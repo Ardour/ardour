@@ -872,7 +872,18 @@ StepView::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>
 		}
 	} else if (_seq.mode() == SequencerGrid::Timing) {
 		if (_step.velocity()) {
+			Temporal::Beats offset = _step.offset ();
+			const double fract = offset.to_ticks() / (double) _seq.sequencer().step_size().to_ticks();
+			const double width = ((_step_dimen - 4.0)/2.0) * fract;
+			const Duple origin = item_to_window (Duple (_step_dimen / 2.0, 0.0));
 
+			/* draw sideways "bars" from center" to indicate extent
+			 * of time displacement from nominal time for this step
+			 */
+
+			set_source_rgba (context, outline_color());
+			context->rectangle (origin.x + 2.0, origin.y + 2.0, width, _step_dimen - 4.0);
+			context->fill ();
 		}
 	}
 
@@ -913,7 +924,16 @@ StepView::motion_event (GdkEventMotion* ev)
 		return false;
 	}
 
-	const double distance = last_motion.second - ev->y;
+	double distance;
+
+	switch (_seq.mode()) {
+	case SequencerGrid::Timing:
+		distance = ev->x - last_motion.first;
+		break;
+	default:
+		distance = last_motion.second - ev->y;
+		break;
+	}
 
 	if ((ev->state & GDK_MOD1_MASK) || _seq.mode() == SequencerGrid::Pitch) {
 		adjust_step_pitch (distance);
@@ -923,6 +943,8 @@ StepView::motion_event (GdkEventMotion* ev)
 		adjust_step_duration (Step::DurationRatio (distance, 32)); /* adjust by 1/32 of the sequencer step size */
 	} else if (_seq.mode() == SequencerGrid::Octave) {
 		adjust_step_octave (distance);
+	} else if (_seq.mode() == SequencerGrid::Timing) {
+		adjust_step_timing (distance/(_step_dimen / 2.0));
 	} else if (_seq.mode() == SequencerGrid::Group) {
 	}
 
@@ -948,7 +970,18 @@ StepView::button_release_event (GdkEventButton* ev)
 		ungrab ();
 		grabbed = false;
 
-		if (fabs (last_motion.second - grab_at.second) < 4) {
+		int distance_moved;
+
+		switch (_seq.mode()) {
+		case SequencerGrid::Timing:
+			distance_moved = grab_at.first - last_motion.first;
+			break;
+		default:
+			distance_moved = last_motion.second - grab_at.second;
+			break;
+		}
+
+		if (::abs (distance_moved) < 4) {
 			/* just a click */
 
 			/* in all modes except octave, turn step on if it is off */
@@ -1001,10 +1034,18 @@ StepView::scroll_event (GdkEventScroll* ev)
 		adjust_step_duration (Step::DurationRatio (amt, 32));
 	} else if (_seq.mode() == SequencerGrid::Octave) {
 		adjust_step_octave (amt);
+	} else if (_seq.mode() == SequencerGrid::Timing) {
+		adjust_step_timing (amt);
 	} else if (_seq.mode() == SequencerGrid::Group) {
 	}
 
 	return true;
+}
+
+void
+StepView::adjust_step_timing (double fract)
+{
+	_step.adjust_offset (fract);
 }
 
 void
@@ -1058,7 +1099,7 @@ SequenceHeader::SequenceHeader (SequencerGrid& sg, StepSequence& sq, Item* paren
 	name_text->set_position (Duple (number_display->width() + 5.0, (_step_dimen/2.0) - (name_text->height() / 2.0)));
 	name_text->set_color (contrasting_text_color (fill_color()));
 	name_text->Event.connect (sigc::mem_fun (*this, &SequenceHeader::name_text_event));
-	
+
 	root_display = new Rectangle (this);
 	root_display->set_position (Duple (180, 4.0));
 	root_display->set (Rect (0.0, 0.0, _step_dimen * 1.5, _step_dimen - 8.0));

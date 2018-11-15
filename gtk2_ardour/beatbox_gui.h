@@ -116,6 +116,7 @@ class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
 	void adjust_step_velocity (int amt);
 	void adjust_step_duration (ARDOUR::Step::DurationRatio const &);
 	void adjust_step_octave (int amt);
+	void adjust_step_timing (double fract);
 
 	void step_changed (PBD::PropertyChange const &);
 	PBD::ScopedConnection step_connection;
