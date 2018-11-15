@@ -400,8 +400,9 @@ Step::set_state (XMLNode const &, int)
 
 /**/
 
-StepSequence::StepSequence (StepSequencer& s, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size, int r)
+StepSequence::StepSequence (StepSequencer& s, size_t cnt, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size, int r)
 	: _sequencer (s)
+	, _index (cnt)
 	, _channel (0)
 	, _root (r)
 	, _mode (MusicalMode::IonianMajor)
@@ -522,7 +523,7 @@ StepSequencer::StepSequencer (TempoMap& tmap, size_t nseqs, size_t nsteps, Tempo
 	, requests (64)
 {
 	for (size_t n = 0; n < nseqs; ++n) {
-		_sequences.push_back (new StepSequence (*this, nsteps, step_size, bar_size, notenum));
+		_sequences.push_back (new StepSequence (*this, n, nsteps, step_size, bar_size, notenum));
 		notenum++;
 	}
 }

@@ -164,17 +164,18 @@ class StepSequence : public PBD::Stateful
 		rd_random = 3
 	};
 
-	StepSequence (StepSequencer &myseq, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size, int notenum);
+	StepSequence (StepSequencer &myseq, size_t index, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size, int notenum);
 	~StepSequence ();
 
+	size_t index() const { return _index; }
 	size_t nsteps() const { return _steps.size(); }
 
 	Step& step (size_t n) const;
 
 	void startup (Temporal::Beats const & start, Temporal::Beats const & offset);
 
-	double root() const { return _root; }
-	void set_root (double n);
+	int root() const { return _root; }
+	void set_root (int n);
 
 	int channel() const { return _channel; }
 	void set_channel (int);
@@ -200,12 +201,13 @@ class StepSequence : public PBD::Stateful
 
   private:
 	StepSequencer& _sequencer;
+	int         _index;
 	mutable Glib::Threads::Mutex _step_lock;
 	typedef std::vector<Step*> Steps;
 
 	Steps       _steps;
 	int         _channel; /* MIDI channel */
-	double      _root;
+	int         _root;
 	MusicalMode _mode;
 };
 
