@@ -330,6 +330,8 @@ Editor::register_actions ()
 
 	/* this is a duplicated action so that the main menu can use a different label */
 	reg_sens (editor_actions, "main-menu-play-selected-regions", _("Play Selected Regions"), sigc::mem_fun (*this, &Editor::play_selected_region));
+	reg_sens (editor_actions, "main-menu-tag-selected-regions", _("Tag Selected Regions"), sigc::mem_fun (*this, &Editor::tag_selected_region));
+
 	reg_sens (editor_actions, "play-from-edit-point", _("Play from Edit Point"), sigc::mem_fun(*this, &Editor::play_from_edit_point));
 	reg_sens (editor_actions, "play-from-edit-point-and-return", _("Play from Edit Point and Return"), sigc::mem_fun(*this, &Editor::play_from_edit_point_and_return));
 
@@ -422,6 +424,7 @@ Editor::register_actions ()
 
 	toggle_reg_sens (editor_actions, "toggle-follow-playhead", _("Follow Playhead"), (sigc::mem_fun(*this, &Editor::toggle_follow_playhead)));
 	act = reg_sens (editor_actions, "remove-last-capture", _("Remove Last Capture"), (sigc::mem_fun(*this, &Editor::remove_last_capture)));
+	act = reg_sens (editor_actions, "tag-last-capture", _("Tag Last Capture"), (sigc::mem_fun(*this, &Editor::tag_last_capture)));
 
 	ActionManager::register_toggle_action (editor_actions, "toggle-stationary-playhead", _("Stationary Playhead"), (mem_fun(*this, &Editor::toggle_stationary_playhead)));
 
@@ -1512,6 +1515,7 @@ Editor::register_region_actions ()
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions), "show-region-properties", _("Properties..."), sigc::mem_fun (*this, &Editor::show_region_properties));
 
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "play-selected-regions", _("Play selected Regions"), sigc::mem_fun(*this, &Editor::play_selected_region));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "tag-selected-regions", _("Tag selected Regions"), sigc::mem_fun(*this, &Editor::tag_selected_region));
 
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions), "bounce-regions-processed", _("Bounce (with processing)"), (sigc::bind (sigc::mem_fun (*this, &Editor::bounce_region_selection), true)));
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions), "bounce-regions-unprocessed", _("Bounce (without processing)"), (sigc::bind (sigc::mem_fun (*this, &Editor::bounce_region_selection), false)));
