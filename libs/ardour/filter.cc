@@ -119,7 +119,7 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 
 		boost::shared_ptr<SMFSource> smfs = boost::dynamic_pointer_cast<SMFSource>(*si);
 		if (smfs) {
-			smfs->set_timeline_position (region->position());
+			smfs->set_natural_position (region->position());
 			smfs->flush ();
 		}
 

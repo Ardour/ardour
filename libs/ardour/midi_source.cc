@@ -352,7 +352,7 @@ MidiSource::mark_write_starting_now (samplecnt_t position,
 	   because it is not RT-safe.
 	*/
 
-	set_timeline_position(position);
+	set_natural_position (position);
 	_capture_length      = capture_length;
 	_capture_loop_length = loop_length;
 
@@ -417,7 +417,7 @@ MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Te
 {
 	Lock newsrc_lock (newsrc->mutex ());
 
-	newsrc->set_timeline_position (_timeline_position);
+	newsrc->set_natural_position (_natural_position);
 	newsrc->copy_interpolation_from (this);
 	newsrc->copy_automation_state_from (this);
 
