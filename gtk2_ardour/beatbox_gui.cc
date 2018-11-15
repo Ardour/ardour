@@ -317,6 +317,17 @@ SequencerGrid::SequencerGrid (StepSequencer& s, Canvas* c)
 	octave_mode_text->set_color (contrasting_text_color (octave_mode_button->fill_color()));
 	octave_mode_text->set_position (mode_button_center.translate (Duple (-octave_mode_text->width()/2.0, -octave_mode_text->height()/2.0)));
 
+	timing_mode_button = new Rectangle (no_scroll_group);
+	timing_mode_button->set_corner_radius (10.0);
+	timing_mode_button->set_position (Duple (rhs_xoffset + (mode_button_xdim * 4), mode_button_spacing));
+	timing_mode_button->set (Rect (0, 0, mode_button_width, mode_button_height));
+	timing_mode_button->set_fill_color (not_current_mode_color);
+	timing_mode_text = new Text (timing_mode_button);
+	timing_mode_text->set_font_description (UIConfiguration::instance().get_LargeFont());
+	timing_mode_text->set (_("Timing"));
+	timing_mode_text->set_color (contrasting_text_color (timing_mode_button->fill_color()));
+	timing_mode_text->set_position (mode_button_center.translate (Duple (-timing_mode_text->width()/2.0, -timing_mode_text->height()/2.0)));
+
 	/* place "us", the rectangle that contains/defines/draws the grid */
 	set_position (Duple (rhs_xoffset, _step_dimen + mode_button_ydim + mode_button_spacing));
 
@@ -324,6 +335,7 @@ SequencerGrid::SequencerGrid (StepSequencer& s, Canvas* c)
 	gate_mode_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &SequencerGrid::mode_button_event), Duration));
 	pitch_mode_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &SequencerGrid::mode_button_event), Pitch));
 	velocity_mode_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &SequencerGrid::mode_button_event), Velocity));
+	timing_mode_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &SequencerGrid::mode_button_event), Timing));
 
 	_sequencer.PropertyChanged.connect (sequencer_connection, invalidator (*this), boost::bind (&SequencerGrid::sequencer_changed, this, _1), gui_context());
 
@@ -442,48 +454,70 @@ SequencerGrid::set_mode (Mode m)
 		octave_mode_button->set_fill_color (current_mode_color);
 		octave_mode_text->set_color (contrasting_text_color (current_mode_color));
 
+		timing_mode_button->set_fill_color (not_current_mode_color);
 		velocity_mode_button->set_fill_color (not_current_mode_color);
 		gate_mode_button->set_fill_color (not_current_mode_color);
 		pitch_mode_button->set_fill_color (not_current_mode_color);
 		pitch_mode_text->set_color (contrasting_text_color (not_current_mode_color));
 		gate_mode_text->set_color (pitch_mode_text->color ());
 		velocity_mode_text->set_color (pitch_mode_text->color());
+		timing_mode_text->set_color (pitch_mode_text->color());
 		break;
 
 	case Duration:
 		gate_mode_button->set_fill_color (current_mode_color);
 		gate_mode_text->set_color (contrasting_text_color (current_mode_color));
 
+		timing_mode_button->set_fill_color (not_current_mode_color);
 		velocity_mode_button->set_fill_color (not_current_mode_color);
 		octave_mode_button->set_fill_color (not_current_mode_color);
 		pitch_mode_button->set_fill_color (not_current_mode_color);
 		pitch_mode_text->set_color (contrasting_text_color (not_current_mode_color));
 		octave_mode_text->set_color (pitch_mode_text->color ());
 		velocity_mode_text->set_color (pitch_mode_text->color());
+		timing_mode_text->set_color (pitch_mode_text->color());
 		break;
 
 	case Pitch:
 		pitch_mode_button->set_fill_color (current_mode_color);
 		pitch_mode_text->set_color (contrasting_text_color (current_mode_color));
 
+		timing_mode_button->set_fill_color (not_current_mode_color);
 		velocity_mode_button->set_fill_color (not_current_mode_color);
 		octave_mode_button->set_fill_color (not_current_mode_color);
 		gate_mode_button->set_fill_color (not_current_mode_color);
 		gate_mode_text->set_color (contrasting_text_color (not_current_mode_color));
 		octave_mode_text->set_color (gate_mode_text->color ());
 		velocity_mode_text->set_color (gate_mode_text->color());
+		timing_mode_text->set_color (gate_mode_text->color());
 		break;
 
 	case Velocity:
 		velocity_mode_button->set_fill_color (current_mode_color);
 		velocity_mode_text->set_color (contrasting_text_color (current_mode_color));
 
+		timing_mode_button->set_fill_color (not_current_mode_color);
 		pitch_mode_button->set_fill_color (not_current_mode_color);
 		octave_mode_button->set_fill_color (not_current_mode_color);
 		gate_mode_button->set_fill_color (not_current_mode_color);
 		pitch_mode_text->set_color (contrasting_text_color (not_current_mode_color));
 		octave_mode_text->set_color (pitch_mode_text->color ());
 		gate_mode_text->set_color (pitch_mode_text->color());
+		timing_mode_text->set_color (pitch_mode_text->color());
+		break;
+
+	case Timing:
+		timing_mode_button->set_fill_color (current_mode_color);
+		timing_mode_text->set_color (contrasting_text_color (current_mode_color));
+
+		velocity_mode_button->set_fill_color (not_current_mode_color);
+		pitch_mode_button->set_fill_color (not_current_mode_color);
+		octave_mode_button->set_fill_color (not_current_mode_color);
+		gate_mode_button->set_fill_color (not_current_mode_color);
+		pitch_mode_text->set_color (contrasting_text_color (not_current_mode_color));
+		octave_mode_text->set_color (pitch_mode_text->color ());
+		gate_mode_text->set_color (pitch_mode_text->color());
+		velocity_mode_text->set_color (gate_mode_text->color());
 
 	default:
 		break;
@@ -493,8 +527,8 @@ SequencerGrid::set_mode (Mode m)
 		(*s)->view_mode_changed ();
 	}
 
-	redraw ();
-}
+	redraw ();}
+
 
 void
 SequencerGrid::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
@@ -835,6 +869,10 @@ StepView::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>
 			set_source_rgba (context, outline_color());
 			context->rectangle (origin.x + 2, origin.y + (_step_dimen - height - 2), _step_dimen - 4, height);
 			context->fill ();
+		}
+	} else if (_seq.mode() == SequencerGrid::Timing) {
+		if (_step.velocity()) {
+
 		}
 	}
 

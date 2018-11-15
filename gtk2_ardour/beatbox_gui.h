@@ -168,6 +168,7 @@ class SequencerGrid : public ArdourCanvas::Rectangle, public sigc::trackable {
 		Duration,
 		Octave,
 		Group,
+		Timing,
 	};
 
 	SequencerGrid (ARDOUR::StepSequencer&, ArdourCanvas::Canvas*);
@@ -210,11 +211,13 @@ class SequencerGrid : public ArdourCanvas::Rectangle, public sigc::trackable {
 	ArdourCanvas::Rectangle* pitch_mode_button;
 	ArdourCanvas::Rectangle* octave_mode_button;
 	ArdourCanvas::Rectangle* gate_mode_button;
+	ArdourCanvas::Rectangle* timing_mode_button;
 
 	ArdourCanvas::Text* velocity_mode_text;
 	ArdourCanvas::Text* pitch_mode_text;
 	ArdourCanvas::Text* octave_mode_text;
 	ArdourCanvas::Text* gate_mode_text;
+	ArdourCanvas::Text* timing_mode_text;
 
 	static Gtkmm2ext::Color current_mode_color;
 	static Gtkmm2ext::Color not_current_mode_color;
