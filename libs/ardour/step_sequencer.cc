@@ -255,30 +255,6 @@ Step::check_note (size_t n, MidiBuffer& buf, bool running, samplepos_t start_sam
 {
 	Note& note (_notes[n]);
 
-	/* could be a note off message to be delivered before any note on
-	 * message (and the note number may differ from the current value.
-	 * Deliver it now, if appropriate.
-	 */
-
-	if (note.on) {
-
-		samplepos_t off_samples = sequencer().tempo_map().sample_at_beat (note.off_at.to_double());
-
-		if (off_samples >= start_sample && off_samples < end_sample) {
-
-			buf.write (off_samples - start_sample, Evoral::MIDI_EVENT, 3, note.off_msg);
-			tracker.remove (note.off_msg[1], _sequence.channel());
-
-			/* record keeping */
-
-			note.on = false;
-			note.off_at = Temporal::Beats();
-		}
-
-		/* XXX we should possibly queue these note offs */
-
-	}
-
 	if (_duration == DurationRatio ()) {
 		/* no duration, so no new notes on */
 		return;
@@ -295,95 +271,68 @@ Step::check_note (size_t n, MidiBuffer& buf, bool running, samplepos_t start_sam
 
 	note_on_time += note.offset;
 
-	if (running && !note.on) {
+	/* don't play silent notes */
 
-		/* don't play silent notes */
-
-		if (note.velocity == 0) {
-			return;
-		}
-
-		samplepos_t on_samples = sequencer().tempo_map().sample_at_beat (note_on_time.to_double());
-
-		if (on_samples >= start_sample && on_samples < end_sample) {
-
-			uint8_t mbuf[3];
-
-			/* prepare 3 MIDI bytes for note on */
-
-			mbuf[0] = 0x90 | _sequence.channel();
-
-			switch (_mode) {
-			case AbsolutePitch:
-				mbuf[1] = note.number;
-				break;
-			case RelativePitch:
-				mbuf[1] = _sequence.root() + note.interval;
-				break;
-			}
-
-			if (_octave_shift) {
-
-				const int t = mbuf[1] + (12 * _octave_shift);
-
-				if (t > 127 || t < 0) {
-					/* Out of range */
-					return;
-				}
-
-				mbuf[1] = t;
-			}
-
-			mbuf[2] = (uint8_t) floor (note.velocity * 127.0);
-
-			note.off_msg[0] = 0x80 | _sequence.channel();
-			note.off_msg[1] = mbuf[1];
-			note.off_msg[2] = mbuf[2];
-
-			/* Put it into the MIDI buffer */
-			buf.write (on_samples - start_sample, Evoral::MIDI_EVENT, 3, mbuf);
-			tracker.add (mbuf[1], _sequence.channel());
-
-			/* keep track (even though other things will at different levels */
-
-			note.on = true;
-
-			/* compute note off time based on our duration */
-
-			note.off_at = note_on_time;
-
-			if (_duration == DurationRatio (1)) {
-				/* use 1 tick less than the sequence step size
-				 * just to get non-simultaneous on/off events at
-				 * step boundaries.
-				*/
-				note.off_at += Temporal::Beats (0, sequencer().step_size().to_ticks() - 1);
-			} else {
-				note.off_at += Temporal::Beats (0, (sequencer().step_size().to_ticks() * _duration.numerator()) / _duration.denominator());
-			}
-		}
+	if (note.velocity == 0) {
+		return;
 	}
 
-	/* if the buffer size is large and the step size or note length is very
-	 * small, the note off could be within the same ::run() cycle as the
-	 * note on. So check again to see if we should deliver it in this same
-	 * ::run() cycle.
-	 */
+	samplepos_t on_samples = sequencer().tempo_map().sample_at_beat (note_on_time.to_double());
 
-	if (note.on) {
+	if (on_samples >= start_sample && on_samples < end_sample) {
 
-		samplepos_t off_samples = sequencer().tempo_map().sample_at_beat (note.off_at.to_double());
+		uint8_t mbuf[3];
 
-		if (off_samples >= start_sample && off_samples < end_sample) {
+		/* prepare 3 MIDI bytes for note on */
 
-			buf.write (off_samples - start_sample, Evoral::MIDI_EVENT, 3, note.off_msg);
-			tracker.remove (note.off_msg[1], _sequence.channel());
+		mbuf[0] = 0x90 | _sequence.channel();
 
-			/* record keeping */
-
-			note.on = false;
-			note.off_at = Temporal::Beats();
+		switch (_mode) {
+		case AbsolutePitch:
+			mbuf[1] = note.number;
+			break;
+		case RelativePitch:
+			mbuf[1] = _sequence.root() + note.interval;
+			break;
 		}
+
+		if (_octave_shift) {
+
+			const int t = mbuf[1] + (12 * _octave_shift);
+
+			if (t > 127 || t < 0) {
+				/* Out of range */
+				return;
+			}
+
+			mbuf[1] = t;
+		}
+
+		mbuf[2] = (uint8_t) floor (note.velocity * 127.0);
+
+		note.off_msg[0] = 0x80 | _sequence.channel();
+		note.off_msg[1] = mbuf[1];
+		note.off_msg[2] = mbuf[2];
+
+		/* Put it into the MIDI buffer */
+		buf.write (on_samples - start_sample, Evoral::MIDI_EVENT, 3, mbuf);
+		tracker.add (mbuf[1], _sequence.channel());
+
+		/* compute note off time based on our duration */
+
+		Temporal::Beats off_at = note_on_time;
+
+		if (_duration == DurationRatio (1)) {
+			/* use 1 tick less than the sequence step size
+			 * just to get non-simultaneous on/off events at
+			 * step boundaries.
+			 */
+			off_at += Temporal::Beats (0, sequencer().step_size().to_ticks() - 1);
+		} else {
+			off_at += Temporal::Beats (0, (sequencer().step_size().to_ticks() * _duration.numerator()) / _duration.denominator());
+		}
+
+		sequencer().queue_note_off (off_at, mbuf[1], mbuf[2], _sequence.channel());
 	}
 }
 
@@ -394,15 +343,6 @@ Step::reschedule (Temporal::Beats const & start, Temporal::Beats const & offset)
 		_scheduled_beat = start + _nominal_beat + sequencer().duration(); /* schedule into the next loop iteration */
 	} else {
 		_scheduled_beat = start + _nominal_beat; /* schedule into the current loop iteration */
-	}
-
-	/* MIDI state tracker will deal with any stuck notes, so here we just
-	 * update our records to note that all notes are not currently
-	 * sounding.
-	 */
-	for (size_t n = 0; n < _notes_per_step; ++n) {
-		_notes[n].on = false;
-		_notes[n].off_at = Temporal::Beats();
 	}
 }
 
@@ -529,6 +469,7 @@ StepSequence::set_state (XMLNode const &, int)
 /**/
 
 MultiAllocSingleReleasePool StepSequencer::Request::pool (X_("step sequencer requests"), sizeof (StepSequencer::Request), 64);
+Pool                        StepSequencer::NoteOffBlob::pool (X_("step sequencer noteoffs"), sizeof (StepSequencer::NoteOffBlob), 1024);
 
 StepSequencer::StepSequencer (TempoMap& tmap, size_t nseqs, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size, int notenum)
 	: _tempo_map (tmap)
@@ -615,6 +556,8 @@ StepSequencer::run (MidiBuffer& buf, samplepos_t start_sample, samplepos_t end_s
 		need_reschedule = false;
 	}
 
+	check_note_offs (buf, start_sample, end_sample);
+
 	for (StepSequences::iterator s = _sequences.begin(); s != _sequences.end(); ++s) {
 		(*s)->run (buf, _running, start_sample, end_sample, outbound_tracker);
 	}
@@ -627,6 +570,7 @@ StepSequencer::run (MidiBuffer& buf, samplepos_t start_sample, samplepos_t end_s
 
 	if (resolve) {
 		outbound_tracker.resolve_notes (buf, 0);
+		clear_note_offs ();
 	}
 
 	last_start = start_sample;
@@ -754,4 +698,43 @@ StepSequencer::check_requests ()
 	}
 
 	return reschedule;
+}
+
+void
+StepSequencer::queue_note_off (Temporal::Beats const & when, uint8_t n, uint8_t v, uint8_t c)
+{
+	NoteOffBlob* nob = new NoteOffBlob (when, n, v, c);
+	NoteOffList::iterator i = std::upper_bound (note_offs.begin(), note_offs.end(), *nob);
+	note_offs.insert (i, *nob);
+}
+
+void
+StepSequencer::check_note_offs (MidiBuffer& mbuf, samplepos_t start_sample, samplepos_t end_sample)
+{
+	for (NoteOffList::iterator i = note_offs.begin(); i != note_offs.end(); ) {
+		samplepos_t when  = _tempo_map.sample_at_beat (i->when.to_double()); /* XXX nutempo */
+
+		cerr << "note off at " << i->when << " sample " << when << " within " << start_sample << " .. " << end_sample << endl;
+
+		if (when >= start_sample && when < end_sample) {
+			mbuf.write (when - start_sample, Evoral::MIDI_EVENT, 3, i->buf);
+			NoteOffBlob& nob (*i);
+			i = note_offs.erase (i);
+			delete &nob;
+		} else if (when < start_sample) {
+			i = note_offs.erase (i);
+		} else {
+			++i;
+		}
+	}
+}
+
+void
+StepSequencer::clear_note_offs ()
+{
+	for (NoteOffList::iterator i = note_offs.begin(); i != note_offs.end(); ) {
+		NoteOffBlob& nob (*i);
+		delete &nob;
+		i = note_offs.erase (i);
+	}
 }

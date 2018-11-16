@@ -24,6 +24,7 @@
 
 #include <boost/atomic.hpp>
 #include <boost/rational.hpp>
+#include <boost/intrusive/list.hpp>
 
 #include <glibmm/threads.h>
 
@@ -134,12 +135,10 @@ class Step : public PBD::Stateful {
 		};
 		double velocity;
 		Temporal::Beats offset;
-		bool on;
-		Temporal::Beats off_at;
 		MIDI::byte off_msg[3];
 
-		Note () : number (-1), velocity (0.0), on (false) {}
-		Note (double n, double v,Temporal::Beats const & o) : number (n), velocity (v), offset (o), on (false) {}
+		Note () : number (-1), velocity (0.0) {}
+		Note (double n, double v,Temporal::Beats const & o) : number (n), velocity (v), offset (o) {}
 	};
 
 	static const int _notes_per_step = 5;
@@ -247,6 +246,8 @@ class StepSequencer : public PBD::Stateful
 	XMLNode& get_state();
 	int set_state (XMLNode const &, int);
 
+	void queue_note_off (Temporal::Beats const &, uint8_t note, uint8_t velocity, uint8_t channel);
+
   private:
 	mutable Glib::Threads::Mutex       _sequence_lock;
 	TempoMap&       _tempo_map;
@@ -299,6 +300,35 @@ class StepSequencer : public PBD::Stateful
 	PBD::RingBuffer<Request*> requests;
 	bool check_requests ();
 	Temporal::Beats reschedule (samplepos_t);
+
+	struct NoteOffBlob : public boost::intrusive::list_base_hook<> {
+
+		NoteOffBlob (Temporal::Beats const & w, uint8_t n, uint8_t v, uint8_t c)
+			: when (w) { buf[0] = 0x80|c; buf[1] = n; buf[2] = v; }
+
+		Temporal::Beats when;
+		uint8_t buf[3];
+
+		static Pool pool;
+
+		void *operator new (size_t) {
+			return pool.alloc ();
+		}
+
+		void operator delete (void* ptr, size_t /* size */) {
+			pool.release (ptr);
+		}
+
+		bool operator< (NoteOffBlob const & other) const {
+			return when < other.when;
+		}
+	};
+
+	typedef boost::intrusive::list<NoteOffBlob> NoteOffList;
+
+	NoteOffList note_offs;
+	void check_note_offs (ARDOUR::MidiBuffer&, samplepos_t start_sample, samplepos_t last_sample);
+	void clear_note_offs ();
 };
 
 } /* namespace */
