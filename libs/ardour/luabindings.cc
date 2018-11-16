@@ -172,7 +172,8 @@ CLASSINFO(TrackSelection);
 CLASSINFO(TrackViewList);
 
 
-CLASSKEYS(std::bitset<48ul>); // LuaSignal::LAST_SIGNAL
+/* this needs to match gtk2_ardour/luasignal.h */
+CLASSKEYS(std::bitset<49ul>); // LuaSignal::LAST_SIGNAL
 
 CLASSKEYS(void);
 CLASSKEYS(float);
