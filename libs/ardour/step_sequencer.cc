@@ -688,9 +688,9 @@ StepSequencer::check_requests ()
 				changed = true;
 			}
 		}
-	}
 
-	delete req;
+		delete req;
+	}
 
 	if (changed) {
 		PropertyChange pc;
