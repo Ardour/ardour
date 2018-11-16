@@ -60,8 +60,6 @@ using namespace ArdourCanvas;
 using std::cerr;
 using std::endl;
 
-const int _nsteps = 32;
-const int _nrows = 8;
 const double _step_dimen = 32;
 
 BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
@@ -550,7 +548,7 @@ SequencerGrid::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 
 	Gtkmm2ext::set_source_rgba (context, 0x000000ff);
 
-	for (int n = 0; n < _nrows; ++n) {
+	for (size_t n = 0; n < _sequencer.nsequences(); ++n) {
 		double x = 0;
 		double y = n * _step_dimen;
 		Duple start = item_to_window (Duple (x, y).translate (Duple (0.5, 0.5)));
@@ -562,7 +560,7 @@ SequencerGrid::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 
 	/* vertical */
 
-	for (int n = 0; n < _nsteps; ++n) {
+	for (size_t n = 0; n < _sequencer.nsteps(); ++n) {
 		double x = n * _step_dimen;
 		double y = 0;
 		Duple start = item_to_window (Duple (x, y).translate (Duple (0.5, 0.5)));
