@@ -20,6 +20,8 @@
 #include <cstdlib>
 #include <ctime>
 
+#include <boost/math/common_factor.hpp>
+
 #include "pbd/compose.h"
 #include "pbd/i18n.h"
 
@@ -789,10 +791,18 @@ StepView::view_mode_changed ()
 {
 	/* this should leave the text to the last text-displaying mode */
 
-	if (_seq.mode() == SequencerGrid::Octave) {
+	switch (_seq.mode()) {
+	case SequencerGrid::Octave:
 		set_octave_text ();
-	} else if (_seq.mode() == SequencerGrid::Group) {
+		break;
+	case SequencerGrid::Group:
 		set_group_text ();
+		break;
+	case SequencerGrid::Timing:
+		set_timing_text ();
+		break;
+	default:
+		text->hide ();
 	}
 }
 
@@ -823,10 +833,37 @@ StepView::set_octave_text ()
 }
 
 void
+StepView::set_timing_text ()
+{
+	if (!_step.velocity()) {
+		text->hide ();
+		return;
+	}
+
+	if (_step.offset() == Temporal::Beats()) {
+		text->set (X_("0"));
+	} else {
+		const int64_t gcd = boost::math::gcd (_step.offset().to_ticks(), int64_t (1920));
+		const int64_t n = _step.offset().to_ticks() / gcd;
+		const int64_t d = 1920 / gcd;
+		text->set (string_compose ("%1/%2", n, d));
+		text->show ();
+	}
+
+	if (text->self_visible()) {
+		const double w = text->width();
+		const double h = text->height();
+		text->set_position (Duple (_step_dimen/2 - (w/2), _step_dimen/2 - (h/2)));
+	}
+}
+
+void
 StepView::step_changed (PropertyChange const &)
 {
 	if (_seq.mode() == SequencerGrid::Octave) {
 		set_octave_text ();
+	} else if (_seq.mode() == SequencerGrid::Timing) {
+		set_timing_text ();
 	}
 
 	if (_step.velocity()) {

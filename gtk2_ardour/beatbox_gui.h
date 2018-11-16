@@ -123,7 +123,8 @@ class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
 
 	void set_octave_text ();
 	void set_group_text ();
-
+	void set_timing_text ();
+	
 	static Gtkmm2ext::Color on_fill_color;
 	static Gtkmm2ext::Color off_fill_color;
 };
