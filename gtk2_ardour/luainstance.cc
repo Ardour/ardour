@@ -512,6 +512,7 @@ lua_translate_order (RouteDialogs::InsertAt place)
 
 using namespace ARDOUR;
 
+PBD::Signal0<void> LuaInstance::LuaTimerS;
 PBD::Signal0<void> LuaInstance::LuaTimerDS;
 PBD::Signal0<void> LuaInstance::SetSession;
 
@@ -1341,6 +1342,7 @@ void LuaInstance::set_session (Session* s)
 	for (LuaCallbackMap::iterator i = _callbacks.begin(); i != _callbacks.end(); ++i) {
 		i->second->set_session (s);
 	}
+	second_connection = Timers::rapid_connect (sigc::mem_fun(*this, & LuaInstance::every_second));
 	point_one_second_connection = Timers::rapid_connect (sigc::mem_fun(*this, & LuaInstance::every_point_one_seconds));
 	SetSession (); /* EMIT SIGNAL */
 }
@@ -1349,6 +1351,7 @@ void
 LuaInstance::session_going_away ()
 {
 	ENSURE_GUI_THREAD (*this, &LuaInstance::session_going_away);
+	second_connection.disconnect ();
 	point_one_second_connection.disconnect ();
 
 	(*_lua_clear)();
@@ -1361,6 +1364,12 @@ LuaInstance::session_going_away ()
 	lua_State* L = lua.getState();
 	LuaBindings::set_session (L, _session);
 	lua.do_command ("collectgarbage();");
+}
+
+void
+LuaInstance::every_second ()
+{
+	LuaTimerS (); // emit signal
 }
 
 void

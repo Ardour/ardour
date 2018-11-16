@@ -21,7 +21,6 @@
 STATIC(SessionLoad, &, 0)
 STATIC(SessionClose, &, 0)
 #endif
-//STATIC(EverySecond, get_timers().second, 0) // XXX
 STATIC(ConfigChanged, &ARDOUR::Config->ParameterChanged, 1)
 
 // engine instance
@@ -85,6 +84,7 @@ STATIC(DiskUnderrun, &ARDOUR::DiskReader::Underrun, 0)
 STATIC(RegionPropertyChanged, &ARDOUR::Region::RegionPropertyChanged, 2)
 
 // Timers
+STATIC(LuaTimerS,  &LuaInstance::LuaTimerS, 0)
 STATIC(LuaTimerDS, &LuaInstance::LuaTimerDS, 0)
 
 // Session load
