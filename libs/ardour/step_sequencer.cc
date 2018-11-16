@@ -714,8 +714,6 @@ StepSequencer::check_note_offs (MidiBuffer& mbuf, samplepos_t start_sample, samp
 	for (NoteOffList::iterator i = note_offs.begin(); i != note_offs.end(); ) {
 		samplepos_t when  = _tempo_map.sample_at_beat (i->when.to_double()); /* XXX nutempo */
 
-		cerr << "note off at " << i->when << " sample " << when << " within " << start_sample << " .. " << end_sample << endl;
-
 		if (when >= start_sample && when < end_sample) {
 			mbuf.write (when - start_sample, Evoral::MIDI_EVENT, 3, i->buf);
 			NoteOffBlob& nob (*i);
