@@ -257,6 +257,7 @@ SequencerGrid::SequencerGrid (StepSequencer& s, Canvas* c)
 	: Rectangle (c)
 	, _sequencer (s)
 	, _mode (Velocity)
+	, step_indicator_bg (0)
 {
 	if (current_mode_color == 0) {
 		current_mode_color = UIConfiguration::instance().color ("gtk_lightest");
@@ -266,8 +267,9 @@ SequencerGrid::SequencerGrid (StepSequencer& s, Canvas* c)
 	const Duple mode_button_center (mode_button_width/2.0, mode_button_height/2.0);
 
 	no_scroll_group = new ArdourCanvas::Container (_canvas->root());
-	step_indicator_box = new ArdourCanvas::Container (no_scroll_group);
+	step_indicator_box = new ArdourCanvas::HBox (no_scroll_group);
 	step_indicator_box->set_position (Duple (rhs_xoffset, mode_button_height + (mode_button_spacing * 2.0)));
+	step_indicator_box->name = "step_indicator_box";
 
 	v_scroll_group = new ScrollGroup (_canvas->root(), ScrollGroup::ScrollsVertically);
 	_canvas->add_scroller (*v_scroll_group);
@@ -393,22 +395,31 @@ SequencerGrid::sequencer_changed (PropertyChange const &)
 
 	set (Rect (0, 0, _width, _height));
 
-	step_indicator_box->clear (true); /* delete all existing step indicators */
-	step_indicators.clear ();
+	delete step_indicator_bg;
 
-	step_indicator_bg = new ArdourCanvas::Rectangle (step_indicator_box);
+	step_indicator_bg = new ArdourCanvas::Rectangle (no_scroll_group);
 	step_indicator_bg->set_fill_color (HSV (UIConfiguration::instance().color ("gtk_bases")).lighter (0.1));
 	step_indicator_bg->set_outline (false);
+	step_indicator_bg->set_position (Duple (rhs_xoffset, mode_button_height + (mode_button_spacing * 2.0)));
 	step_indicator_bg->set (Rect (0, 0, _width, _step_dimen));
+	step_indicator_bg->lower_to_bottom ();
 
 	/* indicator row */
 
-	for (size_t n = 0; n < nsteps; ++n) {
-		SequencerStepIndicator* ssi = new SequencerStepIndicator (*this, step_indicator_box, n);
-		ssi->set_position (Duple (n * _step_dimen, 0));
-		ssi->set (Rect (0, 0, _step_dimen, _step_dimen));
-		ssi->set_fill_color (random());
+	while (step_indicators.size() > nsteps) {
+		SequencerStepIndicator* ssi = step_indicators.back();
+		step_indicators.pop_back();
+		delete ssi;
+	}
+
+	size_t n = step_indicators.size();
+
+	while (step_indicators.size() < nsteps) {
+		SequencerStepIndicator* ssi = new SequencerStepIndicator (*this, canvas(), n);
+		ssi->set (Rect (0.0, 0.0, _step_dimen - 3.0, _step_dimen - 3.0));
+		step_indicator_box->pack_start (ssi);
 		step_indicators.push_back (ssi);
+		++n;
 	}
 
 	/* step views, one per step per sequence */
@@ -416,25 +427,28 @@ SequencerGrid::sequencer_changed (PropertyChange const &)
 	clear (true);
 	step_views.clear ();
 
-	if (nsequences != sequence_headers.size()) {
-		//sequence_headers.clear (true);
+	while (sequence_headers.size() > nsequences) {
+		SequenceHeader* sh = sequence_headers.back ();
+		sequence_headers.pop_back ();
+		delete sh;
+	}
 
-		cerr << "Creating " << nsequences << " SH\n";
+	n = sequence_headers.size();
 
-		for (size_t s = 0; s < nsequences; ++s) {
-			SequenceHeader* sh = new SequenceHeader (*this, _sequencer.sequence (s), v_scroll_group);
-			sh->set_position (Duple (0, (mode_button_ydim + mode_button_spacing) + ((s+1) * _step_dimen)));
-			sh->set (Rect (1, 1, rhs_xoffset - 2, _step_dimen - 2));
-			sh->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
-			sequence_headers.push_back (sh);
-		}
+	while (sequence_headers.size() < nsequences) {
+		SequenceHeader* sh = new SequenceHeader (*this, _sequencer.sequence (n), v_scroll_group);
+		sh->set_position (Duple (0, (mode_button_ydim + mode_button_spacing) + ((n+1) * _step_dimen)));
+		sh->set (Rect (1, 1, rhs_xoffset - 2, _step_dimen - 2));
+		sh->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
+		sequence_headers.push_back (sh);
+		++n;
 	}
 
 	for (size_t s = 0; s < nsequences; ++s) {
 		for (size_t n = 0; n < nsteps; ++n) {
 			StepView* sv = new StepView (*this, _sequencer.sequence (s).step (n), this);
 			sv->set_position (Duple (n * _step_dimen, s * _step_dimen));
-			sv->set (Rect (1, 1, _step_dimen - 2, _step_dimen - 2));
+			sv->set (Rect (0, 0, _step_dimen - 1, _step_dimen - 1));
 			step_views.push_back (sv);
 		}
 	}
@@ -533,45 +547,8 @@ SequencerGrid::set_mode (Mode m)
 void
 SequencerGrid::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	Rect self (item_to_window (get(), false));
-	const Rect draw = self.intersection (area);
-
-	if (!draw) {
-		return;
-	}
-
-	setup_fill_context (context);
-	context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
-	context->fill ();
-
-	context->set_line_width (1.0);
-
-	/* horizontal lines */
-
-	Gtkmm2ext::set_source_rgba (context, 0x000000ff);
-
-	for (size_t n = 0; n < _sequencer.nsequences(); ++n) {
-		double x = 0;
-		double y = n * _step_dimen;
-		Duple start = item_to_window (Duple (x, y).translate (Duple (0.5, 0.5)));
-
-		context->move_to (start.x, start.y);
-		context->line_to (start.x + _width, start.y);
-		context->stroke ();
-	}
-
-	/* vertical */
-
-	for (size_t n = 0; n < _sequencer.nsteps(); ++n) {
-		double x = n * _step_dimen;
-		double y = 0;
-		Duple start = item_to_window (Duple (x, y).translate (Duple (0.5, 0.5)));
-
-		context->move_to (start.x, start.y);
-		context->line_to (start.x, start.y + _height);
-		context->stroke ();
-	}
-
+	/* might do more one day */
+	Rectangle::render (area, context);
 	render_children (area, context);
 }
 
@@ -591,8 +568,8 @@ Gtkmm2ext::Color SequencerStepIndicator::current_text_color = Gtkmm2ext::Color (
 Gtkmm2ext::Color SequencerStepIndicator::bright_outline_color = Gtkmm2ext::Color (0);
 int SequencerStepIndicator::dragging = 0;
 
-SequencerStepIndicator::SequencerStepIndicator (SequencerGrid& s, Item *p, size_t n)
-	: Rectangle (p)
+SequencerStepIndicator::SequencerStepIndicator (SequencerGrid& s, Canvas* c, size_t n)
+	: Rectangle (c)
 	, grid (s)
 	, number (n)
 	, being_dragged (false)
@@ -610,16 +587,16 @@ SequencerStepIndicator::SequencerStepIndicator (SequencerGrid& s, Item *p, size_
 
 	poly = new Polygon (this);
 	Points points;
-	/* half pixel shifts are to get a clean single pixel outline */
-	points.push_back (Duple (0.5, 0.5));
-	points.push_back (Duple (_step_dimen - 0.5, 0.5));
-	points.push_back (Duple (_step_dimen - 0.5, (_step_dimen - 1.0)/2.0));
-	points.push_back (Duple ((_step_dimen - 1.0)/2.0, _step_dimen - 0.5));
-	points.push_back (Duple (0.5, (_step_dimen - 1.0)/2.0));
+	points.push_back (Duple (0, 0));
+	points.push_back (Duple (_step_dimen - 4.0, 0));
+	points.push_back (Duple (_step_dimen - 4.0, (_step_dimen - 4.0)/2.0));
+	points.push_back (Duple ((_step_dimen - 4.0)/2.0, _step_dimen - 4.0));
+	points.push_back (Duple (0, (_step_dimen - 4.0)/2.0));
 	poly->set (points);
 	poly->set_fill_color (current_color);
 	poly->set_outline_color (other_color);
 	poly->set_ignore_events (true);
+	poly->move (Duple (0.5, 0.5));
 
 	text = new Text (this);
 

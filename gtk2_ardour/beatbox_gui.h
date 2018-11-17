@@ -124,14 +124,14 @@ class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
 	void set_octave_text ();
 	void set_group_text ();
 	void set_timing_text ();
-	
+
 	static Gtkmm2ext::Color on_fill_color;
 	static Gtkmm2ext::Color off_fill_color;
 };
 
 class SequencerStepIndicator : public ArdourCanvas::Rectangle, public sigc::trackable {
   public:
-	SequencerStepIndicator (SequencerGrid&, ArdourCanvas::Item *, size_t n);
+	SequencerStepIndicator (SequencerGrid&, ArdourCanvas::Canvas*, size_t n);
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	bool on_event (GdkEvent*);
 
@@ -207,7 +207,7 @@ class SequencerGrid : public ArdourCanvas::Rectangle, public sigc::trackable {
 	ArdourCanvas::ScrollGroup* v_scroll_group;
 	ArdourCanvas::Container* no_scroll_group;
 	ArdourCanvas::Rectangle* step_indicator_bg;
-	ArdourCanvas::Container* step_indicator_box;
+	ArdourCanvas::HBox* step_indicator_box;
 
 	ArdourCanvas::Rectangle* velocity_mode_button;
 	ArdourCanvas::Rectangle* pitch_mode_button;
