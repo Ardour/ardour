@@ -103,6 +103,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	void set_soundcloud_upload (bool yn) { _soundcloud_upload = yn; }
 	void set_command (std::string command) { _command = command; }
 	void set_analyse (bool yn) { _analyse = yn; }
+	void set_codec_quality (int q) { _codec_quality = q; }
 
 	void set_silence_beginning (AnyTime const & value) { _silence_beginning = value; }
 	void set_silence_end (AnyTime const & value) { _silence_end = value; }
@@ -171,6 +172,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	bool soundcloud_upload() const { return _soundcloud_upload; }
 	std::string command() const { return _command; }
 	bool analyse() const { return _analyse; }
+	int  codec_quality() const { return _codec_quality; }
 
 	bool tag () const { return _tag && supports_tagging; }
 
@@ -228,6 +230,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 
 	std::string     _command;
 	bool            _analyse;
+	int             _codec_quality;
 
 	/* serialization helpers */
 

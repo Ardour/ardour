@@ -156,6 +156,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 	, _soundcloud_upload (false)
 	, _command ("")
 	, _analyse (true)
+	, _codec_quality (-3)
 {
 	format_ids.insert (F_None);
 	endiannesses.insert (E_FileDefault);
@@ -191,6 +192,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const
 	, _soundcloud_upload (false)
 	, _command ("")
 	, _analyse (true)
+	, _codec_quality (-3)
 {
 	_silence_beginning.type = Time::Timecode;
 	_silence_end.type = Time::Timecode;
@@ -205,6 +207,7 @@ ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification 
 	, _silence_end (other.session)
 	, _soundcloud_upload (false)
 	, _analyse (other._analyse)
+	, _codec_quality (other._codec_quality)
 {
 	if (modify_name) {
 		set_name (other.name() + " (copy)");
@@ -276,6 +279,9 @@ ExportFormatSpecification::get_state ()
 
 	node = root->add_child ("SRCQuality");
 	node->set_property ("quality", src_quality());
+
+	node = root->add_child ("CodecQuality");
+	node->set_property ("quality", codec_quality());
 
 	XMLNode * enc_opts = root->add_child ("EncodingOptions");
 
@@ -382,6 +388,10 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 
 	if ((child = root.child ("SRCQuality"))) {
 		child->get_property ("quality", _src_quality);
+	}
+
+	if ((child = root.child ("CodecQuality"))) {
+		child->get_property ("quality", _codec_quality);
 	}
 
 	/* Encoding options */

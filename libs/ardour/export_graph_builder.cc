@@ -322,7 +322,7 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPip
 		throw ExportFailed ("External encoder (ffmpeg) is not available.");
 	}
 
-	int quality = 3; // TODO get from config.format
+	int quality = config.format->codec_quality ();
 
 	int a=0;
 	char **argp = (char**) calloc (100, sizeof(char*));
@@ -342,9 +342,9 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPip
 	argp[a++] = strdup ("pipe:0");
 
 	argp[a++] = strdup ("-y");
-	if (quality < 10) {
+	if (quality <= 0) {
 		/* variable rate, lower is better */
-		snprintf (tmp, sizeof(tmp), "%d", quality);
+		snprintf (tmp, sizeof(tmp), "%d", -quality);
 		argp[a++] = strdup ("-q:a"); argp[a++] = strdup (tmp);
 	} else {
 		/* fixed bitrate, higher is better */
