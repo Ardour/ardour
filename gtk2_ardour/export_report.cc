@@ -182,10 +182,14 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			clock->set (info.timecode * src_coef + 0.5, true);
 			t->attach (*clock, 3, 4, 3, 4);
 		} else if (with_file) {
-			l = manage (new Label (_("Error:"), ALIGN_END));
-			t->attach (*l, 0, 1, 1, 2);
-			l = manage (new Label (errmsg, ALIGN_START));
-			t->attach (*l, 1, 4, 1, 2);
+			with_file = false;
+			/* Note: errmsg can have size = 1, and contain "\0\0" */
+			if (!errmsg.empty() && 0 != strlen(errmsg.c_str())) {
+				l = manage (new Label (_("Error:"), ALIGN_END));
+				t->attach (*l, 0, 1, 1, 2);
+				l = manage (new Label (errmsg, ALIGN_START));
+				t->attach (*l, 1, 4, 1, 2);
+			}
 		}
 
 		int w, h;
