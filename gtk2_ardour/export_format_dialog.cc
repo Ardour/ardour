@@ -196,6 +196,13 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	bold.insert (b);
 	encoding_options_label.set_attributes (bold);
 
+	/* Codec options */
+
+	codec_quality_list = Gtk::ListStore::create (codec_quality_cols);
+	codec_quality_combo.set_model (codec_quality_list);
+	codec_quality_combo.pack_start (codec_quality_cols.label);
+	//codec_quality_combo.set_active (0);
+
 	/* Buttons */
 
 	revert_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -241,6 +248,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	silence_end_clock.ValueChanged.connect (sigc::mem_fun (*this, &ExportFormatDialog::update_silence_end_selection));
 
 	src_quality_combo.signal_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_src_quality_selection));
+	codec_quality_combo.signal_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_codec_quality_selection));
 
 	/* Format table signals */
 
@@ -335,6 +343,13 @@ ExportFormatDialog::load_state (FormatPtr spec)
 	for (Gtk::ListStore::Children::iterator it = src_quality_list->children().begin(); it != src_quality_list->children().end(); ++it) {
 		if (it->get_value (src_quality_cols.id) == spec->src_quality()) {
 			src_quality_combo.set_active (it);
+			break;
+		}
+	}
+
+	for (Gtk::ListStore::Children::iterator it = codec_quality_list->children().begin(); it != codec_quality_list->children().end(); ++it) {
+		if (it->get_value (codec_quality_cols.quality) == spec->codec_quality()) {
+			codec_quality_combo.set_active (it);
 			break;
 		}
 	}
@@ -938,6 +953,17 @@ ExportFormatDialog::update_src_quality_selection ()
 }
 
 void
+ExportFormatDialog::update_codec_quality_selection ()
+{
+	Gtk::TreeModel::const_iterator iter = codec_quality_combo.get_active();
+	if (!iter) {
+		return;
+	}
+	int quality = iter->get_value (codec_quality_cols.quality);
+	manager.select_codec_quality (quality);
+}
+
+void
 ExportFormatDialog::update_tagging_selection ()
 {
 	manager.select_tagging (tag_checkbox.get_active());
@@ -952,6 +978,7 @@ ExportFormatDialog::change_encoding_options (ExportFormatPtr ptr)
 	boost::shared_ptr<ARDOUR::ExportFormatOggVorbis> ogg_ptr;
 	boost::shared_ptr<ARDOUR::ExportFormatFLAC> flac_ptr;
 	boost::shared_ptr<ARDOUR::ExportFormatBWF> bwf_ptr;
+	boost::shared_ptr<ARDOUR::ExportFormatFFMPEG> ffmpeg_ptr;
 
 	if ((linear_ptr = boost::dynamic_pointer_cast<ExportFormatLinear> (ptr))) {
 		show_linear_enconding_options (linear_ptr);
@@ -961,6 +988,8 @@ ExportFormatDialog::change_encoding_options (ExportFormatPtr ptr)
 		show_flac_enconding_options (flac_ptr);
 	} else if ((bwf_ptr = boost::dynamic_pointer_cast<ExportFormatBWF> (ptr))) {
 		show_bwf_enconding_options (bwf_ptr);
+	} else if ((ffmpeg_ptr = boost::dynamic_pointer_cast<ExportFormatFFMPEG> (ptr))) {
+		show_ffmpeg_enconding_options (ffmpeg_ptr);
 	} else {
 		std::cout << "Unrecognized format!" << std::endl;
 	}
@@ -1036,6 +1065,34 @@ ExportFormatDialog::show_bwf_enconding_options (boost::shared_ptr<ARDOUR::Export
 	encoding_options_table.attach (dither_type_view, 1, 2, 1, 2);
 
 	fill_sample_format_lists (boost::dynamic_pointer_cast<HasSampleFormat> (ptr));
+
+	show_all_children ();
+}
+
+void
+ExportFormatDialog::show_ffmpeg_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatFFMPEG> ptr)
+{
+	encoding_options_label.set_label (_("FFMPEG/MP3 options"));
+	encoding_options_table.resize (1, 1);
+	encoding_options_table.attach (codec_quality_combo, 0, 1, 0, 1);
+
+	HasCodecQuality::CodecQualityList const & codecs = ptr->get_codec_qualities();
+
+	codec_quality_list->clear();
+	for (HasCodecQuality::CodecQualityList::const_iterator it = codecs.begin(); it != codecs.end(); ++it) {
+
+	Gtk::TreeModel::iterator iter = codec_quality_list->append();
+	Gtk::TreeModel::Row row = *iter;
+		row[codec_quality_cols.quality] = (*it)->quality;
+		row[codec_quality_cols.label] = (*it)->name;
+	}
+
+	for (Gtk::ListStore::Children::iterator it = codec_quality_list->children().begin(); it != codec_quality_list->children().end(); ++it) {
+		if (it->get_value (codec_quality_cols.quality) == format->codec_quality()) {
+			codec_quality_combo.set_active (it);
+			break;
+		}
+	}
 
 	show_all_children ();
 }
