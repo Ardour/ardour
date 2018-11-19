@@ -217,7 +217,6 @@ public:
 	virtual void add (Item *);
 	virtual void add_front (Item *);
 	virtual void remove (Item *);
-	/* XXX this should become virtual also */
 	void clear (bool with_delete = false);
 
 	std::list<Item*> const & items () const {
