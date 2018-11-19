@@ -19,6 +19,7 @@
 */
 
 #include "ardour/export_format_manager.h"
+#include "ardour/filesystem_paths.h"
 
 #include "ardour/export_format_specification.h"
 #include "ardour/export_format_compatibility.h"
@@ -210,6 +211,12 @@ ExportFormatManager::init_formats ()
 		f_ptr.reset (new ExportFormatFLAC ());
 		add_format (f_ptr);
 	} catch (ExportFormatIncompatible & e) {}
+
+	std::string unused;
+	if (ArdourVideoToolPaths::transcoder_exe (unused, unused)) {
+		f_ptr.reset (new ExportFormatFFMPEG ("MP3", "mp3"));
+		add_format (f_ptr);
+	}
 }
 
 void

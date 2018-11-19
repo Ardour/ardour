@@ -365,4 +365,37 @@ ExportFormatBWF::set_compatibility_state (ExportFormatCompatibility const & comp
 	return compatible;
 }
 
+
+/*** FFMPEG Pipe ***/
+
+ExportFormatFFMPEG::ExportFormatFFMPEG (std::string const& name, std::string const& ext)
+{
+	set_name (name);
+	set_format_id (F_FFMPEG);
+	sample_formats.insert (SF_Float);
+
+	add_sample_rate (SR_22_05);
+	add_sample_rate (SR_44_1);
+	add_sample_rate (SR_48);
+	add_sample_rate (SR_88_2);
+	add_sample_rate (SR_96);
+	add_sample_rate (SR_176_4);
+	add_sample_rate (SR_192);
+	add_sample_rate (SR_Session);
+
+	add_endianness (E_Little);
+
+	set_extension (ext);
+	set_quality (Q_LossyCompression);
+}
+
+bool
+ExportFormatFFMPEG::set_compatibility_state (ExportFormatCompatibility const & compatibility)
+{
+	bool compatible = compatibility.has_format (F_FFMPEG);
+	set_compatible (compatible);
+	return compatible;
+}
+
+
 }; // namespace ARDOUR

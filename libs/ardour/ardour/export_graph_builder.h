@@ -39,6 +39,7 @@ namespace AudioGrapher {
 	template <typename T> class SampleFormatConverter;
 	template <typename T> class Interleaver;
 	template <typename T> class SndfileWriter;
+	template <typename T> class CmdPipeWriter;
 	template <typename T> class SilenceTrimmer;
 	template <typename T> class TmpFile;
 	template <typename T> class Threader;
@@ -102,7 +103,11 @@ class LIBARDOUR_API ExportGraphBuilder
 		typedef boost::shared_ptr<AudioGrapher::SndfileWriter<int> >    IntWriterPtr;
 		typedef boost::shared_ptr<AudioGrapher::SndfileWriter<short> >  ShortWriterPtr;
 
+		typedef boost::shared_ptr<AudioGrapher::CmdPipeWriter<Sample> > FloatPipePtr;
+
 		template<typename T> void init_writer (boost::shared_ptr<AudioGrapher::SndfileWriter<T> > & writer);
+		template<typename T> void init_writer (boost::shared_ptr<AudioGrapher::CmdPipeWriter<T> > & writer);
+
 		void copy_files (std::string orig_path);
 
 		FileSpec               config;
@@ -115,6 +120,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		FloatWriterPtr float_writer;
 		IntWriterPtr   int_writer;
 		ShortWriterPtr short_writer;
+		FloatPipePtr   pipe_writer;
 	};
 
 	// sample format converter

@@ -210,6 +210,17 @@ class LIBARDOUR_API ExportFormatBWF : public ExportFormat, public HasSampleForma
 	virtual bool has_broadcast_info () const { return true; }
 };
 
+
+class LIBARDOUR_API ExportFormatFFMPEG : public ExportFormat {
+  public:
+	ExportFormatFFMPEG (std::string const& name, std::string const& ext);
+	~ExportFormatFFMPEG () {};
+
+	bool set_compatibility_state (ExportFormatCompatibility const & compatibility);
+	Type get_type () const { return T_FFMPEG; }
+	SampleFormat get_explicit_sample_format () const { return SF_Float; }
+};
+
 } // namespace ARDOUR
 
 #endif /* __ardour_export_formats__ */

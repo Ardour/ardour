@@ -26,6 +26,7 @@
 
 #include "audiographer/process_context.h"
 #include "audiographer/general/chunker.h"
+#include "audiographer/general/cmdpipe_writer.h"
 #include "audiographer/general/interleaver.h"
 #include "audiographer/general/normalizer.h"
 #include "audiographer/general/analyser.h"
@@ -42,11 +43,14 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/export_channel_configuration.h"
+#include "ardour/export_failed.h"
 #include "ardour/export_filename.h"
 #include "ardour/export_format_specification.h"
 #include "ardour/export_timespan.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/session_directory.h"
 #include "ardour/sndfile_helpers.h"
+#include "ardour/system_exec.h"
 
 #include "pbd/file_utils.h"
 #include "pbd/cpus.h"
@@ -212,8 +216,13 @@ boost::shared_ptr<AudioGrapher::Sink<Sample> >
 ExportGraphBuilder::Encoder::init (FileSpec const & new_config)
 {
 	config = new_config;
-	init_writer (float_writer);
-	return float_writer;
+	if (config.format->format_id() == ExportFormatBase::F_FFMPEG) {
+		init_writer (pipe_writer);
+		return pipe_writer;
+	} else {
+		init_writer (float_writer);
+		return float_writer;
+	}
 }
 
 template <>
@@ -257,6 +266,10 @@ ExportGraphBuilder::Encoder::destroy_writer (bool delete_out_file)
 			short_writer->close ();
 		}
 
+		if (pipe_writer) {
+			pipe_writer->close ();
+		}
+
 		if (std::remove(writer_filename.c_str() ) != 0) {
 			std::cout << "Encoder::destroy_writer () : Error removing file: " << strerror(errno) << std::endl;
 		}
@@ -265,6 +278,7 @@ ExportGraphBuilder::Encoder::destroy_writer (bool delete_out_file)
 	float_writer.reset ();
 	int_writer.reset ();
 	short_writer.reset ();
+	pipe_writer.reset ();
 }
 
 bool
@@ -290,6 +304,69 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::Sndfil
 	writer_filename = config.filename->get_path (config.format);
 
 	writer.reset (new AudioGrapher::SndfileWriter<T> (writer_filename, format, channels, config.format->sample_rate(), config.broadcast_info));
+	writer->FileWritten.connect_same_thread (copy_files_connection, boost::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
+}
+
+template<typename T>
+void
+ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPipeWriter<T> > & writer)
+{
+	unsigned channels = config.channel_config->get_n_chans();
+	config.filename->set_channel_config(config.channel_config);
+	writer_filename = config.filename->get_path (config.format);
+
+	std::string ffmpeg_exe;
+	std::string unused;
+
+	if (!ArdourVideoToolPaths::transcoder_exe (ffmpeg_exe, unused)) {
+		throw ExportFailed ("External encoder (ffmpeg) is not available.");
+	}
+
+	int quality = 3; // TODO get from config.format
+
+	int a=0;
+	char **argp = (char**) calloc (100, sizeof(char*));
+	char tmp[64];
+	argp[a++] = strdup(ffmpeg_exe.c_str());
+	argp[a++] = strdup ("-f");
+	argp[a++] = strdup ("f32le");
+	argp[a++] = strdup ("-acodec");
+	argp[a++] = strdup ("pcm_f32le");
+	argp[a++] = strdup ("-ac");
+	snprintf (tmp, sizeof(tmp), "%d", channels);
+	argp[a++] = strdup (tmp);
+	argp[a++] = strdup ("-ar");
+	snprintf (tmp, sizeof(tmp), "%d", config.format->sample_rate());
+	argp[a++] = strdup (tmp);
+	argp[a++] = strdup ("-i");
+	argp[a++] = strdup ("pipe:0");
+
+	argp[a++] = strdup ("-y");
+	if (quality < 10) {
+		/* variable rate, lower is better */
+		snprintf (tmp, sizeof(tmp), "%d", quality);
+		argp[a++] = strdup ("-q:a"); argp[a++] = strdup (tmp);
+	} else {
+		/* fixed bitrate, higher is better */
+		snprintf (tmp, sizeof(tmp), "%dk", quality); // eg. "192k"
+		argp[a++] = strdup ("-b:a"); argp[a++] = strdup (tmp);
+	}
+
+	/* TODO: add SessionMetadata::Metadata()
+	 * see gtk2_ardour/export_video_dialog.cc
+	 * and gtk2_ardour/transcode_ffmpeg.cc
+	 */
+
+	argp[a++] = strdup (writer_filename.c_str());
+	argp[a] = (char *)0;
+
+	/* argp is free()d in ~SystemExec,
+	 * SystemExec is deleted when writer is destroyed */
+	ARDOUR::SystemExec* exec = new ARDOUR::SystemExec (ffmpeg_exe, argp);
+	if (exec->start(0)) {
+		throw ExportFailed ("External encoder (ffmpeg) cannot be started.");
+	}
+	writer.reset (new AudioGrapher::CmdPipeWriter<T> (exec, writer_filename));
 	writer->FileWritten.connect_same_thread (copy_files_connection, boost::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
 }
 

@@ -43,7 +43,8 @@ class LIBARDOUR_API ExportFormatBase {
 
 	enum Type {
 		T_None = 0,
-		T_Sndfile
+		T_Sndfile,
+		T_FFMPEG
 	};
 
 	enum FormatId {
@@ -56,7 +57,8 @@ class LIBARDOUR_API ExportFormatBase {
 		F_IRCAM = SF_FORMAT_IRCAM,
 		F_RAW = SF_FORMAT_RAW,
 		F_FLAC = SF_FORMAT_FLAC,
-		F_Ogg = SF_FORMAT_OGG
+		F_Ogg = SF_FORMAT_OGG,
+		F_FFMPEG = 0xF10000
 	};
 
 	enum Endianness {

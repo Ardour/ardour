@@ -954,6 +954,8 @@ ExportProfileManager::check_format (ExportFormatSpecPtr format, uint32_t channel
 	switch (format->type()) {
 	  case ExportFormatBase::T_Sndfile:
 		return check_sndfile_format (format, channels);
+	  case ExportFormatBase::T_FFMPEG:
+		return true;
 
 	  default:
 		throw ExportFailed (X_("Invalid format given for ExportFileFactory::check!"));
