@@ -86,6 +86,14 @@ namespace ARDOUR {
 	 */
 	LIBARDOUR_API std::string windows_package_directory_path ();
 #endif
+
+	namespace ArdourVideoToolPaths {
+
+		LIBARDOUR_API bool harvid_exe (std::string &harvid_exe);
+		LIBARDOUR_API bool xjadeo_exe (std::string &xjadeo_exe);
+		LIBARDOUR_API bool transcoder_exe (std::string &ffmpeg_exe, std::string &ffprobe_exe);
+	};
+
 } // namespace ARDOUR
 
 #endif

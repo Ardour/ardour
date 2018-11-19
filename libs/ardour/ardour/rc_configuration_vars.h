@@ -269,6 +269,7 @@ CONFIG_VARIABLE (std::string, updates_url, "updates-url", "http://ardour.org/wha
 CONFIG_VARIABLE (std::string, donate_url, "donate-url", "http://ardour.org/donate")
 
 /* video timeline configuration */
+CONFIG_VARIABLE (std::string, xjadeo_binary, "xjadeo-binary", "")
 CONFIG_VARIABLE (bool, video_advanced_setup, "video-advanced-setup", false)
 CONFIG_VARIABLE (std::string, video_server_url, "video-server-url", "http://127.0.0.1:1554")
 #ifndef PLATFORM_WINDOWS
