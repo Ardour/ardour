@@ -288,6 +288,13 @@ ExportFormatManager::select_src_quality (ExportFormatBase::SRCQuality value)
 }
 
 void
+ExportFormatManager::select_codec_quality (int value)
+{
+	current_selection->set_codec_quality (value);
+	check_for_description_change ();
+}
+
+void
 ExportFormatManager::select_with_cue (bool value)
 {
 	current_selection->set_with_cue (value);

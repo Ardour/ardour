@@ -156,7 +156,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 	, _soundcloud_upload (false)
 	, _command ("")
 	, _analyse (true)
-	, _codec_quality (-3)
+	, _codec_quality (-2)
 {
 	format_ids.insert (F_None);
 	endiannesses.insert (E_FileDefault);
@@ -192,7 +192,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const
 	, _soundcloud_upload (false)
 	, _command ("")
 	, _analyse (true)
-	, _codec_quality (-3)
+	, _codec_quality (-2)
 {
 	_silence_beginning.type = Time::Timecode;
 	_silence_end.type = Time::Timecode;

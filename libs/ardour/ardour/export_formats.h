@@ -52,6 +52,8 @@ class LIBARDOUR_API ExportFormat : public ExportFormatBase, public ExportFormatB
 	Quality get_quality () const { return *qualities.begin(); }
 
 	bool has_sample_format ();
+	bool has_codec_quality ();
+
 	bool sample_format_is_compatible (SampleFormat format) const;
 
 	/* If the format has a specific sample format, this function should be overridden
@@ -76,6 +78,7 @@ class LIBARDOUR_API ExportFormat : public ExportFormatBase, public ExportFormatB
 
 	virtual bool has_broadcast_info () const { return false; }
 
+
   protected:
 
 	void add_sample_rate (SampleRate rate) { sample_rates.insert (rate); }
@@ -83,6 +86,36 @@ class LIBARDOUR_API ExportFormat : public ExportFormatBase, public ExportFormatB
 
 	void set_format_id (FormatId id) { format_ids.clear (); format_ids.insert (id); }
 	void set_quality (Quality value) { qualities.clear(); qualities.insert (value); }
+};
+
+class LIBARDOUR_API HasCodecQuality : public PBD::ScopedConnectionList {
+public:
+	struct CodecQuality {
+		CodecQuality (std::string const& n, int q)
+			: name (n)
+			, quality (q)
+		{}
+
+		std::string name;
+		int         quality;
+	};
+
+	typedef boost::shared_ptr<CodecQuality> CodecQualityPtr;
+	typedef std::list<CodecQualityPtr> CodecQualityList;
+
+	virtual ~HasCodecQuality () {}
+
+	void add_codec_quality (std::string const& name, int q) {
+		CodecQualityPtr ptr (new CodecQuality (name, q));
+		_codec_qualties.push_back (ptr);
+	}
+
+	CodecQualityList const & get_codec_qualities () const {
+		return _codec_qualties;
+	}
+
+protected:
+	CodecQualityList _codec_qualties;
 };
 
 /// Class to be inherited by export formats that have a selectable sample format
@@ -211,7 +244,7 @@ class LIBARDOUR_API ExportFormatBWF : public ExportFormat, public HasSampleForma
 };
 
 
-class LIBARDOUR_API ExportFormatFFMPEG : public ExportFormat {
+class LIBARDOUR_API ExportFormatFFMPEG : public ExportFormat, public HasCodecQuality {
   public:
 	ExportFormatFFMPEG (std::string const& name, std::string const& ext);
 	~ExportFormatFFMPEG () {};

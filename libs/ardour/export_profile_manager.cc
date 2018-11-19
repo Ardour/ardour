@@ -763,6 +763,13 @@ ExportProfileManager::load_format_from_disk (std::string const & path)
 
 	ExportFormatSpecPtr format = handler->add_format (*root);
 
+	if (format->format_id() == ExportFormatBase::F_FFMPEG) {
+		std::string unused;
+		if (!ArdourVideoToolPaths::transcoder_exe (unused, unused)) {
+			error << string_compose (_("Ignored format '%1': encoder is not avilable"), path) << endmsg;
+			return;
+		}
+	}
 	/* Handle id to filename mapping and don't add duplicates to list */
 
 	FilePair pair (format->id(), path);
