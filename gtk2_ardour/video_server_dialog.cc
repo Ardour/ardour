@@ -29,6 +29,7 @@
 
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/session_directory.h"
 #include "gtkmm2ext/utils.h"
 #include "ardour/template_utils.h"
@@ -40,7 +41,6 @@
 
 #include "video_server_dialog.h"
 #include "utils_videotl.h"
-#include "video_tool_paths.h"
 #include "pbd/i18n.h"
 
 #ifdef PLATFORM_WINDOWS

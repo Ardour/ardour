@@ -27,9 +27,10 @@
 #include "pbd/file_utils.h"
 #include "gui_thread.h"
 
+#include "ardour/filesystem_paths.h"
+
 #include "transcode_ffmpeg.h"
 #include "utils_videotl.h"
-#include "video_tool_paths.h"
 
 #include "pbd/i18n.h"
 
@@ -50,7 +51,7 @@ TranscodeFfmpeg::TranscodeFfmpeg (std::string f)
 	debug_enable = false;
 #endif
 
-	if (!ArdourVideoToolPaths::transcoder_exe(ffmpeg_exe, ffprobe_exe)) {
+	if (!ARDOUR::ArdourVideoToolPaths::transcoder_exe(ffmpeg_exe, ffprobe_exe)) {
 		warning << string_compose(
 				_(
 					"ffmpeg installation was not found on this system.\n"
@@ -598,7 +599,6 @@ TranscodeFfmpeg::ffmpegparse_v (std::string d, size_t /* s */)
 		  printf("ffmpeg: '%s'\n", d.c_str());
 		}
 #endif
-		Progress(0, 0); /* EMIT SIGNAL */
 		return;
 	}
 	ARDOUR::samplecnt_t f = atol(d.substr(6));

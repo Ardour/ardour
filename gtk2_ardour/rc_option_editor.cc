@@ -1594,9 +1594,6 @@ class VideoTimelineOptions : public OptionEditorMiniPage
 			_video_server_docroot_entry.signal_activate().connect (sigc::mem_fun(*this, &VideoTimelineOptions::server_docroot_changed));
 			_custom_xjadeo_path.signal_changed().connect (sigc::mem_fun (*this, &VideoTimelineOptions::custom_xjadeo_path_changed));
 			_xjadeo_browse_button.signal_clicked ().connect (sigc::mem_fun (*this, &VideoTimelineOptions::xjadeo_browse_clicked));
-
-			// xjadeo-path is a UIConfig parameter
-			UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &VideoTimelineOptions::parameter_changed));
 		}
 
 		void server_url_changed ()
@@ -1629,13 +1626,13 @@ class VideoTimelineOptions : public OptionEditorMiniPage
 
 		void custom_xjadeo_path_changed ()
 		{
-			UIConfiguration::instance().set_xjadeo_binary (_custom_xjadeo_path.get_text());
+			_rc_config->set_xjadeo_binary (_custom_xjadeo_path.get_text());
 		}
 
 		void xjadeo_browse_clicked ()
 		{
 			Gtk::FileChooserDialog dialog(_("Set Video Monitor Executable"), Gtk::FILE_CHOOSER_ACTION_OPEN);
-			dialog.set_filename (UIConfiguration::instance().get_xjadeo_binary());
+			dialog.set_filename (_rc_config->get_xjadeo_binary());
 			dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 			dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
 			if (dialog.run () == Gtk::RESPONSE_OK) {
@@ -1646,7 +1643,7 @@ class VideoTimelineOptions : public OptionEditorMiniPage
 #endif
 							Glib::file_test (filename, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)
 							)) {
-					UIConfiguration::instance().set_xjadeo_binary (filename);
+					_rc_config->set_xjadeo_binary (filename);
 				}
 			}
 		}
@@ -1669,7 +1666,7 @@ class VideoTimelineOptions : public OptionEditorMiniPage
 				_video_server_docroot_entry.set_sensitive(x);
 				_video_server_url_entry.set_sensitive(x);
 			} else if (p == "xjadeo-binary") {
-				_custom_xjadeo_path.set_text (UIConfiguration::instance().get_xjadeo_binary());
+				_custom_xjadeo_path.set_text (_rc_config->get_xjadeo_binary());
 			}
 		}
 

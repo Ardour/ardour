@@ -23,6 +23,7 @@
 
 #include "pbd/file_utils.h"
 #include "pbd/types_convert.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/session_directory.h"
 
 #include "ardour_ui.h"
@@ -32,7 +33,6 @@
 #include "utils_videotl.h"
 #include "rgb_macros.h"
 #include "video_timeline.h"
-#include "video_tool_paths.h"
 
 #include <gtkmm2ext/utils.h>
 #include <pthread.h>
