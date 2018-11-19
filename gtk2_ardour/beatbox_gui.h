@@ -50,7 +50,6 @@ class PropertyChange;
 }
 
 namespace ArdourCanvas {
-class Grid;
 class Item;
 class StepButton;
 class Polygon;
@@ -63,17 +62,93 @@ namespace ARDOUR {
 class BeatBox;
 }
 
-class SequencerGrid;
+class SequencerView;
+class SequenceView;
+class StepView;
 class FloatingTextEntry;
+class SequencerStepIndicator;
 
-class SequenceHeader : public ArdourCanvas::Rectangle
-{
+class SequencerView : public ArdourCanvas::Rectangle, public sigc::trackable {
   public:
-	SequenceHeader (SequencerGrid&, ARDOUR::StepSequence&, ArdourCanvas::Item* parent);
+	enum Mode {
+		Velocity,
+		Pitch,
+		Duration,
+		Octave,
+		Group,
+		Timing,
+	};
+
+	SequencerView (ARDOUR::StepSequencer&, ArdourCanvas::Item*);
+
+	ARDOUR::StepSequencer& sequencer() const { return _sequencer; }
+
+	SequenceView& sequence_view (size_t n) const;
+
+	Mode mode() const { return _mode; }
+	void set_mode (Mode m);
+
+	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
+	void update ();
+
+	static double rhs_xoffset;
+	static double mode_button_width;
+	static double mode_button_height;
+	static double mode_button_spacing;
+	static double mode_button_xdim;
+	static double mode_button_ydim;
 
   private:
-	SequencerGrid& grid;
+	ARDOUR::StepSequencer& _sequencer;
+	typedef std::vector<SequencerStepIndicator*> StepIndicators;
+	StepIndicators step_indicators;
+	typedef std::vector<SequenceView*> SequenceViews;
+	SequenceViews sequence_views;
+
+	double _width;
+	double _height;
+	Mode   _mode;
+	ArdourCanvas::ScrollGroup* v_scroll_group;
+	ArdourCanvas::Container* no_scroll_group;
+	ArdourCanvas::HBox* step_indicator_box;
+	ArdourCanvas::VBox* sequence_vbox;
+
+	ArdourCanvas::Rectangle* velocity_mode_button;
+	ArdourCanvas::Rectangle* pitch_mode_button;
+	ArdourCanvas::Rectangle* octave_mode_button;
+	ArdourCanvas::Rectangle* gate_mode_button;
+	ArdourCanvas::Rectangle* timing_mode_button;
+
+	ArdourCanvas::Text* velocity_mode_text;
+	ArdourCanvas::Text* pitch_mode_text;
+	ArdourCanvas::Text* octave_mode_text;
+	ArdourCanvas::Text* gate_mode_text;
+	ArdourCanvas::Text* timing_mode_text;
+
+	static Gtkmm2ext::Color current_mode_color;
+	static Gtkmm2ext::Color not_current_mode_color;
+
+	void sequencer_changed (PBD::PropertyChange const &);
+	bool mode_button_event (GdkEvent*, SequencerView::Mode);
+
+	PBD::ScopedConnection sequencer_connection;
+
+};
+
+class SequenceView : public ArdourCanvas::HBox
+{
+  public:
+	SequenceView (SequencerView&, ARDOUR::StepSequence&, ArdourCanvas::Item* parent);
+
+	void view_mode_changed ();
+	SequencerView::Mode mode() const { return sv.mode(); }
+	ARDOUR::StepSequencer& sequencer() const  { return sv.sequencer(); }
+
+   private:
+	SequencerView& sv;
 	ARDOUR::StepSequence& sequence;
+
+	ArdourCanvas::HBox* lhs_box;
 
 	ArdourCanvas::Rectangle* number_display;
 	ArdourCanvas::Rectangle* root_display;
@@ -87,20 +162,27 @@ class SequenceHeader : public ArdourCanvas::Rectangle
 	void name_edited (std::string, int);
 
 	FloatingTextEntry* floating_entry;
+
+	typedef std::vector<StepView*> StepViews;
+	StepViews step_views;
+
+	void sequence_changed ();
+	PBD::ScopedConnection sequence_connection;
 };
 
 class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
    public:
-	StepView (SequencerGrid&, ARDOUR::Step&, ArdourCanvas::Item*);
+	StepView (SequenceView&, ARDOUR::Step&, ArdourCanvas::Item* parent);
 
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	bool on_event (GdkEvent*);
 
 	void view_mode_changed ();
+	ARDOUR::StepSequencer& sequencer() const  { return sv.sequencer(); }
 
    private:
 	ARDOUR::Step& _step;
-	SequencerGrid& _seq;
+	SequenceView& sv;
 	ArdourCanvas::Text* text;
 	bool grabbed;
 
@@ -131,14 +213,14 @@ class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
 
 class SequencerStepIndicator : public ArdourCanvas::Rectangle, public sigc::trackable {
   public:
-	SequencerStepIndicator (SequencerGrid&, ArdourCanvas::Canvas*, size_t n);
+	SequencerStepIndicator (SequencerView&, ArdourCanvas::Item* parent, size_t n);
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	bool on_event (GdkEvent*);
 
 	void set_current (bool);
 
   private:
-	SequencerGrid& grid;
+	SequencerView& sv;
 	size_t number;
 	ArdourCanvas::Polygon* poly;
 	ArdourCanvas::Text*    text;
@@ -160,75 +242,6 @@ class SequencerStepIndicator : public ArdourCanvas::Rectangle, public sigc::trac
 	static Gtkmm2ext::Color current_text_color;
 	static Gtkmm2ext::Color other_text_color;
 	static Gtkmm2ext::Color bright_outline_color;
-};
-
-class SequencerGrid : public ArdourCanvas::Rectangle, public sigc::trackable {
-  public:
-	enum Mode {
-		Velocity,
-		Pitch,
-		Duration,
-		Octave,
-		Group,
-		Timing,
-	};
-
-	SequencerGrid (ARDOUR::StepSequencer&, ArdourCanvas::Canvas*);
-
-	ARDOUR::StepSequencer& sequencer() const { return _sequencer; }
-
-	SequenceHeader& sequence_header (size_t n) const;
-
-	Mode mode() const { return _mode; }
-	void set_mode (Mode m);
-
-	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
-	void update ();
-
-	static double rhs_xoffset;
-	static double mode_button_width;
-	static double mode_button_height;
-	static double mode_button_spacing;
-	static double mode_button_xdim;
-	static double mode_button_ydim;
-
-  private:
-	ARDOUR::StepSequencer& _sequencer;
-	typedef std::vector<StepView*> StepViews;
-	StepViews step_views;
-	typedef std::vector<SequencerStepIndicator*> StepIndicators;
-	StepIndicators step_indicators;
-	typedef std::vector<SequenceHeader*> SequenceHeaders;
-	SequenceHeaders sequence_headers;
-
-	double _width;
-	double _height;
-	Mode   _mode;
-	ArdourCanvas::ScrollGroup* v_scroll_group;
-	ArdourCanvas::Container* no_scroll_group;
-	ArdourCanvas::Rectangle* step_indicator_bg;
-	ArdourCanvas::HBox* step_indicator_box;
-
-	ArdourCanvas::Rectangle* velocity_mode_button;
-	ArdourCanvas::Rectangle* pitch_mode_button;
-	ArdourCanvas::Rectangle* octave_mode_button;
-	ArdourCanvas::Rectangle* gate_mode_button;
-	ArdourCanvas::Rectangle* timing_mode_button;
-
-	ArdourCanvas::Text* velocity_mode_text;
-	ArdourCanvas::Text* pitch_mode_text;
-	ArdourCanvas::Text* octave_mode_text;
-	ArdourCanvas::Text* gate_mode_text;
-	ArdourCanvas::Text* timing_mode_text;
-
-	static Gtkmm2ext::Color current_mode_color;
-	static Gtkmm2ext::Color not_current_mode_color;
-
-	void sequencer_changed (PBD::PropertyChange const &);
-	bool mode_button_event (GdkEvent*, SequencerGrid::Mode);
-
-	PBD::ScopedConnection sequencer_connection;
-
 };
 
 class BBGUI : public ArdourDialog {
@@ -254,7 +267,7 @@ class BBGUI : public ArdourDialog {
 	ArdourCanvas::GtkCanvasViewport* _canvas_viewport;
 	ArdourCanvas::GtkCanvas* _canvas;
 
-	SequencerGrid* _sequencer;
+	SequencerView* _sequencer;
 
 	ArdourWidgets::ArdourButton start_button;
 	void toggle_play ();
@@ -272,14 +285,6 @@ class BBGUI : public ArdourDialog {
 	sigc::connection timer_connection;
 
 	void sequencer_changed (PBD::PropertyChange const &);
-
-	Gtk::HBox mode_box;
-	ArdourWidgets::ArdourButton mode_velocity_button;
-	ArdourWidgets:: ArdourButton mode_pitch_button;
-	ArdourWidgets::ArdourButton mode_octave_button;
-	ArdourWidgets::ArdourButton mode_group_button;
-	ArdourWidgets::ArdourButton mode_duration_button;
-
 	PBD::ScopedConnection sequencer_connection;
 };
 
