@@ -60,8 +60,8 @@ public:
 	void set_border_color (Gtkmm2ext::Color c)  { set_outline_color (c); }
 
 	void add (Item*);
-	void pack_start (Item*, double extra_padding = 0);
-	void pack_end (Item*, double extra_padding = 0);
+	void add_front (Item*);
+	void layout ();
 
 	void set_collapse_on_hide (bool);
 	void set_homogenous (bool);

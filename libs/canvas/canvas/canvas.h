@@ -83,6 +83,8 @@ public:
 	virtual void grab (Item *) = 0;
 	/** called to ask the canvas' host to `ungrab' any grabbed item */
 	virtual void ungrab () = 0;
+	/** called to ask for a resize/relayout of all or part of the canvas */
+	virtual void queue_resize () = 0;
 
 	/** called to ask the canvas' host to keyboard focus on an item */
 	virtual void focus (Item *) = 0;
@@ -187,6 +189,7 @@ protected:
 	static uint32_t tooltip_timeout_msecs;
 
 	void queue_draw_item_area (Item *, Rect);
+
 	virtual void pick_current_item (int state) = 0;
 	virtual void pick_current_item (Duple const &, int state) = 0;
 
@@ -227,6 +230,7 @@ public:
 
 	void queue_draw ();
 	void queue_draw_area (int x, int y, int width, int height);
+	void queue_resize ();
 
 	Glib::RefPtr<Pango::Context> get_pango_context();
 
@@ -288,8 +292,10 @@ private:
 	bool show_tooltip ();
 	void hide_tooltip ();
 	bool really_start_tooltip_timeout ();
+	bool resize_handler ();
 
 	bool _in_dtor;
+	bool resize_queued;
 
 	void* _nsglview;
 	Cairo::RefPtr<Cairo::Surface> _canvas_image;

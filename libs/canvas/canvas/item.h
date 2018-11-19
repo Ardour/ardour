@@ -272,7 +272,20 @@ public:
 	virtual void dump (std::ostream&) const;
 	std::string whatami() const;
 
-protected:
+        bool resize_queued() const { return _resize_queued; }
+        void queue_resize();
+
+        /* only derived containers need to implement this, but this
+           is where they compute the sizes and position and their
+           children. A fixed-layout container (i.e. one where every child
+           has just had its position fixed via ::set_position()) does not
+           need to do anything here. Only box/table/grid style containers,
+           where the position of one child depends on the position and size of
+           other children, need to provide an implementation.
+        */
+        virtual void layout();
+
+  protected:
 	friend class Fill;
 	friend class Outline;
 
@@ -334,6 +347,10 @@ protected:
 	Duple scroll_offset() const;
   public:
 	Duple position_offset() const;
+
+	bool _resize_queued;
+	double requested_width;
+	double requested_height;
 
 private:
 	void init ();
