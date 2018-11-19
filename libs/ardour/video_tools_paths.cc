@@ -29,6 +29,7 @@
 
 #include "pbd/file_utils.h"
 
+#include <glibmm/convert.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 

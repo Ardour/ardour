@@ -601,7 +601,7 @@ SystemExec::write_to_stdin(const void* data, size_t bytes)
 
 	c=0;
 	while (c < bytes) {
-		if (!WriteFile(stdinP[1], data+c, bytes-c, &r, NULL)) {
+		if (!WriteFile(stdinP[1], &((const char*)data)[c], bytes - c, &r, NULL)) {
 			if (GetLastError() == 0xE8 /*NT_STATUS_INVALID_USER_BUFFER*/) {
 				Sleep(100);
 				continue;
@@ -965,7 +965,7 @@ SystemExec::write_to_stdin(const void* data, size_t bytes)
 	c=0;
 	while (c < bytes) {
 		for (;;) {
-			r=::write(pin[1], data+c, bytes-c);
+			r = ::write(pin[1], &((const char*)data)[c], bytes - c);
 			if (r < 0 && (errno == EINTR || errno == EAGAIN)) {
 				sleep(1);
 				continue;
