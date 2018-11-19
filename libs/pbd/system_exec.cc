@@ -351,6 +351,16 @@ SystemExec::to_s () const
 #endif
 }
 
+size_t
+SystemExec::write_to_stdin (std::string const& d, size_t len)
+{
+	const char *data = d.c_str();
+	if (len == 0) {
+		len = d.length();
+	}
+	return write_to_stdin ((const void*)data, len);
+}
+
 #ifdef PLATFORM_WINDOWS /* Windows Process */
 
 /* HELPER FUNCTIONS */
@@ -582,21 +592,16 @@ SystemExec::close_stdin()
 	destroy_pipe(stdinP);
 }
 
-int
-SystemExec::write_to_stdin(std::string d, size_t len)
+size_t
+SystemExec::write_to_stdin(const void* data, size_t bytes)
 {
-	const char *data;
 	DWORD r,c;
 
 	::pthread_mutex_lock(&write_lock);
 
-	data=d.c_str();
-	if (len == 0) {
-		len=(d.length());
-	}
 	c=0;
-	while (c < len) {
-		if (!WriteFile(stdinP[1], data+c, len-c, &r, NULL)) {
+	while (c < bytes) {
+		if (!WriteFile(stdinP[1], data+c, bytes-c, &r, NULL)) {
 			if (GetLastError() == 0xE8 /*NT_STATUS_INVALID_USER_BUFFER*/) {
 				Sleep(100);
 				continue;
@@ -950,27 +955,22 @@ SystemExec::close_stdin()
 	close_fd(pout[1]);
 }
 
-int
-SystemExec::write_to_stdin(std::string d, size_t len)
+size_t
+SystemExec::write_to_stdin(const void* data, size_t bytes)
 {
-	const char *data;
 	ssize_t r;
 	size_t c;
 	::pthread_mutex_lock(&write_lock);
 
-	data=d.c_str();
-	if (len == 0) {
-		len=(d.length());
-	}
 	c=0;
-	while (c < len) {
+	while (c < bytes) {
 		for (;;) {
-			r=::write(pin[1], data+c, len-c);
+			r=::write(pin[1], data+c, bytes-c);
 			if (r < 0 && (errno == EINTR || errno == EAGAIN)) {
 				sleep(1);
 				continue;
 			}
-			if ((size_t) r != (len-c)) {
+			if ((size_t) r != (bytes-c)) {
 				::pthread_mutex_unlock(&write_lock);
 				return c;
 			}

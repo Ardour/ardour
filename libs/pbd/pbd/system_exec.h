@@ -164,12 +164,19 @@ class LIBPBD_API SystemExec
 		 */
 		void close_stdin ();
 		/** write into child-program's STDIN
-		 * @param d data to write
+		 * @param d text to write
 		 * @param len length of data to write, if it is 0 (zero), d.length() is
 		 * used to determine the number of bytes to transmit.
 		 * @return number of bytes written.
 		 */
-		int write_to_stdin (std::string d, size_t len=0);
+		size_t write_to_stdin (std::string const& d, size_t len=0);
+
+		/** write into child-program's STDIN
+		 * @param data data to write
+		 * @param bytes length of data to write
+		 * @return number of bytes written.
+		 */
+		size_t write_to_stdin (const void* d, size_t bytes=0);
 
 		/** The ReadStdout signal is emitted when the application writes to STDOUT.
 		 * it passes the written data and its length in bytes as arguments to the bound
