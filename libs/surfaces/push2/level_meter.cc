@@ -468,7 +468,7 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 			meters[n].length = len;
 		}
 
-		meter_packer->pack_start (meters[n].meter);
+		meter_packer->add (meters[n].meter);
 		meters[n].packed = true;
 		if (max_visible_meters == 0 || (uint32_t) n < max_visible_meters + nmidi) {
 			meters[n].meter->show ();
