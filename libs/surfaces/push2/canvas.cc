@@ -69,9 +69,19 @@ Push2Canvas::~Push2Canvas ()
 	device_sample_buffer = 0;
 }
 
+void
+Push2Canvas::queue_resize ()
+{
+	/* nothing to do here, for now */
+}
+
 bool
 Push2Canvas::vblank ()
 {
+	if (_root.resize_queued()) {
+		_root.layout ();
+	}
+
 	/* re-render dirty areas, if any */
 
 	if (expose ()) {
