@@ -1026,13 +1026,14 @@ ExportFormatDialog::show_linear_enconding_options (boost::shared_ptr<ARDOUR::Exp
 }
 
 void
-ExportFormatDialog::show_ogg_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatOggVorbis> /*ptr*/)
+ExportFormatDialog::show_ogg_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatOggVorbis> ptr)
 {
 	encoding_options_label.set_label (_("Ogg Vorbis options"));
 
-	encoding_options_table.resize (1, 1);
-	encoding_options_table.attach (tag_checkbox, 0, 1, 0, 1);
-
+	encoding_options_table.resize (2, 1);
+	encoding_options_table.attach (codec_quality_combo, 0, 1, 0, 1);
+	encoding_options_table.attach (tag_checkbox, 0, 1, 1, 2);
+	fill_codec_quality_lists (ptr);
 	show_all_children ();
 }
 
@@ -1075,25 +1076,7 @@ ExportFormatDialog::show_ffmpeg_enconding_options (boost::shared_ptr<ARDOUR::Exp
 	encoding_options_label.set_label (_("FFMPEG/MP3 options"));
 	encoding_options_table.resize (1, 1);
 	encoding_options_table.attach (codec_quality_combo, 0, 1, 0, 1);
-
-	HasCodecQuality::CodecQualityList const & codecs = ptr->get_codec_qualities();
-
-	codec_quality_list->clear();
-	for (HasCodecQuality::CodecQualityList::const_iterator it = codecs.begin(); it != codecs.end(); ++it) {
-
-	Gtk::TreeModel::iterator iter = codec_quality_list->append();
-	Gtk::TreeModel::Row row = *iter;
-		row[codec_quality_cols.quality] = (*it)->quality;
-		row[codec_quality_cols.label] = (*it)->name;
-	}
-
-	for (Gtk::ListStore::Children::iterator it = codec_quality_list->children().begin(); it != codec_quality_list->children().end(); ++it) {
-		if (it->get_value (codec_quality_cols.quality) == format->codec_quality()) {
-			codec_quality_combo.set_active (it);
-			break;
-		}
-	}
-
+	fill_codec_quality_lists (ptr);
 	show_all_children ();
 }
 
@@ -1136,6 +1119,28 @@ ExportFormatDialog::fill_sample_format_lists (boost::shared_ptr<ARDOUR::HasSampl
 
 		if ((*it)->selected()) {
 			dither_type_view.get_selection()->select (iter);
+		}
+	}
+}
+
+void
+ExportFormatDialog::fill_codec_quality_lists (boost::shared_ptr<ARDOUR::HasCodecQuality> ptr)
+{
+	HasCodecQuality::CodecQualityList const & codecs = ptr->get_codec_qualities();
+
+	codec_quality_list->clear();
+	for (HasCodecQuality::CodecQualityList::const_iterator it = codecs.begin(); it != codecs.end(); ++it) {
+
+	Gtk::TreeModel::iterator iter = codec_quality_list->append();
+	Gtk::TreeModel::Row row = *iter;
+		row[codec_quality_cols.quality] = (*it)->quality;
+		row[codec_quality_cols.label] = (*it)->name;
+	}
+
+	for (Gtk::ListStore::Children::iterator it = codec_quality_list->children().begin(); it != codec_quality_list->children().end(); ++it) {
+		if (it->get_value (codec_quality_cols.quality) == format->codec_quality()) {
+			codec_quality_combo.set_active (it);
+			break;
 		}
 	}
 }
