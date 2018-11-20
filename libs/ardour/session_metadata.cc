@@ -647,3 +647,29 @@ SessionMetadata::set_country (const string & v)
 {
 	set_value ("user_country", v);
 }
+
+void
+SessionMetadata::av_export_tag (MetaDataMap& meta) const
+{
+	if (year() > 0) {
+		std::ostringstream osstream; osstream << year();
+		meta["year"] = osstream.str();
+	}
+	if (track_number() > 0) {
+		std::ostringstream osstream; osstream << track_number();
+		meta["track"] = osstream.str();
+	}
+	if (disc_number() > 0) {
+		std::ostringstream osstream; osstream << disc_number();
+		meta["disc"] = osstream.str();
+	}
+	if (!title().empty())        { meta["title"] = title(); }
+	if (!artist().empty())       { meta["author"] = artist(); }
+	if (!album_artist().empty()) { meta["album_artist"] = album_artist(); }
+	if (!album().empty())        { meta["album"] = album(); }
+	if (!genre().empty())        { meta["genre"] = genre(); }
+	if (!composer().empty())     { meta["composer"] = composer(); }
+	if (!comment().empty())      { meta["comment"] = comment(); }
+	if (!copyright().empty())    { meta["copyright"] = copyright(); }
+	if (!subtitle().empty())     { meta["description"] = subtitle(); }
+}

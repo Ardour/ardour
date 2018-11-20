@@ -132,6 +132,10 @@ class LIBARDOUR_API SessionMetadata : public PBD::StatefulDestructible
 	void set_organization (const std::string &);
 	void set_country (const std::string &);
 
+	/*** Export ***/
+	typedef std::map<std::string,std::string> MetaDataMap;
+	void av_export_tag (MetaDataMap&) const;
+
 	/*** Serialization ***/
 	XMLNode & get_state ();  //serializes stuff in the map, to be stored in session file
 	XMLNode & get_user_state ();  //serializes stuff in the user_map, to be stored in user's config file

@@ -118,6 +118,8 @@ class LIBPBD_API SystemExec
 
 		virtual ~SystemExec ();
 
+		static char* format_key_value_parameter (std::string, std::string);
+
 		std::string to_s() const;
 
 		/** fork and execute the given program
