@@ -150,7 +150,6 @@ class TranscodeFfmpeg : public sigc::trackable
 
 		FFAudioStreams m_audio;
 
-		char *format_metadata (std::string, std::string);
 		void ffmpegparse_v (std::string d, size_t s);
 		void ffmpegparse_a (std::string d, size_t s);
 		void ffprobeparse (std::string d, size_t s);
