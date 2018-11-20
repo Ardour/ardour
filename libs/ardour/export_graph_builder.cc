@@ -49,6 +49,7 @@
 #include "ardour/export_timespan.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/session_directory.h"
+#include "ardour/session_metadata.h"
 #include "ardour/sndfile_helpers.h"
 #include "ardour/system_exec.h"
 
@@ -359,10 +360,17 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPip
 		argp[a++] = strdup ("-b:a"); argp[a++] = strdup (tmp);
 	}
 
-	/* TODO: add SessionMetadata::Metadata()
-	 * see gtk2_ardour/export_video_dialog.cc
-	 * and gtk2_ardour/transcode_ffmpeg.cc
-	 */
+	if (1) {
+		SessionMetadata::MetaDataMap meta;
+		meta["comment"] = "Created with " PROGRAM_NAME;
+		ARDOUR::SessionMetadata* session_data = ARDOUR::SessionMetadata::Metadata();
+		session_data->av_export_tag (meta);
+
+		for(SessionMetadata::MetaDataMap::const_iterator it = meta.begin(); it != meta.end(); ++it) {
+			argp[a++] = strdup("-metadata");
+			argp[a++] = SystemExec::format_key_value_parameter (it->first.c_str(), it->second.c_str());
+		}
+	}
 
 	argp[a++] = strdup (writer_filename.c_str());
 	argp[a] = (char *)0;
