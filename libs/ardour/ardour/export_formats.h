@@ -88,7 +88,7 @@ class LIBARDOUR_API ExportFormat : public ExportFormatBase, public ExportFormatB
 	void set_quality (Quality value) { qualities.clear(); qualities.insert (value); }
 };
 
-class LIBARDOUR_API HasCodecQuality : public PBD::ScopedConnectionList {
+class LIBARDOUR_API HasCodecQuality {
 public:
 	struct CodecQuality {
 		CodecQuality (std::string const& n, int q)
@@ -113,6 +113,8 @@ public:
 	CodecQualityList const & get_codec_qualities () const {
 		return _codec_qualties;
 	}
+
+	virtual int default_codec_quality () const = 0;
 
 protected:
 	CodecQualityList _codec_qualties;
@@ -207,7 +209,7 @@ class LIBARDOUR_API ExportFormatLinear : public ExportFormat, public HasSampleFo
 	SampleFormat _default_sample_format;
 };
 
-class LIBARDOUR_API ExportFormatOggVorbis : public ExportFormat {
+class LIBARDOUR_API ExportFormatOggVorbis : public ExportFormat, public HasCodecQuality {
   public:
 	ExportFormatOggVorbis ();
 	~ExportFormatOggVorbis () {};
@@ -216,6 +218,8 @@ class LIBARDOUR_API ExportFormatOggVorbis : public ExportFormat {
 	Type get_type () const { return T_Sndfile; }
 	SampleFormat get_explicit_sample_format () const { return SF_Vorbis; }
 	virtual bool supports_tagging () const { return true; }
+
+	int default_codec_quality () const { return 40; }
 };
 
 class LIBARDOUR_API ExportFormatFLAC : public ExportFormat, public HasSampleFormat {
@@ -252,6 +256,7 @@ class LIBARDOUR_API ExportFormatFFMPEG : public ExportFormat, public HasCodecQua
 	bool set_compatibility_state (ExportFormatCompatibility const & compatibility);
 	Type get_type () const { return T_FFMPEG; }
 	SampleFormat get_explicit_sample_format () const { return SF_Float; }
+	int default_codec_quality () const { return -2; }
 };
 
 } // namespace ARDOUR

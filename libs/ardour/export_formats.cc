@@ -275,6 +275,12 @@ ExportFormatOggVorbis::ExportFormatOggVorbis ()
 	add_sample_rate (SR_192);
 	add_sample_rate (SR_Session);
 
+	/* these are 100 vorbis_encode_init_vbr() quality */
+	add_codec_quality ("Low (0)",           0);
+	add_codec_quality ("Default (4)",      40);
+	add_codec_quality ("High (6)",         60);
+	add_codec_quality ("Very High (10)",  100);
+
 	add_endianness (E_FileDefault);
 
 	set_extension ("ogg");
