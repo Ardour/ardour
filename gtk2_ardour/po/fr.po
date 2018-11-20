@@ -10,14 +10,14 @@
 # Raphaël Doursenaud <rdoursenaud@free.fr>, 2015.
 # Edouard <edwsaintesprit@hotmail.com>, 2016.
 # Rivaud Julien <frnchfrgg@free.fr>, 2016.
-# Olivier Humbert <trebmuh@tuxfamily.org>, 2016.
+# Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2018.
 msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-12-01 01:22+0100\n"
-"PO-Revision-Date: 2016-12-01 02:25+0100\n"
-"Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>, 2016\n"
+"PO-Revision-Date: 2018-11-20 23:12+0100\n"
+"Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>, 2018\n"
 "Language-Team: \n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -2071,7 +2071,7 @@ msgstr "[INFORMATION] : "
 
 #: ardour_ui2.cc:197 ardour_ui_ed.cc:524
 msgid "Auto Return"
-msgstr "Retour automatique"
+msgstr "Retour auto"
 
 #: ardour_ui2.cc:199 ardour_ui_ed.cc:527
 msgid "Follow Edits"
