@@ -162,6 +162,13 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 }
 
 void
+Rectangle::size_request (double& w, double& h) const
+{
+	w = _rect.width();
+	h = _rect.height();
+}
+
+void
 Rectangle::compute_bounding_box () const
 {
 	if (!_rect.empty()) {

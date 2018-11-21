@@ -614,6 +614,8 @@ Item::size_request (double& w, double& h) const
 {
 	Rect r (bounding_box());
 
+	std::cerr << "\titem " << this << " bbox " << r << std::endl;
+
 	w = std::max (requested_width, r.width());
 	h = std::max (requested_height, r.height());
 }

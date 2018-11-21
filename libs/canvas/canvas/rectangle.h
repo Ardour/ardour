@@ -90,6 +90,8 @@ public:
 	void set_outline_what (What);
 	void set_outline_all () { set_outline_what (ArdourCanvas::Rectangle::ALL); }
 
+	void size_request (double& w, double& h) const;
+
   private:
 	/** Our rectangle; note that x0 may not always be less than x1
 	 *  and likewise with y0 and y1.
