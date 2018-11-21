@@ -147,6 +147,7 @@ private:
 	void update_src_quality_selection ();
 	void update_codec_quality_selection ();
 	void update_tagging_selection ();
+	void set_codec_quality_selection ();
 
 	/*** Encoding options */
 

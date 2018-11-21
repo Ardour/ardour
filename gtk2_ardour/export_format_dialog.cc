@@ -661,6 +661,8 @@ ExportFormatDialog::update_selection (Glib::RefPtr<Gtk::ListStore> & list, Gtk::
 		bool selected = selection->is_selected (it);
 		it->get_value (cols.ptr)->set_selected (selected);
 	}
+
+	set_codec_quality_selection ();
 }
 
 void
@@ -1136,7 +1138,12 @@ ExportFormatDialog::fill_codec_quality_lists (boost::shared_ptr<ARDOUR::HasCodec
 		row[codec_quality_cols.quality] = (*it)->quality;
 		row[codec_quality_cols.label] = (*it)->name;
 	}
+	set_codec_quality_selection ();
+}
 
+void
+ExportFormatDialog::set_codec_quality_selection ()
+{
 	for (Gtk::ListStore::Children::iterator it = codec_quality_list->children().begin(); it != codec_quality_list->children().end(); ++it) {
 		if (it->get_value (codec_quality_cols.quality) == format->codec_quality()) {
 			codec_quality_combo.set_active (it);
