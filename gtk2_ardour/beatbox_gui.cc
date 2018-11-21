@@ -391,7 +391,7 @@ SequencerView::sequencer_changed (PropertyChange const &)
 		step_indicator_box->set_position (Duple (rhs_xoffset, mode_button_height + (mode_button_spacing * 2.0)));
 		step_indicator_box->name = "step_indicator_box";
 		step_indicator_box->set_fill (true);
-		step_indicator_box->set_fill_color (HSV (UIConfiguration::instance().color ("gtk_bases")).lighter (0.1));
+		step_indicator_box->set_spacing (1.0);
 	}
 
 	/* indicator row */
@@ -406,7 +406,6 @@ SequencerView::sequencer_changed (PropertyChange const &)
 
 	while (step_indicators.size() < nsteps) {
 		SequencerStepIndicator* ssi = new SequencerStepIndicator (*this, step_indicator_box, n);
-		ssi->set (Rect (0.0, 0.0, _step_dimen - 3.0, _step_dimen - 3.0));
 		step_indicators.push_back (ssi);
 		++n;
 	}
@@ -554,21 +553,24 @@ SequencerStepIndicator::SequencerStepIndicator (SequencerView& s, Item* p, size_
 		bright_outline_color = UIConfiguration::instance().color ("gtk_bright_indicator");
 	}
 
-	set_fill (false);
+	set (Rect (0.0, 0.0, _step_dimen - 1, _step_dimen - 1)); // UR/LR corners, not UR, width, height
+
+	set_fill_color (HSV (UIConfiguration::instance().color ("gtk_bases")).lighter (0.1));
+	set_fill (true);
 	set_outline (false);
 
 	poly = new Polygon (this);
 	Points points;
-	points.push_back (Duple (0, 0));
-	points.push_back (Duple (_step_dimen - 4.0, 0));
-	points.push_back (Duple (_step_dimen - 4.0, (_step_dimen - 4.0)/2.0));
-	points.push_back (Duple ((_step_dimen - 4.0)/2.0, _step_dimen - 4.0));
-	points.push_back (Duple (0, (_step_dimen - 4.0)/2.0));
+	points.push_back (Duple (1, 1));
+	points.push_back (Duple (_step_dimen - 2.0, 1));
+	points.push_back (Duple (_step_dimen - 2.0, (_step_dimen - 2.0)/2.0));
+	points.push_back (Duple ((_step_dimen - 2.0)/2.0, _step_dimen - 2.0));
+	points.push_back (Duple (1, (_step_dimen - 2.0)/2.0));
 	poly->set (points);
 	poly->set_fill_color (current_color);
 	poly->set_outline_color (other_color);
 	poly->set_ignore_events (true);
-	poly->move (Duple (0.5, 0.5));
+	poly->move (Duple (-0.5, -0.5));
 
 	text = new Text (this);
 
@@ -718,8 +720,9 @@ StepView::StepView (SequenceView& sview, Step& s, ArdourCanvas::Item* parent)
 	, text (new Text (this))
 	, grabbed (false)
 {
-	set (Rect (0, 0, _step_dimen, _step_dimen));
-
+	set (Rect (0, 0, _step_dimen - 1, _step_dimen - 1)); // x0, y0, x1, y1 NOT x0, y0 width, height
+	name = string_compose ("stepview for %1", _step.index());
+	
 	if (on_fill_color == 0) {
 		on_fill_color = UIConfiguration::instance().color ("gtk_bases");
 		off_fill_color = HSV (on_fill_color).lighter (0.1);
@@ -1065,10 +1068,13 @@ SequenceView::SequenceView (SequencerView& sview, StepSequence& sq, Item* parent
 	, sv (sview)
 	, sequence (sq)
 {
+	set_spacing (1.0);
+
 	lhs_box = new ArdourCanvas::HBox (this);
 	lhs_box->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
 	lhs_box->set_fill (true);
 	lhs_box->set_outline (false);
+	lhs_box->name = "sequence step packer";
 
 	number_display = new Rectangle (lhs_box);
 	number_display->set_position (Duple (4.0, 4.0));
@@ -1102,8 +1108,8 @@ SequenceView::SequenceView (SequencerView& sview, StepSequence& sq, Item* parent
 	root_text->set_font_description (UIConfiguration::instance().get_LargeFont());
 	root_text->set_position (Duple (4.0, ((_step_dimen - 8.0) / 2.0) - (root_text->height() / 2.0)));
 	root_text->set_color (contrasting_text_color (root_display->fill_color()));
-
-	name_text->set_size_request (SequencerView::rhs_xoffset - number_display->get().width() - root_display->get().width(), -1);
+ 
+	name_text->set_size_request (SequencerView::rhs_xoffset - number_display->get().width() - root_display->get().width() - 5, -1);
 
 	const size_t nsteps = sequencer().nsteps();
 
