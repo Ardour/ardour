@@ -26,6 +26,8 @@
 #include "lv2_plugin_ui.h"
 #include "timers.h"
 
+#include "gtkmm2ext/utils.h"
+
 #include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
 
 #include <lilv/lilv.h>
@@ -110,6 +112,45 @@ LV2PluginUI::touch(void*    controller,
 	} else {
 		control->stop_touch(control->session().transport_sample());
 	}
+}
+
+uint32_t
+LV2PluginUI::request_parameter (void* handle, LV2_URID key)
+{
+	LV2PluginUI* me = (LV2PluginUI*)handle;
+
+	/* This will return `PropertyDescriptors nothing` when not found */
+	const ParameterDescriptor& desc (me->_lv2->get_property_descriptor(key));
+	if (desc.datatype != Variant::PATH) {
+		return -1;
+	}
+
+	// TODO:  check if window for current URID already exists -> return -1;
+	// Create and show window, subscribe to file-selected signal
+	// then return 0;  don't block here.
+
+	Gtk::FileChooserDialog lv2ui_file_dialog (desc.label, FILE_CHOOSER_ACTION_OPEN);
+	Gtkmm2ext::add_volume_shortcuts (lv2ui_file_dialog);
+
+	/* LV2Plugin does not currently save property values and only
+	 * emits a  PropertyChanged(urid, Variant) signal
+	 */
+	//lv2ui_file_dialog.set_current_folder (TODO)
+
+#if 0 // TODO mime-type,
+	FileFilter file_ext_filter;
+	file_ext_filter.add_pattern ("*.foo");
+	file_ext_filter.set_name ("Foo File");
+	lv2ui_file_dialog.add_filter (file_ext_filter);
+#endif
+	int response = lv2ui_file_dialog.run();
+	lv2ui_file_dialog.hide ();
+
+	if (response == Gtk::RESPONSE_OK) {
+		me->plugin->set_property (desc.key, Variant(Variant::PATH, lv2ui_file_dialog.get_filename()));
+	}
+
+	return 0;
 }
 
 void
@@ -259,8 +300,26 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	LV2_Feature** features       = const_cast<LV2_Feature**>(_lv2->features());
 	size_t        features_count = 0;
 	while (*features++) {
-		features_count++;
+		++features_count;
 	}
+
+	if (is_external_ui) {
+		features = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * (features_count + 4));
+	} else {
+		features = (LV2_Feature**)malloc(sizeof(LV2_Feature*) * (features_count + 3));
+	}
+
+	size_t fi = 0;
+	for (; fi < features_count; ++fi) {
+		features[fi] = features_src[fi];
+	}
+
+	_lv2ui_request_paramater.handle = this;
+	_lv2ui_request_paramater.request = LV2PluginUI::request_parameter;
+	_lv2ui_request_feature.URI  = LV2_EXTERNAL_UI_URI;
+	_lv2ui_request_feature.data = &_lv2ui_request_paramater;
+
+	features[fi++] = &_lv2ui_request_feature;
 
 	Gtk::Alignment* container = NULL;
 	if (is_external_ui) {
@@ -273,15 +332,8 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		_external_kxui_feature.URI  = LV2_EXTERNAL_UI_KX__Host;
 		_external_kxui_feature.data = &_external_ui_host;
 
-		++features_count;
-		features = (LV2_Feature**)malloc(
-			sizeof(LV2_Feature*) * (features_count + 2));
-		for (size_t i = 0; i < features_count - 2; ++i) {
-			features[i] = features_src[i];
-		}
-		features[features_count - 2] = &_external_kxui_feature;
-		features[features_count - 1] = &_external_ui_feature;
-		features[features_count]     = NULL;
+		features[fi++] = &_external_kxui_feature;
+		features[fi++] = &_external_ui_feature;
 	} else {
 		if (_ardour_buttons_box.get_parent()) {
 			_ardour_buttons_box.get_parent()->remove(_ardour_buttons_box);
@@ -296,15 +348,11 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		_parent_feature.URI  = LV2_UI__parent;
 		_parent_feature.data = _gui_widget->gobj();
 
-		++features_count;
-		features = (LV2_Feature**)malloc(
-			sizeof(LV2_Feature*) * (features_count + 1));
-		for (size_t i = 0; i < features_count - 1; ++i) {
-			features[i] = features_src[i];
-		}
-		features[features_count - 1] = &_parent_feature;
-		features[features_count]     = NULL;
+		features[fi++] = &_parent_feature;
 	}
+
+	features[fi] = NULL;
+	assert (fi == features_count + (is_external_ui ? 3 : 2));
 
 	if (!ui_host) {
 		ui_host = suil_host_new(LV2PluginUI::write_from_ui,
