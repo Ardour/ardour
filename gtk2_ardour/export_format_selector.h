@@ -57,6 +57,7 @@ public:
 	sigc::signal<void, FormatPtr> FormatEdited;
 	sigc::signal<void, FormatPtr> FormatRemoved;
 	sigc::signal<FormatPtr, FormatPtr> NewFormat;
+	sigc::signal<void, FormatPtr> FormatReverted;
 
 	/* Compatibility with other elements */
 

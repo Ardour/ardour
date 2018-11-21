@@ -159,6 +159,9 @@ ExportFormatSelector::open_edit_dialog (bool new_dialog)
 		update_format_description ();
 		FormatEdited (state->format);
 		CriticalSelectionChanged();
+	} else {
+		FormatReverted (state->format);
+		CriticalSelectionChanged();
 	}
 	return response;
 }

@@ -252,6 +252,7 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 	format_selector.FormatEdited.connect (sigc::mem_fun (*this, &ExportFileNotebook::FilePage::save_format_to_manager));
 	format_selector.FormatRemoved.connect (sigc::mem_fun (*profile_manager, &ExportProfileManager::remove_format_profile));
 	format_selector.NewFormat.connect (sigc::mem_fun (*profile_manager, &ExportProfileManager::get_new_format));
+	format_selector.FormatReverted.connect (sigc::mem_fun (*profile_manager, &ExportProfileManager::revert_format_profile));
 
 	format_selector.CriticalSelectionChanged.connect (
 		sigc::mem_fun (*this, &ExportFileNotebook::FilePage::critical_selection_changed));
