@@ -62,6 +62,8 @@ class Step : public PBD::Stateful {
 	Step (StepSequence&, size_t n, Temporal::Beats const & beat, int notenum);
 	~Step ();
 
+	size_t index() const { return _index; }
+
 	void set_note (double note, double velocity = 0.5, int n = 0);
 	void set_chord (size_t note_cnt, double* notes);
 	void set_parameter (int number, double value, int n = 0);
@@ -114,7 +116,7 @@ class Step : public PBD::Stateful {
 	friend class StepSequence; /* HACK */
 
 	StepSequence&      _sequence;
-	size_t              index;
+	size_t             _index;
 	bool               _enabled;
 	Temporal::Beats    _nominal_beat;
 	Temporal::Beats    _scheduled_beat;

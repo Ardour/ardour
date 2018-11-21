@@ -32,7 +32,7 @@ using namespace std;
 
 Step::Step (StepSequence &s, size_t n, Temporal::Beats const & b, int base_note)
 	: _sequence (s)
-	, index (n)
+	, _index (n)
 	, _enabled (true)
 	, _nominal_beat (b)
 	, _skipped (false)
