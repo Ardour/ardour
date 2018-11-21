@@ -205,6 +205,7 @@ class LIBARDOUR_API ExportProfileManager
 
 	std::string save_format_to_disk (ExportFormatSpecPtr format);
 	void remove_format_profile (ExportFormatSpecPtr format);
+	void revert_format_profile (ExportFormatSpecPtr format);
 	ExportFormatSpecPtr get_new_format (ExportFormatSpecPtr original);
 
 	PBD::Signal0<void> FormatListChanged;

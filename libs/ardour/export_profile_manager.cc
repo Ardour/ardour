@@ -661,6 +661,23 @@ ExportProfileManager::remove_format_profile (ExportFormatSpecPtr format)
 	FormatListChanged ();
 }
 
+void
+ExportProfileManager::revert_format_profile (ExportFormatSpecPtr format)
+{
+	FileMap::iterator it;
+	if ((it = format_file_map.find (format->id())) == format_file_map.end()) {
+		return;
+	}
+
+	XMLTree tree;
+	if (!tree.read (it->second.c_str())) {
+		return;
+	}
+
+	format->set_state (*tree.root());
+	FormatListChanged ();
+}
+
 ExportFormatSpecPtr
 ExportProfileManager::get_new_format (ExportFormatSpecPtr original)
 {
