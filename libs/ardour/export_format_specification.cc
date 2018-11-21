@@ -131,9 +131,9 @@ ExportFormatSpecification::Time::set_state (const XMLNode & node)
 
 ExportFormatSpecification::ExportFormatSpecification (Session & s)
 	: session (s)
-
 	, has_sample_format (false)
 	, supports_tagging (false)
+	, _has_codec_quality (false)
 	, _has_broadcast_info (false)
 	, _channel_limit (0)
 	, _dither_type (D_None)
@@ -156,7 +156,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 	, _soundcloud_upload (false)
 	, _command ("")
 	, _analyse (true)
-	, _codec_quality (-2)
+	, _codec_quality (0)
 {
 	format_ids.insert (F_None);
 	endiannesses.insert (E_FileDefault);
@@ -167,9 +167,9 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 
 ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const & state)
 	: session (s)
-
 	, has_sample_format (false)
 	, supports_tagging (false)
+	, _has_codec_quality (false)
 	, _has_broadcast_info (false)
 	, _channel_limit (0)
 	, _dither_type (D_None)
@@ -192,7 +192,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const
 	, _soundcloud_upload (false)
 	, _command ("")
 	, _analyse (true)
-	, _codec_quality (-2)
+	, _codec_quality (0)
 {
 	_silence_beginning.type = Time::Timecode;
 	_silence_end.type = Time::Timecode;
@@ -217,8 +217,8 @@ ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification 
 
 	_format_name = other._format_name;
 	has_sample_format = other.has_sample_format;
-
 	supports_tagging = other.supports_tagging;
+	_has_codec_quality = other._has_codec_quality;
 	_has_broadcast_info = other._has_broadcast_info;
 	_channel_limit = other._channel_limit;
 
@@ -280,8 +280,10 @@ ExportFormatSpecification::get_state ()
 	node = root->add_child ("SRCQuality");
 	node->set_property ("quality", src_quality());
 
-	node = root->add_child ("CodecQuality");
-	node->set_property ("quality", codec_quality());
+	if (_has_codec_quality) {
+		node = root->add_child ("CodecQuality");
+		node->set_property ("quality", codec_quality());
+	}
 
 	XMLNode * enc_opts = root->add_child ("EncodingOptions");
 
@@ -392,6 +394,24 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 
 	if ((child = root.child ("CodecQuality"))) {
 		child->get_property ("quality", _codec_quality);
+		_has_codec_quality = true;
+	} else {
+		_has_codec_quality = false;
+	}
+
+	/* fixup codec quality for old states */
+	if (!_has_codec_quality) {
+		/* We'd need an instance of ExportFormatManager to look up
+		 * defaults for a given type -- in the future there may even be
+		 * difference qualities depending on sub-type, so we just
+		 * hardcode them here for the time being.
+		 */
+		if (format_id() == F_FFMPEG) {
+			_codec_quality = -2; // ExportFormatOggVorbis::default_codec_quality();
+		}
+		else if (format_id() == F_Ogg) {
+			_codec_quality = 40; // ExportFormatFFMPEG::default_codec_quality();
+		}
 	}
 
 	/* Encoding options */
@@ -518,7 +538,10 @@ void
 ExportFormatSpecification::set_format (boost::shared_ptr<ExportFormat> format)
 {
 	if (format) {
-		set_format_id (format->get_format_id ());
+		FormatId new_fmt = format->get_format_id ();
+		bool fmt_changed = format_id() != new_fmt;
+		set_format_id (new_fmt);
+
 		set_type (format->get_type());
 		set_extension (format->extension());
 
@@ -534,6 +557,13 @@ ExportFormatSpecification::set_format (boost::shared_ptr<ExportFormat> format)
 			_has_broadcast_info = true;
 		}
 
+		_has_codec_quality = format->has_codec_quality();
+		if (!_has_codec_quality) {
+			_codec_quality = 0;
+		} else if (fmt_changed) {
+			_codec_quality = boost::dynamic_pointer_cast<HasCodecQuality> (format)->default_codec_quality();
+		}
+
 		supports_tagging = format->supports_tagging ();
 		_channel_limit = format->get_channel_limit();
 
@@ -546,6 +576,7 @@ ExportFormatSpecification::set_format (boost::shared_ptr<ExportFormat> format)
 		has_sample_format = false;
 		supports_tagging = false;
 		_channel_limit = 0;
+		_codec_quality = 0;
 		_format_name = "";
 	}
 }

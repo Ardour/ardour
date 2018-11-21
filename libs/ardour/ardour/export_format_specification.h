@@ -199,6 +199,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 	std::string  _format_name;
 	bool            has_sample_format;
 	bool            supports_tagging;
+	bool           _has_codec_quality;
 	bool           _has_broadcast_info;
 	uint32_t       _channel_limit;
 
