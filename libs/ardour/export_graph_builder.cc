@@ -311,7 +311,7 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::Sndfil
 		 * SFC_SET_VBR_ENCODING_QUALITY and maps
 		 * SFC_SET_COMPRESSION_LEVEL = 1.0 - VBR_ENCODING_QUALITY
 		 */
-		double vorbis_quality = 1.0 - config.format->codec_quality () / 100.f;
+		double vorbis_quality = config.format->codec_quality () / 100.f;
 		if (vorbis_quality >= 0 && vorbis_quality <= 1.0) {
 			writer->command (SFC_SET_VBR_ENCODING_QUALITY, &vorbis_quality, sizeof (double));
 		}
