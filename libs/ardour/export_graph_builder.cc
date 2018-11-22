@@ -307,10 +307,13 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::Sndfil
 	writer.reset (new AudioGrapher::SndfileWriter<T> (writer_filename, format, channels, config.format->sample_rate(), config.broadcast_info));
 	writer->FileWritten.connect_same_thread (copy_files_connection, boost::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
 	if (format & ExportFormatBase::SF_Vorbis) {
-		/* libsndfile uses range 0..1 (best .. worst) */
+		/* libsndfile uses range 0..1 (worst.. best) for
+		 * SFC_SET_VBR_ENCODING_QUALITY and maps
+		 * SFC_SET_COMPRESSION_LEVEL = 1.0 - VBR_ENCODING_QUALITY
+		 */
 		double vorbis_quality = 1.0 - config.format->codec_quality () / 100.f;
 		if (vorbis_quality >= 0 && vorbis_quality <= 1.0) {
-			writer->command (SFC_SET_COMPRESSION_LEVEL, &vorbis_quality, sizeof (double));
+			writer->command (SFC_SET_VBR_ENCODING_QUALITY, &vorbis_quality, sizeof (double));
 		}
 	}
 }
