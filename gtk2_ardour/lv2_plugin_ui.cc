@@ -316,7 +316,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 
 	_lv2ui_request_paramater.handle = this;
 	_lv2ui_request_paramater.request = LV2PluginUI::request_parameter;
-	_lv2ui_request_feature.URI  = LV2_EXTERNAL_UI_URI;
+	_lv2ui_request_feature.URI  = LV2_UI_PREFIX "requestParameter";
 	_lv2ui_request_feature.data = &_lv2ui_request_paramater;
 
 	features[fi++] = &_lv2ui_request_feature;
