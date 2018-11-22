@@ -17,6 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <gtkmm/stock.h>
+
 #include "ardour/lv2_plugin.h"
 #include "ardour/session.h"
 #include "pbd/error.h"
@@ -114,6 +116,23 @@ LV2PluginUI::touch(void*    controller,
 	}
 }
 
+void
+LV2PluginUI::set_path_property (int response,
+                                const ParameterDescriptor& desc,
+                                Gtk::FileChooserDialog*    widget)
+{
+	if (response == Gtk::RESPONSE_ACCEPT) {
+		plugin->set_property (desc.key, Variant (Variant::PATH, widget->get_filename()));
+	}
+#if 0
+	widget->hide ();
+	delete_when_idle (widget);
+#else
+	delete widget;
+#endif
+	active_parameter_requests.erase (desc.key);
+}
+
 uint32_t
 LV2PluginUI::request_parameter (void* handle, LV2_URID key)
 {
@@ -122,35 +141,53 @@ LV2PluginUI::request_parameter (void* handle, LV2_URID key)
 	/* This will return `PropertyDescriptors nothing` when not found */
 	const ParameterDescriptor& desc (me->_lv2->get_property_descriptor(key));
 	if (desc.datatype != Variant::PATH) {
-		return -1;
+		return 0;
 	}
 
-	// TODO:  check if window for current URID already exists -> return -1;
-	// Create and show window, subscribe to file-selected signal
-	// then return 0;  don't block here.
+#if 0 // MODAL, blocking
 
-	Gtk::FileChooserDialog lv2ui_file_dialog (desc.label, FILE_CHOOSER_ACTION_OPEN);
+	Gtk::FileChooserDialog* lv2ui_file_dialog (desc.label, FILE_CHOOSER_ACTION_OPEN);
 	Gtkmm2ext::add_volume_shortcuts (lv2ui_file_dialog);
+	lv2ui_file_dialog.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	lv2ui_file_dialog.add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
+	lv2ui_file_dialog.set_default_response(Gtk::RESPONSE_ACCEPT);
+	if (_file_dialog.run()= Gtk::RESPONSE_ACCEPT) {
+		me->plugin->set_property (desc.key, Variant(Variant::PATH, lv2ui_file_dialog.get_filename()));
+	}
+	return 0;
 
-	/* LV2Plugin does not currently save property values and only
-	 * emits a  PropertyChanged(urid, Variant) signal
-	 */
-	//lv2ui_file_dialog.set_current_folder (TODO)
+#else
 
-#if 0 // TODO mime-type,
+	if (me->active_parameter_requests.find (key) != me->active_parameter_requests.end()) {
+		return 0; /* already showing dialog */
+	}
+	me->active_parameter_requests.insert (key);
+
+	Gtk::FileChooserDialog* lv2ui_file_dialog = new Gtk::FileChooserDialog(desc.label, FILE_CHOOSER_ACTION_OPEN);
+	Gtkmm2ext::add_volume_shortcuts (*lv2ui_file_dialog);
+	lv2ui_file_dialog->add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	lv2ui_file_dialog->add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
+	lv2ui_file_dialog->set_default_response(Gtk::RESPONSE_ACCEPT);
+
+	/* this assumes  announce_property_values() was called, or
+	 * the plugin has previously sent a patch:Set */
+	const Variant& value = me->_lv2->get_property_value (desc.key);
+	if (value.type() == Variant::PATH) {
+		lv2ui_file_dialog->set_filename (value.get_path());
+	}
+
+#if 0 // TODO mime-type, file-extension filter, get from LV2 Parameter Property
 	FileFilter file_ext_filter;
 	file_ext_filter.add_pattern ("*.foo");
 	file_ext_filter.set_name ("Foo File");
 	lv2ui_file_dialog.add_filter (file_ext_filter);
 #endif
-	int response = lv2ui_file_dialog.run();
-	lv2ui_file_dialog.hide ();
 
-	if (response == Gtk::RESPONSE_OK) {
-		me->plugin->set_property (desc.key, Variant(Variant::PATH, lv2ui_file_dialog.get_filename()));
-	}
-
+	lv2ui_file_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*me, &LV2PluginUI::set_path_property), desc, lv2ui_file_dialog));
+	lv2ui_file_dialog->present();
 	return 0;
+
+#endif
 }
 
 void

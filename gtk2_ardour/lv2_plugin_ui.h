@@ -120,6 +120,10 @@ private:
 	                  bool     grabbed);
 
 	static uint32_t request_parameter (void* handle, LV2_URID key);
+	void set_path_property (int,
+	                        const ARDOUR::ParameterDescriptor&,
+	                        Gtk::FileChooserDialog*);
+	std::set<uint32_t> active_parameter_requests;
 
 	void update_timeout();
 
