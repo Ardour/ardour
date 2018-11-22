@@ -1992,6 +1992,16 @@ LV2Plugin::load_supported_properties(PropertyDescriptors& descs)
 	lilv_nodes_free(properties);
 }
 
+Variant
+LV2Plugin::get_property_value (uint32_t prop_id) const
+{
+	std::map<uint32_t, Variant>::const_iterator it;
+	if ((it = _property_values.find (prop_id)) == _property_values.end()) {
+		return Variant();
+	}
+	return it->second;
+}
+
 void
 LV2Plugin::announce_property_values()
 {
@@ -2944,6 +2954,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 								// Emit PropertyChanged signal for UI
 								// TODO: This should emit the control's Changed signal
 								PropertyChanged(prop_id, Variant(Variant::PATH, path));
+								_property_values[prop_id] = Variant(Variant::PATH, path);
 							} else {
 								std::cerr << "warning: patch:Set for unknown property" << std::endl;
 							}

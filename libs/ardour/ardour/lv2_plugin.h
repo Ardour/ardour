@@ -172,6 +172,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	void                       set_property(uint32_t key, const Variant& value);
 	const PropertyDescriptors& get_supported_properties() const { return _property_descriptors; }
 	const ParameterDescriptor& get_property_descriptor(uint32_t id) const;
+	Variant                    get_property_value (uint32_t) const;
 	void                       announce_property_values();
 
   private:
@@ -230,6 +231,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	std::vector<PortFlags>         _port_flags;
 	std::vector<size_t>            _port_minimumSize;
 	std::map<std::string,uint32_t> _port_indices;
+
+	std::map<uint32_t, Variant>    _property_values;
 
 	PropertyDescriptors _property_descriptors;
 
