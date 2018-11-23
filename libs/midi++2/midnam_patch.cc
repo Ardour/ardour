@@ -113,7 +113,7 @@ int
 Patch::set_state (const XMLTree& tree, const XMLNode& node)
 {
 	if (node.name() != "Patch") {
-		cerr << "Incorrect node " << node.name() << " handed to Patch" << endl;
+		cerr << "Incorrect node type '" << node.name() << "' handed to Patch" << endl;
 		return -1;
 	}
 
@@ -437,8 +437,9 @@ PatchBank::set_state (const XMLTree& tree, const XMLNode& node)
 		const XMLNodeList patches = patch_name_list->children();
 		for (XMLNodeList::const_iterator i = patches.begin(); i != patches.end(); ++i) {
 			boost::shared_ptr<Patch> patch (new Patch (string(), 0, _number));
-			patch->set_state(tree, *(*i));
-			_patch_name_list.push_back(patch);
+			if (0 == patch->set_state(tree, *(*i))) {
+				_patch_name_list.push_back(patch);
+			}
 		}
 	} else {
 		XMLNode* use_patch_name_list = node.child ("UsesPatchNameList");
