@@ -1432,6 +1432,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\video_tools_paths.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\vst_info_file.cc"
 				>
 			</File>
