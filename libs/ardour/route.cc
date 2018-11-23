@@ -1016,6 +1016,10 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 
 		pi->set_strict_io (_strict_io);
 
+		if (is_auditioner()) {
+			continue;
+		}
+
 		PluginSetupOptions mask = None;
 		if (Config->get_ask_replace_instrument ()) {
 			mask |= CanReplace;

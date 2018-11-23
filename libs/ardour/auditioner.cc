@@ -32,8 +32,8 @@
 #include "ardour/disk_reader.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_region.h"
-#include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/plugin_manager.h"
 #include "ardour/profile.h"
 #include "ardour/region_factory.h"
 #include "ardour/route.h"
@@ -55,8 +55,6 @@ Auditioner::Auditioner (Session& s)
 	, _seek_complete (false)
 	, via_monitor (false)
 	, _midi_audition (false)
-	, _synth_added (false)
-	, _synth_changed (false)
 	, _queue_panic (false)
 	, _import_position (0)
 {
@@ -76,10 +74,9 @@ Auditioner::init ()
 	_output->add_port ("", this, DataType::MIDI);
 	use_new_playlist (DataType::MIDI);
 
-	lookup_synth();
+	lookup_synth (false);
 
 	_output->changed.connect_same_thread (*this, boost::bind (&Auditioner::output_changed, this, _1, _2));
-	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Auditioner::config_changed, this, _1));
 
 	return 0;
 }
@@ -92,41 +89,66 @@ Auditioner::~Auditioner ()
 	asynth.reset ();
 }
 
+PluginInfoPtr
+Auditioner::lookup_synth_plugin_info (std::string const& uri) const
+{
+	PluginManager& mgr (PluginManager::instance());
+	PluginInfoList plugs;
+#ifdef LV2_SUPPORT
+	plugs = mgr.lv2_plugin_info();
+#endif
+	for (PluginInfoList::const_iterator i = plugs.begin (); i != plugs.end (); ++i) {
+		if (uri == (*i)->unique_id){
+			return (*i);
+		}
+	}
+	return PluginInfoPtr ();
+}
+
 void
-Auditioner::lookup_synth ()
+Auditioner::lookup_synth (bool and_load)
 {
 	string plugin_id = Config->get_midi_audition_synth_uri();
-	asynth.reset ();
-	if (!plugin_id.empty() || plugin_id == X_("@default@")) {
-		boost::shared_ptr<Plugin> p;
-		p = find_plugin (_session, plugin_id, ARDOUR::LV2);
-		if (!p) {
-			p = find_plugin (_session, "http://gareus.org/oss/lv2/gmsynth", ARDOUR::LV2);
-			if (!p) {
-				p = find_plugin (_session, "https://community.ardour.org/node/7596", ARDOUR::LV2);
-			}
-			if (p) {
-				warning << _("Falling back to Reasonable Synth for Midi Audition") << endmsg;
-			} else {
-				warning << _("No synth for midi-audition found.") << endmsg;
-				Config->set_midi_audition_synth_uri(""); // Don't check again for Reasonable Synth (ie --no-lv2)
-			}
+	if (plugin_id.empty() && plugin_id != X_("@default@")) {
+		return;
+	}
+	PluginInfoPtr nfo;
+
+	nfo = lookup_synth_plugin_info (plugin_id);
+	if (!nfo) {
+		nfo = lookup_synth_plugin_info ("http://gareus.org/oss/lv2/gmsynth");
+	}
+	if (!nfo) {
+		nfo = lookup_synth_plugin_info ("https://community.ardour.org/node/7596");
+		if (nfo) {
+			warning << _("Falling back to Reasonable Synth for Midi Audition") << endmsg;
 		}
-		if (p) {
-			if (plugin_id == X_("@default@")) {
-				Config->set_midi_audition_synth_uri (p->get_info()->unique_id);
-			}
-			asynth = boost::shared_ptr<Processor> (new PluginInsert (_session, p));
-		}
+	}
+	if (!nfo) {
+		warning << _("No synth for midi-audition found.") << endmsg;
+		Config->set_midi_audition_synth_uri(""); // Don't check again for Reasonable Synth
+		return;
+	}
+
+	if (plugin_id == X_("@default@")) {
+		Config->set_midi_audition_synth_uri (nfo->unique_id);
+	}
+	if (and_load) {
+		assert (!asynth);
+		boost::shared_ptr<Plugin> p = nfo->load (_session);
+		asynth = boost::shared_ptr<Processor> (new PluginInsert (_session, p));
 	}
 }
 
 void
-Auditioner::config_changed (std::string p)
+Auditioner::unload_synth (bool need_lock)
 {
-	if (p == "midi-audition-synth-uri") {
-		_synth_changed = true;
+	if (!asynth) {
+		return;
 	}
+	remove_processor (asynth, NULL, need_lock);
+	asynth->drop_references ();
+	asynth.reset ();
 }
 
 int
@@ -280,10 +302,8 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 
 		_midi_audition = false;
 
-		if (_synth_added) {
-			remove_processor(asynth);
-			_synth_added = false;
-		}
+		unload_synth (true);
+
 		midi_region.reset();
 		_import_position = 0;
 
@@ -325,24 +345,14 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 
 		ProcessorStreams ps;
 
-		if (_synth_changed && _synth_added) {
-			remove_processor(asynth);
-			_synth_added = false;
-		}
-		if (_synth_changed && !_synth_added) {
-			_synth_added = false;
-			lookup_synth();
-		}
+		unload_synth (true);
+		lookup_synth (true);
 
-		if (!_synth_added && asynth) {
+		if (asynth) {
 			int rv = add_processor (asynth, PreFader, &ps, true);
 			if (rv) {
 				error << _("Failed to load synth for MIDI-Audition.") << endmsg;
-			} else {
-				_synth_added = true;
 			}
-		} else {
-			_queue_panic = true;
 		}
 
 		{
@@ -351,6 +361,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 			if (configure_processors (&ps)) {
 				error << string_compose (_("Cannot setup auditioner processing flow for %1 channels"),
 							 region->n_channels()) << endmsg;
+				unload_synth (true);
 				return;
 			}
 		}
@@ -379,6 +390,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 
 	if (length == 0) {
 		error << _("Cannot audition empty file.") << endmsg;
+		unload_synth (true);
 		return;
 	}
 
@@ -403,6 +415,7 @@ Auditioner::play_audition (samplecnt_t nframes)
 
 	if (g_atomic_int_get (&_auditioning) == 0) {
 		silence (nframes);
+		unload_synth (false);
 		return 0;
 	}
 
@@ -456,6 +469,7 @@ Auditioner::play_audition (samplecnt_t nframes)
 
 	if (current_sample >= length + _import_position) {
 		_session.cancel_audition ();
+		unload_synth (false);
 		return 0;
 	} else {
 		return need_butler ? 1 : 0;

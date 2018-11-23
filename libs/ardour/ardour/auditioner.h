@@ -25,6 +25,7 @@
 #include <glibmm/threads.h>
 
 #include "ardour/ardour.h"
+#include "ardour/plugin.h"
 #include "ardour/track.h"
 
 namespace ARDOUR {
@@ -104,16 +105,15 @@ class LIBARDOUR_API Auditioner : public Track
 	bool _seek_complete;
 	bool via_monitor;
 	bool _midi_audition;
-	bool _synth_added;
-	bool _synth_changed;
 	bool _queue_panic;
 
 	boost::shared_ptr<Processor> asynth;
 
+	PluginInfoPtr lookup_synth_plugin_info (std::string const&) const;
 	void drop_ports ();
-	void lookup_synth ();
-	void config_changed (std::string);
-	static void *_drop_ports (void *);
+	void lookup_synth (bool);
+	void unload_synth (bool);
+	static void*_drop_ports (void*);
 	void actually_drop_ports ();
 	void output_changed (IOChange, void*);
 	sampleoffset_t _import_position;
