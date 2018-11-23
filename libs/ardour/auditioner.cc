@@ -231,7 +231,6 @@ Auditioner::connect ()
 	return 0;
 }
 
-
 DataType
 Auditioner::data_type () const {
 	if (_midi_audition) {
@@ -475,6 +474,41 @@ Auditioner::play_audition (samplecnt_t nframes)
 		return need_butler ? 1 : 0;
 	}
 }
+
+void
+Auditioner::cancel_audition () {
+	g_atomic_int_set (&_auditioning, 0);
+}
+
+bool
+Auditioner::auditioning() const {
+	return g_atomic_int_get (&_auditioning);
+}
+
+void
+Auditioner::seek_to_sample (sampleoffset_t pos) {
+	if (_seek_sample < 0 && !_seeking) {
+		_seek_sample = pos;
+	}
+}
+
+void
+Auditioner::seek_to_percent (float const pos) {
+	if (_seek_sample < 0 && !_seeking) {
+		_seek_sample = floorf(length * pos / 100.0);
+	}
+}
+
+void
+Auditioner::seek_response (sampleoffset_t pos) {
+	/* called from the butler thread */
+	_seek_complete = true;
+	if (_seeking) {
+		current_sample = pos;
+		_seek_complete = true;
+	}
+}
+
 
 void
 Auditioner::output_changed (IOChange change, void* /*src*/)
