@@ -328,6 +328,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\audiographer\general\cmdpipe_writer.h"
+				>
+			</File>
+			<File
 				RelativePath="..\audiographer\debug_utils.h"
 				>
 			</File>
