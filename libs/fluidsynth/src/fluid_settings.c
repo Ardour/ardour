@@ -1732,7 +1732,6 @@ fluid_settings_option_concat(fluid_settings_t *settings, const char *name,
                              const char *separator)
 {
     fluid_setting_node_t *node;
-    fluid_str_setting_t *setting;
     fluid_list_t *p, *newlist = NULL;
     size_t count, len;
     char *str, *option;
@@ -1755,10 +1754,8 @@ fluid_settings_option_concat(fluid_settings_t *settings, const char *name,
         return (NULL);
     }
 
-    setting = &node->str;
-
     /* Duplicate option list, count options and get total string length */
-    for(p = setting->options, count = 0, len = 0; p; p = p->next, count++)
+    for(p = node->str.options, count = 0, len = 0; p; p = p->next)
     {
         option = fluid_list_get(p);
 
@@ -1766,6 +1763,7 @@ fluid_settings_option_concat(fluid_settings_t *settings, const char *name,
         {
             newlist = fluid_list_append(newlist, option);
             len += FLUID_STRLEN(option);
+            count++;
         }
     }
 

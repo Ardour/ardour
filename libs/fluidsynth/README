@@ -1,7 +1,7 @@
 This is a stripped down version of fluidsynth (library only)
 
 from git://github.com/FluidSynth/fluidsynth.git
-rev.  v2.0.1-5-gebc177f  Oct/2018
+rev. v2.0.2 (6e9d84f02a7a0f7e436c2adffc4a065608f490ba)
 
 fluidsynth is licensed in terms of the  LGPL-2+, see individual source
 files for (C) holders.

@@ -150,7 +150,7 @@ fluid_real_t fluid_gen_scale(int gen, float value)
 
 fluid_real_t fluid_gen_scale_nrpn(int gen, int data)
 {
-    fluid_real_t value = (float) data - 8192.0f;
-    fluid_clip(value, -8192, 8192);
-    return value * (float) fluid_gen_info[gen].nrpn_scale;
+    data = data - 8192;
+    fluid_clip(data, -8192, 8192);
+    return (fluid_real_t)(data * fluid_gen_info[gen].nrpn_scale);
 }

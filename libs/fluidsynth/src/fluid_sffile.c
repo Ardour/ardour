@@ -77,9 +77,31 @@ enum
     SM24_ID
 };
 
-static const char idlist[] = {"RIFFLISTsfbkINFOsdtapdtaifilisngINAMiromiverICRDIENGIPRD"
-                              "ICOPICMTISFTsnamsmplphdrpbagpmodpgeninstibagimodigenshdrsm24"
-                             };
+/*
+ * This declares a char array containing the SF2 chunk identifiers. This
+ * array is being accessed like an uint32 below to simplify id comparison.
+ * To make sure it is suitably aligned for uint32 access, we must wrap it
+ * inside a union along with a uint32 telling the compiler to align it
+ * for integer access and avoiding undefined behaviour.
+ * This basically is the C89 equivalent to what is written in C11 as:
+ * alignas(uint32_t) static const char idlist[] = {};
+ *
+ * See: EXP36-C. Do not cast pointers into more strictly aligned pointer
+ * types - SEI CERT C Coding Standard
+ */
+static const union fluid_idlist
+{
+    /*
+     * Cannot be char c[ ], because in C89, arrays wraped in unions
+     * must have a fixed size. Otherwise the size of the union would depend
+     * on the initialization of its first member, which results in
+     * different sizes for different instances of the same union type.
+     */
+    char c[116];
+    uint32_t i;
+} idlist = {"RIFFLISTsfbkINFOsdtapdtaifilisngINAMiromiverICRDIENGIPRD"
+            "ICOPICMTISFTsnamsmplphdrpbagpmodpgeninstibagimodigenshdrsm24"
+           };
 
 
 /* generator types */
@@ -183,7 +205,7 @@ static const unsigned short invalid_preset_gen[] =
 };
 
 
-#define CHNKIDSTR(id) &idlist[(id - 1) * 4]
+#define CHNKIDSTR(id) &idlist.c[(id - 1) * 4]
 
 /* sfont file chunk sizes */
 #define SF_PHDR_SIZE (38)
@@ -284,7 +306,7 @@ static int load_shdr(SFData *sf, unsigned int size);
 static int fixup_pgen(SFData *sf);
 static int fixup_igen(SFData *sf);
 
-static int chunkid(unsigned int id);
+static int chunkid(uint32_t id);
 static int read_listchunk(SFData *sf, SFChunk *chunk);
 static int pdtahelper(SFData *sf, unsigned int expid, unsigned int reclen, SFChunk *chunk, int *size);
 static int preset_compare_func(void *a, void *b);
@@ -486,14 +508,12 @@ void fluid_sffile_close(SFData *sf)
  */
 
 /* sound font file load functions */
-static int chunkid(unsigned int id)
+static int chunkid(uint32_t id)
 {
     unsigned int i;
-    const unsigned int *p;
+    const uint32_t *p = &idlist.i;
 
-    p = (const unsigned int *)&idlist;
-
-    for(i = 0; i < sizeof(idlist) / sizeof(int); i++, p += 1)
+    for(i = 0; i < sizeof(idlist) / sizeof(idlist.i); i++, p += 1)
     {
         if(*p == id)
         {
@@ -987,6 +1007,7 @@ static int load_phdr(SFData *sf, int size)
             FLUID_LOG(FLUID_ERR, "Out of memory");
             return FALSE;
         }
+
         sf->preset = fluid_list_append(sf->preset, preset);
         preset->zone = NULL; /* In case of failure, fluid_sffile_close can cleanup */
         READSTR(sf, &preset->name); /* possible read failure ^ */
@@ -1078,6 +1099,7 @@ static int load_pbag(SFData *sf, int size)
                 FLUID_LOG(FLUID_ERR, "Out of memory");
                 return FALSE;
             }
+
             p2->data = z;
             z->gen = NULL; /* Init gen and mod before possible failure, */
             z->mod = NULL; /* to ensure proper cleanup (fluid_sffile_close) */
@@ -1211,6 +1233,7 @@ static int load_pmod(SFData *sf, int size)
                     FLUID_LOG(FLUID_ERR, "Out of memory");
                     return FALSE;
                 }
+
                 p3->data = m;
                 READW(sf, m->src);
                 READW(sf, m->dest);
@@ -1367,6 +1390,7 @@ static int load_pgen(SFData *sf, int size)
                             FLUID_LOG(FLUID_ERR, "Out of memory");
                             return FALSE;
                         }
+
                         p3->data = g;
                         g->id = genid;
                     }
@@ -1508,6 +1532,7 @@ static int load_ihdr(SFData *sf, int size)
             FLUID_LOG(FLUID_ERR, "Out of memory");
             return FALSE;
         }
+
         sf->inst = fluid_list_append(sf->inst, p);
         p->zone = NULL; /* For proper cleanup if fail (fluid_sffile_close) */
         p->idx = i;
@@ -1593,6 +1618,7 @@ static int load_ibag(SFData *sf, int size)
                 FLUID_LOG(FLUID_ERR, "Out of memory");
                 return FALSE;
             }
+
             p2->data = z;
             z->gen = NULL; /* In case of failure, */
             z->mod = NULL; /* fluid_sffile_close can clean up */
@@ -1727,6 +1753,7 @@ static int load_imod(SFData *sf, int size)
                     FLUID_LOG(FLUID_ERR, "Out of memory");
                     return FALSE;
                 }
+
                 p3->data = m;
                 READW(sf, m->src);
                 READW(sf, m->dest);
@@ -1872,6 +1899,7 @@ static int load_igen(SFData *sf, int size)
                             FLUID_LOG(FLUID_ERR, "Out of memory");
                             return FALSE;
                         }
+
                         p3->data = g;
                         g->id = genid;
                     }
@@ -2011,6 +2039,7 @@ static int load_shdr(SFData *sf, unsigned int size)
             FLUID_LOG(FLUID_ERR, "Out of memory");
             return FALSE;
         }
+
         sf->sample = fluid_list_append(sf->sample, p);
         READSTR(sf, &p->name);
         READD(sf, p->start);
@@ -2138,7 +2167,7 @@ static void delete_preset(SFPreset *preset)
     }
 
     delete_fluid_list(preset->zone);
-    
+
     FLUID_FREE(preset);
 }
 
@@ -2162,7 +2191,7 @@ static void delete_inst(SFInst *inst)
     }
 
     delete_fluid_list(inst->zone);
-    
+
     FLUID_FREE(inst);
 }
 

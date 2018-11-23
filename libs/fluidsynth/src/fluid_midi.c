@@ -2153,7 +2153,7 @@ int fluid_player_set_midi_tempo(fluid_player_t *player, int tempo)
  */
 int fluid_player_set_bpm(fluid_player_t *player, int bpm)
 {
-    return fluid_player_set_midi_tempo(player, (int)((double) 60 * 1e6 / bpm));
+    return fluid_player_set_midi_tempo(player, 60000000L / bpm);
 }
 
 /**
@@ -2226,7 +2226,7 @@ int fluid_player_get_total_ticks(fluid_player_t *player)
  */
 int fluid_player_get_bpm(fluid_player_t *player)
 {
-    return (int)(60e6 / player->miditempo);
+    return 60000000L / player->miditempo;
 }
 
 /**

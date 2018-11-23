@@ -39,7 +39,7 @@ typedef struct _fluid_rvoice_t fluid_rvoice_t;
  * 24 bits => 144-4 = 140 dB dynamic range => 1.e-7
  * 1.e-7 * 2 == 2.e-7 :)
  */
-#define FLUID_NOISE_FLOOR 2.e-7
+#define FLUID_NOISE_FLOOR ((fluid_real_t)2.e-7)
 
 enum fluid_loop
 {

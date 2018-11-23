@@ -61,10 +61,10 @@ typedef struct _fluid_revmodel_presets_t
 fluid_revmodel_t *new_fluid_revmodel(fluid_real_t sample_rate);
 void delete_fluid_revmodel(fluid_revmodel_t *rev);
 
-void fluid_revmodel_processmix(fluid_revmodel_t *rev, fluid_real_t *in,
+void fluid_revmodel_processmix(fluid_revmodel_t *rev, const fluid_real_t *in,
                                fluid_real_t *left_out, fluid_real_t *right_out);
 
-void fluid_revmodel_processreplace(fluid_revmodel_t *rev, fluid_real_t *in,
+void fluid_revmodel_processreplace(fluid_revmodel_t *rev, const fluid_real_t *in,
                                    fluid_real_t *left_out, fluid_real_t *right_out);
 
 void fluid_revmodel_reset(fluid_revmodel_t *rev);

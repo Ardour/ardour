@@ -685,7 +685,7 @@ calculate_hold_decay_buffers(fluid_voice_t *voice, int gen_base,
      * will cause (60-72)*100=-1200 timecents of time variation.
      * The time is cut in half.
      */
-    timecents = (fluid_voice_gen_value(voice, gen_base) + fluid_voice_gen_value(voice, gen_key2base) * (60.0 - fluid_voice_get_actual_key(voice)));
+    timecents = (fluid_voice_gen_value(voice, gen_base) + fluid_voice_gen_value(voice, gen_key2base) * (fluid_real_t)(60 - fluid_voice_get_actual_key(voice)));
 
     /* Range checking */
     if(is_decay)

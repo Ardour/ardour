@@ -34,7 +34,7 @@
  * output.  There is a very small turn-on transient response, which should not
  * cause problems.
  */
-#define DC_OFFSET 1e-8
+#define DC_OFFSET ((fluid_real_t)1e-8)
 
 typedef struct _fluid_allpass fluid_allpass;
 typedef struct _fluid_comb fluid_comb;
@@ -368,7 +368,7 @@ fluid_revmodel_reset(fluid_revmodel_t *rev)
 }
 
 void
-fluid_revmodel_processreplace(fluid_revmodel_t *rev, fluid_real_t *in,
+fluid_revmodel_processreplace(fluid_revmodel_t *rev, const fluid_real_t *in,
                               fluid_real_t *left_out, fluid_real_t *right_out)
 {
     int i, k = 0;
@@ -410,7 +410,7 @@ fluid_revmodel_processreplace(fluid_revmodel_t *rev, fluid_real_t *in,
 }
 
 void
-fluid_revmodel_processmix(fluid_revmodel_t *rev, fluid_real_t *in,
+fluid_revmodel_processmix(fluid_revmodel_t *rev, const fluid_real_t *in,
                           fluid_real_t *left_out, fluid_real_t *right_out)
 {
     int i, k = 0;

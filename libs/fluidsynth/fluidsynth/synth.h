@@ -233,7 +233,7 @@ FLUIDSYNTH_API int fluid_synth_tuning_dump(fluid_synth_t *synth, int bank, int p
 /* Misc */
 
 FLUIDSYNTH_API double fluid_synth_get_cpu_load(fluid_synth_t *synth);
-FLUIDSYNTH_API const char *fluid_synth_error(fluid_synth_t *synth);
+const char *fluid_synth_error(fluid_synth_t *synth);
 
 
 /* Default modulators */

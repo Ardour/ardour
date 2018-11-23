@@ -22,6 +22,7 @@
 #include "fluid_phase.h"
 #include "fluid_rvoice.h"
 #include "fluid_sys.h"
+#include "fluid_rvoice_dsp_tables.c"
 
 /* Purpose:
  *
@@ -46,85 +47,6 @@
  */
 
 /* Interpolation (find a value between two samples of the original waveform) */
-
-/* Linear interpolation table (2 coefficients centered on 1st) */
-static fluid_real_t interp_coeff_linear[FLUID_INTERP_MAX][2];
-
-/* 4th order (cubic) interpolation table (4 coefficients centered on 2nd) */
-static fluid_real_t interp_coeff[FLUID_INTERP_MAX][4];
-
-/* 7th order interpolation (7 coefficients centered on 3rd) */
-static fluid_real_t sinc_table7[FLUID_INTERP_MAX][7];
-
-
-#define SINC_INTERP_ORDER 7	/* 7th order constant */
-
-
-/* Initializes interpolation tables */
-void fluid_rvoice_dsp_config(void)
-{
-    int i, i2;
-    double x, v;
-    double i_shifted;
-
-    /* Initialize the coefficients for the interpolation. The math comes
-     * from a mail, posted by Olli Niemitalo to the music-dsp mailing
-     * list (I found it in the music-dsp archives
-     * http://www.smartelectronix.com/musicdsp/).  */
-
-    for(i = 0; i < FLUID_INTERP_MAX; i++)
-    {
-        x = (double) i / (double) FLUID_INTERP_MAX;
-
-        interp_coeff[i][0] = (fluid_real_t)(x * (-0.5 + x * (1 - 0.5 * x)));
-        interp_coeff[i][1] = (fluid_real_t)(1.0 + x * x * (1.5 * x - 2.5));
-        interp_coeff[i][2] = (fluid_real_t)(x * (0.5 + x * (2.0 - 1.5 * x)));
-        interp_coeff[i][3] = (fluid_real_t)(0.5 * x * x * (x - 1.0));
-
-        interp_coeff_linear[i][0] = (fluid_real_t)(1.0 - x);
-        interp_coeff_linear[i][1] = (fluid_real_t)x;
-    }
-
-    /* i: Offset in terms of whole samples */
-    for(i = 0; i < SINC_INTERP_ORDER; i++)
-    {
-        /* i2: Offset in terms of fractional samples ('subsamples') */
-        for(i2 = 0; i2 < FLUID_INTERP_MAX; i2++)
-        {
-            /* center on middle of table */
-            i_shifted = (double)i - ((double)SINC_INTERP_ORDER / 2.0)
-                        + (double)i2 / (double)FLUID_INTERP_MAX;
-
-            /* sinc(0) cannot be calculated straightforward (limit needed for 0/0) */
-            if(fabs(i_shifted) > 0.000001)
-            {
-                double arg = M_PI * i_shifted;
-                v = (fluid_real_t)sin(arg) / (arg);
-                /* Hanning window */
-                v *= (fluid_real_t)0.5 * (1.0 + cos(2.0 * arg / (fluid_real_t)SINC_INTERP_ORDER));
-            }
-            else
-            {
-                v = 1.0;
-            }
-
-            sinc_table7[FLUID_INTERP_MAX - i2 - 1][i] = v;
-        }
-    }
-
-#if 0
-
-    for(i = 0; i < FLUID_INTERP_MAX; i++)
-    {
-        printf("%d %0.3f %0.3f %0.3f %0.3f %0.3f %0.3f %0.3f\n",
-               i, sinc_table7[0][i], sinc_table7[1][i], sinc_table7[2][i],
-               sinc_table7[3][i], sinc_table7[4][i], sinc_table7[5][i], sinc_table7[6][i]);
-    }
-
-#endif
-
-    fluid_check_fpe("interpolation table calculation");
-}
 
 static FLUID_INLINE fluid_real_t
 fluid_rvoice_get_float_sample(const short int *dsp_msb, const char *dsp_lsb, unsigned int idx)

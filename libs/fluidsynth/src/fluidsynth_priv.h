@@ -134,8 +134,6 @@ typedef guint64  uint64_t;
 #include <windows.h>
 
 /* WIN32 special defines */
-#define DSOUND_SUPPORT 1
-#define WINMIDI_SUPPORT 1
 #define STDIN_FILENO 0
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2

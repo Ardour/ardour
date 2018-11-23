@@ -383,7 +383,7 @@ fluid_chorus_set(fluid_chorus_t *chorus, int set, int nr, fluid_real_t level,
 }
 
 
-void fluid_chorus_processmix(fluid_chorus_t *chorus, fluid_real_t *in,
+void fluid_chorus_processmix(fluid_chorus_t *chorus, const fluid_real_t *in,
                              fluid_real_t *left_out, fluid_real_t *right_out)
 {
     int sample_index;
@@ -456,7 +456,7 @@ void fluid_chorus_processmix(fluid_chorus_t *chorus, fluid_real_t *in,
 }
 
 /* Duplication of code ... (replaces sample data instead of mixing) */
-void fluid_chorus_processreplace(fluid_chorus_t *chorus, fluid_real_t *in,
+void fluid_chorus_processreplace(fluid_chorus_t *chorus, const fluid_real_t *in,
                                  fluid_real_t *left_out, fluid_real_t *right_out)
 {
     int sample_index;

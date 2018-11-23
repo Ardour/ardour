@@ -55,9 +55,9 @@ void fluid_chorus_reset(fluid_chorus_t *chorus);
 void fluid_chorus_set(fluid_chorus_t *chorus, int set, int nr, fluid_real_t level,
                       fluid_real_t speed, fluid_real_t depth_ms, int type);
 
-void fluid_chorus_processmix(fluid_chorus_t *chorus, fluid_real_t *in,
+void fluid_chorus_processmix(fluid_chorus_t *chorus, const fluid_real_t *in,
                              fluid_real_t *left_out, fluid_real_t *right_out);
-void fluid_chorus_processreplace(fluid_chorus_t *chorus, fluid_real_t *in,
+void fluid_chorus_processreplace(fluid_chorus_t *chorus, const fluid_real_t *in,
                                  fluid_real_t *left_out, fluid_real_t *right_out);
 
 

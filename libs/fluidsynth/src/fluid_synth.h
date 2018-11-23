@@ -190,7 +190,7 @@ fluid_preset_t *fluid_synth_find_preset(fluid_synth_t *synth,
                                         int prognum);
 void fluid_synth_sfont_unref(fluid_synth_t *synth, fluid_sfont_t *sfont);
 
-void fluid_synth_dither_s16(int *dither_index, int len, float *lin, float *rin,
+void fluid_synth_dither_s16(int *dither_index, int len, const float *lin, const float *rin,
                             void *lout, int loff, int lincr,
                             void *rout, int roff, int rincr);
 

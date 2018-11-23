@@ -71,6 +71,7 @@ rsync -auc --info=progress2 \
 	${FSR}src/synth/fluid_voice.h \
 	${FSR}src/utils/fluid_conv.c \
 	${FSR}src/utils/fluid_conv.h \
+	${FSR}src/utils/fluid_conv_tables.h \
 	${FSR}src/utils/fluid_hash.c \
 	${FSR}src/utils/fluid_hash.h \
 	${FSR}src/utils/fluid_list.c \
@@ -102,4 +103,7 @@ rsync -auc --info=progress2 \
 	"$ASRC/libs/fluidsynth/fluidsynth/"
 
 cd "$ASRC"
-patch -p1 < tools/ardour_fluidsynth.diff
+patch -p1 < tools/fluid-patches/ardour_fluidsynth.diff
+
+cp tools/fluid-patches/fluid_conv_tables.c  libs/fluidsynth/src/
+cp tools/fluid-patches/fluid_rvoice_dsp_tables.c  libs/fluidsynth/src/
