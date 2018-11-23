@@ -1324,10 +1324,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\video_tool_paths.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\visibility_group.cc"
 				>
 			</File>
