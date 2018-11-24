@@ -146,9 +146,9 @@ Auditioner::unload_synth (bool need_lock)
 	if (!asynth) {
 		return;
 	}
-	remove_processor (asynth, NULL, need_lock);
-	asynth->drop_references ();
-	asynth.reset ();
+	if (0 == remove_processor (asynth, NULL, need_lock)) {
+		asynth.reset ();
+	}
 }
 
 int
