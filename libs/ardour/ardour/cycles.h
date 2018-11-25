@@ -70,6 +70,14 @@ static inline cycles_t get_cycles (void)
 }
 #endif
 
+#elif defined(__powerpc64__)
+
+static inline cycles_t get_cycles(void)
+{
+#warning You are compiling libardour on a platform for which ardour/cycles.h needs work
+	return 0;
+}
+
 #elif defined(__powerpc__)
 
 #define CPU_FTR_601			0x00000100
