@@ -408,13 +408,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	set_current_page (_("Timecode"));
 }
 
-SessionOptionEditor::~SessionOptionEditor ()
-{
-	delete _vpu;
-	delete _sf;
-	delete _take_name;
-}
-
 void
 SessionOptionEditor::parameter_changed (std::string const & p)
 {

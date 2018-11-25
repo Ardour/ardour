@@ -31,7 +31,6 @@ class SessionOptionEditor : public OptionEditorWindow
 {
 public:
 	SessionOptionEditor (ARDOUR::Session* s);
-	~SessionOptionEditor ();
 
 private:
 	void parameter_changed (std::string const &);
