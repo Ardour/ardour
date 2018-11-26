@@ -562,10 +562,10 @@ SequencerStepIndicator::SequencerStepIndicator (SequencerView& s, Item* p, size_
 	poly = new Polygon (this);
 	Points points;
 	points.push_back (Duple (1, 1));
-	points.push_back (Duple (_step_dimen - 2.0, 1));
-	points.push_back (Duple (_step_dimen - 2.0, (_step_dimen - 2.0)/2.0));
-	points.push_back (Duple ((_step_dimen - 2.0)/2.0, _step_dimen - 2.0));
-	points.push_back (Duple (1, (_step_dimen - 2.0)/2.0));
+	points.push_back (Duple (_step_dimen - 3.0, 1));
+	points.push_back (Duple (_step_dimen - 3.0, (_step_dimen - 3.0)/2.0));
+	points.push_back (Duple ((_step_dimen - 3.0)/2.0, _step_dimen - 3.0));
+	points.push_back (Duple (1, (_step_dimen - 3.0)/2.0));
 	poly->set (points);
 	poly->set_fill_color (current_color);
 	poly->set_outline_color (other_color);
@@ -722,7 +722,7 @@ StepView::StepView (SequenceView& sview, Step& s, ArdourCanvas::Item* parent)
 {
 	set (Rect (0, 0, _step_dimen - 1, _step_dimen - 1)); // x0, y0, x1, y1 NOT x0, y0 width, height
 	name = string_compose ("stepview for %1", _step.index());
-	
+
 	if (on_fill_color == 0) {
 		on_fill_color = UIConfiguration::instance().color ("gtk_bases");
 		off_fill_color = HSV (on_fill_color).lighter (0.1);
@@ -1098,7 +1098,6 @@ SequenceView::SequenceView (SequencerView& sview, StepSequence& sq, Item* parent
 	name_text->Event.connect (sigc::mem_fun (*this, &SequenceView::name_text_event));
 
 	root_display = new Rectangle (lhs_box);
-	root_display->set_position (Duple (180, 4.0));
 	root_display->set (Rect (0.0, 0.0, _step_dimen * 1.5, _step_dimen - 8.0));
 	root_display->set_corner_radius (5);
 
@@ -1108,8 +1107,9 @@ SequenceView::SequenceView (SequencerView& sview, StepSequence& sq, Item* parent
 	root_text->set_font_description (UIConfiguration::instance().get_LargeFont());
 	root_text->set_position (Duple (4.0, ((_step_dimen - 8.0) / 2.0) - (root_text->height() / 2.0)));
 	root_text->set_color (contrasting_text_color (root_display->fill_color()));
- 
-	name_text->set_size_request (SequencerView::rhs_xoffset - number_display->get().width() - root_display->get().width() - 5, -1);
+
+	name_text->set_size_request (SequencerView::rhs_xoffset - number_display->get().width() - root_display->get().width() - 5, _step_dimen);
+	root_display->set_position (Duple (SequencerView::rhs_xoffset - root_display->get().width() - 4.0, 4.0));
 
 	const size_t nsteps = sequencer().nsteps();
 
