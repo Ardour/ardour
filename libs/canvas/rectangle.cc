@@ -32,6 +32,21 @@
 using namespace std;
 using namespace ArdourCanvas;
 
+/* Rectangle notes
+ *
+ * A Rectangle is defined by an ArdourCanvas::Rect which encloses every pixel
+ * that the Rectangle might draw. If the Rect is (0, 0, 10, 10) then a filled
+ * version of the Rectangle will paint every pixel up to and including those
+ * edges.
+ *
+ * If there is a border to the Rectangle, it will be drawn *INSIDE* the
+ * boundary given by the Rect. The border will include (at minimum) the outer
+ * pixel edge(s) of the Rectangle.
+ *
+ * This makes ArdourCanvas::Rectangle follow the semantics implied by CSS's
+ * box-sizing: border-box, rather than box-sizing: content-box
+ */
+
 Rectangle::Rectangle (Canvas* c)
 	: Item (c)
 	, _outline_what ((What) (LEFT | RIGHT | TOP | BOTTOM))
@@ -69,7 +84,7 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 	   part of item_to_canvas()
 	*/
 
-	Rect self (item_to_window (_rect, false));
+	Rect self (item_to_window (_rect));
 	const Rect draw = self.intersection (area);
 
 	if (!draw) {
@@ -102,30 +117,19 @@ Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 
 		setup_outline_context (context);
 
-		/* the goal here is that if the border is 1 pixel
-		 * thick, it will precisely align with the corner
-		 * coordinates of the rectangle. So if the rectangle
-		 * has a left edge at 0 and a right edge at 10, then
-		 * the left edge must span 0..1, the right edge
-		 * must span 10..11 because the first and final pixels
-		 * to be colored are actually "at" 0.5 and 10.5 (midway
-		 * between the integer coordinates).
-		 *
-		 * See the Cairo FAQ on single pixel lines for more
-		 * detail.
-		 */
+		const double shift = _outline_width * 0.5;
+		self = self.translate (Duple (shift, shift));
 
-		if (fmod (_outline_width, 2.0)  != 0.0) {
-			const double shift = _outline_width * 0.5;
-			self = self.translate (Duple (shift, shift));
+		if (name == "selection frame") {
+			std::cerr << "Render selection frame on " << self << std::endl;
 		}
 
 		if (_outline_what == What (LEFT|RIGHT|BOTTOM|TOP)) {
 
 			if (_corner_radius) {
-				Gtkmm2ext::rounded_rectangle (context, self.x0, self.y0, self.width(), self.height(), _corner_radius);
+				Gtkmm2ext::rounded_rectangle (context, self.x0, self.y0, self.width() - _outline_width, self.height() - _outline_width, _corner_radius);
 			} else {
-				context->rectangle (self.x0, self.y0, self.width(), self.height());
+				context->rectangle (self.x0, self.y0, self.width() - _outline_width, self.height() - _outline_width);
 			}
 
 		} else {
@@ -172,35 +176,7 @@ void
 Rectangle::compute_bounding_box () const
 {
 	if (!_rect.empty()) {
-		Rect r = _rect.fix ();
-
-		/* if the outline is 1 pixel, then the actual
-		   bounding box is 0.5 pixels outside the stated
-		   corners of the rectangle.
-
-		   if the outline is 2 pixels, then the actual
-		   bounding box is 1.0 pixels outside the stated
-		   corners of the rectangle (so that the middle
-		   of the 2 pixel wide border passes through
-		   the corners, alternatively described as 1 row
-		   of pixels outside of the corners, and 1 row
-		   inside).
-
-		   if the outline is 3 pixels, then the actual
-		   bounding box is 1.5 outside the stated corners
-		   of the rectangle (so that the middle row of
-		   pixels of the border passes through the corners).
-
-		   if the outline is 4 pixels, then the actual bounding
-		   box is 2.0 pixels outside the stated corners
-		   of the rectangle, so that the border consists
-		   of 2 pixels outside the corners and 2 pixels inside.
-
-		   hence ... the bounding box is width * 0.5 larger
-		   than the rectangle itself.
-		*/
-
-		_bounding_box = r.expand (1.0 + _outline_width * 0.5);
+		_bounding_box = _rect.fix().expand (_outline_width * 0.5);
 	}
 
 	_bounding_box_dirty = false;
