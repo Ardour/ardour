@@ -673,8 +673,9 @@ void
 Item::redraw () const
 {
 	if (visible() && _bounding_box && _canvas) {
-		_canvas->request_redraw (item_to_window (_bounding_box));
+		_canvas->request_redraw (item_to_window (_bounding_box, false));
 	}
+
 }
 
 void
