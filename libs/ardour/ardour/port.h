@@ -183,7 +183,7 @@ private:
 	void port_connected_or_disconnected (boost::weak_ptr<Port>, boost::weak_ptr<Port>, bool);
 	void signal_drop ();
 	void drop ();
-	PBD::ScopedConnection drop_connection;
+	PBD::ScopedConnectionList drop_connection;
 	PBD::ScopedConnection engine_connection;
 };
 
