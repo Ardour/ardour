@@ -3814,7 +3814,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 		resort_routes ();
 #endif
 
-	if (_process_graph && !(_state_of_the_state & Deletion)) {
+	if (_process_graph && !(_state_of_the_state & Deletion) && _engine.running()) {
 		_process_graph->clear_other_chain ();
 	}
 
