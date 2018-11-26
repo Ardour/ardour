@@ -1161,6 +1161,12 @@ Session::remove_monitor_section ()
 		return;
 	}
 
+	/* allow deletion when session is unloaded */
+	if (!_engine.running() && !(_state_of_the_state & Deletion)) {
+		error << _("Cannot remove monitor section while the engine is offline.") << endmsg;
+		return;
+	}
+
 	/* force reversion to Solo-In-Place */
 	Config->set_solo_control_is_listen_control (false);
 
@@ -1216,6 +1222,11 @@ void
 Session::add_monitor_section ()
 {
 	RouteList rl;
+
+	if (!_engine.running()) {
+		error << _("Cannot create monitor section while the engine is offline.") << endmsg;
+		return;
+	}
 
 	if (_monitor_out || !_master_out || Profile->get_trx()) {
 		return;
