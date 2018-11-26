@@ -414,7 +414,41 @@ Canvas::item_moved (Item* item, Rect pre_change_parent_bounding_box)
 void
 Canvas::queue_draw_item_area (Item* item, Rect area)
 {
-	request_redraw (item->item_to_window (area));
+	if ((area.width()) > 1.0 && (area.height() > 1.0)) {
+		/* item has a rectangular bounding box, which may fall
+		 * on non-integer locations. Expand it appropriately.
+		 */
+		Rect r = item->item_to_window (area, false);
+		r.x0 = floor (r.x0);
+		r.y0 = floor (r.y0);
+		r.x1 = ceil (r.x1);
+		r.y1 = ceil (r.y1);
+		//std::cerr << "redraw box, adjust from " << area << " to " << r << std::endl;
+		request_redraw (r);
+		return;
+	} else if (area.width() > 1.0 && area.height() == 1.0) {
+		/* horizontal line, which may fall on non-integer
+		 * coordinates.
+		 */
+		Rect r = item->item_to_window (area, false);
+		r.y0 = floor (r.y0);
+		r.y1 = ceil (r.y1);
+		//std::cerr << "redraw HLine, adjust from " << area << " to " << r << std::endl;
+		request_redraw (r);
+	} else if (area.width() == 1.0 && area.height() > 1.0) {
+		/* vertical single pixel line, which may fall on non-integer
+		 * coordinates
+		 */
+		Rect r = item->item_to_window (area, false);
+		r.x0 = floor (r.x0);
+		r.x1 = ceil (r.x1);
+		//std::cerr << "redraw VLine, adjust from " << area << " to " << r << std::endl;
+		request_redraw (r);
+	} else {
+		/* impossible? one of width or height must be zero ... */
+		//std::cerr << "redraw IMPOSSIBLE of " << area  << std::endl;
+		request_redraw (item->item_to_window (area, false));
+	}
 }
 
 void
