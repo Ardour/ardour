@@ -477,6 +477,7 @@ MidiRegionView::enter_internal (uint32_t state)
 	}
 
 	// Lower frame handles below notes so they don't steal events
+
 	if (frame_handle_start) {
 		frame_handle_start->lower_to_bottom();
 	}
@@ -496,6 +497,7 @@ MidiRegionView::leave_internal()
 	if (frame_handle_start) {
 		frame_handle_start->raise_to_top();
 	}
+
 	if (frame_handle_end) {
 		frame_handle_end->raise_to_top();
 	}
