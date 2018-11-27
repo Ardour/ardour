@@ -52,6 +52,11 @@ namespace ARDOUR_UI_UTILS {
 gint   just_hide_it (GdkEventAny*, Gtk::Window*);
 void add_item_with_sensitivity (Gtk::Menu_Helpers::MenuList &, Gtk::Menu_Helpers::MenuElem, bool);
 
+/* return 0 (false) if there is no error (engine runs).
+ * otherwise queue an idle user-notificaion and return true.
+ */
+bool no_engine_notify ();
+
 unsigned char* xpm2rgb  (const char** xpm, uint32_t& w, uint32_t& h);
 unsigned char* xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h);
 
