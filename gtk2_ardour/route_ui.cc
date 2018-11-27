@@ -2374,19 +2374,27 @@ RouteUI::fan_out (bool to_busses, bool group)
 		std::string bn = BUSNAME;
 		boost::shared_ptr<Route> r = _session->route_by_name (bn);
 		if (!r) {
-			if (to_busses) {
-				RouteList rl = _session->new_audio_route (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::AudioBus, PresentationInfo::max_order);
-				r = rl.front ();
-				assert (r);
-			} else {
-				list<boost::shared_ptr<AudioTrack> > tl =
-					_session->new_audio_track (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::max_order, Normal);
-				r = tl.front ();
-				assert (r);
+			try {
+				if (to_busses) {
+					RouteList rl = _session->new_audio_route (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::AudioBus, PresentationInfo::max_order);
+					r = rl.front ();
+					assert (r);
+				} else {
+					list<boost::shared_ptr<AudioTrack> > tl =
+						_session->new_audio_track (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::max_order, Normal);
+					r = tl.front ();
+					assert (r);
 
-				boost::shared_ptr<ControlList> cl (new ControlList);
-				cl->push_back (r->monitoring_control ());
-				_session->set_controls (cl, (double) MonitorInput, Controllable::NoGroup);
+					boost::shared_ptr<ControlList> cl (new ControlList);
+					cl->push_back (r->monitoring_control ());
+					_session->set_controls (cl, (double) MonitorInput, Controllable::NoGroup);
+				}
+			} catch (...) {
+				if (!to_group.empty()) {
+					boost::shared_ptr<RouteList> rl (&to_group);
+					_session->remove_routes (rl);
+				}
+				return;
 			}
 			r->input ()->disconnect (this);
 		}
