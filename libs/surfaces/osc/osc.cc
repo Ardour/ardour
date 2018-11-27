@@ -6894,10 +6894,7 @@ OSC::Sorted
 OSC::cue_get_sorted_stripables(boost::shared_ptr<Stripable> aux, uint32_t id, lo_message msg)
 {
 	Sorted sorted;
-	// fetch all stripables
-	StripableList stripables;
 
-	session->get_stripables (stripables, PresentationInfo::MixerStripables);
 	boost::shared_ptr<Route> aux_rt = boost::dynamic_pointer_cast<Route> (aux);
 	Route::FedBy fed_by = aux_rt->fed_by();
 	for (Route::FedBy::iterator i = fed_by.begin(); i != fed_by.end(); ++i) {
