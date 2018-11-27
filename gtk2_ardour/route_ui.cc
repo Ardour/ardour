@@ -2323,9 +2323,7 @@ RouteUI::manage_pins ()
 void
 RouteUI::fan_out (bool to_busses, bool group)
 {
-	if (!AudioEngine::instance()->running ()) {
-		MessageDialog msg (_("Not connected to audio engine - Fanning out to Tracks/Busses is not possible"));
-		msg.run ();
+	if (ARDOUR_UI_UTILS::no_engine_notify ()) {
 		return;
 	}
 

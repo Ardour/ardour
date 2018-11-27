@@ -2057,7 +2057,7 @@ SoundFileOmega::do_something (int action)
 {
 	SoundFileBrowser::do_something (action);
 
-	if (action == RESPONSE_CLOSE) {
+	if (action == RESPONSE_CLOSE || ARDOUR_UI_UTILS::no_engine_notify ()) {
 		hide ();
 		return;
 	}

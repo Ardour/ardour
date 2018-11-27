@@ -873,9 +873,7 @@ gint
 MixerStrip::output_press (GdkEventButton *ev)
 {
 	using namespace Menu_Helpers;
-	if (!_session->engine().connected()) {
-		MessageDialog msg (_("Not connected to audio engine - no I/O changes are possible"));
-		msg.run ();
+	if (ARDOUR_UI_UTILS::no_engine_notify ()) {
 		return true;
 	}
 
@@ -989,9 +987,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 	input_menu.set_name ("ArdourContextMenu");
 	citems.clear();
 
-	if (!_session->engine().connected()) {
-		MessageDialog msg (_("Not connected to audio engine - no I/O changes are possible"));
-		msg.run ();
+	if (ARDOUR_UI_UTILS::no_engine_notify ()) {
 		return true;
 	}
 
