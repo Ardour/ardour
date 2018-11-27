@@ -2424,18 +2424,17 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 
 	if (processor && (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS))) {
 
-		if (_session->engine().connected()) {
-			/* XXX giving an error message here is hard, because we may be in the midst of a button press */
+		if (!one_processor_can_be_edited ()) {
+			return true;
+		}
+		if (ARDOUR_UI_UTILS::no_engine_notify ()) {
+			return true;
+		}
 
-			if (!one_processor_can_be_edited ()) {
-				return true;
-			}
-
-			if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
-				generic_edit_processor (processor);
-			} else {
-				edit_processor (processor);
-			}
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+			generic_edit_processor (processor);
+		} else {
+			edit_processor (processor);
 		}
 
 		ret = true;
@@ -2534,8 +2533,10 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 			else if (boost::dynamic_pointer_cast<PluginInsert>(processor)->plugin()->has_inline_display() && UIConfiguration::instance().get_prefer_inline_over_gui()) {
 				; /* only show inline display */
 			}
-			else if (_session->engine().connected () && processor_can_be_edited (processor)) {
-				if ((*p)->has_editor ()) {
+			else if (processor_can_be_edited (processor)) {
+				if (ARDOUR_UI_UTILS::no_engine_notify()) {
+					return true;
+				} else if ((*p)->has_editor ()) {
 					edit_processor (processor);
 				} else if (boost::dynamic_pointer_cast<PluginInsert>(processor)->plugin()->parameter_count() > 0) {
 					generic_edit_processor (processor);
@@ -3662,7 +3663,7 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 
 	} else if ((send = boost::dynamic_pointer_cast<Send> (processor)) != 0) {
 
-		if (!_session->engine().connected()) {
+		if (ARDOUR_UI_UTILS::no_engine_notify ()) {
 			return 0;
 		}
 
@@ -3678,7 +3679,7 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 			return 0;
 		}
 
-		if (!_session->engine().connected()) {
+		if (ARDOUR_UI_UTILS::no_engine_notify ()) {
 			return 0;
 		}
 
@@ -4088,7 +4089,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 	if (edit_aux_send (processor)) {
 		return;
 	}
-	if (!_session->engine().connected()) {
+	if (ARDOUR_UI_UTILS::no_engine_notify ()) {
 		return;
 	}
 
@@ -4109,7 +4110,7 @@ ProcessorBox::generic_edit_processor (boost::shared_ptr<Processor> processor)
 	if (edit_aux_send (processor)) {
 		return;
 	}
-	if (!_session->engine().connected()) {
+	if (ARDOUR_UI_UTILS::no_engine_notify ()) {
 		return;
 	}
 
