@@ -4353,6 +4353,20 @@ ARDOUR_UI::add_route_dialog_response (int r)
 		return;
 	}
 
+	if (!AudioEngine::instance()->running ()) {
+		switch (r) {
+			case AddRouteDialog::Add:
+			case AddRouteDialog::AddAndClose:
+				break;
+			default:
+				return;
+		}
+		add_route_dialog->ArdourDialog::on_response (r);
+		MessageDialog msg (_("Not connected to audio engine - Adding Tracks/Busses is not possible"));
+		msg.run ();
+		return;
+	}
+
 	int count;
 
 	switch (r) {

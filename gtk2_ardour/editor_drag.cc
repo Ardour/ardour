@@ -1428,6 +1428,11 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 RouteTimeAxisView*
 RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, TimeAxisView* original)
 {
+	if (!AudioEngine::instance()->running ()) {
+		error << _("Not connected to audio engine - Could not create new track after region placed in the drop zone") << endmsg;
+		return NULL;
+	}
+
 	/* Add a new track of the correct type, and return the RouteTimeAxisView that is created to display the
 	   new track.
 	 */

@@ -2323,6 +2323,12 @@ RouteUI::manage_pins ()
 void
 RouteUI::fan_out (bool to_busses, bool group)
 {
+	if (!AudioEngine::instance()->running ()) {
+		MessageDialog msg (_("Not connected to audio engine - Fanning out to Tracks/Busses is not possible"));
+		msg.run ();
+		return;
+	}
+
 	DisplaySuspender ds;
 	boost::shared_ptr<ARDOUR::Route> route = _route;
 	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (route->the_instrument ());

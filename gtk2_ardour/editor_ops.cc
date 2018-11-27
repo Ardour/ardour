@@ -45,6 +45,7 @@
 #include "widgets/prompter.h"
 
 #include "ardour/audio_track.h"
+#include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
 #include "ardour/boost_debug.h"
 #include "ardour/dB.h"
@@ -7417,6 +7418,12 @@ Editor::_remove_tracks ()
 	TrackSelection& ts (selection->tracks);
 
 	if (ts.empty()) {
+		return;
+	}
+
+	if (!AudioEngine::instance()->running ()) {
+		MessageDialog msg (_("Not connected to audio engine - Removing Tracks/Busses is not possible"));
+		msg.run ();
 		return;
 	}
 
