@@ -492,6 +492,9 @@ Session::butler_transport_work ()
 	}
 
 	if (ptw & PostTransportAdjustCaptureBuffering) {
+		/* need to prevent concurrency with ARDOUR::DiskWriter::run(),
+		 * DiskWriter::adjust_buffering() re-allocates the ringbuffer */
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 			if (tr) {
