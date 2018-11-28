@@ -1595,7 +1595,7 @@ ARDOUR_UI::update_sample_rate (samplecnt_t)
 
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::update_sample_rate, ignored)
 
-	if (!AudioEngine::instance()->connected()) {
+	if (!AudioEngine::instance()->running()) {
 
 		snprintf (buf, sizeof (buf), "%s", _("Audio: <span foreground=\"red\">none</span>"));
 
@@ -1898,7 +1898,7 @@ ARDOUR_UI::open_recent_session ()
 bool
 ARDOUR_UI::check_audioengine (Gtk::Window& parent)
 {
-	if (!AudioEngine::instance()->connected()) {
+	if (!AudioEngine::instance()->running()) {
 		MessageDialog msg (parent, string_compose (
 		                           _("%1 is not connected to any audio backend.\n"
 		                           "You cannot open or close sessions in this condition"),
