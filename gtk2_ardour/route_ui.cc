@@ -773,9 +773,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 	if (BindingProxy::is_bind_action(ev) )
 		return false;
 
-	if (!_session->engine().connected()) {
-		MessageDialog msg (_("Not connected to AudioEngine - cannot engage record"));
-		msg.run ();
+	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 		return false;
 	}
 

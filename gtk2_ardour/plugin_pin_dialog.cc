@@ -48,6 +48,7 @@
 #include "gui_thread.h"
 #include "timers.h"
 #include "ui_config.h"
+#include "utils.h"
 
 #include "pbd/i18n.h"
 
@@ -1794,8 +1795,11 @@ PluginPinWidget::sc_input_press (GdkEventButton *ev, boost::weak_ptr<ARDOUR::Por
 {
 	using namespace Menu_Helpers;
 	assert (_session);
-	if (_session->actively_recording () || !_session->engine ().connected ()) {
-		error_message_dialog (_("Port Connections are only available with active Audio/MIDI system."));
+	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
+		return false;
+	}
+	if (_session->actively_recording ()) {
+		error_message_dialog (/* unused */ "");
 		return false;
 	}
 
