@@ -1171,12 +1171,6 @@ AlsaAudioBackend::my_name () const
 	return _instance_name;
 }
 
-bool
-AlsaAudioBackend::available () const
-{
-	return _run && _active;
-}
-
 uint32_t
 AlsaAudioBackend::port_name_size () const
 {

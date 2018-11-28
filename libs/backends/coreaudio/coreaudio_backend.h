@@ -316,7 +316,6 @@ class CoreAudioBackend : public AudioBackend {
 
 	void* private_handle () const;
 	const std::string& my_name () const;
-	bool available () const;
 	uint32_t port_name_size () const;
 
 	int         set_port_name (PortHandle, const std::string&);

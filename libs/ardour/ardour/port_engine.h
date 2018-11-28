@@ -101,12 +101,6 @@ public:
 	 */
 	virtual const std::string& my_name() const = 0;
 
-	/** Return true if the underlying mechanism/API is still available
-	 * for us to utilize. return false if some or all of the AudioBackend
-	 * API can no longer be effectively used.
-	 */
-	virtual bool available() const = 0;
-
 	/** Return the maximum size of a port name
 	*/
 	virtual uint32_t port_name_size() const = 0;

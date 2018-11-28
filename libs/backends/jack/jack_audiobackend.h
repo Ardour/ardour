@@ -47,7 +47,6 @@ class JACKAudioBackend : public AudioBackend {
 
     std::string name() const;
     void* private_handle() const;
-    bool available() const;
     bool is_realtime () const;
 
     bool requires_driver_selection() const;
@@ -242,6 +241,8 @@ class JACKAudioBackend : public AudioBackend {
 
     void set_jack_callbacks ();
     int reconnect_to_jack ();
+
+		bool available() const;
 
     struct ThreadData {
 	JACKAudioBackend* engine;

@@ -635,12 +635,6 @@ DummyAudioBackend::my_name () const
 	return _instance_name;
 }
 
-bool
-DummyAudioBackend::available () const
-{
-	return _running;
-}
-
 uint32_t
 DummyAudioBackend::port_name_size () const
 {

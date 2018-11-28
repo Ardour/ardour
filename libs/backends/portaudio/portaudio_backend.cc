@@ -1196,12 +1196,6 @@ PortAudioBackend::my_name () const
 	return _instance_name;
 }
 
-bool
-PortAudioBackend::available () const
-{
-	return _run && _active;
-}
-
 uint32_t
 PortAudioBackend::port_name_size () const
 {

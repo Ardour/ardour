@@ -123,7 +123,6 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	void           launch_device_control_app();
 
 	bool           is_realtime() const;
-	bool           connected() const;
 
 	// for the user which hold state_lock to check if reset operation is pending
 	bool           is_reset_requested() const { return g_atomic_int_get(const_cast<gint*>(&_hw_reset_request_count)); }

@@ -914,12 +914,6 @@ CoreAudioBackend::my_name () const
 	return _instance_name;
 }
 
-bool
-CoreAudioBackend::available () const
-{
-	return _run && _active_fw && _active_ca;
-}
-
 uint32_t
 CoreAudioBackend::port_name_size () const
 {
