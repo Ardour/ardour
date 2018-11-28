@@ -1074,7 +1074,8 @@ SequenceView::SequenceView (SequencerView& sview, StepSequence& sq, Item* parent
 	lhs_box->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
 	lhs_box->set_fill (true);
 	lhs_box->set_outline (false);
-	lhs_box->name = "sequence step packer";
+	lhs_box->set_spacing (5.0);
+	lhs_box->name = string_compose ("lhs box for %1", sequence.index());
 
 	number_display = new Rectangle (lhs_box);
 	number_display->set_position (Duple (4.0, 4.0));
@@ -1102,13 +1103,13 @@ SequenceView::SequenceView (SequencerView& sview, StepSequence& sq, Item* parent
 	root_display->set_corner_radius (5);
 
 	root_text = new Text (root_display);
-	root_text->set ("A#8"); // likely widest root label
+	root_text->set ("G#2"); // likely widest root label
 	root_text->set (ParameterDescriptor::midi_note_name (sequence.root()));
 	root_text->set_font_description (UIConfiguration::instance().get_LargeFont());
 	root_text->set_position (Duple (4.0, ((_step_dimen - 8.0) / 2.0) - (root_text->height() / 2.0)));
 	root_text->set_color (contrasting_text_color (root_display->fill_color()));
 
-	name_text->set_size_request (SequencerView::rhs_xoffset - number_display->get().width() - root_display->get().width() - 5, _step_dimen);
+	name_text->set_size_request (SequencerView::rhs_xoffset - number_display->get().width() - root_display->get().width() - 2.0, _step_dimen);
 	root_display->set_position (Duple (SequencerView::rhs_xoffset - root_display->get().width() - 4.0, 4.0));
 
 	const size_t nsteps = sequencer().nsteps();
