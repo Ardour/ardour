@@ -373,7 +373,7 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 					 const SelectionData& data,
 					 guint info, guint time)
 {
-	if (ARDOUR_UI_UTILS::no_engine_notify ()) {
+	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 		return;
 	}
 	if (data.get_target() == "regions") {

@@ -2427,7 +2427,7 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 		if (!one_processor_can_be_edited ()) {
 			return true;
 		}
-		if (ARDOUR_UI_UTILS::no_engine_notify ()) {
+		if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 			return true;
 		}
 
@@ -2534,7 +2534,7 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 				; /* only show inline display */
 			}
 			else if (processor_can_be_edited (processor)) {
-				if (ARDOUR_UI_UTILS::no_engine_notify()) {
+				if (!ARDOUR_UI_UTILS::engine_is_running()) {
 					return true;
 				} else if ((*p)->has_editor ()) {
 					edit_processor (processor);
@@ -3663,7 +3663,7 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 
 	} else if ((send = boost::dynamic_pointer_cast<Send> (processor)) != 0) {
 
-		if (ARDOUR_UI_UTILS::no_engine_notify ()) {
+		if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 			return 0;
 		}
 
@@ -3679,7 +3679,7 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 			return 0;
 		}
 
-		if (ARDOUR_UI_UTILS::no_engine_notify ()) {
+		if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 			return 0;
 		}
 
@@ -3721,7 +3721,7 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 
 	} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (processor)) != 0) {
 
-		if (ARDOUR_UI_UTILS::no_engine_notify ()) {
+		if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 			return 0;
 		}
 
@@ -4089,7 +4089,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 	if (edit_aux_send (processor)) {
 		return;
 	}
-	if (ARDOUR_UI_UTILS::no_engine_notify ()) {
+	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 		return;
 	}
 
@@ -4110,7 +4110,7 @@ ProcessorBox::generic_edit_processor (boost::shared_ptr<Processor> processor)
 	if (edit_aux_send (processor)) {
 		return;
 	}
-	if (ARDOUR_UI_UTILS::no_engine_notify ()) {
+	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 		return;
 	}
 

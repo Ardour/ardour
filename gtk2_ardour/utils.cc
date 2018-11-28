@@ -124,13 +124,13 @@ idle_notify_engine_stopped ()
 }
 
 bool
-ARDOUR_UI_UTILS::no_engine_notify ()
+ARDOUR_UI_UTILS::engine_is_running ()
 {
 	if (ARDOUR::AudioEngine::instance()->running ()) {
-		return false; // 0 == OK
+		return true;
 	}
 	Glib::signal_idle().connect (sigc::ptr_fun (&idle_notify_engine_stopped));
-	return true;
+	return false;
 }
 
 

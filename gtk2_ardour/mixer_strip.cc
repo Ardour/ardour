@@ -873,7 +873,7 @@ gint
 MixerStrip::output_press (GdkEventButton *ev)
 {
 	using namespace Menu_Helpers;
-	if (ARDOUR_UI_UTILS::no_engine_notify ()) {
+	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 		return true;
 	}
 
@@ -987,7 +987,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 	input_menu.set_name ("ArdourContextMenu");
 	citems.clear();
 
-	if (ARDOUR_UI_UTILS::no_engine_notify ()) {
+	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 		return true;
 	}
 

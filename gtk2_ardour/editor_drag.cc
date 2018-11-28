@@ -1428,7 +1428,7 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 RouteTimeAxisView*
 RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, TimeAxisView* original)
 {
-	if (ARDOUR_UI_UTILS::no_engine_notify ()) {
+	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 		return NULL;
 	}
 

@@ -7421,7 +7421,7 @@ Editor::_remove_tracks ()
 		return;
 	}
 
-	if (ARDOUR_UI_UTILS::no_engine_notify ()) {
+	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 		return;
 	}
 

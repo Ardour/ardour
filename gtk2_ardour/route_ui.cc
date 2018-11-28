@@ -2323,7 +2323,7 @@ RouteUI::manage_pins ()
 void
 RouteUI::fan_out (bool to_busses, bool group)
 {
-	if (ARDOUR_UI_UTILS::no_engine_notify ()) {
+	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 		return;
 	}
 

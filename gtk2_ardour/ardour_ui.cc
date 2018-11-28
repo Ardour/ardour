@@ -4362,7 +4362,7 @@ ARDOUR_UI::add_route_dialog_response (int r)
 				return;
 		}
 		add_route_dialog->ArdourDialog::on_response (r);
-		ARDOUR_UI_UTILS::no_engine_notify ();
+		ARDOUR_UI_UTILS::engine_is_running ();
 		return;
 	}
 
