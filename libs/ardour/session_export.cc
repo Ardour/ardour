@@ -172,7 +172,7 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 
 	/* we are ready to go ... */
 
-	if (!_engine.connected()) {
+	if (!_engine.running()) {
 		return -1;
 	}
 

@@ -1286,7 +1286,7 @@ Route::ab_plugins (bool forward)
 void
 Route::clear_processors (Placement p)
 {
-	if (!_session.engine().connected()) {
+	if (!_session.engine().running()) {
 		return;
 	}
 
@@ -1391,7 +1391,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 		return 0;
 	}
 
-	if (!_session.engine().connected()) {
+	if (!_session.engine().running()) {
 		return 1;
 	}
 
@@ -1507,7 +1507,7 @@ Route::replace_processor (boost::shared_ptr<Processor> old, boost::shared_ptr<Pr
 		return 1;
 	}
 
-	if (!AudioEngine::instance()->connected() || !old || !sub) {
+	if (!AudioEngine::instance()->running() || !old || !sub) {
 		return 1;
 	}
 
@@ -1588,7 +1588,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 {
 	ProcessorList deleted;
 
-	if (!_session.engine().connected()) {
+	if (!_session.engine().running()) {
 		return 1;
 	}
 
@@ -3283,7 +3283,7 @@ Route::remove_aux_or_listen (boost::shared_ptr<Route> route)
 				/* list could have been demolished while we dropped the lock
 				   so start over.
 				*/
-				if (_session.engine().connected()) {
+				if (_session.engine().running()) {
 					/* i/o processors cannot be removed if the engine is not running
 					 * so don't live-loop in case the engine is N/A or dies
 					 */

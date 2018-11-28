@@ -6931,7 +6931,7 @@ Session::set_worst_output_latency ()
 
 	_worst_output_latency = 0;
 
-	if (!_engine.connected()) {
+	if (!_engine.running()) {
 		return;
 	}
 
@@ -6955,7 +6955,7 @@ Session::set_worst_input_latency ()
 
 	_worst_input_latency = 0;
 
-	if (!_engine.connected()) {
+	if (!_engine.running()) {
 		return;
 	}
 

@@ -925,7 +925,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	   because there will be no process callbacks to deliver stuff from
 	*/
 
-	if (_engine.connected() && !_engine.freewheeling()) {
+	if (_engine.running() && !_engine.freewheeling()) {
 		// need to queue this in the next RT cycle
 		_send_timecode_update = true;
 
