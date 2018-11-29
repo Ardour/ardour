@@ -154,7 +154,6 @@ ExportVideoDialog::ExportVideoDialog ()
 	path_hbox->pack_start (*l, false, false, 2);
 	vbox->pack_start (*path_hbox, false, false, 2);
 
-	insnd_combo.append_text (string_compose (_("from session start marker to session end marker"), PROGRAM_NAME));
 	outfn_path_entry.set_width_chars(38);
 
 	l = manage (new Label (_("<b>Settings:</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
@@ -335,6 +334,11 @@ ExportVideoDialog::apply_state (TimeSelection &tme, bool range)
 
 	// TODO remember setting for export-range.. somehow, (let explicit range override)
 	sampleoffset_t av_offset = ARDOUR_UI::instance()->video_timeline->get_offset();
+
+	insnd_combo.remove_all ();
+
+	insnd_combo.append_text (_("from session start marker to session end marker"));
+
 	if (av_offset < 0 ) {
 		insnd_combo.append_text (_("from 00:00:00:00 to the video end"));
 	} else {
