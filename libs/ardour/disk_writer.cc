@@ -517,6 +517,8 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack>(_route);
 		MidiChannelFilter* filter = mt ? &mt->capture_filter() : 0;
 
+		assert (buf.size() == 0 || _midi_buf);
+
 		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
 			Evoral::Event<MidiBuffer::TimeType> ev (*i, false);
 			if (ev.time() + rec_offset > rec_nframes) {
@@ -571,6 +573,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				_midi_buf->write (event_time, ev.event_type(), ev.size(), ev.buffer());
 			}
 		}
+
 		g_atomic_int_add (const_cast<gint*>(&_samples_pending_write), nframes);
 
 		if (buf.size() != 0) {
@@ -815,7 +818,9 @@ DiskWriter::seek (samplepos_t sample, bool complete_refill)
 		(*chan)->wbuf->reset ();
 	}
 
-	_midi_buf->reset ();
+	if (_midi_buf) {
+		_midi_buf->reset ();
+	}
 	g_atomic_int_set(&_samples_read_from_ringbuffer, 0);
 	g_atomic_int_set(&_samples_written_to_ringbuffer, 0);
 
@@ -953,7 +958,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 
 	/* MIDI*/
 
-	if (_midi_write_source) {
+	if (_midi_write_source && _midi_buf) {
 
 		const samplecnt_t total = g_atomic_int_get(const_cast<gint*> (&_samples_pending_write));
 

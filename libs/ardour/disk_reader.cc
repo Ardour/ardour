@@ -71,7 +71,6 @@ DiskReader::~DiskReader ()
 			_playlists[n]->release ();
 		}
 	}
-	delete _midi_buf;
 }
 
 void
@@ -408,7 +407,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	/* MIDI data handling */
 
   midi:
-	if (/*!_session.declick_out_pending() && */ bufs.count().n_midi()) {
+	if (/*!_session.declick_out_pending() && */ bufs.count().n_midi() && _midi_buf) {
 		MidiBuffer* dst;
 
 		if (_no_disk_output) {
@@ -642,7 +641,9 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 		reset_tracker ();
 	}
 
-	_midi_buf->reset();
+	if (_midi_buf) {
+		_midi_buf->reset();
+	}
 	g_atomic_int_set(&_samples_read_from_ringbuffer, 0);
 	g_atomic_int_set(&_samples_written_to_ringbuffer, 0);
 
@@ -1209,7 +1210,9 @@ DiskReader::move_processor_automation (boost::weak_ptr<Processor> p, list< Evora
 void
 DiskReader::reset_tracker ()
 {
-	_midi_buf->reset_tracker ();
+	if (_midi_buf) {
+		_midi_buf->reset_tracker ();
+	}
 
 	boost::shared_ptr<MidiPlaylist> mp (midi_playlist());
 
@@ -1221,7 +1224,9 @@ DiskReader::reset_tracker ()
 void
 DiskReader::resolve_tracker (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time)
 {
-	_midi_buf->resolve_tracker(buffer, time);
+	if (_midi_buf) {
+		_midi_buf->resolve_tracker(buffer, time);
+	}
 
 	boost::shared_ptr<MidiPlaylist> mp (midi_playlist());
 
@@ -1238,6 +1243,8 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 {
 	MidiBuffer* target;
 	samplepos_t nframes = end_sample - start_sample;
+
+	assert (_midi_buf);
 
 	if ((ms & MonitoringInput) == 0) {
 		/* Route::process_output_buffers() clears the buffer as-needed */
@@ -1378,6 +1385,8 @@ DiskReader::midi_read (samplepos_t& start, samplecnt_t dur, bool reversed)
 	samplepos_t effective_start = start;
 	Evoral::Range<samplepos_t>*  loop_range (0);
 
+	assert(_midi_buf);
+
 	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MDS::midi_read @ %1 cnt %2\n", start, dur));
 
 	boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack>(_route);
@@ -1463,7 +1472,7 @@ DiskReader::midi_read (samplepos_t& start, samplecnt_t dur, bool reversed)
 int
 DiskReader::refill_midi ()
 {
-	if (!_playlists[DataType::MIDI]) {
+	if (!_playlists[DataType::MIDI] || !_midi_buf) {
 		return 0;
 	}
 

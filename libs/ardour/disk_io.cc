@@ -55,7 +55,7 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
 	, playback_sample (0)
 	, _need_butler (false)
 	, channels (new ChannelList)
-	, _midi_buf (new MidiRingBuffer<samplepos_t> (s.butler()->midi_diskstream_buffer_size()))
+	, _midi_buf (0)
 	, _samples_written_to_ringbuffer (0)
 	, _samples_read_from_ringbuffer (0)
 {
@@ -76,6 +76,7 @@ DiskIOProcessor::~DiskIOProcessor ()
 	}
 
 	channels.flush ();
+	delete _midi_buf;
 }
 
 
