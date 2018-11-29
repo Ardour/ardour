@@ -68,6 +68,7 @@ WindowProxy::WindowProxy (const std::string& name, const std::string& menu_name,
 	, _width (-1)
 	, _height (-1)
 	, vistracker (0)
+	, _state_mask (StateMask (Position|Size))
 {
 	set_state (node, 0);
 }
