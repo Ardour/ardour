@@ -97,7 +97,6 @@ class ProxyTemporary: public ProxyBase
 {
 public:
 	ProxyTemporary (const std::string& name, Gtk::Window* win);
-	~ProxyTemporary();
 
 	Gtk::Window* get (bool create = false) {
 		(void) create;
@@ -109,6 +108,8 @@ public:
 	}
 
 	ARDOUR::SessionHandlePtr* session_handle ();
+
+	void explicit_delete () { _window = 0 ; delete this; }
 };
 
 template<typename T>

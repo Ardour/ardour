@@ -255,11 +255,6 @@ ProxyTemporary::ProxyTemporary (const string& name, Gtk::Window* win)
 	_window = win;
 }
 
-ProxyTemporary::~ProxyTemporary ()
-{
-}
-
-
 ARDOUR::SessionHandlePtr*
 ProxyTemporary::session_handle()
 {

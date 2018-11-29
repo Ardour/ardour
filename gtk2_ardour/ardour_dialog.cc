@@ -45,6 +45,7 @@ ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
 
 ArdourDialog::ArdourDialog (Gtk::Window& parent, string title, bool modal, bool use_seperator)
 	: Dialog (title, parent, modal, use_seperator)
+	, proxy (0)
 	, _splash_pushed (false)
 {
 	init ();
@@ -56,6 +57,7 @@ ArdourDialog::~ArdourDialog ()
 	pop_splash ();
 	Keyboard::the_keyboard().focus_out_window (0, this);
 	WM::Manager::instance().remove (proxy);
+	proxy->explicit_delete ();
 }
 
 void
