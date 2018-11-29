@@ -4210,9 +4210,9 @@ Session::save_snapshot_name (const std::string & n)
 	 */
 	instant_xml ("LastUsedSnapshot");
 
-	XMLNode* last_used_snapshot = new XMLNode ("LastUsedSnapshot");
-	last_used_snapshot->set_property ("name", n);
-	add_instant_xml (*last_used_snapshot, false);
+	XMLNode last_used_snapshot ("LastUsedSnapshot");
+	last_used_snapshot.set_property ("name", n);
+	add_instant_xml (last_used_snapshot, false);
 }
 
 void
