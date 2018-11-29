@@ -231,6 +231,9 @@ class LIBPBD_API SystemExec
 		void make_wargs(char **);
 #else
 		pid_t pid;
+# ifndef NO_VFORK
+		char **argx;
+# endif
 #endif
 		void init ();
 		pthread_mutex_t write_lock;

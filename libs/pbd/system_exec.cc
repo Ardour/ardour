@@ -171,6 +171,8 @@ SystemExec::init ()
 	stdoutP[0] = stdoutP[1] = INVALID_HANDLE_VALUE;
 	stderrP[0] = stderrP[1] = INVALID_HANDLE_VALUE;
 	w_args = NULL;
+#elif !defined NO_VFORK
+	argx = NULL;
 #endif
 }
 
@@ -356,6 +358,14 @@ SystemExec::~SystemExec ()
 	}
 #ifdef PLATFORM_WINDOWS
 	if (w_args) free(w_args);
+#elif !defined NO_VFORK
+	if (argx) {
+		/* argx[0 .. 8] are fixed parameters to vfork-exec-wrapper */
+		for (int i = 0; i < 9; ++i) {
+			free (argx[i]);
+		}
+		free (argx);
+	}
 #endif
 	pthread_mutex_destroy(&write_lock);
 }
@@ -911,8 +921,9 @@ SystemExec::start (int stderr_mode, const char *vfork_exec_wrapper)
 	 */
 	int argn = 0;
 	for (int i=0;argp[i];++i) { argn++; }
-	char **argx = (char **) malloc((argn + 10) * sizeof(char *));
-	argx[0] = strdup(vfork_exec_wrapper); // XXX
+
+	argx = (char **) malloc((argn + 10) * sizeof(char *));
+	argx[0] = strdup(vfork_exec_wrapper);
 
 #define FDARG(NUM, FDN) \
 	argx[NUM] = (char*) calloc(6, sizeof(char)); snprintf(argx[NUM], 6, "%d", FDN);
