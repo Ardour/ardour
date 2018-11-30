@@ -211,16 +211,16 @@ if test -z "$NOVIDEOTOOLS"; then
 	XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
 
 	rsync -a -q --partial \
-		rsync://ardour.org/video-tools/harvid_win-${HARVID_VERSION}.tar.xz \
-		"${SRCCACHE}/harvid_win-${HARVID_VERSION}.tar.xz"
+		rsync://ardour.org/video-tools/harvid_${WARCH}-${HARVID_VERSION}.tar.xz \
+		"${SRCCACHE}/harvid_${WARCH}-${HARVID_VERSION}.tar.xz"
 
 	rsync -a -q --partial \
 		rsync://ardour.org/video-tools/xjadeo_win-${XJADEO_VERSION}.tar.xz \
 		"${SRCCACHE}/xjadeo_win-${XJADEO_VERSION}.tar.xz"
 
 	mkdir $DESTDIR/video
-	tar -xf "${SRCCACHE}/harvid_win-${HARVID_VERSION}.tar.xz" -C "$DESTDIR/video/"
-	tar -xf "${SRCCACHE}/xjadeo_win-${XJADEO_VERSION}.tar.xz" -C "$DESTDIR/video/"
+	tar -xf "${SRCCACHE}/harvid_${WARCH}-${HARVID_VERSION}.tar.xz" -C "$DESTDIR/video/"
+	tar -xf "${SRCCACHE}/xjadeo_${WARCH}-${XJADEO_VERSION}.tar.xz" -C "$DESTDIR/video/"
 
 	echo " === unzipped"
 	du -sh $DESTDIR/video
