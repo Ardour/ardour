@@ -216,7 +216,7 @@ if test -z "$NOVIDEOTOOLS"; then
 
 	rsync -a -q --partial \
 		rsync://ardour.org/video-tools/xjadeo_${WARCH}-${XJADEO_VERSION}.tar.xz \
-		"${SRCCACHE}/xjadeo_win-${XJADEO_VERSION}.tar.xz"
+		"${SRCCACHE}/xjadeo_${WARCH}-${XJADEO_VERSION}.tar.xz"
 
 	mkdir $DESTDIR/video
 	tar -xf "${SRCCACHE}/harvid_${WARCH}-${HARVID_VERSION}.tar.xz" -C "$DESTDIR/video/"
