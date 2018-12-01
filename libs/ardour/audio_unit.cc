@@ -2170,8 +2170,6 @@ AUPlugin::set_state(const XMLNode& node, int version)
 bool
 AUPlugin::load_preset (PresetRecord r)
 {
-	Plugin::load_preset (r);
-
 	bool ret = false;
 	CFPropertyListRef propertyList;
 	Glib::ustring path;
@@ -2218,7 +2216,7 @@ AUPlugin::load_preset (PresetRecord r)
 		}
 	}
 
-	return ret;
+	return ret && Plugin::load_preset (r);
 }
 
 void
