@@ -2279,7 +2279,7 @@ AUPlugin::do_save_preset (string preset_name)
 
 	DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Saving Preset to %1\n", user_preset_path));
 
-	return string ("file:///") + user_preset_path;
+	return user_preset_path;
 }
 
 //-----------------------------------------------------------------------------
@@ -2556,7 +2556,7 @@ AUPlugin::find_presets ()
 		*/
 
 		if (check_and_get_preset_name (get_comp()->Comp(), path, preset_name)) {
-			user_preset_map[preset_name] = "file:///" + path;
+			user_preset_map[preset_name] = path;
 			DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Preset File: %1 > %2\n", preset_name, path));
 		} else {
 			DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU INVALID Preset: %1 > %2\n", preset_name, path));
