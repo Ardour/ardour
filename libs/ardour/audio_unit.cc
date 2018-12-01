@@ -3479,7 +3479,7 @@ AUPlugin::parameter_change_listener (void* /*arg*/, void* src, const AudioUnitEv
                 /* whenever we change a parameter, we request that we are NOT notified of the change, so anytime we arrive here, it
                    means that something else (i.e. the plugin GUI) made the change.
                 */
-                ParameterChangedExternally (i->second, new_value);
+                Plugin::parameter_changed_externally (i->second, new_value);
                 break;
         default:
                 break;
