@@ -475,9 +475,18 @@ Plugin::parameter_changed_externally (uint32_t which, float /* value */)
 int
 Plugin::set_state (const XMLNode& node, int /*version*/)
 {
-	node.get_property (X_("last-preset-uri"), _last_preset.uri);
-	node.get_property (X_("last-preset-label"), _last_preset.label);
-	node.get_property (X_("parameter-changed-since-last-preset"), _parameter_changed_since_last_preset);
+	std::string preset_uri;
+	const Plugin::PresetRecord* r = 0;
+	if (node.get_property (X_("last-preset-uri"), preset_uri)) {
+		r = preset_by_uri (preset_uri);
+	}
+	if (r) {
+		_last_preset = *r;
+		node.get_property (X_("parameter-changed-since-last-preset"), _parameter_changed_since_last_preset); // XXX
+	} else {
+		_last_preset.uri = "";
+		_last_preset.valid = false;
+	}
 	return 0;
 }
 
