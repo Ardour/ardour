@@ -2220,8 +2220,31 @@ AUPlugin::load_preset (PresetRecord r)
 }
 
 void
-AUPlugin::do_remove_preset (std::string)
+AUPlugin::do_remove_preset (std::string preset_name)
 {
+	vector<Glib::ustring> v;
+
+	std::string m = maker();
+	std::string n = name();
+
+	strip_whitespace_edges (m);
+	strip_whitespace_edges (n);
+
+	v.push_back (Glib::get_home_dir());
+	v.push_back ("Library");
+	v.push_back ("Audio");
+	v.push_back ("Presets");
+	v.push_back (m);
+	v.push_back (n);
+	v.push_back (preset_name + preset_suffix);
+
+	Glib::ustring user_preset_path = Glib::build_filename (v);
+
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Deleting Preset file %1\n", user_preset_path));
+
+	if (g_unlink (user_preset_path.c_str())) {
+		error << string_compose (X_("Could not delete preset at \"%1\": %2"), user_preset_path, strerror (errno)) << endmsg;
+	}
 }
 
 string
