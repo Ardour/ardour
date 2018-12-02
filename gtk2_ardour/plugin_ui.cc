@@ -888,17 +888,17 @@ PlugUIBase::update_preset ()
 	}
 	--_no_load_preset;
 
-	save_button.set_sensitive (!p.uri.empty() && p.user);
 	delete_button.set_sensitive (!p.uri.empty() && p.user);
-
 	update_preset_modified ();
 }
 
 void
 PlugUIBase::update_preset_modified ()
 {
+	Plugin::PresetRecord p = plugin->last_preset();
 
-	if (plugin->last_preset().uri.empty()) {
+	if (p.uri.empty()) {
+		save_button.set_sensitive (false);
 		_preset_modified.set_text ("");
 		return;
 	}
@@ -907,6 +907,7 @@ PlugUIBase::update_preset_modified ()
 	if (_preset_modified.get_text().empty() == c) {
 		_preset_modified.set_text (c ? "*" : "");
 	}
+	save_button.set_sensitive (c && p.user);
 }
 
 void
