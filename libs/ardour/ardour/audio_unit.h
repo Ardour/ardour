@@ -228,8 +228,9 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	void discover_factory_presets ();
 
 	samplepos_t transport_sample;
-	float      transport_speed;
-	float      last_transport_speed;
+	float       transport_speed;
+	float       last_transport_speed;
+	pframes_t   preset_holdoff;
 
 	static void _parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value);
 	void parameter_change_listener (void* /*arg*/, void* /*src*/, const AudioUnitEvent* event, UInt64 host_time, Float32 new_value);

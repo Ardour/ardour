@@ -452,6 +452,7 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	, transport_sample (0)
 	, transport_speed (0)
 	, last_transport_speed (0.0)
+	, preset_holdoff (0)
 {
 	if (!preset_search_path_initialized) {
 		Glib::ustring p = Glib::get_home_dir();
@@ -493,6 +494,7 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 	, transport_sample (0)
 	, transport_speed (0)
 	, last_transport_speed (0.0)
+	, preset_holdoff (0)
 
 {
 	init ();
@@ -1651,6 +1653,10 @@ AUPlugin::connect_and_run (BufferSet& bufs,
 	AudioTimeStamp ts;
 	OSErr err;
 
+	if (preset_holdoff > 0) {
+		preset_holdoff -= std::min (nframes, preset_holdoff);
+	}
+
 	if (requires_fixed_size_buffers() && (nframes != _last_nframes)) {
 		unit->GlobalReset();
 		_last_nframes = nframes;
@@ -2214,6 +2220,9 @@ AUPlugin::load_preset (PresetRecord r)
 			changedUnit.mParameterID = kAUParameterListener_AnyParameter;
 			AUParameterListenerNotify (NULL, NULL, &changedUnit);
 		}
+	}
+	if (ret) {
+		preset_holdoff = std::max (_session.get_block_size() * 2.0, _session.sample_rate() * .2);
 	}
 
 	return ret && Plugin::load_preset (r);
@@ -3500,7 +3509,11 @@ AUPlugin::parameter_change_listener (void* /*arg*/, void* src, const AudioUnitEv
                 /* whenever we change a parameter, we request that we are NOT notified of the change, so anytime we arrive here, it
                    means that something else (i.e. the plugin GUI) made the change.
                 */
-                Plugin::parameter_changed_externally (i->second, new_value);
+                if (preset_holdoff > 0) {
+	                ParameterChangedExternally (i->second, new_value);
+                } else {
+                        Plugin::parameter_changed_externally (i->second, new_value);
+		}
                 break;
         default:
                 break;
