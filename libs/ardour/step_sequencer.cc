@@ -150,7 +150,7 @@ Step::adjust_duration (DurationRatio const & amt)
 void
 Step::set_duration (DurationRatio const & dur)
 {
-	if (dur > 1.0) {
+	if (dur > DurationRatio (1)) {
 		_duration = DurationRatio (1);
 	} else if (dur < DurationRatio()) {
 		_duration = DurationRatio ();
