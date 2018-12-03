@@ -255,6 +255,17 @@ public:
 		return ticks ((_beats * PPQN + _ticks) / factor);
 	}
 
+	Beats operator% (Beats const & b) {
+		return Beats::ticks (to_ticks() % b.to_ticks());
+	}
+
+	Beats operator%= (Beats const & b) {
+		const Beats B (Beats::ticks (to_ticks() % b.to_ticks()));
+		_beats = B._beats;
+		_ticks = B._ticks;
+		return *this;
+	}
+
 	Beats& operator+=(const Beats& b) {
 		_beats += b._beats;
 		_ticks += b._ticks;
