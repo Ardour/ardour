@@ -197,6 +197,7 @@ public:
 
 	bool load_preset (Plugin::PresetRecord);
 
+	bool provides_stats () const;
 	bool get_stats (uint64_t& min, uint64_t& max, double& avg, double& dev) const;
 	void clear_stats ();
 

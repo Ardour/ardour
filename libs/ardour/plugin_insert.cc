@@ -1226,7 +1226,13 @@ PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	}
 
 	if (_pending_active) {
+#if defined MIXBUS && !defined NDEBUG
+		if (!is_channelstrip ()) {
+			_timing_stats.start ();
+		}
+#else
 		_timing_stats.start ();
+#endif
 		/* run as normal if we are active or moving from inactive to active */
 
 		if (_session.transport_rolling() || _session.bounce_processing()) {
@@ -1235,7 +1241,13 @@ PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 			Glib::Threads::Mutex::Lock lm (control_lock(), Glib::Threads::TRY_LOCK);
 			connect_and_run (bufs, start_sample, end_sample, speed, nframes, 0, lm.locked());
 		}
+#if defined MIXBUS && !defined NDEBUG
+		if (!is_channelstrip ()) {
+			_timing_stats.update ();
+		}
+#else
 		_timing_stats.update ();
+#endif
 
 	} else {
 		_timing_stats.reset ();
@@ -3197,6 +3209,17 @@ PluginInsert::end_touch (uint32_t param_id)
 		// ToDo subtract _plugin_signal_latency  from audible_sample() when rolling, assert > 0
 		ac->stop_touch (session().audible_sample());
 	}
+}
+
+bool
+PluginInsert::provides_stats () const
+{
+#if defined MIXBUS && !defined NDEBUG
+	if (is_channelstrip () || !display_to_user ()) {
+		return false;
+	}
+#endif
+	return true;
 }
 
 bool
