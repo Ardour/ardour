@@ -157,7 +157,9 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 		pack_end (plugin_analysis_expander, false, false);
 	}
 
-	pack_end (cpuload_expander, false, false);
+	if (insert->provides_stats ()) {
+		pack_end (cpuload_expander, false, false);
+	}
 
 	if (!plugin->get_docs().empty()) {
 		pack_end (description_expander, false, false);

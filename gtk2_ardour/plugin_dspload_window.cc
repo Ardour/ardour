@@ -154,7 +154,7 @@ PluginDSPLoadWindow::add_processor_to_display (boost::weak_ptr<Processor> w, std
 {
 	boost::shared_ptr<Processor> p = w.lock ();
 	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (p);
-	if (!pi) {
+	if (!pi || !pi->provides_stats ()) {
 		return;
 	}
 	p->DropReferences.connect (_processor_connections, MISSING_INVALIDATOR, boost::bind (&PluginDSPLoadWindow::refill_processors, this), gui_context());
