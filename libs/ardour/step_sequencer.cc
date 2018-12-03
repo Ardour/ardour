@@ -18,17 +18,25 @@
 
 #include <cassert>
 
+#include <glibmm/fileutils.h>
+
 #include "pbd/i18n.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_state_tracker.h"
+#include "ardour/session.h"
+#include "ardour/smf_source.h"
+#include "ardour/source_factory.h"
 #include "ardour/step_sequencer.h"
 #include "ardour/tempo.h"
 
 using namespace PBD;
 using namespace ARDOUR;
 using namespace std;
+
+using std::cerr;
+using std::endl;
 
 Step::Step (StepSequence &s, size_t n, Temporal::Beats const & b, int base_note)
 	: _sequence (s)
@@ -218,7 +226,7 @@ Step::adjust_octave (int amt)
 bool
 Step::run (MidiBuffer& buf, bool running, samplepos_t start_sample, samplepos_t end_sample, MidiStateTracker&  tracker)
 {
-	for (size_t n = 0; n < _notes_per_step; ++n) {
+	for (size_t n = 0; n < _parameters_per_step; ++n) {
 		check_parameter (n, buf, running, start_sample, end_sample);
 	}
 
@@ -247,6 +255,11 @@ Step::run (MidiBuffer& buf, bool running, samplepos_t start_sample, samplepos_t 
 
 void
 Step::check_parameter (size_t n, MidiBuffer& buf, bool running, samplepos_t start_sample, samplepos_t end_sample)
+{
+}
+
+void
+Step::dump_parameter (MusicTimeEvents& events, size_t n, Temporal::Beats const & pattern_length) const
 {
 }
 
@@ -337,6 +350,83 @@ Step::check_note (size_t n, MidiBuffer& buf, bool running, samplepos_t start_sam
 }
 
 void
+Step::dump_note (MusicTimeEvents& events, size_t n, Temporal::Beats const & pattern_length) const
+{
+	Note const & note (_notes[n]);
+
+	if (_duration == DurationRatio ()) {
+		/* no duration, so no new notes on */
+		return;
+	}
+
+	if (note.number < 0) {
+		/* note not set .. ignore */
+		return;
+	}
+
+	/* figure out when this note would sound */
+
+	Temporal::Beats note_on_time (sequencer().step_size() * _index);
+
+	note_on_time += note.offset;
+	note_on_time %= pattern_length;
+
+	/* don't play silent notes */
+
+	if (note.velocity == 0) {
+		return;
+	}
+
+	uint8_t mbuf[3];
+
+	/* prepare 3 MIDI bytes for note on */
+
+	mbuf[0] = 0x90 | _sequence.channel();
+
+	switch (_mode) {
+	case AbsolutePitch:
+		mbuf[1] = note.number;
+		break;
+	case RelativePitch:
+		mbuf[1] = _sequence.root() + note.interval;
+		break;
+	}
+
+	if (_octave_shift) {
+
+		const int t = mbuf[1] + (12 * _octave_shift);
+
+		if (t > 127 || t < 0) {
+			/* Out of range */
+			return;
+		}
+
+		mbuf[1] = t;
+	}
+
+	mbuf[2] = (uint8_t) floor (note.velocity * 127.0);
+	events.push_back (new MusicTimeEvent (Evoral::MIDI_EVENT, note_on_time, 3, mbuf, true));
+	mbuf[0] = 0x80 | _sequence.channel();
+
+	/* compute note off time based on our duration */
+
+	Temporal::Beats off_at = note_on_time;
+
+	if (_duration == DurationRatio (1)) {
+		/* use 1 tick less than the sequence step size
+		 * just to get non-simultaneous on/off events at
+		 * step boundaries.
+		 */
+		off_at += Temporal::Beats (0, sequencer().step_size().to_ticks() - 1);
+	} else {
+		off_at += Temporal::Beats (0, (sequencer().step_size().to_ticks() * _duration.numerator()) / _duration.denominator());
+	}
+
+	off_at %= pattern_length;
+	events.push_back (new MusicTimeEvent (Evoral::MIDI_EVENT, off_at, 3, mbuf, true));
+}
+
+void
 Step::reschedule (Temporal::Beats const & start, Temporal::Beats const & offset)
 {
 	if (_nominal_beat < offset) {
@@ -356,6 +446,18 @@ int
 Step::set_state (XMLNode const &, int)
 {
 	return 0;
+}
+
+void
+Step::dump (MusicTimeEvents& events, Temporal::Beats const & pattern_length) const
+{
+	for (size_t n = 0; n < _parameters_per_step; ++n) {
+		dump_parameter (events, n, pattern_length);
+	}
+
+	for (size_t n = 0; n < _notes_per_step; ++n) {
+		dump_note (events, n, pattern_length);
+	}
 }
 
 /**/
@@ -394,10 +496,8 @@ StepSequence::schedule (Temporal::Beats const & start)
 
 	for (size_t n = s; n < e; ++n) {
 		_steps[n]->set_beat (beats);
-		cerr << "beat " << n << " @ " << beats << ' ';
 		beats += _sequencer.step_size();
 	}
-	cerr << endl;
 }
 
 void
@@ -466,6 +566,17 @@ StepSequence::set_state (XMLNode const &, int)
 	return 0;
 }
 
+void
+StepSequence::dump (MusicTimeEvents& events, Temporal::Beats const & pattern_length) const
+{
+	const size_t s = _sequencer.start_step();
+	const size_t e = _sequencer.end_step();
+
+	for (size_t n = s; n < e; ++n) {
+		_steps[n]->dump (events, pattern_length);
+	}
+}
+
 /**/
 
 MultiAllocSingleReleasePool StepSequencer::Request::pool (X_("step sequencer requests"), sizeof (StepSequencer::Request), 64);
@@ -499,8 +610,6 @@ StepSequencer::~StepSequencer ()
 Temporal::Beats
 StepSequencer::reschedule (samplepos_t start_sample)
 {
-	cerr << "SEQ reschedule\n";
-
 	/* compute the beat position of this first "while-moving
 	 * run() call as an offset into the sequencer's current loop
 	 * length.
@@ -735,4 +844,89 @@ StepSequencer::clear_note_offs ()
 		delete &nob;
 		i = note_offs.erase (i);
 	}
+}
+
+boost::shared_ptr<Source>
+StepSequencer::write_to_source (Session& session, string path) const
+{
+	boost::shared_ptr<SMFSource> src;
+
+	/* caller must check for pre-existing file */
+
+	assert (!path.empty());
+	assert (!Glib::file_test (path, Glib::FILE_TEST_EXISTS));
+
+	src = boost::dynamic_pointer_cast<SMFSource>(SourceFactory::createWritable (DataType::MIDI, session, path, false, session.sample_rate()));
+
+	try {
+		if (src->create (path)) {
+			return boost::shared_ptr<Source>();
+		}
+	} catch (...) {
+		return boost::shared_ptr<Source>();
+	}
+
+	if (!fill_midi_source (src)) {
+		/* src will go out of scope, and its destructor will remove the
+		   file, if any
+		*/
+		return boost::shared_ptr<Source>();
+	}
+
+	return src;
+}
+
+struct ETC {
+	bool operator() (MusicTimeEvent const * a, MusicTimeEvent const * b) {
+		return a->time() < b->time();
+	}
+};
+
+bool
+StepSequencer::fill_midi_source (boost::shared_ptr<SMFSource> src) const
+{
+	Temporal::Beats smf_beats;
+
+	Source::Lock lck (src->mutex());
+
+	/* first pass: run through the sequence one time to get all events, and
+	 * then sort them. We have no idea what order they are in when we pull
+	 * them, because each step may consist of several messages with
+	 * arbitrary offsets.
+	 */
+
+	MusicTimeEvents events;
+	events.reserve ((_sequences.size() * nsteps()  * (Step::_notes_per_step * 2) * 3) + // the note on and off messages
+	                ((_sequences.size() * nsteps() * Step::_parameters_per_step) * 3)); // CC messages
+
+	const Temporal::Beats total_steps = _step_size * nsteps();
+
+	for (StepSequences::const_iterator s = _sequences.begin(); s != _sequences.end(); ++s) {
+		(*s)->dump (events, total_steps);
+	}
+
+	sort (events.begin(), events.end(), ETC());
+
+	try {
+		src->mark_streaming_midi_write_started (lck, Sustained);
+		src->begin_write ();
+
+		for (MusicTimeEvents::iterator e = events.begin(); e != events.end(); ++e) {
+			src->append_event_beats (lck, **e);
+		}
+
+		src->end_write (src->path());
+		src->mark_nonremovable ();
+		src->mark_streaming_write_completed (lck);
+		return true;
+
+	} catch (...) {
+		cerr << "Exception during beatbox write to SMF... " << endl;
+	}
+
+	for (MusicTimeEvents::iterator e = events.begin(); e != events.end(); ++e) {
+		delete *e;
+	}
+
+	return false;
 }

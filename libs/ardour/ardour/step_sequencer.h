@@ -32,6 +32,8 @@
 #include "pbd/ringbuffer.h"
 #include "pbd/stateful.h"
 
+#include "evoral/Event.hpp"
+
 #include "temporal/types.h"
 #include "temporal/beats.h"
 
@@ -46,9 +48,13 @@ class MidiStateTracker;
 class StepSequencer;
 class StepSequence;
 class TempoMap;
+class SMFSource;
 
 typedef std::pair<Temporal::Beats,samplepos_t> BeatPosition;
 typedef std::vector<BeatPosition> BeatPositions;
+
+typedef Evoral::Event<Temporal::Beats> MusicTimeEvent;
+typedef std::vector<MusicTimeEvent*> MusicTimeEvents;
 
 class Step : public PBD::Stateful {
   public:
@@ -112,6 +118,11 @@ class Step : public PBD::Stateful {
 	XMLNode& get_state();
 	int set_state (XMLNode const &, int);
 
+	void dump (MusicTimeEvents&, Temporal::Beats const&) const;
+
+	static const int _notes_per_step = 5;
+	static const int _parameters_per_step = 5;
+
   private:
 	friend class StepSequence; /* HACK */
 
@@ -143,15 +154,14 @@ class Step : public PBD::Stateful {
 		Note (double n, double v,Temporal::Beats const & o) : number (n), velocity (v), offset (o) {}
 	};
 
-	static const int _notes_per_step = 5;
-	static const int _parameters_per_step = 5;
-
 	Note _notes[_notes_per_step];
 	ParameterValue _parameters[_parameters_per_step];
 	size_t _repeat;
 
 	void check_note (size_t n, MidiBuffer& buf, bool, samplepos_t, samplepos_t, MidiStateTracker&);
 	void check_parameter (size_t n, MidiBuffer& buf, bool, samplepos_t, samplepos_t);
+	void dump_note (MusicTimeEvents&, size_t n, Temporal::Beats const &) const;
+	void dump_parameter (MusicTimeEvents&, size_t n, Temporal::Beats const &) const;
 
 	StepSequencer& sequencer() const;
 };
@@ -201,6 +211,8 @@ class StepSequence : public PBD::Stateful
 	XMLNode& get_state();
 	int set_state (XMLNode const &, int);
 
+	void dump (MusicTimeEvents&, Temporal::Beats const &) const;
+
   private:
 	StepSequencer& _sequencer;
 	int         _index;
@@ -249,6 +261,8 @@ class StepSequencer : public PBD::Stateful
 	int set_state (XMLNode const &, int);
 
 	void queue_note_off (Temporal::Beats const &, uint8_t note, uint8_t velocity, uint8_t channel);
+
+	boost::shared_ptr<Source> write_to_source (Session& s, std::string p = std::string()) const;
 
   private:
 	mutable Glib::Threads::Mutex       _sequence_lock;
@@ -331,6 +345,9 @@ class StepSequencer : public PBD::Stateful
 	NoteOffList note_offs;
 	void check_note_offs (ARDOUR::MidiBuffer&, samplepos_t start_sample, samplepos_t last_sample);
 	void clear_note_offs ();
+
+	bool fill_midi_source (boost::shared_ptr<SMFSource> src) const;
+
 };
 
 } /* namespace */
