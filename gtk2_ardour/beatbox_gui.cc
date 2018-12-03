@@ -176,26 +176,9 @@ void
 BBGUI::export_as_region ()
 {
 	std::string path = bbox->session().new_midi_source_path (bbox->owner()->name());
+	boost::shared_ptr<Source> src = bbox->sequencer().write_to_source (bbox->session(), path);
 
-	boost::shared_ptr<SMFSource> src;
-
-	/* caller must check for pre-existing file */
-
-	assert (!path.empty());
-	assert (!Glib::file_test (path, Glib::FILE_TEST_EXISTS));
-
-	src = boost::dynamic_pointer_cast<SMFSource>(SourceFactory::createWritable (DataType::MIDI, bbox->session(), path, false, bbox->session().sample_rate()));
-
-	try {
-		if (src->create (path)) {
-			return;
-		}
-	} catch (...) {
-		return;
-	}
-
-	if (!bbox->fill_source (src)) {
-
+	if (!src) {
 		return;
 	}
 
