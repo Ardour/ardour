@@ -896,7 +896,7 @@ StepView::motion_event (GdkEventMotion* ev)
 		return false;
 	}
 
-	double distance;
+	int distance;
 
 	switch (sv.mode()) {
 	case SequencerView::Timing:
