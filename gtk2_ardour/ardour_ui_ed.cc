@@ -376,22 +376,6 @@ ARDOUR_UI::install_actions ()
 	global_actions.register_toggle_action (common_actions, X_("ToggleMaximalMixer"), _("Maximise Mixer Space"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_mixer_space));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = global_actions.register_toggle_action (common_actions, X_("ToggleMixerList"), _("Toggle Mixer List"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_mixer_list));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = global_actions.register_toggle_action (common_actions, X_("ToggleVCAPane"), _("Toggle VCA Pane"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_vca_pane));
-	ActionManager::session_sensitive_actions.push_back (act);
-	Glib::RefPtr<ToggleAction>::cast_dynamic(act)->set_active (true);
-
-#ifdef MIXBUS
-	act = global_actions.register_toggle_action (common_actions, X_("ToggleMixbusPane"), _("Toggle Mixbus Pane"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_mixbus_pane));
-	ActionManager::session_sensitive_actions.push_back (act);
-	Glib::RefPtr<ToggleAction>::cast_dynamic(act)->set_active (true);
-#endif
-
-	act = global_actions.register_toggle_action (common_actions, X_("ToggleMonitorSection"), _("Toggle Monitor Section Visibility"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_monitor_section_visibility));
-	act->set_sensitive (false);
-
 	if (Profile->get_mixbus()) {
 		global_actions.register_action (common_actions, X_("show-ui-prefs"), _("Show more UI preferences"), sigc::mem_fun (*this, &ARDOUR_UI::show_ui_prefs));
 	}
@@ -640,6 +624,22 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
+	/* Monitor actions (accessible globally) */
+	/* ...will get sensitized if a mon-section is added */
+
+	act = global_actions.register_action (main_actions, X_("MonitorMenu"), _("Monitor Section"));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	Glib::RefPtr<ActionGroup> monitor_actions = global_actions.create_action_group (X_("Monitor"));
+
+	act = global_actions.register_toggle_action (monitor_actions, X_("UseMonitorSection"), _("Use Monitor Section"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_use_monitor_section));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_toggle_action (monitor_actions, "monitor-mono", _("Monitor Section: Mono"), sigc::mem_fun (*this, &ARDOUR_UI::monitor_mono));
+	act->set_sensitive(false);
+	act = global_actions.register_toggle_action (monitor_actions, "monitor-cut-all", _("Monitor Section: Mute"), sigc::mem_fun (*this, &ARDOUR_UI::monitor_cut_all));
+	act->set_sensitive(false);
+	act = global_actions.register_toggle_action (monitor_actions, "monitor-dim-all", _("Monitor Section: Dim"), sigc::mem_fun (*this, &ARDOUR_UI::monitor_dim_all));
+	act->set_sensitive(false);
 
 	act = global_actions.register_toggle_action (transport_actions, X_("ToggleVideoSync"), _("Sync Startup to Video"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_video_sync));
 	ActionManager::session_sensitive_actions.push_back (act);

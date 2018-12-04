@@ -927,15 +927,6 @@ MonitorSection::register_actions ()
 
 	monitor_actions = myactions.create_action_group (X_("Monitor"));
 
-	myactions.register_toggle_action (monitor_actions, "monitor-mono", _("Switch monitor to mono"),
-			sigc::bind (sigc::ptr_fun (MonitorSection::action_proxy0), MonitorMono));
-
-	myactions.register_toggle_action (monitor_actions, "monitor-cut-all", _("Cut monitor"),
-			sigc::bind (sigc::ptr_fun (MonitorSection::action_proxy0), MonitorCutAll));
-
-	myactions.register_toggle_action (monitor_actions, "monitor-dim-all", _("Dim monitor"),
-			sigc::bind (sigc::ptr_fun (MonitorSection::action_proxy0), MonitorDimAll));
-
 	act = myactions.register_toggle_action (monitor_actions, "toggle-exclusive-solo", _("Toggle exclusive solo mode"),
 			sigc::bind (sigc::ptr_fun (MonitorSection::action_proxy0), ToggleExclusiveSolo));
 
@@ -1103,13 +1094,14 @@ MonitorSection::map_state ()
 		return;
 	}
 
-	Glib::RefPtr<Action> act;
-
 	update_solo_model ();
+
+	Glib::RefPtr<Action> act;
+	Glib::RefPtr<ToggleAction> tact;
 
 	act = ActionManager::get_action (X_("Monitor"), "monitor-cut-all");
 	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+		tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 		if (tact) {
 			tact->set_active (_monitor->cut_all());
 		}
@@ -1117,7 +1109,7 @@ MonitorSection::map_state ()
 
 	act = ActionManager::get_action (X_("Monitor"), "monitor-dim-all");
 	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+		tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 		if (tact) {
 			tact->set_active (_monitor->dim_all());
 		}
@@ -1125,7 +1117,7 @@ MonitorSection::map_state ()
 
 	act = ActionManager::get_action (X_("Monitor"), "monitor-mono");
 	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+		tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 		if (tact) {
 			tact->set_active (_monitor->mono());
 		}

@@ -20,6 +20,7 @@
 #include "ardour/session.h"
 #include "ardour/transport_master_manager.h"
 
+#include "actions.h"
 #include "gui_thread.h"
 #include "session_option_editor.h"
 #include "search_path_option.h"
@@ -273,11 +274,10 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 				sigc::mem_fun (*_session_config, &SessionConfiguration::set_auto_input)
 				));
 
-	add_option (_("Monitoring"), new BoolOption (
+	add_option (_("Monitoring"), new CheckOption (
 				"have-monitor-section",
 				_("Use monitor section in this session"),
-				sigc::mem_fun (*this, &SessionOptionEditor::get_use_monitor_section),
-				sigc::mem_fun (*this, &SessionOptionEditor::set_use_monitor_section)
+				ActionManager::get_action(X_("Monitor"), "UseMonitorSection")
 				));
 
 	add_option (_("Monitoring"), new OptionEditorBlank ());
@@ -446,34 +446,6 @@ SessionOptionEditor::parameter_changed (std::string const & p)
 			parameter_changed ("native-file-data-format");
 		}
 	}
-}
-
-/* the presence of absence of a monitor section is not really a regular session
- * property so we provide these two functions to act as setter/getter slots
- */
-
-bool
-SessionOptionEditor::set_use_monitor_section (bool yn)
-{
-	bool had_monitor_section = _session->monitor_out() != 0;
-
-	if (yn) {
-		_session->add_monitor_section ();
-	} else {
-		_session->remove_monitor_section ();
-	}
-
-	/* store this choice for any new sessions */
-
-	Config->set_use_monitor_bus (yn);
-
-	return had_monitor_section != (_session->monitor_out() != 0);
-}
-
-bool
-SessionOptionEditor::get_use_monitor_section ()
-{
-	return _session->monitor_out() != 0;
 }
 
 void

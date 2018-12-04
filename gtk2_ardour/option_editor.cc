@@ -204,6 +204,55 @@ RcActionButton::add_to_page (OptionEditorPage *p)
 
 /*--------------------------*/
 
+CheckOption::CheckOption (string const & i, string const & n, Glib::RefPtr<Gtk::Action> act)
+{
+	_button = manage (new CheckButton);
+	_label = manage (new Label);
+	_label->set_markup (n);
+	_button->add (*_label);
+	_button->signal_toggled().connect (sigc::mem_fun (*this, &CheckOption::toggled));
+
+	Gtkmm2ext::Activatable::set_related_action (act);
+	if (_action) {
+
+		action_sensitivity_changed ();
+
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
+		if (tact) {
+			action_toggled ();
+			tact->signal_toggled().connect (sigc::mem_fun (*this, &CheckOption::action_toggled));
+		}
+
+		_action->connect_property_changed ("sensitive", sigc::mem_fun (*this, &CheckOption::action_sensitivity_changed));
+	}
+}
+
+void
+CheckOption::action_toggled ()
+{
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
+	if (tact) {
+		_button->set_active(tact->get_active());
+	}
+}
+
+void
+CheckOption::add_to_page (OptionEditorPage* p)
+{
+	add_widget_to_page (p, _button);
+}
+
+void
+CheckOption::toggled ()
+{
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
+
+	tact->set_active( _button->get_active() );
+}
+
+
+/*--------------------------*/
+
 BoolOption::BoolOption (string const & i, string const & n, sigc::slot<bool> g, sigc::slot<bool, bool> s)
 	: Option (i, n),
 	  _get (g),

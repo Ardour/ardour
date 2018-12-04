@@ -37,9 +37,6 @@ private:
 
 	ARDOUR::SessionConfiguration* _session_config;
 
-	bool set_use_monitor_section (bool);
-	bool get_use_monitor_section ();
-
 	ComboOption<float>* _vpu;
 	ComboOption<ARDOUR::SampleFormat>* _sf;
 	EntryOption* _take_name;

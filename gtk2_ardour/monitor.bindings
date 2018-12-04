@@ -1,8 +1,5 @@
 <Bindings name="Monitor Section">
   <Press>
-     <Binding key="m" action="Monitor/monitor-mono"/>
-     <Binding key="c" action="Monitor/monitor-cut-all"/>
-     <Binding key="d" action="Monitor/monitor-dim-all"/>
      <Binding key="e" action="Monitor/toggle-exclusive-solo"/>
      <Binding key="Shift-o" action="Monitor/toggle-mute-overrides-solo"/>
      <Binding key="b" action="Monitor/toggle-monitor-processor-box"/>
