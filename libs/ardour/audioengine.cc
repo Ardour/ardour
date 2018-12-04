@@ -578,7 +578,7 @@ AudioEngine::do_devicelist_update()
 
 	while (!_stop_hw_devicelist_processing) {
 
-		if (_hw_devicelist_update_count) {
+		if (g_atomic_int_get (&_hw_devicelist_update_count)) {
 
 			_devicelist_update_lock.unlock();
 
