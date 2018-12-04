@@ -1226,7 +1226,7 @@ PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	}
 
 	if (_pending_active) {
-#if defined MIXBUS && !defined NDEBUG
+#if defined MIXBUS && defined NDEBUG
 		if (!is_channelstrip ()) {
 			_timing_stats.start ();
 		}
@@ -1241,7 +1241,7 @@ PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 			Glib::Threads::Mutex::Lock lm (control_lock(), Glib::Threads::TRY_LOCK);
 			connect_and_run (bufs, start_sample, end_sample, speed, nframes, 0, lm.locked());
 		}
-#if defined MIXBUS && !defined NDEBUG
+#if defined MIXBUS && defined NDEBUG
 		if (!is_channelstrip ()) {
 			_timing_stats.update ();
 		}
@@ -3214,7 +3214,7 @@ PluginInsert::end_touch (uint32_t param_id)
 bool
 PluginInsert::provides_stats () const
 {
-#if defined MIXBUS && !defined NDEBUG
+#if defined MIXBUS && defined NDEBUG
 	if (is_channelstrip () || !display_to_user ()) {
 		return false;
 	}
