@@ -581,7 +581,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		solo_iso_table.set_sensitive(false);
 		control_slave_ui.set_sensitive(false);
 		if (monitor_section_button == 0) {
-			Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMonitorSection");
+			Glib::RefPtr<Action> act = ActionManager::get_action ("Mixer", "ToggleMonitorSection");
 			_session->MonitorChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::monitor_changed, this), gui_context());
 
 			monitor_section_button = manage (new ArdourButton);

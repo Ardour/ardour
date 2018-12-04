@@ -20,5 +20,9 @@
    <Binding key="Secondary-m" action="Mixer/show-editor" group="Window Visibility"/>
    <Binding key="Secondary-Down" action="Mixer/select-next-stripable" group="Window Visibility"/>
    <Binding key="Secondary-Up" action="Mixer/select-prev-stripable" group="Window Visibility"/>
+
+   <Binding key="Tertiary-l" action="Mixer/ToggleMixerList" group="Window Visibility"/>
+   <Binding key="Tertiary-v" action="Mixer/ToggleVCAPane" group="Window Visibility"/>
+   <Binding key="Tertiary-m" action="Mixer/ToggleMonitorSection" group="Window Visibility"/>
   </Press>
  </Bindings>

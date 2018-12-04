@@ -112,7 +112,6 @@ Mixer_UI::Mixer_UI ()
 	, _in_group_rebuild_or_clear (false)
 	, _route_deletion_in_progress (false)
 	, _maximised (false)
-	, _show_mixer_list (true)
 	, _strip_selection_change_without_scroll (false)
 	, _selection (*this, *this)
 {
@@ -1526,24 +1525,28 @@ Mixer_UI::redisplay_track_list ()
 	/* update visibility of VCA assign buttons */
 
 	if (n_masters == 0) {
+		//show/hide the channelstrip VCA assign buttons on channelstrips:
 		UIConfiguration::instance().set_mixer_strip_visibility (VisibilityGroup::remove_element (UIConfiguration::instance().get_mixer_strip_visibility(), X_("VCA")));
-		vca_vpacker.hide ();
-		Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleVCAPane");
+
+		Glib::RefPtr<Action> act = myactions.find_action ("Mixer", "ToggleVCAPane");
 		if (act) {
 			act->set_sensitive (false);
 		}
 
+		//remove the VCA packer, but don't change our prior setting for show/hide:
+		vca_vpacker.hide ();
 	} else {
+		//show/hide the channelstrip VCA assign buttons on channelstrips:
 		UIConfiguration::instance().set_mixer_strip_visibility (VisibilityGroup::add_element (UIConfiguration::instance().get_mixer_strip_visibility(), X_("VCA")));
 
-		Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleVCAPane");
-		if (act) {
-			act->set_sensitive (true);
-			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-			showhide_vcas (tact->get_active());
-		} else {
-			vca_vpacker.show ();
-		}
+		Glib::RefPtr<Action> act = myactions.find_action ("Mixer", "ToggleVCAPane");
+		assert (act);
+		act->set_sensitive (true);
+
+		//if we were showing VCAs before, show them now:
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		assert (tact);
+		showhide_vcas (  tact->get_active () );
 	}
 
 	_group_tabs->set_dirty ();
@@ -1934,19 +1937,38 @@ Mixer_UI::route_group_property_changed (RouteGroup* group, const PropertyChange&
 }
 
 void
-Mixer_UI::show_mixer_list (bool yn)
+Mixer_UI::toggle_mixer_list ()
+{
+	Glib::RefPtr<Action> act = myactions.find_action ("Mixer", "ToggleMixerList");
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		showhide_mixer_list (tact->get_active());
+	}
+}
+
+void
+Mixer_UI::showhide_mixer_list (bool yn)
 {
 	if (yn) {
 		list_vpacker.show ();
 	} else {
 		list_vpacker.hide ();
 	}
-
-	_show_mixer_list = yn;
 }
 
 void
-Mixer_UI::show_monitor_section (bool yn)
+Mixer_UI::toggle_monitor_section ()
+{
+	Glib::RefPtr<Action> act = myactions.find_action ("Mixer", "ToggleMonitorSection");
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		showhide_monitor_section (tact->get_active());
+	}
+}
+
+
+void
+Mixer_UI::showhide_monitor_section (bool yn)
 {
 	if (!monitor_section()) {
 		return;
@@ -1961,6 +1983,49 @@ Mixer_UI::show_monitor_section (bool yn)
 		monitor_section()->tearoff().hide();
 	}
 }
+
+void
+Mixer_UI::toggle_vcas ()
+{
+	Glib::RefPtr<Action> act = myactions.find_action ("Mixer", "ToggleVCAPane");
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		showhide_vcas (tact->get_active());
+	}
+}
+
+void
+Mixer_UI::showhide_vcas (bool yn)
+{
+	if (yn) {
+		vca_vpacker.show();
+	} else {
+		vca_vpacker.hide();
+	}
+}
+
+#ifdef MIXBUS
+void
+Mixer_UI::toggle_mixbuses ()
+{
+	Glib::RefPtr<Action> act = myactions.find_action ("Mixer", "ToggleMixbusPane");
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		showhide_mixbuses (tact->get_active());
+	}
+}
+
+void
+Mixer_UI::showhide_mixbuses (bool on)
+{
+	if (on) {
+		mb_vpacker.show();
+	} else {
+		mb_vpacker.hide();
+	}
+}
+#endif
+
 
 void
 Mixer_UI::route_group_name_edit (const std::string& path, const std::string& new_text)
@@ -2169,9 +2234,10 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 	}
 
 	if (node.get_property ("show-mixer-list", yn)) {
-		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleMixerList"));
+		Glib::RefPtr<Action> act = myactions.find_action (X_("Mixer"), X_("ToggleMixerList"));
 		assert (act);
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		assert (tact);
 
 		/* do it twice to force the change */
 		tact->set_active (!yn);
@@ -2179,12 +2245,40 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 	}
 
 	if (node.get_property ("monitor-section-visible", yn)) {
-		Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMonitorSection");
+		Glib::RefPtr<Action> act = myactions.find_action (X_("Mixer"), X_("ToggleMonitorSection"));
+		assert (act);
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		assert (tact);
+
 		/* do it twice to force the change */
+		tact->set_active (!yn);
 		tact->set_active (yn);
-		show_monitor_section (yn);
 	}
+
+	if (node.get_property ("show-vca-pane", yn)) {
+		Glib::RefPtr<Action> act = myactions.find_action (X_("Mixer"), X_("ToggleVCAPane"));
+		assert (act);
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		assert (tact);
+
+		/* do it twice to force the change */
+		tact->set_active (!yn);
+		tact->set_active (yn);
+	}
+
+#ifdef MIXBUS
+	if (node.get_property ("show-mixbus-pane", yn)) {
+		Glib::RefPtr<Action> act = myactions.find_action (X_("Mixer"), X_("ToggleMixbusPane"));
+		assert (act);
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		assert (tact);
+
+		/* do it twice to force the change */
+		tact->set_active (!yn);
+		tact->set_active (yn);
+	}
+
+#endif
 
 	//check for the user's plugin_order file
 	XMLNode plugin_order_new(X_("PO"));
@@ -2272,13 +2366,25 @@ Mixer_UI::get_state ()
 
 	node->set_property ("narrow-strips", (_strip_width == Narrow));
 	node->set_property ("show-mixer", _visible);
-	node->set_property ("show-mixer-list", _show_mixer_list);
 	node->set_property ("maximised", _maximised);
 
-	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMonitorSection");
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-	assert (tact);
-	node->set_property ("monitor-section-visible", tact->get_active ());
+	Glib::RefPtr<Action> act = myactions.find_action ("Mixer", "ToggleMixerList");
+	assert (act); Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+	assert (tact); node->set_property ("show-mixer-list", tact->get_active ());
+
+	act = myactions.find_action ("Mixer", "ToggleMonitorSection");
+	assert (act); tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+	assert (tact); node->set_property ("monitor-section-visible", tact->get_active ());
+
+	act = myactions.find_action ("Mixer", "ToggleVCAPane");
+	assert (act); tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+	assert (tact); node->set_property ("show-vca-pane", tact->get_active ());
+
+#ifdef MIXBUS
+	act = myactions.find_action ("Mixer", "ToggleMixbusPane");
+	assert (act); tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+	assert (tact); node->set_property ("show-mixbus-pane", tact->get_active ());
+#endif
 
 	return *node;
 }
@@ -2606,16 +2712,18 @@ Mixer_UI::restore_mixer_space ()
 void
 Mixer_UI::monitor_section_attached ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMonitorSection");
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+	Glib::RefPtr<Action> act = myactions.find_action ("Mixer", "ToggleMonitorSection");
 	act->set_sensitive (true);
-	show_monitor_section (tact->get_active ());
+
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+	assert (tact);
+	showhide_monitor_section (  tact->get_active () );
 }
 
 void
 Mixer_UI::monitor_section_detached ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMonitorSection");
+	Glib::RefPtr<Action> act = myactions.find_action ("Mixer", "ToggleMonitorSection");
 	act->set_sensitive (false);
 }
 
@@ -3102,6 +3210,16 @@ Mixer_UI::register_actions ()
 
 	myactions.register_action (group, "toggle-midi-input-active", _("Toggle MIDI Input Active for Mixer-Selected Tracks/Busses"),
 	                           sigc::bind (sigc::mem_fun (*this, &Mixer_UI::toggle_midi_input_active), false));
+
+	myactions.register_toggle_action (group, X_("ToggleMixerList"), _("Mixer: Show Mixer List"), sigc::mem_fun (*this, &Mixer_UI::toggle_mixer_list));
+
+	myactions.register_toggle_action (group, X_("ToggleVCAPane"), _("Mixer: Show VCAs"), sigc::mem_fun (*this, &Mixer_UI::toggle_vcas));
+
+#ifdef MIXBUS
+	myactions.register_toggle_action (group, X_("ToggleMixbusPane"), _("Mixer: Show Mixbuses"), sigc::mem_fun (*this, &Mixer_UI::toggle_mixbus_pane));
+#endif
+
+	myactions.register_toggle_action (group, X_("ToggleMonitorSection"), _("Mixer: Show Monitor Section"), sigc::mem_fun (*this, &Mixer_UI::toggle_monitor_section));
 }
 
 void

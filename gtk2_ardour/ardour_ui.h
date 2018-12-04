@@ -231,14 +231,7 @@ public:
 	void new_midi_tracer_window ();
 	void toggle_editing_space();
 	void toggle_mixer_space();
-	void toggle_mixer_list();
-	void toggle_monitor_section_visibility ();
 	void toggle_keep_tearoffs();
-
-	void toggle_vca_pane();
-#ifdef MIXBUS
-	void toggle_mixbus_pane();
-#endif
 
 	void reset_focus (Gtk::Widget*);
 

@@ -512,15 +512,18 @@
 
       <menuitem action='show-editor-mixer'/>
       <menuitem action='show-editor-list'/>
+
+      <menuitem action='ToggleSummary'/>
+      <menuitem action='ToggleGroupTabs'/>
+      <menuitem action='show-marker-lines'/>
+
+      <separator/>
       <menuitem action='ToggleMixerList'/>
-      <menuitem action='ToggleMonitorSection'/>
 #ifdef MIXBUS
       <menuitem action='ToggleMixbusPane'/>
 #endif
       <menuitem action='ToggleVCAPane'/>
-      <menuitem action='ToggleSummary'/>
-      <menuitem action='ToggleGroupTabs'/>
-      <menuitem action='show-marker-lines'/>
+      <menuitem action='ToggleMonitorSection'/>
 
     </menu>
     <menu action = 'WindowMenu'>
