@@ -661,7 +661,7 @@ TimeAxisView::end_name_edit (std::string str, int next_dir)
 
 				RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
 
-				if (rtav && (!rtav->is_track() || rtav->track()->rec_enable_control()->get_value())) {
+				if (rtav && rtav->is_track() && rtav->track()->rec_enable_control()->get_value()) {
 					continue;
 				}
 
@@ -692,7 +692,7 @@ TimeAxisView::end_name_edit (std::string str, int next_dir)
 
 				RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
 
-				if (rtav && (!rtav->is_track() || rtav->track()->rec_enable_control()->get_value())) {
+				if (rtav && rtav->is_track() && rtav->track()->rec_enable_control()->get_value()) {
 					continue;
 				}
 
