@@ -139,6 +139,24 @@ class LIBGTKMM2EXT_API ActionMap {
 
 };
 
+class LIBGTKMM2EXT_API ActionMapOwner {
+  protected:
+	Gtkmm2ext::ActionMap myactions;
+  public:
+	ActionMapOwner (std::string const & map_name) : myactions (map_name) {}
+	Glib::RefPtr<Gtk::Action> find_action (const std::string& name) { return myactions.find_action (name); }
+	Glib::RefPtr<Gtk::Action> find_action (char const * group_name, char const * action_name) { return myactions.find_action (group_name, action_name); }
+};
+
+class LIBGTKMM2EXT_API StaticActionMapOwner {
+  protected:
+	virtual Gtkmm2ext::ActionMap& my_actions() const = 0;
+  public:
+	virtual ~StaticActionMapOwner() {}
+	Glib::RefPtr<Gtk::Action> find_action (const std::string& name) { return my_actions().find_action (name); }
+	Glib::RefPtr<Gtk::Action> find_action (char const * group_name, char const * action_name) { return my_actions().find_action (group_name, action_name); }
+};
+
 class LIBGTKMM2EXT_API Bindings {
   public:
 	enum Operation {

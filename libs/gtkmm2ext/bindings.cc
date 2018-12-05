@@ -1174,6 +1174,7 @@ ActionMap::get_actions (ActionMap::Actions& acts)
 	}
 }
 
+
 RefPtr<Action>
 ActionMap::find_action (const string& name)
 {
@@ -1190,9 +1191,7 @@ ActionMap::find_action (const string& name)
 RefPtr<Action>
 ActionMap::find_action (char const * group_name, char const * action_name)
 {
-	string fullpath;
-
-	fullpath = group_name;
+	string fullpath (group_name);
 	fullpath += '/';
 	fullpath += action_name;
 
