@@ -106,6 +106,7 @@ class LIBGTKMM2EXT_API ActionMap {
 	                                                  const char* name, const char* label, sigc::slot<void> sl);
 
 	Glib::RefPtr<Gtk::Action> find_action (const std::string& name);
+	Glib::RefPtr<Gtk::Action> find_action (char const * group_name, char const * action_name);
 
 	void set_bindings (Bindings*);
 	Bindings* bindings() const { return _bindings; }

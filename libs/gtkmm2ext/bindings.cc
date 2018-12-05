@@ -1183,6 +1183,26 @@ ActionMap::find_action (const string& name)
 		return a->second;
 	}
 
+	cerr << "Failed to find action: [" << name << ']' << endl;
+	return RefPtr<Action>();
+}
+
+RefPtr<Action>
+ActionMap::find_action (char const * group_name, char const * action_name)
+{
+	string fullpath;
+
+	fullpath = group_name;
+	fullpath += '/';
+	fullpath += action_name;
+
+	_ActionMap::iterator a = _actions.find (fullpath);
+
+	if (a != _actions.end()) {
+		return a->second;
+	}
+
+	cerr << "Failed to find action (2): [" << fullpath << ']' << endl;
 	return RefPtr<Action>();
 }
 
