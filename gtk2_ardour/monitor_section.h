@@ -41,7 +41,7 @@ namespace ArdourWidgets {
 	class TearOff;
 }
 
-class MonitorSection : public RouteUI, public Gtk::EventBox
+class MonitorSection : public RouteUI, public Gtk::EventBox, public Gtkmm2ext::StaticActionMapOwner
 {
 public:
 	MonitorSection (ARDOUR::Session*);
@@ -54,6 +54,8 @@ public:
 	std::string state_id() const;
 
 	PluginSelector* plugin_selector() { return _plugin_selector; }
+
+	Gtkmm2ext::ActionMap& my_actions() const { return myactions; }
 
 private:
 	Gtk::HBox hpacker;

@@ -2318,8 +2318,6 @@ private:
 	void toggle_reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const * name, char const * label, sigc::slot<void> slot);
 	void radio_reg_sens (Glib::RefPtr<Gtk::ActionGroup> action_group, Gtk::RadioAction::Group& radio_group, char const * name, char const * label, sigc::slot<void> slot);
 
-	Gtkmm2ext::ActionMap myactions;
-
 	friend class Drag;
 	friend class RegionCutDrag;
 	friend class RegionDrag;

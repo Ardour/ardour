@@ -255,42 +255,42 @@ ARDOUR_UI::setup_transport ()
 	RefPtr<Action> act;
 	/* setup actions */
 
-	act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
+	act = global_actions.find_action (X_("Transport"), X_("ToggleExternalSync"));
 	sync_button.set_related_action (act);
 	sync_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::sync_button_clicked), false);
 
 	sync_button.set_sizing_text (S_("LogestSync|M-Clk"));
 
 	/* CANNOT sigc::bind these to clicked or toggled, must use pressed or released */
-	act = ActionManager::get_action (X_("Main"), X_("cancel-solo"));
+	act = global_actions.find_action (X_("Main"), X_("cancel-solo"));
 	solo_alert_button.set_related_action (act);
 	auditioning_alert_button.signal_clicked.connect (sigc::mem_fun(*this,&ARDOUR_UI::audition_alert_clicked));
 	error_alert_button.signal_button_release_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::error_alert_press), false);
-	act = ActionManager::get_action (X_("Editor"), X_("toggle-log-window"));
+	act = editor->find_action (X_("Editor"), X_("toggle-log-window"));
 	error_alert_button.set_related_action(act);
 	error_alert_button.set_fallthrough_to_parent(true);
 
 	layered_button.signal_clicked.connect (sigc::mem_fun(*this,&ARDOUR_UI::layered_button_clicked));
 
-	editor_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-editor-visibility")));
-	mixer_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-mixer-visibility")));
-	prefs_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-preferences-visibility")));
+	editor_visibility_button.set_related_action (global_actions.find_action (X_("Common"), X_("change-editor-visibility")));
+	mixer_visibility_button.set_related_action (global_actions.find_action (X_("Common"), X_("change-mixer-visibility")));
+	prefs_visibility_button.set_related_action (global_actions.find_action (X_("Common"), X_("change-preferences-visibility")));
 
-	act = ActionManager::get_action ("Transport", "ToggleAutoReturn");
+	act = global_actions.find_action ("Transport", "ToggleAutoReturn");
 	auto_return_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
+	act = global_actions.find_action (X_("Transport"), X_("ToggleFollowEdits"));
 	follow_edits_button.set_related_action (act);
-	act = ActionManager::get_action ("Transport", "ToggleAutoInput");
+	act = global_actions.find_action ("Transport", "ToggleAutoInput");
 	auto_input_button.set_related_action (act);
 
-	act = ActionManager::get_action ("Transport", "TogglePunchIn");
+	act = global_actions.find_action ("Transport", "TogglePunchIn");
 	punch_in_button.set_related_action (act);
-	act = ActionManager::get_action ("Transport", "TogglePunchOut");
+	act = global_actions.find_action ("Transport", "TogglePunchOut");
 	punch_out_button.set_related_action (act);
 
-	act = ActionManager::get_action ("Transport", "SessionMonitorIn");
+	act = global_actions.find_action ("Transport", "SessionMonitorIn");
 	monitor_in_button.set_related_action (act);
-	act = ActionManager::get_action ("Transport", "SessionMonitorDisk");
+	act = global_actions.find_action ("Transport", "SessionMonitorDisk");
 	monitor_disk_button.set_related_action (act);
 
 	/* connect signals */
@@ -594,7 +594,7 @@ ARDOUR_UI::error_alert_press (GdkEventButton* ev)
 	if (ev->button == 1) {
 		if (_log_not_acknowledged == LogLevelError) {
 			// just acknowledge the error, don't hide the log if it's already visible
-			RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-log-window"));
+			RefPtr<Action> act = editor->find_action (X_("Editor"), X_("toggle-log-window"));
 			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 			if (tact && tact->get_active()) {
 				do_toggle = false;
@@ -781,7 +781,7 @@ ARDOUR_UI::sync_button_clicked (GdkEventButton* ev)
 void
 ARDOUR_UI::toggle_follow_edits ()
 {
-	RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
+	RefPtr<Action> act = global_actions.find_action (X_("Transport"), X_("ToggleFollowEdits"));
 	assert (act);
 
 	RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);

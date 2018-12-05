@@ -32,7 +32,7 @@
 
 class StepEditor;
 
-class StepEntry : public ArdourWindow
+class StepEntry : public ArdourWindow, public Gtkmm2ext::ActionMapOwner
 {
 public:
 	StepEntry (StepEditor&);
@@ -165,7 +165,6 @@ private:
 	bool radio_button_release (GdkEventButton*, Gtk::RadioButton*, int);
 
 	void load_bindings ();
-	Gtkmm2ext::ActionMap myactions;
 	Gtkmm2ext::Bindings*  bindings;
 
 	void inc_note_velocity ();

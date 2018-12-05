@@ -59,6 +59,7 @@ _rest_event_handler (GtkWidget* /*widget*/, gpointer arg)
 
 StepEntry::StepEntry (StepEditor& seditor)
 	: ArdourWindow (string_compose (_("Step Entry: %1"), seditor.name()))
+	, ActionMapOwner (X_("step entry"))
 	, _current_note_length (1.0)
 	, _current_note_velocity (64)
 	, triplet_button ("3")
@@ -87,7 +88,6 @@ StepEntry::StepEntry (StepEditor& seditor)
 	, _piano (0)
 	, piano (0)
 	, se (&seditor)
-	, myactions (X_("step entry"))
 {
 	register_actions ();
 	load_bindings ();

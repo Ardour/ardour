@@ -100,6 +100,7 @@ Mixer_UI::instance ()
 
 Mixer_UI::Mixer_UI ()
 	: Tabbable (_content, _("Mixer"))
+	, ActionMapOwner (X_("mixer"))
 	, no_track_list_redisplay (false)
 	, in_group_row_change (false)
 	, track_menu (0)
@@ -113,7 +114,6 @@ Mixer_UI::Mixer_UI ()
 	, _maximised (false)
 	, _show_mixer_list (true)
 	, _strip_selection_change_without_scroll (false)
-	, myactions (X_("mixer"))
 	, _selection (*this, *this)
 {
 	register_actions ();

@@ -80,7 +80,7 @@ protected:
 	virtual bool row_drop_possible_vfunc (const Gtk::TreeModel::Path&, const Gtk::SelectionData&) const;
 };
 
-class Mixer_UI : public ArdourWidgets::Tabbable, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public AxisViewProvider
+class Mixer_UI : public ArdourWidgets::Tabbable, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public AxisViewProvider, public Gtkmm2ext::ActionMapOwner
 {
 public:
 	static Mixer_UI* instance();
@@ -407,7 +407,6 @@ private:
 
 	void escape ();
 
-	Gtkmm2ext::ActionMap myactions;
 	RouteProcessorSelection _selection;
 	AxisViewSelection _axis_targets;
 
