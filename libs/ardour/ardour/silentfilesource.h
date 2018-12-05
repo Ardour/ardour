@@ -51,7 +51,8 @@ protected:
 		_length = len;
 	}
 
-	samplecnt_t read_unlocked (Sample *dst, samplepos_t /*start*/, samplecnt_t cnt) const {
+	samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const {
+		cnt = std::min (cnt, _length - start);
 		memset (dst, 0, sizeof (Sample) * cnt);
 		return cnt;
 	}
