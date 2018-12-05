@@ -5259,6 +5259,9 @@ Session::archive_session (const std::string& dest,
 		/* build a list of used names */
 		std::set<std::string> audio_file_names;
 		for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+			if (boost::dynamic_pointer_cast<SilentFileSource> (i->second)) {
+				continue;
+			}
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (i->second);
 			if (!afs || afs->readable_length () == 0) {
 				continue;
@@ -5275,6 +5278,9 @@ Session::archive_session (const std::string& dest,
 		}
 
 		for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+			if (boost::dynamic_pointer_cast<SilentFileSource> (i->second)) {
+				continue;
+			}
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (i->second);
 			if (!afs || afs->readable_length () == 0) {
 				continue;
@@ -5336,6 +5342,9 @@ Session::archive_session (const std::string& dest,
 
 		Glib::Threads::Mutex::Lock lm (source_lock);
 		for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+			if (boost::dynamic_pointer_cast<SilentFileSource> (i->second)) {
+				continue;
+			}
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (i->second);
 			if (!afs || afs->readable_length () == 0) {
 				continue;
