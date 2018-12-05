@@ -817,3 +817,17 @@ ARDOUR_UI::update_title ()
 	}
 
 }
+
+void
+ARDOUR_UI::toggle_use_monitor_section ()
+{
+	bool yn = !(_session->monitor_out() != 0);
+
+	if (yn) {
+		_session->add_monitor_section ();
+	} else {
+		_session->remove_monitor_section ();
+	}
+
+	Config->set_use_monitor_bus (yn);
+}

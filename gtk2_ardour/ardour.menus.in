@@ -34,6 +34,14 @@
       </menu>
       <separator/>
       <menuitem action='toggle-session-options-editor'/>
+
+      <menu name='MonitorMenu' action='MonitorMenu'>
+	    <menuitem action='UseMonitorSection'/>
+	    <menuitem action='monitor-cut-all'/>
+	    <menuitem action='monitor-dim-all'/>
+	    <menuitem action='monitor-mono'/>
+      </menu>
+      
       <menu name='Metadata' action='Metadata'>
         <menuitem action='EditMetadata'/>
         <menuitem action='ImportMetadata'/>
@@ -77,17 +85,16 @@
 #endif
 
       <separator/>
-      <menuitem action='set-loop-from-edit-range'/>
-      <menuitem action='set-punch-from-edit-range'/>
-      <menuitem action='set-session-from-edit-range'/>
-
-      <separator/>
       <menuitem action='Forward'/>
       <menuitem action='Rewind'/>
       <menuitem action='TransitionToRoll'/>
       <menuitem action='TransitionToReverse'/>
       <separator/>
 
+      <separator/>
+      <menuitem action='set-loop-from-edit-range'/>
+      <menuitem action='set-punch-from-edit-range'/>
+      <menuitem action='set-session-from-edit-range'/>
 
       <menu action="MovePlayHeadMenu">
         <menuitem action='set-playhead'/>

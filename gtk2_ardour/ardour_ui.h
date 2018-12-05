@@ -365,6 +365,11 @@ public:
 protected:
 	friend class PublicEditor;
 
+	void toggle_use_monitor_section ();
+	void monitor_dim_all ();
+	void monitor_cut_all ();
+	void monitor_mono ();
+
 	void toggle_auto_play ();
 	void toggle_auto_input ();
 	void toggle_punch ();

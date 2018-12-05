@@ -92,6 +92,7 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/ltc_file_reader.h"
+#include "ardour/monitor_control.h"
 #include "ardour/midi_track.h"
 #include "ardour/port.h"
 #include "ardour/plugin_manager.h"
@@ -5984,4 +5985,46 @@ ARDOUR_UI::reset_focus (Gtk::Widget* w)
 
 	gtk_window_set_focus (GTK_WINDOW(top->gobj()), 0);
 
+}
+
+void
+ARDOUR_UI::monitor_dim_all ()
+{
+	boost::shared_ptr<Route> mon = _session->monitor_out ();
+	if (!mon) {
+		return;
+	}
+	boost::shared_ptr<ARDOUR::MonitorProcessor> _monitor = mon->monitor_control ();
+
+	Glib::RefPtr<Action> act = global_actions.find_action (X_("Transport"), "monitor-dim-all");
+	assert (act);  Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+	assert (tact); _monitor->set_dim_all (tact->get_active());
+}
+
+void
+ARDOUR_UI::monitor_cut_all ()
+{
+	boost::shared_ptr<Route> mon = _session->monitor_out ();
+	if (!mon) {
+		return;
+	}
+	boost::shared_ptr<ARDOUR::MonitorProcessor> _monitor = mon->monitor_control ();
+
+	Glib::RefPtr<Action> act = global_actions.find_action (X_("Transport"), "monitor-cut-all");
+	assert (act);  Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+	assert (tact); _monitor->set_cut_all (tact->get_active());
+}
+
+void
+ARDOUR_UI::monitor_mono ()
+{
+	boost::shared_ptr<Route> mon = _session->monitor_out ();
+	if (!mon) {
+		return;
+	}
+	boost::shared_ptr<ARDOUR::MonitorProcessor> _monitor = mon->monitor_control ();
+
+	Glib::RefPtr<Action> act = global_actions.find_action (X_("Transport"), "monitor-mono");
+	assert (act);  Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+	assert (tact);_monitor->set_mono (tact->get_active());
 }

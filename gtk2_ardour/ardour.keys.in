@@ -57,6 +57,8 @@ just align the first region and moves other selected regions to maintain relativ
 
 %gmode Global Global Transport Modes
 
+%gmon Global Global Monitor Operations
+
 %movp Global Global Playhead Operations
 A left click in the rulers positions the playhead unless Ardour is recording. You can use {\tt KP$\_$n} to move the 
 playhead to the n-th marker.
@@ -150,6 +152,7 @@ This mode provides many different operations on both regions and control points,
 @gmark|Common/jump-backward-to-mark|q|to previous mark
 @sess|Common/Quit|<@PRIMARY@>q|quit
 @gmark|Common/jump-forward-to-mark|w|to next mark
+@mmode|MouseMode/set-mouse-mode-content|e|content mode
 @select|Editor/select-all-before-edit-cursor|<@PRIMARY@>e|select all before EP
 @rop|Region/export-region|<@PRIMARY@><@SECONDARY@>e|export selected region(s)
 @sess|Main/ExportAudio|<@SECONDARY@>e|export session
@@ -167,8 +170,6 @@ This mode provides many different operations on both regions and control points,
 @sess|Common/addExistingAudioFiles|<@PRIMARY@>i|import audio files
 @gselect|Common/invert-selection|<@TERTIARY@>i|invert selection
 @edtrk|Editor/toggle-midi-input-active|<@SECONDARY@>i|toggle sel. track MIDI input
-@mmode|MouseMode/set-mouse-mode-object|g|object mode
-@mmode|MouseMode/set-mouse-mode-content|e|content mode
 @sess|Main/Open|<@PRIMARY@>o|open an existing session
 @sess|Main/Recent|<@PRIMARY@><@TERTIARY@>o|open a recent session
 @wvis|Window/toggle-session-options-editor|<@SECONDARY@>o|toggle preferences dialog
@@ -198,6 +199,7 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/show-rhythm-ferret|<@SECONDARY@>f|show rhythm ferret window 
 @wvis|Common/ToggleMaximalEditor|<@PRIMARY@><@SECONDARY@>f|maximise editor space
 @wvis|Common/ToggleMaximalMixer|<@PRIMARY@><@TERTIARY@>f|maximise mixer space
+@mmode|MouseMode/set-mouse-mode-object|g|object mode
 @edit|Region/play-selected-regions|h|play selected region(s)
 @eep|Region/trim-front|j|trim front
 @eep|Region/trim-back|k|trim back
@@ -228,6 +230,10 @@ This mode provides many different operations on both regions and control points,
 @sess|Main/New|<@PRIMARY@>n|open a new session
 @wvis|Window/toggle-midi-connection-manager|<@SECONDARY@><@TERTIARY@>m|toggle global midi patchbay
 @wvis|Window/show-mixer|<@SECONDARY@>m|show mixer window
+
+@gmon|Transport/monitor-cut-all|<@PRIMARY@>m|monitor cut all
+@gmon|Transport/monitor-mono|<@PRIMARY@><@SECONDARY@>m|monitor mono
+@gmon|Transport/monitor-dim-all|<@PRIMARY@><@TERTIARY@>m|monitor dim
 
 ;; arrow keys, navigation etc.
 

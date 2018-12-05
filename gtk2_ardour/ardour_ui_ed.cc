@@ -624,6 +624,20 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
+	/* Monitor actions (accessible globally) */
+	/* ...will get sensitized if a mon-section is added */
+
+	act = global_actions.register_action (main_actions, X_("MonitorMenu"), _("Monitor Section"));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = global_actions.register_toggle_action (transport_actions, X_("UseMonitorSection"), _("Use Monitor Section"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_use_monitor_section));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_toggle_action (transport_actions, "monitor-mono", _("Monitor Section: Mono"), sigc::mem_fun (*this, &ARDOUR_UI::monitor_mono));
+	act->set_sensitive(false);
+	act = global_actions.register_toggle_action (transport_actions, "monitor-cut-all", _("Monitor Section: Mute"), sigc::mem_fun (*this, &ARDOUR_UI::monitor_cut_all));
+	act->set_sensitive(false);
+	act = global_actions.register_toggle_action (transport_actions, "monitor-dim-all", _("Monitor Section: Dim"), sigc::mem_fun (*this, &ARDOUR_UI::monitor_dim_all));
+	act->set_sensitive(false);
 
 	act = global_actions.register_toggle_action (transport_actions, X_("ToggleVideoSync"), _("Sync Startup to Video"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_video_sync));
 	ActionManager::session_sensitive_actions.push_back (act);

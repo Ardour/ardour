@@ -2634,7 +2634,25 @@ Mixer_UI::set_axis_targets_for_operation ()
 void
 Mixer_UI::monitor_section_going_away ()
 {
+	/* Set sensitivity based on existence of the monitor bus  */
+	
+	Glib::RefPtr<Action> act;
+	Glib::RefPtr<ToggleAction> tact;
+
+	act = ActionManager::get_action (X_("Transport"), "monitor-cut-all");
+	assert (act);  tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	assert (tact); tact->set_sensitive ( false );
+
+	act = ActionManager::get_action (X_("Transport"), "monitor-dim-all");
+	assert (act);  tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	assert (tact); tact->set_sensitive ( false );
+
+	act = ActionManager::get_action (X_("Transport"), "monitor-mono");
+	assert (act);  tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	assert (tact); tact->set_sensitive ( false );
+
 	if (_monitor_section) {
+
 		XMLNode* ui_node = Config->extra_xml(X_("UI"));
 		/* immediate state save.
 		 *
@@ -2712,8 +2730,21 @@ Mixer_UI::restore_mixer_space ()
 void
 Mixer_UI::monitor_section_attached ()
 {
-	Glib::RefPtr<Action> act = myactions.find_action ("Mixer", "ToggleMonitorSection");
-	act->set_sensitive (true);
+	/* Set sensitivity based on existence of the monitor bus  */
+	
+	Glib::RefPtr<Action> act;
+
+	act = ActionManager::get_action (X_("Transport"), "monitor-cut-all");
+	assert (act);  act->set_sensitive ( true );
+
+	act = ActionManager::get_action (X_("Transport"), "monitor-dim-all");
+	assert (act);  act->set_sensitive ( true );
+
+	act = ActionManager::get_action (X_("Transport"), "monitor-mono");
+	assert (act);  act->set_sensitive ( true );
+
+	act = myactions.find_action ("Mixer", "ToggleMonitorSection");
+	assert (act); act->set_sensitive (true);
 
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 	assert (tact);
