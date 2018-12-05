@@ -199,7 +199,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	main_contents.pack_start (scroller, true, true);
 
-	prefheight = 0;
+	prefheight = -1;
 	build ();
 
 	if (insert->plugin()->has_midnam() && insert->plugin()->knows_bank_patch()) {
@@ -317,7 +317,8 @@ void
 GenericPluginUI::build ()
 {
 	std::vector<ControlUI *> control_uis;
-	bool grid = plugin->parameter_count() > 0;
+	bool grid_avail = false;
+	bool grid_veto = false;
 
 	// Build a ControlUI for each control port
 	for (size_t i = 0; i < plugin->parameter_count(); ++i) {
@@ -340,8 +341,10 @@ GenericPluginUI::build ()
 			ControlUI* cui;
 			Plugin::UILayoutHint hint;
 
-			if (!plugin->get_layout(i, hint)) {
-				grid = false;
+			if (plugin->get_layout(i, hint)) {
+				grid_avail = true;
+			} else {
+				grid_veto = true;
 			}
 
 			boost::shared_ptr<ARDOUR::AutomationControl> c
@@ -355,7 +358,7 @@ GenericPluginUI::build ()
 				continue;
 			}
 
-			if (grid) {
+			if (grid_avail && !grid_veto) {
 				cui->x0 = hint.x0;
 				cui->x1 = hint.x1;
 				cui->y0 = hint.y0;
@@ -370,6 +373,8 @@ GenericPluginUI::build ()
 			control_uis.push_back(cui);
 		}
 	}
+
+	bool grid = grid_avail && !grid_veto;
 
 	// Build a ControlUI for each property
 	const Plugin::PropertyDescriptors& descs = plugin->get_supported_properties();
@@ -605,7 +610,7 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 		box->pack_start (*cui, false, false);
 	}
 
-	if (is_scrollable) {
+	if (is_scrollable && i > 0) {
 		prefheight = 30 * i;
 	}
 
