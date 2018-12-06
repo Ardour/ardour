@@ -337,10 +337,9 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 
 	blink_connection.disconnect ();
 
-	delete _session;
+	ARDOUR::Session* session_to_delete = _session;
 	_session = 0;
-
-	session_loaded = false;
+	delete session_to_delete;
 
 	update_title ();
 

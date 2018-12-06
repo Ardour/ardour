@@ -666,7 +666,7 @@ SessionDialog::setup_new_session_page ()
 	//determine the text in the new folder selector
 	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 		new_folder_chooser.set_current_folder (poor_mans_glob (Glib::path_get_dirname (ARDOUR_COMMAND_LINE::session_name)));
-	} else if (ARDOUR_UI::instance()->session_loaded) {
+	} else if (ARDOUR_UI::instance()->the_session ()) {
 		// point the new session file chooser at the parent directory of the current session
 		string session_parent_dir = Glib::path_get_dirname(ARDOUR_UI::instance()->the_session()->path());
 		new_folder_chooser.set_current_folder (session_parent_dir);

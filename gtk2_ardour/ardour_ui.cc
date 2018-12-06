@@ -272,7 +272,6 @@ libxml_structured_error_func (void* /* parsing_context*/,
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	: Gtkmm2ext::UI (PROGRAM_NAME, X_("gui"), argcp, argvp)
-	, session_loaded (false)
 	, session_load_in_progress (false)
 	, gui_object_state (new GUIObjectState)
 	, primary_clock   (new MainClock (X_("primary"),   X_("transport"), true ))
@@ -3547,8 +3546,6 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		}
 	}
 
-	session_loaded = false;
-
 	loading_message (string_compose (_("Please wait while %1 loads your session"), PROGRAM_NAME));
 
 	try {
@@ -3658,8 +3655,6 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 
 	set_session (new_session);
 
-	session_loaded = true;
-
 	if (_session) {
 		_session->set_clean ();
 	}
@@ -3703,7 +3698,6 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	Session *new_session;
 	int x;
 
-	session_loaded = false;
 	x = unload_session ();
 
 	if (x < 0) {
@@ -3767,8 +3761,6 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	}
 
 	set_session (new_session);
-
-	session_loaded = true;
 
 	new_session->save_state(new_session->name());
 

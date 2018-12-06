@@ -983,7 +983,7 @@ Editor::set_entered_track (TimeAxisView* tav)
 void
 Editor::instant_save ()
 {
-	if (!constructed || !ARDOUR_UI::instance()->session_loaded || no_save_instant) {
+	if (!constructed || no_save_instant) {
 		return;
 	}
 
