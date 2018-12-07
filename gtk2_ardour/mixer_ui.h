@@ -378,6 +378,8 @@ private:
 
 	friend class MixerGroupTabs;
 
+	void set_monitor_action_sensitivity (bool);
+
 	void monitor_section_going_away ();
 
 	void monitor_section_attached ();

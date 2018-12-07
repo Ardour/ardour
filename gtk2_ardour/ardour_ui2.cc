@@ -821,7 +821,11 @@ ARDOUR_UI::update_title ()
 void
 ARDOUR_UI::toggle_use_monitor_section ()
 {
-	bool yn = !(_session->monitor_out() != 0);
+	RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), "UseMonitorSection");
+	assert (act);  RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	assert (tact);
+
+	bool yn = tact->get_active ();
 
 	if (yn) {
 		_session->add_monitor_section ();

@@ -571,6 +571,8 @@ Mixer_UI::add_stripables (StripableList& slist)
 						if (mnode) {
 							_monitor_section->tearoff().set_state (*mnode);
 						}
+						
+						set_monitor_action_sensitivity(true);
 					}
 
 					out_packer.pack_end (_monitor_section->tearoff(), false, false);
@@ -2632,25 +2634,35 @@ Mixer_UI::set_axis_targets_for_operation ()
 }
 
 void
+Mixer_UI::set_monitor_action_sensitivity (bool yn)
+{
+	Glib::RefPtr<Action> act;
+	Glib::RefPtr<ToggleAction> tact;
+
+	act = ActionManager::get_action (X_("Monitor"), "UseMonitorSection");
+	assert (act);  tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	assert (tact); tact->set_active ( yn );
+
+	act = ActionManager::get_action (X_("Monitor"), "monitor-cut-all");
+	assert (act);  tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	assert (tact); tact->set_sensitive ( yn );
+
+	act = ActionManager::get_action (X_("Monitor"), "monitor-dim-all");
+	assert (act);  tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	assert (tact); tact->set_sensitive ( yn );
+
+	act = ActionManager::get_action (X_("Monitor"), "monitor-mono");
+	assert (act);  tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	assert (tact); tact->set_sensitive ( yn );
+}
+
+void
 Mixer_UI::monitor_section_going_away ()
 {
 	/* Set sensitivity based on existence of the monitor bus  */
 	
-	Glib::RefPtr<Action> act;
-	Glib::RefPtr<ToggleAction> tact;
-
-	act = ActionManager::get_action (X_("Monitor"), "monitor-cut-all");
-	assert (act);  tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	assert (tact); tact->set_sensitive ( false );
-
-	act = ActionManager::get_action (X_("Monitor"), "monitor-dim-all");
-	assert (act);  tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	assert (tact); tact->set_sensitive ( false );
-
-	act = ActionManager::get_action (X_("Monitor"), "monitor-mono");
-	assert (act);  tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	assert (tact); tact->set_sensitive ( false );
-
+	set_monitor_action_sensitivity(false);
+	
 	if (_monitor_section) {
 
 		XMLNode* ui_node = Config->extra_xml(X_("UI"));
@@ -2730,20 +2742,7 @@ Mixer_UI::restore_mixer_space ()
 void
 Mixer_UI::monitor_section_attached ()
 {
-	/* Set sensitivity based on existence of the monitor bus  */
-	
-	Glib::RefPtr<Action> act;
-
-	act = ActionManager::get_action (X_("Monitor"), "monitor-cut-all");
-	assert (act);  act->set_sensitive ( true );
-
-	act = ActionManager::get_action (X_("Monitor"), "monitor-dim-all");
-	assert (act);  act->set_sensitive ( true );
-
-	act = ActionManager::get_action (X_("Monitor"), "monitor-mono");
-	assert (act);  act->set_sensitive ( true );
-
-	act = myactions.find_action ("Mixer", "ToggleMonitorSection");
+	Glib::RefPtr<Action> act = myactions.find_action ("Mixer", "ToggleMonitorSection");
 	assert (act); act->set_sensitive (true);
 
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
