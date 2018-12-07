@@ -273,13 +273,13 @@ libxml_structured_error_func (void* /* parsing_context*/,
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	: Gtkmm2ext::UI (PROGRAM_NAME, X_("gui"), argcp, argvp)
+	, Gtkmm2ext::ActionMapOwner (X_("global"))
 	, session_load_in_progress (false)
 	, gui_object_state (new GUIObjectState)
 	, primary_clock   (new MainClock (X_("primary"),   X_("transport"), true ))
 	, secondary_clock (new MainClock (X_("secondary"), X_("secondary"), false))
 	, big_clock (new AudioClock (X_("bigclock"), false, "big", true, true, false, false))
 	, video_timeline(0)
-	, global_actions (X_("global"))
 	, ignore_dual_punch (false)
 	, main_window_visibility (0)
 	, editor (0)
@@ -5922,7 +5922,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 void
 ARDOUR_UI::load_bindings ()
 {
-	if ((global_bindings = Bindings::get_bindings (X_("Global"), global_actions)) == 0) {
+	if ((global_bindings = Bindings::get_bindings (X_("Global"), myactions)) == 0) {
 		error << _("Global keybindings are missing") << endmsg;
 	}
 }
@@ -5996,7 +5996,7 @@ ARDOUR_UI::monitor_dim_all ()
 	}
 	boost::shared_ptr<ARDOUR::MonitorProcessor> _monitor = mon->monitor_control ();
 
-	Glib::RefPtr<Action> act = global_actions.find_action (X_("Monitor"), "monitor-dim-all");
+	Glib::RefPtr<Action> act = find_action (X_("Monitor"), "monitor-dim-all");
 	assert (act);  Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 	assert (tact); _monitor->set_dim_all (tact->get_active());
 }
@@ -6010,7 +6010,7 @@ ARDOUR_UI::monitor_cut_all ()
 	}
 	boost::shared_ptr<ARDOUR::MonitorProcessor> _monitor = mon->monitor_control ();
 
-	Glib::RefPtr<Action> act = global_actions.find_action (X_("Monitor"), "monitor-cut-all");
+	Glib::RefPtr<Action> act = find_action (X_("Monitor"), "monitor-cut-all");
 	assert (act);  Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 	assert (tact); _monitor->set_cut_all (tact->get_active());
 }
@@ -6024,7 +6024,7 @@ ARDOUR_UI::monitor_mono ()
 	}
 	boost::shared_ptr<ARDOUR::MonitorProcessor> _monitor = mon->monitor_control ();
 
-	Glib::RefPtr<Action> act = global_actions.find_action (X_("Monitor"), "monitor-mono");
+	Glib::RefPtr<Action> act = find_action (X_("Monitor"), "monitor-mono");
 	assert (act);  Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 	assert (tact);_monitor->set_mono (tact->get_active());
 }
