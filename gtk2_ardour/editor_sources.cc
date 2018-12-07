@@ -32,6 +32,7 @@
 #include "ardour/silentfilesource.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
+#include "ardour/session_directory.h"
 #include "ardour/profile.h"
 
 #include "gtkmm2ext/treeutils.h"
@@ -337,7 +338,12 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Sourc
 	} else {
 		boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource>(source);
 		if (fs) {
-			row[_columns.path] = Gtkmm2ext::markup_escape_text (fs->path());
+			const string sound_directory = _session->session_directory().sound_path();
+			if ( fs->path().find(sound_directory) == std::string::npos ) { // external file
+				row[_columns.path] = Gtkmm2ext::markup_escape_text (fs->path());
+			} else {
+				row[_columns.path] = source->name();
+			}
 		} else {
 			row[_columns.path] = Gtkmm2ext::markup_escape_text (source->name());
 		}
