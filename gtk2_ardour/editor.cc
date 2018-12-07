@@ -860,8 +860,6 @@ Editor::Editor ()
 	setup_fade_images ();
 
 	set_grid_to (GridTypeNone);
-
-	instant_save ();
 }
 
 Editor::~Editor()
