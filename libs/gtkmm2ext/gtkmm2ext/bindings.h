@@ -150,6 +150,8 @@ class LIBGTKMM2EXT_API ActionMapOwner {
 	ActionMapOwner (std::string const & map_name) : myactions (map_name) {}
 	Glib::RefPtr<Gtk::Action> find_action (const std::string& name) { return myactions.find_action (name); }
 	Glib::RefPtr<Gtk::Action> find_action (char const * group_name, char const * action_name) { return myactions.find_action (group_name, action_name); }
+
+	Gtkmm2ext::ActionMap& action_map() { return myactions; }
 };
 
 class LIBGTKMM2EXT_API StaticActionMapOwner {
@@ -159,6 +161,8 @@ class LIBGTKMM2EXT_API StaticActionMapOwner {
 	virtual ~StaticActionMapOwner() {}
 	Glib::RefPtr<Gtk::Action> find_action (const std::string& name) { return my_actions().find_action (name); }
 	Glib::RefPtr<Gtk::Action> find_action (char const * group_name, char const * action_name) { return my_actions().find_action (group_name, action_name); }
+
+	Gtkmm2ext::ActionMap& action_map() { return my_actions(); }
 };
 
 class LIBGTKMM2EXT_API Bindings {
