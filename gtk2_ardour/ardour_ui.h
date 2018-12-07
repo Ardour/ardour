@@ -167,7 +167,7 @@ namespace ArdourWidgets {
 
 #define MAX_LUA_ACTION_SCRIPTS 12
 
-class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr, public TransportControlProvider
+class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr, public TransportControlProvider, public Gtkmm2ext::ActionMapOwner
 {
 public:
 	ARDOUR_UI (int *argcp, char **argvp[], const char* localedir);
@@ -355,8 +355,6 @@ public:
 
 	bool tabbed_window_state_event_handler (GdkEventWindowState*, void* object);
 	bool key_event_handler (GdkEventKey*, Gtk::Window* window);
-
-	Gtkmm2ext::ActionMap global_actions;
 
 	ARDOUR::PresentationInfo::order_t translate_order (RouteDialogs::InsertAt);
 
