@@ -260,7 +260,7 @@ MonitorSection::MonitorSection (Session* s)
 	cut_all_button.set_size_request (-1, PX_SCALE(30));
 	cut_all_button.show ();
 
-	act = ActionManager::get_action (X_("Transport"), X_("monitor-cut-all"));
+	act = ActionManager::get_action (X_("Monitor"), X_("monitor-cut-all"));
 	if (act) {
 		cut_all_button.set_related_action (act);
 	}
@@ -269,7 +269,7 @@ MonitorSection::MonitorSection (Session* s)
 	dim_all_button.set_text (_("Dim"));
 	dim_all_button.set_name ("monitor section dim");
 	dim_all_button.set_size_request (-1, PX_SCALE(25));
-	act = ActionManager::get_action (X_("Transport"), X_("monitor-dim-all"));
+	act = ActionManager::get_action (X_("Monitor"), X_("monitor-dim-all"));
 	if (act) {
 		dim_all_button.set_related_action (act);
 	}
@@ -278,7 +278,7 @@ MonitorSection::MonitorSection (Session* s)
 	mono_button.set_text (_("Mono"));
 	mono_button.set_name ("monitor section mono");
 	mono_button.set_size_request (-1, PX_SCALE(25));
-	act = ActionManager::get_action (X_("Transport"), X_("monitor-mono"));
+	act = ActionManager::get_action (X_("Monitor"), X_("monitor-mono"));
 	if (act) {
 		mono_button.set_related_action (act);
 	}
@@ -812,7 +812,7 @@ MonitorSection::dim_all ()
 		return;
 	}
 
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), "monitor-dim-all");
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), "monitor-dim-all");
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		_monitor->set_dim_all (tact->get_active());
@@ -827,7 +827,7 @@ MonitorSection::cut_all ()
 		return;
 	}
 
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), "monitor-cut-all");
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), "monitor-cut-all");
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		_monitor->set_cut_all (tact->get_active());
@@ -841,7 +841,7 @@ MonitorSection::mono ()
 		return;
 	}
 
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), "monitor-mono");
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), "monitor-mono");
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		_monitor->set_mono (tact->get_active());
@@ -1099,7 +1099,7 @@ MonitorSection::map_state ()
 	Glib::RefPtr<Action> act;
 	Glib::RefPtr<ToggleAction> tact;
 
-	act = ActionManager::get_action (X_("Transport"), "monitor-cut-all");
+	act = ActionManager::get_action (X_("Monitor"), "monitor-cut-all");
 	if (act) {
 		tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 		if (tact) {
@@ -1107,7 +1107,7 @@ MonitorSection::map_state ()
 		}
 	}
 
-	act = ActionManager::get_action (X_("Transport"), "monitor-dim-all");
+	act = ActionManager::get_action (X_("Monitor"), "monitor-dim-all");
 	if (act) {
 		tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 		if (tact) {
@@ -1115,7 +1115,7 @@ MonitorSection::map_state ()
 		}
 	}
 
-	act = ActionManager::get_action (X_("Transport"), "monitor-mono");
+	act = ActionManager::get_action (X_("Monitor"), "monitor-mono");
 	if (act) {
 		tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 		if (tact) {

@@ -231,9 +231,9 @@ This mode provides many different operations on both regions and control points,
 @wvis|Window/toggle-midi-connection-manager|<@SECONDARY@><@TERTIARY@>m|toggle global midi patchbay
 @wvis|Window/show-mixer|<@SECONDARY@>m|show mixer window
 
-@gmon|Transport/monitor-cut-all|<@PRIMARY@>m|monitor cut all
-@gmon|Transport/monitor-mono|<@PRIMARY@><@SECONDARY@>m|monitor mono
-@gmon|Transport/monitor-dim-all|<@PRIMARY@><@TERTIARY@>m|monitor dim
+@gmon|Monitor/monitor-cut-all|<@PRIMARY@>m|monitor cut all
+@gmon|Monitor/monitor-mono|<@PRIMARY@><@SECONDARY@>m|monitor mono
+@gmon|Monitor/monitor-dim-all|<@PRIMARY@><@TERTIARY@>m|monitor dim
 
 ;; arrow keys, navigation etc.
 

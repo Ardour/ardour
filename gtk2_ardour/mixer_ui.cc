@@ -2639,15 +2639,15 @@ Mixer_UI::monitor_section_going_away ()
 	Glib::RefPtr<Action> act;
 	Glib::RefPtr<ToggleAction> tact;
 
-	act = ActionManager::get_action (X_("Transport"), "monitor-cut-all");
+	act = ActionManager::get_action (X_("Monitor"), "monitor-cut-all");
 	assert (act);  tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 	assert (tact); tact->set_sensitive ( false );
 
-	act = ActionManager::get_action (X_("Transport"), "monitor-dim-all");
+	act = ActionManager::get_action (X_("Monitor"), "monitor-dim-all");
 	assert (act);  tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 	assert (tact); tact->set_sensitive ( false );
 
-	act = ActionManager::get_action (X_("Transport"), "monitor-mono");
+	act = ActionManager::get_action (X_("Monitor"), "monitor-mono");
 	assert (act);  tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 	assert (tact); tact->set_sensitive ( false );
 
@@ -2734,13 +2734,13 @@ Mixer_UI::monitor_section_attached ()
 	
 	Glib::RefPtr<Action> act;
 
-	act = ActionManager::get_action (X_("Transport"), "monitor-cut-all");
+	act = ActionManager::get_action (X_("Monitor"), "monitor-cut-all");
 	assert (act);  act->set_sensitive ( true );
 
-	act = ActionManager::get_action (X_("Transport"), "monitor-dim-all");
+	act = ActionManager::get_action (X_("Monitor"), "monitor-dim-all");
 	assert (act);  act->set_sensitive ( true );
 
-	act = ActionManager::get_action (X_("Transport"), "monitor-mono");
+	act = ActionManager::get_action (X_("Monitor"), "monitor-mono");
 	assert (act);  act->set_sensitive ( true );
 
 	act = myactions.find_action ("Mixer", "ToggleMonitorSection");
