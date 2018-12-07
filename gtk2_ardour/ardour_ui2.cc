@@ -255,14 +255,14 @@ ARDOUR_UI::setup_transport ()
 	RefPtr<Action> act;
 	/* setup actions */
 
-	act = global_actions.find_action (X_("Transport"), X_("ToggleExternalSync"));
+	act = find_action (X_("Transport"), X_("ToggleExternalSync"));
 	sync_button.set_related_action (act);
 	sync_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::sync_button_clicked), false);
 
 	sync_button.set_sizing_text (S_("LogestSync|M-Clk"));
 
 	/* CANNOT sigc::bind these to clicked or toggled, must use pressed or released */
-	act = global_actions.find_action (X_("Main"), X_("cancel-solo"));
+	act = find_action (X_("Main"), X_("cancel-solo"));
 	solo_alert_button.set_related_action (act);
 	auditioning_alert_button.signal_clicked.connect (sigc::mem_fun(*this,&ARDOUR_UI::audition_alert_clicked));
 	error_alert_button.signal_button_release_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::error_alert_press), false);
@@ -272,25 +272,25 @@ ARDOUR_UI::setup_transport ()
 
 	layered_button.signal_clicked.connect (sigc::mem_fun(*this,&ARDOUR_UI::layered_button_clicked));
 
-	editor_visibility_button.set_related_action (global_actions.find_action (X_("Common"), X_("change-editor-visibility")));
-	mixer_visibility_button.set_related_action (global_actions.find_action (X_("Common"), X_("change-mixer-visibility")));
-	prefs_visibility_button.set_related_action (global_actions.find_action (X_("Common"), X_("change-preferences-visibility")));
+	editor_visibility_button.set_related_action (find_action (X_("Common"), X_("change-editor-visibility")));
+	mixer_visibility_button.set_related_action (find_action (X_("Common"), X_("change-mixer-visibility")));
+	prefs_visibility_button.set_related_action (find_action (X_("Common"), X_("change-preferences-visibility")));
 
-	act = global_actions.find_action ("Transport", "ToggleAutoReturn");
+	act = find_action ("Transport", "ToggleAutoReturn");
 	auto_return_button.set_related_action (act);
-	act = global_actions.find_action (X_("Transport"), X_("ToggleFollowEdits"));
+	act = find_action (X_("Transport"), X_("ToggleFollowEdits"));
 	follow_edits_button.set_related_action (act);
-	act = global_actions.find_action ("Transport", "ToggleAutoInput");
+	act = find_action ("Transport", "ToggleAutoInput");
 	auto_input_button.set_related_action (act);
 
-	act = global_actions.find_action ("Transport", "TogglePunchIn");
+	act = find_action ("Transport", "TogglePunchIn");
 	punch_in_button.set_related_action (act);
-	act = global_actions.find_action ("Transport", "TogglePunchOut");
+	act = find_action ("Transport", "TogglePunchOut");
 	punch_out_button.set_related_action (act);
 
-	act = global_actions.find_action ("Transport", "SessionMonitorIn");
+	act = find_action ("Transport", "SessionMonitorIn");
 	monitor_in_button.set_related_action (act);
-	act = global_actions.find_action ("Transport", "SessionMonitorDisk");
+	act = find_action ("Transport", "SessionMonitorDisk");
 	monitor_disk_button.set_related_action (act);
 
 	/* connect signals */
@@ -781,7 +781,7 @@ ARDOUR_UI::sync_button_clicked (GdkEventButton* ev)
 void
 ARDOUR_UI::toggle_follow_edits ()
 {
-	RefPtr<Action> act = global_actions.find_action (X_("Transport"), X_("ToggleFollowEdits"));
+	RefPtr<Action> act = find_action (X_("Transport"), X_("ToggleFollowEdits"));
 	assert (act);
 
 	RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
