@@ -107,6 +107,10 @@ class LIBGTKMM2EXT_API ActionMap {
 
 	Glib::RefPtr<Gtk::Action> find_action (const std::string& name);
 	Glib::RefPtr<Gtk::Action> find_action (char const * group_name, char const * action_name);
+	Glib::RefPtr<Gtk::ToggleAction> find_toggle_action (const std::string& name);
+	Glib::RefPtr<Gtk::ToggleAction> find_toggle_action (char const * group_name, char const * action_name);
+	Glib::RefPtr<Gtk::RadioAction> find_radio_action (const std::string& name);
+	Glib::RefPtr<Gtk::RadioAction> find_radio_action (char const * group_name, char const * action_name);
 
 	void set_bindings (Bindings*);
 	Bindings* bindings() const { return _bindings; }

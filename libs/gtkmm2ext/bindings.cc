@@ -1188,6 +1188,30 @@ ActionMap::find_action (const string& name)
 	return RefPtr<Action>();
 }
 
+RefPtr<ToggleAction>
+ActionMap::find_toggle_action (const string& name)
+{
+	RefPtr<Action> act = find_action (name);
+
+	if (!act) {
+		return RefPtr<ToggleAction>();
+	}
+
+	return Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+}
+
+RefPtr<RadioAction>
+ActionMap::find_radio_action (const string& name)
+{
+	RefPtr<Action> act = find_action (name);
+
+	if (!act) {
+		return RefPtr<RadioAction>();
+	}
+
+	return Glib::RefPtr<RadioAction>::cast_dynamic (act);
+}
+
 RefPtr<Action>
 ActionMap::find_action (char const * group_name, char const * action_name)
 {
@@ -1204,6 +1228,31 @@ ActionMap::find_action (char const * group_name, char const * action_name)
 	cerr << "Failed to find action (2): [" << fullpath << ']' << endl;
 	return RefPtr<Action>();
 }
+
+RefPtr<ToggleAction>
+ActionMap::find_toggle_action (char const * group_name, char const * action_name)
+{
+	RefPtr<Action> act = find_action (group_name, action_name);
+
+	if (!act) {
+		return RefPtr<ToggleAction>();
+	}
+
+	return Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+}
+
+RefPtr<RadioAction>
+ActionMap::find_radio_action (char const * group_name, char const * action_name)
+{
+	RefPtr<Action> act = find_action (group_name, action_name);
+
+	if (!act) {
+		return RefPtr<RadioAction>();
+	}
+
+	return Glib::RefPtr<RadioAction>::cast_dynamic (act);
+}
+
 
 RefPtr<ActionGroup>
 ActionMap::create_action_group (const string& name)
