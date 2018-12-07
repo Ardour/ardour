@@ -278,7 +278,7 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 				break;
 			}
 
-			peak = compute_peak (data.get(), nread * channels, peak);
+			peak = compute_peak (data.get(), nread, peak);
 
 			read_count += nread / channels;
 			status.progress = 0.5 * read_count / (source->ratio() * source->length() * channels);
