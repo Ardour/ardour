@@ -261,6 +261,7 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 	status.progress = 0.0f;
 	float progress_multiplier = 1;
 	float progress_base = 0;
+	const float progress_length = source->ratio() * source->length();
 
 	if (!source->clamped_at_unity() && s->clamped_at_unity()) {
 
@@ -281,7 +282,7 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 			peak = compute_peak (data.get(), nread, peak);
 
 			read_count += nread / channels;
-			status.progress = 0.5 * read_count / (source->ratio() * source->length() * channels);
+			status.progress = 0.5 * read_count / progress_length;
 		}
 
 		if (peak >= 1) {
@@ -339,8 +340,8 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 			}
 		}
 
-		read_count += nread;
-		status.progress = progress_base + progress_multiplier * read_count / (source->ratio () * source->length() * channels);
+		read_count += nfread;
+		status.progress = progress_base + progress_multiplier * read_count / progress_length;
 	}
 }
 
