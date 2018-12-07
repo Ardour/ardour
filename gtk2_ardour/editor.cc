@@ -983,15 +983,11 @@ Editor::set_entered_track (TimeAxisView* tav)
 void
 Editor::instant_save ()
 {
-	if (!constructed || no_save_instant) {
+	if (!constructed || !_session || no_save_instant) {
 		return;
 	}
 
-	if (_session) {
-		_session->add_instant_xml(get_state());
-	} else {
-		Config->add_instant_xml(get_state());
-	}
+	_session->add_instant_xml(get_state());
 }
 
 void
