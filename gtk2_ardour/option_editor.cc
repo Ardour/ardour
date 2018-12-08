@@ -232,7 +232,7 @@ CheckOption::action_toggled ()
 {
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
 	if (tact) {
-		_button->set_active(tact->get_active());
+		_button->set_active (tact->get_active());
 	}
 }
 
@@ -247,7 +247,7 @@ CheckOption::toggled ()
 {
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
 
-	tact->set_active( _button->get_active() );
+	tact->set_active (_button->get_active ());
 }
 
 

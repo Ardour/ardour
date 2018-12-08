@@ -2636,24 +2636,25 @@ Mixer_UI::set_axis_targets_for_operation ()
 void
 Mixer_UI::set_monitor_action_sensitivity (bool yn)
 {
+	// TODO use ActionMap::find_toggle_action()->set_*();
 	Glib::RefPtr<Action> act;
 	Glib::RefPtr<ToggleAction> tact;
 
 	act = ActionManager::get_action (X_("Monitor"), "UseMonitorSection");
-	assert (act);  tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	assert (tact); tact->set_active ( yn );
+	tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	tact->set_active (yn);
 
 	act = ActionManager::get_action (X_("Monitor"), "monitor-cut-all");
-	assert (act);  tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	assert (tact); tact->set_sensitive ( yn );
+	tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	tact->set_sensitive (yn);
 
 	act = ActionManager::get_action (X_("Monitor"), "monitor-dim-all");
-	assert (act);  tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	assert (tact); tact->set_sensitive ( yn );
+	tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	tact->set_sensitive (yn);
 
 	act = ActionManager::get_action (X_("Monitor"), "monitor-mono");
-	assert (act);  tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	assert (tact); tact->set_sensitive ( yn );
+	tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	tact->set_sensitive (yn);
 }
 
 void
