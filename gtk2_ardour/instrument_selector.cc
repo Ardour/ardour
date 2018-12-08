@@ -153,7 +153,7 @@ InstrumentSelector::build_instrument_list()
 			_reasonable_synth_id = n;
 		}
 		if (p->unique_id == "http://gareus.org/oss/lv2/gmsynth") {
-			_reasonable_synth_id = n;
+			_gmsynth_id = n;
 		}
 		prev = p->name;
 		n++;
