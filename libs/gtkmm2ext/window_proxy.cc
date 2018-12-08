@@ -211,11 +211,11 @@ void
 WindowProxy::drop_window ()
 {
 	if (_window) {
+		_window->hide ();
 		delete_connection.disconnect ();
 		configure_connection.disconnect ();
 		map_connection.disconnect ();
 		unmap_connection.disconnect ();
-		_window->hide ();
 		delete _window;
 		_window = 0;
 		delete vistracker;
