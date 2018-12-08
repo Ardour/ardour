@@ -193,6 +193,7 @@ class CheckOption : public OptionEditorComponent , public Gtkmm2ext::Activatable
 {
 public:
 	CheckOption (std::string const &, std::string const &, Glib::RefPtr<Gtk::Action> act );
+	virtual ~CheckOption ();
 	void set_state_from_config () {}
 	void parameter_changed (std::string const &) {}
 	void add_to_page (OptionEditorPage*);
@@ -203,17 +204,18 @@ public:
 
 	Gtk::Widget& tip_widget() { return *_button; }
 
+protected:
 	void action_toggled ();
 	void action_sensitivity_changed () {}
 	void action_visibility_changed () {}
 
-protected:
 	virtual void toggled ();
 
-	sigc::slot<bool>       _get; ///< slot to get the configuration variable's value
-	sigc::slot<bool, bool> _set;  ///< slot to set the configuration variable's value
 	Gtk::CheckButton*      _button; ///< UI button
 	Gtk::Label*            _label; ///< label for button, so we can use markup
+
+private:
+	sigc::connection       _callback_connection;
 };
 
 /** Component which provides the UI to handle a boolean option using a GTK CheckButton */

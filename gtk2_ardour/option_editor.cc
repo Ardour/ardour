@@ -213,18 +213,22 @@ CheckOption::CheckOption (string const & i, string const & n, Glib::RefPtr<Gtk::
 	_button->signal_toggled().connect (sigc::mem_fun (*this, &CheckOption::toggled));
 
 	Gtkmm2ext::Activatable::set_related_action (act);
-	if (_action) {
+	assert (_action);
 
-		action_sensitivity_changed ();
+	action_sensitivity_changed ();
 
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
-		if (tact) {
-			action_toggled ();
-			tact->signal_toggled().connect (sigc::mem_fun (*this, &CheckOption::action_toggled));
-		}
-
-		_action->connect_property_changed ("sensitive", sigc::mem_fun (*this, &CheckOption::action_sensitivity_changed));
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
+	if (tact) {
+		action_toggled ();
+		_callback_connection = tact->signal_toggled().connect (sigc::mem_fun (*this, &CheckOption::action_toggled));
 	}
+
+	_action->connect_property_changed ("sensitive", sigc::mem_fun (*this, &CheckOption::action_sensitivity_changed));
+}
+
+CheckOption::~CheckOption ()
+{
+	_callback_connection.disconnect ();
 }
 
 void
