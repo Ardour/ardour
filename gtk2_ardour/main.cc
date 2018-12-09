@@ -82,7 +82,7 @@ using namespace ARDOUR_COMMAND_LINE;
 using namespace ARDOUR;
 using namespace PBD;
 
-TextReceiver text_receiver ("ardour");
+TextReceiver text_receiver (PROGRAM_NAME);
 
 extern int curvetest (string);
 
