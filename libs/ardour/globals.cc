@@ -269,7 +269,7 @@ lotsa_files_please ()
 			}
 		} else {
 			if (rl.rlim_cur != RLIM_INFINITY) {
-				info << string_compose (_("Your system is configured to limit %1 to only %2 open files"), PROGRAM_NAME, rl.rlim_cur) << endmsg;
+				info << string_compose (_("Your system is configured to limit %1 to %2 open files"), PROGRAM_NAME, rl.rlim_cur) << endmsg;
 			}
 		}
 	} else {
@@ -286,7 +286,7 @@ lotsa_files_please ()
 	 */
 	int newmax = _setmaxstdio (2048);
 	if (newmax > 0) {
-		info << string_compose (_("Your system is configured to limit %1 to only %2 open files"), PROGRAM_NAME, newmax) << endmsg;
+		info << string_compose (_("Your system is configured to limit %1 to %2 open files"), PROGRAM_NAME, newmax) << endmsg;
 	} else {
 		error << string_compose (_("Could not set system open files limit. Current limit is %1 open files"), _getmaxstdio())  << endmsg;
 	}
