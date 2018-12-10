@@ -37,6 +37,7 @@
 #include <glibmm/miscutils.h>
 
 #include "pbd/error.h"
+#include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/utils.h"
@@ -302,6 +303,7 @@ ActionManager::get_action (char const * group_name, char const * action_name, bo
 	}
 
 	cerr << "Failed to find action (2): [" << fullpath << ']' << endl;
+	PBD::stacktrace (std::cerr, 20);
 	return RefPtr<Action>();
 }
 
@@ -331,7 +333,7 @@ ActionManager::get_radio_action (char const * group_name, char const * action_na
 
 
 RefPtr<ActionGroup>
-ActionManager::create_action_group (string const & name)
+ActionManager::create_action_group (void * owner, string const & name)
 {
 	for (ActionGroups::iterator g = groups.begin(); g != groups.end(); ++g) {
 		if ((*g)->get_name () == name) {
@@ -341,6 +343,7 @@ ActionManager::create_action_group (string const & name)
 
 	RefPtr<ActionGroup> g = ActionGroup::create (name);
 
+	g->set_data (X_("owner"), owner);
 	groups.push_back (g);
 
 	/* this is one of the places where our own Action management code

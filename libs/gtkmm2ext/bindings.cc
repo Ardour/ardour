@@ -1045,7 +1045,6 @@ Bindings::get_bindings (string const& name)
 {
 	for (list<Bindings*>::iterator b = bindings.begin(); b != bindings.end(); b++) {
 		if ((*b)->name() == name) {
-			(*b)->reassociate (); // XXX important side-effects, wierd to call it here
 			return *b;
 		}
 	}
