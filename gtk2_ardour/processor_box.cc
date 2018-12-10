@@ -3761,7 +3761,11 @@ ProcessorBox::get_generic_editor_window (boost::shared_ptr<Processor> processor)
 void
 ProcessorBox::register_actions ()
 {
-	processor_box_actions = ActionManager::create_action_group (X_("ProcessorMenu"));
+	/* We need to use a static object as the owner, since these actions
+	   need to be considered ownable by all ProcessorBox objects
+	*/
+
+	processor_box_actions = ActionManager::create_action_group (bindings, X_("ProcessorMenu"));
 
 	Glib::RefPtr<Action> act;
 

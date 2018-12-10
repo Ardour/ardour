@@ -588,7 +588,7 @@ StepEntry::register_actions ()
 {
 	/* add named actions for the step editor */
 
-	Glib::RefPtr<ActionGroup> group = ActionManager::create_action_group (X_("StepEditing"));
+	Glib::RefPtr<ActionGroup> group = ActionManager::create_action_group (this, X_("StepEditing"));
 
 	ActionManager::register_action (group, "insert-a", _("Insert Note A"), sigc::mem_fun (*this, &StepEntry::insert_a));
 	ActionManager::register_action (group, "insert-asharp", _("Insert Note A-sharp"), sigc::mem_fun (*this, &StepEntry::insert_asharp));
