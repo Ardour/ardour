@@ -570,7 +570,7 @@ Mixer_UI::add_stripables (StripableList& slist)
 						if (mnode) {
 							_monitor_section->tearoff().set_state (*mnode);
 						}
-						
+
 						set_monitor_action_sensitivity(true);
 					}
 
@@ -2660,9 +2660,9 @@ void
 Mixer_UI::monitor_section_going_away ()
 {
 	/* Set sensitivity based on existence of the monitor bus  */
-	
+
 	set_monitor_action_sensitivity(false);
-	
+
 	if (_monitor_section) {
 
 		XMLNode* ui_node = Config->extra_xml(X_("UI"));
@@ -2684,8 +2684,6 @@ Mixer_UI::monitor_section_going_away ()
 		monitor_section_detached ();
 		out_packer.remove (_monitor_section->tearoff());
 		_monitor_section->set_session (0);
-		delete _monitor_section;
-		_monitor_section = 0;
 	}
 }
 

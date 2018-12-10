@@ -60,9 +60,6 @@ using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace std;
 
-Glib::RefPtr<ActionGroup> MonitorSection::monitor_actions;
-Gtkmm2ext::Bindings* MonitorSection::bindings = 0;
-
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
 
 MonitorSection::MonitorSection (Session* s)
@@ -96,14 +93,12 @@ MonitorSection::MonitorSection (Session* s)
 
 	Glib::RefPtr<Action> act;
 
-	if (!monitor_actions) {
-		register_actions ();
-		load_bindings ();
-	}
+	load_bindings ();
+	register_actions ();
+	set_data ("ardour-bindings", bindings);
+	bindings->associate ();
 
 	channel_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
-
-	set_data ("ardour-bindings", bindings);
 
 	_plugin_selector = new PluginSelector (PluginManager::instance());
 	insert_box = new ProcessorBox (_session, boost::bind (&MonitorSection::plugin_selector, this), _rr_selection, 0);
@@ -621,6 +616,12 @@ MonitorSection::set_session (Session* s)
 		}
 
 		populate_buttons ();
+
+		/* some actions may have been left in the wrong state from a
+		 * previous monitor route that was then deleted
+		 */
+		ActionManager::set_sensitive (monitor_actions, true);
+		ActionManager::set_sensitive (solo_actions, true);
 
 	} else {
 		/* no session */
