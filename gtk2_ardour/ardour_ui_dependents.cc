@@ -65,8 +65,6 @@ using namespace Gtkmm2ext;
 void
 ARDOUR_UI::we_have_dependents ()
 {
-	install_actions ();
-
 	/* other windows and related key-event-handling contexts have already
 	 * called Bindings::get_bindings() to setup their list of keybindings.
 	 * Do that here for the global bindings.
@@ -76,6 +74,7 @@ ARDOUR_UI::we_have_dependents ()
 		error << _("Global keybindings are missing") << endmsg;
 	}
 
+	install_actions ();
 	ProcessorBox::register_actions ();
 
 	/* Global, editor, mixer, processor box actions are defined now. Link
@@ -274,16 +273,16 @@ ARDOUR_UI::setup_windows ()
 		return -1;
 	}
 
+	time_info_box = new TimeInfoBox ("ToolbarTimeInfo", false);
+	/* all other dialogs are created conditionally */
+
+	we_have_dependents ();
+
 	/* order of addition affects order seen in initial window display */
 
 	rc_option_editor->add_to_notebook (_tabs, _("Preferences"));
 	mixer->add_to_notebook (_tabs, _("Mixer"));
 	editor->add_to_notebook (_tabs, _("Editor"));
-
-	time_info_box = new TimeInfoBox ("ToolbarTimeInfo", false);
-	/* all other dialogs are created conditionally */
-
-	we_have_dependents ();
 
 	top_packer.pack_start (menu_bar_base, false, false);
 
