@@ -94,6 +94,21 @@ ActionManager::save_action_states ()
 }
 
 void
+ActionManager::set_sensitive (Glib::RefPtr<ActionGroup> group, bool yn)
+{
+	/* the C++ API for functions used here appears to be broken in
+	   gtkmm2.6, so we fall back to the C level.
+	*/
+
+	GtkActionGroup* grp = group->gobj();
+
+	for (GList* acts = gtk_action_group_list_actions (grp); acts; acts = g_list_next (acts)) {
+		GtkAction* action = (GtkAction*) acts->data;
+		gtk_action_set_sensitive (action, yn);
+	}
+}
+
+void
 ActionManager::enable_active_actions ()
 {
 	if (!actions_disabled) {
