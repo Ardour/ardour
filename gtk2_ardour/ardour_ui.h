@@ -861,7 +861,6 @@ private:
 	bool main_window_delete_event (GdkEventAny*);
 	bool idle_ask_about_quit ();
 
-	void load_bindings ();
 	bool tabbable_visibility_button_press (GdkEventButton* ev, std::string const& tabbable_name);
 
 	void step_up_through_tabs ();

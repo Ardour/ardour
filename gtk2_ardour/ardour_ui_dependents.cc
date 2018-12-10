@@ -60,12 +60,21 @@ namespace ARDOUR {
 }
 
 using namespace ARDOUR;
+using namespace Gtkmm2ext;
 
 void
 ARDOUR_UI::we_have_dependents ()
 {
 	install_actions ();
-	load_bindings ();
+
+	/* other windows and related key-event-handling contexts have already
+	 * called Bindings::get_bindings() to setup their list of keybindings.
+	 * Do that here for the global bindings.
+	 */
+
+	if ((global_bindings = Bindings::get_bindings (X_("Global"))) == 0) {
+		error << _("Global keybindings are missing") << endmsg;
+	}
 
 	ProcessorBox::register_actions ();
 
