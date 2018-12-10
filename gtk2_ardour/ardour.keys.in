@@ -229,7 +229,7 @@ This mode provides many different operations on both regions and control points,
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
 @sess|Main/New|<@PRIMARY@>n|open a new session
 @wvis|Window/toggle-midi-connection-manager|<@SECONDARY@><@TERTIARY@>m|toggle global midi patchbay
-@wvis|Window/show-mixer|<@SECONDARY@>m|show mixer window
+@wvis|Common/show-mixer|<@SECONDARY@>m|show mixer window
 
 @gmon|Monitor/monitor-cut-all|<@PRIMARY@>m|monitor cut all
 @gmon|Monitor/monitor-mono|<@PRIMARY@><@SECONDARY@>m|monitor mono
