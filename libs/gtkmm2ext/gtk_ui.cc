@@ -617,7 +617,7 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 void
 UI::show_errors ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-log-window"));
+	Glib::RefPtr<Action> act = ActionManager::find_action (X_("Editor"), X_("toggle-log-window"));
 	if (!act) {
 		return;
 	}
@@ -631,7 +631,7 @@ UI::show_errors ()
 void
 UI::toggle_errors ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-log-window"));
+	Glib::RefPtr<Action> act = ActionManager::find_action (X_("Editor"), X_("toggle-log-window"));
 	if (!act) {
 		return;
 	}

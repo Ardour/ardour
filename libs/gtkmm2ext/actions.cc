@@ -50,8 +50,13 @@ using namespace sigc;
 using namespace PBD;
 using namespace Gtkmm2ext;
 
+typedef std::map<std::string, Glib::RefPtr<Gtk::Action> > ActionMap;
+static ActionMap actions;
+typedef std::vector<Glib::RefPtr<Gtk::ActionGroup> > ActionGroups;
+static ActionGroups groups;
+
 RefPtr<UIManager> ActionManager::ui_manager;
-string ActionManager::unbound_string = "--";
+string ActionManager::unbound_string = X_("--");
 
 struct ActionState {
 	GtkAction* action;
@@ -65,20 +70,23 @@ static ActionStates action_states_to_restore;
 static bool actions_disabled = false;
 
 void
+ActionManager::init ()
+{
+	ui_manager = UIManager::create ();
+}
+
+void
 ActionManager::save_action_states ()
 {
-	/* the C++ API for functions used here appears to be broken in
-	   gtkmm2.6, so we fall back to the C level.
-	*/
-	GList* list = gtk_ui_manager_get_action_groups (ActionManager::ui_manager->gobj());
-	GList* node;
-	GList* acts;
+	for (ActionGroups::iterator g = groups.begin(); g != groups.end(); ++g) {
 
-	for (node = list; node; node = g_list_next (node)) {
+		/* the C++ API for functions used here appears to be broken in
+		   gtkmm2.6, so we fall back to the C level.
+		*/
 
-		GtkActionGroup* group = (GtkActionGroup*) node->data;
+		GtkActionGroup* group = (*g)->gobj();
 
-		for (acts = gtk_action_group_list_actions (group); acts; acts = g_list_next (acts)) {
+		for (GList* acts = gtk_action_group_list_actions (group); acts; acts = g_list_next (acts)) {
 			GtkAction* action = (GtkAction*) acts->data;
 			action_states_to_restore.push_back (ActionState (action, gtk_action_get_sensitive (action)));
 		}
@@ -124,75 +132,6 @@ Widget*
 ActionManager::get_widget (const char * name)
 {
 	return ui_manager->get_widget (name);
-}
-
-RefPtr<Action>
-ActionManager::get_action (const char* path)
-{
-	if (!path) {
-		return RefPtr<Action>();
-	}
-
-	/* Skip <Actions>/ in path */
-
-	int len = strlen (path);
-
-	if (len < 3) {
-		/* shortest possible path: "a/b" */
-		return RefPtr<Action>();
-	}
-
-	if (len > 10 && !strncmp (path, "<Actions>/", 10 )) {
-		path = path+10;
-	} else if (path[0] == '/') {
-		path++;
-	}
-
-	vector<char> copy(len+1);
-	strcpy (&copy[0], path);
-	char* slash = strchr (&copy[0], '/');
-	if (!slash) {
-		return RefPtr<Action> ();
-	}
-	*slash = '\0';
-
-	return get_action (&copy[0], ++slash);
-
-}
-
-RefPtr<Action>
-ActionManager::get_action (const char* group_name, const char* action_name)
-{
-	/* the C++ API for functions used here appears to be broken in
-	   gtkmm2.6, so we fall back to the C level.
-	*/
-
-	if (! ui_manager) {
-		return RefPtr<Action> ();
-	}
-
-	GList* list = gtk_ui_manager_get_action_groups (ui_manager->gobj());
-	GList* node;
-	RefPtr<Action> act;
-
-	for (node = list; node; node = g_list_next (node)) {
-
-		GtkActionGroup* _ag = (GtkActionGroup*) node->data;
-
-		if (strcmp (group_name,  gtk_action_group_get_name (_ag)) == 0) {
-
-			GtkAction* _act;
-
-			if ((_act = gtk_action_group_get_action (_ag, action_name)) != 0) {
-				act = Glib::wrap (_act, true);
-				break;
-			}
-
-			break;
-		}
-	}
-
-	return act;
 }
 
 void
@@ -262,7 +201,7 @@ ActionManager::set_toggleaction_state (const string& n, bool s)
 bool
 ActionManager::set_toggleaction_state (const char* group_name, const char* action_name, bool s)
 {
-	RefPtr<Action> act = get_action (group_name, action_name);
+	RefPtr<Action> act = find_action (group_name, action_name);
 	if (act) {
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
 		if (tact) {
@@ -276,7 +215,7 @@ ActionManager::set_toggleaction_state (const char* group_name, const char* actio
 void
 ActionManager::do_action (const char* group, const char*action)
 {
-	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (group, action);
+	Glib::RefPtr<Gtk::Action> act = ActionManager::find_action (group, action);
 	if (act) {
 		act->activate ();
 	}
@@ -285,11 +224,275 @@ ActionManager::do_action (const char* group, const char*action)
 void
 ActionManager::set_toggle_action (const char* group, const char*action, bool yn)
 {
-	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (group, action);
-	if (act) {
-		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-		if (tact) {
-			tact->set_active (yn);
+	Glib::RefPtr<Gtk::ToggleAction> tact = ActionManager::find_toggle_action (group, action);
+	tact->set_active (yn);
+}
+
+RefPtr<Action>
+ActionManager::find_action (const string& name, bool or_die)
+{
+	ActionMap::const_iterator a = actions.find (name);
+
+	if (a != actions.end()) {
+		return a->second;
+	}
+
+	if (or_die) {
+		::abort ();
+	}
+
+	cerr << "Failed to find action: [" << name << ']' << endl;
+	return RefPtr<Action>();
+}
+
+RefPtr<ToggleAction>
+ActionManager::find_toggle_action (const string& name, bool or_die)
+{
+	RefPtr<Action> act = find_action (name, or_die);
+
+	if (!act) {
+		return RefPtr<ToggleAction>();
+	}
+
+	return Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+}
+
+RefPtr<RadioAction>
+ActionManager::find_radio_action (const string& name, bool or_die)
+{
+	RefPtr<Action> act = find_action (name, or_die);
+
+	if (!act) {
+		return RefPtr<RadioAction>();
+	}
+
+	return Glib::RefPtr<RadioAction>::cast_dynamic (act);
+}
+
+RefPtr<Action>
+ActionManager::find_action (char const * group_name, char const * action_name, bool or_die)
+{
+	string fullpath (group_name);
+	fullpath += '/';
+	fullpath += action_name;
+
+	ActionMap::const_iterator a = actions.find (fullpath);
+
+	if (a != actions.end()) {
+		return a->second;
+	}
+
+	if (or_die) {
+		::abort ();
+	}
+
+	cerr << "Failed to find action (2): [" << fullpath << ']' << endl;
+	return RefPtr<Action>();
+}
+
+RefPtr<ToggleAction>
+ActionManager::find_toggle_action (char const * group_name, char const * action_name, bool or_die)
+{
+	RefPtr<Action> act = find_action (group_name, action_name, or_die);
+
+	if (!act) {
+		return RefPtr<ToggleAction>();
+	}
+
+	return Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+}
+
+RefPtr<RadioAction>
+ActionManager::find_radio_action (char const * group_name, char const * action_name, bool or_die)
+{
+	RefPtr<Action> act = find_action (group_name, action_name, or_die);
+
+	if (!act) {
+		return RefPtr<RadioAction>();
+	}
+
+	return Glib::RefPtr<RadioAction>::cast_dynamic (act);
+}
+
+
+RefPtr<ActionGroup>
+ActionManager::create_action_group (string const & name)
+{
+	for (ActionGroups::iterator g = groups.begin(); g != groups.end(); ++g) {
+		if ((*g)->get_name () == name) {
+			return *g;
 		}
+	}
+
+	RefPtr<ActionGroup> g = ActionGroup::create (name);
+
+	groups.push_back (g);
+
+	/* this is one of the places where our own Action management code
+	   has to touch the GTK one, because we want the GtkUIManager to
+	   be able to create widgets (particularly Menus) from our actions.
+
+	   This is a a necessary step for that to happen.
+	*/
+
+	if (g) {
+		ActionManager::ui_manager->insert_action_group (g);
+	}
+
+	return g;
+}
+
+RefPtr<Action>
+ActionManager::register_action (RefPtr<ActionGroup> group, const char* name, const char* label)
+{
+	string fullpath;
+
+	RefPtr<Action> act = Action::create (name, label);
+
+	fullpath = group->get_name();
+	fullpath += '/';
+	fullpath += name;
+
+	if (actions.insert (ActionMap::value_type (fullpath, act)).second) {
+		group->add (act);
+		return act;
+	}
+
+	/* already registered */
+	return RefPtr<Action> ();
+}
+
+RefPtr<Action>
+ActionManager::register_action (RefPtr<ActionGroup> group,
+                            const char* name, const char* label, sigc::slot<void> sl)
+{
+	string fullpath;
+
+	RefPtr<Action> act = Action::create (name, label);
+
+	fullpath = group->get_name();
+	fullpath += '/';
+	fullpath += name;
+
+	if (actions.insert (ActionMap::value_type (fullpath, act)).second) {
+		group->add (act, sl);
+		return act;
+	}
+
+	/* already registered */
+	return RefPtr<Action>();
+}
+
+RefPtr<Action>
+ActionManager::register_radio_action (RefPtr<ActionGroup> group,
+                                  Gtk::RadioAction::Group& rgroup,
+                                  const char* name, const char* label,
+                                  sigc::slot<void> sl)
+{
+	string fullpath;
+
+	RefPtr<Action> act = RadioAction::create (rgroup, name, label);
+	RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+
+	fullpath = group->get_name();
+	fullpath += '/';
+	fullpath += name;
+
+	if (actions.insert (ActionMap::value_type (fullpath, act)).second) {
+		group->add (act, sl);
+		return act;
+	}
+
+	/* already registered */
+	return RefPtr<Action>();
+}
+
+RefPtr<Action>
+ActionManager::register_radio_action (RefPtr<ActionGroup> group,
+                                  Gtk::RadioAction::Group& rgroup,
+                                  const char* name, const char* label,
+                                  sigc::slot<void,GtkAction*> sl,
+                                  int value)
+{
+	string fullpath;
+
+	RefPtr<Action> act = RadioAction::create (rgroup, name, label);
+	RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+	ract->property_value() = value;
+
+	fullpath = group->get_name();
+	fullpath += '/';
+	fullpath += name;
+
+	if (actions.insert (ActionMap::value_type (fullpath, act)).second) {
+		group->add (act, sigc::bind (sl, act->gobj()));
+		return act;
+	}
+
+	/* already registered */
+
+	return RefPtr<Action>();
+}
+
+RefPtr<Action>
+ActionManager::register_toggle_action (RefPtr<ActionGroup> group,
+                                   const char* name, const char* label, sigc::slot<void> sl)
+{
+	string fullpath;
+
+	fullpath = group->get_name();
+	fullpath += '/';
+	fullpath += name;
+
+	RefPtr<Action> act = ToggleAction::create (name, label);
+
+	if (actions.insert (ActionMap::value_type (fullpath, act)).second) {
+		group->add (act, sl);
+		return act;
+	}
+
+	/* already registered */
+	return RefPtr<Action>();
+}
+
+void
+ActionManager::get_all_actions (std::vector<std::string>& paths,
+                            std::vector<std::string>& labels,
+                            std::vector<std::string>& tooltips,
+                            std::vector<std::string>& keys,
+                            std::vector<RefPtr<Action> >& acts)
+{
+	for (ActionMap::const_iterator a = actions.begin(); a != actions.end(); ++a) {
+
+		Glib::RefPtr<Action> act = a->second;
+
+			paths.push_back (act->get_accel_path());
+			labels.push_back (act->get_label());
+			tooltips.push_back (act->get_tooltip());
+			acts.push_back (act);
+
+			/* foreach binding */
+
+#if 0
+			Bindings* bindings = (*map)->bindings();
+
+			if (bindings) {
+
+				KeyboardKey key;
+				Bindings::Operation op;
+
+				key = bindings->get_binding_for_action (*act, op);
+
+				if (key == KeyboardKey::null_key()) {
+					keys.push_back (string());
+				} else {
+					keys.push_back (key.display_label());
+				}
+			} else {
+				keys.push_back (string());
+			}
+		}
+#endif
+
 	}
 }

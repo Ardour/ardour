@@ -81,90 +81,6 @@ class LIBGTKMM2EXT_API MouseButton {
 
 class LIBGTKMM2EXT_API Bindings;
 
-class LIBGTKMM2EXT_API ActionMap {
-  public:
-	ActionMap (std::string const& name);
-	~ActionMap();
-
-	std::string name() const { return _name; }
-
-	Glib::RefPtr<Gtk::ActionGroup> create_action_group (const std::string& group_name);
-
-	Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, const char* name, const char* label);
-	Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
-	                                           const char* name, const char* label, sigc::slot<void> sl);
-	Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group,
-	                                                 Gtk::RadioAction::Group&,
-	                                                 const char* name, const char* label,
-	                                                 sigc::slot<void,GtkAction*> sl,
-	                                                 int value);
-	Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group,
-	                                                 Gtk::RadioAction::Group&,
-	                                                 const char* name, const char* label,
-	                                                 sigc::slot<void> sl);
-	Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group,
-	                                                  const char* name, const char* label, sigc::slot<void> sl);
-
-	Glib::RefPtr<Gtk::Action> find_action (const std::string& name);
-	Glib::RefPtr<Gtk::Action> find_action (char const * group_name, char const * action_name);
-	Glib::RefPtr<Gtk::ToggleAction> find_toggle_action (const std::string& name);
-	Glib::RefPtr<Gtk::ToggleAction> find_toggle_action (char const * group_name, char const * action_name);
-	Glib::RefPtr<Gtk::RadioAction> find_radio_action (const std::string& name);
-	Glib::RefPtr<Gtk::RadioAction> find_radio_action (char const * group_name, char const * action_name);
-
-	void set_bindings (Bindings*);
-	Bindings* bindings() const { return _bindings; }
-
-	typedef std::vector<Glib::RefPtr<Gtk::Action> > Actions;
-	void get_actions (Actions&);
-
-	static std::list<ActionMap*> action_maps;
-
-	/* used by control surface protocols and other UIs */
-	static void get_all_actions (std::vector<std::string>& paths,
-	                             std::vector<std::string>& labels,
-	                             std::vector<std::string>& tooltips,
-	                             std::vector<std::string>& keys,
-	                             std::vector<Glib::RefPtr<Gtk::Action> >& actions);
-
-  private:
-	std::string _name;
-
-	/* hash for faster lookup of actions by name */
-
-	typedef std::map<std::string, Glib::RefPtr<Gtk::Action> > _ActionMap;
-	_ActionMap _actions;
-
-	/* initialized to null; set after a Bindings object has ::associated()
-	 * itself with this action map.
-	 */
-
-	Bindings* _bindings;
-
-};
-
-class LIBGTKMM2EXT_API ActionMapOwner {
-  protected:
-	Gtkmm2ext::ActionMap myactions;
-  public:
-	ActionMapOwner (std::string const & map_name) : myactions (map_name) {}
-	Glib::RefPtr<Gtk::Action> find_action (const std::string& name) { return myactions.find_action (name); }
-	Glib::RefPtr<Gtk::Action> find_action (char const * group_name, char const * action_name) { return myactions.find_action (group_name, action_name); }
-
-	Gtkmm2ext::ActionMap& action_map() { return myactions; }
-};
-
-class LIBGTKMM2EXT_API StaticActionMapOwner {
-  protected:
-	virtual Gtkmm2ext::ActionMap& my_actions() const = 0;
-  public:
-	virtual ~StaticActionMapOwner() {}
-	Glib::RefPtr<Gtk::Action> find_action (const std::string& name) { return my_actions().find_action (name); }
-	Glib::RefPtr<Gtk::Action> find_action (char const * group_name, char const * action_name) { return my_actions().find_action (group_name, action_name); }
-
-	Gtkmm2ext::ActionMap& action_map() { return my_actions(); }
-};
-
 class LIBGTKMM2EXT_API Bindings {
   public:
 	enum Operation {
@@ -187,6 +103,7 @@ class LIBGTKMM2EXT_API Bindings {
 
 	std::string const& name() const { return _name; }
 
+	void reassociate ();
 	void associate ();
 	void dissociate ();
 
@@ -230,8 +147,6 @@ class LIBGTKMM2EXT_API Bindings {
 	 */
 	static std::string ardour_action_name (Glib::RefPtr<Gtk::Action>);
 
-	void set_action_map (ActionMap&);
-
 	/* used for editing bindings */
 	void get_all_actions (std::vector<std::string>& paths,
 	                      std::vector<std::string>& labels,
@@ -242,7 +157,7 @@ class LIBGTKMM2EXT_API Bindings {
 	/* all bindings currently in existence, as grouped into Bindings */
 	static void reset_bindings () { bindings.clear (); }
 	static std::list<Bindings*> bindings;
-	static Bindings* get_bindings (std::string const& name, ActionMap&);
+	static Bindings* get_bindings (std::string const & name);
 	static void associate_all ();
 	static void save_all_bindings_as_html (std::ostream&);
 
@@ -250,7 +165,6 @@ class LIBGTKMM2EXT_API Bindings {
 
   private:
 	std::string  _name;
-	ActionMap*   _action_map;
 	KeybindingMap press_bindings;
 	KeybindingMap release_bindings;
 
