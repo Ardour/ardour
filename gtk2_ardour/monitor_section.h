@@ -127,8 +127,9 @@ private:
 		InvertChannel
 	};
 
-	static Glib::RefPtr<Gtk::ActionGroup> monitor_actions;
-	static void register_actions ();
+	Glib::RefPtr<Gtk::ActionGroup> monitor_actions;
+	Glib::RefPtr<Gtk::ActionGroup> solo_actions;
+	void register_actions ();
 
 	static void action_proxy0 (enum MonitorActions);
 	static void action_proxy1 (enum ChannelActions, uint32_t);
@@ -202,9 +203,9 @@ private:
 	Glib::RefPtr<Gtk::Action> proctoggle;
 	bool _ui_initialized;
 
-	static Gtkmm2ext::Bindings* bindings;
+	Gtkmm2ext::Bindings* bindings;
 
-	static void load_bindings ();
+	void load_bindings ();
 	bool enter_handler (GdkEventCrossing*);
 	bool leave_handler (GdkEventCrossing*);
 };
