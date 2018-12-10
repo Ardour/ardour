@@ -408,7 +408,7 @@ Bindings::get_binding_for_action (RefPtr<Action> action, Operation& op)
 		 */
 
 		if (k->second.action_name == action_name) {
-			k->second.action = ActionManager::find_action (action_name, false);
+			k->second.action = ActionManager::get_action (action_name, false);
 			return k->first;
 		}
 
@@ -429,7 +429,7 @@ Bindings::get_binding_for_action (RefPtr<Action> action, Operation& op)
 		 */
 
 		if (k->second.action_name == action_name) {
-			k->second.action = ActionManager::find_action (action_name, false);
+			k->second.action = ActionManager::get_action (action_name, false);
 			return k->first;
 		}
 
@@ -488,7 +488,7 @@ Bindings::activate (KeyboardKey kb, Operation op)
 	if (k->second.action) {
 		action = k->second.action;
 	} else {
-		action = ActionManager::find_action (k->second.action_name, false);
+		action = ActionManager::get_action (k->second.action_name, false);
 	}
 
 	if (action) {
@@ -508,7 +508,7 @@ Bindings::associate ()
 	KeybindingMap::iterator k;
 
 	for (k = press_bindings.begin(); k != press_bindings.end(); ++k) {
-		k->second.action = ActionManager::find_action (k->second.action_name, false);
+		k->second.action = ActionManager::get_action (k->second.action_name, false);
 		if (k->second.action) {
 			push_to_gtk (k->first, k->second.action);
 		} else {
@@ -517,18 +517,18 @@ Bindings::associate ()
 	}
 
 	for (k = release_bindings.begin(); k != release_bindings.end(); ++k) {
-		k->second.action = ActionManager::find_action (k->second.action_name, false);
+		k->second.action = ActionManager::get_action (k->second.action_name, false);
 		/* no working support in GTK for release bindings */
 	}
 
 	MouseButtonBindingMap::iterator b;
 
 	for (b = button_press_bindings.begin(); b != button_press_bindings.end(); ++b) {
-		b->second.action = ActionManager::find_action (b->second.action_name, false);
+		b->second.action = ActionManager::get_action (b->second.action_name, false);
 	}
 
 	for (b = button_release_bindings.begin(); b != button_release_bindings.end(); ++b) {
-		b->second.action = ActionManager::find_action (b->second.action_name, false);
+		b->second.action = ActionManager::get_action (b->second.action_name, false);
 	}
 }
 
@@ -662,7 +662,7 @@ Bindings::activate (MouseButton bb, Operation op)
 	if (b->second.action) {
 		action = b->second.action;
 	} else {
-		action = ActionManager::find_action (b->second.action_name, false);
+		action = ActionManager::get_action (b->second.action_name, false);
 	}
 
 	if (action) {
@@ -881,7 +881,7 @@ Bindings::save_as_html (ostream& ostr, bool categorize) const
 				if ((*k)->second.action) {
 					action = (*k)->second.action;
 				} else {
-					action = ActionManager::find_action ((*k)->second.action_name, false);
+					action = ActionManager::get_action ((*k)->second.action_name, false);
 				}
 
 				if (!action) {

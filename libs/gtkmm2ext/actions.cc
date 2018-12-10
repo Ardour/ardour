@@ -201,7 +201,7 @@ ActionManager::set_toggleaction_state (const string& n, bool s)
 bool
 ActionManager::set_toggleaction_state (const char* group_name, const char* action_name, bool s)
 {
-	RefPtr<Action> act = find_action (group_name, action_name);
+	RefPtr<Action> act = get_action (group_name, action_name);
 	if (act) {
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
 		if (tact) {
@@ -215,7 +215,7 @@ ActionManager::set_toggleaction_state (const char* group_name, const char* actio
 void
 ActionManager::do_action (const char* group, const char*action)
 {
-	Glib::RefPtr<Gtk::Action> act = ActionManager::find_action (group, action);
+	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (group, action);
 	if (act) {
 		act->activate ();
 	}
@@ -224,12 +224,12 @@ ActionManager::do_action (const char* group, const char*action)
 void
 ActionManager::set_toggle_action (const char* group, const char*action, bool yn)
 {
-	Glib::RefPtr<Gtk::ToggleAction> tact = ActionManager::find_toggle_action (group, action);
+	Glib::RefPtr<Gtk::ToggleAction> tact = ActionManager::get_toggle_action (group, action);
 	tact->set_active (yn);
 }
 
 RefPtr<Action>
-ActionManager::find_action (const string& name, bool or_die)
+ActionManager::get_action (const string& name, bool or_die)
 {
 	ActionMap::const_iterator a = actions.find (name);
 
@@ -246,9 +246,9 @@ ActionManager::find_action (const string& name, bool or_die)
 }
 
 RefPtr<ToggleAction>
-ActionManager::find_toggle_action (const string& name, bool or_die)
+ActionManager::get_toggle_action (const string& name, bool or_die)
 {
-	RefPtr<Action> act = find_action (name, or_die);
+	RefPtr<Action> act = get_action (name, or_die);
 
 	if (!act) {
 		return RefPtr<ToggleAction>();
@@ -258,9 +258,9 @@ ActionManager::find_toggle_action (const string& name, bool or_die)
 }
 
 RefPtr<RadioAction>
-ActionManager::find_radio_action (const string& name, bool or_die)
+ActionManager::get_radio_action (const string& name, bool or_die)
 {
-	RefPtr<Action> act = find_action (name, or_die);
+	RefPtr<Action> act = get_action (name, or_die);
 
 	if (!act) {
 		return RefPtr<RadioAction>();
@@ -270,7 +270,7 @@ ActionManager::find_radio_action (const string& name, bool or_die)
 }
 
 RefPtr<Action>
-ActionManager::find_action (char const * group_name, char const * action_name, bool or_die)
+ActionManager::get_action (char const * group_name, char const * action_name, bool or_die)
 {
 	string fullpath (group_name);
 	fullpath += '/';
@@ -291,9 +291,9 @@ ActionManager::find_action (char const * group_name, char const * action_name, b
 }
 
 RefPtr<ToggleAction>
-ActionManager::find_toggle_action (char const * group_name, char const * action_name, bool or_die)
+ActionManager::get_toggle_action (char const * group_name, char const * action_name, bool or_die)
 {
-	RefPtr<Action> act = find_action (group_name, action_name, or_die);
+	RefPtr<Action> act = get_action (group_name, action_name, or_die);
 
 	if (!act) {
 		return RefPtr<ToggleAction>();
@@ -303,9 +303,9 @@ ActionManager::find_toggle_action (char const * group_name, char const * action_
 }
 
 RefPtr<RadioAction>
-ActionManager::find_radio_action (char const * group_name, char const * action_name, bool or_die)
+ActionManager::get_radio_action (char const * group_name, char const * action_name, bool or_die)
 {
-	RefPtr<Action> act = find_action (group_name, action_name, or_die);
+	RefPtr<Action> act = get_action (group_name, action_name, or_die);
 
 	if (!act) {
 		return RefPtr<RadioAction>();

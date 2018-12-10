@@ -86,12 +86,12 @@ namespace ActionManager {
 	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group,
 	                                                  const char* name, const char* label, sigc::slot<void> sl);
 
-	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action>       find_action (const std::string& name, bool or_die = true);
-	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action>       find_action (char const * group_name, char const * action_name, bool or_die = true);
-	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::ToggleAction> find_toggle_action (const std::string& name, bool or_die = true);
-	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::ToggleAction> find_toggle_action (char const * group_name, char const * action_name, bool or_die = true);
-	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::RadioAction>  find_radio_action (const std::string& name, bool or_die = true);
-	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::RadioAction>  find_radio_action (char const * group_name, char const * action_name, bool or_die = true);
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action>       get_action (const std::string& name, bool or_die = true);
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action>       get_action (char const * group_name, char const * action_name, bool or_die = true);
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::ToggleAction> get_toggle_action (const std::string& name, bool or_die = true);
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::ToggleAction> get_toggle_action (char const * group_name, char const * action_name, bool or_die = true);
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::RadioAction>  get_radio_action (const std::string& name, bool or_die = true);
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::RadioAction>  get_radio_action (char const * group_name, char const * action_name, bool or_die = true);
 
 
 	LIBGTKMM2EXT_API extern void get_all_actions (std::vector<std::string>& paths,
