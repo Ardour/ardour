@@ -51,23 +51,23 @@ Maschine2::connect_signals ()
 	/* Actions */
 	Glib::RefPtr<Gtk::Action> act;
 #if 0
-	act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
+	act = ActionManager::find_action (X_("Editor"), X_("ToggleMeasureVisibility"));
 	if (act) {
 		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic (act);
 		tact->signal_toggled ().connect (sigc::mem_fun (*this, &Maschine2::notify_grid_change));
 	}
 #endif
-	act = ActionManager::get_action (X_("Editor"), X_("snap-off"));
+	act = ActionManager::find_action (X_("Editor"), X_("snap-off"));
 	if (act) {
 		Glib::RefPtr<Gtk::RadioAction> ract = Glib::RefPtr<Gtk::RadioAction>::cast_dynamic (act);
 		ract->signal_toggled ().connect (sigc::mem_fun (*this, &Maschine2::notify_snap_change));
 	}
-	act = ActionManager::get_action (X_("Editor"), X_("snap-magnetic"));
+	act = ActionManager::find_action (X_("Editor"), X_("snap-magnetic"));
 	if (act) {
 		Glib::RefPtr<Gtk::RadioAction> ract = Glib::RefPtr<Gtk::RadioAction>::cast_dynamic (act);
 		ract->signal_toggled ().connect (sigc::mem_fun (*this, &Maschine2::notify_snap_change));
 	}
-	act = ActionManager::get_action (X_("Editor"), X_("snap-normal"));
+	act = ActionManager::find_action (X_("Editor"), X_("snap-normal"));
 	if (act) {
 		Glib::RefPtr<Gtk::RadioAction> ract = Glib::RefPtr<Gtk::RadioAction>::cast_dynamic (act);
 		ract->signal_toggled ().connect (sigc::mem_fun (*this, &Maschine2::notify_snap_change));
@@ -167,7 +167,7 @@ Maschine2::notify_parameter_changed (std::string param)
 void
 Maschine2::notify_grid_change ()
 {
-	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
+	Glib::RefPtr<Gtk::Action> act = ActionManager::find_action (X_("Editor"), X_("ToggleMeasureVisibility"));
 	if (act) {
 		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic (act);
 		_ctrl->button (M2Contols::Grid)->set_color (tact->get_active () ? COLOR_WHITE : 0);
@@ -183,12 +183,12 @@ Maschine2::notify_snap_change ()
 		return;
 	}
 
-	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("snap-magnetic"));
+	Glib::RefPtr<Gtk::Action> act = ActionManager::find_action (X_("Editor"), X_("snap-magnetic"));
 	if (act) {
 		Glib::RefPtr<Gtk::RadioAction> ract = Glib::RefPtr<Gtk::RadioAction>::cast_dynamic (act);
 		if (ract->get_active ()) { rgba = COLOR_GRAY; }
 	}
-	act = ActionManager::get_action (X_("Editor"), X_("snap-normal"));
+	act = ActionManager::find_action (X_("Editor"), X_("snap-normal"));
 	if (act) {
 		Glib::RefPtr<Gtk::RadioAction> ract = Glib::RefPtr<Gtk::RadioAction>::cast_dynamic (act);
 		if (ract->get_active ()) { rgba = COLOR_WHITE; }
@@ -257,7 +257,7 @@ Maschine2::button_action (const std::string& group, const std::string& item)
 void
 Maschine2::button_grid ()
 {
-	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
+	Glib::RefPtr<Gtk::Action> act = ActionManager::find_action (X_("Editor"), X_("ToggleMeasureVisibility"));
 	if (act) {
 		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic (act);
 		tact->set_active (!tact->get_active ());
@@ -288,19 +288,19 @@ Maschine2::button_snap_released ()
 	_ctrl->button (M2Contols::Grid)->set_blinking (false);
 
 	const char* action = 0;
-	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("snap-off"));
+	Glib::RefPtr<Gtk::Action> act = ActionManager::find_action (X_("Editor"), X_("snap-off"));
 	if (act) {
 		Glib::RefPtr<Gtk::RadioAction> ract = Glib::RefPtr<Gtk::RadioAction>::cast_dynamic (act);
 		if (ract->get_active ()) { action = "snap-normal"; }
 	}
 
-	act = ActionManager::get_action (X_("Editor"), X_("snap-normal"));
+	act = ActionManager::find_action (X_("Editor"), X_("snap-normal"));
 	if (act) {
 		Glib::RefPtr<Gtk::RadioAction> ract = Glib::RefPtr<Gtk::RadioAction>::cast_dynamic (act);
 		if (ract->get_active ()) { action = "snap-magnetic"; }
 	}
 
-	act = ActionManager::get_action (X_("Editor"), X_("snap-magnetic"));
+	act = ActionManager::find_action (X_("Editor"), X_("snap-magnetic"));
 	if (act) {
 		Glib::RefPtr<Gtk::RadioAction> ract = Glib::RefPtr<Gtk::RadioAction>::cast_dynamic (act);
 		if (ract->get_active ()) { action = "snap-off"; }
@@ -311,7 +311,7 @@ Maschine2::button_snap_released ()
 		return;
 	}
 
-	act = ActionManager::get_action (X_("Editor"), action);
+	act = ActionManager::find_action (X_("Editor"), action);
 	if (act) {
 		Glib::RefPtr<Gtk::RadioAction> ract = Glib::RefPtr<Gtk::RadioAction>::cast_dynamic (act);
 		ract->set_active (true);

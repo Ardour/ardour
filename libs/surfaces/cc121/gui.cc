@@ -26,6 +26,7 @@
 #include "pbd/strsplit.h"
 #include "pbd/file_utils.h"
 
+#include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/gui_thread.h"
@@ -378,7 +379,7 @@ CC121GUI::build_available_action_menu ()
 	vector<string> keys;
 	vector<Glib::RefPtr<Gtk::Action> > actions;
 
-	Gtkmm2ext::ActionMap::get_all_actions (paths, labels, tooltips, keys, actions);
+	ActionManager::get_all_actions (paths, labels, tooltips, keys, actions);
 
 	typedef std::map<string,TreeIter> NodeMap;
 	NodeMap nodes;

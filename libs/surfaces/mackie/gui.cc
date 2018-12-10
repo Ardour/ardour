@@ -460,7 +460,7 @@ MackieControlProtocolGUI::build_available_action_menu ()
 	NodeMap nodes;
 	NodeMap::iterator r;
 
-	Gtkmm2ext::ActionMap::get_all_actions (paths, labels, tooltips, keys, actions);
+	ActionManager::get_all_actions (paths, labels, tooltips, keys, actions);
 
 	vector<string>::iterator k;
 	vector<string>::iterator p;
