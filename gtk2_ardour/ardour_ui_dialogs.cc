@@ -717,14 +717,14 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 	}
 
 	for (std::vector<std::string>::iterator s = insensitive_action_names.begin(); s != insensitive_action_names.end(); ++s) {
-		action = ActionManager::get_action (X_("Common"), (*s).c_str());
+		action = ActionManager::get_action (X_("Common"), (*s).c_str(), false);
 		if (action) {
 			action->set_sensitive (false);
 		}
 	}
 
 	for (std::vector<std::string>::iterator s = sensitive_action_names.begin(); s != sensitive_action_names.end(); ++s) {
-		action = ActionManager::get_action (X_("Common"), (*s).c_str());
+		action = ActionManager::get_action (X_("Common"), (*s).c_str(), false);
 		if (action) {
 			action->set_sensitive (true);
 		}

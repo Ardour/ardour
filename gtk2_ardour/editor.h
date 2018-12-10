@@ -1798,6 +1798,8 @@ private:
 
 	bool                     mouse_select_button_release (GdkEventButton*);
 
+	Glib::RefPtr<Gtk::Action> get_mouse_mode_action (Editing::MouseMode m) const;
+
 	Gtk::VBox                automation_box;
 	Gtk::Button              automation_mode_button;
 

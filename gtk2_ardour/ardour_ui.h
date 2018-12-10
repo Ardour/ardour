@@ -167,7 +167,7 @@ namespace ArdourWidgets {
 
 #define MAX_LUA_ACTION_SCRIPTS 12
 
-class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr, public TransportControlProvider, public Gtkmm2ext::ActionMapOwner
+class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr, public TransportControlProvider
 {
 public:
 	ARDOUR_UI (int *argcp, char **argvp[], const char* localedir);

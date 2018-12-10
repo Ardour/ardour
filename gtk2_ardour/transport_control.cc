@@ -1,5 +1,6 @@
 
 #include "actions.h"
+#include "ardour_ui.h"
 #include "transport_control.h"
 
 #include "pbd/i18n.h"

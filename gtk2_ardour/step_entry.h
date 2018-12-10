@@ -32,7 +32,7 @@
 
 class StepEditor;
 
-class StepEntry : public ArdourWindow, public Gtkmm2ext::ActionMapOwner
+class StepEntry : public ArdourWindow
 {
 public:
 	StepEntry (StepEditor&);

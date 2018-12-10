@@ -237,8 +237,8 @@ Editor::snap_mode_button_clicked (GdkEventButton* ev)
 
 
 
-static Glib::RefPtr<Action>
-get_mouse_mode_action(MouseMode m)
+Glib::RefPtr<Action>
+Editor::get_mouse_mode_action(MouseMode m) const
 {
 	switch (m) {
 	case MouseRange:

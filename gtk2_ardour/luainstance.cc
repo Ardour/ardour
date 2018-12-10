@@ -446,7 +446,7 @@ lua_actionlist (lua_State *L)
 	vector<string> tooltips;
 	vector<string> keys;
 	vector<Glib::RefPtr<Gtk::Action> > actions;
-	Gtkmm2ext::ActionMap::get_all_actions (paths, labels, tooltips, keys, actions);
+	ActionManager::get_all_actions (paths, labels, tooltips, keys, actions);
 
 	vector<string>::iterator p;
 	vector<string>::iterator l;

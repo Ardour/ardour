@@ -104,7 +104,7 @@ ARDOUR_UI_UTILS::just_hide_it (GdkEventAny */*ev*/, Gtk::Window *win)
 static bool
 idle_notify_engine_stopped ()
 {
-	Glib::RefPtr<Action> act = ARDOUR_UI::instance()->find_action ("Window", "toggle-audio-midi-setup");
+	Glib::RefPtr<Action> act = ActionManager::get_action ("Window", "toggle-audio-midi-setup");
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 
 	MessageDialog msg (

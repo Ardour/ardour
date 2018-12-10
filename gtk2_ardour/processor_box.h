@@ -392,7 +392,7 @@ private:
 	PBD::ScopedConnectionList _iomap_connection;
 };
 
-class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARDOUR::SessionHandlePtr, Gtkmm2ext::StaticActionMapOwner
+class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARDOUR::SessionHandlePtr
 {
 public:
 	enum ProcessorOperation {
@@ -444,8 +444,6 @@ public:
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorSelected;
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorUnselected;
 
-	Gtkmm2ext::ActionMap& my_actions() const { return myactions; }
-
 	static Glib::RefPtr<Gtk::ActionGroup> processor_box_actions;
 	static Gtkmm2ext::Bindings* bindings;
 	static void register_actions();
@@ -486,7 +484,6 @@ private:
 	int _placement;
 
 	ProcessorSelection& _p_selection;
-	static Gtkmm2ext::ActionMap myactions;
 
 	static void load_bindings ();
 

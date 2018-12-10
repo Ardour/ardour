@@ -59,7 +59,6 @@ _rest_event_handler (GtkWidget* /*widget*/, gpointer arg)
 
 StepEntry::StepEntry (StepEditor& seditor)
 	: ArdourWindow (string_compose (_("Step Entry: %1"), seditor.name()))
-	, ActionMapOwner (X_("step entry"))
 	, _current_note_length (1.0)
 	, _current_note_velocity (64)
 	, triplet_button ("3")
@@ -144,19 +143,19 @@ StepEntry::StepEntry (StepEditor& seditor)
 
 	RefPtr<Action> act;
 
-	act = myactions.find_action ("StepEditing/note-length-whole");
+	act = ActionManager::get_action ("StepEditing/note-length-whole");
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (length_1_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/note-length-half");
+	act = ActionManager::get_action ("StepEditing/note-length-half");
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (length_2_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/note-length-quarter");
+	act = ActionManager::get_action ("StepEditing/note-length-quarter");
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (length_4_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/note-length-eighth");
+	act = ActionManager::get_action ("StepEditing/note-length-eighth");
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (length_8_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/note-length-sixteenth");
+	act = ActionManager::get_action ("StepEditing/note-length-sixteenth");
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (length_16_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/note-length-thirtysecond");
+	act = ActionManager::get_action ("StepEditing/note-length-thirtysecond");
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (length_32_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/note-length-sixtyfourth");
+	act = ActionManager::get_action ("StepEditing/note-length-sixtyfourth");
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (length_64_button.gobj()), act->gobj());
 
 	length_1_button.signal_button_press_event().connect (sigc::mem_fun (*this, &StepEntry::radio_button_press), false);
@@ -232,21 +231,21 @@ StepEntry::StepEntry (StepEditor& seditor)
 	w->show();
 	velocity_fff_button.add (*w);
 
-	act = myactions.find_action ("StepEditing/note-velocity-ppp");
+	act = ActionManager::get_action ("StepEditing/note-velocity-ppp");
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (velocity_ppp_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/note-velocity-pp");
+	act = ActionManager::get_action ("StepEditing/note-velocity-pp");
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (velocity_pp_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/note-velocity-p");
+	act = ActionManager::get_action ("StepEditing/note-velocity-p");
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (velocity_p_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/note-velocity-mp");
+	act = ActionManager::get_action ("StepEditing/note-velocity-mp");
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (velocity_mp_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/note-velocity-mf");
+	act = ActionManager::get_action ("StepEditing/note-velocity-mf");
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (velocity_mf_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/note-velocity-f");
+	act = ActionManager::get_action ("StepEditing/note-velocity-f");
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (velocity_f_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/note-velocity-ff");
+	act = ActionManager::get_action ("StepEditing/note-velocity-ff");
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (velocity_ff_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/note-velocity-fff");
+	act = ActionManager::get_action ("StepEditing/note-velocity-fff");
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (velocity_fff_button.gobj()), act->gobj());
 
 	velocity_ppp_button.signal_button_press_event().connect (sigc::mem_fun (*this, &StepEntry::radio_button_press), false);
@@ -345,37 +344,37 @@ StepEntry::StepEntry (StepEditor& seditor)
 	set_tooltip (&back_button, _("Move Insert Position Back by Note Length"), "");
 	set_tooltip (&resync_button, _("Move Insert Position to Edit Point"), "");
 
-	act = myactions.find_action ("StepEditing/back");
+	act = ActionManager::get_action ("StepEditing/back");
 	gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (back_button.gobj()), false);
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (back_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/sync-to-edit-point");
+	act = ActionManager::get_action ("StepEditing/sync-to-edit-point");
 	gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (resync_button.gobj()), false);
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (resync_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/toggle-triplet");
+	act = ActionManager::get_action ("StepEditing/toggle-triplet");
 	gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (triplet_button.gobj()), false);
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (triplet_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/no-dotted");
+	act = ActionManager::get_action ("StepEditing/no-dotted");
 	gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (dot0_button.gobj()), false);
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (dot0_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/toggle-dotted");
+	act = ActionManager::get_action ("StepEditing/toggle-dotted");
 	gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (dot1_button.gobj()), false);
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (dot1_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/toggle-double-dotted");
+	act = ActionManager::get_action ("StepEditing/toggle-double-dotted");
 	gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (dot2_button.gobj()), false);
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (dot2_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/toggle-triple-dotted");
+	act = ActionManager::get_action ("StepEditing/toggle-triple-dotted");
 	gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (dot3_button.gobj()), false);
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (dot3_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/toggle-chord");
+	act = ActionManager::get_action ("StepEditing/toggle-chord");
 	gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (chord_button.gobj()), false);
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (chord_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/insert-rest");
+	act = ActionManager::get_action ("StepEditing/insert-rest");
 	gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (rest_button.gobj()), false);
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (rest_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/insert-snap-rest");
+	act = ActionManager::get_action ("StepEditing/insert-snap-rest");
 	gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (grid_rest_button.gobj()), false);
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (grid_rest_button.gobj()), act->gobj());
-	act = myactions.find_action ("StepEditing/sustain");
+	act = ActionManager::get_action ("StepEditing/sustain");
 	gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (sustain_button.gobj()), false);
 	gtk_activatable_set_related_action (GTK_ACTIVATABLE (sustain_button.gobj()), act->gobj());
 
@@ -464,12 +463,12 @@ StepEntry::StepEntry (StepEditor& seditor)
 
 	/* initial settings: quarter note and mezzo forte */
 
-	act = myactions.find_action ("StepEditing/note-length-quarter");
+	act = ActionManager::get_action ("StepEditing/note-length-quarter");
 	RefPtr<RadioAction> r = RefPtr<RadioAction>::cast_dynamic (act);
 	assert (r);
 	r->set_active (true);
 
-	act = myactions.find_action ("StepEditing/note-velocity-mf");
+	act = ActionManager::get_action ("StepEditing/note-velocity-mf");
 	r = RefPtr<RadioAction>::cast_dynamic (act);
 	assert (r);
 	r->set_active (true);
@@ -528,7 +527,7 @@ StepEntry::note_length ()
 {
 	double base_time = 4.0 / (double) length_divisor_adjustment.get_value();
 
-	RefPtr<Action> act = myactions.find_action ("StepEditing/toggle-triplet");
+	RefPtr<Action> act = ActionManager::get_action ("StepEditing/toggle-triplet");
 	RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
 	bool triplets = tact->get_active ();
 
@@ -589,114 +588,114 @@ StepEntry::register_actions ()
 {
 	/* add named actions for the step editor */
 
-	Glib::RefPtr<ActionGroup> group = myactions.create_action_group (X_("StepEditing"));
+	Glib::RefPtr<ActionGroup> group = ActionManager::create_action_group (X_("StepEditing"));
 
-	myactions.register_action (group, "insert-a", _("Insert Note A"), sigc::mem_fun (*this, &StepEntry::insert_a));
-	myactions.register_action (group, "insert-asharp", _("Insert Note A-sharp"), sigc::mem_fun (*this, &StepEntry::insert_asharp));
-	myactions.register_action (group, "insert-b", _("Insert Note B"), sigc::mem_fun (*this, &StepEntry::insert_b));
-	myactions.register_action (group, "insert-c", _("Insert Note C"), sigc::mem_fun (*this, &StepEntry::insert_c));
-	myactions.register_action (group, "insert-csharp", _("Insert Note C-sharp"), sigc::mem_fun (*this, &StepEntry::insert_csharp));
-	myactions.register_action (group, "insert-d", _("Insert Note D"), sigc::mem_fun (*this, &StepEntry::insert_d));
-	myactions.register_action (group, "insert-dsharp", _("Insert Note D-sharp"), sigc::mem_fun (*this, &StepEntry::insert_dsharp));
-	myactions.register_action (group, "insert-e", _("Insert Note E"), sigc::mem_fun (*this, &StepEntry::insert_e));
-	myactions.register_action (group, "insert-f", _("Insert Note F"), sigc::mem_fun (*this, &StepEntry::insert_f));
-	myactions.register_action (group, "insert-fsharp", _("Insert Note F-sharp"), sigc::mem_fun (*this, &StepEntry::insert_fsharp));
-	myactions.register_action (group, "insert-g", _("Insert Note G"), sigc::mem_fun (*this, &StepEntry::insert_g));
-	myactions.register_action (group, "insert-gsharp", _("Insert Note G-sharp"), sigc::mem_fun (*this, &StepEntry::insert_gsharp));
+	ActionManager::register_action (group, "insert-a", _("Insert Note A"), sigc::mem_fun (*this, &StepEntry::insert_a));
+	ActionManager::register_action (group, "insert-asharp", _("Insert Note A-sharp"), sigc::mem_fun (*this, &StepEntry::insert_asharp));
+	ActionManager::register_action (group, "insert-b", _("Insert Note B"), sigc::mem_fun (*this, &StepEntry::insert_b));
+	ActionManager::register_action (group, "insert-c", _("Insert Note C"), sigc::mem_fun (*this, &StepEntry::insert_c));
+	ActionManager::register_action (group, "insert-csharp", _("Insert Note C-sharp"), sigc::mem_fun (*this, &StepEntry::insert_csharp));
+	ActionManager::register_action (group, "insert-d", _("Insert Note D"), sigc::mem_fun (*this, &StepEntry::insert_d));
+	ActionManager::register_action (group, "insert-dsharp", _("Insert Note D-sharp"), sigc::mem_fun (*this, &StepEntry::insert_dsharp));
+	ActionManager::register_action (group, "insert-e", _("Insert Note E"), sigc::mem_fun (*this, &StepEntry::insert_e));
+	ActionManager::register_action (group, "insert-f", _("Insert Note F"), sigc::mem_fun (*this, &StepEntry::insert_f));
+	ActionManager::register_action (group, "insert-fsharp", _("Insert Note F-sharp"), sigc::mem_fun (*this, &StepEntry::insert_fsharp));
+	ActionManager::register_action (group, "insert-g", _("Insert Note G"), sigc::mem_fun (*this, &StepEntry::insert_g));
+	ActionManager::register_action (group, "insert-gsharp", _("Insert Note G-sharp"), sigc::mem_fun (*this, &StepEntry::insert_gsharp));
 
-	myactions.register_action (group, "insert-rest", _("Insert a Note-length Rest"), sigc::mem_fun (*this, &StepEntry::insert_rest));
-	myactions.register_action (group, "insert-snap-rest", _("Insert a Snap-length Rest"), sigc::mem_fun (*this, &StepEntry::insert_grid_rest));
+	ActionManager::register_action (group, "insert-rest", _("Insert a Note-length Rest"), sigc::mem_fun (*this, &StepEntry::insert_rest));
+	ActionManager::register_action (group, "insert-snap-rest", _("Insert a Snap-length Rest"), sigc::mem_fun (*this, &StepEntry::insert_grid_rest));
 
-	myactions.register_action (group, "next-octave", _("Move to next octave"), sigc::mem_fun (*this, &StepEntry::next_octave));
-	myactions.register_action (group, "prev-octave", _("Move to next octave"), sigc::mem_fun (*this, &StepEntry::prev_octave));
+	ActionManager::register_action (group, "next-octave", _("Move to next octave"), sigc::mem_fun (*this, &StepEntry::next_octave));
+	ActionManager::register_action (group, "prev-octave", _("Move to next octave"), sigc::mem_fun (*this, &StepEntry::prev_octave));
 
-	myactions.register_action (group, "next-note-length", _("Move to Next Note Length"), sigc::mem_fun (*this, &StepEntry::next_note_length));
-	myactions.register_action (group, "prev-note-length", _("Move to Previous Note Length"), sigc::mem_fun (*this, &StepEntry::prev_note_length));
+	ActionManager::register_action (group, "next-note-length", _("Move to Next Note Length"), sigc::mem_fun (*this, &StepEntry::next_note_length));
+	ActionManager::register_action (group, "prev-note-length", _("Move to Previous Note Length"), sigc::mem_fun (*this, &StepEntry::prev_note_length));
 
-	myactions.register_action (group, "inc-note-length", _("Increase Note Length"), sigc::mem_fun (*this, &StepEntry::inc_note_length));
-	myactions.register_action (group, "dec-note-length", _("Decrease Note Length"), sigc::mem_fun (*this, &StepEntry::dec_note_length));
+	ActionManager::register_action (group, "inc-note-length", _("Increase Note Length"), sigc::mem_fun (*this, &StepEntry::inc_note_length));
+	ActionManager::register_action (group, "dec-note-length", _("Decrease Note Length"), sigc::mem_fun (*this, &StepEntry::dec_note_length));
 
-	myactions.register_action (group, "next-note-velocity", _("Move to Next Note Velocity"), sigc::mem_fun (*this, &StepEntry::next_note_velocity));
-	myactions.register_action (group, "prev-note-velocity", _("Move to Previous Note Velocity"), sigc::mem_fun (*this, &StepEntry::prev_note_velocity));
+	ActionManager::register_action (group, "next-note-velocity", _("Move to Next Note Velocity"), sigc::mem_fun (*this, &StepEntry::next_note_velocity));
+	ActionManager::register_action (group, "prev-note-velocity", _("Move to Previous Note Velocity"), sigc::mem_fun (*this, &StepEntry::prev_note_velocity));
 
-	myactions.register_action (group, "inc-note-velocity", _("Increase Note Velocity"), sigc::mem_fun (*this, &StepEntry::inc_note_velocity));
-	myactions.register_action (group, "dec-note-velocity", _("Decrease Note Velocity"), sigc::mem_fun (*this, &StepEntry::dec_note_velocity));
+	ActionManager::register_action (group, "inc-note-velocity", _("Increase Note Velocity"), sigc::mem_fun (*this, &StepEntry::inc_note_velocity));
+	ActionManager::register_action (group, "dec-note-velocity", _("Decrease Note Velocity"), sigc::mem_fun (*this, &StepEntry::dec_note_velocity));
 
-	myactions.register_action (group, "octave-0", _("Switch to the 1st octave"), sigc::mem_fun (*this, &StepEntry::octave_0));
-	myactions.register_action (group, "octave-1", _("Switch to the 2nd octave"), sigc::mem_fun (*this, &StepEntry::octave_1));
-	myactions.register_action (group, "octave-2", _("Switch to the 3rd octave"), sigc::mem_fun (*this, &StepEntry::octave_2));
-	myactions.register_action (group, "octave-3", _("Switch to the 4th octave"), sigc::mem_fun (*this, &StepEntry::octave_3));
-	myactions.register_action (group, "octave-4", _("Switch to the 5th octave"), sigc::mem_fun (*this, &StepEntry::octave_4));
-	myactions.register_action (group, "octave-5", _("Switch to the 6th octave"), sigc::mem_fun (*this, &StepEntry::octave_5));
-	myactions.register_action (group, "octave-6", _("Switch to the 7th octave"), sigc::mem_fun (*this, &StepEntry::octave_6));
-	myactions.register_action (group, "octave-7", _("Switch to the 8th octave"), sigc::mem_fun (*this, &StepEntry::octave_7));
-	myactions.register_action (group, "octave-8", _("Switch to the 9th octave"), sigc::mem_fun (*this, &StepEntry::octave_8));
-	myactions.register_action (group, "octave-9", _("Switch to the 10th octave"), sigc::mem_fun (*this, &StepEntry::octave_9));
-	myactions.register_action (group, "octave-10", _("Switch to the 11th octave"), sigc::mem_fun (*this, &StepEntry::octave_10));
+	ActionManager::register_action (group, "octave-0", _("Switch to the 1st octave"), sigc::mem_fun (*this, &StepEntry::octave_0));
+	ActionManager::register_action (group, "octave-1", _("Switch to the 2nd octave"), sigc::mem_fun (*this, &StepEntry::octave_1));
+	ActionManager::register_action (group, "octave-2", _("Switch to the 3rd octave"), sigc::mem_fun (*this, &StepEntry::octave_2));
+	ActionManager::register_action (group, "octave-3", _("Switch to the 4th octave"), sigc::mem_fun (*this, &StepEntry::octave_3));
+	ActionManager::register_action (group, "octave-4", _("Switch to the 5th octave"), sigc::mem_fun (*this, &StepEntry::octave_4));
+	ActionManager::register_action (group, "octave-5", _("Switch to the 6th octave"), sigc::mem_fun (*this, &StepEntry::octave_5));
+	ActionManager::register_action (group, "octave-6", _("Switch to the 7th octave"), sigc::mem_fun (*this, &StepEntry::octave_6));
+	ActionManager::register_action (group, "octave-7", _("Switch to the 8th octave"), sigc::mem_fun (*this, &StepEntry::octave_7));
+	ActionManager::register_action (group, "octave-8", _("Switch to the 9th octave"), sigc::mem_fun (*this, &StepEntry::octave_8));
+	ActionManager::register_action (group, "octave-9", _("Switch to the 10th octave"), sigc::mem_fun (*this, &StepEntry::octave_9));
+	ActionManager::register_action (group, "octave-10", _("Switch to the 11th octave"), sigc::mem_fun (*this, &StepEntry::octave_10));
 
-	myactions.register_toggle_action (group, "toggle-triplet", _("Toggle Triple Notes"),
+	ActionManager::register_toggle_action (group, "toggle-triplet", _("Toggle Triple Notes"),
 	                                  sigc::mem_fun (*this, &StepEntry::toggle_triplet));
 
-	myactions.register_toggle_action (group, "toggle-chord", _("Toggle Chord Entry"),
+	ActionManager::register_toggle_action (group, "toggle-chord", _("Toggle Chord Entry"),
 	                                  sigc::mem_fun (*this, &StepEntry::toggle_chord));
-	myactions.register_action (group, "sustain", _("Sustain Selected Notes by Note Length"),
+	ActionManager::register_action (group, "sustain", _("Sustain Selected Notes by Note Length"),
 	                           sigc::mem_fun (*this, &StepEntry::do_sustain));
 
-	myactions.register_action (group, "sync-to-edit-point", _("Move Insert Position to Edit Point"),
+	ActionManager::register_action (group, "sync-to-edit-point", _("Move Insert Position to Edit Point"),
 	                           sigc::mem_fun (*this, &StepEntry::sync_to_edit_point));
-	myactions.register_action (group, "back", _("Move Insert Position Back by Note Length"),
+	ActionManager::register_action (group, "back", _("Move Insert Position Back by Note Length"),
 	                           sigc::mem_fun (*this, &StepEntry::back));
 	RadioAction::Group note_length_group;
 
-	myactions.register_radio_action (group, note_length_group, "note-length-whole",
+	ActionManager::register_radio_action (group, note_length_group, "note-length-whole",
 	                                 _("Set Note Length to Whole"), sigc::mem_fun (*this, &StepEntry::note_length_change), 1);
-	myactions.register_radio_action (group, note_length_group, "note-length-half",
+	ActionManager::register_radio_action (group, note_length_group, "note-length-half",
 	                                 _("Set Note Length to 1/2"), sigc::mem_fun (*this, &StepEntry::note_length_change), 2);
-	myactions.register_radio_action (group, note_length_group, "note-length-third",
+	ActionManager::register_radio_action (group, note_length_group, "note-length-third",
 	                                 _("Set Note Length to 1/3"), sigc::mem_fun (*this, &StepEntry::note_length_change), 3);
-	myactions.register_radio_action (group, note_length_group, "note-length-quarter",
+	ActionManager::register_radio_action (group, note_length_group, "note-length-quarter",
 	                                 _("Set Note Length to 1/4"), sigc::mem_fun (*this, &StepEntry::note_length_change), 4);
-	myactions.register_radio_action (group, note_length_group, "note-length-eighth",
+	ActionManager::register_radio_action (group, note_length_group, "note-length-eighth",
 	                                 _("Set Note Length to 1/8"), sigc::mem_fun (*this, &StepEntry::note_length_change), 8);
-	myactions.register_radio_action (group, note_length_group, "note-length-sixteenth",
+	ActionManager::register_radio_action (group, note_length_group, "note-length-sixteenth",
 	                                 _("Set Note Length to 1/16"), sigc::mem_fun (*this, &StepEntry::note_length_change), 16);
-	myactions.register_radio_action (group, note_length_group, "note-length-thirtysecond",
+	ActionManager::register_radio_action (group, note_length_group, "note-length-thirtysecond",
 	                                 _("Set Note Length to 1/32"), sigc::mem_fun (*this, &StepEntry::note_length_change), 32);
-	myactions.register_radio_action (group, note_length_group, "note-length-sixtyfourth",
+	ActionManager::register_radio_action (group, note_length_group, "note-length-sixtyfourth",
 	                                 _("Set Note Length to 1/64"), sigc::mem_fun (*this, &StepEntry::note_length_change), 64);
 
 	RadioAction::Group note_velocity_group;
 
-	myactions.register_radio_action (group, note_velocity_group, "note-velocity-ppp",
+	ActionManager::register_radio_action (group, note_velocity_group, "note-velocity-ppp",
 	                                 _("Set Note Velocity to Pianississimo"), sigc::mem_fun (*this, &StepEntry::note_velocity_change), 1);
-	myactions.register_radio_action (group, note_velocity_group, "note-velocity-pp",
+	ActionManager::register_radio_action (group, note_velocity_group, "note-velocity-pp",
 	                                 _("Set Note Velocity to Pianissimo"), sigc::mem_fun (*this, &StepEntry::note_velocity_change), 16);
-	myactions.register_radio_action (group, note_velocity_group, "note-velocity-p",
+	ActionManager::register_radio_action (group, note_velocity_group, "note-velocity-p",
 	                                 _("Set Note Velocity to Piano"), sigc::mem_fun (*this, &StepEntry::note_velocity_change), 32);
-	myactions.register_radio_action (group, note_velocity_group, "note-velocity-mp",
+	ActionManager::register_radio_action (group, note_velocity_group, "note-velocity-mp",
 	                                 _("Set Note Velocity to Mezzo-Piano"), sigc::mem_fun (*this, &StepEntry::note_velocity_change), 64);
-	myactions.register_radio_action (group, note_velocity_group, "note-velocity-mf",
+	ActionManager::register_radio_action (group, note_velocity_group, "note-velocity-mf",
 	                                 _("Set Note Velocity to Mezzo-Forte"), sigc::mem_fun (*this, &StepEntry::note_velocity_change), 80);
-	myactions.register_radio_action (group, note_velocity_group, "note-velocity-f",
+	ActionManager::register_radio_action (group, note_velocity_group, "note-velocity-f",
 	                                 _("Set Note Velocity to Forte"), sigc::mem_fun (*this, &StepEntry::note_velocity_change), 96);
-	myactions.register_radio_action (group, note_velocity_group, "note-velocity-ff",
+	ActionManager::register_radio_action (group, note_velocity_group, "note-velocity-ff",
 	                                 _("Set Note Velocity to Fortississimo"), sigc::mem_fun (*this, &StepEntry::note_velocity_change), 112);
-	myactions.register_radio_action (group, note_velocity_group, "note-velocity-fff",
+	ActionManager::register_radio_action (group, note_velocity_group, "note-velocity-fff",
 	                                 _("Set Note Velocity to Fortississimo"), sigc::mem_fun (*this, &StepEntry::note_velocity_change), 127);
 
 
 	RadioAction::Group dot_group;
 
-	myactions.register_radio_action (group, dot_group, "no-dotted", _("No Dotted Notes"), sigc::mem_fun (*this, &StepEntry::dot_change), 0);
-	myactions.register_radio_action (group, dot_group, "toggle-dotted", _("Toggled Dotted Notes"), sigc::mem_fun (*this, &StepEntry::dot_change), 1);
-	myactions.register_radio_action (group, dot_group, "toggle-double-dotted", _("Toggled Double-Dotted Notes"), sigc::mem_fun (*this, &StepEntry::dot_change), 2);
-	myactions.register_radio_action (group, dot_group, "toggle-triple-dotted", _("Toggled Triple-Dotted Notes"), sigc::mem_fun (*this, &StepEntry::dot_change), 3);
+	ActionManager::register_radio_action (group, dot_group, "no-dotted", _("No Dotted Notes"), sigc::mem_fun (*this, &StepEntry::dot_change), 0);
+	ActionManager::register_radio_action (group, dot_group, "toggle-dotted", _("Toggled Dotted Notes"), sigc::mem_fun (*this, &StepEntry::dot_change), 1);
+	ActionManager::register_radio_action (group, dot_group, "toggle-double-dotted", _("Toggled Double-Dotted Notes"), sigc::mem_fun (*this, &StepEntry::dot_change), 2);
+	ActionManager::register_radio_action (group, dot_group, "toggle-triple-dotted", _("Toggled Triple-Dotted Notes"), sigc::mem_fun (*this, &StepEntry::dot_change), 3);
 }
 
 void
 StepEntry::load_bindings ()
 {
-	bindings = Bindings::get_bindings (X_("Step Editing"), myactions);
+	bindings = Bindings::get_bindings (X_("Step Editing"));
 	set_data ("ardour-bindings", bindings);
 }
 
@@ -737,7 +736,7 @@ StepEntry::dot_value_change ()
 
 	for (vector<const char*>::iterator i = dot_actions.begin(); i != dot_actions.end(); ++i) {
 
-		act = myactions.find_action (*i);
+		act = ActionManager::get_action (*i);
 
 		if (act) {
 			ract = RefPtr<RadioAction>::cast_dynamic (act);
@@ -909,7 +908,7 @@ StepEntry::velocity_value_change ()
 
 	for (vector<const char*>::iterator i = velocity_actions.begin(); i != velocity_actions.end(); ++i) {
 
-		act = myactions.find_action (*i);
+		act = ActionManager::get_action (*i);
 
 		if (act) {
 			ract = RefPtr<RadioAction>::cast_dynamic (act);
@@ -953,19 +952,11 @@ StepEntry::length_value_change ()
 
 	for (vector<const char*>::iterator i = length_actions.begin(); i != length_actions.end(); ++i) {
 
-		act = myactions.find_action (*i);
+		Glib::RefPtr<RadioAction> ract = ActionManager::get_radio_action (*i);
 
-		if (act) {
-			ract = RefPtr<RadioAction>::cast_dynamic (act);
-
-			if (ract) {
-				if (ract->property_value() == val) {
-					ract->set_active (true);
-					inconsistent = false;
-					break;
-				}
-			}
-		}
+		ract->set_active (true);
+		inconsistent = false;
+		break;
 	}
 
 	length_1_button.set_inconsistent (inconsistent);

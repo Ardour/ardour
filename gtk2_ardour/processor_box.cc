@@ -117,7 +117,6 @@ RefPtr<Action> ProcessorBox::disk_io_action;
 RefPtr<Action> ProcessorBox::edit_action;
 RefPtr<Action> ProcessorBox::edit_generic_action;
 RefPtr<ActionGroup> ProcessorBox::processor_box_actions;
-Gtkmm2ext::ActionMap ProcessorBox::myactions (X_("processor box"));
 Gtkmm2ext::Bindings* ProcessorBox::bindings = 0;
 
 
@@ -3762,44 +3761,44 @@ ProcessorBox::get_generic_editor_window (boost::shared_ptr<Processor> processor)
 void
 ProcessorBox::register_actions ()
 {
-	processor_box_actions = myactions.create_action_group (X_("ProcessorMenu"));
+	processor_box_actions = ActionManager::create_action_group (X_("ProcessorMenu"));
 
 	Glib::RefPtr<Action> act;
 
 	/* new stuff */
-	myactions.register_action (processor_box_actions, X_("newplugin"), _("New Plugin"),
+	ActionManager::register_action (processor_box_actions, X_("newplugin"), _("New Plugin"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_plugin));
 
-	act = myactions.register_action (processor_box_actions, X_("newinsert"), _("New Insert"),
+	act = ActionManager::register_action (processor_box_actions, X_("newinsert"), _("New Insert"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_insert));
 	ActionManager::engine_sensitive_actions.push_back (act);
-	act = myactions.register_action (processor_box_actions, X_("newsend"), _("New External Send ..."),
+	act = ActionManager::register_action (processor_box_actions, X_("newsend"), _("New External Send ..."),
 			sigc::ptr_fun (ProcessorBox::rb_choose_send));
 	ActionManager::engine_sensitive_actions.push_back (act);
 
-	myactions.register_action (processor_box_actions, X_("newaux"), _("New Aux Send ..."));
-	myactions.register_action (processor_box_actions, X_("newlisten"), _("New Monitor Send ..."));
-	myactions.register_action (processor_box_actions, X_("removelisten"), _("Remove Monitor Send ..."));
+	ActionManager::register_action (processor_box_actions, X_("newaux"), _("New Aux Send ..."));
+	ActionManager::register_action (processor_box_actions, X_("newlisten"), _("New Monitor Send ..."));
+	ActionManager::register_action (processor_box_actions, X_("removelisten"), _("Remove Monitor Send ..."));
 
-	myactions.register_action (processor_box_actions, X_("controls"), _("Controls"));
-	myactions.register_action (processor_box_actions, X_("send_options"), _("Send Options"));
+	ActionManager::register_action (processor_box_actions, X_("controls"), _("Controls"));
+	ActionManager::register_action (processor_box_actions, X_("send_options"), _("Send Options"));
 
-	myactions.register_action (processor_box_actions, X_("clear"), _("Clear (all)"),
+	ActionManager::register_action (processor_box_actions, X_("clear"), _("Clear (all)"),
 			sigc::ptr_fun (ProcessorBox::rb_clear));
-	myactions.register_action (processor_box_actions, X_("clear_pre"), _("Clear (pre-fader)"),
+	ActionManager::register_action (processor_box_actions, X_("clear_pre"), _("Clear (pre-fader)"),
 			sigc::ptr_fun (ProcessorBox::rb_clear_pre));
-	myactions.register_action (processor_box_actions, X_("clear_post"), _("Clear (post-fader)"),
+	ActionManager::register_action (processor_box_actions, X_("clear_post"), _("Clear (post-fader)"),
 			sigc::ptr_fun (ProcessorBox::rb_clear_post));
 
 	/* standard editing stuff */
 
-	cut_action = myactions.register_action (processor_box_actions, X_("cut"), _("Cut"),
+	cut_action = ActionManager::register_action (processor_box_actions, X_("cut"), _("Cut"),
 	                                                    sigc::ptr_fun (ProcessorBox::rb_cut));
-	copy_action = myactions.register_action (processor_box_actions, X_("copy"), _("Copy"),
+	copy_action = ActionManager::register_action (processor_box_actions, X_("copy"), _("Copy"),
 	                                                     sigc::ptr_fun (ProcessorBox::rb_copy));
-	delete_action = myactions.register_action (processor_box_actions, X_("delete"), _("Delete"),
+	delete_action = ActionManager::register_action (processor_box_actions, X_("delete"), _("Delete"),
 	                                                       sigc::ptr_fun (ProcessorBox::rb_delete));
-	backspace_action = myactions.register_action (processor_box_actions, X_("backspace"), _("Delete"),
+	backspace_action = ActionManager::register_action (processor_box_actions, X_("backspace"), _("Delete"),
 	                                                       sigc::ptr_fun (ProcessorBox::rb_delete));
 
 	ActionManager::plugin_selection_sensitive_actions.push_back (cut_action);
@@ -3807,40 +3806,40 @@ ProcessorBox::register_actions ()
 	ActionManager::plugin_selection_sensitive_actions.push_back (delete_action);
 	ActionManager::plugin_selection_sensitive_actions.push_back (backspace_action);
 
-	paste_action = myactions.register_action (processor_box_actions, X_("paste"), _("Paste"),
+	paste_action = ActionManager::register_action (processor_box_actions, X_("paste"), _("Paste"),
 			sigc::ptr_fun (ProcessorBox::rb_paste));
-	rename_action = myactions.register_action (processor_box_actions, X_("rename"), _("Rename"),
+	rename_action = ActionManager::register_action (processor_box_actions, X_("rename"), _("Rename"),
 			sigc::ptr_fun (ProcessorBox::rb_rename));
-	myactions.register_action (processor_box_actions, X_("selectall"), _("Select All"),
+	ActionManager::register_action (processor_box_actions, X_("selectall"), _("Select All"),
 			sigc::ptr_fun (ProcessorBox::rb_select_all));
-	myactions.register_action (processor_box_actions, X_("deselectall"), _("Deselect All"),
+	ActionManager::register_action (processor_box_actions, X_("deselectall"), _("Deselect All"),
 			sigc::ptr_fun (ProcessorBox::rb_deselect_all));
 
 	/* activation etc. */
 
-	myactions.register_action (processor_box_actions, X_("activate_all"), _("Activate All"),
+	ActionManager::register_action (processor_box_actions, X_("activate_all"), _("Activate All"),
 			sigc::ptr_fun (ProcessorBox::rb_activate_all));
-	myactions.register_action (processor_box_actions, X_("deactivate_all"), _("Deactivate All"),
+	ActionManager::register_action (processor_box_actions, X_("deactivate_all"), _("Deactivate All"),
 			sigc::ptr_fun (ProcessorBox::rb_deactivate_all));
-	myactions.register_action (processor_box_actions, X_("ab_plugins"), _("A/B Plugins"),
+	ActionManager::register_action (processor_box_actions, X_("ab_plugins"), _("A/B Plugins"),
 			sigc::ptr_fun (ProcessorBox::rb_ab_plugins));
 
-	manage_pins_action = myactions.register_action (
+	manage_pins_action = ActionManager::register_action (
 		processor_box_actions, X_("manage-pins"), _("Pin Connections..."),
 		sigc::ptr_fun (ProcessorBox::rb_manage_pins));
 
 	/* Disk IO stuff */
-	disk_io_action = myactions.register_action (processor_box_actions, X_("disk-io-menu"), _("Disk I/O ..."));
-	myactions.register_action (processor_box_actions, X_("disk-io-prefader"), _("Pre-Fader."), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOPreFader));
-	myactions.register_action (processor_box_actions, X_("disk-io-postfader"), _("Post-Fader."), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOPostFader));
-	myactions.register_action (processor_box_actions, X_("disk-io-custom"), _("Custom."), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOCustom));
+	disk_io_action = ActionManager::register_action (processor_box_actions, X_("disk-io-menu"), _("Disk I/O ..."));
+	ActionManager::register_action (processor_box_actions, X_("disk-io-prefader"), _("Pre-Fader."), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOPreFader));
+	ActionManager::register_action (processor_box_actions, X_("disk-io-postfader"), _("Post-Fader."), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOPostFader));
+	ActionManager::register_action (processor_box_actions, X_("disk-io-custom"), _("Custom."), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOCustom));
 
 	/* show editors */
-	edit_action = myactions.register_action (
+	edit_action = ActionManager::register_action (
 		processor_box_actions, X_("edit"), _("Edit..."),
 		sigc::ptr_fun (ProcessorBox::rb_edit));
 
-	edit_generic_action = myactions.register_action (
+	edit_generic_action = ActionManager::register_action (
 		processor_box_actions, X_("edit-generic"), _("Edit with generic controls..."),
 		sigc::ptr_fun (ProcessorBox::rb_edit_generic));
 
@@ -4479,5 +4478,5 @@ PluginPinWindowProxy::processor_going_away ()
 void
 ProcessorBox::load_bindings ()
 {
-	bindings = Bindings::get_bindings (X_("Processor Box"), myactions);
+	bindings = Bindings::get_bindings (X_("Processor Box"));
 }

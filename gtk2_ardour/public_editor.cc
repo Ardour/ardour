@@ -32,7 +32,6 @@ sigc::signal<void> PublicEditor::DropDownKeys;
 
 PublicEditor::PublicEditor (Gtk::Widget& content)
 	: Tabbable (content, _("Editor"))
-	, ActionMapOwner (X_("editor"))
 	, _suspend_route_redisplay_counter (0)
 {
 }

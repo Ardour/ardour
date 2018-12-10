@@ -31,7 +31,6 @@ namespace ActionManager {
 
 	/* Ardour specific */
 
-	extern void init ();
 	extern void load_menus (const std::string& menus_file_name); /* not path, just name */
 
 	extern std::vector<Glib::RefPtr<Gtk::Action> > session_sensitive_actions;
