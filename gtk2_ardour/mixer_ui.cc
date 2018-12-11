@@ -2694,12 +2694,9 @@ Mixer_UI::restore_mixer_space ()
 void
 Mixer_UI::monitor_section_attached ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action ("Mixer", "ToggleMonitorSection");
-	assert (act); act->set_sensitive (true);
-
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-	assert (tact);
-	showhide_monitor_section (  tact->get_active () );
+	Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action ("Mixer", "ToggleMonitorSection");
+	act->set_sensitive (true);
+	showhide_monitor_section (act->get_active ());
 }
 
 void
