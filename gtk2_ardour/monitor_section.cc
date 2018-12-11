@@ -87,6 +87,11 @@ MonitorSection::MonitorSection ()
 	, _rr_selection ()
 	, _ui_initialized (false)
 {
+	/* note that although this a RouteUI, we never called ::set_route() so
+	 * we do not need to worry about self-destructing when the Route (the
+	 * monitor out) is destroyed.
+	 */
+	
 	using namespace Menu_Helpers;
 
 	Glib::RefPtr<Action> act;
@@ -601,6 +606,8 @@ MonitorSection::set_session (Session* s)
 			insert_box->set_route (_route);
 			_route->processors_changed.connect (*this, invalidator (*this), boost::bind (&MonitorSection::processors_changed, this, _1), gui_context());
 			_route->output()->PortCountChanged.connect (output_changed_connections, invalidator (*this), boost::bind (&MonitorSection::populate_buttons, this), gui_context());
+			_route->DropReferences.connect (*this, invalidator (*this), boost::bind (&MonitorSection::drop_route, this), gui_context());
+
 			if (_ui_initialized) {
 				update_processor_box ();
 			}
@@ -617,8 +624,13 @@ MonitorSection::set_session (Session* s)
 			_output_selector = 0;
 
 			ActionManager::set_sensitive (monitor_actions, false);
+			/* this action needs to always be true in this * scenaro, so that we can turn it back on*/
+			ActionManager::get_toggle_action (X_("Monitor"), X_("UseMonitorSection"))->set_sensitive (true);
 			ActionManager::set_sensitive (solo_actions, true);
 		}
+
+		/* make sure the state of this action reflects reality */
+		ActionManager::get_toggle_action (X_("Monitor"), X_("UseMonitorSection"))->set_active (_route != 0);
 
 		populate_buttons ();
 
@@ -627,20 +639,25 @@ MonitorSection::set_session (Session* s)
 
 		/* no session */
 
-		output_changed_connections.drop_connections();
-		_monitor.reset ();
-		_route.reset ();
-		control_connections.drop_connections ();
-		rude_iso_button.unset_active_state ();
-		rude_solo_button.unset_active_state ();
-		delete _output_selector;
-		_output_selector = 0;
-
+		drop_route ();
 		assign_controllables ();
 
 		ActionManager::set_sensitive (monitor_actions, false);
 		ActionManager::set_sensitive (solo_actions, false);
 	}
+}
+
+void
+MonitorSection::drop_route ()
+{
+	output_changed_connections.drop_connections();
+	_monitor.reset ();
+	_route.reset ();
+	control_connections.drop_connections ();
+	rude_iso_button.unset_active_state ();
+	rude_solo_button.unset_active_state ();
+	delete _output_selector;
+	_output_selector = 0;
 }
 
 MonitorSection::ChannelButtonSet::ChannelButtonSet ()
@@ -1253,6 +1270,8 @@ MonitorSection::parameter_changed (std::string name)
 		SYNCHRONIZE_TOGGLE_ACTION (ActionManager::get_toggle_action (X_("Solo"), "toggle-mute-overrides-solo"), Config->get_solo_mute_override ());
 	} else if (name == "exclusive-solo") {
 		SYNCHRONIZE_TOGGLE_ACTION (ActionManager::get_toggle_action (X_("Solo"), "toggle-exclusive-solo"), Config->get_exclusive_solo ());
+	} else if (name == "use-monitor-bus") {
+		SYNCHRONIZE_TOGGLE_ACTION (ActionManager::get_toggle_action (X_("Monitor"), "UseMonitorSection"), Config->get_use_monitor_bus ());
 	}
 }
 
@@ -1683,13 +1702,5 @@ MonitorSection::toggle_use_monitor_section ()
 		return;
 	}
 
-	bool yn = ActionManager::get_toggle_action (X_("Monitor"), "UseMonitorSection")->get_active();
-
-	if (yn) {
-		_session->add_monitor_section ();
-	} else {
-		_session->remove_monitor_section ();
-	}
-
-	Config->set_use_monitor_bus (yn);
+	Config->set_use_monitor_bus (ActionManager::get_toggle_action (X_("Monitor"), "UseMonitorSection")->get_active());
 }

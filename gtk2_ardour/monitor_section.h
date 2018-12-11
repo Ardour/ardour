@@ -111,7 +111,6 @@ private:
 	void map_state ();
 
 	boost::shared_ptr<ARDOUR::MonitorProcessor> _monitor;
-	boost::shared_ptr<ARDOUR::Route> _route;
 
 	Glib::RefPtr<Gtk::ActionGroup> monitor_actions;
 	Glib::RefPtr<Gtk::ActionGroup> solo_actions;
@@ -193,6 +192,7 @@ private:
 	bool leave_handler (GdkEventCrossing*);
 
 	void toggle_use_monitor_section ();
+	void drop_route ();
 };
 
 #endif /* __gtk2_ardour_monitor_section_h__ */
