@@ -1,7 +1,7 @@
 <Bindings name="Monitor Section">
   <Press>
-     <Binding key="e" action="Monitor/toggle-exclusive-solo"/>
-     <Binding key="Shift-o" action="Monitor/toggle-mute-overrides-solo"/>
+     <Binding key="e" action="Solo/toggle-exclusive-solo"/>
+     <Binding key="Shift-o" action="Solo/toggle-mute-overrides-solo"/>
      <Binding key="b" action="Monitor/toggle-monitor-processor-box"/>
      
      <Binding key="l" action="Monitor/monitor-cut-0"/>
