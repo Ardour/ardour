@@ -125,8 +125,8 @@ ARDOUR_UI::close_current_dialog ()
 void
 ARDOUR_UI::install_actions ()
 {
-	Glib::RefPtr<ActionGroup> main_actions = ActionManager::create_action_group (this, X_("Main"));
-	Glib::RefPtr<ActionGroup> main_menu_actions = ActionManager::create_action_group (this, X_("Main_menu"));
+	Glib::RefPtr<ActionGroup> main_actions = ActionManager::create_action_group (global_bindings, X_("Main"));
+	Glib::RefPtr<ActionGroup> main_menu_actions = ActionManager::create_action_group (global_bindings, X_("Main_menu"));
 	Glib::RefPtr<Action> act;
 
 	ActionManager::register_action (main_actions, X_("Escape"), _("Escape (deselect all)"), sigc::mem_fun (*this, &ARDOUR_UI::escape));
@@ -259,7 +259,7 @@ ARDOUR_UI::install_actions ()
 
 	/* these actions are intended to be shared across all windows */
 
-	common_actions = ActionManager::create_action_group (this, X_("Common"));
+	common_actions = ActionManager::create_action_group (global_bindings, X_("Common"));
 	ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (hide_return (sigc::mem_fun(*this, &ARDOUR_UI::finish))));
 	ActionManager::register_action (common_actions, X_("Hide"), _("Hide"), sigc::mem_fun (*this, &ARDOUR_UI::hide_application));
 
@@ -415,7 +415,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	Glib::RefPtr<ActionGroup> transport_actions = ActionManager::create_action_group (this, X_("Transport"));
+	Glib::RefPtr<ActionGroup> transport_actions = ActionManager::create_action_group (global_bindings, X_("Transport"));
 
 	/* do-nothing action for the "transport" menu bar item */
 
@@ -631,7 +631,7 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("MonitorMenu"), _("Monitor Section"));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	Glib::RefPtr<ActionGroup> monitor_actions = ActionManager::create_action_group (this, X_("Monitor"));
+	Glib::RefPtr<ActionGroup> monitor_actions = ActionManager::create_action_group (global_bindings, X_("Monitor"));
 
 	act = ActionManager::register_toggle_action (monitor_actions, X_("UseMonitorSection"), _("Use Monitor Section"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_use_monitor_section));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -656,12 +656,12 @@ ARDOUR_UI::install_actions ()
 		ActionManager::session_sensitive_actions.push_back (act);
 	}
 
-	Glib::RefPtr<ActionGroup> shuttle_actions = ActionManager::create_action_group (this, "ShuttleActions");
+	Glib::RefPtr<ActionGroup> shuttle_actions = ActionManager::create_action_group (global_bindings, "ShuttleActions");
 
 	shuttle_actions->add (Action::create (X_("SetShuttleUnitsPercentage"), _("Percentage")), hide_return (sigc::bind (sigc::mem_fun (*Config, &RCConfiguration::set_shuttle_units), Percentage)));
 	shuttle_actions->add (Action::create (X_("SetShuttleUnitsSemitones"), _("Semitones")), hide_return (sigc::bind (sigc::mem_fun (*Config, &RCConfiguration::set_shuttle_units), Semitones)));
 
-	Glib::RefPtr<ActionGroup> option_actions = ActionManager::create_action_group (this, "Options");
+	Glib::RefPtr<ActionGroup> option_actions = ActionManager::create_action_group (global_bindings, "Options");
 
 	act = ActionManager::register_toggle_action (option_actions, X_("SendMTC"), _("Send MTC"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_send_mtc));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -674,7 +674,7 @@ ARDOUR_UI::install_actions ()
 
 	/* MIDI */
 
-	Glib::RefPtr<ActionGroup> midi_actions = ActionManager::create_action_group (this, X_("MIDI"));
+	Glib::RefPtr<ActionGroup> midi_actions = ActionManager::create_action_group (global_bindings, X_("MIDI"));
 	act = ActionManager::register_action (midi_actions, X_("panic"), _("Panic (Send MIDI all-notes-off)"), sigc::mem_fun(*this, &ARDOUR_UI::midi_panic));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);

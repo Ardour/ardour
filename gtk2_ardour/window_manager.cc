@@ -66,7 +66,7 @@ Manager::register_window (ProxyBase* info)
 	if (!info->menu_name().empty()) {
 
 		if (!window_actions) {
-			window_actions = ActionManager::create_action_group (this, X_("Window"));
+			window_actions = ActionManager::create_action_group (Gtkmm2ext::UI::instance()->global_bindings, X_("Window"));
 		}
 
 		ActionManager::register_toggle_action (window_actions,

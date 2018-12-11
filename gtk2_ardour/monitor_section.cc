@@ -925,7 +925,7 @@ MonitorSection::register_actions ()
 	string action_descr;
 	Glib::RefPtr<Action> act;
 
-	monitor_actions = ActionManager::create_action_group (this, X_("Monitor"));
+	monitor_actions = ActionManager::create_action_group (bindings, X_("Monitor"));
 
 	act = ActionManager::register_toggle_action (monitor_actions, "toggle-exclusive-solo", _("Toggle exclusive solo mode"),
 			sigc::bind (sigc::ptr_fun (MonitorSection::action_proxy0), ToggleExclusiveSolo));
@@ -963,7 +963,7 @@ MonitorSection::register_actions ()
 
 	}
 
-	solo_actions = ActionManager::create_action_group (this, X_("Solo"));
+	solo_actions = ActionManager::create_action_group (bindings, X_("Solo"));
 	RadioAction::Group solo_group;
 
 	ActionManager::register_radio_action (solo_actions, solo_group, "solo-use-in-place", _("In-place solo"),

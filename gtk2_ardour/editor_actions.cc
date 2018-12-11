@@ -108,8 +108,8 @@ Editor::register_actions ()
 {
 	RefPtr<Action> act;
 
-	editor_actions = ActionManager::create_action_group (this, X_("Editor"));
-	editor_menu_actions = ActionManager::create_action_group (this, X_("EditorMenu"));
+	editor_actions = ActionManager::create_action_group (bindings, X_("Editor"));
+	editor_menu_actions = ActionManager::create_action_group (bindings, X_("EditorMenu"));
 
 	/* non-operative menu items for menu bar */
 
@@ -458,7 +458,7 @@ Editor::register_actions ()
 
 	toggle_reg_sens (editor_actions, "sound-midi-notes", _("Sound Selected MIDI Notes"), sigc::mem_fun (*this, &Editor::toggle_sound_midi_notes));
 
-	Glib::RefPtr<ActionGroup> zoom_actions = ActionManager::create_action_group (this, X_("Zoom"));
+	Glib::RefPtr<ActionGroup> zoom_actions = ActionManager::create_action_group (bindings, X_("Zoom"));
 	RadioAction::Group zoom_group;
 
 	radio_reg_sens (zoom_actions, zoom_group, "zoom-focus-left", _("Zoom Focus Left"), sigc::bind (sigc::mem_fun(*this, &Editor::zoom_focus_chosen), Editing::ZoomFocusLeft));
@@ -478,7 +478,7 @@ Editor::register_actions ()
 		act->set_sensitive (false);
 	}
 
-	Glib::RefPtr<ActionGroup> mouse_mode_actions = ActionManager::create_action_group (this, X_("MouseMode"));
+	Glib::RefPtr<ActionGroup> mouse_mode_actions = ActionManager::create_action_group (bindings, X_("MouseMode"));
 	RadioAction::Group mouse_mode_group;
 
 	act = ActionManager::register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Smart Object Mode"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));
@@ -555,7 +555,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, X_("next-grid-choice"), _("Next Quantize Grid Choice"), sigc::mem_fun (*this, &Editor::next_grid_choice));
 	ActionManager::register_action (editor_actions, X_("prev-grid-choice"), _("Previous Quantize Grid Choice"), sigc::mem_fun (*this, &Editor::prev_grid_choice));
 
-	Glib::RefPtr<ActionGroup> snap_actions = ActionManager::create_action_group (this, X_("Snap"));
+	Glib::RefPtr<ActionGroup> snap_actions = ActionManager::create_action_group (bindings, X_("Snap"));
 	RadioAction::Group grid_choice_group;
 
 	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-thirtyseconds"),  grid_type_strings[(int)GridTypeBeatDiv32].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv32)));
@@ -587,7 +587,7 @@ Editor::register_actions ()
 
 	/* RULERS */
 
-	Glib::RefPtr<ActionGroup> ruler_actions = ActionManager::create_action_group (this, X_("Rulers"));
+	Glib::RefPtr<ActionGroup> ruler_actions = ActionManager::create_action_group (bindings, X_("Rulers"));
 	ruler_tempo_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-tempo-ruler"), _("Tempo"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_tempo)));
 	ruler_meter_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-meter-ruler"), _("Meter"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_meter)));
 	ruler_range_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-range-ruler"), _("Ranges"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_range_marker)));
@@ -662,7 +662,7 @@ Editor::register_actions ()
 
 	/* REGION LIST */
 
-	Glib::RefPtr<ActionGroup> rl_actions = ActionManager::create_action_group (this, X_("RegionList"));
+	Glib::RefPtr<ActionGroup> rl_actions = ActionManager::create_action_group (bindings, X_("RegionList"));
 	RadioAction::Group sort_type_group;
 	RadioAction::Group sort_order_group;
 
@@ -1504,7 +1504,7 @@ Editor::reset_canvas_action_sensitivity (bool onoff)
 void
 Editor::register_region_actions ()
 {
-	_region_actions = ActionManager::create_action_group (this, X_("Region"));
+	_region_actions = ActionManager::create_action_group (bindings, X_("Region"));
 
 	/* PART 1: actions that operate on the selection, and for which the edit point type and location is irrelevant */
 

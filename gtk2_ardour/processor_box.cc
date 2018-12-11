@@ -3765,6 +3765,8 @@ ProcessorBox::register_actions ()
 	   need to be considered ownable by all ProcessorBox objects
 	*/
 
+	load_bindings ();
+
 	processor_box_actions = ActionManager::create_action_group (bindings, X_("ProcessorMenu"));
 
 	Glib::RefPtr<Action> act;
@@ -3847,7 +3849,6 @@ ProcessorBox::register_actions ()
 		processor_box_actions, X_("edit-generic"), _("Edit with generic controls..."),
 		sigc::ptr_fun (ProcessorBox::rb_edit_generic));
 
-	load_bindings ();
 }
 
 void

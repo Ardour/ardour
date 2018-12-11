@@ -774,8 +774,8 @@ Editor::Editor ()
 
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
 
-	register_actions ();
 	load_bindings ();
+	register_actions ();
 
 	setup_toolbar ();
 

@@ -114,8 +114,8 @@ Mixer_UI::Mixer_UI ()
 	, _strip_selection_change_without_scroll (false)
 	, _selection (*this, *this)
 {
-	register_actions ();
 	load_bindings ();
+	register_actions ();
 	_content.set_data ("ardour-bindings", bindings);
 
 	PresentationInfo::Change.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::presentation_info_changed, this, _1), gui_context());
@@ -3203,7 +3203,7 @@ Mixer_UI::showing_spill_for (boost::shared_ptr<Stripable> s) const
 void
 Mixer_UI::register_actions ()
 {
-	Glib::RefPtr<ActionGroup> group = ActionManager::create_action_group (this, X_("Mixer"));
+	Glib::RefPtr<ActionGroup> group = ActionManager::create_action_group (bindings, X_("Mixer"));
 
 	ActionManager::register_action (group, "solo", _("Toggle Solo on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &Mixer_UI::solo_action));
 	ActionManager::register_action (group, "mute", _("Toggle Mute on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &Mixer_UI::mute_action));
