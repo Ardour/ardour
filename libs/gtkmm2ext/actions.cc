@@ -474,6 +474,21 @@ ActionManager::register_toggle_action (RefPtr<ActionGroup> group,
 }
 
 void
+ActionManager::get_actions (void* owner, std::vector<Glib::RefPtr<Gtk::Action> >& acts)
+{
+	for (ActionMap::const_iterator a = actions.begin(); a != actions.end(); ++a) {
+		if (owner) {
+			Glib::RefPtr<Gtk::ActionGroup> group = a->second->property_action_group ();
+			if (group->get_data (X_("owner")) == owner) {
+				acts.push_back (a->second);
+			}
+		} else {
+			acts.push_back (a->second);
+		}
+	}
+}
+
+void
 ActionManager::get_all_actions (std::vector<std::string>& paths,
                             std::vector<std::string>& labels,
                             std::vector<std::string>& tooltips,

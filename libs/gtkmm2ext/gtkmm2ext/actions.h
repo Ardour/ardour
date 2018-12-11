@@ -94,6 +94,7 @@ namespace ActionManager {
 	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::RadioAction>  get_radio_action (const std::string& name, bool or_die = true);
 	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::RadioAction>  get_radio_action (char const * group_name, char const * action_name, bool or_die = true);
 
+	LIBGTKMM2EXT_API extern void get_actions (void* owner, std::vector<Glib::RefPtr<Gtk::Action> >&);
 
 	LIBGTKMM2EXT_API extern void get_all_actions (std::vector<std::string>& paths,
 	                             std::vector<std::string>& labels,

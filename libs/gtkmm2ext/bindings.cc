@@ -1014,14 +1014,12 @@ Bindings::get_all_actions (std::vector<std::string>& paths,
 		rmap.insert (make_pair (k->second.action, k->first));
 	}
 
-#if 0
-
 	/* get a list of all actions XXX relevant for these bindings */
 
-	ActionMap::Actions all_actions;
-	ActionManager::get_actions (all_actions);
+	std::vector<Glib::RefPtr<Action> > relevant_actions;
+	ActionManager::get_actions (this, relevant_actions);
 
-	for (ActionMap::Actions::const_iterator act = all_actions.begin(); act != all_actions.end(); ++act) {
+	for (vector<Glib::RefPtr<Action> >::const_iterator act = relevant_actions.begin(); act != relevant_actions.end(); ++act) {
 
 		paths.push_back ((*act)->get_accel_path());
 		labels.push_back ((*act)->get_label());
@@ -1037,7 +1035,6 @@ Bindings::get_all_actions (std::vector<std::string>& paths,
 
 		actions.push_back (*act);
 	}
-#endif
 }
 
 Bindings*
