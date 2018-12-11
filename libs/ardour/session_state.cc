@@ -4135,6 +4135,13 @@ Session::config_changed (std::string p, bool ours)
 		ltc_tx_parse_offset();
 	} else if (p == "auto-return-target-list") {
 		follow_playhead_priority ();
+	} else if (p == "use-monitor-bus") {
+		bool yn = Config->get_use_monitor_bus();
+		if (yn && !_monitor_out) {
+			add_monitor_section ();
+		} else if (!yn && _monitor_out) {
+			remove_monitor_section ();
+		}
 	}
 
 	set_dirty ();
