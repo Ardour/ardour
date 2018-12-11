@@ -103,7 +103,6 @@ Mixer_UI::Mixer_UI ()
 	, no_track_list_redisplay (false)
 	, in_group_row_change (false)
 	, track_menu (0)
-	, _monitor_section (0)
 	, _plugin_selector (0)
 	, _strip_width (UIConfiguration::instance().get_default_narrow_ms() ? Narrow : Wide)
 	, _spill_scroll_position (0)
@@ -348,6 +347,11 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_display.show();
 	add_button.show ();
 
+	XMLNode* mnode = ARDOUR_UI::instance()->tearoff_settings (X_("monitor-section"));
+	if (mnode) {
+		_monitor_section.tearoff().set_state (*mnode);
+	}
+
 	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_strip, this, _1), gui_context());
 	VCAMasterStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_master, this, _1), gui_context());
 
@@ -368,10 +372,8 @@ Mixer_UI::Mixer_UI ()
 
 Mixer_UI::~Mixer_UI ()
 {
-	if (_monitor_section) {
-		monitor_section_detached ();
-		delete _monitor_section;
-	}
+	monitor_section_detached ();
+
 	delete _plugin_selector;
 	delete track_menu;
 }
@@ -563,25 +565,14 @@ Mixer_UI::add_stripables (StripableList& slist)
 
 				if (route->is_monitor()) {
 
-					if (!_monitor_section) {
-						_monitor_section = new MonitorSection (_session);
+					out_packer.pack_end (_monitor_section.tearoff(), false, false);
+					_monitor_section.set_session (_session);
+					_monitor_section.tearoff().show_all ();
 
-						XMLNode* mnode = ARDOUR_UI::instance()->tearoff_settings (X_("monitor-section"));
-						if (mnode) {
-							_monitor_section->tearoff().set_state (*mnode);
-						}
+					_monitor_section.tearoff().Detach.connect (sigc::mem_fun(*this, &Mixer_UI::monitor_section_detached));
+					_monitor_section.tearoff().Attach.connect (sigc::mem_fun(*this, &Mixer_UI::monitor_section_attached));
 
-						set_monitor_action_sensitivity(true);
-					}
-
-					out_packer.pack_end (_monitor_section->tearoff(), false, false);
-					_monitor_section->set_session (_session);
-					_monitor_section->tearoff().show_all ();
-
-					_monitor_section->tearoff().Detach.connect (sigc::mem_fun(*this, &Mixer_UI::monitor_section_detached));
-					_monitor_section->tearoff().Attach.connect (sigc::mem_fun(*this, &Mixer_UI::monitor_section_attached));
-
-					if (_monitor_section->tearoff().torn_off()) {
+					if (_monitor_section.tearoff().torn_off()) {
 						monitor_section_detached ();
 					} else {
 						monitor_section_attached ();
@@ -1036,16 +1027,13 @@ void
 Mixer_UI::set_session (Session* sess)
 {
 	SessionHandlePtr::set_session (sess);
+	_monitor_section.set_session (sess);
 
 	if (_plugin_selector) {
 		_plugin_selector->set_session (_session);
 	}
 
 	_group_tabs->set_session (sess);
-
-	if (_monitor_section) {
-		_monitor_section->set_session (_session);
-	}
 
 	if (!_session) {
 		_selection.clear ();
@@ -1105,9 +1093,7 @@ Mixer_UI::session_going_away ()
 		delete (*i);
 	}
 
-	if (_monitor_section) {
-		_monitor_section->tearoff().hide_visible ();
-	}
+	_monitor_section.tearoff().hide_visible ();
 
 	monitor_section_detached ();
 
@@ -1971,17 +1957,14 @@ Mixer_UI::toggle_monitor_section ()
 void
 Mixer_UI::showhide_monitor_section (bool yn)
 {
-	if (!monitor_section()) {
-		return;
-	}
-	if (monitor_section()->tearoff().torn_off()) {
+	if (monitor_section().tearoff().torn_off()) {
 		return;
 	}
 
 	if (yn) {
-		monitor_section()->tearoff().show();
+		monitor_section().tearoff().show();
 	} else {
-		monitor_section()->tearoff().hide();
+		monitor_section().tearoff().hide();
 	}
 }
 
@@ -2633,58 +2616,30 @@ Mixer_UI::set_axis_targets_for_operation ()
 }
 
 void
-Mixer_UI::set_monitor_action_sensitivity (bool yn)
-{
-	// TODO use ActionMap::find_toggle_action()->set_*();
-	Glib::RefPtr<Action> act;
-	Glib::RefPtr<ToggleAction> tact;
-
-	act = ActionManager::get_action (X_("Monitor"), "UseMonitorSection");
-	tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	tact->set_active (yn);
-
-	act = ActionManager::get_action (X_("Monitor"), "monitor-cut-all");
-	tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	tact->set_sensitive (yn);
-
-	act = ActionManager::get_action (X_("Monitor"), "monitor-dim-all");
-	tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	tact->set_sensitive (yn);
-
-	act = ActionManager::get_action (X_("Monitor"), "monitor-mono");
-	tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	tact->set_sensitive (yn);
-}
-
-void
 Mixer_UI::monitor_section_going_away ()
 {
-	/* Set sensitivity based on existence of the monitor bus  */
+	XMLNode* ui_node = Config->extra_xml(X_("UI"));
 
-	set_monitor_action_sensitivity(false);
+	/* immediate state save.
+	 *
+	 * Tearoff settings are otherwise only stored during
+	 * save_ardour_state(). The mon-section may or may not
+	 * exist at that point.
+	 */
 
-	if (_monitor_section) {
-
-		XMLNode* ui_node = Config->extra_xml(X_("UI"));
-		/* immediate state save.
-		 *
-		 * Tearoff settings are otherwise only stored during
-		 * save_ardour_state(). The mon-section may or may not
-		 * exist at that point.
-		 * */
-		if (ui_node) {
-			XMLNode* tearoff_node = ui_node->child (X_("Tearoffs"));
-			if (tearoff_node) {
-				tearoff_node->remove_nodes_and_delete (X_("monitor-section"));
-				XMLNode* t = new XMLNode (X_("monitor-section"));
-				_monitor_section->tearoff().add_state (*t);
-				tearoff_node->add_child_nocopy (*t);
-			}
+	if (ui_node) {
+		XMLNode* tearoff_node = ui_node->child (X_("Tearoffs"));
+		if (tearoff_node) {
+			tearoff_node->remove_nodes_and_delete (X_("monitor-section"));
+			XMLNode* t = new XMLNode (X_("monitor-section"));
+			_monitor_section.tearoff().add_state (*t);
+			tearoff_node->add_child_nocopy (*t);
 		}
-		monitor_section_detached ();
-		out_packer.remove (_monitor_section->tearoff());
-		_monitor_section->set_session (0);
 	}
+
+	monitor_section_detached ();
+	out_packer.remove (_monitor_section.tearoff());
+	_monitor_section.set_session (0);
 }
 
 void

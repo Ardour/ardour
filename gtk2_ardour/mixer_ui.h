@@ -52,6 +52,7 @@
 
 #include "axis_provider.h"
 #include "enums.h"
+#include "monitor_section.h"
 #include "route_processor_selection.h"
 
 namespace ARDOUR {
@@ -107,7 +108,7 @@ public:
 	void maximise_mixer_space();
 	void restore_mixer_space();
 
-	MonitorSection* monitor_section() const { return _monitor_section; }
+	MonitorSection& monitor_section() { return _monitor_section; }
 
 	void deselect_all_strip_processors();
 	void delete_processors();
@@ -287,8 +288,8 @@ private:
 	void track_column_click (gint);
 	void build_track_menu ();
 
-	MonitorSection* _monitor_section;
-	PluginSelector    *_plugin_selector;
+	MonitorSection   _monitor_section;
+	PluginSelector *_plugin_selector;
 
 	void stripable_property_changed (const PBD::PropertyChange& what_changed, boost::weak_ptr<ARDOUR::Stripable> ws);
 	void route_group_property_changed (ARDOUR::RouteGroup *, const PBD::PropertyChange &);
@@ -378,10 +379,7 @@ private:
 
 	friend class MixerGroupTabs;
 
-	void set_monitor_action_sensitivity (bool);
-
 	void monitor_section_going_away ();
-
 	void monitor_section_attached ();
 	void monitor_section_detached ();
 

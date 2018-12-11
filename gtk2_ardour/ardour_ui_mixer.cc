@@ -27,8 +27,8 @@
 
 #include "actions.h"
 #include "ardour_ui.h"
-#include "mixer_ui.h"
 #include "meterbridge.h"
+#include "mixer_ui.h"
 
 #include "pbd/i18n.h"
 

@@ -631,17 +631,6 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("MonitorMenu"), _("Monitor Section"));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	Glib::RefPtr<ActionGroup> monitor_actions = ActionManager::create_action_group (global_bindings, X_("Monitor"));
-
-	act = ActionManager::register_toggle_action (monitor_actions, X_("UseMonitorSection"), _("Use Monitor Section"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_use_monitor_section));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (monitor_actions, "monitor-mono", _("Monitor Section: Mono"), sigc::mem_fun (*this, &ARDOUR_UI::monitor_mono));
-	act->set_sensitive(false);
-	act = ActionManager::register_toggle_action (monitor_actions, "monitor-cut-all", _("Monitor Section: Mute"), sigc::mem_fun (*this, &ARDOUR_UI::monitor_cut_all));
-	act->set_sensitive(false);
-	act = ActionManager::register_toggle_action (monitor_actions, "monitor-dim-all", _("Monitor Section: Dim"), sigc::mem_fun (*this, &ARDOUR_UI::monitor_dim_all));
-	act->set_sensitive(false);
-
 	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleVideoSync"), _("Sync Startup to Video"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_video_sync));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleTimeMaster"), _("Time Master"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_time_master));
@@ -820,11 +809,9 @@ ARDOUR_UI::save_ardour_state ()
 
 	XMLNode* tearoff_node = new XMLNode (X_("Tearoffs"));
 
-	if (mixer->monitor_section()) {
-		XMLNode* t = new XMLNode (X_("monitor-section"));
-		mixer->monitor_section()->tearoff().add_state (*t);
-		tearoff_node->add_child_nocopy (*t);
-	}
+	XMLNode* t = new XMLNode (X_("monitor-section"));
+	mixer->monitor_section().tearoff().add_state (*t);
+	tearoff_node->add_child_nocopy (*t);
 
 	window_node->add_child_nocopy (*tearoff_node);
 

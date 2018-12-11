@@ -17,6 +17,9 @@
 
 */
 
+#ifndef __gtk2_ardour_monitor_section_h__
+#define __gtk2_ardour_monitor_section_h__
+
 #include <gtkmm/box.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/sizegroup.h>
@@ -44,7 +47,7 @@ namespace ArdourWidgets {
 class MonitorSection : public RouteUI, public Gtk::EventBox
 {
 public:
-	MonitorSection (ARDOUR::Session*);
+	MonitorSection ();
 	~MonitorSection ();
 
 	void set_session (ARDOUR::Session*);
@@ -54,6 +57,8 @@ public:
 	std::string state_id() const;
 
 	PluginSelector* plugin_selector() { return _plugin_selector; }
+
+	void use_others_actions ();
 
 private:
 	Gtk::HBox hpacker;
@@ -108,31 +113,9 @@ private:
 	boost::shared_ptr<ARDOUR::MonitorProcessor> _monitor;
 	boost::shared_ptr<ARDOUR::Route> _route;
 
-	enum MonitorActions {
-		MonitorMono,
-		MonitorCutAll,
-		MonitorDimAll,
-		ToggleExclusiveSolo,
-		ToggleMuteOverridesSolo,
-		SoloUseInPlace,
-		SoloUseAFL,
-		SoloUsePFL,
-		ToggleMonitorProcessorBox
-	};
-
-	enum ChannelActions {
-		CutChannel,
-		DimChannel,
-		SoloChannel,
-		InvertChannel
-	};
-
 	Glib::RefPtr<Gtk::ActionGroup> monitor_actions;
 	Glib::RefPtr<Gtk::ActionGroup> solo_actions;
 	void register_actions ();
-
-	static void action_proxy0 (enum MonitorActions);
-	static void action_proxy1 (enum ChannelActions, uint32_t);
 
 	void cut_channel (uint32_t);
 	void dim_channel (uint32_t);
@@ -208,4 +191,8 @@ private:
 	void load_bindings ();
 	bool enter_handler (GdkEventCrossing*);
 	bool leave_handler (GdkEventCrossing*);
+
+	void toggle_use_monitor_section ();
 };
+
+#endif /* __gtk2_ardour_monitor_section_h__ */

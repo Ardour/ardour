@@ -75,6 +75,13 @@ ARDOUR_UI::we_have_dependents ()
 	}
 
 	install_actions ();
+	/* The monitor section relies on at least 1 action defined by us. Since that
+	 * action now exists, give it a chance to use it.
+	 */
+	mixer->monitor_section().use_others_actions ();
+
+	/* Create "static" actions that apply to all ProcessorBoxes
+	 */
 	ProcessorBox::register_actions ();
 
 	/* Global, editor, mixer, processor box actions are defined now. Link
