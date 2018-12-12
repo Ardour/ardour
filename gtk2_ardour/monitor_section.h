@@ -182,7 +182,7 @@ private:
 	uint32_t count_processors ();
 
 	void processors_changed (ARDOUR::RouteProcessorChange);
-	Glib::RefPtr<Gtk::Action> proctoggle;
+	Glib::RefPtr<Gtk::ToggleAction> proctoggle;
 	bool _ui_initialized;
 
 	Gtkmm2ext::Bindings* bindings;

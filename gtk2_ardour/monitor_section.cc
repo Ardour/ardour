@@ -184,7 +184,7 @@ MonitorSection::MonitorSection ()
 	toggle_processorbox_button.set_name (X_("monitor section processors toggle"));
 	set_tooltip (&toggle_processorbox_button, _("Allow one to add monitor effect processors"));
 
-	proctoggle = ActionManager::get_action (X_("Monitor"), X_("toggle-monitor-processor-box"));
+	proctoggle = ActionManager::get_toggle_action (X_("Monitor"), X_("toggle-monitor-processor-box"));
 	toggle_processorbox_button.set_related_action (proctoggle);
 
 	/* Knobs */
@@ -551,7 +551,7 @@ MonitorSection::leave_handler (GdkEventCrossing* ev)
 void
 MonitorSection::update_processor_box ()
 {
-	bool show_processor_box = Glib::RefPtr<ToggleAction>::cast_dynamic (proctoggle)->get_active ();
+	bool show_processor_box = proctoggle->get_active ();
 
 	if (count_processors () > 0 && !show_processor_box) {
 		toggle_processorbox_button.set_name (X_("monitor section processors present"));
@@ -814,11 +814,8 @@ MonitorSection::toggle_mute_overrides_solo ()
 		return;
 	}
 
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Solo"), "toggle-mute-overrides-solo");
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		Config->set_solo_mute_override (tact->get_active());
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Solo"), "toggle-mute-overrides-solo");
+	Config->set_solo_mute_override (tact->get_active());
 }
 
 void
@@ -828,12 +825,8 @@ MonitorSection::dim_all ()
 		return;
 	}
 
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), "monitor-dim-all");
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		_monitor->set_dim_all (tact->get_active());
-	}
-
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Monitor"), "monitor-dim-all");
+	_monitor->set_dim_all (tact->get_active());
 }
 
 void
@@ -843,11 +836,8 @@ MonitorSection::cut_all ()
 		return;
 	}
 
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), "monitor-cut-all");
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		_monitor->set_cut_all (tact->get_active());
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Monitor"), "monitor-cut-all");
+	_monitor->set_cut_all (tact->get_active());
 }
 
 void
@@ -857,11 +847,8 @@ MonitorSection::mono ()
 		return;
 	}
 
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), "monitor-mono");
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		_monitor->set_mono (tact->get_active());
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Monitor"), "monitor-mono");
+	_monitor->set_mono (tact->get_active());
 }
 
 void
@@ -874,11 +861,8 @@ MonitorSection::cut_channel (uint32_t chn)
 	char buf[64];
 	snprintf (buf, sizeof (buf), "monitor-cut-%u", chn);
 
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), buf);
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		_monitor->set_cut (chn, tact->get_active());
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Monitor"), buf);
+	_monitor->set_cut (chn, tact->get_active());
 }
 
 void
@@ -891,12 +875,8 @@ MonitorSection::dim_channel (uint32_t chn)
 	char buf[64];
 	snprintf (buf, sizeof (buf), "monitor-dim-%u", chn);
 
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), buf);
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		_monitor->set_dim (chn, tact->get_active());
-	}
-
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Monitor"), buf);
+	_monitor->set_dim (chn, tact->get_active());
 }
 
 void
@@ -909,11 +889,8 @@ MonitorSection::solo_channel (uint32_t chn)
 	char buf[64];
 	snprintf (buf, sizeof (buf), "monitor-solo-%u", chn);
 
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), buf);
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		_monitor->set_solo (chn, tact->get_active());
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Monitor"), buf);
+	_monitor->set_solo (chn, tact->get_active());
 
 }
 
@@ -927,11 +904,8 @@ MonitorSection::invert_channel (uint32_t chn)
 	char buf[64];
 	snprintf (buf, sizeof (buf), "monitor-invert-%u", chn);
 
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), buf);
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		_monitor->set_polarity (chn, tact->get_active());
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Monitor"), buf);
+	_monitor->set_polarity (chn, tact->get_active());
 }
 
 void
@@ -1003,23 +977,17 @@ MonitorSection::solo_use_in_place ()
 		 active.
 		 */
 
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Solo"), X_("solo-use-in-place"));
-
-	if (act) {
-		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
-		if (ract) {
-			if (!ract->get_active ()) {
-				/* We are turning SiP off, which means that AFL or PFL will be turned on
-					 shortly; don't update the solo model in the mean time, as if the currently
-					 configured listen position is not the one that is about to be turned on,
-					 things will go wrong.
-					 */
-				_inhibit_solo_model_update = true;
-			}
-			Config->set_solo_control_is_listen_control (!ract->get_active());
-			_inhibit_solo_model_update = false;
-		}
+	Glib::RefPtr<RadioAction> ract = ActionManager::get_radio_action (X_("Solo"), X_("solo-use-in-place"));
+	if (!ract->get_active ()) {
+		/* We are turning SiP off, which means that AFL or PFL will be turned on
+		   shortly; don't update the solo model in the mean time, as if the currently
+		   configured listen position is not the one that is about to be turned on,
+		   things will go wrong.
+		*/
+		_inhibit_solo_model_update = true;
 	}
+	Config->set_solo_control_is_listen_control (!ract->get_active());
+	_inhibit_solo_model_update = false;
 }
 
 void
@@ -1030,15 +998,10 @@ MonitorSection::solo_use_afl ()
 		 active.
 		 */
 
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Solo"), X_("solo-use-afl"));
-	if (act) {
-		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
-		if (ract) {
-			if (ract->get_active()) {
-				Config->set_solo_control_is_listen_control (true);
-				Config->set_listen_position (AfterFaderListen);
-			}
-		}
+	Glib::RefPtr<RadioAction> ract = ActionManager::get_radio_action (X_("Solo"), X_("solo-use-afl"));
+	if (ract->get_active()) {
+		Config->set_solo_control_is_listen_control (true);
+		Config->set_listen_position (AfterFaderListen);
 	}
 }
 
@@ -1050,15 +1013,10 @@ MonitorSection::solo_use_pfl ()
 	   active.
 	*/
 
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Solo"), X_("solo-use-pfl"));
-	if (act) {
-		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
-		if (ract) {
-			if (ract->get_active()) {
-				Config->set_solo_control_is_listen_control (true);
-				Config->set_listen_position (PreFaderListen);
-			}
-		}
+	Glib::RefPtr<RadioAction> ract = ActionManager::get_radio_action (X_("Solo"), X_("solo-use-pfl"));
+	if (ract->get_active()) {
+		Config->set_solo_control_is_listen_control (true);
+		Config->set_listen_position (PreFaderListen);
 	}
 }
 
@@ -1070,7 +1028,7 @@ MonitorSection::update_solo_model ()
 	}
 
 	const char* action_name = 0;
-	Glib::RefPtr<Action> act;
+	Glib::RefPtr<RadioAction> ract;
 
 	if (Config->get_solo_control_is_listen_control()) {
 		switch (Config->get_listen_position()) {
@@ -1085,22 +1043,18 @@ MonitorSection::update_solo_model ()
 		action_name = X_("solo-use-in-place");
 	}
 
-	act = ActionManager::get_action (X_("Solo"), action_name);
-	if (act) {
+	ract = ActionManager::get_radio_action (X_("Solo"), action_name);
 
-		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
-		if (ract) {
-			/* because these are radio buttons, one of them will be
-				 active no matter what. to trigger a change in the
-				 action so that the view picks it up, toggle it.
-				 */
-			if (ract->get_active()) {
-				ract->set_active (false);
-			}
-			ract->set_active (true);
-		}
+	/* because these are radio buttons, one of them will be
+	   active no matter what. to trigger a change in the
+	   action so that the view picks it up, toggle it.
+	*/
 
+	if (ract->get_active()) {
+		ract->set_active (false);
 	}
+
+	ract->set_active (true);
 }
 
 void
@@ -1115,29 +1069,14 @@ MonitorSection::map_state ()
 	Glib::RefPtr<Action> act;
 	Glib::RefPtr<ToggleAction> tact;
 
-	act = ActionManager::get_action (X_("Monitor"), "monitor-cut-all");
-	if (act) {
-		tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-		if (tact) {
-			tact->set_active (_monitor->cut_all());
-		}
-	}
+	tact = ActionManager::get_toggle_action (X_("Monitor"), "monitor-cut-all");
+	tact->set_active (_monitor->cut_all());
 
-	act = ActionManager::get_action (X_("Monitor"), "monitor-dim-all");
-	if (act) {
-		tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-		if (tact) {
-			tact->set_active (_monitor->dim_all());
-		}
-	}
+	tact = ActionManager::get_toggle_action (X_("Monitor"), "monitor-dim-all");
+	tact->set_active (_monitor->dim_all());
 
-	act = ActionManager::get_action (X_("Monitor"), "monitor-mono");
-	if (act) {
-		tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-		if (tact) {
-			tact->set_active (_monitor->mono());
-		}
-	}
+	tact = ActionManager::get_toggle_action (X_("Monitor"), "monitor-mono");
+	tact->set_active (_monitor->mono());
 
 	uint32_t nchans = _monitor->output_streams().n_audio();
 
@@ -1148,40 +1087,20 @@ MonitorSection::map_state ()
 		char action_name[32];
 
 		snprintf (action_name, sizeof (action_name), "monitor-cut-%u", n);
-		act = ActionManager::get_action (X_("Monitor"), action_name);
-		if (act) {
-			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-			if (tact) {
-				tact->set_active (_monitor->cut (n));
-			}
-		}
+		tact = ActionManager::get_toggle_action (X_("Monitor"), action_name);
+		tact->set_active (_monitor->cut (n));
 
 		snprintf (action_name, sizeof (action_name), "monitor-dim-%u", n);
-		act = ActionManager::get_action (X_("Monitor"), action_name);
-		if (act) {
-			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-			if (tact) {
-				tact->set_active (_monitor->dimmed (n));
-			}
-		}
+		tact = ActionManager::get_toggle_action (X_("Monitor"), action_name);
+		tact->set_active (_monitor->dimmed (n));
 
 		snprintf (action_name, sizeof (action_name), "monitor-solo-%u", n);
-		act = ActionManager::get_action (X_("Monitor"), action_name);
-		if (act) {
-			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-			if (tact) {
-				tact->set_active (_monitor->soloed (n));
-			}
-		}
+		tact = ActionManager::get_toggle_action (X_("Monitor"), action_name);
+		tact->set_active (_monitor->soloed (n));
 
 		snprintf (action_name, sizeof (action_name), "monitor-invert-%u", n);
-		act = ActionManager::get_action (X_("Monitor"), action_name);
-		if (act) {
-			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-			if (tact) {
-				tact->set_active (_monitor->inverted (n));
-			}
-		}
+		tact = ActionManager::get_toggle_action (X_("Monitor"), action_name);
+		tact->set_active (_monitor->inverted (n));
 	}
 }
 
