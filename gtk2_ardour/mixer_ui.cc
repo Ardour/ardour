@@ -1526,14 +1526,11 @@ Mixer_UI::redisplay_track_list ()
 		//show/hide the channelstrip VCA assign buttons on channelstrips:
 		UIConfiguration::instance().set_mixer_strip_visibility (VisibilityGroup::add_element (UIConfiguration::instance().get_mixer_strip_visibility(), X_("VCA")));
 
-		Glib::RefPtr<Action> act = ActionManager::get_action ("Mixer", "ToggleVCAPane");
-		assert (act);
+		Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action ("Mixer", "ToggleVCAPane");
 		act->set_sensitive (true);
 
 		//if we were showing VCAs before, show them now:
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		assert (tact);
-		showhide_vcas (  tact->get_active () );
+		showhide_vcas (act->get_active ());
 	}
 
 	_group_tabs->set_dirty ();
@@ -1926,11 +1923,8 @@ Mixer_UI::route_group_property_changed (RouteGroup* group, const PropertyChange&
 void
 Mixer_UI::toggle_mixer_list ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action ("Mixer", "ToggleMixerList");
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		showhide_mixer_list (tact->get_active());
-	}
+	Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action ("Mixer", "ToggleMixerList");
+	showhide_mixer_list (act->get_active());
 }
 
 void
@@ -1946,11 +1940,8 @@ Mixer_UI::showhide_mixer_list (bool yn)
 void
 Mixer_UI::toggle_monitor_section ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action ("Mixer", "ToggleMonitorSection");
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		showhide_monitor_section (tact->get_active());
-	}
+	Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action ("Mixer", "ToggleMonitorSection");
+	showhide_monitor_section (act->get_active());
 }
 
 
@@ -1971,11 +1962,8 @@ Mixer_UI::showhide_monitor_section (bool yn)
 void
 Mixer_UI::toggle_vcas ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action ("Mixer", "ToggleVCAPane");
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		showhide_vcas (tact->get_active());
-	}
+	Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action ("Mixer", "ToggleVCAPane");
+	showhide_vcas (act->get_active());
 }
 
 void
@@ -1992,11 +1980,8 @@ Mixer_UI::showhide_vcas (bool yn)
 void
 Mixer_UI::toggle_mixbuses ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action ("Mixer", "ToggleMixbusPane");
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		showhide_mixbuses (tact->get_active());
-	}
+	Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action ("Mixer", "ToggleMixbusPane");
+	showhide_mixbuses (act->get_active());
 }
 
 void
@@ -2208,58 +2193,41 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 	node.get_property ("show-mixer", _visible);
 
 	if (node.get_property ("maximised", yn)) {
-		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleMaximalMixer"));
-		assert (act);
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		bool fs = tact && tact->get_active();
+		Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action (X_("Common"), X_("ToggleMaximalMixer"));
+		bool fs = act && act->get_active();
 		if (yn ^ fs) {
 			ActionManager::do_action ("Common", "ToggleMaximalMixer");
 		}
 	}
 
 	if (node.get_property ("show-mixer-list", yn)) {
-		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Mixer"), X_("ToggleMixerList"));
-		assert (act);
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		assert (tact);
+		Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action (X_("Mixer"), X_("ToggleMixerList"));
 
 		/* do it twice to force the change */
-		tact->set_active (!yn);
-		tact->set_active (yn);
+		act->set_active (!yn);
+		act->set_active (yn);
 	}
 
 	if (node.get_property ("monitor-section-visible", yn)) {
-		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Mixer"), X_("ToggleMonitorSection"));
-		assert (act);
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		assert (tact);
-
+		Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action (X_("Mixer"), X_("ToggleMonitorSection"));
 		/* do it twice to force the change */
-		tact->set_active (!yn);
-		tact->set_active (yn);
+		act->set_active (!yn);
+		act->set_active (yn);
 	}
 
 	if (node.get_property ("show-vca-pane", yn)) {
-		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Mixer"), X_("ToggleVCAPane"));
-		assert (act);
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		assert (tact);
-
+		Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action (X_("Mixer"), X_("ToggleVCAPane"));
 		/* do it twice to force the change */
-		tact->set_active (!yn);
-		tact->set_active (yn);
+		act->set_active (!yn);
+		act->set_active (yn);
 	}
 
 #ifdef MIXBUS
 	if (node.get_property ("show-mixbus-pane", yn)) {
-		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Mixer"), X_("ToggleMixbusPane"));
-		assert (act);
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		assert (tact);
-
+		Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action (X_("Mixer"), X_("ToggleMixbusPane"));
 		/* do it twice to force the change */
-		tact->set_active (!yn);
-		tact->set_active (yn);
+		act->set_active (!yn);
+		act->set_active (yn);
 	}
 
 #endif
@@ -2352,22 +2320,18 @@ Mixer_UI::get_state ()
 	node->set_property ("show-mixer", _visible);
 	node->set_property ("maximised", _maximised);
 
-	Glib::RefPtr<Action> act = ActionManager::get_action ("Mixer", "ToggleMixerList");
-	assert (act); Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-	assert (tact); node->set_property ("show-mixer-list", tact->get_active ());
+	Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action ("Mixer", "ToggleMixerList");
+	node->set_property ("show-mixer-list", act->get_active ());
 
-	act = ActionManager::get_action ("Mixer", "ToggleMonitorSection");
-	assert (act); tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-	assert (tact); node->set_property ("monitor-section-visible", tact->get_active ());
+	act = ActionManager::get_toggle_action ("Mixer", "ToggleMonitorSection");
+	node->set_property ("monitor-section-visible", act->get_active ());
 
-	act = ActionManager::get_action ("Mixer", "ToggleVCAPane");
-	assert (act); tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-	assert (tact); node->set_property ("show-vca-pane", tact->get_active ());
+	act = ActionManager::get_toggle_action ("Mixer", "ToggleVCAPane");
+	node->set_property ("show-vca-pane", act->get_active ());
 
 #ifdef MIXBUS
-	act = ActionManager::get_action ("Mixer", "ToggleMixbusPane");
-	assert (act); tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-	assert (tact); node->set_property ("show-mixbus-pane", tact->get_active ());
+	act = ActionManager::get_toggle_action ("Mixer", "ToggleMixbusPane");
+	node->set_property ("show-mixbus-pane", act->get_active ());
 #endif
 
 	return *node;
