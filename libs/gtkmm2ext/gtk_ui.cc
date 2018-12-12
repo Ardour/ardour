@@ -617,27 +617,14 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 void
 UI::show_errors ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-log-window"));
-	if (!act) {
-		return;
-	}
-
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-        if (tact) {
-                tact->set_active ();
-        }
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("toggle-log-window"));
+	tact->set_active ();
 }
 
 void
 UI::toggle_errors ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-log-window"));
-	if (!act) {
-		return;
-	}
-
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("toggle-log-window"));
 	if (tact->get_active()) {
 		errors->set_position (WIN_POS_MOUSE);
 		errors->show ();
