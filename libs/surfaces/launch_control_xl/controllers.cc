@@ -345,23 +345,23 @@ LaunchControlXL::build_maps ()
 	        boost::bind (&LaunchControlXL::button_device_long_press, this));
 
 
-	if (!device_mode()) {	/* mixer mode */
-		MAKE_SELECT_BUTTON_PRESS(SelectLeft, 106, 46, boost::bind (&LaunchControlXL::button_select_left, this));
-		MAKE_SELECT_BUTTON_PRESS(SelectRight, 107, 47, boost::bind (&LaunchControlXL::button_select_right, this));
+	/* Cancel all mute / solo is available in both modes */
 
-		//MAKE_TRACK_STATE_BUTTON_PRESS(Mute, 106, 41, boost::bind (&LaunchControlXL::button_mute, this));
-
-		MAKE_TRACK_STATE_BUTTON_PRESS_RELEASE_LONG(Mute, 106, 41,
+	MAKE_TRACK_STATE_BUTTON_PRESS_RELEASE_LONG(Mute, 106, 41,
 			boost::bind (&LaunchControlXL::relax, this) ,
 			boost::bind (&LaunchControlXL::button_mute, this),
 	        boost::bind (&LaunchControlXL::button_mute_long_press, this));
 
-		MAKE_TRACK_STATE_BUTTON_PRESS_RELEASE_LONG(Solo, 107, 42,
+	MAKE_TRACK_STATE_BUTTON_PRESS_RELEASE_LONG(Solo, 107, 42,
 			boost::bind (&LaunchControlXL::relax, this) ,
 			boost::bind (&LaunchControlXL::button_solo, this),
 	        boost::bind (&LaunchControlXL::button_solo_long_press, this));
 
-		//MAKE_TRACK_STATE_BUTTON_PRESS(Solo, 107, 42, boost::bind (&LaunchControlXL::button_solo, this));
+
+	if (!device_mode()) {	/* mixer mode */
+		MAKE_SELECT_BUTTON_PRESS(SelectLeft, 106, 46, boost::bind (&LaunchControlXL::button_select_left, this));
+		MAKE_SELECT_BUTTON_PRESS(SelectRight, 107, 47, boost::bind (&LaunchControlXL::button_select_right, this));
+
 		MAKE_TRACK_STATE_BUTTON_PRESS(Record, 108, 43, boost::bind (&LaunchControlXL::button_record, this));
 
 	} else {	/* device mode */
@@ -866,7 +866,7 @@ LaunchControlXL::knob_pan(uint8_t n)
 
 	if (buttons_down.find(Device) != buttons_down.end()) { // Device button hold
 #ifdef MIXBUS
-		ac = stripable[n]->filter_freq_controllable(true);
+		ac = stripable[n]->comp_threshold_controllable();
 #else
 		ac = stripable[n]->pan_width_control();
 #endif
