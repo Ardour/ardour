@@ -1006,7 +1006,7 @@ private:
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_proc_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_ontop_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_timecode_action;
-	Glib::RefPtr<Gtk::ToggleAction> xjadeo_sample_action;
+	Glib::RefPtr<Gtk::ToggleAction> xjadeo_frame_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_osdbg_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_fullscreen_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_letterbox_action;

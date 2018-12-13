@@ -606,7 +606,7 @@ Editor::register_actions ()
 
 	xjadeo_ontop_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("toggle-vmon-ontop"), _("Always on Top"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 1)));
 	xjadeo_timecode_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("toggle-vmon-timecode"), _("Timecode"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 2)));
-	xjadeo_sample_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("toggle-vmon-frame"), _("Frame number"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 3)));
+	xjadeo_frame_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("toggle-vmon-frame"), _("Frame number"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 3)));
 	xjadeo_osdbg_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("toggle-vmon-osdbg"), _("Timecode Background"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 4)));
 	xjadeo_fullscreen_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("toggle-vmon-fullscreen"), _("Fullscreen"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 5)));
 	xjadeo_letterbox_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("toggle-vmon-letterbox"), _("Letterbox"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 6)));
@@ -647,8 +647,8 @@ Editor::register_actions ()
 	xjadeo_ontop_action->set_sensitive (false);
 	xjadeo_timecode_action->set_active (false);
 	xjadeo_timecode_action->set_sensitive (false);
-	xjadeo_sample_action->set_active (false);
-	xjadeo_sample_action->set_sensitive (false);
+	xjadeo_frame_action->set_active (false);
+	xjadeo_frame_action->set_sensitive (false);
 	xjadeo_osdbg_action->set_active (false);
 	xjadeo_osdbg_action->set_sensitive (false);
 	xjadeo_fullscreen_action->set_active (false);
@@ -918,7 +918,7 @@ Editor::toggle_xjadeo_proc (int state)
 	bool onoff = xjadeo_proc_action->get_active();
 	xjadeo_ontop_action->set_sensitive(onoff);
 	xjadeo_timecode_action->set_sensitive(onoff);
-	xjadeo_sample_action->set_sensitive(onoff);
+	xjadeo_frame_action->set_sensitive(onoff);
 	xjadeo_osdbg_action->set_sensitive(onoff);
 	xjadeo_fullscreen_action->set_sensitive(onoff);
 	xjadeo_letterbox_action->set_sensitive(onoff);
@@ -947,7 +947,7 @@ Editor::toggle_xjadeo_viewoption (int what, int state)
 			action = xjadeo_timecode_action;
 			break;
 		case 3:
-			action = xjadeo_sample_action;
+			action = xjadeo_frame_action;
 			break;
 		case 4:
 			action = xjadeo_osdbg_action;
@@ -989,7 +989,7 @@ Editor::set_xjadeo_viewoption (int what)
 			action = xjadeo_timecode_action;
 			break;
 		case 3:
-			action = xjadeo_sample_action;
+			action = xjadeo_frame_action;
 			break;
 		case 4:
 			action = xjadeo_osdbg_action;
