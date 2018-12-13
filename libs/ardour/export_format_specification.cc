@@ -205,7 +205,11 @@ ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification 
 	, session (other.session)
 	, _silence_beginning (other.session)
 	, _silence_end (other.session)
+	, _with_toc (other._with_toc)
+	, _with_cue (other._with_cue)
+	, _with_mp4chaps (other._with_mp4chaps)
 	, _soundcloud_upload (false)
+	, _command (other._command)
 	, _analyse (other._analyse)
 	, _codec_quality (other._codec_quality)
 {
