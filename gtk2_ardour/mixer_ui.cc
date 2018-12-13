@@ -3151,7 +3151,7 @@ Mixer_UI::register_actions ()
 	ActionManager::register_toggle_action (group, X_("ToggleVCAPane"), _("Mixer: Show VCAs"), sigc::mem_fun (*this, &Mixer_UI::toggle_vcas));
 
 #ifdef MIXBUS
-	ActionManager::register_toggle_action (group, X_("ToggleMixbusPane"), _("Mixer: Show Mixbuses"), sigc::mem_fun (*this, &Mixer_UI::toggle_mixbus_pane));
+	ActionManager::register_toggle_action (group, X_("ToggleMixbusPane"), _("Mixer: Show Mixbuses"), sigc::mem_fun (*this, &Mixer_UI::toggle_mixbuses));
 #endif
 
 	ActionManager::register_toggle_action (group, X_("ToggleMonitorSection"), _("Mixer: Show Monitor Section"), sigc::mem_fun (*this, &Mixer_UI::toggle_monitor_section));
