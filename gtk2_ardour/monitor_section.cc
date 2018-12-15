@@ -91,7 +91,7 @@ MonitorSection::MonitorSection ()
 	 * we do not need to worry about self-destructing when the Route (the
 	 * monitor out) is destroyed.
 	 */
-	
+
 	using namespace Menu_Helpers;
 
 	Glib::RefPtr<Action> act;
@@ -103,7 +103,7 @@ MonitorSection::MonitorSection ()
 	channel_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
 
 	_plugin_selector = new PluginSelector (PluginManager::instance());
-	insert_box = new ProcessorBox (_session, boost::bind (&MonitorSection::plugin_selector, this), _rr_selection, 0);
+	insert_box = new ProcessorBox (0, boost::bind (&MonitorSection::plugin_selector, this), _rr_selection, 0);
 	insert_box->set_no_show_all ();
 	insert_box->show ();
 	// TODO allow keyboard shortcuts in ProcessorBox
@@ -583,6 +583,7 @@ MonitorSection::set_session (Session* s)
 {
 	RouteUI::set_session (s);
 	_plugin_selector->set_session (_session);
+	insert_box->set_session (_session);
 
 	if (_session) {
 
