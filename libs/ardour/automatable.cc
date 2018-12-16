@@ -65,12 +65,12 @@ Automatable::Automatable (const Automatable& other)
 	, _a_session (other._a_session)
 	, _automated_controls (new ControlList)
 {
-        Glib::Threads::Mutex::Lock lm (other._control_lock);
+	Glib::Threads::Mutex::Lock lm (other._control_lock);
 
-        for (Controls::const_iterator i = other._controls.begin(); i != other._controls.end(); ++i) {
-                boost::shared_ptr<Evoral::Control> ac (control_factory (i->first));
+	for (Controls::const_iterator i = other._controls.begin(); i != other._controls.end(); ++i) {
+		boost::shared_ptr<Evoral::Control> ac (control_factory (i->first));
 		add_control (ac);
-        }
+	}
 }
 
 Automatable::~Automatable ()
@@ -148,7 +148,7 @@ Automatable::load_automation (const string& path)
 
 	return 0;
 
-  bad:
+bad:
 	error << string_compose(_("cannot load automation data from %2"), fullpath) << endmsg;
 	controls().clear ();
 	::fclose (in);
@@ -270,11 +270,11 @@ Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter le
 			boost::shared_ptr<AutomationControl> existing = automation_control (param);
 
 			if (existing) {
-                                existing->alist()->set_state (**niter, 3000);
+				existing->alist()->set_state (**niter, 3000);
 			} else {
-                                boost::shared_ptr<Evoral::Control> newcontrol = control_factory(param);
+				boost::shared_ptr<Evoral::Control> newcontrol = control_factory(param);
 				add_control (newcontrol);
-                                boost::shared_ptr<AutomationList> al (new AutomationList(**niter, param));
+				boost::shared_ptr<AutomationList> al (new AutomationList(**niter, param));
 				newcontrol->set_list(al);
 			}
 
