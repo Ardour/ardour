@@ -879,27 +879,6 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 	bufs.set_count(ChanCount::max(bufs.count(), _configured_out));
 
 	if (with_auto) {
-
-#if 0
-		uint32_t n = 0;
-
-		for (Controls::const_iterator li = controls().begin(); li != controls().end(); ++li, ++n) {
-
-			/* boost::dynamic_pointer_cast<> has significant overhead, since we know that
-			 * all controls are AutomationControl and their lists - if any - are AutomationList,
-			 * we can use static_cast<>. This yields a speedup of 2.8/4.6 over to the
-			 * previous code (measuerd with VeeSeeVSTRack 10k parameters, optimized build) */
-			AutomationControl& c = static_cast<AutomationControl&> (*(li->second));
-			boost::shared_ptr<const Evoral::ControlList> clist (c.list());
-			if (clist && (static_cast<AutomationList const&> (*clist)).automation_playback ()) {
-				bool valid;
-				const float val = c.list()->rt_safe_eval (start, valid);
-				if (valid) {
-					c.set_value_unchecked(val);
-				}
-			}
-		}
-#else
 		boost::shared_ptr<ControlList> cl = _automated_controls.reader ();
 		for (ControlList::const_iterator ci = cl->begin(); ci != cl->end(); ++ci) {
 			AutomationControl& c = *(ci->get());
@@ -913,7 +892,6 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 				}
 			}
 		}
-#endif
 	}
 
 	/* Calculate if, and how many samples we need to collect for analysis */
