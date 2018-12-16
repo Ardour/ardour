@@ -589,7 +589,7 @@ PluginInsert::set_block_size (pframes_t nframes)
 }
 
 void
-PluginInsert::automation_run (samplepos_t start, pframes_t nframes)
+PluginInsert::automation_run (samplepos_t start, pframes_t nframes, bool only_active)
 {
 	// XXX does not work when rolling backwards
 	if (_loop_location && nframes > 0) {
@@ -607,13 +607,13 @@ PluginInsert::automation_run (samplepos_t start, pframes_t nframes)
 			}
 			samplecnt_t move = std::min ((samplecnt_t)nframes, loop_end - start_pos);
 
-			Automatable::automation_run (start_pos, move);
+			Automatable::automation_run (start_pos, move, only_active);
 			remain -= move;
 			start_pos += move;
 		}
 		return;
 	}
-	Automatable::automation_run (start, nframes);
+	Automatable::automation_run (start, nframes, only_active);
 }
 
 bool
@@ -880,6 +880,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 
 	if (with_auto) {
 
+#if 0
 		uint32_t n = 0;
 
 		for (Controls::const_iterator li = controls().begin(); li != controls().end(); ++li, ++n) {
@@ -898,6 +899,21 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 				}
 			}
 		}
+#else
+		boost::shared_ptr<ControlList> cl = _automated_controls.reader ();
+		for (ControlList::const_iterator ci = cl->begin(); ci != cl->end(); ++ci) {
+			AutomationControl& c = *(ci->get());
+			boost::shared_ptr<const Evoral::ControlList> clist (c.list());
+			/* we still need to check for Touch and Latch */
+			if (clist && (static_cast<AutomationList const&> (*clist)).automation_playback ()) {
+				bool valid;
+				const float val = c.list()->rt_safe_eval (start, valid);
+				if (valid) {
+					c.set_value_unchecked(val);
+				}
+			}
+		}
+#endif
 	}
 
 	/* Calculate if, and how many samples we need to collect for analysis */
@@ -1188,7 +1204,7 @@ PluginInsert::bypass (BufferSet& bufs, pframes_t nframes)
 void
 PluginInsert::silence (samplecnt_t nframes, samplepos_t start_sample)
 {
-	automation_run (start_sample, nframes); // evaluate automation only
+	automation_run (start_sample, nframes, true); // evaluate automation only
 
 	if (!active ()) {
 		// XXX delaybuffers need to be offset by nframes
@@ -1254,7 +1270,7 @@ PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		// XXX should call ::silence() to run plugin(s) for consistent load.
 		// We'll need to change this anyway when bypass can be automated
 		bypass (bufs, nframes);
-		automation_run (start_sample, nframes); // evaluate automation only
+		automation_run (start_sample, nframes, true); // evaluate automation only
 		_delaybuffers.flush ();
 	}
 

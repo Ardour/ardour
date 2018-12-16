@@ -55,13 +55,15 @@ const string Automatable::xml_node_name = X_("Automation");
 
 Automatable::Automatable(Session& session)
 	: _a_session(session)
+	, _automated_controls (new ControlList)
 {
 }
 
 Automatable::Automatable (const Automatable& other)
-        : ControlSet (other)
-        , Slavable ()
-        , _a_session (other._a_session)
+	: ControlSet (other)
+	, Slavable ()
+	, _a_session (other._a_session)
+	, _automated_controls (new ControlList)
 {
         Glib::Threads::Mutex::Lock lm (other._control_lock);
 
@@ -73,6 +75,13 @@ Automatable::Automatable (const Automatable& other)
 
 Automatable::~Automatable ()
 {
+	{
+		RCUWriter<ControlList> writer (_automated_controls);
+		boost::shared_ptr<ControlList> cl = writer.get_copy ();
+		cl->clear ();
+	}
+	_automated_controls.flush ();
+
 	Glib::Threads::Mutex::Lock lm (_control_lock);
 	for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
 		boost::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
@@ -439,8 +448,16 @@ Automatable::non_realtime_transport_stop (samplepos_t now, bool /*flush_processo
 }
 
 void
-Automatable::automation_run (samplepos_t start, pframes_t nframes)
+Automatable::automation_run (samplepos_t start, pframes_t nframes, bool only_active)
 {
+	if (only_active) {
+		boost::shared_ptr<ControlList> cl = _automated_controls.reader ();
+		for (ControlList::const_iterator ci = cl->begin(); ci != cl->end(); ++ci) {
+			(*ci)->automation_run (start, nframes);
+		}
+		return;
+	}
+
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
 		boost::shared_ptr<AutomationControl> c =
 			boost::dynamic_pointer_cast<AutomationControl>(li->second);
@@ -449,6 +466,35 @@ Automatable::automation_run (samplepos_t start, pframes_t nframes)
 		}
 		c->automation_run (start, nframes);
 	}
+}
+
+void
+Automatable::automation_list_automation_state_changed (Evoral::Parameter param, AutoState as)
+{
+	{
+		boost::shared_ptr<AutomationControl> c (automation_control(param));
+		assert (c && c->list());
+
+		RCUWriter<ControlList> writer (_automated_controls);
+		boost::shared_ptr<ControlList> cl = writer.get_copy ();
+
+		ControlList::const_iterator fi = std::find (cl->begin(), cl->end(), c);
+		if (fi != cl->end()) {
+			cl->erase (fi);
+		}
+		switch (as) {
+			/* all potential  automation_playback() states */
+			case Play:
+			case Touch:
+			case Latch:
+				cl->push_back (c);
+				break;
+			case Off:
+			case Write:
+				break;
+		}
+	}
+	_automated_controls.flush();
 }
 
 boost::shared_ptr<Evoral::Control>

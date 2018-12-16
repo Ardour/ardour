@@ -79,7 +79,7 @@ public:
 
 	bool write_immediate_event (size_t size, const uint8_t* buf);
 
-	void automation_run (samplepos_t, pframes_t);
+	void automation_run (samplepos_t, pframes_t, bool only_active = false);
 	bool find_next_event (double, double, Evoral::ControlEvent&, bool only_active = true) const;
 
 	int set_block_size (pframes_t nframes);

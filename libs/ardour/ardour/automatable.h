@@ -26,6 +26,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "pbd/rcu.h"
 #include "pbd/signals.h"
 
 #include "evoral/ControlSet.hpp"
@@ -88,7 +89,7 @@ public:
 	virtual void non_realtime_locate (samplepos_t now);
 	virtual void non_realtime_transport_stop (samplepos_t now, bool flush);
 
-	virtual void automation_run (samplepos_t, pframes_t);
+	virtual void automation_run (samplepos_t, pframes_t, bool only_active = false);
 
 	virtual std::string describe_parameter(Evoral::Parameter param);
 
@@ -112,7 +113,8 @@ protected:
 
 	void can_automate(Evoral::Parameter);
 
-	virtual void automation_list_automation_state_changed (Evoral::Parameter, AutoState) {}
+	virtual void automation_list_automation_state_changed (Evoral::Parameter, AutoState);
+	SerializedRCUManager<ControlList> _automated_controls;
 
 	int load_automation (const std::string& path);
 	int old_set_automation_state(const XMLNode&);
