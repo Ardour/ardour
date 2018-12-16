@@ -153,12 +153,18 @@ public:
 	unsigned char c1;
 	unsigned char *ptfunxored;
 	uint64_t len;
+	bool is_bigendian;
 
 private:
 	bool jumpback(uint32_t *currpos, unsigned char *buf, const uint32_t maxoffset, const unsigned char *needle, const uint32_t needlelen);
 	bool jumpto(uint32_t *currpos, unsigned char *buf, const uint32_t maxoffset, const unsigned char *needle, const uint32_t needlelen);
 	bool foundin(std::string haystack, std::string needle);
 	int64_t foundat(unsigned char *haystack, uint64_t n, const char *needle);
+	uint16_t u_endian_read2(unsigned char *buf, bool);
+	uint32_t u_endian_read3(unsigned char *buf, bool);
+	uint32_t u_endian_read4(unsigned char *buf, bool);
+	uint64_t u_endian_read5(unsigned char *buf, bool);
+
 	int parse(void);
 	bool parse_version();
 	uint8_t gen_xor_delta(uint8_t xor_value, uint8_t mul, bool negative);
@@ -182,6 +188,7 @@ private:
 	std::vector<wav_t> actualwavs;
 	float ratefactor;
 	std::string extension;
+	uint32_t upto;
 };
 
 

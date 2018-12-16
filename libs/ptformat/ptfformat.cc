@@ -83,6 +83,64 @@ PTFFormat::~PTFFormat() {
 	cleanup();
 }
 
+uint16_t
+PTFFormat::u_endian_read2(unsigned char *buf, bool bigendian)
+{
+	if (bigendian) {
+		return ((uint16_t)(buf[0]) << 8) | (uint16_t)(buf[1]);
+	} else {
+		return ((uint16_t)(buf[1]) << 8) | (uint16_t)(buf[0]);
+	}
+}
+
+uint32_t
+PTFFormat::u_endian_read3(unsigned char *buf, bool bigendian)
+{
+	if (bigendian) {
+		return ((uint32_t)(buf[0]) << 16) |
+			((uint32_t)(buf[1]) << 8) |
+			(uint32_t)(buf[2]);
+	} else {
+		return ((uint32_t)(buf[2]) << 16) |
+			((uint32_t)(buf[1]) << 8) |
+			(uint32_t)(buf[0]);
+	}
+}
+
+uint32_t
+PTFFormat::u_endian_read4(unsigned char *buf, bool bigendian)
+{
+	if (bigendian) {
+		return ((uint32_t)(buf[0]) << 24) |
+			((uint32_t)(buf[1]) << 16) |
+			((uint32_t)(buf[2]) << 8) |
+			(uint32_t)(buf[3]);
+	} else {
+		return ((uint32_t)(buf[3]) << 24) |
+			((uint32_t)(buf[2]) << 16) |
+			((uint32_t)(buf[1]) << 8) |
+			(uint32_t)(buf[0]);
+	}
+}
+
+uint64_t
+PTFFormat::u_endian_read5(unsigned char *buf, bool bigendian)
+{
+	if (bigendian) {
+		return ((uint64_t)(buf[0]) << 32) |
+			((uint64_t)(buf[1]) << 24) |
+			((uint64_t)(buf[2]) << 16) |
+			((uint64_t)(buf[3]) << 8) |
+			(uint64_t)(buf[4]);
+	} else {
+		return ((uint64_t)(buf[4]) << 32) |
+			((uint64_t)(buf[3]) << 24) |
+			((uint64_t)(buf[2]) << 16) |
+			((uint64_t)(buf[1]) << 8) |
+			(uint64_t)(buf[0]);
+	}
+}
+
 void
 PTFFormat::cleanup(void) {
 	if (ptfunxored) {
@@ -290,12 +348,14 @@ PTFFormat::parse_version() {
 		/* Skip segment header */
 		data += 3;
 		if (data[0] == 0 && data[1] == 0) {
-			/* LE */
-			seg_len = data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
-		} else {
 			/* BE */
-			seg_len = data[3] << 24 | data[2] << 16 | data[1] << 8 | data[0];
+			is_bigendian = true;
+		} else {
+			/* LE */
+			is_bigendian = false;
 		}
+		seg_len = u_endian_read4(&data[0], is_bigendian);
+
 		/* Skip seg_len */
 		data += 4;
 		if (!(seg_type == 0x04 || seg_type == 0x03) || data[0] != 0x03) {
@@ -425,12 +485,12 @@ PTFFormat::parse5header(void) {
 	// Find session sample rate
 	k = 0x100;
 
-	jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x00\x02", 3);
+	if (!jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x00\x02", 3)) {
+		jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x03", 2);
+		k--;
+	}
 
-	sessionrate = 0;
-	sessionrate |= ptfunxored[k+12] << 16;
-	sessionrate |= ptfunxored[k+13] << 8;
-	sessionrate |= ptfunxored[k+14];
+	sessionrate = u_endian_read3(&ptfunxored[k+12], is_bigendian);
 }
 
 void
@@ -442,10 +502,7 @@ PTFFormat::parse7header(void) {
 
 	jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x00\x05", 3);
 
-	sessionrate = 0;
-	sessionrate |= ptfunxored[k+12] << 16;
-	sessionrate |= ptfunxored[k+13] << 8;
-	sessionrate |= ptfunxored[k+14];
+	sessionrate = u_endian_read3(&ptfunxored[k+12], is_bigendian);
 }
 
 void
@@ -457,10 +514,7 @@ PTFFormat::parse8header(void) {
 
 	jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x05", 2);
 
-	sessionrate = 0;
-	sessionrate |= ptfunxored[k+11];
-	sessionrate |= ptfunxored[k+12] << 8;
-	sessionrate |= ptfunxored[k+13] << 16;
+	sessionrate = u_endian_read3(&ptfunxored[k+11], is_bigendian);
 }
 
 void
@@ -472,10 +526,7 @@ PTFFormat::parse9header(void) {
 
 	jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x06", 2);
 
-	sessionrate = 0;
-	sessionrate |= ptfunxored[k+11];
-	sessionrate |= ptfunxored[k+12] << 8;
-	sessionrate |= ptfunxored[k+13] << 16;
+	sessionrate = u_endian_read3(&ptfunxored[k+11], is_bigendian);
 }
 
 void
@@ -487,44 +538,204 @@ PTFFormat::parse10header(void) {
 
 	jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x09", 2);
 
-	sessionrate = 0;
-	sessionrate |= ptfunxored[k+11];
-	sessionrate |= ptfunxored[k+12] << 8;
-	sessionrate |= ptfunxored[k+13] << 16;
+	sessionrate = u_endian_read3(&ptfunxored[k+11], is_bigendian);
 }
 
 void
 PTFFormat::parserest5(void) {
 	uint32_t i, j, k;
-	uint64_t regionspertrack, lengthofname;
-	uint64_t startbytes, lengthbytes, offsetbytes;
+	uint64_t regionspertrack, lengthofname, numberofregions;
+	uint64_t startbytes, lengthbytes, offsetbytes, somethingbytes, skipbytes;
 	uint16_t tracknumber = 0;
 	uint16_t findex;
 	uint16_t rindex;
+	unsigned char tag1[3];
+	unsigned char tag2[3];
+	unsigned char tag3[3];
 
-	k = 0;
-	for (i = 0; i < 5; i++) {
-		jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x00\x03", 3);
+	if (is_bigendian) {
+		tag1[0] = tag2[0] = tag3[0] = '\x5a';
+		tag1[1] = tag2[1] = tag3[1] = '\x00';
+		tag1[2] = '\x01';
+		tag2[2] = '\x02';
+		tag3[2] = '\x03';
+	} else {
+		tag1[0] = tag2[0] = tag3[0] = '\x5a';
+		tag1[1] = '\x01';
+		tag2[1] = '\x02';
+		tag3[1] = '\x03';
+		tag1[2] = tag2[2] = tag3[2] = '\x00';
+	}
+
+	// Find Source->Region info
+	k = upto;
+	for (i = 0; i < 2; i++) {
+		jumpto(&k, ptfunxored, len, tag3, 3);
 		k++;
 	}
-	k--;
+	jumpto(&k, ptfunxored, len, tag2, 3);
 
-	for (i = 0; i < 2; i++) {
-		jumpback(&k, ptfunxored, len, (const unsigned char *)"\x5a\x00\x01", 3);
-		if (k)
-			k--;
+	numberofregions = u_endian_read4(&ptfunxored[k-13], is_bigendian);
+
+	i = k;
+	while (numberofregions > 0 && i < len) {
+		jumpto(&i, ptfunxored, len, tag2, 3);
+
+		uint32_t lengthofname = u_endian_read4(&ptfunxored[i+9], is_bigendian);
+
+		char name[256] = {0};
+		for (j = 0; j < lengthofname; j++) {
+			name[j] = ptfunxored[i+13+j];
+		}
+		name[j] = '\0';
+		j += i+13;
+		//uint8_t disabled = ptfunxored[j];
+
+		if (is_bigendian) {
+			offsetbytes = (ptfunxored[j+4] & 0xf0) >> 4;
+			lengthbytes = (ptfunxored[j+3] & 0xf0) >> 4;
+			startbytes = (ptfunxored[j+2] & 0xf0) >> 4;
+			somethingbytes = (ptfunxored[j+2] & 0xf);
+			skipbytes = ptfunxored[j+1];
+		} else {
+			offsetbytes = (ptfunxored[j+1] & 0xf0) >> 4; //3
+			lengthbytes = (ptfunxored[j+2] & 0xf0) >> 4;
+			startbytes = (ptfunxored[j+3] & 0xf0) >> 4; //1
+			somethingbytes = (ptfunxored[j+3] & 0xf);
+			skipbytes = ptfunxored[j+4];
+		}
+		findex = u_endian_read4(&ptfunxored[j+5
+				+startbytes
+				+lengthbytes
+				+offsetbytes
+				+somethingbytes
+				+skipbytes], is_bigendian);
+
+		uint32_t sampleoffset = 0;
+		switch (offsetbytes) {
+		case 4:
+			sampleoffset = u_endian_read4(&ptfunxored[j+5], false);
+			break;
+		case 3:
+			sampleoffset = u_endian_read3(&ptfunxored[j+5], false);
+			break;
+		case 2:
+			sampleoffset = (uint32_t)u_endian_read2(&ptfunxored[j+5], false);
+			break;
+		case 1:
+			sampleoffset = (uint32_t)(ptfunxored[j+5]);
+			break;
+		default:
+			break;
+		}
+		j+=offsetbytes;
+		uint32_t length = 0;
+		switch (lengthbytes) {
+		case 4:
+			length = u_endian_read4(&ptfunxored[j+5], false);
+			break;
+		case 3:
+			length = u_endian_read3(&ptfunxored[j+5], false);
+			break;
+		case 2:
+			length = (uint32_t)u_endian_read2(&ptfunxored[j+5], false);
+			break;
+		case 1:
+			length = (uint32_t)(ptfunxored[j+5]);
+			break;
+		default:
+			break;
+		}
+		j+=lengthbytes;
+		uint32_t start = 0;
+		switch (startbytes) {
+		case 4:
+			start = u_endian_read4(&ptfunxored[j+5], false);
+			break;
+		case 3:
+			start = u_endian_read3(&ptfunxored[j+5], false);
+			break;
+		case 2:
+			start = (uint32_t)u_endian_read2(&ptfunxored[j+5], false);
+			break;
+		case 1:
+			start = (uint32_t)(ptfunxored[j+5]);
+			break;
+		default:
+			break;
+		}
+		j+=startbytes;
+
+		std::string filename = string(name);
+		wav_t f = {
+			"",
+			(uint16_t)findex,
+			(int64_t)(start*ratefactor),
+			(int64_t)(length*ratefactor),
+		};
+
+		vector<wav_t>::iterator begin = actualwavs.begin();
+		vector<wav_t>::iterator finish = actualwavs.end();
+		vector<wav_t>::iterator found;
+		if ((found = std::find(begin, finish, f)) != finish) {
+			f.filename = (*found).filename;
+		}
+		std::vector<midi_ev_t> m;
+		region_t r = {
+			name,
+			rindex,
+			(int64_t)(start*ratefactor),
+			(int64_t)(sampleoffset*ratefactor),
+			(int64_t)(length*ratefactor),
+			f,
+			m
+		};
+		regions.push_back(r);
+		rindex++;
+		i = j + 1;
+		numberofregions--;
 	}
-	k++;
 
+	// Find Region->Track info
+	/*
+	k = 0;
+	for (i = 0; i < 4; i++) {
+		jumpto(&k, ptfunxored, len, tag3, 3);
+		k++;
+	}
+	*/
+	k = j = i;
+	while (j < len) {
+		if (jumpto(&j, ptfunxored, j+13+3, tag1, 3)) {
+			j++;
+			if (jumpto(&j, ptfunxored, j+13+3, tag1, 3)) {
+				j++;
+				if (jumpto(&j, ptfunxored, j+13+3, tag1, 3)) {
+					if ((j == k+26) && (ptfunxored[j-13] == '\x5a') && (ptfunxored[j-26] == '\x5a')) {
+						k = j;
+						break;
+					}
+				}
+			}
+		}
+		k++;
+		j = k;
+	}
+
+	if (ptfunxored[k+13] == '\x5a') {
+		k++;
+	}
+
+	// Start parsing track info
 	rindex = 0;
 	while (k < len) {
 		if (		(ptfunxored[k  ] == 0xff) &&
 				(ptfunxored[k+1] == 0xff)) {
 			break;
 		}
-		jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x00\x01", 3);
+		jumpto(&k, ptfunxored, len, tag1, 3);
 
-		lengthofname = ptfunxored[k+12];
+		lengthofname = u_endian_read4(&ptfunxored[k+9], is_bigendian);
 		if (ptfunxored[k+13] == 0x5a) {
 			k++;
 			break;
@@ -534,26 +745,36 @@ PTFFormat::parserest5(void) {
 			name[j] = ptfunxored[k+13+j];
 		}
 		name[j] = '\0';
-		regionspertrack = ptfunxored[k+13+j+3];
+		regionspertrack = u_endian_read4(&ptfunxored[k+13+j], is_bigendian);
 		for (i = 0; i < regionspertrack; i++) {
-			jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x00\x03", 3);
-			j = k+16;
-			startbytes = (ptfunxored[j+3] & 0xf0) >> 4;
-			lengthbytes = (ptfunxored[j+2] & 0xf0) >> 4;
-			offsetbytes = (ptfunxored[j+1] & 0xf0) >> 4;
-			//somethingbytes = (ptfunxored[j+1] & 0xf);
-			findex = ptfunxored[k+14];
-			j--;
+			jumpto(&k, ptfunxored, len, tag3, 3);
+			j = k + 15;
+			if (is_bigendian) {
+				offsetbytes = (ptfunxored[j+1] & 0xf0) >> 4;
+				//somethingbytes = (ptfunxored[j+2] & 0xf);
+				lengthbytes = (ptfunxored[j+3] & 0xf0) >> 4;
+				startbytes = (ptfunxored[j+4] & 0xf0) >> 4;
+			} else {
+				offsetbytes = (ptfunxored[j+4] & 0xf0) >> 4;
+				//somethingbytes = (ptfunxored[j+3] & 0xf);
+				lengthbytes = (ptfunxored[j+2] & 0xf0) >> 4;
+				startbytes = (ptfunxored[j+1] & 0xf0) >> 4;
+			}
+			rindex = u_endian_read4(&ptfunxored[k+11], is_bigendian);
 			uint32_t start = 0;
 			switch (startbytes) {
 			case 4:
-				start |= (uint32_t)(ptfunxored[j+8] << 24);
+				start = u_endian_read4(&ptfunxored[j+5], false); 
+				break;
 			case 3:
-				start |= (uint32_t)(ptfunxored[j+7] << 16);
+				start = u_endian_read3(&ptfunxored[j+5], false); 
+				break;
 			case 2:
-				start |= (uint32_t)(ptfunxored[j+6] << 8);
+				start = (uint32_t)u_endian_read2(&ptfunxored[j+5], false); 
+				break;
 			case 1:
-				start |= (uint32_t)(ptfunxored[j+5]);
+				start = (uint32_t)(ptfunxored[j+5]);
+				break;
 			default:
 				break;
 			}
@@ -561,13 +782,17 @@ PTFFormat::parserest5(void) {
 			uint32_t length = 0;
 			switch (lengthbytes) {
 			case 4:
-				length |= (uint32_t)(ptfunxored[j+8] << 24);
+				length = u_endian_read4(&ptfunxored[j+5], false);
+				break;
 			case 3:
-				length |= (uint32_t)(ptfunxored[j+7] << 16);
+				length = u_endian_read3(&ptfunxored[j+5], false);
+				break;
 			case 2:
-				length |= (uint32_t)(ptfunxored[j+6] << 8);
+				length = (uint32_t)u_endian_read2(&ptfunxored[j+5], false);
+				break;
 			case 1:
-				length |= (uint32_t)(ptfunxored[j+5]);
+				length = (uint32_t)(ptfunxored[j+5]);
+				break;
 			default:
 				break;
 			}
@@ -575,91 +800,55 @@ PTFFormat::parserest5(void) {
 			uint32_t sampleoffset = 0;
 			switch (offsetbytes) {
 			case 4:
-				sampleoffset |= (uint32_t)(ptfunxored[j+8] << 24);
+				sampleoffset = u_endian_read4(&ptfunxored[j+5], false); 
+				break;
 			case 3:
-				sampleoffset |= (uint32_t)(ptfunxored[j+7] << 16);
+				sampleoffset = u_endian_read3(&ptfunxored[j+5], false); 
+				break;
 			case 2:
-				sampleoffset |= (uint32_t)(ptfunxored[j+6] << 8);
+				sampleoffset = (uint32_t)u_endian_read2(&ptfunxored[j+5], false); 
+				break;
 			case 1:
-				sampleoffset |= (uint32_t)(ptfunxored[j+5]);
+				sampleoffset = (uint32_t)(ptfunxored[j+5]);
+				break;
 			default:
 				break;
 			}
 			j+=offsetbytes;
 
-			//printf("name=`%s` start=%04x length=%04x offset=%04x findex=%d\n", name,start,length,sampleoffset,findex);
+			track_t tr;
+			tr.name = name;
 
-			std::string filename = string(name);
-			wav_t f = {
-				filename,
-				findex,
-				(int64_t)(start*ratefactor),
-				(int64_t)(length*ratefactor),
-			};
+			region_t r;
+			r.index = rindex;
 
-			vector<wav_t>::iterator begin = audiofiles.begin();
-			vector<wav_t>::iterator finish = audiofiles.end();
-			vector<wav_t>::iterator found;
-			// Add file to lists
-			if ((found = std::find(begin, finish, f)) != finish) {
-				f.filename = (*found).filename;
-				std::vector<midi_ev_t> m;
-				region_t r = {
-					name,
-					rindex,
-					(int64_t)(start*ratefactor),
-					(int64_t)(sampleoffset*ratefactor),
-					(int64_t)(length*ratefactor),
-					*found,
-					m
-				};
-				regions.push_back(r);
-				vector<track_t>::iterator ti;
-				vector<track_t>::iterator bt = tracks.begin();
-				vector<track_t>::iterator et = tracks.end();
-				track_t tr = { name, 0, 0, r };
-				if ((ti = std::find(bt, et, tr)) != et) {
-					tracknumber = (*ti).index;
-				} else {
-					tracknumber = tracks.size() + 1;
-				}
-				track_t t = {
-					name,
-					(uint16_t)tracknumber,
-					uint8_t(0),
-					r
-				};
-				tracks.push_back(t);
-			} else {
-				std::vector<midi_ev_t> m;
-				region_t r = {
-					name,
-					rindex,
-					(int64_t)(start*ratefactor),
-					(int64_t)(sampleoffset*ratefactor),
-					(int64_t)(length*ratefactor),
-					f,
-					m,
-				};
-				regions.push_back(r);
-				vector<track_t>::iterator ti;
-				vector<track_t>::iterator bt = tracks.begin();
-				vector<track_t>::iterator et = tracks.end();
-				track_t tr = { name, 0, 0, r };
-				if ((ti = std::find(bt, et, tr)) != et) {
-					tracknumber = (*ti).index;
-				} else {
-					tracknumber = tracks.size() + 1;
-				}
-				track_t t = {
-					name,
-					(uint16_t)tracknumber,
-					uint8_t(0),
-					r
-				};
-				tracks.push_back(t);
+			vector<region_t>::iterator begin = regions.begin();
+			vector<region_t>::iterator finish = regions.end();
+			vector<region_t>::iterator found;
+			if ((found = std::find(begin, finish, r)) != finish) {
+				tr.reg = (*found);
 			}
-			rindex++;
+
+			tr.reg.startpos = (int64_t)(start*ratefactor);
+			tr.reg.sampleoffset = (int64_t)(sampleoffset*ratefactor);
+			tr.reg.length = (int64_t)(length*ratefactor);
+			vector<track_t>::iterator ti;
+			vector<track_t>::iterator bt = tracks.begin();
+			vector<track_t>::iterator et = tracks.end();
+			if ((ti = std::find(bt, et, tr)) != et) {
+				tracknumber = (*ti).index;
+			} else {
+				++tracknumber;
+			}
+			track_t t = {
+				name,
+				(uint16_t)tracknumber,
+				uint8_t(0),
+				tr.reg
+			};
+			//if (tr.reg.length > 0) {
+				tracks.push_back(t);
+			//}
 			k++;
 		}
 		k++;
@@ -698,15 +887,17 @@ void
 PTFFormat::parseaudio5(void) {
 	uint32_t i,k,l;
 	uint64_t lengthofname, wavnumber;
+	uint32_t numberofwavs;
+	unsigned char tag6_LE[3], tag5_BE[3];
+	unsigned char tag2_LE[3], tag2_BE[3];
 
-	// Find end of wav file list
+	// Find start of wav file list
 	k = 0;
-	jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5f\x50\x35", 3);
-	k++;
-	jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5f\x50\x35", 3);
+	if (!jumpto(&k, ptfunxored, len, (const unsigned char *)"\xff\xff\xff\xff", 4))
+		return;
+	numberofwavs = u_endian_read4(&ptfunxored[k-18], is_bigendian);
 
 	// Find actual wav names
-	uint16_t numberofwavs = ptfunxored[k-23];
 	char wavname[256];
 	i = k;
 	jumpto(&i, ptfunxored, len, (const unsigned char *)"Files", 5);
@@ -716,12 +907,14 @@ PTFFormat::parseaudio5(void) {
 	char ext[5];
 	while (i < len && numberofwavs > 0) {
 		i++;
-		if (		(ptfunxored[i  ] == 0x5a) &&
+		if (		((ptfunxored[i  ] == 0x5a) &&
 				(ptfunxored[i+1] == 0x00) &&
-				(ptfunxored[i+2] == 0x05)) {
+				(ptfunxored[i+2] == 0x05)) ||
+				((ptfunxored[i  ] == 0x5a) &&
+				(ptfunxored[i+1] == 0x06))) {
 			break;
 		}
-		lengthofname = ptfunxored[i];
+		lengthofname = u_endian_read4(&ptfunxored[i-3], is_bigendian);
 		i++;
 		l = 0;
 		while (l < lengthofname) {
@@ -747,11 +940,16 @@ PTFFormat::parseaudio5(void) {
 		}
 
 		std::string wave = string(wavname);
-		wav_t f = { wave, (uint16_t)(wavnumber++), 0, 0 };
 
 		if (foundin(wave, string(".grp"))) {
 			continue;
 		}
+		if (foundin(wave, string("Fade Files"))) {
+			i += 7;
+			continue;
+		}
+
+		wav_t f = { wave, (uint16_t)(wavnumber++), 0, 0 };
 
 		actualwavs.push_back(f);
 		audiofiles.push_back(f);
@@ -759,8 +957,37 @@ PTFFormat::parseaudio5(void) {
 		numberofwavs--;
 		i += 7;
 	}
-	resort(actualwavs);
-	resort(audiofiles);
+
+	i -= 7;
+
+	tag5_BE[0] = tag6_LE[0] = tag2_BE[0] = tag2_LE[0] = '\x5a';
+	tag5_BE[1] = '\x00';
+	tag6_LE[1] = '\x06';
+	tag2_BE[1] = '\x00';
+	tag2_LE[1] = '\x02';
+	tag5_BE[2] = '\x05';
+	tag6_LE[2] = '\x00';
+	tag2_BE[2] = '\x02';
+	tag2_LE[2] = '\x00';
+
+	// Loop through all the sources
+	for (vector<wav_t>::iterator w = audiofiles.begin(); w != audiofiles.end(); ++w) {
+		// Jump to start of source metadata for this source
+		if (is_bigendian) {
+			if (!jumpto(&i, ptfunxored, len, tag5_BE, 3))
+				return;
+			if (!jumpto(&i, ptfunxored, len, tag2_BE, 3))
+				return;
+			w->length = u_endian_read4(&ptfunxored[i+19], true);
+		} else {
+			if (!jumpto(&i, ptfunxored, len, tag6_LE, 3))
+				return;
+			if (!jumpto(&i, ptfunxored, len, tag2_LE, 3))
+				return;
+			w->length = u_endian_read4(&ptfunxored[i+15], false);
+		}
+	}
+	upto = i;
 }
 
 struct mchunk {
@@ -803,24 +1030,12 @@ PTFFormat::parsemidi(void) {
 				ptfunxored[k+2] << 16 | ptfunxored[k+3] << 24;
 
 		k += 4;
-		zero_ticks = (uint64_t)ptfunxored[k] |
-			(uint64_t)ptfunxored[k+1] << 8 |
-			(uint64_t)ptfunxored[k+2] << 16 |
-			(uint64_t)ptfunxored[k+3] << 24 |
-			(uint64_t)ptfunxored[k+4] << 32;
+		zero_ticks = u_endian_read5(&ptfunxored[k], is_bigendian);
 		for (i = 0; i < n_midi_events && k < len; i++, k += 35) {
-			midi_pos = (uint64_t)ptfunxored[k] |
-				(uint64_t)ptfunxored[k+1] << 8 |
-				(uint64_t)ptfunxored[k+2] << 16 |
-				(uint64_t)ptfunxored[k+3] << 24 |
-				(uint64_t)ptfunxored[k+4] << 32;
+			midi_pos = u_endian_read5(&ptfunxored[k], is_bigendian);
 			midi_pos -= zero_ticks;
 			midi_note = ptfunxored[k+8];
-			midi_len = (uint64_t)ptfunxored[k+9] |
-				(uint64_t)ptfunxored[k+10] << 8 |
-				(uint64_t)ptfunxored[k+11] << 16 |
-				(uint64_t)ptfunxored[k+12] << 24 |
-				(uint64_t)ptfunxored[k+13] << 32;
+			midi_len = u_endian_read5(&ptfunxored[k+9], is_bigendian);
 			midi_velocity = ptfunxored[k+17];
 
 			if (midi_pos + midi_len > max_pos) {
@@ -855,9 +1070,7 @@ PTFFormat::parsemidi(void) {
 
 		k += 41;
 
-		nregions = 0;
-		nregions |= ptfunxored[k];
-		nregions |= ptfunxored[k+1] << 8;
+		nregions = u_endian_read2(&ptfunxored[k], is_bigendian);
 
 		for (mr = 0; mr < nregions; mr++) {
 			if (!jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x0c", 2)) {
@@ -913,13 +1126,7 @@ PTFFormat::parsemidi(void) {
 		return;
 	}
 
-	k -= 4;
-
-	nmiditracks = 0;
-	nmiditracks |= ptfunxored[k];
-	nmiditracks |= ptfunxored[k+1] << 8;
-
-	k += 4;
+	nmiditracks = u_endian_read2(&ptfunxored[k-4], is_bigendian);
 
 	for (tr = 0; tr < nmiditracks; tr++) {
 		char miditrackname[256];
@@ -934,24 +1141,16 @@ PTFFormat::parsemidi(void) {
 		}
 		miditrackname[namelen] = '\0';
 		k += 13 + namelen;
-		nregions = 0;
-		nregions |= ptfunxored[k];
-		nregions |= ptfunxored[k+1] << 8;
+		nregions = u_endian_read2(&ptfunxored[k], is_bigendian);
 
 		for (i = 0; (i < nregions) && (k < len); i++) {
 			k += 24;
 
-			ridx = 0;
-			ridx |= ptfunxored[k];
-			ridx |= ptfunxored[k+1] << 8;
+			ridx = u_endian_read2(&ptfunxored[k], is_bigendian);
 
 			k += 5;
 
-			region_pos = (uint64_t)ptfunxored[k] |
-					(uint64_t)ptfunxored[k+1] << 8 |
-					(uint64_t)ptfunxored[k+2] << 16 |
-					(uint64_t)ptfunxored[k+3] << 24 |
-					(uint64_t)ptfunxored[k+4] << 32;
+			region_pos = u_endian_read5(&ptfunxored[k], is_bigendian);
 
 			k += 20;
 
@@ -1001,28 +1200,15 @@ PTFFormat::parsemidi12(void) {
 		}
 
 		k += 11;
-		n_midi_events = ptfunxored[k] | ptfunxored[k+1] << 8 |
-				ptfunxored[k+2] << 16 | ptfunxored[k+3] << 24;
+		n_midi_events = u_endian_read4(&ptfunxored[k], is_bigendian);
 
 		k += 4;
-		zero_ticks = (uint64_t)ptfunxored[k] |
-			(uint64_t)ptfunxored[k+1] << 8 |
-			(uint64_t)ptfunxored[k+2] << 16 |
-			(uint64_t)ptfunxored[k+3] << 24 |
-			(uint64_t)ptfunxored[k+4] << 32;
+		zero_ticks = u_endian_read5(&ptfunxored[k], is_bigendian);
 		for (i = 0; i < n_midi_events && k < len; i++, k += 35) {
-			midi_pos = (uint64_t)ptfunxored[k] |
-				(uint64_t)ptfunxored[k+1] << 8 |
-				(uint64_t)ptfunxored[k+2] << 16 |
-				(uint64_t)ptfunxored[k+3] << 24 |
-				(uint64_t)ptfunxored[k+4] << 32;
+			midi_pos = u_endian_read5(&ptfunxored[k], is_bigendian);
 			midi_pos -= zero_ticks;
 			midi_note = ptfunxored[k+8];
-			midi_len = (uint64_t)ptfunxored[k+9] |
-				(uint64_t)ptfunxored[k+10] << 8 |
-				(uint64_t)ptfunxored[k+11] << 16 |
-				(uint64_t)ptfunxored[k+12] << 24 |
-				(uint64_t)ptfunxored[k+13] << 32;
+			midi_len = u_endian_read5(&ptfunxored[k+9], is_bigendian);
 			midi_velocity = ptfunxored[k+17];
 
 			if (midi_pos + midi_len > max_pos) {
@@ -1057,9 +1243,7 @@ PTFFormat::parsemidi12(void) {
 
 		k += 41;
 
-		nregions = 0;
-		nregions |= ptfunxored[k];
-		nregions |= ptfunxored[k+1] << 8;
+		nregions = u_endian_read2(&ptfunxored[k], is_bigendian);
 
 		for (mr = 0; mr < nregions; mr++) {
 			if (!jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x01", 2)) {
@@ -1088,8 +1272,7 @@ PTFFormat::parsemidi12(void) {
 
 			k += 37;
 
-			ridx = ptfunxored[k];
-			ridx |= ptfunxored[k+1] << 8;
+			ridx = u_endian_read2(&ptfunxored[k], is_bigendian);
 
 			k += 3;
 			struct mchunk mc = *(midichunks.begin()+ridx);
@@ -1115,13 +1298,7 @@ PTFFormat::parsemidi12(void) {
 		return;
 	}
 
-	k -= 4;
-
-	nmiditracks = 0;
-	nmiditracks |= ptfunxored[k];
-	nmiditracks |= ptfunxored[k+1] << 8;
-
-	k += 4;
+	nmiditracks = u_endian_read2(&ptfunxored[k-4], is_bigendian);
 
 	for (tr = 0; tr < nmiditracks; tr++) {
 		char miditrackname[256];
@@ -1136,9 +1313,7 @@ PTFFormat::parsemidi12(void) {
 		}
 		miditrackname[namelen] = '\0';
 		k += 13 + namelen;
-		nregions = 0;
-		nregions |= ptfunxored[k];
-		nregions |= ptfunxored[k+1] << 8;
+		nregions = u_endian_read2(&ptfunxored[k], is_bigendian);
 
 		k += 13;
 
@@ -1152,17 +1327,11 @@ PTFFormat::parsemidi12(void) {
 			}
 			k += 11;
 
-			ridx = 0;
-			ridx |= ptfunxored[k];
-			ridx |= ptfunxored[k+1] << 8;
+			ridx = u_endian_read2(&ptfunxored[k], is_bigendian);
 
 			k += 5;
 
-			region_pos = (uint64_t)ptfunxored[k] |
-					(uint64_t)ptfunxored[k+1] << 8 |
-					(uint64_t)ptfunxored[k+2] << 16 |
-					(uint64_t)ptfunxored[k+3] << 24 |
-					(uint64_t)ptfunxored[k+4] << 32;
+			region_pos = u_endian_read5(&ptfunxored[k], is_bigendian);
 
 			track_t mtr;
 			mtr.name = string(miditrackname);
@@ -1206,11 +1375,7 @@ PTFFormat::parseaudio(void) {
 	if (!jumpback(&j, ptfunxored, len, (const unsigned char *)"\x5a\x01", 2))
 		return;
 
-	numberofwavs = 0;
-	numberofwavs |= (uint32_t)(ptfunxored[j-1] << 24);
-	numberofwavs |= (uint32_t)(ptfunxored[j-2] << 16);
-	numberofwavs |= (uint32_t)(ptfunxored[j-3] << 8);
-	numberofwavs |= (uint32_t)(ptfunxored[j-4]);
+	numberofwavs = u_endian_read4(&ptfunxored[j-4], is_bigendian);
 	//printf("%d wavs\n", numberofwavs);
 
 	// Find actual wav names
@@ -1289,11 +1454,7 @@ PTFFormat::parseaudio(void) {
 		if (!jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x02", 2))
 			return;
 
-		w->length = 0;
-		w->length |= (uint32_t)(ptfunxored[k-22]) << 24;
-		w->length |= (uint32_t)(ptfunxored[k-23]) << 16;
-		w->length |= (uint32_t)(ptfunxored[k-24]) << 8;
-		w->length |= (uint32_t)(ptfunxored[k-25]);
+		w->length = u_endian_read4(&ptfunxored[k-25], false);
 	}
 }
 
@@ -1355,13 +1516,17 @@ PTFFormat::parserest89(void) {
 			uint32_t sampleoffset = 0;
 			switch (offsetbytes) {
 			case 4:
-				sampleoffset |= (uint32_t)(ptfunxored[j+8] << 24);
+				sampleoffset = u_endian_read4(&ptfunxored[j+5], false);
+				break;
 			case 3:
-				sampleoffset |= (uint32_t)(ptfunxored[j+7] << 16);
+				sampleoffset = u_endian_read3(&ptfunxored[j+5], false);
+				break;
 			case 2:
-				sampleoffset |= (uint32_t)(ptfunxored[j+6] << 8);
+				sampleoffset = (uint32_t)u_endian_read2(&ptfunxored[j+5], false);
+				break;
 			case 1:
-				sampleoffset |= (uint32_t)(ptfunxored[j+5]);
+				sampleoffset = (uint32_t)(ptfunxored[j+5]);
+				break;
 			default:
 				break;
 			}
@@ -1369,13 +1534,17 @@ PTFFormat::parserest89(void) {
 			uint32_t length = 0;
 			switch (lengthbytes) {
 			case 4:
-				length |= (uint32_t)(ptfunxored[j+8] << 24);
+				length = u_endian_read4(&ptfunxored[j+5], false);
+				break;
 			case 3:
-				length |= (uint32_t)(ptfunxored[j+7] << 16);
+				length = u_endian_read3(&ptfunxored[j+5], false);
+				break;
 			case 2:
-				length |= (uint32_t)(ptfunxored[j+6] << 8);
+				length = (uint32_t)u_endian_read2(&ptfunxored[j+5], false);
+				break;
 			case 1:
-				length |= (uint32_t)(ptfunxored[j+5]);
+				length = (uint32_t)(ptfunxored[j+5]);
+				break;
 			default:
 				break;
 			}
@@ -1383,13 +1552,17 @@ PTFFormat::parserest89(void) {
 			uint32_t start = 0;
 			switch (startbytes) {
 			case 4:
-				start |= (uint32_t)(ptfunxored[j+8] << 24);
+				start = u_endian_read4(&ptfunxored[j+5], false);
+				break;
 			case 3:
-				start |= (uint32_t)(ptfunxored[j+7] << 16);
+				start = u_endian_read3(&ptfunxored[j+5], false);
+				break;
 			case 2:
-				start |= (uint32_t)(ptfunxored[j+6] << 8);
+				start = (uint32_t)u_endian_read2(&ptfunxored[j+5], false);
+				break;
 			case 1:
-				start |= (uint32_t)(ptfunxored[j+5]);
+				start = (uint32_t)(ptfunxored[j+5]);
+				break;
 			default:
 				break;
 			}
@@ -1508,11 +1681,7 @@ PTFFormat::parserest89(void) {
 					tr.reg = (*found);
 				}
 				i = j+16;
-				offset = 0;
-				offset |= (uint32_t)(ptfunxored[i+3] << 24);
-				offset |= (uint32_t)(ptfunxored[i+2] << 16);
-				offset |= (uint32_t)(ptfunxored[i+1] << 8);
-				offset |= (uint32_t)(ptfunxored[i]);
+				offset = u_endian_read4(&ptfunxored[i], is_bigendian);
 				tr.reg.startpos = (int64_t)(offset*ratefactor);
 				if (tr.reg.length > 0) {
 					tracks.push_back(tr);
@@ -1619,8 +1788,8 @@ PTFFormat::parserest12(void) {
 		}
 		if (k > len)
 			break;
-		gindex = ptfunxored[k+9] | ptfunxored[k+10] << 8;
-		gindex2 = ptfunxored[k+3] | ptfunxored[k+4] << 8;
+		gindex = u_endian_read2(&ptfunxored[k+9], is_bigendian);
+		gindex2 = u_endian_read2(&ptfunxored[k+3], is_bigendian);
 
 		uint8_t lengthofname = ptfunxored[k+13];
 		char name[256] = {0};
@@ -1693,7 +1862,7 @@ nocustom:
 
 	compoundcount = 0;
 	j = k;
-	groupmax = groupcount == 0 ? 0 : ptfunxored[j+3] | ptfunxored[j+4] << 8;
+	groupmax = groupcount == 0 ? 0 : u_endian_read2(&ptfunxored[j+3], is_bigendian);
 	groupcount = 0;
 	for (i = k; (groupcount < groupmax) && (i < len-70); i++) {
 		if (		(ptfunxored[i  ] == 0x5a) &&
@@ -1755,15 +1924,20 @@ nocustom:
 			uint64_t sampleoffset = 0;
 			switch (offsetbytes) {
 			case 5:
-				sampleoffset |= (uint64_t)(ptfunxored[j+9]) << 32;
+				sampleoffset = u_endian_read5(&ptfunxored[j+5], false);
+				break;
 			case 4:
-				sampleoffset |= (uint64_t)(ptfunxored[j+8]) << 24;
+				sampleoffset = (uint64_t)u_endian_read4(&ptfunxored[j+5], false);
+				break;
 			case 3:
-				sampleoffset |= (uint64_t)(ptfunxored[j+7]) << 16;
+				sampleoffset = (uint64_t)u_endian_read3(&ptfunxored[j+5], false);
+				break;
 			case 2:
-				sampleoffset |= (uint64_t)(ptfunxored[j+6]) << 8;
+				sampleoffset = (uint64_t)u_endian_read2(&ptfunxored[j+5], false);
+				break;
 			case 1:
-				sampleoffset |= (uint64_t)(ptfunxored[j+5]);
+				sampleoffset = (uint64_t)(ptfunxored[j+5]);
+				break;
 			default:
 				break;
 			}
@@ -1771,15 +1945,20 @@ nocustom:
 			uint64_t length = 0;
 			switch (lengthbytes) {
 			case 5:
-				length |= (uint64_t)(ptfunxored[j+9]) << 32;
+				length = u_endian_read5(&ptfunxored[j+5], false);
+				break;
 			case 4:
-				length |= (uint64_t)(ptfunxored[j+8]) << 24;
+				length = (uint64_t)u_endian_read4(&ptfunxored[j+5], false);
+				break;
 			case 3:
-				length |= (uint64_t)(ptfunxored[j+7]) << 16;
+				length = (uint64_t)u_endian_read3(&ptfunxored[j+5], false);
+				break;
 			case 2:
-				length |= (uint64_t)(ptfunxored[j+6]) << 8;
+				length = (uint64_t)u_endian_read2(&ptfunxored[j+5], false);
+				break;
 			case 1:
-				length |= (uint64_t)(ptfunxored[j+5]);
+				length = (uint64_t)(ptfunxored[j+5]);
+				break;
 			default:
 				break;
 			}
@@ -1787,15 +1966,20 @@ nocustom:
 			uint64_t start = 0;
 			switch (startbytes) {
 			case 5:
-				start |= (uint64_t)(ptfunxored[j+9]) << 32;
+				start = u_endian_read5(&ptfunxored[j+5], false);
+				break;
 			case 4:
-				start |= (uint64_t)(ptfunxored[j+8]) << 24;
+				start = (uint64_t)u_endian_read4(&ptfunxored[j+5], false);
+				break;
 			case 3:
-				start |= (uint64_t)(ptfunxored[j+7]) << 16;
+				start = (uint64_t)u_endian_read3(&ptfunxored[j+5], false);
+				break;
 			case 2:
-				start |= (uint64_t)(ptfunxored[j+6]) << 8;
+				start = (uint64_t)u_endian_read2(&ptfunxored[j+5], false);
+				break;
 			case 1:
-				start |= (uint64_t)(ptfunxored[j+5]);
+				start = (uint64_t)(ptfunxored[j+5]);
+				break;
 			default:
 				break;
 			}
@@ -1840,8 +2024,8 @@ nocustom:
 				n--;
 				//printf("n=0x%x\n", n+112);
 				//findex = ptfunxored[n+112] | (ptfunxored[n+113] << 8);
-				findex = ptfunxored[i-11] | ptfunxored[i-10] << 8;
-				findex2 = ptfunxored[n+108] | (ptfunxored[n+109] << 8);
+				findex = u_endian_read2(&ptfunxored[i-11], is_bigendian);
+				findex2 = u_endian_read2(&ptfunxored[n+108], is_bigendian);
 				//findex2= rindex; //XXX
 				// Find wav with correct findex
 				vector<wav_t>::iterator wave = actualwavs.end();
@@ -1863,21 +2047,26 @@ nocustom:
 						return;
 
 					m += 37;
-					rindex = ptfunxored[m] | (ptfunxored[m+1] << 8);
+					rindex = u_endian_read2(&ptfunxored[m], is_bigendian);
 
 					m += 12;
 					sampleoffset = 0;
 					switch (offsetbytes) {
 					case 5:
-						sampleoffset |= (uint64_t)(ptfunxored[m+4]) << 32;
+						sampleoffset = u_endian_read5(&ptfunxored[m], false);
+						break;
 					case 4:
-						sampleoffset |= (uint64_t)(ptfunxored[m+3]) << 24;
+						sampleoffset = (uint64_t)u_endian_read4(&ptfunxored[m], false);
+						break;
 					case 3:
-						sampleoffset |= (uint64_t)(ptfunxored[m+2]) << 16;
+						sampleoffset = (uint64_t)u_endian_read3(&ptfunxored[m], false);
+						break;
 					case 2:
-						sampleoffset |= (uint64_t)(ptfunxored[m+1]) << 8;
+						sampleoffset = (uint64_t)u_endian_read2(&ptfunxored[m], false);
+						break;
 					case 1:
-						sampleoffset |= (uint64_t)(ptfunxored[m]);
+						sampleoffset = (uint64_t)(ptfunxored[m]);
+						break;
 					default:
 						break;
 					}
@@ -1885,15 +2074,20 @@ nocustom:
 					start = 0;
 					switch (offsetbytes) {
 					case 5:
-						start |= (uint64_t)(ptfunxored[m+4]) << 32;
+						start = u_endian_read5(&ptfunxored[m], false);
+						break;
 					case 4:
-						start |= (uint64_t)(ptfunxored[m+3]) << 24;
+						start = (uint64_t)u_endian_read4(&ptfunxored[m], false);
+						break;
 					case 3:
-						start |= (uint64_t)(ptfunxored[m+2]) << 16;
+						start = (uint64_t)u_endian_read3(&ptfunxored[m], false);
+						break;
 					case 2:
-						start |= (uint64_t)(ptfunxored[m+1]) << 8;
+						start = (uint64_t)u_endian_read2(&ptfunxored[m], false);
+						break;
 					case 1:
-						start |= (uint64_t)(ptfunxored[m]);
+						start = (uint64_t)(ptfunxored[m]);
+						break;
 					default:
 						break;
 					}
@@ -1901,15 +2095,20 @@ nocustom:
 					length = 0;
 					switch (lengthbytes) {
 					case 5:
-						length |= (uint64_t)(ptfunxored[m+4]) << 32;
+						length = u_endian_read5(&ptfunxored[m], false);
+						break;
 					case 4:
-						length |= (uint64_t)(ptfunxored[m+3]) << 24;
+						length = (uint64_t)u_endian_read4(&ptfunxored[m], false);
+						break;
 					case 3:
-						length |= (uint64_t)(ptfunxored[m+2]) << 16;
+						length = (uint64_t)u_endian_read3(&ptfunxored[m], false);
+						break;
 					case 2:
-						length |= (uint64_t)(ptfunxored[m+1]) << 8;
+						length = (uint64_t)u_endian_read2(&ptfunxored[m], false);
+						break;
 					case 1:
-						length |= (uint64_t)(ptfunxored[m]);
+						length = (uint64_t)(ptfunxored[m]);
+						break;
 					default:
 						break;
 					}
@@ -1969,10 +2168,7 @@ nocustom:
 
 	verbose_printf("pure regions k=0x%x\n", k);
 
-	maxregions |= (uint32_t)(ptfunxored[k-4]);
-	maxregions |= (uint32_t)(ptfunxored[k-3]) << 8;
-	maxregions |= (uint32_t)(ptfunxored[k-2]) << 16;
-	maxregions |= (uint32_t)(ptfunxored[k-1]) << 24;
+	maxregions = u_endian_read4(&ptfunxored[k-4], is_bigendian);
 
 	verbose_printf("maxregions=%u\n", maxregions);
 	rindex = 0;
@@ -2026,15 +2222,20 @@ nocustom:
 			uint64_t sampleoffset = 0;
 			switch (offsetbytes) {
 			case 5:
-				sampleoffset |= (uint64_t)(ptfunxored[j+9]) << 32;
+				sampleoffset = u_endian_read5(&ptfunxored[j+5], false);
+				break;
 			case 4:
-				sampleoffset |= (uint64_t)(ptfunxored[j+8]) << 24;
+				sampleoffset = (uint64_t)u_endian_read4(&ptfunxored[j+5], false);
+				break;
 			case 3:
-				sampleoffset |= (uint64_t)(ptfunxored[j+7]) << 16;
+				sampleoffset = (uint64_t)u_endian_read3(&ptfunxored[j+5], false);
+				break;
 			case 2:
-				sampleoffset |= (uint64_t)(ptfunxored[j+6]) << 8;
+				sampleoffset = (uint64_t)u_endian_read2(&ptfunxored[j+5], false);
+				break;
 			case 1:
-				sampleoffset |= (uint64_t)(ptfunxored[j+5]);
+				sampleoffset = (uint64_t)(ptfunxored[j+5]);
+				break;
 			default:
 				break;
 			}
@@ -2042,15 +2243,20 @@ nocustom:
 			uint64_t length = 0;
 			switch (lengthbytes) {
 			case 5:
-				length |= (uint64_t)(ptfunxored[j+9]) << 32;
+				length = u_endian_read5(&ptfunxored[j+5], false);
+				break;
 			case 4:
-				length |= (uint64_t)(ptfunxored[j+8]) << 24;
+				length = (uint64_t)u_endian_read4(&ptfunxored[j+5], false);
+				break;
 			case 3:
-				length |= (uint64_t)(ptfunxored[j+7]) << 16;
+				length = (uint64_t)u_endian_read3(&ptfunxored[j+5], false);
+				break;
 			case 2:
-				length |= (uint64_t)(ptfunxored[j+6]) << 8;
+				length = (uint64_t)u_endian_read2(&ptfunxored[j+5], false);
+				break;
 			case 1:
-				length |= (uint64_t)(ptfunxored[j+5]);
+				length = (uint64_t)(ptfunxored[j+5]);
+				break;
 			default:
 				break;
 			}
@@ -2058,15 +2264,20 @@ nocustom:
 			uint64_t start = 0;
 			switch (startbytes) {
 			case 5:
-				start |= (uint64_t)(ptfunxored[j+9]) << 32;
+				start = u_endian_read5(&ptfunxored[j+5], false);
+				break;
 			case 4:
-				start |= (uint64_t)(ptfunxored[j+8]) << 24;
+				start = (uint64_t)u_endian_read4(&ptfunxored[j+5], false);
+				break;
 			case 3:
-				start |= (uint64_t)(ptfunxored[j+7]) << 16;
+				start = (uint64_t)u_endian_read3(&ptfunxored[j+5], false);
+				break;
 			case 2:
-				start |= (uint64_t)(ptfunxored[j+6]) << 8;
+				start = (uint64_t)u_endian_read2(&ptfunxored[j+5], false);
+				break;
 			case 1:
-				start |= (uint64_t)(ptfunxored[j+5]);
+				start = (uint64_t)(ptfunxored[j+5]);
+				break;
 			default:
 				break;
 			}
@@ -2219,16 +2430,12 @@ nocustom:
 	uint32_t offset;
 	uint32_t tracknumber = 0;
 	uint32_t regionspertrack = 0;
-	uint32_t maxtracks = 0;
 
 	// Total tracks
 	j = k;
 	if (!jumpto(&j, ptfunxored, len, (const unsigned char *)"\x5a\x03\x00", 3))
 		return;
-	maxtracks |= (uint32_t)(ptfunxored[j-4]);
-	maxtracks |= (uint32_t)(ptfunxored[j-3]) << 8;
-	maxtracks |= (uint32_t)(ptfunxored[j-2]) << 16;
-	maxtracks |= (uint32_t)(ptfunxored[j-1]) << 24;
+	//maxtracks = u_endian_read4(&ptfunxored[j-4]);
 
 	// Jump to start of region -> track mappings
 	if (jumpto(&k, ptfunxored, k + regions.size() * 0x400, (const unsigned char *)"\x5a\x08", 2)) {
@@ -2290,11 +2497,7 @@ nocustom:
 						tracknumber, tr.reg.index, tr.reg.name.c_str(), tr.name.c_str());
 				}
 				i = j+16;
-				offset = 0;
-				offset |= (uint32_t)(ptfunxored[i+3] << 24);
-				offset |= (uint32_t)(ptfunxored[i+2] << 16);
-				offset |= (uint32_t)(ptfunxored[i+1] << 8);
-				offset |= (uint32_t)(ptfunxored[i]);
+				offset = u_endian_read4(&ptfunxored[i], is_bigendian);
 				tr.reg.startpos = (int64_t)(offset*ratefactor);
 				if (tr.reg.length > 0) {
 					tracks.push_back(tr);
