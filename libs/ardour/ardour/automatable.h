@@ -126,6 +126,8 @@ protected:
 	SlavableControlList slavables () const { return SlavableControlList(); }
 
 private:
+	inline void find_next_ac_event (boost::shared_ptr<AutomationControl>, double start, double end, Evoral::ControlEvent& ev) const;
+
 	PBD::ScopedConnectionList _control_connections; ///< connections to our controls' signals
 };
 
