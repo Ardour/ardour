@@ -22,6 +22,7 @@
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/replace_all.h"
+#include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/utils.h"
@@ -462,7 +463,6 @@ MonitorSection::MonitorSection ()
 	hpacker.show ();
 
 	map_state ();
-	assign_controllables ();
 
 	output_button->signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::output_press), false);
 	output_button->signal_button_release_event().connect (sigc::mem_fun(*this, &MonitorSection::output_release), false);
@@ -500,7 +500,7 @@ MonitorSection::~MonitorSection ()
 	}
 
 	_channel_buttons.clear ();
-	output_changed_connections.drop_connections ();
+	route_connections.drop_connections ();
 
 	delete insert_box; insert_box = 0;
 	delete output_button; output_button = 0;
@@ -601,13 +601,14 @@ MonitorSection::set_session (Session* s)
 			/* session with monitor section */
 			_monitor = _route->monitor_control ();
 			assign_controllables ();
-			_route->output()->changed.connect (output_changed_connections, invalidator (*this),
-											boost::bind (&MonitorSection::update_output_display, this),
-											gui_context());
+			_route->output()->changed.connect (route_connections, invalidator (*this),
+			                                   boost::bind (&MonitorSection::update_output_display, this),
+			                                   gui_context());
 			insert_box->set_route (_route);
-			_route->processors_changed.connect (*this, invalidator (*this), boost::bind (&MonitorSection::processors_changed, this, _1), gui_context());
-			_route->output()->PortCountChanged.connect (output_changed_connections, invalidator (*this), boost::bind (&MonitorSection::populate_buttons, this), gui_context());
-			_route->DropReferences.connect (*this, invalidator (*this), boost::bind (&MonitorSection::drop_route, this), gui_context());
+			_route->processors_changed.connect (route_connections, invalidator (*this), boost::bind (&MonitorSection::processors_changed, this, _1), gui_context());
+			_route->output()->PortCountChanged.connect (route_connections, invalidator (*this), boost::bind (&MonitorSection::populate_buttons, this), gui_context());
+			_route->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&MonitorSection::drop_route, this), gui_context());
+			cerr << this << " connected to DR for " << _route << endl;
 
 			if (_ui_initialized) {
 				update_processor_box ();
@@ -618,7 +619,7 @@ MonitorSection::set_session (Session* s)
 
 		} else {
 			/* session with no monitor section */
-			output_changed_connections.drop_connections();
+			route_connections.drop_connections();
 			_monitor.reset ();
 			_route.reset ();
 			delete _output_selector;
@@ -640,8 +641,10 @@ MonitorSection::set_session (Session* s)
 
 		/* no session */
 
-		drop_route ();
-		assign_controllables ();
+		if (_route) {
+			drop_route ();
+			unassign_controllables ();
+		}
 
 		ActionManager::set_sensitive (monitor_actions, false);
 		ActionManager::set_sensitive (solo_actions, false);
@@ -651,10 +654,10 @@ MonitorSection::set_session (Session* s)
 void
 MonitorSection::drop_route ()
 {
-	output_changed_connections.drop_connections();
+	route_connections.drop_connections();
 	_monitor.reset ();
 	_route.reset ();
-	control_connections.drop_connections ();
+	unassign_controllables ();
 	rude_iso_button.unset_active_state ();
 	rude_solo_button.unset_active_state ();
 	delete _output_selector;
@@ -1196,55 +1199,48 @@ MonitorSection::parameter_changed (std::string name)
 }
 
 void
-MonitorSection::assign_controllables ()
+MonitorSection::unassign_controllables ()
 {
 	boost::shared_ptr<Controllable> none;
 
-	if (!gain_control) {
-		/* too early - GUI controls not set up yet */
-		return;
-	}
+	cerr << this << " unassign MS controls";
 
-	if (_session) {
-		solo_cut_control->set_controllable (_session->solo_cut_control());
-		solo_cut_display->set_controllable (_session->solo_cut_control());
-	} else {
-		solo_cut_control->set_controllable (none);
-		solo_cut_display->set_controllable (none);
-	}
+	solo_cut_control->set_controllable (none);
+	solo_cut_display->set_controllable (none);
+	gain_control->set_controllable (none);
+	gain_display->set_controllable (none);
+	cut_all_button.set_controllable (none);
+	dim_all_button.set_controllable (none);
+	mono_button.set_controllable (none);
+	dim_control->set_controllable (none);
+	dim_display->set_controllable (none);
+	solo_boost_control->set_controllable (none);
+	solo_boost_display->set_controllable (none);
+}
 
-	if (_route) {
-		gain_control->set_controllable (_route->gain_control());
-		gain_display->set_controllable (_route->gain_control());
-	} else {
-		gain_control->set_controllable (none);
-	}
+void
+MonitorSection::assign_controllables ()
+{
+	assert (_session);
+	assert (_route);
+	assert (_monitor);
 
-	if (_monitor) {
+	solo_cut_control->set_controllable (_session->solo_cut_control());
+	solo_cut_display->set_controllable (_session->solo_cut_control());
 
-		cut_all_button.set_controllable (_monitor->cut_control());
-		cut_all_button.watch ();
-		dim_all_button.set_controllable (_monitor->dim_control());
-		dim_all_button.watch ();
-		mono_button.set_controllable (_monitor->mono_control());
-		mono_button.watch ();
-
-		dim_control->set_controllable (_monitor->dim_level_control ());
-		dim_display->set_controllable (_monitor->dim_level_control ());
-		solo_boost_control->set_controllable (_monitor->solo_boost_control ());
-		solo_boost_display->set_controllable (_monitor->solo_boost_control ());
-
-	} else {
-
-		cut_all_button.set_controllable (none);
-		dim_all_button.set_controllable (none);
-		mono_button.set_controllable (none);
-
-		dim_control->set_controllable (none);
-		dim_display->set_controllable (none);
-		solo_boost_control->set_controllable (none);
-		solo_boost_display->set_controllable (none);
-	}
+	cerr << "MS gainc ontrol is " << _route->gain_control() << endl;
+	gain_control->set_controllable (_route->gain_control());
+	gain_display->set_controllable (_route->gain_control());
+	cut_all_button.set_controllable (_monitor->cut_control());
+	cut_all_button.watch ();
+	dim_all_button.set_controllable (_monitor->dim_control());
+	dim_all_button.watch ();
+	mono_button.set_controllable (_monitor->mono_control());
+	mono_button.watch ();
+	dim_control->set_controllable (_monitor->dim_level_control ());
+	dim_display->set_controllable (_monitor->dim_level_control ());
+	solo_boost_control->set_controllable (_monitor->solo_boost_control ());
+	solo_boost_display->set_controllable (_monitor->solo_boost_control ());
 }
 
 string

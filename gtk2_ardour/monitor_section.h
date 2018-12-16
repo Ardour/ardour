@@ -162,12 +162,13 @@ private:
 	void isolated_changed ();
 
 	PBD::ScopedConnection config_connection;
-	PBD::ScopedConnectionList control_connections;
-	PBD::ScopedConnectionList output_changed_connections;
+	PBD::ScopedConnectionList connections;
+	PBD::ScopedConnectionList route_connections;
 
 	bool _inhibit_solo_model_update;
 
 	void assign_controllables ();
+	void unassign_controllables ();
 
 	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
 
