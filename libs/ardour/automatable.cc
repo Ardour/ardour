@@ -478,7 +478,7 @@ Automatable::automation_list_automation_state_changed (Evoral::Parameter param, 
 		RCUWriter<ControlList> writer (_automated_controls);
 		boost::shared_ptr<ControlList> cl = writer.get_copy ();
 
-		ControlList::const_iterator fi = std::find (cl->begin(), cl->end(), c);
+		ControlList::iterator fi = std::find (cl->begin(), cl->end(), c);
 		if (fi != cl->end()) {
 			cl->erase (fi);
 		}
