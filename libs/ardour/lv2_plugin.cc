@@ -1462,22 +1462,30 @@ get_value(LilvWorld* world, const LilvNode* subject, const LilvNode* predicate)
 void
 LV2Plugin::find_presets()
 {
+	/* see also LV2PluginInfo::get_presets */
 	LilvNode* lv2_appliesTo = lilv_new_uri(_world.world, LV2_CORE__appliesTo);
 	LilvNode* pset_Preset   = lilv_new_uri(_world.world, LV2_PRESETS__Preset);
 	LilvNode* rdfs_label    = lilv_new_uri(_world.world, LILV_NS_RDFS "label");
+	LilvNode* rdfs_comment  = lilv_new_uri(_world.world, LILV_NS_RDFS "comment");
 
 	LilvNodes* presets = lilv_plugin_get_related(_impl->plugin, pset_Preset);
 	LILV_FOREACH(nodes, i, presets) {
 		const LilvNode* preset = lilv_nodes_get(presets, i);
 		lilv_world_load_resource(_world.world, preset);
 		LilvNode* name = get_value(_world.world, preset, rdfs_label);
-		bool userpreset = true; // TODO
+		LilvNode* comment = get_value(_world.world, preset, rdfs_comment);
+		/* TODO properly identify user vs factory presets.
+		 * here's an indirect condition: only factory presets can have comments
+		 */
+		bool userpreset = comment ? false : true;
 		if (name) {
 			_presets.insert(std::make_pair(lilv_node_as_string(preset),
 			                               Plugin::PresetRecord(
 				                               lilv_node_as_string(preset),
 				                               lilv_node_as_string(name),
-				                               userpreset)));
+				                               userpreset,
+				                               comment ? lilv_node_as_string (comment) : ""
+			                               )));
 			lilv_node_free(name);
 		} else {
 			warning << string_compose(
@@ -1485,9 +1493,13 @@ LV2Plugin::find_presets()
 			    lilv_node_as_string(lilv_plugin_get_uri(_impl->plugin)),
 			    lilv_node_as_string(preset)) << endmsg;
 		}
+		if (comment) {
+			lilv_node_free(comment);
+		}
 	}
 	lilv_nodes_free(presets);
 
+	lilv_node_free(rdfs_comment);
 	lilv_node_free(rdfs_label);
 	lilv_node_free(pset_Preset);
 	lilv_node_free(lv2_appliesTo);
@@ -3424,19 +3436,28 @@ LV2PluginInfo::get_presets (bool /*user_only*/) const
 	LilvNode* lv2_appliesTo = lilv_new_uri(_world.world, LV2_CORE__appliesTo);
 	LilvNode* pset_Preset   = lilv_new_uri(_world.world, LV2_PRESETS__Preset);
 	LilvNode* rdfs_label    = lilv_new_uri(_world.world, LILV_NS_RDFS "label");
+	LilvNode* rdfs_comment  = lilv_new_uri(_world.world, LILV_NS_RDFS "comment");
 
 	LilvNodes* presets = lilv_plugin_get_related(lp, pset_Preset);
 	LILV_FOREACH(nodes, i, presets) {
 		const LilvNode* preset = lilv_nodes_get(presets, i);
 		lilv_world_load_resource(_world.world, preset);
 		LilvNode* name = get_value(_world.world, preset, rdfs_label);
-		bool userpreset = true; // TODO
+		LilvNode* comment = get_value(_world.world, preset, rdfs_comment);
+		/* TODO properly identify user vs factory presets.
+		 * here's an indirect condition: only factory presets can have comments
+		 */
+		bool userpreset = comment ? false : true;
 		if (name) {
-			p.push_back (Plugin::PresetRecord (lilv_node_as_string(preset), lilv_node_as_string(name), userpreset));
+			p.push_back (Plugin::PresetRecord (lilv_node_as_string(preset), lilv_node_as_string(name), userpreset, comment ? lilv_node_as_string (comment) : ""));
 			lilv_node_free(name);
+		}
+		if (comment) {
+			lilv_node_free(comment);
 		}
 	}
 	lilv_nodes_free(presets);
+	lilv_node_free(rdfs_comment);
 	lilv_node_free(rdfs_label);
 	lilv_node_free(pset_Preset);
 	lilv_node_free(lv2_appliesTo);

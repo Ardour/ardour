@@ -190,7 +190,8 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 
 	struct PresetRecord {
 	    PresetRecord () : valid (false) {}
-	    PresetRecord (const std::string& u, const std::string& l, bool s = true) : uri (u), label (l), user (s), valid (true)  {}
+	    PresetRecord (const std::string& u, const std::string& l, bool s = true, const std::string& d = "")
+				: uri (u), label (l), description (d), user (s), valid (true)  {}
 
 	    bool operator!= (PresetRecord const & a) const {
 		    return uri != a.uri || label != a.label;
@@ -198,6 +199,7 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 
 	    std::string uri;
 	    std::string label;
+	    std::string description;
 	    bool user;
 	    bool valid;
 	};
