@@ -731,6 +731,10 @@ save (LV2_Handle                instance,
 			apath, strlen (apath) + 1,
 			self->atom_Path, LV2_STATE_IS_POD);
 
+#ifndef _WIN32 // TODO need lilv_free() -- https://github.com/drobilla/lilv/issues/14
+	free (apath);
+#endif
+
 	return LV2_STATE_SUCCESS;
 }
 
@@ -747,15 +751,32 @@ restore (LV2_Handle                  instance,
 		return LV2_STATE_ERR_UNKNOWN;
 	}
 
+	LV2_State_Map_Path* map_path = NULL;
+
+	for (int i = 0; features[i]; ++i) {
+		if (!strcmp (features[i]->URI, LV2_STATE__mapPath)) {
+			map_path = (LV2_State_Map_Path*) features[i]->data;
+		}
+	}
+
+	if (!map_path) {
+		return LV2_STATE_ERR_NO_FEATURE;
+	}
+
   size_t   size;
   uint32_t type;
   uint32_t valflags;
 
   const void* value = retrieve (handle, self->afs_sf2file, &size, &type, &valflags);
 	if (value) {
-		strncpy (self->queue_sf2_file_path, (const char*) value, 1023);
+		char* apath = map_path->absolute_path (map_path->handle, (const char*) value);
+		strncpy (self->queue_sf2_file_path, apath, 1023);
+		printf ("XXX %s -> %s\n", (const char*) value, apath);
 		self->queue_sf2_file_path[1023] = '\0';
 		self->queue_reinit = true;
+#ifndef _WIN32 // TODO need lilv_free() -- https://github.com/drobilla/lilv/issues/14
+		free (apath);
+#endif
 	}
 	return LV2_STATE_SUCCESS;
 }
