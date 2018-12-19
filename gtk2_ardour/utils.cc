@@ -104,8 +104,7 @@ ARDOUR_UI_UTILS::just_hide_it (GdkEventAny */*ev*/, Gtk::Window *win)
 static bool
 idle_notify_engine_stopped ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action ("Window", "toggle-audio-midi-setup");
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-audio-midi-setup");
 
 	MessageDialog msg (
 			_("The current operation is not possible because of an error communicating with the audio hardware."),
