@@ -90,96 +90,97 @@ AddRouteDialog::AddRouteDialog ()
 	if (builtin_types.empty()) {
 		builtin_types.push_back (
 			std::pair<string,string>(_("Audio Tracks"),  _(" \
-Use the settings, below, to create 1 or more new Audio tracks.\n \
-\n\n \
+Use these settings to create one or more audio tracks.\n \
+\n \
 You may select:\n \
 * The number of tracks to add.\n \
-* A Name for the new track(s).\n \
-* Mono, Stereo, or Multichannel operation for the new track(s).\n \
-* A Group which the track will be assigned to.\n \
-* The Pin Connections mode. (see tooltip for details).\n \
-* Normal (non-destructive) or Tape (destructive) recording mode.\n \
+* A name for the track(s).\n \
+* Mono, stereo, or multi-channel operation for the track(s).\n \
+* A group which the track(s) will be assigned to.\n \
+* The pin connections mode (see tooltip for details).\n \
+* Normal (non-destructive) or tape (destructive) recording mode.\n \
 \n \
-The track will be added in the location specified by \"Position\".\n \
+The track(s) will be added at the location specified by \"Position\".\n \
 ")
 		));
 		builtin_types.push_back (
 			std::pair<string,string>(_("MIDI Tracks"),  _(" \
-Use the settings, below, to create 1 or more new MIDI tracks.\n \
-\n\n \
+Use these settings to create one or more MIDI tracks.\n \
+\n \
 You may select:\n \
 * The number of tracks to add.\n \
-* A Name for the track(s).\n \
-* An Instrument plugin (or select \"None\" to drive an external device)\n \
-* A Group which the track will be assigned to.\n \
-* The Pin Connections mode. (see tooltip for details)\n \
+* A name for the track(s).\n \
+* An instrument plugin (or select \"None\" to drive an external device).\n \
+* A group which the track(s) will be assigned to.\n \
+* The pin connections mode (see tooltip for details).\n \
 \n \
-The track will be added in the location specified by \"Position\".\n \
+The track(s) will be added at the location specified by \"Position\".\n \
 ")
 		));
 		builtin_types.push_back (
 			std::pair<string,string>(_("Audio+MIDI Tracks"),   _(" \
-Use the settings, below, to create 1 or more new Audio+MIDI tracks.\n \
-\n\n \
+Use these settings to create one or more Audio+MIDI tracks.\n \
+\n \
 You may select:\n \
 * The number of tracks to add.\n \
-* A Name for the track(s).\n \
-* An Instrument plugin (or select \"None\" to drive an external device)\n \
-* A Group which will be assigned to the track(s).\n \
-* Pin Connections mode. (see tooltip for details).\n \
-* Normal (non-destructive) or Tape (destructive) recording mode.\n \
+* A name for the track(s).\n \
+* An instrument plugin (or select \"None\" to drive an external device).\n \
+* A group which the track(s) will be assigned to.\n \
+* The pin connections mode (see tooltip for details).\n \
+* Normal (non-destructive) or tape (destructive) recording mode.\n \
 \n \
-The track will be added in the location specified by \"Position\".\n \
+The track(s) will be added at the location specified by \"Position\".\n \
 ")
 		));
 		builtin_types.push_back (
 			std::pair<string,string>(_("Audio Busses"),  _(" \
-Use the settings, below, to create new Audio Busses.\n \
-\n\n \
+Use these settings to create one or more audio busses.\n \
+\n \
 You may select:\n \
 * The number of busses to add.\n \
-* A Name for the busses.\n \
-* A Group which will be assigned to the Busses.\n \
-* Pin Connections mode. (see tooltip for details).\n \
+* A name for the buss(es).\n \
+* A group which the buss(es) will be assigned to.\n \
+* The pin connections mode (see tooltip for details).\n \
 \n \
-The Busses will be added in the location specified by \"Position\".\n \
+The buss(es) will be added at the location specified by \"Position\".\n \
 ")
 		));
 		builtin_types.push_back (
 			std::pair<string,string>(_("MIDI Busses"),  _(" \
-Use the settings, below, to create new MIDI Busses.\n \
+Use these settings to create one or more MIDI busses.\n \
 \n \
-MIDI Busses can combine the output of multiple tracks. \n \
-MIDI Busses are sometimes used to host a single \"heavy\" instrument plugin which is fed from multiple MIDI tracks.  \
-\n\n \
+MIDI busses can combine the output of multiple tracks. They are sometimes used\n \
+to host a single \"heavy\" instrument plugin which is fed from multiple MIDI tracks.\n  \
+\n \
 You may select:\n \
 * The number of busses to add.\n \
-* A Name for the busses.\n \
-* An Instrument plugin (or select \"None\" to drive an external device)\n \
-* A Group which will be assigned to the busses.\n \
-* Pin Connections mode. (see tooltip for details).\n \
+* A name for the buss(es).\n \
+* An instrument plugin (or select \"None\" to drive an external device).\n \
+* A group which the buss(es) will be assigned to.\n \
+* The pin connections mode (see tooltip for details).\n \
 \n \
-The busses will be added in the location specified by \"Position\".\n \
+The buss(es) will be added at the location specified by \"Position\".\n \
 ")
 		));
 		builtin_types.push_back (
 			std::pair<string,string>(_("VCA Masters"),   _(" \
-Use the settings, below, to create 1 or more VCA Master(s).\n \
-\n\n \
+Use these settings to create one or more VCA masters.\n \
+\n \
 You may select:\n \
 * The number of VCAs to add.\n \
-* A name for the new VCAs.  \"%n\" will be replaced by an index number for each VCA.\n \
+* A name for the VCA(s).  \"%n\" will be replaced by an index number for each VCA.\n \
 ")
 		));
 		builtin_types.push_back (
 			std::pair<string,string>(_("Foldback Busses"),   _(" \
-Use the settings, below, to create new Foldback Busses.\n \
-Foldback Busses are used as master outputs for monitor channels which are fed by\n \
+Use these settings to create one or more foldback busses.\n \
+\n \
+Foldback busses are used as master outputs for monitor channels and are fed by\n \
 hidden monitor sends.\n \
-\n\n \
+\n \
 You may select:\n \
-* The number of Foldback Busses to add.\n \
-* A name for the new Foldback Busses.\n \
+* The number of foldback busses to add.\n \
+* A name for the foldback buss(es).\n \
 ")
 		));
 	}
@@ -668,8 +669,8 @@ AddRouteDialog::track_type_chosen ()
 		break;
 	case MixedTrack:
 		{
-			MessageDialog msg (_("Audio+MIDI tracks are intended for use <b>ONLY</b> with plugins that use both audio and MIDI input data\n\n"
-					     "If you do not plan to use such a plugin, then use a normal audio or MIDI track instead."),
+			MessageDialog msg (_("Audio+MIDI tracks are intended for use <b>ONLY</b> with plugins that use both audio and MIDI input data.\n\n"
+					     "Use a normal audio or MIDI track if you do not plan to use such a plugin."),
 					   true, MESSAGE_INFO, BUTTONS_OK, true);
 			msg.set_position (WIN_POS_MOUSE);
 			msg.run ();
