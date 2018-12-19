@@ -1838,8 +1838,8 @@ ProcessorBox::set_route (boost::shared_ptr<Route> r)
 void
 ProcessorBox::route_going_away ()
 {
-	/* don't keep updating display as processors are deleted */
 	no_processor_redisplay = true;
+	processor_display.clear ();
 	_route.reset ();
 }
 
