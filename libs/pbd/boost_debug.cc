@@ -115,8 +115,8 @@ std::ostream& operator<< (std::ostream& str, const SPDebug& spd)
 	return str;
 }
 
-typedef std::multimap<void const*,SPDebug*> PointerMap;
-typedef std::map<void const*,const char*> IPointerMap;
+typedef std::multimap<volatile void const*,SPDebug*> PointerMap;
+typedef std::map<volatile void const*,const char*> IPointerMap;
 
 using namespace std;
 
@@ -146,7 +146,7 @@ static Glib::Threads::Mutex& the_lock() {
 
 
 static bool
-is_interesting_object (void const* ptr)
+is_interesting_object (volatile void const* ptr)
 {
 	if (ptr == 0) {
 		return false;
@@ -273,7 +273,7 @@ boost_debug_shared_ptr_reset (void const *sp, void const *old_obj, int old_use_c
 }
 
 void
-boost_debug_shared_ptr_destructor (void const *sp, void const *obj, int use_count)
+boost_debug_shared_ptr_destructor (void const *sp, volatile void const *obj, int use_count)
 {
 	Glib::Threads::Mutex::Lock guard (the_lock());
 	PointerMap::iterator x = sptrs().find (sp);
@@ -287,7 +287,7 @@ boost_debug_shared_ptr_destructor (void const *sp, void const *obj, int use_coun
 }
 
 void
-boost_debug_shared_ptr_constructor (void const *sp, void const *obj, int use_count)
+boost_debug_shared_ptr_constructor (void const *sp, volatile void const *obj, int use_count)
 {
 	if (is_interesting_object (obj)) {
 		Glib::Threads::Mutex::Lock guard (the_lock());
