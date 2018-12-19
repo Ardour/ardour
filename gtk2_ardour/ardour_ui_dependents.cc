@@ -28,6 +28,7 @@
 #include <cstdio>
 
 #include "pbd/error.h"
+#include "pbd/i18n.h"
 
 #include "ardour/session.h"
 
@@ -46,10 +47,10 @@
 #include "rc_option_editor.h"
 #include "route_params_ui.h"
 #include "time_info_box.h"
+#include "step_entry.h"
 #include "opts.h"
 #include "utils.h"
 
-#include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace PBD;
