@@ -72,6 +72,7 @@
 #include "latency_gui.h"
 #include "plugin_dspload_ui.h"
 #include "plugin_eq_gui.h"
+#include "plugin_presets_ui.h"
 #include "timers.h"
 #include "new_plugin_preset_dialog.h"
 
@@ -468,6 +469,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	, latency_dialog (0)
 	, eqgui (0)
 	, stats_gui (0)
+	, preset_gui (0)
 {
 	_preset_modified.set_size_request (16, -1);
 	_preset_combo.set_text("(default)");
@@ -544,6 +546,7 @@ PlugUIBase::~PlugUIBase()
 {
 	delete eqgui;
 	delete stats_gui;
+	delete preset_gui;
 	delete latency_gui;
 }
 

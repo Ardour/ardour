@@ -79,6 +79,7 @@ class LatencyGUI;
 class ArdourWindow;
 class PluginEqGui;
 class PluginLoadStatsGui;
+class PluginPresetsUI;
 class VSTPluginUI;
 
 class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionList
@@ -159,6 +160,7 @@ protected:
 
 	PluginEqGui* eqgui;
 	PluginLoadStatsGui* stats_gui;
+	PluginPresetsUI* preset_gui;
 
 	Gtk::Image* focus_out_image;
 	Gtk::Image* focus_in_image;

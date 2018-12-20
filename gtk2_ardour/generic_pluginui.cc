@@ -56,6 +56,7 @@
 #include "widgets/tooltips.h"
 
 #include "plugin_ui.h"
+#include "plugin_presets_ui.h"
 #include "plugin_display.h"
 #include "gui_thread.h"
 #include "automation_controller.h"
@@ -412,7 +413,20 @@ GenericPluginUI::build ()
 		plugin->announce_property_values();
 	}
 
-	if (grid) {
+	if (control_uis.empty ()) {
+		std::vector<Plugin::PresetRecord> presets = insert->plugin()->get_presets();
+		bool show_preset_browser = false;
+		for (std::vector<Plugin::PresetRecord>::const_iterator i = presets.begin(); i != presets.end(); ++i) {
+			if (i->valid && !i->description.empty()) {
+				show_preset_browser = true;
+				break;
+			}
+		}
+		if (show_preset_browser) {
+			preset_gui = new PluginPresetsUI (insert);
+			hpacker.pack_start (*preset_gui, true, true);
+		}
+	} else if (grid) {
 		custom_layout (control_uis);
 	} else {
 		automatic_layout (control_uis);
