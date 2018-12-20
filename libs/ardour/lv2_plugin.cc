@@ -653,7 +653,6 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	lilv_nodes_free(optional_features);
 #endif
 
-#ifdef HAVE_LILV_0_16_0
 	// Load default state
 	if (_worker) {
 		/* immediately schedule any work,
@@ -668,7 +667,6 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		lilv_state_restore(state, _impl->instance, NULL, NULL, 0, NULL);
 	}
 	lilv_state_free(state);
-#endif
 
 	_sample_rate = rate;
 
@@ -1603,7 +1601,6 @@ LV2Plugin::do_save_preset(string name)
 		Glib::build_filename(".lv2", prefix + "_" + base_name + ".lv2"));
 #endif
 
-#ifdef HAVE_LILV_0_21_3
 	/* delete reference to old preset (if any) */
 	const PresetRecord* r = preset_by_label(name);
 	if (r) {
@@ -1613,7 +1610,6 @@ LV2Plugin::do_save_preset(string name)
 			lilv_node_free(pset);
 		}
 	}
-#endif
 
 	LilvState* state = lilv_state_new_from_instance(
 		_impl->plugin,
@@ -1645,10 +1641,8 @@ LV2Plugin::do_save_preset(string name)
 	std::string uri = Glib::filename_to_uri(Glib::build_filename(bundle, file_name));
 	LilvNode *node_bundle = lilv_new_uri(_world.world, Glib::filename_to_uri(Glib::build_filename(bundle, "/")).c_str());
 	LilvNode *node_preset = lilv_new_uri(_world.world, uri.c_str());
-#ifdef HAVE_LILV_0_21_3
 	lilv_world_unload_resource(_world.world, node_preset);
 	lilv_world_unload_bundle(_world.world, node_bundle);
-#endif
 	lilv_world_load_bundle(_world.world, node_bundle);
 	lilv_world_load_resource(_world.world, node_preset);
 	lilv_node_free(node_bundle);
@@ -1660,7 +1654,6 @@ LV2Plugin::do_save_preset(string name)
 void
 LV2Plugin::do_remove_preset(string name)
 {
-#ifdef HAVE_LILV_0_21_3
 	/* Look up preset record by label (FIXME: ick, label as ID) */
 	const PresetRecord* r = preset_by_label(name);
 	if (!r) {
@@ -1686,11 +1679,6 @@ LV2Plugin::do_remove_preset(string name)
 
 	lilv_state_free(state);
 	lilv_node_free(pset);
-#endif
-	/* Without lilv_state_delete(), we could delete the preset file, but this
-	   would leave a broken bundle/manifest around, so the preset would still
-	   be visible, but broken.  Naively deleting a bundle is too dangerous, so
-	   we simply do not support preset deletion with older Lilv */
 }
 
 bool

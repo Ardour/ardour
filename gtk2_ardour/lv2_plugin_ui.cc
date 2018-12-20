@@ -408,13 +408,8 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	const LilvUI*   ui     = (const LilvUI*)_lv2->c_ui();
 	const LilvNode* bundle = lilv_ui_get_bundle_uri(ui);
 	const LilvNode* binary = lilv_ui_get_binary_uri(ui);
-#ifdef HAVE_LILV_0_21_3
 	char* ui_bundle_path = lilv_file_uri_parse(lilv_node_as_uri(bundle), NULL);
 	char* ui_binary_path = lilv_file_uri_parse(lilv_node_as_uri(binary), NULL);
-#else
-	char* ui_bundle_path = strdup(lilv_uri_to_path(lilv_node_as_uri(bundle)));
-	char* ui_binary_path = strdup(lilv_uri_to_path(lilv_node_as_uri(binary)));
-#endif
 	if (!ui_bundle_path || !ui_binary_path) {
 		error << _("failed to get path for UI bindle or binary") << endmsg;
 		free(ui_bundle_path);
