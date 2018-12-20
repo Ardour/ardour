@@ -1444,17 +1444,10 @@ LV2Plugin::add_state(XMLNode* root) const
 	}
 }
 
-// TODO: Once we can rely on lilv 0.16.0, lilv_world_get can replace this
 static LilvNode*
 get_value(LilvWorld* world, const LilvNode* subject, const LilvNode* predicate)
 {
-	LilvNodes* vs = lilv_world_find_nodes(world, subject, predicate, NULL);
-	if (vs) {
-		LilvNode* node = lilv_node_duplicate(lilv_nodes_get_first(vs));
-		lilv_nodes_free(vs);
-		return node;
-	}
-	return NULL;
+	return lilv_world_get(world, subject, predicate, NULL);
 }
 
 void
