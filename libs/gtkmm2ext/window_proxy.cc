@@ -145,7 +145,11 @@ WindowProxy::toggle()
 			save_pos_and_size();
 		}
 
-		vistracker->cycle_visibility ();
+		if (vistracker) {
+			vistracker->cycle_visibility ();
+		} else {
+			_window->present ();
+		}
 
 		if (_window->is_mapped()) {
 			if (_width != -1 && _height != -1) {
