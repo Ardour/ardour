@@ -398,10 +398,11 @@ struct PluginPreset {
 		: _pip (pip)
 	{
 		if (preset) {
-			_preset.uri    = preset->uri;
-			_preset.label  = preset->label;
-			_preset.user   = preset->user;
-			_preset.valid  = preset->valid;
+			_preset.uri         = preset->uri;
+			_preset.label       = preset->label;
+			_preset.user        = preset->user;
+			_preset.description = preset->description;
+			_preset.valid       = preset->valid;
 		}
 	}
 };
