@@ -421,6 +421,7 @@ private:
 	boost::shared_ptr<RegionList> find_regions_at (samplepos_t);
 
 	samplepos_t _end_space;  //this is used when we are pasting a range with extra space at the end
+	bool _playlist_shift_active;
 };
 
 } /* namespace ARDOUR */

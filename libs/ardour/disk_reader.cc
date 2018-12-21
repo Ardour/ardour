@@ -1127,14 +1127,18 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, samplecnt_
 }
 
 void
-DiskReader::playlist_ranges_moved (list< Evoral::RangeMove<samplepos_t> > const & movements_samples, bool from_undo)
+DiskReader::playlist_ranges_moved (list< Evoral::RangeMove<samplepos_t> > const & movements_samples, bool from_undo_or_shift)
 {
 	/* If we're coming from an undo, it will have handled
-	   automation undo (it must, since automation-follows-regions
-	   can lose automation data).  Hence we can do nothing here.
-	*/
+	 * automation undo (it must, since automation-follows-regions
+	 * can lose automation data).  Hence we can do nothing here.
+	 *
+	 * Likewise when shifting regions (insert/remove time)
+	 * automation is taken care of separately (busses with
+	 * automation have no disk-reader).
+	 */
 
-	if (from_undo) {
+	if (from_undo_or_shift) {
 		return;
 	}
 

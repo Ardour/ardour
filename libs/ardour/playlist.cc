@@ -25,6 +25,7 @@
 #include "pbd/types_convert.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/strsplit.h"
+#include "pbd/unwind.h"
 #include "pbd/xml++.h"
 
 #include "ardour/debug.h"
@@ -322,6 +323,7 @@ Playlist::init (bool hide)
 	_capture_insertion_underway = false;
 	_combine_ops = 0;
 	_end_space = 0;
+	_playlist_shift_active = false;
 
 	_session.history().BeginUndoRedo.connect_same_thread (*this, boost::bind (&Playlist::begin_undo, this));
 	_session.history().EndUndoRedo.connect_same_thread (*this, boost::bind (&Playlist::end_undo, this));
@@ -633,7 +635,7 @@ Playlist::flush_notifications (bool from_undo)
 		/* We don't need to check crossfades for these as pending_bounds has
 		   already covered it.
 		*/
-		RangesMoved (pending_range_moves, from_undo);
+		RangesMoved (pending_range_moves, from_undo || _playlist_shift_active);
 	}
 
 	if (!pending_region_extensions.empty ()) {
@@ -1396,6 +1398,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
 void
 Playlist::shift (samplepos_t at, sampleoffset_t distance, bool move_intersected, bool ignore_music_glue)
 {
+	PBD::Unwinder<bool> uw (_playlist_shift_active, true);
 	RegionWriteLock rlock (this);
 	RegionList copy (regions.rlist());
 	RegionList fixup;
