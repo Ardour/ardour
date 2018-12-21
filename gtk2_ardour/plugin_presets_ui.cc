@@ -93,10 +93,10 @@ PluginPresetsUI::update_preset_list ()
 	for (std::vector<Plugin::PresetRecord>::const_iterator i = presets.begin (); i != presets.end (); ++i) {
 		Gtk::TreeModel::Row row = *(_plugin_preset_model->append ());
 		if (p.uri == i->uri) {
-			row[_plugin_preset_columns.name] = string_compose ("<span weight=\"bold\"  background=\"green\">%1</span>", i->label);
+			row[_plugin_preset_columns.name] = string_compose ("<span weight=\"bold\"  background=\"green\">%1</span>", Gtkmm2ext::markup_escape_text (i->label));
 			found_active = true;
 		} else {
-			row[_plugin_preset_columns.name] = i->label;
+			row[_plugin_preset_columns.name] = Gtkmm2ext::markup_escape_text (i->label);
 		}
 		row[_plugin_preset_columns.description] = i->description;
 		row[_plugin_preset_columns.plugin_preset] = *i;
@@ -143,7 +143,7 @@ PluginPresetsUI::preset_selected ()
 	} else {
 		d = (*iter)[_plugin_preset_columns.description];
 	}
-	_preset_desc.get_buffer ()->set_text (Gtkmm2ext::markup_escape_text (d));
+	_preset_desc.get_buffer ()->set_text (d);
 
 	Plugin::PresetRecord const& p = _insert->plugin ()->last_preset ();
 	_load_button.set_sensitive (ppr.valid && !(p.valid && p.uri == ppr.uri));
