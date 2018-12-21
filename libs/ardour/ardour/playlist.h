@@ -53,21 +53,21 @@ class Crossfade;
 
 namespace Properties {
 	/* fake the type, since regions are handled by SequenceProperty which doesn't
-	   care about such things.
-	*/
+	 * care about such things.
+	 */
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> regions;
 }
 
 class LIBARDOUR_API RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_ptr<Region> > >
 {
-  public:
+public:
 	RegionListProperty (Playlist&);
 
 	RegionListProperty* clone () const;
 	void get_content_as_xml (boost::shared_ptr<Region>, XMLNode &) const;
 	boost::shared_ptr<Region> get_content_from_xml (XMLNode const &) const;
 
-  private:
+private:
 	RegionListProperty* create () const;
 
 	/* copy construction only by ourselves */
@@ -254,36 +254,36 @@ public:
 
 	void set_capture_insertion_in_progress (bool yn);
 
-  protected:
+protected:
 	friend class Session;
 
-  protected:
-    class RegionReadLock : public Glib::Threads::RWLock::ReaderLock {
-    public:
-        RegionReadLock (Playlist *pl) : Glib::Threads::RWLock::ReaderLock (pl->region_lock) {}
-        ~RegionReadLock() {}
-    };
+protected:
+	class RegionReadLock : public Glib::Threads::RWLock::ReaderLock {
+		public:
+			RegionReadLock (Playlist *pl) : Glib::Threads::RWLock::ReaderLock (pl->region_lock) {}
+			~RegionReadLock() {}
+	};
 
-    class RegionWriteLock : public Glib::Threads::RWLock::WriterLock {
-    public:
-	    RegionWriteLock (Playlist *pl, bool do_block_notify = true)
-                    : Glib::Threads::RWLock::WriterLock (pl->region_lock)
-                    , playlist (pl)
-                    , block_notify (do_block_notify) {
-                    if (block_notify) {
-                            playlist->delay_notifications();
-                    }
-            }
+	class RegionWriteLock : public Glib::Threads::RWLock::WriterLock {
+		public:
+			RegionWriteLock (Playlist *pl, bool do_block_notify = true)
+				: Glib::Threads::RWLock::WriterLock (pl->region_lock)
+					, playlist (pl)
+					 , block_notify (do_block_notify) {
+						 if (block_notify) {
+							 playlist->delay_notifications();
+						 }
+					 }
 
-        ~RegionWriteLock() {
-                Glib::Threads::RWLock::WriterLock::release ();
-                if (block_notify) {
-                        playlist->release_notifications ();
-                }
-        }
-        Playlist *playlist;
-        bool block_notify;
-    };
+			~RegionWriteLock() {
+				Glib::Threads::RWLock::WriterLock::release ();
+				if (block_notify) {
+					playlist->release_notifications ();
+				}
+			}
+			Playlist *playlist;
+			bool block_notify;
+	};
 
 	RegionListProperty   regions;  /* the current list of regions in the playlist */
 	std::set<boost::shared_ptr<Region> > all_regions; /* all regions ever added to this playlist */
@@ -410,12 +410,12 @@ public:
 	*/
 	virtual void pre_uncombine (std::vector<boost::shared_ptr<Region> >&, boost::shared_ptr<Region>) {}
 
-  private:
+private:
 	friend class RegionReadLock;
 	friend class RegionWriteLock;
 	mutable Glib::Threads::RWLock region_lock;
 
-  private:
+private:
 	void setup_layering_indices (RegionList const &);
 	void coalesce_and_check_crossfades (std::list<Evoral::Range<samplepos_t> >);
 	boost::shared_ptr<RegionList> find_regions_at (samplepos_t);
