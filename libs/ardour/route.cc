@@ -4160,28 +4160,6 @@ Route::protect_automation ()
 void
 Route::shift (samplepos_t pos, samplecnt_t samples)
 {
-	/* gain automation */
-	{
-		boost::shared_ptr<AutomationControl> gc = _amp->gain_control();
-
-		XMLNode &before = gc->alist()->get_state ();
-		gc->alist()->shift (pos, samples);
-		XMLNode &after = gc->alist()->get_state ();
-		_session.add_command (new MementoCommand<AutomationList> (*gc->alist().get(), &before, &after));
-	}
-
-	/* gain automation */
-	{
-		boost::shared_ptr<AutomationControl> gc = _trim->gain_control();
-
-		XMLNode &before = gc->alist()->get_state ();
-		gc->alist()->shift (pos, samples);
-		XMLNode &after = gc->alist()->get_state ();
-		_session.add_command (new MementoCommand<AutomationList> (*gc->alist().get(), &before, &after));
-	}
-
-	// TODO mute automation ??
-
 	/* pan automation */
 	if (_pannable) {
 		ControlSet::Controls& c (_pannable->controls());
@@ -4198,7 +4176,9 @@ Route::shift (samplepos_t pos, samplecnt_t samples)
 		}
 	}
 
-	/* redirect automation */
+	/* TODO mute automation, MuteControl */
+
+	/* processor automation (incl. gain, trim,..) */
 	{
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 		for (ProcessorList::iterator i = _processors.begin (); i != _processors.end (); ++i) {
