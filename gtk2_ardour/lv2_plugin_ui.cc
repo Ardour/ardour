@@ -144,20 +144,6 @@ LV2PluginUI::request_parameter (void* handle, LV2_URID key)
 		return 0;
 	}
 
-#if 0 // MODAL, blocking
-
-	Gtk::FileChooserDialog* lv2ui_file_dialog (desc.label, FILE_CHOOSER_ACTION_OPEN);
-	Gtkmm2ext::add_volume_shortcuts (lv2ui_file_dialog);
-	lv2ui_file_dialog.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	lv2ui_file_dialog.add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
-	lv2ui_file_dialog.set_default_response(Gtk::RESPONSE_ACCEPT);
-	if (_file_dialog.run()= Gtk::RESPONSE_ACCEPT) {
-		me->plugin->set_property (desc.key, Variant(Variant::PATH, lv2ui_file_dialog.get_filename()));
-	}
-	return 0;
-
-#else
-
 	if (me->active_parameter_requests.find (key) != me->active_parameter_requests.end()) {
 		return 0; /* already showing dialog */
 	}
@@ -186,8 +172,6 @@ LV2PluginUI::request_parameter (void* handle, LV2_URID key)
 	lv2ui_file_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*me, &LV2PluginUI::set_path_property), desc, lv2ui_file_dialog));
 	lv2ui_file_dialog->present();
 	return 0;
-
-#endif
 }
 
 void
