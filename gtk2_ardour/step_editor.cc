@@ -73,8 +73,8 @@ StepEditor::start_step_editing ()
 	assert (step_edit_region_view);
 
 	StepEntry::instance().set_step_editor (this);
-	StepEntry::instance().signal_delete_event().connect (sigc::mem_fun (*this, &StepEditor::step_entry_hidden));
-	StepEntry::instance(). signal_hide().connect (sigc::mem_fun (*this, &StepEditor::step_entry_hide));
+	delete_connection = StepEntry::instance().signal_delete_event().connect (sigc::mem_fun (*this, &StepEditor::step_entry_hidden));
+	hide_connection = StepEntry::instance(). signal_hide().connect (sigc::mem_fun (*this, &StepEditor::step_entry_done));
 
 	step_edit_region_view->show_step_edit_cursor (step_edit_beat_pos);
 	step_edit_region_view->set_step_edit_cursor_width (StepEntry::instance().note_length());
@@ -148,13 +148,15 @@ StepEditor::reset_step_edit_beat_pos ()
 bool
 StepEditor::step_entry_hidden (GdkEventAny*)
 {
-	step_entry_hide ();
-	return true; // XXX remember position ?!
+	step_entry_done ();
+	return true;
 }
 
 void
-StepEditor::step_entry_hide ()
+StepEditor::step_entry_done ()
 {
+	hide_connection.disconnect ();
+	delete_connection.disconnect ();
 	/* everything else will follow the change in the model */
 	_track->set_step_editing (false);
 }

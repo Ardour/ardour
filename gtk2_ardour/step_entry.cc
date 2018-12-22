@@ -469,6 +469,10 @@ StepEntry::~StepEntry()
 void
 StepEntry::set_step_editor (StepEditor* seditor)
 {
+	if (se) {
+		se->step_entry_done ();
+	}
+
 	se = seditor;
 
 	if (se) {

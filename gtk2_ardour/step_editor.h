@@ -38,11 +38,24 @@ class MidiTimeAxisView;
 class PublicEditor;
 class StepEntry;
 
+/** A StepEditor is an object which understands how to interact with the
+ * MidiTrack and MidiTimeAxisView APIs to make the changes required during step
+ * editing. However, it defers all GUI matters to the StepEntry class, which
+ * presents an interface to the user, and then calls StepEditor methods to make
+ * changes.
+ *
+ * The StepEntry is a singleton, used over and over each time the user wants to
+ * step edit; the StepEditor is owned by a MidiTimeAxisView and re-used for any
+ * step editing in the MidiTrack for which the MidiTimeAxisView is a view.
+ */
+
 class StepEditor : public PBD::ScopedConnectionList, public sigc::trackable
 {
 public:
 	StepEditor (PublicEditor&, boost::shared_ptr<ARDOUR::MidiTrack>, MidiTimeAxisView&);
 	virtual ~StepEditor ();
+
+	void step_entry_done ();
 
 	void check_step_edit ();
 	void step_edit_rest (Temporal::Beats beats);
@@ -82,10 +95,12 @@ private:
 	int8_t                                last_added_pitch;
 	Temporal::Beats                       last_added_end;
 
+	sigc::connection delete_connection;
+	sigc::connection hide_connection;
+
 	void region_removed (boost::weak_ptr<ARDOUR::Region>);
 	void playlist_changed ();
 	bool step_entry_hidden (GdkEventAny*);
-	void step_entry_hide ();
 	void resync_step_edit_position ();
 	void prepare_step_edit_region ();
 };
