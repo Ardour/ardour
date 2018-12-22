@@ -990,6 +990,14 @@ ControlList::shift (double pos, double frames)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
+		if (frames < 0) {
+			/* Route::shift () with negative shift is used
+			 * for "remove time". The time [pos.. pos-frames] is removed.
+			 * and everyhing after, moved backwards.
+			 * TODO: consider adding guard-points (need special-casing)
+			 */
+			erase_range_internal (pos, pos - frames, _events);
+		}
 
 		for (iterator i = _events.begin(); i != _events.end(); ++i) {
 			if ((*i)->when >= pos) {
