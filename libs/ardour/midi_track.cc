@@ -660,6 +660,8 @@ MidiTrack::set_step_editing (bool yn)
 	}
 
 	if (yn != _step_editing) {
+		std::cerr << "\n\n\n" << name() << " changed step editing to " << yn << std::endl;
+		PBD::stacktrace (std::cerr, 100);
 		_step_editing = yn;
 		StepEditStatusChange (yn);
 	}

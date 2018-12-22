@@ -17,6 +17,8 @@
 
 */
 
+#include "pbd/stacktrace.h"
+
 #include "ardour/midi_track.h"
 #include "ardour/midi_region.h"
 #include "ardour/tempo.h"
@@ -155,8 +157,11 @@ StepEditor::step_entry_hidden (GdkEventAny*)
 void
 StepEditor::step_entry_done ()
 {
+	cerr << this << " SE done\n";
+
 	hide_connection.disconnect ();
 	delete_connection.disconnect ();
+
 	/* everything else will follow the change in the model */
 	_track->set_step_editing (false);
 }

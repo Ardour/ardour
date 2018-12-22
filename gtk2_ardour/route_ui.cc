@@ -779,9 +779,9 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 	if (is_midi_track()) {
 
-		/* rec-enable button exits from step editing */
+		/* rec-enable button exits from step editing, but not context click */
 
-		if (midi_track()->step_editing()) {
+		if (!Keyboard::is_context_menu_event (ev) && midi_track()->step_editing()) {
 			midi_track()->set_step_editing (false);
 			return false;
 		}
@@ -992,6 +992,7 @@ RouteUI::toggle_rec_safe ()
 void
 RouteUI::step_edit_changed (bool yn)
 {
+	cerr << _route->name() << " step editing changed to " << yn << endl;
 	if (yn) {
 		if (rec_enable_button) {
 			rec_enable_button->set_active_state (Gtkmm2ext::ExplicitActive);
