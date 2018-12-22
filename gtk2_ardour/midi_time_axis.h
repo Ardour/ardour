@@ -192,8 +192,6 @@ private:
 	ParameterMenuMap _controller_menu_map;
 
 	StepEditor* _step_editor;
-
-	void immediate_patch_chnage_response (int response);
 };
 
 #endif /* __ardour_midi_time_axis_h__ */
