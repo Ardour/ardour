@@ -46,7 +46,7 @@ using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 
 Gtkmm2ext::Bindings* StepEntry::bindings = 0;
-StepEntry* StepEntry::_current_step_entry = 0;
+StepEntry* StepEntry::_instance = 0;
 
 static void
 _note_off_event_handler (GtkWidget* /*widget*/, int note, gpointer arg)
@@ -60,8 +60,18 @@ _rest_event_handler (GtkWidget* /*widget*/, gpointer arg)
 	((StepEntry*)arg)->rest_event_handler ();
 }
 
-StepEntry::StepEntry (StepEditor& seditor)
-	: ArdourWindow (string_compose (_("Step Entry: %1"), seditor.name()))
+StepEntry&
+StepEntry::instance()
+{
+	if (!_instance) {
+		_instance = new StepEntry;
+	}
+
+	return *_instance;
+}
+
+StepEntry::StepEntry ()
+	: ArdourWindow (string())
 	, _current_note_length (1.0)
 	, _current_note_velocity (64)
 	, triplet_button ("3")
@@ -89,26 +99,9 @@ StepEntry::StepEntry (StepEditor& seditor)
 	, program_button (_("+"))
 	, _piano (0)
 	, piano (0)
-	, se (&seditor)
+	, se (0)
 {
 	set_data ("ardour-bindings", bindings);
-
-#if 0
-	/* set channel selector to first selected channel. if none
-	   are selected, it will remain at the value set in its
-	   constructor, above (1)
-	*/
-
-	uint16_t chn_mask = se->channel_selector().get_selected_channels();
-
-	for (uint32_t i = 0; i < 16; ++i) {
-		if (chn_mask & (1<<i)) {
-			channel_adjustment.set_value (i+1);
-			break;
-		}
-	}
-
-#endif
 
 	RadioButtonGroup length_group = length_1_button.get_group();
 	length_2_button.set_group (length_group);
@@ -474,6 +467,35 @@ StepEntry::~StepEntry()
 }
 
 void
+StepEntry::set_step_editor (StepEditor* seditor)
+{
+	se = seditor;
+
+	if (se) {
+		set_title (string_compose (_("Step Entry: %1"), se->name()));
+#if 0
+		/* set channel selector to first selected channel. if none
+		   are selected, it will remain at the value set in its
+		   constructor, above (1)
+		*/
+
+		uint16_t chn_mask = se->channel_selector().get_selected_channels();
+
+		for (uint32_t i = 0; i < 16; ++i) {
+			if (chn_mask & (1<<i)) {
+				channel_adjustment.set_value (i+1);
+				break;
+			}
+		}
+
+#endif
+	} else {
+		hide ();
+	}
+}
+
+
+void
 StepEntry::length_changed ()
 {
 	length_1_button.queue_draw ();
@@ -514,7 +536,9 @@ StepEntry::on_key_release_event (GdkEventKey* ev)
 void
 StepEntry::rest_event_handler ()
 {
-	se->step_edit_rest (Temporal::Beats());
+	if (se) {
+		se->step_edit_rest (Temporal::Beats());
+	}
 }
 
 Temporal::Beats
@@ -569,13 +593,17 @@ StepEntry::on_show ()
 void
 StepEntry::beat_resync_click ()
 {
-	se->step_edit_beat_sync ();
+	if (se) {
+		se->step_edit_beat_sync ();
+	}
 }
 
 void
 StepEntry::bar_resync_click ()
 {
-	se->step_edit_bar_sync ();
+	if (se) {
+		se->step_edit_bar_sync ();
+	}
 }
 
 void
@@ -699,13 +727,17 @@ StepEntry::load_bindings ()
 void
 StepEntry::toggle_triplet ()
 {
-	se->set_step_edit_cursor_width (note_length());
+	if (se) {
+		se->set_step_edit_cursor_width (note_length());
+	}
 }
 
 void
 StepEntry::toggle_chord ()
 {
-	se->step_edit_toggle_chord ();
+	if (se) {
+		se->step_edit_toggle_chord ();
+	}
 }
 
 void
@@ -752,31 +784,41 @@ StepEntry::dot_value_change ()
 	dot2_button.set_inconsistent (inconsistent);
 	dot3_button.set_inconsistent (inconsistent);
 
-	se->set_step_edit_cursor_width (note_length());
+	if (se) {
+		se->set_step_edit_cursor_width (note_length());
+	}
 }
 
 void
 StepEntry::program_click ()
 {
-	se->step_add_program_change (note_channel(), (int8_t) floor (program_adjustment.get_value()));
+	if (se) {
+		se->step_add_program_change (note_channel(), (int8_t) floor (program_adjustment.get_value()));
+	}
 }
 
 void
 StepEntry::bank_click ()
 {
-	se->step_add_bank_change (note_channel(), (int8_t) floor (bank_adjustment.get_value()));
+	if (se) {
+		se->step_add_bank_change (note_channel(), (int8_t) floor (bank_adjustment.get_value()));
+	}
 }
 
 void
 StepEntry::insert_rest ()
 {
-	se->step_edit_rest (note_length());
+	if (se) {
+		se->step_edit_rest (note_length());
+	}
 }
 
 void
 StepEntry::insert_grid_rest ()
 {
-	se->step_edit_rest (Temporal::Beats());
+	if (se) {
+		se->step_edit_rest (Temporal::Beats());
+	}
 }
 
 void
@@ -786,7 +828,9 @@ StepEntry::insert_note (uint8_t note)
 		return;
 	}
 
-	se->step_add_note (note_channel(), note, note_velocity(), note_length());
+	if (se) {
+		se->step_add_note (note_channel(), note, note_velocity(), note_length());
+	}
 }
 void
 StepEntry::insert_c ()
@@ -935,7 +979,6 @@ StepEntry::length_value_change ()
 {
 	RefPtr<Action> act;
 	RefPtr<RadioAction> ract;
-	double val = length_divisor_adjustment.get_value();
 	bool inconsistent = true;
 	vector<const char*> length_actions;
 
@@ -964,7 +1007,9 @@ StepEntry::length_value_change ()
 	length_32_button.set_inconsistent (inconsistent);
 	length_64_button.set_inconsistent (inconsistent);
 
-	se->set_step_edit_cursor_width (note_length());
+	if (se) {
+		se->set_step_edit_cursor_width (note_length());
+	}
 }
 
 bool
@@ -1124,31 +1169,23 @@ StepEntry::octave_n (int n)
 void
 StepEntry::do_sustain ()
 {
-	se->step_edit_sustain (note_length());
+	if (se) {
+		se->step_edit_sustain (note_length());
+	}
 }
 
 void
 StepEntry::back ()
 {
-	se->move_step_edit_beat_pos (-note_length());
+	if (se) {
+		se->move_step_edit_beat_pos (-note_length());
+	}
 }
 
 void
 StepEntry::sync_to_edit_point ()
 {
-	se->resync_step_edit_to_edit_point ();
-}
-
-bool
-StepEntry::on_focus_in_event (GdkEventFocus* ev)
-{
-	_current_step_entry = this;
-	return ArdourWindow::on_focus_in_event (ev);
-}
-
-bool
-StepEntry::on_focus_out_event (GdkEventFocus* ev)
-{
-	_current_step_entry = 0;
-	return ArdourWindow::on_focus_out_event (ev);
+	if (se) {
+		se->resync_step_edit_to_edit_point ();
+	}
 }

@@ -78,15 +78,14 @@ private:
 	PBD::ScopedConnection                 step_edit_region_connection;
 	PublicEditor&                         _editor;
 	boost::shared_ptr<ARDOUR::MidiTrack>  _track;
-	StepEntry*                            step_editor;
 	MidiTimeAxisView&                     _mtv;
 	int8_t                                last_added_pitch;
 	Temporal::Beats                       last_added_end;
 
 	void region_removed (boost::weak_ptr<ARDOUR::Region>);
 	void playlist_changed ();
-	bool step_editor_hidden (GdkEventAny*);
-	void step_editor_hide ();
+	bool step_entry_hidden (GdkEventAny*);
+	void step_entry_hide ();
 	void resync_step_edit_position ();
 	void prepare_step_edit_region ();
 };

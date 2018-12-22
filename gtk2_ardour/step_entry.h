@@ -35,8 +35,11 @@ class StepEditor;
 class StepEntry : public ArdourWindow
 {
   public:
-	StepEntry (StepEditor&);
+	static StepEntry& instance();
+
 	~StepEntry ();
+
+	void set_step_editor (StepEditor*);
 
 	void note_off_event_handler (int note);
 	void rest_event_handler ();
@@ -49,11 +52,10 @@ class StepEntry : public ArdourWindow
 
 	static void setup_actions_and_bindings ();
 
-  protected:
-	bool on_focus_in_event (GdkEventFocus*);
-	bool on_focus_out_event (GdkEventFocus*);
-
   private:
+	static StepEntry* _instance;
+	StepEntry ();
+
 	Temporal::Beats _current_note_length;
 	uint8_t _current_note_velocity;
 
@@ -198,55 +200,53 @@ class StepEntry : public ArdourWindow
 	   having an actual StepEntry object.
 	*/
 
-	static StepEntry* _current_step_entry;
-
-	static void se_insert_rest () { if (_current_step_entry) { _current_step_entry->insert_rest (); } }
-	static void se_insert_grid_rest () { if (_current_step_entry) { _current_step_entry->insert_grid_rest (); } }
-	static void se_insert_a () { if (_current_step_entry) { _current_step_entry->insert_a (); } }
-	static void se_insert_asharp () { if (_current_step_entry) { _current_step_entry->insert_asharp (); } }
-	static void se_insert_b () { if (_current_step_entry) { _current_step_entry->insert_b (); } }
-	static void se_insert_c () { if (_current_step_entry) { _current_step_entry->insert_c (); } }
-	static void se_insert_csharp () { if (_current_step_entry) { _current_step_entry->insert_csharp (); } }
-	static void se_insert_d () { if (_current_step_entry) { _current_step_entry->insert_d (); } }
-	static void se_insert_dsharp () { if (_current_step_entry) { _current_step_entry->insert_dsharp (); } }
-	static void se_insert_e () { if (_current_step_entry) { _current_step_entry->insert_e (); } }
-	static void se_insert_f () { if (_current_step_entry) { _current_step_entry->insert_f (); } }
-	static void se_insert_fsharp () { if (_current_step_entry) { _current_step_entry->insert_fsharp (); } }
-	static void se_insert_g () { if (_current_step_entry) { _current_step_entry->insert_g (); } }
-	static void se_insert_gsharp () { if (_current_step_entry) { _current_step_entry->insert_gsharp (); } }
-	static void se_note_length_change (GtkAction* act) { if (_current_step_entry) { _current_step_entry->note_length_change (act); } }
-	static void se_note_velocity_change (GtkAction* act) { if (_current_step_entry) { _current_step_entry->note_velocity_change (act); } }
-	static bool se_radio_button_press (GdkEventButton* ev) { if (_current_step_entry) { return _current_step_entry->radio_button_press (ev); } return false; }
-	static bool se_radio_button_release (GdkEventButton* ev, Gtk::RadioButton* rb, int n) { if (_current_step_entry) { return  _current_step_entry->radio_button_release (ev, rb, n); } return false; }
-	static void se_inc_note_velocity () { if (_current_step_entry) { _current_step_entry->inc_note_velocity (); } }
-	static void se_dec_note_velocity () { if (_current_step_entry) { _current_step_entry->dec_note_velocity (); } }
-	static void se_next_note_velocity () { if (_current_step_entry) { _current_step_entry->next_note_velocity (); } }
-	static void se_prev_note_velocity () { if (_current_step_entry) { _current_step_entry->prev_note_velocity (); } }
-	static void se_inc_note_length () { if (_current_step_entry) { _current_step_entry->inc_note_length (); } }
-	static void se_dec_note_length () { if (_current_step_entry) { _current_step_entry->dec_note_length (); } }
-	static void se_next_note_length () { if (_current_step_entry) { _current_step_entry->next_note_length (); } }
-	static void se_prev_note_length () { if (_current_step_entry) { _current_step_entry->prev_note_length (); } }
-	static void se_next_octave () { if (_current_step_entry) { _current_step_entry->next_octave (); } }
-	static void se_prev_octave () { if (_current_step_entry) { _current_step_entry->prev_octave (); } }
-	static void se_octave_n (int n) { if (_current_step_entry) { _current_step_entry->octave_n (n); } }
-	static void se_octave_0 () { if (_current_step_entry) { _current_step_entry->octave_0 (); } }
-	static void se_octave_1 () { if (_current_step_entry) { _current_step_entry->octave_1 (); } }
-	static void se_octave_2 () { if (_current_step_entry) { _current_step_entry->octave_2 (); } }
-	static void se_octave_3 () { if (_current_step_entry) { _current_step_entry->octave_3 (); } }
-	static void se_octave_4 () { if (_current_step_entry) { _current_step_entry->octave_4 (); } }
-	static void se_octave_5 () { if (_current_step_entry) { _current_step_entry->octave_5 (); } }
-	static void se_octave_6 () { if (_current_step_entry) { _current_step_entry->octave_6 (); } }
-	static void se_octave_7 () { if (_current_step_entry) { _current_step_entry->octave_7 (); } }
-	static void se_octave_8 () { if (_current_step_entry) { _current_step_entry->octave_8 (); } }
-	static void se_octave_9 () { if (_current_step_entry) { _current_step_entry->octave_9 (); } }
-	static void se_octave_10 () { if (_current_step_entry) { _current_step_entry->octave_10 (); } }
-	static void se_dot_change (GtkAction* act) { if (_current_step_entry) { _current_step_entry->dot_change (act); } }
-	static void se_dot_value_change () { if (_current_step_entry) { _current_step_entry->dot_value_change (); } }
-	static void se_toggle_triplet() { if (_current_step_entry) { _current_step_entry->toggle_triplet (); } }
-	static void se_toggle_chord() { if (_current_step_entry) { _current_step_entry->toggle_chord (); } }
-	static void se_do_sustain () { if (_current_step_entry) { _current_step_entry->do_sustain (); } }
-	static void se_back() { if (_current_step_entry) { _current_step_entry->back (); } }
-	static void se_sync_to_edit_point () { if (_current_step_entry) { _current_step_entry->sync_to_edit_point (); } }
+	static void se_insert_rest () { if (_instance) { _instance->insert_rest (); } }
+	static void se_insert_grid_rest () { if (_instance) { _instance->insert_grid_rest (); } }
+	static void se_insert_a () { if (_instance) { _instance->insert_a (); } }
+	static void se_insert_asharp () { if (_instance) { _instance->insert_asharp (); } }
+	static void se_insert_b () { if (_instance) { _instance->insert_b (); } }
+	static void se_insert_c () { if (_instance) { _instance->insert_c (); } }
+	static void se_insert_csharp () { if (_instance) { _instance->insert_csharp (); } }
+	static void se_insert_d () { if (_instance) { _instance->insert_d (); } }
+	static void se_insert_dsharp () { if (_instance) { _instance->insert_dsharp (); } }
+	static void se_insert_e () { if (_instance) { _instance->insert_e (); } }
+	static void se_insert_f () { if (_instance) { _instance->insert_f (); } }
+	static void se_insert_fsharp () { if (_instance) { _instance->insert_fsharp (); } }
+	static void se_insert_g () { if (_instance) { _instance->insert_g (); } }
+	static void se_insert_gsharp () { if (_instance) { _instance->insert_gsharp (); } }
+	static void se_note_length_change (GtkAction* act) { if (_instance) { _instance->note_length_change (act); } }
+	static void se_note_velocity_change (GtkAction* act) { if (_instance) { _instance->note_velocity_change (act); } }
+	static bool se_radio_button_press (GdkEventButton* ev) { if (_instance) { return _instance->radio_button_press (ev); } return false; }
+	static bool se_radio_button_release (GdkEventButton* ev, Gtk::RadioButton* rb, int n) { if (_instance) { return  _instance->radio_button_release (ev, rb, n); } return false; }
+	static void se_inc_note_velocity () { if (_instance) { _instance->inc_note_velocity (); } }
+	static void se_dec_note_velocity () { if (_instance) { _instance->dec_note_velocity (); } }
+	static void se_next_note_velocity () { if (_instance) { _instance->next_note_velocity (); } }
+	static void se_prev_note_velocity () { if (_instance) { _instance->prev_note_velocity (); } }
+	static void se_inc_note_length () { if (_instance) { _instance->inc_note_length (); } }
+	static void se_dec_note_length () { if (_instance) { _instance->dec_note_length (); } }
+	static void se_next_note_length () { if (_instance) { _instance->next_note_length (); } }
+	static void se_prev_note_length () { if (_instance) { _instance->prev_note_length (); } }
+	static void se_next_octave () { if (_instance) { _instance->next_octave (); } }
+	static void se_prev_octave () { if (_instance) { _instance->prev_octave (); } }
+	static void se_octave_n (int n) { if (_instance) { _instance->octave_n (n); } }
+	static void se_octave_0 () { if (_instance) { _instance->octave_0 (); } }
+	static void se_octave_1 () { if (_instance) { _instance->octave_1 (); } }
+	static void se_octave_2 () { if (_instance) { _instance->octave_2 (); } }
+	static void se_octave_3 () { if (_instance) { _instance->octave_3 (); } }
+	static void se_octave_4 () { if (_instance) { _instance->octave_4 (); } }
+	static void se_octave_5 () { if (_instance) { _instance->octave_5 (); } }
+	static void se_octave_6 () { if (_instance) { _instance->octave_6 (); } }
+	static void se_octave_7 () { if (_instance) { _instance->octave_7 (); } }
+	static void se_octave_8 () { if (_instance) { _instance->octave_8 (); } }
+	static void se_octave_9 () { if (_instance) { _instance->octave_9 (); } }
+	static void se_octave_10 () { if (_instance) { _instance->octave_10 (); } }
+	static void se_dot_change (GtkAction* act) { if (_instance) { _instance->dot_change (act); } }
+	static void se_dot_value_change () { if (_instance) { _instance->dot_value_change (); } }
+	static void se_toggle_triplet() { if (_instance) { _instance->toggle_triplet (); } }
+	static void se_toggle_chord() { if (_instance) { _instance->toggle_chord (); } }
+	static void se_do_sustain () { if (_instance) { _instance->do_sustain (); } }
+	static void se_back() { if (_instance) { _instance->back (); } }
+	static void se_sync_to_edit_point () { if (_instance) { _instance->sync_to_edit_point (); } }
 
 	static void load_bindings ();
 	static Gtkmm2ext::Bindings*  bindings;

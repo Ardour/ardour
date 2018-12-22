@@ -35,7 +35,6 @@ using namespace std;
 StepEditor::StepEditor (PublicEditor& e, boost::shared_ptr<MidiTrack> t, MidiTimeAxisView& mtv)
 	: _editor (e)
 	, _track (t)
-	, step_editor (0)
 	, _mtv (mtv)
 {
 	step_edit_insert_position = 0;
@@ -52,7 +51,7 @@ StepEditor::StepEditor (PublicEditor& e, boost::shared_ptr<MidiTrack> t, MidiTim
 
 StepEditor::~StepEditor()
 {
-	delete step_editor;
+	StepEntry::instance().set_step_editor (0);
 }
 
 void
@@ -73,16 +72,14 @@ StepEditor::start_step_editing ()
 	assert (step_edit_region);
 	assert (step_edit_region_view);
 
-	if (step_editor == 0) {
-		step_editor = new StepEntry (*this);
-		step_editor->signal_delete_event().connect (sigc::mem_fun (*this, &StepEditor::step_editor_hidden));
-		step_editor->signal_hide().connect (sigc::mem_fun (*this, &StepEditor::step_editor_hide));
-	}
+	StepEntry::instance().set_step_editor (this);
+	StepEntry::instance().signal_delete_event().connect (sigc::mem_fun (*this, &StepEditor::step_entry_hidden));
+	StepEntry::instance(). signal_hide().connect (sigc::mem_fun (*this, &StepEditor::step_entry_hide));
 
 	step_edit_region_view->show_step_edit_cursor (step_edit_beat_pos);
-	step_edit_region_view->set_step_edit_cursor_width (step_editor->note_length());
+	step_edit_region_view->set_step_edit_cursor_width (StepEntry::instance().note_length());
 
-	step_editor->present ();
+	StepEntry::instance().present ();
 }
 
 void
@@ -149,14 +146,14 @@ StepEditor::reset_step_edit_beat_pos ()
 }
 
 bool
-StepEditor::step_editor_hidden (GdkEventAny*)
+StepEditor::step_entry_hidden (GdkEventAny*)
 {
-	step_editor_hide ();
+	step_entry_hide ();
 	return true; // XXX remember position ?!
 }
 
 void
-StepEditor::step_editor_hide ()
+StepEditor::step_entry_hide ()
 {
 	/* everything else will follow the change in the model */
 	_track->set_step_editing (false);
@@ -165,9 +162,7 @@ StepEditor::step_editor_hide ()
 void
 StepEditor::stop_step_editing ()
 {
-	if (step_editor) {
-		step_editor->hide ();
-	}
+	StepEntry::instance().hide ();
 
 	if (step_edit_region_view) {
 		step_edit_region_view->hide_step_edit_cursor();
@@ -256,14 +251,14 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Tem
 		prepare_step_edit_region ();
 		reset_step_edit_beat_pos ();
 		step_edit_region_view->show_step_edit_cursor (step_edit_beat_pos);
-		step_edit_region_view->set_step_edit_cursor_width (step_editor->note_length());
+		step_edit_region_view->set_step_edit_cursor_width (StepEntry::instance().note_length());
 	}
 
 	assert (step_edit_region);
 	assert (step_edit_region_view);
 
-	if (beat_duration == 0.0 && step_editor) {
-		beat_duration = step_editor->note_length();
+	if (beat_duration == 0.0) {
+		beat_duration = StepEntry::instance().note_length();
 	} else if (beat_duration == 0.0) {
 		bool success;
 		beat_duration = _editor.get_grid_type_as_beats (success, step_edit_insert_position);
@@ -324,7 +319,7 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Tem
 		_step_edit_chord_duration = max (_step_edit_chord_duration, beat_duration);
 	}
 
-	step_edit_region_view->set_step_edit_cursor_width (step_editor->note_length());
+	step_edit_region_view->set_step_edit_cursor_width (StepEntry::instance().note_length());
 
 	return 0;
 }
