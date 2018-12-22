@@ -32,6 +32,16 @@
 
 class StepEditor;
 
+/** StepEntry is a singleton class which presents a GUI to the user to allow
+ * them to carry out step editing. It does not understand the details of making
+ * changes to the model directly, but instead calls into a StepEditor object to
+ * accomplish that.
+ *
+ * The StepEntry is a singleton, used over and over each time the user wants to
+ * step edit; the StepEditor is owned by a MidiTimeAxisView and re-used for any
+ * step editing in the MidiTrack for which the MidiTimeAxisView is a view.
+ */
+
 class StepEntry : public ArdourWindow
 {
   public:
