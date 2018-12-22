@@ -990,20 +990,51 @@ ControlList::shift (double pos, double frames)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
+		double v0, v1;
 		if (frames < 0) {
 			/* Route::shift () with negative shift is used
 			 * for "remove time". The time [pos.. pos-frames] is removed.
 			 * and everyhing after, moved backwards.
-			 * TODO: consider adding guard-points (need special-casing)
 			 */
+			v0 = unlocked_eval (pos);
+			v1 = unlocked_eval (pos - frames);
 			erase_range_internal (pos, pos - frames, _events);
+		} else {
+			v0 = v1 = unlocked_eval (pos);
 		}
 
+		bool dst_guard_exists = false;
+
 		for (iterator i = _events.begin(); i != _events.end(); ++i) {
+			if ((*i)->when == pos) {
+				dst_guard_exists = true;
+			}
 			if ((*i)->when >= pos) {
 				(*i)->when += frames;
 			}
 		}
+
+		/* add guard-points to retain shape, if needed */
+		if (frames > 0) {
+			ControlEvent cp (pos, 0.0);
+			iterator s = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+			if (s != _events.end ()) {
+				_events.insert (s, new ControlEvent (pos, v0));
+			}
+			pos += frames;
+		} else if (frames < 0 && pos > 0) {
+			ControlEvent cp (pos - 1, 0.0);
+			iterator s = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+			if (s != _events.end ()) {
+				_events.insert (s, new ControlEvent (pos - 1, v0));
+			}
+		}
+		if (!dst_guard_exists) {
+			ControlEvent cp (pos, 0.0);
+			iterator s = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+			_events.insert (s, new ControlEvent (pos, s == _events.end () ? v0 : v1));
+		}
+
 
 		mark_dirty ();
 	}
