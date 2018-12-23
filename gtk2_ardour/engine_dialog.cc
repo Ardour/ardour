@@ -3098,7 +3098,9 @@ EngineControl::device_list_changed ()
 		return;
 	}
 	PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1); // ??
-	list_devices ();
+	if (!ARDOUR::AudioEngine::instance()->running()) {
+		list_devices ();
+	}
 	midi_option_changed();
 }
 
