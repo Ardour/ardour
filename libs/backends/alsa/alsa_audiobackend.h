@@ -434,9 +434,6 @@ class AlsaAudioBackend : public AudioBackend {
 		std::vector<AlsaMidiOut *> _rmidi_out;
 		std::vector<AlsaMidiIn  *> _rmidi_in;
 
-		unsigned _midi_ins;
-		unsigned _midi_outs;
-
 		struct PortConnectData {
 			std::string a;
 			std::string b;

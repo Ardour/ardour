@@ -73,8 +73,6 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _systemic_audio_output_latency (0)
 	, _dsp_load (0)
 	, _processed_samples (0)
-	, _midi_ins (0)
-	, _midi_outs (0)
 	, _port_change_flag (false)
 {
 	_instance_name = s_instance_name;
@@ -900,7 +898,6 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 	_measure_latency = for_latency_measurement;
 
-	_midi_ins = _midi_outs = 0;
 	register_system_midi_ports();
 
 	if (register_system_audio_ports()) {
@@ -1016,7 +1013,6 @@ AlsaAudioBackend::stop ()
 
 	unregister_ports();
 	delete _pcmi; _pcmi = 0;
-	_midi_ins = _midi_outs = 0;
 	_device_reservation.release_device();
 	_measure_latency = false;
 
@@ -1440,12 +1436,26 @@ static std::string replace_name_io (std::string const& name, bool in)
 	return name.substr (0, pos) + "(" + (in ? "In" : "Out") + ")";
 }
 
+static uint32_t
+elf_hash (std::string const& s)
+{
+	const uint8_t* b = (const uint8_t*)s.c_str();
+	uint32_t h = 0;
+	for (size_t i = 0; i < s.length(); ++i) {
+		h = ( h << 4 ) + b[i];
+		uint32_t high = h & 0xF0000000;
+		if (high) {
+			h ^= high >> 24;
+			h &= ~high;
+		}
+	}
+	return h;
+}
+
 int
 AlsaAudioBackend::register_system_midi_ports(const std::string device)
 {
 	std::map<std::string, std::string> devices;
-
-	// TODO use consistent numbering when re-adding devices: _midi_ins, _midi_outs
 
 	if (_midi_driver_option == get_standard_device_name(DeviceNone)) {
 		return 0;
@@ -1485,7 +1495,7 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 				delete mout;
 			} else {
 				char tmp[64];
-				snprintf(tmp, sizeof(tmp), "system:midi_playback_%d", ++_midi_ins);
+				snprintf(tmp, sizeof(tmp), "system:midi_playback_%u", elf_hash (i->first + i->second));
 				PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 				if (!p) {
 					mout->stop();
@@ -1524,7 +1534,7 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 				delete midin;
 			} else {
 				char tmp[64];
-				snprintf(tmp, sizeof(tmp), "system:midi_capture_%d", ++_midi_outs);
+				snprintf(tmp, sizeof(tmp), "system:midi_capture_%u", elf_hash (i->first + i->second));
 				PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 				if (!p) {
 					midin->stop();
