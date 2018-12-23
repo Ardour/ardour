@@ -269,6 +269,8 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 	if (longwin)           options |= RubberBandStretcher::OptionWindowLong;
 	if (shortwin)          options |= RubberBandStretcher::OptionWindowShort;
 
+	if (pitching)          options |= RubberBandStretcher::OptionPitchHighQuality;
+
 	switch (transients) {
 	case NoTransients:
 		options |= RubberBandStretcher::OptionTransientsSmooth;
