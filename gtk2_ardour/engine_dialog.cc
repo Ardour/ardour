@@ -902,6 +902,18 @@ EngineControl::midi_latency_adjustment_changed (Gtk::Adjustment *a, MidiDeviceSe
 	} else {
 		device->output_latency = a->get_value();
 	}
+
+	if (ARDOUR::AudioEngine::instance()->running() && !_measure_midi) {
+		boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+		assert (backend);
+		if (backend->can_change_systemic_latency_when_running () && device->enabled) {
+			if (for_input) {
+				backend->set_systemic_midi_input_latency (device->name, device->input_latency);
+			} else {
+				backend->set_systemic_midi_output_latency (device->name, device->output_latency);
+			}
+		}
+	}
 }
 
 void
@@ -909,6 +921,16 @@ EngineControl::midi_device_enabled_toggled (ArdourButton *b, MidiDeviceSettings 
 	b->set_active (!b->get_active());
 	device->enabled = b->get_active();
 	refresh_midi_display(device->name);
+
+	if (ARDOUR::AudioEngine::instance()->running()) {
+		boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+		assert (backend);
+		backend->set_midi_device_enabled (device->name, device->enabled);
+		if (backend->can_change_systemic_latency_when_running () && device->enabled) {
+			backend->set_systemic_midi_input_latency (device->name, device->input_latency);
+			backend->set_systemic_midi_output_latency (device->name, device->output_latency);
+		}
+	}
 }
 
 void
@@ -3101,7 +3123,16 @@ EngineControl::device_list_changed ()
 	if (!ARDOUR::AudioEngine::instance()->running()) {
 		list_devices ();
 	}
+
 	midi_option_changed();
+
+	if (notebook.get_current_page() == midi_tab) {
+		if (_midi_devices.empty ()) {
+			notebook.set_current_page (0);
+		} else {
+			refresh_midi_display ();
+		}
+	}
 }
 
 void
