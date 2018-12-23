@@ -1636,7 +1636,7 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 				delete mout;
 			} else {
 				char tmp[64];
-				snprintf(tmp, sizeof(tmp), "system:midi_playback_%u", elf_hash (i->first + i->second));
+				snprintf(tmp, sizeof(tmp), "system:midi_playback_%u", elf_hash (i->first));
 				PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 				if (!p) {
 					mout->stop();
@@ -1675,7 +1675,7 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 				delete midin;
 			} else {
 				char tmp[64];
-				snprintf(tmp, sizeof(tmp), "system:midi_capture_%u", elf_hash (i->first + i->second));
+				snprintf(tmp, sizeof(tmp), "system:midi_capture_%u", elf_hash (i->first));
 				PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 				if (!p) {
 					midin->stop();
