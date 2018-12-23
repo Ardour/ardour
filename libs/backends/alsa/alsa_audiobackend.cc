@@ -71,6 +71,7 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _n_outputs (0)
 	, _systemic_audio_input_latency (0)
 	, _systemic_audio_output_latency (0)
+	, _midi_device_thread_active (false)
 	, _dsp_load (0)
 	, _processed_samples (0)
 	, _port_change_flag (false)
@@ -947,6 +948,8 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		return ProcessThreadStartError;
 	}
 
+	_midi_device_thread_active = listen_for_midi_device_changes ();
+
 #if 1
 	if (NULL != getenv ("ALSAEXT")) {
 		boost::char_separator<char> sep (";");
@@ -991,6 +994,8 @@ AlsaAudioBackend::stop ()
 		PBD::error << _("AlsaAudioBackend: failed to terminate.") << endmsg;
 		return -1;
 	}
+
+	stop_listen_for_midi_device_changes ();
 
 	while (!_rmidi_out.empty ()) {
 		AlsaMidiIO *m = _rmidi_out.back ();
@@ -1384,6 +1389,142 @@ AlsaAudioBackend::register_system_audio_ports()
 		_system_outputs.push_back (ap);
 	}
 	return 0;
+}
+
+void
+AlsaAudioBackend::auto_update_midi_devices ()
+{
+	std::map<std::string, std::string> devices;
+	if (_midi_driver_option == _("ALSA raw devices")) {
+		get_alsa_rawmidi_device_names (devices);
+	} else if (_midi_driver_option == _("ALSA sequencer")) {
+		get_alsa_sequencer_names (devices);
+	} else {
+		return;
+	}
+
+	/* find new devices */
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+		if (_midi_devices.find (i->first) != _midi_devices.end()) {
+			continue;
+		}
+		printf ("NEW MIDI DEVICE %s", i->first.c_str());
+		_midi_devices[i->first] = new AlsaMidiDeviceInfo (false);
+		set_midi_device_enabled (i->first, true);
+	}
+
+	for (std::map<std::string, struct AlsaMidiDeviceInfo*>::iterator i = _midi_devices.begin (); i != _midi_devices.end(); ) {
+		if (devices.find (i->first) != devices.end()) {
+			++i;
+			continue;
+		}
+		printf ("REMOVE MIDI DEVICE %s", i->first.c_str());
+		set_midi_device_enabled (i->first, false);
+		i = _midi_devices.erase (i);
+	}
+}
+
+void*
+AlsaAudioBackend::_midi_device_thread (void* arg)
+{
+	AlsaAudioBackend* self = static_cast<AlsaAudioBackend*>(arg);
+	self->midi_device_thread ();
+	pthread_exit (0);
+	return 0;
+}
+
+void
+AlsaAudioBackend::midi_device_thread ()
+{
+	snd_seq_t* seq;
+	if (snd_seq_open (&seq, "hw", SND_SEQ_OPEN_INPUT, 0) < 0) {
+		return;
+	}
+	if (snd_seq_set_client_name (seq, "Ardour")) {
+		snd_seq_close (seq);
+		return;
+	}
+	if (snd_seq_nonblock (seq, 1) < 0) {
+		snd_seq_close (seq);
+		return;
+	}
+
+	int npfds = snd_seq_poll_descriptors_count (seq, POLLIN);
+	if (npfds < 1) {
+		snd_seq_close (seq);
+		return;
+	}
+
+	int port = snd_seq_create_simple_port (seq, "port", SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_NO_EXPORT, SND_SEQ_PORT_TYPE_APPLICATION);
+	snd_seq_connect_from (seq, port, SND_SEQ_CLIENT_SYSTEM, SND_SEQ_PORT_SYSTEM_ANNOUNCE);
+
+	struct pollfd* pfds = (struct pollfd*) malloc (npfds * sizeof(struct pollfd));
+	snd_seq_poll_descriptors (seq, pfds, npfds, POLLIN);
+	snd_seq_drop_input (seq);
+
+	bool do_poll = true;
+	while (_run) {
+		if (do_poll) {
+			int perr = poll (pfds, npfds, 200 /* ms */);
+			if (perr == 0) {
+				continue;
+			}
+			if (perr < 0) {
+				break;
+			}
+		}
+
+		snd_seq_event_t *event;
+		ssize_t err = snd_seq_event_input (seq, &event);
+#if EAGAIN == EWOULDBLOCK
+		if ((err == -EAGAIN) || (err == -ENOSPC))
+#else
+		if ((err == -EAGAIN) || (err == -EWOULDBLOCK) || (err == -ENOSPC))
+#endif
+		{
+			do_poll = true;
+			continue;
+		}
+		if (err < 0) {
+			break;
+		}
+
+		assert (event->source.client == SND_SEQ_CLIENT_SYSTEM);
+
+		const snd_seq_addr_t addr = event->data.addr;
+		switch (event->type) {
+			case SND_SEQ_EVENT_PORT_START:
+			case SND_SEQ_EVENT_PORT_EXIT:
+			case SND_SEQ_EVENT_PORT_CHANGE:
+				auto_update_midi_devices ();
+				engine.request_device_list_update();
+			default:
+				break;
+		}
+		do_poll = (0 == err);
+	}
+	free (pfds);
+	snd_seq_delete_simple_port (seq, port);
+	snd_seq_close (seq);
+}
+
+bool
+AlsaAudioBackend::listen_for_midi_device_changes ()
+{
+	if (pthread_create (&_midi_device_thread_id, NULL, _midi_device_thread, this)) {
+		return false;
+	}
+	return true;
+}
+
+void
+AlsaAudioBackend::stop_listen_for_midi_device_changes ()
+{
+	if (!_midi_device_thread_active) {
+		return;
+	}
+	pthread_join (_midi_device_thread_id, NULL);
+	_midi_device_thread_active = false;
 }
 
 /* set playback-latency for _system_inputs

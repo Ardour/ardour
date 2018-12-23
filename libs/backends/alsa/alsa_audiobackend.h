@@ -374,8 +374,8 @@ class AlsaAudioBackend : public AudioBackend {
 			bool     enabled;
 			uint32_t systemic_input_latency;
 			uint32_t systemic_output_latency;
-			AlsaMidiDeviceInfo()
-				: enabled (true)
+			AlsaMidiDeviceInfo (bool en = true)
+				: enabled (en)
 				, systemic_input_latency (0)
 				, systemic_output_latency (0)
 			{}
@@ -383,6 +383,15 @@ class AlsaAudioBackend : public AudioBackend {
 
 		mutable std::map<std::string, struct AlsaMidiDeviceInfo *> _midi_devices;
 		struct AlsaMidiDeviceInfo * midi_device_info(std::string const) const;
+
+		/* midi device changes */
+		void auto_update_midi_devices();
+		bool listen_for_midi_device_changes ();
+		void stop_listen_for_midi_device_changes ();
+		void midi_device_thread ();
+		static void* _midi_device_thread (void *arg);
+		pthread_t _midi_device_thread_id;
+		bool _midi_device_thread_active;
 
 		/* processing */
 		float  _dsp_load;
