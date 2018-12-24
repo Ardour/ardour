@@ -82,7 +82,7 @@ Convolver::Convolver (
 		}
 	}
 
-	if (_readables.empty()) {
+	if (_readables.empty ()) {
 		PBD::error << string_compose (_("Convolver: IR \"%1\" no usable audio-channels sound."), path) << endmsg;
 		throw failed_constructor ();
 	}
@@ -99,11 +99,11 @@ Convolver::reconfigure ()
 	_convproc.cleanup ();
 	_convproc.set_options (0);
 
-	assert (!_readables.empty());
+	assert (!_readables.empty ());
 
-	_offset = 0;
-	_n_samples = _session.get_block_size();
-	_max_size = _readables[0]->readable_length();
+	_offset    = 0;
+	_n_samples = _session.get_block_size ();
+	_max_size  = _readables[0]->readable_length ();
 
 	uint32_t power_of_two;
 	for (power_of_two = 1; 1U << power_of_two < _n_samples; ++power_of_two);
@@ -132,8 +132,8 @@ Convolver::reconfigure ()
 	 *    4chan file:  L -> L, L -> R, R -> R, R -> L
 	 */
 
-	uint32_t n_imp = n_inputs() * n_outputs ();
-	uint32_t n_chn = _readables.size();
+	uint32_t n_imp = n_inputs () * n_outputs ();
+	uint32_t n_chn = _readables.size ();
 
 #ifndef NDEBUG
 	printf ("Convolver::reconfigure Nin %d Nout %d Nimp %d Nchn %d\n", n_inputs (), n_outputs (), n_imp, n_chn);
@@ -152,21 +152,21 @@ Convolver::reconfigure ()
 
 	for (uint32_t c = 0; c < n_imp && rv == 0; ++c) {
 		int ir_c = c % n_chn;
-		int io_o = c % n_outputs();
+		int io_o = c % n_outputs ();
 		int io_i;
 
 		if (n_imp == 2 && _irc == Stereo) {
 			/*           (imp, in, out)
 			 * Stereo       (2, 2, 2)    1: L -> L, 2: R -> R
 			 */
-			io_i = c % n_inputs();
+			io_i = c % n_inputs ();
 		} else {
 			/*           (imp, in, out)
 			 * Mono         (1, 1, 1)   1: M -> M
 			 * MonoToStereo (2, 1, 2)   1: M -> L, 2: M -> R
 			 * Stereo       (4, 2, 2)   1: L -> L, 2: L -> R, 3: R -> L, 4: R -> R
 			 */
-			io_i = (c / n_outputs()) % n_inputs();
+			io_i = (c / n_outputs ()) % n_inputs ();
 		}
 
 
@@ -200,7 +200,7 @@ Convolver::reconfigure ()
 
 			rv = _convproc.impdata_create (
 					/*i/o map */ io_i, io_o,
-					/*stride, de-interleave */1,
+					/*stride, de-interleave */ 1,
 					ir,
 					chan_delay + pos, chan_delay + pos + ns);
 
@@ -237,7 +237,8 @@ Convolver::reconfigure ()
 }
 
 bool
-Convolver::ready () const {
+Convolver::ready () const
+{
 	return _configured && _convproc.state () == Convproc::ST_PROC;
 }
 
@@ -247,14 +248,14 @@ Convolver::run (float* buf, uint32_t n_samples)
 	assert (_convproc.state () == Convproc::ST_PROC);
 	assert (_irc == Mono);
 
-	uint32_t done = 0;
+	uint32_t done   = 0;
 	uint32_t remain = n_samples;
 
 	while (remain > 0) {
 		uint32_t ns = std::min (remain, _n_samples - _offset);
 
-		float* const       in  = _convproc.inpdata (/*channel*/0);
-		float const* const out = _convproc.outdata (/*channel*/0);
+		float* const       in  = _convproc.inpdata (/*channel*/ 0);
+		float const* const out = _convproc.outdata (/*channel*/ 0);
 
 		memcpy (&in[_offset], &buf[done], sizeof (float) * ns);
 		memcpy (&buf[done], &out[_offset], sizeof (float) * ns);
@@ -276,18 +277,18 @@ Convolver::run_stereo (float* left, float* right, uint32_t n_samples)
 	assert (_convproc.state () == Convproc::ST_PROC);
 	assert (_irc != Mono);
 
-	uint32_t done = 0;
+	uint32_t done   = 0;
 	uint32_t remain = n_samples;
 
 	while (remain > 0) {
 		uint32_t ns = std::min (remain, _n_samples - _offset);
 
-		memcpy (&_convproc.inpdata(0)[_offset], &left[done], sizeof (float) * ns);
+		memcpy (&_convproc.inpdata (0)[_offset], &left[done], sizeof (float) * ns);
 		if (_irc >= Stereo) {
-			memcpy (&_convproc.inpdata(1)[_offset], &right[done], sizeof (float) * ns);
+			memcpy (&_convproc.inpdata (1)[_offset], &right[done], sizeof (float) * ns);
 		}
-		memcpy (&left[done],  &_convproc.outdata(0)[_offset], sizeof (float) * ns);
-		memcpy (&right[done], &_convproc.outdata(1)[_offset], sizeof (float) * ns);
+		memcpy (&left[done],  &_convproc.outdata (0)[_offset], sizeof (float) * ns);
+		memcpy (&right[done], &_convproc.outdata (1)[_offset], sizeof (float) * ns);
 
 		_offset += ns;
 		done    += ns;
