@@ -36,10 +36,14 @@ using namespace ArdourZita;
 
 using ARDOUR::Session;
 
-Convolver::Convolver (Session& session, std::string const& path, IRChannelConfig irc, uint32_t pre_delay)
+Convolver::Convolver (
+		Session& session,
+		std::string const& path,
+		IRChannelConfig irc,
+		IRSettings irs)
 	: SessionHandleRef (session)
 	, _irc (irc)
-	, _initial_delay (pre_delay)
+	, _ir_settings (irs)
 	, _n_samples (0)
 	, _max_size (0)
 	, _offset (0)
@@ -131,6 +135,10 @@ Convolver::reconfigure ()
 	uint32_t n_imp = n_inputs() * n_outputs ();
 	uint32_t n_chn = _readables.size();
 
+#ifndef NDEBUG
+	printf ("Convolver::reconfigure Nin %d Nout %d Nimp %d Nchn %d\n", n_inputs (), n_outputs (), n_imp, n_chn);
+#endif
+
 	if (_irc == Stereo && n_chn == 3) {
 		/* ignore 3rd channel */
 		n_chn = 2;
@@ -140,12 +148,14 @@ Convolver::reconfigure ()
 		n_imp = 2;
 	}
 
+	assert (n_imp <= 4);
+
 	for (uint32_t c = 0; c < n_imp && rv == 0; ++c) {
 		int ir_c = c % n_chn;
 		int io_o = c % n_outputs();
 		int io_i;
 
-		if (n_imp > n_chn && _irc == Stereo) {
+		if (n_imp == 2 && _irc == Stereo) {
 			/*           (imp, in, out)
 			 * Stereo       (2, 2, 2)    1: L -> L, 2: R -> R
 			 */
@@ -159,13 +169,17 @@ Convolver::reconfigure ()
 			io_i = (c / n_outputs()) % n_inputs();
 		}
 
-#ifndef NDEBUG
-		printf ("Convolver map: IR-chn %d: in %d -> out %d\n", ir_c + 1, io_i + 1, io_o + 1);
-#endif
 
-		boost::shared_ptr<Readable> r = _readables[ir_c % n_chn];
+		boost::shared_ptr<Readable> r = _readables[ir_c];
 		assert (r->readable_length () == _max_size);
 		assert (r->n_channels () == 1);
+
+		const float    chan_gain  = _ir_settings.gain * _ir_settings.channel_gain[c];
+		const uint32_t chan_delay = _ir_settings.pre_delay + _ir_settings.channel_delay[c];
+
+#ifndef NDEBUG
+		printf ("Convolver map: IR-chn %d: in %d -> out %d (gain: %.1fdB delay; %d)\n", ir_c + 1, io_i + 1, io_o + 1, 20.f * log10f(chan_gain), chan_delay);
+#endif
 
 		uint32_t pos = 0;
 		while (true) {
@@ -178,11 +192,17 @@ Convolver::reconfigure ()
 				break;
 			}
 
+			if (chan_gain != 1.f) {
+				for (samplecnt_t i = 0; i < ns; ++i) {
+					ir[i] *= chan_gain;
+				}
+			}
+
 			rv = _convproc.impdata_create (
 					/*i/o map */ io_i, io_o,
 					/*stride, de-interleave */1,
 					ir,
-					_initial_delay + pos, _initial_delay + pos + ns);
+					chan_delay + pos, chan_delay + pos + ns);
 
 			if (rv != 0) {
 				break;
@@ -193,7 +213,7 @@ Convolver::reconfigure ()
 			if (pos == _max_size) {
 				break;
 			}
-		};
+		}
 	}
 
 	if (rv == 0) {

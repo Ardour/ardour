@@ -26,7 +26,9 @@ function dsp_configure (ins, outs)
 		mode = ARDOUR.DSP.IRChannelConfig.Stereo
 	end
 
-	conv = ARDOUR.DSP.Convolver (Session, ir_file, mode, 0)
+	local irs = ARDOUR.DSP.IRSettings()
+	irs.gain = 0.5
+	conv = ARDOUR.DSP.Convolver (Session, ir_file, mode, irs)
 	collectgarbage ()
 end
 

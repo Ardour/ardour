@@ -37,7 +37,38 @@ public:
 		Stereo,       ///< 2 in, 2 out, stereo IR  L -> L, R -> R || 4 chan IR  L -> L, L -> R, R -> R, R -> L
 	};
 
-	Convolver (Session&, std::string const&, IRChannelConfig irc = Mono, uint32_t pre_delay = 0);
+	struct IRSettings {
+		IRSettings () {
+			gain  = 1.0;
+			pre_delay = 0.0;
+			channel_gain[0] = channel_gain[1] = channel_gain[2] = channel_gain[3] = 1.0;
+			channel_delay[0] = channel_delay[1] = channel_delay[2] = channel_delay[3] = 0;
+		};
+
+		float    gain;
+		uint32_t pre_delay;
+		float    channel_gain[4];
+		uint32_t channel_delay[4];
+
+		/* convenient array accessors for Lua bindings */
+		float get_channel_gain (unsigned i) const {
+			if (i < 4) { return channel_gain[i]; }
+			return 0;
+		}
+		void set_channel_gain (unsigned i, float g) {
+			if (i < 4) { channel_gain[i] = g; }
+		}
+		uint32_t get_channel_delay (unsigned i) const {
+			if (i < 4) { return channel_delay[i]; }
+			return 0;
+		}
+		void set_channel_delay (unsigned i, uint32_t d) {
+			if (i < 4) { channel_delay[i] = d; }
+		}
+	};
+
+
+	Convolver (Session&, std::string const&, IRChannelConfig irc = Mono, IRSettings irs = IRSettings ());
 
 	void run (float*, uint32_t);
 	void run_stereo (float* L, float* R, uint32_t);
@@ -55,7 +86,7 @@ private:
 	ArdourZita::Convproc _convproc;
 
 	IRChannelConfig _irc;
-	uint32_t _initial_delay;
+	IRSettings      _ir_settings;
 
 	uint32_t _n_samples;
 	uint32_t _max_size;
