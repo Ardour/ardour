@@ -1408,7 +1408,6 @@ AlsaAudioBackend::auto_update_midi_devices ()
 		if (_midi_devices.find (i->first) != _midi_devices.end()) {
 			continue;
 		}
-		printf ("NEW MIDI DEVICE %s", i->first.c_str());
 		_midi_devices[i->first] = new AlsaMidiDeviceInfo (false);
 		set_midi_device_enabled (i->first, true);
 	}
@@ -1418,9 +1417,11 @@ AlsaAudioBackend::auto_update_midi_devices ()
 			++i;
 			continue;
 		}
-		printf ("REMOVE MIDI DEVICE %s", i->first.c_str());
 		set_midi_device_enabled (i->first, false);
-		i = _midi_devices.erase (i);
+		std::map<std::string, struct AlsaMidiDeviceInfo *>::iterator tmp = i;
+		++tmp;
+		_midi_devices.erase (i);
+		i = tmp;
 	}
 }
 
