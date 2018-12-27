@@ -469,7 +469,7 @@ StepEntry::~StepEntry()
 void
 StepEntry::set_step_editor (StepEditor* seditor)
 {
-	if (se) {
+	if (se && se != seditor) {
 		se->step_entry_done ();
 	}
 
