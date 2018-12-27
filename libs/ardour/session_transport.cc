@@ -1625,7 +1625,7 @@ Session::start_transport ()
 			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
 		}
 
-		if (actively_recording() && click_data && (config.get_count_in () || _count_in_once)) {
+		if ((actively_recording() || (config.get_punch_in() && get_record_enabled())) && click_data && (config.get_count_in () || _count_in_once)) {
 			_count_in_once = false;
 			/* calculate count-in duration (in audio samples)
 			 * - use [fixed] tempo/meter at _transport_sample
