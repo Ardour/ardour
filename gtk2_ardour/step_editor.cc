@@ -157,8 +157,6 @@ StepEditor::step_entry_hidden (GdkEventAny*)
 void
 StepEditor::step_entry_done ()
 {
-	cerr << this << " SE done\n";
-
 	hide_connection.disconnect ();
 	delete_connection.disconnect ();
 

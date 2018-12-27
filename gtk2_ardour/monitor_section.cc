@@ -608,7 +608,6 @@ MonitorSection::set_session (Session* s)
 			_route->processors_changed.connect (route_connections, invalidator (*this), boost::bind (&MonitorSection::processors_changed, this, _1), gui_context());
 			_route->output()->PortCountChanged.connect (route_connections, invalidator (*this), boost::bind (&MonitorSection::populate_buttons, this), gui_context());
 			_route->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&MonitorSection::drop_route, this), gui_context());
-			cerr << this << " connected to DR for " << _route << endl;
 
 			if (_ui_initialized) {
 				update_processor_box ();
@@ -1203,8 +1202,6 @@ MonitorSection::unassign_controllables ()
 {
 	boost::shared_ptr<Controllable> none;
 
-	cerr << this << " unassign MS controls";
-
 	solo_cut_control->set_controllable (none);
 	solo_cut_display->set_controllable (none);
 	gain_control->set_controllable (none);
@@ -1228,7 +1225,6 @@ MonitorSection::assign_controllables ()
 	solo_cut_control->set_controllable (_session->solo_cut_control());
 	solo_cut_display->set_controllable (_session->solo_cut_control());
 
-	cerr << "MS gainc ontrol is " << _route->gain_control() << endl;
 	gain_control->set_controllable (_route->gain_control());
 	gain_display->set_controllable (_route->gain_control());
 	cut_all_button.set_controllable (_monitor->cut_control());

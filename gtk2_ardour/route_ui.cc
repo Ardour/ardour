@@ -992,7 +992,6 @@ RouteUI::toggle_rec_safe ()
 void
 RouteUI::step_edit_changed (bool yn)
 {
-	cerr << _route->name() << " step editing changed to " << yn << endl;
 	if (yn) {
 		if (rec_enable_button) {
 			rec_enable_button->set_active_state (Gtkmm2ext::ExplicitActive);
