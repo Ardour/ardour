@@ -650,7 +650,7 @@ Editor::mouse_add_new_marker (samplepos_t where, bool is_cd)
 
 	if (_session) {
 		_session->locations()->next_available_name(markername, _("mark"));
-		if (!choose_new_marker_name(markername)) {
+		if (!choose_new_marker_name(markername, false)) {
 			return;
 		}
 		Location *location = new Location (*_session, where, where, markername, (Location::Flags) flags, get_grid_music_divisions (0));
