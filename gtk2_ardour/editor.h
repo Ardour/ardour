@@ -714,7 +714,7 @@ private:
 	void mouse_add_new_range (samplepos_t);
 	void mouse_add_new_loop (samplepos_t);
 	void mouse_add_new_punch (samplepos_t);
-	bool choose_new_marker_name(std::string &name);
+	bool choose_new_marker_name(std::string &name, bool is_range=false);
 	void update_cd_marker_display ();
 	void ensure_cd_marker_updated (LocationMarkers * lam, ARDOUR::Location * location);
 

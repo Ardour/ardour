@@ -2153,7 +2153,7 @@ Editor::temporal_zoom_to_sample (bool coarser, samplepos_t sample)
 
 
 bool
-Editor::choose_new_marker_name(string &name) {
+Editor::choose_new_marker_name(string &name, bool is_range) {
 
 	if (!UIConfiguration::instance().get_name_new_markers()) {
 		/* don't prompt user for a new name */
@@ -2164,7 +2164,11 @@ Editor::choose_new_marker_name(string &name) {
 
 	dialog.set_prompt (_("New Name:"));
 
-	dialog.set_title (_("New Location Marker"));
+	if (is_range) {
+		dialog.set_title(_("New Range"));
+	} else {
+		dialog.set_title (_("New Location Marker"));
+	}
 
 	dialog.set_name ("MarkNameWindow");
 	dialog.set_size_request (250, -1);
@@ -2205,6 +2209,9 @@ Editor::add_location_from_selection ()
 	samplepos_t end = selection->time[clicked_selection].end;
 
 	_session->locations()->next_available_name(rangename,"selection");
+	if (!choose_new_marker_name(rangename, true)) {
+		return;
+	}
 	Location *location = new Location (*_session, start, end, rangename, Location::IsRangeMarker, get_grid_music_divisions(0));
 
 	begin_reversible_command (_("add marker"));
