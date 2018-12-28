@@ -769,8 +769,6 @@ def options(opt):
                     help='Compile beatbox test app')
     opt.add_option('--lv2', action='store_true', default=True, dest='lv2',
                     help='Compile with support for LV2 (if Lilv+Suil is available)')
-    opt.add_option('--no-lv2', action='store_false', dest='lv2',
-                    help='Do not compile with support for LV2')
     opt.add_option('--lv2dir', type='string', help="install destination for builtin LV2 bundles [Default: LIBDIR/lv2]")
     opt.add_option('--lxvst', action='store_true', default=True, dest='lxvst',
                     help='Compile with support for linuxVST plugins')
