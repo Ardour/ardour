@@ -2232,7 +2232,7 @@ Editor::add_location_mark (samplepos_t where)
 	select_new_marker = true;
 
 	_session->locations()->next_available_name(markername,"mark");
-	if (!choose_new_marker_name(markername, false)) {
+	if (!choose_new_marker_name(markername)) {
 		return;
 	}
 	Location *location = new Location (*_session, where, where, markername, Location::IsMark, get_grid_music_divisions (0));
@@ -2400,7 +2400,7 @@ Editor::add_location_from_region ()
 		markername = region->name();
 	}
 
-	if (!choose_new_marker_name(markername, false)) {
+	if (!choose_new_marker_name(markername)) {
 		return;
 	}
 
@@ -2464,7 +2464,7 @@ Editor::set_mark ()
 	string markername;
 	_session->locations()->next_available_name (markername, "mark");
 
-	if (!choose_new_marker_name (markername, false)) {
+	if (!choose_new_marker_name (markername)) {
 		return;
 	}
 
