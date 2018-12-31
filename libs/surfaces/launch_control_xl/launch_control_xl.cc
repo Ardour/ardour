@@ -879,19 +879,26 @@ LaunchControlXL::input_port()
 void
 LaunchControlXL::stripable_selection_changed ()
 {
+	DEBUG_TRACE (DEBUG::LaunchControlXL, "Stripable Selection changed\n");
 	if (!device_mode()) {
 		switch_bank (bank_start);
 	} else {
 #ifdef MIXBUS32C
 		if (first_selected_stripable()) {
+			DEBUG_TRACE (DEBUG::LaunchControlXL, "32C special handling. Checking if stripable type changed\n");
 			bool fss_unchanged;
 			fss_unchanged = (fss_is_mixbus() == (first_selected_stripable()->mixbus() || first_selected_stripable()->is_master()));
-				if (!fss_unchanged) {
+			if (!fss_unchanged) {
+				DEBUG_TRACE (DEBUG::LaunchControlXL, "32C special handling: Stripable type DID CHANGE\n");
 				reset(template_number());
 				build_maps();
-				store_fss_type();
+			} else {
+				DEBUG_TRACE (DEBUG::LaunchControlXL, "32C special handling: Stripable type DID NOT CHANGE\n");
 			}
+		} else {
+			reset(template_number());
 		}
+		store_fss_type();
 #endif
 		init_knobs_and_buttons();
 		init_dm_callbacks();
@@ -1207,10 +1214,14 @@ LaunchControlXL::store_fss_type()
 {
 	if (first_selected_stripable()) {
 		if (first_selected_stripable()->mixbus() || first_selected_stripable()->is_master()) {
+			DEBUG_TRACE (DEBUG::LaunchControlXL, "Storing fss is mixbus: true\n");
 			_fss_is_mixbus = true;
 		} else {
+			DEBUG_TRACE (DEBUG::LaunchControlXL, "Storing fss is mixbus: false\n");
 			_fss_is_mixbus = false;
 		}
+	} else {
+		_fss_is_mixbus = false;
 	}
 }
 #endif
