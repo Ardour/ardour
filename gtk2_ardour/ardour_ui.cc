@@ -534,11 +534,12 @@ release software. So, a few guidelines:\n\
    though it may be so, depending on your workflow.\n\
 2) Please wait for a helpful writeup of new features.\n\
 3) <b>Please do NOT use the forums at ardour.org to report issues</b>.\n\
-4) Please <b>DO</b> use the bugtracker at http://tracker.ardour.org/ to report issues\n\
-   making sure to note the product version number as 6.0-pre.\n\
-5) Please <b>DO</b> use the ardour-users mailing list to discuss ideas and pass on comments.\n\
-6) Please <b>DO</b> join us on IRC for real time discussions about %1 %2. You\n\
+4) <b>Please do NOT file bugs for this alpha-development versions at this point in time</b>.\n\
+   There is no bug triaging before the initial development concludes and\n\
+   reporting issue for incomplete, ongoing work-in-progress is mostly useless.\n\
+5) Please <b>DO</b> join us on IRC for real time discussions about %1 %2. You\n\
    can get there directly from within the program via the Help->Chat menu option.\n\
+6) Please <b>DO</b> submit patches for issues after discussing them on IRC.\n\
 \n\
 Full information on all the above can be found on the support page at\n\
 \n\
