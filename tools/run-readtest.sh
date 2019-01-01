@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 dir=/tmp
 filesize=100 # megabytes
