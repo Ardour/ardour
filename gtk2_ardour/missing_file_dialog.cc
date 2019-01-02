@@ -118,6 +118,7 @@ MissingFileDialog::MissingFileDialog (Session* s, const std::string& path, DataT
 
 	msg.show ();
 
+	Gtkmm2ext::add_volume_shortcuts (chooser);
 	chooser.set_current_folder (Glib::get_home_dir());
 	chooser.set_create_folders (false);
 }

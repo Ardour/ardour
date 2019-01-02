@@ -44,6 +44,7 @@
 #include "pbd/xml++.h"
 
 #include "gtkmm2ext/gui_thread.h"
+#include "gtkmm2ext/utils.h"
 
 #include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
@@ -490,6 +491,7 @@ TemplateManager::export_all_templates ()
 	g_clear_error (&err);
 
 	FileChooserDialog dialog(_("Save Exported Template Archive"), FILE_CHOOSER_ACTION_SAVE);
+	Gtkmm2ext::add_volume_shortcuts (dialog);
 	dialog.set_filename (X_("templates"));
 
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);

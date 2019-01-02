@@ -895,6 +895,7 @@ DirectoryOption::DirectoryOption (string const & i, string const & n, sigc::slot
 	, _get (g)
 	, _set (s)
 {
+	Gtkmm2ext::add_volume_shortcuts (_file_chooser);
 	_file_chooser.set_action (Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
 	_file_chooser.signal_selection_changed().connect (sigc::mem_fun (*this, &DirectoryOption::selection_changed));
 }

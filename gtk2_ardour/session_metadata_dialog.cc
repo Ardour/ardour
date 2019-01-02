@@ -908,6 +908,7 @@ SessionMetadataImporter::run ()
 	/* Open session file selector */
 
 	Gtk::FileChooserDialog session_selector(_("Choose session to import metadata from"), Gtk::FILE_CHOOSER_ACTION_OPEN);
+	Gtkmm2ext::add_volume_shortcuts (session_selector);
 	session_selector.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	session_selector.add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
 	session_selector.set_default_response(Gtk::RESPONSE_ACCEPT);

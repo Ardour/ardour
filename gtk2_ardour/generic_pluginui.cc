@@ -961,6 +961,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			// Create/add controller
 			control_ui->file_button = manage(new Gtk::FileChooserButton(Gtk::FILE_CHOOSER_ACTION_OPEN));
 			control_ui->file_button->set_title(desc.label);
+			Gtkmm2ext::add_volume_shortcuts (*control_ui->file_button);
 
 			if (use_knob) {
 				control_ui->knobtable = manage (new Table());

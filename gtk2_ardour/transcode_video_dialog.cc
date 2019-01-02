@@ -544,6 +544,7 @@ TranscodeVideoDialog::open_browse_dialog ()
 {
 	Gtk::FileChooserDialog dialog(_("Save Transcoded Video File"), Gtk::FILE_CHOOSER_ACTION_SAVE);
 	dialog.set_filename (path_entry.get_text());
+	Gtkmm2ext::add_volume_shortcuts (dialog);
 
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);

@@ -520,6 +520,7 @@ public:
 		: LuaDialogWidget (key, title)
 		, _fc (a)
 	{
+		Gtkmm2ext::add_volume_shortcuts (_fc);
 		if (!path.empty ()) {
 			switch (a) {
 				case Gtk::FILE_CHOOSER_ACTION_OPEN:

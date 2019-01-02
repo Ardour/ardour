@@ -23,6 +23,8 @@
 
 #include "ardour/filename_extensions.h"
 
+#include "gtkmm2ext/utils.h"
+
 #include "session_archive_dialog.h"
 
 #include "pbd/i18n.h"
@@ -106,6 +108,7 @@ SessionArchiveDialog::SessionArchiveDialog ()
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::OK, RESPONSE_OK);
 
+	Gtkmm2ext::add_volume_shortcuts (target_folder_selector);
 	target_folder_selector.set_action (FILE_CHOOSER_ACTION_SELECT_FOLDER);
 	target_folder_selector.set_current_folder (Config->get_default_session_parent_dir ()); // TODO get/set default_archive_dir
 	name_entry.signal_changed().connect (sigc::mem_fun (*this, &SessionArchiveDialog::name_entry_changed));

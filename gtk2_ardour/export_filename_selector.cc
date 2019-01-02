@@ -23,6 +23,9 @@
 #include <gtkmm/stock.h>
 
 #include "pbd/openuri.h"
+
+#include "gtkmm2ext/utils.h"
+
 #include "export_filename_selector.h"
 
 #include "pbd/i18n.h"
@@ -413,6 +416,7 @@ void
 ExportFilenameSelector::open_browse_dialog ()
 {
 	Gtk::FileChooserDialog dialog(_("Choose export folder"), Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
+	Gtkmm2ext::add_volume_shortcuts (dialog);
 	//dialog.set_transient_for(*this);
 	dialog.set_filename (path_entry.get_text());
 

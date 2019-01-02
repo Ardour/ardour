@@ -25,6 +25,8 @@
 #include "ardour/midi_region.h"
 #include "ardour/session.h"
 
+#include "gtkmm2ext/utils.h"
+
 #include "midi_export_dialog.h"
 
 #include "pbd/i18n.h"
@@ -45,6 +47,7 @@ MidiExportDialog::MidiExportDialog (PublicEditor&, boost::shared_ptr<MidiRegion>
 
 	set_default_response (Gtk::RESPONSE_ACCEPT);
 
+	Gtkmm2ext::add_volume_shortcuts (file_chooser);
 	file_chooser.set_current_name (region->name() + ".mid");
 	file_chooser.show ();
 

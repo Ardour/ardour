@@ -22,6 +22,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <iostream>
+
 #include "pbd/gstdio_compat.h"
 #include "pbd/i18n.h"
 #include "pbd/file_utils.h"
@@ -29,6 +30,9 @@
 #include "ptformat/ptfformat.h"
 
 #include "ardour/session_handle.h"
+
+#include "gtkmm2ext/utils.h"
+
 #include "pt_import_selector.h"
 
 using namespace Gtk;
@@ -66,6 +70,7 @@ PTImportSelector::PTImportSelector (PTFFormat& ptf) :
 	match_pt_filter.add_pattern ("*.ptx");
 	match_pt_filter.set_name (_("All PT sessions"));
 
+	Gtkmm2ext::add_volume_shortcuts (ptimport_ptf_chooser);
 	ptimport_ptf_chooser.add_filter (match_pt_filter);
 	ptimport_ptf_chooser.set_select_multiple (false);
 	//XXX ptimport_ptf_chooser.set_current_folder (dstdir);

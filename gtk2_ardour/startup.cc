@@ -48,6 +48,8 @@
 #include "ardour/template_utils.h"
 #include "ardour/profile.h"
 
+#include "gtkmm2ext/utils.h"
+
 #include "startup.h"
 #include "opts.h"
 #include "engine_dialog.h"
@@ -202,6 +204,7 @@ Where would you like new %1 sessions to be stored by default?\n\n\
 	vbox->pack_start (*hbox, false, true);
 
 	cerr << "set default folder to " << poor_mans_glob (Config->get_default_session_parent_dir()) << endl;
+	Gtkmm2ext::add_volume_shortcuts (*default_dir_chooser);
 	default_dir_chooser->set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
 	default_dir_chooser->signal_current_folder_changed().connect (sigc::mem_fun (*this, &ArdourStartup::default_dir_changed));
 	default_dir_chooser->show ();

@@ -22,6 +22,8 @@
 #include "pbd/compose.h"
 #include "pbd/shortpath.h"
 
+#include "gtkmm2ext/utils.h"
+
 #include "search_path_option.h"
 #include "pbd/i18n.h"
 
@@ -36,6 +38,7 @@ SearchPathOption::SearchPathOption (const string& pathname, const string& label,
 	, _set (set)
 	, add_chooser (_("Select folder to search for media"), FILE_CHOOSER_ACTION_SELECT_FOLDER)
 {
+	Gtkmm2ext::add_volume_shortcuts (add_chooser);
 	add_chooser.signal_file_set().connect (sigc::mem_fun (*this, &SearchPathOption::path_chosen));
 
 	HBox* hbox = manage (new HBox);

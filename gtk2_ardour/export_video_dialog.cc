@@ -1257,6 +1257,7 @@ void
 ExportVideoDialog::open_outfn_dialog ()
 {
 	Gtk::FileChooserDialog dialog(_("Save Exported Video File"), Gtk::FILE_CHOOSER_ACTION_SAVE);
+	Gtkmm2ext::add_volume_shortcuts (dialog);
 	dialog.set_filename (outfn_path_entry.get_text());
 
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -1277,6 +1278,7 @@ void
 ExportVideoDialog::open_invid_dialog ()
 {
 	Gtk::FileChooserDialog dialog(_("Save Exported Video File"), Gtk::FILE_CHOOSER_ACTION_SAVE);
+	Gtkmm2ext::add_volume_shortcuts (dialog);
 	dialog.set_filename (invid_path_entry.get_text());
 
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
