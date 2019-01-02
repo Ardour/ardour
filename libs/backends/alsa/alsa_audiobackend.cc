@@ -1492,7 +1492,6 @@ AlsaAudioBackend::midi_device_thread ()
 
 		assert (event->source.client == SND_SEQ_CLIENT_SYSTEM);
 
-		const snd_seq_addr_t addr = event->data.addr;
 		switch (event->type) {
 			case SND_SEQ_EVENT_PORT_START:
 			case SND_SEQ_EVENT_PORT_EXIT:
