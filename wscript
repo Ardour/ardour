@@ -767,8 +767,6 @@ def options(opt):
                     help='Compile libcanvas test GUI')
     opt.add_option('--beatbox', action='store_true', default=False, dest='beatbox',
                     help='Compile beatbox test app')
-    opt.add_option('--lv2', action='store_true', default=True, dest='lv2',
-                    help='Compile with support for LV2 (if Lilv+Suil is available)')
     opt.add_option('--lv2dir', type='string', help="install destination for builtin LV2 bundles [Default: LIBDIR/lv2]")
     opt.add_option('--lxvst', action='store_true', default=True, dest='lxvst',
                     help='Compile with support for linuxVST plugins')
