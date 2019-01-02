@@ -25,6 +25,9 @@
 
 #include "pbd/i18n.h"
 #include "pbd/pathexpand.h"
+
+#include "gtkmm2ext/utils.h"
+
 #include "widgets/paths_dialog.h"
 
 using namespace Gtk;
@@ -112,6 +115,7 @@ PathsDialog::selection_changed () {
 void
 PathsDialog::add_path() {
 	Gtk::FileChooserDialog d (_("Add folder to search path"), Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
+	Gtkmm2ext::add_volume_shortcuts (d);
 
 	std::vector<int> selection = paths_list_view.get_selected();
 	if (selection.size() == 1 ) {
