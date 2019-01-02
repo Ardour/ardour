@@ -682,6 +682,140 @@ fluid_defpreset_next(fluid_defpreset_t *defpreset)
     return defpreset->next;
 }
 
+/*
+ * Adds global and local modulators list to the voice. This is done in 2 steps:
+ * - Step 1: Local modulators replace identic global modulators.
+ * - Step 2: global + local modulators are added to the voice using mode.
+ *
+ * Instrument zone list (local/global) must be added using FLUID_VOICE_OVERWRITE.
+ * Preset zone list (local/global) must be added using FLUID_VOICE_ADD.
+ *
+ * @param voice voice instance.
+ * @param global_mod global list of modulators.
+ * @param local_mod local list of modulators.
+ * @param mode Determines how to handle an existing identical modulator.
+ *   #FLUID_VOICE_ADD to add (offset) the modulator amounts,
+ *   #FLUID_VOICE_OVERWRITE to replace the modulator,
+*/
+static void
+fluid_defpreset_noteon_add_mod_to_voice(fluid_voice_t *voice,
+                                        fluid_mod_t *global_mod, fluid_mod_t *local_mod,
+                                        int mode)
+{
+    fluid_mod_t *mod;
+    /* list for 'sorting' global/local modulators */
+    fluid_mod_t *mod_list[FLUID_NUM_MOD];
+    int mod_list_count, i;
+
+    /* identity_limit_count is the modulator upper limit number to handle with
+     * existing identical modulators.
+     * When identity_limit_count is below the actual number of modulators, this
+     * will restrict identity check to this upper limit,
+     * This is useful when we know by advance that there is no duplicate with
+     * modulators at index above this limit. This avoid wasting cpu cycles at
+     * noteon.
+     */
+    int identity_limit_count;
+
+    /* Step 1: Local modulators replace identic global modulators. */
+
+    /* local (instrument zone/preset zone), modulators: Put them all into a list. */
+    mod_list_count = 0;
+
+    while(local_mod)
+    {
+        /* As modulators number in local_mod list was limited to FLUID_NUM_MOD at
+           soundfont loading time (fluid_limit_mod_list()), here we don't need
+           to check if mod_list is full.
+         */
+        mod_list[mod_list_count++] = local_mod;
+        local_mod = local_mod->next;
+    }
+
+    /* global (instrument zone/preset zone), modulators.
+     * Replace modulators with the same definition in the global list:
+     * (Instrument zone: SF 2.01 page 69, 'bullet' 8)
+     * (Preset zone:     SF 2.01 page 69, second-last bullet).
+     *
+     * mod_list contains local modulators. Now we know that there
+     * is no global modulator identic to another global modulator (this has
+     * been checked at soundfont loading time). So global modulators
+     * are only checked against local modulators number.
+     */
+
+    /* Restrict identity check to the number of local modulators */
+    identity_limit_count = mod_list_count;
+
+    while(global_mod)
+    {
+        /* 'Identical' global modulators are ignored.
+         *  SF2.01 section 9.5.1
+         *  page 69, 'bullet' 3 defines 'identical'.  */
+
+        for(i = 0; i < identity_limit_count; i++)
+        {
+            if(fluid_mod_test_identity(global_mod, mod_list[i]))
+            {
+                break;
+            }
+        }
+
+        /* Finally add the new modulator to the list. */
+        if(i >= identity_limit_count)
+        {
+            /* Although local_mod and global_mod lists was limited to
+               FLUID_NUM_MOD at soundfont loading time, it is possible that
+               local + global modulators exceeds FLUID_NUM_MOD.
+               So, checks if mod_list_count reachs the limit.
+            */
+            if(mod_list_count >= FLUID_NUM_MOD)
+            {
+                /* mod_list is full, we silently forget this modulator and
+                   next global modulators. When mod_list will be added to the
+                   voice, a warning will be displayed if the voice list is full.
+                   (see fluid_voice_add_mod_local()).
+                */
+                break;
+            }
+
+            mod_list[mod_list_count++] = global_mod;
+        }
+
+        global_mod = global_mod->next;
+    }
+
+    /* Step 2: global + local modulators are added to the voice using mode. */
+
+    /*
+     * mod_list contains local and global modulators, we know that:
+     * - there is no global modulator identic to another global modulator,
+     * - there is no local modulator identic to another local modulator,
+     * So these local/global modulators are only checked against
+     * actual number of voice modulators.
+     */
+
+    /* Restrict identity check to the actual number of voice modulators */
+    /* Acual number of voice modulators : defaults + [instruments] */
+    identity_limit_count = voice->mod_count;
+
+    for(i = 0; i < mod_list_count; i++)
+    {
+
+        mod = mod_list[i];
+        /* in mode FLUID_VOICE_OVERWRITE disabled instruments modulators CANNOT be skipped. */
+        /* in mode FLUID_VOICE_ADD disabled preset modulators can be skipped. */
+
+        if((mode == FLUID_VOICE_OVERWRITE) || (mod->amount != 0))
+        {
+            /* Instrument modulators -supersede- existing (default) modulators.
+               SF 2.01 page 69, 'bullet' 6 */
+
+            /* Preset modulators -add- to existing instrument modulators.
+               SF2.01 page 70 first bullet on page */
+            fluid_voice_add_mod_local(voice, mod, mode, identity_limit_count);
+        }
+    }
+}
 
 /*
  * fluid_defpreset_noteon
@@ -695,9 +829,6 @@ fluid_defpreset_noteon(fluid_defpreset_t *defpreset, fluid_synth_t *synth, int c
     fluid_voice_zone_t *voice_zone;
     fluid_list_t *list;
     fluid_voice_t *voice;
-    fluid_mod_t *mod;
-    fluid_mod_t *mod_list[FLUID_NUM_MOD];  /* list for 'sorting' preset modulators */
-    int mod_list_count;
     int i;
 
     global_preset_zone = fluid_defpreset_get_global_zone(defpreset);
@@ -769,63 +900,12 @@ fluid_defpreset_noteon(fluid_defpreset_t *defpreset, fluid_synth_t *synth, int c
 
                     } /* for all generators */
 
-                    /* global instrument zone, modulators: Put them all into a
-                     * list. */
-
-                    mod_list_count = 0;
-
-                    if(global_inst_zone)
-                    {
-                        mod = global_inst_zone->mod;
-
-                        while(mod)
-                        {
-                            mod_list[mod_list_count++] = mod;
-                            mod = mod->next;
-                        }
-                    }
-
-                    /* local instrument zone, modulators.
-                     * Replace modulators with the same definition in the list:
-                     * SF 2.01 page 69, 'bullet' 8
-                     */
-                    mod = inst_zone->mod;
-
-                    while(mod)
-                    {
-
-                        /* 'Identical' modulators will be deleted by setting their
-                         *  list entry to NULL.  The list length is known, NULL
-                         *  entries will be ignored later.  SF2.01 section 9.5.1
-                         *  page 69, 'bullet' 3 defines 'identical'.  */
-
-                        for(i = 0; i < mod_list_count; i++)
-                        {
-                            if(mod_list[i] && fluid_mod_test_identity(mod, mod_list[i]))
-                            {
-                                mod_list[i] = NULL;
-                            }
-                        }
-
-                        /* Finally add the new modulator to to the list. */
-                        mod_list[mod_list_count++] = mod;
-                        mod = mod->next;
-                    }
-
-                    /* Add instrument modulators (global / local) to the voice. */
-                    for(i = 0; i < mod_list_count; i++)
-                    {
-
-                        mod = mod_list[i];
-
-                        if(mod != NULL)   /* disabled modulators CANNOT be skipped. */
-                        {
-
-                            /* Instrument modulators -supersede- existing (default)
-                             * modulators.  SF 2.01 page 69, 'bullet' 6 */
-                            fluid_voice_add_mod(voice, mod, FLUID_VOICE_OVERWRITE);
-                        }
-                    }
+                    /* Adds instrument zone modulators (global and local) to the voice.*/
+                    fluid_defpreset_noteon_add_mod_to_voice(voice,
+                                                            /* global instrument modulators */
+                                                            global_inst_zone ? global_inst_zone->mod : NULL,
+                                                            inst_zone->mod, /* local instrument modulators */
+                                                            FLUID_VOICE_OVERWRITE); /* mode */
 
                     /* Preset level, generators */
 
@@ -868,57 +948,12 @@ fluid_defpreset_noteon(fluid_defpreset_t *defpreset, fluid_synth_t *synth, int c
                         }
                     } /* for all generators */
 
-
-                    /* Global preset zone, modulators: put them all into a
-                     * list. */
-                    mod_list_count = 0;
-
-                    if(global_preset_zone)
-                    {
-                        mod = global_preset_zone->mod;
-
-                        while(mod)
-                        {
-                            mod_list[mod_list_count++] = mod;
-                            mod = mod->next;
-                        }
-                    }
-
-                    /* Process the modulators of the local preset zone.  Kick
-                     * out all identical modulators from the global preset zone
-                     * (SF 2.01 page 69, second-last bullet) */
-
-                    mod = preset_zone->mod;
-
-                    while(mod)
-                    {
-                        for(i = 0; i < mod_list_count; i++)
-                        {
-                            if(mod_list[i] && fluid_mod_test_identity(mod, mod_list[i]))
-                            {
-                                mod_list[i] = NULL;
-                            }
-                        }
-
-                        /* Finally add the new modulator to the list. */
-                        mod_list[mod_list_count++] = mod;
-                        mod = mod->next;
-                    }
-
-                    /* Add preset modulators (global / local) to the voice. */
-                    for(i = 0; i < mod_list_count; i++)
-                    {
-                        mod = mod_list[i];
-
-                        if((mod != NULL) && (mod->amount != 0))    /* disabled modulators can be skipped. */
-                        {
-
-                            /* Preset modulators -add- to existing instrument /
-                             * default modulators.  SF2.01 page 70 first bullet on
-                             * page */
-                            fluid_voice_add_mod(voice, mod, FLUID_VOICE_ADD);
-                        }
-                    }
+                    /* Adds preset zone modulators (global and local) to the voice.*/
+                    fluid_defpreset_noteon_add_mod_to_voice(voice,
+                                                            /* global preset modulators */
+                                                            global_preset_zone ? global_preset_zone->mod : NULL,
+                                                            preset_zone->mod, /* local preset modulators */
+                                                            FLUID_VOICE_ADD); /* mode */
 
                     /* add the synthesis process to the synthesis loop. */
                     fluid_synth_start_voice(synth, voice);
@@ -930,7 +965,6 @@ fluid_defpreset_noteon(fluid_defpreset_t *defpreset, fluid_synth_t *synth, int c
                      * class - for example when using stereo samples)
                      */
                 }
-
             }
         }
 
@@ -1105,17 +1139,11 @@ new_fluid_preset_zone(char *name)
 }
 
 /*
- * delete_fluid_preset_zone
+ * delete list of modulators.
  */
-void
-delete_fluid_preset_zone(fluid_preset_zone_t *zone)
+static void delete_fluid_list_mod(fluid_mod_t *mod)
 {
-    fluid_mod_t *mod, *tmp;
-    fluid_list_t *list;
-
-    fluid_return_if_fail(zone != NULL);
-
-    mod = zone->mod;
+    fluid_mod_t *tmp;
 
     while(mod)	/* delete the modulators */
     {
@@ -1123,6 +1151,19 @@ delete_fluid_preset_zone(fluid_preset_zone_t *zone)
         mod = mod->next;
         delete_fluid_mod(tmp);
     }
+}
+
+/*
+ * delete_fluid_preset_zone
+ */
+void
+delete_fluid_preset_zone(fluid_preset_zone_t *zone)
+{
+    fluid_list_t *list;
+
+    fluid_return_if_fail(zone != NULL);
+
+    delete_fluid_list_mod(zone->mod);
 
     for(list = zone->voice_zone; list != NULL; list = fluid_list_next(list))
     {
@@ -1186,53 +1227,379 @@ static int fluid_preset_zone_create_voice_zones(fluid_preset_zone_t *preset_zone
     return FLUID_OK;
 }
 
-/*
- * fluid_preset_zone_import_sfont
+/**
+ * Checks if modulator mod is identic to another modulator in the list
+ * (specs SF 2.0X  7.4, 7.8).
+ * @param mod, modulator list.
+ * @param name, if not NULL, pointer on a string displayed as warning.
+ * @return TRUE if mod is identic to another modulator, FALSE otherwise.
  */
-int
-fluid_preset_zone_import_sfont(fluid_preset_zone_t *zone, SFZone *sfzone, fluid_defsfont_t *defsfont)
+static int
+fluid_zone_is_mod_identic(fluid_mod_t *mod, char *name)
+{
+    fluid_mod_t *next = mod->next;
+
+    while(next)
+    {
+        /* is mod identic to next ? */
+        if(fluid_mod_test_identity(mod, next))
+        {
+            if(name)
+            {
+                FLUID_LOG(FLUID_WARN, "Ignoring identic modulator %s", name);
+            }
+
+            return TRUE;
+        }
+
+        next = next->next;
+    }
+
+    return FALSE;
+}
+
+/**
+ * Limits the number of modulators in a modulator list.
+ * This is appropriate to internal synthesizer modulators tables
+ * which have a fixed size (FLUID_NUM_MOD).
+ *
+ * @param zone_name, zone name
+ * @param list_mod, address of pointer on modulator list.
+ */
+static void fluid_limit_mod_list(char *zone_name, fluid_mod_t **list_mod)
+{
+    int mod_idx = 0; /* modulator index */
+    fluid_mod_t *prev_mod = NULL; /* previous modulator in list_mod */
+    fluid_mod_t *mod = *list_mod; /* first modulator in list_mod */
+
+    while(mod)
+    {
+        if((mod_idx + 1) > FLUID_NUM_MOD)
+        {
+            /* truncation of list_mod */
+            if(mod_idx)
+            {
+                prev_mod->next = NULL;
+            }
+            else
+            {
+                *list_mod = NULL;
+            }
+
+            delete_fluid_list_mod(mod);
+            FLUID_LOG(FLUID_WARN, "%s, modulators count limited to %d", zone_name,
+                      FLUID_NUM_MOD);
+            break;
+        }
+
+        mod_idx++;
+        prev_mod = mod;
+        mod = mod->next;
+    }
+}
+
+/**
+ * Checks and remove invalid modulators from a zone modulators list.
+ * - checks valid modulator sources (specs SF 2.01  7.4, 7.8, 8.2.1).
+ * - checks identic modulators in the list (specs SF 2.01  7.4, 7.8).
+ * @param zone_name, zone name.
+ * @param list_mod, address of pointer on modulators list.
+ */
+static void
+fluid_zone_check_mod(char *zone_name, fluid_mod_t **list_mod)
+{
+    fluid_mod_t *prev_mod = NULL; /* previous modulator in list_mod */
+    fluid_mod_t *mod = *list_mod; /* first modulator in list_mod */
+    int mod_idx = 0; /* modulator index */
+
+    while(mod)
+    {
+        char zone_mod_name[256];
+        fluid_mod_t *next = mod->next;
+
+        /* prepare modulator name: zonename/#modulator */
+        FLUID_SNPRINTF(zone_mod_name, sizeof(zone_mod_name), "%s/mod%d", zone_name, mod_idx);
+
+        /* has mod invalid sources ? */
+        if(!fluid_mod_check_sources(mod,  zone_mod_name)
+                /* or is mod identic to any following modulator ? */
+                || fluid_zone_is_mod_identic(mod, zone_mod_name))
+        {
+            /* the modulator is useless so we remove it */
+            if(prev_mod)
+            {
+                prev_mod->next = next;
+            }
+            else
+            {
+                *list_mod = next;
+            }
+
+            delete_fluid_mod(mod); /* freeing */
+        }
+        else
+        {
+            prev_mod = mod;
+        }
+
+        mod = next;
+        mod_idx++;
+    }
+
+    /* limits the size of modulators list */
+    fluid_limit_mod_list(zone_name, list_mod);
+}
+
+/*
+ * fluid_zone_gen_import_sfont
+ * Imports generators from sfzone to gen and range.
+ * @param gen, pointer on destination generators table.
+ * @param range, pointer on destination range generators.
+ * @param sfzone, pointer on soundfont zone generators.
+ */
+static void
+fluid_zone_gen_import_sfont(fluid_gen_t *gen, fluid_zone_range_t *range, SFZone *sfzone)
 {
     fluid_list_t *r;
     SFGen *sfgen;
-    SFInst *sfinst;
-    int count;
 
-    for(count = 0, r = sfzone->gen; r != NULL; count++)
+    for(r = sfzone->gen; r != NULL;)
     {
         sfgen = (SFGen *)fluid_list_get(r);
 
         switch(sfgen->id)
         {
         case GEN_KEYRANGE:
-            zone->range.keylo = sfgen->amount.range.lo;
-            zone->range.keyhi = sfgen->amount.range.hi;
+            range->keylo = sfgen->amount.range.lo;
+            range->keyhi = sfgen->amount.range.hi;
             break;
 
         case GEN_VELRANGE:
-            zone->range.vello = sfgen->amount.range.lo;
-            zone->range.velhi = sfgen->amount.range.hi;
+            range->vello = sfgen->amount.range.lo;
+            range->velhi = sfgen->amount.range.hi;
             break;
 
         case GEN_ATTENUATION:
             /* EMU8k/10k hardware applies a scale factor to initial attenuation generator values set at
              * preset and instrument level */
-            zone->gen[sfgen->id].val = (fluid_real_t) sfgen->amount.sword * EMU_ATTENUATION_FACTOR;
-            zone->gen[sfgen->id].flags = GEN_SET;
+            gen[sfgen->id].val = (fluid_real_t) sfgen->amount.sword * EMU_ATTENUATION_FACTOR;
+            gen[sfgen->id].flags = GEN_SET;
             break;
 
         default:
             /* FIXME: some generators have an unsigne word amount value but i don't know which ones */
-            zone->gen[sfgen->id].val = (fluid_real_t) sfgen->amount.sword;
-            zone->gen[sfgen->id].flags = GEN_SET;
+            gen[sfgen->id].val = (fluid_real_t) sfgen->amount.sword;
+            gen[sfgen->id].flags = GEN_SET;
             break;
         }
 
         r = fluid_list_next(r);
     }
+}
+
+/*
+ * fluid_zone_mod_source_import_sfont
+ * Imports source information from sf_source to src and flags.
+ * @param src, pointer on destination modulator source.
+ * @param flags, pointer on destination modulator flags.
+ * @param sf_source, soundfont modulator source.
+ * @return return TRUE if success, FALSE if source type is unknow.
+ */
+static int
+fluid_zone_mod_source_import_sfont(unsigned char *src, unsigned char *flags, unsigned short sf_source)
+{
+    int type;
+    unsigned char flags_dest; /* destination flags */
+
+    /* sources */
+    *src = sf_source & 127; /* index of source, seven-bit value, SF2.01 section 8.2, page 50 */
+
+    /* Bit 7: CC flag SF 2.01 section 8.2.1 page 50*/
+    flags_dest = 0;
+
+    if(sf_source & (1 << 7))
+    {
+        flags_dest |= FLUID_MOD_CC;
+    }
+    else
+    {
+        flags_dest |= FLUID_MOD_GC;
+    }
+
+    /* Bit 8: D flag SF 2.01 section 8.2.2 page 51*/
+    if(sf_source & (1 << 8))
+    {
+        flags_dest |= FLUID_MOD_NEGATIVE;
+    }
+    else
+    {
+        flags_dest |= FLUID_MOD_POSITIVE;
+    }
+
+    /* Bit 9: P flag SF 2.01 section 8.2.3 page 51*/
+    if(sf_source & (1 << 9))
+    {
+        flags_dest |= FLUID_MOD_BIPOLAR;
+    }
+    else
+    {
+        flags_dest |= FLUID_MOD_UNIPOLAR;
+    }
+
+    /* modulator source types: SF2.01 section 8.2.1 page 52 */
+    type = sf_source >> 10;
+    type &= 63; /* type is a 6-bit value */
+
+    if(type == 0)
+    {
+        flags_dest |= FLUID_MOD_LINEAR;
+    }
+    else if(type == 1)
+    {
+        flags_dest |= FLUID_MOD_CONCAVE;
+    }
+    else if(type == 2)
+    {
+        flags_dest |= FLUID_MOD_CONVEX;
+    }
+    else if(type == 3)
+    {
+        flags_dest |= FLUID_MOD_SWITCH;
+    }
+    else
+    {
+        *flags = flags_dest;
+        /* This shouldn't happen - unknown type! */
+        return FALSE;
+    }
+
+    *flags = flags_dest;
+    return TRUE;
+}
+
+/*
+ * fluid_zone_mod_import_sfont
+ * Imports modulators from sfzone to modulators list mod.
+ * @param zone_name, zone name.
+ * @param mod, address of pointer on modulators list to return.
+ * @param sfzone, pointer on soundfont zone.
+ * @return FLUID_OK if success, FLUID_FAILED otherwise.
+ */
+static int
+fluid_zone_mod_import_sfont(char *zone_name, fluid_mod_t **mod, SFZone *sfzone)
+{
+    fluid_list_t *r;
+    int count;
+
+    /* Import the modulators (only SF2.1 and higher) */
+    for(count = 0, r = sfzone->mod; r != NULL; count++)
+    {
+
+        SFMod *mod_src = (SFMod *)fluid_list_get(r);
+        fluid_mod_t *mod_dest = new_fluid_mod();
+
+        if(mod_dest == NULL)
+        {
+            return FLUID_FAILED;
+        }
+
+        mod_dest->next = NULL; /* pointer to next modulator, this is the end of the list now.*/
+
+        /* *** Amount *** */
+        mod_dest->amount = mod_src->amount;
+
+        /* *** Source *** */
+        if(!fluid_zone_mod_source_import_sfont(&mod_dest->src1, &mod_dest->flags1, mod_src->src))
+        {
+            /* This shouldn't happen - unknown type!
+             * Deactivate the modulator by setting the amount to 0. */
+            mod_dest->amount = 0;
+        }  
+
+        /* Note: When primary source input (src1) is set to General Controller 'No Controller',
+           output will be forced to 0.0 at synthesis time (see fluid_mod_get_value()).
+           That means that the minimum value of the modulator will be always 0.0.
+           We need to force amount value to 0 to ensure a correct evaluation of the minimum
+           value later (see fluid_voice_get_lower_boundary_for_attenuation()).
+        */
+        if(((mod_dest->flags1 & FLUID_MOD_CC) == FLUID_MOD_GC) && 
+            (mod_dest->src1 == FLUID_MOD_NONE))
+        {
+            mod_dest->amount = 0;
+        }
+
+        /* *** Dest *** */
+        mod_dest->dest = mod_src->dest; /* index of controlled generator */
+
+        /* *** Amount source *** */
+        if(!fluid_zone_mod_source_import_sfont(&mod_dest->src2, &mod_dest->flags2, mod_src->amtsrc))
+        {
+            /* This shouldn't happen - unknown type!
+             * Deactivate the modulator by setting the amount to 0. */
+            mod_dest->amount = 0;
+        }  
+        /* Note: When secondary source input (src2) is set to General Controller 'No Controller',
+           output will be forced to +1.0 at synthesis time (see fluid_mod_get_value()).
+           That means that this source will behave unipolar only. We need to force the
+           unipolar flag to ensure to ensure a correct evaluation of the minimum
+           value later (see fluid_voice_get_lower_boundary_for_attenuation()).
+        */
+        if(((mod_dest->flags2 & FLUID_MOD_CC) == FLUID_MOD_GC) && 
+            (mod_dest->src2 == FLUID_MOD_NONE))
+        {
+            mod_dest->flags2 &= ~FLUID_MOD_BIPOLAR;
+        }
+
+        /* *** Transform *** */
+        /* SF2.01 only uses the 'linear' transform (0).
+         * Deactivate the modulator by setting the amount to 0 in any other case.
+         */
+        if(mod_src->trans != 0)
+        {
+            mod_dest->amount = 0;
+        }
+
+        /* Store the new modulator in the zone The order of modulators
+         * will make a difference, at least in an instrument context: The
+         * second modulator overwrites the first one, if they only differ
+         * in amount. */
+        if(count == 0)
+        {
+            *mod = mod_dest;
+        }
+        else
+        {
+            fluid_mod_t *last_mod = *mod;
+
+            /* Find the end of the list */
+            while(last_mod->next != NULL)
+            {
+                last_mod = last_mod->next;
+            }
+
+            last_mod->next = mod_dest;
+        }
+
+        r = fluid_list_next(r);
+    } /* foreach modulator */
+
+    /* checks and removes invalid modulators in modulators list*/
+    fluid_zone_check_mod(zone_name, mod);
+    return FLUID_OK;
+}
+
+/*
+ * fluid_preset_zone_import_sfont
+ */
+int
+fluid_preset_zone_import_sfont(fluid_preset_zone_t *zone, SFZone *sfzone, fluid_defsfont_t *defsfont)
+{
+    /* import the generators */
+    fluid_zone_gen_import_sfont(zone->gen, &zone->range, sfzone);
 
     if((sfzone->instsamp != NULL) && (sfzone->instsamp->data != NULL))
     {
-        sfinst = sfzone->instsamp->data;
+        SFInst *sfinst = sfzone->instsamp->data;
 
         zone->inst = find_inst_by_idx(defsfont, sfinst->idx);
 
@@ -1253,182 +1620,7 @@ fluid_preset_zone_import_sfont(fluid_preset_zone_t *zone, SFZone *sfzone, fluid_
     }
 
     /* Import the modulators (only SF2.1 and higher) */
-    for(count = 0, r = sfzone->mod; r != NULL; count++)
-    {
-
-        SFMod *mod_src = (SFMod *)fluid_list_get(r);
-        fluid_mod_t *mod_dest = new_fluid_mod();
-        int type;
-
-        if(mod_dest == NULL)
-        {
-            return FLUID_FAILED;
-        }
-
-        mod_dest->next = NULL; /* pointer to next modulator, this is the end of the list now.*/
-
-        /* *** Amount *** */
-        mod_dest->amount = mod_src->amount;
-
-        /* *** Source *** */
-        mod_dest->src1 = mod_src->src & 127; /* index of source 1, seven-bit value, SF2.01 section 8.2, page 50 */
-        mod_dest->flags1 = 0;
-
-        /* Bit 7: CC flag SF 2.01 section 8.2.1 page 50*/
-        if(mod_src->src & (1 << 7))
-        {
-            mod_dest->flags1 |= FLUID_MOD_CC;
-        }
-        else
-        {
-            mod_dest->flags1 |= FLUID_MOD_GC;
-        }
-
-        /* Bit 8: D flag SF 2.01 section 8.2.2 page 51*/
-        if(mod_src->src & (1 << 8))
-        {
-            mod_dest->flags1 |= FLUID_MOD_NEGATIVE;
-        }
-        else
-        {
-            mod_dest->flags1 |= FLUID_MOD_POSITIVE;
-        }
-
-        /* Bit 9: P flag SF 2.01 section 8.2.3 page 51*/
-        if(mod_src->src & (1 << 9))
-        {
-            mod_dest->flags1 |= FLUID_MOD_BIPOLAR;
-        }
-        else
-        {
-            mod_dest->flags1 |= FLUID_MOD_UNIPOLAR;
-        }
-
-        /* modulator source types: SF2.01 section 8.2.1 page 52 */
-        type = (mod_src->src) >> 10;
-        type &= 63; /* type is a 6-bit value */
-
-        if(type == 0)
-        {
-            mod_dest->flags1 |= FLUID_MOD_LINEAR;
-        }
-        else if(type == 1)
-        {
-            mod_dest->flags1 |= FLUID_MOD_CONCAVE;
-        }
-        else if(type == 2)
-        {
-            mod_dest->flags1 |= FLUID_MOD_CONVEX;
-        }
-        else if(type == 3)
-        {
-            mod_dest->flags1 |= FLUID_MOD_SWITCH;
-        }
-        else
-        {
-            /* This shouldn't happen - unknown type!
-             * Deactivate the modulator by setting the amount to 0. */
-            mod_dest->amount = 0;
-        }
-
-        /* *** Dest *** */
-        mod_dest->dest = mod_src->dest; /* index of controlled generator */
-
-        /* *** Amount source *** */
-        mod_dest->src2 = mod_src->amtsrc & 127; /* index of source 2, seven-bit value, SF2.01 section 8.2, p.50 */
-        mod_dest->flags2 = 0;
-
-        /* Bit 7: CC flag SF 2.01 section 8.2.1 page 50*/
-        if(mod_src->amtsrc & (1 << 7))
-        {
-            mod_dest->flags2 |= FLUID_MOD_CC;
-        }
-        else
-        {
-            mod_dest->flags2 |= FLUID_MOD_GC;
-        }
-
-        /* Bit 8: D flag SF 2.01 section 8.2.2 page 51*/
-        if(mod_src->amtsrc & (1 << 8))
-        {
-            mod_dest->flags2 |= FLUID_MOD_NEGATIVE;
-        }
-        else
-        {
-            mod_dest->flags2 |= FLUID_MOD_POSITIVE;
-        }
-
-        /* Bit 9: P flag SF 2.01 section 8.2.3 page 51*/
-        if(mod_src->amtsrc & (1 << 9))
-        {
-            mod_dest->flags2 |= FLUID_MOD_BIPOLAR;
-        }
-        else
-        {
-            mod_dest->flags2 |= FLUID_MOD_UNIPOLAR;
-        }
-
-        /* modulator source types: SF2.01 section 8.2.1 page 52 */
-        type = (mod_src->amtsrc) >> 10;
-        type &= 63; /* type is a 6-bit value */
-
-        if(type == 0)
-        {
-            mod_dest->flags2 |= FLUID_MOD_LINEAR;
-        }
-        else if(type == 1)
-        {
-            mod_dest->flags2 |= FLUID_MOD_CONCAVE;
-        }
-        else if(type == 2)
-        {
-            mod_dest->flags2 |= FLUID_MOD_CONVEX;
-        }
-        else if(type == 3)
-        {
-            mod_dest->flags2 |= FLUID_MOD_SWITCH;
-        }
-        else
-        {
-            /* This shouldn't happen - unknown type!
-             * Deactivate the modulator by setting the amount to 0. */
-            mod_dest->amount = 0;
-        }
-
-        /* *** Transform *** */
-        /* SF2.01 only uses the 'linear' transform (0).
-         * Deactivate the modulator by setting the amount to 0 in any other case.
-         */
-        if(mod_src->trans != 0)
-        {
-            mod_dest->amount = 0;
-        }
-
-        /* Store the new modulator in the zone The order of modulators
-         * will make a difference, at least in an instrument context: The
-         * second modulator overwrites the first one, if they only differ
-         * in amount. */
-        if(count == 0)
-        {
-            zone->mod = mod_dest;
-        }
-        else
-        {
-            fluid_mod_t *last_mod = zone->mod;
-
-            /* Find the end of the list */
-            while(last_mod->next != NULL)
-            {
-                last_mod = last_mod->next;
-            }
-
-            last_mod->next = mod_dest;
-        }
-
-        r = fluid_list_next(r);
-    } /* foreach modulator */
-
-    return FLUID_OK;
+    return fluid_zone_mod_import_sfont(zone->name, &zone->mod, sfzone);
 }
 
 /*
@@ -1541,7 +1733,9 @@ fluid_inst_import_sfont(fluid_preset_zone_t *preset_zone, SFInst *sfinst, fluid_
     {
 
         sfzone = (SFZone *)fluid_list_get(p);
-        FLUID_SNPRINTF(zone_name, sizeof(zone_name), "%s/%d", inst->name, count);
+        /* integrates preset zone name in instrument zone name */
+        FLUID_SNPRINTF(zone_name, sizeof(zone_name), "%s/%s/%d", preset_zone->name,
+                       inst->name, count);
 
         inst_zone = new_fluid_inst_zone(zone_name);
 
@@ -1661,18 +1855,9 @@ new_fluid_inst_zone(char *name)
 void
 delete_fluid_inst_zone(fluid_inst_zone_t *zone)
 {
-    fluid_mod_t *mod, *tmp;
-
     fluid_return_if_fail(zone != NULL);
 
-    mod = zone->mod;
-
-    while(mod)	/* delete the modulators */
-    {
-        tmp = mod;
-        mod = mod->next;
-        delete_fluid_mod(tmp);
-    }
+    delete_fluid_list_mod(zone->mod);
 
     FLUID_FREE(zone->name);
     FLUID_FREE(zone);
@@ -1693,43 +1878,8 @@ fluid_inst_zone_next(fluid_inst_zone_t *zone)
 int
 fluid_inst_zone_import_sfont(fluid_inst_zone_t *inst_zone, SFZone *sfzone, fluid_defsfont_t *defsfont)
 {
-    fluid_list_t *r;
-    SFGen *sfgen;
-    int count;
-
-    for(count = 0, r = sfzone->gen; r != NULL; count++)
-    {
-        sfgen = (SFGen *)fluid_list_get(r);
-
-        switch(sfgen->id)
-        {
-        case GEN_KEYRANGE:
-            inst_zone->range.keylo = sfgen->amount.range.lo;
-            inst_zone->range.keyhi = sfgen->amount.range.hi;
-            break;
-
-        case GEN_VELRANGE:
-            inst_zone->range.vello = sfgen->amount.range.lo;
-            inst_zone->range.velhi = sfgen->amount.range.hi;
-            break;
-
-        case GEN_ATTENUATION:
-            /* EMU8k/10k hardware applies a scale factor to initial attenuation generator values set at
-             * preset and instrument level */
-            inst_zone->gen[sfgen->id].val = (fluid_real_t) sfgen->amount.sword * EMU_ATTENUATION_FACTOR;
-            inst_zone->gen[sfgen->id].flags = GEN_SET;
-            break;
-
-        default:
-            /* FIXME: some generators have an unsigned word amount value but
-            i don't know which ones */
-            inst_zone->gen[sfgen->id].val = (fluid_real_t) sfgen->amount.sword;
-            inst_zone->gen[sfgen->id].flags = GEN_SET;
-            break;
-        }
-
-        r = fluid_list_next(r);
-    }
+    /* import the generators */
+    fluid_zone_gen_import_sfont(inst_zone->gen, &inst_zone->range, sfzone);
 
     /* FIXME */
     /*    if (zone->gen[GEN_EXCLUSIVECLASS].flags == GEN_SET) { */
@@ -1743,182 +1893,7 @@ fluid_inst_zone_import_sfont(fluid_inst_zone_t *inst_zone, SFZone *sfzone, fluid
     }
 
     /* Import the modulators (only SF2.1 and higher) */
-    for(count = 0, r = sfzone->mod; r != NULL; count++)
-    {
-        SFMod *mod_src = (SFMod *)fluid_list_get(r);
-        int type;
-        fluid_mod_t *mod_dest;
-
-        mod_dest = new_fluid_mod();
-
-        if(mod_dest == NULL)
-        {
-            return FLUID_FAILED;
-        }
-
-        mod_dest->next = NULL; /* pointer to next modulator, this is the end of the list now.*/
-
-        /* *** Amount *** */
-        mod_dest->amount = mod_src->amount;
-
-        /* *** Source *** */
-        mod_dest->src1 = mod_src->src & 127; /* index of source 1, seven-bit value, SF2.01 section 8.2, page 50 */
-        mod_dest->flags1 = 0;
-
-        /* Bit 7: CC flag SF 2.01 section 8.2.1 page 50*/
-        if(mod_src->src & (1 << 7))
-        {
-            mod_dest->flags1 |= FLUID_MOD_CC;
-        }
-        else
-        {
-            mod_dest->flags1 |= FLUID_MOD_GC;
-        }
-
-        /* Bit 8: D flag SF 2.01 section 8.2.2 page 51*/
-        if(mod_src->src & (1 << 8))
-        {
-            mod_dest->flags1 |= FLUID_MOD_NEGATIVE;
-        }
-        else
-        {
-            mod_dest->flags1 |= FLUID_MOD_POSITIVE;
-        }
-
-        /* Bit 9: P flag SF 2.01 section 8.2.3 page 51*/
-        if(mod_src->src & (1 << 9))
-        {
-            mod_dest->flags1 |= FLUID_MOD_BIPOLAR;
-        }
-        else
-        {
-            mod_dest->flags1 |= FLUID_MOD_UNIPOLAR;
-        }
-
-        /* modulator source types: SF2.01 section 8.2.1 page 52 */
-        type = (mod_src->src) >> 10;
-        type &= 63; /* type is a 6-bit value */
-
-        if(type == 0)
-        {
-            mod_dest->flags1 |= FLUID_MOD_LINEAR;
-        }
-        else if(type == 1)
-        {
-            mod_dest->flags1 |= FLUID_MOD_CONCAVE;
-        }
-        else if(type == 2)
-        {
-            mod_dest->flags1 |= FLUID_MOD_CONVEX;
-        }
-        else if(type == 3)
-        {
-            mod_dest->flags1 |= FLUID_MOD_SWITCH;
-        }
-        else
-        {
-            /* This shouldn't happen - unknown type!
-             * Deactivate the modulator by setting the amount to 0. */
-            mod_dest->amount = 0;
-        }
-
-        /* *** Dest *** */
-        mod_dest->dest = mod_src->dest; /* index of controlled generator */
-
-        /* *** Amount source *** */
-        mod_dest->src2 = mod_src->amtsrc & 127; /* index of source 2, seven-bit value, SF2.01 section 8.2, page 50 */
-        mod_dest->flags2 = 0;
-
-        /* Bit 7: CC flag SF 2.01 section 8.2.1 page 50*/
-        if(mod_src->amtsrc & (1 << 7))
-        {
-            mod_dest->flags2 |= FLUID_MOD_CC;
-        }
-        else
-        {
-            mod_dest->flags2 |= FLUID_MOD_GC;
-        }
-
-        /* Bit 8: D flag SF 2.01 section 8.2.2 page 51*/
-        if(mod_src->amtsrc & (1 << 8))
-        {
-            mod_dest->flags2 |= FLUID_MOD_NEGATIVE;
-        }
-        else
-        {
-            mod_dest->flags2 |= FLUID_MOD_POSITIVE;
-        }
-
-        /* Bit 9: P flag SF 2.01 section 8.2.3 page 51*/
-        if(mod_src->amtsrc & (1 << 9))
-        {
-            mod_dest->flags2 |= FLUID_MOD_BIPOLAR;
-        }
-        else
-        {
-            mod_dest->flags2 |= FLUID_MOD_UNIPOLAR;
-        }
-
-        /* modulator source types: SF2.01 section 8.2.1 page 52 */
-        type = (mod_src->amtsrc) >> 10;
-        type &= 63; /* type is a 6-bit value */
-
-        if(type == 0)
-        {
-            mod_dest->flags2 |= FLUID_MOD_LINEAR;
-        }
-        else if(type == 1)
-        {
-            mod_dest->flags2 |= FLUID_MOD_CONCAVE;
-        }
-        else if(type == 2)
-        {
-            mod_dest->flags2 |= FLUID_MOD_CONVEX;
-        }
-        else if(type == 3)
-        {
-            mod_dest->flags2 |= FLUID_MOD_SWITCH;
-        }
-        else
-        {
-            /* This shouldn't happen - unknown type!
-             * Deactivate the modulator by setting the amount to 0. */
-            mod_dest->amount = 0;
-        }
-
-        /* *** Transform *** */
-        /* SF2.01 only uses the 'linear' transform (0).
-         * Deactivate the modulator by setting the amount to 0 in any other case.
-         */
-        if(mod_src->trans != 0)
-        {
-            mod_dest->amount = 0;
-        }
-
-        /* Store the new modulator in the zone
-         * The order of modulators will make a difference, at least in an instrument context:
-         * The second modulator overwrites the first one, if they only differ in amount. */
-        if(count == 0)
-        {
-            inst_zone->mod = mod_dest;
-        }
-        else
-        {
-            fluid_mod_t *last_mod = inst_zone->mod;
-
-            /* Find the end of the list */
-            while(last_mod->next != NULL)
-            {
-                last_mod = last_mod->next;
-            }
-
-            last_mod->next = mod_dest;
-        }
-
-        r = fluid_list_next(r);
-    } /* foreach modulator */
-
-    return FLUID_OK;
+    return fluid_zone_mod_import_sfont(inst_zone->name, &inst_zone->mod, sfzone);
 }
 
 /*

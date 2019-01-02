@@ -60,8 +60,10 @@ struct _fluid_samplecache_entry_t
 static fluid_list_t *samplecache_list = NULL;
 static fluid_mutex_t samplecache_mutex = FLUID_MUTEX_INIT;
 
-static fluid_samplecache_entry_t *new_samplecache_entry(SFData *sf, unsigned int sample_start, unsigned int sample_end, int sample_type);
-static fluid_samplecache_entry_t *get_samplecache_entry(SFData *sf, unsigned int sample_start, unsigned int sample_end, int sample_type);
+static fluid_samplecache_entry_t *new_samplecache_entry(SFData *sf, unsigned int sample_start,
+        unsigned int sample_end, int sample_type, time_t mtime);
+static fluid_samplecache_entry_t *get_samplecache_entry(SFData *sf, unsigned int sample_start,
+        unsigned int sample_end, int sample_type, time_t mtime);
 static void delete_samplecache_entry(fluid_samplecache_entry_t *entry);
 
 static int fluid_get_file_modification_time(char *filename, time_t *modification_time);
@@ -75,14 +77,20 @@ int fluid_samplecache_load(SFData *sf,
 {
     fluid_samplecache_entry_t *entry;
     int ret;
+    time_t mtime;
 
     fluid_mutex_lock(samplecache_mutex);
 
-    entry = get_samplecache_entry(sf, sample_start, sample_end, sample_type);
+    if(fluid_get_file_modification_time(sf->fname, &mtime) == FLUID_FAILED)
+    {
+        mtime = 0;
+    }
+
+    entry = get_samplecache_entry(sf, sample_start, sample_end, sample_type, mtime);
 
     if(entry == NULL)
     {
-        entry = new_samplecache_entry(sf, sample_start, sample_end, sample_type);
+        entry = new_samplecache_entry(sf, sample_start, sample_end, sample_type, mtime);
 
         if(entry == NULL)
         {
@@ -180,7 +188,8 @@ unlock_exit:
 static fluid_samplecache_entry_t *new_samplecache_entry(SFData *sf,
         unsigned int sample_start,
         unsigned int sample_end,
-        int sample_type)
+        int sample_type,
+        time_t mtime)
 {
     fluid_samplecache_entry_t *entry;
 
@@ -202,12 +211,6 @@ static fluid_samplecache_entry_t *new_samplecache_entry(SFData *sf,
         goto error_exit;
     }
 
-    if(fluid_get_file_modification_time(entry->filename, &entry->modification_time) == FLUID_FAILED)
-    {
-        FLUID_LOG(FLUID_WARN, "Unable to read modificaton time of soundfont file.");
-        entry->modification_time = 0;
-    }
-
     entry->sf_samplepos = sf->samplepos;
     entry->sf_samplesize = sf->samplesize;
     entry->sf_sample24pos = sf->sample24pos;
@@ -215,6 +218,7 @@ static fluid_samplecache_entry_t *new_samplecache_entry(SFData *sf,
     entry->sample_start = sample_start;
     entry->sample_end = sample_end;
     entry->sample_type = sample_type;
+    entry->modification_time = mtime;
 
     entry->sample_count = fluid_sffile_read_sample_data(sf, sample_start, sample_end, sample_type,
                           &entry->sample_data, &entry->sample_data24);
@@ -244,17 +248,11 @@ static void delete_samplecache_entry(fluid_samplecache_entry_t *entry)
 static fluid_samplecache_entry_t *get_samplecache_entry(SFData *sf,
         unsigned int sample_start,
         unsigned int sample_end,
-        int sample_type)
+        int sample_type,
+        time_t mtime)
 {
-    time_t mtime;
     fluid_list_t *entry_list;
     fluid_samplecache_entry_t *entry;
-
-    if(fluid_get_file_modification_time(sf->fname, &mtime) == FLUID_FAILED)
-    {
-        FLUID_LOG(FLUID_WARN, "Unable to read modificaton time of soundfont file.");
-        mtime = 0;
-    }
 
     entry_list = samplecache_list;
 

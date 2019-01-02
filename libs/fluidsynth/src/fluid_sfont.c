@@ -512,9 +512,13 @@ delete_fluid_sample(fluid_sample_t *sample)
 /**
  * Returns the size of the fluid_sample_t structure.
  *
- * Useful in low latency scenarios e.g. to allocate a sample on the stack.
+ * Useful in low latency scenarios e.g. to allocate a pool of samples.
  *
  * @return Size of fluid_sample_t in bytes
+ * 
+ * @note It is recommend to zero initialize the memory before using the object.
+ * 
+ * @warning Do NOT allocate samples on the stack and assign them to a voice!
  */
 size_t fluid_sample_sizeof()
 {
@@ -563,16 +567,17 @@ fluid_sample_set_sound_data(fluid_sample_t *sample,
 
     fluid_return_val_if_fail(sample != NULL, FLUID_FAILED);
     fluid_return_val_if_fail(data != NULL, FLUID_FAILED);
-    fluid_return_val_if_fail(nbframes == 0, FLUID_FAILED);
+    fluid_return_val_if_fail(nbframes != 0, FLUID_FAILED);
 
     /* in case we already have some data */
     if((sample->data != NULL || sample->data24 != NULL) && sample->auto_free)
     {
         FLUID_FREE(sample->data);
         FLUID_FREE(sample->data24);
-        sample->data = NULL;
-        sample->data24 = NULL;
     }
+    
+    sample->data = NULL;
+    sample->data24 = NULL;
 
     if(copy_data)
     {
@@ -635,6 +640,8 @@ error_rec:
     FLUID_LOG(FLUID_ERR, "Out of memory");
     FLUID_FREE(sample->data);
     FLUID_FREE(sample->data24);
+    sample->data = NULL;
+    sample->data24 = NULL;
     return FLUID_FAILED;
 
 #undef SAMPLE_LOOP_MARGIN

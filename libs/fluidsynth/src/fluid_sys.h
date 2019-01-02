@@ -77,6 +77,14 @@
 #define FLUID_LE32TOH(x)          GINT32_FROM_LE(x)
 #define FLUID_LE16TOH(x)          GINT16_FROM_LE(x)
 
+#if FLUID_IS_BIG_ENDIAN
+#define FLUID_FOURCC(_a, _b, _c, _d) \
+    (uint32_t)(((uint32_t)(_a) << 24) | ((uint32_t)(_b) << 16) | ((uint32_t)(_c) << 8) | (uint32_t)(_d))
+#else
+#define FLUID_FOURCC(_a, _b, _c, _d) \
+    (uint32_t)(((uint32_t)(_d) << 24) | ((uint32_t)(_c) << 16) | ((uint32_t)(_b) << 8) | (uint32_t)(_a)) 
+#endif
+
 
 #define fluid_return_if_fail(cond) \
 if(cond) \

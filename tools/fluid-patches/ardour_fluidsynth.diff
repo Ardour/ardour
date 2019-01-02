@@ -78,10 +78,10 @@ index 37b0a06a4..b6586895b 100644
  /*
   * fluid_hashtable_foreach_remove_or_steal:
 diff --git b/libs/fluidsynth/src/fluid_midi.c a/libs/fluidsynth/src/fluid_midi.c
-index 4795fceb3..b82bfdf61 100644
+index 1a394f811..8deb0b0d1 100644
 --- b/libs/fluidsynth/src/fluid_midi.c
 +++ a/libs/fluidsynth/src/fluid_midi.c
-@@ -75,7 +75,7 @@ static int fluid_midi_file_read_tracklen(fluid_midi_file *mf);
+@@ -76,7 +76,7 @@ static int fluid_midi_file_read_tracklen(fluid_midi_file *mf);
  static int fluid_midi_file_eot(fluid_midi_file *mf);
  static int fluid_midi_file_get_division(fluid_midi_file *midifile);
  
@@ -90,7 +90,7 @@ index 4795fceb3..b82bfdf61 100644
  /***************************************************************
   *
   *                      MIDIFILE
-@@ -1011,6 +1011,7 @@ fluid_midi_file_get_division(fluid_midi_file *midifile)
+@@ -1047,6 +1047,7 @@ fluid_midi_file_get_division(fluid_midi_file *midifile)
  {
      return midifile->division;
  }
@@ -98,7 +98,7 @@ index 4795fceb3..b82bfdf61 100644
  
  /******************************************************
   *
-@@ -1330,7 +1331,7 @@ static void fluid_midi_event_set_sysex_LOCAL(fluid_midi_event_t *evt, int type,
+@@ -1413,7 +1414,7 @@ static void fluid_midi_event_get_sysex_LOCAL(fluid_midi_event_t *evt, void **dat
   *
   *     fluid_track_t
   */
@@ -107,35 +107,39 @@ index 4795fceb3..b82bfdf61 100644
  /*
   * new_fluid_track
   */
-@@ -2434,3 +2435,4 @@ fluid_midi_event_length(unsigned char event)
+@@ -2517,3 +2518,4 @@ fluid_midi_event_length(unsigned char event)
  
      return 1;
  }
 +#endif
-diff --git b/libs/fluidsynth/src/fluid_rev.c a/libs/fluidsynth/src/fluid_rev.c
-index 198a06e58..894afc5a0 100644
---- b/libs/fluidsynth/src/fluid_rev.c
-+++ a/libs/fluidsynth/src/fluid_rev.c
-@@ -51,7 +51,7 @@ void fluid_allpass_init(fluid_allpass *allpass);
- void fluid_allpass_setfeedback(fluid_allpass *allpass, fluid_real_t val);
- fluid_real_t fluid_allpass_getfeedback(fluid_allpass *allpass);
- 
--void
-+static void
- fluid_allpass_setbuffer(fluid_allpass *allpass, int size)
+diff --git b/libs/fluidsynth/src/fluid_mod.c a/libs/fluidsynth/src/fluid_mod.c
+index 84e97731e..5e57455d4 100644
+--- b/libs/fluidsynth/src/fluid_mod.c
++++ a/libs/fluidsynth/src/fluid_mod.c
+@@ -603,7 +603,7 @@ fluid_mod_check_cc_source(const fluid_mod_t *mod, unsigned char src1_select)
+  * @param name,if not NULL, pointer on a string displayed as a warning.
+  * @return TRUE if modulator sources src1, src2 are valid, FALSE otherwise.
+  */
+-int fluid_mod_check_sources(const fluid_mod_t *mod, char *name)
++int fluid_mod_check_sources(const fluid_mod_t *mod, const char *name)
  {
-     allpass->bufidx = 0;
-@@ -59,7 +59,7 @@ fluid_allpass_setbuffer(fluid_allpass *allpass, int size)
-     allpass->bufsize = size;
- }
+     static const char *invalid_non_cc_src =
+         "Invalid modulator, using non-CC source %s.src%d=%d";
+diff --git b/libs/fluidsynth/src/fluid_mod.h a/libs/fluidsynth/src/fluid_mod.h
+index 3e7661741..ec8e967a3 100644
+--- b/libs/fluidsynth/src/fluid_mod.h
++++ a/libs/fluidsynth/src/fluid_mod.h
+@@ -44,7 +44,7 @@ struct _fluid_mod_t
+ };
  
--void
-+static void
- fluid_allpass_release(fluid_allpass *allpass)
- {
-     FLUID_FREE(allpass->buffer);
+ fluid_real_t fluid_mod_get_value(fluid_mod_t *mod, fluid_voice_t *voice);
+-int fluid_mod_check_sources(const fluid_mod_t *mod, char *name);
++int fluid_mod_check_sources(const fluid_mod_t *mod, const char *name);
+ 
+ #ifdef DEBUG
+ void fluid_dump_modulator(fluid_mod_t *mod);
 diff --git b/libs/fluidsynth/src/fluid_rvoice_mixer.c a/libs/fluidsynth/src/fluid_rvoice_mixer.c
-index af0ef75d1..9e7b164bb 100644
+index af0ef75d1..9acc5f830 100644
 --- b/libs/fluidsynth/src/fluid_rvoice_mixer.c
 +++ a/libs/fluidsynth/src/fluid_rvoice_mixer.c
 @@ -24,7 +24,6 @@
@@ -146,7 +150,6 @@ index af0ef75d1..9e7b164bb 100644
  #include "fluid_synth.h"
  
  
- // If less than x voices, the thread overhead is larger than the gain,
 diff --git b/libs/fluidsynth/src/fluid_rvoice_mixer.h a/libs/fluidsynth/src/fluid_rvoice_mixer.h
 index 4ee072e4b..1b3fceb34 100644
 --- b/libs/fluidsynth/src/fluid_rvoice_mixer.h
@@ -188,7 +191,7 @@ index 02be9a033..9207ab063 100644
  
  static int
 diff --git b/libs/fluidsynth/src/fluid_synth.c a/libs/fluidsynth/src/fluid_synth.c
-index faadefb27..79c5a9c87 100644
+index 07bfc0427..b4524a2ac 100644
 --- b/libs/fluidsynth/src/fluid_synth.c
 +++ a/libs/fluidsynth/src/fluid_synth.c
 @@ -267,7 +267,7 @@ void fluid_version(int *major, int *minor, int *micro)
@@ -200,7 +203,7 @@ index faadefb27..79c5a9c87 100644
  fluid_version_str(void)
  {
      return FLUIDSYNTH_VERSION;
-@@ -6430,6 +6430,7 @@ int fluid_synth_set_channel_type(fluid_synth_t *synth, int chan, int type)
+@@ -6442,6 +6442,7 @@ int fluid_synth_set_channel_type(fluid_synth_t *synth, int chan, int type)
      FLUID_API_RETURN(FLUID_OK);
  }
  
@@ -208,7 +211,7 @@ index faadefb27..79c5a9c87 100644
  /**
   * Return the LADSPA effects instance used by FluidSynth
   *
-@@ -6442,6 +6443,7 @@ fluid_ladspa_fx_t *fluid_synth_get_ladspa_fx(fluid_synth_t *synth)
+@@ -6454,6 +6455,7 @@ fluid_ladspa_fx_t *fluid_synth_get_ladspa_fx(fluid_synth_t *synth)
  
      return synth->ladspa_fx;
  }
@@ -240,7 +243,7 @@ index 156424af1..58869730c 100644
      enum fluid_iir_filter_flags custom_filter_flags; /**< filter type of the user-defined filter currently used for all voices */
  };
 diff --git b/libs/fluidsynth/src/fluid_sys.c a/libs/fluidsynth/src/fluid_sys.c
-index 3df88fc23..cce778b3c 100644
+index d686737f6..28911ee7f 100644
 --- b/libs/fluidsynth/src/fluid_sys.c
 +++ a/libs/fluidsynth/src/fluid_sys.c
 @@ -202,9 +202,10 @@ fluid_log(int level, const char *fmt, ...)
@@ -257,10 +260,10 @@ index 3df88fc23..cce778b3c 100644
  
      if(str == NULL || delim == NULL || !*delim)
 diff --git b/libs/fluidsynth/src/fluid_sys.h a/libs/fluidsynth/src/fluid_sys.h
-index 47cc95c11..d95f6159f 100644
+index 72b323029..122938655 100644
 --- b/libs/fluidsynth/src/fluid_sys.h
 +++ a/libs/fluidsynth/src/fluid_sys.h
-@@ -91,7 +91,7 @@ else \
+@@ -99,7 +99,7 @@ else \
  /*
   * Utility functions
   */
@@ -270,7 +273,7 @@ index 47cc95c11..d95f6159f 100644
  
  #if defined(__OS2__)
 diff --git b/libs/fluidsynth/src/fluidsynth_priv.h a/libs/fluidsynth/src/fluidsynth_priv.h
-index d5dbdf7e9..5de758dc0 100644
+index 4df590e21..384785fcc 100644
 --- b/libs/fluidsynth/src/fluidsynth_priv.h
 +++ a/libs/fluidsynth/src/fluidsynth_priv.h
 @@ -26,10 +26,6 @@

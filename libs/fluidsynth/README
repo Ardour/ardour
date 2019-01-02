@@ -1,7 +1,14 @@
 This is a stripped down version of fluidsynth (library only)
 
 from git://github.com/FluidSynth/fluidsynth.git
-rev. v2.0.2 (6e9d84f02a7a0f7e436c2adffc4a065608f490ba)
+rev. v2.0.3-16-g8b18205
 
 fluidsynth is licensed in terms of the  LGPL-2+, see individual source
 files for (C) holders.
+
+---
+
+The source is imported in the repository in order to allow static linking,
+with hidden visibility. This is required for a-fluidsynth.lv2 (plugin must
+be self-contained and not rely on external shared libs) and to make it
+available to to libardour on all platforms that Ardour is.

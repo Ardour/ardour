@@ -157,6 +157,7 @@ void fluid_voice_release(fluid_voice_t *voice);
 void fluid_voice_noteoff(fluid_voice_t *voice);
 void fluid_voice_off(fluid_voice_t *voice);
 void fluid_voice_stop(fluid_voice_t *voice);
+void fluid_voice_add_mod_local(fluid_voice_t *voice, fluid_mod_t *mod, int mode, int check_limit_count);
 void fluid_voice_overflow_rvoice_finished(fluid_voice_t *voice);
 
 int fluid_voice_kill_excl(fluid_voice_t *voice);

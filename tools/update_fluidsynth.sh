@@ -23,6 +23,11 @@ cd $TMP
 #git clone git://git.code.sf.net/p/fluidsynth/code-git fs-git
 git clone git://github.com/FluidSynth/fluidsynth.git fs-git
 
+cd fs-git;
+git describe --tags
+git log | head
+cd $TMP
+
 FSR=fs-git/
 
 rsync -auc --info=progress2 \

@@ -245,10 +245,7 @@ fluid_mod_get_source_value(const unsigned char mod_src,
 static fluid_real_t
 fluid_mod_transform_source_value(fluid_real_t val, unsigned char mod_flags, const fluid_real_t range)
 {
-    /* normalized value, i.e. usually in the range [0;1]
-     *
-     * if val was retrieved from pitch_bend then [-0.5;0.5]
-     */
+    /* normalized value, i.e. usually in the range [0;1] */
     const fluid_real_t val_norm = val / range;
 
     /* we could also only switch case the lower nibble of mod_flags, however
@@ -364,7 +361,22 @@ fluid_mod_transform_source_value(fluid_real_t val, unsigned char mod_flags, cons
 }
 
 /*
- * fluid_mod_get_value
+ * fluid_mod_get_value.
+ * Computes and return modulator output following SF2.01
+ * (See SoundFont Modulator Controller Model Chapter 9.5).
+ *
+ * Output = Transform(Amount * Map(primary source input) * Map(secondary source input))
+ *
+ * Notes:
+ * 1)fluid_mod_get_value, ignores the Transform operator. The result is:
+ *
+ *   Output = Amount * Map(primary source input) * Map(secondary source input)
+ *
+ * 2)When primary source input (src1) is set to General Controller 'No Controller',
+ *   output is forced to 0.
+ *
+ * 3)When secondary source input (src2) is set to General Controller 'No Controller',
+ *   output is forced to +1.0 
  */
 fluid_real_t
 fluid_mod_get_value(fluid_mod_t *mod, fluid_voice_t *voice)
@@ -418,6 +430,9 @@ fluid_mod_get_value(fluid_mod_t *mod, fluid_voice_t *voice)
         /* transform the input value */
         v1 = fluid_mod_transform_source_value(v1, mod->flags1, range1);
     }
+    /* When primary source input (src1) is set to General Controller 'No Controller',
+       output is forced to 0.0
+    */
     else
     {
         return 0.0;
@@ -437,6 +452,9 @@ fluid_mod_get_value(fluid_mod_t *mod, fluid_voice_t *voice)
         /* transform the second input value */
         v2 = fluid_mod_transform_source_value(v2, mod->flags2, range2);
     }
+    /* When secondary source input (src2) is set to General Controller 'No Controller',
+       output is forced to +1.0
+    */
     else
     {
         v2 = 1.0f;
@@ -484,6 +502,177 @@ delete_fluid_mod(fluid_mod_t *mod)
 size_t fluid_mod_sizeof()
 {
     return sizeof(fluid_mod_t);
+}
+
+/**
+ * Checks if modulator with source 1 other than CC is FLUID_MOD_NONE.
+ *
+ * @param mod, modulator.
+ * @return TRUE if modulator source 1 other than cc is FLUID_MOD_NONE, FALSE otherwise.
+ */
+static int
+fluid_mod_is_src1_none(const fluid_mod_t *mod)
+{
+    return(((mod->flags1 & FLUID_MOD_CC) == 0) && (mod->src1 == FLUID_MOD_NONE));
+}
+
+/**
+ * Checks if modulators source other than CC source is invalid.
+ * (specs SF 2.01  7.4, 7.8, 8.2.1)
+ *
+ * @param mod, modulator.
+ * @param src1_select, source input selection to check.
+ *   1 to check src1 source.
+ *   0 to check src2 source.
+ * @return FALSE if selected modulator source other than cc is invalid, TRUE otherwise.
+ */
+static int
+fluid_mod_check_non_cc_source(const fluid_mod_t *mod, unsigned char src1_select)
+{
+    unsigned char flags, src;
+
+    if(src1_select)
+    {
+        flags = mod->flags1;
+        src = mod->src1;
+    }
+    else
+    {
+        flags = mod->flags2;
+        src = mod->src2;
+    }
+
+    return(((flags & FLUID_MOD_CC) != 0)  /* src is a CC */
+           /* SF2.01 section 8.2.1: Constant value */
+           || ((src == FLUID_MOD_NONE)
+               || (src == FLUID_MOD_VELOCITY)        /* Note-on velocity */
+               || (src == FLUID_MOD_KEY)             /* Note-on key number */
+               || (src == FLUID_MOD_KEYPRESSURE)     /* Poly pressure */
+               || (src == FLUID_MOD_CHANNELPRESSURE) /* Channel pressure */
+               || (src == FLUID_MOD_PITCHWHEEL)      /* Pitch wheel */
+               || (src == FLUID_MOD_PITCHWHEELSENS)  /* Pitch wheel sensitivity */
+              ));
+}
+
+/**
+ * Checks if modulator CC source is invalid (specs SF 2.01  7.4, 7.8, 8.2.1).
+ * @param mod, modulator.
+ * @src1_select, source input selection:
+ *   1 to check src1 source or
+ *   0 to check src2 source.
+ * @return FALSE if selected modulator's source CC is invalid, TRUE otherwise.
+ */
+static int
+fluid_mod_check_cc_source(const fluid_mod_t *mod, unsigned char src1_select)
+{
+    unsigned char flags, src;
+
+    if(src1_select)
+    {
+        flags = mod->flags1;
+        src = mod->src1;
+    }
+    else
+    {
+        flags = mod->flags2;
+        src = mod->src2;
+    }
+
+    return(((flags & FLUID_MOD_CC) == 0)  /* src is non CC */
+           || ((src != BANK_SELECT_MSB)
+               && (src != BANK_SELECT_LSB)
+               && (src != DATA_ENTRY_MSB)
+               && (src != DATA_ENTRY_LSB)
+               /* is src not NRPN_LSB, NRPN_MSB, RPN_LSB, RPN_MSB */
+               && ((src < NRPN_LSB) || (RPN_MSB < src))
+               /* is src not ALL_SOUND_OFF, ALL_CTRL_OFF, LOCAL_CONTROL, ALL_NOTES_OFF ? */
+               /* is src not OMNI_OFF, OMNI_ON, POLY_OFF, POLY_ON ? */
+               && (src < ALL_SOUND_OFF)
+               /* CC lsb shouldn't allowed to modulate (spec SF 2.01 - 8.2.1)
+                  However, as long fluidsynth will use only CC 7 bits resolution,
+                  it is safe to ignore these SF recommendations on CC receive.
+                  See explanations in fluid_synth_cc_LOCAL() */
+               /* uncomment next line to forbid CC lsb  */
+               /* && ((src < 32) || (63 < src)) */
+              ));
+}
+
+/**
+ * Checks valid modulator sources (specs SF 2.01  7.4, 7.8, 8.2.1)
+ * @param mod, modulator.
+ * @param name,if not NULL, pointer on a string displayed as a warning.
+ * @return TRUE if modulator sources src1, src2 are valid, FALSE otherwise.
+ */
+int fluid_mod_check_sources(const fluid_mod_t *mod, const char *name)
+{
+    static const char *invalid_non_cc_src =
+        "Invalid modulator, using non-CC source %s.src%d=%d";
+    static const char *invalid_cc_src =
+        "Invalid modulator, using CC source %s.src%d=%d";
+    static const char *src1_is_none =
+        "Modulator with source 1 none %s.src1=%d";
+
+    /* checks valid non cc sources */
+    if(!fluid_mod_check_non_cc_source(mod, 1)) /* check src1 */
+    {
+        if(name)
+        {
+            FLUID_LOG(FLUID_WARN, invalid_non_cc_src, name, 1, mod->src1);
+        }
+
+        return FALSE;
+    }
+
+    /*
+      When src1 is non CC source FLUID_MOD_NONE, the modulator is valid but
+      the output of this modulator will be forced to 0 at synthesis time.
+      Also this modulator cannot be used to overwrite a default modulator (as
+      there is no default modulator with src1 source equal to FLUID_MOD_NONE).
+      Consequently it is useful to return FALSE to indicate this modulator
+      being useless. It will be removed later with others invalid modulators.
+    */
+    if(fluid_mod_is_src1_none(mod))
+    {
+        if(name)
+        {
+            FLUID_LOG(FLUID_WARN, src1_is_none, name, mod->src1);
+        }
+
+        return FALSE;
+    }
+
+    if(!fluid_mod_check_non_cc_source(mod, 0)) /* check src2 */
+    {
+        if(name)
+        {
+            FLUID_LOG(FLUID_WARN, invalid_non_cc_src, name, 2, mod->src2);
+        }
+
+        return FALSE;
+    }
+
+    /* checks valid cc sources */
+    if(!fluid_mod_check_cc_source(mod, 1)) /* check src1 */
+    {
+        if(name)
+        {
+            FLUID_LOG(FLUID_WARN, invalid_cc_src, name, 1, mod->src1);
+        }
+
+        return FALSE;
+    }
+
+    if(!fluid_mod_check_cc_source(mod, 0)) /* check src2 */
+    {
+        if(name)
+        {
+            FLUID_LOG(FLUID_WARN, invalid_cc_src, name, 2, mod->src2);
+        }
+
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 /**

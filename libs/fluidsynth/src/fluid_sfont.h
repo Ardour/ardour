@@ -183,8 +183,6 @@ struct _fluid_sample_t
      * @return Should return #FLUID_OK
      */
     int (*notify)(fluid_sample_t *sample, int reason);
-
-    void *userdata;       /**< User defined data */
 };
 
 

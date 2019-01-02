@@ -516,7 +516,6 @@ fluid_voice_calculate_gen_pitch(fluid_voice_t *voice)
     voice->gen[GEN_PITCH].val = fluid_voice_calculate_pitch(voice, fluid_voice_get_actual_key(voice));
 }
 
-
 /*
  * fluid_voice_calculate_runtime_synthesis_parameters
  *
@@ -1153,7 +1152,9 @@ fluid_voice_update_param(fluid_voice_t *voice, int gen)
  * Recalculate voice parameters for a given control.
  * @param voice the synthesis voice
  * @param cc flag to distinguish between a continous control and a channel control (pitch bend, ...)
- * @param ctrl the control number
+ * @param ctrl the control number:
+ *   when >=0, only modulators's destination having ctrl as source are updated.
+ *   when -1, all modulators's destination are updated (regardless of ctrl).
  *
  * In this implementation, I want to make sure that all controllers
  * are event based: the parameter values of the DSP algorithm should
@@ -1161,57 +1162,83 @@ fluid_voice_update_param(fluid_voice_t *voice, int gen)
  * iteration of the audio cycle (which would probably be feasible if
  * the synth was made in silicon).
  *
- * The update is done in three steps:
+ * The update is done in two steps:
  *
- * - first, we look for all the modulators that have the changed
- * controller as a source. This will yield a list of generators that
- * will be changed because of the controller event.
+ * - step 1: first, we look for all the modulators that have the changed
+ * controller as a source. This will yield a generator that will be changed
+ * because of the controller event.
  *
- * - For every changed generator, calculate its new value. This is the
- * sum of its original value plus the values of al the attached
- * modulators.
- *
- * - For every changed generator, convert its value to the correct
- * unit of the corresponding DSP parameter
+ * - step 2: For this generator, calculate its new value. This is the
+ * sum of its original value plus the values of all the attached modulators.
+ * The generator flag is set to indicate the parameters must be updated.
+ * This avoid the risk to call 'fluid_voice_update_param' several
+ * times for the same generator if several modulators have that generator as
+ * destination. So every changed generators are updated only once.
  */
+
+ /* bit table for each generator being updated. The bits are packed in variables
+  Each variable have NBR_BIT_BY_VAR bits represented by NBR_BIT_BY_VAR_LN2.
+  The size of the table is the number of variables: SIZE_UPDATED_GEN_BIT.
+ 
+  Note: In this implementation NBR_BIT_BY_VAR_LN2 is set to 5 (convenient for 32 bits cpu)
+  but this could be set to 6 for 64 bits cpu.
+ */
+
+#define NBR_BIT_BY_VAR_LN2 5	/* for 32 bits variables */
+#define NBR_BIT_BY_VAR  (1 << NBR_BIT_BY_VAR_LN2)
+#define NBR_BIT_BY_VAR_ANDMASK (NBR_BIT_BY_VAR - 1)
+#define	SIZE_UPDATED_GEN_BIT  ((GEN_LAST + NBR_BIT_BY_VAR_ANDMASK) / NBR_BIT_BY_VAR)
+
+#define is_gen_updated(bit,gen)  (bit[gen >> NBR_BIT_BY_VAR_LN2] &  (1 << (gen & NBR_BIT_BY_VAR_ANDMASK)))
+#define set_gen_updated(bit,gen) (bit[gen >> NBR_BIT_BY_VAR_LN2] |= (1 << (gen & NBR_BIT_BY_VAR_ANDMASK)))
+
 int fluid_voice_modulate(fluid_voice_t *voice, int cc, int ctrl)
 {
     int i, k;
     fluid_mod_t *mod;
-    int gen;
+    uint32_t gen;
     fluid_real_t modval;
+
+    /* Clears registered bits table of updated generators */
+    uint32_t updated_gen_bit[SIZE_UPDATED_GEN_BIT] = {0};
 
     /*    printf("Chan=%d, CC=%d, Src=%d, Val=%d\n", voice->channel->channum, cc, ctrl, val); */
 
     for(i = 0; i < voice->mod_count; i++)
     {
-
         mod = &voice->mod[i];
 
         /* step 1: find all the modulators that have the changed controller
-         * as input source. */
-        if(fluid_mod_has_source(mod, cc, ctrl))
+           as input source. When ctrl is -1 all modulators destination
+           are updated */
+        if(ctrl < 0 || fluid_mod_has_source(mod, cc, ctrl))
         {
-
             gen = fluid_mod_get_dest(mod);
-            modval = 0.0;
 
-            /* step 2: for every changed modulator, calculate the modulation
-             * value of its associated generator */
-            for(k = 0; k < voice->mod_count; k++)
+            /* Skip if this generator has already been updated */
+            if(!is_gen_updated(updated_gen_bit, gen))
             {
-                if(fluid_mod_has_dest(&voice->mod[k], gen))
+                modval = 0.0;
+
+                /* step 2: for every attached modulator, calculate the modulation
+                 * value for the generator gen */
+                for(k = 0; k < voice->mod_count; k++)
                 {
-                    modval += fluid_mod_get_value(&voice->mod[k], voice);
+                    if(fluid_mod_has_dest(&voice->mod[k], gen))
+                    {
+                        modval += fluid_mod_get_value(&voice->mod[k], voice);
+                    }
                 }
+
+                fluid_gen_set_mod(&voice->gen[gen], modval);
+
+                /* now recalculate the parameter values that are derived from the
+                   generator */
+                fluid_voice_update_param(voice, gen);
+
+                /* set the bit that indicates this generator is updated */
+                set_gen_updated(updated_gen_bit, gen);
             }
-
-            fluid_gen_set_mod(&voice->gen[gen], modval);
-
-            /* step 3: now that we have the new value of the generator,
-             * recalculate the parameter values that are derived from the
-             * generator */
-            fluid_voice_update_param(voice, gen);
         }
     }
 
@@ -1222,47 +1249,11 @@ int fluid_voice_modulate(fluid_voice_t *voice, int cc, int ctrl)
  * Update all the modulators. This function is called after a
  * ALL_CTRL_OFF MIDI message has been received (CC 121).
  *
+ * All destination of all modulators must be updated.
  */
 int fluid_voice_modulate_all(fluid_voice_t *voice)
 {
-    fluid_mod_t *mod;
-    int i, k, gen;
-    fluid_real_t modval;
-
-    /* Loop through all the modulators.
-
-       FIXME: we should loop through the set of generators instead of
-       the set of modulators. We risk to call 'fluid_voice_update_param'
-       several times for the same generator if several modulators have
-       that generator as destination. It's not an error, just a wast of
-       energy (think polution, global warming, unhappy musicians,
-       ...) */
-
-    for(i = 0; i < voice->mod_count; i++)
-    {
-
-        mod = &voice->mod[i];
-        gen = fluid_mod_get_dest(mod);
-        modval = 0.0;
-
-        /* Accumulate the modulation values of all the modulators with
-         * destination generator 'gen' */
-        for(k = 0; k < voice->mod_count; k++)
-        {
-            if(fluid_mod_has_dest(&voice->mod[k], gen))
-            {
-                modval += fluid_mod_get_value(&voice->mod[k], voice);
-            }
-        }
-
-        fluid_gen_set_mod(&voice->gen[gen], modval);
-
-        /* Update the parameter values that are depend on the generator
-         * 'gen' */
-        fluid_voice_update_param(voice, gen);
-    }
-
-    return FLUID_OK;
+    return fluid_voice_modulate(voice, 0, -1);
 }
 
 /** legato update functions --------------------------------------------------*/
@@ -1474,10 +1465,10 @@ fluid_voice_stop(fluid_voice_t *voice)
 }
 
 /**
- * Adds a modulator to the voice.
- * @param voice Voice instance
- * @param mod Modulator info (copied)
- * @param mode Determines how to handle an existing identical modulator
+ * Adds a modulator to the voice if the modulator has valid sources.
+ * @param voice Voice instance.
+ * @param mod Modulator info (copied).
+ * @param mode Determines how to handle an existing identical modulator.
  *   #FLUID_VOICE_ADD to add (offset) the modulator amounts,
  *   #FLUID_VOICE_OVERWRITE to replace the modulator,
  *   #FLUID_VOICE_DEFAULT when adding a default modulator - no duplicate should
@@ -1486,32 +1477,42 @@ fluid_voice_stop(fluid_voice_t *voice)
 void
 fluid_voice_add_mod(fluid_voice_t *voice, fluid_mod_t *mod, int mode)
 {
+    /* Ignore the modulator if its sources inputs are invalid */
+    if(fluid_mod_check_sources(mod, "api fluid_voice_add_mod mod"))
+    {
+        fluid_voice_add_mod_local(voice, mod, mode, FLUID_NUM_MOD);
+    }
+}
+
+/**
+ * Adds a modulator to the voice.
+ * local version of fluid_voice_add_mod function. Called at noteon time.
+ * @param voice, mod, mode, same as for fluid_voice_add_mod() (see above).
+ * @param check_limit_count is the modulator number limit to handle with existing
+ *   identical modulator(i.e mode FLUID_VOICE_OVERWRITE, FLUID_VOICE_ADD).
+ *   - When FLUID_NUM_MOD, all the voices modulators (since the previous call)
+ *     are checked for identity.
+ *   - When check_count_limit is below the actual number of voices modulators
+ *   (voice->mod_count), this will restrict identity check to this number,
+ *   This is usefull when we know by advance that there is no duplicate with
+ *   modulators at index above this limit. This avoid wasting cpu cycles at noteon.
+ */
+void
+fluid_voice_add_mod_local(fluid_voice_t *voice, fluid_mod_t *mod, int mode, int check_limit_count)
+{
     int i;
 
-    /*
-     * Some soundfonts come with a huge number of non-standard
-     * controllers, because they have been designed for one particular
-     * sound card.  Discard them, maybe print a warning.
-     */
-
-    if(((mod->flags1 & FLUID_MOD_CC) == 0)
-            && ((mod->src1 != FLUID_MOD_NONE)            /* SF2.01 section 8.2.1: Constant value */
-                && (mod->src1 != FLUID_MOD_VELOCITY)        /* Note-on velocity */
-                && (mod->src1 != FLUID_MOD_KEY)             /* Note-on key number */
-                && (mod->src1 != FLUID_MOD_KEYPRESSURE)     /* Poly pressure */
-                && (mod->src1 != FLUID_MOD_CHANNELPRESSURE) /* Channel pressure */
-                && (mod->src1 != FLUID_MOD_PITCHWHEEL)      /* Pitch wheel */
-                && (mod->src1 != FLUID_MOD_PITCHWHEELSENS)))/* Pitch wheel sensitivity */
+    /* check_limit_count cannot be above voice->mod_count */
+    if(check_limit_count > voice->mod_count)
     {
-        FLUID_LOG(FLUID_WARN, "Ignoring invalid controller, using non-CC source %i.", mod->src1);
-        return;
+        check_limit_count = voice->mod_count;
     }
 
     if(mode == FLUID_VOICE_ADD)
     {
 
         /* if identical modulator exists, add them */
-        for(i = 0; i < voice->mod_count; i++)
+        for(i = 0; i < check_limit_count; i++)
         {
             if(fluid_mod_test_identity(&voice->mod[i], mod))
             {
@@ -1526,7 +1527,7 @@ fluid_voice_add_mod(fluid_voice_t *voice, fluid_mod_t *mod, int mode)
     {
 
         /* if identical modulator exists, replace it (only the amount has to be changed) */
-        for(i = 0; i < voice->mod_count; i++)
+        for(i = 0; i < check_limit_count; i++)
         {
             if(fluid_mod_test_identity(&voice->mod[i], mod))
             {
@@ -1704,9 +1705,10 @@ int fluid_voice_get_velocity(const fluid_voice_t *voice)
  * A lower boundary for the attenuation (as in 'the minimum
  * attenuation of this voice, with volume pedals, modulators
  * etc. resulting in minimum attenuation, cannot fall below x cB) is
- * calculated.  This has to be called during fluid_voice_init, after
+ * calculated.  This has to be called during fluid_voice_start, after
  * all modulators have been run on the voice once.  Also,
  * voice->attenuation has to be initialized.
+ * (see fluid_voice_calculate_runtime_synthesis_parameters())
  */
 static fluid_real_t
 fluid_voice_get_lower_boundary_for_attenuation(fluid_voice_t *voice)
@@ -1733,30 +1735,42 @@ fluid_voice_get_lower_boundary_for_attenuation(fluid_voice_t *voice)
         {
 
             fluid_real_t current_val = fluid_mod_get_value(mod, voice);
-            fluid_real_t v = fabs(mod->amount);
+            /* min_val is the possible minimum value for this modulator.
+               it depends of 3 things :
+               1)the minimum values of src1,src2 (i.e -1 if mapping is bipolar
+                 or 0 if mapping is unipolar).
+               2)the sign of amount.
+               3)absolute value of amount.
 
-            if((mod->src1 == FLUID_MOD_PITCHWHEEL)
-                    || (mod->flags1 & FLUID_MOD_BIPOLAR)
+               When at least one source mapping is bipolar:
+			     min_val is -|amount| regardless the sign of amount.
+               When both sources mapping are unipolar:
+                 min_val is -|amount|, if amount is negative.
+                 min_val is 0, if amount is positive
+             */
+            fluid_real_t min_val = fabs(mod->amount);
+
+            /* Can this modulator produce a negative contribution? */
+            if((mod->flags1 & FLUID_MOD_BIPOLAR)
                     || (mod->flags2 & FLUID_MOD_BIPOLAR)
                     || (mod->amount < 0))
             {
-                /* Can this modulator produce a negative contribution? */
-                v *= -1.0;
+                min_val *= -1.0; /* min_val = - |amount|*/
             }
             else
             {
                 /* No negative value possible. But still, the minimum contribution is 0. */
-                v = 0;
+                min_val = 0;
             }
 
             /* For example:
              * - current_val=100
              * - min_val=-4000
-             * - possible_att_reduction_cB += 4100
+             * - possible reduction contribution of this modulator = current_val - min_val = 4100
              */
-            if(current_val > v)
+            if(current_val > min_val)
             {
-                possible_att_reduction_cB += (current_val - v);
+                possible_att_reduction_cB += (current_val - min_val);
             }
         }
     }
