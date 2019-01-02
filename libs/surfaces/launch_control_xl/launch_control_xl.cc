@@ -271,6 +271,7 @@ LaunchControlXL::init_buttons()
 void
 LaunchControlXL::init_buttons (ButtonID buttons[], uint8_t i)
 {
+	DEBUG_TRACE (DEBUG::LaunchControlXL, "init_buttons buttons[]\n");
 	for (uint8_t n = 0; n < i; ++n) {
 		boost::shared_ptr<TrackButton> button = boost::dynamic_pointer_cast<TrackButton> (id_note_button_map[buttons[n]]);
 		if (button) {
@@ -307,6 +308,7 @@ LaunchControlXL::init_buttons (ButtonID buttons[], uint8_t i)
 void
 LaunchControlXL::init_buttons (bool startup)
 {
+	DEBUG_TRACE (DEBUG::LaunchControlXL, "init_buttons (bool startup)\n");
 	if (startup && !device_mode()) {
 		switch_bank(bank_start);
 		return;
@@ -1090,7 +1092,6 @@ LaunchControlXL::switch_bank (uint32_t base)
 		if (n == stripable_counter) { /* last strip +1 -> another bank exists */
 			DEBUG_TRACE (DEBUG::LaunchControlXL, string_compose ("StripableList iterator - n: %1. Filling next_base\n", n));
 			next_base = *strip;
-			bank_start = base;
 			break;
 		}
 
@@ -1101,6 +1102,8 @@ LaunchControlXL::switch_bank (uint32_t base)
 		/* not even the first stripable exists, do nothing */
 		DEBUG_TRACE (DEBUG::LaunchControlXL, "not even first stripable exists.. returning\n");
 		return;
+	} else {
+		bank_start = base;
 	}
 
 	if (sl && sr) {

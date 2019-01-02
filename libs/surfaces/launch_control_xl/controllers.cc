@@ -674,6 +674,7 @@ LaunchControlXL::solo_mute_rec_changed(uint32_t n) {
 	if (!stripable[n]) {
 		return;
 	}
+	DEBUG_TRACE (DEBUG::LaunchControlXL, "solo_mute_rec_changed - CALLING switch_bank(bank_start)\n");
 	switch_bank(bank_start);
 	//update_track_control_led(n);
 }
