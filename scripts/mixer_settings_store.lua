@@ -230,15 +230,16 @@ function factory () return function ()
 			local order_nmbr = 0
 			local tmp_order_str, tmp_cache_str = "", ""
 			for p in order:iter() do
+				local ptype
 				if not(p:to_insert():isnil()) then
-					type = p:to_insert():plugin(0):get_info().type
+					ptype = p:to_insert():plugin(0):get_info().type
 				else
-					type = 99
+					ptype = 99
 				end
 				local pid = p:to_stateful():id():to_s()
 				if not(string.find(p:display_name(), "latcomp")) then
 					tmp_order_str = tmp_order_str .. string.format(proc_order_string, order_nmbr, pid)
-					tmp_cache_str = tmp_cache_str .. string.format(proc_cache_string, pid, p:display_name(), type)
+					tmp_cache_str = tmp_cache_str .. string.format(proc_cache_string, pid, p:display_name(), ptype)
 				end
 				order_nmbr = order_nmbr + 1
 			end
@@ -271,7 +272,7 @@ function factory () return function ()
 				local active = proc:active()
 				local id = proc:to_stateful():id():to_s()
 				local plug = proc:to_insert ():plugin (0)
-				local type = proc:to_insert():plugin(0):get_info().type
+				local ptype = proc:to_insert():plugin(0):get_info().type
 				local n = 0 -- count control-ports
 				for j = 0, plug:parameter_count () - 1 do -- iterate over all plugin parameters
 					if plug:parameter_is_control (j) then
@@ -295,7 +296,7 @@ function factory () return function ()
 				local proc_str = string.format(
 						processor_string,
 						id,
-						type,
+						ptype,
 						proc:display_name(),
 						r:name(),
 						r:to_stateful():id():to_s(),
