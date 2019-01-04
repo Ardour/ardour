@@ -13,7 +13,11 @@ ardour {
 	]]
 }
 
-function factory () return function ()
+function factory () 
+	
+	local acoraida_monicas_last_used_recall_file
+
+	return function ()
 
 	local user_cfg = ARDOUR.user_config_directory(-1)
 	local local_path = ARDOUR.LuaAPI.build_filename(Session:path(), 'mixer_settings')
@@ -362,9 +366,9 @@ function factory () return function ()
 		{
 			type = "radio", col=0, colspan=20, align="left", key = "recall-dir", title = "", values =
 			{
-				['Pick from Global Settings'] = 1, ['Pick from Local Settings'] = 2
+				['Pick from Global Settings'] = 1, ['Pick from Local Settings'] = 2, ['Last Used Recall File'] = 3,
 			},
-			default = 'Pick from Local Settings'
+			default = 'Last Used Recall File'
 		},
 		{ type = "label", col=0, colspan=20, align="left", title = ""},
 	}
@@ -390,6 +394,7 @@ function factory () return function ()
 				if not(rv) then return end
 				local dry_return = LuaDialog.Dialog("Recall Mixer Settings:", dry_run(false, rv['file'])):run()
 				if dry_return then
+					acoraida_monicas_last_used_recall_file = rv['file']
 					recall(false, rv['file'], dry_return)
 				else
 					return
@@ -411,6 +416,7 @@ function factory () return function ()
 				if not(rv) then return end
 				local dry_return = LuaDialog.Dialog("Recall Mixer Settings:", dry_run(false, rv['file'])):run()
 				if dry_return then
+					acoraida_monicas_last_used_recall_file = rv['file']
 					recall(true, rv['file'], dry_return)
 				else
 					return
@@ -418,6 +424,21 @@ function factory () return function ()
 			else
 				LuaDialog.Message ("Recall Mixer Settings:",
 					local_path .. 'does not exist!\nPlease run Store Mixer Settings first.',
+					LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run()
+			end
+		end
+
+		if gvld['recall-dir'] == 3 then
+			if acoraida_monicas_last_used_recall_file then
+				local dry_return = LuaDialog.Dialog("Recall Mixer Settings:", dry_run(false, acoraida_monicas_last_used_recall_file)):run()
+				if dry_return then
+					recall(true, acoraida_monicas_last_used_recall_file, dry_return)
+				else
+					return
+				end
+			else
+				LuaDialog.Message ("Script has no record of last used file:",
+					'Please pick a recall file and then this option will be available',
 					LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run()
 			end
 		end
