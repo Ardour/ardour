@@ -556,7 +556,7 @@ US2400ProtocolGUI::refresh_function_key_editor ()
 					row[function_key_columns.plain] = action;
 				} else {
 
-					act = ActionManager::get_action (action.c_str());
+					act = ActionManager::get_action (action.c_str(), false);
 					if (act) {
 						row[function_key_columns.plain] = act->get_label();
 					} else {
@@ -677,7 +677,7 @@ US2400ProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib::ustri
 				return;
 			}
 		}
-		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (i->second.c_str());
+		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (i->second.c_str(), false);
 
 		if (act || remove) {
 			/* update visible text, using string supplied by
