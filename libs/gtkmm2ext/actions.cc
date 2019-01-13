@@ -360,6 +360,18 @@ ActionManager::create_action_group (void * owner, string const & name)
 	return g;
 }
 
+RefPtr<ActionGroup>
+ActionManager::get_action_group (string const & name)
+{
+	for (ActionGroups::iterator g = groups.begin(); g != groups.end(); ++g) {
+		if ((*g)->get_name () == name) {
+			return *g;
+		}
+	}
+
+	return RefPtr<ActionGroup> ();
+}
+
 RefPtr<Action>
 ActionManager::register_action (RefPtr<ActionGroup> group, const char* name, const char* label)
 {

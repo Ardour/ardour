@@ -71,6 +71,7 @@ namespace ActionManager {
 	LIBGTKMM2EXT_API extern void disable_active_actions ();
 
 	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::ActionGroup> create_action_group (void * owner, std::string const & group_name);
+	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::ActionGroup> get_action_group (std::string const & group_name);
 
 	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, const char* name, const char* label);
 	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
