@@ -376,6 +376,21 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	xmlSetGenericErrorFunc (this, libxml_generic_error_func);
 	xmlSetStructuredErrorFunc (this, libxml_structured_error_func);
 
+	/* Set this up early */
+
+	ActionManager::init ();
+
+	/* we like keyboards */
+
+	keyboard = new ArdourKeyboard(*this);
+
+	XMLNode* node = ARDOUR_UI::instance()->keyboard_settings();
+	if (node) {
+		keyboard->set_state (*node, Stateful::loading_state_version);
+	}
+
+	install_actions ();
+
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	UIConfiguration::instance().map_parameters (pc);
@@ -439,22 +454,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	SessionEvent::create_per_thread_pool ("GUI", 4096);
 
-	/* we like keyboards */
-
-	keyboard = new ArdourKeyboard(*this);
-
-	XMLNode* node = ARDOUR_UI::instance()->keyboard_settings();
-	if (node) {
-		keyboard->set_state (*node, Stateful::loading_state_version);
-	}
-
 	UIConfiguration::instance().reset_dpi ();
 
 	TimeAxisViewItem::set_constant_heights ();
-
-	/* Set this up so that our window proxies can register actions */
-
-	ActionManager::init ();
 
 	/* The following must happen after ARDOUR::init() so that Config is set up */
 
@@ -5857,7 +5859,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 			}
 		}
 
-		DEBUG_TRACE (DEBUG::Accelerators, "\tnot yet handled, try global bindings\n");
+		DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tnot yet handled, try global bindings (%1)\n", global_bindings));
 
 		if (global_bindings && global_bindings->activate (k, Bindings::Press)) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
@@ -5907,7 +5909,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 			}
 		}
 
-		DEBUG_TRACE (DEBUG::Accelerators, "\tnot yet handled, try global bindings\n");
+		DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tnot yet handled, try global bindings (%1)\n", global_bindings));
 
 		if (global_bindings && global_bindings->activate (k, Bindings::Press)) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");

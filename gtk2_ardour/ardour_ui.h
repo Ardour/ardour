@@ -719,6 +719,7 @@ private:
 	/* Keymap handling */
 
 	void install_actions ();
+	void install_dependent_actions ();
 
 	void toggle_record_enable (uint16_t);
 
