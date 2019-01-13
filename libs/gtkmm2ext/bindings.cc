@@ -479,7 +479,7 @@ Bindings::activate (KeyboardKey kb, Operation op)
 
 	if (k == kbm.end()) {
 		/* no entry for this key in the state map */
-		DEBUG_TRACE (DEBUG::Bindings, string_compose ("no binding for %1\n", unshifted));
+		DEBUG_TRACE (DEBUG::Bindings, string_compose ("no binding for %1 (of %2)\n", unshifted, kbm.size()));
 		return false;
 	}
 
@@ -495,8 +495,9 @@ Bindings::activate (KeyboardKey kb, Operation op)
 		/* lets do it ... */
 		DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2\n", unshifted, k->second.action_name));
 		action->activate ();
+	} else {
+		DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1 is known but has no action\n", unshifted));
 	}
-
 	/* return true even if the action could not be found */
 
 	return true;
@@ -511,8 +512,6 @@ Bindings::associate ()
 		k->second.action = ActionManager::get_action (k->second.action_name, false);
 		if (k->second.action) {
 			push_to_gtk (k->first, k->second.action);
-		} else {
-			cerr << _name << " didn't find " << k->second.action_name << endl;
 		}
 	}
 
