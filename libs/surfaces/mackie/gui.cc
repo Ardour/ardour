@@ -639,7 +639,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 					row[function_key_columns.plain] = action;
 				} else {
 
-					act = ActionManager::get_action (action.c_str(), false);
+					act = ActionManager::get_action (action, false);
 					if (act) {
 						row[function_key_columns.plain] = act->get_label();
 					} else {
@@ -663,7 +663,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 					/* Probably a key alias */
 					row[function_key_columns.shift] = action;
 				} else {
-					act = ActionManager::get_action (action.c_str(), false);
+					act = ActionManager::get_action (action, false);
 					if (act) {
 						row[function_key_columns.shift] = act->get_label();
 					} else {
@@ -681,7 +681,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 				/* Probably a key alias */
 				row[function_key_columns.control] = action;
 			} else {
-				act = ActionManager::get_action (action.c_str(), false);
+				act = ActionManager::get_action (action, false);
 				if (act) {
 					row[function_key_columns.control] = act->get_label();
 				} else {
@@ -698,7 +698,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 				/* Probably a key alias */
 				row[function_key_columns.option] = action;
 			} else {
-				act = ActionManager::get_action (action.c_str(), false);
+				act = ActionManager::get_action (action, false);
 				if (act) {
 					row[function_key_columns.option] = act->get_label();
 				} else {
@@ -715,7 +715,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 				/* Probably a key alias */
 				row[function_key_columns.cmdalt] = action;
 			} else {
-				act = ActionManager::get_action (action.c_str(), false);
+				act = ActionManager::get_action (action, false);
 				if (act) {
 					row[function_key_columns.cmdalt] = act->get_label();
 				} else {
@@ -728,7 +728,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 		if (action.empty()) {
 			row[function_key_columns.shiftcontrol] = defstring;
 		} else {
-			act = ActionManager::get_action (action.c_str(), false);
+			act = ActionManager::get_action (action, false);
 			if (act) {
 				row[function_key_columns.shiftcontrol] = act->get_label();
 			} else {
@@ -760,7 +760,7 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 				return;
 			}
 		}
-		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (i->second.c_str(), false);
+		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (i->second, false);
 
 		if (act || remove) {
 			/* update visible text, using string supplied by
