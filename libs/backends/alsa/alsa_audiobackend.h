@@ -393,6 +393,8 @@ class AlsaAudioBackend : public AudioBackend {
 		pthread_t _midi_device_thread_id;
 		bool _midi_device_thread_active;
 
+		pthread_mutex_t _device_port_mutex;
+
 		/* processing */
 		float  _dsp_load;
 		ARDOUR::DSPLoadCalculator  _dsp_load_calc;
