@@ -51,8 +51,6 @@ AudioEngineTest::test_start ()
 
 	CPPUNIT_ASSERT (backend);
 
-	init_post_engine ();
-
 	CPPUNIT_ASSERT (engine->start () == 0);
 
 	Glib::usleep(2000);

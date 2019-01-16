@@ -62,7 +62,7 @@ namespace ARDOUR {
 	 * @return true if Ardour library was successfully initialized
 	 */
 	LIBARDOUR_API bool init (bool with_vst, bool try_optimization, const char* localedir);
-	LIBARDOUR_API void init_post_engine ();
+	LIBARDOUR_API void init_post_engine (uint32_t);
 	LIBARDOUR_API void cleanup ();
 	LIBARDOUR_API bool no_auto_connect ();
 	LIBARDOUR_API void make_property_quarks ();

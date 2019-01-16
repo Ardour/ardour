@@ -98,6 +98,7 @@ AudioEngine::AudioEngine ()
 	, _hw_devicelist_update_thread(0)
 	, _hw_devicelist_update_count(0)
 	, _stop_hw_devicelist_processing(0)
+	, _start_cnt (0)
 #ifdef SILENCE_AFTER_SECONDS
 	, _silence_countdown (0)
 	, _silence_hit_cnt (0)
@@ -929,8 +930,10 @@ AudioEngine::start (bool for_latency)
 	PortManager::fill_midi_port_info ();
 
 	if (!for_latency) {
-		Running(); /* EMIT SIGNAL */
+		Running (_start_cnt); /* EMIT SIGNAL */
 	}
+
+	_start_cnt++;
 
 	return 0;
 }

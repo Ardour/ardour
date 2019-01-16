@@ -196,7 +196,7 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	   started and stopped
 	*/
 
-	PBD::Signal0<void> Running;
+	PBD::Signal1<void,uint32_t> Running;
 	PBD::Signal0<void> Stopped;
 
 	/* these two are emitted when a device reset is initiated/finished
@@ -306,6 +306,7 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	Glib::Threads::Cond        _hw_devicelist_update_condition;
 	Glib::Threads::Mutex       _devicelist_update_lock;
 	gint                       _stop_hw_devicelist_processing;
+	uint32_t                   _start_cnt;
 
 	void start_hw_event_processing();
 	void stop_hw_event_processing();
