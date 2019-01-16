@@ -45,8 +45,6 @@ load_session (string dir, string state)
 		::exit (1);
 	}
 
-	init_post_engine ();
-
 	if (engine->start () != 0) {
 		std::cerr << "Cannot start Audio/MIDI engine\n";
 		::exit (1);

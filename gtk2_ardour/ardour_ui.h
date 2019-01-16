@@ -400,7 +400,6 @@ private:
 	bool          _was_dirty;
 	bool          _mixer_on_top;
 	bool          _initial_verbose_plugin_scan;
-	bool           first_time_engine_run;
 
 	void hide_tabbable (ArdourWidgets::Tabbable*);
 	void detach_tabbable (ArdourWidgets::Tabbable*);
@@ -439,7 +438,7 @@ private:
 
 	void engine_halted (const char* reason, bool free_reason);
 	void engine_stopped ();
-	void engine_running ();
+	void engine_running (uint32_t cnt);
 
 	void use_config ();
 

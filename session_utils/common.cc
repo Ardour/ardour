@@ -139,8 +139,6 @@ static Session * _load_session (string dir, string state)
 		return 0;
 	}
 
-	init_post_engine ();
-
 	if (engine->start () != 0) {
 		std::cerr << "Cannot start Audio/MIDI engine\n";
 		return 0;
@@ -193,8 +191,6 @@ SessionUtils::create_session (string dir, string state, float sample_rate)
 		std::cerr << "Cannot set session's samplerate.\n";
 		return 0;
 	}
-
-	init_post_engine ();
 
 	if (engine->start () != 0) {
 		std::cerr << "Cannot start Audio/MIDI engine\n";

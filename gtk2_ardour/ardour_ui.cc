@@ -287,7 +287,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, _was_dirty (false)
 	, _mixer_on_top (false)
 	, _initial_verbose_plugin_scan (false)
-	, first_time_engine_run (true)
 	, secondary_clock_spacer (0)
 	, auto_input_button (ArdourButton::led_default_elements)
 	, time_info_box (0)
@@ -567,7 +566,7 @@ ARDOUR_UI::create_global_port_matrix (ARDOUR::DataType type)
 void
 ARDOUR_UI::attach_to_engine ()
 {
-	AudioEngine::instance()->Running.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_running, this), gui_context());
+	AudioEngine::instance()->Running.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_running, this, _1), gui_context());
 	ARDOUR::Port::set_connecting_blocked (ARDOUR_COMMAND_LINE::no_connect_ports);
 }
 
@@ -582,12 +581,10 @@ ARDOUR_UI::engine_stopped ()
 }
 
 void
-ARDOUR_UI::engine_running ()
+ARDOUR_UI::engine_running (uint32_t cnt)
 {
-	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::engine_running)
-	if (first_time_engine_run) {
+	if (cnt == 0) {
 		post_engine();
-		first_time_engine_run = false;
 	}
 
 	if (_session) {
@@ -658,8 +655,6 @@ ARDOUR_UI::post_engine ()
 		info << au_msg << endmsg;
 	}
 #endif
-
-	ARDOUR::init_post_engine ();
 
 	/* connect to important signals */
 
