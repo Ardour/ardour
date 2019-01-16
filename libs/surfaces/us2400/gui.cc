@@ -556,7 +556,7 @@ US2400ProtocolGUI::refresh_function_key_editor ()
 					row[function_key_columns.plain] = action;
 				} else {
 
-					act = ActionManager::get_action (action.c_str(), false);
+					act = ActionManager::get_action (action, false);
 					if (act) {
 						row[function_key_columns.plain] = act->get_label();
 					} else {
