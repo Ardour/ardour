@@ -198,7 +198,6 @@ static int start_engine (uint32_t rate)
 		return -1;
 	}
 
-	init_post_engine ();
 	return 0;
 }
 
