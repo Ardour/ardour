@@ -2733,13 +2733,17 @@ RCOptionEditor::RCOptionEditor ()
 
 		add_option (_("Signal Flow"), new OptionEditorHeading (_("Track and Bus Connections")));
 
-		add_option (_("Signal Flow"),
-				new BoolOption (
+		bo = new BoolOption (
 					"auto-connect-standard-busses",
-					_("Auto-connect master/monitor busses"),
+					_("Auto-connect main output (master or monitor) bus to physical ports"),
 					sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_connect_standard_busses),
 					sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_connect_standard_busses)
-					));
+					);
+		add_option (_("Signal Flow"), bo);
+		Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> the main output bus is auto-connected to the first N physical ports. "
+				"If the session has a monitor-section, the monitor-bus output is conneced the the hardware playback ports, "
+				"otherwise the master-bus output is directly used for playback."));
 
 		ComboOption<AutoConnectOption>* iac = new ComboOption<AutoConnectOption> (
 				"input-auto-connect",
