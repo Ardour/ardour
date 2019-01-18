@@ -67,6 +67,7 @@ namespace ARDOUR {
 };
 
 class AxisView;
+class FoldbackStrip;
 class MixerStrip;
 class PluginSelector;
 class MixerGroupTabs;
@@ -146,7 +147,7 @@ public:
 
 	void toggle_vcas ();
 	void showhide_vcas (bool on);
-	
+
 #ifdef MIXBUS
 	void toggle_mixbuses ();
 	void showhide_mixbusses (bool on);
@@ -303,6 +304,7 @@ private:
 
 	MonitorSection   _monitor_section;
 	PluginSelector *_plugin_selector;
+	FoldbackStrip * foldback_strip;
 
 	void stripable_property_changed (const PBD::PropertyChange& what_changed, boost::weak_ptr<ARDOUR::Stripable> ws);
 	void route_group_property_changed (ARDOUR::RouteGroup *, const PBD::PropertyChange &);

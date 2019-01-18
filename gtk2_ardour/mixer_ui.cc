@@ -64,6 +64,7 @@
 
 #include "widgets/tearoff.h"
 
+#include "foldback_strip.h"
 #include "keyboard.h"
 #include "mixer_ui.h"
 #include "mixer_strip.h"
@@ -113,6 +114,7 @@ Mixer_UI::Mixer_UI ()
 	, in_group_row_change (false)
 	, track_menu (0)
 	, _plugin_selector (0)
+	, foldback_strip (0)
 	, _strip_width (UIConfiguration::instance().get_default_narrow_ms() ? Narrow : Wide)
 	, _spill_scroll_position (0)
 	, ignore_reorder (false)
@@ -383,6 +385,14 @@ Mixer_UI::~Mixer_UI ()
 {
 	monitor_section_detached ();
 
+	StripableList fb;
+	_session->get_stripables (fb, PresentationInfo::FoldbackBus);
+	if (fb.size()) {
+		if (foldback_strip) {
+			delete foldback_strip;
+			foldback_strip = 0;
+		}
+	}
 	delete _plugin_selector;
 	delete track_menu;
 }
@@ -598,6 +608,17 @@ Mixer_UI::add_stripables (StripableList& slist)
 					/* no regular strip shown for control out */
 
 					continue;
+				}
+				if (route->is_foldbackbus ()) {
+					if (foldback_strip) {
+						foldback_strip->set_route (route);
+					} else {
+						foldback_strip = new FoldbackStrip (*this, _session, route);
+						out_packer.pack_end (*foldback_strip, false, false);
+						foldback_strip->set_packed (true);
+					}
+					continue;
+
 				}
 
 				strip = new MixerStrip (*this, _session, route);
@@ -1110,6 +1131,14 @@ Mixer_UI::session_going_away ()
 	}
 
 	_monitor_section.tearoff().hide_visible ();
+	StripableList fb;
+	_session->get_stripables (fb, PresentationInfo::FoldbackBus);
+	if (fb.size()) {
+		if (foldback_strip) {
+			delete foldback_strip;
+			foldback_strip = 0;
+		}
+	}
 
 	monitor_section_detached ();
 
@@ -1605,7 +1634,13 @@ void
 Mixer_UI::initial_track_display ()
 {
 	StripableList sl;
+	StripableList fb;
 	_session->get_stripables (sl);
+	_session->get_stripables (fb, PresentationInfo::FoldbackBus);
+	if (fb.size()) {
+		boost::shared_ptr<ARDOUR::Stripable> _current_foldback = *(fb.begin());
+		sl.push_back (_current_foldback);
+	}
 
 	sl.sort (PresentationInfoMixerSorter());
 
