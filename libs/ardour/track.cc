@@ -169,7 +169,7 @@ Track::set_state (const XMLNode& node, int version)
 	if (version >= 3000 && version < 6000) {
 		if (XMLNode* ds_node = find_named_node (node, "Diskstream")) {
 			std::string name;
-			if (ds_node->get_property ("name", name)) {
+			if (ds_node->get_property ("playlist", name)) {
 
 				ds_node->set_property ("active", true);
 
