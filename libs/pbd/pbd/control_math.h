@@ -86,12 +86,18 @@ interpolate_linear (double from, double to, double fraction)
 }
 
 static inline double
-interpolate_logarithmic (double from, double to, double fraction, double lower, double upper)
+interpolate_logarithmic (double from, double to, double fraction, double /*lower*/, double /*upper*/)
 {
-	// this is expensive -- optimize
+#if 0
+	/* this is expensive, original math incl. range-check assertions */
 	double l0 = logscale_to_position (from, lower, upper);
 	double l1 = logscale_to_position (to, lower, upper);
 	return position_to_logscale (l0 + fraction * (l1 - l0), lower, upper);
+#else
+	assert (from > 0 && from * to > 0);
+	assert (fraction >= 0 && fraction <= 1);
+	return from * pow (to / from, fraction);
+#endif
 }
 
 static inline double
