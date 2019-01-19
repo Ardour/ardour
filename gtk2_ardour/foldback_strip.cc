@@ -478,9 +478,7 @@ gint
 FoldbackStrip::output_press (GdkEventButton *ev)
 {
 	using namespace Menu_Helpers;
-	if (!_session->engine().connected()) {
-		MessageDialog msg (_("Not connected to audio engine - no I/O changes are possible"));
-		msg.run ();
+	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 		return true;
 	}
 
