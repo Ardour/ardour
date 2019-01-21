@@ -677,7 +677,7 @@ US2400ProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib::ustri
 				return;
 			}
 		}
-		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (i->second.c_str(), false);
+		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (i->second, false);
 
 		if (act || remove) {
 			/* update visible text, using string supplied by
