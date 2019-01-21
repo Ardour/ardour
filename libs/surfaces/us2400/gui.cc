@@ -487,28 +487,6 @@ US2400ProtocolGUI::build_function_key_editor ()
 	col->add_attribute (renderer->property_text(), function_key_columns.shift);
 	function_key_editor.append_column (*col);
 
-/*
- * 	renderer = make_action_renderer (available_action_model, function_key_columns.control);
-	col = manage (new TreeViewColumn (_("Control"), *renderer));
-	col->add_attribute (renderer->property_text(), function_key_columns.control);
-	function_key_editor.append_column (*col);
-
-	renderer = make_action_renderer (available_action_model, function_key_columns.option);
-	col = manage (new TreeViewColumn (_("Option"), *renderer));
-	col->add_attribute (renderer->property_text(), function_key_columns.option);
-	function_key_editor.append_column (*col);
-
-	renderer = make_action_renderer (available_action_model, function_key_columns.cmdalt);
-	col = manage (new TreeViewColumn (_("Cmd/Alt"), *renderer));
-	col->add_attribute (renderer->property_text(), function_key_columns.cmdalt);
-	function_key_editor.append_column (*col);
-
-	renderer = make_action_renderer (available_action_model, function_key_columns.shiftcontrol);
-	col = manage (new TreeViewColumn (_("Shift+Control"), *renderer));
-	col->add_attribute (renderer->property_text(), function_key_columns.shiftcontrol);
-	function_key_editor.append_column (*col);
-*/
-
 	function_key_model = ListStore::create (function_key_columns);
 	function_key_editor.set_model (function_key_model);
 }
@@ -565,93 +543,6 @@ US2400ProtocolGUI::refresh_function_key_editor ()
 				}
 			}
 		}
-
-		//~ /* We only allow plain bindings for Fn keys. All others are
-		 //~ * reserved for hard-coded actions.
-		 //~ */
-//~ 
-		//~ if (bid >= US2400::Button::F1 && bid <= US2400::Button::F8) {
-//~ 
-			//~ action = dp.get_button_action (bid, US2400Protocol::MODIFIER_SHIFT);
-			//~ if (action.empty()) {
-				//~ row[function_key_columns.shift] = defstring;
-			//~ } else {
-				//~ if (action.find ('/') == string::npos) {
-					//~ /* Probably a key alias */
-					//~ row[function_key_columns.shift] = action;
-				//~ } else {
-					//~ act = ActionManager::get_action (action.c_str());
-					//~ if (act) {
-						//~ row[function_key_columns.shift] = act->get_label();
-					//~ } else {
-						//~ row[function_key_columns.shift] = defstring;
-					//~ }
-				//~ }
-			//~ }
-		//~ }
-
-		//~ action = dp.get_button_action (bid, US2400Protocol::MODIFIER_CONTROL);
-		//~ if (action.empty()) {
-			//~ row[function_key_columns.control] = defstring;
-		//~ } else {
-			//~ if (action.find ('/') == string::npos) {
-				//~ /* Probably a key alias */
-				//~ row[function_key_columns.control] = action;
-			//~ } else {
-				//~ act = ActionManager::get_action (action.c_str());
-				//~ if (act) {
-					//~ row[function_key_columns.control] = act->get_label();
-				//~ } else {
-					//~ row[function_key_columns.control] = defstring;
-				//~ }
-			//~ }
-		//~ }
-//~ 
-		//~ action = dp.get_button_action (bid, US2400Protocol::MODIFIER_OPTION);
-		//~ if (action.empty()) {
-			//~ row[function_key_columns.option] = defstring;
-		//~ } else {
-			//~ if (action.find ('/') == string::npos) {
-				//~ /* Probably a key alias */
-				//~ row[function_key_columns.option] = action;
-			//~ } else {
-				//~ act = ActionManager::get_action (action.c_str());
-				//~ if (act) {
-					//~ row[function_key_columns.option] = act->get_label();
-				//~ } else {
-					//~ row[function_key_columns.option] = defstring;
-				//~ }
-			//~ }
-		//~ }
-//~ 
-		//~ action = dp.get_button_action (bid, US2400Protocol::MODIFIER_CMDALT);
-		//~ if (action.empty()) {
-			//~ row[function_key_columns.cmdalt] = defstring;
-		//~ } else {
-			//~ if (action.find ('/') == string::npos) {
-				//~ /* Probably a key alias */
-				//~ row[function_key_columns.cmdalt] = action;
-			//~ } else {
-				//~ act = ActionManager::get_action (action.c_str());
-				//~ if (act) {
-					//~ row[function_key_columns.cmdalt] = act->get_label();
-				//~ } else {
-					//~ row[function_key_columns.cmdalt] = defstring;
-				//~ }
-			//~ }
-		//~ }
-//~ 
-		//~ action = dp.get_button_action (bid, (US2400Protocol::MODIFIER_SHIFT|US2400Protocol::MODIFIER_CONTROL));
-		//~ if (action.empty()) {
-			//~ row[function_key_columns.shiftcontrol] = defstring;
-		//~ } else {
-			//~ act = ActionManager::get_action (action.c_str());
-			//~ if (act) {
-				//~ row[function_key_columns.shiftcontrol] = act->get_label();
-			//~ } else {
-				//~ row[function_key_columns.shiftcontrol] = defstring;
-			//~ }
-		//~ }
 	}
 
 	function_key_editor.set_model (function_key_model);
