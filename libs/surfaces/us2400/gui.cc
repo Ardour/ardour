@@ -192,9 +192,9 @@ US2400ProtocolGUI::connection_handler ()
 
 void
 US2400ProtocolGUI::update_port_combos (vector<string> const& midi_inputs, vector<string> const& midi_outputs,
-                                              Gtk::ComboBox* input_combo,
-                                              Gtk::ComboBox* output_combo,
-                                              boost::shared_ptr<Surface> surface)
+                                       Gtk::ComboBox* input_combo,
+                                       Gtk::ComboBox* output_combo,
+                                       boost::shared_ptr<Surface> surface)
 {
 	Glib::RefPtr<Gtk::ListStore> input = build_midi_port_list (midi_inputs, true);
 	Glib::RefPtr<Gtk::ListStore> output = build_midi_port_list (midi_outputs, false);
@@ -294,11 +294,11 @@ US2400ProtocolGUI::device_dependent_widget ()
 
 		string send_string;
 		string receive_string;
-		
+
 		//port 1,2,3 are faders & pan knobs. like mackie MCU
 		//port 4 is the joystick
-		//port 5 sends "chan" knobs (24 of them )
-		//port 6 --- ???  ( could be send to knobs... ? )
+		//port 5 sends "chan" knobs (24 of them)
+		//port 6 --- ???  (could be send to knobs... ?)
 
 		send_string = string_compose(_("US-2400 send port #%1 (faders %2 to %3):"), n + 1, n*8+1, n*8+8);
 		receive_string = string_compose(_("US-2400 receive port #%1 (faders %2 to %3):"), n + 1, n*8+1, n*8+8);
@@ -306,7 +306,7 @@ US2400ProtocolGUI::device_dependent_widget ()
 			send_string = string_compose(_("US-2400 send port #%1 (joystick):"), n + 1);
 			receive_string = string_compose(_("US-2400 receive port #%1 (joystick):"), n + 1);
 		}
-		
+
 		l = manage (new Gtk::Label (send_string));
 		l->set_alignment (1.0, 0.5);
 		dd_table->attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
@@ -321,7 +321,7 @@ US2400ProtocolGUI::device_dependent_widget ()
 	}
 
 	row++;
-	
+
 	l = manage (new Gtk::Label ("US-2400 Port #5 is reserved for use as a generic USB device. (click the CHAN button to activate)"));
 	l->set_alignment (1.0, 0.5);
 	dd_table->attach (*l, 0, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
@@ -385,9 +385,8 @@ US2400ProtocolGUI::build_available_action_menu ()
 	available_action_model->clear ();
 
 	/* Because there are button bindings built in that are not
-	   in the key binding map, there needs to be a way to undo
-	   a profile edit.
-	*/
+	 * in the key binding map, there needs to be a way to undo
+	 * a profile edit. */
 	TreeIter rowp;
 	TreeModel::Row parent;
 	rowp = available_action_model->append();
@@ -422,18 +421,18 @@ US2400ProtocolGUI::build_available_action_menu ()
 			continue;
 		}
 
-		//kinda kludgy way to avoid displaying menu items as mappable
-		if ( parts[1] == _("Main_menu") )
+		/* kinda kludgy way to avoid displaying menu items as mappable */
+		if (parts[1] == _("Main_menu"))
 			continue;
-		if ( parts[1] == _("JACK") )
+		if (parts[1] == _("JACK"))
 			continue;
-		if ( parts[1] == _("redirectmenu") )
+		if (parts[1] == _("redirectmenu"))
 			continue;
-		if ( parts[1] == _("Editor_menus") )
+		if (parts[1] == _("Editor_menus"))
 			continue;
-		if ( parts[1] == _("RegionList") )
+		if (parts[1] == _("RegionList"))
 			continue;
-		if ( parts[1] == _("ProcessorMenu") )
+		if (parts[1] == _("ProcessorMenu"))
 			continue;
 
 		if ((r = nodes.find (parts[1])) == nodes.end()) {
@@ -520,8 +519,7 @@ US2400ProtocolGUI::refresh_function_key_editor ()
 		const string defstring = "\u2022";
 
 		/* We only allow plain bindings for Fn keys. All others are
-		 * reserved for hard-coded actions.
-		 */
+		 * reserved for hard-coded actions. */
 
 		if (bid >= US2400::Button::F1 && bid <= US2400::Button::F6) {
 
@@ -553,7 +551,7 @@ US2400ProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib::ustri
 {
 	// Remove Binding is not in the action map but still valid
 	bool remove (false);
-	if ( text == "Remove Binding") {
+	if (text == "Remove Binding") {
 		remove = true;
 	}
 	Gtk::TreePath path(sPath);
@@ -572,9 +570,9 @@ US2400ProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib::ustri
 
 		if (act || remove) {
 			/* update visible text, using string supplied by
-			   available action model so that it matches and is found
-			   within the model.
-			*/
+			 * available action model so that it matches and is found
+			 * within the model.
+			 */
 			if (remove) {
 				Glib::ustring dot = "\u2022";
 				(*row).set_value (col.index(), dot);
@@ -615,7 +613,7 @@ US2400ProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib::ustri
 			}
 
 			_ignore_profile_changed = true;
-			_profile_combo.set_active_text ( _cp.device_profile().name() );
+			_profile_combo.set_active_text (_cp.device_profile().name());
 			_ignore_profile_changed = false;
 
 		} else {
