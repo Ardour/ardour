@@ -61,6 +61,7 @@ Worker::schedule(uint32_t size, const void* data)
 {
 	if (_synchronous || !_requests) {
 		_workee->work(*this, size, data);
+		emit_responses ();
 		return true;
 	}
 	if (_requests->write_space() < size + sizeof(size)) {
