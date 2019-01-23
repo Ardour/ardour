@@ -160,8 +160,8 @@ static int close_allv(const int except_fds[]) {
 void
 SystemExec::init ()
 {
-	pthread_mutex_init(&write_lock, NULL);
-	thread_active=false;
+	pthread_mutex_init (&write_lock, NULL);
+	thread_active = false;
 	pid = 0;
 	pin[1] = -1;
 	nicelevel = 0;
@@ -272,7 +272,7 @@ SystemExec::format_key_value_parameter (std::string key, std::string value)
 }
 
 void
-SystemExec::make_argp_escaped(std::string command, const std::map<char, std::string> subs)
+SystemExec::make_argp_escaped (std::string command, const std::map<char, std::string> subs)
 {
 
 	int inquotes = 0;
@@ -280,7 +280,7 @@ SystemExec::make_argp_escaped(std::string command, const std::map<char, std::str
 	size_t i = 0;
 	std::string arg = "";
 
-	argp = (char **) malloc(sizeof(char *));
+	argp = (char**) malloc (sizeof(char*));
 
 	for (i = 0; i <= command.length(); i++) { // include terminating '\0'
 		char c = command.c_str()[i];
@@ -345,14 +345,14 @@ SystemExec::~SystemExec ()
 {
 	terminate ();
 	if (envp) {
-		for (int i=0;envp[i];++i) {
-			free(envp[i]);
+		for (int i = 0; envp[i]; ++i) {
+			free (envp[i]);
 		}
 		free (envp);
 	}
 	if (argp) {
-		for (int i=0;argp[i];++i) {
-			free(argp[i]);
+		for (int i = 0; argp[i]; ++i) {
+			free (argp[i]);
 		}
 		free (argp);
 	}
@@ -370,7 +370,7 @@ SystemExec::~SystemExec ()
 	pthread_mutex_destroy(&write_lock);
 }
 
-static void *
+static void*
 interposer_thread (void *arg) {
 	SystemExec *sex = static_cast<SystemExec *>(arg);
 	sex->output_interposer();
@@ -408,8 +408,10 @@ SystemExec::write_to_stdin (std::string const& d, size_t len)
 
 /* HELPER FUNCTIONS */
 
-static void create_pipe (HANDLE *pipe, bool in) {
-	SECURITY_ATTRIBUTES secAtt = { sizeof( SECURITY_ATTRIBUTES ), NULL, TRUE };
+static void
+create_pipe (HANDLE *pipe, bool in)
+{
+	SECURITY_ATTRIBUTES secAtt = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
 	HANDLE tmpHandle;
 	if (in) {
 		if (!CreatePipe(&pipe[0], &tmpHandle, &secAtt, 1024 * 1024)) return;
@@ -421,7 +423,9 @@ static void create_pipe (HANDLE *pipe, bool in) {
 	CloseHandle(tmpHandle);
 }
 
-static void destroy_pipe (HANDLE pipe[2]) {
+static void
+destroy_pipe (HANDLE pipe[2])
+{
 	if (pipe[0] != INVALID_HANDLE_VALUE) {
 		CloseHandle(pipe[0]);
 		pipe[0] = INVALID_HANDLE_VALUE;
@@ -432,7 +436,8 @@ static void destroy_pipe (HANDLE pipe[2]) {
 	}
 }
 
-static BOOL CALLBACK my_terminateApp(HWND hwnd, LPARAM procId)
+static BOOL
+CALLBACK my_terminateApp(HWND hwnd, LPARAM procId)
 {
 	DWORD currentProcId = 0;
 	GetWindowThreadProcessId(hwnd, &currentProcId);
@@ -444,12 +449,14 @@ static BOOL CALLBACK my_terminateApp(HWND hwnd, LPARAM procId)
 /* PROCESS API */
 
 void
-SystemExec::make_envp() {
-	;/* environemt is copied over with CreateProcess(...,env=0 ,..) */
+SystemExec::make_envp()
+{
+	; /* environemt is copied over with CreateProcess(...,env=0 ,..) */
 }
 
 void
-SystemExec::make_wargs(char **a) {
+SystemExec::make_wargs (char** a)
+{
 	std::string wa = cmd;
 	if (cmd[0] != '"' && cmd[cmd.size()] != '"' && strchr(cmd.c_str(), ' ')) { wa = "\"" + cmd + "\""; }
 	std::replace(cmd.begin(), cmd.end(), '/', '\\' );
@@ -467,7 +474,8 @@ SystemExec::make_wargs(char **a) {
 }
 
 void
-SystemExec::make_argp(std::string args) {
+SystemExec::make_argp (std::string args)
+{
 	std::string wa = cmd;
 	if (cmd[0] != '"' && cmd[cmd.size()] != '"' && strchr(cmd.c_str(), ' ')) { wa = "\"" + cmd + "\""; }
 	std::replace(cmd.begin(), cmd.end(), '/', '\\' );
@@ -546,7 +554,7 @@ SystemExec::start (int stderr_mode, const char * /*vfork_exec_wrapper*/)
 	}
 
 	bool success = false;
-	STARTUPINFOA startupInfo = { sizeof( STARTUPINFO ), 0, 0, 0,
+	STARTUPINFOA startupInfo = { sizeof(STARTUPINFO), 0, 0, 0,
 		(unsigned long)CW_USEDEFAULT, (unsigned long)CW_USEDEFAULT,
 		(unsigned long)CW_USEDEFAULT, (unsigned long)CW_USEDEFAULT,
 		0, 0, 0,
@@ -586,7 +594,7 @@ SystemExec::start (int stderr_mode, const char * /*vfork_exec_wrapper*/)
 		return -1;
 	}
 
-	int rv = pthread_create(&thread_id_tt, NULL, interposer_thread, this);
+	int rv = pthread_create (&thread_id_tt, NULL, interposer_thread, this);
 	thread_active=true;
 	if (rv) {
 		thread_active=false;
@@ -620,31 +628,31 @@ SystemExec::output_interposer()
 		}
 		if (bytesRead < 1) continue; /* actually not needed; but this is safe. */
 		data[bytesRead] = 0;
-		ReadStdout(data, bytesRead);/* EMIT SIGNAL */
+		ReadStdout(data, bytesRead); /* EMIT SIGNAL */
 	}
-	Terminated();/* EMIT SIGNAL */
+	Terminated(); /* EMIT SIGNAL */
 	pthread_exit(0);
 }
 
 void
 SystemExec::close_stdin()
 {
-	if (stdinP[0]!= INVALID_HANDLE_VALUE)  FlushFileBuffers(stdinP[0]);
-	if (stdinP[1]!= INVALID_HANDLE_VALUE)  FlushFileBuffers(stdinP[1]);
+	if (stdinP[0] != INVALID_HANDLE_VALUE) FlushFileBuffers (stdinP[0]);
+	if (stdinP[1] != INVALID_HANDLE_VALUE) FlushFileBuffers (stdinP[1]);
 	Sleep(200);
-	destroy_pipe(stdinP);
+	destroy_pipe (stdinP);
 }
 
 size_t
-SystemExec::write_to_stdin(const void* data, size_t bytes)
+SystemExec::write_to_stdin (const void* data, size_t bytes)
 {
-	DWORD r,c;
+	DWORD r, c;
 
-	::pthread_mutex_lock(&write_lock);
+	::pthread_mutex_lock (&write_lock);
 
 	c=0;
 	while (c < bytes) {
-		if (!WriteFile(stdinP[1], &((const char*)data)[c], bytes - c, &r, NULL)) {
+		if (!WriteFile (stdinP[1], &((const char*)data)[c], bytes - c, &r, NULL)) {
 			if (GetLastError() == 0xE8 /*NT_STATUS_INVALID_USER_BUFFER*/) {
 				Sleep(100);
 				continue;
@@ -665,12 +673,14 @@ SystemExec::write_to_stdin(const void* data, size_t bytes)
 /* UNIX/POSIX process */
 
 extern char **environ;
+
 void
-SystemExec::make_envp() {
-	int i=0;
+SystemExec::make_envp()
+{
+	int i = 0;
 	envp = (char **) calloc(1, sizeof(char*));
 	/* copy current environment */
-	for (i=0;environ[i];++i) {
+	for (i = 0; environ[i]; ++i) {
 	  envp[i] = strdup(environ[i]);
 	  envp = (char **) realloc(envp, (i+2) * sizeof(char*));
 	}
@@ -678,7 +688,8 @@ SystemExec::make_envp() {
 }
 
 void
-SystemExec::make_argp(std::string args) {
+SystemExec::make_argp(std::string args)
+{
 	int argn = 1;
 	char *cp1;
 	char *cp2;
@@ -715,8 +726,6 @@ SystemExec::make_argp(std::string args) {
 	argp[argn] = (char *) 0;
 	free(carg);
 }
-
-
 
 void
 SystemExec::terminate ()
@@ -764,10 +773,10 @@ SystemExec::terminate ()
 int
 SystemExec::wait (int options)
 {
-	int status=0;
+	int status = 0;
 	int ret;
 
-	if (pid==0) return -1;
+	if (pid == 0) return -1;
 
 	ret = waitpid (pid, &status, options);
 
@@ -789,18 +798,23 @@ SystemExec::wait (int options)
 bool
 SystemExec::is_running ()
 {
-	int status=0;
-	if (pid==0) return false;
-	if (::waitpid(pid, &status, WNOHANG)==0) return true;
+	int status = 0;
+	if (pid == 0) {
+		return false;
+	}
+	if (::waitpid (pid, &status, WNOHANG)==0) {
+		return true;
+	}
 	return false;
 }
 
 int
 SystemExec::start (int stderr_mode, const char *vfork_exec_wrapper)
 {
-	if (is_running()) {
-		return 0; // mmh what to return here?
+	if (is_running ()) {
+		return 0;
 	}
+
 	int r;
 
 	if (::pipe(pin) < 0 || ::pipe(pout) < 0 || ::pipe(pok) < 0) {
@@ -820,37 +834,40 @@ SystemExec::start (int stderr_mode, const char *vfork_exec_wrapper)
 
 	if (r > 0) {
 		/* main */
-		pid=r;
+		pid = r;
 
 		/* check if execve was successful. */
-		close_fd(pok[1]);
+		close_fd (pok[1]);
 		char buf;
-		for ( ;; ) {
-			ssize_t n = ::read(pok[0], &buf, 1 );
-			if ( n==1 ) {
+		for (;;) {
+			ssize_t n = ::read (pok[0], &buf, 1);
+			if (n == 1) {
 				/* child process returned from execve */
 				pid=0;
-				close_fd(pok[0]);
-				close_fd(pok[1]);
-				close_fd(pin[1]);
-				close_fd(pin[0]);
-				close_fd(pout[1]);
-				close_fd(pout[0]);
+				close_fd (pok[0]);
+				close_fd (pok[1]);
+				close_fd (pin[1]);
+				close_fd (pin[0]);
+				close_fd (pout[1]);
+				close_fd (pout[0]);
 				return -3;
-			} else if ( n==-1 ) {
-				 if ( errno==EAGAIN || errno==EINTR )
-					 continue;
+			} else if (n == -1) {
+				if (errno==EAGAIN || errno==EINTR) {
+					continue;
+				}
 			}
 			break;
 		}
-		close_fd(pok[0]);
+
+		close_fd (pok[0]);
 		/* child started successfully */
 
-		close_fd(pout[1]);
-		close_fd(pin[0]);
-		int rv = pthread_create(&thread_id_tt, NULL, interposer_thread, this);
+		close_fd (pout[1]);
+		close_fd (pin[0]);
 
+		int rv = pthread_create (&thread_id_tt, NULL, interposer_thread, this);
 		thread_active=true;
+
 		if (rv) {
 			thread_active=false;
 			terminate();
@@ -861,17 +878,17 @@ SystemExec::start (int stderr_mode, const char *vfork_exec_wrapper)
 
 #ifdef NO_VFORK
 	/* child process - exec external process */
-	close_fd(pok[0]);
-	::fcntl(pok[1], F_SETFD, FD_CLOEXEC);
+	close_fd (pok[0]);
+	::fcntl (pok[1], F_SETFD, FD_CLOEXEC);
 
-	close_fd(pin[1]);
+	close_fd (pin[1]);
 	if (pin[0] != STDIN_FILENO) {
-	  ::dup2(pin[0], STDIN_FILENO);
+	  ::dup2 (pin[0], STDIN_FILENO);
 	}
-	close_fd(pin[0]);
-	close_fd(pout[0]);
+	close_fd (pin[0]);
+	close_fd (pout[0]);
 	if (pout[1] != STDOUT_FILENO) {
-		::dup2(pout[1], STDOUT_FILENO);
+		::dup2 (pout[1], STDOUT_FILENO);
 	}
 
 	if (stderr_mode == 2) {
@@ -895,9 +912,9 @@ SystemExec::start (int stderr_mode, const char *vfork_exec_wrapper)
 	}
 
 #ifdef HAVE_SIGSET
-	sigset(SIGPIPE, SIG_DFL);
+	sigset (SIGPIPE, SIG_DFL);
 #else
-	signal(SIGPIPE, SIG_DFL);
+	signal (SIGPIPE, SIG_DFL);
 #endif
 	if (!vfork_exec_wrapper) {
 		error << _("Cannot start external process, no vfork wrapper") << endmsg;
@@ -908,71 +925,66 @@ SystemExec::start (int stderr_mode, const char *vfork_exec_wrapper)
 	close_allv(good_fds);
 
 	::execve(argp[0], argp, envp);
-	/* if we reach here something went wrong.. */
-	char buf = 0;
-	(void) ::write(pok[1], &buf, 1 );
-	close_fd(pok[1]);
-	exit(-1);
-	return -1;
-#else
+
+#else /* ! NO_VFORK */
 
 	/* XXX this should be done before vfork()
 	 * calling malloc here only increases the time vfork() blocks
 	 */
 	int argn = 0;
-	for (int i=0;argp[i];++i) { argn++; }
+	for (int i = 0; argp[i]; ++i) { argn++; }
 
-	argx = (char **) malloc((argn + 10) * sizeof(char *));
-	argx[0] = strdup(vfork_exec_wrapper);
+	argx = (char **) malloc ((argn + 10) * sizeof(char*));
+	argx[0] = strdup (vfork_exec_wrapper);
 
 #define FDARG(NUM, FDN) \
 	argx[NUM] = (char*) calloc(6, sizeof(char)); snprintf(argx[NUM], 6, "%d", FDN);
 
-	FDARG(1, pok[0])
-	FDARG(2, pok[1])
-	FDARG(3, pin[0])
-	FDARG(4, pin[1])
-	FDARG(5, pout[0])
-	FDARG(6, pout[1])
-	FDARG(7, stderr_mode)
-	FDARG(8, nicelevel)
+	FDARG (1, pok[0])
+	FDARG (2, pok[1])
+	FDARG (3, pin[0])
+	FDARG (4, pin[1])
+	FDARG (5, pout[0])
+	FDARG (6, pout[1])
+	FDARG (7, stderr_mode)
+	FDARG (8, nicelevel)
 
-	for (int i=0;argp[i];++i) {
+	for (int i = 0; argp[i]; ++i) {
 		argx[9+i] = argp[i];
 	}
 	argx[argn+9] = NULL;
 
-	::execve(argx[0], argx, envp);
+	::execve (argx[0], argx, envp);
+#endif
 
 	/* if we reach here something went wrong.. */
 	char buf = 0;
-	(void) ::write(pok[1], &buf, 1 );
-	close_fd(pok[1]);
-	exit(-1);
+	(void) ::write (pok[1], &buf, 1);
+	close_fd (pok[1]);
+	exit (-1);
 	return -1;
-#endif
 }
 
 void
-SystemExec::output_interposer()
+SystemExec::output_interposer ()
 {
-	int rfd=pout[0];
+	int rfd = pout[0];
 	char buf[BUFSIZ];
 	ssize_t r;
 	unsigned long l = 1;
 
-	ioctl(rfd, FIONBIO, &l); // set non-blocking I/O
+	ioctl (rfd, FIONBIO, &l); // set non-blocking I/O
 
-	for (;fcntl(rfd, F_GETFL)!=-1;) {
-		r = read(rfd, buf, BUFSIZ - 1);
+	for (;fcntl (rfd, F_GETFL) != -1;) {
+		r = read (rfd, buf, BUFSIZ - 1);
 		if (r < 0 && (errno == EINTR || errno == EAGAIN)) {
 			fd_set rfds;
 			struct timeval tv;
-			FD_ZERO(&rfds);
-			FD_SET(rfd, &rfds);
+			FD_ZERO (&rfds);
+			FD_SET (rfd, &rfds);
 			tv.tv_sec = 0;
 			tv.tv_usec = 10000;
-			int rv = select(1, &rfds, NULL, NULL, &tv);
+			int rv = select (1, &rfds, NULL, NULL, &tv);
 			if (rv == -1) {
 				break;
 			}
@@ -982,34 +994,36 @@ SystemExec::output_interposer()
 			break;
 		}
 		buf[r]=0;
-		std::string rv = std::string(buf,r); // TODO: check allocation strategy
-		ReadStdout(rv, r);/* EMIT SIGNAL */
+		std::string rv = std::string (buf, r);
+		ReadStdout (rv, r); /* EMIT SIGNAL */
 	}
-	Terminated();/* EMIT SIGNAL */
-	pthread_exit(0);
+	Terminated (); /* EMIT SIGNAL */
+	pthread_exit (0);
 }
 
 void
 SystemExec::close_stdin()
 {
-	if (pin[1]<0) return;
-	close_fd(pin[0]);
-	close_fd(pin[1]);
-	close_fd(pout[0]);
-	close_fd(pout[1]);
+	if (pin[1] < 0) {
+		return;
+	}
+	close_fd (pin[0]);
+	close_fd (pin[1]);
+	close_fd (pout[0]);
+	close_fd (pout[1]);
 }
 
 size_t
-SystemExec::write_to_stdin(const void* data, size_t bytes)
+SystemExec::write_to_stdin (const void* data, size_t bytes)
 {
 	ssize_t r;
 	size_t c;
-	::pthread_mutex_lock(&write_lock);
+	::pthread_mutex_lock (&write_lock);
 
-	c=0;
+	c = 0;
 	while (c < bytes) {
 		for (;;) {
-			r = ::write(pin[1], &((const char*)data)[c], bytes - c);
+			r = ::write (pin[1], &((const char*)data)[c], bytes - c);
 			if (r < 0 && (errno == EINTR || errno == EAGAIN)) {
 				sleep(1);
 				continue;
@@ -1022,7 +1036,7 @@ SystemExec::write_to_stdin(const void* data, size_t bytes)
 		}
 		c += r;
 	}
-	fsync(pin[1]);
+	fsync (pin[1]);
 	::pthread_mutex_unlock(&write_lock);
 	return c;
 }
