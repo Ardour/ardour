@@ -1045,7 +1045,7 @@ RouteUI::build_sends_menu ()
 		);
 
 	items.push_back (
-		MenuElem(_("Assign all tracks and buses (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PreFader, true))
+		MenuElem(_("Assign all tracks and busses (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PreFader, true))
 		);
 
 	items.push_back (
@@ -1053,7 +1053,7 @@ RouteUI::build_sends_menu ()
 		);
 
 	items.push_back (
-		MenuElem(_("Assign all tracks and buses (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PostFader, true))
+		MenuElem(_("Assign all tracks and busses (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PostFader, true))
 		);
 
 	items.push_back (
@@ -1061,14 +1061,14 @@ RouteUI::build_sends_menu ()
 		);
 
 	items.push_back (
-		MenuElem(_("Assign selected tracks and buses (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PreFader, true)));
+		MenuElem(_("Assign selected tracks and busses (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PreFader, true)));
 
 	items.push_back (
 		MenuElem(_("Assign selected tracks (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PostFader, false))
 		);
 
 	items.push_back (
-		MenuElem(_("Assign selected tracks and buses (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PostFader, true))
+		MenuElem(_("Assign selected tracks and busses (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PostFader, true))
 		);
 
 	items.push_back (MenuElem(_("Copy track/bus gains to sends"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_from_track)));
