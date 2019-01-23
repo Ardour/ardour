@@ -613,7 +613,7 @@ SystemExec::output_interposer()
 		if (bytesAvail < 1) {Sleep(500); printf("N/A\n"); continue;}
 #endif
 		if (stdoutP[0] == INVALID_HANDLE_VALUE) break;
-		if (!ReadFile(stdoutP[0], data, BUFSIZ, &bytesRead, 0)) {
+		if (!ReadFile(stdoutP[0], data, BUFSIZ - 1, &bytesRead, 0)) {
 			DWORD err =  GetLastError();
 			if (err == ERROR_IO_PENDING) continue;
 			break;
@@ -964,7 +964,7 @@ SystemExec::output_interposer()
 	ioctl(rfd, FIONBIO, &l); // set non-blocking I/O
 
 	for (;fcntl(rfd, F_GETFL)!=-1;) {
-		r = read(rfd, buf, sizeof(buf));
+		r = read(rfd, buf, BUFSIZ - 1);
 		if (r < 0 && (errno == EINTR || errno == EAGAIN)) {
 			fd_set rfds;
 			struct timeval tv;
