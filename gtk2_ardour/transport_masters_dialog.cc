@@ -99,7 +99,6 @@ TransportMastersWidget::~TransportMastersWidget ()
 void
 TransportMastersWidget::set_transport_master (boost::shared_ptr<TransportMaster> tm)
 {
-	std::cerr << "TMW:stm to " << tm << std::endl;
 	_session->request_sync_source (tm);
 }
 
@@ -170,8 +169,6 @@ TransportMastersWidget::rebuild ()
 	uint32_t n = 1;
 
 	Gtk::RadioButtonGroup use_button_group;
-
-	cerr << "Rebuild TMW @ " << this << " with " << masters.size() << "tms\n";
 
 	for (TransportMasterManager::TransportMasters::const_iterator m = masters.begin(); m != masters.end(); ++m, ++n) {
 
