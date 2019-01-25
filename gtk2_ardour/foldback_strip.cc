@@ -81,12 +81,15 @@ FoldbackStrip::FoldbackStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Rou
 	, RouteUI (sess)
 	, _mixer(mx)
 	, _mixer_owned (true)
+	, _pr_selection ()
 	, panners (sess)
 	, button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
 	, mute_solo_table (1, 2)
 	, bottom_button_table (1, 1)
+	, _plugin_insert_cnt (0)
 	, _comment_button (_("Comments"))
 	, fb_level_control (0)
+//	, _visibility (X_("mixer-element-visibility"))
 {
 	init ();
 	set_route (rt);
@@ -106,11 +109,9 @@ FoldbackStrip::init ()
 	/* the length of this string determines the width of the mixer strip when it is set to `wide' */
 	longest_label = "longest label";
 
-	//input_button_box.set_spacing(2);
-
 
 	output_button.set_text (_("Output"));
-	output_button.set_name ("foldback strip button");
+	output_button.set_name ("mixer strip button");
 //	send_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 //	send_scroller.add (send_display);
 
@@ -120,6 +121,9 @@ FoldbackStrip::init ()
 	send_display.set_size_request (48, -1);
 	send_display.set_spacing (0);
 
+	insert_box = new ProcessorBox (0, boost::bind (&FoldbackStrip::plugin_selector, this), _pr_selection, 0);
+	insert_box->set_no_show_all ();
+	insert_box->show ();
 
 //	send_scroller.show ();
 	send_display.show ();
@@ -151,16 +155,13 @@ FoldbackStrip::init ()
 
 	name_button.set_name ("monitor section button");
 	name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
-	name_button.signal_size_allocate().connect (sigc::mem_fun (*this, &FoldbackStrip::name_button_resized));
 
 	_select_button.set_name ("monitor section button");
 	_select_button.set_text (_("Select Foldback Bus"));
 
-
-	_comment_button.set_name (X_("foldback strip button"));
+	_comment_button.set_name (X_("mixer strip button"));
 	_comment_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
-	_comment_button.signal_size_allocate().connect (sigc::mem_fun (*this, &FoldbackStrip::comment_button_resized));
 
 	global_vpacker.set_border_width (1);
 
@@ -171,9 +172,9 @@ FoldbackStrip::init ()
 	global_vpacker.pack_start (show_sends_box, Gtk::PACK_SHRINK);
 
 #ifndef MIXBUS
-	//add a spacer underneath the master bus;
+	//add a spacer underneath the foldback bus;
 	//this fills the area that is taken up by the scrollbar on the tracks;
-	//and therefore keeps the faders "even" across the bottom
+	//and therefore keeps the strip boxes "even" across the bottom
 	int scrollbar_height = 0;
 	{
 		Gtk::Window window (WINDOW_TOPLEVEL);
@@ -192,6 +193,8 @@ FoldbackStrip::init ()
 	global_vpacker.pack_end (mute_solo_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (bottom_button_table, Gtk::PACK_SHRINK);
+//	global_vpacker.pack_end (*insert_box, true, true);
+	global_vpacker.pack_end (*insert_box, Gtk::PACK_SHRINK);
 
 	global_frame.add (global_vpacker);
 	global_frame.set_shadow_type (Gtk::SHADOW_IN);
@@ -214,7 +217,6 @@ FoldbackStrip::init ()
 
 	output_button.signal_button_press_event().connect (sigc::mem_fun(*this, &FoldbackStrip::output_press), false);
 	output_button.signal_button_release_event().connect (sigc::mem_fun(*this, &FoldbackStrip::output_release), false);
-	output_button.signal_size_allocate().connect (sigc::mem_fun (*this, &FoldbackStrip::output_button_resized));
 
 
 	name_button.signal_button_press_event().connect (sigc::mem_fun(*this, &FoldbackStrip::name_button_button_press), false);
@@ -241,7 +243,19 @@ FoldbackStrip::init ()
 		*this, invalidator (*this), boost::bind (&FoldbackStrip::port_connected_or_disconnected, this, _1, _3), gui_context ()
 		);
 
+	/* Add the widgets under visibility control to the VisibilityGroup; the names used here
+	   must be the same as those used in RCOptionEditor so that the configuration changes
+	   are recognised when they occur.
+	*/
+/*	_visibility.add (&_invert_button_box, X_("PhaseInvert"), _("Phase Invert"), false);
+	_visibility.add (&output_button, X_("Output"), _("Output"), false);
+	_visibility.add (&_comment_button, X_("Comments"), _("Comments"), false);
 
+	parameter_changed (X_("mixer-element-visibility"));
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &FoldbackStrip::parameter_changed));
+	Config->ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&FoldbackStrip::parameter_changed, this, _1), gui_context());
+	_session->config.ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&FoldbackStrip::parameter_changed, this, _1), gui_context());
+*/
 	//watch for mouse enter/exit so we can do some stuff
 	signal_enter_notify_event().connect (sigc::mem_fun(*this, &FoldbackStrip::mixer_strip_enter_event ));
 	signal_leave_notify_event().connect (sigc::mem_fun(*this, &FoldbackStrip::mixer_strip_leave_event ));
@@ -265,7 +279,7 @@ FoldbackStrip::mixer_strip_enter_event (GdkEventCrossing* /*ev*/)
 
 	//although we are triggering on the "enter", to the user it will appear that it is happenin on the "leave"
 	//because the FoldbackStrip control is a parent that encompasses the strip
-	//deselect_all_processors();
+	deselect_all_processors();
 
 	return false;
 }
@@ -304,34 +318,26 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	/// FIX NO route
 	if (!rt) {
 		RouteUI::self_delete ();
-/*	_route.reset (); // drop reference to route, so that it can be cleaned up
-	route_connections.drop_connections ();
 
-	delete solo_menu;
-	delete mute_menu;
-	delete sends_menu;
-	delete record_menu;
-	delete comment_window;
-	delete input_selector;
-	delete output_selector;
-	delete monitor_input_button;
-	delete monitor_disk_button;
-	delete _invert_menu;
-
-	send_blink_connection.disconnect ();
-	rec_blink_connection.disconnect ();*/
 		return;
 	}
-	//the rec/monitor stuff only shows up for tracks.
-	//the show_sends only shows up for buses.
-	//remove them all here, and we may add them back later
 	if (show_sends_button->get_parent()) {
 		show_sends_box.remove (*show_sends_button);
 	}
 
 	RouteUI::set_route (rt);
 
+	/* ProcessorBox needs access to _route so that it can read
+	   GUI object state.
+	*/
+//	processor_box.set_route (rt);
+	insert_box->set_route (rt);
+
 	revert_to_default_display ();
+
+
+//	mute_solo_table.attach (gpm.gain_display,0,1,1,2, EXPAND|FILL, EXPAND);
+//	mute_solo_table.attach (gpm.peak_display,1,2,1,2, EXPAND|FILL, EXPAND);
 
 	if (solo_button->get_parent()) {
 		mute_solo_table.remove (*solo_button);
@@ -389,6 +395,8 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 
 	add_events (Gdk::BUTTON_RELEASE_MASK);
 
+	insert_box->show ();
+
 	Route::FedBy fed_by = _route->fed_by();
 	for (Route::FedBy::iterator i = fed_by.begin(); i != fed_by.end(); ++i) {
 		if (i->sends_only) {
@@ -445,6 +453,7 @@ FoldbackStrip::set_stuff_from_route ()
 
 	Width width;
 	if (get_gui_property ("strip-width", width)) {
+//		set_width_enum (width, this);
 	}
 }
 
@@ -641,10 +650,10 @@ FoldbackStrip::connect_to_pan ()
 	 * we switch the panner eg. AUX-Send and back
 	 * _route->panner_shell()->Changed() vs _panshell->Changed
 	 */
-/*	if (panners._panner == 0) {
+	/*if (panners._panner == 0) {
 		panners.panshell_changed ();
-	}
-*/	update_panner_choices();
+	}*/
+	update_panner_choices();
 }
 
 void
@@ -853,8 +862,8 @@ FoldbackStrip::update_io_button ()
 		vector<string> phys;
 		string playorcapture;
 
-			_session->engine().get_physical_outputs(dt, phys);
-			playorcapture = "playback_";
+		_session->engine().get_physical_outputs(dt, phys);
+		playorcapture = "playback_";
 		for (PortSet::iterator port = io->ports().begin(dt);
 		                       port != io->ports().end(dt);
 		                       ++port) {
@@ -933,9 +942,8 @@ FoldbackStrip::update_io_button ()
 	char * cstr = new char[tooltip.str().size() + 1];
 	strcpy(cstr, tooltip.str().c_str());
 
-
-		output_button.set_text (label.str());
-		set_tooltip (&output_button, cstr);
+	output_button.set_text (label.str());
+	set_tooltip (&output_button, cstr);
 
 	delete [] cstr;
 }
@@ -1002,6 +1010,24 @@ FoldbackStrip::show_passthru_color ()
 	//reset_strip_style ();
 }
 
+
+void
+FoldbackStrip::help_count_plugins (boost::weak_ptr<Processor> p)
+{
+	boost::shared_ptr<Processor> processor (p.lock ());
+	if (!processor || !processor->display_to_user()) {
+		return;
+	}
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (processor);
+#ifdef MIXBUS
+	if (pi && pi->is_channelstrip ()) {
+		return;
+	}
+#endif
+	if (pi) {
+		++_plugin_insert_cnt;
+	}
+}
 void
 FoldbackStrip::build_route_ops_menu ()
 {
@@ -1016,6 +1042,8 @@ FoldbackStrip::build_route_ops_menu ()
 	items.push_back (MenuElem (_("Outputs..."), sigc::mem_fun (*this, &RouteUI::edit_output_configuration)));
 
 	items.push_back (SeparatorElem());
+
+	items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun(*this, &RouteUI::save_as_template)));
 
 	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
 
@@ -1110,6 +1138,25 @@ FoldbackStrip::list_fb_routes ()
 }
 
 void
+FoldbackStrip::set_selected (bool yn)
+{
+	AxisView::set_selected (yn);
+
+	if (selected()) {
+		global_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
+		global_frame.set_name ("MixerStripSelectedFrame");
+	} else {
+		global_frame.set_shadow_type (Gtk::SHADOW_IN);
+		global_frame.set_name ("MixerStripFrame");
+	}
+
+	global_frame.queue_draw ();
+
+//	if (!yn)
+//		processor_box.deselect_all_processors();
+}
+
+void
 FoldbackStrip::route_property_changed (const PropertyChange& what_changed)
 {
 	if (what_changed.contains (ARDOUR::Properties::name)) {
@@ -1127,25 +1174,25 @@ FoldbackStrip::name_changed ()
 	set_tooltip (name_button, Gtkmm2ext::markup_escape_text(_route->name()));
 
 }
-
+/*
 void
 FoldbackStrip::output_button_resized (Gtk::Allocation& alloc)
 {
-	output_button.set_layout_ellipsize_width (alloc.get_width() * PANGO_SCALE);
+	//output_button.set_layout_ellipsize_width (alloc.get_width() * PANGO_SCALE);
 }
 
 void
 FoldbackStrip::name_button_resized (Gtk::Allocation& alloc)
 {
-	name_button.set_layout_ellipsize_width (20);
+	//name_button.set_layout_ellipsize_width (20);
 }
 
 void
 FoldbackStrip::comment_button_resized (Gtk::Allocation& alloc)
 {
-	_comment_button.set_layout_ellipsize_width (alloc.get_width() * PANGO_SCALE);
+	//_comment_button.set_layout_ellipsize_width (alloc.get_width() * PANGO_SCALE);
 }
-
+*/
 void
 FoldbackStrip::set_embedded (bool yn)
 {
@@ -1164,12 +1211,34 @@ FoldbackStrip::map_frozen ()
 void
 FoldbackStrip::hide_redirect_editors ()
 {
+	_route->foreach_processor (sigc::mem_fun (*this, &FoldbackStrip::hide_processor_editor));
+}
+
+void
+FoldbackStrip::hide_processor_editor (boost::weak_ptr<Processor> p)
+{
+	boost::shared_ptr<Processor> processor (p.lock ());
+	if (!processor) {
+		return;
+	}
+
+//	Gtk::Window* w = processor_box.get_processor_ui (processor);
+	Gtk::Window* w = insert_box->get_processor_ui (processor);
+
+	if (w) {
+		w->hide ();
+	}
 }
 
 void
 FoldbackStrip::reset_strip_style ()
 {
-	set_name ("AudioBusStripBase");
+			if (_route->active()) {
+				set_name ("AudioBusStripBase");
+			} else {
+				set_name ("AudioBusStripBaseInactive");
+			}
+
 }
 
 void
@@ -1233,28 +1302,31 @@ void
 FoldbackStrip::set_button_names ()
 {
 
-		mute_button->set_text (_("Mute"));
+	mute_button->set_text (_("Mute"));
 
-
-		if (_route && _route->solo_safe_control()->solo_safe()) {
-			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
-		} else {
-			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
+	if (_route && _route->solo_safe_control()->solo_safe()) {
+		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
+	} else {
+		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
+	}
+	if (!Config->get_solo_control_is_listen_control()) {
+		solo_button->set_text (_("Solo"));
+	} else {
+		switch (Config->get_listen_position()) {
+		case AfterFaderListen:
+			solo_button->set_text (_("AFL"));
+			break;
+		case PreFaderListen:
+			solo_button->set_text (_("PFL"));
+			break;
 		}
-		if (!Config->get_solo_control_is_listen_control()) {
-			solo_button->set_text (_("Solo"));
-		} else {
-			switch (Config->get_listen_position()) {
-			case AfterFaderListen:
-				solo_button->set_text (_("AFL"));
-				break;
-			case PreFaderListen:
-				solo_button->set_text (_("PFL"));
-				break;
-			}
-		}
+	}
+}
 
-
+PluginSelector*
+FoldbackStrip::plugin_selector()
+{
+	return _mixer.plugin_selector();
 }
 
 string
@@ -1273,6 +1345,57 @@ void
 FoldbackStrip::route_active_changed ()
 {
 	reset_strip_style ();
+}
+
+void
+FoldbackStrip::copy_processors ()
+{
+//	processor_box.processor_operation (ProcessorBox::ProcessorsCopy);
+	insert_box->processor_operation (ProcessorBox::ProcessorsCopy);
+}
+
+void
+FoldbackStrip::cut_processors ()
+{
+//	processor_box.processor_operation (ProcessorBox::ProcessorsCut);
+	insert_box->processor_operation (ProcessorBox::ProcessorsCut);
+}
+
+void
+FoldbackStrip::paste_processors ()
+{
+	insert_box->processor_operation (ProcessorBox::ProcessorsPaste);
+}
+
+void
+FoldbackStrip::select_all_processors ()
+{
+	insert_box->processor_operation (ProcessorBox::ProcessorsSelectAll);
+}
+
+void
+FoldbackStrip::deselect_all_processors ()
+{
+//	processor_box.processor_operation (ProcessorBox::ProcessorsSelectNone);
+	insert_box->processor_operation (ProcessorBox::ProcessorsSelectNone);
+}
+
+bool
+FoldbackStrip::delete_processors ()
+{
+	return insert_box->processor_operation (ProcessorBox::ProcessorsDelete);
+}
+
+void
+FoldbackStrip::toggle_processors ()
+{
+	insert_box->processor_operation (ProcessorBox::ProcessorsToggleActive);
+}
+
+void
+FoldbackStrip::ab_plugins ()
+{
+	insert_box->processor_operation (ProcessorBox::ProcessorsAB);
 }
 
 void
@@ -1310,13 +1433,13 @@ FoldbackStrip::color () const
 {
 	return route_color ();
 }
-/*
-bool
+
+/*bool
 FoldbackStrip::marked_for_display () const
 {
 	return !_route->presentation_info().hidden();
-}
-*/
+}*/
+
 void
 FoldbackStrip::remove_current_fb ()
 {

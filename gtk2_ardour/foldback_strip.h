@@ -30,9 +30,7 @@
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
 #include <gtkmm/menu.h>
-//#include <gtkmm/scrolledwindow.h> // test
 #include <gtkmm/sizegroup.h>
-#include <gtkmm/table.h>
 #include <gtkmm/textview.h>
 #include <gtkmm/togglebutton.h>
 
@@ -51,6 +49,10 @@
 #include "route_ui.h"
 #include "panner_ui.h"
 #include "enums.h"
+#include "processor_box.h"
+//#include "visibility_group.h"
+#include "processor_selection.h"
+
 namespace ARDOUR {
 	class Route;
 	class Send;
@@ -81,15 +83,18 @@ public:
 
 	boost::shared_ptr<ARDOUR::Stripable> stripable() const { return RouteUI::stripable(); }
 
+//	Width get_width_enum () const { return _width; }
 	void* width_owner () const { return _width_owner; }
 
 	PannerUI&       panner_ui()       { return panners; }
+	PluginSelector* plugin_selector();
 
 	void fast_update ();
 	void set_embedded (bool);
 
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 	void set_button_names ();
+//	void show_send (boost::shared_ptr<ARDOUR::Send>);
 	void revert_to_default_display ();
 
 	/** @return the delivery that is being edited using our fader; it will be the
@@ -110,7 +115,19 @@ public:
 
 	std::string state_id() const;
 
+//	void parameter_changed (std::string);
 	void route_active_changed ();
+
+	void copy_processors ();
+	void cut_processors ();
+	void paste_processors ();
+	void select_all_processors ();
+	void deselect_all_processors ();
+	bool delete_processors ();  //note: returns false if nothing was deleted
+	void toggle_processors ();
+	void ab_plugins ();
+
+	void set_selected (bool yn);
 
 	static FoldbackStrip* entered_foldback_strip() { return _entered_foldback_strip; }
 
@@ -132,12 +149,14 @@ private:
 	Width _width;
 	void*  _width_owner;
 
-	Gtk::EventBox		spacer;
+	Gtk::EventBox               spacer;
 	Gtk::VBox			send_display;
 
 	Gtk::Frame          global_frame;
 	Gtk::VBox           global_vpacker;
 
+	ProcessorBox* insert_box;
+	ProcessorSelection _pr_selection;
 	PannerUI     panners;
 
 	Glib::RefPtr<Gtk::SizeGroup> button_size_group;
@@ -147,12 +166,12 @@ private:
 
 	ArdourWidgets::ArdourButton output_button;
 
-	void output_button_resized (Gtk::Allocation&);
-	void comment_button_resized (Gtk::Allocation&);
-
 	Gtk::HBox show_sends_box;
 
 	std::string longest_label;
+
+	void help_count_plugins (boost::weak_ptr<ARDOUR::Processor>);
+	uint32_t _plugin_insert_cnt;
 
 	gint    mark_update_safe ();
 	guint32 mode_switch_in_progress;
@@ -207,10 +226,10 @@ private:
 	void show_passthru_color ();
 
 	void route_property_changed (const PBD::PropertyChange&);
-	void name_button_resized (Gtk::Allocation&);
 	void name_changed ();
 	void update_speed_display ();
 	void map_frozen ();
+	void hide_processor_editor (boost::weak_ptr<ARDOUR::Processor> processor);
 	void hide_redirect_editors ();
 
 	bool ignore_speed_adjustment;
@@ -219,6 +238,8 @@ private:
 
 	void engine_running();
 	void engine_stopped();
+
+//	virtual void bus_send_display_changed (boost::shared_ptr<ARDOUR::Route>);
 
 	void set_current_delivery (boost::shared_ptr<ARDOUR::Delivery>);
 
