@@ -99,6 +99,7 @@ TransportMastersWidget::~TransportMastersWidget ()
 void
 TransportMastersWidget::set_transport_master (boost::shared_ptr<TransportMaster> tm)
 {
+	std::cerr << "TMW:stm to " << tm << std::endl;
 	_session->request_sync_source (tm);
 }
 
@@ -143,10 +144,8 @@ TransportMastersWidget::add_master ()
 }
 
 void
-TransportMastersWidget::rebuild ()
+TransportMastersWidget::clear ()
 {
-	TransportMasterManager::TransportMasters const & masters (TransportMasterManager::instance().transport_masters());
-
 	container_clear (table);
 
 	for (vector<Row*>::iterator r = rows.begin(); r != rows.end(); ++r) {
@@ -154,6 +153,14 @@ TransportMastersWidget::rebuild ()
 	}
 
 	rows.clear ();
+}
+
+void
+TransportMastersWidget::rebuild ()
+{
+	TransportMasterManager::TransportMasters const & masters (TransportMasterManager::instance().transport_masters());
+
+	clear ();
 	table.resize (masters.size()+1, 14);
 
 	for (size_t col = 0; col < sizeof (col_title) / sizeof (col_title[0]); ++col) {
@@ -163,6 +170,8 @@ TransportMastersWidget::rebuild ()
 	uint32_t n = 1;
 
 	Gtk::RadioButtonGroup use_button_group;
+
+	cerr << "Rebuild TMW @ " << this << " with " << masters.size() << "tms\n";
 
 	for (TransportMasterManager::TransportMasters::const_iterator m = masters.begin(); m != masters.end(); ++m, ++n) {
 

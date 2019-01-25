@@ -145,6 +145,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	PBD::ScopedConnection remove_connection;
 
 	void rebuild ();
+	void clear ();
 	void current_changed (boost::shared_ptr<ARDOUR::TransportMaster> old_master, boost::shared_ptr<ARDOUR::TransportMaster> new_master);
 	void add_master ();
 
