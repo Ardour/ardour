@@ -1002,6 +1002,8 @@ AudioEngine::stop (bool for_latency)
 	}
 
 	if (stop_engine) {
+		TransportMasterManager& tmm (TransportMasterManager::instance());
+		tmm.engine_stopped ();
 		Stopped (); /* EMIT SIGNAL */
 	}
 

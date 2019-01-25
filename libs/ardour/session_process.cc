@@ -861,6 +861,7 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::SetTransportMaster:
+		cerr << "Process TMM current request\n";
 		TransportMasterManager::instance().set_current (ev->transport_master);
 		break;
 

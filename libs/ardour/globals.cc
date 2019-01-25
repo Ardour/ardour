@@ -561,7 +561,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 	ARDOUR::AudioEngine::create ();
 
-	/* This will run only once in whatever thread calls AudioEngine::start() */
+	/* This will run in whatever thread calls AudioEngine::start() */
 	ARDOUR::AudioEngine::instance()->Running.connect_same_thread (engine_startup_connection, ARDOUR::init_post_engine);
 
 	/* it is unfortunate that we need to include reserved names here that
@@ -599,39 +599,30 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 }
 
 void
-ARDOUR::init_post_engine (uint32_t /* ignored */)
+ARDOUR::init_post_engine (uint32_t start_cnt)
 {
 	XMLNode* node;
+
+	std::cerr << "Engine stated, libardour inits, cnt = " << start_cnt << std::endl;
+
+	if (start_cnt == 0) {
+
+		/* find plugins */
+
+		ARDOUR::PluginManager::instance().refresh (!Config->get_discover_vst_on_start());
+	}
 
 	if ((node = Config->control_protocol_state()) != 0) {
 		ControlProtocolManager::instance().set_state (*node, 0 /* here: global-config state */);
 	}
 
-	if ((node = Config->transport_master_state()) != 0) {
-		if (TransportMasterManager::instance().set_state (*node, Stateful::loading_state_version)) {
-			error << _("Cannot restore transport master manager") << endmsg;
-			/* XXX now what? */
-		}
-	} else {
-		if (TransportMasterManager::instance().set_default_configuration ()) {
-			error << _("Cannot initialize transport master manager") << endmsg;
-			/* XXX now what? */
-		}
+	if (start_cnt == 0) {
+		TransportMasterManager::instance().restart ();
 	}
-
-	/* find plugins */
-
-	ARDOUR::PluginManager::instance().refresh (!Config->get_discover_vst_on_start());
-
-	/* Don't do this again - we are only meant to execute on the first
-	 * engine start, not any subsequence starts
-	 */
-
-	engine_startup_connection.disconnect ();
 }
 
 void
-	ARDOUR::cleanup ()
+ARDOUR::cleanup ()
 {
 	if (!libardour_initialized) {
 		return;

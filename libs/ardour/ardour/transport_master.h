@@ -33,7 +33,7 @@
 #include "pbd/i18n.h"
 #include "pbd/properties.h"
 #include "pbd/signals.h"
-#include "pbd/stateful.h"
+#include "pbd/statefuldestructible.h"
 
 #include "temporal/time.h"
 
@@ -214,6 +214,8 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	 */
 	virtual bool speed_and_position (double& speed, samplepos_t& position, samplepos_t & lp, samplepos_t & when, samplepos_t now);
 
+	virtual void reset (bool with_position) = 0;
+
 	/**
 	 * reports to ARDOUR whether the TransportMaster is currently synced to its external
 	 * time source.
@@ -346,6 +348,8 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 
 	std::string display_name (bool sh/*ort*/ = true) const;
 
+	virtual void unregister_port ();
+
   protected:
 	SyncSource      _type;
 	PBD::Property<std::string>   _name;
@@ -423,6 +427,9 @@ class LIBARDOUR_API MTC_TransportMaster : public TimecodeTransportMaster, public
 
 	void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>);
 
+	void unregister_port ();
+
+	void reset (bool with_pos);
 	bool locked() const;
 	bool ok() const;
 	void handle_locate (const MIDI::byte*);
@@ -467,7 +474,6 @@ class LIBARDOUR_API MTC_TransportMaster : public TimecodeTransportMaster, public
 	Timecode::Time timecode;
 	bool           printed_timecode_warning;
 
-	void reset (bool with_pos);
 	void queue_reset (bool with_pos);
 	void maybe_reset ();
 
@@ -490,6 +496,7 @@ public:
 
 	void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>);
 
+	void reset (bool with_pos);
 	bool locked() const;
 	bool ok() const;
 
@@ -510,7 +517,6 @@ public:
 	bool detect_discontinuity(LTCFrameExt *, int, bool);
 	bool detect_ltc_fps(int, bool);
 	bool equal_ltc_sample_time(LTCFrame *a, LTCFrame *b);
-	void reset (bool with_ts = true);
 	void resync_xrun();
 	void resync_latency();
 	void parse_timecode_offset();
@@ -550,10 +556,13 @@ class LIBARDOUR_API MIDIClock_TransportMaster : public TransportMaster, public T
 
 	void set_session (Session*);
 
+	void unregister_port ();
+
 	void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>);
 
 	void rebind (MidiPort&);
 
+	void reset (bool with_pos);
 	bool locked() const;
 	bool ok() const;
 	bool starting() const;
@@ -594,7 +603,6 @@ class LIBARDOUR_API MIDIClock_TransportMaster : public TransportMaster, public T
 	bool _running;
 	double _bpm;
 
-	void reset ();
 	void start (MIDI::Parser& parser, samplepos_t timestamp);
 	void contineu (MIDI::Parser& parser, samplepos_t timestamp);
 	void stop (MIDI::Parser& parser, samplepos_t timestamp);
@@ -616,6 +624,7 @@ class LIBARDOUR_API Engine_TransportMaster : public TransportMaster
 	bool speed_and_position (double& speed, samplepos_t& pos, samplepos_t &, samplepos_t &, samplepos_t);
 
 	bool starting() const { return _starting; }
+	void reset (bool with_position);
 	bool locked() const;
 	bool ok() const;
 	samplecnt_t update_interval () const;

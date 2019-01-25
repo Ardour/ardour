@@ -104,7 +104,7 @@ LTC_TransportMaster::set_session (Session *s)
 		decoder = ltc_decoder_create((int) samples_per_ltc_frame, 128 /*queue size*/);
 
 		parse_timecode_offset();
-		reset();
+		reset (true);
 
 		_session->config.ParameterChanged.connect_same_thread (config_connection, boost::bind (&LTC_TransportMaster::parameter_changed, this, _1));
 	}
@@ -189,10 +189,10 @@ LTC_TransportMaster::resync_latency()
 }
 
 void
-LTC_TransportMaster::reset (bool with_ts)
+LTC_TransportMaster::reset (bool with_position)
 {
 	DEBUG_TRACE (DEBUG::LTC, "LTC reset()\n");
-	if (with_ts) {
+	if (with_position) {
 		current.update (current.position, 0, current.speed);
 		_current_delta = 0;
 	}
@@ -381,7 +381,7 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 		}
 
 		if (!ltc_is_stationary && detect_ltc_fps (stime.frame, (sample.ltc.dfbit)? true : false)) {
-			reset();
+			reset(true);
 			fps_detected=true;
 		}
 
@@ -528,7 +528,7 @@ LTC_TransportMaster::pre_process (ARDOUR::pframes_t nframes, samplepos_t now, bo
 	} else if (skip != 0) {
 		/* this should never happen. it may if monotonic_cnt, now overflow on 64bit */
 		DEBUG_TRACE (DEBUG::LTC, string_compose("engine skipped %1 samples\n", skip));
-		reset();
+		reset(true);
 	}
 
 	/* Now feed the incoming LTC signal into the decoder */
@@ -553,7 +553,7 @@ LTC_TransportMaster::pre_process (ARDOUR::pframes_t nframes, samplepos_t now, bo
 
 	if (abs (now - current.timestamp) > FLYWHEEL_TIMEOUT) {
 		DEBUG_TRACE (DEBUG::LTC, "flywheel timeout\n");
-		reset();
+		reset(true);
 		/* don't change position from last known */
 
 		return;

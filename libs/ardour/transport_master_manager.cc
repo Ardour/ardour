@@ -22,6 +22,7 @@
 #include "ardour/session.h"
 #include "ardour/transport_master_manager.h"
 
+#include "pbd/boost_debug.cc"
 #include "pbd/i18n.h"
 
 #if __cplusplus > 199711L
@@ -54,19 +55,24 @@ int
 TransportMasterManager::set_default_configuration ()
 {
 	try {
+
+		clear ();
+
 		/* setup default transport masters. Most people will never need any
 		   others
 		*/
+
 		add (Engine, X_("JACK Transport"), false);
 		add (MTC, X_("MTC"), false);
 		add (LTC, X_("LTC"), false);
 		add (MIDIClock, X_("MIDI Clock"), false);
+
 	} catch (...) {
 		return -1;
 	}
 
 	_current_master = _transport_masters.back();
-
+	cerr << "default current master (back) is " << _current_master->name() << endl;
 	return 0;
 }
 
@@ -324,6 +330,7 @@ TransportMasterManager::add (SyncSource type, std::string const & name, bool rem
 		}
 
 		tm = TransportMaster::factory (type, name, removeable);
+		boost_debug_shared_ptr_mark_interesting (tm.get(), "tm");
 		ret = add_locked (tm);
 	}
 
@@ -382,9 +389,11 @@ TransportMasterManager::remove (std::string const & name)
 int
 TransportMasterManager::set_current_locked (boost::shared_ptr<TransportMaster> c)
 {
-	if (find (_transport_masters.begin(), _transport_masters.end(), c) == _transport_masters.end()) {
-		warning << string_compose (X_("programming error: attempt to use unknown transport master named \"%1\"\n"), c->name());
-		return -1;
+	if (c) {
+		if (find (_transport_masters.begin(), _transport_masters.end(), c) == _transport_masters.end()) {
+			warning << string_compose (X_("programming error: attempt to use unknown transport master \"%1\"\n"), c->name());
+			return -1;
+		}
 	}
 
 	_current_master = c;
@@ -393,7 +402,7 @@ TransportMasterManager::set_current_locked (boost::shared_ptr<TransportMaster> c
 
 	master_dll_initstate = 0;
 
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("current transport master set to %1\n", c->name()));
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("current transport master set to %1\n", (c ? c->name() : string ("none"))));
 
 	return 0;
 }
@@ -471,6 +480,7 @@ TransportMasterManager::clear ()
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
+		_current_master.reset ();
 		_transport_masters.clear ();
 	}
 
@@ -484,18 +494,18 @@ TransportMasterManager::set_state (XMLNode const & node, int version)
 
 	XMLNodeList const & children = node.children();
 
-
-	if (!children.empty()) {
-		_transport_masters.clear ();
-	}
-
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
 
+		_current_master.reset ();
+		boost_debug_list_ptrs ();
+
+		_transport_masters.clear ();
 
 		for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
 
 			boost::shared_ptr<TransportMaster> tm = TransportMaster::factory (**c);
+			boost_debug_shared_ptr_mark_interesting (tm.get(), "tm");
 
 			if (add_locked (tm)) {
 				continue;
@@ -547,4 +557,34 @@ TransportMasterManager::master_by_type (SyncSource src) const
 	}
 
 	return boost::shared_ptr<TransportMaster> ();
+}
+
+void
+TransportMasterManager::engine_stopped ()
+{
+	{
+		Glib::Threads::RWLock::ReaderLock lm (lock);
+
+		for (TransportMasters::const_iterator tm = _transport_masters.begin(); tm != _transport_masters.end(); ++tm) {
+			(*tm)->reset (false);
+		}
+	}
+}
+
+void
+TransportMasterManager::restart ()
+{
+	XMLNode* node;
+
+	if ((node = Config->transport_master_state()) != 0) {
+		if (TransportMasterManager::instance().set_state (*node, Stateful::loading_state_version)) {
+			error << _("Cannot restore transport master manager") << endmsg;
+			/* XXX now what? */
+		}
+	} else {
+		if (TransportMasterManager::instance().set_default_configuration ()) {
+			error << _("Cannot initialize transport master manager") << endmsg;
+			/* XXX now what? */
+		}
+	}
 }

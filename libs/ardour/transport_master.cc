@@ -19,7 +19,9 @@
 
 #include <vector>
 
+#include "pbd/boost_debug.h"
 #include "pbd/debug.h"
+#include "pbd/i18n.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
@@ -30,7 +32,6 @@
 #include "ardour/types_convert.h"
 #include "ardour/utils.h"
 
-#include "pbd/i18n.h"
 
 namespace ARDOUR {
 	namespace Properties {
@@ -83,6 +84,9 @@ TransportMaster::TransportMaster (SyncSource t, std::string const & name)
 
 TransportMaster::~TransportMaster()
 {
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("destroying transport master \"%1\" along with port %2\n", name(), (_port ? _port->name() : std::string ("no port"))));
+
+	unregister_port ();
 }
 
 bool
@@ -429,6 +433,15 @@ TransportMaster::display_name (bool sh) const
 	}
 	/* GRRRR .... stupid, stupid gcc - you can't get here from there, all enum values are handled */
 	return S_("SyncSource|JACK");
+}
+
+void
+TransportMaster::unregister_port ()
+{
+	if (_port) {
+		AudioEngine::instance()->unregister_port (_port);
+		_port.reset ();
+	}
 }
 
 boost::shared_ptr<Port>

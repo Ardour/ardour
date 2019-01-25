@@ -88,7 +88,7 @@ MIDIClock_TransportMaster::set_session (Session *session)
 		parser.stop.connect_same_thread (port_connections, boost::bind (&MIDIClock_TransportMaster::stop, this, _1, _2));
 		parser.position.connect_same_thread (port_connections, boost::bind (&MIDIClock_TransportMaster::position, this, _1, _2, _3, _4));
 
-		reset ();
+		reset (true);
 	}
 }
 
@@ -284,18 +284,22 @@ MIDIClock_TransportMaster::start (Parser& /*parser*/, samplepos_t timestamp)
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("MIDIClock_TransportMaster got start message at time %1 engine time %2 transport_sample %3\n", timestamp, ENGINE->sample_time(), _session->transport_sample()));
 
 	if (!_running) {
-		reset();
+		reset(true);
 		_running = true;
 		current.update (_session->transport_sample(), timestamp, 0);
 	}
 }
 
 void
-MIDIClock_TransportMaster::reset ()
+MIDIClock_TransportMaster::reset (bool with_position)
 {
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("MidiClock Master reset(): calculated filter for period size %2\n", ENGINE->samples_per_cycle()));
 
-	current.update (_session->transport_sample(), 0, 0);
+	if (with_position) {
+		current.update (_session->transport_sample(), 0, 0);
+	} else {
+		current.update (0, 0, 0);
+	}
 
 	_running = false;
 	_current_delta = 0;
@@ -409,3 +413,11 @@ MIDIClock_TransportMaster::delta_string() const
 	}
 	return std::string(delta);
 }
+
+void
+MIDIClock_TransportMaster::unregister_port ()
+{
+	_midi_port.reset ();
+	TransportMaster::unregister_port ();
+}
+

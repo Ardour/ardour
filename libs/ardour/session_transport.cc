@@ -1975,7 +1975,7 @@ Session::transport_master() const
 bool
 Session::transport_master_is_external () const
 {
-	return config.get_external_sync();
+	return TransportMasterManager::instance().current() && config.get_external_sync();
 }
 
 void

@@ -57,6 +57,12 @@ Engine_TransportMaster::check_backend()
 	}
 }
 
+void
+Engine_TransportMaster::reset (bool)
+{
+	_starting = false;
+}
+
 bool
 Engine_TransportMaster::locked() const
 {

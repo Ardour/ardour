@@ -587,3 +587,10 @@ MTC_TransportMaster::delta_string () const
 	}
 	return std::string(delta);
 }
+
+void
+MTC_TransportMaster::unregister_port ()
+{
+	_midi_port.reset ();
+	TransportMaster::unregister_port ();
+}

@@ -36,6 +36,8 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 	~TransportMasterManager ();
 
 	int set_default_configuration ();
+	void restart ();
+	void engine_stopped ();
 
 	static TransportMasterManager& instance();
 	/* this method is not thread-safe and is intended to be used only

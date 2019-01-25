@@ -184,7 +184,12 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 		return;
 	}
 
+	if (!TransportMasterManager::instance().current()) {
+		return;
+	}
+
 	SyncSource sync_src = TransportMasterManager::instance().current()->type();
+
 	if (engine().freewheeling() || !Config->get_send_ltc()
 	    /* TODO
 	     * decide which time-sources we can generated LTC from.
@@ -194,7 +199,7 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 	     || (config.get_external_sync() && sync_src == LTC)
 	     || (config.get_external_sync() && sync_src == MTC)
 	    */
-	     ||(config.get_external_sync() && sync_src == MIDIClock)
+	    ||(config.get_external_sync() && sync_src == MIDIClock)
 		) {
 		return;
 	}
