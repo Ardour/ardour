@@ -39,6 +39,7 @@
 #include "midi++/mmc.h"
 
 #include "ardour/async_midi_port.h"
+#include "ardour/ardour.h"
 #include "ardour/audio_port.h"
 #include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
@@ -930,10 +931,22 @@ AudioEngine::start (bool for_latency)
 	PortManager::fill_midi_port_info ();
 
 	if (!for_latency) {
+		/* Call the library-wide ::init_post_engine() before emitting
+		 * running to ensure that its tasks are complete before any
+		 * signal handlers execute. PBD::Signal does not ensure
+		 * ordering of signal handlers so even if ::init_post_engine()
+		 * is connected first, it may not run first.
+		 */
+
+		ARDOUR::init_post_engine (_start_cnt);
+
 		Running (_start_cnt); /* EMIT SIGNAL */
+
+		/* latency start/stop cycles do not count as "starts" */
+
+		_start_cnt++;
 	}
 
-	_start_cnt++;
 
 	return 0;
 }

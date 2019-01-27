@@ -561,9 +561,6 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 	ARDOUR::AudioEngine::create ();
 
-	/* This will run in whatever thread calls AudioEngine::start() */
-	ARDOUR::AudioEngine::instance()->Running.connect_same_thread (engine_startup_connection, ARDOUR::init_post_engine);
-
 	/* it is unfortunate that we need to include reserved names here that
 	   refer to control surfaces. But there's no way to ensure a complete
 	   lack of collisions without doing this, since the control surface
