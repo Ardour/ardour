@@ -612,11 +612,12 @@ ARDOUR::init_post_engine (uint32_t start_cnt)
 		ARDOUR::PluginManager::instance().refresh (!Config->get_discover_vst_on_start());
 	}
 
-	if ((node = Config->control_protocol_state()) != 0) {
-		ControlProtocolManager::instance().set_state (*node, 0 /* here: global-config state */);
-	}
-
 	if (start_cnt == 0) {
+
+		if ((node = Config->control_protocol_state()) != 0) {
+			ControlProtocolManager::instance().set_state (*node, 0 /* here: global-config state */);
+		}
+
 		TransportMasterManager::instance().restart ();
 	}
 }
