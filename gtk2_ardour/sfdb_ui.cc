@@ -1798,6 +1798,9 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	where_combo.set_active_text (str.back());
 	where_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::where_combo_changed));
 
+	instrument_combo_changed();
+	instrument_combo.signal_changed().connect(sigc::mem_fun(*this, &SoundFileOmega::instrument_combo_changed) );
+
 	Label* l = manage (new Label);
 	l->set_markup (_("<b>Add files ...</b>"));
 	options.attach (*l, 0, 1, 0, 1, FILL, SHRINK, 8, 0);
@@ -1982,6 +1985,12 @@ void
 SoundFileOmega::where_combo_changed()
 {
 	preview.set_import_position(get_position());
+}
+
+void
+SoundFileOmega::instrument_combo_changed()
+{
+	_session->the_auditioner()->set_audition_synth_info( instrument_combo.selected_instrument() );
 }
 
 MidiTrackNameSource
