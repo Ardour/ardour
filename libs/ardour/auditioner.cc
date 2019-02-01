@@ -74,7 +74,9 @@ Auditioner::init ()
 	_output->add_port ("", this, DataType::MIDI);
 	use_new_playlist (DataType::MIDI);
 
-	lookup_synth (false);
+	if (!audition_synth_info) {
+		lookup_fallback_synth ();
+	} 
 
 	_output->changed.connect_same_thread (*this, boost::bind (&Auditioner::output_changed, this, _1, _2));
 
@@ -83,14 +85,11 @@ Auditioner::init ()
 
 Auditioner::~Auditioner ()
 {
-	if (asynth) {
-		asynth->drop_references ();
-	}
-	asynth.reset ();
+	unload_synth(true);
 }
 
 PluginInfoPtr
-Auditioner::lookup_synth_plugin_info (std::string const& uri) const
+Auditioner::lookup_fallback_synth_plugin_info (std::string const& uri) const
 {
 	PluginManager& mgr (PluginManager::instance());
 	PluginInfoList plugs;
@@ -106,45 +105,42 @@ Auditioner::lookup_synth_plugin_info (std::string const& uri) const
 }
 
 void
-Auditioner::lookup_synth (bool and_load)
+Auditioner::lookup_fallback_synth ()
 {
-	string plugin_id = Config->get_midi_audition_synth_uri();
-	if (plugin_id.empty() && plugin_id != X_("@default@")) {
-		return;
-	}
-	PluginInfoPtr nfo;
+	
+	PluginInfoPtr nfo = lookup_fallback_synth_plugin_info ("http://gareus.org/oss/lv2/gmsynth");
 
-	nfo = lookup_synth_plugin_info (plugin_id);
+	//GMsynth not found: fallback to Reasonable Synth
 	if (!nfo) {
-		nfo = lookup_synth_plugin_info ("http://gareus.org/oss/lv2/gmsynth");
-	}
-	if (!nfo) {
-		nfo = lookup_synth_plugin_info ("https://community.ardour.org/node/7596");
+		nfo = lookup_fallback_synth_plugin_info ("https://community.ardour.org/node/7596");
 		if (nfo) {
 			warning << _("Falling back to Reasonable Synth for Midi Audition") << endmsg;
 		}
 	}
+
 	if (!nfo) {
 		warning << _("No synth for midi-audition found.") << endmsg;
 		Config->set_midi_audition_synth_uri(""); // Don't check again for Reasonable Synth
 		return;
 	}
 
-	if (plugin_id == X_("@default@")) {
-		Config->set_midi_audition_synth_uri (nfo->unique_id);
-	}
-	if (and_load) {
-		assert (!asynth);
-		boost::shared_ptr<Plugin> p = nfo->load (_session);
-		asynth = boost::shared_ptr<Processor> (new PluginInsert (_session, p));
-	}
+	set_audition_synth_info(nfo);
+}
+
+void
+Auditioner::load_synth (bool need_lock)
+{
+	unload_synth(need_lock);
+	
+	boost::shared_ptr<Plugin> p = audition_synth_info->load (_session);
+	asynth = boost::shared_ptr<Processor> (new PluginInsert (_session, p));
 }
 
 void
 Auditioner::unload_synth (bool need_lock)
 {
-	if (!asynth) {
-		return;
+	if (asynth) {
+		asynth->drop_references ();
 	}
 	if (0 == remove_processor (asynth, NULL, need_lock)) {
 		asynth.reset ();
@@ -344,8 +340,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 
 		ProcessorStreams ps;
 
-		unload_synth (true);
-		lookup_synth (true);
+		load_synth (true);
 
 		if (asynth) {
 			int rv = add_processor (asynth, PreFader, &ps, true);
