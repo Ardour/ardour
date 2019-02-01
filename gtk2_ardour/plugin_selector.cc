@@ -938,23 +938,36 @@ void
 PluginSelector::build_plugin_menu ()
 {
 	PluginInfoList all_plugs;
-
-	all_plugs.insert (all_plugs.end(), manager.ladspa_plugin_info().begin(), manager.ladspa_plugin_info().end());
-	all_plugs.insert (all_plugs.end(), manager.lua_plugin_info().begin(), manager.lua_plugin_info().end());
+	if (!manager.ladspa_plugin_info().empty()) {
+		all_plugs.insert (all_plugs.end(), manager.ladspa_plugin_info().begin(), manager.ladspa_plugin_info().end());
+	}
+	if (!manager.lua_plugin_info().empty()) {
+		all_plugs.insert (all_plugs.end(), manager.lua_plugin_info().begin(), manager.lua_plugin_info().end());
+	}
 #ifdef WINDOWS_VST_SUPPORT
-	all_plugs.insert (all_plugs.end(), manager.windows_vst_plugin_info().begin(), manager.windows_vst_plugin_info().end());
+	if (!manager.windows_vst_plugin_info().empty()) {
+		all_plugs.insert (all_plugs.end(), manager.windows_vst_plugin_info().begin(), manager.windows_vst_plugin_info().end());
+	}
 #endif
 #ifdef LXVST_SUPPORT
-	all_plugs.insert (all_plugs.end(), manager.lxvst_plugin_info().begin(), manager.lxvst_plugin_info().end());
+	if (!manager.lxvst_plugin_info().empty()) {
+		all_plugs.insert (all_plugs.end(), manager.lxvst_plugin_info().begin(), manager.lxvst_plugin_info().end());
+	}
 #endif
 #ifdef MACVST_SUPPORT
-	all_plugs.insert (all_plugs.end(), manager.mac_vst_plugin_info().begin(), manager.mac_vst_plugin_info().end());
+	if (!manager.mac_vst_plugin_info().empty()) {
+		all_plugs.insert (all_plugs.end(), manager.mac_vst_plugin_info().begin(), manager.mac_vst_plugin_info().end());
+	}
 #endif
 #ifdef AUDIOUNIT_SUPPORT
-	all_plugs.insert (all_plugs.end(), manager.au_plugin_info().begin(), manager.au_plugin_info().end());
+	if (!manager.au_plugin_info().empty()) {
+		all_plugs.insert (all_plugs.end(), manager.au_plugin_info().begin(), manager.au_plugin_info().end());
+	}
 #endif
 #ifdef LV2_SUPPORT
-	all_plugs.insert (all_plugs.end(), manager.lv2_plugin_info().begin(), manager.lv2_plugin_info().end());
+	if (!manager.lv2_plugin_info().empty()) {
+		all_plugs.insert (all_plugs.end(), manager.lv2_plugin_info().begin(), manager.lv2_plugin_info().end());
+	}
 #endif
 
 	using namespace Menu_Helpers;
