@@ -324,6 +324,8 @@ private:
 
 	static bool check_link_status (const ARDOUR::Session*, const std::vector<std::string>& paths);
 
+	void instrument_combo_changed ();
+
 	void file_selection_changed ();
 	bool reset_options ();
 	void reset_options_noret ();
