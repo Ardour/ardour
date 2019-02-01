@@ -86,7 +86,12 @@ public:
 
 	int export_stuff (BufferSet&, samplepos_t, samplecnt_t, boost::shared_ptr<Processor>, bool, bool, bool) { return -1; }
 
+	void set_audition_synth_info(PluginInfoPtr in) { audition_synth_info = in; }
+
 private:
+  
+	PluginInfoPtr audition_synth_info;  //we will use this to create a new synth on-the-fly each time an audition is requested
+  
 	boost::shared_ptr<AudioRegion> the_region;
 	boost::shared_ptr<MidiRegion> midi_region;
 	samplepos_t current_sample;
@@ -102,9 +107,10 @@ private:
 
 	boost::shared_ptr<Processor> asynth;
 
-	PluginInfoPtr lookup_synth_plugin_info (std::string const&) const;
+	PluginInfoPtr lookup_fallback_synth_plugin_info (std::string const&) const;
 	void drop_ports ();
-	void lookup_synth (bool);
+	void lookup_fallback_synth ();
+	void load_synth(bool);
 	void unload_synth (bool);
 	static void*_drop_ports (void*);
 	void actually_drop_ports ();
