@@ -1715,53 +1715,53 @@ const ARDOUR::PluginInfoList&
 PluginManager::windows_vst_plugin_info ()
 {
 #ifdef WINDOWS_VST_SUPPORT
-	if (!_windows_vst_plugin_info) {
-		windows_vst_refresh ();
+	if (_windows_vst_plugin_info) {
+		return *_windows_vst_plugin_info;
 	}
-	return *_windows_vst_plugin_info;
-#else
-	return _empty_plugin_info;
 #endif
+	return _empty_plugin_info;
 }
 
 const ARDOUR::PluginInfoList&
 PluginManager::mac_vst_plugin_info ()
 {
 #ifdef MACVST_SUPPORT
-	assert(_mac_vst_plugin_info);
-	return *_mac_vst_plugin_info;
-#else
-	return _empty_plugin_info;
+	if (_mac_vst_plugin_info) {
+		return *_mac_vst_plugin_info;
+	}
 #endif
+	return _empty_plugin_info;
 }
 
 const ARDOUR::PluginInfoList&
 PluginManager::lxvst_plugin_info ()
 {
 #ifdef LXVST_SUPPORT
-	assert(_lxvst_plugin_info);
-	return *_lxvst_plugin_info;
-#else
-	return _empty_plugin_info;
+	if (_lxvst_plugin_info) {
+		return *_lxvst_plugin_info;
+	}
 #endif
+	return _empty_plugin_info;
 }
 
 const ARDOUR::PluginInfoList&
 PluginManager::ladspa_plugin_info ()
 {
-	assert(_ladspa_plugin_info);
-	return *_ladspa_plugin_info;
+	if (_ladspa_plugin_info) {
+		return *_ladspa_plugin_info;
+	}
+	return _empty_plugin_info;
 }
 
 const ARDOUR::PluginInfoList&
 PluginManager::lv2_plugin_info ()
 {
 #ifdef LV2_SUPPORT
-	assert(_lv2_plugin_info);
-	return *_lv2_plugin_info;
-#else
-	return _empty_plugin_info;
+	if (_lv2_plugin_info) {
+		return *_lv2_plugin_info;
+	}
 #endif
+	return _empty_plugin_info;
 }
 
 const ARDOUR::PluginInfoList&
@@ -1778,6 +1778,8 @@ PluginManager::au_plugin_info ()
 const ARDOUR::PluginInfoList&
 PluginManager::lua_plugin_info ()
 {
-	assert(_lua_plugin_info);
-	return *_lua_plugin_info;
+	if (_lua_plugin_info) {
+		return *_lua_plugin_info;
+	}
+	return _empty_plugin_info;
 }
