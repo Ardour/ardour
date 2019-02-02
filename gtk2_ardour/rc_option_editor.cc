@@ -2905,33 +2905,6 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_sound_midi_notes)
 		     ));
 
-	ComboOption<std::string>* audition_synth = new ComboOption<std::string> (
-		"midi-audition-synth-uri",
-		_("MIDI Audition Synth (LV2)"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_audition_synth_uri),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_audition_synth_uri)
-		);
-
-	audition_synth->add(X_(""), _("None"));
-	PluginInfoList all_plugs;
-	PluginManager& manager (PluginManager::instance());
-#ifdef LV2_SUPPORT
-	all_plugs.insert (all_plugs.end(), manager.lv2_plugin_info().begin(), manager.lv2_plugin_info().end());
-
-	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
-		if (manager.get_status (*i) == PluginManager::Hidden) continue;
-		if (!(*i)->is_instrument()) continue;
-		if ((*i)->type != ARDOUR::LV2) continue;
-		if ((*i)->name.length() > 46) {
-			audition_synth->add((*i)->unique_id, (*i)->name.substr (0, 44) + "...");
-		} else {
-			audition_synth->add((*i)->unique_id, (*i)->name);
-		}
-	}
-#endif
-
-	add_option (_("MIDI"), audition_synth);
-
 	/* Click */
 
 	add_option (_("Metronome"), new OptionEditorHeading (_("Metronome")));
