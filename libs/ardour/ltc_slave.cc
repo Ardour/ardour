@@ -49,14 +49,19 @@ using namespace Timecode;
 LTC_TransportMaster::LTC_TransportMaster (std::string const & name)
 	: TimecodeTransportMaster (name, LTC)
 	, did_reset_tc_format (false)
+	, saved_tc_format (timecode_24) // whatever ....
 	, decoder (0)
 	, samples_per_ltc_frame (0)
 	, fps_detected (false)
 	, monotonic_cnt (0)
 	, delayedlocked (10)
 	, ltc_detect_fps_cnt (0)
+	, printed_timecode_warning (false)
 	, ltc_detect_fps_max (0)
 	, sync_lock_broken (false)
+	, ltc_timecode (Timecode::timecode_24)
+	, a3e_timecode (Timecode::timecode_24)
+	, samples_per_timecode_frame (0)
 {
 	if ((_port = AudioEngine::instance()->register_input_port (DataType::AUDIO, string_compose ("%1 in", _name))) == 0) {
 		throw failed_constructor();
