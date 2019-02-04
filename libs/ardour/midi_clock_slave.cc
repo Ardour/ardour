@@ -298,7 +298,7 @@ MIDIClock_TransportMaster::reset (bool with_position)
 	if (with_position) {
 		current.update (_session->transport_sample(), 0, 0);
 	} else {
-		current.update (0, 0, 0);
+		current.reset ();
 	}
 
 	_running = false;

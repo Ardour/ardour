@@ -234,9 +234,9 @@ MTC_TransportMaster::reset (bool with_position)
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC_TransportMaster reset %1\n", with_position?"with position":"without position"));
 
 	if (with_position) {
-		current.update (0, 0, 0);
-	} else {
 		current.update (current.position, 0, 0);
+	} else {
+		current.reset ();
 	}
 	first_mtc_timestamp = 0;
 	window_begin = 0;
