@@ -600,8 +600,6 @@ ARDOUR::init_post_engine (uint32_t start_cnt)
 {
 	XMLNode* node;
 
-	std::cerr << "Engine stated, libardour inits, cnt = " << start_cnt << std::endl;
-
 	if (start_cnt == 0) {
 
 		/* find plugins */
