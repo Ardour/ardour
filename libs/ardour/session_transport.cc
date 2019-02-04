@@ -1222,7 +1222,7 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 		return;
 	}
 
-	cerr << "... now doing the actual locate\n";
+	cerr << "... now doing the actual locate to " << target_sample << " from " << _transport_sample << endl;
 
 	// Update Timecode time
 	_transport_sample = target_sample;
