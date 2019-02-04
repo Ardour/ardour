@@ -196,10 +196,12 @@ LTC_TransportMaster::resync_latency()
 void
 LTC_TransportMaster::reset (bool with_position)
 {
-	DEBUG_TRACE (DEBUG::LTC, "LTC reset()\n");
+	DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC reset() with pos ? %1\n", with_position));
 	if (with_position) {
 		current.update (current.position, 0, current.speed);
 		_current_delta = 0;
+	} else {
+		current.reset ();
 	}
 	transport_direction = 0;
 	sync_lock_broken = false;
