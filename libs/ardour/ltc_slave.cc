@@ -69,7 +69,7 @@ LTC_TransportMaster::LTC_TransportMaster (std::string const & name)
 
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("LTC registered %1\n", _port->name()));
 
-	memset(&prev_sample, 0, sizeof(LTCFrameExt));
+	memset (&prev_sample, 0, sizeof(LTCFrameExt));
 
 	resync_latency();
 
