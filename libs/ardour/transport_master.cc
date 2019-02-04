@@ -112,7 +112,6 @@ TransportMaster::speed_and_position (double& speed, samplepos_t& pos, samplepos_
 			lp = last.position;
 			when = last.timestamp;
 			_current_delta = 0;
-			// queue_reset (false);
 			DEBUG_TRACE (DEBUG::Slave, string_compose ("%1 not seen since %2 vs %3 (%4) with seekahead = %5 reset pending, pos = %6\n", name(), last.timestamp, now, (now - last.timestamp), update_interval(), pos));
 			return false;
 		}
