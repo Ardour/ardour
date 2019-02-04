@@ -562,6 +562,7 @@ TransportMasterManager::master_by_type (SyncSource src) const
 void
 TransportMasterManager::engine_stopped ()
 {
+	DEBUG_TRACE (DEBUG::Slave, "engine stopped, reset all transport masters\n");
 	{
 		Glib::Threads::RWLock::ReaderLock lm (lock);
 
