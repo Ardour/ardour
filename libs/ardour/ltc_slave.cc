@@ -188,7 +188,7 @@ LTC_TransportMaster::resync_latency()
 	DEBUG_TRACE (DEBUG::LTC, "LTC resync_latency()\n");
 	sync_lock_broken = false;
 
-	if (!_port) {
+	if (_port) {
 		_port->get_connected_latency_range (ltc_slave_latency, false);
 	}
 }
