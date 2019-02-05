@@ -63,7 +63,7 @@ public:
 	/* called by the Butler in a non-realtime context */
 
 	int do_refill () {
-		return refill (_mixdown_buffer, _gain_buffer, 0);
+		return refill (_sum_buffer, _mixdown_buffer, _gain_buffer, 0);
 	}
 
 	/** For non-butler contexts (allocates temporary working buffers)
@@ -130,7 +130,6 @@ private:
 	    with respect to the transport sample.  This is used for latency compensation.
 	*/
 	samplepos_t   overwrite_sample;
-	off_t         overwrite_offset;
 	bool          _pending_overwrite;
 	bool          overwrite_queued;
 	IOChange      input_change_pending;
@@ -144,16 +143,20 @@ private:
 	static samplecnt_t midi_readahead;
 	static bool       _no_disk_output;
 
-	int audio_read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
+	int audio_read (PBD::PlaybackBuffer<Sample>*,
+	                Sample* sum_buffer,
+	                Sample* mixdown_buffer,
+	                float*  gain_buffer,
 	                samplepos_t& start, samplecnt_t cnt,
 	                int channel, bool reversed);
 	int midi_read (samplepos_t& start, samplecnt_t cnt, bool reversed);
 
+	static Sample* _sum_buffer;
 	static Sample* _mixdown_buffer;
 	static gain_t* _gain_buffer;
 
-	int refill (Sample* mixdown_buffer, float* gain_buffer, samplecnt_t fill_level);
-	int refill_audio (Sample *mixdown_buffer, float *gain_buffer, samplecnt_t fill_level);
+	int refill (Sample* sum_buffer, Sample* mixdown_buffer, float* gain_buffer, samplecnt_t fill_level);
+	int refill_audio (Sample* sum_buffer, Sample *mixdown_buffer, float *gain_buffer, samplecnt_t fill_level);
 	int refill_midi ();
 
 	sampleoffset_t calculate_playback_distance (pframes_t);

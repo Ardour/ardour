@@ -19,6 +19,7 @@
 
 #include "pbd/debug.h"
 #include "pbd/error.h"
+#include "pbd/playback_buffer.h"
 
 #include "ardour/audioplaylist.h"
 #include "ardour/butler.h"
