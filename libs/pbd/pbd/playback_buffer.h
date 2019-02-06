@@ -106,7 +106,8 @@ public:
 	}
 
 	guint read  (T *dest, guint cnt, bool commit = true);
-	guint write (T const * src,  guint cnt);
+	guint write (T const * src, guint cnt);
+	guint write_zero (guint cnt);
 
 	T *buffer () { return buf; }
 	guint bufsize () const { return size; }
@@ -139,7 +140,6 @@ private:
 	Glib::Threads::Mutex _reset_lock;
 };
 
-
 template<class T> /*LIBPBD_API*/ guint
 PlaybackBuffer<T>::write (T const *src, guint cnt)
 {
@@ -167,6 +167,44 @@ PlaybackBuffer<T>::write (T const *src, guint cnt)
 
 	if (n2) {
 		memcpy (buf, src+n1, n2 * sizeof (T));
+		w = n2;
+	}
+
+	{
+		SpinLock sl (_writepos_lock);
+		write_pos += to_write;
+		g_atomic_int_set (&write_idx, w);
+	}
+	return to_write;
+}
+
+template<class T> /*LIBPBD_API*/ guint
+PlaybackBuffer<T>::write_zero (guint cnt)
+{
+	guint w = g_atomic_int_get (&write_idx);
+	const guint free_cnt = write_space ();
+
+	if (free_cnt == 0) {
+		return 0;
+	}
+
+	const guint to_write = cnt > free_cnt ? free_cnt : cnt;
+	const guint cnt2 = w + to_write;
+
+	guint n1, n2;
+	if (cnt2 > size) {
+		n1 = size - w;
+		n2 = cnt2 & size_mask;
+	} else {
+		n1 = to_write;
+		n2 = 0;
+	}
+
+	memset (&buf[w], 0, n1 * sizeof (T));
+	w = (w + n1) & size_mask;
+
+	if (n2) {
+		memset (buf, 0, n2 * sizeof (T));
 		w = n2;
 	}
 

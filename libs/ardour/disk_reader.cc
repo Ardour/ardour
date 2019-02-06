@@ -692,11 +692,7 @@ DiskReader::audio_read (PBD::PlaybackBuffer<Sample>*rb,
 	Location *loc = 0;
 
 	if (!_playlists[DataType::AUDIO]) {
-		// TODO optimize use zero-buffer
-		for (uint32_t z = 0; z < cnt; ++z) {
-			Sample t = 0;
-			rb->write (&t, 1);
-		}
+		rb->write_zero (cnt);
 		return 0;
 	}
 
@@ -908,12 +904,7 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 			/* at start: nothing to do but fill with silence */
 			for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
 				ChannelInfo* chan (*i);
-				// TODO optimize use zero-buffer
-				samplecnt_t ws = chan->rbuf->write_space ();
-				for (uint32_t z = 0; z < ws; ++z) {
-					Sample t = 0;
-					chan->rbuf->write (&t, 1);
-				}
+				chan->rbuf->write_zero (chan->rbuf->write_space ());
 			}
 			return 0;
 		}
@@ -932,12 +923,7 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 			/* at end: nothing to do but fill with silence */
 			for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
 				ChannelInfo* chan (*i);
-				// TODO optimize use zero-buffer
-				samplecnt_t ws = chan->rbuf->write_space ();
-				for (uint32_t z = 0; z < ws; ++z) {
-					Sample t = 0;
-					chan->rbuf->write (&t, 1);
-				}
+				chan->rbuf->write_zero (chan->rbuf->write_space ());
 			}
 			return 0;
 		}
@@ -990,7 +976,10 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 		}
 
 		if (zero_fill) {
-			/* XXX: do something */
+			/* not sure if action is needed,
+			 * we'll later hit the "to close to the end" case
+			 */
+			//chan->rbuf->write_zero (zero_fill);
 		}
 	}
 
