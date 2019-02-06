@@ -601,7 +601,7 @@ Session::process_without_events (pframes_t nframes)
 		no_roll (nframes);
 		return;
 	} else {
-		samples_moved = (samplecnt_t) nframes;
+		samples_moved = (samplecnt_t) nframes * _transport_speed;
 	}
 
 	if (!_exporting && !timecode_transmission_suspended()) {
