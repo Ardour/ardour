@@ -283,12 +283,10 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	assert (speed == -1 || speed == 0 || speed == 1);
 
-	if (speed < 0) {
-		disk_samples_to_consume = -nframes;
-	} else if (speed > 0) {
-		disk_samples_to_consume = nframes;
-	} else {
+	if (speed == 0) {
 		disk_samples_to_consume = 0;
+	} else {
+		disk_samples_to_consume = nframes;
 	}
 
 	if (!result_required || ((ms & MonitoringDisk) == 0) || still_locating || _no_disk_output) {
@@ -316,7 +314,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		gain_t scaling;
 
 		if (n_chans > n_buffers) {
-			scaling = ((float) n_buffers)/n_chans;
+			scaling = ((float) n_buffers) / n_chans;
 		} else {
 			scaling = 1.0;
 		}
@@ -335,27 +333,14 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				disk_signal = output.data ();
 			}
 
-			if (speed > 0) {
-				if (start_sample < playback_sample) {
-					cerr << owner()->name() << " SS = " << start_sample << " PS = " << playback_sample << endl;
-					abort ();
-				}
-			} else if (speed < 0) {
-				if (playback_sample < start_sample) {
-					cerr << owner()->name() << " SS = " << start_sample << " PS = " << playback_sample << " REVERSE" << endl;
-					abort ();
-				}
-			}
-
-			if ((speed > 0) && (start_sample != playback_sample)) {
-				stringstream str;
-				str << owner()->name() << " playback @ " << start_sample << " not aligned with " << playback_sample << " jump ahead " << (start_sample - playback_sample) << endl;
-				cerr << str.str();
+			if (start_sample != playback_sample) {
+				cerr << owner()->name() << " playback @ " << start_sample << " not aligned with " << playback_sample << " jump " << (start_sample - playback_sample) << endl;
 
 				if (can_internal_playback_seek (start_sample - playback_sample)) {
 					internal_playback_seek (start_sample - playback_sample);
 				} else {
 					cerr << owner()->name() << " playback not possible: ss = " << start_sample << " ps = " << playback_sample << endl;
+					abort (); // XXX -- now what?
 					goto midi;
 				}
 			}
@@ -376,8 +361,6 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			if (scaling != 1.0f && speed != 0.0) {
 				apply_gain_to_buffer (disk_signal, disk_samples_to_consume, scaling);
 			}
-
-			//chaninfo->rbuf->increment_read_ptr (disk_samples_to_consume);
 
 			if (ms & MonitoringInput) {
 				/* mix the disk signal into the input signal (already in bufs) */
@@ -537,6 +520,7 @@ DiskReader::overwrite_existing_buffers ()
 			samplecnt_t to_read = size;
 
 			cerr << owner()->name() << " over-read: " << to_read << endl;
+
 			if (audio_read ((*chan)->rbuf, sum_buffer.get(), mixdown_buffer.get(), gain_buffer.get(), start, to_read, n, reversed)) {
 				error << string_compose(_("DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"), id(), size, overwrite_sample) << endmsg;
 				goto midi;
@@ -976,7 +960,7 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 		to_read = min (to_read, samples_to_read);
 		assert (to_read >= 0);
 
-		cerr << owner()->name() << " to-read: " << to_read << endl;
+		// cerr << owner()->name() << " to-read: " << to_read << endl;
 
 		if (to_read) {
 			if (audio_read (chan->rbuf, sum_buffer, mixdown_buffer, gain_buffer, file_sample_tmp, to_read, chan_n, reversed)) {
@@ -1126,7 +1110,7 @@ void
 DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, samplepos_t end_sample, MonitorState ms, BufferSet& scratch_bufs, double speed, samplecnt_t disk_samples_to_consume)
 {
 	MidiBuffer* target;
-	samplepos_t nframes = end_sample - start_sample;
+	samplepos_t nframes = llabs (end_sample - start_sample);
 
 	assert (_midi_buf);
 
