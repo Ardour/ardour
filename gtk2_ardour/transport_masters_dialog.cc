@@ -488,6 +488,10 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 	boost::shared_ptr<TimecodeTransportMaster> ttm;
 	boost::shared_ptr<MIDIClock_TransportMaster> mtm;
 
+	if (!AudioEngine::instance()->running()) {
+		return;
+	}
+
 	if (s) {
 
 		if (tm->speed_and_position (speed, pos, most_recent, when, now)) {
