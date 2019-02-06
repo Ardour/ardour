@@ -183,7 +183,7 @@ Session::Session (AudioEngine &eng,
 	, _transport_sample (0)
 	, _seek_counter (0)
 	, _session_range_location (0)
-	, _session_range_end_is_free (true)
+	, _session_range_is_free (true)
 	, _silent (false)
 	, _remaining_latency_preroll (0)
 	, _engine_speed (1.0)
@@ -4642,20 +4642,20 @@ Session::maybe_update_session_range (samplepos_t a, samplepos_t b)
 
 	} else {
 
-		if (a < _session_range_location->start()) {
+		if (_session_range_is_free && (a < _session_range_location->start())) {
 			_session_range_location->set_start (a);
 		}
 
-		if (_session_range_end_is_free && (b > _session_range_location->end())) {
+		if (_session_range_is_free && (b > _session_range_location->end())) {
 			_session_range_location->set_end (b);
 		}
 	}
 }
 
 void
-Session::set_end_is_free (bool yn)
+Session::set_session_range_is_free (bool yn)
 {
-	_session_range_end_is_free = yn;
+	_session_range_is_free = yn;
 }
 
 void

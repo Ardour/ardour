@@ -468,8 +468,8 @@ public:
 	void set_auto_punch_location (Location *);
 	void set_auto_loop_location (Location *);
 	void set_session_extents (samplepos_t start, samplepos_t end);
-	bool end_is_free () const { return _session_range_end_is_free; }
-	void set_end_is_free (bool);
+	bool session_range_is_free () const { return _session_range_is_free; }
+	void set_session_range_is_free (bool);
 
 	pframes_t get_block_size () const         { return current_block_size; }
 	samplecnt_t worst_output_latency () const { return _worst_output_latency; }
@@ -1245,7 +1245,7 @@ private:
 	samplepos_t             _transport_sample;
 	gint                    _seek_counter;
 	Location*               _session_range_location; ///< session range, or 0 if there is nothing in the session yet
-	bool                    _session_range_end_is_free;
+	bool                    _session_range_is_free;
 	bool                    _silent;
 	samplecnt_t             _remaining_latency_preroll;
 

@@ -1208,7 +1208,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 			child = node->add_child ("Path");
 			child->add_content (p);
 		}
-		node->set_property ("end-is-free", _session_range_end_is_free);
+		node->set_property ("end-is-free", _session_range_is_free);  //deprecated, but keep storing this value for compatibility with prior v5.
+		node->set_property ("session-range-is-free", _session_range_is_free);
 	}
 
 	/* save the ID counter */
@@ -1559,7 +1560,9 @@ Session::set_state (const XMLNode& node, int version)
 
 	setup_raid_path(_session_dir->root_path());
 
-	node.get_property (X_("end-is-free"), _session_range_end_is_free);
+	node.get_property (X_("end-is-free"), _session_range_is_free);  //deprectated, but use old values if they are in the config
+
+	node.get_property (X_("session-range-is-free"), _session_range_is_free);
 
 	uint64_t counter;
 	if (node.get_property (X_("id-counter"), counter)) {
