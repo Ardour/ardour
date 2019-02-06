@@ -623,8 +623,8 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 	return ret;
 }
 
-int
-DiskReader::can_internal_playback_seek (samplecnt_t distance)
+bool
+DiskReader::can_internal_playback_seek (sampleoffset_t distance)
 {
 	/* 1. Audio */
 
@@ -632,9 +632,13 @@ DiskReader::can_internal_playback_seek (samplecnt_t distance)
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	for (chan = c->begin(); chan != c->end(); ++chan) {
-		if ((*chan)->rbuf->read_space() < (size_t) distance) {
+		if (!(*chan)->rbuf->can_seek (distance)) {
 			return false;
 		}
+	}
+
+	if (distance < 0) {
+		return true; // XXX TODO un-seek MIDI
 	}
 
 	/* 2. MIDI */
@@ -645,19 +649,26 @@ DiskReader::can_internal_playback_seek (samplecnt_t distance)
 	return ((samples_written - samples_read) < distance);
 }
 
-int
-DiskReader::internal_playback_seek (samplecnt_t distance)
+void
+DiskReader::internal_playback_seek (sampleoffset_t distance)
 {
-	ChannelList::iterator chan;
-	boost::shared_ptr<ChannelList> c = channels.reader();
-
-	for (chan = c->begin(); chan != c->end(); ++chan) {
-		(*chan)->rbuf->increment_read_ptr (::llabs(distance));
+	if (distance == 0) {
+		return;
 	}
 
-	playback_sample += distance;
+	sampleoffset_t off = distance;
 
-	return 0;
+	ChannelList::iterator chan;
+	boost::shared_ptr<ChannelList> c = channels.reader();
+	for (chan = c->begin(); chan != c->end(); ++chan) {
+		if (distance < 0) {
+			off = 0 - (sampleoffset_t) (*chan)->rbuf->decrement_read_ptr (llabs (distance));
+		} else {
+			off = (*chan)->rbuf->increment_read_ptr (distance);
+		}
+	}
+
+	playback_sample += off;
 }
 
 static

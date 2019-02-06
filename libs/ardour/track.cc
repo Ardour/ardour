@@ -506,13 +506,13 @@ Track::seek (samplepos_t p, bool complete_refill)
 	return _disk_writer->seek (p, complete_refill);
 }
 
-int
+bool
 Track::can_internal_playback_seek (samplecnt_t p)
 {
 	return _disk_reader->can_internal_playback_seek (p);
 }
 
-int
+void
 Track::internal_playback_seek (samplecnt_t p)
 {
 	return _disk_reader->internal_playback_seek (p);

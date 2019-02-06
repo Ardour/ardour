@@ -137,8 +137,8 @@ public:
 	int do_flush (RunContext, bool force = false);
 	void set_pending_overwrite (bool);
 	int seek (samplepos_t, bool complete_refill = false);
-	int can_internal_playback_seek (samplecnt_t);
-	int internal_playback_seek (samplecnt_t);
+	bool can_internal_playback_seek (samplecnt_t);
+	void internal_playback_seek (samplecnt_t);
 	void non_realtime_locate (samplepos_t);
 	void realtime_handle_transport_stopped ();
 	int overwrite_existing_buffers ();

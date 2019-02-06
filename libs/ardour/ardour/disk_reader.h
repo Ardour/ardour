@@ -84,8 +84,8 @@ public:
 
 	void adjust_buffering ();
 
-	int can_internal_playback_seek (samplecnt_t distance);
-	int internal_playback_seek (samplecnt_t distance);
+	bool can_internal_playback_seek (sampleoffset_t distance);
+	void internal_playback_seek (sampleoffset_t distance);
 	int seek (samplepos_t sample, bool complete_refill = false);
 
 	static PBD::Signal0<void> Underrun;
