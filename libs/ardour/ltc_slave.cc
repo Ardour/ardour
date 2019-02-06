@@ -618,8 +618,8 @@ LTC_TransportMaster::delta_string() const
 	} else if ((monotonic_cnt - current.timestamp) > 2 * samples_per_ltc_frame) {
 		snprintf (delta, sizeof(delta), "%s", _("flywheel"));
 	} else {
-		snprintf (delta, sizeof(delta), "\u0394<span foreground=\"%s\" face=\"monospace\" >%s%s%lld</span>sm",
-				sync_lock_broken ? "red" : "green",
+		snprintf (delta, sizeof(delta), "<span foreground=\"%s\" face=\"monospace\" >%s%s%lld</span>sm",
+				sync_lock_broken ? "red" : "white",
 				LEADINGZERO(::llabs(_current_delta)), PLUSMINUS(-_current_delta), ::llabs(_current_delta));
 	}
 
