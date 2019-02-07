@@ -111,7 +111,7 @@ public:
 	}
 
 	/* read-thead */
-	guint read  (T *dest, guint cnt, bool commit = true);
+	guint read (T *dest, guint cnt, bool commit = true, guint offset = 0);
 
 	/* write-thead */
 	guint write (T const * src, guint cnt);
@@ -254,7 +254,7 @@ PlaybackBuffer<T>::write_zero (guint cnt)
 }
 
 template<class T> /*LIBPBD_API*/ guint
-PlaybackBuffer<T>::read (T *dest, guint cnt, bool commit)
+PlaybackBuffer<T>::read (T *dest, guint cnt, bool commit, guint offset)
 {
 	Glib::Threads::Mutex::Lock lm (_reset_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked ()) {
@@ -265,7 +265,16 @@ PlaybackBuffer<T>::read (T *dest, guint cnt, bool commit)
 	guint r = g_atomic_int_get (&read_idx);
 	const guint w = g_atomic_int_get (&write_idx);
 
-	const guint free_cnt = (w > r) ? (w - r) : ((w - r + size) & size_mask);
+	guint free_cnt = (w > r) ? (w - r) : ((w - r + size) & size_mask);
+
+	if (!commit && offset > 0) {
+		if (offset > free_cnt) {
+			return 0;
+		}
+		free_cnt -= offset;
+		r = (r + offset) & size_mask;
+	}
+
 	const guint to_read = cnt > free_cnt ? free_cnt : cnt;
 
 	const guint cnt2 = r + to_read;
