@@ -110,6 +110,7 @@ CONFIG_VARIABLE (bool, automation_follows_regions, "automation-follows-regions",
 CONFIG_VARIABLE (bool, region_boundaries_from_selected_tracks, "region-boundaries-from-selected-tracks", true)
 CONFIG_VARIABLE (bool, region_boundaries_from_onscreen_tracks, "region-boundaries-from-onscreen_tracks", true)
 CONFIG_VARIABLE (FadeShape, default_fade_shape, "default-fade-shape", FadeLinear)
+CONFIG_VARIABLE (RangeSelectionAfterSplit, range_selection_after_split, "range-selection-after-split", PreserveSel)
 CONFIG_VARIABLE (RegionSelectionAfterSplit, region_selection_after_split, "region-selection-after-split", None)
 
 /* monitoring, mute, solo etc */

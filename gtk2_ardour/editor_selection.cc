@@ -1585,6 +1585,13 @@ Editor::region_selection_changed ()
 		nudge_forward_button.set_name ("generic button");
 		nudge_backward_button.set_name ("generic button");
 	}
+
+	//there are a few global Editor->Select actions which select regions even if you aren't in Object mode.
+	//if regions are selected, we must always force the mouse mode to Object...
+	//... otherwise the user is confusingly left with selected regions that can't be manipulated.
+	if (!selection->regions.empty()) {
+		set_mouse_mode( MouseObject, false );
+	}
 }
 
 void

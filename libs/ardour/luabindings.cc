@@ -2039,6 +2039,12 @@ LuaBindings::common (lua_State* L)
 		.addConst ("ExistingNewlyCreatedBoth", ARDOUR::RegionSelectionAfterSplit(ExistingNewlyCreatedBoth))
 		.endNamespace ()
 
+		.beginNamespace ("RangeSelectionAfterSplit")
+		.addConst ("ClearSel", ARDOUR::RangeSelectionAfterSplit(ClearSel))
+		.addConst ("PreserveSel", ARDOUR::RangeSelectionAfterSplit(PreserveSel))
+		.addConst ("ForceSel", ARDOUR::RangeSelectionAfterSplit(ForceSel))
+		.endNamespace ()
+
 		.beginNamespace ("ShuttleBehaviour")
 		.addConst ("Sprung", ARDOUR::ShuttleBehaviour(Sprung))
 		.addConst ("Wheel", ARDOUR::ShuttleBehaviour(Wheel))
