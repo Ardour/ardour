@@ -94,7 +94,7 @@ public:
 	void reset_tracker ();
 
 	bool declick_in_progress () const {
-		return _declick_gain != 0; // declick-out
+		return _declick_amp.gain() != 0; // declick-out
 	}
 
 	static void set_midi_readahead_samples (samplecnt_t samples_ahead) { midi_readahead = samples_ahead; }
@@ -125,6 +125,22 @@ protected:
 
 	int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many);
 
+	class DeclickAmp
+	{
+		public:
+			DeclickAmp (samplecnt_t sample_rate);
+
+			void apply_gain (AudioBuffer& buf, samplecnt_t n_samples, const float target);
+
+			float gain () const { return _g; }
+			void set_gain (float g) { _g = g; }
+
+		private:
+			float _a;
+			float _l;
+			float _g;
+	};
+
 private:
 	/** The number of samples by which this diskstream's output should be delayed
 	    with respect to the transport sample.  This is used for latency compensation.
@@ -135,7 +151,8 @@ private:
 	IOChange      input_change_pending;
 	samplepos_t   file_sample[DataType::num_types];
 
-	gain_t        _declick_gain;
+	DeclickAmp     _declick_amp;
+	sampleoffset_t _declick_offs;
 
 	int _do_refill_with_alloc (bool partial_fill);
 

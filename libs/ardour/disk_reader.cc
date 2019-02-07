@@ -23,6 +23,7 @@
 #include "pbd/memento_command.h"
 #include "pbd/playback_buffer.h"
 
+#include "ardour/amp.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/audio_buffer.h"
@@ -57,7 +58,8 @@ DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 	, overwrite_sample (0)
 	, _pending_overwrite (false)
 	, overwrite_queued (false)
-	, _declick_gain (0)
+	, _declick_amp (s.nominal_sample_rate ())
+	, _declick_offs (0)
 {
 	file_sample[DataType::AUDIO] = 0;
 	file_sample[DataType::MIDI] = 0;
@@ -1399,4 +1401,55 @@ DiskReader::set_no_disk_output (bool yn)
 	   synced.
 	*/
 	_no_disk_output = yn;
+}
+
+DiskReader::DeclickAmp::DeclickAmp (samplecnt_t sample_rate)
+{
+	_a = 2200.f / (gain_t)sample_rate;
+	_l = -log1p (_a);
+	_g = 0;
+}
+
+void
+DiskReader::DeclickAmp::apply_gain (AudioBuffer& buf, samplecnt_t n_samples, const float target)
+{
+	if (n_samples == 0) {
+		return;
+	}
+	float g = _g;
+
+	if (g == target) {
+		Amp::apply_simple_gain (buf, n_samples, target, 0);
+		return;
+	}
+
+	const float a = _a;
+	Sample* const buffer = buf.data ();
+
+#define MAX_NPROC 16
+	uint32_t remain = n_samples;
+	uint32_t offset = 0;
+	while (remain > 0) {
+		uint32_t n_proc = remain > MAX_NPROC ? MAX_NPROC : remain;
+		for (uint32_t i = 0; i < n_proc; ++i) {
+			buffer[offset + i] *= g;
+		}
+#if 1
+		g += a * (target - g);
+#else /* accurate exponential fade */
+		if (n_proc == MAX_NPROC) {
+			g += a * (target - g);
+		} else {
+			g = target - (target - g) * expf (_l * n_proc / MAX_NPROC);
+		}
+#endif
+		remain -= n_proc;
+		offset += n_proc;
+	}
+
+	if (fabsf (g - target) < /* GAIN_COEFF_DELTA */ 1e-5) {
+		_g = target;
+	} else {
+		_g = g;
+	}
 }
