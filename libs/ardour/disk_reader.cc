@@ -1199,17 +1199,6 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 
 	g_atomic_int_add (&_samples_read_from_ringbuffer, nframes);
 
-	/* vari-speed */
-	if (speed != 0.0 && fabsf (speed) != 1.0f) {
-		for (MidiBuffer::iterator i = target->begin(); i != target->end(); ++i) {
-			MidiBuffer::TimeType *tme = i.timeptr();
-			// XXX need to subtract port offsets before scaling
-			// also we must only scale events read from disk
-			// and not existing input data in the buffer.
-			*tme = (*tme) * nframes / disk_samples_to_consume;
-		}
-	}
-
 	if (ms & MonitoringInput) {
 		dst.merge_from (*target, nframes);
 	}
