@@ -325,15 +325,8 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 			ChannelInfo* chaninfo (*chan);
 			AudioBuffer& output (bufs.get_audio (n%n_buffers));
-			Sample* disk_signal = 0; /* assignment not really needed but it keeps the compiler quiet and helps track bugs */
 
-			if (ms & MonitoringInput) {
-				/* put disk stream in scratch buffer, blend at end */
-				disk_signal = scratch_bufs.get_audio(n).data ();
-			} else {
-				/* no input stream needed, just overwrite buffers */
-				disk_signal = output.data ();
-			}
+			AudioBuffer& disk_buf ((ms & MonitoringInput) ? scratch_bufs.get_audio(n) : output);
 
 			if (start_sample != playback_sample) {
 				cerr << owner()->name() << " playback @ " << start_sample << " not aligned with " << playback_sample << " jump " << (start_sample - playback_sample) << endl;
@@ -348,8 +341,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			}
 
 			if (speed != 0.0) {
-				assert (disk_signal);
-				const samplecnt_t total = chaninfo->rbuf->read (disk_signal, disk_samples_to_consume);
+				const samplecnt_t total = chaninfo->rbuf->read (disk_buf.data(), disk_samples_to_consume);
 				if (disk_samples_to_consume > total) {
 					cerr << _name << " Need " << disk_samples_to_consume << " total = " << total << endl;
 					cerr << "underrun for " << _name << endl;
@@ -361,12 +353,12 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			}
 
 			if (scaling != 1.0f && speed != 0.0) {
-				apply_gain_to_buffer (disk_signal, disk_samples_to_consume, scaling);
+				Amp::apply_simple_gain (disk_buf, disk_samples_to_consume, scaling);
 			}
 
 			if (ms & MonitoringInput) {
 				/* mix the disk signal into the input signal (already in bufs) */
-				mix_buffers_no_gain (output.data(), disk_signal, disk_samples_to_consume);
+				mix_buffers_no_gain (output.data(), disk_buf.data(), disk_samples_to_consume);
 			}
 		}
 	}
