@@ -45,7 +45,7 @@ public:
 		size_mask = size - 1;
 		buf = new T[size];
 
-		read_idx = 0;
+		g_atomic_int_set (&read_idx, 0);
 		reset ();
 	}
 
