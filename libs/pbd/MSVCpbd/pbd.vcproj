@@ -733,6 +733,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\pbd\playback_buffer.h"
+				>
+			</File>
+			<File
 				RelativePath="..\pbd\properties.h"
 				>
 			</File>
