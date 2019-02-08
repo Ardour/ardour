@@ -56,13 +56,13 @@ bool DiskReader::_no_disk_output = false;
 DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, str, f)
 	, overwrite_sample (0)
-	, _pending_overwrite (false)
 	, overwrite_queued (false)
 	, _declick_amp (s.nominal_sample_rate ())
 	, _declick_offs (0)
 {
 	file_sample[DataType::AUDIO] = 0;
 	file_sample[DataType::MIDI] = 0;
+	g_atomic_int_set (&_pending_overwrite, 0);
 }
 
 DiskReader::~DiskReader ()
@@ -463,31 +463,36 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	// DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 reader run, needs butler = %2\n", name(), _need_butler));
 }
 
+bool
+DiskReader::pending_overwrite () const {
+	return g_atomic_int_get (&_pending_overwrite) != 0;
+}
+
 void
 DiskReader::set_pending_overwrite ()
 {
 	/* called from audio thread, so we can use the read ptr and playback sample as we wish */
 
-	assert (!_pending_overwrite);
-
-	_pending_overwrite = true;
+	assert (!pending_overwrite ());
 	overwrite_sample = playback_sample;
 
 	boost::shared_ptr<ChannelList> c = channels.reader ();
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 		(*chan)->rbuf->read_flush ();
 	}
+	g_atomic_int_set (&_pending_overwrite, 1);
 }
 
 bool
 DiskReader::overwrite_existing_buffers ()
 {
-	boost::shared_ptr<ChannelList> c = channels.reader();
-
+	/* called from butler thread */
+	assert (pending_overwrite ());
 	overwrite_queued = false;
 
 	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 overwriting existing buffers at %2\n", overwrite_sample));
 
+	boost::shared_ptr<ChannelList> c = channels.reader();
 	if (!c->empty ()) {
 		/* AUDIO */
 
@@ -495,6 +500,7 @@ DiskReader::overwrite_existing_buffers ()
 
 		/* assume all are the same size */
 		samplecnt_t size = c->front()->rbuf->write_space ();
+		assert (size > 0);
 
 		boost::scoped_array<Sample> sum_buffer (new Sample[size]);
 		boost::scoped_array<Sample> mixdown_buffer (new Sample[size]);
@@ -545,7 +551,7 @@ DiskReader::overwrite_existing_buffers ()
 		file_sample[DataType::MIDI] = overwrite_sample; // overwrite_sample was adjusted by ::midi_read() to the new position
 	}
 
-	_pending_overwrite = false;
+	g_atomic_int_set (&_pending_overwrite, 0);
 
 	return true;
 }
@@ -557,6 +563,8 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 	int ret = -1;
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
+
+	g_atomic_int_set (&_pending_overwrite, 0);
 
 	//sample = std::max ((samplecnt_t)0, sample -_session.worst_output_latency ());
 

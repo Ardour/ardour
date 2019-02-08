@@ -76,7 +76,7 @@ public:
 		return _do_refill_with_alloc (partial_fill);
 	}
 
-	bool pending_overwrite () const { return _pending_overwrite; }
+	bool pending_overwrite () const;
 
 	// Working buffers for do_refill (butler thread)
 	static void allocate_working_buffers();
@@ -146,7 +146,7 @@ private:
 	    with respect to the transport sample.  This is used for latency compensation.
 	*/
 	samplepos_t   overwrite_sample;
-	bool          _pending_overwrite;
+	mutable gint  _pending_overwrite;
 	bool          overwrite_queued;
 	IOChange      input_change_pending;
 	samplepos_t   file_sample[DataType::num_types];
