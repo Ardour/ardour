@@ -464,12 +464,13 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 }
 
 void
-DiskReader::set_pending_overwrite (bool yn)
+DiskReader::set_pending_overwrite ()
 {
 	/* called from audio thread, so we can use the read ptr and playback sample as we wish */
 
-	_pending_overwrite = yn;
+	assert (!_pending_overwrite);
 
+	_pending_overwrite = true;
 	overwrite_sample = playback_sample;
 
 	boost::shared_ptr<ChannelList> c = channels.reader ();
@@ -478,11 +479,9 @@ DiskReader::set_pending_overwrite (bool yn)
 	}
 }
 
-int
+bool
 DiskReader::overwrite_existing_buffers ()
 {
-	int ret = -1;
-
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	overwrite_queued = false;
@@ -520,8 +519,6 @@ DiskReader::overwrite_existing_buffers ()
 				goto midi;
 			}
 		}
-
-		ret = 0;
 	}
 
   midi:
@@ -550,7 +547,7 @@ DiskReader::overwrite_existing_buffers ()
 
 	_pending_overwrite = false;
 
-	return ret;
+	return true;
 }
 
 int

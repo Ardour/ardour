@@ -135,13 +135,13 @@ public:
 	float capture_buffer_load () const;
 	int do_refill ();
 	int do_flush (RunContext, bool force = false);
-	void set_pending_overwrite (bool);
+	void set_pending_overwrite ();
 	int seek (samplepos_t, bool complete_refill = false);
 	bool can_internal_playback_seek (samplecnt_t);
 	void internal_playback_seek (samplecnt_t);
 	void non_realtime_locate (samplepos_t);
 	void realtime_handle_transport_stopped ();
-	int overwrite_existing_buffers ();
+	bool overwrite_existing_buffers ();
 	samplecnt_t get_captured_samples (uint32_t n = 0) const;
 	void transport_looped (samplepos_t);
 	void transport_stopped_wallclock (struct tm &, time_t, bool);

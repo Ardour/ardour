@@ -49,8 +49,8 @@ public:
 	void run (BufferSet& /*bufs*/, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double speed, pframes_t /*nframes*/, bool /*result_required*/);
 	void realtime_handle_transport_stopped ();
 	void realtime_locate ();
-	int overwrite_existing_buffers ();
-	void set_pending_overwrite (bool yn);
+	bool overwrite_existing_buffers ();
+	void set_pending_overwrite ();
 
 	int set_state (const XMLNode&, int version);
 

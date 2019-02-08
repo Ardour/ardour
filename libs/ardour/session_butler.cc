@@ -98,7 +98,7 @@ Session::overwrite_some_buffers (Track* t)
 
 	if (t) {
 
-		t->set_pending_overwrite (true);
+		t->set_pending_overwrite ();
 
 	} else {
 
@@ -106,7 +106,7 @@ Session::overwrite_some_buffers (Track* t)
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 			if (tr) {
-				tr->set_pending_overwrite (true);
+				tr->set_pending_overwrite ();
 			}
 		}
 	}
