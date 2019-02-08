@@ -1528,6 +1528,9 @@ PluginInsert::no_sc_input_map () const
 			}
 		}
 	}
+	if (has_midi_thru ()) {
+		rv.set (DataType::MIDI, 0, 0);
+	}
 	return rv;
 }
 
