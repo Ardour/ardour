@@ -645,7 +645,7 @@ DiskReader::internal_playback_seek (sampleoffset_t distance)
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	for (chan = c->begin(); chan != c->end(); ++chan) {
 		if (distance < 0) {
-			off = 0 - (sampleoffset_t) (*chan)->rbuf->decrement_read_ptr (llabs (distance));
+			off = 0 - (sampleoffset_t) (*chan)->rbuf->decrement_read_ptr (::llabs (distance));
 		} else {
 			off = (*chan)->rbuf->increment_read_ptr (distance);
 		}
@@ -1109,7 +1109,7 @@ void
 DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, samplepos_t end_sample, MonitorState ms, BufferSet& scratch_bufs, double speed, samplecnt_t disk_samples_to_consume)
 {
 	MidiBuffer* target;
-	samplepos_t nframes = llabs (end_sample - start_sample);
+	samplepos_t nframes = ::llabs (end_sample - start_sample);
 
 	assert (_midi_buf);
 
