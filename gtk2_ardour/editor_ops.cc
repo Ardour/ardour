@@ -181,9 +181,6 @@ Editor::split_regions_at (MusicSample where, RegionSelection& regions)
 {
 	bool frozen = false;
 
-	RegionSelection pre_selected_regions = selection->regions;
-	bool working_on_selection = !pre_selected_regions.empty();
-
 	list<boost::shared_ptr<Playlist> > used_playlists;
 	list<RouteTimeAxisView*> used_trackviews;
 
@@ -271,22 +268,23 @@ Editor::split_regions_at (MusicSample where, RegionSelection& regions)
 		EditorThaw(); /* Emit Signal */
 	}
 
-	if (working_on_selection) {
-		// IFF we were working on selected regions, try to reinstate the other region selections that existed before the freeze/thaw.
+	RegionSelectionAfterSplit rsas = Config->get_region_selection_after_split();
 
-		RegionSelectionAfterSplit rsas = Config->get_region_selection_after_split();
-		/* There are three classes of regions that we might want selected after
-		   splitting selected regions:
-		    - regions selected before the split operation, and unaffected by it
-		    - newly-created regions before the split
-		    - newly-created regions after the split
-		 */
-
-		if (rsas & Existing) {
-			// region selections that existed before the split.
-			selection->add (pre_selected_regions);
-		}
-
+	//if the user has "Clear Selection" as their post-split behavior, then clear the selection
+	if (!latest_regionviews.empty() && (rsas == None)) {
+		selection->clear_objects();
+		selection->clear_time();
+		//but leave track selection intact
+	}
+	
+	//if the user doesn't want to preserve the "Existing" selection, then clear the selection
+	if (!(rsas & Existing)) {
+		selection->clear_objects();
+		selection->clear_time();
+	}
+	
+	//if the user wants newly-created regions to be selected, then select them:
+	if (mouse_mode == MouseObject) {
 		for (RegionSelection::iterator ri = latest_regionviews.begin(); ri != latest_regionviews.end(); ri++) {
 			if ((*ri)->region()->position() < where.sample) {
 				// new regions created before the split
@@ -3210,7 +3208,17 @@ Editor::separate_regions_between (const TimeSelection& ts)
 	}
 
 	if (in_command)	{
-//		selection->set (new_selection);
+
+		RangeSelectionAfterSplit rsas = Config->get_range_selection_after_split();
+
+		//if our config preference says to clear the selection, clear the Range selection
+		if (rsas == ClearSel) {
+			selection->clear_time();
+			//but leave track selection intact
+		} else if (rsas == ForceSel) {
+			//note: forcing the regions to be selected *might* force a tool-change to Object here
+			selection->set(new_selection);	
+		}
 
 		commit_reversible_command ();
 	}
@@ -6416,7 +6424,30 @@ Editor::split_region ()
 	//if no range was selected, try to find some regions to split
 	if (current_mouse_mode() == MouseObject || current_mouse_mode() == MouseRange ) {  //don't try this for Internal Edit, Stretch, Draw, etc.
 
-		RegionSelection rs = get_regions_from_selection_and_edit_point ();
+		RegionSelection rs;
+
+		//new behavior:  the Split action will prioritize the entered_regionview rather than selected regions.
+		//this fixes the unexpected case where you point at a region, but
+		//  * nothing happens OR
+		//  * some other region (maybe off-screen) is split.
+		if (_edit_point == EditAtMouse && entered_regionview) {
+			rs.add (entered_regionview);
+		} else {
+			rs = selection->regions;   //might be empty
+		}
+
+		if (rs.empty()) {
+			TrackViewList tracks = selection->tracks;
+
+			if (!tracks.empty()) {
+				/* no region selected or entered, but some selected tracks:
+				 * act on all regions on the selected tracks at the edit point
+				 */
+				samplepos_t const where = get_preferred_edit_position (Editing::EDIT_IGNORE_NONE, false, false);
+				get_regions_at(rs, where, tracks);
+			}
+		}
+
 		const samplepos_t pos = get_preferred_edit_position();
 		const int32_t division = get_grid_music_divisions (0);
 		MusicSample where (pos, division);
@@ -6426,7 +6457,6 @@ Editor::split_region ()
 		}
 
 		split_regions_at (where, rs);
-
 	}
 }
 

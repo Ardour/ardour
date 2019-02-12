@@ -2460,21 +2460,34 @@ RCOptionEditor::RCOptionEditor ()
 	lm->add (Manual, _("manual layering"));
 	add_option (_("Editor"), lm);
 
+	add_option (_("Editor"), new OptionEditorHeading (_("Split/Separate")));
+
+	ComboOption<RangeSelectionAfterSplit> *rras = new ComboOption<RangeSelectionAfterSplit> (
+		    "range-selection-after-separate",
+		    _("After a Separate operation, in Range mode"),
+		    sigc::mem_fun (*_rc_config, &RCConfiguration::get_range_selection_after_split),
+		    sigc::mem_fun (*_rc_config, &RCConfiguration::set_range_selection_after_split));
+
+	rras->add(ClearSel, _("Clear the Range Selection"));
+	rras->add(PreserveSel, _("Preserve the Range Selection"));
+	rras->add(ForceSel, _("Force-Select the regions under the range. (this might cause a tool change)"));
+	add_option (_("Editor"), rras);
+
 	ComboOption<RegionSelectionAfterSplit> *rsas = new ComboOption<RegionSelectionAfterSplit> (
 		    "region-selection-after-split",
-		    _("After splitting selected regions, select"),
+		    _("After a Split operation, in Object mode"),
 		    sigc::mem_fun (*_rc_config, &RCConfiguration::get_region_selection_after_split),
 		    sigc::mem_fun (*_rc_config, &RCConfiguration::set_region_selection_after_split));
 
 	// TODO: decide which of these modes are really useful
-	rsas->add(None, _("no regions"));
-	// rsas->add(NewlyCreatedLeft, _("newly-created regions before the split"));
-	// rsas->add(NewlyCreatedRight, _("newly-created regions after the split"));
-	rsas->add(NewlyCreatedBoth, _("newly-created regions"));
+	rsas->add(None, _("Clear the Selected Regions"));
+	rsas->add(NewlyCreatedLeft, _("Select only the newly-created regions BEFORE the split point"));
+	rsas->add(NewlyCreatedRight, _("Select only the newly-created regions AFTER the split point"));
+	rsas->add(NewlyCreatedBoth, _("Select the newly-created regions"));
 	// rsas->add(Existing, _("unmodified regions in the existing selection"));
 	// rsas->add(ExistingNewlyCreatedLeft, _("existing selection and newly-created regions before the split"));
 	// rsas->add(ExistingNewlyCreatedRight, _("existing selection and newly-created regions after the split"));
-	rsas->add(ExistingNewlyCreatedBoth, _("existing selection and newly-created regions"));
+	rsas->add(ExistingNewlyCreatedBoth, _("Preserve the existing selection, AND select all newly-created regions"));
 
 	add_option (_("Editor"), rsas);
 
