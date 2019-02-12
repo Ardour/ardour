@@ -4688,7 +4688,7 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 			}
 
 			if (location->is_session_range()) {
-				_editor->session()->set_end_is_free (false);
+				_editor->session()->set_session_range_is_free (false);
 			}
 		}
 	}

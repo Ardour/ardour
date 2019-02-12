@@ -441,7 +441,7 @@ Editor::nudge_forward (bool next, bool force_playhead)
 						loc->set_end (max_samplepos, false, true, divisions);
 					}
 					if (loc->is_session_range()) {
-						_session->set_end_is_free (false);
+						_session->set_session_range_is_free (false);
 					}
 				}
 				if (!in_command) {
@@ -535,7 +535,7 @@ Editor::nudge_backward (bool next, bool force_playhead)
 						loc->set_end (loc->length(), false, true, get_grid_music_divisions(0));
 					}
 					if (loc->is_session_range()) {
-						_session->set_end_is_free (false);
+						_session->set_session_range_is_free (false);
 					}
 				}
 				if (!in_command) {
@@ -2266,6 +2266,8 @@ Editor::set_session_start_from_playhead ()
 
 		commit_reversible_command ();
 	}
+
+	_session->set_session_range_is_free (false);
 }
 
 void
@@ -2291,7 +2293,7 @@ Editor::set_session_end_from_playhead ()
 		commit_reversible_command ();
 	}
 
-	_session->set_end_is_free (false);
+	_session->set_session_range_is_free (false);
 }
 
 
@@ -6600,7 +6602,7 @@ Editor::set_session_extents_from_selection ()
 		commit_reversible_command ();
 	}
 
-	_session->set_end_is_free (false);
+	_session->set_session_range_is_free (false);
 }
 
 void
