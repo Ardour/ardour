@@ -118,6 +118,10 @@ EditorSummary::set_session (Session* s)
 		_editor->selection->RegionsChanged.connect (sigc::mem_fun(*this, &EditorSummary::set_background_dirty));
 	}
 
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &EditorSummary::set_colors));
+
+	set_colors();
+
 	_leftmost = max_samplepos;
 	_rightmost = 0;
 }
@@ -286,8 +290,9 @@ EditorSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle
 	/* Playhead */
 
 	cairo_set_line_width (cr, 1);
-	/* XXX: colour should be set from configuration file */
-	cairo_set_source_rgba (cr, 1, 0, 0, 1);
+
+	double r,g,b,a;  Gtkmm2ext::color_to_rgba(_phead_color, r,g,b,a);
+	cairo_set_source_rgb (cr, r,g,b); // playhead color
 
 	const double ph= playhead_sample_to_position (_editor->playhead_cursor->current_sample());
 	cairo_move_to (cr, ph, 0);
@@ -298,6 +303,14 @@ EditorSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle
 	_last_playhead = ph;
 
 }
+
+void
+EditorSummary::set_colors ()
+{
+	_phead_color = UIConfiguration::instance().color ("play head");
+}
+
+
 
 /** Render a region for the summary.
  *  @param r Region view.

@@ -105,6 +105,9 @@ private:
 
 	bool _move_dragging;
 
+	void set_colors ();
+	uint32_t _phead_color;
+
 	//used for zooming
 	int _last_mx;
 	int _last_my;
