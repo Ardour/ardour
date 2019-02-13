@@ -32,6 +32,7 @@ public:
 	    : m_max_time_us(0)
 	    , m_start_timestamp_us(0)
 	    , m_stop_timestamp_us(0)
+	    , m_alpha(0)
 	    , m_dsp_load(0)
 	{
 
@@ -39,11 +40,13 @@ public:
 
 	void set_max_time(double samplerate, uint32_t period_size) {
 		m_max_time_us = period_size * 1e6 / samplerate;
+		m_alpha = 0.2f * (m_max_time_us * 1e-6f);
 	}
 
 	void set_max_time_us(uint64_t max_time_us) {
 		assert(max_time_us != 0);
 		m_max_time_us = max_time_us;
+		m_alpha = 0.2f * (m_max_time_us * 1e-6f);
 	}
 
 	int64_t get_max_time_us() const { return m_max_time_us; }
@@ -79,9 +82,8 @@ public:
 		if ((calc_avg_load && load > .95f) || (!calc_avg_load && (load > m_dsp_load || load > 1.f))) {
 			m_dsp_load = load;
 		} else {
-			const float alpha = 0.2f * (m_max_time_us * 1e-6f);
 			m_dsp_load = std::min (1.f, m_dsp_load);
-			m_dsp_load += alpha * (load - m_dsp_load) + 1e-12;
+			m_dsp_load += m_alpha * (load - m_dsp_load) + 1e-12;
 		}
 	}
 
@@ -122,6 +124,7 @@ private: // data
 	int64_t m_max_time_us;
 	int64_t m_start_timestamp_us;
 	int64_t m_stop_timestamp_us;
+	float m_alpha;
 	float m_dsp_load;
 };
 
