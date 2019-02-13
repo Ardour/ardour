@@ -440,6 +440,7 @@ Meterbridge::set_session (Session* s)
 	_session->StateSaved.connect (_session_connections, invalidator (*this), boost::bind (&Meterbridge::update_title, this), gui_context());
 	_session->config.ParameterChanged.connect (*this, invalidator (*this), ui_bind (&Meterbridge::parameter_changed, this, _1), gui_context());
 	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&Meterbridge::parameter_changed, this, _1), gui_context());
+	PresentationInfo::Change.connect (*this, invalidator (*this), boost::bind (&Meterbridge::resync_order, this), gui_context());
 
 	if (_visible) {
 		show_window();
