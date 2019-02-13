@@ -6262,6 +6262,15 @@ AutomationRangeDrag::setup (list<boost::shared_ptr<AutomationLine> > const & lin
 
 		pair<samplepos_t, samplepos_t> r = (*i)->get_point_x_range ();
 
+		//need a special detection for automation lanes (not region gain line)
+		//TODO:  if we implement automation regions, this check can probably be removed
+		AudioRegionGainLine *argl = dynamic_cast<AudioRegionGainLine*> ((*i).get());
+		if (!argl) {
+			//in automation lanes, the EFFECTIVE range should be considered 0->max_samplepos (even if there is no line)
+			r.first = 0;
+			r.second = max_samplepos;
+		}
+		
 		/* check this range against all the AudioRanges that we are using */
 		list<AudioRange>::const_iterator k = _ranges.begin ();
 		while (k != _ranges.end()) {
