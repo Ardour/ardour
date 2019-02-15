@@ -32,7 +32,7 @@ template<class T>
 class /*LIBPBD_API*/ PlaybackBuffer
 {
 public:
-	PlaybackBuffer (int32_t sz, guint res = 8191)
+	PlaybackBuffer (guint sz, guint res = 8191)
 	: reservation (res)
 	, _reservation_lock ()
 	{
@@ -40,7 +40,7 @@ public:
 
 		int32_t power_of_two;
 		for (power_of_two = 1; 1U << power_of_two < sz; ++power_of_two);
-		size = 1 << power_of_two;
+		size = 1U << power_of_two;
 
 		size_mask = size - 1;
 		buf = new T[size];
@@ -157,7 +157,7 @@ public:
 	}
 
 	/* read-thead */
-	bool can_seek (int cnt) {
+	bool can_seek (int64_t cnt) {
 		if (cnt > 0) {
 			return read_space() >= cnt;
 		}
