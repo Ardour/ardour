@@ -47,16 +47,16 @@ PortInsert::PortInsert (Session& s, boost::shared_ptr<Pannable> pannable, boost:
 	: IOProcessor (s, true, true, name_and_id_new_insert (s, _bitslot), "", DataType::AUDIO, true)
 	, _out (new Delivery (s, _output, pannable, mm, _name, Delivery::Insert))
 {
-        _mtdm = 0;
-        _latency_detect = false;
-        _latency_flush_samples = 0;
-        _measured_latency = 0;
+	_mtdm = 0;
+	_latency_detect = false;
+	_latency_flush_samples = 0;
+	_measured_latency = 0;
 }
 
 PortInsert::~PortInsert ()
 {
-        _session.unmark_insert_id (_bitslot);
-        delete _mtdm;
+	_session.unmark_insert_id (_bitslot);
+	delete _mtdm;
 }
 
 void
@@ -70,10 +70,10 @@ void
 PortInsert::start_latency_detection ()
 {
 	delete _mtdm;
-        _mtdm = new MTDM (_session.sample_rate());
-        _latency_flush_samples = 0;
-        _latency_detect = true;
-        _measured_latency = 0;
+	_mtdm = new MTDM (_session.sample_rate());
+	_latency_flush_samples = 0;
+	_latency_detect = true;
+	_measured_latency = 0;
 }
 
 void
@@ -86,7 +86,7 @@ PortInsert::stop_latency_detection ()
 void
 PortInsert::set_measured_latency (samplecnt_t n)
 {
-        _measured_latency = n;
+	_measured_latency = n;
 }
 
 samplecnt_t
@@ -113,37 +113,37 @@ PortInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		return;
 	}
 
-        if (_latency_detect) {
+	if (_latency_detect) {
 
-                if (_input->n_ports().n_audio() != 0) {
+		if (_input->n_ports().n_audio() != 0) {
 
-                        AudioBuffer& outbuf (_output->ports().nth_audio_port(0)->get_audio_buffer (nframes));
-                        Sample* in = _input->ports().nth_audio_port(0)->get_audio_buffer (nframes).data();
-                        Sample* out = outbuf.data();
+			AudioBuffer& outbuf (_output->ports().nth_audio_port(0)->get_audio_buffer (nframes));
+			Sample* in = _input->ports().nth_audio_port(0)->get_audio_buffer (nframes).data();
+			Sample* out = outbuf.data();
 
-                        _mtdm->process (nframes, in, out);
+			_mtdm->process (nframes, in, out);
 
-                        outbuf.set_written (true);
-                }
+			outbuf.set_written (true);
+		}
 
-                return;
+		return;
 
-        } else if (_latency_flush_samples) {
+	} else if (_latency_flush_samples) {
 
-                /* wait for the entire input buffer to drain before picking up input again so that we can't
-                   hear the remnants of whatever MTDM pumped into the pipeline.
-                */
+		/* wait for the entire input buffer to drain before picking up input again so that we can't
+		 * hear the remnants of whatever MTDM pumped into the pipeline.
+		 */
 
-                silence (nframes, start_sample);
+		silence (nframes, start_sample);
 
-                if (_latency_flush_samples > nframes) {
-                        _latency_flush_samples -= nframes;
-                } else {
-                        _latency_flush_samples = 0;
-                }
+		if (_latency_flush_samples > nframes) {
+			_latency_flush_samples -= nframes;
+		} else {
+			_latency_flush_samples = 0;
+		}
 
-                return;
-        }
+		return;
+	}
 
 	if (!_active && !_pending_active) {
 		/* deliver silence */
@@ -154,7 +154,7 @@ PortInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	_out->run (bufs, start_sample, end_sample, speed, nframes, true);
 	_input->collect_input (bufs, nframes, ChanCount::ZERO);
 
-  out:
+out:
 	_active = _pending_active;
 }
 
@@ -226,11 +226,11 @@ ARDOUR::samplecnt_t
 PortInsert::signal_latency() const
 {
 	/* because we deliver and collect within the same cycle,
-	   all I/O is necessarily delayed by at least samples_per_cycle().
-
-	   if the return port for insert has its own latency, we
-	   need to take that into account too.
-	*/
+	 * all I/O is necessarily delayed by at least samples_per_cycle().
+	 *
+	 * if the return port for insert has its own latency, we
+	 * need to take that into account too.
+	 */
 
 	if (_measured_latency == 0) {
 		return _session.engine().samples_per_cycle() + _input->effective_latency ();
