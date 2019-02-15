@@ -110,4 +110,12 @@ AudioRegionGainLine::region_changed (const PropertyChange& what_changed)
 	if (what_changed.contains (interesting_stuff)) {
 		_time_converter->set_origin_b (rv.region()->position());
 	}
+
+	interesting_stuff.clear ();
+	interesting_stuff.add (ARDOUR::Properties::start);
+	interesting_stuff.add (ARDOUR::Properties::length);
+
+	if (what_changed.contains (interesting_stuff)) {
+		reset ();
+	}
 }
