@@ -141,9 +141,6 @@ Send::signal_latency () const
 	if (!_pending_active) {
 		 return 0;
 	}
-	if (_user_latency) {
-		return _user_latency;
-	}
 	if (_delay_out > _delay_in) {
 		return _delay_out - _delay_in;
 	}

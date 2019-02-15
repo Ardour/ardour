@@ -645,10 +645,6 @@ VSTPlugin::describe_parameter (Evoral::Parameter param)
 samplecnt_t
 VSTPlugin::signal_latency () const
 {
-	if (_user_latency) {
-		return _user_latency;
-	}
-
 #if ( defined(__x86_64__) || defined(_M_X64) )
 	return *((int32_t *) (((char *) &_plugin->flags) + 24)); /* initialDelay */
 #else

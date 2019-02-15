@@ -536,7 +536,7 @@ IO::state ()
 		node->add_child_nocopy (*pnode);
 	}
 
-	node->set_property (X_("user-latency"), _user_latency);
+	Latent::add_state (node);
 
 	return *node;
 }
@@ -597,7 +597,7 @@ IO::set_state (const XMLNode& node, int version)
 		ConnectingLegal.connect_same_thread (connection_legal_c, boost::bind (&IO::connecting_became_legal, this));
 	}
 
-	node.get_property ("user-latency", _user_latency);
+	Latent::set_state (node, version);
 
 	return 0;
 }

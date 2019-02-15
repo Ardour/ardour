@@ -528,10 +528,6 @@ LadspaPlugin::describe_parameter (Evoral::Parameter which)
 ARDOUR::samplecnt_t
 LadspaPlugin::signal_latency () const
 {
-	if (_user_latency) {
-		return _user_latency;
-	}
-
 	if (_latency_control_port) {
 		return (samplecnt_t) floor (*_latency_control_port);
 	} else {

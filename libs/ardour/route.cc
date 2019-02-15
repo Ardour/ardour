@@ -502,7 +502,7 @@ Route::process_output_buffers (BufferSet& bufs,
 		 * So there can be cases where adding up all latencies may not equal _signal_latency.
 		 */
 		if ((*i)->active ()) {
-			latency += (*i)->signal_latency ();
+			latency += (*i)->effective_latency ();
 		}
 
 		if (re_inject_oob_data) {
@@ -569,7 +569,7 @@ Route::bounce_process (BufferSet& buffers, samplepos_t start, samplecnt_t nframe
 		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
 			(*i)->run (buffers, start - latency, start - latency + nframes, 1.0, nframes, true);
 			buffers.set_count ((*i)->output_streams());
-			latency += (*i)->signal_latency ();
+			latency += (*i)->effective_latency ();
 		}
 
 		if ((*i) == endpoint) {
@@ -598,7 +598,7 @@ Route::bounce_get_latency (boost::shared_ptr<Processor> endpoint,
 			break;
 		}
 		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
-			latency += (*i)->signal_latency ();
+			latency += (*i)->effective_latency ();
 		}
 		if ((*i) == endpoint) {
 			break;
@@ -1129,7 +1129,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 			}
 		}
 
-		_output->set_user_latency (0);
+		_output->unset_user_latency ();
 	}
 
 	reset_instrument_info ();
@@ -1448,7 +1448,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 				++i;
 			}
 
-			_output->set_user_latency (0);
+			_output->unset_user_latency ();
 		}
 
 		if (!removed) {
@@ -1576,7 +1576,7 @@ Route::replace_processor (boost::shared_ptr<Processor> old, boost::shared_ptr<Pr
 		}
 
 		sub->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false));
-		_output->set_user_latency (0);
+		_output->unset_user_latency ();
 	}
 
 	reset_instrument_info ();
@@ -1648,7 +1648,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 			return 0;
 		}
 
-		_output->set_user_latency (0);
+		_output->unset_user_latency ();
 
 		if (configure_processors_unlocked (err, &lm)) {
 			pstate.restore ();
@@ -4038,7 +4038,7 @@ Route::update_signal_latency (bool apply_to_delayline)
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
 	samplecnt_t l_in  = 0;
-	samplecnt_t l_out = _output->user_latency();
+	samplecnt_t l_out = _output->effective_latency ();
 	for (ProcessorList::reverse_iterator i = _processors.rbegin(); i != _processors.rend(); ++i) {
 		if (boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (*i)) {
 			snd->set_delay_in (l_out + _output->latency());
@@ -4052,8 +4052,8 @@ Route::update_signal_latency (bool apply_to_delayline)
 			}
 		}
 		(*i)->set_output_latency (l_out);
-		if ((*i)->active ()) {
-			l_out += (*i)->signal_latency ();
+		if ((*i)->active ()) { // XXX
+			l_out += (*i)->effective_latency ();
 		}
 	}
 
@@ -4087,7 +4087,7 @@ Route::update_signal_latency (bool apply_to_delayline)
 		(*i)->set_playback_offset (_signal_latency + _output->latency ());
 		(*i)->set_capture_offset (_input->latency ());
 		if ((*i)->active ()) {
-			l_in += (*i)->signal_latency ();
+			l_in += (*i)->effective_latency ();
 		}
 	}
 
@@ -4644,7 +4644,7 @@ Route::set_private_port_latencies (bool playback) const
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
 		if ((*i)->active ()) {
-			own_latency += (*i)->signal_latency ();
+			own_latency += (*i)->effective_latency ();
 		}
 	}
 

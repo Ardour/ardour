@@ -146,7 +146,7 @@ Processor::state ()
 		}
 	}
 
-	node->set_property("user-latency", _user_latency);
+	Latent::add_state (node);
 
 	return *node;
 }
@@ -252,7 +252,7 @@ Processor::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	node.get_property ("user-latency", _user_latency);
+	Latent::set_state (node, version);
 
 	return 0;
 }

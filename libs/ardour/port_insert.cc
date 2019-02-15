@@ -79,8 +79,8 @@ PortInsert::start_latency_detection ()
 void
 PortInsert::stop_latency_detection ()
 {
-        _latency_flush_samples = signal_latency() + _session.engine().samples_per_cycle();
-        _latency_detect = false;
+	_latency_flush_samples = effective_latency() + _session.engine().samples_per_cycle();
+	_latency_detect = false;
 }
 
 void
@@ -232,11 +232,11 @@ PortInsert::signal_latency() const
 	   need to take that into account too.
 	*/
 
-        if (_measured_latency == 0) {
-                return _session.engine().samples_per_cycle() + _input->signal_latency();
-        } else {
-                return _measured_latency;
-        }
+	if (_measured_latency == 0) {
+		return _session.engine().samples_per_cycle() + _input->effective_latency ();
+	} else {
+		return _measured_latency;
+	}
 }
 
 /** Caller must hold process lock */

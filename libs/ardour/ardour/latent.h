@@ -26,27 +26,61 @@
 namespace ARDOUR {
 
 class LIBARDOUR_API Latent {
-  public:
+public:
 	Latent() : _user_latency (0) {}
 	virtual ~Latent() {}
 
 	virtual samplecnt_t signal_latency() const = 0;
-	samplecnt_t user_latency () const { return _user_latency; }
 
+	/* effective latency to be used while processing */
 	samplecnt_t effective_latency() const {
-		if (_user_latency) {
+		if (_zero_latency) {
+			return 0;
+		} else if (_use_user_latency) {
 			return _user_latency;
 		} else {
 			return signal_latency ();
 		}
 	}
 
-	virtual void set_user_latency (samplecnt_t val) { _user_latency = val; }
+	/* custom user-set latency, if any */
+	samplecnt_t user_latency () const {
+		if (_use_user_latency) {
+			return _user_latency;
+		} else {
+			return 0;
+		}
+	}
 
-  protected:
-	samplecnt_t           _user_latency;
+	void unset_user_latency () {
+		_use_user_latency = false;
+		_user_latency = 0;
+	}
+
+	virtual void set_user_latency (samplecnt_t val) {
+		_use_user_latency = true;
+		_user_latency = val;
+	}
+
+	static void force_zero_latency (bool en) {
+		_zero_latency = en;
+	}
+
+	static bool zero_latency () {
+		return _zero_latency;
+	}
+
+protected:
+	int  set_state (const XMLNode& node, int version);
+	void add_state (XMLNode*) const;
+
+private:
+	samplecnt_t _use_user_latency;
+	samplecnt_t _user_latency;
+	static bool _zero_latency;
 };
 
-}
+} /* namespace */
+
 
 #endif /* __ardour_latent_h__*/

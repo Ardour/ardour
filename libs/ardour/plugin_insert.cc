@@ -651,8 +651,10 @@ PluginInsert::activate ()
 	if (!owner ()) {
 		return;
 	}
-	if (_plugin_signal_latency != signal_latency ()) {
-		_plugin_signal_latency = signal_latency ();
+
+	const samplecnt_t l = effective_latency ();
+	if (_plugin_signal_latency != l) {
+		_plugin_signal_latency = l;
 		latency_changed ();
 	}
 }
@@ -671,8 +673,10 @@ PluginInsert::deactivate ()
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->deactivate ();
 	}
-	if (_plugin_signal_latency != signal_latency ()) {
-		_plugin_signal_latency = signal_latency ();
+
+	const samplecnt_t l = effective_latency ();
+	if (_plugin_signal_latency != l) {
+		_plugin_signal_latency = l;
 		latency_changed ();
 	}
 }
@@ -1063,8 +1067,9 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 		}
 	}
 
-	if (_plugin_signal_latency != signal_latency ()) {
-		_plugin_signal_latency = signal_latency ();
+	const samplecnt_t l = effective_latency ();
+	if (_plugin_signal_latency != l) {
+		_plugin_signal_latency = l;
 		latency_changed ();
 	}
 }
@@ -2906,11 +2911,7 @@ PluginInsert::signal_latency() const
 	if (!_pending_active) {
 		return 0;
 	}
-	if (_user_latency) {
-		return _user_latency;
-	}
-
-	return _plugins[0]->signal_latency ();
+	return plugin_latency ();
 }
 
 ARDOUR::PluginType
