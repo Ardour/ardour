@@ -414,7 +414,7 @@ PortManager::register_port (DataType dtype, const string& portname, bool input, 
 				               PortDeleter());
 			}
 		} else {
-			throw PortRegistrationFailure("unable to create port (unknown type)");
+			throw PortRegistrationFailure (string_compose ("unable to create port '%1': %2", portname, _("(unknown type)")));
 		}
 
 		RCUWriter<Ports> writer (ports);
@@ -428,10 +428,9 @@ PortManager::register_port (DataType dtype, const string& portname, bool input, 
 	catch (PortRegistrationFailure& err) {
 		throw err;
 	} catch (std::exception& e) {
-		throw PortRegistrationFailure(string_compose(
-				_("unable to create port: %1"), e.what()).c_str());
+		throw PortRegistrationFailure (string_compose ("unable to create port '%1': %2", portname, e.what()).c_str());
 	} catch (...) {
-		throw PortRegistrationFailure("unable to create port (unknown error)");
+		throw PortRegistrationFailure (string_compose ("unable to create port '%1': %2", portname, _("(unknown error)")));
 	}
 
 	DEBUG_TRACE (DEBUG::Ports, string_compose ("\t%2 port registration success, ports now = %1\n", ports.reader()->size(), this));
