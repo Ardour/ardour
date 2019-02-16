@@ -413,7 +413,7 @@ FPGUI::build_available_action_menu ()
 		}
 
 		//kinda kludgy way to avoid displaying menu items as mappable
-		if ( parts[1] == _("Main_menu") )
+		if ( parts[1] == _("Main Menu") )
 			continue;
 		if ( parts[1] == _("JACK") )
 			continue;

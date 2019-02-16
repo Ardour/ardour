@@ -126,7 +126,7 @@ void
 ARDOUR_UI::install_actions ()
 {
 	Glib::RefPtr<ActionGroup> main_actions = ActionManager::create_action_group (global_bindings, X_("Main"));
-	Glib::RefPtr<ActionGroup> main_menu_actions = ActionManager::create_action_group (global_bindings, X_("Main_menu"));
+	Glib::RefPtr<ActionGroup> main_menu_actions = ActionManager::create_action_group (global_bindings, X_("Main Menu"));
 	Glib::RefPtr<Action> act;
 
 	ActionManager::register_action (main_actions, X_("Escape"), _("Escape (deselect all)"), sigc::mem_fun (*this, &ARDOUR_UI::escape));
