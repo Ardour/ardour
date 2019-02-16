@@ -250,7 +250,7 @@ MonitorSection::MonitorSection ()
 	cut_all_button.set_size_request (-1, PX_SCALE(30));
 	cut_all_button.show ();
 
-	act = ActionManager::get_action (X_("Monitor"), X_("monitor-cut-all"));
+	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-cut-all"));
 	if (act) {
 		cut_all_button.set_related_action (act);
 	}
@@ -259,7 +259,7 @@ MonitorSection::MonitorSection ()
 	dim_all_button.set_text (_("Dim"));
 	dim_all_button.set_name ("monitor section dim");
 	dim_all_button.set_size_request (-1, PX_SCALE(25));
-	act = ActionManager::get_action (X_("Monitor"), X_("monitor-dim-all"));
+	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-dim-all"));
 	if (act) {
 		dim_all_button.set_related_action (act);
 	}
@@ -268,7 +268,7 @@ MonitorSection::MonitorSection ()
 	mono_button.set_text (_("Mono"));
 	mono_button.set_name ("monitor section mono");
 	mono_button.set_size_request (-1, PX_SCALE(25));
-	act = ActionManager::get_action (X_("Monitor"), X_("monitor-mono"));
+	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-mono"));
 	if (act) {
 		mono_button.set_related_action (act);
 	}
