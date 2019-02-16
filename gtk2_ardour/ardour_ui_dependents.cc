@@ -66,15 +66,6 @@ using namespace Gtkmm2ext;
 void
 ARDOUR_UI::we_have_dependents ()
 {
-	/* other windows and related key-event-handling contexts have already
-	 * called Bindings::get_bindings() to setup their list of keybindings.
-	 * Do that here for the global bindings.
-	 */
-
-	if ((global_bindings = Bindings::get_bindings (X_("Global"))) == 0) {
-		error << _("Global keybindings are missing") << endmsg;
-	}
-
 	install_dependent_actions ();
 
 	/* The monitor section relies on at least 1 action defined by us. Since that
@@ -248,13 +239,6 @@ tab_window_root_drop (GtkNotebook* src,
 int
 ARDOUR_UI::setup_windows ()
 {
-	/* actions do not need to be defined when we load keybindings. They
-	 * will be lazily discovered. But bindings do need to exist when we
-	 * create windows/tabs with their own binding sets.
-	 */
-
-	keyboard->setup_keybindings ();
-
 	_tabs.set_show_border(false);
 	_tabs.signal_switch_page().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_switch));
 	_tabs.signal_page_added().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_page_added));

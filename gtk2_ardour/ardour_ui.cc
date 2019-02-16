@@ -388,6 +388,17 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		keyboard->set_state (*node, Stateful::loading_state_version);
 	}
 
+	/* actions do not need to be defined when we load keybindings. They
+	 * will be lazily discovered. But bindings do need to exist when we
+	 * create windows/tabs with their own binding sets.
+	 */
+
+	keyboard->setup_keybindings ();
+
+	if ((global_bindings = Bindings::get_bindings (X_("Global"))) == 0) {
+		error << _("Global keybindings are missing") << endmsg;
+	}
+
 	install_actions ();
 
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
