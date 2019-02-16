@@ -828,7 +828,7 @@ MonitorSection::dim_all ()
 		return;
 	}
 
-	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Monitor"), "monitor-dim-all");
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Monitor Section"), "monitor-dim-all");
 	_monitor->set_dim_all (tact->get_active());
 }
 
@@ -839,7 +839,7 @@ MonitorSection::cut_all ()
 		return;
 	}
 
-	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Monitor"), "monitor-cut-all");
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Monitor Section"), "monitor-cut-all");
 	_monitor->set_cut_all (tact->get_active());
 }
 
@@ -850,7 +850,7 @@ MonitorSection::mono ()
 		return;
 	}
 
-	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Monitor"), "monitor-mono");
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Monitor Section"), "monitor-mono");
 	_monitor->set_mono (tact->get_active());
 }
 
@@ -923,10 +923,20 @@ MonitorSection::register_actions ()
 	monitor_actions = ActionManager::create_action_group (bindings, X_("Monitor"));
 	solo_actions = ActionManager::create_action_group (bindings, X_("Monitor"));
 
+
 	ActionManager::register_toggle_action (monitor_actions, X_("UseMonitorSection"), _("Use Monitor Section"), sigc::mem_fun(*this, &MonitorSection::toggle_use_monitor_section));
-	ActionManager::register_toggle_action (monitor_actions, "monitor-mono", _("Monitor Section: Mono"), sigc::mem_fun (*this, &MonitorSection::mono));
-	ActionManager::register_toggle_action (monitor_actions, "monitor-cut-all", _("Monitor Section: Mute"), sigc::mem_fun (*this, &MonitorSection::cut_all));
-	ActionManager::register_toggle_action (monitor_actions, "monitor-dim-all", _("Monitor Section: Dim"), sigc::mem_fun (*this, &MonitorSection::dim_all));
+
+	/* these are global monitor actions that invoke MonitorSectioncode. Do
+	 * not create local versions (i.e. as part of "monitor_actions")
+	 * because then we can end up with two different bindings (one global,
+	 * one local to the monitor section) for the same action.
+	 */
+
+	Glib::RefPtr<ActionGroup> global_monitor_actions = ActionManager::get_action_group (X_("Monitor Section"));
+
+	ActionManager::register_toggle_action (global_monitor_actions, "monitor-mono", _("Mono"), sigc::mem_fun (*this, &MonitorSection::mono));
+	ActionManager::register_toggle_action (global_monitor_actions, "monitor-cut-all", _("Mute"), sigc::mem_fun (*this, &MonitorSection::cut_all));
+	ActionManager::register_toggle_action (global_monitor_actions, "monitor-dim-all", _("Dim"), sigc::mem_fun (*this, &MonitorSection::dim_all));
 
 	ActionManager::register_toggle_action (monitor_actions, "toggle-monitor-processor-box", _("Toggle Monitor Section Processor Box"),
 	                                       sigc::mem_fun (*this, &MonitorSection::update_processor_box));
