@@ -282,6 +282,12 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
+	/* this is used by the monitor section to create global equivalents of
+	 * some of its "local" actions. It will be used when Monitor/... actions
+	 * are created.
+	 */
+
+	(void) ActionManager::create_action_group (global_bindings, X_("Monitor Section"));
 
 	Glib::RefPtr<ActionGroup> transport_actions = ActionManager::create_action_group (global_bindings, X_("Transport"));
 
