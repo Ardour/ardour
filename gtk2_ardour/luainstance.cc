@@ -472,8 +472,6 @@ lua_actionlist (lua_State *L)
 			continue;
 		if (parts[1] == _("redirectmenu"))
 			continue;
-		if (parts[1] == _("Editor_menus"))
-			continue;
 		if (parts[1] == _("RegionList"))
 			continue;
 		if (parts[1] == _("ProcessorMenu"))

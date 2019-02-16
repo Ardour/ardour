@@ -428,8 +428,6 @@ US2400ProtocolGUI::build_available_action_menu ()
 			continue;
 		if (parts[1] == _("redirectmenu"))
 			continue;
-		if (parts[1] == _("Editor_menus"))
-			continue;
 		if (parts[1] == _("RegionList"))
 			continue;
 		if (parts[1] == _("ProcessorMenu"))
