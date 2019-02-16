@@ -81,7 +81,7 @@ private:
 
 	void session_going_away ();
 	void sync_order_keys ();
-	void resync_order ();
+	void resync_order (PBD::PropertyChange what_changed = ARDOUR::Properties::order);
 	mutable Glib::Threads::Mutex _resync_mutex;
 
 	struct MeterBridgeStrip {
