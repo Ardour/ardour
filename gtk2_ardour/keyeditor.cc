@@ -371,8 +371,10 @@ KeyEditor::Tab::populate ()
 		}
 
 		//kinda kludgy way to avoid displaying menu items as mappable
-		if ((action_name.find ("Menu") == action_name.length() - 4) ||
-		    (action_name.find ("menu") == action_name.length() - 4) ||
+		if ((action_name.find (X_("Menu")) == action_name.length() - 4) ||
+		    (action_name.find (X_("menu")) == action_name.length() - 4) ||
+		    (category.find (X_("Menu")) == category.length() - 4) ||
+		    (category.find (X_("menu")) == category.length() - 4) ||
 		    (action_name == _("RegionList"))) {
 			continue;
 		}
