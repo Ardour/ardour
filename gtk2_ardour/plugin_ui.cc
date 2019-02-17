@@ -539,6 +539,8 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	insert->AutomationStateChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::automation_state_changed, this), gui_context());
 
+	insert->LatencyChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::set_latency_label, this), gui_context());
+
 	automation_state_changed();
 }
 
@@ -548,6 +550,7 @@ PlugUIBase::~PlugUIBase()
 	delete stats_gui;
 	delete preset_gui;
 	delete latency_gui;
+	delete latency_dialog;
 }
 
 void
@@ -590,9 +593,9 @@ PlugUIBase::latency_button_clicked ()
 			latency_dialog->set_transient_for (*win);
 		}
 		latency_dialog->add (*latency_gui);
-		latency_dialog->signal_hide().connect (sigc::mem_fun (*this, &PlugUIBase::set_latency_label));
 	}
 
+	latency_gui->refresh ();
 	latency_dialog->show_all ();
 }
 
