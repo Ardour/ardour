@@ -20,6 +20,8 @@
 #ifndef __ardour_latent_h__
 #define __ardour_latent_h__
 
+#include "pbd/signals.h"
+
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
@@ -75,6 +77,8 @@ public:
 	static bool zero_latency () {
 		return _zero_latency;
 	}
+
+	PBD::Signal0<void> LatencyChanged;
 
 protected:
 	int  set_state (const XMLNode& node, int version);
