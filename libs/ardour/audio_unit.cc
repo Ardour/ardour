@@ -954,7 +954,7 @@ AUPlugin::default_value (uint32_t port)
 }
 
 samplecnt_t
-AUPlugin::signal_latency () const
+AUPlugin::plugin_latency () const
 {
 	guint lat = g_atomic_int_get (&_current_latency);;
 	if (lat == UINT_MAX) {

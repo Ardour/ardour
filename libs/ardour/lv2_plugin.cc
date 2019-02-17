@@ -2380,7 +2380,7 @@ LV2Plugin::max_latency () const
 }
 
 samplecnt_t
-LV2Plugin::signal_latency() const
+LV2Plugin::plugin_latency() const
 {
 	if (_latency_control_port) {
 		return (samplecnt_t)floor(*_latency_control_port);

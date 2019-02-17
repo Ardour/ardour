@@ -70,7 +70,6 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	const char * maker () const { return _info->creator.c_str(); }
 	uint32_t parameter_count () const;
 	float default_value (uint32_t port);
-	samplecnt_t signal_latency() const;
 	void set_parameter (uint32_t which, float val);
 	float get_parameter (uint32_t which) const;
 
@@ -161,6 +160,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	void do_remove_preset (std::string);
 
   private:
+	samplecnt_t plugin_latency() const;
 	void find_presets ();
 
 	boost::shared_ptr<CAComponent> comp;

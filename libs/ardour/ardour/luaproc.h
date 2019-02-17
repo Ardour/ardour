@@ -85,7 +85,6 @@ public:
 	void cleanup () { }
 
 	int set_block_size (pframes_t /*nframes*/) { return 0; }
-	samplecnt_t signal_latency() const { return _signal_latency; }
 
 	int connect_and_run (BufferSet& bufs,
 			samplepos_t start, samplepos_t end, double speed,
@@ -129,6 +128,7 @@ public:
 	LuaTableRef* instance_ref () { return &lref; }
 
 private:
+	samplecnt_t plugin_latency() const { return _signal_latency; }
 	void find_presets ();
 
 	/* END Plugin interface */

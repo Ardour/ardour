@@ -61,7 +61,6 @@ public:
 	bool load_preset (PresetRecord);
 	int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
 	std::string describe_parameter (Evoral::Parameter);
-	samplecnt_t signal_latency() const;
 	std::set<Evoral::Parameter> automatable() const;
 
 	PBD::Signal0<void> LoadPresetProgram;
@@ -119,6 +118,7 @@ protected:
 	void do_remove_preset (std::string name);
 	XMLTree * presets_tree () const;
 	std::string presets_file () const;
+	samplecnt_t plugin_latency() const;
 	void find_presets ();
 
 	VSTHandle* _handle;

@@ -25,12 +25,18 @@
 
 namespace ARDOUR {
 
-class LIBARDOUR_API Latent {
+class LIBARDOUR_API HasLatency {
 public:
-	Latent() : _user_latency (0) {}
+	virtual ~HasLatency() {}
+	virtual samplecnt_t signal_latency() const = 0;
+};
+
+class LIBARDOUR_API Latent : public HasLatency {
+public:
+	Latent ();
+	Latent (Latent const&);
 	virtual ~Latent() {}
 
-	virtual samplecnt_t signal_latency() const = 0;
 
 	/* effective latency to be used while processing */
 	samplecnt_t effective_latency() const {
@@ -77,6 +83,7 @@ protected:
 private:
 	samplecnt_t _use_user_latency;
 	samplecnt_t _user_latency;
+
 	static bool _zero_latency;
 };
 

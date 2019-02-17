@@ -526,7 +526,7 @@ LadspaPlugin::describe_parameter (Evoral::Parameter which)
 }
 
 ARDOUR::samplecnt_t
-LadspaPlugin::signal_latency () const
+LadspaPlugin::plugin_latency () const
 {
 	if (_latency_control_port) {
 		return (samplecnt_t) floor (*_latency_control_port);

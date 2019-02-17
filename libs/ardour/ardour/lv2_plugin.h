@@ -75,7 +75,6 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	uint32_t    parameter_count () const;
 	float       default_value (uint32_t port);
 	samplecnt_t  max_latency () const;
-	samplecnt_t  signal_latency () const;
 	void        set_parameter (uint32_t port, float val);
 	float       get_parameter (uint32_t port) const;
 	std::string get_docs() const;
@@ -349,6 +348,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	std::string midnam_model ();
 	bool _midnam_dirty;
 #endif
+
+	samplecnt_t plugin_latency () const;
 
 	void latency_compute_run ();
 	std::string do_save_preset (std::string);

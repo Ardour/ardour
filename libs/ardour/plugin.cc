@@ -102,7 +102,7 @@ Plugin::Plugin (AudioEngine& e, Session& s)
 
 Plugin::Plugin (const Plugin& other)
 	: StatefulDestructible()
-	, Latent()
+	, HasLatency()
 	, _engine (other._engine)
 	, _session (other._session)
 	, _info (other._info)

@@ -67,7 +67,7 @@ typedef std::set<uint32_t> PluginOutputConfiguration;
  *
  * Plugins are not used directly in Ardour but always wrapped by a PluginInsert.
  */
-class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
+class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public HasLatency
 {
   public:
 	Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&);
@@ -337,6 +337,10 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	PBD::Signal1<void,uint32_t> StartTouch;
 	PBD::Signal1<void,uint32_t> EndTouch;
 
+	samplecnt_t signal_latency () const {
+		return plugin_latency ();
+	}
+
 protected:
 
 	friend class PluginInsert;
@@ -369,6 +373,8 @@ protected:
 	SessionObject*           _owner;
 
 private:
+
+	virtual samplecnt_t plugin_latency () const = 0;
 
 	/** Fill _presets with our presets */
 	virtual void find_presets () = 0;

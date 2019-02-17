@@ -24,6 +24,19 @@ using namespace ARDOUR;
 
 bool ARDOUR::Latent::_zero_latency = false;
 
+Latent::Latent ()
+	: HasLatency ()
+	, _use_user_latency (false)
+	, _user_latency (0)
+{}
+
+Latent::Latent (Latent const& other)
+	: HasLatency ()
+	, _use_user_latency (other._use_user_latency)
+	, _user_latency (other._user_latency)
+{}
+
+
 int
 Latent::set_state (const XMLNode& node, int version)
 {
