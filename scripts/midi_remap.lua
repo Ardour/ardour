@@ -12,6 +12,8 @@ ardour {
 -- increase this if they have a need to.
 N_REMAPINGS = 10
 
+OFF_NOTE = -1
+
 function dsp_ioconfig ()
     return { { midi_in = 1, midi_out = 1, audio_in = 0, audio_out = 0}, }
 end
@@ -20,7 +22,7 @@ end
 function dsp_params ()
 
     local map_scalepoints = {}
-    map_scalepoint["Off"] = -1
+    map_scalepoints["Off"] = OFF_NOTE
     for note=0,127 do
         local name = ARDOUR.ParameterDescriptor.midi_note_name(note)
         map_scalepoints[string.format("%03d (%s)", note, name)] = note
@@ -37,7 +39,7 @@ function dsp_params ()
                 name = name,
                 min = -1,
                 max = 127,
-                default = -1,
+                default = OFF_NOTE,
                 integer = true,
                 enum = true,
                 scalepoints = map_scalepoints
@@ -48,17 +50,6 @@ function dsp_params ()
 
     return map_params
 end
-
-
-function dsp_init(samplerate)
-    -- Init translation table, reserve memory
-    translation_table = {}
-    for i = 0,127 do
-        translation_table[i] = i
-    end
-    translation_table[-1] = -1
-end
-
 
 function dsp_run (_, _, n_samples)
     assert (type(midiin) == "table")
@@ -78,13 +69,12 @@ function dsp_run (_, _, n_samples)
     -- any effect.
 
     -- Restore translation table
-    for i = 0,127 do
-        translation_table[i] = i
-    end
-    -- Update it
+    local translation_table = {}
     local ctrl = CtrlPorts:array()
     for i=1,N_REMAPINGS*2,2 do
-        translation_table[ctrl[i]] = ctrl[i + 1]
+        if not (ctrl[i] == OFF_NOTE or ctrl[i + 1] == OFF_NOTE) then
+            translation_table[ctrl[i]] = ctrl[i + 1]
+        end
     end
 
     -- for each incoming midi event
@@ -96,7 +86,7 @@ function dsp_run (_, _, n_samples)
 
         if (#d == 3) and (event_type == 9 or event_type == 8 or event_type == 10) then -- note on, note off, poly. afterpressure
             -- Do the mapping - 2 is note byte for these types
-            d[2] = translation_table[d[2]]
+            d[2] = translation_table[d[2]] or d[2]
             tx_midi (t, d)
         else
             tx_midi (t, d)
