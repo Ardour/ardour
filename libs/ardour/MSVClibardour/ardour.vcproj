@@ -652,6 +652,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\latent.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\legatize.cc"
 				>
 			</File>
