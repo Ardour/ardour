@@ -276,7 +276,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	}
 
 	BufferSet& scratch_bufs (_session.get_scratch_buffers (bufs.count()));
-	const bool still_locating = _session.global_locate_pending();
+	const bool still_locating = _session.global_locate_pending() || pending_overwrite ();
 
 	if (c->empty()) {
 		/* do nothing with audio */
