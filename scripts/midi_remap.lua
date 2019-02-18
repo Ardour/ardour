@@ -1,10 +1,10 @@
 ardour {
     ["type"]    = "dsp",
-    name        = "MIDI Remap Notes",
+    name        = "MIDI Note Mapper",
     category    = "Utility",
     license     = "MIT",
     author      = "Alby Musaelian",
-    description = [[Map arbitrary MIDI notes to others. Affects Note On/Off and polyphonic key pressure.]]
+    description = [[Map arbitrary MIDI notes to others. Affects Note On/Off and polyphonic key pressure. Note that if a single note is mapped multiple times, the last mapping wins -- MIDI events are never duplicated.]]
 }
 
 -- The number of remapping pairs to allow. Increasing this (at least in theory)
@@ -16,14 +16,14 @@ function dsp_ioconfig ()
     return { { midi_in = 1, midi_out = 1, audio_in = 0, audio_out = 0}, }
 end
 
+
 function dsp_params ()
-    local note_names = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"}
 
     local map_scalepoints = {}
+    map_scalepoint["Off"] = -1
     for note=0,127 do
-        local octave = -5 + math.floor(note / 12)
-        local name = note_names[(note % 12) + 1]
-        map_scalepoints[string.format("%03d (%s%d)", note, name, octave)] = note
+        local name = ARDOUR.ParameterDescriptor.midi_note_name(note)
+        map_scalepoints[string.format("%03d (%s)", note, name)] = note
     end
 
     local map_params = {}
@@ -35,9 +35,9 @@ function dsp_params ()
             map_params[i] = {
                 ["type"] = "input",
                 name = name,
-                min = 0,
+                min = -1,
                 max = 127,
-                default = 0,
+                default = -1,
                 integer = true,
                 enum = true,
                 scalepoints = map_scalepoints
@@ -49,12 +49,14 @@ function dsp_params ()
     return map_params
 end
 
+
 function dsp_init(samplerate)
     -- Init translation table, reserve memory
     translation_table = {}
     for i = 0,127 do
         translation_table[i] = i
     end
+    translation_table[-1] = -1
 end
 
 
