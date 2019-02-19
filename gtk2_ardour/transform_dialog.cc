@@ -25,8 +25,6 @@
 
 #include "pbd/i18n.h"
 
-using namespace std;
-using namespace Gtk;
 using namespace ARDOUR;
 
 TransformDialog::Model::Model()
@@ -109,7 +107,7 @@ TransformDialog::TransformDialog()
 	get_vbox()->pack_start(_operations_box, false, false);
 	get_vbox()->pack_start(*add_hbox, false, false);
 
-	add_button(Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	add_button(_("Transform"), Gtk::RESPONSE_OK);
 
 	show_all();
