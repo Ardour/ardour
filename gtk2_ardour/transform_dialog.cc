@@ -229,15 +229,17 @@ TransformDialog::ValueChooser::source_changed()
 }
 
 double
-TransformDialog::ValueChooser::get_value () const
+TransformDialog::ValueChooser::get_value() const
 {
-		return value_spinner.get_value() + ((target_property == MidiModel::NoteDiffCommand::Channel) ? -1. : 0.);
+	const bool is_channel = target_property == MidiModel::NoteDiffCommand::Channel;
+	return value_spinner.get_value() + (is_channel ? -1.0 : 0.0);
 }
 
 double
-TransformDialog::ValueChooser::get_max () const
+TransformDialog::ValueChooser::get_max() const
 {
-		return max_spinner.get_value() + ((target_property == MidiModel::NoteDiffCommand::Channel) ? -1. : 0.);
+	const bool is_channel = target_property == MidiModel::NoteDiffCommand::Channel;
+	return max_spinner.get_value() + (is_channel ? -1.0 : 0.0);
 }
 
 void
