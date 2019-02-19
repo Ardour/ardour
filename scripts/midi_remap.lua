@@ -22,7 +22,7 @@ end
 function dsp_params ()
 
     local map_scalepoints = {}
-    map_scalepoints["Off"] = OFF_NOTE
+    map_scalepoints["None"] = OFF_NOTE
     for note=0,127 do
         local name = ARDOUR.ParameterDescriptor.midi_note_name(note)
         map_scalepoints[string.format("%03d (%s)", note, name)] = note
@@ -72,7 +72,7 @@ function dsp_run (_, _, n_samples)
     local translation_table = {}
     local ctrl = CtrlPorts:array()
     for i=1,N_REMAPINGS*2,2 do
-        if not (ctrl[i] == OFF_NOTE or ctrl[i + 1] == OFF_NOTE) then
+        if not (ctrl[i] == OFF_NOTE) then
             translation_table[ctrl[i]] = ctrl[i + 1]
         end
     end
@@ -87,7 +87,9 @@ function dsp_run (_, _, n_samples)
         if (#d == 3) and (event_type == 9 or event_type == 8 or event_type == 10) then -- note on, note off, poly. afterpressure
             -- Do the mapping - 2 is note byte for these types
             d[2] = translation_table[d[2]] or d[2]
-            tx_midi (t, d)
+            if not (d[2] == OFF_NOTE) then
+                tx_midi (t, d)
+            end
         else
             tx_midi (t, d)
         end
