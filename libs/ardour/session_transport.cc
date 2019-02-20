@@ -512,8 +512,6 @@ Session::butler_transport_work ()
 	if (ptw & PostTransportReverse) {
 
 		clear_clicks();
-		cumulative_rf_motion = 0;
-		reset_rf_scale (0);
 
 		/* don't seek if locate will take care of that in non_realtime_stop() */
 
@@ -784,9 +782,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	if (auditioner) {
 		auditioner->cancel_audition ();
 	}
-
-	cumulative_rf_motion = 0;
-	reset_rf_scale (0);
 
 	if (did_record) {
 		begin_reversible_command (Operations::capture);
@@ -1710,26 +1705,6 @@ Session::post_transport ()
 	   know were handled ?
 	*/
 	set_post_transport_work (PostTransportWork (0));
-}
-
-void
-Session::reset_rf_scale (samplecnt_t motion)
-{
-	cumulative_rf_motion += motion;
-
-	if (cumulative_rf_motion < 4 * _current_sample_rate) {
-		rf_scale = 1;
-	} else if (cumulative_rf_motion < 8 * _current_sample_rate) {
-		rf_scale = 4;
-	} else if (cumulative_rf_motion < 16 * _current_sample_rate) {
-		rf_scale = 10;
-	} else {
-		rf_scale = 100;
-	}
-
-	if (motion != 0) {
-		set_dirty();
-	}
 }
 
 void

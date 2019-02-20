@@ -171,7 +171,6 @@ CONFIG_VARIABLE (bool, loop_is_mode, "loop-is-mode", false)
 #endif
 CONFIG_VARIABLE (samplecnt_t, preroll, "preroll", 0)
 CONFIG_VARIABLE (samplecnt_t, postroll, "postroll", 0)
-CONFIG_VARIABLE (float, rf_speed, "rf-speed", 2.0f)
 CONFIG_VARIABLE (float, shuttle_speed_factor, "shuttle-speed-factor", 1.0f) // used for MMC shuttle
 CONFIG_VARIABLE (float, shuttle_speed_threshold, "shuttle-speed-threshold", 5.0f) // used for MMC shuttle
 CONFIG_VARIABLE (ShuttleBehaviour, shuttle_behaviour, "shuttle-behaviour", Sprung)

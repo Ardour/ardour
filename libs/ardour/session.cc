@@ -241,8 +241,6 @@ Session::Session (AudioEngine &eng,
 	, _n_lua_scripts (0)
 	, _butler (new Butler (*this))
 	, _post_transport_work (0)
-	,  cumulative_rf_motion (0)
-	, rf_scale (1.0)
 	, _locations (new Locations (*this))
 	, _ignore_skips_updates (false)
 	, _rt_thread_active (false)

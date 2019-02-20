@@ -1427,12 +1427,6 @@ private:
 	void schedule_playback_buffering_adjustment ();
 	void schedule_capture_buffering_adjustment ();
 
-	uint32_t    cumulative_rf_motion;
-	uint32_t    rf_scale;
-
-	void set_rf_speed (float speed);
-	void reset_rf_scale (samplecnt_t samples_moved);
-
 	Locations*       _locations;
 	void location_added (Location*);
 	void location_removed (Location*);

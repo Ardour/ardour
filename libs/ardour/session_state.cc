@@ -4031,11 +4031,6 @@ Session::config_changed (std::string p, bool ours)
 			request_play_loop (true);
 		}
 
-	} else if (p == "rf-speed") {
-
-		cumulative_rf_motion = 0;
-		reset_rf_scale (0);
-
 	} else if (p == "click-sound") {
 
 		setup_click_sounds (1);
