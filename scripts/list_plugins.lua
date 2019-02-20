@@ -1,11 +1,11 @@
-ardour { ["type"] = "EditorAction", name = "Dump Plugins",
+ardour { ["type"] = "EditorAction", name = "List Plugins",
 	license     = "MIT",
 	author      = "Ardour Team",
 	description = [[List and count plugins used in this session]]
 }
 
 function factory () return function ()
-	local rv = "Plugins used in this session:\n    | TYPE | NAME (ID)"
+	local rv = "Plugins used in this session:\n<span face=\"mono\">CNT | TYPE | NAME</span>"
 	local all_plugs = {}
 
 	for r in Session:get_routes ():iter () do
@@ -38,10 +38,10 @@ function factory () return function ()
 
 	for k,v in pairs (all_plugs) do
 		print (string.format ("%2d * %-6s %-30s (%s)", v['cnt'], plugintypestr(v['type']), v['name'], v['id']))
-		rv = rv .. "\n" .. string.format ("%2d * %-6s %-30s (%s)", v['cnt'], plugintypestr(v['type']), v['name'], v['id'])
+		rv = rv .. "\n" .. string.format ("%2d * %-6s %s", v['cnt'], plugintypestr(v['type']), v['name'])
 	end
 
-	LuaDialog.Message ("All Plugins", rv, LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run()
+	LuaDialog.Message ("All Plugins", "<span face=\"mono\">" .. rv .. "</span>", LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run()
 
 	all_plugs = nil
 	rv = ""
