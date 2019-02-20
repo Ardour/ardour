@@ -1580,16 +1580,34 @@ PluginInsert::has_midi_thru () const
 	return false;
 }
 
+bool
+PluginInsert::is_channelstrip () const
+{
 #ifdef MIXBUS
-bool
-PluginInsert::is_channelstrip () const {
 	return _plugins.front()->is_channelstrip();
-}
-bool
-PluginInsert::is_nonbypassable () const {
-	return _plugins.front()->is_nonbypassable ();
-}
+#else
+	return false;
 #endif
+}
+
+bool
+PluginInsert::is_nonbypassable () const
+{
+#ifdef MIXBUS
+	return _plugins.front()->is_nonbypassable ();
+#else
+	return false;
+#endif
+}
+
+bool
+PluginInsert::show_on_ctrl_surface () const
+{
+	if (is_channelstrip () || !is_nonbypassable ()) {
+		return false;
+	}
+	return true;
+}
 
 bool
 PluginInsert::check_inplace ()

@@ -113,13 +113,9 @@ public:
 	bool has_midi_thru () const;
 	bool inplace () const { return ! _no_inplace; }
 
-#ifdef MIXBUS
 	bool is_channelstrip () const;
 	bool is_nonbypassable () const;
-#else
-	bool is_channelstrip () const { return false; }
-	bool is_nonbypassable () const { return false; }
-#endif
+	bool show_on_ctrl_surface () const;
 
 	void set_input_map (uint32_t, ChanMapping);
 	void set_output_map (uint32_t, ChanMapping);
