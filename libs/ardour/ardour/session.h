@@ -1105,10 +1105,10 @@ public:
 		PostTransportRoll               = 0x8,
 		PostTransportAbort              = 0x10,
 		PostTransportOverWrite          = 0x20,
-		/* was ... PostTransportSpeed              = 0x40, */
+		/* PostTransportSpeed           = 0x40, */
 		PostTransportAudition           = 0x80,
 		PostTransportReverse            = 0x100,
-		PostTransportInputChange        = 0x200,
+		/* PostTransportInputChange     = 0x200, */
 		PostTransportCurveRealloc       = 0x400,
 		PostTransportClearSubstate      = 0x800,
 		PostTransportAdjustPlaybackBuffering  = 0x1000,
@@ -1413,7 +1413,6 @@ private:
 
 	static const PostTransportWork ProcessCannotProceedMask =
 		PostTransportWork (
-			PostTransportInputChange|
 			PostTransportReverse|
 			PostTransportCurveRealloc|
 			PostTransportAudition|
