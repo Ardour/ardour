@@ -93,9 +93,7 @@ public:
 	void playlist_modified ();
 	void reset_tracker ();
 
-	bool declick_in_progress () const {
-		return _declick_amp.gain() != 0; // declick-out
-	}
+	bool declick_in_progress () const;
 
 	static void set_midi_readahead_samples (samplecnt_t samples_ahead) { midi_readahead = samples_ahead; }
 
