@@ -583,8 +583,7 @@ Session::declick_in_progress () const
 {
 	boost::shared_ptr<RouteList> rl = routes.reader();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (tr && tr->declick_in_progress ()) {
+		if ((*i)->declick_in_progress ()) {
 			return true;
 		}
 	}

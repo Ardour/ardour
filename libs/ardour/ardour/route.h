@@ -148,6 +148,7 @@ public:
 
 	int silent_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler);
 
+	virtual bool declick_in_progress () const { return false; }
 	virtual bool can_record() { return false; }
 
 	void non_realtime_transport_stop (samplepos_t now, bool flush);
