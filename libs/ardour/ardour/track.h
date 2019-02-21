@@ -64,7 +64,6 @@ public:
 
 	bool set_processor_state (XMLNode const & node, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure);
 
-	bool needs_butler () const { return _needs_butler; }
 	bool declick_in_progress () const;
 
 	bool can_record();
@@ -178,7 +177,6 @@ protected:
 
 	MeterPoint    _saved_meter_point;
 	TrackMode     _mode;
-	bool          _needs_butler;
 
 	//private: (FIXME)
 	struct FreezeRecordProcessorInfo {
