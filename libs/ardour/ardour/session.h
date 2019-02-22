@@ -1109,7 +1109,7 @@ public:
 		PostTransportAudition           = 0x80,
 		PostTransportReverse            = 0x100,
 		/* PostTransportInputChange     = 0x200, */
-		PostTransportCurveRealloc       = 0x400,
+		/*PostTransportCurveRealloc       = 0x400, */
 		PostTransportClearSubstate      = 0x800,
 		PostTransportAdjustPlaybackBuffering  = 0x1000,
 		PostTransportAdjustCaptureBuffering   = 0x2000
@@ -1214,7 +1214,6 @@ protected:
 #endif
 
 	friend class Route;
-	void schedule_curve_reallocation ();
 	void update_latency_compensation (bool force = false);
 
 private:
@@ -1414,7 +1413,6 @@ private:
 	static const PostTransportWork ProcessCannotProceedMask =
 		PostTransportWork (
 			PostTransportReverse|
-			PostTransportCurveRealloc|
 			PostTransportAudition|
 			PostTransportStop|
 			PostTransportClearSubstate);

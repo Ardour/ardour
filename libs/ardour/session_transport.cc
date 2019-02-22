@@ -503,12 +503,6 @@ Session::butler_transport_work ()
 		}
 	}
 
-	if (ptw & PostTransportCurveRealloc) {
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			(*i)->curve_reallocate();
-		}
-	}
-
 	if (ptw & PostTransportReverse) {
 
 		clear_clicks();

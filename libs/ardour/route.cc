@@ -3071,13 +3071,6 @@ Route::set_processor_state (XMLNode const & node, XMLProperty const* prop, Proce
 }
 
 void
-Route::curve_reallocate ()
-{
-//	_gain_automation_curve.finish_resize ();
-//	_pan_automation_curve.finish_resize ();
-}
-
-void
 Route::silence (samplecnt_t nframes)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);

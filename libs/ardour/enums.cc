@@ -461,7 +461,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Session, PostTransportOverWrite);
 	REGISTER_CLASS_ENUM (Session, PostTransportAudition);
 	REGISTER_CLASS_ENUM (Session, PostTransportReverse);
-	REGISTER_CLASS_ENUM (Session, PostTransportCurveRealloc);
 	REGISTER_CLASS_ENUM (Session, PostTransportClearSubstate);
 	REGISTER_BITS (_Session_PostTransportWork);
 

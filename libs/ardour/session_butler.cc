@@ -69,13 +69,6 @@ Session::schedule_capture_buffering_adjustment ()
 }
 
 void
-Session::schedule_curve_reallocation ()
-{
-	add_post_transport_work (PostTransportCurveRealloc);
-	_butler->schedule_transport_work ();
-}
-
-void
 Session::request_overwrite_buffer (boost::shared_ptr<Route> r)
 {
 	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (r);

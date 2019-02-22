@@ -601,7 +601,6 @@ protected:
 	void catch_up_on_solo_mute_override ();
 	void set_listen (bool);
 
-	void curve_reallocate ();
 	virtual void set_block_size (pframes_t nframes);
 
 	virtual int no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool session_state_changing);
