@@ -91,6 +91,7 @@ FoldbackStrip::FoldbackStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Rou
 	, fb_level_control (0)
 //	, _visibility (X_("mixer-element-visibility"))
 {
+	_session = sess;
 	init ();
 	set_route (rt);
 }
@@ -124,6 +125,7 @@ FoldbackStrip::init ()
 	insert_box = new ProcessorBox (0, boost::bind (&FoldbackStrip::plugin_selector, this), _pr_selection, 0);
 	insert_box->set_no_show_all ();
 	insert_box->show ();
+	insert_box->set_session (_session);
 
 //	send_scroller.show ();
 	send_display.show ();

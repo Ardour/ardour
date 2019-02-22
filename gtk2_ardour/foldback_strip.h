@@ -148,6 +148,7 @@ private:
 	bool  _mixer_owned;
 	Width _width;
 	void*  _width_owner;
+	ARDOUR::Session* _session;
 
 	Gtk::EventBox               spacer;
 	Gtk::VBox			send_display;
