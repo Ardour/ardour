@@ -29,7 +29,6 @@
 
 #include "fluid_samplecache.h"
 #include "fluid_sys.h"
-#include "fluidsynth.h"
 #include "fluid_list.h"
 
 

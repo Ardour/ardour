@@ -18,7 +18,7 @@
  * 02110-1301, USA
  */
 
-#include "fluidsynth_priv.h"
+#include "fluid_sys.h"
 #include "fluid_voice.h"
 #include "fluid_mod.h"
 #include "fluid_chan.h"
@@ -428,17 +428,7 @@ fluid_voice_gen_get(fluid_voice_t *voice, int gen)
 
 fluid_real_t fluid_voice_gen_value(const fluid_voice_t *voice, int num)
 {
-    /* This is an extension to the SoundFont standard. More
-     * documentation is available at the fluid_synth_set_gen2()
-     * function. */
-    if(voice->gen[num].flags == GEN_ABS_NRPN)
-    {
-        return (fluid_real_t) voice->gen[num].nrpn;
-    }
-    else
-    {
-        return (fluid_real_t)(voice->gen[num].val + voice->gen[num].mod + voice->gen[num].nrpn);
-    }
+    return (fluid_real_t)(voice->gen[num].val + voice->gen[num].mod + voice->gen[num].nrpn);
 }
 
 /*
@@ -605,7 +595,7 @@ fluid_voice_calculate_runtime_synthesis_parameters(fluid_voice_t *voice)
      *  - Add the output value to the modulation value of the generator.
      *
      * Note: The generators have been initialized with
-     * fluid_gen_set_default_values.
+     * fluid_gen_init().
      */
 
     for(i = 0; i < voice->mod_count; i++)
@@ -1789,10 +1779,10 @@ fluid_voice_get_lower_boundary_for_attenuation(fluid_voice_t *voice)
 
 
 
-int fluid_voice_set_param(fluid_voice_t *voice, int gen, fluid_real_t nrpn_value, int abs)
+int fluid_voice_set_param(fluid_voice_t *voice, int gen, fluid_real_t nrpn_value)
 {
     voice->gen[gen].nrpn = nrpn_value;
-    voice->gen[gen].flags = (abs) ? GEN_ABS_NRPN : GEN_SET;
+    voice->gen[gen].flags = GEN_SET;
     fluid_voice_update_param(voice, gen);
     return FLUID_OK;
 }

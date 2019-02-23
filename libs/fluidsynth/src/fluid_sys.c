@@ -30,6 +30,12 @@
 #include "fluid_rtkit.h"
 #endif
 
+#if HAVE_PTHREAD_H && !defined(WIN32)
+// Do not include pthread on windows. It includes winsock.h, which collides with ws2tcpip.h from fluid_sys.h
+// It isn't need on Windows anyway.
+#include <pthread.h>
+#endif
+
 /* WIN32 HACK - Flag used to differentiate between a file descriptor and a socket.
  * Should work, so long as no SOCKET or file descriptor ends up with this bit set. - JG */
 #ifdef _WIN32
@@ -72,9 +78,6 @@ struct _fluid_server_socket_t
 
 
 static int fluid_istream_gets(fluid_istream_t in, char *buf, int len);
-
-
-static char fluid_errbuf[512];  /* buffer for error message */
 
 static fluid_log_function_t fluid_log_function[LAST_LOG_LEVEL] =
 {
@@ -169,20 +172,20 @@ fluid_default_log_function(int level, const char *message, void *data)
 int
 fluid_log(int level, const char *fmt, ...)
 {
-    fluid_log_function_t fun = NULL;
-
-    va_list args;
-    va_start(args, fmt);
-    FLUID_VSNPRINTF(fluid_errbuf, sizeof(fluid_errbuf), fmt, args);
-    va_end(args);
-
     if((level >= 0) && (level < LAST_LOG_LEVEL))
     {
-        fun = fluid_log_function[level];
+        fluid_log_function_t fun = fluid_log_function[level];
 
         if(fun != NULL)
         {
-            (*fun)(level, fluid_errbuf, fluid_log_user_data[level]);
+            char errbuf[1024];
+            
+            va_list args;
+            va_start(args, fmt);
+            FLUID_VSNPRINTF(errbuf, sizeof(errbuf), fmt, args);
+            va_end(args);
+        
+            (*fun)(level, errbuf, fluid_log_user_data[level]);
         }
     }
 
@@ -264,15 +267,6 @@ char *fluid_strtok(char **str, const char *delim)
     /* we get here only if source string ended */
     *str = NULL;
     return token;
-}
-
-/*
- * fluid_error
- */
-char *
-fluid_error()
-{
-    return fluid_errbuf;
 }
 
 /**
@@ -1344,12 +1338,12 @@ fluid_ostream_printf(fluid_ostream_t out, const char *format, ...)
         /* Handle write differently depending on if its a socket or file descriptor */
         if(!(out & FLUID_SOCKET_FLAG))
         {
-            return write(out, buf, FLUID_STRLEN(buf));
+            return write(out, buf, (unsigned int)FLUID_STRLEN(buf));
         }
 
 #ifdef NETWORK_SUPPORT
         /* Socket */
-        retval = send(out & ~FLUID_SOCKET_FLAG, buf, FLUID_STRLEN(buf), 0);
+        retval = send(out & ~FLUID_SOCKET_FLAG, buf, (int)FLUID_STRLEN(buf), 0);
         return retval != SOCKET_ERROR ? retval : -1;
 #else
         return -1;

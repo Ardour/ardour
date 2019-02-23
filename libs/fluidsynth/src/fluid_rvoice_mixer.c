@@ -23,7 +23,6 @@
 #include "fluid_sys.h"
 #include "fluid_rev.h"
 #include "fluid_chorus.h"
-#include "fluidsynth_priv.h"
 #include "fluid_synth.h"
 
 

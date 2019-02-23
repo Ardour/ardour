@@ -24,7 +24,27 @@
 
 void *default_fopen(const char *path)
 {
-    return FLUID_FOPEN(path, "rb");
+    FILE* handle;
+    
+    if(!fluid_file_test(path, G_FILE_TEST_EXISTS))
+    {
+        FLUID_LOG(FLUID_ERR, "fluid_sfloader_load(): Unable to load non-existent file. ('%s')", path);
+        return NULL;
+    }
+    
+    if(!fluid_file_test(path, G_FILE_TEST_IS_REGULAR))
+    {
+        FLUID_LOG(FLUID_ERR, "fluid_sfloader_load(): Refusing to load non-regular file! ('%s')", path);
+        return NULL;
+    }
+    
+    if((handle = FLUID_FOPEN(path, "rb")) == NULL)
+    {
+        FLUID_LOG(FLUID_ERR, "fluid_sfloader_load(): Specified file does not exists or insufficient permissions to open it! ('%s')", path);
+        return NULL;
+    }
+    
+    return handle;
 }
 
 int default_fclose(void *handle)

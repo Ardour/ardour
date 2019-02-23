@@ -3,8 +3,8 @@
 
 #define FLUIDSYNTH_VERSION_MAJOR 2
 #define FLUIDSYNTH_VERSION_MINOR 0
-#define FLUIDSYNTH_VERSION_MICRO 2
-#define FLUIDSYNTH_VERSION "2.0.2"
+#define FLUIDSYNTH_VERSION_MICRO 4
+#define FLUIDSYNTH_VERSION "2.0.4"
 
 /* Define to enable ALSA driver */
 /* #undef ALSA_SUPPORT */
@@ -198,7 +198,7 @@
 /* #undef TRAP_ON_FPE */
 
 /* Version number of package */
-#define VERSION "1.1.6"
+#define VERSION "2.0.4"
 
 /* Define to do all DSP in single floating point precision */
 /* #undef WITH_FLOAT */

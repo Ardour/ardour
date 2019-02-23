@@ -456,7 +456,7 @@ fluid_settings_set(fluid_settings_t *settings, const char *name, fluid_setting_n
             else
             {
                 /* path ends prematurely */
-                FLUID_LOG(FLUID_WARN, "'%s' is not a node. Name of the setting was '%s'", tokens[n], name);
+                FLUID_LOG(FLUID_ERR, "'%s' is not a node. Name of the setting was '%s'", tokens[n], name);
                 return FLUID_FAILED;
             }
 
@@ -549,7 +549,7 @@ fluid_settings_register_str(fluid_settings_t *settings, const char *name, const 
         }
         else
         {
-            FLUID_LOG(FLUID_WARN, "Type mismatch on setting '%s'", name);
+            FLUID_LOG(FLUID_ERR, "Failed to register string setting '%s' as it already exists with a different type", name);
         }
     }
 
@@ -611,7 +611,7 @@ fluid_settings_register_num(fluid_settings_t *settings, const char *name, double
         else
         {
             /* type mismatch */
-            FLUID_LOG(FLUID_WARN, "Type mismatch on setting '%s'", name);
+            FLUID_LOG(FLUID_ERR, "Failed to register numeric setting '%s' as it already exists with a different type", name);
         }
     }
 
@@ -673,7 +673,7 @@ fluid_settings_register_int(fluid_settings_t *settings, const char *name, int de
         else
         {
             /* type mismatch */
-            FLUID_LOG(FLUID_WARN, "Type mismatch on setting '%s'", name);
+            FLUID_LOG(FLUID_ERR, "Failed to register int setting '%s' as it already exists with a different type", name);
         }
     }
 
@@ -935,6 +935,7 @@ fluid_settings_setstr(fluid_settings_t *settings, const char *name, const char *
     if((fluid_settings_get(settings, name, &node) != FLUID_OK)
             || (node->type != FLUID_STR_TYPE))
     {
+        FLUID_LOG(FLUID_ERR, "Unknown string setting '%s'", name);
         goto error_recovery;
     }
 
@@ -1312,6 +1313,7 @@ fluid_settings_setnum(fluid_settings_t *settings, const char *name, double val)
     if((fluid_settings_get(settings, name, &node) != FLUID_OK)
             || (node->type != FLUID_NUM_TYPE))
     {
+        FLUID_LOG(FLUID_ERR, "Unknown numeric setting '%s'", name);
         goto error_recovery;
     }
 
@@ -1319,7 +1321,7 @@ fluid_settings_setnum(fluid_settings_t *settings, const char *name, double val)
 
     if(val < setting->min || val > setting->max)
     {
-        FLUID_LOG(FLUID_DBG, "requested set value for %s out of range", name);
+        FLUID_LOG(FLUID_ERR, "requested set value for '%s' out of range", name);
         goto error_recovery;
     }
 
@@ -1496,6 +1498,7 @@ fluid_settings_setint(fluid_settings_t *settings, const char *name, int val)
     if((fluid_settings_get(settings, name, &node) != FLUID_OK)
             || (node->type != FLUID_INT_TYPE))
     {
+        FLUID_LOG(FLUID_ERR, "Unknown integer parameter '%s'", name);
         goto error_recovery;
     }
 
@@ -1503,7 +1506,7 @@ fluid_settings_setint(fluid_settings_t *settings, const char *name, int val)
 
     if(val < setting->min || val > setting->max)
     {
-        FLUID_LOG(FLUID_DBG, "requested set value for %s out of range", name);
+        FLUID_LOG(FLUID_ERR, "requested set value for setting '%s' out of range", name);
         goto error_recovery;
     }
 

@@ -209,9 +209,6 @@ void delete_fluid_sample_timer(fluid_synth_t *synth, fluid_sample_timer_t *timer
 
 void fluid_synth_process_event_queue(fluid_synth_t *synth);
 
-int fluid_synth_set_gen2(fluid_synth_t *synth, int chan,
-                         int param, float value,
-                         int absolute, int normalized);
 /*
  * misc
  */

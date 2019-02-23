@@ -19,6 +19,7 @@
  */
 
 #include "fluid_conv.h"
+#include "fluid_sys.h"
 #include "fluid_conv_tables.c"
 
 /*

@@ -20,23 +20,137 @@
 
 
 /**
-
-   This header contains a bunch of (mostly) system and machine
-   dependent functions:
-
-   - timers
-   - current time in milliseconds and microseconds
-   - debug logging
-   - profiling
-   - memory locking
-   - checking for floating point exceptions
-
+ * @file fluid_sys.h
+ *
+ * This header contains a bunch of (mostly) system and machine
+ * dependent functions:
+ *
+ * - timers
+ * - current time in milliseconds and microseconds
+ * - debug logging
+ * - profiling
+ * - memory locking
+ * - checking for floating point exceptions
+ *
+ * fluidsynth's wrapper OSAL so to say; include it in .c files, be careful to include
+ * it in fluidsynth's private header files (see comment in fluid_coreaudio.c)
  */
 
 #ifndef _FLUID_SYS_H
 #define _FLUID_SYS_H
 
 #include "fluidsynth_priv.h"
+
+#if HAVE_MATH_H
+#include <math.h>
+#endif
+
+#if HAVE_ERRNO_H
+#include <errno.h>
+#endif
+
+#if HAVE_STDARG_H
+#include <stdarg.h>
+#endif
+
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#if HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+
+#if HAVE_SYS_MMAN_H
+#include <sys/mman.h>
+#endif
+
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#if HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
+#if HAVE_NETINET_TCP_H
+#include <netinet/tcp.h>
+#endif
+
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
+#if HAVE_OPENMP
+#include <omp.h>
+#endif
+
+#if HAVE_IO_H
+#include <io.h> // _open(), _close(), read(), write() on windows
+#endif
+
+#if HAVE_SIGNAL_H
+#include <signal.h>
+#endif
+
+/** Integer types  */
+#if HAVE_STDINT_H
+#include <stdint.h>
+
+#else
+
+/* Assume GLIB types */
+typedef gint8    int8_t;
+typedef guint8   uint8_t;
+typedef gint16   int16_t;
+typedef guint16  uint16_t;
+typedef gint32   int32_t;
+typedef guint32  uint32_t;
+typedef gint64   int64_t;
+typedef guint64  uint64_t;
+
+#endif
+
+#if defined(WIN32) &&  HAVE_WINDOWS_H
+//#include <winsock2.h>
+//#include <ws2tcpip.h>	/* Provides also socklen_t */
+#include <windows.h>
+
+/* WIN32 special defines */
+#define STDIN_FILENO 0
+#define STDOUT_FILENO 1
+#define STDERR_FILENO 2
+
+#ifdef _MSC_VER
+#pragma warning(disable : 4244)
+#pragma warning(disable : 4101)
+#pragma warning(disable : 4305)
+#pragma warning(disable : 4996)
+#endif
+
+#endif
+
+/* Darwin special defines (taken from config_macosx.h) */
+#ifdef DARWIN
+# define MACINTOSH
+# define __Types__
+#endif
 
 #ifdef LADSPA
 #include <gmodule.h>
@@ -52,26 +166,12 @@
  */
 #define fluid_gerror_message(err)  ((err) ? err->message : "No error details")
 
-/* Misc */
-#if defined(__INTEL_COMPILER)
-#define FLUID_RESTRICT restrict
-#elif defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
-#define FLUID_RESTRICT __restrict__
-#elif defined(_MSC_VER) && _MSC_VER >= 1400
-#define FLUID_RESTRICT __restrict
-#else
-#warning "Dont know how this compiler handles restrict pointers, refuse to use them."
-#define FLUID_RESTRICT
-#endif
 
 #define FLUID_INLINE              inline
 #define FLUID_POINTER_TO_UINT     GPOINTER_TO_UINT
 #define FLUID_UINT_TO_POINTER     GUINT_TO_POINTER
 #define FLUID_POINTER_TO_INT      GPOINTER_TO_INT
 #define FLUID_INT_TO_POINTER      GINT_TO_POINTER
-#define FLUID_N_ELEMENTS(struct)  (sizeof (struct) / sizeof (struct[0]))
-#define FLUID_MEMBER_SIZE(struct, member)  ( sizeof (((struct *)0)->member) )
-
 #define FLUID_IS_BIG_ENDIAN       (G_BYTE_ORDER == G_BIG_ENDIAN)
 
 #define FLUID_LE32TOH(x)          GINT32_FROM_LE(x)
@@ -84,17 +184,6 @@
 #define FLUID_FOURCC(_a, _b, _c, _d) \
     (uint32_t)(((uint32_t)(_d) << 24) | ((uint32_t)(_c) << 16) | ((uint32_t)(_b) << 8) | (uint32_t)(_a)) 
 #endif
-
-
-#define fluid_return_if_fail(cond) \
-if(cond) \
-    ; \
-else \
-    return
-
-#define fluid_return_val_if_fail(cond, val) \
- fluid_return_if_fail(cond) (val)
-
 
 /*
  * Utility functions
@@ -356,10 +445,14 @@ typedef GModule fluid_module_t;
 
 /* Sockets and I/O */
 
-fluid_istream_t fluid_get_stdin(void);
-fluid_ostream_t fluid_get_stdout(void);
 int fluid_istream_readline(fluid_istream_t in, fluid_ostream_t out, char *prompt, char *buf, int len);
 int fluid_ostream_printf(fluid_ostream_t out, const char *format, ...);
+
+#if defined(WIN32)
+typedef SOCKET fluid_socket_t;
+#else
+typedef int fluid_socket_t;
+#endif
 
 /* The function should return 0 if no error occured, non-zero
    otherwise. If the function return non-zero, the socket will be
@@ -374,25 +467,26 @@ fluid_istream_t fluid_socket_get_istream(fluid_socket_t sock);
 fluid_ostream_t fluid_socket_get_ostream(fluid_socket_t sock);
 
 /* File access */
+#define fluid_stat(_filename, _statbuf)   g_stat((_filename), (_statbuf))
 #if !GLIB_CHECK_VERSION(2, 26, 0)
     /* GStatBuf has not been introduced yet, manually typedef to what they had at that time:
      * https://github.com/GNOME/glib/blob/e7763678b56e3be073cc55d707a6e92fc2055ee0/glib/gstdio.h#L98-L115
      */
     #if defined(WIN32) || HAVE_WINDOWS_H // somehow reliably mock G_OS_WIN32??
-        #if defined (_MSC_VER) && !defined(_WIN64)
-        typedef struct _stat32 fluid_stat_buf_t;
-        #else
-        typedef struct _stat fluid_stat_buf_t;
-        #endif
+        // Any effort from our side to reliably mock GStatBuf on Windows is in vain. E.g. glib-2.16 is broken as it uses struct stat rather than struct _stat32 on Win x86.
+        // Disable it (the user has been warned by cmake).
+        #undef fluid_stat
+        #define fluid_stat(_filename, _statbuf)  (-1)
+        typedef struct _fluid_stat_buf_t{int st_mtime;} fluid_stat_buf_t;
     #else
-    /* posix, OS/2, etc. */
-    typedef struct stat fluid_stat_buf_t;
+        /* posix, OS/2, etc. */
+        typedef struct stat fluid_stat_buf_t;
     #endif
 #else
 typedef GStatBuf fluid_stat_buf_t;
 #endif
-#define fluid_stat(_filename, _statbuf)   g_stat((_filename), (_statbuf))
 
+#define fluid_file_test g_file_test
 
 /* Profiling */
 #if WITH_PROFILING

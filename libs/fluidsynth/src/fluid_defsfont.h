@@ -196,7 +196,7 @@ struct _fluid_inst_t
 };
 
 fluid_inst_t *new_fluid_inst(void);
-fluid_inst_t *fluid_inst_import_sfont(fluid_preset_zone_t *preset_zone, SFInst *sfinst, fluid_defsfont_t *defsfont);
+fluid_inst_t *fluid_inst_import_sfont(SFInst *sfinst, fluid_defsfont_t *defsfont);
 void delete_fluid_inst(fluid_inst_t *inst);
 int fluid_inst_set_global_zone(fluid_inst_t *inst, fluid_inst_zone_t *zone);
 int fluid_inst_add_zone(fluid_inst_t *inst, fluid_inst_zone_t *zone);

@@ -334,17 +334,23 @@ static int fluid_sffile_read_wav(SFData *sf, unsigned int start, unsigned int en
  */
 int fluid_is_soundfont(const char *filename)
 {
-    FILE    *fp = FLUID_FOPEN(filename, "rb");
+    FILE    *fp;
     uint32_t fcc;
     int      retcode = FALSE;
 
     do
     {
-        if(fp == NULL)
+        if(!fluid_file_test(filename, G_FILE_TEST_IS_REGULAR))
         {
             return retcode;
         }
-
+        
+        // file seems to exist and is a regular file or a symlink to such
+        if((fp = FLUID_FOPEN(filename, "rb")) == NULL)
+        {
+            return retcode;
+        }
+        
         if(FLUID_FREAD(&fcc, sizeof(fcc), 1, fp) != 1)
         {
             break;

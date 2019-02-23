@@ -1015,7 +1015,7 @@ fluid_defpreset_import_sfont(fluid_defpreset_t *defpreset,
     while(p != NULL)
     {
         sfzone = (SFZone *)fluid_list_get(p);
-        FLUID_SNPRINTF(zone_name, sizeof(zone_name), "%s/%d", defpreset->name, count);
+        FLUID_SNPRINTF(zone_name, sizeof(zone_name), "pz:%s/%d", defpreset->name, count);
         zone = new_fluid_preset_zone(zone_name);
 
         if(zone == NULL)
@@ -1133,7 +1133,7 @@ new_fluid_preset_zone(char *name)
     /* Flag all generators as unused (default, they will be set when they are found
      * in the sound font).
      * This also sets the generator values to default, but that is of no concern here.*/
-    fluid_gen_set_default_values(&zone->gen[0]);
+    fluid_gen_init(&zone->gen[0], NULL);
     zone->mod = NULL; /* list of modulators */
     return zone;
 }
@@ -1605,7 +1605,7 @@ fluid_preset_zone_import_sfont(fluid_preset_zone_t *zone, SFZone *sfzone, fluid_
 
         if(zone->inst == NULL)
         {
-            zone->inst = fluid_inst_import_sfont(zone, sfinst, defsfont);
+            zone->inst = fluid_inst_import_sfont(sfinst, defsfont);
         }
 
         if(zone->inst == NULL)
@@ -1697,7 +1697,7 @@ fluid_inst_set_global_zone(fluid_inst_t *inst, fluid_inst_zone_t *zone)
  * fluid_inst_import_sfont
  */
 fluid_inst_t *
-fluid_inst_import_sfont(fluid_preset_zone_t *preset_zone, SFInst *sfinst, fluid_defsfont_t *defsfont)
+fluid_inst_import_sfont(SFInst *sfinst, fluid_defsfont_t *defsfont)
 {
     fluid_list_t *p;
     fluid_inst_t *inst;
@@ -1733,9 +1733,8 @@ fluid_inst_import_sfont(fluid_preset_zone_t *preset_zone, SFInst *sfinst, fluid_
     {
 
         sfzone = (SFZone *)fluid_list_get(p);
-        /* integrates preset zone name in instrument zone name */
-        FLUID_SNPRINTF(zone_name, sizeof(zone_name), "%s/%s/%d", preset_zone->name,
-                       inst->name, count);
+        /* instrument zone name */
+        FLUID_SNPRINTF(zone_name, sizeof(zone_name), "iz:%s/%d", inst->name, count);
 
         inst_zone = new_fluid_inst_zone(zone_name);
 
@@ -1844,7 +1843,7 @@ new_fluid_inst_zone(char *name)
     zone->range.ignore = FALSE;
     /* Flag the generators as unused.
      * This also sets the generator values to default, but they will be overwritten anyway, if used.*/
-    fluid_gen_set_default_values(&zone->gen[0]);
+    fluid_gen_init(&zone->gen[0], NULL);
     zone->mod = NULL; /* list of modulators */
     return zone;
 }

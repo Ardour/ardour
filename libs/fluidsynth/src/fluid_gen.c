@@ -92,14 +92,12 @@ static const fluid_gen_info_t fluid_gen_info[] =
     { GEN_CUSTOM_FILTERQ,         1,     1,       0.0f,    960.0f,       0.0f }
 };
 
-
-/**
- * Set an array of generators to their default values.
- * @param gen Array of generators (should be #GEN_LAST in size).
- * @return Always returns #FLUID_OK
+/* fluid_gen_init
+ *
+ * Set an array of generators to their initial value
  */
-int
-fluid_gen_set_default_values(fluid_gen_t *gen)
+void
+fluid_gen_init(fluid_gen_t *gen, fluid_channel_t *channel)
 {
     int i;
 
@@ -107,39 +105,9 @@ fluid_gen_set_default_values(fluid_gen_t *gen)
     {
         gen[i].flags = GEN_UNUSED;
         gen[i].mod = 0.0;
-        gen[i].nrpn = 0.0;
+        gen[i].nrpn = (channel == NULL) ? 0.0 : fluid_channel_get_gen(channel, i);
         gen[i].val = fluid_gen_info[i].def;
     }
-
-    return FLUID_OK;
-}
-
-
-/* fluid_gen_init
- *
- * Set an array of generators to their initial value
- */
-int
-fluid_gen_init(fluid_gen_t *gen, fluid_channel_t *channel)
-{
-    int i;
-
-    fluid_gen_set_default_values(gen);
-
-    for(i = 0; i < GEN_LAST; i++)
-    {
-        gen[i].nrpn = fluid_channel_get_gen(channel, i);
-
-        /* This is an extension to the SoundFont standard. More
-         * documentation is available at the fluid_synth_set_gen2()
-         * function. */
-        if(fluid_channel_get_gen_abs(channel, i))
-        {
-            gen[i].flags = GEN_ABS_NRPN;
-        }
-    }
-
-    return FLUID_OK;
 }
 
 fluid_real_t fluid_gen_scale(int gen, float value)
