@@ -171,7 +171,9 @@ STStretch::run (boost::shared_ptr<Region> a_region, Progress* progress)
 
 	new_name += suffix;
 
-	ret = finish (region, nsrcs, new_name);
+	if (!tsr.cancel) {
+		ret = finish (region, nsrcs, new_name);
+	}
 
 	/* now reset ancestral data for each new region */
 

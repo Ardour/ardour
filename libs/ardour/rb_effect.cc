@@ -340,7 +340,9 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 	new_name += suffix;
 
-	ret = finish (region, nsrcs, new_name);
+	if (!tsr.cancel) {
+		ret = finish (region, nsrcs, new_name);
+	}
 
 	/* now reset ancestral data for each new region */
 
@@ -360,7 +362,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	/* stretch region gain envelope */
 	/* XXX: assuming we've only processed one input region into one result here */
 
-	if (tsr.time_fraction != 1) {
+	if (ret == 0 && tsr.time_fraction != 1) {
 		result = boost::dynamic_pointer_cast<AudioRegion> (results.front());
 		assert (result);
 		result->envelope()->x_scale (tsr.time_fraction);
