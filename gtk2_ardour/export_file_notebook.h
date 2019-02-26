@@ -128,7 +128,11 @@ private:
 		Gtk::Label              tab_label;
 		Gtk::Alignment          tab_close_alignment;
 		Gtk::Button             tab_close_button;
+
 		uint32_t                tab_number;
+
+		sigc::connection        soundcloud_button_connection;
+		sigc::connection        analysis_button_connection;
 	};
 };
 
