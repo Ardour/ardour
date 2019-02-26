@@ -730,6 +730,7 @@ Session::maybe_sync_start (pframes_t & nframes)
 		_silent = true;
 
 		if (Config->get_locate_while_waiting_for_sync()) {
+			DEBUG_TRACE (DEBUG::Transport, "micro-locate while waiting for sync\n");
 			if (micro_locate (nframes)) {
 				/* XXX ERROR !!! XXX */
 			}
@@ -1089,7 +1090,7 @@ Session::follow_transport_master (pframes_t nframes)
 	if (transport_master_tracking_state == Running) {
 
 		if (!actively_recording() && abs (delta) > tmm.current()->resolution()) {
-			DEBUG_TRACE (DEBUG::Slave, string_compose ("average slave delta %1 greater than slave resolution %2\n", delta, tmm.current()->resolution()));
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("current slave delta %1 greater than slave resolution %2\n", delta, tmm.current()->resolution()));
 			if (micro_locate (-delta) != 0) {
 				DEBUG_TRACE (DEBUG::Slave, "micro-locate didn't work, set no disk output true\n");
 
