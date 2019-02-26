@@ -2562,7 +2562,7 @@ Editor::escape ()
 {
 	if (_drags->active ()) {
 		_drags->abort ();
-	} else {
+	} else if (_session) {
 		selection->clear ();
 
 		/* if session is playing a range, cancel that */
