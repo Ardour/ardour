@@ -363,16 +363,17 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPip
 		argp[a++] = strdup ("-b:a"); argp[a++] = strdup (tmp);
 	}
 
-	if (1) {
-		SessionMetadata::MetaDataMap meta;
-		meta["comment"] = "Created with " PROGRAM_NAME;
+	SessionMetadata::MetaDataMap meta;
+	meta["comment"] = "Created with " PROGRAM_NAME;
+
+	if (config.format->tag()) {
 		ARDOUR::SessionMetadata* session_data = ARDOUR::SessionMetadata::Metadata();
 		session_data->av_export_tag (meta);
+	}
 
-		for(SessionMetadata::MetaDataMap::const_iterator it = meta.begin(); it != meta.end(); ++it) {
-			argp[a++] = strdup("-metadata");
-			argp[a++] = SystemExec::format_key_value_parameter (it->first.c_str(), it->second.c_str());
-		}
+	for(SessionMetadata::MetaDataMap::const_iterator it = meta.begin(); it != meta.end(); ++it) {
+		argp[a++] = strdup("-metadata");
+		argp[a++] = SystemExec::format_key_value_parameter (it->first.c_str(), it->second.c_str());
 	}
 
 	argp[a++] = strdup (writer_filename.c_str());
