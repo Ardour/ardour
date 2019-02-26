@@ -845,9 +845,13 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	    synced_to_engine()) {
 
 		// rg: what is the logic behind this case?
-		// _requested_return_sample should be ignored when synced_to_engine/slaved.
-		// currently worked around in MTC_Slave by forcing _requested_return_sample to -1
-		// 2016-01-10
+		// pd: synced_to_engine() really means "JACK Transport
+		// Master". We need to tell JACK transport to locate to the
+		// target.
+		//
+		// note: should add clause to never do this if using any other
+		// transport master. 2019-Feb-26
+
 		if ((auto_return_enabled || synced_to_engine() || _requested_return_sample >= 0) &&
 		    !(ptw & PostTransportLocate)) {
 
