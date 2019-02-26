@@ -257,6 +257,7 @@ class LIBARDOUR_API ExportFormatFFMPEG : public ExportFormat, public HasCodecQua
 	Type get_type () const { return T_FFMPEG; }
 	SampleFormat get_explicit_sample_format () const { return SF_Float; }
 	int default_codec_quality () const { return -2; }
+	virtual bool supports_tagging () const { return true; }
 };
 
 } // namespace ARDOUR
