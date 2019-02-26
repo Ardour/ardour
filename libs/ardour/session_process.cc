@@ -1077,11 +1077,14 @@ Session::follow_transport_master (pframes_t nframes)
 
 	slave_speed = tmm.get_current_speed_in_process_context();
 	slave_transport_sample = tmm.get_current_position_in_process_context ();
+
+	track_transport_master (slave_speed, slave_transport_sample);
+
+	/* transport sample may have been moved during ::track_transport_master() */
+
 	delta = _transport_sample - slave_transport_sample;
 
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("session at %1, master at %2, delta: %3 res: %4\n", _transport_sample, slave_transport_sample, delta, tmm.current()->resolution()));
-
-	track_transport_master (slave_speed, slave_transport_sample);
 
 	if (transport_master_tracking_state == Running) {
 
