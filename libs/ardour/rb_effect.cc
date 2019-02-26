@@ -302,7 +302,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 			}
 		}
 
-		while ((avail = stretcher.available()) >= 0) {
+		while ((avail = stretcher.available()) > 0) {
 
 			samplecnt_t this_read = min (bufsize, avail);
 
