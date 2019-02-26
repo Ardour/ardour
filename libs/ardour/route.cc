@@ -71,6 +71,7 @@
 #include "ardour/port_insert.h"
 #include "ardour/processor.h"
 #include "ardour/profile.h"
+#include "ardour/revision.h"
 #include "ardour/route.h"
 #include "ardour/route_group.h"
 #include "ardour/send.h"
@@ -2410,6 +2411,16 @@ Route::state (bool save_template)
 	XMLNode *node = new XMLNode("Route");
 	ProcessorList::iterator i;
 
+#ifdef MIXBUS
+	if(save_template) {
+		XMLNode* child = node->add_child("ProgramVersion");
+		child->set_property("created-with", _session.created_with);
+
+		std::string modified_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
+		child->set_property("modified-with", modified_with);	
+	}
+#endif	
+
 	node->set_property (X_("id"), id ());
 	node->set_property (X_("name"), name());
 	node->set_property (X_("default-type"), _default_type);
@@ -4214,7 +4225,7 @@ Route::save_as_template (const string& path, const string& name, const string& d
 	std::string state_dir = path.substr (0, path.find_last_of ('.')); // strip template_suffix
 	PBD::Unwinder<std::string> uw (_session._template_state_dir, state_dir);
 
-	XMLNode& node (state (false));
+	XMLNode& node (state (true));
 	node.set_property (X_("name"), name);
 
 	node.remove_nodes (X_("description"));
