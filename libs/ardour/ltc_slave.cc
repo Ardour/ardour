@@ -492,7 +492,7 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 				ltc_speed = 0;
 			}
 
-			DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC speed: %1\n", ltc_speed));
+			DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC speed: %1 (%2 in %3)\n", ltc_speed, (ltc_sample - current.position), (cur_timestamp - current.timestamp)));
 		}
 		DEBUG_TRACE (DEBUG::LTC, string_compose ("update current to %1 %2 %3\n", ltc_sample, cur_timestamp, ltc_speed));
 		current.update (ltc_sample, cur_timestamp, ltc_speed);
