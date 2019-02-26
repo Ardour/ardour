@@ -122,7 +122,7 @@ TransportMaster::speed_and_position (double& speed, samplepos_t& pos, samplepos_
 	speed = last.speed;
 	pos   = last.position + (now - last.timestamp) * last.speed;
 
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("%1: speed_and_position tme: %2 pos: %3 spd: %4\n", name(), last.timestamp, last.position, last.speed));
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("%1: speed_and_position @ %5 last @ %2 pos: %3 spd: %4\n", name(), last.timestamp, last.position, last.speed, now));
 
 	lp = last.position;
 	when = last.timestamp;
