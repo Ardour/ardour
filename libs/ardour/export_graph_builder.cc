@@ -381,6 +381,7 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPip
 	/* argp is free()d in ~SystemExec,
 	 * SystemExec is deleted when writer is destroyed */
 	ARDOUR::SystemExec* exec = new ARDOUR::SystemExec (ffmpeg_exe, argp);
+	PBD::info << "Encode command: { " << exec->to_s () << "}" << endmsg;
 	if (exec->start(0)) {
 		throw ExportFailed ("External encoder (ffmpeg) cannot be started.");
 	}
