@@ -301,7 +301,6 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 	current_timefx->first_delete = current_timefx->signal_delete_event().connect
 		(sigc::mem_fun (current_timefx, &TimeFXDialog::delete_in_progress));
 
-	current_timefx->start_updates ();
 
 	if (pthread_create_and_store ("timefx", &current_timefx->request.thread, timefx_thread, current_timefx)) {
 		current_timefx->hide ();
@@ -309,7 +308,7 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 		return -1;
 	}
 
-	pthread_detach (current_timefx->request.thread);
+	current_timefx->start_updates ();
 
 	while (!current_timefx->request.done && !current_timefx->request.cancel) {
 		gtk_main_iteration ();
@@ -408,12 +407,6 @@ Editor::timefx_thread (void *arg)
 	   event loop doesn't die before any changes we made are processed
 	   by the GUI ...
 	*/
-
-#ifdef PLATFORM_WINDOWS
-	Glib::usleep(2 * G_USEC_PER_SEC);
-#else
-	struct timespec t = { 2, 0 };
-	nanosleep (&t, 0);
-#endif
+	Glib::usleep(G_USEC_PER_SEC / 5);
 	return 0;
 }
