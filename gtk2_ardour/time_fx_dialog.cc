@@ -246,7 +246,6 @@ TimeFXDialog::timer_update ()
 void
 TimeFXDialog::cancel_in_progress ()
 {
-	status = -2;
 	request.cancel = true;
 	first_cancel.disconnect();
 }
@@ -254,7 +253,6 @@ TimeFXDialog::cancel_in_progress ()
 gint
 TimeFXDialog::delete_in_progress (GdkEventAny*)
 {
-	status = -2;
 	request.cancel = true;
 	first_delete.disconnect();
 	return TRUE;
