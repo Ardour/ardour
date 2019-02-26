@@ -45,8 +45,6 @@
 
 #include <glibmm/miscutils.h>
 
-#define USE_VFORK
-
 #include "pbd/file_utils.h"
 #include "pbd/search_path.h"
 #include "pbd/system_exec.h"
