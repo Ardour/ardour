@@ -199,10 +199,7 @@ ControlSlaveUI::vca_button_release (GdkEventButton* ev, uint32_t n)
 		items.push_back (CheckMenuElem ((*v)->name()));
 		Gtk::CheckMenuItem* item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
 
-		boost::shared_ptr<GainControl> gcs = stripable->gain_control();
-		boost::shared_ptr<GainControl> gcm = (*v)->gain_control();
-
-		if (gcs->slaved_to (gcm)) {
+		if (stripable->slaved_to (*i)) {
 			item->set_active (true);
 			slaved = true;
 		}
