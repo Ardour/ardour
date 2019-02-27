@@ -102,7 +102,7 @@ ControlSlaveUI::update_vca_display ()
 
 	if (stripable) {
 		for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
-			if (stripable->gain_control()->slaved_to ((*v)->gain_control())) {
+			if (stripable->slaved_to (*v)) {
 				add_vca_button (*v);
 				any = true;
 			}
@@ -199,7 +199,7 @@ ControlSlaveUI::vca_button_release (GdkEventButton* ev, uint32_t n)
 		items.push_back (CheckMenuElem ((*v)->name()));
 		Gtk::CheckMenuItem* item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
 
-		if (stripable->slaved_to (*i)) {
+		if (stripable->slaved_to (*v)) {
 			item->set_active (true);
 			slaved = true;
 		}
