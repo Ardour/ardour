@@ -1095,6 +1095,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_meter_point", &Route::set_meter_point)
 		.addFunction ("signal_latency", &Route::signal_latency)
 		.addFunction ("playback_latency", &Route::playback_latency)
+		.addFunction ("slaved_to", &Route::slaved_to)
+		.addFunction ("slaved", &Route::slaved)
 		.endClass ()
 
 		.deriveWSPtrClass <Playlist, SessionObject> ("Playlist")
