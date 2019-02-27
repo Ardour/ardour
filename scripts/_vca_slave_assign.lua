@@ -57,7 +57,7 @@ function factory () return function ()
 	-- if so, don't allow the connection
 	if (not slv:to_slavable ():assigned_to (Session:vca_manager(), mst)) then
 		-- if slv is a VCA and is controlled by master, disconnect it
-		if (not slv:to_vca ():isnil () and slv:to_vca ():slaved_to (mst)) then
+		if (not slv:to_vca ():isnil () and slv:to_vca ():slaved_to (mst)) or (not slv:to_route ():isnil () and slv:to_route ():slaved_to (mst)) then
 			slv:to_slavable ():unassign (mst)
 		else
 			slv:to_slavable ():assign (mst)
