@@ -112,6 +112,7 @@ Plugin::Plugin (const Plugin& other)
 	, _for_impulse_analysis (false)
 	, _have_presets (false)
 	, _have_pending_stop_events (false)
+	, _last_preset (other._last_preset)
 	, _parameter_changed_since_last_preset (false)
 	, _immediate_events(6096) // FIXME: size?
 {

@@ -574,6 +574,10 @@ PluginInsert::parameter_changed_externally (uint32_t which, float val)
 			(*i)->set_parameter (which, val);
 		}
 	}
+	boost::shared_ptr<Plugin> iasp = _impulseAnalysisPlugin.lock();
+	if (iasp) {
+		iasp->set_parameter (which, val);
+	}
 }
 
 int
@@ -3171,6 +3175,12 @@ PluginInsert::load_preset (ARDOUR::Plugin::PresetRecord pr)
 			ok = false;
 		}
 	}
+
+	boost::shared_ptr<Plugin> iasp = _impulseAnalysisPlugin.lock();
+	if (iasp) {
+		iasp->load_preset (pr);
+	}
+
 	return ok;
 }
 
