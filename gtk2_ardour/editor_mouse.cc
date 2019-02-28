@@ -208,14 +208,7 @@ Editor::set_current_movable (boost::shared_ptr<Movable> m)
 void
 Editor::mouse_mode_object_range_toggled()
 {
-	MouseMode m = mouse_mode;
-
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-range"));
-	assert (act);
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	assert (tact);
-
-	set_mouse_mode (m, true); // call this so the button styles can get updated
+	set_mouse_mode (mouse_mode, true); /* updates set-mouse-mode-range */
 }
 
 bool

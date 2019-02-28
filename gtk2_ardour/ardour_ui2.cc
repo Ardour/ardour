@@ -594,9 +594,8 @@ ARDOUR_UI::error_alert_press (GdkEventButton* ev)
 	if (ev->button == 1) {
 		if (_log_not_acknowledged == LogLevelError) {
 			// just acknowledge the error, don't hide the log if it's already visible
-			RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-log-window"));
-			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-			if (tact && tact->get_active()) {
+			RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("toggle-log-window"));
+			if (tact->get_active()) {
 				do_toggle = false;
 			}
 		}
@@ -781,12 +780,7 @@ ARDOUR_UI::sync_button_clicked (GdkEventButton* ev)
 void
 ARDOUR_UI::toggle_follow_edits ()
 {
-	RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
-	assert (act);
-
-	RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
-	assert (tact);
-
+	RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Transport"), X_("ToggleFollowEdits"));
 	UIConfiguration::instance().set_follow_edits (tact->get_active ());
 }
 

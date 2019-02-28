@@ -129,14 +129,7 @@ ARDOUR_UI::toggle_click ()
 void
 ARDOUR_UI::toggle_session_monitoring_in ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("SessionMonitorIn"));
-	if (!act) {
-		return;
-	}
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	if (!tact) {
-		return;
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Transport"), X_("SessionMonitorIn"));
 
 	if (tact->get_active() && _session->config.get_session_monitoring () == MonitorInput) {
 		return;
@@ -155,14 +148,7 @@ ARDOUR_UI::toggle_session_monitoring_in ()
 void
 ARDOUR_UI::toggle_session_monitoring_disk ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("SessionMonitorDisk"));
-	if (!act) {
-		return;
-	}
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	if (!tact) {
-		return;
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Transport"), X_("SessionMonitorDisk"));
 	if (tact->get_active() && _session->config.get_session_monitoring () == MonitorDisk) {
 		return;
 	}
@@ -180,15 +166,11 @@ ARDOUR_UI::toggle_session_monitoring_disk ()
 void
 ARDOUR_UI::unset_dual_punch ()
 {
-	Glib::RefPtr<Action> action = ActionManager::get_action ("Transport", "TogglePunch");
-
-	if (action) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(action);
-		if (tact) {
-			ignore_dual_punch = true;
-			tact->set_active (false);
-			ignore_dual_punch = false;
-		}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Transport", "TogglePunch");
+	if (tact) {
+		ignore_dual_punch = true;
+		tact->set_active (false);
+		ignore_dual_punch = false;
 	}
 }
 
@@ -199,42 +181,20 @@ ARDOUR_UI::toggle_punch ()
 		return;
 	}
 
-	Glib::RefPtr<Action> action = ActionManager::get_action ("Transport", "TogglePunch");
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Transport", "TogglePunch");
 
-	if (action) {
+	/* drive the other two actions from this one */
+	Glib::RefPtr<ToggleAction> in_action = ActionManager::get_toggle_action ("Transport", "TogglePunchIn");
+	Glib::RefPtr<ToggleAction> out_action = ActionManager::get_toggle_action ("Transport", "TogglePunchOut");
 
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(action);
-
-		if (!tact) {
-			return;
-		}
-
-		/* drive the other two actions from this one */
-
-		Glib::RefPtr<Action> in_action = ActionManager::get_action ("Transport", "TogglePunchIn");
-		Glib::RefPtr<Action> out_action = ActionManager::get_action ("Transport", "TogglePunchOut");
-
-		if (in_action && out_action) {
-			Glib::RefPtr<ToggleAction> tiact = Glib::RefPtr<ToggleAction>::cast_dynamic(in_action);
-			Glib::RefPtr<ToggleAction> toact = Glib::RefPtr<ToggleAction>::cast_dynamic(out_action);
-			tiact->set_active (tact->get_active());
-			toact->set_active (tact->get_active());
-		}
-	}
+	in_action->set_active (tact->get_active());
+	out_action->set_active (tact->get_active());
 }
 
 void
 ARDOUR_UI::toggle_punch_in ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("TogglePunchIn"));
-	if (!act) {
-		return;
-	}
-
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	if (!tact) {
-		return;
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Transport"), X_("TogglePunchIn"));
 
 	if (tact->get_active() != _session->config.get_punch_in()) {
 		_session->config.set_punch_in (tact->get_active ());
@@ -252,15 +212,7 @@ ARDOUR_UI::toggle_punch_in ()
 void
 ARDOUR_UI::toggle_punch_out ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("TogglePunchOut"));
-	if (!act) {
-		return;
-	}
-
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	if (!tact) {
-		return;
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Transport"), X_("TogglePunchOut"));
 
 	if (tact->get_active() != _session->config.get_punch_out()) {
 		_session->config.set_punch_out (tact->get_active ());
@@ -278,17 +230,9 @@ ARDOUR_UI::toggle_punch_out ()
 void
 ARDOUR_UI::show_loop_punch_ruler_and_disallow_hide ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Rulers"), "toggle-loop-punch-ruler");
-	if (!act) {
-		return;
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Rulers"), "toggle-loop-punch-ruler");
 
-	act->set_sensitive (false);
-
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	if (!tact) {
-		return;
-	}
+	tact->set_sensitive (false);
 
 	if (!tact->get_active()) {
 		tact->set_active ();
@@ -311,25 +255,18 @@ ARDOUR_UI::reenable_hide_loop_punch_ruler_if_appropriate ()
 void
 ARDOUR_UI::toggle_video_sync()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action ("Transport", "ToggleVideoSync");
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		_session->config.set_use_video_sync (tact->get_active());
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Transport", "ToggleVideoSync");
+	_session->config.set_use_video_sync (tact->get_active());
 }
 
 void
 ARDOUR_UI::toggle_editing_space()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMaximalEditor");
-
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		if (tact->get_active()) {
-			maximise_editing_space ();
-		} else {
-			restore_editing_space ();
-		}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Common", "ToggleMaximalEditor");
+	if (tact->get_active()) {
+		maximise_editing_space ();
+	} else {
+		restore_editing_space ();
 	}
 }
 
@@ -398,27 +335,21 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "auto-input") {
 		ActionManager::map_some_state ("Transport", "ToggleAutoInput", sigc::mem_fun (_session->config, &SessionConfiguration::get_auto_input));
 	} else if (p == "session-monitoring") {
-		Glib::RefPtr<Action> iact = ActionManager::get_action (X_("Transport"), X_("SessionMonitorIn"));
-		Glib::RefPtr<Action> dact = ActionManager::get_action (X_("Transport"), X_("SessionMonitorDisk"));
-		if (iact && dact) {
-			Glib::RefPtr<ToggleAction> tdact = Glib::RefPtr<ToggleAction>::cast_dynamic(dact);
-			Glib::RefPtr<ToggleAction> tiact = Glib::RefPtr<ToggleAction>::cast_dynamic(iact);
-			if (tdact && tiact) {
-				switch (_session->config.get_session_monitoring ()) {
-					case MonitorDisk:
-						tdact->set_active (true);
-						tiact->set_active (false);
-						break;
-					case MonitorInput:
-						tiact->set_active (true);
-						tdact->set_active (false);
-						break;
-					default:
-						tdact->set_active (false);
-						tiact->set_active (false);
-						break;
-				}
-			}
+		Glib::RefPtr<ToggleAction> tiact = ActionManager::get_toggle_action (X_("Transport"), X_("SessionMonitorIn"));
+		Glib::RefPtr<ToggleAction> tdact = ActionManager::get_toggle_action (X_("Transport"), X_("SessionMonitorDisk"));
+		switch (_session->config.get_session_monitoring ()) {
+			case MonitorDisk:
+				tdact->set_active (true);
+				tiact->set_active (false);
+				break;
+			case MonitorInput:
+				tiact->set_active (true);
+				tdact->set_active (false);
+				break;
+			default:
+				tdact->set_active (false);
+				tiact->set_active (false);
+				break;
 		}
 	} else if (p == "punch-out") {
 		ActionManager::map_some_state ("Transport", "TogglePunchOut", sigc::mem_fun (_session->config, &SessionConfiguration::get_punch_out));

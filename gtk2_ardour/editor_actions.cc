@@ -801,14 +801,10 @@ Editor::load_bindings ()
 void
 Editor::toggle_skip_playback ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), "toggle-skip-playback");
-
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		bool s = Config->get_skip_playback ();
-		if (tact->get_active() != s) {
-			Config->set_skip_playback (tact->get_active());
-		}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), "toggle-skip-playback");
+	bool s = Config->get_skip_playback ();
+	if (tact->get_active() != s) {
+		Config->set_skip_playback (tact->get_active());
 	}
 }
 
@@ -857,42 +853,29 @@ Editor::toggle_ruler_visibility (RulerType rt)
 		break;
 	}
 
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Rulers"), action);
-
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		update_ruler_visibility ();
-		store_ruler_visibility ();
-	}
+	update_ruler_visibility ();
+	store_ruler_visibility ();
 }
 
 void
 Editor::set_summary ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleSummary"));
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-		_session->config.set_show_summary (tact->get_active ());
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("ToggleSummary"));
+	_session->config.set_show_summary (tact->get_active ());
 }
 
 void
 Editor::set_group_tabs ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleGroupTabs"));
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-		_session->config.set_show_group_tabs (tact->get_active ());
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("ToggleGroupTabs"));
+	_session->config.set_show_group_tabs (tact->get_active ());
 }
 
 void
 Editor::set_close_video_sensitive (bool onoff)
 {
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Main"), X_("CloseVideo"));
-	if (act) {
-		act->set_sensitive (onoff);
-	}
+	act->set_sensitive (onoff);
 }
 
 void
@@ -1364,29 +1347,16 @@ Editor::zoom_focus_action (ZoomFocus focus)
 		abort(); /*NOTREACHED*/
 	}
 
-	act = ActionManager::get_action (X_("Zoom"), action);
-
-	if (act) {
-		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-		return ract;
-	} else {
-		error << string_compose (_("programming error: %1: %2"), "Editor::zoom_focus_action could not find action to match focus.", action) << endmsg;
-	}
-
-	return RefPtr<RadioAction> ();
+	return ActionManager::get_radio_action (X_("Zoom"), action);
 }
 
 void
 Editor::toggle_sound_midi_notes ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("sound-midi-notes"));
-
-	if (act) {
-		bool s = UIConfiguration::instance().get_sound_midi_notes();
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-		if (tact->get_active () != s) {
-			UIConfiguration::instance().set_sound_midi_notes (tact->get_active());
-		}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("sound-midi-notes"));
+	bool s = UIConfiguration::instance().get_sound_midi_notes();
+	if (tact->get_active () != s) {
+		UIConfiguration::instance().set_sound_midi_notes (tact->get_active());
 	}
 }
 
@@ -1436,12 +1406,9 @@ Editor::parameter_changed (std::string p)
  			_summary_hbox.hide ();
  		}
 
-		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleSummary"));
-		if (act) {
-			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-			if (tact->get_active () != s) {
-				tact->set_active (s);
-			}
+		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("ToggleSummary"));
+		if (tact->get_active () != s) {
+			tact->set_active (s);
 		}
 	} else if (p == "show-group-tabs") {
 
@@ -1454,36 +1421,25 @@ Editor::parameter_changed (std::string p)
 
 		reset_controls_layout_width ();
 
-		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleGroupTabs"));
-		if (act) {
-			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-			if (tact->get_active () != s) {
-				tact->set_active (s);
-			}
+		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("ToggleGroupTabs"));
+		if (tact->get_active () != s) {
+			tact->set_active (s);
 		}
 	} else if (p == "timecode-offset" || p == "timecode-offset-negative") {
 		update_just_timecode ();
 	} else if (p == "sound-midi-notes") {
-		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("sound-midi-notes"));
-
-		if (act) {
-			bool s = UIConfiguration::instance().get_sound_midi_notes();
-			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-			if (tact->get_active () != s) {
-				tact->set_active (s);
-			}
+		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("sound-midi-notes"));
+		bool s = UIConfiguration::instance().get_sound_midi_notes();
+		if (tact->get_active () != s) {
+			tact->set_active (s);
 		}
 	} else if (p == "show-region-gain") {
 		set_gain_envelope_visibility ();
 	} else if (p == "skip-playback") {
-		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-skip-playback"));
-
-		if (act) {
-			bool s = Config->get_skip_playback ();
-			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-			if (tact->get_active () != s) {
-				tact->set_active (s);
-			}
+		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("toggle-skip-playback"));
+		bool s = Config->get_skip_playback ();
+		if (tact->get_active () != s) {
+			tact->set_active (s);
 		}
 	}
 }

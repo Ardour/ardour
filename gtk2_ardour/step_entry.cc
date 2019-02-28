@@ -550,8 +550,7 @@ StepEntry::note_length ()
 {
 	double base_time = 4.0 / (double) length_divisor_adjustment.get_value();
 
-	RefPtr<Action> act = ActionManager::get_action ("StepEditing/toggle-triplet");
-	RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
+	RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("StepEditing/toggle-triplet");
 	bool triplets = tact->get_active ();
 
 	if (triplets) {
