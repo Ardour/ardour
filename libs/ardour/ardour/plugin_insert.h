@@ -333,8 +333,8 @@ private:
 
 	boost::weak_ptr<Plugin> _impulseAnalysisPlugin;
 
-	samplecnt_t _signal_analysis_collected_nframes;
-	samplecnt_t _signal_analysis_collect_nframes_max;
+	samplecnt_t _signal_analysis_collect_nsamples;
+	samplecnt_t _signal_analysis_collect_nsamples_max;
 
 	BufferSet _signal_analysis_inputs;
 	BufferSet _signal_analysis_outputs;

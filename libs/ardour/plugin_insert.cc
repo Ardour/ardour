@@ -74,8 +74,8 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	, _sc_playback_latency (0)
 	, _sc_capture_latency (0)
 	, _plugin_signal_latency (0)
-	, _signal_analysis_collected_nframes(0)
-	, _signal_analysis_collect_nframes_max(0)
+	, _signal_analysis_collect_nsamples (0)
+	, _signal_analysis_collect_nsamples_max (0)
 	, _configured (false)
 	, _no_inplace (false)
 	, _strict_io (false)
@@ -898,29 +898,21 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 		}
 	}
 
-	/* Calculate if, and how many samples we need to collect for analysis */
-	samplecnt_t collect_signal_nframes = (_signal_analysis_collect_nframes_max -
-					     _signal_analysis_collected_nframes);
-	if (nframes < collect_signal_nframes) { // we might not get all samples now
-		collect_signal_nframes = nframes;
-	}
+	if (_signal_analysis_collect_nsamples_max > 0) {
+		if (_signal_analysis_collect_nsamples < _signal_analysis_collect_nsamples_max) {
+			samplecnt_t ns = std::min ((samplecnt_t) nframes, _signal_analysis_collect_nsamples_max - _signal_analysis_collect_nsamples);
+			_signal_analysis_inputs.set_count (ChanCount (DataType::AUDIO, input_streams().n_audio()));
 
-	if (collect_signal_nframes > 0) {
-		// collect input
-		//std::cerr << "collect input, bufs " << bufs.count().n_audio() << " count,  " << bufs.available().n_audio() << " available" << std::endl;
-		//std::cerr << "               streams " << internal_input_streams().n_audio() << std::endl;
-		//std::cerr << "filling buffer with " << collect_signal_nframes << " samples at " << _signal_analysis_collected_nframes << std::endl;
-
-		_signal_analysis_inputs.set_count (ChanCount (DataType::AUDIO, input_streams().n_audio()));
-
-		for (uint32_t i = 0; i < input_streams().n_audio(); ++i) {
-			_signal_analysis_inputs.get_audio(i).read_from (
-				bufs.get_audio(i),
-				collect_signal_nframes,
-				_signal_analysis_collected_nframes); // offset is for target buffer
+			for (uint32_t i = 0; i < input_streams().n_audio(); ++i) {
+				_signal_analysis_inputs.get_audio(i).read_from (
+						bufs.get_audio(i),
+						ns,
+						_signal_analysis_collect_nsamples);
+			}
 		}
-
+		_signal_analysis_collect_nsamples += nframes;
 	}
+
 #ifdef MIXBUS
 	if (is_channelstrip ()) {
 		if (_configured_in.n_audio() > 0) {
@@ -1041,36 +1033,36 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 		inplace_silence_unconnected (bufs, _out_map, nframes, offset);
 	}
 
-	if (collect_signal_nframes > 0) {
-		// collect output
-		//std::cerr << "       output, bufs " << bufs.count().n_audio() << " count,  " << bufs.available().n_audio() << " available" << std::endl;
-		//std::cerr << "               streams " << internal_output_streams().n_audio() << std::endl;
+	const samplecnt_t l = effective_latency ();
+	if (_plugin_signal_latency != l) {
+		_plugin_signal_latency = l;
+		_signal_analysis_collect_nsamples = 0;
+		latency_changed ();
+	}
+
+	if (_signal_analysis_collect_nsamples > l) {
+		assert (_signal_analysis_collect_nsamples_max > 0);
+		assert (_signal_analysis_collect_nsamples >= nframes);
+		samplecnt_t sample_pos = _signal_analysis_collect_nsamples - nframes;
+
+		samplecnt_t dst_off = sample_pos >= l ? sample_pos - l : 0;
+		samplecnt_t src_off = sample_pos >= l ? 0 : l - sample_pos;
+		samplecnt_t n_copy = std::min ((samplecnt_t)nframes, _signal_analysis_collect_nsamples - l);
+		n_copy = std::min (n_copy, _signal_analysis_collect_nsamples_max - dst_off);
 
 		_signal_analysis_outputs.set_count (ChanCount (DataType::AUDIO, output_streams().n_audio()));
 
 		for (uint32_t i = 0; i < output_streams().n_audio(); ++i) {
 			_signal_analysis_outputs.get_audio(i).read_from(
-				bufs.get_audio(i),
-				collect_signal_nframes,
-				_signal_analysis_collected_nframes); // offset is for target buffer
+				bufs.get_audio(i), n_copy, dst_off, src_off);
 		}
 
-		_signal_analysis_collected_nframes += collect_signal_nframes;
-		assert(_signal_analysis_collected_nframes <= _signal_analysis_collect_nframes_max);
+		if (dst_off + n_copy == _signal_analysis_collect_nsamples_max) {
+			_signal_analysis_collect_nsamples_max = 0;
+			_signal_analysis_collect_nsamples     = 0;
 
-		if (_signal_analysis_collected_nframes == _signal_analysis_collect_nframes_max) {
-			_signal_analysis_collect_nframes_max = 0;
-			_signal_analysis_collected_nframes   = 0;
-
-			AnalysisDataGathered(&_signal_analysis_inputs,
-					     &_signal_analysis_outputs);
+			AnalysisDataGathered (&_signal_analysis_inputs, &_signal_analysis_outputs);
 		}
-	}
-
-	const samplecnt_t l = effective_latency ();
-	if (_plugin_signal_latency != l) {
-		_plugin_signal_latency = l;
-		latency_changed ();
 	}
 }
 
@@ -3080,13 +3072,21 @@ PluginInsert::get_impulse_analysis_plugin()
 void
 PluginInsert::collect_signal_for_analysis (samplecnt_t nframes)
 {
+	if (_signal_analysis_collect_nsamples_max != 0
+			|| _signal_analysis_collect_nsamples  != 0) {
+		return;
+	}
+
 	// called from outside the audio thread, so this should be safe
 	// only do audio as analysis is (currently) only for audio plugins
 	_signal_analysis_inputs.ensure_buffers (DataType::AUDIO, input_streams().n_audio(),  nframes);
 	_signal_analysis_outputs.ensure_buffers (DataType::AUDIO, output_streams().n_audio(), nframes);
 
-	_signal_analysis_collected_nframes   = 0;
-	_signal_analysis_collect_nframes_max = nframes;
+	/* these however should not be set while processing,
+	 * however in the given order, this should be fine.
+	 */
+	_signal_analysis_collect_nsamples     = 0;
+	_signal_analysis_collect_nsamples_max = nframes;
 }
 
 /** Add a plugin to our list */
