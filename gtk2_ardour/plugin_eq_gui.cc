@@ -590,7 +590,7 @@ PluginEqGui::draw_scales_phase (Gtk::Widget*, cairo_t *cr)
 	char buf[256];
 	cairo_text_extents_t t_ext;
 
-	for (uint32_t i = 0; i < 3; i++) {
+	for (uint32_t i = 0; i < 5; i++) {
 
 		y = _analysis_height / 2.0 - (float)i * (_analysis_height / 8.0) * PHASE_PROPORTION;
 
@@ -604,14 +604,17 @@ PluginEqGui::draw_scales_phase (Gtk::Widget*, cairo_t *cr)
 		cairo_move_to (cr, _analysis_width - t_ext.width - t_ext.x_bearing - 2.0, y - extents.descent);
 		cairo_show_text (cr, buf);
 
-		if (i == 0)
+		if (i == 0) {
 			continue;
+		}
 
+		y = roundf (y) - .5;
 
-		cairo_set_source_rgba (cr, .8, .9, 0.2, 0.6 / (float)i);
+		cairo_set_source_rgba (cr, .8, .9, .2, 0.4);
 		cairo_move_to (cr, 0.0,             y);
 		cairo_line_to (cr, _analysis_width, y);
-
+		cairo_set_line_width (cr, 1);
+		cairo_stroke (cr);
 
 		y = _analysis_height / 2.0 + (float)i * (_analysis_height / 8.0) * PHASE_PROPORTION;
 
@@ -622,12 +625,13 @@ PluginEqGui::draw_scales_phase (Gtk::Widget*, cairo_t *cr)
 		cairo_move_to (cr, _analysis_width - t_ext.width - t_ext.x_bearing - 2.0, y - extents.descent);
 		cairo_show_text (cr, buf);
 
+		y = roundf (y) - .5;
 		// line
-		cairo_set_source_rgba (cr, .8, .9, 0.2, 0.6 / (float)i);
+		cairo_set_source_rgba (cr, .8, .9, .2, 0.4);
 		cairo_move_to (cr, 0.0,             y);
 		cairo_line_to (cr, _analysis_width, y);
 
-		cairo_set_line_width (cr, 0.25 + 1.0 / (float)(i + 1));
+		cairo_set_line_width (cr, 1);
 		cairo_stroke (cr);
 	}
 }
@@ -643,14 +647,15 @@ PluginEqGui::plot_impulse_phase (Gtk::Widget *w, cairo_t *cr)
 
 	// float width  = w->get_width();
 	float height = w->get_height ();
+	float analysis_height_2 = _analysis_height / 2.f;
 
 	cairo_set_source_rgba (cr, 0.95, 0.3, 0.2, 1.0);
 	for (uint32_t i = 0; i < _impulse_fft->bins() - 1; ++i) {
 		// x coordinate of bin i
 		x  = log10f (1.0 + (float)i / (float)_impulse_fft->bins() * _log_coeff) / _log_max;
 		x *= _analysis_width;
+		y  = analysis_height_2 - (_impulse_fft->phase_at_bin (i) / M_PI) * analysis_height_2 * PHASE_PROPORTION;
 
-		y  = _analysis_height/2.0 - (_impulse_fft->phase_at_bin(i)/M_PI)*(_analysis_height/2.0)*PHASE_PROPORTION;
 		if (i == 0) {
 			cairo_move_to (cr, x, y);
 			avgY = 0;
