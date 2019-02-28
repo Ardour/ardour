@@ -15,7 +15,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #ifndef __ardour_plugin_eq_gui_h
@@ -99,13 +98,13 @@ private:
 	float _log_coeff;
 	float _log_max;
 
+	ARDOUR::samplecnt_t _block_size;
 	ARDOUR::samplecnt_t _buffer_size;
 	ARDOUR::samplecnt_t _signal_buffer_size;
 
 	// buffers
 	ARDOUR::BufferSet _bufferset;
 	ARDOUR::BufferSet _collect_bufferset;
-
 
 	// dimensions
 	float _analysis_width;
@@ -155,4 +154,3 @@ private:
 };
 
 #endif
-

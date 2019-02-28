@@ -1,22 +1,22 @@
 /*
-    Copyright (C) 2008 Paul Davis
-    Author: Sampo Savolainen
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2018 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2008 Paul Davis
+ * Original Author: Sampo Savolainen
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
 
 #include <algorithm>
 #include <math.h>
@@ -25,13 +25,13 @@
 #include <sstream>
 
 #ifdef COMPILER_MSVC
-#include <float.h>
+# include <float.h>
 /* isinf() & isnan() are C99 standards, which older MSVC doesn't provide */
-#define ISINF(val) !((bool)_finite((double)val))
-#define ISNAN(val) (bool)_isnan((double)val)
+# define ISINF(val) !((bool)_finite((double)val))
+# define ISNAN(val) (bool)_isnan((double)val)
 #else
-#define ISINF(val) std::isinf((val))
-#define ISNAN(val) std::isnan((val))
+# define ISINF(val) std::isinf((val))
+# define ISNAN(val) std::isnan((val))
 #endif
 
 #include <gtkmm/box.h>
@@ -57,6 +57,7 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	: _min_dB(-12.0)
 	, _max_dB(+12.0)
 	, _step_dB(3.0)
+	, _block_size(0)
 	, _buffer_size(0)
 	, _signal_buffer_size(0)
 	, _impulse_fft(0)
@@ -170,13 +171,14 @@ void
 PluginEqGui::start_listening ()
 {
 	if (!_plugin) {
-		_plugin = _plugin_insert->get_impulse_analysis_plugin();
+		_plugin = _plugin_insert->get_impulse_analysis_plugin ();
 	}
 
-	_plugin->activate();
-	set_buffer_size(4096, 16384);
-	_plugin->set_block_size (_buffer_size);
-	// Connect the realtime signal collection callback
+	_plugin->activate ();
+	set_buffer_size (8192, 16384);
+	_block_size = 0; // re-initialize the plugin next time.
+
+	/* Connect the realtime signal collection callback */
 	_plugin_insert->AnalysisDataGathered.connect (analysis_connection, invalidator (*this), boost::bind (&PluginEqGui::signal_collect_callback, this, _1, _2), gui_context());
 }
 
@@ -290,7 +292,7 @@ PluginEqGui::set_buffer_size(uint32_t size, uint32_t signal_size)
 	_buffer_size = size;
 	_signal_buffer_size = signal_size;
 
-	// allocate separate in+out buffers, VST cannot process in-place
+	/* allocate separate in+out buffers, VST cannot process in-place */
 	ARDOUR::ChanCount acount (_plugin->get_info()->n_inputs + _plugin->get_info()->n_outputs);
 	ARDOUR::ChanCount ccount = ARDOUR::ChanCount::max (_plugin->get_info()->n_inputs, _plugin->get_info()->n_outputs);
 
@@ -363,91 +365,91 @@ PluginEqGui::run_impulse_analysis()
 	uint32_t inputs  = _plugin->get_info()->n_inputs.n_audio();
 	uint32_t outputs = _plugin->get_info()->n_outputs.n_audio();
 
-	// Create the impulse, can't use silence() because consecutive calls won't work
+	/* Create the impulse, can't use silence() because consecutive calls won't work */
 	for (uint32_t i = 0; i < inputs; ++i) {
 		ARDOUR::AudioBuffer& buf = _bufferset.get_audio(i);
 		ARDOUR::Sample* d = buf.data();
-		memset(d, 0, sizeof(ARDOUR::Sample)*_buffer_size);
+		memset (d, 0, sizeof(ARDOUR::Sample) * _buffer_size);
 		*d = 1.0;
 	}
 
-	ARDOUR::ChanMapping in_map(_plugin->get_info()->n_inputs);
-	ARDOUR::ChanMapping out_map(_plugin->get_info()->n_outputs);
-	// map output buffers after input buffers (no inplace for VST)
-	out_map.offset_to (DataType::AUDIO, inputs);
-
-	_plugin->connect_and_run(_bufferset, 0, _buffer_size, 1.0, in_map, out_map, _buffer_size, 0);
-	samplecnt_t f = _plugin->signal_latency ();
-	// Adding user_latency() could be interesting
-
-	// Gather all output, taking latency into account.
-	_impulse_fft->reset();
-
-	// Silence collect buffers to copy data to, can't use silence() because consecutive calls won't work
+	/* Silence collect buffers to copy data to */
 	for (uint32_t i = 0; i < outputs; ++i) {
 		ARDOUR::AudioBuffer &buf = _collect_bufferset.get_audio(i);
 		ARDOUR::Sample *d = buf.data();
-		memset(d, 0, sizeof(ARDOUR::Sample)*_buffer_size);
+		memset(d, 0, sizeof(ARDOUR::Sample) * _buffer_size);
 	}
 
-	if (f == 0) {
-		//std::cerr << "0: no latency, copying full buffer, trivial.." << std::endl;
-		for (uint32_t i = 0; i < outputs; ++i) {
-			memcpy(_collect_bufferset.get_audio(i).data(),
-			       _bufferset.get_audio(inputs + i).data(), _buffer_size * sizeof(float));
+	/* create default linear I/O maps */
+	ARDOUR::ChanMapping in_map (_plugin->get_info()->n_inputs);
+	ARDOUR::ChanMapping out_map (_plugin->get_info()->n_outputs);
+	/* map output buffers after input buffers (no inplace for VST) */
+	out_map.offset_to (DataType::AUDIO, inputs);
+
+	/* run at most at session's block size chunks.
+	 *
+	 * This is important since VSTs may call audioMasterGetBlockSize
+	 * or access various other /real/ session paramaters using the
+	 * audioMasterCallback
+	 */
+	samplecnt_t block_size = ARDOUR_UI::instance()->the_session()->get_block_size();
+	if (_block_size != block_size) {
+		_block_size = block_size;
+		_plugin->set_block_size (block_size);
+	}
+
+	samplepos_t sample_pos = 0;
+	samplecnt_t latency = _plugin->signal_latency ();
+	samplecnt_t samples_remain = _buffer_size + latency;
+
+	_impulse_fft->reset();
+
+	while (samples_remain > 0) {
+
+		samplecnt_t n_samples = std::min (samples_remain, block_size);
+		_plugin->connect_and_run(_bufferset, sample_pos, sample_pos + n_samples, 1.0, in_map, out_map, n_samples, 0);
+		samples_remain -= n_samples;
+
+		/* zero input buffers */
+		if (sample_pos == 0 && samples_remain > 0) {
+			for (uint32_t i = 0; i < inputs; ++i) {
+				_bufferset.get_audio(i).data()[0] = 0.f;
+			}
 		}
-	} else {
-		//int C = 0;
-		//std::cerr << (++C) << ": latency is " << f << " samples, doing split processing.." << std::endl;
-		samplecnt_t target_offset = 0;
-		samplecnt_t samples_left = _buffer_size; // refaktoroi
-		do {
-			if (f >= _buffer_size) {
-				//std::cerr << (++C) << ": f (=" << f << ") is larger than buffer_size, still trying to reach the actual output" << std::endl;
-				// there is no data in this buffer regarding to the input!
-				f -= _buffer_size;
-			} else {
-				// this buffer contains either the first, last or a whole bu the output of the impulse
-				// first part: offset is 0, so we copy to the start of _collect_bufferset
-				//             we start at output offset "f"
-				//             .. and copy "buffer size" - "f" - "offset" samples
 
-				samplecnt_t length = _buffer_size - f - target_offset;
-
-				//std::cerr << (++C) << ": copying " << length << " samples to _collect_bufferset.get_audio(i)+" << target_offset << " from bufferset at offset " << f << std::endl;
-				for (uint32_t i = 0; i < outputs; ++i) {
-					memcpy(_collect_bufferset.get_audio(i).data(target_offset),
-							_bufferset.get_audio(inputs + i).data() + f,
-							length * sizeof(float));
-				}
-
-				target_offset += length;
-				samples_left   -= length;
-				f = 0;
+#ifndef NDEBUG
+		if (samples_remain > 0) {
+			for (uint32_t i = 0; i < inputs; ++i) {
+				pframes_t unused;
+				assert (_bufferset.get_audio(i).check_silence (block_size, unused));
 			}
-			if (samples_left > 0) {
-				// Silence the buffers
-				for (uint32_t i = 0; i < inputs; ++i) {
-					ARDOUR::AudioBuffer &buf = _bufferset.get_audio(i);
-					ARDOUR::Sample *d = buf.data();
-					memset(d, 0, sizeof(ARDOUR::Sample)*_buffer_size);
-				}
+		}
+#endif
 
-				_plugin->connect_and_run (_bufferset, target_offset, target_offset + _buffer_size, 1.0, in_map, out_map, _buffer_size, 0);
+		if (sample_pos + n_samples > latency) {
+			samplecnt_t dst_off = sample_pos >= latency ? sample_pos - latency : 0;
+			samplecnt_t src_off = sample_pos >= latency ? 0 : latency - sample_pos;
+			samplecnt_t n_copy = std::min (n_samples, sample_pos + n_samples - latency);
+
+			assert (dst_off + n_copy <= _buffer_size);
+			assert (src_off + n_copy <= _block_size);
+
+			for (uint32_t i = 0; i < outputs; ++i) {
+				memcpy(
+						&(_collect_bufferset.get_audio(i).data()[dst_off]),
+						&(_bufferset.get_audio(inputs + i).data()[src_off]),
+						n_copy * sizeof(float));
 			}
-		} while ( samples_left > 0);
+		}
 
+		sample_pos += n_samples;
 	}
-
 
 	for (uint32_t i = 0; i < outputs; ++i) {
-		_impulse_fft->analyze(_collect_bufferset.get_audio(i).data());
+		_impulse_fft->analyze (_collect_bufferset.get_audio(i).data());
 	}
-
-	// normalize the output
 	_impulse_fft->calculate();
 
-	// This signals calls expose_analysis_area()
 	_analysis_area->queue_draw();
 
 	ARDOUR_UI::instance()->drop_process_buffers ();
