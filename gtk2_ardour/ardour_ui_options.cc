@@ -295,8 +295,11 @@ ARDOUR_UI::parameter_changed (std::string p)
 		} else {
 			/* XXX we need to make sure that auto-play is off as well as insensitive */
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (false);
-			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (false);
+			if (!_session->synced_to_engine()) {
+				/* JACK transport allows auto-return */
+				ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
+			}
 		}
 
 	} else if (p == "sync-source") {
