@@ -162,7 +162,6 @@ libardour_sources = [
         'panner_manager.cc',
         'panner_shell.cc',
         'parameter_descriptor.cc',
-        'pcm_utils.cc',
         'phase_control.cc',
         'playlist.cc',
         'playlist_factory.cc',
