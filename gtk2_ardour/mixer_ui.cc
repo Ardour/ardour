@@ -2192,7 +2192,9 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 
 	node.get_property ("show-mixer", _visible);
 
-	if (node.get_property ("maximised", yn)) {
+	yn = false;
+	node.get_property ("maximised", yn);
+	{
 		Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action (X_("Common"), X_("ToggleMaximalMixer"));
 		bool fs = act && act->get_active();
 		if (yn ^ fs) {
@@ -2200,22 +2202,27 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	if (node.get_property ("show-mixer-list", yn)) {
+	yn = true;
+	node.get_property ("show-mixer-list", yn);
+	{
 		Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action (X_("Mixer"), X_("ToggleMixerList"));
-
 		/* do it twice to force the change */
 		act->set_active (!yn);
 		act->set_active (yn);
 	}
 
-	if (node.get_property ("monitor-section-visible", yn)) {
+	yn = true;
+	node.get_property ("monitor-section-visible", yn);
+	{
 		Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action (X_("Mixer"), X_("ToggleMonitorSection"));
 		/* do it twice to force the change */
 		act->set_active (!yn);
 		act->set_active (yn);
 	}
 
-	if (node.get_property ("show-vca-pane", yn)) {
+	yn = true;
+	node.get_property ("show-vca-pane", yn);
+	{
 		Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action (X_("Mixer"), X_("ToggleVCAPane"));
 		/* do it twice to force the change */
 		act->set_active (!yn);
@@ -2223,13 +2230,14 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 	}
 
 #ifdef MIXBUS
-	if (node.get_property ("show-mixbus-pane", yn)) {
+	yn = true;
+	node.get_property ("show-mixbus-pane", yn);
+	{
 		Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action (X_("Mixer"), X_("ToggleMixbusPane"));
 		/* do it twice to force the change */
 		act->set_active (!yn);
 		act->set_active (yn);
 	}
-
 #endif
 
 	//check for the user's plugin_order file

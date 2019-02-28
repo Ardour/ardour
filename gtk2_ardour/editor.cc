@@ -2448,13 +2448,13 @@ Editor::set_state (const XMLNode& node, int version)
 		reset_y_origin (y_origin);
 	}
 
-	if (node.get_property ("join-object-range", yn)) {
-		RefPtr<Action> act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-object-range"));
-		if (act) {
-			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-			tact->set_active (!yn);
-			tact->set_active (yn);
-		}
+	yn = false;
+	node.get_property ("join-object-range", yn);
+	{
+		RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("MouseMode"), X_("set-mouse-mode-object-range"));
+		/* do it twice to force the change */
+		tact->set_active (!yn);
+		tact->set_active (yn);
 		set_mouse_mode(mouse_mode, true);
 	}
 
@@ -2478,22 +2478,20 @@ Editor::set_state (const XMLNode& node, int version)
 		_regions->reset_sort_type (sort_type, true);
 	}
 
-	if (node.get_property ("show-editor-mixer", yn)) {
-
+	yn = false;
+	node.get_property ("show-editor-mixer", yn);
+	{
 		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-editor-mixer"));
-
 		/* do it twice to force the change */
-
 		tact->set_active (!yn);
 		tact->set_active (yn);
 	}
 
-	if (node.get_property ("show-editor-list", yn)) {
-
+	yn = false;
+	node.get_property ("show-editor-list", yn);
+	{
 		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-editor-list"));
-
 		/* do it twice to force the change */
-
 		tact->set_active (!yn);
 		tact->set_active (yn);
 	}
@@ -2503,11 +2501,11 @@ Editor::set_state (const XMLNode& node, int version)
 		_the_notebook.set_current_page (el_page);
 	}
 
-	if (node.get_property (X_("show-marker-lines"), yn)) {
-		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-marker-lines"));
-		assert (act);
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-
+	yn = false;
+	node.get_property (X_("show-marker-lines"), yn);
+	{
+		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-marker-lines"));
+		/* do it twice to force the change */
 		tact->set_active (!yn);
 		tact->set_active (yn);
 	}
