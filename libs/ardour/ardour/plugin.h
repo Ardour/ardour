@@ -293,6 +293,8 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public HasLatency
 	virtual void set_owner (SessionObject* o) { _owner = o; }
 	SessionObject* owner() const { return _owner; }
 
+	void use_for_impulse_analysis () { _for_impulse_analysis = true; }
+
 	ARDOUR::AudioEngine& engine() const { return _engine; }
 	ARDOUR::Session& session() const { return _session; }
 
@@ -364,13 +366,14 @@ protected:
 	/** Do the actual removal of a preset of the provided name */
 	virtual void do_remove_preset (std::string) = 0;
 
-	ARDOUR::AudioEngine&     _engine;
-	ARDOUR::Session&         _session;
-	PluginInfoPtr            _info;
-	uint32_t                 _cycles;
-	std::map<std::string, PresetRecord> _presets;
+	ARDOUR::AudioEngine& _engine;
+	ARDOUR::Session&     _session;
+	PluginInfoPtr        _info;
+	uint32_t             _cycles;
+	SessionObject*       _owner;
+	bool                 _for_impulse_analysis;
 
-	SessionObject*           _owner;
+	std::map<std::string, PresetRecord> _presets;
 
 private:
 

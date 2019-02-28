@@ -3052,6 +3052,7 @@ PluginInsert::get_impulse_analysis_plugin()
 		// during init() -- most notably block_size..
 		// not great.
 		ret = plugin_factory(_plugins[0]);
+		ret->use_for_impulse_analysis ();
 		ChanCount out (internal_output_streams ());
 		if (ret->get_info ()->reconfigurable_io ()) {
 			// populate get_info ()->n_inputs and ->n_outputs
