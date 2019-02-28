@@ -371,6 +371,7 @@ LV2Plugin::LV2Plugin (AudioEngine& engine,
 	, _no_sample_accurate_ctrl (false)
 {
 	init(c_plugin, rate);
+	latency_compute_run();
 }
 
 LV2Plugin::LV2Plugin (const LV2Plugin& other)
@@ -388,10 +389,16 @@ LV2Plugin::LV2Plugin (const LV2Plugin& other)
 {
 	init(other._impl->plugin, other._sample_rate);
 
+	XMLNode root (other.state_node_name ());
+	other.add_state (&root);
+	set_state (root, Stateful::loading_state_version);
+
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
 		_control_data[i] = other._shadow_data[i];
 		_shadow_data[i]  = other._shadow_data[i];
 	}
+
+	latency_compute_run();
 }
 
 void
@@ -817,6 +824,8 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 				if (params[i]) {
 					*params[i] = (void*)&_shadow_data[i];
 				}
+			} else {
+				_shadow_data[i] = 0;
 			}
 		} else {
 			_defaults[i] = 0.0f;
@@ -873,7 +882,6 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 
 	load_supported_properties(_property_descriptors);
 	allocate_atom_event_buffers();
-	latency_compute_run();
 }
 
 int
