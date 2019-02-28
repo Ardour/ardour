@@ -76,7 +76,7 @@ FFT::analyze(ARDOUR::Sample *input, WindowingType windowing_type)
 
 #define Re (_fftOutput[i])
 #define Im (_fftOutput[_window_size-i])
-       	for (uint32_t i=1; i < _data_size - 1; i++) {
+	for (uint32_t i = 1; i < _data_size - 1; ++i) {
 
 		power = (Re * Re) + (Im * Im);
 		phase = atanf(Im / Re);
@@ -95,7 +95,7 @@ FFT::analyze(ARDOUR::Sample *input, WindowingType windowing_type)
 }
 
 void
-FFT::calculate()
+FFT::calculate ()
 {
 	if (_iterations > 1) {
 	       	for (uint32_t i=0; i < _data_size - 1; i++) {
@@ -106,31 +106,30 @@ FFT::calculate()
 	}
 }
 
-float *
-FFT::get_hann_window()
+float*
+FFT::get_hann_window ()
 {
-	if (_hann_window)
+	if (_hann_window) {
 		return _hann_window;
+	}
 
-
-        _hann_window = (float *) malloc(sizeof(float) * _window_size);
+	_hann_window = (float*) malloc (sizeof (float) * _window_size);
 
 	double sum = 0.0;
 
-        for (uint32_t i=0; i < _window_size; i++) {
-                _hann_window[i]=0.81f * ( 0.5f - (0.5f * (float) cos(2.0f * M_PI * (float)i / (float)(_window_size))));
-                sum += _hann_window[i];
-        }
+	for (uint32_t i = 0; i < _window_size; ++i) {
+		_hann_window[i] = 0.81f * (0.5f - (0.5f * (float) cos (2.0f * M_PI * (float)i / (float)(_window_size))));
+		sum += _hann_window[i];
+	}
 
-        double isum = 1.0 / sum;
+	double isum = 1.0 / sum;
 
-        for (uint32_t i=0; i < _window_size; i++) {
-                _hann_window[i] *= isum;
-        }
+	for (uint32_t i = 0; i < _window_size; ++i) {
+		_hann_window[i] *= isum;
+	}
 
 	return _hann_window;
 }
-
 
 FFT::~FFT()
 {
