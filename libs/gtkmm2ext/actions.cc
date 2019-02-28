@@ -401,7 +401,8 @@ ActionManager::register_action (RefPtr<ActionGroup> group, const char* name, con
 
 RefPtr<Action>
 ActionManager::register_action (RefPtr<ActionGroup> group,
-                            const char* name, const char* label, sigc::slot<void> sl)
+                                const char* name, const char* label,
+                                sigc::slot<void> sl)
 {
 	string fullpath;
 
@@ -422,9 +423,9 @@ ActionManager::register_action (RefPtr<ActionGroup> group,
 
 RefPtr<Action>
 ActionManager::register_radio_action (RefPtr<ActionGroup> group,
-                                  Gtk::RadioAction::Group& rgroup,
-                                  const char* name, const char* label,
-                                  sigc::slot<void> sl)
+                                      Gtk::RadioAction::Group& rgroup,
+                                      const char* name, const char* label,
+                                      sigc::slot<void> sl)
 {
 	string fullpath;
 
@@ -446,10 +447,10 @@ ActionManager::register_radio_action (RefPtr<ActionGroup> group,
 
 RefPtr<Action>
 ActionManager::register_radio_action (RefPtr<ActionGroup> group,
-                                  Gtk::RadioAction::Group& rgroup,
-                                  const char* name, const char* label,
-                                  sigc::slot<void,GtkAction*> sl,
-                                  int value)
+                                      Gtk::RadioAction::Group& rgroup,
+                                      const char* name, const char* label,
+                                      sigc::slot<void,GtkAction*> sl,
+                                      int value)
 {
 	string fullpath;
 
