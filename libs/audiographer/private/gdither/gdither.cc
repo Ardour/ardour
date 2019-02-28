@@ -480,5 +480,3 @@ void gdither_runf(GDither s, uint32_t channel, uint32_t length,
 			    s->clamp_l);
     }
 }
-
-/* vi:set ts=8 sts=4 sw=4: */
