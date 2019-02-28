@@ -498,6 +498,11 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 
 {
 	init ();
+
+	XMLNode root (other.state_node_name ());
+	other.add_state (&root);
+	set_state (root, Stateful::loading_state_version);
+
 	for (size_t i = 0; i < descriptors.size(); ++i) {
 		set_parameter (i, other.get_parameter (i));
 	}
