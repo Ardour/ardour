@@ -82,10 +82,10 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 
 	_analysis_area->add_events(Gdk::POINTER_MOTION_MASK | Gdk::LEAVE_NOTIFY_MASK | Gdk::BUTTON_PRESS_MASK);
 
-	_analysis_area->signal_expose_event().connect( sigc::mem_fun (*this, &PluginEqGui::expose_analysis_area));
-	_analysis_area->signal_size_allocate().connect( sigc::mem_fun (*this, &PluginEqGui::resize_analysis_area));
-	_analysis_area->signal_motion_notify_event().connect( sigc::mem_fun (*this, &PluginEqGui::analysis_area_mouseover));
-	_analysis_area->signal_leave_notify_event().connect( sigc::mem_fun (*this, &PluginEqGui::analysis_area_mouseexit));
+	_analysis_area->signal_expose_event().connect (sigc::mem_fun (*this, &PluginEqGui::expose_analysis_area));
+	_analysis_area->signal_size_allocate().connect (sigc::mem_fun (*this, &PluginEqGui::resize_analysis_area));
+	_analysis_area->signal_motion_notify_event().connect (sigc::mem_fun (*this, &PluginEqGui::analysis_area_mouseover));
+	_analysis_area->signal_leave_notify_event().connect (sigc::mem_fun (*this, &PluginEqGui::analysis_area_mouseexit));
 
 	// dB selection
 	dBScaleModel = Gtk::ListStore::create(dBColumns);
@@ -113,13 +113,13 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	dBScaleCombo -> pack_start(dBColumns.name);
 	dBScaleCombo -> set_active(1);
 
-	dBScaleCombo -> signal_changed().connect( sigc::mem_fun(*this, &PluginEqGui::change_dB_scale) );
+	dBScaleCombo -> signal_changed().connect (sigc::mem_fun(*this, &PluginEqGui::change_dB_scale));
 
 	Gtk::Label *dBComboLabel = new Gtk::Label (_("dB scale"));
 
 	Gtk::HBox *dBSelectBin = new Gtk::HBox(false, 5);
-	dBSelectBin->add( *manage(dBComboLabel));
-	dBSelectBin->add( *manage(dBScaleCombo));
+	dBSelectBin->add (*manage(dBComboLabel));
+	dBSelectBin->add (*manage(dBScaleCombo));
 
 	// Phase checkbutton
 	_signal_button = new Gtk::CheckButton (_("Plot live signal"));
@@ -128,7 +128,7 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	// Phase checkbutton
 	_phase_button = new Gtk::CheckButton (_("Show phase"));
 	_phase_button->set_active(true);
-	_phase_button->signal_toggled().connect( sigc::mem_fun(*this, &PluginEqGui::redraw_scales));
+	_phase_button->signal_toggled().connect (sigc::mem_fun(*this, &PluginEqGui::redraw_scales));
 
 	// Freq/dB info for mouse over
 	_pointer_info = new Gtk::Label ("", 1, 0.5);
@@ -208,7 +208,7 @@ void
 PluginEqGui::start_updating()
 {
 	if (!_update_connection.connected() && is_visible()) {
-		_update_connection = Glib::signal_timeout().connect( sigc::mem_fun(this, &PluginEqGui::timeout_callback), 250);
+		_update_connection = Glib::signal_timeout().connect (sigc::mem_fun(this, &PluginEqGui::timeout_callback), 250);
 	}
 }
 
@@ -222,11 +222,11 @@ PluginEqGui::on_show()
 	Gtk::Widget *toplevel = get_toplevel();
 	if (toplevel) {
 		if (!_window_unmap_connection.connected()) {
-			_window_unmap_connection = toplevel->signal_unmap().connect( sigc::mem_fun(this, &PluginEqGui::stop_updating));
+			_window_unmap_connection = toplevel->signal_unmap().connect (sigc::mem_fun(this, &PluginEqGui::stop_updating));
 		}
 
 		if (!_window_map_connection.connected()) {
-			_window_map_connection = toplevel->signal_map().connect( sigc::mem_fun(this, &PluginEqGui::start_updating));
+			_window_map_connection = toplevel->signal_map().connect (sigc::mem_fun(this, &PluginEqGui::start_updating));
 		}
 	}
 }
@@ -277,7 +277,7 @@ PluginEqGui::set_buffer_size(uint32_t size, uint32_t signal_size)
 		_impulse_fft       = new GTKArdour::FFT(size);
 		_signal_input_fft  = new GTKArdour::FFT(signal_size);
 		_signal_output_fft = new GTKArdour::FFT(signal_size);
-	} catch( ... ) {
+	} catch (...) {
 		// Don't care about lost memory, we're screwed anyhow
 		_impulse_fft       = tmp1;
 		_signal_input_fft  = tmp2;
@@ -320,19 +320,19 @@ PluginEqGui::resize_analysis_area (Gtk::Allocation& size)
 }
 
 bool
-PluginEqGui::timeout_callback()
+PluginEqGui::timeout_callback ()
 {
 	if (!_signal_analysis_running) {
 		_signal_analysis_running = true;
-		_plugin_insert -> collect_signal_for_analysis(_signal_buffer_size);
+		_plugin_insert -> collect_signal_for_analysis (_signal_buffer_size);
 	}
-	run_impulse_analysis();
 
+	run_impulse_analysis ();
 	return true;
 }
 
 void
-PluginEqGui::signal_collect_callback(ARDOUR::BufferSet *in, ARDOUR::BufferSet *out)
+PluginEqGui::signal_collect_callback (ARDOUR::BufferSet* in, ARDOUR::BufferSet* out)
 {
 	ENSURE_GUI_THREAD (*this, &PluginEqGui::signal_collect_callback, in, out);
 
@@ -340,19 +340,17 @@ PluginEqGui::signal_collect_callback(ARDOUR::BufferSet *in, ARDOUR::BufferSet *o
 	_signal_output_fft->reset();
 
 	for (uint32_t i = 0; i < _plugin_insert->input_streams().n_audio(); ++i) {
-		_signal_input_fft ->analyze(in ->get_audio(i).data(), GTKArdour::FFT::HANN);
+		_signal_input_fft ->analyze (in ->get_audio(i).data(), GTKArdour::FFT::HANN);
 	}
 
 	for (uint32_t i = 0; i < _plugin_insert->output_streams().n_audio(); ++i) {
-		_signal_output_fft->analyze(out->get_audio(i).data(), GTKArdour::FFT::HANN);
+		_signal_output_fft->analyze (out->get_audio(i).data(), GTKArdour::FFT::HANN);
 	}
 
 	_signal_input_fft ->calculate();
 	_signal_output_fft->calculate();
 
 	_signal_analysis_running = false;
-
-	// This signals calls expose_analysis_area()
 	_analysis_area->queue_draw();
 }
 
@@ -554,10 +552,10 @@ PluginEqGui::redraw_analysis_area()
 	cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
 
 	if (_phase_button->get_active()) {
-		plot_impulse_phase(_analysis_area, cr);
+		plot_impulse_phase (_analysis_area, cr);
 	}
 
-	plot_impulse_amplitude(_analysis_area, cr);
+	plot_impulse_amplitude (_analysis_area, cr);
 
 	if (_pointer_in_area_xpos >= 0) {
 		update_pointer_info (_pointer_in_area_xpos);
@@ -595,7 +593,7 @@ PluginEqGui::draw_scales_phase(Gtk::Widget */*w*/, cairo_t *cr)
 
 	for (uint32_t i = 0; i < 3; i++) {
 
-		y = _analysis_height/2.0 - (float)i*(_analysis_height/8.0)*PHASE_PROPORTION;
+		y = _analysis_height / 2.0 - (float)i * (_analysis_height / 8.0) * PHASE_PROPORTION;
 
 		cairo_set_source_rgb(cr, .8, .9, 0.2);
 		if (i == 0) {
@@ -616,7 +614,7 @@ PluginEqGui::draw_scales_phase(Gtk::Widget */*w*/, cairo_t *cr)
 		cairo_line_to(cr, _analysis_width, y);
 
 
-		y = _analysis_height/2.0 + (float)i*(_analysis_height/8.0)*PHASE_PROPORTION;
+		y = _analysis_height / 2.0 + (float)i * (_analysis_height / 8.0) * PHASE_PROPORTION;
 
 		// label
 		snprintf(buf,256, "-%d\u00b0", (i * 45));
@@ -636,7 +634,7 @@ PluginEqGui::draw_scales_phase(Gtk::Widget */*w*/, cairo_t *cr)
 }
 
 void
-PluginEqGui::plot_impulse_phase(Gtk::Widget *w, cairo_t *cr)
+PluginEqGui::plot_impulse_phase (Gtk::Widget *w, cairo_t *cr)
 {
 	float x,y;
 
@@ -654,22 +652,23 @@ PluginEqGui::plot_impulse_phase(Gtk::Widget *w, cairo_t *cr)
 		x *= _analysis_width;
 
 		y  = _analysis_height/2.0 - (_impulse_fft->phase_at_bin(i)/M_PI)*(_analysis_height/2.0)*PHASE_PROPORTION;
-
-		if ( i == 0 ) {
-			cairo_move_to(cr, x, y);
-
+		if (i == 0) {
+			cairo_move_to (cr, x, y);
 			avgY = 0;
 			avgNum = 0;
-		} else if (rint(x) > prevX || i == _impulse_fft->bins()-1 ) {
-			avgY = avgY/(float)avgNum;
-			if (avgY > (height * 10.0) ) avgY = height * 10.0;
-			if (avgY < (-height * 10.0) ) avgY = -height * 10.0;
+		} else if (rint (x) > prevX || i == _impulse_fft->bins() - 1) {
+			avgY = avgY / (float)avgNum;
+			if (avgY > (height * 10.0)) {
+				avgY = height * 10.0;
+			}
+			if (avgY < (-height * 10.0)) {
+				avgY = -height * 10.0;
+			}
+
 			cairo_line_to(cr, prevX, avgY);
-			//cairo_line_to(cr, prevX, avgY/(float)avgNum);
 
 			avgY = 0;
 			avgNum = 0;
-
 		}
 
 		prevX = rint(x);
@@ -734,10 +733,10 @@ PluginEqGui::draw_scales_power(Gtk::Widget */*w*/, cairo_t *cr)
 	//double dashes[] = { 1.0, 3.0, 4.5, 3.0 };
 	double dashes[] = { 3.0, 5.0 };
 
-	for (float dB = 0.0; dB < _max_dB; dB += _step_dB ) {
-		snprintf(buf, 256, "+%0.0f", dB );
+	for (float dB = 0.0; dB < _max_dB; dB += _step_dB) {
+		snprintf (buf, 256, "+%0.0f", dB);
 
-		y  = ( _max_dB - dB) / ( _max_dB - _min_dB );
+		y  = (_max_dB - dB) / (_max_dB - _min_dB);
 		//std::cerr << " y = " << y << std::endl;
 		y *= _analysis_height;
 
@@ -760,10 +759,10 @@ PluginEqGui::draw_scales_power(Gtk::Widget */*w*/, cairo_t *cr)
 
 
 
-	for (float dB = - _step_dB; dB > _min_dB; dB -= _step_dB ) {
-		snprintf(buf, 256, "%0.0f", dB );
+	for (float dB = - _step_dB; dB > _min_dB; dB -= _step_dB) {
+		snprintf(buf, 256, "%0.0f", dB);
 
-		y  = ( _max_dB - dB) / ( _max_dB - _min_dB );
+		y  = (_max_dB - dB) / (_max_dB - _min_dB);
 		y *= _analysis_height;
 
 		cairo_set_source_rgb(cr, 0.4, 0.4, 0.4);
@@ -782,7 +781,7 @@ PluginEqGui::draw_scales_power(Gtk::Widget */*w*/, cairo_t *cr)
 }
 
 void
-PluginEqGui::plot_impulse_amplitude(Gtk::Widget *w, cairo_t *cr)
+PluginEqGui::plot_impulse_amplitude (Gtk::Widget *w, cairo_t *cr)
 {
 	float x,y;
 	int prevX = 0;
@@ -795,30 +794,31 @@ PluginEqGui::plot_impulse_amplitude(Gtk::Widget *w, cairo_t *cr)
 	cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
 	cairo_set_line_width (cr, 2.5);
 
-	for (uint32_t i = 0; i < _impulse_fft->bins()-1; i++) {
+	for (uint32_t i = 0; i < _impulse_fft->bins() - 1; ++i) {
 		// x coordinate of bin i
-		x  = log10f(1.0 + (float)i / (float)_impulse_fft->bins() * _log_coeff) / _log_max;
+		x  = log10f (1.0 + (float)i / (float)_impulse_fft->bins() * _log_coeff) / _log_max;
 		x *= _analysis_width;
 
-		float yCoeff = ( power_to_dB(_impulse_fft->power_at_bin(i)) - _min_dB) / (_max_dB - _min_dB);
+		float yCoeff = (power_to_dB (_impulse_fft->power_at_bin(i)) - _min_dB) / (_max_dB - _min_dB);
 
-		y = _analysis_height - _analysis_height*yCoeff;
+		y = _analysis_height - _analysis_height * yCoeff;
 
-		if ( i == 0 ) {
+		if (i == 0) {
 			cairo_move_to(cr, x, y);
+			avgY = 0;
+			avgNum = 0;
+		} else if (rint(x) > prevX || i == _impulse_fft->bins() - 1) {
+			avgY = avgY / (float)avgNum;
+			if (avgY > (height * 10.0)) {
+				avgY = height * 10.0;
+			}
+			if (avgY < (-height * 10.0)) {
+				avgY = -height * 10.0;
+			}
+			cairo_line_to (cr, prevX, avgY);
 
 			avgY = 0;
 			avgNum = 0;
-		} else if (rint(x) > prevX || i == _impulse_fft->bins()-1 ) {
-			avgY = avgY/(float)avgNum;
-			if (avgY > (height * 10.0) ) avgY = height * 10.0;
-			if (avgY < (-height * 10.0) ) avgY = -height * 10.0;
-			cairo_line_to(cr, prevX, avgY);
-			//cairo_line_to(cr, prevX, avgY/(float)avgNum);
-
-			avgY = 0;
-			avgNum = 0;
-
 		}
 
 		prevX = rint(x);
@@ -856,19 +856,23 @@ PluginEqGui::plot_signal_amplitude_difference(Gtk::Widget *w, cairo_t *cr)
 		assert (!ISINF(power));
 		assert (!ISNAN(power));
 
-		float yCoeff = ( power - _min_dB) / (_max_dB - _min_dB);
+		float yCoeff = (power - _min_dB) / (_max_dB - _min_dB);
 
 		y = _analysis_height - _analysis_height*yCoeff;
 
-		if ( i == 0 ) {
+		if (i == 0) {
 			cairo_move_to(cr, x, y);
 
 			avgY = 0;
 			avgNum = 0;
-		} else if (rint(x) > prevX || i == _impulse_fft->bins()-1 ) {
+		} else if (rint(x) > prevX || i == _impulse_fft->bins() - 1) {
 			avgY = avgY/(float)avgNum;
-			if (avgY > (height * 10.0) ) avgY = height * 10.0;
-			if (avgY < (-height * 10.0) ) avgY = -height * 10.0;
+			if (avgY > (height * 10.0)) {
+				avgY = height * 10.0;
+			}
+			if (avgY < (-height * 10.0)) {
+				avgY = -height * 10.0;
+			}
 			cairo_line_to(cr, prevX, avgY);
 
 			avgY = 0;
