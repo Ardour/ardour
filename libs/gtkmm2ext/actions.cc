@@ -310,27 +310,34 @@ ActionManager::get_action (char const * group_name, char const * action_name, bo
 RefPtr<ToggleAction>
 ActionManager::get_toggle_action (char const * group_name, char const * action_name, bool or_die)
 {
-	RefPtr<Action> act = get_action (group_name, action_name, or_die);
+	RefPtr<ToggleAction> act = Glib::RefPtr<ToggleAction>::cast_dynamic (get_action (group_name, action_name, or_die));
 
-	if (!act) {
-		return RefPtr<ToggleAction>();
+	if (act) {
+		return act;
 	}
 
-	return Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	if (or_die) {
+		::abort ();
+	}
+
+	return RefPtr<ToggleAction>();
 }
 
 RefPtr<RadioAction>
 ActionManager::get_radio_action (char const * group_name, char const * action_name, bool or_die)
 {
-	RefPtr<Action> act = get_action (group_name, action_name, or_die);
+	RefPtr<RadioAction> act = Glib::RefPtr<RadioAction>::cast_dynamic (get_action (group_name, action_name, or_die));
 
-	if (!act) {
-		return RefPtr<RadioAction>();
+	if (act) {
+		return act;
 	}
 
-	return Glib::RefPtr<RadioAction>::cast_dynamic (act);
-}
+	if (or_die) {
+		::abort ();
+	}
 
+	return RefPtr<RadioAction>();
+}
 
 RefPtr<ActionGroup>
 ActionManager::create_action_group (void * owner, string const & name)
