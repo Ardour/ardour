@@ -873,21 +873,6 @@ private:
 	ArdourCanvas::Rectangle* _canvas_drop_zone;
 	bool canvas_drop_zone_event (GdkEvent* event);
 
-	enum RulerType {
-		ruler_metric_timecode = 0,
-		ruler_metric_bbt = 1,
-		ruler_metric_samples = 2,
-		ruler_metric_minsec = 3,
-
-		ruler_time_tempo = 4,
-		ruler_time_meter = 5,
-		ruler_time_marker = 6,
-		ruler_time_range_marker = 7,
-		ruler_time_transport_marker = 8,
-		ruler_time_cd_marker = 9,
-		ruler_video_timeline = 10,
-	};
-
 	Glib::RefPtr<Gtk::ToggleAction> ruler_timecode_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_bbt_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_samples_action;
@@ -911,8 +896,7 @@ private:
 	void update_tempo_based_rulers ();
 	void popup_ruler_menu (samplepos_t where = 0, ItemType type = RegionItem);
 	void update_ruler_visibility ();
-	void set_ruler_visible (RulerType, bool);
-	void toggle_ruler_visibility (RulerType rt);
+	void toggle_ruler_visibility ();
 	void ruler_toggled (int);
 	bool ruler_label_button_release (GdkEventButton*);
 	void store_ruler_visibility ();

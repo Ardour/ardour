@@ -588,20 +588,20 @@ Editor::register_actions ()
 	/* RULERS */
 
 	Glib::RefPtr<ActionGroup> ruler_actions = ActionManager::create_action_group (bindings, X_("Rulers"));
-	ruler_tempo_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-tempo-ruler"), _("Tempo"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_tempo)));
-	ruler_meter_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-meter-ruler"), _("Meter"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_meter)));
-	ruler_range_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-range-ruler"), _("Ranges"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_range_marker)));
-	ruler_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-marker-ruler"), _("Markers"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_marker)));
-	ruler_cd_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-cd-marker-ruler"), _("CD Markers"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_cd_marker)));
-	ruler_loop_punch_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-loop-punch-ruler"), _("Loop/Punch"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_transport_marker)));
-	ruler_bbt_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-bbt-ruler"), _("Bars & Beats"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_bbt)));
-	ruler_samples_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-samples-ruler"), _("Samples"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_samples)));
-	ruler_timecode_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-timecode-ruler"), _("Timecode"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_timecode)));
-	ruler_minsec_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-minsec-ruler"), _("Min:Sec"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_minsec)));
+	ruler_tempo_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-tempo-ruler"), _("Tempo"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
+	ruler_meter_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-meter-ruler"), _("Meter"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
+	ruler_range_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-range-ruler"), _("Ranges"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
+	ruler_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-marker-ruler"), _("Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
+	ruler_cd_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-cd-marker-ruler"), _("CD Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
+	ruler_loop_punch_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-loop-punch-ruler"), _("Loop/Punch"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
+	ruler_bbt_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-bbt-ruler"), _("Bars & Beats"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
+	ruler_samples_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-samples-ruler"), _("Samples"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
+	ruler_timecode_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-timecode-ruler"), _("Timecode"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
+	ruler_minsec_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-minsec-ruler"), _("Min:Sec"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 
 	ActionManager::register_action (editor_menu_actions, X_("VideoMonitorMenu"), _("Video Monitor"));
 
-	ruler_video_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-video-ruler"), _("Video"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_video_timeline)));
+	ruler_video_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-video-ruler"), _("Video"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	xjadeo_proc_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("ToggleJadeo"), _("Video Monitor"), sigc::mem_fun (*this, &Editor::set_xjadeo_proc)));
 
 	xjadeo_ontop_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (editor_actions, X_("toggle-vmon-ontop"), _("Always on Top"), sigc::bind (sigc::mem_fun (*this, &Editor::set_xjadeo_viewoption), (int) 1)));
@@ -809,48 +809,10 @@ Editor::toggle_skip_playback ()
 }
 
 void
-Editor::toggle_ruler_visibility (RulerType rt)
+Editor::toggle_ruler_visibility ()
 {
-	const char* action = 0;
-
 	if (no_ruler_shown_update) {
 		return;
-	}
-
-	switch (rt) {
-	case ruler_metric_timecode:
-		action = "toggle-timecode-ruler";
-		break;
-	case ruler_metric_bbt:
-		action = "toggle-bbt-ruler";
-		break;
-	case ruler_metric_samples:
-		action = "toggle-samples-ruler";
-		break;
-	case ruler_metric_minsec:
-		action = "toggle-minsec-ruler";
-		break;
-	case ruler_time_tempo:
-		action = "toggle-tempo-ruler";
-		break;
-	case ruler_time_meter:
-		action = "toggle-meter-ruler";
-		break;
-	case ruler_time_marker:
-		action = "toggle-marker-ruler";
-		break;
-	case ruler_time_range_marker:
-		action = "toggle-range-ruler";
-		break;
-	case ruler_time_transport_marker:
-		action = "toggle-loop-punch-ruler";
-		break;
-	case ruler_time_cd_marker:
-		action = "toggle-cd-marker-ruler";
-		break;
-	case ruler_video_timeline:
-		action = "toggle-video-ruler";
-		break;
 	}
 
 	update_ruler_visibility ();
