@@ -873,15 +873,14 @@ public:
 	PBD::Signal0<void> MuteChanged;
 	PBD::Signal0<void> IsolatedChanged;
 	PBD::Signal0<void> MonitorChanged;
+	PBD::Signal0<void> MonitorBusAddedOrRemoved;
 
 	PBD::Signal0<void> session_routes_reconnected;
 
 	/* monitor/master out */
 	int add_master_bus (ChanCount const&);
 
-	void add_monitor_section ();
 	void reset_monitor_section ();
-	void remove_monitor_section ();
 	bool monitor_active() const { return (_monitor_out && _monitor_out->monitor_control () && _monitor_out->monitor_control ()->monitor_active()); }
 
 	boost::shared_ptr<Route> monitor_out() const { return _monitor_out; }
@@ -1275,6 +1274,9 @@ private:
 	unsigned int            _xrun_count;
 
 	std::string             _missing_file_replacement;
+
+	void add_monitor_section ();
+	void remove_monitor_section ();
 
 	void initialize_latencies ();
 	void update_latency (bool playback);

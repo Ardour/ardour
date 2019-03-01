@@ -4135,11 +4135,33 @@ Session::config_changed (std::string p, bool ours)
 	} else if (p == "auto-return-target-list") {
 		follow_playhead_priority ();
 	} else if (p == "use-monitor-bus") {
-		bool yn = Config->get_use_monitor_bus();
-		if (yn && !_monitor_out) {
-			add_monitor_section ();
-		} else if (!yn && _monitor_out) {
-			remove_monitor_section ();
+		/* NB. This is always called when constructing a session,
+		 * after restoring session state (if any),
+		 * via post_engine_init() -> Config->map_parameters()
+		 */
+		bool want_ms = Config->get_use_monitor_bus();
+		bool have_ms = _monitor_out ? true : false;
+		if (loading ()) {
+			/* When loading an existing session, the config "use-monitor-bus"
+			 * is ignored. Instead the sesion-state (xml) will have added the
+			 * "monitor-route" and restored its state (and connections)
+			 * if the session has a monitor-section.
+			 * Update the config to reflect this.
+			 */
+			if (want_ms != have_ms) {
+				Config->set_use_monitor_bus (have_ms);
+			}
+			MonitorBusAddedOrRemoved (); /* EMIT SIGNAL */
+		} else  {
+			/* Otherwise, Config::set_use_monitor_bus() does
+			 * control the the presence of the monitor-section
+			 * (new sessions, user initiated change)
+			 */
+			if (want_ms && !have_ms) {
+				add_monitor_section ();
+			} else if (!want_ms && have_ms) {
+				remove_monitor_section ();
+			}
 		}
 	}
 
