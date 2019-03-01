@@ -523,7 +523,7 @@ ProcessorEntry::setup_tooltip ()
 			}
 
 			if ((replicated = pi->get_count()) > 1) {
-				postfix += string_compose(_("\nThis mono plugin has been replicated %1 times."), replicated);
+				postfix += string_compose(_("\nThis plugin has been replicated %1 times."), replicated);
 			}
 
 			if (pi->plugin()->has_editor()) {
