@@ -856,10 +856,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\pcm_utils.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\phase_control.cc"
 				>
 			</File>
@@ -2090,10 +2086,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\ardour\noise.h"
-				>
-			</File>
-			<File
 				RelativePath="..\ardour\note_fixer.h"
 				>
 			</File>
@@ -2131,10 +2123,6 @@
 			</File>
 			<File
 				RelativePath="..\ardour\parameter_types.h"
-				>
-			</File>
-			<File
-				RelativePath="..\ardour\pcm_utils.h"
 				>
 			</File>
 			<File
