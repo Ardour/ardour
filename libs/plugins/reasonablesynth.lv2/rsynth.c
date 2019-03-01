@@ -333,7 +333,8 @@ synth_fragment (void *synth, const size_t n_samples, float *left, float *right)
 static void
 synth_reset_channel(RSSynthChannel* sc)
 {
-	for (int k = 0; k < 128; ++k) {
+	int k;
+	for (k = 0; k < 128; ++k) {
 		sc->adsr_cnt[k]  = 0;
 		sc->adsr_amp[k]  = 0;
 		sc->phase[k]     = -10;
