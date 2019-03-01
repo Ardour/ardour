@@ -619,11 +619,15 @@ ProcessorEntry::name (Width w) const
 
 	} else {
 		boost::shared_ptr<ARDOUR::PluginInsert> pi;
-		uint32_t replicated;
-		if ((pi = boost::dynamic_pointer_cast<ARDOUR::PluginInsert> (_processor)) != 0
-				&& (replicated = pi->get_count()) > 1)
-		{
-			name_display += string_compose(_("(%1x1) "), replicated);
+		if ((pi = boost::dynamic_pointer_cast<ARDOUR::PluginInsert> (_processor)) != 0 && pi->get_count() > 1) {
+			switch (w) {
+				case Wide:
+					name_display += "* ";
+					break;
+				case Narrow:
+					name_display += "*";
+					break;
+			}
 		}
 
 		switch (w) {
@@ -634,7 +638,6 @@ ProcessorEntry::name (Width w) const
 			name_display += PBD::short_version (_processor->display_name(), 5);
 			break;
 		}
-
 	}
 
 	return name_display;
