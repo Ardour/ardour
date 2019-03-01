@@ -54,6 +54,7 @@ public:
 	VCAList::size_type n_vcas() const { return _vcas.size(); }
 
 	PBD::Signal1<void,VCAList&> VCAAdded;
+	PBD::Signal0<void> VCACreated; /*<< is not emitted during set_state */
 
 	XMLNode& get_state();
 	int set_state (XMLNode const&, int version);

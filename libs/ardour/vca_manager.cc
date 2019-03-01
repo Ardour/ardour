@@ -111,6 +111,10 @@ VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 
 	VCAAdded (vcal); /* EMIT SIGNAL */
 
+	if (!vcal.empty ()) {
+		VCACreated (); /* EMIT SIGNAL */
+	}
+
 	_session.set_dirty ();
 
 	return vcal;
