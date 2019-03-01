@@ -187,6 +187,7 @@ private:
 
 	void meter_changed ();
 	void monitor_changed ();
+	void monitor_section_added_or_removed ();
 
 	ArdourWidgets::ArdourButton input_button;
 	ArdourWidgets::ArdourButton output_button;

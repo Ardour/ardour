@@ -275,7 +275,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 				));
 
 	add_option (_("Monitoring"), new CheckOption (
-				"have-monitor-section",
+				"unused",
 				_("Use monitor section in this session"),
 				ActionManager::get_action(X_("Monitor"), "UseMonitorSection")
 				));

@@ -583,6 +583,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		if (monitor_section_button == 0) {
 			Glib::RefPtr<Action> act = ActionManager::get_action ("Mixer", "ToggleMonitorSection");
 			_session->MonitorChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::monitor_changed, this), gui_context());
+			_session->MonitorBusAddedOrRemoved.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::monitor_section_added_or_removed, this), gui_context());
 
 			monitor_section_button = manage (new ArdourButton);
 			monitor_changed ();
@@ -591,8 +592,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 			mute_solo_table.attach (*monitor_section_button, 1, 2, 0, 1);
 			monitor_section_button->show();
 			monitor_section_button->unset_flags (Gtk::CAN_FOCUS);
+			monitor_section_added_or_removed ();
 		}
-		parameter_changed ("use-monitor-bus");
 	} else {
 		bottom_button_table.attach (group_button, 1, 2, 0, 1);
 		mute_solo_table.attach (*mute_button, 0, 1, 0, 1);
@@ -2115,6 +2116,27 @@ MixerStrip::monitor_changed ()
 	}
 }
 
+void
+MixerStrip::monitor_section_added_or_removed ()
+{
+	assert (monitor_section_button);
+	if (mute_button->get_parent()) {
+		mute_button->get_parent()->remove(*mute_button);
+	}
+	if (monitor_section_button->get_parent()) {
+		monitor_section_button->get_parent()->remove(*monitor_section_button);
+	}
+	if (_session && _session->monitor_out ()) {
+		mute_solo_table.attach (*mute_button, 0, 1, 0, 1);
+		mute_solo_table.attach (*monitor_section_button, 1, 2, 0, 1);
+		mute_button->show();
+		monitor_section_button->show();
+	} else {
+		mute_solo_table.attach (*mute_button, 0, 2, 0, 1);
+		mute_button->show();
+	}
+}
+
 /** Called when the metering point has changed */
 void
 MixerStrip::meter_changed ()
@@ -2394,24 +2416,6 @@ MixerStrip::parameter_changed (string p)
 	} else if (p == "track-name-number") {
 		name_changed ();
 		update_track_number_visibility();
-	} else if (p == "use-monitor-bus") {
-		if (monitor_section_button) {
-			if (mute_button->get_parent()) {
-				mute_button->get_parent()->remove(*mute_button);
-			}
-			if (monitor_section_button->get_parent()) {
-				monitor_section_button->get_parent()->remove(*monitor_section_button);
-			}
-			if (Config->get_use_monitor_bus ()) {
-				mute_solo_table.attach (*mute_button, 0, 1, 0, 1);
-				mute_solo_table.attach (*monitor_section_button, 1, 2, 0, 1);
-				mute_button->show();
-				monitor_section_button->show();
-			} else {
-				mute_solo_table.attach (*mute_button, 0, 2, 0, 1);
-				mute_button->show();
-			}
-		}
 	}
 }
 

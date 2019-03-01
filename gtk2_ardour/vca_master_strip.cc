@@ -159,6 +159,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	_vca->solo_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::solo_changed, this), gui_context());
 	_vca->mute_control()->Changed.connect (vca_connections, invalidator (*this), boost::bind (&VCAMasterStrip::mute_changed, this), gui_context());
 
+	_session->MonitorBusAddedOrRemoved.connect (*this, invalidator (*this), boost::bind (&VCAMasterStrip::set_button_names, this), gui_context());
 
 	s->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&VCAMasterStrip::parameter_changed, this, _1), gui_context());
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&VCAMasterStrip::parameter_changed, this, _1), gui_context());
@@ -197,7 +198,7 @@ VCAMasterStrip::self_delete ()
 void
 VCAMasterStrip::parameter_changed (std::string const & p)
 {
-	if (p == "use-monitor-bus" || p == "solo-control-is-listen-control" || p == "listen-position") {
+	if (p == "solo-control-is-listen-control" || p == "listen-position") {
 		set_button_names ();
 	} else if (p == "mixer-element-visibility") {
 		update_bottom_padding ();

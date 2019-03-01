@@ -210,6 +210,7 @@ RouteUI::init ()
 	_session->SoloChanged.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::solo_changed_so_update_mute, this), gui_context());
 	_session->TransportStateChange.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::check_rec_enable_sensitivity, this), gui_context());
 	_session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::session_rec_enable_changed, this), gui_context());
+	_session->MonitorBusAddedOrRemoved.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::set_button_names, this), gui_context());
 
 	_session->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteUI::parameter_changed, this, _1), gui_context());
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteUI::parameter_changed, this, _1), gui_context());
@@ -1995,7 +1996,7 @@ RouteUI::parameter_changed (string const & p)
 
 	if (p == "disable-disarm-during-roll") {
 		check_rec_enable_sensitivity ();
-	} else if (p == "use-monitor-bus" || p == "solo-control-is-listen-control" || p == "listen-position") {
+	} else if (p == "solo-control-is-listen-control" || p == "listen-position") {
 		set_button_names ();
 	} else if (p == "session-monitoring") {
 		update_monitoring_display ();

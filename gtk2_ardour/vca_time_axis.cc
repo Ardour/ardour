@@ -113,6 +113,8 @@ VCATimeAxisView::VCATimeAxisView (PublicEditor& ed, Session* s, ArdourCanvas::Ca
 	controls_ebox.set_name (controls_base_unselected_name);
 	time_axis_frame.set_name (controls_base_unselected_name);
 
+	s->MonitorBusAddedOrRemoved.connect (*this, invalidator (*this), boost::bind (&VCATimeAxisView::set_button_names, this), gui_context());
+
 	s->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&VCATimeAxisView::parameter_changed, this, _1), gui_context());
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&VCATimeAxisView::parameter_changed, this, _1), gui_context());
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &VCATimeAxisView::parameter_changed));
@@ -135,7 +137,7 @@ VCATimeAxisView::parameter_changed (std::string const & p)
 {
 	if (p == "track-name-number") {
 		update_track_number_visibility();
-	} else if (p == "use-monitor-bus" || p == "solo-control-is-listen-control" || p == "listen-position") {
+	} else if (p == "solo-control-is-listen-control" || p == "listen-position") {
 		set_button_names ();
 	}
 }

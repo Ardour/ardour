@@ -3999,7 +3999,6 @@ These settings will only take effect after %1 is restarted.\n\
 	//trigger some parameter-changed messages which affect widget-visibility or -sensitivity
 	parameter_changed ("send-ltc");
 	parameter_changed ("sync-source");
-	parameter_changed ("use-monitor-bus");
 	parameter_changed ("open-gui-after-adding-plugin");
 
 	XMLNode* node = ARDOUR_UI::instance()->preferences_settings();
@@ -4029,7 +4028,7 @@ RCOptionEditor::parameter_changed (string const & p)
 		bool const s = Config->get_use_monitor_bus ();
 		if (!s) {
 			/* we can't use this if we don't have a monitor bus */
-			Config->set_solo_control_is_listen_control (false);
+			Config->set_solo_control_is_listen_control (false); // XXX
 		}
 		_solo_control_is_listen_control->set_sensitive (s);
 		_listen_position->set_sensitive (s);

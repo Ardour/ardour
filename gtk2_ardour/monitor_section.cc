@@ -63,6 +63,11 @@ using namespace std;
 
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
 
+#define SYNCHRONIZE_TOGGLE_ACTION(action, value) \
+	if (action && action->get_active() != value) { \
+		action->set_active(value); \
+	}
+
 MonitorSection::MonitorSection ()
 	: RouteUI ((Session*) 0)
 	, _tearoff (0)
@@ -585,6 +590,8 @@ MonitorSection::set_session (Session* s)
 	_plugin_selector->set_session (_session);
 	insert_box->set_session (_session);
 
+	Glib::RefPtr<ActionGroup> global_monitor_actions = ActionManager::get_action_group (X_("Monitor Section"));
+
 	if (_session) {
 
 		/* These are not actually dependent on the Session, but they
@@ -613,6 +620,8 @@ MonitorSection::set_session (Session* s)
 				update_processor_box ();
 			}
 
+			SYNCHRONIZE_TOGGLE_ACTION (ActionManager::get_toggle_action (X_("Monitor"), "UseMonitorSection"), true);
+			ActionManager::set_sensitive (global_monitor_actions, true);
 			ActionManager::set_sensitive (monitor_actions, true);
 			ActionManager::set_sensitive (solo_actions, true);
 
@@ -624,17 +633,15 @@ MonitorSection::set_session (Session* s)
 			delete _output_selector;
 			_output_selector = 0;
 
+			SYNCHRONIZE_TOGGLE_ACTION (ActionManager::get_toggle_action (X_("Monitor"), "UseMonitorSection"), false);
+			ActionManager::set_sensitive (global_monitor_actions, false);
 			ActionManager::set_sensitive (monitor_actions, false);
-			/* this action needs to always be true in this * scenaro, so that we can turn it back on*/
-			ActionManager::get_toggle_action (X_("Monitor"), X_("UseMonitorSection"))->set_sensitive (true);
 			ActionManager::set_sensitive (solo_actions, true);
+			/* this action needs to always be true in this, so that we can turn it back on */
+			ActionManager::get_toggle_action (X_("Monitor"), X_("UseMonitorSection"))->set_sensitive (true);
 		}
 
-		/* make sure the state of this action reflects reality */
-		ActionManager::get_toggle_action (X_("Monitor"), X_("UseMonitorSection"))->set_active (_route != 0);
-
 		populate_buttons ();
-
 
 	} else {
 
@@ -647,6 +654,7 @@ MonitorSection::set_session (Session* s)
 
 		ActionManager::set_sensitive (monitor_actions, false);
 		ActionManager::set_sensitive (solo_actions, false);
+		ActionManager::set_sensitive (global_monitor_actions, false);
 	}
 }
 
@@ -1186,11 +1194,6 @@ MonitorSection::cancel_audition (GdkEventButton*)
 	return true;
 }
 
-#define SYNCHRONIZE_TOGGLE_ACTION(action, value) \
-	if (action && action->get_active() != value) { \
-		action->set_active(value); \
-	} \
-
 void
 MonitorSection::parameter_changed (std::string name)
 {
@@ -1202,8 +1205,6 @@ MonitorSection::parameter_changed (std::string name)
 		SYNCHRONIZE_TOGGLE_ACTION (ActionManager::get_toggle_action (X_("Solo"), "toggle-mute-overrides-solo"), Config->get_solo_mute_override ());
 	} else if (name == "exclusive-solo") {
 		SYNCHRONIZE_TOGGLE_ACTION (ActionManager::get_toggle_action (X_("Solo"), "toggle-exclusive-solo"), Config->get_exclusive_solo ());
-	} else if (name == "use-monitor-bus") {
-		SYNCHRONIZE_TOGGLE_ACTION (ActionManager::get_toggle_action (X_("Monitor"), "UseMonitorSection"), Config->get_use_monitor_bus ());
 	}
 }
 
@@ -1623,6 +1624,17 @@ MonitorSection::toggle_use_monitor_section ()
 	if (!_session) {
 		return;
 	}
+	bool want_ms = ActionManager::get_toggle_action (X_("Monitor"), "UseMonitorSection")->get_active();
+	bool have_ms = Config->get_use_monitor_bus ();
 
-	Config->set_use_monitor_bus (ActionManager::get_toggle_action (X_("Monitor"), "UseMonitorSection")->get_active());
+	if (want_ms == have_ms) {
+		return;
+	}
+
+	if (want_ms) {
+		Config->set_use_monitor_bus (true);
+		ActionManager::get_toggle_action (X_("Mixer"), X_("ToggleMonitorSection"))->set_active (true);
+	} else {
+		Config->set_use_monitor_bus (false);
+	}
 }
