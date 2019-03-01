@@ -738,7 +738,7 @@ Session::select_playhead_priority_target (samplepos_t& jump_to)
 bool
 Session::select_playhead_priority_target (samplepos_t& jump_to)
 {
-	if (config.get_external_sync() || !config.get_auto_return()) {
+	if (!transport_master_no_external_or_using_engine() || !config.get_auto_return()) {
 		return false;
 	}
 
@@ -837,57 +837,75 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		update_latency_compensation ();
 	}
 
-	bool const auto_return_enabled = (!config.get_external_sync() && (Config->get_auto_return_target_list() || abort));
+	/* If we are not synced to a "true" external master, and we're not
+	 * handling an explicit locate, we should consider whether or not to
+	 * "auto-return". This could mean going to a specifically requested
+	 * location, or just back to the start of the last roll.
+	 */
 
-	if (auto_return_enabled ||
-	    (ptw & PostTransportLocate) ||
-	    (_requested_return_sample >= 0) ||
-	    synced_to_engine()) {
+	if (transport_master_no_external_or_using_engine() && !(ptw & PostTransportLocate)) {
 
-		// rg: what is the logic behind this case?
-		// pd: synced_to_engine() really means "JACK Transport
-		// Master". We need to tell JACK transport to locate to the
-		// target.
-		//
-		// note: should add clause to never do this if using any other
-		// transport master. 2019-Feb-26
+		bool do_locate = false;
 
-		if ((auto_return_enabled || synced_to_engine() || _requested_return_sample >= 0) &&
-		    !(ptw & PostTransportLocate)) {
+		if (_requested_return_sample >= 0) {
 
-			/* no explicit locate queued */
+			/* explicit return request pre-queued in event list. overrides everything else */
 
-			bool do_locate = false;
+			_transport_sample = _requested_return_sample;
 
-			if (_requested_return_sample >= 0) {
+			/* cancel this request */
+			_requested_return_sample = -1;
+			do_locate = true;
 
-				/* explicit return request pre-queued in event list. overrides everything else */
+		} else if (Config->get_auto_return_target_list()) {
 
-				_transport_sample = _requested_return_sample;
+			samplepos_t jump_to;
+
+			if (select_playhead_priority_target (jump_to)) {
+
+				/* there's a valid target (we don't care how it
+				 * was derived here)
+				 */
+
+				_transport_sample = jump_to;
 				do_locate = true;
 
-			} else {
-				samplepos_t jump_to;
+			} else if (abort) {
 
-				if (select_playhead_priority_target (jump_to)) {
+				/* roll aborted (typically capture) with
+				 * auto-return enabled
+				 */
 
-					_transport_sample = jump_to;
-					do_locate = true;
+				_transport_sample = _last_roll_location;
+				do_locate = true;
 
-				} else if (abort) {
-
-					_transport_sample = _last_roll_location;
-					do_locate = true;
-				}
-			}
-
-			_requested_return_sample = -1;
-
-			if (do_locate) {
-				_engine.transport_locate (_transport_sample);
 			}
 		}
 
+
+		if (do_locate && synced_to_engine()) {
+
+			/* We will unconditionally locate to _transport_sample
+			 * below, which will refill playback buffers based on
+			 * _transport_sample, and maximises the buffering they
+			 * represent.
+			 *
+			 * But if we are synced to engine (JACK), we should
+			 * locate the engine (JACK) as well. We would follow
+			 * the engine (JACK) on the next process cycle, but
+			 * since we're going to do a locate below anyway,
+			 * it seems pointless to not use just do it ourselves
+			 * right now, rather than wait for the engine (JACK) to
+			 * provide the new position on the next cycle.
+			 *
+			 * Despite the generic name of the called method
+			 * (::transport_locate()) this method only does
+			 * anything if the audio/MIDI backend is JACK.
+			 */
+
+			_engine.transport_locate (_transport_sample);
+
+		}
 	}
 
 	clear_clicks();
@@ -1960,6 +1978,12 @@ bool
 Session::transport_master_is_external () const
 {
 	return TransportMasterManager::instance().current() && config.get_external_sync();
+}
+
+bool
+Session::transport_master_no_external_or_using_engine () const
+{
+	return !TransportMasterManager::instance().current() || !config.get_external_sync() || (TransportMasterManager::instance().current()->type() == Engine);
 }
 
 void

@@ -1200,6 +1200,7 @@ public:
 
 	double compute_speed_from_master (pframes_t nframes);
 	bool   transport_master_is_external() const;
+	bool   transport_master_no_external_or_using_engine() const;
 	boost::shared_ptr<TransportMaster> transport_master() const;
 
 	void import_pt (PTFFormat& ptf, ImportStatus& status);
