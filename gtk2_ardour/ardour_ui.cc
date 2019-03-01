@@ -4439,9 +4439,7 @@ ARDOUR_UI::add_route_dialog_response (int r)
 		session_add_midi_bus (route_group, count, name_template, strict_io, instrument, 0, order);
 		break;
 	case AddRouteDialog::VCAMaster:
-		if (!_session->vca_manager().create_vca (count, name_template).empty ()) {
-			ActionManager::get_toggle_action ("Mixer", "ToggleVCAPane")->set_active (true);
-		}
+		_session->vca_manager().create_vca (count, name_template);
 		break;
 	case AddRouteDialog::FoldbackBus:
 		session_add_foldback_bus (count, name_template);
