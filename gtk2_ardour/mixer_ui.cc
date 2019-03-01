@@ -484,6 +484,12 @@ Mixer_UI::masters_scroller_button_release (GdkEventButton* ev)
 }
 
 void
+Mixer_UI::new_masters_created ()
+{
+	ActionManager::get_toggle_action ("Mixer", "ToggleVCAPane")->set_active (true);
+}
+
+void
 Mixer_UI::add_masters (VCAList& vlist)
 {
 	StripableList sl;
@@ -1059,6 +1065,7 @@ Mixer_UI::set_session (Session* sess)
 	_session->StateSaved.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::update_title, this), gui_context());
 
 	_session->vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::add_masters, this, _1), gui_context());
+	_session->vca_manager().VCACreated.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::new_masters_created, this), gui_context());
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::parameter_changed, this, _1), gui_context ());
 

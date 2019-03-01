@@ -209,6 +209,7 @@ private:
 
 	void add_masters (ARDOUR::VCAList&);
 	void remove_master (VCAMasterStrip*);
+	void new_masters_created ();
 
 	MixerStrip* strip_by_route (boost::shared_ptr<ARDOUR::Route>) const;
 	MixerStrip* strip_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
