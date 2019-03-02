@@ -1078,6 +1078,7 @@ ExportFormatDialog::show_ffmpeg_enconding_options (boost::shared_ptr<ARDOUR::Exp
 	encoding_options_label.set_label (_("FFMPEG/MP3 options"));
 	encoding_options_table.resize (1, 1);
 	encoding_options_table.attach (codec_quality_combo, 0, 1, 0, 1);
+	encoding_options_table.attach (tag_checkbox, 0, 1, 1, 2);
 	fill_codec_quality_lists (ptr);
 	show_all_children ();
 }
