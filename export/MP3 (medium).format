@@ -8,7 +8,7 @@
     <Option name="sample-format" value="SF_Float"/>
     <Option name="dithering" value="D_None"/>
     <Option name="tag-metadata" value="0"/>
-    <Option name="tag-support" value="0"/>
+    <Option name="tag-support" value="1"/>
     <Option name="broadcast-info" value="0"/>
   </EncodingOptions>
   <Processing>
