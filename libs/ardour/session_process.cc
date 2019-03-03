@@ -66,7 +66,6 @@ Session::process (pframes_t nframes)
 
 	if (processing_blocked()) {
 		_silent = true;
-		cerr << "%%%%%%%%%%%%%% session process blocked\n";
 		return;
 	}
 
@@ -862,7 +861,6 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::SetTransportMaster:
-		cerr << "Process TMM current request\n";
 		TransportMasterManager::instance().set_current (ev->transport_master);
 		break;
 
