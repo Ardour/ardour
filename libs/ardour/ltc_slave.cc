@@ -93,7 +93,6 @@ LTC_TransportMaster::set_session (Session *s)
 	if (_session) {
 
 		samples_per_ltc_frame = _session->samples_per_timecode_frame();
-		timecode.rate = _session->timecode_frames_per_second();
 		timecode.drop  = _session->timecode_drop_frames();
 		printed_timecode_warning = false;
 		ltc_timecode = _session->config.get_timecode_format();
