@@ -314,10 +314,11 @@ LTC_TransportMaster::detect_ltc_fps(int frameno, bool df)
 {
 	bool fps_changed = false;
 	double detected_fps = 0;
-	if (frameno > ltc_detect_fps_max)
-	{
+
+	if (frameno > ltc_detect_fps_max) {
 		ltc_detect_fps_max = frameno;
 	}
+
 	ltc_detect_fps_cnt++;
 
 	if (ltc_detect_fps_cnt > 40) {
