@@ -162,7 +162,8 @@ LTC_TransportMaster::resolution () const
 bool
 LTC_TransportMaster::locked () const
 {
-	return (delayedlocked < 5);
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("locked: fps ? %1 dlocked %2\n", fps_detected, delayedlocked));
+	return fps_detected && (delayedlocked < 5);
 }
 
 bool
