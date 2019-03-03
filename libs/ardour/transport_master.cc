@@ -124,13 +124,6 @@ TransportMaster::speed_and_position (double& speed, samplepos_t& pos, samplepos_
 	lp = last.position;
 	when = last.timestamp;
 	speed = last.speed;
-	pos   = last.position + (now - last.timestamp) * last.speed;
-
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("%1: speed_and_position @ %5 last @ %2 pos: %3 spd: %4\n", name(), last.timestamp, last.position, last.speed, now));
-
-	lp = last.position;
-	when = last.timestamp;
-	speed = last.speed;
 
 	/* provide a .1% deadzone to lock the speed */
 	if (fabs (speed - 1.0) <= 0.001) {
@@ -139,8 +132,8 @@ TransportMaster::speed_and_position (double& speed, samplepos_t& pos, samplepos_
 
 	pos = last.position + (now - last.timestamp) * speed;
 
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("%1 sync spd: %2 pos: %3 | last-pos: %4 | elapsed: %5\n",
-	                                           name(), speed, pos, last.position, (now - last.timestamp)));
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("%1 sync spd: %2 pos: %3 | last-pos: %4 @  %7| elapsed: %5 | speed: %6\n",
+	                                           name(), speed, pos, last.position, (now - last.timestamp), speed, when));
 
 	return true;
 }
