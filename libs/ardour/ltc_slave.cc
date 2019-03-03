@@ -334,9 +334,9 @@ LTC_TransportMaster::detect_ltc_fps(int frameno, bool df)
 			}
 
 			if (timecode.rate != detected_fps || timecode.drop != df) {
-				DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC detected FPS: %1%2\n", detected_fps, df?"df":"ndf"));
+				DEBUG_TRACE (DEBUG::LTC, string_compose ("detected FPS: %1%2\n", detected_fps, df?"df":"ndf"));
 			} else {
-				detected_fps = 0; /* no cange */
+				detected_fps = 0; /* no change */
 			}
 		}
 		ltc_detect_fps_cnt = ltc_detect_fps_max = 0;
@@ -410,37 +410,44 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 
 		/* set timecode.rate and timecode.drop: */
 
-		const bool ltc_is_stationary = equal_ltc_sample_time (&prev_sample.ltc, &sample.ltc);
+		const bool ltc_is_stationary = equal_ltc_sample_time (&prev_frame.ltc, &sample.ltc);
 
 		if (detect_discontinuity (&sample, ceil(timecode.rate), !fps_detected)) {
-
-			if (fps_detected) {
-				ltc_detect_fps_cnt = ltc_detect_fps_max = 0;
+			if (frames_since_reset > 1) {
+				reset (false);
 			}
-
-			fps_detected = false;
+		} else {
+			if (fps_detected) {
+				frames_since_reset++;
+				DEBUG_TRACE (DEBUG::LTC, string_compose ("fsr %1\n", frames_since_reset));
+			}
 		}
 
-		if (!ltc_is_stationary && detect_ltc_fps (stime.frame, (sample.ltc.dfbit)? true : false)) {
-			reset(true);
-			fps_detected=true;
+		if (!ltc_is_stationary && detect_ltc_fps (stime.frame, (sample.ltc.dfbit) ? true : false)) {
+			reset (true);
+			fps_detected = true;
 		}
 
 #ifndef NDEBUG
 		if (DEBUG_ENABLED (DEBUG::LTC)) {
 			/* use fprintf for simpler correct formatting of times
 			 */
-			fprintf (stderr, "LTC@%ld %02d:%02d:%02d%c%02d | %8lld %8lld%s\n",
-			         now,
-			         stime.hours,
-			         stime.mins,
-			         stime.secs,
-			         (sample.ltc.dfbit) ? '.' : ':',
-			         stime.frame,
-			         sample.off_start,
-			         sample.off_end,
-			         sample.reverse ? " R" : "  "
+
+			char buf[256];
+
+			snprintf (buf, sizeof (buf), "LTC@(%ld..%ld) rate %.3f %02d:%02d:%02d%c%02d | %8lld %8lld%s\n",
+			          now, now+ENGINE->samples_per_cycle(),
+			          timecode.rate,
+			          stime.hours,
+			          stime.mins,
+			          stime.secs,
+			          (sample.ltc.dfbit) ? '.' : ':',
+			          stime.frame,
+			          sample.off_start,
+			          sample.off_end,
+			          sample.reverse ? " R" : "  "
 				);
+			DEBUG_TRACE (DEBUG::LTC, buf);
 		}
 #endif
 
@@ -510,7 +517,7 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 		samplepos_t cur_timestamp = sample.off_end + 1;
 		double ltc_speed = current.speed;
 
-		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC S: %1 LS: %2  N: %3 L: %4 span %5..%6\n", ltc_sample, current.position, cur_timestamp, current.timestamp, sample.off_start, sample.off_end));
+		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC ltc-sample: %1 prev-ltc-sample %2  cur-timestamp: %3 last-timestamp: %4 frame-spans %5..%6\n", ltc_sample, current.position, cur_timestamp, current.timestamp, sample.off_start, sample.off_end));
 
 		if (cur_timestamp <= current.timestamp || current.timestamp == 0) {
 			DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC speed: UNCHANGED: %1\n", current.speed));
@@ -526,7 +533,7 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 				ltc_speed = 0;
 			}
 
-			DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC speed: %1 (%2 in %3)\n", ltc_speed, (ltc_sample - current.position), (cur_timestamp - current.timestamp)));
+			DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC speed: %1 (moved %2 in %3\n", ltc_speed, (ltc_sample - current.position), (cur_timestamp - current.timestamp)));
 		}
 		DEBUG_TRACE (DEBUG::LTC, string_compose ("update current to %1 %2 %3\n", ltc_sample, cur_timestamp, ltc_speed));
 		current.update (ltc_sample, cur_timestamp, ltc_speed);
@@ -574,10 +581,12 @@ LTC_TransportMaster::pre_process (ARDOUR::pframes_t nframes, samplepos_t now, bo
 
 	/* Now feed the incoming LTC signal into the decoder */
 
+	DEBUG_TRACE (DEBUG::LTC, string_compose ("%1@%2 parse ltc @ %3 in %4\n", name(), this, now, nframes));
 	parse_ltc (nframes, in, now);
 
 	/* and pull out actual LTC frame data */
 
+	DEBUG_TRACE (DEBUG::LTC, string_compose ("%1@%2 call process_ltc(%3)\n", name(), this, now));
 	process_ltc (now);
 
 	if (current.timestamp == 0) {
