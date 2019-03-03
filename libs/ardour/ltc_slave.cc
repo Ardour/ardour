@@ -195,7 +195,7 @@ LTC_TransportMaster::reset (bool with_position)
 {
 	DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC reset() with pos ? %1\n", with_position));
 	if (with_position) {
-		current.update (current.position, 0, current.speed);
+		current.update (current.position, 0, 0);
 		_current_delta = 0;
 	} else {
 		current.reset ();
