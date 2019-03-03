@@ -402,7 +402,8 @@ Session::send_full_time_code (samplepos_t const t, MIDI::pframes_t nframes)
 	if (_engine.freewheeling() || !Config->get_send_mtc()) {
 		return 0;
 	}
-	if (!transport_master()->locked()) {
+
+	if (transport_master_is_external() && !transport_master()->locked()) {
 		return 0;
 	}
 
@@ -486,7 +487,7 @@ Session::send_midi_time_code_for_cycle (samplepos_t start_sample, samplepos_t en
 		// cerr << "(MTC) Not sending MTC\n";
 		return 0;
 	}
-	if (!transport_master()->locked()) {
+	if (transport_master_is_external() && !transport_master()->locked()) {
 		return 0;
 	}
 
