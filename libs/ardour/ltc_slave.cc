@@ -69,7 +69,7 @@ LTC_TransportMaster::LTC_TransportMaster (std::string const & name)
 
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("LTC registered %1\n", _port->name()));
 
-	memset (&prev_sample, 0, sizeof(LTCFrameExt));
+	memset (&prev_frame, 0, sizeof(LTCFrameExt));
 
 	resync_latency();
 
@@ -242,30 +242,67 @@ LTC_TransportMaster::equal_ltc_sample_time(LTCFrame *a, LTCFrame *b) {
 	}
 	return true;
 }
+static ostream& operator<< (ostream& ostr, LTCFrame& a)
+{
+	ostr 
+		<< a.hours_tens
+		<< a.hours_units << ':'
+		<< a.mins_tens
+		<< a.mins_units  << ':'
+		<< a.secs_tens
+		<< a.secs_units  << ':'
+		<< a.frame_tens
+		<< a.frame_units
+		<< (a.dfbit ? 'D' : ' ')
+		    ;
+	return ostr;
+}
+
+static ostream& operator<< (ostream& ostr, SMPTETimecode& t)
+{
+	for (size_t i = 0; i < sizeof (timezone); ++i) {
+		ostr << t.timezone[i];
+	}
+	ostr << ' '
+	     << t.years << ' '
+	     << t.months << ' '
+	     << t.days << ' '
+	     << t.hours << ' '
+	     << t.mins << ' '
+	     << t.secs << ' '
+	     << t.frame
+		;
+	return ostr;
+}
 
 bool
 LTC_TransportMaster::detect_discontinuity(LTCFrameExt *sample, int fps, bool fuzzy) {
 	bool discontinuity_detected = false;
 
 	if (fuzzy && (
-		  ( sample->reverse && prev_sample.ltc.frame_units == 0)
+		  ( sample->reverse && prev_frame.ltc.frame_units == 0)
 		||(!sample->reverse && sample->ltc.frame_units == 0)
 		)) {
-		memcpy(&prev_sample, sample, sizeof(LTCFrameExt));
+		memcpy(&prev_frame, sample, sizeof(LTCFrameExt));
 		return false;
 	}
 
 	if (sample->reverse) {
-		ltc_frame_decrement(&prev_sample.ltc, fps, LTC_TV_525_60, 0);
+		ltc_frame_decrement(&prev_frame.ltc, fps, LTC_TV_525_60, 0);
 	} else {
-		ltc_frame_increment(&prev_sample.ltc, fps, LTC_TV_525_60, 0);
+		cerr << "increment from " << prev_frame.ltc << " to ";
+		ltc_frame_increment(&prev_frame.ltc, fps, LTC_TV_525_60, 0);
+		cerr << prev_frame.ltc << " @ " << fps << endl;
 	}
-	if (!equal_ltc_sample_time(&prev_sample.ltc, &sample->ltc)) {
+
+	if (!equal_ltc_sample_time(&prev_frame.ltc, &sample->ltc)) {
+		cerr << prev_frame.ltc <<  " != " << sample->ltc << endl;
+		cerr << "discontinuty detected, prev != sample\n";
 		discontinuity_detected = true;
 	}
 
-    memcpy(&prev_sample, sample, sizeof(LTCFrameExt));
-    return discontinuity_detected;
+	memcpy (&prev_frame, sample, sizeof(LTCFrameExt));
+	return discontinuity_detected;
 }
 
 bool

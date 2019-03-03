@@ -527,7 +527,7 @@ public:
 	LTCDecoder *   decoder;
 	double         samples_per_ltc_frame;
 	Timecode::Time timecode;
-	LTCFrameExt    prev_sample;
+	LTCFrameExt    prev_frame;
 	bool           fps_detected;
 
 	samplecnt_t    monotonic_cnt;
