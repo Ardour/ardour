@@ -294,14 +294,10 @@ LTC_TransportMaster::detect_discontinuity(LTCFrameExt *sample, int fps, bool fuz
 	if (sample->reverse) {
 		ltc_frame_decrement(&prev_frame.ltc, fps, LTC_TV_525_60, 0);
 	} else {
-		cerr << "increment from " << prev_frame.ltc << " to ";
 		ltc_frame_increment(&prev_frame.ltc, fps, LTC_TV_525_60, 0);
-		cerr << prev_frame.ltc << " @ " << fps << endl;
 	}
 
 	if (!equal_ltc_sample_time(&prev_frame.ltc, &sample->ltc)) {
-		cerr << prev_frame.ltc <<  " != " << sample->ltc << endl;
-		cerr << "discontinuty detected, prev != sample\n";
 		discontinuity_detected = true;
 	}
 
@@ -673,3 +669,4 @@ LTC_TransportMaster::delta_string() const
 
 	return delta;
 }
+
