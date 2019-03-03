@@ -71,7 +71,6 @@ TransportMaster::TransportMaster (SyncSource t, std::string const & name)
 	, _pending_collect (true)
 	, _removeable (false)
 	, _request_mask (Properties::allowed_transport_requests, TransportRequestType (0))
-	, _locked (Properties::locked, false)
 	, _sclock_synced (Properties::sclock_synced, false)
 	, _collect (Properties::collect, true)
 	, _connected (Properties::connected, false)
@@ -93,6 +92,11 @@ bool
 TransportMaster::speed_and_position (double& speed, samplepos_t& pos, samplepos_t& lp, samplepos_t& when, samplepos_t now)
 {
 	if (!_collect) {
+		return false;
+	}
+
+	if (!locked()) {
+		DEBUG_TRACE (DEBUG::Slave, string_compose ("%1: not locked, no speed and position!\n", name()));
 		return false;
 	}
 
@@ -147,7 +151,6 @@ TransportMaster::register_properties ()
 	_xml_node_name = state_node_name;
 
 	add_property (_name);
-	add_property (_locked);
 	add_property (_collect);
 	add_property (_sclock_synced);
 	add_property (_request_mask);

@@ -358,7 +358,6 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	bool            _pending_collect;
 	bool            _removeable;
 	PBD::Property<TransportRequestType> _request_mask; /* lists transport requests still accepted when we're in control */
-	PBD::Property<bool> _locked;
 	PBD::Property<bool> _sclock_synced;
 	PBD::Property<bool> _collect;
 	PBD::Property<bool> _connected;
