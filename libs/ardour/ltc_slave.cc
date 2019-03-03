@@ -279,7 +279,8 @@ static ostream& operator<< (ostream& ostr, SMPTETimecode& t)
 }
 
 bool
-LTC_TransportMaster::detect_discontinuity(LTCFrameExt *sample, int fps, bool fuzzy) {
+LTC_TransportMaster::detect_discontinuity(LTCFrameExt *sample, int fps, bool fuzzy)
+{
 	bool discontinuity_detected = false;
 
 	if (fuzzy && (
