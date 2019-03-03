@@ -447,6 +447,7 @@ Session::process_with_events (pframes_t nframes)
 	assert (_transport_speed == 0 || _transport_speed == 1.0 || _transport_speed == -1.0);
 
 	samples_moved = (samplecnt_t) nframes * _transport_speed;
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("plan to move transport by %1 (%2 @ %3)\n", samples_moved, nframes, _transport_speed));
 
 	end_sample = _transport_sample + samples_moved;
 
@@ -496,11 +497,13 @@ Session::process_with_events (pframes_t nframes)
 
 			this_nframes = nframes; /* real (jack) time relative */
 			samples_moved = (samplecnt_t) floor (_transport_speed * nframes); /* transport relative */
+			DEBUG_TRACE (DEBUG::Transport, string_compose ("sub-loop plan to move transport by %1 (%2 @ %3)\n", samples_moved, nframes, _transport_speed));
 
 			/* running an event, position transport precisely to its time */
 			if (this_event && this_event->action_sample <= end_sample && this_event->action_sample >= _transport_sample) {
 				/* this isn't quite right for reverse play */
 				samples_moved = (samplecnt_t) (this_event->action_sample - _transport_sample);
+				DEBUG_TRACE (DEBUG::Transport, string_compose ("sub-loop2 plan to move transport by %1 (%2 @ %3)\n", samples_moved, nframes, _transport_speed));
 				this_nframes = abs (floor(samples_moved / _transport_speed));
 			}
 
@@ -521,8 +524,12 @@ Session::process_with_events (pframes_t nframes)
 
 				if (samples_moved < 0) {
 					decrement_transport_position (-samples_moved);
+					DEBUG_TRACE (DEBUG::Transport, string_compose ("DEcrement transport by %1 to %2\n", samples_moved, _transport_sample));
 				} else if (samples_moved) {
 					increment_transport_position (samples_moved);
+					DEBUG_TRACE (DEBUG::Transport, string_compose ("INcrement transport by %1 to %2\n", samples_moved, _transport_sample));
+				} else {
+					DEBUG_TRACE (DEBUG::Transport, "no transport motion\n");
 				}
 
 				maybe_stop (stop_limit);
@@ -601,6 +608,7 @@ Session::process_without_events (pframes_t nframes)
 		return;
 	} else {
 		samples_moved = (samplecnt_t) nframes * _transport_speed;
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("no-events, plan to move transport by %1 (%2 @ %3)\n", samples_moved, nframes, _transport_speed));
 	}
 
 	if (!_exporting && !timecode_transmission_suspended()) {
@@ -631,8 +639,12 @@ Session::process_without_events (pframes_t nframes)
 
 	if (samples_moved < 0) {
 		decrement_transport_position (-samples_moved);
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("DEcrement transport by %1 to %2\n", samples_moved, _transport_sample));
 	} else if (samples_moved) {
 		increment_transport_position (samples_moved);
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("INcrement transport by %1 to %2\n", samples_moved, _transport_sample));
+	} else {
+		DEBUG_TRACE (DEBUG::Transport, "no transport motion\n");
 	}
 
 	maybe_stop (stop_limit);
@@ -1142,7 +1154,7 @@ Session::track_transport_master (float slave_speed, samplepos_t slave_transport_
 
 		if (transport_master_tracking_state == Waiting) {
 
-			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave waiting at %1\n", slave_transport_sample));
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("master currently at %1, waiting to pass %2\n", slave_transport_sample, master_wait_end));
 
 			if (slave_transport_sample >= master_wait_end) {
 
