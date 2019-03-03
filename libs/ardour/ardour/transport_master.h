@@ -531,6 +531,7 @@ public:
 	bool           fps_detected;
 
 	samplecnt_t    monotonic_cnt;
+	uint64_t       frames_since_reset;
 	int            delayedlocked;
 
 	int            ltc_detect_fps_cnt;

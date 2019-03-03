@@ -54,6 +54,7 @@ LTC_TransportMaster::LTC_TransportMaster (std::string const & name)
 	, samples_per_ltc_frame (0)
 	, fps_detected (false)
 	, monotonic_cnt (0)
+	, frames_since_reset (0)
 	, delayedlocked (10)
 	, ltc_detect_fps_cnt (0)
 	, ltc_detect_fps_max (0)
@@ -545,20 +546,24 @@ void
 LTC_TransportMaster::pre_process (ARDOUR::pframes_t nframes, samplepos_t now, boost::optional<samplepos_t> session_pos)
 {
 	Sample* in = (Sample*) AudioEngine::instance()->port_engine().get_buffer (_port->port_handle(), nframes);
-	sampleoffset_t skip = now - (monotonic_cnt + nframes);
-	monotonic_cnt = now;
+	sampleoffset_t skip;
 
-	DEBUG_TRACE (DEBUG::LTC, string_compose ("pre-process - TID:%1 | latency: %2 | skip %3 | session ? %4| last %5 | dir %6 | sp %7\n",
-	                                         pthread_name(), ltc_slave_latency.max, skip, (_session ? 'y' : 'n'), current.timestamp, transport_direction, current.speed));
-
-	if (current.timestamp == 0) {
+	if (current.timestamp == 0 || frames_since_reset == 0) {
 		if (delayedlocked < 10) {
 			++delayedlocked;
 		}
 
-	} else if (current.speed != 0) {
+		monotonic_cnt = now;
+		skip = 0;
 
+	} else {
+
+		skip = now - (monotonic_cnt + nframes);
+		monotonic_cnt = now;
 	}
+
+	DEBUG_TRACE (DEBUG::LTC, string_compose ("pre-process - TID:%1 | latency: %2 | skip %3 | session ? %4| last %5 | dir %6 | sp %7 | dl %8\n",
+	                                         pthread_name(), ltc_slave_latency.max, skip, (_session ? 'y' : 'n'), current.timestamp, transport_direction, current.speed, delayedlocked));
 
 	DEBUG_TRACE (DEBUG::LTC, string_compose ("pre-process with audio clock time: %1\n", now));
 
