@@ -98,10 +98,6 @@ LTC_TransportMaster::set_session (Session *s)
 		ltc_timecode = _session->config.get_timecode_format();
 		a3e_timecode = _session->config.get_timecode_format();
 
-		if (Config->get_use_session_timecode_format() && _session) {
-			samples_per_timecode_frame = _session->samples_per_timecode_frame();
-		}
-
 		if (decoder) {
 			ltc_decoder_free (decoder);
 		}
@@ -351,11 +347,7 @@ LTC_TransportMaster::detect_ltc_fps(int frameno, bool df)
 	ltc_timecode = tc_format;
 	a3e_timecode = cur_timecode;
 
-	if (Config->get_use_session_timecode_format() && _session) {
-		samples_per_timecode_frame = _session->samples_per_timecode_frame();
-	} else {
-		samples_per_timecode_frame = ENGINE->sample_rate() / Timecode::timecode_to_frames_per_second (ltc_timecode);
-	}
+	samples_per_timecode_frame = ENGINE->sample_rate() / Timecode::timecode_to_frames_per_second (ltc_timecode);
 
 	return fps_changed;
 }
@@ -454,7 +446,7 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 
 		samplepos_t ltc_sample; // audio-sample corresponding to position of LTC frame
 
-		if (_session && Config->get_use_session_timecode_format()) {
+		if (_session) {
 			Timecode::timecode_to_sample (timecode, ltc_sample, true, false, (double)ENGINE->sample_rate(), _session->config.get_subframes_per_frame(), timecode_negative_offset, timecode_offset);
 		} else {
 			Timecode::timecode_to_sample (timecode, ltc_sample, true, false, (double)ENGINE->sample_rate(), 100, timecode_negative_offset, timecode_offset);

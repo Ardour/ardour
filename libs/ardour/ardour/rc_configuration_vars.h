@@ -69,7 +69,6 @@ CONFIG_VARIABLE (bool, midi_input_follows_selection, "midi-input-follows-selecti
 /* Timecode and related */
 
 CONFIG_VARIABLE (bool, run_all_transport_masters_always, "run-all-transport-masters-always", true)
-CONFIG_VARIABLE (bool, use_session_timecode_format, "use-session-timecode-format", true)
 CONFIG_VARIABLE (int, mtc_qf_speed_tolerance, "mtc-qf-speed-tolerance", 5)
 CONFIG_VARIABLE (bool, timecode_sync_frame_rate, "timecode-sync-frame-rate", true)
 #ifdef USE_TRACKS_CODE_FEATURES

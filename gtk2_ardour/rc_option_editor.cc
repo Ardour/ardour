@@ -3249,7 +3249,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Sync/LTC"), _ltc_volume_slider);
 
-
 	add_option (_("Sync/MIDI"), new OptionEditorHeading (_("MIDI Beat Clock (Mclk) Generator")));
 
 	add_option (_("Sync/MIDI"),
