@@ -578,6 +578,7 @@ LTC_TransportMaster::pre_process (ARDOUR::pframes_t nframes, samplepos_t now, bo
 		unsigned char sound[8192];
 		memset (sound, 0x80, sizeof(char) * skip);
 		ltc_decoder_write (decoder, sound, skip, now);
+		reset (false);
 	} else if (skip != 0) {
 		/* this should never happen. it may if monotonic_cnt, now overflow on 64bit */
 		DEBUG_TRACE (DEBUG::LTC, string_compose("engine skipped %1 samples\n", skip));
