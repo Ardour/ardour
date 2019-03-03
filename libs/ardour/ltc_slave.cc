@@ -203,6 +203,8 @@ LTC_TransportMaster::reset (bool with_position)
 	transport_direction = 0;
 	sync_lock_broken = false;
 	monotonic_cnt = 0;
+	memset (&prev_frame, 0, sizeof(LTCFrameExt));
+	frames_since_reset = 0;
 }
 
 void
