@@ -3896,16 +3896,18 @@ Route::set_meter_point (MeterPoint p, bool force)
 	}
 
 	if (force || !AudioEngine::instance()->running()) {
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
-		_pending_meter_point = p;
+		bool meter_visibly_changed = false;
+		{
+			Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+			Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+			_pending_meter_point = p;
+			if (set_meter_point_unlocked ()) {
+				meter_visibly_changed = true;
+			}
+		}
 		_meter->emit_configuration_changed();
 		meter_change (); /* EMIT SIGNAL */
-		if (set_meter_point_unlocked()) {
-			processors_changed (RouteProcessorChange (RouteProcessorChange::MeterPointChange, true)); /* EMIT SIGNAL */
-		} else {
-			processors_changed (RouteProcessorChange (RouteProcessorChange::MeterPointChange, false)); /* EMIT SIGNAL */
-		}
+		processors_changed (RouteProcessorChange (RouteProcessorChange::MeterPointChange, meter_visibly_changed)); /* EMIT SIGNAL */
 	} else {
 		_pending_meter_point = p;
 	}
