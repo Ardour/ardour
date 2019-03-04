@@ -263,7 +263,7 @@ static ostream& operator<< (ostream& ostr, LTCFrame& a)
 
 static ostream& operator<< (ostream& ostr, SMPTETimecode& t)
 {
-	for (size_t i = 0; i < sizeof (timezone); ++i) {
+	for (size_t i = 0; i < sizeof (t.timezone); ++i) {
 		ostr << t.timezone[i];
 	}
 	ostr << ' '
