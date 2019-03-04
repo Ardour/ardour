@@ -384,10 +384,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\private\gdither\noise.h"
-				>
-			</File>
-			<File
 				RelativePath="..\audiographer\general\normalizer.h"
 				>
 			</File>
