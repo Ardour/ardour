@@ -2969,6 +2969,13 @@ Route::set_processor_state (const XMLNode& node)
 		 */
 		_processors = new_order;
 
+		if (_delayline) {
+			must_configure |= find (_processors.begin(), _processors.end(), _delayline) == _processors.end ();
+		}
+		if (_intreturn) {
+			must_configure |= find (_processors.begin(), _processors.end(), _intreturn) == _processors.end ();
+		}
+
 		if (must_configure) {
 			configure_processors_unlocked (0, &lm);
 		}
