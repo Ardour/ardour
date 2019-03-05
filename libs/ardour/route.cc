@@ -187,7 +187,8 @@ Route::init ()
 	 */
 
 	_amp.reset (new Amp (_session, X_("Fader"), _gain_control, true));
-	add_processor (_amp, PostFader);
+	_amp->activate ();
+	_amp->set_owner (this);
 
 	_polarity.reset (new PolarityProcessor (_session, _phase_control));
 	_polarity->activate();
@@ -244,10 +245,13 @@ Route::init ()
 		panner_shell()->select_panner_by_uri ("http://ardour.org/plugin/panner_balance");
 	}
 
-	/* now that we have _meter, its safe to connect to this */
-
+	/* now set up processor chain and invisible processors */
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		{
+			Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+			_processors.push_back (_amp);
+		}
 		configure_processors (0);
 	}
 
