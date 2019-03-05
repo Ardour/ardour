@@ -756,8 +756,6 @@ Session::rewire_selected_midi (boost::shared_ptr<MidiTrack> new_midi_target)
 		}
 
 		for (vector<string>::const_iterator p = msp.begin(); p != msp.end(); ++p) {
-			/* disconnect the port from everything */
-			AudioEngine::instance()->disconnect (*p);
 			/* connect it to the new target */
 			new_midi_target->input()->connect (new_midi_target->input()->nth(0), (*p), this);
 		}
