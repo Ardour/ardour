@@ -76,7 +76,7 @@ VideoMonitor::start ()
 	sync_by_manual_seek = false;
 	if (clock_connection.connected()) { clock_connection.disconnect(); }
 
-	if (process->start(debug_enable?2:1)) {
+	if (process->start (debug_enable ? SystemExec::MergeWithStdin : SystemExec::IgnoreAndClose)) {
 		return false;
 	}
 	return true;

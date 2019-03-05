@@ -726,7 +726,7 @@ VideoTimeLine::find_xjadeo () {
 		xjadeo_version = "";
 		version_check.ReadStdout.connect_same_thread (*this, boost::bind (&VideoTimeLine::xjadeo_readversion, this, _1 ,_2));
 		version_check.Terminated.connect_same_thread (*this, boost::bind (&VideoTimeLine::xjadeo_readversion, this, "\n" ,1));
-		if (version_check.start(2)) {
+		if (version_check.start (ARDOUR::SystemExec::MergeWithStdin)) {
 			warning << _(
 					"Video-monitor 'xjadeo' cannot be launched."
 					) << endmsg;
@@ -795,7 +795,7 @@ VideoTimeLine::find_harvid () {
 	harvid_version = "";
 	version_check.ReadStdout.connect_same_thread (*this, boost::bind (&VideoTimeLine::harvid_readversion, this, _1 ,_2));
 	version_check.Terminated.connect_same_thread (*this, boost::bind (&VideoTimeLine::harvid_readversion, this, "\n" ,1));
-	if (version_check.start(2)) {
+	if (version_check.start (ARDOUR::SystemExec::MergeWithStdin)) {
 		return;
 	}
 
