@@ -642,6 +642,7 @@ MonitorSection::set_session (Session* s)
 		}
 
 		populate_buttons ();
+		map_state ();
 
 	} else {
 
@@ -1090,13 +1091,13 @@ MonitorSection::map_state ()
 	Glib::RefPtr<Action> act;
 	Glib::RefPtr<ToggleAction> tact;
 
-	tact = ActionManager::get_toggle_action (X_("Monitor"), "monitor-cut-all");
+	tact = ActionManager::get_toggle_action (X_("Monitor Section"), "monitor-cut-all");
 	tact->set_active (_monitor->cut_all());
 
-	tact = ActionManager::get_toggle_action (X_("Monitor"), "monitor-dim-all");
+	tact = ActionManager::get_toggle_action (X_("Monitor Section"), "monitor-dim-all");
 	tact->set_active (_monitor->dim_all());
 
-	tact = ActionManager::get_toggle_action (X_("Monitor"), "monitor-mono");
+	tact = ActionManager::get_toggle_action (X_("Monitor Section"), "monitor-mono");
 	tact->set_active (_monitor->mono());
 
 	uint32_t nchans = _monitor->output_streams().n_audio();
