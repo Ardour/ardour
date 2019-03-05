@@ -897,8 +897,11 @@ SystemExec::start (StdErrMode stderr_mode, const char *vfork_exec_wrapper)
 	} else if (stderr_mode == IgnoreAndClose) {
 		/* ignore STDERR */
 		::close(STDERR_FILENO);
-	} else {
+	} else { /* stderr_mode == ShareWithParent */
 		/* keep STDERR */
+#if defined __APPLE__&& defined ASL_LOG_DESCRIPTOR_WRITE
+		::close(STDERR_FILENO);
+#endif
 	}
 
 	if (pout[1] != STDOUT_FILENO && pout[1] != STDERR_FILENO) {
