@@ -268,7 +268,13 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 	}
 
-	if ((speed == 0.0) && (ms == MonitoringDisk)) {
+	const gain_t target_gain = (speed == 0.0 || ((ms & MonitoringDisk) == 0)) ? 0.0 : 1.0;
+
+	if (!_session.cfg ()->get_use_transport_fades ()) {
+		_declick_amp.set_gain (target_gain);
+	}
+
+	if ((speed == 0.0) && (ms == MonitoringDisk) && _declick_amp.gain () == target_gain) {
 		/* no channels, or stopped. Don't accidentally pass any data
 		 * from disk into our outputs (e.g. via interpolation)
 		 */
@@ -289,6 +295,19 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		disk_samples_to_consume = 0;
 	} else {
 		disk_samples_to_consume = nframes;
+	}
+
+	if (_declick_amp.gain () != target_gain && target_gain == 0) {
+		/* fade-out */
+#if 0
+		printf ("DR fade-out speed=%.1f gain=%.3f off=%ld start=%ld playpos=%ld (%s)\n",
+				speed, _declick_amp.gain (), _declick_offs, start_sample, playback_sample, owner()->name().c_str());
+#endif
+		ms = MonitorState (ms | MonitoringDisk);
+		assert (result_required);
+		result_required = true;
+	} else {
+		_declick_offs = 0;
 	}
 
 	if (!result_required || ((ms & MonitoringDisk) == 0) || still_locating || _no_disk_output) {
@@ -324,13 +343,14 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
 
 			ChannelInfo* chaninfo (*chan);
-			AudioBuffer& output (bufs.get_audio (n%n_buffers));
+			AudioBuffer& output (bufs.get_audio (n % n_buffers));
 
 			AudioBuffer& disk_buf ((ms & MonitoringInput) ? scratch_bufs.get_audio(n) : output);
 
-			if (start_sample != playback_sample) {
+			if (start_sample != playback_sample && target_gain != 0) {
+#ifndef NDEBUG
 				cerr << owner()->name() << " playback @ " << start_sample << " not aligned with " << playback_sample << " jump " << (start_sample - playback_sample) << endl;
-
+#endif
 				if (can_internal_playback_seek (start_sample - playback_sample)) {
 					internal_playback_seek (start_sample - playback_sample);
 				} else {
@@ -350,15 +370,19 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					Underrun ();
 					return;
 				}
+			} else if (_declick_amp.gain () != target_gain) {
+				assert (target_gain == 0);
+				const samplecnt_t total = chaninfo->rbuf->read (disk_buf.data(), nframes, false, _declick_offs);
+				_declick_offs += total;
 			}
 
-			if (scaling != 1.0f && speed != 0.0) {
-				Amp::apply_simple_gain (disk_buf, disk_samples_to_consume, scaling);
-			}
+			_declick_amp.apply_gain (disk_buf, nframes, target_gain);
+
+			Amp::apply_simple_gain (disk_buf, nframes, scaling);
 
 			if (ms & MonitoringInput) {
 				/* mix the disk signal into the input signal (already in bufs) */
-				mix_buffers_no_gain (output.data(), disk_buf.data(), disk_samples_to_consume);
+				mix_buffers_no_gain (output.data(), disk_buf.data(), nframes);
 			}
 		}
 	}
@@ -567,14 +591,31 @@ DiskReader::overwrite_existing_buffers ()
 int
 DiskReader::seek (samplepos_t sample, bool complete_refill)
 {
+	/* called via non_realtime_locate() from butler thread */
+
 	uint32_t n;
 	int ret = -1;
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
+#ifndef NDEBUG
+	if (_declick_amp.gain() != 0) {
+		/* this should not happen. new transport should postponse seeking
+		 * until de-click is complete */
+		printf ("LOCATE WITHOUT DECLICK (gain=%f) at %ld seek-to %ld\n", _declick_amp.gain (), playback_sample, sample);
+		return -1;
+	}
+	if (sample == playback_sample && !complete_refill) {
+		return 0; // XXX double-check this
+	}
+#endif
+
 	g_atomic_int_set (&_pending_overwrite, 0);
 
 	//sample = std::max ((samplecnt_t)0, sample -_session.worst_output_latency ());
+
+	printf ("DiskReader::seek %s %ld -> %ld refill=%d\n", owner()->name().c_str(), playback_sample, sample, complete_refill);
+	// TODO: check if we can micro-locate
 
 	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
 		(*chan)->rbuf->reset ();
@@ -609,7 +650,6 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 		*/
 		ret = do_refill_with_alloc (true);
 	}
-
 
 	return ret;
 }
@@ -1399,7 +1439,7 @@ DiskReader::set_no_disk_output (bool yn)
 
 DiskReader::DeclickAmp::DeclickAmp (samplecnt_t sample_rate)
 {
-	_a = 2200.f / (gain_t)sample_rate;
+	_a = 4550.f / (gain_t)sample_rate;
 	_l = -log1p (_a);
 	_g = 0;
 }
