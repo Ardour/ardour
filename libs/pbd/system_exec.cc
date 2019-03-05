@@ -529,7 +529,7 @@ SystemExec::is_running ()
 }
 
 int
-SystemExec::start (int stderr_mode, const char * /*vfork_exec_wrapper*/)
+SystemExec::start (StdErrMode stderr_mode, const char * /*vfork_exec_wrapper*/)
 {
 	char* working_dir = 0;
 
@@ -541,10 +541,10 @@ SystemExec::start (int stderr_mode, const char * /*vfork_exec_wrapper*/)
 	create_pipe(stdinP, true);
 	create_pipe(stdoutP, false);
 
-	if (stderr_mode == 2) {
+	if (stderr_mode == MergeWithStdin) {
 	/* merge stout & stderr */
 		DuplicateHandle(GetCurrentProcess(), stdoutP[1], GetCurrentProcess(), &stderrP[1], 0, TRUE, DUPLICATE_SAME_ACCESS);
-	} else if (stderr_mode == 1) {
+	} else if (stderr_mode == IgnoreAndClose) {
 		//TODO read/flush this pipe or close it...
 		create_pipe(stderrP, false);
 	} else {
@@ -807,7 +807,7 @@ SystemExec::is_running ()
 }
 
 int
-SystemExec::start (int stderr_mode, const char *vfork_exec_wrapper)
+SystemExec::start (StdErrMode stderr_mode, const char *vfork_exec_wrapper)
 {
 	if (is_running ()) {
 		return 0;
@@ -889,12 +889,12 @@ SystemExec::start (int stderr_mode, const char *vfork_exec_wrapper)
 		::dup2 (pout[1], STDOUT_FILENO);
 	}
 
-	if (stderr_mode == 2) {
+	if (stderr_mode == MergeWithStdin) {
 		/* merge STDERR into output */
 		if (pout[1] != STDERR_FILENO) {
 			::dup2(pout[1], STDERR_FILENO);
 		}
-	} else if (stderr_mode == 1) {
+	} else if (stderr_mode == IgnoreAndClose) {
 		/* ignore STDERR */
 		::close(STDERR_FILENO);
 	} else {

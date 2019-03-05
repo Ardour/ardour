@@ -122,6 +122,12 @@ class LIBPBD_API SystemExec
 
 		std::string to_s() const;
 
+		enum StdErrMode {
+			ShareWithParent = 0,
+			IgnoreAndClose  = 1,
+			MergeWithStdin  = 2
+		};
+
 		/** fork and execute the given program
 		 *
 		 * @param stderr_mode select what to do with program's standard error
@@ -133,7 +139,7 @@ class LIBPBD_API SystemExec
 		 * @return If the process is already running or was launched successfully
 		 * the function returns zero (0). A negative number indicates an error.
 		 */
-		int start (int stderr_mode, const char *_vfork_exec_wrapper);
+		int start (StdErrMode, const char *_vfork_exec_wrapper);
 		/** kill running child-process
 		 *
 		 * if a child process exists trt to shut it down by closing its STDIN.

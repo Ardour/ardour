@@ -35,8 +35,8 @@ public:
 	SystemExec (std::string c, const std::map<char, std::string> subs);
 	~SystemExec ();
 
-	int start (int stderr_mode = 1) {
-		return PBD::SystemExec::start(stderr_mode, _vfork_exec_wrapper);
+	int start (StdErrMode stderr_mode = IgnoreAndClose) {
+		return PBD::SystemExec::start (stderr_mode, _vfork_exec_wrapper);
 	}
 
 private:

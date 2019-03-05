@@ -2831,7 +2831,7 @@ AlsaDeviceReservation::acquire_device (const char* device_name)
 	_device_reservation->ReadStdout.connect_same_thread (_reservation_connection, boost::bind (&AlsaDeviceReservation::reservation_stdout, this, _1 ,_2));
 	_device_reservation->Terminated.connect_same_thread (_reservation_connection, boost::bind (&AlsaDeviceReservation::release_device, this));
 
-	if (_device_reservation->start(0)) {
+	if (_device_reservation->start (SystemExec::ShareWithParent)) {
 		PBD::warning << _("AlsaAudioBackend: Device Request failed.") << endmsg;
 		release_device();
 		return false;

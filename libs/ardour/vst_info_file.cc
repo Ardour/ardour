@@ -998,7 +998,7 @@ vstfx_get_info (const char* dllpath, enum ARDOUR::PluginType type, enum VSTScanM
 		ARDOUR::SystemExec scanner (scanner_bin_path, argp);
 		PBD::ScopedConnectionList cons;
 		scanner.ReadStdout.connect_same_thread (cons, boost::bind (&parse_scanner_output, _1 ,_2));
-		if (scanner.start (2 /* send stderr&stdout via signal */)) {
+		if (scanner.start (ARDOUR::SystemExec::MergeWithStdin)) {
 			PBD::error << string_compose (_("Cannot launch VST scanner app '%1': %2"), scanner_bin_path, strerror (errno)) << endmsg;
 			close_error_log ();
 			return infos;
