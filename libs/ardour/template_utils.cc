@@ -104,7 +104,7 @@ find_session_templates (vector<TemplateInfo>& template_names, bool read_xml)
 
 			XMLTree tree;
 			if (!tree.read (file.c_str())) {
-				cerr << "Failed to parse Route-template XML file: " << file;
+				cerr << "Failed to parse Route-template XML file: " << file << endl;
 				continue;
 			}
 
@@ -157,7 +157,7 @@ find_route_templates (vector<TemplateInfo>& template_names)
 		XMLTree tree;
 
 		if (!tree.read (fullpath.c_str())) {
-			cerr << "Failed to parse Route-template XML file: " << fullpath;
+			cerr << "Failed to parse Route-template XML file: " << fullpath << endl;
 			continue;
 		}
 
