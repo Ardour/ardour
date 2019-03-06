@@ -904,7 +904,7 @@ DummyAudioBackend::register_system_ports()
 	lr.min = lr.max = _systemic_input_latency;
 	for (int i = 0; i < m_ins; ++i) {
 		char tmp[64];
-		snprintf(tmp, sizeof(tmp), "system:midi_capture_%d", i+1);
+		snprintf(tmp, sizeof(tmp), "system:midi_capture_dummy_%d", i+1);
 		PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
@@ -920,7 +920,7 @@ DummyAudioBackend::register_system_ports()
 	lr.min = lr.max = _systemic_output_latency;
 	for (int i = 1; i <= m_out; ++i) {
 		char tmp[64];
-		snprintf(tmp, sizeof(tmp), "system:midi_playback_%d", i);
+		snprintf(tmp, sizeof(tmp), "system:midi_playback_dummy_%d", i);
 		PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
