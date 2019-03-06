@@ -997,6 +997,8 @@ LaunchControlXL::button_device_long_press()
 void
 LaunchControlXL::button_mute()
 {
+	if (device_mode()) { return ; }
+
 	if (buttons_down.find(Device) != buttons_down.end()) {
 		access_action ("Editor/track-mute-toggle");
 	} else {
@@ -1013,6 +1015,8 @@ LaunchControlXL::button_mute_long_press()
 void
 LaunchControlXL::button_solo()
 {
+	if (device_mode()) { return ; }
+
 	if (buttons_down.find(Device) != buttons_down.end()) {
 		access_action ("Editor/track-solo-toggle");
 	} else {
@@ -1029,6 +1033,8 @@ LaunchControlXL::button_solo_long_press()
 void
 LaunchControlXL::button_record()
 {
+	if (device_mode()) { return ; }
+
 	if (buttons_down.find(Device) != buttons_down.end()) {
 		access_action ("Editor/track-record-enable-toggle");
 	} else {
