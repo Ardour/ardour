@@ -40,7 +40,6 @@ FluidSynth::FluidSynth (float samplerate, int polyphony)
 	}
 
 	fluid_settings_setnum (_settings, "synth.sample-rate", samplerate);
-	fluid_settings_setint (_settings, "synth.parallel-render", 1);
 	fluid_settings_setint (_settings, "synth.threadsafe-api", 0);
 
 	_synth = new_fluid_synth (_settings);
