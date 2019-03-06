@@ -6437,6 +6437,10 @@ Session::update_route_record_state ()
 void
 Session::listen_position_changed ()
 {
+	if (loading ())  {
+		/* skip duing session restore (already taken care of) */
+		return;
+	}
 	ProcessorChangeBlocker pcb (this);
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
