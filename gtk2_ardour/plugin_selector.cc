@@ -961,7 +961,7 @@ PluginSelector::build_plugin_menu ()
 
 	delete _plugin_menu;
 
-	_plugin_menu = manage (new Menu);
+	_plugin_menu = new Menu;
 	_plugin_menu->set_name("ArdourContextMenu");
 
 	MenuList& items = _plugin_menu->items();
