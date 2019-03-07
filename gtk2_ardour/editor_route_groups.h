@@ -27,6 +27,8 @@
 
 #include "editor_component.h"
 
+#include "ardour/mixer_snapshot.h"
+
 class EditorRouteGroups : public EditorComponent, public ARDOUR::SessionHandlePtr
 {
 public:
@@ -41,6 +43,10 @@ public:
 	void clear ();
 
 private:
+
+	MixerSnapshot* camera;
+	void snap();
+	void recall();
 
 	struct Columns : public Gtk::TreeModel::ColumnRecord {
 

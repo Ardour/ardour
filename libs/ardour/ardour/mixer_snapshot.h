@@ -33,18 +33,20 @@
 class MixerSnapshot //: public PBD::Stateful
 {
     public:
-        MixerSnapshot();
+        MixerSnapshot(ARDOUR::Session*);
         ~MixerSnapshot();
 
-        void snap(ARDOUR::Route*);
-        void snap(ARDOUR::Session*);
-        void recall(ARDOUR::Session*);
+        // void snap(ARDOUR::Route*);
+        void snap();
+        void recall();
 
         int id;
         char label[255];
         std::time_t timestamp;
 
     private:
+        ARDOUR::Session* _session;
+
         void clear();
 
         struct State {

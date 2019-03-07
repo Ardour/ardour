@@ -37,6 +37,9 @@
 #include "ardour/route.h"
 #include "ardour/session.h"
 
+//REMOVE ME
+#include "ardour/mixer_snapshot.h"
+
 #include "ardour_ui.h"
 #include "editor.h"
 #include "editor_group_tabs.h"
@@ -191,9 +194,19 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	button_box->pack_start (*add_button);
 	button_box->pack_start (*remove_button);
 
+	Button* custom1 = new Button("Mark");
+	Button* custom2 = new Button("Recall");
+	button_box->pack_start(*custom1);
+	button_box->pack_start(*custom2);
+	custom1->signal_clicked().connect(sigc::mem_fun(*this, &EditorRouteGroups::snap));
+	custom2->signal_clicked().connect(sigc::mem_fun(*this, &EditorRouteGroups::recall));
+
 	_display_packer.pack_start (_scroller, true, true);
 	_display_packer.pack_start (*button_box, false, false);
 }
+
+void EditorRouteGroups::snap() { camera->snap(); }
+void EditorRouteGroups::recall() { camera->recall(); }
 
 void
 EditorRouteGroups::remove_selected ()
@@ -555,6 +568,7 @@ EditorRouteGroups::set_session (Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
+			camera = new MixerSnapshot(_session);
 
 		_session->route_group_added.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::add, this, _1), gui_context());
 		_session->route_group_removed.connect (
