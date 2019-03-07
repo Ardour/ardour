@@ -768,12 +768,9 @@ private:
 	Gtk::Menu track_region_context_menu;
 	Gtk::Menu track_selection_context_menu;
 
-	Gtk::MenuItem* region_edit_menu_split_item;
-	Gtk::MenuItem* region_edit_menu_split_multichannel_item;
 	Gtk::Menu * track_region_edit_playlist_menu;
 	Gtk::Menu * track_edit_playlist_submenu;
 	Gtk::Menu * track_selection_edit_playlist_submenu;
-
 	GdkEvent context_click_event;
 
 	void popup_track_context_menu (int, int, ItemType, bool);

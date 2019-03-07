@@ -262,8 +262,6 @@ Editor::Editor ()
 	, clicked_control_point (0)
 	, button_release_can_deselect (true)
 	, _mouse_changed_selection (false)
-	, region_edit_menu_split_item (0)
-	, region_edit_menu_split_multichannel_item (0)
 	, track_region_edit_playlist_menu (0)
 	, track_edit_playlist_submenu (0)
 	, track_selection_edit_playlist_submenu (0)
@@ -1605,22 +1603,6 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 	case RegionViewNameHighlight:
 	case LeftFrameHandle:
 	case RightFrameHandle:
-		if (!with_selection) {
-			if (region_edit_menu_split_item) {
-				if (clicked_regionview && clicked_regionview->region()->covers (get_preferred_edit_position())) {
-					ActionManager::set_sensitive (ActionManager::edit_point_in_region_sensitive_actions, true);
-				} else {
-					ActionManager::set_sensitive (ActionManager::edit_point_in_region_sensitive_actions, false);
-				}
-			}
-			if (region_edit_menu_split_multichannel_item) {
-				if (clicked_regionview && clicked_regionview->region()->n_channels() > 1) {
-					region_edit_menu_split_multichannel_item->set_sensitive (true);
-				} else {
-					region_edit_menu_split_multichannel_item->set_sensitive (false);
-				}
-			}
-		}
 		break;
 
 	case SelectionItem:
@@ -1707,9 +1689,6 @@ Editor::build_track_region_context_menu ()
 	/* we've just cleared the track region context menu, so the menu that these
 	   two items were on will have disappeared; stop them dangling.
 	*/
-	region_edit_menu_split_item = 0;
-	region_edit_menu_split_multichannel_item = 0;
-
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (clicked_axisview);
 
 	if (rtv) {
