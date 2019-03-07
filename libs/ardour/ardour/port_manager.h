@@ -142,8 +142,9 @@ class LIBARDOUR_API PortManager
 		MidiPortFlags properties;
 		bool          exists;
 
-		MidiPortInformation (std::string const & canonical, bool input, MidiPortFlags flags, bool xists)
+		MidiPortInformation (std::string const & canonical, std::string const & pretty, bool input, MidiPortFlags flags, bool xists)
 			: canonical_name (canonical)
+			, pretty_name (pretty)
 			, input (input)
 			, properties (flags)
 			, exists (xists) {}

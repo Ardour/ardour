@@ -1014,7 +1014,7 @@ PortManager::midi_port_information (std::string const & name)
 		return x->second;
 	}
 
-	return MidiPortInformation (string(), false, MidiPortFlags(0), false);
+	return MidiPortInformation (string(), string(), false, MidiPortFlags(0), false);
 }
 
 void
@@ -1046,7 +1046,6 @@ PortManager::get_midi_selection_ports (vector<string>& copy)
 void
 PortManager::set_port_pretty_name (string const & port, string const & pretty)
 {
-	bool emit = false;
 	{
 		Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
 
@@ -1057,7 +1056,6 @@ PortManager::set_port_pretty_name (string const & port, string const & pretty)
 			return;
 		}
 		x->second.pretty_name = pretty;
-		emit = true;
 	}
 
 	/* push into back end */
@@ -1068,9 +1066,8 @@ PortManager::set_port_pretty_name (string const & port, string const & pretty)
 		_backend->set_port_property (ph, "http://jackaudio.org/metadata/pretty-name", pretty, string());
 	}
 
-	if (emit) {
-		MidiPortInfoChanged (); /* EMIT SIGNAL*/
-	}
+	save_midi_port_info ();
+	MidiPortInfoChanged (); /* EMIT SIGNAL*/
 }
 
 void
@@ -1162,6 +1159,7 @@ PortManager::save_midi_port_info ()
 			XMLNode* node = new XMLNode (X_("port"));
 			node->set_property (X_("name"), i->first);
 			node->set_property (X_("canonical-name"), i->second.canonical_name);
+			node->set_property (X_("pretty-name"), i->second.pretty_name);
 			node->set_property (X_("input"), i->second.input);
 			node->set_property (X_("properties"), i->second.properties);
 			root->add_child_nocopy (*node);
@@ -1197,18 +1195,20 @@ PortManager::load_midi_port_info ()
 	for (XMLNodeConstIterator i = tree.root()->children().begin(); i != tree.root()->children().end(); ++i) {
 		string name;
 		string canonical;
+		string pretty;
 		bool  input;
 		MidiPortFlags properties;
 
 
 		if (!(*i)->get_property (X_("name"), name) ||
 		    !(*i)->get_property (X_("canonical-name"), canonical) ||
+		    !(*i)->get_property (X_("pretty-name"), pretty) ||
 		    !(*i)->get_property (X_("input"), input) ||
 		    !(*i)->get_property (X_("properties"), properties)) {
 			continue;
 		}
 
-		MidiPortInformation mpi (canonical, input, properties, false);
+		MidiPortInformation mpi (canonical, pretty, input, properties, false);
 
 		midi_port_info.insert (make_pair (name, mpi));
 	}
@@ -1253,6 +1253,7 @@ PortManager::fill_midi_port_info_locked ()
 			}
 
 			MidiPortInformation mpi (string_compose ("%1%4%2%4%3", _backend->name(), _backend->device_name(), *p, MIDI_PORT_INFO_SEPARATOR_CHAR),
+			                         *p,
 			                         true,
 			                         flags,
 			                         true);
@@ -1283,6 +1284,7 @@ PortManager::fill_midi_port_info_locked ()
 			}
 
 			MidiPortInformation mpi (string_compose ("%1%4%2%4%3", _backend->name(), _backend->device_name(), *p, MIDI_PORT_INFO_SEPARATOR_CHAR),
+			                         *p,
 			                         false,
 			                         flags,
 			                         true);
@@ -1332,12 +1334,10 @@ PortManager::fill_midi_port_info_locked ()
 
 			string value;
 
-			value = AudioEngine::instance()->get_pretty_name_by_name (x->first);
+			value = AudioEngine::instance()->get_pretty_name_by_name (parts[2]);
 
 			if (!value.empty()) {
 				x->second.pretty_name = value;
-			} else {
-				x->second.pretty_name = parts[2];
 			}
 		}
 	}
