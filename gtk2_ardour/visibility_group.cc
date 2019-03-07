@@ -69,6 +69,7 @@ VisibilityGroup::button_press_event (GdkEventButton* ev)
 		return false;
 	}
 
+	/* memory leak: Gtk::Menu* */
 	menu()->popup (1, ev->time);
 	return true;
 }

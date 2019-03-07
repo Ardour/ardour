@@ -45,7 +45,6 @@ public:
 		boost::function<boost::optional<bool> ()> = 0
 		);
 
-	Gtk::Menu* menu ();
 	Gtk::Widget* list_view ();
 	bool button_press_event (GdkEventButton *);
 	void update ();
@@ -86,6 +85,8 @@ private:
 	void list_view_visible_changed (std::string const &);
 	void update_list_view ();
 	bool should_actually_be_visible (Member const &) const;
+
+	Gtk::Menu* menu ();
 
 	std::vector<Member> _members;
 	std::string _xml_property_name;

@@ -228,6 +228,8 @@ public:
 	PublicEditor&	  the_editor() { return *editor;}
 	Mixer_UI* the_mixer() { return mixer; }
 
+	Gtk::Menu* shared_popup_menu ();
+
 	void new_midi_tracer_window ();
 	void toggle_editing_space();
 	void toggle_mixer_space();
@@ -401,6 +403,8 @@ private:
 	bool          _mixer_on_top;
 	bool          _initial_verbose_plugin_scan;
 
+	Gtk::Menu*    _shared_popup_menu;
+
 	void hide_tabbable (ArdourWidgets::Tabbable*);
 	void detach_tabbable (ArdourWidgets::Tabbable*);
 	void attach_tabbable (ArdourWidgets::Tabbable*);
@@ -554,8 +558,6 @@ private:
 	/* called by Blink signal */
 
 	void transport_rec_enable_blink (bool onoff);
-
-	Gtk::Menu*        session_popup_menu;
 
 	/* menu bar and associated stuff */
 
