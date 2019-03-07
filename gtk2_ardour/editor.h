@@ -369,10 +369,6 @@ public:
 	void toggle_region_fades (int dir);
 	void update_region_fade_visibility ();
 
-	/* redirect shared ops menu. caller must free returned menu */
-
-	Gtk::Menu* redirect_menu ();
-
 	/* floating windows/transient */
 
 	void ensure_float (Gtk::Window&);
@@ -768,9 +764,6 @@ private:
 	Gtk::Menu track_region_context_menu;
 	Gtk::Menu track_selection_context_menu;
 
-	Gtk::Menu * track_region_edit_playlist_menu;
-	Gtk::Menu * track_edit_playlist_submenu;
-	Gtk::Menu * track_selection_edit_playlist_submenu;
 	GdkEvent context_click_event;
 
 	void popup_track_context_menu (int, int, ItemType, bool);
@@ -1714,7 +1707,6 @@ private:
 	Gtk::Menu* range_marker_menu;
 	Gtk::Menu* transport_marker_menu;
 	Gtk::Menu* new_transport_marker_menu;
-	Gtk::Menu* cd_marker_menu;
 	ArdourCanvas::Item* marker_menu_item;
 
 	typedef std::list<ArdourMarker*> Marks;
