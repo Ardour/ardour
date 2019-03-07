@@ -815,7 +815,6 @@ Editor::tempo_or_meter_marker_context_menu (GdkEventButton* ev, ArdourCanvas::It
 
 	if (mm) {
 		can_remove = !mm->meter().initial ();
-		delete meter_marker_menu;
 		build_meter_marker_menu (mm, can_remove);
 		meter_marker_menu->popup (1, ev->time);
 	} else if (tm) {
@@ -823,7 +822,6 @@ Editor::tempo_or_meter_marker_context_menu (GdkEventButton* ev, ArdourCanvas::It
 			return;
 		}
 		can_remove = !tm->tempo().initial() && !tm->tempo().locked_to_meter();
-		delete tempo_marker_menu;
 		build_tempo_marker_menu (tm, can_remove);
 		tempo_marker_menu->popup (1, ev->time);
 	} else {
@@ -845,15 +843,13 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 
 	if (loc == transport_loop_location() || loc == transport_punch_location() || loc->is_session_range ()) {
 
-		delete transport_marker_menu;
-		build_range_marker_menu (loc, loc == transport_loop_location() || loc == transport_punch_location(), loc->is_session_range());
+		build_range_marker_menu (loc, loc == transport_loop_location() || loc == transport_punch_location(), loc->is_session_range()); // XXX
 
 		marker_menu_item = item;
-		transport_marker_menu->popup (1, ev->time);
+		range_marker_menu->popup (1, ev->time);
 
 	} else if (loc->is_mark()) {
 
-			delete marker_menu;
 			build_marker_menu (loc);
 
 		// GTK2FIX use action group sensitivity
@@ -874,9 +870,7 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 			marker_menu->popup (1, ev->time);
 
 	} else if (loc->is_range_marker()) {
-		delete range_marker_menu;
 		build_range_marker_menu (loc, false, false);
-
 		marker_menu_item = item;
 		range_marker_menu->popup (1, ev->time);
 	}
@@ -898,6 +892,7 @@ Editor::build_marker_menu (Location* loc)
 {
 	using namespace Menu_Helpers;
 
+	delete marker_menu;
 	marker_menu = new Menu;
 
 	MenuList& items = marker_menu->items();
@@ -940,15 +935,11 @@ Editor::build_range_marker_menu (Location* loc, bool loop_or_punch, bool session
 
 	bool const loop_or_punch_or_session = loop_or_punch || session;
 
-	Menu* markerMenu = new Menu;
+	delete range_marker_menu;
+	Menu* range_marker_menu = new Menu;
 
-	if (loop_or_punch_or_session) {
-		transport_marker_menu = markerMenu;
-	} else {
-		range_marker_menu = markerMenu;
-	}
-	MenuList& items = markerMenu->items();
-	markerMenu->set_name ("ArdourContextMenu");
+	MenuList& items = range_marker_menu->items();
+	range_marker_menu->set_name ("ArdourContextMenu");
 
 	items.push_back (MenuElem (_("Play Range"), sigc::mem_fun(*this, &Editor::marker_menu_play_range)));
 	items.push_back (MenuElem (_("Locate to Marker"), sigc::mem_fun(*this, &Editor::marker_menu_set_playhead)));
@@ -995,6 +986,7 @@ Editor::build_tempo_marker_menu (TempoMarker* loc, bool can_remove)
 {
 	using namespace Menu_Helpers;
 
+	delete tempo_marker_menu;
 	tempo_marker_menu = new Menu;
 
 	MenuList& items = tempo_marker_menu->items();
@@ -1037,6 +1029,7 @@ Editor::build_meter_marker_menu (MeterMarker* loc, bool can_remove)
 {
 	using namespace Menu_Helpers;
 
+	delete meter_marker_menu;
 	meter_marker_menu = new Menu;
 
 	MenuList& items = meter_marker_menu->items();

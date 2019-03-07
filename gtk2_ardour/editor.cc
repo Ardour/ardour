@@ -370,7 +370,6 @@ Editor::Editor ()
 	, meter_marker_menu (0)
 	, marker_menu (0)
 	, range_marker_menu (0)
-	, transport_marker_menu (0)
 	, new_transport_marker_menu (0)
 	, marker_menu_item (0)
 	, bbt_beat_subdivision (4)
@@ -859,6 +858,9 @@ Editor::~Editor()
 {
 	delete tempo_marker_menu;
 	delete meter_marker_menu;
+	delete marker_menu;
+	delete range_marker_menu;
+	delete new_transport_marker_menu;
 	delete editor_ruler_menu;
 	delete _popup_region_menu_item;
 

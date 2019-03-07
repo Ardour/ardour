@@ -1699,13 +1699,13 @@ private:
 	void build_tempo_marker_menu (TempoMarker *, bool);
 	void build_meter_marker_menu (MeterMarker *, bool);
 	void build_new_transport_marker_menu ();
+
 	void dynamic_cast_marker_object (void*, MeterMarker**, TempoMarker**) const;
 
 	Gtk::Menu* tempo_marker_menu;
 	Gtk::Menu* meter_marker_menu;
 	Gtk::Menu* marker_menu;
 	Gtk::Menu* range_marker_menu;
-	Gtk::Menu* transport_marker_menu;
 	Gtk::Menu* new_transport_marker_menu;
 	ArdourCanvas::Item* marker_menu_item;
 
