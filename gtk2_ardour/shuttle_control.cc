@@ -106,6 +106,7 @@ ShuttleControl::~ShuttleControl ()
 {
 	cairo_pattern_destroy (pattern);
 	cairo_pattern_destroy (shine_pattern);
+	delete shuttle_context_menu;
 }
 
 void

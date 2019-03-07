@@ -715,7 +715,7 @@ ProcessorEntry::hide_things ()
 }
 
 
-Menu *
+Menu*
 ProcessorEntry::build_controls_menu ()
 {
 	using namespace Menu_Helpers;
@@ -778,7 +778,7 @@ ProcessorEntry::toggle_control_visibility (Control* c)
 	_parent->update_gui_object_state (this);
 }
 
-Menu *
+Menu*
 ProcessorEntry::build_send_options_menu ()
 {
 	using namespace Menu_Helpers;
@@ -2160,6 +2160,7 @@ ProcessorBox::show_processor_menu (int arg)
 			aux_menu_item->set_submenu (*m);
 			aux_menu_item->set_sensitive (true);
 		} else {
+			delete m;
 			/* stupid gtkmm: we need to pass a null reference here */
 			gtk_menu_item_set_submenu (aux_menu_item->gobj(), 0);
 			aux_menu_item->set_sensitive (false);
@@ -2174,6 +2175,7 @@ ProcessorBox::show_processor_menu (int arg)
 			listen_menu_item->set_submenu (*m);
 			listen_menu_item->set_sensitive (true);
 		} else {
+			delete m;
 			/* stupid gtkmm: we need to pass a null reference here */
 			gtk_menu_item_set_submenu (listen_menu_item->gobj(), 0);
 			listen_menu_item->set_sensitive (false);
@@ -2188,6 +2190,7 @@ ProcessorBox::show_processor_menu (int arg)
 			remove_listen_menu_item->set_submenu (*m);
 			remove_listen_menu_item->set_sensitive (true);
 		} else {
+			delete m;
 			/* stupid gtkmm: we need to pass a null reference here */
 			gtk_menu_item_set_submenu (remove_listen_menu_item->gobj(), 0);
 			remove_listen_menu_item->set_sensitive (false);
@@ -2213,6 +2216,7 @@ ProcessorBox::show_processor_menu (int arg)
 				controls_menu_item->set_submenu (*m);
 				controls_menu_item->set_sensitive (true);
 			} else {
+				delete m;
 				gtk_menu_item_set_submenu (controls_menu_item->gobj(), 0);
 				controls_menu_item->set_sensitive (false);
 			}
@@ -2230,6 +2234,7 @@ ProcessorBox::show_processor_menu (int arg)
 				send_menu_item->set_submenu (*m);
 				send_menu_item->set_sensitive (true);
 			} else {
+				delete m;
 				gtk_menu_item_set_submenu (send_menu_item->gobj(), 0);
 				send_menu_item->set_sensitive (false);
 			}

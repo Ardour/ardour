@@ -830,7 +830,6 @@ Editor::Editor ()
 
 	_ignore_region_action = false;
 	_last_region_menu_was_main = false;
-	_popup_region_menu_item = 0;
 
 	_show_marker_lines = false;
 
@@ -858,6 +857,11 @@ Editor::Editor ()
 
 Editor::~Editor()
 {
+	delete tempo_marker_menu;
+	delete meter_marker_menu;
+	delete editor_ruler_menu;
+	delete _popup_region_menu_item;
+
 	delete button_bindings;
 	delete _routes;
 	delete _route_groups;

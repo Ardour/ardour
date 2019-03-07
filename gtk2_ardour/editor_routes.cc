@@ -323,6 +323,11 @@ EditorRoutes::EditorRoutes (Editor* e)
 	Route::PluginSetup.connect_same_thread (*this, boost::bind (&EditorRoutes::plugin_setup, this, _1, _2, _3));
 }
 
+EditorRoutes::~EditorRoutes ()
+{
+	delete _menu;
+}
+
 bool
 EditorRoutes::focus_in (GdkEventFocus*)
 {

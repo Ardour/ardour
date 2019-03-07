@@ -161,9 +161,9 @@ protected:
 
 	struct ProcessorAutomationInfo {
 		boost::shared_ptr<ARDOUR::Processor> processor;
-		bool                                 valid;
-		Gtk::Menu*                           menu;
-		std::vector<ProcessorAutomationNode*>     lines;
+		bool                                  valid;
+		Gtk::Menu*                            menu;
+		std::vector<ProcessorAutomationNode*> lines;
 
 		ProcessorAutomationInfo (boost::shared_ptr<ARDOUR::Processor> i)
 		    : processor (i), valid (true), menu (0) {}
@@ -255,10 +255,6 @@ protected:
 	RouteGroupMenu*     route_group_menu;
 	Gtk::Menu*          playlist_action_menu;
 	Gtk::MenuItem*      playlist_item;
-	Gtk::Menu*          mode_menu;
-	Gtk::Menu*          color_mode_menu;
-
-	virtual Gtk::Menu* build_color_mode_menu() { return 0; }
 
 	void use_playlist (Gtk::RadioMenuItem *item, boost::weak_ptr<ARDOUR::Playlist> wpl);
 

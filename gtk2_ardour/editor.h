@@ -953,7 +953,7 @@ private:
 
 	static double timebar_height;
 	guint32 visible_timebars;
-	Gtk::Menu          *editor_ruler_menu;
+	Gtk::Menu* editor_ruler_menu;
 
 	ArdourCanvas::Rectangle* tempo_bar;
 	ArdourCanvas::Rectangle* meter_bar;

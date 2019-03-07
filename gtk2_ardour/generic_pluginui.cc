@@ -224,6 +224,7 @@ GenericPluginUI::~GenericPluginUI ()
 	if (output_controls.size() > 0) {
 		screen_update_connection.disconnect();
 	}
+	delete automation_menu;
 	delete _pianomm;
 }
 

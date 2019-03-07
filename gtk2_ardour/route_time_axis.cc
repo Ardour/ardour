@@ -109,8 +109,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	, plugins_submenu_item (0)
 	, route_group_menu (0)
 	, playlist_action_menu (0)
-	, mode_menu (0)
-	, color_mode_menu (0)
 	, gm (sess, true, 75, 14)
 	, _ignore_set_layer_display (false)
 	, pan_automation_item(NULL)
@@ -339,7 +337,7 @@ RouteTimeAxisView::~RouteTimeAxisView ()
 	}
 
 	delete playlist_action_menu;
-	playlist_action_menu = 0;
+	delete automation_action_menu;
 
 	delete _view;
 	_view = 0;
@@ -788,6 +786,7 @@ RouteTimeAxisView::build_display_menu ()
 
 		} else {
 			/* show nothing */
+			delete alignment_menu;
 		}
 
 		items.push_back (SeparatorElem());

@@ -127,6 +127,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 
 AudioClock::~AudioClock ()
 {
+	delete ops_menu;
 	delete foreground_attr;
 	delete editing_attr;
 }
