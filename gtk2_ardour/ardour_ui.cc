@@ -5438,7 +5438,7 @@ ARDOUR_UI::popup_editor_meter_menu (GdkEventButton* ev)
 
 	RadioMenuItem::Group group;
 
-	_suspend_editor_meter_callbacks = true;
+	PBD::Unwinder<bool> uw (_suspend_editor_meter_callbacks, true);
 	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterPeak), MeterPeak);
 	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterPeak0dB), MeterPeak0dB);
 	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterKrms),  MeterKrms);
@@ -5452,7 +5452,6 @@ ARDOUR_UI::popup_editor_meter_menu (GdkEventButton* ev)
 	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterVU),  MeterVU);
 
 	m->popup (ev->button, ev->time);
-	_suspend_editor_meter_callbacks = false;
 }
 
 bool

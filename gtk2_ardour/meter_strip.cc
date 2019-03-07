@@ -21,6 +21,8 @@
 
 #include <sigc++/bind.h>
 
+#include "pbd/unwind.h"
+
 #include "ardour/logmeter.h"
 #include "ardour/session.h"
 #include "ardour/route.h"
@@ -840,7 +842,7 @@ MeterStrip::popup_level_meter_menu (GdkEventButton* ev)
 
 	RadioMenuItem::Group group;
 
-	_suspend_menu_callbacks = true;
+	PBD::Unwinder<bool> uw (_suspend_menu_callbacks, true);
 	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterPeak), MeterPeak);
 	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterPeak0dB), MeterPeak0dB);
 	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterKrms),  MeterKrms);
@@ -865,7 +867,6 @@ MeterStrip::popup_level_meter_menu (GdkEventButton* ev)
 				sigc::bind (SetMeterTypeMulti, _strip_type, _route->route_group(), cmt)));
 
 	m->popup (ev->button, ev->time);
-	_suspend_menu_callbacks = false;
 }
 
 bool
@@ -892,7 +893,7 @@ MeterStrip::popup_name_label_menu (GdkEventButton* ev)
 
 	RadioMenuItem::Group group;
 
-	_suspend_menu_callbacks = true;
+	PBD::Unwinder<bool> uw (_suspend_menu_callbacks, true);
 	add_label_height_item (items, group, _("Variable height"), 0);
 	add_label_height_item (items, group, _("Short"), 1);
 	add_label_height_item (items, group, _("Tall"), 2);
@@ -900,7 +901,6 @@ MeterStrip::popup_name_label_menu (GdkEventButton* ev)
 	add_label_height_item (items, group, _("Venti"), 4);
 
 	m->popup (ev->button, ev->time);
-	_suspend_menu_callbacks = false;
 }
 
 void
