@@ -1987,7 +1987,7 @@ MidiPortOptions::setup_midi_port_view (Gtk::TreeView& view, bool with_selection)
 		toggle_cell->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiPortOptions::midi_selection_column_toggled), &view));
 	}
 
-	view.get_selection()->set_mode (SELECTION_NONE);
+	view.get_selection()->set_mode (SELECTION_SINGLE);
 	view.set_tooltip_column (4); /* port "real" name */
 	view.get_column(0)->set_resizable (true);
 	view.get_column(0)->set_expand (true);
