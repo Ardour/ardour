@@ -901,6 +901,7 @@ SystemExec::start (StdErrMode stderr_mode, const char *vfork_exec_wrapper)
 		/* keep STDERR */
 #if defined __APPLE__&& defined ASL_LOG_DESCRIPTOR_WRITE
 		::close(STDERR_FILENO);
+		stderr_mode = IgnoreAndClose; // for vfork
 #endif
 	}
 
