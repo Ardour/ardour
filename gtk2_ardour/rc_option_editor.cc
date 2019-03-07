@@ -2017,8 +2017,7 @@ MidiPortOptions::refill_midi_ports (bool for_input, Gtk::TreeView& view)
 
 		PortManager::MidiPortInformation mpi (AudioEngine::instance()->midi_port_information (*s));
 
-		if (mpi.pretty_name.empty()) {
-			/* vanished since get_known_midi_ports() */
+		if (!mpi.exists) {
 			continue;
 		}
 
@@ -2109,7 +2108,7 @@ MidiPortOptions::pretty_name_edit (std::string const & path, string const & new_
 		return;
 	}
 
-	AudioEngine::instance()->set_midi_port_pretty_name ((*iter)[midi_port_columns.name], new_text);
+	AudioEngine::instance()->set_port_pretty_name ((*iter)[midi_port_columns.name], new_text);
 }
 
 /*============*/
