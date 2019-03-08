@@ -26,6 +26,7 @@
 
 #include "pbd/stateful.h"
 #include "pbd/xml++.h"
+#include "pbd/id.h"
 
 #include "ardour/session.h"
 #include "ardour/route.h"
@@ -50,11 +51,14 @@ class MixerSnapshot //: public PBD::Stateful
         void clear();
 
         struct State {
+            PBD::ID     id;
             std::string name;
-            XMLNode node;
+            XMLNode     node;
         };
 
-        std::vector<State> states;
+        std::vector<State> route_states;
+        std::vector<State> group_states;
+        std::vector<State> vca_states;
 };
 
 #endif /* __ardour_mixer_snapshot_h__ */
