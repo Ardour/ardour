@@ -10175,7 +10175,6 @@ msgstr ""
 msgid "  -b, --bindings              Display all current key bindings\n"
 msgstr ""
 "  -b, --bindings                   Alle momentanen Tastaturkürzel ausgeben\n"
-"\""
 
 #: opts.cc:73
 msgid ""
@@ -10200,7 +10199,6 @@ msgstr "  -C, --curvetest filename    Curve algorithm debugger\n"
 msgid "  -d, --disable-plugins       Disable all plugins (safe mode)\n"
 msgstr ""
 "  -d, --disable-plugins            Alle Plugins deaktivieren (safe mode)\n"
-"\""
 
 #: opts.cc:80
 msgid ""
