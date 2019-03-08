@@ -86,8 +86,6 @@ private:
 	void update_list_view ();
 	bool should_actually_be_visible (Member const &) const;
 
-	Gtk::Menu* menu ();
-
 	std::vector<Member> _members;
 	std::string _xml_property_name;
 	ModelColumns _model_columns;
