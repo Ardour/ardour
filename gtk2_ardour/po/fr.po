@@ -10,14 +10,14 @@
 # Raphaël Doursenaud <rdoursenaud@free.fr>, 2015.
 # Edouard <edwsaintesprit@hotmail.com>, 2016.
 # Rivaud Julien <frnchfrgg@free.fr>, 2016.
-# Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2018.
+# Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2018, 2019.
 msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-12-01 01:22+0100\n"
-"PO-Revision-Date: 2018-11-20 23:12+0100\n"
-"Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>, 2018\n"
+"PO-Revision-Date: 2019-03-08 01:34+0100\n"
+"Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>, 2019\n"
 "Language-Team: \n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -797,11 +797,11 @@ msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
 #: ardour_http.cc:183 ardour_http.cc:197
 msgid "HTTP request failed: (%1) %2"
-msgstr ""
+msgstr "Échec de la requête HTTP : (%1) %2"
 
 #: ardour_http.cc:187 ardour_http.cc:200
 msgid "HTTP request status: %1"
-msgstr ""
+msgstr "Statut de la requête HTTP : %1"
 
 #: ardour_ui.cc:200
 msgid ""
@@ -1769,11 +1769,11 @@ msgstr "pas de fichier vidéo sélectionné"
 
 #: ardour_ui.cc:4555
 msgid "No LTC detected, video will not be aligned."
-msgstr ""
+msgstr "LTC non détecté, la vidéo ne sera pas alignée."
 
 #: ardour_ui.cc:4561
 msgid "Align video-start to %1 [samples]"
-msgstr ""
+msgstr "Aligner le début de la vidéo à %1% [échantillons]"
 
 #: ardour_ui.cc:4737
 msgid "xrun"
@@ -1907,6 +1907,17 @@ msgid ""
 "\n"
 "From now on, use the backup copy with older versions of %3"
 msgstr ""
+"%4Ceci est une session d'une ancienne version de %3%5\n"
+"\n"
+"%3 a copié l'ancien fichier de session\n"
+"\n"
+"%6%1%7\n"
+"\n"
+"vers\n"
+"\n"
+"%6%2%7\n"
+"\n"
+"À partir de maintenant, utiliser la copie de sauvegarde avec les anciennes versions de %3"
 
 #: ardour_ui.cc:5419
 msgid "This is a free/demo copy of %1. It has just switched to silent mode."
@@ -1949,7 +1960,7 @@ msgstr "Laissez moi plus de temps"
 
 #: ardour_ui.cc:5766
 msgid "Global keybindings are missing"
-msgstr ""
+msgstr "Les raccourcis clavier globaux sont manquants"
 
 #: ardour_ui2.cc:79
 msgid "Play from playhead"
@@ -2017,6 +2028,8 @@ msgid ""
 "When active, auditioning is taking place.\n"
 "Click to stop the audition"
 msgstr ""
+"Lorsqu'il est actif, l'audition prend place.\n"
+"Cliquer pour arrêter l'audition"
 
 #: ardour_ui2.cc:93
 msgid "When active, there is a feedback loop."
@@ -3457,15 +3470,15 @@ msgstr "Débloquer"
 
 #: editor.cc:1767
 msgid "Region Loudness Analysis"
-msgstr ""
+msgstr "Analyse de la sonie de la région"
 
 #: editor.cc:1786 editor.cc:1835
 msgid "Audio Report/Analysis"
-msgstr ""
+msgstr "Analyse/rapport audio"
 
 #: editor.cc:1816
 msgid "Range Loudness Analysis"
-msgstr ""
+msgstr "Analyse de la sonie"
 
 #: editor.cc:1902
 msgid "Selected Regions"
@@ -3934,7 +3947,7 @@ msgstr ""
 
 #: editor.cc:4146
 msgid "Delete All Unused"
-msgstr ""
+msgstr "Effacer les non-utilisés"
 
 #: editor.cc:4147
 msgid "Delete Playlist"
@@ -3972,11 +3985,11 @@ msgstr "Patienter pendant que %1 charge les données graphiques."
 
 #: editor.cc:5809 editor_actions.cc:481
 msgid "Unset #%1"
-msgstr ""
+msgstr "Désélectionner #%1"
 
 #: editor.cc:5810 editor_actions.cc:483
 msgid "no action bound"
-msgstr ""
+msgstr "pas d'action liée"
 
 #: editor.cc:5959 editor.cc:5994 editor_markers.cc:998 editor_markers.cc:1018
 #: panner_ui.cc:412 processor_box.cc:3763
@@ -4336,15 +4349,15 @@ msgstr "Sauter au repère précédent"
 
 #: editor_actions.cc:254
 msgid "Set Session Start from Playhead"
-msgstr ""
+msgstr "Paramétrer le début de session à la tête de lecture"
 
 #: editor_actions.cc:255
 msgid "Set Session End from Playhead"
-msgstr ""
+msgstr "Paramétrer la fin de session à la tête de lecture"
 
 #: editor_actions.cc:257
 msgid "Toggle Mark at Playhead"
-msgstr ""
+msgstr "Basculer la marque à la tête de lecture"
 
 #: editor_actions.cc:258 editor_actions.cc:259
 msgid "Add Mark from Playhead"
@@ -4372,11 +4385,11 @@ msgstr "Décaler la tête de lecture vers la gauche"
 
 #: editor_actions.cc:269
 msgid "Playhead to Next Grid"
-msgstr ""
+msgstr "Tête de lecture sur la grille suivante"
 
 #: editor_actions.cc:270
 msgid "Playhead to Previous Grid"
-msgstr ""
+msgstr "Tête de lecture sur la grille précédente"
 
 #: editor_actions.cc:275
 msgid "Zoom to Selection"
@@ -4424,7 +4437,7 @@ msgstr ""
 
 #: editor_actions.cc:294
 msgid "Zoom to 5 min"
-msgstr ""
+msgstr "Zoom sur 5 mins"
 
 #: editor_actions.cc:297
 msgid "Move Selected Tracks Up"
@@ -4508,7 +4521,7 @@ msgstr "Déplacer le repère actif à la position de la souris"
 
 #: editor_actions.cc:333
 msgid "Set Auto Punch In/Out from Playhead"
-msgstr ""
+msgstr "Paramétrer le punch in/out automatique à la tête de lecture"
 
 #: editor_actions.cc:343
 msgid "Undo Selection Change"
@@ -5386,19 +5399,19 @@ msgstr "Lier quand même"
 
 #: editor_pt_import.cc:81
 msgid "You can't import a PT session until you have a session loaded."
-msgstr ""
+msgstr "Vous ne pouvez pas importer une session PT avant d'avoir chargé une session."
 
 #: editor_pt_import.cc:86
 msgid "Import PT Session"
-msgstr ""
+msgstr "Importer une session PT"
 
 #: editor_pt_import.cc:97
 msgid "%1: this is only the directory/folder name, not the filename.\n"
-msgstr ""
+msgstr "%1 : ceci est seulement le nom de répertoire, pas le nom de fichier.\n"
 
 #: editor_pt_import.cc:132
 msgid "Doesn't seem to be a valid PT session file"
-msgstr ""
+msgstr "Ne semble pas être une session PT valide"
 
 #: editor_pt_import.cc:136
 msgid ""
@@ -5410,20 +5423,29 @@ msgid ""
 "\n"
 "Continue..."
 msgstr ""
+"PT v%1 Session @ %2Hz\n"
+"\n"
+"%3 fichiers audio\n"
+"%4 régions\n"
+"%5 régions actives\n"
+"\n"
+"Continue..."
 
 #: editor_pt_import.cc:175
 msgid ""
 "Failed to load one or more of the audio files, but continuing to attempt "
 "import."
 msgstr ""
+"Échec du chargement d'un ou plusieurs fichiers audio, mais on continue "
+"d'essayer d'importer."
 
 #: editor_pt_import.cc:178
 msgid "Success! Import should complete soon."
-msgstr ""
+msgstr "Succès ! L'import devrait être finalisé bientôt."
 
 #: editor_pt_import.cc:263
 msgid "PTImport: UINT_MAX routes? impossible!"
-msgstr ""
+msgstr "PTImport : routes UINT_MAX ? impossible !"
 
 #: editor_canvas_events.cc:1308 editor_drag.cc:1455
 msgid "Could not create new track after region placed in the drop zone"
@@ -5441,7 +5463,7 @@ msgstr "Déplacement avec propagation"
 
 #: editor_drag.cc:2356
 msgid "create region"
-msgstr ""
+msgstr "créer une région"
 
 #: editor_drag.cc:2475 midi_region_view.cc:2826
 msgid "resize notes"
@@ -5489,7 +5511,7 @@ msgstr "copier le repère de tempo"
 
 #: editor_drag.cc:3520
 msgid "dilate tempo"
-msgstr ""
+msgstr "dilater le tempo"
 
 #: editor_drag.cc:3794
 msgid "change fade in length"
@@ -5753,11 +5775,11 @@ msgstr "Intervalle de sélection"
 
 #: editor_markers.cc:987
 msgid "Make Ramped"
-msgstr ""
+msgstr "Faire une rampe"
 
 #: editor_markers.cc:989
 msgid "Make Constant"
-msgstr ""
+msgstr "Faire constant"
 
 #: editor_markers.cc:993 editor_markers.cc:1013
 msgid "Lock to Music"
@@ -6062,7 +6084,7 @@ msgid ""
 "\n"
 "You can do this without processing, which is a different operation."
 msgstr ""
-"Opération impossible: le traitement du signal va obliger au moins une piste "
+"Opération impossible : le traitement du signal va obliger au moins une piste "
 "à contenir une région ayant plus de canaux que la piste a d'entrées.\n"
 "\n"
 "Vous pouvez faire cela sans traitement, ce qui est une opération différente."
@@ -6218,11 +6240,11 @@ msgstr "régler l'intervalle de « punch » sur la sélection"
 
 #: editor_ops.cc:6422
 msgid "Auto Punch In"
-msgstr ""
+msgstr "Punch in automatique"
 
 #: editor_ops.cc:6429 editor_ops.cc:6433
 msgid "Auto Punch In/Out"
-msgstr ""
+msgstr "Punch in/out automatique"
 
 #: editor_ops.cc:6475
 msgid "set session start/end from selection"
@@ -6581,7 +6603,7 @@ msgstr "Multiple"
 
 #: editor_regions.cc:1036
 msgid "MISSING "
-msgstr "(MANQUANT)"
+msgstr "MANQUANT "
 
 #: editor_routes.cc:126
 msgid "RS"
@@ -7020,11 +7042,11 @@ msgstr "Impossible de régler le pilote sur %1"
 
 #: engine_dialog.cc:2453
 msgid "Cannot set input device name to %1"
-msgstr ""
+msgstr "Impossible de paramétrer le nom de périphérique d'entrée à %1"
 
 #: engine_dialog.cc:2457
 msgid "Cannot set output device name to %1"
-msgstr ""
+msgstr "Impossible de paramétrer le nom de périphérique de sortie à %1"
 
 #: engine_dialog.cc:2462
 msgid "Cannot set device name to %1"
@@ -7067,6 +7089,8 @@ msgid ""
 "Input signal is > -3dBFS. Lower the signal level (output gain, input gain) "
 "on the audio-interface."
 msgstr ""
+"Le signal id'entrée est > -3dBFS. Abaissez le niveau de signal (gain de sortie, gain d'entrée) "
+"sur l'interface audio."
 
 #: engine_dialog.cc:2879 engine_dialog.cc:2933 port_insert_ui.cc:70
 #: port_insert_ui.cc:98
@@ -7232,7 +7256,7 @@ msgstr "Normalisation de « %3 » (période %1 sur %2)"
 
 #: export_dialog.cc:412
 msgid "Encoding '%3' (timespan %1 of %2)"
-msgstr ""
+msgstr "Encodage de « %3 » (période %1 sur %2)"
 
 #: export_dialog.cc:417
 msgid "Tagging '%3' (timespan %1 of %2)"
@@ -7244,7 +7268,7 @@ msgstr "Téléversement de « %3 » (période %1 sur %2)"
 
 #: export_dialog.cc:425
 msgid "Running Post Export Command for '%1'"
-msgstr ""
+msgstr "Exécution de la commande de post-export pour '%1'"
 
 #: export_dialog.cc:453 export_dialog.cc:455
 msgid "<span color=\"#ffa755\">Error: "
@@ -7335,7 +7359,7 @@ msgstr "Ouvrir un répertoire"
 
 #: export_filename_selector.cc:45
 msgid "Build filename(s) from these components:"
-msgstr ""
+msgstr "Construire le(s) nom(s) depuis ces composants : "
 
 #: export_filename_selector.cc:217
 msgid ""
@@ -7346,7 +7370,7 @@ msgstr ""
 
 #: export_filename_selector.cc:219
 msgid "<i>Current (approximate) filename</i>: \"%1\""
-msgstr ""
+msgstr "<i>Nom de fichier (approximatif) actuel</i> : \"%1\""
 
 #: export_filename_selector.cc:255 export_filename_selector.cc:402
 msgid ""
@@ -7360,7 +7384,7 @@ msgstr ""
 
 #: export_filename_selector.cc:378
 msgid "%1: this is not a valid directory/folder."
-msgstr ""
+msgstr "%1 : ce n'est pas un répertoire valide."
 
 #: export_filename_selector.cc:388
 msgid "Choose export folder"
@@ -7419,6 +7443,8 @@ msgid ""
 "Command to run post-export\n"
 "(%f=file path, %d=directory, %b=basename, see tooltip for more):"
 msgstr ""
+"Commande & exécuer post-export\n"
+"(%f=chemin de fichier, %d=dossier, %b=nom de base, voir l'infobulle pour plus) :"
 
 #: export_format_dialog.cc:65
 msgid "Compatibility"
@@ -7568,11 +7594,11 @@ msgstr "Voulez-vous vraiment enlever ce pré-réglage ?"
 
 #: export_report.cc:56
 msgid "Export Report/Analysis"
-msgstr ""
+msgstr Exporter le/la rapport/analyse""
 
 #: export_report.cc:147 export_report.cc:327 sfdb_ui.cc:149
 msgid "Format:"
-msgstr "Format :"
+msgstr "Format : "
 
 #: export_report.cc:166 export_report.cc:328
 msgid "%1 Hz"
@@ -7584,7 +7610,7 @@ msgstr "Durée :"
 
 #: export_report.cc:177 export_report.cc:334
 msgid "Timecode:"
-msgstr ""
+msgstr "Code temporel : "
 
 #: export_report.cc:185
 msgid "Error:"
@@ -7604,7 +7630,7 @@ msgstr "Pic :"
 
 #: export_report.cc:228 export_report.cc:360
 msgid "%1 dBFS"
-msgstr ""
+msgstr "%1 dBFS"
 
 #: export_report.cc:229 export_report.cc:369
 msgid "True Peak:"
@@ -7612,11 +7638,11 @@ msgstr ""
 
 #: export_report.cc:230 export_report.cc:376
 msgid "%1 dBTP"
-msgstr ""
+msgstr "%1 dBTP"
 
 #: export_report.cc:231 export_report.cc:387
 msgid "Normalization Gain:"
-msgstr ""
+msgstr "Gain de normalisation : "
 
 #: export_report.cc:232
 msgid "+888.88 dB"
@@ -7624,7 +7650,7 @@ msgstr "+888.88 dB"
 
 #: export_report.cc:234 export_report.cc:448
 msgid "Integrated Loudness:"
-msgstr ""
+msgstr "sonie intégrée : "
 
 #: export_report.cc:235 export_report.cc:454
 msgid "%1 LUFS"
@@ -7632,7 +7658,7 @@ msgstr "%1 LUFS"
 
 #: export_report.cc:236 export_report.cc:460
 msgid "Loudness Range:"
-msgstr ""
+msgstr "Plage de sonie : "
 
 #: export_report.cc:237 export_report.cc:466
 msgid "%1 LU"
@@ -7652,23 +7678,27 @@ msgstr ""
 
 #: export_report.cc:394
 msgid "%1 dB"
-msgstr ""
+msgstr "%1 dB"
 
 #: export_report.cc:425 export_report.cc:433 export_report.cc:553
 msgid ""
 "Not\n"
 "Available"
 msgstr ""
+"Non\n"
+"Disponible"
 
 #: export_report.cc:493
 msgid ""
 "LUFS\n"
 "(short)"
 msgstr ""
+"LUFS\n"
+"(court)"
 
 #: export_report.cc:503
 msgid "Multiplicity"
-msgstr ""
+msgstr "Multiplicité"
 
 #: export_report.cc:603
 msgid "Logscale|Lg"
@@ -7684,7 +7714,7 @@ msgstr ""
 
 #: export_report.cc:606
 msgid "Rectified"
-msgstr ""
+msgstr "Rectifié"
 
 #: export_report.cc:738
 msgid "Hz"
@@ -7708,7 +7738,7 @@ msgstr "10K"
 
 #: export_report.cc:844
 msgid "Writing Export Analysis Image: %1."
-msgstr ""
+msgstr "Fabrique une image d'analyse de l'export"
 
 #: export_report.cc:941 sfdb_ui.cc:293 sfdb_ui.cc:417
 msgid "Could not read file: %1 (%2)."
@@ -7893,7 +7923,7 @@ msgstr "Créer un nouveau groupe à partir de..."
 
 #: group_tabs.cc:325
 msgid "Create New Group with Master From..."
-msgstr ""
+msgstr "Créer un nouveau groupe avec un Master à partir de..."
 
 #: group_tabs.cc:352
 msgid "Edit Group..."
@@ -7910,7 +7940,7 @@ msgstr "Enlever le groupe"
 
 #: group_tabs.cc:365
 msgid "Assign Group to Control Master..."
-msgstr ""
+msgstr "Assigner le group aux contrôle Master..."
 
 #: group_tabs.cc:371
 msgid "Remove Subgroup Bus"
@@ -8018,7 +8048,7 @@ msgstr "Insérer du temps"
 
 #: insert_remove_time_dialog.cc:208
 msgid "Invalid or zero duration entered. Please enter a valid duration"
-msgstr ""
+msgstr "Durée invalide ou égale à zéro entrée. Veuillez entrer une durée valide"
 
 #: instrument_selector.cc:115
 msgid "-none-"
@@ -8079,15 +8109,15 @@ msgstr "Supprimer le raccourci"
 
 #: keyeditor.cc:80
 msgid "Search..."
-msgstr ""
+msgstr "Rechercher..."
 
 #: keyeditor.cc:82
 msgid "Print"
-msgstr ""
+msgstr "Imprimer"
 
 #: keyeditor.cc:93
 msgid "Click to reset search string"
-msgstr ""
+msgstr "Cliquer pour réinitialiser le champs de recherche"
 
 #: keyeditor.cc:97
 msgid "To remove a shortcut select an action then press this: "
@@ -8246,7 +8276,7 @@ msgstr "Action %1"
 
 #: lua_script_manager.cc:132 lua_script_manager.cc:227
 msgid "Unset"
-msgstr ""
+msgstr "Non-paramétré"
 
 #: luainstance.cc:1108
 msgid "Cannot read script '%1': %2"
@@ -8292,7 +8322,7 @@ msgstr ""
 
 #: luawindow.cc:417
 msgid "Script fails to compile."
-msgstr ""
+msgstr "Échec de compilation du script"
 
 #: luawindow.cc:424
 msgid "Invalid or missing script-name or script-type."
@@ -8420,7 +8450,7 @@ msgstr "Impossible d'installer le gestionnaire d'erreurs SIGPIPE"
 
 #: main.cc:391
 msgid "Could not complete pre-GUI initialization"
-msgstr ""
+msgstr "Impossible de finitr l'initialisation pré-IGU"
 
 #: main.cc:398
 msgid "could not create %1 GUI"
@@ -8930,6 +8960,9 @@ msgid ""
 "system:\n"
 "\n"
 msgstr ""
+"Cette session contient les greffons suivants qui ne peuvent pas être trouvés "
+"sur ce système :\n"
+"\n"
 
 #: missing_plugin_dialog.cc:48
 msgid ""
@@ -8939,6 +8972,11 @@ msgid ""
 "session.\n"
 "(also check the blacklist, Window > Log and Preferences > Plugins)"
 msgstr ""
+"\n"
+"Ces greffons seront remplacés par des éléments inactifs.\n"
+"Il vous est recommandé d'installer les greffons manquants et de "
+"recharger la session.\n"
+"(vérifier aussi la liste noire, Fenêtres > Log et Préférences > Greffons)"
 
 #: mixer_strip.cc:100 mixer_strip.cc:133
 msgid "pre"
@@ -12520,7 +12558,7 @@ msgstr "Thème/Couleurs"
 
 #: rc_option_editor.cc:3760
 msgid "Set Linux VST Search Path"
-msgstr "Indique le dossier de recherche des VST Linus"
+msgstr "Indique le dossier de recherche des VST Linux"
 
 #: rc_option_editor.cc:3774
 msgid "Set Windows VST Search Path"
