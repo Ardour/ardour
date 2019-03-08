@@ -511,8 +511,8 @@ Session::send_midi_time_code_for_cycle (samplepos_t start_sample, samplepos_t en
 	double const quarter_frame_duration = _samples_per_timecode_frame / 4.0;
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("TF %1 SF %2 MT %3 QF %4 QD %5\n",
-				_transport_sample, start_sample, outbound_mtc_timecode_frame,
-				next_quarter_frame_to_send, quarter_frame_duration));
+	                                         _transport_sample, start_sample, outbound_mtc_timecode_frame,
+	                                         next_quarter_frame_to_send, quarter_frame_duration));
 
 	if (rint(outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration)) < _transport_sample) {
 		// send full timecode and set outbound_mtc_timecode_frame, next_quarter_frame_to_send
@@ -530,30 +530,30 @@ Session::send_midi_time_code_for_cycle (samplepos_t start_sample, samplepos_t en
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("next sample to send: %1\n", next_quarter_frame_to_send));
 
 		switch (next_quarter_frame_to_send) {
-			case 0:
-				mtc_msg[1] = 0x00 | (transmitting_timecode_time.frames & 0xf);
-				break;
-			case 1:
-				mtc_msg[1] = 0x10 | ((transmitting_timecode_time.frames & 0xf0) >> 4);
-				break;
-			case 2:
-				mtc_msg[1] = 0x20 | (transmitting_timecode_time.seconds & 0xf);
-				break;
-			case 3:
-				mtc_msg[1] = 0x30 | ((transmitting_timecode_time.seconds & 0xf0) >> 4);
-				break;
-			case 4:
-				mtc_msg[1] = 0x40 | (transmitting_timecode_time.minutes & 0xf);
-				break;
-			case 5:
-				mtc_msg[1] = 0x50 | ((transmitting_timecode_time.minutes & 0xf0) >> 4);
-				break;
-			case 6:
-				mtc_msg[1] = 0x60 | ((mtc_timecode_bits | transmitting_timecode_time.hours) & 0xf);
-				break;
-			case 7:
-				mtc_msg[1] = 0x70 | (((mtc_timecode_bits | transmitting_timecode_time.hours) & 0xf0) >> 4);
-				break;
+		case 0:
+			mtc_msg[1] = 0x00 | (transmitting_timecode_time.frames & 0xf);
+			break;
+		case 1:
+			mtc_msg[1] = 0x10 | ((transmitting_timecode_time.frames & 0xf0) >> 4);
+			break;
+		case 2:
+			mtc_msg[1] = 0x20 | (transmitting_timecode_time.seconds & 0xf);
+			break;
+		case 3:
+			mtc_msg[1] = 0x30 | ((transmitting_timecode_time.seconds & 0xf0) >> 4);
+			break;
+		case 4:
+			mtc_msg[1] = 0x40 | (transmitting_timecode_time.minutes & 0xf);
+			break;
+		case 5:
+			mtc_msg[1] = 0x50 | ((transmitting_timecode_time.minutes & 0xf0) >> 4);
+			break;
+		case 6:
+			mtc_msg[1] = 0x60 | ((mtc_timecode_bits | transmitting_timecode_time.hours) & 0xf);
+			break;
+		case 7:
+			mtc_msg[1] = 0x70 | (((mtc_timecode_bits | transmitting_timecode_time.hours) & 0xf0) >> 4);
+			break;
 		}
 
 		const samplepos_t msg_time = rint(outbound_mtc_timecode_frame	+ (quarter_frame_duration * next_quarter_frame_to_send));
@@ -576,10 +576,10 @@ Session::send_midi_time_code_for_cycle (samplepos_t start_sample, samplepos_t en
 #ifndef NDEBUG
 		if (DEBUG_ENABLED(DEBUG::MTC)) {
 			DEBUG_STR_DECL(foo)
-			DEBUG_STR_APPEND(foo,"sending ");
+				DEBUG_STR_APPEND(foo,"sending ");
 			DEBUG_STR_APPEND(foo, transmitting_timecode_time);
 			DEBUG_TRACE (DEBUG::MTC, string_compose ("%1 qfm = %2, stamp = %3\n", DEBUG_STR(foo).str(), next_quarter_frame_to_send,
-								 out_stamp));
+			                                         out_stamp));
 		}
 #endif
 

@@ -1008,13 +1008,15 @@ PortManager::midi_port_information (std::string const & name)
 
 	fill_midi_port_info_locked ();
 
-	MidiPortInfo::iterator x = midi_port_info.find (name);
+	string canonical (make_canonical_name (name));
+
+	MidiPortInfo::iterator x = midi_port_info.find (canonical);
 
 	if (x != midi_port_info.end()) {
 		return x->second;
 	}
 
-	return MidiPortInformation (string(), string(), false, MidiPortFlags(0), false);
+	return MidiPortInformation (string(), false, MidiPortFlags(0), false);
 }
 
 void
@@ -1025,7 +1027,7 @@ PortManager::get_known_midi_ports (vector<string>& copy)
 	fill_midi_port_info_locked ();
 
 	for (MidiPortInfo::const_iterator x = midi_port_info.begin(); x != midi_port_info.end(); ++x) {
-		copy.push_back (x->first);
+		copy.push_back (port_name_from_canonical_name (x->first));
 	}
 }
 
@@ -1038,7 +1040,7 @@ PortManager::get_midi_selection_ports (vector<string>& copy)
 
 	for (MidiPortInfo::const_iterator x = midi_port_info.begin(); x != midi_port_info.end(); ++x) {
 		if (x->second.properties & MidiPortSelection) {
-			copy.push_back (x->first);
+			copy.push_back (port_name_from_canonical_name (x->first));
 		}
 	}
 }
@@ -1051,7 +1053,9 @@ PortManager::set_port_pretty_name (string const & port, string const & pretty)
 
 		fill_midi_port_info_locked ();
 
-		MidiPortInfo::iterator x = midi_port_info.find (port);
+		string const canonical (make_canonical_name (port));
+
+		MidiPortInfo::iterator x = midi_port_info.find (canonical);
 		if (x == midi_port_info.end()) {
 			return;
 		}
@@ -1080,7 +1084,8 @@ PortManager::add_midi_port_flags (string const & port, MidiPortFlags flags)
 
 		fill_midi_port_info_locked ();
 
-		MidiPortInfo::iterator x = midi_port_info.find (port);
+		string const canonical (make_canonical_name (port));
+		MidiPortInfo::iterator x = midi_port_info.find (canonical);
 		if (x != midi_port_info.end()) {
 			if ((x->second.properties & flags) != flags) { // at least one missing
 				x->second.properties = MidiPortFlags (x->second.properties | flags);
@@ -1112,7 +1117,8 @@ PortManager::remove_midi_port_flags (string const & port, MidiPortFlags flags)
 
 		fill_midi_port_info_locked ();
 
-		MidiPortInfo::iterator x = midi_port_info.find (port);
+		string const canonical (make_canonical_name (port));
+		MidiPortInfo::iterator x = midi_port_info.find (canonical);
 		if (x != midi_port_info.end()) {
 			if (x->second.properties & flags) { // at least one is set
 				x->second.properties = MidiPortFlags (x->second.properties & ~flags);
@@ -1157,8 +1163,7 @@ PortManager::save_midi_port_info ()
 
 		for (MidiPortInfo::iterator i = midi_port_info.begin(); i != midi_port_info.end(); ++i) {
 			XMLNode* node = new XMLNode (X_("port"));
-			node->set_property (X_("name"), i->first);
-			node->set_property (X_("canonical-name"), i->second.canonical_name);
+			node->set_property (X_("canonical-name"), i->first);
 			node->set_property (X_("pretty-name"), i->second.pretty_name);
 			node->set_property (X_("input"), i->second.input);
 			node->set_property (X_("properties"), i->second.properties);
@@ -1193,24 +1198,22 @@ PortManager::load_midi_port_info ()
 	midi_port_info.clear ();
 
 	for (XMLNodeConstIterator i = tree.root()->children().begin(); i != tree.root()->children().end(); ++i) {
-		string name;
 		string canonical;
 		string pretty;
 		bool  input;
 		MidiPortFlags properties;
 
 
-		if (!(*i)->get_property (X_("name"), name) ||
-		    !(*i)->get_property (X_("canonical-name"), canonical) ||
+		if (!(*i)->get_property (X_("canonical-name"), canonical) ||
 		    !(*i)->get_property (X_("pretty-name"), pretty) ||
 		    !(*i)->get_property (X_("input"), input) ||
 		    !(*i)->get_property (X_("properties"), properties)) {
 			continue;
 		}
 
-		MidiPortInformation mpi (canonical, pretty, input, properties, false);
+		MidiPortInformation mpi (pretty, input, properties, false);
 
-		midi_port_info.insert (make_pair (name, mpi));
+		midi_port_info.insert (make_pair (canonical, mpi));
 	}
 }
 
@@ -1223,6 +1226,28 @@ PortManager::fill_midi_port_info ()
 	}
 
 	save_midi_port_info ();
+}
+
+string
+PortManager::make_canonical_name (std::string const & full_port_name) const
+{
+	return string_compose ("%1%4%2%4%3", _backend->name(), _backend->device_name(), full_port_name, MIDI_PORT_INFO_SEPARATOR_CHAR);
+}
+
+string
+PortManager::port_name_from_canonical_name (std::string const & canonical) const
+{
+	return canonical.substr (canonical.find_last_of (MIDI_PORT_INFO_SEPARATOR_CHAR) + 1);
+}
+
+string
+PortManager::short_port_name_from_port_name (std::string const & full_name) const
+{
+	string::size_type colon = full_name.find_first_of (':');
+	if (colon == string::npos || colon == full_name.length()) {
+		return full_name;
+	}
+	return full_name.substr (colon+1);
 }
 
 void
@@ -1252,8 +1277,9 @@ PortManager::fill_midi_port_info_locked ()
 				flags = MidiPortControl;
 			}
 
-			MidiPortInformation mpi (string_compose ("%1%4%2%4%3", _backend->name(), _backend->device_name(), *p, MIDI_PORT_INFO_SEPARATOR_CHAR),
-			                         *p,
+			const string canonical = make_canonical_name (*p);
+
+			MidiPortInformation mpi (*p,
 			                         true,
 			                         flags,
 			                         true);
@@ -1263,7 +1289,7 @@ PortManager::fill_midi_port_info_locked ()
 				mpi.properties = MidiPortFlags (mpi.properties | MidiPortVirtual);
 			}
 #endif
-			midi_port_info.insert (make_pair (*p, mpi));
+			midi_port_info.insert (make_pair (canonical, mpi));
 		}
 	}
 
@@ -1283,8 +1309,9 @@ PortManager::fill_midi_port_info_locked ()
 				flags = MidiPortControl;
 			}
 
-			MidiPortInformation mpi (string_compose ("%1%4%2%4%3", _backend->name(), _backend->device_name(), *p, MIDI_PORT_INFO_SEPARATOR_CHAR),
-			                         *p,
+			const string canonical = make_canonical_name (*p);
+
+			MidiPortInformation mpi (*p,
 			                         false,
 			                         flags,
 			                         true);
@@ -1294,7 +1321,7 @@ PortManager::fill_midi_port_info_locked ()
 				mpi.properties = MidiPortFlags (mpi.properties | MidiPortVirtual);
 			}
 #endif
-			midi_port_info.insert (make_pair (*p, mpi));
+			midi_port_info.insert (make_pair (canonical, mpi));
 		}
 	}
 
@@ -1306,7 +1333,7 @@ PortManager::fill_midi_port_info_locked ()
 
 		vector<string> parts;
 
-		/*PBD::*/split (x->second.canonical_name, parts, MIDI_PORT_INFO_SEPARATOR_CHAR);
+		/*PBD::*/split (x->first, parts, MIDI_PORT_INFO_SEPARATOR_CHAR);
 		assert (parts.size() == 3);
 
 		if (parts[0] != _backend->name()) {
