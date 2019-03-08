@@ -82,8 +82,6 @@ class LIBARDOUR_API PortManager
 	std::string             make_port_name_relative (const std::string& name) const;
 	std::string             make_port_name_non_relative (const std::string& name) const;
 	std::string             get_pretty_name_by_name (const std::string& portname) const;
-	std::string             make_canonical_name (std::string const & full_port_name) const;
-	std::string             port_name_from_canonical_name (std::string const & canonical) const;
 	std::string             short_port_name_from_port_name (std::string const & full_name) const;
 	bool                    port_is_mine (const std::string& fullname) const;
 
@@ -139,16 +137,21 @@ class LIBARDOUR_API PortManager
 	bool port_remove_in_progress() const { return _port_remove_in_progress; }
 
 	struct MidiPortInformation {
+		std::string   backend;
 		std::string   pretty_name;
 		bool          input;
 		MidiPortFlags properties;
 		bool          exists;
 
-		MidiPortInformation (std::string const & pretty, bool input, MidiPortFlags flags, bool xists)
-			: pretty_name (pretty)
+		MidiPortInformation (std::string const & b, std::string const & pretty, bool input, MidiPortFlags flags, bool xists)
+			: backend (b)
+			, pretty_name (pretty)
 			, input (input)
 			, properties (flags)
 			, exists (xists) {}
+		MidiPortInformation ()
+			: properties (MidiPortFlags (0))
+			, exists (false) {}
 	};
 
 	void fill_midi_port_info ();
