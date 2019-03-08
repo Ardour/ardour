@@ -53,6 +53,7 @@
 #include "canvas/item.h"
 
 #include "actions.h"
+#include "context_menu_helper.h"
 #include "debug.h"
 #include "public_editor.h"
 #include "keyboard.h"
@@ -815,4 +816,10 @@ ARDOUR_UI_UTILS::running_from_source_tree ()
 {
 	gchar const *x = g_getenv ("ARDOUR_THEMES_PATH");
 	return x && (string (x).find ("gtk2_ardour") != string::npos);
+}
+
+Gtk::Menu*
+ARDOUR_UI_UTILS::shared_popup_menu ()
+{
+	return ARDOUR_UI::instance()->shared_popup_menu ();
 }

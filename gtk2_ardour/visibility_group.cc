@@ -25,7 +25,7 @@
 #include "pbd/strsplit.h"
 #include "pbd/xml++.h"
 
-#include "ardour_ui.h"
+#include "context_menu_helper.h"
 #include "visibility_group.h"
 
 #include "pbd/i18n.h"
@@ -72,7 +72,7 @@ VisibilityGroup::button_press_event (GdkEventButton* ev)
 
 	using namespace Gtk::Menu_Helpers;
 
-	Gtk::Menu* m = ARDOUR_UI::instance()->shared_popup_menu ();
+	Gtk::Menu* m = ARDOUR_UI_UTILS::shared_popup_menu ();
 	MenuList& items = m->items ();
 
 	for (vector<Member>::iterator i = _members.begin(); i != _members.end(); ++i) {

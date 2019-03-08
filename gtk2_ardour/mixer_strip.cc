@@ -59,8 +59,8 @@
 
 #include "widgets/tooltips.h"
 
-#include "ardour_ui.h"
 #include "ardour_window.h"
+#include "context_menu_helper.h"
 #include "enums_convert.h"
 #include "mixer_strip.h"
 #include "mixer_ui.h"
@@ -2521,7 +2521,7 @@ MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
 {
 	using namespace Gtk::Menu_Helpers;
 
-	Gtk::Menu* m = ARDOUR_UI::instance()->shared_popup_menu ();
+	Gtk::Menu* m = ARDOUR_UI_UTILS::shared_popup_menu ();
 	MenuList& items = m->items ();
 
 	RadioMenuItem::Group group;

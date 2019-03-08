@@ -40,8 +40,8 @@
 #include "widgets/tooltips.h"
 
 #include "gui_thread.h"
-#include "ardour_ui.h"
 #include "ardour_window.h"
+#include "context_menu_helper.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -838,7 +838,7 @@ MeterStrip::popup_level_meter_menu (GdkEventButton* ev)
 {
 	using namespace Gtk::Menu_Helpers;
 
-	Gtk::Menu* m = ARDOUR_UI::instance()->shared_popup_menu ();
+	Gtk::Menu* m = ARDOUR_UI_UTILS::shared_popup_menu ();
 	MenuList& items = m->items ();
 
 	RadioMenuItem::Group group;
@@ -889,7 +889,7 @@ MeterStrip::popup_name_label_menu (GdkEventButton* ev)
 {
 	using namespace Gtk::Menu_Helpers;
 
-	Gtk::Menu* m = ARDOUR_UI::instance()->shared_popup_menu ();
+	Gtk::Menu* m = ARDOUR_UI_UTILS::shared_popup_menu ();
 	MenuList& items = m->items ();
 
 	RadioMenuItem::Group group;
