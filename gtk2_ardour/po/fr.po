@@ -7594,7 +7594,7 @@ msgstr "Voulez-vous vraiment enlever ce pré-réglage ?"
 
 #: export_report.cc:56
 msgid "Export Report/Analysis"
-msgstr Exporter le/la rapport/analyse""
+msgstr "Exporter le/la rapport/analyse"
 
 #: export_report.cc:147 export_report.cc:327 sfdb_ui.cc:149
 msgid "Format:"
