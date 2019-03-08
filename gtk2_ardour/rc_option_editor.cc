@@ -1901,7 +1901,8 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 				add (music_data);
 				add (control_data);
 				add (selection);
-				add (name);
+				add (fullname);
+				add (shortname);
 				add (filler);
 			}
 
@@ -1909,7 +1910,8 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 			Gtk::TreeModelColumn<bool> music_data;
 			Gtk::TreeModelColumn<bool> control_data;
 			Gtk::TreeModelColumn<bool> selection;
-			Gtk::TreeModelColumn<std::string> name;
+			Gtk::TreeModelColumn<std::string> fullname;
+			Gtk::TreeModelColumn<std::string> shortname;
 			Gtk::TreeModelColumn<std::string> filler;
 		};
 
@@ -1937,7 +1939,7 @@ MidiPortOptions::setup_midi_port_view (Gtk::TreeView& view, bool with_selection)
 	TreeViewColumn* col;
 	Gtk::Label* l;
 
-	pretty_name_column = view.append_column_editable (_("Name (click to edit)"), midi_port_columns.pretty_name) - 1;
+	pretty_name_column = view.append_column_editable (_("Name (click twice to edit)"), midi_port_columns.pretty_name) - 1;
 
 	col = manage (new TreeViewColumn ("", midi_port_columns.music_data));
 	col->set_alignment (ALIGN_CENTER);
@@ -1988,7 +1990,7 @@ MidiPortOptions::setup_midi_port_view (Gtk::TreeView& view, bool with_selection)
 	}
 
 	view.get_selection()->set_mode (SELECTION_SINGLE);
-	view.set_tooltip_column (4); /* port "real" name */
+	view.set_tooltip_column (5); /* port short name */
 	view.get_column(0)->set_resizable (true);
 	view.get_column(0)->set_expand (true);
 }
@@ -2031,7 +2033,8 @@ MidiPortOptions::refill_midi_ports (bool for_input, Gtk::TreeView& view)
 		row[midi_port_columns.music_data] = mpi.properties & MidiPortMusic;
 		row[midi_port_columns.control_data] = mpi.properties & MidiPortControl;
 		row[midi_port_columns.selection] = mpi.properties & MidiPortSelection;
-		row[midi_port_columns.name] = *s;
+		row[midi_port_columns.fullname] = *s;
+		row[midi_port_columns.shortname] = AudioEngine::instance()->short_port_name_from_port_name (*s);
 	}
 
 	view.set_model (model);
@@ -2053,9 +2056,9 @@ MidiPortOptions::midi_music_column_toggled (string const & path, TreeView* view)
 	/* don't reset model - wait for MidiPortInfoChanged signal */
 
 	if (new_value) {
-		ARDOUR::AudioEngine::instance()->add_midi_port_flags ((*iter)[midi_port_columns.name], MidiPortMusic);
+		ARDOUR::AudioEngine::instance()->add_midi_port_flags ((*iter)[midi_port_columns.fullname], MidiPortMusic);
 	} else {
-		ARDOUR::AudioEngine::instance()->remove_midi_port_flags ((*iter)[midi_port_columns.name], MidiPortMusic);
+		ARDOUR::AudioEngine::instance()->remove_midi_port_flags ((*iter)[midi_port_columns.fullname], MidiPortMusic);
 	}
 }
 
@@ -2073,9 +2076,9 @@ MidiPortOptions::midi_control_column_toggled (string const & path, TreeView* vie
 	/* don't reset model - wait for MidiPortInfoChanged signal */
 
 	if (new_value) {
-		ARDOUR::AudioEngine::instance()->add_midi_port_flags ((*iter)[midi_port_columns.name], MidiPortControl);
+		ARDOUR::AudioEngine::instance()->add_midi_port_flags ((*iter)[midi_port_columns.fullname], MidiPortControl);
 	} else {
-		ARDOUR::AudioEngine::instance()->remove_midi_port_flags ((*iter)[midi_port_columns.name], MidiPortControl);
+		ARDOUR::AudioEngine::instance()->remove_midi_port_flags ((*iter)[midi_port_columns.fullname], MidiPortControl);
 	}
 }
 
@@ -2093,9 +2096,9 @@ MidiPortOptions::midi_selection_column_toggled (string const & path, TreeView* v
 	/* don't reset model - wait for MidiSelectionPortsChanged signal */
 
 	if (new_value) {
-		ARDOUR::AudioEngine::instance()->add_midi_port_flags ((*iter)[midi_port_columns.name], MidiPortSelection);
+		ARDOUR::AudioEngine::instance()->add_midi_port_flags ((*iter)[midi_port_columns.fullname], MidiPortSelection);
 	} else {
-		ARDOUR::AudioEngine::instance()->remove_midi_port_flags ((*iter)[midi_port_columns.name], MidiPortSelection);
+		ARDOUR::AudioEngine::instance()->remove_midi_port_flags ((*iter)[midi_port_columns.fullname], MidiPortSelection);
 	}
 }
 
@@ -2108,7 +2111,7 @@ MidiPortOptions::pretty_name_edit (std::string const & path, string const & new_
 		return;
 	}
 
-	AudioEngine::instance()->set_port_pretty_name ((*iter)[midi_port_columns.name], new_text);
+	AudioEngine::instance()->set_port_pretty_name ((*iter)[midi_port_columns.fullname], new_text);
 }
 
 /*============*/
