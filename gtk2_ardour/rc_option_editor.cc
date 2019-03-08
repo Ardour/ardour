@@ -1878,6 +1878,8 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 
 		void refill () {
 
+			std::cerr << "REFILL MIDI PORTS\n";
+
 			if (refill_midi_ports (true, midi_input_view)) {
 				input_label.show ();
 			} else {
