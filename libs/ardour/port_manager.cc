@@ -1223,8 +1223,6 @@ PortManager::fill_midi_port_info ()
 		Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
 		fill_midi_port_info_locked ();
 	}
-
-	save_midi_port_info ();
 }
 
 string
