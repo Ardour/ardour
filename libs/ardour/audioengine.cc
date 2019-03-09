@@ -926,9 +926,7 @@ AudioEngine::start (bool for_latency)
 
 	}
 
-	/* XXX MIDI ports may not actually be available here yet .. */
-
-	PortManager::fill_midi_port_info ();
+	midi_info_dirty = true;
 
 	if (!for_latency) {
 		/* Call the library-wide ::init_post_engine() before emitting
