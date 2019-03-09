@@ -1205,6 +1205,8 @@ PortManager::load_midi_port_info ()
 		    !(*i)->get_property (X_("pretty-name"), pretty) ||
 		    !(*i)->get_property (X_("input"), input) ||
 		    !(*i)->get_property (X_("properties"), properties)) {
+			/* should only affect version changes */
+			error << string_compose (_("MIDI port info file %1 contains invalid information - please remove it."), path) << endmsg;
 			continue;
 		}
 
