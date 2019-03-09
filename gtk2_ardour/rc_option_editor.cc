@@ -1823,7 +1823,7 @@ private:
 class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 {
 	public:
-		MidiPortOptions() {
+		MidiPortOptions() : refill_id (-1) {
 
 			setup_midi_port_view (midi_output_view, false);
 			setup_midi_port_view (midi_input_view, true);
@@ -1853,13 +1853,15 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 			midi_output_view.show ();
 			midi_input_view.show ();
 
-			table.signal_show().connect (sigc::mem_fun (*this, &MidiPortOptions::on_show));
+			table.signal_map().connect (sigc::mem_fun (*this, &MidiPortOptions::on_map));
+			table.signal_unmap().connect (sigc::mem_fun (*this, &MidiPortOptions::on_unmap));
 		}
 
 		void parameter_changed (string const&) {}
 		void set_state_from_config() {}
 
-		void on_show () {
+		void on_map () {
+
 			refill ();
 
 			AudioEngine::instance()->PortRegisteredOrUnregistered.connect (connections,
@@ -1876,9 +1878,11 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 					gui_context());
 		}
 
-		void refill () {
+		void on_unmap () {
+			connections.drop_connections ();
+		}
 
-			std::cerr << "REFILL MIDI PORTS\n";
+		void refill () {
 
 			if (refill_midi_ports (true, midi_input_view)) {
 				input_label.show ();
@@ -1890,6 +1894,8 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 			} else {
 				output_label.hide ();
 			}
+
+			refill_id = -1;
 		}
 
 	private:
@@ -1922,6 +1928,7 @@ class MidiPortOptions : public OptionEditorMiniPage, public sigc::trackable
 		Gtk::TreeView midi_output_view;
 		Gtk::Label input_label;
 		Gtk::Label output_label;
+		int refill_id;
 
 		void setup_midi_port_view (Gtk::TreeView&, bool with_selection);
 		bool refill_midi_ports (bool for_input, Gtk::TreeView&);
