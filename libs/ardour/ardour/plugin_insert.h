@@ -208,6 +208,7 @@ public:
 		double get_value (void) const;
 		void catch_up_with_external_value (double val);
 		XMLNode& get_state();
+		std::string get_user_string() const;
 
 	private:
 		PluginInsert* _plugin;

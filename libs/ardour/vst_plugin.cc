@@ -807,15 +807,19 @@ VSTPlugin::has_editor () const
 }
 
 bool
-VSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t /*len*/) const
+VSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
 {
 	char *first_nonws;
+	assert (len > VestigeMaxShortLabelLen);
+	memset (buf, 0, len);
 
 	_plugin->dispatcher (_plugin, 7 /* effGetParamDisplay */, param, 0, buf, 0);
 
 	if (buf[0] == '\0') {
 		return false;
 	}
+
+	buf[len - 1] = '\0';
 
 	first_nonws = buf;
 	while (*first_nonws && isspace (*first_nonws)) {
