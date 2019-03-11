@@ -3066,18 +3066,6 @@ LV2Plugin::designated_bypass_port ()
 	return UINT32_MAX;
 }
 
-void
-LV2Plugin::print_parameter(uint32_t param, char* buf, uint32_t len) const
-{
-	if (buf && len) {
-		if (param < parameter_count()) {
-			snprintf(buf, len, "%.3f", get_parameter(param));
-		} else {
-			strcat(buf, "0");
-		}
-	}
-}
-
 boost::shared_ptr<ScalePoints>
 LV2Plugin::get_scale_points(uint32_t port_index) const
 {

@@ -118,10 +118,6 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	std::string describe_parameter (Evoral::Parameter);
 	std::string state_node_name () const { return "lv2"; }
 
-	void print_parameter (uint32_t param,
-	                      char*    buf,
-	                      uint32_t len) const;
-
 	bool parameter_is_audio (uint32_t) const;
 	bool parameter_is_control (uint32_t) const;
 	bool parameter_is_event (uint32_t) const;

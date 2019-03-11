@@ -615,18 +615,6 @@ LadspaPlugin::parameter_is_input (uint32_t param) const
 	return LADSPA_IS_PORT_INPUT(port_descriptor (param));
 }
 
-void
-LadspaPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
-{
-	if (buf && len) {
-		if (param < parameter_count()) {
-			snprintf (buf, len, "%.3f", get_parameter (param));
-		} else {
-			strcat (buf, "0");
-		}
-	}
-}
-
 boost::shared_ptr<ScalePoints>
 LadspaPlugin::get_scale_points(uint32_t port_index) const
 {

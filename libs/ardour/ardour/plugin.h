@@ -121,7 +121,7 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public HasLatency
 	virtual std::set<Evoral::Parameter> automatable() const = 0;
 	virtual std::string describe_parameter (Evoral::Parameter) = 0;
 	virtual std::string state_node_name() const = 0;
-	virtual void print_parameter (uint32_t, char*, uint32_t len) const = 0;
+	virtual bool print_parameter (uint32_t, char*, uint32_t len) const { return false; }
 
 	virtual bool parameter_is_audio(uint32_t) const = 0;
 	virtual bool parameter_is_control(uint32_t) const = 0;

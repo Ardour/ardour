@@ -90,7 +90,6 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	std::string describe_parameter (Evoral::Parameter);
 	IOPortDescription describe_io_port (DataType dt, bool input, uint32_t id) const;
 	std::string state_node_name () const { return "audiounit"; }
-	void print_parameter (uint32_t, char*, uint32_t len) const;
 
 	bool parameter_is_audio (uint32_t) const;
 	bool parameter_is_control (uint32_t) const;

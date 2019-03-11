@@ -806,7 +806,7 @@ VSTPlugin::has_editor () const
 	return _plugin->flags & effFlagsHasEditor;
 }
 
-void
+bool
 VSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t /*len*/) const
 {
 	char *first_nonws;
@@ -814,7 +814,7 @@ VSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t /*len*/) const
 	_plugin->dispatcher (_plugin, 7 /* effGetParamDisplay */, param, 0, buf, 0);
 
 	if (buf[0] == '\0') {
-		return;
+		return false;
 	}
 
 	first_nonws = buf;
@@ -823,10 +823,11 @@ VSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t /*len*/) const
 	}
 
 	if (*first_nonws == '\0') {
-		return;
+		return false;
 	}
 
 	memmove (buf, first_nonws, strlen (buf) - (first_nonws - buf) + 1);
+	return true;
 }
 
 void

@@ -92,7 +92,6 @@ public:
 			pframes_t nframes, samplecnt_t offset);
 
 	std::string describe_parameter (Evoral::Parameter);
-	void        print_parameter (uint32_t, char*, uint32_t len) const;
 	boost::shared_ptr<ScalePoints> get_scale_points(uint32_t port_index) const;
 
 	bool parameter_is_audio (uint32_t) const { return false; }
