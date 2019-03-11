@@ -74,8 +74,6 @@ ShuttleControl::ShuttleControl ()
 	shuttle_speed_on_grab = 0;
 	shuttle_fract = 0.0;
 	shuttle_max_speed = 8.0f;
-	shuttle_style_menu = 0;
-	shuttle_unit_menu = 0;
 	shuttle_context_menu = 0;
 	_hovering = false;
 
@@ -108,6 +106,7 @@ ShuttleControl::~ShuttleControl ()
 {
 	cairo_pattern_destroy (pattern);
 	cairo_pattern_destroy (shine_pattern);
+	delete shuttle_context_menu;
 }
 
 void

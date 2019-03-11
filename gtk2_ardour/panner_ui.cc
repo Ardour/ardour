@@ -374,7 +374,7 @@ PannerUI::pan_button_event (GdkEventButton* ev)
 
 	case 3:
 		if (pan_menu == 0) {
-			pan_menu = manage (new Menu);
+			pan_menu = new Menu;
 			pan_menu->set_name ("ArdourContextMenu");
 		}
 		build_pan_menu ();

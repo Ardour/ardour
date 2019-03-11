@@ -17,6 +17,8 @@
 
 */
 
+#include <vector>
+
 #ifdef COMPILER_MSVC
 #include <io.h> // Microsoft's nearest equivalent to <unistd.h>
 #include <ardourext/misc.h>
@@ -28,6 +30,7 @@
 #include <glibmm/miscutils.h>
 
 #include "pbd/error.h"
+#include "pbd/strsplit.h"
 
 #include "ardour/async_midi_port.h"
 #include "ardour/audio_backend.h"
@@ -143,17 +146,16 @@ std::string
 PortManager::get_pretty_name_by_name(const std::string& portname) const
 {
 	PortEngine::PortHandle ph = _backend->get_port_by_name (portname);
+
 	if (ph) {
 		std::string value;
 		std::string type;
-		if (0 == _backend->get_port_property (ph,
-					"http://jackaudio.org/metadata/pretty-name",
-					value, type))
-		{
+		if (0 == _backend->get_port_property (ph, "http://jackaudio.org/metadata/pretty-name", value, type)) {
 			return value;
 		}
 	}
-	return "";
+
+	return string();
 }
 
 bool
@@ -1040,7 +1042,7 @@ PortManager::get_midi_selection_ports (vector<string>& copy)
 }
 
 void
-PortManager::set_midi_port_pretty_name (string const & port, string const & pretty)
+PortManager::set_port_pretty_name (string const & port, string const & pretty)
 {
 	{
 		Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
@@ -1062,6 +1064,7 @@ PortManager::set_midi_port_pretty_name (string const & port, string const & pret
 		_backend->set_port_property (ph, "http://jackaudio.org/metadata/pretty-name", pretty, string());
 	}
 
+	save_midi_port_info ();
 	MidiPortInfoChanged (); /* EMIT SIGNAL*/
 }
 
@@ -1076,6 +1079,7 @@ PortManager::add_midi_port_flags (string const & port, MidiPortFlags flags)
 		fill_midi_port_info_locked ();
 
 		MidiPortInfo::iterator x = midi_port_info.find (port);
+
 		if (x != midi_port_info.end()) {
 			if ((x->second.properties & flags) != flags) { // at least one missing
 				x->second.properties = MidiPortFlags (x->second.properties | flags);
@@ -1108,6 +1112,7 @@ PortManager::remove_midi_port_flags (string const & port, MidiPortFlags flags)
 		fill_midi_port_info_locked ();
 
 		MidiPortInfo::iterator x = midi_port_info.find (port);
+
 		if (x != midi_port_info.end()) {
 			if (x->second.properties & flags) { // at least one is set
 				x->second.properties = MidiPortFlags (x->second.properties & ~flags);
@@ -1153,6 +1158,8 @@ PortManager::save_midi_port_info ()
 		for (MidiPortInfo::iterator i = midi_port_info.begin(); i != midi_port_info.end(); ++i) {
 			XMLNode* node = new XMLNode (X_("port"));
 			node->set_property (X_("name"), i->first);
+			node->set_property (X_("backend"), i->second.backend);
+			node->set_property (X_("pretty-name"), i->second.pretty_name);
 			node->set_property (X_("input"), i->second.input);
 			node->set_property (X_("properties"), i->second.properties);
 			root->add_child_nocopy (*node);
@@ -1186,14 +1193,24 @@ PortManager::load_midi_port_info ()
 	midi_port_info.clear ();
 
 	for (XMLNodeConstIterator i = tree.root()->children().begin(); i != tree.root()->children().end(); ++i) {
-		MidiPortInformation mpi;
 		string name;
+		string backend;
+		string pretty;
+		bool  input;
+		MidiPortFlags properties;
+
 
 		if (!(*i)->get_property (X_("name"), name) ||
-		    !(*i)->get_property (X_("input"), mpi.input) ||
-		    !(*i)->get_property (X_("properties"), mpi.properties)) {
+		    !(*i)->get_property (X_("backend"), backend) ||
+		    !(*i)->get_property (X_("pretty-name"), pretty) ||
+		    !(*i)->get_property (X_("input"), input) ||
+		    !(*i)->get_property (X_("properties"), properties)) {
+			/* should only affect version changes */
+			error << string_compose (_("MIDI port info file %1 contains invalid information - please remove it."), path) << endmsg;
 			continue;
 		}
+
+		MidiPortInformation mpi (backend, pretty, input, properties, false);
 
 		midi_port_info.insert (make_pair (name, mpi));
 	}
@@ -1202,8 +1219,20 @@ PortManager::load_midi_port_info ()
 void
 PortManager::fill_midi_port_info ()
 {
-	Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
-	fill_midi_port_info_locked ();
+	{
+		Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
+		fill_midi_port_info_locked ();
+	}
+}
+
+string
+PortManager::short_port_name_from_port_name (std::string const & full_name) const
+{
+	string::size_type colon = full_name.find_first_of (':');
+	if (colon == string::npos || colon == full_name.length()) {
+		return full_name;
+	}
+	return full_name.substr (colon+1);
 }
 
 void
@@ -1211,9 +1240,11 @@ PortManager::fill_midi_port_info_locked ()
 {
 	/* MIDI info mutex MUST be held */
 
-	if (!midi_info_dirty) {
+	if (!midi_info_dirty || !_backend) {
 		return;
 	}
+
+	std::cerr << "MID .. doing the work\n";
 
 	std::vector<string> ports;
 
@@ -1226,17 +1257,17 @@ PortManager::fill_midi_port_info_locked ()
 		}
 
 		if (midi_port_info.find (*p) == midi_port_info.end()) {
-			MidiPortInformation mpi;
-			mpi.pretty_name = *p;
-			mpi.input = true;
+
+			MidiPortFlags flags (MidiPortFlags (0));
 
 			if (port_is_control_only (*p)) {
-				mpi.properties = MidiPortFlags (mpi.properties | MidiPortControl);
+				flags = MidiPortControl;
 			}
+
+			MidiPortInformation mpi (_backend->name(), *p, true, flags, true);
+
 #ifdef LINUX
-			if ((*p.find (X_("Midi Through")) != string::npos ||
-			     (*p).find (X_("Midi-Through")) != string::npos))
-			{
+			if ((*p.find (X_("Midi Through")) != string::npos || (*p).find (X_("Midi-Through")) != string::npos)) {
 				mpi.properties = MidiPortFlags (mpi.properties | MidiPortVirtual);
 			}
 #endif
@@ -1253,17 +1284,17 @@ PortManager::fill_midi_port_info_locked ()
 		}
 
 		if (midi_port_info.find (*p) == midi_port_info.end()) {
-			MidiPortInformation mpi;
-			mpi.pretty_name = *p;
-			mpi.input = false;
+
+			MidiPortFlags flags (MidiPortFlags (0));
 
 			if (port_is_control_only (*p)) {
-				mpi.properties = MidiPortFlags (mpi.properties | MidiPortControl);
+				flags = MidiPortControl;
 			}
+
+			MidiPortInformation mpi (_backend->name(), *p, false, flags, true);
+
 #ifdef LINUX
-			if ((*p.find (X_("Midi Through")) != string::npos ||
-			     (*p).find (X_("Midi-Through")) != string::npos))
-			{
+			if ((*p.find (X_("Midi Through")) != string::npos || (*p).find (X_("Midi-Through")) != string::npos)) {
 				mpi.properties = MidiPortFlags (mpi.properties | MidiPortVirtual);
 			}
 #endif
@@ -1271,17 +1302,22 @@ PortManager::fill_midi_port_info_locked ()
 		}
 	}
 
-	/* now push/pull pretty name information between backend and the
-	 * PortManager
+	/* now check with backend about which ports are present and pull
+	 * pretty-name if it exists
 	 */
 
-	// rg: I don't understand what this attempts to solve
-	//
-	// Naming ports should be left to the backend:
-	// Ardour cannot associate numeric IDs with corresponding hardware.
-	// (see also 7dde6c3b)
-
 	for (MidiPortInfo::iterator x = midi_port_info.begin(); x != midi_port_info.end(); ++x) {
+
+		if (x->second.backend != _backend->name()) {
+			/* this port (info) comes from a different
+			 * backend. While there's a reasonable chance that it
+			 * refers to the same physical (or virtual) endpoint, we
+			 * don't allow its use with this backend.
+			*/
+			x->second.exists = false;
+			continue;
+		}
+
 		PortEngine::PortHandle ph = _backend->get_port_by_name (x->first);
 
 		if (!ph) {
@@ -1289,17 +1325,18 @@ PortManager::fill_midi_port_info_locked ()
 			 * existed, but no longer does (i.e. device unplugged
 			 * at present). We don't remove it from midi_port_info.
 			 */
-			continue;
-		}
+			x->second.exists = false;
 
-		/* check with backend for pre-existing pretty name */
-		string value;
-		string type;
+		} else {
+			x->second.exists = true;
 
-		if (0 == _backend->get_port_property (ph,
-		                                      "http://jackaudio.org/metadata/pretty-name",
-		                                      value, type)) {
-			x->second.pretty_name = value;
+			/* check with backend for pre-existing pretty name */
+
+			string value = AudioEngine::instance()->get_pretty_name_by_name (x->first);
+
+			if (!value.empty()) {
+				x->second.pretty_name = value;
+			}
 		}
 	}
 

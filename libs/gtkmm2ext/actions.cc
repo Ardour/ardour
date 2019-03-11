@@ -544,8 +544,8 @@ ActionManager::get_all_actions (std::vector<std::string>& paths,
 			} else {
 				keys.push_back (string());
 			}
-		}
+#else
+			keys.push_back (string());
 #endif
-
 	}
 }

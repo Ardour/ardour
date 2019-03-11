@@ -297,11 +297,6 @@ private:
 
 	void knob_size_request(Gtk::Requisition* req, ControlUI* cui);
 
-	/* XXX: remove */
-	void print_parameter (char *buf, uint32_t len, uint32_t param);
-	bool integer_printer (char* buf, Gtk::Adjustment &, ControlUI *);
-	bool midinote_printer(char* buf, Gtk::Adjustment &, ControlUI *);
-
 	typedef std::map<uint32_t, Gtk::FileChooserButton*> FilePathControls;
 	FilePathControls _filepath_controls;
 	void set_path_property (const ARDOUR::ParameterDescriptor& desc,

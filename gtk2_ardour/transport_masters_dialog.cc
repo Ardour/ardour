@@ -256,6 +256,11 @@ TransportMastersWidget::Row::Row (TransportMastersWidget& p)
 {
 }
 
+TransportMastersWidget::Row::~Row ()
+{
+	delete request_option_menu;
+}
+
 bool
 TransportMastersWidget::Row::name_press (GdkEventButton* ev)
 {
@@ -367,7 +372,7 @@ TransportMastersWidget::Row::build_request_options ()
 {
 	using namespace Gtk::Menu_Helpers;
 
-	request_option_menu = manage (new Menu);
+	request_option_menu = new Menu;
 
 	MenuList& items (request_option_menu->items());
 

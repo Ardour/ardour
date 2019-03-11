@@ -1003,18 +1003,6 @@ LuaProc::describe_parameter (Evoral::Parameter param)
 	return "??";
 }
 
-void
-LuaProc::print_parameter (uint32_t param, char* buf, uint32_t len) const
-{
-	if (buf && len) {
-		if (param < parameter_count ()) {
-			snprintf (buf, len, "%.3f", get_parameter (param));
-		} else {
-			strcat (buf, "0");
-		}
-	}
-}
-
 boost::shared_ptr<ScalePoints>
 LuaProc::parse_scale_points (luabridge::LuaRef* lr)
 {

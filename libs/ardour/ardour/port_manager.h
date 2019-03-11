@@ -82,6 +82,7 @@ class LIBARDOUR_API PortManager
 	std::string             make_port_name_relative (const std::string& name) const;
 	std::string             make_port_name_non_relative (const std::string& name) const;
 	std::string             get_pretty_name_by_name (const std::string& portname) const;
+	std::string             short_port_name_from_port_name (std::string const & full_name) const;
 	bool                    port_is_mine (const std::string& fullname) const;
 
 	static bool port_is_control_only (std::string const &);
@@ -100,6 +101,8 @@ class LIBARDOUR_API PortManager
 
 	int get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>&);
 	int get_ports (DataType, PortList&);
+
+	void set_port_pretty_name (std::string const&, std::string const&);
 
 	void remove_all_ports ();
 	void clear_pending_port_deletions ();
@@ -134,11 +137,21 @@ class LIBARDOUR_API PortManager
 	bool port_remove_in_progress() const { return _port_remove_in_progress; }
 
 	struct MidiPortInformation {
+		std::string   backend;
 		std::string   pretty_name;
 		bool          input;
 		MidiPortFlags properties;
+		bool          exists;
 
-		MidiPortInformation () : input (false) , properties (MidiPortFlags (0)) {}
+		MidiPortInformation (std::string const & b, std::string const & pretty, bool input, MidiPortFlags flags, bool xists)
+			: backend (b)
+			, pretty_name (pretty)
+			, input (input)
+			, properties (flags)
+			, exists (xists) {}
+		MidiPortInformation ()
+			: properties (MidiPortFlags (0))
+			, exists (false) {}
 	};
 
 	void fill_midi_port_info ();
@@ -148,7 +161,6 @@ class LIBARDOUR_API PortManager
 	void get_midi_selection_ports (std::vector<std::string>&);
 	void add_midi_port_flags (std::string const&, MidiPortFlags);
 	void remove_midi_port_flags (std::string const&, MidiPortFlags);
-	void set_midi_port_pretty_name (std::string const&, std::string const&);
 
 	/** Emitted if the list of ports to be used for MIDI selection tracking changes */
 	PBD::Signal0<void> MidiSelectionPortsChanged;

@@ -146,6 +146,7 @@ RouteParams_UI::RouteParams_UI ()
 
 RouteParams_UI::~RouteParams_UI ()
 {
+	delete track_menu;
 }
 
 void

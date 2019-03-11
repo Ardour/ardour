@@ -45,7 +45,6 @@ public:
 		boost::function<boost::optional<bool> ()> = 0
 		);
 
-	Gtk::Menu* menu ();
 	Gtk::Widget* list_view ();
 	bool button_press_event (GdkEventButton *);
 	void update ();

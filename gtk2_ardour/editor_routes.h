@@ -36,6 +36,7 @@ class EditorRoutes : public EditorComponent, public PBD::ScopedConnectionList, p
 {
 public:
 	EditorRoutes (Editor *);
+	~EditorRoutes ();
 
 	void set_session (ARDOUR::Session *);
 

@@ -2874,7 +2874,7 @@ Mixer_UI::popup_note_context_menu (GdkEventButton *ev)
 {
 	using namespace Gtk::Menu_Helpers;
 
-	Gtk::Menu* m = manage (new Menu);
+	Gtk::Menu* m = ARDOUR_UI::instance()->shared_popup_menu ();
 	MenuList& items = m->items ();
 
 	if (_selection.axes.empty()) {

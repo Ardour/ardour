@@ -224,6 +224,7 @@ GenericPluginUI::~GenericPluginUI ()
 	if (output_controls.size() > 0) {
 		screen_update_connection.disconnect();
 	}
+	delete automation_menu;
 	delete _pianomm;
 }
 
@@ -899,32 +900,6 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 		cui->automate_button.set_text (_("???"));
 		break;
 	}
-}
-
-bool
-GenericPluginUI::integer_printer (char buf[32], Adjustment &adj, ControlUI* cui)
-{
-	float const        v   = cui->control->interface_to_internal(adj.get_value ());
-	const std::string& str = ARDOUR::value_as_string(cui->control->desc(), Variant(v));
-	const size_t       len = str.copy(buf, 31);
-	buf[len] = '\0';
-	return true;
-}
-
-bool
-GenericPluginUI::midinote_printer (char buf[32], Adjustment &adj, ControlUI* cui)
-{
-	float const        v   = cui->control->interface_to_internal(adj.get_value ());
-	const std::string& str = ARDOUR::value_as_string(cui->control->desc(), Variant(v));
-	const size_t       len = str.copy(buf, 31);
-	buf[len] = '\0';
-	return true;
-}
-
-void
-GenericPluginUI::print_parameter (char *buf, uint32_t len, uint32_t param)
-{
-	plugin->print_parameter (param, buf, len);
 }
 
 /** Build a ControlUI for a parameter/property.

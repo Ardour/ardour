@@ -262,11 +262,6 @@ Editor::Editor ()
 	, clicked_control_point (0)
 	, button_release_can_deselect (true)
 	, _mouse_changed_selection (false)
-	, region_edit_menu_split_item (0)
-	, region_edit_menu_split_multichannel_item (0)
-	, track_region_edit_playlist_menu (0)
-	, track_edit_playlist_submenu (0)
-	, track_selection_edit_playlist_submenu (0)
 	, _popup_region_menu_item (0)
 	, _track_canvas (0)
 	, _track_canvas_viewport (0)
@@ -375,9 +370,7 @@ Editor::Editor ()
 	, meter_marker_menu (0)
 	, marker_menu (0)
 	, range_marker_menu (0)
-	, transport_marker_menu (0)
 	, new_transport_marker_menu (0)
-	, cd_marker_menu (0)
 	, marker_menu_item (0)
 	, bbt_beat_subdivision (4)
 	, _visible_track_count (-1)
@@ -836,7 +829,6 @@ Editor::Editor ()
 
 	_ignore_region_action = false;
 	_last_region_menu_was_main = false;
-	_popup_region_menu_item = 0;
 
 	_show_marker_lines = false;
 
@@ -864,6 +856,14 @@ Editor::Editor ()
 
 Editor::~Editor()
 {
+	delete tempo_marker_menu;
+	delete meter_marker_menu;
+	delete marker_menu;
+	delete range_marker_menu;
+	delete new_transport_marker_menu;
+	delete editor_ruler_menu;
+	delete _popup_region_menu_item;
+
 	delete button_bindings;
 	delete _routes;
 	delete _route_groups;
@@ -1605,22 +1605,6 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 	case RegionViewNameHighlight:
 	case LeftFrameHandle:
 	case RightFrameHandle:
-		if (!with_selection) {
-			if (region_edit_menu_split_item) {
-				if (clicked_regionview && clicked_regionview->region()->covers (get_preferred_edit_position())) {
-					ActionManager::set_sensitive (ActionManager::edit_point_in_region_sensitive_actions, true);
-				} else {
-					ActionManager::set_sensitive (ActionManager::edit_point_in_region_sensitive_actions, false);
-				}
-			}
-			if (region_edit_menu_split_multichannel_item) {
-				if (clicked_regionview && clicked_regionview->region()->n_channels() > 1) {
-					region_edit_menu_split_multichannel_item->set_sensitive (true);
-				} else {
-					region_edit_menu_split_multichannel_item->set_sensitive (false);
-				}
-			}
-		}
 		break;
 
 	case SelectionItem:
@@ -1707,9 +1691,6 @@ Editor::build_track_region_context_menu ()
 	/* we've just cleared the track region context menu, so the menu that these
 	   two items were on will have disappeared; stop them dangling.
 	*/
-	region_edit_menu_split_item = 0;
-	region_edit_menu_split_multichannel_item = 0;
-
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (clicked_axisview);
 
 	if (rtv) {
@@ -2105,7 +2086,7 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (MenuElem (_("Select"), *select_menu));
 
 	/* Cut-n-Paste */
-
+#if 0 // unused, why?
 	Menu *cutnpaste_menu = manage (new Menu);
 	MenuList& cutnpaste_items = cutnpaste_menu->items();
 	cutnpaste_menu->set_name ("ArdourContextMenu");
@@ -2113,6 +2094,7 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	cutnpaste_items.push_back (MenuElem (_("Cut"), sigc::mem_fun(*this, &Editor::cut)));
 	cutnpaste_items.push_back (MenuElem (_("Copy"), sigc::mem_fun(*this, &Editor::copy)));
 	cutnpaste_items.push_back (MenuElem (_("Paste"), sigc::bind (sigc::mem_fun(*this, &Editor::paste), 1.0f, true)));
+#endif
 
 	Menu *nudge_menu = manage (new Menu());
 	MenuList& nudge_items = nudge_menu->items();

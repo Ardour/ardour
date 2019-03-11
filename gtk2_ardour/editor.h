@@ -369,10 +369,6 @@ public:
 	void toggle_region_fades (int dir);
 	void update_region_fade_visibility ();
 
-	/* redirect shared ops menu. caller must free returned menu */
-
-	Gtk::Menu* redirect_menu ();
-
 	/* floating windows/transient */
 
 	void ensure_float (Gtk::Window&);
@@ -768,12 +764,6 @@ private:
 	Gtk::Menu track_region_context_menu;
 	Gtk::Menu track_selection_context_menu;
 
-	Gtk::MenuItem* region_edit_menu_split_item;
-	Gtk::MenuItem* region_edit_menu_split_multichannel_item;
-	Gtk::Menu * track_region_edit_playlist_menu;
-	Gtk::Menu * track_edit_playlist_submenu;
-	Gtk::Menu * track_selection_edit_playlist_submenu;
-
 	GdkEvent context_click_event;
 
 	void popup_track_context_menu (int, int, ItemType, bool);
@@ -963,7 +953,7 @@ private:
 
 	static double timebar_height;
 	guint32 visible_timebars;
-	Gtk::Menu          *editor_ruler_menu;
+	Gtk::Menu* editor_ruler_menu;
 
 	ArdourCanvas::Rectangle* tempo_bar;
 	ArdourCanvas::Rectangle* meter_bar;
@@ -1709,15 +1699,14 @@ private:
 	void build_tempo_marker_menu (TempoMarker *, bool);
 	void build_meter_marker_menu (MeterMarker *, bool);
 	void build_new_transport_marker_menu ();
+
 	void dynamic_cast_marker_object (void*, MeterMarker**, TempoMarker**) const;
 
 	Gtk::Menu* tempo_marker_menu;
 	Gtk::Menu* meter_marker_menu;
 	Gtk::Menu* marker_menu;
 	Gtk::Menu* range_marker_menu;
-	Gtk::Menu* transport_marker_menu;
 	Gtk::Menu* new_transport_marker_menu;
-	Gtk::Menu* cd_marker_menu;
 	ArdourCanvas::Item* marker_menu_item;
 
 	typedef std::list<ArdourMarker*> Marks;

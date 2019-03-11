@@ -88,7 +88,6 @@ class LIBARDOUR_API LadspaPlugin : public ARDOUR::Plugin
 
 	std::string describe_parameter (Evoral::Parameter);
 	std::string state_node_name() const { return "ladspa"; }
-	void        print_parameter (uint32_t, char*, uint32_t len) const;
 
 	bool parameter_is_audio(uint32_t) const;
 	bool parameter_is_control(uint32_t) const;

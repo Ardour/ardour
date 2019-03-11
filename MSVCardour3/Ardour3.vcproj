@@ -1498,6 +1498,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\context_menu_helper.h"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\control_point.h"
 				>
 			</File>

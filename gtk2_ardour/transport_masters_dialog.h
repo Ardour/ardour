@@ -101,6 +101,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		void update (ARDOUR::Session*, ARDOUR::samplepos_t);
 
 		Row (TransportMastersWidget& parent);
+		~Row ();
 
 		struct PortColumns : public Gtk::TreeModel::ColumnRecord {
 			PortColumns() {

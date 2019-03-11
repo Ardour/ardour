@@ -28,6 +28,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/replace_all.h"
 #include "pbd/stacktrace.h"
+#include "pbd/unwind.h"
 
 #include "ardour/amp.h"
 #include "ardour/audio_track.h"
@@ -59,6 +60,7 @@
 #include "widgets/tooltips.h"
 
 #include "ardour_window.h"
+#include "context_menu_helper.h"
 #include "enums_convert.h"
 #include "mixer_strip.h"
 #include "mixer_ui.h"
@@ -2519,12 +2521,12 @@ MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
 {
 	using namespace Gtk::Menu_Helpers;
 
-	Gtk::Menu* m = manage (new Menu);
+	Gtk::Menu* m = ARDOUR_UI_UTILS::shared_popup_menu ();
 	MenuList& items = m->items ();
 
 	RadioMenuItem::Group group;
 
-	_suspend_menu_callbacks = true;
+	PBD::Unwinder<bool> (_suspend_menu_callbacks, true);
 	add_level_meter_item_point (items, group, _("Input"), MeterInput);
 	add_level_meter_item_point (items, group, _("Pre Fader"), MeterPreFader);
 	add_level_meter_item_point (items, group, _("Post Fader"), MeterPostFader);
@@ -2533,7 +2535,6 @@ MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
 
 	if (gpm.meter_channels().n_audio() == 0) {
 		m->popup (ev->button, ev->time);
-		_suspend_menu_callbacks = false;
 		return;
 	}
 
@@ -2580,7 +2581,6 @@ MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
 				sigc::bind (SetMeterTypeMulti, _strip_type, _route->route_group(), cmt)));
 
 	m->popup (ev->button, ev->time);
-	_suspend_menu_callbacks = false;
 }
 
 void

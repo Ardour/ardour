@@ -69,7 +69,6 @@ intptr_t Session::vst_callback (
 	static VstTimeInfo _timeinfo; // only uses as fallback
 	VstTimeInfo* timeinfo;
 	int32_t newflags = 0;
-	bool used_for_impulse_analysis = false;
 
 	if (effect && effect->ptr1) {
 		plug = (VSTPlugin *) (effect->ptr1);

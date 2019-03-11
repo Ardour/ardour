@@ -287,6 +287,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, _was_dirty (false)
 	, _mixer_on_top (false)
 	, _initial_verbose_plugin_scan (false)
+	, _shared_popup_menu (0)
 	, secondary_clock_spacer (0)
 	, auto_input_button (ArdourButton::led_default_elements)
 	, time_info_box (0)
@@ -868,6 +869,7 @@ ARDOUR_UI::~ARDOUR_UI ()
 		delete rc_option_editor; rc_option_editor = 0; // failed to wrap object warning
 		delete nsm; nsm = 0;
 		delete gui_object_state; gui_object_state = 0;
+		delete _shared_popup_menu ; _shared_popup_menu = 0;
 		delete main_window_visibility;
 		FastMeter::flush_pattern_cache ();
 		ArdourFader::flush_pattern_cache ();
@@ -5433,12 +5435,12 @@ ARDOUR_UI::popup_editor_meter_menu (GdkEventButton* ev)
 {
 	using namespace Gtk::Menu_Helpers;
 
-	Gtk::Menu* m = manage (new Menu);
+	Gtk::Menu* m = shared_popup_menu ();
 	MenuList& items = m->items ();
 
 	RadioMenuItem::Group group;
 
-	_suspend_editor_meter_callbacks = true;
+	PBD::Unwinder<bool> uw (_suspend_editor_meter_callbacks, true);
 	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterPeak), MeterPeak);
 	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterPeak0dB), MeterPeak0dB);
 	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterKrms),  MeterKrms);
@@ -5452,7 +5454,6 @@ ARDOUR_UI::popup_editor_meter_menu (GdkEventButton* ev)
 	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterVU),  MeterVU);
 
 	m->popup (ev->button, ev->time);
-	_suspend_editor_meter_callbacks = false;
 }
 
 bool
@@ -6024,4 +6025,15 @@ ARDOUR_UI::monitor_mono ()
 
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Monitor"), "monitor-mono");
 	_monitor->set_mono (tact->get_active());
+}
+
+Gtk::Menu*
+ARDOUR_UI::shared_popup_menu ()
+{
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::shared_popup_menu, ignored);
+
+	assert (!_shared_popup_menu || !_shared_popup_menu->is_visible());
+	delete _shared_popup_menu;
+	_shared_popup_menu = new Gtk::Menu;
+	return _shared_popup_menu;
 }

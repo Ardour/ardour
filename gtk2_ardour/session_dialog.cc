@@ -1062,7 +1062,7 @@ SessionDialog::recent_context_mennu (GdkEventButton *ev)
 	Gtk::TreeModel::Path tpath = recent_session_model->get_path(iter);
 	const bool is_child = tpath.up () && tpath.up ();
 
-	Gtk::Menu* m = manage (new Menu);
+	Gtk::Menu* m = ARDOUR_UI::instance()->shared_popup_menu ();
 	MenuList& items = m->items ();
 	items.push_back (MenuElem (s, sigc::bind (sigc::hide_return (sigc::ptr_fun (&PBD::open_folder)), s)));
 	if (!is_child) {

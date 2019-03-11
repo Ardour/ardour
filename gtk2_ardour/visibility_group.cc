@@ -25,6 +25,7 @@
 #include "pbd/strsplit.h"
 #include "pbd/xml++.h"
 
+#include "context_menu_helper.h"
 #include "visibility_group.h"
 
 #include "pbd/i18n.h"
@@ -69,16 +70,9 @@ VisibilityGroup::button_press_event (GdkEventButton* ev)
 		return false;
 	}
 
-	menu()->popup (1, ev->time);
-	return true;
-}
-
-Gtk::Menu*
-VisibilityGroup::menu ()
-{
 	using namespace Gtk::Menu_Helpers;
 
-	Gtk::Menu* m = Gtk::manage (new Gtk::Menu);
+	Gtk::Menu* m = ARDOUR_UI_UTILS::shared_popup_menu ();
 	MenuList& items = m->items ();
 
 	for (vector<Member>::iterator i = _members.begin(); i != _members.end(); ++i) {
@@ -88,8 +82,10 @@ VisibilityGroup::menu ()
 		j->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &VisibilityGroup::toggle), i));
 	}
 
-	return m;
+	m->popup (1, ev->time);
+	return true;
 }
+
 
 /** @return true if the member should be visible, even taking into account any override functor */
 bool

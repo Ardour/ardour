@@ -24,6 +24,7 @@
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
 
+#include "context_menu_helper.h"
 #include "time_axis_view.h"
 #include "streamview.h"
 #include "editor_summary.h"
@@ -461,7 +462,7 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 
 	if (ev->button == 3) { // right-click:  show the reset menu action
 		using namespace Gtk::Menu_Helpers;
-		Gtk::Menu* m = manage (new Gtk::Menu);
+		Gtk::Menu* m = ARDOUR_UI_UTILS::shared_popup_menu ();
 		MenuList& items = m->items ();
 		items.push_back(MenuElem(_("Reset Summary to Extents"),
 			sigc::mem_fun(*this, &EditorSummary::reset_to_extents)));

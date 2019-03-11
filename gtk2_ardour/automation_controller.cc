@@ -31,7 +31,9 @@
 
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_knob.h"
+
 #include "automation_controller.h"
+#include "context_menu_helper.h"
 #include "gui_thread.h"
 #include "note_select_dialog.h"
 #include "timers.h"
@@ -301,14 +303,14 @@ AutomationController::on_button_release(GdkEventButton* ev)
 
 	const ARDOUR::ParameterDescriptor& desc = _controllable->desc();
 	if (desc.unit == ARDOUR::ParameterDescriptor::MIDI_NOTE) {
-		Gtk::Menu* menu  = manage(new Menu());
+		Gtk::Menu* menu  = ARDOUR_UI_UTILS::shared_popup_menu ();
 		MenuList&  items = menu->items();
 		items.push_back(MenuElem(_("Select Note..."),
 		                         sigc::mem_fun(*this, &AutomationController::run_note_select_dialog)));
 		menu->popup(1, ev->time);
 		return true;
 	} else if (desc.unit == ARDOUR::ParameterDescriptor::HZ) {
-		Gtk::Menu* menu  = manage(new Menu());
+		Gtk::Menu* menu  = ARDOUR_UI_UTILS::shared_popup_menu ();
 		MenuList&  items = menu->items();
 		items.push_back(MenuElem(_("Halve"),
 		                         sigc::bind(sigc::mem_fun(*this, &AutomationController::set_ratio),

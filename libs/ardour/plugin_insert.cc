@@ -3001,6 +3001,20 @@ PluginInsert::PluginControl::get_value () const
 	return plugin->get_parameter (_list->parameter().id());
 }
 
+std::string
+PluginInsert::PluginControl::get_user_string () const
+{
+	boost::shared_ptr<Plugin> plugin = _plugin->plugin (0);
+	if (plugin) {
+		char buf[32];
+		if (plugin->print_parameter (parameter().id(), buf, sizeof(buf))) {
+			assert (strlen (buf) > 0);
+			return std::string (buf) + " (" + AutomationControl::get_user_string () + ")";
+		}
+	}
+	return AutomationControl::get_user_string ();
+}
+
 PluginInsert::PluginPropertyControl::PluginPropertyControl (PluginInsert*                     p,
                                                             const Evoral::Parameter&          param,
                                                             const ParameterDescriptor&        desc,

@@ -550,10 +550,7 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 	items.push_back (MenuElem (_("Patch Selector..."),
 				sigc::mem_fun(*this, &RouteUI::select_midi_patch)));
 
-	color_mode_menu = build_color_mode_menu();
-	if (color_mode_menu) {
-		items.push_back (MenuElem (_("Color Mode"), *color_mode_menu));
-	}
+	items.push_back (MenuElem (_("Color Mode"), *build_color_mode_menu ()));
 
 	items.push_back (SeparatorElem ());
 }

@@ -76,8 +76,6 @@ protected:
 	ARDOUR::microseconds_t last_shuttle_request;
 	PBD::ScopedConnection parameter_connection;
 	ArdourWidgets::ArdourButton _info_button;
-	Gtk::Menu*                  shuttle_unit_menu;
-	Gtk::Menu*                  shuttle_style_menu;
 	Gtk::Menu*                  shuttle_context_menu;
 	ArdourWidgets::BindingProxy binding_proxy;
 	float bg_r, bg_g, bg_b;

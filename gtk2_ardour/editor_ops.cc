@@ -6432,7 +6432,8 @@ Editor::split_region ()
 		//this fixes the unexpected case where you point at a region, but
 		//  * nothing happens OR
 		//  * some other region (maybe off-screen) is split.
-		if (_edit_point == EditAtMouse && entered_regionview) {
+		//NOTE:  if the entered_regionview is /part of the selection/ then we should operate on the selection as usual
+		if (_edit_point == EditAtMouse && entered_regionview && !entered_regionview->selected()) {
 			rs.add (entered_regionview);
 		} else {
 			rs = selection->regions;   //might be empty
