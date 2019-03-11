@@ -9,22 +9,22 @@
 # Fred Rech <f.rech@yahoo.fr>, 2014.
 # Raphaël Doursenaud <rdoursenaud@free.fr>, 2015.
 # Edouard <edwsaintesprit@hotmail.com>, 2016.
-# Rivaud Julien <frnchfrgg@free.fr>, 2016.
+# Rivaud Julien <frnchfrgg@free.fr>, 2016, 2019.
 # Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2018, 2019.
 msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-12-01 01:22+0100\n"
-"PO-Revision-Date: 2019-03-08 01:34+0100\n"
-"Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>, 2019\n"
+"PO-Revision-Date: 2019-03-11 11:19+0100\n"
+"Last-Translator: Rivaud Julien <frnchfrgg@free.fr>, 2019\n"
 "Language-Team: \n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 1.8.8\n"
+"X-Generator: Poedit 2.2.1\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: ..\n"
 
@@ -1908,7 +1908,7 @@ msgstr "LTC non détecté, la vidéo ne sera pas alignée."
 
 #: ardour_ui.cc:4744
 msgid "Align video-start to %1 [samples]"
-msgstr "Aligner le début de la vidéo à %1% [échantillons]"
+msgstr "Aligner le début de la vidéo à %1 [échantillons]"
 
 #: ardour_ui.cc:4920
 msgid "xrun"
@@ -2111,16 +2111,16 @@ msgid ""
 "When active, something is soloed.\n"
 "Click to de-solo everything"
 msgstr ""
-"Actif lorsque quelque chose est en solo\n"
-"Cliquer pour désactiver tous les solos."
+"Actif lorsque quelque chose est en solo.\n"
+"Cliquer pour désactiver tous les solos"
 
 #: ardour_ui2.cc:82
 msgid ""
 "When active, auditioning is taking place.\n"
 "Click to stop the audition"
 msgstr ""
-"Lorsqu'il est actif, l'audition prend place.\n"
-"Cliquer pour arrêter l'audition"
+"Actif lorsqu'une écoute est en cours.\n"
+"Cliquez pour stopper l'écoute"
 
 #: ardour_ui2.cc:83
 msgid "When active, there is a feedback loop."
@@ -2327,13 +2327,15 @@ msgstr "Éditeur"
 
 #: ardour_ui_dependents.cc:423 editor_actions.cc:475
 msgid "Unset #%1"
-msgstr "Désélectionner #%1"
+msgstr "Non-paramétré #%1"
 
 #: ardour_ui_dependents.cc:424
 msgid ""
 "No action bound\n"
 "Right-click to assign"
 msgstr ""
+"Pas d'action liée\n"
+"Clic droit pour affecter"
 
 #: ardour_ui_dependents.cc:428
 msgid ""
@@ -2897,15 +2899,15 @@ msgstr "Exporter dans des fichiers audio..."
 
 #: ardour_ui_ed.cc:580
 msgid "Set Session Start from Playhead"
-msgstr "Paramétrer le début de session à la tête de lecture"
+msgstr "Placer le début de session à la tête de lecture"
 
 #: ardour_ui_ed.cc:582
 msgid "Set Session End from Playhead"
-msgstr "Paramétrer la fin de session à la tête de lecture"
+msgstr "Placer la fin de session à la tête de lecture"
 
 #: ardour_ui_ed.cc:585
 msgid "Toggle Mark at Playhead"
-msgstr "Basculer la marque à la tête de lecture"
+msgstr "Basculer le repère sous la tête de lecture"
 
 #: ardour_ui_ed.cc:587 ardour_ui_ed.cc:589
 msgid "Add Mark from Playhead"
@@ -4255,7 +4257,7 @@ msgstr ""
 
 #: editor.cc:4224
 msgid "Delete All Unused"
-msgstr "Effacer les non-utilisés"
+msgstr "Supprimer toutes les inutilisées"
 
 #: editor.cc:4225
 msgid "Delete Playlist"
@@ -4783,7 +4785,7 @@ msgstr "Déplacer le repère actif à la position de la souris"
 
 #: editor_actions.cc:340
 msgid "Set Auto Punch In/Out from Playhead"
-msgstr "Paramétrer le punch in/out automatique à la tête de lecture"
+msgstr "Placer le punch in/out automatique à la tête de lecture"
 
 #: editor_actions.cc:345 editor_actions.cc:1501
 msgid "Multi-Duplicate..."
@@ -5077,7 +5079,7 @@ msgstr "croissant"
 
 #: editor_actions.cc:686
 msgid "Descending"
-msgstr "décroissant"
+msgstr "Décroissant"
 
 #: editor_actions.cc:689
 msgid "By Region Name"
@@ -6719,7 +6721,7 @@ msgstr "Oui, supprimer."
 
 #: editor_regions.cc:512
 msgid "Remove unused regions"
-msgstr "Supprimer les régions non-utilisées"
+msgstr "Supprimer les régions inutilisées"
 
 #: editor_regions.cc:750
 msgid "EditorRegions::format_position: negative timecode position: %1"
@@ -7394,9 +7396,10 @@ msgstr "Échec de l'initialisation de l'exportation : %1"
 msgid "Stop Export"
 msgstr "Arrêter l'exportation"
 
+# This one is currently unused (passed to the nag screen which drops it)
 #: export_dialog.cc:384
 msgid "export"
-msgstr "Exporter"
+msgstr "export"
 
 #: export_dialog.cc:403
 msgid "Exporting '%3' (timespan %1 of %2)"
@@ -7603,7 +7606,7 @@ msgid ""
 "Command to run post-export\n"
 "(%f=file path, %d=directory, %b=basename, see tooltip for more):"
 msgstr ""
-"Commande & exécuer post-export\n"
+"Commande à exécuter après l'export\n"
 "(%f=chemin de fichier, %d=dossier, %b=nom de base, voir l'infobulle pour "
 "plus) :"
 
@@ -7759,7 +7762,7 @@ msgstr "Voulez-vous vraiment enlever ce pré-réglage ?"
 
 #: export_report.cc:56
 msgid "Export Report/Analysis"
-msgstr "Exporter le/la rapport/analyse"
+msgstr "Analyse/Rapport d'export"
 
 #: export_report.cc:147 export_report.cc:335 sfdb_ui.cc:168
 msgid "Format:"
@@ -7903,7 +7906,7 @@ msgstr "10K"
 
 #: export_report.cc:852
 msgid "Writing Export Analysis Image: %1."
-msgstr "Fabrique une image d'analyse de l'export"
+msgstr "Enregistrement de l'image d'analyse de l'export: %1."
 
 #: export_report.cc:949 sfdb_ui.cc:319 sfdb_ui.cc:478
 msgid "Could not read file: %1 (%2)."
@@ -8292,7 +8295,7 @@ msgstr "Insérer du temps"
 #: insert_remove_time_dialog.cc:208
 msgid "Invalid or zero duration entered. Please enter a valid duration"
 msgstr ""
-"Durée invalide ou égale à zéro entrée. Veuillez entrer une durée valide"
+"Durée entrée invalide ou égale à zéro. Veuillez entrer une durée valide"
 
 #: instrument_selector.cc:120
 msgid "-none-"
@@ -8350,7 +8353,7 @@ msgstr "Rechercher..."
 
 #: keyeditor.cc:95
 msgid "Click to reset search string"
-msgstr "Cliquer pour réinitialiser le champs de recherche"
+msgstr "Cliquer pour réinitialiser le champ de recherche"
 
 #: keyeditor.cc:99
 msgid "To remove a shortcut, select an action then press this: "
@@ -8641,7 +8644,7 @@ msgstr ""
 
 #: luawindow.cc:453
 msgid "Script fails to compile."
-msgstr "Échec de compilation du script"
+msgstr "Échec de compilation du script."
 
 #: luawindow.cc:460
 msgid "Invalid or missing script-name or script-type."
@@ -8775,11 +8778,11 @@ msgstr "Impossible d'installer le gestionnaire d'erreurs SIGPIPE"
 
 #: main.cc:409
 msgid "Could not complete pre-GUI initialization"
-msgstr "Impossible de finitr l'initialisation pré-IGU"
+msgstr "Impossible de finir l'initialisation avant interface graphique"
 
 #: main.cc:416
 msgid "could not create %1 GUI"
-msgstr "Impossible de créer l'interface de %1"
+msgstr "impossible de créer l'interface de %1"
 
 #: main_clock.cc:70
 msgid "Display absolute time"
@@ -9028,9 +9031,8 @@ msgid "move patch change"
 msgstr "Déplacer le changement de patch"
 
 #: midi_region_view.cc:2130 midi_region_view.cc:2132
-#, fuzzy
 msgid "delete patch change"
-msgstr "Effacer le changement de patch"
+msgstr "effacer le changement de patch"
 
 #: midi_region_view.cc:2178
 msgid "delete selection"
@@ -9849,16 +9851,16 @@ msgid ""
 "When active, something is solo-isolated.\n"
 "Click to de-isolate everything"
 msgstr ""
-"Actif lorsque quelque chose est isolé par un solo\n"
-"Cliquez pour désactiver tous les solos."
+"Actif lorsque quelque chose est isolé des solos\n"
+"Cliquez pour désactiver tous les isolations"
 
 #: monitor_section.cc:138
 msgid ""
 "When active, auditioning is active.\n"
 "Click to stop the audition"
 msgstr ""
-"Actif lorsqu'une écoute est en cours\n"
-"Cliquez pour stopper l'écoute."
+"Actif lorsqu'une écoute est en cours.\n"
+"Cliquez pour stopper l'écoute"
 
 #: monitor_section.cc:155
 msgid "Solo controls affect solo-in-place"
@@ -11373,6 +11375,19 @@ msgid ""
 "%7 active midi regions\n"
 "\n"
 msgstr ""
+"Session PT [ VALIDE ]\n"
+"\n"
+"Informations:\n"
+"\n"
+"\n"
+"PT v%1 Session @ %2Hz\n"
+"\n"
+"%3 fichiers audio\n"
+"%4 régions audio\n"
+"%5 régions audio actives\n"
+"%6 régions MIDI\n"
+"%7 régions MIDI actives\n"
+"\n"
 
 #: pt_import_selector.cc:132
 msgid ""
@@ -14558,7 +14573,7 @@ msgstr "-4,1667 - 0,1%"
 # Chaîne suivie d'un « : » d'où l'espace insécable en fin
 #: session_option_editor.cc:83
 msgid "Ext Timecode Offsets"
-msgstr "Décalage du « timecode » externe "
+msgstr "Décalage du « timecode » externe"
 
 # Chaîne suivie d'un « : » d'où l'espace insécable en fin
 #: session_option_editor.cc:87
@@ -16882,9 +16897,8 @@ msgid "Cannot create video folder \"%1\" (%2)"
 msgstr "Impossible de créer le dossier vidéo \"%1\" (%2)"
 
 #: export_video_dialog.cc:71
-#, fuzzy
 msgid "Export Video File "
-msgstr "Export du fichier vidéo"
+msgstr "Export du fichier vidéo "
 
 #: export_video_dialog.cc:82
 msgid "Video:"
