@@ -88,8 +88,8 @@ void MixerSnapshot::snap()
     for(RouteList::const_iterator i = rl.begin(); i != rl.end(); i++) {
         //copy current state to node obj
         XMLNode node ((*i)->get_state());
-        
-        State state {(*i)->id(), (string) (*i)->name(), node};
+        vector<string> slaves;
+        State state {(*i)->id(), (string) (*i)->name(), node, slaves};
         route_states.push_back(state);
     }
 
@@ -98,22 +98,34 @@ void MixerSnapshot::snap()
     for(list<RouteGroup*>::const_iterator i = gl.begin(); i != gl.end(); i++) {
         //copy current state to node obj
         XMLNode node ((*i)->get_state());
-
-        State state {(*i)->id(), (string) (*i)->name(), node};
+        vector<string> slaves;
+        State state {(*i)->id(), (string) (*i)->name(), node, slaves};
         group_states.push_back(state);
     }
     
     //push back VCA's
-    VCAList _vcas = _session->vca_manager().vcas();
-    for(VCAList::const_iterator i = _vcas.begin(); i != _vcas.end(); i++) {
-        cout << (*i)->name() << endl;
-    }
+    VCAList vl = _session->vca_manager().vcas();
+    for(VCAList::const_iterator i = vl.begin(); i != vl.end(); i++) {
+        //copy current state to node obj
+        XMLNode node ((*i)->get_state());
 
+        boost::shared_ptr<RouteList> rl = _session->get_tracks();
+        vector<string> slaves;
+        for(RouteList::const_iterator t = rl->begin(); t != rl->end(); t++) {
+            if((*t)->slaved_to((*i))) {
+                slaves.push_back((*t)->name());
+            }
+        }
+
+        State state {(*i)->id(), (string) (*i)->name(), node, slaves};
+        vca_states.push_back(state);
+    }
     return;
 }
 
 void MixerSnapshot::recall() {
     
+    //routes
     for(vector<State>::const_iterator i = route_states.begin(); i != route_states.end(); i++) {
         State state = (*i);
         
@@ -126,23 +138,9 @@ void MixerSnapshot::recall() {
             route->set_state(state.node, PBD::Stateful::loading_state_version);
         else
             cout << "couldn't find " << state.name << " in session ... we won't be creating this." << endl;
-
-        // //establish group association if applicable
-        // if((*i).group_name != "") {
-        //     RouteGroup* group = _session->route_group_by_name((*i).group_name);
-            
-        //     if(!group) {
-        //         group = new RouteGroup(*_session, (*i).group_name);
-        //         _session->add_route_group(group);
-        //     }
-
-        //     if(group) {
-        //         group->set_state((*i).group_state, PBD::Stateful::loading_state_version);
-        //         group->changed();
-        //     }
-        // }
     }
 
+    //groups
     for(vector<State>::const_iterator i = group_states.begin(); i != group_states.end(); i++) {
         State state = (*i);
 
@@ -156,9 +154,34 @@ void MixerSnapshot::recall() {
 
         if(group) {
             group->set_state(state.node, PBD::Stateful::loading_state_version);
-            group->changed()
+            group->changed();
+        }
+    }
+
+    //vcas
+    for(vector<State>::const_iterator i = vca_states.begin(); i != vca_states.end(); i++) {
+        State state = (*i);
+
+        boost::shared_ptr<VCA> vca = _session->vca_manager().vca_by_name(state.name);
+
+        if(!vca) {
+           VCAList vl = _session->vca_manager().create_vca(1, state.name);
+           boost::shared_ptr<VCA> vca = vl.front();
+
+           if(vca) {
+               vca->set_state(state.node, PBD::Stateful::loading_state_version);
+               for(vector<string>::const_iterator s = state.slaves.begin(); s != state.slaves.end(); s++) {
+                   boost::shared_ptr<Route> route = _session->route_by_name((*s));
+                   if(route) {route->assign(vca);}
+                   continue;
+               }
+           }
         } else {
-            cout << "not found" << endl;
+            vca->set_state(state.node, PBD::Stateful::loading_state_version);
+            for(vector<string>::const_iterator s = state.slaves.begin(); s != state.slaves.end(); s++) {
+                boost::shared_ptr<Route> route = _session->route_by_name((*s));
+                if(route) {route->assign(vca);}
+            }
         }
     }
     return;

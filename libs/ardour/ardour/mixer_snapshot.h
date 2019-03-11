@@ -54,6 +54,7 @@ class MixerSnapshot //: public PBD::Stateful
             PBD::ID     id;
             std::string name;
             XMLNode     node;
+            std::vector<std::string> slaves;
         };
 
         std::vector<State> route_states;
