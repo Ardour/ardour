@@ -267,6 +267,7 @@ Mixer_UI::Mixer_UI ()
 	vca_scroller_base.set_name (X_("MixerWindow"));
 	vca_scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::masters_scroller_button_release), false);
 
+	vca_hpacker.signal_scroll_event().connect (sigc::mem_fun (*this, &Mixer_UI::on_vca_scroll_event), false);
 	vca_scroller.add (vca_hpacker);
 	vca_scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_AUTOMATIC);
 	vca_scroller.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_release));
@@ -2444,6 +2445,87 @@ Mixer_UI::on_scroll_event (GdkEventScroll* ev)
 	return false;
 }
 
+void
+Mixer_UI::vca_scroll_left ()
+{
+	if (!vca_scroller.get_hscrollbar()) return;
+	Adjustment* adj = vca_scroller.get_hscrollbar()->get_adjustment();
+	int sc_w = vca_scroller.get_width();
+	int sp_w = strip_packer.get_width();
+	if (sp_w <= sc_w) {
+		return;
+	}
+	int lp = adj->get_value();
+	int lm = 0;
+	using namespace Gtk::Box_Helpers;
+	const BoxList& strips = vca_hpacker.children();
+	for (BoxList::const_iterator i = strips.begin(); i != strips.end(); ++i) {
+		if (i->get_widget() == &add_vca_button) {
+			continue;
+		}
+		lm += i->get_widget()->get_width ();
+		if (lm >= lp) {
+			lm -= i->get_widget()->get_width ();
+			break;
+		}
+	}
+	vca_scroller.get_hscrollbar()->set_value (max (adj->get_lower(), min (adj->get_upper(), lm - 1.0)));
+}
+
+void
+Mixer_UI::vca_scroll_right ()
+{
+	if (!vca_scroller.get_hscrollbar()) return;
+	Adjustment* adj = vca_scroller.get_hscrollbar()->get_adjustment();
+	int sc_w = vca_scroller.get_width();
+	int sp_w = strip_packer.get_width();
+	if (sp_w <= sc_w) {
+		return;
+	}
+	int lp = adj->get_value();
+	int lm = 0;
+	using namespace Gtk::Box_Helpers;
+	const BoxList& strips = vca_hpacker.children();
+	for (BoxList::const_iterator i = strips.begin(); i != strips.end(); ++i) {
+		if (i->get_widget() == &add_vca_button) {
+			continue;
+		}
+		lm += i->get_widget()->get_width ();
+		if (lm > lp + 1) {
+			break;
+		}
+	}
+	vca_scroller.get_hscrollbar()->set_value (max (adj->get_lower(), min (adj->get_upper(), lm - 1.0)));
+}
+
+bool
+Mixer_UI::on_vca_scroll_event (GdkEventScroll* ev)
+{
+	switch (ev->direction) {
+	case GDK_SCROLL_LEFT:
+		vca_scroll_left ();
+		return true;
+	case GDK_SCROLL_UP:
+		if (ev->state & Keyboard::TertiaryModifier) {
+			vca_scroll_left ();
+			return true;
+		}
+		return false;
+
+	case GDK_SCROLL_RIGHT:
+		vca_scroll_right ();
+		return true;
+
+	case GDK_SCROLL_DOWN:
+		if (ev->state & Keyboard::TertiaryModifier) {
+			vca_scroll_right ();
+			return true;
+		}
+		return false;
+	}
+
+	return false;
+}
 
 void
 Mixer_UI::parameter_changed (string const & p)

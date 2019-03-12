@@ -190,6 +190,7 @@ private:
 	MixerGroupTabs* _group_tabs;
 
 	bool on_scroll_event (GdkEventScroll*);
+	bool on_vca_scroll_event (GdkEventScroll*);
 
 	std::list<MixerStrip *> strips;
 
@@ -198,6 +199,8 @@ private:
 	bool masters_scroller_button_release (GdkEventButton*);
 	void scroll_left ();
 	void scroll_right ();
+	void vca_scroll_left ();
+	void vca_scroll_right ();
 	void toggle_midi_input_active (bool flip_others);
 
 	void move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable>);
