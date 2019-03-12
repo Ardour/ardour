@@ -846,6 +846,13 @@ Playlist::get_equivalent_regions (boost::shared_ptr<Region> other, vector<boost:
 				 }
 			 }
 			 break;
+		 case LayerTime:
+			 for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+				 if ((*i)->layer_and_time_equivalent (other)) {
+					 results.push_back (*i);
+				 }
+			 }
+			 break;
 		 case Enclosed:
 			 for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 				 if ((*i)->enclosed_equivalent (other)) {

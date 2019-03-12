@@ -843,7 +843,7 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 
 	if (loc == transport_loop_location() || loc == transport_punch_location() || loc->is_session_range ()) {
 
-		build_range_marker_menu (loc, loc == transport_loop_location() || loc == transport_punch_location(), loc->is_session_range()); // XXX
+		build_range_marker_menu (loc, loc == transport_loop_location() || loc == transport_punch_location(), loc->is_session_range());
 
 		marker_menu_item = item;
 		range_marker_menu->popup (1, ev->time);
@@ -936,7 +936,7 @@ Editor::build_range_marker_menu (Location* loc, bool loop_or_punch, bool session
 	bool const loop_or_punch_or_session = loop_or_punch || session;
 
 	delete range_marker_menu;
-	Menu* range_marker_menu = new Menu;
+	range_marker_menu = new Menu;
 
 	MenuList& items = range_marker_menu->items();
 	range_marker_menu->set_name ("ArdourContextMenu");

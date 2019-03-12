@@ -2457,6 +2457,7 @@ RCOptionEditor::RCOptionEditor ()
 	eqv->add (Overlap, _("whenever they overlap in time"));
 	eqv->add (Enclosed, _("if either encloses the other"));
 	eqv->add (Exact, _("only if they have identical length, position and origin"));
+	eqv->add (LayerTime, _("only if they have identical length, position and layer"));
 
 	add_option (_("Editor"), eqv);
 
