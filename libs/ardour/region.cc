@@ -1485,6 +1485,14 @@ Region::enclosed_equivalent (boost::shared_ptr<const Region> other) const
 }
 
 bool
+Region::layer_and_time_equivalent (boost::shared_ptr<const Region> other) const
+{
+	return _layer == other->_layer &&
+		_position == other->_position &&
+		_length == other->_length;
+}
+
+bool
 Region::exact_equivalent (boost::shared_ptr<const Region> other) const
 {
 	return _start == other->_start &&

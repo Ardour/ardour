@@ -631,7 +631,8 @@ typedef std::vector<boost::shared_ptr<Bundle> > BundleList;
 enum RegionEquivalence {
 	Exact,
 	Enclosed,
-	Overlap
+	Overlap,
+	LayerTime
 };
 
 enum WaveformScale {

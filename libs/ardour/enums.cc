@@ -694,6 +694,7 @@ setup_enum_writer ()
 	REGISTER_ENUM(Exact);
 	REGISTER_ENUM(Enclosed);
 	REGISTER_ENUM(Overlap);
+	REGISTER_ENUM(LayerTime);
 	REGISTER(_RegionEquivalence);
 
 	REGISTER_ENUM(Linear);
