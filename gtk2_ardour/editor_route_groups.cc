@@ -205,8 +205,22 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	_display_packer.pack_start (*button_box, false, false);
 }
 
-void EditorRouteGroups::snap() { camera->snap(); }
-void EditorRouteGroups::recall() { camera->recall(); }
+void EditorRouteGroups::snap() {
+	camera->clear();
+	
+	RouteList rl = _editor->get_selection().tracks.routelist();
+	if(rl.empty()) {
+		camera->snap();
+	} else {
+		for(RouteList::const_iterator i = rl.begin(); i != rl.end(); i++) {
+			camera->snap((*i));
+		}
+	}
+}
+
+void EditorRouteGroups::recall() { 
+	camera->recall();
+}
 
 void
 EditorRouteGroups::remove_selected ()

@@ -18,9 +18,9 @@ MixerSnapshot::MixerSnapshot(Session* s)
     : id(0)
     , label("")
     , timestamp(time(0))
-{
-    cout << s->name() << endl;
-    _session = s;
+{   
+    if(s)
+        _session = s;
 }
 
 MixerSnapshot::~MixerSnapshot()
@@ -35,60 +35,63 @@ void MixerSnapshot::clear()
     vca_states.clear();
 }
 
-// void MixerSnapshot::snap(Route* route) 
-// {
-//     clear();
+void MixerSnapshot::snap(boost::shared_ptr<Route> route) 
+{
+    if(route) {
+        cout << route->name() << endl;
 
-//     if(route) {
-//         string name = route->name();
-//         XMLNode previous_state (route->get_state());
+        string name = route->name();
+        XMLNode node (route->get_state());
+        vector<string> slaves;
 
-//         string group_name;
-//         get_property(X_("route-group"), group_name);
-        
-//         State state {name, previous_state};
-//         states.push_back(state);
-//         cout << timestamp << " " << state.name << endl;
-//     }
-//     return;
-// }
+        State state {route->id(), (string) route->name(), node, slaves};
+        route_states.push_back(state);
+
+        //is it in a group?
+        string group_name;
+        node.get_property(X_("route-group"), group_name);
+
+        RouteGroup* group = _session->route_group_by_name(group_name);
+
+        if(group) {
+            XMLNode node (group->get_state());
+            State state {group->id(), group->name(), node, slaves};
+            group_states.push_back(state);
+        }
+
+        //push back VCA's connected to this route
+        VCAList vl = _session->vca_manager().vcas();
+        for(VCAList::const_iterator i = vl.begin(); i != vl.end(); i++) {
+            if(route->slaved_to((*i))) {
+                XMLNode node ((*i)->get_state());
+                vector<string> slaves;
+                slaves.push_back(route->name());
+                State state {(*i)->id(), (*i)->name(), node, slaves};
+                vca_states.push_back(state);
+            }
+        }
+    }
+}
 
 void MixerSnapshot::snap() 
 {
-    clear();
-
     if(!_session)
         return;
+
+    clear();
     
     RouteList rl = _session->get_routelist();
 
     if(rl.empty())
         return;
-    // for(RouteList::iterator i = rl.begin(); i != rl.end(); i++) {
-    //     string route_name = (*i)->name();
-        
-    //     XMLNode& current_state  = (*i)->get_state();
-    //     XMLNode previous_state (current_state);
-
-    //     string group_name = "";
-    //     current_state.get_property(X_("route-group"), group_name);
-
-    //     RouteGroup* group = _session->route_group_by_name(group_name);
-
-    //     XMLNode group_state = XMLNode("");
-    //     if(group) {
-    //         group_state = XMLNode(group->get_state());
-    //     }
-        
-    //     State state {(*i)->id(), route_name, group_name, "", previous_state, group_state, XMLNode("")};
-    //     states.push_back(state);
-    //     cout << timestamp << ": " << state.route_name << endl;
-    // }
 
     for(RouteList::const_iterator i = rl.begin(); i != rl.end(); i++) {
-        //copy current state to node obj
+        //copy current state
         XMLNode node ((*i)->get_state());
+        
+        //placeholder
         vector<string> slaves;
+
         State state {(*i)->id(), (string) (*i)->name(), node, slaves};
         route_states.push_back(state);
     }
@@ -96,9 +99,12 @@ void MixerSnapshot::snap()
     //push back groups
     list<RouteGroup*> gl = _session->route_groups();
     for(list<RouteGroup*>::const_iterator i = gl.begin(); i != gl.end(); i++) {
-        //copy current state to node obj
+        //copy current state
         XMLNode node ((*i)->get_state());
+        
+        //placeholder
         vector<string> slaves;
+
         State state {(*i)->id(), (string) (*i)->name(), node, slaves};
         group_states.push_back(state);
     }
@@ -106,10 +112,11 @@ void MixerSnapshot::snap()
     //push back VCA's
     VCAList vl = _session->vca_manager().vcas();
     for(VCAList::const_iterator i = vl.begin(); i != vl.end(); i++) {
-        //copy current state to node obj
+        //copy current state
         XMLNode node ((*i)->get_state());
 
         boost::shared_ptr<RouteList> rl = _session->get_tracks();
+
         vector<string> slaves;
         for(RouteList::const_iterator t = rl->begin(); t != rl->end(); t++) {
             if((*t)->slaved_to((*i))) {
@@ -120,7 +127,6 @@ void MixerSnapshot::snap()
         State state {(*i)->id(), (string) (*i)->name(), node, slaves};
         vca_states.push_back(state);
     }
-    return;
 }
 
 void MixerSnapshot::recall() {
@@ -136,8 +142,6 @@ void MixerSnapshot::recall() {
 
         if(route)
             route->set_state(state.node, PBD::Stateful::loading_state_version);
-        else
-            cout << "couldn't find " << state.name << " in session ... we won't be creating this." << endl;
     }
 
     //groups
@@ -146,7 +150,7 @@ void MixerSnapshot::recall() {
 
         RouteGroup* group = _session->route_group_by_name(state.name);
 
-        if(!group){
+        if(!group) {
             group = new RouteGroup(*_session, state.name);
             //notify session
             _session->add_route_group(group);
@@ -184,5 +188,4 @@ void MixerSnapshot::recall() {
             }
         }
     }
-    return;
 }
