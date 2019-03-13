@@ -2448,7 +2448,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor"), fadeshape);
 
 	ComboOption<RegionEquivalence> *eqv = new ComboOption<RegionEquivalence> (
-		     "region-equivalence",
+		     "region-equivalency",
 		     _("Regions in active edit groups are edited together"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_region_equivalence),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_region_equivalence)
