@@ -1642,13 +1642,54 @@ Mixer_UI::track_display_button_press (GdkEventButton* ev)
 }
 
 void
+Mixer_UI::move_vca_into_view (boost::shared_ptr<ARDOUR::Stripable> s)
+{
+	if (!vca_scroller.get_hscrollbar()) {
+		return;
+	}
+
+	bool found = false;
+	int x0 = 0;
+	Gtk::Allocation alloc;
+
+	TreeModel::Children rows = track_model->children();
+	for (TreeModel::Children::const_iterator i = rows.begin(); i != rows.end(); ++i) {
+		AxisView* av = (*i)[stripable_columns.strip];
+		VCAMasterStrip* vms = dynamic_cast<VCAMasterStrip*> (av);
+		if (vms && vms->stripable () == s) {
+			int y;
+			found = true;
+			vms->translate_coordinates (vca_hpacker, 0, 0, x0, y);
+			alloc = vms->get_allocation ();
+			break;
+		}
+	}
+
+	if (!found) {
+		return;
+	}
+
+	Adjustment* adj = vca_scroller.get_hscrollbar()->get_adjustment();
+
+	if (x0 < adj->get_value()) {
+		adj->set_value (max (adj->get_lower(), min (adj->get_upper(), (double) x0)));
+	} else if (x0 + alloc.get_width() >= adj->get_value() + adj->get_page_size()) {
+		int x1 = x0 + alloc.get_width() - adj->get_page_size();
+		adj->set_value (max (adj->get_lower(), min (adj->get_upper(), (double) x1)));
+	}
+}
+
+void
 Mixer_UI::move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable> s)
 {
 	if (!scroller.get_hscrollbar()) {
 		return;
 	}
-	if (s->presentation_info().special () || s->presentation_info().flag_match (PresentationInfo::VCA)) {
+	if (s->presentation_info().special ()) {
 		return;
+	}
+	if (s->presentation_info().flag_match (PresentationInfo::VCA)) {
+		move_vca_into_view (s);
 	}
 #ifdef MIXBUS
 	if (s->mixbus ()) {
