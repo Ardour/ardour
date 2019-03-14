@@ -22,6 +22,9 @@
 #include <algorithm>
 #include <unistd.h>
 
+#include <boost/msm/back/state_machine.hpp>
+#include <boost/msm/front/state_machine_def.hpp>
+
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
 
@@ -52,6 +55,90 @@
 using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
+
+/* state machine */
+namespace msm = boost::msm;
+namespace mpl = boost::mpl;
+
+namespace TransportState
+{
+	/* events */
+	struct play {};
+	struct stop {};
+
+	/* front-end: define the FSM structure  */
+	struct TransportFSM : public msm::front::state_machine_def<TransportFSM>
+	{
+
+		/* FSM states */
+		struct Stopped : public msm::front::state<>
+		{
+			template <class Event,class FSM> void
+				on_entry (Event const&, FSM&)
+				{
+					std::cout << "entering: Stopped" << std::endl;
+				}
+			template <class Event,class FSM> void
+				on_exit (Event const&, FSM&)
+				{
+					std::cout << "leaving: Stopped" << std::endl;
+				}
+		};
+
+		struct Playing : public msm::front::state<>
+		{
+			template <class Event,class FSM> void
+				on_entry (Event const&, FSM&)
+				{
+					std::cout << "entering: Playing" << std::endl;
+				}
+
+			template <class Event,class FSM> void
+				on_exit (Event const&, FSM&)
+				{
+					std::cout << "leaving: Playing" << std::endl;
+				}
+		};
+
+		/* the initial state */
+		typedef Stopped initial_state;
+
+		/* transition actions */
+		void start_playback (play const&)
+		{
+			std::cout << "player::start_playback\n";
+		}
+
+		void stop_playback (stop const&)
+		{
+			std::cout << "player::stop_playback\n";
+		}
+
+		typedef TransportFSM _t; // makes transition table cleaner
+
+		struct transition_table : mpl::vector<
+			//      Start     Event         Next      Action				 Guard
+			//    +---------+-------------+---------+---------------------+----------------------+
+			a_row < Stopped , play        , Playing , &_t::start_playback                        >,
+			 _row < Stopped , stop        , Stopped                                              >,
+			//    +---------+-------------+---------+---------------------+----------------------+
+			a_row < Playing , stop        , Stopped , &_t::stop_playback                         >
+			//    +---------+-------------+---------+---------------------+----------------------+
+			> {};
+	};
+
+	typedef msm::back::state_machine<TransportFSM> transport_fsm;
+
+	void test()
+	{
+		transport_fsm t;
+		t.start ();
+		t.process_event (play());
+		t.process_event (stop());
+		t.stop();
+	}
+
+};
 
 /** Called by the audio engine when there is work to be done with JACK.
  * @param nframes Number of samples to process.

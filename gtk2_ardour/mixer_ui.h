@@ -203,6 +203,7 @@ private:
 	void vca_scroll_right ();
 	void toggle_midi_input_active (bool flip_others);
 
+	void move_vca_into_view (boost::shared_ptr<ARDOUR::Stripable>);
 	void move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable>);
 
 	void add_stripables (ARDOUR::StripableList&);
