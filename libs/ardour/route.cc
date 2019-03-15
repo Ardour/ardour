@@ -2969,6 +2969,15 @@ Route::set_processor_state (const XMLNode& node)
 		 */
 		_processors = new_order;
 
+		/* When a required/existing internal processor is not in the list, it needs to
+		 * be added via configure_processors() -> setup_invisible_processors()
+		 */
+		if (_monitor_control) {
+			must_configure |= find (_processors.begin(), _processors.end(), _monitor_control) == _processors.end ();
+		}
+		if (_main_outs) {
+			must_configure |= find (_processors.begin(), _processors.end(), _main_outs) == _processors.end ();
+		}
 		if (_delayline) {
 			must_configure |= find (_processors.begin(), _processors.end(), _delayline) == _processors.end ();
 		}
