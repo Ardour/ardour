@@ -40,6 +40,7 @@ public:
 private:
 	void update_preset_list ();
 	void preset_selected ();
+	void row_activated (Gtk::TreeModel::Path, Gtk::TreeViewColumn*);
 	void load_preset ();
 
 	boost::shared_ptr<ARDOUR::PluginInsert> _insert;
