@@ -37,20 +37,24 @@ class MixerSnapshot //: public PBD::Stateful
         MixerSnapshot(ARDOUR::Session*);
         ~MixerSnapshot();
 
-        void snap(boost::shared_ptr<ARDOUR::Route>);
         void snap();
+        void snap(ARDOUR::RouteList);
         void recall();
         void clear();
+        void write();
+        void load();
 
         int id;
-        char label[255];
+        std::string label;
         std::time_t timestamp;
 
     private:
         ARDOUR::Session* _session;
 
+        void snap(boost::shared_ptr<ARDOUR::Route>);
+
         struct State {
-            PBD::ID     id;
+            std::string id;
             std::string name;
             XMLNode     node;
             std::vector<std::string> slaves;

@@ -196,10 +196,16 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 
 	Button* custom1 = new Button("Mark");
 	Button* custom2 = new Button("Recall");
+	Button* custom3 = new Button("Write");
+	Button* custom4 = new Button("load");
 	button_box->pack_start(*custom1);
 	button_box->pack_start(*custom2);
+	button_box->pack_start(*custom3);
+	button_box->pack_start(*custom4);
 	custom1->signal_clicked().connect(sigc::mem_fun(*this, &EditorRouteGroups::snap));
 	custom2->signal_clicked().connect(sigc::mem_fun(*this, &EditorRouteGroups::recall));
+	custom3->signal_clicked().connect(sigc::mem_fun(*this, &EditorRouteGroups::write));
+	custom4->signal_clicked().connect(sigc::mem_fun(*this, &EditorRouteGroups::load));
 
 	_display_packer.pack_start (_scroller, true, true);
 	_display_packer.pack_start (*button_box, false, false);
@@ -209,17 +215,22 @@ void EditorRouteGroups::snap() {
 	camera->clear();
 	
 	RouteList rl = _editor->get_selection().tracks.routelist();
-	if(rl.empty()) {
+	if(rl.empty())
 		camera->snap();
-	} else {
-		for(RouteList::const_iterator i = rl.begin(); i != rl.end(); i++) {
-			camera->snap((*i));
-		}
-	}
+	else
+		camera->snap(rl);
 }
 
 void EditorRouteGroups::recall() { 
 	camera->recall();
+}
+
+void EditorRouteGroups::write() { 
+	camera->write();
+}
+
+void EditorRouteGroups::load() { 
+	camera->load();
 }
 
 void
