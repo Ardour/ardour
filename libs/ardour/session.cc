@@ -1174,7 +1174,7 @@ Session::remove_monitor_section ()
 	*/
 	cancel_audition ();
 
-	{
+	if (!deletion_in_progress ()) {
 		/* Hold process lock while doing this so that we don't hear bits and
 		 * pieces of audio as we work on each route.
 		 */
@@ -3769,7 +3769,8 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 			(*iter)->output()->disconnect (0);
 
 			/* if the route had internal sends sending to it, remove them */
-			if ((*iter)->internal_return()) {
+
+			if (!deletion_in_progress () && (*iter)->internal_return()) {
 
 				boost::shared_ptr<RouteList> r = routes.reader ();
 				for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
