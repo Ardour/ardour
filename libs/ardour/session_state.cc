@@ -316,6 +316,19 @@ Session::post_engine_init ()
 		config.map_parameters (ft);
 		_butler->map_parameters ();
 
+		/* Configure all processors; now that the
+		 * engine is running, ports are re-established,
+		 * and IOChange are complete.
+		 */
+		{
+			Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+			ProcessorChangeBlocker pcb (this);
+			boost::shared_ptr<RouteList> r = routes.reader ();
+			for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+				(*i)->configure_processors (0);
+			}
+		}
+
 		/* Reset all panners */
 
 		Delivery::reset_panners ();
