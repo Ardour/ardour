@@ -1244,8 +1244,6 @@ PortManager::fill_midi_port_info_locked ()
 		return;
 	}
 
-	std::cerr << "MID .. doing the work\n";
-
 	std::vector<string> ports;
 
 	AudioEngine::instance()->get_ports (string(), DataType::MIDI, IsOutput, ports);
