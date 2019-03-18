@@ -100,6 +100,7 @@ AudioEngine::AudioEngine ()
 	, _hw_devicelist_update_count(0)
 	, _stop_hw_devicelist_processing(0)
 	, _start_cnt (0)
+	, _init_countdown (0)
 #ifdef SILENCE_AFTER_SECONDS
 	, _silence_countdown (0)
 	, _silence_hit_cnt (0)
@@ -246,6 +247,16 @@ AudioEngine::process_callback (pframes_t nframes)
 	 */
 	if (! SessionEvent::has_per_thread_pool ()) {
 		thread_init_callback (NULL);
+	}
+
+	if (_session && _init_countdown > 0) {
+		--_init_countdown;
+		/* Warm up caches */
+		PortManager::cycle_start (nframes);
+		PortManager::silence (nframes);
+		_session->process (nframes);
+		PortManager::cycle_end (nframes);
+		return 0;
 	}
 
 	bool return_after_remove_check = false;
@@ -643,21 +654,7 @@ AudioEngine::set_session (Session *s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
-
-		pframes_t blocksize = samples_per_cycle ();
-
-		PortManager::cycle_start (blocksize);
-
-		_session->process (blocksize);
-		_session->process (blocksize);
-		_session->process (blocksize);
-		_session->process (blocksize);
-		_session->process (blocksize);
-		_session->process (blocksize);
-		_session->process (blocksize);
-		_session->process (blocksize);
-
-		PortManager::cycle_end (blocksize);
+		_init_countdown = 8;
 	}
 }
 
@@ -988,9 +985,7 @@ AudioEngine::stop (bool for_latency)
 		_running = false;
 	}
 
-	if (_session && was_running_will_stop &&
-	    (_session->state_of_the_state() & Session::Loading) == 0 &&
-	    (_session->state_of_the_state() & Session::Deletion) == 0) {
+	if (_session && was_running_will_stop && !_session->loading() && !_session->deletion_in_progress()) {
 		// it's not a halt, but should be handled the same way:
 		// disable record, stop transport and I/O processign but save the data.
 		_session->engine_halted ();

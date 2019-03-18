@@ -36,6 +36,7 @@ PluginPresetsUI::PluginPresetsUI (boost::shared_ptr<PluginInsert> insert)
 	_plugin_preset_display.set_headers_visible (true);
 	_plugin_preset_display.get_selection ()->set_mode (Gtk::SELECTION_SINGLE);
 	_plugin_preset_display.get_selection ()->signal_changed ().connect (sigc::mem_fun (*this, &PluginPresetsUI::preset_selected));
+	_plugin_preset_display.signal_row_activated ().connect (sigc::mem_fun (*this, &PluginPresetsUI::row_activated));
 	_plugin_preset_display.set_sensitive (true);
 
 	Gtk::CellRendererText* label_render = Gtk::manage (new Gtk::CellRendererText());
@@ -147,6 +148,14 @@ PluginPresetsUI::preset_selected ()
 
 	Plugin::PresetRecord const& p = _insert->plugin ()->last_preset ();
 	_load_button.set_sensitive (ppr.valid && !(p.valid && p.uri == ppr.uri));
+}
+
+void
+PluginPresetsUI::row_activated (Gtk::TreeModel::Path, Gtk::TreeViewColumn*)
+{
+	if (_load_button.get_sensitive ()) {
+		load_preset ();
+	}
 }
 
 void

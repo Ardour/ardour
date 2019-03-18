@@ -229,7 +229,7 @@ Session::Session (AudioEngine &eng,
 	, _current_snapshot_name (snapshot_name)
 	, state_tree (0)
 	, state_was_pending (false)
-	, _state_of_the_state (StateOfTheState(CannotSave|InitialConnecting|Loading))
+	, _state_of_the_state (StateOfTheState (CannotSave | InitialConnecting | Loading))
 	, _suspend_save (0)
 	, _save_queued (false)
 	, _last_roll_location (0)
@@ -434,8 +434,7 @@ Session::Session (AudioEngine &eng,
 	store_recent_sessions (_name, _path);
 
 	bool was_dirty = dirty();
-
-	_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
+	unset_dirty ();
 
 	PresentationInfo::Change.connect_same_thread (*this, boost::bind (&Session::notify_presentation_info_change, this));
 
@@ -641,7 +640,7 @@ Session::destroy ()
 
 	Analyser::flush ();
 
-	_state_of_the_state = StateOfTheState (CannotSave|Deletion);
+	_state_of_the_state = StateOfTheState (CannotSave | Deletion);
 
 	{
 		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
@@ -1160,7 +1159,7 @@ Session::remove_monitor_section ()
 	}
 
 	/* allow deletion when session is unloaded */
-	if (!_engine.running() && !(_state_of_the_state & Deletion)) {
+	if (!_engine.running() && !deletion_in_progress ()) {
 		error << _("Cannot remove monitor section while the engine is offline.") << endmsg;
 		return;
 	}
@@ -1174,7 +1173,7 @@ Session::remove_monitor_section ()
 	*/
 	cancel_audition ();
 
-	{
+	if (!deletion_in_progress ()) {
 		/* Hold process lock while doing this so that we don't hear bits and
 		 * pieces of audio as we work on each route.
 		 */
@@ -1203,7 +1202,7 @@ Session::remove_monitor_section ()
 	}
 
 	remove_route (_monitor_out);
-	if (_state_of_the_state & Deletion) {
+	if (deletion_in_progress ()) {
 		return;
 	}
 
@@ -2307,7 +2306,7 @@ Session::resort_routes ()
 	   are being destroyed.
 	*/
 
-	if (_state_of_the_state & (InitialConnecting | Deletion)) {
+	if (inital_connect_or_deletion_in_progress ()) {
 		return;
 	}
 
@@ -3740,7 +3739,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 			}
 
 			/* speed up session deletion, don't do the solo dance */
-			if (0 == (_state_of_the_state & Deletion)) {
+			if (!deletion_in_progress ()) {
 				(*iter)->solo_control()->set_value (0.0, Controllable::NoGroup);
 			}
 
@@ -3769,7 +3768,8 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 			(*iter)->output()->disconnect (0);
 
 			/* if the route had internal sends sending to it, remove them */
-			if ((*iter)->internal_return()) {
+
+			if (!deletion_in_progress () && (*iter)->internal_return()) {
 
 				boost::shared_ptr<RouteList> r = routes.reader ();
 				for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -3819,7 +3819,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 		resort_routes ();
 #endif
 
-	if (_process_graph && !(_state_of_the_state & Deletion) && _engine.running()) {
+	if (_process_graph && !deletion_in_progress() && _engine.running()) {
 		_process_graph->clear_other_chain ();
 	}
 
@@ -4629,7 +4629,7 @@ Session::playlist_region_added (boost::weak_ptr<Region> w)
 void
 Session::maybe_update_session_range (samplepos_t a, samplepos_t b)
 {
-	if (_state_of_the_state & Loading) {
+	if (loading ()) {
 		return;
 	}
 
@@ -4814,7 +4814,7 @@ Session::add_source (boost::shared_ptr<Source> source)
 void
 Session::remove_source (boost::weak_ptr<Source> src)
 {
-	if (_state_of_the_state & Deletion) {
+	if (deletion_in_progress ()) {
 		return;
 	}
 
@@ -4833,11 +4833,11 @@ Session::remove_source (boost::weak_ptr<Source> src)
 		}
 	}
 
-	if (!(_state_of_the_state & StateOfTheState (InCleanup|Loading))) {
+	if (!in_cleanup () && !loading ()) {
 
 		/* save state so we don't end up with a session file
-		   referring to non-existent sources.
-		*/
+		 * referring to non-existent sources.
+		 */
 
 		save_state (_current_snapshot_name);
 	}
@@ -5340,7 +5340,7 @@ Session::add_playlist (boost::shared_ptr<Playlist> playlist, bool unused)
 void
 Session::remove_playlist (boost::weak_ptr<Playlist> weak_playlist)
 {
-	if (_state_of_the_state & Deletion) {
+	if (deletion_in_progress ()) {
 		return;
 	}
 
@@ -5659,7 +5659,7 @@ Session::graph_reordered ()
 	   from a set_state() call or creating new tracks. Ditto for deletion.
 	*/
 
-	if ((_state_of_the_state & (InitialConnecting|Deletion)) || _adding_routes_in_progress || _reconnecting_routes_in_progress || _route_deletion_in_progress) {
+	if (inital_connect_or_deletion_in_progress () || _adding_routes_in_progress || _reconnecting_routes_in_progress || _route_deletion_in_progress) {
 		return;
 	}
 
@@ -5952,7 +5952,9 @@ Session::unmark_aux_send_id (uint32_t id)
 void
 Session::unmark_return_id (uint32_t id)
 {
-	if (_state_of_the_state & Deletion) { return; }
+	if (deletion_in_progress ()) {
+		return;
+	}
 	if (id < return_bitset.size()) {
 		return_bitset[id] = false;
 	}
@@ -5974,9 +5976,8 @@ Session::reset_native_file_format ()
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr) {
-			/* don't save state as we do this, there's no point
-			 */
-			_state_of_the_state = StateOfTheState (_state_of_the_state|InCleanup);
+			/* don't save state as we do this, there's no point */
+			_state_of_the_state = StateOfTheState (_state_of_the_state | InCleanup);
 			tr->reset_write_sources (false);
 			_state_of_the_state = StateOfTheState (_state_of_the_state & ~InCleanup);
 		}
@@ -6437,7 +6438,7 @@ Session::update_route_record_state ()
 void
 Session::listen_position_changed ()
 {
-	if (loading ())  {
+	if (loading ()) {
 		/* skip duing session restore (already taken care of) */
 		return;
 	}
@@ -6873,7 +6874,7 @@ Session::update_latency (bool playback)
 {
 	DEBUG_TRACE (DEBUG::Latency, string_compose ("JACK latency callback: %1\n", (playback ? "PLAYBACK" : "CAPTURE")));
 
-	if ((_state_of_the_state & (InitialConnecting|Deletion)) || _adding_routes_in_progress || _route_deletion_in_progress) {
+	if (inital_connect_or_deletion_in_progress () || _adding_routes_in_progress || _route_deletion_in_progress) {
 		return;
 	}
 	if (!_engine.running()) {
@@ -6928,7 +6929,7 @@ Session::set_worst_io_latencies ()
 void
 Session::set_worst_output_latency ()
 {
-	if (_state_of_the_state & (InitialConnecting|Deletion)) {
+	if (inital_connect_or_deletion_in_progress ()) {
 		return;
 	}
 
@@ -6952,7 +6953,7 @@ Session::set_worst_output_latency ()
 void
 Session::set_worst_input_latency ()
 {
-	if (_state_of_the_state & (InitialConnecting|Deletion)) {
+	if (inital_connect_or_deletion_in_progress ()) {
 		return;
 	}
 
@@ -6974,7 +6975,7 @@ Session::set_worst_input_latency ()
 void
 Session::update_latency_compensation (bool force_whole_graph)
 {
-	if (_state_of_the_state & (InitialConnecting|Deletion)) {
+	if (inital_connect_or_deletion_in_progress ()) {
 		return;
 	}
 	/* this lock is not usually contended, but under certain conditions,

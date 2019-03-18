@@ -603,7 +603,7 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 		/* this should not happen. new transport should postponse seeking
 		 * until de-click is complete */
 		printf ("LOCATE WITHOUT DECLICK (gain=%f) at %ld seek-to %ld\n", _declick_amp.gain (), playback_sample, sample);
-		return -1;
+		//return -1;
 	}
 	if (sample == playback_sample && !complete_refill) {
 		return 0; // XXX double-check this
@@ -614,7 +614,7 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 
 	//sample = std::max ((samplecnt_t)0, sample -_session.worst_output_latency ());
 
-	printf ("DiskReader::seek %s %ld -> %ld refill=%d\n", owner()->name().c_str(), playback_sample, sample, complete_refill);
+	//printf ("DiskReader::seek %s %ld -> %ld refill=%d\n", owner()->name().c_str(), playback_sample, sample, complete_refill);
 	// TODO: check if we can micro-locate
 
 	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {

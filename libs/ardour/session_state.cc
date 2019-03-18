@@ -316,6 +316,19 @@ Session::post_engine_init ()
 		config.map_parameters (ft);
 		_butler->map_parameters ();
 
+		/* Configure all processors; now that the
+		 * engine is running, ports are re-established,
+		 * and IOChange are complete.
+		 */
+		{
+			Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+			ProcessorChangeBlocker pcb (this);
+			boost::shared_ptr<RouteList> r = routes.reader ();
+			for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+				(*i)->configure_processors (0);
+			}
+		}
+
 		/* Reset all panners */
 
 		Delivery::reset_panners ();
@@ -351,7 +364,7 @@ Session::post_engine_init ()
 			auto_connect_master_bus ();
 		}
 
-		_state_of_the_state = StateOfTheState (_state_of_the_state & ~(CannotSave|Dirty));
+		_state_of_the_state = StateOfTheState (_state_of_the_state & ~(CannotSave | Dirty));
 
 		/* update latencies */
 
@@ -771,7 +784,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		lx.acquire ();
 	}
 
-	if (!_writable || (_state_of_the_state & CannotSave)) {
+	if (!_writable || cannot_save()) {
 		return 1;
 	}
 
@@ -907,13 +920,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		save_history (snapshot_name);
 
 		if (mark_as_clean) {
-			bool was_dirty = dirty();
-
-			_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
-
-			if (was_dirty) {
-				DirtyChanged (); /* EMIT SIGNAL */
-			}
+			unset_dirty (/* EMIT SIGNAL */ true);
 		}
 
 		StateSaved (snapshot_name); /* EMIT SIGNAL */
@@ -1432,7 +1439,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 		 */
 
 		if (!was_dirty) {
-			_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
+			unset_dirty ();
 		}
 	}
 
@@ -1531,7 +1538,7 @@ Session::set_state (const XMLNode& node, int version)
 	XMLNode* child;
 	int ret = -1;
 
-	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave);
+	_state_of_the_state = StateOfTheState (_state_of_the_state | CannotSave);
 
 	if (node.name() != X_("Session")) {
 		fatal << _("programming error: Session: incorrect XML node sent to set_state()") << endmsg;
@@ -2307,7 +2314,7 @@ Session::reset_write_sources (bool mark_write_complete, bool force)
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr) {
-			_state_of_the_state = StateOfTheState (_state_of_the_state|InCleanup);
+			_state_of_the_state = StateOfTheState (_state_of_the_state | InCleanup);
 			tr->reset_write_sources(mark_write_complete, force);
 			_state_of_the_state = StateOfTheState (_state_of_the_state & ~InCleanup);
 		}
@@ -2475,7 +2482,7 @@ Session::XMLSourceFactory (const XMLNode& node)
 int
 Session::save_template (const string& template_name, const string& description, bool replace_existing)
 {
-	if ((_state_of_the_state & CannotSave) || template_name.empty ()) {
+	if (cannot_save () || template_name.empty ()) {
 		return -1;
 	}
 
@@ -3280,7 +3287,7 @@ Session::can_cleanup_peakfiles () const
 	if (deletion_in_progress()) {
 		return false;
 	}
-	if (!_writable || (_state_of_the_state & CannotSave)) {
+	if (!_writable || cannot_save ()) {
 		warning << _("Cannot cleanup peak-files for read-only session.") << endmsg;
 		return false;
 	}
@@ -3353,7 +3360,7 @@ Session::cleanup_sources (CleanupReport& rep)
 	Searchpath msp;
 	set<boost::shared_ptr<Source> > sources_used_by_this_snapshot;
 
-	_state_of_the_state = (StateOfTheState) (_state_of_the_state | InCleanup);
+	_state_of_the_state = StateOfTheState (_state_of_the_state | InCleanup);
 
 	/* this is mostly for windows which doesn't allow file
 	 * renaming if the file is in use. But we don't special
@@ -3637,7 +3644,7 @@ Session::cleanup_sources (CleanupReport& rep)
 	ret = 0;
 
 out:
-	_state_of_the_state = (StateOfTheState) (_state_of_the_state & ~InCleanup);
+	_state_of_the_state = StateOfTheState (_state_of_the_state & ~InCleanup);
 
 	return ret;
 }
@@ -3672,7 +3679,7 @@ Session::set_dirty ()
 	}
 
 	/* never mark session dirty during loading */
-	if (_state_of_the_state & (Loading | Deletion)) {
+	if (loading () || deletion_in_progress ()) {
 		return;
 	}
 
@@ -3689,6 +3696,18 @@ Session::set_clean ()
 
 	if (was_dirty) {
 		DirtyChanged(); /* EMIT SIGNAL */
+	}
+}
+
+void
+Session::unset_dirty (bool emit_dirty_changed)
+{
+	bool was_dirty = dirty();
+
+	_state_of_the_state = StateOfTheState (_state_of_the_state & (~Dirty));
+
+	if (was_dirty && emit_dirty_changed) {
+		DirtyChanged (); /* EMIT SIGNAL */
 	}
 }
 
@@ -3722,7 +3741,7 @@ struct null_deleter { void operator()(void const *) const {} };
 void
 Session::remove_controllable (Controllable* c)
 {
-	if (_state_of_the_state & Deletion) {
+	if (deletion_in_progress()) {
 		return;
 	}
 
@@ -4261,7 +4280,7 @@ Session::rename (const std::string& new_name)
 
 	string const old_sources_root = _session_dir->sources_root();
 
-	if (!_writable || (_state_of_the_state & CannotSave)) {
+	if (!_writable || cannot_save ()) {
 		error << _("Cannot rename read-only session.") << endmsg;
 		return 0; // don't show "messed up" warning
 	}
@@ -5112,7 +5131,7 @@ Session::save_as (SaveAs& saveas)
 			*/
 
 			if (!saveas.include_media) {
-				_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
+				unset_dirty ();
 			}
 
 			save_state ("", false, false, !saveas.include_media);

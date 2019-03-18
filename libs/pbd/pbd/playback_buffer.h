@@ -32,16 +32,18 @@ template<class T>
 class /*LIBPBD_API*/ PlaybackBuffer
 {
 public:
+	static guint power_of_two_size (guint sz) {
+		int32_t power_of_two;
+		for (power_of_two = 1; 1U << power_of_two < sz; ++power_of_two);
+		return 1U << power_of_two;
+	}
+
 	PlaybackBuffer (guint sz, guint res = 8191)
 	: reservation (res)
 	, _reservation_lock ()
 	{
 		sz += reservation;
-
-		int32_t power_of_two;
-		for (power_of_two = 1; 1U << power_of_two < sz; ++power_of_two);
-		size = 1U << power_of_two;
-
+		size = power_of_two_size (sz);
 		size_mask = size - 1;
 		buf = new T[size];
 

@@ -843,9 +843,9 @@ Session::maybe_sync_start (pframes_t & nframes)
 void
 Session::queue_event (SessionEvent* ev)
 {
-	if (_state_of_the_state & Deletion) {
+	if (deletion_in_progress ()) {
 		return;
-	} else if (_state_of_the_state & Loading) {
+	} else if (loading ()) {
 		merge_event (ev);
 	} else {
 		Glib::Threads::Mutex::Lock lm (rb_write_lock);

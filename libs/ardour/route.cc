@@ -252,7 +252,9 @@ Route::init ()
 			Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 			_processors.push_back (_amp);
 		}
-		configure_processors (0);
+		if (!_session.loading()) {
+			configure_processors (0);
+		}
 	}
 
 	return 0;
@@ -2969,6 +2971,15 @@ Route::set_processor_state (const XMLNode& node)
 		 */
 		_processors = new_order;
 
+		/* When a required/existing internal processor is not in the list, it needs to
+		 * be added via configure_processors() -> setup_invisible_processors()
+		 */
+		if (_monitor_control) {
+			must_configure |= find (_processors.begin(), _processors.end(), _monitor_control) == _processors.end ();
+		}
+		if (_main_outs) {
+			must_configure |= find (_processors.begin(), _processors.end(), _main_outs) == _processors.end ();
+		}
 		if (_delayline) {
 			must_configure |= find (_processors.begin(), _processors.end(), _delayline) == _processors.end ();
 		}
@@ -2976,7 +2987,7 @@ Route::set_processor_state (const XMLNode& node)
 			must_configure |= find (_processors.begin(), _processors.end(), _intreturn) == _processors.end ();
 		}
 
-		if (must_configure) {
+		if (must_configure && !_session.loading()) {
 			configure_processors_unlocked (0, &lm);
 		}
 
@@ -3503,6 +3514,10 @@ Route::realtime_handle_transport_stopped ()
 void
 Route::input_change_handler (IOChange change, void * /*src*/)
 {
+	if (_session.loading()) {
+		return;
+	}
+
 	if ((change.type & IOChange::ConfigurationChanged)) {
 		/* This is called with the process lock held if change
 		   contains ConfigurationChanged
