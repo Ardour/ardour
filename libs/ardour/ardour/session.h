@@ -213,16 +213,21 @@ public:
 	bool path_is_within_session (const std::string&);
 
 	bool writable() const { return _writable; }
-	void set_dirty ();
-	void set_clean ();
-	bool dirty() const { return _state_of_the_state & Dirty; }
-	void set_deletion_in_progress ();
-	void clear_deletion_in_progress ();
-	bool reconnection_in_progress() const { return _reconnecting_routes_in_progress; }
-	bool deletion_in_progress() const { return _state_of_the_state & Deletion; }
-	bool routes_deletion_in_progress() const { return _route_deletion_in_progress; }
-	bool peaks_cleanup_in_progres() const { return _state_of_the_state & PeakCleanup; }
-	bool loading () const { return _state_of_the_state & Loading; }
+	void set_clean ();   // == Clean and emit DirtyChanged IFF session was Dirty
+	void set_dirty ();   // |= Dirty and emit DirtyChanged (unless already dirty or Loading, Deletion)
+	void unset_dirty (bool emit_dirty_changed = false); // &= ~Dirty
+	void set_deletion_in_progress ();   // |= Deletion
+	void clear_deletion_in_progress (); // &= ~Deletion
+
+	bool reconnection_in_progress () const         { return _reconnecting_routes_in_progress; }
+	bool routes_deletion_in_progress () const      { return _route_deletion_in_progress; }
+	bool dirty () const                            { return _state_of_the_state & Dirty; }
+	bool deletion_in_progress () const             { return _state_of_the_state & Deletion; }
+	bool peaks_cleanup_in_progres () const         { return _state_of_the_state & PeakCleanup; }
+	bool loading () const                          { return _state_of_the_state & Loading; }
+	bool cannot_save () const                      { return _state_of_the_state & CannotSave; }
+	bool in_cleanup () const                       { return _state_of_the_state & InCleanup; }
+	bool inital_connect_or_deletion_in_progress () { return _state_of_the_state & (InitialConnecting | Deletion); }
 
 	PBD::Signal0<void> DirtyChanged;
 
@@ -582,8 +587,6 @@ public:
 		InCleanup = 0x20,
 		PeakCleanup = 0x40
 	};
-
-	StateOfTheState state_of_the_state() const { return _state_of_the_state; }
 
 	class StateProtector {
 		public:

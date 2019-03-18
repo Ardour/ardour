@@ -105,7 +105,7 @@ IO::~IO ()
 void
 IO::disconnect_check (boost::shared_ptr<Port> a, boost::shared_ptr<Port> b)
 {
-	if (_session.state_of_the_state () & Session::Deletion) {
+	if (_session.deletion_in_progress ()) {
 		return;
 	}
 	/* this could be called from within our own ::disconnect() method(s)

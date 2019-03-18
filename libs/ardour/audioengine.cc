@@ -985,9 +985,7 @@ AudioEngine::stop (bool for_latency)
 		_running = false;
 	}
 
-	if (_session && was_running_will_stop &&
-	    (_session->state_of_the_state() & Session::Loading) == 0 &&
-	    (_session->state_of_the_state() & Session::Deletion) == 0) {
+	if (_session && was_running_will_stop && !_session->loading() && !_session->deletion_in_progress()) {
 		// it's not a halt, but should be handled the same way:
 		// disable record, stop transport and I/O processign but save the data.
 		_session->engine_halted ();
