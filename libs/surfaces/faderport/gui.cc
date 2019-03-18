@@ -21,9 +21,9 @@
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
 
-#include "pbd/unwind.h"
-#include "pbd/strsplit.h"
 #include "pbd/file_utils.h"
+#include "pbd/strsplit.h"
+#include "pbd/unwind.h"
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/bindings.h"
