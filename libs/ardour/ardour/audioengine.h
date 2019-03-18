@@ -307,6 +307,7 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	Glib::Threads::Mutex       _devicelist_update_lock;
 	gint                       _stop_hw_devicelist_processing;
 	uint32_t                   _start_cnt;
+	uint32_t                   _init_countdown;
 
 	void start_hw_event_processing();
 	void stop_hw_event_processing();
