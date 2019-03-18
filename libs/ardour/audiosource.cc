@@ -50,6 +50,7 @@
 #include <glibmm/miscutils.h>
 
 #include "pbd/file_utils.h"
+#include "pbd/playback_buffer.h"
 #include "pbd/scoped_file_descriptor.h"
 #include "pbd/xml++.h"
 
@@ -1117,7 +1118,7 @@ AudioSource::ensure_buffers_for_level (uint32_t level, samplecnt_t sample_rate)
 void
 AudioSource::ensure_buffers_for_level_locked (uint32_t level, samplecnt_t sample_rate)
 {
-	samplecnt_t nframes = (samplecnt_t) floor (Config->get_audio_playback_buffer_seconds() * sample_rate);
+	samplecnt_t nframes = PlaybackBuffer<Sample>::power_of_two_size ((samplecnt_t) floor (Config->get_audio_playback_buffer_seconds() * sample_rate));
 
 	/* this may be called because either "level" or "sample_rate" have
 	 * changed. and it may be called with "level" smaller than the current
