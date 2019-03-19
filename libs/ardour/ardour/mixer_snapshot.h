@@ -20,13 +20,8 @@
 #ifndef __ardour_mixer_snapshot_h__
 #define __ardour_mixer_snapshot_h__
 
-#include <utility>
 #include <vector>
 #include <ctime>
-
-#include "pbd/stateful.h"
-#include "pbd/xml++.h"
-#include "pbd/id.h"
 
 #include "ardour/session.h"
 #include "ardour/route.h"

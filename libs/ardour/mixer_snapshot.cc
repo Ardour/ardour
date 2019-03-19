@@ -1,20 +1,13 @@
 #include <iostream>
-#include <ctime>
 
 #include "ardour/mixer_snapshot.h"
-#include "ardour/audioengine.h"
 #include "ardour/route_group.h"
 #include "ardour/vca_manager.h"
-#include "ardour/vca.h"
-#include "ardour/session_directory.h"
 #include "ardour/filesystem_paths.h"
 
-#include "pbd/stateful.h"
-#include "pbd/id.h"
 #include "pbd/i18n.h"
 #include "pbd/xml++.h"
 
-#include <glib.h>
 #include <glibmm.h>
 #include <glibmm/fileutils.h>
 
