@@ -521,6 +521,34 @@ SessionPlaylists::region_use_count (boost::shared_ptr<Region> region) const
 	return cnt;
 }
 
+vector<boost::shared_ptr<Playlist> >
+SessionPlaylists::get_used () const
+{
+	vector<boost::shared_ptr<Playlist> > pl;
+
+	Glib::Threads::Mutex::Lock lm (lock);
+
+	for (List::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		pl.push_back (*i);
+	}
+
+	return pl;
+}
+
+vector<boost::shared_ptr<Playlist> >
+SessionPlaylists::get_unused () const
+{
+	vector<boost::shared_ptr<Playlist> > pl;
+
+	Glib::Threads::Mutex::Lock lm (lock);
+
+	for (List::const_iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+		pl.push_back (*i);
+	}
+
+	return pl;
+}
+
 /** @return list of Playlists that are associated with a track */
 vector<boost::shared_ptr<Playlist> >
 SessionPlaylists::playlists_for_track (boost::shared_ptr<Track> tr) const
