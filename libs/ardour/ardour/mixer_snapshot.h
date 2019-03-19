@@ -30,6 +30,8 @@
 
 #include "ardour/session.h"
 #include "ardour/route.h"
+#include "ardour/vca.h"
+#include "ardour/route_group.h"
 
 class MixerSnapshot //: public PBD::Stateful
 {
@@ -39,6 +41,9 @@ class MixerSnapshot //: public PBD::Stateful
 
         void snap();
         void snap(ARDOUR::RouteList);
+        void snap(ARDOUR::RouteGroup*);
+        void snap(boost::shared_ptr<ARDOUR::VCA>);
+        void snap(boost::shared_ptr<ARDOUR::Route>);
         void recall();
         void clear();
         void write();
@@ -51,13 +56,12 @@ class MixerSnapshot //: public PBD::Stateful
     private:
         ARDOUR::Session* _session;
 
-        void snap(boost::shared_ptr<ARDOUR::Route>);
+        void reassign_masters(boost::shared_ptr<ARDOUR::Route>, XMLNode);
 
         struct State {
             std::string id;
             std::string name;
             XMLNode     node;
-            std::vector<std::string> slaves;
         };
 
         std::vector<State> route_states;
