@@ -1075,7 +1075,7 @@ RouteTimeAxisView::rename_current_playlist ()
 		}
 		prompter.get_result (name);
 		if (name.length()) {
-			if (_session->playlists->by_name (name)) {
+			if (_session->playlists()->by_name (name)) {
 				MessageDialog msg (_("Given playlist name is not unique."));
 				msg.run ();
 				prompter.set_initial_text (Playlist::bump_name (name, *_session));
@@ -1143,7 +1143,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playl
 		name = resolve_new_group_playlist_name(name,playlists_before_op);
 	}
 
-	while (_session->playlists->by_name(name)) {
+	while (_session->playlists()->by_name(name)) {
 		name = Playlist::bump_name (name, *_session);
 	}
 
@@ -1171,7 +1171,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playl
 			}
 			prompter.get_result (name);
 			if (name.length()) {
-				if (_session->playlists->by_name (name)) {
+				if (_session->playlists()->by_name (name)) {
 					MessageDialog msg (_("Given playlist name is not unique."));
 					msg.run ();
 					prompter.set_initial_text (Playlist::bump_name (name, *_session));
@@ -1551,7 +1551,7 @@ RouteTimeAxisView::build_playlist_menu ()
 	RadioMenuItem::Group playlist_group;
 	boost::shared_ptr<Track> tr = track ();
 
-	vector<boost::shared_ptr<Playlist> > playlists_tr = _session->playlists->playlists_for_track (tr);
+	vector<boost::shared_ptr<Playlist> > playlists_tr = _session->playlists()->playlists_for_track (tr);
 
 	/* sort the playlists */
 	PlaylistSorter cmp;
@@ -1646,7 +1646,7 @@ RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> 
 				continue;
 			}
 
-			boost::shared_ptr<Playlist> ipl = session()->playlists->by_name(playlist_name);
+			boost::shared_ptr<Playlist> ipl = session()->playlists()->by_name(playlist_name);
 			if (!ipl) {
 				// No playlist for this track for this take yet, make it
 				track->use_default_new_playlist();
