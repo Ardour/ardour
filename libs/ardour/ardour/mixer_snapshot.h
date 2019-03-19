@@ -51,7 +51,7 @@ class MixerSnapshot //: public PBD::Stateful
     private:
         ARDOUR::Session* _session;
 
-        void reassign_masters(boost::shared_ptr<ARDOUR::Route>, XMLNode);
+        void reassign_masters(boost::shared_ptr<ARDOUR::Slavable>, XMLNode);
 
         struct State {
             std::string id;

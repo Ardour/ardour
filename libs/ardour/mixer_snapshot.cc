@@ -7,6 +7,7 @@
 
 #include "pbd/i18n.h"
 #include "pbd/xml++.h"
+#include "pbd/memento_command.h"
 
 #include <glibmm.h>
 #include <glibmm/fileutils.h>
@@ -53,11 +54,8 @@ void MixerSnapshot::snap(boost::shared_ptr<Route> route)
     
     if(slavable)
     {
-        XMLNodeList nlist;
-        XMLNodeConstIterator niter;
-        nlist = slavable->children();
-
-        for(niter = nlist.begin(); niter != nlist.end(); ++niter) {
+        XMLNodeList nlist = slavable->children();
+        for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); niter++) {
             string number;
             (*niter)->get_property(X_("number"), number);
             
@@ -65,7 +63,7 @@ void MixerSnapshot::snap(boost::shared_ptr<Route> route)
             boost::shared_ptr<VCA> vca = _session->vca_manager().vca_by_number(i);
 
             if(vca) {
-                //we will need this later recollection
+                //we will need this for later recollection
                 (*niter)->set_property(X_("name"), vca->name());
                 snap(vca);
             }
@@ -89,7 +87,7 @@ void MixerSnapshot::snap(RouteGroup* group)
     for(vector<State>::const_iterator it = group_states.begin(); it != group_states.end(); it++)
         if((it)->name == group->name())
             return;
-    cout << "capturing " << "group " << group->name() << endl;
+
     string name = group->name();
     XMLNode& original = group->get_state();
     XMLNode  copy (original);
@@ -111,7 +109,7 @@ void MixerSnapshot::snap(boost::shared_ptr<VCA> vca)
     for(vector<State>::const_iterator it = vca_states.begin(); it != vca_states.end(); it++)
         if((it)->name == vca->name())
             return;
-    cout << "capturing " << "vca " << vca->name() << endl;
+
     string name = vca->name();
     XMLNode& original = vca->get_state();
     XMLNode  copy (original);
@@ -155,7 +153,7 @@ void MixerSnapshot::snap(RouteList rl)
         snap((*it));
 }
 
-void MixerSnapshot::reassign_masters(boost::shared_ptr<Route> slv, XMLNode node)
+void MixerSnapshot::reassign_masters(boost::shared_ptr<Slavable> slv, XMLNode node)
 {
     if(!slv)
         return;
@@ -167,7 +165,7 @@ void MixerSnapshot::reassign_masters(boost::shared_ptr<Route> slv, XMLNode node)
 
     XMLNodeList nlist = slavable->children();
 
-    for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
+    for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); niter++) {
         string name;
         (*niter)->get_property(X_("name"), name);
 
@@ -178,8 +176,10 @@ void MixerSnapshot::reassign_masters(boost::shared_ptr<Route> slv, XMLNode node)
     }
 }
 
-void MixerSnapshot::recall() 
-{    
+void MixerSnapshot::recall()
+{
+    _session->begin_reversible_command(_("mixer-snapshot recall"));
+    
     //vcas
     for(vector<State>::const_iterator i = vca_states.begin(); i != vca_states.end(); i++) {
         State state = (*i);
@@ -208,8 +208,10 @@ void MixerSnapshot::recall()
             route = _session->route_by_name(state.name);
 
         if(route) {
+            XMLNode& bfr = route->get_state();
             route->set_state(state.node, PBD::Stateful::loading_state_version);
             reassign_masters(route, state.node);
+            _session->add_command(new MementoCommand<Route>((*route), &bfr, &route->get_state()));
         }
     }
 
@@ -225,6 +227,8 @@ void MixerSnapshot::recall()
         if(group)
             group->set_state(state.node, PBD::Stateful::loading_state_version);
     }
+
+    _session->commit_reversible_command();
 }
 
 void MixerSnapshot::write()
@@ -272,7 +276,7 @@ void MixerSnapshot::load()
 
     if(route_node) {
         XMLNodeList nlist = route_node->children();
-        for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
+        for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); niter++) {
             string name, id;
             (*niter)->get_property(X_("name"), name);
             (*niter)->get_property(X_("id"), id);
@@ -284,7 +288,7 @@ void MixerSnapshot::load()
 
     if(group_node) {
         XMLNodeList nlist = group_node->children();       
-        for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
+        for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); niter++) {
             string name, id;
             (*niter)->get_property(X_("name"), name);
             (*niter)->get_property(X_("id"), id);
@@ -296,7 +300,7 @@ void MixerSnapshot::load()
 
     if(vca_node) {
         XMLNodeList nlist = vca_node->children();
-        for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
+        for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); niter++) {
             string name, id;
             (*niter)->get_property(X_("name"), name);
             (*niter)->get_property(X_("id"), id);
