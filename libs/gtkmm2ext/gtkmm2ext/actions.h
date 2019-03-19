@@ -55,6 +55,7 @@ namespace ActionManager {
 	class LIBGTKMM2EXT_API MissingActionException : public std::exception {
 	  public:
 		MissingActionException (std::string const & str);
+		~MissingActionException() throw() {}
 		const char *what() const throw();
 	  private:
 		std::string missing_action_name;
