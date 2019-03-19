@@ -105,7 +105,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 
 	model->clear ();
 
-	_session->playlists->foreach (this, &PlaylistSelector::add_playlist_to_map);
+	_session->playlists()->foreach (this, &PlaylistSelector::add_playlist_to_map);
 
 	boost::shared_ptr<Track> this_track = rui->track();
 
@@ -171,7 +171,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 
 	// Add unassigned (imported) playlists to the list
 	list<boost::shared_ptr<Playlist> > unassigned;
-	_session->playlists->unassigned (unassigned);
+	_session->playlists()->unassigned (unassigned);
 
 	TreeModel::Row row;
 	TreeModel::Row selected_row;

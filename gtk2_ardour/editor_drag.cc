@@ -2986,7 +2986,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			/* a MRV start trim may change the source length. ensure we cover all playlists here */
 			if (mrv && _operation == StartTrim) {
 				vector<boost::shared_ptr<Playlist> > all_playlists;
-				_editor->session()->playlists->get (all_playlists);
+				_editor->session()->playlists()->get (all_playlists);
 				for (vector<boost::shared_ptr<Playlist> >::iterator x = all_playlists.begin(); x != all_playlists.end(); ++x) {
 
 					if ((*x)->uses_source (rv->region()->source(0))) {

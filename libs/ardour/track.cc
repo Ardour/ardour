@@ -181,11 +181,11 @@ Track::set_state (const XMLNode& node, int version)
 					set_align_choice (ac, true);
 				}
 
-				if (boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist> (_session.playlists->by_name (name))) {
+				if (boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist> (_session.playlists()->by_name (name))) {
 					use_playlist (DataType::AUDIO, pl);
 				}
 
-				if (boost::shared_ptr<MidiPlaylist> pl = boost::dynamic_pointer_cast<MidiPlaylist> (_session.playlists->by_name (name))) {
+				if (boost::shared_ptr<MidiPlaylist> pl = boost::dynamic_pointer_cast<MidiPlaylist> (_session.playlists()->by_name (name))) {
 					use_playlist (DataType::MIDI, pl);
 				}
 			}
@@ -390,7 +390,7 @@ Track::set_name (const string& str)
 
 	boost::shared_ptr<Track> me = boost::dynamic_pointer_cast<Track> (shared_from_this ());
 
-	if (_playlists[data_type()]->all_regions_empty () && _session.playlists->playlists_for_track (me).size() == 1) {
+	if (_playlists[data_type()]->all_regions_empty () && _session.playlists()->playlists_for_track (me).size() == 1) {
 		/* Only rename the diskstream (and therefore the playlist) if
 		   a) the playlist has never had a region added to it and
 		   b) there is only one playlist for this track.
@@ -608,7 +608,7 @@ Track::find_and_use_playlist (DataType dt, PBD::ID const & id)
 {
 	boost::shared_ptr<Playlist> playlist;
 
-	if ((playlist = _session.playlists->by_id (id)) == 0) {
+	if ((playlist = _session.playlists()->by_id (id)) == 0) {
 		return -1;
 	}
 

@@ -78,6 +78,12 @@ DiskIOProcessor::~DiskIOProcessor ()
 
 	channels.flush ();
 	delete _midi_buf;
+
+	for (uint32_t n = 0; n < DataType::num_types; ++n) {
+		if (_playlists[n]) {
+			_playlists[n]->release ();
+		}
+	}
 }
 
 

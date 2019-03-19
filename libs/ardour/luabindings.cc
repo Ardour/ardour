@@ -78,6 +78,7 @@
 #include "ardour/send.h"
 #include "ardour/session.h"
 #include "ardour/session_object.h"
+#include "ardour/session_playlists.h"
 #include "ardour/sidechain.h"
 #include "ardour/solo_isolate_control.h"
 #include "ardour/solo_safe_control.h"
@@ -261,6 +262,7 @@ CLASSKEYS(boost::shared_ptr<ARDOUR::PluginInfo>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Processor>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Readable>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Region>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::SessionPlaylists>);
 CLASSKEYS(boost::shared_ptr<Evoral::ControlList>);
 CLASSKEYS(boost::shared_ptr<Evoral::Note<Temporal::Beats> >);
 CLASSKEYS(boost::shared_ptr<Evoral::Sequence<Temporal::Beats> >);
@@ -1127,6 +1129,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("combine", &Playlist::combine)
 		.addFunction ("uncombine", &Playlist::uncombine)
 		.addFunction ("split_region", &Playlist::split_region)
+		.addFunction ("get_orig_track_id", &Playlist::get_orig_track_id)
 		//.addFunction ("split", &Playlist::split) // XXX needs MusicSample
 		.addFunction ("cut", (boost::shared_ptr<Playlist> (Playlist::*)(std::list<AudioRange>&, bool))&Playlist::cut)
 #if 0
@@ -1141,6 +1144,17 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <MidiPlaylist, Playlist> ("MidiPlaylist")
 		.addFunction ("set_note_mode", &MidiPlaylist::set_note_mode)
+		.endClass ()
+
+		.beginWSPtrClass <SessionPlaylists> ("SessionPlaylists")
+		.addFunction ("by_name", &SessionPlaylists::by_name)
+		.addFunction ("by_id", &SessionPlaylists::by_id)
+		.addFunction ("source_use_count", &SessionPlaylists::source_use_count)
+		.addFunction ("region_use_count", &SessionPlaylists::region_use_count)
+		.addFunction ("playlists_for_track", &SessionPlaylists::playlists_for_track)
+		.addFunction ("get_used", &SessionPlaylists::get_used)
+		.addFunction ("get_unused", &SessionPlaylists::get_unused)
+		.addFunction ("n_playlists", &SessionPlaylists::n_playlists)
 		.endClass ()
 
 		.deriveWSPtrClass <Track, Route> ("Track")
@@ -1634,6 +1648,10 @@ LuaBindings::common (lua_State* L)
 
 		// typedef std::vector<boost::shared_ptr<Source> > Region::SourceList
 		.beginStdVector <boost::shared_ptr<Source> > ("SourceList")
+		.endClass ()
+
+		// from SessionPlaylists
+		.beginStdVector <boost::shared_ptr<Playlist> > ("PlaylistList")
 		.endClass ()
 
 		// std::list< boost::weak_ptr <AudioSource> >
@@ -2279,6 +2297,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("abort_reversible_command", &Session::abort_reversible_command)
 		.addFunction ("add_command", &Session::add_command)
 		.addFunction ("add_stateful_diff_command", &Session::add_stateful_diff_command)
+		.addFunction ("playlists", &Session::playlists)
 		.addFunction ("engine", (AudioEngine& (Session::*)())&Session::engine)
 		.addFunction ("get_block_size", &Session::get_block_size)
 		.addFunction ("worst_output_latency", &Session::worst_output_latency)
