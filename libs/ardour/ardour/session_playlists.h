@@ -72,6 +72,7 @@ private:
 	void remove (boost::shared_ptr<Playlist>);
 	void remove_weak (boost::weak_ptr<Playlist>);
 	void track (bool, boost::weak_ptr<Playlist>);
+	void update_tracking ();
 
 	void find_equivalent_playlist_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >& result);
 	void update_after_tempo_map_change ();

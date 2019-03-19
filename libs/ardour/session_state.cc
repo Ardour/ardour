@@ -1702,6 +1702,9 @@ Session::set_state (const XMLNode& node, int version)
 		goto out;
 	}
 
+	/* Now that we Tracks have been loaded and playlists are assigned */
+	_playlists->update_tracking ();
+
 	/* Now that we have Routes and masters loaded, connect them if appropriate */
 
 	Slavable::Assign (_vca_manager); /* EMIT SIGNAL */
