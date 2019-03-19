@@ -170,7 +170,7 @@ Session::Session (AudioEngine &eng,
                   const string& snapshot_name,
                   BusProfile* bus_profile,
                   string mix_template)
-	: playlists (new SessionPlaylists)
+	: _playlists (new SessionPlaylists)
 	, _engine (eng)
 	, process_function (&Session::process_with_events)
 	, _bounce_processing_active (false)
@@ -794,7 +794,7 @@ Session::destroy ()
 	}
 
 	/* not strictly necessary, but doing it here allows the shared_ptr debugging to work */
-	playlists.reset ();
+	_playlists.reset ();
 
 	emit_thread_terminate ();
 
@@ -3342,7 +3342,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 				XMLNode* ds_node = find_named_node (node_copy, "Diskstream");
 				if (ds_node) {
 					const std::string playlist_name = ds_node->property (X_("playlist"))->value ();
-					boost::shared_ptr<Playlist> playlist = playlists->by_name (playlist_name);
+					boost::shared_ptr<Playlist> playlist = _playlists->by_name (playlist_name);
 					// Use same name as Route::set_name_in_state so playlist copy
 					// is picked up when creating the Route in XMLRouteFactory below
 					playlist = PlaylistFactory::create (playlist, string_compose ("%1.1", name));
@@ -3352,7 +3352,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 				XMLNode* ds_node = find_named_node (node_copy, "Diskstream");
 				if (ds_node) {
 					const std::string playlist_name = ds_node->property (X_("playlist"))->value ();
-					boost::shared_ptr<Playlist> playlist = playlists->by_name (playlist_name);
+					boost::shared_ptr<Playlist> playlist = _playlists->by_name (playlist_name);
 					playlist->share_with ((node_copy.property (X_("id")))->value());
 				}
 			}
@@ -4714,7 +4714,7 @@ Session::destroy_sources (list<boost::shared_ptr<Source> > srcs)
 		tmp = r;
 		++tmp;
 
-		playlists->destroy_region (*r);
+		_playlists->destroy_region (*r);
 		RegionFactory::map_remove (*r);
 
 		(*r)->drop_sources ();
@@ -5328,7 +5328,7 @@ Session::add_playlist (boost::shared_ptr<Playlist> playlist, bool unused)
 		return;
 	}
 
-	playlists->add (playlist);
+	_playlists->add (playlist);
 
 	if (unused) {
 		playlist->release();
@@ -5350,7 +5350,7 @@ Session::remove_playlist (boost::weak_ptr<Playlist> weak_playlist)
 		return;
 	}
 
-	playlists->remove (playlist);
+	_playlists->remove (playlist);
 
 	set_dirty();
 }
@@ -5773,7 +5773,7 @@ Session::tempo_map_changed (const PropertyChange&)
 {
 	clear_clicks ();
 
-	playlists->update_after_tempo_map_change ();
+	_playlists->update_after_tempo_map_change ();
 
 	_locations->apply (*this, &Session::update_locations_after_tempo_map_change);
 

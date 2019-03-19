@@ -1117,7 +1117,7 @@ public:
 		PostTransportAdjustCaptureBuffering   = 0x2000
 	};
 
-	boost::shared_ptr<SessionPlaylists> playlists;
+	boost::shared_ptr<SessionPlaylists> playlists () const { return _playlists; }
 
 	void send_mmc_locate (samplepos_t);
 	void queue_full_time_code () { _send_timecode_update = true; }
@@ -1226,6 +1226,8 @@ private:
 	static guint _name_id_counter;
 	static void init_name_id_counter (guint n);
 	static unsigned int name_id_counter ();
+
+	boost::shared_ptr<SessionPlaylists> _playlists;
 
 	/* stuff used in process() should be close together to
 	   maximise cache hits

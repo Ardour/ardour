@@ -1263,8 +1263,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 		set<boost::shared_ptr<Source> > sources_used_by_this_snapshot;
 
 		if (only_used_assets) {
-			playlists->sync_all_regions_with_regions ();
-			playlists->foreach (boost::bind (merge_all_sources, _1, &sources_used_by_this_snapshot), false);
+			_playlists->sync_all_regions_with_regions ();
+			_playlists->foreach (boost::bind (merge_all_sources, _1, &sources_used_by_this_snapshot), false);
 		}
 
 		for (SourceMap::iterator siter = sources.begin(); siter != sources.end(); ++siter) {
@@ -1475,7 +1475,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 		}
 	}
 
-	playlists->add_state (node, save_template, !only_used_assets);
+	_playlists->add_state (node, save_template, !only_used_assets);
 
 	child = node->add_child ("RouteGroups");
 	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
@@ -1663,13 +1663,13 @@ Session::set_state (const XMLNode& node, int version)
 	if ((child = find_named_node (node, "Playlists")) == 0) {
 		error << _("Session: XML state has no playlists section") << endmsg;
 		goto out;
-	} else if (playlists->load (*this, *child)) {
+	} else if (_playlists->load (*this, *child)) {
 		goto out;
 	}
 
 	if ((child = find_named_node (node, "UnusedPlaylists")) == 0) {
 		// this is OK
-	} else if (playlists->load_unused (*this, *child)) {
+	} else if (_playlists->load_unused (*this, *child)) {
 		goto out;
 	}
 
@@ -3245,7 +3245,7 @@ Session::cleanup_regions ()
 
 	for (RegionFactory::RegionMap::const_iterator i = regions.begin(); i != regions.end();) {
 
-		uint32_t used = playlists->region_use_count (i->second);
+		uint32_t used = _playlists->region_use_count (i->second);
 
 		if (used == 0 && !i->second->automatic ()) {
 			boost::weak_ptr<Region> w = i->second;
@@ -3265,7 +3265,7 @@ Session::cleanup_regions ()
 				continue;
 			}
 			assert(boost::dynamic_pointer_cast<PlaylistSource>(i->second->source (0)) != 0);
-			if (0 == playlists->region_use_count (i->second)) {
+			if (0 == _playlists->region_use_count (i->second)) {
 				boost::weak_ptr<Region> w = i->second;
 				++i;
 				RegionFactory::map_remove (w);
@@ -3375,14 +3375,14 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	/* consider deleting all unused playlists */
 
-	if (playlists->maybe_delete_unused (boost::bind (Session::ask_about_playlist_deletion, _1))) {
+	if (_playlists->maybe_delete_unused (boost::bind (Session::ask_about_playlist_deletion, _1))) {
 		ret = 0;
 		goto out;
 	}
 
 	/* sync the "all regions" property of each playlist with its current state */
 
-	playlists->sync_all_regions_with_regions ();
+	_playlists->sync_all_regions_with_regions ();
 
 	/* find all un-used sources */
 
@@ -3442,7 +3442,7 @@ Session::cleanup_sources (CleanupReport& rep)
 	 * This will include the playlists used within compound regions.
 	 */
 
-	playlists->foreach (boost::bind (merge_all_sources, _1, &sources_used_by_this_snapshot));
+	_playlists->foreach (boost::bind (merge_all_sources, _1, &sources_used_by_this_snapshot));
 
 	/*  add our current source list
 	*/
@@ -4005,9 +4005,9 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "edit-mode") {
 
-		Glib::Threads::Mutex::Lock lm (playlists->lock);
+		Glib::Threads::Mutex::Lock lm (_playlists->lock);
 
-		for (SessionPlaylists::List::iterator i = playlists->playlists.begin(); i != playlists->playlists.end(); ++i) {
+		for (SessionPlaylists::List::iterator i = _playlists->playlists.begin(); i != _playlists->playlists.end(); ++i) {
 			(*i)->set_edit_mode (Config->get_edit_mode ());
 		}
 
@@ -5292,8 +5292,8 @@ Session::archive_session (const std::string& dest,
 
 	set<boost::shared_ptr<Source> > sources_used_by_this_snapshot;
 	if (only_used_sources) {
-		playlists->sync_all_regions_with_regions ();
-		playlists->foreach (boost::bind (merge_all_sources, _1, &sources_used_by_this_snapshot), false);
+		_playlists->sync_all_regions_with_regions ();
+		_playlists->foreach (boost::bind (merge_all_sources, _1, &sources_used_by_this_snapshot), false);
 	}
 
 	/* collect audio sources for this session, calc total size for encoding

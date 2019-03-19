@@ -111,7 +111,7 @@ Session::memento_command_factory(XMLNode *n)
 	    return new MementoCommand<TempoMap>(*_tempo_map, before, after);
 
     } else if (type_name == "ARDOUR::Playlist" || type_name == "ARDOUR::AudioPlaylist" || type_name == "ARDOUR::MidiPlaylist") {
-	    if (boost::shared_ptr<Playlist> pl = playlists->by_name(child->property("name")->value())) {
+	    if (boost::shared_ptr<Playlist> pl = _playlists->by_name(child->property("name")->value())) {
 		    return new MementoCommand<Playlist>(*(pl.get()), before, after);
 	    }
 
@@ -165,7 +165,7 @@ Session::stateful_diff_command_factory (XMLNode* n)
 		}
 
 	} else if (type_name == "ARDOUR::AudioPlaylist" ||  type_name == "ARDOUR::MidiPlaylist") {
-		boost::shared_ptr<Playlist> p = playlists->by_id (id);
+		boost::shared_ptr<Playlist> p = _playlists->by_id (id);
 		if (p) {
 			return new StatefulDiffCommand (p, *n);
 		} else {

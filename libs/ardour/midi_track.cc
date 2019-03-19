@@ -265,7 +265,7 @@ MidiTrack::set_state_part_two ()
 
 		std::string str;
 		if (fnode->get_property (X_("playlist"), str)) {
-			boost::shared_ptr<Playlist> pl = _session.playlists->by_name (str);
+			boost::shared_ptr<Playlist> pl = _session.playlists()->by_name (str);
 			if (pl) {
 				_freeze_record.playlist = boost::dynamic_pointer_cast<MidiPlaylist> (pl);
 			} else {
