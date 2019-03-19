@@ -1850,9 +1850,9 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 		boost::shared_ptr<Track> track;
 
 		if (type == DataType::AUDIO) {
-			track.reset (new AudioTrack (*this, X_("toBeResetFroXML")));
+			track.reset (new AudioTrack (*this, string())); // name will be reset from XML in ::set_state() below
 		} else {
-			track.reset (new MidiTrack (*this, X_("toBeResetFroXML")));
+			track.reset (new MidiTrack (*this, string())); // name will be reset from XML in ::set_state() below
 		}
 
 		if (track->init()) {

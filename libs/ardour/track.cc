@@ -103,7 +103,13 @@ Track::init ()
 
 	set_align_choice_from_io ();
 
-	use_new_playlist (data_type());
+	if (!name().empty()) {
+		/* an empty name means that we are being constructed via
+		   serialized state (XML). Don't create a playlist, because one
+		   will be created or discovered during ::set_state().
+		*/
+		use_new_playlist (data_type());
+	}
 
 	boost::shared_ptr<Route> rp (boost::dynamic_pointer_cast<Route> (shared_from_this()));
 	boost::shared_ptr<Track> rt = boost::dynamic_pointer_cast<Track> (rp);
