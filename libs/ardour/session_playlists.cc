@@ -111,6 +111,30 @@ SessionPlaylists::remove (boost::shared_ptr<Playlist> playlist)
 	}
 }
 
+void
+SessionPlaylists::update_tracking ()
+{
+	/* This is intended to be called during session-load, after loading
+	 * playlists and re-assigning them to tracks (refcnt is up to date).
+	 * Check playlist refcnt, move unused playlist to unused_playlists
+	 * array (which may be the case when loading old sessions)
+	 */
+	for (List::iterator i = playlists.begin(); i != playlists.end(); ) {
+		if ((*i)->hidden () || (*i)->used ()) {
+			++i;
+			continue;
+		}
+
+		warning << _("Session State: Unused playlist was listed as used.") << endmsg;
+
+		assert (unused_playlists.find (*i) == unused_playlists.end());
+		unused_playlists.insert (*i);
+
+		List::iterator rm = i;
+		++i;
+		 playlists.erase (rm);
+	}
+}
 
 void
 SessionPlaylists::track (bool inuse, boost::weak_ptr<Playlist> wpl)

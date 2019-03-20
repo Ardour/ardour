@@ -1142,10 +1142,13 @@ Editor::access_action (const std::string& action_group, const std::string& actio
 	ENSURE_GUI_THREAD (*this, &Editor::access_action, action_group, action_item)
 
 	RefPtr<Action> act;
-	act = ActionManager::get_action (action_group.c_str(), action_item.c_str());
-
-	if (act) {
-		act->activate();
+	try {
+		act = ActionManager::get_action (action_group.c_str(), action_item.c_str());
+		if (act) {
+			act->activate();
+		}
+	} catch ( ActionManager::MissingActionException const& e) {
+		cerr << "MissingActionException:" << e.what () << endl;
 	}
 }
 

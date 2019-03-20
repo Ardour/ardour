@@ -70,6 +70,20 @@ typedef std::vector<ActionState> ActionStates;
 static ActionStates action_states_to_restore;
 static bool actions_disabled = false;
 
+
+ActionManager::MissingActionException::MissingActionException (std::string const & str)
+	: missing_action_name (str)
+{
+	std::cerr << "MAE: " << str << std::endl;
+}
+
+const char *
+ActionManager::MissingActionException::what () const throw ()
+{
+	/* XXX memory leak */
+	return strdup (string_compose ("missing action: %1", missing_action_name).c_str());
+}
+
 void
 ActionManager::init ()
 {
@@ -195,7 +209,7 @@ ActionManager::set_toggleaction_state (const string& n, bool s)
 
 	if (last_slash == 0) {
 		fatal << string_compose ("programmer error: %1 %2", "illegal toggle action name", name) << endmsg;
-		abort(); /*NOTREACHED*/
+		throw MissingActionException (n);
 		return;
 	}
 
@@ -254,7 +268,7 @@ ActionManager::get_action (const string& name, bool or_die)
 	}
 
 	if (or_die) {
-		::abort ();
+		throw MissingActionException (name);
 	}
 
 	cerr << "Failed to find action: [" << name << ']' << endl;
@@ -299,7 +313,7 @@ ActionManager::get_action (char const * group_name, char const * action_name, bo
 	}
 
 	if (or_die) {
-		::abort ();
+		throw MissingActionException (string_compose ("%1/%2", group_name, action_name));
 	}
 
 	cerr << "Failed to find action (2): [" << fullpath << ']' << endl;
@@ -317,7 +331,7 @@ ActionManager::get_toggle_action (char const * group_name, char const * action_n
 	}
 
 	if (or_die) {
-		::abort ();
+		throw MissingActionException (string_compose ("%1/%2", group_name, action_name));
 	}
 
 	return RefPtr<ToggleAction>();
@@ -333,7 +347,7 @@ ActionManager::get_radio_action (char const * group_name, char const * action_na
 	}
 
 	if (or_die) {
-		::abort ();
+		throw MissingActionException (string_compose ("%1/%2", group_name, action_name));
 	}
 
 	return RefPtr<RadioAction>();

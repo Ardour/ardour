@@ -1702,6 +1702,9 @@ Session::set_state (const XMLNode& node, int version)
 		goto out;
 	}
 
+	/* Now that we Tracks have been loaded and playlists are assigned */
+	_playlists->update_tracking ();
+
 	/* Now that we have Routes and masters loaded, connect them if appropriate */
 
 	Slavable::Assign (_vca_manager); /* EMIT SIGNAL */
@@ -1847,9 +1850,9 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 		boost::shared_ptr<Track> track;
 
 		if (type == DataType::AUDIO) {
-			track.reset (new AudioTrack (*this, X_("toBeResetFroXML")));
+			track.reset (new AudioTrack (*this, string())); // name will be reset from XML in ::set_state() below
 		} else {
-			track.reset (new MidiTrack (*this, X_("toBeResetFroXML")));
+			track.reset (new MidiTrack (*this, string())); // name will be reset from XML in ::set_state() below
 		}
 
 		if (track->init()) {

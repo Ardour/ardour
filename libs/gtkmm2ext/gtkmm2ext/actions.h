@@ -21,6 +21,7 @@
 #define __libgtkmm2ext_actions_h__
 
 #include <vector>
+#include <exception>
 
 #include <gtkmm/action.h>
 #include <gtkmm/radioaction.h>
@@ -50,6 +51,15 @@ namespace ActionManager {
  * well as the extensions in gtk2_ardour/actions.h
  *
  */
+
+	class LIBGTKMM2EXT_API MissingActionException : public std::exception {
+	  public:
+		MissingActionException (std::string const & str);
+		~MissingActionException() throw() {}
+		const char *what() const throw();
+	  private:
+		std::string missing_action_name;
+	};
 
 	LIBGTKMM2EXT_API extern void init ();
 
