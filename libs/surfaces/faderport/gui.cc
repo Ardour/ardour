@@ -413,27 +413,27 @@ FPGUI::build_available_action_menu ()
 		}
 
 		//kinda kludgy way to avoid displaying menu items as mappable
-		if ( parts[1] == _("Main Menu") )
+		if (parts[0] == _("Main Menu") )
 			continue;
-		if ( parts[1] == _("JACK") )
+		if (parts[0] == _("JACK") )
 			continue;
-		if ( parts[1] == _("redirectmenu") )
+		if (parts[0] == _("redirectmenu") )
 			continue;
-		if ( parts[1] == _("RegionList") )
+		if (parts[0] == _("RegionList") )
 			continue;
-		if ( parts[1] == _("ProcessorMenu") )
+		if (parts[0] == _("ProcessorMenu") )
 			continue;
 
-		if ((r = nodes.find (parts[1])) == nodes.end()) {
+		if ((r = nodes.find (parts[0])) == nodes.end()) {
 
 			/* top level is missing */
 
 			TreeIter rowp;
 			TreeModel::Row parent;
 			rowp = available_action_model->append();
-			nodes[parts[1]] = rowp;
+			nodes[parts[0]] = rowp;
 			parent = *(rowp);
-			parent[action_columns.name] = parts[1];
+			parent[action_columns.name] = parts[0];
 
 			row = *(available_action_model->append (parent.children()));
 
