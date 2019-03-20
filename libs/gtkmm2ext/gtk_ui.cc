@@ -109,7 +109,7 @@ UI::UI (string application_name, string thread_name, int *argc, char ***argv)
 	errors = new TextViewer (800,600);
 	errors->text().set_editable (false);
 	errors->text().set_name ("ErrorText");
-	errors->signal_unmap().connect (sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), X_("<Actions>/Editor/toggle-log-window")));
+	errors->signal_unmap().connect (sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), X_("Editor/toggle-log-window")));
 
 	Glib::set_application_name (application_name);
 
