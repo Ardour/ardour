@@ -453,13 +453,7 @@ FPGUI::build_available_action_menu ()
 			action_map[*l] = *p;
 		}
 
-		string path = (*p);
-		/* ControlProtocol::access_action() is not interested in the
-		   legacy "<Actions>/" prefix part of a path.
-		*/
-		path = path.substr (strlen ("<Actions>/"));
-
-		row[action_columns.path] = path;
+		row[action_columns.path] = *p;
 	}
 }
 

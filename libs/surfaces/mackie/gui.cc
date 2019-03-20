@@ -548,7 +548,7 @@ MackieControlProtocolGUI::build_available_action_menu ()
 			action_map[*l] = *p;
 		}
 
-		row[available_action_columns.path] = (*p);
+		row[available_action_columns.path] = *p;
 	}
 }
 

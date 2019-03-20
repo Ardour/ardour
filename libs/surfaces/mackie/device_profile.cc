@@ -258,16 +258,13 @@ DeviceProfile::get_button_action (Button::ID id, int modifier_state) const
 }
 
 void
-DeviceProfile::set_button_action (Button::ID id, int modifier_state, const string& act)
+DeviceProfile::set_button_action (Button::ID id, int modifier_state, const string& action)
 {
 	ButtonActionMap::iterator i = _button_map.find (id);
 
 	if (i == _button_map.end()) {
 		i = _button_map.insert (std::make_pair (id, ButtonActions())).first;
 	}
-
-	string action (act);
-	replace_all (action, "<Actions>/", "");
 
 	if (modifier_state == MackieControlProtocol::MODIFIER_CONTROL) {
 		i->second.control = action;
