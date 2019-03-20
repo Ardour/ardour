@@ -477,17 +477,13 @@ lua_actionlist (lua_State *L)
 		if (parts[1] == _("ProcessorMenu"))
 			continue;
 
-		/* strip <Actions>/ from the start */
-		string path = (*p);
-		path = path.substr (strlen ("<Actions>/"));
-
 		if (!action_tbl[parts[1]].isTable()) {
 			action_tbl[parts[1]] = luabridge::newTable (L);
 		}
 		assert (action_tbl[parts[1]].isTable());
 		luabridge::LuaRef tbl (action_tbl[parts[1]]);
 		assert (tbl.isTable());
-		tbl[*l] = path;
+		tbl[*l] = *p;
 	}
 
 	luabridge::push (L, action_tbl);

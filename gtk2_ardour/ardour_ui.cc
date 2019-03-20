@@ -772,8 +772,7 @@ ARDOUR_UI::post_engine ()
 		vector<string>::iterator l;
 
 		for (p = paths.begin(), l = labels.begin(); p != paths.end(); ++p, ++l) {
-			output << "	<tr><th><kbd class=\"osc\">" << (*p).substr (10, string::npos);
-			output << "</kbd></th><td>" << *l << "</td></tr>" << endl;
+			output << "	<tr><th><kbd class=\"osc\">" << *p << "</kbd></th><td>" << *l << "</td></tr>" << endl;
 		}
 		output << "  </tbody>\n  </table>" << endl;
 
