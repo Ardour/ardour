@@ -3310,6 +3310,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 		 */
 
 		XMLNode node_copy (node);
+		std::vector<boost::shared_ptr<Playlist> > shared_playlists;
 
 		try {
 			string name;
@@ -3365,12 +3366,12 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 
 				if (node_copy.get_property (X_("audio-playlist"), playlist_id)) {
 					boost::shared_ptr<Playlist> playlist = _playlists->by_id (playlist_id);
-					playlist->share_with ((node_copy.property (X_("id")))->value());
+					shared_playlists.push_back (playlist);
 				}
 
 				if (node_copy.get_property (X_("midi-playlist"), playlist_id)) {
 					boost::shared_ptr<Playlist> playlist = _playlists->by_id (playlist_id);
-					playlist->share_with ((node_copy.property (X_("id")))->value());
+					shared_playlists.push_back (playlist);
 				}
 
 			} else { /* NewPlaylist */
@@ -3451,6 +3452,12 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 			if (route == 0) {
 				error << _("Session: cannot create track/bus from template description") << endmsg;
 				goto out;
+			}
+
+			/* Fix up sharing of playlists with the new Route/Track */
+
+			for (vector<boost::shared_ptr<Playlist> >::iterator sp = shared_playlists.begin(); sp != shared_playlists.end(); ++sp) {
+				(*sp)->share_with (route->id());
 			}
 
 			if (boost::dynamic_pointer_cast<Track>(route)) {
