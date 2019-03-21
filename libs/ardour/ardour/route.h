@@ -129,7 +129,7 @@ public:
 	void set_comment (std::string str, void *src);
 
 	bool set_name (const std::string& str);
-	static void set_name_in_state (XMLNode &, const std::string &, bool rename_playlist = true);
+	static void set_name_in_state (XMLNode &, const std::string &);
 
 	boost::shared_ptr<MonitorControl> monitoring_control() const { return _monitoring_control; }
 
