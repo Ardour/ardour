@@ -45,6 +45,7 @@
 #include "pbd/stacktrace.h"
 #include "pbd/stl_delete.h"
 #include "pbd/replace_all.h"
+#include "pbd/types_convert.h"
 #include "pbd/unwind.h"
 
 #include "ardour/amp.h"
@@ -3336,30 +3337,60 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 				}
 			}
 
-			/* set this name in the XML description that we are about to use */
-#warning fixme -- no more Diskstream
+			/* figure out the appropriate playlist setup. The track
+			 * (if the Route we're creating is a track) will find
+			 * playlists via ID.
+			 */
+
 			if (pd == CopyPlaylist) {
-				XMLNode* ds_node = find_named_node (node_copy, "Diskstream");
-				if (ds_node) {
-					const std::string playlist_name = ds_node->property (X_("playlist"))->value ();
-					boost::shared_ptr<Playlist> playlist = _playlists->by_name (playlist_name);
-					// Use same name as Route::set_name_in_state so playlist copy
-					// is picked up when creating the Route in XMLRouteFactory below
+
+				PBD::ID playlist_id;
+
+				if (node_copy.get_property (X_("audio-playlist"), playlist_id)) {
+					boost::shared_ptr<Playlist> playlist = _playlists->by_id (playlist_id);
 					playlist = PlaylistFactory::create (playlist, string_compose ("%1.1", name));
 					playlist->reset_shares ();
+					node_copy.set_property (X_("audio-playlist"), playlist->id());
 				}
+
+				if (node_copy.get_property (X_("midi-playlist"), playlist_id)) {
+					boost::shared_ptr<Playlist> playlist = _playlists->by_id (playlist_id);
+					playlist = PlaylistFactory::create (playlist, string_compose ("%1.1", name));
+					playlist->reset_shares ();
+					node_copy.set_property (X_("midi-playlist"), playlist->id());
+				}
+
 			} else if (pd == SharePlaylist) {
-				XMLNode* ds_node = find_named_node (node_copy, "Diskstream");
-				if (ds_node) {
-					const std::string playlist_name = ds_node->property (X_("playlist"))->value ();
-					boost::shared_ptr<Playlist> playlist = _playlists->by_name (playlist_name);
+				PBD::ID playlist_id;
+
+				if (node_copy.get_property (X_("audio-playlist"), playlist_id)) {
+					boost::shared_ptr<Playlist> playlist = _playlists->by_id (playlist_id);
 					playlist->share_with ((node_copy.property (X_("id")))->value());
+				}
+
+				if (node_copy.get_property (X_("midi-playlist"), playlist_id)) {
+					boost::shared_ptr<Playlist> playlist = _playlists->by_id (playlist_id);
+					playlist->share_with ((node_copy.property (X_("id")))->value());
+				}
+
+			} else { /* NewPlaylist */
+
+				PBD::ID pid;
+
+				if (node_copy.get_property (X_("audio-playlist"), pid)) {
+					boost::shared_ptr<Playlist> playlist = PlaylistFactory::create (DataType::AUDIO, *this, name, false);
+					node_copy.set_property (X_("audio-playlist"), playlist->id());
+				}
+
+				if (node_copy.get_property (X_("midi-playlist"), pid)) {
+					boost::shared_ptr<Playlist> playlist = PlaylistFactory::create (DataType::MIDI, *this, name, false);
+					node_copy.set_property (X_("midi-playlist"), playlist->id());
 				}
 			}
 
-			bool rename_playlist = (pd == CopyPlaylist || pd == NewPlaylist);
+			/* Fix up new name in the XML node */
 
-			Route::set_name_in_state (node_copy, name, rename_playlist);
+			Route::set_name_in_state (node_copy, name);
 
 			/* trim bitslots from listen sends so that new ones are used */
 			XMLNodeList children = node_copy.children ();
@@ -3411,7 +3442,8 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 			}
 
 			/* new routes start off unsoloed to avoid issues related to
-			   upstream / downstream buses. */
+			   upstream / downstream buses.
+			*/
 			node_copy.remove_node_and_delete (X_("Controllable"), X_("name"), X_("solo"));
 
 			boost::shared_ptr<Route> route (XMLRouteFactory (node_copy, 3000));
