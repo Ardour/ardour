@@ -161,21 +161,35 @@ DuplicateRouteDialog::on_response (int response)
 	TrackSelection tracks  (PublicEditor::instance().get_selection().tracks);
 	int err = 0;
 
+	/* Track Selection should be sorted into presentation order before
+	 * duplicating, so that new tracks appear in same order as the
+	 * originals.
+	 */
+
+	StripableList sl;
+
 	for (TrackSelection::iterator t = tracks.begin(); t != tracks.end(); ++t) {
-
 		RouteUI* rui = dynamic_cast<RouteUI*> (*t);
+		sl.push_back (rui->route());
+	}
 
-		if (!rui) {
-			/* some other type of timeaxis view, not a route */
+	sl.sort (Stripable::Sorter());
+
+	for (StripableList::iterator s = sl.begin(); s != sl.end(); ++s) {
+
+		boost::shared_ptr<Route> r;
+
+		if ((r = boost::dynamic_pointer_cast<Route> (*s)) == 0) {
+			/* some other type of Stripable, not a route */
 			continue;
 		}
 
-		if (rui->route()->is_master() || rui->route()->is_monitor()) {
+		if ((*s)->is_master() || (*s)->is_monitor()) {
 			/* no option to duplicate these */
 			continue;
 		}
 
-		XMLNode& state (rui->route()->get_state());
+		XMLNode& state (r->get_state());
 		RouteList rl = _session->new_route_from_template (cnt, ARDOUR_UI::instance()->translate_order (insert_at()), state, std::string(), playlist_action);
 
 		/* normally the state node would be added to a parent, and
