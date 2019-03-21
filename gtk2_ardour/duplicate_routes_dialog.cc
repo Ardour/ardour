@@ -170,7 +170,9 @@ DuplicateRouteDialog::on_response (int response)
 
 	for (TrackSelection::iterator t = tracks.begin(); t != tracks.end(); ++t) {
 		RouteUI* rui = dynamic_cast<RouteUI*> (*t);
-		sl.push_back (rui->route());
+		if (rui) {
+			sl.push_back (rui->route());
+		}
 	}
 
 	sl.sort (Stripable::Sorter());
