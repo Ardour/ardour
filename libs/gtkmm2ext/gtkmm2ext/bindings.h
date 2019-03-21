@@ -132,21 +132,6 @@ class LIBGTKMM2EXT_API Bindings {
 	void save (XMLNode& root);
 	void save_as_html (std::ostream&, bool) const;
 
-	/* GTK has the following position a Gtk::Action:
-	 *
-	 *  accel_path: <Actions>/GroupName/ActionName
-	 *  name: ActionName
-	 *
-	 * We want proper namespacing and we're not interested in
-	 * the silly <Actions> "extra" namespace. So in Ardour:
-	 *
-	 * accel_path: <Actions>/GroupName/ActionName
-	 * name: GroupName/ActionName
-	 *
-	 * This (static) method returns the "ardour" name for the action.
-	 */
-	static std::string ardour_action_name (Glib::RefPtr<Gtk::Action>);
-
 	/* used for editing bindings */
 	void get_all_actions (std::vector<std::string>& paths,
 	                      std::vector<std::string>& labels,
@@ -177,6 +162,22 @@ class LIBGTKMM2EXT_API Bindings {
 	KeybindingMap& get_keymap (Operation op);
 	const KeybindingMap& get_keymap (Operation op) const;
 	MouseButtonBindingMap& get_mousemap (Operation op);
+
+	/* GTK has the following position a Gtk::Action:
+	 *
+	 *  accel_path: <Actions>/GroupName/ActionName
+	 *  name: ActionName
+	 *
+	 * We want proper namespacing and we're not interested in
+	 * the silly <Actions> "extra" namespace. So in Ardour:
+	 *
+	 * accel_path: <Actions>/GroupName/ActionName
+	 * name: GroupName/ActionName
+	 *
+	 * This (static) method returns the "ardour" name for the action.
+	 */
+	static std::string ardour_action_name (Glib::RefPtr<Gtk::Action>);
+
 };
 
 } // namespace

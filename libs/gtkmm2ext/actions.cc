@@ -203,29 +203,16 @@ ActionManager::uncheck_toggleaction (const string& n)
 void
 ActionManager::set_toggleaction_state (const string& n, bool s)
 {
-	char const * name = n.c_str ();
+	string::size_type pos = n.find ('/');
 
-	const char *last_slash = strrchr (name, '/');
-
-	if (last_slash == 0) {
-		fatal << string_compose ("programmer error: %1 %2", "illegal toggle action name", name) << endmsg;
-		throw MissingActionException (n);
+	if (pos == string::npos || pos == n.size() - 1) {
+		error << string_compose ("illegal action name \"%1\" passed to ActionManager::set_toggleaction_state()", n) << endmsg;
 		return;
 	}
 
-	/* 10 = strlen ("<Actions>/") */
-	size_t len = last_slash - (name + 10);
-
-	char* group_name = new char[len+1];
-	memcpy (group_name, name + 10, len);
-	group_name[len] = '\0';
-
-	const char* action_name = last_slash + 1;
-	if (!set_toggleaction_state (group_name, action_name, s)) {
-		error << string_compose (_("Unknown action name: %1/%2"), group_name, action_name) << endmsg;
+	if (!set_toggleaction_state (n.substr (0, pos).c_str(), n.substr (pos+1).c_str(), s)) {
+		error << string_compose (_("Unknown action name: %1/%2"), n.substr (0, pos), n.substr (pos+1)) << endmsg;
 	}
-
-	delete [] group_name;
 }
 
 bool
@@ -533,33 +520,34 @@ ActionManager::get_all_actions (std::vector<std::string>& paths,
 
 		Glib::RefPtr<Action> act = a->second;
 
-			paths.push_back (act->get_accel_path());
-			labels.push_back (act->get_label());
-			tooltips.push_back (act->get_tooltip());
-			acts.push_back (act);
+		/* strip the GTK-added <Actions>/ from the front */
+		paths.push_back (act->get_accel_path().substr (10));
+		labels.push_back (act->get_label());
+		tooltips.push_back (act->get_tooltip());
+		acts.push_back (act);
 
-			/* foreach binding */
+		/* foreach binding */
 
 #if 0
-			Bindings* bindings = (*map)->bindings();
+		Bindings* bindings = (*map)->bindings();
 
-			if (bindings) {
+		if (bindings) {
 
-				KeyboardKey key;
-				Bindings::Operation op;
+			KeyboardKey key;
+			Bindings::Operation op;
 
-				key = bindings->get_binding_for_action (*act, op);
+			key = bindings->get_binding_for_action (*act, op);
 
-				if (key == KeyboardKey::null_key()) {
-					keys.push_back (string());
-				} else {
-					keys.push_back (key.display_label());
-				}
-			} else {
+			if (key == KeyboardKey::null_key()) {
 				keys.push_back (string());
+			} else {
+				keys.push_back (key.display_label());
 			}
-#else
+		} else {
 			keys.push_back (string());
+		}
+#else
+		keys.push_back (string());
 #endif
 	}
 }

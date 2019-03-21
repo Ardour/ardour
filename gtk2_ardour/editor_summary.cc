@@ -424,6 +424,9 @@ EditorSummary::on_key_press_event (GdkEventKey* key)
 {
 	gint x, y;
 	GtkAccelKey set_playhead_accel;
+
+	/* XXXX this is really ugly and should be using our own action maps and bindings */
+
 	if (gtk_accel_map_lookup_entry ("<Actions>/Editor/set-playhead", &set_playhead_accel)) {
 		if (key->keyval == set_playhead_accel.accel_key && (int) key->state == set_playhead_accel.accel_mods) {
 			if (_session) {
@@ -442,6 +445,9 @@ EditorSummary::on_key_release_event (GdkEventKey* key)
 {
 
 	GtkAccelKey set_playhead_accel;
+
+	/* XXXX this is really ugly and should be using our own action maps and bindings */
+
 	if (gtk_accel_map_lookup_entry ("<Actions>/Editor/set-playhead", &set_playhead_accel)) {
 		if (key->keyval == set_playhead_accel.accel_key && (int) key->state == set_playhead_accel.accel_mods) {
 			return true;

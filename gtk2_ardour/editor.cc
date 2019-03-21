@@ -5577,7 +5577,7 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 			 * button to inactive (which also unticks the menu option)
 			 */
 
-			ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
+			ActionManager::uncheck_toggleaction ("Editor/show-editor-mixer");
 		}
 	}
 }

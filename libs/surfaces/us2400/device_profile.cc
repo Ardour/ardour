@@ -230,21 +230,18 @@ DeviceProfile::get_button_action (Button::ID id, int modifier_state) const
 	if (modifier_state == US2400Protocol::MODIFIER_SHIFT) {
 		return i->second.shift;
 	}
-	
+
 	return i->second.plain;
 }
 
 void
-DeviceProfile::set_button_action (Button::ID id, int modifier_state, const string& act)
+DeviceProfile::set_button_action (Button::ID id, int modifier_state, const string& action)
 {
 	ButtonActionMap::iterator i = _button_map.find (id);
 
 	if (i == _button_map.end()) {
 		i = _button_map.insert (std::make_pair (id, ButtonActions())).first;
 	}
-
-	string action (act);
-	replace_all (action, "<Actions>/", "");
 
 	if (modifier_state == US2400Protocol::MODIFIER_SHIFT) {
 		i->second.shift = action;
