@@ -3,7 +3,6 @@
 #include "ardour/mixer_snapshot.h"
 #include "ardour/route_group.h"
 #include "ardour/vca_manager.h"
-#include "ardour/session_state.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/session_state_utils.h"
@@ -247,9 +246,7 @@ void MixerSnapshot::recall()
 }
 
 void MixerSnapshot::write()
-{
-    //_session->mixer_settings_dir()
-    
+{   
     XMLNode* node = new XMLNode("MixerSnapshot");
 	XMLNode* child;
 
@@ -371,7 +368,7 @@ void MixerSnapshot::load_from_session(XMLNode& node)
             (*niter)->get_property(X_("number"), number);
             (*niter)->get_property(X_("id"), id);
 
-            pair<int, string> pair (atoi(number.c_str()), name) ;
+            pair<int, string> pair (atoi(number.c_str()), name);
             number_name_pairs.push_back(pair);
             
             State state {id, name, (**niter)};
@@ -390,8 +387,9 @@ void MixerSnapshot::load_from_session(XMLNode& node)
             that a route's Slavable children has 
             the "name" property. Normal session state 
             files don't have this. So we stash it,
-            reverse look-up the "number", and then 
-            add it to a copy of the node. */
+            reverse look-up the name based on its number, 
+            and then  add it to a copy of the node. */
+            
             XMLNode copy (**niter);
             XMLNode* slavable = find_named_node(copy, "Slavable");
             if(slavable) {
@@ -401,8 +399,12 @@ void MixerSnapshot::load_from_session(XMLNode& node)
                     (*siter)->get_property(X_("number"), number);
 
                     for(vector<pair<int,string>>::const_iterator p = number_name_pairs.begin(); p != number_name_pairs.end(); p++) {
-                        if((*p).first == atoi(number.c_str()))
-                            (*siter)->set_property(X_("name"), (*p).second);
+                        int mst_number  = atoi(number.c_str());
+                        int vca_number  = (*p).first;
+                        string vca_name = (*p).second;
+                        
+                        if(vca_number == mst_number)
+                            (*siter)->set_property(X_("name"), vca_name);
                     }
                 }
             }
