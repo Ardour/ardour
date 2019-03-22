@@ -2197,7 +2197,17 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 		set_state_dir ("");
 	}
 
-	latency_compute_run();
+	/* Do not call latency_compute_run() concurrently with connect_and_run().
+	 * So far this can only guarnteed when the session is loading,
+	 * and the plugin has not been added to the processor chain.
+	 *
+	 * Ideally this would clso be called when copying a plugin from another track,
+	 * but NOT when copying the state from a plugin to another (active) plugin
+	 * instance.
+	 */
+	if (_session.loading ()) {
+		latency_compute_run();
+	}
 #endif
 
 	return Plugin::set_state(node, version);

@@ -396,6 +396,7 @@ private:
 	void control_list_automation_state_changed (Evoral::Parameter, AutoState);
 	void set_parameter_state_2X (const XMLNode& node, int version);
 	void set_control_ids (const XMLNode&, int version);
+	void update_control_values (const XMLNode&, int version);
 
 	void enable_changed ();
 	void bypassable_changed ();

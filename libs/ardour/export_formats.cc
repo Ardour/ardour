@@ -413,6 +413,7 @@ ExportFormatFFMPEG::ExportFormatFFMPEG (std::string const& name, std::string con
 	add_codec_quality ("CBR 160 kb/s",    160);
 	add_codec_quality ("CBR 192 kb/s",    192);
 	add_codec_quality ("CBR 256 kb/s",    256);
+	add_codec_quality ("CBR 320 kb/s",    320);
 
 	set_extension (ext);
 	set_quality (Q_LossyCompression);
