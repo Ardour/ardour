@@ -2498,40 +2498,41 @@ void
 PluginInsert::set_control_ids (const XMLNode& node, int version)
 {
 	const XMLNodeList& nlist = node.children();
-	XMLNodeConstIterator iter;
-	set<Evoral::Parameter>::const_iterator p;
 
-	for (iter = nlist.begin(); iter != nlist.end(); ++iter) {
-		if ((*iter)->name() == Controllable::xml_node_name) {
+	for (XMLNodeConstIterator iter = nlist.begin(); iter != nlist.end(); ++iter) {
+		if ((*iter)->name() != Controllable::xml_node_name) {
+			continue;
+		}
 
-			uint32_t p = (uint32_t)-1;
+		uint32_t p = (uint32_t)-1;
 #ifdef LV2_SUPPORT
-			std::string str;
-			if ((*iter)->get_property (X_("symbol"), str)) {
-				boost::shared_ptr<LV2Plugin> lv2plugin = boost::dynamic_pointer_cast<LV2Plugin> (_plugins[0]);
-				if (lv2plugin) {
-					p = lv2plugin->port_index(str.c_str());
-				}
+		std::string str;
+		if ((*iter)->get_property (X_("symbol"), str)) {
+			boost::shared_ptr<LV2Plugin> lv2plugin = boost::dynamic_pointer_cast<LV2Plugin> (_plugins[0]);
+			if (lv2plugin) {
+				p = lv2plugin->port_index(str.c_str());
 			}
+		}
 #endif
-			if (p == (uint32_t)-1) {
-				(*iter)->get_property (X_("parameter"), p);
-			}
+		if (p == (uint32_t)-1) {
+			(*iter)->get_property (X_("parameter"), p);
+		}
 
-			if (p != (uint32_t)-1) {
+		if (p == (uint32_t)-1) {
+			continue;
+		}
 
-				/* this may create the new controllable */
-
-				boost::shared_ptr<Evoral::Control> c = control (Evoral::Parameter (PluginAutomation, 0, p));
+		/* this may create the new controllable */
+		boost::shared_ptr<Evoral::Control> c = control (Evoral::Parameter (PluginAutomation, 0, p));
 
 #ifndef NO_PLUGIN_STATE
-				if (!c) {
-					continue;
-				}
-				boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (c);
-				if (ac) {
-					ac->set_state (**iter, version);
-				}
+		if (!c) {
+			continue;
+		}
+		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (c);
+		if (ac) {
+			ac->set_state (**iter, version);
+		}
 #endif
 			}
 		}
@@ -2661,7 +2662,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 
 	if (_plugins.empty()) {
 		/* if we are adding the first plugin, we will need to set
-		   up automatable controls.
+		 * up automatable controls.
 		*/
 		add_plugin (plugin);
 		create_automatable_parameters ();
