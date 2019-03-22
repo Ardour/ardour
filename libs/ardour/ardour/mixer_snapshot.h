@@ -28,10 +28,11 @@
 #include "ardour/vca.h"
 #include "ardour/route_group.h"
 
-class MixerSnapshot //: public PBD::Stateful
+class MixerSnapshot
 {
     public:
         MixerSnapshot(ARDOUR::Session*);
+        MixerSnapshot(ARDOUR::Session*, std::string);
         ~MixerSnapshot();
 
         void snap();
@@ -42,7 +43,25 @@ class MixerSnapshot //: public PBD::Stateful
         void recall();
         void clear();
         void write();
-        void load();
+        void load(std::string);
+
+        struct State {
+            std::string id;
+            std::string name;
+            XMLNode     node;
+        };
+        
+        bool empty() {
+            return (
+                route_states.empty() && 
+                group_states.empty() && 
+                vca_states.empty()
+            );
+        };
+
+        std::vector<State> get_routes() {return route_states;};
+        std::vector<State> get_groups() {return group_states;};
+        std::vector<State> get_vcas()   {return vca_states;};
 
         int id;
         std::string label;
@@ -52,12 +71,9 @@ class MixerSnapshot //: public PBD::Stateful
         ARDOUR::Session* _session;
 
         void reassign_masters(boost::shared_ptr<ARDOUR::Slavable>, XMLNode);
+        void load_from_session(std::string);
+        void load_from_session(XMLNode&);
 
-        struct State {
-            std::string id;
-            std::string name;
-            XMLNode     node;
-        };
 
         std::vector<State> route_states;
         std::vector<State> group_states;
