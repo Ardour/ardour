@@ -2498,7 +2498,6 @@ void
 PluginInsert::set_control_ids (const XMLNode& node, int version)
 {
 	const XMLNodeList& nlist = node.children();
-
 	for (XMLNodeConstIterator iter = nlist.begin(); iter != nlist.end(); ++iter) {
 		if ((*iter)->name() != Controllable::xml_node_name) {
 			continue;
@@ -2534,7 +2533,49 @@ PluginInsert::set_control_ids (const XMLNode& node, int version)
 			ac->set_state (**iter, version);
 		}
 #endif
+	}
+}
+
+void
+PluginInsert::update_control_values (const XMLNode& node, int version)
+{
+	const XMLNodeList& nlist = node.children();
+	for (XMLNodeConstIterator iter = nlist.begin(); iter != nlist.end(); ++iter) {
+		if ((*iter)->name() != Controllable::xml_node_name) {
+			continue;
+		}
+
+		float val;
+		if (!(*iter)->get_property (X_("value"), val)) {
+			continue;
+		}
+
+		uint32_t p = (uint32_t)-1;
+#ifdef LV2_SUPPORT
+		std::string str;
+		if ((*iter)->get_property (X_("symbol"), str)) {
+			boost::shared_ptr<LV2Plugin> lv2plugin = boost::dynamic_pointer_cast<LV2Plugin> (_plugins[0]);
+			if (lv2plugin) {
+				p = lv2plugin->port_index(str.c_str());
 			}
+		}
+#endif
+		if (p == (uint32_t)-1) {
+			(*iter)->get_property (X_("parameter"), p);
+		}
+
+		if (p == (uint32_t)-1) {
+			continue;
+		}
+
+		/* lookup controllable */
+		boost::shared_ptr<Evoral::Control> c = control (Evoral::Parameter (PluginAutomation, 0, p), false);
+		if (!c) {
+			continue;
+		}
+		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (c);
+		if (ac) {
+			ac->set_value (val, Controllable::NoGroup);
 		}
 	}
 }
@@ -2667,6 +2708,9 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		add_plugin (plugin);
 		create_automatable_parameters ();
 		set_control_ids (node, version);
+	} else {
+		/* update controllable value only (copy plugin state) */
+		update_control_values (node, version);
 	}
 
 	node.get_property ("count", count);
