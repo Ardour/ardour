@@ -3,11 +3,15 @@
 #include "ardour/mixer_snapshot.h"
 #include "ardour/route_group.h"
 #include "ardour/vca_manager.h"
+#include "ardour/session_state.h"
+#include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
+#include "ardour/session_state_utils.h"
 
 #include "pbd/i18n.h"
 #include "pbd/xml++.h"
 #include "pbd/memento_command.h"
+#include "pbd/file_utils.h"
 
 #include <glibmm.h>
 #include <glibmm/fileutils.h>
@@ -22,6 +26,17 @@ MixerSnapshot::MixerSnapshot(Session* s)
 {   
     if(s)
         _session = s;
+}
+
+MixerSnapshot::MixerSnapshot(Session* s, string file_path)
+    : id(0)
+    , label("snapshot")
+    , timestamp(time(0))
+{   
+    if(s)
+        _session = s;
+
+    load_from_session(file_path);
 }
 
 MixerSnapshot::~MixerSnapshot()
@@ -233,10 +248,12 @@ void MixerSnapshot::recall()
 
 void MixerSnapshot::write()
 {
+    //_session->mixer_settings_dir()
+    
     XMLNode* node = new XMLNode("MixerSnapshot");
 	XMLNode* child;
 
-    child = node->add_child ("Routes");
+    child = node->add_child("Routes");
     for(vector<State>::iterator i = route_states.begin(); i != route_states.end(); i++) {
         child->add_child_copy((*i).node);
     }
@@ -257,13 +274,15 @@ void MixerSnapshot::write()
     tree.write(snap.c_str());
 }
 
-void MixerSnapshot::load()
+void MixerSnapshot::load(string path)
 {
     clear();
 
-    string snap = Glib::build_filename(user_config_directory(-1), label + ".xml");
+    if(!Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS))
+        return;
+
     XMLTree tree;
-    tree.read(snap);
+    tree.read(path);
    
     XMLNode* root = tree.root();
     if(!root) {
@@ -307,6 +326,101 @@ void MixerSnapshot::load()
             
             State state {id, name, (**niter)};
             vca_states.push_back(state);
+        }
+    }
+}
+
+void MixerSnapshot::load_from_session(string path)
+{
+    clear();
+
+    vector<string> states;
+    if(Glib::file_test(path.c_str(), Glib::FILE_TEST_IS_DIR))
+        get_state_files_in_directory(path, states);
+
+    if(!states.empty())
+        load_from_session(states.front());
+
+    //final sanity check
+    if(!("." + PBD::get_suffix(path) == statefile_suffix))
+        return;
+
+    XMLTree tree;
+    tree.read(path);
+
+    XMLNode* root = tree.root();
+    if(!root) {
+        return;
+    }
+}
+
+void MixerSnapshot::load_from_session(XMLNode& node)
+{
+    clear();
+
+    XMLNode* route_node = find_named_node(node, "Routes");
+    XMLNode* group_node = find_named_node(node, "RouteGroups");
+    XMLNode* vca_node   = find_named_node(node, "VCAManager");
+
+    vector<pair<int,string>> number_name_pairs;
+    if(vca_node) {
+        XMLNodeList nlist = vca_node->children();
+        for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); niter++) {
+            string name, number, id;
+            (*niter)->get_property(X_("name"), name);
+            (*niter)->get_property(X_("number"), number);
+            (*niter)->get_property(X_("id"), id);
+
+            pair<int, string> pair (atoi(number.c_str()), name) ;
+            number_name_pairs.push_back(pair);
+            
+            State state {id, name, (**niter)};
+            vca_states.push_back(state);
+        }
+    }
+
+    if(route_node) {
+        XMLNodeList nlist = route_node->children();
+        for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); niter++) {
+            string name, id;
+            (*niter)->get_property(X_("name"), name);
+            (*niter)->get_property(X_("id"), id);
+
+            /* ugly workaround - recall() expects 
+            that a route's Slavable children has 
+            the "name" property. Normal session state 
+            files don't have this. So we stash it,
+            reverse look-up the "number", and then 
+            add it to a copy of the node. */
+            XMLNode copy (**niter);
+            XMLNode* slavable = find_named_node(copy, "Slavable");
+            if(slavable) {
+                XMLNodeList nlist = slavable->children();
+                for(XMLNodeConstIterator siter = nlist.begin(); siter != nlist.end(); siter++) {
+                    string number;
+                    (*siter)->get_property(X_("number"), number);
+
+                    for(vector<pair<int,string>>::const_iterator p = number_name_pairs.begin(); p != number_name_pairs.end(); p++) {
+                        if((*p).first == atoi(number.c_str()))
+                            (*siter)->set_property(X_("name"), (*p).second);
+                    }
+                }
+            }
+            
+            State state {id, name, copy};
+            route_states.push_back(state);
+        }
+    }
+
+    if(group_node) {
+        XMLNodeList nlist = group_node->children();       
+        for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); niter++) {
+            string name, id;
+            (*niter)->get_property(X_("name"), name);
+            (*niter)->get_property(X_("id"), id);
+            
+            State state {id, name, (**niter)};
+            group_states.push_back(state);
         }
     }
 }

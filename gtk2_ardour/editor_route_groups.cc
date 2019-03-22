@@ -39,6 +39,9 @@
 
 //REMOVE ME
 #include "ardour/mixer_snapshot.h"
+#include <glibmm.h>
+#include <glibmm/fileutils.h>
+#include "ardour/filesystem_paths.h"
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -229,8 +232,9 @@ void EditorRouteGroups::write() {
 	camera->write();
 }
 
-void EditorRouteGroups::load() { 
-	camera->load();
+void EditorRouteGroups::load() {
+	string path = Glib::build_filename(user_config_directory(-1), "snapshot.xml");
+	camera->load(path);
 }
 
 void
