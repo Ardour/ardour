@@ -115,7 +115,7 @@ private:
 	int max_value_for_type () const;
 
 	GenericMidiControlProtocol* _surface;
-	boost::weak_ptr<PBD::Controllable> _controllable;
+	boost::shared_ptr<PBD::Controllable> _controllable;
 	std::string     _current_uri;
 	MIDI::Parser&   _parser;
 	bool             setting;
@@ -130,7 +130,7 @@ private:
 	int              midi_msg_id;      /* controller ID or note number */
 	PBD::ScopedConnection midi_sense_connection[2];
 	PBD::ScopedConnection midi_learn_connection;
-        PBD::ScopedConnection controllable_death_connection;
+	PBD::ScopedConnectionList controllable_death_connections;
 	/** the type of MIDI message that is used for this control */
 	MIDI::eventType  control_type;
 	MIDI::byte       control_additional;
@@ -142,7 +142,8 @@ private:
 	std::string     _what;
 	bool            _bank_relative;
 
-	void drop_controllable (PBD::Controllable*);
+	void drop_controllable ();
+	Glib::Threads::Mutex controllable_lock;
 
 	void midi_receiver (MIDI::Parser &p, MIDI::byte *, size_t);
 	void midi_sense_note (MIDI::Parser &, MIDI::EventTwoBytes *, bool is_on);
