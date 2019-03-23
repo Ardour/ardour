@@ -78,6 +78,13 @@ MonitorProcessor::MonitorProcessor (Session& s)
 MonitorProcessor::~MonitorProcessor ()
 {
         allocate_channels (0);
+
+	/* special case for MPControl */
+	_dim_all_control->DropReferences (); /* EMIT SIGNAL */
+	_cut_all_control->DropReferences (); /* EMIT SIGNAL */
+	_mono_control->DropReferences (); /* EMIT SIGNAL */
+	_dim_level_control->DropReferences (); /* EMIT SIGNAL */
+	_solo_boost_level_control->DropReferences (); /* EMIT SIGNAL */
 }
 
 void
@@ -542,5 +549,13 @@ MonitorProcessor::ChannelRecord::ChannelRecord (uint32_t chn)
 	, polarity (*polarity_ptr)
 	, soloed (*soloed_ptr)
 {
+}
 
+MonitorProcessor::ChannelRecord::~ChannelRecord ()
+{
+	/* special case for MPControl */
+	cut_control->DropReferences(); /* EMIT SIGNAL */
+	dim_control->DropReferences(); /* EMIT SIGNAL */
+	polarity_control->DropReferences(); /* EMIT SIGNAL */
+	soloed_control->DropReferences(); /* EMIT SIGNAL */
 }
