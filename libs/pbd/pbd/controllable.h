@@ -28,6 +28,8 @@
 #include "pbd/signals.h"
 #include <glibmm/threads.h>
 
+#include <boost/enable_shared_from_this.hpp>
+
 #include "pbd/statefuldestructible.h"
 
 using std::min;
@@ -49,7 +51,8 @@ namespace PBD {
  * as a control whose value can range between 0 and 1.0.
  *
  */
-class LIBPBD_API Controllable : public PBD::StatefulDestructible {
+class LIBPBD_API Controllable : public PBD::StatefulDestructible, public boost::enable_shared_from_this<Controllable>
+{
 public:
 	enum Flag {
 		Toggle = 0x1,
@@ -150,6 +153,8 @@ public:
 	Flag flags() const { return _flags; }
 	void set_flags (Flag f);
 
+	static boost::shared_ptr<Controllable> by_id (const PBD::ID&);
+
 	static const std::string xml_node_name;
 
 protected:
@@ -160,11 +165,20 @@ protected:
 	}
 
 private:
-
 	std::string _name;
 	std::string _units;
 	Flag        _flags;
 	bool        _touching;
+
+	typedef std::set<PBD::Controllable*> Controllables;
+
+	static ScopedConnectionList registry_connections;
+	static Glib::Threads::RWLock registry_lock;
+	static Controllables registry;
+
+	static void add (Controllable&);
+	static void remove (Controllable*);
+
 };
 
 /* a utility class for the occasions when you need but do not have

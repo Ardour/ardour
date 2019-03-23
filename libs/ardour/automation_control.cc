@@ -141,7 +141,7 @@ AutomationControl::set_value (double val, PBD::Controllable::GroupControlDisposi
 	}
 
 	if (_group && _group->use_me (gcd)) {
-		_group->set_group_value (shared_from_this(), val);
+		_group->set_group_value (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()), val);
 	} else {
 		actually_set_value (val, gcd);
 	}
@@ -252,7 +252,7 @@ AutomationControl::set_automation_state (AutoState as)
 		}
 
 		if (as == Write) {
-			AutomationWatch::instance().add_automation_watch (shared_from_this());
+			AutomationWatch::instance().add_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
 		} else if (as & (Touch | Latch)) {
 			if (alist()->empty()) {
 				Control::set_double (val, _session.current_start_sample (), true);
@@ -260,17 +260,17 @@ AutomationControl::set_automation_state (AutoState as)
 				Changed (true, Controllable::NoGroup);
 			}
 			if (!touching()) {
-				AutomationWatch::instance().remove_automation_watch (shared_from_this());
+				AutomationWatch::instance().remove_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
 			} else {
 				/* this seems unlikely, but the combination of
 				 * a control surface and the mouse could make
 				 * it possible to put the control into Touch
 				 * mode *while* touching it.
 				 */
-				AutomationWatch::instance().add_automation_watch (shared_from_this());
+				AutomationWatch::instance().add_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
 			}
 		} else {
-			AutomationWatch::instance().remove_automation_watch (shared_from_this());
+			AutomationWatch::instance().remove_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
 			Changed (false, Controllable::NoGroup);
 		}
 	}
@@ -293,7 +293,7 @@ AutomationControl::start_touch (double when)
 		AutomationControl::actually_set_value (get_value (), Controllable::NoGroup);
 		alist()->start_touch (when);
 		if (!_desc.toggled) {
-			AutomationWatch::instance().add_automation_watch (shared_from_this());
+			AutomationWatch::instance().add_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
 		}
 		set_touching (true);
 	}
@@ -315,7 +315,7 @@ AutomationControl::stop_touch (double when)
 	if (alist()->automation_state() & (Touch | Latch)) {
 		alist()->stop_touch (when);
 		if (!_desc.toggled) {
-			AutomationWatch::instance().remove_automation_watch (shared_from_this());
+			AutomationWatch::instance().remove_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
 		}
 	}
 }
@@ -378,7 +378,7 @@ AutomationControl::check_rt (double val, Controllable::GroupControlDisposition g
 {
 	if (!_session.loading() && (flags() & Controllable::RealTime) && !AudioEngine::instance()->in_process_thread()) {
 		/* queue change in RT context */
-		_session.set_control (shared_from_this(), val, gcd);
+		_session.set_control (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()), val, gcd);
 		return true;
 	}
 

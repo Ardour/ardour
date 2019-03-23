@@ -34,13 +34,19 @@ PBD::Signal1<bool, boost::weak_ptr<PBD::Controllable> > Controllable::StartLearn
 PBD::Signal1<void, boost::weak_ptr<PBD::Controllable> > Controllable::StopLearning;
 PBD::Signal1<void, boost::weak_ptr<PBD::Controllable> > Controllable::GUIFocusChanged;
 
+Glib::Threads::RWLock Controllable::registry_lock;
+Controllable::Controllables Controllable::registry;
+PBD::ScopedConnectionList Controllable::registry_connections;
+
 const std::string Controllable::xml_node_name = X_("Controllable");
 
 Controllable::Controllable (const string& name, Flag f)
 	: _name (name)
 	, _flags (f)
 	, _touching (false)
-{}
+{
+	add (*this);
+}
 
 XMLNode&
 Controllable::get_state ()
@@ -90,4 +96,35 @@ void
 Controllable::set_flags (Flag f)
 {
 	_flags = f;
+}
+
+void
+Controllable::add (Controllable& ctl)
+{
+	Glib::Threads::RWLock::WriterLock lm (registry_lock);
+	registry.insert (&ctl);
+	ctl.DropReferences.connect_same_thread (registry_connections, boost::bind (&Controllable::remove, &ctl));
+}
+
+void
+Controllable::remove (Controllable* ctl)
+{
+	Glib::Threads::RWLock::WriterLock lm (registry_lock);
+	Controllables::iterator i = std::find (registry.begin(), registry.end(), ctl);
+	if (i != registry.end()) {
+		registry.erase (i);
+	}
+}
+
+boost::shared_ptr<Controllable>
+Controllable::by_id (const ID& id)
+{
+	Glib::Threads::RWLock::ReaderLock lm (registry_lock);
+
+	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i) {
+		if ((*i)->id() == id) {
+			return (*i)->shared_from_this ();
+		}
+	}
+	return boost::shared_ptr<Controllable>();
 }
