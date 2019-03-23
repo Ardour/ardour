@@ -39,7 +39,7 @@ namespace ARDOUR {
 }
 
 namespace MIDI {
-    class Port;
+	class Port;
 }
 
 class MIDIControllable;
@@ -144,8 +144,8 @@ private:
 	};
 	typedef std::list<MIDIPendingControllable* > MIDIPendingControllables;
 	MIDIPendingControllables pending_controllables;
-        Glib::Threads::Mutex controllables_lock;
-        Glib::Threads::Mutex pending_lock;
+	Glib::Threads::Mutex controllables_lock;
+	Glib::Threads::Mutex pending_lock;
 
 	bool start_learning (boost::weak_ptr<PBD::Controllable>);
 	void stop_learning (boost::weak_ptr<PBD::Controllable>);

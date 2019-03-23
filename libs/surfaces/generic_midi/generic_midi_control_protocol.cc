@@ -1232,11 +1232,11 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 		ev = MIDI::program;
 	} else if ((prop = node.property (X_("sysex"))) != 0 || (prop = node.property (X_("msg"))) != 0) {
 
-                if (prop->name() == X_("sysex")) {
-                        ev = MIDI::sysex;
-                } else {
-                        ev = MIDI::any;
-                }
+		if (prop->name() == X_("sysex")) {
+			ev = MIDI::sysex;
+		} else {
+			ev = MIDI::any;
+		}
 
 		int val;
 		uint32_t cnt;
@@ -1332,11 +1332,11 @@ GenericMidiControlProtocol::create_action (const XMLNode& node)
 		ev = MIDI::program;
 	} else if ((prop = node.property (X_("sysex"))) != 0 || (prop = node.property (X_("msg"))) != 0) {
 
-                if (prop->name() == X_("sysex")) {
-                        ev = MIDI::sysex;
-                } else {
-                        ev = MIDI::any;
-                }
+		if (prop->name() == X_("sysex")) {
+			ev = MIDI::sysex;
+		} else {
+			ev = MIDI::any;
+		}
 
 		int val;
 		uint32_t cnt;

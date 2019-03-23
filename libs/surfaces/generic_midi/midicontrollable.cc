@@ -725,7 +725,7 @@ MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*forc
 		return buf;
 	}
 
-        DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Feedback: %1 %2\n", control_description(), current_uri()));
+	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Feedback: %1 %2\n", control_description(), current_uri()));
 
 	*buf++ = (0xF0 & control_type) | (0xF & control_channel);
 	int ev_size = 3;
