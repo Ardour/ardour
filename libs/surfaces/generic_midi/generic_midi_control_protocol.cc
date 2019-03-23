@@ -631,7 +631,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 					if ((*niter)->get_property ("id", id)) {
 
 						DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Relearned binding for session: Control ID: %1\n", id.to_s()));
-						boost::shared_ptr<PBD::Controllable> c = session->controllable_by_id (id); // XXX are these all?
+						boost::shared_ptr<PBD::Controllable> c = Controllable::by_id (id);
 
 						if (c) {
 							MIDIControllable* mc = new MIDIControllable (this, *_input_port->parser(), c, false);

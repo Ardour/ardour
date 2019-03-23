@@ -144,7 +144,6 @@ MIDIControllable::set_controllable (boost::shared_ptr<PBD::Controllable> c)
 	last_incoming = 256;
 
 	if (c) {
-		printf ("MIDIControllable::set %s\n", c->name().c_str());
 		c->Destroyed.connect_same_thread (controllable_death_connection,
 						 boost::bind (&MIDIControllable::drop_controllable, this, _1));
 	}
@@ -278,8 +277,6 @@ MIDIControllable::lookup_controllable()
 void
 MIDIControllable::drop_controllable (Controllable* c)
 {
-	printf ("MIDIControllable::drop_controllable ? %s\n", c->name().c_str());
-
 	boost::shared_ptr<Controllable> controllable = _controllable.lock ();
 	if (controllable && c == controllable.get()) {
 		set_controllable (boost::shared_ptr<PBD::Controllable>());
