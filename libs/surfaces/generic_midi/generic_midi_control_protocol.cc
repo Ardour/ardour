@@ -106,10 +106,8 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	 * thread
 	 */
 
-#if 0 // XXX temp. disabled for API change
-Controllab:le::StartLearning.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::start_learning, this, _1));
-	Controllable::StopLearning.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::stop_learning, this, _1));
-#endif
+	Controllable::StartLearning.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::start_learning, this, _1));
+					 Controllable::StopLearning.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::stop_learning, this, _1));
 
 	/* this signal is emitted by the process() callback, and if
 	 * send_feedback() is going to do anything, it should do it in the
@@ -345,9 +343,10 @@ GenericMidiControlProtocol::_send_feedback ()
 }
 
 bool
-GenericMidiControlProtocol::start_learning (Controllable* c)
+GenericMidiControlProtocol::start_learning (boost::weak_ptr <Controllable> wc)
 {
-	if (c == 0) {
+	boost::shared_ptr<Controllable> c = wc.lock ();
+	if (!c) {
 		return false;
 	}
 
@@ -401,7 +400,7 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	}
 
 	if (!mc) {
-		mc = new MIDIControllable (this, *_input_port->parser(), *c, false);
+		mc = new MIDIControllable (this, *_input_port->parser(), c, false);
 		own_mc = true;
 	}
 
@@ -443,8 +442,13 @@ GenericMidiControlProtocol::learning_stopped (MIDIControllable* mc)
 }
 
 void
-GenericMidiControlProtocol::stop_learning (Controllable* c)
+GenericMidiControlProtocol::stop_learning (boost::weak_ptr<PBD::Controllable> wc)
 {
+	boost::shared_ptr<Controllable> c = wc.lock ();
+	if (!c) {
+		return;
+	}
+
 	Glib::Threads::Mutex::Lock lm (pending_lock);
 	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 	MIDIControllable* dptr = 0;
@@ -627,10 +631,10 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 					if ((*niter)->get_property ("id", id)) {
 
 						DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Relearned binding for session: Control ID: %1\n", id.to_s()));
-						Controllable* c = 0; // Controllable::by_id (id); // XXX temp. disabled for API change
+						boost::shared_ptr<PBD::Controllable> c = session->controllable_by_id (id); // XXX are these all?
 
 						if (c) {
-							MIDIControllable* mc = new MIDIControllable (this, *_input_port->parser(), *c, false);
+							MIDIControllable* mc = new MIDIControllable (this, *_input_port->parser(), c, false);
 
 							if (mc->set_state (**niter, version) == 0) {
 								controllables.push_back (mc);
@@ -1503,9 +1507,9 @@ GenericMidiControlProtocol::input_port() const
 }
 
 void
-GenericMidiControlProtocol::maybe_start_touch (Controllable* controllable)
+GenericMidiControlProtocol::maybe_start_touch (boost::shared_ptr<Controllable> controllable)
 {
-	AutomationControl *actl = dynamic_cast<AutomationControl*> (controllable);
+	boost::shared_ptr<AutomationControl> actl = boost::dynamic_pointer_cast<AutomationControl> (controllable);
 	if (actl) {
 		actl->start_touch (session->audible_sample ());
 	}

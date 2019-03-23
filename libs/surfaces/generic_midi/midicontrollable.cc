@@ -47,7 +47,6 @@ using namespace ARDOUR;
 
 MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser& p, bool m)
 	: _surface (s)
-	, controllable (0)
 	, _parser (p)
 	, _momentary (m)
 {
@@ -65,12 +64,12 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 	control_additional = (MIDI::byte) -1;
 }
 
-MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser& p, Controllable& c, bool m)
+MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser& p, boost::shared_ptr<PBD::Controllable> c, bool m)
 	: _surface (s)
 	, _parser (p)
 	, _momentary (m)
 {
-	set_controllable (&c);
+	set_controllable (c);
 
 	_learned = true; /* from controllable */
 	_ctltype = Ctl_Momentary;
@@ -119,29 +118,35 @@ MIDIControllable::drop_external_control ()
 	control_additional = (MIDI::byte) -1;
 }
 
-void
-MIDIControllable::set_controllable (Controllable* c)
+boost::shared_ptr<PBD::Controllable>
+MIDIControllable::get_controllable () const
 {
-	if (c == controllable) {
+	return _controllable.lock ();
+}
+
+void
+MIDIControllable::set_controllable (boost::shared_ptr<PBD::Controllable> c)
+{
+	if (c == _controllable.lock()) {
 		return;
 	}
 
 	controllable_death_connection.disconnect ();
 
-	controllable = c;
-
-	if (controllable) {
-		last_controllable_value = controllable->get_value();
+	if (c) {
+		_controllable = boost::weak_ptr<PBD::Controllable> (c);
+		last_controllable_value = c->get_value();
 	} else {
+		_controllable.reset();
 		last_controllable_value = 0.0f; // is there a better value?
 	}
 
 	last_incoming = 256;
 
-	if (controllable) {
-		controllable->Destroyed.connect (controllable_death_connection, MISSING_INVALIDATOR,
-						 boost::bind (&MIDIControllable::drop_controllable, this, _1),
-						 MidiControlUI::instance());
+	if (c) {
+		printf ("MIDIControllable::set %s\n", c->name().c_str());
+		c->Destroyed.connect_same_thread (controllable_death_connection,
+						 boost::bind (&MIDIControllable::drop_controllable, this, _1));
 	}
 }
 
@@ -171,6 +176,11 @@ MIDIControllable::stop_learning ()
 int
 MIDIControllable::control_to_midi (float val)
 {
+	boost::shared_ptr<Controllable> controllable = _controllable.lock ();
+	if (!controllable) {
+		return 0;
+	}
+
 	if (controllable->is_gain_like()) {
 		return controllable->internal_to_interface (val) * max_value_for_type ();
 	}
@@ -186,7 +196,7 @@ MIDIControllable::control_to_midi (float val)
 			return 0;
 		}
 	} else {
-		AutomationControl *actl = dynamic_cast<AutomationControl*> (controllable);
+		boost::shared_ptr<AutomationControl> actl = boost::dynamic_pointer_cast<AutomationControl> (controllable);
 		if (actl) {
 			control_min = actl->internal_to_interface(control_min);
 			control_max = actl->internal_to_interface(control_max);
@@ -202,6 +212,10 @@ MIDIControllable::control_to_midi (float val)
 float
 MIDIControllable::midi_to_control (int val)
 {
+	boost::shared_ptr<Controllable> controllable = _controllable.lock ();
+	if (!controllable) {
+		return 0;
+	}
 	/* fiddle with MIDI value so that we get an odd number of integer steps
 		and can thus represent "middle" precisely as 0.5. this maps to
 		the range 0..+1.0 (0 to 126)
@@ -219,7 +233,7 @@ MIDIControllable::midi_to_control (int val)
 	float control_range = control_max - control_min;
 	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Min %1 Max %2 Range %3\n", control_min, control_max, control_range));
 
-	AutomationControl *actl = dynamic_cast<AutomationControl*> (controllable);
+	boost::shared_ptr<AutomationControl> actl = boost::dynamic_pointer_cast<AutomationControl> (controllable);
 	if (actl) {
 		if (fv == 0.f) return control_min;
 		if (fv == 1.f) return control_max;
@@ -256,7 +270,7 @@ MIDIControllable::lookup_controllable()
 		return -1;
 	}
 
-	set_controllable (c.get ());
+	set_controllable (c);
 
 	return 0;
 }
@@ -264,19 +278,25 @@ MIDIControllable::lookup_controllable()
 void
 MIDIControllable::drop_controllable (Controllable* c)
 {
-	if (c == controllable) {
-		set_controllable (0);
+	printf ("MIDIControllable::drop_controllable ? %s\n", c->name().c_str());
+
+	boost::shared_ptr<Controllable> controllable = _controllable.lock ();
+	if (controllable && c == controllable.get()) {
+		set_controllable (boost::shared_ptr<PBD::Controllable>());
 	}
 }
 
 void
 MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool /*is_on*/)
 {
-	if (!controllable) {
+	if (_controllable.expired ()) {
 		if (lookup_controllable()) {
 			return;
 		}
 	}
+
+	boost::shared_ptr<Controllable> controllable = _controllable.lock ();
+	assert (controllable);
 
 	_surface->maybe_start_touch (controllable);
 
@@ -299,12 +319,13 @@ MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool /*is_on*/)
 void
 MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 {
-	if (!controllable) {
+	if (_controllable.expired ()) {
 		if (lookup_controllable ()) {
 			return;
 		}
 	}
 
+	boost::shared_ptr<Controllable> controllable = _controllable.lock ();
 	assert (controllable);
 
 	_surface->maybe_start_touch (controllable);
@@ -420,11 +441,14 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 void
 MIDIControllable::midi_sense_program_change (Parser &, MIDI::byte msg)
 {
-	if (!controllable) {
+	if (_controllable.expired ()) {
 		if (lookup_controllable ()) {
 			return;
 		}
 	}
+
+	boost::shared_ptr<Controllable> controllable = _controllable.lock ();
+	assert (controllable);
 
 	_surface->maybe_start_touch (controllable);
 
@@ -446,11 +470,14 @@ MIDIControllable::midi_sense_program_change (Parser &, MIDI::byte msg)
 void
 MIDIControllable::midi_sense_pitchbend (Parser &, pitchbend_t pb)
 {
-	if (!controllable) {
+	if (_controllable.expired ()) {
 		if (lookup_controllable ()) {
 			return;
 		}
 	}
+
+	boost::shared_ptr<Controllable> controllable = _controllable.lock ();
+	assert (controllable);
 
 	_surface->maybe_start_touch (controllable);
 
@@ -482,6 +509,7 @@ MIDIControllable::midi_receiver (Parser &, MIDI::byte *msg, size_t /*len*/)
 	_surface->check_used_event(msg[0], msg[1]);
 	bind_midi ((channel_t) (msg[0] & 0xf), eventType (msg[0] & 0xF0), msg[1]);
 
+	boost::shared_ptr<Controllable> controllable = _controllable.lock ();
 	if (controllable) {
 		controllable->LearningFinished ();
 	}
@@ -491,6 +519,7 @@ void
 MIDIControllable::rpn_value_change (Parser&, uint16_t rpn, float val)
 {
 	if (control_rpn == rpn) {
+		boost::shared_ptr<Controllable> controllable = _controllable.lock ();
 		if (controllable) {
 			controllable->set_value (val, Controllable::UseGroup);
 		}
@@ -501,6 +530,7 @@ void
 MIDIControllable::nrpn_value_change (Parser&, uint16_t nrpn, float val)
 {
 	if (control_nrpn == nrpn) {
+		boost::shared_ptr<Controllable> controllable = _controllable.lock ();
 		if (controllable) {
 			controllable->set_value (val, Controllable::UseGroup);
 		}
@@ -511,6 +541,7 @@ void
 MIDIControllable::rpn_change (Parser&, uint16_t rpn, int dir)
 {
 	if (control_rpn == rpn) {
+		boost::shared_ptr<Controllable> controllable = _controllable.lock ();
 		if (controllable) {
 			/* XXX how to increment/decrement ? */
 			// controllable->set_value (val);
@@ -522,6 +553,7 @@ void
 MIDIControllable::nrpn_change (Parser&, uint16_t nrpn, int dir)
 {
 	if (control_nrpn == nrpn) {
+		boost::shared_ptr<Controllable> controllable = _controllable.lock ();
 		if (controllable) {
 			/* XXX how to increment/decrement ? */
 			// controllable->set_value (val);
@@ -629,9 +661,12 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 MIDI::byte*
 MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*force*/)
 {
-	if (!controllable || !_surface->get_feedback ()) {
+	if (_controllable.expired () || !_surface->get_feedback ()) {
 		return buf;
 	}
+
+	boost::shared_ptr<Controllable> controllable = _controllable.lock ();
+	assert (controllable);
 
 	float val = controllable->get_value ();
 
@@ -768,7 +803,9 @@ MIDIControllable::get_state ()
 
 	XMLNode* node = new XMLNode ("MIDIControllable");
 
-	if (_current_uri.empty()) {
+	boost::shared_ptr<Controllable> controllable = _controllable.lock ();
+
+	if (_current_uri.empty() && controllable) {
 		node->set_property ("id", controllable->id ());
 	} else {
 		node->set_property ("uri", _current_uri);

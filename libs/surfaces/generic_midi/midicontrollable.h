@@ -43,9 +43,9 @@ namespace ARDOUR {
 
 class MIDIControllable : public PBD::Stateful
 {
-  public:
-        MIDIControllable (GenericMidiControlProtocol *, MIDI::Parser&, PBD::Controllable&, bool momentary);
-        MIDIControllable (GenericMidiControlProtocol *, MIDI::Parser&, bool momentary = false);
+public:
+	MIDIControllable (GenericMidiControlProtocol*, MIDI::Parser&, boost::shared_ptr<PBD::Controllable>, bool momentary);
+	MIDIControllable (GenericMidiControlProtocol*, MIDI::Parser&, bool momentary = false);
 	virtual ~MIDIControllable ();
 
 	int init (const std::string&);
@@ -89,8 +89,8 @@ class MIDIControllable : public PBD::Stateful
 	void set_encoder (Encoder val) { _encoder = val; }
 
 	MIDI::Parser& get_parser() { return _parser; }
-	PBD::Controllable* get_controllable() const { return controllable; }
-	void set_controllable (PBD::Controllable*);
+	void set_controllable (boost::shared_ptr<PBD::Controllable>);
+	boost::shared_ptr<PBD::Controllable> get_controllable () const;
 	const std::string& current_uri() const { return _current_uri; }
 
 	std::string control_description() const { return _control_description; }
@@ -108,16 +108,16 @@ class MIDIControllable : public PBD::Stateful
 	MIDI::eventType get_control_type () { return control_type; }
 	MIDI::byte get_control_additional () { return control_additional; }
 
-        int lookup_controllable();
+	int lookup_controllable();
 
-  private:
+private:
 
 	int max_value_for_type () const;
 
 	GenericMidiControlProtocol* _surface;
-	PBD::Controllable* controllable;
+	boost::weak_ptr<PBD::Controllable> _controllable;
 	std::string     _current_uri;
-        MIDI::Parser&   _parser;
+	MIDI::Parser&   _parser;
 	bool             setting;
 	int              last_value;
 	int              last_incoming;
@@ -159,4 +159,3 @@ class MIDIControllable : public PBD::Stateful
 };
 
 #endif // __gm_midicontrollable_h__
-

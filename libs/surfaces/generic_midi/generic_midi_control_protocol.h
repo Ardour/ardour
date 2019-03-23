@@ -47,7 +47,7 @@ class MIDIFunction;
 class MIDIAction;
 
 class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
-  public:
+public:
 	GenericMidiControlProtocol (ARDOUR::Session&);
 	virtual ~GenericMidiControlProtocol();
 
@@ -68,7 +68,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 
 	boost::shared_ptr<PBD::Controllable> lookup_controllable (std::string const &) const;
 
-	void maybe_start_touch (PBD::Controllable*);
+	void maybe_start_touch (boost::shared_ptr<PBD::Controllable>);
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
@@ -110,7 +110,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 
 	PBD::Signal0<void> ConnectionChange;
 
-  private:
+private:
 	boost::shared_ptr<ARDOUR::Bundle> _input_bundle;
 	boost::shared_ptr<ARDOUR::Bundle> _output_bundle;
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _input_port;
@@ -147,8 +147,8 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
         Glib::Threads::Mutex controllables_lock;
         Glib::Threads::Mutex pending_lock;
 
-	bool start_learning (PBD::Controllable*);
-	void stop_learning (PBD::Controllable*);
+	bool start_learning (boost::weak_ptr<PBD::Controllable>);
+	void stop_learning (boost::weak_ptr<PBD::Controllable>);
 
 	void learning_stopped (MIDIControllable*);
 
