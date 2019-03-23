@@ -106,8 +106,10 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	 * thread
 	 */
 
-	Controllable::StartLearning.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::start_learning, this, _1));
+#if 0 // XXX temp. disabled for API change
+Controllab:le::StartLearning.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::start_learning, this, _1));
 	Controllable::StopLearning.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::stop_learning, this, _1));
+#endif
 
 	/* this signal is emitted by the process() callback, and if
 	 * send_feedback() is going to do anything, it should do it in the
@@ -625,7 +627,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 					if ((*niter)->get_property ("id", id)) {
 
 						DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Relearned binding for session: Control ID: %1\n", id.to_s()));
-						Controllable* c = Controllable::by_id (id);
+						Controllable* c = 0; // Controllable::by_id (id); // XXX temp. disabled for API change
 
 						if (c) {
 							MIDIControllable* mc = new MIDIControllable (this, *_input_port->parser(), *c, false);
