@@ -680,6 +680,14 @@ Session::destroy ()
 
 	Port::PortDrop (); /* EMIT SIGNAL */
 
+	{
+		Glib::Threads::Mutex::Lock lm (controllables_lock);
+		for (Controllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
+			(*i)->DropReferences (); /* EMIT SIGNAL */
+		}
+		controllables.clear ();
+	}
+
 	/* clear history so that no references to objects are held any more */
 
 	_history.clear ();
@@ -863,6 +871,10 @@ Session::destroy ()
 	_selection = 0;
 
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
+
+#ifndef NDEBUG
+	Controllable::dump_registry ();
+#endif
 
 	BOOST_SHOW_POINTERS ();
 }
