@@ -150,8 +150,6 @@ public:
 	Flag flags() const { return _flags; }
 	void set_flags (Flag f);
 
-	static Controllable* by_id (const PBD::ID&);
-	static Controllable* by_name (const std::string&);
 	static const std::string xml_node_name;
 
 protected:
@@ -167,13 +165,6 @@ private:
 	std::string _units;
 	Flag        _flags;
 	bool        _touching;
-
-	static void add (Controllable&);
-	static void remove (Controllable*);
-
-	typedef std::set<PBD::Controllable*> Controllables;
-	static Glib::Threads::RWLock registry_lock;
-	static Controllables registry;
 };
 
 /* a utility class for the occasions when you need but do not have
