@@ -208,7 +208,6 @@ Session::pre_engine_init (string fullpath)
 	SourceFactory::SourceCreated.connect_same_thread (*this, boost::bind (&Session::add_source, this, _1));
 	PlaylistFactory::PlaylistCreated.connect_same_thread (*this, boost::bind (&Session::add_playlist, this, _1, _2));
 	AutomationList::AutomationListCreated.connect_same_thread (*this, boost::bind (&Session::add_automation_list, this, _1));
-	Controllable::Destroyed.connect_same_thread (*this, boost::bind (&Session::remove_controllable, this, _1));
 	IO::PortCountChanged.connect_same_thread (*this, boost::bind (&Session::ensure_buffers, this, _1));
 
 	/* stop IO objects from doing stuff until we're ready for them */
@@ -3737,24 +3736,6 @@ Session::add_controllable (boost::shared_ptr<Controllable> c)
 
 	Glib::Threads::Mutex::Lock lm (controllables_lock);
 	controllables.insert (c);
-}
-
-struct null_deleter { void operator()(void const *) const {} };
-
-void
-Session::remove_controllable (Controllable* c)
-{
-	if (deletion_in_progress()) {
-		return;
-	}
-
-	Glib::Threads::Mutex::Lock lm (controllables_lock);
-
-	Controllables::iterator x = controllables.find (boost::shared_ptr<Controllable>(c, null_deleter()));
-
-	if (x != controllables.end()) {
-		controllables.erase (x);
-	}
 }
 
 boost::shared_ptr<Controllable>
