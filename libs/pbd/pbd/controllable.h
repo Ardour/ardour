@@ -122,8 +122,6 @@ public:
 	virtual std::string get_user_string() const { return std::string(); }
 
 	PBD::Signal0<void> LearningFinished;
-	static PBD::Signal3<void,PBD::Controllable*,int,int> CreateBinding;
-	static PBD::Signal1<void,PBD::Controllable*> DeleteBinding;
 
 	static PBD::Signal1<bool,PBD::Controllable*> StartLearning;
 	static PBD::Signal1<void,PBD::Controllable*> StopLearning;

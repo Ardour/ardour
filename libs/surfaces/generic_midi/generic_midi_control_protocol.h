@@ -152,9 +152,6 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 
 	void learning_stopped (MIDIControllable*);
 
-	void create_binding (PBD::Controllable*, int, int);
-	void delete_binding (PBD::Controllable*);
-
 	MIDIControllable* create_binding (const XMLNode&);
 	MIDIFunction* create_function (const XMLNode&);
 	MIDIAction* create_action (const XMLNode&);

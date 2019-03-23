@@ -108,8 +108,6 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 
 	Controllable::StartLearning.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::start_learning, this, _1));
 	Controllable::StopLearning.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::stop_learning, this, _1));
-	Controllable::CreateBinding.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::create_binding, this, _1, _2, _3));
-	Controllable::DeleteBinding.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::delete_binding, this, _1));
 
 	/* this signal is emitted by the process() callback, and if
 	 * send_feedback() is going to do anything, it should do it in the
@@ -469,64 +467,6 @@ GenericMidiControlProtocol::stop_learning (Controllable* c)
 }
 
 void
-GenericMidiControlProtocol::delete_binding (PBD::Controllable* control)
-{
-	if (control != 0) {
-		Glib::Threads::Mutex::Lock lm2 (controllables_lock);
-
-		for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end();) {
-			MIDIControllable* existingBinding = (*iter);
-
-			if (control == (existingBinding->get_controllable())) {
-				delete existingBinding;
-				iter = controllables.erase (iter);
-			} else {
-				++iter;
-			}
-
-		}
-	}
-}
-
-// This next function seems unused
-void
-GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos, int control_number)
-{
-	if (control != NULL) {
-		Glib::Threads::Mutex::Lock lm2 (controllables_lock);
-
-		MIDI::channel_t channel = (pos & 0xf);
-		MIDI::byte value = control_number;
-
-		// Create a MIDIControllable
-		MIDIControllable* mc = new MIDIControllable (this, *_input_port->parser(), *control, false);
-
-		// Remove any old binding for this midi channel/type/value pair
-		// Note:  can't use delete_binding() here because we don't know the specific controllable we want to remove, only the midi information
-		for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end();) {
-			MIDIControllable* existingBinding = (*iter);
-
-			if ((existingBinding->get_control_channel() & 0xf ) == channel &&
-			    existingBinding->get_control_additional() == value &&
-			    (existingBinding->get_control_type() & 0xf0 ) == MIDI::controller) {
-
-				delete existingBinding;
-				iter = controllables.erase (iter);
-			} else {
-				++iter;
-			}
-
-		}
-
-		// Update the MIDI Controllable based on the the pos param
-		// Here is where a table lookup for user mappings could go; for now we'll just wing it...
-		mc->bind_midi(channel, MIDI::controller, value);
-		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Create binding: Channel: %1 Controller: %2 Value: %3 \n", channel, MIDI::controller, value));
-		controllables.push_back (mc);
-	}
-}
-
-void
 GenericMidiControlProtocol::check_used_event (int pos, int control_number)
 {
 	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
@@ -537,7 +477,6 @@ GenericMidiControlProtocol::check_used_event (int pos, int control_number)
 	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("checking for used event: Channel: %1 Controller: %2 value: %3\n", (int) channel, (pos & 0xf0), (int) value));
 
 	// Remove any old binding for this midi channel/type/value pair
-	// Note:  can't use delete_binding() here because we don't know the specific controllable we want to remove, only the midi information
 	for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end();) {
 		MIDIControllable* existingBinding = (*iter);
 		if ( (existingBinding->get_control_type() & 0xf0 ) == (pos & 0xf0) && (existingBinding->get_control_channel() & 0xf ) == channel ) {
