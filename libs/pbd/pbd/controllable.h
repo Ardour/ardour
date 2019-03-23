@@ -123,8 +123,8 @@ public:
 
 	PBD::Signal0<void> LearningFinished;
 
-	static PBD::Signal1<bool,PBD::Controllable*> StartLearning;
-	static PBD::Signal1<void,PBD::Controllable*> StopLearning;
+	static PBD::Signal1<bool, boost::weak_ptr<PBD::Controllable> > StartLearning;
+	static PBD::Signal1<void, boost::weak_ptr<PBD::Controllable> > StopLearning;
 
 	static PBD::Signal1<void,Controllable*> Destroyed;
 

@@ -30,8 +30,8 @@ using namespace PBD;
 using namespace std;
 
 PBD::Signal1<void,Controllable*> Controllable::Destroyed;
-PBD::Signal1<bool,Controllable*> Controllable::StartLearning;
-PBD::Signal1<void,Controllable*> Controllable::StopLearning;
+PBD::Signal1<bool, boost::weak_ptr<PBD::Controllable> > Controllable::StartLearning;
+PBD::Signal1<void, boost::weak_ptr<PBD::Controllable> > Controllable::StopLearning;
 PBD::Signal1<void, boost::weak_ptr<PBD::Controllable> > Controllable::GUIFocusChanged;
 
 const std::string Controllable::xml_node_name = X_("Controllable");
