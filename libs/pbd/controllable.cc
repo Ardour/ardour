@@ -29,7 +29,6 @@
 using namespace PBD;
 using namespace std;
 
-PBD::Signal1<void,Controllable*> Controllable::Destroyed;
 PBD::Signal1<bool, boost::weak_ptr<PBD::Controllable> > Controllable::StartLearning;
 PBD::Signal1<void, boost::weak_ptr<PBD::Controllable> > Controllable::StopLearning;
 PBD::Signal1<void, boost::weak_ptr<PBD::Controllable> > Controllable::GUIFocusChanged;
@@ -104,6 +103,7 @@ Controllable::add (Controllable& ctl)
 	Glib::Threads::RWLock::WriterLock lm (registry_lock);
 	registry.insert (&ctl);
 	ctl.DropReferences.connect_same_thread (registry_connections, boost::bind (&Controllable::remove, &ctl));
+	ctl.Destroyed.connect_same_thread (registry_connections, boost::bind (&Controllable::remove, &ctl));
 }
 
 void
@@ -127,4 +127,16 @@ Controllable::by_id (const ID& id)
 		}
 	}
 	return boost::shared_ptr<Controllable>();
+}
+
+void
+Controllable::dump_registry ()
+{
+	Glib::Threads::RWLock::ReaderLock lm (registry_lock);
+	unsigned int cnt = 0;
+	cout << "-- List Of Registered Controllables\n";
+	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i, ++cnt) {
+		cout << "CTRL: " << (*i)->name() << "\n";
+	}
+	cout << "Total number of registered sontrollables: " << cnt << "\n";
 }

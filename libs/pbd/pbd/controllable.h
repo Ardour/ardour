@@ -22,7 +22,6 @@
 
 #include <string>
 #include <set>
-#include <map>
 
 #include "pbd/libpbd_visibility.h"
 #include "pbd/signals.h"
@@ -62,7 +61,6 @@ public:
 	};
 
 	Controllable (const std::string& name, Flag f = Flag (0));
-	virtual ~Controllable() { Destroyed (this); }
 
 	/* We express Controllable values in one of three ways:
 	 * 1. `user' --- as presented to the user (e.g. dB, Hz, etc.)
@@ -129,8 +127,6 @@ public:
 	static PBD::Signal1<bool, boost::weak_ptr<PBD::Controllable> > StartLearning;
 	static PBD::Signal1<void, boost::weak_ptr<PBD::Controllable> > StopLearning;
 
-	static PBD::Signal1<void,Controllable*> Destroyed;
-
 	static PBD::Signal1<void, boost::weak_ptr<PBD::Controllable> > GUIFocusChanged;
 
 	PBD::Signal2<void,bool,PBD::Controllable::GroupControlDisposition> Changed;
@@ -138,7 +134,7 @@ public:
 	int set_state (const XMLNode&, int version);
 	virtual XMLNode& get_state ();
 
-	std::string name()      const { return _name; }
+	std::string name() const { return _name; }
 
 	bool touching () const { return _touching; }
 	PBD::Signal0<void> TouchChanged;
@@ -154,6 +150,7 @@ public:
 	void set_flags (Flag f);
 
 	static boost::shared_ptr<Controllable> by_id (const PBD::ID&);
+	static void dump_registry ();
 
 	static const std::string xml_node_name;
 
@@ -178,7 +175,6 @@ private:
 
 	static void add (Controllable&);
 	static void remove (Controllable*);
-
 };
 
 /* a utility class for the occasions when you need but do not have
