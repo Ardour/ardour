@@ -23,7 +23,7 @@ Tambien se busca igualar o mejorar la       funcionalidad de sistemas
 basados en software como ProTools,         Samplitude, Logic Audio, 
 Nuendo y Cubase VST (reconocemos a estos y a todos los nombres ya 
 mencionados, como marcas registradas de sus respectivos dueños). 
-Ardour soporta Control de Maquina MIDI, por lo que puede ser controlado
+Ardour soporta Control de Máquina MIDI, por lo que puede ser controlado
 desde cualquier controladora MMC, como la "Mackie Digital 8 Bus Mixer"
 y otros mixers digitales modernos.
 .SH OPCIONES
