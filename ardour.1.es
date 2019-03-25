@@ -15,7 +15,7 @@ Ardour graba multiples canales simultáneos a disco rigido (HDR) y es una
 estación de trabajo de audio digital (DAW).
 Es capaz de grabar 24 o mas canales simultáneamente con calidad de audio
 de 32 bit y a 48khz.
-La inteción de Ardour es funcionar como un sistema HDR "profesional",
+La intención de Ardour es funcionar como un sistema HDR "profesional",
 reemplazando soluciones de hardware dedicado como la Mackie HDR, el 
 Tascam 2424 y otros sistemas tradicionales que emplean cinta como la 
 linea de ADATs de Alesis.
