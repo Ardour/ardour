@@ -167,6 +167,7 @@ static const char* authors[] = {
 	N_("Nick Lanham"),
 	N_("Colin Law"),
 	N_("Joshua Leach"),
+	N_("Jan Lentfer"),
 	N_("Ben Loftis"),
 	N_("Nick Mainsbridge"),
 	N_("Tim Mayberry"),
