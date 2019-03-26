@@ -57,5 +57,5 @@ PanControllable::actually_set_value (double v, Controllable::GroupControlDisposi
 std::string
 PanControllable::get_user_string () const
 {
-	return owner->value_as_string (shared_from_this());
+	return owner->value_as_string (boost::dynamic_pointer_cast<const AutomationControl>(shared_from_this()));
 }

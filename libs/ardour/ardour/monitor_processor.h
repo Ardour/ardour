@@ -192,6 +192,7 @@ private:
 		MPControl<bool>&   soloed;
 
 		ChannelRecord (uint32_t);
+		~ChannelRecord ();
 	};
 
 	std::vector<ChannelRecord*> _channels;

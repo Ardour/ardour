@@ -1079,7 +1079,6 @@ public:
 	boost::shared_ptr<AutomationControl> automation_control_by_id (const PBD::ID&);
 
 	void add_controllable (boost::shared_ptr<PBD::Controllable>);
-	void remove_controllable (PBD::Controllable*);
 
 	boost::shared_ptr<PBD::Controllable> solo_cut_control() const;
 

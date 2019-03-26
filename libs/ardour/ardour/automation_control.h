@@ -26,7 +26,6 @@
 #include <glibmm/threads.h>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
 
 #include "pbd/controllable.h"
 
@@ -51,7 +50,6 @@ class ControlGroup;
 class LIBARDOUR_API AutomationControl
 	: public PBD::Controllable
 	, public Evoral::Control
-	, public boost::enable_shared_from_this<AutomationControl>
 	, public ControlGroupMember
 	, public SessionHandleRef
 {

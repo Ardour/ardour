@@ -43,9 +43,9 @@ namespace ARDOUR {
 
 class MIDIControllable : public PBD::Stateful
 {
-  public:
-        MIDIControllable (GenericMidiControlProtocol *, MIDI::Parser&, PBD::Controllable&, bool momentary);
-        MIDIControllable (GenericMidiControlProtocol *, MIDI::Parser&, bool momentary = false);
+public:
+	MIDIControllable (GenericMidiControlProtocol*, MIDI::Parser&, boost::shared_ptr<PBD::Controllable>, bool momentary);
+	MIDIControllable (GenericMidiControlProtocol*, MIDI::Parser&, bool momentary = false);
 	virtual ~MIDIControllable ();
 
 	int init (const std::string&);
@@ -89,8 +89,8 @@ class MIDIControllable : public PBD::Stateful
 	void set_encoder (Encoder val) { _encoder = val; }
 
 	MIDI::Parser& get_parser() { return _parser; }
-	PBD::Controllable* get_controllable() const { return controllable; }
-	void set_controllable (PBD::Controllable*);
+	void set_controllable (boost::shared_ptr<PBD::Controllable>);
+	boost::shared_ptr<PBD::Controllable> get_controllable () const;
 	const std::string& current_uri() const { return _current_uri; }
 
 	std::string control_description() const { return _control_description; }
@@ -108,16 +108,16 @@ class MIDIControllable : public PBD::Stateful
 	MIDI::eventType get_control_type () { return control_type; }
 	MIDI::byte get_control_additional () { return control_additional; }
 
-        int lookup_controllable();
+	int lookup_controllable();
 
-  private:
+private:
 
 	int max_value_for_type () const;
 
 	GenericMidiControlProtocol* _surface;
-	PBD::Controllable* controllable;
+	boost::shared_ptr<PBD::Controllable> _controllable;
 	std::string     _current_uri;
-        MIDI::Parser&   _parser;
+	MIDI::Parser&   _parser;
 	bool             setting;
 	int              last_value;
 	int              last_incoming;
@@ -130,7 +130,7 @@ class MIDIControllable : public PBD::Stateful
 	int              midi_msg_id;      /* controller ID or note number */
 	PBD::ScopedConnection midi_sense_connection[2];
 	PBD::ScopedConnection midi_learn_connection;
-        PBD::ScopedConnection controllable_death_connection;
+	PBD::ScopedConnectionList controllable_death_connections;
 	/** the type of MIDI message that is used for this control */
 	MIDI::eventType  control_type;
 	MIDI::byte       control_additional;
@@ -142,7 +142,8 @@ class MIDIControllable : public PBD::Stateful
 	std::string     _what;
 	bool            _bank_relative;
 
-	void drop_controllable (PBD::Controllable*);
+	void drop_controllable ();
+	Glib::Threads::Mutex controllable_lock;
 
 	void midi_receiver (MIDI::Parser &p, MIDI::byte *, size_t);
 	void midi_sense_note (MIDI::Parser &, MIDI::EventTwoBytes *, bool is_on);
@@ -159,4 +160,3 @@ class MIDIControllable : public PBD::Stateful
 };
 
 #endif // __gm_midicontrollable_h__
-

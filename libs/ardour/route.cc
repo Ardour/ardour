@@ -4224,6 +4224,9 @@ Route::shift (samplepos_t pos, samplecnt_t samples)
 				boost::shared_ptr<AutomationControl> ac = (*i)->automation_control (*p);
 				if (ac) {
 					boost::shared_ptr<AutomationList> al = ac->alist();
+					if (al->empty ()) {
+						continue;
+					}
 					XMLNode &before = al->get_state ();
 					al->shift (pos, samples);
 					XMLNode &after = al->get_state ();

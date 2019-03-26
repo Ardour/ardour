@@ -21,6 +21,7 @@
 #define playback_buffer_h
 
 #include <cstring>
+#include <stdint.h>
 #include <glibmm.h>
 
 #include "pbd/libpbd_visibility.h"

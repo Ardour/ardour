@@ -91,7 +91,7 @@ bool
 BindingProxy::button_press_handler (GdkEventButton *ev)
 {
 	if ( controllable && is_bind_action(ev) ) {
-		if (Controllable::StartLearning (controllable.get())) {
+		if (Controllable::StartLearning (controllable)) {
 			string prompt = _("operate controller now");
 			if (prompter == 0) {
 				prompter = new PopUp (Gtk::WIN_POS_MOUSE, 30000, false);
@@ -121,7 +121,7 @@ BindingProxy::prompter_hiding (GdkEventAny* /*ev*/)
 {
 	learning_connection.disconnect ();
 	if (controllable) {
-		Controllable::StopLearning (controllable.get());
+		Controllable::StopLearning (controllable);
 	}
 	return false;
 }
