@@ -1169,18 +1169,14 @@ Session::butler_transport_work ()
 {
 	/* Note: this function executes in the butler thread context */
 
-restart:
-	bool finished;
-	PostTransportWork ptw;
+  restart:
 	boost::shared_ptr<RouteList> r = routes.reader ();
+	int on_entry = g_atomic_int_get (&_butler->should_do_transport_work);
+	bool finished = true;
+	PostTransportWork ptw = post_transport_work();
 	uint64_t before;
 
-	int on_entry = g_atomic_int_get (&_butler->should_do_transport_work);
-	finished = true;
-	ptw = post_transport_work();
-
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler transport work, todo = %1 at %2\n", enum_2_string (ptw), (before = g_get_monotonic_time())));
-
 
 	if (ptw & PostTransportLocate) {
 
