@@ -651,6 +651,12 @@ SessionMetadata::set_country (const string & v)
 void
 SessionMetadata::av_export_tag (MetaDataMap& meta) const
 {
+	/* this is used for ffmpeg/liblame -metadata key=value
+	 * (video and mp3 export).
+	 * for flac/ogg's vorbis-comment see:
+	 * AudiofileTagger::tag_generic()
+	 * AudiofileTagger::tag_vorbis_comment()
+	 */
 	if (year() > 0) {
 		std::ostringstream osstream; osstream << year();
 		meta["year"] = osstream.str();

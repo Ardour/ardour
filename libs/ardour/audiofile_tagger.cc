@@ -42,6 +42,8 @@ namespace ARDOUR
 bool
 AudiofileTagger::tag_file (std::string const & filename, SessionMetadata const & metadata)
 {
+	/* see also SessionMetadata::av_export_tag () for ffmpeg/liblame */
+
 	TagLib::FileRef file (filename.c_str());
 	if (file.isNull()) {
 		std::cerr << "TagLib::FileRef is null for file" << filename  << std::endl;
