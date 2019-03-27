@@ -236,8 +236,8 @@ void EditorRouteGroups::write() {
 void EditorRouteGroups::load() {
 	string path = Glib::build_filename(user_config_directory(-1), "snapshot.xml");
 	camera->load(path);
-	MixerSnapshotDialog m = MixerSnapshotDialog();
-	// m.run();
+	MixerSnapshotDialog* m = new MixerSnapshotDialog();
+	m->run();
 
 }
 

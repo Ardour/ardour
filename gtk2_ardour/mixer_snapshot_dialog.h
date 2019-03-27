@@ -45,10 +45,12 @@ class MixerSnapshotDialog : public ArdourDialog
         MixerSnapshotDialog();
         ~MixerSnapshotDialog();
 
-        // int run();
+        int run();
 
     private:
+
+        Gtkmm2ext::DnDTreeView<std::string> snap_display;
+        Gtk::ScrolledWindow scroller;
+
 };
-
-
 #endif
