@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <gtkmm/table.h>
+
 #include "mixer_snapshot_dialog.h"
 
 #include "pbd/i18n.h"
@@ -12,19 +14,20 @@ MixerSnapshotDialog::MixerSnapshotDialog()
     : ArdourDialog(_("this is a dialog"), true, false)
 {
 
-    set_name("PluginSelectorWindow");
-
-    if(_session)
-        cout << " MixerSnapshotDialog is being constructed in session -" << _session->name() << endl;
+    set_name("msdialog");
+    Table* table = new Table(3, 3);
+    table->set_size_request(-1, 600);
+    table->attach (scroller,               0, 3, 0, 5);
+    get_vbox()->pack_start (*table);
+    
 }
 
-MixerSnapshotDialog::~MixerSnapshotDialog()
+MixerSnapshotDialog::~MixerSnapshotDialog() 
 {
 
 }
 
 int MixerSnapshotDialog::run() {
     show_all();
-    Dialog::run();
     return 0;
 }
