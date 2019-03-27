@@ -1244,7 +1244,7 @@ class AutomationRangeDrag : public Drag
 {
 public:
 	AutomationRangeDrag (Editor *, AutomationTimeAxisView *, std::list<ARDOUR::AudioRange> const &);
-	AutomationRangeDrag (Editor *, RegionView *, std::list<ARDOUR::AudioRange> const &);
+	AutomationRangeDrag (Editor *, RegionView *, std::list<RegionView*> const &, std::list<ARDOUR::AudioRange> const &);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);

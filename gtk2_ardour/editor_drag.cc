@@ -6223,7 +6223,7 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView
 }
 
 /** Make an AutomationRangeDrag for region gain lines or MIDI controller regions */
-AutomationRangeDrag::AutomationRangeDrag (Editor* editor, RegionView* rv, list<AudioRange> const & r)
+AutomationRangeDrag::AutomationRangeDrag (Editor* editor, RegionView* rv, list<RegionView*> const & v, list<AudioRange> const & r)
 	: Drag (editor, rv->get_canvas_group ())
 	, _ranges (r)
 	, _y_origin (rv->get_time_axis_view().y_position())
@@ -6234,17 +6234,21 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, RegionView* rv, list<A
 
 	list<boost::shared_ptr<AutomationLine> > lines;
 
-	AudioRegionView*      audio_view;
-	AutomationRegionView* automation_view;
-	if ((audio_view = dynamic_cast<AudioRegionView*>(rv))) {
-		lines.push_back (audio_view->get_gain_line ());
-	} else if ((automation_view = dynamic_cast<AutomationRegionView*>(rv))) {
-		lines.push_back (automation_view->line ());
-		_integral = true;
-	} else {
-		error << _("Automation range drag created for invalid region type") << endmsg;
+	bool found_primary = false;
+	for (list<RegionView*>::const_iterator i = v.begin(); i != v.end(); ++i) {
+		if (*i == rv) {
+			found_primary = true;
+		}
+		if (AudioRegionView* audio_view = dynamic_cast<AudioRegionView*>(*i)) {
+			lines.push_back (audio_view->get_gain_line ());
+		} else if (AutomationRegionView* automation_view = dynamic_cast<AutomationRegionView*>(*i)) {
+			lines.push_back (automation_view->line ());
+			_integral = true;
+		} else {
+			error << _("Automation range drag created for invalid region type") << endmsg;
+		}
 	}
-
+	assert (found_primary);
 	setup (lines);
 }
 
@@ -6254,6 +6258,7 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, RegionView* rv, list<A
 void
 AutomationRangeDrag::setup (list<boost::shared_ptr<AutomationLine> > const & lines)
 {
+	printf ("AutomationRangeDrag::setup %d lines\n", lines.size());
 	/* find the lines that overlap the ranges being dragged */
 	list<boost::shared_ptr<AutomationLine> >::const_iterator i = lines.begin ();
 	while (i != lines.end ()) {
@@ -6344,7 +6349,7 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 	}
 
 	if (first_move) {
-		_editor->begin_reversible_command (_("automation range move"));
+		_editor->begin_reversible_command (_("automation range move")); // XXX
 
 		if (!_ranges.empty()) {
 
