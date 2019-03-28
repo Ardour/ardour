@@ -97,7 +97,7 @@ TransformDialog::TransformDialog()
 
 	Gtk::HBox* add_hbox = Gtk::manage(new Gtk::HBox);
 	_add_button.add(
-		*manage(new Gtk::Image(Gtk::Stock::ADD, Gtk::ICON_SIZE_BUTTON)));
+		*Gtk::manage(new Gtk::Image(Gtk::Stock::ADD, Gtk::ICON_SIZE_BUTTON)));
 	add_hbox->pack_start(_add_button, false, false);
 	_add_button.signal_clicked().connect(
 		sigc::mem_fun(*this, &TransformDialog::add_clicked));
@@ -311,7 +311,7 @@ TransformDialog::OperationChooser::OperationChooser(const Model& model)
 	pack_start(remove_button, false, false);
 
 	remove_button.add(
-		*manage(new Gtk::Image(Gtk::Stock::REMOVE, Gtk::ICON_SIZE_BUTTON)));
+		*Gtk::manage(new Gtk::Image(Gtk::Stock::REMOVE, Gtk::ICON_SIZE_BUTTON)));
 
 	remove_button.signal_clicked().connect(
 		sigc::mem_fun(*this, &TransformDialog::OperationChooser::remove_clicked));
