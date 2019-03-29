@@ -230,13 +230,14 @@ void EditorRouteGroups::recall() {
 }
 
 void EditorRouteGroups::write() { 
-	camera->write();
+	// camera->write();
 }
 
 void EditorRouteGroups::load() {
 	string path = Glib::build_filename(user_config_directory(-1), "snapshot.xml");
 	camera->load(path);
 	MixerSnapshotDialog* m = new MixerSnapshotDialog();
+	m->set_session(_session);
 	m->run();
 
 }

@@ -42,7 +42,7 @@ class MixerSnapshot
         void snap(boost::shared_ptr<ARDOUR::Route>);
         void recall();
         void clear();
-        void write();
+        void write(bool);
         void load(std::string);
 
         struct State {
@@ -62,10 +62,13 @@ class MixerSnapshot
         std::vector<State> get_routes() {return route_states;};
         std::vector<State> get_groups() {return group_states;};
         std::vector<State> get_vcas()   {return vca_states;};
+        std::string get_last_modified_with() {return last_modified_with;};
 
         int id;
         std::string label;
         std::time_t timestamp;
+        bool favorite;
+        bool has_specials;
 
     private:
         ARDOUR::Session* _session;
@@ -74,7 +77,7 @@ class MixerSnapshot
         void load_from_session(std::string);
         void load_from_session(XMLNode&);
 
-
+        std::string last_modified_with;
         std::vector<State> route_states;
         std::vector<State> group_states;
         std::vector<State> vca_states;

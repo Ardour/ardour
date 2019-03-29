@@ -6,6 +6,8 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/session_state_utils.h"
+#include "ardour/revision.h"
+#include "ardour/session_directory.h"
 
 #include "pbd/i18n.h"
 #include "pbd/xml++.h"
@@ -22,6 +24,8 @@ MixerSnapshot::MixerSnapshot(Session* s)
     : id(0)
     , label("snapshot")
     , timestamp(time(0))
+    , favorite(false)
+    , last_modified_with("")
 {   
     if(s)
         _session = s;
@@ -31,11 +35,21 @@ MixerSnapshot::MixerSnapshot(Session* s, string file_path)
     : id(0)
     , label("snapshot")
     , timestamp(time(0))
+    , favorite(false)
+    , last_modified_with("")
 {   
     if(s)
         _session = s;
 
-    load_from_session(file_path);
+    if(Glib::file_test(file_path.c_str(), Glib::FILE_TEST_IS_DIR))
+        load_from_session(file_path);
+
+    string suffix = "." + PBD::get_suffix(file_path);
+    if(suffix == statefile_suffix)
+        load_from_session(file_path);
+    
+    if(suffix == ".xml")
+        load(file_path);
 }
 
 MixerSnapshot::~MixerSnapshot()
@@ -192,6 +206,9 @@ void MixerSnapshot::reassign_masters(boost::shared_ptr<Slavable> slv, XMLNode no
 
 void MixerSnapshot::recall()
 {
+    if(!_session)
+        return;
+
     _session->begin_reversible_command(_("mixer-snapshot recall"));
     
     //vcas
@@ -245,10 +262,20 @@ void MixerSnapshot::recall()
     _session->commit_reversible_command();
 }
 
-void MixerSnapshot::write()
-{   
+void MixerSnapshot::write(bool global)
+{
+    if(empty())
+        return;
+
     XMLNode* node = new XMLNode("MixerSnapshot");
 	XMLNode* child;
+
+    child = node->add_child ("ProgramVersion");
+    string modified_with = string_compose("%1 %2", PROGRAM_NAME, revision);
+	child->set_property("modified-with", modified_with);
+
+    child = node->add_child ("Favorite");
+	child->set_property("favorite", favorite);
 
     child = node->add_child("Routes");
     for(vector<State>::iterator i = route_states.begin(); i != route_states.end(); i++) {
@@ -265,10 +292,15 @@ void MixerSnapshot::write()
         child->add_child_copy((*i).node);
     }
 
-    string snap = Glib::build_filename(user_config_directory(-1), label + ".xml");
+    string path = "";
+    if(global)
+        path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots/", label + ".xml");
+    else
+        path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots/", label + ".xml");
+    
     XMLTree tree;
 	tree.set_root(node);
-    tree.write(snap.c_str());
+    tree.write(path.c_str());
 }
 
 void MixerSnapshot::load(string path)
@@ -286,9 +318,23 @@ void MixerSnapshot::load(string path)
         return;
     }
 
-    XMLNode* route_node = find_named_node(*root, "Routes");
-    XMLNode* group_node = find_named_node(*root, "Groups");
-    XMLNode* vca_node   = find_named_node(*root, "VCAS");
+    XMLNode* version_node = find_named_node(*root, "ProgramVersion");
+    XMLNode* fav_node     = find_named_node(*root, "Favorite");
+    XMLNode* route_node   = find_named_node(*root, "Routes");
+    XMLNode* group_node   = find_named_node(*root, "Groups");
+    XMLNode* vca_node     = find_named_node(*root, "VCAS");
+
+    if(version_node) {
+        string version;
+        version_node->get_property(X_("modified-with"), version);
+        last_modified_with = version;
+    }
+
+    if(fav_node) {
+        string fav;
+        fav_node->get_property(X_("favorite"), fav);
+        favorite = atoi(fav.c_str());
+    }
 
     if(route_node) {
         XMLNodeList nlist = route_node->children();
