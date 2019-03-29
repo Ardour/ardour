@@ -6253,7 +6253,6 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, list<RegionView*> cons
 void
 AutomationRangeDrag::setup (list<boost::shared_ptr<AutomationLine> > const & lines)
 {
-	printf ("AutomationRangeDrag::setup %d lines\n", lines.size());
 	/* find the lines that overlap the ranges being dragged */
 	list<boost::shared_ptr<AutomationLine> >::const_iterator i = lines.begin ();
 	while (i != lines.end ()) {
@@ -6344,26 +6343,25 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 	}
 
 	if (first_move) {
-		_editor->begin_reversible_command (_("automation range move")); // XXX
+		_editor->begin_reversible_command (_("automation range move"));
 
 		if (!_ranges.empty()) {
 
+			/* add guard points */
 			for (list<AudioRange>::const_iterator i = _ranges.begin(); i != _ranges.end(); ++i) {
 
 				samplecnt_t const half = (i->start + i->end) / 2;
 
-				/* find the line that this audio range starts in */
-				list<Line>::iterator j = _lines.begin();
-				while (j != _lines.end() && (j->range.first > i->start || j->range.second < i->start)) {
-					++j;
-				}
+				for (list<Line>::iterator j = _lines.begin(); j != _lines.end(); ++j) {
+					if (j->range.first > i->start || j->range.second < i->start) {
+						continue;
+					}
 
-				if (j != _lines.end()) {
 					boost::shared_ptr<AutomationList> the_list = j->line->the_list ();
 
-				/* j is the line that this audio range starts in; fade into it;
-				   64 samples length plucked out of thin air.
-				*/
+					/* j is the line that this audio range starts in; fade into it;
+					 * 64 samples length plucked out of thin air.
+					 */
 
 					samplepos_t a = i->start + 64;
 					if (a > half) {
@@ -6384,18 +6382,17 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 				}
 
 				/* same thing for the end */
+				for (list<Line>::iterator j = _lines.begin(); j != _lines.end(); ++j) {
 
-				j = _lines.begin();
-				while (j != _lines.end() && (j->range.first > i->end || j->range.second < i->end)) {
-					++j;
-				}
+					if (j->range.first > i->end || j->range.second < i->end) {
+						continue;
+					}
 
-				if (j != _lines.end()) {
 					boost::shared_ptr<AutomationList> the_list = j->line->the_list ();
 
 					/* j is the line that this audio range starts in; fade out of it;
-					   64 samples length plucked out of thin air.
-					*/
+					 * 64 samples length plucked out of thin air.
+					 */
 
 					samplepos_t b = i->end - 64;
 					if (b < half) {
@@ -6419,9 +6416,8 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 			_nothing_to_drag = true;
 
 			/* Find all the points that should be dragged and put them in the relevant
-			   points lists in the Line structs.
-			*/
-
+			 * points lists in the Line structs.
+			 */
 			for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
 
 				uint32_t const N = i->line->npoints ();
