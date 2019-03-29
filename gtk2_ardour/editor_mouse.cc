@@ -2263,7 +2263,6 @@ Editor::region_view_item_click (AudioRegionView& rv, GdkEventButton* event)
 	*/
 
 	if (Keyboard::modifier_state_contains (event->state, Keyboard::PrimaryModifier)) {
-		TimeAxisView* tv = &rv.get_time_axis_view();
 
 		samplepos_t where = get_preferred_edit_position();
 
