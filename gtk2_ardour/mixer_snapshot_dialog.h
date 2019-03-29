@@ -45,12 +45,54 @@ class MixerSnapshotDialog : public ArdourDialog
         MixerSnapshotDialog();
         ~MixerSnapshotDialog();
 
+        void set_session(ARDOUR::Session*);
+
         int run();
 
     private:
 
-        Gtkmm2ext::DnDTreeView<std::string> snap_display;
-        Gtk::ScrolledWindow scroller;
+        bool button_press(GdkEventButton*, bool);
+        void new_snapshot(bool);
+        bool bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<std::string>&, Glib::RefPtr<Gtk::ListStore>, bool);
+
+        void fav_cell_action(const std::string&, bool);
+        void refill();
+
+        struct MixerSnapshotColumns : public Gtk::TreeModel::ColumnRecord {
+            MixerSnapshotColumns () {
+                add (favorite);
+                add (name);
+                add (n_tracks);
+                add (n_vcas);
+                add (n_groups);
+                add (has_specials);
+                add (date);
+                add (version);
+                add (timestamp);
+                add (full_path);
+                add (snapshot);
+            }
+            Gtk::TreeModelColumn<bool> favorite;
+            Gtk::TreeModelColumn<std::string> name;
+            Gtk::TreeModelColumn<std::string> version;
+            Gtk::TreeModelColumn<int> n_tracks;
+            Gtk::TreeModelColumn<int> n_vcas;
+            Gtk::TreeModelColumn<int> n_groups;
+            Gtk::TreeModelColumn<bool> has_specials;
+            Gtk::TreeModelColumn<std::string> date;
+            Gtk::TreeModelColumn<int64_t> timestamp;
+            Gtk::TreeModelColumn<std::string> full_path;
+            Gtk::TreeModelColumn<MixerSnapshot*> snapshot;
+        };
+
+        MixerSnapshotColumns _columns;
+
+        Gtkmm2ext::DnDTreeView<std::string> global_display;
+        Gtkmm2ext::DnDTreeView<std::string> local_display;
+        Gtk::ScrolledWindow global_scroller;
+        Gtk::ScrolledWindow local_scroller;
+        Glib::RefPtr<Gtk::ListStore> global_model;
+        Glib::RefPtr<Gtk::ListStore> local_model;
 
 };
 #endif
