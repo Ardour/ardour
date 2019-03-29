@@ -37,6 +37,7 @@
 
 #include "canvas/canvas.h"
 
+#include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/operations.h"
 #include "ardour/playlist.h"
@@ -1116,15 +1117,43 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case SelectionItem:
-		{
-			if (dynamic_cast<AudioRegionView*>(clicked_regionview) ||
-			    dynamic_cast<AutomationRegionView*>(clicked_regionview)) {
+			{
+				if (selection->time.empty ()) {
+					/* nothing to do */
+					return true;
+				}
+				pair<TimeAxisView*, int> tvp = trackview_by_y_position (event->button.y, false);
+				if (!tvp.first) {
+					/* clicked outside of a track */
+					return true;
+				}
+				/* handle automation lanes first */
+				AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
+				if (atv) {
+					/* smart "join" mode: drag automation */
+					_drags->set (new AutomationRangeDrag (this, atv, selection->time), event, _cursors->up_down);
+					return true;
+				}
+				if (dynamic_cast<AutomationRegionView*>(clicked_regionview)) {
+					/* MIDI CC or similar -- TODO handle multiple? */
+					list<RegionView*> rvl;
+					rvl.push_back (clicked_regionview);
+					_drags->set (new AutomationRangeDrag (this, rvl, selection->time, clicked_regionview->get_time_axis_view().y_position()), event, _cursors->up_down);
+					return true;
+				}
 
-				/* collect all regions-views in the given range selection
-				 * perhaps this should be a dedicated method:
-				 * Editor::get_region_views_from_range_selection() ?
-				 * except <RegionView*> c-pointer list is not very reliable.
-				 */
+				/* no shift+drag: only apply to clicked_regionview (if any) */
+				if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier)) {
+					if (dynamic_cast<AudioRegionView*>(clicked_regionview) == 0) {
+						return true;
+					}
+					list<RegionView*> rvl;
+					rvl.push_back (clicked_regionview);
+					_drags->set (new AutomationRangeDrag (this, rvl, selection->time, clicked_regionview->get_time_axis_view().y_position()), event, _cursors->up_down);
+					return true;
+				}
+
+				/* collect all audio regions-views in the given range selection */
 				list<RegionView*> rvl;
 				TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
 				for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
@@ -1134,6 +1163,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 						continue;
 					}
 					if ((playlist = (*i)->playlist()) == 0) {
+						continue;
+					}
+					if (boost::dynamic_pointer_cast<AudioPlaylist> (playlist) == 0) {
 						continue;
 					}
 					for (list<AudioRange>::const_iterator j = selection->time.begin(); j != selection->time.end(); ++j) {
@@ -1146,23 +1178,13 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 						}
 					}
 				}
-
-				_drags->set (new AutomationRangeDrag (this, clicked_regionview, rvl, selection->time),
-				             event, _cursors->up_down);
-			} else {
-				double const y = event->button.y;
-				pair<TimeAxisView*, int> tvp = trackview_by_y_position (y, false);
-				if (tvp.first) {
-					AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
-					if (atv) {
-						/* smart "join" mode: drag automation */
-						_drags->set (new AutomationRangeDrag (this, atv, selection->time), event, _cursors->up_down);
-					}
+				/* region-gain drag */
+				if (!rvl.empty ()) {
+					_drags->set (new AutomationRangeDrag (this, rvl, selection->time, tvp.first->y_position()), event, _cursors->up_down);
 				}
+				return true;
+				break;
 			}
-			return true;
-			break;
-		}
 
 		case AutomationLineItem:
 			_drags->set (new LineDrag (this, item), event);

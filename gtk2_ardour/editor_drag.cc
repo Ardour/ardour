@@ -6223,10 +6223,10 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView
 }
 
 /** Make an AutomationRangeDrag for region gain lines or MIDI controller regions */
-AutomationRangeDrag::AutomationRangeDrag (Editor* editor, RegionView* rv, list<RegionView*> const & v, list<AudioRange> const & r)
-	: Drag (editor, rv->get_canvas_group ())
+AutomationRangeDrag::AutomationRangeDrag (Editor* editor, list<RegionView*> const & v, list<AudioRange> const & r, double y_origin)
+	: Drag (editor, v.front()->get_canvas_group ())
 	, _ranges (r)
-	, _y_origin (rv->get_time_axis_view().y_position())
+	, _y_origin (y_origin)
 	, _nothing_to_drag (false)
 	, _integral (false)
 {
@@ -6234,11 +6234,7 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, RegionView* rv, list<R
 
 	list<boost::shared_ptr<AutomationLine> > lines;
 
-	bool found_primary = false;
 	for (list<RegionView*>::const_iterator i = v.begin(); i != v.end(); ++i) {
-		if (*i == rv) {
-			found_primary = true;
-		}
 		if (AudioRegionView* audio_view = dynamic_cast<AudioRegionView*>(*i)) {
 			lines.push_back (audio_view->get_gain_line ());
 		} else if (AutomationRegionView* automation_view = dynamic_cast<AutomationRegionView*>(*i)) {
@@ -6248,7 +6244,6 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, RegionView* rv, list<R
 			error << _("Automation range drag created for invalid region type") << endmsg;
 		}
 	}
-	assert (found_primary);
 	setup (lines);
 }
 
