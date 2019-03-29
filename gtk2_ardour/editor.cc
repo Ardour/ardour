@@ -2327,7 +2327,7 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 		action = "edit-at-playhead";
 		break;
 	case EditAtSelectedMarker:
-		action = "edit-at-marker";
+		action = "edit-at-selected-marker";
 		break;
 	case EditAtMouse:
 		action = "edit-at-mouse";
