@@ -1244,7 +1244,7 @@ class AutomationRangeDrag : public Drag
 {
 public:
 	AutomationRangeDrag (Editor *, AutomationTimeAxisView *, std::list<ARDOUR::AudioRange> const &);
-	AutomationRangeDrag (Editor *, std::list<RegionView*> const &, std::list<ARDOUR::AudioRange> const &, double y_origin);
+	AutomationRangeDrag (Editor *, std::list<RegionView*> const &, std::list<ARDOUR::AudioRange> const &, double y_origin, double y_height);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -1257,7 +1257,7 @@ public:
 
 private:
 	void setup (std::list<boost::shared_ptr<AutomationLine> > const &);
-	double y_fraction (boost::shared_ptr<AutomationLine>, double global_y_position) const;
+	double y_fraction (double global_y_position) const;
 	double value (boost::shared_ptr<ARDOUR::AutomationList> list, double x) const;
 
 	std::list<ARDOUR::AudioRange> _ranges;
@@ -1272,6 +1272,7 @@ private:
 
 	std::list<Line> _lines;
 	double          _y_origin;
+	double          _y_height;
 	bool            _nothing_to_drag;
 	bool            _integral;
 };

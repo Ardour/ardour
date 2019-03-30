@@ -6216,6 +6216,7 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView
 	: Drag (editor, atv->base_item ())
 	, _ranges (r)
 	, _y_origin (atv->y_position())
+	, _y_height (atv->effective_height()) // or atv->lines()->front()->height() ?!
 	, _nothing_to_drag (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationRangeDrag\n");
@@ -6223,10 +6224,11 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView
 }
 
 /** Make an AutomationRangeDrag for region gain lines or MIDI controller regions */
-AutomationRangeDrag::AutomationRangeDrag (Editor* editor, list<RegionView*> const & v, list<AudioRange> const & r, double y_origin)
+AutomationRangeDrag::AutomationRangeDrag (Editor* editor, list<RegionView*> const & v, list<AudioRange> const & r, double y_origin, double y_height)
 	: Drag (editor, v.front()->get_canvas_group ())
 	, _ranges (r)
 	, _y_origin (y_origin)
+	, _y_height (y_height)
 	, _nothing_to_drag (false)
 	, _integral (false)
 {
@@ -6295,9 +6297,9 @@ AutomationRangeDrag::setup (list<boost::shared_ptr<AutomationLine> > const & lin
 }
 
 double
-AutomationRangeDrag::y_fraction (boost::shared_ptr<AutomationLine> line, double global_y) const
+AutomationRangeDrag::y_fraction (double global_y) const
 {
-	return 1.0 - ((global_y - _y_origin) / line->height());
+	return 1.0 - ((global_y - _y_origin) / _y_height);
 }
 
 double
@@ -6442,12 +6444,12 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 		}
 
 		for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-			i->line->start_drag_multiple (i->points, y_fraction (i->line, current_pointer_y()), i->state);
+			i->line->start_drag_multiple (i->points, y_fraction (current_pointer_y()), i->state);
 		}
 	}
 
 	for (list<Line>::iterator l = _lines.begin(); l != _lines.end(); ++l) {
-		float const f = y_fraction (l->line, current_pointer_y());
+		float const f = y_fraction (current_pointer_y());
 		/* we are ignoring x position for this drag, so we can just pass in anything */
 		pair<float, float> result;
 		uint32_t ignored;

@@ -1138,18 +1138,25 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					/* MIDI CC or similar -- TODO handle multiple? */
 					list<RegionView*> rvl;
 					rvl.push_back (clicked_regionview);
-					_drags->set (new AutomationRangeDrag (this, rvl, selection->time, clicked_regionview->get_time_axis_view().y_position()), event, _cursors->up_down);
+					_drags->set (new AutomationRangeDrag (this, rvl, selection->time,
+								clicked_regionview->get_time_axis_view().y_position(),
+								clicked_regionview->get_time_axis_view().current_height()),
+							event, _cursors->up_down);
 					return true;
 				}
 
-				/* no shift+drag: only apply to clicked_regionview (if any) */
-				if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier)) {
+				/* shift+drag: only apply to clicked_regionview (if any) */
+				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier)) {
 					if (dynamic_cast<AudioRegionView*>(clicked_regionview) == 0) {
 						return true;
 					}
 					list<RegionView*> rvl;
 					rvl.push_back (clicked_regionview);
-					_drags->set (new AutomationRangeDrag (this, rvl, selection->time, clicked_regionview->get_time_axis_view().y_position()), event, _cursors->up_down);
+					// TODO: handle layer_display() == Stacked
+					_drags->set (new AutomationRangeDrag (this, rvl, selection->time,
+								clicked_regionview->get_time_axis_view().y_position(),
+								clicked_regionview->get_time_axis_view().current_height()),
+							event, _cursors->up_down);
 					return true;
 				}
 
@@ -1180,7 +1187,16 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				}
 				/* region-gain drag */
 				if (!rvl.empty ()) {
-					_drags->set (new AutomationRangeDrag (this, rvl, selection->time, tvp.first->y_position()), event, _cursors->up_down);
+					double y_pos = tvp.first->y_position();
+					double height = tvp.first->current_height();
+					StreamView* cv = tvp.first->view ();
+					if (cv->layer_display() == Stacked && cv->layers() > 1) {
+						height /= cv->layers();
+						double yy = event->button.y - _trackview_group->canvas_origin().y;
+						y_pos += floor ((yy - y_pos) / height) * height;
+					}
+					_drags->set (new AutomationRangeDrag (this, rvl, selection->time, y_pos, height),
+							event, _cursors->up_down);
 				}
 				return true;
 				break;
