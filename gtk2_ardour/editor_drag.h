@@ -1268,7 +1268,6 @@ private:
 		std::list<ControlPoint*> points; ///< points to drag on the line
 		std::pair<ARDOUR::samplepos_t, ARDOUR::samplepos_t> range; ///< the range of all points on the line, in session samples
 		XMLNode* state; ///< the XML state node before the drag
-		double original_fraction; ///< initial y-fraction before the drag
 	};
 
 	std::list<Line> _lines;
