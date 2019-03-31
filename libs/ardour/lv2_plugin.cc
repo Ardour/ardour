@@ -948,19 +948,14 @@ LV2Plugin::~LV2Plugin ()
 bool
 LV2Plugin::is_external_ui() const
 {
-	if (!_impl->ui) {
-		return false;
-	}
-	return lilv_ui_is_a(_impl->ui, _world.ui_external) || lilv_ui_is_a(_impl->ui, _world.ui_externalkx);
+	return _impl->ui && (lilv_ui_is_a(_impl->ui, _world.ui_external) ||
+	                     lilv_ui_is_a(_impl->ui, _world.ui_externalkx));
 }
 
 bool
 LV2Plugin::is_external_kx() const
 {
-	if (!_impl->ui) {
-		return false;
-	}
-	return lilv_ui_is_a(_impl->ui, _world.ui_externalkx);
+	return _impl->ui && lilv_ui_is_a(_impl->ui, _world.ui_externalkx);
 }
 
 bool
