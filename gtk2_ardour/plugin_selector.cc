@@ -69,10 +69,9 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	_plugin_menu = 0;
 	in_row_change = false;
 
-	//anytime the list changes ( Status, Tags, or scanned plugins ) we need to rebuild redirect-box plugin selector menu
 	manager.PluginListChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::build_plugin_menu, this), gui_context());
+	manager.PluginStatusChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::build_plugin_menu, this), gui_context());
 
-	//these are used to update the info of specific entries, while they are being edited
 	manager.PluginStatusChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::plugin_status_changed, this, _1, _2, _3), gui_context());
 	manager.PluginTagChanged.connect(plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::tags_changed, this, _1, _2, _3), gui_context());
 
@@ -788,10 +787,6 @@ PluginSelector::run ()
 		manager.save_statuses();
 	}
 
-	if ( _need_tag_save || _need_status_save || _need_menu_rebuild ) {
-		manager.PluginListChanged();  //emit signal
-	}
-
 	return (int) r;
 }
 
@@ -810,7 +805,6 @@ PluginSelector::tag_reset_button_clicked ()
 		manager.reset_tags (pi);
 		display_selection_changed ();
 		_need_tag_save = true;
-		_need_menu_rebuild = true;
 	}
 }
 
@@ -833,7 +827,6 @@ PluginSelector::tag_entry_changed ()
 		manager.set_tags (pi->type, pi->unique_id, tag_entry->get_text(), pi->name, PluginManager::FromGui);
 
 		_need_tag_save = true;
-		_need_menu_rebuild = true;
 	}
 }
 
@@ -888,7 +881,6 @@ PluginSelector::on_show ()
 
 	_need_tag_save = false;
 	_need_status_save = false;
-	_need_menu_rebuild = false;
 }
 
 struct PluginMenuCompareByCreator {
@@ -1172,7 +1164,6 @@ PluginSelector::favorite_changed (const std::string& path)
 		manager.set_status (pi->type, pi->unique_id, status);
 
 		_need_status_save = true;
-		_need_menu_rebuild = true;
 	}
 	in_row_change = false;
 }
@@ -1205,7 +1196,6 @@ PluginSelector::hidden_changed (const std::string& path)
 		manager.set_status (pi->type, pi->unique_id, status);
 
 		_need_status_save = true;
-		_need_menu_rebuild = true;
 	}
 	in_row_change = false;
 }
