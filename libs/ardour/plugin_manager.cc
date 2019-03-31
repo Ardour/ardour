@@ -1536,7 +1536,7 @@ PluginManager::save_tags ()
 	XMLNode* root = new XMLNode (X_("PluginTags"));
 
 	for (PluginTagList::iterator i = ptags.begin(); i != ptags.end(); ++i) {
-		if ( (*i).tagtype == FromFactoryFile || (*i).tagtype == FromUserFile ) {
+		if ((*i).tagtype == FromFactoryFile || (*i).tagtype == FromUserFile) {
 			/* user file should contain only plugins that are (a) newly user-tagged or (b) previously unknown */
 			continue;
 		}
@@ -1545,7 +1545,7 @@ PluginManager::save_tags ()
 		node->set_property (X_("id"), (*i).unique_id);
 		node->set_property (X_("tags"), (*i).tags);
 		node->set_property (X_("name"), (*i).name);
-		if ( (*i).tagtype >= FromUserFile ) {
+		if ((*i).tagtype >= FromUserFile) {
 			node->set_property (X_("user-set"), "1");
 		}
 		root->add_child_nocopy (*node);
@@ -1593,25 +1593,25 @@ PluginManager::load_tags ()
 				user_set = false;
 			}
 			strip_whitespace_edges (tags);
-			set_tags (type, id, tags, name, user_set ? FromUserFile : FromFactoryFile );
+			set_tags (type, id, tags, name, user_set ? FromUserFile : FromFactoryFile);
 		}
 	}
 }
 
 void
-PluginManager::set_tags (PluginType t, string id, string tag, std::string name, TagType ttype )
+PluginManager::set_tags (PluginType t, string id, string tag, std::string name, TagType ttype)
 {
 	string sanitized = sanitize_tag (tag);
 
-	PluginTag ps (to_generic_vst (t), id, sanitized, name, ttype );
+	PluginTag ps (to_generic_vst (t), id, sanitized, name, ttype);
 	PluginTagList::const_iterator i = find (ptags.begin(), ptags.end(), ps);
 	if (i == ptags.end()) {
 		ptags.insert (ps);
-	} else if ( (uint32_t) ttype >=  (uint32_t) (*i).tagtype ) {  // only overwrite if we are more important than the existing. Gui > UserFile > FactoryFile > Plugin
+	} else if ((uint32_t) ttype >=  (uint32_t) (*i).tagtype) {  // only overwrite if we are more important than the existing. Gui > UserFile > FactoryFile > Plugin
 		ptags.erase (ps);
 		ptags.insert (ps);
 	}
-	if ( ttype == FromGui ) {
+	if (ttype == FromGui) {
 		PluginTagChanged (t, id, sanitized); /* EMIT SIGNAL */
 	}
 }
