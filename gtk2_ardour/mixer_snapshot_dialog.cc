@@ -4,7 +4,6 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/session_directory.h"
-#include "utils.h"
 
 #include <glib.h>
 #include <glibmm.h>
@@ -14,17 +13,18 @@
 #include <gtkmm/table.h>
 #include <gtkmm/filechooserdialog.h>
 
-#include "widgets/tooltips.h"
-#include "widgets/choice.h"
-#include "widgets/prompter.h"
-
 #include "editor.h"
 #include "mixer_snapshot_dialog.h"
+#include "utils.h"
 
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"
 #include "pbd/gstdio_compat.h"
 #include "pbd/i18n.h"
+
+#include "widgets/tooltips.h"
+#include "widgets/choice.h"
+#include "widgets/prompter.h"
 
 using namespace Gtk;
 using namespace PBD;
@@ -42,7 +42,7 @@ struct ColumnInfo {
 };
 
 MixerSnapshotDialog::MixerSnapshotDialog()
-    : ArdourDialog(_("this is a dialog"), true, false)
+    : ArdourDialog(_("Mixer Snapshot Manager:"), true, false)
 {
     global_model = Gtk::ListStore::create(_columns);
     local_model  = Gtk::ListStore::create(_columns);
@@ -52,11 +52,6 @@ MixerSnapshotDialog::MixerSnapshotDialog()
 
     global_display.signal_button_press_event().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::button_press), true), false);
     local_display.signal_button_press_event().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::button_press), false), false);
-}
-
-MixerSnapshotDialog::~MixerSnapshotDialog() 
-{
-
 }
 
 void MixerSnapshotDialog::set_session(Session* s)
@@ -126,7 +121,6 @@ void MixerSnapshotDialog::popup_context_menu(int btn, int64_t time, string path)
 
 void MixerSnapshotDialog::remove_snapshot(const string path)
 {
-    // Glib::FileUtils
     ::g_remove(path.c_str());
     refill();
 }

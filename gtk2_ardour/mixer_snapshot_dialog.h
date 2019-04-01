@@ -43,14 +43,13 @@ class MixerSnapshotDialog : public ArdourDialog
 {
     public:
         MixerSnapshotDialog();
-        ~MixerSnapshotDialog();
+        ~MixerSnapshotDialog() {};
 
         void set_session(ARDOUR::Session*);
 
         int run();
         
         void refill();
-        void refill(std::vector<std::string>);
 
     private:
 
