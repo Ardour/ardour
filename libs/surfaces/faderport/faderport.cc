@@ -1199,6 +1199,7 @@ FaderPort::map_auto ()
 			get_button (FP_Touch).set_led_state (_output_port, false);
 		break;
 		case ARDOUR::Touch:
+		case ARDOUR::Latch: // XXX
 			get_button (FP_Read).set_led_state (_output_port, false);
 			get_button (FP_Write).set_led_state (_output_port, false);
 			get_button (FP_Touch).set_led_state (_output_port, true);
