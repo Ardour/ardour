@@ -256,6 +256,17 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
 
 void MixerSnapshotDialog::new_snapshot(bool global)
 {
+    if(!_session)
+        return;
+
+    string path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots/");
+    if(!Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS & Glib::FILE_TEST_IS_DIR))
+        ::g_mkdir(path.c_str(), 0775);
+    
+    path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots/");
+    if(!Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS & Glib::FILE_TEST_IS_DIR))
+        ::g_mkdir(path.c_str(), 0775);
+
     MixerSnapshot* snap = new MixerSnapshot(_session);
     
     Prompter prompt(true);
