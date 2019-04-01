@@ -41,6 +41,8 @@ MixerSnapshot::MixerSnapshot(Session* s, string file_path)
     if(s)
         _session = s;
 
+    last_modified_with = string_compose("%1 %2", PROGRAM_NAME, revision);
+
     if(Glib::file_test(file_path.c_str(), Glib::FILE_TEST_IS_DIR))
         load_from_session(file_path);
 
@@ -285,8 +287,7 @@ void MixerSnapshot::write(const string path)
 	XMLNode* child;
 
     child = node->add_child ("ProgramVersion");
-    string modified_with = string_compose("%1 %2", PROGRAM_NAME, revision);
-	child->set_property("modified-with", modified_with);
+	child->set_property("modified-with", last_modified_with);
 
     child = node->add_child ("Favorite");
 	child->set_property("favorite", favorite);
@@ -411,9 +412,16 @@ void MixerSnapshot::load_from_session(XMLNode& node)
 {
     clear();
 
-    XMLNode* route_node = find_named_node(node, "Routes");
-    XMLNode* group_node = find_named_node(node, "RouteGroups");
-    XMLNode* vca_node   = find_named_node(node, "VCAManager");
+    XMLNode* version_node = find_named_node(node, "ProgramVersion");
+    XMLNode* route_node   = find_named_node(node, "Routes");
+    XMLNode* group_node   = find_named_node(node, "RouteGroups");
+    XMLNode* vca_node     = find_named_node(node, "VCAManager");
+
+    if(version_node) {
+        string version;
+        version_node->get_property(X_("modified-with"), version);
+        last_modified_with = version;
+    }
 
     vector<pair<int,string>> number_name_pairs;
     if(vca_node) {
