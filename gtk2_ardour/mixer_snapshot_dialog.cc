@@ -1,19 +1,23 @@
 #include <iostream>
+#include <stdio.h>
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/session_directory.h"
+#include "utils.h"
 
 #include <glib.h>
 #include <glibmm.h>
 #include <glibmm/datetime.h>
 
 #include <gtkmm/table.h>
+#include <gtkmm/filechooserdialog.h>
 
 #include "widgets/tooltips.h"
 #include "widgets/choice.h"
 #include "widgets/prompter.h"
 
+#include "editor.h"
 #include "mixer_snapshot_dialog.h"
 
 #include "pbd/basename.h"
@@ -26,6 +30,7 @@ using namespace PBD;
 using namespace std;
 using namespace ARDOUR;
 using namespace ArdourWidgets;
+using namespace ARDOUR_UI_UTILS;
 
 struct ColumnInfo {
 	int           index;
@@ -73,6 +78,29 @@ void MixerSnapshotDialog::set_session(Session* s)
 
 bool MixerSnapshotDialog::button_press(GdkEventButton* ev, bool global)
 {
+    if (ev->button == 3) {
+
+        Gtk::TreeModel::Path path;
+		Gtk::TreeViewColumn* col;
+		int cx;
+		int cy;
+        
+        TreeModel::iterator iter;
+        if(global) {
+		    global_display.get_path_at_pos ((int) ev->x, (int) ev->y, path, col, cx, cy);
+            iter = global_model->get_iter(path);
+        } else {
+            local_display.get_path_at_pos ((int) ev->x, (int) ev->y, path, col, cx, cy);
+            iter = local_model->get_iter(path);
+        }
+
+		if (iter) {
+			TreeModel::Row row = *(iter);
+			popup_context_menu(ev->button, ev->time, row[_columns.full_path]);
+            return true;
+		}
+	};
+
     if (ev->type == GDK_2BUTTON_PRESS) {
         
         TreeModel::iterator iter;
@@ -94,6 +122,54 @@ bool MixerSnapshotDialog::button_press(GdkEventButton* ev, bool global)
     return false;
 }
 
+void MixerSnapshotDialog::popup_context_menu(int btn, int64_t time, string path)
+{
+    using namespace Menu_Helpers;
+	MenuList& items(_menu.items());
+	items.clear();
+	add_item_with_sensitivity(items, MenuElem (_("Remove"), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::remove_snapshot), path)), true);
+	add_item_with_sensitivity(items, MenuElem (_("Rename..."), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::rename_snapshot), path)), true);
+	_menu.popup(btn, time);
+}
+
+void MixerSnapshotDialog::remove_snapshot(const string path)
+{
+    // printf("%s\n", path.c_str());
+
+    try
+    {
+        std::remove(path.c_str());
+    }
+    catch(const std::exception& e)
+    {
+        cerr << e.what() << '\n';
+        return;
+    }
+    refill();
+}
+
+void MixerSnapshotDialog::rename_snapshot(const string path)
+{
+    ArdourWidgets::Prompter prompter(true);
+
+    string dir_name  = Glib::path_get_dirname(path);
+
+	string new_name;
+	prompter.set_name("Rename MixerSnapshot Prompter");
+	prompter.set_title(_("New Snapshot Name:"));
+	prompter.add_button(Stock::SAVE, RESPONSE_ACCEPT);
+	prompter.set_prompt(_("Rename Mixer Snapshot:"));
+	prompter.set_initial_text(basename_nosuffix(path));
+
+    if (prompter.run() == RESPONSE_ACCEPT) {
+		prompter.get_result(new_name);
+		if (new_name.length() > 0) {
+            string new_path = Glib::build_filename(dir_name, new_name + ".xml");
+            std::rename(path.c_str(), new_path.c_str());
+			refill();
+		}
+	}
+}
 
 bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<string>& display, Glib::RefPtr<ListStore> model, bool global)
 {
@@ -129,11 +205,9 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
 
     HBox* add_remove = manage(new HBox);
     Button* btn_add  = manage(new Button("New"));
-    Button* btn_del  = manage(new Button("Delete"));
-    Button* btn_load = manage(new Button("New From Session"));
-    add_remove->pack_start(*btn_add,  true, true);
-    add_remove->pack_start(*btn_del,  true, true);
-    add_remove->pack_start(*btn_load, true, true);
+    Button* btn_new  = manage(new Button("New From Session"));
+    add_remove->pack_start(*btn_add,  true, true, 50);
+    add_remove->pack_start(*btn_new, true, true, 45);
 
     VBox* vbox = manage(new VBox);
     vbox->set_homogeneous();
@@ -142,7 +216,8 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
 
     if(global) {
         btn_add->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snapshot), true));
-
+        btn_new->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snap_from_session), true));
+        
         global_scroller.set_border_width(10);
 	    global_scroller.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 	    global_scroller.add(global_display);
@@ -154,6 +229,7 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
         get_vbox()->pack_start(*table);
     } else {
         btn_add->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snapshot), false));
+        btn_new->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snap_from_session), false));
 
         local_scroller.set_border_width(10);
 	    local_scroller.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
@@ -205,26 +281,75 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
 void MixerSnapshotDialog::new_snapshot(bool global)
 {
     MixerSnapshot* snap = new MixerSnapshot(_session);
+    
+    Prompter prompt(true);
+    prompt.set_name("New Mixer Snapshot Prompter");
+	prompt.set_title(_("Mixer Snapshot Name:"));
+	prompt.add_button(Stock::SAVE, RESPONSE_ACCEPT);
+	prompt.set_prompt(_("Set Mixer Snapshot Name"));
+	prompt.set_initial_text(snap->label);
 
-    ArdourWidgets::Prompter prompter(true);
-
-	string new_name;
-
-	prompter.set_name("New Mixer Snapshot Prompter");
-	prompter.set_title(_("Mixer Snapshot Name:"));
-	prompter.add_button(Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
-	prompter.set_prompt(_("Set Mixer Snapshot Name"));
-	prompter.set_initial_text(snap->label);
-
-	if (prompter.run() == RESPONSE_ACCEPT) {
-		prompter.get_result(new_name);
-		if (new_name.length() > 0) {
-			snap->label = new_name;
-            snap->snap();
-            snap->write(global);
+    RouteList rl = PublicEditor::instance().get_selection().tracks.routelist();
+    
+    CheckButton* sel = new CheckButton(_("Selected Tracks Only:"));
+    sel->set_active(!rl.empty());
+    prompt.get_vbox()->pack_start(*sel);
+    sel->show();
+	
+    if(prompt.run() == RESPONSE_ACCEPT) {
+        string new_label;
+		prompt.get_result(new_label);
+		if (new_label.length() > 0) {
+			snap->label = new_label;
+            
+            string path = "";
+            if(global) {
+                path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots/", snap->label + ".xml");
+            } else {
+                path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots/", snap->label + ".xml");
+            }
+            
+            if(!rl.empty() && sel->get_active())
+                snap->snap(rl);
+            else
+                snap->snap();
+            
+            snap->write(path);
 			refill();
 		}
 	}
+}
+
+void MixerSnapshotDialog::new_snap_from_session(bool global)
+{
+    Gtk::FileChooserDialog session_selector(_("Open Session"), FILE_CHOOSER_ACTION_OPEN);
+    string session_parent_dir = Glib::path_get_dirname(_session->path());
+    session_selector.add_button(Stock::CANCEL, RESPONSE_CANCEL);
+	session_selector.add_button(Stock::OPEN, RESPONSE_ACCEPT);
+    session_selector.set_current_folder(session_parent_dir);
+
+    int response = session_selector.run();
+	session_selector.hide();
+
+	if (response == RESPONSE_CANCEL) {
+		return;
+	}
+
+    string session_path = session_selector.get_filename();
+
+    MixerSnapshot* snapshot = new MixerSnapshot(_session, session_path);
+
+    snapshot->label = basename_nosuffix(session_path);
+    
+    string path = "";
+    if(global) {
+        path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots/", snapshot->label + ".xml");
+    } else {
+        path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots/", snapshot->label + ".xml");
+    }
+    
+    snapshot->write(path);
+    refill();
 }
 
 void MixerSnapshotDialog::refill()
@@ -254,15 +379,15 @@ void MixerSnapshotDialog::refill()
         row[_columns.version]      = snap->get_last_modified_with();
         row[_columns.n_tracks]     = snap->get_routes().size();
         row[_columns.n_vcas]       = snap->get_vcas().size();
-        row[_columns.n_groups]     = snap->get_groups().size();;
-        row[_columns.has_specials] = true;
+        row[_columns.n_groups]     = snap->get_groups().size();
+        row[_columns.has_specials] = snap->has_specials();
 
         GStatBuf gsb;
 		g_stat(path.c_str(), &gsb);
         Glib::DateTime gdt(Glib::DateTime::create_now_local(gsb.st_mtime));
 
         row[_columns.timestamp] = gsb.st_mtime;
-        row[_columns.date]      = gdt.format ("%F %H:%M");;
+        row[_columns.date]      = gdt.format ("%F %H:%M");
         row[_columns.full_path] = path;
         row[_columns.snapshot]  = snap;
     }
@@ -291,15 +416,15 @@ void MixerSnapshotDialog::refill()
         row[_columns.version]      = snap->get_last_modified_with();
         row[_columns.n_tracks]     = snap->get_routes().size();
         row[_columns.n_vcas]       = snap->get_vcas().size();
-        row[_columns.n_groups]     = snap->get_groups().size();;
-        row[_columns.has_specials] = true;
+        row[_columns.n_groups]     = snap->get_groups().size();
+        row[_columns.has_specials] = snap->has_specials();
 
         GStatBuf gsb;
 		g_stat(path.c_str(), &gsb);
         Glib::DateTime gdt(Glib::DateTime::create_now_local(gsb.st_mtime));
 
         row[_columns.timestamp] = gsb.st_mtime;
-        row[_columns.date]      = gdt.format ("%F %H:%M");;
+        row[_columns.date]      = gdt.format ("%F %H:%M");
         row[_columns.full_path] = path;
         row[_columns.snapshot]  = snap;
     }
@@ -317,7 +442,7 @@ void MixerSnapshotDialog::fav_cell_action(const string& path, bool global)
         MixerSnapshot* snap = (*iter)[_columns.snapshot];
         snap->favorite = !snap->favorite;
 		(*iter)[_columns.favorite] = snap->favorite;
-        snap->write(global);
+        snap->write((*iter)[_columns.full_path]);
     }
     
 }

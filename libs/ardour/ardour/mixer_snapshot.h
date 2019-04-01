@@ -42,8 +42,9 @@ class MixerSnapshot
         void snap(boost::shared_ptr<ARDOUR::Route>);
         void recall();
         void clear();
-        void write(bool);
-        void load(std::string);
+        void write(const std::string);
+        void load(const std::string);
+        bool has_specials();
 
         struct State {
             std::string id;
@@ -68,7 +69,6 @@ class MixerSnapshot
         std::string label;
         std::time_t timestamp;
         bool favorite;
-        bool has_specials;
 
     private:
         ARDOUR::Session* _session;
