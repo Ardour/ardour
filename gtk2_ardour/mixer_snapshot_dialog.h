@@ -51,8 +51,12 @@ class MixerSnapshotDialog : public ArdourDialog
 
     private:
 
+        void popup_context_menu(int, int64_t, std::string);
+        void rename_snapshot(const std::string);
+        void remove_snapshot(const std::string);
         bool button_press(GdkEventButton*, bool);
         void new_snapshot(bool);
+        void new_snap_from_session(bool);
         bool bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<std::string>&, Glib::RefPtr<Gtk::ListStore>, bool);
 
         void fav_cell_action(const std::string&, bool);
@@ -93,6 +97,7 @@ class MixerSnapshotDialog : public ArdourDialog
         Gtk::ScrolledWindow local_scroller;
         Glib::RefPtr<Gtk::ListStore> global_model;
         Glib::RefPtr<Gtk::ListStore> local_model;
+        Gtk::Menu _menu;
 
 };
 #endif

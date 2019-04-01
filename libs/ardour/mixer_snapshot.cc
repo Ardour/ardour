@@ -56,6 +56,20 @@ MixerSnapshot::~MixerSnapshot()
 {
 }
 
+bool MixerSnapshot::has_specials()
+{
+    if(empty())
+        return false;
+
+    for(vector<State>::const_iterator it = route_states.begin(); it != route_states.end(); it++) {
+        if(it->name == "Monitor") {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
 void MixerSnapshot::clear()
 {
     timestamp = time(0);
@@ -262,7 +276,7 @@ void MixerSnapshot::recall()
     _session->commit_reversible_command();
 }
 
-void MixerSnapshot::write(bool global)
+void MixerSnapshot::write(const string path)
 {
     if(empty())
         return;
@@ -292,18 +306,12 @@ void MixerSnapshot::write(bool global)
         child->add_child_copy((*i).node);
     }
 
-    string path = "";
-    if(global)
-        path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots/", label + ".xml");
-    else
-        path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots/", label + ".xml");
-    
     XMLTree tree;
 	tree.set_root(node);
-    tree.write(path.c_str());
+    tree.write(path);
 }
 
-void MixerSnapshot::load(string path)
+void MixerSnapshot::load(const string path)
 {
     clear();
 
@@ -395,6 +403,8 @@ void MixerSnapshot::load_from_session(string path)
     if(!root) {
         return;
     }
+
+    load_from_session(*(root));
 }
 
 void MixerSnapshot::load_from_session(XMLNode& node)
