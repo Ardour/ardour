@@ -9,6 +9,7 @@
 #include <glib.h>
 #include <glibmm.h>
 #include <glibmm/datetime.h>
+#include <glibmm/fileutils.h>
 
 #include <gtkmm/table.h>
 #include <gtkmm/filechooserdialog.h>
@@ -48,15 +49,6 @@ MixerSnapshotDialog::MixerSnapshotDialog()
     
     bootstrap_display_and_model(global_display, global_model, true);
     bootstrap_display_and_model(local_display, local_model,  false);
-
-    // global_display.set_focus_on_click();
-    // local_display.set_focus_on_click();
-
-    // global_display.signal_cursor_changed().connect(sigc::mem_fun(*this, &MixerSnapshotDialog::callback));
-    // local_display.signal_cursor_changed().connect(sigc::mem_fun(*this, &MixerSnapshotDialog::callback));
-
-    // global_display.get_selection()->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::selection_changed), true), false);
-    // local_display.get_selection()->signal_changed().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::selection_changed), false), false);
 
     global_display.signal_button_press_event().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::button_press), true), false);
     local_display.signal_button_press_event().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::button_press), false), false);
@@ -125,47 +117,37 @@ bool MixerSnapshotDialog::button_press(GdkEventButton* ev, bool global)
 void MixerSnapshotDialog::popup_context_menu(int btn, int64_t time, string path)
 {
     using namespace Menu_Helpers;
-	MenuList& items(_menu.items());
+	MenuList& items(menu.items());
 	items.clear();
-	add_item_with_sensitivity(items, MenuElem (_("Remove"), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::remove_snapshot), path)), true);
-	add_item_with_sensitivity(items, MenuElem (_("Rename..."), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::rename_snapshot), path)), true);
-	_menu.popup(btn, time);
+	add_item_with_sensitivity(items, MenuElem(_("Remove"), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::remove_snapshot), path)), true);
+	add_item_with_sensitivity(items, MenuElem(_("Rename..."), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::rename_snapshot), path)), true);
+	menu.popup(btn, time);
 }
 
 void MixerSnapshotDialog::remove_snapshot(const string path)
 {
-    // printf("%s\n", path.c_str());
-
-    try
-    {
-        std::remove(path.c_str());
-    }
-    catch(const std::exception& e)
-    {
-        cerr << e.what() << '\n';
-        return;
-    }
+    // Glib::FileUtils
+    ::g_remove(path.c_str());
     refill();
 }
 
-void MixerSnapshotDialog::rename_snapshot(const string path)
+void MixerSnapshotDialog::rename_snapshot(const string old_path)
 {
-    ArdourWidgets::Prompter prompter(true);
+    string dir_name  = Glib::path_get_dirname(old_path);
 
-    string dir_name  = Glib::path_get_dirname(path);
+    Prompter prompt(true);
+	prompt.set_name("Rename MixerSnapshot Prompter");
+	prompt.set_title(_("New Snapshot Name:"));
+	prompt.add_button(Stock::SAVE, RESPONSE_ACCEPT);
+	prompt.set_prompt(_("Rename Mixer Snapshot:"));
+	prompt.set_initial_text(basename_nosuffix(old_path));
 
-	string new_name;
-	prompter.set_name("Rename MixerSnapshot Prompter");
-	prompter.set_title(_("New Snapshot Name:"));
-	prompter.add_button(Stock::SAVE, RESPONSE_ACCEPT);
-	prompter.set_prompt(_("Rename Mixer Snapshot:"));
-	prompter.set_initial_text(basename_nosuffix(path));
-
-    if (prompter.run() == RESPONSE_ACCEPT) {
-		prompter.get_result(new_name);
-		if (new_name.length() > 0) {
-            string new_path = Glib::build_filename(dir_name, new_name + ".xml");
-            std::rename(path.c_str(), new_path.c_str());
+    if (prompt.run() == RESPONSE_ACCEPT) {
+	    string new_label;
+		prompt.get_result(new_label);
+		if (new_label.length() > 0) {
+            string new_path = Glib::build_filename(dir_name, new_label + ".xml");
+            ::g_rename(old_path.c_str(), new_path.c_str());
 			refill();
 		}
 	}
@@ -287,14 +269,14 @@ void MixerSnapshotDialog::new_snapshot(bool global)
 	prompt.set_title(_("Mixer Snapshot Name:"));
 	prompt.add_button(Stock::SAVE, RESPONSE_ACCEPT);
 	prompt.set_prompt(_("Set Mixer Snapshot Name"));
-	prompt.set_initial_text(snap->label);
+	prompt.set_initial_text(_session->name());
 
     RouteList rl = PublicEditor::instance().get_selection().tracks.routelist();
     
     CheckButton* sel = new CheckButton(_("Selected Tracks Only:"));
     sel->set_active(!rl.empty());
-    prompt.get_vbox()->pack_start(*sel);
     sel->show();
+    prompt.get_vbox()->pack_start(*sel);
 	
     if(prompt.run() == RESPONSE_ACCEPT) {
         string new_label;
@@ -370,8 +352,8 @@ void MixerSnapshotDialog::refill()
 
         TreeModel::Row row = *(global_model->append());
         if (name.length() > 48) {
-				name = name.substr (0, 48);
-				name.append("...");
+            name = name.substr (0, 48);
+            name.append("...");
         }
 
         row[_columns.name]         = name;
@@ -407,8 +389,8 @@ void MixerSnapshotDialog::refill()
 
         TreeModel::Row row = *(local_model->append());
         if (name.length() > 48) {
-				name = name.substr (0, 48);
-				name.append("...");
+            name = name.substr (0, 48);
+            name.append("...");
         }
 
         row[_columns.name]         = name;
@@ -444,7 +426,6 @@ void MixerSnapshotDialog::fav_cell_action(const string& path, bool global)
 		(*iter)[_columns.favorite] = snap->favorite;
         snap->write((*iter)[_columns.full_path]);
     }
-    
 }
 
 int MixerSnapshotDialog::run() {
