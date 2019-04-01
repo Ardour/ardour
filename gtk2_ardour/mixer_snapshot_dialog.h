@@ -48,19 +48,24 @@ class MixerSnapshotDialog : public ArdourDialog
         void set_session(ARDOUR::Session*);
 
         int run();
+        
+        void refill();
+        void refill(std::vector<std::string>);
 
     private:
 
-        void popup_context_menu(int, int64_t, std::string);
-        void rename_snapshot(const std::string);
-        void remove_snapshot(const std::string);
-        bool button_press(GdkEventButton*, bool);
         void new_snapshot(bool);
         void new_snap_from_session(bool);
-        bool bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<std::string>&, Glib::RefPtr<Gtk::ListStore>, bool);
 
+        void rename_snapshot(const std::string);
+        void remove_snapshot(const std::string);
+        
+        bool bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<std::string>&, Glib::RefPtr<Gtk::ListStore>, bool);
+        
+        void popup_context_menu(int, int64_t, std::string);
+        bool button_press(GdkEventButton*, bool);
         void fav_cell_action(const std::string&, bool);
-        void refill();
+
 
         struct MixerSnapshotColumns : public Gtk::TreeModel::ColumnRecord {
             MixerSnapshotColumns () {
@@ -97,7 +102,7 @@ class MixerSnapshotDialog : public ArdourDialog
         Gtk::ScrolledWindow local_scroller;
         Glib::RefPtr<Gtk::ListStore> global_model;
         Glib::RefPtr<Gtk::ListStore> local_model;
-        Gtk::Menu _menu;
+        Gtk::Menu menu;
 
 };
 #endif
