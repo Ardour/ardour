@@ -25,8 +25,6 @@
 
 #include "pbd/i18n.h"
 
-using namespace std;
-using namespace Gtk;
 using namespace ARDOUR;
 
 TransformDialog::Model::Model()
@@ -99,7 +97,7 @@ TransformDialog::TransformDialog()
 
 	Gtk::HBox* add_hbox = Gtk::manage(new Gtk::HBox);
 	_add_button.add(
-		*manage(new Gtk::Image(Gtk::Stock::ADD, Gtk::ICON_SIZE_BUTTON)));
+		*Gtk::manage(new Gtk::Image(Gtk::Stock::ADD, Gtk::ICON_SIZE_BUTTON)));
 	add_hbox->pack_start(_add_button, false, false);
 	_add_button.signal_clicked().connect(
 		sigc::mem_fun(*this, &TransformDialog::add_clicked));
@@ -109,7 +107,7 @@ TransformDialog::TransformDialog()
 	get_vbox()->pack_start(_operations_box, false, false);
 	get_vbox()->pack_start(*add_hbox, false, false);
 
-	add_button(Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	add_button(_("Transform"), Gtk::RESPONSE_OK);
 
 	show_all();
@@ -229,15 +227,17 @@ TransformDialog::ValueChooser::source_changed()
 }
 
 double
-TransformDialog::ValueChooser::get_value () const
+TransformDialog::ValueChooser::get_value() const
 {
-		return value_spinner.get_value() + ((target_property == MidiModel::NoteDiffCommand::Channel) ? -1. : 0.);
+	const bool is_channel = target_property == MidiModel::NoteDiffCommand::Channel;
+	return value_spinner.get_value() + (is_channel ? -1.0 : 0.0);
 }
 
 double
-TransformDialog::ValueChooser::get_max () const
+TransformDialog::ValueChooser::get_max() const
 {
-		return max_spinner.get_value() + ((target_property == MidiModel::NoteDiffCommand::Channel) ? -1. : 0.);
+	const bool is_channel = target_property == MidiModel::NoteDiffCommand::Channel;
+	return max_spinner.get_value() + (is_channel ? -1.0 : 0.0);
 }
 
 void
@@ -311,7 +311,7 @@ TransformDialog::OperationChooser::OperationChooser(const Model& model)
 	pack_start(remove_button, false, false);
 
 	remove_button.add(
-		*manage(new Gtk::Image(Gtk::Stock::REMOVE, Gtk::ICON_SIZE_BUTTON)));
+		*Gtk::manage(new Gtk::Image(Gtk::Stock::REMOVE, Gtk::ICON_SIZE_BUTTON)));
 
 	remove_button.signal_clicked().connect(
 		sigc::mem_fun(*this, &TransformDialog::OperationChooser::remove_clicked));

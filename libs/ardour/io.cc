@@ -576,6 +576,21 @@ IO::set_state (const XMLNode& node, int version)
 	if (create_ports (node, version)) {
 		return -1;
 	}
+	if (_sendish && _direction == Output) {
+		/* ignore <Port name="...">  from XML for sends, but use the names
+		 * ::ensure_ports_locked() creates port using ::build_legal_port_name()
+		 * This is needed to properly restore connections when creating
+		 * external sends from templates because the IO name changes.
+		 */
+		PortSet::iterator i = _ports.begin();
+		XMLNodeConstIterator x = node.children().begin();
+		for (; i != _ports.end(), x != node.children().end(); ++i, ++x) {
+			if ((*x)->name() == "Port") {
+				(*x)->remove_property (X_("name"));
+				(*x)->set_property (X_("name"), i->name());
+			}
+		}
+	}
 
 	// after create_ports, updates names
 	if (node.get_property ("pretty-name", name)) {

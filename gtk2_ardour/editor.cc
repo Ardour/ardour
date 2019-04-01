@@ -2302,12 +2302,15 @@ Editor::set_snap_mode (SnapMode mode)
 void
 Editor::set_edit_point_preference (EditPoint ep, bool force)
 {
+	if (Profile->get_mixbus()) {
+		if (ep == EditAtSelectedMarker) {
+			ep = EditAtPlayhead;
+		}
+	}
+
 	bool changed = (_edit_point != ep);
 
 	_edit_point = ep;
-	if (Profile->get_mixbus())
-		if (ep == EditAtSelectedMarker)
-			ep = EditAtPlayhead;
 
 	string str = edit_point_strings[(int)ep];
 	if (str != edit_point_selector.get_text ()) {
@@ -2327,7 +2330,7 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 		action = "edit-at-playhead";
 		break;
 	case EditAtSelectedMarker:
-		action = "edit-at-marker";
+		action = "edit-at-selected-marker";
 		break;
 	case EditAtMouse:
 		action = "edit-at-mouse";

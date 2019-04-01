@@ -1985,6 +1985,9 @@ ProcessorBox::object_drop (DnDVBox<ProcessorEntry>* source, ProcessorEntry* posi
 			if (boost::dynamic_pointer_cast<UnknownProcessor> ((*i)->processor())) {
 				continue;
 			}
+			if (boost::dynamic_pointer_cast<PortInsert> ((*i)->processor())) {
+				continue;
+			}
 			procs.push_back ((*i)->processor ());
 		}
 	}

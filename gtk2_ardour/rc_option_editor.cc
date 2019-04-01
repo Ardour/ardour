@@ -1329,10 +1329,10 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 		{
 			_store = ListStore::create (_model);
 			_view.set_model (_store);
-			_view.append_column (_("Control Surface Protocol"), _model.name);
-			_view.get_column(0)->set_resizable (true);
-			_view.get_column(0)->set_expand (true);
 			_view.append_column_editable (_("Enable"), _model.enabled);
+			_view.append_column (_("Control Surface Protocol"), _model.name);
+			_view.get_column(1)->set_resizable (true);
+			_view.get_column(1)->set_expand (true);
 
 			Gtk::HBox* edit_box = manage (new Gtk::HBox);
 			edit_box->set_spacing(3);

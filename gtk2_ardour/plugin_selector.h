@@ -186,7 +186,6 @@ private:
 
 	bool _need_tag_save;
 	bool _need_status_save;
-	bool _need_menu_rebuild;
 
 	bool _inhibit_refill;
 };

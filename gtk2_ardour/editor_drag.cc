@@ -6216,6 +6216,7 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView
 	: Drag (editor, atv->base_item ())
 	, _ranges (r)
 	, _y_origin (atv->y_position())
+	, _y_height (atv->effective_height()) // or atv->lines()->front()->height() ?!
 	, _nothing_to_drag (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationRangeDrag\n");
@@ -6223,10 +6224,11 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView
 }
 
 /** Make an AutomationRangeDrag for region gain lines or MIDI controller regions */
-AutomationRangeDrag::AutomationRangeDrag (Editor* editor, RegionView* rv, list<AudioRange> const & r)
-	: Drag (editor, rv->get_canvas_group ())
+AutomationRangeDrag::AutomationRangeDrag (Editor* editor, list<RegionView*> const & v, list<AudioRange> const & r, double y_origin, double y_height)
+	: Drag (editor, v.front()->get_canvas_group ())
 	, _ranges (r)
-	, _y_origin (rv->get_time_axis_view().y_position())
+	, _y_origin (y_origin)
+	, _y_height (y_height)
 	, _nothing_to_drag (false)
 	, _integral (false)
 {
@@ -6234,17 +6236,16 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, RegionView* rv, list<A
 
 	list<boost::shared_ptr<AutomationLine> > lines;
 
-	AudioRegionView*      audio_view;
-	AutomationRegionView* automation_view;
-	if ((audio_view = dynamic_cast<AudioRegionView*>(rv))) {
-		lines.push_back (audio_view->get_gain_line ());
-	} else if ((automation_view = dynamic_cast<AutomationRegionView*>(rv))) {
-		lines.push_back (automation_view->line ());
-		_integral = true;
-	} else {
-		error << _("Automation range drag created for invalid region type") << endmsg;
+	for (list<RegionView*>::const_iterator i = v.begin(); i != v.end(); ++i) {
+		if (AudioRegionView* audio_view = dynamic_cast<AudioRegionView*>(*i)) {
+			lines.push_back (audio_view->get_gain_line ());
+		} else if (AutomationRegionView* automation_view = dynamic_cast<AutomationRegionView*>(*i)) {
+			lines.push_back (automation_view->line ());
+			_integral = true;
+		} else {
+			error << _("Automation range drag created for invalid region type") << endmsg;
+		}
 	}
-
 	setup (lines);
 }
 
@@ -6296,9 +6297,9 @@ AutomationRangeDrag::setup (list<boost::shared_ptr<AutomationLine> > const & lin
 }
 
 double
-AutomationRangeDrag::y_fraction (boost::shared_ptr<AutomationLine> line, double global_y) const
+AutomationRangeDrag::y_fraction (double global_y) const
 {
-	return 1.0 - ((global_y - _y_origin) / line->height());
+	return 1.0 - ((global_y - _y_origin) / _y_height);
 }
 
 double
@@ -6316,7 +6317,6 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	/* Get line states before we start changing things */
 	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
 		i->state = &i->line->get_state ();
-		i->original_fraction = y_fraction (i->line, current_pointer_y());
 	}
 
 	if (_ranges.empty()) {
@@ -6348,22 +6348,21 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 
 		if (!_ranges.empty()) {
 
+			/* add guard points */
 			for (list<AudioRange>::const_iterator i = _ranges.begin(); i != _ranges.end(); ++i) {
 
 				samplecnt_t const half = (i->start + i->end) / 2;
 
-				/* find the line that this audio range starts in */
-				list<Line>::iterator j = _lines.begin();
-				while (j != _lines.end() && (j->range.first > i->start || j->range.second < i->start)) {
-					++j;
-				}
+				for (list<Line>::iterator j = _lines.begin(); j != _lines.end(); ++j) {
+					if (j->range.first > i->start || j->range.second < i->start) {
+						continue;
+					}
 
-				if (j != _lines.end()) {
 					boost::shared_ptr<AutomationList> the_list = j->line->the_list ();
 
-				/* j is the line that this audio range starts in; fade into it;
-				   64 samples length plucked out of thin air.
-				*/
+					/* j is the line that this audio range starts in; fade into it;
+					 * 64 samples length plucked out of thin air.
+					 */
 
 					samplepos_t a = i->start + 64;
 					if (a > half) {
@@ -6384,18 +6383,17 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 				}
 
 				/* same thing for the end */
+				for (list<Line>::iterator j = _lines.begin(); j != _lines.end(); ++j) {
 
-				j = _lines.begin();
-				while (j != _lines.end() && (j->range.first > i->end || j->range.second < i->end)) {
-					++j;
-				}
+					if (j->range.first > i->end || j->range.second < i->end) {
+						continue;
+					}
 
-				if (j != _lines.end()) {
 					boost::shared_ptr<AutomationList> the_list = j->line->the_list ();
 
 					/* j is the line that this audio range starts in; fade out of it;
-					   64 samples length plucked out of thin air.
-					*/
+					 * 64 samples length plucked out of thin air.
+					 */
 
 					samplepos_t b = i->end - 64;
 					if (b < half) {
@@ -6419,9 +6417,8 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 			_nothing_to_drag = true;
 
 			/* Find all the points that should be dragged and put them in the relevant
-			   points lists in the Line structs.
-			*/
-
+			 * points lists in the Line structs.
+			 */
 			for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
 
 				uint32_t const N = i->line->npoints ();
@@ -6447,12 +6444,12 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 		}
 
 		for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-			i->line->start_drag_multiple (i->points, y_fraction (i->line, current_pointer_y()), i->state);
+			i->line->start_drag_multiple (i->points, y_fraction (current_pointer_y()), i->state);
 		}
 	}
 
 	for (list<Line>::iterator l = _lines.begin(); l != _lines.end(); ++l) {
-		float const f = y_fraction (l->line, current_pointer_y());
+		float const f = y_fraction (current_pointer_y());
 		/* we are ignoring x position for this drag, so we can just pass in anything */
 		pair<float, float> result;
 		uint32_t ignored;

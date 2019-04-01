@@ -3439,6 +3439,14 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 						(*i)->remove_property (X_("name"));
 						(*i)->set_property ("bitslot", bitslot);
 						(*i)->set_property ("name", name);
+						XMLNodeList io_kids = (*i)->children ();
+						for (XMLNodeList::iterator j = io_kids.begin(); j != io_kids.end(); ++j) {
+							if ((*j)->name() != X_("IO")) {
+								continue;
+							}
+							(*j)->remove_property (X_("name"));
+							(*j)->set_property ("name", name);
+						}
 					}
 					else if (type && type->value() == X_("intreturn")) {
 						(*i)->remove_property (X_("bitslot"));
