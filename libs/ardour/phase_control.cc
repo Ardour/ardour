@@ -86,7 +86,8 @@ PhaseControl::set_state (XMLNode const & node, int version)
 
 	std::string str;
 	if (node.get_property (X_("phase-invert"), str)) {
-		set_phase_invert (boost::dynamic_bitset<> (str));
+		if(str.length() != 0)
+			set_phase_invert (boost::dynamic_bitset<> (str));
 	}
 
 	return 0;
