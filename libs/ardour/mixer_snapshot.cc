@@ -254,7 +254,7 @@ void MixerSnapshot::recall()
 
         if(route) {
             XMLNode& bfr = route->get_state();
-            route->set_state(state.node, PBD::Stateful::loading_state_version);
+            route->set_state(sanitize_node(state.node), PBD::Stateful::loading_state_version);
             reassign_masters(route, state.node);
             _session->add_command(new MementoCommand<Route>((*route), &bfr, &route->get_state()));
         }
@@ -404,6 +404,19 @@ void MixerSnapshot::load_from_session(string path)
     }
 
     load_from_session(*(root));
+}
+
+XMLNode& MixerSnapshot::sanitize_node(XMLNode& node)
+{
+#ifndef MIXBUS
+    const string proc[] = {"PRE", "EQ", "Comp", "POST"};
+    const string name   = "Processor";
+    const string prop   = "name";
+    
+    for(int i = 0; i <= 3; i++)
+        node.remove_node_and_delete(name, prop, proc[i]);
+#endif
+    return node;
 }
 
 void MixerSnapshot::load_from_session(XMLNode& node)

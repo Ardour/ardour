@@ -73,6 +73,7 @@ class MixerSnapshot
     private:
         ARDOUR::Session* _session;
 
+        XMLNode& sanitize_node(XMLNode&);
         void reassign_masters(boost::shared_ptr<ARDOUR::Slavable>, XMLNode);
         void load_from_session(std::string);
         void load_from_session(XMLNode&);
