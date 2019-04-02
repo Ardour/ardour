@@ -198,47 +198,8 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	button_box->pack_start (*add_button);
 	button_box->pack_start (*remove_button);
 
-	Button* custom1 = new Button("Mark");
-	Button* custom2 = new Button("Recall");
-	Button* custom3 = new Button("Write");
-	Button* custom4 = new Button("load");
-	button_box->pack_start(*custom1);
-	button_box->pack_start(*custom2);
-	button_box->pack_start(*custom3);
-	button_box->pack_start(*custom4);
-	custom1->signal_clicked().connect(sigc::mem_fun(*this, &EditorRouteGroups::snap));
-	custom2->signal_clicked().connect(sigc::mem_fun(*this, &EditorRouteGroups::recall));
-	custom3->signal_clicked().connect(sigc::mem_fun(*this, &EditorRouteGroups::write));
-	custom4->signal_clicked().connect(sigc::mem_fun(*this, &EditorRouteGroups::load));
-
 	_display_packer.pack_start (_scroller, true, true);
 	_display_packer.pack_start (*button_box, false, false);
-}
-
-void EditorRouteGroups::snap() {
-	camera->clear();
-	
-	RouteList rl = _editor->get_selection().tracks.routelist();
-	if(rl.empty())
-		camera->snap();
-	else
-		camera->snap(rl);
-}
-
-void EditorRouteGroups::recall() { 
-	camera->recall();
-}
-
-void EditorRouteGroups::write() { 
-	// camera->write();
-}
-
-void EditorRouteGroups::load() {
-	string path = Glib::build_filename(user_config_directory(-1), "snapshot.xml");
-	camera->load(path);
-	MixerSnapshotDialog* m = new MixerSnapshotDialog(_session);
-	m->run();
-
 }
 
 void
@@ -601,8 +562,6 @@ EditorRouteGroups::set_session (Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
-			camera = new MixerSnapshot(_session);
-
 		_session->route_group_added.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::add, this, _1), gui_context());
 		_session->route_group_removed.connect (
 			_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::groups_changed, this), gui_context()
