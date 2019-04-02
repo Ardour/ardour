@@ -37,13 +37,6 @@
 #include "ardour/route.h"
 #include "ardour/session.h"
 
-//REMOVE ME
-#include "ardour/mixer_snapshot.h"
-#include <glibmm.h>
-#include <glibmm/fileutils.h>
-#include "ardour/filesystem_paths.h"
-#include "mixer_snapshot_dialog.h"
-
 #include "ardour_ui.h"
 #include "editor.h"
 #include "editor_group_tabs.h"
@@ -562,6 +555,7 @@ EditorRouteGroups::set_session (Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
+
 		_session->route_group_added.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::add, this, _1), gui_context());
 		_session->route_group_removed.connect (
 			_session_connections, MISSING_INVALIDATOR, boost::bind (&EditorRouteGroups::groups_changed, this), gui_context()

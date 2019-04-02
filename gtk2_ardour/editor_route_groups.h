@@ -27,8 +27,6 @@
 
 #include "editor_component.h"
 
-#include "ardour/mixer_snapshot.h"
-
 class EditorRouteGroups : public EditorComponent, public ARDOUR::SessionHandlePtr
 {
 public:
