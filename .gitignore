@@ -38,6 +38,7 @@ vgcore.*
 cscope.files
 cscope.out
 tags
+.vscode
 
 # generated folders doc, build, packaging
 .waf-*
