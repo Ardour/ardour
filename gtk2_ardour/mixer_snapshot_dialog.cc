@@ -311,6 +311,14 @@ void MixerSnapshotDialog::new_snapshot(bool global)
 
 void MixerSnapshotDialog::new_snap_from_session(bool global)
 {
+    string testpath = Glib::build_filename(user_config_directory(-1), "mixer_snapshots/");
+    if(!Glib::file_test(testpath.c_str(), Glib::FILE_TEST_EXISTS & Glib::FILE_TEST_IS_DIR))
+        ::g_mkdir(testpath.c_str(), 0775);
+    
+    testpath = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots/");
+    if(!Glib::file_test(testpath.c_str(), Glib::FILE_TEST_EXISTS & Glib::FILE_TEST_IS_DIR))
+        ::g_mkdir(testpath.c_str(), 0775);
+
     Gtk::FileChooserDialog session_selector(_("Open Session"), FILE_CHOOSER_ACTION_OPEN);
     string session_parent_dir = Glib::path_get_dirname(_session->path());
     session_selector.add_button(Stock::CANCEL, RESPONSE_CANCEL);
