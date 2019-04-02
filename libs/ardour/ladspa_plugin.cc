@@ -91,27 +91,27 @@ LadspaPlugin::init (string module_path, uint32_t index, samplecnt_t rate)
 	_was_activated = false;
 
 	if (!(*_module)) {
-		error << _("LADSPA: Unable to open module: ") << Glib::Module::get_last_error() << endmsg;
+		warning << _("LADSPA: Unable to open module: ") << Glib::Module::get_last_error() << endmsg;
 		delete _module;
 		throw failed_constructor();
 	}
 
 	if (!_module->get_symbol("ladspa_descriptor", func)) {
-		error << _("LADSPA: module has no descriptor function.") << endmsg;
+		warning << _("LADSPA: module has no descriptor function.") << endmsg;
 		throw failed_constructor();
 	}
 
 	dfunc = (LADSPA_Descriptor_Function)func;
 
 	if ((_descriptor = dfunc (index)) == 0) {
-		error << _("LADSPA: plugin has gone away since discovery!") << endmsg;
+		warning << _("LADSPA: plugin has gone away since discovery!") << endmsg;
 		throw failed_constructor();
 	}
 
 	_index = index;
 
 	if (LADSPA_IS_INPLACE_BROKEN(_descriptor->Properties)) {
-		error << string_compose(_("LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"), _descriptor->Name) << endmsg;
+		info << string_compose(_("LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"), _descriptor->Name) << endmsg;
 		throw failed_constructor();
 	}
 

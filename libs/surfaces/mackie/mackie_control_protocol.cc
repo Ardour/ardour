@@ -2016,6 +2016,14 @@ MackieControlProtocol::update_fader_automation_state ()
 		update_global_button (Button::Latch, off);
 		update_global_button (Button::Grp, off);
 		break;
+	case Latch:
+		update_global_button (Button::Read, off);
+		update_global_button (Button::Write, off);
+		update_global_button (Button::Touch, off);
+		update_global_button (Button::Trim, off);
+		update_global_button (Button::Latch, on);
+		update_global_button (Button::Grp, off);
+		break;
 	}
 }
 
