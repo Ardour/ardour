@@ -45,12 +45,6 @@ public:
 
 private:
 
-	MixerSnapshot* camera;
-	void snap();
-	void recall();
-	void write();
-	void load();
-
 	struct Columns : public Gtk::TreeModel::ColumnRecord {
 
 		Columns () {
