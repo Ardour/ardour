@@ -949,7 +949,8 @@ Sequence<Time>::append(const Event<Time>& ev, event_id_t evid)
 			                   | (0x7F & ev.pitch_bender_lsb())),
 			evid);
 	} else if (ev.is_poly_pressure()) {
-		append_control_unlocked (Parameter (ev.event_type(), ev.channel(), ev.poly_note()), ev.time(), ev.poly_pressure(), evid);
+		const ParameterType ptype = _type_map.midi_parameter_type(ev.buffer(), ev.size());
+		append_control_unlocked (Parameter (ptype, ev.channel(), ev.poly_note()), ev.time(), ev.poly_pressure(), evid);
 	} else if (ev.is_channel_pressure()) {
 		const ParameterType ptype = _type_map.midi_parameter_type(ev.buffer(), ev.size());
 		append_control_unlocked(
