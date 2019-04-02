@@ -520,6 +520,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&bundle_manager);
 	WM::Manager::instance().register_window (&location_ui);
 	WM::Manager::instance().register_window (&big_clock_window);
+	WM::Manager::instance().register_window (&mixer_snapshot_dialog);
 	WM::Manager::instance().register_window (&big_transport_window);
 	WM::Manager::instance().register_window (&virtual_keyboard_window);
 	WM::Manager::instance().register_window (&audio_port_matrix);

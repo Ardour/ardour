@@ -44,7 +44,6 @@ struct ColumnInfo {
 MixerSnapshotDialog::MixerSnapshotDialog(Session* s)
     : ArdourDialog(_("Mixer Snapshot Manager:"), true, false)
 {
-    set_session(s);
     global_model = Gtk::ListStore::create(_columns);
     local_model  = Gtk::ListStore::create(_columns);
     
@@ -53,6 +52,8 @@ MixerSnapshotDialog::MixerSnapshotDialog(Session* s)
 
     global_display.signal_button_press_event().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::button_press), true), false);
     local_display.signal_button_press_event().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::button_press), false), false);
+    
+    set_session(s);
 }
 
 void MixerSnapshotDialog::set_session(Session* s)
