@@ -42,7 +42,7 @@
 class MixerSnapshotDialog : public ArdourDialog
 {
     public:
-        MixerSnapshotDialog();
+        MixerSnapshotDialog(ARDOUR::Session*);
         ~MixerSnapshotDialog() {};
 
         void set_session(ARDOUR::Session*);
