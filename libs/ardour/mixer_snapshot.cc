@@ -25,7 +25,7 @@ MixerSnapshot::MixerSnapshot(Session* s)
     , label("snapshot")
     , timestamp(time(0))
     , favorite(false)
-    , last_modified_with("")
+    , last_modified_with(string_compose("%1 %2", PROGRAM_NAME, revision))
 {   
     if(s)
         _session = s;
@@ -36,12 +36,10 @@ MixerSnapshot::MixerSnapshot(Session* s, string file_path)
     , label("snapshot")
     , timestamp(time(0))
     , favorite(false)
-    , last_modified_with("")
+    , last_modified_with(string_compose("%1 %2", PROGRAM_NAME, revision))
 {   
     if(s)
         _session = s;
-
-    last_modified_with = string_compose("%1 %2", PROGRAM_NAME, revision);
 
     if(Glib::file_test(file_path.c_str(), Glib::FILE_TEST_IS_DIR))
         load_from_session(file_path);
