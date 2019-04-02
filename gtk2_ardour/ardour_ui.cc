@@ -208,6 +208,7 @@ typedef uint64_t microseconds_t;
 #include "video_server_dialog.h"
 #include "virtual_keyboard_window.h"
 #include "add_video_dialog.h"
+#include "mixer_snapshot_dialog.h"
 #include "transcode_video_dialog.h"
 
 #include "pbd/i18n.h"
@@ -337,6 +338,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, session_option_editor (X_("session-options-editor"), _("Properties"), boost::bind (&ARDOUR_UI::create_session_option_editor, this))
 	, add_video_dialog (X_("add-video"), _("Add Video"), boost::bind (&ARDOUR_UI::create_add_video_dialog, this))
 	, bundle_manager (X_("bundle-manager"), _("Bundle Manager"), boost::bind (&ARDOUR_UI::create_bundle_manager, this))
+	, mixer_snapshot_dialog(X_("mixer-snapshot"), _("Mixer Snapshot Manager"), boost::bind(&ARDOUR_UI::create_mixer_snapshot_dialog, this))
 	, big_clock_window (X_("big-clock"), _("Big Clock"), boost::bind (&ARDOUR_UI::create_big_clock_window, this))
 	, big_transport_window (X_("big-transport"), _("Transport Controls"), boost::bind (&ARDOUR_UI::create_big_transport_window, this))
 	, virtual_keyboard_window (X_("virtual-keyboard"), _("Virtual Keyboard"), boost::bind (&ARDOUR_UI::create_virtual_keyboard_window, this))

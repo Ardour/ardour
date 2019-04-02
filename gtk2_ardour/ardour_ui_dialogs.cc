@@ -69,6 +69,7 @@
 #include "midi_tracer.h"
 #include "mini_timeline.h"
 #include "mixer_ui.h"
+#include "mixer_snapshot_dialog.h"
 #include "plugin_dspload_window.h"
 #include "public_editor.h"
 #include "processor_box.h"
@@ -890,6 +891,13 @@ ARDOUR_UI::create_add_video_dialog ()
 {
 	return new AddVideoDialog (_session);
 }
+
+MixerSnapshotDialog*
+ARDOUR_UI::create_mixer_snapshot_dialog ()
+{
+	return new MixerSnapshotDialog (_session);
+}
+
 
 SessionOptionEditor*
 ARDOUR_UI::create_session_option_editor ()

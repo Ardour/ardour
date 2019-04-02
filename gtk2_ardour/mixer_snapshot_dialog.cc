@@ -41,9 +41,10 @@ struct ColumnInfo {
 	const char*   tooltip;
 };
 
-MixerSnapshotDialog::MixerSnapshotDialog()
+MixerSnapshotDialog::MixerSnapshotDialog(Session* s)
     : ArdourDialog(_("Mixer Snapshot Manager:"), true, false)
 {
+    set_session(s);
     global_model = Gtk::ListStore::create(_columns);
     local_model  = Gtk::ListStore::create(_columns);
     
