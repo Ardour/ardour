@@ -51,11 +51,11 @@ class MixerSnapshot
             std::string name;
             XMLNode     node;
         };
-        
+
         bool empty() {
             return (
-                route_states.empty() && 
-                group_states.empty() && 
+                route_states.empty() &&
+                group_states.empty() &&
                 vca_states.empty()
             );
         };

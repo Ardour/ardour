@@ -26,7 +26,7 @@ MixerSnapshot::MixerSnapshot(Session* s)
     , timestamp(time(0))
     , favorite(false)
     , last_modified_with(string_compose("%1 %2", PROGRAM_NAME, revision))
-{   
+{
     if(s)
         _session = s;
 }
@@ -37,7 +37,7 @@ MixerSnapshot::MixerSnapshot(Session* s, string file_path)
     , timestamp(time(0))
     , favorite(false)
     , last_modified_with(string_compose("%1 %2", PROGRAM_NAME, revision))
-{   
+{
     if(s)
         _session = s;
 
@@ -47,7 +47,7 @@ MixerSnapshot::MixerSnapshot(Session* s, string file_path)
     string suffix = "." + PBD::get_suffix(file_path);
     if(suffix == statefile_suffix)
         load_from_session(file_path);
-    
+
     if(suffix == ".xml")
         load(file_path);
 }
@@ -66,7 +66,7 @@ bool MixerSnapshot::has_specials()
             return true;
         }
     }
-    
+
     return false;
 }
 
@@ -78,11 +78,11 @@ void MixerSnapshot::clear()
     vca_states.clear();
 }
 
-void MixerSnapshot::snap(boost::shared_ptr<Route> route) 
+void MixerSnapshot::snap(boost::shared_ptr<Route> route)
 {
     if(!route)
         return;
-    
+
     string name = route->name();
     XMLNode& original = route->get_state();
     XMLNode copy (original);
@@ -93,14 +93,14 @@ void MixerSnapshot::snap(boost::shared_ptr<Route> route)
     }
 
     XMLNode* slavable = find_named_node(copy, "Slavable");
-    
+
     if(slavable)
     {
         XMLNodeList nlist = slavable->children();
         for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); niter++) {
             string number;
             (*niter)->get_property(X_("number"), number);
-            
+
             int i = atoi(number.c_str());
             boost::shared_ptr<VCA> vca = _session->vca_manager().vca_by_number(i);
 
@@ -113,8 +113,8 @@ void MixerSnapshot::snap(boost::shared_ptr<Route> route)
     }
 
     State state {
-        route->id().to_s(), 
-        route->name(), 
+        route->id().to_s(),
+        route->name(),
         copy
     };
 
@@ -133,10 +133,10 @@ void MixerSnapshot::snap(RouteGroup* group)
     string name = group->name();
     XMLNode& original = group->get_state();
     XMLNode  copy (original);
-    
+
     State state {
-        group->id().to_s(), 
-        group->name(), 
+        group->id().to_s(),
+        group->name(),
         copy
     };
 
@@ -155,10 +155,10 @@ void MixerSnapshot::snap(boost::shared_ptr<VCA> vca)
     string name = vca->name();
     XMLNode& original = vca->get_state();
     XMLNode  copy (original);
-    
+
     State state {
-        vca->id().to_s(), 
-        vca->name(), 
+        vca->id().to_s(),
+        vca->name(),
         copy
     };
 
@@ -166,13 +166,13 @@ void MixerSnapshot::snap(boost::shared_ptr<VCA> vca)
 }
 
 
-void MixerSnapshot::snap() 
+void MixerSnapshot::snap()
 {
     if(!_session)
         return;
 
     clear();
-    
+
     RouteList rl = _session->get_routelist();
     if(rl.empty())
         return;
@@ -181,7 +181,7 @@ void MixerSnapshot::snap()
         snap((*it));
 }
 
-void MixerSnapshot::snap(RouteList rl) 
+void MixerSnapshot::snap(RouteList rl)
 {
     if(!_session)
         return;
@@ -212,7 +212,7 @@ void MixerSnapshot::reassign_masters(boost::shared_ptr<Slavable> slv, XMLNode no
         (*niter)->get_property(X_("name"), name);
 
         boost::shared_ptr<VCA> vca = _session->vca_manager().vca_by_name(name);
-        
+
         if(vca)
             slv->assign(vca);
     }
@@ -224,7 +224,7 @@ void MixerSnapshot::recall()
         return;
 
     _session->begin_reversible_command(_("mixer-snapshot recall"));
-    
+
     //vcas
     for(vector<State>::const_iterator i = vca_states.begin(); i != vca_states.end(); i++) {
         State state = (*i);
@@ -242,13 +242,13 @@ void MixerSnapshot::recall()
             vca->set_state(state.node, PBD::Stateful::loading_state_version);
         }
     }
-    
+
     //routes
     for(vector<State>::const_iterator i = route_states.begin(); i != route_states.end(); i++) {
         State state = (*i);
-        
+
         boost::shared_ptr<Route> route = _session->route_by_id(PBD::ID(state.id));
-        
+
         if(!route)
             route = _session->route_by_name(state.name);
 
@@ -282,13 +282,13 @@ void MixerSnapshot::write(const string path)
         return;
 
     XMLNode* node = new XMLNode("MixerSnapshot");
-	XMLNode* child;
+    XMLNode* child;
 
     child = node->add_child ("ProgramVersion");
-	child->set_property("modified-with", last_modified_with);
+    child->set_property("modified-with", last_modified_with);
 
     child = node->add_child ("Favorite");
-	child->set_property("favorite", favorite);
+    child->set_property("favorite", favorite);
 
     child = node->add_child("Routes");
     for(vector<State>::iterator i = route_states.begin(); i != route_states.end(); i++) {
@@ -306,7 +306,7 @@ void MixerSnapshot::write(const string path)
     }
 
     XMLTree tree;
-	tree.set_root(node);
+    tree.set_root(node);
     tree.write(path);
 }
 
@@ -319,7 +319,7 @@ void MixerSnapshot::load(const string path)
 
     XMLTree tree;
     tree.read(path);
-   
+
     XMLNode* root = tree.root();
     if(!root) {
         return;
@@ -349,19 +349,19 @@ void MixerSnapshot::load(const string path)
             string name, id;
             (*niter)->get_property(X_("name"), name);
             (*niter)->get_property(X_("id"), id);
-            
+
             State state {id, name, (**niter)};
             route_states.push_back(state);
         }
     }
 
     if(group_node) {
-        XMLNodeList nlist = group_node->children();       
+        XMLNodeList nlist = group_node->children();
         for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); niter++) {
             string name, id;
             (*niter)->get_property(X_("name"), name);
             (*niter)->get_property(X_("id"), id);
-            
+
             State state {id, name, (**niter)};
             group_states.push_back(state);
         }
@@ -373,7 +373,7 @@ void MixerSnapshot::load(const string path)
             string name, id;
             (*niter)->get_property(X_("name"), name);
             (*niter)->get_property(X_("id"), id);
-            
+
             State state {id, name, (**niter)};
             vca_states.push_back(state);
         }
@@ -412,7 +412,7 @@ XMLNode& MixerSnapshot::sanitize_node(XMLNode& node)
     const string proc[] = {"PRE", "EQ", "Comp", "POST"};
     const string name   = "Processor";
     const string prop   = "name";
-    
+
     for(int i = 0; i <= 3; i++)
         node.remove_node_and_delete(name, prop, proc[i]);
 #endif
@@ -445,7 +445,7 @@ void MixerSnapshot::load_from_session(XMLNode& node)
 
             pair<int, string> pair (atoi(number.c_str()), name);
             number_name_pairs.push_back(pair);
-            
+
             State state {id, name, (**niter)};
             vca_states.push_back(state);
         }
@@ -458,13 +458,13 @@ void MixerSnapshot::load_from_session(XMLNode& node)
             (*niter)->get_property(X_("name"), name);
             (*niter)->get_property(X_("id"), id);
 
-            /* ugly workaround - recall() expects 
-            that a route's Slavable children has 
-            the "name" property. Normal session state 
+            /* ugly workaround - recall() expects
+            that a route's Slavable children has
+            the "name" property. Normal session state
             files don't have this. So we stash it,
-            reverse look-up the name based on its number, 
+            reverse look-up the name based on its number,
             and then  add it to a copy of the node. */
-            
+
             XMLNode copy (**niter);
             XMLNode* slavable = find_named_node(copy, "Slavable");
             if(slavable) {
@@ -477,25 +477,25 @@ void MixerSnapshot::load_from_session(XMLNode& node)
                         int mst_number  = atoi(number.c_str());
                         int vca_number  = (*p).first;
                         string vca_name = (*p).second;
-                        
+
                         if(vca_number == mst_number)
                             (*siter)->set_property(X_("name"), vca_name);
                     }
                 }
             }
-            
+
             State state {id, name, copy};
             route_states.push_back(state);
         }
     }
 
     if(group_node) {
-        XMLNodeList nlist = group_node->children();       
+        XMLNodeList nlist = group_node->children();
         for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); niter++) {
             string name, id;
             (*niter)->get_property(X_("name"), name);
             (*niter)->get_property(X_("id"), id);
-            
+
             State state {id, name, (**niter)};
             group_states.push_back(state);
         }
