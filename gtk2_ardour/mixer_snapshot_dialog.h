@@ -34,21 +34,18 @@
 
 #include "ardour/mixer_snapshot.h"
 
-#include "ardour_dialog.h"
+#include "ardour_window.h"
 
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_dropdown.h"
 
-class MixerSnapshotDialog : public ArdourDialog
+class MixerSnapshotDialog : public ArdourWindow
 {
     public:
         MixerSnapshotDialog(ARDOUR::Session*);
         ~MixerSnapshotDialog() {};
 
         void set_session(ARDOUR::Session*);
-
-        int run();
-
         void refill();
 
     private:
@@ -102,6 +99,6 @@ class MixerSnapshotDialog : public ArdourDialog
         Glib::RefPtr<Gtk::ListStore> global_model;
         Glib::RefPtr<Gtk::ListStore> local_model;
         Gtk::Menu menu;
-
+        Gtk::VBox top_level_view_box;
 };
-#endif
+#endif /* __ardour_mixer_snapshot_dialog_h__ */
