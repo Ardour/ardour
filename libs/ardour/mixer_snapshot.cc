@@ -434,7 +434,7 @@ void MixerSnapshot::load_from_session(XMLNode& node)
         last_modified_with = version;
     }
 
-    vector<pair<int,string>> number_name_pairs;
+    vector<pair<int,string> > number_name_pairs;
     if(vca_node) {
         XMLNodeList nlist = vca_node->children();
         for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); niter++) {
@@ -473,7 +473,7 @@ void MixerSnapshot::load_from_session(XMLNode& node)
                     string number;
                     (*siter)->get_property(X_("number"), number);
 
-                    for(vector<pair<int,string>>::const_iterator p = number_name_pairs.begin(); p != number_name_pairs.end(); p++) {
+                    for(vector<pair<int,string> >::const_iterator p = number_name_pairs.begin(); p != number_name_pairs.end(); p++) {
                         int mst_number  = atoi(number.c_str());
                         int vca_number  = (*p).first;
                         string vca_name = (*p).second;
