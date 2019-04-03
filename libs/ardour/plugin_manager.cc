@@ -1536,6 +1536,14 @@ PluginManager::save_tags ()
 	XMLNode* root = new XMLNode (X_("PluginTags"));
 
 	for (PluginTagList::iterator i = ptags.begin(); i != ptags.end(); ++i) {
+#ifdef MIXBUS
+		if ((*i).type == LADSPA) {
+			uint32_t id = atoi ((*i).unique_id);
+			if (id >= 9300 && id <= 9399) {
+				continue; /* do not write mixbus channelstrip ladspa's in the tagfile */
+			}
+		}
+#endif
 		if ((*i).tagtype == FromFactoryFile || (*i).tagtype == FromUserFile) {
 			/* user file should contain only plugins that are (a) newly user-tagged or (b) previously unknown */
 			continue;
