@@ -90,7 +90,7 @@ class MixerSnapshotDialog : public ArdourDialog
             Gtk::TreeModelColumn<std::string> date;
             Gtk::TreeModelColumn<int64_t> timestamp;
             Gtk::TreeModelColumn<std::string> full_path;
-            Gtk::TreeModelColumn<MixerSnapshot*> snapshot;
+            Gtk::TreeModelColumn<ARDOUR::MixerSnapshot*> snapshot;
         };
 
         MixerSnapshotColumns _columns;

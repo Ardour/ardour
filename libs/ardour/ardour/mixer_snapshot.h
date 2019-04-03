@@ -28,7 +28,9 @@
 #include "ardour/vca.h"
 #include "ardour/route_group.h"
 
-class MixerSnapshot
+namespace ARDOUR {
+
+class LIBARDOUR_API MixerSnapshot
 {
     public:
         MixerSnapshot(ARDOUR::Session*);
@@ -83,5 +85,7 @@ class MixerSnapshot
         std::vector<State> group_states;
         std::vector<State> vca_states;
 };
+
+} // namespace ARDOUR
 
 #endif /* __ardour_mixer_snapshot_h__ */
