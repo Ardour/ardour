@@ -42,13 +42,15 @@ struct ColumnInfo {
 };
 
 MixerSnapshotDialog::MixerSnapshotDialog(Session* s)
-    : ArdourDialog(_("Mixer Snapshot Manager:"), true, false)
+    : ArdourWindow(_("Mixer Snapshot Manager:"))
 {
     global_model = Gtk::ListStore::create(_columns);
     local_model  = Gtk::ListStore::create(_columns);
 
     bootstrap_display_and_model(global_display, global_model, true);
     bootstrap_display_and_model(local_display, local_model,  false);
+
+    add(top_level_view_box);
 
     global_display.signal_button_press_event().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::button_press), true), false);
     local_display.signal_button_press_event().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::button_press), false), false);
@@ -59,7 +61,7 @@ MixerSnapshotDialog::MixerSnapshotDialog(Session* s)
 void MixerSnapshotDialog::set_session(Session* s)
 {
     if(s)
-        ArdourDialog::set_session(s);
+        ArdourWindow::set_session(s);
 
     refill();
 }
@@ -204,7 +206,7 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
         table->set_size_request(-1, 400);
         table->attach(global_scroller, 0, 3, 0, 5                         );
         table->attach(*vbox,           2, 3, 6, 8, FILL|EXPAND, FILL, 5, 5);
-        get_vbox()->pack_start(*table);
+        top_level_view_box.pack_start(*table);
     } else {
         btn_add->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snapshot), false));
         btn_new->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snap_from_session), false));
@@ -217,7 +219,7 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
         table->set_size_request(-1, 400);
         table->attach(local_scroller,  0, 3, 0, 5                         );
         table->attach(*vbox,           2, 3, 6, 8, FILL|EXPAND, FILL, 5, 5);
-        get_vbox()->pack_start(*table);
+        top_level_view_box.pack_start(*table);
     }
 
     ColumnInfo ci[] = {
@@ -441,9 +443,4 @@ void MixerSnapshotDialog::fav_cell_action(const string& path, bool global)
         (*iter)[_columns.favorite] = snap->favorite;
         snap->write((*iter)[_columns.full_path]);
     }
-}
-
-int MixerSnapshotDialog::run() {
-    show_all();
-    return 0;
 }
