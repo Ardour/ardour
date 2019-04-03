@@ -65,12 +65,21 @@ class LIBARDOUR_API MixerSnapshot
         std::vector<State> get_routes() {return route_states;};
         std::vector<State> get_groups() {return group_states;};
         std::vector<State> get_vcas()   {return vca_states;};
-        std::string get_last_modified_with() {return last_modified_with;};
 
-        int id;
-        std::string label;
-        std::time_t timestamp;
-        bool favorite;
+        unsigned int get_id() {return id;};
+        void set_id(unsigned int new_id) {id = new_id;};
+
+        std::string get_label() {return label;};
+        void set_label(std::string new_label) {label = new_label;};
+        
+        bool get_favorite() {return timestamp;};
+        void set_favorite(bool yn) {favorite = yn;};
+
+        std::time_t get_timestamp() {return timestamp;};
+        void set_timestamp(std::time_t new_timestamp) {timestamp = new_timestamp;};
+
+        std::string get_last_modified_with() {return last_modified_with;};
+        void set_last_modified_with(std::string new_modified_with) {last_modified_with = new_modified_with;};
 
     private:
         ARDOUR::Session* _session;
@@ -80,7 +89,12 @@ class LIBARDOUR_API MixerSnapshot
         void load_from_session(std::string);
         void load_from_session(XMLNode&);
 
+        unsigned int id;
+        bool favorite;
+        std::string label;
+        std::time_t timestamp;
         std::string last_modified_with;
+
         std::vector<State> route_states;
         std::vector<State> group_states;
         std::vector<State> vca_states;
