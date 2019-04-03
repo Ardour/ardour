@@ -291,13 +291,13 @@ void MixerSnapshotDialog::new_snapshot(bool global)
         string new_label;
         prompt.get_result(new_label);
         if (new_label.length() > 0) {
-            snap->label = new_label;
+            snap->set_label(new_label);
 
             string path = "";
             if(global) {
-                path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots/", snap->label + ".xml");
+                path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots/", snap->get_label() + ".xml");
             } else {
-                path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots/", snap->label + ".xml");
+                path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots/", snap->get_label() + ".xml");
             }
 
             if(!rl.empty() && sel->get_active())
@@ -338,13 +338,13 @@ void MixerSnapshotDialog::new_snap_from_session(bool global)
 
     MixerSnapshot* snapshot = new MixerSnapshot(_session, session_path);
 
-    snapshot->label = basename_nosuffix(session_path);
+    snapshot->set_label(basename_nosuffix(session_path));
 
     string path = "";
     if(global) {
-        path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots/", snapshot->label + ".xml");
+        path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots/", snapshot->get_label() + ".xml");
     } else {
-        path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots/", snapshot->label + ".xml");
+        path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots/", snapshot->get_label() + ".xml");
     }
 
     snapshot->write(path);
@@ -365,7 +365,7 @@ void MixerSnapshotDialog::refill()
         string name = basename_nosuffix(*(i));
 
         MixerSnapshot* snap = new MixerSnapshot(_session, path);
-        snap->label = name;
+        snap->set_label(name);
 
         TreeModel::Row row = *(global_model->append());
         if (name.length() > 48) {
@@ -374,7 +374,7 @@ void MixerSnapshotDialog::refill()
         }
 
         row[_columns.name]         = name;
-        row[_columns.favorite]     = snap->favorite;
+        row[_columns.favorite]     = snap->get_favorite();
         row[_columns.version]      = snap->get_last_modified_with();
         row[_columns.n_tracks]     = snap->get_routes().size();
         row[_columns.n_vcas]       = snap->get_vcas().size();
@@ -402,7 +402,7 @@ void MixerSnapshotDialog::refill()
         string name = basename_nosuffix(*(i));
 
         MixerSnapshot* snap = new MixerSnapshot(_session, path);
-        snap->label = name;
+        snap->set_label(name);
 
         TreeModel::Row row = *(local_model->append());
         if (name.length() > 48) {
@@ -411,7 +411,7 @@ void MixerSnapshotDialog::refill()
         }
 
         row[_columns.name]         = name;
-        row[_columns.favorite]     = snap->favorite;
+        row[_columns.favorite]     = snap->get_favorite();
         row[_columns.version]      = snap->get_last_modified_with();
         row[_columns.n_tracks]     = snap->get_routes().size();
         row[_columns.n_vcas]       = snap->get_vcas().size();
@@ -439,8 +439,8 @@ void MixerSnapshotDialog::fav_cell_action(const string& path, bool global)
 
     if(iter) {
         MixerSnapshot* snap = (*iter)[_columns.snapshot];
-        snap->favorite = !snap->favorite;
-        (*iter)[_columns.favorite] = snap->favorite;
+        snap->set_favorite(!snap->get_favorite());
+        (*iter)[_columns.favorite] = snap->get_favorite();
         snap->write((*iter)[_columns.full_path]);
     }
 }

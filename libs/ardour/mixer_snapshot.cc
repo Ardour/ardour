@@ -22,9 +22,9 @@ using namespace ARDOUR;
 
 MixerSnapshot::MixerSnapshot(Session* s)
     : id(0)
+    , favorite(false)
     , label("snapshot")
     , timestamp(time(0))
-    , favorite(false)
     , last_modified_with(string_compose("%1 %2", PROGRAM_NAME, revision))
 {
     if(s)
@@ -33,9 +33,9 @@ MixerSnapshot::MixerSnapshot(Session* s)
 
 MixerSnapshot::MixerSnapshot(Session* s, string file_path)
     : id(0)
+    , favorite(false)
     , label("snapshot")
     , timestamp(time(0))
-    , favorite(false)
     , last_modified_with(string_compose("%1 %2", PROGRAM_NAME, revision))
 {
     if(s)
