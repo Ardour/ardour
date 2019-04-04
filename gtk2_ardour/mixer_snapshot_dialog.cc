@@ -263,11 +263,11 @@ void MixerSnapshotDialog::new_snapshot(bool global)
     if(!_session)
         return;
 
-    string path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots/");
+    string path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots");
     if(!Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS & Glib::FILE_TEST_IS_DIR))
         ::g_mkdir(path.c_str(), 0775);
 
-    path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots/");
+    path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots");
     if(!Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS & Glib::FILE_TEST_IS_DIR))
         ::g_mkdir(path.c_str(), 0775);
 
@@ -295,9 +295,9 @@ void MixerSnapshotDialog::new_snapshot(bool global)
 
             string path = "";
             if(global) {
-                path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots/", snap->get_label() + ".xml");
+                path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots", snap->get_label() + ".xml");
             } else {
-                path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots/", snap->get_label() + ".xml");
+                path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots", snap->get_label() + ".xml");
             }
 
             if(!rl.empty() && sel->get_active())
@@ -313,11 +313,11 @@ void MixerSnapshotDialog::new_snapshot(bool global)
 
 void MixerSnapshotDialog::new_snap_from_session(bool global)
 {
-    string testpath = Glib::build_filename(user_config_directory(-1), "mixer_snapshots/");
+    string testpath = Glib::build_filename(user_config_directory(-1), "mixer_snapshots");
     if(!Glib::file_test(testpath.c_str(), Glib::FILE_TEST_EXISTS & Glib::FILE_TEST_IS_DIR))
         ::g_mkdir(testpath.c_str(), 0775);
 
-    testpath = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots/");
+    testpath = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots");
     if(!Glib::file_test(testpath.c_str(), Glib::FILE_TEST_EXISTS & Glib::FILE_TEST_IS_DIR))
         ::g_mkdir(testpath.c_str(), 0775);
 
@@ -342,9 +342,9 @@ void MixerSnapshotDialog::new_snap_from_session(bool global)
 
     string path = "";
     if(global) {
-        path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots/", snapshot->get_label() + ".xml");
+        path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots", snapshot->get_label() + ".xml");
     } else {
-        path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots/", snapshot->get_label() + ".xml");
+        path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots", snapshot->get_label() + ".xml");
     }
 
     snapshot->write(path);
@@ -355,7 +355,7 @@ void MixerSnapshotDialog::refill()
 {
     global_model->clear();
 
-    string global_directory = Glib::build_filename(user_config_directory(-1), "mixer_snapshots/");
+    string global_directory = Glib::build_filename(user_config_directory(-1), "mixer_snapshots");
 
     vector<string> files;
     find_files_matching_pattern(files, global_directory, "*.xml");
@@ -394,7 +394,7 @@ void MixerSnapshotDialog::refill()
     local_model->clear();
     files.clear();
 
-    string local_directory = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots/");
+    string local_directory = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots");
     find_files_matching_pattern(files, local_directory, "*.xml");
 
     for(vector<string>::iterator i = files.begin(); i != files.end(); i++) {
