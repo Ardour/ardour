@@ -1224,7 +1224,7 @@ OSC::routes_list (lo_message msg)
 			} else if (boost::dynamic_pointer_cast<Route>(s) && !boost::dynamic_pointer_cast<Track>(s)) {
 				if (!(s->presentation_info().flags() & PresentationInfo::MidiBus)) {
 					// r->feeds (session->master_out()) may make more sense
-					if (r->direct_feeds_according_to_reality (session->master_out())) {
+					if (session->master_out() && r->direct_feeds_according_to_reality (session->master_out())) {
 						// this is a bus
 						lo_message_add_string (reply, "B");
 					} else {
@@ -6379,7 +6379,9 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue, uint32_t custom, Sor
 	if (!custom) {
 		// Master/Monitor might be anywhere... we put them at the end - Sorry ;)
 		if (types[5]) {
-			sorted.push_back (session->master_out());
+			if (session->master_out()) {
+				sorted.push_back (session->master_out());
+			}
 		}
 		if (types[6]) {
 			if (session->monitor_out()) {
