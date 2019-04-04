@@ -70,6 +70,15 @@ MixerSnapshotDialog::MixerSnapshotDialog(Session* s)
 
     add(top_level_view_box);
 
+    vector<TargetEntry> target_table;
+    target_table.push_back(TargetEntry("string"));
+
+    global_display.drag_dest_set(target_table);
+    local_display.drag_dest_set(target_table);
+
+    global_display.signal_drag_data_received().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::display_drag_data_received), true));
+    local_display.signal_drag_data_received().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::display_drag_data_received), false));
+
     global_display.signal_button_press_event().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::button_press), true), false);
     local_display.signal_button_press_event().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::button_press), false), false);
 
@@ -85,6 +94,37 @@ void MixerSnapshotDialog::set_session(Session* s)
     refill();
 }
 
+void MixerSnapshotDialog::display_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& data, guint info, guint time, bool global)
+{
+    if (data.get_target() != "string") {
+        context->drag_finish(false, false, time);
+        return;
+    }
+
+    const void* d = data.get_data();
+    const Gtkmm2ext::DnDTreeView<string>* tv = reinterpret_cast<const Gtkmm2ext::DnDTreeView<string>*>(d);
+
+    bool ok = false;
+    if(tv) {
+        list<string> paths;
+        TreeView* source;
+        tv->get_object_drag_data(paths, &source);
+
+        for (list<string>::const_iterator i = paths.begin(); i != paths.end(); i++) {
+            string new_path;
+            if(global) {
+                new_path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots", basename((*i).c_str()));
+            } else {
+                new_path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots", basename((*i).c_str()));
+            }
+            ::g_rename((*i).c_str(), new_path.c_str());
+        }
+        ok = true;
+    }
+
+    context->drag_finish(ok, false, time);
+    refill();
+}
 
 bool MixerSnapshotDialog::button_press(GdkEventButton* ev, bool global)
 {
@@ -194,7 +234,7 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
     display.set_headers_clickable(true);
     display.set_reorderable(false);
     display.set_rules_hint(true);
-    display.add_object_drag(_columns.name.index(), "");
+    display.add_object_drag(_columns.full_path.index(), "string");
     display.set_drag_column(_columns.name.index());
 
     CellRendererToggle* fav_cell = dynamic_cast<CellRendererToggle*>(display.get_column_cell_renderer(0));
