@@ -94,6 +94,20 @@ void MixerSnapshotDialog::set_session(Session* s)
     refill();
 }
 
+void MixerSnapshotDialog::ensure_directory(bool global)
+{
+    string path;
+    if(global) {
+        path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots");
+    } else {
+        path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots");
+    }
+
+    if(!Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS & Glib::FILE_TEST_IS_DIR)) {
+        ::g_mkdir(path.c_str(), 0775);
+    }
+}
+
 void MixerSnapshotDialog::display_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& data, guint info, guint time, bool global)
 {
     if (data.get_target() != "string") {
@@ -109,6 +123,10 @@ void MixerSnapshotDialog::display_drag_data_received(const Glib::RefPtr<Gdk::Dra
         list<string> paths;
         TreeView* source;
         tv->get_object_drag_data(paths, &source);
+
+        if(!paths.empty()) {
+            ensure_directory(global);
+        }
 
         for (list<string>::const_iterator i = paths.begin(); i != paths.end(); i++) {
             string new_path;
@@ -323,16 +341,6 @@ void MixerSnapshotDialog::new_snapshot(bool global)
         return;
     }
 
-    string path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots");
-    if(!Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS & Glib::FILE_TEST_IS_DIR)) {
-        ::g_mkdir(path.c_str(), 0775);
-    }
-
-    path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots");
-    if(!Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS & Glib::FILE_TEST_IS_DIR)) {
-        ::g_mkdir(path.c_str(), 0775);
-    }
-
     MixerSnapshot* snap = new MixerSnapshot(_session);
 
     Prompter prompt(true);
@@ -350,6 +358,7 @@ void MixerSnapshotDialog::new_snapshot(bool global)
     prompt.get_vbox()->pack_start(*sel);
 
     if(prompt.run() == RESPONSE_ACCEPT) {
+        ensure_directory(global);
         string new_label;
         prompt.get_result(new_label);
         if (new_label.length() > 0) {
@@ -376,16 +385,6 @@ void MixerSnapshotDialog::new_snapshot(bool global)
 
 void MixerSnapshotDialog::new_snap_from_session(bool global)
 {
-    string testpath = Glib::build_filename(user_config_directory(-1), "mixer_snapshots");
-    if(!Glib::file_test(testpath.c_str(), Glib::FILE_TEST_EXISTS & Glib::FILE_TEST_IS_DIR)) {
-        ::g_mkdir(testpath.c_str(), 0775);
-    }
-
-    testpath = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots");
-    if(!Glib::file_test(testpath.c_str(), Glib::FILE_TEST_EXISTS & Glib::FILE_TEST_IS_DIR)) {
-        ::g_mkdir(testpath.c_str(), 0775);
-    }
-
     Gtk::FileChooserDialog session_selector(_("Open Session"), FILE_CHOOSER_ACTION_OPEN);
     string session_parent_dir = Glib::path_get_dirname(_session->path());
     session_selector.add_button(Stock::CANCEL, RESPONSE_CANCEL);
@@ -398,6 +397,8 @@ void MixerSnapshotDialog::new_snap_from_session(bool global)
     if (response == RESPONSE_CANCEL) {
         return;
     }
+
+    ensure_directory(global);
 
     string session_path = session_selector.get_filename();
 

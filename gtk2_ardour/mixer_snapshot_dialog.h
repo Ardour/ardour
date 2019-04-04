@@ -50,6 +50,7 @@ class MixerSnapshotDialog : public ArdourWindow
     private:
         void display_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& data, guint info, guint time, bool);
 
+        void ensure_directory(bool);
         void new_snapshot(bool);
         void new_snap_from_session(bool);
 
