@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 20XX Paul Davis
+    Copyright (C) 2019 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #ifndef __ardour_mixer_snapshot_h__
@@ -71,7 +70,7 @@ class LIBARDOUR_API MixerSnapshot
 
         std::string get_label() {return label;};
         void set_label(std::string new_label) {label = new_label;};
-        
+
         bool get_favorite() {return timestamp;};
         void set_favorite(bool yn) {favorite = yn;};
 
