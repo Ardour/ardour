@@ -439,12 +439,13 @@ void MixerSnapshot::load_from_session(string path)
 XMLNode& MixerSnapshot::sanitize_node(XMLNode& node)
 {
 #ifndef MIXBUS
-    const string proc[] = {"PRE", "EQ", "Comp", "POST"};
-    const string name   = "Processor";
-    const string prop   = "name";
+    vector<string> procs {"PRE", "EQ", "Comp", "POST"};
+    const string node_name   = "Processor";
+    const string prop_name   = "name";
 
-    for(int i = 0; i <= 3; i++)
-        node.remove_node_and_delete(name, prop, proc[i]);
+    for(vector<string>::const_iterator it = procs.begin(); it != procs.end(); it++) {
+        node.remove_node_and_delete(node_name, prop_name, (*it));
+    }
 #endif
     return node;
 }
