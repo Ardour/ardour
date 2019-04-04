@@ -27,8 +27,9 @@ MixerSnapshot::MixerSnapshot(Session* s)
     , timestamp(time(0))
     , last_modified_with(string_compose("%1 %2", PROGRAM_NAME, revision))
 {
-    if(s)
+    if(s) {
         _session = s;
+    }
 }
 
 MixerSnapshot::MixerSnapshot(Session* s, string file_path)
@@ -38,18 +39,22 @@ MixerSnapshot::MixerSnapshot(Session* s, string file_path)
     , timestamp(time(0))
     , last_modified_with(string_compose("%1 %2", PROGRAM_NAME, revision))
 {
-    if(s)
+    if(s) {
         _session = s;
+    }
 
-    if(Glib::file_test(file_path.c_str(), Glib::FILE_TEST_IS_DIR))
+    if(Glib::file_test(file_path.c_str(), Glib::FILE_TEST_IS_DIR)) {
         load_from_session(file_path);
+    }
 
     string suffix = "." + PBD::get_suffix(file_path);
-    if(suffix == statefile_suffix)
+    if(suffix == statefile_suffix) {
         load_from_session(file_path);
+    }
 
-    if(suffix == ".xml")
+    if(suffix == ".xml") {
         load(file_path);
+    }
 }
 
 MixerSnapshot::~MixerSnapshot()
@@ -58,8 +63,9 @@ MixerSnapshot::~MixerSnapshot()
 
 bool MixerSnapshot::has_specials()
 {
-    if(empty())
+    if(empty()) {
         return false;
+    }
 
     for(vector<State>::const_iterator it = route_states.begin(); it != route_states.end(); it++) {
         if(it->name == "Monitor") {
@@ -80,8 +86,9 @@ void MixerSnapshot::clear()
 
 void MixerSnapshot::snap(boost::shared_ptr<Route> route)
 {
-    if(!route)
+    if(!route) {
         return;
+    }
 
     string name = route->name();
     XMLNode& original = route->get_state();
@@ -94,8 +101,7 @@ void MixerSnapshot::snap(boost::shared_ptr<Route> route)
 
     XMLNode* slavable = find_named_node(copy, "Slavable");
 
-    if(slavable)
-    {
+    if(slavable) {
         XMLNodeList nlist = slavable->children();
         for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); niter++) {
             string number;
@@ -123,12 +129,15 @@ void MixerSnapshot::snap(boost::shared_ptr<Route> route)
 
 void MixerSnapshot::snap(RouteGroup* group)
 {
-    if(!group)
+    if(!group) {
         return;
+    }
 
-    for(vector<State>::const_iterator it = group_states.begin(); it != group_states.end(); it++)
-        if((it)->name == group->name())
+    for(vector<State>::const_iterator it = group_states.begin(); it != group_states.end(); it++) {
+        if((it)->name == group->name()) {
             return;
+        }
+    }
 
     string name = group->name();
     XMLNode& original = group->get_state();
@@ -145,12 +154,15 @@ void MixerSnapshot::snap(RouteGroup* group)
 
 void MixerSnapshot::snap(boost::shared_ptr<VCA> vca)
 {
-    if(!vca)
+    if(!vca) {
         return;
+    }
 
-    for(vector<State>::const_iterator it = vca_states.begin(); it != vca_states.end(); it++)
-        if((it)->name == vca->name())
+    for(vector<State>::const_iterator it = vca_states.begin(); it != vca_states.end(); it++) {
+        if((it)->name == vca->name()) {
             return;
+        }
+    }
 
     string name = vca->name();
     XMLNode& original = vca->get_state();
@@ -168,42 +180,50 @@ void MixerSnapshot::snap(boost::shared_ptr<VCA> vca)
 
 void MixerSnapshot::snap()
 {
-    if(!_session)
+    if(!_session) {
         return;
+    }
 
     clear();
 
     RouteList rl = _session->get_routelist();
-    if(rl.empty())
+    if(rl.empty()) {
         return;
+    }
 
-    for(RouteList::const_iterator it = rl.begin(); it != rl.end(); it++)
+    for(RouteList::const_iterator it = rl.begin(); it != rl.end(); it++) {
         snap((*it));
+    }
 }
 
 void MixerSnapshot::snap(RouteList rl)
 {
-    if(!_session)
+    if(!_session) {
         return;
+    }
 
     clear();
 
-    if(rl.empty())
+    if(rl.empty()) {
         return;
+    }
 
-    for(RouteList::const_iterator it = rl.begin(); it != rl.end(); it++)
+    for(RouteList::const_iterator it = rl.begin(); it != rl.end(); it++) {
         snap((*it));
+    }
 }
 
 void MixerSnapshot::reassign_masters(boost::shared_ptr<Slavable> slv, XMLNode node)
 {
-    if(!slv)
+    if(!slv) {
         return;
+    }
 
     XMLNode* slavable = find_named_node(node, "Slavable");
 
-    if(!slavable)
+    if(!slavable) {
         return;
+    }
 
     XMLNodeList nlist = slavable->children();
 
@@ -213,15 +233,17 @@ void MixerSnapshot::reassign_masters(boost::shared_ptr<Slavable> slv, XMLNode no
 
         boost::shared_ptr<VCA> vca = _session->vca_manager().vca_by_name(name);
 
-        if(vca)
+        if(vca) {
             slv->assign(vca);
+        }
     }
 }
 
 void MixerSnapshot::recall()
 {
-    if(!_session)
+    if(!_session) {
         return;
+    }
 
     _session->begin_reversible_command(_("mixer-snapshot recall"));
 
@@ -235,8 +257,9 @@ void MixerSnapshot::recall()
            VCAList vl = _session->vca_manager().create_vca(1, state.name);
            boost::shared_ptr<VCA> vca = vl.front();
 
-           if(vca)
+           if(vca) {
                vca->set_state(state.node, PBD::Stateful::loading_state_version);
+           }
 
         } else {
             vca->set_state(state.node, PBD::Stateful::loading_state_version);
@@ -249,8 +272,9 @@ void MixerSnapshot::recall()
 
         boost::shared_ptr<Route> route = _session->route_by_id(PBD::ID(state.id));
 
-        if(!route)
+        if(!route) {
             route = _session->route_by_name(state.name);
+        }
 
         if(route) {
             XMLNode& bfr = route->get_state();
@@ -266,11 +290,13 @@ void MixerSnapshot::recall()
 
         RouteGroup* group = _session->route_group_by_name(state.name);
 
-        if(!group)
+        if(!group) {
             group = _session->new_route_group(state.name);
+        }
 
-        if(group)
+        if(group) {
             group->set_state(state.node, PBD::Stateful::loading_state_version);
+        }
     }
 
     _session->commit_reversible_command();
@@ -278,8 +304,9 @@ void MixerSnapshot::recall()
 
 void MixerSnapshot::write(const string path)
 {
-    if(empty())
+    if(empty()) {
         return;
+    }
 
     XMLNode* node = new XMLNode("MixerSnapshot");
     XMLNode* child;
@@ -385,15 +412,18 @@ void MixerSnapshot::load_from_session(string path)
     clear();
 
     vector<string> states;
-    if(Glib::file_test(path.c_str(), Glib::FILE_TEST_IS_DIR))
+    if(Glib::file_test(path.c_str(), Glib::FILE_TEST_IS_DIR)) {
         get_state_files_in_directory(path, states);
+    }
 
-    if(!states.empty())
+    if(!states.empty()) {
         load_from_session(states.front());
+    }
 
     //final sanity check
-    if(!("." + PBD::get_suffix(path) == statefile_suffix))
+    if(!("." + PBD::get_suffix(path) == statefile_suffix)) {
         return;
+    }
 
     XMLTree tree;
     tree.read(path);
@@ -478,8 +508,9 @@ void MixerSnapshot::load_from_session(XMLNode& node)
                         int vca_number  = (*p).first;
                         string vca_name = (*p).second;
 
-                        if(vca_number == mst_number)
+                        if(vca_number == mst_number) {
                             (*siter)->set_property(X_("name"), vca_name);
+                        }
                     }
                 }
             }
