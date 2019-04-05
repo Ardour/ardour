@@ -82,6 +82,8 @@ MixerSnapshotDialog::MixerSnapshotDialog(Session* s)
     global_display.signal_button_press_event().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::button_press), true), false);
     local_display.signal_button_press_event().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::button_press), false), false);
 
+    signal_show().connect(sigc::mem_fun(*this, &MixerSnapshotDialog::window_opened));
+
     set_session(s);
 }
 
@@ -106,6 +108,11 @@ void MixerSnapshotDialog::ensure_directory(bool global)
     if(!Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS & Glib::FILE_TEST_IS_DIR)) {
         ::g_mkdir(path.c_str(), 0775);
     }
+}
+
+void MixerSnapshotDialog::window_opened()
+{
+    refill();
 }
 
 void MixerSnapshotDialog::display_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& data, guint info, guint time, bool global)
