@@ -195,8 +195,9 @@ void MixerSnapshotDialog::popup_context_menu(int btn, int64_t time, string path)
     using namespace Menu_Helpers;
     MenuList& items(menu.items());
     items.clear();
-    add_item_with_sensitivity(items, MenuElem(_("Remove"), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::remove_snapshot), path)), true);
+    add_item_with_sensitivity(items, MenuElem(_("Recall"), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::load_snapshot), path)), true);
     add_item_with_sensitivity(items, MenuElem(_("Rename..."), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::rename_snapshot), path)), true);
+    add_item_with_sensitivity(items, MenuElem(_("Remove"), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::remove_snapshot), path)), true);
     menu.popup(btn, time);
 }
 
@@ -204,6 +205,12 @@ void MixerSnapshotDialog::remove_snapshot(const string path)
 {
     ::g_remove(path.c_str());
     refill();
+}
+
+void MixerSnapshotDialog::load_snapshot(const string path)
+{
+    MixerSnapshot n = MixerSnapshot(_session, path);
+    n.recall();
 }
 
 void MixerSnapshotDialog::rename_snapshot(const string old_path)

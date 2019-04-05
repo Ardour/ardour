@@ -52,6 +52,7 @@ class MixerSnapshotDialog : public ArdourWindow
 
         void ensure_directory(bool);
         void new_snapshot(bool);
+        void load_snapshot(const std::string);
         void new_snap_from_session(bool);
 
         void rename_snapshot(const std::string);
