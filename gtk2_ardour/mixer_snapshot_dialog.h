@@ -62,6 +62,7 @@ class MixerSnapshotDialog : public ArdourWindow
 
         void popup_context_menu(int, int64_t, std::string);
         bool button_press(GdkEventButton*, bool);
+        void window_opened();
         void fav_cell_action(const std::string&, bool);
 
 
