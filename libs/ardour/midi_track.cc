@@ -478,13 +478,22 @@ MidiTrack::export_stuff (BufferSet&                   buffers,
 	if (!mpl) {
 		return -2;
 	}
+	mpl->reset_note_trackers (); // TODO once at start and end ?
 
 	buffers.get_midi(0).clear();
 	if (mpl->read(buffers.get_midi(0), start, nframes, 0) != nframes) {
 		return -1;
 	}
 
-	//bounce_process (buffers, start, nframes, endpoint, include_endpoint, for_export, for_freeze);
+	if (endpoint && !for_export) {
+		MidiBuffer& buf = buffers.get_midi(0);
+		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
+			MidiBuffer::TimeType *t = i.timeptr ();
+			*t -= start;
+		}
+		bounce_process (buffers, start, nframes, endpoint, include_endpoint, for_export, for_freeze);
+	}
+	mpl->reset_note_trackers ();
 
 	return 0;
 }

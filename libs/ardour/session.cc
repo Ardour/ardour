@@ -6238,7 +6238,9 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 				const MidiBuffer& buf = buffers.get_midi(0);
 				for (MidiBuffer::const_iterator i = buf.begin(); i != buf.end(); ++i) {
 					Evoral::Event<samplepos_t> ev = *i;
-					ev.set_time(ev.time() - position);
+					if (!endpoint || for_export) {
+						ev.set_time(ev.time() - position);
+					}
 					ms->append_event_samples(lock, ev, ms->timeline_position());
 				}
 			}
