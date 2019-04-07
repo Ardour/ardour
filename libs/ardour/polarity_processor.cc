@@ -56,7 +56,8 @@ PolarityProcessor::configure_io (ChanCount in, ChanCount out)
 void
 PolarityProcessor::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double /*speed*/, pframes_t nframes, bool)
 {
-	int chn = 0;
+	size_t chn = 0;
+	assert (bufs.count().n_audio () <= _current_gain.size());
 	if (!_active && !_pending_active) {
 		/* fade all to unity */
 		for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i, ++chn) {
