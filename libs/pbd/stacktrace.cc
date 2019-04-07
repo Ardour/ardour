@@ -77,48 +77,46 @@ PBD::stacktrace (std::ostream& out, int levels)
 #define CaptureStackBackTrace RtlCaptureStackBackTrace
 
 extern "C" {
-    __declspec(dllimport) USHORT WINAPI CaptureStackBackTrace (
-                                 ULONG  SamplesToSkip,
-                                 ULONG  SamplesToCapture,
-                                 PVOID  *BackTrace,
-                                 PULONG BackTraceHash
-	                      );
+	__declspec(dllimport) USHORT WINAPI CaptureStackBackTrace (
+	                             ULONG  FramesToSkip,
+	                             ULONG  FramesToCapture,
+	                             PVOID  *BackTrace,
+	                             PULONG BackTraceHash);
 }
 #endif
 
 void
-PBD::stacktrace( std::ostream& out, int)
+PBD::stacktrace (std::ostream& out, int)
 {
 #ifdef DEBUG
 	const size_t levels = 62; // does not support more then 62 levels of stacktrace
 	unsigned int   i;
 	void         * stack[ levels ];
-	unsigned short samples;
+	unsigned short frames;
 	SYMBOL_INFO  * symbol;
 	HANDLE         process;
 
 	process = GetCurrentProcess();
 	out << "+++++Backtrace process: " <<  DEBUG_THREAD_SELF << std::endl;
 
-	SymInitialize( process, NULL, TRUE );
+	SymInitialize (process, NULL, TRUE);
 
-	samples               = CaptureStackBackTrace( 0, levels, stack, NULL );
+	frames = CaptureStackBackTrace (0, levels, stack, NULL);
 
-	out << "+++++Backtrace samples: " <<  samples << std::endl;
+	out << "+++++Backtrace frames: " << frames << std::endl;
 
-	symbol               = ( SYMBOL_INFO * )calloc( sizeof( SYMBOL_INFO ) + 256 * sizeof( char ), 1 );
+	symbol               = (SYMBOL_INFO*)calloc (sizeof (SYMBOL_INFO) + 256 * sizeof (char), 1);
 	symbol->MaxNameLen   = 255;
-	symbol->SizeOfStruct = sizeof( SYMBOL_INFO );
+	symbol->SizeOfStruct = sizeof (SYMBOL_INFO);
 
-	for( i = 0; i < samples; i++ )
-	{
-		SymFromAddr( process, ( DWORD64 )( stack[ i ] ), 0, symbol );
-		out << string_compose( "%1: %2 - %3\n", samples - i - 1, symbol->Name, symbol->Address );
+	for (i = 0; i < frames; ++i) {
+		SymFromAddr (process, (DWORD64)(stack[i]), 0, symbol);
+		out << string_compose ("%1: %2 - %3\n", samples - i - 1, symbol->Name, symbol->Address);
 	}
 
-	out.flush();
+	out.flush ();
 
-	free( symbol );
+	free (symbol);
 #endif
 }
 
