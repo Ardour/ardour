@@ -173,11 +173,11 @@ class LIBMIDIPP_API Parser {
 	int   expected_mtc_quarter_frame_code;
 	byte _mtc_time[5];
 	byte _qtr_mtc_time[5];
-	unsigned long consecutive_qtr_sample_cnt;
+	unsigned long consecutive_qtr_frame_cnt;
 	MTC_FPS _mtc_fps;
 	MTC_Status _mtc_running;
 	bool       _mtc_locked;
-	byte last_qtr_sample;
+	byte last_qtr_frame;
 
 	samplecnt_t _timestamp;
 

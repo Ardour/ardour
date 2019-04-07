@@ -46,7 +46,7 @@ Parser::possible_mtc (MIDI::byte *sysex_buf, size_t msglen)
 
         /* full MTC */
 
-	fake_mtc_time[0] = sysex_buf[8]; // samples
+	fake_mtc_time[0] = sysex_buf[8]; // frames
 	fake_mtc_time[1] = sysex_buf[7]; // minutes
 	fake_mtc_time[2] = sysex_buf[6]; // seconds
 	fake_mtc_time[3] = (sysex_buf[5] & 0x1f); // hours
@@ -86,8 +86,8 @@ Parser::reset_mtc_state ()
 	expected_mtc_quarter_frame_code = 0;
 	memset (_mtc_time, 0, sizeof (_mtc_time));
 	memset (_qtr_mtc_time, 0, sizeof (_mtc_time));
-	consecutive_qtr_sample_cnt = 0;
-	last_qtr_sample = 0;
+	consecutive_qtr_frame_cnt = 0;
+	last_qtr_frame = 0;
 }
 
 void
@@ -95,46 +95,46 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 {
 	int which_quarter_frame = (msg[1] & 0xf0) >> 4;
 
-	/* Is it an expected sample?
-	   Remember, the first can be sample 7 or sample 0,
+	/* Is it an expected frame?
+	   Remember, the first can be frame 7 or frame 0,
 	   depending on the direction of the MTC generator ...
 	*/
 
 #ifdef DEBUG_MTC
 	 cerr << "MTC: (state = " << _mtc_running << ") "
 	      << which_quarter_frame << " vs. " << expected_mtc_quarter_frame_code
-	      << " consecutive ? " << consecutive_qtr_sample_cnt
+	      << " consecutive ? " << consecutive_qtr_frame_cnt
 	      << endl;
 #endif
 
 	if (_mtc_running == MTC_Stopped) {
 
-		/* we are stopped but are seeing qtr sample messages */
+		/* we are stopped but are seeing qtr frame messages */
 
-		if (consecutive_qtr_sample_cnt == 0) {
+		if (consecutive_qtr_frame_cnt == 0) {
 
 			/* first quarter frame */
 
 			if (which_quarter_frame != 0 && which_quarter_frame != 7) {
 
-				last_qtr_sample = which_quarter_frame;
-				consecutive_qtr_sample_cnt++;
+				last_qtr_frame = which_quarter_frame;
+				consecutive_qtr_frame_cnt++;
 			}
 
-			// cerr << "first seen qframe = " << (int) last_qtr_sample << endl;
+			// cerr << "first seen qframe = " << (int) last_qtr_frame << endl;
 
 			return;
 
-		} else if (consecutive_qtr_sample_cnt == 1) {
+		} else if (consecutive_qtr_frame_cnt == 1) {
 
 			/* third quarter frame */
 
 #ifdef DEBUG_MTC
 			cerr << "second seen qframe = " << (int) which_quarter_frame << endl;
 #endif
-			if (last_qtr_sample < which_quarter_frame) {
+			if (last_qtr_frame < which_quarter_frame) {
 				_mtc_running = MTC_Forward;
-			} else if (last_qtr_sample > which_quarter_frame) {
+			} else if (last_qtr_frame > which_quarter_frame) {
 				_mtc_running = MTC_Backward;
 			}
 #ifdef DEBUG_MTC
@@ -174,7 +174,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 
 		if (which_quarter_frame != expected_mtc_quarter_frame_code) {
 
-			consecutive_qtr_sample_cnt = 0;
+			consecutive_qtr_frame_cnt = 0;
 
 #ifdef DEBUG_MTC
 			cerr << "MTC: (state = " << _mtc_running << ") "
@@ -232,7 +232,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 		} else {
 
 			/* received qtr sample matched expected */
-			consecutive_qtr_sample_cnt++;
+			consecutive_qtr_frame_cnt++;
 
 		}
 	}
@@ -244,11 +244,11 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 #endif
 
 	switch (which_quarter_frame) {
-	case 0: // samples LS nibble
+	case 0: // frames LS nibble
 		_qtr_mtc_time[0] |= msg[1] & 0xf;
 		break;
 
-	case 1:  // samples MS nibble
+	case 1:  // frames MS nibble
 		_qtr_mtc_time[0] |= (msg[1] & 0xf)<<4;
 		break;
 
@@ -307,7 +307,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 			   and signal anyone who wants to know the time.
 			*/
 
-			if (consecutive_qtr_sample_cnt >= 8) {
+			if (consecutive_qtr_frame_cnt >= 8) {
 				memcpy (_mtc_time, _qtr_mtc_time, sizeof (_mtc_time));
 				memset (_qtr_mtc_time, 0, sizeof (_qtr_mtc_time));
 				if (!_mtc_locked) {
@@ -331,7 +331,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 			   and signal anyone who wants to know the time.
 			*/
 
-			if (consecutive_qtr_sample_cnt >= 8) {
+			if (consecutive_qtr_frame_cnt >= 8) {
 				memcpy (_mtc_time, _qtr_mtc_time, sizeof (_mtc_time));
 				memset (_qtr_mtc_time, 0, sizeof (_qtr_mtc_time));
 				if (!_mtc_locked) {
