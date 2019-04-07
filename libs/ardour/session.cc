@@ -6124,6 +6124,10 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 	diskstream_channels = track.bounce_get_output_streams (diskstream_channels, endpoint,
 			include_endpoint, for_export, for_freeze);
 
+	if (data_type == DataType::MIDI && endpoint && !for_export && !for_freeze && diskstream_channels.n(DataType::AUDIO) > 0) {
+		data_type = DataType::AUDIO;
+	}
+
 	if (diskstream_channels.n(data_type) < 1) {
 		error << _("Cannot write a range with no data.") << endmsg;
 		return result;
