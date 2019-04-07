@@ -543,7 +543,6 @@ Route::bounce_process (BufferSet& buffers, samplepos_t start, samplecnt_t nframe
 	_trim->setup_gain_automation (start, start + nframes, nframes);
 
 	latency = 0;
-	const double speed = _session.transport_speed ();
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
 		if (!include_endpoint && (*i) == endpoint) {
@@ -566,7 +565,7 @@ Route::bounce_process (BufferSet& buffers, samplepos_t start, samplecnt_t nframe
 		 */
 		if ((*i) == _main_outs) {
 			assert ((*i)->does_routing());
-			(*i)->run (buffers, start - latency, start - latency + nframes, speed, nframes, true);
+			(*i)->run (buffers, start - latency, start - latency + nframes, 1.0, nframes, true);
 			buffers.set_count ((*i)->output_streams());
 		}
 
