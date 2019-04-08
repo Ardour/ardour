@@ -90,18 +90,18 @@ public:
 	void ensure_disk_file (const Lock& lock);
 
 	samplecnt_t read_unlocked (const Lock&                    lock,
-	                          Evoral::EventSink<samplepos_t>& dst,
-	                          samplepos_t                     position,
-	                          samplepos_t                     start,
-	                          samplecnt_t                     cnt,
-	                          Evoral::Range<samplepos_t>*     loop_range,
-	                          MidiStateTracker*               tracker,
-	                          MidiChannelFilter*              filter) const;
+	                           Evoral::EventSink<samplepos_t>& dst,
+	                           samplepos_t                     position,
+	                           samplepos_t                     start,
+	                           samplecnt_t                     cnt,
+	                           Evoral::Range<samplepos_t>*     loop_range,
+	                           MidiStateTracker*               tracker,
+	                           MidiChannelFilter*              filter) const;
 
 	samplecnt_t write_unlocked (const Lock&                 lock,
-	                           MidiRingBuffer<samplepos_t>& src,
-	                           samplepos_t                  position,
-	                           samplecnt_t                  cnt);
+	                            MidiRingBuffer<samplepos_t>& src,
+	                            samplepos_t                  position,
+	                            samplecnt_t                  cnt);
 
 };
 
