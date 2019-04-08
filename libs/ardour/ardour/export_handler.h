@@ -219,7 +219,7 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 	void write_index_info_toc (CDMarkerStatus & status);
 	void write_index_info_mp4ch (CDMarkerStatus & status);
 
-	void samples_to_cd_samples_string (char* buf, samplepos_t when);
+	void samples_to_cd_frame_string (char* buf, samplepos_t when);
 	void samples_to_chapter_marks_string (char* buf, samplepos_t when);
 
 	std::string toc_escape_cdtext (const std::string&);
