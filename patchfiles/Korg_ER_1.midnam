@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author/>
+  <MasterDeviceNames>
+    <Manufacturer>Korg</Manufacturer>
+    <Model>ER-1</Model>
+    <CustomDeviceMode Name="Default">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Presets"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Presets"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Presets">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="1">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="1"/>
+      </PatchBank>
+      <PatchBank Name="2">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="1"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="2"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <PatchNameList Name="1">
+      <Patch Number="A01" Name="" ProgramChange="0"/>
+      <Patch Number="A02" Name="" ProgramChange="1"/>
+      <Patch Number="A03" Name="" ProgramChange="2"/>
+      <Patch Number="A04" Name="" ProgramChange="3"/>
+      <Patch Number="A05" Name="" ProgramChange="4"/>
+      <Patch Number="A06" Name="" ProgramChange="5"/>
+      <Patch Number="A07" Name="" ProgramChange="6"/>
+      <Patch Number="A08" Name="" ProgramChange="7"/>
+      <Patch Number="A09" Name="" ProgramChange="8"/>
+      <Patch Number="A10" Name="" ProgramChange="9"/>
+      <Patch Number="A11" Name="" ProgramChange="10"/>
+      <Patch Number="A12" Name="" ProgramChange="11"/>
+      <Patch Number="A13" Name="" ProgramChange="12"/>
+      <Patch Number="A14" Name="" ProgramChange="13"/>
+      <Patch Number="A15" Name="" ProgramChange="14"/>
+      <Patch Number="A16" Name="" ProgramChange="15"/>
+      <Patch Number="A17" Name="" ProgramChange="16"/>
+      <Patch Number="A18" Name="" ProgramChange="17"/>
+      <Patch Number="A19" Name="" ProgramChange="18"/>
+      <Patch Number="A20" Name="" ProgramChange="19"/>
+      <Patch Number="A21" Name="" ProgramChange="20"/>
+      <Patch Number="A22" Name="" ProgramChange="21"/>
+      <Patch Number="A23" Name="" ProgramChange="22"/>
+      <Patch Number="A24" Name="" ProgramChange="23"/>
+      <Patch Number="A25" Name="" ProgramChange="24"/>
+      <Patch Number="A26" Name="" ProgramChange="25"/>
+      <Patch Number="A27" Name="" ProgramChange="26"/>
+      <Patch Number="A28" Name="" ProgramChange="27"/>
+      <Patch Number="A29" Name="" ProgramChange="28"/>
+      <Patch Number="A30" Name="" ProgramChange="29"/>
+      <Patch Number="A31" Name="" ProgramChange="30"/>
+      <Patch Number="A32" Name="" ProgramChange="31"/>
+      <Patch Number="A33" Name="" ProgramChange="32"/>
+      <Patch Number="A34" Name="" ProgramChange="33"/>
+      <Patch Number="A35" Name="" ProgramChange="34"/>
+      <Patch Number="A36" Name="" ProgramChange="35"/>
+      <Patch Number="A37" Name="" ProgramChange="36"/>
+      <Patch Number="A38" Name="" ProgramChange="37"/>
+      <Patch Number="A39" Name="" ProgramChange="38"/>
+      <Patch Number="A40" Name="" ProgramChange="39"/>
+      <Patch Number="A41" Name="" ProgramChange="40"/>
+      <Patch Number="A42" Name="" ProgramChange="41"/>
+      <Patch Number="A43" Name="" ProgramChange="42"/>
+      <Patch Number="A44" Name="" ProgramChange="43"/>
+      <Patch Number="A45" Name="" ProgramChange="44"/>
+      <Patch Number="A46" Name="" ProgramChange="45"/>
+      <Patch Number="A47" Name="" ProgramChange="46"/>
+      <Patch Number="A48" Name="" ProgramChange="47"/>
+      <Patch Number="A49" Name="" ProgramChange="48"/>
+      <Patch Number="A50" Name="" ProgramChange="49"/>
+      <Patch Number="A51" Name="" ProgramChange="50"/>
+      <Patch Number="A52" Name="" ProgramChange="51"/>
+      <Patch Number="A53" Name="" ProgramChange="52"/>
+      <Patch Number="A54" Name="" ProgramChange="53"/>
+      <Patch Number="A55" Name="" ProgramChange="54"/>
+      <Patch Number="A56" Name="" ProgramChange="55"/>
+      <Patch Number="A57" Name="" ProgramChange="56"/>
+      <Patch Number="A58" Name="" ProgramChange="57"/>
+      <Patch Number="A59" Name="" ProgramChange="58"/>
+      <Patch Number="A60" Name="" ProgramChange="59"/>
+      <Patch Number="A61" Name="" ProgramChange="60"/>
+      <Patch Number="A62" Name="" ProgramChange="61"/>
+      <Patch Number="A63" Name="" ProgramChange="62"/>
+      <Patch Number="A64" Name="" ProgramChange="63"/>
+      <Patch Number="B01" Name="" ProgramChange="64"/>
+      <Patch Number="B02" Name="" ProgramChange="65"/>
+      <Patch Number="B03" Name="" ProgramChange="66"/>
+      <Patch Number="B04" Name="" ProgramChange="67"/>
+      <Patch Number="B05" Name="" ProgramChange="68"/>
+      <Patch Number="B06" Name="" ProgramChange="69"/>
+      <Patch Number="B07" Name="" ProgramChange="70"/>
+      <Patch Number="B08" Name="" ProgramChange="71"/>
+      <Patch Number="B09" Name="" ProgramChange="72"/>
+      <Patch Number="B10" Name="" ProgramChange="73"/>
+      <Patch Number="B11" Name="" ProgramChange="74"/>
+      <Patch Number="B12" Name="" ProgramChange="75"/>
+      <Patch Number="B13" Name="" ProgramChange="76"/>
+      <Patch Number="B14" Name="" ProgramChange="77"/>
+      <Patch Number="B15" Name="" ProgramChange="78"/>
+      <Patch Number="B16" Name="" ProgramChange="79"/>
+      <Patch Number="B17" Name="" ProgramChange="80"/>
+      <Patch Number="B18" Name="" ProgramChange="81"/>
+      <Patch Number="B19" Name="" ProgramChange="82"/>
+      <Patch Number="B20" Name="" ProgramChange="83"/>
+      <Patch Number="B21" Name="" ProgramChange="84"/>
+      <Patch Number="B22" Name="" ProgramChange="85"/>
+      <Patch Number="B23" Name="" ProgramChange="86"/>
+      <Patch Number="B24" Name="" ProgramChange="87"/>
+      <Patch Number="B25" Name="" ProgramChange="88"/>
+      <Patch Number="B26" Name="" ProgramChange="89"/>
+      <Patch Number="B27" Name="" ProgramChange="90"/>
+      <Patch Number="B28" Name="" ProgramChange="91"/>
+      <Patch Number="B29" Name="" ProgramChange="92"/>
+      <Patch Number="B30" Name="" ProgramChange="93"/>
+      <Patch Number="B31" Name="" ProgramChange="94"/>
+      <Patch Number="B32" Name="" ProgramChange="95"/>
+      <Patch Number="B33" Name="" ProgramChange="96"/>
+      <Patch Number="B34" Name="" ProgramChange="97"/>
+      <Patch Number="B35" Name="" ProgramChange="98"/>
+      <Patch Number="B36" Name="" ProgramChange="99"/>
+      <Patch Number="B37" Name="" ProgramChange="100"/>
+      <Patch Number="B38" Name="" ProgramChange="101"/>
+      <Patch Number="B39" Name="" ProgramChange="102"/>
+      <Patch Number="B40" Name="" ProgramChange="103"/>
+      <Patch Number="B41" Name="" ProgramChange="104"/>
+      <Patch Number="B42" Name="" ProgramChange="105"/>
+      <Patch Number="B43" Name="" ProgramChange="106"/>
+      <Patch Number="B44" Name="" ProgramChange="107"/>
+      <Patch Number="B45" Name="" ProgramChange="108"/>
+      <Patch Number="B46" Name="" ProgramChange="109"/>
+      <Patch Number="B47" Name="" ProgramChange="110"/>
+      <Patch Number="B48" Name="" ProgramChange="111"/>
+      <Patch Number="B49" Name="" ProgramChange="112"/>
+      <Patch Number="B50" Name="" ProgramChange="113"/>
+      <Patch Number="B51" Name="" ProgramChange="114"/>
+      <Patch Number="B52" Name="" ProgramChange="115"/>
+      <Patch Number="B53" Name="" ProgramChange="116"/>
+      <Patch Number="B54" Name="" ProgramChange="117"/>
+      <Patch Number="B55" Name="" ProgramChange="118"/>
+      <Patch Number="B56" Name="" ProgramChange="119"/>
+      <Patch Number="B57" Name="" ProgramChange="120"/>
+      <Patch Number="B58" Name="" ProgramChange="121"/>
+      <Patch Number="B59" Name="" ProgramChange="122"/>
+      <Patch Number="B60" Name="" ProgramChange="123"/>
+      <Patch Number="B61" Name="" ProgramChange="124"/>
+      <Patch Number="B62" Name="" ProgramChange="125"/>
+      <Patch Number="B63" Name="" ProgramChange="126"/>
+      <Patch Number="B64" Name="" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="2">
+      <Patch Number="C01" Name="" ProgramChange="0"/>
+      <Patch Number="C02" Name="" ProgramChange="1"/>
+      <Patch Number="C03" Name="" ProgramChange="2"/>
+      <Patch Number="C04" Name="" ProgramChange="3"/>
+      <Patch Number="C05" Name="" ProgramChange="4"/>
+      <Patch Number="C06" Name="" ProgramChange="5"/>
+      <Patch Number="C07" Name="" ProgramChange="6"/>
+      <Patch Number="C08" Name="" ProgramChange="7"/>
+      <Patch Number="C09" Name="" ProgramChange="8"/>
+      <Patch Number="C10" Name="" ProgramChange="9"/>
+      <Patch Number="C11" Name="" ProgramChange="10"/>
+      <Patch Number="C12" Name="" ProgramChange="11"/>
+      <Patch Number="C13" Name="" ProgramChange="12"/>
+      <Patch Number="C14" Name="" ProgramChange="13"/>
+      <Patch Number="C15" Name="" ProgramChange="14"/>
+      <Patch Number="C16" Name="" ProgramChange="15"/>
+      <Patch Number="C17" Name="" ProgramChange="16"/>
+      <Patch Number="C18" Name="" ProgramChange="17"/>
+      <Patch Number="C19" Name="" ProgramChange="18"/>
+      <Patch Number="C20" Name="" ProgramChange="19"/>
+      <Patch Number="C21" Name="" ProgramChange="20"/>
+      <Patch Number="C22" Name="" ProgramChange="21"/>
+      <Patch Number="C23" Name="" ProgramChange="22"/>
+      <Patch Number="C24" Name="" ProgramChange="23"/>
+      <Patch Number="C25" Name="" ProgramChange="24"/>
+      <Patch Number="C26" Name="" ProgramChange="25"/>
+      <Patch Number="C27" Name="" ProgramChange="26"/>
+      <Patch Number="C28" Name="" ProgramChange="27"/>
+      <Patch Number="C29" Name="" ProgramChange="28"/>
+      <Patch Number="C30" Name="" ProgramChange="29"/>
+      <Patch Number="C31" Name="" ProgramChange="30"/>
+      <Patch Number="C32" Name="" ProgramChange="31"/>
+      <Patch Number="C33" Name="" ProgramChange="32"/>
+      <Patch Number="C34" Name="" ProgramChange="33"/>
+      <Patch Number="C35" Name="" ProgramChange="34"/>
+      <Patch Number="C36" Name="" ProgramChange="35"/>
+      <Patch Number="C37" Name="" ProgramChange="36"/>
+      <Patch Number="C38" Name="" ProgramChange="37"/>
+      <Patch Number="C39" Name="" ProgramChange="38"/>
+      <Patch Number="C40" Name="" ProgramChange="39"/>
+      <Patch Number="C41" Name="" ProgramChange="40"/>
+      <Patch Number="C42" Name="" ProgramChange="41"/>
+      <Patch Number="C43" Name="" ProgramChange="42"/>
+      <Patch Number="C44" Name="" ProgramChange="43"/>
+      <Patch Number="C45" Name="" ProgramChange="44"/>
+      <Patch Number="C46" Name="" ProgramChange="45"/>
+      <Patch Number="C47" Name="" ProgramChange="46"/>
+      <Patch Number="C48" Name="" ProgramChange="47"/>
+      <Patch Number="C49" Name="" ProgramChange="48"/>
+      <Patch Number="C50" Name="" ProgramChange="49"/>
+      <Patch Number="C51" Name="" ProgramChange="50"/>
+      <Patch Number="C52" Name="" ProgramChange="51"/>
+      <Patch Number="C53" Name="" ProgramChange="52"/>
+      <Patch Number="C54" Name="" ProgramChange="53"/>
+      <Patch Number="C55" Name="" ProgramChange="54"/>
+      <Patch Number="C56" Name="" ProgramChange="55"/>
+      <Patch Number="C57" Name="" ProgramChange="56"/>
+      <Patch Number="C58" Name="" ProgramChange="57"/>
+      <Patch Number="C59" Name="" ProgramChange="58"/>
+      <Patch Number="C60" Name="" ProgramChange="59"/>
+      <Patch Number="C61" Name="" ProgramChange="60"/>
+      <Patch Number="C62" Name="" ProgramChange="61"/>
+      <Patch Number="C63" Name="" ProgramChange="62"/>
+      <Patch Number="C64" Name="" ProgramChange="63"/>
+      <Patch Number="D01" Name="" ProgramChange="64"/>
+      <Patch Number="D02" Name="" ProgramChange="65"/>
+      <Patch Number="D03" Name="" ProgramChange="66"/>
+      <Patch Number="D04" Name="" ProgramChange="67"/>
+      <Patch Number="D05" Name="" ProgramChange="68"/>
+      <Patch Number="D06" Name="" ProgramChange="69"/>
+      <Patch Number="D07" Name="" ProgramChange="70"/>
+      <Patch Number="D08" Name="" ProgramChange="71"/>
+      <Patch Number="D09" Name="" ProgramChange="72"/>
+      <Patch Number="D10" Name="" ProgramChange="73"/>
+      <Patch Number="D11" Name="" ProgramChange="74"/>
+      <Patch Number="D12" Name="" ProgramChange="75"/>
+      <Patch Number="D13" Name="" ProgramChange="76"/>
+      <Patch Number="D14" Name="" ProgramChange="77"/>
+      <Patch Number="D15" Name="" ProgramChange="78"/>
+      <Patch Number="D16" Name="" ProgramChange="79"/>
+      <Patch Number="D17" Name="" ProgramChange="80"/>
+      <Patch Number="D18" Name="" ProgramChange="81"/>
+      <Patch Number="D19" Name="" ProgramChange="82"/>
+      <Patch Number="D20" Name="" ProgramChange="83"/>
+      <Patch Number="D21" Name="" ProgramChange="84"/>
+      <Patch Number="D22" Name="" ProgramChange="85"/>
+      <Patch Number="D23" Name="" ProgramChange="86"/>
+      <Patch Number="D24" Name="" ProgramChange="87"/>
+      <Patch Number="D25" Name="" ProgramChange="88"/>
+      <Patch Number="D26" Name="" ProgramChange="89"/>
+      <Patch Number="D27" Name="" ProgramChange="90"/>
+      <Patch Number="D28" Name="" ProgramChange="91"/>
+      <Patch Number="D29" Name="" ProgramChange="92"/>
+      <Patch Number="D30" Name="" ProgramChange="93"/>
+      <Patch Number="D31" Name="" ProgramChange="94"/>
+      <Patch Number="D32" Name="" ProgramChange="95"/>
+      <Patch Number="D33" Name="" ProgramChange="96"/>
+      <Patch Number="D34" Name="" ProgramChange="97"/>
+      <Patch Number="D35" Name="" ProgramChange="98"/>
+      <Patch Number="D36" Name="" ProgramChange="99"/>
+      <Patch Number="D37" Name="" ProgramChange="100"/>
+      <Patch Number="D38" Name="" ProgramChange="101"/>
+      <Patch Number="D39" Name="" ProgramChange="102"/>
+      <Patch Number="D40" Name="" ProgramChange="103"/>
+      <Patch Number="D41" Name="" ProgramChange="104"/>
+      <Patch Number="D42" Name="" ProgramChange="105"/>
+      <Patch Number="D43" Name="" ProgramChange="106"/>
+      <Patch Number="D44" Name="" ProgramChange="107"/>
+      <Patch Number="D45" Name="" ProgramChange="108"/>
+      <Patch Number="D46" Name="" ProgramChange="109"/>
+      <Patch Number="D47" Name="" ProgramChange="110"/>
+      <Patch Number="D48" Name="" ProgramChange="111"/>
+      <Patch Number="D49" Name="" ProgramChange="112"/>
+      <Patch Number="D50" Name="" ProgramChange="113"/>
+      <Patch Number="D51" Name="" ProgramChange="114"/>
+      <Patch Number="D52" Name="" ProgramChange="115"/>
+      <Patch Number="D53" Name="" ProgramChange="116"/>
+      <Patch Number="D54" Name="" ProgramChange="117"/>
+      <Patch Number="D55" Name="" ProgramChange="118"/>
+      <Patch Number="D56" Name="" ProgramChange="119"/>
+      <Patch Number="D57" Name="" ProgramChange="120"/>
+      <Patch Number="D58" Name="" ProgramChange="121"/>
+      <Patch Number="D59" Name="" ProgramChange="122"/>
+      <Patch Number="D60" Name="" ProgramChange="123"/>
+      <Patch Number="D61" Name="" ProgramChange="124"/>
+      <Patch Number="D62" Name="" ProgramChange="125"/>
+      <Patch Number="D63" Name="" ProgramChange="126"/>
+      <Patch Number="D64" Name="" ProgramChange="127"/>
+    </PatchNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

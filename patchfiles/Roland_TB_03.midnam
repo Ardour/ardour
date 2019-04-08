@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Thomas Brand</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>TB-03</Model>
+    <CustomDeviceMode Name="Default">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Names"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="ChannelSet1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <UsesControlNameList Name="Controls"/>
+      <PatchBank Name="Patches">
+        <PatchNameList Name="Patches"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <!-- MIDI Implementation Chart Aug. 30, 2016 Version 1.00 -->
+    <ControlNameList Name="Controls">
+      <Control Type="7bit" Number="12" Name="ENV MOD"/>
+      <Control Type="7bit" Number="16" Name="ACCENT LEVEL"/>
+      <Control Type="7bit" Number="17" Name="OVERDRIVE"/>
+      <Control Type="7bit" Number="18" Name="DELAY TIME"/>
+      <Control Type="7bit" Number="19" Name="DELAY FEEDBACK"/>
+      <Control Type="7bit" Number="71" Name="RESONANCE"/>
+      <Control Type="7bit" Number="74" Name="CUTOFF FREQ"/>
+      <Control Type="7bit" Number="75" Name="DECAY"/>
+      <Control Type="7bit" Number="102" Name="SLIDE STATUS"/>
+      <Control Type="7bit" Number="104" Name="TUNING"/>
+    </ControlNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>
