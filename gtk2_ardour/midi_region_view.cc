@@ -465,11 +465,11 @@ MidiRegionView::enter_internal (uint32_t state)
 	}
 
 	// Lower sample handles below notes so they don't steal events
-	if (sample_handle_start) {
-		sample_handle_start->lower_to_bottom();
+	if (frame_handle_start) {
+		frame_handle_start->lower_to_bottom();
 	}
-	if (sample_handle_end) {
-		sample_handle_end->lower_to_bottom();
+	if (frame_handle_end) {
+		frame_handle_end->lower_to_bottom();
 	}
 }
 
@@ -486,11 +486,11 @@ MidiRegionView::leave_internal()
 	}
 
 	// Raise sample handles above notes so they catch events
-	if (sample_handle_start) {
-		sample_handle_start->raise_to_top();
+	if (frame_handle_start) {
+		frame_handle_start->raise_to_top();
 	}
-	if (sample_handle_end) {
-		sample_handle_end->raise_to_top();
+	if (frame_handle_end) {
+		frame_handle_end->raise_to_top();
 	}
 }
 

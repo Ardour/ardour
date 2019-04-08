@@ -797,7 +797,7 @@ Editor::canvas_selection_end_trim_event (GdkEvent *event, ArdourCanvas::Item* it
 }
 
 bool
-Editor::canvas_sample_handle_event (GdkEvent* event, ArdourCanvas::Item* item, RegionView* rv)
+Editor::canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item* item, RegionView* rv)
 {
 	bool ret = false;
 

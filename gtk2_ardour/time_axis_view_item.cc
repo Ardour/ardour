@@ -231,19 +231,19 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 		double top   = TimeAxisViewItem::GRAB_HANDLE_TOP;
 		double width = TimeAxisViewItem::GRAB_HANDLE_WIDTH;
 
-		sample_handle_start = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, top, width, trackview.current_height()));
-		CANVAS_DEBUG_NAME (sample_handle_start, "TAVI frame handle start");
-		sample_handle_start->set_outline (false);
-		sample_handle_start->set_fill (false);
-		sample_handle_start->Event.connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisViewItem::sample_handle_crossing), sample_handle_start));
+		frame_handle_start = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, top, width, trackview.current_height()));
+		CANVAS_DEBUG_NAME (frame_handle_start, "TAVI frame handle start");
+		frame_handle_start->set_outline (false);
+		frame_handle_start->set_fill (false);
+		frame_handle_start->Event.connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisViewItem::sample_handle_crossing), frame_handle_start));
 
-		sample_handle_end = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, top, width, trackview.current_height()));
-		CANVAS_DEBUG_NAME (sample_handle_end, "TAVI frame handle end");
-		sample_handle_end->set_outline (false);
-		sample_handle_end->set_fill (false);
-		sample_handle_end->Event.connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisViewItem::sample_handle_crossing), sample_handle_end));
+		frame_handle_end = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, top, width, trackview.current_height()));
+		CANVAS_DEBUG_NAME (frame_handle_end, "TAVI frame handle end");
+		frame_handle_end->set_outline (false);
+		frame_handle_end->set_fill (false);
+		frame_handle_end->Event.connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisViewItem::sample_handle_crossing), frame_handle_end));
 	} else {
-		sample_handle_start = sample_handle_end = 0;
+		frame_handle_start = frame_handle_end = 0;
 	}
 
 	//set_color (base_color);
@@ -560,9 +560,9 @@ TimeAxisViewItem::set_height (double height)
 		frame->set_y0 (0.0);
 		frame->set_y1 (height);
 
-		if (sample_handle_start) {
-			sample_handle_start->set_y1 (height);
-			sample_handle_end->set_y1 (height);
+		if (frame_handle_start) {
+			frame_handle_start->set_y1 (height);
+			frame_handle_end->set_y1 (height);
 		}
 
 		if (selection_frame) {
@@ -741,18 +741,18 @@ TimeAxisViewItem::set_trim_handle_colors()
 {
 #if 1
 	/* Leave them transparent for now */
-	if (sample_handle_start) {
-		sample_handle_start->set_fill_color (0x00000000);
-		sample_handle_end->set_fill_color (0x00000000);
+	if (frame_handle_start) {
+		frame_handle_start->set_fill_color (0x00000000);
+		frame_handle_end->set_fill_color (0x00000000);
 	}
 #else
-	if (sample_handle_start) {
+	if (frame_handle_start) {
 		if (position_locked) {
-			sample_handle_start->set_fill_color (UIConfiguration::instance().get_TrimHandleLocked());
-			sample_handle_end->set_fill_color (UIConfiguration::instance().get_TrimHandleLocked());
+			frame_handle_start->set_fill_color (UIConfiguration::instance().get_TrimHandleLocked());
+			frame_handle_end->set_fill_color (UIConfiguration::instance().get_TrimHandleLocked());
 		} else {
-			sample_handle_start->set_fill_color (UIConfiguration::instance().get_TrimHandle());
-			sample_handle_end->set_fill_color (UIConfiguration::instance().get_TrimHandle());
+			frame_handle_start->set_fill_color (UIConfiguration::instance().get_TrimHandle());
+			frame_handle_end->set_fill_color (UIConfiguration::instance().get_TrimHandle());
 		}
 	}
 #endif
@@ -820,9 +820,9 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 			frame->set_x1 (std::max(1.0, pixel_width));
 		}
 
-		if (sample_handle_start) {
-			sample_handle_start->hide();
-			sample_handle_end->hide();
+		if (frame_handle_start) {
+			frame_handle_start->hide();
+			frame_handle_end->hide();
 		}
 
 	} else {
@@ -838,24 +838,24 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 			}
 		}
 
-		if (sample_handle_start) {
+		if (frame_handle_start) {
 			if (pixel_width < (3 * TimeAxisViewItem::GRAB_HANDLE_WIDTH)) {
 				/*
 				 * there's less than GRAB_HANDLE_WIDTH of the region between
-				 * the right-hand end of sample_handle_start and the left-hand
-				 * end of sample_handle_end, so disable the handles
+				 * the right-hand end of frame_handle_start and the left-hand
+				 * end of frame_handle_end, so disable the handles
 				 */
 
-				sample_handle_start->hide();
-				sample_handle_end->hide();
+				frame_handle_start->hide();
+				frame_handle_end->hide();
 			} else {
-				sample_handle_start->show();
-				sample_handle_end->set_x0 (pixel_width - (TimeAxisViewItem::GRAB_HANDLE_WIDTH));
-				sample_handle_end->set_x1 (pixel_width);
-				sample_handle_end->show();
+				frame_handle_start->show();
+				frame_handle_end->set_x0 (pixel_width - (TimeAxisViewItem::GRAB_HANDLE_WIDTH));
+				frame_handle_end->set_x1 (pixel_width);
+				frame_handle_end->show();
 
-				sample_handle_start->raise_to_top ();
-				sample_handle_end->raise_to_top ();
+				frame_handle_start->raise_to_top ();
+				frame_handle_end->raise_to_top ();
 			}
 		}
 	}
