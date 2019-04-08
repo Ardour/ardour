@@ -104,7 +104,7 @@ public:
 	samplepos_t get_fade_out_shape_width ();
 
 	void set_fade_visibility (bool);
-	void update_coverage_samples (LayerDisplay);
+	void update_coverage_frame (LayerDisplay);
 
 	void update_transient(float old_pos, float new_pos);
 	void remove_transient(float pos);

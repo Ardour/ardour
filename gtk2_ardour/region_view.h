@@ -100,7 +100,7 @@ public:
 	virtual void exited () {}
 
 	virtual void enable_display(bool yn) { _enable_display = yn; }
-	virtual void update_coverage_samples (LayerDisplay);
+	virtual void update_coverage_frame (LayerDisplay);
 
 	static PBD::Signal1<void,RegionView*> RegionViewGoingAway;
 
@@ -184,7 +184,7 @@ protected:
 	 * different bits of regions according to whether or not they are the one
 	 * that will be played at any given time.
 	 */
-	std::list<ArdourCanvas::Rectangle*> _coverage_samples;
+	std::list<ArdourCanvas::Rectangle*> _coverage_frame;
 
 	/** a list of rectangles used to show silent segments
 	*/

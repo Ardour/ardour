@@ -185,7 +185,7 @@ protected:
 	void setup_new_rec_layer_time (boost::shared_ptr<ARDOUR::Region>);
 
 private:
-	void update_coverage_samples ();
+	void update_coverage_frame ();
 };
 
 #endif /* __ardour_streamview_h__ */

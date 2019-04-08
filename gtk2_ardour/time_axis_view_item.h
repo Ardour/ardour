@@ -78,7 +78,7 @@ public:
 
 	virtual uint32_t get_fill_color () const;
 
-	ArdourCanvas::Item* get_canvas_sample();
+	ArdourCanvas::Item* get_canvas_frame();
 	ArdourCanvas::Item* get_canvas_group();
 	ArdourCanvas::Item* get_name_highlight();
 
@@ -227,7 +227,7 @@ protected:
 	ArdourCanvas::Rectangle* frame_handle_start; ///< `sample' (fade) handle for the start of the item, or 0
 	ArdourCanvas::Rectangle* frame_handle_end; ///< `sample' (fade) handle for the end of the item, or 0
 
-	bool sample_handle_crossing (GdkEvent*, ArdourCanvas::Rectangle*);
+	bool frame_handle_crossing (GdkEvent*, ArdourCanvas::Rectangle*);
 
 	double _height;
 	Visibility visibility;

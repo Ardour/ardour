@@ -199,7 +199,7 @@ RegionView::~RegionView ()
 		delete *g;
 	}
 
-	for (list<ArdourCanvas::Rectangle*>::iterator i = _coverage_samples.begin (); i != _coverage_samples.end (); ++i) {
+	for (list<ArdourCanvas::Rectangle*>::iterator i = _coverage_frame.begin (); i != _coverage_frame.end (); ++i) {
 		delete *i;
 	}
 
@@ -738,7 +738,7 @@ RegionView::set_height (double h)
 			);
 	}
 
-	for (list<ArdourCanvas::Rectangle*>::iterator i = _coverage_samples.begin(); i != _coverage_samples.end(); ++i) {
+	for (list<ArdourCanvas::Rectangle*>::iterator i = _coverage_frame.begin(); i != _coverage_frame.end(); ++i) {
 		(*i)->set_y1 (h + 1);
 	}
 
@@ -748,20 +748,20 @@ RegionView::set_height (double h)
 
 }
 
-/** Remove old coverage samples and make new ones, if we're in a LayerDisplay mode
+/** Remove old coverage frame and make new ones, if we're in a LayerDisplay mode
  *  which uses them. */
 void
-RegionView::update_coverage_samples (LayerDisplay d)
+RegionView::update_coverage_frame (LayerDisplay d)
 {
-	/* remove old coverage samples */
-	for (list<ArdourCanvas::Rectangle*>::iterator i = _coverage_samples.begin (); i != _coverage_samples.end (); ++i) {
+	/* remove old coverage frame */
+	for (list<ArdourCanvas::Rectangle*>::iterator i = _coverage_frame.begin (); i != _coverage_frame.end (); ++i) {
 		delete *i;
 	}
 
-	_coverage_samples.clear ();
+	_coverage_frame.clear ();
 
 	if (d != Stacked) {
-		/* don't do coverage samples unless we're in stacked mode */
+		/* don't do coverage frame unless we're in stacked mode */
 		return;
 	}
 
@@ -795,7 +795,7 @@ RegionView::update_coverage_samples (LayerDisplay d)
 		/* start off any new rect, if required */
 		if (cr == 0 || me != new_me) {
 			cr = new ArdourCanvas::Rectangle (group);
-			_coverage_samples.push_back (cr);
+			_coverage_frame.push_back (cr);
 			cr->set_x0 (trackview.editor().sample_to_pixel (t - position));
 			cr->set_y0 (1);
 			cr->set_y1 (_height + 1);

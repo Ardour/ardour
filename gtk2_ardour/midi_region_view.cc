@@ -423,7 +423,7 @@ MidiRegionView::leave_notify (GdkEventCrossing*)
 void
 MidiRegionView::mouse_mode_changed ()
 {
-	// Adjust sample colour (become more transparent for internal tools)
+	// Adjust frame colour (become more transparent for internal tools)
 	set_frame_color();
 
 	if (_entered) {
@@ -464,7 +464,7 @@ MidiRegionView::enter_internal (uint32_t state)
 		_grabbed_keyboard = true;
 	}
 
-	// Lower sample handles below notes so they don't steal events
+	// Lower frame handles below notes so they don't steal events
 	if (frame_handle_start) {
 		frame_handle_start->lower_to_bottom();
 	}
