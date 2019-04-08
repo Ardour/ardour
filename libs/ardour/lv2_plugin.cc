@@ -2553,7 +2553,7 @@ write_position(LV2_Atom_Forge*     forge,
 	LV2_Atom_Forge_Frame sample;
 #ifdef HAVE_LV2_1_10_0
 	lv2_atom_forge_object(forge, &sample, 0, urids.time_Position);
-	lv2_atom_forge_key(forge, urids.time_sample);
+	lv2_atom_forge_key(forge, urids.time_frame);
 	lv2_atom_forge_long(forge, position);
 	lv2_atom_forge_key(forge, urids.time_speed);
 	lv2_atom_forge_float(forge, speed);
@@ -2570,7 +2570,7 @@ write_position(LV2_Atom_Forge*     forge,
 	lv2_atom_forge_float(forge, bpm);
 #else
 	lv2_atom_forge_blank(forge, &sample, 1, urids.time_Position);
-	lv2_atom_forge_property_head(forge, urids.time_sample, 0);
+	lv2_atom_forge_property_head(forge, urids.time_frame, 0);
 	lv2_atom_forge_long(forge, position);
 	lv2_atom_forge_property_head(forge, urids.time_speed, 0);
 	lv2_atom_forge_float(forge, speed);

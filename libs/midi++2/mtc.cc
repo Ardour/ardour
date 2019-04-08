@@ -189,7 +189,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 
 			if (res.get_value_or (false)) {
 
-				/* no error, reset next expected sample */
+				/* no error, reset next expected frame */
 
 				switch (_mtc_running) {
 				case MTC_Forward:
@@ -222,7 +222,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 			/* skip counts as an error ... go back to waiting for the first sample */
 
 #ifdef DEBUG_MTC
-			cerr << "Skipped MTC qtr sample, return to stopped state" << endl;
+			cerr << "Skipped MTC qtr frame, return to stopped state" << endl;
 #endif
 			reset_mtc_state ();
 			mtc_status (MTC_Stopped);
@@ -231,7 +231,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 
 		} else {
 
-			/* received qtr sample matched expected */
+			/* received qtr frame matched expected */
 			consecutive_qtr_frame_cnt++;
 
 		}
