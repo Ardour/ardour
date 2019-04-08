@@ -432,14 +432,14 @@ RegionView::reset_width_dependent_items (double pixel_width)
 void
 RegionView::region_muted ()
 {
-	set_sample_color ();
+	set_frame_color ();
 	region_renamed ();
 }
 
 void
 RegionView::region_opacity ()
 {
-	set_sample_color ();
+	set_frame_color ();
 }
 
 void

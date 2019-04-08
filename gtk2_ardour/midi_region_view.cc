@@ -424,7 +424,7 @@ void
 MidiRegionView::mouse_mode_changed ()
 {
 	// Adjust sample colour (become more transparent for internal tools)
-	set_sample_color();
+	set_frame_color();
 
 	if (_entered) {
 		if (!trackview.editor().internal_editing()) {

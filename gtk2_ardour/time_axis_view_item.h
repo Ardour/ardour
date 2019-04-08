@@ -163,8 +163,8 @@ protected:
 	virtual bool canvas_group_event (GdkEvent*);
 
 	virtual void set_colors();
-	virtual void set_sample_color();
-	virtual void set_sample_gradient ();
+	virtual void set_frame_color();
+	virtual void set_frame_gradient ();
 	void set_trim_handle_colors();
 
 	virtual void reset_width_dependent_items (double);
@@ -217,9 +217,9 @@ protected:
 	bool wide_enough_for_name;
 	bool high_enough_for_name;
 
-	ArdourCanvas::Container*      group;
-	ArdourCanvas::Rectangle* sample;
-	ArdourCanvas::Rectangle* selection_sample;
+	ArdourCanvas::Container* group;
+	ArdourCanvas::Rectangle* frame;
+	ArdourCanvas::Rectangle* selection_frame;
 	ArdourCanvas::Text*      name_text;
 	ArdourCanvas::Rectangle* name_highlight;
 
