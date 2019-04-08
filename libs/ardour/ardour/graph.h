@@ -118,11 +118,11 @@ private:
 	volatile int _setup_chain;
 
 	// parameter caches.
-	pframes_t  _process_nframes;
+	pframes_t   _process_nframes;
 	samplepos_t _process_start_sample;
 	samplepos_t _process_end_sample;
-	bool	   _process_can_record;
-	bool	   _process_non_rt_pending;
+	bool	      _process_can_record;
+	bool	      _process_non_rt_pending;
 
 	bool _process_noroll;
 	int  _process_retval;

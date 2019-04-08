@@ -78,11 +78,11 @@ public:
 	 * @return The number of samples read (time, not an event count).
 	 */
 	samplecnt_t read (Evoral::EventSink<samplepos_t>& buf,
-	                 samplepos_t                    start,
-	                 samplecnt_t                    cnt,
-	                 Evoral::Range<samplepos_t>*    loop_range,
-	                 uint32_t                       chan_n = 0,
-	                 MidiChannelFilter*             filter = NULL);
+	                 samplepos_t                      start,
+	                 samplecnt_t                      cnt,
+	                 Evoral::Range<samplepos_t>*      loop_range,
+	                 uint32_t                         chan_n = 0,
+	                 MidiChannelFilter*               filter = NULL);
 
 	int set_state (const XMLNode&, int version);
 

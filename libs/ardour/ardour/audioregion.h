@@ -106,8 +106,8 @@ class LIBARDOUR_API AudioRegion : public Region
 	Evoral::Range<samplepos_t> body_range () const;
 
 	virtual samplecnt_t read_peaks (PeakData *buf, samplecnt_t npeaks,
-			samplecnt_t offset, samplecnt_t cnt,
-			uint32_t chan_n=0, double samples_per_pixel = 1.0) const;
+	                                samplecnt_t offset, samplecnt_t cnt,
+	                                uint32_t chan_n=0, double samples_per_pixel = 1.0) const;
 
 	/* Readable interface */
 
@@ -115,12 +115,13 @@ class LIBARDOUR_API AudioRegion : public Region
 	virtual samplecnt_t readable_length() const { return length(); }
 
 	virtual samplecnt_t read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
-				    samplepos_t position,
-				    samplecnt_t cnt,
-				    uint32_t   chan_n = 0) const;
+	                             samplepos_t position,
+	                             samplecnt_t cnt,
+	                             uint32_t   chan_n = 0) const;
 
 	virtual samplecnt_t master_read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
-					   samplepos_t position, samplecnt_t cnt, uint32_t chan_n=0) const;
+	                                    samplepos_t position, samplecnt_t cnt,
+	                                    uint32_t chan_n=0) const;
 
 	virtual samplecnt_t read_raw_internal (Sample*, samplepos_t, samplecnt_t, int channel) const;
 

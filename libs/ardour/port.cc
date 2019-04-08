@@ -489,11 +489,11 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 			} else {
 
 				/* port belongs to this instance of ardour,
-					 so look up its latency information
-					 internally, because our published/public
-					 values already contain our plugin
-					 latency compensation.
-					 */
+				 * so look up its latency information
+				 * internally, because our published/public
+				 * values already contain our plugin
+				 * latency compensation.
+				 */
 
 				boost::shared_ptr<Port> remote_port = AudioEngine::instance()->get_port_by_name (*c);
 				if (remote_port) {

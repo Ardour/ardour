@@ -115,7 +115,7 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 *
 	 * Caller must ensure that the event is later than the last written event.
 	 */
-	virtual void append_event_beats(const Lock&                         lock,
+	virtual void append_event_beats(const Lock&                           lock,
 	                                const Evoral::Event<Temporal::Beats>& ev) = 0;
 
 	/** Append a single event with a timestamp in samples.
@@ -154,9 +154,9 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 * etc.
 	 */
 	virtual void mark_midi_streaming_write_completed (
-		const Lock&                                      lock,
+		const Lock&                                        lock,
 		Evoral::Sequence<Temporal::Beats>::StuckNoteOption stuck_option,
-		Temporal::Beats                                  when = Temporal::Beats());
+		Temporal::Beats                                    when = Temporal::Beats());
 
 	virtual void session_saved();
 

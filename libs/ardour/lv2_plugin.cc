@@ -357,7 +357,7 @@ struct LV2Plugin::Impl {
 LV2Plugin::LV2Plugin (AudioEngine& engine,
                       Session&     session,
                       const void*  c_plugin,
-                      samplecnt_t   rate)
+                      samplecnt_t  rate)
 	: Plugin (engine, session)
 	, Workee ()
 	, _impl(new Impl())
@@ -2543,8 +2543,8 @@ write_position(LV2_Atom_Forge*     forge,
                Timecode::BBT_Time& bbt,
                double              speed,
                double              bpm,
-               samplepos_t          position,
-               samplecnt_t          offset)
+               samplepos_t         position,
+               samplecnt_t         offset)
 {
 	const URIMap::URIDs& urids = URIMap::instance().urids;
 
@@ -2710,7 +2710,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 				// Now merge MIDI and any transport events into the buffer
 				const uint32_t     type = _uri_map.urids.midi_MidiEvent;
-				const samplepos_t   tend = end;
+				const samplepos_t  tend = end;
 				++metric_i;
 				while (m != m_end || (metric_i != tmap.metrics_end() &&
 				                      (*metric_i)->sample() < tend)) {
@@ -3155,7 +3155,7 @@ LV2Plugin::latency_compute_run()
 
 	// this is done in the main thread. non realtime.
 	const samplecnt_t bufsize = _engine.samples_per_cycle();
-	float            *buffer = (float*) malloc(_engine.samples_per_cycle() * sizeof(float));
+	float*            buffer  = (float*) malloc(_engine.samples_per_cycle() * sizeof(float));
 
 	memset(buffer, 0, sizeof(float) * bufsize);
 

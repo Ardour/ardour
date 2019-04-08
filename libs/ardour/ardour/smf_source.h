@@ -79,7 +79,7 @@ public:
   private:
 	bool _open;
 	Temporal::Beats     _last_ev_time_beats;
-	samplepos_t          _last_ev_time_samples;
+	samplepos_t         _last_ev_time_samples;
 	/** end time (start + duration) of last call to read_unlocked */
 	mutable samplepos_t _smf_last_read_end;
 	/** time (in SMF ticks, 1 tick per _ppqn) of the last event read by read_unlocked */
@@ -95,8 +95,8 @@ public:
 	                          samplepos_t                     start,
 	                          samplecnt_t                     cnt,
 	                          Evoral::Range<samplepos_t>*     loop_range,
-	                          MidiStateTracker*              tracker,
-	                          MidiChannelFilter*             filter) const;
+	                          MidiStateTracker*               tracker,
+	                          MidiChannelFilter*              filter) const;
 
 	samplecnt_t write_unlocked (const Lock&                 lock,
 	                           MidiRingBuffer<samplepos_t>& src,
