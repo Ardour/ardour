@@ -485,7 +485,7 @@ MidiRegionView::leave_internal()
 		_grabbed_keyboard = false;
 	}
 
-	// Raise sample handles above notes so they catch events
+	// Raise frame handles above notes so they catch events
 	if (frame_handle_start) {
 		frame_handle_start->raise_to_top();
 	}

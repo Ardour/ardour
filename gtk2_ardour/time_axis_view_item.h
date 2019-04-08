@@ -224,8 +224,8 @@ protected:
 	ArdourCanvas::Rectangle* name_highlight;
 
 	/* with these two values, if frame_handle_start == 0 then frame_handle_end will also be 0 */
-	ArdourCanvas::Rectangle* frame_handle_start; ///< `sample' (fade) handle for the start of the item, or 0
-	ArdourCanvas::Rectangle* frame_handle_end; ///< `sample' (fade) handle for the end of the item, or 0
+	ArdourCanvas::Rectangle* frame_handle_start; ///< `frame' (fade) handle for the start of the item, or 0
+	ArdourCanvas::Rectangle* frame_handle_end; ///< `frame' (fade) handle for the end of the item, or 0
 
 	bool frame_handle_crossing (GdkEvent*, ArdourCanvas::Rectangle*);
 

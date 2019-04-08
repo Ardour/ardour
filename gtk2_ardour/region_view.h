@@ -116,9 +116,9 @@ public:
 	void move_contents (ARDOUR::sampleoffset_t);
 	virtual void thaw_after_trim ();
 
-	void set_silent_samples (const ARDOUR::AudioIntervalResult&, double threshold);
-	void drop_silent_samples ();
-	void hide_silent_samples ();
+	void set_silent_frames (const ARDOUR::AudioIntervalResult&, double threshold);
+	void drop_silent_frames ();
+	void hide_silent_frames ();
 
 	struct PositionOrder {
 		bool operator()(const RegionView* a, const RegionView* b) {
@@ -188,7 +188,7 @@ protected:
 
 	/** a list of rectangles used to show silent segments
 	*/
-	std::list<ArdourCanvas::Rectangle*> _silent_samples;
+	std::list<ArdourCanvas::Rectangle*> _silent_frames;
 	/** a list of rectangles used to show the current silence threshold
 	*/
 	std::list<ArdourCanvas::Rectangle*> _silent_threshold_samples;

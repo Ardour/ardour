@@ -203,7 +203,7 @@ RegionView::~RegionView ()
 		delete *i;
 	}
 
-	drop_silent_samples ();
+	drop_silent_frames ();
 
 	delete editor;
 }
@@ -218,12 +218,12 @@ RegionView::canvas_group_event (GdkEvent* event)
 }
 
 void
-RegionView::set_silent_samples (const AudioIntervalResult& silences, double /*threshold*/)
+RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*threshold*/)
 {
 	samplecnt_t shortest = max_samplecnt;
 
 	/* remove old silent samples */
-	drop_silent_samples ();
+	drop_silent_frames ();
 
 	if (silences.empty()) {
 		return;
@@ -235,7 +235,7 @@ RegionView::set_silent_samples (const AudioIntervalResult& silences, double /*th
 
 		ArdourCanvas::Rectangle* cr = new ArdourCanvas::Rectangle (group);
 		cr->set_ignore_events (true);
-		_silent_samples.push_back (cr);
+		_silent_frames.push_back (cr);
 
 		/* coordinates for the rect are relative to the regionview origin */
 
@@ -319,21 +319,21 @@ RegionView::set_silent_samples (const AudioIntervalResult& silences, double /*th
 }
 
 void
-RegionView::hide_silent_samples ()
+RegionView::hide_silent_frames ()
 {
-	for (list<ArdourCanvas::Rectangle*>::iterator i = _silent_samples.begin (); i != _silent_samples.end (); ++i) {
+	for (list<ArdourCanvas::Rectangle*>::iterator i = _silent_frames.begin (); i != _silent_frames.end (); ++i) {
 		(*i)->hide ();
 	}
 	_silence_text->hide();
 }
 
 void
-RegionView::drop_silent_samples ()
+RegionView::drop_silent_frames ()
 {
-	for (list<ArdourCanvas::Rectangle*>::iterator i = _silent_samples.begin (); i != _silent_samples.end (); ++i) {
+	for (list<ArdourCanvas::Rectangle*>::iterator i = _silent_frames.begin (); i != _silent_frames.end (); ++i) {
 		delete *i;
 	}
-	_silent_samples.clear ();
+	_silent_frames.clear ();
 
 	delete _silence_text;
 	_silence_text = 0;
@@ -742,7 +742,7 @@ RegionView::set_height (double h)
 		(*i)->set_y1 (h + 1);
 	}
 
-	for (list<ArdourCanvas::Rectangle*>::iterator i = _silent_samples.begin(); i != _silent_samples.end(); ++i) {
+	for (list<ArdourCanvas::Rectangle*>::iterator i = _silent_frames.begin(); i != _silent_frames.end(); ++i) {
 		(*i)->set_y1 (h + 1);
 	}
 
