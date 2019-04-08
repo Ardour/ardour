@@ -316,14 +316,14 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, samplepos_t pos)
 }
 
 void
-Editor::do_import (vector<string>        paths,
-                   ImportDisposition     disposition,
-                   ImportMode            mode,
-                   SrcQuality            quality,
-                   MidiTrackNameSource   midi_track_name_source,
+Editor::do_import (vector<string>          paths,
+                   ImportDisposition       disposition,
+                   ImportMode              mode,
+                   SrcQuality              quality,
+                   MidiTrackNameSource     midi_track_name_source,
                    MidiTempoMapDisposition smf_tempo_disposition,
-                   samplepos_t&           pos,
-                   ARDOUR::PluginInfoPtr instrument)
+                   samplepos_t&            pos,
+                   ARDOUR::PluginInfoPtr   instrument)
 {
 	boost::shared_ptr<Track> track;
 	vector<string> to_import;
@@ -547,7 +547,7 @@ Editor::import_sndfiles (vector<string>            paths,
                          ImportDisposition         disposition,
                          ImportMode                mode,
                          SrcQuality                quality,
-                         samplepos_t&               pos,
+                         samplepos_t&              pos,
                          int                       target_regions,
                          int                       target_tracks,
                          boost::shared_ptr<Track>& track,
@@ -617,7 +617,7 @@ Editor::embed_sndfiles (vector<string>            paths,
                         bool&                     check_sample_rate,
                         ImportDisposition         disposition,
                         ImportMode                mode,
-                        samplepos_t&               pos,
+                        samplepos_t&              pos,
                         int                       target_regions,
                         int                       target_tracks,
                         boost::shared_ptr<Track>& track,
@@ -739,7 +739,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 int
 Editor::add_sources (vector<string>            paths,
                      SourceList&               sources,
-                     samplepos_t&               pos,
+                     samplepos_t&              pos,
                      ImportDisposition         disposition,
                      ImportMode                mode,
                      int                       target_regions,

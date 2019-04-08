@@ -283,7 +283,7 @@ private:
 	 *  samplepos. used for relative snap.
 	 */
 	samplepos_t _snap_delta;
-	double     _snap_delta_music;
+	double      _snap_delta_music;
 	CursorContext::Handle _cursor_ctx; ///< cursor change context
 	bool _constraint_pressed; ///< if the keyboard indicated constraint modifier was pressed on start_grab()
 };
@@ -636,7 +636,7 @@ private:
 	}
 
 	MidiRegionView* _region_view;
-	samplepos_t      _last_pos;
+	samplepos_t     _last_pos;
 	double          _y;
 
 };

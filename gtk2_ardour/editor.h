@@ -295,7 +295,7 @@ public:
 
 	void               set_zoom_focus (Editing::ZoomFocus);
 	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
-	samplecnt_t         get_current_zoom () const { return samples_per_pixel; }
+	samplecnt_t        get_current_zoom () const { return samples_per_pixel; }
 	void               cycle_zoom_focus ();
 	void temporal_zoom_step (bool zoom_out);
 	void temporal_zoom_step_scale (bool zoom_out, double scale);
@@ -401,8 +401,8 @@ public:
 	void reposition_and_zoom (samplepos_t, double);
 
 	samplepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE,
-	                                        bool use_context_click = false,
-	                                        bool from_outside_canvas = false);
+	                                         bool use_context_click = false,
+	                                         bool from_outside_canvas = false);
 
 	bool update_mouse_speed ();
 	bool decelerate_mouse_speed ();
@@ -432,13 +432,13 @@ public:
 	                ARDOUR::SrcQuality                    quality,
 	                ARDOUR::MidiTrackNameSource           mts,
 	                ARDOUR::MidiTempoMapDisposition       mtd,
-	                samplepos_t&                           pos,
+	                samplepos_t&                          pos,
 	                boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
 	void do_embed (std::vector<std::string>              paths,
 	               Editing::ImportDisposition            disposition,
 	               Editing::ImportMode                   mode,
-	               samplepos_t&                           pos,
+	               samplepos_t&                          pos,
 	               boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
 	void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions, bool src_comparison);
@@ -451,14 +451,14 @@ public:
 	TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const;
 
 	void snap_to (ARDOUR::MusicSample& first,
-	              ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
-	              ARDOUR::SnapPref    pref = ARDOUR::SnapToAny_Visual,
-	              bool                ensure_snap = false);
+	              ARDOUR::RoundMode    direction = ARDOUR::RoundNearest,
+	              ARDOUR::SnapPref     pref = ARDOUR::SnapToAny_Visual,
+	              bool                 ensure_snap = false);
 
 	void snap_to_with_modifier (ARDOUR::MusicSample& first,
-	                            GdkEvent const *    ev,
-	                            ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
-	                            ARDOUR::SnapPref    pref = ARDOUR::SnapToAny_Visual);
+	                            GdkEvent const *     ev,
+	                            ARDOUR::RoundMode    direction = ARDOUR::RoundNearest,
+	                            ARDOUR::SnapPref     pref = ARDOUR::SnapToAny_Visual);
 
 	void set_snapped_cursor_position (samplepos_t pos);
 
@@ -576,8 +576,8 @@ private:
 		VisualState (bool with_tracks);
 		~VisualState ();
 		double              y_position;
-		samplecnt_t          samples_per_pixel;
-		samplepos_t          _leftmost_sample;
+		samplecnt_t         samples_per_pixel;
+		samplepos_t        _leftmost_sample;
 		Editing::ZoomFocus  zoom_focus;
 		GUIObjectState*     gui_state;
 	};
@@ -1105,10 +1105,10 @@ private:
 			VideoTimeline = 0x8
 		};
 
-		Type       pending;
+		Type        pending;
 		samplepos_t time_origin;
-	        samplecnt_t samples_per_pixel;
-		double     y_origin;
+		samplecnt_t samples_per_pixel;
+		double      y_origin;
 
 		int idle_handler_id;
 		/** true if we are currently in the idle handler */
@@ -1188,7 +1188,7 @@ private:
 	/* CUT/COPY/PASTE */
 
 	samplepos_t last_paste_pos;
-	unsigned   paste_count;
+	unsigned    paste_count;
 
 	void cut_copy (Editing::CutCopyOp);
 	bool can_cut_copy () const;
@@ -1340,7 +1340,7 @@ private:
 	                     Editing::ImportDisposition            disposition,
 	                     Editing::ImportMode                   mode,
 	                     ARDOUR::SrcQuality                    quality,
-	                     samplepos_t&                           pos,
+	                     samplepos_t&                          pos,
 	                     int                                   target_regions,
 	                     int                                   target_tracks,
 	                     boost::shared_ptr<ARDOUR::Track>&     track,
@@ -1352,7 +1352,7 @@ private:
 	                    bool&                                 check_sample_rate,
 	                    Editing::ImportDisposition            disposition,
 	                    Editing::ImportMode                   mode,
-	                    samplepos_t&                           pos,
+	                    samplepos_t&                          pos,
 	                    int                                   target_regions,
 	                    int                                   target_tracks,
 	                    boost::shared_ptr<ARDOUR::Track>&     track,
@@ -1360,7 +1360,7 @@ private:
 
 	int add_sources (std::vector<std::string>              paths,
 	                 ARDOUR::SourceList&                   sources,
-	                 samplepos_t&                           pos,
+	                 samplepos_t&                          pos,
 	                 Editing::ImportDisposition            disposition,
 	                 Editing::ImportMode                   mode,
 	                 int                                   target_regions,
@@ -1372,7 +1372,7 @@ private:
 	int finish_bringing_in_material (boost::shared_ptr<ARDOUR::Region>     region,
 	                                 uint32_t                              in_chans,
 	                                 uint32_t                              out_chans,
-	                                 samplepos_t&                           pos,
+	                                 samplepos_t&                          pos,
 	                                 Editing::ImportMode                   mode,
 	                                 boost::shared_ptr<ARDOUR::Track>&     existing_track,
 	                                 const std::string&                    new_track_name,
@@ -2179,12 +2179,12 @@ private:
 	                                  ARDOUR::SnapPref    gpref);
 
 	void snap_to_internal (ARDOUR::MusicSample& first,
-	                       ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
-	                       ARDOUR::SnapPref    gpref = ARDOUR::SnapToAny_Visual,
-	                       bool                ensure_snap = false);
+	                       ARDOUR::RoundMode    direction = ARDOUR::RoundNearest,
+	                       ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
+	                       bool                 ensure_snap = false);
 
-	samplepos_t snap_to_marker (samplepos_t        presnap,
-	                            ARDOUR::RoundMode   direction = ARDOUR::RoundNearest);
+	samplepos_t snap_to_marker (samplepos_t       presnap,
+	                            ARDOUR::RoundMode direction = ARDOUR::RoundNearest);
 
 	RhythmFerret* rhythm_ferret;
 

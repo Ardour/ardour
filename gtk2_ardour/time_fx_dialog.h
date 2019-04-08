@@ -84,19 +84,19 @@ public:
 	}
 
 private:
-	ARDOUR::samplecnt_t      original_length;
-	Gtk::Adjustment pitch_octave_adjustment;
-	Gtk::Adjustment pitch_semitone_adjustment;
-	Gtk::Adjustment pitch_cent_adjustment;
-	Gtk::SpinButton pitch_octave_spinner;
-	Gtk::SpinButton pitch_semitone_spinner;
-	Gtk::SpinButton pitch_cent_spinner;
-	Gtk::Adjustment duration_adjustment;
-	AudioClock*     duration_clock;
-	bool            ignore_adjustment_change;
-	bool            ignore_clock_change;
-	sigc::connection update_connection;
-	float           progress;
+	ARDOUR::samplecnt_t original_length;
+	Gtk::Adjustment     pitch_octave_adjustment;
+	Gtk::Adjustment     pitch_semitone_adjustment;
+	Gtk::Adjustment     pitch_cent_adjustment;
+	Gtk::SpinButton     pitch_octave_spinner;
+	Gtk::SpinButton     pitch_semitone_spinner;
+	Gtk::SpinButton     pitch_cent_spinner;
+	Gtk::Adjustment     duration_adjustment;
+	AudioClock*         duration_clock;
+	bool                ignore_adjustment_change;
+	bool                ignore_clock_change;
+	sigc::connection    update_connection;
+	float               progress;
 
 	void update_progress_gui (float);
 	void duration_clock_changed ();
