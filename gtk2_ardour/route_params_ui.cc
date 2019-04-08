@@ -313,9 +313,9 @@ RouteParams_UI::setup_latency_frame ()
 }
 
 void
-RouteParams_UI::setup_io_samples()
+RouteParams_UI::setup_io_selector()
 {
-	cleanup_io_samples();
+	cleanup_io_selector();
 
 	// input
 	_input_iosel = new IOSelector (this, _session, _route->input());
@@ -331,7 +331,7 @@ RouteParams_UI::setup_io_samples()
 }
 
 void
-RouteParams_UI::cleanup_io_samples()
+RouteParams_UI::cleanup_io_selector()
 {
 	if (_input_iosel) {
 		_input_iosel->Finished (IOSelector::Cancelled);
@@ -390,7 +390,7 @@ RouteParams_UI::route_removed (boost::weak_ptr<Route> wr)
 	}
 
 	if (route == _route) {
-		cleanup_io_samples();
+		cleanup_io_selector();
 		cleanup_view();
 		cleanup_processor_boxes();
 
@@ -428,7 +428,7 @@ RouteParams_UI::session_going_away ()
 
 	route_display_model->clear();
 
-	cleanup_io_samples();
+	cleanup_io_selector();
 	cleanup_view();
 	cleanup_processor_boxes();
 	cleanup_latency_frame ();
@@ -458,7 +458,7 @@ RouteParams_UI::route_selected()
 			_route_processors_connection.disconnect ();
 			cleanup_processor_boxes();
 			cleanup_view();
-			cleanup_io_samples();
+			cleanup_io_selector();
 			cleanup_latency_frame ();
 		}
 
@@ -466,7 +466,7 @@ RouteParams_UI::route_selected()
 		_route = route;
 		//update_routeinfo (route);
 
-		setup_io_samples();
+		setup_io_selector();
 		setup_processor_boxes();
 		setup_latency_frame ();
 
@@ -482,7 +482,7 @@ RouteParams_UI::route_selected()
 			_route_processors_connection.disconnect ();
 
 			// remove from view
-			cleanup_io_samples();
+			cleanup_io_selector();
 			cleanup_view();
 			cleanup_processor_boxes();
 			cleanup_latency_frame ();
