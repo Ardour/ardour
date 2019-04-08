@@ -1115,6 +1115,7 @@ CC121::map_auto ()
 			get_button (EButton).set_led_state (_output_port, false);
 			get_button (OpenVST).set_led_state (_output_port, false);
 		break;
+		case ARDOUR::Latch:
 		case ARDOUR::Touch:
 			get_button (EButton).set_led_state (_output_port, true);
 			get_button (FP_Read).set_led_state (_output_port, false);
