@@ -100,13 +100,14 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	/* destructive */
 
 	static samplecnt_t xfade_samples;
+
 	static gain_t* out_coefficient;
 	static gain_t* in_coefficient;
 
-	bool          _capture_start;
-	bool          _capture_end;
-	samplepos_t     capture_start_sample;
-	samplepos_t     file_pos; // unit is samples
+	bool           _capture_start;
+	bool           _capture_end;
+	samplepos_t    capture_start_sample;
+	samplepos_t    file_pos; // unit is samples
 	Sample*        xfade_buf;
 
 	samplecnt_t crossfade (Sample* data, samplecnt_t cnt, int dir);

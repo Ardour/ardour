@@ -4201,17 +4201,14 @@ Clean-up will move all unused files to a \"dead\" location."));
 	default:
 		return;
 	}
+	checker.hide();
 
 	ARDOUR::CleanupReport rep;
 
 	editor->prepare_for_cleanup ();
 
 	/* do not allow flush until a session is reloaded */
-
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Main"), X_("FlushWastebasket"));
-	if (act) {
-		act->set_sensitive (false);
-	}
+	ActionManager::get_action (X_("Main"), X_("FlushWastebasket"))->set_sensitive (false);
 
 	if (_session->cleanup_sources (rep)) {
 		editor->finish_cleanup ();
@@ -4220,7 +4217,6 @@ Clean-up will move all unused files to a \"dead\" location."));
 
 	editor->finish_cleanup ();
 
-	checker.hide();
 	display_cleanup_results (rep, _("Cleaned Files"), false);
 }
 

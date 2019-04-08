@@ -357,7 +357,7 @@ struct LV2Plugin::Impl {
 LV2Plugin::LV2Plugin (AudioEngine& engine,
                       Session&     session,
                       const void*  c_plugin,
-                      samplecnt_t   rate)
+                      samplecnt_t  rate)
 	: Plugin (engine, session)
 	, Workee ()
 	, _impl(new Impl())
@@ -1846,19 +1846,19 @@ LV2Plugin::set_property(uint32_t key, const Variant& value)
 
 	// Set up forge to write to temporary buffer on the stack
 	LV2_Atom_Forge*      forge = &_impl->ui_forge;
-	LV2_Atom_Forge_Frame sample;
+	LV2_Atom_Forge_Frame frame;
 	uint8_t              buf[PATH_MAX];  // Ought to be enough for anyone...
 
 	lv2_atom_forge_set_buffer(forge, buf, sizeof(buf));
 
 	// Serialize patch:Set message to set property
 #ifdef HAVE_LV2_1_10_0
-	lv2_atom_forge_object(forge, &sample, 0, _uri_map.urids.patch_Set);
+	lv2_atom_forge_object(forge, &frame, 0, _uri_map.urids.patch_Set);
 	lv2_atom_forge_key(forge, _uri_map.urids.patch_property);
 	lv2_atom_forge_urid(forge, key);
 	lv2_atom_forge_key(forge, _uri_map.urids.patch_value);
 #else
-	lv2_atom_forge_blank(forge, &sample, 0, _uri_map.urids.patch_Set);
+	lv2_atom_forge_blank(forge, &frame, 0, _uri_map.urids.patch_Set);
 	lv2_atom_forge_property_head(forge, _uri_map.urids.patch_property, 0);
 	lv2_atom_forge_urid(forge, key);
 	lv2_atom_forge_property_head(forge, _uri_map.urids.patch_value, 0);
@@ -2019,16 +2019,16 @@ LV2Plugin::announce_property_values()
 
 	// Set up forge to write to temporary buffer on the stack
 	LV2_Atom_Forge*      forge = &_impl->ui_forge;
-	LV2_Atom_Forge_Frame sample;
+	LV2_Atom_Forge_Frame frame;
 	uint8_t              buf[PATH_MAX];  // Ought to be enough for anyone...
 
 	lv2_atom_forge_set_buffer(forge, buf, sizeof(buf));
 
 	// Serialize patch:Get message with no subject (implicitly plugin instance)
 #ifdef HAVE_LV2_1_10_0
-	lv2_atom_forge_object(forge, &sample, 0, _uri_map.urids.patch_Get);
+	lv2_atom_forge_object(forge, &frame, 0, _uri_map.urids.patch_Get);
 #else
-	lv2_atom_forge_blank(forge, &sample, 0, _uri_map.urids.patch_Get);
+	lv2_atom_forge_blank(forge, &frame, 0, _uri_map.urids.patch_Get);
 #endif
 
 	// Write message to UI=>Plugin ring
@@ -2543,17 +2543,17 @@ write_position(LV2_Atom_Forge*     forge,
                Timecode::BBT_Time& bbt,
                double              speed,
                double              bpm,
-               samplepos_t          position,
-               samplecnt_t          offset)
+               samplepos_t         position,
+               samplecnt_t         offset)
 {
 	const URIMap::URIDs& urids = URIMap::instance().urids;
 
 	uint8_t pos_buf[256];
 	lv2_atom_forge_set_buffer(forge, pos_buf, sizeof(pos_buf));
-	LV2_Atom_Forge_Frame sample;
+	LV2_Atom_Forge_Frame frame;
 #ifdef HAVE_LV2_1_10_0
-	lv2_atom_forge_object(forge, &sample, 0, urids.time_Position);
-	lv2_atom_forge_key(forge, urids.time_sample);
+	lv2_atom_forge_object(forge, &frame, 0, urids.time_Position);
+	lv2_atom_forge_key(forge, urids.time_frame);
 	lv2_atom_forge_long(forge, position);
 	lv2_atom_forge_key(forge, urids.time_speed);
 	lv2_atom_forge_float(forge, speed);
@@ -2569,8 +2569,8 @@ write_position(LV2_Atom_Forge*     forge,
 	lv2_atom_forge_key(forge, urids.time_beatsPerMinute);
 	lv2_atom_forge_float(forge, bpm);
 #else
-	lv2_atom_forge_blank(forge, &sample, 1, urids.time_Position);
-	lv2_atom_forge_property_head(forge, urids.time_sample, 0);
+	lv2_atom_forge_blank(forge, &frame, 1, urids.time_Position);
+	lv2_atom_forge_property_head(forge, urids.time_frame, 0);
 	lv2_atom_forge_long(forge, position);
 	lv2_atom_forge_property_head(forge, urids.time_speed, 0);
 	lv2_atom_forge_float(forge, speed);
@@ -2710,7 +2710,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 				// Now merge MIDI and any transport events into the buffer
 				const uint32_t     type = _uri_map.urids.midi_MidiEvent;
-				const samplepos_t   tend = end;
+				const samplepos_t  tend = end;
 				++metric_i;
 				while (m != m_end || (metric_i != tmap.metrics_end() &&
 				                      (*metric_i)->sample() < tend)) {
@@ -3155,7 +3155,7 @@ LV2Plugin::latency_compute_run()
 
 	// this is done in the main thread. non realtime.
 	const samplecnt_t bufsize = _engine.samples_per_cycle();
-	float            *buffer = (float*) malloc(_engine.samples_per_cycle() * sizeof(float));
+	float*            buffer  = (float*) malloc(_engine.samples_per_cycle() * sizeof(float));
 
 	memset(buffer, 0, sizeof(float) * bufsize);
 

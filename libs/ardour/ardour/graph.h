@@ -1,5 +1,6 @@
 /*
     Copyright (C) 2010 Paul Davis
+    Copyright (C) 2017 Robin Gareus <robin@gareus.org>
     Author: Torben Hohn
 
     This program is free software; you can redistribute it and/or modify
@@ -79,7 +80,7 @@ protected:
 	virtual void session_going_away ();
 
 private:
-	volatile bool        _threads_active;
+	volatile bool _threads_active;
 
 	void reset_thread_list ();
 	void drop_threads ();
@@ -110,25 +111,26 @@ private:
 
 	bool _graph_empty;
 
-	// chain swapping
-	Glib::Threads::Mutex  _swap_mutex;
-        Glib::Threads::Cond   _cleanup_cond;
+	/* chain swapping */
+	Glib::Threads::Mutex _swap_mutex;
+	Glib::Threads::Cond  _cleanup_cond;
+
 	volatile int _current_chain;
 	volatile int _pending_chain;
 	volatile int _setup_chain;
 
-	// parameter caches.
-	pframes_t  _process_nframes;
+	/* parameter caches */
+	pframes_t   _process_nframes;
 	samplepos_t _process_start_sample;
 	samplepos_t _process_end_sample;
-	bool	   _process_can_record;
-	bool	   _process_non_rt_pending;
+	bool        _process_can_record;
+	bool        _process_non_rt_pending;
 
 	bool _process_noroll;
 	int  _process_retval;
 	bool _process_need_butler;
 
-	// enginer / thread connection
+	/* engine / thread connection */
 	PBD::ScopedConnectionList engine_connections;
 	void engine_stopped ();
 };

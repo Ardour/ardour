@@ -279,7 +279,7 @@ US2400Protocol::get_sorted_stripables()
 			if (s->mixbus()) {
 				sorted.push_back (s);
 			}
-			break
+			break;
 #else
 			if (!is_track(s) && !s->presentation_info().hidden()) {
 				sorted.push_back (s);

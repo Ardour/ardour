@@ -49,7 +49,7 @@ public:
 
 	void init (bool wfd);
 
-	bool paste (samplepos_t                                      pos,
+	bool paste (samplepos_t                                     pos,
 	            unsigned                                        paste_count,
 	            float                                           times,
 	            boost::shared_ptr<const ARDOUR::AutomationList> slist);
@@ -88,9 +88,9 @@ protected:
 private:
 	ARDOUR::DoubleBeatsSamplesConverter _region_relative_time_converter;
 	ARDOUR::DoubleBeatsSamplesConverter _source_relative_time_converter;
-	Evoral::Parameter                  _parameter;
-	boost::shared_ptr<AutomationLine>  _line;
-	PBD::ScopedConnection              _mouse_mode_connection;
+	Evoral::Parameter                   _parameter;
+	boost::shared_ptr<AutomationLine>   _line;
+	PBD::ScopedConnection               _mouse_mode_connection;
 };
 
 #endif /* __gtk_ardour_automation_region_view_h__ */

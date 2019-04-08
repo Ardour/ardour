@@ -6113,6 +6113,8 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 	string legal_playlist_name;
 	string possible_path;
 
+	DataType data_type = track.data_type();
+
 	if (end <= start) {
 		error << string_compose (_("Cannot write a range where end <= start (e.g. %1 <= %2)"),
 					 end, start) << endmsg;
@@ -6122,7 +6124,11 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 	diskstream_channels = track.bounce_get_output_streams (diskstream_channels, endpoint,
 			include_endpoint, for_export, for_freeze);
 
-	if (diskstream_channels.n(track.data_type()) < 1) {
+	if (data_type == DataType::MIDI && endpoint && !for_export && !for_freeze && diskstream_channels.n(DataType::AUDIO) > 0) {
+		data_type = DataType::AUDIO;
+	}
+
+	if (diskstream_channels.n(data_type) < 1) {
 		error << _("Cannot write a range with no data.") << endmsg;
 		return result;
 	}
@@ -6149,10 +6155,10 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 	legal_playlist_name = legalize_for_path (playlist->name());
 
-	for (uint32_t chan_n = 0; chan_n < diskstream_channels.n(track.data_type()); ++chan_n) {
+	for (uint32_t chan_n = 0; chan_n < diskstream_channels.n(data_type); ++chan_n) {
 
 		string base_name = string_compose ("%1-%2-bounce", playlist->name(), chan_n);
-		string path = ((track.data_type() == DataType::AUDIO)
+		string path = ((data_type == DataType::AUDIO)
 		               ? new_audio_source_path (legal_playlist_name, diskstream_channels.n_audio(), chan_n, false, true)
 		               : new_midi_source_path (legal_playlist_name));
 
@@ -6161,7 +6167,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 		}
 
 		try {
-			source = SourceFactory::createWritable (track.data_type(), *this, path, false, sample_rate());
+			source = SourceFactory::createWritable (data_type, *this, path, false, sample_rate());
 		}
 
 		catch (failed_constructor& err) {
@@ -6236,7 +6242,9 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 				const MidiBuffer& buf = buffers.get_midi(0);
 				for (MidiBuffer::const_iterator i = buf.begin(); i != buf.end(); ++i) {
 					Evoral::Event<samplepos_t> ev = *i;
-					ev.set_time(ev.time() - position);
+					if (!endpoint || for_export) {
+						ev.set_time(ev.time() - position);
+					}
 					ms->append_event_samples(lock, ev, ms->timeline_position());
 				}
 			}

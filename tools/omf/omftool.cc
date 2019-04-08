@@ -68,7 +68,7 @@ OMF::OMF ()
 	session_name = "omfsession";
 	base_dir = ".";
 	sample_rate = 0;
-	sample_rate = 0;
+	frame_rate = 0;
 	version = 3000;
 	db = 0;
 	file = 0;
@@ -675,15 +675,15 @@ OMF::create_xml ()
 			fread(&num, 4, 1, file);
 			num = e32(num);
 			INFO ("Rate = %d / %d\n", num, denom);
-			if (sample_rate == 0) {
-				sample_rate = (double) num / (double) denom;
+			if (frame_rate == 0) {
+				frame_rate = (double) num / (double) denom;
 			}
 			if (sample_rate == 0) {
 				sample_rate = denom;
 			}
 		} else {
 			INFO ("OMF file is missing frame rate information for track %d\n", i);
-			sample_rate = 0.04; // 25FPS
+			frame_rate = 0.04; // 25FPS
 			if (sample_rate == 0) {
 				sample_rate = 44100;
 			}
@@ -706,7 +706,7 @@ OMF::create_xml ()
 			char **len;
 			int lenCount;
 			double length = 0.0;
-			int lenSamples = 0;
+			int lenFrames = 0;
 
 			region = 0;
 
@@ -728,8 +728,8 @@ OMF::create_xml ()
 				continue;
 			}
 
-			lenSamples = atoi(len[1]);
-			length = lenSamples * sample_rate;
+			lenFrames = atoi(len[1]);
+			length = lenFrames * frame_rate;
 
 			if (!strcmp(type[1], "TRAN")) {
 
@@ -837,7 +837,7 @@ OMF::create_xml ()
 					region->add_property ("position", sbuf);
 					snprintf (sbuf, sizeof (sbuf), "%" PRId64, llrintf (length * sample_rate));
 					region->add_property ("length", sbuf);
-					snprintf (sbuf, sizeof (sbuf), "%" PRId64, llrintf (start * sample_rate * sample_rate));
+					snprintf (sbuf, sizeof (sbuf), "%" PRId64, llrintf (start * frame_rate * sample_rate));
 					region->add_property ("start", sbuf);
 					set_region_sources (region, sinfo);
 
@@ -913,7 +913,7 @@ OMF::create_xml ()
 					region->add_property ("position", sbuf);
 					snprintf (sbuf, sizeof (sbuf), "%" PRId64, llrintf (length * sample_rate));
 					region->add_property ("length", sbuf);
-					snprintf (sbuf, sizeof (sbuf), "%" PRId64, llrintf (start * sample_rate * sample_rate));
+					snprintf (sbuf, sizeof (sbuf), "%" PRId64, llrintf (start * frame_rate * sample_rate));
 					region->add_property ("start", sbuf);
 					set_region_sources (region, sinfo);
 

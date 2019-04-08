@@ -37,14 +37,14 @@ class ExportTempFile;
 
 class LIBARDOUR_API ExportTimespan
 {
-  private:
+private:
 	typedef boost::shared_ptr<ExportStatus> ExportStatusPtr;
 
-  private:
+private:
 	friend class ExportElementFactory;
 	ExportTimespan (ExportStatusPtr status, samplecnt_t sample_rate);
 
-  public:
+public:
 	~ExportTimespan ();
 
 	std::string name () const { return _name; }
@@ -68,14 +68,14 @@ class LIBARDOUR_API ExportTimespan
 		return end_sample < other.end_sample;
 	}
 
-  private:
+private:
 
 	ExportStatusPtr status;
 
-	samplepos_t      start_sample;
-	samplepos_t      end_sample;
-	samplepos_t      position;
-	samplecnt_t      sample_rate;
+	samplepos_t start_sample;
+	samplepos_t end_sample;
+	samplepos_t position;
+	samplecnt_t sample_rate;
 
 	std::string _name;
 	std::string _range_id;

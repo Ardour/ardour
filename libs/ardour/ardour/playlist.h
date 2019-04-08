@@ -179,7 +179,7 @@ public:
 	boost::shared_ptr<RegionList> region_list();
 
 	boost::shared_ptr<RegionList> regions_at (samplepos_t sample);
-	uint32_t                   count_regions_at (samplepos_t) const;
+	uint32_t                      count_regions_at (samplepos_t) const;
 	boost::shared_ptr<RegionList> regions_touched (samplepos_t start, samplepos_t end);
 	boost::shared_ptr<RegionList> regions_with_start_within (Evoral::Range<samplepos_t>);
 	boost::shared_ptr<RegionList> regions_with_end_within (Evoral::Range<samplepos_t>);
@@ -188,7 +188,7 @@ public:
 	boost::shared_ptr<Region>  top_region_at (samplepos_t sample);
 	boost::shared_ptr<Region>  top_unmuted_region_at (samplepos_t sample);
 	boost::shared_ptr<Region>  find_next_region (samplepos_t sample, RegionPoint point, int dir);
-	samplepos_t                 find_next_region_boundary (samplepos_t sample, int dir);
+	samplepos_t                find_next_region_boundary (samplepos_t sample, int dir);
 	bool                       region_is_shuffle_constrained (boost::shared_ptr<Region>);
 	bool                       has_region_at (samplepos_t const) const;
 

@@ -1240,7 +1240,7 @@ private:
 	process_function_type    last_process_function;
 	bool                    _bounce_processing_active;
 	bool                     waiting_for_sync_offset;
-	samplecnt_t              _base_sample_rate;     // sample-rate of the session at creation time, "native" SR
+	samplecnt_t             _base_sample_rate;     // sample-rate of the session at creation time, "native" SR
 	samplecnt_t             _nominal_sample_rate;  // overridden by audioengine setting
 	samplecnt_t             _current_sample_rate;  // this includes video pullup offset
 	int                      transport_sub_state;
@@ -1365,7 +1365,7 @@ private:
 	pframes_t               _pframes_since_last_mtc;
 	bool                     play_loop;
 	bool                     loop_changing;
-	samplepos_t               last_loopend;
+	samplepos_t              last_loopend;
 
 	boost::scoped_ptr<SessionDirectory> _session_dir;
 
@@ -1618,13 +1618,13 @@ private:
 
 	double            ltc_speed;
 	int32_t           ltc_enc_byte;
-	samplepos_t        ltc_enc_pos;
+	samplepos_t       ltc_enc_pos;
 	double            ltc_enc_cnt;
-	samplepos_t        ltc_enc_off;
+	samplepos_t       ltc_enc_off;
 	bool              restarting;
-	samplepos_t        ltc_prev_cycle;
+	samplepos_t       ltc_prev_cycle;
 
-	samplepos_t        ltc_timecode_offset;
+	samplepos_t       ltc_timecode_offset;
 	bool              ltc_timecode_negative_offset;
 
 	LatencyRange      ltc_out_latency;
@@ -1876,32 +1876,32 @@ private:
 	XMLNode& get_template ();
 
 	/* click track */
-	typedef std::list<Click*> Clicks;
-	Clicks                  clicks;
-	bool                   _clicking;
-	bool                   _click_rec_only;
-	boost::shared_ptr<IO>  _click_io;
-	boost::shared_ptr<Amp> _click_gain;
-	Sample*                 click_data;
-	Sample*                 click_emphasis_data;
-	samplecnt_t              click_length;
-	samplecnt_t              click_emphasis_length;
-	mutable Glib::Threads::RWLock    click_lock;
+	typedef std::list<Click*>     Clicks;
+	Clicks                        clicks;
+	bool                         _clicking;
+	bool                         _click_rec_only;
+	boost::shared_ptr<IO>        _click_io;
+	boost::shared_ptr<Amp>       _click_gain;
+	Sample*                       click_data;
+	Sample*                       click_emphasis_data;
+	samplecnt_t                   click_length;
+	samplecnt_t                   click_emphasis_length;
+	mutable Glib::Threads::RWLock click_lock;
 
 	static const Sample     default_click[];
 	static const samplecnt_t default_click_length;
 	static const Sample     default_click_emphasis[];
 	static const samplecnt_t default_click_emphasis_length;
 
-	Click *get_click();
+	Click* get_click();
 	samplepos_t _clicks_cleared;
-	void   setup_click_sounds (int which);
-	void   setup_click_sounds (Sample**, Sample const *, samplecnt_t*, samplecnt_t, std::string const &);
-	void   clear_clicks ();
-	void   click (samplepos_t start, samplecnt_t nframes);
-	void   run_click (samplepos_t start, samplecnt_t nframes);
-	void   add_click (samplepos_t pos, bool emphasis);
 	samplecnt_t _count_in_samples;
+	void setup_click_sounds (int which);
+	void setup_click_sounds (Sample**, Sample const *, samplecnt_t*, samplecnt_t, std::string const &);
+	void clear_clicks ();
+	void click (samplepos_t start, samplecnt_t nframes);
+	void run_click (samplepos_t start, samplecnt_t nframes);
+	void add_click (samplepos_t pos, bool emphasis);
 
 	/* range playback */
 

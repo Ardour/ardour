@@ -590,7 +590,7 @@ private:
 	static Meter    _default_meter;
 
 	Metrics                       _metrics;
-	samplecnt_t                    _sample_rate;
+	samplecnt_t                   _sample_rate;
 	mutable Glib::Threads::RWLock lock;
 
 	void recompute_tempi (Metrics& metrics);

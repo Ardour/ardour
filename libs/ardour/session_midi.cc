@@ -77,7 +77,7 @@ Session::setup_midi_control ()
 	outbound_mtc_timecode_frame = 0;
 	next_quarter_frame_to_send = 0;
 
-	/* Set up the qtr sample message */
+	/* Set up the qtr frame message */
 
 	mtc_msg[0] = 0xf1;
 	mtc_msg[2] = 0xf1;
@@ -300,7 +300,7 @@ Session::mmc_locate (MIDI::MachineControl &/*mmc*/, const MIDI::byte* mmc_tc)
 		target_sample = max_samplepos;
 	}
 
-	/* Some (all?) MTC/MMC devices do not send a full MTC sample
+	/* Some (all?) MTC/MMC devices do not send a full MTC frame
 	   at the end of a locate, instead sending only an MMC
 	   locate command. This causes the current position
 	   of an MTC slave to become out of date. Catch this.
@@ -438,11 +438,9 @@ Session::send_full_time_code (samplepos_t const t, MIDI::pframes_t nframes)
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("Full MTC TC %1 (off %2)\n", outbound_mtc_timecode_frame, mtc_offset));
 
-	// I don't understand this bit yet.. [DR]
-	// I do [rg]:
-	// according to MTC spec 24, 30 drop and 30 non-drop TC, the sample-number represented by 8 quarter frames must be even.
+	/* according to MTC spec 24, 30 drop and 30 non-drop TC, the frame-number represented by 8 quarter frames must be even. */
 	if (((mtc_timecode_bits >> 5) != MIDI::MTC_25_FPS) && (transmitting_timecode_time.frames % 2)) {
-		// start MTC quarter frame transmission on an even sample
+		/* start MTC quarter frame transmission on an even frame */
 		Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
 		outbound_mtc_timecode_frame += _samples_per_timecode_frame;
 	}
@@ -474,7 +472,7 @@ Session::send_full_time_code (samplepos_t const t, MIDI::pframes_t nframes)
 /** Send MTC (quarter-frame) messages for this cycle.
  * Must be called exactly once per cycle from the process thread.  Realtime safe.
  * This function assumes the state of full Timecode is sane, eg. the slave is
- * expecting quarter frame messages and has the right sample of reference (any
+ * expecting quarter frame messages and has the right frame of reference (any
  * full MTC Timecode time messages that needed to be sent should have been sent
  * earlier already this cycle by send_full_time_code)
  */
@@ -575,8 +573,8 @@ Session::send_midi_time_code_for_cycle (samplepos_t start_sample, samplepos_t en
 
 #ifndef NDEBUG
 		if (DEBUG_ENABLED(DEBUG::MTC)) {
-			DEBUG_STR_DECL(foo)
-				DEBUG_STR_APPEND(foo,"sending ");
+			DEBUG_STR_DECL(foo);
+			DEBUG_STR_APPEND(foo,"sending ");
 			DEBUG_STR_APPEND(foo, transmitting_timecode_time);
 			DEBUG_TRACE (DEBUG::MTC, string_compose ("%1 qfm = %2, stamp = %3\n", DEBUG_STR(foo).str(), next_quarter_frame_to_send,
 			                                         out_stamp));

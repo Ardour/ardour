@@ -5,7 +5,7 @@
   <MasterDeviceNames>
     <Manufacturer>Eventide</Manufacturer>
     <Model>Eclipse</Model>
-    <CustomDeviceMode Name="">
+    <CustomDeviceMode Name="Default">
       <ChannelNameSetAssignments>
         <ChannelNameSetAssign Channel="1" NameSet="Eventide Eclipse"/>
         <ChannelNameSetAssign Channel="2" NameSet="Eventide Eclipse"/>

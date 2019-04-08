@@ -87,20 +87,20 @@ using Gtkmm2ext::Keyboard;
 bool
 Editor::mouse_sample (samplepos_t& where, bool& in_track_canvas) const
 {
-        /* gdk_window_get_pointer() has X11's XQueryPointer semantics in that it only
-	   pays attentions to subwindows. this means that menu windows are ignored, and
-	   if the pointer is in a menu, the return window from the call will be the
-	   the regular subwindow *under* the menu.
+	/* gdk_window_get_pointer() has X11's XQueryPointer semantics in that it only
+	 * pays attentions to subwindows. this means that menu windows are ignored, and
+	 * if the pointer is in a menu, the return window from the call will be the
+	 * the regular subwindow *under* the menu.
+	 *
+	 * this matters quite a lot if the pointer is moving around in a menu that overlaps
+	 * the track canvas because we will believe that we are within the track canvas
+	 * when we are not. therefore, we track enter/leave events for the track canvas
+	 * and allow that to override the result of gdk_window_get_pointer().
+	 */
 
-	   this matters quite a lot if the pointer is moving around in a menu that overlaps
-	   the track canvas because we will believe that we are within the track canvas
-	   when we are not. therefore, we track enter/leave events for the track canvas
-	   and allow that to override the result of gdk_window_get_pointer().
-        */
-
-        if (!within_track_canvas) {
+	if (!within_track_canvas) {
 		return false;
-        }
+	}
 
 	int x, y;
 	Glib::RefPtr<Gdk::Window> canvas_window = const_cast<Editor*>(this)->_track_canvas->get_window();
@@ -311,10 +311,10 @@ Editor::mouse_mode_toggled (MouseMode m)
 	/* Switch snap type/mode if we're moving to/from an internal tool.  Note
 	   this must toggle the actions and not call set_snap_*() directly,
 	   otherwise things get out of sync and the combo box stops working. */
- 	if (!UIConfiguration::instance().get_grid_follows_internal()) {
+	if (!UIConfiguration::instance().get_grid_follows_internal()) {
 		grid_type_action(pre_internal_grid_type)->set_active(true);
 		snap_mode_action(pre_internal_snap_mode)->set_active(true);
- 	} else if (!was_internal && internal_editing()) {
+	} else if (!was_internal && internal_editing()) {
 		grid_type_action(internal_grid_type)->set_active(true);
 		snap_mode_action(internal_snap_mode)->set_active(true);
 	} else if (was_internal && !internal_editing()) {
@@ -420,19 +420,18 @@ Editor::step_mouse_mode (bool next)
 void
 Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-
- 	/* in object/audition/timefx/gain-automation mode,
-	   any button press sets the selection if the object
-	   can be selected. this is a bit of hack, because
-	   we want to avoid this if the mouse operation is a
-	   region alignment.
-
-	   note: not dbl-click or triple-click
-
-	   Also note that there is no region selection in internal edit mode, otherwise
-	   for operations operating on the selection (e.g. cut) it is not obvious whether
-	   to cut notes or regions.
-	*/
+	/* in object/audition/timefx/gain-automation mode,
+	 * any button press sets the selection if the object
+	 * can be selected. this is a bit of hack, because
+	 * we want to avoid this if the mouse operation is a
+	 * region alignment.
+	 *
+	 * note: not dbl-click or triple-click
+	 *
+	 * Also note that there is no region selection in internal edit mode, otherwise
+	 * for operations operating on the selection (e.g. cut) it is not obvious whether
+	 * to cut notes or regions.
+	 */
 
 	MouseMode eff_mouse_mode = effective_mouse_mode ();
 
@@ -443,31 +442,31 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 
 	if (get_smart_mode() && eff_mouse_mode == MouseRange && event->button.button == 3 && item_type == RegionItem) {
 		/* context clicks are always about object properties, even if
-		   we're in range mode within smart mode.
-		*/
+			 we're in range mode within smart mode.
+			 */
 		eff_mouse_mode = MouseObject;
 	}
 
 	/* special case: allow drag of region fade in/out in object mode with join object/range enabled */
 	if (get_smart_mode()) {
 		switch (item_type) {
-		  case FadeInHandleItem:
-		  case FadeInTrimHandleItem:
-		  case FadeOutHandleItem:
-		  case FadeOutTrimHandleItem:
-			  eff_mouse_mode = MouseObject;
-			  break;
-		default:
-			break;
+			case FadeInHandleItem:
+			case FadeInTrimHandleItem:
+			case FadeOutHandleItem:
+			case FadeOutTrimHandleItem:
+				eff_mouse_mode = MouseObject;
+				break;
+			default:
+				break;
 		}
 	}
 
 	if (((mouse_mode != MouseObject) &&
-	     (mouse_mode != MouseAudition || item_type != RegionItem) &&
-	     (mouse_mode != MouseTimeFX || item_type != RegionItem) &&
-	     (mouse_mode != MouseDraw) &&
-	     (mouse_mode != MouseContent || item_type == RegionItem)) ||
-	    ((event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE) || event->button.button > 3)) {
+				(mouse_mode != MouseAudition || item_type != RegionItem) &&
+				(mouse_mode != MouseTimeFX || item_type != RegionItem) &&
+				(mouse_mode != MouseDraw) &&
+				(mouse_mode != MouseContent || item_type == RegionItem)) ||
+			((event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE) || event->button.button > 3)) {
 		return;
 	}
 
@@ -478,8 +477,8 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 			/* almost no selection action on modified button-2 or button-3 events */
 
 			if ((item_type != RegionItem && event->button.button != 2)
-			    /* for selection of control points prior to delete (shift-right click) */
-			    && !(item_type == ControlPointItem && event->button.button == 3 && event->type == GDK_BUTTON_PRESS)) {
+					/* for selection of control points prior to delete (shift-right click) */
+					&& !(item_type == ControlPointItem && event->button.button == 3 && event->type == GDK_BUTTON_PRESS)) {
 				return;
 			}
 		}
@@ -493,183 +492,183 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	}
 
 	switch (item_type) {
-	case RegionItem:
-		if (eff_mouse_mode == MouseDraw) {
+		case RegionItem:
+			if (eff_mouse_mode == MouseDraw) {
+				break;
+			}
+			if (press) {
+				if (eff_mouse_mode != MouseRange) {
+					_mouse_changed_selection = set_selected_regionview_from_click (press, op);
+				} else {
+					/* don't change the selection unless the
+						 clicked track is not currently selected. if
+						 so, "collapse" the selection to just this
+						 track
+						 */
+					if (!selection->selected (clicked_axisview)) {
+						set_selected_track_as_side_effect (Selection::Set);
+					}
+				}
+			} else {
+				if (eff_mouse_mode != MouseRange) {
+					_mouse_changed_selection |= set_selected_regionview_from_click (press, op);
+				}
+			}
 			break;
-		}
-		if (press) {
-			if (eff_mouse_mode != MouseRange) {
-				_mouse_changed_selection = set_selected_regionview_from_click (press, op);
-			} else {
-				/* don't change the selection unless the
-				   clicked track is not currently selected. if
-				   so, "collapse" the selection to just this
-				   track
-				*/
-				if (!selection->selected (clicked_axisview)) {
-					set_selected_track_as_side_effect (Selection::Set);
-				}
-			}
-		} else {
-			if (eff_mouse_mode != MouseRange) {
+
+		case RegionViewNameHighlight:
+		case RegionViewName:
+		case LeftFrameHandle:
+		case RightFrameHandle:
+		case FadeInHandleItem:
+		case FadeInTrimHandleItem:
+		case FadeInItem:
+		case FadeOutHandleItem:
+		case FadeOutTrimHandleItem:
+		case FadeOutItem:
+		case StartCrossFadeItem:
+		case EndCrossFadeItem:
+			if (get_smart_mode() || eff_mouse_mode != MouseRange) {
 				_mouse_changed_selection |= set_selected_regionview_from_click (press, op);
+			} else if (event->type == GDK_BUTTON_PRESS) {
+				set_selected_track_as_side_effect (op);
 			}
-		}
-		break;
+			break;
 
- 	case RegionViewNameHighlight:
- 	case RegionViewName:
-	case LeftFrameHandle:
-	case RightFrameHandle:
-	case FadeInHandleItem:
-	case FadeInTrimHandleItem:
-	case FadeInItem:
-	case FadeOutHandleItem:
-	case FadeOutTrimHandleItem:
-	case FadeOutItem:
-	case StartCrossFadeItem:
-	case EndCrossFadeItem:
-		if (get_smart_mode() || eff_mouse_mode != MouseRange) {
-			_mouse_changed_selection |= set_selected_regionview_from_click (press, op);
-		} else if (event->type == GDK_BUTTON_PRESS) {
-			set_selected_track_as_side_effect (op);
-		}
-		break;
+		case ControlPointItem:
+			/* for object/track exclusivity, we don't call set_selected_track_as_side_effect (op); */
 
-	case ControlPointItem:
-		/* for object/track exclusivity, we don't call set_selected_track_as_side_effect (op); */
-
-		if (eff_mouse_mode != MouseRange) {
-			if (event->button.button != 3) {
-				_mouse_changed_selection |= set_selected_control_point_from_click (press, op);
-			} else {
-				_mouse_changed_selection |= set_selected_control_point_from_click (press, Selection::Set);
+			if (eff_mouse_mode != MouseRange) {
+				if (event->button.button != 3) {
+					_mouse_changed_selection |= set_selected_control_point_from_click (press, op);
+				} else {
+					_mouse_changed_selection |= set_selected_control_point_from_click (press, Selection::Set);
+				}
 			}
-		}
-		break;
+			break;
 
-	case GainLineItem:
-		if (eff_mouse_mode != MouseRange) {
-			AutomationLine* argl = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
+		case GainLineItem:
+			if (eff_mouse_mode != MouseRange) {
+				AutomationLine* argl = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
 
-			std::list<Selectable*> selectables;
-			uint32_t before, after;
-			samplecnt_t const  where = (samplecnt_t) floor (event->button.x * samples_per_pixel) - clicked_regionview->region ()->position ();
+				std::list<Selectable*> selectables;
+				uint32_t before, after;
+				samplecnt_t const  where = (samplecnt_t) floor (event->button.x * samples_per_pixel) - clicked_regionview->region ()->position ();
 
-			if (!argl || !argl->control_points_adjacent (where, before, after)) {
-				break;
+				if (!argl || !argl->control_points_adjacent (where, before, after)) {
+					break;
+				}
+
+				selectables.push_back (argl->nth (before));
+				selectables.push_back (argl->nth (after));
+
+				switch (op) {
+					case Selection::Set:
+						if (press) {
+							selection->set (selectables);
+							_mouse_changed_selection = true;
+						}
+						break;
+					case Selection::Add:
+						if (press) {
+							selection->add (selectables);
+							_mouse_changed_selection = true;
+						}
+						break;
+					case Selection::Toggle:
+						if (press) {
+							selection->toggle (selectables);
+							_mouse_changed_selection = true;
+						}
+						break;
+
+					case Selection::Extend:
+						/* XXX */
+						break;
+				}
 			}
+			break;
 
-			selectables.push_back (argl->nth (before));
-			selectables.push_back (argl->nth (after));
+		case AutomationLineItem:
+			if (eff_mouse_mode != MouseRange) {
+				AutomationLine* al = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
+				std::list<Selectable*> selectables;
+				double mx = event->button.x;
+				double my = event->button.y;
 
-			switch (op) {
-			case Selection::Set:
-				if (press) {
-					selection->set (selectables);
-					_mouse_changed_selection = true;
-				}
-				break;
-			case Selection::Add:
-				if (press) {
-					selection->add (selectables);
-					_mouse_changed_selection = true;
-				}
-				break;
-			case Selection::Toggle:
-				if (press) {
-					selection->toggle (selectables);
-					_mouse_changed_selection = true;
-				}
-				break;
+				al->grab_item().canvas_to_item (mx, my);
 
-			case Selection::Extend:
-				/* XXX */
-				break;
+				uint32_t before, after;
+				samplecnt_t const  where = (samplecnt_t) floor (mx * samples_per_pixel);
+
+				if (!al || !al->control_points_adjacent (where, before, after)) {
+					break;
+				}
+
+				selectables.push_back (al->nth (before));
+				selectables.push_back (al->nth (after));
+
+				switch (op) {
+					case Selection::Set:
+						if (press) {
+							selection->set (selectables);
+							_mouse_changed_selection = true;
+						}
+						break;
+					case Selection::Add:
+						if (press) {
+							selection->add (selectables);
+							_mouse_changed_selection = true;
+						}
+						break;
+					case Selection::Toggle:
+						if (press) {
+							selection->toggle (selectables);
+							_mouse_changed_selection = true;
+						}
+						break;
+
+					case Selection::Extend:
+						/* XXX */
+						break;
+				}
 			}
-		}
-		break;
+			break;
 
-	case AutomationLineItem:
-		if (eff_mouse_mode != MouseRange) {
-			AutomationLine* al = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
-			std::list<Selectable*> selectables;
-			double mx = event->button.x;
-			double my = event->button.y;
+		case StreamItem:
+			/* for context click, select track */
+			if (event->button.button == 3) {
+				selection->clear_tracks ();
+				set_selected_track_as_side_effect (op);
 
-			al->grab_item().canvas_to_item (mx, my);
-
-			uint32_t before, after;
-			samplecnt_t const  where = (samplecnt_t) floor (mx * samples_per_pixel);
-
-			if (!al || !al->control_points_adjacent (where, before, after)) {
-				break;
-			}
-
-			selectables.push_back (al->nth (before));
-			selectables.push_back (al->nth (after));
-
-			switch (op) {
-			case Selection::Set:
-				if (press) {
-					selection->set (selectables);
-					_mouse_changed_selection = true;
-				}
-				break;
-			case Selection::Add:
-				if (press) {
-					selection->add (selectables);
-					_mouse_changed_selection = true;
-				}
-				break;
-			case Selection::Toggle:
-				if (press) {
-					selection->toggle (selectables);
-					_mouse_changed_selection = true;
-				}
-				break;
-
-			case Selection::Extend:
-				/* XXX */
-				break;
-			}
-		}
-		break;
-
-	case StreamItem:
-		/* for context click, select track */
-		if (event->button.button == 3) {
-			selection->clear_tracks ();
-			set_selected_track_as_side_effect (op);
-
-			/* We won't get a release.*/
-			begin_reversible_selection_op (X_("Button 3 Menu Select"));
-			commit_reversible_selection_op ();
-		}
-		break;
-
-	case AutomationTrackItem:
-		if (eff_mouse_mode != MouseDraw && op == Selection::Set) {
-			set_selected_track_as_side_effect (op);
-		}
-		break;
-
-	case NoteItem:
-		if (press && event->button.button == 3) {
-			NoteBase* cnote = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
-			assert (cnote);
-			if (cnote->region_view().selection_size() == 0 || !cnote->selected()) {
-				selection->clear_points();
-				cnote->region_view().unique_select (cnote);
-				/* we won't get the release, so store the selection change now */
-				begin_reversible_selection_op (X_("Button 3 Note Selection"));
+				/* We won't get a release.*/
+				begin_reversible_selection_op (X_("Button 3 Menu Select"));
 				commit_reversible_selection_op ();
 			}
-		}
-		break;
+			break;
 
-	default:
-		break;
+		case AutomationTrackItem:
+			if (eff_mouse_mode != MouseDraw && op == Selection::Set) {
+				set_selected_track_as_side_effect (op);
+			}
+			break;
+
+		case NoteItem:
+			if (press && event->button.button == 3) {
+				NoteBase* cnote = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
+				assert (cnote);
+				if (cnote->region_view().selection_size() == 0 || !cnote->selected()) {
+					selection->clear_points();
+					cnote->region_view().unique_select (cnote);
+					/* we won't get the release, so store the selection change now */
+					begin_reversible_selection_op (X_("Button 3 Note Selection"));
+					commit_reversible_selection_op ();
+				}
+			}
+			break;
+
+		default:
+			break;
 	}
 
 	if ((!press) && _mouse_changed_selection) {
@@ -1399,21 +1398,19 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 bool
 Editor::button_press_dispatch (GdkEventButton* ev)
 {
-        /* this function is intended only for buttons 4 and above.
-         */
+	/* this function is intended only for buttons 4 and above. */
 
-        Gtkmm2ext::MouseButton b (ev->state, ev->button);
-        return button_bindings->activate (b, Gtkmm2ext::Bindings::Press);
+	Gtkmm2ext::MouseButton b (ev->state, ev->button);
+	return button_bindings->activate (b, Gtkmm2ext::Bindings::Press);
 }
 
 bool
 Editor::button_release_dispatch (GdkEventButton* ev)
 {
-        /* this function is intended only for buttons 4 and above.
-         */
+	/* this function is intended only for buttons 4 and above. */
 
-        Gtkmm2ext::MouseButton b (ev->state, ev->button);
-        return button_bindings->activate (b, Gtkmm2ext::Bindings::Release);
+	Gtkmm2ext::MouseButton b (ev->state, ev->button);
+	return button_bindings->activate (b, Gtkmm2ext::Bindings::Release);
 }
 
 bool

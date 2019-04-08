@@ -197,7 +197,7 @@ protected:
 	void set_colors ();
 	void set_waveform_colors ();
 	void reset_width_dependent_items (double pixel_width);
-	void set_sample_color ();
+	void set_frame_color ();
 
 	void color_handler ();
 

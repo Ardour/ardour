@@ -41,8 +41,8 @@ public:
 	samplepos_t read (uint32_t& hh, uint32_t& mm, uint32_t& ss, uint32_t& ff);
 
 private:
-	LTCDecoder*  _decoder;
-	samplecnt_t  _position;
+	LTCDecoder* _decoder;
+	samplecnt_t _position;
 };
 
 class LIBARDOUR_API LTCFileReader
@@ -76,9 +76,9 @@ private:
 	SNDFILE* _sndfile;
 	SF_INFO  _info;
 
-	LTCReader*   _reader;
-	float*       _interleaved_audio_buffer;
-	samplecnt_t  _samples_read;
+	LTCReader*  _reader;
+	float*      _interleaved_audio_buffer;
+	samplecnt_t _samples_read;
 
 };
 

@@ -54,7 +54,7 @@ private:
 
 	static AutomationWatch* _instance;
 	Glib::Threads::Thread*  _thread;
-	samplepos_t              _last_time;
+	samplepos_t             _last_time;
 	bool                    _run_thread;
 	AutomationWatches        automation_watches;
 	AutomationConnection     automation_connections;

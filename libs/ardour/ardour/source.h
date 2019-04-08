@@ -38,7 +38,7 @@ class Session;
 
 class LIBARDOUR_API Source : public SessionObject
 {
-  public:
+public:
 	enum Flag {
 		Writable = 0x1,
 		CanRename = 0x2,
@@ -64,9 +64,9 @@ class LIBARDOUR_API Source : public SessionObject
 	time_t timestamp() const { return _timestamp; }
 	void stamp (time_t when) { _timestamp = when; }
 
-	virtual bool       empty () const = 0;
+	virtual bool        empty () const = 0;
 	virtual samplecnt_t length (samplepos_t pos) const = 0;
-	virtual void       update_length (samplecnt_t cnt) = 0;
+	virtual void        update_length (samplecnt_t cnt) = 0;
 
 	virtual samplepos_t natural_position() const { return 0; }
 
@@ -98,36 +98,39 @@ class LIBARDOUR_API Source : public SessionObject
 	std::string get_transients_path() const;
 	int load_transients (const std::string&);
 
-	samplepos_t    timeline_position() const { return _timeline_position; }
+	samplepos_t  timeline_position() const { return _timeline_position; }
 	virtual void set_timeline_position (samplepos_t pos);
 
 	void set_allow_remove_if_empty (bool yn);
 
-        Glib::Threads::Mutex& mutex() { return _lock; }
-	Flag         flags() const { return _flags; }
+	Glib::Threads::Mutex& mutex() { return _lock; }
+	Flag flags() const { return _flags; }
 
 	virtual void inc_use_count ();
 	virtual void dec_use_count ();
-        int  use_count() const { return g_atomic_int_get (const_cast<gint*>(&_use_count)); }
+	int  use_count() const { return g_atomic_int_get (const_cast<gint*>(&_use_count)); }
 	bool used() const { return use_count() > 0; }
+
 	uint32_t level() const { return _level; }
 
 	std::string ancestor_name() { return _ancestor_name.empty() ? name() : _ancestor_name; }
-	void set_ancestor_name(const std::string& name) { _ancestor_name = name; }
+	void        set_ancestor_name(const std::string& name) { _ancestor_name = name; }
 
-  protected:
-	DataType            _type;
-	Flag                _flags;
-	time_t              _timestamp;
-	samplepos_t          _timeline_position;
-	bool                _analysed;
-        mutable Glib::Threads::Mutex _lock;
-        mutable Glib::Threads::Mutex _analysis_lock;
-	gint                _use_count; /* atomic */
-	uint32_t            _level; /* how deeply nested is this source w.r.t a disk file */
-	std::string         _ancestor_name;
+protected:
+	DataType    _type;
+	Flag        _flags;
+	time_t      _timestamp;
+	samplepos_t _timeline_position;
+	bool        _analysed;
 
-  private:
+	mutable Glib::Threads::Mutex _lock;
+	mutable Glib::Threads::Mutex _analysis_lock;
+
+	gint        _use_count; /* atomic */
+	uint32_t    _level; /* how deeply nested is this source w.r.t a disk file */
+	std::string _ancestor_name;
+
+private:
 	void fix_writable_flags ();
 };
 

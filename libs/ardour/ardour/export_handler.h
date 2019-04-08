@@ -155,7 +155,7 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 	TimespanBounds        timespan_bounds;
 
 	PBD::ScopedConnection process_connection;
-	samplepos_t             process_position;
+	samplepos_t           process_position;
 
 	/* CD Marker stuff */
 
@@ -194,13 +194,13 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 
 		/* Track info */
 		uint32_t        track_number;
-		samplepos_t      track_position;
-		samplepos_t      track_duration;
-		samplepos_t      track_start_sample;
+		samplepos_t     track_position;
+		samplepos_t     track_duration;
+		samplepos_t     track_start_sample;
 
 		/* Index info */
-		uint32_t       index_number;
-		samplepos_t      index_position;
+		uint32_t        index_number;
+		samplepos_t     index_position;
 	};
 
 
@@ -219,7 +219,7 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 	void write_index_info_toc (CDMarkerStatus & status);
 	void write_index_info_mp4ch (CDMarkerStatus & status);
 
-	void samples_to_cd_samples_string (char* buf, samplepos_t when);
+	void samples_to_cd_frame_string (char* buf, samplepos_t when);
 	void samples_to_chapter_marks_string (char* buf, samplepos_t when);
 
 	std::string toc_escape_cdtext (const std::string&);

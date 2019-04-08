@@ -2156,9 +2156,6 @@ Editor::select_range_between ()
 bool
 Editor::get_edit_op_range (samplepos_t& start, samplepos_t& end) const
 {
-//	samplepos_t m;
-//	bool ignored;
-
 	/* if an explicit range exists, use it */
 
 	if ((mouse_mode == MouseRange || get_smart_mode()) &&  !selection->time.empty()) {
@@ -2171,87 +2168,6 @@ Editor::get_edit_op_range (samplepos_t& start, samplepos_t& end) const
 		end = 0;
 		return false;
 	}
-
-//	if (!mouse_sample (m, ignored)) {
-//		/* mouse is not in a canvas, try playhead+selected marker.
-//		   this is probably most true when using menus.
-//		*/
-//
-//		if (selection->markers.empty()) {
-//			return false;
-//		}
-
-//		start = selection->markers.front()->position();
-//		end = _session->audible_sample();
-
-//	} else {
-
-//		switch (_edit_point) {
-//		case EditAtPlayhead:
-//			if (selection->markers.empty()) {
-//				/* use mouse + playhead */
-//				start = m;
-//				end = _session->audible_sample();
-//			} else {
-//				/* use playhead + selected marker */
-//				start = _session->audible_sample();
-//				end = selection->markers.front()->position();
-//			}
-//			break;
-
-//		case EditAtMouse:
-//			/* use mouse + selected marker */
-//			if (selection->markers.empty()) {
-//				start = m;
-//				end = _session->audible_sample();
-//			} else {
-//				start = selection->markers.front()->position();
-//				end = m;
-//			}
-//			break;
-
-//		case EditAtSelectedMarker:
-//			/* use mouse + selected marker */
-//			if (selection->markers.empty()) {
-
-//				MessageDialog win (_("No edit range defined"),
-//				                   false,
-//				                   MESSAGE_INFO,
-//				                   BUTTONS_OK);
-
-//				win.set_secondary_text (
-//					_("the edit point is Selected Marker\nbut there is no selected marker."));
-
-
-//				win.set_default_response (RESPONSE_CLOSE);
-//				win.set_position (Gtk::WIN_POS_MOUSE);
-//				win.show_all();
-
-//				win.run ();
-
-//				return false; // NO RANGE
-//			}
-//			start = selection->markers.front()->position();
-//			end = m;
-//			break;
-//		}
-//	}
-
-//	if (start == end) {
-//		return false;
-//	}
-
-//	if (start > end) {
-//		swap (start, end);
-//	}
-
-	/* turn range into one delimited by start...end,
-	   not start...end-1
-	*/
-
-//	end++;
-
-//	return true;
 }
 
 void

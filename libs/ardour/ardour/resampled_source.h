@@ -36,11 +36,11 @@ class LIBARDOUR_API ResampledImportableSource : public ImportableSource
 	~ResampledImportableSource ();
 
 	samplecnt_t read (Sample* buffer, samplecnt_t nframes);
-	float      ratio() const { return _src_data.src_ratio; }
-	uint32_t   channels() const { return source->channels(); }
+	float       ratio() const { return _src_data.src_ratio; }
+	uint32_t    channels() const { return source->channels(); }
 	samplecnt_t length() const { return source->length(); }
 	samplecnt_t samplerate() const { return source->samplerate(); }
-	void       seek (samplepos_t);
+	void        seek (samplepos_t);
 	samplepos_t natural_position() const;
 
 	bool clamped_at_unity () const {

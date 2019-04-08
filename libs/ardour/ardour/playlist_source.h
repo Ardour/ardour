@@ -42,8 +42,8 @@ public:
 protected:
 	boost::shared_ptr<Playlist> _playlist;
 	PBD::ID                     _original;
-	sampleoffset_t               _playlist_offset;
-	samplecnt_t                  _playlist_length;
+	sampleoffset_t              _playlist_offset;
+	samplecnt_t                 _playlist_length;
 
 	PlaylistSource (Session&, const PBD::ID&, const std::string& name, boost::shared_ptr<Playlist>, DataType,
 	                sampleoffset_t begin, samplecnt_t len, Source::Flag flags);

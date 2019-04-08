@@ -123,7 +123,7 @@ class LIBARDOUR_API LadspaPlugin : public ARDOUR::Plugin
 	Glib::Module*            _module;
 	const LADSPA_Descriptor* _descriptor;
 	LADSPA_Handle            _handle;
-	samplecnt_t               _sample_rate;
+	samplecnt_t              _sample_rate;
 	LADSPA_Data*             _control_data;
 	LADSPA_Data*             _shadow_data;
 	LADSPA_Data*             _latency_control_port;

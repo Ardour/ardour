@@ -745,11 +745,11 @@ ExportHandler::write_track_info_cue (CDMarkerStatus & status)
 	}
 
 	if (status.track_position != status.track_start_sample) {
-		samples_to_cd_samples_string (buf, status.track_position);
+		samples_to_cd_frame_string (buf, status.track_position);
 		status.out << "    INDEX 00" << buf << endl;
 	}
 
-	samples_to_cd_samples_string (buf, status.track_start_sample);
+	samples_to_cd_frame_string (buf, status.track_start_sample);
 	status.out << "    INDEX 01" << buf << endl;
 
 	status.index_number = 2;
@@ -802,13 +802,13 @@ ExportHandler::write_track_info_toc (CDMarkerStatus & status)
 
 	status.out << "  }" << endl << "}" << endl;
 
-	samples_to_cd_samples_string (buf, status.track_position);
+	samples_to_cd_frame_string (buf, status.track_position);
 	status.out << "FILE " << toc_escape_filename (status.filename) << ' ' << buf;
 
-	samples_to_cd_samples_string (buf, status.track_duration);
+	samples_to_cd_frame_string (buf, status.track_duration);
 	status.out << buf << endl;
 
-	samples_to_cd_samples_string (buf, status.track_start_sample - status.track_position);
+	samples_to_cd_frame_string (buf, status.track_start_sample - status.track_position);
 	status.out << "START" << buf << endl;
 }
 
@@ -827,7 +827,7 @@ ExportHandler::write_index_info_cue (CDMarkerStatus & status)
 
 	snprintf (buf, sizeof(buf), "    INDEX %02d", cue_indexnum);
 	status.out << buf;
-	samples_to_cd_samples_string (buf, status.index_position);
+	samples_to_cd_frame_string (buf, status.index_position);
 	status.out << buf << endl;
 
 	cue_indexnum++;
@@ -838,7 +838,7 @@ ExportHandler::write_index_info_toc (CDMarkerStatus & status)
 {
 	gchar buf[18];
 
-	samples_to_cd_samples_string (buf, status.index_position - status.track_position);
+	samples_to_cd_frame_string (buf, status.index_position - status.track_position);
 	status.out << "INDEX" << buf << endl;
 }
 
@@ -848,7 +848,7 @@ ExportHandler::write_index_info_mp4ch (CDMarkerStatus & status)
 }
 
 void
-ExportHandler::samples_to_cd_samples_string (char* buf, samplepos_t when)
+ExportHandler::samples_to_cd_frame_string (char* buf, samplepos_t when)
 {
 	samplecnt_t remainder;
 	samplecnt_t fr = session.nominal_sample_rate();

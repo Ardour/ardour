@@ -682,8 +682,8 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, s
 	redraw_start_xfade_to (ar, width, points, effective_height, handle_left);
 
 	/* ensure trim handle stays on top */
-	if (sample_handle_start) {
-		sample_handle_start->raise_to_top();
+	if (frame_handle_start) {
+		frame_handle_start->raise_to_top();
 	}
 }
 
@@ -708,7 +708,7 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 
 	double const pwidth = floor(trackview.editor().sample_to_pixel (width));
 
-	/* the right edge should be right on the region sample is the pixel
+	/* the right edge should be right on the region frame is the pixel
 	 * width is zero. Hence the additional + 1.0 at the end.
 	 */
 
@@ -768,8 +768,8 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 	redraw_end_xfade_to (ar, width, points, effective_height, handle_right, pwidth);
 
 	/* ensure trim handle stays on top */
-	if (sample_handle_end) {
-		sample_handle_end->raise_to_top();
+	if (frame_handle_end) {
+		frame_handle_end->raise_to_top();
 	}
 }
 
@@ -1339,7 +1339,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 		return;
 	}
 
-	/*y is in item sample */
+	/* y is in item frame */
 	double const bx = gain_line->nth (before_p)->get_x();
 	double const ax = gain_line->nth (after_p)->get_x();
 	double const click_ratio = (ax - mx) / (ax - bx);
@@ -1591,13 +1591,13 @@ AudioRegionView::set_some_waveform_colors (vector<ArdourWaveView::WaveView*>& wa
 }
 
 void
-AudioRegionView::set_sample_color ()
+AudioRegionView::set_frame_color ()
 {
-	if (!sample) {
+	if (!frame) {
 		return;
 	}
 
-	RegionView::set_sample_color ();
+	RegionView::set_frame_color ();
 
 	set_waveform_colors ();
 }
