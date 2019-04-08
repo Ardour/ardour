@@ -64,9 +64,9 @@ class LIBARDOUR_API Source : public SessionObject
 	time_t timestamp() const { return _timestamp; }
 	void stamp (time_t when) { _timestamp = when; }
 
-	virtual bool       empty () const = 0;
+	virtual bool        empty () const = 0;
 	virtual samplecnt_t length (samplepos_t pos) const = 0;
-	virtual void       update_length (samplecnt_t cnt) = 0;
+	virtual void        update_length (samplecnt_t cnt) = 0;
 
 	virtual samplepos_t natural_position() const { return 0; }
 
@@ -119,10 +119,12 @@ class LIBARDOUR_API Source : public SessionObject
 	DataType            _type;
 	Flag                _flags;
 	time_t              _timestamp;
-	samplepos_t          _timeline_position;
+	samplepos_t         _timeline_position;
 	bool                _analysed;
-        mutable Glib::Threads::Mutex _lock;
-        mutable Glib::Threads::Mutex _analysis_lock;
+
+	mutable Glib::Threads::Mutex _lock;
+	mutable Glib::Threads::Mutex _analysis_lock;
+
 	gint                _use_count; /* atomic */
 	uint32_t            _level; /* how deeply nested is this source w.r.t a disk file */
 	std::string         _ancestor_name;

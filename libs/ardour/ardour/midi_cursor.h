@@ -51,8 +51,8 @@ struct MidiCursor : public boost::noncopyable {
 
 	Evoral::Sequence<Temporal::Beats>::const_iterator        iter;
 	std::set<Evoral::Sequence<Temporal::Beats>::WeakNotePtr> active_notes;
-	samplepos_t                                             last_read_end;
-	PBD::ScopedConnectionList                              connections;
+	samplepos_t                                              last_read_end;
+	PBD::ScopedConnectionList                                connections;
 };
 
 }

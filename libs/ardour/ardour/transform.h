@@ -50,8 +50,8 @@ namespace ARDOUR {
  */
 class LIBARDOUR_API Transform : public MidiOperator {
 public:
-	typedef Evoral::Sequence<Temporal::Beats>::NotePtr     NotePtr;
-	typedef Evoral::Sequence<Temporal::Beats>::Notes       Notes;
+	typedef Evoral::Sequence<Temporal::Beats>::NotePtr   NotePtr;
+	typedef Evoral::Sequence<Temporal::Beats>::Notes     Notes;
 	typedef ARDOUR::MidiModel::NoteDiffCommand::Property Property;
 
 	/** Context while iterating over notes during transformation. */

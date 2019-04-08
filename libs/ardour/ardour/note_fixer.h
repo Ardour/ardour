@@ -67,8 +67,8 @@ public:
 	 */
 	void prepare(TempoMap&                          tempo_map,
 	             const MidiModel::NoteDiffCommand*  cmd,
-	             samplepos_t                         origin,
-	             samplepos_t                         pos,
+	             samplepos_t                        origin,
+	             samplepos_t                        pos,
 	             std::set< boost::weak_ptr<Note> >& active_notes);
 
 	/** Emit any pending edit compensation events.
@@ -80,7 +80,7 @@ public:
 	 */
 	void emit(Evoral::EventSink<samplepos_t>& dst,
 	          samplepos_t                     pos,
-	          MidiStateTracker&              tracker);
+	          MidiStateTracker&               tracker);
 
 private:
 	typedef Evoral::Event<samplepos_t> Event;
@@ -91,7 +91,7 @@ private:
 
 	/** Return true iff `note` is active at `pos`. */
 	bool note_is_active(const BeatsSamplesConverter& converter,
-	                    boost::shared_ptr<Note>     note,
+	                    boost::shared_ptr<Note>      note,
 	                    samplepos_t                  pos);
 
 	Events _events;

@@ -42,8 +42,8 @@ NoteFixer::clear()
 void
 NoteFixer::prepare(TempoMap&                          tempo_map,
                    const MidiModel::NoteDiffCommand*  cmd,
-                   const samplepos_t                   origin,
-                   const samplepos_t                   pos,
+                   const samplepos_t                  origin,
+                   const samplepos_t                  pos,
                    std::set< boost::weak_ptr<Note> >& active_notes)
 {
 	typedef MidiModel::NoteDiffCommand Command;
@@ -115,7 +115,7 @@ NoteFixer::prepare(TempoMap&                          tempo_map,
 void
 NoteFixer::emit(Evoral::EventSink<samplepos_t>& dst,
                 samplepos_t                     pos,
-                MidiStateTracker&              tracker)
+                MidiStateTracker&               tracker)
 {
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		dst.write(pos, (*i)->event_type(), (*i)->size(), (*i)->buffer());
@@ -133,7 +133,7 @@ NoteFixer::copy_event(samplepos_t time, const Evoral::Event<Temporal::Beats>& ev
 
 bool
 NoteFixer::note_is_active(const BeatsSamplesConverter& converter,
-                          boost::shared_ptr<Note>     note,
+                          boost::shared_ptr<Note>      note,
                           samplepos_t                  pos)
 {
 	const samplepos_t start_time = converter.to(note->time());

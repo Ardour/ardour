@@ -75,14 +75,14 @@ MidiPort::cycle_start (pframes_t nframes)
 		read_and_parse_entire_midi_buffer_with_no_speed_adjustment (nframes, *_trace_parser, AudioEngine::instance()->sample_time_at_cycle_start());
 	}
 
-	if (inbound_midi_filter) {
+	if (_inbound_midi_filter) {
 		MidiBuffer& mb (get_midi_buffer (nframes));
-		inbound_midi_filter (mb, mb);
+		_inbound_midi_filter (mb, mb);
 	}
 
 	if (_shadow_port) {
 		MidiBuffer& mb (get_midi_buffer (nframes));
-		if (shadow_midi_filter (mb, _shadow_port->get_midi_buffer (nframes))) {
+		if (_shadow_midi_filter (mb, _shadow_port->get_midi_buffer (nframes))) {
 			_shadow_port->flush_buffers (nframes);
 		}
 	}
@@ -376,7 +376,7 @@ MidiPort::add_shadow_port (string const & name, MidiFilter mf)
 		return -2;
 	}
 
-	shadow_midi_filter = mf;
+	_shadow_midi_filter = mf;
 
 	if (!(_shadow_port = boost::dynamic_pointer_cast<MidiPort> (AudioEngine::instance()->register_output_port (DataType::MIDI, name, false, PortFlags (Shadow|IsTerminal))))) {
 		return -3;

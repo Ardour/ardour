@@ -74,7 +74,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	uint32_t    num_ports () const;
 	uint32_t    parameter_count () const;
 	float       default_value (uint32_t port);
-	samplecnt_t  max_latency () const;
+	samplecnt_t max_latency () const;
 	void        set_parameter (uint32_t port, float val);
 	float       get_parameter (uint32_t port) const;
 	std::string get_docs() const;
@@ -183,11 +183,11 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	float*        _defaults;
 	LV2_Evbuf**   _ev_buffers;
 	LV2_Evbuf**   _atom_ev_buffers;
-	float*        _bpm_control_port;  ///< Special input set by ardour
-	float*        _freewheel_control_port;  ///< Special input set by ardour
-	float*        _latency_control_port;  ///< Special output set by ardour
-	samplepos_t   _next_cycle_start;  ///< Expected start sample of next run cycle
-	double        _next_cycle_speed;  ///< Expected start sample of next run cycle
+	float*        _bpm_control_port; ///< Special input set by ardour
+	float*        _freewheel_control_port; ///< Special input set by ardour
+	float*        _latency_control_port; ///< Special output set by ardour
+	samplepos_t   _next_cycle_start; ///< Expected start sample of next run cycle
+	double        _next_cycle_speed; ///< Expected start sample of next run cycle
 	double        _next_cycle_beat;  ///< Expected bar_beat of next run cycle
 	double        _current_bpm;
 	PBD::ID       _insert_id;

@@ -103,11 +103,10 @@ private:
 
 	int set_state_2X (XMLNode const &, int);
 
-	uint32_t  _bitslot;
-
+	uint32_t    _bitslot;
 	samplecnt_t _delay_in;
 	samplecnt_t _delay_out;
-	bool       _remove_on_disconnect;
+	bool        _remove_on_disconnect;
 };
 
 } // namespace ARDOUR

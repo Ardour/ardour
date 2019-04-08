@@ -55,14 +55,14 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              hidden;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              position_locked;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              valid_transients;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<samplepos_t>        start;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<samplecnt_t>        length;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<samplepos_t>        position;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<samplepos_t>       start;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<samplecnt_t>       length;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<samplepos_t>       position;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<double>            beat;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<samplecnt_t>        sync_position;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<samplecnt_t>       sync_position;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<layer_t>           layer;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<samplepos_t>        ancestral_start;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<samplecnt_t>        ancestral_length;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<samplepos_t>       ancestral_start;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<samplecnt_t>       ancestral_length;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float>             stretch;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float>             shift;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<PositionLockStyle> position_lock_style;
@@ -108,14 +108,14 @@ public:
 	 * START:    first sample of the region within its source(s)
 	 * LENGTH:   number of samples the region represents
 	 */
-	samplepos_t position ()  const { return _position; }
-	samplepos_t start ()     const { return _start; }
-	samplecnt_t length ()    const { return _length; }
+	samplepos_t position () const { return _position; }
+	samplepos_t start ()    const { return _start; }
+	samplecnt_t length ()   const { return _length; }
 	layer_t    layer ()     const { return _layer; }
 
 	void set_selected_for_solo(bool yn);
 
-	samplecnt_t source_length(uint32_t n) const;
+	samplecnt_t source_length (uint32_t n) const;
 	uint32_t   max_source_level () const;
 
 	/* these two are valid ONLY during a StateChanged signal handler */
@@ -389,12 +389,12 @@ protected:
 	PBD::Property<bool>        _left_of_split;
 	PBD::Property<bool>        _right_of_split;
 	PBD::Property<bool>        _valid_transients;
-	PBD::Property<samplepos_t>  _start;
-	PBD::Property<samplecnt_t>  _length;
-	PBD::Property<samplepos_t>  _position;
+	PBD::Property<samplepos_t> _start;
+	PBD::Property<samplecnt_t> _length;
+	PBD::Property<samplepos_t> _position;
 	PBD::Property<double>      _beat;
 	/** Sync position relative to the start of our file */
-	PBD::Property<samplepos_t>  _sync_position;
+	PBD::Property<samplepos_t> _sync_position;
 
 	double                  _quarter_note;
 
@@ -410,12 +410,12 @@ protected:
 
 	// _transient_user_start is covered by  _valid_transients
 	AnalysisFeatureList     _user_transients; // user added
-	samplepos_t              _transient_user_start; // region's _start relative to user_transients
+	samplepos_t             _transient_user_start; // region's _start relative to user_transients
 
 	// these are used by Playlist::find_next_transient() in absence of onsets
 	AnalysisFeatureList     _transients; // Source Analysis (QM Transient), user read-only
-	samplepos_t              _transient_analysis_start;
-	samplepos_t              _transient_analysis_end;
+	samplepos_t             _transient_analysis_start;
+	samplepos_t             _transient_analysis_end;
 
 	bool                    _soloSelected;
 
@@ -445,15 +445,15 @@ private:
 	PBD::Property<bool>        _external;
 	PBD::Property<bool>        _hidden;
 	PBD::Property<bool>        _position_locked;
-	PBD::Property<samplepos_t>  _ancestral_start;
-	PBD::Property<samplecnt_t>  _ancestral_length;
+	PBD::Property<samplepos_t> _ancestral_start;
+	PBD::Property<samplecnt_t> _ancestral_length;
 	PBD::Property<float>       _stretch;
 	PBD::Property<float>       _shift;
 	PBD::EnumProperty<PositionLockStyle> _position_lock_style;
 	PBD::Property<uint64_t>    _layering_index;
 
-	samplecnt_t              _last_length;
-	samplepos_t              _last_position;
+	samplecnt_t             _last_length;
+	samplepos_t             _last_position;
 	mutable RegionEditState _first_edit;
 	layer_t                 _layer;
 

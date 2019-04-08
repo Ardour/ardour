@@ -59,8 +59,8 @@ public:
 
 	/** This constructor does NOT notify others (session) */
 	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other,
-	              samplepos_t                            start,
-	              samplecnt_t                            cnt,
+	              samplepos_t                           start,
+	              samplecnt_t                           cnt,
 	              std::string                           name,
 	              bool                                  hidden = false);
 
@@ -78,9 +78,9 @@ public:
 	 * @return The number of samples read (time, not an event count).
 	 */
 	samplecnt_t read (Evoral::EventSink<samplepos_t>& buf,
-	                 samplepos_t                     start,
-	                 samplecnt_t                     cnt,
-	                 Evoral::Range<samplepos_t>*     loop_range,
+	                 samplepos_t                    start,
+	                 samplecnt_t                    cnt,
+	                 Evoral::Range<samplepos_t>*    loop_range,
 	                 uint32_t                       chan_n = 0,
 	                 MidiChannelFilter*             filter = NULL);
 
@@ -132,7 +132,7 @@ private:
 
 	NoteTrackers _note_trackers;
 	NoteMode     _note_mode;
-	samplepos_t   _read_end;
+	samplepos_t  _read_end;
 };
 
 } /* namespace ARDOUR */

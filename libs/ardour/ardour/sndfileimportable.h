@@ -29,26 +29,25 @@
 namespace ARDOUR {
 
 class LIBARDOUR_API SndFileImportableSource : public ImportableSource {
-    public:
+public:
 	SndFileImportableSource (const std::string& path);
 	virtual ~SndFileImportableSource();
 
 	samplecnt_t read (Sample* buffer, samplecnt_t nframes);
-	uint32_t   channels() const;
+	uint32_t    channels() const;
 	samplecnt_t length() const;
 	samplecnt_t samplerate() const;
-	void       seek (samplepos_t pos);
+	void        seek (samplepos_t pos);
 	samplepos_t natural_position() const;
-	bool       clamped_at_unity () const;
+	bool        clamped_at_unity () const;
 
-   protected:
+protected:
 	SF_INFO sf_info;
 	boost::shared_ptr<SNDFILE> in;
 
 	/* these are int64_t so as to be independent of whatever
-	   types Ardour may use for samplepos_t, samplecnt_t etc.
-	*/
-
+	 * types Ardour may use for samplepos_t, samplecnt_t etc.
+	 */
 	int64_t timecode;
 	int64_t get_timecode_info (SNDFILE*, SF_BROADCAST_INFO*, bool&);
 };

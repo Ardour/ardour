@@ -180,7 +180,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		ExportGraphBuilder & parent;
 
 		FileSpec        config;
-		samplecnt_t      max_samples_out;
+		samplecnt_t     max_samples_out;
 		bool            use_loudness;
 		bool            use_peak;
 		BufferPtr       buffer;
@@ -188,6 +188,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		TmpFilePtr      tmp_file;
 		NormalizerPtr   normalizer;
 		ThreaderPtr     threader;
+
 		LoudnessReaderPtr    loudness_reader;
 		boost::ptr_list<SFC> children;
 
@@ -215,7 +216,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		boost::ptr_list<SFC>  children;
 		boost::ptr_list<Intermediate> intermediate_children;
 		SRConverterPtr        converter;
-		samplecnt_t            max_samples_out;
+		samplecnt_t           max_samples_out;
 	};
 
 	// Silence trimmer + adder
@@ -234,7 +235,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		FileSpec             config;
 		boost::ptr_list<SRC> children;
 		SilenceTrimmerPtr    silence_trimmer;
-		samplecnt_t           max_samples_in;
+		samplecnt_t          max_samples_in;
 	};
 
 	// channel configuration
@@ -254,7 +255,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		boost::ptr_list<SilenceHandler> children;
 		InterleaverPtr            interleaver;
 		ChunkerPtr                chunker;
-		samplecnt_t                max_samples_out;
+		samplecnt_t               max_samples_out;
 	};
 
 	Session const & session;
