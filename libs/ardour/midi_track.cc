@@ -461,8 +461,8 @@ MidiTrack::write_out_of_band_data (BufferSet& bufs, samplecnt_t nframes) const
 
 int
 MidiTrack::export_stuff (BufferSet&                   buffers,
-                         samplepos_t                   start,
-                         samplecnt_t                   nframes,
+                         samplepos_t                  start,
+                         samplecnt_t                  nframes,
                          boost::shared_ptr<Processor> endpoint,
                          bool                         include_endpoint,
                          bool                         for_export,
@@ -505,8 +505,8 @@ MidiTrack::bounce (InterThreadInfo& itt)
 }
 
 boost::shared_ptr<Region>
-MidiTrack::bounce_range (samplepos_t                   start,
-                         samplepos_t                   end,
+MidiTrack::bounce_range (samplepos_t                  start,
+                         samplepos_t                  end,
                          InterThreadInfo&             itt,
                          boost::shared_ptr<Processor> endpoint,
                          bool                         include_endpoint)

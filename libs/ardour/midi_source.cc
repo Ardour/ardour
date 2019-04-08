@@ -195,11 +195,11 @@ MidiSource::invalidate (const Lock& lock)
 
 samplecnt_t
 MidiSource::midi_read (const Lock&                        lm,
-                       Evoral::EventSink<samplepos_t>&     dst,
-                       samplepos_t                         source_start,
-                       samplepos_t                         start,
-                       samplecnt_t                         cnt,
-                       Evoral::Range<samplepos_t>*         loop_range,
+                       Evoral::EventSink<samplepos_t>&    dst,
+                       samplepos_t                        source_start,
+                       samplepos_t                        start,
+                       samplecnt_t                        cnt,
+                       Evoral::Range<samplepos_t>*        loop_range,
                        MidiCursor&                        cursor,
                        MidiStateTracker*                  tracker,
                        MidiChannelFilter*                 filter,
@@ -309,7 +309,7 @@ MidiSource::midi_read (const Lock&                        lm,
 }
 
 samplecnt_t
-MidiSource::midi_write (const Lock&                 lm,
+MidiSource::midi_write (const Lock&                  lm,
                         MidiRingBuffer<samplepos_t>& source,
                         samplepos_t                  source_start,
                         samplecnt_t                  cnt)
@@ -369,9 +369,9 @@ MidiSource::mark_streaming_write_started (const Lock& lock)
 }
 
 void
-MidiSource::mark_midi_streaming_write_completed (const Lock&                                      lock,
+MidiSource::mark_midi_streaming_write_completed (const Lock&                                        lock,
                                                  Evoral::Sequence<Temporal::Beats>::StuckNoteOption option,
-                                                 Temporal::Beats                                  end)
+                                                 Temporal::Beats                                    end)
 {
 	if (_model) {
 		_model->end_write (option, end);

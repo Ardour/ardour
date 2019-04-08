@@ -123,13 +123,13 @@ MidiPlaylistSource::length (samplepos_t)  const
 
 samplecnt_t
 MidiPlaylistSource::read_unlocked (const Lock& lock,
-				   Evoral::EventSink<samplepos_t>& dst,
-				   samplepos_t /*position*/,
-				   samplepos_t start,
+                                   Evoral::EventSink<samplepos_t>& dst,
+                                   samplepos_t /*position*/,
+                                   samplepos_t start,
                                    samplecnt_t cnt,
                                    Evoral::Range<samplepos_t>* loop_range,
-				   MidiStateTracker*,
-				   MidiChannelFilter*) const
+                                   MidiStateTracker*,
+                                   MidiChannelFilter*) const
 {
 	boost::shared_ptr<MidiPlaylist> mp = boost::dynamic_pointer_cast<MidiPlaylist> (_playlist);
 
