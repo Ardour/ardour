@@ -219,7 +219,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 				return;
 			}
 
-			/* skip counts as an error ... go back to waiting for the first sample */
+			/* skip counts as an error ... go back to waiting for the first frame */
 
 #ifdef DEBUG_MTC
 			cerr << "Skipped MTC qtr frame, return to stopped state" << endl;

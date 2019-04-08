@@ -1846,19 +1846,19 @@ LV2Plugin::set_property(uint32_t key, const Variant& value)
 
 	// Set up forge to write to temporary buffer on the stack
 	LV2_Atom_Forge*      forge = &_impl->ui_forge;
-	LV2_Atom_Forge_Frame sample;
+	LV2_Atom_Forge_Frame frame;
 	uint8_t              buf[PATH_MAX];  // Ought to be enough for anyone...
 
 	lv2_atom_forge_set_buffer(forge, buf, sizeof(buf));
 
 	// Serialize patch:Set message to set property
 #ifdef HAVE_LV2_1_10_0
-	lv2_atom_forge_object(forge, &sample, 0, _uri_map.urids.patch_Set);
+	lv2_atom_forge_object(forge, &frame, 0, _uri_map.urids.patch_Set);
 	lv2_atom_forge_key(forge, _uri_map.urids.patch_property);
 	lv2_atom_forge_urid(forge, key);
 	lv2_atom_forge_key(forge, _uri_map.urids.patch_value);
 #else
-	lv2_atom_forge_blank(forge, &sample, 0, _uri_map.urids.patch_Set);
+	lv2_atom_forge_blank(forge, &frame, 0, _uri_map.urids.patch_Set);
 	lv2_atom_forge_property_head(forge, _uri_map.urids.patch_property, 0);
 	lv2_atom_forge_urid(forge, key);
 	lv2_atom_forge_property_head(forge, _uri_map.urids.patch_value, 0);
@@ -2019,16 +2019,16 @@ LV2Plugin::announce_property_values()
 
 	// Set up forge to write to temporary buffer on the stack
 	LV2_Atom_Forge*      forge = &_impl->ui_forge;
-	LV2_Atom_Forge_Frame sample;
+	LV2_Atom_Forge_Frame frame;
 	uint8_t              buf[PATH_MAX];  // Ought to be enough for anyone...
 
 	lv2_atom_forge_set_buffer(forge, buf, sizeof(buf));
 
 	// Serialize patch:Get message with no subject (implicitly plugin instance)
 #ifdef HAVE_LV2_1_10_0
-	lv2_atom_forge_object(forge, &sample, 0, _uri_map.urids.patch_Get);
+	lv2_atom_forge_object(forge, &frame, 0, _uri_map.urids.patch_Get);
 #else
-	lv2_atom_forge_blank(forge, &sample, 0, _uri_map.urids.patch_Get);
+	lv2_atom_forge_blank(forge, &frame, 0, _uri_map.urids.patch_Get);
 #endif
 
 	// Write message to UI=>Plugin ring
@@ -2550,9 +2550,9 @@ write_position(LV2_Atom_Forge*     forge,
 
 	uint8_t pos_buf[256];
 	lv2_atom_forge_set_buffer(forge, pos_buf, sizeof(pos_buf));
-	LV2_Atom_Forge_Frame sample;
+	LV2_Atom_Forge_Frame frame;
 #ifdef HAVE_LV2_1_10_0
-	lv2_atom_forge_object(forge, &sample, 0, urids.time_Position);
+	lv2_atom_forge_object(forge, &frame, 0, urids.time_Position);
 	lv2_atom_forge_key(forge, urids.time_frame);
 	lv2_atom_forge_long(forge, position);
 	lv2_atom_forge_key(forge, urids.time_speed);
@@ -2569,7 +2569,7 @@ write_position(LV2_Atom_Forge*     forge,
 	lv2_atom_forge_key(forge, urids.time_beatsPerMinute);
 	lv2_atom_forge_float(forge, bpm);
 #else
-	lv2_atom_forge_blank(forge, &sample, 1, urids.time_Position);
+	lv2_atom_forge_blank(forge, &frame, 1, urids.time_Position);
 	lv2_atom_forge_property_head(forge, urids.time_frame, 0);
 	lv2_atom_forge_long(forge, position);
 	lv2_atom_forge_property_head(forge, urids.time_speed, 0);
