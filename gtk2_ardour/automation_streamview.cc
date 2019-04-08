@@ -319,7 +319,7 @@ AutomationStreamView::get_lines () const
 }
 
 bool
-AutomationStreamView::paste (samplepos_t                                pos,
+AutomationStreamView::paste (samplepos_t                               pos,
                              unsigned                                  paste_count,
                              float                                     times,
                              boost::shared_ptr<ARDOUR::AutomationList> alist)

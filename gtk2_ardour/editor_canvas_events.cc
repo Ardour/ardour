@@ -801,7 +801,7 @@ Editor::canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item* item, Re
 {
 	bool ret = false;
 
-	/* sample handles are not active when in internal edit mode, because actual notes
+	/* frame handles are not active when in internal edit mode, because actual notes
 	   might be in the area occupied by the handle - we want them to be editable as normal.
 	*/
 
@@ -809,7 +809,7 @@ Editor::canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item* item, Re
 		return false;
 	}
 
-	/* NOTE: sample handles pretend to be the colored trim bar from an event handling
+	/* NOTE: frame handles pretend to be the colored trim bar from an event handling
 	   perspective. XXX change this ??
 	*/
 

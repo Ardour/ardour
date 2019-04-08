@@ -501,10 +501,9 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 					_mouse_changed_selection = set_selected_regionview_from_click (press, op);
 				} else {
 					/* don't change the selection unless the
-						 clicked track is not currently selected. if
-						 so, "collapse" the selection to just this
-						 track
-						 */
+					 * clicked track is not currently selected. if
+					 * so, "collapse" the selection to just this track
+					 */
 					if (!selection->selected (clicked_axisview)) {
 						set_selected_track_as_side_effect (Selection::Set);
 					}

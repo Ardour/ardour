@@ -122,7 +122,7 @@ AutomationRegionView::get_fill_color() const
 void
 AutomationRegionView::mouse_mode_changed ()
 {
-	// Adjust sample colour (become more transparent for internal tools)
+	/* Adjust frame colour (become more transparent for internal tools) */
 	set_frame_color();
 }
 
@@ -206,7 +206,7 @@ AutomationRegionView::add_automation_event (GdkEvent *, samplepos_t when, double
 }
 
 bool
-AutomationRegionView::paste (samplepos_t                                      pos,
+AutomationRegionView::paste (samplepos_t                                     pos,
                              unsigned                                        paste_count,
                              float                                           times,
                              boost::shared_ptr<const ARDOUR::AutomationList> slist)

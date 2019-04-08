@@ -145,7 +145,7 @@ public:
 	Editor ();
 	~Editor ();
 
-	void             set_session (ARDOUR::Session *);
+	void             set_session (ARDOUR::Session*);
 
 	Gtk::Window* use_own_window (bool and_fill_it);
 
@@ -155,7 +155,7 @@ public:
 	samplepos_t leftmost_sample() const { return _leftmost_sample; }
 
 	samplecnt_t current_page_samples() const {
-		return (samplecnt_t) _visible_canvas_width * samples_per_pixel;
+		return (samplecnt_t) _visible_canvas_width* samples_per_pixel;
 	}
 
 	double visible_canvas_height () const {
@@ -184,7 +184,7 @@ public:
 	void step_mouse_mode (bool next);
 	Editing::MouseMode current_mouse_mode () const { return mouse_mode; }
 	Editing::MidiEditMode current_midi_edit_mode () const;
-	void remove_midi_note (ArdourCanvas::Item *, GdkEvent *);
+	void remove_midi_note (ArdourCanvas::Item*, GdkEvent*);
 
 	bool internal_editing() const;
 
@@ -456,7 +456,7 @@ public:
 	              bool                 ensure_snap = false);
 
 	void snap_to_with_modifier (ARDOUR::MusicSample& first,
-	                            GdkEvent const *     ev,
+	                            GdkEvent const*      ev,
 	                            ARDOUR::RoundMode    direction = ARDOUR::RoundNearest,
 	                            ARDOUR::SnapPref     pref = ARDOUR::SnapToAny_Visual);
 
@@ -484,7 +484,7 @@ public:
 	void set_current_trimmable (boost::shared_ptr<ARDOUR::Trimmable>);
 	void set_current_movable (boost::shared_ptr<ARDOUR::Movable>);
 
-	MouseCursors const * cursors () const {
+	MouseCursors const* cursors () const {
 		return _cursors;
 	}
 
@@ -595,8 +595,8 @@ private:
 	void start_visual_state_op (uint32_t n);
 	void cancel_visual_state_op (uint32_t n);
 
-	samplepos_t         _leftmost_sample;
-	samplecnt_t         samples_per_pixel;
+	samplepos_t       _leftmost_sample;
+	samplecnt_t        samples_per_pixel;
 	Editing::ZoomFocus zoom_focus;
 
 	void set_samples_per_pixel (samplecnt_t);
@@ -626,8 +626,8 @@ private:
 	Gtk::VBox _editor_list_vbox;
 	Gtk::Notebook _the_notebook;
 	bool _notebook_shrunk;
-	void add_notebook_page (std::string const &, Gtk::Widget &);
-	bool notebook_tab_clicked (GdkEventButton *, Gtk::Widget *);
+	void add_notebook_page (std::string const&, Gtk::Widget&);
+	bool notebook_tab_clicked (GdkEventButton*, Gtk::Widget*);
 
 	ArdourWidgets::HPane edit_pane;
 	ArdourWidgets::VPane editor_summary_pane;
@@ -637,13 +637,13 @@ private:
 	Gtk::HBox     marker_box;
 	Gtk::VBox     scrollers_rulers_markers_box;
 
-	void location_changed (ARDOUR::Location *);
-	void location_flags_changed (ARDOUR::Location *);
+	void location_changed (ARDOUR::Location*);
+	void location_flags_changed (ARDOUR::Location*);
 	void refresh_location_display ();
 	void refresh_location_display_internal (const ARDOUR::Locations::LocationList&);
-	void add_new_location (ARDOUR::Location *);
-	ArdourCanvas::Container* add_new_location_internal (ARDOUR::Location *);
-	void location_gone (ARDOUR::Location *);
+	void add_new_location (ARDOUR::Location*);
+	ArdourCanvas::Container* add_new_location_internal (ARDOUR::Location*);
+	void location_gone (ARDOUR::Location*);
 	void remove_marker (ArdourCanvas::Item&, GdkEvent*);
 	gint really_remove_marker (ARDOUR::Location* loc);
 	void goto_nth_marker (int nth);
@@ -683,18 +683,18 @@ private:
 		void set_color_rgba (uint32_t);
 	};
 
-	LocationMarkers  *find_location_markers (ARDOUR::Location *) const;
-	ARDOUR::Location* find_location_from_marker (ArdourMarker *, bool& is_start) const;
-	ArdourMarker* find_marker_from_location_id (PBD::ID const &, bool) const;
+	LocationMarkers*  find_location_markers (ARDOUR::Location*) const;
+	ARDOUR::Location* find_location_from_marker (ArdourMarker*, bool& is_start) const;
+	ArdourMarker* find_marker_from_location_id (PBD::ID const&, bool) const;
 	ArdourMarker* entered_marker;
 	bool _show_marker_lines;
 
-	typedef std::map<ARDOUR::Location*,LocationMarkers *> LocationMarkerMap;
+	typedef std::map<ARDOUR::Location*,LocationMarkers*> LocationMarkerMap;
 	LocationMarkerMap location_markers;
 
 	void update_marker_labels ();
-	void update_marker_labels (ArdourCanvas::Container *);
-	void check_marker_label (ArdourMarker *);
+	void update_marker_labels (ArdourCanvas::Container*);
+	void check_marker_label (ArdourMarker*);
 
 	/** A set of lists of Markers that are in each of the canvas groups
 	 *  for the marker sections at the top of the editor.  These lists
@@ -702,8 +702,8 @@ private:
 	 *  a marker has moved we can decide whether we need to update the labels
 	 *  for all markers or for just a few.
 	 */
-	std::map<ArdourCanvas::Container *, std::list<ArdourMarker *> > _sorted_marker_lists;
-	void remove_sorted_marker (ArdourMarker *);
+	std::map<ArdourCanvas::Container*, std::list<ArdourMarker*> > _sorted_marker_lists;
+	void remove_sorted_marker (ArdourMarker*);
 
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
 	void clear_marker_display ();
@@ -712,7 +712,7 @@ private:
 	void mouse_add_new_punch (samplepos_t);
 	bool choose_new_marker_name(std::string &name, bool is_range=false);
 	void update_cd_marker_display ();
-	void ensure_cd_marker_updated (LocationMarkers * lam, ARDOUR::Location * location);
+	void ensure_cd_marker_updated (LocationMarkers* lam, ARDOUR::Location* location);
 
 	TimeAxisView*      clicked_axisview;
 	RouteTimeAxisView* clicked_routeview;
@@ -736,7 +736,7 @@ private:
 	void mapover_tracks_with_unique_playlists (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, PBD::PropertyID) const;
 
 	/* functions to be passed to mapover_tracks(), possibly with sigc::bind()-supplied arguments */
-	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView *, std::vector<RegionView*>*) const;
+	void mapped_get_equivalent_regions (RouteTimeAxisView&, uint32_t, RegionView*, std::vector<RegionView*>*) const;
 	void mapped_use_new_playlist (RouteTimeAxisView&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 	void mapped_use_copy_playlist (RouteTimeAxisView&, uint32_t, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 	void mapped_clear_playlist (RouteTimeAxisView&, uint32_t);
@@ -745,7 +745,7 @@ private:
 	bool button_release_can_deselect;
 	bool _mouse_changed_selection;
 
-	void catch_vanishing_regionview (RegionView *);
+	void catch_vanishing_regionview (RegionView*);
 
 	void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
 	void select_all_tracks ();
@@ -757,8 +757,8 @@ private:
 	bool set_selected_regionview_from_click (bool press, Selection::Operation op = Selection::Set);
 
 	bool set_selected_regionview_from_map_event (GdkEventAny*, StreamView*, boost::weak_ptr<ARDOUR::Region>);
-	void collect_new_region_view (RegionView *);
-	void collect_and_select_new_region_view (RegionView *);
+	void collect_new_region_view (RegionView*);
+	void collect_and_select_new_region_view (RegionView*);
 
 	Gtk::Menu track_context_menu;
 	Gtk::Menu track_region_context_menu;
@@ -777,15 +777,15 @@ private:
 	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&);
 	Gtk::MenuItem* _popup_region_menu_item;
 
-	void popup_control_point_context_menu (ArdourCanvas::Item *, GdkEvent *);
+	void popup_control_point_context_menu (ArdourCanvas::Item*, GdkEvent*);
 	Gtk::Menu _control_point_context_menu;
 
-	void popup_note_context_menu (ArdourCanvas::Item *, GdkEvent *);
+	void popup_note_context_menu (ArdourCanvas::Item*, GdkEvent*);
 	Gtk::Menu _note_context_menu;
 
 	void add_stripables (ARDOUR::StripableList&);
 	void add_routes (ARDOUR::RouteList&);
-	void timeaxisview_deleted (TimeAxisView *);
+	void timeaxisview_deleted (TimeAxisView*);
 	void add_vcas (ARDOUR::VCAList&);
 
 	Gtk::HBox global_hpacker;
@@ -820,18 +820,18 @@ private:
 	void parameter_changed (std::string);
 	void ui_parameter_changed (std::string);
 
-	Gtk::EventBox             time_bars_event_box;
-	Gtk::VBox                 time_bars_vbox;
+	Gtk::EventBox            time_bars_event_box;
+	Gtk::VBox                time_bars_vbox;
 
-	ArdourCanvas::Container      *tempo_group;
-	ArdourCanvas::Container      *meter_group;
-	ArdourCanvas::Container      *marker_group;
-	ArdourCanvas::Container      *range_marker_group;
-	ArdourCanvas::Container      *transport_marker_group;
-	ArdourCanvas::Container*      cd_marker_group;
+	ArdourCanvas::Container* tempo_group;
+	ArdourCanvas::Container* meter_group;
+	ArdourCanvas::Container* marker_group;
+	ArdourCanvas::Container* range_marker_group;
+	ArdourCanvas::Container* transport_marker_group;
+	ArdourCanvas::Container* cd_marker_group;
 
 	/* parent for groups which themselves contain time markers */
-	ArdourCanvas::Container*     _time_markers_group;
+	ArdourCanvas::Container* _time_markers_group;
 
 	/* The group containing all other groups that are scrolled vertically
 	   and horizontally.
@@ -875,7 +875,7 @@ private:
 	Glib::RefPtr<Gtk::ToggleAction> ruler_cd_marker_action;
 	bool                            no_ruler_shown_update;
 
-	Gtk::Widget * ruler_grabbed_widget;
+	Gtk::Widget* ruler_grabbed_widget;
 
 	RulerDialog* ruler_dialog;
 
@@ -1011,8 +1011,8 @@ private:
 	void    cursor_to_next_region_point (EditorCursor*, ARDOUR::RegionPoint);
 	void    cursor_to_previous_region_point (EditorCursor*, ARDOUR::RegionPoint);
 	void    cursor_to_region_point (EditorCursor*, ARDOUR::RegionPoint, int32_t dir);
-	void    cursor_to_selection_start (EditorCursor *);
-	void    cursor_to_selection_end   (EditorCursor *);
+	void    cursor_to_selection_start (EditorCursor*);
+	void    cursor_to_selection_end   (EditorCursor*);
 
 	void    selected_marker_to_region_boundary (bool with_selection, int32_t dir);
 	void    selected_marker_to_next_region_boundary (bool with_selection);
@@ -1023,12 +1023,12 @@ private:
 	void    selected_marker_to_selection_start ();
 	void    selected_marker_to_selection_end   ();
 
-	void    select_all_selectables_using_cursor (EditorCursor *, bool);
+	void    select_all_selectables_using_cursor (EditorCursor*, bool);
 	void    select_all_selectables_using_edit (bool, bool);
 	void    select_all_selectables_between (bool within);
 	void    select_range_between ();
 
-	boost::shared_ptr<ARDOUR::Region> find_next_region (ARDOUR::samplepos_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
+	boost::shared_ptr<ARDOUR::Region> find_next_region (ARDOUR::samplepos_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView** = 0);
 	ARDOUR::samplepos_t find_next_region_boundary (ARDOUR::samplepos_t, int32_t dir, const TrackViewList&);
 
 	std::vector<ARDOUR::samplepos_t> region_boundary_cache;
@@ -1071,8 +1071,8 @@ private:
 	bool track_canvas_map_handler (GdkEventAny*);
 
 	bool edit_controls_button_release (GdkEventButton*);
-	Gtk::Menu *edit_controls_left_menu;
-	Gtk::Menu *edit_controls_right_menu;
+	Gtk::Menu* edit_controls_left_menu;
+	Gtk::Menu* edit_controls_right_menu;
 
 	Gtk::VBox           track_canvas_vbox;
 	Gtk::VBox           edit_controls_vbox;
@@ -1125,7 +1125,7 @@ private:
 
 	void pre_render ();
 
-	static int _idle_visual_changer (void *arg);
+	static int _idle_visual_changer (void* arg);
 	int idle_visual_changer ();
 	void visual_changer (const VisualChange&);
 	void ensure_visual_change_idle_handler ();
@@ -1163,8 +1163,8 @@ private:
 
 	bool typed_event (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
-	bool button_press_handler_1 (ArdourCanvas::Item *, GdkEvent *, ItemType);
-	bool button_press_handler_2 (ArdourCanvas::Item *, GdkEvent *, ItemType);
+	bool button_press_handler_1 (ArdourCanvas::Item*, GdkEvent*, ItemType);
+	bool button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_double_click_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool button_press_dispatch (GdkEventButton*);
@@ -1394,7 +1394,7 @@ private:
 	/* PT import specific */
 	void external_pt_dialog ();
 	ARDOUR::ImportStatus import_pt_status;
-	static void *_import_pt_thread (void *);
+	static void*_import_pt_thread (void*);
 	void* import_pt_thread ();
 	PTFFormat import_ptf;
 
@@ -1410,7 +1410,7 @@ private:
 	};
 
 	EditorImportStatus import_status;
-	static void *_import_thread (void *);
+	static void*_import_thread (void*);
 	void* import_thread ();
 	void finish_import ();
 
@@ -1545,8 +1545,8 @@ private:
 
 	void region_view_item_click (AudioRegionView&, GdkEventButton*);
 
-	bool can_remove_control_point (ArdourCanvas::Item *);
-	void remove_control_point (ArdourCanvas::Item *);
+	bool can_remove_control_point (ArdourCanvas::Item*);
+	void remove_control_point (ArdourCanvas::Item*);
 
 	void mouse_brush_insert_region (RegionView*, samplepos_t pos);
 
@@ -1576,9 +1576,9 @@ private:
 	bool canvas_tempo_curve_event (GdkEvent* event,ArdourCanvas::Item*, TempoCurve*);
 	bool canvas_meter_marker_event (GdkEvent* event,ArdourCanvas::Item*, MeterMarker*);
 	bool canvas_automation_track_event(GdkEvent* event, ArdourCanvas::Item*, AutomationTimeAxisView*);
-	bool canvas_note_event (GdkEvent* event, ArdourCanvas::Item *);
+	bool canvas_note_event (GdkEvent* event, ArdourCanvas::Item*);
 
-	bool canvas_ruler_event (GdkEvent* event, ArdourCanvas::Item *, ItemType);
+	bool canvas_ruler_event (GdkEvent* event, ArdourCanvas::Item*, ItemType);
 	bool canvas_tempo_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_meter_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool canvas_marker_bar_event (GdkEvent* event, ArdourCanvas::Item*);
@@ -1620,8 +1620,8 @@ private:
 	void track_canvas_viewport_allocate (Gtk::Allocation alloc);
 	void track_canvas_viewport_size_allocated ();
 	bool track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const &, int, int, guint);
-	bool track_canvas_key_press (GdkEventKey *);
-	bool track_canvas_key_release (GdkEventKey *);
+	bool track_canvas_key_press (GdkEventKey*);
+	bool track_canvas_key_release (GdkEventKey*);
 
 	void set_playhead_cursor ();
 
@@ -1666,7 +1666,7 @@ private:
 	void marker_menu_edit ();
 	void marker_menu_remove ();
 	void marker_menu_rename ();
-	void rename_marker (ArdourMarker *marker);
+	void rename_marker (ArdourMarker* marker);
 	void toggle_marker_lock_style ();
 	void toggle_tempo_clamped ();
 	void toggle_tempo_type ();
@@ -1694,10 +1694,10 @@ private:
 	void marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void tempo_or_meter_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void new_transport_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
-	void build_range_marker_menu (ARDOUR::Location *, bool, bool);
-	void build_marker_menu (ARDOUR::Location *);
-	void build_tempo_marker_menu (TempoMarker *, bool);
-	void build_meter_marker_menu (MeterMarker *, bool);
+	void build_range_marker_menu (ARDOUR::Location*, bool, bool);
+	void build_marker_menu (ARDOUR::Location*);
+	void build_tempo_marker_menu (TempoMarker*, bool);
+	void build_meter_marker_menu (MeterMarker*, bool);
 	void build_new_transport_marker_menu ();
 
 	void dynamic_cast_marker_object (void*, MeterMarker**, TempoMarker**) const;
@@ -1789,7 +1789,7 @@ private:
 	void build_grid_type_menu ();
 
 	ArdourWidgets::ArdourButton snap_mode_button;
-	bool snap_mode_button_clicked (GdkEventButton *);
+	bool snap_mode_button_clicked (GdkEventButton*);
 
 	Gtk::HBox snap_box;
 
@@ -1922,7 +1922,7 @@ private:
 	void stop_canvas_autoscroll ();
 
 	/* trimming */
-	void point_trim (GdkEvent *, samplepos_t);
+	void point_trim (GdkEvent*, samplepos_t);
 
 	void trim_region_front();
 	void trim_region_back();
@@ -1997,8 +1997,8 @@ private:
 	uint32_t selection_op_cmd_depth;
 	uint32_t selection_op_history_it;
 
-	std::list<XMLNode *> selection_op_history; /* used in *_reversible_selection_op */
-	std::list<XMLNode *> before; /* used in *_reversible_command */
+	std::list<XMLNode*> selection_op_history; /* used in *_reversible_selection_op */
+	std::list<XMLNode*> before; /* used in *_reversible_command */
 
 	void update_title ();
 	void update_title_s (const std::string & snapshot_name);
@@ -2025,19 +2025,19 @@ private:
 	/** computes the timeline sample (sample) of an event whose coordinates
 	 * are in canvas units (pixels, scroll offset included).
 	 */
-	samplepos_t canvas_event_sample (GdkEvent const *, double* px = 0, double* py = 0) const;
+	samplepos_t canvas_event_sample (GdkEvent const*, double* px = 0, double* py = 0) const;
 
 	/** computes the timeline sample (sample) of an event whose coordinates
 	 * are in window units (pixels, no scroll offset).
 	 */
-	samplepos_t window_event_sample (GdkEvent const *, double* px = 0, double* py = 0) const;
+	samplepos_t window_event_sample (GdkEvent const*, double* px = 0, double* py = 0) const;
 
 	/* returns false if mouse pointer is not in track or marker canvas
 	 */
 	bool mouse_sample (samplepos_t&, bool& in_track_canvas) const;
 
 	TimeFXDialog* current_timefx;
-	static void* timefx_thread (void *arg);
+	static void* timefx_thread (void* arg);
 	void do_timefx ();
 
 	int time_stretch (RegionSelection&, float fraction);
@@ -2219,11 +2219,11 @@ private:
 	Gtk::HBox _summary_hbox;
 	EditorSummary* _summary;
 
-	void region_view_added (RegionView *);
+	void region_view_added (RegionView*);
 	void region_view_removed ();
 
 	EditorGroupTabs* _group_tabs;
-	void fit_route_group (ARDOUR::RouteGroup *);
+	void fit_route_group (ARDOUR::RouteGroup*);
 
 	void step_edit_status_change (bool);
 	void start_step_editing ();
@@ -2286,12 +2286,12 @@ private:
 
 	/* private helper functions to help with registering region actions */
 
-	Glib::RefPtr<Gtk::Action> register_region_action (Glib::RefPtr<Gtk::ActionGroup> group, Editing::RegionActionTarget, char const * name, char const * label, sigc::slot<void> slot);
-	void register_toggle_region_action (Glib::RefPtr<Gtk::ActionGroup> group, Editing::RegionActionTarget, char const * name, char const * label, sigc::slot<void> slot);
+	Glib::RefPtr<Gtk::Action> register_region_action (Glib::RefPtr<Gtk::ActionGroup> group, Editing::RegionActionTarget, char const* name, char const* label, sigc::slot<void> slot);
+	void register_toggle_region_action (Glib::RefPtr<Gtk::ActionGroup> group, Editing::RegionActionTarget, char const* name, char const* label, sigc::slot<void> slot);
 
-	Glib::RefPtr<Gtk::Action> reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const * name, char const * label, sigc::slot<void> slot);
-	void toggle_reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const * name, char const * label, sigc::slot<void> slot);
-	void radio_reg_sens (Glib::RefPtr<Gtk::ActionGroup> action_group, Gtk::RadioAction::Group& radio_group, char const * name, char const * label, sigc::slot<void> slot);
+	Glib::RefPtr<Gtk::Action> reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const* name, char const* label, sigc::slot<void> slot);
+	void toggle_reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const* name, char const* label, sigc::slot<void> slot);
+	void radio_reg_sens (Glib::RefPtr<Gtk::ActionGroup> action_group, Gtk::RadioAction::Group& radio_group, char const* name, char const* label, sigc::slot<void> slot);
 
 	friend class Drag;
 	friend class RegionCutDrag;

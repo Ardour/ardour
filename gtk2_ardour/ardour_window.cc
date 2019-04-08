@@ -54,7 +54,6 @@ ArdourWindow::ArdourWindow (Gtk::Window& parent, string title)
 
 ArdourWindow::~ArdourWindow ()
 {
-	// WM::Manager::instance().remove (proxy);
 }
 
 bool
