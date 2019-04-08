@@ -35,8 +35,8 @@ public:
 	void set_color_rgba (uint32_t rgba);
 	samplepos_t position() const { return sample_position; }
 
-	ArdourCanvas::Container * get_parent() { return _parent; }
-	void reparent (ArdourCanvas::Container & parent);
+	ArdourCanvas::Container* get_parent() { return _parent; }
+	void reparent (ArdourCanvas::Container& parent);
 
 	void hide ();
 	void show ();
@@ -49,7 +49,7 @@ public:
 protected:
 	PublicEditor& editor;
 
-	ArdourCanvas::Container*    parent;
+	ArdourCanvas::Container*   _parent;
 	ArdourCanvas::Container*    group;
 	ArdourCanvas::Points*       points;
 	ArdourCanvas::FramedCurve* _curve;
