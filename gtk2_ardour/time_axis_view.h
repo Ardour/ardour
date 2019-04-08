@@ -90,13 +90,13 @@ class PasteContext;
  */
 class TimeAxisView : public virtual AxisView
 {
-	private:
+private:
 	enum NamePackingBits {
 		NameLabelPacked = 0x1,
 		NameEntryPacked = 0x2
 	};
 
-	public:
+public:
 	TimeAxisView(ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
 	virtual ~TimeAxisView ();
 
@@ -183,9 +183,13 @@ class TimeAxisView : public virtual AxisView
 	 *  @param ctx Paste context.
 	 */
 	virtual bool paste (ARDOUR::samplepos_t pos,
-	                    const Selection&   selection,
-	                    PasteContext&      ctx,
-			    const int32_t sub_num) { return false; }
+	                    const Selection&    selection,
+	                    PasteContext&       ctx,
+	                    const int32_t sub_num)
+	{
+		return false;
+	}
+
 
 	virtual void set_selected_regionviews (RegionSelection&) {}
 	virtual void set_selected_points (PointSelection&);
@@ -220,7 +224,7 @@ class TimeAxisView : public virtual AxisView
 
 	static uint32_t preset_height (Height);
 
-	protected:
+protected:
 	static Glib::RefPtr<Gtk::SizeGroup> controls_meters_size_group;
 	static Glib::RefPtr<Gtk::SizeGroup> midi_scroomer_size_group;
 	static unsigned int name_width_px;
@@ -305,7 +309,7 @@ class TimeAxisView : public virtual AxisView
 
 	void build_size_menu ();
 
-  private:
+private:
 	Gtk::VBox*            control_parent;
 	int                  _order;
 	uint32_t             _effective_height;

@@ -470,7 +470,7 @@ MidiStreamView::setup_rec_box ()
 				samplepos_t start = 0;
 				if (rec_regions.size() > 0) {
 					start = rec_regions.back().first->start()
-						+ _trackview.track()->get_captured_samples(rec_regions.size()-1);
+					        + _trackview.track()->get_captured_samples (rec_regions.size() - 1);
 				}
 
 				if (!rec_regions.empty()) {
@@ -521,7 +521,7 @@ MidiStreamView::setup_rec_box ()
 
 			/* start a new rec box */
 
-			create_rec_box(_trackview.midi_track()->current_capture_start(), 0);
+			create_rec_box (_trackview.midi_track()->current_capture_start(), 0);
 
 		} else if (rec_active &&
 		           (_trackview.session()->record_status() != Session::Recording ||

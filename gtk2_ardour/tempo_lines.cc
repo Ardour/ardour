@@ -63,9 +63,9 @@ TempoLines::hide ()
 
 void
 TempoLines::draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
-			unsigned                                              divisions,
-                        samplecnt_t                                            leftmost_sample,
-                        samplecnt_t                                            sample_rate)
+                        unsigned                                 divisions,
+                        samplecnt_t                              leftmost_sample,
+                        samplecnt_t                              sample_rate)
 {
 	const uint32_t base = UIConfiguration::instance().color_mod("measure line beat", "measure line beat");
 
@@ -90,9 +90,9 @@ TempoLines::draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 
 void
 TempoLines::draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
-		  unsigned                                              divisions,
-                  samplecnt_t                                            leftmost_sample,
-                  samplecnt_t                                            sample_rate)
+                  unsigned                                 divisions,
+                  samplecnt_t                              leftmost_sample,
+                  samplecnt_t                              sample_rate)
 {
 	std::vector<ARDOUR::TempoMap::BBTPoint>::const_iterator i;
 	double  beat_density;

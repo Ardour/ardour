@@ -49,28 +49,31 @@ public:
 protected:
 	PublicEditor& editor;
 
-	ArdourCanvas::Container* _parent;
-	ArdourCanvas::Container *group;
-	ArdourCanvas::Points *points;
+	ArdourCanvas::Container*    parent;
+	ArdourCanvas::Container*    group;
+	ArdourCanvas::Points*       points;
 	ArdourCanvas::FramedCurve* _curve;
 
 	double        unit_position;
-	samplepos_t    sample_position;
-	samplepos_t    _end_sample;
+	samplepos_t   sample_position;
+	samplepos_t  _end_sample;
 	bool         _shown;
 	double       _canvas_height;
 	uint32_t     _color;
 
 	void reposition ();
+
 private:
-	double       _min_tempo;
-	double       _max_tempo;
 	/* disallow copy construction */
 	TempoCurve (TempoCurve const &);
-	TempoCurve & operator= (TempoCurve const &);
-	ARDOUR::TempoSection& _tempo;
-	ArdourCanvas::Text *_start_text;
-	ArdourCanvas::Text *_end_text;
 
+	TempoCurve & operator= (TempoCurve const &);
+
+	double _min_tempo;
+	double _max_tempo;
+
+	ARDOUR::TempoSection& _tempo;
+	ArdourCanvas::Text*   _start_text;
+	ArdourCanvas::Text*   _end_text;
 };
 #endif /* __gtk_ardour_tempo_curve_h__ */

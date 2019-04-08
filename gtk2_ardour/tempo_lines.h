@@ -32,18 +32,18 @@ public:
 	void tempo_map_changed(samplepos_t new_origin);
 
 	void draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
-		   unsigned                                              divisions,
-	           ARDOUR::samplecnt_t                                    leftmost_sample,
-	           ARDOUR::samplecnt_t                                    sample_rate);
+	           unsigned                                 divisions,
+	           ARDOUR::samplecnt_t                      leftmost_sample,
+	           ARDOUR::samplecnt_t                      sample_rate);
 
 	void show();
 	void hide();
 
 private:
 	void draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
-			 unsigned                                              divisions,
-	                 ARDOUR::samplecnt_t                                    leftmost_sample,
-	                 ARDOUR::samplecnt_t                                    sample_rate);
+	                 unsigned                                 divisions,
+	                 ARDOUR::samplecnt_t                      leftmost_sample,
+	                 ARDOUR::samplecnt_t                      sample_rate);
 
 	ArdourCanvas::LineSet lines;
 	ARDOUR::BeatsSamplesConverter* _bfc;

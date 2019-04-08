@@ -854,7 +854,7 @@ RegionView::trim_front (samplepos_t new_bound, bool no_overlap, const int32_t su
 	_region->trim_front (new_bound, sub_num);
 
 	if (no_overlap) {
-		// Get the next region on the left of this region and shrink/expand it.
+		/* Get the next region on the left of this region and shrink/expand it. */
 		boost::shared_ptr<Playlist> playlist (_region->playlist());
 		boost::shared_ptr<Region> region_left = playlist->find_next_region (pre_trim_first_sample, End, 0);
 
@@ -864,7 +864,7 @@ RegionView::trim_front (samplepos_t new_bound, bool no_overlap, const int32_t su
 			regions_touching = true;
 		}
 
-		// Only trim region on the left if the first sample has gone beyond the left region's last sample.
+		/* Only trim region on the left if the first sample has gone beyond the left region's last sample. */
 		if (region_left != 0 &&	(region_left->last_sample() > _region->first_sample() || regions_touching)) {
 			region_left->trim_end (_region->first_sample() - 1);
 		}
@@ -872,7 +872,7 @@ RegionView::trim_front (samplepos_t new_bound, bool no_overlap, const int32_t su
 
 	region_changed (ARDOUR::bounds_change);
 
-	return (pre_trim_first_sample != _region->first_sample());  //return true if we actually changed something
+	return (pre_trim_first_sample != _region->first_sample()); // return true if we actually changed something
 }
 
 bool
@@ -887,7 +887,7 @@ RegionView::trim_end (samplepos_t new_bound, bool no_overlap, const int32_t sub_
 	_region->trim_end (new_bound, sub_num);
 
 	if (no_overlap) {
-		// Get the next region on the right of this region and shrink/expand it.
+		/* Get the next region on the right of this region and shrink/expand it. */
 		boost::shared_ptr<Playlist> playlist (_region->playlist());
 		boost::shared_ptr<Region> region_right = playlist->find_next_region (pre_trim_last_sample, Start, 1);
 
@@ -897,7 +897,7 @@ RegionView::trim_end (samplepos_t new_bound, bool no_overlap, const int32_t sub_
 			regions_touching = true;
 		}
 
-		// Only trim region on the right if the last sample has gone beyond the right region's first sample.
+		/* Only trim region on the right if the last sample has gone beyond the right region's first sample. */
 		if (region_right != 0 && (region_right->first_sample() < _region->last_sample() || regions_touching)) {
 			region_right->trim_front (_region->last_sample() + 1, sub_num);
 		}
@@ -908,7 +908,7 @@ RegionView::trim_end (samplepos_t new_bound, bool no_overlap, const int32_t sub_
 		region_changed (PropertyChange (ARDOUR::Properties::length));
 	}
 
-	return (pre_trim_last_sample != _region->last_sample());  //return true if we actually changed something
+	return (pre_trim_last_sample != _region->last_sample()); // return true if we actually changed something
 }
 
 

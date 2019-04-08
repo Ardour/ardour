@@ -442,8 +442,8 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 
 	if (get_smart_mode() && eff_mouse_mode == MouseRange && event->button.button == 3 && item_type == RegionItem) {
 		/* context clicks are always about object properties, even if
-			 we're in range mode within smart mode.
-			 */
+		 * we're in range mode within smart mode.
+		 */
 		eff_mouse_mode = MouseObject;
 	}
 
@@ -462,11 +462,11 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	}
 
 	if (((mouse_mode != MouseObject) &&
-				(mouse_mode != MouseAudition || item_type != RegionItem) &&
-				(mouse_mode != MouseTimeFX || item_type != RegionItem) &&
-				(mouse_mode != MouseDraw) &&
-				(mouse_mode != MouseContent || item_type == RegionItem)) ||
-			((event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE) || event->button.button > 3)) {
+	     (mouse_mode != MouseAudition || item_type != RegionItem) &&
+	     (mouse_mode != MouseTimeFX || item_type != RegionItem) &&
+	     (mouse_mode != MouseDraw) &&
+	     (mouse_mode != MouseContent || item_type == RegionItem)) ||
+	    ((event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE) || event->button.button > 3)) {
 		return;
 	}
 
@@ -477,8 +477,8 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 			/* almost no selection action on modified button-2 or button-3 events */
 
 			if ((item_type != RegionItem && event->button.button != 2)
-					/* for selection of control points prior to delete (shift-right click) */
-					&& !(item_type == ControlPointItem && event->button.button == 3 && event->type == GDK_BUTTON_PRESS)) {
+			    /* for selection of control points prior to delete (shift-right click) */
+			    && !(item_type == ControlPointItem && event->button.button == 3 && event->type == GDK_BUTTON_PRESS)) {
 				return;
 			}
 		}
@@ -682,10 +682,10 @@ bool
 Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	/* single mouse clicks on any of these item types operate
-	   independent of mouse mode, mostly because they are
-	   not on the main track canvas or because we want
-	   them to be modeless.
-	*/
+	 * independent of mouse mode, mostly because they are
+	 * not on the main track canvas or because we want
+	 * them to be modeless.
+	 */
 
 	NoteBase* note = NULL;
 
@@ -753,10 +753,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case MinsecRulerItem:
 	case BBTRulerItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
-			&& !ArdourKeyboard::indicates_constraint (event->button.state)) {
+		    && !ArdourKeyboard::indicates_constraint (event->button.state)) {
 			_drags->set (new CursorDrag (this, *playhead_cursor, false), event);
 		} else if (ArdourKeyboard::indicates_constraint (event->button.state)
-			   && Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier)) {
+		           && Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier)) {
 			_drags->set (new TempoTwistDrag (this, item), event);
 		} else if (ArdourKeyboard::indicates_constraint (event->button.state)) {
 			_drags->set (new BBTRulerDrag (this, item), event);
@@ -800,11 +800,11 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	if (_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT) {
 		/* special case: allow trim of range selections in joined object mode;
-		   in theory eff should equal MouseRange in this case, but it doesn't
-		   because entering the range selection canvas item results in entered_regionview
-		   being set to 0, so update_join_object_range_location acts as if we aren't
-		   over a region.
-		*/
+		 * in theory eff should equal MouseRange in this case, but it doesn't
+		 * because entering the range selection canvas item results in entered_regionview
+		 * being set to 0, so update_join_object_range_location acts as if we aren't
+		 * over a region.
+		 */
 		if (item_type == StartSelectionTrimItem) {
 			_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionStartTrim), event);
 		} else if (item_type == EndSelectionTrimItem) {
@@ -847,8 +847,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				/* grab selection for moving */
 				_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionMove), event);
 			} else {
-				/* this was debated, but decided the more common action was to
-				   make a new selection */
+				/* this was debated, but decided the more common action was to make a new selection */
 				_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
 			}
 			break;
@@ -2138,13 +2137,13 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 		gint x, y;
 
 		/* We call this so that MOTION_NOTIFY events continue to be
-		   delivered to the canvas. We need to do this because we set
-		   Gdk::POINTER_MOTION_HINT_MASK on the canvas. This reduces
-		   the density of the events, at the expense of a round-trip
-		   to the server. Given that this will mostly occur on cases
-		   where DISPLAY = :0.0, and given the cost of what the motion
-		   event might do, its a good tradeoff.
-		*/
+		 * delivered to the canvas. We need to do this because we set
+		 * Gdk::POINTER_MOTION_HINT_MASK on the canvas. This reduces
+		 * the density of the events, at the expense of a round-trip
+		 * to the server. Given that this will mostly occur on cases
+		 * where DISPLAY = :0.0, and given the cost of what the motion
+		 * event might do, its a good tradeoff.
+		 */
 
 		_track_canvas->get_pointer (x, y);
 	}
@@ -2294,8 +2293,8 @@ void
 Editor::region_view_item_click (AudioRegionView& rv, GdkEventButton* event)
 {
 	/* Either add to or set the set the region selection, unless
-	   this is an alignment click (control used)
-	*/
+	 * this is an alignment click (control used)
+	 */
 
 	if (Keyboard::modifier_state_contains (event->state, Keyboard::PrimaryModifier)) {
 
@@ -2573,18 +2572,18 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 	boost::shared_ptr<Region> region (new_regions.front());
 
 	/* add it to the current stream/playlist.
-
-	   tricky: the streamview for the track will add a new regionview. we will
-	   catch the signal it sends when it creates the regionview to
-	   set the regionview we want to then drag.
-	*/
+	 *
+	 * tricky: the streamview for the track will add a new regionview. we will
+	 * catch the signal it sends when it creates the regionview to
+	 * set the regionview we want to then drag.
+	 */
 
 	latest_regionviews.clear();
 	sigc::connection c = clicked_routeview->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
 
 	/* A selection grab currently creates two undo/redo operations, one for
-	   creating the new region and another for moving it.
-	*/
+	 * creating the new region and another for moving it.
+	 */
 	begin_reversible_command (Operations::selection_grab);
 
 	boost::shared_ptr<Playlist> playlist = clicked_axisview->playlist();
@@ -2602,8 +2601,8 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 	}
 
 	/* we need to deselect all other regionviews, and select this one
-	   i'm ignoring undo stuff, because the region creation will take care of it
-	*/
+	 * i'm ignoring undo stuff, because the region creation will take care of it
+	 */
 
 	selection->set (latest_regionviews);
 

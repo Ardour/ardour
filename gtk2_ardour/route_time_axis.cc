@@ -1502,7 +1502,7 @@ RouteTimeAxisView::paste (samplepos_t pos, const Selection& selection, PasteCont
 	DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("paste to %1\n", pos));
 
 	/* add multi-paste offset if applicable */
-	std::pair<samplepos_t, samplepos_t> extent   = (*p)->get_extent();
+	std::pair<samplepos_t, samplepos_t> extent  = (*p)->get_extent();
 	const samplecnt_t                  duration = extent.second - extent.first;
 	pos += _editor.get_paste_offset(pos, ctx.count, duration);
 
