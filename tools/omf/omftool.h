@@ -43,7 +43,7 @@ private:
 	std::string session_name;
 	std::vector<std::string> audiofile_path_vector;
 	int      sample_rate; /* audio samples per second */
-	double   sample_rate;  /* time per video frame */
+	double   frame_rate;  /* time per video frame */
 	XMLNode* session;
 	XMLNode* sources;
 	XMLNode* routes;
