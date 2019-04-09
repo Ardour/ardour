@@ -423,7 +423,7 @@ MidiRegionView::leave_notify (GdkEventCrossing*)
 void
 MidiRegionView::mouse_mode_changed ()
 {
-	// Adjust sample colour (become more transparent for internal tools)
+	// Adjust frame colour (become more transparent for internal tools)
 	set_frame_color();
 
 	if (_entered) {
@@ -464,7 +464,7 @@ MidiRegionView::enter_internal (uint32_t state)
 		_grabbed_keyboard = true;
 	}
 
-	// Lower sample handles below notes so they don't steal events
+	// Lower frame handles below notes so they don't steal events
 	if (frame_handle_start) {
 		frame_handle_start->lower_to_bottom();
 	}
@@ -485,7 +485,7 @@ MidiRegionView::leave_internal()
 		_grabbed_keyboard = false;
 	}
 
-	// Raise sample handles above notes so they catch events
+	// Raise frame handles above notes so they catch events
 	if (frame_handle_start) {
 		frame_handle_start->raise_to_top();
 	}
@@ -2996,8 +2996,9 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		if (current_x < 0) {
-			// This works even with snapping because RegionView::snap_sample_to_sample()
-			// snaps forward if the snapped sample is before the beginning of the region
+			/* This works even with snapping because RegionView::snap_sample_to_sample()
+			 * snaps forward if the snapped sample is before the beginning of the region
+			 */
 			current_x = 0;
 		}
 		if (current_x > trackview.editor().sample_to_pixel(_region->length())) {
@@ -3030,7 +3031,7 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 			if (snap_delta_samps > 0) {
 				snap_delta_beats = region_samples_to_region_beats_double (snap_delta_samps);
 			} else if (snap_delta_samps < 0) {
-				snap_delta_beats = region_samples_to_region_beats_double ( - snap_delta_samps);
+				snap_delta_beats = region_samples_to_region_beats_double (- snap_delta_samps);
 				sign = -1;
 			}
 
@@ -3045,7 +3046,8 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 			}
 
 			const Temporal::Beats beats = Temporal::Beats (tmap.exact_beat_at_sample (snapped_x + midi_region()->position(), divisions)
-								     - midi_region()->beat()) + midi_region()->start_beats();
+			                                               - midi_region()->beat())
+			                              + midi_region()->start_beats();
 
 			Temporal::Beats len         = Temporal::Beats();
 
@@ -3796,8 +3798,8 @@ MidiRegionView::paste_internal (samplepos_t pos, unsigned paste_count, float tim
 	const Temporal::Beats duration      = last_time - first_time;
 	const Temporal::Beats snap_duration = duration.snap_to(snap_beats);
 	const Temporal::Beats paste_offset  = snap_duration * paste_count;
-	const Temporal::Beats quarter_note     = absolute_samples_to_source_beats(pos) + paste_offset;
-	Temporal::Beats     end_point     = Temporal::Beats();
+	const Temporal::Beats quarter_note  = absolute_samples_to_source_beats(pos) + paste_offset;
+	Temporal::Beats       end_point     = Temporal::Beats();
 
 	DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("Paste data spans from %1 to %2 (%3) ; paste pos beats = %4 (based on %5 - %6)\n",
 	                                               first_time,
@@ -4159,9 +4161,10 @@ MidiRegionView::set_step_edit_cursor_width (Temporal::Beats beats)
 	_step_edit_cursor_width = beats;
 
 	if (_step_edit_cursor) {
-		_step_edit_cursor->set_x1 (_step_edit_cursor->x0() + trackview.editor().sample_to_pixel (
-						   region_beats_to_region_samples (_step_edit_cursor_position + beats)
-						   - region_beats_to_region_samples (_step_edit_cursor_position)));
+		_step_edit_cursor->set_x1 (_step_edit_cursor->x0()
+		                           + trackview.editor().sample_to_pixel (
+		                             region_beats_to_region_samples (_step_edit_cursor_position + beats)
+		                             - region_beats_to_region_samples (_step_edit_cursor_position)));
 	}
 }
 

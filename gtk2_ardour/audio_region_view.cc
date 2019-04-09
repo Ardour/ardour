@@ -1233,10 +1233,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 		ht = (_height - NAME_HIGHLIGHT_SIZE) / (double) nchans;
 	}
 
-	/* first waveview starts at 1.0, not 0.0 since that will overlap the
-	 * sample
-	 */
-
+	/* first waveview starts at 1.0, not 0.0 since that will overlap the frame */
 	gdouble yoff = which * ht;
 
 	ArdourWaveView::WaveView *wave = new ArdourWaveView::WaveView (group, audio_region ());
@@ -1303,7 +1300,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 		/* Restore stacked coverage */
 		LayerDisplay layer_display;
 		if (trackview.get_gui_property ("layer-display", layer_display)) {
-			update_coverage_samples (layer_display);
+			update_coverage_frame (layer_display);
 	  }
 	}
 
@@ -1625,9 +1622,9 @@ AudioRegionView::set_fade_visibility (bool yn)
 }
 
 void
-AudioRegionView::update_coverage_samples (LayerDisplay d)
+AudioRegionView::update_coverage_frame (LayerDisplay d)
 {
-	RegionView::update_coverage_samples (d);
+	RegionView::update_coverage_frame (d);
 
 	if (d == Stacked) {
 		if (fade_in_handle)       { fade_in_handle->raise_to_top (); }

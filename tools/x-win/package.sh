@@ -88,7 +88,7 @@ fi
 export SRCCACHE
 
 if [ "$(id -u)" = "0" ]; then
-	apt-get -y install nsis curl
+	apt-get -y install nsis curl wget
 fi
 
 

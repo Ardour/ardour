@@ -75,25 +75,25 @@ public:
 	void move_step_edit_beat_pos (Temporal::Beats beats);
 	void set_step_edit_cursor_width (Temporal::Beats beats);
 
-	std::string name() const;
+	std::string name () const;
 
 	void start_step_editing ();
 	void stop_step_editing ();
 
 private:
 	ARDOUR::samplepos_t                    step_edit_insert_position;
-	Temporal::Beats                       step_edit_beat_pos;
-	boost::shared_ptr<ARDOUR::MidiRegion> step_edit_region;
-	MidiRegionView*                       step_edit_region_view;
+	Temporal::Beats                        step_edit_beat_pos;
+	boost::shared_ptr<ARDOUR::MidiRegion>  step_edit_region;
+	MidiRegionView*                        step_edit_region_view;
 	uint8_t                               _step_edit_triplet_countdown;
 	bool                                  _step_edit_within_chord;
 	Temporal::Beats                       _step_edit_chord_duration;
-	PBD::ScopedConnection                 step_edit_region_connection;
+	PBD::ScopedConnection                  step_edit_region_connection;
 	PublicEditor&                         _editor;
 	boost::shared_ptr<ARDOUR::MidiTrack>  _track;
 	MidiTimeAxisView&                     _mtv;
-	int8_t                                last_added_pitch;
-	Temporal::Beats                       last_added_end;
+	int8_t                                 last_added_pitch;
+	Temporal::Beats                        last_added_end;
 
 	sigc::connection delete_connection;
 	sigc::connection hide_connection;

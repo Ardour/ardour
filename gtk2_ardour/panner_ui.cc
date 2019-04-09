@@ -308,7 +308,7 @@ PannerUI::setup_pan ()
 		twod_panner->set_size_request (-1, rintf(61.f * scale));
 		twod_panner->set_send_drawing_mode (_send_mode);
 
-		/* and finally, add it to the panner sample */
+		/* and finally, add it to the panner frame */
 
 		pan_vbox.pack_start (*twod_panner, false, false);
 	}

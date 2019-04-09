@@ -42,12 +42,12 @@ using namespace Gtkmm2ext;
 /** @param tc If non-0, a time converter for this patch change.  If 0, time control will be desensitized */
 PatchChangeDialog::PatchChangeDialog (
 	const ARDOUR::BeatsSamplesConverter*        tc,
-	ARDOUR::Session*                           session,
-	Evoral::PatchChange<Temporal::Beats> const & patch,
-	ARDOUR::InstrumentInfo&                    info,
-	const Gtk::BuiltinStockID&                 ok,
-	bool                                       allow_delete,
-	bool                                       modal)
+	ARDOUR::Session*                            session,
+	Evoral::PatchChange<Temporal::Beats> const& patch,
+	ARDOUR::InstrumentInfo&                     info,
+	const Gtk::BuiltinStockID&                  ok,
+	bool                                        allow_delete,
+	bool                                        modal)
 	: ArdourDialog (_("Patch Change"), modal)
 	, _time_converter (tc)
 	, _info (info)

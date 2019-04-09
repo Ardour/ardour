@@ -57,7 +57,7 @@ public:
 private:
 	Editor&               _editor;
 	ArdourCanvas::Arrow*  _track_canvas_item;
-	samplepos_t            _current_sample;
+	samplepos_t           _current_sample;
 };
 
 #endif // __gtk_ardour_editor_cursors_h__

@@ -158,7 +158,7 @@ StreamView::set_samples_per_pixel (double fpp)
 		recbox.rectangle->set_x1 (xend);
 	}
 
-	update_coverage_samples ();
+	update_coverage_frame ();
 
 	return 0;
 }
@@ -296,7 +296,7 @@ StreamView::playlist_layered (boost::weak_ptr<Track> wtr)
 	if (_layer_display == Stacked) {
 		update_contents_height ();
 		/* tricky. playlist_changed() does this as well, and its really inefficient. */
-		update_coverage_samples ();
+		update_coverage_frame ();
 	} else {
 		/* layering has probably been modified. reflect this in the canvas. */
 		layer_regions();
@@ -324,14 +324,14 @@ StreamView::playlist_switched (boost::weak_ptr<Track> wtr)
 	/* update layers count and the y positions and heights of our regions */
 	_layers = tr->playlist()->top_layer() + 1;
 	update_contents_height ();
-	update_coverage_samples ();
+	update_coverage_frame ();
 
 	/* catch changes */
 
 	tr->playlist()->LayeringChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::playlist_layered, this, boost::weak_ptr<Track> (tr)), gui_context());
 	tr->playlist()->RegionAdded.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::add_region_view, this, _1), gui_context());
 	tr->playlist()->RegionRemoved.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::remove_region_view, this, _1), gui_context());
-	tr->playlist()->ContentsChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::update_coverage_samples, this), gui_context());
+	tr->playlist()->ContentsChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::update_coverage_frame, this), gui_context());
 }
 
 
@@ -676,14 +676,14 @@ StreamView::set_layer_display (LayerDisplay d)
 	}
 
 	update_contents_height ();
-	update_coverage_samples ();
+	update_coverage_frame ();
 }
 
 void
-StreamView::update_coverage_samples ()
+StreamView::update_coverage_frame ()
 {
 	for (RegionViewList::iterator i = region_views.begin (); i != region_views.end (); ++i) {
-		(*i)->update_coverage_samples (_layer_display);
+		(*i)->update_coverage_frame (_layer_display);
 	}
 }
 

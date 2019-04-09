@@ -449,20 +449,20 @@ public:
 	virtual void access_action (const std::string&, const std::string&) = 0;
 	virtual void set_toggleaction (const std::string&, const std::string&, bool) = 0;
 
-	virtual MouseCursors const * cursors () const = 0;
-	virtual VerboseCursor * verbose_cursor () const = 0;
+	virtual MouseCursors const* cursors () const = 0;
+	virtual VerboseCursor* verbose_cursor () const = 0;
 
 	virtual bool get_smart_mode () const = 0;
 
 	virtual void get_pointer_position (double &, double &) const = 0;
 
-	virtual ARDOUR::Location* find_location_from_marker (ArdourMarker *, bool &) const = 0;
-	virtual ArdourMarker* find_marker_from_location_id (PBD::ID const &, bool) const = 0;
+	virtual ARDOUR::Location* find_location_from_marker (ArdourMarker*, bool&) const = 0;
+	virtual ArdourMarker* find_marker_from_location_id (PBD::ID const&, bool) const = 0;
 
 	virtual void snap_to_with_modifier (ARDOUR::MusicSample& first,
-	                                    GdkEvent const *    ev,
-	                                    ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
-	                                    ARDOUR::SnapPref    gpref = ARDOUR::SnapToAny_Visual) = 0;
+	                                    GdkEvent const*      ev,
+	                                    ARDOUR::RoundMode    direction = ARDOUR::RoundNearest,
+	                                    ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual) = 0;
 
 	virtual void set_snapped_cursor_position (samplepos_t pos) = 0;
 

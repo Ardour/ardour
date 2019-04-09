@@ -46,9 +46,9 @@ namespace ArdourCanvas {
 }
 
 struct RecBoxInfo {
-	ArdourCanvas::Rectangle*   rectangle;
-	samplepos_t                 start;
-	ARDOUR::samplecnt_t         length;
+	ArdourCanvas::Rectangle* rectangle;
+	samplepos_t              start;
+	ARDOUR::samplecnt_t      length;
 };
 
 class Selectable;
@@ -149,20 +149,20 @@ protected:
 
 	virtual void color_handler () = 0;
 
-	RouteTimeAxisView&        _trackview;
-	ArdourCanvas::Container*      _canvas_group;
-	ArdourCanvas::Rectangle*   canvas_rect; /* sample around the whole thing */
+	RouteTimeAxisView&       _trackview;
+	ArdourCanvas::Container* _canvas_group;
+	ArdourCanvas::Rectangle*  canvas_rect; /* frame around the whole thing */
 
 	typedef std::list<RegionView* > RegionViewList;
-	RegionViewList  region_views;
+	RegionViewList region_views;
 
 	double _samples_per_pixel;
 
-	sigc::connection       screen_update_connection;
-	std::vector<RecBoxInfo>     rec_rects;
+	sigc::connection        screen_update_connection;
+	std::vector<RecBoxInfo> rec_rects;
 	std::list< std::pair<boost::shared_ptr<ARDOUR::Region>,RegionView* > > rec_regions;
-	bool                   rec_updating;
-	bool                   rec_active;
+	bool                    rec_updating;
+	bool                    rec_active;
 
 	uint32_t region_color;      ///< Contained region color
 	uint32_t stream_base_color; ///< Background color
@@ -176,7 +176,7 @@ protected:
 	double height;
 
 	PBD::ScopedConnectionList rec_data_ready_connections;
-	samplepos_t                last_rec_data_sample;
+	samplepos_t               last_rec_data_sample;
 
 	/* When recording, the session time at which a new layer must be created for the region
 	   being recorded, or max_samplepos if not applicable.
@@ -185,7 +185,7 @@ protected:
 	void setup_new_rec_layer_time (boost::shared_ptr<ARDOUR::Region>);
 
 private:
-	void update_coverage_samples ();
+	void update_coverage_frame ();
 };
 
 #endif /* __ardour_streamview_h__ */

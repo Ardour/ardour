@@ -100,7 +100,7 @@ public:
 	virtual void exited () {}
 
 	virtual void enable_display(bool yn) { _enable_display = yn; }
-	virtual void update_coverage_samples (LayerDisplay);
+	virtual void update_coverage_frame (LayerDisplay);
 
 	static PBD::Signal1<void,RegionView*> RegionViewGoingAway;
 
@@ -116,9 +116,9 @@ public:
 	void move_contents (ARDOUR::sampleoffset_t);
 	virtual void thaw_after_trim ();
 
-	void set_silent_samples (const ARDOUR::AudioIntervalResult&, double threshold);
-	void drop_silent_samples ();
-	void hide_silent_samples ();
+	void set_silent_frames (const ARDOUR::AudioIntervalResult&, double threshold);
+	void drop_silent_frames ();
+	void hide_silent_frames ();
 
 	struct PositionOrder {
 		bool operator()(const RegionView* a, const RegionView* b) {
@@ -184,11 +184,11 @@ protected:
 	 * different bits of regions according to whether or not they are the one
 	 * that will be played at any given time.
 	 */
-	std::list<ArdourCanvas::Rectangle*> _coverage_samples;
+	std::list<ArdourCanvas::Rectangle*> _coverage_frame;
 
 	/** a list of rectangles used to show silent segments
 	*/
-	std::list<ArdourCanvas::Rectangle*> _silent_samples;
+	std::list<ArdourCanvas::Rectangle*> _silent_frames;
 	/** a list of rectangles used to show the current silence threshold
 	*/
 	std::list<ArdourCanvas::Rectangle*> _silent_threshold_samples;

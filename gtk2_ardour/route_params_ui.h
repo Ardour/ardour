@@ -160,8 +160,8 @@ private:
 	void route_selected();
 	//void route_unselected (gint row, gint col, GdkEvent *ev);
 
-	void setup_io_samples();
-	void cleanup_io_samples();
+	void setup_io_selector();
+	void cleanup_io_selector();
 	void cleanup_view(bool stopupdate = true);
 	void cleanup_latency_frame ();
 	void setup_latency_frame ();

@@ -187,6 +187,7 @@ Backends=$APPLIB/backends
 Themes=$Shared/themes
 Templates=$Shared/templates
 PluginMetadata=$Shared/plugin_metadata
+MixerSettings=$Shared/mixer_settings
 ExportFormats=$Shared/export
 Locale=$Shared/locale
 MidiMaps=$Shared/midi_maps
@@ -396,6 +397,12 @@ done
 # got to be careful with names here
 for x in $BUILD_ROOT/../osc/*.preset ; do
     cp "$x" $OSC
+done
+
+# Mixbus MixerSettings (if any)
+for x in $BUILD_ROOT/../mixer_settings/*.lua ; do
+    mkdir -p $MixerSettings  # create on demand
+    cp "$x" $MixerSettings
 done
 
 #Session templates

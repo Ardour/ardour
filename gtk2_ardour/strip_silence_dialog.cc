@@ -176,7 +176,7 @@ StripSilenceDialog::drop_rects ()
 	_lock.unlock ();
 
 	for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
-		v->view->drop_silent_samples ();
+		v->view->drop_silent_frames ();
 	}
 
 	cancel_button->set_sensitive (false);
@@ -223,7 +223,7 @@ StripSilenceDialog::update_silence_rects ()
 	double const y = _threshold.get_value();
 
 	for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
-		v->view->set_silent_samples (v->intervals, y);
+		v->view->set_silent_frames (v->intervals, y);
 	}
 }
 

@@ -41,11 +41,11 @@ class PatchChangeDialog : public ArdourDialog
 {
 public:
 	PatchChangeDialog (
-		const ARDOUR::BeatsSamplesConverter *,
-		ARDOUR::Session *,
-		Evoral::PatchChange<Temporal::Beats> const &,
+		const ARDOUR::BeatsSamplesConverter*,
+		ARDOUR::Session*,
+		Evoral::PatchChange<Temporal::Beats> const&,
 		ARDOUR::InstrumentInfo&,
-		const Gtk::BuiltinStockID &,
+		const Gtk::BuiltinStockID&,
 		bool allow_delete = false,
 		bool modal = true
 		);
@@ -71,14 +71,16 @@ private:
 	const ARDOUR::BeatsSamplesConverter* _time_converter;
 	ARDOUR::InstrumentInfo& _info;
 	AudioClock _time;
-	Gtk::SpinButton _channel;
-	Gtk::SpinButton _program;
-	Gtk::SpinButton _bank_msb;
-	Gtk::SpinButton _bank_lsb;
+
+	Gtk::SpinButton   _channel;
+	Gtk::SpinButton   _program;
+	Gtk::SpinButton   _bank_msb;
+	Gtk::SpinButton   _bank_lsb;
 	Gtk::ComboBoxText _bank_combo;
 	Gtk::ComboBoxText _patch_combo;
 
 	boost::shared_ptr<MIDI::Name::PatchBank> _current_patch_bank;
+
 	bool _ignore_signals;
 	bool _keep_open;
 

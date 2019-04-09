@@ -235,13 +235,13 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 		CANVAS_DEBUG_NAME (frame_handle_start, "TAVI frame handle start");
 		frame_handle_start->set_outline (false);
 		frame_handle_start->set_fill (false);
-		frame_handle_start->Event.connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisViewItem::sample_handle_crossing), frame_handle_start));
+		frame_handle_start->Event.connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisViewItem::frame_handle_crossing), frame_handle_start));
 
 		frame_handle_end = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, top, width, trackview.current_height()));
 		CANVAS_DEBUG_NAME (frame_handle_end, "TAVI frame handle end");
 		frame_handle_end->set_outline (false);
 		frame_handle_end->set_fill (false);
-		frame_handle_end->Event.connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisViewItem::sample_handle_crossing), frame_handle_end));
+		frame_handle_end->Event.connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisViewItem::frame_handle_crossing), frame_handle_end));
 	} else {
 		frame_handle_start = frame_handle_end = 0;
 	}
@@ -611,7 +611,7 @@ TimeAxisViewItem::set_color (uint32_t base_color)
 }
 
 ArdourCanvas::Item*
-TimeAxisViewItem::get_canvas_sample()
+TimeAxisViewItem::get_canvas_frame()
 {
 	return frame;
 }
@@ -759,7 +759,7 @@ TimeAxisViewItem::set_trim_handle_colors()
 }
 
 bool
-TimeAxisViewItem::sample_handle_crossing (GdkEvent* ev, ArdourCanvas::Rectangle* item)
+TimeAxisViewItem::frame_handle_crossing (GdkEvent* ev, ArdourCanvas::Rectangle* item)
 {
 	switch (ev->type) {
 	case GDK_LEAVE_NOTIFY:
