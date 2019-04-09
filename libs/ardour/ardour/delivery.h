@@ -112,6 +112,9 @@ protected:
 	gain_t      _current_gain;
 	boost::shared_ptr<PannerShell> _panshell;
 
+#ifdef MIXBUS
+public: /* expose target_gain to mixbus processor Route::process_output_buffers */
+#endif
 	gain_t target_gain ();
 
 private:
