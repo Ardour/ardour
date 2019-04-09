@@ -24,8 +24,6 @@
 #include "evoral/TimeConverter.hpp"
 #include "evoral/types.hpp"
 
-typedef int64_t framepos_t; /* MUST match libs/ardour/ardour/types.h */
-
 namespace Evoral {
 
 template<typename A, typename B>
