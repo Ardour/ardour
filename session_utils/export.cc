@@ -90,13 +90,13 @@ static int export_session (Session *session,
 "      <Start>"
 "        <Trim enabled=\"false\"/>"
 "        <Add enabled=\"false\">"
-"          <Duration format=\"Timecode\" hours=\"0\" minutes=\"0\" seconds=\"0\" samples=\"0\"/>"
+"          <Duration format=\"Timecode\" hours=\"0\" minutes=\"0\" seconds=\"0\" frames=\"0\"/>"
 "        </Add>"
 "      </Start>"
 "      <End>"
 "        <Trim enabled=\"false\"/>"
 "        <Add enabled=\"false\">"
-"          <Duration format=\"Timecode\" hours=\"0\" minutes=\"0\" seconds=\"0\" samples=\"0\"/>"
+"          <Duration format=\"Timecode\" hours=\"0\" minutes=\"0\" seconds=\"0\" frames=\"0\"/>"
 "        </Add>"
 "      </End>"
 "    </Silence>"
@@ -254,7 +254,6 @@ int main (int argc, char* argv[])
 							settings._sample_format = ExportFormatBase::SF_Float;
 							break;
 						}
-
 						/* fall through */
 					default:
 						fprintf(stderr, "Invalid Bit Depth\n");
