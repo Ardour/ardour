@@ -151,7 +151,7 @@ protected:
 
 	RouteTimeAxisView&       _trackview;
 	ArdourCanvas::Container* _canvas_group;
-	ArdourCanvas::Rectangle*  canvas_rect; /* sample around the whole thing */
+	ArdourCanvas::Rectangle*  canvas_rect; /* frame around the whole thing */
 
 	typedef std::list<RegionView* > RegionViewList;
 	RegionViewList region_views;
