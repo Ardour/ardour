@@ -222,7 +222,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 {
 	samplecnt_t shortest = max_samplecnt;
 
-	/* remove old silent samples */
+	/* remove old silent frames */
 	drop_silent_frames ();
 
 	if (silences.empty()) {
