@@ -621,7 +621,7 @@ SessionDialog::populate_session_templates ()
 	TreeModel::Row row = *template_model->prepend ();
 	row[session_template_columns.name] = (_("Empty Template"));
 	row[session_template_columns.path] = string();
-	row[session_template_columns.description] = _("An empty session with factory default settings.");
+	row[session_template_columns.description] = _("An empty session with factory default settings.\n\nSelect this option if you are importing files to mix.");
 	row[session_template_columns.modified_with_short] = _("");
 	row[session_template_columns.modified_with_long] = _("");
 
