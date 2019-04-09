@@ -140,6 +140,7 @@ Panners=$Frameworks/panners
 Backends=$Frameworks/backends
 MidiMaps=$Shared/midi_maps
 PluginMetadata=$Shared/plugin_metadata
+MixerSettings=$Shared/mixer_settings
 ExportFormats=$Shared/export
 Templates=$Shared/templates
 PatchFiles=$Shared/patchfiles
@@ -383,6 +384,12 @@ done
 # got to be careful with names here
 for x in $BUILD_ROOT/../osc/*.preset ; do
     cp "$x" $OSC
+done
+
+# Mixbus MixerSettings (if any)
+for x in $BUILD_ROOT/../mixer_settings/*.lua ; do
+    mkdir -p $MixerSettings  # create on demand
+    cp "$x" $MixerSettings
 done
 
 # VAMP plugins that we use

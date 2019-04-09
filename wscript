@@ -671,11 +671,12 @@ int main() { return 0; }''',
          '-DCANVAS_COMPATIBILITY', '-DCANVAS_DEBUG'))
 
     # use sparingly, prefer runtime profile
-    if Options.options.program_name.lower() == "mixbus":
+    if Options.options.program_name.lower().startswith('mixbus'):
         compiler_flags.append ('-DMIXBUS')
+        conf.define('MIXBUS', 1)
 
     if Options.options.program_name.lower() == "mixbus32c":
-        compiler_flags.append ('-DMIXBUS')
+        conf.define('MIXBUS32C', 1)
         compiler_flags.append ('-DMIXBUS32C')
 
     compiler_flags.append ('-DPROGRAM_NAME="' + Options.options.program_name + '"')
@@ -1091,6 +1092,9 @@ int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
         conf.check_cc(function_name='htonl', header_name='winsock2.h', lib='ws2_32')
         conf.env.append_value('LIB', 'ws2_32')
         conf.env.append_value('LIB', 'winmm')
+        if Options.options.program_name.lower().startswith('mixbus'):
+            conf.env.append_value('LIB', 'ole32')
+            conf.env.append_value('LIB', 'uuid')
         # needed for mingw64 packages, not harmful on normal mingw build
         conf.env.append_value('LIB', 'intl')
         conf.check_cc(function_name='regcomp', header_name='regex.h',
