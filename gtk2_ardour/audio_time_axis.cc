@@ -51,6 +51,7 @@
 #include "public_editor.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
+#include "ui_config.h"
 #include "utils.h"
 
 #include "pbd/i18n.h"
@@ -67,6 +68,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	: SessionHandlePtr (sess)
 	, RouteTimeAxisView(ed, sess, canvas)
 {
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &AudioTimeAxisView::parameter_changed));
 }
 
 void
@@ -276,6 +278,14 @@ void
 AudioTimeAxisView::route_active_changed ()
 {
 	update_control_names ();
+}
+
+void
+AudioTimeAxisView::parameter_changed (string const & p)
+{
+	if (p == "vertical-region-gap") {
+		_view->update_contents_height ();
+	}
 }
 
 

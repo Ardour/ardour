@@ -538,6 +538,14 @@ AudioRegionView::setup_fade_handle_positions()
 void
 AudioRegionView::set_height (gdouble height)
 {
+	uint32_t gap = UIConfiguration::instance().get_vertical_region_gap ();
+	float ui_scale = UIConfiguration::instance().get_ui_scale ();
+	if (gap > 0 && ui_scale > 0) {
+		gap = ceil (gap * ui_scale);
+	}
+
+	height = std::max (3.0, height - gap);
+
 	if (height == _height) {
 		return;
 	}
