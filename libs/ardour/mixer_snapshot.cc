@@ -18,6 +18,18 @@
 
 #include <iostream>
 
+#include <glibmm.h>
+#include <glibmm/fileutils.h>
+
+#include "pbd/file_utils.h"
+#include "pbd/i18n.h"
+#include "pbd/memento_command.h"
+
+#include "pbd/types_convert.h"
+#include "pbd/stl_delete.h"
+#include "pbd/xml++.h"
+#include "pbd/enumwriter.h"
+
 #include "ardour/mixer_snapshot.h"
 #include "ardour/route_group.h"
 #include "ardour/vca_manager.h"
@@ -26,17 +38,15 @@
 #include "ardour/session_state_utils.h"
 #include "ardour/revision.h"
 #include "ardour/session_directory.h"
+#include "ardour/types_convert.h"
 
-#include "pbd/i18n.h"
-#include "pbd/xml++.h"
-#include "pbd/memento_command.h"
-#include "pbd/file_utils.h"
-
-#include <glibmm.h>
-#include <glibmm/fileutils.h>
+namespace PBD {
+    DEFINE_ENUM_CONVERT(ARDOUR::MixerSnapshot::RecallFlags)
+}
 
 using namespace std;
 using namespace ARDOUR;
+
 
 MixerSnapshot::MixerSnapshot(Session* s)
     : id(0)
@@ -44,6 +54,7 @@ MixerSnapshot::MixerSnapshot(Session* s)
     , label("snapshot")
     , timestamp(time(0))
     , last_modified_with(string_compose("%1 %2", PROGRAM_NAME, revision))
+    , _flags(RecallFlags(0))
 {
     if(s) {
         _session = s;
@@ -56,6 +67,7 @@ MixerSnapshot::MixerSnapshot(Session* s, string file_path)
     , label("snapshot")
     , timestamp(time(0))
     , last_modified_with(string_compose("%1 %2", PROGRAM_NAME, revision))
+    , _flags(RecallFlags(0))
 {
     if(s) {
         _session = s;
@@ -78,6 +90,29 @@ MixerSnapshot::MixerSnapshot(Session* s, string file_path)
 MixerSnapshot::~MixerSnapshot()
 {
 }
+
+bool MixerSnapshot::set_flag(bool yn, RecallFlags flag)
+{
+    if (yn) {
+        if (!(_flags & flag)) {
+            _flags = RecallFlags (_flags | flag);
+            return true;
+        }
+    } else {
+        if (_flags & flag) {
+            _flags = RecallFlags (_flags & ~flag);
+            return true;
+        }
+    }
+    return false;
+}
+
+void MixerSnapshot::set_recall_eq(bool yn) { set_flag(yn, RecallEQ);};
+void MixerSnapshot::set_recall_comp(bool yn) { set_flag(yn, RecallComp);};
+void MixerSnapshot::set_recall_io(bool yn) { set_flag(yn, RecallIO);};
+void MixerSnapshot::set_recall_group(bool yn) { set_flag(yn, RecallGroup);};
+void MixerSnapshot::set_recall_vca(bool yn) { set_flag(yn, RecallVCA);};
+
 
 bool MixerSnapshot::has_specials()
 {
@@ -326,14 +361,18 @@ void MixerSnapshot::write(const string path)
         return;
     }
 
+    set_recall_eq(true);
+    set_recall_io(true);
+    set_recall_vca(true);
+
     XMLNode* node = new XMLNode("MixerSnapshot");
+    node->set_property(X_("flags"), _flags);
+    node->set_property(X_("favorite"), favorite);
+    node->set_property(X_("modified-with"), last_modified_with);
     XMLNode* child;
 
-    child = node->add_child ("ProgramVersion");
-    child->set_property("modified-with", last_modified_with);
-
-    child = node->add_child ("Favorite");
-    child->set_property("favorite", favorite);
+    // child = node->add_child ("ProgramVersion");
+    // child->set_property("modified-with", last_modified_with);
 
     child = node->add_child("Routes");
     for(vector<State>::iterator i = route_states.begin(); i != route_states.end(); i++) {
@@ -370,23 +409,15 @@ void MixerSnapshot::load(const string path)
         return;
     }
 
-    XMLNode* version_node = find_named_node(*root, "ProgramVersion");
-    XMLNode* fav_node     = find_named_node(*root, "Favorite");
+    string fav;
+    root->get_property(X_("flags"), _flags);
+    root->get_property(X_("favorite"), fav);
+    root->get_property(X_("modified-with"), last_modified_with);
+    set_favorite(atoi(fav.c_str()));
+
     XMLNode* route_node   = find_named_node(*root, "Routes");
     XMLNode* group_node   = find_named_node(*root, "Groups");
     XMLNode* vca_node     = find_named_node(*root, "VCAS");
-
-    if(version_node) {
-        string version;
-        version_node->get_property(X_("modified-with"), version);
-        last_modified_with = version;
-    }
-
-    if(fav_node) {
-        string fav;
-        fav_node->get_property(X_("favorite"), fav);
-        favorite = atoi(fav.c_str());
-    }
 
     if(route_node) {
         XMLNodeList nlist = route_node->children();

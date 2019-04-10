@@ -32,6 +32,14 @@ namespace ARDOUR {
 class LIBARDOUR_API MixerSnapshot
 {
     public:
+        enum RecallFlags {
+            RecallEQ = 0x1,
+            RecallComp = 0x2,
+            RecallIO = 0x4,
+            RecallGroup = 0x8,
+            RecallVCA = 0x10,
+        };
+
         MixerSnapshot(ARDOUR::Session*);
         MixerSnapshot(ARDOUR::Session*, std::string);
         ~MixerSnapshot();
@@ -65,13 +73,25 @@ class LIBARDOUR_API MixerSnapshot
         std::vector<State> get_groups() {return group_states;};
         std::vector<State> get_vcas()   {return vca_states;};
 
+        bool recall_eq()    { return _flags & RecallEQ;};
+        bool recall_comp()  { return _flags & RecallComp;};
+        bool recall_io()    { return _flags & RecallIO;};
+        bool recall_group() { return _flags & RecallGroup;};
+        bool recall_vca()   { return _flags & RecallVCA;};
+
+        void set_recall_eq(bool);
+        void set_recall_comp(bool);
+        void set_recall_io(bool);
+        void set_recall_group(bool);
+        void set_recall_vca(bool);
+
         unsigned int get_id() {return id;};
         void set_id(unsigned int new_id) {id = new_id;};
 
         std::string get_label() {return label;};
         void set_label(std::string new_label) {label = new_label;};
 
-        bool get_favorite() {return timestamp;};
+        bool get_favorite() {return favorite;};
         void set_favorite(bool yn) {favorite = yn;};
 
         std::time_t get_timestamp() {return timestamp;};
@@ -87,16 +107,19 @@ class LIBARDOUR_API MixerSnapshot
         void reassign_masters(boost::shared_ptr<ARDOUR::Slavable>, XMLNode);
         void load_from_session(std::string);
         void load_from_session(XMLNode&);
+        bool set_flag(bool, RecallFlags);
 
         unsigned int id;
         bool favorite;
         std::string label;
         std::time_t timestamp;
         std::string last_modified_with;
+        RecallFlags _flags;
 
         std::vector<State> route_states;
         std::vector<State> group_states;
         std::vector<State> vca_states;
+
 };
 
 } // namespace ARDOUR

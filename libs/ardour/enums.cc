@@ -40,6 +40,7 @@
 #include "ardour/io.h"
 #include "ardour/location.h"
 #include "ardour/midi_model.h"
+#include "ardour/mixer_snapshot.h"
 #include "ardour/mode.h"
 #include "ardour/mute_master.h"
 #include "ardour/presentation_info.h"
@@ -159,6 +160,7 @@ setup_enum_writer ()
 	LoopFadeChoice _LoopFadeChooice;
 	TransportState _TransportState;
 	LocateTransportDisposition _LocateTransportDisposition;
+	MixerSnapshot::RecallFlags _Recall_Flags;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -848,6 +850,12 @@ setup_enum_writer ()
 	REGISTER_ENUM (MustRoll);
 	REGISTER_ENUM (RollIfAppropriate);
 	REGISTER (_LocateTransportDisposition);
+	REGISTER_CLASS_ENUM (MixerSnapshot, RecallEQ);
+	REGISTER_CLASS_ENUM (MixerSnapshot, RecallComp);
+	REGISTER_CLASS_ENUM (MixerSnapshot, RecallIO);
+	REGISTER_CLASS_ENUM (MixerSnapshot, RecallGroup);
+	REGISTER_CLASS_ENUM (MixerSnapshot, RecallVCA);
+	REGISTER_BITS (_Recall_Flags);
 }
 
 } /* namespace ARDOUR */
