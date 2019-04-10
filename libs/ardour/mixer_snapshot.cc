@@ -361,10 +361,6 @@ void MixerSnapshot::write(const string path)
         return;
     }
 
-    set_recall_eq(true);
-    set_recall_io(true);
-    set_recall_vca(true);
-
     XMLNode* node = new XMLNode("MixerSnapshot");
     node->set_property(X_("flags"), _flags);
     node->set_property(X_("favorite"), favorite);
