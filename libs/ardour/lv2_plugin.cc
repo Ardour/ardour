@@ -82,10 +82,9 @@
 #include "lv2/lv2plug.in/ns/extensions/units/units.h"
 #include "lv2/lv2plug.in/ns/ext/patch/patch.h"
 #include "lv2/lv2plug.in/ns/ext/port-groups/port-groups.h"
-#ifdef HAVE_LV2_1_2_0
+#include "lv2/lv2plug.in/ns/ext/parameters/parameters.h"
 #include "lv2/lv2plug.in/ns/ext/buf-size/buf-size.h"
 #include "lv2/lv2plug.in/ns/ext/options/options.h"
-#endif
 
 #include "lv2_evbuf.h"
 
@@ -180,12 +179,11 @@ public:
 	LilvNode* units_midiNote;
 	LilvNode* patch_writable;
 	LilvNode* patch_Message;
-#ifdef HAVE_LV2_1_2_0
+	LilvNode* opts_requiredOptions;
 	LilvNode* bufz_powerOf2BlockLength;
 	LilvNode* bufz_fixedBlockLength;
 	LilvNode* bufz_nominalBlockLength;
 	LilvNode* bufz_coarseBlockLength;
-#endif
 
 #ifdef HAVE_LV2_1_10_0
 	LilvNode* atom_int;
@@ -311,14 +309,10 @@ log_printf(LV2_Log_Handle handle,
 struct LV2Plugin::Impl {
 	Impl() : plugin(0), ui(0), ui_type(0), name(0), author(0), instance(0)
 	       , work_iface(0)
-#ifdef HAVE_LV2_1_2_0
 	       , opts_iface(0)
-#endif
 	       , state(0)
 	       , block_length(0)
-#ifdef HAVE_LV2_1_2_0
 	       , options(0)
-#endif
 #ifdef LV2_EXTENDED
 	       , queue_draw(0)
 	       , midnam(0)
@@ -337,16 +331,12 @@ struct LV2Plugin::Impl {
 	LilvNode*                    author;
 	LilvInstance*                instance;
 	const LV2_Worker_Interface*  work_iface;
-#ifdef HAVE_LV2_1_2_0
 	const LV2_Options_Interface* opts_iface;
-#endif
 	LilvState*                   state;
 	LV2_Atom_Forge               forge;
 	LV2_Atom_Forge               ui_forge;
 	int32_t                      block_length;
-#ifdef HAVE_LV2_1_2_0
 	LV2_Options_Option*          options;
-#endif
 #ifdef LV2_EXTENDED
 	LV2_Inline_Display*          queue_draw;
 	LV2_Midnam*                  midnam;
@@ -463,9 +453,7 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	_features[6] = &_log_feature;
 
 	unsigned n_features = 7;
-#ifdef HAVE_LV2_1_2_0
 	_features[n_features++] = &_def_state_feature;
-#endif
 
 	lv2_atom_forge_init(&_impl->forge, _uri_map.urid_map());
 	lv2_atom_forge_init(&_impl->ui_forge, _uri_map.urid_map());
@@ -499,7 +487,6 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	_features[n_features++]  = &_bankpatch_feature;
 #endif
 
-#ifdef HAVE_LV2_1_2_0
 	LV2_URID atom_Int = _uri_map.uri_to_id(LV2_ATOM__Int);
 	static const int32_t _min_block_length = 1;   // may happen during split-cycles
 	static const int32_t _max_block_length = 8192; // max possible (with all engines and during export)
@@ -534,7 +521,6 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	_options_feature.URI    = LV2_OPTIONS__options;
 	_options_feature.data   = _impl->options;
 	_features[n_features++] = &_options_feature;
-#endif
 
 #ifdef LV2_EXTENDED
 	seen_bankpatch = false;
@@ -593,15 +579,12 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	}
 	lilv_node_free(worker_iface_uri);
 
-
-#ifdef HAVE_LV2_1_2_0
 	LilvNode* options_iface_uri = lilv_new_uri(_world.world, LV2_OPTIONS__interface);
 	if (lilv_plugin_has_extension_data(plugin, options_iface_uri)) {
 		_impl->opts_iface = (const LV2_Options_Interface*)extension_data(
 			LV2_OPTIONS__interface);
 	}
 	lilv_node_free(options_iface_uri);
-#endif
 
 #ifdef LV2_EXTENDED
 	_display_interface = (const LV2_Inline_Display_Interface*)
@@ -624,28 +607,11 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		throw failed_constructor();
 	}
 
-#ifdef HAVE_LV2_1_2_0
-	LilvNodes *required_features = lilv_plugin_get_required_features (plugin);
-	if (lilv_nodes_contains (required_features, _world.bufz_powerOf2BlockLength) ||
-			lilv_nodes_contains (required_features, _world.bufz_fixedBlockLength)
-	   ) {
-		error << string_compose(
-		    _("LV2: \"%1\" buffer-size requirements cannot be satisfied."),
-		    lilv_node_as_string(_impl->name)) << endmsg;
-		lilv_node_free(_impl->name);
-		lilv_node_free(_impl->author);
-		lilv_nodes_free(required_features);
-		throw failed_constructor();
-	}
-	lilv_nodes_free(required_features);
-#endif
-
 	LilvNodes* optional_features = lilv_plugin_get_optional_features (plugin);
-#ifdef HAVE_LV2_1_2_0
 	if (lilv_nodes_contains (optional_features, _world.bufz_coarseBlockLength)) {
 		_no_sample_accurate_ctrl = true;
 	}
-#endif
+
 #ifdef LV2_EXTENDED
 	if (lilv_nodes_contains (optional_features, _world.lv2_noSampleAccurateCtrl)) {
 		/* deprecated 2016-Sep-18 in favor of bufz_coarseBlockLength */
@@ -887,7 +853,6 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 int
 LV2Plugin::set_block_size (pframes_t nframes)
 {
-#ifdef HAVE_LV2_1_2_0
 	if (_impl->opts_iface) {
 		LV2_URID atom_Int = _uri_map.uri_to_id(LV2_ATOM__Int);
 		_impl->block_length = nframes;
@@ -897,7 +862,7 @@ LV2Plugin::set_block_size (pframes_t nframes)
 		};
 		_impl->opts_iface->set (_impl->instance->lv2_handle, &block_size_option);
 	}
-#endif
+
 	return 0;
 }
 
@@ -947,9 +912,7 @@ LV2Plugin::~LV2Plugin ()
 	lilv_state_free(_impl->state);
 	lilv_node_free(_impl->name);
 	lilv_node_free(_impl->author);
-#ifdef HAVE_LV2_1_2_0
 	free(_impl->options);
-#endif
 #ifdef LV2_EXTENDED
 	free(_impl->queue_draw);
 	free(_impl->midnam);
@@ -985,19 +948,14 @@ LV2Plugin::~LV2Plugin ()
 bool
 LV2Plugin::is_external_ui() const
 {
-	if (!_impl->ui) {
-		return false;
-	}
-	return lilv_ui_is_a(_impl->ui, _world.ui_external) || lilv_ui_is_a(_impl->ui, _world.ui_externalkx);
+	return _impl->ui && (lilv_ui_is_a(_impl->ui, _world.ui_external) ||
+	                     lilv_ui_is_a(_impl->ui, _world.ui_externalkx));
 }
 
 bool
 LV2Plugin::is_external_kx() const
 {
-	if (!_impl->ui) {
-		return false;
-	}
-	return lilv_ui_is_a(_impl->ui, _world.ui_externalkx);
+	return _impl->ui && lilv_ui_is_a(_impl->ui, _world.ui_externalkx);
 }
 
 bool
@@ -3258,6 +3216,7 @@ LV2World::LV2World()
 	units_db           = lilv_new_uri(world, LV2_UNITS__db);
 	patch_writable     = lilv_new_uri(world, LV2_PATCH__writable);
 	patch_Message      = lilv_new_uri(world, LV2_PATCH__Message);
+	opts_requiredOptions = lilv_new_uri(world, LV2_OPTIONS__requiredOption);
 #ifdef LV2_EXTENDED
 	lv2_noSampleAccurateCtrl    = lilv_new_uri(world, "http://ardour.org/lv2/ext#noSampleAccurateControls"); // deprecated 2016-09-18
 	auto_can_write_automatation = lilv_new_uri(world, LV2_AUTOMATE_URI__can_write);
@@ -3266,13 +3225,10 @@ LV2World::LV2World()
 	auto_automation_controller  = lilv_new_uri(world, LV2_AUTOMATE_URI__controller);
 	inline_display_in_gui       = lilv_new_uri(world, LV2_INLINEDISPLAY__in_gui);
 #endif
-#ifdef HAVE_LV2_1_2_0
 	bufz_powerOf2BlockLength = lilv_new_uri(world, LV2_BUF_SIZE__powerOf2BlockLength);
 	bufz_fixedBlockLength    = lilv_new_uri(world, LV2_BUF_SIZE__fixedBlockLength);
 	bufz_nominalBlockLength  = lilv_new_uri(world, "http://lv2plug.in/ns/ext/buf-size#nominalBlockLength");
 	bufz_coarseBlockLength   = lilv_new_uri(world, "http://lv2plug.in/ns/ext/buf-size#coarseBlockLength");
-#endif
-
 }
 
 LV2World::~LV2World()
@@ -3280,12 +3236,10 @@ LV2World::~LV2World()
 	if (!world) {
 		return;
 	}
-#ifdef HAVE_LV2_1_2_0
 	lilv_node_free(bufz_coarseBlockLength);
 	lilv_node_free(bufz_nominalBlockLength);
 	lilv_node_free(bufz_fixedBlockLength);
 	lilv_node_free(bufz_powerOf2BlockLength);
-#endif
 #ifdef LV2_EXTENDED
 	lilv_node_free(lv2_noSampleAccurateCtrl);
 	lilv_node_free(auto_can_write_automatation);
@@ -3294,6 +3248,7 @@ LV2World::~LV2World()
 	lilv_node_free(auto_automation_controller);
 #endif
 	lilv_node_free(patch_Message);
+	lilv_node_free(opts_requiredOptions);
 	lilv_node_free(patch_writable);
 	lilv_node_free(units_hz);
 	lilv_node_free(units_midiNote);
@@ -3484,20 +3439,56 @@ LV2PluginInfo::discover()
 			continue;
 		}
 
-#ifdef HAVE_LV2_1_2_0
-		LilvNodes *required_features = lilv_plugin_get_required_features (p);
-		if (lilv_nodes_contains (required_features, world.bufz_powerOf2BlockLength) ||
-				lilv_nodes_contains (required_features, world.bufz_fixedBlockLength)
-		   ) {
-			warning << string_compose(
-			    _("Ignoring LV2 plugin \"%1\" because its buffer-size requirements cannot be satisfied."),
-			    lilv_node_as_string(name)) << endmsg;
-			lilv_nodes_free(required_features);
-			lilv_node_free(name);
+		int err = 0;
+		LilvNodes* required_features = lilv_plugin_get_required_features (p);
+		LILV_FOREACH(nodes, i, required_features) {
+				const char* rf = lilv_node_as_uri (lilv_nodes_get (required_features, i));
+				bool ok = false;
+				if (!strcmp (rf, "http://lv2plug.in/ns/ext/instance-access")) { ok = true; }
+				if (!strcmp (rf, "http://lv2plug.in/ns/ext/data-access")) { ok = true; }
+				if (!strcmp (rf, LV2_STATE__makePath)) { ok = true; }
+				if (!strcmp (rf, LV2_LOG__log)) { ok = true; }
+				if (!strcmp (rf, LV2_WORKER__schedule)) { ok = true; }
+				if (!strcmp (rf, LV2_STATE_PREFIX "loadDefaultState")) { ok = true; }
+				if (!strcmp (rf, LV2_URID_MAP_URI)) { ok = true; }
+				if (!strcmp (rf, LV2_URID_UNMAP_URI)) { ok = true; }
+				if (!strcmp (rf, "http://lv2plug.in/ns/lv2core#isLive")) { ok = true; }
+				if (!ok) {
+					warning << string_compose (
+							_("Unsupported required LV2 feature: '%1' in '%2'."),
+							rf, lilv_node_as_string(name)) << endmsg;
+					err = 1;
+				}
+		}
+
+		if (err) {
 			continue;
 		}
-		lilv_nodes_free(required_features);
-#endif
+
+		lilv_nodes_free (required_features);
+
+		LilvNodes* required_options = lilv_world_find_nodes (world.world, lilv_plugin_get_uri (p), world.opts_requiredOptions, NULL);
+		if (required_options) {
+			LILV_FOREACH(nodes, i, required_options) {
+				const char* ro = lilv_node_as_uri (lilv_nodes_get (required_options, i));
+				bool ok = false;
+				if (!strcmp (ro, LV2_PARAMETERS__sampleRate)) { ok = true; }
+				if (!strcmp (ro, LV2_BUF_SIZE__minBlockLength)) { ok = true; }
+				if (!strcmp (ro, LV2_BUF_SIZE__maxBlockLength)) { ok = true; }
+				if (!strcmp (ro, LV2_BUF_SIZE__sequenceSize)) { ok = true; }
+				if (!ok) {
+					warning << string_compose (
+							_("Unsupported required LV2 option: '%1' in '%2'."),
+							ro, lilv_node_as_string(name)) << endmsg;
+					err = 1;
+				}
+			}
+		}
+		lilv_nodes_free(required_options);
+
+		if (err) {
+			continue;
+		}
 
 		info->type = LV2;
 

@@ -3666,6 +3666,19 @@ RCOptionEditor::RCOptionEditor ()
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_color_regions_using_track_color)
 			));
 
+#ifndef MIXBUS // hide this setting in Mixbus. Always on, 4px
+	ComboOption<uint32_t>* gap = new ComboOption<uint32_t> (
+		     "vertical-region-gap",
+		     _("Add a visual gap below Audio Regions"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_vertical_region_gap),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_vertical_region_gap)
+		     );
+	gap->add (0, _("None"));
+	gap->add (2, _("Small"));
+	gap->add (4, _("Large"));
+	add_option (_("Appearance/Editor"), gap);
+#endif
+
 	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("Waveforms")));
 
 	if (!Profile->get_mixbus()) {

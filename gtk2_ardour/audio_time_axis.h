@@ -84,6 +84,7 @@ private:
 	friend class AudioRegionView;
 
 	void route_active_changed ();
+	void parameter_changed (std::string const &);
 
 	Gtk::Menu* build_mode_menu();
 	void build_automation_action_menu (bool);
