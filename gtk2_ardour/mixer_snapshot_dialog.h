@@ -64,6 +64,7 @@ class MixerSnapshotDialog : public ArdourWindow
         bool button_press(GdkEventButton*, bool);
         void window_opened();
         void fav_cell_action(const std::string&, bool);
+        void recall_flag_cell_action(const std::string&, bool, int);
 
 
         struct MixerSnapshotColumns : public Gtk::TreeModel::ColumnRecord {
@@ -79,6 +80,11 @@ class MixerSnapshotDialog : public ArdourWindow
                 add (timestamp);
                 add (full_path);
                 add (snapshot);
+                add (recall_eq);
+                add (recall_comp);
+                add (recall_io);
+                add (recall_groups);
+                add (recall_vcas);
             }
             Gtk::TreeModelColumn<bool> favorite;
             Gtk::TreeModelColumn<std::string> name;
@@ -91,6 +97,11 @@ class MixerSnapshotDialog : public ArdourWindow
             Gtk::TreeModelColumn<int64_t> timestamp;
             Gtk::TreeModelColumn<std::string> full_path;
             Gtk::TreeModelColumn<ARDOUR::MixerSnapshot*> snapshot;
+            Gtk::TreeModelColumn<bool> recall_eq;
+            Gtk::TreeModelColumn<bool> recall_comp;
+            Gtk::TreeModelColumn<bool> recall_io;
+            Gtk::TreeModelColumn<bool> recall_groups;
+            Gtk::TreeModelColumn<bool> recall_vcas;
         };
 
         MixerSnapshotColumns _columns;

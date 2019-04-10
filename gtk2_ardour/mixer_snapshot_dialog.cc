@@ -262,6 +262,21 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
     //newest snaps should be at the top
     model->set_sort_column(6, SORT_DESCENDING);
 
+    //new stuff - see TODO
+    display.append_column(_("EQ"),     _columns.recall_eq); // col 8
+    display.append_column(_("Comp"),   _columns.recall_comp);
+    display.append_column(_("I/O"),    _columns.recall_io);
+    display.append_column(_("Groups"), _columns.recall_groups);
+    display.append_column(_("VCAs"),   _columns.recall_vcas); //col 12
+
+    // TODO make this a vector
+    for(int i = 8; i <= 12; i++) {
+        CellRendererToggle* cell = dynamic_cast<CellRendererToggle*>(display.get_column_cell_renderer(i));
+        cell->property_activatable() = true;
+        cell->property_radio() = true;
+        cell->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::recall_flag_cell_action), global, i));
+    }
+
     display.set_headers_visible(true);
     display.set_headers_clickable(true);
     display.set_reorderable(false);
@@ -469,6 +484,12 @@ void MixerSnapshotDialog::refill()
         row[_columns.date]      = gdt.format ("%F %H:%M");
         row[_columns.full_path] = path;
         row[_columns.snapshot]  = snap;
+
+        row[_columns.recall_eq]     = snap->recall_eq();
+        row[_columns.recall_comp]   = snap->recall_comp();
+        row[_columns.recall_io]     = snap->recall_io();
+        row[_columns.recall_groups] = snap->recall_group();
+        row[_columns.recall_vcas]   = snap->recall_vca();
     }
 
     local_model->clear();
@@ -506,6 +527,12 @@ void MixerSnapshotDialog::refill()
         row[_columns.date]      = gdt.format ("%F %H:%M");
         row[_columns.full_path] = path;
         row[_columns.snapshot]  = snap;
+
+        row[_columns.recall_eq]     = snap->recall_eq();
+        row[_columns.recall_comp]   = snap->recall_comp();
+        row[_columns.recall_io]     = snap->recall_io();
+        row[_columns.recall_groups] = snap->recall_group();
+        row[_columns.recall_vcas]   = snap->recall_vca();
     }
 }
 
@@ -522,6 +549,52 @@ void MixerSnapshotDialog::fav_cell_action(const string& path, bool global)
         MixerSnapshot* snap = (*iter)[_columns.snapshot];
         snap->set_favorite(!snap->get_favorite());
         (*iter)[_columns.favorite] = snap->get_favorite();
+        snap->write((*iter)[_columns.full_path]);
+    }
+}
+
+void MixerSnapshotDialog::recall_flag_cell_action(const std::string& path, bool global, int col_index)
+{
+    TreeModel::iterator iter;
+    if(global) {
+        iter = global_model->get_iter(path);
+    } else {
+        iter = local_model->get_iter(path);
+    }
+
+    if(iter) {
+        MixerSnapshot* snap = (*iter)[_columns.snapshot];
+
+        switch (col_index)
+        {
+            case 8:
+                snap->set_recall_eq(!snap->recall_eq());
+                (*iter)[_columns.recall_eq] = snap->recall_eq();
+                break;
+
+            case 9:
+                snap->set_recall_comp(!snap->recall_comp());
+                (*iter)[_columns.recall_comp] = snap->recall_comp();
+                break;
+
+            case 10:
+                snap->set_recall_io(!snap->recall_io());
+                (*iter)[_columns.recall_io] = snap->recall_io();
+                break;
+
+            case 11:
+                snap->set_recall_group(!snap->recall_group());
+                (*iter)[_columns.recall_groups] = snap->recall_group();
+                break;
+
+            case 12:
+                snap->set_recall_vca(!snap->recall_vca());
+                (*iter)[_columns.recall_vcas] = snap->recall_vca();
+                break;
+
+            default:
+                break;
+        }
         snap->write((*iter)[_columns.full_path]);
     }
 }
