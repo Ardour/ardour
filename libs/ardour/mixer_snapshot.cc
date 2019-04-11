@@ -54,7 +54,7 @@ MixerSnapshot::MixerSnapshot(Session* s)
     , label("snapshot")
     , timestamp(time(0))
     , last_modified_with(string_compose("%1 %2", PROGRAM_NAME, revision))
-    , _flags(RecallFlags(0))
+    , _flags(RecallFlags(31))
 {
     if(s) {
         _session = s;
@@ -67,7 +67,7 @@ MixerSnapshot::MixerSnapshot(Session* s, string file_path)
     , label("snapshot")
     , timestamp(time(0))
     , last_modified_with(string_compose("%1 %2", PROGRAM_NAME, revision))
-    , _flags(RecallFlags(0))
+    , _flags(RecallFlags(31))
 {
     if(s) {
         _session = s;
