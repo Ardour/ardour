@@ -800,6 +800,19 @@ Gtkmm2ext::rounded_top_right_rectangle (cairo_t* cr, double x, double y, double 
 	cairo_line_to (cr, x,y); // Line to A
 }
 
+void
+Gtkmm2ext::add_reflection (cairo_t* cr, double w, double h)
+{
+	cairo_pattern_t* convex_pattern = cairo_pattern_create_linear (0.0, 0, 0.3, h * 0.7);
+	cairo_pattern_add_color_stop_rgba (convex_pattern, 0.0,  1, 1, 1, 0.10);
+	cairo_pattern_add_color_stop_rgba (convex_pattern, 0.79, 1, 1, 1, 0.03);
+	cairo_pattern_add_color_stop_rgba (convex_pattern, 1.0,  1, 1, 1, 0.0);
+	cairo_set_source (cr, convex_pattern);
+	Gtkmm2ext::rounded_rectangle (cr, 2, 2, w - 4, h - 4, 4);
+	cairo_fill (cr);
+	cairo_pattern_destroy(convex_pattern);
+}
+
 Glib::RefPtr<Gdk::Window>
 Gtkmm2ext::window_to_draw_on (Gtk::Widget& w, Gtk::Widget** parent)
 {
