@@ -107,8 +107,10 @@ bool MixerSnapshot::set_flag(bool yn, RecallFlags flag)
     return false;
 }
 
+#ifdef MIXBUS
 void MixerSnapshot::set_recall_eq(bool yn) { set_flag(yn, RecallEQ);};
 void MixerSnapshot::set_recall_comp(bool yn) { set_flag(yn, RecallComp);};
+#endif
 void MixerSnapshot::set_recall_io(bool yn) { set_flag(yn, RecallIO);};
 void MixerSnapshot::set_recall_group(bool yn) { set_flag(yn, RecallGroup);};
 void MixerSnapshot::set_recall_vca(bool yn) { set_flag(yn, RecallVCA);};
@@ -305,7 +307,7 @@ void MixerSnapshot::recall()
         if(!get_recall_vca()) {
             continue;
         }
-        
+
         State state = (*i);
 
         boost::shared_ptr<VCA> vca = _session->vca_manager().vca_by_name(state.name);
@@ -499,8 +501,8 @@ XMLNode& MixerSnapshot::sanitize_node(XMLNode& node)
     for(vector<string>::const_iterator it = procs.begin(); it != procs.end(); it++) {
         node.remove_node_and_delete(node_name, prop_name, (*it));
     }
-#endif
 
+#else
     if(!get_recall_eq()) {
         node.remove_node_and_delete("Processor", "name", "EQ");
     }
@@ -508,6 +510,7 @@ XMLNode& MixerSnapshot::sanitize_node(XMLNode& node)
     if(!get_recall_comp()) {
         node.remove_node_and_delete("Processor", "name", "Comp");
     }
+#endif
 
     if(!get_recall_io()) {
         node.remove_node_and_delete("IO", "direction", "Input");

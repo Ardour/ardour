@@ -72,15 +72,18 @@ class LIBARDOUR_API MixerSnapshot
         std::vector<State> get_routes() {return route_states;};
         std::vector<State> get_groups() {return group_states;};
         std::vector<State> get_vcas()   {return vca_states;};
-
+#ifdef MIXBUS
         bool get_recall_eq()    const { return _flags & RecallEQ;};
         bool get_recall_comp()  const { return _flags & RecallComp;};
+#endif
         bool get_recall_io()    const { return _flags & RecallIO;};
         bool get_recall_group() const { return _flags & RecallGroup;};
         bool get_recall_vca()   const { return _flags & RecallVCA;};
 
+#ifdef MIXBUS
         void set_recall_eq(bool);
         void set_recall_comp(bool);
+#endif
         void set_recall_io(bool);
         void set_recall_group(bool);
         void set_recall_vca(bool);
