@@ -263,18 +263,27 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
     model->set_sort_column(6, SORT_DESCENDING);
 
     //new stuff - see TODO
-    display.append_column(_("EQ"),     _columns.recall_eq); // col 8
-    display.append_column(_("Comp"),   _columns.recall_comp);
-    display.append_column(_("I/O"),    _columns.recall_io);
-    display.append_column(_("Groups"), _columns.recall_groups);
-    display.append_column(_("VCAs"),   _columns.recall_vcas); //col 12
+
+    //dumb work around because we're doing an ifdef MIXBUS here
+    int col_count[] = {
+#ifdef MIXBUS
+        display.append_column(_("EQ"),     _columns.recall_eq),
+        display.append_column(_("Comp"),   _columns.recall_comp),
+#endif
+        display.append_column(_("I/O"),    _columns.recall_io),
+        display.append_column(_("Groups"), _columns.recall_groups),
+        display.append_column(_("VCAs"),   _columns.recall_vcas),
+    };
 
     // TODO make this a vector
-    for(int i = 8; i <= 12; i++) {
-        CellRendererToggle* cell = dynamic_cast<CellRendererToggle*>(display.get_column_cell_renderer(i));
+    int col_count_size = (sizeof(col_count)/sizeof(*col_count));
+    for(int i = 0; i < col_count_size; i++) {
+        int index = col_count[i] - 1; //the actual count at the time of appending
+        CellRendererToggle* cell = dynamic_cast<CellRendererToggle*>(display.get_column_cell_renderer(index));
+        string col_title = display.get_column(index)->get_title();
         cell->property_activatable() = true;
         cell->property_radio() = true;
-        cell->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::recall_flag_cell_action), global, i));
+        cell->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::recall_flag_cell_action), global, col_title));
     }
 
     display.set_headers_visible(true);
@@ -485,8 +494,10 @@ void MixerSnapshotDialog::refill()
         row[_columns.full_path] = path;
         row[_columns.snapshot]  = snap;
 
+#ifdef MIXBUS
         row[_columns.recall_eq]     = snap->get_recall_eq();
         row[_columns.recall_comp]   = snap->get_recall_comp();
+#endif
         row[_columns.recall_io]     = snap->get_recall_io();
         row[_columns.recall_groups] = snap->get_recall_group();
         row[_columns.recall_vcas]   = snap->get_recall_vca();
@@ -528,8 +539,10 @@ void MixerSnapshotDialog::refill()
         row[_columns.full_path] = path;
         row[_columns.snapshot]  = snap;
 
+#ifdef MIXBUS
         row[_columns.recall_eq]     = snap->get_recall_eq();
         row[_columns.recall_comp]   = snap->get_recall_comp();
+#endif
         row[_columns.recall_io]     = snap->get_recall_io();
         row[_columns.recall_groups] = snap->get_recall_group();
         row[_columns.recall_vcas]   = snap->get_recall_vca();
@@ -553,7 +566,7 @@ void MixerSnapshotDialog::fav_cell_action(const string& path, bool global)
     }
 }
 
-void MixerSnapshotDialog::recall_flag_cell_action(const std::string& path, bool global, int col_index)
+void MixerSnapshotDialog::recall_flag_cell_action(const std::string& path, bool global, string title)
 {
     TreeModel::iterator iter;
     if(global) {
@@ -565,36 +578,32 @@ void MixerSnapshotDialog::recall_flag_cell_action(const std::string& path, bool 
     if(iter) {
         MixerSnapshot* snap = (*iter)[_columns.snapshot];
 
-        switch (col_index)
-        {
-            case 8:
-                snap->set_recall_eq(!snap->get_recall_eq());
-                (*iter)[_columns.recall_eq] = snap->get_recall_eq();
-                break;
+#ifdef MIXBUS
+        if(title == "EQ") {
+            snap->set_recall_eq(!snap->get_recall_eq());
+            (*iter)[_columns.recall_eq] = snap->get_recall_eq();
+        }
 
-            case 9:
-                snap->set_recall_comp(!snap->get_recall_comp());
-                (*iter)[_columns.recall_comp] = snap->get_recall_comp();
-                break;
-
-            case 10:
+        if(title == "Comp") {
+            snap->set_recall_comp(!snap->get_recall_comp());
+            (*iter)[_columns.recall_comp] = snap->get_recall_comp();
+        }
+#endif
+        if(title == "I/O") {
                 snap->set_recall_io(!snap->get_recall_io());
                 (*iter)[_columns.recall_io] = snap->get_recall_io();
-                break;
-
-            case 11:
-                snap->set_recall_group(!snap->get_recall_group());
-                (*iter)[_columns.recall_groups] = snap->get_recall_group();
-                break;
-
-            case 12:
-                snap->set_recall_vca(!snap->get_recall_vca());
-                (*iter)[_columns.recall_vcas] = snap->get_recall_vca();
-                break;
-
-            default:
-                break;
         }
+
+        if(title == "Groups") {
+            snap->set_recall_group(!snap->get_recall_group());
+            (*iter)[_columns.recall_groups] = snap->get_recall_group();
+        }
+
+        if(title == "VCAs") {
+            snap->set_recall_vca(!snap->get_recall_vca());
+            (*iter)[_columns.recall_vcas] = snap->get_recall_vca();
+        }
+
         snap->write((*iter)[_columns.full_path]);
     }
 }
