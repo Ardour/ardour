@@ -493,26 +493,58 @@ void MixerSnapshot::load_from_session(string path)
 
 XMLNode& MixerSnapshot::sanitize_node(XMLNode& node)
 {
+    vector<string> procs {"PRE"};
 #ifndef MIXBUS
-    vector<string> procs {"PRE", "EQ", "Comp", "POST"};
+    procs.push_back("EQ");
+    procs.push_back("Comp");
+    procs.push_back("POST");
+#endif
+
     const string node_name   = "Processor";
     const string prop_name   = "name";
 
     for(vector<string>::const_iterator it = procs.begin(); it != procs.end(); it++) {
+        cout << (*it) << endl;
         node.remove_node_and_delete(node_name, prop_name, (*it));
     }
 
-#else
-    if(!get_recall_eq()) {
-        node.remove_node_and_delete("Processor", "name", "EQ");
-    }
+#ifdef MIXBUS
 
-    if(!get_recall_comp()) {
-        node.remove_node_and_delete("Processor", "name", "Comp");
+    XMLNodeList nlist;
+    XMLNodeConstIterator niter;
+    XMLNode* child;
+
+    nlist = node.children();
+
+    for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+        if(get_recall_eq() && get_recall_comp()) {
+            break;
+        }
+
+        child = *niter;
+
+        if (child->name() == "Processor") {
+            XMLProperty const * name_prop = (*niter)->property(X_("name"));
+            if(name_prop && name_prop->value() == "EQ") {
+                if(!get_recall_eq()) {
+                    child->remove_nodes_and_delete("Automation");
+                    child->remove_nodes_and_delete("ladspa");
+                    child->remove_nodes_and_delete("Controllable");
+                }
+            }
+            if(name_prop && name_prop->value() == "Comp") {
+                if(!get_recall_comp()) {
+                    child->remove_nodes_and_delete("Automation");
+                    child->remove_nodes_and_delete("ladspa");
+                    child->remove_nodes_and_delete("Controllable");
+                }
+            }
+        }
     }
 #endif
 
     if(!get_recall_io()) {
+        cout << "removing IO node" << endl;
         node.remove_node_and_delete("IO", "direction", "Input");
         node.remove_node_and_delete("IO", "direction", "Output");
     }
