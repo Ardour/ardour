@@ -73,11 +73,11 @@ class LIBARDOUR_API MixerSnapshot
         std::vector<State> get_groups() {return group_states;};
         std::vector<State> get_vcas()   {return vca_states;};
 
-        bool recall_eq()    const { return _flags & RecallEQ;};
-        bool recall_comp()  const { return _flags & RecallComp;};
-        bool recall_io()    const { return _flags & RecallIO;};
-        bool recall_group() const { return _flags & RecallGroup;};
-        bool recall_vca()   const { return _flags & RecallVCA;};
+        bool get_recall_eq()    const { return _flags & RecallEQ;};
+        bool get_recall_comp()  const { return _flags & RecallComp;};
+        bool get_recall_io()    const { return _flags & RecallIO;};
+        bool get_recall_group() const { return _flags & RecallGroup;};
+        bool get_recall_vca()   const { return _flags & RecallVCA;};
 
         void set_recall_eq(bool);
         void set_recall_comp(bool);

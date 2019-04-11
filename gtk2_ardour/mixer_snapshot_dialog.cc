@@ -478,18 +478,18 @@ void MixerSnapshotDialog::refill()
 
         GStatBuf gsb;
         g_stat(path.c_str(), &gsb);
-        Glib::DateTime gdt(Glib::DateTime::create_now_local(gsb.st_mtime));
+        Glib::DateTime gdt(Glib::DateTime::create_now_local(gsb.st_ctime));
 
-        row[_columns.timestamp] = gsb.st_mtime;
+        row[_columns.timestamp] = gsb.st_ctime;
         row[_columns.date]      = gdt.format ("%F %H:%M");
         row[_columns.full_path] = path;
         row[_columns.snapshot]  = snap;
 
-        row[_columns.recall_eq]     = snap->recall_eq();
-        row[_columns.recall_comp]   = snap->recall_comp();
-        row[_columns.recall_io]     = snap->recall_io();
-        row[_columns.recall_groups] = snap->recall_group();
-        row[_columns.recall_vcas]   = snap->recall_vca();
+        row[_columns.recall_eq]     = snap->get_recall_eq();
+        row[_columns.recall_comp]   = snap->get_recall_comp();
+        row[_columns.recall_io]     = snap->get_recall_io();
+        row[_columns.recall_groups] = snap->get_recall_group();
+        row[_columns.recall_vcas]   = snap->get_recall_vca();
     }
 
     local_model->clear();
@@ -521,18 +521,18 @@ void MixerSnapshotDialog::refill()
 
         GStatBuf gsb;
         g_stat(path.c_str(), &gsb);
-        Glib::DateTime gdt(Glib::DateTime::create_now_local(gsb.st_mtime));
+        Glib::DateTime gdt(Glib::DateTime::create_now_local(gsb.st_ctime));
 
-        row[_columns.timestamp] = gsb.st_mtime;
+        row[_columns.timestamp] = gsb.st_ctime;
         row[_columns.date]      = gdt.format ("%F %H:%M");
         row[_columns.full_path] = path;
         row[_columns.snapshot]  = snap;
 
-        row[_columns.recall_eq]     = snap->recall_eq();
-        row[_columns.recall_comp]   = snap->recall_comp();
-        row[_columns.recall_io]     = snap->recall_io();
-        row[_columns.recall_groups] = snap->recall_group();
-        row[_columns.recall_vcas]   = snap->recall_vca();
+        row[_columns.recall_eq]     = snap->get_recall_eq();
+        row[_columns.recall_comp]   = snap->get_recall_comp();
+        row[_columns.recall_io]     = snap->get_recall_io();
+        row[_columns.recall_groups] = snap->get_recall_group();
+        row[_columns.recall_vcas]   = snap->get_recall_vca();
     }
 }
 
@@ -568,28 +568,28 @@ void MixerSnapshotDialog::recall_flag_cell_action(const std::string& path, bool 
         switch (col_index)
         {
             case 8:
-                snap->set_recall_eq(!snap->recall_eq());
-                (*iter)[_columns.recall_eq] = snap->recall_eq();
+                snap->set_recall_eq(!snap->get_recall_eq());
+                (*iter)[_columns.recall_eq] = snap->get_recall_eq();
                 break;
 
             case 9:
-                snap->set_recall_comp(!snap->recall_comp());
-                (*iter)[_columns.recall_comp] = snap->recall_comp();
+                snap->set_recall_comp(!snap->get_recall_comp());
+                (*iter)[_columns.recall_comp] = snap->get_recall_comp();
                 break;
 
             case 10:
-                snap->set_recall_io(!snap->recall_io());
-                (*iter)[_columns.recall_io] = snap->recall_io();
+                snap->set_recall_io(!snap->get_recall_io());
+                (*iter)[_columns.recall_io] = snap->get_recall_io();
                 break;
 
             case 11:
-                snap->set_recall_group(!snap->recall_group());
-                (*iter)[_columns.recall_groups] = snap->recall_group();
+                snap->set_recall_group(!snap->get_recall_group());
+                (*iter)[_columns.recall_groups] = snap->get_recall_group();
                 break;
 
             case 12:
-                snap->set_recall_vca(!snap->recall_vca());
-                (*iter)[_columns.recall_vcas] = snap->recall_vca();
+                snap->set_recall_vca(!snap->get_recall_vca());
+                (*iter)[_columns.recall_vcas] = snap->get_recall_vca();
                 break;
 
             default:
