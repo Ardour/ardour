@@ -302,6 +302,10 @@ void MixerSnapshot::recall()
 
     //vcas
     for(vector<State>::const_iterator i = vca_states.begin(); i != vca_states.end(); i++) {
+        if(!get_recall_vca()) {
+            continue;
+        }
+        
         State state = (*i);
 
         boost::shared_ptr<VCA> vca = _session->vca_manager().vca_by_name(state.name);
@@ -339,6 +343,10 @@ void MixerSnapshot::recall()
 
     //groups
     for(vector<State>::const_iterator i = group_states.begin(); i != group_states.end(); i++) {
+        if(!get_recall_group()) {
+            continue;
+        }
+
         State state = (*i);
 
         RouteGroup* group = _session->route_group_by_name(state.name);
@@ -492,6 +500,20 @@ XMLNode& MixerSnapshot::sanitize_node(XMLNode& node)
         node.remove_node_and_delete(node_name, prop_name, (*it));
     }
 #endif
+
+    if(!get_recall_eq()) {
+        node.remove_node_and_delete("Processor", "name", "EQ");
+    }
+
+    if(!get_recall_comp()) {
+        node.remove_node_and_delete("Processor", "name", "Comp");
+    }
+
+    if(!get_recall_io()) {
+        node.remove_node_and_delete("IO", "direction", "Input");
+        node.remove_node_and_delete("IO", "direction", "Output");
+    }
+
     return node;
 }
 
