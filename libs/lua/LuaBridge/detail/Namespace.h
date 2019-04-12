@@ -1911,7 +1911,7 @@ public:
     typedef std::list<TP> LT;
     return beginConstStdCPtrList<T> (name)
       .addFunction ("unique", (void (LT::*)())&LT::unique)
-      .addFunction ("push_back", (void (LT::*)(const TP&))&LT::push_back);
+      .addExtCFunction ("push_back", &CFunc::pushbackptr<T, LT>);
   }
 
 
