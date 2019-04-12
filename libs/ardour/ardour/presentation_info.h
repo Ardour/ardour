@@ -111,12 +111,19 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 		MasterOut = 0x20,
 		MonitorOut = 0x40,
 		Auditioner = 0x80,
+#ifdef MIXBUS
+		Mixbus = 0x1000,
+#endif
 		/* These are for sharing Stripable states between the GUI and other
 		 * user interfaces/control surfaces
 		 */
 		Hidden = 0x100,
+#ifdef MIXBUS
+		MixbusEditorHidden = 0x800,
+#endif
 		/* single bit indicates that the group order is set */
 		OrderSet = 0x400,
+
 		/* bus type for monitor mixes */
 		FoldbackBus = 0x2000,
 

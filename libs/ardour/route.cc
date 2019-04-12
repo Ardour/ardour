@@ -1390,6 +1390,11 @@ Route::is_internal_processor (boost::shared_ptr<Processor> p) const
 	if (p == _amp || p == _meter || p == _main_outs || p == _delayline || p == _trim || p == _polarity) {
 		return true;
 	}
+#ifdef MIXBUS
+	if (p == _ch_pre || p == _ch_post || p == _ch_eq  || p == _ch_comp) {
+		return true;
+	}
+#endif
 	return false;
 }
 
