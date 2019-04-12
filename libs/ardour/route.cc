@@ -3084,6 +3084,7 @@ Route::set_processor_state (XMLNode const & node, XMLProperty const* prop, Proce
 			                                        boost::bind (&Route::processor_selfdestruct, this, boost::weak_ptr<Processor> (processor)));
 
 		} else {
+			warning << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
 			return false;
 		}
 
@@ -5566,8 +5567,8 @@ Route::eq_band_name (uint32_t band) const
 	} else {
 		switch (band) {
 			case 0: return _("lo");
-			case 1: return _("lo mid");
-			case 2: return _("hi mid");
+			case 1: return _("lm");
+			case 2: return _("hm");
 			case 3: return _("hi");
 			default: return string();
 		}

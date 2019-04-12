@@ -4172,7 +4172,7 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 			}
 			in_signal_flow = true;
 		} else {
-			DEBUG_TRACE (DEBUG::Solo, "\tno feed to\n");
+			DEBUG_TRACE (DEBUG::Solo, string_compose("\tno feed to %1\n", (*i)->name()) );
 		}
 
 		if (!in_signal_flow) {
