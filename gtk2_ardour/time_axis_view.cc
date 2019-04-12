@@ -1122,8 +1122,8 @@ TimeAxisView::compute_heights ()
 	Gtk::Table one_row_table (1, 1);
 	ArdourButton* test_button = manage (new ArdourButton);
 	const int border_width = 2;
-	const int sample_height = 2;
-	extra_height = (2 * border_width) + sample_height;
+	const int frame_height = 2;
+	extra_height = (2 * border_width) + frame_height;
 
 	window.add (one_row_table);
 	test_button->set_name ("mute button");
