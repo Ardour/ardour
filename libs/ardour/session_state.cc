@@ -543,6 +543,15 @@ Session::ensure_subdirs ()
 		return -1;
 	}
 
+	if(Profile->get_mixbus()) {
+		dir = session_directory().backup_path();
+
+		if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
+			error << string_compose(_("Session: cannot create session backup folder \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
+			return -1;
+		}
+	}
+
 	dir = analysis_dir ();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
