@@ -54,7 +54,11 @@ hardware_concurrency()
 #elif defined(__APPLE__)
 	int count;
 	size_t size=sizeof(count);
+# ifdef MIXBUS
+	return sysctlbyname("hw.logicalcpu",&count,&size,NULL,0)?0:count;
+# else
 	return sysctlbyname("hw.physicalcpu",&count,&size,NULL,0)?0:count;
+# endif
 #elif defined(__FreeBSD__)
 	int count;
 	size_t size=sizeof(count);
