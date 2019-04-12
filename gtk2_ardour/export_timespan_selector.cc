@@ -472,7 +472,6 @@ ExportTimespanSelectorSingle::fill_range_list ()
 			row[range_cols.timestamp] = (*it)->timestamp();
 			row[range_cols.date] = gdt.format ("%F %H:%M");;
 
-
 			add_range_to_selection (*it, false);
 
 			break;
