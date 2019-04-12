@@ -47,7 +47,6 @@ namespace PBD {
 using namespace std;
 using namespace ARDOUR;
 
-
 MixerSnapshot::MixerSnapshot(Session* s)
     : id(0)
     , favorite(false)
@@ -114,7 +113,6 @@ void MixerSnapshot::set_recall_comp(bool yn) { set_flag(yn, RecallComp);};
 void MixerSnapshot::set_recall_io(bool yn) { set_flag(yn, RecallIO);};
 void MixerSnapshot::set_recall_group(bool yn) { set_flag(yn, RecallGroup);};
 void MixerSnapshot::set_recall_vca(bool yn) { set_flag(yn, RecallVCA);};
-
 
 bool MixerSnapshot::has_specials()
 {
@@ -305,7 +303,7 @@ void MixerSnapshot::recall()
     //vcas
     for(vector<State>::const_iterator i = vca_states.begin(); i != vca_states.end(); i++) {
         if(!get_recall_vca()) {
-            continue;
+            break;
         }
 
         State state = (*i);
@@ -346,7 +344,7 @@ void MixerSnapshot::recall()
     //groups
     for(vector<State>::const_iterator i = group_states.begin(); i != group_states.end(); i++) {
         if(!get_recall_group()) {
-            continue;
+            break;
         }
 
         State state = (*i);
@@ -376,9 +374,6 @@ void MixerSnapshot::write(const string path)
     node->set_property(X_("favorite"), favorite);
     node->set_property(X_("modified-with"), last_modified_with);
     XMLNode* child;
-
-    // child = node->add_child ("ProgramVersion");
-    // child->set_property("modified-with", last_modified_with);
 
     child = node->add_child("Routes");
     for(vector<State>::iterator i = route_states.begin(); i != route_states.end(); i++) {
@@ -421,9 +416,9 @@ void MixerSnapshot::load(const string path)
     root->get_property(X_("modified-with"), last_modified_with);
     set_favorite(atoi(fav.c_str()));
 
-    XMLNode* route_node   = find_named_node(*root, "Routes");
-    XMLNode* group_node   = find_named_node(*root, "Groups");
-    XMLNode* vca_node     = find_named_node(*root, "VCAS");
+    XMLNode* route_node = find_named_node(*root, "Routes");
+    XMLNode* group_node = find_named_node(*root, "Groups");
+    XMLNode* vca_node   = find_named_node(*root, "VCAS");
 
     if(route_node) {
         XMLNodeList nlist = route_node->children();
@@ -494,6 +489,7 @@ void MixerSnapshot::load_from_session(string path)
 XMLNode& MixerSnapshot::sanitize_node(XMLNode& node)
 {
     vector<string> procs {"PRE"};
+
 #ifndef MIXBUS
     procs.push_back("EQ");
     procs.push_back("Comp");
@@ -504,7 +500,6 @@ XMLNode& MixerSnapshot::sanitize_node(XMLNode& node)
     const string prop_name   = "name";
 
     for(vector<string>::const_iterator it = procs.begin(); it != procs.end(); it++) {
-        cout << (*it) << endl;
         node.remove_node_and_delete(node_name, prop_name, (*it));
     }
 
@@ -544,7 +539,6 @@ XMLNode& MixerSnapshot::sanitize_node(XMLNode& node)
 #endif
 
     if(!get_recall_io()) {
-        cout << "removing IO node" << endl;
         node.remove_node_and_delete("IO", "direction", "Input");
         node.remove_node_and_delete("IO", "direction", "Output");
     }

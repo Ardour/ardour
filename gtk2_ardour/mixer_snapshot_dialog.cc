@@ -65,8 +65,8 @@ MixerSnapshotDialog::MixerSnapshotDialog(Session* s)
     global_model = Gtk::ListStore::create(_columns);
     local_model  = Gtk::ListStore::create(_columns);
 
-    bootstrap_display_and_model(global_display, global_model, true);
-    bootstrap_display_and_model(local_display, local_model,  false);
+    bootstrap_display_and_model(global_display, global_scroller, global_model, true);
+    bootstrap_display_and_model(local_display, local_scroller, local_model,  false);
 
     add(top_level_view_box);
 
@@ -82,7 +82,7 @@ MixerSnapshotDialog::MixerSnapshotDialog(Session* s)
     global_display.signal_button_press_event().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::button_press), true), false);
     local_display.signal_button_press_event().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::button_press), false), false);
 
-    signal_show().connect(sigc::mem_fun(*this, &MixerSnapshotDialog::window_opened));
+    // signal_show().connect(sigc::mem_fun(*this, &MixerSnapshotDialog::window_opened));
 
     set_session(s);
 }
@@ -242,7 +242,7 @@ void MixerSnapshotDialog::rename_snapshot(const string old_path)
     }
 }
 
-bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<string>& display, Glib::RefPtr<ListStore> model, bool global)
+bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<string>& display, Gtk::ScrolledWindow& scroller, Glib::RefPtr<ListStore> model, bool global)
 {
     if(!model) {
         return false;
@@ -262,10 +262,12 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
     //newest snaps should be at the top
     model->set_sort_column(6, SORT_DESCENDING);
 
-    //new stuff - see TODO
+    //flag setting columns
 
-    //dumb work around because we're doing an ifdef MIXBUS here
-    int col_count[] = {
+    /* dumb work around here because we're doing an #ifdef MIXBUS -
+       Basically, append_column() returns the no. of columns *after*
+       appending, we can just put this in a vector and use it later */
+    vector<int> column_counts {
 #ifdef MIXBUS
         display.append_column(_("EQ"),     _columns.recall_eq),
         display.append_column(_("Comp"),   _columns.recall_comp),
@@ -275,10 +277,8 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
         display.append_column(_("VCAs"),   _columns.recall_vcas),
     };
 
-    // TODO make this a vector
-    int col_count_size = (sizeof(col_count)/sizeof(*col_count));
-    for(int i = 0; i < col_count_size; i++) {
-        int index = col_count[i] - 1; //the actual count at the time of appending
+    for(vector<int>::iterator i = column_counts.begin(); i != column_counts.end(); i++) {
+        int index = (*i) - 1; //the actual index at the time of appending
         CellRendererToggle* cell = dynamic_cast<CellRendererToggle*>(display.get_column_cell_renderer(index));
         string col_title = display.get_column(index)->get_title();
         cell->property_activatable() = true;
@@ -309,33 +309,18 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
     vbox->pack_start(*add_remove);
     vbox->set_size_request(800, -1);
 
-    if(global) {
-        btn_add->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snapshot), true));
-        btn_new->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snap_from_session), true));
+    btn_add->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snapshot), global));
+    btn_new->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snap_from_session), global));
 
-        global_scroller.set_border_width(10);
-        global_scroller.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
-        global_scroller.add(global_display);
+    scroller.set_border_width(10);
+    scroller.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
+    scroller.add(display);
 
-        Table* table = manage(new Table(3, 3));
-        table->set_size_request(-1, 400);
-        table->attach(global_scroller, 0, 3, 0, 5                         );
-        table->attach(*vbox,           2, 3, 6, 8, FILL|EXPAND, FILL, 5, 5);
-        top_level_view_box.pack_start(*table);
-    } else {
-        btn_add->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snapshot), false));
-        btn_new->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snap_from_session), false));
-
-        local_scroller.set_border_width(10);
-        local_scroller.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
-        local_scroller.add(local_display);
-
-        Table* table = manage(new Table(3, 3));
-        table->set_size_request(-1, 400);
-        table->attach(local_scroller,  0, 3, 0, 5                         );
-        table->attach(*vbox,           2, 3, 6, 8, FILL|EXPAND, FILL, 5, 5);
-        top_level_view_box.pack_start(*table);
-    }
+    Table* table = manage(new Table(3, 3));
+    table->set_size_request(-1, 400);
+    table->attach(scroller,        0, 3, 0, 5                         );
+    table->attach(*vbox,           2, 3, 6, 8, FILL|EXPAND, FILL, 5, 5);
+    top_level_view_box.pack_start(*table);
 
     ColumnInfo ci[] = {
         { 0,  0,  ALIGN_CENTER,  _("Favorite"),       _("") },
