@@ -24,9 +24,6 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
-
-#include "widgets/pane.h"
-
 #include "editor_component.h"
 
 class EditorSnapshots : public EditorComponent, public ARDOUR::SessionHandlePtr
@@ -37,17 +34,14 @@ public:
 	void set_session (ARDOUR::Session *);
 
 	Gtk::Widget& widget () {
-		return _pane;
+		return _scroller;
 	}
 
 	void redisplay ();
 
 private:
 
-	ArdourWidgets::VPane _pane;
-
-	Gtk::ScrolledWindow _snap_scroller;
-	Gtk::ScrolledWindow _back_scroller;
+	Gtk::ScrolledWindow _scroller;
 
 	struct Columns : public Gtk::TreeModel::ColumnRecord {
 		Columns () {
@@ -61,10 +55,8 @@ private:
 	};
 
 	Columns _columns;
-	Glib::RefPtr<Gtk::ListStore> _snap_model;
-	Glib::RefPtr<Gtk::ListStore> _back_model;
-	Gtk::TreeView _snap_display;
-	Gtk::TreeView _back_display;
+	Glib::RefPtr<Gtk::ListStore> _snapshot_model;
+	Gtk::TreeView _snapshot_display;
 	Gtk::Menu _menu;
 
 	bool button_press (GdkEventButton *);
@@ -72,8 +64,6 @@ private:
 	void popup_context_menu (int, int32_t, std::string);
 	void remove (std::string);
 	void rename (std::string);
-
-	void backup_selection_changed ();
 };
 
 #endif // __gtk_ardour_editor_snapshots_h__
