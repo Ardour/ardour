@@ -24,6 +24,7 @@
 #include "audio_clock.h"
 
 #include <list>
+#include <ctime>
 
 #ifdef interface
 #undef interface
@@ -136,8 +137,10 @@ protected:
 		Gtk::TreeModelColumn<bool>              realtime;
 		Gtk::TreeModelColumn<std::string>       name;
 		Gtk::TreeModelColumn<std::string>       length;
+		Gtk::TreeModelColumn<std::string>       date;
+		Gtk::TreeModelColumn<time_t>            timestamp;
 
-		RangeCols () { add (location); add(label); add(selected); add(realtime); add(name); add(length); }
+		RangeCols () { add (location); add(label); add(selected); add(realtime); add(name); add(length); add(date); add(timestamp);}
 	};
 	RangeCols                    range_cols;
 

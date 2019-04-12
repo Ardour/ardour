@@ -65,6 +65,7 @@ Location::Location (Session& s)
 	, _flags (Flags (0))
 	, _locked (false)
 	, _position_lock_style (AudioTime)
+	, _timestamp(time(0))
 {
 	assert (_start >= 0);
 	assert (_end >= 0);
@@ -79,7 +80,7 @@ Location::Location (Session& s, samplepos_t sample_start, samplepos_t sample_end
 	, _flags (bits)
 	, _locked (false)
 	, _position_lock_style (s.config.get_glue_new_markers_to_bars_and_beats() ? MusicTime : AudioTime)
-
+	, _timestamp(time(0))
 {
 	recompute_beat_from_samples (sub_num);
 
@@ -599,6 +600,7 @@ Location::get_state ()
 	node->set_property ("flags", _flags);
 	node->set_property ("locked", _locked);
 	node->set_property ("position-lock-style", _position_lock_style);
+	node->set_property ("timestamp", _timestamp);
 
 	if (_scene_change) {
 		node->add_child_nocopy (_scene_change->get_state());
@@ -683,6 +685,7 @@ Location::set_state (const XMLNode& node, int version)
 	}
 
 	node.get_property ("position-lock-style", _position_lock_style);
+	node.get_property ("timestamp", _timestamp);
 
 	XMLNode* scene_child = find_named_node (node, SceneChange::xml_node_name);
 
