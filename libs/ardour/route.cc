@@ -213,7 +213,7 @@ Route::init ()
 		 */
 		_trim->activate();
 	}
-	else if (!dynamic_cast<Track*>(this) && ! ( is_monitor() || is_auditioner() )) {
+	else if (!dynamic_cast<Track*>(this) && ! (is_monitor() || is_auditioner())) {
 		/* regular bus */
 		_trim->activate();
 	}
@@ -963,7 +963,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 		//A2 uses the "active" flag in the toplevel redirect node, not in the child plugin/IO
 		if (i != children.end()) {
 			if ((prop = (*i)->property (X_("active"))) != 0) {
-				if ( string_to<bool> (prop->value()) && (!_session.get_bypass_all_loaded_plugins () || !processor->display_to_user () ) )
+				if (string_to<bool> (prop->value()) && (!_session.get_bypass_all_loaded_plugins () || !processor->display_to_user ()))
 					processor->activate();
 				else
 					processor->deactivate();
