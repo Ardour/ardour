@@ -74,15 +74,18 @@ MixerSnapshot::MixerSnapshot(Session* s, string file_path)
 
     if(Glib::file_test(file_path.c_str(), Glib::FILE_TEST_IS_DIR)) {
         load_from_session(file_path);
+        return;
     }
 
     string suffix = "." + PBD::get_suffix(file_path);
     if(suffix == statefile_suffix) {
         load_from_session(file_path);
+        return;
     }
 
     if(suffix == ".xml") {
         load(file_path);
+        return;
     }
 }
 
@@ -107,12 +110,12 @@ bool MixerSnapshot::set_flag(bool yn, RecallFlags flag)
 }
 
 #ifdef MIXBUS
-void MixerSnapshot::set_recall_eq(bool yn) { set_flag(yn, RecallEQ);};
-void MixerSnapshot::set_recall_comp(bool yn) { set_flag(yn, RecallComp);};
+void MixerSnapshot::set_recall_eq(bool yn)    { set_flag(yn, RecallEQ);   };
+void MixerSnapshot::set_recall_comp(bool yn)  { set_flag(yn, RecallComp); };
 #endif
-void MixerSnapshot::set_recall_io(bool yn) { set_flag(yn, RecallIO);};
+void MixerSnapshot::set_recall_io(bool yn)    { set_flag(yn, RecallIO);   };
 void MixerSnapshot::set_recall_group(bool yn) { set_flag(yn, RecallGroup);};
-void MixerSnapshot::set_recall_vca(bool yn) { set_flag(yn, RecallVCA);};
+void MixerSnapshot::set_recall_vca(bool yn)   { set_flag(yn, RecallVCA);  };
 
 bool MixerSnapshot::has_specials()
 {

@@ -171,7 +171,7 @@ bool MixerSnapshotDialog::button_press(GdkEventButton* ev, bool global)
 
         if (iter) {
             TreeModel::Row row = *(iter);
-            popup_context_menu(ev->button, ev->time, row[_columns.full_path]);
+            popup_context_menu(ev->button, ev->time, row[_columns.full_path], global);
             return true;
         }
     };
@@ -197,21 +197,21 @@ bool MixerSnapshotDialog::button_press(GdkEventButton* ev, bool global)
     return false;
 }
 
-void MixerSnapshotDialog::popup_context_menu(int btn, int64_t time, string path)
+void MixerSnapshotDialog::popup_context_menu(int btn, int64_t time, string path, bool global)
 {
     using namespace Menu_Helpers;
     MenuList& items(menu.items());
     items.clear();
     add_item_with_sensitivity(items, MenuElem(_("Recall"), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::load_snapshot), path)), true);
-    add_item_with_sensitivity(items, MenuElem(_("Rename..."), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::rename_snapshot), path)), true);
-    add_item_with_sensitivity(items, MenuElem(_("Remove"), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::remove_snapshot), path)), true);
+    add_item_with_sensitivity(items, MenuElem(_("Rename..."), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::rename_snapshot), path, global)), true);
+    add_item_with_sensitivity(items, MenuElem(_("Remove"), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::remove_snapshot), path, global)), true);
     menu.popup(btn, time);
 }
 
-void MixerSnapshotDialog::remove_snapshot(const string path)
+void MixerSnapshotDialog::remove_snapshot(const string path, bool global)
 {
     ::g_remove(path.c_str());
-    refill();
+    refill_display(global);
 }
 
 void MixerSnapshotDialog::load_snapshot(const string path)
@@ -220,7 +220,7 @@ void MixerSnapshotDialog::load_snapshot(const string path)
     n.recall();
 }
 
-void MixerSnapshotDialog::rename_snapshot(const string old_path)
+void MixerSnapshotDialog::rename_snapshot(const string old_path, bool global)
 {
     string dir_name  = Glib::path_get_dirname(old_path);
 
@@ -237,7 +237,7 @@ void MixerSnapshotDialog::rename_snapshot(const string old_path)
         if (new_label.length() > 0) {
             string new_path = Glib::build_filename(dir_name, new_label + ".xml");
             ::g_rename(old_path.c_str(), new_path.c_str());
-            refill();
+            refill_display(global);
         }
     }
 }
@@ -401,7 +401,7 @@ void MixerSnapshotDialog::new_snapshot(bool global)
             }
 
             snap->write(path);
-            refill();
+            refill_display(global);
         }
     }
 }
@@ -437,101 +437,73 @@ void MixerSnapshotDialog::new_snap_from_session(bool global)
     }
 
     snapshot->write(path);
-    refill();
+    refill_display(global);
+}
+
+void MixerSnapshotDialog::refill_display(bool global)
+{
+    Glib::RefPtr<ListStore> model;
+    if(global) {
+        model = global_model;
+    } else {
+        model = local_model;
+    }
+
+    model->clear();
+    vector<string> files;
+
+    if(global) {
+        string dir = Glib::build_filename(user_config_directory(-1), "mixer_snapshots");
+        find_files_matching_pattern(files, dir, "*.xml");
+    } else {
+        string dir = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots");
+        find_files_matching_pattern(files, dir, "*.xml");
+    }
+
+    for(vector<string>::iterator i = files.begin(); i != files.end(); i++) {
+        string path = *(i);
+        string name = basename_nosuffix(*(i));
+
+        MixerSnapshot* snap = new MixerSnapshot(_session, path);
+        snap->set_label(name);
+
+        TreeModel::Row row = *(model->append());
+        if (name.length() > 48) {
+            name = name.substr (0, 48);
+            name.append("...");
+        }
+
+        row[_columns.name]         = name;
+        row[_columns.favorite]     = snap->get_favorite();
+        row[_columns.version]      = snap->get_last_modified_with();
+        row[_columns.n_tracks]     = snap->get_routes().size();
+        row[_columns.n_vcas]       = snap->get_vcas().size();
+        row[_columns.n_groups]     = snap->get_groups().size();
+        row[_columns.has_specials] = snap->has_specials();
+
+        GStatBuf gsb;
+        g_stat(path.c_str(), &gsb);
+        Glib::DateTime gdt(Glib::DateTime::create_now_local(gsb.st_ctime));
+
+        row[_columns.timestamp] = gsb.st_ctime;
+        row[_columns.date]      = gdt.format ("%F %H:%M");
+        row[_columns.full_path] = path;
+        row[_columns.snapshot]  = snap;
+
+#ifdef MIXBUS
+        row[_columns.recall_eq]     = snap->get_recall_eq();
+        row[_columns.recall_comp]   = snap->get_recall_comp();
+#endif
+        row[_columns.recall_io]     = snap->get_recall_io();
+        row[_columns.recall_groups] = snap->get_recall_group();
+        row[_columns.recall_vcas]   = snap->get_recall_vca();
+    }
 }
 
 void MixerSnapshotDialog::refill()
 {
-    global_model->clear();
-
-    string global_directory = Glib::build_filename(user_config_directory(-1), "mixer_snapshots");
-
-    vector<string> files;
-    find_files_matching_pattern(files, global_directory, "*.xml");
-
-    for(vector<string>::iterator i = files.begin(); i != files.end(); i++) {
-        string path = *(i);
-        string name = basename_nosuffix(*(i));
-
-        MixerSnapshot* snap = new MixerSnapshot(_session, path);
-        snap->set_label(name);
-
-        TreeModel::Row row = *(global_model->append());
-        if (name.length() > 48) {
-            name = name.substr (0, 48);
-            name.append("...");
-        }
-
-        row[_columns.name]         = name;
-        row[_columns.favorite]     = snap->get_favorite();
-        row[_columns.version]      = snap->get_last_modified_with();
-        row[_columns.n_tracks]     = snap->get_routes().size();
-        row[_columns.n_vcas]       = snap->get_vcas().size();
-        row[_columns.n_groups]     = snap->get_groups().size();
-        row[_columns.has_specials] = snap->has_specials();
-
-        GStatBuf gsb;
-        g_stat(path.c_str(), &gsb);
-        Glib::DateTime gdt(Glib::DateTime::create_now_local(gsb.st_ctime));
-
-        row[_columns.timestamp] = gsb.st_ctime;
-        row[_columns.date]      = gdt.format ("%F %H:%M");
-        row[_columns.full_path] = path;
-        row[_columns.snapshot]  = snap;
-
-#ifdef MIXBUS
-        row[_columns.recall_eq]     = snap->get_recall_eq();
-        row[_columns.recall_comp]   = snap->get_recall_comp();
-#endif
-        row[_columns.recall_io]     = snap->get_recall_io();
-        row[_columns.recall_groups] = snap->get_recall_group();
-        row[_columns.recall_vcas]   = snap->get_recall_vca();
-    }
-
-    local_model->clear();
-    files.clear();
-
-    string local_directory = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots");
-    find_files_matching_pattern(files, local_directory, "*.xml");
-
-    for(vector<string>::iterator i = files.begin(); i != files.end(); i++) {
-        string path = *(i);
-        string name = basename_nosuffix(*(i));
-
-        MixerSnapshot* snap = new MixerSnapshot(_session, path);
-        snap->set_label(name);
-
-        TreeModel::Row row = *(local_model->append());
-        if (name.length() > 48) {
-            name = name.substr (0, 48);
-            name.append("...");
-        }
-
-        row[_columns.name]         = name;
-        row[_columns.favorite]     = snap->get_favorite();
-        row[_columns.version]      = snap->get_last_modified_with();
-        row[_columns.n_tracks]     = snap->get_routes().size();
-        row[_columns.n_vcas]       = snap->get_vcas().size();
-        row[_columns.n_groups]     = snap->get_groups().size();
-        row[_columns.has_specials] = snap->has_specials();
-
-        GStatBuf gsb;
-        g_stat(path.c_str(), &gsb);
-        Glib::DateTime gdt(Glib::DateTime::create_now_local(gsb.st_ctime));
-
-        row[_columns.timestamp] = gsb.st_ctime;
-        row[_columns.date]      = gdt.format ("%F %H:%M");
-        row[_columns.full_path] = path;
-        row[_columns.snapshot]  = snap;
-
-#ifdef MIXBUS
-        row[_columns.recall_eq]     = snap->get_recall_eq();
-        row[_columns.recall_comp]   = snap->get_recall_comp();
-#endif
-        row[_columns.recall_io]     = snap->get_recall_io();
-        row[_columns.recall_groups] = snap->get_recall_group();
-        row[_columns.recall_vcas]   = snap->get_recall_vca();
-    }
+    refill_display(true);
+    refill_display(false);
 }
 
 void MixerSnapshotDialog::fav_cell_action(const string& path, bool global)

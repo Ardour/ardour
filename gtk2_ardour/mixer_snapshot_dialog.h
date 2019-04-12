@@ -48,6 +48,7 @@ class MixerSnapshotDialog : public ArdourWindow
         void refill();
 
     private:
+        void refill_display(bool);
         void display_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& data, guint info, guint time, bool);
 
         void ensure_directory(bool);
@@ -55,12 +56,12 @@ class MixerSnapshotDialog : public ArdourWindow
         void load_snapshot(const std::string);
         void new_snap_from_session(bool);
 
-        void rename_snapshot(const std::string);
-        void remove_snapshot(const std::string);
+        void rename_snapshot(const std::string, bool);
+        void remove_snapshot(const std::string, bool);
 
         bool bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<std::string>&, Gtk::ScrolledWindow&, Glib::RefPtr<Gtk::ListStore>, bool);
 
-        void popup_context_menu(int, int64_t, std::string);
+        void popup_context_menu(int, int64_t, std::string, bool);
         bool button_press(GdkEventButton*, bool);
         void window_opened();
         void fav_cell_action(const std::string&, bool);
