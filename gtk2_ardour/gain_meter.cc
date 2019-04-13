@@ -685,8 +685,8 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 					meter_point_change_target = MeterPointChangeSingle;
 				}
 				Gtkmm2ext::anchored_menu_popup(&meter_point_menu,
-			  	                             &meter_point_button,
-			    	                           "", 1, ev->time);
+				                               &meter_point_button,
+				                               "", 1, ev->time);
 				break;
 			default:
 				break;

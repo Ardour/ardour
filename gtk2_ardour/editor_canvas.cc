@@ -525,7 +525,7 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 
 		controls_layout.get_parent()->translate_coordinates (*toplevel,
 		                                                     alloc.get_x(), alloc.get_y(),
-		        		                             wx, wy);
+		                                                     wx, wy);
 
 		scrolling_boundary = ArdourCanvas::Rect (wx, wy, wx + alloc.get_width(), wy + alloc.get_height());
 

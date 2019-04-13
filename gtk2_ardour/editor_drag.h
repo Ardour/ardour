@@ -486,8 +486,8 @@ protected:
 	bool y_movement_allowed (int delta_track, double delta_layer, int skip_invisible = 0) const;
 
 private:
-	TimeAxisView *prev_tav;		// where regions were most recently dragged from
-	TimeAxisView *orig_tav;		// where drag started
+	TimeAxisView *prev_tav; // where regions were most recently dragged from
+	TimeAxisView *orig_tav; // where drag started
 	ARDOUR::samplecnt_t prev_amount;
 	ARDOUR::samplepos_t prev_position;
 	ARDOUR::samplecnt_t selection_length;

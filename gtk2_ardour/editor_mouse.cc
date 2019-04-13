@@ -2162,7 +2162,7 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 
 	if (_drags->active ()) {
 		//drags change the snapped_cursor location, because we are snapping the thing being dragged, not the actual mouse cursor
-	 	return _drags->motion_handler (event, from_autoscroll);
+		return _drags->motion_handler (event, from_autoscroll);
 	} else {
 		//the snapped_cursor shows where an operation (like Split) is going to occur
 		bool ignored;

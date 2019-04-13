@@ -3209,7 +3209,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 		}
 	}
 
-	if (in_command)	{
+	if (in_command) {
 
 		RangeSelectionAfterSplit rsas = Config->get_range_selection_after_split();
 
@@ -6557,7 +6557,7 @@ Editor::set_auto_punch_range ()
 			set_punch_range (tpl->start(), now, _("Auto Punch In/Out"));
 			_session->config.set_punch_out(true);
 		}
-	} else	{
+	} else {
 		if (_session->config.get_punch_out()) {
 			_session->config.set_punch_out(false);
 		}

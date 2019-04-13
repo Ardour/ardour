@@ -246,17 +246,9 @@ ExportTimespanSelector::construct_label (ARDOUR::Location const * location) cons
 		break;
 	}
 
-	// label += _("from ");
-
-	// label += "<span color=\"#7fff7f\">";
 	label += start;
-// 	label += "</span>";
-
 	label += _(" to ");
-
-// 	label += "<span color=\"#7fff7f\">";
 	label += end;
-// 	label += "</span>";
 
 	return label;
 }

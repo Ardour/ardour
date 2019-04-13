@@ -44,14 +44,14 @@ using namespace Editing;
 using namespace ARDOUR;
 using ArdourCanvas::Duple;
 
-GhostRegion::GhostRegion(RegionView& rv,
-                         ArdourCanvas::Container* parent,
-                         TimeAxisView& tv,
-                         TimeAxisView& source_tv,
-                         double initial_pos)
-    : parent_rv(rv)
-    , trackview(tv)
-    , source_trackview(source_tv)
+GhostRegion::GhostRegion (RegionView& rv,
+                          ArdourCanvas::Container* parent,
+                          TimeAxisView& tv,
+                          TimeAxisView& source_tv,
+                          double initial_pos)
+	: parent_rv(rv)
+	, trackview(tv)
+	, source_trackview(source_tv)
 {
 	group = new ArdourCanvas::Container (parent);
 	CANVAS_DEBUG_NAME (group, "ghost region");
@@ -116,11 +116,11 @@ GhostRegion::is_automation_ghost()
 	return (dynamic_cast<AutomationTimeAxisView*>(&trackview)) != 0;
 }
 
-AudioGhostRegion::AudioGhostRegion(RegionView& rv,
-                                   TimeAxisView& tv,
-                                   TimeAxisView& source_tv,
-                                   double initial_unit_pos)
-    : GhostRegion(rv, tv.ghost_group(), tv, source_tv, initial_unit_pos)
+AudioGhostRegion::AudioGhostRegion (RegionView& rv,
+                                    TimeAxisView& tv,
+                                    TimeAxisView& source_tv,
+                                    double initial_unit_pos)
+	: GhostRegion(rv, tv.ghost_group(), tv, source_tv, initial_unit_pos)
 {
 
 }
@@ -181,10 +181,10 @@ MidiGhostRegion::MidiGhostRegion(MidiRegionView& rv,
                                  TimeAxisView& tv,
                                  TimeAxisView& source_tv,
                                  double initial_unit_pos)
-    : GhostRegion(rv, tv.ghost_group(), tv, source_tv, initial_unit_pos)
-    , _note_group (new ArdourCanvas::Container (group))
-    ,  parent_mrv (rv)
-    , _optimization_iterator(events.end())
+	: GhostRegion(rv, tv.ghost_group(), tv, source_tv, initial_unit_pos)
+	, _note_group (new ArdourCanvas::Container (group))
+	,  parent_mrv (rv)
+	, _optimization_iterator(events.end())
 {
 	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
@@ -200,14 +200,14 @@ MidiGhostRegion::MidiGhostRegion(MidiRegionView& rv,
                                  MidiStreamView& msv,
                                  TimeAxisView& source_tv,
                                  double initial_unit_pos)
-    : GhostRegion(rv,
-                  msv.midi_underlay_group,
-                  msv.trackview(),
-                  source_tv,
-                  initial_unit_pos)
-    , _note_group (new ArdourCanvas::Container (group))
-    , 	parent_mrv (rv)
-    , _optimization_iterator(events.end())
+	: GhostRegion (rv,
+	               msv.midi_underlay_group,
+	               msv.trackview(),
+	               source_tv,
+	               initial_unit_pos)
+	, _note_group (new ArdourCanvas::Container (group))
+	, parent_mrv (rv)
+	, _optimization_iterator(events.end())
 {
 	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
@@ -465,7 +465,6 @@ MidiGhostRegion::redisplay_model ()
  *  representation of it.
  *  @return Our Event, or 0 if not found.
  */
-
 MidiGhostRegion::GhostEvent *
 MidiGhostRegion::find_event (boost::shared_ptr<NoteType> parent)
 {

@@ -305,8 +305,9 @@ std::size_t s1pos, s2pos, n = 0;
 	s1pos = s1.length();
 	s2pos = s2.length();
 	while (s1pos-- > 0 && s2pos-- > 0) {
-		if (!match_or_digit(s1[s1pos], s2[s2pos])	)
+		if (!match_or_digit(s1[s1pos], s2[s2pos])) {
 			break;
+		}
 		n++;
 	}
 	return n;
