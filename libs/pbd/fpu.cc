@@ -48,25 +48,25 @@ FPU* FPU::_instance (0);
 static void
 __cpuid(int regs[4], int cpuid_leaf)
 {
-        asm volatile (
+	asm volatile (
 #if defined(__i386__)
-	        "pushl %%ebx;\n\t"
+			"pushl %%ebx;\n\t"
 #endif
-	        "cpuid;\n\t"
-	        "movl %%eax, (%1);\n\t"
-	        "movl %%ebx, 4(%1);\n\t"
-	        "movl %%ecx, 8(%1);\n\t"
-	        "movl %%edx, 12(%1);\n\t"
+			"cpuid;\n\t"
+			"movl %%eax, (%1);\n\t"
+			"movl %%ebx, 4(%1);\n\t"
+			"movl %%ecx, 8(%1);\n\t"
+			"movl %%edx, 12(%1);\n\t"
 #if defined(__i386__)
-	        "popl %%ebx;\n\t"
+			"popl %%ebx;\n\t"
 #endif
-	        :"=a" (cpuid_leaf) /* %eax clobbered by CPUID */
-	        :"S" (regs), "a" (cpuid_leaf)
-	        :
+			:"=a" (cpuid_leaf) /* %eax clobbered by CPUID */
+			:"S" (regs), "a" (cpuid_leaf)
+			:
 #if !defined(__i386__)
-	         "%ebx",
+			"%ebx",
 #endif
-	         "%ecx", "%edx", "memory");
+			"%ecx", "%edx", "memory");
 }
 
 #endif /* !PLATFORM_WINDOWS */
@@ -158,15 +158,16 @@ FPU::FPU ()
 	return;
 #else
 
-	/* Get the CPU vendor just for kicks */
-
-	// __cpuid with an InfoType argument of 0 returns the number of
- 	// valid Ids in CPUInfo[0] and the CPU identification string in
- 	// the other three array elements. The CPU identification string is
- 	// not in linear order. The code below arranges the information
- 	// in a human readable form. The human readable order is CPUInfo[1] |
- 	// CPUInfo[3] | CPUInfo[2]. CPUInfo[2] and CPUInfo[3] are swapped
- 	// before using memcpy to copy these three array elements to cpu_string.
+	/* Get the CPU vendor just for kicks
+	 *
+	 * __cpuid with an InfoType argument of 0 returns the number of
+	 * valid Ids in CPUInfo[0] and the CPU identification string in
+	 * the other three array elements. The CPU identification string is
+	 * not in linear order. The code below arranges the information
+	 * in a human readable form. The human readable order is CPUInfo[1] |
+	 * CPUInfo[3] | CPUInfo[2]. CPUInfo[2] and CPUInfo[3] are swapped
+	 * before using memcpy to copy these three array elements to cpu_string.
+	 */
 
 	int cpu_info[4];
 	char cpu_string[48];
@@ -175,9 +176,9 @@ FPU::FPU ()
 	__cpuid (cpu_info, 0);
 
 	int num_ids = cpu_info[0];
- 	std::swap(cpu_info[2], cpu_info[3]);
+	std::swap(cpu_info[2], cpu_info[3]);
 	memcpy(cpu_string, &cpu_info[1], 3 * sizeof(cpu_info[1]));
- 	cpu_vendor.assign(cpu_string, 3 * sizeof(cpu_info[1]));
+	cpu_vendor.assign(cpu_string, 3 * sizeof(cpu_info[1]));
 
 	info << string_compose (_("CPU vendor: %1"), cpu_vendor) << endmsg;
 

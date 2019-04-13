@@ -61,6 +61,4 @@ private:
 
 } /* namespace ARDOUR */
 
-#endif	/* __ardour_audio_playlist_h__ */
-
-
+#endif /* __ardour_audio_playlist_h__ */

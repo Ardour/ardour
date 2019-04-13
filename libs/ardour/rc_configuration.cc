@@ -257,13 +257,14 @@ RCConfiguration::set_variables (const XMLNode& node)
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(type,var,name,value) \
-	if (var.set_from_node (node)) { \
-		ParameterChanged (name);		  \
-	}
+  if (var.set_from_node (node)) {            \
+    ParameterChanged (name);                 \
+  }
+
 #define CONFIG_VARIABLE_SPECIAL(type,var,name,value,mutator) \
-	if (var.set_from_node (node)) {    \
-		ParameterChanged (name);		     \
-	}
+  if (var.set_from_node (node)) {                            \
+    ParameterChanged (name);                                 \
+  }
 
 #include "ardour/rc_configuration_vars.h"
 #undef  CONFIG_VARIABLE

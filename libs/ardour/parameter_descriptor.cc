@@ -294,7 +294,7 @@ ParameterDescriptor::midi_note_num (const std::string& name)
 {
 	static NameNumMap name2num = build_midi_name2num();
 
-	uint8_t num = -1;			// -1 (or 255) is returned in case of failure
+	uint8_t num = -1; // -1 (or 255) is returned in case of failure
 
 	NameNumMap::const_iterator it = name2num.find(normalize_note_name(name));
 	if (it != name2num.end())

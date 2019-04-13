@@ -63,28 +63,28 @@ void
 RouteGroup::make_property_quarks ()
 {
 	Properties::active.property_id = g_quark_from_static_string (X_("active"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for active = %1\n",	Properties::active.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for active = %1\n", Properties::active.property_id));
 
-        Properties::group_relative.property_id = g_quark_from_static_string (X_("relative"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for relative = %1\n",	Properties::group_relative.property_id));
+	Properties::group_relative.property_id = g_quark_from_static_string (X_("relative"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for relative = %1\n", Properties::group_relative.property_id));
 	Properties::group_gain.property_id = g_quark_from_static_string (X_("gain"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for gain = %1\n",	Properties::group_gain.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for gain = %1\n", Properties::group_gain.property_id));
 	Properties::group_mute.property_id = g_quark_from_static_string (X_("mute"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for mute = %1\n",	Properties::group_mute.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for mute = %1\n", Properties::group_mute.property_id));
 	Properties::group_solo.property_id = g_quark_from_static_string (X_("solo"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for solo = %1\n",	Properties::group_solo.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for solo = %1\n", Properties::group_solo.property_id));
 	Properties::group_recenable.property_id = g_quark_from_static_string (X_("recenable"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for recenable = %1\n",	Properties::group_recenable.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for recenable = %1\n", Properties::group_recenable.property_id));
 	Properties::group_select.property_id = g_quark_from_static_string (X_("select"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for select = %1\n",	Properties::group_select.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for select = %1\n", Properties::group_select.property_id));
 	Properties::group_route_active.property_id = g_quark_from_static_string (X_("route-active"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for route-active = %1\n", Properties::group_route_active.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for route-active = %1\n", Properties::group_route_active.property_id));
 	Properties::group_color.property_id = g_quark_from_static_string (X_("color"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for color = %1\n", Properties::group_color.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for color = %1\n", Properties::group_color.property_id));
 	Properties::group_monitoring.property_id = g_quark_from_static_string (X_("monitoring"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for monitoring = %1\n", Properties::group_monitoring.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for monitoring = %1\n", Properties::group_monitoring.property_id));
 	Properties::group_master_number.property_id = g_quark_from_static_string (X_("group-master-number"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for group-master-number = %1\n", Properties::group_master_number.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for group-master-number = %1\n", Properties::group_master_number.property_id));
 }
 
 #define ROUTE_GROUP_DEFAULT_PROPERTIES  _relative (Properties::group_relative, true) \

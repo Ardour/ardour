@@ -375,7 +375,7 @@ ExportHandler::finish_timespan ()
 		if (!fmt->command().empty()) {
 			SessionMetadata const & metadata (*SessionMetadata::Metadata());
 
-#if 0	// would be nicer with C++11 initialiser...
+#if 0 // would be nicer with C++11 initialiser...
 			std::map<char, std::string> subs {
 				{ 'f', filename },
 				{ 'd', Glib::path_get_dirname(filename)  + G_DIR_SEPARATOR },

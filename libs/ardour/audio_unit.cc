@@ -1381,8 +1381,8 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 	float penalty = 9999;
 	int used_possible_in = 0;
 #if defined (__clang__)
-#	pragma clang diagnostic push
-#	pragma clang diagnostic ignored "-Wtautological-compare"
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wtautological-compare"
 #endif
 
 #define FOUNDCFG(nch) {                            \
@@ -1575,7 +1575,7 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: in %1 out %2\n", in, out));
 
 #if defined (__clang__)
-#	pragma clang diagnostic pop
+# pragma clang diagnostic pop
 #endif
 	return true;
 }
@@ -3102,7 +3102,7 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 		 * bus configs as incremental options.
 		 */
 		Boolean* isWritable = 0;
-		UInt32	dataSize = 0;
+		UInt32   dataSize   = 0;
 		OSStatus result = AudioUnitGetPropertyInfo (unit.AU(),
 				kAudioUnitProperty_SupportedNumChannels,
 				kAudioUnitScope_Global, 0,

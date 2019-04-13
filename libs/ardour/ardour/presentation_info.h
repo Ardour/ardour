@@ -73,13 +73,12 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	 * There are several pathways for the order being set:
 	 *
 	 *   - object created during session loading from XML
-	 *           - numeric order will be set during ::set_state(), based on
-	 *           - type will be set during ctor call
+	 *   - numeric order will be set during ::set_state(), based on
+	 *   - type will be set during ctor call
 	 *
 	 *   - object created in response to user request
-	 *		- numeric order will be set by Session, before adding
-	 *		     to container.
-	 *		- type set during ctor call
+	 *   - numeric order will be set by Session, before adding to container.
+	 *   - type set during ctor call
 	 *
 	 *
 	 * OBJECT IDENTITY

@@ -531,8 +531,10 @@ FPGUI::build_proj_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 	actions.push_back (make_pair (string("Toggle Meterbridge"), string(X_("Common/toggle-meterbridge"))));
 	actions.push_back (make_pair (string (_("Zoom to Session")), string (X_("Editor/zoom-to-session"))));
 
-//	actions.push_back (make_pair (string (_("Zoom In")), string (X_("Editor/temporal-zoom-in"))));
-//	actions.push_back (make_pair (string (_("Zoom Out")), string (X_("Editor/temporal-zoom-out"))));
+#if 0
+	actions.push_back (make_pair (string (_("Zoom In")), string (X_("Editor/temporal-zoom-in"))));
+	actions.push_back (make_pair (string (_("Zoom Out")), string (X_("Editor/temporal-zoom-out"))));
+#endif
 
 	build_action_combo (cb, actions, FaderPort::Proj, bs);
 }

@@ -86,7 +86,7 @@ protected:
 			ctx->set_source (_gradient);
 			ctx->rectangle (0, 0, 4, height);
 			ctx->fill ();
-		}		
+		}
 	}
 
 	float alpha;

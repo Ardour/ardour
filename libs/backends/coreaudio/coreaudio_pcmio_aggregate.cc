@@ -305,7 +305,7 @@ CoreAudioPCM::create_aggregate_device (
 			fprintf(stderr, "AggregateDevice: kAudioObjectPropertyOwnedObjects error\n");
 		}
 
-		//	Calculate the number of object IDs
+		// Calculate the number of object IDs
 		subDevicesNum = size / sizeof(AudioObjectID);
 #ifndef NDEBUG
 		printf("AggregateDevice: clock drift compensation, number of sub-devices = %u\n", (unsigned int)subDevicesNum);

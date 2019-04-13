@@ -554,7 +554,7 @@ Session::send_midi_time_code_for_cycle (samplepos_t start_sample, samplepos_t en
 			break;
 		}
 
-		const samplepos_t msg_time = rint(outbound_mtc_timecode_frame	+ (quarter_frame_duration * next_quarter_frame_to_send));
+		const samplepos_t msg_time = rint (outbound_mtc_timecode_frame + (quarter_frame_duration * next_quarter_frame_to_send));
 
 		// This message must fall within this block or something is broken
 		assert (msg_time >= start_sample);
@@ -642,10 +642,9 @@ Session::mmc_step_timeout ()
 	return true;
 }
 
-/***********************************************************************
- OUTBOUND SYSTEM COMMON STUFF
-**********************************************************************/
-
+/* *********************************************************************
+ * OUTBOUND SYSTEM COMMON STUFF
+ **********************************************************************/
 
 void
 Session::send_song_position_pointer (samplepos_t)

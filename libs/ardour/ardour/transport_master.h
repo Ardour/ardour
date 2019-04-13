@@ -205,7 +205,7 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	 *     ARDOURs transport position to the slaves requested transport position.
 	 *   </li>
 	 *   <li>TransportMaster::locked() should return true, otherwise Session::no_roll will be called</li>
-	 *   <li>TransportMaster::starting() should be false, otherwise the transport will not move until it becomes true</li>	 *
+	 *   <li>TransportMaster::starting() should be false, otherwise the transport will not move until it becomes true</li>
 	 * </ul>
 	 *
 	 * @param speed - The transport speed requested

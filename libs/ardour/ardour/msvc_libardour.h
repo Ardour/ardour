@@ -35,13 +35,13 @@ namespace ARDOUR {
 
 #ifdef __cplusplus
 extern "C" {
-#endif	/* __cplusplus */
+#endif /* __cplusplus */
 
 // LIBARDOUR_API char*  LIBARDOUR_APICALLTYPE placeholder_for_non_msvc_specific_function(s);
 
 #ifdef __cplusplus
-}		/* extern "C" */
-#endif	/* __cplusplus */
+} /* extern "C" */
+#endif /* __cplusplus */
 
 }  // namespace ARDOUR
 
@@ -58,16 +58,16 @@ namespace ARDOUR {
 
 #ifdef __cplusplus
 extern "C" {
-#endif	/* __cplusplus */
+#endif /* __cplusplus */
 
 LIBARDOUR_API int    LIBARDOUR_APICALLTYPE symlink(const char *dest, const char *shortcut, const char *working_directory = 0);
 LIBARDOUR_API int    LIBARDOUR_APICALLTYPE readlink(const char *__restrict shortcut, char *__restrict buf, size_t bufsize);
 
 #ifdef __cplusplus
-}		/* extern "C" */
-#endif	/* __cplusplus */
+} /* extern "C" */
+#endif /* __cplusplus */
 
 }  // namespace ARDOUR
 
-#endif  // 	COMPILER_MSVC
-#endif  // __mavc_libardour_h__
+#endif // COMPILER_MSVC
+#endif // __mavc_libardour_h__

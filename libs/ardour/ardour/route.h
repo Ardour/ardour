@@ -586,7 +586,7 @@ public:
 	bool has_external_redirects() const;
 
 	/* can only be executed by a route for which is_monitor() is true
-	 *	 (i.e. the monitor out)
+	 * (i.e. the monitor out)
 	 */
 	void monitor_run (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes);
 

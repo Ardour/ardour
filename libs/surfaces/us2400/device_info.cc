@@ -109,11 +109,12 @@ DeviceInfo::logic_control_buttons ()
 void
 DeviceInfo::shared_buttons ()
 {
-//	US-2499 button notes:
-//	CHAN button sends nothing.  it inititates a dumb 0..127 knob mode for the 24 knobs
-//	PAN sends the regular pan/surround message.  this tells our strips to send the pan knob position
-//	AUX1-6  all send the same 0x29 + 0x21 message, I believe the surface uses this to captures knob info, somehow
-	
+	/* US-2499 button notes:
+	 * CHAN button sends nothing.  it inititates a dumb 0..127 knob mode for the 24 knobs
+	 * PAN sends the regular pan/surround message.  this tells our strips to send the pan knob position
+	 * AUX1-6  all send the same 0x29 + 0x21 message, I believe the surface uses this to captures knob info, somehow
+	 */
+
 	_global_buttons[Button::Pan] = GlobalButtonInfo ("Pan/Surround", "assignment", 0x2a);  // US-2400:  this is sent (on&off in one msg) from the Pan button
 
 	_global_buttons[Button::Left] = GlobalButtonInfo ("Bank Left", "bank", 0x2e);
@@ -300,7 +301,7 @@ static Searchpath
 devinfo_search_path ()
 {
 	bool devinfo_path_defined = false;
-        std::string spath_env (Glib::getenv (devinfo_env_variable_name, devinfo_path_defined));
+	std::string spath_env (Glib::getenv (devinfo_env_variable_name, devinfo_path_defined));
 
 	if (devinfo_path_defined) {
 		return spath_env;

@@ -637,7 +637,7 @@ PluginManager::ladspa_discover (string path)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Checking for LADSPA plugin at %1\n", path));
 
-	Glib::Module module(path);
+	Glib::Module module (path);
 	const LADSPA_Descriptor *descriptor;
 	LADSPA_Descriptor_Function dfunc;
 	void* func = 0;
@@ -738,9 +738,6 @@ PluginManager::ladspa_discover (string path)
 
 		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Found LADSPA plugin, name: %1, Inputs: %2, Outputs: %3\n", info->name, info->n_inputs, info->n_outputs));
 	}
-
-// GDB WILL NOT LIKE YOU IF YOU DO THIS
-//	dlclose (module);
 
 	return 0;
 }

@@ -172,8 +172,8 @@ private:
 
 	ARDOUR::PluginInfoList  _empty_plugin_info;
 	ARDOUR::PluginInfoList* _windows_vst_plugin_info;
-	ARDOUR::PluginInfoList*	_lxvst_plugin_info;
-	ARDOUR::PluginInfoList*	_mac_vst_plugin_info;
+	ARDOUR::PluginInfoList* _lxvst_plugin_info;
+	ARDOUR::PluginInfoList* _mac_vst_plugin_info;
 	ARDOUR::PluginInfoList* _ladspa_plugin_info;
 	ARDOUR::PluginInfoList* _lv2_plugin_info;
 	ARDOUR::PluginInfoList* _au_plugin_info;

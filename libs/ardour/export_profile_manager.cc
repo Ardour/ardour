@@ -158,7 +158,6 @@ ExportProfileManager::prepare_for_export ()
 		     ++format_it, ++filename_it) {
 
 			ExportFilenamePtr filename = (*filename_it)->filename;
-//			filename->include_timespan = (ts_list->size() > 1); Disabled for now...
 
 			boost::shared_ptr<BroadcastInfo> b;
 			if ((*format_it)->format->has_broadcast_info()) {
@@ -942,8 +941,6 @@ ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
 	if (!warnings->errors.empty()) { return; }
 
 	/* Check filenames */
-
-//	filename->include_timespan = (timespans->size() > 1); Disabled for now...
 
 	std::list<string> paths;
 	build_filenames(paths, filename, timespans, channel_config, format);

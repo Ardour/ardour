@@ -113,7 +113,7 @@ private:
 	PBD::ScopedConnectionList send_connections;
 	int       eq_band;
 	
-	int		_trickle_counter;
+	int      _trickle_counter;
 	
 	ARDOUR::AutomationType  _pan_mode;
 

@@ -264,21 +264,21 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 
 	static AudioEngine*       _instance;
 
-	Glib::Threads::Mutex	   _process_lock;
+	Glib::Threads::Mutex       _process_lock;
 	Glib::Threads::RecMutex    _state_lock;
 	Glib::Threads::Cond        session_removed;
 	bool                       session_remove_pending;
-	sampleoffset_t              session_removal_countdown;
+	sampleoffset_t             session_removal_countdown;
 	gain_t                     session_removal_gain;
 	gain_t                     session_removal_gain_step;
 	bool                      _running;
 	bool                      _freewheeling;
 	/// number of samples between each check for changes in monitor input
-	samplecnt_t                 monitor_check_interval;
+	samplecnt_t                monitor_check_interval;
 	/// time of the last monitor check in samples
-	samplecnt_t                 last_monitor_check;
+	samplecnt_t                last_monitor_check;
 	/// the number of samples processed since start() was called
-	samplecnt_t                _processed_samples;
+	samplecnt_t               _processed_samples;
 	Glib::Threads::Thread*     m_meter_thread;
 	ProcessThread*            _main_thread;
 	MTDM*                     _mtdm;
@@ -286,28 +286,28 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	LatencyMeasurement        _measuring_latency;
 	PortEngine::PortHandle    _latency_input_port;
 	PortEngine::PortHandle    _latency_output_port;
-	samplecnt_t                _latency_flush_samples;
+	samplecnt_t               _latency_flush_samples;
 	std::string               _latency_input_name;
 	std::string               _latency_output_name;
-	samplecnt_t                _latency_signal_latency;
+	samplecnt_t               _latency_signal_latency;
 	bool                      _stopped_for_latency;
 	bool                      _started_for_latency;
 	bool                      _in_destructor;
 
 	std::string               _last_backend_error_string;
 
-	Glib::Threads::Thread*     _hw_reset_event_thread;
-	gint                       _hw_reset_request_count;
-	Glib::Threads::Cond        _hw_reset_condition;
-	Glib::Threads::Mutex       _reset_request_lock;
-	gint                       _stop_hw_reset_processing;
-	Glib::Threads::Thread*     _hw_devicelist_update_thread;
-	gint                       _hw_devicelist_update_count;
-	Glib::Threads::Cond        _hw_devicelist_update_condition;
-	Glib::Threads::Mutex       _devicelist_update_lock;
-	gint                       _stop_hw_devicelist_processing;
-	uint32_t                   _start_cnt;
-	uint32_t                   _init_countdown;
+	Glib::Threads::Thread*    _hw_reset_event_thread;
+	gint                      _hw_reset_request_count;
+	Glib::Threads::Cond       _hw_reset_condition;
+	Glib::Threads::Mutex      _reset_request_lock;
+	gint                      _stop_hw_reset_processing;
+	Glib::Threads::Thread*    _hw_devicelist_update_thread;
+	gint                      _hw_devicelist_update_count;
+	Glib::Threads::Cond       _hw_devicelist_update_condition;
+	Glib::Threads::Mutex      _devicelist_update_lock;
+	gint                      _stop_hw_devicelist_processing;
+	uint32_t                  _start_cnt;
+	uint32_t                  _init_countdown;
 
 	void start_hw_event_processing();
 	void stop_hw_event_processing();

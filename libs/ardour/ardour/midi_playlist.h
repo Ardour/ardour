@@ -137,6 +137,4 @@ private:
 
 } /* namespace ARDOUR */
 
-#endif	/* __ardour_midi_playlist_h__ */
-
-
+#endif /* __ardour_midi_playlist_h__ */

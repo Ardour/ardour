@@ -150,27 +150,27 @@ void
 AudioRegion::make_property_quarks ()
 {
 	Properties::envelope_active.property_id = g_quark_from_static_string (X_("envelope-active"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for envelope-active = %1\n", 	Properties::envelope_active.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for envelope-active = %1\n", Properties::envelope_active.property_id));
 	Properties::default_fade_in.property_id = g_quark_from_static_string (X_("default-fade-in"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for default-fade-in = %1\n", 	Properties::default_fade_in.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for default-fade-in = %1\n", Properties::default_fade_in.property_id));
 	Properties::default_fade_out.property_id = g_quark_from_static_string (X_("default-fade-out"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for default-fade-out = %1\n", 	Properties::default_fade_out.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for default-fade-out = %1\n", Properties::default_fade_out.property_id));
 	Properties::fade_in_active.property_id = g_quark_from_static_string (X_("fade-in-active"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-in-active = %1\n", 	Properties::fade_in_active.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-in-active = %1\n", Properties::fade_in_active.property_id));
 	Properties::fade_out_active.property_id = g_quark_from_static_string (X_("fade-out-active"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-out-active = %1\n", 	Properties::fade_out_active.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-out-active = %1\n", Properties::fade_out_active.property_id));
 	Properties::scale_amplitude.property_id = g_quark_from_static_string (X_("scale-amplitude"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for scale-amplitude = %1\n", 	Properties::scale_amplitude.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for scale-amplitude = %1\n", Properties::scale_amplitude.property_id));
 	Properties::fade_in.property_id = g_quark_from_static_string (X_("FadeIn"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for FadeIn = %1\n",		Properties::fade_in.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for FadeIn = %1\n", Properties::fade_in.property_id));
 	Properties::inverse_fade_in.property_id = g_quark_from_static_string (X_("InverseFadeIn"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for InverseFadeIn = %1\n",	Properties::inverse_fade_in.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for InverseFadeIn = %1\n", Properties::inverse_fade_in.property_id));
 	Properties::fade_out.property_id = g_quark_from_static_string (X_("FadeOut"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for FadeOut = %1\n",		Properties::fade_out.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for FadeOut = %1\n", Properties::fade_out.property_id));
 	Properties::inverse_fade_out.property_id = g_quark_from_static_string (X_("InverseFadeOut"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for InverseFadeOut = %1\n",	Properties::inverse_fade_out.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for InverseFadeOut = %1\n", Properties::inverse_fade_out.property_id));
 	Properties::envelope.property_id = g_quark_from_static_string (X_("Envelope"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for Envelope = %1\n",		Properties::envelope.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for Envelope = %1\n", Properties::envelope.property_id));
 }
 
 void
@@ -261,8 +261,8 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	: Region (other)
 	, AUDIOREGION_COPY_STATE (other)
 	  /* As far as I can see, the _envelope's times are relative to region position, and have nothing
-	     to do with sources (and hence _start).  So when we copy the envelope, we just use the supplied offset.
-	  */
+		 * to do with sources (and hence _start).  So when we copy the envelope, we just use the supplied offset.
+		 */
 	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (*other->_envelope.val(), 0, other->_length)))
 	, _automatable (other->session())
 	, _fade_in_suspended (0)
@@ -1195,7 +1195,7 @@ AudioRegion::set_fade_out_length (samplecnt_t len)
 		len = 64;
 	}
 
-	bool changed =	_fade_out->extend_to (len);
+	bool changed = _fade_out->extend_to (len);
 
 	if (changed) {
 

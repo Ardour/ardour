@@ -183,13 +183,13 @@ class LIBARDOUR_API RouteExportChannel : public ExportChannel
 
 	// Removes the processor from the track when deleted
 	class ProcessorRemover {
-	  public:
-   	         ProcessorRemover (boost::shared_ptr<Route> route, boost::shared_ptr<CapturingProcessor> processor)
-			: route (route), processor (processor) {}
-		~ProcessorRemover();
-	  private:
-                boost::shared_ptr<Route> route;
-		boost::shared_ptr<CapturingProcessor> processor;
+		public:
+			ProcessorRemover (boost::shared_ptr<Route> route, boost::shared_ptr<CapturingProcessor> processor)
+				: route (route), processor (processor) {}
+			~ProcessorRemover();
+		private:
+			boost::shared_ptr<Route> route;
+			boost::shared_ptr<CapturingProcessor> processor;
 	};
 
 	boost::shared_ptr<CapturingProcessor> processor;
