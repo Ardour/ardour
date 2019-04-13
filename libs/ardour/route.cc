@@ -2442,8 +2442,8 @@ Route::state (bool save_template)
 		child->set_property("created-with", _session.created_with);
 
 		std::string modified_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
-		child->set_property("modified-with", modified_with);	
-	}	
+		child->set_property("modified-with", modified_with);
+	}
 
 	node->set_property (X_("id"), id ());
 	node->set_property (X_("name"), name());
