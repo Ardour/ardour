@@ -89,100 +89,95 @@ AddRouteDialog::AddRouteDialog ()
 
 	if (builtin_types.empty()) {
 		builtin_types.push_back (
-			std::pair<string,string>(_("Audio Tracks"),  _(" \
-Use these settings to create one or more audio tracks.\n \
-\n \
-You may select:\n \
-* The number of tracks to add.\n \
-* A name for the track(s).\n \
-* Mono, stereo, or multi-channel operation for the track(s).\n \
-* A group which the track(s) will be assigned to.\n \
-* The pin connections mode (see tooltip for details).\n \
-* Normal (non-destructive) or tape (destructive) recording mode.\n \
-\n \
-The track(s) will be added at the location specified by \"Position\".\n \
-")
-		));
+		   std::pair<string,string> (_("Audio Tracks"), std::string () +
+		     _("Use these settings to create one or more audio tracks.") + "\n\n" +
+		     _("You may select:") + "\n" +
+		     "* " + _("The number of tracks to add") + "\n" +
+		     "* " + _("A name for the track(s)") + "\n" +
+		     "* " + _("Mono, stereo, or multi-channel operation for the track(s)") + "\n" +
+		     "* " + _("A group which the track(s) will be assigned to") + "\n" +
+#ifndef MIXBUS
+		     "* " + _("The pin connections mode (see tooltip for details)") + "\n" +
+		     "* " + _("Normal (non-destructive) or tape (destructive) recording mode") + "\n" +
+#endif
+		     "\n" + _("The track(s) will be added at the location specified by \"Position\"")
+		     ));
+
 		builtin_types.push_back (
-			std::pair<string,string>(_("MIDI Tracks"),  _(" \
-Use these settings to create one or more MIDI tracks.\n \
-\n \
-You may select:\n \
-* The number of tracks to add.\n \
-* A name for the track(s).\n \
-* An instrument plugin (or select \"None\" to drive an external device).\n \
-* A group which the track(s) will be assigned to.\n \
-* The pin connections mode (see tooltip for details).\n \
-\n \
-The track(s) will be added at the location specified by \"Position\".\n \
-")
-		));
+		   std::pair<string,string> (_("MIDI Tracks"), std::string () +
+		     _(" Use these settings to create one or more MIDI tracks.") + "\n\n" +
+		     _("You may select:") + "\n" +
+		     "* " + _("The number of tracks to add") + "\n" +
+		     "* " + _("A name for the track(s)") + "\n" +
+		     "* " + _("An instrument plugin (or select \"None\" to drive an external device)") + "\n" +
+		     "* " + _("A group which the track(s) will be assigned to") + "\n" +
+#ifndef MIXBUS
+		     "* " + _("The pin connections mode (see tooltip for details)") + "\n" +
+#endif
+		     "\n" + _("The track(s) will be added at the location specified by \"Position\"")
+		     ));
+
+#ifndef MIXBUS
 		builtin_types.push_back (
-			std::pair<string,string>(_("Audio+MIDI Tracks"),   _(" \
-Use these settings to create one or more Audio+MIDI tracks.\n \
-\n \
-You may select:\n \
-* The number of tracks to add.\n \
-* A name for the track(s).\n \
-* An instrument plugin (or select \"None\" to drive an external device).\n \
-* A group which the track(s) will be assigned to.\n \
-* The pin connections mode (see tooltip for details).\n \
-* Normal (non-destructive) or tape (destructive) recording mode.\n \
-\n \
-The track(s) will be added at the location specified by \"Position\".\n \
-")
-		));
+		   std::pair<string,string> (_("Audio+MIDI Tracks"), std::string () +
+		     _("Use these settings to create one or more Audio+MIDI tracks.") + "\n\n" +
+		     _("You may select:") + "\n" +
+		     "* " + _("The number of tracks to add") + "\n" +
+		     "* " + _("A name for the track(s)") + "\n" +
+		     "* " + _("An instrument plugin (or select \"None\" to drive an external device)") + "\n" +
+		     "* " + _("A group which the track(s) will be assigned to") + "\n" +
+#ifndef MIXBUS
+		     "* " + _("The pin connections mode (see tooltip for details)") + "\n" +
+		     "* " + _("Normal (non-destructive) or tape (destructive) recording mode") + "\n" +
+#endif
+		     "\n" + _("The track(s) will be added at the location specified by \"Position\"")
+		     ));
+#endif
+
 		builtin_types.push_back (
-			std::pair<string,string>(_("Audio Busses"),  _(" \
-Use these settings to create one or more audio busses.\n \
-\n \
-You may select:\n \
-* The number of busses to add.\n \
-* A name for the buss(es).\n \
-* A group which the buss(es) will be assigned to.\n \
-* The pin connections mode (see tooltip for details).\n \
-\n \
-The buss(es) will be added at the location specified by \"Position\".\n \
-")
-		));
+		   std::pair<string,string> (_("Audio Busses"), std::string () +
+		     _("Use these settings to create one or more audio busses.") + "\n\n" +
+		     _("You may select:") + "\n" +
+		     "* " + _("The number of busses to add") + "\n" +
+		     "* " + _("A name for the buss(es)") + "\n" +
+		     "* " + _("A group which the buss(es) will be assigned to") + "\n" +
+#ifndef MIXBUS
+		     "* " + _("The pin connections mode (see tooltip for details)") + "\n" +
+#endif
+		     "\n" + _("The buss(es) will be added at the location specified by \"Position\"")
+		     ));
+
 		builtin_types.push_back (
-			std::pair<string,string>(_("MIDI Busses"),  _(" \
-Use these settings to create one or more MIDI busses.\n \
-\n \
-MIDI busses can combine the output of multiple tracks. They are sometimes used\n \
-to host a single \"heavy\" instrument plugin which is fed from multiple MIDI tracks.\n  \
-\n \
-You may select:\n \
-* The number of busses to add.\n \
-* A name for the buss(es).\n \
-* An instrument plugin (or select \"None\" to drive an external device).\n \
-* A group which the buss(es) will be assigned to.\n \
-* The pin connections mode (see tooltip for details).\n \
-\n \
-The buss(es) will be added at the location specified by \"Position\".\n \
-")
-		));
+		   std::pair<string,string> (_("MIDI Busses"), std::string () +
+		     _("Use these settings to create one or more MIDI busses.") + "\n\n" +
+		     _("MIDI busses can combine the output of multiple tracks. They are sometimes used\nto host a single \"heavy\" instrument plugin which is fed from multiple MIDI tracks.") + "\n\n" +
+		     _("You may select:") + "\n" +
+		     "* " + _("The number of busses to add") + "\n" +
+		     "* " + _("A name for the buss(es)") + "\n" +
+		     "* " + _("An instrument plugin (or select \"None\" to drive an external device)") + "\n" +
+		     "* " + _("A group which the buss(es) will be assigned to") + "\n" +
+#ifndef MIXBUS
+		     "* " + _("The pin connections mode (see tooltip for details)") + "\n" +
+#endif
+		     "\n" + _("The buss(es) will be added at the location specified by \"Position\"")
+		     ));
+
 		builtin_types.push_back (
-			std::pair<string,string>(_("VCA Masters"),   _(" \
-Use these settings to create one or more VCA masters.\n \
-\n \
-You may select:\n \
-* The number of VCAs to add.\n \
-* A name for the VCA(s).  \"%n\" will be replaced by an index number for each VCA.\n \
-")
-		));
+		   std::pair<string,string> (_("VCA Masters"), std::string () +
+		     _("Use these settings to create one or more VCA masters.") + "\n\n" +
+		     _("You may select:") + "\n" +
+		     "* " + _("The number of VCAs to add") + "\n" +
+		     "* " + _("A name for the VCA(s). \"%n\" will be replaced by an index number for each VCA")
+		     ));
+
 		builtin_types.push_back (
-			std::pair<string,string>(_("Foldback Busses"),   _(" \
-Use these settings to create one or more foldback busses.\n \
-\n \
-Foldback busses are used as master outputs for monitor channels and are fed by\n \
-hidden monitor sends.\n \
-\n \
-You may select:\n \
-* The number of foldback busses to add.\n \
-* A name for the foldback buss(es).\n \
-")
-		));
+		   std::pair<string,string> (_("Foldback Busses"), std::string () +
+		     _("Use these settings to create one or more foldback busses.") + "\n\n" +
+		     _("Foldback busses are used as master outputs for monitor channels and are fed by\nhidden monitor sends.") + "\n\n" +
+		     _("You may select:") + "\n" +
+		     "* " + _("The number of busses to add") + "\n" +
+		     "* " + _("A name for the buss(es)")
+		     ));
 	}
 
 	insert_at_combo.append_text (_("First"));
