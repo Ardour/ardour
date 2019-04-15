@@ -361,6 +361,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 		Lyg = 0.f;
 		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
 		Lxg = sanitize_denormal(Lxg);
+
 		if (Lxg > in_peak_db) {
 			in_peak_db = Lxg;
 		}
