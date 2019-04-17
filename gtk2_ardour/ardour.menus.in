@@ -299,8 +299,10 @@
       <menuitem action='loudness-analyze-region'/>
       <menuitem action='spectral-analyze-region'/>
       <menu action='RegionMenuEdit'>
+#ifndef MIXBUS
         <menuitem action='combine-regions'/>
         <menuitem action='uncombine-regions'/>
+#endif
         <menuitem action='pitch-shift-region'/>
         <menuitem action='split-region-at-transients'/>
         <menuitem action='split-multichannel-region'/>
@@ -585,10 +587,6 @@
       <menuitem action='ManageTemplates'/>
       <menuitem action='toggle-key-editor'/>
       <separator/>
-#ifdef MIXBUS
-      <menuitem action='license-manager'/>
-      <separator/>
-#endif
       <menuitem action='NewMIDITracer'/>
       <menuitem action='toggle-log-window'/>
       <separator/>
@@ -598,10 +596,11 @@
       <menuitem action='toggle-about'/>
 #endif
 #ifdef MIXBUS
-      <menuitem action='reference'/>
+      <menuitem action='website'/>
       <menuitem action='manual'/>
+      <menuitem action='reference'/>
+      <menuitem action='videos'/>
       <menuitem action='forums'/>
-      <menuitem action='chat'/>
 #else
       <menuitem action='chat'/>
       <menuitem action='manual'/>
