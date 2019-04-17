@@ -181,12 +181,6 @@ ControlProtocolManager::drop_protocols ()
 
 	Glib::Threads::RWLock::WriterLock lm (protocols_lock);
 
-	for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
-		delete *p;
-	}
-
-	control_protocols.clear ();
-
 	for (list<ControlProtocolInfo*>::iterator p = control_protocol_info.begin(); p != control_protocol_info.end(); ++p) {
 		// mark existing protocols as requested
 		// otherwise the ControlProtocol instances are not recreated in set_session
@@ -196,6 +190,12 @@ ControlProtocolManager::drop_protocols ()
 			ProtocolStatusChange (*p); /* EMIT SIGNAL */
 		}
 	}
+
+	for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
+		delete *p;
+	}
+
+	control_protocols.clear ();
 }
 
 ControlProtocol*
