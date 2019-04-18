@@ -304,6 +304,7 @@ protected:
 	virtual void selection_click (GdkEventButton*);
 
 	void color_handler ();
+	void parameter_changed (std::string const &);
 
 	void conditionally_add_to_selection ();
 
