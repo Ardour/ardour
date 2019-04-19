@@ -925,7 +925,7 @@ FaderPort::connected ()
 	_output_port->write (buf, 6, 0);
 }
 
-bool 
+bool
 FaderPort::Button::invoke (FaderPort::ButtonState bs, bool press)
 {
 	DEBUG_TRACE (DEBUG::FaderPort, string_compose ("invoke button %1 for %2 state %3%4%5\n", id, (press ? "press":"release"), hex, bs, dec));
@@ -1101,6 +1101,11 @@ FaderPort::Button::get_state () const
 	state_pairs.push_back (make_pair (string ("plain"), ButtonState (0)));
 	state_pairs.push_back (make_pair (string ("shift"), ShiftDown));
 	state_pairs.push_back (make_pair (string ("long"), LongPress));
+
+#ifndef MIXBUS
+	state_pairs.push_back (make_pair (string ("plain"), UserDown));
+	state_pairs.push_back (make_pair (string ("long"), ButtonState (LongPress | UserDown)));
+#endif
 
 	for (vector<state_pair_t>::const_iterator sp = state_pairs.begin(); sp != state_pairs.end(); ++sp) {
 		if ((x = on_press.find (sp->second)) != on_press.end()) {

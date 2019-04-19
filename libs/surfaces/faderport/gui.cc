@@ -589,6 +589,9 @@ FPGUI::find_action_in_model (const TreeModel::iterator& iter, std::string const 
 void
 FPGUI::build_user_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 {
+#ifndef MIXBUS
+	bs = FaderPort::ButtonState (bs|FaderPort::UserDown);
+#endif
 	cb.set_model (available_action_model);
 	cb.pack_start (action_columns.name);
 	cb.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FPGUI::action_changed), &cb, FaderPort::User, bs));
