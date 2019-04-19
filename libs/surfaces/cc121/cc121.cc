@@ -782,7 +782,7 @@ CC121::set_state (const XMLNode& node, int version)
 	for (XMLNodeList::const_iterator n = node.children().begin(); n != node.children().end(); ++n) {
 		if ((*n)->name() == X_("Button")) {
 			int32_t xid;
-			if (!node.get_property ("id", xid)) {
+			if (!(*n)->get_property ("id", xid)) {
 				continue;
 			}
 			ButtonMap::iterator b = buttons.find (ButtonID (xid));
