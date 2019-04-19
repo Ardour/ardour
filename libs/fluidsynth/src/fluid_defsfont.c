@@ -246,7 +246,18 @@ int delete_fluid_defsfont(fluid_defsfont_t *defsfont)
 
     for(list = defsfont->sample; list; list = fluid_list_next(list))
     {
-        delete_fluid_sample((fluid_sample_t *) fluid_list_get(list));
+        sample = (fluid_sample_t *) fluid_list_get(list);
+
+        /* If the sample data pointer is different to the sampledata chunk of
+         * the soundfont, then the sample has been loaded individually (SF3)
+         * and needs to be unloaded explicitly. This is safe even if using
+         * dynamic sample loading, as the sample_unload mechanism sets
+         * sample->data to NULL after unload. */
+        if ((sample->data != NULL) && (sample->data != defsfont->sampledata))
+        {
+            fluid_samplecache_unload(sample->data);
+        }
+        delete_fluid_sample(sample);
     }
 
     if(defsfont->sample)
@@ -425,7 +436,7 @@ int fluid_defsfont_load(fluid_defsfont_t *defsfont, const fluid_file_callbacks_t
 
     if(sfdata == NULL)
     {
-        FLUID_LOG(FLUID_ERR, "Couldn't load soundfont file");
+        /* error message already printed */
         return FLUID_FAILED;
     }
 

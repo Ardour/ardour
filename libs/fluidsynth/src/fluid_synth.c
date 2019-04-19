@@ -1235,7 +1235,7 @@ fluid_synth_noteoff_LOCAL(fluid_synth_t *synth, int chan, int key)
     {
         /* channel is poly and legato CC is Off) */
         /* removes the note from the monophonic list */
-        if(key == fluid_channel_last_note(channel))
+        if(channel->n_notes && key == fluid_channel_last_note(channel))
         {
             fluid_channel_clear_monolist(channel);
         }
@@ -3639,12 +3639,19 @@ int
 fluid_synth_process(fluid_synth_t *synth, int len, int nfx, float *fx[],
                     int nout, float *out[])
 {
+    return fluid_synth_process_LOCAL(synth, len, nfx, fx, nout, out, fluid_synth_render_blocks);
+}
+
+int
+fluid_synth_process_LOCAL(fluid_synth_t *synth, int len, int nfx, float *fx[],
+                    int nout, float *out[], int (*block_render_func)(fluid_synth_t *, int))
+{
     fluid_real_t *left_in, *fx_left_in;
     fluid_real_t *right_in, *fx_right_in;
     int nfxchan, nfxunits, naudchan;
 
     double time = fluid_utime();
-    int i, f, num, count;
+    int i, f, num, count, buffered_blocks;
 
     float cpu_load;
 
@@ -3668,9 +3675,10 @@ fluid_synth_process(fluid_synth_t *synth, int len, int nfx, float *fx[],
     count = 0;
     num = synth->cur;
 
-    if(synth->cur < FLUID_BUFSIZE)
+    buffered_blocks = (synth->cur + FLUID_BUFSIZE - 1) / FLUID_BUFSIZE;
+    if(synth->cur < buffered_blocks * FLUID_BUFSIZE)
     {
-        int available = FLUID_BUFSIZE - synth->cur;
+        int available = (buffered_blocks * FLUID_BUFSIZE) - synth->cur;
         num = (available > len) ? len : available;
 
         if(nout != 0)
@@ -3712,7 +3720,7 @@ fluid_synth_process(fluid_synth_t *synth, int len, int nfx, float *fx[],
     while(count < len)
     {
         int blocksleft = (len - count + FLUID_BUFSIZE - 1) / FLUID_BUFSIZE;
-        int blockcount = fluid_synth_render_blocks(synth, blocksleft);
+        int blockcount = block_render_func(synth, blocksleft);
 
         num = (blockcount * FLUID_BUFSIZE > len - count) ? len - count : blockcount * FLUID_BUFSIZE;
 
