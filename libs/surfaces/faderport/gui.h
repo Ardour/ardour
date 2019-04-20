@@ -36,6 +36,10 @@ namespace Gtk {
 
 #include "faderport.h"
 
+namespace ActionManager {
+        class ActionModel;
+}
+
 namespace ArdourSurface {
 
 class FPGUI : public Gtk::VBox
@@ -83,17 +87,8 @@ private:
 	Glib::RefPtr<Gtk::ListStore> build_midi_port_list (std::vector<std::string> const & ports, bool for_input);
 	void active_port_changed (Gtk::ComboBox*,bool for_input);
 
-	struct ActionColumns : public Gtk::TreeModel::ColumnRecord {
-		ActionColumns() {
-			add (name);
-			add (path);
-		}
-		Gtk::TreeModelColumn<std::string> name;
-		Gtk::TreeModelColumn<std::string> path;
-	};
+	const ActionManager::ActionModel& action_model;
 
-	ActionColumns action_columns;
-	Glib::RefPtr<Gtk::TreeStore> available_action_model;
 	std::map<std::string,std::string> action_map; // map from action names to paths
 
 	void build_action_combo (Gtk::ComboBox& cb, std::vector<std::pair<std::string,std::string> > const & actions, FaderPort::ButtonID, FaderPort::ButtonState);
@@ -103,7 +98,6 @@ private:
 	void build_user_action_combo (Gtk::ComboBox&, FaderPort::ButtonState);
 	void build_foot_action_combo (Gtk::ComboBox&, FaderPort::ButtonState);
 
-	void build_available_action_menu ();
 	void action_changed (Gtk::ComboBox*, FaderPort::ButtonID, FaderPort::ButtonState);
 
 	bool find_action_in_model (const Gtk::TreeModel::iterator& iter, std::string const & action_path, Gtk::TreeModel::iterator* found);

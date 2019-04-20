@@ -27,6 +27,7 @@
 #include "pbd/file_utils.h"
 
 #include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/action_model.h"
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/gui_thread.h"
@@ -84,6 +85,7 @@ CC121GUI::CC121GUI (CC121& p)
 	, table (2, 5)
 	, action_table (5, 4)
 	, ignore_active_change (false)
+	, action_model (ActionManager::ActionModel::instance ())
 {
 	set_border_width (12);
 
@@ -126,8 +128,6 @@ CC121GUI::CC121GUI (CC121& p)
 	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table.attach (output_combo, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	row++;
-
-	build_available_action_menu ();
 
 	build_user_action_combo (function1_combo, CC121::ButtonState(0), CC121::Function1);
 	build_user_action_combo (function2_combo, CC121::ButtonState(0), CC121::Function2);
@@ -365,106 +365,10 @@ CC121GUI::update_port_combos ()
 }
 
 void
-CC121GUI::build_available_action_menu ()
-{
-	/* build a model of all available actions (needs to be tree structured
-	 * more)
-	 */
-
-	available_action_model = TreeStore::create (action_columns);
-
-	vector<string> paths;
-	vector<string> labels;
-	vector<string> tooltips;
-	vector<string> keys;
-	vector<Glib::RefPtr<Gtk::Action> > actions;
-
-	ActionManager::get_all_actions (paths, labels, tooltips, keys, actions);
-
-	typedef std::map<string,TreeIter> NodeMap;
-	NodeMap nodes;
-	NodeMap::iterator r;
-
-
-	vector<string>::iterator k;
-	vector<string>::iterator p;
-	vector<string>::iterator t;
-	vector<string>::iterator l;
-
-	available_action_model->clear ();
-
-	TreeIter rowp;
-	TreeModel::Row parent;
-
-	/* Disabled item (row 0) */
-
-	rowp = available_action_model->append();
-	parent = *(rowp);
-	parent[action_columns.name] = _("Disabled");
-
-	for (l = labels.begin(), k = keys.begin(), p = paths.begin(), t = tooltips.begin(); l != labels.end(); ++k, ++p, ++t, ++l) {
-
-		TreeModel::Row row;
-		vector<string> parts;
-
-		parts.clear ();
-
-		split (*p, parts, '/');
-
-		if (parts.empty()) {
-			continue;
-		}
-
-		//kinda kludgy way to avoid displaying menu items as mappable
-		if (parts[0] == _("Main Menu") )
-			continue;
-		if (parts[0] == _("JACK") )
-			continue;
-		if (parts[0] == _("redirectmenu") )
-			continue;
-		if (parts[0] == _("RegionList") )
-			continue;
-		if (parts[0] == _("ProcessorMenu") )
-			continue;
-
-		if ((r = nodes.find (parts[0])) == nodes.end()) {
-
-			/* top level is missing */
-
-			TreeIter rowp;
-			TreeModel::Row parent;
-			rowp = available_action_model->append();
-			nodes[parts[0]] = rowp;
-			parent = *(rowp);
-			parent[action_columns.name] = parts[0];
-
-			row = *(available_action_model->append (parent.children()));
-
-		} else {
-
-			row = *(available_action_model->append ((*r->second)->children()));
-
-		}
-
-		/* add this action */
-
-		if (l->empty ()) {
-			row[action_columns.name] = *t;
-			action_map[*t] = *p;
-		} else {
-			row[action_columns.name] = *l;
-			action_map[*l] = *p;
-		}
-
-		row[action_columns.path] = *p;
-	}
-}
-
-void
 CC121GUI::action_changed (Gtk::ComboBox* cb, CC121::ButtonID id, CC121::ButtonState bs)
 {
 	TreeModel::const_iterator row = cb->get_active ();
-	string action_path = (*row)[action_columns.path];
+	string action_path = (*row)[action_model.path()];
 
 	/* release binding */
 	fp.set_action (id, action_path, false, bs);
@@ -473,7 +377,7 @@ CC121GUI::action_changed (Gtk::ComboBox* cb, CC121::ButtonID id, CC121::ButtonSt
 void
 CC121GUI::build_action_combo (Gtk::ComboBox& cb, vector<pair<string,string> > const & actions, CC121::ButtonID id, CC121::ButtonState bs)
 {
-	Glib::RefPtr<Gtk::ListStore> model (Gtk::ListStore::create (action_columns));
+	Glib::RefPtr<Gtk::ListStore> model (Gtk::ListStore::create (action_model.columns()));
 	TreeIter rowp;
 	TreeModel::Row row;
 	string current_action = fp.get_action (id, false, bs); /* lookup release action */
@@ -483,8 +387,8 @@ CC121GUI::build_action_combo (Gtk::ComboBox& cb, vector<pair<string,string> > co
 
 	rowp = model->append();
 	row = *(rowp);
-	row[action_columns.name] = _("Disabled");
-	row[action_columns.path] = string();
+	row[action_model.name()] = _("Disabled");
+	row[action_model.path()] = string();
 
 	if (current_action.empty()) {
 		active_row = 0;
@@ -493,15 +397,15 @@ CC121GUI::build_action_combo (Gtk::ComboBox& cb, vector<pair<string,string> > co
 	for (i = actions.begin(), n = 0; i != actions.end(); ++i, ++n) {
 		rowp = model->append();
 		row = *(rowp);
-		row[action_columns.name] = i->first;
-		row[action_columns.path] = i->second;
+		row[action_model.name()] = i->first;
+		row[action_model.path()] = i->second;
 		if (current_action == i->second) {
 			active_row = n+1;
 		}
 	}
 
 	cb.set_model (model);
-	cb.pack_start (action_columns.name);
+	cb.pack_start (action_model.name());
 
 	if (active_row >= 0) {
 		cb.set_active (active_row);
@@ -528,7 +432,7 @@ bool
 CC121GUI::find_action_in_model (const TreeModel::iterator& iter, std::string const & action_path, TreeModel::iterator* found)
 {
 	TreeModel::Row row = *iter;
-	string path = row[action_columns.path];
+	string path = row[action_model.path()];
 
 	if (path == action_path) {
 		*found = iter;
@@ -541,8 +445,8 @@ CC121GUI::find_action_in_model (const TreeModel::iterator& iter, std::string con
 void
 CC121GUI::build_user_action_combo (Gtk::ComboBox& cb, CC121::ButtonState bs, CC121::ButtonID id)
 {
-	cb.set_model (available_action_model);
-	cb.pack_start (action_columns.name);
+	cb.set_model (action_model.model());
+	cb.pack_start (action_model.name());
 	cb.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &CC121GUI::action_changed), &cb, id, bs));
 
 	/* set the active "row" to the right value for the current button binding */
@@ -554,11 +458,11 @@ CC121GUI::build_user_action_combo (Gtk::ComboBox& cb, CC121::ButtonState bs, CC1
 		return;
 	}
 
-	TreeModel::iterator iter = available_action_model->children().end();
+	TreeModel::iterator iter = action_model.model()->children().end();
 
-	available_action_model->foreach_iter (sigc::bind (sigc::mem_fun (*this, &CC121GUI::find_action_in_model), current_action, &iter));
+	action_model.model()->foreach_iter (sigc::bind (sigc::mem_fun (*this, &CC121GUI::find_action_in_model), current_action, &iter));
 
-	if (iter != available_action_model->children().end()) {
+	if (iter != action_model.model()->children().end()) {
 		cb.set_active (iter);
 	} else {
 		cb.set_active (0);
