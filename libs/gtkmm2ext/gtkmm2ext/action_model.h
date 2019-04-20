@@ -61,6 +61,9 @@ public:
 	const Columns& columns() const { return _columns; }
 
 	void build_action_combo (Gtk::ComboBox& cb, std::string const& current_action) const;
+	void build_custom_action_combo (Gtk::ComboBox& cb,
+					const std::vector<std::pair<std::string,std::string> >& actions,
+					const std::string& current_action) const;
 
 private:
 	ActionModel ();

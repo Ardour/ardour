@@ -21,6 +21,7 @@
 #include <vector>
 
 #include  <gtkmm/combobox.h>
+#include <gtkmm/liststore.h>
 
 #include "pbd/i18n.h"
 #include "pbd/strsplit.h"
@@ -31,14 +32,16 @@
 using namespace std;
 using namespace Gtk;
 
-const ActionManager::ActionModel&
-ActionManager::ActionModel::instance ()
+namespace ActionManager {
+
+const ActionModel&
+ActionModel::instance ()
 {
-	static ActionManager::ActionModel am;
+	static ActionModel am;
 	return am;
 }
 
-ActionManager::ActionModel::ActionModel ()
+ActionModel::ActionModel ()
 {
 	_model = TreeStore::create (_columns);
 	_model->clear ();
@@ -60,7 +63,7 @@ ActionManager::ActionModel::ActionModel ()
 	vector<string> keys;
 	vector<Glib::RefPtr<Gtk::Action> > actions;
 
-	ActionManager::get_all_actions (paths, labels, tooltips, keys, actions);
+	get_all_actions (paths, labels, tooltips, keys, actions);
 
 	vector<string>::iterator k;
 	vector<string>::iterator p;
@@ -120,7 +123,7 @@ ActionManager::ActionModel::ActionModel ()
 }
 
 bool
-ActionManager::ActionModel::find_action_in_model (const TreeModel::iterator& iter, std::string const & action_path, TreeModel::iterator* found) const
+ActionModel::find_action_in_model (const TreeModel::iterator& iter, std::string const & action_path, TreeModel::iterator* found) const
 {
 	TreeModel::Row row = *iter;
 	string path = row[_columns.path];
@@ -134,7 +137,7 @@ ActionManager::ActionModel::find_action_in_model (const TreeModel::iterator& ite
 }
 
 void
-ActionManager::ActionModel::build_action_combo (ComboBox& cb, string const& current_action) const
+ActionModel::build_action_combo (ComboBox& cb, string const& current_action) const
 {
 	cb.set_model (_model);
 	cb.pack_start (_columns.name);
@@ -146,11 +149,50 @@ ActionManager::ActionModel::build_action_combo (ComboBox& cb, string const& curr
 
 	TreeModel::iterator iter = _model->children().end();
 
-	_model->foreach_iter (sigc::bind (sigc::mem_fun (*this, &ActionManager::ActionModel::find_action_in_model), current_action, &iter));
+	_model->foreach_iter (sigc::bind (sigc::mem_fun (*this, &ActionModel::find_action_in_model), current_action, &iter));
 
 	if (iter != _model->children().end()) {
 		cb.set_active (iter);
 	} else {
 		cb.set_active (0);
 	}
+}
+
+void
+ActionModel::build_custom_action_combo (ComboBox& cb, const vector<pair<string,string> >& actions, const string& current_action) const
+{
+	Glib::RefPtr<Gtk::ListStore> model (Gtk::ListStore::create (_columns));
+	TreeIter rowp;
+	TreeModel::Row row;
+	int active_row = -1;
+	int n;
+	vector<pair<string,string> >::const_iterator i;
+
+	rowp = model->append();
+	row = *(rowp);
+	row[_columns.name] = _("Disabled");
+	row[_columns.path] = string();
+
+	if (current_action.empty()) {
+		active_row = 0;
+	}
+
+	for (i = actions.begin(), n = 0; i != actions.end(); ++i, ++n) {
+		rowp = model->append();
+		row = *(rowp);
+		row[_columns.name] = i->first;
+		row[_columns.path] = i->second;
+		if (current_action == i->second) {
+			active_row = n+1;
+		}
+	}
+
+	cb.set_model (model);
+	cb.pack_start (_columns.name);
+
+	if (active_row >= 0) {
+		cb.set_active (active_row);
+	}
+}
+
 }
