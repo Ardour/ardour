@@ -339,14 +339,11 @@ FP8GUI::active_port_changed (Gtk::ComboBox* combo, bool for_input)
 	}
 }
 
-
-
-
 void
 FP8GUI::build_action_combo (Gtk::ComboBox& cb, FP8Controls::ButtonId id)
 {
 	/* set the active "row" to the right value for the current button binding */
-	string current_action = fp.get_button_action (id, false); /* lookup release action */
+	const string current_action = fp.get_button_action (id, false); /* lookup release action */
 	action_model.build_action_combo(cb, current_action);
 	cb.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FP8GUI::action_changed), &cb, id));
 }

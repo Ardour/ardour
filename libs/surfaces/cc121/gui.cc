@@ -377,40 +377,8 @@ CC121GUI::action_changed (Gtk::ComboBox* cb, CC121::ButtonID id, CC121::ButtonSt
 void
 CC121GUI::build_action_combo (Gtk::ComboBox& cb, vector<pair<string,string> > const & actions, CC121::ButtonID id, CC121::ButtonState bs)
 {
-	Glib::RefPtr<Gtk::ListStore> model (Gtk::ListStore::create (action_model.columns()));
-	TreeIter rowp;
-	TreeModel::Row row;
-	string current_action = fp.get_action (id, false, bs); /* lookup release action */
-	int active_row = -1;
-	int n;
-	vector<pair<string,string> >::const_iterator i;
-
-	rowp = model->append();
-	row = *(rowp);
-	row[action_model.name()] = _("Disabled");
-	row[action_model.path()] = string();
-
-	if (current_action.empty()) {
-		active_row = 0;
-	}
-
-	for (i = actions.begin(), n = 0; i != actions.end(); ++i, ++n) {
-		rowp = model->append();
-		row = *(rowp);
-		row[action_model.name()] = i->first;
-		row[action_model.path()] = i->second;
-		if (current_action == i->second) {
-			active_row = n+1;
-		}
-	}
-
-	cb.set_model (model);
-	cb.pack_start (action_model.name());
-
-	if (active_row >= 0) {
-		cb.set_active (active_row);
-	}
-
+	const string current_action = fp.get_action (id, false, bs); /* lookup release action */
+	action_model.build_custom_action_combo (cb, actions, current_action);
 	cb.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &CC121GUI::action_changed), &cb, id, bs));
 }
 
