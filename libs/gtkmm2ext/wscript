@@ -24,6 +24,7 @@ I18N_PACKAGE = 'gtkmm2ext3'
 
 gtkmm2ext_sources = [
         'actions.cc',
+        'action_model.cc',
         'application.cc',
         'bindings.cc',
         'cairo_packer.cc',
