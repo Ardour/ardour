@@ -99,9 +99,6 @@ private:
 	void build_foot_action_combo (Gtk::ComboBox&, FaderPort::ButtonState);
 
 	void action_changed (Gtk::ComboBox*, FaderPort::ButtonID, FaderPort::ButtonState);
-
-	bool find_action_in_model (const Gtk::TreeModel::iterator& iter, std::string const & action_path, Gtk::TreeModel::iterator* found);
-
 };
 
 }

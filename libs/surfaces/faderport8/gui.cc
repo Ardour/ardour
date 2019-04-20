@@ -341,43 +341,13 @@ FP8GUI::active_port_changed (Gtk::ComboBox* combo, bool for_input)
 
 
 
-bool
-FP8GUI::find_action_in_model (const TreeModel::iterator& iter, std::string const& action_path, TreeModel::iterator* found)
-{
-	TreeModel::Row row = *iter;
-	string path = row[action_model.path()];
-
-	if (path == action_path) {
-		*found = iter;
-		return true;
-	}
-
-	return false;
-}
 
 void
 FP8GUI::build_action_combo (Gtk::ComboBox& cb, FP8Controls::ButtonId id)
 {
-	cb.set_model (action_model.model());
-	cb.pack_start (action_model.name());
-
 	/* set the active "row" to the right value for the current button binding */
 	string current_action = fp.get_button_action (id, false); /* lookup release action */
-
-	if (current_action.empty()) {
-		cb.set_active (0); /* "disabled" */
-	} else {
-		TreeModel::iterator iter = action_model.model()->children().end();
-
-		action_model.model()->foreach_iter (sigc::bind (sigc::mem_fun (*this, &FP8GUI::find_action_in_model), current_action, &iter));
-
-		if (iter != action_model.model()->children().end()) {
-			cb.set_active (iter);
-		} else {
-			cb.set_active (0);
-		}
-	}
-	/* bind signal _after_ setting the current value */
+	action_model.build_action_combo(cb, current_action);
 	cb.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FP8GUI::action_changed), &cb, id));
 }
 

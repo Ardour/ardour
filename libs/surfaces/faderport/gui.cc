@@ -460,19 +460,6 @@ FPGUI::build_foot_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 	build_action_combo (cb, actions, FaderPort::Footswitch, bs);
 }
 
-bool
-FPGUI::find_action_in_model (const TreeModel::iterator& iter, std::string const & action_path, TreeModel::iterator* found)
-{
-	TreeModel::Row row = *iter;
-	string path = row[action_model.path()];
-
-	if (path == action_path) {
-		*found = iter;
-		return true;
-	}
-
-	return false;
-}
 
 void
 FPGUI::build_user_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
@@ -480,28 +467,12 @@ FPGUI::build_user_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 #ifndef MIXBUS
 	bs = FaderPort::ButtonState (bs|FaderPort::UserDown);
 #endif
-	cb.set_model (action_model.model());
-	cb.pack_start (action_model.name());
-	cb.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FPGUI::action_changed), &cb, FaderPort::User, bs));
 
 	/* set the active "row" to the right value for the current button binding */
 
 	string current_action = fp.get_action (FaderPort::User, false, bs); /* lookup release action */
-
-	if (current_action.empty()) {
-		cb.set_active (0); /* "disabled" */
-		return;
-	}
-
-	TreeModel::iterator iter = action_model.model()->children().end();
-
-	action_model.model()->foreach_iter (sigc::bind (sigc::mem_fun (*this, &FPGUI::find_action_in_model), current_action, &iter));
-
-	if (iter != action_model.model()->children().end()) {
-		cb.set_active (iter);
-	} else {
-		cb.set_active (0);
-	}
+	action_model.build_action_combo (cb, current_action);
+	cb.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FPGUI::action_changed), &cb, FaderPort::User, bs));
 
 }
 
