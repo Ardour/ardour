@@ -25,6 +25,11 @@
 
 #include "gtkmm2ext/visibility.h"
 
+namespace Gtk
+{
+class ComboBox;
+}
+
 /*
   The singleton ActionModel provides a Gtk::Treestore of all actions known to
   ardour.
@@ -55,8 +60,12 @@ public:
 
 	const Columns& columns() const { return _columns; }
 
+	void build_action_combo (Gtk::ComboBox& cb, std::string const& current_action) const;
+
 private:
 	ActionModel ();
+
+	bool find_action_in_model (const Gtk::TreeModel::iterator& iter, std::string const & action_path, Gtk::TreeModel::iterator* found) const;
 
 	const Columns _columns;
 	Glib::RefPtr<Gtk::TreeStore> _model;

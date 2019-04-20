@@ -20,6 +20,8 @@
 
 #include <vector>
 
+#include  <gtkmm/combobox.h>
+
 #include "pbd/i18n.h"
 #include "pbd/strsplit.h"
 
@@ -114,5 +116,41 @@ ActionManager::ActionModel::ActionModel ()
 		}
 
 		row[_columns.path] = *p;
+	}
+}
+
+bool
+ActionManager::ActionModel::find_action_in_model (const TreeModel::iterator& iter, std::string const & action_path, TreeModel::iterator* found) const
+{
+	TreeModel::Row row = *iter;
+	string path = row[_columns.path];
+
+	if (path == action_path) {
+		*found = iter;
+		return true;
+	}
+
+	return false;
+}
+
+void
+ActionManager::ActionModel::build_action_combo (ComboBox& cb, string const& current_action) const
+{
+	cb.set_model (_model);
+	cb.pack_start (_columns.name);
+
+	if (current_action.empty()) {
+		cb.set_active (0); /* "disabled" */
+		return;
+	}
+
+	TreeModel::iterator iter = _model->children().end();
+
+	_model->foreach_iter (sigc::bind (sigc::mem_fun (*this, &ActionManager::ActionModel::find_action_in_model), current_action, &iter));
+
+	if (iter != _model->children().end()) {
+		cb.set_active (iter);
+	} else {
+		cb.set_active (0);
 	}
 }
