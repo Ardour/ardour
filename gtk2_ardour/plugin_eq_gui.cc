@@ -38,6 +38,8 @@
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
 
+#include "gtkmm2ext/utils.h"
+
 #include "ardour/audio_buffer.h"
 #include "ardour/data_type.h"
 #include "ardour/chan_mapping.h"
@@ -91,7 +93,6 @@ PluginEqGui::PluginEqGui (boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	dBScaleModel = Gtk::ListStore::create (dBColumns);
 
 	dBScaleCombo = new Gtk::ComboBox (dBScaleModel, false);
-	dBScaleCombo->set_title (_("dB scale"));
 
 #define ADD_DB_ROW(MIN,MAX,STEP,NAME) \
 	{ \
@@ -115,15 +116,26 @@ PluginEqGui::PluginEqGui (boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 
 	dBScaleCombo -> signal_changed().connect (sigc::mem_fun(*this, &PluginEqGui::change_dB_scale));
 
-	Gtk::Label *dBComboLabel = new Gtk::Label (_("dB scale"));
+	Gtk::Label *dBComboLabel = new Gtk::Label (_("Range:"));
 
-	Gtk::HBox *dBSelectBin = new Gtk::HBox (false, 5);
+	Gtk::HBox *dBSelectBin = new Gtk::HBox (false, 4);
 	dBSelectBin->add (*manage(dBComboLabel));
 	dBSelectBin->add (*manage(dBScaleCombo));
 
-	// Phase checkbutton
-	_signal_button = new Gtk::CheckButton (_("Plot live signal"));
-	_signal_button->set_active(true);
+	_live_signal_combo = new Gtk::ComboBoxText ();
+	_live_signal_combo->append_text (_("Off"));
+	_live_signal_combo->append_text (_("Output / Input"));
+	_live_signal_combo->append_text (_("Input"));
+	_live_signal_combo->append_text (_("Output"));
+	_live_signal_combo->append_text (_("Input +40dB"));
+	_live_signal_combo->append_text (_("Output +40dB"));
+	_live_signal_combo->set_active (0);
+
+	Gtk::Label *live_signal_label = new Gtk::Label (_("Live signal:"));
+
+	Gtk::HBox *liveSelectBin = new Gtk::HBox (false, 4);
+	liveSelectBin->add (*manage(live_signal_label));
+	liveSelectBin->add (*manage(_live_signal_combo));
 
 	// Phase checkbutton
 	_phase_button = new Gtk::CheckButton (_("Show phase"));
@@ -132,14 +144,14 @@ PluginEqGui::PluginEqGui (boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 
 	// Freq/dB info for mouse over
 	_pointer_info = new Gtk::Label ("", 1, 0.5);
-	_pointer_info->set_size_request (_analysis_width / 4, -1);
 	_pointer_info->set_name ("PluginAnalysisInfoLabel");
+	Gtkmm2ext::set_size_request_to_display_given_text (*_pointer_info, "10.0kHz_000.0dB_180.0\u00B0", 0, 0);
 
 	// populate table
 	attach (*manage(_analysis_area), 0, 4, 0, 1);
 	attach (*manage(dBSelectBin),    0, 1, 1, 2, Gtk::SHRINK, Gtk::SHRINK);
-	attach (*manage(_signal_button), 1, 2, 1, 2, Gtk::SHRINK, Gtk::SHRINK);
-	attach (*manage(_phase_button),  2, 3, 1, 2, Gtk::SHRINK, Gtk::SHRINK);
+	attach (*manage(liveSelectBin),  1, 2, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 4, 0);
+	attach (*manage(_phase_button),  2, 3, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 4, 0);
 	attach (*manage(_pointer_info),  3, 4, 1, 2, Gtk::FILL,   Gtk::SHRINK);
 }
 
@@ -202,6 +214,7 @@ PluginEqGui::stop_updating ()
 	if (_update_connection.connected ()) {
 		_update_connection.disconnect ();
 	}
+	_signal_analysis_running = false;
 }
 
 void
@@ -314,8 +327,6 @@ PluginEqGui::resize_analysis_area (Gtk::Allocation& size)
 		cairo_surface_destroy (_analysis_scale_surface);
 		_analysis_scale_surface = 0;
 	}
-
-	_pointer_info->set_size_request (_analysis_width / 4, -1);
 }
 
 bool
@@ -560,7 +571,7 @@ PluginEqGui::redraw_analysis_area ()
 		update_pointer_info (_pointer_in_area_xpos);
 	}
 
-	if (_signal_button->get_active()) {
+	if (_live_signal_combo->get_active_row_number() > 0) {
 		plot_signal_amplitude_difference (_analysis_area, cr);
 	}
 
@@ -850,7 +861,24 @@ PluginEqGui::plot_signal_amplitude_difference (Gtk::Widget *w, cairo_t *cr)
 
 		float power_out = _signal_output_fft->power_at_bin (i) + 1e-30;
 		float power_in  = _signal_input_fft ->power_at_bin (i) + 1e-30;
-		float power = power_to_dB (power_out / power_in);
+		float power;
+		switch (_live_signal_combo->get_active_row_number()) {
+			case 2:
+				power = power_to_dB (power_in);
+				break;
+			case 3:
+				power = power_to_dB (power_out);
+				break;
+			case 4:
+				power = power_to_dB (power_in) + 40;
+				break;
+			case 5:
+				power = power_to_dB (power_out) + 40;
+				break;
+			default:
+				power = power_to_dB (power_out / power_in);
+				break;
+		}
 
 		assert (!ISINF(power));
 		assert (!ISNAN(power));
