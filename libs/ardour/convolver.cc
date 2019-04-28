@@ -74,7 +74,7 @@ Convolver::Convolver (
 				boost::shared_ptr<SrcFileSource> sfs (new SrcFileSource(_session, afs, ARDOUR::SrcBest));
 				_readables.push_back(sfs);
 			} else {
-				_readables.push_back(afs);
+				_readables.push_back (afs);
 			}
 		} catch (failed_constructor& err) {
 			PBD::error << string_compose(_("Convolver: Could not open IR \"%1\"."), path) << endmsg;
@@ -106,7 +106,7 @@ Convolver::reconfigure ()
 	_max_size  = _readables[0]->readable_length ();
 
 	uint32_t power_of_two;
-	for (power_of_two = 1; 1U << power_of_two < _n_samples; ++power_of_two);
+	for (power_of_two = 1; 1U << power_of_two < _n_samples; ++power_of_two) ;
 	_n_samples = 1 << power_of_two;
 
 	int n_part = std::min ((uint32_t)Convproc::MAXPART, 4 * _n_samples);
@@ -135,10 +135,6 @@ Convolver::reconfigure ()
 	uint32_t n_imp = n_inputs () * n_outputs ();
 	uint32_t n_chn = _readables.size ();
 
-#ifndef NDEBUG
-	printf ("Convolver::reconfigure Nin %d Nout %d Nimp %d Nchn %d\n", n_inputs (), n_outputs (), n_imp, n_chn);
-#endif
-
 	if (_irc == Stereo && n_chn == 3) {
 		/* ignore 3rd channel */
 		n_chn = 2;
@@ -147,6 +143,10 @@ Convolver::reconfigure ()
 		/* ignore x-over */
 		n_imp = 2;
 	}
+
+#ifndef NDEBUG
+	printf ("Convolver::reconfigure Nin=%d Nout=%d Nimp=%d Nchn=%d\n", n_inputs (), n_outputs (), n_imp, n_chn);
+#endif
 
 	assert (n_imp <= 4);
 
@@ -178,14 +178,15 @@ Convolver::reconfigure ()
 		const uint32_t chan_delay = _ir_settings.pre_delay + _ir_settings.channel_delay[c];
 
 #ifndef NDEBUG
-		printf ("Convolver map: IR-chn %d: in %d -> out %d (gain: %.1fdB delay; %d)\n", ir_c + 1, io_i + 1, io_o + 1, 20.f * log10f(chan_gain), chan_delay);
+		printf ("Convolver map: IR-chn %d: in %d -> out %d (gain: %.1fdB delay; %d)\n", ir_c + 1, io_i + 1, io_o + 1, 20.f * log10f (chan_gain), chan_delay);
 #endif
 
 		uint32_t pos = 0;
 		while (true) {
 			float ir[8192];
+
 			samplecnt_t to_read = std::min ((uint32_t)8192, _max_size - pos);
-			samplecnt_t ns = r->read (ir, pos, to_read, 0);
+			samplecnt_t ns      = r->read (ir, pos, to_read, 0);
 
 			if (ns == 0) {
 				assert (pos == _max_size);
