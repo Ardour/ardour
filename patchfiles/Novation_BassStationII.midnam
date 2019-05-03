@@ -2,11 +2,11 @@
 <!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "">
 <MIDINameDocument>
     <Author>at0m</Author>
-	<MasterDeviceNames>
-		<Manufacturer>Novation</Manufacturer>
-		<Model>BassStationII</Model>
-		<CustomDeviceMode Name="Novation BassStationII" >
-			<ChannelNameSetAssignments>
+        <MasterDeviceNames>
+                <Manufacturer>Novation</Manufacturer>
+                <Model>BassStationII</Model>
+                <CustomDeviceMode Name="Novation BassStationII" >
+                        <ChannelNameSetAssignments>
                 <ChannelNameSetAssign Channel="1" NameSet="Patches"/>
                 <ChannelNameSetAssign Channel="2" NameSet="Patches"/>
                 <ChannelNameSetAssign Channel="3" NameSet="Patches"/>
@@ -26,34 +26,34 @@
             </ChannelNameSetAssignments>
       <UsesControlNameList Name="ControlsBSII"/>
       </CustomDeviceMode>
-		<ChannelNameSet Name="Patches" >
-			<AvailableForChannels>
-				<AvailableChannel Channel="1" Available="true" />
-				<AvailableChannel Channel="2" Available="true" />
-				<AvailableChannel Channel="3" Available="true" />
-				<AvailableChannel Channel="4" Available="true" />
-				<AvailableChannel Channel="5" Available="true" />
-				<AvailableChannel Channel="6" Available="true" />
-				<AvailableChannel Channel="7" Available="true" />
-				<AvailableChannel Channel="8" Available="true" />
-				<AvailableChannel Channel="9" Available="true" />
-				<AvailableChannel Channel="10" Available="true" />
-				<AvailableChannel Channel="11" Available="true" />
-				<AvailableChannel Channel="12" Available="true" />
-				<AvailableChannel Channel="13" Available="true" />
-				<AvailableChannel Channel="14" Available="true" />
-				<AvailableChannel Channel="15" Available="true" />
-				<AvailableChannel Channel="16" Available="true" />
-			</AvailableForChannels>
-			<PatchBank Name="Patches" >
-				<MIDICommands>
-					<ControlChange Control="0" Value="0" />
-					<ControlChange Control="32" Value="0" />
-				</MIDICommands>
-				<UsesPatchNameList Name="Patches" />
-			</PatchBank>
-		</ChannelNameSet>
-		<PatchNameList Name="Patches" >
+                <ChannelNameSet Name="Patches" >
+                        <AvailableForChannels>
+                                <AvailableChannel Channel="1" Available="true" />
+                                <AvailableChannel Channel="2" Available="true" />
+                                <AvailableChannel Channel="3" Available="true" />
+                                <AvailableChannel Channel="4" Available="true" />
+                                <AvailableChannel Channel="5" Available="true" />
+                                <AvailableChannel Channel="6" Available="true" />
+                                <AvailableChannel Channel="7" Available="true" />
+                                <AvailableChannel Channel="8" Available="true" />
+                                <AvailableChannel Channel="9" Available="true" />
+                                <AvailableChannel Channel="10" Available="true" />
+                                <AvailableChannel Channel="11" Available="true" />
+                                <AvailableChannel Channel="12" Available="true" />
+                                <AvailableChannel Channel="13" Available="true" />
+                                <AvailableChannel Channel="14" Available="true" />
+                                <AvailableChannel Channel="15" Available="true" />
+                                <AvailableChannel Channel="16" Available="true" />
+                        </AvailableForChannels>
+                        <PatchBank Name="Patches" >
+                                <MIDICommands>
+                                        <ControlChange Control="0" Value="0" />
+                                        <ControlChange Control="32" Value="0" />
+                                </MIDICommands>
+                                <UsesPatchNameList Name="Patches" />
+                        </PatchBank>
+                </ChannelNameSet>
+                <PatchNameList Name="Patches" >
             <Patch Number="0" Name="Patch 0" ProgramChange="0"/>
             <Patch Number="1" Name="Patch 1" ProgramChange="1"/>
             <Patch Number="2" Name="Patch 2" ProgramChange="2"/>
@@ -183,7 +183,7 @@
             <Patch Number="126" Name="Patch 126" ProgramChange="126"/>
             <Patch Number="127" Name="Patch 127" ProgramChange="127"/>
         <Patch Number="128" Name="Patch 128" ProgramChange="128"/>
-		</PatchNameList>
+                </PatchNameList>
         <ControlNameList Name="ControlsBSII">
 <!-- MASTER -->
         <Control Type="7bit" Number="7" Name="Patch Volume"/>
