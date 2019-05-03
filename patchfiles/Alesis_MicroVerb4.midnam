@@ -253,7 +253,6 @@
             <Patch Number="197" Name="Wooden drum room with medium delay" ProgramChange="97"/>
             <Patch Number="198" Name="Warm plate with a slow stereo chorus" ProgramChange="98"/>
             <Patch Number="199" Name="Bright room with a thick stereo flange" ProgramChange="99"/>
-	</PatchNameList>       1
 	</PatchNameList>
 
         <ControlNameList Name="ControlsMV4">
