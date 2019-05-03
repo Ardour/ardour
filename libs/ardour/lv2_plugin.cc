@@ -3453,6 +3453,14 @@ LV2PluginInfo::discover()
 				if (!strcmp (rf, LV2_URID_MAP_URI)) { ok = true; }
 				if (!strcmp (rf, LV2_URID_UNMAP_URI)) { ok = true; }
 				if (!strcmp (rf, "http://lv2plug.in/ns/lv2core#isLive")) { ok = true; }
+				if (!strcmp (rf, LV2_BUF_SIZE__boundedBlockLength)) { ok = true; }
+				if (!strcmp (rf, "http://lv2plug.in/ns/ext/buf-size#coarseBlockLength" /*LV2_BUF_SIZE__coarseBlockLength*/)) { ok = true; }
+				if (!strcmp (rf, LV2_OPTIONS__options)) { ok = true; }
+#ifdef LV2_EXTENDED
+				if (!strcmp (rf, LV2_INLINEDISPLAY__queue_draw)) { ok = true; }
+				if (!strcmp (rf, LV2_MIDNAM__update)) { ok = true; }
+				if (!strcmp (rf, LV2_BANKPATCH__notify)) { ok = true; }
+#endif
 				if (!ok) {
 					warning << string_compose (
 							_("Unsupported required LV2 feature: '%1' in '%2'."),
