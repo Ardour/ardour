@@ -250,6 +250,9 @@ Control::set_state (const XMLTree& tree, const XMLNode& node)
 	} else {
 		_type = "7bit";
 	}
+	if (_type == "NRPN") {
+		return -1;
+	}
 	_number = string_to_int(tree, node.property("Number")->value());
 	_name   = node.property("Name")->value();
 
@@ -292,7 +295,9 @@ ControlNameList::set_state (const XMLTree& tree, const XMLNode& node)
 	     i != node.children().end(); ++i) {
 		if ((*i)->name() == "Control") {
 			boost::shared_ptr<Control> control(new Control());
-			control->set_state (tree, *(*i));
+			if (control->set_state (tree, *(*i))) {
+				continue;
+			}
 			if (_controls.find(control->number()) == _controls.end()) {
 				_controls.insert(make_pair(control->number(), control));
 			} else {
