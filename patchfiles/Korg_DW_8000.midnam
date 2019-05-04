@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 0.7//EN" "http://www.sonosphere.com/dtds/MIDINameDocument.dtd">
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
 
 <MIDINameDocument>
 	<Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
-	<MasterDeviceNames>		<Manufacturer>Korg</Manufacturer>		<Model>DW-8000</Model>
+	<MasterDeviceNames>
+		<Manufacturer>Korg</Manufacturer>
+		<Model>DW-8000</Model>
 		<CustomDeviceMode Name="Mode 1" >
+
 			<ChannelNameSetAssignments>
 				<ChannelNameSetAssign Channel="1" NameSet="Name Set 1" />
 				<ChannelNameSetAssign Channel="2" NameSet="Name Set 1" />
@@ -24,6 +27,7 @@
 				<ChannelNameSetAssign Channel="16" NameSet="Name Set 1" />
 			</ChannelNameSetAssignments>
 		</CustomDeviceMode>
+
 		<ChannelNameSet Name="Name Set 1">
 			<AvailableForChannels>
 				<AvailableChannel Channel="1" Available="true" />
@@ -44,6 +48,7 @@
 				<AvailableChannel Channel="16" Available="true" />
 			</AvailableForChannels>
 			<PatchBank Name="Patch Names" >
+
 				<PatchNameList>
 					<Patch Number="11" Name="Program 11" ProgramChange="0" />
 					<Patch Number="12" Name="Program 12" ProgramChange="1" />
