@@ -136,7 +136,7 @@ MIDIControllable::set_controllable (boost::shared_ptr<PBD::Controllable> c)
 
 	if (c) {
 		_controllable = c;
-		last_controllable_value = c->get_value();
+		last_controllable_value = control_to_midi (c->get_value());
 	} else {
 		_controllable.reset();
 		last_controllable_value = 0.0f; // is there a better value?
