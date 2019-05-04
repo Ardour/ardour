@@ -70,9 +70,6 @@
         "Tanzbar has to be set to MANUAL TRIGGER MODE (Rec/ManTrg LED green) to work as a drum sound expander."
         "When Roll Record is active (Shift+Step10 till Rec/ManTrg LED red, then Select), the incoming MIDI notes
         are recorded into Tanzbar's sequencer." -->
-      <AvailableForChannels>
-        <AvailableChannel Channel="3" Available="true"/>
-      </AvailableForChannels>
       <Note Number="36" Name="BD1"/>
       <Note Number="37" Name="BD2"/>
       <Note Number="38" Name="SD"/>
@@ -102,9 +99,6 @@
         - I've set all Drum notes 'learned' to ch10 as per MIDI default.
         - Again, these notes are not default: they are inspired by the GM/GS MIDI layout. YMMV.
         -->
-      <AvailableForChannels>
-        <AvailableChannel Channel="10" Available="true"/>
-      </AvailableForChannels>
       <Note Number="36" Name="BD1"/>
       <Note Number="35" Name="BD2"/>
       <Note Number="37" Name="SD"/>
@@ -130,10 +124,6 @@
 	It receives CC# for most functions and parameters.
 	To receive CC#, Ch10 is always used!
 							-->
-	<AvailableForChannels>
-	<AvailableChannel Channel="10" Available="true"/>
-	</AvailableForChannels>
-
 <Control Type="7bit" Number="2" Name="BD1 Attack"/>
       <Control Type="7bit" Number="64" Name="BD1 Decay"/>
       <Control Type="7bit" Number="65" Name="BD1 Pitch"/>

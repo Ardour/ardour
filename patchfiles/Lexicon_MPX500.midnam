@@ -12,7 +12,6 @@
 		<ChannelNameSetAssignments>
 			<ChannelNameSetAssign Channel="13" NameSet="Presets" />
 		</ChannelNameSetAssignments>
-		<UsesControlNameList Name="ControlsMPX500"/> <!--      SEE BELOW-->
 	</CustomDeviceMode>
 
 <ChannelNameSet Name="Presets" >
@@ -35,6 +34,7 @@
 	<AvailableChannel Channel="15" Available="false" />
 	<AvailableChannel Channel="16" Available="false" />
 	</AvailableForChannels>
+	<UsesControlNameList Name="ControlsMPX500"/>
 
 	<PatchBank Name="Plate" >
 		<MIDICommands>

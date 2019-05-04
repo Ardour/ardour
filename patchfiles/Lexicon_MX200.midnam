@@ -12,7 +12,6 @@
 			<ChannelNameSetAssignments>
 				<ChannelNameSetAssign Channel="12" NameSet="Presets" />
             </ChannelNameSetAssignments>
-      <UsesControlNameList Name="ControlsMX200"/>
       </CustomDeviceMode>
 		<ChannelNameSet Name="Presets" >
 			<AvailableForChannels>
@@ -33,6 +32,7 @@
 				<AvailableChannel Channel="15" Available="false" />
 				<AvailableChannel Channel="16" Available="false" />
 			</AvailableForChannels>
+      <UsesControlNameList Name="ControlsMX200"/>
 			<PatchBank Name="FACTORY" >
 				<MIDICommands>
 					<ControlChange Control="0" Value="0" />

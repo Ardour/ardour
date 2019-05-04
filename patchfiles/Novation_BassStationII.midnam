@@ -24,7 +24,6 @@
                 <ChannelNameSetAssign Channel="15" NameSet="Patches"/>
                 <ChannelNameSetAssign Channel="16" NameSet="Patches"/>
             </ChannelNameSetAssignments>
-      <UsesControlNameList Name="ControlsBSII"/>
       </CustomDeviceMode>
         <ChannelNameSet Name="Patches" >
             <AvailableForChannels>
@@ -45,6 +44,7 @@
                 <AvailableChannel Channel="15" Available="true" />
                 <AvailableChannel Channel="16" Available="true" />
             </AvailableForChannels>
+            <UsesControlNameList Name="ControlsBSII"/>
             <PatchBank Name="Patches" >
                 <MIDICommands>
                     <ControlChange Control="0" Value="0" />
@@ -190,7 +190,7 @@
 <!-- OSCILLATOR -->
 <!-- osc1 -->
         <Control Type="7bit" Number="26" Name="osc 1 fine"/>
-        <Control Type="7bit" Number="70" Name="osc 1 range"/>
+        <Control Type="7bit" Number="70" Name="osc 1 range">
                 <Values Min="63" Max="66">
                     <ValueNameList>
                         <Value Number="63" Name="16'"/>
@@ -199,8 +199,9 @@
                         <Value Number="66" Name="2'"/>
                     </ValueNameList>
                 </Values>
+        </Control>
         <Control Type="7bit" Number="27" Name="osc 1 coarse"/>
-        <Control Type="NRPN" Number="72" Name="osc 1 waveform"/>
+        <Control Type="NRPN" Number="72" Name="osc 1 waveform">
                 <Values Min="0" Max="3">
                     <ValueNameList>
                         <Value Number="0" Name="Sine"/>
@@ -209,6 +210,7 @@
                         <Value Number="3" Name="Pulse"/>
                     </ValueNameList>
                 </Values>
+        </Control>
         <Control Type="7bit" Number="71" Name="osc 1 mod env depth"/>
         <Control Type="7bit" Number="28" Name="osc 1 LFO 1 depth"/>
         <Control Type="7bit" Number="72" Name="osc 1 Mod Env PW mod amount"/>
@@ -216,7 +218,7 @@
         <Control Type="7bit" Number="74" Name="osc 1 manual PW amount"/>
 <!-- osc2 -->
         <Control Type="7bit" Number="29" Name="osc 2 fine"/>
-        <Control Type="7bit" Number="75" Name="osc 2 range"/>
+        <Control Type="7bit" Number="75" Name="osc 2 range">
                 <Values Min="63" Max="66">
                     <ValueNameList>
                         <Value Number="63" Name="16"/>
@@ -225,8 +227,9 @@
                         <Value Number="66" Name="2"/>
                     </ValueNameList>
                 </Values>
+        </Control>
         <Control Type="7bit" Number="30" Name="osc 2 coarse"/>
-        <Control Type="NRPN" Number="82" Name="osc 2 waveform"/>
+        <Control Type="NRPN" Number="82" Name="osc 2 waveform">
                 <Values Min="0" Max="3">
                     <ValueNameList>
                         <Value Number="0" Name="Sine"/>
@@ -235,6 +238,7 @@
                         <Value Number="3" Name="Pulse"/>
                     </ValueNameList>
                 </Values>
+        </Control>
         <Control Type="7bit" Number="76" Name="osc 2 mod env depth"/>
         <Control Type="7bit" Number="31" Name="osc 2 LFO 1 depth"/>
         <Control Type="7bit" Number="77" Name="osc 2 Mod Env PW mod amount"/>
@@ -251,21 +255,23 @@
         <Control Type="7bit" Number="24" Name="ringmod level"/>
         <Control Type="7bit" Number="25" Name="ext signal level"/>
 <!-- FILTER -->
-        <Control Type="7bit" Number="83" Name="Type"/>
+        <Control Type="7bit" Number="83" Name="Type">
                 <Values Min="0" Max="1">
                     <ValueNameList>
                         <Value Number="0" Name="Classic"/>
                         <Value Number="1" Name="Acid"/>
                     </ValueNameList>
                 </Values>
-        <Control Type="7bit" Number="106" Name="slope"/>
+        </Control>
+        <Control Type="7bit" Number="106" Name="slope">
                 <Values Min="0" Max="1">
                     <ValueNameList>
                         <Value Number="0" Name="12dB"/>
                         <Value Number="1" Name="24dB"/>
                     </ValueNameList>
                 </Values>
-        <Control Type="7bit" Number="84" Name="shape: LP, BP, HP"/>
+        </Control>
+        <Control Type="7bit" Number="84" Name="shape: LP, BP, HP">
                 <Values Min="0" Max="2">
                     <ValueNameList>
                         <Value Number="0" Name="LP"/>
@@ -273,6 +279,7 @@
                         <Value Number="2" Name="HP"/>
                     </ValueNameList>
                 </Values>
+        </Control>
         <Control Type="7bit" Number="16" Name="frequency"/>
         <Control Type="7bit" Number="82" Name="resonance"/>
         <Control Type="7bit" Number="85" Name="mod env depth"/>
@@ -285,7 +292,7 @@
         <Control Type="7bit" Number="86" Name="LFO 1 delay"/>
         <Control Type="7bit" Number="19" Name="LFO 2 speed"/>
         <Control Type="7bit" Number="87" Name="LFO 2 delay"/>
-        <Control Type="7bit" Number="88" Name="LFO 1 wave"/>
+        <Control Type="7bit" Number="88" Name="LFO 1 wave">
                 <Values Min="0" Max="3">
                     <ValueNameList>
                         <Value Number="0" Name="Saw"/>
@@ -294,7 +301,8 @@
                         <Value Number="3" Name="S&amp;H"/>
                     </ValueNameList>
                 </Values>
-        <Control Type="7bit" Number="89" Name="LFO 2 wave"/>
+        </Control>
+        <Control Type="7bit" Number="89" Name="LFO 2 wave">
                 <Values Min="0" Max="3">
                     <ValueNameList>
                         <Value Number="0" Name="Saw"/>
@@ -303,26 +311,29 @@
                         <Value Number="3" Name="S&amp;H"/>
                     </ValueNameList>
                 </Values>
-        <Control Type="NRPN" Number="87" Name="LFO 1 Sync"/>
+        </Control>
+        <Control Type="NRPN" Number="87" Name="LFO 1 Sync">
                 <Values Min="0" Max="1">
                     <ValueNameList>
                         <Value Number="0" Name="Speed"/>
                         <Value Number="1" Name="Sync"/>
                     </ValueNameList>
                 </Values>
-        <Control Type="NRPN" Number="91" Name="LFO 2 Sync"/>
+        </Control>
+        <Control Type="NRPN" Number="91" Name="LFO 2 Sync">
                 <Values Min="0" Max="1">
                     <ValueNameList>
                         <Value Number="0" Name="Speed"/>
                         <Value Number="1" Name="Sync"/>
                     </ValueNameList>
                 </Values>
+        </Control>
 <!-- Envelope -->
         <Control Type="7bit" Number="90" Name="Amp Env attack"/>
         <Control Type="7bit" Number="91" Name="Amp Env decay"/>
         <Control Type="7bit" Number="92" Name="Amp Env sustain"/>
         <Control Type="7bit" Number="93" Name="Amp Env release"/>
-        <Control Type="NRPN" Number="73" Name="Amp Env triggering"/>
+        <Control Type="NRPN" Number="73" Name="Amp Env triggering">
                 <Values Min="0" Max="2">
                     <ValueNameList>
                         <Value Number="0" Name="Multi"/>
@@ -330,11 +341,12 @@
                         <Value Number="2" Name="Autoglide"/>
                     </ValueNameList>
                 </Values>
+        </Control>
         <Control Type="7bit" Number="102" Name="Mod Env attack"/>
         <Control Type="7bit" Number="103" Name="Mod Env decay"/>
         <Control Type="7bit" Number="104" Name="Mod Env sustain"/>
         <Control Type="7bit" Number="105" Name="Mod Env release"/>
-        <Control Type="NRPN" Number="105" Name="Mod Env triggering"/>
+        <Control Type="NRPN" Number="105" Name="Mod Env triggering">
                 <Values Min="0" Max="2">
                     <ValueNameList>
                         <Value Number="0" Name="Multi"/>
@@ -342,25 +354,28 @@
                         <Value Number="2" Name="Autoglide"/>
                     </ValueNameList>
                 </Values>
+        </Control>
 <!-- EFFECTS -->
         <Control Type="7bit" Number="94" Name="Distortion"/>
         <Control Type="7bit" Number="115" Name="Osc1 Filter Mod"/>
 <!-- ARPEGGIATOR -->
-        <Control Type="7bit" Number="108" Name="On Off"/>
+        <Control Type="7bit" Number="108" Name="On Off">
                 <Values Min="0" Max="1">
                     <ValueNameList>
                         <Value Number="0" Name="Arpeg Off"/>
                         <Value Number="1" Name="Arpeg On"/>
                     </ValueNameList>
                 </Values>
-        <Control Type="7bit" Number="109" Name="Latch"/>
+        </Control>
+        <Control Type="7bit" Number="109" Name="Latch">
                 <Values Min="0" Max="1">
                     <ValueNameList>
                         <Value Number="0" Name="Off"/>
                         <Value Number="1" Name="On"/>
                     </ValueNameList>
                 </Values>
-        <Control Type="7bit" Number="119" Name="Rhythm"/>
+        </Control>
+        <Control Type="7bit" Number="119" Name="Rhythm">
                 <Values Min="0" Max="31">
                     <ValueNameList>
                         <Value Number="0" Name="Pattern 1"/>
@@ -397,7 +412,8 @@
                         <Value Number="31" Name="Pattern 32"/>
                     </ValueNameList>
                 </Values>
-        <Control Type="7bit" Number="118" Name="Note Mode"/>
+        </Control>
+        <Control Type="7bit" Number="118" Name="Note Mode">
                 <Values Min="0" Max="7">
                     <ValueNameList>
                         <Value Number="0" Name="Up"/>
@@ -410,7 +426,8 @@
                         <Value Number="7" Name="RECORD"/>
                     </ValueNameList>
                 </Values>
-        <Control Type="7bit" Number="111" Name="Arp Octaves"/>
+        </Control>
+        <Control Type="7bit" Number="111" Name="Arp Octaves">
                 <Values Min="1" Max="4">
                     <ValueNameList>
                         <Value Number="1" Name="1oct"/>
@@ -419,6 +436,7 @@
                         <Value Number="4" Name="4oct"/>
                     </ValueNameList>
                 </Values>
+        </Control>
 <!-- OTHER -->
         <Control Type="7bit" Number="0" Name="mod wheel"/>
         <Control Type="7bit" Number="64" Name="sustain hold"/>
@@ -431,46 +449,52 @@
         <Control Type="NRPN" Number="75" Name="AT LFO1 to Osc Pitch"/>
         <Control Type="NRPN" Number="76" Name="AT LFO2 Speed"/>
 <!-- LFO -->
-        <Control Type="NRPN" Number="89" Name="Key Sync LFO 1"/>
+        <Control Type="NRPN" Number="89" Name="Key Sync LFO 1">
                 <Values Min="0" Max="1">
                     <ValueNameList>
                         <Value Number="0" Name="Off"/>
                         <Value Number="1" Name="On"/>
                     </ValueNameList>
                 </Values>
-        <Control Type="NRPN" Number="93" Name="Key Sync LFO 2"/>
+        </Control>
+        <Control Type="NRPN" Number="93" Name="Key Sync LFO 2">
                 <Values Min="0" Max="1">
                     <ValueNameList>
                         <Value Number="0" Name="Off"/>
                         <Value Number="1" Name="On"/>
                     </ValueNameList>
                 </Values>
-        <Control Type="NRPN" Number="87" Name="Speed or Sync LFO 1"/>
+        </Control>
+        <Control Type="NRPN" Number="87" Name="Speed or Sync LFO 1">
                 <Values Min="0" Max="1">
                     <ValueNameList>
                         <Value Number="0" Name="Off"/>
                         <Value Number="1" Name="On"/>
                     </ValueNameList>
                 </Values>
-        <Control Type="NRPN" Number="91" Name="Speed or Sync LFO 2"/>
+        </Control>
+        <Control Type="NRPN" Number="91" Name="Speed or Sync LFO 2">
                 <Values Min="0" Max="1">
                     <ValueNameList>
                         <Value Number="0" Name="Off"/>
                         <Value Number="1" Name="On"/>
                     </ValueNameList>
                 </Values>
+        </Control>
         <Control Type="NRPN" Number="86" Name="Slew LFO 1"/>
         <Control Type="NRPN" Number="90" Name="Slew LFO 2"/>
 <!-- OSCILLATOR -->
-        <Control Type="7bit" Number="107" Name="Bend Amount"/>
-        <Values Min="1" Max="12"/>
-        <Control Type="7bit" Number="110" Name="Osc 1-2 Sync"/>
+        <Control Type="7bit" Number="107" Name="Bend Amount">
+                <Values Min="1" Max="12"/>
+        </Control>
+        <Control Type="7bit" Number="110" Name="Osc 1-2 Sync">
                 <Values Min="0" Max="1">
                     <ValueNameList>
                         <Value Number="0" Name="Off"/>
                         <Value Number="1" Name="On"/>
                     </ValueNameList>
                 </Values>
+        </Control>
 <!-- Velocity -->
         <Control Type="7bit" Number="112" Name="Velo to Amp Env"/>
         <Control Type="7bit" Number="113" Name="Velo to Mod Env"/>
@@ -478,13 +502,14 @@
         <Control Type="7bit" Number="95" Name="VCA Limit"/>
 <!-- Arpeg -->
         <Control Type="7bit" Number="116" Name="Arpeg Swing"/>
-        <Control Type="NRPN" Number="106" Name="Arpeg Seq Retrig"/>
+        <Control Type="NRPN" Number="106" Name="Arpeg Seq Retrig">
                 <Values Min="0" Max="1">
                     <ValueNameList>
                         <Value Number="0" Name="Off"/>
                         <Value Number="1" Name="On"/>
                     </ValueNameList>
                 </Values>
+        </Control>
         </ControlNameList>
         </MasterDeviceNames>
 </MIDINameDocument>

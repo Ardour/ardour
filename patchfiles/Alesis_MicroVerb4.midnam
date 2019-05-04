@@ -8,15 +8,13 @@
 <MasterDeviceNames>
 	<Manufacturer>Alesis</Manufacturer>
 	<Model>MicroVerb4</Model>
-	<CustomDeviceMode Name="Alesis MicroVerb4 " >
+	<CustomDeviceMode Name="Alesis MicroVerb4">
 		<ChannelNameSetAssignments>
 			<ChannelNameSetAssign Channel="14" NameSet="Presets MV4" />
 		</ChannelNameSetAssignments>
-		<UsesControlNameList Name="ControlsMV4"/>
 	</CustomDeviceMode>
 
 <ChannelNameSet Name="Presets" >
-
 	<AvailableForChannels>
 	<AvailableChannel Channel="1" Available="false" />
 	<AvailableChannel Channel="2" Available="false" />
@@ -35,6 +33,7 @@
 	<AvailableChannel Channel="15" Available="false" />
 	<AvailableChannel Channel="16" Available="false" />
 	</AvailableForChannels>
+	<UsesControlNameList Name="ControlsMV4"/>
 
 	<PatchBank Name="Factory" >
 		<MIDICommands>
