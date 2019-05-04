@@ -64,7 +64,7 @@
       </PatchBank>
     </ChannelNameSet>
     <NoteNameList Name="Factory Drums Notes">
-        <!-- Below are the FACTORY note assignments for the drums. The notes for CV1/23 (Ch2/3) range from 36-72.
+      <!-- Below are the FACTORY note assignments for the drums. The notes for CV1/23 (Ch2/3) range from 36-72.
         Unlike on the Tanzbar itself -where only no/mid/high Accent is available- via midi, note velocity is recognized, too.
             Noteworthy, from the manual:
         "Tanzbar has to be set to MANUAL TRIGGER MODE (Rec/ManTrg LED green) to work as a drum sound expander."
@@ -89,13 +89,13 @@
       <Note Number="49" Name="MA"/>
     </NoteNameList>
     <NoteNameList Name="Custom Drums Notes">
-        <!--Below are the author's CUSTOM MIDI note assignments for the drums. The notes for CV1/23 (Ch2/3) range from 36-72.
+      <!--Below are the author's CUSTOM MIDI note assignments for the drums. The notes for CV1/23 (Ch2/3) range from 36-72.
         Unlike on the Tanzbar itself -where only no/mid/high Accent is available- MIDI note velocity is recognized, too.
             Noteworthy, from the manual:
         "Tanzbar has to be set to MANUAL TRIGGER MODE (Rec/ManTrg LED green) to work as a drum sound expander."
         "When Roll Record is active (Shift+Step10 till Rec/ManTrg LED red, then Select), the incoming MIDI notes are
         recorded into Tanzbar's sequencer." -->
-        <!-- NOTE:
+      <!-- NOTE:
         - I've set all Drum notes 'learned' to ch10 as per MIDI default.
         - Again, these notes are not default: they are inspired by the GM/GS MIDI layout. YMMV.
         -->
@@ -118,13 +118,12 @@
       <Note Number="50" Name="MA"/>
     </NoteNameList>
     <ControlNameList Name="Controls">
-
-<!--
+      <!--
 	Below the CC# list of the Tanzbar.
 	It receives CC# for most functions and parameters.
 	To receive CC#, Ch10 is always used!
 							-->
-<Control Type="7bit" Number="2" Name="BD1 Attack"/>
+      <Control Type="7bit" Number="2" Name="BD1 Attack"/>
       <Control Type="7bit" Number="64" Name="BD1 Decay"/>
       <Control Type="7bit" Number="65" Name="BD1 Pitch"/>
       <Control Type="7bit" Number="3" Name="BD1 Tune"/>
@@ -171,9 +170,7 @@
       <Control Type="7bit" Number="85" Name="CB Tune"/>
       <Control Type="7bit" Number="86" Name="CB Decay"/>
       <Control Type="7bit" Number="87" Name="MA Decay"/>
-
       <!-- <Control Type="7bit" Number="0" Name="Set Select"/> Bank Select: valid values: 0,1,2 see PatchBanks above -->
-
       <Control Type="7bit" Number="89" Name="Delay CV1"/>
       <Control Type="7bit" Number="90" Name="Delay CV23"/>
       <Control Type="7bit" Number="91" Name="Delay BD1"/>
@@ -191,7 +188,6 @@
       <Control Type="7bit" Number="103" Name="Delay CB"/>
       <Control Type="7bit" Number="104" Name="Delay MA"/>
     </ControlNameList>
-
     <PatchNameList Name="Set A">
       <Patch Number="1" Name="Yapacc 1" ProgramChange="0"/>
       <Patch Number="2" Name="Yapacc 2" ProgramChange="1"/>

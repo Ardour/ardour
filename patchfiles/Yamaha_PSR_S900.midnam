@@ -896,7 +896,7 @@
               <ProgramChange Number="25"/>
             </PatchMIDICommands>
           </Patch>
-          <Patch Number="51" Name="Camp&#xFB01;reGtr">
+          <Patch Number="51" Name="CampﬁreGtr">
             <PatchMIDICommands>
               <ControlChange Control="0" Value="0"/>
               <ControlChange Control="32" Value="115"/>
