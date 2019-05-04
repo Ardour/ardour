@@ -79,12 +79,9 @@
       <Note Number="42" Name="HH"/>
       <Note Number="43" Name="CL"/>
       <Note Number="44" Name="CP"/>
-      <Note Number="45" Name="LT"/>
-      <Note Number="45" Name="LC"/>
-      <Note Number="46" Name="MT"/>
-      <Note Number="46" Name="MC"/>
-      <Note Number="47" Name="HT"/>
-      <Note Number="47" Name="HC"/>
+      <Note Number="45" Name="LTC"/>
+      <Note Number="46" Name="MTC"/>
+      <Note Number="47" Name="HTC"/>
       <Note Number="48" Name="CB"/>
       <Note Number="49" Name="MA"/>
     </NoteNameList>
