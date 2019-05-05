@@ -1726,7 +1726,6 @@ EngineControl::midi_option_changed ()
 
 	vector<ARDOUR::AudioBackend::DeviceStatus> midi_devices = backend->enumerate_midi_devices();
 
-	//_midi_devices.clear(); // TODO merge with state-saved settings..
 	_can_set_midi_latencies = backend->can_set_systemic_midi_latencies();
 	std::vector<MidiDeviceSettings> new_devices;
 
@@ -1939,6 +1938,7 @@ EngineControl::maybe_display_saved_state ()
 		if (!state->midi_option.empty()) {
 			midi_option_combo.set_active_text (state->midi_option);
 			_midi_devices = state->midi_devices;
+			midi_option_changed ();
 		}
 	} else {
 		DEBUG_ECONTROL ("Unable to find saved state for backend and devices");
