@@ -485,7 +485,7 @@ AlsaAudioBackend::update_systemic_midi_latencies ()
 		assert (nfo);
 		LatencyRange lr;
 		lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_output_latency);
-		set_latency_range (*it, false, lr);
+		set_latency_range (*it, true, lr);
 	}
 
 	i = 0;
@@ -496,7 +496,7 @@ AlsaAudioBackend::update_systemic_midi_latencies ()
 		assert (nfo);
 		LatencyRange lr;
 		lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_input_latency);
-		set_latency_range (*it, true, lr);
+		set_latency_range (*it, false, lr);
 	}
 	pthread_mutex_unlock (&_device_port_mutex);
 	update_latencies ();
