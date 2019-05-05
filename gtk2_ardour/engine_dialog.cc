@@ -2516,14 +2516,12 @@ EngineControl::push_state_to_backend (bool start)
 	if (1 /* TODO */) {
 		for (vector<MidiDeviceSettings>::const_iterator p = _midi_devices.begin(); p != _midi_devices.end(); ++p) {
 			if (_measure_midi) {
+				/* Disable other MIDI devices while measuring.
+				 * This is a hack to only show ports from the selected device */
 				if (*p == _measure_midi) {
 					backend->set_midi_device_enabled ((*p)->name, true);
 				} else {
 					backend->set_midi_device_enabled ((*p)->name, false);
-				}
-				if (backend->can_change_systemic_latency_when_running ()) {
-					backend->set_systemic_midi_input_latency ((*p)->name, 0);
-					backend->set_systemic_midi_output_latency ((*p)->name, 0);
 				}
 				continue;
 			}
@@ -2805,6 +2803,17 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 	if (page_num == midi_tab) {
 		/* MIDI tab */
 		refresh_midi_display ();
+
+		/* undo special case from push_state_to_backend() when measuring midi latency */
+		if (_measure_midi && ARDOUR::AudioEngine::instance()->running ()) {
+			boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+			if (backend->can_change_systemic_latency_when_running ()) {
+				for (vector<MidiDeviceSettings>::const_iterator p = _midi_devices.begin(); p != _midi_devices.end(); ++p) {
+					backend->set_midi_device_enabled ((*p)->name, (*p)->enabled);
+				}
+			}
+		}
+		_measure_midi.reset();
 	}
 
 	if (page_num == latency_tab) {
@@ -2850,7 +2859,6 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 	} else {
 		if (lm_running) {
 			end_latency_detection ();
-			ARDOUR::AudioEngine::instance()->stop_latency_detection();
 		}
 	}
 }
