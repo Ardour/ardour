@@ -692,9 +692,10 @@ AlsaAudioBackend::set_midi_device_enabled (std::string const device, bool enable
 				assert (_rmidi_out.size() > i);
 				AlsaMidiOut *rm = _rmidi_out.at(i);
 				if (rm->name () != device) { ++it; ++i; continue; }
-				it = _system_midi_out.erase (it);
 				unregister_port (*it);
+				it = _system_midi_out.erase (it);
 				rm->stop();
+				assert (rm == *(_rmidi_out.begin() + i));
 				_rmidi_out.erase (_rmidi_out.begin() + i);
 				delete rm;
 			}
@@ -704,9 +705,10 @@ AlsaAudioBackend::set_midi_device_enabled (std::string const device, bool enable
 				assert (_rmidi_in.size() > i);
 				AlsaMidiIn *rm = _rmidi_in.at(i);
 				if (rm->name () != device) { ++it; ++i; continue; }
-				it = _system_midi_in.erase (it);
 				unregister_port (*it);
+				it = _system_midi_in.erase (it);
 				rm->stop();
+				assert (rm == *(_rmidi_in.begin() + i));
 				_rmidi_in.erase (_rmidi_in.begin() + i);
 				delete rm;
 			}
