@@ -676,11 +676,6 @@ AlsaAudioBackend::set_midi_device_enabled (std::string const device, bool enable
 	nfo->enabled = enable;
 
 	if (_run && prev_enabled != enable) {
-		// XXX actually we should not change system-ports while running,
-		// because iterators in main_process_thread will become invalid.
-		//
-		// Luckily the engine dialog does not call this while the engine is running,
-		// This code is currently not used.
 		if (enable) {
 			// add ports for the given device
 			register_system_midi_ports(device);
