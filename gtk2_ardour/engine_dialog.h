@@ -97,8 +97,25 @@ private:
 
 	/* latency measurement */
 
-	Gtk::ComboBoxText           lm_output_channel_combo;
-	Gtk::ComboBoxText           lm_input_channel_combo;
+	class ChannelNameCols : public Gtk::TreeModelColumnRecord
+	{
+		public:
+			ChannelNameCols () {
+				add (pretty_name);
+				add (port_name);
+			}
+			Gtk::TreeModelColumn<std::string> pretty_name;
+			Gtk::TreeModelColumn<std::string> port_name;
+	};
+
+	ChannelNameCols              lm_output_channel_cols;
+	Glib::RefPtr<Gtk::ListStore> lm_output_channel_list;
+	Gtk::ComboBox                lm_output_channel_combo;
+
+	ChannelNameCols              lm_input_channel_cols;
+	Glib::RefPtr<Gtk::ListStore> lm_input_channel_list;
+	Gtk::ComboBox                lm_input_channel_combo;
+
 	Gtk::Label                  lm_measure_label;
 	Gtk::Button                 lm_measure_button;
 	Gtk::Button                 lm_use_button;

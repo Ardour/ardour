@@ -173,16 +173,24 @@ EngineControl::EngineControl ()
 	lm_table.attach (*preamble, 0, 3, row, row+1, AttachOptions(FILL|EXPAND), (AttachOptions) 0);
 	row++;
 
-	label = manage (new Label (_("Output channel")));
+	label = manage (new Label (_("Output channel:")));
 	lm_table.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
+
+	lm_output_channel_list = Gtk::ListStore::create (lm_output_channel_cols);
+	lm_output_channel_combo.set_model (lm_output_channel_list);
+	lm_output_channel_combo.pack_start (lm_output_channel_cols.pretty_name);
 
 	Gtk::Alignment* misc_align = manage (new Alignment (0.0, 0.5));
 	misc_align->add (lm_output_channel_combo);
 	lm_table.attach (*misc_align, 1, 3, row, row+1, xopt, (AttachOptions) 0);
 	++row;
 
-	label = manage (new Label (_("Input channel")));
+	label = manage (new Label (_("Input channel:")));
 	lm_table.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
+
+	lm_input_channel_list = Gtk::ListStore::create (lm_input_channel_cols);
+	lm_input_channel_combo.set_model (lm_input_channel_list);
+	lm_input_channel_combo.pack_start (lm_input_channel_cols.pretty_name);
 
 	misc_align = manage (new Alignment (0.0, 0.5));
 	misc_align->add (lm_input_channel_combo);
@@ -595,7 +603,7 @@ EngineControl::build_full_control_notebook ()
 	output_channels.set_editable (true);
 
 	if (!ARDOUR::Profile->get_mixbus()) {
-		label = manage (left_aligned_label (_("Input Channels:")));
+		label = manage (left_aligned_label (_("Input channels:")));
 		basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
 		basic_packer.attach (input_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 		++row;
@@ -608,7 +616,7 @@ EngineControl::build_full_control_notebook ()
 	output_channels.set_editable (true);
 
 	if (!ARDOUR::Profile->get_mixbus()) {
-		label = manage (left_aligned_label (_("Output Channels:")));
+		label = manage (left_aligned_label (_("Output channels:")));
 		basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
 		basic_packer.attach (output_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 		++row;
@@ -697,9 +705,8 @@ EngineControl::~EngineControl ()
 void
 EngineControl::disable_latency_tab ()
 {
-	vector<string> empty;
-	set_popdown_strings (lm_output_channel_combo, empty);
-	set_popdown_strings (lm_input_channel_combo, empty);
+	lm_input_channel_list->clear ();
+	lm_output_channel_list->clear ();
 	lm_measure_button.set_sensitive (false);
 	lm_use_button.set_sensitive (false);
 }
@@ -737,12 +744,24 @@ EngineControl::enable_latency_tab ()
 		lm_preamble.show ();
 	}
 
-	set_popdown_strings (lm_output_channel_combo, outputs);
-	lm_output_channel_combo.set_active_text (outputs.front());
+	lm_output_channel_list->clear ();
+	for (vector<string>::const_iterator i = outputs.begin(); i != outputs.end(); ++i) {
+		Gtk::TreeModel::iterator iter = lm_output_channel_list->append ();
+		Gtk::TreeModel::Row row = *iter;
+		 row[lm_output_channel_cols.port_name] = *i;
+		 row[lm_output_channel_cols.pretty_name] = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*i);
+	}
+	lm_output_channel_combo.set_active (0);
 	lm_output_channel_combo.set_sensitive (true);
 
-	set_popdown_strings (lm_input_channel_combo, inputs);
-	lm_input_channel_combo.set_active_text (inputs.front());
+	lm_input_channel_list->clear ();
+	for (vector<string>::const_iterator i = inputs.begin(); i != inputs.end(); ++i) {
+		Gtk::TreeModel::iterator iter = lm_input_channel_list->append ();
+		Gtk::TreeModel::Row row = *iter;
+		 row[lm_input_channel_cols.port_name] = *i;
+		 row[lm_input_channel_cols.pretty_name] = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*i);
+	}
+	lm_input_channel_combo.set_active (0);
 	lm_input_channel_combo.set_sensitive (true);
 
 	lm_measure_button.set_sensitive (true);
@@ -956,7 +975,7 @@ EngineControl::refresh_midi_display (std::string focus)
 
 	l = manage (new Label (_("Device"))); l->show (); l->set_alignment (0.5, 0.5);
 	midi_device_table.attach (*l, 0, 1, row, row + 2, xopt, AttachOptions (0));
-	l = manage (new Label (_("Hardware Latencies"))); l->show (); l->set_alignment (0.5, 0.5);
+	l = manage (new Label (_("Systemic Latency [samples]"))); l->show (); l->set_alignment (0.5, 0.5);
 	midi_device_table.attach (*l, 1, 3, row, row + 1, xopt, AttachOptions (0));
 	row++;
 	l = manage (new Label (_("Input"))); l->show (); l->set_alignment (0.5, 0.5);
@@ -2969,8 +2988,8 @@ EngineControl::check_midi_latency_measurement ()
 void
 EngineControl::start_latency_detection ()
 {
-	ARDOUR::AudioEngine::instance()->set_latency_input_port (lm_input_channel_combo.get_active_text());
-	ARDOUR::AudioEngine::instance()->set_latency_output_port (lm_output_channel_combo.get_active_text());
+	ARDOUR::AudioEngine::instance()->set_latency_input_port (lm_input_channel_combo.get_active ()->get_value (lm_input_channel_cols.port_name));
+	ARDOUR::AudioEngine::instance()->set_latency_output_port (lm_output_channel_combo.get_active ()->get_value (lm_output_channel_cols.port_name));
 
 	if (ARDOUR::AudioEngine::instance()->start_latency_detection (_measure_midi ? true : false) == 0) {
 		lm_results.set_markup (string_compose (results_markup, _("Detecting ...")));
