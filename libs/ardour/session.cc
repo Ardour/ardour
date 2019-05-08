@@ -2257,7 +2257,7 @@ Session::set_block_size (pframes_t nframes)
 
 
 static void
-trace_terminal (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> rbase)
+trace_terminal (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> rbase, bool sends_only)
 {
 	boost::shared_ptr<Route> r2;
 
@@ -2284,7 +2284,7 @@ trace_terminal (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> rbase)
 		   base as being fed by r2
 		*/
 
-		rbase->add_fed_by (r2, i->sends_only);
+		rbase->add_fed_by (r2, i->sends_only || sends_only);
 
 		if (r2 != rbase) {
 
@@ -2300,7 +2300,7 @@ trace_terminal (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> rbase)
 			   all routes that feed r2
 			*/
 
-			trace_terminal (r2, rbase);
+			trace_terminal (r2, rbase, i->sends_only || sends_only);
 		}
 
 	}
@@ -2415,7 +2415,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 		   or indirectly feeds them.
 		*/
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			trace_terminal (*i, *i);
+			trace_terminal (*i, *i, false);
 		}
 
 		*r = *sorted_routes;
