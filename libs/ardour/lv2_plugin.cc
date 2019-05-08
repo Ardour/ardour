@@ -356,6 +356,7 @@ LV2Plugin::LV2Plugin (AudioEngine& engine,
 	, _worker(NULL)
 	, _state_worker(NULL)
 	, _insert_id("0")
+	, _bpm_control_port_index((uint32_t)-1)
 	, _patch_port_in_index((uint32_t)-1)
 	, _patch_port_out_index((uint32_t)-1)
 	, _uri_map(URIMap::instance())
@@ -373,6 +374,7 @@ LV2Plugin::LV2Plugin (const LV2Plugin& other)
 	, _worker(NULL)
 	, _state_worker(NULL)
 	, _insert_id(other._insert_id)
+	, _bpm_control_port_index((uint32_t)-1)
 	, _patch_port_in_index((uint32_t)-1)
 	, _patch_port_out_index((uint32_t)-1)
 	, _uri_map(URIMap::instance())
@@ -758,6 +760,11 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	}
 	_impl->designated_input (LV2_TIME__beatsPerMinute, params, (void**)&_bpm_control_port);
 	_impl->designated_input (LV2_CORE__freeWheeling, params, (void**)&_freewheel_control_port);
+
+	const LilvPort* bpmport = lilv_plugin_get_port_by_designation(plugin, _world.lv2_InputPort, _world.time_beatsPerMin);
+	if (bpmport) {
+		_bpm_control_port_index = lilv_port_get_index (plugin, bpmport);
+	}
 
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		const LilvPort* port = lilv_plugin_get_port_by_index(plugin, i);
@@ -2397,6 +2404,9 @@ LV2Plugin::set_automation_control (uint32_t i, boost::shared_ptr<AutomationContr
 		DEBUG_TRACE(DEBUG::LV2Automate, string_compose ("Ctrl Port %1\n", i));
 		_ctrl_map [i] = AutomationCtrlPtr (new AutomationCtrl(c));
 	}
+	else if (i == _bpm_control_port_index) {
+		_ctrl_map [i] = AutomationCtrlPtr (new AutomationCtrl(c));
+	}
 }
 
 LV2Plugin::AutomationCtrlPtr
@@ -2577,7 +2587,15 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	}
 
 	if (_bpm_control_port) {
-		*_bpm_control_port = tmap.tempo_at_sample (start).note_types_per_minute();
+		float bpm = tmap.tempo_at_sample (start).note_types_per_minute();
+		if (*_bpm_control_port != bpm) {
+			AutomationCtrlPtr c = get_automation_control (_bpm_control_port_index);
+			if (c && c->ac) {
+				/* may be NULL for replicated instances - only one custom UI/ctrl */
+				c->ac->Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+			}
+		}
+		*_bpm_control_port = bpm;
 	}
 
 #ifdef LV2_EXTENDED
