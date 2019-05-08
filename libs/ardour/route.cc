@@ -3443,9 +3443,9 @@ Route::all_outputs () const
 bool
 Route::direct_feeds_according_to_reality (boost::shared_ptr<Route> other, bool* via_send_only)
 {
-	DEBUG_TRACE (DEBUG::Graph, string_compose ("Feeds? %1\n", _name));
+	DEBUG_TRACE (DEBUG::Graph, string_compose ("Feeds from %1 (-> %2)?\n", _name, other->name()));
 	if (other->all_inputs().fed_by (_output)) {
-		DEBUG_TRACE (DEBUG::Graph, string_compose ("\tdirect FEEDS %2\n", other->name()));
+		DEBUG_TRACE (DEBUG::Graph, string_compose ("\tdirect FEEDS to %1\n", other->name()));
 		if (via_send_only) {
 			*via_send_only = false;
 		}
@@ -3480,10 +3480,7 @@ Route::direct_feeds_according_to_reality (boost::shared_ptr<Route> other, bool* 
 			} else {
 				DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tIOP %1 does NOT feed %2\n", iop->name(), other->name()));
 			}
-		} else {
-			DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tPROC %1 is not an IOP\n", (*r)->name()));
 		}
-
 	}
 
 	DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tdoes NOT feed %1\n", other->name()));
