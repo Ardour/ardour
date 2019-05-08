@@ -94,6 +94,29 @@ ARDOUR::get_alsa_audio_device_names (std::map<std::string, std::string>& devices
 	}
 }
 
+static void
+insert_unique_device_name (std::map<std::string, std::string>& devices, std::string const& card_name, std::string const& devname)
+{
+	std::pair<std::map<std::string, std::string>::iterator, bool> rv;
+	char cnt = '1';
+	std::string cn = card_name;
+	/* Add numbers first this is be independent of physical ID (sequencer vs rawmidi).
+	 * If this fails (>= 10 devices) add the device-name for uniqness
+	 *
+	 * XXX: Perhaps this is a bad idea, and `devname` should always be added if
+	 * there is more than one device with the same name.
+	 */
+	do {
+		rv = devices.insert (std::make_pair (cn, devname));
+		cn = card_name + " (" + cnt + ")";
+	} while (!rv.second && ++cnt <= '9');
+
+	if (!rv.second) {
+		rv = devices.insert (std::make_pair (card_name + " (" + devname + ")", devname));
+		assert (rv.second == true);
+	}
+}
+
 void
 ARDOUR::get_alsa_rawmidi_device_names (std::map<std::string, std::string>& devices)
 {
@@ -156,7 +179,7 @@ ARDOUR::get_alsa_rawmidi_device_names (std::map<std::string, std::string>& devic
 						if (sub < subs_out) card_name += "O";
 						card_name += ")";
 
-						devices.insert (std::make_pair (card_name, devname));
+						insert_unique_device_name (devices, card_name, devname);
 						break;
 					} else {
 						devname = "hw:";
@@ -171,7 +194,7 @@ ARDOUR::get_alsa_rawmidi_device_names (std::map<std::string, std::string>& devic
 						if (sub < subs_in) card_name += "I";
 						if (sub < subs_out) card_name += "O";
 						card_name += ")";
-						devices.insert (std::make_pair (card_name, devname));
+						insert_unique_device_name (devices, card_name, devname);
 					}
 				}
 			}
@@ -226,7 +249,7 @@ ARDOUR::get_alsa_sequencer_names (std::map<std::string, std::string>& devices)
 			devname = PBD::to_string(snd_seq_port_info_get_client (pinfo));
 			devname += ":";
 			devname += PBD::to_string(snd_seq_port_info_get_port (pinfo));
-			devices.insert (std::make_pair (card_name, devname));
+			insert_unique_device_name (devices, card_name, devname);
 		}
 	}
 	snd_seq_close (seq);
