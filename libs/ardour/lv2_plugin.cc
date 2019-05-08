@@ -169,6 +169,7 @@ public:
 	LilvNode* rdfs_range;
 	LilvNode* rsz_minimumSize;
 	LilvNode* time_Position;
+	LilvNode* time_beatsPerMin;
 	LilvNode* ui_GtkUI;
 	LilvNode* ui_external;
 	LilvNode* ui_externalkx;
@@ -2331,6 +2332,11 @@ LV2Plugin::describe_parameter(Evoral::Parameter which)
 			return X_("hidden");
 		}
 
+		const LilvPort* bpmport = lilv_plugin_get_port_by_designation(_impl->plugin, _world.lv2_InputPort, _world.time_beatsPerMin);
+		if (bpmport && bpmport == port) {
+			return X_("hidden");
+		}
+
 		if (lilv_port_has_property(_impl->plugin, port, _world.lv2_freewheeling)) {
 			return X_("hidden");
 		}
@@ -3206,6 +3212,7 @@ LV2World::LV2World()
 	rdfs_range         = lilv_new_uri(world, LILV_NS_RDFS "range");
 	rsz_minimumSize    = lilv_new_uri(world, LV2_RESIZE_PORT__minimumSize);
 	time_Position      = lilv_new_uri(world, LV2_TIME__Position);
+	time_beatsPerMin   = lilv_new_uri(world, LV2_TIME__beatsPerMinute);
 	ui_GtkUI           = lilv_new_uri(world, LV2_UI__GtkUI);
 	ui_external        = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/ui#external");
 	ui_externalkx      = lilv_new_uri(world, "http://kxstudio.sf.net/ns/lv2ext/external-ui#Widget");
@@ -3258,6 +3265,7 @@ LV2World::~LV2World()
 	lilv_node_free(ui_externalkx);
 	lilv_node_free(ui_external);
 	lilv_node_free(ui_GtkUI);
+	lilv_node_free(time_beatsPerMin);
 	lilv_node_free(time_Position);
 	lilv_node_free(rsz_minimumSize);
 	lilv_node_free(rdfs_comment);
