@@ -472,8 +472,25 @@ MIDIControllable::midi_sense_pitchbend (Parser &, pitchbend_t pb)
 	_surface->maybe_start_touch (_controllable);
 
 	if (!_controllable->is_toggle()) {
-		_controllable->set_value (midi_to_control (pb), Controllable::UseGroup);
+
+		float new_value = pb;
+		float max_value = max (last_controllable_value, new_value);
+		float min_value = min (last_controllable_value, new_value);
+		float range = max_value - min_value;
+		float threshold = 128.f * _surface->threshold ();
+
+		bool const in_sync = (
+				range < threshold &&
+				_controllable->get_value() <= midi_to_control (max_value) &&
+				_controllable->get_value() >= midi_to_control (min_value)
+				);
+
+		if (in_sync || _surface->motorised ()) {
+			_controllable->set_value (midi_to_control (pb), Controllable::UseGroup);
+		}
+
 		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI pitchbend %1 value %2  %3\n", (int) control_channel, (float) midi_to_control (pb), current_uri() ));
+		last_controllable_value = new_value;
 	} else {
 		if (pb > 8065.0f) {
 			_controllable->set_value (1, Controllable::UseGroup);
