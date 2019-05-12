@@ -3407,7 +3407,7 @@ Editor::convert_drop_to_paths (
 		   THERE MAY BE NO NULL TERMINATING CHAR!!!
 		*/
 
-		string txt = data.get_text();
+		string txt = Glib::convert(data.get_text(), "ISO-8859-1", "UTF-8");
 		char* p;
 		const char* q;
 
