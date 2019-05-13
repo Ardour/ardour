@@ -252,8 +252,8 @@ Editor::initialize_canvas ()
 	// Drag-N-Drop from the region list can generate this target
 	target_table.push_back (TargetEntry ("regions"));
 
-	target_table.push_back (TargetEntry ("text/plain"));
 	target_table.push_back (TargetEntry ("text/uri-list"));
+	target_table.push_back (TargetEntry ("text/plain"));
 	target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
 
 	_track_canvas->drag_dest_set (target_table);
