@@ -568,7 +568,7 @@ LedState
 US2400Protocol::loop_press (Button &)
 {
 	if (main_modifier_state() & MODIFIER_SHIFT) {
-		access_action ("Common/set-loop-from-edit-range");
+		access_action ("Editor/set-loop-from-edit-range");
 		return off;
 	} else {
 		bool was_on = session->get_play_loop();
@@ -1100,7 +1100,7 @@ US2400::LedState
 US2400Protocol::click_press (US2400::Button&)
 {
 	if (main_modifier_state() & MODIFIER_SHIFT) {
-		access_action ("Common/set-punch-from-edit-range");
+		access_action ("Editor/set-punch-from-edit-range");
 		return off;
 	} else {
 		bool state = !Config->get_clicking();
