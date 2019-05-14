@@ -170,8 +170,7 @@ bool MixerSnapshotDialog::button_press(GdkEventButton* ev, bool global)
         }
 
         if (iter) {
-            TreeModel::Row row = *(iter);
-            popup_context_menu(ev->button, ev->time, row[_columns.full_path], global);
+            popup_context_menu(ev->button, ev->time, iter, global);
             return true;
         }
     };
@@ -189,39 +188,33 @@ bool MixerSnapshotDialog::button_press(GdkEventButton* ev, bool global)
         local_display.get_selection()->unselect_all();
 
         if(iter) {
-            MixerSnapshot* s = (*iter)[_columns.snapshot];
-            s->recall();
+            load_snapshot(iter);
             return true;
         }
     }
     return false;
 }
 
-void MixerSnapshotDialog::popup_context_menu(int btn, int64_t time, string path, bool global)
+void MixerSnapshotDialog::popup_context_menu(int btn, int64_t time, TreeModel::iterator& iter, bool global)
 {
     using namespace Menu_Helpers;
     MenuList& items(menu.items());
     items.clear();
-    add_item_with_sensitivity(items, MenuElem(_("Recall"), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::load_snapshot), path)), true);
-    add_item_with_sensitivity(items, MenuElem(_("Rename..."), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::rename_snapshot), path, global)), true);
-    add_item_with_sensitivity(items, MenuElem(_("Remove"), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::remove_snapshot), path, global)), true);
+    add_item_with_sensitivity(items, MenuElem(_("Recall"), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::load_snapshot), iter)), true);
+    add_item_with_sensitivity(items, MenuElem(_("Rename..."), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::rename_snapshot), iter)), true);
+    add_item_with_sensitivity(items, MenuElem(_("Remove"), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::remove_snapshot), iter, global)), true);
     menu.popup(btn, time);
 }
 
-void MixerSnapshotDialog::remove_snapshot(const string path, bool global)
+void MixerSnapshotDialog::load_snapshot(TreeModel::iterator& iter)
 {
-    ::g_remove(path.c_str());
-    refill_display(global);
+    MixerSnapshot* snap = (*iter)[_columns.snapshot];
+    snap->recall();
 }
 
-void MixerSnapshotDialog::load_snapshot(const string path)
+void MixerSnapshotDialog::rename_snapshot(TreeModel::iterator& iter)
 {
-    MixerSnapshot n = MixerSnapshot(_session, path);
-    n.recall();
-}
-
-void MixerSnapshotDialog::rename_snapshot(const string old_path, bool global)
-{
+    string old_path = (*iter)[_columns.full_path];
     string dir_name  = Glib::path_get_dirname(old_path);
 
     Prompter prompt(true);
@@ -237,10 +230,23 @@ void MixerSnapshotDialog::rename_snapshot(const string old_path, bool global)
         if (new_label.length() > 0) {
             string new_path = Glib::build_filename(dir_name, new_label + ".xml");
             ::g_rename(old_path.c_str(), new_path.c_str());
-            refill_display(global);
+            (*iter)[_columns.name] = new_label;
         }
     }
 }
+
+void MixerSnapshotDialog::remove_snapshot(TreeModel::iterator& iter, bool global)
+{
+    string path = (*iter)[_columns.full_path];
+    ::g_remove(path.c_str());
+
+    if(global) {
+        global_model->erase(iter);
+    } else {
+        local_model->erase(iter);
+    }
+}
+
 
 bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<string>& display, Gtk::ScrolledWindow& scroller, Glib::RefPtr<ListStore> model, bool global)
 {
