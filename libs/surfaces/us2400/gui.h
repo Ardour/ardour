@@ -35,6 +35,10 @@ namespace Gtk {
 
 #include "pbd/i18n.h"
 
+namespace ActionManager {
+        class ActionModel;
+}
+
 namespace ArdourSurface {
 
 class US2400Protocol;
@@ -66,15 +70,6 @@ class US2400ProtocolGUI : public Gtk::Notebook
 		Gtk::TreeModelColumn<std::string> full_name;
 	};
 
-	struct AvailableActionColumns : public Gtk::TreeModel::ColumnRecord {
-		AvailableActionColumns() {
-			add (name);
-			add (path);
-		}
-		Gtk::TreeModelColumn<std::string> name;
-		Gtk::TreeModelColumn<std::string> path;
-	};
-
 	struct FunctionKeyColumns : public Gtk::TreeModel::ColumnRecord {
 		FunctionKeyColumns() {
 			add (name);
@@ -96,7 +91,6 @@ class US2400ProtocolGUI : public Gtk::Notebook
 		Gtk::TreeModelColumn<std::string> shiftcontrol;
 	};
 
-	AvailableActionColumns available_action_columns;
 	FunctionKeyColumns function_key_columns;
 	MidiPortColumns midi_port_columns;
 
@@ -107,7 +101,8 @@ class US2400ProtocolGUI : public Gtk::Notebook
 
 	Glib::RefPtr<Gtk::ListStore> build_midi_port_list (bool for_input);
 
-	void build_available_action_menu ();
+	const ActionManager::ActionModel& action_model;
+
 	void refresh_function_key_editor ();
 	void build_function_key_editor ();
 	void action_changed (const Glib::ustring &sPath, const Glib::ustring &text, Gtk::TreeModelColumnBase);
@@ -139,4 +134,3 @@ class US2400ProtocolGUI : public Gtk::Notebook
 };
 
 }
-

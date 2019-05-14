@@ -1,4 +1,5 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
 <MIDINameDocument>
   <Author>Hans Baier</Author>
   <MasterDeviceNames>
@@ -895,7 +896,7 @@
               <ProgramChange Number="25"/>
             </PatchMIDICommands>
           </Patch>
-          <Patch Number="51" Name="Camp&#xFB01;reGtr">
+          <Patch Number="51" Name="CampﬁreGtr">
             <PatchMIDICommands>
               <ControlChange Control="0" Value="0"/>
               <ControlChange Control="32" Value="115"/>

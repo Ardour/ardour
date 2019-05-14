@@ -97,7 +97,7 @@ PBD::init ()
 	//              will be created or opened in BINARY mode!
 	_fmode = O_BINARY;
 
-	WSADATA	wsaData;
+	WSADATA wsaData;
 
 	/* Initialize windows socket DLL for PBD::CrossThreadChannel
 	 */

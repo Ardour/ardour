@@ -37,16 +37,15 @@
 
 class Backtrace {
 public:
-    Backtrace ();
-    std::ostream& print (std::ostream& str) const;
+	Backtrace ();
+	std::ostream& print (std::ostream& str) const;
 
 private:
-    void* trace[200];
-    size_t size;
+	void* trace[200];
+	size_t size;
 };
 
 std::ostream& operator<< (std::ostream& str, const Backtrace& bt) { return bt.print (str); }
-
 
 Backtrace::Backtrace()
 {
@@ -78,12 +77,11 @@ Backtrace::print (std::ostream& str) const
 
 struct BTPair {
 
-    Backtrace* ref;
-    Backtrace* rel;
+	Backtrace* ref;
+	Backtrace* rel;
 
-    BTPair (Backtrace* bt) : ref (bt), rel (0) {}
-    ~BTPair () { }
-
+	BTPair (Backtrace* bt) : ref (bt), rel (0) {}
+	~BTPair () { }
 };
 
 std::ostream& operator<<(std::ostream& str, const BTPair& btp) {
@@ -95,14 +93,14 @@ std::ostream& operator<<(std::ostream& str, const BTPair& btp) {
 }
 
 struct SPDebug {
-    Backtrace* constructor;
-    Backtrace* destructor;
+	Backtrace* constructor;
+	Backtrace* destructor;
 
-    SPDebug (Backtrace* c) : constructor (c), destructor (0) {}
-    ~SPDebug () {
-	    delete constructor;
-	    delete destructor;
-    }
+	SPDebug (Backtrace* c) : constructor (c), destructor (0) {}
+	~SPDebug () {
+		delete constructor;
+		delete destructor;
+	}
 };
 
 std::ostream& operator<< (std::ostream& str, const SPDebug& spd)
@@ -121,27 +119,30 @@ typedef std::map<volatile void const*,const char*> IPointerMap;
 using namespace std;
 
 static PointerMap* _sptrs;
-PointerMap& sptrs() {
-        if (_sptrs == 0) {
-                _sptrs = new PointerMap;
-        }
-        return *_sptrs;
+PointerMap& sptrs()
+{
+	if (_sptrs == 0) {
+		_sptrs = new PointerMap;
+	}
+	return *_sptrs;
 }
 
 static IPointerMap* _interesting_pointers;
-IPointerMap& interesting_pointers() {
-        if (_interesting_pointers == 0) {
-                _interesting_pointers = new IPointerMap;
-        }
-        return *_interesting_pointers;
+IPointerMap& interesting_pointers()
+{
+	if (_interesting_pointers == 0) {
+		_interesting_pointers = new IPointerMap;
+	}
+	return *_interesting_pointers;
 }
 
 static Glib::Threads::Mutex* _the_lock;
-static Glib::Threads::Mutex& the_lock() {
-        if (_the_lock == 0) {
-                _the_lock = new Glib::Threads::Mutex;
-        }
-        return *_the_lock;
+static Glib::Threads::Mutex& the_lock()
+{
+	if (_the_lock == 0) {
+		_the_lock = new Glib::Threads::Mutex;
+	}
+	return *_the_lock;
 }
 
 
@@ -169,7 +170,7 @@ void
 boost_debug_shared_ptr_mark_interesting (void* ptr, const char* type)
 {
 	Glib::Threads::Mutex::Lock guard (the_lock());
- 	pair<void*,const char*> newpair (ptr, type);
+	pair<void*,const char*> newpair (ptr, type);
 	interesting_pointers().insert (newpair);
 	if (debug_out) {
 		cerr << "Interesting object @ " << ptr << " of type " << type << endl;

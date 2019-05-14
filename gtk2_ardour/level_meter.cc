@@ -250,10 +250,10 @@ void
 LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 {
 
- 	if (!_meter) {
+	if (!_meter) {
 		hide_all_meters ();
- 		return; /* do it later or never */
- 	}
+		return; /* do it later or never */
+	}
 
 	uint32_t nmidi = _meter->input_streams().n_midi();
 	uint32_t nmeters = _meter->input_streams().n_total();

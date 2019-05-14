@@ -340,13 +340,7 @@ int fluid_is_soundfont(const char *filename)
 
     do
     {
-        if(!fluid_file_test(filename, G_FILE_TEST_IS_REGULAR))
-        {
-            return retcode;
-        }
-        
-        // file seems to exist and is a regular file or a symlink to such
-        if((fp = FLUID_FOPEN(filename, "rb")) == NULL)
+        if((fp = fluid_file_open(filename, NULL)) == NULL)
         {
             return retcode;
         }

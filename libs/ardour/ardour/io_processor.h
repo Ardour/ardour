@@ -38,16 +38,17 @@ class Session;
 class IO;
 class Route;
 
-/** A mixer strip element (Processor) with 1 or 2 IO elements.
- */
+/** A mixer strip element (Processor) with 1 or 2 IO elements. */
 class LIBARDOUR_API IOProcessor : public Processor
 {
-  public:
+public:
 	IOProcessor (Session&, bool with_input, bool with_output,
-		     const std::string& proc_name, const std::string io_name="",
-  		     ARDOUR::DataType default_type = DataType::AUDIO, bool sendish=false);
-        IOProcessor (Session&, boost::shared_ptr<IO> input, boost::shared_ptr<IO> output,
-		     const std::string& proc_name, ARDOUR::DataType default_type = DataType::AUDIO);
+	             const std::string& proc_name, const std::string io_name="",
+	             ARDOUR::DataType default_type = DataType::AUDIO, bool sendish=false);
+
+	IOProcessor (Session&, boost::shared_ptr<IO> input, boost::shared_ptr<IO> output,
+	             const std::string& proc_name, ARDOUR::DataType default_type = DataType::AUDIO);
+
 	virtual ~IOProcessor ();
 
 	bool set_name (const std::string& str);
@@ -57,10 +58,11 @@ class LIBARDOUR_API IOProcessor : public Processor
 	virtual ChanCount natural_output_streams() const;
 	virtual ChanCount natural_input_streams () const;
 
-	boost::shared_ptr<IO>       input()       { return _input; }
-	boost::shared_ptr<const IO> input() const { return _input; }
+	boost::shared_ptr<IO>       input()        { return _input; }
+	boost::shared_ptr<const IO> input() const  { return _input; }
 	boost::shared_ptr<IO>       output()       { return _output; }
 	boost::shared_ptr<const IO> output() const { return _output; }
+
 	void set_input (boost::shared_ptr<IO>);
 	void set_output (boost::shared_ptr<IO>);
 
@@ -77,11 +79,11 @@ class LIBARDOUR_API IOProcessor : public Processor
 
 	static void prepare_for_reset (XMLNode& state, const std::string& name);
 
-  protected:
+protected:
 	boost::shared_ptr<IO> _input;
 	boost::shared_ptr<IO> _output;
 
-  private:
+private:
 	/* disallow copy construction */
 	IOProcessor (const IOProcessor&);
 

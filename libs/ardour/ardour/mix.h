@@ -72,6 +72,6 @@ LIBARDOUR_API void  default_find_peaks                (const ARDOUR::Sample * bu
 LIBARDOUR_API void  default_apply_gain_to_buffer      (ARDOUR::Sample * buf, ARDOUR::pframes_t nframes, float gain);
 LIBARDOUR_API void  default_mix_buffers_with_gain     (ARDOUR::Sample * dst, const ARDOUR::Sample * src, ARDOUR::pframes_t nframes, float gain);
 LIBARDOUR_API void  default_mix_buffers_no_gain       (ARDOUR::Sample * dst, const ARDOUR::Sample * src, ARDOUR::pframes_t nframes);
-LIBARDOUR_API void  default_copy_vector				  (ARDOUR::Sample * dst, const ARDOUR::Sample * src, ARDOUR::pframes_t nframes);
+LIBARDOUR_API void  default_copy_vector               (ARDOUR::Sample * dst, const ARDOUR::Sample * src, ARDOUR::pframes_t nframes);
 
 #endif /* __ardour_mix_h__ */

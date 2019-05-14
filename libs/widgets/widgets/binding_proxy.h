@@ -49,7 +49,7 @@ public:
 	bool button_press_handler (GdkEventButton *);
 
 	boost::shared_ptr<PBD::Controllable> get_controllable() const { return controllable; }
- 	void set_controllable (boost::shared_ptr<PBD::Controllable>);
+	void set_controllable (boost::shared_ptr<PBD::Controllable>);
 
 protected:
 	ArdourWidgets::PopUp* prompter;

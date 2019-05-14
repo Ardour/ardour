@@ -27,6 +27,7 @@
 #include "pbd/file_utils.h"
 
 #include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/action_model.h"
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/gui_thread.h"
@@ -85,6 +86,7 @@ FP8GUI::FP8GUI (FaderPort8& p)
 	, ignore_active_change (false)
 	, two_line_text_cb (_("Two Line Trackname"))
 	, auto_pluginui_cb (_("Auto Show/Hide Plugin GUIs"))
+	, action_model (ActionManager::ActionModel::instance ())
 {
 	set_border_width (12);
 
@@ -148,7 +150,6 @@ FP8GUI::FP8GUI (FaderPort8& p)
 	pack_start (hpacker, false, false);
 
 	/* actions */
-	build_available_action_menu ();
 
 	int action_row = 0;
 	int action_col = 0;
@@ -338,141 +339,12 @@ FP8GUI::active_port_changed (Gtk::ComboBox* combo, bool for_input)
 	}
 }
 
-
-
-void
-FP8GUI::build_available_action_menu ()
-{
-	/* build a model of all available actions (needs to be tree structured
-	 * more)
-	 */
-
-	available_action_model = TreeStore::create (action_columns);
-
-	vector<string> paths;
-	vector<string> labels;
-	vector<string> tooltips;
-	vector<string> keys;
-	vector<Glib::RefPtr<Gtk::Action> > actions;
-
-	ActionManager::get_all_actions (paths, labels, tooltips, keys, actions);
-
-	typedef std::map<string,TreeIter> NodeMap;
-	NodeMap nodes;
-	NodeMap::iterator r;
-
-
-	vector<string>::iterator k;
-	vector<string>::iterator p;
-	vector<string>::iterator t;
-	vector<string>::iterator l;
-
-	available_action_model->clear ();
-
-	TreeIter rowp;
-	TreeModel::Row parent;
-
-	/* Disabled item (row 0) */
-
-	rowp = available_action_model->append();
-	parent = *(rowp);
-	parent[action_columns.name] = _("Disabled");
-
-	for (l = labels.begin(), k = keys.begin(), p = paths.begin(), t = tooltips.begin(); l != labels.end(); ++k, ++p, ++t, ++l) {
-
-		TreeModel::Row row;
-		vector<string> parts;
-
-		parts.clear ();
-
-		split (*p, parts, '/');
-
-		if (parts.empty()) {
-			continue;
-		}
-
-		//kinda kludgy way to avoid displaying menu items as mappable
-		if (parts[0] == _("Main Menu") )
-			continue;
-		if (parts[0] == _("JACK") )
-			continue;
-		if (parts[0] == _("redirectmenu") )
-			continue;
-		if (parts[0] == _("RegionList") )
-			continue;
-		if (parts[0] == _("ProcessorMenu") )
-			continue;
-
-		if ((r = nodes.find (parts[0])) == nodes.end()) {
-
-			/* top level is missing */
-
-			TreeIter rowp;
-			TreeModel::Row parent;
-			rowp = available_action_model->append();
-			nodes[parts[0]] = rowp;
-			parent = *(rowp);
-			parent[action_columns.name] = parts[0];
-
-			row = *(available_action_model->append (parent.children()));
-
-		} else {
-
-			row = *(available_action_model->append ((*r->second)->children()));
-
-		}
-
-		/* add this action */
-
-		if (l->empty ()) {
-			row[action_columns.name] = *t;
-			action_map[*t] = *p;
-		} else {
-			row[action_columns.name] = *l;
-			action_map[*l] = *p;
-		}
-
-		row[action_columns.path] = *p;
-	}
-}
-
-bool
-FP8GUI::find_action_in_model (const TreeModel::iterator& iter, std::string const& action_path, TreeModel::iterator* found)
-{
-	TreeModel::Row row = *iter;
-	string path = row[action_columns.path];
-
-	if (path == action_path) {
-		*found = iter;
-		return true;
-	}
-
-	return false;
-}
-
 void
 FP8GUI::build_action_combo (Gtk::ComboBox& cb, FP8Controls::ButtonId id)
 {
-	cb.set_model (available_action_model);
-	cb.pack_start (action_columns.name);
-
 	/* set the active "row" to the right value for the current button binding */
-	string current_action = fp.get_button_action (id, false); /* lookup release action */
-
-	if (current_action.empty()) {
-		cb.set_active (0); /* "disabled" */
-	} else {
-		TreeModel::iterator iter = available_action_model->children().end();
-
-		available_action_model->foreach_iter (sigc::bind (sigc::mem_fun (*this, &FP8GUI::find_action_in_model), current_action, &iter));
-
-		if (iter != available_action_model->children().end()) {
-			cb.set_active (iter);
-		} else {
-			cb.set_active (0);
-		}
-	}
-	/* bind signal _after_ setting the current value */
+	const string current_action = fp.get_button_action (id, false); /* lookup release action */
+	action_model.build_action_combo(cb, current_action);
 	cb.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FP8GUI::action_changed), &cb, id));
 }
 
@@ -480,7 +352,7 @@ void
 FP8GUI::action_changed (Gtk::ComboBox* cb, FP8Controls::ButtonId id)
 {
 	TreeModel::const_iterator row = cb->get_active ();
-	string action_path = (*row)[action_columns.path];
+	string action_path = (*row)[action_model.path()];
 	fp.set_button_action (id, false, action_path);
 }
 

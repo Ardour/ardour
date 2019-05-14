@@ -18,7 +18,7 @@
 */
 
 #ifndef __IEC1PPMDSP_H
-#define	__IEC1PPMDSP_H
+#define __IEC1PPMDSP_H
 
 #include "ardour/libardour_visibility.h"
 

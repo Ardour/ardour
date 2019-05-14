@@ -27,10 +27,10 @@
 
 #include "lv2/lv2plug.in/ns/lv2core/lv2.h"
 
-#define RESET_PEAK_AFTER_SECONDS 3
-
 #define AEXP_URI "urn:ardour:a-exp"
 #define AEXP_STEREO_URI "urn:ardour:a-exp#stereo"
+
+#define RESET_PEAK_AFTER_SECONDS 3
 
 #ifndef M_PI
 #  define M_PI 3.14159265358979323846
@@ -57,8 +57,8 @@ typedef enum {
 	AEXP_MAKEUP,
 
 	AEXP_GAINR,
-	AEXP_OUTLEVEL,
 	AEXP_INLEVEL,
+	AEXP_OUTLEVEL,
 	AEXP_SIDECHAIN,
 	AEXP_ENABLE,
 
@@ -287,7 +287,6 @@ activate(LV2_Handle instance)
 #endif
 }
 
-
 static void
 run(LV2_Handle instance, uint32_t n_samples)
 {
@@ -363,7 +362,6 @@ run(LV2_Handle instance, uint32_t n_samples)
 #endif
 
 	float in_peak_db = -160.f;
-	old_gainr = *aexp->gainr;
 	float max_gainr = 0.0;
 
 	for (i = 0; i < n_samples; i++) {

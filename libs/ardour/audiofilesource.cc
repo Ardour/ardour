@@ -335,7 +335,7 @@ AudioFileSource::safe_audio_file_extension(const string& file)
 		".mp3", ".MP3",
 		".mp4", ".MP4",
 		".m4a", ".M4A",
-		".sd2", ".SD2", 	// libsndfile supports sd2 also, but the resource fork is required to open.
+		".sd2", ".SD2", // libsndfile supports sd2 also, but the resource fork is required to open.
 #endif // HAVE_COREAUDIO
 	};
 

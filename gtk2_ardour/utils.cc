@@ -405,7 +405,7 @@ ARDOUR_UI_UTILS::get_xpm (std::string name)
 
 		try {
 			xpm_map[name] =  Gdk::Pixbuf::create_from_file (data_file_path);
-		} catch(const Glib::Error& e)	{
+		} catch (const Glib::Error& e) {
 			warning << "Caught Glib::Error: " << e.what() << endmsg;
 		}
 	}

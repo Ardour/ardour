@@ -839,15 +839,15 @@ void
 Panner2d::cart_to_gtk (CartesianVector& c) const
 {
 	/* cartesian coordinate space:
-   	      center = 0.0
-	      dimension = 2.0 * 2.0
-	      increasing y moves up
-	      so max values along each axis are -1..+1
-
-	   GTK uses a coordinate space that is:
-  	      top left = 0.0
-	      dimension = (radius*2.0) * (radius*2.0)
-	      increasing y moves down
+	 *  center = 0.0
+	 *  dimension = 2.0 * 2.0
+	 *  increasing y moves up
+	 * so max values along each axis are -1..+1
+	 *
+	 * GTK uses a coordinate space that is:
+	 *  top left = 0.0
+	 *  dimension = (radius*2.0) * (radius*2.0)
+	 * increasing y moves down
 	*/
 	const double diameter = radius*2.0;
 

@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>at0m</Author>
+  <MasterDeviceNames>
+    <Manufacturer>MFB</Manufacturer>
+    <Model>Tanzbar</Model>
+    <CustomDeviceMode Name="Default">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="CV1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="CV23"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Factory Drums"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Custom Drums"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Factory Drums">
+      <AvailableForChannels>
+        <AvailableChannel Channel="3" Available="true"/>
+      </AvailableForChannels>
+      <UsesNoteNameList Name="Factory Drums Notes"/>
+      <UsesControlNameList Name="Controls"/>
+      <PatchBank Name="Set A" ROM="false">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Set A"/>
+      </PatchBank>
+      <PatchBank Name="Set B" ROM="false">
+        <MIDICommands>
+          <ControlChange Control="0" Value="1"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Set B"/>
+      </PatchBank>
+      <PatchBank Name="Set C" ROM="false">
+        <MIDICommands>
+          <ControlChange Control="0" Value="2"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Set C"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <ChannelNameSet Name="Custom Drums">
+      <AvailableForChannels>
+        <AvailableChannel Channel="10" Available="true"/>
+      </AvailableForChannels>
+      <UsesNoteNameList Name="Custom Drums Notes"/>
+      <UsesControlNameList Name="Controls"/>
+      <PatchBank Name="Set A" ROM="false">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Set A"/>
+      </PatchBank>
+      <PatchBank Name="Set B" ROM="false">
+        <MIDICommands>
+          <ControlChange Control="0" Value="1"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Set B"/>
+      </PatchBank>
+      <PatchBank Name="Set C" ROM="false">
+        <MIDICommands>
+          <ControlChange Control="0" Value="2"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Set C"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <NoteNameList Name="Factory Drums Notes">
+      <!-- Below are the FACTORY note assignments for the drums. The notes for CV1/23 (Ch2/3) range from 36-72.
+        Unlike on the Tanzbar itself -where only no/mid/high Accent is available- via midi, note velocity is recognized, too.
+            Noteworthy, from the manual:
+        "Tanzbar has to be set to MANUAL TRIGGER MODE (Rec/ManTrg LED green) to work as a drum sound expander."
+        "When Roll Record is active (Shift+Step10 till Rec/ManTrg LED red, then Select), the incoming MIDI notes
+        are recorded into Tanzbar's sequencer." -->
+      <Note Number="36" Name="BD1"/>
+      <Note Number="37" Name="BD2"/>
+      <Note Number="38" Name="SD"/>
+      <Note Number="39" Name="RS"/>
+      <Note Number="40" Name="CY"/>
+      <Note Number="41" Name="OH"/>
+      <Note Number="42" Name="HH"/>
+      <Note Number="43" Name="CL"/>
+      <Note Number="44" Name="CP"/>
+      <Note Number="45" Name="LTC"/>
+      <Note Number="46" Name="MTC"/>
+      <Note Number="47" Name="HTC"/>
+      <Note Number="48" Name="CB"/>
+      <Note Number="49" Name="MA"/>
+    </NoteNameList>
+    <NoteNameList Name="Custom Drums Notes">
+      <!--Below are the author's CUSTOM MIDI note assignments for the drums. The notes for CV1/23 (Ch2/3) range from 36-72.
+        Unlike on the Tanzbar itself -where only no/mid/high Accent is available- MIDI note velocity is recognized, too.
+            Noteworthy, from the manual:
+        "Tanzbar has to be set to MANUAL TRIGGER MODE (Rec/ManTrg LED green) to work as a drum sound expander."
+        "When Roll Record is active (Shift+Step10 till Rec/ManTrg LED red, then Select), the incoming MIDI notes are
+        recorded into Tanzbar's sequencer." -->
+      <!-- NOTE:
+        - I've set all Drum notes 'learned' to ch10 as per MIDI default.
+        - Again, these notes are not default: they are inspired by the GM/GS MIDI layout. YMMV.
+        -->
+      <Note Number="36" Name="BD1"/>
+      <Note Number="35" Name="BD2"/>
+      <Note Number="37" Name="SD"/>
+      <Note Number="38" Name="RS"/>
+      <Note Number="39" Name="CY"/>
+      <Note Number="40" Name="OH"/>
+      <Note Number="41" Name="HH"/>
+      <Note Number="48" Name="CL"/>
+      <Note Number="51" Name="CP"/>
+      <Note Number="42" Name="LT"/>
+      <Note Number="43" Name="LC"/>
+      <Note Number="44" Name="MT"/>
+      <Note Number="45" Name="MC"/>
+      <Note Number="46" Name="HT"/>
+      <Note Number="47" Name="HC"/>
+      <Note Number="49" Name="CB"/>
+      <Note Number="50" Name="MA"/>
+    </NoteNameList>
+    <ControlNameList Name="Controls">
+      <!--
+	Below the CC# list of the Tanzbar.
+	It receives CC# for most functions and parameters.
+	To receive CC#, Ch10 is always used!
+							-->
+      <Control Type="7bit" Number="2" Name="BD1 Attack"/>
+      <Control Type="7bit" Number="64" Name="BD1 Decay"/>
+      <Control Type="7bit" Number="65" Name="BD1 Pitch"/>
+      <Control Type="7bit" Number="3" Name="BD1 Tune"/>
+      <Control Type="7bit" Number="4" Name="BD1 Noise"/>
+      <Control Type="7bit" Number="5" Name="BD1 Filter"/>
+      <Control Type="7bit" Number="6" Name="BD1 Dist"/>
+      <Control Type="7bit" Number="66" Name="BD1 Trigger"/>
+      <Control Type="7bit" Number="8" Name="BD2 Decay"/>
+      <Control Type="7bit" Number="9" Name="BD2 Tune"/>
+      <Control Type="7bit" Number="10" Name="BD2 Tone"/>
+      <Control Type="7bit" Number="11" Name="SD Tune"/>
+      <Control Type="7bit" Number="12" Name="SD D-Tune"/>
+      <Control Type="7bit" Number="13" Name="SD Snappy"/>
+      <Control Type="7bit" Number="67" Name="SD SN Decay"/>
+      <Control Type="7bit" Number="14" Name="SD Tone"/>
+      <Control Type="7bit" Number="68" Name="SD Tone Decay"/>
+      <Control Type="7bit" Number="69" Name="SD Pitch"/>
+      <Control Type="7bit" Number="88" Name="RS Tune"/>
+      <Control Type="7bit" Number="70" Name="CY Decay"/>
+      <Control Type="7bit" Number="15" Name="CY Tone"/>
+      <Control Type="7bit" Number="71" Name="CY Tune"/>
+      <Control Type="7bit" Number="72" Name="OH Decay"/>
+      <Control Type="7bit" Number="73" Name="HH Tune"/>
+      <Control Type="7bit" Number="74" Name="HH Decay"/>
+      <Control Type="7bit" Number="16" Name="CL Tune"/>
+      <Control Type="7bit" Number="17" Name="CL Decay"/>
+      <Control Type="7bit" Number="75" Name="CP Decay"/>
+      <Control Type="7bit" Number="18" Name="CP Filter"/>
+      <Control Type="7bit" Number="76" Name="CP Attack"/>
+      <Control Type="7bit" Number="77" Name="CP Trigger"/>
+      <Control Type="7bit" Number="19" Name="HTC Tune"/>
+      <Control Type="7bit" Number="20" Name="HTC Decay"/>
+      <Control Type="7bit" Number="78" Name="HTC Noise On/Off"/>
+      <Control Type="7bit" Number="79" Name="HTC Tom/Conga"/>
+      <Control Type="7bit" Number="21" Name="MTC Tune"/>
+      <Control Type="7bit" Number="22" Name="MTC Decay"/>
+      <Control Type="7bit" Number="80" Name="MTC Noise On/Off"/>
+      <Control Type="7bit" Number="81" Name="MTC Tom/Conga"/>
+      <Control Type="7bit" Number="23" Name="LTC Tune"/>
+      <Control Type="7bit" Number="24" Name="LTC Decay"/>
+      <Control Type="7bit" Number="82" Name="LTC Noise On/Off"/>
+      <Control Type="7bit" Number="83" Name="LTC Tom/Conga"/>
+      <Control Type="7bit" Number="84" Name="Tom Noise"/>
+      <Control Type="7bit" Number="85" Name="CB Tune"/>
+      <Control Type="7bit" Number="86" Name="CB Decay"/>
+      <Control Type="7bit" Number="87" Name="MA Decay"/>
+      <!-- <Control Type="7bit" Number="0" Name="Set Select"/> Bank Select: valid values: 0,1,2 see PatchBanks above -->
+      <Control Type="7bit" Number="89" Name="Delay CV1"/>
+      <Control Type="7bit" Number="90" Name="Delay CV23"/>
+      <Control Type="7bit" Number="91" Name="Delay BD1"/>
+      <Control Type="7bit" Number="92" Name="Delay BD2"/>
+      <Control Type="7bit" Number="93" Name="Delay SD"/>
+      <Control Type="7bit" Number="94" Name="Delay RS"/>
+      <Control Type="7bit" Number="95" Name="Delay CY"/>
+      <Control Type="7bit" Number="96" Name="Delay OH"/>
+      <Control Type="7bit" Number="97" Name="Delay HH"/>
+      <Control Type="7bit" Number="98" Name="Delay CL"/>
+      <Control Type="7bit" Number="99" Name="Delay CP"/>
+      <Control Type="7bit" Number="100" Name="Delay LTC"/>
+      <Control Type="7bit" Number="101" Name="Delay MTC"/>
+      <Control Type="7bit" Number="102" Name="Delay HTC"/>
+      <Control Type="7bit" Number="103" Name="Delay CB"/>
+      <Control Type="7bit" Number="104" Name="Delay MA"/>
+    </ControlNameList>
+    <PatchNameList Name="Set A">
+      <Patch Number="1" Name="Yapacc 1" ProgramChange="0"/>
+      <Patch Number="2" Name="Yapacc 2" ProgramChange="1"/>
+      <Patch Number="3" Name="Yapacc 3" ProgramChange="2"/>
+      <Patch Number="4" Name="Yapacc 4" ProgramChange="3"/>
+      <Patch Number="5" Name="Yapacc 5" ProgramChange="4"/>
+      <Patch Number="6" Name="Yapacc 6" ProgramChange="5"/>
+      <Patch Number="7" Name="Yapacc 7" ProgramChange="6"/>
+      <Patch Number="8" Name="Yapacc 8" ProgramChange="7"/>
+      <Patch Number="9" Name="Yapacc 9" ProgramChange="8"/>
+      <Patch Number="10" Name="Yapacc 10" ProgramChange="9"/>
+      <Patch Number="11" Name="Yapacc 11" ProgramChange="10"/>
+      <Patch Number="12" Name="Yapacc 12" ProgramChange="11"/>
+      <Patch Number="13" Name="Yapacc 13" ProgramChange="12"/>
+      <Patch Number="14" Name="Yapacc 14" ProgramChange="13"/>
+      <Patch Number="15" Name="Yapacc 15" ProgramChange="14"/>
+      <Patch Number="16" Name="Yapacc 16" ProgramChange="15"/>
+      <Patch Number="17" Name="Yapacc 17" ProgramChange="16"/>
+      <Patch Number="18" Name="Yapacc 18" ProgramChange="17"/>
+      <Patch Number="19" Name="Yapacc 19" ProgramChange="18"/>
+      <Patch Number="20" Name="Yapacc 20" ProgramChange="19"/>
+      <Patch Number="21" Name="Yapacc 21" ProgramChange="20"/>
+      <Patch Number="22" Name="Yapacc 22" ProgramChange="21"/>
+      <Patch Number="23" Name="Yapacc 23" ProgramChange="22"/>
+      <Patch Number="24" Name="Yapacc 24" ProgramChange="23"/>
+      <Patch Number="25" Name="Yapacc 25" ProgramChange="24"/>
+      <Patch Number="26" Name="Yapacc 26" ProgramChange="25"/>
+      <Patch Number="27" Name="Yapacc 27" ProgramChange="26"/>
+      <Patch Number="28" Name="Yapacc 28" ProgramChange="27"/>
+      <Patch Number="29" Name="Yapacc 29" ProgramChange="28"/>
+      <Patch Number="30" Name="Yapacc 30" ProgramChange="29"/>
+      <Patch Number="31" Name="Yapacc 31" ProgramChange="30"/>
+      <Patch Number="32" Name="Yapacc 32" ProgramChange="31"/>
+      <Patch Number="33" Name="MFB Kult 33" ProgramChange="32"/>
+      <Patch Number="34" Name="MFB Kult 34" ProgramChange="33"/>
+      <Patch Number="35" Name="MFB Kult 35" ProgramChange="34"/>
+      <Patch Number="36" Name="MFB Kult 36" ProgramChange="35"/>
+      <Patch Number="37" Name="MFB Kult 37" ProgramChange="36"/>
+      <Patch Number="38" Name="MFB Kult 38" ProgramChange="37"/>
+      <Patch Number="39" Name="MFB Kult 39" ProgramChange="38"/>
+      <Patch Number="40" Name="MFB Kult 40" ProgramChange="39"/>
+      <Patch Number="41" Name="MFB Kult 41" ProgramChange="40"/>
+      <Patch Number="42" Name="MFB Kult 42" ProgramChange="41"/>
+      <Patch Number="43" Name="MFB Kult 43" ProgramChange="42"/>
+      <Patch Number="44" Name="MFB Kult 44" ProgramChange="43"/>
+      <Patch Number="45" Name="MFB Kult 45" ProgramChange="44"/>
+      <Patch Number="46" Name="MFB Kult 46" ProgramChange="45"/>
+      <Patch Number="47" Name="MFB Kult 47" ProgramChange="46"/>
+      <Patch Number="48" Name="MFB Kult 48" ProgramChange="47"/>
+    </PatchNameList>
+    <PatchNameList Name="Set B">
+      <Patch Number="1" Name="User 1" ProgramChange="0"/>
+      <Patch Number="2" Name="User 2" ProgramChange="1"/>
+      <Patch Number="3" Name="User 3" ProgramChange="2"/>
+      <Patch Number="4" Name="User 4" ProgramChange="3"/>
+      <Patch Number="5" Name="User 5" ProgramChange="4"/>
+      <Patch Number="6" Name="User 6" ProgramChange="5"/>
+      <Patch Number="7" Name="User 7" ProgramChange="6"/>
+      <Patch Number="8" Name="User 8" ProgramChange="7"/>
+      <Patch Number="9" Name="User 9" ProgramChange="8"/>
+      <Patch Number="10" Name="User 10" ProgramChange="9"/>
+      <Patch Number="11" Name="User 11" ProgramChange="10"/>
+      <Patch Number="12" Name="User 12" ProgramChange="11"/>
+      <Patch Number="13" Name="User 13" ProgramChange="12"/>
+      <Patch Number="14" Name="User 14" ProgramChange="13"/>
+      <Patch Number="15" Name="User 15" ProgramChange="14"/>
+      <Patch Number="16" Name="User 16" ProgramChange="15"/>
+      <Patch Number="17" Name="User 17" ProgramChange="16"/>
+      <Patch Number="18" Name="User 18" ProgramChange="17"/>
+      <Patch Number="19" Name="User 19" ProgramChange="18"/>
+      <Patch Number="20" Name="User 20" ProgramChange="19"/>
+      <Patch Number="21" Name="User 21" ProgramChange="20"/>
+      <Patch Number="22" Name="User 22" ProgramChange="21"/>
+      <Patch Number="23" Name="User 23" ProgramChange="22"/>
+      <Patch Number="24" Name="User 24" ProgramChange="23"/>
+      <Patch Number="25" Name="User 25" ProgramChange="24"/>
+      <Patch Number="26" Name="User 26" ProgramChange="25"/>
+      <Patch Number="27" Name="User 27" ProgramChange="26"/>
+      <Patch Number="28" Name="User 28" ProgramChange="27"/>
+      <Patch Number="29" Name="User 29" ProgramChange="28"/>
+      <Patch Number="30" Name="User 30" ProgramChange="29"/>
+      <Patch Number="31" Name="User 31" ProgramChange="30"/>
+      <Patch Number="32" Name="User 32" ProgramChange="31"/>
+      <Patch Number="33" Name="User 33" ProgramChange="32"/>
+      <Patch Number="34" Name="User 34" ProgramChange="33"/>
+      <Patch Number="35" Name="User 35" ProgramChange="34"/>
+      <Patch Number="36" Name="User 36" ProgramChange="35"/>
+      <Patch Number="37" Name="User 37" ProgramChange="36"/>
+      <Patch Number="38" Name="User 38" ProgramChange="37"/>
+      <Patch Number="39" Name="User 39" ProgramChange="38"/>
+      <Patch Number="40" Name="User 40" ProgramChange="39"/>
+      <Patch Number="41" Name="User 41" ProgramChange="40"/>
+      <Patch Number="42" Name="User 42" ProgramChange="41"/>
+      <Patch Number="43" Name="User 43" ProgramChange="42"/>
+      <Patch Number="44" Name="User 44" ProgramChange="43"/>
+      <Patch Number="45" Name="User 45" ProgramChange="44"/>
+      <Patch Number="46" Name="User 46" ProgramChange="45"/>
+      <Patch Number="47" Name="User 47" ProgramChange="46"/>
+      <Patch Number="48" Name="User 48" ProgramChange="47"/>
+    </PatchNameList>
+    <PatchNameList Name="Set C">
+      <Patch Number="1" Name="User 1" ProgramChange="0"/>
+      <Patch Number="2" Name="User 2" ProgramChange="1"/>
+      <Patch Number="3" Name="User 3" ProgramChange="2"/>
+      <Patch Number="4" Name="User 4" ProgramChange="3"/>
+      <Patch Number="5" Name="User 5" ProgramChange="4"/>
+      <Patch Number="6" Name="User 6" ProgramChange="5"/>
+      <Patch Number="7" Name="User 7" ProgramChange="6"/>
+      <Patch Number="8" Name="User 8" ProgramChange="7"/>
+      <Patch Number="9" Name="User 9" ProgramChange="8"/>
+      <Patch Number="10" Name="User 10" ProgramChange="9"/>
+      <Patch Number="11" Name="User 11" ProgramChange="10"/>
+      <Patch Number="12" Name="User 12" ProgramChange="11"/>
+      <Patch Number="13" Name="User 13" ProgramChange="12"/>
+      <Patch Number="14" Name="User 14" ProgramChange="13"/>
+      <Patch Number="15" Name="User 15" ProgramChange="14"/>
+      <Patch Number="16" Name="User 16" ProgramChange="15"/>
+      <Patch Number="17" Name="User 17" ProgramChange="16"/>
+      <Patch Number="18" Name="User 18" ProgramChange="17"/>
+      <Patch Number="19" Name="User 19" ProgramChange="18"/>
+      <Patch Number="20" Name="User 20" ProgramChange="19"/>
+      <Patch Number="21" Name="User 21" ProgramChange="20"/>
+      <Patch Number="22" Name="User 22" ProgramChange="21"/>
+      <Patch Number="23" Name="User 23" ProgramChange="22"/>
+      <Patch Number="24" Name="User 24" ProgramChange="23"/>
+      <Patch Number="25" Name="User 25" ProgramChange="24"/>
+      <Patch Number="26" Name="User 26" ProgramChange="25"/>
+      <Patch Number="27" Name="User 27" ProgramChange="26"/>
+      <Patch Number="28" Name="User 28" ProgramChange="27"/>
+      <Patch Number="29" Name="User 29" ProgramChange="28"/>
+      <Patch Number="30" Name="User 30" ProgramChange="29"/>
+      <Patch Number="31" Name="User 31" ProgramChange="30"/>
+      <Patch Number="32" Name="User 32" ProgramChange="31"/>
+      <Patch Number="33" Name="User 33" ProgramChange="32"/>
+      <Patch Number="34" Name="User 34" ProgramChange="33"/>
+      <Patch Number="35" Name="User 35" ProgramChange="34"/>
+      <Patch Number="36" Name="User 36" ProgramChange="35"/>
+      <Patch Number="37" Name="User 37" ProgramChange="36"/>
+      <Patch Number="38" Name="User 38" ProgramChange="37"/>
+      <Patch Number="39" Name="User 39" ProgramChange="38"/>
+      <Patch Number="40" Name="User 40" ProgramChange="39"/>
+      <Patch Number="41" Name="User 41" ProgramChange="40"/>
+      <Patch Number="42" Name="User 42" ProgramChange="41"/>
+      <Patch Number="43" Name="User 43" ProgramChange="42"/>
+      <Patch Number="44" Name="User 44" ProgramChange="43"/>
+      <Patch Number="45" Name="User 45" ProgramChange="44"/>
+      <Patch Number="46" Name="User 46" ProgramChange="45"/>
+      <Patch Number="47" Name="User 47" ProgramChange="46"/>
+      <Patch Number="48" Name="User 48" ProgramChange="47"/>
+    </PatchNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

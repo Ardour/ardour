@@ -2198,7 +2198,7 @@ RegionRippleDrag::remove_unselected_from_views(samplecnt_t amount, bool move_reg
 				rv->region()->set_position (rv->region()->position() + amount);
 			} else {
 				// restore the view to match the underlying region's original position
-				rv->move(-amount, 0);	// second parameter is y delta - seems 0 is OK
+				rv->move(-amount, 0); // second parameter is y delta - seems 0 is OK
 			}
 
 			rv->set_height (rtv->view()->child_height ());
@@ -4567,7 +4567,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 				if (move_both || (*x).move_both) {
 					copy_location->set_start (new_start, false, true, divisions);
 					copy_location->set_end (new_end, false, true, divisions);
-				} else	if (new_start < copy_location->end()) {
+				} else if (new_start < copy_location->end()) {
 					copy_location->set_start (new_start, false, true, divisions);
 				} else if (newframe > 0) {
 					//_editor->snap_to (next, RoundUpAlways, true);

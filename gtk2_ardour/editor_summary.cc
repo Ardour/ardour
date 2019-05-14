@@ -160,7 +160,7 @@ EditorSummary::render_background_image ()
 	/* calculate x scale */
 	if (_end != _start) {
 		_x_scale = static_cast<double> (get_width()) / (_end - _start);
- 	} else {
+	} else {
 		_x_scale = 1;
 	}
 

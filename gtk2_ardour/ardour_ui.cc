@@ -775,7 +775,7 @@ ARDOUR_UI::post_engine ()
 		vector<string>::iterator l;
 
 		for (p = paths.begin(), l = labels.begin(); p != paths.end(); ++p, ++l) {
-			output << "	<tr><th><kbd class=\"osc\">" << *p << "</kbd></th><td>" << *l << "</td></tr>" << endl;
+			output << " <tr><th><kbd class=\"osc\">" << *p << "</kbd></th><td>" << *l << "</td></tr>" << endl;
 		}
 		output << "  </tbody>\n  </table>" << endl;
 
@@ -5560,16 +5560,16 @@ ARDOUR_UI::transport_numpad_event (int num)
 		_pending_locate_num = _pending_locate_num*10 + num;
 	} else {
 		switch (num) {
-			case 0:  toggle_roll(false, false);		break;
-			case 1:  transport_rewind(1);				break;
-			case 2:  transport_forward(1);				break;
-			case 3:  transport_record(true);			break;
-			case 4:  toggle_session_auto_loop();		break;
-			case 5:  transport_record(false); toggle_session_auto_loop();	break;
-			case 6:  toggle_punch();					break;
-			case 7:  toggle_click();				break;
-			case 8:  toggle_auto_return();			break;
-			case 9:  toggle_follow_edits();		break;
+			case 0: toggle_roll(false, false);                           break;
+			case 1: transport_rewind(1);                                 break;
+			case 2: transport_forward(1);                                break;
+			case 3: transport_record(true);                              break;
+			case 4: toggle_session_auto_loop();                          break;
+			case 5: transport_record(false); toggle_session_auto_loop(); break;
+			case 6: toggle_punch();                                      break;
+			case 7: toggle_click();                                      break;
+			case 8: toggle_auto_return();                                break;
+			case 9: toggle_follow_edits();                               break;
 		}
 	}
 }

@@ -43,49 +43,47 @@ tokenize(const StringType& str,
         Iter it,
 		bool strip_whitespace=false)
 {
-    typename StringType::size_type start_pos = 0;
-    typename StringType::size_type end_pos = 0;
-    unsigned int token_count = 0;
+	typename StringType::size_type start_pos = 0;
+	typename StringType::size_type end_pos = 0;
+	unsigned int token_count = 0;
 
-    do {
-        start_pos = str.find_first_not_of(delims, start_pos);
-        end_pos = str.find_first_of(delims, start_pos);
-        if (start_pos != end_pos) {
-            if (end_pos == str.npos) {
-                end_pos = str.length();
-            }
-	    	if (strip_whitespace) {
+	do {
+		start_pos = str.find_first_not_of(delims, start_pos);
+		end_pos = str.find_first_of(delims, start_pos);
+		if (start_pos != end_pos) {
+			if (end_pos == str.npos) {
+				end_pos = str.length();
+			}
+			if (strip_whitespace) {
 				StringType stripped = str.substr(start_pos, end_pos - start_pos);
 				strip_whitespace_edges (stripped);
 				if (stripped.length()) {
 					*it++ = stripped;
 				}
 			} else {
-            	*it++ = str.substr(start_pos, end_pos - start_pos);
+				*it++ = str.substr(start_pos, end_pos - start_pos);
 			}
-            ++token_count;
-            start_pos = str.find_first_not_of(delims, end_pos + 1);
-        }
-    } while (start_pos != str.npos);
+			++token_count;
+			start_pos = str.find_first_not_of(delims, end_pos + 1);
+		}
+	} while (start_pos != str.npos);
 
-    if (start_pos != str.npos) {
-    	if (strip_whitespace) {
+	if (start_pos != str.npos) {
+		if (strip_whitespace) {
 			StringType stripped = str.substr(start_pos, str.length() - start_pos);
 			strip_whitespace_edges (stripped);
 			if (stripped.length()) {
 				*it++ = stripped;
 			}
 		} else {
-        	*it++ = str.substr(start_pos, str.length() - start_pos);
+			*it++ = str.substr(start_pos, str.length() - start_pos);
 		}
-        ++token_count;
-    }
+		++token_count;
+	}
 
-    return token_count;
+	return token_count;
 }
 
 } // namespace PBD
 
 #endif // PBD_TOKENIZER
-
-

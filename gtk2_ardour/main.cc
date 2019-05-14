@@ -377,7 +377,7 @@ int main (int argc, char *argv[])
 		     << _("Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker, Robin Gareus") << endl
 		     << endl
 		     << string_compose (_("%1 comes with ABSOLUTELY NO WARRANTY"), PROGRAM_NAME) << endl
-		     <<	_("not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.") << endl
+		     << _("not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.") << endl
 		     << _("This is free software, and you are welcome to redistribute it ") << endl
 		     << _("under certain conditions; see the source for copying conditions.")
 		     << endl;

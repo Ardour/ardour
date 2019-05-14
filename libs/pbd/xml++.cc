@@ -258,7 +258,7 @@ XMLNode::clear_lists ()
 
 	_selected_children.clear ();
 
-	for (curchild = _children.begin(); curchild != _children.end();	++curchild) {
+	for (curchild = _children.begin(); curchild != _children.end(); ++curchild) {
 		delete *curchild;
 	}
 
@@ -665,8 +665,7 @@ XMLNode::remove_nodes_and_delete(const string& propname, const string& val)
 }
 
 void
-XMLNode::remove_node_and_delete(const string& n, const string& propname,
- const string& val)
+XMLNode::remove_node_and_delete(const string& n, const string& propname, const string& val)
 {
 	for (XMLNodeIterator i = _children.begin(); i != _children.end(); ++i) {
 		if ((*i)->name() == n) {

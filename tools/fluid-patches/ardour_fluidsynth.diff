@@ -1,5 +1,5 @@
 diff --git b/libs/fluidsynth/fluidsynth/synth.h a/libs/fluidsynth/fluidsynth/synth.h
-index 369a2c261..87826809f 100644
+index 369a2c2615..87826809fd 100644
 --- b/libs/fluidsynth/fluidsynth/synth.h
 +++ a/libs/fluidsynth/fluidsynth/synth.h
 @@ -233,7 +233,7 @@ FLUIDSYNTH_API int fluid_synth_tuning_dump(fluid_synth_t *synth, int bank, int p
@@ -31,7 +31,7 @@ index 369a2c261..87826809f 100644
  
  /* API: Poly mono mode */
 diff --git b/libs/fluidsynth/fluidsynth/types.h a/libs/fluidsynth/fluidsynth/types.h
-index 47ef18336..5ad29281a 100644
+index 47ef18336a..5ad29281ad 100644
 --- b/libs/fluidsynth/fluidsynth/types.h
 +++ a/libs/fluidsynth/fluidsynth/types.h
 @@ -56,7 +56,9 @@ typedef struct _fluid_sequencer_t fluid_sequencer_t;            /**< Sequencer i
@@ -45,7 +45,7 @@ index 47ef18336..5ad29281a 100644
  
  typedef int fluid_istream_t;    /**< Input stream descriptor */
 diff --git b/libs/fluidsynth/src/fluid_conv.h a/libs/fluidsynth/src/fluid_conv.h
-index 60f441c49..e6455186e 100644
+index 60f441c49f..e6455186eb 100644
 --- b/libs/fluidsynth/src/fluid_conv.h
 +++ a/libs/fluidsynth/src/fluid_conv.h
 @@ -22,7 +22,7 @@
@@ -58,7 +58,7 @@ index 60f441c49..e6455186e 100644
  fluid_real_t fluid_ct2hz_real(fluid_real_t cents);
  fluid_real_t fluid_ct2hz(fluid_real_t cents);
 diff --git b/libs/fluidsynth/src/fluid_hash.c a/libs/fluidsynth/src/fluid_hash.c
-index 946a873bb..79f83a458 100644
+index 946a873bbf..79f83a4583 100644
 --- b/libs/fluidsynth/src/fluid_hash.c
 +++ a/libs/fluidsynth/src/fluid_hash.c
 @@ -991,6 +991,7 @@ fluid_hashtable_remove_all(fluid_hashtable_t *hashtable)
@@ -78,7 +78,7 @@ index 946a873bb..79f83a458 100644
  /*
   * fluid_hashtable_foreach_remove_or_steal:
 diff --git b/libs/fluidsynth/src/fluid_midi.c a/libs/fluidsynth/src/fluid_midi.c
-index 38c2bf6ef..73551a6d8 100644
+index 6e527b1822..5b2efe0b9b 100644
 --- b/libs/fluidsynth/src/fluid_midi.c
 +++ a/libs/fluidsynth/src/fluid_midi.c
 @@ -77,7 +77,7 @@ static int fluid_midi_file_read_tracklen(fluid_midi_file *mf);
@@ -90,7 +90,7 @@ index 38c2bf6ef..73551a6d8 100644
  /***************************************************************
   *
   *                      MIDIFILE
-@@ -1054,6 +1054,7 @@ fluid_midi_file_get_division(fluid_midi_file *midifile)
+@@ -1048,6 +1048,7 @@ fluid_midi_file_get_division(fluid_midi_file *midifile)
  {
      return midifile->division;
  }
@@ -98,7 +98,7 @@ index 38c2bf6ef..73551a6d8 100644
  
  /******************************************************
   *
-@@ -1420,7 +1421,7 @@ static void fluid_midi_event_get_sysex_LOCAL(fluid_midi_event_t *evt, void **dat
+@@ -1414,7 +1415,7 @@ static void fluid_midi_event_get_sysex_LOCAL(fluid_midi_event_t *evt, void **dat
   *
   *     fluid_track_t
   */
@@ -107,13 +107,13 @@ index 38c2bf6ef..73551a6d8 100644
  /*
   * new_fluid_track
   */
-@@ -2524,3 +2525,4 @@ fluid_midi_event_length(unsigned char event)
+@@ -2518,3 +2519,4 @@ fluid_midi_event_length(unsigned char event)
  
      return 1;
  }
 +#endif
 diff --git b/libs/fluidsynth/src/fluid_mod.c a/libs/fluidsynth/src/fluid_mod.c
-index 84e97731e..5e57455d4 100644
+index 84e97731e5..5e57455d4d 100644
 --- b/libs/fluidsynth/src/fluid_mod.c
 +++ a/libs/fluidsynth/src/fluid_mod.c
 @@ -603,7 +603,7 @@ fluid_mod_check_cc_source(const fluid_mod_t *mod, unsigned char src1_select)
@@ -126,7 +126,7 @@ index 84e97731e..5e57455d4 100644
      static const char *invalid_non_cc_src =
          "Invalid modulator, using non-CC source %s.src%d=%d";
 diff --git b/libs/fluidsynth/src/fluid_mod.h a/libs/fluidsynth/src/fluid_mod.h
-index 3e7661741..ec8e967a3 100644
+index 3e7661741f..ec8e967a35 100644
 --- b/libs/fluidsynth/src/fluid_mod.h
 +++ a/libs/fluidsynth/src/fluid_mod.h
 @@ -44,7 +44,7 @@ struct _fluid_mod_t
@@ -139,7 +139,7 @@ index 3e7661741..ec8e967a3 100644
  #ifdef DEBUG
  void fluid_dump_modulator(fluid_mod_t *mod);
 diff --git b/libs/fluidsynth/src/fluid_rvoice_mixer.c a/libs/fluidsynth/src/fluid_rvoice_mixer.c
-index 85c3fb914..5ea08ff6f 100644
+index 85c3fb9142..5ea08ff6fa 100644
 --- b/libs/fluidsynth/src/fluid_rvoice_mixer.c
 +++ a/libs/fluidsynth/src/fluid_rvoice_mixer.c
 @@ -23,7 +23,6 @@
@@ -151,7 +151,7 @@ index 85c3fb914..5ea08ff6f 100644
  
  
 diff --git b/libs/fluidsynth/src/fluid_rvoice_mixer.h a/libs/fluidsynth/src/fluid_rvoice_mixer.h
-index 4ee072e4b..1b3fceb34 100644
+index 4ee072e4b9..1b3fceb342 100644
 --- b/libs/fluidsynth/src/fluid_rvoice_mixer.h
 +++ a/libs/fluidsynth/src/fluid_rvoice_mixer.h
 @@ -24,7 +24,6 @@
@@ -163,7 +163,7 @@ index 4ee072e4b..1b3fceb34 100644
  typedef struct _fluid_rvoice_mixer_t fluid_rvoice_mixer_t;
  
 diff --git b/libs/fluidsynth/src/fluid_settings.c a/libs/fluidsynth/src/fluid_settings.c
-index 5b2b08748..181116984 100644
+index 5b2b08748f..1811169846 100644
 --- b/libs/fluidsynth/src/fluid_settings.c
 +++ a/libs/fluidsynth/src/fluid_settings.c
 @@ -21,9 +21,6 @@
@@ -191,7 +191,7 @@ index 5b2b08748..181116984 100644
  
  static int
 diff --git b/libs/fluidsynth/src/fluid_synth.c a/libs/fluidsynth/src/fluid_synth.c
-index 1c7a1f272..e26772073 100644
+index b72d5139ef..83d427fcac 100644
 --- b/libs/fluidsynth/src/fluid_synth.c
 +++ a/libs/fluidsynth/src/fluid_synth.c
 @@ -267,7 +267,7 @@ void fluid_version(int *major, int *minor, int *micro)
@@ -203,7 +203,7 @@ index 1c7a1f272..e26772073 100644
  fluid_version_str(void)
  {
      return FLUIDSYNTH_VERSION;
-@@ -6411,6 +6411,7 @@ int fluid_synth_set_channel_type(fluid_synth_t *synth, int chan, int type)
+@@ -6419,6 +6419,7 @@ int fluid_synth_set_channel_type(fluid_synth_t *synth, int chan, int type)
      FLUID_API_RETURN(FLUID_OK);
  }
  
@@ -211,7 +211,7 @@ index 1c7a1f272..e26772073 100644
  /**
   * Return the LADSPA effects instance used by FluidSynth
   *
-@@ -6423,6 +6424,7 @@ fluid_ladspa_fx_t *fluid_synth_get_ladspa_fx(fluid_synth_t *synth)
+@@ -6431,6 +6432,7 @@ fluid_ladspa_fx_t *fluid_synth_get_ladspa_fx(fluid_synth_t *synth)
  
      return synth->ladspa_fx;
  }
@@ -220,7 +220,7 @@ index 1c7a1f272..e26772073 100644
  /**
   * Configure a general-purpose IIR biquad filter.
 diff --git b/libs/fluidsynth/src/fluid_synth.h a/libs/fluidsynth/src/fluid_synth.h
-index 46c92ccf6..9615cb1b5 100644
+index f061aeaf38..2b35f1fcb0 100644
 --- b/libs/fluidsynth/src/fluid_synth.h
 +++ a/libs/fluidsynth/src/fluid_synth.h
 @@ -33,8 +33,6 @@
@@ -243,7 +243,7 @@ index 46c92ccf6..9615cb1b5 100644
      enum fluid_iir_filter_flags custom_filter_flags; /**< filter type of the user-defined filter currently used for all voices */
  };
 diff --git b/libs/fluidsynth/src/fluid_sys.c a/libs/fluidsynth/src/fluid_sys.c
-index b85fa3fbf..bcb86bac2 100644
+index 4225583481..22694f21c5 100644
 --- b/libs/fluidsynth/src/fluid_sys.c
 +++ a/libs/fluidsynth/src/fluid_sys.c
 @@ -205,9 +205,10 @@ fluid_log(int level, const char *fmt, ...)
@@ -260,7 +260,7 @@ index b85fa3fbf..bcb86bac2 100644
  
      if(str == NULL || delim == NULL || !*delim)
 diff --git b/libs/fluidsynth/src/fluid_sys.h a/libs/fluidsynth/src/fluid_sys.h
-index 9f2d6f6c7..e3a696741 100644
+index 65c088ca3c..5d82b686dd 100644
 --- b/libs/fluidsynth/src/fluid_sys.h
 +++ a/libs/fluidsynth/src/fluid_sys.h
 @@ -128,8 +128,9 @@ typedef guint64  uint64_t;

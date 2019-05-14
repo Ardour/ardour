@@ -30,10 +30,10 @@
 #ifndef _VESTIGE_H
 #define _VESTIGE_H
 
-#define CCONST(a, b, c, d)( ( ( (int) a ) << 24 ) |		\
-				( ( (int) b ) << 16 ) |		\
-				( ( (int) c ) << 8 ) |		\
-				( ( (int) d ) << 0 ) )
+#define CCONST(a, b, c, d) (( ((int) a) << 24 ) | \
+                            ( ((int) b) << 16 ) | \
+                            ( ((int) c) <<  8 ) | \
+                            ( ((int) d) <<  0 ))
 
 #define audioMasterAutomate 0
 #define audioMasterVersion 1

@@ -49,12 +49,12 @@ namespace ArdourCanvas {
 class RegionView : public TimeAxisViewItem
 {
 public:
-	RegionView (ArdourCanvas::Container* parent,
-	            TimeAxisView&        time_view,
+	RegionView (ArdourCanvas::Container*          parent,
+	            TimeAxisView&                     time_view,
 	            boost::shared_ptr<ARDOUR::Region> region,
-	            double               samples_per_pixel,
-	            uint32_t             base_color,
-	            bool 		 automation = false);
+	            double                            samples_per_pixel,
+	            uint32_t                          base_color,
+	            bool                              automation = false);
 
 	RegionView (const RegionView& other);
 	RegionView (const RegionView& other, boost::shared_ptr<ARDOUR::Region> other_region);

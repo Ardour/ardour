@@ -541,7 +541,7 @@ LocationEditRow::cd_toggled ()
 
 		item_table.remove (cd_track_details_hbox);
 		//	  item_table.resize(1, 7);
-		redraw_ranges(); /* 	EMIT_SIGNAL */
+		redraw_ranges(); /* EMIT_SIGNAL */
 	}
 }
 
@@ -590,7 +590,7 @@ LocationEditRow::remove_button_pressed ()
 		return;
 	}
 
-	remove_requested (location); /*	EMIT_SIGNAL */
+	remove_requested (location); /* EMIT_SIGNAL */
 }
 
 

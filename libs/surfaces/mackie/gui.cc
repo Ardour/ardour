@@ -34,6 +34,7 @@
 #include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/action_model.h"
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
@@ -88,6 +89,7 @@ MackieControlProtocol::build_gui ()
 MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	: _cp (p)
 	, table (2, 9)
+	, action_model (ActionManager::ActionModel::instance ())
 	, touch_sensitivity_adjustment (0, 0, 9, 1, 4)
 	, touch_sensitivity_scale (touch_sensitivity_adjustment)
 	, recalibrate_fader_button (_("Recalibrate Faders"))
@@ -239,7 +241,6 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	function_key_scroller.add (function_key_editor);
 	append_page (*fkey_packer, _("Function Keys"));
 
-	build_available_action_menu ();
 	build_function_key_editor ();
 	refresh_function_key_editor ();
 	fkey_packer->show_all();
@@ -442,117 +443,6 @@ MackieControlProtocolGUI::make_action_renderer (Glib::RefPtr<TreeStore> model, G
 }
 
 void
-MackieControlProtocolGUI::build_available_action_menu ()
-{
-	/* build a model of all available actions (needs to be tree structured
-	 * more)
-	 */
-
-	available_action_model = TreeStore::create (available_action_columns);
-
-	vector<string> paths;
-	vector<string> labels;
-	vector<string> tooltips;
-	vector<string> keys;
-	vector<Glib::RefPtr<Gtk::Action> > actions;
-
-	typedef std::map<string,TreeIter> NodeMap;
-	NodeMap nodes;
-	NodeMap::iterator r;
-
-	ActionManager::get_all_actions (paths, labels, tooltips, keys, actions);
-
-	vector<string>::iterator k;
-	vector<string>::iterator p;
-	vector<string>::iterator t;
-	vector<string>::iterator l;
-
-	available_action_model->clear ();
-
-	/* Because there are button bindings built in that are not
-	   in the key binding map, there needs to be a way to undo
-	   a profile edit.
-	*/
-	TreeIter rowp;
-	TreeModel::Row parent;
-	rowp = available_action_model->append();
-	parent = *(rowp);
-	parent[available_action_columns.name] = _("Remove Binding");
-
-	/* Key aliasing */
-
-	rowp = available_action_model->append();
-	parent = *(rowp);
-	parent[available_action_columns.name] = _("Shift");
-	rowp = available_action_model->append();
-	parent = *(rowp);
-	parent[available_action_columns.name] = _("Control");
-	rowp = available_action_model->append();
-	parent = *(rowp);
-	parent[available_action_columns.name] = _("Option");
-	rowp = available_action_model->append();
-	parent = *(rowp);
-	parent[available_action_columns.name] = _("CmdAlt");
-
-	for (l = labels.begin(), k = keys.begin(), p = paths.begin(), t = tooltips.begin(); l != labels.end(); ++k, ++p, ++t, ++l) {
-
-		TreeModel::Row row;
-		vector<string> parts;
-
-		parts.clear ();
-
-		split (*p, parts, '/');
-
-		if (parts.empty()) {
-			continue;
-		}
-
-		//kinda kludgy way to avoid displaying menu items as mappable
-		if (parts[0] == _("Main Menu") )
-			continue;
-		if (parts[0] == _("JACK") )
-			continue;
-		if (parts[0] == _("redirectmenu") )
-			continue;
-		if (parts[0] == _("RegionList") )
-			continue;
-		if (parts[0] == _("ProcessorMenu") )
-			continue;
-
-		if ((r = nodes.find (parts[0])) == nodes.end()) {
-
-			/* top level is missing */
-
-			TreeIter rowp;
-			TreeModel::Row parent;
-			rowp = available_action_model->append();
-			nodes[parts[0]] = rowp;
-			parent = *(rowp);
-			parent[available_action_columns.name] = parts[0];
-
-			row = *(available_action_model->append (parent.children()));
-
-		} else {
-
-			row = *(available_action_model->append ((*r->second)->children()));
-
-		}
-
-		/* add this action */
-
-		if (l->empty ()) {
-			row[available_action_columns.name] = *t;
-			action_map[*t] = *p;
-		} else {
-			row[available_action_columns.name] = *l;
-			action_map[*l] = *p;
-		}
-
-		row[available_action_columns.path] = *p;
-	}
-}
-
-void
 MackieControlProtocolGUI::build_function_key_editor ()
 {
 	function_key_editor.append_column (_("Key"), function_key_columns.name);
@@ -560,32 +450,32 @@ MackieControlProtocolGUI::build_function_key_editor ()
 	TreeViewColumn* col;
 	CellRendererCombo* renderer;
 
-	renderer = make_action_renderer (available_action_model, function_key_columns.plain);
+	renderer = make_action_renderer (action_model.model(), function_key_columns.plain);
 	col = manage (new TreeViewColumn (_("Plain"), *renderer));
 	col->add_attribute (renderer->property_text(), function_key_columns.plain);
 	function_key_editor.append_column (*col);
 
-	renderer = make_action_renderer (available_action_model, function_key_columns.shift);
+	renderer = make_action_renderer (action_model.model(), function_key_columns.shift);
 	col = manage (new TreeViewColumn (_("Shift"), *renderer));
 	col->add_attribute (renderer->property_text(), function_key_columns.shift);
 	function_key_editor.append_column (*col);
 
-	renderer = make_action_renderer (available_action_model, function_key_columns.control);
+	renderer = make_action_renderer (action_model.model(), function_key_columns.control);
 	col = manage (new TreeViewColumn (_("Control"), *renderer));
 	col->add_attribute (renderer->property_text(), function_key_columns.control);
 	function_key_editor.append_column (*col);
 
-	renderer = make_action_renderer (available_action_model, function_key_columns.option);
+	renderer = make_action_renderer (action_model.model(), function_key_columns.option);
 	col = manage (new TreeViewColumn (_("Option"), *renderer));
 	col->add_attribute (renderer->property_text(), function_key_columns.option);
 	function_key_editor.append_column (*col);
 
-	renderer = make_action_renderer (available_action_model, function_key_columns.cmdalt);
+	renderer = make_action_renderer (action_model.model(), function_key_columns.cmdalt);
 	col = manage (new TreeViewColumn (_("Cmd/Alt"), *renderer));
 	col->add_attribute (renderer->property_text(), function_key_columns.cmdalt);
 	function_key_editor.append_column (*col);
 
-	renderer = make_action_renderer (available_action_model, function_key_columns.shiftcontrol);
+	renderer = make_action_renderer (action_model.model(), function_key_columns.shiftcontrol);
 	col = manage (new TreeViewColumn (_("Shift+Control"), *renderer));
 	col->add_attribute (renderer->property_text(), function_key_columns.shiftcontrol);
 	function_key_editor.append_column (*col);

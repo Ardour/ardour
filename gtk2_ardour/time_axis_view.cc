@@ -46,6 +46,7 @@
 #include "widgets/tooltips.h"
 
 #include "ardour_dialog.h"
+#include "audio_time_axis.h"
 #include "floating_text_entry.h"
 #include "gui_thread.h"
 #include "public_editor.h"
@@ -221,6 +222,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	top_hbox.pack_start (scroomer_placeholder, false, false); // OR pack_end to move after meters ?
 
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &TimeAxisView::parameter_changed));
 }
 
 TimeAxisView::~TimeAxisView()
@@ -580,7 +582,9 @@ TimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 	uint32_t lanes = 0;
 	if (m == TotalHeight) {
 		for (Children::iterator i = children.begin(); i != children.end(); ++i) {
-			if ( !(*i)->hidden()) ++lanes;
+			if (!(*i)->hidden()) {
+				++lanes;
+			}
 		}
 	}
 	h /= (lanes + 1);
@@ -844,6 +848,12 @@ TimeAxisView::show_selection (TimeSelection& ts)
 	selection_group->show();
 	selection_group->raise_to_top();
 
+	uint32_t gap = UIConfiguration::instance().get_vertical_region_gap ();
+	float ui_scale = UIConfiguration::instance().get_ui_scale ();
+	if (gap > 0 && ui_scale > 0) {
+		gap = ceil (gap * ui_scale);
+	}
+
 	for (list<AudioRange>::iterator i = ts.begin(); i != ts.end(); ++i) {
 		samplepos_t start, end;
 		samplecnt_t cnt;
@@ -857,6 +867,14 @@ TimeAxisView::show_selection (TimeSelection& ts)
 		x1 = _editor.sample_to_pixel (start);
 		x2 = _editor.sample_to_pixel (start + cnt - 1);
 		y2 = current_height() - 1;
+
+		if (dynamic_cast<AudioTimeAxisView*>(this)) {
+			if (y2 > gap) {
+				y2 -= gap;
+			} else {
+				y2 = 1;
+			}
+		}
 
 		rect->rect->set (ArdourCanvas::Rect (x1, 0, x2, y2));
 
@@ -1122,8 +1140,8 @@ TimeAxisView::compute_heights ()
 	Gtk::Table one_row_table (1, 1);
 	ArdourButton* test_button = manage (new ArdourButton);
 	const int border_width = 2;
-	const int sample_height = 2;
-	extra_height = (2 * border_width) + sample_height;
+	const int frame_height = 2;
+	extra_height = (2 * border_width) + frame_height;
 
 	window.add (one_row_table);
 	test_button->set_name ("mute button");
@@ -1170,6 +1188,16 @@ TimeAxisView::color_handler ()
 
 		(*i)->end_trim->set_fill_color (UIConfiguration::instance().color ("selection"));
 		(*i)->end_trim->set_outline_color (UIConfiguration::instance().color ("selection"));
+	}
+}
+
+void
+TimeAxisView::parameter_changed (string const & p)
+{
+	if (p == "vertical-region-gap") {
+		if (selected ()) {
+			show_selection (_editor.get_selection().time);
+		}
 	}
 }
 

@@ -27,6 +27,7 @@
 #include <gtkmm/table.h>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/combobox.h>
+#include <gtkmm/comboboxtext.h>
 #include <gtkmm/liststore.h>
 
 namespace ARDOUR {
@@ -142,7 +143,8 @@ private:
 	Gtk::ComboBox *dBScaleCombo;
 	Glib::RefPtr<Gtk::ListStore> dBScaleModel;
 
-	Gtk::CheckButton *_signal_button;
+	Gtk::ComboBoxText* _live_signal_combo;
+
 	Gtk::CheckButton *_phase_button;
 
 	// signals and connections

@@ -1098,7 +1098,7 @@ smf_get_length_seconds(const smf_t *smf)
 		smf_track_t *track;
 		smf_event_t *event;
 
-	       	track = smf_get_track_by_number(smf, i);
+		track = smf_get_track_by_number(smf, i);
 		assert(track);
 
 		event = smf_track_get_last_event(track);

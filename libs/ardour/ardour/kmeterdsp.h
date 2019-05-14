@@ -18,7 +18,7 @@
 */
 
 #ifndef __KMETERDSP_H
-#define	__KMETERDSP_H
+#define __KMETERDSP_H
 
 #include "ardour/libardour_visibility.h"
 

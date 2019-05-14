@@ -37,6 +37,10 @@ namespace Gtk {
 
 #include "faderport8.h"
 
+namespace ActionManager {
+        class ActionModel;
+}
+
 namespace ArdourSurface { namespace FP_NAMESPACE {
 
 class FP8GUI : public Gtk::VBox
@@ -88,24 +92,12 @@ private:
 	void auto_pluginui_toggled ();
 
 	/* user actions */
-	void build_available_action_menu ();
 	void build_action_combo (Gtk::ComboBox& cb, FP8Controls::ButtonId id);
 	void action_changed (Gtk::ComboBox* cb, FP8Controls::ButtonId id);
 
-	struct ActionColumns : public Gtk::TreeModel::ColumnRecord {
-		ActionColumns() {
-			add (name);
-			add (path);
-		}
-		Gtk::TreeModelColumn<std::string> name;
-		Gtk::TreeModelColumn<std::string> path;
-	};
+	const ActionManager::ActionModel& action_model;
 
-	ActionColumns action_columns;
-	Glib::RefPtr<Gtk::TreeStore> available_action_model;
 	std::map<std::string,std::string> action_map; // map from action names to paths
-
-	bool find_action_in_model (const Gtk::TreeModel::iterator& iter, std::string const & action_path, Gtk::TreeModel::iterator* found);
 };
 
 } }

@@ -336,6 +336,9 @@ instantiate (const LV2_Descriptor*     descriptor,
 	fluid_synth_set_polyphony (self->synth, 32);
 	fluid_synth_set_sample_rate (self->synth, (float)rate);
 
+	fluid_synth_set_reverb_on (self->synth, 0);
+	fluid_synth_set_chorus_on (self->synth, 0);
+
 	self->fmidi_event = new_fluid_midi_event ();
 
 	if (!self->fmidi_event) {

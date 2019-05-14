@@ -18,7 +18,7 @@
 */
 
 #ifndef __VUMETERDSP_H
-#define	__VUMETERDSP_H
+#define __VUMETERDSP_H
 
 #include "ardour/libardour_visibility.h"
 
@@ -45,6 +45,5 @@ private:
     static float   _w;           // lowpass filter coefficient
     static float   _g;           // gain factor
 };
-
 
 #endif

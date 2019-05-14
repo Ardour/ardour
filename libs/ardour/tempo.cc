@@ -704,15 +704,15 @@ MeterSection::get_state() const
 
 */
 struct MetricSectionSorter {
-    bool operator() (const MetricSection* a, const MetricSection* b) {
-	    return a->pulse() < b->pulse();
-    }
+	bool operator() (const MetricSection* a, const MetricSection* b) {
+		return a->pulse() < b->pulse();
+	}
 };
 
 struct MetricSectionFrameSorter {
-    bool operator() (const MetricSection* a, const MetricSection* b) {
-	    return a->sample() < b->sample();
-    }
+	bool operator() (const MetricSection* a, const MetricSection* b) {
+		return a->sample() < b->sample();
+	}
 };
 
 TempoMap::TempoMap (samplecnt_t fr)
@@ -1426,10 +1426,10 @@ TempoMap::recompute_tempi (Metrics& metrics)
 }
 
 /* tempos must be positioned correctly.
-   the current approach is to use a meter's bbt time as its base position unit.
-   an audio-locked meter requires a recomputation of pulse and beat (but not bbt),
-   while a music-locked meter requires recomputations of sample pulse and beat (but not bbt)
-*/
+ * the current approach is to use a meter's bbt time as its base position unit.
+ * an audio-locked meter requires a recomputation of pulse and beat (but not bbt),
+ * while a music-locked meter requires recomputations of sample pulse and beat (but not bbt)
+ */
 void
 TempoMap::recompute_meters (Metrics& metrics)
 {
@@ -3382,9 +3382,10 @@ TempoMap::gui_stretch_tempo (TempoSection* ts, const samplepos_t sample, const s
 		if (ts_copy->clamped()) {
 			TempoSection* next_t = next_tempo_section_locked (future_map, ts_copy);
 			TempoSection* prev_to_ts_copy = previous_tempo_section_locked (future_map, ts_copy);
-                        /* the change in samples is the result of changing the slope of at most 2 previous tempo sections.
-			   constant to constant is straightforward, as the tempo prev to ts_copy has constant slope.
-                        */			double contribution = 0.0;
+			/* the change in samples is the result of changing the slope of at most 2 previous tempo sections.
+			 * constant to constant is straightforward, as the tempo prev to ts_copy has constant slope.
+			 */
+			double contribution = 0.0;
 			if (next_t && prev_to_ts_copy && prev_to_ts_copy->type() == TempoSection::Ramp) {
 				contribution = (ts_copy->pulse() - prev_to_ts_copy->pulse()) / (double) (next_t->pulse() - prev_to_ts_copy->pulse());
 			}
@@ -3951,13 +3952,16 @@ TempoMap::round_to_quarter_note_subdivision (samplepos_t fr, int sub_num, RoundM
 			ticks += ticks_one_subdivisions_worth - mod;
 		}
 
-//NOTE:  this code intentionally limits the rounding so we don't advance to the next beat.
-//  For the purposes of "jump-to-next-subdivision", we DO want to advance to the next beat.
-//	And since the "prev" direction DOES move beats, I assume this code is unintended.
-//  But I'm keeping it around, until we determine there are no terrible consequences.
-//		if (ticks >= BBT_Time::ticks_per_beat) {
-//			ticks -= BBT_Time::ticks_per_beat;
-//		}
+		/* NOTE: this code intentionally limits the rounding so we don't advance to the next beat.
+		 * For the purposes of "jump-to-next-subdivision", we DO want to advance to the next beat.
+		 * And since the "prev" direction DOES move beats, I assume this code is unintended.
+		 * But I'm keeping it around, commened out, until we determine there are no terrible consequences.
+		 */
+#if 0
+		if (ticks >= BBT_Time::ticks_per_beat) {
+			ticks -= BBT_Time::ticks_per_beat;
+		}
+#endif
 
 	} else if (dir < 0) {
 
@@ -4337,8 +4341,8 @@ TempoMap::next_tempo_section_locked (const Metrics& metrics, TempoSection* ts) c
 	return 0;
 }
 /* don't use this to calculate length (the tempo is only correct for this sample).
-   do that stuff based on the beat_at_sample and sample_at_beat api
-*/
+ * do that stuff based on the beat_at_sample and sample_at_beat api
+ */
 double
 TempoMap::samples_per_quarter_note_at (const samplepos_t sample, const samplecnt_t sr) const
 {
@@ -4856,8 +4860,8 @@ TempoMap::samplepos_plus_bbt (samplepos_t pos, BBT_Time op) const
 }
 
 /** Count the number of beats that are equivalent to distance when going forward,
-    starting at pos.
-*/
+ * starting at pos.
+ */
 Temporal::Beats
 TempoMap::framewalk_to_qn (samplepos_t pos, samplecnt_t distance) const
 {
@@ -4867,9 +4871,9 @@ TempoMap::framewalk_to_qn (samplepos_t pos, samplecnt_t distance) const
 }
 
 struct bbtcmp {
-    bool operator() (const BBT_Time& a, const BBT_Time& b) {
-	    return a < b;
-    }
+	bool operator() (const BBT_Time& a, const BBT_Time& b) {
+		return a < b;
+	}
 };
 
 std::ostream&

@@ -54,15 +54,15 @@ struct SfdbMemoryStruct {
 };
 
 enum sortMethod {
-	sort_none,		// no sort
-	sort_duration_desc,	// Sort by the duration of the sounds, longest sounds first.
-	sort_duration_asc, 	// Same as above, but shortest sounds first.
-	sort_created_desc, 	// Sort by the date of when the sound was added. newest sounds first.
-	sort_created_asc, 	// Same as above, but oldest sounds first.
-	sort_downloads_desc, 	// Sort by the number of downloads, most downloaded sounds first.
-	sort_downloads_asc, 	// Same as above, but least downloaded sounds first.
-	sort_rating_desc, 	// Sort by the average rating given to the sounds, highest rated first.
-	sort_rating_asc 	// Same as above, but lowest rated sounds first.
+	sort_none,           // no sort
+	sort_duration_desc,  // Sort by the duration of the sounds, longest sounds first.
+	sort_duration_asc,   // Same as above, but shortest sounds first.
+	sort_created_desc,   // Sort by the date of when the sound was added. newest sounds first.
+	sort_created_asc,    // Same as above, but oldest sounds first.
+	sort_downloads_desc, // Sort by the number of downloads, most downloaded sounds first.
+	sort_downloads_asc,  // Same as above, but least downloaded sounds first.
+	sort_rating_desc,    // Sort by the average rating given to the sounds, highest rated first.
+	sort_rating_asc      // Same as above, but lowest rated sounds first.
 };
 
 
@@ -72,14 +72,14 @@ public:
 	Mootcher();
 	~Mootcher();
 
-	bool		checkAudioFile(std::string originalFileName, std::string ID);
-	bool		fetchAudioFile(std::string originalFileName, std::string ID, std::string audioURL, SoundFileBrowser *caller);
-	std::string	searchText(std::string query, int page, std::string filter, enum sortMethod sort);
-	std::string	searchSimilar(std::string id);
-	void *		threadFunc();
+	bool checkAudioFile(std::string originalFileName, std::string ID);
+	bool fetchAudioFile(std::string originalFileName, std::string ID, std::string audioURL, SoundFileBrowser *caller);
+	std::string searchText(std::string query, int page, std::string filter, enum sortMethod sort);
+	std::string searchSimilar(std::string id);
+	void* threadFunc();
 	SoundFileBrowser *sfb;
-	std::string	audioFileName;
-	std::string	ID;
+	std::string audioFileName;
+	std::string ID;
 
 	/** signal emitted when mootcher reports progress updates during download.
 	 * The parameters are current and total numbers of bytes downloaded.
@@ -90,19 +90,18 @@ public:
 
 
 private:
+	void ensureWorkingDir ();
 
-	void		ensureWorkingDir();
+	std::string doRequest (std::string uri, std::string params);
+	void setcUrlOptions ();
 
-	std::string	doRequest(std::string uri, std::string params);
-	void		setcUrlOptions();
-
-	static size_t	WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data);
-	static int	progress_callback(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
-	std::string	sortMethodString(enum sortMethod sort);
-	std::string	getSoundResourceFile(std::string ID);
+	static size_t WriteMemoryCallback (void *ptr, size_t size, size_t nmemb, void *data);
+	static int progress_callback (void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
+	std::string sortMethodString (enum sortMethod sort);
+	std::string getSoundResourceFile (std::string ID);
 
 	CURL *curl;
-	char errorBuffer[CURL_ERROR_SIZE];	// storage for cUrl error message
+	char errorBuffer[CURL_ERROR_SIZE]; // storage for cUrl error message
 
 	FILE* theFile;
 

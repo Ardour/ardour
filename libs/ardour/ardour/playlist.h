@@ -426,6 +426,4 @@ private:
 
 } /* namespace ARDOUR */
 
-#endif	/* __ardour_playlist_h__ */
-
-
+#endif /* __ardour_playlist_h__ */

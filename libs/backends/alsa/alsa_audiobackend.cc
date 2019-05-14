@@ -485,7 +485,7 @@ AlsaAudioBackend::update_systemic_midi_latencies ()
 		assert (nfo);
 		LatencyRange lr;
 		lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_output_latency);
-		set_latency_range (*it, false, lr);
+		set_latency_range (*it, true, lr);
 	}
 
 	i = 0;
@@ -496,7 +496,7 @@ AlsaAudioBackend::update_systemic_midi_latencies ()
 		assert (nfo);
 		LatencyRange lr;
 		lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_input_latency);
-		set_latency_range (*it, true, lr);
+		set_latency_range (*it, false, lr);
 	}
 	pthread_mutex_unlock (&_device_port_mutex);
 	update_latencies ();
@@ -676,11 +676,6 @@ AlsaAudioBackend::set_midi_device_enabled (std::string const device, bool enable
 	nfo->enabled = enable;
 
 	if (_run && prev_enabled != enable) {
-		// XXX actually we should not change system-ports while running,
-		// because iterators in main_process_thread will become invalid.
-		//
-		// Luckily the engine dialog does not call this while the engine is running,
-		// This code is currently not used.
 		if (enable) {
 			// add ports for the given device
 			register_system_midi_ports(device);
@@ -692,9 +687,10 @@ AlsaAudioBackend::set_midi_device_enabled (std::string const device, bool enable
 				assert (_rmidi_out.size() > i);
 				AlsaMidiOut *rm = _rmidi_out.at(i);
 				if (rm->name () != device) { ++it; ++i; continue; }
-				it = _system_midi_out.erase (it);
 				unregister_port (*it);
+				it = _system_midi_out.erase (it);
 				rm->stop();
+				assert (rm == *(_rmidi_out.begin() + i));
 				_rmidi_out.erase (_rmidi_out.begin() + i);
 				delete rm;
 			}
@@ -704,9 +700,10 @@ AlsaAudioBackend::set_midi_device_enabled (std::string const device, bool enable
 				assert (_rmidi_in.size() > i);
 				AlsaMidiIn *rm = _rmidi_in.at(i);
 				if (rm->name () != device) { ++it; ++i; continue; }
-				it = _system_midi_in.erase (it);
 				unregister_port (*it);
+				it = _system_midi_in.erase (it);
 				rm->stop();
+				assert (rm == *(_rmidi_in.begin() + i));
 				_rmidi_in.erase (_rmidi_in.begin() + i);
 				delete rm;
 			}

@@ -140,7 +140,7 @@ find_peaks_t            ARDOUR::find_peaks = 0;
 apply_gain_to_buffer_t  ARDOUR::apply_gain_to_buffer = 0;
 mix_buffers_with_gain_t ARDOUR::mix_buffers_with_gain = 0;
 mix_buffers_no_gain_t   ARDOUR::mix_buffers_no_gain = 0;
-copy_vector_t			ARDOUR::copy_vector = 0;
+copy_vector_t           ARDOUR::copy_vector = 0;
 
 PBD::Signal1<void,std::string> ARDOUR::BootMessage;
 PBD::Signal3<void,std::string,std::string,bool> ARDOUR::PluginScanMessage;

@@ -98,7 +98,7 @@ void
 FFT::calculate ()
 {
 	if (_iterations > 1) {
-	       	for (uint32_t i=0; i < _data_size - 1; i++) {
+		for (uint32_t i=0; i < _data_size - 1; i++) {
 			_power_at_bin[i] /= (float)_iterations;
 			_phase_at_bin[i] /= (float)_iterations;
 		}

@@ -169,6 +169,7 @@ public:
 	LilvNode* rdfs_range;
 	LilvNode* rsz_minimumSize;
 	LilvNode* time_Position;
+	LilvNode* time_beatsPerMin;
 	LilvNode* ui_GtkUI;
 	LilvNode* ui_external;
 	LilvNode* ui_externalkx;
@@ -355,6 +356,7 @@ LV2Plugin::LV2Plugin (AudioEngine& engine,
 	, _worker(NULL)
 	, _state_worker(NULL)
 	, _insert_id("0")
+	, _bpm_control_port_index((uint32_t)-1)
 	, _patch_port_in_index((uint32_t)-1)
 	, _patch_port_out_index((uint32_t)-1)
 	, _uri_map(URIMap::instance())
@@ -372,6 +374,7 @@ LV2Plugin::LV2Plugin (const LV2Plugin& other)
 	, _worker(NULL)
 	, _state_worker(NULL)
 	, _insert_id(other._insert_id)
+	, _bpm_control_port_index((uint32_t)-1)
 	, _patch_port_in_index((uint32_t)-1)
 	, _patch_port_out_index((uint32_t)-1)
 	, _uri_map(URIMap::instance())
@@ -757,6 +760,11 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	}
 	_impl->designated_input (LV2_TIME__beatsPerMinute, params, (void**)&_bpm_control_port);
 	_impl->designated_input (LV2_CORE__freeWheeling, params, (void**)&_freewheel_control_port);
+
+	const LilvPort* bpmport = lilv_plugin_get_port_by_designation(plugin, _world.lv2_InputPort, _world.time_beatsPerMin);
+	if (bpmport) {
+		_bpm_control_port_index = lilv_port_get_index (plugin, bpmport);
+	}
 
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		const LilvPort* port = lilv_plugin_get_port_by_index(plugin, i);
@@ -2331,6 +2339,11 @@ LV2Plugin::describe_parameter(Evoral::Parameter which)
 			return X_("hidden");
 		}
 
+		const LilvPort* bpmport = lilv_plugin_get_port_by_designation(_impl->plugin, _world.lv2_InputPort, _world.time_beatsPerMin);
+		if (bpmport && bpmport == port) {
+			return X_("hidden");
+		}
+
 		if (lilv_port_has_property(_impl->plugin, port, _world.lv2_freewheeling)) {
 			return X_("hidden");
 		}
@@ -2389,6 +2402,9 @@ LV2Plugin::set_automation_control (uint32_t i, boost::shared_ptr<AutomationContr
 {
 	if ((_port_flags[i] & (PORT_CTRLED | PORT_CTRLER))) {
 		DEBUG_TRACE(DEBUG::LV2Automate, string_compose ("Ctrl Port %1\n", i));
+		_ctrl_map [i] = AutomationCtrlPtr (new AutomationCtrl(c));
+	}
+	else if (i == _bpm_control_port_index) {
 		_ctrl_map [i] = AutomationCtrlPtr (new AutomationCtrl(c));
 	}
 }
@@ -2571,7 +2587,15 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	}
 
 	if (_bpm_control_port) {
-		*_bpm_control_port = tmap.tempo_at_sample (start).note_types_per_minute();
+		float bpm = tmap.tempo_at_sample (start).note_types_per_minute();
+		if (*_bpm_control_port != bpm) {
+			AutomationCtrlPtr c = get_automation_control (_bpm_control_port_index);
+			if (c && c->ac) {
+				/* may be NULL for replicated instances - only one custom UI/ctrl */
+				c->ac->Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+			}
+		}
+		*_bpm_control_port = bpm;
 	}
 
 #ifdef LV2_EXTENDED
@@ -3206,6 +3230,7 @@ LV2World::LV2World()
 	rdfs_range         = lilv_new_uri(world, LILV_NS_RDFS "range");
 	rsz_minimumSize    = lilv_new_uri(world, LV2_RESIZE_PORT__minimumSize);
 	time_Position      = lilv_new_uri(world, LV2_TIME__Position);
+	time_beatsPerMin   = lilv_new_uri(world, LV2_TIME__beatsPerMinute);
 	ui_GtkUI           = lilv_new_uri(world, LV2_UI__GtkUI);
 	ui_external        = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/ui#external");
 	ui_externalkx      = lilv_new_uri(world, "http://kxstudio.sf.net/ns/lv2ext/external-ui#Widget");
@@ -3258,6 +3283,7 @@ LV2World::~LV2World()
 	lilv_node_free(ui_externalkx);
 	lilv_node_free(ui_external);
 	lilv_node_free(ui_GtkUI);
+	lilv_node_free(time_beatsPerMin);
 	lilv_node_free(time_Position);
 	lilv_node_free(rsz_minimumSize);
 	lilv_node_free(rdfs_comment);
@@ -3453,6 +3479,14 @@ LV2PluginInfo::discover()
 				if (!strcmp (rf, LV2_URID_MAP_URI)) { ok = true; }
 				if (!strcmp (rf, LV2_URID_UNMAP_URI)) { ok = true; }
 				if (!strcmp (rf, "http://lv2plug.in/ns/lv2core#isLive")) { ok = true; }
+				if (!strcmp (rf, LV2_BUF_SIZE__boundedBlockLength)) { ok = true; }
+				if (!strcmp (rf, "http://lv2plug.in/ns/ext/buf-size#coarseBlockLength" /*LV2_BUF_SIZE__coarseBlockLength*/)) { ok = true; }
+				if (!strcmp (rf, LV2_OPTIONS__options)) { ok = true; }
+#ifdef LV2_EXTENDED
+				if (!strcmp (rf, LV2_INLINEDISPLAY__queue_draw)) { ok = true; }
+				if (!strcmp (rf, LV2_MIDNAM__update)) { ok = true; }
+				if (!strcmp (rf, LV2_BANKPATCH__notify)) { ok = true; }
+#endif
 				if (!ok) {
 					warning << string_compose (
 							_("Unsupported required LV2 feature: '%1' in '%2'."),

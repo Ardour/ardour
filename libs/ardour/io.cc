@@ -1384,8 +1384,6 @@ IO::enable_connecting ()
 void
 IO::bundle_changed (Bundle::Change /*c*/)
 {
-	/* XXX */
-//	connect_input_ports_to_bundle (_input_bundle, this);
 }
 
 

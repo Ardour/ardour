@@ -213,7 +213,7 @@ Route::init ()
 		 */
 		_trim->activate();
 	}
-	else if (!dynamic_cast<Track*>(this) && ! ( is_monitor() || is_auditioner() )) {
+	else if (!dynamic_cast<Track*>(this) && ! (is_monitor() || is_auditioner())) {
 		/* regular bus */
 		_trim->activate();
 	}
@@ -963,7 +963,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 		//A2 uses the "active" flag in the toplevel redirect node, not in the child plugin/IO
 		if (i != children.end()) {
 			if ((prop = (*i)->property (X_("active"))) != 0) {
-				if ( string_to<bool> (prop->value()) && (!_session.get_bypass_all_loaded_plugins () || !processor->display_to_user () ) )
+				if (string_to<bool> (prop->value()) && (!_session.get_bypass_all_loaded_plugins () || !processor->display_to_user ()))
 					processor->activate();
 				else
 					processor->deactivate();
@@ -1390,6 +1390,11 @@ Route::is_internal_processor (boost::shared_ptr<Processor> p) const
 	if (p == _amp || p == _meter || p == _main_outs || p == _delayline || p == _trim || p == _polarity) {
 		return true;
 	}
+#ifdef MIXBUS
+	if (p == _ch_pre || p == _ch_post || p == _ch_eq  || p == _ch_comp) {
+		return true;
+	}
+#endif
 	return false;
 }
 
@@ -2437,8 +2442,8 @@ Route::state (bool save_template)
 		child->set_property("created-with", _session.created_with);
 
 		std::string modified_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
-		child->set_property("modified-with", modified_with);	
-	}	
+		child->set_property("modified-with", modified_with);
+	}
 
 	node->set_property (X_("id"), id ());
 	node->set_property (X_("name"), name());
@@ -3084,6 +3089,7 @@ Route::set_processor_state (XMLNode const & node, XMLProperty const* prop, Proce
 			                                        boost::bind (&Route::processor_selfdestruct, this, boost::weak_ptr<Processor> (processor)));
 
 		} else {
+			warning << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
 			return false;
 		}
 
@@ -3437,9 +3443,9 @@ Route::all_outputs () const
 bool
 Route::direct_feeds_according_to_reality (boost::shared_ptr<Route> other, bool* via_send_only)
 {
-	DEBUG_TRACE (DEBUG::Graph, string_compose ("Feeds? %1\n", _name));
+	DEBUG_TRACE (DEBUG::Graph, string_compose ("Feeds from %1 (-> %2)?\n", _name, other->name()));
 	if (other->all_inputs().fed_by (_output)) {
-		DEBUG_TRACE (DEBUG::Graph, string_compose ("\tdirect FEEDS %2\n", other->name()));
+		DEBUG_TRACE (DEBUG::Graph, string_compose ("\tdirect FEEDS to %1\n", other->name()));
 		if (via_send_only) {
 			*via_send_only = false;
 		}
@@ -3474,10 +3480,7 @@ Route::direct_feeds_according_to_reality (boost::shared_ptr<Route> other, bool* 
 			} else {
 				DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tIOP %1 does NOT feed %2\n", iop->name(), other->name()));
 			}
-		} else {
-			DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tPROC %1 is not an IOP\n", (*r)->name()));
 		}
-
 	}
 
 	DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tdoes NOT feed %1\n", other->name()));
@@ -5566,8 +5569,8 @@ Route::eq_band_name (uint32_t band) const
 	} else {
 		switch (band) {
 			case 0: return _("lo");
-			case 1: return _("lo mid");
-			case 2: return _("hi mid");
+			case 1: return _("lm");
+			case 2: return _("hm");
 			case 3: return _("hi");
 			default: return string();
 		}

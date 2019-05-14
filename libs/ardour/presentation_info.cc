@@ -123,12 +123,12 @@ const PresentationInfo::Flag PresentationInfo::MixerStripables = PresentationInf
 void
 PresentationInfo::make_property_quarks ()
 {
-        Properties::selected.property_id = g_quark_from_static_string (X_("selected"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for selected = %1\n",	Properties::selected.property_id));
-        Properties::color.property_id = g_quark_from_static_string (X_("color"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for color = %1\n",	Properties::color.property_id));
-        Properties::order.property_id = g_quark_from_static_string (X_("order"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for order = %1\n",	Properties::order.property_id));
+	Properties::selected.property_id = g_quark_from_static_string (X_("selected"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for selected = %1\n", Properties::selected.property_id));
+	Properties::color.property_id = g_quark_from_static_string (X_("color"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for color = %1\n", Properties::color.property_id));
+	Properties::order.property_id = g_quark_from_static_string (X_("order"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for order = %1\n", Properties::order.property_id));
 }
 
 PresentationInfo::PresentationInfo (Flag f)

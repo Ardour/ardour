@@ -49,7 +49,6 @@ using namespace std;
 ArdourDropdown::ArdourDropdown (Element e)
 	: _scrolling_disabled(false)
 {
-//	signal_button_press_event().connect (sigc::mem_fun(*this, &ArdourDropdown::on_mouse_pressed));
 	_menu.signal_size_request().connect (sigc::mem_fun(*this, &ArdourDropdown::menu_size_request));
 
 	_menu.set_reserve_toggle_size(false);

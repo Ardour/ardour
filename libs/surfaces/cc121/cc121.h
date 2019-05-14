@@ -150,7 +150,7 @@ class CC121 : public ARDOUR::ControlProtocol, public AbstractUI<CC121Request> {
 	};
 
 	enum ButtonState {
-	  ShiftDown = 0x1,
+		ShiftDown = 0x1,
 		RewindDown = 0x2,
 		StopDown = 0x4,
 		UserDown = 0x8,

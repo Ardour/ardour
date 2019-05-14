@@ -1042,7 +1042,7 @@ Session::setup_bundles ()
 		if (np + 1 < outputs[DataType::AUDIO].size()) {
 			char buf[32];
 			snprintf (buf, sizeof(buf), _("out %" PRIu32 "+%" PRIu32), np + 1, np + 2);
-                        boost::shared_ptr<Bundle> c (new Bundle (buf, true));
+			boost::shared_ptr<Bundle> c (new Bundle (buf, true));
 			c->add_channel (_("L"), DataType::AUDIO);
 			c->set_port (0, outputs[DataType::AUDIO][np]);
 			c->add_channel (_("R"), DataType::AUDIO);
@@ -1616,11 +1616,6 @@ Session::track_playlist_changed (boost::weak_ptr<Track> wp)
 bool
 Session::record_enabling_legal () const
 {
-	/* this used to be in here, but survey says.... we don't need to restrict it */
-	// if (record_status() == Recording) {
-	//	return false;
-	// }
-
 	if (Config->get_all_safe()) {
 		return false;
 	}
@@ -1841,10 +1836,10 @@ Session::update_skips (Location* loc, bool consolidate)
 
 	Locations::LocationList skips;
 
-        if (consolidate) {
-	        PBD::Unwinder<bool> uw (_ignore_skips_updates, true);
-	        consolidate_skips (loc);
-        }
+	if (consolidate) {
+		PBD::Unwinder<bool> uw (_ignore_skips_updates, true);
+		consolidate_skips (loc);
+	}
 
 	sync_locations_to_skips ();
 
@@ -1854,41 +1849,41 @@ Session::update_skips (Location* loc, bool consolidate)
 void
 Session::consolidate_skips (Location* loc)
 {
-        Locations::LocationList all_locations = _locations->list ();
+	Locations::LocationList all_locations = _locations->list ();
 
-        for (Locations::LocationList::iterator l = all_locations.begin(); l != all_locations.end(); ) {
+	for (Locations::LocationList::iterator l = all_locations.begin(); l != all_locations.end(); ) {
 
-                if (!(*l)->is_skip ()) {
-                        ++l;
-                        continue;
-                }
+		if (!(*l)->is_skip ()) {
+			++l;
+			continue;
+		}
 
-                /* don't test against self */
+		/* don't test against self */
 
-                if (*l == loc) {
-                        ++l;
-                        continue;
-                }
+		if (*l == loc) {
+			++l;
+			continue;
+		}
 
-                switch (Evoral::coverage ((*l)->start(), (*l)->end(), loc->start(), loc->end())) {
-                case Evoral::OverlapInternal:
-                case Evoral::OverlapExternal:
-                case Evoral::OverlapStart:
-                case Evoral::OverlapEnd:
-                        /* adjust new location to cover existing one */
-                        loc->set_start (min (loc->start(), (*l)->start()));
-                        loc->set_end (max (loc->end(), (*l)->end()));
-                        /* we don't need this one any more */
-                        _locations->remove (*l);
-                        /* the location has been deleted, so remove reference to it in our local list */
-                        l = all_locations.erase (l);
-                        break;
+		switch (Evoral::coverage ((*l)->start(), (*l)->end(), loc->start(), loc->end())) {
+			case Evoral::OverlapInternal:
+			case Evoral::OverlapExternal:
+			case Evoral::OverlapStart:
+			case Evoral::OverlapEnd:
+				/* adjust new location to cover existing one */
+				loc->set_start (min (loc->start(), (*l)->start()));
+				loc->set_end (max (loc->end(), (*l)->end()));
+				/* we don't need this one any more */
+				_locations->remove (*l);
+				/* the location has been deleted, so remove reference to it in our local list */
+				l = all_locations.erase (l);
+				break;
 
-                case Evoral::OverlapNone:
-                        ++l;
-                        break;
-                }
-        }
+			case Evoral::OverlapNone:
+				++l;
+				break;
+		}
+	}
 }
 
 void
@@ -1922,52 +1917,52 @@ Session::_sync_locations_to_skips ()
 void
 Session::location_added (Location *location)
 {
-        if (location->is_auto_punch()) {
-                set_auto_punch_location (location);
-        }
+	if (location->is_auto_punch()) {
+		set_auto_punch_location (location);
+	}
 
-        if (location->is_auto_loop()) {
-                set_auto_loop_location (location);
-        }
+	if (location->is_auto_loop()) {
+		set_auto_loop_location (location);
+	}
 
-        if (location->is_session_range()) {
-                /* no need for any signal handling or event setting with the session range,
-                   because we keep a direct reference to it and use its start/end directly.
-                */
-                _session_range_location = location;
-        }
+	if (location->is_session_range()) {
+		/* no need for any signal handling or event setting with the session range,
+			 because we keep a direct reference to it and use its start/end directly.
+			 */
+		_session_range_location = location;
+	}
 
-        if (location->is_mark()) {
-                /* listen for per-location signals that require us to do any * global updates for marks */
+	if (location->is_mark()) {
+		/* listen for per-location signals that require us to do any * global updates for marks */
 
-                location->StartChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
-                location->EndChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
-                location->Changed.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
-                location->FlagsChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
+		location->StartChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
+		location->EndChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
+		location->Changed.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
+		location->FlagsChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
 		location->PositionLockStyleChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
-        }
+	}
 
 	if (location->is_range_marker()) {
-                /* listen for per-location signals that require us to do any * global updates for marks */
+		/* listen for per-location signals that require us to do any * global updates for marks */
 
-                location->StartChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
-                location->EndChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
-                location->Changed.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
-                location->FlagsChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
+		location->StartChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
+		location->EndChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
+		location->Changed.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
+		location->FlagsChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
 		location->PositionLockStyleChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
-        }
+	}
 
-        if (location->is_skip()) {
-                /* listen for per-location signals that require us to update skip-locate events */
+	if (location->is_skip()) {
+		/* listen for per-location signals that require us to update skip-locate events */
 
-                location->StartChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
-                location->EndChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
-                location->Changed.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
-                location->FlagsChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, false));
+		location->StartChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
+		location->EndChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
+		location->Changed.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
+		location->FlagsChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, false));
 		location->PositionLockStyleChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_marks, this, location));
 
-                update_skips (location, true);
-        }
+		update_skips (location, true);
+	}
 
 	set_dirty ();
 }
@@ -2003,17 +1998,17 @@ Session::location_removed (Location *location)
 void
 Session::locations_changed ()
 {
-        _locations->apply (*this, &Session::_locations_changed);
+	_locations->apply (*this, &Session::_locations_changed);
 }
 
 void
 Session::_locations_changed (const Locations::LocationList& locations)
 {
-        /* There was some mass-change in the Locations object.
-
-           We might be re-adding a location here but it doesn't actually matter
-           for all the locations that the Session takes an interest in.
-        */
+	/* There was some mass-change in the Locations object.
+	 * 
+	 * We might be re-adding a location here but it doesn't actually matter
+	 * for all the locations that the Session takes an interest in.
+	 */
 
 	{
 		PBD::Unwinder<bool> protect_ignore_skip_updates (_ignore_skips_updates, true);
@@ -2262,7 +2257,7 @@ Session::set_block_size (pframes_t nframes)
 
 
 static void
-trace_terminal (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> rbase)
+trace_terminal (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> rbase, bool sends_only)
 {
 	boost::shared_ptr<Route> r2;
 
@@ -2289,7 +2284,7 @@ trace_terminal (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> rbase)
 		   base as being fed by r2
 		*/
 
-		rbase->add_fed_by (r2, i->sends_only);
+		rbase->add_fed_by (r2, i->sends_only || sends_only);
 
 		if (r2 != rbase) {
 
@@ -2305,7 +2300,7 @@ trace_terminal (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> rbase)
 			   all routes that feed r2
 			*/
 
-			trace_terminal (r2, rbase);
+			trace_terminal (r2, rbase, i->sends_only || sends_only);
 		}
 
 	}
@@ -2420,7 +2415,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 		   or indirectly feeds them.
 		*/
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			trace_terminal (*i, *i);
+			trace_terminal (*i, *i, false);
 		}
 
 		*r = *sorted_routes;
@@ -2622,7 +2617,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 		--how_many;
 	}
 
-  failed:
+	failed:
 	if (!new_routes.empty()) {
 		StateProtector sp (this);
 		if (Profile->get_trx()) {
@@ -2726,7 +2721,7 @@ Session::new_midi_route (RouteGroup* route_group, uint32_t how_many, string name
 		--how_many;
 	}
 
-  failure:
+	failure:
 	if (!ret.empty()) {
 		StateProtector sp (this);
 		add_routes (ret, false, false, false, order);
@@ -2958,43 +2953,43 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool r
 void
 Session::reconnect_midi_scene_ports(bool inputs)
 {
-    if (inputs ) {
+	if (inputs ) {
 
-        boost::shared_ptr<MidiPort> scene_in_ptr = scene_in();
-        if (scene_in_ptr) {
-            scene_in_ptr->disconnect_all ();
+		boost::shared_ptr<MidiPort> scene_in_ptr = scene_in();
+		if (scene_in_ptr) {
+			scene_in_ptr->disconnect_all ();
 
-            std::vector<EngineStateController::MidiPortState> midi_port_states;
-            EngineStateController::instance()->get_physical_midi_input_states (midi_port_states);
+			std::vector<EngineStateController::MidiPortState> midi_port_states;
+			EngineStateController::instance()->get_physical_midi_input_states (midi_port_states);
 
-            std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
+			std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
 
-            for (; state_iter != midi_port_states.end(); ++state_iter) {
-                if (state_iter->active && state_iter->available && state_iter->scene_connected) {
-                    scene_in_ptr->connect (state_iter->name);
-                }
-            }
-        }
+			for (; state_iter != midi_port_states.end(); ++state_iter) {
+				if (state_iter->active && state_iter->available && state_iter->scene_connected) {
+					scene_in_ptr->connect (state_iter->name);
+				}
+			}
+		}
 
-    } else {
+	} else {
 
-        boost::shared_ptr<MidiPort> scene_out_ptr = scene_out();
+		boost::shared_ptr<MidiPort> scene_out_ptr = scene_out();
 
-        if (scene_out_ptr ) {
-            scene_out_ptr->disconnect_all ();
+		if (scene_out_ptr ) {
+			scene_out_ptr->disconnect_all ();
 
-            std::vector<EngineStateController::MidiPortState> midi_port_states;
-            EngineStateController::instance()->get_physical_midi_output_states (midi_port_states);
+			std::vector<EngineStateController::MidiPortState> midi_port_states;
+			EngineStateController::instance()->get_physical_midi_output_states (midi_port_states);
 
-            std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
+			std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
 
-            for (; state_iter != midi_port_states.end(); ++state_iter) {
-                if (state_iter->active && state_iter->available && state_iter->scene_connected) {
-                    scene_out_ptr->connect (state_iter->name);
-                }
-            }
-        }
-    }
+			for (; state_iter != midi_port_states.end(); ++state_iter) {
+				if (state_iter->active && state_iter->available && state_iter->scene_connected) {
+					scene_out_ptr->connect (state_iter->name);
+				}
+			}
+		}
+	}
 }
 
 void
@@ -3187,7 +3182,7 @@ Session::new_audio_track (int input_channels, int output_channels, RouteGroup* r
 		--how_many;
 	}
 
-  failed:
+	failed:
 	if (!new_routes.empty()) {
 		StateProtector sp (this);
 		if (Profile->get_trx()) {
@@ -3274,7 +3269,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 		--how_many;
 	}
 
-  failure:
+	failure:
 	if (!ret.empty()) {
 		StateProtector sp (this);
 		if (Profile->get_trx()) {
@@ -3516,7 +3511,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 		--how_many;
 	}
 
-  out:
+	out:
 	if (!ret.empty()) {
 		StateProtector sp (this);
 		if (Profile->get_trx()) {
@@ -4172,7 +4167,7 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 			}
 			in_signal_flow = true;
 		} else {
-			DEBUG_TRACE (DEBUG::Solo, "\tno feed to\n");
+			DEBUG_TRACE (DEBUG::Solo, string_compose("\tno feed to %1\n", (*i)->name()) );
 		}
 
 		if (!in_signal_flow) {
@@ -6306,7 +6301,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 	}
 
-  out:
+	out:
 	if (!result) {
 		for (vector<boost::shared_ptr<Source> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
 			(*src)->mark_for_remove ();
@@ -6458,7 +6453,7 @@ Session::have_rec_enabled_track () const
 bool
 Session::have_rec_disabled_track () const
 {
-    return g_atomic_int_get (const_cast<gint*>(&_have_rec_disabled_track)) == 1;
+	return g_atomic_int_get (const_cast<gint*>(&_have_rec_disabled_track)) == 1;
 }
 
 /** Update the state of our rec-enabled tracks flag */

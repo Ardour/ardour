@@ -34,7 +34,7 @@ namespace ArdourCanvas {
 	class Rectangle;
 	class Item;
 	class Container;
- 	class Text;
+	class Text;
 }
 
 using ARDOUR::samplepos_t;

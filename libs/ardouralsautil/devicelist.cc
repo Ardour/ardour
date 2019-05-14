@@ -94,6 +94,38 @@ ARDOUR::get_alsa_audio_device_names (std::map<std::string, std::string>& devices
 	}
 }
 
+static void
+insert_unique_device_name (std::map<std::string, std::string>& devices, std::string const& card_name, std::string const& devname, int caps)
+{
+	assert (caps != 0);
+	std::pair<std::map<std::string, std::string>::iterator, bool> rv;
+	char cnt = '2';
+	std::string cn = card_name;
+	/* Add numbers first this is be independent of physical ID (sequencer vs rawmidi).
+	 * If this fails (>= 10 devices) add the device-name for uniqness
+	 *
+	 * XXX: Perhaps this is a bad idea, and `devname` should always be added if
+	 * there is more than one device with the same name.
+	 */
+	do {
+		cn += " (";
+		if (caps & SND_SEQ_PORT_CAP_READ) cn += "I";
+		if (caps & SND_SEQ_PORT_CAP_WRITE) cn += "O";
+		cn += ")";
+		rv = devices.insert (std::make_pair (cn, devname));
+		cn = card_name + " [" + cnt + "]";
+	} while (!rv.second && ++cnt <= '9');
+
+	if (!rv.second) {
+		cn = card_name + " [" + devname + "] (";
+		if (caps & SND_SEQ_PORT_CAP_READ) cn += "I";
+		if (caps & SND_SEQ_PORT_CAP_WRITE) cn += "O";
+		cn += ")";
+		rv = devices.insert (std::make_pair (cn, devname));
+		assert (rv.second == true);
+	}
+}
+
 void
 ARDOUR::get_alsa_rawmidi_device_names (std::map<std::string, std::string>& devices)
 {
@@ -149,14 +181,13 @@ ARDOUR::get_alsa_rawmidi_device_names (std::map<std::string, std::string>& devic
 						devname += ",";
 						devname += PBD::to_string (device);
 
-						std::string card_name;
-						card_name = snd_rawmidi_info_get_name (info);
-						card_name += " (";
-						if (sub < subs_in) card_name += "I";
-						if (sub < subs_out) card_name += "O";
-						card_name += ")";
+						std::string card_name = snd_rawmidi_info_get_name (info);
 
-						devices.insert (std::make_pair (card_name, devname));
+						int caps = 0;
+						if (sub < subs_in) caps |= SND_SEQ_PORT_CAP_READ;
+						if (sub < subs_out) caps |= SND_SEQ_PORT_CAP_WRITE;
+
+						insert_unique_device_name (devices, card_name, devname, caps);
 						break;
 					} else {
 						devname = "hw:";
@@ -166,12 +197,10 @@ ARDOUR::get_alsa_rawmidi_device_names (std::map<std::string, std::string>& devic
 						devname += ",";
 						devname += PBD::to_string (sub);
 
-						std::string card_name = sub_name;
-						card_name += " (";
-						if (sub < subs_in) card_name += "I";
-						if (sub < subs_out) card_name += "O";
-						card_name += ")";
-						devices.insert (std::make_pair (card_name, devname));
+						int caps = 0;
+						if (sub < subs_in) caps |= SND_SEQ_PORT_CAP_READ;
+						if (sub < subs_out) caps |= SND_SEQ_PORT_CAP_WRITE;
+						insert_unique_device_name (devices, sub_name, devname, caps);
 					}
 				}
 			}
@@ -217,16 +246,11 @@ ARDOUR::get_alsa_sequencer_names (std::map<std::string, std::string>& devices)
 			std::string card_name;
 			card_name = snd_seq_port_info_get_name (pinfo);
 
-			card_name += " (";
-			if (caps & SND_SEQ_PORT_CAP_READ) card_name += "I";
-			if (caps & SND_SEQ_PORT_CAP_WRITE) card_name += "O";
-			card_name += ")";
-
 			std::string devname;
 			devname = PBD::to_string(snd_seq_port_info_get_client (pinfo));
 			devname += ":";
 			devname += PBD::to_string(snd_seq_port_info_get_port (pinfo));
-			devices.insert (std::make_pair (card_name, devname));
+			insert_unique_device_name (devices, card_name, devname, caps);
 		}
 	}
 	snd_seq_close (seq);

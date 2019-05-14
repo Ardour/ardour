@@ -1234,6 +1234,20 @@ struct CFunc
   }
 
   //--------------------------------------------------------------------------
+  // push back a C-pointer to a std::list<T*>
+
+  template <class T, class C>
+  static int pushbackptr (lua_State *L)
+  {
+    C * const c = Userdata::get <C> (L, 1, false);
+    if (!c) { return luaL_error (L, "invalid pointer to std::list<>"); }
+    T * const v = Userdata::get <T> (L, 2, true);
+    if (!v) { return luaL_error (L, "invalid pointer to std::list<>::value_type"); }
+    c->push_back (v);
+    return 0;
+  }
+
+  //--------------------------------------------------------------------------
   // generate std::map from table
 
   template <class K, class V>

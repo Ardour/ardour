@@ -241,8 +241,8 @@ EditorRegions::EditorRegions (Editor* e)
 
 	list<TargetEntry> region_list_target_table;
 
-	region_list_target_table.push_back (TargetEntry ("text/plain"));
 	region_list_target_table.push_back (TargetEntry ("text/uri-list"));
+	region_list_target_table.push_back (TargetEntry ("text/plain"));
 	region_list_target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
 
 	_display.add_drop_targets (region_list_target_table);

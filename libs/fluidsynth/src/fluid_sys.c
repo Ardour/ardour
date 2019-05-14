@@ -934,7 +934,7 @@ fluid_thread_t *
 new_fluid_thread(const char *name, fluid_thread_func_t func, void *data, int prio_level, int detach)
 {
     GThread *thread;
-    fluid_thread_info_t *info;
+    fluid_thread_info_t *info = NULL;
     GError *err = NULL;
 
     g_return_val_if_fail(func != NULL, NULL);
@@ -971,25 +971,21 @@ new_fluid_thread(const char *name, fluid_thread_func_t func, void *data, int pri
 #endif
     }
 
+    else
+    {
 #if NEW_GLIB_THREAD_API
-    else
-    {
         thread = g_thread_try_new(name, (GThreadFunc)func, data, &err);
-    }
-
 #else
-    else
-    {
         thread = g_thread_create((GThreadFunc)func, data, detach == FALSE, &err);
-    }
-
 #endif
+    }
 
     if(!thread)
     {
         FLUID_LOG(FLUID_ERR, "Failed to create the thread: %s",
                   fluid_gerror_message(err));
         g_clear_error(&err);
+        FLUID_FREE(info);
         return NULL;
     }
 
@@ -1603,3 +1599,36 @@ void delete_fluid_server_socket(fluid_server_socket_t *server_socket)
 }
 
 #endif // NETWORK_SUPPORT
+
+FILE* fluid_file_open(const char* path, const char** errMsg)
+{
+    static const char ErrExist[] = "File does not exist.";
+    static const char ErrRegular[] = "File is not regular, refusing to open it.";
+    static const char ErrNull[] = "File does not exists or insufficient permissions to open it.";
+    
+    FILE* handle = NULL;
+    
+    if(!g_file_test(path, G_FILE_TEST_EXISTS))
+    {
+        if(errMsg != NULL)
+        {
+            *errMsg = ErrExist;
+        }
+    }
+    else if(!g_file_test(path, G_FILE_TEST_IS_REGULAR))
+    {
+        if(errMsg != NULL)
+        {
+            *errMsg = ErrRegular;
+        }
+    }
+    else if((handle = FLUID_FOPEN(path, "rb")) == NULL)
+    {
+        if(errMsg != NULL)
+        {
+            *errMsg = ErrNull;
+        }
+    }
+    
+    return handle;
+}

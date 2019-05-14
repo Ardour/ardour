@@ -90,7 +90,7 @@ PannerUI::set_panner (boost::shared_ptr<PannerShell> ps, boost::shared_ptr<Panne
 	/* note that the panshell might not change here (i.e. ps == _panshell)
 	 */
 
- 	connections.drop_connections ();
+	connections.drop_connections ();
 
 	delete pan_astyle_menu;
 	pan_astyle_menu = 0;

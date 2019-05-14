@@ -99,6 +99,4 @@ private:
 
 } /* namespace ARDOUR */
 
-#endif	/* __ardour_note_fixer_h__ */
-
-
+#endif /* __ardour_note_fixer_h__ */

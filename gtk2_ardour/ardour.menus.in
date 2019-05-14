@@ -36,10 +36,10 @@
       <menuitem action='toggle-session-options-editor'/>
 
       <menu name='MonitorMenu' action='MonitorMenu'>
-	    <menuitem action='UseMonitorSection'/>
-	    <menuitem action='monitor-cut-all'/>
-	    <menuitem action='monitor-dim-all'/>
-	    <menuitem action='monitor-mono'/>
+        <menuitem action='UseMonitorSection'/>
+        <menuitem action='monitor-cut-all'/>
+        <menuitem action='monitor-dim-all'/>
+        <menuitem action='monitor-mono'/>
       </menu>
       
       <menu name='Metadata' action='Metadata'>
@@ -299,8 +299,10 @@
       <menuitem action='loudness-analyze-region'/>
       <menuitem action='spectral-analyze-region'/>
       <menu action='RegionMenuEdit'>
+#ifndef MIXBUS
         <menuitem action='combine-regions'/>
         <menuitem action='uncombine-regions'/>
+#endif
         <menuitem action='pitch-shift-region'/>
         <menuitem action='split-region-at-transients'/>
         <menuitem action='split-multichannel-region'/>
@@ -586,10 +588,6 @@
       <menuitem action='ManageTemplates'/>
       <menuitem action='toggle-key-editor'/>
       <separator/>
-#ifdef MIXBUS
-      <menuitem action='license-manager'/>
-      <separator/>
-#endif
       <menuitem action='NewMIDITracer'/>
       <menuitem action='toggle-log-window'/>
       <separator/>
@@ -599,10 +597,11 @@
       <menuitem action='toggle-about'/>
 #endif
 #ifdef MIXBUS
-      <menuitem action='reference'/>
+      <menuitem action='website'/>
       <menuitem action='manual'/>
+      <menuitem action='reference'/>
+      <menuitem action='videos'/>
       <menuitem action='forums'/>
-      <menuitem action='chat'/>
 #else
       <menuitem action='chat'/>
       <menuitem action='manual'/>
@@ -666,9 +665,9 @@
     <menuitem action='send_options'/>
     <separator/>
     <menu action="disk-io-menu">
-        <menuitem action='disk-io-prefader'/>
-	<menuitem action='disk-io-postfader'/>
-	<menuitem action='disk-io-custom'/>
+      <menuitem action='disk-io-prefader'/>
+      <menuitem action='disk-io-postfader'/>
+      <menuitem action='disk-io-custom'/>
     </menu>
     <separator/>
     <menuitem action='clear'/>
@@ -822,7 +821,6 @@
     <menuitem action='spectral-analyze-region'/>
     <separator/>
     <menuitem action='remove-region'/>
-
   </popup>
 
 </ui>

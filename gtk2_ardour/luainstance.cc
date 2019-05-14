@@ -73,9 +73,9 @@ class ImageSurface {
 		 * color or alpha channel belonging to format will be 0. The contents of bits
 		 * within a pixel, but not belonging to the given format are undefined).
 		 *
-		 * @param format 	format of pixels in the surface to create
-		 * @param width 	width of the surface, in pixels
-		 * @param height 	height of the surface, in pixels
+		 * @param format  format of pixels in the surface to create
+		 * @param width   width of the surface, in pixels
+		 * @param height  height of the surface, in pixels
 		 */
 		ImageSurface (Cairo::Format format, int width, int height)
 			: _surface (Cairo::ImageSurface::create (format, width, height))
@@ -147,10 +147,10 @@ class ImageSurface {
 
 		/** Marks a rectangular area of the given surface dirty.
 		 *
-		 * @param x 	 X coordinate of dirty rectangle
-		 * @param y 	Y coordinate of dirty rectangle
-		 * @param width 	width of dirty rectangle
-		 * @param height 	height of dirty rectangle
+		 * @param x X coordinate of dirty rectangle
+		 * @param y Y coordinate of dirty rectangle
+		 * @param width width of dirty rectangle
+		 * @param height height of dirty rectangle
 		 */
 		void mark_dirty (int x, int y, int width, int height) {
 			_surface->mark_dirty (x, y, width, height);

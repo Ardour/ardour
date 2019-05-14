@@ -414,11 +414,11 @@ RegionView::region_resized (const PropertyChange& what_changed)
 
 		unit_length = _region->length() / samples_per_pixel;
 
- 		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
+		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 
- 			(*i)->set_duration (unit_length);
+			(*i)->set_duration (unit_length);
 
- 		}
+		}
 	}
 }
 
@@ -865,7 +865,7 @@ RegionView::trim_front (samplepos_t new_bound, bool no_overlap, const int32_t su
 		}
 
 		/* Only trim region on the left if the first sample has gone beyond the left region's last sample. */
-		if (region_left != 0 &&	(region_left->last_sample() > _region->first_sample() || regions_touching)) {
+		if (region_left != 0 && (region_left->last_sample() > _region->first_sample() || regions_touching)) {
 			region_left->trim_end (_region->first_sample() - 1);
 		}
 	}

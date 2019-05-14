@@ -1362,11 +1362,11 @@ Editor::parameter_changed (std::string p)
 	} else if (p == "show-summary") {
 
 		bool const s = _session->config.get_show_summary ();
- 		if (s) {
- 			_summary_hbox.show ();
- 		} else {
- 			_summary_hbox.hide ();
- 		}
+		if (s) {
+			_summary_hbox.show ();
+		} else {
+			_summary_hbox.hide ();
+		}
 
 		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("ToggleSummary"));
 		if (tact->get_active () != s) {

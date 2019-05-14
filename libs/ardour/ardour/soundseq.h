@@ -47,7 +47,7 @@ class LIBARDOUR_API SoundPlaylist : public EDL::Playlist {
 
 } /* namespace ARDOUR */
 
-#endif	/* __soundseq_h__ */
+#endif /* __soundseq_h__ */
 
 
 

@@ -247,8 +247,8 @@ PortMatrixRowLabels::render_bundle_name (
 	Gdk::Color textcolor;
 	ARDOUR_UI_UTILS::set_color_from_rgba(textcolor, Gtkmm2ext::contrasting_text_color(ARDOUR_UI_UTILS::gdk_color_to_rgba(bg_colour)));
 	set_source_rgb (cr, textcolor);
- 	cairo_move_to (cr, xoff + x + name_pad(), yoff + name_pad() + off);
- 	cairo_show_text (cr, b->name().c_str());
+	cairo_move_to (cr, xoff + x + name_pad(), yoff + name_pad() + off);
+	cairo_show_text (cr, b->name().c_str());
 }
 
 void

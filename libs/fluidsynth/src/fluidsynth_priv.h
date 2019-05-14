@@ -18,7 +18,7 @@
  * 02110-1301, USA
  */
 
-/**
+/*
  * @file fluidsynth_priv.h
  * 
  * lightweight part of fluid_sys.h, containing forward declarations of fluidsynth's private types and private macros

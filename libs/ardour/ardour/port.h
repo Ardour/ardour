@@ -158,7 +158,7 @@ protected:
 
 	PortEngine::PortHandle _port_handle;
 
-	static bool	      _connecting_blocked;
+	static bool       _connecting_blocked;
 	static pframes_t  _cycle_nframes; /* access only from process() tree */
 
 	static pframes_t  _global_port_buffer_offset; /* access only from process() tree */

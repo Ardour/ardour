@@ -246,13 +246,13 @@ SpeakerDialog::clamp_to_circle (double& x, double& y)
 void
 SpeakerDialog::darea_size_allocate (Gtk::Allocation& alloc)
 {
-  	width = alloc.get_width();
-  	height = alloc.get_height();
+	width = alloc.get_width();
+	height = alloc.get_height();
 
 	/* The allocation will (should) be rectangualar, but make the basic
-	   drawing square; space to the right of the square is for over-hanging
-	   text labels.
-	*/
+	 * drawing square; space to the right of the square is for over-hanging
+	 * text labels.
+	 */
 	width = height;
 
 	if (height > 100) {

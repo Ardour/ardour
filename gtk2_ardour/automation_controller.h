@@ -33,7 +33,8 @@
 #include <gtkmm/alignment.h>
 
 #include "pbd/signals.h"
-#include "evoral/Parameter.hpp"
+#include "ardour/parameter_descriptor.h"
+
 #include "widgets/barcontroller.h"
 
 namespace ARDOUR {

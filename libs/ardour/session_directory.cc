@@ -134,9 +134,9 @@ SessionDirectory::sources_root () const
 	 *    SessionDirectory is also used directly by the AudioRegionImporter,
 	 *    and the peak-file background thread (session.cc).
 	 *
-	 * 	  There is no actual benefit to use the session-name instead of
-	 * 	  the folder-name. Under normal circumstances they are always
-	 * 	  identical.  But it would be consistent to prefer the name.
+	 *    There is no actual benefit to use the session-name instead of
+	 *    the folder-name. Under normal circumstances they are always
+	 *    identical.  But it would be consistent to prefer the name.
 	 */
 	try {
 		Glib::Dir dir(sources_root_path);

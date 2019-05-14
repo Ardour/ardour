@@ -86,9 +86,6 @@ PortExportChannelSelector::PortExportChannelSelector (ARDOUR::Session * session,
 
 PortExportChannelSelector::~PortExportChannelSelector ()
 {
-// 	if (session) {
-// 		session->add_instant_xml (get_state(), false);
-// 	}
 }
 
 void

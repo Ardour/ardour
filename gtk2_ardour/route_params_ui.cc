@@ -353,14 +353,14 @@ void
 RouteParams_UI::cleanup_view (bool stopupdate)
 {
 	if (_active_view) {
-		GenericPluginUI *   plugui = 0;
+		GenericPluginUI* plugui = 0;
 
 		if (stopupdate && (plugui = dynamic_cast<GenericPluginUI*>(_active_view)) != 0) {
-			  plugui->stop_updating (0);
+			plugui->stop_updating (0);
 		}
 
 		_processor_going_away_connection.disconnect ();
- 		redir_hpane.remove(*_active_view);
+		redir_hpane.remove(*_active_view);
 		delete _active_view;
 		_active_view = 0;
 	}

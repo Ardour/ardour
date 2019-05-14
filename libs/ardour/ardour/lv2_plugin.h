@@ -192,6 +192,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	double        _current_bpm;
 	PBD::ID       _insert_id;
 	std::string   _plugin_state_dir;
+	uint32_t      _bpm_control_port_index;
 	uint32_t      _patch_port_in_index;
 	uint32_t      _patch_port_out_index;
 	URIMap&       _uri_map;
