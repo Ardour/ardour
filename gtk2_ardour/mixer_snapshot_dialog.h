@@ -53,15 +53,15 @@ class MixerSnapshotDialog : public ArdourWindow
 
         void ensure_directory(bool);
         void new_snapshot(bool);
-        void load_snapshot(const std::string);
+        void load_snapshot(Gtk::TreeModel::iterator&);
         void new_snap_from_session(bool);
 
-        void rename_snapshot(const std::string, bool);
-        void remove_snapshot(const std::string, bool);
+        void rename_snapshot(Gtk::TreeModel::iterator&);
+        void remove_snapshot(Gtk::TreeModel::iterator&, bool);
 
         bool bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<std::string>&, Gtk::ScrolledWindow&, Glib::RefPtr<Gtk::ListStore>, bool);
 
-        void popup_context_menu(int, int64_t, std::string, bool);
+        void popup_context_menu(int, int64_t, Gtk::TreeModel::iterator&, bool);
         bool button_press(GdkEventButton*, bool);
         void window_opened();
         void fav_cell_action(const std::string&, bool);
