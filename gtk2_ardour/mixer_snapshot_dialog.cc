@@ -407,7 +407,37 @@ void MixerSnapshotDialog::new_snapshot(bool global)
             }
 
             snap->write(path);
-            refill_display(global);
+            
+            string name = basename_nosuffix(path);
+            
+            TreeModel::Row row;
+            if(global) {
+                row = *(global_model->append());
+            } else {
+                row = *(local_model->append());
+            }
+            
+            if (name.length() > 48) {
+                name = name.substr (0, 48);
+                name.append("...");
+            }
+            
+            row[_columns.name]         = name;
+            row[_columns.favorite]     = snap->get_favorite();
+            row[_columns.version]      = snap->get_last_modified_with();
+            row[_columns.n_tracks]     = snap->get_routes().size();
+            row[_columns.n_vcas]       = snap->get_vcas().size();
+            row[_columns.n_groups]     = snap->get_groups().size();
+            row[_columns.has_specials] = snap->has_specials();
+
+            GStatBuf gsb;
+            g_stat(path.c_str(), &gsb);
+            Glib::DateTime gdt(Glib::DateTime::create_now_local(gsb.st_ctime));
+
+            row[_columns.timestamp] = gsb.st_ctime;
+            row[_columns.date]      = gdt.format ("%F %H:%M");
+            row[_columns.full_path] = path;
+            row[_columns.snapshot]  = snap;
         }
     }
 }
