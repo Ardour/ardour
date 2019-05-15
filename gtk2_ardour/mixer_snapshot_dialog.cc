@@ -376,14 +376,14 @@ void MixerSnapshotDialog::new_row(Glib::RefPtr<ListStore> model, MixerSnapshot* 
             break;
         }
     }
-    
+
     if (name.length() > 48) {
         name = name.substr (0, 48);
         name.append("...");
     }
-    
+
     TreeModel::Row row = *(model->append());
-    
+
     row[_columns.name]         = name;
     row[_columns.favorite]     = snap->get_favorite();
     row[_columns.version]      = snap->get_last_modified_with();
@@ -454,7 +454,7 @@ void MixerSnapshotDialog::new_snapshot(bool global)
             }
 
             snap->write(path);
-            
+
             if(global && !snap->empty()) {
                 new_row(global_model, snap, path);
             } else {
@@ -494,11 +494,15 @@ void MixerSnapshotDialog::new_snap_from_session(bool global)
         path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots", snapshot->get_label() + ".xml");
     }
 
-    snapshot->write(path);
-    if(global && !snapshot->empty()) {
-        new_row(global_model, snapshot, path);
+    if(!snapshot->empty()) {
+        snapshot->write(path);
+        if(global) {
+            new_row(global_model, snapshot, path);
+        } else {
+            new_row(local_model, snapshot, path);
+        }
     } else {
-        new_row(local_model, snapshot, path);
+        delete snapshot;
     }
 }
 
@@ -529,7 +533,7 @@ void MixerSnapshotDialog::refill_display(bool global)
         MixerSnapshot* snap = new MixerSnapshot(_session, path);
         snap->set_label(name);
 
-        new_row(model, snap, name);
+        new_row(model, snap, path);
     }
 }
 
