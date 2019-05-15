@@ -67,6 +67,7 @@ class MixerSnapshotDialog : public ArdourWindow
         void fav_cell_action(const std::string&, bool);
         void recall_flag_cell_action(const std::string&, bool, std::string);
 
+        void new_row(Glib::RefPtr<Gtk::ListStore>, ARDOUR::MixerSnapshot*, std::string);
 
         struct MixerSnapshotColumns : public Gtk::TreeModel::ColumnRecord {
             MixerSnapshotColumns () {
