@@ -364,6 +364,53 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
     return true;
 }
 
+void MixerSnapshotDialog::new_row(Glib::RefPtr<ListStore> model, MixerSnapshot* snap, string path)
+{
+    string name = basename_nosuffix(path);
+
+    TreeModel::Children rows = model->children();
+    for(TreeModel::iterator i = rows.begin(); i != rows.end(); i++) {
+        string row_name = (*i)[_columns.name];
+        if(row_name == name) {
+            model->erase((*i));
+            break;
+        }
+    }
+    
+    if (name.length() > 48) {
+        name = name.substr (0, 48);
+        name.append("...");
+    }
+    
+    TreeModel::Row row = *(model->append());
+    
+    row[_columns.name]         = name;
+    row[_columns.favorite]     = snap->get_favorite();
+    row[_columns.version]      = snap->get_last_modified_with();
+    row[_columns.n_tracks]     = snap->get_routes().size();
+    row[_columns.n_vcas]       = snap->get_vcas().size();
+    row[_columns.n_groups]     = snap->get_groups().size();
+    row[_columns.has_specials] = snap->has_specials();
+
+    GStatBuf gsb;
+    g_stat(path.c_str(), &gsb);
+    Glib::DateTime gdt(Glib::DateTime::create_now_local(gsb.st_ctime));
+
+    row[_columns.timestamp] = gsb.st_ctime;
+    row[_columns.date]      = gdt.format ("%F %H:%M");
+    row[_columns.full_path] = path;
+    row[_columns.snapshot]  = snap;
+
+#ifdef MIXBUS
+    row[_columns.recall_eq]     = snap->get_recall_eq();
+    row[_columns.recall_comp]   = snap->get_recall_comp();
+#endif
+    row[_columns.recall_io]     = snap->get_recall_io();
+    row[_columns.recall_groups] = snap->get_recall_group();
+    row[_columns.recall_vcas]   = snap->get_recall_vca();
+
+}
+
 void MixerSnapshotDialog::new_snapshot(bool global)
 {
     if(!_session) {
@@ -408,36 +455,11 @@ void MixerSnapshotDialog::new_snapshot(bool global)
 
             snap->write(path);
             
-            string name = basename_nosuffix(path);
-            
-            TreeModel::Row row;
-            if(global) {
-                row = *(global_model->append());
+            if(global && !snap->empty()) {
+                new_row(global_model, snap, path);
             } else {
-                row = *(local_model->append());
+                new_row(local_model, snap, path);
             }
-            
-            if (name.length() > 48) {
-                name = name.substr (0, 48);
-                name.append("...");
-            }
-            
-            row[_columns.name]         = name;
-            row[_columns.favorite]     = snap->get_favorite();
-            row[_columns.version]      = snap->get_last_modified_with();
-            row[_columns.n_tracks]     = snap->get_routes().size();
-            row[_columns.n_vcas]       = snap->get_vcas().size();
-            row[_columns.n_groups]     = snap->get_groups().size();
-            row[_columns.has_specials] = snap->has_specials();
-
-            GStatBuf gsb;
-            g_stat(path.c_str(), &gsb);
-            Glib::DateTime gdt(Glib::DateTime::create_now_local(gsb.st_ctime));
-
-            row[_columns.timestamp] = gsb.st_ctime;
-            row[_columns.date]      = gdt.format ("%F %H:%M");
-            row[_columns.full_path] = path;
-            row[_columns.snapshot]  = snap;
         }
     }
 }
@@ -473,7 +495,11 @@ void MixerSnapshotDialog::new_snap_from_session(bool global)
     }
 
     snapshot->write(path);
-    refill_display(global);
+    if(global && !snapshot->empty()) {
+        new_row(global_model, snapshot, path);
+    } else {
+        new_row(local_model, snapshot, path);
+    }
 }
 
 void MixerSnapshotDialog::refill_display(bool global)
@@ -503,36 +529,7 @@ void MixerSnapshotDialog::refill_display(bool global)
         MixerSnapshot* snap = new MixerSnapshot(_session, path);
         snap->set_label(name);
 
-        TreeModel::Row row = *(model->append());
-        if (name.length() > 48) {
-            name = name.substr (0, 48);
-            name.append("...");
-        }
-
-        row[_columns.name]         = name;
-        row[_columns.favorite]     = snap->get_favorite();
-        row[_columns.version]      = snap->get_last_modified_with();
-        row[_columns.n_tracks]     = snap->get_routes().size();
-        row[_columns.n_vcas]       = snap->get_vcas().size();
-        row[_columns.n_groups]     = snap->get_groups().size();
-        row[_columns.has_specials] = snap->has_specials();
-
-        GStatBuf gsb;
-        g_stat(path.c_str(), &gsb);
-        Glib::DateTime gdt(Glib::DateTime::create_now_local(gsb.st_ctime));
-
-        row[_columns.timestamp] = gsb.st_ctime;
-        row[_columns.date]      = gdt.format ("%F %H:%M");
-        row[_columns.full_path] = path;
-        row[_columns.snapshot]  = snap;
-
-#ifdef MIXBUS
-        row[_columns.recall_eq]     = snap->get_recall_eq();
-        row[_columns.recall_comp]   = snap->get_recall_comp();
-#endif
-        row[_columns.recall_io]     = snap->get_recall_io();
-        row[_columns.recall_groups] = snap->get_recall_group();
-        row[_columns.recall_vcas]   = snap->get_recall_vca();
+        new_row(model, snap, name);
     }
 }
 
