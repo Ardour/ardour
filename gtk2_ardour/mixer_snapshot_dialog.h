@@ -51,10 +51,10 @@ class MixerSnapshotDialog : public ArdourWindow
         void refill_display(bool);
         void display_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& data, guint info, guint time, bool);
 
-        void ensure_directory(bool);
+        bool ensure_directory(bool);
         void new_snapshot(bool);
         void load_snapshot(Gtk::TreeModel::iterator&);
-        void new_snap_from_session(bool);
+        void new_snapshot_from_session(bool);
 
         void rename_snapshot(Gtk::TreeModel::iterator&);
         void remove_snapshot(Gtk::TreeModel::iterator&, bool);
@@ -63,7 +63,6 @@ class MixerSnapshotDialog : public ArdourWindow
 
         void popup_context_menu(int, int64_t, Gtk::TreeModel::iterator&, bool);
         bool button_press(GdkEventButton*, bool);
-        void window_opened();
         void fav_cell_action(const std::string&, bool);
         void recall_flag_cell_action(const std::string&, bool, std::string);
 
@@ -105,6 +104,9 @@ class MixerSnapshotDialog : public ArdourWindow
             Gtk::TreeModelColumn<bool> recall_groups;
             Gtk::TreeModelColumn<bool> recall_vcas;
         };
+
+        std::string global_snap_path;
+        std::string local_snap_path;
 
         MixerSnapshotColumns _columns;
 
