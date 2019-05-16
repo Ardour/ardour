@@ -62,14 +62,16 @@ struct ColumnInfo {
 MixerSnapshotDialog::MixerSnapshotDialog(Session* s)
     : ArdourWindow(_("Mixer Snapshot Manager:"))
 {
-    global_model = Gtk::ListStore::create(_columns);
-    local_model  = Gtk::ListStore::create(_columns);
+    global_model = ListStore::create(_columns);
+    local_model  = ListStore::create(_columns);
 
     bootstrap_display_and_model(global_display, global_scroller, global_model, true);
     bootstrap_display_and_model(local_display, local_scroller, local_model,  false);
 
+    //needs to happen after bootstrap
     add(top_level_view_box);
 
+    //DnD stuff
     vector<TargetEntry> target_table;
     target_table.push_back(TargetEntry("string"));
 
@@ -82,8 +84,6 @@ MixerSnapshotDialog::MixerSnapshotDialog(Session* s)
     global_display.signal_button_press_event().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::button_press), true), false);
     local_display.signal_button_press_event().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::button_press), false), false);
 
-    // signal_show().connect(sigc::mem_fun(*this, &MixerSnapshotDialog::window_opened));
-
     set_session(s);
 }
 
@@ -91,31 +91,24 @@ void MixerSnapshotDialog::set_session(Session* s)
 {
     if(s) {
         ArdourWindow::set_session(s);
+        global_snap_path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots");
+        local_snap_path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots");
     }
-
     refill();
 }
 
-void MixerSnapshotDialog::ensure_directory(bool global)
+bool MixerSnapshotDialog::ensure_directory(bool global)
 {
-    string path;
-    if(global) {
-        path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots");
-    } else {
-        path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots");
-    }
+    string path = global ? global_snap_path : local_snap_path;
 
     if(!Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS & Glib::FILE_TEST_IS_DIR)) {
         ::g_mkdir(path.c_str(), 0775);
+        return true;
     }
+    return false;
 }
 
-void MixerSnapshotDialog::window_opened()
-{
-    refill();
-}
-
-void MixerSnapshotDialog::display_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& data, guint info, guint time, bool global)
+void MixerSnapshotDialog::display_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const SelectionData& data, guint info, guint time, bool global)
 {
     if (data.get_target() != "string") {
         context->drag_finish(false, false, time);
@@ -123,31 +116,27 @@ void MixerSnapshotDialog::display_drag_data_received(const Glib::RefPtr<Gdk::Dra
     }
 
     const void* d = data.get_data();
-    const Gtkmm2ext::DnDTreeView<string>* tv = reinterpret_cast<const Gtkmm2ext::DnDTreeView<string>*>(d);
+    const Gtkmm2ext::DnDTreeView<string>* tree_view = reinterpret_cast<const Gtkmm2ext::DnDTreeView<string>*>(d);
 
     bool ok = false;
-    if(tv) {
+    if(tree_view) {
         list<string> paths;
         TreeView* source;
-        tv->get_object_drag_data(paths, &source);
+        tree_view->get_object_drag_data(paths, &source);
 
         if(!paths.empty()) {
             ensure_directory(global);
         }
 
         for (list<string>::const_iterator i = paths.begin(); i != paths.end(); i++) {
-            string new_path;
-            if(global) {
-                new_path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots", basename((*i).c_str()));
-            } else {
-                new_path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots", basename((*i).c_str()));
-            }
+            string new_path = Glib::build_filename(global ? global_snap_path : local_snap_path, basename((*i).c_str()));
             ::g_rename((*i).c_str(), new_path.c_str());
         }
         ok = true;
     }
-
     context->drag_finish(ok, false, time);
+
+    // ToDo: create/delete model rows instead of doing a heavy refill
     refill();
 }
 
@@ -155,8 +144,8 @@ bool MixerSnapshotDialog::button_press(GdkEventButton* ev, bool global)
 {
     if (ev->button == 3) {
 
-        Gtk::TreeModel::Path path;
-        Gtk::TreeViewColumn* col;
+        TreeViewColumn* col;
+        TreeModel::Path path;
         int cx;
         int cy;
 
@@ -248,7 +237,7 @@ void MixerSnapshotDialog::remove_snapshot(TreeModel::iterator& iter, bool global
 }
 
 
-bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<string>& display, Gtk::ScrolledWindow& scroller, Glib::RefPtr<ListStore> model, bool global)
+bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<string>& display, ScrolledWindow& scroller, Glib::RefPtr<ListStore> model, bool global)
 {
     if(!model) {
         return false;
@@ -316,7 +305,7 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
     vbox->set_size_request(800, -1);
 
     btn_add->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snapshot), global));
-    btn_new->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snap_from_session), global));
+    btn_new->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snapshot_from_session), global));
 
     scroller.set_border_width(10);
     scroller.set_policy(POLICY_AUTOMATIC, POLICY_AUTOMATIC);
@@ -367,6 +356,7 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
 void MixerSnapshotDialog::new_row(Glib::RefPtr<ListStore> model, MixerSnapshot* snap, string path)
 {
     string name = basename_nosuffix(path);
+    snap->set_label(name);
 
     TreeModel::Children rows = model->children();
     for(TreeModel::iterator i = rows.begin(); i != rows.end(); i++) {
@@ -440,13 +430,7 @@ void MixerSnapshotDialog::new_snapshot(bool global)
         if (new_label.length() > 0) {
             snap->set_label(new_label);
 
-            string path = "";
-            if(global) {
-                path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots", snap->get_label() + ".xml");
-            } else {
-                path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots", snap->get_label() + ".xml");
-            }
-
+            string path = Glib::build_filename(global ? global_snap_path : local_snap_path, snap->get_label() + ".xml");
             if(!rl.empty() && sel->get_active()) {
                 snap->snap(rl);
             } else {
@@ -464,9 +448,9 @@ void MixerSnapshotDialog::new_snapshot(bool global)
     }
 }
 
-void MixerSnapshotDialog::new_snap_from_session(bool global)
+void MixerSnapshotDialog::new_snapshot_from_session(bool global)
 {
-    Gtk::FileChooserDialog session_selector(_("Open Session"), FILE_CHOOSER_ACTION_OPEN);
+    FileChooserDialog session_selector(_("Open Session"), FILE_CHOOSER_ACTION_OPEN);
     string session_parent_dir = Glib::path_get_dirname(_session->path());
     session_selector.add_button(Stock::CANCEL, RESPONSE_CANCEL);
     session_selector.add_button(Stock::OPEN, RESPONSE_ACCEPT);
@@ -483,26 +467,20 @@ void MixerSnapshotDialog::new_snap_from_session(bool global)
 
     string session_path = session_selector.get_filename();
 
-    MixerSnapshot* snapshot = new MixerSnapshot(_session, session_path);
+    MixerSnapshot* snap = new MixerSnapshot(_session, session_path);
 
-    snapshot->set_label(basename_nosuffix(session_path));
+    snap->set_label(basename_nosuffix(session_path));
 
-    string path = "";
-    if(global) {
-        path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots", snapshot->get_label() + ".xml");
-    } else {
-        path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots", snapshot->get_label() + ".xml");
-    }
-
-    if(!snapshot->empty()) {
-        snapshot->write(path);
+    string path = Glib::build_filename(global ? global_snap_path : local_snap_path, snap->get_label() + ".xml");
+    if(!snap->empty()) {
+        snap->write(path);
         if(global) {
-            new_row(global_model, snapshot, path);
+            new_row(global_model, snap, path);
         } else {
-            new_row(local_model, snapshot, path);
+            new_row(local_model, snap, path);
         }
     } else {
-        delete snapshot;
+        delete snap;
     }
 }
 
@@ -518,21 +496,11 @@ void MixerSnapshotDialog::refill_display(bool global)
     model->clear();
     vector<string> files;
 
-    if(global) {
-        string dir = Glib::build_filename(user_config_directory(-1), "mixer_snapshots");
-        find_files_matching_pattern(files, dir, "*.xml");
-    } else {
-        string dir = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots");
-        find_files_matching_pattern(files, dir, "*.xml");
-    }
+    find_files_matching_pattern(files, global ? global_snap_path : local_snap_path, "*.xml");
 
     for(vector<string>::iterator i = files.begin(); i != files.end(); i++) {
         string path = *(i);
-        string name = basename_nosuffix(*(i));
-
         MixerSnapshot* snap = new MixerSnapshot(_session, path);
-        snap->set_label(name);
-
         new_row(model, snap, path);
     }
 }
