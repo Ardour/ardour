@@ -1872,8 +1872,8 @@ public:
       .addFunction ("empty", &LT::empty)
       .addFunction ("size", &LT::size)
       .addFunction ("reverse", &LT::reverse)
-      .addFunction ("front", static_cast<const T& (LT::*)() const>(&LT::front))
-      .addFunction ("back", static_cast<const T& (LT::*)() const>(&LT::back))
+      .addFunction ("front", static_cast<T& (LT::*)()>(&LT::front))
+      .addFunction ("back", static_cast<T& (LT::*)()>(&LT::back))
       .addExtCFunction ("iter", &CFunc::listIter<T, LT>)
       .addExtCFunction ("table", &CFunc::listToTable<T, LT>);
   }
