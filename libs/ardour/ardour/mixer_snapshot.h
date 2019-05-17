@@ -55,6 +55,8 @@ class LIBARDOUR_API MixerSnapshot
         void load(const std::string);
         bool has_specials();
 
+        ARDOUR::Session* get_session() {return _session;};
+
         struct State {
             std::string id;
             std::string name;
