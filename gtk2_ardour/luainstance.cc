@@ -749,7 +749,7 @@ LuaInstance::register_classes (lua_State* L)
 
 		.addFunction ("processor_selection", &LuaMixer::processor_selection)
 
-		.beginStdList <ArdourMarker*> ("ArdourMarkerList")
+		.beginStdCPtrList <ArdourMarker> ("ArdourMarkerList")
 		.endClass ()
 
 		.beginClass <ArdourMarker> ("ArdourMarker")
