@@ -153,6 +153,7 @@ gtk2_ardour_sources = [
         'missing_file_dialog.cc',
         'missing_plugin_dialog.cc',
         'mixer_snapshot_dialog.cc',
+        'mixer_snapshot_substitution_dialog.cc',
         'mixer_group_tabs.cc',
         'mixer_strip.cc',
         'mixer_ui.cc',
