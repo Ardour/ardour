@@ -498,6 +498,10 @@ void MixerSnapshotDialog::refill_display(bool global)
 
     find_files_matching_pattern(files, global ? global_snap_path : local_snap_path, "*.xml");
 
+    if(files.empty()) {
+        return;
+    }
+
     for(vector<string>::iterator i = files.begin(); i != files.end(); i++) {
         string path = *(i);
         MixerSnapshot* snap = new MixerSnapshot(_session, path);
