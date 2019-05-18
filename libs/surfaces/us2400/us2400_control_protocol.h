@@ -199,7 +199,7 @@ class US2400Protocol
 	void update_global_led (int id, US2400::LedState);
 
 	ARDOUR::Session & get_session() { return *session; }
-	samplepos_t transport_frame() const;
+	samplepos_t transport_sample() const;
 
 	int modifier_state() const { return _modifier_state; }
 	int main_modifier_state() const { return _modifier_state & MAIN_MODIFIER_MASK; }
@@ -281,7 +281,7 @@ class US2400Protocol
 	US2400::Timer            _frm_left_last;
 	// last written timecode string
 	std::string              _timecode_last;
-	samplepos_t				 _frame_last;
+	samplepos_t				 _sample_last;
 	// Which timecode are we displaying? BBT or Timecode
 	ARDOUR::AnyTime::Type    _timecode_type;
 	// Bundle to represent our input ports
