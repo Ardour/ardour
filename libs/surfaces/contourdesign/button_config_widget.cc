@@ -24,6 +24,7 @@
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/action_model.h"
 
 #include "pbd/i18n.h"
 #include "pbd/strsplit.h"
@@ -35,38 +36,12 @@ using namespace std;
 using namespace Gtk;
 using namespace ArdourSurface;
 
-class ActionModel
-{
-public:
-	static const ActionModel& instance ();
-
-	const Glib::RefPtr<TreeStore> model () const { return _available_action_model; }
-
-	const TreeModelColumn<string>& name () const { return _action_columns.name; }
-	const TreeModelColumn<string>& path () const { return _action_columns.path; }
-
-private:
-	ActionModel ();
-	struct ActionColumns : public TreeModel::ColumnRecord {
-		ActionColumns() {
-			add (name);
-			add (path);
-		}
-		TreeModelColumn<string> name;
-		TreeModelColumn<string> path;
-	};
-
-	const ActionColumns _action_columns;
-	Glib::RefPtr<TreeStore> _available_action_model;
-};
-
-
 ButtonConfigWidget::ButtonConfigWidget ()
 	: HBox ()
 	, _choice_jump (_("Jump: "))
 	, _choice_action (_("Other action: "))
 	, _jump_distance (JumpDistance ())
-	, _action_model (ActionModel::instance ())
+	, _action_model (ActionManager::ActionModel::instance ())
 {
 	RadioButtonGroup cbg = _choice_jump.get_group ();
 	_choice_action.set_group (cbg);
@@ -179,94 +154,4 @@ void
 ButtonConfigWidget::update_config ()
 {
 	Changed (); /* emit signal */
-}
-
-
-
-const ActionModel&
-ActionModel::instance ()
-{
-	static ActionModel am;
-	return am;
-}
-
-ActionModel::ActionModel ()
-{
-	_available_action_model = TreeStore::create (_action_columns);
-	_available_action_model->clear ();
-
-	typedef std::map<string,TreeIter> NodeMap;
-	NodeMap nodes;
-	NodeMap::iterator r;
-
-	TreeIter rowp;
-	TreeModel::Row parent;
-
-	rowp = _available_action_model->append ();
-	parent = *(rowp);
-	parent[_action_columns.name] = _("Disabled");
-
-	vector<string> paths;
-	vector<string> labels;
-	vector<string> tooltips;
-	vector<string> keys;
-	vector<Glib::RefPtr<Gtk::Action> > actions;
-
-	ActionManager::get_all_actions (paths, labels, tooltips, keys, actions);
-
-	vector<string>::iterator k;
-	vector<string>::iterator p;
-	vector<string>::iterator t;
-	vector<string>::iterator l;
-
-	for (l = labels.begin(), k = keys.begin(), p = paths.begin(), t = tooltips.begin(); l != labels.end(); ++k, ++p, ++t, ++l) {
-
-		TreeModel::Row row;
-		vector<string> parts;
-		parts.clear ();
-		split (*p, parts, '/');
-
-		if (parts.empty()) {
-			continue;
-		}
-
-		//kinda kludgy way to avoid displaying menu items as mappable
-		if ( parts[0] == _("Main_menu") )
-			continue;
-		if ( parts[0] == _("JACK") )
-			continue;
-		if ( parts[0] == _("redirectmenu") )
-			continue;
-		if ( parts[0] == _("Editor_menus") )
-			continue;
-		if ( parts[0] == _("RegionList") )
-			continue;
-		if ( parts[0] == _("ProcessorMenu") )
-			continue;
-
-		if ((r = nodes.find (parts[0])) == nodes.end()) {
-			/* top level is missing */
-
-			TreeIter rowp;
-			TreeModel::Row parent;
-			rowp = _available_action_model->append();
-			nodes[parts[0]] = rowp;
-			parent = *(rowp);
-			parent[_action_columns.name] = parts[0];
-
-			row = *(_available_action_model->append (parent.children()));
-		} else {
-			row = *(_available_action_model->append ((*r->second)->children()));
-		}
-
-		/* add this action */
-
-		if (l->empty ()) {
-			row[_action_columns.name] = *t;
-		} else {
-			row[_action_columns.name] = *l;
-		}
-
-		row[_action_columns.path] = *p;
-	}
 }

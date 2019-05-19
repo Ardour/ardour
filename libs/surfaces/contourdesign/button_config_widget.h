@@ -29,7 +29,10 @@
 #include "contourdesign.h"
 #include "jump_distance_widget.h"
 
+namespace ActionManager
+{
 class ActionModel;
+}
 
 namespace ArdourSurface
 {
@@ -59,7 +62,7 @@ private:
 	JumpDistanceWidget _jump_distance;
 	Gtk::ComboBox _action_cb;
 
-	const ActionModel& _action_model;
+	const ActionManager::ActionModel& _action_model;
 };
 }
 
