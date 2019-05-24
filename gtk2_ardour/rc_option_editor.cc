@@ -3518,6 +3518,17 @@ RCOptionEditor::RCOptionEditor ()
 				_("AU Blacklist:")));
 #endif
 
+#ifdef HAVE_LV2
+	add_option (_("Plugins"), new OptionEditorHeading (_("LV1/LV2")));
+	add_option (_("Plugins"),
+	     new BoolOption (
+		     "conceal-lv1-if-lv2-exists",
+		     _("Conceal LADSPA (LV1) Plugins if matching LV2 exists"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_conceal_lv1_if_lv2_exists),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_conceal_lv1_if_lv2_exists)
+		     ));
+#endif
+
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT || defined HAVE_LV2)
 	add_option (_("Plugins"), new OptionEditorHeading (_("Plugin GUI")));
 	add_option (_("Plugins"),
@@ -4071,6 +4082,8 @@ RCOptionEditor::parameter_changed (string const & p)
 #if (defined LV2_SUPPORT && defined LV2_EXTENDED)
 		_plugin_prefer_inline->set_sensitive (UIConfiguration::instance().get_open_gui_after_adding_plugin() && UIConfiguration::instance().get_show_inline_display_by_default());
 #endif
+	} else if (p == "conceal-lv1-if-lv2-exists") {
+		PluginManager::instance().refresh (true);
 	}
 }
 
