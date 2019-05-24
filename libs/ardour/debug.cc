@@ -65,6 +65,7 @@ PBD::DebugBits PBD::DEBUG::TempoMap = PBD::new_debug_bit ("tempomap");
 PBD::DebugBits PBD::DEBUG::OrderKeys = PBD::new_debug_bit ("orderkeys");
 PBD::DebugBits PBD::DEBUG::Automation = PBD::new_debug_bit ("automation");
 PBD::DebugBits PBD::DEBUG::WiimoteControl = PBD::new_debug_bit ("wiimotecontrol");
+PBD::DebugBits PBD::DEBUG::ContourDesignControl = PBD::new_debug_bit ("contourdesigncontrol");
 PBD::DebugBits PBD::DEBUG::Ports = PBD::new_debug_bit ("Ports");
 PBD::DebugBits PBD::DEBUG::AudioEngine = PBD::new_debug_bit ("AudioEngine");
 PBD::DebugBits PBD::DEBUG::Soundcloud = PBD::new_debug_bit ("Soundcloud");

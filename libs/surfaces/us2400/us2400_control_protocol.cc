@@ -111,7 +111,7 @@ US2400Protocol::US2400Protocol (Session& session)
 	: ControlProtocol (session, X_("Tascam US-2400"))
 	, AbstractUI<US2400ControlUIRequest> (name())
 	, _current_initial_bank (0)
-	, _frame_last (0)
+	, _sample_last (0)
 	, _timecode_type (ARDOUR::AnyTime::BBT)
 	, _gui (0)
 	, _scrub_mode (false)
@@ -1510,7 +1510,7 @@ US2400Protocol::update_fader_automation_state ()
 }
 
 samplepos_t
-US2400Protocol::transport_frame() const
+US2400Protocol::transport_sample() const
 {
 	return session->transport_sample();
 }

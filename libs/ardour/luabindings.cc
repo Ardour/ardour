@@ -1654,7 +1654,7 @@ LuaBindings::common (lua_State* L)
 		.beginStdVector <boost::shared_ptr<Source> > ("SourceList")
 		.endClass ()
 
-		// from SessionPlaylists
+		// from SessionPlaylists: std::vector<boost::shared_ptr<Playlist > >
 		.beginStdVector <boost::shared_ptr<Playlist> > ("PlaylistList")
 		.endClass ()
 
@@ -1691,7 +1691,7 @@ LuaBindings::common (lua_State* L)
 		.beginConstStdList <AudioRange> ("AudioRangeList")
 		.endClass ()
 
-		.beginConstStdList <Location*> ("LocationList")
+		.beginConstStdCPtrList <Location> ("LocationList")
 		.endClass ()
 
 		// std::list<boost::shared_ptr<AutomationControl> > ControlList;
@@ -1705,7 +1705,7 @@ LuaBindings::common (lua_State* L)
 		.beginStdList <boost::shared_ptr<Evoral::Note<Temporal::Beats> > > ("NotePtrList")
 		.endClass ()
 
-		.beginConstStdList <Evoral::ControlEvent*> ("EventList")
+		.beginConstStdCPtrList <Evoral::ControlEvent> ("EventList")
 		.endClass ()
 
 #if 0  // depends on Evoal:: Note, Beats see note_fixer.h

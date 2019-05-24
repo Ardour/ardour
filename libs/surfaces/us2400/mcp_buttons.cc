@@ -853,7 +853,7 @@ US2400Protocol::master_fader_touch_press (US2400::Button &)
 	boost::shared_ptr<AutomationControl> ac = master_fader->control ();
 
 	master_fader->set_in_use (true);
-	master_fader->start_touch (transport_frame());
+	master_fader->start_touch (transport_sample());
 
 	return none;
 }
@@ -865,7 +865,7 @@ US2400Protocol::master_fader_touch_release (US2400::Button &)
 	Fader* master_fader = _master_surface->master_fader();
 
 	master_fader->set_in_use (false);
-	master_fader->stop_touch (transport_frame());
+	master_fader->stop_touch (transport_sample());
 
 	return none;
 }
