@@ -73,7 +73,8 @@ public:
 	enum PluginStatusType {
 		Normal = 0,
 		Favorite,
-		Hidden
+		Hidden,
+		Concealed
 	};
 
 	std::string user_plugin_metadata_dir () const;

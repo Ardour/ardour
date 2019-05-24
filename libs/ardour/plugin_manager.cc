@@ -277,6 +277,27 @@ PluginManager::refresh (bool cache_only)
 #ifdef LV2_SUPPORT
 	BootMessage (_("Scanning LV2 Plugins"));
 	lv2_refresh ();
+
+	if (Config->get_conceal_lv1_if_lv2_exists()) {
+		for (PluginInfoList::const_iterator i = _ladspa_plugin_info->begin(); i != _ladspa_plugin_info->end(); ++i) {
+			for (PluginInfoList::const_iterator j = _lv2_plugin_info->begin(); j != _lv2_plugin_info->end(); ++j) {
+				if ((*i)->creator == (*j)->creator && (*i)->name == (*j)->name) {
+					PluginStatus ps (LADSPA, (*i)->unique_id, Concealed);
+					if (find (statuses.begin(), statuses.end(), ps) == statuses.end()) {
+						statuses.erase (ps);
+						statuses.insert (ps);
+					}
+				}
+			}
+		}
+	} else {
+		for (PluginStatusList::iterator i = statuses.begin(); i != statuses.end();) {
+			PluginStatusList::iterator j = i++;
+			if ((*j).status == Concealed) {
+				statuses.erase (j);
+			}
+		}
+	}
 #endif
 #ifdef WINDOWS_VST_SUPPORT
 	if (Config->get_use_windows_vst()) {
@@ -1293,6 +1314,9 @@ PluginManager::save_statuses ()
 	stringstream ofs;
 
 	for (PluginStatusList::iterator i = statuses.begin(); i != statuses.end(); ++i) {
+		if ((*i).status == Concealed) {
+			continue;
+		}
 		switch ((*i).type) {
 		case LADSPA:
 			ofs << "LADSPA";
@@ -1328,6 +1352,10 @@ PluginManager::save_statuses ()
 			break;
 		case Hidden:
 			ofs << "Hidden";
+			break;
+		case Concealed:
+			ofs << "Hidden";
+			assert (0);
 			break;
 		}
 
@@ -1422,7 +1450,7 @@ PluginManager::set_status (PluginType t, string id, PluginStatusType status)
 	PluginStatus ps (t, id, status);
 	statuses.erase (ps);
 
-	if (status != Normal) {
+	if (status != Normal && status != Concealed) {
 		statuses.insert (ps);
 	}
 
@@ -1683,7 +1711,7 @@ PluginManager::get_all_tags (TagFilter tag_filter) const
 		if (tag_filter == NoHidden) {
 			PluginStatus stat ((*pt).type, (*pt).unique_id);
 			PluginStatusList::const_iterator i = find (statuses.begin(), statuses.end(), stat);
-			if ((i != statuses.end()) && (i->status == Hidden)) {
+			if ((i != statuses.end()) && ((i->status == Hidden) || (i->status == Concealed))) {
 				continue;
 			}
 		}
