@@ -700,6 +700,7 @@ PluginManager::ladspa_discover (string path)
 			info->creator = "Unknown";
 		} else{
 			info->creator = creator.substr (0, pos);
+			strip_whitespace_edges (info->creator);
 		}
 
 		char buf[32];
