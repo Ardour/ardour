@@ -168,7 +168,7 @@ PluginManager::PluginManager ()
 				"ardour-vst-scanner"
 #endif
 				, scanner_bin_path)) {
-		PBD::warning << "VST scanner app (ardour-vst-scanner) not found in path " << vstsp.to_string() <<  endmsg;
+		PBD::warning << "VST scanner app (ardour-vst-scanner) not found in path " << vstsp.to_string() << endmsg;
 	}
 #endif
 
@@ -728,12 +728,12 @@ PluginManager::ladspa_discover (string path)
 
 		for (PluginInfoList::const_iterator i = _ladspa_plugin_info->begin(); i != _ladspa_plugin_info->end(); ++i) {
 			if(0 == info->unique_id.compare((*i)->unique_id)){
-			      found = true;
+				found = true;
 			}
 		}
 
 		if(!found){
-		    _ladspa_plugin_info->push_back (info);
+			_ladspa_plugin_info->push_back (info);
 			set_tags (info->type, info->unique_id, info->category, info->name, FromPlug);
 		}
 
@@ -977,7 +977,7 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 	vector<VSTInfo*> * finfos = vstfx_get_info_fst (const_cast<char *> (path.c_str()),
 			cache_only ? VST_SCAN_CACHE_ONLY : VST_SCAN_USE_APP);
 
-	// TODO  get extended error messae from vstfx_get_info_fst() e.g  blacklisted, 32/64bit compat,
+	// TODO get extended error messae from vstfx_get_info_fst() e.g blacklisted, 32/64bit compat,
 	// .err file scanner output etc.
 
 	if (finfos->empty()) {
@@ -1245,7 +1245,7 @@ PluginManager::lxvst_discover (string path, bool cache_only)
 		/* Make sure we don't find the same plugin in more than one place along
 		 * the LXVST_PATH We can't use a simple 'find' because the path is included
 		 * in the PluginInfo, and that is the one thing we can be sure MUST be
-		 * different if a duplicate instance is found.  So we just compare the type
+		 * different if a duplicate instance is found. So we just compare the type
 		 * and unique ID (which for some VSTs isn't actually unique...)
 		 */
 
@@ -1278,8 +1278,8 @@ PluginManager::PluginStatusType
 PluginManager::get_status (const PluginInfoPtr& pi) const
 {
 	PluginStatus ps (pi->type, pi->unique_id);
-	PluginStatusList::const_iterator i =  find (statuses.begin(), statuses.end(), ps);
-	if (i ==  statuses.end()) {
+	PluginStatusList::const_iterator i = find (statuses.begin(), statuses.end(), ps);
+	if (i == statuses.end()) {
 		return Normal;
 	} else {
 		return i->status;
@@ -1343,9 +1343,9 @@ void
 PluginManager::load_statuses ()
 {
 	std::string path;
-	find_file (plugin_metadata_search_path(), "plugin_statuses", path);  //note: if no user folder is found, this will find the resources path
+	find_file (plugin_metadata_search_path(), "plugin_statuses", path); // note: if no user folder is found, this will find the resources path
 	gchar *fbuf = NULL;
-	if (!g_file_get_contents (path.c_str(), &fbuf, NULL, NULL))  {
+	if (!g_file_get_contents (path.c_str(), &fbuf, NULL, NULL)) {
 		return;
 	}
 	stringstream ifs (fbuf);
@@ -1369,7 +1369,6 @@ PluginManager::load_statuses ()
 		ifs >> sstatus;
 		if (!ifs) {
 			break;
-
 		}
 
 		/* rest of the line is the plugin ID */
@@ -1386,8 +1385,7 @@ PluginManager::load_statuses ()
 		} else if (sstatus == "Hidden") {
 			status = Hidden;
 		} else {
-			error << string_compose (_("unknown plugin status type \"%1\" - all entries ignored"), sstatus)
-				  << endmsg;
+			error << string_compose (_("unknown plugin status type \"%1\" - all entries ignored"), sstatus) << endmsg;
 			statuses.clear ();
 			break;
 		}
@@ -1523,7 +1521,7 @@ PluginManager::save_plugin_order_file (XMLNode &elem) const
 	if (!tree.write (path)) {
 		error << string_compose (_("Could not save Plugin Order info to %1"), path) << endmsg;
 	}
-	tree.set_root (0);  //note: must disconnect the elem from XMLTree, or it will try to delete memory it didn't allocate
+	tree.set_root (0); // note: must disconnect the elem from XMLTree, or it will try to delete memory it didn't allocate
 }
 
 
@@ -1613,7 +1611,7 @@ PluginManager::set_tags (PluginType t, string id, string tag, std::string name, 
 	PluginTagList::const_iterator i = find (ptags.begin(), ptags.end(), ps);
 	if (i == ptags.end()) {
 		ptags.insert (ps);
-	} else if ((uint32_t) ttype >=  (uint32_t) (*i).tagtype) {  // only overwrite if we are more important than the existing. Gui > UserFile > FactoryFile > Plugin
+	} else if ((uint32_t) ttype >= (uint32_t) (*i).tagtype) { // only overwrite if we are more important than the existing. Gui > UserFile > FactoryFile > Plugin
 		ptags.erase (ps);
 		ptags.insert (ps);
 	}
@@ -1675,7 +1673,7 @@ PluginManager::get_all_tags (TagFilter tag_filter) const
 		/* if favorites_only then we need to check the info ptr and maybe skip */
 		if (tag_filter == OnlyFavorites) {
 			PluginStatus stat ((*pt).type, (*pt).unique_id);
-			PluginStatusList::const_iterator i =  find (statuses.begin(), statuses.end(), stat);
+			PluginStatusList::const_iterator i = find (statuses.begin(), statuses.end(), stat);
 			if ((i != statuses.end()) && (i->status == Favorite)) {
 				/* it's a favorite! */
 			} else {
@@ -1684,7 +1682,7 @@ PluginManager::get_all_tags (TagFilter tag_filter) const
 		}
 		if (tag_filter == NoHidden) {
 			PluginStatus stat ((*pt).type, (*pt).unique_id);
-			PluginStatusList::const_iterator i =  find (statuses.begin(), statuses.end(), stat);
+			PluginStatusList::const_iterator i = find (statuses.begin(), statuses.end(), stat);
 			if ((i != statuses.end()) && (i->status == Hidden)) {
 				continue;
 			}
@@ -1702,7 +1700,7 @@ PluginManager::get_all_tags (TagFilter tag_filter) const
 		/* maybe add the tags we've found */
 		for (vector<string>::iterator t = tags.begin(); t != tags.end(); ++t) {
 			/* if this tag isn't already in the list, add it */
-			vector<string>::iterator i =  find (ret.begin(), ret.end(), *t);
+			vector<string>::iterator i = find (ret.begin(), ret.end(), *t);
 			if (i == ret.end()) {
 				ret.push_back (*t);
 			}
