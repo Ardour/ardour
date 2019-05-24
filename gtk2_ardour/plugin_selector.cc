@@ -61,6 +61,9 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	: ArdourDialog (_("Plugin Manager"), true, false)
 	, search_clear_button (Stock::CLEAR)
 	, manager (mgr)
+	, _need_tag_save (false)
+	, _need_status_save (false)
+	, _need_menu_rebuild (false)
 	, _inhibit_refill (false)
 {
 	set_name ("PluginSelectorWindow");
@@ -786,6 +789,9 @@ PluginSelector::run ()
 	if (_need_status_save) {
 		manager.save_statuses();
 	}
+	if (_need_menu_rebuild) {
+		build_plugin_menu ();
+	}
 
 	return (int) r;
 }
@@ -929,6 +935,11 @@ PluginSelector::plugin_menu()
 void
 PluginSelector::build_plugin_menu ()
 {
+	if (is_visible ()) {
+		_need_menu_rebuild = true;
+		return;
+	}
+	_need_menu_rebuild = false;
 	PluginInfoList all_plugs;
 
 	all_plugs.insert (all_plugs.end(), manager.ladspa_plugin_info().begin(), manager.ladspa_plugin_info().end());
