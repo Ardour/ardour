@@ -349,6 +349,7 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 {
 	string mode;
 	bool maybe_show = false;
+	PluginManager::PluginStatusType status = manager.get_status (info);
 
 	if (!searchstr.empty()) {
 
@@ -376,7 +377,9 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 
 		/* user asked to ignore filters */
 		if (maybe_show && _search_ignore_checkbox->get_active()) {
-			if (manager.get_status (info) == PluginManager::Hidden) {
+			if (status == PluginManager::Hidden) {
+				return false;
+			}
 				return false;
 			}
 			return true;
@@ -395,15 +398,17 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 		return false;
 	}
 
-	if (_fil_favorites_radio->get_active() && !(manager.get_status (info) == PluginManager::Favorite)) {
+	if (_fil_favorites_radio->get_active() && status != PluginManager::Favorite) {
 		return false;
 	}
 
-	if (_fil_hidden_radio->get_active() && !(manager.get_status (info) == PluginManager::Hidden)) {
+	if (_fil_hidden_radio->get_active() && status != PluginManager::Hidden) {
 		return false;
 	}
 
-	if (!_fil_hidden_radio->get_active() && manager.get_status (info) == PluginManager::Hidden) {
+	if (!_fil_hidden_radio->get_active() && status == PluginManager::Hidden) {
+		return false;
+	}
 		return false;
 	}
 
