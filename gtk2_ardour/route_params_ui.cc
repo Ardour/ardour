@@ -41,6 +41,7 @@
 #include "gui_thread.h"
 #include "io_selector.h"
 #include "keyboard.h"
+#include "mixer_ui.h"
 #include "mixer_strip.h"
 #include "port_insert_ui.h"
 #include "plugin_selector.h"
@@ -140,7 +141,6 @@ RouteParams_UI::RouteParams_UI ()
 
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_RELEASE_MASK);
 
-	_plugin_selector = new PluginSelector (PluginManager::instance());
 	show_all();
 }
 
@@ -226,6 +226,11 @@ RouteParams_UI::map_frozen()
 				break;
 		}
 	}
+}
+
+PluginSelector*
+RouteParams_UI::plugin_selector() {
+	return Mixer_UI::instance()->plugin_selector ();
 }
 
 void
@@ -406,7 +411,6 @@ RouteParams_UI::set_session (Session *sess)
 	ArdourWindow::set_session (sess);
 
 	route_display_model->clear();
-	_plugin_selector->set_session (_session);
 
 	if (_session) {
 		boost::shared_ptr<RouteList> r = _session->get_routes();

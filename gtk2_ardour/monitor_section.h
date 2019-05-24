@@ -36,13 +36,14 @@
 #include "route_ui.h"
 #include "monitor_selector.h"
 
-#include "plugin_selector.h"
 #include "processor_box.h"
 #include "processor_selection.h"
 
 namespace ArdourWidgets {
 	class TearOff;
 }
+
+class PluginSelector;
 
 class MonitorSection : public RouteUI, public Gtk::EventBox
 {
@@ -56,7 +57,7 @@ public:
 
 	std::string state_id() const;
 
-	PluginSelector* plugin_selector() { return _plugin_selector; }
+	PluginSelector* plugin_selector();
 
 	void use_others_actions ();
 
@@ -177,7 +178,6 @@ private:
 	void route_property_changed (const PBD::PropertyChange&) {}
 
 	ProcessorBox* insert_box;
-	PluginSelector* _plugin_selector;
 	ProcessorSelection _rr_selection;
 	void help_count_processors (boost::weak_ptr<ARDOUR::Processor> p, uint32_t* cnt) const;
 	uint32_t count_processors ();
