@@ -105,6 +105,8 @@ class LIBARDOUR_API MixerSnapshot
         std::string get_last_modified_with() {return last_modified_with;};
         void set_last_modified_with(std::string new_modified_with) {last_modified_with = new_modified_with;};
 
+        void set_route_states(std::vector<State> states) { route_states = states;};
+
     private:
         ARDOUR::Session* _session;
 

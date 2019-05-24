@@ -33,6 +33,7 @@
 
 #include "editor.h"
 #include "mixer_snapshot_dialog.h"
+#include "mixer_snapshot_substitution_dialog.h"
 #include "utils.h"
 
 #include "pbd/basename.h"
@@ -198,7 +199,11 @@ void MixerSnapshotDialog::popup_context_menu(int btn, int64_t time, TreeModel::i
 void MixerSnapshotDialog::load_snapshot(TreeModel::iterator& iter)
 {
     MixerSnapshot* snap = (*iter)[_columns.snapshot];
-    snap->recall();
+    
+    MixerSnapshotSubstitutionDialog* d = new MixerSnapshotSubstitutionDialog(snap);
+    d->show_all();
+    // d->signal_response().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::sub_dialog_finished), d));
+    // snap->recall();
 }
 
 void MixerSnapshotDialog::rename_snapshot(TreeModel::iterator& iter)

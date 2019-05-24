@@ -330,17 +330,17 @@ void MixerSnapshot::recall()
     for(vector<State>::const_iterator i = route_states.begin(); i != route_states.end(); i++) {
         State state = (*i);
 
-        boost::shared_ptr<Route> route = _session->route_by_id(PBD::ID(state.id));
+        // boost::shared_ptr<Route> route;// = _session->route_by_id(PBD::ID(state.id));
 
-        if(!route) {
-            route = _session->route_by_name(state.name);
-        }
+        boost::shared_ptr<Route> route = _session->route_by_name(state.name);
 
         if(route) {
+            printf("Setting state %s for route %s\n", state.name.c_str(), route->name().c_str());
             XMLNode& bfr = route->get_state();
             route->set_state(sanitize_node(state.node), PBD::Stateful::loading_state_version);
             reassign_masters(route, state.node);
             _session->add_command(new MementoCommand<Route>((*route), &bfr, &route->get_state()));
+            route->emit_pending_signals();
         }
     }
 
