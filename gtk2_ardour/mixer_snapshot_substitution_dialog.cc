@@ -229,7 +229,6 @@ XMLNode& MixerSnapshotSubstitutionDialog::sanitize_node(XMLNode& node, const str
     node.remove_property(X_("audio-playlist"));
 
     XMLNode* pi_node = find_named_node(node, X_("PresentationInfo"));
-    XMLNode* proc_node = find_named_node(node, X_("PresentationInfo"));
 
     if(pi_node) {
         pi_node->remove_property(X_("order"));
