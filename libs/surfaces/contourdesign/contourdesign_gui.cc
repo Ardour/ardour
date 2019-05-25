@@ -100,7 +100,7 @@ ContourDesignGUI::ContourDesignGUI (ContourDesignControlProtocol& ccp)
 	: _ccp (ccp)
 	, _test_button (_("Button Test"), ArdourButton::led_default_elements)
 	, _keep_rolling (_("Keep rolling after jumps"))
-	, _jog_distance (ccp._jog_distance)
+	, _jog_distance (ccp.jog_distance ())
 	, _device_state_lbl ()
 {
 	Frame* dg_sample = manage (new Frame (_("Device")));
@@ -123,7 +123,7 @@ ContourDesignGUI::ContourDesignGUI (ContourDesignControlProtocol& ccp)
 
 	HBox* speed_box = manage (new HBox);
 	for (int i=0; i != ContourDesignControlProtocol::num_shuttle_speeds; ++i) {
-		double speed = ccp._shuttle_speeds[i];
+		double speed = ccp.shuttle_speed (i);
 		boost::shared_ptr<Gtk::Adjustment> adj (new Gtk::Adjustment (speed, 0.0, 100.0, 0.25));
 		_shuttle_speed_adjustments.push_back (adj);
 		SpinButton* sb = manage (new SpinButton (*adj, 0.25, 2));
@@ -140,7 +140,7 @@ ContourDesignGUI::ContourDesignGUI (ContourDesignControlProtocol& ccp)
 
 	_keep_rolling.set_tooltip_text (_("If checked Ardour keeps rolling after jog or shuttle events. If unchecked it stops."));
 	_keep_rolling.signal_toggled().connect (sigc::mem_fun (*this, &ContourDesignGUI::toggle_keep_rolling));
-	_keep_rolling.set_active (_ccp._keep_rolling);
+	_keep_rolling.set_active (_ccp.keep_rolling ());
 
 	sj_table->attach (_keep_rolling, 0,1, 2,3);
 
@@ -207,20 +207,20 @@ ContourDesignGUI::ContourDesignGUI (ContourDesignControlProtocol& ccp)
 void
 ContourDesignGUI::toggle_keep_rolling ()
 {
-	_ccp._keep_rolling = _keep_rolling.get_active();
+	_ccp.set_keep_rolling (_keep_rolling.get_active ());
 }
 
 void
 ContourDesignGUI::set_shuttle_speed (int index)
 {
 	double speed = _shuttle_speed_adjustments[index]->get_value ();
-	_ccp._shuttle_speeds[index] = speed;
+	_ccp.set_shuttle_speed (index, speed);
 }
 
 void
 ContourDesignGUI::update_jog_distance ()
 {
-	_ccp._jog_distance = _jog_distance.get_distance ();
+	_ccp.set_jog_distance (_jog_distance.get_distance ());
 }
 
 void
@@ -237,9 +237,10 @@ ContourDesignGUI::update_action (unsigned int index, ButtonConfigWidget* sender)
 void
 ContourDesignGUI::toggle_test_mode ()
 {
-	_ccp._test_mode = !_ccp._test_mode;
-	if (_ccp._test_mode) {
-		_test_button.set_active_state (ActiveState::ExplicitActive);
+	bool testmode = ! _ccp.test_mode(); // toggle
+	_ccp.set_test_mode (testmode);
+	if (testmode) {
+		_test_button.set_active_state (Gtkmm2ext::ExplicitActive);
 	} else {
 		reset_test_state ();
 	}
@@ -257,11 +258,11 @@ ContourDesignGUI::init_on_show ()
 bool
 ContourDesignGUI::reset_test_state (GdkEventAny*)
 {
-	_ccp._test_mode = false;
-	_test_button.set_active (ActiveState::Off);
+	_ccp.set_test_mode (false);
+	_test_button.set_active (Gtkmm2ext::Off);
 	vector<boost::shared_ptr<ArdourButton> >::const_iterator it;
 	for (it = _btn_leds.begin(); it != _btn_leds.end(); ++it) {
-		(*it)->set_active_state (ActiveState::Off);
+		(*it)->set_active_state (Gtkmm2ext::Off);
 	}
 
 	return false;
@@ -270,13 +271,13 @@ ContourDesignGUI::reset_test_state (GdkEventAny*)
 void
 ContourDesignGUI::test_button_press (unsigned short btn)
 {
-	_btn_leds[btn]->set_active_state (ActiveState::ExplicitActive);
+	_btn_leds[btn]->set_active_state (Gtkmm2ext::ExplicitActive);
 }
 
 void
 ContourDesignGUI::test_button_release (unsigned short btn)
 {
-	_btn_leds[btn]->set_active_state (ActiveState::Off);
+	_btn_leds[btn]->set_active_state (Gtkmm2ext::Off);
 }
 
 bool
@@ -297,7 +298,7 @@ ContourDesignGUI::update_device_state ()
 		XpressButtonsSensitive (false);
 		ProButtonsSensitive (false);
 		_device_state_lbl.set_markup (string_compose ("<span weight=\"bold\" foreground=\"red\">Device not working:</span> %1",
-		 					      libusb_strerror ((libusb_error)_ccp._error)));
+		                              libusb_strerror ((libusb_error)_ccp.usb_errorcode ())));
 	}
 
 	return false;

@@ -571,6 +571,15 @@ void ContourDesignControlProtocol::jump_backward (JumpDistance dist)
 }
 
 void
+ContourDesignControlProtocol::set_shuttle_speed (int index, double speed)
+{
+	/* called from GUI thread */
+	// XXX this may race with ContourDesignControlProtocol::shuttle_event()
+	// TODO: add bounds check
+	_shuttle_speeds[index] = speed;
+}
+
+void
 ContourDesignControlProtocol::shuttle_event(int position)
 {
 	DEBUG_TRACE (DEBUG::ContourDesignControl, string_compose ("shuttle event %1\n", position));
