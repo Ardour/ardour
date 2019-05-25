@@ -498,6 +498,25 @@ ContourDesignControlProtocol::setup_default_button_actions ()
 	_button_actions.push_back (make_button_action ("Transport/GotoEnd"));
 }
 
+const boost::shared_ptr<ButtonBase>
+ContourDesignControlProtocol::get_button_action (unsigned int index) const
+{
+	if (index >= _button_actions.size()) {
+		return boost::shared_ptr<ButtonBase>();
+	}
+	return _button_actions[index];
+}
+
+void
+ContourDesignControlProtocol::set_button_action (unsigned int index, const boost::shared_ptr<ButtonBase> btn_act)
+{
+	if (index >= _button_actions.size()) {
+		return;
+	}
+	_button_actions[index] = btn_act;
+}
+
+
 void
 ContourDesignControlProtocol::handle_button_press (unsigned short btn)
 {

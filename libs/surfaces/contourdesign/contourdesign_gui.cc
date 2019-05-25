@@ -164,9 +164,7 @@ ContourDesignGUI::ContourDesignGUI (ContourDesignControlProtocol& ccp)
 	table->set_row_spacings (6);
 	table->set_col_spacings (6);;
 
-	vector<boost::shared_ptr<ButtonBase> >::const_iterator it;
-	unsigned int btn_idx = 0;
-	for (it = _ccp._button_actions.begin(); it != _ccp._button_actions.end(); ++it) {
+	for (int btn_idx=0; btn_idx < _ccp.get_button_count(); ++btn_idx) {
 		boost::shared_ptr<ArdourButton> b (new ArdourButton (string_compose (_("Setting for button %1"), btn_idx+1),
 								     ArdourButton::Element(ArdourButton::Indicator|ArdourButton::Text|ArdourButton::Inactive)));
 		table->attach (*b, 0, 2, btn_idx, btn_idx+1);
@@ -174,7 +172,10 @@ ContourDesignGUI::ContourDesignGUI (ContourDesignControlProtocol& ccp)
 
 		ButtonConfigWidget* bcw = manage (new ButtonConfigWidget);
 
-		bcw->set_current_config (*it);
+		boost::shared_ptr<ButtonBase> btn_act = _ccp.get_button_action (btn_idx);
+		assert (btn_act);
+		bcw->set_current_config (btn_act);
+
 		bcw->Changed.connect (sigc::bind (sigc::mem_fun (*this, &ContourDesignGUI::update_action), btn_idx, bcw));
 		table->attach (*bcw, 3, 5, btn_idx, btn_idx+1);
 
@@ -185,7 +186,6 @@ ContourDesignGUI::ContourDesignGUI (ContourDesignControlProtocol& ccp)
 			this->ProButtonsSensitive.connect (sigc::mem_fun (*b, &ArdourButton::set_sensitive));
 			this->ProButtonsSensitive.connect (sigc::mem_fun (*bcw, &ButtonConfigWidget::set_sensitive));
 		}
-		++btn_idx;
 	}
 
 	set_spacing (6);
@@ -226,12 +226,7 @@ ContourDesignGUI::update_jog_distance ()
 void
 ContourDesignGUI::update_action (unsigned int index, ButtonConfigWidget* sender)
 {
-	if (index >= _ccp._button_actions.size()) {
-		DEBUG_TRACE (DEBUG::ContourDesignControl, string_compose ("ContourDesignGUI::update_action() index out of bounds %1 / %2\n", index, _ccp._button_actions.size()));
-		return;
-	}
-	_ccp._button_actions[index] = sender->get_current_config (_ccp);
-	DEBUG_TRACE (DEBUG::ContourDesignControl, string_compose ("update_action () %1\n", index));
+	_ccp.set_button_action (index, sender->get_current_config (_ccp));
 }
 
 void

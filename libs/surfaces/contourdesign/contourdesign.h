@@ -107,6 +107,10 @@ public:
 	bool test_mode () const { return _test_mode; }
 	void set_test_mode (bool tm) { _test_mode = tm; }
 
+	int get_button_count() const { return _button_actions.size(); }
+	const boost::shared_ptr<ButtonBase> get_button_action (unsigned int index) const;
+	void set_button_action (unsigned int index, const boost::shared_ptr<ButtonBase> btn_act);
+
 	JumpDistance jog_distance () const { return _jog_distance; }
 	void set_jog_distance (JumpDistance jd) { _jog_distance = jd; }
 
@@ -117,8 +121,6 @@ public:
 
 	PBD::Signal1<void, unsigned short> ButtonPress;
 	PBD::Signal1<void, unsigned short> ButtonRelease;
-
-	std::vector<boost::shared_ptr<ButtonBase> > _button_actions; // XXX TODO: use accessor/setter methods
 
 private:
 	void do_request (ContourDesignControlUIRequest*);
@@ -169,6 +171,8 @@ private:
 	bool _keep_rolling;
 	std::vector<double> _shuttle_speeds;
 	JumpDistance _jog_distance;
+
+	std::vector<boost::shared_ptr<ButtonBase> > _button_actions;
 
 	mutable ContourDesignGUI* _gui;
 	void build_gui ();
