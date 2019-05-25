@@ -114,8 +114,8 @@ public:
 	JumpDistance jog_distance () const { return _jog_distance; }
 	void set_jog_distance (JumpDistance jd) { _jog_distance = jd; }
 
-	void set_shuttle_speed (int index, double speed);
-	double shuttle_speed (int index) const {
+	void set_shuttle_speed (unsigned int index, double speed);
+	double shuttle_speed (unsigned int index) const {
 		return _shuttle_speeds[index];
 	}
 

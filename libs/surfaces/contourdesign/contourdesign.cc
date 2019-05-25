@@ -601,23 +601,28 @@ void ContourDesignControlProtocol::jump_backward (JumpDistance dist)
 }
 
 void
-ContourDesignControlProtocol::set_shuttle_speed (int index, double speed)
+ContourDesignControlProtocol::set_shuttle_speed (unsigned int index, double speed)
 {
-	/* called from GUI thread */
-	// XXX this may race with ContourDesignControlProtocol::shuttle_event()
-	// TODO: add bounds check
+	if (index >= _shuttle_speeds.size()) {
+		return;
+	}
 	_shuttle_speeds[index] = speed;
 }
 
 void
-ContourDesignControlProtocol::shuttle_event(int position)
+ContourDesignControlProtocol::shuttle_event (int position)
 {
-	DEBUG_TRACE (DEBUG::ContourDesignControl, string_compose ("shuttle event %1\n", position));
+	if (abs(position) > num_shuttle_speeds) {
+		DEBUG_TRACE (DEBUG::ContourDesignControl, "received invalid shuttle position... ignoring.\n");
+		return;
+	}
+
 	if (position != 0) {
 		if (_shuttle_was_zero) {
 			_was_rolling_before_shuttle = session->transport_rolling ();
 		}
-		double speed = position > 0 ? _shuttle_speeds[position-1] : -_shuttle_speeds[-position-1];
+		const vector<double>& spds = _shuttle_speeds;
+		const double speed = position > 0 ? spds[position-1] : -spds[-position-1];
 		set_transport_speed (speed);
 		_shuttle_was_zero = false;
 	} else {
