@@ -278,17 +278,17 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	BufferSet& scratch_bufs (_session.get_scratch_buffers (bufs.count()));
 	const bool still_locating = _session.global_locate_pending() || pending_overwrite ();
 
-	if (c->empty()) {
-		/* do nothing with audio */
-		goto midi;
-	}
-
 	assert (speed == -1 || speed == 0 || speed == 1);
 
 	if (speed == 0) {
 		disk_samples_to_consume = 0;
 	} else {
 		disk_samples_to_consume = nframes;
+	}
+
+	if (c->empty()) {
+		/* do nothing with audio */
+		goto midi;
 	}
 
 	if (_declick_amp.gain () != target_gain && target_gain == 0) {
