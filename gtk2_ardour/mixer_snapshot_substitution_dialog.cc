@@ -218,9 +218,6 @@ XMLNode& MixerSnapshotSubstitutionDialog::sanitize_node(XMLNode& node, const str
     node.remove_node_and_delete("Processor", "type", "diskwriter");
     node.remove_node_and_delete("Processor", "type", "diskreader");
 
-    //remove any sidechain stuff
-    // node.remove_node_and_delete("Processor", "type", "sidechain");
-
     //set node <Route name=""> to destination's name
     node.set_property(X_("name"), route_name);
 
@@ -234,13 +231,12 @@ XMLNode& MixerSnapshotSubstitutionDialog::sanitize_node(XMLNode& node, const str
         pi_node->remove_property(X_("order"));
     }
 
-    
+    //remove any sidechain stuff
     XMLNodeList nlist = node.children();
     for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); niter++) {
         if((*niter)->name() != "Processor") {
             continue;
         }
-
         (*niter)->remove_node_and_delete("Processor", "type", "sidechain");
     }
 
