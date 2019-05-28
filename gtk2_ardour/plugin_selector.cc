@@ -61,6 +61,9 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	: ArdourDialog (_("Plugin Manager"), true, false)
 	, search_clear_button (Stock::CLEAR)
 	, manager (mgr)
+	, _need_tag_save (false)
+	, _need_status_save (false)
+	, _need_menu_rebuild (false)
 	, _inhibit_refill (false)
 {
 	set_name ("PluginSelectorWindow");
@@ -346,6 +349,7 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 {
 	string mode;
 	bool maybe_show = false;
+	PluginManager::PluginStatusType status = manager.get_status (info);
 
 	if (!searchstr.empty()) {
 
@@ -373,7 +377,10 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 
 		/* user asked to ignore filters */
 		if (maybe_show && _search_ignore_checkbox->get_active()) {
-			if (manager.get_status (info) == PluginManager::Hidden) {
+			if (status == PluginManager::Hidden) {
+				return false;
+			}
+			if (status == PluginManager::Concealed) {
 				return false;
 			}
 			return true;
@@ -392,15 +399,19 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 		return false;
 	}
 
-	if (_fil_favorites_radio->get_active() && !(manager.get_status (info) == PluginManager::Favorite)) {
+	if (_fil_favorites_radio->get_active() && status != PluginManager::Favorite) {
 		return false;
 	}
 
-	if (_fil_hidden_radio->get_active() && !(manager.get_status (info) == PluginManager::Hidden)) {
+	if (_fil_hidden_radio->get_active() && (status != PluginManager::Hidden && status != PluginManager::Concealed)) {
 		return false;
 	}
 
-	if (!_fil_hidden_radio->get_active() && manager.get_status (info) == PluginManager::Hidden) {
+	if (!_fil_hidden_radio->get_active() && status == PluginManager::Hidden) {
+		return false;
+	}
+
+	if (!_fil_hidden_radio->get_active() && status == PluginManager::Concealed) {
 		return false;
 	}
 
@@ -527,8 +538,10 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& searc
 		if (show_this_plugin (*i, searchstr)) {
 
 			TreeModel::Row newrow = *(plugin_model->append());
-			newrow[plugin_columns.favorite] = (manager.get_status (*i) == PluginManager::Favorite);
-			newrow[plugin_columns.hidden] = (manager.get_status (*i) == PluginManager::Hidden);
+
+			PluginManager::PluginStatusType status = manager.get_status (*i);
+			newrow[plugin_columns.favorite] = status == PluginManager::Favorite;
+			newrow[plugin_columns.hidden] = status == PluginManager::Hidden;
 
 			string name = (*i)->name;
 			if (name.length() > 48) {
@@ -786,6 +799,9 @@ PluginSelector::run ()
 	if (_need_status_save) {
 		manager.save_statuses();
 	}
+	if (_need_menu_rebuild) {
+		build_plugin_menu ();
+	}
 
 	return (int) r;
 }
@@ -854,7 +870,7 @@ PluginSelector::plugin_status_changed (PluginType t, std::string uid, PluginMana
 			(*i)[plugin_columns.hidden] = (stat == PluginManager::Hidden) ? true : false;
 
 			/* if plug was hidden, remove it from the view */
-			if (stat == PluginManager::Hidden) {
+			if (stat == PluginManager::Hidden || stat == PluginManager::Concealed) {
 				if (!_fil_hidden_radio->get_active() && !_fil_all_radio->get_active()) {
 					plugin_model->erase(i);
 				}
@@ -929,6 +945,11 @@ PluginSelector::plugin_menu()
 void
 PluginSelector::build_plugin_menu ()
 {
+	if (is_visible ()) {
+		_need_menu_rebuild = true;
+		return;
+	}
+	_need_menu_rebuild = false;
 	PluginInfoList all_plugs;
 
 	all_plugs.insert (all_plugs.end(), manager.ladspa_plugin_info().begin(), manager.ladspa_plugin_info().end());
@@ -1045,7 +1066,9 @@ PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
 
-		if (manager.get_status (*i) == PluginManager::Hidden) continue;
+		PluginManager::PluginStatusType status = manager.get_status (*i);
+		if (status == PluginManager::Hidden) continue;
+		if (status == PluginManager::Concealed) continue;
 
 		string creator = (*i)->creator;
 
@@ -1103,7 +1126,9 @@ PluginSelector::create_by_tags_menu (ARDOUR::PluginInfoList& all_plugs)
 
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
 
-		if (manager.get_status (*i) == PluginManager::Hidden) continue;
+		PluginManager::PluginStatusType status = manager.get_status (*i);
+		if (status == PluginManager::Hidden) continue;
+		if (status == PluginManager::Concealed) continue;
 
 		/* for each tag in the plugins tag list, add it to that submenu */
 		vector<string> tokens = manager.get_tags(*i);

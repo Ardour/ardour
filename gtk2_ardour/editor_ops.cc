@@ -4456,12 +4456,15 @@ Editor::remove_clicked_region ()
 	begin_reversible_command (_("remove region"));
 
 	boost::shared_ptr<Playlist> playlist = clicked_routeview->playlist();
+	boost::shared_ptr<Region> region = clicked_regionview->region();
 
 	playlist->clear_changes ();
 	playlist->clear_owned_changes ();
-	playlist->remove_region (clicked_regionview->region());
-	if (Config->get_edit_mode() == Ripple)
-		playlist->ripple (clicked_regionview->region()->position(), -clicked_regionview->region()->length(), boost::shared_ptr<Region>());
+	playlist->remove_region (region);
+
+	if (Config->get_edit_mode() == Ripple) {
+		playlist->ripple (region->position(), - region->length(), boost::shared_ptr<Region>());
+	}
 
 	/* We might have removed regions, which alters other regions' layering_index,
 	   so we need to do a recursive diff here.

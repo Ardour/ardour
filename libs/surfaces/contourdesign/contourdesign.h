@@ -65,7 +65,6 @@ class ContourDesignControlProtocol
 	: public ARDOUR::ControlProtocol
 	, public AbstractUI<ContourDesignControlUIRequest>
 {
-	friend ContourDesignGUI;
 public:
 	ContourDesignControlProtocol (ARDOUR::Session &);
 	virtual ~ContourDesignControlProtocol ();
@@ -79,6 +78,7 @@ public:
 	DeviceType device_type() const { return _device_type; }
 
 	static bool probe ();
+	static void* request_factory (uint32_t);
 
 	int set_active (bool yn);
 
@@ -99,6 +99,27 @@ public:
 
 	boost::shared_ptr<ButtonBase> make_button_action (std::string action_string);
 
+	int usb_errorcode () const { return _error; }
+
+	bool keep_rolling () const { return _keep_rolling; }
+	void set_keep_rolling (bool kr) { _keep_rolling = kr; }
+
+	bool test_mode () const { return _test_mode; }
+	void set_test_mode (bool tm) { _test_mode = tm; }
+
+	JumpDistance jog_distance () const { return _jog_distance; }
+	void set_jog_distance (JumpDistance jd) { _jog_distance = jd; }
+
+	void set_shuttle_speed (int index, double speed);
+	double shuttle_speed (int index) const {
+		return _shuttle_speeds[index];
+	}
+
+	PBD::Signal1<void, unsigned short> ButtonPress;
+	PBD::Signal1<void, unsigned short> ButtonRelease;
+
+	std::vector<boost::shared_ptr<ButtonBase> > _button_actions; // XXX TODO: use accessor/setter methods
+
 private:
 	void do_request (ContourDesignControlUIRequest*);
 	void start ();
@@ -113,6 +134,7 @@ private:
 	int acquire_device ();
 	void release_device ();
 
+	void setup_default_button_actions ();
 	void handle_button_press (unsigned short btn);
 	void handle_button_release (unsigned short btn);
 
@@ -141,17 +163,12 @@ private:
 	State _state;
 
 	bool _test_mode;
-	PBD::Signal1<void, unsigned short> ButtonPress;
-	PBD::Signal1<void, unsigned short> ButtonRelease;
 
 	// Config stuff
 
 	bool _keep_rolling;
 	std::vector<double> _shuttle_speeds;
 	JumpDistance _jog_distance;
-
-	std::vector<boost::shared_ptr<ButtonBase> > _button_actions;
-	void setup_default_button_actions ();
 
 	mutable ContourDesignGUI* _gui;
 	void build_gui ();

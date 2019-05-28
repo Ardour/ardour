@@ -108,7 +108,6 @@ MonitorSection::MonitorSection ()
 
 	channel_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
 
-	_plugin_selector = new PluginSelector (PluginManager::instance());
 	insert_box = new ProcessorBox (0, boost::bind (&MonitorSection::plugin_selector, this), _rr_selection, 0);
 	insert_box->set_no_show_all ();
 	insert_box->show ();
@@ -587,7 +586,6 @@ void
 MonitorSection::set_session (Session* s)
 {
 	RouteUI::set_session (s);
-	_plugin_selector->set_session (_session);
 	insert_box->set_session (_session);
 
 	Glib::RefPtr<ActionGroup> global_monitor_actions = ActionManager::get_action_group (X_("Monitor Section"));
@@ -1611,6 +1609,12 @@ void
 MonitorSection::processors_changed (ARDOUR::RouteProcessorChange)
 {
 	update_processor_box ();
+}
+
+PluginSelector*
+MonitorSection::plugin_selector ()
+{
+	return Mixer_UI::instance()->plugin_selector ();
 }
 
 void

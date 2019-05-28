@@ -93,6 +93,17 @@ ContourDesignControlProtocol::probe ()
 	return true;
 }
 
+void*
+ContourDesignControlProtocol::request_factory (uint32_t num_requests)
+{
+	/* AbstractUI<T>::request_buffer_factory() is a template method only
+	 * instantiated in this source module. To provide something visible for
+	 * use in the interface/descriptor, we have this static method that is
+	 * template-free.
+	 */
+	return request_buffer_factory (num_requests);
+}
+
 int
 ContourDesignControlProtocol::set_active (bool yn)
 {
@@ -568,6 +579,15 @@ void ContourDesignControlProtocol::jump_backward (JumpDistance dist)
 	JumpDistance bw = dist;
 	bw.value = -bw.value;
 	jump_forward(bw);
+}
+
+void
+ContourDesignControlProtocol::set_shuttle_speed (int index, double speed)
+{
+	/* called from GUI thread */
+	// XXX this may race with ContourDesignControlProtocol::shuttle_event()
+	// TODO: add bounds check
+	_shuttle_speeds[index] = speed;
 }
 
 void

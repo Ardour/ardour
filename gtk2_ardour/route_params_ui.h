@@ -64,7 +64,7 @@ public:
 
 	void set_session (ARDOUR::Session*);
 	void session_going_away ();
-	PluginSelector* plugin_selector() { return _plugin_selector; }
+	PluginSelector* plugin_selector();
 
 private:
 	Gtk::VBox                list_vpacker;
@@ -112,7 +112,6 @@ private:
 	IOSelector     * _input_iosel;
 	IOSelector     * _output_iosel;
 
-	PluginSelector    *_plugin_selector;
 	ProcessorSelection  _p_selection;
 
 	boost::shared_ptr<ARDOUR::Route> _route;
