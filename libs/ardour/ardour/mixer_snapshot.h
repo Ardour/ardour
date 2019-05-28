@@ -34,10 +34,12 @@ class LIBARDOUR_API MixerSnapshot
     public:
         enum RecallFlags {
             RecallEQ = 0x1,
-            RecallComp = 0x2,
-            RecallIO = 0x4,
-            RecallGroup = 0x8,
-            RecallVCA = 0x10,
+            RecallSends = 0x2,
+            RecallComp = 0x4,
+            RecallPan = 0x8,
+            RecallPlugs = 0x10,
+            RecallGroups = 0x20,
+            RecallVCAs = 0x40
         };
 
         MixerSnapshot(ARDOUR::Session*);
@@ -76,19 +78,23 @@ class LIBARDOUR_API MixerSnapshot
         std::vector<State> get_vcas()   {return vca_states;};
 #ifdef MIXBUS
         bool get_recall_eq()    const { return _flags & RecallEQ;};
+        bool get_recall_sends() const { return _flags & RecallSends;};
         bool get_recall_comp()  const { return _flags & RecallComp;};
 #endif
-        bool get_recall_io()    const { return _flags & RecallIO;};
-        bool get_recall_group() const { return _flags & RecallGroup;};
-        bool get_recall_vca()   const { return _flags & RecallVCA;};
+        bool get_recall_pan()     const { return _flags & RecallPan;};
+        bool get_recall_plugins() const { return _flags & RecallPlugs;};
+        bool get_recall_groups()  const { return _flags & RecallGroups;};
+        bool get_recall_vcas()    const { return _flags & RecallVCAs;};
 
 #ifdef MIXBUS
         void set_recall_eq(bool);
+        void set_recall_sends(bool);
         void set_recall_comp(bool);
 #endif
-        void set_recall_io(bool);
-        void set_recall_group(bool);
-        void set_recall_vca(bool);
+        void set_recall_pan(bool);
+        void set_recall_plugins(bool);
+        void set_recall_groups(bool);
+        void set_recall_vcas(bool);
 
         unsigned int get_id() {return id;};
         void set_id(unsigned int new_id) {id = new_id;};

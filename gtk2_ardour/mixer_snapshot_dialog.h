@@ -83,7 +83,9 @@ class MixerSnapshotDialog : public ArdourWindow
                 add (snapshot);
                 add (recall_eq);
                 add (recall_comp);
-                add (recall_io);
+                add (recall_sends);
+                add (recall_pan);
+                add (recall_plugins);
                 add (recall_groups);
                 add (recall_vcas);
             }
@@ -100,7 +102,9 @@ class MixerSnapshotDialog : public ArdourWindow
             Gtk::TreeModelColumn<ARDOUR::MixerSnapshot*> snapshot;
             Gtk::TreeModelColumn<bool> recall_eq;
             Gtk::TreeModelColumn<bool> recall_comp;
-            Gtk::TreeModelColumn<bool> recall_io;
+            Gtk::TreeModelColumn<bool> recall_sends;
+            Gtk::TreeModelColumn<bool> recall_pan;
+            Gtk::TreeModelColumn<bool> recall_plugins;
             Gtk::TreeModelColumn<bool> recall_groups;
             Gtk::TreeModelColumn<bool> recall_vcas;
         };
