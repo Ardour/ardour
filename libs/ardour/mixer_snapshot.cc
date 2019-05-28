@@ -506,6 +506,8 @@ XMLNode& MixerSnapshot::sanitize_node(XMLNode& node)
         node.remove_node_and_delete(node_name, prop_name, (*it));
     }
 
+    node.remove_node_and_delete("Processor", "role", "Aux");
+
 #ifdef MIXBUS
 
     XMLNodeList nlist;
