@@ -269,12 +269,14 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
        appending, we can just put this in a vector and use it later */
     vector<int> column_counts {
 #ifdef MIXBUS
-        display.append_column(_("EQ"),     _columns.recall_eq),
-        display.append_column(_("Comp"),   _columns.recall_comp),
+        display.append_column(_("EQ"),      _columns.recall_eq),
+        display.append_column(_("Comp."),   _columns.recall_comp),
+        display.append_column(_("Sends"),   _columns.recall_sends),
 #endif
-        display.append_column(_("I/O"),    _columns.recall_io),
-        display.append_column(_("Groups"), _columns.recall_groups),
-        display.append_column(_("VCAs"),   _columns.recall_vcas),
+        display.append_column(_("Pan"),     _columns.recall_pan),
+        display.append_column(_("Plugins"), _columns.recall_plugins),
+        display.append_column(_("Groups"),  _columns.recall_groups),
+        display.append_column(_("VCAs"),    _columns.recall_vcas),
     };
 
     for(vector<int>::iterator i = column_counts.begin(); i != column_counts.end(); i++) {
@@ -399,10 +401,12 @@ void MixerSnapshotDialog::new_row(Glib::RefPtr<ListStore> model, MixerSnapshot* 
 #ifdef MIXBUS
     row[_columns.recall_eq]     = snap->get_recall_eq();
     row[_columns.recall_comp]   = snap->get_recall_comp();
+    row[_columns.recall_sends]  = snap->get_recall_sends();
 #endif
-    row[_columns.recall_io]     = snap->get_recall_io();
-    row[_columns.recall_groups] = snap->get_recall_group();
-    row[_columns.recall_vcas]   = snap->get_recall_vca();
+    row[_columns.recall_pan]     = snap->get_recall_pan();
+    row[_columns.recall_plugins] = snap->get_recall_plugins();
+    row[_columns.recall_groups]  = snap->get_recall_groups();
+    row[_columns.recall_vcas]    = snap->get_recall_vcas();
 
 }
 
@@ -555,24 +559,34 @@ void MixerSnapshotDialog::recall_flag_cell_action(const std::string& path, bool 
             (*iter)[_columns.recall_eq] = snap->get_recall_eq();
         }
 
-        if(title == "Comp") {
+        if(title == "Comp.") {
             snap->set_recall_comp(!snap->get_recall_comp());
             (*iter)[_columns.recall_comp] = snap->get_recall_comp();
         }
+
+        if(title == "Sends") {
+            snap->set_recall_sends(!snap->get_recall_sends());
+            (*iter)[_columns.recall_comp] = snap->get_recall_sends();
+        }
 #endif
-        if(title == "I/O") {
-                snap->set_recall_io(!snap->get_recall_io());
-                (*iter)[_columns.recall_io] = snap->get_recall_io();
+        if(title == "Pan") {
+            snap->set_recall_pan(!snap->get_recall_pan());
+            (*iter)[_columns.recall_pan] = snap->get_recall_pan();
+        }
+
+        if(title == "Plugins") {
+            snap->set_recall_plugins(!snap->get_recall_plugins());
+            (*iter)[_columns.recall_plugins] = snap->get_recall_plugins();
         }
 
         if(title == "Groups") {
-            snap->set_recall_group(!snap->get_recall_group());
-            (*iter)[_columns.recall_groups] = snap->get_recall_group();
+            snap->set_recall_groups(!snap->get_recall_groups());
+            (*iter)[_columns.recall_groups] = snap->get_recall_groups();
         }
 
         if(title == "VCAs") {
-            snap->set_recall_vca(!snap->get_recall_vca());
-            (*iter)[_columns.recall_vcas] = snap->get_recall_vca();
+            snap->set_recall_vcas(!snap->get_recall_vcas());
+            (*iter)[_columns.recall_vcas] = snap->get_recall_vcas();
         }
 
         snap->write((*iter)[_columns.full_path]);

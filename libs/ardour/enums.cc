@@ -783,10 +783,12 @@ setup_enum_writer ()
 	REGISTER (mode);
 
 	REGISTER_CLASS_ENUM (MixerSnapshot, RecallEQ);
+	REGISTER_CLASS_ENUM (MixerSnapshot, RecallSends);
 	REGISTER_CLASS_ENUM (MixerSnapshot, RecallComp);
-	REGISTER_CLASS_ENUM (MixerSnapshot, RecallIO);
-	REGISTER_CLASS_ENUM (MixerSnapshot, RecallGroup);
-	REGISTER_CLASS_ENUM (MixerSnapshot, RecallVCA);
+	REGISTER_CLASS_ENUM (MixerSnapshot, RecallPan);
+	REGISTER_CLASS_ENUM (MixerSnapshot, RecallPlugs);
+	REGISTER_CLASS_ENUM (MixerSnapshot, RecallGroups);
+	REGISTER_CLASS_ENUM (MixerSnapshot, RecallVCAs);
 	REGISTER_BITS (_Recall_Flags);
 }
 

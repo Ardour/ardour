@@ -53,7 +53,7 @@ MixerSnapshot::MixerSnapshot(Session* s)
     , label("snapshot")
     , timestamp(time(0))
     , last_modified_with(string_compose("%1 %2", PROGRAM_NAME, revision))
-    , _flags(RecallFlags(31))
+    , _flags(RecallFlags(127))
 {
     if(s) {
         _session = s;
@@ -66,7 +66,7 @@ MixerSnapshot::MixerSnapshot(Session* s, string file_path)
     , label("snapshot")
     , timestamp(time(0))
     , last_modified_with(string_compose("%1 %2", PROGRAM_NAME, revision))
-    , _flags(RecallFlags(31))
+    , _flags(RecallFlags(127))
 {
     if(s) {
         _session = s;
@@ -111,11 +111,13 @@ bool MixerSnapshot::set_flag(bool yn, RecallFlags flag)
 
 #ifdef MIXBUS
 void MixerSnapshot::set_recall_eq(bool yn)    { set_flag(yn, RecallEQ);   };
+void MixerSnapshot::set_recall_sends(bool yn) { set_flag(yn, RecallSends);};
 void MixerSnapshot::set_recall_comp(bool yn)  { set_flag(yn, RecallComp); };
 #endif
-void MixerSnapshot::set_recall_io(bool yn)    { set_flag(yn, RecallIO);   };
-void MixerSnapshot::set_recall_group(bool yn) { set_flag(yn, RecallGroup);};
-void MixerSnapshot::set_recall_vca(bool yn)   { set_flag(yn, RecallVCA);  };
+void MixerSnapshot::set_recall_pan(bool yn)     { set_flag(yn, RecallPan);   };
+void MixerSnapshot::set_recall_plugins(bool yn) { set_flag(yn, RecallPlugs); };
+void MixerSnapshot::set_recall_groups(bool yn)  { set_flag(yn, RecallGroups);};
+void MixerSnapshot::set_recall_vcas(bool yn)    { set_flag(yn, RecallVCAs);  };
 
 bool MixerSnapshot::has_specials()
 {
@@ -305,7 +307,7 @@ void MixerSnapshot::recall()
 
     //vcas
     for(vector<State>::const_iterator i = vca_states.begin(); i != vca_states.end(); i++) {
-        if(!get_recall_vca()) {
+        if(!get_recall_vcas()) {
             break;
         }
 
@@ -346,7 +348,7 @@ void MixerSnapshot::recall()
 
     //groups
     for(vector<State>::const_iterator i = group_states.begin(); i != group_states.end(); i++) {
-        if(!get_recall_group()) {
+        if(!get_recall_groups()) {
             break;
         }
 
@@ -543,10 +545,8 @@ XMLNode& MixerSnapshot::sanitize_node(XMLNode& node)
     }
 #endif
 
-    if(!get_recall_io()) {
-        node.remove_node_and_delete("IO", "direction", "Input");
-        node.remove_node_and_delete("IO", "direction", "Output");
-    }
+    node.remove_node_and_delete("IO", "direction", "Input");
+    node.remove_node_and_delete("IO", "direction", "Output");
 
     return node;
 }
