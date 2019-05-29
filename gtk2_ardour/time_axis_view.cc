@@ -1192,16 +1192,16 @@ TimeAxisView::color_handler ()
 }
 
 void
-TimeAxisView::parameter_changed (string const & p)
+TimeAxisView::parameter_changed (string const & what_changed)
 {
-	if (p == "vertical-region-gap") {
+	if (what_changed == "vertical-region-gap") {
 		if (selected ()) {
 			show_selection (_editor.get_selection().time);
 		}
 	}
 
 	if (view()) {
-		view()->parameter_handler (what);
+		view()->parameter_changed (what_changed);
 	}
 }
 

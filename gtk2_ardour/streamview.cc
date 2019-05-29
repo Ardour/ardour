@@ -726,7 +726,7 @@ StreamView::setup_new_rec_layer_time (boost::shared_ptr<Region> region)
 }
 
 void
-StreamView::parameter_handler (string const & what)
+StreamView::parameter_changed (string const & what)
 {
 	if (what == "show-region-name") {
 		for (RegionViewList::iterator i = region_views.begin (); i != region_views.end (); ++i) {

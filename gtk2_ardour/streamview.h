@@ -125,7 +125,7 @@ public:
 	/** Emitted when the height of regions has changed */
 	sigc::signal<void> ContentsHeightChanged;
 
-	virtual void parameter_handler (std::string const &);
+	virtual void parameter_changed (std::string const &);
 
 protected:
 	StreamView (RouteTimeAxisView&, ArdourCanvas::Container* canvas_group = 0);
