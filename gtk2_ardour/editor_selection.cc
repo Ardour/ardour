@@ -1503,12 +1503,15 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 		_region_actions->get_action("naturalize-region")->set_sensitive (false);
 	}
 
+/* Todo: insert-region-from-source-list  
 	/* XXX: should also check that there is a track of the appropriate type for the selected region */
+#if 0
 	if (_edit_point == EditAtMouse || _regions->get_single_selection() == 0 || selection->tracks.empty()) {
 		_region_actions->get_action("insert-region-from-region-list")->set_sensitive (false);
 	} else {
 		_region_actions->get_action("insert-region-from-region-list")->set_sensitive (true);
 	}
+#endif
 
 	a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-fade-in"));
 	a->set_active (have_active_fade_in && !have_inactive_fade_in);
