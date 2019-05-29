@@ -5400,8 +5400,8 @@ Session::create_midi_source_by_stealing_name (boost::shared_ptr<Track> track)
 bool
 Session::playlist_is_active (boost::shared_ptr<Playlist> playlist)
 {
-	Glib::Threads::Mutex::Lock lm (playlists->lock);
-	for (SessionPlaylists::List::iterator i = playlists->playlists.begin(); i != playlists->playlists.end(); i++) {
+	Glib::Threads::Mutex::Lock lm (_playlists->lock);
+	for (SessionPlaylists::List::iterator i = _playlists->playlists.begin(); i != _playlists->playlists.end(); i++) {
 		if ( (*i) == playlist ) {
 			return true;
 		}

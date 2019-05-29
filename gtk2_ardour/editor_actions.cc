@@ -670,10 +670,10 @@ Editor::register_actions ()
 	RadioAction::Group sort_order_group;
 
 	/* the region list popup menu */
-	act = myactions.register_action (rl_actions, X_("rlAudition"), _("Audition"), sigc::mem_fun(*this, &Editor::audition_region_from_region_list));
+	act = ActionManager::register_action (rl_actions, X_("rlAudition"), _("Audition"), sigc::mem_fun(*this, &Editor::audition_region_from_region_list));
 	ActionManager::region_list_selection_sensitive_actions.push_back (act);
 
-	myactions.register_action (rl_actions, X_("removeUnusedRegions"), _("Remove Unused"), sigc::mem_fun (*_regions, &EditorRegions::remove_unused_regions));
+	ActionManager::register_action (rl_actions, X_("removeUnusedRegions"), _("Remove Unused"), sigc::mem_fun (*_regions, &EditorRegions::remove_unused_regions));
 
 	act = reg_sens (editor_actions, X_("addExistingPTFiles"), _("Import PT session"), sigc::mem_fun (*this, &Editor::external_pt_dialog));
 	ActionManager::write_sensitive_actions.push_back (act);

@@ -238,18 +238,6 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("Export"), _("Export"));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("CleanupUnusedSources"), _("Clean-up Unused Sources..."),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::write_sensitive_actions.push_back (act);
-
-	act = global_actions.register_action (main_actions, X_("CleanupUnusedRegions"), _("Clean-up Unused Regions..."),  sigc::mem_fun (*editor, &PublicEditor::cleanup_regions));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::write_sensitive_actions.push_back (act);
-
-	act = ActionManager::register_action (main_actions, X_("CleanupPeakFiles"), _("Reset Peak Files"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup_peakfiles));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::write_sensitive_actions.push_back (act);
-
 	act = ActionManager::register_action (main_actions, X_("FlushWastebasket"), _("Flush Wastebasket"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::flush_trash));
 
 	ActionManager::write_sensitive_actions.push_back (act);
@@ -571,6 +559,18 @@ ARDOUR_UI::install_dependent_actions ()
 
 	act = ActionManager::register_action (main_actions, X_("ExportAudio"), _("Export to Audio File(s)..."),  sigc::mem_fun (*editor, &PublicEditor::export_audio));
 	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (main_actions, X_("CleanupUnusedSources"), _("Clean-up Unused Sources..."),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (main_actions, X_("CleanupUnusedRegions"), _("Clean-up Unused Regions..."),  sigc::mem_fun (*editor, &PublicEditor::cleanup_regions));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (main_actions, X_("CleanupPeakFiles"), _("Reset Peak Files"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup_peakfiles));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
 
 	/* these actions are all currently implemented by the Editor, but need
 	 * to be accessible from anywhere as actions.
