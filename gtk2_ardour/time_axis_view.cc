@@ -1199,6 +1199,10 @@ TimeAxisView::parameter_changed (string const & p)
 			show_selection (_editor.get_selection().time);
 		}
 	}
+
+	if (view()) {
+		view()->parameter_handler (what);
+	}
 }
 
 /** @return Pair: TimeAxisView, layer index.

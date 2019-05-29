@@ -128,6 +128,8 @@ public:
 
 	ARDOUR::MusicSample snap_sample_to_sample (ARDOUR::sampleoffset_t, bool ensure_snap = false) const;
 
+	void update_visibility ();
+
 protected:
 
 	/** Allows derived types to specify their visibility requirements

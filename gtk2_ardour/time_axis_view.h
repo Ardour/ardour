@@ -306,6 +306,8 @@ protected:
 	void color_handler ();
 	void parameter_changed (std::string const &);
 
+	virtual void parameter_handler (std::string const &);
+
 	void conditionally_add_to_selection ();
 
 	void build_size_menu ();
