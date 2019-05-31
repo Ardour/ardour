@@ -1200,9 +1200,6 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 
 		if (target == X_("regions")) {
 			region = _regions->get_dragged_region ();
-		} else if (target == X_("sources")) {
-			boost::shared_ptr<ARDOUR::Source> src = _sources->get_dragged_source ();
-			region = RegionFactory::get_whole_region_for_source (src);
 		}
 
 		if (region) {
@@ -1279,10 +1276,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	if (from_region_list) {
 		region = _regions->get_dragged_region ();
 	} else {
-		boost::shared_ptr<ARDOUR::Source> src = _sources->get_dragged_source ();
-		if (src) {
-			region = RegionFactory::get_whole_region_for_source (src);
-		}
+		region = _sources->get_dragged_region ();
 	}
 
 	if (!region) { return; }
