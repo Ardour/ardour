@@ -45,12 +45,10 @@ public:
 
 	void clear ();
 	
-	void remove_selected_sources ();
-
 	void selection_mapover (sigc::slot<void,boost::shared_ptr<ARDOUR::Region> >);
 
-	boost::shared_ptr<ARDOUR::Source> get_dragged_source ();
-	boost::shared_ptr<ARDOUR::Source> get_single_selection ();
+	boost::shared_ptr<ARDOUR::Region> get_dragged_region ();
+	boost::shared_ptr<ARDOUR::Region> get_single_selection ();
 
 	void block_change_connection (bool b) {
 		_change_connection.block (b);
@@ -59,6 +57,10 @@ public:
 	void unselect_all () {
 		_display.get_selection()->unselect_all ();
 	}
+
+	//user actions
+	void remove_selected_sources ();
+	void recover_selected_sources();
 
 	XMLNode& get_state () const;
 	void set_state (const XMLNode &);
@@ -72,12 +74,12 @@ private:
 			add (natural_pos);
 			add (path);
 			add (color_);
-			add (source);
+			add (region);
 			add (natural_s);
 		}
 
 		Gtk::TreeModelColumn<std::string> name;
-		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Source> > source;
+		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Region> > region;
 		Gtk::TreeModelColumn<Gdk::Color> color_;
 		Gtk::TreeModelColumn<std::string> natural_pos;
 		Gtk::TreeModelColumn<std::string> path;
@@ -91,8 +93,8 @@ private:
 
 	void freeze_tree_model ();
 	void thaw_tree_model ();
-	void source_changed (boost::shared_ptr<ARDOUR::Source>);
-	void populate_row (Gtk::TreeModel::Row row, boost::shared_ptr<ARDOUR::Source> source);
+	void source_changed (boost::shared_ptr<ARDOUR::Region>);
+	void populate_row (Gtk::TreeModel::Row row, boost::shared_ptr<ARDOUR::Region> region);
 	void selection_changed ();
 
 	sigc::connection _change_connection;
@@ -113,10 +115,21 @@ private:
 
 	void format_position (ARDOUR::samplepos_t pos, char* buf, size_t bufsize, bool onoff = true);
 
-	void add_source (boost::shared_ptr<ARDOUR::Source>);
-	void remove_source (boost::shared_ptr<ARDOUR::Source>);
+	void add_source (boost::shared_ptr<ARDOUR::Region>);
+	void remove_source (boost::shared_ptr<ARDOUR::Region>);
 
 	void clock_format_changed ();
+
+	void redisplay ();
+
+	void suspend_redisplay () {
+		_no_redisplay = true;
+	}
+
+	void resume_redisplay () {
+		_no_redisplay = false;
+		redisplay ();
+	}
 
 	void drag_data_received (
 		Glib::RefPtr<Gdk::DragContext> const &, gint, gint, Gtk::SelectionData const &, guint, guint
@@ -126,19 +139,19 @@ private:
 	Gtk::ScrolledWindow _scroller;
 	Gtk::Frame _frame;
 
-	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Source> > _display;
+	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Region> > _display;
 
 	Glib::RefPtr<Gtk::TreeStore> _model;
 
-	PBD::ScopedConnection source_property_connection;
-
-	PBD::ScopedConnection source_added_connection;
-	PBD::ScopedConnection source_removed_connection;
+	PBD::ScopedConnection region_property_connection;
+	PBD::ScopedConnection check_new_region_connection;
 
 	PBD::ScopedConnection editor_freeze_connection;
 	PBD::ScopedConnection editor_thaw_connection;
 
 	Selection* _selection;
+	
+	bool _no_redisplay;
 
 };
 

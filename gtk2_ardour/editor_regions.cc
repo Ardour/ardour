@@ -369,6 +369,11 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 		return;
 	}
 
+	//whole-file regions are shown in the Source List
+	if ( region->whole_file() ) {
+		return;
+	}
+
 	PropertyChange pc;
 	region_changed(region, pc);
 }
@@ -521,12 +526,7 @@ EditorRegions::redisplay ()
 
 	region_row_map.clear();
 
-	const RegionFactory::RegionMap& regions (RegionFactory::regions());
-	for (RegionFactory::RegionMap::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		if ( ! i->second->whole_file() ) {
-			add_region (i->second);
-		}
-	}
+	RegionFactory::foreach_region (sigc::mem_fun (*this, &EditorRegions::add_region));
 
 	_model->set_sort_column (0, SORT_ASCENDING); // renabale sorting
 	_display.set_model (_model);
@@ -1248,7 +1248,7 @@ EditorRegions::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("RegionList"));
 
-	//TODO
+	//TODO:  save sort state?
 //	node->set_property (X_("sort-col"), _sort_type);
 //	node->set_property (X_("sort-asc"), _sort_type);
 
