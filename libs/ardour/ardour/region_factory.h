@@ -95,6 +95,15 @@ public:
 	static void delete_all_regions ();
 	static const RegionMap& regions() { return region_map; }
 	static uint32_t nregions ();
+	
+	static void foreach_region (boost::function<void( boost::shared_ptr<Region> )> f) {
+		Glib::Threads::Mutex::Lock ls (region_map_lock);
+		for (RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
+			f ( (*i).second );
+		}
+	}
+	
+
 
 	static int region_name (std::string &, std::string, bool new_level = false);
 	static std::string new_region_name (std::string);
