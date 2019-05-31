@@ -42,6 +42,7 @@
 #include "widgets/tooltips.h"
 
 #include "audio_clock.h"
+#include "context_menu_helper.h"
 #include "editor.h"
 #include "editing.h"
 #include "editing_convert.h"
@@ -174,7 +175,7 @@ EditorSources::EditorSources (Editor* e)
 	tv_col->set_expand (true);
 
 	_display.get_selection()->set_mode (SELECTION_MULTIPLE);
-	_display.add_object_drag (_columns.source.index(), "sources");
+	_display.add_object_drag (_columns.region.index(), "regions");
 	_display.set_drag_column (_columns.name.index());
 
 	/* setup DnD handling */
@@ -262,28 +263,28 @@ EditorSources::set_session (ARDOUR::Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (s) {
-		//get all existing sources
-		s->foreach_source (sigc::mem_fun (*this, &EditorSources::add_source));
 
-		//register to get new sources that are recorded/imported
-		s->SourceAdded.connect (source_added_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::add_source, this, _1), gui_context());
-		s->SourceRemoved.connect (source_removed_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::remove_source, this, _1), gui_context());
+		/*  Currently, none of the displayed properties are mutable, so there is no reason to register for changes
+		 * ARDOUR::Region::RegionPropertyChanged.connect (region_property_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::source_changed, this, _1, _2), gui_context());
+		*/
+		
+		ARDOUR::RegionFactory::CheckNewRegion.connect (check_new_region_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::add_source, this, _1), gui_context());
 
-		//register for source property changes ( some things like take_id aren't immediately available at construction )
-		ARDOUR::Source::SourcePropertyChanged.connect (source_property_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::source_changed, this, _1), gui_context());
+		redisplay();
+
 	} else {
 		clear();
 	}
 }
 
 void
-EditorSources::remove_source (boost::shared_ptr<ARDOUR::Source> source)
+EditorSources::remove_source (boost::shared_ptr<ARDOUR::Region> region)
 {
 	TreeModel::iterator i;
 	TreeModel::Children rows = _model->children();
 	for (i = rows.begin(); i != rows.end(); ++i) {
-		boost::shared_ptr<ARDOUR::Source> ss = (*i)[_columns.source];
-		if (source == ss) {
+		boost::shared_ptr<ARDOUR::Region> rr = (*i)[_columns.region];
+		if (region == rr) {
 			_model->erase(i);
 			break;
 		}
@@ -291,50 +292,40 @@ EditorSources::remove_source (boost::shared_ptr<ARDOUR::Source> source)
 }
 
 void
-EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Source> source)
+EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Region> region)
 {
-	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::record_state_changed, row, source);
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::record_state_changed, row, region);
 
-	if (!source) {
+	if (!region) {
 		return;
 	}
 
-	string str;
-	Gdk::Color c;
+	boost::shared_ptr<ARDOUR::Source> source = region->source();  //ToDo:  is it OK to use only the first source?
 
+	//COLOR  (for missing files)
+	Gdk::Color c;
 	bool missing_source = boost::dynamic_pointer_cast<SilentFileSource>(source) != NULL;
 	if (missing_source) {
 		set_color_from_rgba (c, UIConfiguration::instance().color ("region list missing source"));
 	} else {
 		set_color_from_rgba (c, UIConfiguration::instance().color ("region list whole file"));
 	}
-
 	row[_columns.color_] = c;
 
-	if (source->name()[0] == '/') { // external file
-
-		str = ".../";
-
-		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(source);
-		if (afs) {
-			str += source->name();
-			str += "[";
-			str += afs->n_channels();  //ToDo:   num channels may be its own column?
-			str += "]";
-		} else {
-			str += source->name();
-		}
-
-	} else {
-		str = source->name();
+	//NAME
+	std::string str = region->name();
+	//if a multichannel region, show the number of channels  ToDo:  make a sortable column for this?
+	if ( region->n_channels() > 1 ) {
+		str += string_compose("[%1]", region->n_channels());
 	}
-
 	row[_columns.name] = str;
-	row[_columns.source] = source;
 
+	row[_columns.region] = region;
+	row[_columns.take_id] = source->take_id();
+
+	//PATH
 	if (missing_source) {
 		row[_columns.path] = _("(MISSING) ") + Gtkmm2ext::markup_escape_text (source->name());
-
 	} else {
 		boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource>(source);
 		if (fs) {
@@ -348,9 +339,6 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Sourc
 			row[_columns.path] = Gtkmm2ext::markup_escape_text (source->name());
 		}
 	}
-
-	row[_columns.take_id] = source->take_id();
-
 
 	//Natural Position (samples, an invisible column for sorting)
 	row[_columns.natural_s] = source->natural_position();
@@ -366,40 +354,60 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Sourc
 }
 
 void
-EditorSources::add_source (boost::shared_ptr<ARDOUR::Source> source)
+EditorSources::redisplay ()
 {
-	if (!source || !_session ) {
+	if (_no_redisplay || !_session) {
 		return;
 	}
 
-	boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (source);
+	_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
+	_model->clear ();
+	_model->set_sort_column (-2, SORT_ASCENDING); //Disable sorting to gain performance
 
+	//Ask the region factory to fill our list of whole-file regions
+	RegionFactory::foreach_region (sigc::mem_fun (*this, &EditorSources::add_source));
+
+	_model->set_sort_column (0, SORT_ASCENDING); // re-enable sorting
+	_display.set_model (_model);
+}
+
+void
+EditorSources::add_source (boost::shared_ptr<ARDOUR::Region> region)
+{
+	if (!region || !_session ) {
+		return;
+	}
+
+	//by definition, the Source List only shows whole-file regions
+	//this roughly equates to Source objects, but preserves the stereo-ness (or multichannel-ness) of a stereo source file.
+	if ( !region->whole_file() ) {
+		return;
+	}
+	
+	//we only show files-on-disk.  if there's some other kind of source, we ignore it (for now)
+	boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (region->source());
 	if (!fs || fs->empty()) {
 		return;
 	}
 
 	TreeModel::Row row = *(_model->append());
-	populate_row (row, source);
+	populate_row (row, region);
 }
 
 void
-EditorSources::source_changed (boost::shared_ptr<ARDOUR::Source> source)
+EditorSources::source_changed (boost::shared_ptr<ARDOUR::Region> region)
 {
+	/* Currently never reached .. we have no mutable properties shown in the list*/
+	
 	TreeModel::iterator i;
 	TreeModel::Children rows = _model->children();
-	bool found = false;
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
-		boost::shared_ptr<ARDOUR::Source> ss = (*i)[_columns.source];
-		if (source == ss) {
-			populate_row(*i, source);
-			found = true;
+		boost::shared_ptr<ARDOUR::Region> rr = (*i)[_columns.region];
+		if (region == rr) {
+			populate_row(*i, region);
 			break;
 		}
-	}
-
-	if (!found) {
-		add_source (source);
 	}
 }
 
@@ -418,7 +426,11 @@ EditorSources::selection_changed ()
 
 			if ((iter = _model->get_iter (*i))) {
 
-				boost::shared_ptr<ARDOUR::Source> source = (*iter)[_columns.source];
+				//highlight any regions in the editor that use this region's source
+ 				boost::shared_ptr<ARDOUR::Region> region = (*iter)[_columns.region];
+ 				if (!region) continue;
+
+ 				boost::shared_ptr<ARDOUR::Source> source = region->source();
 				if (source) {
 
 					set<boost::shared_ptr<Region> > regions;
@@ -432,7 +444,6 @@ EditorSources::selection_changed ()
 					}
 				}
 			}
-
 		}
 	} else {
 		_editor->get_selection().clear_regions ();
@@ -446,8 +457,8 @@ EditorSources::clock_format_changed ()
 	TreeModel::iterator i;
 	TreeModel::Children rows = _model->children();
 	for (i = rows.begin(); i != rows.end(); ++i) {
-		boost::shared_ptr<ARDOUR::Source> ss = (*i)[_columns.source];
-		populate_row(*i, ss);
+		boost::shared_ptr<ARDOUR::Region> rr = (*i)[_columns.region];
+		populate_row(*i, rr);
 	}
 }
 
@@ -523,8 +534,40 @@ EditorSources::format_position (samplepos_t pos, char* buf, size_t bufsize, bool
 void
 EditorSources::show_context_menu (int button, int time)
 {
-
+	using namespace Gtk::Menu_Helpers;
+	Gtk::Menu* menu = ARDOUR_UI_UTILS::shared_popup_menu ();
+	MenuList&  items = menu->items();
+	items.push_back(MenuElem(_("Recover the selected Sources to their original Track & Position"),
+							 sigc::mem_fun(*this, &EditorSources::recover_selected_sources)));
+	items.push_back(MenuElem(_("Remove the selected Sources"),
+							 sigc::mem_fun(*this, &EditorSources::remove_selected_sources)));
+	menu->popup(1, time);
 }
+
+void
+EditorSources::recover_selected_sources ()
+{
+	std::list<boost::weak_ptr<ARDOUR::Region> > to_be_recovered;
+	
+	if (_display.get_selection()->count_selected_rows() > 0) {
+
+		TreeIter iter;
+		TreeView::Selection::ListHandle_Path rows = _display.get_selection()->get_selected_rows ();
+		for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
+			if ((iter = _model->get_iter (*i))) {
+				boost::shared_ptr<ARDOUR::Region> region = (*iter)[_columns.region];
+				if (region) {
+					to_be_recovered.push_back(region);
+				}
+			}
+		}
+	}
+
+
+	/* ToDo */
+//	_editor->recover_regions();  //this operation should be undo-able
+}
+
 
 void
 EditorSources::remove_selected_sources ()
@@ -559,9 +602,12 @@ EditorSources::remove_selected_sources ()
 
 				if ((iter = _model->get_iter (*i))) {
 
-					boost::shared_ptr<ARDOUR::Source> source = (*iter)[_columns.source];
-					if (source) {
+					boost::shared_ptr<ARDOUR::Region> region = (*iter)[_columns.region];
+	
+	 				if (!region) continue;
 
+ 					boost::shared_ptr<ARDOUR::Source> source = region->source();
+					if (source) {
 						set<boost::shared_ptr<Region> > regions;
 						RegionFactory::get_regions_using_source ( source, regions );
 
@@ -606,7 +652,7 @@ EditorSources::key_press (GdkEventKey* ev)
 bool
 EditorSources::button_press (GdkEventButton *ev)
 {
-	boost::shared_ptr<ARDOUR::Source> source;
+	boost::shared_ptr<ARDOUR::Region> region;
 	TreeIter iter;
 	TreeModel::Path path;
 	TreeViewColumn* column;
@@ -615,7 +661,7 @@ EditorSources::button_press (GdkEventButton *ev)
 
 	if (_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		if ((iter = _model->get_iter (path))) {
-			source = (*iter)[_columns.source];
+			region = (*iter)[_columns.region];
 		}
 	}
 
@@ -640,7 +686,7 @@ EditorSources::drag_data_received (const RefPtr<Gdk::DragContext>& context,
                                    const SelectionData& data,
                                    guint info, guint time)
 {
-
+	/* ToDo:  allow dropping files/loops into the source list?  */
 }
 
 bool
@@ -650,19 +696,19 @@ EditorSources::selection_filter (const RefPtr<TreeModel>& model, const TreeModel
 }
 
 /** @return Region that has been dragged out of the list, or 0 */
-boost::shared_ptr<ARDOUR::Source>
-EditorSources::get_dragged_source ()
+boost::shared_ptr<ARDOUR::Region>
+EditorSources::get_dragged_region ()
 {
-	list<boost::shared_ptr<ARDOUR::Source> > sources;
-	TreeView* source;
-	_display.get_object_drag_data (sources, &source);
+	list<boost::shared_ptr<ARDOUR::Region> > regions;
+	TreeView* region;
+	_display.get_object_drag_data (regions, &region);
 
-	if (sources.empty()) {
-		return boost::shared_ptr<ARDOUR::Source> ();
+	if (regions.empty()) {
+		return boost::shared_ptr<ARDOUR::Region> ();
 	}
 
-	assert (sources.size() == 1);
-	return sources.front ();
+	assert (regions.size() == 1);
+	return regions.front ();
 }
 
 void
@@ -673,13 +719,13 @@ EditorSources::clear ()
 	_display.set_model (_model);
 }
 
-boost::shared_ptr<ARDOUR::Source>
+boost::shared_ptr<ARDOUR::Region>
 EditorSources::get_single_selection ()
 {
 	Glib::RefPtr<TreeSelection> selected = _display.get_selection();
 
 	if (selected->count_selected_rows() != 1) {
-		return boost::shared_ptr<ARDOUR::Source> ();
+		return boost::shared_ptr<ARDOUR::Region> ();
 	}
 
 	TreeView::Selection::ListHandle_Path rows = selected->get_selected_rows ();
@@ -689,10 +735,10 @@ EditorSources::get_single_selection ()
 	TreeIter iter = _model->get_iter (*rows.begin());
 
 	if (!iter) {
-		return boost::shared_ptr<ARDOUR::Source> ();
+		return boost::shared_ptr<ARDOUR::Region> ();
 	}
 
-	return (*iter)[_columns.source];
+	return (*iter)[_columns.region];
 }
 
 void
