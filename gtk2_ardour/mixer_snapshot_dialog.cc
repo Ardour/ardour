@@ -224,7 +224,13 @@ void MixerSnapshotDialog::rename_snapshot(TreeModel::iterator& iter)
         if (new_label.length() > 0) {
             string new_path = Glib::build_filename(dir_name, new_label + ".xml");
             ::g_rename(old_path.c_str(), new_path.c_str());
+
+            if (new_label.length() > 45) {
+                new_label = new_label.substr (0, 45);
+                new_label.append("...");
+            }
             (*iter)[_columns.name] = new_label;
+            (*iter)[_columns.full_path] = new_path;
         }
     }
 }
@@ -309,7 +315,7 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
     VBox* vbox = manage(new VBox);
     vbox->set_homogeneous();
     vbox->pack_start(*add_remove);
-    vbox->set_size_request(800, -1);
+    vbox->set_size_request(1000, -1);
 
     btn_add->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snapshot), global));
     btn_new->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snapshot_from_session), global));
@@ -320,7 +326,7 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
 
     Table* table = manage(new Table(3, 3));
     table->set_size_request(-1, 400);
-    table->attach(scroller,        0, 3, 0, 5                         );
+    table->attach(scroller,        0, 3, 0, 5      );
     table->attach(*vbox,           2, 3, 6, 8, FILL|EXPAND, FILL, 5, 5);
     top_level_view_box.pack_start(*table);
 
@@ -374,8 +380,8 @@ void MixerSnapshotDialog::new_row(Glib::RefPtr<ListStore> model, MixerSnapshot* 
         }
     }
 
-    if (name.length() > 48) {
-        name = name.substr (0, 48);
+    if (name.length() > 45) {
+        name = name.substr (0, 45);
         name.append("...");
     }
 
