@@ -24,7 +24,6 @@
 #include "pbd/file_utils.h"
 #include "pbd/i18n.h"
 #include "pbd/memento_command.h"
-
 #include "pbd/types_convert.h"
 #include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
@@ -126,11 +125,10 @@ bool MixerSnapshot::has_specials()
     }
 
     for(vector<State>::const_iterator it = route_states.begin(); it != route_states.end(); it++) {
-        if(it->name == "Monitor") {
+        if((*it)->name == "Monitor") {
             return true;
         }
     }
-
     return false;
 }
 
@@ -149,7 +147,7 @@ void MixerSnapshot::snap(boost::shared_ptr<Route> route)
     }
 
     string name = route->name();
-    XMLNode& original = route->get_state();
+    XMLNode& original = route->get_template();
     XMLNode copy (original);
 
     RouteGroup* group = route->route_group();
@@ -299,6 +297,7 @@ void MixerSnapshot::reassign_masters(boost::shared_ptr<Slavable> slv, XMLNode no
 
 void MixerSnapshot::recall()
 {
+
     if(!_session) {
         return;
     }
@@ -332,17 +331,17 @@ void MixerSnapshot::recall()
     for(vector<State>::const_iterator i = route_states.begin(); i != route_states.end(); i++) {
         State state = (*i);
 
-        // boost::shared_ptr<Route> route;// = _session->route_by_id(PBD::ID(state.id));
-
         boost::shared_ptr<Route> route = _session->route_by_name(state.name);
 
         if(route) {
-            printf("Setting state %s for route %s\n", state.name.c_str(), route->name().c_str());
-            XMLNode& bfr = route->get_state();
-            route->set_state(sanitize_node(state.node), PBD::Stateful::loading_state_version);
+            _session->remove_route(route);
+            route = 0; //explicitly drop reference
+            RouteList rl = _session->new_route_from_template(1, 1, state.node, state.name, NewPlaylist);
+
+            // this is no longer possible due to using new_from_route_template
+            // _session->add_command(new MementoCommand<Route>((*route), &bfr, &route->get_state()));
+
             reassign_masters(route, state.node);
-            _session->add_command(new MementoCommand<Route>((*route), &bfr, &route->get_state()));
-            route->emit_pending_signals();
         }
     }
 
@@ -364,7 +363,6 @@ void MixerSnapshot::recall()
             group->set_state(state.node, PBD::Stateful::loading_state_version);
         }
     }
-
     _session->commit_reversible_command();
 }
 
@@ -489,66 +487,6 @@ void MixerSnapshot::load_from_session(string path)
     }
 
     load_from_session(*(root));
-}
-
-XMLNode& MixerSnapshot::sanitize_node(XMLNode& node)
-{
-    vector<string> procs {"PRE"};
-
-#ifndef MIXBUS
-    procs.push_back("EQ");
-    procs.push_back("Comp");
-    procs.push_back("POST");
-#endif
-
-    const string node_name   = "Processor";
-    const string prop_name   = "name";
-
-    for(vector<string>::const_iterator it = procs.begin(); it != procs.end(); it++) {
-        node.remove_node_and_delete(node_name, prop_name, (*it));
-    }
-
-    node.remove_node_and_delete("Processor", "role", "Aux");
-
-#ifdef MIXBUS
-
-    XMLNodeList nlist;
-    XMLNodeConstIterator niter;
-    XMLNode* child;
-
-    nlist = node.children();
-
-    for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-        if(get_recall_eq() && get_recall_comp()) {
-            break;
-        }
-
-        child = *niter;
-
-        if (child->name() == "Processor") {
-            XMLProperty const * name_prop = (*niter)->property(X_("name"));
-            if(name_prop && name_prop->value() == "EQ") {
-                if(!get_recall_eq()) {
-                    child->remove_nodes_and_delete("Automation");
-                    child->remove_nodes_and_delete("ladspa");
-                    child->remove_nodes_and_delete("Controllable");
-                }
-            }
-            if(name_prop && name_prop->value() == "Comp") {
-                if(!get_recall_comp()) {
-                    child->remove_nodes_and_delete("Automation");
-                    child->remove_nodes_and_delete("ladspa");
-                    child->remove_nodes_and_delete("Controllable");
-                }
-            }
-        }
-    }
-#endif
-
-    node.remove_node_and_delete("IO", "direction", "Input");
-    node.remove_node_and_delete("IO", "direction", "Output");
-
-    return node;
 }
 
 void MixerSnapshot::load_from_session(XMLNode& node)
