@@ -38,7 +38,6 @@ private:
     ARDOUR::MixerSnapshot::State get_state_by_name(const std::string);
     void fill_combo_box(Gtk::ComboBoxText*, const std::string);
     void on_response(int);
-    XMLNode& sanitize_node(XMLNode&, const std::string);
 
     std::vector<route_combo> substitutions;
 
