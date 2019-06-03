@@ -139,15 +139,15 @@ void MixerSnapshotSubstitutionDialog::on_response(int r)
                 if(route_name != subst_name) {
                     if(route_state_exists && subst_state_exists) {
                         XMLNode copy (get_state_by_name(subst_name).node);
-                        sanitize_node(copy, route_name);
                         state.node = copy;
+                        state.name = route_name;
                     }
 
                     //state did *not* exist, make it and add the substitute node
                     if(!route_state_exists && subst_state_exists) {
                         //copy the substitute node
                         XMLNode copy (get_state_by_name(subst_name).node);
-                        sanitize_node(copy, route_name);
+
                         MixerSnapshot::State s {
                             "",
                             route_name,
@@ -179,7 +179,7 @@ void MixerSnapshotSubstitutionDialog::on_response(int r)
     for(vector<MixerSnapshot::State>::iterator s = dirty.begin(); s != dirty.end(); s++) {
         cout << (*s).name << endl;
     }
-
+    substitutions.clear();
     _snapshot->set_route_states(dirty);
     _snapshot->recall();
     _snapshot->set_route_states(clean);
@@ -205,40 +205,4 @@ MixerSnapshot::State MixerSnapshotSubstitutionDialog::get_state_by_name(const st
             return (*i);
         }
     }
-}
-
-XMLNode& MixerSnapshotSubstitutionDialog::sanitize_node(XMLNode& node, const string route_name)
-{
-    //remove I/O
-    node.remove_node_and_delete("IO", "direction", "Input");
-    node.remove_node_and_delete("IO", "direction", "Output");
-    node.remove_node_and_delete("IO", "direction", "Output");
-
-    //remove diskwriter and reader
-    node.remove_node_and_delete("Processor", "type", "diskwriter");
-    node.remove_node_and_delete("Processor", "type", "diskreader");
-
-    //set node <Route name=""> to destination's name
-    node.set_property(X_("name"), route_name);
-
-    //unlink playlists
-    node.remove_property(X_("id"));
-    node.remove_property(X_("audio-playlist"));
-
-    XMLNode* pi_node = find_named_node(node, X_("PresentationInfo"));
-
-    if(pi_node) {
-        pi_node->remove_property(X_("order"));
-    }
-
-    //remove any sidechain stuff
-    XMLNodeList nlist = node.children();
-    for(XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); niter++) {
-        if((*niter)->name() != "Processor") {
-            continue;
-        }
-        (*niter)->remove_node_and_delete("Processor", "type", "sidechain");
-    }
-
-    return node;
 }
