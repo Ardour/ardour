@@ -125,7 +125,7 @@ bool MixerSnapshot::has_specials()
     }
 
     for(vector<State>::const_iterator it = route_states.begin(); it != route_states.end(); it++) {
-        if((*it)->name == "Monitor") {
+        if((*it).name == "Monitor") {
             return true;
         }
     }
