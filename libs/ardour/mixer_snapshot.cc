@@ -572,3 +572,14 @@ void MixerSnapshot::load_from_session(XMLNode& node)
         }
     }
 }
+
+XMLNode& MixerSnapshot::sanitize_node(XMLNode& node)
+{
+    if(!get_recall_plugins()) {
+        vector<string> types {"lv2", "windows-vst", "lxvst", "mac-vst", "audiounit", "luaproc"};
+        for(vector<string>::iterator it = types.begin(); it != types.end(); it++) {
+            node.remove_nodes_and_delete(X_("type"), (*it));
+        }
+    }
+    return node;
+}
