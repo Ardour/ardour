@@ -3677,6 +3677,14 @@ RCOptionEditor::RCOptionEditor ()
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_color_regions_using_track_color)
 			));
 
+	add_option (_("Appearance/Editor"),
+			new BoolOption (
+			"show-region-names",
+			_("Show Region Names"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_region_name),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_name)
+			));
+
 #ifndef MIXBUS // hide this setting in Mixbus. Always on, 4px
 	ComboOption<uint32_t>* gap = new ComboOption<uint32_t> (
 		     "vertical-region-gap",

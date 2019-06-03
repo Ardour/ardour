@@ -71,7 +71,7 @@ RegionView::RegionView (ArdourCanvas::Container*          parent,
                         bool                              automation)
 	: TimeAxisViewItem (r->name(), *parent, tv, spu, basic_color, r->position(), r->length(), false, automation,
 			    (automation ? TimeAxisViewItem::ShowFrame :
-			     TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowNameText|
+			     TimeAxisViewItem::Visibility ((UIConfiguration::instance().get_show_region_name() ? TimeAxisViewItem::ShowNameText : 0) |
 							   TimeAxisViewItem::ShowNameHighlight| TimeAxisViewItem::ShowFrame)))
 	, _region (r)
 	, sync_mark(0)
@@ -958,4 +958,18 @@ RegionView::snap_sample_to_sample (sampleoffset_t x, bool ensure_snap) const
 
 	/* back to region relative, keeping the relevant divisor */
 	return MusicSample (sample.sample - _region->position(), sample.division);
+}
+
+void
+RegionView::update_visibility ()
+{
+	/* currently only the name visibility can be changed dynamically */
+
+	if (UIConfiguration::instance().get_show_region_name()) {
+		visibility = Visibility (visibility | ShowNameText);
+	} else {
+		visibility = Visibility (visibility & ~ShowNameText);
+	}
+
+	manage_name_text ();
 }

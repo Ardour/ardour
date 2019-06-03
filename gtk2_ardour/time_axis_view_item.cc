@@ -870,7 +870,7 @@ TimeAxisViewItem::manage_name_text ()
 		return;
 	}
 
-	if (!wide_enough_for_name || !high_enough_for_name) {
+	if (!(visibility & ShowNameText) || (!wide_enough_for_name || !high_enough_for_name)) {
 		name_text->hide ();
 		return;
 	}

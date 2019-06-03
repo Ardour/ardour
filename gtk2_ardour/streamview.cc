@@ -724,3 +724,13 @@ StreamView::setup_new_rec_layer_time (boost::shared_ptr<Region> region)
 		_new_rec_layer_time = max_samplepos;
 	}
 }
+
+void
+StreamView::parameter_changed (string const & what)
+{
+	if (what == "show-region-name") {
+		for (RegionViewList::iterator i = region_views.begin (); i != region_views.end (); ++i) {
+			(*i)->update_visibility ();
+		}
+	}
+}

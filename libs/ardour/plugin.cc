@@ -292,9 +292,14 @@ Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 		ss << _("Out") << " ";
 	}
 
+	std::stringstream gn;
+	gn << ss.str();
+
 	ss << (id + 1);
+	gn << (id / 2 + 1) << " L/R";
 
 	Plugin::IOPortDescription iod (ss.str());
+	iod.group_name = gn.str();
 	return iod;
 }
 

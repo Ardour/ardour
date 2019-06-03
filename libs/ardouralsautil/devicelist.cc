@@ -57,11 +57,7 @@ ARDOUR::get_alsa_audio_device_names (std::map<std::string, std::string>& devices
 			}
 
 			string card_name = snd_ctl_card_info_get_name (info);
-
-			/* change devname to use ID, not number */
-
-			devname = "hw:";
-			devname += snd_ctl_card_info_get_id (info);
+			bool have_multiple_subdevices = false;
 
 			while (snd_ctl_pcm_next_device (handle, &device) >= 0 && device >= 0) {
 
@@ -84,9 +80,43 @@ ARDOUR::get_alsa_audio_device_names (std::map<std::string, std::string>& devices
 				if (snd_ctl_pcm_info (handle, pcminfo) < 0 && (duplex & HalfDuplexOut)) {
 					continue;
 				}
-				devname += ',';
-				devname += PBD::to_string (device);
-				devices.insert (std::make_pair (card_name, devname));
+
+				/* prefer hardware ID (not card/device number) */
+				string hwname = "hw:";
+				hwname += snd_ctl_card_info_get_id (info);
+				hwname += ',';
+				hwname += PBD::to_string (device);
+
+				if (false /* list first subdevice only */) {
+					devices.insert (std::make_pair (card_name, hwname));
+					continue;
+				}
+
+				string uniq_name = card_name;
+
+				if (have_multiple_subdevices) {
+					uniq_name += " (" + PBD::to_string (device) + ")";
+				}
+
+				std::pair<std::map<std::string, std::string>::iterator, bool> rv;
+				rv = devices.insert (std::make_pair (uniq_name, hwname));
+
+				if (!rv.second) {
+					assert (!have_multiple_subdevices);
+					have_multiple_subdevices = true;
+
+					uniq_name += " (" + PBD::to_string (device) + ")";
+					devices.insert (std::make_pair (uniq_name, hwname));
+
+					/* remname the previous entry */
+					hwname = devices[card_name];
+					devices.erase (devices.find (card_name));
+					size_t se = hwname.find_last_of (',');
+					assert (se != string::npos);
+
+					uniq_name = card_name + " (" + hwname.substr (se + 1) + ")";
+					devices.insert (std::make_pair (uniq_name, hwname));
+				}
 			}
 
 			snd_ctl_close(handle);

@@ -481,7 +481,7 @@ Editor::register_actions ()
 	Glib::RefPtr<ActionGroup> mouse_mode_actions = ActionManager::create_action_group (bindings, X_("MouseMode"));
 	RadioAction::Group mouse_mode_group;
 
-	act = ActionManager::register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Smart Object Mode"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));
+	act = ActionManager::register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Smart Mode"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));
 	smart_mode_action = Glib::RefPtr<ToggleAction>::cast_static (act);
 	smart_mode_button.set_related_action (smart_mode_action);
 	smart_mode_button.set_text (_("Smart"));

@@ -152,6 +152,8 @@ public:
 		FullWidthNameHighlight = 0x80
 	};
 
+	virtual void update_visibility () {}
+
 protected:
 	TimeAxisViewItem (const std::string &, ArdourCanvas::Item&, TimeAxisView&, double, uint32_t fill_color,
 	                  samplepos_t, samplecnt_t, bool recording = false, bool automation = false, Visibility v = Visibility (0));
@@ -237,10 +239,11 @@ protected:
 	bool _dragging;
 	double _width;
 
+	void manage_name_text ();
+
 private:
 	void parameter_changed (std::string);
 	void manage_name_highlight ();
-	void manage_name_text ();
 
 }; /* class TimeAxisViewItem */
 
