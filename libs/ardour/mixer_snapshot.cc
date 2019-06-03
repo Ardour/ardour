@@ -334,14 +334,20 @@ void MixerSnapshot::recall()
         boost::shared_ptr<Route> route = _session->route_by_name(state.name);
 
         if(route) {
+            PresentationInfo::order_t order = route->presentation_info().order();
+            string                    name  = route->name();
+            XMLNode&                  node  = sanitize_node(state.node);
+            PlaylistDisposition       disp  = NewPlaylist;
+
             _session->remove_route(route);
             route = 0; //explicitly drop reference
-            RouteList rl = _session->new_route_from_template(1, 1, state.node, state.name, NewPlaylist);
+            
+            RouteList rl = _session->new_route_from_template(1, order, node, name, disp);
 
             // this is no longer possible due to using new_from_route_template
             // _session->add_command(new MementoCommand<Route>((*route), &bfr, &route->get_state()));
 
-            reassign_masters(route, state.node);
+            reassign_masters(rl.front(), node);
         }
     }
 
