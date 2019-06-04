@@ -428,6 +428,16 @@ for file in $BUILD_ROOT/session_utils/${lower_case_appname}${major_version}-*; d
 	HAVE_SESSION_UTILS=true
 done
 
+if test -x $BUILD_ROOT/tools/luadevel/luasession; then
+	BN=${lower_case_appname}${major_version}-lua
+	cp -v $BUILD_ROOT/tools/luadevel/luasession $Frameworks/$BN
+	if test x$STRIP = xall ; then
+		strip -s $Frameworks/${BN}
+	fi
+	ln -s ../lib/ardour-util.sh ${APPROOT}/MacOS/${BN}
+	HAVE_SESSION_UTILS=true
+fi
+
 # dynamically loaded NSS/SSL libs
 nsslibs="libsoftokn3.dylib libnsspem.dylib libnssckbi.dylib libfreebl3.dylib libnssdbm3.dylib libplds4.dylib"
 for nsslib in $nsslibs; do

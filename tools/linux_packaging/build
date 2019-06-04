@@ -477,6 +477,16 @@ for file in $BUILD_ROOT/session_utils/${lower_case_appname}${major_version}-*; d
 	HAVE_SESSION_UTILS=true
 done
 
+if test -x $BUILD_ROOT/tools/luadevel/luasession; then
+	BN=${lower_case_appname}${major_version}-lua
+	cp -v $BUILD_ROOT/tools/luadevel/luasession $APPLIB/$BN
+	if test x$STRIP = xall ; then
+		strip -s $APPLIB/${BN}
+	fi
+	ln -s ../lib/ardour-util.sh $APPBIN/${BN}
+	HAVE_SESSION_UTILS=true
+fi
+
 if test "$HAVE_SESSION_UTILS" = true ; then
 	cat >> $APPLIB/ardour-util.sh << EOF
 #!/bin/sh

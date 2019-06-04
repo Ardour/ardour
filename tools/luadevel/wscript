@@ -43,15 +43,16 @@ def build(bld):
         obj.install_path = None
     #########################################
 
-    # commandline luasession wrapper
-    obj              = bld(features = 'subst')
-    obj.source       = 'ardour-lua.sh.in'
-    obj.target       = 'ardour' + str (bld.env['MAJOR']) + '-lua'
-    obj.chmod        = Utils.O755
-    obj.install_path = bld.env['BINDIR']
-    obj.LIBDIR       = os.path.normpath(bld.env['DLLDIR'])
-    obj.DATADIR      = os.path.normpath(bld.env['DATADIR'])
-    obj.CONFDIR      = os.path.normpath(bld.env['CONFDIR'])
+    # commandline luasession wrapper script
+    if bld.env['build_target'] != 'mingw':
+        obj              = bld(features = 'subst')
+        obj.source       = 'ardour-lua.sh.in'
+        obj.target       = 'ardour' + str (bld.env['MAJOR']) + '-lua'
+        obj.chmod        = Utils.O755
+        obj.install_path = bld.env['BINDIR']
+        obj.LIBDIR       = os.path.normpath(bld.env['DLLDIR'])
+        obj.DATADIR      = os.path.normpath(bld.env['DATADIR'])
+        obj.CONFDIR      = os.path.normpath(bld.env['CONFDIR'])
 
     # commandline luasession
     obj = bld (features = 'cxx c cxxprogram')
@@ -90,4 +91,8 @@ def build(bld):
     if bld.is_defined('NEED_INTL'):
         obj.linkflags = ' -lintl'
 
-    obj.install_path = bld.env['DLLDIR']
+    if bld.env['build_target'] == 'mingw':
+        obj.install_path = bld.env['BINDIR']
+        obj.target       = 'ardour' + str (bld.env['MAJOR']) + '-lua'
+    else:
+        obj.install_path = bld.env['DLLDIR']
