@@ -45,6 +45,7 @@ namespace PBD {
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 MixerSnapshot::MixerSnapshot(Session* s)
     : id(0)
@@ -76,7 +77,7 @@ MixerSnapshot::MixerSnapshot(Session* s, string file_path)
         return;
     }
 
-    string suffix = "." + PBD::get_suffix(file_path);
+    string suffix = "." + get_suffix(file_path);
     if(suffix == statefile_suffix) {
         load_from_session(file_path);
         return;
@@ -319,11 +320,11 @@ void MixerSnapshot::recall()
            boost::shared_ptr<VCA> vca = vl.front();
 
            if(vca) {
-               vca->set_state(state.node, PBD::Stateful::loading_state_version);
+               vca->set_state(state.node, Stateful::loading_state_version);
            }
 
         } else {
-            vca->set_state(state.node, PBD::Stateful::loading_state_version);
+            vca->set_state(state.node, Stateful::loading_state_version);
         }
     }
 
@@ -375,7 +376,7 @@ void MixerSnapshot::recall()
         }
 
         if(group) {
-            group->set_state(state.node, PBD::Stateful::loading_state_version);
+            group->set_state(state.node, Stateful::loading_state_version);
         }
     }
     _session->commit_reversible_command();
@@ -489,7 +490,7 @@ void MixerSnapshot::load_from_session(string path)
     }
 
     //final sanity check
-    if(!("." + PBD::get_suffix(path) == statefile_suffix)) {
+    if(!("." + get_suffix(path) == statefile_suffix)) {
         return;
     }
 
