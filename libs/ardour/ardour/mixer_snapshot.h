@@ -44,7 +44,6 @@ class LIBARDOUR_API MixerSnapshot
 
         MixerSnapshot(ARDOUR::Session*);
         MixerSnapshot(ARDOUR::Session*, std::string);
-        ~MixerSnapshot();
 
         void snap();
         void snap(ARDOUR::RouteList);
@@ -87,14 +86,14 @@ class LIBARDOUR_API MixerSnapshot
         bool get_recall_vcas()    const { return _flags & RecallVCAs;};
 
 #ifdef MIXBUS
-        void set_recall_eq(bool);
-        void set_recall_sends(bool);
-        void set_recall_comp(bool);
+        bool set_recall_eq(bool);
+        bool set_recall_sends(bool);
+        bool set_recall_comp(bool);
 #endif
-        void set_recall_pan(bool);
-        void set_recall_plugins(bool);
-        void set_recall_groups(bool);
-        void set_recall_vcas(bool);
+        bool set_recall_pan(bool);
+        bool set_recall_plugins(bool);
+        bool set_recall_groups(bool);
+        bool set_recall_vcas(bool);
 
         unsigned int get_id() {return id;};
         void set_id(unsigned int new_id) {id = new_id;};
@@ -116,7 +115,7 @@ class LIBARDOUR_API MixerSnapshot
     private:
         ARDOUR::Session* _session;
 
-        XMLNode& sanitize_node(XMLNode&);
+        XMLNode& sanitize_route_node(XMLNode&);
         void reassign_masters(boost::shared_ptr<ARDOUR::Slavable>, XMLNode);
         void load_from_session(std::string);
         void load_from_session(XMLNode&);

@@ -89,10 +89,6 @@ MixerSnapshot::MixerSnapshot(Session* s, string file_path)
     }
 }
 
-MixerSnapshot::~MixerSnapshot()
-{
-}
-
 bool MixerSnapshot::set_flag(bool yn, RecallFlags flag)
 {
     if (yn) {
@@ -110,14 +106,14 @@ bool MixerSnapshot::set_flag(bool yn, RecallFlags flag)
 }
 
 #ifdef MIXBUS
-void MixerSnapshot::set_recall_eq(bool yn)    { set_flag(yn, RecallEQ);   };
-void MixerSnapshot::set_recall_sends(bool yn) { set_flag(yn, RecallSends);};
-void MixerSnapshot::set_recall_comp(bool yn)  { set_flag(yn, RecallComp); };
+bool MixerSnapshot::set_recall_eq(bool yn)    { return set_flag(yn, RecallEQ);   };
+bool MixerSnapshot::set_recall_sends(bool yn) { return set_flag(yn, RecallSends);};
+bool MixerSnapshot::set_recall_comp(bool yn)  { return set_flag(yn, RecallComp); };
 #endif
-void MixerSnapshot::set_recall_pan(bool yn)     { set_flag(yn, RecallPan);   };
-void MixerSnapshot::set_recall_plugins(bool yn) { set_flag(yn, RecallPlugs); };
-void MixerSnapshot::set_recall_groups(bool yn)  { set_flag(yn, RecallGroups);};
-void MixerSnapshot::set_recall_vcas(bool yn)    { set_flag(yn, RecallVCAs);  };
+bool MixerSnapshot::set_recall_pan(bool yn)     { return set_flag(yn, RecallPan);   };
+bool MixerSnapshot::set_recall_plugins(bool yn) { return set_flag(yn, RecallPlugs); };
+bool MixerSnapshot::set_recall_groups(bool yn)  { return set_flag(yn, RecallGroups);};
+bool MixerSnapshot::set_recall_vcas(bool yn)    { return set_flag(yn, RecallVCAs);  };
 
 bool MixerSnapshot::has_specials()
 {
@@ -126,7 +122,7 @@ bool MixerSnapshot::has_specials()
     }
 
     for(vector<State>::const_iterator it = route_states.begin(); it != route_states.end(); it++) {
-        if((*it).name == "Monitor") {
+        if((*it).name == "Monitor" || "Auditioner" || "Master") {
             return true;
         }
     }
@@ -175,12 +171,7 @@ void MixerSnapshot::snap(boost::shared_ptr<Route> route)
         }
     }
 
-    State state {
-        route->id().to_s(),
-        route->name(),
-        copy
-    };
-
+    State state {route->id().to_s(), route->name(), copy};
     route_states.push_back(state);
 }
 
@@ -190,22 +181,11 @@ void MixerSnapshot::snap(RouteGroup* group)
         return;
     }
 
-    for(vector<State>::const_iterator it = group_states.begin(); it != group_states.end(); it++) {
-        if((it)->name == group->name()) {
-            return;
-        }
-    }
-
     string name = group->name();
     XMLNode& original = group->get_state();
     XMLNode  copy (original);
 
-    State state {
-        group->id().to_s(),
-        group->name(),
-        copy
-    };
-
+    State state {group->id().to_s(), group->name(), copy};
     group_states.push_back(state);
 }
 
@@ -215,43 +195,15 @@ void MixerSnapshot::snap(boost::shared_ptr<VCA> vca)
         return;
     }
 
-    for(vector<State>::const_iterator it = vca_states.begin(); it != vca_states.end(); it++) {
-        if((it)->name == vca->name()) {
-            return;
-        }
-    }
-
     string name = vca->name();
     XMLNode& original = vca->get_state();
     XMLNode  copy (original);
 
-    State state {
-        vca->id().to_s(),
-        vca->name(),
-        copy
-    };
-
+    State state {vca->id().to_s(), vca->name(), copy};
     vca_states.push_back(state);
 }
 
 
-void MixerSnapshot::snap()
-{
-    if(!_session) {
-        return;
-    }
-
-    clear();
-
-    RouteList rl = _session->get_routelist();
-    if(rl.empty()) {
-        return;
-    }
-
-    for(RouteList::const_iterator it = rl.begin(); it != rl.end(); it++) {
-        snap((*it));
-    }
-}
 
 void MixerSnapshot::snap(RouteList rl)
 {
@@ -267,6 +219,22 @@ void MixerSnapshot::snap(RouteList rl)
 
     for(RouteList::const_iterator it = rl.begin(); it != rl.end(); it++) {
         snap((*it));
+    }
+}
+
+void MixerSnapshot::snap()
+{
+    if(!_session) {
+        return;
+    }
+
+    clear();
+
+    RouteList rl = _session->get_routelist();
+    if(rl.empty()) {
+        return;
+    } else {
+        snap(rl);
     }
 }
 
@@ -346,7 +314,7 @@ void MixerSnapshot::recall()
         if(route) {
             PresentationInfo::order_t order = route->presentation_info().order();
             string                    name  = route->name();
-            XMLNode&                  node  = sanitize_node(state.node);
+            XMLNode&                  node  = sanitize_route_node(state.node);
             PlaylistDisposition       disp  = NewPlaylist;
 
             _session->remove_route(route);
@@ -379,6 +347,7 @@ void MixerSnapshot::recall()
             group->set_state(state.node, Stateful::loading_state_version);
         }
     }
+    
     _session->commit_reversible_command();
 }
 
@@ -589,7 +558,7 @@ void MixerSnapshot::load_from_session(XMLNode& node)
     }
 }
 
-XMLNode& MixerSnapshot::sanitize_node(XMLNode& node)
+XMLNode& MixerSnapshot::sanitize_route_node(XMLNode& node)
 {
     if(!get_recall_plugins()) {
         vector<string> types {"lv2", "windows-vst", "lxvst", "mac-vst", "audiounit", "luaproc"};
