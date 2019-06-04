@@ -334,6 +334,15 @@ void MixerSnapshot::recall()
         boost::shared_ptr<Route> route = _session->route_by_name(state.name);
 
         if(route) {
+            if(route->is_auditioner() || route->is_master() || route->is_monitor()) {
+                /*  we need to special case this but I still
+                    want to be able to set some state info here
+                    skip... for now */
+                continue;
+            }
+        }
+
+        if(route) {
             PresentationInfo::order_t order = route->presentation_info().order();
             string                    name  = route->name();
             XMLNode&                  node  = sanitize_node(state.node);
