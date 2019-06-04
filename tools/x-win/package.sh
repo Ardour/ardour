@@ -116,13 +116,13 @@ echo " === bundle to $DESTDIR"
 if test -z "$DESTDIR"; then
 	DESTDIR=`mktemp -d`
 	trap 'rm -rf $DESTDIR' exit SIGINT SIGTERM
+	rm -rf $DESTDIR
 fi
 
 echo " === bundle to $DESTDIR"
 
 ALIBDIR=$DESTDIR/lib/${LOWERCASE_DIRNAME}
 
-rm -rf $DESTDIR
 mkdir -p $DESTDIR/bin
 mkdir -p $DESTDIR/share/
 mkdir -p $ALIBDIR/surfaces
@@ -144,6 +144,7 @@ cp build/libs/ptformat/ptformat-*.dll $DESTDIR/bin/
 cp build/libs/audiographer/audiographer-*.dll $DESTDIR/bin/
 cp build/libs/fst/ardour-vst-scanner.exe $DESTDIR/bin/ || true
 cp build/session_utils/*-*.exe $DESTDIR/bin/ || true
+cp build/tools/luadevel/ardour6-lua.exe $DESTDIR/bin/ || true
 cp `ls -t build/gtk2_ardour/ardour-*.exe | head -n1` $DESTDIR/bin/${PRODUCT_EXE}
 
 mkdir -p $DESTDIR/lib/gtk-2.0/engines
