@@ -84,7 +84,9 @@ PeakMeter::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end
 		return;
 	}
 	const bool do_reset_max = _reset_max;
-	const bool do_reset_dpm = _reset_dpm;
+	// XXX max-peak is set from DPM's peak-buffer, so DPM also needs to be reset in sync:
+	const bool do_reset_dpm = _reset_dpm || do_reset_max;
+
 	_reset_max = false;
 	_reset_dpm = false;
 	_combined_peak = 0;
