@@ -926,14 +926,8 @@ ARDOUR_UI::tabbed_window_state_event_handler (GdkEventWindowState* ev, void* obj
 bool
 ARDOUR_UI::editor_meter_peak_button_release (GdkEventButton* ev)
 {
-	if (ev->button == 1 && Gtkmm2ext::Keyboard::modifier_state_equals (ev->state, Gtkmm2ext::Keyboard::PrimaryModifier|Gtkmm2ext::Keyboard::TertiaryModifier)) {
+	if (ev->button == 1) {
 		ArdourMeter::ResetAllPeakDisplays ();
-	} else if (ev->button == 1 && Gtkmm2ext::Keyboard::modifier_state_equals (ev->state, Gtkmm2ext::Keyboard::PrimaryModifier)) {
-		if (_session->master_out()) {
-			ArdourMeter::ResetGroupPeakDisplays (_session->master_out()->route_group());
-		}
-	} else if (_session->master_out()) {
-		ArdourMeter::ResetRoutePeakDisplays (_session->master_out().get());
 	}
 	return false;
 }

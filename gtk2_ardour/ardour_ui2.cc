@@ -83,7 +83,7 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (feedback_alert_button, _("When active, there is a feedback loop."));
 	set_tip (primary_clock, _("<b>Primary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
 	set_tip (secondary_clock, _("<b>Secondary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
-	set_tip (editor_meter_peak_display, _("Reset All Peak Indicators"));
+	set_tip (editor_meter_peak_display, _("Reset All Peak Meters"));
 	set_tip (error_alert_button, _("Show Error Log and acknowledge warnings"));
 
 	synchronize_sync_source_and_video_pullup ();
