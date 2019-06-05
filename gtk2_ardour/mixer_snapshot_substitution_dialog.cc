@@ -53,6 +53,11 @@ MixerSnapshotSubstitutionDialog::MixerSnapshotSubstitutionDialog(MixerSnapshot* 
     for(RouteList::const_iterator it = rl.begin(); it != rl.end(); it++) {
         boost::shared_ptr<Route> route = (*it);
 
+        if(route->is_monitor() || route->is_master() || route->is_auditioner()) {
+            //skip for now
+            continue;
+        }
+
         if(route) {
             ComboBoxText* combo = manage(new ComboBoxText());
             fill_combo_box(combo, route->name());
@@ -90,6 +95,7 @@ void MixerSnapshotSubstitutionDialog::fill_combo_box(ComboBoxText* box, const st
 
     for(vector<MixerSnapshot::State>::iterator i = routes.begin(); i != routes.end(); i++) {
         string state_name = (*i).name;
+
         box->append(state_name);
         if(state_name == route_name) {
             box->set_active_text(state_name);
@@ -100,6 +106,7 @@ void MixerSnapshotSubstitutionDialog::fill_combo_box(ComboBoxText* box, const st
 void MixerSnapshotSubstitutionDialog::on_response(int r)
 {
     if(r == RESPONSE_CANCEL) {
+        substitutions.clear();
         close_self();
         return;
     }
