@@ -150,7 +150,7 @@ void MixerSnapshot::snap(boost::shared_ptr<Route> route)
     RouteGroup* group = route->route_group();
     if(group) {
         XMLNode* group_node = copy.add_child(X_("Group"));
-        group_node->set_property(X_("name"), name);
+        group_node->set_property(X_("name"), group->name());
         snap(group);
     }
 
@@ -312,7 +312,15 @@ void MixerSnapshot::recall()
             group = _session->new_route_group(state.name);
         }
 
+        // state.node.remove_property(X_("routes"));
+
         if(group) {
+            Stateful::ForceIDRegeneration fid;
+            
+            uint32_t color;
+            state.node.get_property(X_("rgba"), color);
+            
+            group->set_color(color);
             group->set_state(state.node, Stateful::loading_state_version);
         }
     }
@@ -342,18 +350,21 @@ void MixerSnapshot::recall()
             route = 0; //explicitly drop reference
             
             RouteList rl = _session->new_route_from_template(1, order, node, name, disp);
+            boost::shared_ptr<Route> route = rl.front();
+
+            if(!route) {
+                continue;
+            }
 
             if(get_recall_groups()) {
                 XMLNode* group_node = find_named_node(node, X_("Group"));
                 if(group_node) {
                     string name;
                     group_node->get_property(X_("name"), name);
-                    const list<RouteGroup*>& rgs (_session->route_groups());
-                    for (list<RouteGroup*>::const_iterator i = rgs.begin (); i != rgs.end (); ++i) {
-                        if ((*i)->name () == name) {
-                            (*i)->add(rl.front());
-                            break;
-                        }
+                    RouteGroup* rg = _session->route_group_by_name(name);
+                    if(rg) {
+                        printf("adding %s to %s\n", route->name().c_str(), rg->name().c_str());
+                        rg->add(route);
                     }
                 }
             }
@@ -361,7 +372,7 @@ void MixerSnapshot::recall()
             // this is no longer possible due to using new_from_route_template
             // _session->add_command(new MementoCommand<Route>((*route), &bfr, &route->get_state()));
 
-            reassign_masters(rl.front(), node);
+            reassign_masters(route, node);
         }
     }
 
