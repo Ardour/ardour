@@ -149,6 +149,8 @@ void MixerSnapshot::snap(boost::shared_ptr<Route> route)
 
     RouteGroup* group = route->route_group();
     if(group) {
+        XMLNode* group_node = copy.add_child(X_("Group"));
+        group_node->set_property(X_("name"), name);
         snap(group);
     }
 
@@ -296,39 +298,6 @@ void MixerSnapshot::recall()
         }
     }
 
-    //routes
-    for(vector<State>::const_iterator i = route_states.begin(); i != route_states.end(); i++) {
-        State state = (*i);
-
-        boost::shared_ptr<Route> route = _session->route_by_name(state.name);
-
-        if(route) {
-            if(route->is_auditioner() || route->is_master() || route->is_monitor()) {
-                /*  we need to special case this but I still
-                    want to be able to set some state info here
-                    skip... for now */
-                continue;
-            }
-        }
-
-        if(route) {
-            PresentationInfo::order_t order = route->presentation_info().order();
-            string                    name  = route->name();
-            XMLNode&                  node  = sanitize_route_node(state.node);
-            PlaylistDisposition       disp  = NewPlaylist;
-
-            _session->remove_route(route);
-            route = 0; //explicitly drop reference
-            
-            RouteList rl = _session->new_route_from_template(1, order, node, name, disp);
-
-            // this is no longer possible due to using new_from_route_template
-            // _session->add_command(new MementoCommand<Route>((*route), &bfr, &route->get_state()));
-
-            reassign_masters(rl.front(), node);
-        }
-    }
-
     //groups
     for(vector<State>::const_iterator i = group_states.begin(); i != group_states.end(); i++) {
         if(!get_recall_groups()) {
@@ -347,6 +316,55 @@ void MixerSnapshot::recall()
             group->set_state(state.node, Stateful::loading_state_version);
         }
     }
+
+    //routes
+    for(vector<State>::const_iterator i = route_states.begin(); i != route_states.end(); i++) {
+        State state = (*i);
+
+        boost::shared_ptr<Route> route = _session->route_by_name(state.name);
+
+        if(route) {
+            if(route->is_auditioner() || route->is_master() || route->is_monitor()) {
+                /*  we need to special case this but I still
+                    want to be able to set some state info here
+                    skip... for now */
+                continue;
+            }
+        }
+
+        if(route) {
+            PresentationInfo::order_t order = route->presentation_info().order();
+            string                    name  = route->name();
+            XMLNode&                  node  = sanitize_node(state.node);
+            PlaylistDisposition       disp  = NewPlaylist;
+
+            _session->remove_route(route);
+            route = 0; //explicitly drop reference
+            
+            RouteList rl = _session->new_route_from_template(1, order, node, name, disp);
+
+            if(get_recall_groups()) {
+                XMLNode* group_node = find_named_node(node, X_("Group"));
+                if(group_node) {
+                    string name;
+                    group_node->get_property(X_("name"), name);
+                    const list<RouteGroup*>& rgs (_session->route_groups());
+                    for (list<RouteGroup*>::const_iterator i = rgs.begin (); i != rgs.end (); ++i) {
+                        if ((*i)->name () == name) {
+                            (*i)->add(rl.front());
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // this is no longer possible due to using new_from_route_template
+            // _session->add_command(new MementoCommand<Route>((*route), &bfr, &route->get_state()));
+
+            reassign_masters(rl.front(), node);
+        }
+    }
+
     
     _session->commit_reversible_command();
 }
@@ -558,7 +576,7 @@ void MixerSnapshot::load_from_session(XMLNode& node)
     }
 }
 
-XMLNode& MixerSnapshot::sanitize_route_node(XMLNode& node)
+XMLNode& MixerSnapshot::sanitize_node(XMLNode& node)
 {
     if(!get_recall_plugins()) {
         vector<string> types {"lv2", "windows-vst", "lxvst", "mac-vst", "audiounit", "luaproc"};
