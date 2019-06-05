@@ -368,8 +368,8 @@ MidiTrack::non_realtime_locate (samplepos_t pos)
 	}
 
 	/* Get the top unmuted region at this position. */
-	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion>(
-		playlist->top_unmuted_region_at(pos));
+	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion>(playlist->top_unmuted_region_at(pos));
+
 	if (!region) {
 		return;
 	}
