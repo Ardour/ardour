@@ -477,6 +477,7 @@ while [ true ] ; do
 					cp $dep $Frameworks
 				fi
 				missing=true
+				chmod 755 $Frameworks/$base
 			fi
 		done
 	done
