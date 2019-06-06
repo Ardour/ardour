@@ -593,6 +593,7 @@ while [ true ] ; do
 					echo "Copying dependant lib $dep    (required by ${parent})"
 					cp $dep $Libraries
 				fi
+				chmod 755 $Libraries/`basename $dep`
                                 #
                                 # reset RPATH so that the runtime linker never looks
                                 # in places we don't want it to
