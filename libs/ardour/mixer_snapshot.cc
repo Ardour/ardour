@@ -26,6 +26,7 @@
 #include "pbd/memento_command.h"
 #include "pbd/types_convert.h"
 #include "pbd/stl_delete.h"
+#include "pbd/strsplit.h"
 #include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
 
@@ -348,7 +349,7 @@ void MixerSnapshot::recall()
 
             _session->remove_route(route);
             route = 0; //explicitly drop reference
-            
+
             RouteList rl = _session->new_route_from_template(1, order, node, name, disp);
             boost::shared_ptr<Route> route = rl.front();
 
@@ -364,9 +365,9 @@ void MixerSnapshot::recall()
                     RouteGroup* rg = _session->route_group_by_name(name);
                     if(rg) {
                         printf("adding %s to %s\n", route->name().c_str(), rg->name().c_str());
-                        rg->add(route);
-                    }
+                    rg->add(route);
                 }
+            }
             }
 
             // this is no longer possible due to using new_from_route_template
@@ -376,7 +377,7 @@ void MixerSnapshot::recall()
         }
     }
 
-    
+            
     _session->commit_reversible_command();
 }
 
@@ -580,6 +581,30 @@ void MixerSnapshot::load_from_session(XMLNode& node)
             string name, id;
             (*niter)->get_property(X_("name"), name);
             (*niter)->get_property(X_("id"), id);
+            
+            /* reverse look-up the routes that belong to this group
+             and notify them that they belong to this group name
+             just like we do in a normal creation */
+             
+            string routes;
+            if((*niter)->get_property(X_("routes"), routes)) {
+                
+                stringstream str (routes);
+                vector<string> ids;
+                split(str.str(), ids, ' ');
+
+                for(vector<string>::iterator i = ids.begin(); i != ids.end(); i++) {
+                    for(vector<State>::iterator j = route_states.begin(); j != route_states.end(); j++) {
+                        //route state id matches id from vector
+                        if((*j).id == (*i)) {
+                            XMLNode* group = (*j).node.add_child(X_("Group"));
+                            if(group) {
+                                group->set_property(X_("name"), name);
+                            }
+                        }
+                    }
+                }
+            }
 
             State state {id, name, (**niter)};
             group_states.push_back(state);
