@@ -299,32 +299,6 @@ void MixerSnapshot::recall()
         }
     }
 
-    //groups
-    for(vector<State>::const_iterator i = group_states.begin(); i != group_states.end(); i++) {
-        if(!get_recall_groups()) {
-            break;
-        }
-
-        State state = (*i);
-
-        RouteGroup* group = _session->route_group_by_name(state.name);
-
-        if(!group) {
-            group = _session->new_route_group(state.name);
-        }
-
-        // state.node.remove_property(X_("routes"));
-
-        if(group) {
-            Stateful::ForceIDRegeneration fid;
-            
-            uint32_t color;
-            state.node.get_property(X_("rgba"), color);
-            
-            group->set_color(color);
-            group->set_state(state.node, Stateful::loading_state_version);
-        }
-    }
 
     //routes
     for(vector<State>::const_iterator i = route_states.begin(); i != route_states.end(); i++) {
@@ -348,7 +322,7 @@ void MixerSnapshot::recall()
             PlaylistDisposition       disp  = NewPlaylist;
 
             _session->remove_route(route);
-            route = 0; //explicitly drop reference
+            route = 0; //explicitly drop referenc
 
             RouteList rl = _session->new_route_from_template(1, order, node, name, disp);
             boost::shared_ptr<Route> route = rl.front();
@@ -363,11 +337,12 @@ void MixerSnapshot::recall()
                     string name;
                     group_node->get_property(X_("name"), name);
                     RouteGroup* rg = _session->route_group_by_name(name);
-                    if(rg) {
-                        printf("adding %s to %s\n", route->name().c_str(), rg->name().c_str());
+                    if(!rg) {
+                        //this might've been destroyed earlier
+                        rg = _session->new_route_group(name);
+                    }
                     rg->add(route);
                 }
-            }
             }
 
             // this is no longer possible due to using new_from_route_template
@@ -377,7 +352,31 @@ void MixerSnapshot::recall()
         }
     }
 
+    //groups
+    for(vector<State>::const_iterator i = group_states.begin(); i != group_states.end(); i++) {
+        if(!get_recall_groups()) {
+            break;
+        }
+
+        State state = (*i);
+
+        RouteGroup* group = _session->route_group_by_name(state.name);
+
+        if(!group) {
+            group = _session->new_route_group(state.name);
+        }
+
+        if(group) {
+            Stateful::ForceIDRegeneration fid;
             
+            uint32_t color;
+            state.node.get_property(X_("rgba"), color);
+            
+            group->set_color(color);
+            group->set_state(state.node, Stateful::loading_state_version);
+        }
+    }
+
     _session->commit_reversible_command();
 }
 
