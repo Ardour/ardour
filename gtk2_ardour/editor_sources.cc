@@ -537,8 +537,10 @@ EditorSources::show_context_menu (int button, int time)
 	using namespace Gtk::Menu_Helpers;
 	Gtk::Menu* menu = ARDOUR_UI_UTILS::shared_popup_menu ();
 	MenuList&  items = menu->items();
+#ifdef RECOVER_REGIONS_IS_WORKING
 	items.push_back(MenuElem(_("Recover the selected Sources to their original Track & Position"),
 							 sigc::mem_fun(*this, &EditorSources::recover_selected_sources)));
+#endif
 	items.push_back(MenuElem(_("Remove the selected Sources"),
 							 sigc::mem_fun(*this, &EditorSources::remove_selected_sources)));
 	menu->popup(1, time);
@@ -547,7 +549,7 @@ EditorSources::show_context_menu (int button, int time)
 void
 EditorSources::recover_selected_sources ()
 {
-	std::list<boost::weak_ptr<ARDOUR::Region> > to_be_recovered;
+	ARDOUR::RegionList to_be_recovered;
 	
 	if (_display.get_selection()->count_selected_rows() > 0) {
 
@@ -565,7 +567,7 @@ EditorSources::recover_selected_sources ()
 
 
 	/* ToDo */
-//	_editor->recover_regions();  //this operation should be undo-able
+	_editor->recover_regions(to_be_recovered);  //this operation should be undo-able
 }
 
 
