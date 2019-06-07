@@ -190,13 +190,16 @@ void
 RcActionButton::add_to_page (OptionEditorPage *p)
 {
 	int const n = p->table.property_n_rows();
-	int m = n + 1;
+	const int m = n + 1;
 	p->table.resize (m, 3);
+	Alignment* a = manage (new Alignment (0, 0.5, 0, 1.0));
+	a->add (*_button);
+
 	if (_label) {
-		p->table.attach (*_label,  1, 2, n, n + 1, FILL | EXPAND);
-		p->table.attach (*_button, 2, 3, n, n + 1, FILL | EXPAND);
+		p->table.attach (*_label,  1, 2, n, m);
+		p->table.attach (*a, 2, 3, n, m, FILL|EXPAND);
 	} else {
-		p->table.attach (*_button, 1, 3, n, n + 1, FILL | EXPAND);
+		p->table.attach (*a, 1, 3, n, m, FILL|EXPAND);
 	}
 }
 
