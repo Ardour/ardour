@@ -121,6 +121,9 @@ public:
 	std::string ancestor_name() { return _ancestor_name.empty() ? name() : _ancestor_name; }
 	void set_ancestor_name(const std::string& name) { _ancestor_name = name; }
 
+	void set_captured_for (std::string str) { _captured_for = str; }
+	std::string captured_for() const { return _captured_for; }
+
 	static PBD::Signal1<void,boost::shared_ptr<ARDOUR::Source> > SourcePropertyChanged;
 
   protected:
@@ -136,6 +139,7 @@ public:
 	gint                _use_count; /* atomic */
 	uint32_t            _level; /* how deeply nested is this source w.r.t a disk file */
 	std::string         _ancestor_name;
+	std::string        _captured_for;
 
   private:
 	void fix_writable_flags ();
