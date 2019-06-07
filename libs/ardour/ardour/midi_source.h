@@ -160,9 +160,6 @@ class LIBARDOUR_API MidiSource : virtual public Source
 
 	virtual void session_saved();
 
-	std::string captured_for() const               { return _captured_for; }
-	void        set_captured_for (std::string str) { _captured_for = str; }
-
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
@@ -226,8 +223,6 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	                                   MidiRingBuffer<samplepos_t>& source,
 	                                   samplepos_t                  position,
 	                                   samplecnt_t                  cnt) = 0;
-
-	std::string _captured_for;
 
 	boost::shared_ptr<MidiModel> _model;
 	bool                         _writing;

@@ -64,9 +64,6 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 
 	virtual bool can_truncate_peaks() const { return true; }
 
-	void set_captured_for (std::string str) { _captured_for = str; }
-	std::string captured_for() const { return _captured_for; }
-
 	int read_peaks (PeakData *peaks, samplecnt_t npeaks,
 			samplepos_t start, samplecnt_t cnt, double samples_per_visual_peak) const;
 
@@ -124,7 +121,6 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 
 	samplecnt_t           _length;
 	std::string         _peakpath;
-	std::string        _captured_for;
 
 	int initialize_peakfile (const std::string& path, const bool in_session = false);
 	int build_peaks_from_scratch ();

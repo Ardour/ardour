@@ -61,6 +61,7 @@
 #include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
+#include "ardour/source.h"
 #include "ardour/strip_silence.h"
 #include "ardour/transient_detector.h"
 #include "ardour/transport_master_manager.h"
@@ -4475,6 +4476,32 @@ Editor::remove_clicked_region ()
 
 	_session->add_command(new StatefulDiffCommand (playlist));
 	commit_reversible_command ();
+}
+
+
+void
+Editor::recover_regions (ARDOUR::RegionList regions)
+{
+#ifdef RECOVER_REGIONS_IS_WORKING
+	begin_reversible_command (_("recover regions"));
+
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+		boost::shared_ptr<ARDOUR::Source> source = (*i)->source();
+
+		RouteList routes = _session->get_routelist();
+		for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
+			boost::shared_ptr<ARDOUR::Track> track = boost::dynamic_pointer_cast<Track>(*it);
+			if (track) {
+				//ToDo
+				if (source->captured_for() == track->) {
+					//_session->add_command(new StatefulDiffCommand (playlist));	
+				}
+			}
+		}
+	}
+
+	commit_reversible_command ();
+#endif
 }
 
 
