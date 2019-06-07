@@ -383,6 +383,13 @@ HSliderOption::HSliderOption (
 	_adj.set_value (_get());
 	_adj.signal_value_changed().connect (sigc::mem_fun (*this, &HSliderOption::changed));
 	_hscale.set_update_policy (Gtk::UPDATE_DISCONTINUOUS);
+
+	/* make the slider be a fixed, font-relative width */
+
+	_hscale.ensure_style ();
+	int width, height;
+	get_pixel_size (_hscale.create_pango_layout (X_("a long piece of text that is about as wide as we want sliders to be")), width, height);
+	_hscale.set_size_request (width, -1);
 }
 
 void
