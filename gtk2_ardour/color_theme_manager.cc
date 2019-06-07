@@ -101,8 +101,7 @@ ColorThemeManager::ColorThemeManager ()
 		}
 
 		Gtk::HBox* hbox = Gtk::manage (new Gtk::HBox());
-		Gtk::Alignment* align = Gtk::manage (new Gtk::Alignment);
-		align->set (0, 0.5);
+		Gtk::Alignment* align = Gtk::manage (new Gtk::Alignment (0, 0.5, 0, 1.0));
 		align->add (color_theme_dropdown);
 		hbox->set_spacing (6);
 		hbox->pack_start (color_theme_label, false, false);
