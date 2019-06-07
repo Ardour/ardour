@@ -172,8 +172,8 @@ ColorThemeManager::ColorThemeManager ()
 
 ColorThemeManager::~ColorThemeManager ()
 {
-	if (palette_group) { 
-		palette_group->clear (true);  
+	if (palette_group) {
+		palette_group->clear (true);
 		delete palette_group;
 	}
 }
