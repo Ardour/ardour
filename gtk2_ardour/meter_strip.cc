@@ -68,13 +68,14 @@ PBD::Signal0<void> MeterStrip::ConfigurationChanged;
 
 MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	: RouteUI ((Session*) 0)
+	, metric_type (MeterPeak)
+	, _has_midi (false)
+	, _tick_bar (0)
+	, _strip_type (0)
+	, _metricmode (-1)
+	, level_meter (0)
+	, _suspend_menu_callbacks (false)
 {
-	level_meter = 0;
-	_strip_type = 0;
-	_tick_bar = 0;
-	_metricmode = -1;
-	metric_type = MeterPeak;
-
 	mtr_vbox.set_spacing (PX_SCALE(2, 2));
 	nfo_vbox.set_spacing (PX_SCALE(2, 2));
 	peakbx.set_size_request (-1, PX_SCALE(14, 14));
@@ -122,20 +123,21 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 
 MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	: SessionHandlePtr (sess)
-	, RouteUI(0)
-	, _route(rt)
-	, peak_display()
+	, RouteUI ((Session*) 0)
+	, _route (rt)
+	, metric_type (MeterPeak)
+	, _has_midi (false)
+	, _tick_bar (0)
+	, _strip_type (0)
+	, _metricmode (-1)
+	, level_meter (0)
+	, _suspend_menu_callbacks (false)
 {
 	mtr_vbox.set_spacing (PX_SCALE(2, 2));
 	nfo_vbox.set_spacing (PX_SCALE(2, 2));
 	SessionHandlePtr::set_session (sess);
 	RouteUI::init ();
 	RouteUI::set_route (rt);
-
-	_has_midi = false;
-	_tick_bar = 0;
-	_metricmode = -1;
-	metric_type = MeterPeak;
 
 	// note: level_meter->setup_meters() does the scaling
 	int meter_width = 6;
