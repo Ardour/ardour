@@ -524,11 +524,6 @@ private:
 	float                       editor_meter_max_peak;
 	bool                        editor_meter_peak_button_release (GdkEventButton*);
 
-	bool editor_meter_button_press (GdkEventButton* ev);
-	void popup_editor_meter_menu (GdkEventButton* ev);
-	void add_editor_meter_type_item (Gtk::Menu_Helpers::MenuList&, Gtk::RadioMenuItem::Group&, std::string const &, ARDOUR::MeterType);
-	bool _suspend_editor_meter_callbacks;
-
 	void blink_handler (bool);
 	sigc::connection blink_connection;
 

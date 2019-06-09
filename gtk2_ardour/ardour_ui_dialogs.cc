@@ -233,7 +233,6 @@ ARDOUR_UI::set_session (Session *s)
 			editor_meter->set_meter_type (_session->master_out()->meter_type());
 			editor_meter->setup_meters (30, 10, 6);
 			editor_meter->show();
-			editor_meter->ButtonPress.connect_same_thread (editor_meter_connection, boost::bind (&ARDOUR_UI::editor_meter_button_press, this, _1));
 
 			editor_meter_table.set_spacings(3);
 			editor_meter_table.attach(*editor_meter,             0,1, 0,1, FILL, FILL);
