@@ -403,7 +403,7 @@ PeakMeter::meter_level(uint32_t n, MeterType type) {
 }
 
 void
-PeakMeter::set_type(MeterType t)
+PeakMeter::set_meter_type (MeterType t)
 {
 	if (t == _meter_type) {
 		return;
@@ -436,7 +436,7 @@ PeakMeter::set_type(MeterType t)
 		}
 	}
 
-	TypeChanged(t);
+	MeterTypeChanged (t); /* EMIT SIGNAL */
 }
 
 XMLNode&
