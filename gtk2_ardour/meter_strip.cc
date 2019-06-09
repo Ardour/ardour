@@ -473,7 +473,9 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 	set_tick_bar(_tick_bar);
 
 	on_theme_changed();
-	if (old_has_midi != _has_midi) MetricChanged();
+	if (old_has_midi != _has_midi) {
+		MetricChanged(); /* EMIT SIGNAL */
+	}
 	else ConfigurationChanged();
 }
 
@@ -581,7 +583,8 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 
 	if (need_relayout) {
 		queue_resize();
-		MetricChanged(); // force re-layout, parent on_scroll(), queue_resize()
+		/* force re-layout, parent on_scroll(), queue_resize() */
+		MetricChanged(); /* EMIT SIGNAL */
 	}
 }
 
@@ -941,7 +944,7 @@ void
 MeterStrip::meter_type_changed (MeterType type)
 {
 	update_background (type);
-	MetricChanged();
+	MetricChanged(); /* EMIT SIGNAL */
 }
 
 void

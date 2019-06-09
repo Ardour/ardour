@@ -1155,5 +1155,5 @@ ArdourMeter::meter_clear_pattern_cache(int which) {
 			++j;
 		}
 	}
-	RedrawMetrics();
+	RedrawMetrics(); /* EMIT SIGNAL */
 }
