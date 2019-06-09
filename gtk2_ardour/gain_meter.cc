@@ -384,12 +384,6 @@ GainMeterBase::setup_meters (int len)
 }
 
 void
-GainMeterBase::set_type (MeterType t)
-{
-	level_meter->set_meter_type(t);
-}
-
-void
 GainMeter::setup_meters (int len)
 {
 	switch (_width) {
@@ -409,12 +403,6 @@ GainMeter::setup_meters (int len)
 			break;
 	}
 	GainMeterBase::setup_meters (len);
-}
-
-void
-GainMeter::set_type (MeterType t)
-{
-	GainMeterBase::set_type (t);
 }
 
 bool
@@ -971,8 +959,8 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 		_meter->ConfigurationChanged.connect (
 			model_connections, invalidator (*this), boost::bind (&GainMeter::meter_configuration_changed, this, _1), gui_context()
 			);
-		_meter->TypeChanged.connect (
-			model_connections, invalidator (*this), boost::bind (&GainMeter::meter_type_changed, this, _1), gui_context()
+		_meter->MeterTypeChanged.connect (
+			model_connections, invalidator (*this), boost::bind (&GainMeter::redraw_metrics, this), gui_context()
 			);
 
 		meter_configuration_changed (_meter->input_streams ());
@@ -1128,11 +1116,4 @@ GainMeter::route_active_changed ()
 	if (_meter) {
 		meter_configuration_changed (_meter->input_streams ());
 	}
-}
-
-void
-GainMeter::meter_type_changed (MeterType t)
-{
-	_route->set_meter_type(t);
-	RedrawMetrics();
 }

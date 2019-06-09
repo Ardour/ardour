@@ -49,7 +49,6 @@ LevelMeterBase::LevelMeterBase (Session* s, PBD::EventLoop::InvalidationRecord* 
 	, meter_length (0)
 	, thin_meter_width(2)
 	, max_peak (minus_infinity())
-	, _meter_type (MeterPeak)
 	, visible_meter_type (MeterType(0))
 	, midi_count (0)
 	, meter_count (0)
@@ -85,7 +84,7 @@ LevelMeterBase::set_meter (PeakMeter* meter)
 
 	if (_meter) {
 		_meter->ConfigurationChanged.connect (_configuration_connection, parent_invalidator, boost::bind (&LevelMeterBase::configuration_changed, this, _1, _2), gui_context());
-		_meter->TypeChanged.connect (_meter_type_connection, parent_invalidator, boost::bind (&LevelMeterBase::meter_type_changed, this, _1), gui_context());
+		_meter->MeterTypeChanged.connect (_meter_type_connection, parent_invalidator, boost::bind (&LevelMeterBase::meter_type_changed, this, _1), gui_context());
 	}
 }
 
@@ -150,6 +149,7 @@ LevelMeterBase::update_meters ()
 			if (n < nmidi) {
 				(*i).meter->set (_meter->meter_level (n, MeterPeak));
 			} else {
+				MeterType _meter_type = _meter->meter_type ();
 				const float peak = _meter->meter_level (n, _meter_type);
 				if (_meter_type == MeterPeak) {
 					(*i).meter->set (log_meter (peak));
@@ -218,9 +218,7 @@ LevelMeterBase::configuration_changed (ChanCount /*in*/, ChanCount /*out*/)
 void
 LevelMeterBase::meter_type_changed (MeterType t)
 {
-	_meter_type = t;
 	setup_meters (meter_length, regular_meter_width, thin_meter_width);
-	MeterTypeChanged(t);
 }
 
 void
@@ -255,6 +253,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 		return; /* do it later or never */
 	}
 
+	MeterType _meter_type = _meter->meter_type ();
 	uint32_t nmidi = _meter->input_streams().n_midi();
 	uint32_t nmeters = _meter->input_streams().n_total();
 	regular_meter_width = initial_width;
@@ -485,13 +484,6 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 	visible_meter_type = _meter_type;
 	midi_count = nmidi;
 	meter_count = nmeters;
-}
-
-void
-LevelMeterBase::set_meter_type(MeterType t)
-{
-	_meter_type = t;
-	_meter->set_type(t);
 }
 
 bool

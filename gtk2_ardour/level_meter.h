@@ -66,13 +66,9 @@ public:
 	void setup_meters (int len=0, int width=3, int thin=2);
 	void set_max_audio_meter_count (uint32_t cnt = 0);
 
-	void set_meter_type (ARDOUR::MeterType);
-	ARDOUR::MeterType meter_type () { return _meter_type; }
-
 	/** Emitted in the GUI thread when a button is pressed over the meter */
 	PBD::Signal1<bool, GdkEventButton *> ButtonPress;
 	PBD::Signal1<bool, GdkEventButton *> ButtonRelease;
-	PBD::Signal1<void, ARDOUR::MeterType> MeterTypeChanged;
 
 protected:
 	virtual void mtr_pack(Gtk::Widget &w) = 0;
@@ -106,7 +102,6 @@ private:
 	guint16                thin_meter_width;
 	std::vector<MeterInfo> meters;
 	float                  max_peak;
-	ARDOUR::MeterType      _meter_type;
 	ARDOUR::MeterType      visible_meter_type;
 	uint32_t               midi_count;
 	uint32_t               meter_count;
