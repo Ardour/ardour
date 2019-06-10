@@ -324,10 +324,17 @@ void MixerSnapshot::recall()
             PresentationInfo::order_t order = route->presentation_info().order();
             string                    name  = route->name();
             XMLNode&                  node  = sanitize_node(state.node);
-            PlaylistDisposition       disp  = NewPlaylist;
+            PlaylistDisposition       disp  = CopyPlaylist;
+
+            //we need the route's playlist id before it dissapears
+            XMLNode& route_node = route->get_state();
+            string playlist_id;
+            route_node.get_property (X_("audio-playlist"), playlist_id);
+
+            node.set_property(X_("audio-playlist"), playlist_id);
 
             _session->remove_route(route);
-            route = 0; //explicitly drop referenc
+            route = 0; //explicitly drop reference
 
             RouteList rl = _session->new_route_from_template(1, order, node, name, disp);
             boost::shared_ptr<Route> route = rl.front();
