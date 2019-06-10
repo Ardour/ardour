@@ -383,9 +383,22 @@ void MixerSnapshot::recall()
             
             uint32_t color;
             state.node.get_property(X_("rgba"), color);
-            
+
+            bool gain, mute, solo, recenable, select, route_active, monitoring;
+            state.node.get_property(X_("used-to-share-gain"), gain);
+            state.node.get_property(X_("mute"), mute);
+            state.node.get_property(X_("recenable"), recenable);
+            state.node.get_property(X_("select"), select);
+            state.node.get_property(X_("route-active"), route_active);
+            state.node.get_property(X_("monitoring"), monitoring);
+            group->set_gain(gain);
+            group->set_mute(mute);
+            group->set_solo(solo);
+            group->set_recenable(recenable);
+            group->set_select(select);
+            group->set_route_active(route_active);
+            group->set_monitoring(monitoring);
             group->set_color(color);
-            group->set_state(state.node, Stateful::loading_state_version);
         }
     }
 
