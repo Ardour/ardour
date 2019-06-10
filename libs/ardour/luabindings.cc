@@ -1554,7 +1554,8 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <PeakMeter, Processor> ("PeakMeter")
 		.addFunction ("meter_level", &PeakMeter::meter_level)
-		.addFunction ("set_type", &PeakMeter::set_type)
+		.addFunction ("set_meter_type", &PeakMeter::set_meter_type)
+		.addFunction ("meter_type", &PeakMeter::meter_type)
 		.addFunction ("reset_max", &PeakMeter::reset_max)
 		.endClass ()
 

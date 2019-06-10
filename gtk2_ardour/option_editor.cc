@@ -59,7 +59,7 @@ OptionEditorComponent::add_widget_to_page (OptionEditorPage* p, Gtk::Widget* w)
 }
 
 void
-OptionEditorComponent::add_widgets_to_page (OptionEditorPage* p, Gtk::Widget* wa, Gtk::Widget* wb, bool expand)
+OptionEditorComponent::add_widgets_to_page (OptionEditorPage* p, Gtk::Widget* wa, Gtk::Widget* wb, bool /*notused*/)
 {
 	int const n = p->table.property_n_rows();
 	int m = n + 1;
@@ -69,13 +69,11 @@ OptionEditorComponent::add_widgets_to_page (OptionEditorPage* p, Gtk::Widget* wa
 
 	p->table.resize (m, 3);
 	p->table.attach (*wa, 1, 2, n, n + 1, FILL);
-	if (expand) {
-		p->table.attach (*wb, 2, 3, n, n + 1, FILL | EXPAND);
-	} else {
-		Alignment* a = manage (new Alignment (0, 0.5, 0, 1.0));
-		a->add (*wb);
-		p->table.attach (*a, 2, 3, n, n + 1, FILL | EXPAND);
-	}
+
+	Alignment* a = manage (new Alignment (0, 0.5, 0, 1.0));
+	a->add (*wb);
+	p->table.attach (*a, 2, 3, n, n + 1, FILL | EXPAND);
+
 	maybe_add_note (p, n + 1);
 }
 
@@ -192,13 +190,16 @@ void
 RcActionButton::add_to_page (OptionEditorPage *p)
 {
 	int const n = p->table.property_n_rows();
-	int m = n + 1;
+	const int m = n + 1;
 	p->table.resize (m, 3);
+	Alignment* a = manage (new Alignment (0, 0.5, 0, 1.0));
+	a->add (*_button);
+
 	if (_label) {
-		p->table.attach (*_label,  1, 2, n, n + 1, FILL | EXPAND);
-		p->table.attach (*_button, 2, 3, n, n + 1, FILL | EXPAND);
+		p->table.attach (*_label,  1, 2, n, m);
+		p->table.attach (*a, 2, 3, n, m, FILL|EXPAND);
 	} else {
-		p->table.attach (*_button, 1, 3, n, n + 1, FILL | EXPAND);
+		p->table.attach (*a, 1, 3, n, m, FILL|EXPAND);
 	}
 }
 
@@ -382,6 +383,13 @@ HSliderOption::HSliderOption (
 	_adj.set_value (_get());
 	_adj.signal_value_changed().connect (sigc::mem_fun (*this, &HSliderOption::changed));
 	_hscale.set_update_policy (Gtk::UPDATE_DISCONTINUOUS);
+
+	/* make the slider be a fixed, font-relative width */
+
+	_hscale.ensure_style ();
+	int width, height;
+	get_pixel_size (_hscale.create_pango_layout (X_("a long piece of text that is about as wide as we want sliders to be")), width, height);
+	_hscale.set_size_request (width, -1);
 }
 
 void

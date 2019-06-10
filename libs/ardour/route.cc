@@ -103,7 +103,6 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	, _pending_signals (0)
 	, _meter_point (MeterPostFader)
 	, _pending_meter_point (MeterPostFader)
-	, _meter_type (MeterPeak)
 	, _denormal_protection (false)
 	, _recordable (true)
 	, _have_internal_generator (false)
@@ -129,16 +128,6 @@ Route::weakroute () {
 int
 Route::init ()
 {
-	/* set default meter type */
-	if (is_master()) {
-		_meter_type = Config->get_meter_type_master ();
-	}
-	else if (dynamic_cast<Track*>(this)) {
-		_meter_type = Config->get_meter_type_track ();
-	} else {
-		_meter_type = Config->get_meter_type_bus ();
-	}
-
 	/* add standard controls */
 
 	_gain_control.reset (new GainControl (_session, GainAutomation));
@@ -226,6 +215,15 @@ Route::init ()
 	_meter->set_owner (this);
 	_meter->set_display_to_user (false);
 	_meter->activate ();
+
+	/* set default meter type */
+	if (is_master()) {
+		set_meter_type (Config->get_meter_type_master ());
+	} else if (dynamic_cast<Track*>(this)) {
+		set_meter_type (Config->get_meter_type_track ());
+	} else {
+		set_meter_type (Config->get_meter_type_bus ());
+	}
 
 	_main_outs.reset (new Delivery (_session, _output, _pannable, _mute_master, _name, Delivery::Main));
 	_main_outs->activate ();
@@ -2457,7 +2455,7 @@ Route::state (bool save_template)
 	node->set_property (X_("meter-point"), _meter_point);
 	node->set_property (X_("disk-io-point"), _disk_io_point);
 
-	node->set_property (X_("meter-type"), _meter_type);
+	node->set_property (X_("meter-type"), _meter->meter_type ());
 
 	if (_route_group) {
 		node->set_property (X_("route-group"), _route_group->name());
@@ -2626,7 +2624,10 @@ Route::set_state (const XMLNode& node, int version)
 		set_disk_io_point (diop);
 	}
 
-	node.get_property (X_("meter-type"), _meter_type);
+	MeterType meter_type;
+	if (node.get_property (X_("meter-type"), meter_type)) {
+		set_meter_type (meter_type);
+	}
 
 	_initial_io_setup = false;
 
@@ -5957,6 +5958,18 @@ Route::slavables () const
 	rv.push_back (_mute_control);
 	rv.push_back (_solo_control);
 	return rv;
+}
+
+void
+Route::set_meter_type (MeterType t)
+{
+	_meter->set_meter_type (t);
+}
+
+MeterType
+Route::meter_type () const
+{
+	return _meter->meter_type ();
 }
 
 void

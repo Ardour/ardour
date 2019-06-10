@@ -368,8 +368,8 @@ MidiTrack::non_realtime_locate (samplepos_t pos)
 	}
 
 	/* Get the top unmuted region at this position. */
-	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion>(
-		playlist->top_unmuted_region_at(pos));
+	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion>(playlist->top_unmuted_region_at(pos));
+
 	if (!region) {
 		return;
 	}
@@ -387,10 +387,20 @@ MidiTrack::non_realtime_locate (samplepos_t pos)
 	/* Update track controllers based on its "automation". */
 	const samplepos_t     origin = region->position() - region->start();
 	BeatsSamplesConverter bfc(_session.tempo_map(), origin);
+
 	for (Controls::const_iterator c = _controls.begin(); c != _controls.end(); ++c) {
+
+		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (c->second);
+
+		if (!ac->automation_playback()) {
+			continue;
+		}
+
 		boost::shared_ptr<MidiTrack::MidiControl> tcontrol;
 		boost::shared_ptr<Evoral::Control>        rcontrol;
+
 		if ((tcontrol = boost::dynamic_pointer_cast<MidiTrack::MidiControl>(c->second)) &&
+
 		    (rcontrol = region->control(tcontrol->parameter()))) {
 			const Temporal::Beats pos_beats = bfc.from(pos - origin);
 			if (rcontrol->list()->size() > 0) {

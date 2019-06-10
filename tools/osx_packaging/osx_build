@@ -31,8 +31,8 @@ WITH_NLS=
 . ../define_versions.sh
 
 while [ $# -gt 0 ] ; do
-    echo "arg = $1"
-    case $1 in
+	echo "arg = $1"
+	case $1 in
 
 	#
 	# top level build targets
@@ -93,7 +93,7 @@ while [ $# -gt 0 ] ; do
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
 	--chanstrip) HARRISONCHANNELSTRIP=$2 ; shift; shift ;;
-    esac
+	esac
 done
 
 if test -z "$PRODUCT_PKG_DIR" -o -z "$APPNAME"; then
@@ -103,9 +103,9 @@ fi
 
 echo "Version is $release_version"
 if [ "x$commit" != "x" ] ; then
-    info_string="$release_version ($commit) built on `hostname` by `whoami` on `date`"
+	info_string="$release_version ($commit) built on `hostname` by `whoami` on `date`"
 else
-    info_string="$release_version built on `hostname` by `whoami` on `date`"
+	info_string="$release_version built on `hostname` by `whoami` on `date`"
 fi
 echo "Info string is $info_string"
 
@@ -130,7 +130,7 @@ Resources=$APPROOT/Resources
 # Since this is OS X, don't try to distinguish between etc and shared
 # (machine dependent and independent data) - just put everything
 # into Resources.
-# 
+#
 Shared=$Resources
 Etc=$Resources
 Locale=$Resources/locale
@@ -158,9 +158,9 @@ for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* ; do
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
-	otool -L $file | awk '{print $1}' | egrep -v "(^@executable_path|^Ardour[0-9][.0-9]*.app)" 
-    done | sort | uniq
-    exit 0
+	otool -L $file | awk '{print $1}' | egrep -v "(^@executable_path|^Ardour[0-9][.0-9]*.app)"
+	done | sort | uniq
+	exit 0
 fi
 
 echo "Removing old $APPDIR tree ..."
@@ -238,14 +238,14 @@ MAIN_EXECUTABLE=Ardour.bin  ## used in startup_script
 echo "Copying ardour executable ...."
 cp $BUILD_ROOT/gtk2_ardour/ardour-$release_version $APPROOT/MacOS/$MAIN_EXECUTABLE
 if test x$SAE != x ; then
-    # cp $BUILD_ROOT/gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
-    cp  Ardour3-SAE.icns $Resources/appIcon.icns
+	# cp $BUILD_ROOT/gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
+	cp  Ardour3-SAE.icns $Resources/appIcon.icns
 elif test x$MIXBUS32C != x ; then
-    cp  Mixbus32C.icns $Resources/appIcon.icns
+	cp  Mixbus32C.icns $Resources/appIcon.icns
 elif test x$MIXBUS != x ; then
-    cp  Mixbus.icns $Resources/appIcon.icns
+	cp  Mixbus.icns $Resources/appIcon.icns
 else
-    cp  Ardour.icns $Resources/appIcon.icns
+	cp  Ardour.icns $Resources/appIcon.icns
 fi
 cp  typeArdour.icns $Resources/
 
@@ -253,64 +253,64 @@ set +e # things below are not error-free (optional files etc) :(
 
 # copy locale files
 if test x$WITH_NLS != x ; then
-    echo "NLS support ..."
-    echo "I hope you remembered to run waf i18n"
-    LINGUAS=
+	echo "NLS support ..."
+	echo "I hope you remembered to run waf i18n"
+	LINGUAS=
 
-    for pkg in gtk2_ardour libs/ardour libs/gtkmm2ext ; do 
-	files=`find ../../$pkg -name "*.mo"`
-	
-            #
-            # the package name is appended with a number so that
-            # it can be parallel installed during a regular install
-            # with older (and newer) versions. it is just the major
-            # number of the release (i.e. leading digits)
-            #
-	
-        vsuffix=`echo $release_version | sed 's/^\([0-9][0-9]*\).*/\1/'`
-	
-	if [ -z "$files" ]; then
-	    echo ""
-	    echo "!!!! WARNING !!!! - Did not find any .mo files in ../../$pkg"
-	    echo ""
-	fi
-	
-	for file in $files 
-	do
-	    echo $file
-	    lang=`basename $file | sed 's/\.mo//'`
-	    mkdir -p $Locale/$lang/LC_MESSAGES
-	    cp $file $Locale/$lang/LC_MESSAGES/`basename $pkg`$vsuffix.mo
-	    echo copy $file to $Locale/$lang/LC_MESSAGES/`basename $pkg`$vsuffix.mo
-            if echo $LINGUAS | grep $lang >/dev/null 2>&1 ; then
-                :
-            else 
-		LINGUAS="$LINGUAS $lang"
-            fi
+	for pkg in gtk2_ardour libs/ardour libs/gtkmm2ext ; do
+		files=`find ../../$pkg -name "*.mo"`
+
+		#
+		# the package name is appended with a number so that
+		# it can be parallel installed during a regular install
+		# with older (and newer) versions. it is just the major
+		# number of the release (i.e. leading digits)
+		#
+
+		vsuffix=`echo $release_version | sed 's/^\([0-9][0-9]*\).*/\1/'`
+
+		if [ -z "$files" ]; then
+			echo ""
+			echo "!!!! WARNING !!!! - Did not find any .mo files in ../../$pkg"
+			echo ""
+		fi
+
+		for file in $files
+		do
+			echo $file
+			lang=`basename $file | sed 's/\.mo//'`
+			mkdir -p $Locale/$lang/LC_MESSAGES
+			cp $file $Locale/$lang/LC_MESSAGES/`basename $pkg`$vsuffix.mo
+			echo copy $file to $Locale/$lang/LC_MESSAGES/`basename $pkg`$vsuffix.mo
+			if echo $LINGUAS | grep $lang >/dev/null 2>&1 ; then
+				:
+			else
+				LINGUAS="$LINGUAS $lang"
+			fi
+		done
 	done
-    done
 
-    for l in $LINGUAS
-    do
-      if [ -d $GTKSTACK_ROOT/share/locale/$l ] ; then
-	  echo "Copying GTK i18n files for $l..."
-	  cp -r $GTKSTACK_ROOT/share/locale/$l $Locale
-      else
-	  # try with just the language spec
-	  just_lang=`echo $l | sed 's/_[A-Z][A-Z]$//'`
-	  if [ -d $GTKSTACK_ROOT/share/locale/$just_lang ] ; then
-	      echo "Copying GTK i18n files for $l..."
-	      cp -r $GTKSTACK_ROOT/share/locale/$just_lang $Locale
-	  fi
-      fi
-    done
+	for l in $LINGUAS
+	do
+		if [ -d $GTKSTACK_ROOT/share/locale/$l ] ; then
+			echo "Copying GTK i18n files for $l..."
+			cp -r $GTKSTACK_ROOT/share/locale/$l $Locale
+		else
+			# try with just the language spec
+			just_lang=`echo $l | sed 's/_[A-Z][A-Z]$//'`
+			if [ -d $GTKSTACK_ROOT/share/locale/$just_lang ] ; then
+				echo "Copying GTK i18n files for $l..."
+				cp -r $GTKSTACK_ROOT/share/locale/$just_lang $Locale
+			fi
+		fi
+	done
 else
-    echo "Skipping NLS support"
+	echo "Skipping NLS support"
 fi
 
 #
 # Copy stuff that may be dynamically loaded
-# 
+#
 
 cp -R $GTKSTACK_ROOT/etc/* $Etc
 cp -R $GTKSTACK_ROOT/lib/charset.alias $Resources
@@ -338,12 +338,12 @@ cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
 
 # Backends
 for backend in jack wavesaudio dummy coreaudio; do
-    cp $BUILD_ROOT/libs/backends/$backend/lib*.dylib $Backends
+	cp $BUILD_ROOT/libs/backends/$backend/lib*.dylib $Backends
 done
 
 # Export Formats/Presets
-for f in $BUILD_ROOT/../export/*.preset $BUILD_ROOT/../export/*.format ; do 
-    cp "$f" $ExportFormats ; 
+for f in $BUILD_ROOT/../export/*.preset $BUILD_ROOT/../export/*.format ; do
+	cp "$f" $ExportFormats ;
 done
 
 #Session templates
@@ -355,41 +355,41 @@ cp -av $BUILD_ROOT/../plugin_metadata $PluginMetadata
 # MidiMaps
 # got to be careful with names here
 for x in $BUILD_ROOT/../midi_maps/*.map ; do
-    cp "$x" $MidiMaps
+	cp "$x" $MidiMaps
 done
 
 # MIDNAM Patch Files
 # got to be careful with names here
 for x in $BUILD_ROOT/../patchfiles/*.midnam ; do
-    cp "$x" $PatchFiles
+	cp "$x" $PatchFiles
 done
 
 # Lua Script Files
 # got to be careful with names here
 for x in $BUILD_ROOT/../scripts/*.lua ; do
-		BN=$(basename $x)
-	  if test "${BN:0:1}" = "_"; then
-			continue;
-		fi
-    cp "$x" $LuaScripts
+	BN=$(basename $x)
+	if test "${BN:0:1}" = "_"; then
+		continue;
+	fi
+	cp "$x" $LuaScripts
 done
 
 # MackieControl data
 # got to be careful with names here
 for x in $BUILD_ROOT/../mcp/*.device $BUILD_ROOT/../mcp/*.profile ; do
-    cp "$x" $MackieControl
+	cp "$x" $MackieControl
 done
 
 # OSC data
 # got to be careful with names here
 for x in $BUILD_ROOT/../osc/*.preset ; do
-    cp "$x" $OSC
+	cp "$x" $OSC
 done
 
 # Mixbus MixerSettings (if any)
 for x in $BUILD_ROOT/../mixer_settings/*.lua ; do
-    mkdir -p $MixerSettings  # create on demand
-    cp "$x" $MixerSettings
+	mkdir -p $MixerSettings  # create on demand
+	cp "$x" $MixerSettings
 done
 
 # VAMP plugins that we use
@@ -397,23 +397,23 @@ cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.dylib $Frameworks
 
 # Suil modules (new dir 'build-stack')
 if test -d $GTKSTACK_ROOT/lib/suil-0/ ; then
-    cp $GTKSTACK_ROOT/lib/suil-0/lib* $Frameworks
+	cp $GTKSTACK_ROOT/lib/suil-0/lib* $Frameworks
 fi
 
 # Suil modules (old dir 'build-ardour-stack')
 if test -d $ARDOURSTACK_ROOT/lib/suil-0/ ; then
-    cp $ARDOURSTACK_ROOT/lib/suil-0/lib* $Frameworks
+	cp $ARDOURSTACK_ROOT/lib/suil-0/lib* $Frameworks
 fi
 
 # VST scanner app and wrapper script, if they exist
 if test -d $BUILD_ROOT/libs/fst ; then
-    cp $BUILD_ROOT/libs/fst/ardour-vst-scanner* $Frameworks/
+	cp $BUILD_ROOT/libs/fst/ardour-vst-scanner* $Frameworks/
 fi
 
 # vfork wrapper
 if test -f $BUILD_ROOT/libs/vfork/ardour-exec-wrapper ; then
-    mkdir -p $Frameworks/vfork
-    cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $Frameworks/
+	mkdir -p $Frameworks/vfork
+	cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $Frameworks/
 fi
 
 # session-utils
@@ -428,6 +428,16 @@ for file in $BUILD_ROOT/session_utils/${lower_case_appname}${major_version}-*; d
 	HAVE_SESSION_UTILS=true
 done
 
+if test -x $BUILD_ROOT/tools/luadevel/luasession; then
+	BN=${lower_case_appname}${major_version}-lua
+	cp -v $BUILD_ROOT/tools/luadevel/luasession $Frameworks/$BN
+	if test x$STRIP = xall ; then
+		strip -s $Frameworks/${BN}
+	fi
+	ln -s ../lib/ardour-util.sh ${APPROOT}/MacOS/${BN}
+	HAVE_SESSION_UTILS=true
+fi
+
 # dynamically loaded NSS/SSL libs
 nsslibs="libsoftokn3.dylib libnsspem.dylib libnssckbi.dylib libfreebl3.dylib libnssdbm3.dylib libplds4.dylib"
 for nsslib in $nsslibs; do
@@ -441,39 +451,40 @@ else
 STDCPP=
 fi
 
-while [ true ] ; do 
-    missing=false
-    for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Panners/*.dylib $Backends/*.dylib $Surfaces/*.dylib ; do
-	if ! file $file | grep -qs Mach-O ; then
-	    continue
-	fi
-	# libffi contains "S" (other section symbols) that should not be stripped.
-	if [[ $file == *"libffi"* ]] ; then
-	    continue
-	fi
-
-	if test x$STRIP != x ; then
-		strip -u -r -arch all $file &>/dev/null
-	fi
-
-	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | grep -v 'libjack\.' | grep -v "$(basename $file)"`
-	# echo -n "."
-	for dep in $deps ; do
-	    base=`basename $dep`
-	    if ! test -f $Frameworks/$base; then
-		if echo $dep | grep -sq '^libs' ; then
-		    cp $BUILD_ROOT/$dep $Frameworks
-		else
-		    cp $dep $Frameworks
+while [ true ] ; do
+	missing=false
+	for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Panners/*.dylib $Backends/*.dylib $Surfaces/*.dylib ; do
+		if ! file $file | grep -qs Mach-O ; then
+			continue
 		fi
-		missing=true
-	    fi
+		# libffi contains "S" (other section symbols) that should not be stripped.
+		if [[ $file == *"libffi"* ]] ; then
+			continue
+		fi
+
+		if test x$STRIP != x ; then
+			strip -u -r -arch all $file &>/dev/null
+		fi
+
+		deps=`otool -L $file | awk '{print $1}' | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | grep -v 'libjack\.' | grep -v "$(basename $file)"`
+		# echo -n "."
+		for dep in $deps ; do
+			base=`basename $dep`
+			if ! test -f $Frameworks/$base; then
+				if echo $dep | grep -sq '^libs' ; then
+					cp $BUILD_ROOT/$dep $Frameworks
+				else
+					cp $dep $Frameworks
+				fi
+				missing=true
+				chmod 755 $Frameworks/$base
+			fi
+		done
 	done
-    done
-    if test x$missing = xfalse ; then
-	# everything has been found
-	break
-    fi
+	if test x$missing = xfalse ; then
+		# everything has been found
+		break
+	fi
 done
 echo
 
@@ -500,7 +511,7 @@ cp ../../gtk2_ardour/themes/*-${lower_case_appname}.colors $Themes
 
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type dir`; do
-    rm -rf $svndir
+	rm -rf $svndir
 done
 
 # session utils start script
@@ -538,7 +549,7 @@ fi
 echo "Fixing up executable dependency names ..."
 executables=$MAIN_EXECUTABLE
 if test x$SAE != x ; then
-    executables="$executables"
+	executables="$executables"
 fi
 if test "$HAVE_SESSION_UTILS" = true ; then
 	for file in  $Frameworks/${lower_case_appname}${major_version}-*; do
@@ -552,62 +563,62 @@ if test -f "$Frameworks/ardour-vst-scanner"; then
 fi
 
 for exe in $executables; do
-    echo "Processing Executable: $exe"
-    EXE=$APPROOT/MacOS/$exe
-    changes=""
-    for lib in `otool -L $EXE | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
-      base=`basename $lib`
-      changes="$changes -change $lib @executable_path/../lib/$base"
-    done
-    if test "x$changes" != "x" ; then
-	install_name_tool $changes $EXE
-    fi
+	echo "Processing Executable: $exe"
+	EXE=$APPROOT/MacOS/$exe
+	changes=""
+	for lib in `otool -L $EXE | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+		base=`basename $lib`
+		changes="$changes -change $lib @executable_path/../lib/$base"
+	done
+	if test "x$changes" != "x" ; then
+		install_name_tool $changes $EXE
+	fi
 done
 
 echo "Fixing up library names ..."
 # now do the same for all the libraries we include
 for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners $Backends $Frameworks/LV2/* ; do
 
-    libbase=`basename $libdir`
-    
-    for dylib in $libdir/*.dylib $libdir/*.so ; do
-	
-       # skip symlinks
-	
-	if test -L $dylib ; then
-	    continue
-	fi
-	
-        # change all the dependencies
-	
-	changes=""
-	for lib in `otool -L $dylib | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
-	    base=`basename $lib`
-	    if echo $lib | grep -s libbase; then
-		changes="$changes -change $lib @executable_path/../$libbase/$base"
-	    else
-		changes="$changes -change $lib @executable_path/../lib/$base"
-	    fi
+	libbase=`basename $libdir`
+
+	for dylib in $libdir/*.dylib $libdir/*.so ; do
+
+		# skip symlinks
+
+		if test -L $dylib ; then
+			continue
+		fi
+
+		# change all the dependencies
+
+		changes=""
+		for lib in `otool -L $dylib | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+			base=`basename $lib`
+			if echo $lib | grep -s libbase; then
+				changes="$changes -change $lib @executable_path/../$libbase/$base"
+			else
+				changes="$changes -change $lib @executable_path/../lib/$base"
+			fi
+		done
+
+		if test "x$changes" != x ; then
+			if  install_name_tool $changes $dylib ; then
+				:
+			else
+				exit 1
+			fi
+		fi
+
+		# now the change what the library thinks its own name is
+
+		base=`basename $dylib`
+		install_name_tool -id @executable_path/../$libbase/$base $dylib
 	done
-	
-	if test "x$changes" != x ; then
-	    if  install_name_tool $changes $dylib ; then
-		:
-	    else
-		exit 1
-	    fi
-	fi
-	
-	# now the change what the library thinks its own name is
-	
-	base=`basename $dylib`
-	install_name_tool -id @executable_path/../$libbase/$base $dylib
-    done
 done
 
 #
 # and now ... the DMG
-# 
+#
 
 rm -rf $PRODUCT_PKG_DIR
 mkdir $PRODUCT_PKG_DIR
@@ -616,26 +627,26 @@ DMGWINBOTTOM=440
 DMGBACKGROUND=dmgbg
 
 if [ x$SAE != x ] ; then
-	
-    # SAE packaging
-    
-    echo "Creating SAE packaging directory"
-    mv $APPDIR $PRODUCT_PKG_DIR/Ardour3-SAE.app
-    cp HowToInstallArdourSAE.pdf "$PRODUCT_PKG_DIR/How To Install Ardour SAE.pdf"
-    cp SAE-de-keypad.pdf "$PRODUCT_PKG_DIR/Ardour SAE Shortcuts (keypad).pdf"
-    cp SAE-de-nokeypad.pdf "$PRODUCT_PKG_DIR/Ardour SAE Shortcuts.pdf"
-    
+
+	# SAE packaging
+
+	echo "Creating SAE packaging directory"
+	mv $APPDIR $PRODUCT_PKG_DIR/Ardour3-SAE.app
+	cp HowToInstallArdourSAE.pdf "$PRODUCT_PKG_DIR/How To Install Ardour SAE.pdf"
+	cp SAE-de-keypad.pdf "$PRODUCT_PKG_DIR/Ardour SAE Shortcuts (keypad).pdf"
+	cp SAE-de-nokeypad.pdf "$PRODUCT_PKG_DIR/Ardour SAE Shortcuts.pdf"
+
 elif [ x$MIXBUS != x ] ; then
 
-     # Mixbus packaging
+	# Mixbus packaging
 
-    echo "Creating Mixbus packaging directory"
-    mv $APPDIR $PRODUCT_PKG_DIR/
-    DMGBACKGROUND=dmgbgMB
-else 
+	echo "Creating Mixbus packaging directory"
+	mv $APPDIR $PRODUCT_PKG_DIR/
+	DMGBACKGROUND=dmgbgMB
+else
 
-    echo "Creating $APPNAME packaging directory"
-    mv $APPDIR $PRODUCT_PKG_DIR/
+	echo "Creating $APPNAME packaging directory"
+	mv $APPDIR $PRODUCT_PKG_DIR/
 
 fi
 

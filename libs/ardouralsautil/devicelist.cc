@@ -107,7 +107,19 @@ ARDOUR::get_alsa_audio_device_names (std::map<std::string, std::string>& devices
 
 					uniq_name += " (" + PBD::to_string (device) + ")";
 					devices.insert (std::make_pair (uniq_name, hwname));
-
+#if 0 // disabled (blame the_CLA's laptop)
+					/* It may happen that the soundcard has multiple sub-devices for playback
+					 * but none for recording.
+					 *
+					 * In that case the playback device-name has a suffix "(0)" while
+					 * the capture device has none.
+					 *
+					 * This causes issues for backends that use
+					 *  ::match_input_output_devices_or_none()
+					 *
+					 * (the alternative would be to always add a suffix,
+					 * and the proper solution would be to compare the hw:name)
+					 */
 					/* remname the previous entry */
 					hwname = devices[card_name];
 					devices.erase (devices.find (card_name));
@@ -116,6 +128,7 @@ ARDOUR::get_alsa_audio_device_names (std::map<std::string, std::string>& devices
 
 					uniq_name = card_name + " (" + hwname.substr (se + 1) + ")";
 					devices.insert (std::make_pair (uniq_name, hwname));
+#endif
 				}
 			}
 

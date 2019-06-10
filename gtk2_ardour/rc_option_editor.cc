@@ -1154,30 +1154,27 @@ public:
 	}
 };
 
-class ClipLevelOptions : public OptionEditorComponent
+class ClipLevelOptions : public HSliderOption
 {
 public:
 	ClipLevelOptions ()
-		: _clip_level_adjustment (-.5, -50.0, 0.0, 0.1, 1.0) /* units of dB */
-		, _clip_level_slider (_clip_level_adjustment)
-		, _label (_("Waveform Clip Level (dBFS):"))
+		: HSliderOption (X_("waveform-clip-level"),
+		                 _("Waveform Clip Level (dBFS):"),
+		                 sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_clip_level),
+		                 sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_clip_level),
+		                 -50.0, -0.5, 0.1, 1.0, /* units of dB */
+		                 1.0,
+		                 false)
 	{
-		_label.set_name ("OptionsLabel");
-
-		_clip_level_adjustment.set_value (UIConfiguration::instance().get_waveform_clip_level ());
-
-		_clip_level_slider.set_update_policy (UPDATE_DISCONTINUOUS);
-
-		_clip_level_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &ClipLevelOptions::clip_level_changed));
 	}
 
 	void parameter_changed (string const & p)
 	{
 		if (p == "waveform-clip-level") {
-			_clip_level_adjustment.set_value (UIConfiguration::instance().get_waveform_clip_level());
+			ArdourWaveView::WaveView::set_clip_level (UIConfiguration::instance().get_waveform_clip_level());
 		}
 		if (p == "show-waveform-clipping") {
-			_clip_level_slider.set_sensitive (UIConfiguration::instance().get_show_waveform_clipping ());
+			_hscale.set_sensitive (UIConfiguration::instance().get_show_waveform_clipping ());
 		}
 	}
 
@@ -1186,27 +1183,6 @@ public:
 		parameter_changed ("waveform-clip-level");
 		parameter_changed ("show-waveform-clipping");
 	}
-
-	void add_to_page (OptionEditorPage* p) {
-		add_widgets_to_page (p, &_label, &_clip_level_slider);
-	}
-
-	Gtk::Widget& tip_widget() {
-		return _clip_level_slider;
-	}
-
-private:
-
-	void clip_level_changed ()
-	{
-		UIConfiguration::instance().set_waveform_clip_level (_clip_level_adjustment.get_value());
-		/* XXX: should be triggered from the parameter changed signal */
-		ArdourWaveView::WaveView::set_clip_level (_clip_level_adjustment.get_value());
-	}
-
-	Adjustment _clip_level_adjustment;
-	HScale _clip_level_slider;
-	Label _label;
 };
 
 class BufferingOptions : public OptionEditorComponent

@@ -101,8 +101,7 @@ ColorThemeManager::ColorThemeManager ()
 		}
 
 		Gtk::HBox* hbox = Gtk::manage (new Gtk::HBox());
-		Gtk::Alignment* align = Gtk::manage (new Gtk::Alignment);
-		align->set (0, 0.5);
+		Gtk::Alignment* align = Gtk::manage (new Gtk::Alignment (0, 0.5, 0, 1.0));
 		align->add (color_theme_dropdown);
 		hbox->set_spacing (6);
 		hbox->pack_start (color_theme_label, false, false);
@@ -151,7 +150,10 @@ ColorThemeManager::ColorThemeManager ()
 
 	table.attach (notebook, 0, 3, n, n + 1);
 	++n;
-	table.attach (reset_button, 0, 3, n, n + 1);
+
+	Alignment* a = manage (new Alignment (0, 0.5, 0, 1.0));
+	a->add (reset_button);
+	table.attach (*a, 0, 1, n, n + 1);
 
 	color_dialog.get_colorsel()->set_has_opacity_control (true);
 	color_dialog.get_colorsel()->set_has_palette (true);
@@ -170,8 +172,8 @@ ColorThemeManager::ColorThemeManager ()
 
 ColorThemeManager::~ColorThemeManager ()
 {
-	if (palette_group) { 
-		palette_group->clear (true);  
+	if (palette_group) {
+		palette_group->clear (true);
 		delete palette_group;
 	}
 }

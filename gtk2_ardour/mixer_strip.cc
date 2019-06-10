@@ -563,8 +563,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		gpm.gain_display.get_parent()->remove (gpm.gain_display);
 	}
 
-	gpm.set_type (rt->meter_type());
-
 	mute_solo_table.attach (gpm.gain_display,0,1,1,2, EXPAND|FILL, EXPAND);
 	mute_solo_table.attach (gpm.peak_display,1,2,1,2, EXPAND|FILL, EXPAND);
 
@@ -2217,7 +2215,7 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 
 	set_current_delivery (send);
 
-	send->meter()->set_type(_route->shared_peak_meter()->get_type());
+	send->meter()->set_meter_type (_route->meter_type ());
 	send->set_metering (true);
 	_current_delivery->DropReferences.connect (send_gone_connection, invalidator (*this), boost::bind (&MixerStrip::revert_to_default_display, this), gui_context());
 
@@ -2616,7 +2614,7 @@ void
 MixerStrip::set_meter_type (MeterType t)
 {
 	if (_suspend_menu_callbacks) return;
-	gpm.set_type (t);
+	_route->set_meter_type (t);
 }
 
 void

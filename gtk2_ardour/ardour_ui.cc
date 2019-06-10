@@ -300,7 +300,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, error_alert_button ( ArdourButton::just_led_default_elements )
 	, editor_meter_peak_display()
 	, editor_meter(0)
-	, _suspend_editor_meter_callbacks (false)
 	, _numpad_locate_happening (false)
 	, _session_is_new (false)
 	, last_key_press_time (0)
@@ -5416,52 +5415,6 @@ ARDOUR_UI::session_format_mismatch (std::string xml_path, std::string backup_pat
 	                                   start_mono, end_mono), true);
 
 	msg.run ();
-}
-
-void
-ARDOUR_UI::add_editor_meter_type_item (Menu_Helpers::MenuList& items, RadioMenuItem::Group& group, string const & name, MeterType type)
-{
-	using namespace Menu_Helpers;
-
-	items.push_back (RadioMenuElem (group, name, sigc::bind (sigc::mem_fun (editor_meter, &LevelMeterHBox::set_meter_type), type)));
-	RadioMenuItem* i = dynamic_cast<RadioMenuItem *> (&items.back ());
-	i->set_active (editor_meter->meter_type () == type);
-}
-
-void
-ARDOUR_UI::popup_editor_meter_menu (GdkEventButton* ev)
-{
-	using namespace Gtk::Menu_Helpers;
-
-	Gtk::Menu* m = shared_popup_menu ();
-	MenuList& items = m->items ();
-
-	RadioMenuItem::Group group;
-
-	PBD::Unwinder<bool> uw (_suspend_editor_meter_callbacks, true);
-	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterPeak), MeterPeak);
-	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterPeak0dB), MeterPeak0dB);
-	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterKrms),  MeterKrms);
-	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterIEC1DIN), MeterIEC1DIN);
-	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterIEC1NOR), MeterIEC1NOR);
-	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterIEC2BBC), MeterIEC2BBC);
-	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterIEC2EBU), MeterIEC2EBU);
-	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterK20), MeterK20);
-	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterK14), MeterK14);
-	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterK12), MeterK12);
-	add_editor_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterVU),  MeterVU);
-
-	m->popup (ev->button, ev->time);
-}
-
-bool
-ARDOUR_UI::editor_meter_button_press (GdkEventButton* ev)
-{
-	if (ev->button == 3 && editor_meter) {
-		popup_editor_meter_menu (ev);
-		return true;
-	}
-	return false;
 }
 
 void

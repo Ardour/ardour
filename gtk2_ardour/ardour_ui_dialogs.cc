@@ -231,10 +231,8 @@ ARDOUR_UI::set_session (Session *s)
 			editor_meter = new LevelMeterHBox(_session);
 			editor_meter->set_meter (_session->master_out()->shared_peak_meter().get());
 			editor_meter->clear_meters();
-			editor_meter->set_meter_type (_session->master_out()->meter_type());
 			editor_meter->setup_meters (30, 10, 6);
 			editor_meter->show();
-			editor_meter->ButtonPress.connect_same_thread (editor_meter_connection, boost::bind (&ARDOUR_UI::editor_meter_button_press, this, _1));
 
 			editor_meter_table.set_spacings(3);
 			editor_meter_table.attach(*editor_meter,             0,1, 0,1, FILL, FILL);
@@ -934,14 +932,8 @@ ARDOUR_UI::tabbed_window_state_event_handler (GdkEventWindowState* ev, void* obj
 bool
 ARDOUR_UI::editor_meter_peak_button_release (GdkEventButton* ev)
 {
-	if (ev->button == 1 && Gtkmm2ext::Keyboard::modifier_state_equals (ev->state, Gtkmm2ext::Keyboard::PrimaryModifier|Gtkmm2ext::Keyboard::TertiaryModifier)) {
+	if (ev->button == 1) {
 		ArdourMeter::ResetAllPeakDisplays ();
-	} else if (ev->button == 1 && Gtkmm2ext::Keyboard::modifier_state_equals (ev->state, Gtkmm2ext::Keyboard::PrimaryModifier)) {
-		if (_session->master_out()) {
-			ArdourMeter::ResetGroupPeakDisplays (_session->master_out()->route_group());
-		}
-	} else if (_session->master_out()) {
-		ArdourMeter::ResetRoutePeakDisplays (_session->master_out().get());
 	}
 	return false;
 }

@@ -68,13 +68,14 @@ PBD::Signal0<void> MeterStrip::ConfigurationChanged;
 
 MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	: RouteUI ((Session*) 0)
+	, metric_type (MeterPeak)
+	, _has_midi (false)
+	, _tick_bar (0)
+	, _strip_type (0)
+	, _metricmode (-1)
+	, level_meter (0)
+	, _suspend_menu_callbacks (false)
 {
-	level_meter = 0;
-	_strip_type = 0;
-	_tick_bar = 0;
-	_metricmode = -1;
-	metric_type = MeterPeak;
-
 	mtr_vbox.set_spacing (PX_SCALE(2, 2));
 	nfo_vbox.set_spacing (PX_SCALE(2, 2));
 	peakbx.set_size_request (-1, PX_SCALE(14, 14));
@@ -122,20 +123,21 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 
 MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	: SessionHandlePtr (sess)
-	, RouteUI(0)
-	, _route(rt)
-	, peak_display()
+	, RouteUI ((Session*) 0)
+	, _route (rt)
+	, metric_type (MeterPeak)
+	, _has_midi (false)
+	, _tick_bar (0)
+	, _strip_type (0)
+	, _metricmode (-1)
+	, level_meter (0)
+	, _suspend_menu_callbacks (false)
 {
 	mtr_vbox.set_spacing (PX_SCALE(2, 2));
 	nfo_vbox.set_spacing (PX_SCALE(2, 2));
 	SessionHandlePtr::set_session (sess);
 	RouteUI::init ();
 	RouteUI::set_route (rt);
-
-	_has_midi = false;
-	_tick_bar = 0;
-	_metricmode = -1;
-	metric_type = MeterPeak;
 
 	// note: level_meter->setup_meters() does the scaling
 	int meter_width = 6;
@@ -147,10 +149,9 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	level_meter = new LevelMeterHBox(sess);
 	level_meter->set_meter (_route->shared_peak_meter().get());
 	level_meter->clear_meters();
-	level_meter->set_meter_type (_route->meter_type());
 	level_meter->setup_meters (220, meter_width, 6);
 	level_meter->ButtonPress.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::level_meter_button_press, this, _1));
-	level_meter->MeterTypeChanged.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::meter_type_changed, this, _1));
+	_route->shared_peak_meter()->MeterTypeChanged.connect (meter_route_connections, invalidator (*this), boost::bind (&MeterStrip::meter_type_changed, this, _1), gui_context());
 
 	meter_align.set(0.5, 0.5, 0.0, 1.0);
 	meter_align.add(*level_meter);
@@ -474,7 +475,9 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 	set_tick_bar(_tick_bar);
 
 	on_theme_changed();
-	if (old_has_midi != _has_midi) MetricChanged();
+	if (old_has_midi != _has_midi) {
+		MetricChanged(); /* EMIT SIGNAL */
+	}
 	else ConfigurationChanged();
 }
 
@@ -582,7 +585,8 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 
 	if (need_relayout) {
 		queue_resize();
-		MetricChanged(); // force re-layout, parent on_scroll(), queue_resize()
+		/* force re-layout, parent on_scroll(), queue_resize() */
+		MetricChanged(); /* EMIT SIGNAL */
 	}
 }
 
@@ -928,9 +932,7 @@ void
 MeterStrip::set_meter_type (MeterType type)
 {
 	if (_suspend_menu_callbacks) return;
-	if (_route->meter_type() == type) return;
-
-	level_meter->set_meter_type (type);
+	_route->set_meter_type (type);
 }
 
 void
@@ -943,11 +945,8 @@ MeterStrip::set_label_height (uint32_t h)
 void
 MeterStrip::meter_type_changed (MeterType type)
 {
-	if (_route->meter_type() != type) {
-		_route->set_meter_type(type);
-	}
 	update_background (type);
-	MetricChanged();
+	MetricChanged(); /* EMIT SIGNAL */
 }
 
 void
@@ -956,15 +955,15 @@ MeterStrip::set_meter_type_multi (int what, RouteGroup* group, MeterType type)
 	switch (what) {
 		case -1:
 			if (_route && group == _route->route_group()) {
-				level_meter->set_meter_type (type);
+				_route->set_meter_type (type);
 			}
 			break;
 		case 0:
-			level_meter->set_meter_type (type);
+			_route->set_meter_type (type);
 			break;
 		default:
 			if (what == _strip_type) {
-				level_meter->set_meter_type (type);
+				_route->set_meter_type (type);
 			}
 			break;
 	}

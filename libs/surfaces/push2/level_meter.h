@@ -54,8 +54,6 @@ class LevelMeter : public ArdourCanvas::Container, public sigc::trackable
 	void setup_meters (int len=0, int width=3, int thin=2);
 	void set_max_audio_meter_count (uint32_t cnt = 0);
 
-	void set_type (ARDOUR::MeterType);
-	ARDOUR::MeterType get_type () { return meter_type; }
 
   private:
 	Push2& p2;
@@ -84,7 +82,6 @@ class LevelMeter : public ArdourCanvas::Container, public sigc::trackable
 	guint16                thin_meter_width;
 	std::vector<MeterInfo> meters;
 	float                  max_peak;
-	ARDOUR::MeterType      meter_type;
 	ARDOUR::MeterType      visible_meter_type;
 	uint32_t               midi_count;
 	uint32_t               meter_count;

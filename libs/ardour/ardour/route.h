@@ -193,8 +193,8 @@ public:
 	void         emit_pending_signals ();
 	MeterPoint   meter_point() const { return _pending_meter_point; }
 
-	void         set_meter_type (MeterType t) { _meter_type = t; }
-	MeterType    meter_type() const { return _meter_type; }
+	void         set_meter_type (MeterType t);
+	MeterType    meter_type () const;
 
 	void set_disk_io_point (DiskIOPoint);
 	DiskIOPoint disk_io_point() const { return _disk_io_point; }
@@ -659,7 +659,6 @@ protected:
 
 	MeterPoint     _meter_point;
 	MeterPoint     _pending_meter_point;
-	MeterType      _meter_type;
 
 	bool           _denormal_protection;
 

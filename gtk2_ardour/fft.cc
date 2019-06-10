@@ -79,12 +79,15 @@ FFT::analyze(ARDOUR::Sample *input, WindowingType windowing_type)
 	for (uint32_t i = 1; i < _data_size - 1; ++i) {
 
 		power = (Re * Re) + (Im * Im);
-		phase = atanf(Im / Re);
-
-		if (Re < 0.0 && Im > 0.0) {
-			phase += M_PI;
-		} else if (Re < 0.0 && Im < 0.0) {
-			phase -= M_PI;
+		if (power < 1e-16) {
+			phase = 0;
+		} else {
+			phase = atanf (Im / Re);
+			if (Re < 0.0 && Im > 0.0) {
+				phase += M_PI;
+			} else if (Re < 0.0 && Im < 0.0) {
+				phase -= M_PI;
+			}
 		}
 
 		_power_at_bin[i] += power;

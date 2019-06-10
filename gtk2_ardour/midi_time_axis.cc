@@ -934,21 +934,39 @@ MidiTimeAxisView::build_controller_menu ()
 		unsigned n_items  = 0;
 		unsigned n_groups = 0;
 
+		/* keep track of CC numbers that are added */
+		uint16_t ctl_start = 1;
+		uint16_t ctl_end   = 1;
+
+		MasterDeviceNames::ControlNameLists const& ctllist (device_names->controls());
+
+		size_t total_ctrls = 0;
+		for (MasterDeviceNames::ControlNameLists::const_iterator l = ctllist.begin(); l != ctllist.end(); ++l) {
+			boost::shared_ptr<ControlNameList> name_list = l->second;
+			total_ctrls += name_list->controls().size();
+		}
+
+		bool to_top_level = total_ctrls < 32;
+
 		/* TODO: This is not correct, should look up the currently applicable ControlNameList
 		   and only build a menu for that one. */
-		for (MasterDeviceNames::ControlNameLists::const_iterator l = device_names->controls().begin();
-		     l != device_names->controls().end(); ++l) {
+		for (MasterDeviceNames::ControlNameLists::const_iterator l = ctllist.begin(); l != ctllist.end(); ++l) {
 			boost::shared_ptr<ControlNameList> name_list = l->second;
 			Menu*                              ctl_menu  = NULL;
 
 			for (ControlNameList::Controls::const_iterator c = name_list->controls().begin();
 			     c != name_list->controls().end();) {
 				const uint16_t ctl = c->second->number();
+
+				/* Skip bank select controllers since they're handled specially */
 				if (ctl != MIDI_CTL_MSB_BANK && ctl != MIDI_CTL_LSB_BANK) {
-					/* Skip bank select controllers since they're handled specially */
-					if (n_items == 0) {
+
+					if (to_top_level) {
+						ctl_menu = controller_menu;
+					} else if (!ctl_menu) {
 						/* Create a new submenu */
 						ctl_menu = manage (new Menu);
+						ctl_start = ctl;
 					}
 
 					MenuList& ctl_items (ctl_menu->items());
@@ -957,15 +975,19 @@ MidiTimeAxisView::build_controller_menu ()
 					} else {
 						add_single_channel_controller_item(ctl_items, ctl, c->second->name());
 					}
+					ctl_end = ctl;
 				}
 
 				++c;
-				if (ctl_menu && (++n_items == 16 || c == name_list->controls().end())) {
-					/* Submenu has 16 items or we're done, add it to controller menu and reset */
-					items.push_back(
-						MenuElem(string_compose(_("Controllers %1-%2"),
-						                        (16 * n_groups), (16 * n_groups) + n_items - 1),
-						         *ctl_menu));
+
+				if (!ctl_menu || to_top_level) {
+					continue;
+				}
+
+				if (++n_items == 32 || ctl < ctl_start || c == name_list->controls().end()) {
+					/* Submenu has 32 items or we're done, or a new name-list started:
+					 * add it to controller menu and reset */
+					items.push_back (MenuElem (string_compose (_("Controllers %1-%2"), ctl_start, ctl_end), *ctl_menu));
 					ctl_menu = NULL;
 					n_items  = 0;
 					++n_groups;
@@ -974,11 +996,11 @@ MidiTimeAxisView::build_controller_menu ()
 		}
 	} else {
 		/* No controllers names, generate generic numeric menu */
-		for (int i = 0; i < 127; i += 16) {
+		for (int i = 0; i < 127; i += 32) {
 			Menu*     ctl_menu = manage (new Menu);
 			MenuList& ctl_items (ctl_menu->items());
 
-			for (int ctl = i; ctl < i+16; ++ctl) {
+			for (int ctl = i; ctl < i + 32; ++ctl) {
 				if (ctl == MIDI_CTL_MSB_BANK || ctl == MIDI_CTL_LSB_BANK) {
 					/* Skip bank select controllers since they're handled specially */
 					continue;
@@ -994,9 +1016,16 @@ MidiTimeAxisView::build_controller_menu ()
 			}
 
 			/* Add submenu for this block of controllers to controller menu */
-			items.push_back (
-				MenuElem (string_compose (_("Controllers %1-%2"), i, i + 15),
-				          *ctl_menu));
+			switch (i) {
+				case 0:
+				case 32:
+					/* skip 0x00 and 0x20 (bank-select) */
+					items.push_back (MenuElem (string_compose (_("Controllers %1-%2"), i + 1, i + 31), *ctl_menu));
+					break;
+				default:
+					items.push_back (MenuElem (string_compose (_("Controllers %1-%2"), i, i + 31), *ctl_menu));
+					break;
+			}
 		}
 	}
 }

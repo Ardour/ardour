@@ -74,11 +74,11 @@ public:
 
 	float meter_level (uint32_t n, MeterType type);
 
-	void set_type(MeterType t);
-	MeterType get_type() { return _meter_type; }
+	void set_meter_type (MeterType t);
+	MeterType meter_type () const { return _meter_type; }
 
 
-	PBD::Signal1<void, MeterType> TypeChanged;
+	PBD::Signal1<void, MeterType> MeterTypeChanged;
 
 protected:
 	XMLNode& state ();
