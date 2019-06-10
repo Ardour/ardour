@@ -342,12 +342,6 @@ else
 	echo "Skipping NLS support"
 fi
 
-#
-# Copy stuff that may be dynamically loaded
-#
-
-cp -R $GTKSTACK_ROOT/etc/* $Etc
-
 # We rely on clearlooks, so include a version from our own build tree
 # this one is special - we will set GTK_PATH to $Libraries/gtkengines
 
