@@ -84,6 +84,11 @@ MixerSnapshot::MixerSnapshot(Session* s, string file_path)
         return;
     }
 
+    if(suffix == template_suffix) {
+        load_from_session(file_path);
+        return;
+    }
+
     if(suffix == ".xml") {
         load(file_path);
         return;
@@ -488,8 +493,11 @@ void MixerSnapshot::load_from_session(string path)
     }
 
     //final sanity check
-    if(!("." + get_suffix(path) == statefile_suffix)) {
-        return;
+    const string suffix = "." + get_suffix(path);
+    if(!(suffix == statefile_suffix)) {
+        if(!(suffix == template_suffix)) {
+            return;
+        }
     }
 
     XMLTree tree;
@@ -500,17 +508,38 @@ void MixerSnapshot::load_from_session(string path)
         return;
     }
 
+    if(root->name() == "Route") {
+        //must be a route template
+        load_from_route_template(*(root));
+        return;
+    }
+
     load_from_session(*(root));
+}
+
+void MixerSnapshot::load_from_route_template(XMLNode& node) 
+{
+    string name, id, group_name;
+    node.get_property(X_("name"), name);
+    node.get_property(X_("id"), id);
+    node.get_property(X_("route-group"), group_name);
+
+    XMLNode* group = node.add_child(X_("Group"));
+    if(group) {
+        group->set_property(X_("name"), group_name);
+    }
+    State state {id, name, node};
+    route_states.push_back(state);
 }
 
 void MixerSnapshot::load_from_session(XMLNode& node)
 {
     clear();
 
-    XMLNode* version_node = find_named_node(node, "ProgramVersion");
-    XMLNode* route_node   = find_named_node(node, "Routes");
-    XMLNode* group_node   = find_named_node(node, "RouteGroups");
-    XMLNode* vca_node     = find_named_node(node, "VCAManager");
+    XMLNode* version_node = find_named_node(node, X_("ProgramVersion"));
+    XMLNode* route_node   = find_named_node(node, X_("Routes"));
+    XMLNode* group_node   = find_named_node(node, X_("RouteGroups"));
+    XMLNode* vca_node     = find_named_node(node, X_("VCAManager"));
 
     if(version_node) {
         string version;

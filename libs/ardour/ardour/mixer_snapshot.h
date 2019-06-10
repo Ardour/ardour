@@ -120,6 +120,7 @@ class LIBARDOUR_API MixerSnapshot
         void reassign_masters(boost::shared_ptr<ARDOUR::Slavable>, XMLNode);
         void load_from_session(std::string);
         void load_from_session(XMLNode&);
+        void load_from_route_template(XMLNode&);
         bool set_flag(bool, RecallFlags);
 
         unsigned int id;
