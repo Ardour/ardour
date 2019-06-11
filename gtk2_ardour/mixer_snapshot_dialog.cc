@@ -474,7 +474,7 @@ void MixerSnapshotDialog::new_snapshot_from_session(bool global)
     int response = session_selector.run();
     session_selector.hide();
 
-    if (response == RESPONSE_CANCEL) {
+    if (response != RESPONSE_ACCEPT) {
         return;
     }
 
