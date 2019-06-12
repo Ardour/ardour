@@ -21,6 +21,10 @@
 #include "gtk2ardour-config.h"
 #endif
 
+#ifdef PLATFORM_WINDOWS
+#include <windows.h>
+#endif
+
 #include <map>
 #include <cerrno>
 #include <sstream>
@@ -1696,9 +1700,6 @@ SoundFileOmega::check_info (const vector<string>& paths, bool& same_size, bool& 
 bool
 SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths)
 {
-#ifdef PLATFORM_WINDOWS
-	return false;
-#else
 	std::string tmpdir(Glib::build_filename (s->session_directory().sound_path(), "linktest"));
 	bool ret = false;
 
@@ -1715,10 +1716,16 @@ SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths
 		snprintf (tmpc, sizeof(tmpc), "%s/%s", tmpdir.c_str(), Glib::path_get_basename (*i).c_str());
 
 		/* can we link ? */
-
-		if (link ((*i).c_str(), tmpc)) {
+#ifdef PLATFORM_WINDOWS
+		/* see also ntfs_link -- msvc only pbd extension */
+		if (false == CreateHardLinkA (/*new link*/ tmpc, /*existing file*/ (*i).c_str(), NULL)) {
 			goto out;
 		}
+#else
+		if (link (/*existing file*/(*i).c_str(), tmpc)) {
+			goto out;
+		}
+#endif
 
 		::g_unlink (tmpc);
 	}
@@ -1728,7 +1735,6 @@ SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths
   out:
 	g_rmdir (tmpdir.c_str());
 	return ret;
-#endif
 }
 
 SoundFileChooser::SoundFileChooser (string title, ARDOUR::Session* s)
