@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MackieProtocolDevice>
+  <Name value="Behringer X-Touch + Two X-Touch Compact"/>
+  <DeviceType value="MCU"/>
+  <Strips value="8"/>
+  <MasterFader value="yes"/>
+  <TimecodeDisplay value="yes"/>
+  <TwoCharacterDisplay value="yes"/>
+  <Extenders value="2"/>
+  <MasterPosition value="1"/>
+  <GlobalControls value="yes"/>
+  <JogWheel value="yes"/>
+  <TouchSenseFaders value="yes"/>
+  <HasSeparateMeters value="yes"/>
+</MackieProtocolDevice>
