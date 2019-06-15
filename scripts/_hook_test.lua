@@ -32,8 +32,8 @@ function factory (params)
 			io.output (file)
 			io.write (string.format ("Region: '%s' pos-changed: %s, length-changed: %s\n",
 				obj:name (),
-				tostring (pch:containsFramePos (ARDOUR.Properties.Start)),
-				tostring (pch:containsFramePos (ARDOUR.Properties.Length))
+				tostring (pch:containsSamplePos (ARDOUR.Properties.Start)),
+				tostring (pch:containsSamplePos (ARDOUR.Properties.Length))
 				))
 			io.close (file)
 		end
