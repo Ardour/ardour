@@ -27,7 +27,7 @@ function factory (unused_params) return function ()
 		if not l:is_mark() or string.find(name, "^xrun%d*$") then
 			goto next end
 
-		local t = l:start()
+		local t = l:start() - Session:current_start_sample()
 		local h = math.floor(t / (3600*fr))
 		local r = t - (h*3600*fr)
 		local m = math.floor(r / (60*fr))
