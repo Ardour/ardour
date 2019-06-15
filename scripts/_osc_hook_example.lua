@@ -44,8 +44,8 @@ function factory (params)
 			obj,pch = ...
 			tx:send ("/region_property_changed", "sTTiii",
 				obj:name (),
-				(pch:containsFramePos (ARDOUR.Properties.Start)),
-				(pch:containsFramePos (ARDOUR.Properties.Length)),
+				(pch:containsSamplePos (ARDOUR.Properties.Start)),
+				(pch:containsSamplePos (ARDOUR.Properties.Length)),
 				obj:position (), obj:start (), obj:length ())
 		end
 	end

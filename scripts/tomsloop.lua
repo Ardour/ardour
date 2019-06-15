@@ -274,7 +274,7 @@ function factory (params) return function ()
 		Session:abort_reversible_command ()
 	end
 
-	print ("bounced " .. n_regions_created .. " regions from loop range (" .. loop:length() ..  " frames) to playhead @ frame # " .. playhead)
+	print ("bounced " .. n_regions_created .. " regions from loop range (" .. loop:length() ..  " samples) to playhead @ sample # " .. playhead)
 	::errorout::
 end -- end of anonymous action script function
 end -- end of script factory
