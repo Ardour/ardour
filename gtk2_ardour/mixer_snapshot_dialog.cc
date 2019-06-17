@@ -261,7 +261,6 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
     display.append_column(_("# Tracks"),       _columns.n_tracks);
     display.append_column(_("# VCAs"),         _columns.n_vcas);
     display.append_column(_("# Groups"),       _columns.n_groups);
-    display.append_column(_("Special Tracks"), _columns.has_specials);
     display.append_column(_("Date"),           _columns.date);
     display.append_column(_("Version"),        _columns.version);
 
@@ -336,9 +335,8 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
         { 2,  2,  ALIGN_CENTER,  _("# Tracks"),       _("") },
         { 3,  3,  ALIGN_CENTER,  _("# VCAs"),         _("") },
         { 4,  4,  ALIGN_CENTER,  _("# Groups"),       _("") },
-        { 5,  5,  ALIGN_CENTER,  _("Special Tracks"), _("") },
-        { 6,  8,  ALIGN_LEFT,    _("Date"),           _("") },
-        { 7,  7,  ALIGN_LEFT,    _("Version"),        _("") },
+        { 5,  8,  ALIGN_LEFT,    _("Date"),           _("") },
+        { 6,  6,  ALIGN_LEFT,    _("Version"),        _("") },
         { -1,-1,  ALIGN_CENTER, 0, 0 }
     };
 
@@ -393,7 +391,6 @@ void MixerSnapshotDialog::new_row(Glib::RefPtr<ListStore> model, MixerSnapshot* 
     row[_columns.n_tracks]     = snap->get_routes().size();
     row[_columns.n_vcas]       = snap->get_vcas().size();
     row[_columns.n_groups]     = snap->get_groups().size();
-    row[_columns.has_specials] = snap->has_specials();
 
     GStatBuf gsb;
     g_stat(path.c_str(), &gsb);
