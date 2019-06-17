@@ -329,9 +329,16 @@ void MixerSnapshot::recall()
             //we need the route's playlist id before it dissapears
             XMLNode& route_node = route->get_state();
             string playlist_id;
-            route_node.get_property (X_("audio-playlist"), playlist_id);
 
-            node.set_property(X_("audio-playlist"), playlist_id);
+            //audio route playlists
+            if (route_node.get_property (X_("audio-playlist"), playlist_id)) {
+                node.set_property(X_("audio-playlist"), playlist_id);
+            }
+
+            //midi route playlists
+            if (route_node.get_property (X_("midi-playlist"), playlist_id)) {
+                node.set_property(X_("midi-playlist"), playlist_id);
+            }
 
             _session->remove_route(route);
             route = 0; //explicitly drop reference
