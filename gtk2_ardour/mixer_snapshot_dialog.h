@@ -75,7 +75,6 @@ class MixerSnapshotDialog : public ArdourWindow
                 add (n_tracks);
                 add (n_vcas);
                 add (n_groups);
-                add (has_specials);
                 add (date);
                 add (version);
                 add (timestamp);
@@ -95,7 +94,6 @@ class MixerSnapshotDialog : public ArdourWindow
             Gtk::TreeModelColumn<int> n_tracks;
             Gtk::TreeModelColumn<int> n_vcas;
             Gtk::TreeModelColumn<int> n_groups;
-            Gtk::TreeModelColumn<bool> has_specials;
             Gtk::TreeModelColumn<std::string> date;
             Gtk::TreeModelColumn<int64_t> timestamp;
             Gtk::TreeModelColumn<std::string> full_path;
