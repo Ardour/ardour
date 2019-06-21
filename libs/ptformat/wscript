@@ -30,10 +30,10 @@ def configure(conf):
 def build(bld):
     # Library
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
-        obj = bld.shlib (features = 'cxx cxxshlib', source = [ 'ptfformat.cc' ])
+        obj = bld.shlib (features = 'cxx cxxshlib', source = [ 'ptformat.cc' ])
         obj.defines = [ 'LIBPTFORMAT_DLL_EXPORTS=1' ]
     else:
-        obj = bld.stdlib (source = [ 'ptfformat.cc' ])
+        obj = bld.stdlib (source = [ 'ptformat.cc' ])
         obj.cxxflags = [  bld.env['compiler_flags_dict']['pic'] ]
         obj.cflags = [ bld.env['compiler_flags_dict']['pic'] ]
         
