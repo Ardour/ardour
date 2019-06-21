@@ -44,7 +44,7 @@
 #include "ardour/session.h"
 #include "pbd/memento_command.h"
 
-#include "ptformat/ptfformat.h"
+#include "ptformat/ptformat.h"
 
 #include "ardour_ui.h"
 #include "cursor_context.h"

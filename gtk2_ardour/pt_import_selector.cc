@@ -27,7 +27,7 @@
 #include "pbd/i18n.h"
 #include "pbd/file_utils.h"
 
-#include "ptformat/ptfformat.h"
+#include "ptformat/ptformat.h"
 
 #include "ardour/session_handle.h"
 
@@ -111,24 +111,35 @@ void
 PTImportSelector::update_ptf()
 {
 	if (ptimport_ptf_chooser.get_filename ().size () > 0) {
+		int err = 0;
                 std::string path = ptimport_ptf_chooser.get_filename ();
 		bool ok = Glib::file_test(path.c_str(), Glib::FILE_TEST_IS_REGULAR | Glib::FILE_TEST_IS_SYMLINK)
 				&& !Glib::file_test(path.c_str(), Glib::FILE_TEST_IS_DIR);
 		if (ok) {
-			if (_ptf->load (path, _session_rate) == -1) {
+			err = _ptf->load (path, _session_rate);
+			if (err == -1) {
+				ptimport_info_text.get_buffer ()->set_text ("Cannot decrypt PT session\n");
+				ptimport_import_button.set_sensitive(false);
+			} else if (err == -2) {
 				ptimport_info_text.get_buffer ()->set_text ("Cannot detect PT session\n");
+				ptimport_import_button.set_sensitive(false);
+			} else if (err == -3) {
+				ptimport_info_text.get_buffer ()->set_text ("Incompatible PT version\n");
+				ptimport_import_button.set_sensitive(false);
+			} else if (err == -4) {
+				ptimport_info_text.get_buffer ()->set_text ("Cannot parse PT session\n");
 				ptimport_import_button.set_sensitive(false);
 			} else {
 				std::string ptinfo = string_compose (_("PT Session [ VALID ]\n\nSession Info:\n\n\nPT v%1 Session @ %2Hz\n\n%3 audio files\n%4 audio regions\n%5 active audio regions\n%6 midi regions\n%7 active midi regions\n\n"),
-					(int)_ptf->version,
-					_ptf->sessionrate,
-					_ptf->audiofiles.size (),
-					_ptf->regions.size (),
-					_ptf->tracks.size (),
-					_ptf->midiregions.size (),
-					_ptf->miditracks.size ()
+					(int)_ptf->version (),
+					_ptf->sessionrate (),
+					_ptf->audiofiles ().size (),
+					_ptf->regions ().size (),
+					_ptf->tracks ().size (),
+					_ptf->midiregions ().size (),
+					_ptf->miditracks ().size ()
 				);
-				if (_session_rate != _ptf->sessionrate) {
+				if (_session_rate != _ptf->sessionrate ()) {
 					ptinfo = string_compose (_("%1WARNING:\n\nSample rate mismatch,\nwill be resampling\n"), ptinfo);
 				}
 				ptimport_info_text.get_buffer ()->set_text (ptinfo);

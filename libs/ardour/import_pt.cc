@@ -48,7 +48,7 @@
 #include "ardour/session.h"
 #include "pbd/memento_command.h"
 
-#include "ptformat/ptfformat.h"
+#include "ptformat/ptformat.h"
 
 #include "pbd/i18n.h"
 
@@ -201,7 +201,7 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 
 	vector<ptflookup_t> ptfwavpair;
 	vector<ptflookup_t> ptfregpair;
-	vector<PTFFormat::wav_t>::iterator w;
+	vector<PTFFormat::wav_t>::const_iterator w;
 
 	SourceList just_one_src;
 	SourceList imported;
@@ -213,18 +213,18 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 
 	Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
 
-	for (w = ptf.audiofiles.begin (); w != ptf.audiofiles.end () && !status.cancel; ++w) {
+	for (w = ptf.audiofiles ().begin (); w != ptf.audiofiles ().end () && !status.cancel; ++w) {
 		ptflookup_t p;
 		ok = false;
 		/* Try audio file */
-		fullpath = Glib::build_filename (Glib::path_get_dirname (ptf.path), "Audio Files");
+		fullpath = Glib::build_filename (Glib::path_get_dirname (ptf.path ()), "Audio Files");
 		fullpath = Glib::build_filename (fullpath, w->filename);
 		if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS)) {
 			just_one_src.clear();
 			ok = import_sndfile_as_region (fullpath, SrcBest, pos, just_one_src, status);
 		} else {
 			/* Try fade file */
-			fullpath = Glib::build_filename (Glib::path_get_dirname (ptf.path), "Fade Files");
+			fullpath = Glib::build_filename (Glib::path_get_dirname (ptf.path ()), "Fade Files");
 			fullpath = Glib::build_filename (fullpath, w->filename);
 			if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS)) {
 				just_one_src.clear();
@@ -237,7 +237,7 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 				 * it won't be resampled, so we can only do this
 				 * when sample rates are matching
 				 */
-				if (sample_rate () == ptf.sessionrate) {
+				if (sample_rate () == ptf.sessionrate ()) {
 					/* Insert reference to missing source */
 					samplecnt_t sourcelen = w->length;
 					XMLNode srcxml (X_("Source"));
@@ -276,8 +276,8 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 	lx.acquire();
 	save_state("");
 
-	for (vector<PTFFormat::region_t>::iterator a = ptf.regions.begin ();
-			a != ptf.regions.end (); ++a) {
+	for (vector<PTFFormat::region_t>::const_iterator a = ptf.regions ().begin ();
+			a != ptf.regions ().end (); ++a) {
 		for (vector<ptflookup_t>::iterator p = ptfwavpair.begin ();
 				p != ptfwavpair.end (); ++p) {
 			if ((p->index1 == a->wave.index) && (strcmp (a->wave.filename.c_str (), "") != 0)) {
@@ -310,7 +310,7 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 		}
 	}
 
-	for (vector<PTFFormat::track_t>::iterator a = ptf.tracks.begin (); a != ptf.tracks.end (); ++a) {
+	for (vector<PTFFormat::track_t>::const_iterator a = ptf.tracks ().begin (); a != ptf.tracks ().end (); ++a) {
 		for (vector<ptflookup_t>::iterator p = ptfregpair.begin ();
 				p != ptfregpair.end (); ++p) {
 
@@ -384,7 +384,7 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 
 trymidi:
 	status.paths.clear();
-	status.paths.push_back(ptf.path);
+	status.paths.push_back(ptf.path ());
 	status.current = 1;
 	status.total = 1;
 	status.freeze = false;
@@ -396,7 +396,7 @@ trymidi:
 
 	vector<midipair> uniquetr;
 
-	for (vector<PTFFormat::track_t>::iterator a = ptf.miditracks.begin (); a != ptf.miditracks.end (); ++a) {
+	for (vector<PTFFormat::track_t>::const_iterator a = ptf.miditracks ().begin (); a != ptf.miditracks ().end (); ++a) {
 		bool found = false;
 		for (vector<midipair>::iterator b = uniquetr.begin (); b != uniquetr.end (); ++b) {
 			if (b->trname == a->name) {
@@ -429,7 +429,7 @@ trymidi:
 	}
 
 	/* MIDI - Add midi regions one-by-one to corresponding midi tracks */
-	for (vector<PTFFormat::track_t>::iterator a = ptf.miditracks.begin (); a != ptf.miditracks.end (); ++a) {
+	for (vector<PTFFormat::track_t>::const_iterator a = ptf.miditracks ().begin (); a != ptf.miditracks ().end (); ++a) {
 
 		boost::shared_ptr<MidiTrack> midi_track = midi_tracks[a->index];
 		assert (midi_track);
@@ -453,7 +453,7 @@ trymidi:
 		MidiModel::NoteDiffCommand *midicmd;
 		midicmd = mm->new_note_diff_command ("Import ProTools MIDI");
 
-		for (vector<PTFFormat::midi_ev_t>::iterator j = a->reg.midi.begin (); j != a->reg.midi.end (); ++j) {
+		for (vector<PTFFormat::midi_ev_t>::const_iterator j = a->reg.midi.begin (); j != a->reg.midi.end (); ++j) {
 			//printf(" : MIDI : pos=%f len=%f\n", (float)j->pos / 960000., (float)j->length / 960000.);
 			Temporal::Beats start = (Temporal::Beats)(j->pos / 960000.);
 			Temporal::Beats len = (Temporal::Beats)(j->length / 960000.);
