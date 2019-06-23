@@ -29,6 +29,7 @@
 #ifdef HAVE_GLIB
 # include <glib/gstdio.h>
 # define ptf_open	g_fopen
+# define strndup	g_strndup
 #else
 # define ptf_open	fopen
 #endif
