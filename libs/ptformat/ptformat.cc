@@ -184,8 +184,8 @@ PTFFormat::get_content_description(uint16_t ctype) {
 	}
 }
 
-uint16_t
-PTFFormat::u_endian_read2(unsigned char *buf, bool bigendian)
+static uint16_t
+u_endian_read2(unsigned char *buf, bool bigendian)
 {
 	if (bigendian) {
 		return ((uint16_t)(buf[0]) << 8) | (uint16_t)(buf[1]);
@@ -194,8 +194,8 @@ PTFFormat::u_endian_read2(unsigned char *buf, bool bigendian)
 	}
 }
 
-uint32_t
-PTFFormat::u_endian_read3(unsigned char *buf, bool bigendian)
+static uint32_t
+u_endian_read3(unsigned char *buf, bool bigendian)
 {
 	if (bigendian) {
 		return ((uint32_t)(buf[0]) << 16) |
@@ -208,8 +208,8 @@ PTFFormat::u_endian_read3(unsigned char *buf, bool bigendian)
 	}
 }
 
-uint32_t
-PTFFormat::u_endian_read4(unsigned char *buf, bool bigendian)
+static uint32_t
+u_endian_read4(unsigned char *buf, bool bigendian)
 {
 	if (bigendian) {
 		return ((uint32_t)(buf[0]) << 24) |
@@ -224,8 +224,8 @@ PTFFormat::u_endian_read4(unsigned char *buf, bool bigendian)
 	}
 }
 
-uint64_t
-PTFFormat::u_endian_read5(unsigned char *buf, bool bigendian)
+static uint64_t
+u_endian_read5(unsigned char *buf, bool bigendian)
 {
 	if (bigendian) {
 		return ((uint64_t)(buf[0]) << 32) |
@@ -242,8 +242,8 @@ PTFFormat::u_endian_read5(unsigned char *buf, bool bigendian)
 	}
 }
 
-uint64_t
-PTFFormat::u_endian_read8(unsigned char *buf, bool bigendian)
+static uint64_t
+u_endian_read8(unsigned char *buf, bool bigendian)
 {
 	if (bigendian) {
 		return ((uint64_t)(buf[0]) << 56) |
@@ -594,7 +594,7 @@ PTFFormat::parse_block_at(uint32_t pos, struct block_t *block, struct block_t *p
 	block->block_size = b.block_size;
 	block->content_type = b.content_type;
 	block->offset = b.offset;
-	memset(&block->child, 0, sizeof(block->child));
+	block->child.clear();
 
 	for (i = 1; (i < block->block_size) && (pos + i + childjump < max); i += childjump ? childjump : 1) {
 		int p = pos + i;
@@ -702,11 +702,11 @@ PTFFormat::parseheader(void) {
 	return found;
 }
 
-char *
-PTFFormat::parsestring(uint32_t pos) {
+std::string
+PTFFormat::parsestring (uint32_t pos) {
 	uint32_t length = u_endian_read4(&_ptfunxored[pos], is_bigendian);
 	pos += 4;
-	return strndup((const char *)&_ptfunxored[pos], length);
+	return std::string((const char *)&_ptfunxored[pos], length);
 }
 
 bool
@@ -714,7 +714,6 @@ PTFFormat::parseaudio(void) {
 	bool found = false;
 	uint32_t nwavs, i, n;
 	uint32_t pos = 0;
-	char *str;
 	std::string wavtype;
 	std::string wavname;
 
@@ -733,13 +732,9 @@ PTFFormat::parseaudio(void) {
 					pos = c->offset + 11;
 					// Found wav list
 					for (i = n = 0; (pos < c->offset + c->block_size) && (n < nwavs); i++) {
-						str = parsestring(pos);
-						wavname = std::string(str);
-						free(str);
+						wavname = parsestring(pos);
 						pos += wavname.size() + 4;
-						str = strndup((const char *)&_ptfunxored[pos], 4);
-						wavtype = std::string(str);
-						free(str);
+						wavtype = std::string((const char*)&_ptfunxored[pos], 4);
 						pos += 9;
 						if (foundin(wavname, std::string(".grp")))
 							continue;
@@ -920,7 +915,6 @@ PTFFormat::parserest(void) {
 	uint32_t nch;
 	uint16_t ch_map[MAX_CHANNELS_PER_TRACK];
 	bool found = false;
-	char *reg;
 	std::string regionname, trackname, midiregionname;
 	rindex = 0;
 
@@ -937,9 +931,7 @@ PTFFormat::parserest(void) {
 
 					found = true;
 					j = c->offset + 11;
-					reg = parsestring(j);
-					regionname = std::string(reg);
-					free(reg);
+					regionname = parsestring(j);
 					j += regionname.size() + 4;
 
 					r.name = regionname;
@@ -963,8 +955,7 @@ PTFFormat::parserest(void) {
 					c != b->child.end(); ++c) {
 				if (c->content_type == 0x1014) {
 					j = c->offset + 2;
-					reg = parsestring(j);
-					trackname = std::string(reg);
+					trackname = parsestring(j);
 					j += trackname.size() + 5;
 					nch = u_endian_read4(&_ptfunxored[j], is_bigendian);
 					j += 4;
@@ -983,7 +974,6 @@ PTFFormat::parserest(void) {
 						//verbose_printf("%s : %d(%d)\n", reg, nch, ch_map[0]);
 						j += 2;
 					}
-					free(reg);
 				}
 			}
 		}
@@ -1000,9 +990,7 @@ PTFFormat::parserest(void) {
 					c != b->child.end(); ++c) {
 				if (c->content_type == 0x251a) {
 					j = c->offset + 4;
-					reg = parsestring(j);
-					trackname = std::string(reg);
-					free(reg);
+					trackname = parsestring(j);
 					j += trackname.size() + 4 + 18;
 					//tindex = u_endian_read4(&_ptfunxored[j], is_bigendian);
 
@@ -1034,9 +1022,7 @@ PTFFormat::parserest(void) {
 			for (vector<PTFFormat::block_t>::iterator c = b->child.begin();
 					c != b->child.end(); ++c) {
 				if (c->content_type == 0x1011) {
-					reg = parsestring(c->offset + 2);
-					regionname = std::string(reg);
-					free(reg);
+					regionname = parsestring(c->offset + 2);
 					for (vector<PTFFormat::block_t>::iterator d = c->child.begin();
 							d != c->child.end(); ++d) {
 						if (d->content_type == 0x100f) {
@@ -1068,9 +1054,7 @@ PTFFormat::parserest(void) {
 			for (vector<PTFFormat::block_t>::iterator c = b->child.begin();
 					c != b->child.end(); ++c) {
 				if (c->content_type == 0x1052) {
-					reg = parsestring(c->offset + 2);
-					regionname = std::string(reg);
-					free(reg);
+					regionname = parsestring(c->offset + 2);
 					for (vector<PTFFormat::block_t>::iterator d = c->child.begin();
 							d != c->child.end(); ++d) {
 						if (d->content_type == 0x1050) {
@@ -1140,7 +1124,6 @@ PTFFormat::parsemidi(void) {
 	std::vector<mchunk> midichunks;
 	midi_ev_t m;
 
-	char *str;
 	std::string regionname, trackname;
 	rindex = 0;
 
@@ -1193,8 +1176,7 @@ PTFFormat::parsemidi(void) {
 							d != c->child.end(); ++d) {
 						if ((d->content_type == 0x1007) || (d->content_type == 0x2628)) {
 							j = d->offset + 2;
-							str = parsestring(j);
-							midiregionname = std::string(str);
+							midiregionname = parsestring(j);
 							j += 4 + midiregionname.size();
 							parse_three_point(j, region_pos, zero_ticks, midi_len);
 							j = d->offset + d->block_size;
@@ -1211,7 +1193,6 @@ PTFFormat::parsemidi(void) {
 							_midiregions.push_back(r);
 							//verbose_printf("MIDI %s : r(%d) (%llu, %llu, %llu)\n", str, rindex, zero_ticks, region_pos, midi_len);
 							//dump_block(*d, 1);
-							free(str);
 						}
 					}
 				}
@@ -1232,8 +1213,7 @@ PTFFormat::parsemidi(void) {
 						if (d->content_type == 0x2628) {
 							count = 0;
 							j = d->offset + 2;
-							str = parsestring(j);
-							regionname = std::string(str);
+							regionname = parsestring(j);
 							j += 4 + regionname.size();
 							parse_three_point(j, start, offset, length);
 							j = d->offset + d->block_size + 2;
@@ -1280,7 +1260,6 @@ PTFFormat::parsemidi(void) {
 								verbose_printf("%s : MIDI region mr(%d) ?(%d) (%llu %llu %llu)\n", str, mindex, n, start, offset, length);
 								mindex++;
 							}
-							free(str);
 						}
 					}
 				}
@@ -1297,9 +1276,7 @@ PTFFormat::parsemidi(void) {
 			for (vector<PTFFormat::block_t>::iterator c = b->child.begin();
 					c != b->child.end(); ++c) {
 				if (c->content_type == 0x1057) {
-					str = parsestring(c->offset + 2);
-					regionname = std::string(str);
-					free(str);
+					regionname = parsestring(c->offset + 2);
 					for (vector<PTFFormat::block_t>::iterator d = c->child.begin();
 							d != c->child.end(); ++d) {
 						if (d->content_type == 0x1056) {
