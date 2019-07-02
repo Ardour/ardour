@@ -218,7 +218,11 @@ Route::init ()
 
 	/* set default meter type */
 	if (is_master()) {
+#ifdef MIXBUS
+		set_meter_type (MeterK20);
+#else
 		set_meter_type (Config->get_meter_type_master ());
+#endif
 	} else if (dynamic_cast<Track*>(this)) {
 		set_meter_type (Config->get_meter_type_track ());
 	} else {
