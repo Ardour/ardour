@@ -2,9 +2,14 @@
 #include <cstdlib>
 #include <getopt.h>
 
+#ifndef PLATFORM_WINDOWS
+#include <signal.h>
+#endif
+
 #include <glibmm.h>
 
 #include "pbd/convert.h"
+#include "pbd/crossthread.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/error.h"
 #include "pbd/debug.h"
@@ -22,18 +27,12 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-#ifdef PLATFORM_WINDOWS
-#include <windows.h>
-#define sleep(X) Sleep((X) * 1000)
-#endif
-
 static const char* localedir = LOCALEDIR;
 
 static string backend_client_name;
 static string backend_name = "JACK";
-static volatile bool run_headless = true;
-
-TestReceiver test_receiver;
+static CrossThreadChannel xthread (true);
+static TestReceiver test_receiver;
 
 /** @param dir Session directory.
  *  @param state Session state file, without .ardour suffix.
@@ -69,22 +68,29 @@ static void
 access_action (const std::string& action_group, const std::string& action_item)
 {
 	if (action_group == "Common" && action_item == "Quit") {
-		run_headless = false;
+		xthread.deliver ('x');
 	}
 }
 
 static void
 engine_halted (const char* reason)
 {
-	cerr << "The audio backend has either been shutdown";
+	cerr << "The audio backend has been shutdown";
 	if (reason && strlen (reason) > 0) {
 		cerr << ": " << reason;
 	} else {
 		cerr << ".";
 	}
 	cerr << endl;
-	run_headless = false;
+	xthread.deliver ('x');
 }
+
+#ifndef PLATFORM_WINDOWS
+static void wearedone (int) {
+	cerr << "caught signal - terminating." << endl;
+	xthread.deliver ('x');
+}
+#endif
 
 static void
 print_version ()
@@ -237,11 +243,15 @@ int main (int argc, char* argv[])
 	BasicUI::AccessAction.connect_same_thread (con, boost::bind (&access_action, _1, _2));
 	AudioEngine::instance()->Halted.connect_same_thread (con, boost::bind (&engine_halted, _1));
 
+#ifndef PLATFORM_WINDOWS
+	signal(SIGINT, wearedone);
+	signal(SIGTERM, wearedone);
+#endif
+
 	s->request_transport_speed (1.0);
 
-	while (run_headless) {
-		Glib::usleep (500000);
-	}
+	char msg;
+	do {} while (0 == xthread.receive (msg, true));
 
 	AudioEngine::instance()->remove_session ();
 	delete s;
