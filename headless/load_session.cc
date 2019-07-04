@@ -1,6 +1,6 @@
-#include <iostream>
 #include <cstdlib>
 #include <getopt.h>
+#include <iostream>
 
 #ifndef PLATFORM_WINDOWS
 #include <signal.h>
@@ -10,9 +10,9 @@
 
 #include "pbd/convert.h"
 #include "pbd/crossthread.h"
-#include "pbd/failed_constructor.h"
-#include "pbd/error.h"
 #include "pbd/debug.h"
+#include "pbd/error.h"
+#include "pbd/failed_constructor.h"
 
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
@@ -29,15 +29,15 @@ using namespace PBD;
 
 static const char* localedir = LOCALEDIR;
 
-static string backend_client_name;
-static string backend_name = "JACK";
+static string             backend_client_name;
+static string             backend_name = "JACK";
 static CrossThreadChannel xthread (true);
-static TestReceiver test_receiver;
+static TestReceiver       test_receiver;
 
 /** @param dir Session directory.
  *  @param state Session state file, without .ardour suffix.
  */
-static Session *
+static Session*
 load_session (string dir, string state)
 {
 	SessionEvent::create_per_thread_pool ("test", 512);
@@ -86,7 +86,9 @@ engine_halted (const char* reason)
 }
 
 #ifndef PLATFORM_WINDOWS
-static void wearedone (int) {
+static void
+wearedone (int)
+{
 	cerr << "caught signal - terminating." << endl;
 	xthread.deliver ('x');
 }
@@ -96,15 +98,15 @@ static void
 print_version ()
 {
 	cout
-		<< PROGRAM_NAME
-		<< VERSIONSTRING
-		<< " (built using "
-		<< ARDOUR::revision
+	    << PROGRAM_NAME
+	    << VERSIONSTRING
+	    << " (built using "
+	    << ARDOUR::revision
 #ifdef __GNUC__
-		<< " and GCC version " << __VERSION__
+	    << " and GCC version " << __VERSION__
 #endif
-		<< ')'
-		<< endl;
+	    << ')'
+	    << endl;
 }
 
 static void
@@ -123,13 +125,15 @@ print_help ()
 #ifdef WINDOWS_VST_SUPPORT
 	     << "  -V, --novst                 Do not use VST support\n"
 #endif
-		;
+	    ;
 }
 
-int main (int argc, char* argv[])
+int
+main (int argc, char* argv[])
 {
-	const char *optstring = "vhBdD:c:VOU:P";
+	const char* optstring = "vhBdD:c:VOU:P";
 
+	/* clang-format off */
 	const struct option longopts[] = {
 		{ "version",             no_argument,       0, 'v' },
 		{ "help",                no_argument,       0, 'h' },
@@ -142,64 +146,64 @@ int main (int argc, char* argv[])
 		{ "no-connect-ports",    no_argument,       0, 'P' },
 		{ 0, 0, 0, 0 }
 	};
+	/* clang-format on */
 
-	bool use_vst = true;
+	bool use_vst             = true;
 	bool try_hw_optimization = true;
 
-	backend_client_name = PBD::downcase (std::string(PROGRAM_NAME));
-
+	backend_client_name = PBD::downcase (std::string (PROGRAM_NAME));
 
 	int c;
 	while ((c = getopt_long (argc, argv, optstring, longopts, (int*)0)) != EOF) {
 		switch (c) {
-		case 0:
-			break;
+			case 0:
+				break;
 
-		case 'v':
-			print_version ();
-			exit (EXIT_SUCCESS);
-			break;
-
-		case 'h':
-			print_help ();
-			exit (EXIT_SUCCESS);
-			break;
-
-		case 'c':
-			backend_client_name = optarg;
-			break;
-
-		case 'B':
-			ARDOUR::Session::set_bypass_all_loaded_plugins (true);
-			break;
-
-		case 'd':
-			ARDOUR::Session::set_disable_all_loaded_plugins (true);
-			break;
-
-		case 'D':
-			if (PBD::parse_debug_options (optarg)) {
+			case 'v':
+				print_version ();
 				exit (EXIT_SUCCESS);
-			}
-			break;
+				break;
 
-		case 'O':
-			try_hw_optimization = false;
-			break;
+			case 'h':
+				print_help ();
+				exit (EXIT_SUCCESS);
+				break;
 
-		case 'P':
-			ARDOUR::Port::set_connecting_blocked (true);
-			break;
+			case 'c':
+				backend_client_name = optarg;
+				break;
 
-		case 'V':
+			case 'B':
+				ARDOUR::Session::set_bypass_all_loaded_plugins (true);
+				break;
+
+			case 'd':
+				ARDOUR::Session::set_disable_all_loaded_plugins (true);
+				break;
+
+			case 'D':
+				if (PBD::parse_debug_options (optarg)) {
+					exit (EXIT_SUCCESS);
+				}
+				break;
+
+			case 'O':
+				try_hw_optimization = false;
+				break;
+
+			case 'P':
+				ARDOUR::Port::set_connecting_blocked (true);
+				break;
+
+			case 'V':
 #ifdef WINDOWS_VST_SUPPORT
-			use_vst = false;
+				use_vst = false;
 #endif /* WINDOWS_VST_SUPPORT */
-			break;
+				break;
 
-		default:
-			print_help ();
-			exit (EXIT_FAILURE);
+			default:
+				print_help ();
+				exit (EXIT_FAILURE);
 		}
 	}
 
@@ -209,22 +213,23 @@ int main (int argc, char* argv[])
 	}
 
 	if (!ARDOUR::init (use_vst, try_hw_optimization, localedir)) {
-		cerr << "Ardour failed to initialize\n" << endl;
+		cerr << "Ardour failed to initialize\n"
+		     << endl;
 		exit (EXIT_FAILURE);
 	}
 
 	Session* s = 0;
 
 	try {
-		s = load_session (argv[optind], argv[optind+1]);
+		s = load_session (argv[optind], argv[optind + 1]);
 	} catch (failed_constructor& e) {
-		cerr << "failed_constructor: " << e.what() << "\n";
+		cerr << "failed_constructor: " << e.what () << "\n";
 		exit (EXIT_FAILURE);
 	} catch (AudioEngine::PortRegistrationFailure& e) {
-		cerr << "PortRegistrationFailure: " << e.what() << "\n";
+		cerr << "PortRegistrationFailure: " << e.what () << "\n";
 		exit (EXIT_FAILURE);
 	} catch (exception& e) {
-		cerr << "exception: " << e.what() << "\n";
+		cerr << "exception: " << e.what () << "\n";
 		exit (EXIT_FAILURE);
 	} catch (...) {
 		cerr << "unknown exception.\n";
@@ -243,21 +248,22 @@ int main (int argc, char* argv[])
 
 	PBD::ScopedConnectionList con;
 	BasicUI::AccessAction.connect_same_thread (con, boost::bind (&access_action, _1, _2));
-	AudioEngine::instance()->Halted.connect_same_thread (con, boost::bind (&engine_halted, _1));
+	AudioEngine::instance ()->Halted.connect_same_thread (con, boost::bind (&engine_halted, _1));
 
 #ifndef PLATFORM_WINDOWS
-	signal(SIGINT, wearedone);
-	signal(SIGTERM, wearedone);
+	signal (SIGINT, wearedone);
+	signal (SIGTERM, wearedone);
 #endif
 
 	s->request_transport_speed (1.0);
 
 	char msg;
-	do {} while (0 == xthread.receive (msg, true));
+	do {
+	} while (0 == xthread.receive (msg, true));
 
-	AudioEngine::instance()->remove_session ();
+	AudioEngine::instance ()->remove_session ();
 	delete s;
-	AudioEngine::instance()->stop ();
+	AudioEngine::instance ()->stop ();
 
 	AudioEngine::destroy ();
 	return 0;
