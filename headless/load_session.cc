@@ -131,34 +131,26 @@ int main (int argc, char* argv[])
 	const char *optstring = "vhBdD:c:VOU:P";
 
 	const struct option longopts[] = {
-		{ "version", 0, 0, 'v' },
-		{ "help", 0, 0, 'h' },
-		{ "bypass-plugins", 1, 0, 'B' },
-		{ "disable-plugins", 1, 0, 'd' },
-		{ "debug", 1, 0, 'D' },
-		{ "name", 1, 0, 'c' },
-		{ "novst", 0, 0, 'V' },
-		{ "no-hw-optimizations", 0, 0, 'O' },
-		{ "uuid", 1, 0, 'U' },
-		{ "no-connect-ports", 0, 0, 'P' },
+		{ "version",             no_argument,       0, 'v' },
+		{ "help",                no_argument,       0, 'h' },
+		{ "bypass-plugins",      no_argument,       0, 'B' },
+		{ "disable-plugins",     no_argument,       0, 'd' },
+		{ "debug",               required_argument, 0, 'D' },
+		{ "name",                required_argument, 0, 'c' },
+		{ "novst",               no_argument,       0, 'V' },
+		{ "no-hw-optimizations", no_argument,       0, 'O' },
+		{ "no-connect-ports",    no_argument,       0, 'P' },
 		{ 0, 0, 0, 0 }
 	};
-
-	int option_index = 0;
-	int c = 0;
 
 	bool use_vst = true;
 	bool try_hw_optimization = true;
 
 	backend_client_name = PBD::downcase (std::string(PROGRAM_NAME));
 
-	while (1) {
-		c = getopt_long (argc, argv, optstring, longopts, &option_index);
 
-		if (c == -1) {
-			break;
-		}
-
+	int c;
+	while ((c = getopt_long (argc, argv, optstring, longopts, (int*)0)) != EOF) {
 		switch (c) {
 		case 0:
 			break;
