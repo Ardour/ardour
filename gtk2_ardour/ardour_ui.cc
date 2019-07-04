@@ -351,7 +351,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		MessageDialog msg (string_compose (_("Your configuration files were copied. You can now restart %1."), PROGRAM_NAME), true);
 		msg.run ();
 		/* configuration was modified, exit immediately */
-		_exit (0);
+		_exit (EXIT_SUCCESS);
 	}
 
 
@@ -739,7 +739,7 @@ ARDOUR_UI::post_engine ()
 
 		halt_connection.disconnect ();
 		AudioEngine::instance()->stop ();
-		exit (0);
+		exit (EXIT_SUCCESS);
 
 	}
 
@@ -816,7 +816,7 @@ ARDOUR_UI::post_engine ()
 
 		halt_connection.disconnect ();
 		AudioEngine::instance()->stop ();
-		exit (0);
+		exit (EXIT_SUCCESS);
 	}
 
 	/* this being a GUI and all, we want peakfiles */
@@ -1261,7 +1261,7 @@ ARDOUR_UI::starting ()
 			c.signal_toggled().connect (sigc::hide_return (sigc::bind (sigc::ptr_fun (toggle_file_existence), path)));
 
 			if (d.run () != RESPONSE_OK) {
-				_exit (0);
+				_exit (EXIT_SUCCESS);
 			}
 		}
 #endif
@@ -1878,7 +1878,7 @@ ARDOUR_UI::open_recent_session ()
 				recent_session_dialog.hide();
 				return;
 			} else {
-				exit (1);
+				exit (EXIT_FAILURE);
 			}
 		}
 
@@ -3242,7 +3242,7 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 		ARDOUR_COMMAND_LINE::session_name = "";
 
 		if (get_session_parameters (true, false)) {
-			exit (1);
+			exit (EXIT_FAILURE);
 		}
 	}
 }
@@ -3483,12 +3483,12 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 			if (ret == -2) {
 				/* not connected to the AudioEngine, so quit to avoid an infinite loop */
-				exit (1);
+				exit (EXIT_FAILURE);
 			}
 
 			if (!ARDOUR_COMMAND_LINE::immediate_save.empty()) {
 				_session->save_state (ARDOUR_COMMAND_LINE::immediate_save, false);
-				exit (1);
+				exit (EXIT_FAILURE);
 			}
 
 			/* clear this to avoid endless attempts to load the
@@ -3518,7 +3518,7 @@ ARDOUR_UI::close_session()
 	ARDOUR_COMMAND_LINE::session_name = "";
 
 	if (get_session_parameters (true, false)) {
-		exit (1);
+		exit (EXIT_FAILURE);
 	}
 }
 
@@ -3582,7 +3582,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 
 		switch (response) {
 		case RESPONSE_CANCEL:
-			exit (1);
+			exit (EXIT_FAILURE);
 		default:
 			break;
 		}
@@ -5577,7 +5577,7 @@ ARDOUR_UI::audioengine_became_silent ()
 	case Gtk::RESPONSE_NO:
 		/* save and quit */
 		save_state_canfail ("");
-		exit (0);
+		exit (EXIT_SUCCESS);
 		break;
 
 	case Gtk::RESPONSE_CANCEL:

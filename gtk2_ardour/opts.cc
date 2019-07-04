@@ -158,7 +158,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 
 		case 'h':
 			print_help (execname);
-			exit (0);
+			exit (EXIT_SUCCESS);
 			break;
 		case 'H':
 #ifndef NDEBUG
@@ -187,7 +187,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 
 		case 'D':
 			if (PBD::parse_debug_options (optarg)) {
-				exit (0);
+				exit (EXIT_SUCCESS);
 			}
 			break;
 

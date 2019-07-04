@@ -149,7 +149,7 @@ This could be due to misconfiguration or to an error inside %2.\n\
 Click OK to exit %1."), PROGRAM_NAME, AudioEngine::instance()->current_backend_name()));
 
 		msg.run ();
-		_exit (0);
+		_exit (EXIT_SUCCESS);
 
 	} else {
 
@@ -355,7 +355,7 @@ int main (int argc, char *argv[])
 
 	if (parse_opts (argc, argv)) {
 		command_line_parse_error (&argc, &argv);
-		exit (1);
+		exit (EXIT_FAILURE);
 	}
 
 	cout << PROGRAM_NAME
@@ -369,7 +369,7 @@ int main (int argc, char *argv[])
 	     << endl;
 
 	if (just_version) {
-		exit (0);
+		exit (EXIT_SUCCESS);
 	}
 
 	if (no_splash) {
@@ -390,7 +390,7 @@ int main (int argc, char *argv[])
 		                                          "Run %1 from a commandline for more information."), PROGRAM_NAME),
 		                        false, Gtk::MESSAGE_ERROR , Gtk::BUTTONS_OK, true);
 		msg.run ();
-		exit (1);
+		exit (EXIT_FAILURE);
 	}
 
 	if (curvetest_file) {
@@ -407,14 +407,14 @@ int main (int argc, char *argv[])
 
 	if (UIConfiguration::instance().pre_gui_init ()) {
 		error << _("Could not complete pre-GUI initialization") << endmsg;
-		exit (1);
+		exit (EXIT_FAILURE);
 	}
 
 	try {
 		ui = new ARDOUR_UI (&argc, &argv, localedir.c_str());
 	} catch (failed_constructor& err) {
 		error << string_compose (_("could not create %1 GUI"), PROGRAM_NAME) << endmsg;
-		exit (1);
+		exit (EXIT_FAILURE);
 	}
 
 #ifndef NDEBUG

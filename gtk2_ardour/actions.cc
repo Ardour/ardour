@@ -90,7 +90,7 @@ ActionManager::load_menus (const string& menus_file)
 	if (!loaded) {
 		cerr << string_compose (_("%1 will not work without a valid menu definition file"), PROGRAM_NAME) << endl;
 		error << string_compose (_("%1 will not work without a valid menu definition file"), PROGRAM_NAME) << endmsg;
-		exit(1);
+		exit (EXIT_FAILURE);
 	}
 }
 
