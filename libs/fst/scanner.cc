@@ -76,7 +76,7 @@ class DummyReceiver : public Receiver {
 			std::cerr << prefix << str << std::endl;
 
 			if (chn == Transmitter::Fatal) {
-				::exit (1);
+				::exit (EXIT_FAILURE);
 			}
 		}
 };

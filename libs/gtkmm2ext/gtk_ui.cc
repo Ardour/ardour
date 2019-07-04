@@ -594,7 +594,7 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 	default:
 		/* no choice but to use text/console output here */
 		cerr << "programmer error in UI::check_error_messages (channel = " << chn << ")\n";
-		::exit (1);
+		::exit (EXIT_FAILURE);
 	}
 
 	errors->text().get_buffer()->begin_user_action();

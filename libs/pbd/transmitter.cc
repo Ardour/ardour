@@ -91,7 +91,7 @@ Transmitter::deliver ()
 		sigemptyset (&mask);
 		sigsuspend (&mask);
 		/*NOTREACHED*/
-		exit (1);
+		exit (EXIT_FAILURE);
 /* JE - From what I can tell, the above code suspends
  * program execution until (any) signal occurs. Not
  * sure at the moment what this achieves, unless it
