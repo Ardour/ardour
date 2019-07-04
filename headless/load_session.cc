@@ -239,6 +239,16 @@ int main (int argc, char* argv[])
 		exit (EXIT_FAILURE);
 	}
 
+	/* allow signal propagation, callback/thread-pool setup, etc
+	 * similar to to GUI "first idle"
+	 */
+	Glib::usleep (1000000); // 1 sec
+
+	if (!s) {
+		cerr << "failed_to load session\n";
+		exit (EXIT_FAILURE);
+	}
+
 	PBD::ScopedConnectionList con;
 	BasicUI::AccessAction.connect_same_thread (con, boost::bind (&access_action, _1, _2));
 	AudioEngine::instance()->Halted.connect_same_thread (con, boost::bind (&engine_halted, _1));
