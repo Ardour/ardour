@@ -290,7 +290,7 @@ int main (int argc, char* argv[])
 				break;
 
 			case 'h':
-				usage (0);
+				usage (EXIT_SUCCESS);
 				break;
 
 			case 'l':
@@ -304,7 +304,7 @@ int main (int argc, char* argv[])
 			case 'V':
 				printf ("ardour-utils version %s\n\n", VERSIONSTRING);
 				printf ("Copyright (C) GPL 2016 Robin Gareus <robin@gareus.org>\n");
-				exit (0);
+				exit (EXIT_SUCCESS);
 				break;
 
 			case 'v':
@@ -330,19 +330,19 @@ int main (int argc, char* argv[])
 
 	if (!ends_with (src, statefile_suffix)) {
 		fprintf (stderr, "source is not a .ardour session file.\n");
-		exit (1);
+		exit (EXIT_FAILURE);
 	}
 	if (!ends_with (dst, statefile_suffix)) {
 		fprintf (stderr, "target is not a .ardour session file.\n");
-		exit (1);
+		exit (EXIT_FAILURE);
 	}
 	if (!Glib::file_test (src, Glib::FILE_TEST_IS_REGULAR)) {
 		fprintf (stderr, "source is not a regular file.\n");
-		exit (1);
+		exit (EXIT_FAILURE);
 	}
 	if (!Glib::file_test (dst, Glib::FILE_TEST_IS_REGULAR)) {
 		fprintf (stderr, "target is not a regular file.\n");
-		exit (1);
+		exit (EXIT_FAILURE);
 	}
 
 	std::string src_path = Glib::path_get_dirname (src);

@@ -51,12 +51,12 @@ load_session (string dir, string state)
 
 	if (!engine->set_backend (backend_name, backend_client_name, "")) {
 		std::cerr << "Cannot set Audio/MIDI engine backend\n";
-		::exit (1);
+		exit (EXIT_FAILURE);
 	}
 
 	if (engine->start () != 0) {
 		std::cerr << "Cannot start Audio/MIDI engine\n";
-		::exit (1);
+		exit (EXIT_FAILURE);
 	}
 
 	Session* session = new Session (*engine, dir, state);
@@ -165,12 +165,12 @@ int main (int argc, char* argv[])
 
 		case 'v':
 			print_version ();
-			::exit (0);
+			exit (EXIT_SUCCESS);
 			break;
 
 		case 'h':
 			print_help ();
-			exit (0);
+			exit (EXIT_SUCCESS);
 			break;
 
 		case 'c':
@@ -187,7 +187,7 @@ int main (int argc, char* argv[])
 
 		case 'D':
 			if (PBD::parse_debug_options (optarg)) {
-				::exit (1);
+				exit (EXIT_SUCCESS);
 			}
 			break;
 
@@ -207,18 +207,18 @@ int main (int argc, char* argv[])
 
 		default:
 			print_help ();
-			::exit (1);
+			exit (EXIT_FAILURE);
 		}
 	}
 
 	if (argc < 3) {
 		print_help ();
-		::exit (1);
+		exit (EXIT_FAILURE);
 	}
 
 	if (!ARDOUR::init (use_vst, try_hw_optimization, localedir)) {
 		cerr << "Ardour failed to initialize\n" << endl;
-		::exit (1);
+		exit (EXIT_FAILURE);
 	}
 
 	Session* s = 0;
@@ -258,6 +258,5 @@ int main (int argc, char* argv[])
 	AudioEngine::instance()->stop ();
 
 	AudioEngine::destroy ();
-
 	return 0;
 }
