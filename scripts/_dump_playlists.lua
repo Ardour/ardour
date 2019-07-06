@@ -21,7 +21,11 @@ function factory () return function ()
 	for r in Session:get_tracks():iter() do
 		print ("*", r:name())
 		for p in Session:playlists():playlists_for_track (r:to_track()):iter() do
-			print ("  -", p:name(), p:n_regions())
+			if (p == r:to_track():playlist()) then
+				print (" >-", p:name(), p:n_regions())
+			else
+				print ("  -", p:name(), p:n_regions())
+			end
 		end
 	end
 end end
