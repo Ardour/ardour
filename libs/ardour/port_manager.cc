@@ -396,7 +396,7 @@ PortManager::register_port (DataType dtype, const string& portname, bool input, 
 
 	/* limit the possible flags that can be set */
 
-	flags = PortFlags (flags & (Hidden|Shadow|IsTerminal));
+	flags = PortFlags (flags & (Hidden|Shadow|IsTerminal|TransportMasterPort));
 
 	try {
 		if (dtype == DataType::AUDIO) {
@@ -802,15 +802,19 @@ PortManager::cycle_start (pframes_t nframes, Session* s)
 	 *    A single external source-port may be connected to many ardour
 	 *    input-ports. Currently re-sampling is per input.
 	 */
-	if (s && s->rt_tasklist () && fabs (Port::speed_ratio ()) != 1.0) {
+	if (0 && s && s->rt_tasklist () && fabs (Port::speed_ratio ()) != 1.0) {
 		RTTaskList::TaskList tl;
 		for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
-			tl.push_back (boost::bind (&Port::cycle_start, p->second, nframes));
+			if (!(p->second->flags() & TransportMasterPort)) {
+				tl.push_back (boost::bind (&Port::cycle_start, p->second, nframes));
+			}
 		}
 		s->rt_tasklist()->process (tl);
 	} else {
 		for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
-			p->second->cycle_start (nframes);
+			if (!(p->second->flags() & TransportMasterPort)) {
+				p->second->cycle_start (nframes);
+			}
 		}
 	}
 }
@@ -819,15 +823,19 @@ void
 PortManager::cycle_end (pframes_t nframes, Session* s)
 {
 	// see optimzation note in ::cycle_start()
-	if (s && s->rt_tasklist () && fabs (Port::speed_ratio ()) != 1.0) {
+	if (0 && s && s->rt_tasklist () && fabs (Port::speed_ratio ()) != 1.0) {
 		RTTaskList::TaskList tl;
 		for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
-			tl.push_back (boost::bind (&Port::cycle_end, p->second, nframes));
+			if (!(p->second->flags() & TransportMasterPort)) {
+				tl.push_back (boost::bind (&Port::cycle_end, p->second, nframes));
+			}
 		}
 		s->rt_tasklist()->process (tl);
 	} else {
 		for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
-			p->second->cycle_end (nframes);
+			if (!(p->second->flags() & TransportMasterPort)) {
+				p->second->cycle_end (nframes);
+			}
 		}
 	}
 
@@ -922,15 +930,19 @@ void
 PortManager::cycle_end_fade_out (gain_t base_gain, gain_t gain_step, pframes_t nframes, Session* s)
 {
 	// see optimzation note in ::cycle_start()
-	if (s && s->rt_tasklist () && fabs (Port::speed_ratio ()) != 1.0) {
+	if (0 && s && s->rt_tasklist () && fabs (Port::speed_ratio ()) != 1.0) {
 		RTTaskList::TaskList tl;
 		for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
-			tl.push_back (boost::bind (&Port::cycle_end, p->second, nframes));
+			if (!(p->second->flags() & TransportMasterPort)) {
+				tl.push_back (boost::bind (&Port::cycle_end, p->second, nframes));
+			}
 		}
 		s->rt_tasklist()->process (tl);
 	} else {
 		for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
-			p->second->cycle_end (nframes);
+			if (!(p->second->flags() & TransportMasterPort)) {
+				p->second->cycle_end (nframes);
+			}
 		}
 	}
 
