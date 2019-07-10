@@ -428,6 +428,16 @@ Graph::run_one()
 void
 Graph::helper_thread()
 {
+	/* This is needed for ARDOUR::Session requests called from rt-processors
+	 * in particular Lua scripts may do cross-thread calls */
+	if (! SessionEvent::has_per_thread_pool ()) {
+		char name[64];
+		snprintf (name, 64, "RT-%p", this);
+		pthread_set_name (name);
+		SessionEvent::create_per_thread_pool (name, 64);
+		PBD::notify_event_loops_about_thread_creation (pthread_self(), name, 64);
+	}
+
 	suspend_rt_malloc_checks ();
 	ProcessThread* pt = new ProcessThread ();
 	resume_rt_malloc_checks ();
@@ -450,6 +460,16 @@ Graph::main_thread()
 {
 	suspend_rt_malloc_checks ();
 	ProcessThread* pt = new ProcessThread ();
+
+	/* This is needed for ARDOUR::Session requests called from rt-processors
+	 * in particular Lua scripts may do cross-thread calls */
+	if (! SessionEvent::has_per_thread_pool ()) {
+		char name[64];
+		snprintf (name, 64, "RT-main-%p", this);
+		pthread_set_name (name);
+		SessionEvent::create_per_thread_pool (name, 64);
+		PBD::notify_event_loops_about_thread_creation (pthread_self(), name, 64);
+	}
 	resume_rt_malloc_checks ();
 
 	pt->get_buffers();
