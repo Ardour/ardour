@@ -25,11 +25,11 @@
 using namespace ARDOUR;
 
 GraphNode::GraphNode (boost::shared_ptr<Graph> graph)
-	: _graph(graph)
+	: _graph (graph)
 {
 }
 
-GraphNode::~GraphNode()
+GraphNode::~GraphNode ()
 {
 }
 
@@ -37,19 +37,20 @@ void
 GraphNode::prep (int chain)
 {
 	/* This is the number of nodes that directly feed us */
-	_refcount = _init_refcount[chain];
+	g_atomic_int_set (&_refcount, _init_refcount[chain]);
 }
 
-/** Called by another node to tell us that one of the nodes that feed us
- *  has been processed.
- */
+/** Called by an upstream node, when it has completed processing */
 void
-GraphNode::dec_ref()
+GraphNode::trigger ()
 {
+	/* check if we can run */
 	if (g_atomic_int_dec_and_test (&_refcount)) {
-		/* All the nodes that feed us are done, so we can queue this node
-		 * for processing.
-		 */
+#if 0 // TODO optimize: remove prep()
+		/* reset reference count for next cycle */
+		g_atomic_int_set (&_refcount, _init_refcount[chain]);
+#endif
+		/* All nodes that feed this node have completed, so this node be processed now. */
 		_graph->trigger (this);
 	}
 }
@@ -58,23 +59,23 @@ void
 GraphNode::finish (int chain)
 {
 	node_set_t::iterator i;
-	bool feeds_somebody = false;
+	bool                 feeds = false;
 
-	/* Tell the nodes that we feed that we've finished */
-	for (i=_activation_set[chain].begin(); i!=_activation_set[chain].end(); i++) {
-		(*i)->dec_ref();
-		feeds_somebody = true;
+	/* Notify downstream nodes that depend on this node */
+	for (i = _activation_set[chain].begin (); i != _activation_set[chain].end (); ++i) {
+		(*i)->trigger ();
+		feeds = true;
 	}
 
-	if (!feeds_somebody) {
-		/* This node does not feed anybody, so decrement the graph's finished count */
-		_graph->dec_ref();
+	if (!feeds) {
+		/* This node is a terminal node that does not feed another note,
+		 * so notify the graph to decrement the the finished count */
+		_graph->reached_terminal_node ();
 	}
 }
 
-
 void
-GraphNode::process()
+GraphNode::process ()
 {
-	_graph->process_one_route (dynamic_cast<Route *>(this));
+	_graph->process_one_route (dynamic_cast<Route*> (this));
 }
