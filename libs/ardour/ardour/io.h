@@ -104,6 +104,8 @@ public:
 
 	boost::shared_ptr<Bundle> bundle () { return _bundle; }
 
+	bool can_add_port (DataType) const;
+
 	int add_port (std::string connection, void *src, DataType type = DataType::NIL);
 	int remove_port (boost::shared_ptr<Port>, void *src);
 	int connect (boost::shared_ptr<Port> our_port, std::string other_port, void *src);

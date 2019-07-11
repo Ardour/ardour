@@ -200,6 +200,19 @@ IO::connect (boost::shared_ptr<Port> our_port, string other_port, void* src)
 	return 0;
 }
 
+bool
+IO::can_add_port (DataType type) const
+{
+	switch (type) {
+		case DataType::NIL:
+			return false;
+		case DataType::AUDIO:
+			return true;
+		case DataType::MIDI:
+			return _ports.count ().n_midi() < 1;
+	}
+}
+
 int
 IO::remove_port (boost::shared_ptr<Port> port, void* src)
 {
@@ -267,6 +280,10 @@ IO::add_port (string destination, void* src, DataType type)
 
 	if (type == DataType::NIL) {
 		type = _default_type;
+	}
+
+	if (!can_add_port (type)) {
+		return -1;
 	}
 
 	ChanCount before = _ports.count ();
