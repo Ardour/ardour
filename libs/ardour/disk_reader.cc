@@ -1454,21 +1454,22 @@ DiskReader::DeclickAmp::apply_gain (AudioBuffer& buf, samplecnt_t n_samples, con
 	const float a = _a;
 	Sample* const buffer = buf.data ();
 
-#define MAX_NPROC 16
+	const int max_nproc = 16;
 	uint32_t remain = n_samples;
 	uint32_t offset = 0;
 	while (remain > 0) {
-		uint32_t n_proc = remain > MAX_NPROC ? MAX_NPROC : remain;
+		uint32_t n_proc = remain > max_nproc ? max_nproc : remain;
+		std::cerr << "g = " << g << std::endl;
 		for (uint32_t i = 0; i < n_proc; ++i) {
 			buffer[offset + i] *= g;
 		}
 #if 1
 		g += a * (target - g);
 #else /* accurate exponential fade */
-		if (n_proc == MAX_NPROC) {
+		if (n_proc == max_nproc) {
 			g += a * (target - g);
 		} else {
-			g = target - (target - g) * expf (_l * n_proc / MAX_NPROC);
+			g = target - (target - g) * expf (_l * n_proc / max_nproc);
 		}
 #endif
 		remain -= n_proc;
