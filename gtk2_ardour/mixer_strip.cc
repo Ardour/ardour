@@ -934,10 +934,15 @@ MixerStrip::output_press (GdkEventButton *ev)
 			citems.pop_back ();
 		}
 
-		if (!ARDOUR::Profile->get_mixbus()) {
-			citems.push_back (SeparatorElem());
+		citems.push_back (SeparatorElem());
 
+		if (!ARDOUR::Profile->get_mixbus()) {
+			bool need_separator = false;
 			for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+				if (!_route->output()->can_add_port (*i)) {
+					continue;
+				}
+				need_separator = true;
 				citems.push_back (
 						MenuElem (
 							string_compose (_("Add %1 port"), (*i).to_i18n_string()),
@@ -945,9 +950,11 @@ MixerStrip::output_press (GdkEventButton *ev)
 							)
 						);
 			}
+			if (need_separator) {
+				citems.push_back (SeparatorElem());
+			}
 		}
 
-		citems.push_back (SeparatorElem());
 		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::edit_output_configuration)));
 
 		Gtkmm2ext::anchored_menu_popup(&output_menu, &output_button, "",
@@ -1040,7 +1047,13 @@ MixerStrip::input_press (GdkEventButton *ev)
 		}
 
 		citems.push_back (SeparatorElem());
+
+		bool need_separator = false;
 		for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+			if (!_route->input()->can_add_port (*i)) {
+				continue;
+			}
+			need_separator = true;
 			citems.push_back (
 				MenuElem (
 					string_compose (_("Add %1 port"), (*i).to_i18n_string()),
@@ -1048,8 +1061,10 @@ MixerStrip::input_press (GdkEventButton *ev)
 					)
 				);
 		}
+		if (need_separator) {
+			citems.push_back (SeparatorElem());
+		}
 
-		citems.push_back (SeparatorElem());
 		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::edit_input_configuration)));
 
 		Gtkmm2ext::anchored_menu_popup(&input_menu, &input_button, "",
