@@ -412,9 +412,9 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 	*/
 
 	if (speed > 0) {
-		speed = min (8.0, speed);
+		speed = min ((double) Config->get_max_transport_speed(), speed);
 	} else if (speed < 0) {
-		speed = max (-8.0, speed);
+		speed = max ((double) -Config->get_max_transport_speed(), speed);
 	}
 
 	double new_engine_speed = 1.0;

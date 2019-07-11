@@ -77,7 +77,7 @@ ShuttleControl::ShuttleControl ()
 	shuttle_grabbed = false;
 	shuttle_speed_on_grab = 0;
 	shuttle_fract = 0.0;
-	shuttle_max_speed = 8.0f;
+	shuttle_max_speed = Config->get_max_transport_speed();
 	shuttle_context_menu = 0;
 	_hovering = false;
 
@@ -89,7 +89,7 @@ ShuttleControl::ShuttleControl ()
 
 	shuttle_max_speed = Config->get_shuttle_max_speed();
 
-	if      (shuttle_max_speed >= 8.f) { shuttle_max_speed = 8.0f; }
+	if      (shuttle_max_speed >= Config->get_max_transport_speed()) { shuttle_max_speed = Config->get_max_transport_speed(); }
 	else if (shuttle_max_speed >= 6.f) { shuttle_max_speed = 6.0f; }
 	else if (shuttle_max_speed >= 4.f) { shuttle_max_speed = 4.0f; }
 	else if (shuttle_max_speed >= 3.f) { shuttle_max_speed = 3.0f; }
@@ -224,6 +224,8 @@ ShuttleControl::build_shuttle_context_menu ()
 	items.push_back (MenuElem (_("Mode"), *style_menu));
 
 	RadioMenuItem::Group speed_group;
+
+	/* XXX this code assumes that Config->get_max_transport_speed() returns 8 */
 
 	speed_items.push_back (RadioMenuElem (speed_group, "8", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 8.0f)));
 	if (shuttle_max_speed == 8.0) {
