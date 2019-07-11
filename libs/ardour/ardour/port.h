@@ -123,6 +123,7 @@ public:
 	virtual void flush_buffers (pframes_t /*nframes*/) {}
 	virtual void transport_stopped () {}
 	virtual void realtime_locate () {}
+	virtual void set_buffer_size (pframes_t) {}
 
 	bool physically_connected () const;
 	uint32_t externally_connected () const { return _externally_connected; }

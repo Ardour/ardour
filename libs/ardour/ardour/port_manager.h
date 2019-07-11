@@ -223,6 +223,8 @@ class LIBARDOUR_API PortManager
 	void fill_midi_port_info_locked ();
 
 	void filter_midi_ports (std::vector<std::string>&, MidiPortFlags, MidiPortFlags);
+
+	void set_port_buffer_sizes (pframes_t);
 };
 
 

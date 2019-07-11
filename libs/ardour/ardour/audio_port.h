@@ -47,6 +47,7 @@ public:
 	}
 
 	AudioBuffer& get_audio_buffer (pframes_t nframes);
+	void set_buffer_size (pframes_t nframes);
 
 protected:
 	friend class PortManager;

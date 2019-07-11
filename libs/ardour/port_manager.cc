@@ -420,12 +420,13 @@ PortManager::register_port (DataType dtype, const string& portname, bool input, 
 			throw PortRegistrationFailure (string_compose ("unable to create port '%1': %2", portname, _("(unknown type)")));
 		}
 
+		newport->set_buffer_size (AudioEngine::instance()->samples_per_cycle());
+
 		RCUWriter<Ports> writer (ports);
 		boost::shared_ptr<Ports> ps = writer.get_copy ();
 		ps->insert (make_pair (make_port_name_relative (portname), newport));
 
 		/* writer goes out of scope, forces update */
-
 	}
 
 	catch (PortRegistrationFailure& err) {
@@ -1352,4 +1353,15 @@ PortManager::fill_midi_port_info_locked ()
 	}
 
 	midi_info_dirty = false;
+}
+
+void
+PortManager::set_port_buffer_sizes (pframes_t n)
+{
+
+	boost::shared_ptr<Ports> all = ports.reader();
+
+	for (Ports::iterator p = all->begin(); p != all->end(); ++p) {
+		p->second->set_buffer_size (n);
+	}
 }

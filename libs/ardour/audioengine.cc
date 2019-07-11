@@ -181,6 +181,8 @@ AudioEngine::sample_rate_change (pframes_t nframes)
 int
 AudioEngine::buffer_size_change (pframes_t bufsiz)
 {
+	set_port_buffer_sizes (bufsiz);
+
 	if (_session) {
 		_session->set_block_size (bufsiz);
 		last_monitor_check = 0;

@@ -29,6 +29,7 @@
 #include "ardour/audio_port.h"
 #include "ardour/data_type.h"
 #include "ardour/port_engine.h"
+#include "ardour/rc_configuration.h"
 
 using namespace ARDOUR;
 using namespace std;
@@ -39,17 +40,24 @@ using namespace std;
 AudioPort::AudioPort (const std::string& name, PortFlags flags)
 	: Port (name, DataType::AUDIO, flags)
 	, _buffer (new AudioBuffer (0))
+	, _data (0)
 {
 	assert (name.find_first_of (':') == string::npos);
-	cache_aligned_malloc ((void**) &_data, sizeof (Sample) * 8192);
 	_src.setup (_resampler_quality);
 	_src.set_rrfilt (10);
 }
 
 AudioPort::~AudioPort ()
 {
-	cache_aligned_free (_data);
+	if (_data) cache_aligned_free (_data);
 	delete _buffer;
+}
+
+void
+AudioPort::set_buffer_size (pframes_t nframes)
+{
+	if (_data) cache_aligned_free (_data);
+	cache_aligned_malloc ((void**) &_data, sizeof (Sample) * lrint (floor (nframes * Config->get_max_transport_speed())));
 }
 
 void

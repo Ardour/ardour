@@ -26,13 +26,13 @@
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
+#include "pbd/i18n.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
 #include "ardour/port.h"
 #include "ardour/port_engine.h"
-
-#include "pbd/i18n.h"
+#include "ardour/rc_configuration.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -645,10 +645,11 @@ Port::set_state (const XMLNode& node, int)
 /*static*/ void
 Port::set_speed_ratio (double s) {
 	/* see VMResampler::set_rratio() for min/max range */
-	_speed_ratio = std::min (16.0, std::max (0.5, s));
+	_speed_ratio = std::min ((double) Config->get_max_transport_speed(), std::max (0.5, s));
 }
 
 /*static*/ void
-Port::set_cycle_samplecnt (pframes_t n) {
+Port::set_cycle_samplecnt (pframes_t n)
+{
 	_cycle_nframes = floor (n * _speed_ratio);
 }
