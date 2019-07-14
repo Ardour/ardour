@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Johannes Maibaum</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Moog</Manufacturer>
+    <Model>Slim Phatty</Model>
+    <CustomDeviceMode Name="Default">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Names"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Names">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1"/>
+        <AvailableChannel Channel="2"/>
+        <AvailableChannel Channel="3"/>
+        <AvailableChannel Channel="4"/>
+        <AvailableChannel Channel="5"/>
+        <AvailableChannel Channel="6"/>
+        <AvailableChannel Channel="7"/>
+        <AvailableChannel Channel="8"/>
+        <AvailableChannel Channel="9"/>
+        <AvailableChannel Channel="10"/>
+        <AvailableChannel Channel="11"/>
+        <AvailableChannel Channel="12"/>
+        <AvailableChannel Channel="13"/>
+        <AvailableChannel Channel="14"/>
+        <AvailableChannel Channel="15"/>
+        <AvailableChannel Channel="16"/>
+      </AvailableForChannels>
+      <UsesControlNameList Name="Controls"/>
+      <PatchBank Name="Factory Presets">
+        <UsesPatchNameList Name="Factory Preset Names"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <PatchNameList Name="Factory Preset Names">
+      <Patch Number="1" Name="Slim Not Slim" ProgramChange="0"/>
+      <Patch Number="2" Name="Ripsaw Bass" ProgramChange="1"/>
+      <Patch Number="3" Name="Unruly Lead" ProgramChange="2"/>
+      <Patch Number="4" Name="Little Lead" ProgramChange="3"/>
+      <Patch Number="5" Name="GrindMyBass" ProgramChange="4"/>
+      <Patch Number="6" Name="Deep and Dark" ProgramChange="5"/>
+      <Patch Number="7" Name="Analog Drum" ProgramChange="6"/>
+      <Patch Number="8" Name="Minor Slider" ProgramChange="7"/>
+      <Patch Number="9" Name="Sync Seq" ProgramChange="8"/>
+      <Patch Number="10" Name="Brite Lite" ProgramChange="9"/>
+      <Patch Number="11" Name="Squarez" ProgramChange="10"/>
+      <Patch Number="12" Name="Rezzy Pad" ProgramChange="11"/>
+      <Patch Number="13" Name="Cold Lead" ProgramChange="12"/>
+      <Patch Number="14" Name="Dark Side" ProgramChange="13"/>
+      <Patch Number="15" Name="Electro Sitar" ProgramChange="14"/>
+      <Patch Number="16" Name="Slippery Funk" ProgramChange="15"/>
+      <Patch Number="17" Name="Mello Edge" ProgramChange="16"/>
+      <Patch Number="18" Name="Fattus Bottom" ProgramChange="17"/>
+      <Patch Number="19" Name="Click Bug" ProgramChange="18"/>
+      <Patch Number="20" Name="Ebbflow Lead" ProgramChange="19"/>
+      <Patch Number="21" Name="Triangle Sub" ProgramChange="20"/>
+      <Patch Number="22" Name="Parallel Mood" ProgramChange="21"/>
+      <Patch Number="23" Name="Backwardsish" ProgramChange="22"/>
+      <Patch Number="24" Name="Dirty Cheese" ProgramChange="23"/>
+      <Patch Number="25" Name="Blipz Seq" ProgramChange="24"/>
+      <Patch Number="26" Name="Mush Mush" ProgramChange="25"/>
+      <Patch Number="27" Name="Disturber" ProgramChange="26"/>
+      <Patch Number="28" Name="Simple Deep" ProgramChange="27"/>
+      <Patch Number="29" Name="Pulse Bass 1" ProgramChange="28"/>
+      <Patch Number="30" Name="Sparkle Wah" ProgramChange="29"/>
+      <Patch Number="31" Name="Cushion Bass" ProgramChange="30"/>
+      <Patch Number="32" Name="Electrosaw" ProgramChange="31"/>
+      <Patch Number="33" Name="Arguru" ProgramChange="32"/>
+      <Patch Number="34" Name="Dead Robot" ProgramChange="33"/>
+      <Patch Number="35" Name="Tron Bass" ProgramChange="34"/>
+      <Patch Number="36" Name="Get Plucked" ProgramChange="35"/>
+      <Patch Number="37" Name="Stab Me" ProgramChange="36"/>
+      <Patch Number="38" Name="Hold4Fizz" ProgramChange="37"/>
+      <Patch Number="39" Name="Open Up" ProgramChange="38"/>
+      <Patch Number="40" Name="Say Whaa" ProgramChange="39"/>
+      <Patch Number="41" Name="Moog Solo" ProgramChange="40"/>
+      <Patch Number="42" Name="Disturbance" ProgramChange="41"/>
+      <Patch Number="43" Name="Wawawee" ProgramChange="42"/>
+      <Patch Number="44" Name="Dark Bright" ProgramChange="43"/>
+      <Patch Number="45" Name="For Her Lead" ProgramChange="44"/>
+      <Patch Number="46" Name="Harumph" ProgramChange="45"/>
+      <Patch Number="47" Name="Helon I" ProgramChange="46"/>
+      <Patch Number="48" Name="Transformer" ProgramChange="47"/>
+      <Patch Number="49" Name="Niche" ProgramChange="48"/>
+      <Patch Number="50" Name="Lansing II" ProgramChange="49"/>
+      <Patch Number="51" Name="Star Wreck" ProgramChange="50"/>
+      <Patch Number="52" Name="Karate" ProgramChange="51"/>
+      <Patch Number="53" Name="Marine" ProgramChange="52"/>
+      <Patch Number="54" Name="Meant 4 Droney" ProgramChange="53"/>
+      <Patch Number="55" Name="Nintendo" ProgramChange="54"/>
+      <Patch Number="56" Name="Super Powers" ProgramChange="55"/>
+      <Patch Number="57" Name="Marine G II" ProgramChange="56"/>
+      <Patch Number="58" Name="Tee Pee Funk" ProgramChange="57"/>
+      <Patch Number="59" Name="Quiet Jacob" ProgramChange="58"/>
+      <Patch Number="60" Name="Mikey Dance" ProgramChange="59"/>
+      <Patch Number="61" Name="Play In E Mod" ProgramChange="60"/>
+      <Patch Number="62" Name="Filt Rez Kick" ProgramChange="61"/>
+      <Patch Number="63" Name="Gritty 9th" ProgramChange="62"/>
+      <Patch Number="64" Name="Dissonantting" ProgramChange="63"/>
+      <Patch Number="65" Name="Legato Sweep" ProgramChange="64"/>
+      <Patch Number="66" Name="Hard Tinelead" ProgramChange="65"/>
+      <Patch Number="67" Name="Dirt Bubbles" ProgramChange="66"/>
+      <Patch Number="68" Name="MassivePWMMod" ProgramChange="67"/>
+      <Patch Number="69" Name="Cheese Grit" ProgramChange="68"/>
+      <Patch Number="70" Name="BBQ Sync" ProgramChange="69"/>
+      <Patch Number="71" Name="Mouthfull" ProgramChange="70"/>
+      <Patch Number="72" Name="Ghosts Fade" ProgramChange="71"/>
+      <Patch Number="73" Name="Rezzy Dualsaw" ProgramChange="72"/>
+      <Patch Number="74" Name="Tiny Thing" ProgramChange="73"/>
+      <Patch Number="75" Name="Wave Glider" ProgramChange="74"/>
+      <Patch Number="76" Name="Stinger Lead" ProgramChange="75"/>
+      <Patch Number="77" Name="Dirty Beating" ProgramChange="76"/>
+      <Patch Number="78" Name="Game Over" ProgramChange="77"/>
+      <Patch Number="79" Name="Slow Subsweep" ProgramChange="78"/>
+      <Patch Number="80" Name="Modvox Bass" ProgramChange="79"/>
+      <Patch Number="81" Name="Filter Drips" ProgramChange="80"/>
+      <Patch Number="82" Name="Smooth N High" ProgramChange="81"/>
+      <Patch Number="83" Name="Pulserezsweep" ProgramChange="82"/>
+      <Patch Number="84" Name="Seksu Bongo" ProgramChange="83"/>
+      <Patch Number="85" Name="Sir Wah Wha" ProgramChange="84"/>
+      <Patch Number="86" Name="Sharp Seque" ProgramChange="85"/>
+      <Patch Number="87" Name="PWM Mod Baste" ProgramChange="86"/>
+      <Patch Number="88" Name="Saw U Lead" ProgramChange="87"/>
+      <Patch Number="89" Name="Sourpuss" ProgramChange="88"/>
+      <Patch Number="90" Name="Pulse Bass 2" ProgramChange="89"/>
+      <Patch Number="91" Name="Mod Shard Seq" ProgramChange="90"/>
+      <Patch Number="92" Name="Scalar Sync" ProgramChange="91"/>
+      <Patch Number="93" Name="Bubble Butt" ProgramChange="92"/>
+      <Patch Number="94" Name="Aggrosyncbass" ProgramChange="93"/>
+      <Patch Number="95" Name="Touch Gong" ProgramChange="94"/>
+      <Patch Number="96" Name="Space Lead" ProgramChange="95"/>
+      <Patch Number="97" Name="Snappy Saw" ProgramChange="96"/>
+      <Patch Number="98" Name="Simple Tri" ProgramChange="97"/>
+      <Patch Number="99" Name="Simple Square" ProgramChange="98"/>
+      <Patch Number="100" Name="Simple Pulse" ProgramChange="99"/>
+    </PatchNameList>
+    <ValueNameList Name="Switch">
+      <Value Number="0" Name="Off"/>
+      <Value Number="64" Name="On"/>
+    </ValueNameList>
+    <ValueNameList Name="ClockDivs">
+      <Value Number="0" Name="1/32"/>
+      <Value Number="8" Name="1/32 Dot"/>
+      <Value Number="16" Name="1/16"/>
+      <Value Number="24" Name="1/16 Dot"/>
+      <Value Number="32" Name="1/8"/>
+      <Value Number="40" Name="1/8 Dot"/>
+      <Value Number="48" Name="1/4"/>
+      <Value Number="56" Name="1/4 Dot"/>
+      <Value Number="64" Name="1/2"/>
+      <Value Number="72" Name="1/2 Dot"/>
+      <Value Number="80" Name="WH"/>
+      <Value Number="88" Name="WH + 1/4"/>
+      <Value Number="96" Name="WH + 1/2"/>
+      <Value Number="104" Name="WH + 1/2 Dot"/>
+      <Value Number="112" Name="WH + WH"/>
+    </ValueNameList>
+    <ValueNameList Name="Octaves">
+      <Value Number="16" Name="16'"/>
+      <Value Number="32" Name="8'"/>
+      <Value Number="48" Name="4'"/>
+      <Value Number="64" Name="2'"/>
+    </ValueNameList>
+    <ControlNameList Name="Controls">
+      <!-- Interface -->
+      <Control Type="7bit" Number="65" Name="Glide On/Off">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <!-- Modulation -->
+      <!-- Should actually be: <Control Type="14bit" Number="3" Name="LFO Rate"/>-->
+      <Control Type="7bit" Number="3" Name="LFO Rate (Coarse)"/>
+      <Control Type="7bit" Number="35" Name="LFO Rate (Fine)"/>
+      <!-- Should actually be: <Control Type="14bit" Number="6" Name="LFO Amount"/>-->
+      <Control Type="7bit" Number="6" Name="LFO Amount (Coarse)"/>
+      <Control Type="7bit" Number="38" Name="LFO Amount (Fine)"/>
+      <Control Type="7bit" Number="68" Name="LFO Source">
+        <Values Min="0" Max="127">
+          <Value Number="0" Name="Triangle"/>
+          <Value Number="16" Name="Square"/>
+          <Value Number="32" Name="Saw"/>
+          <Value Number="48" Name="Ramp"/>
+          <Value Number="64" Name="Filter ENV"/>
+          <Value Number="80" Name="OSC 2"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="69" Name="LFO Destination">
+        <Values Min="0" Max="127">
+          <Value Number="0" Name="Pitch"/>
+          <Value Number="16" Name="Filter"/>
+          <Value Number="32" Name="Wave"/>
+          <Value Number="48" Name="OSC 2"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="102" Name="LFO Sync Source">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Internal"/>
+            <Value Number="16" Name="MIDI Clock"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="103" Name="LFO Sync Clock Div">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="ClockDivs"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="104" Name="Mod Source 5">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Filter"/>
+            <Value Number="64" Name="S+H"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="105" Name="Mod Source 6">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="OSC 2"/>
+            <Value Number="64" Name="Noise"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="106" Name="Mod Destination 2">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Off"/>
+            <Value Number="25" Name="Pitch"/>
+            <Value Number="50" Name="Filter"/>
+            <Value Number="75" Name="Wave"/>
+            <Value Number="100" Name="OSC 2"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <!-- Oscillators -->
+      <Control Type="7bit" Number="74" Name="OSC 1 Octave">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Octaves"/>
+        </Values>
+      </Control>
+      <!-- Should actually be: <Control Type="14bit" Number="9" Name="OSC 1 Wave"/>-->
+      <Control Type="7bit" Number="9" Name="OSC 1 Wave (Coarse)"/>
+      <Control Type="7bit" Number="41" Name="OSC 1 Wave (Fine)"/>
+      <!-- Should actually be: <Control Type="14bit" Number="15" Name="OSC 1 Level"/>-->
+      <Control Type="7bit" Number="15" Name="OSC 1 Level (Coarse)"/>
+      <Control Type="7bit" Number="47" Name="OSC 1 Level (Fine)"/>
+      <!-- Should actually be: <Control Type="14bit" Number="5" Name="Glide Rate"/>-->
+      <Control Type="7bit" Number="5" Name="Glide Rate (Coarse)"/>
+      <Control Type="7bit" Number="37" Name="Glide Rate (Fine)"/>
+      <Control Type="7bit" Number="77" Name="OSC 1-2 Sync">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="75" Name="OSC 2 Octave">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Octaves"/>
+        </Values>
+      </Control>
+      <!-- Should actually be: <Control Type="14bit" Number="10" Name="OSC 2 Frequency"/>-->
+      <Control Type="7bit" Number="10" Name="OSC 2 Frequency (Coarse)"/>
+      <Control Type="7bit" Number="42" Name="OSC 2 Frequency (Fine)"/>
+      <!-- Should actually be: <Control Type="14bit" Number="11" Name="OSC 2 Wave"/>-->
+      <Control Type="7bit" Number="11" Name="OSC 2 Wave (Coarse)"/>
+      <Control Type="7bit" Number="43" Name="OSC 2 Wave (Fine)"/>
+      <!-- Should actually be: <Control Type="14bit" Number="16" Name="OSC 2 Level"/>-->
+      <Control Type="7bit" Number="16" Name="OSC 2 Level (Coarse)"/>
+      <Control Type="7bit" Number="48" Name="OSC 2 Level (Fine)"/>
+      <Control Type="7bit" Number="107" Name="Pitch Bend Up Amount">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="0"/>
+            <Value Number="16" Name="+2"/>
+            <Value Number="32" Name="+3"/>
+            <Value Number="48" Name="+4"/>
+            <Value Number="64" Name="+5"/>
+            <Value Number="80" Name="+7"/>
+            <Value Number="96" Name="+12"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="108" Name="Pitch Bend Down Amount">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="0"/>
+            <Value Number="16" Name="-2"/>
+            <Value Number="32" Name="-3"/>
+            <Value Number="48" Name="-4"/>
+            <Value Number="64" Name="-5"/>
+            <Value Number="80" Name="-7"/>
+            <Value Number="96" Name="-12"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <!-- Filter -->
+      <!-- Should actually be: <Control Type="14bit" Number="19" Name="VCF Cutoff"/>-->
+      <Control Type="7bit" Number="19" Name="VCF Cutoff (Coarse)"/>
+      <Control Type="7bit" Number="51" Name="VCF Cutoff (Fine)"/>
+      <!-- Should actually be: <Control Type="14bit" Number="21" Name="VCF Resonance"/>-->
+      <Control Type="7bit" Number="21" Name="VCF Resonance (Coarse)"/>
+      <Control Type="7bit" Number="53" Name="VCF Resonance (Fine)"/>
+      <Control Type="7bit" Number="22" Name="VCF KB Amount"/>
+      <!-- Should actually be: <Control Type="14bit" Number="27" Name="VCF EG Amount"/>-->
+      <Control Type="7bit" Number="27" Name="VCF EG Amount (Coarse)"/>
+      <Control Type="7bit" Number="59" Name="VCF EG Amount (Fine)"/>
+      <!-- Should actually be: <Control Type="14bit" Number="18" Name="VCF Overload"/>-->
+      <Control Type="7bit" Number="18" Name="VCF Overload (Coarse)"/>
+      <Control Type="7bit" Number="50" Name="VCF Overload (Fine)"/>
+      <Control Type="7bit" Number="109" Name="VCF Poles">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="1"/>
+            <Value Number="32" Name="2"/>
+            <Value Number="64" Name="3"/>
+            <Value Number="96" Name="4"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="110" Name="VCF Velocity Sense">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="-8"/>
+            <Value Number="12" Name="-7"/>
+            <Value Number="19" Name="-6"/>
+            <Value Number="26" Name="-5"/>
+            <Value Number="33" Name="-4"/>
+            <Value Number="40" Name="-3"/>
+            <Value Number="47" Name="-2"/>
+            <Value Number="54" Name="-1"/>
+            <Value Number="61" Name="0"/>
+            <Value Number="68" Name="+1"/>
+            <Value Number="75" Name="+2"/>
+            <Value Number="82" Name="+3"/>
+            <Value Number="89" Name="+4"/>
+            <Value Number="96" Name="+5"/>
+            <Value Number="103" Name="+6"/>
+            <Value Number="110" Name="+7"/>
+            <Value Number="117" Name="+8"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <!-- Envelopes -->
+      <!-- Should actually be: <Control Type="14bit" Number="23" Name="VCF Attack"/>-->
+      <Control Type="7bit" Number="23" Name="VCF Attack (Coarse)"/>
+      <Control Type="7bit" Number="55" Name="VCF Attack (Fine)"/>
+      <!-- Should actually be: <Control Type="14bit" Number="24" Name="VCF Decay"/>-->
+      <Control Type="7bit" Number="24" Name="VCF Decay (Coarse)"/>
+      <Control Type="7bit" Number="56" Name="VCF Decay (Fine)"/>
+      <!-- Should actually be: <Control Type="14bit" Number="25" Name="VCF Sustain"/>-->
+      <Control Type="7bit" Number="25" Name="VCF Sustain (Coarse)"/>
+      <Control Type="7bit" Number="57" Name="VCF Sustain (Fine)"/>
+      <!-- Should actually be: <Control Type="14bit" Number="26" Name="VCF Release"/>-->
+      <Control Type="7bit" Number="26" Name="VCF Release (Coarse)"/>
+      <Control Type="7bit" Number="58" Name="VCF Release (Fine)"/>
+      <!-- Should actually be: <Control Type="14bit" Number="28" Name="VCA Attack"/>-->
+      <Control Type="7bit" Number="28" Name="VCA Attack (Coarse)"/>
+      <Control Type="7bit" Number="60" Name="VCA Attack (Fine)"/>
+      <!-- Should actually be: <Control Type="14bit" Number="29" Name="VCA Decay"/>-->
+      <Control Type="7bit" Number="29" Name="VCA Decay (Coarse)"/>
+      <Control Type="7bit" Number="61" Name="VCA Decay (Fine)"/>
+      <!-- Should actually be:<Control Type="14bit" Number="30" Name="VCA Sustain"/>-->
+      <Control Type="7bit" Number="30" Name="VCA Sustain (Coarse)"/>
+      <Control Type="7bit" Number="62" Name="VCA Sustain (Fine)"/>
+      <!-- Should actually be: <Control Type="14bit" Number="31" Name="VCA Release"/>-->
+      <Control Type="7bit" Number="31" Name="VCA Release (Coarse)"/>
+      <Control Type="7bit" Number="63" Name="VCA Release (Fine)"/>
+      <Control Type="7bit" Number="111" Name="EGR Release Switch">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="112" Name="EGR Legato">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Legato On"/>
+            <Value Number="43" Name="Legato Off"/>
+            <Value Number="86" Name="EG Reset"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <!-- Arpeggiator -->
+      <Control Type="7bit" Number="113" Name="ARP Enable">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="90" Name="ARP Run/Stop">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <!-- Should actually be: <Control Type="14bit" Number="4" Name="ARP Clock Rate"/> -->
+      <Control Type="7bit" Number="4" Name="ARP Clock Rate (Coarse)"/>
+      <Control Type="7bit" Number="36" Name="ARP Clock Rate (Fine)"/>
+      <Control Type="7bit" Number="114" Name="ARP Clock Source">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Internal"/>
+            <Value Number="43" Name="LFO"/>
+            <Value Number="86" Name="MIDI"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="115" Name="ARP Clock Divisions">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="ClockDivs"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="116" Name="ARP Range">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="-3 Octaves"/>
+            <Value Number="19" Name="-2 Octaves"/>
+            <Value Number="38" Name="-1 Octaves"/>
+            <Value Number="57" Name="0 Octaves"/>
+            <Value Number="71" Name="+1 Octaves"/>
+            <Value Number="90" Name="+2 Octaves"/>
+            <Value Number="109" Name="+3 Octaves"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="117" Name="ARP Pattern">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Up"/>
+            <Value Number="43" Name="Down"/>
+            <Value Number="86" Name="Order"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="118" Name="ARP Mode">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Loop"/>
+            <Value Number="43" Name="Back/Forth"/>
+            <Value Number="86" Name="Once"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="119" Name="ARP Latch Enable">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="91" Name="ARP Latch/Unlatch">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <!-- Output -->
+      <!-- Should actually be: <Control Type="14bit" Number="7" Name="Volume"/>-->
+      <Control Type="7bit" Number="7" Name="Volume (Coarse)"/>
+      <Control Type="7bit" Number="39" Name="Volume (Fine)"/>
+      <!-- Keyboard Response -->
+      <Control Type="7bit" Number="88" Name="Keyboard Note Priority">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Glob"/>
+            <Value Number="32" Name="Low"/>
+            <Value Number="64" Name="High"/>
+            <Value Number="96" Name="Last"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <!-- Mod Wheel Response -->
+      <!-- Should actually be: <Control Type="14bit" Number="1" Name="Mod Wheel"/> -->
+      <Control Type="7bit" Number="1" Name="Mod Wheel (Coarse)"/>
+      <Control Type="7bit" Number="33" Name="Mod Wheel (Fine)"/>
+    </ControlNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>
