@@ -62,7 +62,7 @@ Graph::Graph (Session& session)
 	, _graph_empty (true)
 	, _current_chain (0)
 	, _pending_chain (0)
-	, _setup_chain (0)
+	, _setup_chain (1)
 {
 	g_atomic_int_set (&_terminal_refcnt, 0);
 	g_atomic_int_set (&_terminate, 0);
