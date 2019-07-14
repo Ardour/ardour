@@ -119,8 +119,6 @@ private:
 	void setup_midnam_patches ();
 	void update_patch_selector ();
 
-	void start_scroomer_update ();
-	void stop_scroomer_update ();
 	sigc::connection _note_range_changed_connection;
 
 	void model_changed(const std::string& model);

@@ -212,7 +212,7 @@ MidiStreamView::display_track (boost::shared_ptr<Track> tr)
 
 	draw_note_lines();
 
-	NoteRangeChanged();
+	NoteRangeChanged(); /* EMIT SIGNAL*/
 }
 
 void
@@ -424,7 +424,7 @@ MidiStreamView::apply_note_range(uint8_t lowest, uint8_t highest, bool to_region
 		apply_note_range_to_regions ();
 	}
 
-	NoteRangeChanged();
+	NoteRangeChanged(); /* EMIT SIGNAL*/
 }
 
 void
