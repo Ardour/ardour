@@ -96,8 +96,6 @@ public:
 	boost::shared_ptr<MIDI::Name::MasterDeviceNames> get_device_names();
 	boost::shared_ptr<MIDI::Name::CustomDeviceMode> get_device_mode();
 
-	void update_range();
-
 	Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
 
 	StepEditor* step_editor() { return _step_editor; }

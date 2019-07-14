@@ -231,8 +231,6 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		time_axis_hbox.pack_end(*v, false, false, 0);
 		midi_scroomer_size_group->add_widget (*v);
 
-		midi_view()->NoteRangeChanged.connect (
-			sigc::mem_fun(*this, &MidiTimeAxisView::update_range));
 
 		/* ask for notifications of any new RegionViews */
 		_view->RegionViewAdded.connect (
@@ -1145,11 +1143,6 @@ MidiTimeAxisView::set_note_range (MidiStreamView::VisibleNoteRange range, bool a
 			midi_view()->set_note_range(range);
 		}
 	}
-}
-
-void
-MidiTimeAxisView::update_range()
-{
 }
 
 void
