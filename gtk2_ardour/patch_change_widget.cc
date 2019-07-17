@@ -229,7 +229,7 @@ PatchChangeWidget::refill_banks ()
 	const int b = bank (_channel);
 
 	{
-		PBD::Unwinder<bool> (_ignore_spin_btn_signals, true);
+		PBD::Unwinder<bool> uw (_ignore_spin_btn_signals, true);
 		_bank_msb_spin.set_value (b >> 7);
 		_bank_lsb_spin.set_value (b & 127);
 	}
