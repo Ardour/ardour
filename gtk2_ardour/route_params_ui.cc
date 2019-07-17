@@ -299,9 +299,7 @@ RouteParams_UI::setup_latency_frame ()
 {
 	latency_widget = new LatencyGUI (*(_route->output()), _session->sample_rate(), AudioEngine::instance()->samples_per_cycle());
 
-	char buf[128];
-	snprintf (buf, sizeof (buf), _("Latency: %" PRId64 " samples"), _route->signal_latency());
-	delay_label.set_text (buf);
+	refresh_latency ();
 
 	latency_packer.pack_start (*latency_widget, false, false);
 	latency_packer.pack_start (delay_label, false, false);
