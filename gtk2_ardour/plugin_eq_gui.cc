@@ -407,8 +407,14 @@ PluginEqGui::run_impulse_analysis ()
 	}
 
 	samplepos_t sample_pos = 0;
-	samplecnt_t latency = _plugin->signal_latency ();
+	samplecnt_t latency = _plugin_insert->effective_latency ();
 	samplecnt_t samples_remain = _buffer_size + latency;
+
+	/* Note: https://discourse.ardour.org/t/plugins-ladspa-questions/101292/15
+	 * Capture the complete response from the beginning, and more than "latency" samples,
+	 * Then unwrap the phase-response corresponding to reported latency, leaving the
+	 * magnitude unchanged.
+	 */
 
 	_impulse_fft->reset ();
 
