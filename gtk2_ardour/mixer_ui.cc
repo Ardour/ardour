@@ -160,15 +160,14 @@ Mixer_UI::Mixer_UI ()
 #endif
 
 	_group_tabs = new MixerGroupTabs (this);
-	VBox* b = manage (new VBox);
-	b->set_spacing (0);
-	b->set_border_width (0);
-	b->pack_start (*_group_tabs, PACK_SHRINK);
-	b->pack_start (strip_packer);
-	b->show_all ();
-	b->signal_scroll_event().connect (sigc::mem_fun (*this, &Mixer_UI::on_scroll_event), false);
+	strip_group_box.set_spacing (0);
+	strip_group_box.set_border_width (0);
+	strip_group_box.pack_start (*_group_tabs, PACK_SHRINK);
+	strip_group_box.pack_start (strip_packer);
+	strip_group_box.show_all ();
+	strip_group_box.signal_scroll_event().connect (sigc::mem_fun (*this, &Mixer_UI::on_scroll_event), false);
 
-	scroller.add (*b);
+	scroller.add (strip_group_box);
 	scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_AUTOMATIC);
 
 	setup_track_display ();
