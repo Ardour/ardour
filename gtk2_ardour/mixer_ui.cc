@@ -3503,21 +3503,82 @@ Mixer_UI::vca_unassign (boost::shared_ptr<VCA> vca)
 	}
 }
 
-void
+bool
 Mixer_UI::screenshot (std::string const& filename)
 {
-	Gtk::OffscreenWindow osw;
+	if (!_session) {
+		return false;
+	}
+
 	int height = strip_packer.get_height();
+	bool with_vca = vca_vpacker.is_visible ();
+	MixerStrip* master = strip_by_route (_session->master_out ());
+
+	Gtk::OffscreenWindow osw;
+	Gtk::HBox b;
+	osw.add (b);
+	b.show ();
+
+	/* unpack widgets, add to OffscreenWindow */
+
 	strip_group_box.remove (strip_packer);
-	osw.add (strip_packer);
+	b.pack_start (strip_packer, false, false);
+	/* hide extra elements inside strip_packer */
 	add_button.hide ();
+	scroller_base.hide ();
+#ifdef MIXBUS
+	mb_shadow.hide();
+#endif
+
+	if (with_vca) {
+		/* work around Gtk::ScrolledWindow */
+		Gtk::Viewport* viewport = (Gtk::Viewport*) vca_scroller.get_child();
+		viewport->remove (); // << vca_hpacker
+		b.pack_start (vca_hpacker, false, false);
+		/* hide some growing widgets */
+		add_vca_button.hide ();
+		vca_scroller_base.hide();
+	}
+
+	if (master) {
+		out_packer.remove (*master);
+		b.pack_start (*master, false, false);
+		master->hide_master_spacer (true);
+	}
+
+	/* prepare the OffscreenWindow for rendering */
 	osw.set_size_request (-1, height);
-	osw.show();
+	osw.show ();
+	osw.queue_resize ();
+	osw.queue_draw ();
 	osw.get_window()->process_updates (true);
+
+	/* create screenshot */
 	Glib::RefPtr<Gdk::Pixbuf> pb = osw.get_pixbuf ();
 	pb->save (filename, "png");
+
+	/* unpack elements before destorying the Box & OffscreenWindow */
+	list<Gtk::Widget*> children = b.get_children();
+	for (list<Gtk::Widget*>::iterator child = children.begin(); child != children.end(); ++child) {
+		b.remove (**child);
+	}
 	osw.remove ();
-	pb.release ();
+
+	/* now re-pack the widgets into the main mixer window */
 	add_button.show ();
+	scroller_base.show ();
+#ifdef MIXBUS
+	mb_shadow.show();
+#endif
 	strip_group_box.pack_start (strip_packer);
+	if (with_vca) {
+		add_vca_button.show ();
+		vca_scroller_base.show();
+		vca_scroller.add (vca_hpacker);
+	}
+	if (master) {
+		master->hide_master_spacer (false);
+		out_packer.pack_start (*master, false, false);
+	}
+	return true;
 }

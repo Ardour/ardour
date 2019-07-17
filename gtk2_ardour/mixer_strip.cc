@@ -607,11 +607,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		control_slave_ui.set_sensitive(true);
 	}
 
-	if (_mixer_owned && route()->is_master() ) {
-		spacer.show();
-	} else {
-		spacer.hide();
-	}
+	hide_master_spacer (false);
 
 	if (is_track()) {
 		monitor_input_button->show ();
@@ -2674,4 +2670,14 @@ bool
 MixerStrip::set_marked_for_display (bool yn)
 {
 	return RouteUI::mark_hidden (!yn);
+}
+
+void
+MixerStrip::hide_master_spacer (bool yn)
+{
+	if (_mixer_owned && route()->is_master() && !yn) {
+		spacer.show();
+	} else {
+		spacer.hide();
+	}
 }

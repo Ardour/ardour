@@ -114,6 +114,9 @@ public:
 		return _mixer_owned;
 	}
 
+	/* used for screenshots */
+	void hide_master_spacer (bool);
+
 	void hide_things ();
 
 	sigc::signal<void> WidthChanged;
