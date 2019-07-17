@@ -30,6 +30,7 @@
 #include <glibmm/threads.h>
 
 #include <gtkmm/accelmap.h>
+#include <gtkmm/offscreenwindow.h>
 #include <gtkmm/stock.h>
 
 #include "pbd/convert.h"
@@ -3500,4 +3501,23 @@ Mixer_UI::vca_unassign (boost::shared_ptr<VCA> vca)
 			ms->vca_unassign (vca);
 		}
 	}
+}
+
+void
+Mixer_UI::screenshot (std::string const& filename)
+{
+	Gtk::OffscreenWindow osw;
+	int height = strip_packer.get_height();
+	strip_group_box.remove (strip_packer);
+	osw.add (strip_packer);
+	add_button.hide ();
+	osw.set_size_request (-1, height);
+	osw.show();
+	osw.get_window()->process_updates (true);
+	Glib::RefPtr<Gdk::Pixbuf> pb = osw.get_pixbuf ();
+	pb->save (filename, "png");
+	osw.remove ();
+	pb.release ();
+	add_button.show ();
+	strip_group_box.pack_start (strip_packer);
 }

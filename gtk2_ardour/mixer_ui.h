@@ -147,6 +147,8 @@ public:
 	void showhide_mixbusses (bool on);
 #endif
 
+	void screenshot (std::string const&);
+
 protected:
 	void set_axis_targets_for_operation ();
 	ARDOUR::AutomationControlSet selected_gaincontrols ();
