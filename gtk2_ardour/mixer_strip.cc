@@ -106,6 +106,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
 	, _visibility (X_("mixer-element-visibility"))
+	, _suspend_menu_callbacks (false)
 	, control_slave_ui (sess)
 {
 	init ();
@@ -138,6 +139,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
 	, _visibility (X_("mixer-element-visibility"))
+	, _suspend_menu_callbacks (false)
 	, control_slave_ui (sess)
 {
 	init ();
@@ -2539,7 +2541,7 @@ MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
 
 	RadioMenuItem::Group group;
 
-	PBD::Unwinder<bool> (_suspend_menu_callbacks, true);
+	PBD::Unwinder<bool> uw (_suspend_menu_callbacks, true);
 	add_level_meter_item_point (items, group, _("Input"), MeterInput);
 	add_level_meter_item_point (items, group, _("Pre Fader"), MeterPreFader);
 	add_level_meter_item_point (items, group, _("Post Fader"), MeterPostFader);
