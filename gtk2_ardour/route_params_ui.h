@@ -92,8 +92,6 @@ private:
 
 	Gtk::Frame               latency_frame;
 	Gtk::VBox                latency_packer;
-	Gtk::HButtonBox          latency_button_box;
-	Gtk::Button              latency_apply_button;
 	LatencyGUI*              latency_widget;
 	Gtk::Label               delay_label;
 
