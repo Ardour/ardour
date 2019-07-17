@@ -24,6 +24,8 @@
 
 #include "pbd/convert.h"
 #include "pbd/error.h"
+#include "pbd/unwind.h"
+
 #include "ardour/latent.h"
 
 #include "gtkmm2ext/utils.h"
@@ -63,16 +65,15 @@ LatencyBarController::get_label (double&)
 	return s.str ();
 }
 
-LatencyGUI::LatencyGUI (Latent& l, samplepos_t sr, samplepos_t psz)
-	: _latent (l),
-	  initial_value (_latent.effective_latency ()),
-	  sample_rate (sr),
-	  period_size (psz),
-	  ignored (new PBD::IgnorableControllable()),
-	  /* max 1 second, step by samples, page by msecs */
-	  adjustment (initial_value, 0.0, sample_rate, 1.0, sample_rate / 1000.0f),
-	  bc (adjustment, this),
-	  reset_button (_("Reset"))
+LatencyGUI::LatencyGUI (Latent& l, samplepos_t sr, samplepos_t psz, bool apply)
+	: _latent (l)
+	, initial_value (_latent.effective_latency ())
+	, sample_rate (sr)
+	, period_size (psz)
+	, ignored (new PBD::IgnorableControllable())
+	, adjustment (0, 0.0, sample_rate, 1.0, sample_rate / 1000.0f) /* max 1 second, step by samples, page by msecs */
+	, bc (adjustment, this)
+	, reset_button (_("Reset"))
 {
 	Widget* w;
 
@@ -175,5 +176,3 @@ LatencyDialog::LatencyDialog (const std::string& title, Latent& l, samplepos_t s
 	show_all ();
 	run ();
 }
-
-
