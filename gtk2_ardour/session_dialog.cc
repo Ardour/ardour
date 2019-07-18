@@ -93,7 +93,7 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	open_button->signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::open_button_pressed), false);
 
 	open_button->set_sensitive (false);
-	back_button->set_sensitive (!require_new);
+	back_button->set_sensitive (false);
 
 	/* this is where announcements will be displayed, but it may be empty
 	 * and invisible most of the time.
@@ -250,7 +250,7 @@ SessionDialog::master_channel_count ()
 bool
 SessionDialog::use_session_template () const
 {
-	if (!back_button->sensitive ()) {
+	if (!back_button->sensitive () && !new_only) {
 		/* open session -- not create a new one */
 		return false;
 	}
