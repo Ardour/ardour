@@ -580,7 +580,7 @@ Session::ensure_subdirs ()
  *  Caller must not hold process lock.
  */
 int
-Session::create (const string& session_template, BusProfile* bus_profile)
+Session::create (const string& st, BusProfile* bus_profile)
 {
 	if (g_mkdir_with_parents (_path.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session folder \"%1\" (%2)"), _path, strerror (errno)) << endmsg;
@@ -593,71 +593,78 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 
 	_writable = exists_and_writable (_path);
 
+	string session_template (st);
+
 	if (!session_template.empty()) {
+
+		if (session_template.find (G_DIR_SEPARATOR) == string::npos) {
+			/* not a path */
+			session_template = Glib::build_filename (user_template_directory(), session_template);
+		}
+
+		cerr << "Using session template " << session_template << endl;
+
 		string in_path = (ARDOUR::Profile->get_trx () ? session_template : session_template_dir_to_file (session_template));
 
 		FILE* in = g_fopen (in_path.c_str(), "rb");
 
-		if (in) {
-			/* no need to call legalize_for_path() since the string
-			 * in session_template is already a legal path name
-			 */
-			string out_path = Glib::build_filename (_session_dir->root_path(), _name + statefile_suffix);
-
-			FILE* out = g_fopen (out_path.c_str(), "wb");
-
-			if (out) {
-				char buf[1024];
-				stringstream new_session;
-
-				while (!feof (in)) {
-					size_t charsRead = fread (buf, sizeof(char), 1024, in);
-
-					if (ferror (in)) {
-						error << string_compose (_("Error reading session template file %1 (%2)"), in_path, strerror (errno)) << endmsg;
-						fclose (in);
-						fclose (out);
-						return -1;
-					}
-					if (charsRead == 0) {
-						break;
-					}
-					new_session.write (buf, charsRead);
-				}
-				fclose (in);
-
-				string file_contents = new_session.str();
-				size_t writeSize = file_contents.length();
-				if (fwrite (file_contents.c_str(), sizeof(char), writeSize, out) != writeSize) {
-					error << string_compose (_("Error writing session template file %1 (%2)"), out_path, strerror (errno)) << endmsg;
-					fclose (out);
-					return -1;
-				}
-				fclose (out);
-
-				_is_new = false;
-
-				if (!ARDOUR::Profile->get_trx()) {
-					/* Copy plugin state files from template to new session */
-					std::string template_plugins = Glib::build_filename (session_template, X_("plugins"));
-					copy_recurse (template_plugins, plugins_dir ());
-				}
-
-				return 0;
-
-			} else {
-				error << string_compose (_("Could not open %1 for writing session template"), out_path)
-					<< endmsg;
-				fclose(in);
-				return -1;
-			}
-
-		} else {
+		if (!in) {
 			error << string_compose (_("Could not open session template %1 for reading"), in_path)
 				<< endmsg;
 			return -1;
 		}
 
+		/* no need to call legalize_for_path() since the string
+		 * in session_template is already a legal path name
+		 */
+		string out_path = Glib::build_filename (_session_dir->root_path(), _name + statefile_suffix);
+
+		FILE* out = g_fopen (out_path.c_str(), "wb");
+
+		if (!out) {
+			error << string_compose (_("Could not open %1 for writing session template"), out_path)
+			      << endmsg;
+			fclose(in);
+			return -1;
+		}
+
+		char buf[1024];
+		stringstream new_session;
+
+		while (!feof (in)) {
+			size_t charsRead = fread (buf, sizeof(char), 1024, in);
+
+			if (ferror (in)) {
+				error << string_compose (_("Error reading session template file %1 (%2)"), in_path, strerror (errno)) << endmsg;
+				fclose (in);
+				fclose (out);
+				return -1;
+			}
+			if (charsRead == 0) {
+				break;
+			}
+			new_session.write (buf, charsRead);
+		}
+		fclose (in);
+
+		string file_contents = new_session.str();
+		size_t writeSize = file_contents.length();
+		if (fwrite (file_contents.c_str(), sizeof(char), writeSize, out) != writeSize) {
+			error << string_compose (_("Error writing session template file %1 (%2)"), out_path, strerror (errno)) << endmsg;
+			fclose (out);
+			return -1;
+		}
+		fclose (out);
+
+		_is_new = false;
+
+		if (!ARDOUR::Profile->get_trx()) {
+			/* Copy plugin state files from template to new session */
+			std::string template_plugins = Glib::build_filename (session_template, X_("plugins"));
+			copy_recurse (template_plugins, plugins_dir ());
+		}
+
+		return 0;
 	}
 
 	if (Profile->get_trx()) {
