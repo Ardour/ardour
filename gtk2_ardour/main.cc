@@ -393,10 +393,6 @@ int main (int argc, char *argv[])
 		exit (EXIT_FAILURE);
 	}
 
-	if (curvetest_file) {
-		return curvetest (curvetest_file);
-	}
-
 #ifndef PLATFORM_WINDOWS
 	if (::signal (SIGPIPE, sigpipe_handler)) {
 		cerr << _("Cannot xinstall SIGPIPE error handler") << endl;

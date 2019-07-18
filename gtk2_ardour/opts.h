@@ -30,17 +30,14 @@ extern bool   show_actions;
 extern bool   no_splash;
 extern bool   just_version;
 extern std::string backend_client_name;
-extern std::string backend_session_uuid;
 extern bool   use_vst;
 extern bool   new_session;
-extern char*  curvetest_file;
 extern bool   try_hw_optimization;
 extern bool no_connect_ports;
 extern bool   use_gtk_theme;
 extern std::string keybindings_path;
 extern std::string menus_file;
 extern bool   finder_invoked_ardour;
-extern std::string immediate_save;
 extern std::string load_template;
 extern bool        check_announcements;
 

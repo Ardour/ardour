@@ -3501,11 +3501,6 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 				exit (EXIT_FAILURE);
 			}
 
-			if (!ARDOUR_COMMAND_LINE::immediate_save.empty()) {
-				_session->save_state (ARDOUR_COMMAND_LINE::immediate_save, false);
-				exit (EXIT_FAILURE);
-			}
-
 			/* clear this to avoid endless attempts to load the
 			   same session.
 			*/
