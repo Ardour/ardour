@@ -285,6 +285,35 @@ std::string
 SessionDialog::session_template_name ()
 {
 	if (!load_template_override.empty()) {
+		/* compare to SessionDialog::populate_session_templates */
+
+		/* compare by name (path may or may not be UTF-8) */
+		vector<TemplateInfo> templates;
+		find_session_templates (templates, false);
+		for (vector<TemplateInfo>::iterator x = templates.begin(); x != templates.end(); ++x) {
+			if ((*x).name == load_template_override) {
+				return (*x).path;
+			}
+		}
+
+		/* look up script by name */
+		LuaScriptList scripts (LuaScripting::instance ().scripts (LuaScriptInfo::SessionInit));
+		LuaScriptList& as (LuaScripting::instance ().scripts (LuaScriptInfo::EditorAction));
+		for (LuaScriptList::const_iterator s = as.begin(); s != as.end(); ++s) {
+			if ((*s)->subtype & LuaScriptInfo::SessionSetup) {
+				scripts.push_back (*s);
+			}
+		}
+		std::sort (scripts.begin(), scripts.end(), LuaScripting::Sorter());
+		for (LuaScriptList::const_iterator s = scripts.begin(); s != scripts.end(); ++s) {
+			if ((*s)->name == load_template_override) {
+				return "urn:ardour:" + (*s)->path;
+			}
+		}
+
+		/* this will produce a more or less meaninful error later:
+		 * "ERROR: Could not open session template [abs-path to user-config dir]"
+		 */
 		return Glib::build_filename (ARDOUR::user_template_directory (), load_template_override);
 	}
 
