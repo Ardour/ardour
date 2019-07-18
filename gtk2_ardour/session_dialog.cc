@@ -104,6 +104,10 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	info_frame.set_border_width (12);
 	get_vbox()->pack_start (info_frame, false, false);
 
+	if (!template_name.empty()) {
+		load_template_override = template_name;
+	}
+
 	setup_new_session_page ();
 
 	if (!new_only) {
@@ -111,10 +115,6 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 		get_vbox()->pack_start (ic_vbox, true, true);
 	} else {
 		get_vbox()->pack_start (session_new_vbox, true, true);
-	}
-
-	if (!template_name.empty()) {
-		load_template_override = template_name;
 	}
 
 	get_vbox()->show_all ();
@@ -285,8 +285,7 @@ std::string
 SessionDialog::session_template_name ()
 {
 	if (!load_template_override.empty()) {
-		string the_path (ARDOUR::user_template_directory());
-		return Glib::build_filename (the_path, load_template_override + ARDOUR::template_suffix);
+		return Glib::build_filename (ARDOUR::user_template_directory (), load_template_override);
 	}
 
 	if (template_chooser.get_selection()->count_selected_rows() > 0) {
@@ -681,7 +680,7 @@ SessionDialog::setup_new_session_page ()
 	HBox* template_hbox = manage (new HBox);
 
 	//if the "template override" is provided, don't give the user any template selections   (?)
-	if ( load_template_override.empty() ) {
+	if (load_template_override.empty()) {
 		template_hbox->set_spacing (8);
 
 		Gtk::ScrolledWindow *template_scroller = manage (new Gtk::ScrolledWindow());
