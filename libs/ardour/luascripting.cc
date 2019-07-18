@@ -28,6 +28,7 @@
 #include "ardour/luascripting.h"
 #include "ardour/lua_script_params.h"
 #include "ardour/search_paths.h"
+#include "ardour/utils.h"
 
 #include "lua/luastate.h"
 #include "LuaBridge/LuaBridge.h"
@@ -104,11 +105,10 @@ LuaScripting::refresh (bool run_scan)
 	}
 }
 
-struct ScriptSorter {
-	bool operator () (LuaScriptInfoPtr a, LuaScriptInfoPtr b) {
-		return a->name < b->name;
-	}
-};
+bool
+LuaScripting::Sorter::operator() (LuaScriptInfoPtr const a, LuaScriptInfoPtr const b) const {
+	return ARDOUR::cmp_nocase_utf8 (a->name, b->name) < 0;
+}
 
 LuaScriptInfoPtr
 LuaScripting::script_info (const std::string &script) {
@@ -166,13 +166,13 @@ LuaScripting::scan ()
 		}
 	}
 
-	std::sort (_sl_dsp->begin(), _sl_dsp->end(), ScriptSorter());
-	std::sort (_sl_session->begin(), _sl_session->end(), ScriptSorter());
-	std::sort (_sl_hook->begin(), _sl_hook->end(), ScriptSorter());
-	std::sort (_sl_action->begin(), _sl_action->end(), ScriptSorter());
-	std::sort (_sl_snippet->begin(), _sl_snippet->end(), ScriptSorter());
-	std::sort (_sl_setup->begin(), _sl_setup->end(), ScriptSorter());
-	std::sort (_sl_tracks->begin(), _sl_tracks->end(), ScriptSorter());
+	std::sort (_sl_dsp->begin(), _sl_dsp->end(), Sorter());
+	std::sort (_sl_session->begin(), _sl_session->end(), Sorter());
+	std::sort (_sl_hook->begin(), _sl_hook->end(), Sorter());
+	std::sort (_sl_action->begin(), _sl_action->end(), Sorter());
+	std::sort (_sl_snippet->begin(), _sl_snippet->end(), Sorter());
+	std::sort (_sl_setup->begin(), _sl_setup->end(), Sorter());
+	std::sort (_sl_tracks->begin(), _sl_tracks->end(), Sorter());
 
 	scripts_changed (); /* EMIT SIGNAL */
 }
