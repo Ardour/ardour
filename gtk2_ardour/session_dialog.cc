@@ -564,14 +564,6 @@ SessionDialog::open_button_pressed (GdkEventButton* ev)
 	return true;
 }
 
-struct LuaScriptListSorter
-{
-	bool operator() (LuaScriptInfoPtr const a, LuaScriptInfoPtr const b) const {
-		return ARDOUR::cmp_nocase_utf8 (a->name, b->name) < 0;
-	}
-};
-
-
 void
 SessionDialog::populate_session_templates ()
 {
@@ -592,8 +584,7 @@ SessionDialog::populate_session_templates ()
 		}
 	}
 
-	LuaScriptListSorter cmp;
-	std::sort (scripts.begin(), scripts.end(), cmp);
+	std::sort (scripts.begin(), scripts.end(), LuaScripting::Sorter());
 
 	for (LuaScriptList::const_iterator s = scripts.begin(); s != scripts.end(); ++s) {
 		TreeModel::Row row = *(template_model->append ());
