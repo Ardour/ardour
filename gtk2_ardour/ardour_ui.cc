@@ -3343,7 +3343,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			session_dialog.clear_given ();
 		}
 
-		if (should_be_new || session_name.empty()) {
+		if (session_name.empty()) {
 			/* need the dialog to get info from user */
 
 			cerr << "run dialog\n";
