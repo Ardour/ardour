@@ -93,7 +93,7 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	open_button->signal_button_press_event().connect (sigc::mem_fun (*this, &SessionDialog::open_button_pressed), false);
 
 	open_button->set_sensitive (false);
-	back_button->set_sensitive (false);
+	back_button->set_sensitive (!require_new);
 
 	/* this is where announcements will be displayed, but it may be empty
 	 * and invisible most of the time.
@@ -110,7 +110,7 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 
 	setup_new_session_page ();
 
-	if (!new_only) {
+	if (!require_new) {
 		setup_initial_choice_box ();
 		get_vbox()->pack_start (ic_vbox, true, true);
 	} else {
@@ -138,19 +138,6 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 			recent_scroller.hide();
 			recent_label.hide ();
 		}
-	}
-
-	/* possibly get out of here immediately if everything is ready to go.
-	   We still need to set up the whole dialog because of the way
-	   ARDOUR_UI::get_session_parameters() might skip it on a first
-	   pass then require it for a second pass (e.g. when there
-	   is an error with session loading and we have to ask the user
-	   what to do next).
-	*/
-
-	if (!session_name.empty() && !require_new) {
-		response (RESPONSE_OK);
-		return;
 	}
 }
 
@@ -182,8 +169,6 @@ SessionDialog::SessionDialog ()
 	}
 
 }
-
-
 
 SessionDialog::~SessionDialog()
 {
@@ -265,7 +250,7 @@ SessionDialog::master_channel_count ()
 bool
 SessionDialog::use_session_template () const
 {
-	if (!back_button->sensitive () && !new_only) {
+	if (!back_button->sensitive ()) {
 		/* open session -- not create a new one */
 		return false;
 	}
@@ -333,8 +318,11 @@ SessionDialog::session_template_name ()
 std::string
 SessionDialog::session_name (bool& should_be_new)
 {
-	if (!_provided_session_name.empty() && !new_only) {
-		should_be_new = false;
+	if (!_provided_session_name.empty()) {
+		/* user gave name on cmdline/invocation. Did they also specify
+		   that it must be a new session?
+		*/
+		should_be_new = new_only;
 		return _provided_session_name;
 	}
 
@@ -366,7 +354,7 @@ SessionDialog::session_name (bool& should_be_new)
 std::string
 SessionDialog::session_folder ()
 {
-	if (!_provided_session_path.empty() && !new_only) {
+	if (!_provided_session_path.empty()) {
 		return _provided_session_path;
 	}
 
