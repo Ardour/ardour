@@ -3344,10 +3344,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		}
 
 		if (session_name.empty()) {
-			/* need the dialog to get info from user */
-
-			cerr << "run dialog\n";
-
+			/* need the dialog to get the name (at least) from the user */
 			switch (session_dialog.run()) {
 			case RESPONSE_ACCEPT:
 				break;
