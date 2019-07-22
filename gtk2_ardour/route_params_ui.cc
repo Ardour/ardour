@@ -60,7 +60,6 @@ using namespace Gtkmm2ext;
 
 RouteParams_UI::RouteParams_UI ()
 	: ArdourWindow (_("Tracks and Busses"))
-	, latency_apply_button (Stock::APPLY)
 	, track_menu(0)
 {
 	insert_box = 0;
@@ -114,7 +113,6 @@ RouteParams_UI::RouteParams_UI ()
 	update_title();
 
 	latency_packer.set_spacing (18);
-	latency_button_box.pack_start (latency_apply_button);
 	delay_label.set_alignment (0, 0.5);
 
 	// changeable area
@@ -286,7 +284,6 @@ RouteParams_UI::cleanup_latency_frame ()
 	if (latency_widget) {
 		latency_frame.remove ();
 		latency_packer.remove (*latency_widget);
-		latency_packer.remove (latency_button_box);
 		latency_packer.remove (delay_label);
 		latency_connections.drop_connections ();
 		latency_click_connection.disconnect ();
@@ -302,15 +299,11 @@ RouteParams_UI::setup_latency_frame ()
 {
 	latency_widget = new LatencyGUI (*(_route->output()), _session->sample_rate(), AudioEngine::instance()->samples_per_cycle());
 
-	char buf[128];
-	snprintf (buf, sizeof (buf), _("Latency: %" PRId64 " samples"), _route->signal_latency());
-	delay_label.set_text (buf);
+	refresh_latency ();
 
 	latency_packer.pack_start (*latency_widget, false, false);
-	latency_packer.pack_start (latency_button_box, false, false);
-	latency_packer.pack_start (delay_label);
+	latency_packer.pack_start (delay_label, false, false);
 
-	latency_click_connection = latency_apply_button.signal_clicked().connect (sigc::mem_fun (*latency_widget, &LatencyGUI::finish));
 	_route->signal_latency_updated.connect (latency_connections, invalidator (*this), boost::bind (&RouteParams_UI::refresh_latency, this), gui_context());
 
 	latency_frame.add (latency_packer);

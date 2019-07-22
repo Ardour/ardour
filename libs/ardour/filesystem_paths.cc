@@ -98,7 +98,7 @@ user_config_directory (int version)
 #endif
 		if (home_dir.empty ()) {
 			error << "Unable to determine home directory" << endmsg;
-			exit (1);
+			exit (EXIT_FAILURE);
 		}
 		p = home_dir;
 
@@ -119,7 +119,7 @@ user_config_directory (int version)
 			if (g_mkdir_with_parents (p.c_str(), 0755)) {
 				error << string_compose (_("Cannot create Configuration directory %1 - cannot run"),
 				                         p) << endmsg;
-				exit (1);
+				exit (EXIT_FAILURE);
 			}
 			} else if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
 			fatal << string_compose (_("Configuration directory %1 already exists and is not a directory/folder - cannot run"),
@@ -156,7 +156,7 @@ user_cache_directory (std::string cachename)
 #endif
 		if (home_dir.empty ()) {
 			error << "Unable to determine home directory" << endmsg;
-			exit (1);
+			exit (EXIT_FAILURE);
 		}
 		p = home_dir;
 
@@ -187,7 +187,7 @@ user_cache_directory (std::string cachename)
 		if (g_mkdir_with_parents (p.c_str(), 0755)) {
 			error << string_compose (_("Cannot create cache directory %1 - cannot run"),
 						   p) << endmsg;
-			exit (1);
+			exit (EXIT_FAILURE);
 		}
 	} else if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
 		fatal << string_compose (_("Cache directory %1 already exists and is not a directory/folder - cannot run"),
@@ -209,7 +209,7 @@ ardour_dll_directory ()
 	std::string s = Glib::getenv("ARDOUR_DLL_PATH");
 	if (s.empty()) {
 		std::cerr << _("ARDOUR_DLL_PATH not set in environment - exiting\n");
-		::exit (1);
+		::exit (EXIT_FAILURE);
 	}
 	return s;
 #endif

@@ -30,6 +30,7 @@
 #include <glibmm/threads.h>
 
 #include <gtkmm/accelmap.h>
+#include <gtkmm/offscreenwindow.h>
 #include <gtkmm/stock.h>
 
 #include "pbd/convert.h"
@@ -160,15 +161,14 @@ Mixer_UI::Mixer_UI ()
 #endif
 
 	_group_tabs = new MixerGroupTabs (this);
-	VBox* b = manage (new VBox);
-	b->set_spacing (0);
-	b->set_border_width (0);
-	b->pack_start (*_group_tabs, PACK_SHRINK);
-	b->pack_start (strip_packer);
-	b->show_all ();
-	b->signal_scroll_event().connect (sigc::mem_fun (*this, &Mixer_UI::on_scroll_event), false);
+	strip_group_box.set_spacing (0);
+	strip_group_box.set_border_width (0);
+	strip_group_box.pack_start (*_group_tabs, PACK_SHRINK);
+	strip_group_box.pack_start (strip_packer);
+	strip_group_box.show_all ();
+	strip_group_box.signal_scroll_event().connect (sigc::mem_fun (*this, &Mixer_UI::on_scroll_event), false);
 
-	scroller.add (*b);
+	scroller.add (strip_group_box);
 	scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_AUTOMATIC);
 
 	setup_track_display ();
@@ -3501,4 +3501,84 @@ Mixer_UI::vca_unassign (boost::shared_ptr<VCA> vca)
 			ms->vca_unassign (vca);
 		}
 	}
+}
+
+bool
+Mixer_UI::screenshot (std::string const& filename)
+{
+	if (!_session) {
+		return false;
+	}
+
+	int height = strip_packer.get_height();
+	bool with_vca = vca_vpacker.is_visible ();
+	MixerStrip* master = strip_by_route (_session->master_out ());
+
+	Gtk::OffscreenWindow osw;
+	Gtk::HBox b;
+	osw.add (b);
+	b.show ();
+
+	/* unpack widgets, add to OffscreenWindow */
+
+	strip_group_box.remove (strip_packer);
+	b.pack_start (strip_packer, false, false);
+	/* hide extra elements inside strip_packer */
+	add_button.hide ();
+	scroller_base.hide ();
+#ifdef MIXBUS
+	mb_shadow.hide();
+#endif
+
+	if (with_vca) {
+		/* work around Gtk::ScrolledWindow */
+		Gtk::Viewport* viewport = (Gtk::Viewport*) vca_scroller.get_child();
+		viewport->remove (); // << vca_hpacker
+		b.pack_start (vca_hpacker, false, false);
+		/* hide some growing widgets */
+		add_vca_button.hide ();
+		vca_scroller_base.hide();
+	}
+
+	if (master) {
+		out_packer.remove (*master);
+		b.pack_start (*master, false, false);
+		master->hide_master_spacer (true);
+	}
+
+	/* prepare the OffscreenWindow for rendering */
+	osw.set_size_request (-1, height);
+	osw.show ();
+	osw.queue_resize ();
+	osw.queue_draw ();
+	osw.get_window()->process_updates (true);
+
+	/* create screenshot */
+	Glib::RefPtr<Gdk::Pixbuf> pb = osw.get_pixbuf ();
+	pb->save (filename, "png");
+
+	/* unpack elements before destorying the Box & OffscreenWindow */
+	list<Gtk::Widget*> children = b.get_children();
+	for (list<Gtk::Widget*>::iterator child = children.begin(); child != children.end(); ++child) {
+		b.remove (**child);
+	}
+	osw.remove ();
+
+	/* now re-pack the widgets into the main mixer window */
+	add_button.show ();
+	scroller_base.show ();
+#ifdef MIXBUS
+	mb_shadow.show();
+#endif
+	strip_group_box.pack_start (strip_packer);
+	if (with_vca) {
+		add_vca_button.show ();
+		vca_scroller_base.show();
+		vca_scroller.add (vca_hpacker);
+	}
+	if (master) {
+		master->hide_master_spacer (false);
+		out_packer.pack_start (*master, false, false);
+	}
+	return true;
 }

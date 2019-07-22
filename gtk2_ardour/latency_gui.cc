@@ -24,6 +24,8 @@
 
 #include "pbd/convert.h"
 #include "pbd/error.h"
+#include "pbd/unwind.h"
+
 #include "ardour/latent.h"
 
 #include "gtkmm2ext/utils.h"
@@ -64,15 +66,14 @@ LatencyBarController::get_label (double&)
 }
 
 LatencyGUI::LatencyGUI (Latent& l, samplepos_t sr, samplepos_t psz)
-	: _latent (l),
-	  initial_value (_latent.effective_latency ()),
-	  sample_rate (sr),
-	  period_size (psz),
-	  ignored (new PBD::IgnorableControllable()),
-	  /* max 1 second, step by samples, page by msecs */
-	  adjustment (initial_value, 0.0, sample_rate, 1.0, sample_rate / 1000.0f),
-	  bc (adjustment, this),
-	  reset_button (_("Reset"))
+	: _latent (l)
+	, sample_rate (sr)
+	, period_size (psz)
+	, ignored (new PBD::IgnorableControllable())
+	, _ignore_change (false)
+	, adjustment (0, 0.0, sample_rate, 1.0, sample_rate / 1000.0f) /* max 1 second, step by samples, page by msecs */
+	, bc (adjustment, this)
+	, reset_button (_("Reset"))
 {
 	Widget* w;
 
@@ -103,6 +104,12 @@ LatencyGUI::LatencyGUI (Latent& l, samplepos_t sr, samplepos_t psz)
 	plus_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LatencyGUI::change_latency_from_button), 1));
 	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &LatencyGUI::reset));
 
+	/* Limit value to adjustment range (max = sample_rate).
+	 * Otherwise if the signal_latency() is larger than the adjustment's max,
+	 * LatencyGUI::finish() would set the adjustment's max value as custom-latency.
+	 */
+	adjustment.set_value (std::min (sample_rate, _latent.signal_latency ()));
+
 	adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &LatencyGUI::finish));
 
 	bc.set_size_request (-1, 25);
@@ -116,28 +123,26 @@ LatencyGUI::LatencyGUI (Latent& l, samplepos_t sr, samplepos_t psz)
 void
 LatencyGUI::finish ()
 {
-	samplepos_t new_value = (samplepos_t) adjustment.get_value();
-	if (new_value != initial_value) {
-		_latent.set_user_latency (new_value);
+	if (_ignore_change) {
+		return;
 	}
+	samplepos_t new_value = (samplepos_t) adjustment.get_value();
+	_latent.set_user_latency (new_value);
 }
 
 void
 LatencyGUI::reset ()
 {
 	_latent.unset_user_latency ();
-	initial_value = std::min (sample_rate, _latent.signal_latency ());
-	adjustment.set_value (initial_value);
+	PBD::Unwinder<bool> uw (_ignore_change, true);
+	adjustment.set_value (std::min (sample_rate, _latent.signal_latency ()));
 }
 
 void
 LatencyGUI::refresh ()
 {
-	/* limit to adjustment range, otherwise LatencyGUI::finish() would
-	 * set the adjustment's value as custom-latency
-	 */
-	initial_value = std::min (sample_rate, _latent.effective_latency ());
-	adjustment.set_value (initial_value);
+	PBD::Unwinder<bool> uw (_ignore_change, true);
+	adjustment.set_value (std::min (sample_rate, _latent.effective_latency ()));
 }
 
 void
@@ -175,5 +180,3 @@ LatencyDialog::LatencyDialog (const std::string& title, Latent& l, samplepos_t s
 	show_all ();
 	run ();
 }
-
-

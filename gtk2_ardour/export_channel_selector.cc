@@ -19,6 +19,9 @@
 */
 
 #include <algorithm>
+#include <sstream>
+
+#include <gtkmm/menu.h>
 
 #include "pbd/convert.h"
 
@@ -28,8 +31,6 @@
 #include "ardour/io.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
-
-#include <sstream>
 
 #include "export_channel_selector.h"
 #include "route_sorter.h"
@@ -547,18 +548,37 @@ RegionExportChannelSelector::handle_selection ()
 TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager)
   : ExportChannelSelector(session, manager)
   , track_output_button(_("Apply track/bus processing"))
-  , select_tracks_button (_("Select all tracks"))
-  , select_busses_button (_("Select all busses"))
-  , select_none_button (_("Deselect all"))
 {
 	pack_start(main_layout);
 
+	// Populate Selection Menu
+	{
+		using namespace Gtk::Menu_Helpers;
+
+		select_menu.set_text (_("Selection Actions"));
+		select_menu.disable_scrolling ();
+
+		select_menu.AddMenuElem (MenuElem (_("Select tracks"), sigc::mem_fun (*this, &TrackExportChannelSelector::select_tracks)));
+		select_menu.AddMenuElem (MenuElem (_("Select busses"), sigc::mem_fun (*this, &TrackExportChannelSelector::select_busses)));
+		select_menu.AddMenuElem (MenuElem (_("Deselect all"), sigc::mem_fun (*this, &TrackExportChannelSelector::select_none)));
+		select_menu.AddMenuElem (SeparatorElem ());
+
+		exclude_hidden = new Gtk::CheckMenuItem (_("Exclude Hidden"));
+		exclude_hidden->set_active (false);
+		exclude_hidden->show();
+		select_menu.AddMenuElem (*exclude_hidden);
+
+		exclude_muted = new Gtk::CheckMenuItem (_("Exclude Muted"));
+		exclude_muted->set_active (true);
+		exclude_muted->show();
+		select_menu.AddMenuElem (*exclude_muted);
+	}
+
 	// Options
-	options_box.pack_start(track_output_button);
-	options_box.pack_start (select_tracks_button);
-	options_box.pack_start (select_busses_button);
-	options_box.pack_start (select_none_button);
-	main_layout.pack_start(options_box, false, false);
+	options_box.set_spacing (8);
+	options_box.pack_start (track_output_button, false, false);
+	options_box.pack_start (select_menu, false, false);
+	main_layout.pack_start (options_box, false, false);
 
 	// Track scroller
 	track_scroller.add (track_view);
@@ -589,15 +609,17 @@ TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * sessio
 	column->pack_start (*text_renderer, false);
 	column->add_attribute (text_renderer->property_text(), track_cols.label);
 
-	select_tracks_button.signal_clicked().connect (sigc::mem_fun (*this, &TrackExportChannelSelector::select_tracks));
-	select_busses_button.signal_clicked().connect (sigc::mem_fun (*this, &TrackExportChannelSelector::select_busses));
-	select_none_button.signal_clicked().connect (sigc::mem_fun (*this, &TrackExportChannelSelector::select_none));
-
 	track_output_button.signal_clicked().connect (sigc::mem_fun (*this, &TrackExportChannelSelector::track_outputs_selected));
 
 	fill_list();
 
 	show_all_children ();
+}
+
+TrackExportChannelSelector::~TrackExportChannelSelector ()
+{
+	delete exclude_hidden;
+	delete exclude_muted;
 }
 
 void
@@ -610,11 +632,19 @@ TrackExportChannelSelector::sync_with_manager ()
 void
 TrackExportChannelSelector::select_tracks ()
 {
+	bool excl_hidden = exclude_hidden->get_active ();
+	bool excl_muted  = exclude_muted->get_active ();
+
 	for (Gtk::ListStore::Children::iterator it = track_list->children().begin(); it != track_list->children().end(); ++it) {
 		Gtk::TreeModel::Row row = *it;
 		boost::shared_ptr<Route> route = row[track_cols.route];
 		if (boost::dynamic_pointer_cast<Track> (route)) {
-			// it's a track
+			if (excl_muted && route->muted ()) {
+				continue;
+			}
+			if (excl_hidden && route->is_hidden ()) {
+				continue;
+			}
 			row[track_cols.selected] = true;
 		}
 	}
@@ -624,11 +654,19 @@ TrackExportChannelSelector::select_tracks ()
 void
 TrackExportChannelSelector::select_busses ()
 {
+	bool excl_hidden = exclude_hidden->get_active ();
+	bool excl_muted  = exclude_muted->get_active ();
+
 	for (Gtk::ListStore::Children::iterator it = track_list->children().begin(); it != track_list->children().end(); ++it) {
 		Gtk::TreeModel::Row row = *it;
 		boost::shared_ptr<Route> route = row[track_cols.route];
 		if (!boost::dynamic_pointer_cast<Track> (route)) {
-			// it's not a track, must be a bus
+			if (excl_muted && route->muted ()) {
+				continue;
+			}
+			if (excl_hidden && route->is_hidden ()) {
+				continue;
+			}
 			row[track_cols.selected] = true;
 		}
 	}

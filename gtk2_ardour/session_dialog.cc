@@ -104,17 +104,17 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	info_frame.set_border_width (12);
 	get_vbox()->pack_start (info_frame, false, false);
 
+	if (!template_name.empty()) {
+		load_template_override = template_name;
+	}
+
 	setup_new_session_page ();
 
-	if (!new_only) {
+	if (!require_new) {
 		setup_initial_choice_box ();
 		get_vbox()->pack_start (ic_vbox, true, true);
 	} else {
 		get_vbox()->pack_start (session_new_vbox, true, true);
-	}
-
-	if (!template_name.empty()) {
-		load_template_override = template_name;
 	}
 
 	get_vbox()->show_all ();
@@ -138,19 +138,6 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 			recent_scroller.hide();
 			recent_label.hide ();
 		}
-	}
-
-	/* possibly get out of here immediately if everything is ready to go.
-	   We still need to set up the whole dialog because of the way
-	   ARDOUR_UI::get_session_parameters() might skip it on a first
-	   pass then require it for a second pass (e.g. when there
-	   is an error with session loading and we have to ask the user
-	   what to do next).
-	*/
-
-	if (!session_name.empty() && !require_new) {
-		response (RESPONSE_OK);
-		return;
 	}
 }
 
@@ -182,8 +169,6 @@ SessionDialog::SessionDialog ()
 	}
 
 }
-
-
 
 SessionDialog::~SessionDialog()
 {
@@ -285,8 +270,36 @@ std::string
 SessionDialog::session_template_name ()
 {
 	if (!load_template_override.empty()) {
-		string the_path (ARDOUR::user_template_directory());
-		return Glib::build_filename (the_path, load_template_override + ARDOUR::template_suffix);
+		/* compare to SessionDialog::populate_session_templates */
+
+		/* compare by name (path may or may not be UTF-8) */
+		vector<TemplateInfo> templates;
+		find_session_templates (templates, false);
+		for (vector<TemplateInfo>::iterator x = templates.begin(); x != templates.end(); ++x) {
+			if ((*x).name == load_template_override) {
+				return (*x).path;
+			}
+		}
+
+		/* look up script by name */
+		LuaScriptList scripts (LuaScripting::instance ().scripts (LuaScriptInfo::SessionInit));
+		LuaScriptList& as (LuaScripting::instance ().scripts (LuaScriptInfo::EditorAction));
+		for (LuaScriptList::const_iterator s = as.begin(); s != as.end(); ++s) {
+			if ((*s)->subtype & LuaScriptInfo::SessionSetup) {
+				scripts.push_back (*s);
+			}
+		}
+		std::sort (scripts.begin(), scripts.end(), LuaScripting::Sorter());
+		for (LuaScriptList::const_iterator s = scripts.begin(); s != scripts.end(); ++s) {
+			if ((*s)->name == load_template_override) {
+				return "urn:ardour:" + (*s)->path;
+			}
+		}
+
+		/* this will produce a more or less meaninful error later:
+		 * "ERROR: Could not open session template [abs-path to user-config dir]"
+		 */
+		return Glib::build_filename (ARDOUR::user_template_directory (), load_template_override);
 	}
 
 	if (template_chooser.get_selection()->count_selected_rows() > 0) {
@@ -305,8 +318,11 @@ SessionDialog::session_template_name ()
 std::string
 SessionDialog::session_name (bool& should_be_new)
 {
-	if (!_provided_session_name.empty() && !new_only) {
-		should_be_new = false;
+	if (!_provided_session_name.empty()) {
+		/* user gave name on cmdline/invocation. Did they also specify
+		   that it must be a new session?
+		*/
+		should_be_new = new_only;
 		return _provided_session_name;
 	}
 
@@ -338,7 +354,7 @@ SessionDialog::session_name (bool& should_be_new)
 std::string
 SessionDialog::session_folder ()
 {
-	if (!_provided_session_path.empty() && !new_only) {
+	if (!_provided_session_path.empty()) {
 		return _provided_session_path;
 	}
 
@@ -564,14 +580,6 @@ SessionDialog::open_button_pressed (GdkEventButton* ev)
 	return true;
 }
 
-struct LuaScriptListSorter
-{
-	bool operator() (LuaScriptInfoPtr const a, LuaScriptInfoPtr const b) const {
-		return ARDOUR::cmp_nocase_utf8 (a->name, b->name) < 0;
-	}
-};
-
-
 void
 SessionDialog::populate_session_templates ()
 {
@@ -592,8 +600,7 @@ SessionDialog::populate_session_templates ()
 		}
 	}
 
-	LuaScriptListSorter cmp;
-	std::sort (scripts.begin(), scripts.end(), cmp);
+	std::sort (scripts.begin(), scripts.end(), LuaScripting::Sorter());
 
 	for (LuaScriptList::const_iterator s = scripts.begin(); s != scripts.end(); ++s) {
 		TreeModel::Row row = *(template_model->append ());
@@ -690,7 +697,7 @@ SessionDialog::setup_new_session_page ()
 	HBox* template_hbox = manage (new HBox);
 
 	//if the "template override" is provided, don't give the user any template selections   (?)
-	if ( load_template_override.empty() ) {
+	if (load_template_override.empty()) {
 		template_hbox->set_spacing (8);
 
 		Gtk::ScrolledWindow *template_scroller = manage (new Gtk::ScrolledWindow());

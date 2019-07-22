@@ -182,6 +182,7 @@ private:
 	void routes_changed ();
 	void reconnect_to_routes ();
 	void select_arrangement ();
+	bool can_add_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, ARDOUR::DataType) const;
 	void add_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, ARDOUR::DataType);
 	void remove_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
 	void rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);

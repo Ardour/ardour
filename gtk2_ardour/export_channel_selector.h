@@ -43,6 +43,8 @@
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
 
+#include "widgets/ardour_dropdown.h"
+
 namespace ARDOUR {
 	class Session;
 	class ExportChannelConfiguration;
@@ -243,6 +245,7 @@ class TrackExportChannelSelector : public ExportChannelSelector
 {
   public:
 	TrackExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager);
+	~TrackExportChannelSelector ();
 
 	virtual void sync_with_manager ();
 
@@ -274,11 +277,11 @@ class TrackExportChannelSelector : public ExportChannelSelector
 
 	Gtk::ScrolledWindow          track_scroller;
 
-	Gtk::HBox                    options_box;
-	Gtk::CheckButton             track_output_button;
-	Gtk::Button                  select_tracks_button;
-	Gtk::Button                  select_busses_button;
-	Gtk::Button                  select_none_button;
+	Gtk::HBox                     options_box;
+	Gtk::CheckButton              track_output_button;
+	ArdourWidgets::ArdourDropdown select_menu;
+	Gtk::CheckMenuItem*           exclude_hidden;
+	Gtk::CheckMenuItem*           exclude_muted;
 	void select_tracks ();
 	void select_busses ();
 	void select_none ();

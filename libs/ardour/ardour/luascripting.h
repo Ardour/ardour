@@ -123,6 +123,10 @@ public:
 	static std::string get_factory_bytecode (const std::string&, const std::string& ffn = "factory", const std::string& fp = "f");
 	static std::string user_script_dir ();
 
+	struct LIBARDOUR_API Sorter {
+		bool operator() (LuaScriptInfoPtr const a, LuaScriptInfoPtr const b) const;
+	};
+
 private:
 	static LuaScripting* _instance; // singleton
 	LuaScripting ();

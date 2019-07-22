@@ -74,26 +74,3 @@ def build(bld):
 
     if bld.is_defined('NEED_INTL'):
         obj.linkflags = ' -lintl'
-
-    # Wrappers
-
-    wrapper_subst_dict = {
-            'INSTALL_PREFIX' : bld.env['PREFIX'],
-            'LIBDIR'         : os.path.normpath(bld.env['LIBDIR']),
-            'DATADIR'        : os.path.normpath(bld.env['DATADIR']),
-            'CONFDIR'        : os.path.normpath(bld.env['CONFDIR']),
-            'LIBS'           : 'build/libs',
-            'VERSION'        : bld.env['VERSION'],
-            'EXECUTABLE'     : 'build/headless/hardour-' + str(bld.env['VERSION'])
-    }
-
-    def set_subst_dict(obj, dict):
-        for i in dict:
-            setattr(obj, i, dict[i])
-
-    obj              = bld(features = 'subst')
-    obj.source       = 'hardev_common.sh.in'
-    obj.target       = 'hardev_common_waf.sh'
-    obj.chmod        = Utils.O755
-    obj.dict         = wrapper_subst_dict
-    set_subst_dict(obj, wrapper_subst_dict)

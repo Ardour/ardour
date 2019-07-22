@@ -353,7 +353,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		MessageDialog msg (string_compose (_("Your configuration files were copied. You can now restart %1."), PROGRAM_NAME), true);
 		msg.run ();
 		/* configuration was modified, exit immediately */
-		_exit (0);
+		_exit (EXIT_SUCCESS);
 	}
 
 
@@ -742,7 +742,7 @@ ARDOUR_UI::post_engine ()
 
 		halt_connection.disconnect ();
 		AudioEngine::instance()->stop ();
-		exit (0);
+		exit (EXIT_SUCCESS);
 
 	}
 
@@ -819,7 +819,7 @@ ARDOUR_UI::post_engine ()
 
 		halt_connection.disconnect ();
 		AudioEngine::instance()->stop ();
-		exit (0);
+		exit (EXIT_SUCCESS);
 	}
 
 	/* this being a GUI and all, we want peakfiles */
@@ -1264,7 +1264,7 @@ ARDOUR_UI::starting ()
 			c.signal_toggled().connect (sigc::hide_return (sigc::bind (sigc::ptr_fun (toggle_file_existence), path)));
 
 			if (d.run () != RESPONSE_OK) {
-				_exit (0);
+				_exit (EXIT_SUCCESS);
 			}
 		}
 #endif
@@ -1881,7 +1881,7 @@ ARDOUR_UI::open_recent_session ()
 				recent_session_dialog.hide();
 				return;
 			} else {
-				exit (1);
+				exit (EXIT_FAILURE);
 			}
 		}
 
@@ -3245,7 +3245,7 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 		ARDOUR_COMMAND_LINE::session_name = "";
 
 		if (get_session_parameters (true, false)) {
-			exit (1);
+			exit (EXIT_FAILURE);
 		}
 	}
 }
@@ -3288,14 +3288,32 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		template_name = load_template;
 	}
 
-	session_name = basename_nosuffix (ARDOUR_COMMAND_LINE::session_name);
 	session_path = ARDOUR_COMMAND_LINE::session_name;
 
 	if (!session_path.empty()) {
+
 		if (Glib::file_test (session_path.c_str(), Glib::FILE_TEST_EXISTS)) {
+
+			session_name = basename_nosuffix (ARDOUR_COMMAND_LINE::session_name);
+
 			if (Glib::file_test (session_path.c_str(), Glib::FILE_TEST_IS_REGULAR)) {
 				/* session/snapshot file, change path to be dir */
 				session_path = Glib::path_get_dirname (session_path);
+			}
+		} else {
+
+			/* session (file or folder) does not exist ... did the
+			 * user give us a path or just a name?
+			 */
+
+			if (session_path.find (G_DIR_SEPARATOR) == string::npos) {
+				/* user gave session name with no path info, use
+				   default session folder.
+				*/
+				session_name = ARDOUR_COMMAND_LINE::session_name;
+				session_path = Glib::build_filename (Config->get_default_session_parent_dir (), session_name);
+			} else {
+				session_name = basename_nosuffix (ARDOUR_COMMAND_LINE::session_name);
 			}
 		}
 	}
@@ -3328,11 +3346,8 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			session_dialog.clear_given ();
 		}
 
-		if (should_be_new || session_name.empty()) {
-			/* need the dialog to get info from user */
-
-			cerr << "run dialog\n";
-
+		if (session_name.empty()) {
+			/* need the dialog to get the name (at least) from the user */
 			switch (session_dialog.run()) {
 			case RESPONSE_ACCEPT:
 				break;
@@ -3486,12 +3501,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 			if (ret == -2) {
 				/* not connected to the AudioEngine, so quit to avoid an infinite loop */
-				exit (1);
-			}
-
-			if (!ARDOUR_COMMAND_LINE::immediate_save.empty()) {
-				_session->save_state (ARDOUR_COMMAND_LINE::immediate_save, false);
-				exit (1);
+				exit (EXIT_FAILURE);
 			}
 
 			/* clear this to avoid endless attempts to load the
@@ -3521,7 +3531,7 @@ ARDOUR_UI::close_session()
 	ARDOUR_COMMAND_LINE::session_name = "";
 
 	if (get_session_parameters (true, false)) {
-		exit (1);
+		exit (EXIT_FAILURE);
 	}
 }
 
@@ -3585,7 +3595,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 
 		switch (response) {
 		case RESPONSE_CANCEL:
-			exit (1);
+			exit (EXIT_FAILURE);
 		default:
 			break;
 		}
@@ -5580,7 +5590,7 @@ ARDOUR_UI::audioengine_became_silent ()
 	case Gtk::RESPONSE_NO:
 		/* save and quit */
 		save_state_canfail ("");
-		exit (0);
+		exit (EXIT_SUCCESS);
 		break;
 
 	case Gtk::RESPONSE_CANCEL:

@@ -1117,3 +1117,9 @@ GainMeter::route_active_changed ()
 		meter_configuration_changed (_meter->input_streams ());
 	}
 }
+
+void
+GainMeter::redraw_metrics ()
+{
+	GainMeterBase::redraw_metrics ();
+}

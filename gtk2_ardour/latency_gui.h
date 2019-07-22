@@ -60,17 +60,19 @@ public:
 	LatencyGUI (ARDOUR::Latent&, samplepos_t sample_rate, samplepos_t period_size);
 	~LatencyGUI() { }
 
-	void finish ();
-	void reset ();
 	void refresh ();
 
 private:
+	void reset ();
+	void finish ();
+
 	ARDOUR::Latent& _latent;
-	samplepos_t initial_value;
 	samplepos_t sample_rate;
 	samplepos_t period_size;
+
 	boost::shared_ptr<PBD::IgnorableControllable> ignored;
 
+	bool _ignore_change;
 	Gtk::Adjustment adjustment;
 	LatencyBarController bc;
 	Gtk::HBox hbox1;

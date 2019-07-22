@@ -147,6 +147,8 @@ public:
 	void showhide_mixbusses (bool on);
 #endif
 
+	bool screenshot (std::string const&);
+
 protected:
 	void set_axis_targets_for_operation ();
 	ARDOUR::AutomationControlSet selected_gaincontrols ();
@@ -175,6 +177,7 @@ private:
 	ArdourWidgets::VPane  rhs_pane1;
 	ArdourWidgets::VPane  rhs_pane2;
 	ArdourWidgets::HPane  inner_pane;
+	Gtk::VBox             strip_group_box;
 	Gtk::HBox             strip_packer;
 	Gtk::ScrolledWindow   vca_scroller;
 	Gtk::HBox             vca_hpacker;

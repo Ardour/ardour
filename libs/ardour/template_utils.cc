@@ -91,8 +91,6 @@ find_session_templates (vector<TemplateInfo>& template_names, bool read_xml)
 		return;
 	}
 
-	cerr << "Found " << templates.size() << " along " << template_search_path().to_string() << endl;
-
 	for (vector<string>::iterator i = templates.begin(); i != templates.end(); ++i) {
 		string file = session_template_dir_to_file (*i);
 

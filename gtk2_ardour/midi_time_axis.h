@@ -96,8 +96,6 @@ public:
 	boost::shared_ptr<MIDI::Name::MasterDeviceNames> get_device_names();
 	boost::shared_ptr<MIDI::Name::CustomDeviceMode> get_device_mode();
 
-	void update_range();
-
 	Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
 
 	StepEditor* step_editor() { return _step_editor; }
@@ -121,8 +119,6 @@ private:
 	void setup_midnam_patches ();
 	void update_patch_selector ();
 
-	void start_scroomer_update ();
-	void stop_scroomer_update ();
 	sigc::connection _note_range_changed_connection;
 
 	void model_changed(const std::string& model);

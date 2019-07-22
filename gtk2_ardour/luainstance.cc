@@ -45,6 +45,7 @@
 #include "luainstance.h"
 #include "luasignal.h"
 #include "marker.h"
+#include "mixer_ui.h"
 #include "region_view.h"
 #include "processor_box.h"
 #include "time_axis_view.h"
@@ -378,6 +379,10 @@ namespace LuaMixer {
 	}
 
 };
+
+static void mixer_screenshot (const std::string& fn) {
+	Mixer_UI::instance()->screenshot (fn);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -746,6 +751,8 @@ LuaInstance::register_classes (lua_State* L)
 		.beginNamespace ("ArdourUI")
 
 		.addFunction ("http_get", &http_get_unlogged)
+
+		.addFunction ("mixer_screenshot", &mixer_screenshot)
 
 		.addFunction ("processor_selection", &LuaMixer::processor_selection)
 

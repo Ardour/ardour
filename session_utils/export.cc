@@ -287,11 +287,11 @@ int main (int argc, char* argv[])
 			case 'V':
 				printf ("ardour-utils version %s\n\n", VERSIONSTRING);
 				printf ("Copyright (C) GPL 2015,2017 Robin Gareus <robin@gareus.org>\n");
-				exit (0);
+				exit (EXIT_SUCCESS);
 				break;
 
 			case 'h':
-				usage (0);
+				usage (EXIT_SUCCESS);
 				break;
 
 			default:

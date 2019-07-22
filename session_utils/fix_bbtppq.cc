@@ -416,18 +416,18 @@ int main (int argc, char* argv[])
 		case 'o':
 			outfile = optarg;
 			if (outfile.empty()) {
-				usage (0);
+				usage (EXIT_SUCCESS);
 			}
 			break;
 
 		case 'V':
 			printf ("ardour-utils version %s\n\n", VERSIONSTRING);
 			printf ("Copyright (C) GPL 2015 Robin Gareus <robin@gareus.org>\n");
-			exit (0);
+			exit (EXIT_SUCCESS);
 			break;
 
 		case 'h':
-			usage (0);
+			usage (EXIT_SUCCESS);
 			break;
 
 		default:

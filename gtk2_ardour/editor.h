@@ -61,7 +61,7 @@
 #include "selection_memento.h"
 #include "tempo_curve.h"
 
-#include "ptformat/ptfformat.h"
+#include "ptformat/ptformat.h"
 
 namespace Gtkmm2ext {
 	class Bindings;

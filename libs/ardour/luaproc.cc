@@ -624,13 +624,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 	Plugin::connect_and_run (bufs, start, end, speed, in, out, nframes, offset);
 
 	// This is needed for ARDOUR::Session requests :(
-	if (! SessionEvent::has_per_thread_pool ()) {
-		char name[64];
-		snprintf (name, 64, "Proc-%p", this);
-		pthread_set_name (name);
-		SessionEvent::create_per_thread_pool (name, 64);
-		PBD::notify_event_loops_about_thread_creation (pthread_self(), name, 64);
-	}
+	assert (SessionEvent::has_per_thread_pool ());
 
 	uint32_t const n = parameter_count ();
 	for (uint32_t i = 0; i < n; ++i) {

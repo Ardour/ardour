@@ -52,7 +52,7 @@ foreach (json_decode ($json, true) as $b) {
 
 if (count ($doc) == 0) {
 	fwrite (STDERR, "Failed to read luadoc.json\n");
-	exit (1);
+	exit (EXIT_FAILURE);
 }
 
 ################################################################################

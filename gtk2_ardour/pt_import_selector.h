@@ -27,7 +27,7 @@
 #include <sstream>
 #include <vector>
 
-#include "ptformat/ptfformat.h"
+#include "ptformat/ptformat.h"
 
 #include "ardour_dialog.h"
 #include "ardour/session.h"

@@ -158,6 +158,8 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	subplugin_menu.set_name ("ArdourContextMenu");
 
+	_note_range_changed_connection.disconnect();
+
 	if (!gui_property ("note-range-min").empty ()) {
 		midi_view()->apply_note_range (atoi (gui_property ("note-range-min").c_str()),
 		                               atoi (gui_property ("note-range-max").c_str()),
@@ -202,13 +204,6 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		_piano_roll_header->ToggleNoteSelection.connect (
 			sigc::mem_fun (*this, &MidiTimeAxisView::toggle_note_selection));
 
-		/* Update StreamView during scroomer drags.*/
-
-		_range_scroomer->DragStarting.connect (
-			sigc::mem_fun (*this, &MidiTimeAxisView::start_scroomer_update));
-		_range_scroomer->DragFinishing.connect (
-			sigc::mem_fun (*this, &MidiTimeAxisView::stop_scroomer_update));
-
 		/* Put the scroomer and the keyboard in a VBox with a padding
 		   label so that they can be reduced in height for stacked-view
 		   tracks.
@@ -231,8 +226,13 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		time_axis_hbox.pack_end(*v, false, false, 0);
 		midi_scroomer_size_group->add_widget (*v);
 
-		midi_view()->NoteRangeChanged.connect (
-			sigc::mem_fun(*this, &MidiTimeAxisView::update_range));
+		/* callback from StreamView scroomer drags, as well as
+		 * automatic changes of note-range (e.g. at rec-stop).
+		 * This callback is used to save the note-range-min/max
+		 * GUI Object property
+		 */
+		_note_range_changed_connection = midi_view()->NoteRangeChanged.connect (
+				sigc::mem_fun (*this, &MidiTimeAxisView::note_range_changed));
 
 		/* ask for notifications of any new RegionViews */
 		_view->RegionViewAdded.connect (
@@ -381,19 +381,6 @@ MidiTimeAxisView::setup_midnam_patches ()
 	if (!get_device_names()) {
 		model_changed ("Generic");
 	}
-}
-
-void
-MidiTimeAxisView::start_scroomer_update ()
-{
-	_note_range_changed_connection.disconnect();
-	_note_range_changed_connection = midi_view()->NoteRangeChanged.connect (
-		sigc::mem_fun (*this, &MidiTimeAxisView::note_range_changed));
-}
-void
-MidiTimeAxisView::stop_scroomer_update ()
-{
-	_note_range_changed_connection.disconnect();
 }
 
 void
@@ -1145,11 +1132,6 @@ MidiTimeAxisView::set_note_range (MidiStreamView::VisibleNoteRange range, bool a
 			midi_view()->set_note_range(range);
 		}
 	}
-}
-
-void
-MidiTimeAxisView::update_range()
-{
 }
 
 void

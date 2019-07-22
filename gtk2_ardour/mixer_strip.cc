@@ -106,6 +106,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
 	, _visibility (X_("mixer-element-visibility"))
+	, _suspend_menu_callbacks (false)
 	, control_slave_ui (sess)
 {
 	init ();
@@ -138,6 +139,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, _comment_button (_("Comments"))
 	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
 	, _visibility (X_("mixer-element-visibility"))
+	, _suspend_menu_callbacks (false)
 	, control_slave_ui (sess)
 {
 	init ();
@@ -605,11 +607,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		control_slave_ui.set_sensitive(true);
 	}
 
-	if (_mixer_owned && route()->is_master() ) {
-		spacer.show();
-	} else {
-		spacer.hide();
-	}
+	hide_master_spacer (false);
 
 	if (is_track()) {
 		monitor_input_button->show ();
@@ -934,10 +932,15 @@ MixerStrip::output_press (GdkEventButton *ev)
 			citems.pop_back ();
 		}
 
-		if (!ARDOUR::Profile->get_mixbus()) {
-			citems.push_back (SeparatorElem());
+		citems.push_back (SeparatorElem());
 
+		if (!ARDOUR::Profile->get_mixbus()) {
+			bool need_separator = false;
 			for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+				if (!_route->output()->can_add_port (*i)) {
+					continue;
+				}
+				need_separator = true;
 				citems.push_back (
 						MenuElem (
 							string_compose (_("Add %1 port"), (*i).to_i18n_string()),
@@ -945,9 +948,11 @@ MixerStrip::output_press (GdkEventButton *ev)
 							)
 						);
 			}
+			if (need_separator) {
+				citems.push_back (SeparatorElem());
+			}
 		}
 
-		citems.push_back (SeparatorElem());
 		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::edit_output_configuration)));
 
 		Gtkmm2ext::anchored_menu_popup(&output_menu, &output_button, "",
@@ -1040,7 +1045,13 @@ MixerStrip::input_press (GdkEventButton *ev)
 		}
 
 		citems.push_back (SeparatorElem());
+
+		bool need_separator = false;
 		for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+			if (!_route->input()->can_add_port (*i)) {
+				continue;
+			}
+			need_separator = true;
 			citems.push_back (
 				MenuElem (
 					string_compose (_("Add %1 port"), (*i).to_i18n_string()),
@@ -1048,8 +1059,10 @@ MixerStrip::input_press (GdkEventButton *ev)
 					)
 				);
 		}
+		if (need_separator) {
+			citems.push_back (SeparatorElem());
+		}
 
-		citems.push_back (SeparatorElem());
 		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::edit_input_configuration)));
 
 		Gtkmm2ext::anchored_menu_popup(&input_menu, &input_button, "",
@@ -2524,7 +2537,7 @@ MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
 
 	RadioMenuItem::Group group;
 
-	PBD::Unwinder<bool> (_suspend_menu_callbacks, true);
+	PBD::Unwinder<bool> uw (_suspend_menu_callbacks, true);
 	add_level_meter_item_point (items, group, _("Input"), MeterInput);
 	add_level_meter_item_point (items, group, _("Pre Fader"), MeterPreFader);
 	add_level_meter_item_point (items, group, _("Post Fader"), MeterPostFader);
@@ -2657,4 +2670,14 @@ bool
 MixerStrip::set_marked_for_display (bool yn)
 {
 	return RouteUI::mark_hidden (!yn);
+}
+
+void
+MixerStrip::hide_master_spacer (bool yn)
+{
+	if (_mixer_owned && route()->is_master() && !yn) {
+		spacer.show();
+	} else {
+		spacer.hide();
+	}
 }
