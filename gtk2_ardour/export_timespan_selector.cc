@@ -405,6 +405,7 @@ ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (ARDOUR::Session * se
 	range_view.append_column (*label_col);
 
 	range_view.append_column (_("Length"), range_cols.length);
+	range_view.append_column (_("Creation Date"), range_cols.date);
 }
 
 void
@@ -444,6 +445,11 @@ ExportTimespanSelectorSingle::fill_range_list ()
 			row[range_cols.name] = (*it)->name();
 			row[range_cols.label] = construct_label (*it);
 			row[range_cols.length] = construct_length (*it);
+
+			Glib::DateTime gdt(Glib::DateTime::create_now_local ((*it)->timestamp()));
+			row[range_cols.timestamp] = (*it)->timestamp();
+			row[range_cols.date] = gdt.format ("%F %H:%M");;
+
 
 			add_range_to_selection (*it, false);
 
@@ -496,6 +502,12 @@ ExportTimespanSelectorMultiple::ExportTimespanSelectorMultiple (ARDOUR::Session 
 	range_view.append_column (*label_col);
 
 	range_view.append_column (_("Length"), range_cols.length);
+	range_view.append_column (_("Creation Date"), range_cols.date);
+
+	range_list->set_sort_column(5, Gtk::SORT_DESCENDING);
+	Gtk::TreeViewColumn* date_col = range_view.get_column(5); // date column
+	date_col->set_sort_column(7); // set sort as the timestamp
+
 }
 
 void
@@ -526,6 +538,11 @@ ExportTimespanSelectorMultiple::fill_range_list ()
 		row[range_cols.name] = (*it)->name();
 		row[range_cols.label] = construct_label (*it);
 		row[range_cols.length] = construct_length (*it);
+
+		Glib::DateTime gdt(Glib::DateTime::create_now_local ((*it)->timestamp()));
+		row[range_cols.timestamp] = (*it)->timestamp();
+		row[range_cols.date] = gdt.format ("%F %H:%M");;
+
 	}
 
 	set_selection_from_state ();

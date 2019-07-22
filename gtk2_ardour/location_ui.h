@@ -79,6 +79,7 @@ protected:
 	Gtk::Entry    name_entry;
 	Gtk::Label    name_label;
 	Gtk::Label    number_label;
+	Gtk::Label    date_label;
 
 	Gtk::HBox     start_hbox;
 	AudioClock    start_clock;

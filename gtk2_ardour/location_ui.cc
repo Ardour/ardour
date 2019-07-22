@@ -63,12 +63,14 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	, glue_check_button (_("Glue"))
 	, _clock_group (0)
 {
+
 	i_am_the_modifier = 0;
 
 	remove_button.set_icon (ArdourIcon::CloseCross);
 	remove_button.set_events (remove_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
 	number_label.set_name ("LocationEditNumberLabel");
+	date_label.set_name ("LocationDateLabel");
 	name_label.set_name ("LocationEditNameLabel");
 	name_entry.set_name ("LocationEditNameEntry");
 	cd_check_button.set_name ("LocationEditCdButton");
@@ -242,6 +244,12 @@ LocationEditRow::set_location (Location *loc)
 		item_table.attach (hide_check_button, 5, 6, 0, 1, FILL, Gtk::FILL, 4, 0);
 		item_table.attach (lock_check_button, 6, 7, 0, 1, FILL, Gtk::FILL, 4, 0);
 		item_table.attach (glue_check_button, 7, 8, 0, 1, FILL, Gtk::FILL, 4, 0);
+
+		Glib::DateTime gdt(Glib::DateTime::create_now_local (location->timestamp()));
+		string date = gdt.format ("%F %H:%M");
+		date_label.set_text(date);
+		item_table.attach (date_label, 9, 10, 0, 1, FILL, Gtk::FILL, 4, 0);
+		
 	}
 	hide_check_button.set_active (location->is_hidden());
 	lock_check_button.set_active (location->locked());
@@ -803,7 +811,7 @@ LocationUI::LocationUI (std::string state_node_name)
 	location_rows.set_name("LocationLocRows");
 	location_rows_scroller.add (location_rows);
 	location_rows_scroller.set_name ("LocationLocRowsScroller");
-	location_rows_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	location_rows_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	location_rows_scroller.set_size_request (-1, 130);
 
 	newest_location = 0;
@@ -838,7 +846,7 @@ LocationUI::LocationUI (std::string state_node_name)
 	range_rows.set_name("LocationRangeRows");
 	range_rows_scroller.add (range_rows);
 	range_rows_scroller.set_name ("LocationRangeRowsScroller");
-	range_rows_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	range_rows_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	range_rows_scroller.set_size_request (-1, 130);
 
 	range_frame_box.set_spacing (5);
