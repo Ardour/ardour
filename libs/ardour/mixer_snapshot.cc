@@ -387,7 +387,7 @@ void MixerSnapshot::recall()
 
         if(group) {
             Stateful::ForceIDRegeneration fid;
-            
+
             uint32_t color;
             state.node.get_property(X_("rgba"), color);
 
@@ -544,7 +544,7 @@ void MixerSnapshot::load_from_session(string path)
     load_from_session(*(root));
 }
 
-void MixerSnapshot::load_from_route_template(XMLNode& node) 
+void MixerSnapshot::load_from_route_template(XMLNode& node)
 {
     string name, id, group_name;
     node.get_property(X_("name"), name);
@@ -636,14 +636,14 @@ void MixerSnapshot::load_from_session(XMLNode& node)
             string name, id;
             (*niter)->get_property(X_("name"), name);
             (*niter)->get_property(X_("id"), id);
-            
+
             /* reverse look-up the routes that belong to this group
              and notify them that they belong to this group name
              just like we do in a normal creation */
-             
+
             string routes;
             if((*niter)->get_property(X_("routes"), routes)) {
-                
+
                 stringstream str (routes);
                 vector<string> ids;
                 split(str.str(), ids, ' ');
