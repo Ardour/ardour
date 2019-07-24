@@ -310,7 +310,7 @@ AlsaAudioBackend::set_input_device_name (const std::string& d)
 		return 1;
 	}
 	/* device will be busy once used, hence cache the parameters */
-	/* return */ get_alsa_device_parameters (alsa_device.c_str(), true, &_input_audio_device_info);
+	/* return */ get_alsa_device_parameters (alsa_device.c_str(), false, &_input_audio_device_info);
 	return 0;
 }
 
@@ -869,6 +869,11 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 #ifndef NDEBUG
 	_pcmi->printinfo ();
+#else
+	/* If any debug parameter is set, print info */
+	if (getenv ("ZITA_ALSA_PCMI_DEBUG")) {
+		_pcmi->printinfo ();
+	}
 #endif
 
 	if (_n_outputs != _pcmi->nplay ()) {
