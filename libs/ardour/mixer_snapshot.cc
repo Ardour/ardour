@@ -344,11 +344,13 @@ void MixerSnapshot::recall()
             route = 0; //explicitly drop reference
 
             RouteList rl = _session->new_route_from_template(1, order, node, name, disp);
-            boost::shared_ptr<Route> route = rl.front();
 
-            if(!route) {
+            //rl can be empty()
+            if(rl.empty()) {
                 continue;
             }
+
+            boost::shared_ptr<Route> route = rl.front();
 
             if(get_recall_groups()) {
                 XMLNode* group_node = find_named_node(node, X_("Group"));
