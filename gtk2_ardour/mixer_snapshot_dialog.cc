@@ -288,8 +288,8 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
         int index = (*i) - 1; //the actual index at the time of appending
         CellRendererToggle* cell = dynamic_cast<CellRendererToggle*>(display.get_column_cell_renderer(index));
         string col_title = display.get_column(index)->get_title();
+        display.get_column(index)->set_expand(true);
         cell->property_activatable() = true;
-        cell->property_radio() = true;
         cell->signal_toggled().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::recall_flag_cell_action), global, col_title));
     }
 
@@ -324,7 +324,7 @@ bool MixerSnapshotDialog::bootstrap_display_and_model(Gtkmm2ext::DnDTreeView<str
     scroller.add(display);
 
     Table* table = manage(new Table(3, 3));
-    table->set_size_request(-1, 400);
+    table->set_size_request(-1, 250);
     table->attach(scroller,        0, 3, 0, 5      );
     table->attach(*vbox,           2, 3, 6, 8, FILL|EXPAND, FILL, 5, 5);
     top_level_view_box.pack_start(*table);
