@@ -394,9 +394,9 @@ void MixerSnapshotDialog::new_row(Glib::RefPtr<ListStore> model, MixerSnapshot* 
 
     GStatBuf gsb;
     g_stat(path.c_str(), &gsb);
-    Glib::DateTime gdt(Glib::DateTime::create_now_local(gsb.st_ctime));
+    Glib::DateTime gdt(Glib::DateTime::create_now_local(gsb.st_mtime));
 
-    row[_columns.timestamp] = gsb.st_ctime;
+    row[_columns.timestamp] = gsb.st_mtime;
     row[_columns.date]      = gdt.format ("%F %H:%M");
     row[_columns.full_path] = path;
     row[_columns.snapshot]  = snap;
