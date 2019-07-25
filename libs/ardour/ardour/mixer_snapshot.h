@@ -128,6 +128,7 @@ class LIBARDOUR_API MixerSnapshot
         std::string label;
         std::time_t timestamp;
         std::string last_modified_with;
+        std::string suffix;
         RecallFlags _flags;
 
         std::vector<State> route_states;

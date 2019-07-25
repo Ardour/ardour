@@ -54,6 +54,7 @@ MixerSnapshot::MixerSnapshot(Session* s)
     , label("snapshot")
     , timestamp(time(0))
     , last_modified_with(string_compose("%1 %2", PROGRAM_NAME, revision))
+    , suffix (template_suffix)
     , _flags(RecallFlags(127))
 {
     if(s) {
@@ -67,29 +68,29 @@ MixerSnapshot::MixerSnapshot(Session* s, string file_path)
     , label("snapshot")
     , timestamp(time(0))
     , last_modified_with(string_compose("%1 %2", PROGRAM_NAME, revision))
+    , suffix (template_suffix)
     , _flags(RecallFlags(127))
 {
     if(s) {
         _session = s;
     }
 
+    //this is most likely a session dir
     if(Glib::file_test(file_path.c_str(), Glib::FILE_TEST_IS_DIR)) {
         load_from_session(file_path);
         return;
     }
 
-    string suffix = "." + get_suffix(file_path);
-    if(suffix == statefile_suffix) {
+    string file_suffix = "." + get_suffix(file_path);
+
+    //this is a session file
+    if(file_suffix == statefile_suffix) {
         load_from_session(file_path);
         return;
     }
 
+    //this is a mixer template or snapshot
     if(suffix == template_suffix) {
-        load_from_session(file_path);
-        return;
-    }
-
-    if(suffix == ".xml") {
         load(file_path);
         return;
     }
@@ -414,11 +415,17 @@ void MixerSnapshot::recall()
     _session->commit_reversible_command();
 }
 
-void MixerSnapshot::write(const string path)
+void MixerSnapshot::write(const string dir)
 {
     if(empty()) {
         return;
     }
+
+    if(!Glib::file_test(dir.c_str(), Glib::FILE_TEST_IS_DIR)) {
+        return;
+    }
+
+    string path = Glib::build_filename(dir, label + template_suffix);
 
     XMLNode* node = new XMLNode("MixerSnapshot");
     node->set_property(X_("flags"), _flags);
@@ -443,15 +450,16 @@ void MixerSnapshot::write(const string path)
 
     XMLTree tree;
     tree.set_root(node);
-    tree.write(path);
+    tree.write(path.c_str());
 }
 
 void MixerSnapshot::load(const string path)
 {
     clear();
 
-    if(!Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS))
+    if(!Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS)) {
         return;
+    }
 
     XMLTree tree;
     tree.read(path);
