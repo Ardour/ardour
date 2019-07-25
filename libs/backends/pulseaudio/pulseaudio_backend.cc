@@ -1376,8 +1376,7 @@ PulseAudioBackend::main_process_thread ()
 			/* drain stream freewheeling */
 			pa_threaded_mainloop_lock (p_mainloop);
 			_operation_succeeded = false;
-			sync_pulse (pa_stream_drain (p_stream, stream_operation_cb, this));
-			if (!_operation_succeeded) {
+			if (!sync_pulse (pa_stream_drain (p_stream, stream_operation_cb, this)) || !_operation_succeeded) {
 				break;
 			}
 
@@ -1388,8 +1387,7 @@ PulseAudioBackend::main_process_thread ()
 			if (!_freewheel) {
 				pa_threaded_mainloop_lock (p_mainloop);
 				_operation_succeeded = false;
-				sync_pulse (pa_stream_flush (p_stream, stream_operation_cb, this));
-				if (!_operation_succeeded) {
+				if (!sync_pulse (pa_stream_flush (p_stream, stream_operation_cb, this)) || !_operation_succeeded) {
 					break;
 				}
 			}
@@ -1405,6 +1403,7 @@ PulseAudioBackend::main_process_thread ()
 			}
 
 			if (pa_stream_get_state (p_stream) != PA_STREAM_READY) {
+				pa_threaded_mainloop_unlock (p_mainloop);
 				break;
 			}
 
@@ -1412,6 +1411,7 @@ PulseAudioBackend::main_process_thread ()
 			/* call engine process callback */
 			_last_process_start = g_get_monotonic_time ();
 			if (engine.process_callback (_samples_per_period)) {
+				pa_threaded_mainloop_unlock (p_mainloop);
 				_active = false;
 				return 0;
 			}
@@ -1430,6 +1430,7 @@ PulseAudioBackend::main_process_thread ()
 			}
 
 			if (pa_stream_write (p_stream, buf, bytes_to_write, NULL, 0, PA_SEEK_RELATIVE) < 0) {
+				pa_threaded_mainloop_unlock (p_mainloop);
 				break;
 			}
 			pa_threaded_mainloop_unlock (p_mainloop);
