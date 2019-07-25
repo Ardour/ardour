@@ -425,7 +425,7 @@ void MixerSnapshot::write(const string dir)
         return;
     }
 
-    string path = Glib::build_filename(dir, label + template_suffix);
+    string path = Glib::build_filename(dir, label + suffix);
 
     XMLNode* node = new XMLNode("MixerSnapshot");
     node->set_property(X_("flags"), _flags);
