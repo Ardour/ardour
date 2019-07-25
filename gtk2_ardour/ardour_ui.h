@@ -306,6 +306,9 @@ public:
 
 	void start_duplicate_routes ();
 
+	void save_as_template_dialog_response (int response, SaveTemplateDialog* d);
+	void save_as_template ();
+
 	void add_video (Gtk::Window* float_window);
 	void remove_video ();
 	void start_video_server_menu (Gtk::Window* float_window);
