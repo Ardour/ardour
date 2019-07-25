@@ -189,6 +189,24 @@ ARDOUR_UI::install_actions ()
 	ActionManager::write_sensitive_actions.push_back (act);
 	ActionManager::route_selection_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (main_actions, X_("save-route-template"), _("Save Selected Tracks as Template..."),
+	                                      sigc::mem_fun(*this, &ARDOUR_UI::save_route_template));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
+	ActionManager::route_selection_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (main_actions, X_("apply-route-template"), _("Apply Track Template..."),
+	                                      sigc::mem_fun(*this, &ARDOUR_UI::apply_route_template));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
+	ActionManager::route_selection_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (main_actions, X_("new-routes-from-template"), _("New Tracks from Template..."),
+	                                      sigc::mem_fun(*this, &ARDOUR_UI::new_from_route_template));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
+	ActionManager::route_selection_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (main_actions, X_("cancel-solo"), _("Cancel Solo"), sigc::mem_fun(*this, &ARDOUR_UI::cancel_solo));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);

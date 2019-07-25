@@ -404,6 +404,11 @@
       <separator/>
       <menuitem action='insert-time'/>
       <menuitem action='remove-time'/>
+      <separator/>
+      <menuitem action='save-route-template'/>
+      <menuitem action='apply-route-template'/>
+      <menuitem action='new-routes-from-template'/>
+      <separator/>
       <menuitem action="move-selected-tracks-up"/>
       <menuitem action="move-selected-tracks-down"/>
       <menu action='TrackHeightMenu'>
