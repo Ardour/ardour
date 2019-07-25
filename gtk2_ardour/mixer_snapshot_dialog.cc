@@ -20,6 +20,8 @@
 #include <stdio.h>
 
 #include "ardour/filesystem_paths.h"
+#include "ardour/filename_extensions.h"
+#include "ardour/directory_names.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/session_directory.h"
 
@@ -92,8 +94,9 @@ void MixerSnapshotDialog::set_session(Session* s)
 {
     if(s) {
         ArdourWindow::set_session(s);
-        global_snap_path = Glib::build_filename(user_config_directory(-1), "mixer_snapshots");
-        local_snap_path = Glib::build_filename(_session->session_directory().root_path(), "mixer_snapshots");
+        global_snap_path = Glib::build_filename(user_config_directory(-1), route_templates_dir_name);
+        printf("Set global snap path to: %s\n", global_snap_path.c_str());
+        local_snap_path = Glib::build_filename(_session->session_directory().root_path(), route_templates_dir_name);
     }
     refill();
 }
@@ -442,14 +445,14 @@ void MixerSnapshotDialog::new_snapshot(bool global)
         if (new_label.length() > 0) {
             snap->set_label(new_label);
 
-            string path = Glib::build_filename(global ? global_snap_path : local_snap_path, snap->get_label() + ".xml");
+            string path = Glib::build_filename(global ? global_snap_path : local_snap_path, snap->get_label() + template_suffix);
             if(!rl.empty() && sel->get_active()) {
                 snap->snap(rl);
             } else {
                 snap->snap();
             }
 
-            snap->write(path);
+            snap->write(global?global_snap_path:local_snap_path);
 
             if(global && !snap->empty()) {
                 new_row(global_model, snap, path);
