@@ -1044,6 +1044,9 @@ def configure(conf):
     if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw':
         autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
 
+    if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw':
+        autowaf.check_pkg(conf, 'libpulse', uselib_store='PULSEAUDIO', atleast_version='10.0', mandatory=False)
+
     if re.search ("openbsd", sys.platform) != None:
         conf.env.append_value('LDFLAGS', '-L/usr/X11R6/lib')
 
@@ -1229,6 +1232,7 @@ int main () { return 0; }
     conf.env['BUILD_DUMMYBACKEND'] = any('dummy' in b for b in backends)
     conf.env['BUILD_PABACKEND'] = any('portaudio' in b for b in backends)
     conf.env['BUILD_CORECRAPPITA'] = any('coreaudio' in b for b in backends)
+    conf.env['BUILD_PULSEAUDIO'] = any('pulseaudio' in b for b in backends)
 
     if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
         print("PortAudio Backend is not for Linux")
@@ -1240,6 +1244,14 @@ int main () { return 0; }
 
     if re.search ("linux", sys.platform) == None and conf.env['BUILD_ALSABACKEND']:
         print("ALSA Backend is only available on Linux")
+        sys.exit(1)
+
+    if re.search ("linux", sys.platform) == None and conf.env['BUILD_PULSEAUDIO']:
+        print("Pulseaudio Backend is only available on Linux")
+        sys.exit(1)
+
+    if conf.env['BUILD_PULSEAUDIO'] and not conf.is_defined('HAVE_PULSEAUDIO'):
+        print("Pulseaudio Backend requires libpulse-dev")
         sys.exit(1)
 
     set_compiler_flags (conf, Options.options)
@@ -1327,6 +1339,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('ALSA Backend',          conf.env['BUILD_ALSABACKEND'])
     write_config_text('Dummy backend',         conf.env['BUILD_DUMMYBACKEND'])
     write_config_text('JACK Backend',          conf.env['BUILD_JACKBACKEND'])
+    write_config_text('Pulseaudio Backend',    conf.env['BUILD_PULSEAUDIO'])
     config_text.write("\\n\\\n")
     write_config_text('Buildstack', conf.env['DEPSTACK_REV'])
     write_config_text('Mac i386 Architecture', opts.generic)
