@@ -68,6 +68,7 @@
 #include "foldback_strip.h"
 #include "keyboard.h"
 #include "mixer_ui.h"
+#include "mixer_snapshots.h"
 #include "mixer_strip.h"
 #include "monitor_section.h"
 #include "plugin_selector.h"
@@ -273,7 +274,12 @@ Mixer_UI::Mixer_UI ()
 	rhs_pane2.add (rhs_pane1);
 	rhs_pane2.add (group_display_frame);
 
-	list_vpacker.pack_start (rhs_pane2, true, true);
+	_mix_snaps = new MixerSnapshotList();
+	
+	rhs_pane3.add (rhs_pane2);
+	rhs_pane3.add (_mix_snaps->widget());
+
+	list_vpacker.pack_start (rhs_pane3, true, true);
 
 	vca_label_bar.set_size_request (-1, 16 + 1); /* must match height in GroupTabs::set_size_request()  + 1 border px*/
 	vca_vpacker.pack_start (vca_label_bar, false, false);
@@ -325,6 +331,7 @@ Mixer_UI::Mixer_UI ()
 
 	rhs_pane1.set_drag_cursor (*PublicEditor::instance().cursors()->expand_up_down);
 	rhs_pane2.set_drag_cursor (*PublicEditor::instance().cursors()->expand_up_down);
+	rhs_pane3.set_drag_cursor (*PublicEditor::instance().cursors()->expand_up_down);
 	list_hpane.set_drag_cursor (*PublicEditor::instance().cursors()->expand_left_right);
 	inner_pane.set_drag_cursor (*PublicEditor::instance().cursors()->expand_left_right);
 
@@ -349,6 +356,7 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_frame.show();
 	rhs_pane1.show();
 	rhs_pane2.show();
+	rhs_pane3.show();
 	strip_packer.show();
 	inner_pane.show();
 	vca_scroller.show();
@@ -1096,6 +1104,8 @@ Mixer_UI::set_session (Session* sess)
 	}
 
 	_group_tabs->set_session (sess);
+
+	_mix_snaps->set_session (sess);
 
 	if (!_session) {
 		_selection.clear ();

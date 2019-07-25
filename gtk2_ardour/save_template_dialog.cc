@@ -31,9 +31,12 @@
 using namespace Gtk;
 using namespace ARDOUR;
 
-SaveTemplateDialog::SaveTemplateDialog (const std::string& name, const std::string& desc)
+SaveTemplateDialog::SaveTemplateDialog (const std::string& name, const std::string& desc, bool local)
 	: ArdourDialog (_("Save as template"))
 {
+printf("saving %s\n", local ? "LOCAL" : "PREFS");
+	_local = local;
+	
 	_name_entry.get_buffer()->set_text (name);
 	_description_editor.get_buffer()->set_text (desc);
 	_description_editor.set_wrap_mode (Gtk::WRAP_WORD);

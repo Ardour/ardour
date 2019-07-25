@@ -189,8 +189,14 @@ ARDOUR_UI::install_actions ()
 	ActionManager::write_sensitive_actions.push_back (act);
 	ActionManager::route_selection_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (main_actions, X_("MixerSnapshot"), _("Mixer Snapshot..."),
+	                                      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::save_route_template), true));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
+	ActionManager::route_selection_sensitive_actions.push_back (act);
+
 	act = ActionManager::register_action (main_actions, X_("save-route-template"), _("Save Selected Tracks as Template..."),
-	                                      sigc::mem_fun(*this, &ARDOUR_UI::save_route_template));
+	                                      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::save_route_template), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 	ActionManager::route_selection_sensitive_actions.push_back (act);

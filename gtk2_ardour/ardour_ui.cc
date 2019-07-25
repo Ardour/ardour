@@ -101,6 +101,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/automation_watch.h"
+#include "ardour/directory_names.h"
 #include "ardour/disk_reader.h"
 #include "ardour/disk_writer.h"
 #include "ardour/filename_extensions.h"

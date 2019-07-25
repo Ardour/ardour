@@ -307,7 +307,7 @@ public:
 	void start_duplicate_routes ();
 
 	void save_as_template_dialog_response (int response, SaveTemplateDialog* d);
-	void save_route_template ();
+	void save_route_template (bool local);  //local route templates are "mixer snapshots"
 	void apply_route_template ();
 	void new_from_route_template ();
 

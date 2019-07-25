@@ -30,12 +30,14 @@
 class SaveTemplateDialog : public ArdourDialog
 {
 public:
-	SaveTemplateDialog (const std::string& name, const std::string& description = "");
+	SaveTemplateDialog (const std::string& name, const std::string& description = "", bool local = false);
 
 	std::string get_template_name () const;
 	std::string get_description () const;
-
+	bool        is_local() { return _local; }
 private:
+	bool _local;
+
 	Gtk::Entry _name_entry;
 	Gtk::TextView _description_editor;
 };

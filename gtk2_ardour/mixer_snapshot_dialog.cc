@@ -519,7 +519,7 @@ void MixerSnapshotDialog::refill_display(bool global)
 
     for(vector<string>::iterator i = files.begin(); i != files.end(); i++) {
         string path = *(i);
-        MixerSnapshot* snap = new MixerSnapshot(_session, path);
+        MixerSnapshot* snap = new MixerSnapshot(_session, path); //ToDo: pretty sure this is leaked
         new_row(model, snap, path);
     }
 }
