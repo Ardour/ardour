@@ -29,6 +29,7 @@
 #include <glibmm.h>
 
 #include "pbd/file_utils.h"
+#include "pbd/basename.h"
 #include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
 
@@ -188,6 +189,10 @@ find_route_templates (vector<TemplateInfo>& template_names)
 		} catch (XMLException &e) {}
 
 		rti.name = IO::name_from_state (*root->children().front());
+
+		if (rti.name.empty()) {
+			rti.name = basename_nosuffix(*i);
+		}
 		rti.path = fullpath;
 
 		template_names.push_back (rti);
