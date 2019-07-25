@@ -557,13 +557,14 @@ while [ true ] ; do
 
 			# don't use anything mapped at a specific address
 			if echo $dep | grep -qs '0x' ; then continue; fi
-			# don't include /lib
+			# don't include any distro libraries
 			if echo $dep | grep -qs "^/lib/" ; then continue; fi
-			# don't include jack
+			if echo $dep | grep -qs "^/usr/lib/" ; then continue; fi
+			if echo $dep | grep -qs "^/usr/local/lib/" ; then continue; fi
+			## the following re likley redudant ##
+			# skip jack, ALSA & pulse
 			if echo $dep | grep -qs libjack ; then continue; fi
-			# don't include ALSA
 			if echo $dep | grep -qs libasound ; then continue; fi
-			# nor pulse
 			if echo $dep | grep -qs libpulse ; then continue; fi
 			# don't include any X Window libraries
 			if echo $dep | grep -qs libX\. ; then continue; fi
