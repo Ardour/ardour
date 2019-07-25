@@ -1104,6 +1104,7 @@ EngineControl::update_midi_options ()
 
 	if (midi_options.size() == 1) {
 		/* only contains the "none" option */
+		set_popdown_strings (midi_option_combo, midi_options);
 		midi_option_combo.set_sensitive (false);
 	} else {
 		if (_have_control) {
