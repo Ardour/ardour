@@ -23,7 +23,6 @@
 #include <list>
 #include <iostream>
 #include <map>
-#include <ctime>
 
 #include <sys/types.h>
 
@@ -70,7 +69,7 @@ public:
 	void lock ();
 	void unlock ();
 
-	time_t timestamp() { return _timestamp; };
+	int64_t timestamp() const { return _timestamp; };
 	samplepos_t start() const { return _start; }
 	samplepos_t end() const { return _end; }
 	samplecnt_t length() const { return _end - _start; }
@@ -162,7 +161,7 @@ private:
 	bool               _locked;
 	PositionLockStyle  _position_lock_style;
 	boost::shared_ptr<SceneChange> _scene_change;
-	time_t             _timestamp;
+	int64_t            _timestamp;
 
 	void set_mark (bool yn);
 	bool set_flag_internal (bool yn, Flags flag);
