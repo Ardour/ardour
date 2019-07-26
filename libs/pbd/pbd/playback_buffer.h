@@ -41,7 +41,6 @@ public:
 
 	PlaybackBuffer (guint sz, guint res = 8191)
 	: reservation (res)
-	, _reservation_lock ()
 	{
 		sz += reservation;
 		size = power_of_two_size (sz);

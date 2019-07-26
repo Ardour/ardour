@@ -29,8 +29,18 @@ namespace PBD {
  *   bool try_lock();
  *   void unlock();
  * };
+ *
+ * initialize with BOOST_DETAIL_SPINLOCK_INIT
  */
-typedef boost::detail::spinlock spinlock_t;
+struct spinlock_t {
+public:
+	spinlock_t () : l (BOOST_DETAIL_SPINLOCK_INIT) {};
+	void lock () { l.lock (); }
+	void unlock () { l.unlock (); }
+	bool try_lock () { return l.try_lock (); }
+private:
+	boost::detail::spinlock l;
+};
 
 /* RAII wrapper */
 class LIBPBD_API SpinLock {
