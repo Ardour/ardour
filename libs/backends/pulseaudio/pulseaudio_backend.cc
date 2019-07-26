@@ -22,11 +22,14 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <glibmm.h>
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
+#include "pbd/file_utils.h"
 #include "pbd/pthread_utils.h"
 
 #include "ardour/port_manager.h"
@@ -519,6 +522,30 @@ std::string
 PulseAudioBackend::midi_option () const
 {
 	return get_standard_device_name (DeviceNone);
+}
+
+/* External control app */
+std::string
+PulseAudioBackend::control_app_name () const
+{
+	std::string ignored;
+	if (PBD::find_file (PBD::Searchpath (Glib::getenv("PATH")), X_("pavucontrol"), ignored)) {
+		return "pavucontrol";
+	}
+	return "";
+}
+
+void
+PulseAudioBackend::launch_control_app ()
+{
+#ifdef NO_VFORK
+	(void) system ("pavucontrol");
+#else
+	if (::vfork () == 0) {
+		::execlp ("pavucontrol", "pavucontrol", (char*)NULL);
+		exit (EXIT_SUCCESS);
+	}
+#endif
 }
 
 /* State Control */

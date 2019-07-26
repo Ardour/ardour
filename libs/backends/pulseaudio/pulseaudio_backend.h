@@ -202,8 +202,8 @@ public:
 	uint32_t    systemic_midi_output_latency (std::string const) const { return 0; }
 
 	/* External control app */
-	std::string control_app_name () const { return std::string (); }
-	void launch_control_app () { }
+	std::string control_app_name () const;
+	void launch_control_app ();
 
 	/* MIDI */
 	std::vector<std::string>  enumerate_midi_options () const;
