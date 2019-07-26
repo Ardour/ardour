@@ -649,6 +649,10 @@ PulseAudioBackend::stop ()
 	}
 
 	_run = false;
+
+	pa_threaded_mainloop_lock (p_mainloop);
+	sync_pulse (pa_stream_flush (p_stream, stream_operation_cb, this));
+
 	if (pthread_join (_main_thread, &status)) {
 		PBD::error << _("PulseAudioBackend: failed to terminate.") << endmsg;
 		return -1;
