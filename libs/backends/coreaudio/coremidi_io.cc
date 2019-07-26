@@ -153,7 +153,7 @@ CoreMidiIo::CoreMidiIo()
 	pthread_mutex_init (&_discovery_lock, 0);
 
 #ifndef NDEBUG
-	const char *p = getenv ("COREMIDIDEBUG");
+	const char *p = getenv ("ARDOUR_COREMIDI_DEBUG");
 	if (p && *p) _debug_mode = atoi (p);
 #endif
 }

@@ -958,10 +958,10 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 	_midi_device_thread_active = listen_for_midi_device_changes ();
 
-#if 1
-	if (NULL != getenv ("ALSAEXT")) {
+#if 1 // TODO: we need a GUI (and API) for this
+	if (NULL != getenv ("ARDOUR_ALSA_EXT")) {
 		boost::char_separator<char> sep (";");
-		boost::tokenizer<boost::char_separator<char> > devs (std::string(getenv ("ALSAEXT")), sep);
+		boost::tokenizer<boost::char_separator<char> > devs (std::string(getenv ("ARDOUR_ALSA_EXT")), sep);
 		BOOST_FOREACH (const std::string& tmp, devs) {
 			std::string dev (tmp);
 			std::string::size_type n = dev.find ('@');

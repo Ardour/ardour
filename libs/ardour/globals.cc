@@ -439,7 +439,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	}
 
 #ifndef NDEBUG
-	if (getenv("LUA_METATABLES")) {
+	if (getenv("ARDOUR_LUA_METATABLES")) {
 		luabridge::Security::setHideMetatables (false);
 	}
 #endif

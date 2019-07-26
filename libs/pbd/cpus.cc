@@ -43,8 +43,8 @@
 uint32_t
 hardware_concurrency()
 {
-	if (getenv("CONCURRENCY")) {
-		int c = atoi (getenv("CONCURRENCY"));
+	if (getenv("ARDOUR_CONCURRENCY")) {
+		int c = atoi (getenv("ARDOUR_CONCURRENCY"));
 		if (c > 0) {
 			return c;
 		}

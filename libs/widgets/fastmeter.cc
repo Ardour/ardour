@@ -74,7 +74,7 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	last_peak_rect.x = 0;
 	last_peak_rect.y = 0;
 
-	no_rgba_overlay = ! Glib::getenv("NO_METER_SHADE").empty();
+	no_rgba_overlay = ! Glib::getenv("ARDOUR_NO_METER_SHADE").empty();
 
 	_clr[0] = clr0;
 	_clr[1] = clr1;

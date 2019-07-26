@@ -73,7 +73,7 @@ public:
 		}
 
 #ifndef NDEBUG
-		const bool calc_avg_load = NULL != getenv("AVGLOAD");
+		const bool calc_avg_load = NULL != getenv("ARDOUR_AVG_DSP_LOAD");
 #else
 		const bool calc_avg_load = false;
 #endif
