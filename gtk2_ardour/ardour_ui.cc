@@ -5458,7 +5458,7 @@ ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 	audio_midi_setup->set_position (WIN_POS_CENTER);
 
 	if (desired_sample_rate != 0) {
-		if (Config->get_try_autostart_engine () || getenv ("TRY_AUTOSTART_ENGINE")) {
+		if (Config->get_try_autostart_engine () || g_getenv ("ARDOUR_TRY_AUTOSTART_ENGINE")) {
 			audio_midi_setup->try_autostart ();
 			if (ARDOUR::AudioEngine::instance()->running()) {
 				return 0;
