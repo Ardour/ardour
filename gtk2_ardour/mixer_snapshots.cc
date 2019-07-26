@@ -180,7 +180,7 @@ MixerSnapshotList::redisplay ()
 	suffix_pattern = suffix_pattern + template_suffix;  // "*.template"
 
     vector<string> files;
-    find_files_matching_pattern(files, local_snap_path, suffix_pattern);  //assume they are all templates in here?
+    find_files_matching_pattern(files, local_snap_path, suffix_pattern);
 
     if(files.empty()) {
         return;
