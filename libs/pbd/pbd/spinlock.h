@@ -32,9 +32,11 @@ namespace PBD {
  *
  * initialize with BOOST_DETAIL_SPINLOCK_INIT
  */
+static boost::detail::spinlock sl_init = BOOST_DETAIL_SPINLOCK_INIT;
+
 struct spinlock_t {
 public:
-	spinlock_t () : l (BOOST_DETAIL_SPINLOCK_INIT) {};
+	spinlock_t () : l (sl_init) {};
 	void lock () { l.lock (); }
 	void unlock () { l.unlock (); }
 	bool try_lock () { return l.try_lock (); }
