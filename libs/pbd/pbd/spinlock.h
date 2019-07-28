@@ -41,6 +41,9 @@ public:
 	bool try_lock () { return l.try_lock (); }
 private:
 	boost::detail::spinlock l;
+
+	/* prevent copy construction */
+	spinlock_t (const spinlock_t&);
 };
 
 /* RAII wrapper */
