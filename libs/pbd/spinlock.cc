@@ -25,6 +25,11 @@
 
 using namespace PBD;
 
+spinlock_t::spinlock_t ()
+{
+	l = BOOST_DETAIL_SPINLOCK_INIT;
+}
+
 SpinLock::SpinLock (spinlock_t& lock)
 	: _lock (lock)
 {
