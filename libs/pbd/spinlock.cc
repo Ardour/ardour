@@ -21,13 +21,16 @@
 #include <malloc.h>
 #endif
 
+#include <cstring>
+
 #include "pbd/spinlock.h"
 
 using namespace PBD;
 
 spinlock_t::spinlock_t ()
 {
-	l = BOOST_DETAIL_SPINLOCK_INIT;
+	boost::detail::spinlock init = BOOST_DETAIL_SPINLOCK_INIT;
+	std::memcpy (&l, &init, sizeof (init));
 }
 
 SpinLock::SpinLock (spinlock_t& lock)
