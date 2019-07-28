@@ -28,10 +28,17 @@
 using namespace PBD;
 
 spinlock_t::spinlock_t ()
+#ifdef BOOST_SMART_PTR_DETAIL_SPINLOCK_STD_ATOMIC_HPP_INCLUDED
+	/* C++11 non-static data member initialization,
+	 * with non-copyable std::atomic ATOMIC_FLAG_INIT
+	 */
+	: l {BOOST_DETAIL_SPINLOCK_INIT} {}
+#else
+	/* default C++ assign struct's first member */
 {
-	boost::detail::spinlock init = BOOST_DETAIL_SPINLOCK_INIT;
-	std::memcpy (&l, &init, sizeof (init));
+	l = BOOST_DETAIL_SPINLOCK_INIT;
 }
+#endif
 
 SpinLock::SpinLock (spinlock_t& lock)
 	: _lock (lock)
