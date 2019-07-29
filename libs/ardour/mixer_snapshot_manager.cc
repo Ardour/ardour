@@ -27,6 +27,8 @@
 #include "ardour/session_directory.h"
 #include "ardour/template_utils.h"
 
+#include "pbd/basename.h"
+
 using namespace ARDOUR;
 using namespace std;
 
@@ -51,9 +53,13 @@ void MixerSnapshotManager::refresh()
 
     for(vector<TemplateInfo>::const_iterator it = global_templates.begin(); it != global_templates.end(); it++) {
         TemplateInfo info = (*it);
-        printf("Snapshot name: %s\n", info.name.c_str());
-        prinft("Path: %s\n", info.path.c_str());
-        _global_snapshots.insert(new MixerSnapshot(_session, info.path));
+
+        MixerSnapshot* snap = new MixerSnapshot(_session, info.path);
+        snap->set_label(info.name);
+        _global_snapshots.insert(snap);
+        
+        printf("Snapshot name: %s\n", snap->get_label().c_str());
+        printf("Path: %s\n", info.path.c_str());
     }
 
     //TODO: the local part of this discovery
