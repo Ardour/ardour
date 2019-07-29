@@ -1159,8 +1159,8 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	double x  = self.x0 + image_origin_in_self_coordinates;
 	double y  = self.y0;
 	context->user_to_device (x, y);
-	x = round (x);
-	y = round (y);
+	x = floor (x);
+	y = floor (y);
 	context->device_to_user (x, y);
 
 	/* the coordinates specify where in "user coordinates" (i.e. what we

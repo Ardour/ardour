@@ -140,7 +140,7 @@ public: // methods
 		return sample_end - sample_start;
 	}
 
-	samplepos_t get_center_sample ()
+	samplepos_t get_center_sample () const
 	{
 		return sample_start + (get_length_samples() / 2);
 	}
