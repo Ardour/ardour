@@ -647,9 +647,8 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		samplecnt_t chunksize = (samplecnt_t) min (cnt, (samplecnt_t) 4096);
 		boost::scoped_array<Sample> raw_staging(new Sample[chunksize]);
 
-		samplepos_t sample_pos = start;
-		double pixel_pos = floor (sample_pos / samples_per_visual_peak);
-		double next_pixel_pos = ceil (sample_pos / samples_per_visual_peak);
+		double pixel_pos         = start / samples_per_visual_peak;
+		double next_pixel_pos    = 1.0 + floor (pixel_pos);
 		double pixels_per_sample = 1.0 / samples_per_visual_peak;
 
 		xmin = 1.0;
