@@ -88,6 +88,7 @@
 #include "ardour/midi_patch_manager.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_ui.h"
+#include "ardour/mixer_snapshot_manager.h"
 #include "ardour/operations.h"
 #include "ardour/playlist.h"
 #include "ardour/playlist_factory.h"
@@ -317,6 +318,7 @@ Session::Session (AudioEngine &eng,
 	, _midi_ports (0)
 	, _mmc (0)
 	, _vca_manager (new VCAManager (*this))
+	, _mixer_snapshot_manager (new MixerSnapshotManager(this))
 	, _selection (new CoreSelection (*this))
 	, _global_locate_pending (false)
 	, _had_destructive_tracks (false)

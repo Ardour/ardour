@@ -145,6 +145,7 @@ class MidiPort;
 class MidiRegion;
 class MidiSource;
 class MidiTrack;
+class MixerSnapshotManager;
 class Playlist;
 class PluginInsert;
 class PluginInfo;
@@ -1238,6 +1239,8 @@ public:
 	VCAManager& vca_manager() { return *_vca_manager; }
 	VCAManager* vca_manager_ptr() { return _vca_manager; }
 
+	MixerSnapshotManager& snapshot_manager() {return *_mixer_snapshot_manager;}
+
 	void auto_connect_thread_wakeup ();
 
 	double compute_speed_from_master (pframes_t nframes);
@@ -2148,6 +2151,8 @@ private:
 	std::string _template_state_dir;
 
 	VCAManager* _vca_manager;
+	MixerSnapshotManager* _mixer_snapshot_manager;
+
 
 	boost::shared_ptr<Route> get_midi_nth_route_by_id (PresentationInfo::order_t n) const;
 

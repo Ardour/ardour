@@ -109,6 +109,7 @@
 #include "ardour/ltc_file_reader.h"
 #include "ardour/monitor_control.h"
 #include "ardour/midi_track.h"
+#include "ardour/mixer_snapshot_manager.h"
 #include "ardour/port.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/process_thread.h"
