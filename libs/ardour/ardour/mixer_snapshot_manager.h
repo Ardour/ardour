@@ -34,10 +34,10 @@ class LIBARDOUR_API MixerSnapshotManager : public boost::noncopyable
 public:
     typedef std::set<MixerSnapshot*> SnapshotList;
 
-    MixerSnapshotManager (ARDOUR::Session*); //constructor
+    MixerSnapshotManager (ARDOUR::Session*);
     ~MixerSnapshotManager() {}
 
-    void create_snapshot(std::string const&, RouteList&, bool);
+    void create_snapshot(std::string const& label, RouteList& rl, bool global);
 
     std::string get_global_path() {return _global_path;}
     std::string get_local_path() {return _local_path;}
