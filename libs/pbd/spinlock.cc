@@ -36,7 +36,8 @@ spinlock_t::spinlock_t ()
 #else
 	/* default C++ assign struct's first member */
 {
-	l = BOOST_DETAIL_SPINLOCK_INIT;
+	boost::detail::spinlock init = BOOST_DETAIL_SPINLOCK_INIT;
+	std::memcpy (&l, &init, sizeof (init));
 }
 #endif
 
