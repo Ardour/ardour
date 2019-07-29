@@ -20,6 +20,8 @@
 #define _pbd_spinlock_h_
 
 #include <boost/smart_ptr/detail/spinlock.hpp>
+#include <cstring>
+
 #include "pbd/libpbd_visibility.h"
 
 namespace PBD {
@@ -35,10 +37,23 @@ namespace PBD {
 
 struct spinlock_t {
 public:
-	spinlock_t ();
+#ifdef BOOST_SMART_PTR_DETAIL_SPINLOCK_STD_ATOMIC_HPP_INCLUDED
+	/* C++11 non-static data member initialization,
+	 * with non-copyable std::atomic ATOMIC_FLAG_INIT
+	 */
+	spinlock_t () : l (BOOST_DETAIL_SPINLOCK_INIT) {};
+#else
+	/* default C++ assign struct's first member */
+	spinlock_t ()
+	{
+		boost::detail::spinlock init = BOOST_DETAIL_SPINLOCK_INIT;
+		std::memcpy (&l, &init, sizeof (init));
+	}
+#endif
 	void lock () { l.lock (); }
 	void unlock () { l.unlock (); }
 	bool try_lock () { return l.try_lock (); }
+
 private:
 	boost::detail::spinlock l;
 
