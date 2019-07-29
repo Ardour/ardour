@@ -33,6 +33,7 @@
 #include "ardour/session.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/session_directory.h"
+#include "ardour/mixer_snapshot_manager.h"
 
 #include "widgets/choice.h"
 #include "widgets/prompter.h"
@@ -172,27 +173,16 @@ MixerSnapshotList::redisplay ()
 		return;
 	}
 
-	std::string local_snap_path = Glib::build_filename(_session->session_directory().root_path(), route_templates_dir_name);
+	MixerSnapshotManager::SnapshotList local_snapshots = _session->snapshot_manager().get_local_snapshots();
 
-	_snapshot_model->clear();
-	
-	std::string suffix_pattern ("*");
-	suffix_pattern = suffix_pattern + template_suffix;  // "*.template"
+	if(local_snapshots.empty()) {
+		return;
+	}
 
-    vector<string> files;
-    find_files_matching_pattern(files, local_snap_path, suffix_pattern);
-
-    if(files.empty()) {
-        return;
-    }
-
-    for(vector<string>::iterator i = files.begin(); i != files.end(); i++) {
-        string path = *(i);
-        MixerSnapshot* snap = new MixerSnapshot(_session, path);  //ToDo: this is leaked; probably need a "template manager" in libardour
-
+	for(MixerSnapshotManager::SnapshotList::const_iterator it = local_snapshots.begin(); it != local_snapshots.end(); it++) {
 		TreeModel::Row row = *(_snapshot_model->append());
-		row[_columns.name] = snap->get_label();
-		row[_columns.snapshot] = snap;
-    }
+		row[_columns.name] = (*it)->get_label();
+		row[_columns.snapshot] = (*it);
+	}
 }
 
