@@ -52,6 +52,8 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
 MixerSnapshotList::MixerSnapshotList ()
+	: add_template_button("Add Template")
+	, add_session_template_button("Add from Session")
 {
 	_snapshot_model = ListStore::create (_columns);
 	_snapshot_display.set_model (_snapshot_model);
@@ -60,9 +62,13 @@ MixerSnapshotList::MixerSnapshotList ()
 	_snapshot_display.set_size_request (75, -1);
 	_snapshot_display.set_headers_visible (true);
 	_snapshot_display.set_reorderable (false);
+
 	_scroller.add (_snapshot_display);
 	_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
+    // btn_add->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snapshot), global));
+    // btn_new->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snapshot_from_session), global));
+	
 	_snapshot_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &MixerSnapshotList::selection_changed));
 	_snapshot_display.signal_button_press_event().connect (sigc::mem_fun (*this, &MixerSnapshotList::button_press), false);
 }

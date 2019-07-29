@@ -184,6 +184,7 @@ private:
 	Gtk::Frame            track_display_frame;
 	Gtk::Frame            group_display_frame;
 	Gtk::Frame            favorite_plugins_frame;
+	Gtk::Frame            mixer_snapshots_list_frame;
 	Gtk::VBox             favorite_plugins_vbox;
 	Gtk::ComboBoxText     favorite_plugins_tag_combo;
 	ArdourWidgets::VPane  rhs_pane1;

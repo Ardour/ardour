@@ -20,10 +20,14 @@
 #ifndef __gtk_ardour_mixer_snapshots_h__
 #define __gtk_ardour_mixer_snapshots_h__
 
+#include <ctime>
+
+#include <gtkmm/button.h>
 #include <gtkmm/widget.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
+#include <gtkmm/box.h>
 
 #include "ardour/mixer_snapshot.h"
 
@@ -38,6 +42,9 @@ public:
 		return _scroller;
 	}
 
+	Gtk::Button& get_add_template_button () {return add_template_button;};
+	Gtk::Button& get_add_session_template_button () {return add_session_template_button;};
+
 	void redisplay ();
 
 private:
@@ -51,7 +58,7 @@ private:
             add (snapshot);
 		}
 		Gtk::TreeModelColumn<std::string> name;
-		Gtk::TreeModelColumn<std::int64_t> timestamp;
+		Gtk::TreeModelColumn<std::time_t> timestamp;
         Gtk::TreeModelColumn<ARDOUR::MixerSnapshot*> snapshot;  //ToDo: these are leaked
 	};
 
@@ -59,6 +66,9 @@ private:
 	Glib::RefPtr<Gtk::ListStore> _snapshot_model;
 	Gtk::TreeView _snapshot_display;
 	Gtk::Menu _menu;
+
+	Gtk::Button add_template_button;
+	Gtk::Button add_session_template_button;
 
 	bool button_press (GdkEventButton *);
 	void selection_changed ();

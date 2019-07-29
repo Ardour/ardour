@@ -275,9 +275,19 @@ Mixer_UI::Mixer_UI ()
 	rhs_pane2.add (group_display_frame);
 
 	_mix_snaps = new MixerSnapshotList();
-	
+
+	Gtk::VBox* mix_packer = new Gtk::VBox();
+	mix_packer->pack_start(_mix_snaps->widget());
+	mix_packer->pack_start(_mix_snaps->get_add_template_button());
+	mix_packer->pack_start(_mix_snaps->get_add_session_template_button());
+
+	Gtk::Frame* mix_snap_frame = new Gtk::Frame();
+	mix_snap_frame->set_name("asdf");
+	mix_snap_frame->set_shadow_type (Gtk::SHADOW_IN);
+	mix_snap_frame->add (*mix_packer);
+
 	rhs_pane3.add (rhs_pane2);
-	rhs_pane3.add (_mix_snaps->widget());
+	rhs_pane3.add (*mix_snap_frame);
 
 	list_vpacker.pack_start (rhs_pane3, true, true);
 
