@@ -520,14 +520,14 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		DEBUG_TRACE (DEBUG::Peaks, "DOWNSAMPLE\n");
 
 		/* the caller wants:
-
-		    - more samples-per-peak (lower resolution) than the peakfile, or to put it another way,
-                    - less peaks than the peakfile holds for the same range
-
-		    So, read a block into a staging area, and then downsample from there.
-
-		    to avoid confusion, I'll refer to the requested peaks as visual_peaks and the peakfile peaks as stored_peaks
-		*/
+		 *
+		 * - more samples-per-peak (lower resolution) than the peakfile, or to put it another way,
+		 * - less peaks than the peakfile holds for the same range
+		 *
+		 * So, read a block into a staging area, and then downsample from there.
+		 *
+		 * to avoid confusion, I'll refer to the requested peaks as visual_peaks and the peakfile peaks as stored_peaks
+		 */
 
 		const samplecnt_t chunksize = (samplecnt_t) expected_peaks; // we read all the peaks we need in one hit.
 
@@ -611,7 +611,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 				peak_cache[nvisual_peaks].max = xmax;
 				peak_cache[nvisual_peaks].min = xmin;
 				++nvisual_peaks;
-				next_visual_peak_sample =  min ((double) start + cnt, (next_visual_peak_sample + samples_per_visual_peak));
+				next_visual_peak_sample = min ((double) start + cnt, (next_visual_peak_sample + samples_per_visual_peak));
 				stored_peak_before_next_visual_peak = (uint32_t) next_visual_peak_sample / samples_per_file_peak;
 			}
 
@@ -632,12 +632,12 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		DEBUG_TRACE (DEBUG::Peaks, "UPSAMPLE\n");
 
 		/* the caller wants
-
-		     - less samples-per-peak (more resolution)
-		     - more peaks than stored in the Peakfile
-
-		   So, fetch data from the raw source, and generate peak
-		   data on the fly.
+		 *
+		 * - less samples-per-peak (more resolution)
+		 * - more peaks than stored in the Peakfile
+		 *
+		 * So, fetch data from the raw source, and generate peak
+		 * data on the fly.
 		*/
 
 		samplecnt_t samples_read = 0;
@@ -663,27 +663,27 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 
 				if (current_sample >= _length) {
 
-                                        /* hmm, error condition - we've reached the end of the file
-                                           without generating all the peak data. cook up a zero-filled
-                                           data buffer and then use it. this is simpler than
-                                           adjusting zero_fill and read_npeaks and then breaking out of
-                                           this loop early
-					*/
+					/* hmm, error condition - we've reached the end of the file
+					 * without generating all the peak data. cook up a zero-filled
+					 * data buffer and then use it. this is simpler than
+					 * adjusting zero_fill and read_npeaks and then breaking out of
+					 * this loop early
+					 */
 
-                                        memset (raw_staging.get(), 0, sizeof (Sample) * chunksize);
+					memset (raw_staging.get(), 0, sizeof (Sample) * chunksize);
 
-                                } else {
+				} else {
 
-                                        to_read = min (chunksize, (_length - current_sample));
+					to_read = min (chunksize, (_length - current_sample));
 
 
-                                        if ((samples_read = read_unlocked (raw_staging.get(), current_sample, to_read)) == 0) {
-                                                error << string_compose(_("AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"),
-                                                                        _name, to_read, current_sample, _length, strerror (errno))
-                                                      << endmsg;
-                                                return -1;
-                                        }
-                                }
+					if ((samples_read = read_unlocked (raw_staging.get(), current_sample, to_read)) == 0) {
+						error << string_compose(_("AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"),
+						                        _name, to_read, current_sample, _length, strerror (errno))
+						     << endmsg;
+						return -1;
+					}
+				}
 
 				i = 0;
 			}
