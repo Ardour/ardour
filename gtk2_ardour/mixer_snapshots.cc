@@ -54,6 +54,8 @@ using namespace ARDOUR_UI_UTILS;
 MixerSnapshotList::MixerSnapshotList ()
 	: add_template_button("Add Template")
 	, add_session_template_button("Add from Session")
+	, _window_packer(new VBox())
+	, _button_packer(new HBox())
 {
 	_snapshot_model = ListStore::create (_columns);
 	_snapshot_display.set_model (_snapshot_model);
@@ -66,9 +68,14 @@ MixerSnapshotList::MixerSnapshotList ()
 	_scroller.add (_snapshot_display);
 	_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-    // btn_add->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snapshot), global));
-    // btn_new->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotDialog::new_snapshot_from_session), global));
+	add_template_button.signal_clicked().connect(sigc::mem_fun(*this, &MixerSnapshotList::new_snapshot));
+	add_session_template_button.signal_clicked().connect(sigc::mem_fun(*this, &MixerSnapshotList::new_snapshot));
 	
+	_button_packer->pack_start(add_template_button, false, false);
+	_button_packer->pack_start(add_session_template_button, false, false);
+	_window_packer->pack_start(_scroller, true, true);
+	_window_packer->pack_start(*_button_packer, true, true);
+
 	_snapshot_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &MixerSnapshotList::selection_changed));
 	_snapshot_display.signal_button_press_event().connect (sigc::mem_fun (*this, &MixerSnapshotList::button_press), false);
 }
@@ -79,6 +86,10 @@ MixerSnapshotList::set_session (Session* s)
 	SessionHandlePtr::set_session (s);
 
 	redisplay ();
+}
+
+void MixerSnapshotList::new_snapshot() {
+	printf("New Local Snapshot!\n");
 }
 
 /* A new snapshot has been selected. */

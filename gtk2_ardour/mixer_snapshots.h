@@ -39,15 +39,16 @@ public:
 	void set_session (ARDOUR::Session *);
 
 	Gtk::Widget& widget () {
-		return _scroller;
+		return *_window_packer;
 	}
 
-	Gtk::Button& get_add_template_button () {return add_template_button;};
-	Gtk::Button& get_add_session_template_button () {return add_session_template_button;};
+	void new_snapshot();
 
 	void redisplay ();
 
 private:
+	Gtk::VBox* _window_packer;
+	Gtk::HBox* _button_packer;
 
 	Gtk::ScrolledWindow _scroller;
 
