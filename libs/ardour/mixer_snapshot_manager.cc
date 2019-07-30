@@ -108,7 +108,15 @@ void MixerSnapshotManager::create_snapshot(std::string const& label, RouteList& 
     ensure_snapshot_dir(global);
     const string path = global ? _global_path : _local_path;
     MixerSnapshot* snapshot = new MixerSnapshot(_session);
-    snapshot->snap(rl);
+
+    if(!rl.empty()) {
+        //just this routelist
+        snapshot->snap(rl);
+    } else {
+        //the whole session
+        snapshot->snap();
+    }
+
     snapshot->set_label(label);
     snapshot->write(path);
     refresh();
