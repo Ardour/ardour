@@ -238,13 +238,32 @@ Sequence<Time>::const_iterator::choose_next(Time earliest_t)
 {
 	_type = NIL;
 
-	// Next earliest note on
+	// Next earliest note on, if any
 	if (_note_iter != _seq->notes().end()) {
 		_type      = NOTE_ON;
 		earliest_t = (*_note_iter)->time();
 	}
 
-	// Use the next note off iff it's earlier or the same time as the note on
+	/* Use the next earliest patch change iff it is earlier or coincident with the note-on.
+	 * A patch-change with the same time-stamp applies to the concurrent note-on */
+	if (_patch_change_iter != _seq->patch_changes().end()) {
+		if (_type == NIL || (*_patch_change_iter)->time() <= earliest_t) {
+			_type      = PATCH_CHANGE;
+			earliest_t = (*_patch_change_iter)->time();
+		}
+	}
+
+	/* Use the next earliest controller iff it's earlier or coincident with the note-on
+	 * or patch-change. Bank-select (CC0, CC32) needs to be sent before the PGM. */
+	if (_control_iter != _control_iters.end() &&
+	    _control_iter->list && _control_iter->x != DBL_MAX) {
+		if (_type == NIL || _control_iter->x <= earliest_t.to_double()) {
+			_type      = CONTROL;
+			earliest_t = Time(_control_iter->x);
+		}
+	}
+
+	/* .. but prefer to send any Note-off first */
 	if ((!_active_notes.empty())) {
 		if (_type == NIL || _active_notes.top()->end_time().to_double() <= earliest_t.to_double()) {
 			_type      = NOTE_OFF;
@@ -252,16 +271,7 @@ Sequence<Time>::const_iterator::choose_next(Time earliest_t)
 		}
 	}
 
-	// Use the next earliest controller iff it's earlier than the note event
-	if (_control_iter != _control_iters.end() &&
-	    _control_iter->list && _control_iter->x != DBL_MAX) {
-		if (_type == NIL || _control_iter->x < earliest_t.to_double()) {
-			_type      = CONTROL;
-			earliest_t = Time(_control_iter->x);
-		}
-	}
-
-	// Use the next earliest SysEx iff it's earlier than the controller
+	/* SysEx is last, always sent after any other concurrent 3 byte event */
 	if (_sysex_iter != _seq->sysexes().end()) {
 		if (_type == NIL || (*_sysex_iter)->time() < earliest_t) {
 			_type      = SYSEX;
@@ -269,13 +279,6 @@ Sequence<Time>::const_iterator::choose_next(Time earliest_t)
 		}
 	}
 
-	// Use the next earliest patch change iff it's earlier than the SysEx
-	if (_patch_change_iter != _seq->patch_changes().end()) {
-		if (_type == NIL || (*_patch_change_iter)->time() < earliest_t) {
-			_type      = PATCH_CHANGE;
-			earliest_t = (*_patch_change_iter)->time();
-		}
-	}
 	return earliest_t;
 }
 
