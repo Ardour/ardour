@@ -116,7 +116,7 @@ private:
 	void format_position (ARDOUR::samplepos_t pos, char* buf, size_t bufsize, bool onoff = true);
 
 	void add_source (boost::shared_ptr<ARDOUR::Region>);
-	void remove_source (boost::shared_ptr<ARDOUR::Region>);
+	void remove_source (boost::shared_ptr<ARDOUR::Source>);
 
 	void clock_format_changed ();
 
@@ -143,8 +143,9 @@ private:
 
 	Glib::RefPtr<Gtk::TreeStore> _model;
 
-	PBD::ScopedConnection region_property_connection;
-	PBD::ScopedConnection check_new_region_connection;
+	PBD::ScopedConnection source_property_connection;
+	PBD::ScopedConnection add_source_connection;
+	PBD::ScopedConnection remove_source_connection;
 
 	PBD::ScopedConnection editor_freeze_connection;
 	PBD::ScopedConnection editor_thaw_connection;
