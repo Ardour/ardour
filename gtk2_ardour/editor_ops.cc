@@ -84,6 +84,7 @@
 #include "editor_cursors.h"
 #include "editor_drag.h"
 #include "editor_regions.h"
+#include "editor_sources.h"
 #include "editor_routes.h"
 #include "gui_thread.h"
 #include "insert_remove_time_dialog.h"
@@ -2542,7 +2543,7 @@ Editor::unhide_ranges ()
 /* INSERT/REPLACE */
 
 void
-Editor::insert_region_list_selection (float times)
+Editor::insert_source_list_selection (float times)
 {
 	RouteTimeAxisView *tv = 0;
 	boost::shared_ptr<Playlist> playlist;
@@ -2565,7 +2566,7 @@ Editor::insert_region_list_selection (float times)
 		return;
 	}
 
-	boost::shared_ptr<Region> region = _regions->get_single_selection ();
+	boost::shared_ptr<Region> region = _sources->get_single_selection ();
 	if (region == 0) {
 		return;
 	}
