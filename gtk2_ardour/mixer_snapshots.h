@@ -43,6 +43,7 @@ public:
 	}
 
 	void new_snapshot();
+	void new_snapshot_from_session();
 
 	void redisplay ();
 
@@ -73,7 +74,7 @@ private:
 
 	bool button_press (GdkEventButton *);
 	void selection_changed ();
-	void popup_context_menu (int, int32_t, std::string);
+	void popup_context_menu (int, int32_t, Gtk::TreeModel::iterator&);
 	void remove (std::string);
 	void rename (std::string);
 };
