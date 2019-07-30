@@ -293,7 +293,7 @@
     </menu>
 
     <menu name='RegionMenu' action='RegionMenu'>
-      <menuitem action='insert-region-from-region-list'/>
+      <menuitem action='insert-region-from-source-list'/>
       <menuitem action='play-selected-regions'/>
       <menuitem action='tag-selected-regions'/>
       <menuitem action='loop-region'/>

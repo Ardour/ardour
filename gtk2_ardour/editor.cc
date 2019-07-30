@@ -2041,7 +2041,7 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	/* Adding new material */
 
 	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Insert Selected Region"), sigc::bind (sigc::mem_fun(*this, &Editor::insert_region_list_selection), 1.0f)));
+	edit_items.push_back (MenuElem (_("Insert Selected Region"), sigc::bind (sigc::mem_fun(*this, &Editor::insert_source_list_selection), 1.0f)));
 	edit_items.push_back (MenuElem (_("Insert Existing Media"), sigc::bind (sigc::mem_fun(*this, &Editor::add_external_audio_action), ImportToTrack)));
 
 	/* Nudge track */
