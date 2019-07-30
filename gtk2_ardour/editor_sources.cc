@@ -266,10 +266,12 @@ EditorSources::set_session (ARDOUR::Session* s)
 	if (s) {
 
 		/*  Currently, none of the displayed properties are mutable, so there is no reason to register for changes
-		 * ARDOUR::Region::RegionPropertyChanged.connect (region_property_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::source_changed, this, _1, _2), gui_context());
+		 * ARDOUR::Region::RegionPropertyChanged.connect (source_property_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::source_changed, this, _1, _2), gui_context());
 		*/
 		
-		ARDOUR::RegionFactory::CheckNewRegion.connect (check_new_region_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::add_source, this, _1), gui_context());
+		ARDOUR::RegionFactory::CheckNewRegion.connect (add_source_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::add_source, this, _1), gui_context());
+
+		s->SourceRemoved.connect (remove_source_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::remove_source, this, _1), gui_context());
 
 		redisplay();
 
@@ -279,13 +281,13 @@ EditorSources::set_session (ARDOUR::Session* s)
 }
 
 void
-EditorSources::remove_source (boost::shared_ptr<ARDOUR::Region> region)
+EditorSources::remove_source (boost::shared_ptr<ARDOUR::Source> source)
 {
 	TreeModel::iterator i;
 	TreeModel::Children rows = _model->children();
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		boost::shared_ptr<ARDOUR::Region> rr = (*i)[_columns.region];
-		if (region == rr) {
+		if (rr->source() == source) {
 			_model->erase(i);
 			break;
 		}
