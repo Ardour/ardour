@@ -35,6 +35,7 @@
 #include "editor.h"
 #include "editor_drag.h"
 #include "editor_routes.h"
+#include "editor_sources.h"
 #include "actions.h"
 #include "audio_time_axis.h"
 #include "audio_region_view.h"
@@ -1214,6 +1215,7 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 	bool have_selection = false;
 	bool have_entered = false;
 	bool have_edit_point = false;
+	bool have_selected_source = false;
 	RegionSelection rs;
 
 	// std::cerr << "STRRA: crossing ? " << because_canvas_crossing << " within ? " << within_track_canvas
@@ -1227,6 +1229,10 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 	if (entered_regionview) {
 		have_entered = true;
 		rs.add (entered_regionview);
+	}
+
+	if ( _sources->get_single_selection() ) {
+		have_selected_source = true;
 	}
 
 	if (rs.empty() && !selection->tracks.empty()) {
@@ -1277,6 +1283,8 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 		} else if ((tgt & EnteredRegions) && have_entered) {
 			sensitive = true;
 		} else if ((tgt & EditPointRegions) && have_edit_point) {
+			sensitive = true;
+		} else if ((tgt & ListSelection) && have_selected_source ) {
 			sensitive = true;
 		}
 
@@ -1507,9 +1515,9 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 	/* XXX: should also check that there is a track of the appropriate type for the selected region */
 #if 0
 	if (_edit_point == EditAtMouse || _regions->get_single_selection() == 0 || selection->tracks.empty()) {
-		_region_actions->get_action("insert-region-from-region-list")->set_sensitive (false);
+		_region_actions->get_action("insert-region-from-source-list")->set_sensitive (false);
 	} else {
-		_region_actions->get_action("insert-region-from-region-list")->set_sensitive (true);
+		_region_actions->get_action("insert-region-from-source-list")->set_sensitive (true);
 	}
 #endif
 

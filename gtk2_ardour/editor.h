@@ -1322,7 +1322,7 @@ private:
 	void temporal_zoom_by_sample (samplepos_t start, samplepos_t end);
 	void temporal_zoom_to_sample (bool coarser, samplepos_t sample);
 
-	void insert_region_list_selection (float times);
+	void insert_source_list_selection (float times);
 
 	/* import & embed */
 

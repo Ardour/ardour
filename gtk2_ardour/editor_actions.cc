@@ -1559,7 +1559,7 @@ Editor::register_region_actions ()
 
 	/* PART 2: actions that are not related to the selection, but for which the edit point type and location is important */
 
-//	register_region_action (_region_actions, RegionActionTarget (ListSelection), "insert-region-from-region-list", _("Insert Region from Region List"), sigc::bind (sigc::mem_fun (*this, &Editor::insert_region_list_selection), 1));
+	register_region_action (_region_actions, RegionActionTarget (ListSelection), "insert-region-from-source-list", _("Insert Region from Source List"), sigc::bind (sigc::mem_fun (*this, &Editor::insert_source_list_selection), 1));
 
 	/* PART 3: actions that operate on the selection and also require the edit point location */
 
