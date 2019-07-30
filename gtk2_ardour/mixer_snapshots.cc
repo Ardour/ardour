@@ -201,6 +201,7 @@ MixerSnapshotList::popup_context_menu (int button, int32_t time, TreeModel::iter
 
     add_item_with_sensitivity(items, MenuElem (_("Remove"), sigc::bind(sigc::mem_fun (*this, &MixerSnapshotList::remove_snapshot), iter)), true);
     add_item_with_sensitivity (items, MenuElem (_("Rename..."), sigc::bind (sigc::mem_fun (*this, &MixerSnapshotList::rename_snapshot), iter)), true);
+    add_item_with_sensitivity (items, MenuElem (_("Promote To Mixer Template"), sigc::bind (sigc::mem_fun (*this, &MixerSnapshotList::promote_snapshot), iter)), true);
     _menu.popup (button, time);
 }
 
@@ -219,7 +220,7 @@ void MixerSnapshotList::remove_snapshot(TreeModel::iterator& iter)
     if (prompter.run () == 1) {
         redisplay ();
     }
-    printf("remove snapshot @ path %s\n", snapshot->get_path().c_str());
+    printf("remove snapshot %s @ path %s\n", snapshot->get_label().c_str(), snapshot->get_path().c_str());
 }
 
 void
@@ -242,7 +243,13 @@ MixerSnapshotList::rename_snapshot(TreeModel::iterator& iter)
             redisplay ();
         }
     }
-    printf("rename snapshot to %s\n", new_name.c_str());
+    printf("rename snapshot %s to %s\n", snapshot->get_label().c_str(), new_name.c_str());
+}
+
+void MixerSnapshotList::promote_snapshot(TreeModel::iterator& iter)
+{
+    MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
+    printf("promote snapshot %s to mixer template\n", snapshot->get_label().c_str());
 }
 
 void

@@ -77,6 +77,7 @@ private:
 	void popup_context_menu (int, int32_t, Gtk::TreeModel::iterator&);
 	void remove_snapshot (Gtk::TreeModel::iterator&);
 	void rename_snapshot (Gtk::TreeModel::iterator&);
+	void promote_snapshot (Gtk::TreeModel::iterator&);
 };
 
 #endif // __gtk_ardour_mixer_snapshots_h__
