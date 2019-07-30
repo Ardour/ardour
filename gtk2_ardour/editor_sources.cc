@@ -81,6 +81,7 @@ EditorSources::EditorSources (Editor* e)
 	, old_focus (0)
 	, _menu (0)
 	, _selection (0)
+	, _no_redisplay (false)
 {
 	_display.set_size_request (100, -1);
 	_display.set_rules_hint (true);
