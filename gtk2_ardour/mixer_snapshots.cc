@@ -55,118 +55,134 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
 MixerSnapshotList::MixerSnapshotList ()
-	: add_template_button("Add Template")
-	, add_session_template_button("Add from Session")
-	, _window_packer(new VBox())
-	, _button_packer(new HBox())
+    : add_template_button("Add Template")
+    , add_session_template_button("Add from Session")
+    , _window_packer(new VBox())
+    , _button_packer(new HBox())
 {
-	_snapshot_model = ListStore::create (_columns);
-	_snapshot_display.set_model (_snapshot_model);
-	_snapshot_display.append_column (_("Mixer Snapshots (double-click to load)"), _columns.name);
+    _snapshot_model = ListStore::create (_columns);
+    _snapshot_display.set_model (_snapshot_model);
+    _snapshot_display.append_column (_("Mixer Snapshots (double-click to load)"), _columns.name);
 //	_snapshot_display.append_column (_("Modified Date"), _columns.timestamp);
-	_snapshot_display.set_size_request (75, -1);
-	_snapshot_display.set_headers_visible (true);
-	_snapshot_display.set_reorderable (false);
+    _snapshot_display.set_size_request (75, -1);
+    _snapshot_display.set_headers_visible (true);
+    _snapshot_display.set_reorderable (false);
 
-	_scroller.add (_snapshot_display);
-	_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+    _scroller.add (_snapshot_display);
+    _scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	add_template_button.signal_clicked().connect(sigc::mem_fun(*this, &MixerSnapshotList::new_snapshot));
-	add_session_template_button.signal_clicked().connect(sigc::mem_fun(*this, &MixerSnapshotList::new_snapshot_from_session));
-	
-	_button_packer->pack_start(add_template_button, false, false);
-	_button_packer->pack_start(add_session_template_button, false, false);
-	_window_packer->pack_start(_scroller, true, true);
-	_window_packer->pack_start(*_button_packer, true, true);
+    add_template_button.signal_clicked().connect(sigc::mem_fun(*this, &MixerSnapshotList::new_snapshot));
+    add_session_template_button.signal_clicked().connect(sigc::mem_fun(*this, &MixerSnapshotList::new_snapshot_from_session));
 
-	_snapshot_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &MixerSnapshotList::selection_changed));
-	_snapshot_display.signal_button_press_event().connect (sigc::mem_fun (*this, &MixerSnapshotList::button_press), false);
+    _button_packer->pack_start(add_template_button, false, false);
+    _button_packer->pack_start(add_session_template_button, false, false);
+    _window_packer->pack_start(_scroller, true, true);
+    _window_packer->pack_start(*_button_packer, true, true);
+
+    _snapshot_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &MixerSnapshotList::selection_changed));
+    _snapshot_display.signal_button_press_event().connect (sigc::mem_fun (*this, &MixerSnapshotList::button_press), false);
 }
 
 void
 MixerSnapshotList::set_session (Session* s)
 {
-	SessionHandlePtr::set_session (s);
+    SessionHandlePtr::set_session (s);
 
-	redisplay ();
+    redisplay ();
 }
 
 void MixerSnapshotList::new_snapshot() {
-	ArdourWidgets::Prompter prompter (true);
-	prompter.set_name ("Prompter");
-	prompter.set_title (_("New Mixer Sanpshot"));
-	prompter.set_prompt (_("Sanpshot Name:"));
-	prompter.set_initial_text (_session->name());
-	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+    ArdourWidgets::Prompter prompter (true);
+    prompter.set_name ("Prompter");
+    prompter.set_title (_("New Mixer Sanpshot"));
+    prompter.set_prompt (_("Sanpshot Name:"));
+    prompter.set_initial_text (_session->name());
+    prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 
 
-	string name;
-	if (prompter.run() == RESPONSE_ACCEPT) {
-		prompter.get_result(name);
-		if (name.length()) {
-			RouteList rl = PublicEditor::instance().get_selection().tracks.routelist();
-			_session->snapshot_manager().create_snapshot(name, rl, false);
-			redisplay();
-		}
-	}
+    string name;
+    if (prompter.run() == RESPONSE_ACCEPT) {
+        prompter.get_result(name);
+        if (name.length()) {
+            RouteList rl = PublicEditor::instance().get_selection().tracks.routelist();
+            _session->snapshot_manager().create_snapshot(name, rl, false);
+            redisplay();
+        }
+    }
 }
 
 void MixerSnapshotList::new_snapshot_from_session() {
-	FileChooserDialog session_selector(_("Open Session"), FILE_CHOOSER_ACTION_OPEN);
+    FileChooserDialog session_selector(_("Open Session"), FILE_CHOOSER_ACTION_OPEN);
 
-	session_selector.add_button(Stock::CANCEL, RESPONSE_CANCEL);
+    session_selector.add_button(Stock::CANCEL, RESPONSE_CANCEL);
     session_selector.add_button(Stock::OPEN, RESPONSE_ACCEPT);
     session_selector.set_current_folder(Glib::path_get_dirname(_session->path()));
 
-	int response = session_selector.run();
+    int response = session_selector.run();
     session_selector.hide();
 
     if (response != RESPONSE_ACCEPT) {
         return;
     }
 
-	string session_path = session_selector.get_filename();
-	string name = basename_nosuffix(session_path);
-	_session->snapshot_manager().create_snapshot(name, session_path, false);
-	redisplay();
+    string session_path = session_selector.get_filename();
+    string name = basename_nosuffix(session_path);
+    _session->snapshot_manager().create_snapshot(name, session_path, false);
+    redisplay();
 }
 
 /* A new snapshot has been selected. */
 void
 MixerSnapshotList::selection_changed ()
 {
-	if (_snapshot_display.get_selection()->count_selected_rows() == 0) {
-		return;
-	}
+    if (_snapshot_display.get_selection()->count_selected_rows() == 0) {
+        return;
+    }
 
-	TreeModel::iterator i = _snapshot_display.get_selection()->get_selected();
+    TreeModel::iterator i = _snapshot_display.get_selection()->get_selected();
 
-	//std::string snap_path = (*i)[_columns.snap];
+    //std::string snap_path = (*i)[_columns.snap];
 
-	_snapshot_display.set_sensitive (false);
+    _snapshot_display.set_sensitive (false);
 //	ARDOUR_UI::instance()->load_session (_session->path(), string (snap_name));
-	_snapshot_display.set_sensitive (true);
+    _snapshot_display.set_sensitive (true);
 }
 
 bool
 MixerSnapshotList::button_press (GdkEventButton* ev)
 {
-	if (ev->button == 3) {
-		TreeViewColumn* col;
+    if (ev->button == 3) {
+        TreeViewColumn* col;
         TreeModel::Path path;
         int cx;
         int cy;
 
-		_snapshot_display.get_path_at_pos ((int) ev->x, (int) ev->y, path, col, cx, cy);
+        _snapshot_display.get_path_at_pos ((int) ev->x, (int) ev->y, path, col, cx, cy);
         TreeModel::iterator iter = _snapshot_model->get_iter(path);
 
-		if (iter) {
+        if (iter) {
             popup_context_menu(ev->button, ev->time, iter);
             return true;
         }
-		return true;
-	}
-	return false;
+        return true;
+    }
+
+    if (ev->type == GDK_2BUTTON_PRESS) {
+        TreeViewColumn* col;
+        TreeModel::Path path;
+        int cx;
+        int cy;
+
+        _snapshot_display.get_path_at_pos ((int) ev->x, (int) ev->y, path, col, cx, cy);
+        TreeModel::iterator iter = _snapshot_model->get_iter(path);
+
+        if (iter) {
+            MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
+            snapshot->recall();
+            return true;
+        }
+    }
+    return false;
 }
 
 
@@ -178,83 +194,76 @@ MixerSnapshotList::button_press (GdkEventButton* ev)
 void
 MixerSnapshotList::popup_context_menu (int button, int32_t time, TreeModel::iterator& iter)
 {
-	using namespace Menu_Helpers;
+    using namespace Menu_Helpers;
 
-	MenuList& items (_menu.items());
-	items.clear ();
+    MenuList& items (_menu.items());
+    items.clear ();
 
-	string name = (*iter)[_columns.name];
+    add_item_with_sensitivity(items, MenuElem (_("Remove"), sigc::bind(sigc::mem_fun (*this, &MixerSnapshotList::remove_snapshot), iter)), true);
+    add_item_with_sensitivity (items, MenuElem (_("Rename..."), sigc::bind (sigc::mem_fun (*this, &MixerSnapshotList::rename_snapshot), iter)), true);
+    _menu.popup (button, time);
+}
 
-	// const bool modification_allowed = (_session->snap_name() != snapshot_name && _session->name() != snapshot_name);
-	printf("right click - name: %s\n", name.c_str());
-/*	add_item_with_sensitivity (items, MenuElem (_("Remove"), sigc::bind (sigc::mem_fun (*this, &MixerSnapshotList::remove), snapshot_name)), modification_allowed);
+void MixerSnapshotList::remove_snapshot(TreeModel::iterator& iter)
+{
+    MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
+    vector<string> choices;
 
-	add_item_with_sensitivity (items, MenuElem (_("Rename..."), sigc::bind (sigc::mem_fun (*this, &MixerSnapshotList::rename), snapshot_name)), modification_allowed);
-*/
+    std::string prompt = string_compose (_("Do you really want to remove snapshot \"%1\" ?\n(which cannot be undone)"), snapshot->get_label());
 
-	_menu.popup (button, time);
+    choices.push_back (_("No, do nothing."));
+    choices.push_back (_("Yes, remove it."));
+
+    ArdourWidgets::Choice prompter (_("Remove snapshot"), prompt, choices);
+
+    if (prompter.run () == 1) {
+        redisplay ();
+    }
+    printf("remove snapshot @ path %s\n", snapshot->get_path().c_str());
 }
 
 void
-MixerSnapshotList::rename (std::string old_name)
+MixerSnapshotList::rename_snapshot(TreeModel::iterator& iter)
 {
-	ArdourWidgets::Prompter prompter(true);
+    MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
+    ArdourWidgets::Prompter prompter(true);
 
-	string new_name;
+    string new_name;
 
-	prompter.set_name ("Prompter");
-	prompter.set_title (_("Rename Snapshot"));
-	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
-	prompter.set_prompt (_("New name of snapshot"));
-	prompter.set_initial_text (old_name);
+    prompter.set_name ("Prompter");
+    prompter.set_title (_("Rename Snapshot"));
+    prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+    prompter.set_prompt (_("New name of snapshot"));
+    prompter.set_initial_text (snapshot->get_label());
 
-	if (prompter.run() == RESPONSE_ACCEPT) {
-		prompter.get_result (new_name);
-		if (new_name.length()) {
-//			_session->rename_state (old_name, new_name);
-			redisplay ();
-		}
-	}
-}
-
-
-void
-MixerSnapshotList::remove (std::string name)
-{
-	vector<string> choices;
-
-	std::string prompt = string_compose (_("Do you really want to remove snapshot \"%1\" ?\n(which cannot be undone)"), name);
-
-	choices.push_back (_("No, do nothing."));
-	choices.push_back (_("Yes, remove it."));
-
-	ArdourWidgets::Choice prompter (_("Remove snapshot"), prompt, choices);
-
-	if (prompter.run () == 1) {
-//		_session->remove_state (name);
-		redisplay ();
-	}
+    if (prompter.run() == RESPONSE_ACCEPT) {
+        prompter.get_result (new_name);
+        if (new_name.length()) {
+            redisplay ();
+        }
+    }
+    printf("rename snapshot to %s\n", new_name.c_str());
 }
 
 void
 MixerSnapshotList::redisplay ()
 {
-	if (_session == 0) {
-		return;
-	}
+    if (_session == 0) {
+        return;
+    }
 
-	MixerSnapshotManager::SnapshotList local_snapshots = _session->snapshot_manager().get_local_snapshots();
+    MixerSnapshotManager::SnapshotList local_snapshots = _session->snapshot_manager().get_local_snapshots();
 
-	if(local_snapshots.empty()) {
-		return;
-	}
+    if(local_snapshots.empty()) {
+        return;
+    }
 
-	_snapshot_model->clear();
+    _snapshot_model->clear();
 
-	for(MixerSnapshotManager::SnapshotList::const_iterator it = local_snapshots.begin(); it != local_snapshots.end(); it++) {
-		TreeModel::Row row = *(_snapshot_model->append());
-		row[_columns.name] = (*it)->get_label();
-		row[_columns.snapshot] = (*it);
-	}
+    for(MixerSnapshotManager::SnapshotList::const_iterator it = local_snapshots.begin(); it != local_snapshots.end(); it++) {
+        TreeModel::Row row = *(_snapshot_model->append());
+        row[_columns.name] = (*it)->get_label();
+        row[_columns.snapshot] = (*it);
+    }
 }
 

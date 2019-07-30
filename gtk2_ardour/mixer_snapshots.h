@@ -61,7 +61,7 @@ private:
 		}
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::time_t> timestamp;
-        Gtk::TreeModelColumn<ARDOUR::MixerSnapshot*> snapshot;  //ToDo: these are leaked
+        Gtk::TreeModelColumn<ARDOUR::MixerSnapshot*> snapshot;  //TODO: these are leaked
 	};
 
 	Columns _columns;
@@ -75,8 +75,8 @@ private:
 	bool button_press (GdkEventButton *);
 	void selection_changed ();
 	void popup_context_menu (int, int32_t, Gtk::TreeModel::iterator&);
-	void remove (std::string);
-	void rename (std::string);
+	void remove_snapshot (Gtk::TreeModel::iterator&);
+	void rename_snapshot (Gtk::TreeModel::iterator&);
 };
 
 #endif // __gtk_ardour_mixer_snapshots_h__
