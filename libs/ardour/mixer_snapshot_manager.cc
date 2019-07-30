@@ -31,6 +31,7 @@
 
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"
+#include "pbd/gstdio_compat.h"
 
 using namespace ARDOUR;
 using namespace std;
@@ -46,6 +47,14 @@ MixerSnapshotManager::MixerSnapshotManager (Session* s)
     _local_path  = Glib::build_filename(_session->session_directory().root_path(), route_templates_dir_name);
 
     refresh();
+}
+
+void MixerSnapshotManager::ensure_snapshot_dir(bool global)
+{
+    const string path = global ? _global_path : _local_path;
+    if(!Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS & Glib::FILE_TEST_IS_DIR)) {
+        ::g_mkdir(path.c_str(), 0775);
+    }
 }
 
 void MixerSnapshotManager::refresh()
@@ -96,7 +105,8 @@ void MixerSnapshotManager::refresh()
 
 void MixerSnapshotManager::create_snapshot(std::string const& label, RouteList& rl, bool global)
 {
-    const string path = global?_global_path:_local_path;
+    ensure_snapshot_dir(global);
+    const string path = global ? _global_path : _local_path;
     MixerSnapshot* snapshot = new MixerSnapshot(_session);
     snapshot->snap(rl);
     snapshot->set_label(label);
@@ -113,7 +123,8 @@ void MixerSnapshotManager::create_snapshot(std::string const& label, RouteList& 
 
 void MixerSnapshotManager::create_snapshot(std::string const& label, std::string const& from_path, bool global)
 {
-    const string path = global?_global_path:_local_path;
+    ensure_snapshot_dir(global);
+    const string path = global ? _global_path : _local_path;
     MixerSnapshot* snapshot = new MixerSnapshot(_session, from_path);
     snapshot->set_label(label);
     snapshot->write(path);

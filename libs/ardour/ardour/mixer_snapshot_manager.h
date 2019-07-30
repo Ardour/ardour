@@ -49,7 +49,7 @@ public:
     void refresh();
     void clear() { _global_snapshots.clear(); _local_snapshots.clear(); };
 private:
-
+    void ensure_snapshot_dir(bool global);
     std::string _global_path;
     std::string _local_path;
 
