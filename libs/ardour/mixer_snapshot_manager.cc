@@ -100,10 +100,28 @@ void MixerSnapshotManager::create_snapshot(std::string const& label, RouteList& 
     snapshot->snap(rl);
     snapshot->set_label(label);
     snapshot->write(path);
+    refresh();
 
-    if(global) {
-        _global_snapshots.insert(snapshot);
-    } else {
-        _local_snapshots.insert(snapshot);
-    }
+    //I want this to eventually remove the appropriate snapshot ptr and insert the new one...
+    // if(global) {
+    //     _global_snapshots.insert(snapshot);
+    // } else {
+    //     _local_snapshots.insert(snapshot);
+    // }
+}
+
+void MixerSnapshotManager::create_snapshot(std::string const& label, std::string const& from_path, bool global)
+{
+    const string path = global?_global_path:_local_path;
+    MixerSnapshot* snapshot = new MixerSnapshot(_session, from_path);
+    snapshot->set_label(label);
+    snapshot->write(path);
+    refresh();
+
+    //I want this to eventually remove the appropriate snapshot ptr and insert the new one...
+    // if(global) {
+    //     _global_snapshots.insert(snapshot);
+    // } else {
+    //     _local_snapshots.insert(snapshot);
+    // }
 }

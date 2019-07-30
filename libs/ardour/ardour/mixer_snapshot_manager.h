@@ -38,6 +38,7 @@ public:
     ~MixerSnapshotManager() {}
 
     void create_snapshot(std::string const& label, RouteList& rl, bool global);
+    void create_snapshot(std::string const& label, std::string const& from_path, bool global);
 
     std::string get_global_path() {return _global_path;}
     std::string get_local_path() {return _local_path;}
