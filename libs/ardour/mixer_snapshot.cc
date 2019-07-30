@@ -461,6 +461,8 @@ void MixerSnapshot::load(const string path)
         return;
     }
 
+    _path = path;
+
     XMLTree tree;
     tree.read(path);
 
@@ -536,7 +538,7 @@ void MixerSnapshot::load_from_session(string path)
             return;
         }
     }
-
+    _path = path;
     XMLTree tree;
     tree.read(path);
 

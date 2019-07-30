@@ -99,7 +99,10 @@ class LIBARDOUR_API MixerSnapshot
         void set_id(unsigned int new_id) {id = new_id;};
 
         std::string get_label() {return label;};
-        void set_label(std::string new_label) {label = new_label;};
+        void set_label(const std::string& new_label) {label = new_label;};
+
+        std::string get_path() {return _path;};
+        void set_path(const std::string& new_path) {_path = new_path;};
 
         bool get_favorite() {return favorite;};
         void set_favorite(bool yn) {favorite = yn;};
@@ -130,6 +133,7 @@ class LIBARDOUR_API MixerSnapshot
         std::string last_modified_with;
         std::string suffix;
         RecallFlags _flags;
+        std::string _path;
 
         std::vector<State> route_states;
         std::vector<State> group_states;

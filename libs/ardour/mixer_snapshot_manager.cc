@@ -60,6 +60,7 @@ void MixerSnapshotManager::refresh()
 
             MixerSnapshot* snap = new MixerSnapshot(_session, info.path);
             snap->set_label(info.name);
+            snap->set_path(info.path);
             _global_snapshots.insert(snap);
             
             printf("Global - name: %s\n", snap->get_label().c_str());
