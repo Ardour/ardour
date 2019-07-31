@@ -40,6 +40,12 @@ public:
     void create_snapshot(std::string const& label, RouteList& rl, bool global);
     void create_snapshot(std::string const& label, std::string const& from_path, bool global);
 
+    bool rename_snapshot(MixerSnapshot*, const std::string&);
+    bool remove_snapshot(MixerSnapshot*);
+
+    bool promote(ARDOUR::MixerSnapshot*);
+    bool demote(ARDOUR::MixerSnapshot*);
+
     MixerSnapshot* get_snapshot_by_name(const std::string&, bool);
 
     std::string get_global_path() {return _global_path;}

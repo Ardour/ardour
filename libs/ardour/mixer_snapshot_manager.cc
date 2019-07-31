@@ -20,9 +20,11 @@
 
 #include <stdio.h>
 #include <glibmm.h>
+#include <glibmm/miscutils.h>
 
 #include "ardour/directory_names.h"
 #include "ardour/filename_extensions.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/mixer_snapshot_manager.h"
 #include "ardour/mixer_snapshot.h"
 #include "ardour/search_paths.h"
@@ -71,7 +73,7 @@ void MixerSnapshotManager::refresh()
             snap->set_label(info.name);
             snap->set_path(info.path);
             _global_snapshots.insert(snap);
-            
+
             printf("Global - name: %s\n", snap->get_label().c_str());
             printf("Global - path: %s\n", info.path.c_str());
         }
@@ -101,6 +103,68 @@ void MixerSnapshotManager::refresh()
             printf("Local - path: %s\n", path.c_str());
         }
     }
+}
+
+bool MixerSnapshotManager::promote(MixerSnapshot* snapshot) {
+    if(!snapshot) {
+        return false;
+    }
+
+    const string path = snapshot->get_path();
+    if(Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS)) {
+        const string dir = Glib::build_filename(user_config_directory(-1), route_templates_dir_name);
+        //this will just write the snapshot to the global dir
+        snapshot->write(dir);
+        _global_snapshots.insert(snapshot);
+    }
+    return true;
+}
+
+bool MixerSnapshotManager::rename_snapshot(MixerSnapshot* snapshot, const string& new_name) {
+    if(!snapshot) {
+        return false;
+    }
+
+    if(new_name.empty()) {
+        return false;
+    }
+    const string old_path = snapshot->get_path();
+    const string dir = Glib::path_get_dirname(old_path);
+    snapshot->set_label(new_name);
+
+    const string new_path = Glib::build_filename(dir, snapshot->get_label() + string(template_suffix));
+    ::g_rename(old_path.c_str(), new_path.c_str());
+    snapshot->set_path(new_path);
+    return true;
+}
+
+bool MixerSnapshotManager::remove_snapshot(MixerSnapshot* snapshot) {
+    if(!snapshot) {
+        return false;
+    }
+
+    const string path = snapshot->get_path();
+    const string dir = Glib::path_get_dirname(path);
+
+    ::g_remove(path.c_str());
+
+    set<MixerSnapshot*>::iterator iter;
+    if(dir == _global_path) {
+        iter = _global_snapshots.find(snapshot);
+        if(iter != _global_snapshots.end()) {
+            _global_snapshots.erase(iter);
+        }
+    } else {
+        iter = _local_snapshots.find(snapshot);
+        if(iter != _local_snapshots.end()) {
+            _local_snapshots.erase(iter);
+        }
+    }
+    return true;
+}
+
+bool MixerSnapshotManager::demote(MixerSnapshot* snapshot) {
+    return true;
 }
 
 MixerSnapshot* MixerSnapshotManager::get_snapshot_by_name(const string& name, bool global)
