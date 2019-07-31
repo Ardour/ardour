@@ -6182,7 +6182,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 		goto out;
 	}
 
-	legal_playlist_name = "(BOUNCE) " + legalize_for_path (playlist->name());
+	legal_playlist_name = "(bounce)" + legalize_for_path (playlist->name());
 
 	for (uint32_t chan_n = 0; chan_n < diskstream_channels.n(data_type); ++chan_n) {
 
