@@ -210,7 +210,7 @@ void MixerSnapshotList::remove_snapshot(TreeModel::iterator& iter)
     MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
     vector<string> choices;
 
-    std::string prompt = string_compose (_("Do you really want to remove snapshot \"%1\" ?\n(which cannot be undone)"), snapshot->get_label());
+    std::string prompt = string_compose (_("Do you really want to remove snapshot \"%1\" ?\n(this cannot be undone)"), snapshot->get_label());
 
     choices.push_back (_("No, do nothing."));
     choices.push_back (_("Yes, remove it."));
@@ -218,9 +218,10 @@ void MixerSnapshotList::remove_snapshot(TreeModel::iterator& iter)
     ArdourWidgets::Choice prompter (_("Remove snapshot"), prompt, choices);
 
     if (prompter.run () == 1) {
-        redisplay ();
+        if(_session->snapshot_manager().remove_snapshot(snapshot)) {
+            _snapshot_model->erase((*iter));
+        }
     }
-    printf("remove snapshot %s @ path %s\n", snapshot->get_label().c_str(), snapshot->get_path().c_str());
 }
 
 void
@@ -240,16 +241,17 @@ MixerSnapshotList::rename_snapshot(TreeModel::iterator& iter)
     if (prompter.run() == RESPONSE_ACCEPT) {
         prompter.get_result (new_name);
         if (new_name.length()) {
-            redisplay ();
+            if(_session->snapshot_manager().rename_snapshot(snapshot, new_name)) {
+                (*iter)[_columns.name] = new_name;
+            }
         }
     }
-    printf("rename snapshot %s to %s\n", snapshot->get_label().c_str(), new_name.c_str());
 }
 
 void MixerSnapshotList::promote_snapshot(TreeModel::iterator& iter)
 {
     MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
-    printf("promote snapshot %s to mixer template\n", snapshot->get_label().c_str());
+    _session->snapshot_manager().promote(snapshot);
 }
 
 void
