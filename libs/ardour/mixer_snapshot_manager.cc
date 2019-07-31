@@ -103,6 +103,18 @@ void MixerSnapshotManager::refresh()
     }
 }
 
+MixerSnapshot* MixerSnapshotManager::get_snapshot_by_name(const string& name, bool global)
+{
+    set<MixerSnapshot*> snapshots_list = global ? _global_snapshots : _local_snapshots;
+
+    set<MixerSnapshot*>::iterator it;
+    for(it = snapshots_list.begin(); it != snapshots_list.end(); it++) {
+        if((*it)->get_label() == name) {
+            return (*it);
+        }
+    }
+}
+
 void MixerSnapshotManager::create_snapshot(std::string const& label, RouteList& rl, bool global)
 {
     ensure_snapshot_dir(global);
@@ -119,14 +131,17 @@ void MixerSnapshotManager::create_snapshot(std::string const& label, RouteList& 
 
     snapshot->set_label(label);
     snapshot->write(path);
-    refresh();
 
-    //I want this to eventually remove the appropriate snapshot ptr and insert the new one...
-    // if(global) {
-    //     _global_snapshots.insert(snapshot);
-    // } else {
-    //     _local_snapshots.insert(snapshot);
-    // }
+    MixerSnapshot* old_snapshot = get_snapshot_by_name(snapshot->get_label(), global);
+    set<MixerSnapshot*>& snapshots_list = global ? _global_snapshots : _local_snapshots;
+    set<MixerSnapshot*>::iterator iter = snapshots_list.find(old_snapshot);
+
+    //remove it from it's set
+    if(iter != snapshots_list.end()) {
+        snapshots_list.erase(iter);
+    }
+    //and insert the new one
+    snapshots_list.insert(snapshot);
 }
 
 void MixerSnapshotManager::create_snapshot(std::string const& label, std::string const& from_path, bool global)
@@ -136,12 +151,15 @@ void MixerSnapshotManager::create_snapshot(std::string const& label, std::string
     MixerSnapshot* snapshot = new MixerSnapshot(_session, from_path);
     snapshot->set_label(label);
     snapshot->write(path);
-    refresh();
 
-    //I want this to eventually remove the appropriate snapshot ptr and insert the new one...
-    // if(global) {
-    //     _global_snapshots.insert(snapshot);
-    // } else {
-    //     _local_snapshots.insert(snapshot);
-    // }
+    MixerSnapshot* old_snapshot = get_snapshot_by_name(snapshot->get_label(), global);
+    set<MixerSnapshot*>& snapshots_list = global ? _global_snapshots : _local_snapshots;
+    set<MixerSnapshot*>::iterator iter = snapshots_list.find(old_snapshot);
+
+    //remove it from it's set
+    if(iter != snapshots_list.end()) {
+        snapshots_list.erase(iter);
+    }
+    //and insert the new one
+    snapshots_list.insert(snapshot);
 }
