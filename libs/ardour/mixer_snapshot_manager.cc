@@ -115,7 +115,22 @@ bool MixerSnapshotManager::promote(MixerSnapshot* snapshot) {
         const string dir = Glib::build_filename(user_config_directory(-1), route_templates_dir_name);
         //this will just write the snapshot to the global dir
         snapshot->write(dir);
-        _global_snapshots.insert(snapshot);
+
+        //make new snapshot
+        string new_path = Glib::build_filename(dir, snapshot->get_label() + string(template_suffix));
+        MixerSnapshot* new_snap = new MixerSnapshot(_session, new_path);
+        new_snap->set_label(snapshot->get_label());
+        new_snap->set_path(new_path);
+
+        //this might've been overwritten and thus needs a new pointer
+        MixerSnapshot* old_snapshot = get_snapshot_by_name(new_snap->get_label(), true);
+        set<MixerSnapshot*>::iterator iter = _global_snapshots.find(old_snapshot);
+        if(iter != _global_snapshots.end()) {
+            _global_snapshots.erase(iter);
+        }
+
+        //insert the new snapshot
+        _global_snapshots.insert(new_snap);
     }
     return true;
 }
