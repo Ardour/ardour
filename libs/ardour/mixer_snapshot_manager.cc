@@ -211,6 +211,9 @@ void MixerSnapshotManager::create_snapshot(std::string const& label, RouteList& 
     snapshot->set_label(label);
     snapshot->write(path);
 
+    const string full_path = Glib::build_filename(path, snapshot->get_label() + string(template_suffix));
+    snapshot->set_path(full_path);
+
     MixerSnapshot* old_snapshot = get_snapshot_by_name(snapshot->get_label(), global);
     set<MixerSnapshot*>& snapshots_list = global ? _global_snapshots : _local_snapshots;
     set<MixerSnapshot*>::iterator iter = snapshots_list.find(old_snapshot);
@@ -230,6 +233,9 @@ void MixerSnapshotManager::create_snapshot(std::string const& label, std::string
     MixerSnapshot* snapshot = new MixerSnapshot(_session, from_path);
     snapshot->set_label(label);
     snapshot->write(path);
+
+    const string full_path = Glib::build_filename(path, snapshot->get_label() + string(template_suffix));
+    snapshot->set_path(full_path);
 
     MixerSnapshot* old_snapshot = get_snapshot_by_name(snapshot->get_label(), global);
     set<MixerSnapshot*>& snapshots_list = global ? _global_snapshots : _local_snapshots;
