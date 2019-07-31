@@ -41,7 +41,7 @@ public:
 	/* C++11 non-static data member initialization,
 	 * with non-copyable std::atomic ATOMIC_FLAG_INIT
 	 */
-	spinlock_t () : l (BOOST_DETAIL_SPINLOCK_INIT) {};
+	spinlock_t () : l {BOOST_DETAIL_SPINLOCK_INIT} {};
 #else
 	/* default C++ assign struct's first member */
 	spinlock_t ()
