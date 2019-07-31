@@ -55,7 +55,7 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
 MixerSnapshotList::MixerSnapshotList ()
-    : add_template_button("Add Template")
+    : add_template_button("Add Snapshot")
     , add_session_template_button("Add from Session")
     , _window_packer(new VBox())
     , _button_packer(new HBox())
