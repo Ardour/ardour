@@ -35,7 +35,7 @@
 class MixerSnapshotList : public ARDOUR::SessionHandlePtr
 {
 public:
-	MixerSnapshotList ();
+	MixerSnapshotList (bool global);
 
 	void set_session (ARDOUR::Session *);
 
@@ -74,6 +74,7 @@ private:
 	Gtk::Button add_session_template_button;
 
 	bool _bug_user;
+	bool _global;
 
 	bool button_press (GdkEventButton *);
 	void selection_changed ();

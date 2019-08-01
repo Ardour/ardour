@@ -274,7 +274,7 @@ Mixer_UI::Mixer_UI ()
 	rhs_pane2.add (rhs_pane1);
 	rhs_pane2.add (group_display_frame);
 
-	_mix_snaps = new MixerSnapshotList();
+	_mix_snaps = new MixerSnapshotList(true);
 	// Gtk::VBox* mix_packer = new Gtk::VBox();
 	// mix_packer->pack_start(_mix_snaps->widget());
 	// mix_packer->pack_start(_mix_snaps->get_add_template_button());

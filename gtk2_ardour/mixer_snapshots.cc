@@ -54,12 +54,13 @@ using namespace Gtk;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
-MixerSnapshotList::MixerSnapshotList ()
+MixerSnapshotList::MixerSnapshotList (bool global)
     : add_template_button("Add Snapshot")
     , add_session_template_button("Add from Session")
     , _window_packer(new VBox())
     , _button_packer(new HBox())
     , _bug_user(true)
+    , _global(global)
 {
     _snapshot_model = ListStore::create (_columns);
     _snapshot_display.set_model (_snapshot_model);
@@ -106,7 +107,7 @@ void MixerSnapshotList::new_snapshot() {
         prompter.get_result(name);
         if (name.length()) {
             RouteList rl = PublicEditor::instance().get_selection().tracks.routelist();
-            _session->snapshot_manager().create_snapshot(name, rl, false);
+            _session->snapshot_manager().create_snapshot(name, rl, _global);
             redisplay();
         }
     }
@@ -128,7 +129,7 @@ void MixerSnapshotList::new_snapshot_from_session() {
 
     string session_path = session_selector.get_filename();
     string name = basename_nosuffix(session_path);
-    _session->snapshot_manager().create_snapshot(name, session_path, false);
+    _session->snapshot_manager().create_snapshot(name, session_path, _global);
     redisplay();
 }
 
@@ -283,15 +284,21 @@ MixerSnapshotList::redisplay ()
         return;
     }
 
-    SnapshotList local_snapshots = _session->snapshot_manager().get_local_snapshots();
+    SnapshotList active_list;
+    if(_global) {
+        active_list = _session->snapshot_manager().get_global_snapshots();
+    } else if(!_global) {
+        active_list = _session->snapshot_manager().get_local_snapshots();
+    }
 
-    if(local_snapshots.empty()) {
+    if(active_list.empty()) {
+        printf("it's empty jim, cannot redisplay\n");
         return;
     }
 
     _snapshot_model->clear();
 
-    for(SnapshotList::const_iterator it = local_snapshots.begin(); it != local_snapshots.end(); it++) {
+    for(SnapshotList::const_iterator it = active_list.begin(); it != active_list.end(); it++) {
         TreeModel::Row row = *(_snapshot_model->append());
         row[_columns.name] = (*it)->get_label();
         row[_columns.snapshot] = (*it);
