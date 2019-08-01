@@ -78,6 +78,7 @@ struct ColumnInfo {
 EditorSources::EditorSources (Editor* e)
 	: EditorComponent (e)
 	, old_focus (0)
+	, tags_editable (0)
 	, _menu (0)
 	, _selection (0)
 	, _no_redisplay (false)
@@ -109,6 +110,10 @@ EditorSources::EditorSources (Editor* e)
 	col_name->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	col_name->set_sort_column(0);
 
+	TreeViewColumn* col_tags = manage (new TreeViewColumn ("", _columns.tags));
+	col_tags->set_fixed_width (bbt_width*2);
+	col_tags->set_sizing (TREE_VIEW_COLUMN_FIXED);
+
 	TreeViewColumn* col_take_id = manage (new TreeViewColumn ("", _columns.take_id));
 	col_take_id->set_fixed_width (date_width);
 	col_take_id->set_sizing (TREE_VIEW_COLUMN_FIXED);
@@ -125,6 +130,7 @@ EditorSources::EditorSources (Editor* e)
 	col_path->set_sort_column(3);
 
 	_display.append_column (*col_name);
+	_display.append_column (*col_tags);
 	_display.append_column (*col_take_id);
 	_display.append_column (*col_nat_pos);
 	_display.append_column (*col_path);
@@ -134,9 +140,10 @@ EditorSources::EditorSources (Editor* e)
 
 	ColumnInfo ci[] = {
 		{ 0,   _("Source"),    _("Source name, with number of channels in []'s") },
-		{ 1,   _("Take ID"),   _("Take ID") },
-		{ 2,   _("Orig Pos"),  _("Original Position of the file on timeline, when it was recorded") },
-		{ 3,   _("Path"),      _("Path (folder) of the file locationlosition of end of region") },
+		{ 1,   _("Tags"),      _("Tags") },
+		{ 2,   _("Take ID"),   _("Take ID") },
+		{ 3,   _("Orig Pos"),  _("Original Position of the file on timeline, when it was recorded") },
+		{ 4,   _("Path"),      _("Path (folder) of the file locationlosition of end of region") },
 		{ -1, 0, 0 }
 	};
 
@@ -160,17 +167,23 @@ EditorSources::EditorSources (Editor* e)
 	tv_col->add_attribute(renderer->property_text(), _columns.name);
 	tv_col->add_attribute(renderer->property_foreground_gdk(), _columns.color_);
 
+	//Tags cell: make editable
+	CellRendererText* region_tags_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (1));
+	region_tags_cell->property_editable() = true;
+	region_tags_cell->signal_edited().connect (sigc::mem_fun (*this, &EditorSources::tag_edit));
+	region_tags_cell->signal_editing_started().connect (sigc::mem_fun (*this, &EditorSources::tag_editing_started));
+
 	//right-align the Natural Pos column
-	TreeViewColumn* nat_col = _display.get_column(2);
+	TreeViewColumn* nat_col = _display.get_column(3);
 	nat_col->set_alignment (ALIGN_RIGHT);
-	renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (2));
+	renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (3));
 	if (renderer) {
 		renderer->property_xalign() = ( 1.0 );
 	}
 
 	//the PATH field should expand when the pane is opened wider
-	tv_col = _display.get_column(3);
-	renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (3));
+	tv_col = _display.get_column(4);
+	renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (4));
 	tv_col->add_attribute(renderer->property_text(), _columns.path);
 	tv_col->set_expand (true);
 
@@ -219,6 +232,8 @@ EditorSources::focus_in (GdkEventFocus*)
 		old_focus = 0;
 	}
 
+	tags_editable = 0;
+
 	/* try to do nothing on focus in (doesn't work, hence selection_count nonsense) */
 	return true;
 }
@@ -231,12 +246,18 @@ EditorSources::focus_out (GdkEventFocus*)
 		old_focus = 0;
 	}
 
+	tags_editable = 0;
+
 	return false;
 }
 
 bool
 EditorSources::enter_notify (GdkEventCrossing*)
 {
+	if (tags_editable) {
+		return true;
+	}
+
 	/* arm counter so that ::selection_filter() will deny selecting anything for the
 	   next two attempts to change selection status.
 	*/
@@ -321,6 +342,9 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Regio
 		str += string_compose("[%1]", region->n_channels());
 	}
 	row[_columns.name] = str;
+
+	//TAGS
+	row[_columns.tags] = region->tags();
 
 	row[_columns.region] = region;
 	row[_columns.take_id] = source->take_id();
@@ -643,11 +667,34 @@ EditorSources::remove_selected_sources ()
 bool
 EditorSources::key_press (GdkEventKey* ev)
 {
+	TreeViewColumn *col;
+
 	switch (ev->keyval) {
-	case GDK_Delete:
+	case GDK_Tab:
+	case GDK_ISO_Left_Tab:
+
+		if (tags_editable) {
+			tags_editable->editing_done ();
+			tags_editable = 0;
+		}
+
+		col = _display.get_column (1); // select&focus on tags column
+
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+			treeview_select_previous (_display, _model, col);
+		} else {
+			treeview_select_next (_display, _model, col);
+		}
+
+		return true;
+		break;
+
 	case GDK_BackSpace:
 		remove_selected_sources();
 		return true; 
+
+	default:
+		break;
 	}
 
 	return false;
@@ -676,6 +723,52 @@ EditorSources::button_press (GdkEventButton *ev)
 
 	return false;
 }
+
+void
+EditorSources::tag_editing_started (CellEditable* ce, const Glib::ustring& path)
+{
+	tags_editable = ce;
+
+	/* give it a special name */
+
+	Gtk::Entry *e = dynamic_cast<Gtk::Entry*> (ce);
+
+	if (e) {
+		e->set_name (X_("SourceTagEditorEntry"));
+
+		TreeIter iter;
+		if ((iter = _model->get_iter (path))) {
+			boost::shared_ptr<Region> region = (*iter)[_columns.region];
+
+			if(region) {
+				e->set_text(region->tags());
+			}
+		}
+	}
+}
+
+void
+EditorSources::tag_edit (const std::string& path, const std::string& new_text)
+{
+	tags_editable = 0;
+
+	boost::shared_ptr<Region> region;
+	TreeIter row_iter;
+
+	if ((row_iter = _model->get_iter (path))) {
+		region = (*row_iter)[_columns.region];
+		(*row_iter)[_columns.tags] = new_text;
+	}
+
+	if (region) {
+		region->set_tags (new_text);
+
+		_session->set_dirty();  //whole-file regions aren't in a playlist to catch property changes, so we need to explicitly set the session dirty
+
+		populate_row ((*row_iter), region);
+	}
+}
+
 
 void
 EditorSources::selection_mapover (sigc::slot<void,boost::shared_ptr<Region> > sl)

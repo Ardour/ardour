@@ -69,6 +69,7 @@ private:
 	struct Columns : public Gtk::TreeModel::ColumnRecord {
 		Columns () {
 			add (name);
+			add (tags);
 			add (take_id);
 			add (natural_pos);
 			add (path);
@@ -78,6 +79,7 @@ private:
 		}
 
 		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<std::string> tags;
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Region> > region;
 		Gtk::TreeModelColumn<Gdk::Color> color_;
 		Gtk::TreeModelColumn<std::string> natural_pos;
@@ -101,6 +103,10 @@ private:
 	bool selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
 
 	Gtk::Widget* old_focus;
+
+	Gtk::CellEditable* tags_editable;
+	void tag_editing_started (Gtk::CellEditable*, const Glib::ustring&);
+	void tag_edit (const std::string&, const std::string&);
 
 	bool key_press (GdkEventKey *);
 	bool button_press (GdkEventButton *);
@@ -152,7 +158,6 @@ private:
 	Selection* _selection;
 	
 	bool _no_redisplay;
-
 };
 
 #endif /* __gtk_ardour_editor_regions_h__ */
