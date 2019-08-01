@@ -72,6 +72,8 @@ private:
 	Gtk::Button add_template_button;
 	Gtk::Button add_session_template_button;
 
+	bool _bug_user;
+
 	bool button_press (GdkEventButton *);
 	void selection_changed ();
 	void popup_context_menu (int, int32_t, Gtk::TreeModel::iterator&);

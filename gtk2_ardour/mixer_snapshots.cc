@@ -59,6 +59,7 @@ MixerSnapshotList::MixerSnapshotList ()
     , add_session_template_button("Add from Session")
     , _window_packer(new VBox())
     , _button_packer(new HBox())
+    , _bug_user(true)
 {
     _snapshot_model = ListStore::create (_columns);
     _snapshot_display.set_model (_snapshot_model);
@@ -214,10 +215,31 @@ void MixerSnapshotList::remove_snapshot(TreeModel::iterator& iter)
 
     choices.push_back (_("No, do nothing."));
     choices.push_back (_("Yes, remove it."));
+    choices.push_back (_("Yes, and don't ask again."));
 
     ArdourWidgets::Choice prompter (_("Remove snapshot"), prompt, choices);
 
-    if (prompter.run () == 1) {
+    if(_bug_user) {
+        switch(prompter.run()) {
+            case 0:
+                break;
+            case 1:
+                //remove
+                if(_session->snapshot_manager().remove_snapshot(snapshot)) {
+                    _snapshot_model->erase((*iter));
+                }
+                break;
+            case 2:
+                //remove and switch bug_user
+                if(_session->snapshot_manager().remove_snapshot(snapshot)) {
+                    _snapshot_model->erase((*iter));
+                    _bug_user = false;
+                }
+                break;
+            default:
+                break;
+        }
+    } else {
         if(_session->snapshot_manager().remove_snapshot(snapshot)) {
             _snapshot_model->erase((*iter));
         }
