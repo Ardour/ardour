@@ -283,7 +283,7 @@ MixerSnapshotList::redisplay ()
         return;
     }
 
-    MixerSnapshotManager::SnapshotList local_snapshots = _session->snapshot_manager().get_local_snapshots();
+    SnapshotList local_snapshots = _session->snapshot_manager().get_local_snapshots();
 
     if(local_snapshots.empty()) {
         return;
@@ -291,7 +291,7 @@ MixerSnapshotList::redisplay ()
 
     _snapshot_model->clear();
 
-    for(MixerSnapshotManager::SnapshotList::const_iterator it = local_snapshots.begin(); it != local_snapshots.end(); it++) {
+    for(SnapshotList::const_iterator it = local_snapshots.begin(); it != local_snapshots.end(); it++) {
         TreeModel::Row row = *(_snapshot_model->append());
         row[_columns.name] = (*it)->get_label();
         row[_columns.snapshot] = (*it);

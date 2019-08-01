@@ -28,11 +28,11 @@
 #include "ardour/session.h"
 
 namespace ARDOUR {
+typedef std::set<MixerSnapshot*> SnapshotList;
 
 class LIBARDOUR_API MixerSnapshotManager : public boost::noncopyable
 {
 public:
-    typedef std::set<MixerSnapshot*> SnapshotList;
 
     MixerSnapshotManager (ARDOUR::Session*);
     ~MixerSnapshotManager() {}
@@ -51,8 +51,8 @@ public:
     std::string get_global_path() {return _global_path;}
     std::string get_local_path() {return _local_path;}
     
-    SnapshotList get_global_snapshots() {return _global_snapshots;}
-    SnapshotList get_local_snapshots() {return _local_snapshots;}
+    ARDOUR::SnapshotList get_global_snapshots() {return _global_snapshots;}
+    ARDOUR::SnapshotList get_local_snapshots() {return _local_snapshots;}
 
     void refresh();
     void clear() { _global_snapshots.clear(); _local_snapshots.clear(); };
@@ -61,8 +61,8 @@ private:
     std::string _global_path;
     std::string _local_path;
 
-    SnapshotList _global_snapshots;
-    SnapshotList _local_snapshots;
+    ARDOUR::SnapshotList _global_snapshots;
+    ARDOUR::SnapshotList _local_snapshots;
 
     ARDOUR::Session* _session;
 };

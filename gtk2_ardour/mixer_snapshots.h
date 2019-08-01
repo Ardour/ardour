@@ -30,6 +30,7 @@
 #include <gtkmm/box.h>
 
 #include "ardour/mixer_snapshot.h"
+#include "ardour/mixer_snapshot_manager.h"
 
 class MixerSnapshotList : public ARDOUR::SessionHandlePtr
 {
