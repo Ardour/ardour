@@ -73,15 +73,14 @@ void MixerSnapshotManager::refresh()
             snap->set_label(info.name);
             snap->set_path(info.path);
             _global_snapshots.insert(snap);
-
-            printf("Global - name: %s\n", snap->get_label().c_str());
-            printf("Global - path: %s\n", info.path.c_str());
         }
     }
 
 
-    //this should be in search_paths and then integrated into template_utils
-    //but having it be based on the session presents... complications
+    /* this should be in search_paths and then integrated into template_utils
+       but having it be based on the session presents... complications. For now
+       We're just going to construct our own search path.
+    */
     PBD::Searchpath spath (_session->session_directory().root_path());
     spath.add_subdirectory_to_paths(route_templates_dir_name);
 
@@ -98,9 +97,6 @@ void MixerSnapshotManager::refresh()
             MixerSnapshot* snap = new MixerSnapshot(_session, path);
             snap->set_label(label);
             _local_snapshots.insert(snap);
-
-            printf("Local - name: %s\n", snap->get_label().c_str());
-            printf("Local - path: %s\n", path.c_str());
         }
     }
 }
@@ -112,27 +108,29 @@ bool MixerSnapshotManager::promote(MixerSnapshot* snapshot) {
 
     const string path = snapshot->get_path();
     if(Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS)) {
-        const string dir = Glib::build_filename(user_config_directory(-1), route_templates_dir_name);
-        //this will just write the snapshot to the global dir
-        snapshot->write(dir);
+        const string label = snapshot->get_label();
+        snapshot->write(_global_path);
 
-        //make new snapshot
-        string new_path = Glib::build_filename(dir, snapshot->get_label() + string(template_suffix));
-        MixerSnapshot* new_snap = new MixerSnapshot(_session, new_path);
-        new_snap->set_label(snapshot->get_label());
-        new_snap->set_path(new_path);
-
-        //this might've been overwritten and thus needs a new pointer
-        MixerSnapshot* old_snapshot = get_snapshot_by_name(new_snap->get_label(), true);
+        //that might've overwritten a file, erase it's reference
+        MixerSnapshot* old_snapshot = get_snapshot_by_name(label, true);
         set<MixerSnapshot*>::iterator iter = _global_snapshots.find(old_snapshot);
         if(iter != _global_snapshots.end()) {
             _global_snapshots.erase(iter);
         }
 
+        //make new snapshot to insert into the global set
+        const string file_name = label + string(template_suffix);
+        const string file_path  = Glib::build_filename(_global_path, file_name);
+
+        MixerSnapshot* new_snap = new MixerSnapshot(_session, file_path);
+        new_snap->set_label(label);
+        new_snap->set_path(file_path);
+
         //insert the new snapshot
         _global_snapshots.insert(new_snap);
+        return true;
     }
-    return true;
+    return false;
 }
 
 bool MixerSnapshotManager::rename_snapshot(MixerSnapshot* snapshot, const string& new_name) {
@@ -179,7 +177,7 @@ bool MixerSnapshotManager::remove_snapshot(MixerSnapshot* snapshot) {
 }
 
 bool MixerSnapshotManager::demote(MixerSnapshot* snapshot) {
-    return true;
+    return false;
 }
 
 MixerSnapshot* MixerSnapshotManager::get_snapshot_by_name(const string& name, bool global)
