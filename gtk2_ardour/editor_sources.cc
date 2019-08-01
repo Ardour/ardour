@@ -24,11 +24,13 @@
 
 #include "pbd/basename.h"
 #include "pbd/enumwriter.h"
+#include "pbd/file_utils.h"
 
 #include "ardour/audioregion.h"
 #include "ardour/source.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/silentfilesource.h"
+#include "ardour/smf_source.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
@@ -350,21 +352,39 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Regio
 	row[_columns.take_id] = source->take_id();
 
 	//PATH
+	string pathstr = source->name();
 	if (missing_source) {
-		row[_columns.path] = _("(MISSING) ") + Gtkmm2ext::markup_escape_text (source->name());
+		pathstr = _("(MISSING) ") + Gtkmm2ext::markup_escape_text (source->name());
 	} else {
+
+		//is it a file?
 		boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource>(source);
-		if (fs) {
-			const string sound_directory = _session->session_directory().sound_path();
-			if ( fs->path().find(sound_directory) == std::string::npos ) { // external file
-				row[_columns.path] = Gtkmm2ext::markup_escape_text (fs->path());
-			} else {
-				row[_columns.path] = source->name();
-			}
+		if (!fs) {
+			pathstr = Gtkmm2ext::markup_escape_text (source->name());  //someday:  sequence region(?)
 		} else {
-			row[_columns.path] = Gtkmm2ext::markup_escape_text (source->name());
+	
+			//audio file?
+			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(source);
+			if (afs) {
+				const string audio_directory = _session->session_directory().sound_path();
+				if ( !PBD::path_is_within(audio_directory, fs->path())) {
+					pathstr = Gtkmm2ext::markup_escape_text (fs->path());
+				}
+			}
+			
+			//midi file?
+			boost::shared_ptr<SMFSource> mfs = boost::dynamic_pointer_cast<SMFSource>(source);
+			if (mfs) {
+				const string midi_directory = _session->session_directory().midi_path();
+				if ( !PBD::path_is_within(midi_directory, fs->path())) {
+					pathstr = Gtkmm2ext::markup_escape_text (fs->path());
+				}
+			}
+			
 		}
 	}
+	
+	row[_columns.path] = pathstr;
 
 	//Natural Position (samples, an invisible column for sorting)
 	row[_columns.natural_s] = source->natural_position();
