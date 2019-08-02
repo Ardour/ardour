@@ -43,6 +43,10 @@ public:
 		return *_window_packer;
 	}
 
+	Gtk::Widget& display() {
+		return _scroller;
+	}
+
 	void new_snapshot();
 	void new_snapshot_from_session();
 
@@ -57,11 +61,21 @@ private:
 	struct Columns : public Gtk::TreeModel::ColumnRecord {
 		Columns () {
 			add (name);
+			add (n_tracks);
+			add (n_vcas);
+			add (n_groups);
+			add (date);
+			add (version);
 			add (timestamp);
             add (snapshot);
 		}
 		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<int32_t> n_tracks;
+		Gtk::TreeModelColumn<int32_t> n_vcas;
+		Gtk::TreeModelColumn<int32_t> n_groups;
 		Gtk::TreeModelColumn<std::time_t> timestamp;
+		Gtk::TreeModelColumn<std::string> date;
+		Gtk::TreeModelColumn<std::string> version;
         Gtk::TreeModelColumn<ARDOUR::MixerSnapshot*> snapshot;  //TODO: these are leaked
 	};
 
@@ -72,6 +86,8 @@ private:
 
 	Gtk::Button add_template_button;
 	Gtk::Button add_session_template_button;
+
+	void bootstrap_display_and_model(Gtk::TreeView&);
 
 	bool _bug_user;
 	bool _global;

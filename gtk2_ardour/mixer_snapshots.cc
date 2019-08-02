@@ -45,6 +45,7 @@
 
 #include "pbd/i18n.h"
 #include "pbd/basename.h"
+#include "pbd/gstdio_compat.h"
 
 #include "mixer_snapshots.h"
 
@@ -76,13 +77,26 @@ MixerSnapshotList::MixerSnapshotList (bool global)
     add_template_button.signal_clicked().connect(sigc::mem_fun(*this, &MixerSnapshotList::new_snapshot));
     add_session_template_button.signal_clicked().connect(sigc::mem_fun(*this, &MixerSnapshotList::new_snapshot_from_session));
 
-    _button_packer->pack_start(add_template_button, false, false);
-    _button_packer->pack_start(add_session_template_button, false, false);
-    _window_packer->pack_start(_scroller, true, true);
-    _window_packer->pack_start(*_button_packer, true, true);
+    if(global) {
+        bootstrap_display_and_model(_snapshot_display);
+    } else {
+        _button_packer->pack_start(add_template_button, false, false);
+        _button_packer->pack_start(add_session_template_button, false, false);
+        _window_packer->pack_start(_scroller, true, true);
+        _window_packer->pack_start(*_button_packer, true, true);
+    }
 
     _snapshot_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &MixerSnapshotList::selection_changed));
     _snapshot_display.signal_button_press_event().connect (sigc::mem_fun (*this, &MixerSnapshotList::button_press), false);
+}
+
+void MixerSnapshotList::bootstrap_display_and_model(TreeView& display)
+{
+    display.append_column(_("# Tracks"),       _columns.n_tracks);
+    display.append_column(_("# VCAs"),         _columns.n_vcas);
+    display.append_column(_("# Groups"),       _columns.n_groups);
+    display.append_column(_("Date"),           _columns.date);
+    display.append_column(_("Version"),        _columns.version);
 }
 
 void
@@ -292,7 +306,6 @@ MixerSnapshotList::redisplay ()
     }
 
     if(active_list.empty()) {
-        printf("it's empty jim, cannot redisplay\n");
         return;
     }
 
@@ -301,6 +314,19 @@ MixerSnapshotList::redisplay ()
     for(SnapshotList::const_iterator it = active_list.begin(); it != active_list.end(); it++) {
         TreeModel::Row row = *(_snapshot_model->append());
         row[_columns.name] = (*it)->get_label();
+        if(_global) {
+            row[_columns.n_tracks]  = (*it)->get_routes().size();
+            row[_columns.n_vcas]    = (*it)->get_vcas().size();
+            row[_columns.n_groups]  = (*it)->get_groups().size();
+
+            GStatBuf gsb;
+            g_stat((*it)->get_path().c_str(), &gsb);
+            Glib::DateTime gdt(Glib::DateTime::create_now_local(gsb.st_mtime));
+
+            row[_columns.timestamp] = gsb.st_mtime;;
+            row[_columns.date]      = gdt.format("%F %H:%M");
+            row[_columns.version]   = (*it)->get_last_modified_with();
+        }
         row[_columns.snapshot] = (*it);
     }
 }

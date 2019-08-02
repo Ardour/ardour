@@ -178,6 +178,7 @@ typedef uint64_t microseconds_t;
 #include "main_clock.h"
 #include "missing_file_dialog.h"
 #include "missing_plugin_dialog.h"
+#include "mixer_snapshots.h"
 #include "mixer_ui.h"
 #include "meterbridge.h"
 #include "meter_patterns.h"
