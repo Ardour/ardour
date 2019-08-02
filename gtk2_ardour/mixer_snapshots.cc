@@ -87,7 +87,7 @@ MixerSnapshotList::MixerSnapshotList (bool global)
     add_template_button.signal_clicked().connect(sigc::mem_fun(*this, &MixerSnapshotList::new_snapshot));
     add_session_template_button.signal_clicked().connect(sigc::mem_fun(*this, &MixerSnapshotList::new_snapshot_from_session));
 
-    if(global) {
+    if(_global) {
         bootstrap_display_and_model();
     } else {
         _button_packer->pack_start(add_template_button, false, false);
