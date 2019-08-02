@@ -35,69 +35,69 @@
 class MixerSnapshotList : public ARDOUR::SessionHandlePtr
 {
 public:
-	MixerSnapshotList (bool global);
+    MixerSnapshotList (bool global);
 
-	void set_session (ARDOUR::Session *);
+    void set_session (ARDOUR::Session *);
 
-	Gtk::Widget& widget () {
-		return *_window_packer;
-	}
+    Gtk::Widget& widget () {
+        return *_window_packer;
+    }
 
-	Gtk::Widget& display() {
-		return _scroller;
-	}
+    Gtk::Widget& display() {
+        return _scroller;
+    }
 
-	void new_snapshot();
-	void new_snapshot_from_session();
+    void new_snapshot();
+    void new_snapshot_from_session();
 
-	void redisplay ();
+    void redisplay ();
 
 private:
-	Gtk::VBox* _window_packer;
-	Gtk::HBox* _button_packer;
+    Gtk::VBox* _window_packer;
+    Gtk::HBox* _button_packer;
 
-	Gtk::ScrolledWindow _scroller;
+    Gtk::ScrolledWindow _scroller;
 
-	struct Columns : public Gtk::TreeModel::ColumnRecord {
-		Columns () {
-			add (name);
-			add (n_tracks);
-			add (n_vcas);
-			add (n_groups);
-			add (date);
-			add (version);
-			add (timestamp);
+    struct Columns : public Gtk::TreeModel::ColumnRecord {
+        Columns () {
+            add (name);
+            add (n_tracks);
+            add (n_vcas);
+            add (n_groups);
+            add (date);
+            add (version);
+            add (timestamp);
             add (snapshot);
-		}
-		Gtk::TreeModelColumn<std::string> name;
-		Gtk::TreeModelColumn<int32_t> n_tracks;
-		Gtk::TreeModelColumn<int32_t> n_vcas;
-		Gtk::TreeModelColumn<int32_t> n_groups;
-		Gtk::TreeModelColumn<std::time_t> timestamp;
-		Gtk::TreeModelColumn<std::string> date;
-		Gtk::TreeModelColumn<std::string> version;
+        }
+        Gtk::TreeModelColumn<std::string> name;
+        Gtk::TreeModelColumn<int32_t> n_tracks;
+        Gtk::TreeModelColumn<int32_t> n_vcas;
+        Gtk::TreeModelColumn<int32_t> n_groups;
+        Gtk::TreeModelColumn<std::string> date;
+        Gtk::TreeModelColumn<std::string> version;
+        Gtk::TreeModelColumn<std::time_t> timestamp;
         Gtk::TreeModelColumn<ARDOUR::MixerSnapshot*> snapshot;  //TODO: these are leaked
-	};
+    };
 
-	Columns _columns;
-	Glib::RefPtr<Gtk::ListStore> _snapshot_model;
-	Gtk::TreeView _snapshot_display;
-	Gtk::Menu _menu;
+    Columns _columns;
+    Glib::RefPtr<Gtk::ListStore> _snapshot_model;
+    Gtk::TreeView _snapshot_display;
+    Gtk::Menu _menu;
 
-	Gtk::Button add_template_button;
-	Gtk::Button add_session_template_button;
+    Gtk::Button add_template_button;
+    Gtk::Button add_session_template_button;
 
-	void bootstrap_display_and_model(Gtk::TreeView&);
+    void bootstrap_display_and_model();
 
-	bool _bug_user;
-	bool _global;
+    bool _bug_user;
+    bool _global;
 
-	bool button_press (GdkEventButton *);
-	void selection_changed ();
-	void popup_context_menu (int, int32_t, Gtk::TreeModel::iterator&);
-	void remove_snapshot (Gtk::TreeModel::iterator&);
-	void rename_snapshot (Gtk::TreeModel::iterator&);
-	void promote_snapshot (Gtk::TreeModel::iterator&);
+    bool button_press (GdkEventButton *);
+    void selection_changed ();
+    void popup_context_menu (int, int32_t, Gtk::TreeModel::iterator&);
+    void remove_snapshot (Gtk::TreeModel::iterator&);
+    void rename_snapshot (Gtk::TreeModel::iterator&);
+    void promote_snapshot (Gtk::TreeModel::iterator&);
 };
 
 #endif // __gtk_ardour_mixer_snapshots_h__

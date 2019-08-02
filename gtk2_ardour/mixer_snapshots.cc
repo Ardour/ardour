@@ -36,6 +36,7 @@
 #include "ardour/session_directory.h"
 #include "ardour/mixer_snapshot_manager.h"
 
+#include "widgets/tooltips.h"
 #include "widgets/choice.h"
 #include "widgets/prompter.h"
 
@@ -53,7 +54,16 @@ using namespace std;
 using namespace PBD;
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
+
+struct ColumnInfo {
+    int           index;
+    int           sort_idx;
+    AlignmentEnum al;
+    const char*   label;
+    const char*   tooltip;
+};
 
 MixerSnapshotList::MixerSnapshotList (bool global)
     : add_template_button("Add Snapshot")
@@ -78,7 +88,7 @@ MixerSnapshotList::MixerSnapshotList (bool global)
     add_session_template_button.signal_clicked().connect(sigc::mem_fun(*this, &MixerSnapshotList::new_snapshot_from_session));
 
     if(global) {
-        bootstrap_display_and_model(_snapshot_display);
+        bootstrap_display_and_model();
     } else {
         _button_packer->pack_start(add_template_button, false, false);
         _button_packer->pack_start(add_session_template_button, false, false);
@@ -90,13 +100,51 @@ MixerSnapshotList::MixerSnapshotList (bool global)
     _snapshot_display.signal_button_press_event().connect (sigc::mem_fun (*this, &MixerSnapshotList::button_press), false);
 }
 
-void MixerSnapshotList::bootstrap_display_and_model(TreeView& display)
+void MixerSnapshotList::bootstrap_display_and_model()
 {
-    display.append_column(_("# Tracks"),       _columns.n_tracks);
-    display.append_column(_("# VCAs"),         _columns.n_vcas);
-    display.append_column(_("# Groups"),       _columns.n_groups);
-    display.append_column(_("Date"),           _columns.date);
-    display.append_column(_("Version"),        _columns.version);
+    TreeView& display = _snapshot_display;
+    Glib::RefPtr<ListStore> model = _snapshot_model;
+
+    display.append_column(_("# Tracks"), _columns.n_tracks);
+    display.append_column(_("# VCAs"),   _columns.n_vcas);
+    display.append_column(_("# Groups"), _columns.n_groups);
+    display.append_column(_("Date"),     _columns.date);
+    display.append_column(_("Version"),  _columns.version);
+
+    //newest snaps should be at the top
+    model->set_sort_column(4, SORT_DESCENDING);
+
+    ColumnInfo ci[] = {
+        { 0,  0,  ALIGN_LEFT,    _("Name"),     _("") },
+        { 1,  1,  ALIGN_CENTER,  _("# Tracks"), _("") },
+        { 2,  2,  ALIGN_CENTER,  _("# VCAs"),   _("") },
+        { 3,  3,  ALIGN_CENTER,  _("# Groups"), _("") },
+        { 4,  6,  ALIGN_LEFT,    _("Date"),     _("") },
+        { 5,  5,  ALIGN_LEFT,    _("Version"),  _("") },
+        { -1,-1,  ALIGN_CENTER, 0, 0 }
+    };
+
+    for (int i = 0; ci[i].index >= 0; ++i) {
+        ColumnInfo info = ci[i];
+
+        TreeViewColumn* column = display.get_column(info.index);
+
+        Label* label = manage(new Label (info.label));
+        label->set_alignment(info.al);
+        set_tooltip(*label, info.tooltip);
+        column->set_widget(*label);
+        label->show();
+
+        column->set_sort_column(info.sort_idx);
+        column->set_expand(false);
+        column->set_alignment(info.al);
+
+        //...and this sets the alignment for the data cells
+        CellRendererText* rend = dynamic_cast<CellRendererText*>(display.get_column_cell_renderer(info.index));
+        if (rend) {
+            rend->property_xalign() = (info.al == ALIGN_RIGHT ? 1.0 : (info.al == ALIGN_LEFT ? 0.0 : 0.5));
+        }
+    }
 }
 
 void
@@ -217,7 +265,9 @@ MixerSnapshotList::popup_context_menu (int button, int32_t time, TreeModel::iter
 
     add_item_with_sensitivity(items, MenuElem (_("Remove"), sigc::bind(sigc::mem_fun (*this, &MixerSnapshotList::remove_snapshot), iter)), true);
     add_item_with_sensitivity (items, MenuElem (_("Rename..."), sigc::bind (sigc::mem_fun (*this, &MixerSnapshotList::rename_snapshot), iter)), true);
-    add_item_with_sensitivity (items, MenuElem (_("Promote To Mixer Template"), sigc::bind (sigc::mem_fun (*this, &MixerSnapshotList::promote_snapshot), iter)), true);
+    if(!_global)  {
+        add_item_with_sensitivity (items, MenuElem (_("Promote To Mixer Template"), sigc::bind (sigc::mem_fun (*this, &MixerSnapshotList::promote_snapshot), iter)), true);
+    }
     _menu.popup (button, time);
 }
 
