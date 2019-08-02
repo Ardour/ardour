@@ -838,7 +838,7 @@ ExportHandler::write_index_info_toc (CDMarkerStatus & status)
 {
 	gchar buf[18];
 
-	samples_to_cd_frame_string (buf, status.index_position - status.track_position);
+	samples_to_cd_frame_string (buf, status.index_position - status.track_start_sample);
 	status.out << "INDEX" << buf << endl;
 }
 
