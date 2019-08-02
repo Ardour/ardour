@@ -548,6 +548,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\editor_sources.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\editor_summary.cc"
 				>
 			</File>
@@ -1591,6 +1595,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\editor_snapshots.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\editor_sources.h"
 				>
 			</File>
 			<File
