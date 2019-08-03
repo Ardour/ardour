@@ -1,21 +1,26 @@
 /*
- * Frontier Designs Tranzport driver
- *
- * Copyright (C) 2007 Michael Taht (m@taht.net)
+ * Copyright (C) 2008-2015 Paul Davis <paul@linuxaudiosystems.com>
  *
  * Based on the usbled driver and ldusb drivers by
- *
  * Copyright (C) 2004 Greg Kroah-Hartman (greg@kroah.com)
  * Copyright (C) 2005 Michael Hund <mhund@ld-didactic.de>
  *
- * The ldusb driver was, in turn, derived from Lego USB Tower driver
+ * The ldusb driver was, in turn, derived from Lego USB Tower drive
  * Copyright (C) 2003 David Glance <advidgsf@sourceforge.net>
- *		 2001-2004 Juergen Stuber <starblue@users.sourceforge.net>
+ * Copyright (C) 2001-2004 Juergen Stuber <starblue@users.sourceforge.net>
  *
- *	This program is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU General Public License as
- *	published by the Free Software Foundation, version 2.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2.
  *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 /**
