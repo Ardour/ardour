@@ -39,11 +39,12 @@ class LIBARDOUR_API CAImportableSource : public ImportableSource {
 	virtual ~CAImportableSource();
 
 	samplecnt_t read (Sample* buffer, samplecnt_t nframes);
-	uint32_t  channels() const;
+	uint32_t    channels() const;
 	samplecnt_t length() const;
 	samplecnt_t samplerate() const;
-	void      seek (samplepos_t pos);
-	bool clamped_at_unity () const { return false; }
+	void        seek (samplepos_t pos);
+	samplepos_t natural_position ();
+	bool        clamped_at_unity () const { return false; }
 
    protected:
 #ifdef COREAUDIO105
