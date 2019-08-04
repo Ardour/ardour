@@ -137,7 +137,7 @@ CAImportableSource::seek (samplepos_t pos)
 
 
 samplepos_t
-CAImportableSource::natural_position ()
+CAImportableSource::natural_position () const
 {
 	// TODO: extract timecode, if any
 	return 0;
