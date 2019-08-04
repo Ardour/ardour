@@ -942,6 +942,8 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	meter_hbox.pack_start (meter_alignment, false, false);
 	meter_hbox.pack_start (meter_ticks2_area, false, false);
 	meter_hbox.pack_start (meter_metric_area, false, false);
+
+	meter_metric_area.set_no_show_all ();
 }
 #undef PX_SCALE
 
