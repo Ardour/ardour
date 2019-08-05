@@ -39,6 +39,7 @@
 #include "widgets/tooltips.h"
 #include "widgets/choice.h"
 #include "widgets/prompter.h"
+#include "widgets/popup.h"
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -147,8 +148,7 @@ void MixerSnapshotList::bootstrap_display_and_model()
     }
 }
 
-void
-MixerSnapshotList::set_session (Session* s)
+void MixerSnapshotList::set_session (Session* s)
 {
     SessionHandlePtr::set_session (s);
 
@@ -196,8 +196,7 @@ void MixerSnapshotList::new_snapshot_from_session() {
 }
 
 /* A new snapshot has been selected. */
-void
-MixerSnapshotList::selection_changed ()
+void MixerSnapshotList::selection_changed ()
 {
     if (_snapshot_display.get_selection()->count_selected_rows() == 0) {
         return;
@@ -212,8 +211,7 @@ MixerSnapshotList::selection_changed ()
     _snapshot_display.set_sensitive (true);
 }
 
-bool
-MixerSnapshotList::button_press (GdkEventButton* ev)
+bool MixerSnapshotList::button_press (GdkEventButton* ev)
 {
     if (ev->button == 3) {
         TreeViewColumn* col;
@@ -255,8 +253,7 @@ MixerSnapshotList::button_press (GdkEventButton* ev)
  * @param time Menu open time.
  * @param snapshot_name Name of the snapshot that the menu click was over.
  */
-void
-MixerSnapshotList::popup_context_menu (int button, int32_t time, TreeModel::iterator& iter)
+void MixerSnapshotList::popup_context_menu (int button, int32_t time, TreeModel::iterator& iter)
 {
     using namespace Menu_Helpers;
 
@@ -311,8 +308,7 @@ void MixerSnapshotList::remove_snapshot(TreeModel::iterator& iter)
     }
 }
 
-void
-MixerSnapshotList::rename_snapshot(TreeModel::iterator& iter)
+void MixerSnapshotList::rename_snapshot(TreeModel::iterator& iter)
 {
     MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
     ArdourWidgets::Prompter prompter(true);
@@ -329,6 +325,10 @@ MixerSnapshotList::rename_snapshot(TreeModel::iterator& iter)
         prompter.get_result (new_name);
         if (new_name.length()) {
             if(_session->snapshot_manager().rename_snapshot(snapshot, new_name)) {
+                if (new_name.length() > 45) {
+                    new_name = new_name.substr(0, 45);
+                    new_name.append("...");
+                }
                 (*iter)[_columns.name] = new_name;
             }
         }
@@ -338,11 +338,18 @@ MixerSnapshotList::rename_snapshot(TreeModel::iterator& iter)
 void MixerSnapshotList::promote_snapshot(TreeModel::iterator& iter)
 {
     MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
-    _session->snapshot_manager().promote(snapshot);
+
+    //let the user know that this was successful.
+    if(_session->snapshot_manager().promote(snapshot)) {
+        const string notification = string_compose(_("Snapshot \"%1\" is now available to all sessions.\n"), snapshot->get_label());
+
+        PopUp* notify = new PopUp(WIN_POS_MOUSE, 2000, true);
+        notify->set_text(notification);
+        notify->touch();
+    }
 }
 
-void
-MixerSnapshotList::redisplay ()
+void MixerSnapshotList::redisplay ()
 {
     if (_session == 0) {
         return;
