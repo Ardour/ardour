@@ -348,7 +348,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	int cue_set (uint32_t aux, lo_message msg);
 	int _cue_set (uint32_t aux, lo_address addr);
-	int cue_new_aux (std::string name, std::string dest_1, std::string dest_2, lo_message msg);
+	int cue_new_aux (std::string name, std::string dest_1, std::string dest_2, uint32_t count, lo_message msg);
 	int cue_new_send (std::string rt_name, lo_message msg);
 	int cue_connect_aux (std::string dest, lo_message msg);
 	int cue_next (lo_message msg);

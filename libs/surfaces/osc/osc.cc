@@ -4296,7 +4296,7 @@ OSC::sel_new_personal_send (char *foldback, lo_message msg)
 		}
 	}
 	/* if a foldbackbus called foldback exists use it
-	 * other wise create create it. Then create a foldback send from
+	 * other wise create it. Then create a foldback send from
 	 * this route to that bus.
 	 */
 	string foldbackbus = foldback;
@@ -4312,7 +4312,7 @@ OSC::sel_new_personal_send (char *foldback, lo_message msg)
 			lsn_rt = raw_rt;
 		} else {
 			// create the foldbackbus
-			RouteList list = session->new_audio_route (2, 2, 0, 1, foldback_name, PresentationInfo::FoldbackBus, (uint32_t) -1);
+			RouteList list = session->new_audio_route (1, 1, 0, 1, foldback_name, PresentationInfo::FoldbackBus, (uint32_t) -1);
 			lsn_rt = *(list.begin());
 			lsn_rt->presentation_info().set_hidden (true);
 			session->set_dirty();
@@ -6450,15 +6450,15 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 			name = &argv[0]->s;
 			dest_1 = &argv[1]->s;
 			dest_2 = &argv[2]->s;
-			ret = cue_new_aux (name, dest_1, dest_2, msg);
+			ret = cue_new_aux (name, dest_1, dest_2, 2, msg);
 		} else if (argc == 2 && types[0] == 's' && types[1] == 's') {
 			name = &argv[0]->s;
 			dest_1 = &argv[1]->s;
 			dest_2 = dest_1;
-			ret = cue_new_aux (name, dest_1, dest_2, msg);
+			ret = cue_new_aux (name, dest_1, dest_2, 1, msg);
 		} else if (argc == 1 && types[0] == 's') {
 			name = &argv[0]->s;
-			ret = cue_new_aux (name, dest_1, dest_2, msg);
+			ret = cue_new_aux (name, dest_1, dest_2, 1, msg);
 		} else {
 			PBD::warning << "OSC: new_aux has wrong number or type of parameters." << endmsg;
 		}
@@ -6573,28 +6573,30 @@ OSC::_cue_set (uint32_t aux, lo_address addr)
 }
 
 int
-OSC::cue_new_aux (string name, string dest_1, string dest_2, lo_message msg)
+OSC::cue_new_aux (string name, string dest_1, string dest_2, uint32_t count, lo_message msg)
 {
 	// create a new bus named name - monitor
 	RouteList list;
 	boost::shared_ptr<Stripable> aux;
-	name = string_compose ("%1 - monitor", name);
-	list = session->new_audio_route (2, 2, 0, 1, name, PresentationInfo::FoldbackBus, (uint32_t) -1);
+	name = string_compose ("%1 - FB", name);
+	list = session->new_audio_route (count, count, 0, 1, name, PresentationInfo::FoldbackBus, (uint32_t) -1);
 	aux = *(list.begin());
 	if (aux) {
 		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(aux);
 		if (dest_1.size()) {
+			PortSet& ports = r->output()->ports ();
 			if (atoi( dest_1.c_str())) {
 				dest_1 = string_compose ("system:playback_%1", dest_1);
 			}
-			if (atoi( dest_2.c_str())) {
-				dest_2 = string_compose ("system:playback_%1", dest_2);
-			}
-			PortSet& ports = r->output()->ports ();
-			PortSet::iterator i = ports.begin();
-			++i;
 			r->output ()->connect (*(ports.begin()), dest_1, this);
-			r->output ()->connect (*(i), dest_2, this);
+			if (count == 2) {
+				if (atoi( dest_2.c_str())) {
+					dest_2 = string_compose ("system:playback_%1", dest_2);
+				}
+				PortSet::iterator i = ports.begin();
+				++i;
+				r->output ()->connect (*(i), dest_2, this);
+			}
 		}
 		cue_set ((uint32_t) -1, msg);
 		session->set_dirty();
