@@ -2145,14 +2145,14 @@ ARDOUR_UI::session_add_audio_route (
 }
 
 void
-ARDOUR_UI::session_add_foldback_bus (uint32_t how_many, string const & name_template)
+ARDOUR_UI::session_add_foldback_bus (int32_t channels, uint32_t how_many, string const & name_template)
 {
 	RouteList routes;
 
 	assert (_session);
 
 	try {
-		routes = _session->new_audio_route (2, 2, 0, how_many, name_template, PresentationInfo::FoldbackBus, -1);
+		routes = _session->new_audio_route (channels, channels, 0, how_many, name_template, PresentationInfo::FoldbackBus, -1);
 
 		if (routes.size() != how_many) {
 			error << string_compose (P_("could not create %1 new foldback bus", "could not create %1 new foldback busses", how_many), how_many)
@@ -2163,10 +2163,6 @@ ARDOUR_UI::session_add_foldback_bus (uint32_t how_many, string const & name_temp
 	catch (...) {
 		display_insufficient_ports_message ();
 		return;
-	}
-
-	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-		(*i)->set_strict_io (true);
 	}
 }
 
@@ -4462,7 +4458,7 @@ ARDOUR_UI::add_route_dialog_response (int r)
 		_session->vca_manager().create_vca (count, name_template);
 		break;
 	case AddRouteDialog::FoldbackBus:
-		session_add_foldback_bus (count, name_template);
+		session_add_foldback_bus (input_chan.n_audio(), count, name_template);
 		break;
 	}
 }

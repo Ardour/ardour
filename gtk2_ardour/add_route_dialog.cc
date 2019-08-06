@@ -761,8 +761,8 @@ AddRouteDialog::track_type_chosen ()
 		break;
 	case FoldbackBus:
 
-		configuration_label.set_sensitive (false);
-		channel_combo.set_sensitive (false);
+		configuration_label.set_sensitive (true);
+		channel_combo.set_sensitive (true);
 
 		mode_label.set_sensitive (false);
 		mode_combo.set_sensitive (false);
@@ -800,6 +800,7 @@ AddRouteDialog::name_template_is_default () const
 	    n == _("MIDI") ||
 	    n == _("Audio+MIDI") ||
 	    n == _("Bus") ||
+	    n == _("Foldback") ||
 	    n == VCA::default_name_template()) {
 		return true;
 	}
@@ -881,7 +882,7 @@ AddRouteDialog::channels ()
 		break;
 
 	case FoldbackBus:
-		ret.set (DataType::AUDIO, 2);
+		ret.set (DataType::AUDIO, channel_count ());
 		ret.set (DataType::MIDI, 0);
 		break;
 

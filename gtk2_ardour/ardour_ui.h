@@ -323,7 +323,7 @@ public:
 	                             ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord*,
 	                             ARDOUR::PresentationInfo::order_t order);
 
-	void session_add_foldback_bus (uint32_t, std::string const &);
+	void session_add_foldback_bus (int32_t, uint32_t, std::string const &);
 
 	void display_insufficient_ports_message ();
 
