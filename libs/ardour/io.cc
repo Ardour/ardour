@@ -219,6 +219,8 @@ IO::can_add_port (DataType type) const
 		case DataType::MIDI:
 			return _ports.count ().n_midi() < 1;
 	}
+	abort(); /*NOTREACHED*/
+	return false;
 }
 
 int
