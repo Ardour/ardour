@@ -6482,6 +6482,11 @@ Session::nstripables (bool with_monitor) const
 	return rv;
 }
 
+bool
+Session::plot_process_graph (std::string const& file_name) const {
+	return _process_graph ? _process_graph->plot (file_name) : false;
+}
+
 void
 Session::add_automation_list(AutomationList *al)
 {

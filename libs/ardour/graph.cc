@@ -526,11 +526,11 @@ again:
 }
 
 void
-Graph::dump (int chain)
+Graph::dump (int chain) const
 {
 #ifndef NDEBUG
-	node_list_t::iterator ni;
-	node_set_t::iterator  ai;
+	node_list_t::const_iterator ni;
+	node_set_t::const_iterator  ai;
 
 	chain = _pending_chain;
 
@@ -550,6 +550,56 @@ Graph::dump (int chain)
 
 	DEBUG_TRACE (DEBUG::Graph, string_compose ("final activation refcount: %1\n", _n_terminal_nodes[chain]));
 #endif
+}
+
+bool
+Graph::plot (std::string const& file_name) const
+{
+	Glib::Threads::Mutex::Lock ls (_swap_mutex);
+	int chain = _current_chain;
+
+	node_list_t::const_iterator ni;
+	node_set_t::const_iterator  ai;
+	stringstream ss;
+
+	ss << "digraph {\n";
+	ss << "  node [shape = ellipse];\n";
+
+	for (ni = _nodes_rt[chain].begin (); ni != _nodes_rt[chain].end (); ni++) {
+		boost::shared_ptr<Route> sr = boost::dynamic_pointer_cast<Route> (*ni);
+		std::string sn = string_compose ("%1 (%2)", sr->name (), (*ni)->_init_refcount[chain]);
+		if ((*ni)->_init_refcount[chain] == 0 && (*ni)->_activation_set[chain].size() == 0) {
+				ss << "  \"" << sn << "\"[style=filled,fillcolor=gold1];\n";
+		} else if ((*ni)->_init_refcount[chain] == 0) {
+				ss << "  \"" << sn << "\"[style=filled,fillcolor=lightskyblue1];\n";
+		} else if ((*ni)->_activation_set[chain].size() == 0) {
+				ss << "  \"" << sn << "\"[style=filled,fillcolor=aquamarine2];\n";
+		}
+		for (ai = (*ni)->_activation_set[chain].begin (); ai != (*ni)->_activation_set[chain].end (); ai++) {
+			boost::shared_ptr<Route> dr = boost::dynamic_pointer_cast<Route> (*ai);
+			std::string dn = string_compose ("%1 (%2)", dr->name (), (*ai)->_init_refcount[chain]);
+			bool sends_only = false;
+			sr->feeds (dr, &sends_only);
+			if (sends_only) {
+				ss << "  edge [style=dashed];\n";
+			}
+			ss << "  \"" << sn << "\" -> \"" << dn << "\"\n";
+			if (sends_only) {
+				ss << "  edge [style=solid];\n";
+			}
+		}
+	}
+	ss << "}\n";
+
+	GError *err = NULL;
+	if (!g_file_set_contents (file_name.c_str(), ss.str().c_str(), -1, &err)) {
+		if (err) {
+			error << string_compose (_("Could not graph to file (%1)"), err->message) << endmsg;
+			g_error_free (err);
+		}
+		return false;
+	}
+	return true;
 }
 
 int

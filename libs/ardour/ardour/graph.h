@@ -59,8 +59,9 @@ public:
 
 	void trigger (GraphNode* n);
 	void rechain (boost::shared_ptr<RouteList>, GraphEdges const&);
+	bool plot (std::string const& file_name) const;
 
-	void dump (int chain);
+	void plot (int chain);
 	void reached_terminal_node ();
 
 	void helper_thread ();
@@ -84,6 +85,7 @@ private:
 	void run_one ();
 	void main_thread ();
 	void prep ();
+	void dump (int chain) const;
 
 	node_list_t _nodes_rt[2];
 	node_list_t _init_trigger_list[2];
@@ -115,8 +117,8 @@ private:
 	volatile gint _terminate;
 
 	/* chain swapping */
-	Glib::Threads::Mutex _swap_mutex;
 	Glib::Threads::Cond  _cleanup_cond;
+	mutable Glib::Threads::Mutex _swap_mutex;
 
 	volatile int _current_chain;
 	volatile int _pending_chain;

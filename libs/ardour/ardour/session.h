@@ -328,6 +328,8 @@ public:
 	uint32_t ntracks () const;
 	uint32_t nbusses () const;
 
+	bool plot_process_graph (std::string const& file_name) const;
+
 	boost::shared_ptr<BundleList> bundles () {
 		return _bundles.reader ();
 	}
