@@ -266,6 +266,22 @@ class PangoLayout {
 			return _layout->is_ellipsized ();
 		}
 
+		/** Sets the alignment for the layout: how partial lines are
+		 * positioned within the horizontal space available.
+		 * @param alignment The alignment.
+		 */
+		void set_alignment(Pango::Alignment alignment) {
+			_layout->set_alignment (alignment);
+		}
+
+		/** Gets the alignment for the layout: how partial lines are
+		 * positioned within the horizontal space available.
+		 * @return The alignment.
+		 */
+		Pango::Alignment get_alignment() const {
+			return _layout->get_alignment ();
+		}
+
 		/** Sets the wrap mode; the wrap mode only has effect if a width
 		 * is set on the layout with set_width().
 		 * To turn off wrapping, set the width to -1.
@@ -311,7 +327,6 @@ class PangoLayout {
 			luabridge::Stack<int>::push (L, height);
 			return 2;
 		}
-
 
 		/** Draws a Layout in the specified Cairo @a context. The top-left
 		 *  corner of the Layout will be drawn at the current point of the
@@ -650,6 +665,8 @@ LuaInstance::bind_cairo (lua_State* L)
 		.addFunction ("set_ellipsize", &LuaCairo::PangoLayout::set_ellipsize)
 		.addFunction ("get_ellipsize", &LuaCairo::PangoLayout::get_ellipsize)
 		.addFunction ("is_ellipsized", &LuaCairo::PangoLayout::is_ellipsized)
+		.addFunction ("set_alignment", &LuaCairo::PangoLayout::set_alignment)
+		.addFunction ("get_alignment", &LuaCairo::PangoLayout::get_alignment)
 		.addFunction ("set_wrap", &LuaCairo::PangoLayout::set_wrap)
 		.addFunction ("get_wrap", &LuaCairo::PangoLayout::get_wrap)
 		.addFunction ("is_wrapped", &LuaCairo::PangoLayout::is_wrapped)
@@ -661,6 +678,12 @@ LuaInstance::bind_cairo (lua_State* L)
 		.addConst ("Start", Pango::ELLIPSIZE_START)
 		.addConst ("Middle", Pango::ELLIPSIZE_MIDDLE)
 		.addConst ("End", Pango::ELLIPSIZE_END)
+		.endNamespace ()
+
+		.beginNamespace ("Alignment")
+		.addConst ("Left", Pango::ALIGN_LEFT)
+		.addConst ("Center", Pango::ALIGN_CENTER)
+		.addConst ("Right", Pango::ALIGN_RIGHT)
 		.endNamespace ()
 
 		.beginNamespace ("WrapMode")
