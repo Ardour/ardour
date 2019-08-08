@@ -70,7 +70,7 @@ struct ColumnInfo {
 
 MixerSnapshotList::MixerSnapshotList (bool global)
     : add_template_button("Add Snapshot")
-    , add_session_template_button("Add from Session")
+    , add_session_template_button("Add from External")
     , _window_packer(new VBox())
     , _button_packer(new HBox())
     , _bug_user(true)
@@ -92,10 +92,11 @@ MixerSnapshotList::MixerSnapshotList (bool global)
     if(_global) {
         bootstrap_display_and_model();
     } else {
-        _button_packer->pack_start(add_template_button, false, false);
-        _button_packer->pack_start(add_session_template_button, false, false);
+        _button_packer->pack_start(add_template_button, true, true);
+        add_session_template_button.set_size_request(-1, 50);
+        _button_packer->pack_start(add_session_template_button, true, true);
         _window_packer->pack_start(_scroller, true, true);
-        _window_packer->pack_start(*_button_packer, true, true);
+        _window_packer->pack_start(*_button_packer, false, true);
     }
 
     _snapshot_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &MixerSnapshotList::selection_changed));
