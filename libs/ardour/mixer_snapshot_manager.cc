@@ -88,7 +88,6 @@ void MixerSnapshotManager::refresh()
     string pattern = "*" + string(template_suffix);
     find_files_matching_pattern(local_templates, spath, pattern);
 
-    printf("Searching for templates with pattern %s in searchpath %s\n", pattern.c_str(), spath.to_string().c_str());
     if(!local_templates.empty()) {
         for(vector<string>::const_iterator it = local_templates.begin(); it != local_templates.end(); it++) {
             const string path  = (*it);
@@ -115,6 +114,7 @@ bool MixerSnapshotManager::promote(MixerSnapshot* snapshot) {
         MixerSnapshot* old_snapshot = get_snapshot_by_name(label, true);
         set<MixerSnapshot*>::iterator iter = _global_snapshots.find(old_snapshot);
         if(iter != _global_snapshots.end()) {
+            delete (*iter);
             _global_snapshots.erase(iter);
         }
 
@@ -165,11 +165,13 @@ bool MixerSnapshotManager::remove_snapshot(MixerSnapshot* snapshot) {
     if(dir == _global_path) {
         iter = _global_snapshots.find(snapshot);
         if(iter != _global_snapshots.end()) {
+            delete (*iter);
             _global_snapshots.erase(iter);
         }
-    } else {
+    } else if(dir == _local_path) {
         iter = _local_snapshots.find(snapshot);
         if(iter != _local_snapshots.end()) {
+            delete (*iter);
             _local_snapshots.erase(iter);
         }
     }
@@ -218,6 +220,7 @@ void MixerSnapshotManager::create_snapshot(std::string const& label, RouteList& 
 
     //remove it from it's set
     if(iter != snapshots_list.end()) {
+        delete (*iter);
         snapshots_list.erase(iter);
     }
     //and insert the new one
@@ -241,6 +244,7 @@ void MixerSnapshotManager::create_snapshot(std::string const& label, std::string
 
     //remove it from it's set
     if(iter != snapshots_list.end()) {
+        delete (*iter);
         snapshots_list.erase(iter);
     }
     //and insert the new one

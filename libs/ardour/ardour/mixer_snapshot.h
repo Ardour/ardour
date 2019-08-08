@@ -27,6 +27,8 @@
 #include "ardour/vca.h"
 #include "ardour/route_group.h"
 
+#include "pbd/signals.h"
+
 namespace ARDOUR {
 
 class LIBARDOUR_API MixerSnapshot
@@ -99,10 +101,10 @@ class LIBARDOUR_API MixerSnapshot
         void set_id(unsigned int new_id) {id = new_id;};
 
         std::string get_label() {return label;};
-        void set_label(const std::string& new_label) {label = new_label;};
+        void set_label(const std::string& new_label) {label = new_label; LabelChanged(this);};
 
         std::string get_path() {return _path;};
-        void set_path(const std::string& new_path) {_path = new_path;};
+        void set_path(const std::string& new_path) {_path = new_path; PathChanged(this);};
 
         bool get_favorite() {return favorite;};
         void set_favorite(bool yn) {favorite = yn;};
@@ -115,6 +117,9 @@ class LIBARDOUR_API MixerSnapshot
 
         void set_route_states(std::vector<State> states) { route_states = states;};
 
+        //signals
+        PBD::Signal1<void, ARDOUR::MixerSnapshot*> LabelChanged;
+        PBD::Signal1<void, ARDOUR::MixerSnapshot*> PathChanged;
     private:
         ARDOUR::Session* _session;
 

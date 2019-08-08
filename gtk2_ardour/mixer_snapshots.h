@@ -29,10 +29,15 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/box.h>
 
+#include <sigc++/trackable.h>
+
 #include "ardour/mixer_snapshot.h"
 #include "ardour/mixer_snapshot_manager.h"
 
-class MixerSnapshotList : public ARDOUR::SessionHandlePtr
+#include "pbd/signals.h"
+
+
+class MixerSnapshotList : public ARDOUR::SessionHandlePtr,  public sigc::trackable
 {
 public:
     MixerSnapshotList (bool global);
@@ -52,6 +57,7 @@ public:
 
     void redisplay ();
 
+    PBD::ScopedConnectionList connections;
 private:
     Gtk::VBox* _window_packer;
     Gtk::HBox* _button_packer;
@@ -98,6 +104,8 @@ private:
     void remove_snapshot (Gtk::TreeModel::iterator&);
     void rename_snapshot (Gtk::TreeModel::iterator&);
     void promote_snapshot (Gtk::TreeModel::iterator&);
+
+    void remove_row_by_name(const std::string&);
 };
 
 #endif // __gtk_ardour_mixer_snapshots_h__

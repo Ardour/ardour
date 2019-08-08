@@ -51,6 +51,8 @@
 
 #include "mixer_snapshots.h"
 
+#include "gui_thread.h"
+
 using namespace std;
 using namespace PBD;
 using namespace Gtk;
@@ -324,11 +326,14 @@ void MixerSnapshotList::rename_snapshot(TreeModel::iterator& iter)
     if (prompter.run() == RESPONSE_ACCEPT) {
         prompter.get_result (new_name);
         if (new_name.length()) {
+            //remove any row with this new name (we're overwriting this)
+            remove_row_by_name(new_name);
             if(_session->snapshot_manager().rename_snapshot(snapshot, new_name)) {
                 if (new_name.length() > 45) {
                     new_name = new_name.substr(0, 45);
                     new_name.append("...");
                 }
+                //set this row's name to the new name
                 (*iter)[_columns.name] = new_name;
             }
         }
@@ -341,11 +346,38 @@ void MixerSnapshotList::promote_snapshot(TreeModel::iterator& iter)
 
     //let the user know that this was successful.
     if(_session->snapshot_manager().promote(snapshot)) {
-        const string notification = string_compose(_("Snapshot \"%1\" is now available to all sessions.\n"), snapshot->get_label());
+        const string label = snapshot->get_label();
+        
+        const string notification = string_compose(
+            _("Snapshot \"%1\" is now available to all sessions.\n"), 
+            label
+        );
 
+        //not leaked, self-deleting
         PopUp* notify = new PopUp(WIN_POS_MOUSE, 2000, true);
         notify->set_text(notification);
         notify->touch();
+    }
+}
+
+void MixerSnapshotList::remove_row_by_name(const string& name)
+{
+    TreeModel::const_iterator iter;
+    TreeModel::Children rows = _snapshot_model->children();
+    for(iter = rows.begin(); iter != rows.end(); iter++) {
+        const string row_name = (*iter)[_columns.name];
+        if(row_name == name) {
+            break;
+        }
+    }
+
+    if(iter) {
+        const string name = (*iter)[_columns.name];
+        MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
+        _snapshot_model->erase((*iter));
+        if(snapshot) {
+            _session->snapshot_manager().remove_snapshot(snapshot);
+        }
     }
 }
 
@@ -367,10 +399,13 @@ void MixerSnapshotList::redisplay ()
     }
 
     _snapshot_model->clear();
-
     for(SnapshotList::const_iterator it = active_list.begin(); it != active_list.end(); it++) {
+        // (*it)->LabelChanged.connect(connections, invalidator(*this), boost::bind(&MixerSnapshotList::test_func, this, _1), gui_context());
         TreeModel::Row row = *(_snapshot_model->append());
         row[_columns.name] = (*it)->get_label();
+        row[_columns.snapshot] = (*it);
+
+        //additional information for the global snapshots
         if(_global) {
             row[_columns.n_tracks]  = (*it)->get_routes().size();
             row[_columns.n_vcas]    = (*it)->get_vcas().size();
@@ -384,7 +419,6 @@ void MixerSnapshotList::redisplay ()
             row[_columns.date]      = gdt.format("%F %H:%M");
             row[_columns.version]   = (*it)->get_last_modified_with();
         }
-        row[_columns.snapshot] = (*it);
     }
 }
 
