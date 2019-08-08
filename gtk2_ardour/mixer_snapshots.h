@@ -104,8 +104,8 @@ private:
     void remove_snapshot (Gtk::TreeModel::iterator&);
     void rename_snapshot (Gtk::TreeModel::iterator&);
     void promote_snapshot (Gtk::TreeModel::iterator&);
-
-    void remove_row_by_name(const std::string&);
+    Gtk::TreeModel::const_iterator get_row_by_name(const std::string&);
+    bool remove_row(Gtk::TreeModel::const_iterator&);
 };
 
 #endif // __gtk_ardour_mixer_snapshots_h__

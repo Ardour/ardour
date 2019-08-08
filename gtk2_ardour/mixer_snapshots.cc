@@ -320,8 +320,28 @@ void MixerSnapshotList::rename_snapshot(TreeModel::iterator& iter)
     if (prompter.run() == RESPONSE_ACCEPT) {
         prompter.get_result(new_name);
         if (new_name.length()) {
+            //notify the user that this is about to be overwritten
+            TreeModel::const_iterator jter = get_row_by_name(new_name);
+            if(jter) {
+                const string name = (*jter)[_columns.name];
+                const string prompt = string_compose(
+                    _("Do you really want to overwrite snapshot \"%1\" ?\n(this cannot be undone)"), 
+                    name
+                );
+
+                vector<string> choices;
+                choices.push_back(_("No, do nothing."));
+                choices.push_back(_("Yes, overwrite it."));
+
+                ArdourWidgets::Choice prompter (_("Overwrite Snapshot"), prompt, choices);
+
+                if(prompter.run() == 1) {
+                    remove_row(jter);
+                } else {
+                    return;
+                }
+            }
             //remove any row with this new name (we're overwriting this)
-            remove_row_by_name(new_name);
             if(_session->snapshot_manager().rename_snapshot(snapshot, new_name)) {
                 if (new_name.length() > 45) {
                     new_name = new_name.substr(0, 45);
@@ -354,7 +374,7 @@ void MixerSnapshotList::promote_snapshot(TreeModel::iterator& iter)
     }
 }
 
-void MixerSnapshotList::remove_row_by_name(const string& name)
+TreeModel::const_iterator MixerSnapshotList::get_row_by_name(const std::string& name)
 {
     TreeModel::const_iterator iter;
     TreeModel::Children rows = _snapshot_model->children();
@@ -364,7 +384,11 @@ void MixerSnapshotList::remove_row_by_name(const string& name)
             break;
         }
     }
+    return iter;
+}
 
+bool MixerSnapshotList::remove_row(Gtk::TreeModel::const_iterator& iter)
+{
     if(iter) {
         const string name = (*iter)[_columns.name];
         MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
@@ -372,7 +396,9 @@ void MixerSnapshotList::remove_row_by_name(const string& name)
         if(snapshot) {
             _session->snapshot_manager().remove_snapshot(snapshot);
         }
+        return true;
     }
+    return false;
 }
 
 void MixerSnapshotList::redisplay ()
