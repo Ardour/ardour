@@ -79,7 +79,6 @@ MixerSnapshotList::MixerSnapshotList (bool global)
     _snapshot_model = ListStore::create (_columns);
     _snapshot_display.set_model (_snapshot_model);
     _snapshot_display.append_column (_("Mixer Snapshots (double-click to load)"), _columns.name);
-//	_snapshot_display.append_column (_("Modified Date"), _columns.timestamp);
     _snapshot_display.set_size_request (75, -1);
     _snapshot_display.set_headers_visible (true);
     _snapshot_display.set_reorderable (false);
@@ -118,12 +117,12 @@ void MixerSnapshotList::bootstrap_display_and_model()
     model->set_sort_column(4, SORT_DESCENDING);
 
     ColumnInfo ci[] = {
-        { 0,  0,  ALIGN_LEFT,    _("Name"),     _("") },
-        { 1,  1,  ALIGN_CENTER,  _("# Tracks"), _("") },
-        { 2,  2,  ALIGN_CENTER,  _("# VCAs"),   _("") },
-        { 3,  3,  ALIGN_CENTER,  _("# Groups"), _("") },
-        { 4,  6,  ALIGN_LEFT,    _("Date"),     _("") },
-        { 5,  5,  ALIGN_LEFT,    _("Version"),  _("") },
+        { 0,  0,  ALIGN_LEFT,   _("Name"),     _("") },
+        { 1,  1,  ALIGN_CENTER, _("# Tracks"), _("") },
+        { 2,  2,  ALIGN_CENTER, _("# VCAs"),   _("") },
+        { 3,  3,  ALIGN_CENTER, _("# Groups"), _("") },
+        { 4,  6,  ALIGN_LEFT,   _("Date"),     _("") },
+        { 5,  5,  ALIGN_LEFT,   _("Version"),  _("") },
         { -1,-1,  ALIGN_CENTER, 0, 0 }
     };
 
@@ -153,7 +152,6 @@ void MixerSnapshotList::bootstrap_display_and_model()
 void MixerSnapshotList::set_session (Session* s)
 {
     SessionHandlePtr::set_session (s);
-
     redisplay ();
 }
 
@@ -205,11 +203,7 @@ void MixerSnapshotList::selection_changed ()
     }
 
     TreeModel::iterator i = _snapshot_display.get_selection()->get_selected();
-
-    //std::string snap_path = (*i)[_columns.snap];
-
     _snapshot_display.set_sensitive (false);
-//	ARDOUR_UI::instance()->load_session (_session->path(), string (snap_name));
     _snapshot_display.set_sensitive (true);
 }
 
@@ -250,7 +244,7 @@ bool MixerSnapshotList::button_press (GdkEventButton* ev)
 }
 
 
-/** Pop up the snapshot display context menu.
+/* Pop up the snapshot display context menu.
  * @param button Button used to open the menu.
  * @param time Menu open time.
  * @param snapshot_name Name of the snapshot that the menu click was over.
@@ -260,12 +254,12 @@ void MixerSnapshotList::popup_context_menu (int button, int32_t time, TreeModel:
     using namespace Menu_Helpers;
 
     MenuList& items (_menu.items());
-    items.clear ();
+    items.clear();
 
-    add_item_with_sensitivity(items, MenuElem (_("Remove"), sigc::bind(sigc::mem_fun (*this, &MixerSnapshotList::remove_snapshot), iter)), true);
-    add_item_with_sensitivity (items, MenuElem (_("Rename..."), sigc::bind (sigc::mem_fun (*this, &MixerSnapshotList::rename_snapshot), iter)), true);
-    if(!_global)  {
-        add_item_with_sensitivity (items, MenuElem (_("Promote To Mixer Template"), sigc::bind (sigc::mem_fun (*this, &MixerSnapshotList::promote_snapshot), iter)), true);
+    add_item_with_sensitivity(items, MenuElem(_("Remove"), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotList::remove_snapshot), iter)), true);
+    add_item_with_sensitivity (items, MenuElem(_("Rename..."), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotList::rename_snapshot), iter)), true);
+    if(!_global) {
+        add_item_with_sensitivity (items, MenuElem (_("Promote To Mixer Template"), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotList::promote_snapshot), iter)), true);
     }
     _menu.popup (button, time);
 }
@@ -275,11 +269,11 @@ void MixerSnapshotList::remove_snapshot(TreeModel::iterator& iter)
     MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
     vector<string> choices;
 
-    std::string prompt = string_compose (_("Do you really want to remove snapshot \"%1\" ?\n(this cannot be undone)"), snapshot->get_label());
+    std::string prompt = string_compose(_("Do you really want to remove snapshot \"%1\" ?\n(this cannot be undone)"), snapshot->get_label());
 
-    choices.push_back (_("No, do nothing."));
-    choices.push_back (_("Yes, remove it."));
-    choices.push_back (_("Yes, and don't ask again."));
+    choices.push_back(_("No, do nothing."));
+    choices.push_back(_("Yes, remove it."));
+    choices.push_back(_("Yes, and don't ask again."));
 
     ArdourWidgets::Choice prompter (_("Remove snapshot"), prompt, choices);
 
@@ -317,14 +311,14 @@ void MixerSnapshotList::rename_snapshot(TreeModel::iterator& iter)
 
     string new_name;
 
-    prompter.set_name ("Prompter");
-    prompter.set_title (_("Rename Snapshot"));
-    prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
-    prompter.set_prompt (_("New name of snapshot"));
-    prompter.set_initial_text (snapshot->get_label());
+    prompter.set_name("Prompter");
+    prompter.set_title(_("Rename Snapshot"));
+    prompter.add_button(Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+    prompter.set_prompt(_("New name of snapshot"));
+    prompter.set_initial_text(snapshot->get_label());
 
     if (prompter.run() == RESPONSE_ACCEPT) {
-        prompter.get_result (new_name);
+        prompter.get_result(new_name);
         if (new_name.length()) {
             //remove any row with this new name (we're overwriting this)
             remove_row_by_name(new_name);
