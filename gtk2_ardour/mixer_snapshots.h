@@ -31,6 +31,8 @@
 
 #include <sigc++/trackable.h>
 
+#include "mixer_snapshot_substitution_dialog.h"
+
 #include "ardour/mixer_snapshot.h"
 #include "ardour/mixer_snapshot_manager.h"
 
@@ -97,6 +99,8 @@ private:
 
     bool _bug_user;
     bool _global;
+
+    void substitution_dialog_response(int, MixerSnapshotSubstitutionDialog*);
 
     bool button_press (GdkEventButton *);
     void selection_changed ();

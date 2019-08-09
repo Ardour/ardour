@@ -44,14 +44,12 @@
 #include "ardour_ui.h"
 #include "editor.h"
 #include "utils.h"
+#include "mixer_snapshots.h"
+#include "gui_thread.h"
 
 #include "pbd/i18n.h"
 #include "pbd/basename.h"
 #include "pbd/gstdio_compat.h"
-
-#include "mixer_snapshots.h"
-
-#include "gui_thread.h"
 
 using namespace std;
 using namespace PBD;
@@ -237,11 +235,108 @@ bool MixerSnapshotList::button_press (GdkEventButton* ev)
 
         if (iter) {
             MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
-            snapshot->recall();
+
+            MixerSnapshotSubstitutionDialog* sub_dialog = new MixerSnapshotSubstitutionDialog(snapshot);
+            sub_dialog->signal_response().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotList::substitution_dialog_response), sub_dialog));
+            sub_dialog->show_all();
+            sub_dialog->set_position(WIN_POS_MOUSE);
+            sub_dialog->present();
+
             return true;
         }
     }
     return false;
+}
+
+void MixerSnapshotList::substitution_dialog_response(int response, MixerSnapshotSubstitutionDialog* dialog)
+{
+    if(!dialog) {
+        return;
+    }
+
+    if(response != RESPONSE_ACCEPT) {
+        delete dialog;
+        return;
+    }
+
+    MixerSnapshot* snapshot = dialog->get_snapshot();
+    if(!snapshot) {
+        delete dialog;
+        return;
+    }
+
+    vector<MixerSnapshot::State> clean = snapshot->get_routes();
+    vector<MixerSnapshot::State> dirty;
+
+    vector<route_combo>::const_iterator p;
+    vector<route_combo> pairs = dialog->get_substitutions();
+    for(p = pairs.begin(); p != pairs.end(); p++) {
+        boost::shared_ptr<Route> route = (*p).first;
+        ComboBoxText*            cb    = (*p).second;
+
+        if(!route || !cb) {
+            continue;
+        }
+
+        if(route->is_monitor() || route->is_master() || route->is_auditioner()) {
+            continue;
+        }
+
+        const string name = route->name();
+        const string at   = cb->get_active_text();
+
+        printf(
+            "*** begining work for route %s, with substitution state %s\n", 
+            name.c_str(), 
+            at.c_str()
+        );
+
+        //do not recall this state
+        if(at == " --- ") {
+            continue;
+        }
+
+        const bool route_state_exists = snapshot->route_state_exists(name);
+        const bool subst_state_exists = snapshot->route_state_exists(at);
+        if(route_state_exists && subst_state_exists) {
+            XMLNode copy (snapshot->get_route_state_by_name(at).node);
+            MixerSnapshot::State new_state {
+                string(),
+                name,
+                copy
+            };
+            dirty.push_back(new_state);
+            continue;
+        } else if(!route_state_exists && subst_state_exists) {
+            XMLNode copy (snapshot->get_route_state_by_name(at).node);
+            MixerSnapshot::State new_state {
+                string(),
+                name,
+                copy
+            };
+            dirty.push_back(new_state);
+            continue;
+        }
+    }
+
+    //DEBUG OUTPUT
+    printf("\nDirty States ------------------------------------------\n");
+    for(vector<MixerSnapshot::State>::const_iterator i = dirty.begin(); i != dirty.end(); i++) {
+        string name;
+        (*i).node.get_property(X_("name"), name);
+        printf("\nState {id:%s, name:%s, node:%s}\n", (*i).id.c_str(), (*i).name.c_str(), name.c_str());
+    }
+    printf("\n-------------------------------------------------------\n");
+
+    //this needs to be called to drop it's shared route ptrs
+    pairs.clear();
+    dialog->clear_substitutions();
+    delete dialog;
+
+    //swap the vectors Indiana Jones style and then recall
+    snapshot->set_route_states(dirty);
+    snapshot->recall();
+    snapshot->set_route_states(clean);
 }
 
 
@@ -326,7 +421,7 @@ void MixerSnapshotList::rename_snapshot(TreeModel::iterator& iter)
             if(jter) {
                 const string name = (*jter)[_columns.name];
                 const string prompt = string_compose(
-                    _("Do you really want to overwrite snapshot \"%1\" ?\n(this cannot be undone)"), 
+                    _("Do you really want to overwrite snapshot \"%1\" ?\n(this cannot be undone)"),
                     name
                 );
 
@@ -362,9 +457,9 @@ void MixerSnapshotList::promote_snapshot(TreeModel::iterator& iter)
     //let the user know that this was successful.
     if(_session->snapshot_manager().promote(snapshot)) {
         const string label = snapshot->get_label();
-        
+
         const string notification = string_compose(
-            _("Snapshot \"%1\" is now available to all sessions.\n"), 
+            _("Snapshot \"%1\" is now available to all sessions.\n"),
             label
         );
 

@@ -103,95 +103,95 @@ void MixerSnapshotSubstitutionDialog::fill_combo_box(ComboBoxText* box, const st
     }
 }
 
-void MixerSnapshotSubstitutionDialog::on_response(int r)
-{
-    if(r == RESPONSE_CANCEL) {
-        substitutions.clear();
-        close_self();
-        return;
-    }
+// void MixerSnapshotSubstitutionDialog::on_response(int r)
+// {
+//     if(r == RESPONSE_CANCEL) {
+//         substitutions.clear();
+//         close_self();
+//         return;
+//     }
 
-    vector<MixerSnapshot::State> dirty = _snapshot->get_routes();
-    vector<MixerSnapshot::State> clean = _snapshot->get_routes();
-    vector<MixerSnapshot::State> new_s;
-    vector<MixerSnapshot::State> del_s;
+//     vector<MixerSnapshot::State> dirty = _snapshot->get_routes();
+//     vector<MixerSnapshot::State> clean = _snapshot->get_routes();
+//     vector<MixerSnapshot::State> new_s;
+//     vector<MixerSnapshot::State> del_s;
 
-    if(r == RESPONSE_ACCEPT) {
-        for(vector<route_combo>::iterator c = substitutions.begin(); c != substitutions.end(); c++) {
-            string route_name = (*c).first->name();
-            string subst_name = (*c).second->get_active_text();
-            int n = 0;
-            for(vector<MixerSnapshot::State>::iterator s = dirty.begin(); s != dirty.end(); s++) {
-                MixerSnapshot::State state = (*s);
-                if(route_name == state.name) {
-                    //state and substitution are matches
-                    if(route_name == subst_name) {
-                        break;
-                    }
+//     if(r == RESPONSE_ACCEPT) {
+//         for(vector<route_combo>::iterator c = substitutions.begin(); c != substitutions.end(); c++) {
+//             string route_name = (*c).first->name();
+//             string subst_name = (*c).second->get_active_text();
+//             int n = 0;
+//             for(vector<MixerSnapshot::State>::iterator s = dirty.begin(); s != dirty.end(); s++) {
+//                 MixerSnapshot::State state = (*s);
+//                 if(route_name == state.name) {
+//                     //state and substitution are matches
+//                     if(route_name == subst_name) {
+//                         break;
+//                     }
 
-                    //empty sub - erase it
-                    if(subst_name == " --- ") {
-                        del_s.push_back(state);
-                        break;
-                    }
-                }
-                if(subst_name == " --- ") {
-                    break;
-                }
+//                     //empty sub - erase it
+//                     if(subst_name == " --- ") {
+//                         del_s.push_back(state);
+//                         break;
+//                     }
+//                 }
+//                 if(subst_name == " --- ") {
+//                     break;
+//                 }
 
-                bool route_state_exists = state_exists(route_name);
-                bool subst_state_exists = state_exists(subst_name);
+//                 bool route_state_exists = state_exists(route_name);
+//                 bool subst_state_exists = state_exists(subst_name);
 
-                //state exists but we are picking a different source
-                if(route_name != subst_name) {
-                    if(route_state_exists && subst_state_exists) {
-                        XMLNode copy (get_state_by_name(subst_name).node);
-                        state.node = copy;
-                        state.name = route_name;
-                    }
+//                 //state exists but we are picking a different source
+//                 if(route_name != subst_name) {
+//                     if(route_state_exists && subst_state_exists) {
+//                         XMLNode copy (get_state_by_name(subst_name).node);
+//                         state.node = copy;
+//                         state.name = route_name;
+//                     }
 
-                    //state did *not* exist, make it and add the substitute node
-                    if(!route_state_exists && subst_state_exists) {
-                        //copy the substitute node
-                        XMLNode copy (get_state_by_name(subst_name).node);
+//                     //state did *not* exist, make it and add the substitute node
+//                     if(!route_state_exists && subst_state_exists) {
+//                         //copy the substitute node
+//                         XMLNode copy (get_state_by_name(subst_name).node);
 
-                        MixerSnapshot::State s {
-                            "",
-                            route_name,
-                            copy
-                        };
+//                         MixerSnapshot::State s {
+//                             "",
+//                             route_name,
+//                             copy
+//                         };
 
-                        new_s.push_back(s);
-                    }
-                }
-                n++;
-            }
-        }
-    }
+//                         new_s.push_back(s);
+//                     }
+//                 }
+//                 n++;
+//             }
+//         }
+//     }
 
-    for(vector<MixerSnapshot::State>::iterator s = new_s.begin(); s != new_s.end(); s++) {
-        dirty.push_back((*s));
-    }
+//     for(vector<MixerSnapshot::State>::iterator s = new_s.begin(); s != new_s.end(); s++) {
+//         dirty.push_back((*s));
+//     }
 
-    for(vector<MixerSnapshot::State>::iterator d = del_s.begin(); d != del_s.end(); d++) {
-        for(vector<MixerSnapshot::State>::iterator s = dirty.begin(); s != dirty.end(); s++) {
-            if((*d).id == (*s).id) {
-                dirty.erase(s);
-                s--;
-                break;
-            }
-        }
-    }
+//     for(vector<MixerSnapshot::State>::iterator d = del_s.begin(); d != del_s.end(); d++) {
+//         for(vector<MixerSnapshot::State>::iterator s = dirty.begin(); s != dirty.end(); s++) {
+//             if((*d).id == (*s).id) {
+//                 dirty.erase(s);
+//                 s--;
+//                 break;
+//             }
+//         }
+//     }
 
-    for(vector<MixerSnapshot::State>::iterator s = dirty.begin(); s != dirty.end(); s++) {
-        cout << (*s).name << endl;
-    }
-    substitutions.clear();
-    _snapshot->set_route_states(dirty);
-    _snapshot->recall();
-    _snapshot->set_route_states(clean);
-    close_self();
-}
+//     for(vector<MixerSnapshot::State>::iterator s = dirty.begin(); s != dirty.end(); s++) {
+//         cout << (*s).name << endl;
+//     }
+//     substitutions.clear();
+//     _snapshot->set_route_states(dirty);
+//     _snapshot->recall();
+//     _snapshot->set_route_states(clean);
+//     close_self();
+// }
 
 bool MixerSnapshotSubstitutionDialog::state_exists(const string name)
 {

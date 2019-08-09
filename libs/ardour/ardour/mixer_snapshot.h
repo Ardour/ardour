@@ -74,6 +74,9 @@ class LIBARDOUR_API MixerSnapshot
             );
         };
 
+        MixerSnapshot::State get_route_state_by_name(const std::string&);
+        bool route_state_exists(const std::string&);
+
         std::vector<State> get_routes() {return route_states;};
         std::vector<State> get_groups() {return group_states;};
         std::vector<State> get_vcas()   {return vca_states;};

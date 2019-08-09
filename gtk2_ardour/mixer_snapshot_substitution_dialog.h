@@ -33,11 +33,16 @@ class MixerSnapshotSubstitutionDialog : public ArdourDialog
 {
 public:
     MixerSnapshotSubstitutionDialog(ARDOUR::MixerSnapshot*);
+    ARDOUR::MixerSnapshot* get_snapshot() { return _snapshot;};
+    void set_snapshot(ARDOUR::MixerSnapshot* new_snapshot) {_snapshot = new_snapshot;};
+
+    std::vector<route_combo> get_substitutions() {return substitutions;};
+    void clear_substitutions() {substitutions.clear();};
+
 private:
     bool state_exists(const std::string);
     ARDOUR::MixerSnapshot::State get_state_by_name(const std::string);
     void fill_combo_box(Gtk::ComboBoxText*, const std::string);
-    void on_response(int);
 
     std::vector<route_combo> substitutions;
 

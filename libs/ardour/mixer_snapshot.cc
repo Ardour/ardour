@@ -689,3 +689,29 @@ XMLNode& MixerSnapshot::sanitize_node(XMLNode& node)
     }
     return node;
 }
+
+MixerSnapshot::State MixerSnapshot::get_route_state_by_name(const string& name)
+{
+    State route_state {string(), string(), XMLNode("")};
+    for(vector<MixerSnapshot::State>::iterator i = route_states.begin(); i != route_states.end(); i++) {
+        const string state_name = (*i).name;
+        if(state_name == name) {
+            route_state.id = (*i).id;
+            route_state.name = state_name;
+            route_state.node = (*i).node;
+            break;
+        }
+    }
+    return route_state;
+}
+
+bool MixerSnapshot::route_state_exists(const string& name)
+{
+    for(vector<MixerSnapshot::State>::iterator i = route_states.begin(); i != route_states.end(); i++) {
+        const string state_name = (*i).name;
+        if(state_name == name) {
+            return true;
+        }
+    }
+    return false;
+}
