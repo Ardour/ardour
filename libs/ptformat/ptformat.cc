@@ -915,6 +915,7 @@ PTFFormat::parserest(void) {
 	uint32_t nch;
 	uint16_t ch_map[MAX_CHANNELS_PER_TRACK];
 	bool found = false;
+	bool region_is_fade = false;
 	std::string regionname, trackname, midiregionname;
 	rindex = 0;
 
@@ -1054,10 +1055,15 @@ PTFFormat::parserest(void) {
 			for (vector<PTFFormat::block_t>::iterator c = b->child.begin();
 					c != b->child.end(); ++c) {
 				if (c->content_type == 0x1052) {
-					regionname = parsestring(c->offset + 2);
+					trackname = parsestring(c->offset + 2);
 					for (vector<PTFFormat::block_t>::iterator d = c->child.begin();
 							d != c->child.end(); ++d) {
 						if (d->content_type == 0x1050) {
+							region_is_fade = (_ptfunxored[d->offset + 46] == 0x01);
+							if (region_is_fade) {
+								verbose_printf("dropped fade region\n");
+								continue;
+							}
 							for (vector<PTFFormat::block_t>::iterator e = d->child.begin();
 									e != d->child.end(); ++e) {
 								if (e->content_type == 0x104f) {
@@ -1076,7 +1082,7 @@ PTFFormat::parserest(void) {
 										verbose_printf("dropped region %d\n", rawindex);
 										continue;
 									}
-									ti.reg.startpos = start;
+									ti.reg.startpos = start * _ratefactor;
 									if (ti.reg.index != 65535) {
 										_tracks.push_back(ti);
 									}
@@ -1257,7 +1263,7 @@ PTFFormat::parsemidi(void) {
 								r.length = mc.maxlen;
 								r.midi = mc.chunk;
 								_midiregions.push_back(r);
-								verbose_printf("%s : MIDI region mr(%d) ?(%d) (%llu %llu %llu)\n", str, mindex, n, start, offset, length);
+								verbose_printf("%s : MIDI region mr(%d) ?(%d) (%lu %lu %lu)\n", regionname.c_str(), mindex, n, start, offset, length);
 								mindex++;
 							}
 						}
@@ -1302,7 +1308,7 @@ PTFFormat::parsemidi(void) {
 									int64_t signedstart = (int64_t)(start - ZERO_TICKS);
 									if (signedstart < 0)
 										signedstart = -signedstart;
-									ti.reg.startpos = (uint64_t)signedstart;
+									ti.reg.startpos = (uint64_t)(signedstart * _ratefactor);
 									if (ti.reg.index != 65535) {
 										_miditracks.push_back(ti);
 									}
