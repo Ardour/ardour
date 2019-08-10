@@ -7,7 +7,7 @@
  * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
  * Copyright (C) 2009 David Robillard <d@drobilla.net>
  * Copyright (C) 2009 Sampo Savolainen <v2@iki.fi>
- * Copyright (C) 2013-2018 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2015 André Nusser <andre.nusser@googlemail.com>
  * Copyright (C) 2015 Tim Mayberry <mojofunk@gmail.com>
  *
@@ -106,6 +106,9 @@ bool windows_overlap (Gtk::Window *a, Gtk::Window *b);
 
 bool overwrite_file_dialog (Gtk::Window& parent, std::string title, std::string text);
 bool running_from_source_tree ();
+
+void enable_screensaver ();
+void disable_screensaver ();
 
 } // namespace
 #endif /* __ardour_gtk_utils_h__ */

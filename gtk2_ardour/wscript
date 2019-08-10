@@ -227,6 +227,7 @@ gtk2_ardour_sources = [
         'save_as_dialog.cc',
         'save_template_dialog.cc',
         'search_path_option.cc',
+        'screensaver.cc',
         'script_selector.cc',
         'selection.cc',
         'selection_memento.cc',
