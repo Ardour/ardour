@@ -23,15 +23,13 @@
 #include <windows.h>
 
 void
-ARDOUR_UI_UTILS::enable_screensaver ()
+ARDOUR_UI_UTILS::inhibit_screensaver (bool inhibit)
 {
-	SetThreadExecutionState (ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED | ES_CONTINUOUS);
-}
-
-void
-ARDOUR_UI_UTILS::disable_screensaver ()
-{
-	SetThreadExecutionState (ES_CONTINUOUS);
+	if (inhibit) {
+		SetThreadExecutionState (ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED | ES_CONTINUOUS);
+	} else {
+		SetThreadExecutionState (ES_CONTINUOUS);
+	}
 }
 
 #elif defined __APPLE__
@@ -42,23 +40,26 @@ static IOReturn success = kIOReturnError;
 static IOPMAssertionID assertion_id;
 
 void
-ARDOUR_UI_UTILS::enable_screensaver ()
+ARDOUR_UI_UTILS::inhibit_screensaver (bool inhibit)
 {
-	static const CFStringRef name = CFSTR("Ardour DAW");
-	/* kIOPMAssertionTypeNoDisplaySleep prevents display sleep,
-	 * kIOPMAssertionTypeNoIdleSleep prevents idle sleep
-	 */
-	success = IOPMAssertionCreateWithName (kIOPMAssertionTypeNoDisplaySleep, kIOPMAssertionLevelOn, name, &assertion_id);
-}
-
-void
-ARDOUR_UI_UTILS::disable_screensaver ()
-{
-	if (success != kIOReturnSuccess) {
+	if (inhibit == (success == kIOReturnSuccess)) {
 		return;
 	}
-	if (kIOReturnSuccess == IOPMAssertionRelease (assertion_id)) {
-		success = kIOReturnError;
+
+	if (inhibit) {
+		/* kIOPMAssertionTypeNoDisplaySleep prevents display sleep,
+		 * kIOPMAssertionTypeNoIdleSleep prevents idle sleep
+		 */
+#ifdef __ppc__ /* OS X 10.5 compat API */
+		success = IOPMAssertionCreate (kIOPMAssertionTypeNoDisplaySleep, kIOPMAssertionLevelOn, &assertion_id);
+#else
+		static const CFStringRef name = CFSTR("Ardour DAW");
+		success = IOPMAssertionCreateWithName (kIOPMAssertionTypeNoDisplaySleep, kIOPMAssertionLevelOn, name, &assertion_id);
+#endif
+	} else {
+		if (kIOReturnSuccess == IOPMAssertionRelease (assertion_id)) {
+			success = kIOReturnError; // mark as inactive
+		}
 	}
 }
 
@@ -88,15 +89,13 @@ xdg_screensaver_reset ()
 }
 
 void
-ARDOUR_UI_UTILS::enable_screensaver ()
-{
-	glib_timer = Glib::signal_timeout().connect_seconds (sigc::ptr_fun (&xdg_screensaver_reset), 45, Glib::PRIORITY_DEFAULT_IDLE);
-}
-
-void
-ARDOUR_UI_UTILS::disable_screensaver ()
+ARDOUR_UI_UTILS::inhibit_screensaver (bool inhibit)
 {
 	glib_timer.disconnect ();
+	if (inhibit) {
+		xdg_screensaver_reset ();
+		glib_timer = Glib::signal_timeout().connect_seconds (sigc::ptr_fun (&xdg_screensaver_reset), 45, Glib::PRIORITY_DEFAULT_IDLE);
+	}
 }
 
 #endif

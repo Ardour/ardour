@@ -107,8 +107,7 @@ bool windows_overlap (Gtk::Window *a, Gtk::Window *b);
 bool overwrite_file_dialog (Gtk::Window& parent, std::string title, std::string text);
 bool running_from_source_tree ();
 
-void enable_screensaver ();
-void disable_screensaver ();
+void inhibit_screensaver (bool);
 
 } // namespace
 #endif /* __ardour_gtk_utils_h__ */
