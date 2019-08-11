@@ -525,11 +525,12 @@ public:
 		if (!path.empty ()) {
 			switch (a) {
 				case Gtk::FILE_CHOOSER_ACTION_OPEN:
-				case Gtk::FILE_CHOOSER_ACTION_SAVE:
 				case Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER:
 					_fc.set_filename (path);
 					break;
+				case Gtk::FILE_CHOOSER_ACTION_SAVE:
 				case Gtk::FILE_CHOOSER_ACTION_CREATE_FOLDER:
+					/* not supported by Gtk::FileChooserButton */
 					break;
 			}
 		}
@@ -550,6 +551,43 @@ protected:
 };
 
 
+class LuaFileChooserWidget : public LuaDialogWidget
+{
+public:
+	LuaFileChooserWidget (std::string const& key, std::string const& title, Gtk::FileChooserAction a, const std::string& path)
+		: LuaDialogWidget (key, title)
+		, _fc (a)
+	{
+		Gtkmm2ext::add_volume_shortcuts (_fc);
+		if (!path.empty ()) {
+			switch (a) {
+				case Gtk::FILE_CHOOSER_ACTION_OPEN:
+				case Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER:
+					_fc.set_filename (path);
+					break;
+				case Gtk::FILE_CHOOSER_ACTION_SAVE:
+				case Gtk::FILE_CHOOSER_ACTION_CREATE_FOLDER:
+					_fc.set_filename (path);
+					_fc.set_current_name (Glib::path_get_basename (path));
+					break;
+					break;
+			}
+		}
+	}
+
+	Gtk::Widget* widget ()
+	{
+		return &_fc;
+	}
+
+	void assign (luabridge::LuaRef* rv) const
+	{
+		(*rv)[_key] = std::string (_fc.get_filename ());
+	}
+
+protected:
+	Gtk::FileChooserWidget _fc;
+};
 
 /*******************************************************************************
  * Lua Parameter Dialog
@@ -691,6 +729,18 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 				path = i.value ()["path"].cast<std::string> ();
 			}
 			w = new LuaFileChooser (key, title, Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER, path);
+		} else if (type == "createfile") {
+			std::string path;
+			if (i.value ()["path"].isString ()) {
+				path = i.value ()["path"].cast<std::string> ();
+			}
+			w = new LuaFileChooserWidget (key, title, Gtk::FILE_CHOOSER_ACTION_SAVE, path);
+		} else if (type == "createdir") {
+			std::string path;
+			if (i.value ()["path"].isString ()) {
+				path = i.value ()["path"].cast<std::string> ();
+			}
+			w = new LuaFileChooserWidget (key, title, Gtk::FILE_CHOOSER_ACTION_CREATE_FOLDER, path);
 		} else if (type == "color") {
 			w = new LuaColorPicker (key);
 		}
