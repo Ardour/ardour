@@ -142,6 +142,7 @@ setup_enum_writer ()
 	RegionEquivalence _RegionEquivalence;
 	WaveformScale _WaveformScale;
 	WaveformShape _WaveformShape;
+	ScreenSaverMode _ScreenSaverMode;
 	Session::PostTransportWork _Session_PostTransportWork;
 	MTC_Status _MIDI_MTC_Status;
 	Evoral::OverlapType _OverlapType;
@@ -713,6 +714,11 @@ setup_enum_writer ()
 	REGISTER_ENUM(Traditional);
 	REGISTER_ENUM(Rectified);
 	REGISTER(_WaveformShape);
+
+	REGISTER_ENUM(InhibitNever);
+	REGISTER_ENUM(InhibitWhileRecording);
+	REGISTER_ENUM(InhibitAlways);
+	REGISTER(_ScreenSaverMode);
 
 	REGISTER_ENUM(AudioTime);
 	REGISTER_ENUM(MusicTime);

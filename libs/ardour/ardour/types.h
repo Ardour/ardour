@@ -656,6 +656,12 @@ enum WaveformShape {
 	Rectified
 };
 
+enum ScreenSaverMode {
+	InhibitNever,
+	InhibitWhileRecording,
+	InhibitAlways
+};
+
 struct CleanupReport {
 	std::vector<std::string> paths;
 	size_t                   space;
