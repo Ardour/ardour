@@ -1104,6 +1104,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\screensaver.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\script_selector.cc"
 				>
 			</File>
