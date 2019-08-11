@@ -2223,6 +2223,21 @@ RCOptionEditor::RCOptionEditor ()
 				slts->tip_widget(),
 				_("Lock GUI after this many idle seconds (zero to never lock)"));
 		add_option (_("General"), slts);
+
+		ComboOption<ScreenSaverMode>* scsvr = new ComboOption<ScreenSaverMode> (
+				"screen-saver-mode",
+				_("System Screensaver Mode"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_screen_saver_mode),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_screen_saver_mode)
+				);
+
+		scsvr->add (InhibitNever, _("Never Inhibit"));
+		scsvr->add (InhibitWhileRecording, _("Inhibit while Recording"));
+		scsvr->add (InhibitAlways, string_compose (_("Inhibit while %1 is running"), PROGRAM_NAME));
+
+		add_option (_("General"), scsvr);
+
+
 	} // !mixbus
 
 	add_option (_("General/Session"), new OptionEditorHeading (S_("Options|Undo")));

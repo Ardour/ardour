@@ -865,6 +865,8 @@ ARDOUR_UI::~ARDOUR_UI ()
 {
 	UIConfiguration::instance().save_state();
 
+	ARDOUR_UI_UTILS::inhibit_screensaver (false);
+
 	stop_video_server();
 
 	if (getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
@@ -2642,6 +2644,9 @@ ARDOUR_UI::map_transport_state ()
 	} else {
 		layered_button.set_sensitive (true);
 		update_disk_space ();
+	}
+	if (UIConfiguration::instance().get_screen_saver_mode () == InhibitWhileRecording) {
+		inhibit_screensaver (_session->actively_recording ());
 	}
 }
 

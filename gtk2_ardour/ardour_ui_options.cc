@@ -475,8 +475,20 @@ ARDOUR_UI::parameter_changed (std::string p)
 		}
 	} else if ( (p == "snap-to-region-sync") || (p == "snap-to-region-start") || (p == "snap-to-region-end") ) {
 		if (editor) editor->mark_region_boundary_cache_dirty();
+	} else if (p == "screen-saver-mode") {
+		switch (UIConfiguration::instance().get_screen_saver_mode ()) {
+			using namespace ARDOUR_UI_UTILS;
+			case InhibitWhileRecording:
+				inhibit_screensaver (_session && _session->actively_recording ());
+				break;
+			case InhibitAlways:
+				inhibit_screensaver (true);
+				break;
+			case InhibitNever:
+				inhibit_screensaver (false);
+				break;
+		}
 	}
-
 }
 
 void
