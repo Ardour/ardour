@@ -270,52 +270,69 @@ void MixerSnapshotList::substitution_dialog_response(int response, MixerSnapshot
 
     vector<route_combo>::const_iterator p;
     vector<route_combo> pairs = dialog->get_substitutions();
-    for(p = pairs.begin(); p != pairs.end(); p++) {
-        boost::shared_ptr<Route> route = (*p).first;
-        ComboBoxText*            cb    = (*p).second;
 
-        if(!route || !cb) {
-            continue;
-        }
+    const string selected_state = dialog->get_selection_combo_active_text();
+    bool state_exists = snapshot->route_state_exists(selected_state);
+    //set all selected routes to this selected state
+    if(state_exists) {
+        XMLNode node (snapshot->get_route_state_by_name(selected_state).node);
+        RouteList rl = PublicEditor::instance().get_selection().tracks.routelist();
+        for(RouteList::const_iterator i = rl.begin(); i != rl.end(); i++) {
+            if((*i)->is_monitor() || (*i)->is_master() || (*i)->is_auditioner()) {
+                continue;
+            }
 
-        if(route->is_monitor() || route->is_master() || route->is_auditioner()) {
-            continue;
-        }
-
-        const string name = route->name();
-        const string at   = cb->get_active_text();
-
-        printf(
-            "*** begining work for route %s, with substitution state %s\n", 
-            name.c_str(), 
-            at.c_str()
-        );
-
-        //do not recall this state
-        if(at == " --- ") {
-            continue;
-        }
-
-        const bool route_state_exists = snapshot->route_state_exists(name);
-        const bool subst_state_exists = snapshot->route_state_exists(at);
-        if(route_state_exists && subst_state_exists) {
-            XMLNode copy (snapshot->get_route_state_by_name(at).node);
+            XMLNode copy (node);
             MixerSnapshot::State new_state {
                 string(),
-                name,
+                (*i)->name(),
                 copy
             };
+
             dirty.push_back(new_state);
-            continue;
-        } else if(!route_state_exists && subst_state_exists) {
-            XMLNode copy (snapshot->get_route_state_by_name(at).node);
-            MixerSnapshot::State new_state {
-                string(),
-                name,
-                copy
-            };
-            dirty.push_back(new_state);
-            continue;
+        }
+    } else {
+        for(p = pairs.begin(); p != pairs.end(); p++) {
+            boost::shared_ptr<Route> route = (*p).first;
+            ComboBoxText*            cb    = (*p).second;
+
+            if(!route || !cb) {
+                continue;
+            }
+
+            if(route->is_monitor() || route->is_master() || route->is_auditioner()) {
+                continue;
+            }
+
+            const string name = route->name();
+            const string at   = cb->get_active_text();
+
+            //do not recall this state
+            if(at == " --- ") {
+                continue;
+            }
+
+            const bool route_state_exists = snapshot->route_state_exists(name);
+            const bool subst_state_exists = snapshot->route_state_exists(at);
+            if(route_state_exists && subst_state_exists) {
+                XMLNode copy (snapshot->get_route_state_by_name(at).node);
+                MixerSnapshot::State new_state {
+                    string(),
+                    name,
+                    copy
+                };
+                dirty.push_back(new_state);
+                continue;
+            } else if(!route_state_exists && subst_state_exists) {
+                XMLNode copy (snapshot->get_route_state_by_name(at).node);
+                MixerSnapshot::State new_state {
+                    string(),
+                    name,
+                    copy
+                };
+                dirty.push_back(new_state);
+                continue;
+            }
         }
     }
 

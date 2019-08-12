@@ -71,11 +71,11 @@ MixerSnapshotSubstitutionDialog::MixerSnapshotSubstitutionDialog(MixerSnapshot* 
         n++;
     }
 
-    ComboBoxText* sel_combo = manage(new ComboBoxText());
-    Label* sel = manage(new Label(_("All Selected: ")));
-    fill_combo_box(sel_combo, "");
-    table->attach(*sel,       0, 1, n, n+1);
-    table->attach(*sel_combo, 1, 2, n, n+1);
+    selection_combo = manage(new ComboBoxText());
+    Label* selection_combo_text = manage(new Label(_("All Selected: "), ALIGN_LEFT, ALIGN_CENTER, false));
+    fill_combo_box(selection_combo, "");
+    table->attach(*selection_combo_text,       0, 1, n, n+1);
+    table->attach(*selection_combo,            1, 2, n, n+1);
     n++;
 
 

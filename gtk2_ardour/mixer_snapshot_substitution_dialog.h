@@ -39,11 +39,14 @@ public:
     std::vector<route_combo> get_substitutions() {return substitutions;};
     void clear_substitutions() {substitutions.clear();};
 
+    std::string get_selection_combo_active_text() {return selection_combo->get_active_text();};
+
 private:
     bool state_exists(const std::string);
     ARDOUR::MixerSnapshot::State get_state_by_name(const std::string);
     void fill_combo_box(Gtk::ComboBoxText*, const std::string);
 
+    Gtk::ComboBoxText* selection_combo;
     std::vector<route_combo> substitutions;
 
     ARDOUR::MixerSnapshot* _snapshot;
