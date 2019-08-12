@@ -19,6 +19,8 @@
 #ifndef AUDIOGRAPHER_LOUDNESS_READER_H
 #define AUDIOGRAPHER_LOUDNESS_READER_H
 
+#include <vector>
+
 #include <vamp-hostsdk/PluginLoader.h>
 
 #include "audiographer/visibility.h"
@@ -47,8 +49,8 @@ class LIBAUDIOGRAPHER_API LoudnessReader : public ListedSource<float>, public Si
 	using Sink<float>::process;
 
   protected:
-	Vamp::Plugin*  _ebur_plugin;
-	Vamp::Plugin** _dbtp_plugin;
+	Vamp::Plugin*              _ebur_plugin;
+	std::vector<Vamp::Plugin*> _dbtp_plugins;
 
 	float        _sample_rate;
 	unsigned int _channels;
