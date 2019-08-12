@@ -1733,7 +1733,7 @@ Editor::invert_selection ()
 {
 
 	if (internal_editing()) {
-		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		for (MidiRegionSelection::iterator i = selection->midi_regions.begin(); i != selection->midi_regions.end(); ++i) {
 			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
 			if (mrv) {
 				mrv->invert_selection ();
