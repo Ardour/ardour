@@ -50,6 +50,7 @@
 
 #include "pbd/tokenizer.h"
 #include "pbd/enumwriter.h"
+#include "pbd/file_utils.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/string_convert.h"
 #include "pbd/xml++.h"
@@ -1721,22 +1722,12 @@ SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths
 	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
 
 		char tmpc[PATH_MAX+1];
-
 		snprintf (tmpc, sizeof(tmpc), "%s/%s", tmpdir.c_str(), Glib::path_get_basename (*i).c_str());
 
 		/* can we link ? */
-#ifdef PLATFORM_WINDOWS
-		/* see also ntfs_link -- msvc only pbd extension */
-		if (false == CreateHardLinkA (/*new link*/ tmpc, /*existing file*/ (*i).c_str(), NULL)) {
-			goto out;
+		if (PBD::hard_link (/*existing file*/(*i).c_str(), tmpc)) {
+			::g_unlink (tmpc);
 		}
-#else
-		if (link (/*existing file*/(*i).c_str(), tmpc)) {
-			goto out;
-		}
-#endif
-
-		::g_unlink (tmpc);
 	}
 
 	ret = true;
