@@ -161,8 +161,6 @@ EditorSources::EditorSources (Editor* e)
 	_display.set_headers_visible (true);
 	_display.set_rules_hint ();
 
-	_display.get_selection()->set_select_function (sigc::mem_fun (*this, &EditorSources::selection_filter));
-
 	//set the color of the name field
 	TreeViewColumn* tv_col = _display.get_column(0);
 	CellRendererText* renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
@@ -800,12 +798,6 @@ EditorSources::drag_data_received (const RefPtr<Gdk::DragContext>& context,
                                    guint info, guint time)
 {
 	/* ToDo:  allow dropping files/loops into the source list?  */
-}
-
-bool
-EditorSources::selection_filter (const RefPtr<TreeModel>& model, const TreeModel::Path& path, bool already_selected)
-{
-	return true;
 }
 
 /** @return Region that has been dragged out of the list, or 0 */

@@ -100,8 +100,6 @@ private:
 
 	sigc::connection _change_connection;
 
-	bool selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
-
 	Gtk::Widget* old_focus;
 
 	Gtk::CellEditable* tags_editable;
