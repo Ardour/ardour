@@ -1360,13 +1360,19 @@ MidiTimeAxisView::set_note_selection (uint8_t note)
 
 	_editor.begin_reversible_selection_op (X_("Set Note Selection"));
 
+	/* set_note_selection_region_view() will not work with multiple regions,
+	 * as each individual `foreach` call will clear prior selection.
+	 * Use clear_midi_notes() and add_note_selection_region_view() instead. */
+
+	_editor.get_selection().clear_midi_notes();
+
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
-			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_selection_region_view),
+			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::add_note_selection_region_view),
 			            note, chn_mask));
 	} else {
 		_view->foreach_selected_regionview (
-			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_selection_region_view),
+			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::add_note_selection_region_view),
 			            note, chn_mask));
 	}
 
