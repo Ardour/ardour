@@ -663,9 +663,9 @@ Editor::Editor ()
 	Location::end_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
 	Location::changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
 
+	add_notebook_page (_("Tracks & Busses"), _routes->widget ());
 	add_notebook_page (_("Sources"), _sources->widget ());
 	add_notebook_page (_("Regions"), _regions->widget ());
-	add_notebook_page (_("Tracks & Busses"), _routes->widget ());
 	add_notebook_page (_("Snapshots"), _snapshots->widget ());
 	add_notebook_page (_("Track & Bus Groups"), _route_groups->widget ());
 	add_notebook_page (_("Ranges & Marks"), _locations->widget ());
