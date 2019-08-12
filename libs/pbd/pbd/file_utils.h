@@ -190,6 +190,11 @@ LIBPBD_API void copy_recurse(const std::string & from_path, const std::string & 
  */
 LIBPBD_API bool touch_file (const std::string& path);
 
+/** try hard-link a file
+ * @return true if file was successfully linked
+ */
+LIBPBD_API bool hard_link (const std::string& existing_file, const std::string& new_path);
+
 /**
  * Take a (possibly) relative path and make it absolute
  * @return An absolute path

@@ -356,6 +356,17 @@ touch_file (const std::string& path)
 	return false;
 }
 
+bool
+hard_link (const std::string& existing_file, const std::string& new_path)
+{
+#ifdef PLATFORM_WINDOWS
+	/* see also ntfs_link -- msvc only pbd extension */
+	return CreateHardLinkA (new_path.c_str(), existing_file.c_str(), NULL);
+#else
+	return 0 == link (existing_file.c_str(), new_path.c_str());
+#endif
+}
+
 std::string
 get_absolute_path (const std::string & p)
 {
