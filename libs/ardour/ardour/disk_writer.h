@@ -44,7 +44,7 @@ public:
 	bool set_name (std::string const & str);
 	std::string display_name() const { return std::string (_("recorder")); }
 
-	bool               recordable()  const { return _flags & Recordable; }
+	bool recordable() const { return _flags & Recordable; }
 
 	static samplecnt_t chunk_samples() { return _chunk_samples; }
 	static samplecnt_t default_chunk_samples ();
@@ -57,7 +57,8 @@ public:
 
 	int set_state (const XMLNode&, int version);
 
-	virtual bool set_write_source_name (const std::string& str);
+	bool set_write_source_name (const std::string& str);
+
 	std::string  write_source_name () const {
 		if (_write_source_name.empty()) {
 			return name();
@@ -71,13 +72,12 @@ public:
 		if (n < c->size()) {
 			return (*c)[n]->write_source;
 		}
-
 		return boost::shared_ptr<AudioFileSource>();
 	}
 
-	boost::shared_ptr<SMFSource> midi_write_source () { return _midi_write_source; }
+	boost::shared_ptr<SMFSource> midi_write_source () const { return _midi_write_source; }
 
-	virtual std::string steal_write_source_name ();
+	std::string steal_write_source_name ();
 	int  use_new_write_source (DataType, uint32_t n = 0);
 	void reset_write_sources (bool, bool force = false);
 
@@ -92,21 +92,18 @@ public:
 
 	bool         record_enabled() const { return g_atomic_int_get (const_cast<gint*>(&_record_enabled)); }
 	bool         record_safe () const { return g_atomic_int_get (const_cast<gint*>(&_record_safe)); }
-	virtual void set_record_enabled (bool yn);
-	virtual void set_record_safe (bool yn);
+	void set_record_enabled (bool yn);
+	void set_record_safe (bool yn);
 
 	bool destructive() const { return _flags & Destructive; }
 
 	/** @return Start position of currently-running capture (in session samples) */
-	samplepos_t current_capture_start() const { return capture_start_sample; }
-	samplepos_t current_capture_end()   const { return capture_start_sample + capture_captured; }
+	samplepos_t current_capture_start() const { return _capture_start_sample; }
+	samplepos_t current_capture_end()   const { return _capture_start_sample + _capture_captured; }
 	samplepos_t get_capture_start_sample (uint32_t n = 0) const;
 	samplecnt_t get_captured_samples (uint32_t n = 0) const;
 
 	float buffer_load() const;
-
-	virtual void request_input_monitoring (bool) {}
-	virtual void ensure_input_monitoring (bool) {}
 
 	int seek (samplepos_t sample, bool complete_refill);
 
@@ -146,9 +143,10 @@ protected:
 
 	int do_flush (RunContext context, bool force = false);
 
-	void get_input_sources ();
+private:
+	static samplecnt_t _chunk_samples;
+
 	void prepare_record_status (samplepos_t /*capture_start_sample*/);
-	void set_align_style_from_io();
 	void setup_destructive_playlist ();
 	void use_destructive_playlist ();
 
@@ -167,41 +165,37 @@ protected:
 		samplecnt_t& rec_nframes, samplecnt_t& rec_offset
 		);
 
+	void check_record_status (samplepos_t transport_sample, double speed, bool can_record);
+	void finish_capture (boost::shared_ptr<ChannelList> c);
+
 	mutable Glib::Threads::Mutex capture_info_lock;
 	CaptureInfos capture_info;
 
-private:
-	gint         _record_enabled;
-	gint         _record_safe;
-	samplepos_t  capture_start_sample;
-	samplecnt_t  capture_captured;
-	bool         was_recording;
-	samplepos_t  first_recordable_sample;
-	samplepos_t  last_recordable_sample;
-	int          last_possibly_recording;
-	AlignStyle   _alignment_style;
-	std::string  _write_source_name;
+	gint          _record_enabled;
+	gint          _record_safe;
+	samplepos_t   _capture_start_sample;
+	samplecnt_t   _capture_captured;
+	bool          _was_recording;
+	samplepos_t   _first_recordable_sample;
+	samplepos_t   _last_recordable_sample;
+	int           _last_possibly_recording;
+	AlignStyle    _alignment_style;
+	std::string   _write_source_name;
+	NoteMode      _note_mode;
+	volatile gint _samples_pending_write;
+	volatile gint _num_captured_loops;
+	samplepos_t   _accumulated_capture_offset;
 
 	boost::shared_ptr<SMFSource> _midi_write_source;
 
 	std::list<boost::shared_ptr<Source> > _last_capture_sources;
 	std::vector<boost::shared_ptr<AudioFileSource> > capturing_sources;
 
-	static samplecnt_t _chunk_samples;
-
-	NoteMode           _note_mode;
-	volatile gint      _samples_pending_write;
-	volatile gint      _num_captured_loops;
-	samplepos_t        _accumulated_capture_offset;
-
 	/** A buffer that we use to put newly-arrived MIDI data in for
-	    the GUI to read (so that it can update itself).
-	*/
+	 * the GUI to read (so that it can update itself).
+	 */
 	MidiBuffer                   _gui_feed_buffer;
 	mutable Glib::Threads::Mutex _gui_feed_buffer_mutex;
-
-	void check_record_status (samplepos_t transport_sample, double speed, bool can_record);
-	void finish_capture (boost::shared_ptr<ChannelList> c);
 };
 
 } // namespace
