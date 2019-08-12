@@ -3085,9 +3085,17 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (S_("Preferences|Metering"),
 	     new BoolOption (
 		     "save-export-analysis-image",
-		     _("Save loudness analysis as image file"),
+		     _("Save loudness analysis as image file after export"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_save_export_analysis_image),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_save_export_analysis_image)
+		     ));
+
+	add_option (S_("Preferences|Metering"),
+	     new BoolOption (
+		     "save-export-mixer-screenshot",
+		     _("Save Mixer screenshot after export"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_save_export_mixer_screenshot),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_save_export_mixer_screenshot)
 		     ));
 
 	/* TRANSPORT & Sync */

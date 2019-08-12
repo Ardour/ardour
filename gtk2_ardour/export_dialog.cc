@@ -31,8 +31,12 @@
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
 
+#include "pbd/gstdio_compat.h"
+#include "pbd/file_utils.h"
+
 #include "ardour/audioregion.h"
 #include "ardour/export_channel_configuration.h"
+#include "ardour/export_format_specification.h"
 #include "ardour/export_status.h"
 #include "ardour/export_handler.h"
 #include "ardour/profile.h"
@@ -40,7 +44,9 @@
 #include "export_dialog.h"
 #include "export_report.h"
 #include "gui_thread.h"
+#include "mixer_ui.h"
 #include "nag.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -52,7 +58,6 @@ ExportDialog::ExportDialog (PublicEditor & editor, std::string title, ARDOUR::Ex
   : ArdourDialog (title)
   , type (type)
   , editor (editor)
-
   , warn_label ("", Gtk::ALIGN_LEFT)
   , list_files_label (_("<span color=\"#ffa755\">Some already existing files will be overwritten.</span>"), Gtk::ALIGN_RIGHT)
   , list_files_button (_("List files"))
@@ -379,6 +384,37 @@ ExportDialog::show_progress ()
 	}
 
 	status->finish ();
+
+	if (!status->aborted() && UIConfiguration::instance().get_save_export_mixer_screenshot ()) {
+		ExportProfileManager::TimespanStateList const& timespans = profile_manager->get_timespans();
+		ExportProfileManager::FilenameStateList const& filenames = profile_manager->get_filenames ();
+
+		std::list<std::string> paths;
+		for (ExportProfileManager::FilenameStateList::const_iterator fi = filenames.begin(); fi != filenames.end(); ++fi) {
+			for (ExportProfileManager::TimespanStateList::const_iterator ti = timespans.begin(); ti != timespans.end(); ++ti) {
+				ExportProfileManager::TimespanListPtr tlp = (*ti)->timespans;
+				for (ExportProfileManager::TimespanList::const_iterator eti = tlp->begin(); eti != tlp->end(); ++eti) {
+					(*fi)->filename->set_timespan (*eti);
+					paths.push_back ((*fi)->filename->get_path (ExportFormatSpecPtr ()) + "-mixer.png");
+				}
+			}
+		}
+
+		if (paths.size() > 0) {
+			PBD::info << string_compose(_("Writing Mixer Screenshot: %1."), paths.front()) << endmsg;
+			Mixer_UI::instance()->screenshot (paths.front());
+
+			std::list<std::string>::const_iterator it = paths.begin ();
+			++it;
+			for (; it != paths.end(); ++it) {
+				PBD::info << string_compose(_("Copying Mixer Screenshot: %1."), *it) << endmsg;
+				::g_unlink (it->c_str());
+				if (!hard_link (paths.front(), *it)) {
+					copy_file (paths.front(), *it);
+				}
+			}
+		}
+	}
 
 	if (!status->aborted() && status->result_map.size() > 0) {
 		hide();
