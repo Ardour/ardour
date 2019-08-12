@@ -268,30 +268,30 @@ void MixerSnapshotList::substitution_dialog_response(int response, MixerSnapshot
     vector<MixerSnapshot::State> clean = snapshot->get_routes();
     vector<MixerSnapshot::State> dirty;
 
-    vector<route_combo>::const_iterator p;
-    vector<route_combo> pairs = dialog->get_substitutions();
+    const string selection_text = dialog->get_selection_combo_active_text();
+    if(selection_text != " --- ") {
+        //set all selected routes to the selection's state
+        if(snapshot->route_state_exists(selection_text)) {
+            XMLNode node (snapshot->get_route_state_by_name(selection_text).node);
 
-    const string selected_state = dialog->get_selection_combo_active_text();
-    bool state_exists = snapshot->route_state_exists(selected_state);
-    //set all selected routes to this selected state
-    if(state_exists) {
-        XMLNode node (snapshot->get_route_state_by_name(selected_state).node);
-        RouteList rl = PublicEditor::instance().get_selection().tracks.routelist();
-        for(RouteList::const_iterator i = rl.begin(); i != rl.end(); i++) {
-            if((*i)->is_monitor() || (*i)->is_master() || (*i)->is_auditioner()) {
-                continue;
+            RouteList rl = PublicEditor::instance().get_selection().tracks.routelist();
+            for(RouteList::const_iterator i = rl.begin(); i != rl.end(); i++) {
+                if((*i)->is_monitor() || (*i)->is_master() || (*i)->is_auditioner()) {
+                    continue;
+                }
+                XMLNode copy (node);
+                MixerSnapshot::State new_state {
+                    string(),
+                    (*i)->name(),
+                    copy
+                };
+                dirty.push_back(new_state);
             }
-
-            XMLNode copy (node);
-            MixerSnapshot::State new_state {
-                string(),
-                (*i)->name(),
-                copy
-            };
-
-            dirty.push_back(new_state);
         }
     } else {
+        //make standard substitutions
+        vector<route_combo>::const_iterator p;
+        vector<route_combo> pairs = dialog->get_substitutions();
         for(p = pairs.begin(); p != pairs.end(); p++) {
             boost::shared_ptr<Route> route = (*p).first;
             ComboBoxText*            cb    = (*p).second;
@@ -336,21 +336,8 @@ void MixerSnapshotList::substitution_dialog_response(int response, MixerSnapshot
         }
     }
 
-    //DEBUG OUTPUT
-    printf("\nDirty States ------------------------------------------\n");
-    for(vector<MixerSnapshot::State>::const_iterator i = dirty.begin(); i != dirty.end(); i++) {
-        string name;
-        (*i).node.get_property(X_("name"), name);
-        printf("\nState {id:%s, name:%s, node:%s}\n", (*i).id.c_str(), (*i).name.c_str(), name.c_str());
-    }
-    printf("\n-------------------------------------------------------\n");
-
-    //this needs to be called to drop it's shared route ptrs
-    pairs.clear();
-    dialog->clear_substitutions();
     delete dialog;
 
-    //swap the vectors Indiana Jones style and then recall
     snapshot->set_route_states(dirty);
     snapshot->recall();
     snapshot->set_route_states(clean);
