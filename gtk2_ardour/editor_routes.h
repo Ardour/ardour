@@ -117,7 +117,6 @@ private:
 
 	int plugin_setup (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::PluginInsert>, ARDOUR::Route::PluginSetupOptions);
 
-	bool selection_filter (Glib::RefPtr<Gtk::TreeModel> const &, Gtk::TreeModel::Path const &, bool);
 	void name_edit (std::string const &, std::string const &);
 	void solo_changed_so_update_mute ();
 

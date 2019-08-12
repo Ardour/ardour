@@ -260,7 +260,6 @@ EditorRoutes::EditorRoutes (Editor* e)
 
 	_display.set_headers_visible (true);
 	_display.get_selection()->set_mode (SELECTION_MULTIPLE);
-	_display.get_selection()->set_select_function (sigc::mem_fun (*this, &EditorRoutes::selection_filter));
 	_display.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::selection_changed));
 	_display.set_reorderable (true);
 	_display.set_name (X_("EditGroupList"));
@@ -1468,17 +1467,6 @@ EditorRoutes::selection_changed ()
 	}
 
 	_editor->commit_reversible_selection_op ();
-}
-
-bool
-EditorRoutes::selection_filter (Glib::RefPtr<TreeModel> const& model, TreeModel::Path const& path, bool /*selected*/)
-{
-	TreeModel::iterator iter = model->get_iter (path);
-	if (iter) {
-		boost::shared_ptr<Stripable> stripable = (*iter)[_columns.stripable];
-	}
-
-	return true;
 }
 
 void
