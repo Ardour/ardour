@@ -260,10 +260,6 @@ EditorSources::enter_notify (GdkEventCrossing*)
 		return true;
 	}
 
-	/* arm counter so that ::selection_filter() will deny selecting anything for the
-	   next two attempts to change selection status.
-	*/
-	_scroller.grab_focus ();
 	Keyboard::magic_widget_grab_focus ();
 	return false;
 }
