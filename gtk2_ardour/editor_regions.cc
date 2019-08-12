@@ -949,7 +949,7 @@ EditorRegions::button_press (GdkEventButton *ev)
 
 	if (Keyboard::is_context_menu_event (ev)) {
 		show_context_menu (ev->button, ev->time);
-		return false;
+		return true;
 	}
 
 	if (region != 0 && Keyboard::is_button2_event (ev)) {
