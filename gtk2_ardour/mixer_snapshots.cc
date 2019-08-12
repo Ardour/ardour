@@ -175,7 +175,7 @@ void MixerSnapshotList::new_snapshot() {
 }
 
 void MixerSnapshotList::new_snapshot_from_session() {
-    FileChooserDialog session_selector(_("Open Session"), FILE_CHOOSER_ACTION_OPEN);
+    FileChooserDialog session_selector(_("New Snapshot from Session, Template or Other:"), FILE_CHOOSER_ACTION_OPEN);
 
     session_selector.add_button(Stock::CANCEL, RESPONSE_CANCEL);
     session_selector.add_button(Stock::OPEN, RESPONSE_ACCEPT);
