@@ -246,7 +246,7 @@ ExportFilename::get_path (ExportFormatSpecPtr format) const
 		filename_empty = false;
 	}
 
-	if (include_format_name) {
+	if (include_format_name && format) {
 		path += filename_empty ? "" : "_";
 		path += format->name();
 		filename_empty = false;
@@ -256,8 +256,10 @@ ExportFilename::get_path (ExportFormatSpecPtr format) const
 		path = "export";
 	}
 
-	path += ".";
-	path += format->extension ();
+	if (format) {
+		path += ".";
+		path += format->extension ();
+	}
 
 	path = legalize_for_universal_path (path);
 
