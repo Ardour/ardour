@@ -369,6 +369,7 @@ TruePeakdsp::TruePeakdsp (void)
 	: _m (0)
 	, _p (0)
 	, _res (true)
+	, _res_peak (true)
 	, _buf (NULL)
 {
 }
