@@ -503,7 +503,7 @@ bool MixerSnapshotList::remove_row(Gtk::TreeModel::const_iterator& iter)
 
 void MixerSnapshotList::redisplay ()
 {
-    if (_session == 0) {
+    if (!_session) {
         return;
     }
 

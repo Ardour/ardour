@@ -90,6 +90,7 @@
 #include "editing.h"
 #include "enums.h"
 #include "mini_timeline.h"
+#include "mixer_snapshots.h"
 #include "shuttle_control.h"
 #include "startup_fsm.h"
 #include "transport_control.h"
@@ -421,6 +422,9 @@ private:
 	bool          _mixer_on_top;
 
 	Gtk::Menu*    _shared_popup_menu;
+
+	MixerSnapshotList* _template_list;
+	Gtk::Window _template_picker;
 
 	void hide_tabbable (ArdourWidgets::Tabbable*);
 	void detach_tabbable (ArdourWidgets::Tabbable*);

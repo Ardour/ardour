@@ -178,7 +178,6 @@ typedef uint64_t microseconds_t;
 #include "main_clock.h"
 #include "missing_file_dialog.h"
 #include "missing_plugin_dialog.h"
-#include "mixer_snapshots.h"
 #include "mixer_ui.h"
 #include "meterbridge.h"
 #include "meter_patterns.h"
@@ -327,6 +326,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, meterbridge (0)
 	, luawindow (0)
 	, rc_option_editor (0)
+	, _template_list(0)
 	, speaker_config_window (X_("speaker-config"), _("Speaker Configuration"))
 	, add_route_dialog (X_("add-routes"), _("Add Tracks/Busses"))
 	, about (X_("about"), _("About"))
