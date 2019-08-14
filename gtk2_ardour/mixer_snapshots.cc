@@ -149,8 +149,13 @@ void MixerSnapshotList::bootstrap_display_and_model()
 
 void MixerSnapshotList::set_session (Session* s)
 {
-    SessionHandlePtr::set_session (s);
-    redisplay ();
+    if(s) {
+        SessionHandlePtr::set_session(s);
+        redisplay ();
+        if(_global) {
+            s->snapshot_manager().PromotedSnapshot.connect(connections, invalidator(*this), boost::bind(&MixerSnapshotList::add_promoted_snapshot, this, _1), gui_context());
+        }
+    }
 }
 
 void MixerSnapshotList::new_snapshot() {
@@ -340,6 +345,14 @@ void MixerSnapshotList::substitution_dialog_response(int response, MixerSnapshot
     snapshot->set_route_states(dirty);
     snapshot->recall();
     snapshot->set_route_states(clean);
+}
+
+void MixerSnapshotList::add_promoted_snapshot(MixerSnapshot* snapshot)
+{
+    if(!snapshot) {
+        return;
+    }
+    redisplay();
 }
 
 

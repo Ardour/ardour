@@ -109,6 +109,7 @@ private:
     void promote_snapshot (Gtk::TreeModel::iterator&);
     Gtk::TreeModel::const_iterator get_row_by_name(const std::string&);
     bool remove_row(Gtk::TreeModel::const_iterator&);
+    void add_promoted_snapshot(ARDOUR::MixerSnapshot*);
 };
 
 #endif // __gtk_ardour_mixer_snapshots_h__

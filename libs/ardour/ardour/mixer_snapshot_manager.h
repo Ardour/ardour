@@ -27,6 +27,8 @@
 #include "ardour/mixer_snapshot.h"
 #include "ardour/session.h"
 
+#include "pbd/signals.h"
+
 namespace ARDOUR {
 typedef std::set<MixerSnapshot*> SnapshotList;
 
@@ -56,6 +58,8 @@ public:
 
     void refresh();
     void clear() { _global_snapshots.clear(); _local_snapshots.clear(); };
+
+    PBD::Signal1<void, ARDOUR::MixerSnapshot*> PromotedSnapshot;
 private:
     void ensure_snapshot_dir(bool global);
     std::string _global_path;

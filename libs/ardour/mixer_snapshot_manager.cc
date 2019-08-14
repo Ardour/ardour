@@ -128,6 +128,7 @@ bool MixerSnapshotManager::promote(MixerSnapshot* snapshot) {
 
         //insert the new snapshot
         _global_snapshots.insert(new_snap);
+        PromotedSnapshot(new_snap); /* EMIT SIGNAL */
         return true;
     }
     return false;
