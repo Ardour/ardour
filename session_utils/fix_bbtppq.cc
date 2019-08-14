@@ -334,7 +334,7 @@ apply_one_source_per_source_fix (Session* session)
 	return true;
 }
 
-static void usage (int status) {
+static void usage () {
 	// help2man compatible format (standard GNU help-text)
 	printf (UTILNAME " - convert an ardour session with 5.0 - 5.3 midi sources to be compatible with 5.4.\n\n");
 	printf ("Usage: " UTILNAME " [ OPTIONS ] <session-dir> <snapshot-name>\n\n");
@@ -389,7 +389,7 @@ If a MIDI session only contains quarter note meter divisors, it will be unaffect
 
 	printf ("Report bugs to <http://tracker.ardour.org/>\n"
 	        "Website: <http://ardour.org/>\n");
-	::exit (status);
+	::exit (EXIT_SUCCESS);
 }
 
 int main (int argc, char* argv[])
@@ -417,9 +417,6 @@ int main (int argc, char* argv[])
 
 		case 'o':
 			outfile = optarg;
-			if (outfile.empty()) {
-				usage (EXIT_SUCCESS);
-			}
 			break;
 
 		case 'V':
@@ -429,17 +426,19 @@ int main (int argc, char* argv[])
 			break;
 
 		case 'h':
-			usage (EXIT_SUCCESS);
+			usage ();
 			break;
 
 		default:
-			usage (EXIT_FAILURE);
+			cerr << "Error: unrecognized option. See --help for usage information.\n";
+			::exit (EXIT_FAILURE);
 			break;
 		}
 	}
 
 	if (optind + 2 > argc) {
-		usage (EXIT_FAILURE);
+		cerr << "Error: Missing parameter. See --help for usage information.\n";
+		::exit (EXIT_FAILURE);
 	}
 
 	SessionDirectory* session_dir = new SessionDirectory (argv[optind]);

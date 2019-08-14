@@ -246,7 +246,7 @@ copy_session_routes (
 }
 
 
-static void usage (int status) {
+static void usage () {
 	// help2man compatible format (standard GNU help-text)
 	printf (UTILNAME " - copy mixer settings from one session to another.\n\n");
 	printf ("Usage: " UTILNAME " [ OPTIONS ] <src> <dst>\n\n");
@@ -270,7 +270,7 @@ When --snapshot is set, a new snaphot in the <dst> session is created.\n\
 
 	printf ("Report bugs to <http://tracker.ardour.org/>\n"
 	        "Website: <http://ardour.org/>\n");
-	::exit (status);
+	::exit (EXIT_SUCCESS);
 }
 
 static bool ends_with (std::string const& value, std::string const& ending)
@@ -308,7 +308,7 @@ int main (int argc, char* argv[])
 				break;
 
 			case 'h':
-				usage (EXIT_SUCCESS);
+				usage ();
 				break;
 
 			case 'l':
@@ -330,15 +330,17 @@ int main (int argc, char* argv[])
 				break;
 
 			default:
-					usage (EXIT_FAILURE);
-					break;
+				cerr << "Error: unrecognized option. See --help for usage information.\n";
+				::exit (EXIT_FAILURE);
+				break;
 		}
 	}
 
 	// TODO parse path/name  from a single argument.
 
 	if (optind + 2 > argc) {
-		usage (EXIT_FAILURE);
+		cerr << "Error: Missing parameter. See --help for usage information.\n";
+		::exit (EXIT_FAILURE);
 	}
 
 	std::string src = argv[optind];

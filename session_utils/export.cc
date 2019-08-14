@@ -207,7 +207,7 @@ static int export_session (Session *session,
 	return 0;
 }
 
-static void usage (int status) {
+static void usage () {
 	// help2man compatible format (standard GNU help-text)
 	printf (UTILNAME " - export an ardour session from the commandline.\n\n");
 	printf ("Usage: " UTILNAME " [ OPTIONS ] <session-dir> <session/snapshot-name>\n\n");
@@ -231,7 +231,7 @@ Note: the tool expects a session-name without .ardour file-name extension.\n\
 
 	printf ("Report bugs to <http://tracker.ardour.org/>\n"
 	        "Website: <http://ardour.org/>\n");
-	::exit (status);
+	::exit (EXIT_SUCCESS);
 }
 
 int main (int argc, char* argv[])
@@ -309,17 +309,19 @@ int main (int argc, char* argv[])
 				break;
 
 			case 'h':
-				usage (EXIT_SUCCESS);
+				usage ();
 				break;
 
 			default:
-					usage (EXIT_FAILURE);
-					break;
+				cerr << "Error: unrecognized option. See --help for usage information.\n";
+				::exit (EXIT_FAILURE);
+				break;
 		}
 	}
 
 	if (optind + 2 > argc) {
-		usage (EXIT_FAILURE);
+		cerr << "Error: Missing parameter. See --help for usage information.\n";
+		::exit (EXIT_FAILURE);
 	}
 
 	SessionUtils::init(false);

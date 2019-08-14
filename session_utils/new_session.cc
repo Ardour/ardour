@@ -32,8 +32,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace SessionUtils;
 
-static void
-usage (int status)
+static void usage ()
 {
 	// help2man compatible format (standard GNU help-text)
 	printf (UTILNAME " - create a new session from the commandline.\n\n");
@@ -70,7 +69,7 @@ Examples:\n\
 
 	printf ("Report bugs to <http://tracker.ardour.org/>\n"
 	        "Website: <http://ardour.org/>\n");
-	::exit (status);
+	::exit (EXIT_SUCCESS);
 }
 
 static void
@@ -210,11 +209,12 @@ main (int argc, char* argv[])
 				break;
 
 			case 'h':
-				usage (EXIT_SUCCESS);
+				usage ();
 				break;
 
 			default:
-				usage (EXIT_FAILURE);
+				cerr << "Error: unrecognized option. See --help for usage information.\n";
+				::exit (EXIT_FAILURE);
 				break;
 		}
 	}
@@ -226,7 +226,8 @@ main (int argc, char* argv[])
 	} else if (optind + 1 == argc) {
 		snapshot_name = Glib::path_get_basename (argv[optind]);
 	} else {
-		usage (EXIT_FAILURE);
+		cerr << "Error: Missing parameter. See --help for usage information.\n";
+		::exit (EXIT_FAILURE);
 	}
 
 	if (snapshot_name.empty ()) {
