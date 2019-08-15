@@ -189,8 +189,8 @@ private:
 
 	boost::shared_ptr<SMFSource> _midi_write_source;
 
-	std::list<boost::shared_ptr<Source>>            _last_capture_sources;
-	std::vector<boost::shared_ptr<AudioFileSource>> capturing_sources;
+	std::list<boost::shared_ptr<Source> >            _last_capture_sources;
+	std::vector<boost::shared_ptr<AudioFileSource> > capturing_sources;
 
 	/** A buffer that we use to put newly-arrived MIDI data in for
 	 * the GUI to read (so that it can update itself).
