@@ -1456,7 +1456,6 @@ If you still wish to quit, please use the\n\n\
 
 	if (_session) {
 		_session->set_clean ();
-		_session->remove_pending_capture_state ();
 		delete _session;
 		_session = 0;
 	}
