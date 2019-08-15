@@ -107,10 +107,12 @@ bool MixerSnapshotManager::promote(MixerSnapshot* snapshot) {
 
     const string path = snapshot->get_path();
     if(Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS)) {
-        const string label = snapshot->get_label();
+        //write out this snapshot to the global path
         snapshot->write(_global_path);
 
         //that might've overwritten a file, erase it's reference
+        const string label = snapshot->get_label();
+
         MixerSnapshot* old_snapshot = get_snapshot_by_name(label, true);
         set<MixerSnapshot*>::iterator iter = _global_snapshots.find(old_snapshot);
         if(iter != _global_snapshots.end()) {

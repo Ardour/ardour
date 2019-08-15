@@ -55,6 +55,7 @@ public:
 
     void new_snapshot();
     void new_snapshot_from_session();
+    void new_row_from_snapshot(ARDOUR::MixerSnapshot*);
 
     void redisplay ();
 

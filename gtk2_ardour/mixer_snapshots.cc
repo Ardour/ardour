@@ -469,20 +469,64 @@ void MixerSnapshotList::rename_snapshot(TreeModel::iterator& iter)
 void MixerSnapshotList::promote_snapshot(TreeModel::iterator& iter)
 {
     MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
+    const string name = (*iter)[_columns.name];
 
-    //let the user know that this was successful.
-    if(_session->snapshot_manager().promote(snapshot)) {
-        const string label = snapshot->get_label();
+    SnapshotList non_active_list;
+    if(_global) {
+        non_active_list = _session->snapshot_manager().get_local_snapshots();
+    } else if(!_global) {
+        non_active_list = _session->snapshot_manager().get_global_snapshots();
+    }
 
-        const string notification = string_compose(
-            _("Snapshot \"%1\" is now available to all sessions.\n"),
-            label
+    bool would_overwrite = false;
+    for(SnapshotList::const_iterator it = non_active_list.begin(); it != non_active_list.end(); it++) {
+        //this is going to overwite something in the *other* list
+        if((*it)->get_label() == snapshot->get_label()) {
+            would_overwrite = true;
+            break;
+        }
+    }
+
+    if(would_overwrite) {
+        const string prompt = string_compose(
+            _("Do you really want to overwrite snapshot \"%1\" ?\n(this cannot be undone)"),
+            name
         );
 
-        //not leaked, self-deleting
-        PopUp* notify = new PopUp(WIN_POS_MOUSE, 2000, true);
-        notify->set_text(notification);
-        notify->touch();
+        vector<string> choices;
+        choices.push_back(_("No, do nothing."));
+        choices.push_back(_("Yes, overwrite it."));
+
+        ArdourWidgets::Choice prompter (_("Overwrite Snapshot"), prompt, choices);
+
+        if(prompter.run() == 1) {
+            if(_session->snapshot_manager().promote(snapshot)) {
+                const string notification = string_compose(
+                    _("Snapshot \"%1\" is now available to all sessions.\n"),
+                    name
+                );
+
+                //not leaked, self-deleting
+                PopUp* notify = new PopUp(WIN_POS_MOUSE, 2000, true);
+                notify->set_text(notification);
+                notify->touch();
+            }
+        } else {
+            return;
+        }
+    //not overwriting anything, we're in the clear
+    } else {
+        if(_session->snapshot_manager().promote(snapshot)) {
+            const string notification = string_compose(
+                _("Snapshot \"%1\" is now available to all sessions.\n"),
+                name
+            );
+
+            //not leaked, self-deleting
+            PopUp* notify = new PopUp(WIN_POS_MOUSE, 2000, true);
+            notify->set_text(notification);
+            notify->touch();
+        }
     }
 }
 
@@ -502,7 +546,6 @@ TreeModel::const_iterator MixerSnapshotList::get_row_by_name(const std::string& 
 bool MixerSnapshotList::remove_row(Gtk::TreeModel::const_iterator& iter)
 {
     if(iter) {
-        const string name = (*iter)[_columns.name];
         MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
         _snapshot_model->erase((*iter));
         if(snapshot) {
@@ -513,7 +556,7 @@ bool MixerSnapshotList::remove_row(Gtk::TreeModel::const_iterator& iter)
     return false;
 }
 
-void MixerSnapshotList::redisplay ()
+void MixerSnapshotList::redisplay()
 {
     if (!_session) {
         return;
@@ -532,25 +575,34 @@ void MixerSnapshotList::redisplay ()
 
     _snapshot_model->clear();
     for(SnapshotList::const_iterator it = active_list.begin(); it != active_list.end(); it++) {
-        // (*it)->LabelChanged.connect(connections, invalidator(*this), boost::bind(&MixerSnapshotList::test_func, this, _1), gui_context());
-        TreeModel::Row row = *(_snapshot_model->append());
-        row[_columns.name] = (*it)->get_label();
-        row[_columns.snapshot] = (*it);
+        new_row_from_snapshot((*it));
+    }
+}
 
-        //additional information for the global snapshots
-        if(_global) {
-            row[_columns.n_tracks]  = (*it)->get_routes().size();
-            row[_columns.n_vcas]    = (*it)->get_vcas().size();
-            row[_columns.n_groups]  = (*it)->get_groups().size();
+void MixerSnapshotList::new_row_from_snapshot(MixerSnapshot* snapshot)
+{
+    if(!snapshot) {
+        return;
+    }
 
-            GStatBuf gsb;
-            g_stat((*it)->get_path().c_str(), &gsb);
-            Glib::DateTime gdt(Glib::DateTime::create_now_local(gsb.st_mtime));
+    TreeModel::Row row = *(_snapshot_model->append());
 
-            row[_columns.timestamp] = gsb.st_mtime;;
-            row[_columns.date]      = gdt.format("%F %H:%M");
-            row[_columns.version]   = (*it)->get_last_modified_with();
-        }
+    row[_columns.name]     = snapshot->get_label();
+    row[_columns.snapshot] = snapshot;
+
+    //additional information only for global snapshots
+    if(_global) {
+        row[_columns.n_tracks]  = snapshot->get_routes().size();
+        row[_columns.n_vcas]    = snapshot->get_vcas().size();
+        row[_columns.n_groups]  = snapshot->get_groups().size();
+
+        GStatBuf gsb;
+        g_stat(snapshot->get_path().c_str(), &gsb);
+        Glib::DateTime gdt(Glib::DateTime::create_now_local(gsb.st_mtime));
+
+        row[_columns.timestamp] = gsb.st_mtime;;
+        row[_columns.date]      = gdt.format("%F %H:%M");
+        row[_columns.version]   = snapshot->get_last_modified_with();
     }
 }
 
