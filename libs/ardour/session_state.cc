@@ -449,7 +449,6 @@ Session::session_loaded ()
 		save_state ("");
 	} else if (state_was_pending) {
 		save_state ("");
-		remove_pending_capture_state ();
 		state_was_pending = false;
 	}
 
@@ -816,6 +815,10 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	if (!snapshot_name.empty() && snapshot_name != _current_snapshot_name && !template_only && !pending && !for_archive) {
 		/* snapshot, close midi */
 		fork_state = switch_to_snapshot ? SwitchToSnapshot : SnapshotKeep;
+	}
+
+	if (!pending && !for_archive && ! template_only) {
+		remove_pending_capture_state ();
 	}
 
 #ifndef NDEBUG

@@ -1724,10 +1724,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		}
 	}
 
-	/* always try to get rid of this */
-
-	remove_pending_capture_state ();
-
 	/* save the current state of things if appropriate */
 
 	if (did_record && !saved) {

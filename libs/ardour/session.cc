@@ -2088,10 +2088,6 @@ Session::disable_record (bool rt_context, bool force)
 		}
 
 		RecordStateChanged (); /* emit signal */
-
-		if (!rt_context) {
-			remove_pending_capture_state ();
-		}
 	}
 }
 
