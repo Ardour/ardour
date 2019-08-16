@@ -1045,7 +1045,7 @@ def configure(conf):
         autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
 
     if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw':
-        autowaf.check_pkg(conf, 'libpulse', uselib_store='PULSEAUDIO', atleast_version='10.0', mandatory=False)
+        autowaf.check_pkg(conf, 'libpulse', uselib_store='PULSEAUDIO', mandatory=False)
 
     if re.search ("openbsd", sys.platform) != None:
         conf.env.append_value('LDFLAGS', '-L/usr/X11R6/lib')
