@@ -94,7 +94,7 @@ ARDOUR::get_alsa_audio_device_names (std::map<std::string, std::string>& devices
 				string uniq_name = card_name;
 
 				if (have_multiple_subdevices) {
-					uniq_name += " (" + PBD::to_string (device) + ")";
+					uniq_name += " (" + hwname + ")";
 				}
 
 				std::pair<std::map<std::string, std::string>::iterator, bool> rv;
