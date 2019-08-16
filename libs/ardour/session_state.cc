@@ -722,12 +722,19 @@ Session::remove_pending_capture_state ()
 
 	pending_state_file_path = Glib::build_filename (pending_state_file_path, legalize_for_path (_current_snapshot_name) + pending_suffix);
 
-	if (!Glib::file_test (pending_state_file_path, Glib::FILE_TEST_EXISTS)) return;
+	if (!Glib::file_test (pending_state_file_path, Glib::FILE_TEST_EXISTS)) {
+		return;
+	}
 
-	if (g_remove (pending_state_file_path.c_str()) != 0) {
+	if (::g_unlink (pending_state_file_path.c_str()) != 0) {
 		error << string_compose(_("Could not remove pending capture state at path \"%1\" (%2)"),
 				pending_state_file_path, g_strerror (errno)) << endmsg;
 	}
+#ifndef NDEBUG
+	else {
+		cerr << "removed " << pending_state_file_path << endl;
+	}
+#endif
 }
 
 /** Rename a state file.
@@ -817,10 +824,6 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		fork_state = switch_to_snapshot ? SwitchToSnapshot : SnapshotKeep;
 	}
 
-	if (!pending && !for_archive && ! template_only) {
-		remove_pending_capture_state ();
-	}
-
 #ifndef NDEBUG
 	const int64_t save_start_time = g_get_monotonic_time();
 #endif
@@ -873,7 +876,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		}
 
 	} else {
-
+		assert (snapshot_name == _current_snapshot_name);
 		/* pending save: use pending_suffix (.pending in English) */
 		xml_path = Glib::build_filename (xml_path, legalize_for_path (snapshot_name) + pending_suffix);
 	}
@@ -951,6 +954,11 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	const int64_t elapsed_time_us = g_get_monotonic_time() - save_start_time;
 	cerr << "saved state in " << fixed << setprecision (1) << elapsed_time_us / 1000. << " ms\n";
 #endif
+
+	if (!pending && !for_archive && ! template_only) {
+		remove_pending_capture_state ();
+	}
+
 	return 0;
 }
 
