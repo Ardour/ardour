@@ -113,6 +113,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	int set_block_size (pframes_t);
 	bool requires_fixed_sized_buffers () const;
+	bool connect_all_audio_outputs () const;
 
 	int connect_and_run (BufferSet& bufs,
 	                     samplepos_t start, samplepos_t end, double speed,
@@ -201,6 +202,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	uint32_t      _patch_port_out_index;
 	URIMap&       _uri_map;
 	bool          _no_sample_accurate_ctrl;
+	bool          _connect_all_audio_outputs;
 	bool          _can_write_automation;
 	samplecnt_t   _max_latency;
 	samplecnt_t   _current_latency;

@@ -112,8 +112,14 @@ PluginInsert::~PluginInsert ()
 void
 PluginInsert::set_strict_io (bool b)
 {
+	if (_plugins.front()->connect_all_audio_outputs ()) {
+		/* Ignore route setting, allow plugin to add/remove ports */
+		b = false;
+	}
+
 	bool changed = _strict_io != b;
 	_strict_io = b;
+
 	if (changed) {
 		PluginConfigChanged (); /* EMIT SIGNAL */
 	}

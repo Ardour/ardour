@@ -202,6 +202,7 @@ public:
 #endif
 #ifdef LV2_EXTENDED
 	LilvNode* lv2_noSampleAccurateCtrl;
+	LilvNode* routing_connectAllOutputs; // lv2:optionalFeature
 	LilvNode* auto_can_write_automatation; // lv2:optionalFeature
 	LilvNode* auto_automation_control; // atom:supports
 	LilvNode* auto_automation_controlled; // lv2:portProperty
@@ -369,6 +370,7 @@ LV2Plugin::LV2Plugin (AudioEngine& engine,
 	, _patch_port_out_index((uint32_t)-1)
 	, _uri_map(URIMap::instance())
 	, _no_sample_accurate_ctrl (false)
+	, _connect_all_audio_outputs (false)
 {
 	init(c_plugin, rate);
 	latency_compute_run();
@@ -387,6 +389,7 @@ LV2Plugin::LV2Plugin (const LV2Plugin& other)
 	, _patch_port_out_index((uint32_t)-1)
 	, _uri_map(URIMap::instance())
 	, _no_sample_accurate_ctrl (false)
+	, _connect_all_audio_outputs (false)
 {
 	init(other._impl->plugin, other._sample_rate);
 
@@ -627,6 +630,9 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	if (lilv_nodes_contains (optional_features, _world.lv2_noSampleAccurateCtrl)) {
 		/* deprecated 2016-Sep-18 in favor of bufz_coarseBlockLength */
 		_no_sample_accurate_ctrl = true;
+	}
+	if (lilv_nodes_contains (optional_features, _world.routing_connectAllOutputs)) {
+		_connect_all_audio_outputs = true;
 	}
 	if (lilv_nodes_contains (optional_features, _world.auto_can_write_automatation)) {
 		_can_write_automation = true;
@@ -906,6 +912,12 @@ LV2Plugin::requires_fixed_sized_buffers () const
 		return true;
 	}
 	return _no_sample_accurate_ctrl;
+}
+
+bool
+LV2Plugin::connect_all_audio_outputs () const
+{
+	return _connect_all_audio_outputs;
 }
 
 LV2Plugin::~LV2Plugin ()
@@ -3252,6 +3264,7 @@ LV2World::LV2World()
 	opts_requiredOptions = lilv_new_uri(world, LV2_OPTIONS__requiredOption);
 #ifdef LV2_EXTENDED
 	lv2_noSampleAccurateCtrl    = lilv_new_uri(world, "http://ardour.org/lv2/ext#noSampleAccurateControls"); // deprecated 2016-09-18
+	routing_connectAllOutputs   = lilv_new_uri(world, LV2_ROUTING__connectAllOutputs);
 	auto_can_write_automatation = lilv_new_uri(world, LV2_AUTOMATE_URI__can_write);
 	auto_automation_control     = lilv_new_uri(world, LV2_AUTOMATE_URI__control);
 	auto_automation_controlled  = lilv_new_uri(world, LV2_AUTOMATE_URI__controlled);
@@ -3275,6 +3288,7 @@ LV2World::~LV2World()
 	lilv_node_free(bufz_powerOf2BlockLength);
 #ifdef LV2_EXTENDED
 	lilv_node_free(lv2_noSampleAccurateCtrl);
+	lilv_node_free(routing_connectAllOutputs);
 	lilv_node_free(auto_can_write_automatation);
 	lilv_node_free(auto_automation_control);
 	lilv_node_free(auto_automation_controlled);

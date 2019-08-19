@@ -113,8 +113,10 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public HasLatency
 	virtual void flush () { deactivate(); activate(); }
 
 	virtual int set_block_size (pframes_t nframes) = 0;
+
 	virtual bool requires_fixed_sized_buffers() const { return false; }
 	virtual bool inplace_broken() const { return false; }
+	virtual bool connect_all_audio_outputs () const { return false; }
 
 	virtual int connect_and_run (BufferSet& bufs,
 			samplepos_t start, samplepos_t end, double speed,

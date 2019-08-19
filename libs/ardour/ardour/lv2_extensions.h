@@ -180,6 +180,29 @@ typedef struct _LV2_License_Interface {
    @}
 */
 
+
+/**
+   @defgroup plugin port/routing control
+
+   This is a "feature" to simplify per port meta-data of
+   http://lv2plug.in/ns/ext/port-groups/port-groups.html#source
+
+   Plugins using this feature provide a strong hint that the host
+   should always connect all audio output-ports.
+
+   This allows mono->stereo plugins to override strict_io rules.
+
+   @{
+*/
+
+#define LV2_ROUTING_URI "http://harrisonconsoles.com/lv2/routing"
+#define LV2_ROUTING_PREFIX LV2_ROUTING_URI "#"
+#define LV2_ROUTING__connectAllOutputs LV2_ROUTING_PREFIX "connectAllOutputs"
+
+/**
+   @}
+*/
+
 /**
    @defgroup midnam MIDI Naming
 
