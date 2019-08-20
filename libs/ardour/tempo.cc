@@ -4258,6 +4258,12 @@ TempoMap::tempo_section_at_beat_locked (const Metrics& metrics, const double& be
 		}
 
 	}
+
+	if (prev_t == 0) {
+		fatal << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
 	return *prev_t;
 }
 
@@ -4435,6 +4441,12 @@ TempoMap::meter_section_at_beat_locked (const Metrics& metrics, const double& be
 		}
 
 	}
+
+	if (prev_m == 0) {
+		fatal << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
 	return *prev_m;
 }
 
