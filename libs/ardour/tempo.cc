@@ -1630,6 +1630,8 @@ TempoMap::beat_at_minute_locked (const Metrics& metrics, const double& minute) c
 		}
 	}
 
+	assert (prev_m);
+
 	const double beat = prev_m->beat() + (ts.pulse_at_minute (minute) - prev_m->pulse()) * prev_m->note_divisor();
 
 	/* audio locked meters fake their beat */
@@ -1730,6 +1732,7 @@ TempoMap::tempo_at_minute_locked (const Metrics& metrics, const double& minute) 
 		}
 	}
 
+	assert (prev_t);
 	return Tempo (prev_t->note_types_per_minute(), prev_t->note_type(), prev_t->end_note_types_per_minute());
 }
 
@@ -1783,6 +1786,7 @@ TempoMap::minute_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) co
 		}
 	}
 
+	assert (prev_t);
 	return prev_t->minute();
 }
 
@@ -1807,6 +1811,7 @@ TempoMap::tempo_at_pulse_locked (const Metrics& metrics, const double& pulse) co
 		}
 	}
 
+	assert (prev_t);
 	return Tempo (prev_t->note_types_per_minute(), prev_t->note_type(), prev_t->end_note_types_per_minute());
 }
 
@@ -1844,6 +1849,7 @@ TempoMap::pulse_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) con
 		}
 	}
 
+	assert (prev_t);
 	return prev_t->pulse();
 }
 
@@ -1945,6 +1951,8 @@ TempoMap::pulse_at_minute_locked (const Metrics& metrics, const double& minute) 
 		}
 	}
 
+	assert (prev_t);
+
 	/* treated as constant for this ts */
 	const double pulses_in_section = ((minute - prev_t->minute()) * prev_t->note_types_per_minute()) / prev_t->note_type();
 
@@ -1974,6 +1982,9 @@ TempoMap::minute_at_pulse_locked (const Metrics& metrics, const double& pulse) c
 			prev_t = t;
 		}
 	}
+
+	assert (prev_t);
+
 	/* must be treated as constant, irrespective of _type */
 	double const dtime = ((pulse - prev_t->pulse()) * prev_t->note_type()) / prev_t->note_types_per_minute();
 
@@ -2017,6 +2028,8 @@ TempoMap::beat_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time& 
 			prev_m = m;
 		}
 	}
+
+	assert (prev_m);
 
 	const double remaining_bars = bbt.bars - prev_m->bbt().bars;
 	const double remaining_bars_in_beats = remaining_bars * prev_m->divisions_per_bar();
@@ -2141,6 +2154,8 @@ TempoMap::pulse_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time&
 			prev_m = m;
 		}
 	}
+
+	assert (prev_m);
 
 	const double remaining_bars = bbt.bars - prev_m->bbt().bars;
 	const double remaining_pulses = remaining_bars * prev_m->divisions_per_bar() / prev_m->note_divisor();
@@ -2295,6 +2310,8 @@ TempoMap::bbt_at_minute_locked (const Metrics& metrics, const double& minute) co
 			prev_m = m;
 		}
 	}
+
+	assert (prev_m);
 
 	double beat = prev_m->beat() + (ts.pulse_at_minute (minute) - prev_m->pulse()) * prev_m->note_divisor();
 
@@ -3026,6 +3043,7 @@ TempoMap::solve_map_bbt (Metrics& imaginary, MeterSection* section, const BBT_Ti
 	}
 
 	if (!section_prev) {
+		assert (prev_m);
 
 		const double beats = (when.bars - prev_m->bbt().bars) * prev_m->divisions_per_bar();
 		const double pulse = (beats / prev_m->note_divisor()) + prev_m->pulse();
