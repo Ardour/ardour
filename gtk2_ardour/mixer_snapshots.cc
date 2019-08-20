@@ -158,6 +158,25 @@ void MixerSnapshotList::set_session (Session* s)
     }
 }
 
+bool MixerSnapshotList::prompt_delete(const std::string& name)
+{
+    const string prompt = string_compose(
+        _("Do you really want to overwrite snapshot \"%1\" ?\n(this cannot be undone)"),
+        name
+    );
+
+    vector<string> choices;
+    choices.push_back(_("No, do nothing."));
+    choices.push_back(_("Yes, overwrite it."));
+
+    ArdourWidgets::Choice prompter (_("Overwrite Snapshot"), prompt, choices);
+
+    if(prompter.run() == 1) {
+        return true;
+    }
+    return false;
+}
+
 void MixerSnapshotList::new_snapshot() {
     ArdourWidgets::Prompter prompter (true);
     prompter.set_name ("Prompter");
@@ -166,11 +185,19 @@ void MixerSnapshotList::new_snapshot() {
     prompter.set_initial_text (_session->name());
     prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 
-
     string name;
     if (prompter.run() == RESPONSE_ACCEPT) {
         prompter.get_result(name);
         if (name.length()) {
+
+            TreeModel::const_iterator iter = get_row_by_name(name);
+            if(iter) {
+                const string row_name = (*iter)[_columns.name];
+                if(prompt_delete(row_name)) {
+                    remove_row(iter);
+                }
+            }
+
             RouteList rl = PublicEditor::instance().get_selection().tracks.routelist();
             _session->snapshot_manager().create_snapshot(name, rl, _global);
             redisplay();
@@ -587,7 +614,13 @@ void MixerSnapshotList::new_row_from_snapshot(MixerSnapshot* snapshot)
 
     TreeModel::Row row = *(_snapshot_model->append());
 
-    row[_columns.name]     = snapshot->get_label();
+    string snapshot_name = snapshot->get_label();
+    if (snapshot_name.length() > 45) {
+        snapshot_name = snapshot_name.substr(0, 45);
+        snapshot_name.append("...");
+    }
+
+    row[_columns.name]     = snapshot_name;
     row[_columns.snapshot] = snapshot;
 
     //additional information only for global snapshots
