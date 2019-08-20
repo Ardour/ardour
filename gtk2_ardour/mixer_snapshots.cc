@@ -181,7 +181,7 @@ void MixerSnapshotList::new_snapshot() {
     ArdourWidgets::Prompter prompter (true);
     prompter.set_name ("Prompter");
     prompter.set_title (_("New Mixer Sanpshot"));
-    prompter.set_prompt (_("Sanpshot Name:"));
+    prompter.set_prompt (_("Sapashot Name:"));
     prompter.set_initial_text (_session->name());
     prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 
