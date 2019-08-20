@@ -492,15 +492,19 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	update_preset ();
 
 	add_button.set_name ("generic button");
+	add_button.set_icon (ArdourIcon::PsetAdd);
 	add_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::add_plugin_setting));
 
 	save_button.set_name ("generic button");
+	save_button.set_icon (ArdourIcon::PsetSave);
 	save_button.signal_clicked.connect(sigc::mem_fun(*this, &PlugUIBase::save_plugin_setting));
 
 	delete_button.set_name ("generic button");
+	delete_button.set_icon (ArdourIcon::PsetDelete);
 	delete_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::delete_plugin_setting));
 
 	reset_button.set_name ("generic button");
+	reset_button.set_icon (ArdourIcon::PluginReset);
 	reset_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::reset_plugin_parameters));
 
 	pin_management_button.set_name ("generic button");
@@ -510,6 +514,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	bypass_button.set_name ("plugin bypass button");
 	bypass_button.set_text (_("Bypass"));
+	//bypass_button.set_icon (ArdourIcon::PluginBypass);
 	bypass_button.set_active (!pi->enabled ());
 	bypass_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::bypass_button_release), false);
 	focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
