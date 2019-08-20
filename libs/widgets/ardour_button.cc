@@ -370,18 +370,25 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	if (_elements & (VectorIcon | IconRenderCallback)) {
 		int vw = get_width();
 		int vh = get_height();
+		cairo_save (cr);
+
 		if (_elements & Menu) {
 			vw -= _diameter + 4;
+		}
+		if (_elements & Indicator) {
+			vw -= _diameter + char_pixel_width ();
+			if (_led_left) {
+				cairo_translate (cr, _diameter + char_pixel_width (), 0);
+			}
 		}
 		if (_elements & VectorIcon) {
 			ArdourIcon::render (cr, _icon, vw, vh, active_state(), text_color);
 		} else {
-			cairo_save (cr);
 			rounded_function (cr, 0, 0, get_width(), get_height(), corner_radius + 1.5);
 			cairo_clip (cr);
 			_icon_render_cb (cr, vw, vh, text_color, _icon_render_cb_data);
-			cairo_restore (cr);
 		}
+		cairo_restore (cr);
 	}
 
 	const int text_margin = char_pixel_width();
@@ -490,7 +497,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		cairo_save (cr);
 
 		/* move to the center of the indicator/led */
-		if (_elements & Text) {
+		if (_elements & (Text | VectorIcon | IconRenderCallback)) {
 			int led_xoff = ceil(char_pixel_width() + _diameter * .5);
 			if (_led_left) {
 				cairo_translate (cr, led_xoff, get_height() * .5);
