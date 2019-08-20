@@ -193,7 +193,9 @@ StepEditor::check_step_edit ()
 		Evoral::EventType type;
 		uint32_t size;
 
-		incoming.read_prefix (&time, &type, &size);
+		if (!incoming.read_prefix (&time, &type, &size)) {
+			break;
+		}
 
 		if (size > bufsize) {
 			delete [] buf;
@@ -201,9 +203,11 @@ StepEditor::check_step_edit ()
 			buf = new uint8_t[bufsize];
 		}
 
-		incoming.read_contents (size, buf);
+		if (!incoming.read_contents (size, buf)) {
+			break;
+		}
 
-		if ((buf[0] & 0xf0) == MIDI_CMD_NOTE_ON) {
+		if ((buf[0] & 0xf0) == MIDI_CMD_NOTE_ON && size == 3) {
 			step_add_note (buf[0] & 0xf, buf[1], buf[2], Temporal::Beats());
 		}
 	}
