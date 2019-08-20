@@ -1626,6 +1626,7 @@ PluginManager::load_tags ()
 					!(*i)->get_property (X_("id"), id) ||
 					!(*i)->get_property (X_("tags"), tags) ||
 					!(*i)->get_property (X_("name"), name)) {
+				continue;
 			}
 			if (!(*i)->get_property (X_("user-set"), user_set)) {
 				user_set = false;
