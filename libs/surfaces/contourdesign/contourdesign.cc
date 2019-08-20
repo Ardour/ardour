@@ -194,10 +194,15 @@ ContourDesignControlProtocol::set_state (const XMLNode& node, int version)
 			_button_actions[i] = b;
 		} else {
 			double value;
-			child->get_property(X_("value"), value);
-
 			string s;
-			child->get_property(X_("unit"), s);
+
+			if (!child->get_property(X_("value"), value)) {
+				continue;
+			}
+			if (!child->get_property(X_("unit"), s)) {
+				continue;
+			}
+
 			JumpUnit unit;
 			if (s == X_("seconds")) {
 				unit = SECONDS;
