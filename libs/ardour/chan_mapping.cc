@@ -55,13 +55,14 @@ ChanMapping::ChanMapping (const XMLNode& node)
 	XMLNodeConstIterator iter = node.children().begin();
 	for ( ; iter != node.children().end(); ++iter) {
 		if ((*iter)->name() == X_(state_node_name)) {
-			DataType type(DataType::NIL);
+			DataType type (DataType::NIL);
 			uint32_t from;
 			uint32_t to;
-			(*iter)->get_property("type", type);
-			(*iter)->get_property("from", from);
-			(*iter)->get_property("to", to);
-			set(type, from, to);
+			if (   (*iter)->get_property ("type", type)
+			    && (*iter)->get_property ("from", from)
+			    && (*iter)->get_property ("to", to)) {
+				set(type, from, to);
+			}
 		}
 	}
 }

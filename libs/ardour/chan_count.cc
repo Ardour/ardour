@@ -38,11 +38,11 @@ ChanCount::ChanCount(const XMLNode& node)
 	XMLNodeConstIterator iter = node.children().begin();
 	for ( ; iter != node.children().end(); ++iter) {
 		if ((*iter)->name() == X_(state_node_name)) {
-			DataType type(DataType::NIL);
+			DataType type (DataType::NIL);
 			uint32_t count;
-			(*iter)->get_property("type", type);
-			(*iter)->get_property("count", count);
-			set(type, count);
+			if ((*iter)->get_property ("type", type) && (*iter)->get_property ("count", count)) {
+				set(type, count);
+			}
 		}
 	}
 }
