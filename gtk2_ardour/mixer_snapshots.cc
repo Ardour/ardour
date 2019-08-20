@@ -158,7 +158,7 @@ void MixerSnapshotList::set_session (Session* s)
     }
 }
 
-bool MixerSnapshotList::prompt_delete(const std::string& name)
+bool MixerSnapshotList::prompt_overwrite(const std::string& name)
 {
     const string prompt = string_compose(
         _("Do you really want to overwrite snapshot \"%1\" ?\n(this cannot be undone)"),
@@ -190,11 +190,14 @@ void MixerSnapshotList::new_snapshot() {
         prompter.get_result(name);
         if (name.length()) {
 
+            //prompt for overwrite
             TreeModel::const_iterator iter = get_row_by_name(name);
             if(iter) {
                 const string row_name = (*iter)[_columns.name];
-                if(prompt_delete(row_name)) {
+                if(prompt_overwrite(row_name)) {
                     remove_row(iter);
+                } else {
+                    return;
                 }
             }
 
@@ -459,27 +462,18 @@ void MixerSnapshotList::rename_snapshot(TreeModel::iterator& iter)
     if (prompter.run() == RESPONSE_ACCEPT) {
         prompter.get_result(new_name);
         if (new_name.length()) {
-            //notify the user that this is about to be overwritten
+
+            //prompt for overwrite
             TreeModel::const_iterator jter = get_row_by_name(new_name);
             if(jter) {
-                const string name = (*jter)[_columns.name];
-                const string prompt = string_compose(
-                    _("Do you really want to overwrite snapshot \"%1\" ?\n(this cannot be undone)"),
-                    name
-                );
-
-                vector<string> choices;
-                choices.push_back(_("No, do nothing."));
-                choices.push_back(_("Yes, overwrite it."));
-
-                ArdourWidgets::Choice prompter (_("Overwrite Snapshot"), prompt, choices);
-
-                if(prompter.run() == 1) {
+                const string row_name = (*iter)[_columns.name];
+                if(prompt_overwrite(row_name)) {
                     remove_row(jter);
                 } else {
                     return;
                 }
             }
+
             //remove any row with this new name (we're overwriting this)
             if(_session->snapshot_manager().rename_snapshot(snapshot, new_name)) {
                 if (new_name.length() > 45) {
