@@ -168,11 +168,11 @@ Worker::run()
 			if (buf) {
 				buf_size = size;
 			} else {
-				PBD::error << "Worker: Error allocating memory"
-				           << endmsg;
-				buf_size = 0; // TODO: This is probably fatal
+				PBD::fatal << "Worker: Error allocating memory" << endmsg;
+				abort(); /*NOTREACHED*/
 			}
 		}
+		assert (buf);
 
 		if (_requests->read((uint8_t*)buf, size) < size) {
 			PBD::error << "Worker: Error reading body from request ring"
