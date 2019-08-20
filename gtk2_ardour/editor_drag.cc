@@ -3197,6 +3197,7 @@ TrimDrag::aborted (bool movement_occurred)
 	*/
 
 	GdkEvent ev;
+	memset (&ev, 0, sizeof (GdkEvent));
 	finished (&ev, true);
 
 	if (movement_occurred) {
