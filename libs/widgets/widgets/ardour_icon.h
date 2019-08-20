@@ -56,6 +56,11 @@ namespace ArdourWidgets { namespace ArdourIcon {
 		ToolAudition,
 		ToolDraw,
 		ToolContent,
+		PsetAdd,
+		PsetSave,
+		PsetDelete,
+		PluginReset,
+		PluginBypass,
 	};
 
 	LIBWIDGETS_API bool render (cairo_t *cr,

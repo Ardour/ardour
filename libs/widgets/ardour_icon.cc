@@ -1002,6 +1002,104 @@ static void icon_din_midi (cairo_t *cr, const int width, const int height, const
 	cairo_stroke (cr);
 }
 
+/*****************************************************************************
+ * Plugin Window Buttons
+ */
+
+static void icon_plus_sign (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double xc = rint (width * .5);
+	const double yc = rint (height * .5);
+	const int wh = std::min (width, height) * .1;
+	const int ln = std::min (width, height) * .33;
+
+	cairo_rectangle (cr,
+	                 xc - wh, yc - ln,
+	                 wh * 2,  ln * 2);
+
+	cairo_rectangle (cr,
+	                 xc - ln, yc - wh,
+	                 ln * 2,  wh * 2);
+
+	VECTORICONSTROKEFILL(0.9);
+}
+
+static void icon_no_parking (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x = width * .5;
+	const double y = height * .5;
+	const double r = std::min (x, y) * .65;
+	const double rl = .7 * r;
+	cairo_arc (cr, x, y, r, 0, 2. * M_PI);
+	cairo_move_to (cr, x - rl, y - rl);
+	cairo_line_to (cr, x + rl, y + rl);
+	VECTORICONSTROKEOUTLINE(ceil (.25 * r), fg_color);
+}
+
+static void icon_save_arrow_box (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x = width * .5;
+	const double y = height * .5;
+
+	const double o0 = .5 + std::min (x, y) * .35;
+	const double ww = .5 + std::min (x, y) * .55;
+	const double hh = .5 + std::min (x, y) * .45;
+	const double ar = .5 + std::min (x, y) * .1;
+
+	/* box open at top middle */
+	cairo_move_to (cr, x - o0, y - hh);
+	cairo_line_to (cr, x - ww, y - hh);
+	cairo_line_to (cr, x - ww, y + hh);
+	cairo_line_to (cr, x + ww, y + hh);
+	cairo_line_to (cr, x + ww, y - hh);
+	cairo_line_to (cr, x + o0, y - hh);
+	VECTORICONSTROKEOUTLINE(1.2 * ar, fg_color);
+
+	/* downward arrow into the box */
+	cairo_move_to (cr, x,      y - ar);
+	cairo_line_to (cr, x - ar, y - ar);
+	cairo_line_to (cr, x,      y);
+	cairo_line_to (cr, x + ar, y - ar);
+	cairo_line_to (cr, x,      y - ar);
+	cairo_line_to (cr, x,      y - ww - ar);
+	VECTORICONSTROKEOUTLINE(1.2 * ar, fg_color);
+}
+
+static void icon_on_off (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x = width * .5;
+	const double y = height * .5;
+	const double r = std::min (x, y) * .65;
+	cairo_arc (cr, x, y, r, -.3 * M_PI, 1.3 * M_PI);
+	cairo_move_to (cr, x, y - r);
+	cairo_line_to (cr, x, y);
+	VECTORICONSTROKEOUTLINE(ceil (.25 * r), fg_color);
+}
+
+static void icon_reset_knob (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x = ceil (width * .5) - .5;
+	const double y = ceil (height * .5) - .5;
+	const double pt = std::min (x, y) * .125;
+	const double r0 = std::min (x, y) * .3;
+	const double r1 = std::min (x, y) * .7;
+	const double ar = r0;
+	const double ra = r1 * .707;
+
+	cairo_arc (cr, x, y, r0, 0, 2. * M_PI);
+	cairo_move_to (cr, x, y - r0);
+	cairo_line_to (cr, x, y);
+	VECTORICONSTROKEOUTLINE(pt, fg_color);
+
+	/* outer ring w/arrow) */
+	cairo_arc (cr, x, y, r1, -.24 * M_PI, 1.5 * M_PI);
+	cairo_move_to (cr, x + ra, y - ra);
+	cairo_rel_line_to (cr, 0, ar * 1.25);
+	cairo_move_to (cr, x + ra, y - ra);
+	cairo_rel_line_to (cr, ar, 0);
+	VECTORICONSTROKEOUTLINE(pt, fg_color);
+}
+
 
 /*****************************************************************************/
 
@@ -1099,6 +1197,21 @@ ArdourWidgets::ArdourIcon::render (cairo_t *cr,
 			break;
 		case ToolContent:
 			icon_tool_content (cr, width, height);
+			break;
+		case PsetAdd:
+			icon_plus_sign (cr, width, height, fg_color);
+			break;
+		case PsetSave:
+			icon_save_arrow_box (cr, width, height, fg_color);
+			break;
+		case PsetDelete:
+			icon_no_parking (cr, width, height, fg_color);
+			break;
+		case PluginReset:
+			icon_reset_knob (cr, width, height, fg_color);
+			break;
+		case PluginBypass:
+			icon_on_off (cr, width, height, fg_color);
 			break;
 		default:
 			rv = false;
