@@ -159,7 +159,7 @@ void MixerSnapshotList::set_session (Session* s)
         if(_global) {
             s->snapshot_manager().PromotedSnapshot.connect(connections, invalidator(*this), boost::bind(&MixerSnapshotList::add_promoted_snapshot, this, _1), gui_context());
         }
-        redisplay ();
+        redisplay();
     }
 }
 
@@ -174,11 +174,12 @@ bool MixerSnapshotList::prompt_overwrite(const std::string& name)
     choices.push_back(_("No, do nothing."));
     choices.push_back(_("Yes, overwrite it."));
 
-    ArdourWidgets::Choice prompter (_("Overwrite Snapshot"), prompt, choices);
+    Choice prompter (_("Overwrite Snapshot?"), prompt, choices);
 
     if(prompter.run() == 1) {
         return true;
     }
+
     return false;
 }
 
@@ -201,9 +202,9 @@ void MixerSnapshotList::new_snapshot() {
 
             TreeModel::const_iterator iter = get_row_by_name(name);
             if(iter) {
-                const string row_name = (*iter)[_columns.name];
                 //prompt for overwriting
-                if(prompt_overwrite(row_name)) {
+                const string name = (*iter)[_columns.name];
+                if(prompt_overwrite(name)) {
                     remove_row(iter);
                 } else {
                     return;
@@ -242,7 +243,6 @@ void MixerSnapshotList::new_snapshot_from_external() {
     _external_selector.run();
 }
 
-/* A new snapshot has been selected. */
 void MixerSnapshotList::selection_changed ()
 {
     if (_snapshot_display.get_selection()->count_selected_rows() == 0) {
@@ -398,12 +398,6 @@ void MixerSnapshotList::add_promoted_snapshot(MixerSnapshot* snapshot)
     redisplay();
 }
 
-
-/* Pop up the snapshot display context menu.
- * @param button Button used to open the menu.
- * @param time Menu open time.
- * @param snapshot_name Name of the snapshot that the menu click was over.
- */
 void MixerSnapshotList::popup_context_menu (int button, int32_t time, TreeModel::iterator& iter)
 {
     using namespace Menu_Helpers;
@@ -478,9 +472,9 @@ void MixerSnapshotList::rename_snapshot(TreeModel::const_iterator& iter)
         prompter.get_result(new_name);
         if (new_name.length()) {
 
-            //prompt for overwrite
             TreeModel::const_iterator jter = get_row_by_name(new_name);
             if(jter) {
+                //prompt for overwriting
                 const string name = (*jter)[_columns.name];
                 if(prompt_overwrite(name)) {
                     remove_row(jter);
