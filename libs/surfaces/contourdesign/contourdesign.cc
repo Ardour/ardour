@@ -271,7 +271,7 @@ get_usb_device (uint16_t vendor_id, uint16_t product_id, libusb_device** device)
 	while ((dev = devs[i++])) {
 		struct libusb_device_descriptor desc;
 		r = libusb_get_device_descriptor (dev, &desc);
-		if (r < 0) {
+		if (r != LIBUSB_SUCCESS) {
 			goto out;
 		}
 		if (desc.idVendor == vendor_id && desc.idProduct == product_id) {
@@ -282,7 +282,7 @@ get_usb_device (uint16_t vendor_id, uint16_t product_id, libusb_device** device)
 
 out:
 	libusb_free_device_list(devs, 1);
-	if (!dev && !r) {
+	if (!dev && r != LIBUSB_SUCCESS) {
 		return LIBUSB_ERROR_NO_DEVICE;
 	}
 	return r;
@@ -303,10 +303,10 @@ ContourDesignControlProtocol::acquire_device ()
 	libusb_device* dev;
 
 
-	if ((err = get_usb_device (ContourDesign, ShuttleXpress_id, &dev)) == 0) {
+	if ((err = get_usb_device (ContourDesign, ShuttleXpress_id, &dev)) == LIBUSB_SUCCESS) {
 		_device_type = ShuttleXpress;
 	}
-	else if ((err = get_usb_device (ContourDesign, ShuttlePRO_id, &dev)) == 0) {
+	else if ((err = get_usb_device (ContourDesign, ShuttlePRO_id, &dev)) == LIBUSB_SUCCESS) {
 		_device_type = ShuttlePRO;
 	} else {
 		_device_type = None;
@@ -314,13 +314,13 @@ ContourDesignControlProtocol::acquire_device ()
 	}
 
 	err = libusb_open (dev, &_dev_handle);
-	if (err < 0) {
+	if (err != LIBUSB_SUCCESS) {
 		return err;
 	}
 
 	libusb_set_auto_detach_kernel_driver (_dev_handle, true);
 
-	if ((err = libusb_claim_interface (_dev_handle, 0x00))) {
+	if ((err = libusb_claim_interface (_dev_handle, 0x00)) != LIBUSB_SUCCESS) {
 		DEBUG_TRACE (DEBUG::ContourDesignControl, "failed to claim USB device\n");
 		goto usb_close;
 	}
@@ -337,7 +337,7 @@ ContourDesignControlProtocol::acquire_device ()
 
 	DEBUG_TRACE (DEBUG::ContourDesignControl, "callback installed\n");
 
-	if ((err = libusb_submit_transfer (_usb_transfer))) {
+	if ((err = libusb_submit_transfer (_usb_transfer)) != LIBUSB_SUCCESS) {
 		DEBUG_TRACE (DEBUG::ContourDesignControl, string_compose ("failed to submit tansfer: %1\n", err));
 		goto free_transfer;
 	}
@@ -375,7 +375,7 @@ ContourDesignControlProtocol::start ()
 	_supposed_to_quit = false;
 
 	_error = acquire_device();
-	if (_error) {
+	if (_error != LIBUSB_SUCCESS) {
 		return;
 	}
 
