@@ -229,6 +229,7 @@ void MixerSnapshotList::choose_external_dialog_response(int response)
     const string external = _external_selector.get_filename();
     const string name = basename_nosuffix(external);
     _session->snapshot_manager().create_snapshot(name, external, _global);
+
     redisplay();
 }
 
@@ -236,6 +237,7 @@ void MixerSnapshotList::new_snapshot_from_external() {
     if(!_session) {
         return;
     }
+
     _external_selector.set_current_folder(Glib::path_get_dirname(_session->path()));
     _external_selector.run();
 }
@@ -265,7 +267,6 @@ bool MixerSnapshotList::button_press (GdkEventButton* ev)
 
         if (iter) {
             popup_context_menu(ev->button, ev->time, iter);
-            return true;
         }
         return true;
     }
@@ -412,9 +413,11 @@ void MixerSnapshotList::popup_context_menu (int button, int32_t time, TreeModel:
 
     add_item_with_sensitivity(items, MenuElem(_("Remove"), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotList::remove_snapshot), iter)), true);
     add_item_with_sensitivity (items, MenuElem(_("Rename..."), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotList::rename_snapshot), iter)), true);
+
     if(!_global) {
         add_item_with_sensitivity (items, MenuElem (_("Promote To Mixer Template"), sigc::bind(sigc::mem_fun(*this, &MixerSnapshotList::promote_snapshot), iter)), true);
     }
+
     _menu.popup (button, time);
 }
 
