@@ -195,8 +195,8 @@ void MixerSnapshotList::new_snapshot() {
     prompt.set_initial_text (_session->name());
     prompt.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 
-    string name;
     if (prompt.run() == RESPONSE_ACCEPT) {
+        string name;
         prompt.get_result(name);
         if (name.length()) {
 
@@ -458,7 +458,8 @@ void MixerSnapshotList::rename_snapshot(TreeModel::const_iterator& iter)
         return;
     }
 
-    const string name =  (*iter)[_columns.name];
+    MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
+    const string name =  snapshot->get_label();
 
     Prompter prompter (true);
     prompter.set_name("RenamePrompter");
@@ -467,8 +468,8 @@ void MixerSnapshotList::rename_snapshot(TreeModel::const_iterator& iter)
     prompter.set_initial_text(name);
     prompter.add_button(Stock::SAVE, RESPONSE_ACCEPT);
 
-    string new_name;
     if (prompter.run() == RESPONSE_ACCEPT) {
+        string new_name;
         prompter.get_result(new_name);
         if (new_name.length()) {
 
@@ -486,7 +487,6 @@ void MixerSnapshotList::rename_snapshot(TreeModel::const_iterator& iter)
                 }
             }
 
-            MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
             if(_session->snapshot_manager().rename_snapshot(snapshot, new_name)) {
                 if (new_name.length() > 45) {
                     new_name = new_name.substr(0, 45);
@@ -568,8 +568,8 @@ TreeModel::const_iterator MixerSnapshotList::get_row_by_name(const std::string& 
     TreeModel::const_iterator iter;
     TreeModel::Children rows = _snapshot_model->children();
     for(iter = rows.begin(); iter != rows.end(); iter++) {
-        const string row_name = (*iter)[_columns.name];
-        if(row_name == name) {
+        MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
+        if(snapshot->get_label() == name) {
             break;
         }
     }
