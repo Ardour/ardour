@@ -24,7 +24,6 @@
 #include <glibmm.h>
 #include <glibmm/datetime.h>
 
-#include <gtkmm/filechooserdialog.h>
 #include <gtkmm/liststore.h>
 
 #include "ardour/directory_names.h"
@@ -71,6 +70,7 @@ MixerSnapshotList::MixerSnapshotList (bool global)
     , _window_packer(new VBox())
     , _button_packer(new HBox())
     , _bug_user(true)
+    , _external_selector(_("New Snapshot from Session, Template or Other:"), FILE_CHOOSER_ACTION_OPEN)
     , _global(global)
 {
     _snapshot_model = ListStore::create (_columns);
@@ -84,7 +84,7 @@ MixerSnapshotList::MixerSnapshotList (bool global)
     _scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
     add_template_button.signal_clicked().connect(sigc::mem_fun(*this, &MixerSnapshotList::new_snapshot));
-    add_session_template_button.signal_clicked().connect(sigc::mem_fun(*this, &MixerSnapshotList::new_snapshot_from_session));
+    add_session_template_button.signal_clicked().connect(sigc::mem_fun(*this, &MixerSnapshotList::new_snapshot_from_external));
 
     if(_global) {
         bootstrap_display_and_model();
@@ -96,8 +96,13 @@ MixerSnapshotList::MixerSnapshotList (bool global)
         _window_packer->pack_start(*_button_packer, false, true);
     }
 
+    _external_selector.add_button(Stock::CANCEL, RESPONSE_CANCEL);
+    _external_selector.add_button(Stock::OPEN, RESPONSE_ACCEPT);
+
     _snapshot_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &MixerSnapshotList::selection_changed));
     _snapshot_display.signal_button_press_event().connect (sigc::mem_fun (*this, &MixerSnapshotList::button_press), false);
+    _external_selector.signal_response().connect(sigc::mem_fun(*this, &MixerSnapshotList::choose_external_dialog_response));
+
 }
 
 void MixerSnapshotList::bootstrap_display_and_model()
@@ -139,7 +144,7 @@ void MixerSnapshotList::bootstrap_display_and_model()
         column->set_expand(false);
         column->set_alignment(info.al);
 
-        //...and this sets the alignment for the data cells
+        //this sets the alignment for the data cells
         CellRendererText* rend = dynamic_cast<CellRendererText*>(display.get_column_cell_renderer(info.index));
         if (rend) {
             rend->property_xalign() = (info.al == ALIGN_RIGHT ? 1.0 : (info.al == ALIGN_LEFT ? 0.0 : 0.5));
@@ -151,10 +156,10 @@ void MixerSnapshotList::set_session (Session* s)
 {
     if(s) {
         SessionHandlePtr::set_session(s);
-        redisplay ();
         if(_global) {
             s->snapshot_manager().PromotedSnapshot.connect(connections, invalidator(*this), boost::bind(&MixerSnapshotList::add_promoted_snapshot, this, _1), gui_context());
         }
+        redisplay ();
     }
 }
 
@@ -178,22 +183,26 @@ bool MixerSnapshotList::prompt_overwrite(const std::string& name)
 }
 
 void MixerSnapshotList::new_snapshot() {
-    ArdourWidgets::Prompter prompter (true);
-    prompter.set_name ("Prompter");
-    prompter.set_title (_("New Mixer Sanpshot"));
-    prompter.set_prompt (_("Sapashot Name:"));
-    prompter.set_initial_text (_session->name());
-    prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+    if(!_session) {
+        return;
+    }
+
+    Prompter prompt (true);
+    prompt.set_name ("Prompter");
+    prompt.set_title (_("New Mixer Sanpshot"));
+    prompt.set_prompt (_("Sapashot Name:"));
+    prompt.set_initial_text (_session->name());
+    prompt.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 
     string name;
-    if (prompter.run() == RESPONSE_ACCEPT) {
-        prompter.get_result(name);
+    if (prompt.run() == RESPONSE_ACCEPT) {
+        prompt.get_result(name);
         if (name.length()) {
 
-            //prompt for overwrite
             TreeModel::const_iterator iter = get_row_by_name(name);
             if(iter) {
                 const string row_name = (*iter)[_columns.name];
+                //prompt for overwriting
                 if(prompt_overwrite(row_name)) {
                     remove_row(iter);
                 } else {
@@ -201,6 +210,7 @@ void MixerSnapshotList::new_snapshot() {
                 }
             }
 
+            //actually create the snapshot
             RouteList rl = PublicEditor::instance().get_selection().tracks.routelist();
             _session->snapshot_manager().create_snapshot(name, rl, _global);
             redisplay();
@@ -208,24 +218,26 @@ void MixerSnapshotList::new_snapshot() {
     }
 }
 
-void MixerSnapshotList::new_snapshot_from_session() {
-    FileChooserDialog session_selector(_("New Snapshot from Session, Template or Other:"), FILE_CHOOSER_ACTION_OPEN);
-
-    session_selector.add_button(Stock::CANCEL, RESPONSE_CANCEL);
-    session_selector.add_button(Stock::OPEN, RESPONSE_ACCEPT);
-    session_selector.set_current_folder(Glib::path_get_dirname(_session->path()));
-
-    int response = session_selector.run();
-    session_selector.hide();
+void MixerSnapshotList::choose_external_dialog_response(int response)
+{
+    _external_selector.hide();
 
     if (response != RESPONSE_ACCEPT) {
         return;
     }
 
-    string session_path = session_selector.get_filename();
-    string name = basename_nosuffix(session_path);
-    _session->snapshot_manager().create_snapshot(name, session_path, _global);
+    const string external = _external_selector.get_filename();
+    const string name = basename_nosuffix(external);
+    _session->snapshot_manager().create_snapshot(name, external, _global);
     redisplay();
+}
+
+void MixerSnapshotList::new_snapshot_from_external() {
+    if(!_session) {
+        return;
+    }
+    _external_selector.set_current_folder(Glib::path_get_dirname(_session->path()));
+    _external_selector.run();
 }
 
 /* A new snapshot has been selected. */

@@ -21,12 +21,13 @@
 
 #include <ctime>
 
+#include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/widget.h>
+#include <gtkmm/filechooserdialog.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
-#include <gtkmm/box.h>
+#include <gtkmm/widget.h>
 
 #include <sigc++/trackable.h>
 
@@ -54,7 +55,7 @@ public:
     }
 
     void new_snapshot();
-    void new_snapshot_from_session();
+    void new_snapshot_from_external();
     void new_row_from_snapshot(ARDOUR::MixerSnapshot*);
 
     void redisplay ();
@@ -95,6 +96,8 @@ private:
     Gtk::Button add_template_button;
     Gtk::Button add_session_template_button;
 
+    Gtk::FileChooserDialog _external_selector;
+
     void bootstrap_display_and_model();
 
     bool _bug_user;
@@ -112,6 +115,7 @@ private:
     bool remove_row(Gtk::TreeModel::const_iterator&);
     void add_promoted_snapshot(ARDOUR::MixerSnapshot*);
     bool prompt_overwrite(const std::string&);
+    void choose_external_dialog_response(int);
 };
 
 #endif // __gtk_ardour_mixer_snapshots_h__
