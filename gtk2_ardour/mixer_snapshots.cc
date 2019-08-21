@@ -421,18 +421,21 @@ void MixerSnapshotList::popup_context_menu (int button, int32_t time, TreeModel:
     _menu.popup (button, time);
 }
 
-void MixerSnapshotList::remove_snapshot(TreeModel::iterator& iter)
+void MixerSnapshotList::remove_snapshot(TreeModel::const_iterator& iter)
 {
-    MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
+    if(!iter) {
+        return;
+    }
+
+    const string name = (*iter)[_columns.name];
+    const string prompt = string_compose(_("Do you really want to remove snapshot \"%1\" ?\n(this cannot be undone)"), name);
+
     vector<string> choices;
-
-    std::string prompt = string_compose(_("Do you really want to remove snapshot \"%1\" ?\n(this cannot be undone)"), snapshot->get_label());
-
     choices.push_back(_("No, do nothing."));
     choices.push_back(_("Yes, remove it."));
     choices.push_back(_("Yes, and don't ask again."));
 
-    ArdourWidgets::Choice prompter (_("Remove snapshot"), prompt, choices);
+    Choice prompter (_("Remove snapshot"), prompt, choices);
 
     if(_bug_user) {
         switch(prompter.run()) {
@@ -440,40 +443,37 @@ void MixerSnapshotList::remove_snapshot(TreeModel::iterator& iter)
                 break;
             case 1:
                 //remove
-                if(_session->snapshot_manager().remove_snapshot(snapshot)) {
-                    _snapshot_model->erase((*iter));
-                }
+                remove_row(iter);
                 break;
             case 2:
                 //remove and switch bug_user
-                if(_session->snapshot_manager().remove_snapshot(snapshot)) {
-                    _snapshot_model->erase((*iter));
-                    _bug_user = false;
-                }
+                remove_row(iter);
+                _bug_user = false;
                 break;
             default:
                 break;
         }
     } else {
-        if(_session->snapshot_manager().remove_snapshot(snapshot)) {
-            _snapshot_model->erase((*iter));
-        }
+        remove_row(iter);
     }
 }
 
-void MixerSnapshotList::rename_snapshot(TreeModel::iterator& iter)
+void MixerSnapshotList::rename_snapshot(TreeModel::const_iterator& iter)
 {
-    MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
-    ArdourWidgets::Prompter prompter(true);
+    if(!iter) {
+        return;
+    }
+
+    const string name =  (*iter)[_columns.name];
+
+    Prompter prompter (true);
+    prompter.set_name("RenamePrompter");
+    prompter.set_title(_("Rename Snapshot"));
+    prompter.set_prompt(_("New name of snapshot:"));
+    prompter.set_initial_text(name);
+    prompter.add_button(Stock::SAVE, RESPONSE_ACCEPT);
 
     string new_name;
-
-    prompter.set_name("Prompter");
-    prompter.set_title(_("Rename Snapshot"));
-    prompter.add_button(Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
-    prompter.set_prompt(_("New name of snapshot"));
-    prompter.set_initial_text(snapshot->get_label());
-
     if (prompter.run() == RESPONSE_ACCEPT) {
         prompter.get_result(new_name);
         if (new_name.length()) {
@@ -481,15 +481,15 @@ void MixerSnapshotList::rename_snapshot(TreeModel::iterator& iter)
             //prompt for overwrite
             TreeModel::const_iterator jter = get_row_by_name(new_name);
             if(jter) {
-                const string row_name = (*iter)[_columns.name];
-                if(prompt_overwrite(row_name)) {
+                const string name = (*jter)[_columns.name];
+                if(prompt_overwrite(name)) {
                     remove_row(jter);
                 } else {
                     return;
                 }
             }
 
-            //remove any row with this new name (we're overwriting this)
+            MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
             if(_session->snapshot_manager().rename_snapshot(snapshot, new_name)) {
                 if (new_name.length() > 45) {
                     new_name = new_name.substr(0, 45);
