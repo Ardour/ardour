@@ -1002,6 +1002,8 @@ LaunchControlXL::filter_stripables(StripableList& strips) const
 	FilterFunction flt;
 
 	switch ((int)template_number()) {
+		default:
+			/* FALLTHROUGH */
 		case 8:
 			flt = &flt_default;
 			break;
