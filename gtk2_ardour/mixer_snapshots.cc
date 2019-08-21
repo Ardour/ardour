@@ -474,12 +474,15 @@ void MixerSnapshotList::rename_snapshot(TreeModel::const_iterator& iter)
 
             TreeModel::const_iterator jter = get_row_by_name(new_name);
             if(jter) {
-                //prompt for overwriting
-                const string name = (*jter)[_columns.name];
-                if(prompt_overwrite(name)) {
-                    remove_row(jter);
-                } else {
-                    return;
+                //check that we aren't destroying ourselves
+                if(iter != jter) {
+                    //prompt for overwriting
+                    const string name = (*jter)[_columns.name];
+                    if(prompt_overwrite(name)) {
+                        remove_row(jter);
+                    } else {
+                        return;
+                    }
                 }
             }
 
