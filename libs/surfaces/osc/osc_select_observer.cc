@@ -690,11 +690,11 @@ OSCSelectObserver::group_sharing (RouteGroup *rgc)
 	_group_sharing[15] = 1;
 	boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
 	string new_name = "none";
-	RouteGroup *rg;
+	RouteGroup* rg = NULL;
 	if (rt) {
 		rg = rt->route_group();
 	}
-	if (rg && rt) {
+	if (rg) {
 		new_name = rg->name();
 		_osc.text_message (X_("/select/group"), new_name, addr);
 		_osc.send_group_list (addr);
