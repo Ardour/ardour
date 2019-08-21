@@ -260,7 +260,7 @@ get_usb_device (uint16_t vendor_id, uint16_t product_id, libusb_device** device)
 	struct libusb_device **devs;
 	struct libusb_device *dev;
 	size_t i = 0;
-	int r;
+	int r = LIBUSB_ERROR_NO_DEVICE;
 
 	*device = 0;
 
