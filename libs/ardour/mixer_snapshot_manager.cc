@@ -197,7 +197,7 @@ MixerSnapshot* MixerSnapshotManager::get_snapshot_by_name(const string& name, bo
     }
 }
 
-void MixerSnapshotManager::create_snapshot(std::string const& label, RouteList& rl, bool global)
+void MixerSnapshotManager::create_snapshot(const string& label, RouteList& rl, bool global)
 {
     ensure_snapshot_dir(global);
     const string path = global ? _global_path : _local_path;
@@ -236,7 +236,7 @@ void MixerSnapshotManager::create_snapshot(std::string const& label, RouteList& 
     snapshots_list.insert(snapshot);
 }
 
-void MixerSnapshotManager::create_snapshot(std::string const& label, std::string const& from_path, bool global)
+void MixerSnapshotManager::create_snapshot(const string& label, const string& from_path, bool global)
 {
     ensure_snapshot_dir(global);
     const string path = global ? _global_path : _local_path;
