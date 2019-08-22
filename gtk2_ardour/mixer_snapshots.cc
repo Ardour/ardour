@@ -229,6 +229,18 @@ void MixerSnapshotList::choose_external_dialog_response(int response)
 
     const string external = _external_selector.get_filename();
     const string name = basename_nosuffix(external);
+
+    TreeModel::const_iterator iter = get_row_by_name(name);
+    if(iter) {
+        //prompt for overwriting
+        const string name = (*iter)[_columns.name];
+        if(prompt_overwrite(name)) {
+            remove_row(iter);
+        } else {
+            return;
+        }
+    }
+
     _session->snapshot_manager().create_snapshot(name, external, _global);
 
     redisplay();
