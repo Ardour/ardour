@@ -211,6 +211,12 @@ void MixerSnapshotManager::create_snapshot(std::string const& label, RouteList& 
         snapshot->snap();
     }
 
+    //is this even possible? either way, sanity check
+    if(snapshot->empty()) {
+        delete snapshot;
+        return;
+    }
+
     snapshot->set_label(label);
     snapshot->write(path);
 
@@ -235,6 +241,13 @@ void MixerSnapshotManager::create_snapshot(std::string const& label, std::string
     ensure_snapshot_dir(global);
     const string path = global ? _global_path : _local_path;
     MixerSnapshot* snapshot = new MixerSnapshot(_session, from_path);
+
+    //clearly from_path doesn't point to a parsable state file
+    if(snapshot->empty()) {
+        delete snapshot;
+        return;
+    }
+
     snapshot->set_label(label);
     snapshot->write(path);
 
