@@ -4534,10 +4534,10 @@ Route::nth_send (uint32_t n) const
 	for (i = _processors.begin(); i != _processors.end(); ++i) {
 		if (boost::dynamic_pointer_cast<Send> (*i)) {
 
-			if ((*i)->name().find (_("Monitor")) == 0) {
+			if ((*i) == _monitor_send) {
 				/* send to monitor section is not considered
-				   to be an accessible send.
-				*/
+				 * to be an accessible send.
+				 */
 				continue;
 			}
 
