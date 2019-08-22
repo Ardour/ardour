@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis
+    Copyright (C) 2018-2019 Len Ovens
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -72,6 +72,38 @@ class MotionController;
 class RouteGroupMenu;
 class ArdourWindow;
 
+class FoldbackSend : public Gtk::VBox
+{
+public:
+	FoldbackSend (boost::shared_ptr<ARDOUR::Send>, \
+		boost::shared_ptr<ARDOUR::Route> sr, boost::shared_ptr<ARDOUR::Route> fr);
+	~FoldbackSend ();
+
+private:
+	ArdourWidgets::ArdourButton _button;
+	boost::shared_ptr<ARDOUR::Send> _send;
+	boost::shared_ptr<ARDOUR::Route> _send_route;
+	boost::shared_ptr<ARDOUR::Route> _foldback_route;
+	boost::shared_ptr<ARDOUR::Processor> _send_proc;
+	boost::shared_ptr<ARDOUR::Delivery> _send_del;
+
+	void led_clicked(GdkEventButton *);
+	void send_state_changed ();
+	void level_adjusted ();
+	void level_changed ();
+	void set_tooltip ();
+	ArdourWidgets::ArdourKnob   pan_control;
+	Gtk::Adjustment _adjustment;
+	ArdourWidgets::HSliderController _slider;
+	bool _ignore_ui_adjustment;
+	Gtkmm2ext::PersistentTooltip _slider_persistant_tooltip;
+
+	PBD::ScopedConnectionList _connections;
+
+
+
+};
+
 class FoldbackStrip : public AxisView, public RouteUI, public Gtk::EventBox
 {
 public:
@@ -140,7 +172,6 @@ protected:
 
 private:
 	Mixer_UI& _mixer;
-
 	void init ();
 
 	bool  _embedded;
@@ -150,8 +181,9 @@ private:
 	void*  _width_owner;
 	ARDOUR::Session* _session;
 
-	Gtk::EventBox               spacer;
+	Gtk::EventBox		spacer;
 	Gtk::VBox			send_display;
+	Gtk::ScrolledWindow	send_scroller;
 
 	Gtk::Frame          global_frame;
 	Gtk::VBox           global_vpacker;
@@ -159,8 +191,6 @@ private:
 	ProcessorBox* insert_box;
 	ProcessorSelection _pr_selection;
 	PannerUI     panners;
-
-	Glib::RefPtr<Gtk::SizeGroup> button_size_group;
 
 	Gtk::Table mute_solo_table;
 	Gtk::Table bottom_button_table;
@@ -206,6 +236,10 @@ private:
 	void update_fb_level_control ();
 
 	void update_output_display ();
+	void update_send_box ();
+	void update_send_box_2 (ARDOUR::IOProcessor*,uint32_t);
+	void processors_changed (ARDOUR::RouteProcessorChange);
+	void clear_send_box ();
 
 	void set_automated_controls_sensitivity (bool yn);
 
@@ -260,6 +294,8 @@ private:
 	void add_output_port (ARDOUR::DataType);
 
 	bool _suspend_menu_callbacks;
+	PBD::ScopedConnectionList _connections;
+
 };
 
 #endif /* __ardour_foldback_strip__ */
