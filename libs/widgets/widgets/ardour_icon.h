@@ -61,6 +61,10 @@ namespace ArdourWidgets { namespace ArdourIcon {
 		PsetDelete,
 		PluginReset,
 		PluginBypass,
+		PluginPinout,
+		Config,
+		ConfigReset,
+		PowerOnOff,
 	};
 
 	LIBWIDGETS_API bool render (cairo_t *cr,

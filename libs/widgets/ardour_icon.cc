@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2018 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2017-2019 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1076,30 +1076,131 @@ static void icon_on_off (cairo_t *cr, const int width, const int height, const u
 	VECTORICONSTROKEOUTLINE(ceil (.25 * r), fg_color);
 }
 
+static void icon_bypass (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x = width * .5;
+	const double y = height * .5;
+	const double y0 = height * .6;
+	const double r = std::min (x, y) * .75;
+	const double o = std::min (x, y) * .275;
+	const double ar = std::min (x, y) * .15;
+	const double pt = std::min (x, y) * .125;
+
+	const double dashes[] = { 1, pt };
+	cairo_set_dash (cr, dashes, 2, 0);
+	cairo_move_to (cr, x - r, y0);
+	cairo_line_to (cr, x + r, y0);
+	VECTORICONSTROKEOUTLINE(pt * .8, fg_color);
+	cairo_set_dash (cr, 0, 0, 0);
+
+	cairo_move_to (cr, x - o, y0 - o);
+	cairo_line_to (cr, x + o, y0 + o);
+	cairo_move_to (cr, x + o, y0 - o);
+	cairo_line_to (cr, x - o, y0 + o);
+	VECTORICONSTROKEOUTLINE(pt * .8, fg_color);
+
+	cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
+	cairo_arc (cr, x, y0, r, 0, 0);
+	cairo_arc (cr, x, y0, r *.8, 1.92 * M_PI, 1.92 * M_PI);
+	cairo_arc (cr, x, y0, r * 1.17, 1.92 * M_PI, 1.92 * M_PI);
+	cairo_close_path (cr);
+	cairo_arc_negative (cr, x, y0, r, 0, M_PI);
+	VECTORICONSTROKEOUTLINE(pt, fg_color);
+}
+
+
 static void icon_reset_knob (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
 {
-	const double x = ceil (width * .5) - .5;
-	const double y = ceil (height * .5) - .5;
-	const double pt = std::min (x, y) * .125;
+	const double x = width * .5;
+	const double y = height * .5;
 	const double r0 = std::min (x, y) * .3;
 	const double r1 = std::min (x, y) * .7;
-	const double ar = r0;
-	const double ra = r1 * .707;
+	const double ar = std::min (x, y) * .25;
+	const double pt = std::min (x, y) * .125;
 
 	cairo_arc (cr, x, y, r0, 0, 2. * M_PI);
 	cairo_move_to (cr, x, y - r0);
 	cairo_line_to (cr, x, y);
 	VECTORICONSTROKEOUTLINE(pt, fg_color);
 
-	/* outer ring w/arrow) */
-	cairo_arc (cr, x, y, r1, -.24 * M_PI, 1.5 * M_PI);
-	cairo_move_to (cr, x + ra, y - ra);
-	cairo_rel_line_to (cr, 0, ar * 1.25);
-	cairo_move_to (cr, x + ra, y - ra);
-	cairo_rel_line_to (cr, ar, 0);
+	/* outer ring w/CCW arrow */
+	cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
+	cairo_arc (cr, x, y, r1, -.25 * M_PI, -.25 * M_PI);
+	cairo_rel_line_to (cr, 0, ar);
+	cairo_rel_line_to (cr, ar, -ar);
+	cairo_arc (cr, x, y, r1, -.25 * M_PI, -.25 * M_PI);
+	cairo_arc (cr, x, y, r1, -.25 * M_PI, 1.50 * M_PI);
 	VECTORICONSTROKEOUTLINE(pt, fg_color);
 }
 
+static void icon_config_wheel (cairo_t *cr, const int width, const int height, const uint32_t fg_color, int arrow)
+{
+	const double x = width * .5;
+	const double y = height * .5;
+	const double r0 = std::min (x, y) * .3;
+	const double r1 = std::min (x, y) * .60;
+	const double r2 = std::min (x, y) * .75;
+	const double ar = std::min (x, y) * .25;
+	const double pt = std::min (x, y) * .125;
+
+
+	for (int i = 0; i < 8; ++i) {
+		double ang0 = i * 2.0 * M_PI / 8.0;
+		double ang1 = (i + 1) * 2.0 * M_PI / 8.0;
+		double angm = 2.0 * M_PI / 48.0;
+		double angd = 2.0 * M_PI / 64.0;
+
+		cairo_arc (cr, x, y, r2, ang0 - angm, ang0 + angm);
+		cairo_arc (cr, x, y, r1, ang0 + angm + angd, ang1 - angm - angd);
+	}
+	cairo_close_path (cr);
+	VECTORICONSTROKEOUTLINE(pt, fg_color);
+
+	cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
+	if (arrow == 0) {
+		cairo_arc (cr, x, y, r0, 0, 2.0 * M_PI);
+	} else if (arrow > 0) {
+		/* clockwise pointing arrow */
+		cairo_arc (cr, x, y, r0, 1.9 * M_PI, 1.9 * M_PI);
+		cairo_rel_line_to (cr, 0, -ar);
+		cairo_rel_line_to (cr, -ar, ar);
+		cairo_arc (cr, x, y, r0, 1.9 * M_PI, 1.9 * M_PI);
+		cairo_arc_negative (cr, x, y, r0, 1.9 * M_PI, .5 * M_PI);
+	} else {
+		/* counterclockwise arrow */
+		cairo_arc (cr, x, y, r0, 1.1 * M_PI, 1.1 * M_PI);
+		cairo_rel_line_to (cr, 0, -ar);
+		cairo_rel_line_to (cr, ar, ar);
+		cairo_arc (cr, x, y, r0, 1.1 * M_PI, 1.1 * M_PI);
+		cairo_arc (cr, x, y, r0, 1.1 * M_PI, .5 * M_PI);
+	}
+	VECTORICONSTROKEOUTLINE(pt, fg_color);
+}
+
+static void icon_pcb_via (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x = ceil (width * .5) - .5;
+	const double y = ceil (height * .5) - .5;
+
+	const double d = rint (std::min (x, y) * .5);
+	const double r = std::min (x, y) * .15;
+	const double p = std::min (x, y) * .1;
+	const double o = std::min (x, y) * .4;
+
+	cairo_arc_negative (cr, x+d, y+d, r,        1.15 * M_PI, -.85 * M_PI);
+	cairo_arc          (cr, x+d, y+d, d * 1.12, 1.15 * M_PI, 1.15 * M_PI);
+
+	cairo_arc          (cr, x-d, y-d, d * 1.12, 0.15 * M_PI, .15 * M_PI);
+	cairo_arc          (cr, x-d, y-d, r,        0.15 * M_PI, 2.5 * M_PI);
+
+	cairo_arc          (cr, x-d, y-d, r,          .5 * M_PI,  .5 * M_PI);
+	cairo_arc          (cr, x-d, y+d, r,         -.5 * M_PI, 1.5 * M_PI);
+	VECTORICONSTROKEOUTLINE(p, fg_color);
+
+	cairo_arc (cr, x+d, y-d, o, -.5 * M_PI, -.5 * M_PI);
+	cairo_arc (cr, x+d, y-d, r, -.5 * M_PI, 1.5 * M_PI);
+	VECTORICONSTROKEOUTLINE(p, fg_color);
+}
 
 /*****************************************************************************/
 
@@ -1211,6 +1312,18 @@ ArdourWidgets::ArdourIcon::render (cairo_t *cr,
 			icon_reset_knob (cr, width, height, fg_color);
 			break;
 		case PluginBypass:
+			icon_bypass (cr, width, height, fg_color);
+			break;
+		case PluginPinout:
+			icon_pcb_via (cr, width, height, fg_color);
+			break;
+		case Config: /* unused */
+			icon_config_wheel (cr, width, height, fg_color, 0);
+			break;
+		case ConfigReset: /* unused */
+			icon_config_wheel (cr, width, height, fg_color, -1);
+			break;
+		case PowerOnOff: /* unused */
 			icon_on_off (cr, width, height, fg_color);
 			break;
 		default:
