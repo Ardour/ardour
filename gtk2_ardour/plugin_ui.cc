@@ -508,13 +508,14 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	reset_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::reset_plugin_parameters));
 
 	pin_management_button.set_name ("generic button");
+	pin_management_button.set_icon (ArdourIcon::PluginPinout);
 	pin_management_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::manage_pins));
 
 	insert->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&PlugUIBase::processor_active_changed, this,  boost::weak_ptr<Processor>(insert)), gui_context());
 
 	bypass_button.set_name ("plugin bypass button");
 	bypass_button.set_text (_("Bypass"));
-	//bypass_button.set_icon (ArdourIcon::PluginBypass);
+	bypass_button.set_icon (ArdourIcon::PluginBypass);
 	bypass_button.set_active (!pi->enabled ());
 	bypass_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::bypass_button_release), false);
 	focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
