@@ -53,6 +53,8 @@
 #include "ardour/file_source.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/fluid_synth.h"
+#include "ardour/internal_send.h"
+#include "ardour/internal_return.h"
 #include "ardour/interthread_info.h"
 #include "ardour/ltc_file_reader.h"
 #include "ardour/lua_api.h"
