@@ -1578,13 +1578,12 @@ Editor::region_selection_changed ()
 	sensitize_the_right_region_actions (false);
 
 	/* propagate into backend */
+	assert (_session);
 
-	if (_session) {
-		if (!selection->regions.empty()) {
-			_session->set_object_selection (selection->regions.start(), selection->regions.end_sample());
-		} else {
-			_session->clear_object_selection ();
-		}
+	if (!selection->regions.empty()) {
+		_session->set_object_selection (selection->regions.start(), selection->regions.end_sample());
+	} else {
+		_session->clear_object_selection ();
 	}
 
 	if (_session->solo_selection_active()) {
