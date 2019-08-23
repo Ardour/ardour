@@ -1083,7 +1083,6 @@ static void icon_bypass (cairo_t *cr, const int width, const int height, const u
 	const double y0 = height * .6;
 	const double r = std::min (x, y) * .75;
 	const double o = std::min (x, y) * .275;
-	const double ar = std::min (x, y) * .15;
 	const double pt = std::min (x, y) * .125;
 
 	const double dashes[] = { 1, pt };
@@ -1326,7 +1325,7 @@ ArdourWidgets::ArdourIcon::render (cairo_t *cr,
 		case PowerOnOff: /* unused */
 			icon_on_off (cr, width, height, fg_color);
 			break;
-		default:
+		case NoIcon:
 			rv = false;
 			break;
 	}
