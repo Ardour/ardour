@@ -2726,6 +2726,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 						}
 						++m;
 					} else {
+						assert (metric);
 						tmetric.set_metric(metric);
 						Timecode::BBT_Time bbt;
 						bbt = tmap.bbt_at_sample (metric->sample());

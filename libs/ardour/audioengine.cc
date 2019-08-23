@@ -356,6 +356,7 @@ AudioEngine::process_callback (pframes_t nframes)
 			*/
 
 			if (session_removal_countdown <= nframes) {
+				assert (_session);
 				_session->midi_panic ();
 			}
 
