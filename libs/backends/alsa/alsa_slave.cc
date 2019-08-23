@@ -451,7 +451,7 @@ AlsaAudioSlave::cycle_end ()
 	_src_play.inp_count = _samples_per_period;
 	_src_play.inp_data  = _play_buff;
 
-	while (_src_play.inp_count && _active) {
+	while (_src_play.inp_count && _active && nchn > 0) {
 		unsigned int n;
 		PBD::RingBuffer<float>::rw_vector vec;
 		_rb_playback.get_write_vector (&vec);
