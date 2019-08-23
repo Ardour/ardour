@@ -1197,6 +1197,8 @@ LuaBindings::common (lua_State* L)
 		.addCast<Readable> ("to_readable")
 		.addCast<MidiRegion> ("to_midiregion")
 		.addCast<AudioRegion> ("to_audioregion")
+
+		.addFunction ("set_name", &Region::set_name)
 		/* properties */
 		.addFunction ("position", &Region::position)
 		.addFunction ("start", &Region::start)
