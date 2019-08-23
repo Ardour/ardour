@@ -579,7 +579,7 @@ Graph::plot (std::string const& file_name) const
 			boost::shared_ptr<Route> dr = boost::dynamic_pointer_cast<Route> (*ai);
 			std::string dn = string_compose ("%1 (%2)", dr->name (), (*ai)->_init_refcount[chain]);
 			bool sends_only = false;
-			sr->feeds (dr, &sends_only);
+			sr->direct_feeds_according_to_reality (dr, &sends_only);
 			if (sends_only) {
 				ss << "  edge [style=dashed];\n";
 			}
