@@ -27,7 +27,6 @@
 
 namespace ArdourWidgets { namespace ArdourIcon {
 	enum Icon {
-		NoIcon,
 		RecButton,
 		RecTapeMode,
 		CloseCross,
@@ -65,6 +64,7 @@ namespace ArdourWidgets { namespace ArdourIcon {
 		Config,
 		ConfigReset,
 		PowerOnOff,
+		NoIcon,
 	};
 
 	LIBWIDGETS_API bool render (cairo_t *cr,
