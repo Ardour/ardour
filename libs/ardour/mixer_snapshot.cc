@@ -451,6 +451,14 @@ void MixerSnapshot::write(const string dir)
 
     XMLTree tree;
     tree.set_root(node);
+
+    if(_description != string()) {
+        XMLNode* desc = new XMLNode(X_("description"));
+        XMLNode* dn = new XMLNode(X_("content"), _description);
+        desc->add_child_copy(*dn);
+        tree.root()->add_child_copy(*desc);
+    }
+
     tree.write(path.c_str());
 }
 

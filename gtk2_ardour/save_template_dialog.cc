@@ -34,7 +34,6 @@ using namespace ARDOUR;
 SaveTemplateDialog::SaveTemplateDialog (const std::string& name, const std::string& desc, bool local)
 	: ArdourDialog (_("Save as template"))
 {
-printf("saving %s\n", local ? "LOCAL" : "PREFS");
 	_local = local;
 	
 	_name_entry.get_buffer()->set_text (name);

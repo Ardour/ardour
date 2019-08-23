@@ -213,7 +213,7 @@ void MixerSnapshotList::new_snapshot() {
 
             //actually create the snapshot
             RouteList rl = PublicEditor::instance().get_selection().tracks.routelist();
-            _session->snapshot_manager().create_snapshot(name, rl, _global);
+            _session->snapshot_manager().create_snapshot(name, string(), rl, _global);
             redisplay();
         }
     }
@@ -241,7 +241,7 @@ void MixerSnapshotList::choose_external_dialog_response(int response)
         }
     }
 
-    _session->snapshot_manager().create_snapshot(name, external, _global);
+    _session->snapshot_manager().create_snapshot(name, string(), external, _global);
 
     redisplay();
 }

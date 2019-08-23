@@ -106,6 +106,9 @@ class LIBARDOUR_API MixerSnapshot
         std::string get_label() {return label;};
         void set_label(const std::string& new_label) {label = new_label; LabelChanged(this);};
 
+        std::string get_description() {return _description;}
+        void set_description(const std::string& new_desc) {_description = new_desc; DescriptionChanged();};
+
         std::string get_path() {return _path;};
         void set_path(const std::string& new_path) {_path = new_path; PathChanged(this);};
 
@@ -122,6 +125,7 @@ class LIBARDOUR_API MixerSnapshot
 
         //signals
         PBD::Signal1<void, ARDOUR::MixerSnapshot*> LabelChanged;
+        PBD::Signal0<void>                         DescriptionChanged;
         PBD::Signal1<void, ARDOUR::MixerSnapshot*> PathChanged;
     private:
         ARDOUR::Session* _session;
@@ -136,7 +140,8 @@ class LIBARDOUR_API MixerSnapshot
 
         unsigned int id;
         bool favorite;
-        std::string label;
+        std::string  label;
+        std::string _description;
         std::time_t timestamp;
         std::string last_modified_with;
         std::string suffix;

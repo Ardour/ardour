@@ -197,11 +197,13 @@ MixerSnapshot* MixerSnapshotManager::get_snapshot_by_name(const string& name, bo
     }
 }
 
-void MixerSnapshotManager::create_snapshot(const string& label, RouteList& rl, bool global)
+void MixerSnapshotManager::create_snapshot(const string& label, const string& desc, RouteList& rl, bool global)
 {
     ensure_snapshot_dir(global);
     const string path = global ? _global_path : _local_path;
     MixerSnapshot* snapshot = new MixerSnapshot(_session);
+
+    snapshot->set_description(desc);
 
     if(!rl.empty()) {
         //just this routelist
@@ -236,7 +238,7 @@ void MixerSnapshotManager::create_snapshot(const string& label, RouteList& rl, b
     snapshots_list.insert(snapshot);
 }
 
-void MixerSnapshotManager::create_snapshot(const string& label, const string& from_path, bool global)
+void MixerSnapshotManager::create_snapshot(const string& label, const string& desc, const string& from_path, bool global)
 {
     ensure_snapshot_dir(global);
     const string path = global ? _global_path : _local_path;

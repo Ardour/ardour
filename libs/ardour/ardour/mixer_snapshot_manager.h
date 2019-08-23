@@ -39,8 +39,8 @@ public:
     MixerSnapshotManager (ARDOUR::Session*);
     ~MixerSnapshotManager() {}
 
-    void create_snapshot(const std::string& label, RouteList& rl, bool global);
-    void create_snapshot(const std::string& label, const std::string& from_path, bool global);
+    void create_snapshot(const std::string& label, const std::string& desc, RouteList& rl, bool global);
+    void create_snapshot(const std::string& label, const std::string& desc, const std::string& from_path, bool global);
 
     bool rename_snapshot(MixerSnapshot*, const std::string&);
     bool remove_snapshot(MixerSnapshot*);
