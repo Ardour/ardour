@@ -183,37 +183,4 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM(MouseContent);
 	REGISTER (mouse_mode);
 
-	ArdourIcon::Icon icons;
-
-	REGISTER_ENUM (ArdourIcon::NoIcon);
-	REGISTER_ENUM (ArdourIcon::RecButton);
-	REGISTER_ENUM (ArdourIcon::RecTapeMode);
-	REGISTER_ENUM (ArdourIcon::CloseCross);
-	REGISTER_ENUM (ArdourIcon::StripWidth);
-	REGISTER_ENUM (ArdourIcon::DinMidi);
-	REGISTER_ENUM (ArdourIcon::TransportStop);
-	REGISTER_ENUM (ArdourIcon::TransportPlay);
-	REGISTER_ENUM (ArdourIcon::TransportLoop);
-	REGISTER_ENUM (ArdourIcon::TransportRange);
-	REGISTER_ENUM (ArdourIcon::TransportStart);
-	REGISTER_ENUM (ArdourIcon::TransportEnd);
-	REGISTER_ENUM (ArdourIcon::TransportPanic);
-	REGISTER_ENUM (ArdourIcon::TransportMetronom);
-	REGISTER_ENUM (ArdourIcon::NudgeLeft);
-	REGISTER_ENUM (ArdourIcon::NudgeRight);
-	REGISTER_ENUM (ArdourIcon::ZoomIn);
-	REGISTER_ENUM (ArdourIcon::ZoomOut);
-	REGISTER_ENUM (ArdourIcon::ZoomFull);
-	REGISTER_ENUM (ArdourIcon::ZoomExpand);
-	REGISTER_ENUM (ArdourIcon::TimeAxisShrink);
-	REGISTER_ENUM (ArdourIcon::TimeAxisExpand);
-	REGISTER_ENUM (ArdourIcon::ToolGrab);
-	REGISTER_ENUM (ArdourIcon::ToolRange);
-	REGISTER_ENUM (ArdourIcon::ToolCut);
-	REGISTER_ENUM (ArdourIcon::ToolStretch);
-	REGISTER_ENUM (ArdourIcon::ToolAudition);
-	REGISTER_ENUM (ArdourIcon::ToolDraw);
-	REGISTER_ENUM (ArdourIcon::ToolContent);
-	REGISTER (icons);
-
 }
