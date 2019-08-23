@@ -1657,17 +1657,18 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 				if (!p) {
 					mout->stop();
 					delete mout;
+				} else {
+					LatencyRange lr;
+					lr.min = lr.max = (nfo->systemic_output_latency);
+					set_latency_range (p, true, lr);
+					static_cast<AlsaMidiPort*>(p)->set_n_periods(_periods_per_cycle); // TODO check MIDI alignment
+					AlsaPort *ap = static_cast<AlsaPort*>(p);
+					ap->set_pretty_name (replace_name_io (i->first, false));
+					pthread_mutex_lock (&_device_port_mutex);
+					_system_midi_out.push_back (ap);
+					pthread_mutex_unlock (&_device_port_mutex);
+					_rmidi_out.push_back (mout);
 				}
-				LatencyRange lr;
-				lr.min = lr.max = (nfo->systemic_output_latency);
-				set_latency_range (p, true, lr);
-				static_cast<AlsaMidiPort*>(p)->set_n_periods(_periods_per_cycle); // TODO check MIDI alignment
-				AlsaPort *ap = static_cast<AlsaPort*>(p);
-				ap->set_pretty_name (replace_name_io (i->first, false));
-				pthread_mutex_lock (&_device_port_mutex);
-				_system_midi_out.push_back (ap);
-				pthread_mutex_unlock (&_device_port_mutex);
-				_rmidi_out.push_back (mout);
 			}
 		}
 
