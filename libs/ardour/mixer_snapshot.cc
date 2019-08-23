@@ -431,6 +431,7 @@ void MixerSnapshot::write(const string dir)
     node->set_property(X_("flags"), _flags);
     node->set_property(X_("favorite"), favorite);
     node->set_property(X_("modified-with"), last_modified_with);
+    node->set_property(X_("name"), label);
     XMLNode* child;
 
     child = node->add_child("Routes");
