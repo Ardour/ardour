@@ -210,7 +210,7 @@ AlsaAudioSlave::process_thread ()
 			no_proc_errors = 0;
 
 			_pcmi.capt_init (spp);
-			if (drain) {
+			if (drain || _pcmi.ncapt () == 0) {
 				/* do nothing */
 			} else if (_rb_capture.write_space () >= _pcmi.ncapt () * spp) {
 #if 0 // failsafe: write interleave sample by sample
@@ -267,7 +267,10 @@ AlsaAudioSlave::process_thread ()
 			}
 
 			_pcmi.play_init (spp);
-			if (_rb_playback.read_space () >= _pcmi.nplay () * spp) {
+			if (_pcmi.nplay () == 0) {
+				/* relax */
+			}
+			else if (_rb_playback.read_space () >= _pcmi.nplay () * spp) {
 #if 0 // failsafe: read sample by sample de-interleave
 				for (uint32_t s = 0; s < spp; ++s) {
 					for (uint32_t c = 0; c < _pcmi.nplay (); ++c) {
