@@ -1031,8 +1031,9 @@ LaunchControlXL::filter_stripables(StripableList& strips) const
 		case 13:
 			flt = &flt_selected;
 			break;
-		case 14:	// Factory Template 7 behaves strange
-			break;  // don't map it to anyhting
+		case 14:	// Factory Template 7 behaves strange, don't map it to anyhting
+			flt = &flt_default;
+			break;
 		case 15:
 			flt = &flt_mains;
 			break;
