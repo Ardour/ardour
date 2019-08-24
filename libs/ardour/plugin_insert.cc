@@ -1076,7 +1076,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 			_signal_analysis_collect_nsamples_max = 0;
 			_signal_analysis_collect_nsamples     = 0;
 
-			AnalysisDataGathered (&_signal_analysis_inputs, &_signal_analysis_outputs);
+			AnalysisDataGathered (&_signal_analysis_inputs, &_signal_analysis_outputs); /* EMIT SIGNAL */
 		}
 	}
 }
