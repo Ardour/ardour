@@ -219,8 +219,10 @@ Resampler::setup (unsigned int fs_inp,
 		_inmax = k;
 		_pstep = s;
 		return reset ();
+	} else {
+		delete[] B;
+		return 1;
 	}
-	else return 1;
 }
 
 void
