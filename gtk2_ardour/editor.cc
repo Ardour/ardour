@@ -5567,14 +5567,12 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 		i = track_views.erase (i);
 	}
 
-	/* update whatever the current mixer strip is displaying, if revelant */
-
-	boost::shared_ptr<Route> route;
-
-	if (rtav) {
-		route = rtav->route ();
+	/* Update the route that is shown in the editor-mixer. */
+	if (!rtav) {
+		return;
 	}
 
+	boost::shared_ptr<Route> route = rtav->route ();
 	if (current_mixer_strip && current_mixer_strip->route() == route) {
 
 		TimeAxisView* next_tv;
