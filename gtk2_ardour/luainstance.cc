@@ -795,6 +795,11 @@ LuaInstance::register_classes (lua_State* L)
 		.endClass ()
 
 		.deriveClass <TimeAxisView, AxisView> ("TimeAxisView")
+		.addFunction ("order", &TimeAxisView::order)
+		.addFunction ("y_position", &TimeAxisView::y_position)
+		.addFunction ("effective_height", &TimeAxisView::effective_height)
+		.addFunction ("current_height", &TimeAxisView::current_height)
+		.addFunction ("set_height", &TimeAxisView::set_height)
 		.endClass ()
 
 		.deriveClass <StripableTimeAxisView, TimeAxisView> ("StripableTimeAxisView")
@@ -818,11 +823,11 @@ LuaInstance::register_classes (lua_State* L)
 		.endClass ()
 
 		// std::list<Selectable*>
-		.beginStdCPtrList <Selectable> ("SelectionList")
+		.beginConstStdCPtrList <Selectable> ("SelectionList")
 		.endClass ()
 
 		// std::list<TimeAxisView*>
-		.beginStdCPtrList <TimeAxisView> ("TrackViewStdList")
+		.beginConstStdCPtrList <TimeAxisView> ("TrackViewStdList")
 		.endClass ()
 
 
@@ -842,7 +847,8 @@ LuaInstance::register_classes (lua_State* L)
 		.deriveClass <MarkerSelection, std::list<ArdourMarker*> > ("MarkerSelection")
 		.endClass ()
 
-		.deriveClass <TrackViewList, std::list<TimeAxisView*> > ("TrackViewList")
+		.beginClass <TrackViewList> ("TrackViewList")
+		.addCast<std::list<TimeAxisView*> > ("to_tav_list")
 		.addFunction ("contains", &TrackViewList::contains)
 		.addFunction ("routelist", &TrackViewList::routelist)
 		.endClass ()
@@ -1045,6 +1051,12 @@ LuaInstance::register_classes (lua_State* L)
 		.addConst ("Set", Selection::Operation(Selection::Set))
 		.addConst ("Extend", Selection::Operation(Selection::Extend))
 		.addConst ("Add", Selection::Operation(Selection::Add))
+		.endNamespace ()
+
+		.beginNamespace ("TrackHeightMode")
+		.addConst ("OnlySelf", TimeAxisView::TrackHeightMode(TimeAxisView::OnlySelf))
+		.addConst ("TotalHeight", TimeAxisView::TrackHeightMode(TimeAxisView::TotalHeight))
+		.addConst ("HeightPerLane,", TimeAxisView::TrackHeightMode(TimeAxisView::HeightPerLane))
 		.endNamespace ()
 
 		.addCFunction ("actionlist", &lua_actionlist)
