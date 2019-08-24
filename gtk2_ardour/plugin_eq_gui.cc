@@ -224,7 +224,7 @@ void
 PluginEqGui::start_updating ()
 {
 	if (!_update_connection.connected() && is_visible()) {
-		_update_connection = Glib::signal_timeout().connect (sigc::mem_fun (this, &PluginEqGui::timeout_callback), 250);
+		_update_connection = Glib::signal_timeout().connect (sigc::mem_fun (this, &PluginEqGui::timeout_callback), 250, Glib::PRIORITY_DEFAULT_IDLE);
 	}
 }
 
