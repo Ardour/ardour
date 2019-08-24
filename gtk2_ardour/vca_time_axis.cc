@@ -123,6 +123,7 @@ VCATimeAxisView::VCATimeAxisView (PublicEditor& ed, Session* s, ArdourCanvas::Ca
 VCATimeAxisView::~VCATimeAxisView ()
 {
 	delete automation_action_menu;
+	CatchDeletion (this);
 }
 
 void
