@@ -332,6 +332,7 @@ AutomationTimeAxisView::~AutomationTimeAxisView ()
 		cleanup_gui_properties ();
 	}
 	delete _view;
+	CatchDeletion (this);
 }
 
 void

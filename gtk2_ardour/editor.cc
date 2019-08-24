@@ -5543,6 +5543,11 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 
 	ENSURE_GUI_THREAD (*this, &Editor::timeaxisview_deleted, tv);
 
+	if (dynamic_cast<AutomationTimeAxisView*> (tv)) {
+		selection->remove (tv);
+		return;
+	}
+
 	RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (tv);
 
 	_routes->route_removed (tv);
