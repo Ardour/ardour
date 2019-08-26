@@ -175,6 +175,17 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	Variant                    get_property_value (uint32_t) const;
 	void                       announce_property_values();
 
+	/* LV2 Option Options */
+	static void set_global_ui_background_color (uint32_t c) {
+		_ui_background_color = c;
+	}
+	static void set_global_ui_foreground_color (uint32_t c) {
+		_ui_foreground_color = c;
+	}
+	static void set_global_ui_scale_factor (float s) {
+		_ui_scale_factor = s;
+	}
+
   private:
 	struct Impl;
 	Impl*         _impl;
@@ -298,7 +309,6 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 		if (chn > 15) return UINT32_MAX;
 		return _bankpatch[chn];
 	}
-
 #endif
 
 	typedef struct {
@@ -320,7 +330,10 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 #endif
 
 	// Options passed to plugin
-	int32_t _seq_size;
+	int32_t         _seq_size;
+	static uint32_t _ui_background_color;
+	static uint32_t _ui_foreground_color;
+	static float    _ui_scale_factor;
 
 	mutable unsigned _state_version;
 
