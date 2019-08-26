@@ -1010,7 +1010,7 @@ static void icon_plus_sign (cairo_t *cr, const int width, const int height, cons
 {
 	const double xc = rint (width * .5);
 	const double yc = rint (height * .5);
-	const int wh = std::min (width, height) * .1;
+	const double wh = ceil (std::min (width, height) * .077) / 2.0;
 	const int ln = std::min (width, height) * .33;
 
 	cairo_rectangle (cr,
