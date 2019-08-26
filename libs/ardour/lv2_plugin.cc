@@ -439,6 +439,9 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	_current_latency        = 0;
 	_impl->block_length     = _session.get_block_size();
 
+	_sample_rate = rate;
+	_fsample_rate = rate;
+
 	_instance_access_feature.URI = "http://lv2plug.in/ns/ext/instance-access";
 	_data_access_feature.URI     = "http://lv2plug.in/ns/ext/data-access";
 	_make_path_feature.URI       = LV2_STATE__makePath;
@@ -525,6 +528,8 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		  sizeof(int32_t), atom_Int, &_max_block_length },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id(LV2_BUF_SIZE__sequenceSize),
 		  sizeof(int32_t), atom_Int, &_seq_size },
+		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id(LV2_PARAMETERS__sampleRate),
+		  sizeof(float), atom_Float, &_fsample_rate },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/ext/buf-size#nominalBlockLength"),
 		  sizeof(int32_t), atom_Int, &_impl->block_length },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://ardour.org/lv2/threads/#schedPolicy"),
@@ -668,8 +673,6 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		lilv_state_restore(state, _impl->instance, NULL, NULL, 0, NULL);
 	}
 	lilv_state_free(state);
-
-	_sample_rate = rate;
 
 	const uint32_t num_ports = this->num_ports();
 	for (uint32_t i = 0; i < num_ports; ++i) {

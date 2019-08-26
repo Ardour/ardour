@@ -194,6 +194,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	Worker*       _worker;
 	Worker*       _state_worker;
 	samplecnt_t   _sample_rate;
+	float         _fsample_rate;
 	float*        _control_data;
 	float*        _shadow_data;
 	float*        _defaults;
