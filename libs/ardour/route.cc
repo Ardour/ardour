@@ -3312,6 +3312,7 @@ Route::add_foldback_send (boost::shared_ptr<Route> route)
 	} catch (failed_constructor& err) {
 		return -1;
 	}
+	_session.FBSendsChanged ();
 
 	return 0;
 }
@@ -3321,6 +3322,7 @@ Route::remove_aux_or_listen (boost::shared_ptr<Route> route)
 {
 	ProcessorStreams err;
 	ProcessorList::iterator tmp;
+	bool do_fb_signal = false;
 
 	{
 		Glib::Threads::RWLock::ReaderLock rl(_processor_lock);
@@ -3339,6 +3341,11 @@ Route::remove_aux_or_listen (boost::shared_ptr<Route> route)
 			boost::shared_ptr<InternalSend> d = boost::dynamic_pointer_cast<InternalSend>(*x);
 
 			if (d && d->target_route() == route) {
+				boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send>(d);
+				if (snd && snd->is_foldback()) {
+					do_fb_signal = true;
+				}
+
 				rl.release ();
 				if (remove_processor (*x, &err, false) > 0) {
 					rl.acquire ();
@@ -3358,6 +3365,10 @@ Route::remove_aux_or_listen (boost::shared_ptr<Route> route)
 			}
 		}
 	}
+	if (do_fb_signal) {
+		_session.FBSendsChanged ();
+	}
+
 }
 
 void

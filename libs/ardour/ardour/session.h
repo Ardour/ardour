@@ -425,6 +425,10 @@ public:
 	 */
 	PBD::Signal2<void, RouteGroup *, boost::weak_ptr<Route> > RouteRemovedFromRouteGroup;
 
+	/** Emitted when a foldback send is created or deleted
+	 */
+	PBD::Signal0<void> FBSendsChanged;
+
 	/* Step Editing status changed */
 	PBD::Signal1<void,bool> StepEditStatusChange;
 
@@ -1782,9 +1786,9 @@ public:
 			f ( (*i).second );
 		}
 	}
-	
+
 	bool playlist_is_active( boost::shared_ptr<Playlist>);
-	
+
 private:
 	void reset_write_sources (bool mark_write_complete, bool force = false);
 	SourceMap sources;
