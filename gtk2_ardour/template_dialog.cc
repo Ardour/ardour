@@ -48,6 +48,7 @@
 
 #include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
+#include "ardour/mixer_snapshot_manager.h"
 #include "ardour/template_utils.h"
 
 #include "progress_reporter.h"
@@ -150,6 +151,7 @@ public:
 	~SessionTemplateManager () {}
 
 	void init ();
+	void set_session(Session*);
 
 	void get_templates (vector<TemplateInfo>& templates) const;
 
@@ -161,6 +163,8 @@ private:
 	std::string template_file (const Gtk::TreeModel::const_iterator& item) const;
 
 	bool adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const;
+
+	Session* _session;
 };
 
 
@@ -171,6 +175,7 @@ public:
 	~RouteTemplateManager () {}
 
 	void init ();
+	void set_session(Session*);
 
 	void get_templates (vector<TemplateInfo>& templates) const;
 
@@ -182,11 +187,13 @@ private:
 	std::string template_file (const Gtk::TreeModel::const_iterator& item) const;
 
 	bool adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const;
+
+	Session* _session;
 };
 
 
 
-TemplateDialog::TemplateDialog ()
+TemplateDialog::TemplateDialog (Session* s)
 	: ArdourDialog ("Manage Templates")
 {
 	Notebook* nb = manage (new Notebook);
@@ -204,6 +211,11 @@ TemplateDialog::TemplateDialog ()
 
 	session_tm->init ();
 	route_tm->init ();
+
+	if(s) {
+		session_tm->set_session(s);
+		route_tm->set_session(s);
+	}
 
 	session_tm->TemplatesImported.connect (*this, invalidator (*this), boost::bind (&RouteTemplateManager::init, route_tm), gui_context ());
 	route_tm->TemplatesImported.connect (*this, invalidator (*this), boost::bind (&SessionTemplateManager::init, session_tm), gui_context ());
@@ -676,6 +688,12 @@ SessionTemplateManager::init ()
 	_save_desc.set_sensitive (false);
 }
 
+void SessionTemplateManager::set_session(Session* s) {
+	if(s) {
+		_session = s;
+	}
+}
+
 void
 RouteTemplateManager::init ()
 {
@@ -686,6 +704,12 @@ RouteTemplateManager::init ()
 	_progress_bar.hide ();
 	_description_editor.set_sensitive (false);
 	_save_desc.set_sensitive (false);
+}
+
+void RouteTemplateManager::set_session(Session* s) {
+	if(s) {
+		_session = s;
+	}
 }
 
 void
@@ -868,6 +892,10 @@ RouteTemplateManager::delete_selected_template ()
 		return;
 	}
 
+	if(!_session) {
+		return;
+	}
+
 	const string file_path = _current_selection->get_value (_template_columns.path);
 
 	if (g_unlink (file_path.c_str()) != 0) {
@@ -879,6 +907,13 @@ RouteTemplateManager::delete_selected_template ()
 
 	_template_model->erase (_current_selection);
 	row_selection_changed ();
+
+	SnapshotList sl = _session->snapshot_manager().get_global_snapshots();
+	for(SnapshotList::const_iterator it = sl.begin(); it != sl.end(); it++) {
+		if(file_path == (*it)->get_path()) {
+			_session->snapshot_manager().remove_snapshot((*it));
+		}
+	}
 }
 
 string

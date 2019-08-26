@@ -178,6 +178,7 @@ bool MixerSnapshotManager::remove_snapshot(MixerSnapshot* snapshot) {
             _local_snapshots.erase(iter);
         }
     }
+    RemovedSnapshot(); /* EMIT SIGNAL */
     return true;
 }
 
@@ -236,6 +237,7 @@ void MixerSnapshotManager::create_snapshot(const string& label, const string& de
     }
     //and insert the new one
     snapshots_list.insert(snapshot);
+    CreatedSnapshot(snapshot); /* EMIT SIGNAL */
 }
 
 void MixerSnapshotManager::create_snapshot(const string& label, const string& desc, const string& from_path, bool global)
@@ -267,4 +269,5 @@ void MixerSnapshotManager::create_snapshot(const string& label, const string& de
     }
     //and insert the new one
     snapshots_list.insert(snapshot);
+    CreatedSnapshot(snapshot); /* EMIT SIGNAL */
 }

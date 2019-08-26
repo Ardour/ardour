@@ -158,6 +158,7 @@ void MixerSnapshotList::set_session (Session* s)
         SessionHandlePtr::set_session(s);
         if(_global) {
             s->snapshot_manager().PromotedSnapshot.connect(connections, invalidator(*this), boost::bind(&MixerSnapshotList::add_promoted_snapshot, this, _1), gui_context());
+            s->snapshot_manager().RemovedSnapshot.connect(connections, invalidator(*this), boost::bind(&MixerSnapshotList::redisplay, this), gui_context());
         }
         redisplay();
     }

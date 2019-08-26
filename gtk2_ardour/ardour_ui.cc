@@ -2124,7 +2124,10 @@ ARDOUR_UI::save_template ()
 
 void ARDOUR_UI::manage_templates ()
 {
-	TemplateDialog td;
+	if(!_session) {
+		return;
+	}
+	TemplateDialog td (_session);
 	td.run();
 }
 

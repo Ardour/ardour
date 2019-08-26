@@ -20,12 +20,13 @@
 #define __gtk2_ardour_template_dialog_h__
 
 #include "ardour_dialog.h"
+#include "ardour/session.h"
 
 class TemplateDialog : public ArdourDialog,
 		       public PBD::ScopedConnectionList
 {
 public:
-	TemplateDialog ();
+	TemplateDialog (ARDOUR::Session*);
 	~TemplateDialog () {}
 };
 

@@ -60,6 +60,8 @@ public:
     void clear() { _global_snapshots.clear(); _local_snapshots.clear(); };
 
     PBD::Signal1<void, ARDOUR::MixerSnapshot*> PromotedSnapshot;
+    PBD::Signal1<void, ARDOUR::MixerSnapshot*> CreatedSnapshot;
+    PBD::Signal0<void>                         RemovedSnapshot;
 private:
     void ensure_snapshot_dir(bool global);
     std::string _global_path;
