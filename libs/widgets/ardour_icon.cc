@@ -125,7 +125,7 @@ static void icon_tool_range (cairo_t *cr, const int width, const int height)
 	const double x  = width * .5;
 	const double y  = height * .5;
 	const double wh = std::min (x, y) * .55;
-	const double lw = rint (wh / 6.0); // line width
+	const double lw = ceil (wh * .1); // line width
 	const double ar = wh * .6; // arrow
 
 	const double bw = ceil (wh) - .5;
@@ -808,7 +808,7 @@ static void icon_zoom (cairo_t *cr, const enum ArdourWidgets::ArdourIcon::Icon i
 
 	// add "+", "-" or "[]"
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
-	cairo_set_line_width (cr, 1.5);
+	cairo_set_line_width (cr, .5 + ceil (.08 * wh));
 	ardour_icon_set_source_inv_rgba (cr, fg_color);
 
 	if (icon == ZoomIn || icon == ZoomOut) {
@@ -887,7 +887,7 @@ static void icon_close_cross (cairo_t *cr, const int width, const int height, co
 	const double y = height * .5;
 	const double o = .5 + std::min (x, y) * .4;
 	Gtkmm2ext::set_source_rgba (cr, fg_color);
-	cairo_set_line_width (cr, 1.0);
+	cairo_set_line_width (cr, ceil (.07 * std::min (x, y)));
 	cairo_move_to (cr, x-o, y-o);
 	cairo_line_to (cr, x+o, y+o);
 	cairo_move_to (cr, x+o, y-o);
@@ -908,7 +908,7 @@ static void icon_nudge_left (cairo_t *cr, const int width, const int height, con
 	cairo_move_to (cr, x + tri_x, y - tri_y);
 	cairo_line_to (cr, x - tri_x, y);
 	cairo_line_to (cr, x + tri_x, y + tri_y);
-	VECTORICONSTROKEOUTLINE(1.5, fg_color);
+	VECTORICONSTROKEOUTLINE(.5 + ceil (.07 * wh), fg_color);
 }
 
 /** ">" */
@@ -925,7 +925,7 @@ static void icon_nudge_right (cairo_t *cr, const int width, const int height, co
 	cairo_move_to (cr, x - tri_x, y - tri_y);
 	cairo_line_to (cr, x + tri_x, y);
 	cairo_line_to (cr, x - tri_x, y + tri_y);
-	VECTORICONSTROKEOUTLINE(1.5, fg_color);
+	VECTORICONSTROKEOUTLINE(.5 + ceil (.07 * wh), fg_color);
 
 }
 
@@ -947,7 +947,7 @@ static void icon_strip_width (cairo_t *cr, const int width, const int height, co
 	const double ya1= height * .65;
 
 	Gtkmm2ext::set_source_rgba (cr, fg_color);
-	cairo_set_line_width (cr, 1);
+	cairo_set_line_width (cr, ceil (std::min (width, width) * .035));
 
 	// left + right
 	cairo_move_to (cr, x0, y0);
@@ -980,7 +980,7 @@ static void icon_din_midi (cairo_t *cr, const int width, const int height, const
 	const double y = height * .5;
 	const double r = std::min (x, y) * .75;
 	Gtkmm2ext::set_source_rgba (cr, fg_color);
-	cairo_set_line_width (cr, 1);
+	cairo_set_line_width (cr, ceil (r * .05));
 	cairo_arc (cr, x, y, r, .57 * M_PI, 2.43 * M_PI);
 	cairo_stroke (cr);
 
