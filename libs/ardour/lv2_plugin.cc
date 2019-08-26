@@ -536,7 +536,7 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/extensions/ui#foregroundColor"),
 		  sizeof(int32_t), atom_Int, &_ui_foreground_color },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/extensions/ui#scaleFactor"),
-		  sizeof(int32_t), atom_Float, &_ui_scale_factor },
+		  sizeof(float), atom_Float, &_ui_scale_factor },
 		{ LV2_OPTIONS_INSTANCE, 0, 0, 0, 0, NULL }
 	};
 
