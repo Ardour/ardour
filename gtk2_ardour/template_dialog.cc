@@ -883,6 +883,14 @@ RouteTemplateManager::rename_template (TreeModel::iterator& item, const Glib::us
 
 	item->set_value (_template_columns.name, string (new_name));
 	item->set_value (_template_columns.path, new_filepath);
+
+	SnapshotList sl = _session->snapshot_manager().get_global_snapshots();
+	for(SnapshotList::const_iterator it = sl.begin(); it != sl.end(); it++) {
+		if(old_name == (*it)->get_label()) {
+			_session->snapshot_manager().rename_snapshot((*it), new_name);
+			break;
+		}
+	}
 }
 
 void

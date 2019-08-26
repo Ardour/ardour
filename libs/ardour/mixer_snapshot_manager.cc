@@ -151,6 +151,7 @@ bool MixerSnapshotManager::rename_snapshot(MixerSnapshot* snapshot, const string
     const string new_path = Glib::build_filename(dir, snapshot->get_label() + string(template_suffix));
     ::g_rename(old_path.c_str(), new_path.c_str());
     snapshot->set_path(new_path);
+    RenamedSnapshot(); /* EMIT SIGNAL */
     return true;
 }
 

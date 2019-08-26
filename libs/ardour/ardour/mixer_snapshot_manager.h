@@ -62,6 +62,7 @@ public:
     PBD::Signal1<void, ARDOUR::MixerSnapshot*> PromotedSnapshot;
     PBD::Signal1<void, ARDOUR::MixerSnapshot*> CreatedSnapshot;
     PBD::Signal0<void>                         RemovedSnapshot;
+    PBD::Signal0<void>                         RenamedSnapshot;
 private:
     void ensure_snapshot_dir(bool global);
     std::string _global_path;
