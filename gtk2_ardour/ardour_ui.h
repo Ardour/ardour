@@ -844,7 +844,7 @@ private:
 
 	ArdourLogLevel _log_not_acknowledged;
 
-	void resize_text_widgets ();
+	void on_theme_changed ();
 
 	bool xrun_button_release (GdkEventButton* ev);
 

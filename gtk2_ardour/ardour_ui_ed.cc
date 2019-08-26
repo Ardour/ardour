@@ -75,6 +75,7 @@
 #include "ardour/session.h"
 #include "ardour/profile.h"
 #include "ardour/audioengine.h"
+#include "ardour/lv2_plugin.h"
 
 #include "control_protocol/control_protocol.h"
 
@@ -889,8 +890,11 @@ ARDOUR_UI::save_ardour_state ()
 }
 
 void
-ARDOUR_UI::resize_text_widgets ()
+ARDOUR_UI::on_theme_changed ()
 {
+	LV2Plugin::set_global_ui_background_color (UIConfiguration::instance().color ("gtk_background"));
+	LV2Plugin::set_global_ui_foreground_color (UIConfiguration::instance().color ("gtk_foreground"));
+	LV2Plugin::set_global_ui_scale_factor (UIConfiguration::instance().get_ui_scale());
 }
 
 void

@@ -471,6 +471,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	Config->ParameterChanged.connect ( forever_connections, MISSING_INVALIDATOR, boost::bind(&ARDOUR_UI::set_flat_buttons, this), gui_context() );
 	set_flat_buttons();
 
+	theme_changed.connect (sigc::mem_fun(*this, &ARDOUR_UI::on_theme_changed));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::on_theme_changed));
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::on_theme_changed));
+
 	/* lets get this party started */
 
 	setup_gtk_ardour_enums ();
@@ -538,8 +542,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	_process_thread = new ProcessThread ();
 	_process_thread->init ();
-
-	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
 
 	attach_to_engine ();
 }
