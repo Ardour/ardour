@@ -345,6 +345,8 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		}
 	}
 
+	const int text_margin = char_pixel_width();
+
 	//Pixbuf, if any
 	if (_pixbuf) {
 		double x = rint((get_width() - _pixbuf->get_width()) * .5);
@@ -376,10 +378,13 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 			vw -= _diameter + 4;
 		}
 		if (_elements & Indicator) {
-			vw -= _diameter + char_pixel_width ();
+			vw -= _diameter + .5 * text_margin;
 			if (_led_left) {
-				cairo_translate (cr, _diameter + char_pixel_width (), 0);
+				cairo_translate (cr, _diameter + text_margin, 0);
 			}
+		}
+		if (_elements & Text) {
+			vw -= _text_width + text_margin;
 		}
 		if (_elements & VectorIcon) {
 			ArdourIcon::render (cr, _icon, vw, vh, active_state(), text_color);
@@ -391,7 +396,6 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		cairo_restore (cr);
 	}
 
-	const int text_margin = char_pixel_width();
 	// Text, if any
 	if (!_pixbuf && ((_elements & Text)==Text) && !_text.empty()) {
 		assert(_layout);
@@ -433,6 +437,9 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 			} else {
 				cairo_move_to (cr, text_margin, text_ypos);
 			}
+			pango_cairo_show_layout (cr, _layout->gobj());
+		} else if (VectorIcon == (_elements & VectorIcon)) {
+			cairo_move_to (cr, get_width () - text_margin - _text_width, text_ypos);
 			pango_cairo_show_layout (cr, _layout->gobj());
 		} else {
 			/* centered text otherwise */
@@ -498,7 +505,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 
 		/* move to the center of the indicator/led */
 		if (_elements & (Text | VectorIcon | IconRenderCallback)) {
-			int led_xoff = ceil(char_pixel_width() + _diameter * .5);
+			int led_xoff = ceil((char_pixel_width() + _diameter) * .5);
 			if (_led_left) {
 				cairo_translate (cr, led_xoff, get_height() * .5);
 			} else {
@@ -671,7 +678,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	}
 
 	if (_elements & Indicator) {
-		req->width += lrint (_diameter) + char_pixel_width();
+		req->width += ceil (_diameter + char_pixel_width());
 		req->height = std::max (req->height, (int) lrint (_diameter) + 4);
 	}
 
@@ -680,8 +687,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	}
 
 	if (_elements & (VectorIcon | IconRenderCallback)) {
-		assert(!(_elements & Text));
-		const int wh = std::max (6., std::max (rint (TRACKHEADERBTNW * char_avg_pixel_width()), ceil (char_pixel_height() * BASELINESTRETCH + 1.)));
+		const int wh = std::max (8., std::max (ceil (TRACKHEADERBTNW * char_avg_pixel_width()), ceil (char_pixel_height() * BASELINESTRETCH + 1.)));
 		req->width += wh;
 		req->height = std::max(req->height, wh);
 	}
