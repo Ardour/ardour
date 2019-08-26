@@ -932,22 +932,22 @@ static void icon_nudge_right (cairo_t *cr, const int width, const int height, co
 /** mixer strip narrow/wide */
 static void icon_strip_width (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
 {
-	const double x0 = width   * .2;
-	const double x1 = width   * .8;
+	const double xm = .5 + rint (width * .5);
+	const double ym = .5 + rint (height * .5);
 
-	const double y0 = height  * .25;
-	const double y1 = height  * .75;
+	const double dx = ceil (width * .3);
+	const double dy = ceil (height * .25);
 
-	const double ym = height  * .5;
+	const double x0 = xm - dx;
+	const double x1 = xm + dx;
+	const double y0 = ym - dy;
+	const double y1 = ym + dy;
 
-	// arrow
-	const double xa0= width  * .39;
-	const double xa1= width  * .61;
-	const double ya0= height * .35;
-	const double ya1= height * .65;
+	const double arx = width  * .15;
+	const double ary = height * .15;
 
 	Gtkmm2ext::set_source_rgba (cr, fg_color);
-	cairo_set_line_width (cr, ceil (std::min (width, width) * .035));
+	cairo_set_line_width (cr, ceil (std::min (width, height) * .035));
 
 	// left + right
 	cairo_move_to (cr, x0, y0);
@@ -961,15 +961,15 @@ static void icon_strip_width (cairo_t *cr, const int width, const int height, co
 
 	// arrow left
 	cairo_move_to (cr,  x0, ym);
-	cairo_line_to (cr, xa0, ya0);
+	cairo_rel_line_to (cr, arx, -ary);
 	cairo_move_to (cr,  x0, ym);
-	cairo_line_to (cr, xa0, ya1);
+	cairo_rel_line_to (cr, arx, ary);
 
 	// arrow right
 	cairo_move_to (cr,  x1,  ym);
-	cairo_line_to (cr, xa1, ya0);
+	cairo_rel_line_to (cr, -arx, -ary);
 	cairo_move_to (cr,  x1,  ym);
-	cairo_line_to (cr, xa1, ya1);
+	cairo_rel_line_to (cr, -arx, ary);
 	cairo_stroke (cr);
 }
 
@@ -1298,6 +1298,7 @@ ArdourWidgets::ArdourIcon::render (cairo_t *cr,
 			icon_tav_expand (cr, width, height);
 			break;
 		case ToolRange:
+			/* similar to icon_strip_width() but with outline */
 			icon_tool_range (cr, width, height);
 			break;
 		case ToolGrab:
