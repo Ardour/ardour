@@ -64,6 +64,7 @@ namespace ArdourWidgets { namespace ArdourIcon {
 		Config,
 		ConfigReset,
 		PowerOnOff,
+		LatencyClock,
 		NoIcon,
 	};
 

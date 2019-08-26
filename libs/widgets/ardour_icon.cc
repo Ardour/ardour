@@ -1201,6 +1201,26 @@ static void icon_pcb_via (cairo_t *cr, const int width, const int height, const 
 	VECTORICONSTROKEOUTLINE(p, fg_color);
 }
 
+static void icon_latency_clock (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x = width * .5;
+	const double y = height * .5;
+	const double y0 = std::min (x, y) * .45;
+	const double r0 = std::min (x, y) * .1;
+	const double r1 = std::min (x, y) * .7;
+	const double pt = std::min (x, y) * .1;
+
+	cairo_move_to (cr, x, y - y0);
+	cairo_arc (cr, x, y, r1, -.5 * M_PI, 1.25 * M_PI);
+	VECTORICONSTROKEOUTLINE(pt, fg_color);
+
+	cairo_arc (cr, x, y, r0,  -.4 * M_PI  , .9 * M_PI);
+	cairo_arc (cr, x, y, y0, 1.25 * M_PI, 1.25 * M_PI);
+	cairo_arc (cr, x, y, r0,  -.4 * M_PI,  -.4 * M_PI);
+	cairo_close_path (cr);
+	VECTORICONSTROKEFILL(1.0);
+}
+
 /*****************************************************************************/
 
 bool
@@ -1324,6 +1344,9 @@ ArdourWidgets::ArdourIcon::render (cairo_t *cr,
 			break;
 		case PowerOnOff: /* unused */
 			icon_on_off (cr, width, height, fg_color);
+			break;
+		case LatencyClock: /* unused */
+			icon_latency_clock (cr, width, height, fg_color);
 			break;
 		case NoIcon:
 			rv = false;
