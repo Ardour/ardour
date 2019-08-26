@@ -614,10 +614,6 @@ void MixerSnapshotList::redisplay()
         active_list = _session->snapshot_manager().get_local_snapshots();
     }
 
-    if(active_list.empty()) {
-        return;
-    }
-
     _snapshot_model->clear();
     for(SnapshotList::const_iterator it = active_list.begin(); it != active_list.end(); it++) {
         new_row_from_snapshot((*it));
