@@ -487,10 +487,14 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	set_tooltip (reset_button, _("Reset parameters to default (if no parameters are in automation play mode)"));
 	set_tooltip (pin_management_button, _("Show Plugin Pin Management Dialog"));
 	set_tooltip (bypass_button, _("Disable signal processing by the plugin"));
+	set_tooltip (latency_button, _("Edit Plugin Delay/Latency Compensation"));
 	_no_load_preset = 0;
 
 	update_preset_list ();
 	update_preset ();
+
+	latency_button.set_icon (ArdourIcon::LatencyClock);
+	latency_button.add_elements (ArdourButton::Text);
 
 	add_button.set_name ("generic button");
 	add_button.set_icon (ArdourIcon::PsetAdd);
@@ -583,9 +587,9 @@ PlugUIBase::set_latency_label ()
 	string t;
 
 	if (l < sr / 1000) {
-		t = string_compose (P_("latency (%1 sample)", "latency (%1 samples)", l), l);
+		t = string_compose (P_("%1 sample", "%1 samples", l), l);
 	} else {
-		t = string_compose (_("latency (%1 ms)"), (float) l / ((float) sr / 1000.0f));
+		t = string_compose (_("%1 ms"), (float) l / ((float) sr / 1000.0f));
 	}
 
 	latency_button.set_text (t);
