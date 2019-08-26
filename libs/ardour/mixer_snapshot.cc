@@ -158,7 +158,17 @@ void MixerSnapshot::snap(boost::shared_ptr<Route> route)
     if(group) {
         XMLNode* group_node = copy.add_child(X_("Group"));
         group_node->set_property(X_("name"), group->name());
-        snap(group);
+
+        bool need_to_be_made = true;
+        for(vector<State>::const_iterator it = group_states.begin(); it != group_states.end(); it++) {
+            if((*it).name == group->name()) {
+                need_to_be_made = false;
+                break;
+            }
+        }
+        if(need_to_be_made) {
+            snap(group);
+        }
     }
 
     XMLNode* slavable = find_named_node(copy, "Slavable");
@@ -173,9 +183,18 @@ void MixerSnapshot::snap(boost::shared_ptr<Route> route)
             boost::shared_ptr<VCA> vca = _session->vca_manager().vca_by_number(i);
 
             if(vca) {
+                bool need_to_be_made = true;
+                for(vector<State>::const_iterator it = vca_states.begin(); it != vca_states.end(); it++) {
+                    if((*it).name == vca->name()) {
+                        need_to_be_made = false;
+                        break;
+                    }
+                }
+                if(need_to_be_made) {
+                    snap(vca);
+                }
                 //we will need this for later recollection
                 (*niter)->set_property(X_("name"), vca->name());
-                snap(vca);
             }
         }
     }
