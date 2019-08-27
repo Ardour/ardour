@@ -636,6 +636,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\foldback_strip.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\gain_meter.cc"
 				>
 			</File>
@@ -1687,6 +1691,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\floating_text_entry.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\foldback_strip.h"
 				>
 			</File>
 			<File
