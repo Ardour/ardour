@@ -30,8 +30,9 @@
 
 using namespace ArdourWidgets;
 
-static int wh = 64;
-static int sq = 1;
+static int  wh   = 64;
+static int  sq   = 1;
+static bool grid = false;
 
 static uint32_t bg_color = 0x3d3d3dff; // gtk_background
 static uint32_t fg_color = 0xeeeeecff; // gtk_foreground
@@ -119,6 +120,17 @@ draw_icon (cairo_t* cr, int pos, const enum ArdourIcon::Icon icon, const Gtkmm2e
 	int row = pos / sq;
 	cairo_save (cr);
 	cairo_translate (cr, col * wh, row * wh);
+	if (grid) {
+		cairo_rectangle (cr, .5, .5, wh - 1, wh - 1);
+		cairo_set_line_width (cr, 1);
+		cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
+		cairo_stroke (cr);
+		cairo_move_to (cr, wh * .5, 0);
+		cairo_line_to (cr, wh * .5, wh);
+		cairo_move_to (cr, 0, wh * .5);
+		cairo_line_to (cr, wh, wh * .5);
+		cairo_stroke (cr);
+	}
 	ArdourIcon::render (cr, icon, wh, wh, state, fg_color);
 	cairo_restore (cr);
 }
@@ -129,8 +141,11 @@ main (int argc, char** argv)
 	const char* fn = "/tmp/ardour_icons.png";
 
 	int c = 0;
-	while (EOF != (c = getopt (argc, argv, "o:s:t:"))) {
+	while (EOF != (c = getopt (argc, argv, "go:s:t:"))) {
 		switch (c) {
+			case 'g':
+				grid = true;
+				break;
 			case 't':
 				if (!load_colors (optarg)) {
 					std::cerr << "Error: failed to load color theme.\n";
