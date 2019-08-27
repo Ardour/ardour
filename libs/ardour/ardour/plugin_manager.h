@@ -123,27 +123,27 @@ public:
 private:
 
 	struct PluginTag {
-	    ARDOUR::PluginType type;
-	    std::string unique_id;
-	    std::string tags;
-	    std::string name;
+		ARDOUR::PluginType type;
+		std::string unique_id;
+		std::string tags;
+		std::string name;
 		TagType tagtype;
 
-	    PluginTag (ARDOUR::PluginType t, std::string id, std::string tag, std::string n, TagType tt)
-	    : type (t), unique_id (id), tags (tag), name(n), tagtype (tt) {}
+		PluginTag (ARDOUR::PluginType t, std::string id, std::string tag, std::string n, TagType tt)
+			: type (t), unique_id (id), tags (tag), name(n), tagtype (tt) {}
 
-	    bool operator== (PluginTag const& other) const {
-		    return other.type == type && other.unique_id == unique_id;
-	    }
+		bool operator== (PluginTag const& other) const {
+			return other.type == type && other.unique_id == unique_id;
+		}
 
-	    bool operator< (PluginTag const& other) const {
-		    if (other.type < type) {
-			    return true;
-		    } else if (other.type == type && other.unique_id < unique_id) {
-			    return true;
-		    }
-		    return false;
-	    }
+		bool operator< (PluginTag const& other) const {
+			if (other.type < type) {
+				return true;
+			} else if (other.type == type && other.unique_id < unique_id) {
+				return true;
+			}
+			return false;
+		}
 	};
 
 	typedef std::set<PluginTag> PluginTagList;
