@@ -148,6 +148,7 @@ private:
 
 	typedef std::set<PluginTag> PluginTagList;
 	PluginTagList ptags;
+	PluginTagList ftags; /* factory-file defaults */
 
 	std::string sanitize_tag (const std::string) const;
 

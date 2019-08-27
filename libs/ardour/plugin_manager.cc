@@ -1574,8 +1574,8 @@ PluginManager::save_tags ()
 			}
 		}
 #endif
-		if ((*i).tagtype == FromFactoryFile || (*i).tagtype == FromUserFile) {
-			/* user file should contain only plugins that are (a) newly user-tagged or (b) previously unknown */
+		if ((*i).tagtype <= FromFactoryFile) {
+			/* user file should contain only plugins that are user-tagged */
 			continue;
 		}
 		XMLNode* node = new XMLNode (X_("Plugin"));
@@ -1583,9 +1583,7 @@ PluginManager::save_tags ()
 		node->set_property (X_("id"), (*i).unique_id);
 		node->set_property (X_("tags"), (*i).tags);
 		node->set_property (X_("name"), (*i).name);
-		if ((*i).tagtype >= FromUserFile) {
-			node->set_property (X_("user-set"), "1");
-		}
+		node->set_property (X_("user-set"), "1");
 		root->add_child_nocopy (*node);
 	}
 
@@ -1650,6 +1648,12 @@ PluginManager::set_tags (PluginType t, string id, string tag, std::string name, 
 		ptags.erase (ps);
 		ptags.insert (ps);
 	}
+	if (ttype == FromFactoryFile) {
+		if (find (ftags.begin(), ftags.end(), ps) != ftags.end()) {
+			ftags.erase (ps);
+		}
+		ftags.insert (ps);
+	}
 	if (ttype == FromGui) {
 		PluginTagChanged (t, id, sanitized); /* EMIT SIGNAL */
 	}
@@ -1660,11 +1664,16 @@ PluginManager::reset_tags (PluginInfoPtr const& pi)
 {
 	PluginTag ps (pi->type, pi->unique_id, pi->category, pi->name, FromPlug);
 
+	PluginTagList::const_iterator j = find (ftags.begin(), ftags.end(), ps);
+	if (j != ftags.end()) {
+		ps = *j;
+	}
+
 	PluginTagList::const_iterator i = find (ptags.begin(), ptags.end(), ps);
 	if (i != ptags.end()) {
 		ptags.erase (ps);
 		ptags.insert (ps);
-		PluginTagChanged (pi->type, pi->unique_id, pi->category); /* EMIT SIGNAL */
+		PluginTagChanged (ps.type, ps.unique_id, ps.tags); /* EMIT SIGNAL */
 	}
 }
 
