@@ -45,12 +45,10 @@
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_knob.h"
 
-#include "axis_view.h"
 #include "route_ui.h"
 #include "panner_ui.h"
 #include "enums.h"
 #include "processor_box.h"
-//#include "visibility_group.h"
 #include "processor_selection.h"
 
 namespace ARDOUR {
@@ -104,7 +102,7 @@ private:
 
 };
 
-class FoldbackStrip : public AxisView, public RouteUI, public Gtk::EventBox
+class FoldbackStrip : public RouteUI, public Gtk::EventBox
 {
 public:
 	FoldbackStrip (Mixer_UI&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
@@ -145,7 +143,6 @@ public:
 
 	std::string state_id() const;
 
-//	void parameter_changed (std::string);
 	void route_active_changed ();
 
 	void copy_processors ();
@@ -165,8 +162,6 @@ protected:
 	friend class Mixer_UI;
 	void set_packed (bool yn);
 	bool packed () { return _packed; }
-
-	void set_stuff_from_route ();
 
 private:
 	Mixer_UI& _mixer;
@@ -270,8 +265,6 @@ private:
 
 	void engine_running();
 	void engine_stopped();
-
-//	virtual void bus_send_display_changed (boost::shared_ptr<ARDOUR::Route>);
 
 	void set_current_delivery (boost::shared_ptr<ARDOUR::Delivery>);
 

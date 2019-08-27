@@ -483,8 +483,6 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 
 	_route->comment_changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::setup_comment_button, this), gui_context());
 
-	set_stuff_from_route ();
-
 	/* now force an update of all the various elements */
 
 	update_mute_display ();
@@ -507,7 +505,6 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	mute_solo_table.show();
 	bottom_button_table.show();
 	show_sends_box.show_all();
-	//send_scroller.show ();
 	send_display.show ();
 	output_button.show();
 	name_button.show();
@@ -560,21 +557,9 @@ FoldbackStrip::processors_changed (RouteProcessorChange)
 }
 
 void
-FoldbackStrip::set_stuff_from_route ()
-{
-	/* if width is not set, it will be set by the MixerUI or editor */
-
-	Width width;
-	if (get_gui_property ("strip-width", width)) {
-//		set_width_enum (width, this);
-	}
-}
-
-void
 FoldbackStrip::set_packed (bool yn)
 {
 	_packed = yn;
-	set_gui_property ("visible", _packed);
 }
 
 
@@ -1253,7 +1238,7 @@ FoldbackStrip::list_fb_routes ()
 void
 FoldbackStrip::set_selected (bool yn)
 {
-	AxisView::set_selected (yn);
+	//AxisView::set_selected (yn);
 
 	if (selected()) {
 		global_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
