@@ -1664,6 +1664,7 @@ PluginManager::reset_tags (PluginInfoPtr const& pi)
 	if (i != ptags.end()) {
 		ptags.erase (ps);
 		ptags.insert (ps);
+		PluginTagChanged (pi->type, pi->unique_id, pi->category); /* EMIT SIGNAL */
 	}
 }
 
