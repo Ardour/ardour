@@ -94,7 +94,6 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, \
 
 {
 
-	//Gtk::HBox * snd_but_pan = new Gtk::HBox ();
 	HBox * snd_but_pan = new HBox ();
 
 	_button.set_distinct_led_click (true);
@@ -486,7 +485,6 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 
 	set_stuff_from_route ();
 
-	_session->DirtyChanged.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::update_send_box, this), gui_context());
 	/* now force an update of all the various elements */
 
 	update_mute_display ();
@@ -502,6 +500,8 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 
 	insert_box->show ();
 	update_send_box ();
+	_session->FBSendsChanged.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::update_send_box, this), gui_context());
+
 	global_frame.show();
 	global_vpacker.show();
 	mute_solo_table.show();
@@ -522,64 +522,40 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 void
 FoldbackStrip::update_send_box ()
 {
-	std::cout << "update_send_box\n";
 	clear_send_box ();
 	if (!_route) {
 		return;
 	}
-	std::cout << "update_send_box get fedby\n";
 	Route::FedBy fed_by = _route->fed_by();
-	std::cout << "update_send_box got fedby\n";
 	for (Route::FedBy::iterator i = fed_by.begin(); i != fed_by.end(); ++i) {
-		std::cout << "update_send_box route: " << i->r.lock()->name() << " \n";
 		if (i->sends_only) {
 			boost::shared_ptr<Route> s_rt (i->r.lock());
-			std::cout << "update_send_box sends only for " << s_rt->name() << " \n";
 			boost::shared_ptr<Send> snd = s_rt->internal_send_for (_route);
 			if (snd) {
-				std::cout << "update_send_box got send\n";
 				FoldbackSend * fb_s = new FoldbackSend (snd, s_rt, _route);
-				std::cout << "update_send_box started new FoldbackSend\n";
 				send_display.pack_start (*fb_s, Gtk::PACK_SHRINK);
-				std::cout << "update_send_box FbS packed\n";
 				fb_s->show ();
-				std::cout << "update_send_box FbS shown\n";
 				s_rt->processors_changed.connect (_connections, invalidator (*this), boost::bind (&FoldbackStrip::processors_changed, this, _1), gui_context ());
-				std::cout << "update_send_box sending route changed connected\n";
 			}
 		}
 	}
-	std::cout << "update_send_box finished\n";
-}
-
-void
-FoldbackStrip::update_send_box_2 (IOProcessor*,uint32_t)
-{
-	std::cout << "update_send_box_2\n";
-	update_send_box ();
 }
 
 void
 FoldbackStrip::clear_send_box ()
 {
-	std::cout << "clear_send_box\n";
 	std::vector< Widget* > snd_list = send_display.get_children ();
 	_connections.drop_connections ();
 	for (uint32_t i = 0; i < snd_list.size(); i++) {
-		std::cout << "clear_send_box for " << i << "\n";
 		send_display.remove (*(snd_list[i]));
 		delete snd_list[i];
-		std::cout << "clear_send_box deleted " << i << "\n";
 	}
-	std::cout << "clear_send_box for finished\n";
 	snd_list.clear();
-	std::cout << "clear_send_box list cleared\n";
 }
 
 void
 FoldbackStrip::processors_changed (RouteProcessorChange)
 {
-	std::cout << "processors_changed\n";
 	update_send_box ();
 }
 
@@ -1468,14 +1444,12 @@ FoldbackStrip::route_active_changed ()
 void
 FoldbackStrip::copy_processors ()
 {
-//	processor_box.processor_operation (ProcessorBox::ProcessorsCopy);
 	insert_box->processor_operation (ProcessorBox::ProcessorsCopy);
 }
 
 void
 FoldbackStrip::cut_processors ()
 {
-//	processor_box.processor_operation (ProcessorBox::ProcessorsCut);
 	insert_box->processor_operation (ProcessorBox::ProcessorsCut);
 }
 
@@ -1494,7 +1468,6 @@ FoldbackStrip::select_all_processors ()
 void
 FoldbackStrip::deselect_all_processors ()
 {
-//	processor_box.processor_operation (ProcessorBox::ProcessorsSelectNone);
 	insert_box->processor_operation (ProcessorBox::ProcessorsSelectNone);
 }
 
@@ -1572,9 +1545,9 @@ FoldbackStrip::remove_current_fb ()
 		set_route (next);
 		_session->remove_route (old_route);
 	} else {
-		//_session->remove_route (old_route);
 		clear_send_box ();
 		RouteUI::self_delete ();
+		_session->remove_route (old_route);
 	}
 
 

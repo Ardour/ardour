@@ -115,7 +115,6 @@ public:
 
 	boost::shared_ptr<ARDOUR::Stripable> stripable() const { return RouteUI::stripable(); }
 
-//	Width get_width_enum () const { return _width; }
 	void* width_owner () const { return _width_owner; }
 
 	PannerUI&       panner_ui()       { return panners; }
@@ -126,7 +125,6 @@ public:
 
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 	void set_button_names ();
-//	void show_send (boost::shared_ptr<ARDOUR::Send>);
 	void revert_to_default_display ();
 
 	/** @return the delivery that is being edited using our fader; it will be the
@@ -237,7 +235,6 @@ private:
 
 	void update_output_display ();
 	void update_send_box ();
-	void update_send_box_2 (ARDOUR::IOProcessor*,uint32_t);
 	void processors_changed (ARDOUR::RouteProcessorChange);
 	void clear_send_box ();
 
