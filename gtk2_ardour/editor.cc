@@ -5472,6 +5472,10 @@ Editor::add_stripables (StripableList& sl)
 
 	for (StripableList::iterator s = sl.begin(); s != sl.end(); ++s) {
 
+		if ((*s)->is_foldbackbus()) {
+			continue;
+		}
+
 		if ((v = boost::dynamic_pointer_cast<VCA> (*s)) != 0) {
 
 			VCATimeAxisView* vtv = new VCATimeAxisView (*this, _session, *_track_canvas);
