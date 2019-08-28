@@ -186,7 +186,7 @@ private:
 	PannerUI     panners;
 
 	Gtk::Table mute_solo_table;
-	Gtk::Table bottom_button_table;
+	Gtk::Table level_table;
 
 	ArdourWidgets::ArdourButton output_button;
 
