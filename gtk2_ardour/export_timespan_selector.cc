@@ -415,9 +415,8 @@ ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (ARDOUR::Session * se
 	range_col->set_sort_column(4); // set sort name
 
 	Gtk::TreeViewColumn* time_span_col = range_view.get_column(3); // time span column
-	time_span_col->set_sort_column(8); //set sort length_actual 
+	time_span_col->set_sort_column(9); //set sort start
 
-	range_list->set_sort_column(5, Gtk::SORT_DESCENDING);
 	Gtk::TreeViewColumn* date_col = range_view.get_column(5); // date column
 	date_col->set_sort_column(7); // set sort as the timestamp
 
@@ -464,6 +463,9 @@ ExportTimespanSelectorSingle::fill_range_list ()
 			row[range_cols.length] = construct_length (*it);
 			//the actual samplecnt_t for sorting
 			row[range_cols.length_actual] = (*it)->length();
+
+			//start samplecnt_t for sorting
+			row[range_cols.start] = (*it)->start();
 
 			Glib::DateTime gdt(Glib::DateTime::create_now_local ((*it)->timestamp()));
 			row[range_cols.timestamp] = (*it)->timestamp();
@@ -527,9 +529,8 @@ ExportTimespanSelectorMultiple::ExportTimespanSelectorMultiple (ARDOUR::Session 
 	range_col->set_sort_column(4); // set sort name
 
 	Gtk::TreeViewColumn* time_span_col = range_view.get_column(3); // time span column
-	time_span_col->set_sort_column(8); //set sort length_actual 
+	time_span_col->set_sort_column(9); //set sort start
 
-	range_list->set_sort_column(5, Gtk::SORT_DESCENDING);
 	Gtk::TreeViewColumn* date_col = range_view.get_column(5); // date column
 	date_col->set_sort_column(7); // set sort as the timestamp
 
@@ -567,6 +568,9 @@ ExportTimespanSelectorMultiple::fill_range_list ()
 		row[range_cols.length] = construct_length (*it);
 		//the actual samplecnt_t for sorting
 		row[range_cols.length_actual] = (*it)->length();
+
+		//start samplecnt_t for sorting
+		row[range_cols.start] = (*it)->start();
 
 		Glib::DateTime gdt(Glib::DateTime::create_now_local ((*it)->timestamp()));
 		row[range_cols.timestamp] = (*it)->timestamp();

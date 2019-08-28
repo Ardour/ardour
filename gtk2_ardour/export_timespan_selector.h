@@ -144,8 +144,9 @@ protected:
 		Gtk::TreeModelColumn<std::string>       date;
 		Gtk::TreeModelColumn<time_t>            timestamp;
 		Gtk::TreeModelColumn<ARDOUR::samplecnt_t> length_actual;
+		Gtk::TreeModelColumn<ARDOUR::samplecnt_t> start;
 
-		RangeCols () { add (location); add(label); add(selected); add(realtime); add(name); add(length); add(date); add(timestamp); add(length_actual);}
+		RangeCols () { add (location); add(label); add(selected); add(realtime); add(name); add(length); add(date); add(timestamp); add(length_actual); add(start);}
 	};
 	RangeCols                    range_cols;
 
