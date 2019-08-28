@@ -219,7 +219,7 @@ private:
 
 	void add_routes (ARDOUR::RouteList&);
 	void remove_strip (MixerStrip *);
-
+	void remove_foldback (FoldbackStrip *);
 	void add_masters (ARDOUR::VCAList&);
 	void remove_master (VCAMasterStrip*);
 	void new_masters_created ();

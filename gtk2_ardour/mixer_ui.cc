@@ -365,6 +365,7 @@ Mixer_UI::Mixer_UI ()
 
 	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_strip, this, _1), gui_context());
 	VCAMasterStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_master, this, _1), gui_context());
+	FoldbackStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_foldback, this, _1), gui_context());
 
 	/* handle escape */
 
@@ -738,6 +739,19 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 			break;
 		}
 	}
+}
+
+void
+Mixer_UI::remove_foldback (FoldbackStrip* strip)
+{
+	if (_session && _session->deletion_in_progress()) {
+		/* its all being taken care of */
+		return;
+	}
+	if (foldback_strip) {
+		foldback_strip->destroy_();
+	}
+	foldback_strip = 0;
 }
 
 void
