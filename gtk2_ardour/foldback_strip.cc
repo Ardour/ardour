@@ -16,35 +16,14 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <cmath>
-#include <list>
-#include <algorithm>
-
-#include <sigc++/bind.h>
-
-#include <gtkmm/messagedialog.h>
-
-#include "pbd/convert.h"
-#include "pbd/enumwriter.h"
-#include "pbd/replace_all.h"
-#include "pbd/stacktrace.h"
-
-#include "ardour/amp.h"
 #include "ardour/audioengine.h"
-#include "ardour/internal_send.h"
-#include "ardour/internal_return.h"
-#include "ardour/io.h"
-#include "ardour/io_processor.h"
 #include "ardour/pannable.h"
-#include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 #include "ardour/panner_manager.h"
-#include "ardour/port.h"
 #include "ardour/profile.h"
 #include "ardour/route.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
-#include "ardour/types.h"
 #include "ardour/user_bundle.h"
 #include "ardour/value_as_string.h"
 
@@ -234,7 +213,7 @@ FoldbackStrip::FoldbackStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Rou
 	, _pr_selection ()
 	, panners (sess)
 	, mute_solo_table (1, 2)
-	, bottom_button_table (1, 1)
+	, level_table (1, 1)
 	, _plugin_insert_cnt (0)
 	, _comment_button (_("Comments"))
 	, fb_level_control (0)
@@ -283,10 +262,10 @@ FoldbackStrip::init ()
 	fb_level_control->set_name ("monitor section knob");
 	fb_level_control->set_no_show_all (true);
 
-	bottom_button_table.attach (*fb_level_control, 0, 1, 0, 1,FILL,FILL,20,20); //EXPAND
-	bottom_button_table.set_spacings (20);
-	bottom_button_table.set_row_spacings (20);
-	bottom_button_table.set_homogeneous (true);
+	level_table.attach (*fb_level_control, 0, 1, 0, 1,FILL,FILL,20,20); //EXPAND
+	level_table.set_spacings (20);
+	level_table.set_row_spacings (20);
+	level_table.set_homogeneous (true);
 
 	mute_solo_table.set_homogeneous (true);
 	mute_solo_table.set_spacings (2);
@@ -334,9 +313,9 @@ FoldbackStrip::init ()
 #endif
 	global_vpacker.pack_end (_comment_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (output_button, Gtk::PACK_SHRINK);
-	global_vpacker.pack_end (*insert_box, Gtk::PACK_SHRINK);
-	global_vpacker.pack_end (bottom_button_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (mute_solo_table, Gtk::PACK_SHRINK);
+	global_vpacker.pack_end (level_table, Gtk::PACK_SHRINK);
+	global_vpacker.pack_end (*insert_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (panners, Gtk::PACK_SHRINK);
 
 	global_frame.add (global_vpacker);
@@ -503,7 +482,7 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	global_frame.show();
 	global_vpacker.show();
 	mute_solo_table.show();
-	bottom_button_table.show();
+	level_table.show();
 	show_sends_box.show_all();
 	send_display.show ();
 	output_button.show();
@@ -1238,15 +1217,14 @@ FoldbackStrip::list_fb_routes ()
 void
 FoldbackStrip::set_selected (bool yn)
 {
-	//AxisView::set_selected (yn);
 
-	if (selected()) {
+	/*if (selected()) {
 		global_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
 		global_frame.set_name ("MixerStripSelectedFrame");
-	} else {
+	} else {*/
 		global_frame.set_shadow_type (Gtk::SHADOW_IN);
 		global_frame.set_name ("MixerStripFrame");
-	}
+	//}
 
 	global_frame.queue_draw ();
 

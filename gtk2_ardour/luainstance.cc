@@ -823,7 +823,7 @@ LuaInstance::register_classes (lua_State* L)
 		.endClass ()
 
 		// std::list<Selectable*>
-		.beginConstStdCPtrList <Selectable> ("SelectionList")
+		.beginStdCPtrList <Selectable> ("SelectionList")
 		.endClass ()
 
 		// std::list<TimeAxisView*>
