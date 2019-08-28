@@ -410,6 +410,19 @@ ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (ARDOUR::Session * se
 
 	range_view.append_column (_("Length"), range_cols.length);
 	range_view.append_column (_("Creation Date"), range_cols.date);
+
+	Gtk::TreeViewColumn* range_col = range_view.get_column(2); // range name column
+	range_col->set_sort_column(4); // set sort name
+
+	Gtk::TreeViewColumn* time_span_col = range_view.get_column(3); // time span column
+	time_span_col->set_sort_column(8); //set sort length_actual 
+
+	range_list->set_sort_column(5, Gtk::SORT_DESCENDING);
+	Gtk::TreeViewColumn* date_col = range_view.get_column(5); // date column
+	date_col->set_sort_column(7); // set sort as the timestamp
+
+	Gtk::TreeViewColumn* length_col = range_view.get_column(4); // length column
+	length_col->set_sort_column(8); //set sort length_actual
 }
 
 void
@@ -449,6 +462,8 @@ ExportTimespanSelectorSingle::fill_range_list ()
 			row[range_cols.name] = (*it)->name();
 			row[range_cols.label] = construct_label (*it);
 			row[range_cols.length] = construct_length (*it);
+			//the actual samplecnt_t for sorting
+			row[range_cols.length_actual] = (*it)->length();
 
 			Glib::DateTime gdt(Glib::DateTime::create_now_local ((*it)->timestamp()));
 			row[range_cols.timestamp] = (*it)->timestamp();
@@ -508,10 +523,18 @@ ExportTimespanSelectorMultiple::ExportTimespanSelectorMultiple (ARDOUR::Session 
 	range_view.append_column (_("Length"), range_cols.length);
 	range_view.append_column (_("Creation Date"), range_cols.date);
 
+	Gtk::TreeViewColumn* range_col = range_view.get_column(2); // range name column
+	range_col->set_sort_column(4); // set sort name
+
+	Gtk::TreeViewColumn* time_span_col = range_view.get_column(3); // time span column
+	time_span_col->set_sort_column(8); //set sort length_actual 
+
 	range_list->set_sort_column(5, Gtk::SORT_DESCENDING);
 	Gtk::TreeViewColumn* date_col = range_view.get_column(5); // date column
 	date_col->set_sort_column(7); // set sort as the timestamp
 
+	Gtk::TreeViewColumn* length_col = range_view.get_column(4); // length column
+	length_col->set_sort_column(8); //set sort length_actual
 }
 
 void
@@ -542,6 +565,8 @@ ExportTimespanSelectorMultiple::fill_range_list ()
 		row[range_cols.name] = (*it)->name();
 		row[range_cols.label] = construct_label (*it);
 		row[range_cols.length] = construct_length (*it);
+		//the actual samplecnt_t for sorting
+		row[range_cols.length_actual] = (*it)->length();
 
 		Glib::DateTime gdt(Glib::DateTime::create_now_local ((*it)->timestamp()));
 		row[range_cols.timestamp] = (*it)->timestamp();
