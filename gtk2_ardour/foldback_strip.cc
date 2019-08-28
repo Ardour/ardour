@@ -279,8 +279,17 @@ FoldbackStrip::init ()
 	name_button.set_name ("mixer strip button");
 	name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 
-	_select_button.set_name ("mixer strip button");
-	_select_button.set_text (_("Select Foldback Bus"));
+	_previous_button.set_name ("mixer strip button");
+	_previous_button.set_text (_("Previous"));
+	_next_button.set_name ("mixer strip button");
+	_next_button.set_text (_("Next"));
+
+	prev_next_box.set_homogeneous (true);
+	prev_next_box.pack_start (_previous_button, true, true);
+	prev_next_box.pack_start (_next_button, true, true);
+	_previous_button.show();
+	_next_button.show();
+
 
 	_comment_button.set_name (X_("mixer strip button"));
 	_comment_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
@@ -289,7 +298,7 @@ FoldbackStrip::init ()
 	global_vpacker.set_border_width (1);
 	global_vpacker.set_spacing (4);
 
-	global_vpacker.pack_start (_select_button, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (prev_next_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_invert_button_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (show_sends_box, Gtk::PACK_SHRINK);
@@ -339,7 +348,8 @@ FoldbackStrip::init ()
 	output_button.signal_button_release_event().connect (sigc::mem_fun(*this, &FoldbackStrip::output_release), false);
 
 	name_button.signal_button_press_event().connect (sigc::mem_fun(*this, &FoldbackStrip::name_button_button_press), false);
-	_select_button.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackStrip::select_button_button_press), false);
+	_previous_button.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackStrip::previous_button_button_press), false);
+	_next_button.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackStrip::next_button_button_press), false);
 
 	_width = Wide;
 
@@ -441,6 +451,7 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	mute_button->show ();
 	solo_button->show ();
 	show_sends_box.show ();
+	prev_next_box.show ();
 	spacer.show();
 	update_fb_level_control();
 
@@ -487,7 +498,8 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	send_display.show ();
 	output_button.show();
 	name_button.show();
-	_select_button.show();
+	_previous_button.show();
+	_next_button.show();
 	_comment_button.show();
 
 	map_frozen();
@@ -1165,35 +1177,88 @@ FoldbackStrip::build_route_select_menu ()
 gboolean
 FoldbackStrip::name_button_button_press (GdkEventButton* ev)
 {
-	if (ev->button == 1 || ev->button == 3) {
-		list_route_operations ();
+	if (ev->button == 1) {
+		list_fb_routes ();
 
-		if (ev->button == 1) {
-			Gtkmm2ext::anchored_menu_popup(route_ops_menu, &name_button, "",
+		Gtkmm2ext::anchored_menu_popup(route_select_menu, &name_button, "",
 			                               1, ev->time);
-		} else {
-			route_ops_menu->popup (3, ev->time);
-		}
+		return true;
+	} else if (ev->button == 3) {
+		list_route_operations ();
+		route_ops_menu->popup (3, ev->time);
+		return true;
+	}
 
+	return false;
+
+}
+
+gboolean
+FoldbackStrip::previous_button_button_press (GdkEventButton* ev)
+{
+	if (ev->button == 1 || ev->button == 3) {
+		bool past_current = false;
+		StripableList slist;
+		boost::shared_ptr<Route> previous = boost::shared_ptr<Route> ();
+		boost::shared_ptr<Route> last = boost::shared_ptr<Route> ();
+		_session->get_stripables (slist, PresentationInfo::FoldbackBus);
+		if (slist.size () > 1) {
+			for (StripableList::iterator s = slist.begin(); s != slist.end(); ++s) {
+				last = boost::dynamic_pointer_cast<Route> (*s);
+				if ((*s) == _route) {
+					past_current = true;
+				}
+				if (!past_current) {
+					previous = boost::dynamic_pointer_cast<Route> (*s);
+				}
+			}
+		} else {
+			// only one route do nothing
+			return true;
+		}
+		//use previous to set route
+		if (previous) {
+			set_route (previous);
+		} else {
+			set_route (last);
+		}
 		return true;
 	}
 
 	return false;
 }
 
+
 gboolean
-FoldbackStrip::select_button_button_press (GdkEventButton* ev)
+FoldbackStrip::next_button_button_press (GdkEventButton* ev)
 {
 	if (ev->button == 1 || ev->button == 3) {
-		list_fb_routes ();
-
-		if (ev->button == 1) {
-			Gtkmm2ext::anchored_menu_popup(route_select_menu, &_select_button, "",
-			                               1, ev->time);
+		bool past_current = false;
+		StripableList slist;
+		boost::shared_ptr<Route> next = boost::shared_ptr<Route> ();
+		boost::shared_ptr<Route> first = boost::shared_ptr<Route> ();
+		_session->get_stripables (slist, PresentationInfo::FoldbackBus);
+		if (slist.size () > 1) {
+			first = boost::dynamic_pointer_cast<Route> (*(slist.begin()));
+			for (StripableList::iterator s = slist.begin(); s != slist.end(); ++s) {
+				if (past_current) {
+					next = boost::dynamic_pointer_cast<Route> (*s);
+					break;
+				}
+				if ((*s) == _route) {
+					past_current = true;
+				}
+			}
 		} else {
-			route_select_menu->popup (3, ev->time);
+			// only one route do nothing
+			return true;
 		}
-
+		//use next to set route
+		if (next) {
+			set_route (next);
+		} else {
+			set_route (first);
+		}
 		return true;
 	}
 
@@ -1218,18 +1283,11 @@ void
 FoldbackStrip::set_selected (bool yn)
 {
 
-	/*if (selected()) {
-		global_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
-		global_frame.set_name ("MixerStripSelectedFrame");
-	} else {*/
-		global_frame.set_shadow_type (Gtk::SHADOW_IN);
-		global_frame.set_name ("MixerStripFrame");
-	//}
+	global_frame.set_shadow_type (Gtk::SHADOW_IN);
+	global_frame.set_name ("MixerStripFrame");
 
 	global_frame.queue_draw ();
 
-//	if (!yn)
-//		processor_box.deselect_all_processors();
 }
 
 void

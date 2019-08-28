@@ -191,6 +191,7 @@ private:
 	ArdourWidgets::ArdourButton output_button;
 
 	Gtk::HBox show_sends_box;
+	Gtk::HBox prev_next_box;
 
 	std::string longest_label;
 
@@ -201,7 +202,8 @@ private:
 	guint32 mode_switch_in_progress;
 
 	ArdourWidgets::ArdourButton name_button;
-	ArdourWidgets::ArdourButton _select_button;
+	ArdourWidgets::ArdourButton _previous_button;
+	ArdourWidgets::ArdourButton _next_button;
 	ArdourWidgets::ArdourButton _comment_button;
 	ArdourWidgets::ArdourKnob*   fb_level_control;
 
@@ -242,7 +244,8 @@ private:
 
 	Gtk::Menu* route_select_menu;
 	void build_route_select_menu ();
-	gboolean select_button_button_press (GdkEventButton*);
+	gboolean previous_button_button_press (GdkEventButton*);
+	gboolean next_button_button_press (GdkEventButton*);
 	void list_fb_routes ();
 
 	void build_sends_menu ();
