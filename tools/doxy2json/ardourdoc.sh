@@ -38,39 +38,8 @@ time ./tools/doxy2json/doxy2json -j 4 \
 
 ls -lh $TMPFILE
 
-echo "# consolidating JSON"
-php << EOF
-<?php
-\$json = file_get_contents ('$TMPFILE');
-\$api = array ();
-foreach (json_decode (\$json, true) as \$a) {
-	if (!isset (\$a['decl'])) { continue; }
-
-	\$a['decl'] = str_replace ('size_t', 'unsigned long', \$a['decl']);
-	\$a['decl'] = str_replace ('uint32_t', 'unsigned int', \$a['decl']);
-	\$a['decl'] = str_replace ('int32_t', 'int', \$a['decl']);
-	\$a['decl'] = str_replace ('samplepos_t', 'long', \$a['decl']);
-	\$a['decl'] = str_replace ('samplecnt_t', 'long', \$a['decl']);
-	\$a['decl'] = str_replace ('frameoffset_t', 'long', \$a['decl']);
-	\$a['decl'] = str_replace ('int64_t', 'long', \$a['decl']);
-	\$a['decl'] = str_replace ('uint8_t', 'unsigned char', \$a['decl']);
-	\$a['decl'] = str_replace ('pframes_t', 'unsigned int', \$a['decl']);
-	\$a['decl'] = str_replace ('uint64_t', 'unsigned long', \$a['decl']);
-	\$a['decl'] = str_replace ('const char', 'char', \$a['decl']);
-	\$a['decl'] = str_replace ('const float', 'float', \$a['decl']);
-	\$a['decl'] = str_replace ('const double', 'double', \$a['decl']);
-	\$a['decl'] = str_replace ('const long', 'long', \$a['decl']);
-	\$a['decl'] = str_replace ('const unsigned int', 'unsigned int', \$a['decl']);
-	\$a['decl'] = str_replace ('const unsigned long', 'unsigned long', \$a['decl']);
-	\$a['decl'] = str_replace (' ::Vamp::', ' Vamp::', \$a['decl']);
-	\$canon = str_replace (' *', '*', \$a['decl']);
-	\$api[\$canon] = \$a;
-}
-\$jout = array ();
-foreach (\$api as \$k => \$a) {
-	\$jout[] = \$a;
-}
-file_put_contents('doc/ardourapi.json.gz', gzencode (json_encode (\$jout, JSON_PRETTY_PRINT)));
-EOF
-
-ls -l doc/ardourapi.json.gz
+if test -z "$1"; then
+	./tools/doxy2json/postproc.sh $TMPFILE
+else
+	cp -vi $TMPFILE doc/ardourapi-pre.json
+fi
