@@ -205,7 +205,6 @@ function canonical_decl ($b) {
 			if (!$first) { $rv .= ', '; }; $first = false;
 			if (empty ($a)) { continue; }
 			$a = preg_replace ('/([^>]) >/', '$1>', $a);
-			$a = preg_replace ('/^Cairo::/', '', $a); // special case cairo enums
 			$a = preg_replace ('/([^ ])&/', '$1 &', $a);
 			$a = preg_replace ('/std::vector<([^>]*)> const/', 'const std::vector<$1>', $a);
 			$a = str_replace ('std::vector', 'vector', $a);

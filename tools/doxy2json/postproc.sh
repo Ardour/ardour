@@ -23,11 +23,15 @@ foreach (json_decode (\$json, true) as \$a) {
 	\$a['decl'] = str_replace ('ARDOUR::sampleoffset_t', 'long', \$a['decl']);
 	\$a['decl'] = str_replace ('ARDOUR::frameoffset_t', 'long', \$a['decl']);
 	\$a['decl'] = str_replace ('ARDOUR::pframes_t', 'unsigned int', \$a['decl']);
+	\$a['decl'] = str_replace ('ARDOUR::Sample', 'float', \$a['decl']);
+	\$a['decl'] = str_replace ('ARDOUR::gain_t', 'float', \$a['decl']);
 	\$a['decl'] = str_replace ('samplepos_t', 'long', \$a['decl']);
 	\$a['decl'] = str_replace ('samplecnt_t', 'long', \$a['decl']);
 	\$a['decl'] = str_replace ('sampleoffset_t', 'long', \$a['decl']);
 	\$a['decl'] = str_replace ('frameoffset_t', 'long', \$a['decl']);
 	\$a['decl'] = str_replace ('pframes_t', 'unsigned int', \$a['decl']);
+	\$a['decl'] = preg_replace ('/\bSample\b/', 'float', \$a['decl']);
+	\$a['decl'] = str_replace ('gain_t', 'float', \$a['decl']);
 	\$a['decl'] = str_replace ('int64_t', 'long', \$a['decl']);
 	\$a['decl'] = str_replace ('uint8_t', 'unsigned char', \$a['decl']);
 	\$a['decl'] = str_replace ('uint64_t', 'unsigned long', \$a['decl']);
@@ -38,6 +42,9 @@ foreach (json_decode (\$json, true) as \$a) {
 	\$a['decl'] = str_replace ('const unsigned int', 'unsigned int', \$a['decl']);
 	\$a['decl'] = str_replace ('const unsigned long', 'unsigned long', \$a['decl']);
 	\$a['decl'] = str_replace (' ::Vamp::', ' Vamp::', \$a['decl']);
+	\$a['decl'] = str_replace ('Cairo::Context::set_line_join(LineJoin)', 'Cairo::Context::set_line_join(Cairo::LineJoin)', \$a['decl']);
+	\$a['decl'] = str_replace ('Cairo::Context::set_line_cap(LineCap)', 'Cairo::Context::set_line_cap(Cairo::LineCap)', \$a['decl']);
+	\$a['decl'] = str_replace ('Cairo::Context::set_operator(Operator)', 'Cairo::Context::set_operator(Cairo::Operator)', \$a['decl']);
 	\$canon = str_replace (' *', '*', \$a['decl']);
 	\$api[\$canon] = \$a;
 }
