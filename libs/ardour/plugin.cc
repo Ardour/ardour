@@ -152,7 +152,6 @@ Plugin::remove_preset (string name)
 	PresetRemoved (); /* EMIT SIGNAL */
 }
 
-/** @return PresetRecord with empty URI on failure */
 Plugin::PresetRecord
 Plugin::save_preset (string name)
 {
@@ -447,7 +446,6 @@ Plugin::get_presets ()
 	return p;
 }
 
-/** Set parameters using a preset */
 bool
 Plugin::load_preset (PresetRecord r)
 {

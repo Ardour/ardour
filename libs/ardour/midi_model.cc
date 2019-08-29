@@ -64,12 +64,6 @@ MidiModel::MidiModel (boost::shared_ptr<MidiSource> s)
 	set_midi_source (s);
 }
 
-/** Start a new NoteDiff command.
- *
- * This has no side-effects on the model or Session, the returned command
- * can be held on to for as long as the caller wishes, or discarded without
- * formality, until apply_command is called and ownership is taken.
- */
 MidiModel::NoteDiffCommand*
 MidiModel::new_note_diff_command (const string& name)
 {
@@ -79,7 +73,6 @@ MidiModel::new_note_diff_command (const string& name)
 	return new NoteDiffCommand (ms->model(), name);
 }
 
-/** Start a new SysExDiff command */
 MidiModel::SysExDiffCommand*
 MidiModel::new_sysex_diff_command (const string& name)
 {
@@ -89,7 +82,6 @@ MidiModel::new_sysex_diff_command (const string& name)
 	return new SysExDiffCommand (ms->model(), name);
 }
 
-/** Start a new PatchChangeDiff command */
 MidiModel::PatchChangeDiffCommand*
 MidiModel::new_patch_change_diff_command (const string& name)
 {
@@ -100,11 +92,6 @@ MidiModel::new_patch_change_diff_command (const string& name)
 }
 
 
-/** Apply a command.
- *
- * Ownership of cmd is taken, it must not be deleted by the caller.
- * The command will constitute one item on the undo stack.
- */
 void
 MidiModel::apply_command(Session& session, Command* cmd)
 {
@@ -114,11 +101,6 @@ MidiModel::apply_command(Session& session, Command* cmd)
 	set_edited (true);
 }
 
-/** Apply a command as part of a larger reversible transaction
- *
- * Ownership of cmd is taken, it must not be deleted by the caller.
- * The command will constitute one item on the undo stack.
- */
 void
 MidiModel::apply_command_as_subcommand(Session& session, Command* cmd)
 {
@@ -127,7 +109,7 @@ MidiModel::apply_command_as_subcommand(Session& session, Command* cmd)
 	set_edited (true);
 }
 
-/************** DIFF COMMAND ********************/
+/* ************* DIFF COMMAND ********************/
 
 #define NOTE_DIFF_COMMAND_ELEMENT "NoteDiffCommand"
 #define DIFF_NOTES_ELEMENT "ChangedNotes"

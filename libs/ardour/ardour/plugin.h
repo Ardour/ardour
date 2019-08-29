@@ -209,9 +209,15 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public HasLatency
 	    bool valid;
 	};
 
-	PresetRecord save_preset (std::string);
+	/** Create a new plugin-preset from the current state
+	 *
+	 * @param_name label to use for new preset (needs to be unique)
+	 * @return PresetRecord with empty URI on failure
+	 */
+	PresetRecord save_preset (std::string name);
 	void remove_preset (std::string);
 
+	/** Set parameters using a preset */
 	virtual bool load_preset (PresetRecord);
 	void clear_preset ();
 

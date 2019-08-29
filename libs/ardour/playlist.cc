@@ -1996,10 +1996,6 @@ Playlist::regions_with_end_within (Evoral::Range<samplepos_t> range)
 	return rlist;
 }
 
-/** @param start Range start.
- *  @param end Range end.
- *  @return regions which have some part within this range.
- */
 boost::shared_ptr<RegionList>
 Playlist::regions_touched (samplepos_t start, samplepos_t end)
 {

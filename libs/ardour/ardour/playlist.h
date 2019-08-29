@@ -187,6 +187,11 @@ public:
 
 	boost::shared_ptr<RegionList> regions_at (samplepos_t sample);
 	uint32_t                      count_regions_at (samplepos_t) const;
+
+	/** @param start Range start.
+	 *  @param end Range end.
+	 *  @return regions which have some part within this range.
+	 */
 	boost::shared_ptr<RegionList> regions_touched (samplepos_t start, samplepos_t end);
 	boost::shared_ptr<RegionList> regions_with_start_within (Evoral::Range<samplepos_t>);
 	boost::shared_ptr<RegionList> regions_with_end_within (Evoral::Range<samplepos_t>);
