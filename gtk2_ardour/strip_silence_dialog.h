@@ -22,6 +22,8 @@
 #include <gtkmm/spinbutton.h>
 #include <glibmm/threads.h>
 
+#include <pbd/xml++.h>
+
 #include "ardour/types.h"
 #include "ardour_dialog.h"
 #include "progress_reporter.h"
@@ -54,6 +56,9 @@ public:
 	void on_response (int response_id) {
 		Gtk::Dialog::on_response (response_id);
 	}
+
+	XMLNode& get_state ();
+	void set_state (const XMLNode &);
 
 private:
 	void create_waves ();
@@ -100,4 +105,8 @@ private:
 	bool idle_update_progress(); ///< GUI-thread progress updates of background silence computation
 	int analysis_progress_cur;
 	int analysis_progress_max;
+
+	int _threshold_value;
+	ARDOUR::samplecnt_t _minimum_length_value;
+	ARDOUR::samplecnt_t _fade_length_value;
 };
