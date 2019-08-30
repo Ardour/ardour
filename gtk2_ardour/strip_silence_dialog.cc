@@ -131,6 +131,8 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	Completed.connect (_completed_connection, invalidator(*this), boost::bind (&StripSilenceDialog::update, this), gui_context ());
 	_thread_should_finish = false;
 	pthread_create (&_thread, 0, StripSilenceDialog::_detection_thread_work, this);
+
+	signal_response().connect(sigc::mem_fun (*this, &StripSilenceDialog::finished));
 }
 
 
@@ -364,4 +366,12 @@ StripSilenceDialog::get_state ()
 void
 StripSilenceDialog::set_state (const XMLNode &)
 {
+}
+
+void
+StripSilenceDialog::finished(int response)
+{
+	if(response == Gtk::RESPONSE_OK) {
+		_session->add_extra_xml(get_state());
+	}
 }

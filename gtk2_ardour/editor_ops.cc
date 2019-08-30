@@ -5522,7 +5522,6 @@ Editor::strip_region_silence ()
 		StripSilence s (*_session, silences, d.fade_length());
 
 		apply_filter (s, _("strip silence"), &d);
-		_session->add_extra_xml(d.get_state());
 	}
 }
 

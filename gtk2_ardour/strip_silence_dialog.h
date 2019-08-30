@@ -71,6 +71,7 @@ private:
 	void threshold_changed ();
 	void update_progress_gui (float);
 	void restart_thread ();
+	void finished(int);
 
 	Gtk::SpinButton _threshold;
 	AudioClock*      _minimum_length;
