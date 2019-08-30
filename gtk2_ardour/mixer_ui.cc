@@ -1204,9 +1204,7 @@ Mixer_UI::update_track_visibility ()
 			(*i)[stripable_columns.visible] = av->marked_for_display ();
 		}
 
-		/* force presentation catch up with visibility changes
-		 */
-
+		/* force presentation to catch up with visibility changes */
 		sync_presentation_info_from_treeview ();
 	}
 
@@ -1299,11 +1297,13 @@ Mixer_UI::set_all_strips_visibility (bool yn)
 
 			(*i)[stripable_columns.visible] = yn;
 		}
+
+		/* force presentation to catch up with visibility changes */
+		sync_presentation_info_from_treeview ();
 	}
 
 	redisplay_track_list ();
 }
-
 
 void
 Mixer_UI::set_all_audio_midi_visibility (int tracks, bool yn)
@@ -1354,6 +1354,9 @@ Mixer_UI::set_all_audio_midi_visibility (int tracks, bool yn)
 				break;
 			}
 		}
+
+		/* force presentation to catch up with visibility changes */
+		sync_presentation_info_from_treeview ();
 	}
 
 	redisplay_track_list ();
