@@ -1096,7 +1096,6 @@ ArdourButton::set_active_state (Gtkmm2ext::ActiveState s)
 	bool changed = (_active_state != s);
 	CairoWidget::set_active_state (s);
 	if (changed) {
-		_update_colors = true;
 		CairoWidget::set_dirty ();
 	}
 }
