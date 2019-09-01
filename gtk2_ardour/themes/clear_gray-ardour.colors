@@ -163,7 +163,7 @@
     <ColorAlias name="entered marker" alias="color 19"/>
     <ColorAlias name="feedback alert: fill" alias="color 10"/>
     <ColorAlias name="feedback alert: fill active" alias="color 9"/>
-    <ColorAlias name="feedback alert: led active" alias="color 4"/>
+    <ColorAlias name="feedback alert: alt active" alias="color 8"/>
     <ColorAlias name="frame handle" alias="color 13"/>
     <ColorAlias name="gain line" alias="color 6"/>
     <ColorAlias name="gain line inactive" alias="color 24"/>
