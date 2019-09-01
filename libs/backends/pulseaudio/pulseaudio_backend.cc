@@ -235,11 +235,29 @@ PulseAudioBackend::init_pulse ()
 		return BackendInitializationError;
 	}
 
-	if (!(p_context = pa_context_new (pa_threaded_mainloop_get_api (p_mainloop), PROGRAM_NAME))) {
+	/* see https://freedesktop.org/software/pulseaudio/doxygen/proplist_8h.html */
+	pa_proplist* proplist = pa_proplist_new ();
+	pa_proplist_sets (proplist, PA_PROP_MEDIA_SOFTWARE, PROGRAM_NAME);
+	pa_proplist_sets (proplist, PA_PROP_MEDIA_ROLE, "production");
+#if 0 // TODO
+	/* in tools/linux_packaging/stage2.run.in uses xdg
+	 * ICON_NAME="${PGM_VENDOR}-${PGM_NAME}_${PGM_VERSION}"
+	 * e.g. "Harrison-Mixbus32C_3.7.24" "Ardour-Ardour_5.12.0"
+	 *
+	 * gtk2_ardour/wscript $ARDOUR_ICON is used in .desktop.in
+	 * 'ardour<major>'
+	 */
+	pa_proplist_sets (proplist, PA_PROP_APPLICATION_ICON_NAME, "Ardour-Ardour_5.12.0");
+#endif
+
+	if (!(p_context = pa_context_new_with_proplist (pa_threaded_mainloop_get_api (p_mainloop), PROGRAM_NAME, proplist))) {
 		PBD::error << _("PulseAudioBackend: Failed to allocate context") << endmsg;
 		close_pulse ();
+		pa_proplist_free (proplist);
 		return BackendInitializationError;
 	}
+
+	pa_proplist_free (proplist);
 
 	pa_context_set_state_callback (p_context, PulseAudioBackend::context_state_cb, this);
 
