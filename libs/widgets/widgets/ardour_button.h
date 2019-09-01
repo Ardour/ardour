@@ -124,6 +124,7 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	void set_fixed_colors   (const uint32_t active_color, const uint32_t inactive_color);
 	void set_active_color   (const uint32_t active_color);
 	void set_inactive_color (const uint32_t inactive_color);
+	void reset_fixed_colors ();
 
 	void set_fallthrough_to_parent(bool fall) { _fallthrough_to_parent = fall; }
 

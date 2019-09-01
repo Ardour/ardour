@@ -827,6 +827,16 @@ void ArdourButton::set_inactive_color (const uint32_t color)
 	CairoWidget::set_dirty ();
 }
 
+void ArdourButton::reset_fixed_colors ()
+{
+	if (_fixed_colors_set == 0) {
+		return;
+	}
+	_fixed_colors_set = 0;
+	_update_colors = true;
+	CairoWidget::set_dirty ();
+}
+
 void
 ArdourButton::build_patterns ()
 {
@@ -1096,6 +1106,7 @@ ArdourButton::set_active_state (Gtkmm2ext::ActiveState s)
 	bool changed = (_active_state != s);
 	CairoWidget::set_active_state (s);
 	if (changed) {
+		_update_colors = true;
 		CairoWidget::set_dirty ();
 	}
 }
