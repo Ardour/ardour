@@ -686,12 +686,14 @@ void
 ARDOUR_UI::feedback_blink (bool onoff)
 {
 	if (_feedback_exists) {
+		feedback_alert_button.set_active (true);
 		if (onoff) {
-			feedback_alert_button.set_active (true);
+			feedback_alert_button.reset_fixed_colors ();
 		} else {
-			feedback_alert_button.set_active (false);
+			feedback_alert_button.set_active_color (UIConfigurationBase::instance().color ("feedback alert: alt active", NULL));
 		}
 	} else {
+		feedback_alert_button.reset_fixed_colors ();
 		feedback_alert_button.set_active (false);
 	}
 }
