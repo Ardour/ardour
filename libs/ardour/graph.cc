@@ -72,6 +72,9 @@ Graph::Graph (Session& session)
 	g_atomic_int_set (&_idle_thread_cnt, 0);
 	g_atomic_int_set (&_trigger_queue_size, 0);
 
+	_n_terminal_nodes[0] = 0;
+	_n_terminal_nodes[1] = 0;
+
 	/* pre-allocate memory */
 	_trigger_queue.reserve (1024);
 
