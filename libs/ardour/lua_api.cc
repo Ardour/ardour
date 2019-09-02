@@ -830,7 +830,9 @@ LuaAPI::Vamp::analyze (boost::shared_ptr<ARDOUR::Readable> r, uint32_t channel, 
 		features = _plugin->process (bufs, ::Vamp::RealTime::fromSeconds ((double) pos / _sample_rate));
 
 		if (cb.type () == LUA_TFUNCTION) {
-			cb (&features, pos);
+			if (cb (&features, pos)) {
+				break;
+			}
 		}
 
 		pos += std::min (_stepsize, to_read);
