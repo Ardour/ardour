@@ -23,6 +23,9 @@
 #include <cairomm/surface.h>
 #include <pango/pangocairo.h>
 
+#include <gtkmm/progressbar.h>
+#include <gtkmm/stock.h>
+
 #include "pbd/file_utils.h"
 #include "pbd/strsplit.h"
 
@@ -40,6 +43,7 @@
 
 #include "LuaBridge/LuaBridge.h"
 
+#include "ardour_dialog.h"
 #include "ardour_http.h"
 #include "ardour_ui.h"
 #include "public_editor.h"
@@ -459,6 +463,85 @@ lua_exec (std::string cmd)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+/** Synchronous GUI-thread Progress dialog
+ *
+ * This shows a modal progress dialog with an optional
+ * "Cancel" button. Since it runs in the UI thread
+ * the script needs to regularly call progress(),
+ * as well as close the dialog, as needed.
+ */
+class LuaProgressWindow : public ArdourDialog
+{
+public:
+	/** Create a new progress window.
+	 * @param title Window title
+	 * @param allow_cancel include a "Cancel" option
+	 */
+	LuaProgressWindow (std::string const& title, bool allow_cancel)
+		: ArdourDialog (title, true)
+		, _canceled (false)
+	{
+		_bar.set_orientation (Gtk::PROGRESS_LEFT_TO_RIGHT);
+
+		set_border_width (12);
+		get_vbox()->set_spacing (6);
+		get_vbox()->pack_start (_bar, false, false);
+
+		if (allow_cancel) {
+			using namespace Gtk;
+			Button* b = add_button (Stock::CANCEL, RESPONSE_CANCEL);
+			b->signal_clicked().connect (sigc::mem_fun (*this, &LuaProgressWindow::cancel_clicked));
+		}
+
+		set_default_size (200, -1);
+		show_all ();
+	}
+
+	/** Report progress and update GUI.
+	 * @param prog progress in range 0..1 show a bar, values outside this range show a pulsing dialog.
+	 * @param text optional text to show on the progress-bar
+	 * @return true if cancel was clicked, false otherwise
+	 */
+	bool progress (float prog, std::string const& text = "")
+	{
+		if (!text.empty ()) {
+			_bar.set_text (text);
+		}
+		if (prog < 0 || prog > 1) {
+			std::cerr << "pulse\n";
+			_bar.set_pulse_step(.1);
+			_bar.pulse();
+		} else {
+		_bar.set_fraction (prog);
+		}
+		ARDOUR::GUIIdle ();
+		return _canceled;
+	}
+
+	bool canceled () const {
+		return _canceled;
+	}
+
+	/** Close and hide the dialog.
+	 *
+	 * This is required to be at the end, since the dialog
+	 * is modal and prevents other UI operations while visible.
+	 */
+	void done () {
+		Gtk::Dialog::response(_canceled ? Gtk::RESPONSE_CANCEL : Gtk::RESPONSE_OK);
+	}
+
+private:
+	void cancel_clicked () {
+		_canceled = true;
+	}
+
+	Gtk::ProgressBar _bar;
+	bool             _canceled;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 static int
 lua_actionlist (lua_State *L)
 {
@@ -758,8 +841,14 @@ LuaInstance::bind_dialog (lua_State* L)
 		.addConst ("None", -1)
 		.endNamespace ()
 
-		.endNamespace ();
+		.beginClass <LuaProgressWindow> ("LuaProgressWindow")
+		.addConstructor <void (*) (std::string const&, bool)> ()
+		.addFunction ("progress", &LuaProgressWindow::progress)
+		.addFunction ("done", &LuaProgressWindow::done)
+		.addFunction ("canceled", &LuaProgressWindow::canceled)
+		.endClass ()
 
+		.endNamespace ();
 }
 
 void
