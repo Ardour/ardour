@@ -37,7 +37,7 @@
 
 using namespace LuaDialog;
 
-/*******************************************************************************
+/* *****************************************************************************
  * Simple Message Dialog
  */
 Message::Message (std::string const& title, std::string const& msg, Message::MessageType mt, Message::ButtonType bt)
@@ -589,9 +589,10 @@ protected:
 	Gtk::FileChooserWidget _fc;
 };
 
-/*******************************************************************************
+/* *****************************************************************************
  * Lua Parameter Dialog
  */
+
 Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 	:_ad (title, true, false)
 	, _title (title)
@@ -839,4 +840,50 @@ Dialog::table_size_alloc (Gtk::Allocation& allocation)
 		_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 		_ad.set_size_request (-1, 512);
 	}
+}
+
+/* *****************************************************************************
+ * Lua Progress Dialog
+ */
+
+ProgressWindow::ProgressWindow (std::string const& title, bool allow_cancel)
+	: ArdourDialog (title, true)
+	, _canceled (false)
+{
+	_bar.set_orientation (Gtk::PROGRESS_LEFT_TO_RIGHT);
+
+	set_border_width (12);
+	get_vbox()->set_spacing (6);
+	get_vbox()->pack_start (_bar, false, false);
+
+	if (allow_cancel) {
+		using namespace Gtk;
+		Button* b = add_button (Stock::CANCEL, RESPONSE_CANCEL);
+		b->signal_clicked().connect (sigc::mem_fun (*this, &ProgressWindow::cancel_clicked));
+	}
+
+	set_default_size (200, -1);
+	show_all ();
+}
+
+bool
+ProgressWindow::progress (float prog, std::string const& text)
+{
+	if (!text.empty ()) {
+		_bar.set_text (text);
+	}
+	if (prog < 0 || prog > 1) {
+		std::cerr << "pulse\n";
+		_bar.set_pulse_step(.1);
+		_bar.pulse();
+	} else {
+		_bar.set_fraction (prog);
+	}
+	ARDOUR::GUIIdle ();
+	return _canceled;
+}
+
+void
+ProgressWindow::done () {
+	Gtk::Dialog::response(_canceled ? Gtk::RESPONSE_CANCEL : Gtk::RESPONSE_OK);
 }
