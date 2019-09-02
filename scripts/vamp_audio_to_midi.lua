@@ -22,6 +22,8 @@ function factory () return function ()
 	local audio_regions = {}
 	local start_time = Session:current_end_sample ()
 	local end_time = Session:current_start_sample ()
+	local max_pos = 0
+	local cur_pos = 0
 	for r in sel.regions:regionlist ():iter () do
 		if r:to_midiregion():isnil() then
 			local st = r:position()
@@ -34,6 +36,7 @@ function factory () return function ()
 				end_time = et
 			end
 			table.insert(audio_regions, r)
+			max_pos = max_pos + r:to_readable ():readable_length ()
 		else
 			midi_region = r:to_midiregion()
 		end
@@ -42,11 +45,24 @@ function factory () return function ()
 	midi_region:set_initial_position(start_time)
 	midi_region:set_length(end_time - start_time, 0)
 
+	local pdialog = LuaDialog.LuaProgressWindow ("Audio to MIDI", true)
+	function progress (_, pos)
+		return pdialog:progress ((cur_pos + pos) / max_pos, "Analyzing")
+	end
+
 	for i,ar in pairs(audio_regions) do
 		local a_off = ar:position ()
 		local b_off = midi_region:quarter_note () - midi_region:start_beats ()
 
-		vamp:analyze (ar:to_readable (), 0, nil)
+		vamp:analyze (ar:to_readable (), 0, progress)
+
+		if pdialog:canceled () then
+			goto out
+		end
+
+		cur_pos = cur_pos + ar:to_readable ():readable_length ()
+		pdialog:progress (cur_pos / max_pos, "Generating MIDI")
+
 		local fl = vamp:plugin ():getRemainingFeatures ():at (0)
 		if fl and fl:size() > 0 then
 			local mm = midi_region:midi_source(0):model()
@@ -66,7 +82,15 @@ function factory () return function ()
 			end
 			mm:apply_command (Session, midi_command)
 		end
+		-- reset the plugin (prepare for next iteration)
+		vamp:reset ()
 	end
+
+	::out::
+	pdialog:done ();
+	pdialog = nil
+	vamp = nil;
+	collectgarbage ()
 end end
 
 function icon (params) return function (ctx, width, height, fg)

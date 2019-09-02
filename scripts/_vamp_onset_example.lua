@@ -43,6 +43,7 @@ function factory () return function ()
 					end
 				end
 			end
+			return false -- continue, !cancel
 		end
 
 		-- Configure Vamp plugin
