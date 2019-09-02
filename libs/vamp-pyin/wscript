@@ -44,6 +44,7 @@ def build(bld):
     obj.includes     = ['.']
     obj.name         = 'libardourvamppyin'
     obj.target       = 'ardourvamppyin'
+    obj.uselib       = 'VAMPSDK'
     obj.use          = 'libvampplugin'
     autowaf.ensure_visible_symbols (obj, True)
     obj.vnum         = VAMP_PYIN_LIB_VERSION
