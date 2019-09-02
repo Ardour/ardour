@@ -309,6 +309,7 @@ CLASSKEYS(LuaCairo::PangoLayout);
 
 CLASSKEYS(LuaDialog::Message);
 CLASSKEYS(LuaDialog::Dialog);
+CLASSKEYS(LuaDialog::ProgressWindow);
 
 #endif // end windows special case
 
