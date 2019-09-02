@@ -297,6 +297,7 @@ namespace LuaCairo {
 namespace LuaDialog {
 	class Message;
 	class Dialog;
+	class ProgressWindow;
 }
 
 namespace Cairo {
