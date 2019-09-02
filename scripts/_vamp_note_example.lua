@@ -15,7 +15,7 @@ function factory () return function ()
 	-- prepare progress dialog
 	local progress_total = 0;
 	local progress_part = 0
-	local pdialog = LuaDialog.LuaProgressWindow ("Audio to MIDI", true)
+	local pdialog = LuaDialog.ProgressWindow ("Audio to MIDI", true)
 	function cb (_, pos)
 		return pdialog:progress ((pos + progress_part) / progress_total, "Analyzing")
 	end

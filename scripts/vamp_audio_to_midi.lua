@@ -45,7 +45,7 @@ function factory () return function ()
 	midi_region:set_initial_position(start_time)
 	midi_region:set_length(end_time - start_time, 0)
 
-	local pdialog = LuaDialog.LuaProgressWindow ("Audio to MIDI", true)
+	local pdialog = LuaDialog.ProgressWindow ("Audio to MIDI", true)
 	function progress (_, pos)
 		return pdialog:progress ((cur_pos + pos) / max_pos, "Analyzing")
 	end
