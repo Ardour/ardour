@@ -394,6 +394,7 @@ done
 
 # VAMP plugins that we use
 cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.dylib $Frameworks
+cp $BUILD_ROOT/libs/vamp-pyin/libardourvamppyin.dylib $Frameworks
 
 # Suil modules (new dir 'build-stack')
 if test -d $GTKSTACK_ROOT/lib/suil-0/ ; then
