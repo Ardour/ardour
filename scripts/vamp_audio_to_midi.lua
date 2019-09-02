@@ -18,7 +18,7 @@ function factory () return function ()
 	local sr = Session:nominal_sample_rate ()
 	local tm = Session:tempo_map ()
 	local vamp = ARDOUR.LuaAPI.Vamp ("libardourvampplugins:qm-transcription", sr)
-	local midi_region
+	local midi_region = nil
 	local audio_regions = {}
 	local start_time = Session:current_end_sample ()
 	local end_time = Session:current_start_sample ()
@@ -41,7 +41,16 @@ function factory () return function ()
 			midi_region = r:to_midiregion()
 		end
 	end
-	assert (audio_regions and midi_region)
+
+	if #audio_regions == 0 then
+		LuaDialog.Message ("Polyphonic Audio to MIDI", "No source audio region(s) selected.\nAt least one audio-region to be analyzed need to be selected.", LuaDialog.MessageType.Error, LuaDialog.ButtonType.Close):run ()
+		return
+	end
+	if not midi_region then
+		LuaDialog.Message ("Polyphonic Audio to MIDI", "No target MIDI region selected.\nA MIDI region, ideally empty, and extending beyond the selected audio-region(s) needs to be selected.", LuaDialog.MessageType.Error, LuaDialog.ButtonType.Close):run ()
+		return
+	end
+
 	midi_region:set_initial_position(start_time)
 	midi_region:set_length(end_time - start_time, 0)
 
