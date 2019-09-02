@@ -235,6 +235,7 @@ children = [
         'libs/ptformat',
         'libs/qm-dsp',
         'libs/vamp-plugins',
+        'libs/vamp-pyin',
         'libs/zita-resampler',
         'libs/zita-convolver',
         # core ardour libraries
