@@ -86,8 +86,11 @@ LuaScriptManager::LuaScriptManager ()
 	doc->set_line_wrap();
 	f->add (*doc);
 
+	Gtk::ScrolledWindow *scroller = manage (new Gtk::ScrolledWindow());
+	scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	scroller->add (_a_view);
 	Gtk::VBox *vbox = manage (new VBox());
-	vbox->pack_start (_a_view, false, false);
+	vbox->pack_start (*scroller, true, true);
 	vbox->pack_end (*edit_box, false, false);
 	vbox->pack_end (*f, false, false);
 	vbox->show_all ();
@@ -124,8 +127,11 @@ LuaScriptManager::LuaScriptManager ()
 	doc->set_line_wrap();
 	f->add (*doc);
 
+	scroller = manage (new Gtk::ScrolledWindow());
+	scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	scroller->add (_c_view);
 	vbox = manage (new VBox());
-	vbox->pack_start (_c_view, false, false);
+	vbox->pack_start (*scroller, true, true);
 	vbox->pack_end (*edit_box, false, false);
 	vbox->pack_end (*f, false, false);
 	vbox->show_all ();
@@ -157,8 +163,11 @@ LuaScriptManager::LuaScriptManager ()
 	doc->set_line_wrap();
 	f->add (*doc);
 
+	scroller = manage (new Gtk::ScrolledWindow());
+	scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	scroller->add (_s_view);
 	vbox = manage (new VBox());
-	vbox->pack_start (_s_view, false, false);
+	vbox->pack_start (*scroller, true, true);
 	vbox->pack_end (*edit_box, false, false);
 	vbox->pack_end (*f, false, false);
 	vbox->show_all ();
