@@ -3383,6 +3383,7 @@ Mixer_UI::control_action (boost::shared_ptr<T> (Stripable::*get_control)() const
 		if (s) {
 			ac = (s.get()->*get_control)();
 			if (ac) {
+				ac->start_touch (_session->audible_sample ());
 				cl->push_back (ac);
 				if (!have_val) {
 					val = !ac->get_value();

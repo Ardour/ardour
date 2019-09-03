@@ -6162,7 +6162,9 @@ Editor::toggle_mute ()
 			first = false;
 		}
 
-		cl->push_back (stav->stripable()->mute_control());
+		boost::shared_ptr<MuteControl> mc = stav->stripable()->mute_control();
+		cl->push_back (mc);
+		mc->start_touch (_session->audible_sample ());
 	}
 
 	_session->set_controls (cl, new_state, Controllable::UseGroup);
