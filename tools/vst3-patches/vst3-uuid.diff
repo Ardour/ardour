@@ -1,0 +1,52 @@
+diff --git a/libs/vst3/pluginterfaces/base/funknown.cpp b/libs/vst3/pluginterfaces/base/funknown.cpp
+index f205ac88de..09d5d27836 100644
+--- a/libs/vst3/pluginterfaces/base/funknown.cpp
++++ b/libs/vst3/pluginterfaces/base/funknown.cpp
+@@ -22,6 +22,14 @@
+ 
+ #if SMTG_OS_WINDOWS
+ #include <objbase.h>
++
++#if defined(__MINGW32__)
++/* UUID */
++#include <string>
++#include <boost/uuid/uuid.hpp>
++#include <boost/uuid/uuid_generators.hpp>
++#endif
++
+ #endif
+ 
+ #if SMTG_OS_MACOS
+@@ -37,6 +45,10 @@
+ 
+ #if SMTG_OS_LINUX
+ #include <ext/atomicity.h>
++/* UUID */
++#include <string>
++#include <boost/uuid/uuid.hpp>
++#include <boost/uuid/uuid_generators.hpp>
+ #endif
+ 
+ namespace Steinberg {
+@@ -124,6 +136,10 @@ bool FUID::generate ()
+ #if defined(_M_ARM64) || defined(_M_ARM)
+ 	//#warning implement me!
+ 	return false;
++#elif defined(__MINGW32__)
++	boost::uuids::uuid u = boost::uuids::random_generator()();
++	memcpy(data, (const void*)&u, 16);
++	return true;
+ #else
+ 	GUID guid;
+ 	HRESULT hr = CoCreateGuid (&guid);
+@@ -147,6 +163,10 @@ bool FUID::generate ()
+ 	}
+ 	return false;
+ 
++#elif SMTG_OS_LINUX
++	boost::uuids::uuid u = boost::uuids::random_generator()();
++	memcpy(data, (const void*)&u, 16);
++	return true;
+ #else
+ #warning implement me!
+ 	return false;

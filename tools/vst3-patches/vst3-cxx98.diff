@@ -1,0 +1,84 @@
+diff --git b/libs/vst3/pluginterfaces/base/fplatform.h a/libs/vst3/pluginterfaces/base/fplatform.h
+index 3a93738937..7db1c5d222 100644
+--- b/libs/vst3/pluginterfaces/base/fplatform.h
++++ a/libs/vst3/pluginterfaces/base/fplatform.h
+@@ -115,8 +115,8 @@
+ 		#ifndef SMTG_CPP11
+ 			#error unsupported compiler
+ 		#endif
+-		#define SMTG_CPP11_STDLIBSUPPORT 1
+-		#define SMTG_HAS_NOEXCEPT 1
++		#define SMTG_CPP11_STDLIBSUPPORT SMTG_CPP11
++		#define SMTG_HAS_NOEXCEPT SMTG_CPP11
+ 	#endif
+ //-----------------------------------------------------------------------------
+ // Mac and iOS
+diff --git b/libs/vst3/pluginterfaces/vst/ivstnoteexpression.h a/libs/vst3/pluginterfaces/vst/ivstnoteexpression.h
+index dd04d14f6a..87f5feac91 100644
+--- b/libs/vst3/pluginterfaces/vst/ivstnoteexpression.h
++++ a/libs/vst3/pluginterfaces/vst/ivstnoteexpression.h
+@@ -34,7 +34,10 @@ VST predefines some types like volume, pan, tuning by defining their ranges and
+ Used by NoteExpressionEvent::typeId and NoteExpressionTypeID::typeId
+ \see NoteExpressionTypeInfo
+ */
+-enum NoteExpressionTypeIDs : uint32
++enum NoteExpressionTypeIDs
++#if SMTG_CPP11
++	: uint32
++#endif
+ {
+ 	kVolumeTypeID = 0,		///< Volume, plain range [0 = -oo , 0.25 = 0dB, 0.5 = +6dB, 1 = +12dB]: plain = 20 * log (4 * norm)
+ 	kPanTypeID,				///< Panning (L-R), plain range [0 = left, 0.5 = center, 1 = right]
+@@ -183,7 +186,10 @@ DECLARE_CLASS_IID (INoteExpressionController, 0xB7F8F859, 0x41234872, 0x91169581
+ /** KeyswitchTypeIDs describes the type of a key switch
+ \see KeyswitchInfo
+ */
+-enum KeyswitchTypeIDs : uint32
++enum KeyswitchTypeIDs
++#if SMTG_CPP11
++: uint32
++#endif
+ {
+ 	kNoteOnKeyswitchTypeID = 0,				///< press before noteOn is played
+ 	kOnTheFlyKeyswitchTypeID,				///< press while noteOn is played
+diff --git b/libs/vst3/pluginterfaces/gui/iplugview.h a/libs/vst3/pluginterfaces/gui/iplugview.h
+index 32e1fcb3bd..9d6ec9a0d4 100644
+--- b/libs/vst3/pluginterfaces/gui/iplugview.h
++++ a/libs/vst3/pluginterfaces/gui/iplugview.h
+@@ -213,8 +213,8 @@ DECLARE_CLASS_IID (IPlugFrame, 0x367FAF01, 0xAFA94693, 0x8D4DA2A0, 0xED0882A3)
+ //------------------------------------------------------------------------
+ namespace Linux {
+ 
+-using TimerInterval = uint64;
+-using FileDescriptor = int;
++#define TimerInterval uint64
++#define FileDescriptor int
+ 
+ //------------------------------------------------------------------------
+ /** Linux event handler interface
+diff --git a/libs/vst3/pluginterfaces/base/ftypes.h b/libs/vst3/pluginterfaces/base/ftypes.h
+index feda6b0b9b..5f61e0ac81 100644
+--- a/libs/vst3/pluginterfaces/base/ftypes.h
++++ b/libs/vst3/pluginterfaces/base/ftypes.h
+@@ -93,6 +93,8 @@ namespace Steinberg
+ 	typedef char char8;
+ #ifdef _NATIVE_WCHAR_T_DEFINED
+ 	typedef __wchar_t char16;
++#elif defined(__MINGW32__)
++	typedef wchar_t char16;
+ #elif SMTG_CPP11
+ 	typedef char16_t char16;
+ #else
+diff --git a/libs/vst3/pluginterfaces/base/funknown.cpp b/libs/vst3/pluginterfaces/base/funknown.cpp
+index 0419bbc4bb..f205ac88de 100644
+--- a/libs/vst3/pluginterfaces/base/funknown.cpp
++++ b/libs/vst3/pluginterfaces/base/funknown.cpp
+@@ -68,7 +68,7 @@ namespace FUnknownPrivate {
+ int32 PLUGIN_API atomicAdd (int32& var, int32 d)
+ {
+ #if SMTG_OS_WINDOWS
+-	return InterlockedExchangeAdd (&var, d) + d;
++	return InterlockedExchangeAdd ((volatile long int*)&var, d) + d;
+ #elif SMTG_OS_MACOS
+ 	return OSAtomicAdd32Barrier (d, (int32_t*)&var);
+ #elif SMTG_OS_LINUX
