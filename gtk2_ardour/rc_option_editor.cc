@@ -1688,9 +1688,9 @@ class ColumVisibilityOption : public Option
 	{
 		cb = (CheckButton**) malloc (sizeof (CheckButton*) * n_col);
 		for (uint32_t i = 0; i < n_col; ++i) {
-			CheckButton* col = manage (new CheckButton (string_compose (_("Column %1"), i + 1)));
+			CheckButton* col = manage (new CheckButton (string_compose (_("Column %1 (Actions %2 + %3)"), i + 1, i * 2 + 1, i * 2 + 2)));
 			col->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &ColumVisibilityOption::column_toggled), i));
-			_hbox.pack_start (*col);
+			_vbox.pack_start (*col);
 			cb[i] = col;
 		}
 		parameter_changed (id);
@@ -1700,7 +1700,7 @@ class ColumVisibilityOption : public Option
 		free (cb);
 	}
 
-	Gtk::Widget& tip_widget() { return _hbox; }
+	Gtk::Widget& tip_widget() { return _vbox; }
 
 	void set_state_from_config ()
 	{
@@ -1716,7 +1716,7 @@ class ColumVisibilityOption : public Option
 	void add_to_page (OptionEditorPage* p)
 	{
 		_heading.add_to_page (p);
-		add_widget_to_page (p, &_hbox);
+		add_widget_to_page (p, &_vbox);
 	}
 	private:
 
@@ -1733,7 +1733,7 @@ class ColumVisibilityOption : public Option
 		}
 	}
 
-	HBox _hbox;
+	VBox _vbox;
 	OptionEditorHeading _heading;
 
 	CheckButton** cb;
@@ -3911,7 +3911,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Appearance/Toolbar"),
 			new ColumVisibilityOption (
-				"action-table-columns", _("Display Action-Buttons"), 4,
+				"action-table-columns", _("Display Action-Buttons"), MAX_LUA_ACTION_BUTTONS / 2,
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_action_table_columns),
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_action_table_columns)
 				)

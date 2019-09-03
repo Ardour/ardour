@@ -299,9 +299,9 @@ ARDOUR_UI::setup_windows ()
 
 	LuaInstance::instance()->ActionChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::update_action_script_btn));
 
-	for (int i = 0; i < MAX_LUA_ACTION_SCRIPTS; ++i) {
+	for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
 		std::string const a = string_compose (X_("script-action-%1"), i + 1);
-		Glib::RefPtr<Action> act = ActionManager::get_action(X_("Editor"), a.c_str());
+		Glib::RefPtr<Action> act = ActionManager::get_action(X_("LuaAction"), a.c_str());
 		assert (act);
 		action_script_call_btn[i].set_text (string_compose ("%1", i+1));
 		action_script_call_btn[i].set_related_action (act);
@@ -414,6 +414,9 @@ ARDOUR_UI::bind_lua_action_script (GdkEventButton*ev, int i)
 void
 ARDOUR_UI::update_action_script_btn (int i, const std::string& n)
 {
+	if (i < 0 || i >= MAX_LUA_ACTION_BUTTONS) {
+		return;
+	}
 	if (LuaInstance::instance()->lua_action_has_icon (i)) {
 		uintptr_t ii = i;
 		action_script_call_btn[i].set_icon (&LuaInstance::render_action_icon, (void*)ii);
@@ -422,7 +425,7 @@ ARDOUR_UI::update_action_script_btn (int i, const std::string& n)
 	}
 
 	std::string const a = string_compose (X_("script-action-%1"), i + 1);
-	Glib::RefPtr<Action> act = ActionManager::get_action(X_("Editor"), a.c_str());
+	Glib::RefPtr<Action> act = ActionManager::get_action(X_("LuaAction"), a.c_str());
 	assert (act);
 	if (n.empty ()) {
 		act->set_label (string_compose (_("Unset #%1"), i + 1));

@@ -449,7 +449,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 		VisibilityTracker::set_use_window_manager_visibility (UIConfiguration::instance().get_use_wm_visibility());
 	} else if (p == "action-table-columns") {
 		const uint32_t cols = UIConfiguration::instance().get_action_table_columns ();
-		for (int i = 0; i < MAX_LUA_ACTION_SCRIPTS; ++i) {
+		for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
 			const int col = i / 2;
 			if (cols & (1<<col)) {
 				action_script_call_btn[i].show();
