@@ -23,6 +23,7 @@ using std::pair;
 class SparseHMM
 {
 public:
+    virtual ~SparseHMM () {}
     virtual const std::vector<double> calculateObsProb(const vector<pair<double, double> >);
     const std::vector<int> decodeViterbi(std::vector<vector<double> > obs,
                                    vector<double> *scale);

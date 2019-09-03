@@ -27,6 +27,7 @@ class MonoPitchHMM : public SparseHMM
 {
 public:
     MonoPitchHMM();
+    virtual ~MonoPitchHMM() {}
     const std::vector<double> calculateObsProb(const vector<pair<double, double> >);
     // double getMidiPitch(size_t index);
     // double getFrequency(size_t index);
