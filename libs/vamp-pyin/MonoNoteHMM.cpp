@@ -3,7 +3,7 @@
 /*
     pYIN - A fundamental frequency estimator for monophonic audio
     Centre for Digital Music, Queen Mary, University of London.
-    
+
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
     published by the Free Software Foundation; either version 2 of the
@@ -31,9 +31,9 @@ const vector<double>
 MonoNoteHMM::calculateObsProb(const vector<pair<double, double> > pitchProb)
 {
     // pitchProb is a list of pairs (pitches and their probabilities)
-    
+
     size_t nCandidate = pitchProb.size();
-    
+
     // what is the probability of pitched
     double pIsPitched = 0;
     for (size_t iCandidate = 0; iCandidate < nCandidate; ++iCandidate)
@@ -68,8 +68,8 @@ MonoNoteHMM::calculateObsProb(const vector<pair<double, double> > pitchProb)
                         minDistCandidate = iCandidate;
                     }
                 }
-                tempProb = std::pow(minDistProb, par.yinTrust) * 
-                           boost::math::pdf(pitchDistr[i], 
+                tempProb = std::pow(minDistProb, par.yinTrust) *
+                           boost::math::pdf(pitchDistr[i],
                                             pitchProb[minDistCandidate].first);
             } else {
                 tempProb = 1;
@@ -78,12 +78,12 @@ MonoNoteHMM::calculateObsProb(const vector<pair<double, double> > pitchProb)
             out[i] = tempProb;
         }
     }
-    
+
     for (size_t i = 0; i < par.n; ++i)
     {
         if (i % par.nSPP != 2)
         {
-            if (tempProbSum > 0) 
+            if (tempProbSum > 0)
             {
                 out[i] = out[i] / tempProbSum * pIsPitched;
             }
@@ -106,7 +106,7 @@ MonoNoteHMM::build()
     // 3-5. second-lowest pitch
     //    3. attack state
     //    ...
-    
+
     // observation distributions
     for (size_t iState = 0; iState < par.n; ++iState)
     {
@@ -116,7 +116,7 @@ MonoNoteHMM::build()
             // silent state starts tracking
             init.push_back(1.0/(par.nS * par.nPPS));
         } else {
-            init.push_back(0.0);            
+            init.push_back(0.0);
         }
     }
 
@@ -128,7 +128,7 @@ MonoNoteHMM::build()
         pitchDistr[index+1] = boost::math::normal(mu, par.sigmaYinPitchStable);
         pitchDistr[index+2] = boost::math::normal(mu, 1.0); // dummy
     }
-    
+
     boost::math::normal noteDistanceDistr(0, par.sigma2Note);
 
     for (size_t iPitch = 0; iPitch < (par.nS * par.nPPS); ++iPitch)
@@ -149,7 +149,7 @@ MonoNoteHMM::build()
         from.push_back(index+1);
         to.push_back(index+1); // to itself
         transProb.push_back(par.pStableSelftrans);
-        
+
         from.push_back(index+1);
         to.push_back(index+2); // to silent
         transProb.push_back(par.pStable2Silent);
@@ -158,8 +158,7 @@ MonoNoteHMM::build()
         from.push_back(index+2);
         to.push_back(index+2);
         transProb.push_back(par.pSilentSelftrans);
-        
-        
+
         // the more complicated transitions from the silent
         double probSumSilent = 0;
 
@@ -168,17 +167,17 @@ MonoNoteHMM::build()
         {
             int fromPitch = iPitch;
             int toPitch = jPitch;
-            double semitoneDistance = 
+            double semitoneDistance =
                 std::abs(fromPitch - toPitch) * 1.0 / par.nPPS;
-            
+
             // if (std::fmod(semitoneDistance, 1) == 0 && semitoneDistance > par.minSemitoneDistance)
-            if (semitoneDistance == 0 || 
-                (semitoneDistance > par.minSemitoneDistance 
+            if (semitoneDistance == 0 ||
+                (semitoneDistance > par.minSemitoneDistance
                  && semitoneDistance < par.maxJump))
             {
                 size_t toIndex = jPitch * par.nSPP; // note attack index
 
-                double tempWeightSilent = boost::math::pdf(noteDistanceDistr, 
+                double tempWeightSilent = boost::math::pdf(noteDistanceDistr,
                                                            semitoneDistance);
                 probSumSilent += tempWeightSilent;
 

@@ -3,7 +3,7 @@
 /*
     pYIN - A fundamental frequency estimator for monophonic audio
     Centre for Digital Music, Queen Mary, University of London.
-    
+
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
     published by the Free Software Foundation; either version 2 of the
@@ -99,7 +99,7 @@ YinVamp::getPreferredBlockSize() const
     return 2048;
 }
 
-size_t 
+size_t
 YinVamp::getPreferredStepSize() const
 {
     return 256;
@@ -121,7 +121,7 @@ YinVamp::ParameterList
 YinVamp::getParameterDescriptors() const
 {
     ParameterList list;
-    
+
     ParameterDescriptor d;
     d.identifier = "yinThreshold";
     d.name = "Yin threshold";
@@ -132,7 +132,7 @@ YinVamp::getParameterDescriptors() const
     d.defaultValue = 0.15f;
     d.isQuantized = true;
     d.quantizeStep = 0.025f;
-        
+
     list.push_back(d);
 
     d.identifier = "outputunvoiced";
@@ -166,7 +166,7 @@ YinVamp::getParameter(string identifier) const
 }
 
 void
-YinVamp::setParameter(string identifier, float value) 
+YinVamp::setParameter(string identifier, float value)
 {
     if (identifier == "yinThreshold")
     {
@@ -202,7 +202,7 @@ YinVamp::getOutputDescriptors() const
     OutputList outputs;
 
     OutputDescriptor d;
-    
+
     int outputNumber = 0;
 
     d.identifier = "f0";
@@ -285,7 +285,7 @@ YinVamp::initialise(size_t channels, size_t stepSize, size_t blockSize)
     m_channels = channels;
     m_stepSize = stepSize;
     m_blockSize = blockSize;
-    
+
     reset();
 
     return true;
@@ -293,10 +293,10 @@ YinVamp::initialise(size_t channels, size_t stepSize, size_t blockSize)
 
 void
 YinVamp::reset()
-{    
+{
     m_yin.setThreshold(m_yinParameter);
     m_yin.setFrameSize(m_blockSize);
-/*        
+/*
     std::cerr << "YinVamp::reset: yin threshold set to " << (m_yinParameter)
           << ", blockSize = " << m_blockSize
           << std::endl;
@@ -308,10 +308,10 @@ YinVamp::process(const float *const *inputBuffers, RealTime timestamp)
 {
     timestamp = timestamp + Vamp::RealTime::frame2RealTime(m_blockSize/2, lrintf(m_inputSampleRate));
     FeatureSet fs;
-    
+
     double *dInputBuffers = new double[m_blockSize];
     for (size_t i = 0; i < m_blockSize; ++i) dInputBuffers[i] = inputBuffers[0][i];
-    
+
     Yin::YinOutput yo = m_yin.process(dInputBuffers);
     // std::cerr << "f0 in YinVamp: " << yo.f0 << std::endl;
     Feature f;
@@ -341,19 +341,19 @@ YinVamp::process(const float *const *inputBuffers, RealTime timestamp)
     f.values.clear();
     f.values.push_back(yo.rms);
     fs[m_outNoRms].push_back(f);
-    
+
     f.values.clear();
     for (size_t iBin = 0; iBin < yo.salience.size(); ++iBin)
     {
         f.values.push_back(yo.salience[iBin]);
     }
     fs[m_outNoSalience].push_back(f);
-    
+
     f.values.clear();
     // f.values[0] = yo.periodicity;
     f.values.push_back(yo.periodicity);
     fs[m_outNoPeriodicity].push_back(f);
-    
+
     delete [] dInputBuffers;
 
     return fs;

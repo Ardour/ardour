@@ -3,7 +3,7 @@
 /*
     pYIN - A fundamental frequency estimator for monophonic audio
     Centre for Digital Music, Queen Mary, University of London.
-    
+
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
     published by the Free Software Foundation; either version 2 of the
@@ -27,7 +27,6 @@ using std::vector;
 using std::pair;
 
 
-
 class Yin
 {
 public:
@@ -40,16 +39,16 @@ public:
         double rms;
         vector<double> salience;
         vector<pair<double, double> > freqProb;
-        YinOutput() :  f0(0), periodicity(0), rms(0), 
+        YinOutput() :  f0(0), periodicity(0), rms(0),
             salience(vector<double>(0)), freqProb(vector<pair<double, double> >(0)) { }
         YinOutput(double _f, double _p, double _r) :
-            f0(_f), periodicity(_p), rms(_r), 
+            f0(_f), periodicity(_p), rms(_r),
             salience(vector<double>(0)), freqProb(vector<pair<double, double> >(0)) { }
         YinOutput(double _f, double _p, double _r, vector<double> _salience) :
-            f0(_f), periodicity(_p), rms(_r), salience(_salience), 
+            f0(_f), periodicity(_p), rms(_r), salience(_salience),
             freqProb(vector<pair<double, double> >(0)) { }
     };
-    
+
     int setThreshold(double parameter);
     int setThresholdDistr(float parameter);
     int setFrameSize(size_t frameSize);

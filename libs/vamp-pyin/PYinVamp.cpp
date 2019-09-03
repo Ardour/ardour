@@ -3,7 +3,7 @@
 /*
     pYIN - A fundamental frequency estimator for monophonic audio
     Centre for Digital Music, Queen Mary, University of London.
-    
+
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
     published by the Free Software Foundation; either version 2 of the
@@ -109,7 +109,7 @@ PYinVamp::getPreferredBlockSize() const
     return 2048;
 }
 
-size_t 
+size_t
 PYinVamp::getPreferredStepSize() const
 {
     return 256;
@@ -131,7 +131,7 @@ PYinVamp::ParameterList
 PYinVamp::getParameterDescriptors() const
 {
     ParameterList list;
-    
+
     ParameterDescriptor d;
 
     d.identifier = "threshdistr";
@@ -241,7 +241,7 @@ PYinVamp::getParameter(string identifier) const
 }
 
 void
-PYinVamp::setParameter(string identifier, float value) 
+PYinVamp::setParameter(string identifier, float value)
 {
     if (identifier == "threshdistr")
     {
@@ -293,7 +293,7 @@ PYinVamp::getOutputDescriptors() const
     OutputList outputs;
 
     OutputDescriptor d;
-    
+
     int outputNumber = 0;
 
     d.identifier = "f0candidates";
@@ -327,7 +327,7 @@ PYinVamp::getOutputDescriptors() const
     d.hasDuration = false;
     outputs.push_back(d);
     m_oF0Probs = outputNumber++;
-    
+
     d.identifier = "voicedprob";
     d.name = "Voiced Probability";
     d.description = "Probability that the signal is voiced according to Probabilistic Yin.";
@@ -358,7 +358,7 @@ PYinVamp::getOutputDescriptors() const
     d.hasDuration = false;
     outputs.push_back(d);
     m_oCandidateSalience = outputNumber++;
-    
+
     d.identifier = "smoothedpitchtrack";
     d.name = "Smoothed Pitch Track";
     d.description = ".";
@@ -407,7 +407,7 @@ PYinVamp::initialise(size_t channels, size_t stepSize, size_t blockSize)
     m_channels = channels;
     m_stepSize = stepSize;
     m_blockSize = blockSize;
-    
+
     reset();
 
     return true;
@@ -415,15 +415,15 @@ PYinVamp::initialise(size_t channels, size_t stepSize, size_t blockSize)
 
 void
 PYinVamp::reset()
-{    
+{
     m_yin.setThresholdDistr(m_threshDistr);
     m_yin.setFrameSize(m_blockSize);
     m_yin.setFast(!m_preciseTime);
-    
+
     m_pitchProb.clear();
     m_timestamp.clear();
     m_level.clear();
-/*    
+/*
     std::cerr << "PYinVamp::reset"
           << ", blockSize = " << m_blockSize
           << std::endl;
@@ -437,9 +437,9 @@ PYinVamp::process(const float *const *inputBuffers, RealTime timestamp)
     timestamp = timestamp + Vamp::RealTime::frame2RealTime(offset, lrintf(m_inputSampleRate));
 
     FeatureSet fs;
-    
+
     float rms = 0;
-    
+
     double *dInputBuffers = new double[m_blockSize];
     for (size_t i = 0; i < m_blockSize; ++i) {
         dInputBuffers[i] = inputBuffers[0][i];
@@ -447,15 +447,15 @@ PYinVamp::process(const float *const *inputBuffers, RealTime timestamp)
     }
     rms /= m_blockSize;
     rms = sqrt(rms);
-    
+
     bool isLowAmplitude = (rms < m_lowAmp);
-    
+
     Yin::YinOutput yo = m_yin.processProbabilisticYin(dInputBuffers);
     delete [] dInputBuffers;
 
     m_level.push_back(yo.rms);
 
-    // First, get the things out of the way that we don't want to output 
+    // First, get the things out of the way that we don't want to output
     // immediately, but instead save for later.
     vector<pair<double, double> > tempPitchProb;
     for (size_t iCandidate = 0; iCandidate < yo.freqProb.size(); ++iCandidate)
@@ -483,7 +483,7 @@ PYinVamp::process(const float *const *inputBuffers, RealTime timestamp)
         f.values.push_back(yo.freqProb[i].first);
     }
     fs[m_oF0Candidates].push_back(f);
-    
+
     // VOICEDPROB
     f.values.clear();
     float voicedProb = 0;
@@ -493,7 +493,7 @@ PYinVamp::process(const float *const *inputBuffers, RealTime timestamp)
         voicedProb += yo.freqProb[i].second;
     }
     fs[m_oF0Probs].push_back(f);
-    
+
     f.values.push_back(voicedProb);
     fs[m_oVoicedProb].push_back(f);
 
@@ -517,7 +517,7 @@ PYinVamp::getRemainingFeatures()
     Feature f;
     f.hasTimestamp = true;
     f.hasDuration = false;
-    
+
     if (m_pitchProb.empty()) {
         return fs;
     }
@@ -536,10 +536,10 @@ PYinVamp::getRemainingFeatures()
         } else {
             f.values.push_back(mpOut[iFrame]);
         }
-        
+
         fs[m_oSmoothedPitchTrack].push_back(f);
     }
-    
+
     // MONO-NOTE STUFF
 //    std::cerr << "Mono Note Stuff" << std::endl;
     MonoNote mn;
@@ -555,19 +555,19 @@ PYinVamp::getRemainingFeatures()
     }
     // vector<MonoNote::FrameOutput> mnOut = mn.process(m_pitchProb);
     vector<MonoNote::FrameOutput> mnOut = mn.process(smoothedPitch);
-    
+
     // turning feature into a note feature
     f.hasTimestamp = true;
     f.hasDuration = true;
     f.values.clear();
-        
+
     int onsetFrame = 0;
     bool isVoiced = 0;
     bool oldIsVoiced = 0;
     size_t nFrame = m_pitchProb.size();
 
     float minNoteFrames = (m_inputSampleRate*m_pruneThresh) / m_stepSize;
-    
+
     std::vector<float> notePitchTrack; // collects pitches for one note at a time
     for (size_t iFrame = 0; iFrame < nFrame; ++iFrame)
     {

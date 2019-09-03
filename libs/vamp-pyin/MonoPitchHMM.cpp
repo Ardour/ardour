@@ -3,7 +3,7 @@
 /*
     pYIN - A fundamental frequency estimator for monophonic audio
     Centre for Digital Music, Queen Mary, University of London.
-    
+
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
     published by the Free Software Foundation; either version 2 of the
@@ -66,7 +66,7 @@ MonoPitchHMM::calculateObsProb(const vector<pair<double, double> > pitchProb)
             oldd = d;
         }
     }
-    
+
     double probReallyPitched = m_yinTrust * probYinPitched;
     // std::cerr << probReallyPitched << " " << probYinPitched << std::endl;
     // damn, I forget what this is all about...
@@ -84,14 +84,14 @@ MonoPitchHMM::build()
 {
     // INITIAL VECTOR
     init = vector<double>(2*m_nPitch, 1.0 / 2*m_nPitch);
-    
+
     // TRANSITIONS
     for (size_t iPitch = 0; iPitch < m_nPitch; ++iPitch)
     {
         int theoreticalMinNextPitch = static_cast<int>(iPitch)-static_cast<int>(m_transitionWidth/2);
         int minNextPitch = iPitch>m_transitionWidth/2 ? iPitch-m_transitionWidth/2 : 0;
         int maxNextPitch = iPitch<m_nPitch-m_transitionWidth/2 ? iPitch+m_transitionWidth/2 : m_nPitch-1;
-        
+
         // WEIGHT VECTOR
         double weightSum = 0;
         vector<double> weights;
@@ -107,7 +107,7 @@ MonoPitchHMM::build()
             }
             weightSum += weights[weights.size()-1];
         }
-        
+
         // std::cerr << minNextPitch << "  " << maxNextPitch << std::endl;
         // TRANSITIONS TO CLOSE PITCH
         for (size_t i = minNextPitch; i <= maxNextPitch; ++i)
@@ -124,7 +124,7 @@ MonoPitchHMM::build()
             to.push_back(i+m_nPitch);
             transProb.push_back(weights[i-minNextPitch] / weightSum * m_selfTrans);
             // transProb.push_back(weights[i-minNextPitch] / weightSum * 0.5);
-            
+
             from.push_back(iPitch+m_nPitch);
             to.push_back(i);
             transProb.push_back(weights[i-minNextPitch] / weightSum * (1-m_selfTrans));
@@ -135,7 +135,7 @@ MonoPitchHMM::build()
         // from.push_back(iPitch+m_nPitch);
         // to.push_back(2*m_nPitch);
         // transProb.push_back(1-m_selfTrans);
-        
+
         // TRANSITION FROM UNVOICED TO PITCH
         // from.push_back(2*m_nPitch);
         // to.push_back(iPitch+m_nPitch);
@@ -145,9 +145,9 @@ MonoPitchHMM::build()
     // from.push_back(2*m_nPitch);
     // to.push_back(2*m_nPitch);
     // transProb.push_back(m_selfTrans);
-    
+
     // for (size_t i = 0; i < from.size(); ++i) {
     //     std::cerr << "P(["<< from[i] << " --> " << to[i] << "]) = " << transProb[i] << std::endl;
     // }
-    
+
 }

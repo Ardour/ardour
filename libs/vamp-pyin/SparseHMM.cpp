@@ -3,7 +3,7 @@
 /*
     pYIN - A fundamental frequency estimator for monophonic audio
     Centre for Digital Music, Queen Mary, University of London.
-    
+
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
     published by the Free Software Foundation; either version 2 of the
@@ -26,9 +26,9 @@ SparseHMM::calculateObsProb(const vector<pair<double, double> > data)
     return(vector<double>());
 }
 
-const std::vector<int> 
+const std::vector<int>
 SparseHMM::decodeViterbi(std::vector<vector<double> > obsProb,
-                         vector<double> *scale) 
+                         vector<double> *scale)
 {
     if (obsProb.size() < 1) {
         return vector<int>();
@@ -36,10 +36,10 @@ SparseHMM::decodeViterbi(std::vector<vector<double> > obsProb,
 
     size_t nState = init.size();
     size_t nFrame = obsProb.size();
-    
-    // check for consistency    
+
+    // check for consistency
     size_t nTrans = transProb.size();
-    
+
     // declaring variables
     std::vector<double> delta = std::vector<double>(nState);
     std::vector<double> oldDelta = std::vector<double>(nState);
@@ -76,22 +76,22 @@ SparseHMM::decodeViterbi(std::vector<vector<double> > obsProb,
         size_t toState;
         double currentTransProb;
         double currentValue;
-        
+
         // this is the "sparse" loop
         for (size_t iTrans = 0; iTrans < nTrans; ++iTrans)
         {
             fromState = from[iTrans];
             toState = to[iTrans];
             currentTransProb = transProb[iTrans];
-            
+
             currentValue = oldDelta[fromState] * currentTransProb;
             if (currentValue > delta[toState])
             {
                 delta[toState] = currentValue; // will be multiplied by the right obs later!
                 psi[iFrame][toState] = fromState;
-            }            
+            }
         }
-        
+
         for (size_t jState = 0; jState < nState; ++jState)
         {
             delta[jState] *= obsProb[iFrame][jState];
@@ -125,7 +125,7 @@ SparseHMM::decodeViterbi(std::vector<vector<double> > obsProb,
         double currentValue = oldDelta[iState];
         if (currentValue > bestValue)
         {
-            bestValue = currentValue;            
+            bestValue = currentValue;
             path[nFrame-1] = iState;
         }
     }
@@ -135,11 +135,11 @@ SparseHMM::decodeViterbi(std::vector<vector<double> > obsProb,
     {
         path[iFrame] = psi[iFrame+1][path[iFrame+1]];
     }
-    
+
     // for (size_t iState = 0; iState < nState; ++iState)
     // {
     //     // std::cerr << psi[2][iState] << std::endl;
     // }
-    
+
     return path;
 }

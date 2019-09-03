@@ -3,7 +3,7 @@
 /*
     pYIN - A fundamental frequency estimator for monophonic audio
     Centre for Digital Music, Queen Mary, University of London.
-    
+
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
     published by the Free Software Foundation; either version 2 of the
@@ -40,15 +40,15 @@ MonoPitch::process(const vector<vector<pair<double, double> > > pitchProb)
     {
         obsProb.push_back(hmm.calculateObsProb(pitchProb[iFrame]));
     }
-    
+
     vector<double> *scale = new vector<double>(0);
-    
-    vector<float> out; 
-    
+
+    vector<float> out;
+
     // std::cerr << "before Viterbi decoding" << obsProb.size() << "ng" << obsProb[1].size() << std::endl;
     vector<int> path = hmm.decodeViterbi(obsProb, scale);
     // std::cerr << "after Viterbi decoding" << std::endl;
-    
+
     for (size_t iFrame = 0; iFrame < path.size(); ++iFrame)
     {
         // std::cerr << path[iFrame] << " " << hmm.m_freqs[path[iFrame]] << std::endl;

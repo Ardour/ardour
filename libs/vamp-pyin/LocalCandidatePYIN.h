@@ -3,7 +3,7 @@
 /*
     pYIN - A fundamental frequency estimator for monophonic audio
     Centre for Digital Music, Queen Mary, University of London.
-    
+
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
     published by the Free Software Foundation; either version 2 of the
@@ -61,9 +61,9 @@ protected:
     size_t m_blockSize;
     float m_fmin;
     float m_fmax;
-    
+
     mutable int m_oPitchTrackCandidates;
-    
+
     float m_threshDistr;
     float m_outputUnvoiced;
     float m_preciseTime;

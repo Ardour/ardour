@@ -3,7 +3,7 @@
 /*
     pYIN - A fundamental frequency estimator for monophonic audio
     Centre for Digital Music, Queen Mary, University of London.
-    
+
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
     published by the Free Software Foundation; either version 2 of the
@@ -24,7 +24,7 @@ class SparseHMM
 {
 public:
     virtual const std::vector<double> calculateObsProb(const vector<pair<double, double> >);
-    const std::vector<int> decodeViterbi(std::vector<vector<double> > obs, 
+    const std::vector<int> decodeViterbi(std::vector<vector<double> > obs,
                                    vector<double> *scale);
     vector<double> init;
     vector<size_t> from;

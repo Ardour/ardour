@@ -3,7 +3,7 @@
 /*
     pYIN - A fundamental frequency estimator for monophonic audio
     Centre for Digital Music, Queen Mary, University of London.
-    
+
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
     published by the Free Software Foundation; either version 2 of the
@@ -25,7 +25,7 @@
 
 using std::vector;
 
-Yin::Yin(size_t frameSize, size_t inputSampleRate, double thresh, bool fast) : 
+Yin::Yin(size_t frameSize, size_t inputSampleRate, double thresh, bool fast) :
     m_frameSize(frameSize),
     m_inputSampleRate(inputSampleRate),
     m_thresh(thresh),
@@ -38,13 +38,13 @@ Yin::Yin(size_t frameSize, size_t inputSampleRate, double thresh, bool fast) :
     }
 }
 
-Yin::~Yin() 
+Yin::~Yin()
 {
 }
 
 Yin::YinOutput
 Yin::process(const double *in) const {
-    
+
     double* yinBuffer = new double[m_yinBufferSize];
 
     // calculate aperiodicity function for all periods
@@ -55,11 +55,11 @@ Yin::process(const double *in) const {
 
     int tau = 0;
     tau = YinUtil::absoluteThreshold(yinBuffer, m_yinBufferSize, m_thresh);
-        
+
     double interpolatedTau;
     double aperiodicity;
     double f0;
-    
+
     if (tau!=0)
     {
         interpolatedTau = YinUtil::parabolicInterpolation(yinBuffer, abs(tau), m_yinBufferSize);
@@ -78,14 +78,14 @@ Yin::process(const double *in) const {
     {
         yo.salience.push_back(yinBuffer[iBuf] < 1 ? 1-yinBuffer[iBuf] : 0); // why are the values sometimes < 0 if I don't check?
     }
-    
+
     delete [] yinBuffer;
     return yo;
 }
 
 Yin::YinOutput
 Yin::processProbabilisticYin(const double *in) const {
-    
+
     double* yinBuffer = new double[m_yinBufferSize];
 
     // calculate aperiodicity function for all periods
@@ -95,7 +95,7 @@ Yin::processProbabilisticYin(const double *in) const {
     YinUtil::cumulativeDifference(yinBuffer, m_yinBufferSize);
 
     vector<double> peakProbability = YinUtil::yinProb(yinBuffer, m_threshDistr, m_yinBufferSize);
-    
+
     // calculate overall "probability" from peak probability
     double probSum = 0;
     for (size_t iBin = 0; iBin < m_yinBufferSize; ++iBin)
@@ -109,15 +109,15 @@ Yin::processProbabilisticYin(const double *in) const {
         yo.salience.push_back(peakProbability[iBuf]);
         if (peakProbability[iBuf] > 0)
         {
-            double currentF0 = 
+            double currentF0 =
                 m_inputSampleRate * (1.0 /
                 YinUtil::parabolicInterpolation(yinBuffer, iBuf, m_yinBufferSize));
             yo.freqProb.push_back(pair<double, double>(currentF0, peakProbability[iBuf]));
         }
     }
-    
+
     // std::cerr << yo.freqProb.size() << std::endl;
-    
+
     delete [] yinBuffer;
     return yo;
 }

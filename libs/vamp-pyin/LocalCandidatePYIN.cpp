@@ -3,7 +3,7 @@
 /*
     pYIN - A fundamental frequency estimator for monophonic audio
     Centre for Digital Music, Queen Mary, University of London.
-    
+
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License as
     published by the Free Software Foundation; either version 2 of the
@@ -106,7 +106,7 @@ LocalCandidatePYIN::getPreferredBlockSize() const
     return 2048;
 }
 
-size_t 
+size_t
 LocalCandidatePYIN::getPreferredStepSize() const
 {
     return 256;
@@ -128,7 +128,7 @@ LocalCandidatePYIN::ParameterList
 LocalCandidatePYIN::getParameterDescriptors() const
 {
     ParameterList list;
-    
+
     ParameterDescriptor d;
 
     d.identifier = "threshdistr";
@@ -196,7 +196,7 @@ LocalCandidatePYIN::getParameter(string identifier) const
 }
 
 void
-LocalCandidatePYIN::setParameter(string identifier, float value) 
+LocalCandidatePYIN::setParameter(string identifier, float value)
 {
     if (identifier == "threshdistr")
     {
@@ -268,7 +268,7 @@ LocalCandidatePYIN::initialise(size_t channels, size_t stepSize, size_t blockSiz
     m_channels = channels;
     m_stepSize = stepSize;
     m_blockSize = blockSize;
-    
+
     reset();
 
     return true;
@@ -276,10 +276,10 @@ LocalCandidatePYIN::initialise(size_t channels, size_t stepSize, size_t blockSiz
 
 void
 LocalCandidatePYIN::reset()
-{    
+{
     m_pitchProb.clear();
     m_timestamp.clear();
-/*    
+/*
     std::cerr << "LocalCandidatePYIN::reset"
           << ", blockSize = " << m_blockSize
           << std::endl;
@@ -291,25 +291,25 @@ LocalCandidatePYIN::process(const float *const *inputBuffers, RealTime timestamp
 {
     int offset = m_preciseTime == 1.0 ? m_blockSize/2 : m_blockSize/4;
     timestamp = timestamp + Vamp::RealTime::frame2RealTime(offset, lrintf(m_inputSampleRate));
-    
+
     double *dInputBuffers = new double[m_blockSize];
     for (size_t i = 0; i < m_blockSize; ++i) dInputBuffers[i] = inputBuffers[0][i];
-    
+
     size_t yinBufferSize = m_blockSize/2;
     double* yinBuffer = new double[yinBufferSize];
     if (!m_preciseTime) YinUtil::fastDifference(dInputBuffers, yinBuffer, yinBufferSize);
-    else YinUtil::slowDifference(dInputBuffers, yinBuffer, yinBufferSize);    
-    
+    else YinUtil::slowDifference(dInputBuffers, yinBuffer, yinBufferSize);
+
     delete [] dInputBuffers;
 
     YinUtil::cumulativeDifference(yinBuffer, yinBufferSize);
-    
+
     float minFrequency = 60;
     float maxFrequency = 900;
-    vector<double> peakProbability = YinUtil::yinProb(yinBuffer, 
-                                                      m_threshDistr, 
-                                                      yinBufferSize, 
-                                                      m_inputSampleRate/maxFrequency, 
+    vector<double> peakProbability = YinUtil::yinProb(yinBuffer,
+                                                      m_threshDistr,
+                                                      yinBufferSize,
+                                                      m_inputSampleRate/maxFrequency,
                                                       m_inputSampleRate/minFrequency);
 
     vector<pair<double, double> > tempPitchProb;
@@ -317,7 +317,7 @@ LocalCandidatePYIN::process(const float *const *inputBuffers, RealTime timestamp
     {
         if (peakProbability[iBuf] > 0)
         {
-            double currentF0 = 
+            double currentF0 =
                 m_inputSampleRate * (1.0 /
                 YinUtil::parabolicInterpolation(yinBuffer, iBuf, yinBufferSize));
             double tempPitch = 12 * std::log(currentF0/440)/std::log(2.) + 69;
@@ -351,10 +351,10 @@ LocalCandidatePYIN::getRemainingFeatures()
     vector<float> freqSum = vector<float>(m_nCandidate);
     vector<float> freqNumber = vector<float>(m_nCandidate);
     vector<float> freqMean = vector<float>(m_nCandidate);
-    
+
     boost::math::normal normalDist(0, 8); // semitones sd
     float maxNormalDist = boost::math::pdf(normalDist, 0);
-    
+
     // Viterbi-decode multiple times with different frequencies emphasised
     for (size_t iCandidate = 0; iCandidate < m_nCandidate; ++iCandidate)
     {
@@ -369,8 +369,8 @@ LocalCandidatePYIN::getRemainingFeatures()
             float prob = 0;
             for (size_t iProb = 0; iProb < m_pitchProb[iFrame].size(); ++iProb)
             {
-                pitch = m_pitchProb[iFrame][iProb].first;                
-                prob  = m_pitchProb[iFrame][iProb].second * 
+                pitch = m_pitchProb[iFrame][iProb].first;
+                prob  = m_pitchProb[iFrame][iProb].second *
                     boost::math::pdf(normalDist, pitch-centrePitch) /
                     maxNormalDist * 2;
                 sumProb += prob;
@@ -404,13 +404,13 @@ LocalCandidatePYIN::getRemainingFeatures()
     for (size_t iCandidate = 0; iCandidate < m_nCandidate; ++iCandidate) {
         for (size_t jCandidate = iCandidate+1; jCandidate < m_nCandidate; ++jCandidate) {
             size_t countEqual = 0;
-            for (size_t iFrame = 0; iFrame < nFrame; ++iFrame) 
+            for (size_t iFrame = 0; iFrame < nFrame; ++iFrame)
             {
                 if ((pitchTracks[jCandidate][iFrame] == 0 && pitchTracks[iCandidate][iFrame] == 0) ||
                 fabs(pitchTracks[iCandidate][iFrame]/pitchTracks[jCandidate][iFrame]-1)<0.01)
                 countEqual++;
             }
-            // std::cerr << "proportion equal: " << (countEqual * 1.0 / nFrame) << std::endl;    
+            // std::cerr << "proportion equal: " << (countEqual * 1.0 / nFrame) << std::endl;
             if (countEqual * 1.0 / nFrame > 0.8) {
                 if (freqNumber[iCandidate] > freqNumber[jCandidate]) {
                     duplicates.push_back(jCandidate);
@@ -433,7 +433,7 @@ LocalCandidatePYIN::getRemainingFeatures()
     {
         bool isDuplicate = false;
         for (size_t i = 0; i < duplicates.size(); ++i) {
-    
+
             if (duplicates[i] == iCandidate) {
                 isDuplicate = true;
                 break;
@@ -446,11 +446,11 @@ LocalCandidatePYIN::getRemainingFeatures()
             candidateLabels[iCandidate] = convert.str();
             candidateActuals[iCandidate] = actualCandidateNumber;
             // std::cerr << iCandidate << " " << actualCandidateNumber << " " << freqNumber[iCandidate] << " " << freqMean[iCandidate] << std::endl;
-            for (size_t iFrame = 0; iFrame < nFrame; ++iFrame) 
+            for (size_t iFrame = 0; iFrame < nFrame; ++iFrame)
             {
                 if (pitchTracks[iCandidate][iFrame] > 0)
                 {
-                    // featureValues[m_timestamp[iFrame]][iCandidate] = 
+                    // featureValues[m_timestamp[iFrame]][iCandidate] =
                     //     pitchTracks[iCandidate][iFrame];
                     outputFrequencies[iFrame].push_back(pitchTracks[iCandidate][iFrame]);
                 } else {
@@ -473,7 +473,7 @@ LocalCandidatePYIN::getRemainingFeatures()
         f.values = outputFrequencies[iFrame];
         fs[0].push_back(f);
     }
-    
+
     // I stopped using Chris's map stuff below because I couldn't get my head around it
     //
     // for (map<RealTime, map<int, float> >::const_iterator i =
@@ -482,7 +482,7 @@ LocalCandidatePYIN::getRemainingFeatures()
     //     f.hasTimestamp = true;
     //     f.timestamp = i->first;
     //     int nextCandidate = candidateActuals.begin()->second;
-    //     for (map<int, float>::const_iterator j = 
+    //     for (map<int, float>::const_iterator j =
     //              i->second.begin(); j != i->second.end(); ++j) {
     //         while (candidateActuals[j->first] > nextCandidate) {
     //             f.values.push_back(0);
