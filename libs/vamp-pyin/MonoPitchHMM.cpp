@@ -89,8 +89,8 @@ MonoPitchHMM::build()
     for (size_t iPitch = 0; iPitch < m_nPitch; ++iPitch)
     {
         int theoreticalMinNextPitch = static_cast<int>(iPitch)-static_cast<int>(m_transitionWidth/2);
-        int minNextPitch = iPitch>m_transitionWidth/2 ? iPitch-m_transitionWidth/2 : 0;
-        int maxNextPitch = iPitch<m_nPitch-m_transitionWidth/2 ? iPitch+m_transitionWidth/2 : m_nPitch-1;
+        size_t minNextPitch = iPitch>m_transitionWidth/2 ? iPitch-m_transitionWidth/2 : 0;
+        size_t maxNextPitch = iPitch<m_nPitch-m_transitionWidth/2 ? iPitch+m_transitionWidth/2 : m_nPitch-1;
 
         // WEIGHT VECTOR
         double weightSum = 0;

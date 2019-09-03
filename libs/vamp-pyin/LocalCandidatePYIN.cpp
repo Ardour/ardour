@@ -384,7 +384,7 @@ LocalCandidatePYIN::getRemainingFeatures()
         }
 
         vector<float> mpOut = mp.process(tempPitchProb);
-        float prevFreq = 0;
+        //float prevFreq = 0;
         for (size_t iFrame = 0; iFrame < nFrame; ++iFrame)
         {
             if (mpOut[iFrame] > 0) {
@@ -392,7 +392,7 @@ LocalCandidatePYIN::getRemainingFeatures()
                 pitchTracks[iCandidate][iFrame] = mpOut[iFrame];
                 freqSum[iCandidate] += mpOut[iFrame];
                 freqNumber[iCandidate]++;
-                prevFreq = mpOut[iFrame];
+                //prevFreq = mpOut[iFrame];
 
             }
         }
