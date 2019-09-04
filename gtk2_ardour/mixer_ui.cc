@@ -592,11 +592,6 @@ Mixer_UI::add_stripables (StripableList& slist)
 				if (route->is_monitor()) {
 
 					out_packer.pack_end (_monitor_section.tearoff(), false, false);
-					if (foldback_strip) {
-						out_packer.remove (*foldback_strip);
-						out_packer.pack_end (*foldback_strip, false, false);
-						foldback_strip->set_packed (true);
-					}
 					_monitor_section.set_session (_session);
 					_monitor_section.tearoff().show_all ();
 
@@ -620,7 +615,9 @@ Mixer_UI::add_stripables (StripableList& slist)
 						foldback_strip->set_route (route);
 					} else {
 						foldback_strip = new FoldbackStrip (*this, _session, route);
-						out_packer.pack_end (*foldback_strip, false, false);
+						out_packer.pack_start (*foldback_strip, false, false);
+						// change 0 to 1 below for foldback to right of master
+						out_packer.reorder_child (*foldback_strip, 0);
 						foldback_strip->set_packed (true);
 					}
 					continue;
