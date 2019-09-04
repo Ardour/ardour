@@ -344,9 +344,9 @@ fluid_voice_init(fluid_voice_t *voice, fluid_sample_t *sample,
     voice->synth_gain = gain;
 
     /* avoid division by zero later*/
-    if(voice->synth_gain < 0.0000001)
+    if(voice->synth_gain < 0.0000001f)
     {
-        voice->synth_gain = 0.0000001;
+        voice->synth_gain = 0.0000001f;
     }
 
     UPDATE_RVOICE_R1(fluid_rvoice_set_synth_gain, voice->synth_gain);
@@ -680,32 +680,32 @@ calculate_hold_decay_buffers(fluid_voice_t *voice, int gen_base,
     if(is_decay)
     {
         /* SF 2.01 section 8.1.3 # 28, 36 */
-        if(timecents > 8000.0)
+        if(timecents > 8000.f)
         {
-            timecents = 8000.0;
+            timecents = 8000.f;
         }
     }
     else
     {
         /* SF 2.01 section 8.1.3 # 27, 35 */
-        if(timecents > 5000)
+        if(timecents > 5000.f)
         {
-            timecents = 5000.0;
+            timecents = 5000.f;
         }
 
         /* SF 2.01 section 8.1.2 # 27, 35:
          * The most negative number indicates no hold time
          */
-        if(timecents <= -32768.)
+        if(timecents <= -32768.f)
         {
             return 0;
         }
     }
 
     /* SF 2.01 section 8.1.3 # 27, 28, 35, 36 */
-    if(timecents < -12000.0)
+    if(timecents < -12000.f)
     {
-        timecents = -12000.0;
+        timecents = -12000.f;
     }
 
     seconds = fluid_tc2sec(timecents);
@@ -714,7 +714,7 @@ calculate_hold_decay_buffers(fluid_voice_t *voice, int gen_base,
     /* round to next full number of buffers */
     buffers = (int)(((fluid_real_t)voice->output_rate * seconds)
                     / (fluid_real_t)FLUID_BUFSIZE
-                    + 0.5);
+                    + 0.5f);
 
     return buffers;
 }
@@ -774,7 +774,7 @@ fluid_voice_update_param(fluid_voice_t *voice, int gen)
         /* Range: SF2.01 section 8.1.3 # 48
          * Motivation for range checking:
          * OHPiano.SF2 sets initial attenuation to a whooping -96 dB */
-        fluid_clip(voice->attenuation, 0.0, 1440.0);
+        fluid_clip(voice->attenuation, 0.f, 1440.f);
         UPDATE_RVOICE_R1(fluid_rvoice_set_attenuation, voice->attenuation);
         break;
 
@@ -794,14 +794,14 @@ fluid_voice_update_param(fluid_voice_t *voice, int gen)
     case GEN_REVERBSEND:
         /* The generator unit is 'tenths of a percent'. */
         voice->reverb_send = x / 1000.0f;
-        fluid_clip(voice->reverb_send, 0.0, 1.0);
+        fluid_clip(voice->reverb_send, 0.f, 1.f);
         UPDATE_RVOICE_BUFFERS_AMP(fluid_rvoice_buffers_set_amp, 2, fluid_voice_calculate_gain_amplitude(voice, voice->reverb_send));
         break;
 
     case GEN_CHORUSSEND:
         /* The generator unit is 'tenths of a percent'. */
         voice->chorus_send = x / 1000.0f;
-        fluid_clip(voice->chorus_send, 0.0, 1.0);
+        fluid_clip(voice->chorus_send, 0.f, 1.f);
         UPDATE_RVOICE_BUFFERS_AMP(fluid_rvoice_buffers_set_amp, 3, fluid_voice_calculate_gain_amplitude(voice, voice->chorus_send));
         break;
 
@@ -870,17 +870,17 @@ fluid_voice_update_param(fluid_voice_t *voice, int gen)
         break;
 
     case GEN_MODLFOTOPITCH:
-        fluid_clip(x, -12000.0, 12000.0);
+        fluid_clip(x, -12000.f, 12000.f);
         UPDATE_RVOICE_R1(fluid_rvoice_set_modlfo_to_pitch, x);
         break;
 
     case GEN_MODLFOTOVOL:
-        fluid_clip(x, -960.0, 960.0);
+        fluid_clip(x, -960.f, 960.f);
         UPDATE_RVOICE_R1(fluid_rvoice_set_modlfo_to_vol, x);
         break;
 
     case GEN_MODLFOTOFILTERFC:
-        fluid_clip(x, -12000, 12000);
+        fluid_clip(x, -12000.f, 12000.f);
         UPDATE_RVOICE_R1(fluid_rvoice_set_modlfo_to_fc, x);
         break;
 
@@ -917,7 +917,7 @@ fluid_voice_update_param(fluid_voice_t *voice, int gen)
         break;
 
     case GEN_VIBLFOTOPITCH:
-        fluid_clip(x, -12000.0, 12000.0);
+        fluid_clip(x, -12000.f, 12000.f);
         UPDATE_RVOICE_R1(fluid_rvoice_set_viblfo_to_pitch, x);
         break;
 
@@ -970,7 +970,7 @@ fluid_voice_update_param(fluid_voice_t *voice, int gen)
         break;
 
     case GEN_MODENVTOPITCH:
-        fluid_clip(x, -12000.0, 12000.0);
+        fluid_clip(x, -12000.f, 12000.f);
         UPDATE_RVOICE_R1(fluid_rvoice_set_modenv_to_pitch, x);
         break;
 
@@ -979,7 +979,7 @@ fluid_voice_update_param(fluid_voice_t *voice, int gen)
          * Motivation for range checking:
          * Filter is reported to make funny noises now and then
          */
-        fluid_clip(x, -12000.0, 12000.0);
+        fluid_clip(x, -12000.f, 12000.f);
         UPDATE_RVOICE_R1(fluid_rvoice_set_modenv_to_fc, x);
         break;
 
@@ -1271,7 +1271,7 @@ void fluid_voice_update_portamento(fluid_voice_t *voice, int fromkey, int tokey)
     unsigned int countinc = (unsigned int)(((fluid_real_t)voice->output_rate *
                                             0.001f *
                                             (fluid_real_t)fluid_channel_portamentotime(channel))  /
-                                           (fluid_real_t)FLUID_BUFSIZE  + 0.5);
+                                           (fluid_real_t)FLUID_BUFSIZE  + 0.5f);
 
     /* Send portamento parameters to the voice dsp */
     UPDATE_RVOICE_GENERIC_IR(fluid_rvoice_set_portamento, voice->rvoice, countinc, pitchoffset);
@@ -1745,7 +1745,7 @@ fluid_voice_get_lower_boundary_for_attenuation(fluid_voice_t *voice)
                     || (mod->flags2 & FLUID_MOD_BIPOLAR)
                     || (mod->amount < 0))
             {
-                min_val *= -1.0; /* min_val = - |amount|*/
+                min_val = -min_val; /* min_val = - |amount|*/
             }
             else
             {
@@ -1792,9 +1792,9 @@ int fluid_voice_set_gain(fluid_voice_t *voice, fluid_real_t gain)
     fluid_real_t left, right, reverb, chorus;
 
     /* avoid division by zero*/
-    if(gain < 0.0000001)
+    if(gain < 0.0000001f)
     {
-        gain = 0.0000001;
+        gain = 0.0000001f;
     }
 
     voice->synth_gain = gain;
@@ -1964,9 +1964,9 @@ fluid_voice_get_overflow_prio(fluid_voice_t *voice,
             // FIXME: Should take into account where on the envelope we are...?
         }
 
-        if(a < 0.1)
+        if(a < 0.1f)
         {
-            a = 0.1; // Avoid div by zero
+            a = 0.1f; // Avoid div by zero
         }
 
         this_voice_prio += score->volume / a;

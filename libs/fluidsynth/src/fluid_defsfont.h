@@ -143,7 +143,6 @@ int fluid_defsfont_add_preset(fluid_defsfont_t *defsfont, fluid_defpreset_t *def
 struct _fluid_defpreset_t
 {
     fluid_defpreset_t *next;
-    fluid_defsfont_t *defsfont;           /* the soundfont this preset belongs to */
     char name[21];                        /* the name of the preset */
     unsigned int bank;                    /* the bank number */
     unsigned int num;                     /* the preset number */
@@ -151,7 +150,7 @@ struct _fluid_defpreset_t
     fluid_preset_zone_t *zone;               /* the chained list of preset zones */
 };
 
-fluid_defpreset_t *new_fluid_defpreset(fluid_defsfont_t *defsfont);
+fluid_defpreset_t *new_fluid_defpreset(void);
 void delete_fluid_defpreset(fluid_defpreset_t *defpreset);
 fluid_defpreset_t *fluid_defpreset_next(fluid_defpreset_t *defpreset);
 int fluid_defpreset_import_sfont(fluid_defpreset_t *defpreset, SFPreset *sfpreset, fluid_defsfont_t *defsfont);

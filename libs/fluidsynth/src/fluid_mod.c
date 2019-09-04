@@ -334,21 +334,21 @@ fluid_mod_transform_source_value(fluid_real_t val, unsigned char mod_flags, cons
      * is close enough.
      */
     case FLUID_MOD_SIN | FLUID_MOD_UNIPOLAR | FLUID_MOD_POSITIVE: /* custom sin(x) */
-        val = sin(M_PI / 2 * val_norm * 0.87);
+        val = FLUID_SIN((FLUID_M_PI / 2.0f * 0.87f) * val_norm);
         break;
 
     case FLUID_MOD_SIN | FLUID_MOD_UNIPOLAR | FLUID_MOD_NEGATIVE: /* custom */
-        val = sin(M_PI / 2 * (1.0f - val_norm) * 0.87);
+        val = FLUID_SIN((FLUID_M_PI / 2.0f * 0.87f) * (1.0f - val_norm));
         break;
 
     case FLUID_MOD_SIN | FLUID_MOD_BIPOLAR | FLUID_MOD_POSITIVE: /* custom */
-        val = (val_norm > 0.5f) ?  sin(M_PI / 2 * 2 * (val_norm - 0.5f))
-              : -sin(M_PI / 2 * 2 * (0.5f - val_norm));
+        val = (val_norm > 0.5f) ?  FLUID_SIN(FLUID_M_PI * (val_norm - 0.5f))
+              : -FLUID_SIN(FLUID_M_PI * (0.5f - val_norm));
         break;
 
     case FLUID_MOD_SIN | FLUID_MOD_BIPOLAR | FLUID_MOD_NEGATIVE: /* custom */
-        val = (val_norm > 0.5f) ? -sin(M_PI / 2 * 2 * (val_norm - 0.5f))
-              :  sin(M_PI / 2 * 2 * (0.5f - val_norm));
+        val = (val_norm > 0.5f) ? -FLUID_SIN(FLUID_M_PI * (val_norm - 0.5f))
+              :  FLUID_SIN(FLUID_M_PI * (0.5f - val_norm));
         break;
 
     default:
@@ -605,11 +605,11 @@ fluid_mod_check_cc_source(const fluid_mod_t *mod, unsigned char src1_select)
  */
 int fluid_mod_check_sources(const fluid_mod_t *mod, const char *name)
 {
-    static const char *invalid_non_cc_src =
+    static const char invalid_non_cc_src[] =
         "Invalid modulator, using non-CC source %s.src%d=%d";
-    static const char *invalid_cc_src =
+    static const char invalid_cc_src[] =
         "Invalid modulator, using CC source %s.src%d=%d";
-    static const char *src1_is_none =
+    static const char src1_is_none[] =
         "Modulator with source 1 none %s.src1=%d";
 
     /* checks valid non cc sources */

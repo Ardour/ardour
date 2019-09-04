@@ -205,7 +205,7 @@ int fluid_synth_set_chorus_full(fluid_synth_t *synth, int set, int nr, double le
 
 fluid_sample_timer_t *new_fluid_sample_timer(fluid_synth_t *synth, fluid_timer_callback_t callback, void *data);
 void delete_fluid_sample_timer(fluid_synth_t *synth, fluid_sample_timer_t *timer);
-
+void fluid_sample_timer_reset(fluid_synth_t *synth, fluid_sample_timer_t *timer);
 
 void fluid_synth_process_event_queue(fluid_synth_t *synth);
 

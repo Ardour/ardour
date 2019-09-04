@@ -1252,6 +1252,9 @@ fluid_istream_gets(fluid_istream_t in, char *buf, int len)
         /* Handle read differently depending on if its a socket or file descriptor */
         if(!(in & FLUID_SOCKET_FLAG))
         {
+            // usually read() is supposed to return '\n' as last valid character of the user input
+            // when compiled with compatibility for WinXP however, read() may return 0 (EOF) rather than '\n'
+            // this would cause the shell to exit early
             n = read(in, &c, 1);
 
             if(n == -1)
@@ -1275,7 +1278,8 @@ fluid_istream_gets(fluid_istream_t in, char *buf, int len)
         if(n == 0)
         {
             *buf = 0;
-            return 0;
+            // return 1 if read from stdin, else 0, to fix early exit of shell
+            return (in == STDIN_FILENO);
         }
 
         if(c == '\n')

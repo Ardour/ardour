@@ -26,7 +26,7 @@ void *default_fopen(const char *path)
 {
     const char* msg;
     FILE* handle = fluid_file_open(path, &msg);
-    
+
     if(handle == NULL)
     {
         FLUID_LOG(FLUID_ERR, "fluid_sfloader_load(): Failed to open '%s': %s", path, msg);
@@ -190,6 +190,7 @@ int fluid_sfloader_set_callbacks(fluid_sfloader_t *loader,
     cb->ftell = tell;
     cb->fclose = close;
 
+    // NOTE: if we ever make the instpatch loader public, this may return FLUID_FAILED
     return FLUID_OK;
 }
 
@@ -523,9 +524,9 @@ delete_fluid_sample(fluid_sample_t *sample)
  * Useful in low latency scenarios e.g. to allocate a pool of samples.
  *
  * @return Size of fluid_sample_t in bytes
- * 
+ *
  * @note It is recommend to zero initialize the memory before using the object.
- * 
+ *
  * @warning Do NOT allocate samples on the stack and assign them to a voice!
  */
 size_t fluid_sample_sizeof()
@@ -583,7 +584,7 @@ fluid_sample_set_sound_data(fluid_sample_t *sample,
         FLUID_FREE(sample->data);
         FLUID_FREE(sample->data24);
     }
-    
+
     sample->data = NULL;
     sample->data24 = NULL;
 

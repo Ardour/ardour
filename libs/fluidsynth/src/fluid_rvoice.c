@@ -599,8 +599,8 @@ fluid_rvoice_noteoff_LOCAL(fluid_rvoice_t *voice, unsigned int min_ticks)
         {
             fluid_real_t lfo = fluid_lfo_get_val(&voice->envlfo.modlfo) * -voice->envlfo.modlfo_to_vol;
             fluid_real_t amp = fluid_adsr_env_get_val(&voice->envlfo.volenv) * fluid_cb2amp(lfo);
-            fluid_real_t env_value = - (((-200 / M_LN10) * log(amp) - lfo) / FLUID_PEAK_ATTENUATION - 1);
-            fluid_clip(env_value, 0.0, 1.0);
+            fluid_real_t env_value = - (((-200.f / FLUID_M_LN10) * FLUID_LOGF(amp) - lfo) / FLUID_PEAK_ATTENUATION - 1);
+            fluid_clip(env_value, 0.0f, 1.0f);
             fluid_adsr_env_set_val(&voice->envlfo.volenv, env_value);
         }
     }
@@ -712,7 +712,7 @@ DECLARE_FLUID_RVOICE_FUNCTION(fluid_rvoice_multi_retrigger_attack)
         Here we need the inverse of fluid_convex() function defined as:
         new_value = pow(10, (1 - current_val) . FLUID_PEAK_ATTENUATION / -200 . 2.0)
         For performance reason we use fluid_cb2amp(Val) = pow(10, val/-200) with
-        val = (1 – current_val) . FLUID_PEAK_ATTENUATION / 2.0 
+        val = (1 - current_val) . FLUID_PEAK_ATTENUATION / 2.0 
         */
         fluid_real_t new_value; /* new modenv value */
         new_value = fluid_cb2amp((1.0f - fluid_adsr_env_get_val(&voice->envlfo.modenv))

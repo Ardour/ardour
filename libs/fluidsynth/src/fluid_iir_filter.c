@@ -73,7 +73,7 @@ fluid_iir_filter_apply(fluid_iir_filter_t *iir_filter,
         /* filter (implement the voice filter according to SoundFont standard) */
 
         /* Check for denormal number (too close to zero). */
-        if(fabs(dsp_hist1) < 1e-20)
+        if(FLUID_FABS(dsp_hist1) < 1e-20f)
         {
             dsp_hist1 = 0.0f;    /* FIXME JMG - Is this even needed? */
         }
@@ -109,7 +109,7 @@ fluid_iir_filter_apply(fluid_iir_filter_t *iir_filter,
                     dsp_b1 += dsp_b1_incr;
 
                     /* Compensate history to avoid the filter going havoc with large frequency changes */
-                    if(iir_filter->compensate_incr && fabs(dsp_b02) > 0.001)
+                    if(iir_filter->compensate_incr && FLUID_FABS(dsp_b02) > 0.001f)
                     {
                         fluid_real_t compensate = old_b02 / dsp_b02;
                         dsp_hist1 *= compensate;
@@ -205,7 +205,7 @@ static fluid_real_t fluid_iir_filter_q_from_dB(fluid_real_t q_dB)
 
     /* The 'sound font' Q is defined in dB. The filter needs a linear
        q. Convert. */
-    return pow(10.0f, q_dB / 20.0f);
+    return FLUID_POW(10.0f, q_dB / 20.0f);
 }
 
 DECLARE_FLUID_RVOICE_FUNCTION(fluid_iir_filter_set_q)
@@ -247,7 +247,7 @@ DECLARE_FLUID_RVOICE_FUNCTION(fluid_iir_filter_set_q)
          *  (numerator of the filter equation).  This gain factor depends
          *  only on Q, so this is the right place to calculate it.
          */
-        iir_filter->filter_gain /= sqrt(q);
+        iir_filter->filter_gain /= FLUID_SQRT(q);
     }
 
     /* The synthesis loop will have to recalculate the filter coefficients. */
@@ -277,8 +277,8 @@ fluid_iir_filter_calculate_coefficients(fluid_iir_filter_t *iir_filter,
 
         fluid_real_t omega = (fluid_real_t)(2.0 * M_PI) *
                                             (iir_filter->last_fres / output_rate);
-        fluid_real_t sin_coeff = (fluid_real_t) sin(omega);
-        fluid_real_t cos_coeff = (fluid_real_t) cos(omega);
+        fluid_real_t sin_coeff = FLUID_SIN(omega);
+        fluid_real_t cos_coeff = FLUID_COS(omega);
         fluid_real_t alpha_coeff = sin_coeff / (2.0f * iir_filter->q_lin);
         fluid_real_t a0_inv = 1.0f / (1.0f + alpha_coeff);
 
@@ -352,10 +352,10 @@ fluid_iir_filter_calculate_coefficients(fluid_iir_filter_t *iir_filter,
             iir_filter->b02_incr = (b02_temp - iir_filter->b02) / transition_samples;
             iir_filter->b1_incr = (b1_temp - iir_filter->b1) / transition_samples;
 
-            if(fabs(iir_filter->b02) > 0.0001)
+            if(FLUID_FABS(iir_filter->b02) > 0.0001f)
             {
                 fluid_real_t quota = b02_temp / iir_filter->b02;
-                iir_filter->compensate_incr = quota < 0.5 || quota > 2;
+                iir_filter->compensate_incr = quota < 0.5f || quota > 2.f;
             }
 
             /* Have to add the increments filter_coeff_incr_count times. */
@@ -393,13 +393,13 @@ void fluid_iir_filter_calc(fluid_iir_filter_t *iir_filter,
     {
         fres = 0.45f * output_rate;
     }
-    else if(fres < 5)
+    else if(fres < 5.f)
     {
-        fres = 5;
+        fres = 5.f;
     }
 
     /* if filter enabled and there is a significant frequency change.. */
-    if(iir_filter->type != FLUID_IIR_DISABLED && fabs(fres - iir_filter->last_fres) > 0.01)
+    if(iir_filter->type != FLUID_IIR_DISABLED && FLUID_FABS(fres - iir_filter->last_fres) > 0.01f)
     {
         /* The filter coefficients have to be recalculated (filter
          * parameters have changed). Recalculation for various reasons is
