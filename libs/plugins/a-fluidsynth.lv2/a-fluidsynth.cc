@@ -865,12 +865,21 @@ mn_file (LV2_Handle instance)
 	pf ("    </ChannelNameSet>\n");
 
 	pf ("    <ControlNameList Name=\"Controls\">\n");
+	pf ("       <Control Type=\"7bit\" Number=\"1\" Name=\"Modulation\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"2\" Name=\"Breath\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"5\" Name=\"Portamento Time\"/>\n");
 	pf ("       <Control Type=\"7bit\" Number=\"7\" Name=\"Channel Volume\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"8\" Name=\"Stereo Balance\"/>\n");
 	pf ("       <Control Type=\"7bit\" Number=\"10\" Name=\"Pan\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"11\" Name=\"Expression\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"37\" Name=\"Portamento Time (Fine)\"/>\n");
 	pf ("       <Control Type=\"7bit\" Number=\"39\" Name=\"Channel Volume (Fine)\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"40\" Name=\"Stereo Balance (Fine)\"/>\n");
 	pf ("       <Control Type=\"7bit\" Number=\"42\" Name=\"Pan (Fine)\"/>\n");
-	pf ("       <Control Type=\"7bit\" Number=\"64\" Name=\"Damper Pedal (Sustain)\"/>\n");
-	pf ("       <Control Type=\"7bit\" Number=\"66\" Name=\"Sostenuto\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"64\" Name=\"Sustain On/Off\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"65\" Name=\"Portamento On/Off\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"66\" Name=\"Sostenuto On/Off\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"68\" Name=\"Legato On/Off\"/>\n");
 	pf ("       <Control Type=\"7bit\" Number=\"91\" Name=\"Reverb\"/>\n");
 	pf ("       <Control Type=\"7bit\" Number=\"93\" Name=\"Chorus\"/>\n");
 	pf ("    </ControlNameList>\n");
