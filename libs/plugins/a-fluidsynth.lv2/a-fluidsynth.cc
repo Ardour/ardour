@@ -873,9 +873,6 @@ mn_file (LV2_Handle instance)
 	pf ("       <Control Type=\"7bit\" Number=\"10\" Name=\"Pan\"/>\n");
 	pf ("       <Control Type=\"7bit\" Number=\"11\" Name=\"Expression\"/>\n");
 	pf ("       <Control Type=\"7bit\" Number=\"37\" Name=\"Portamento Time (Fine)\"/>\n");
-	pf ("       <Control Type=\"7bit\" Number=\"39\" Name=\"Channel Volume (Fine)\"/>\n");
-	pf ("       <Control Type=\"7bit\" Number=\"40\" Name=\"Stereo Balance (Fine)\"/>\n");
-	pf ("       <Control Type=\"7bit\" Number=\"42\" Name=\"Pan (Fine)\"/>\n");
 	pf ("       <Control Type=\"7bit\" Number=\"64\" Name=\"Sustain On/Off\"/>\n");
 	pf ("       <Control Type=\"7bit\" Number=\"65\" Name=\"Portamento On/Off\"/>\n");
 	pf ("       <Control Type=\"7bit\" Number=\"66\" Name=\"Sostenuto On/Off\"/>\n");
