@@ -113,6 +113,8 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, \
 	_adjustment.signal_value_changed().connect (sigc::mem_fun (*this,  &FoldbackSend::level_adjusted));
 	lc->Changed.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::level_changed, this), gui_context ());
 	_send_proc->ActiveChanged.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::send_state_changed, this), gui_context ());
+	/// create button_press() then enable next line
+	//_button.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackSend::button_press), false);
 
 	show ();
 
@@ -244,8 +246,6 @@ FoldbackStrip::init ()
 	send_scroller.add (send_display);
 
 	send_display.set_flags (CAN_FOCUS);
-	//send_display.set_name ("ProcessorList");
-	send_display.set_name ("AudioBusStripBase");
 	send_display.set_spacing (4);
 
 	insert_box = new ProcessorBox (0, boost::bind (&FoldbackStrip::plugin_selector, this), _pr_selection, 0);
@@ -257,9 +257,9 @@ FoldbackStrip::init ()
 	send_display.show ();
 
 	fb_level_control = new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Detent);
-	fb_level_control->set_size_request (PX_SCALE(65), PX_SCALE(65));
+	fb_level_control->set_size_request (PX_SCALE(50), PX_SCALE(50));
 	fb_level_control->set_tooltip_prefix (_("Level: "));
-	fb_level_control->set_name ("monitor section knob");
+	fb_level_control->set_name ("foldback knob");
 	fb_level_control->set_no_show_all (true);
 
 	level_table.attach (*fb_level_control, 0, 1, 0, 1,FILL,FILL,20,20); //EXPAND
@@ -322,8 +322,8 @@ FoldbackStrip::init ()
 #endif
 	global_vpacker.pack_end (_comment_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (output_button, Gtk::PACK_SHRINK);
-	global_vpacker.pack_end (mute_solo_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (level_table, Gtk::PACK_SHRINK);
+	global_vpacker.pack_end (mute_solo_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (*insert_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (panners, Gtk::PACK_SHRINK);
 
