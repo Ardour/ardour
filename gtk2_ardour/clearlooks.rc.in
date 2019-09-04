@@ -104,7 +104,7 @@ style "default" = "medium_text"
 
   GtkEntry::cursor_color = @entry_cursor
   GtkEntry::state-hint = 0
-  
+
   bg[NORMAL]          = @background
   bg[PRELIGHT]        = shade(1.1, @background)
   bg[ACTIVE]          = shade(0.9, @background)
@@ -739,6 +739,13 @@ style "audio_bus_base" = "very_small_text"
 	bg[ACTIVE] = @background
 }
 
+style "foldback_bus_base" = "very_small_text"
+{
+	fg[NORMAL] = @foreground
+	bg[NORMAL] = @foldback_bg
+	bg[ACTIVE] = @background
+}
+
 style "send_strip_base" = "default"
 {
 	font_name = " 8"
@@ -1116,6 +1123,7 @@ widget "*EditorWindow" style:highest  "editor_window"
 widget "*SendStripBase" style:highest "send_strip_base"
 widget "*AudioTrackStripBase" style:highest "audio_track_base"
 widget "*AudioBusStripBase" style:highest "audio_bus_base"
+widget "*FoldbackBusStripBase" style:highest "foldback_bus_base"
 widget "*MidiTrackStripBase" style:highest "midi_track_base"
 widget "*AudioTrackStripBaseInactive" style:highest "track_header_inactive"
 widget "*AudioBusStripBaseInactive" style:highest "track_header_inactive"

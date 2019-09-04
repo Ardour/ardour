@@ -30,6 +30,7 @@
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
 #include <gtkmm/menu.h>
+#include <gtkmm/scrolledwindow.h>
 #include <gtkmm/sizegroup.h>
 #include <gtkmm/textview.h>
 #include <gtkmm/togglebutton.h>

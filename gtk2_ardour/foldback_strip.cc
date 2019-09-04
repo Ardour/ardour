@@ -242,11 +242,12 @@ FoldbackStrip::init ()
 	output_button.set_text (_("Output"));
 	output_button.set_name ("mixer strip button");
 
-	send_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-	send_scroller.add (send_display);
-
 	send_display.set_flags (CAN_FOCUS);
 	send_display.set_spacing (4);
+
+	send_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	send_scroller.add (send_display);
+	send_scroller.get_child()->set_name ("FoldbackBusStripBase");
 
 	insert_box = new ProcessorBox (0, boost::bind (&FoldbackStrip::plugin_selector, this), _pr_selection, 0);
 	insert_box->set_no_show_all ();
@@ -266,6 +267,7 @@ FoldbackStrip::init ()
 	level_table.set_spacings (20);
 	level_table.set_row_spacings (20);
 	level_table.set_homogeneous (true);
+	level_table.set_name ("FoldbackBusStripBase");
 
 	mute_solo_table.set_homogeneous (true);
 	mute_solo_table.set_spacings (2);
@@ -1349,7 +1351,7 @@ void
 FoldbackStrip::reset_strip_style ()
 {
 			if (_route->active()) {
-				set_name ("AudioBusStripBase");
+				set_name ("FoldbackBusStripBase");
 			} else {
 				set_name ("AudioBusStripBaseInactive");
 			}

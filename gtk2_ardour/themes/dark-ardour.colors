@@ -7,6 +7,7 @@
     <Color name="color 101" value="0xa06000ff"/>
     <Color name="color 103" value="0x1e7727ff"/>
     <Color name="color 104" value="0x7f7f7fff"/>
+    <Color name="color 105" value="0x1d3020ff"/>
     <Color name="color 11" value="0x9496a3ff"/>
     <Color name="color 12" value="0x18ab27ff"/>
     <Color name="color 13" value="0xffffffff"/>
@@ -200,6 +201,7 @@
     <ColorAlias name="gtk_darkest" alias="color 67"/>
     <ColorAlias name="gtk_fg_selected" alias="color 67"/>
     <ColorAlias name="gtk_fg_tooltip" alias="color 29"/>
+    <ColorAlias name="gtk_foldback_bg" alias="color 105"/>
     <ColorAlias name="gtk_foreground" alias="color 50"/>
     <ColorAlias name="gtk_light_text_on_dark" alias="color 31"/>
     <ColorAlias name="gtk_lightest" alias="color 13"/>
