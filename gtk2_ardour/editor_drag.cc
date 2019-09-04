@@ -6818,7 +6818,7 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	}
 
 	const samplepos_t start = map.sample_at_quarter_note (eqaf) - _region_view->region()->position();
-	Temporal::Beats length = _region_view->get_grid_beats (pf);
+	Temporal::Beats length = Temporal::Beats(1.0 / 32.0); /* 1/32 beat = 1/128 note */
 
 	_editor->begin_reversible_command (_("Create Hit"));
 	_region_view->clear_editor_note_selection();
