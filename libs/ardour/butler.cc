@@ -85,19 +85,11 @@ Butler::config_changed (std::string p)
 			/* size is in Samples, not bytes */
 			audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.sample_rate());
 			_session.adjust_playback_buffering ();
-		} else {
-#ifndef NDEBUG
-			std::cerr << "Skip explicit buffer seconds, preset in use\n";
-#endif
 		}
 	} else if (p == "capture-buffer-seconds") {
 		if (Config->get_buffering_preset() == Custom) {
 			audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.sample_rate());
 			_session.adjust_capture_buffering ();
-		} else {
-#ifndef NDEBUG
-			std::cerr << "Skip explicit buffer seconds, preset in use\n";
-#endif
 		}
 	} else if (p == "buffering-preset") {
 		DiskIOProcessor::set_buffering_parameters (Config->get_buffering_preset());

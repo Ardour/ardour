@@ -136,6 +136,9 @@ void
 Controllable::dump_registry ()
 {
 	Glib::Threads::RWLock::ReaderLock lm (registry_lock);
+	if (registry.size() == 0) {
+		return;
+	}
 	unsigned int cnt = 0;
 	cout << "-- List Of Registered Controllables\n";
 	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i, ++cnt) {

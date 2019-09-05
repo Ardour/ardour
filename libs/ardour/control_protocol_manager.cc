@@ -485,9 +485,7 @@ ControlProtocolManager::set_state (const XMLNode& node, int session_specific_sta
 			ControlProtocolInfo* cpi = cpi_by_name (name);
 
 			if (cpi) {
-#ifndef NDEBUG
-				std::cerr << "protocol " << name << " active ? " << active << std::endl;
-#endif
+				DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("Protocolstate %1 %2\n", name, active ? "active" : "inactive"));
 
 				if (active) {
 					delete cpi->state;
