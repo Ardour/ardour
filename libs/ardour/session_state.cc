@@ -413,14 +413,6 @@ Session::post_engine_init ()
 
 	DirtyChanged (); /* EMIT SIGNAL */
 
-	if (_is_new) {
-		save_state ("");
-	} else if (state_was_pending) {
-		save_state ("");
-		remove_pending_capture_state ();
-		state_was_pending = false;
-	}
-
 	/* Now, finally, we can fill the playback buffers */
 
 	BootMessage (_("Filling playback buffers"));
