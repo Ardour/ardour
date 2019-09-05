@@ -18,6 +18,7 @@
  */
 
 #include "control_surfaces_test.h"
+#include "control_protocol/control_protocol.h"
 #include "ardour/control_protocol_manager.h"
 #include "ardour/session.h"
 
@@ -44,7 +45,16 @@ ControlSurfacesTest::instantiateAndTeardownTest ()
 			continue;
 		}
 #endif
+		std::cout << "ControlSurfacesTest: " << (*i)->name << "\n";
+		if ((*i)->protocol && (*i)->protocol->active()) {
+			/* may already be active because of user preferences */
+			m.deactivate (**i);
+		}
+
 		m.activate (**i);
+		m.activate (**i); // should be a NO-OP, prints a warning
+
 		m.deactivate (**i);
+		m.deactivate (**i); // should be a NO-OP
 	}
 }
