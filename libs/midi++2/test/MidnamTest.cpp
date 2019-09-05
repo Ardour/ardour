@@ -191,6 +191,12 @@ MidnamTest::load_all_midnams_test ()
         boost::shared_ptr<XMLSharedNodeList> result = xmldoc.find("//MIDINameDocument");
         CPPUNIT_ASSERT(result->size() == 1);
 
+        result = xmldoc.find("//ExtendingDeviceNames");
+        if (result->size() != 0) {
+          cout << "  ... skipped (ExtendingDeviceNames)" << endl;
+          continue;
+        }
+
         result = xmldoc.find("//MasterDeviceNames");
         CPPUNIT_ASSERT(result->size() == 1);
 
