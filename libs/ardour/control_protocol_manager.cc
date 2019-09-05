@@ -129,6 +129,11 @@ ControlProtocolManager::activate (ControlProtocolInfo& cpi)
 
 	cpi.requested = true;
 
+	if (cpi.protocol && cpi.protocol->active()) {
+		warning << string_compose (_("Control protocol %1 was already active."), cpi.name) << endmsg;
+		return 0;
+	}
+
 	if ((cp = instantiate (cpi)) == 0) {
 		return -1;
 	}
