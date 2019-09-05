@@ -19,6 +19,7 @@
 
 #include "ardour/playlist.h"
 #include "ardour/playlist_factory.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/region.h"
 #include "playlist_equivalent_regions_test.h"
 
@@ -86,11 +87,39 @@ PlaylistEquivalentRegionsTest::multiLayerTest ()
 	_playlist_b->add_region (_r[2], 42);
 	_playlist_b->add_region (_r[3], 42);
 
-	/* Look for equivalents to _r[0] on _playlist_b */
+	RegionEquivalence re = Config->get_region_equivalence();
+
+	/* Look for equivalents to _r[0] on _playlist_b
+	 * using different equivalence modes */
+
+	Config->set_region_equivalence (Exact);
 	vector<boost::shared_ptr<Region> > e;
 	_playlist_b->get_equivalent_regions (_r[0], e);
-
 	/* That should be _r[2] and _r[3] */
 	CPPUNIT_ASSERT_EQUAL (size_t (2), e.size ());
 	CPPUNIT_ASSERT ((e.front() == _r[2] && e.back() == _r[3]) || (e.front() == _r[3] && e.back() == _r[2]));
+
+	Config->set_region_equivalence (Enclosed);
+	e.clear ();
+	_playlist_b->get_equivalent_regions (_r[0], e);
+	/* That should be _r[2] and _r[3] */
+	CPPUNIT_ASSERT_EQUAL (size_t (2), e.size ());
+	CPPUNIT_ASSERT ((e.front() == _r[2] && e.back() == _r[3]) || (e.front() == _r[3] && e.back() == _r[2]));
+
+	Config->set_region_equivalence (Overlap);
+	e.clear ();
+	_playlist_b->get_equivalent_regions (_r[0], e);
+	/* That should be _r[2] and _r[3] */
+	CPPUNIT_ASSERT_EQUAL (size_t (2), e.size ());
+	CPPUNIT_ASSERT ((e.front() == _r[2] && e.back() == _r[3]) || (e.front() == _r[3] && e.back() == _r[2]));
+
+	Config->set_region_equivalence (LayerTime);
+	e.clear ();
+	_playlist_b->get_equivalent_regions (_r[0], e);
+	/* That should be _r[2] */
+	CPPUNIT_ASSERT_EQUAL (size_t (1), e.size ());
+	CPPUNIT_ASSERT (e.front() == _r[2]);
+
+	/* restore original setting */
+	Config->set_region_equivalence (re);
 }
