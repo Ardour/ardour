@@ -1497,11 +1497,25 @@ DiskWriter::steal_write_source_name ()
 bool
 DiskWriter::configure_io (ChanCount in, ChanCount out)
 {
+	bool changed = false;
+	{
+		boost::shared_ptr<ChannelList> c = channels.reader();
+		if (in.n_audio() != c->size()) {
+			changed = true;
+		}
+		if ((0 == in.n_midi ()) != (0 == _midi_buf)) {
+			changed = true;
+		}
+	}
+
+
 	if (!DiskIOProcessor::configure_io (in, out)) {
 		return false;
 	}
 
-	reset_write_sources (false, true);
+	if (record_enabled() || changed) {
+		reset_write_sources (false, true);
+	}
 
 	return true;
 }
