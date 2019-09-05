@@ -42,7 +42,10 @@ public:
 	}
 
 	ParameterDescriptor descriptor(const Parameter& param) const {
-		return ParameterDescriptor();
+		Evoral::ParameterDescriptor desc;
+		desc.upper = 127;
+		desc.rangesteps = 128;
+		return desc;
 	}
 
 	std::string to_symbol(const Parameter& /*param*/) const { return "control"; }
@@ -57,8 +60,10 @@ public:
 	virtual bool find_next_event(double start, double end, ControlEvent& ev, bool only_active) const { return false; }
 
 	boost::shared_ptr<Control> control_factory(const Parameter& param) {
-		const Evoral::ParameterDescriptor desc;
-		boost::shared_ptr<ControlList>    list(new ControlList(param, desc));
+		Evoral::ParameterDescriptor desc;
+		desc.upper = 127;
+		desc.rangesteps = 128;
+		boost::shared_ptr<ControlList> list(new ControlList(param, desc));
 		return boost::shared_ptr<Control>(new Control(param, desc, list));
 	}
 };

@@ -315,6 +315,8 @@ CurveTest::constrainedCubic ()
 	int32_t type = 0;
 	Evoral::Parameter p(type);
 	Evoral::ParameterDescriptor pd;
+	pd.lower = 5;
+	pd.upper = 325;
 	Evoral::ControlList l(p,pd);
 
 	size_t i;
