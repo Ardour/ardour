@@ -164,7 +164,7 @@ public:
 			return read_space() >= cnt;
 		}
 		else if (cnt < 0) {
-			return g_atomic_int_get (&reserved) >= cnt;
+			return g_atomic_int_get (&reserved) >= -cnt;
 		}
 		else {
 			return true;
