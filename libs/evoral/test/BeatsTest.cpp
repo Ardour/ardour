@@ -1,11 +1,12 @@
 #include <stdlib.h>
 
 #include "BeatsTest.hpp"
-#include "evoral/Beats.hpp"
+#include "temporal/beats.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION(BeatsTest);
 
 using namespace Evoral;
+using namespace Temporal;
 
 static const double delta = 1.5 / (double)Beats::PPQN;
 

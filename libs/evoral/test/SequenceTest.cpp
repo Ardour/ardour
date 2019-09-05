@@ -88,7 +88,7 @@ SequenceTest::iteratorSeekTest ()
 
 	// Iterate over all notes
 	bool on = true;
-	for (Sequence<Time>::const_iterator i = seq->begin(Evoral::Beats(600)); i != seq->end(); ++i) {
+	for (Sequence<Time>::const_iterator i = seq->begin(Time(600)); i != seq->end(); ++i) {
 		if (on) {
 			CPPUNIT_ASSERT(i->is_note_on());
 			CPPUNIT_ASSERT_EQUAL(i->time(), Time((num_notes + 6) * 100));
@@ -161,11 +161,11 @@ SequenceTest::controlInterpolationTest ()
 		sink.write(i->time(), i->event_type(), i->size(), i->buffer());
 	}
 	CPPUNIT_ASSERT_EQUAL((size_t)3, sink.events.size());
-	CPPUNIT_ASSERT_EQUAL(Evoral::Beats(0), sink.events[0].first);
+	CPPUNIT_ASSERT_EQUAL(Time(0), sink.events[0].first);
 	CPPUNIT_ASSERT_EQUAL((uint8_t)0, sink.events[0].second);
-	CPPUNIT_ASSERT_EQUAL(Evoral::Beats(1000), sink.events[1].first);
+	CPPUNIT_ASSERT_EQUAL(Time(1000), sink.events[1].first);
 	CPPUNIT_ASSERT_EQUAL((uint8_t)127, sink.events[1].second);
-	CPPUNIT_ASSERT_EQUAL(Evoral::Beats(2000), sink.events[2].first);
+	CPPUNIT_ASSERT_EQUAL(Time(2000), sink.events[2].first);
 	CPPUNIT_ASSERT_EQUAL((uint8_t)0, sink.events[2].second);
 	sink.events.clear();
 	CPPUNIT_ASSERT_EQUAL((size_t)0, sink.events.size());

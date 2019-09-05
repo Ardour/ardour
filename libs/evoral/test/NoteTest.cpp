@@ -1,18 +1,18 @@
 #include "NoteTest.hpp"
+#include "temporal/beats.h"
 #include "evoral/Note.hpp"
-#include "evoral/Beats.hpp"
 #include <stdlib.h>
 
 CPPUNIT_TEST_SUITE_REGISTRATION (NoteTest);
 
 using namespace Evoral;
 
-typedef Beats Time;
+typedef Temporal::Beats Time;
 
 void
 NoteTest::copyTest ()
 {
-	Note<Time> a(0, Beats(1.0), Beats(2.0), 60, 0x40);
+	Note<Time> a(0, Time(1.0), Time(2.0), 60, 0x40);
 	Note<Time> b(a);
 	CPPUNIT_ASSERT (a == b);
 
@@ -25,7 +25,7 @@ NoteTest::copyTest ()
 void
 NoteTest::idTest ()
 {
-	Note<Time> a(0, Beats(1.0), Beats(2.0), 60, 0x40);
+	Note<Time> a(0, Time(1.0), Time(2.0), 60, 0x40);
 	CPPUNIT_ASSERT_EQUAL (-1, a.id());
 
 	a.set_id(1234);

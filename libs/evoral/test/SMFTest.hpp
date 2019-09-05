@@ -23,7 +23,7 @@
 #include <sigc++/sigc++.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include "evoral/types.hpp"
+#include "temporal/beats.h"
 #include "evoral/SMF.hpp"
 #include "SequenceTest.hpp"
 
@@ -60,7 +60,7 @@ class SMFTest : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE_END();
 
 public:
-	typedef Evoral::Beats Time;
+	typedef Temporal::Beats Time;
 
 	void setUp() {
 		type_map = new DummyTypeMap();

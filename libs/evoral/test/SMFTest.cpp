@@ -51,33 +51,33 @@ SMFTest::takeFiveTest ()
 	smf.seek_to_start();
 
 	uint64_t time = 0; /* in SMF ticks */
-	Evoral::Event<Evoral::Beats> ev;
+	Evoral::Event<Time> ev;
 
 	uint32_t delta_t = 0;
 	uint32_t size    = 0;
 	uint8_t* buf     = NULL;
 	int ret;
 	while ((ret = smf.read_event(&delta_t, &size, &buf)) >= 0) {
-		ev.set(buf, size, Evoral::Beats());
+		ev.set(buf, size, Time());
 		time += delta_t;
 
 		if (ret > 0) { // didn't skip (meta) event
 			//cerr << "read smf event type " << hex << int(buf[0]) << endl;
-			ev.set_time(Evoral::Beats::ticks_at_rate(time, smf.ppqn()));
+			ev.set_time(Temporal::Beats::ticks_at_rate(time, smf.ppqn()));
 			ev.set_event_type(Evoral::MIDI_EVENT);
 			seq->append(ev, next_event_id ());
 		}
 	}
 
 	seq->end_write (Sequence<Time>::Relax,
-	                Evoral::Beats::ticks_at_rate(time, smf.ppqn()));
+	                Temporal::Beats::ticks_at_rate(time, smf.ppqn()));
 	CPPUNIT_ASSERT(!seq->empty());
 
 	// Iterate over all notes
 	bool   on          = true;
 	size_t num_notes   = 0;
 	size_t num_sysexes = 0;
-	for (Sequence<Time>::const_iterator i = seq->begin(Evoral::Beats()); i != seq->end(); ++i) {
+	for (Sequence<Time>::const_iterator i = seq->begin(Time()); i != seq->end(); ++i) {
 		if (i->is_note_on()) {
 			++num_notes;
 		} else if (i->is_sysex()) {
