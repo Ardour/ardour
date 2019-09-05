@@ -69,17 +69,17 @@ LuaScriptTest::dsp_script_test ()
 		std::cout << "LuaProc: " <<(*i)->name << "\n";
 
 		PluginPtr p = (*i)->load (*_session);
-		CPPUNIT_ASSERT (p);
+		CPPUNIT_ASSERT_MESSAGE ((*i)->name, p);
 
 		boost::shared_ptr<Processor> processor (new PluginInsert (*_session, p));
 		processor->enable (true);
 
 		int rv = r->add_processor (processor, boost::shared_ptr<Processor>(), 0);
-		CPPUNIT_ASSERT (rv == 0);
+		CPPUNIT_ASSERT_MESSAGE ((*i)->name, rv == 0);
 		processor->enable (true);
 		Glib::usleep(200000); // run process, failing plugins will be deactivated.
-		CPPUNIT_ASSERT (processor->active());
+		CPPUNIT_ASSERT_MESSAGE ((*i)->name, processor->active());
 		rv = r->remove_processor (processor, NULL, true);
-		CPPUNIT_ASSERT (rv == 0);
+		CPPUNIT_ASSERT_MESSAGE ((*i)->name, rv == 0);
 	}
 }
