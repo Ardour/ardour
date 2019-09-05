@@ -50,6 +50,7 @@ private:
     std::vector<route_combo> substitutions;
 
     ARDOUR::MixerSnapshot* _snapshot;
+    Gtk::HBox route_packer;
 };
 
 #endif /* __ardour_mixer_snapshot_substitution_dialog_h__ */
