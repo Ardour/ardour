@@ -282,7 +282,7 @@ get_usb_device (uint16_t vendor_id, uint16_t product_id, libusb_device** device)
 
 out:
 	libusb_free_device_list(devs, 1);
-	if (!dev && r != LIBUSB_SUCCESS) {
+	if (!dev && r == LIBUSB_SUCCESS) {
 		return LIBUSB_ERROR_NO_DEVICE;
 	}
 	return r;
