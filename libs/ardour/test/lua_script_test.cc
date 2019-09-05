@@ -74,6 +74,16 @@ LuaScriptTest::dsp_script_test ()
 		boost::shared_ptr<Processor> processor (new PluginInsert (*_session, p));
 		processor->enable (true);
 
+		if (Glib::path_get_basename ((*i)->path).find ("__") == 0) {
+			std::cout << " .. skip processing test\n";
+			/* Example scripts (filename with leading underscore), that
+			 * use a double-underscore at the beginning of the file-name
+			 * are excluded from unit-tests (e.g. "Lua Convolver"
+			 * requires IR files).
+			 */
+			continue;
+		}
+
 		int rv = r->add_processor (processor, boost::shared_ptr<Processor>(), 0);
 		CPPUNIT_ASSERT_MESSAGE ((*i)->name, rv == 0);
 		processor->enable (true);
