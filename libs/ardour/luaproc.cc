@@ -241,6 +241,7 @@ LuaProc::load_script ()
 	}
 	else {
 		assert (0);
+		return true;
 	}
 
 	luabridge::LuaRef lua_dsp_latency = luabridge::getGlobal (L, "dsp_latency");
@@ -254,7 +255,10 @@ LuaProc::load_script ()
 		try {
 			lua_dsp_init (_session.nominal_sample_rate ());
 		} catch (luabridge::LuaException const& e) {
-		} catch (...) { }
+			return true; // error
+		} catch (...) {
+			return true;
+		}
 	}
 
 	_ctrl_params.clear ();
@@ -274,23 +278,25 @@ LuaProc::load_script ()
 
 			for (luabridge::Iterator i (params); !i.isNil (); ++i) {
 				// required fields
-				if (!i.key ().isNumber ())           { return false; }
-				if (!i.value ().isTable ())          { return false; }
-				if (!i.value ()["type"].isString ()) { return false; }
-				if (!i.value ()["name"].isString ()) { return false; }
-				if (!i.value ()["min"].isNumber ())  { return false; }
-				if (!i.value ()["max"].isNumber ())  { return false; }
+				if (!i.key ().isNumber ())           { return true; }
+				if (!i.value ().isTable ())          { return true; }
+				if (!i.value ()["type"].isString ()) { return true; }
+				if (!i.value ()["name"].isString ()) { return true; }
+				if (!i.value ()["min"].isNumber ())  { return true; }
+				if (!i.value ()["max"].isNumber ())  { return true; }
 
 				int pn = i.key ().cast<int> ();
 				std::string type = i.value ()["type"].cast<std::string> ();
 				if (type == "input") {
-					if (!i.value ()["default"].isNumber ()) { return false; }
+					if (!i.value ()["default"].isNumber ()) {
+						return true; // error
+					}
 					_ctrl_params.push_back (std::make_pair (false, pn));
 				}
 				else if (type == "output") {
 					_ctrl_params.push_back (std::make_pair (true, pn));
 				} else {
-					return false;
+					return true; // error
 				}
 				assert (pn == (int) _ctrl_params.size ());
 
