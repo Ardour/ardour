@@ -7,7 +7,7 @@
 -- This script currently assumes you have a track named "Audio"
 -- which as a plugin at the top, where the first parameter has a range > 200
 -- e.g. "No Delay Line"
--- 
+--
 -- edit below..
 
 
