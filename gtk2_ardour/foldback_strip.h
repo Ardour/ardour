@@ -86,7 +86,13 @@ private:
 	boost::shared_ptr<ARDOUR::Processor> _send_proc;
 	boost::shared_ptr<ARDOUR::Delivery> _send_del;
 
+	Gtk::Menu* send_menu;
 	void led_clicked(GdkEventButton *);
+	gboolean button_press (GdkEventButton*);
+	Gtk::Menu* build_send_menu ();
+	void set_gain (float new_gain);
+	void remove_me ();
+
 	void send_state_changed ();
 	void level_adjusted ();
 	void level_changed ();
@@ -174,6 +180,7 @@ private:
 	Width _width;
 	void*  _width_owner;
 	ARDOUR::Session* _session;
+	bool _showing_sends;
 
 	Gtk::EventBox		spacer;
 	Gtk::VBox			send_display;
@@ -203,6 +210,7 @@ private:
 	guint32 mode_switch_in_progress;
 
 	ArdourWidgets::ArdourButton name_button;
+	ArdourWidgets::ArdourButton _show_sends_button;
 	ArdourWidgets::ArdourButton _previous_button;
 	ArdourWidgets::ArdourButton _next_button;
 	ArdourWidgets::ArdourButton _comment_button;
@@ -222,9 +230,6 @@ private:
 
 	void io_changed_proxy ();
 
-	Gtk::Menu *send_action_menu;
-	void build_send_action_menu ();
-
 	PBD::ScopedConnection panstate_connection;
 	PBD::ScopedConnection panstyle_connection;
 	void connect_to_pan ();
@@ -242,14 +247,21 @@ private:
 	void build_route_ops_menu ();
 	gboolean name_button_button_press (GdkEventButton*);
 	void list_route_operations ();
-
 	Gtk::Menu* route_select_menu;
 	void build_route_select_menu ();
-	gboolean previous_button_button_press (GdkEventButton*);
-	gboolean next_button_button_press (GdkEventButton*);
 	void list_fb_routes ();
 
+	gboolean previous_button_button_press (GdkEventButton*);
+	gboolean next_button_button_press (GdkEventButton*);
+	gboolean show_sends_press (GdkEventButton*);
+	void send_blink (bool);
+
+	Gtk::Menu *sends_menu;
+	bool send_button_press_event (GdkEventButton *ev);
 	void build_sends_menu ();
+	void list_send_operations ();
+
+	void create_selected_sends (bool include_buses);
 	void remove_current_fb ();
 
 	Gtk::Style *passthru_style;

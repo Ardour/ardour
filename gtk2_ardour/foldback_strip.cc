@@ -41,6 +41,7 @@
 #include "keyboard.h"
 #include "public_editor.h"
 #include "send_ui.h"
+#include "timers.h"
 #include "io_selector.h"
 #include "utils.h"
 #include "gui_thread.h"
@@ -113,8 +114,7 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, \
 	_adjustment.signal_value_changed().connect (sigc::mem_fun (*this,  &FoldbackSend::level_adjusted));
 	lc->Changed.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::level_changed, this), gui_context ());
 	_send_proc->ActiveChanged.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::send_state_changed, this), gui_context ());
-	/// create button_press() then enable next line
-	//_button.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackSend::button_press), false);
+	_button.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackSend::button_press));
 
 	show ();
 
@@ -123,14 +123,14 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, \
 
 FoldbackSend::~FoldbackSend ()
 {
+	_connections.drop_connections();
+	_slider.set_controllable (boost::shared_ptr<AutomationControl> ());
+	pan_control.set_controllable (boost::shared_ptr<AutomationControl> ());
 	_send = boost::shared_ptr<Send> ();
 	_send_route = boost::shared_ptr<Route> ();
 	_foldback_route = boost::shared_ptr<Route> ();
 	_send_proc = boost::shared_ptr<Processor> ();
 	_send_del = boost::shared_ptr<Delivery> ();
-	_connections.drop_connections();
-	pan_control.set_controllable (boost::shared_ptr<AutomationControl> ());
-	_slider.set_controllable (boost::shared_ptr<AutomationControl> ());
 
 }
 
@@ -145,6 +145,18 @@ FoldbackSend::led_clicked(GdkEventButton *ev)
 			_send_proc->enable (true);
 		}
 	}
+}
+
+gboolean
+FoldbackSend::button_press (GdkEventButton* ev)
+{
+	if (ev->button == 1) {
+		Menu* menu = build_send_menu ();
+
+		Gtkmm2ext::anchored_menu_popup(menu, &_button, "", 1, ev->time);
+		return true;
+	}
+	return false;
 }
 
 void
@@ -203,6 +215,59 @@ FoldbackSend::set_tooltip ()
 	ArdourWidgets::set_tooltip (_button, Gtkmm2ext::markup_escape_text (sm));
 }
 
+Menu*
+FoldbackSend::build_send_menu ()
+{
+	using namespace Menu_Helpers;
+
+	if (!_send) {
+		return NULL;
+	}
+
+	Menu* menu = manage (new Menu);
+	MenuList& items = menu->items ();
+	menu->set_name ("ArdourContextMenu");
+
+	items.push_back (
+		MenuElem(_("Copy track/bus gain to send"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_gain), -0.1))
+		);
+	items.push_back (
+		MenuElem(_("Set send gain to -inf"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_gain), 0.0))
+		);
+	items.push_back (
+		MenuElem(_("Set send gain to 0dB"), sigc::bind (sigc::mem_fun (*this, &FoldbackSend::set_gain), 1.0))
+		);
+	items.push_back (MenuElem(_("Remove This Send"), sigc::mem_fun (*this, &FoldbackSend::remove_me)));
+
+	return menu;
+
+}
+
+void
+FoldbackSend::set_gain (float new_gain)
+{
+	if (new_gain < 0) {
+		// get level from sending route
+		new_gain = _send_route->gain_control ()->get_value ();
+	}
+	boost::shared_ptr<AutomationControl> lc = _send->gain_control();
+
+	if (!lc) {
+		return;
+	}
+	lc->set_value (new_gain, Controllable::NoGroup);
+
+}
+
+void
+FoldbackSend::remove_me ()
+{
+	boost::shared_ptr<Processor> send_proc = boost::dynamic_pointer_cast<Processor> (_send);
+	_connections.drop_connections();
+	_send_route->remove_processor (send_proc);
+
+}
+
 
 FoldbackStrip* FoldbackStrip::_entered_foldback_strip;
 PBD::Signal1<void,FoldbackStrip*> FoldbackStrip::CatchDeletion;
@@ -236,7 +301,7 @@ FoldbackStrip::init ()
 	comment_area = 0;
 	_width_owner = 0;
 
-	/* the length of this string determines the width of the mixer strip when it is set to `wide' */
+	/* the length of this string determines the width of the foldback strip */
 	longest_label = "longest label";
 
 	output_button.set_text (_("Output"));
@@ -248,6 +313,7 @@ FoldbackStrip::init ()
 	send_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	send_scroller.add (send_display);
 	send_scroller.get_child()->set_name ("FoldbackBusStripBase");
+	send_scroller.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackStrip::send_button_press_event));
 
 	insert_box = new ProcessorBox (0, boost::bind (&FoldbackStrip::plugin_selector, this), _pr_selection, 0);
 	insert_box->set_no_show_all ();
@@ -272,12 +338,6 @@ FoldbackStrip::init ()
 	mute_solo_table.set_homogeneous (true);
 	mute_solo_table.set_spacings (2);
 
-	show_sends_button->set_text (_("Show Sends"));
-
-	show_sends_box.pack_start (*show_sends_button, true, true);
-	show_sends_button->show();
-
-
 	name_button.set_name ("mixer strip button");
 	name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 
@@ -285,6 +345,13 @@ FoldbackStrip::init ()
 	_previous_button.set_text (_("Previous"));
 	_next_button.set_name ("mixer strip button");
 	_next_button.set_text (_("Next"));
+
+	_show_sends_button.set_name ("send alert button");
+	_show_sends_button.set_text (_("Show Sends"));
+	UI::instance()->set_tip (&_show_sends_button, _("make mixer strips show sends to this bus"), "");
+	_show_sends_button.signal_button_press_event().connect (sigc::mem_fun(*this, &FoldbackStrip::show_sends_press), false);
+	show_sends_box.pack_start (_show_sends_button, true, true);
+	_show_sends_button.show();
 
 	prev_next_box.set_homogeneous (true);
 	prev_next_box.pack_start (_previous_button, true, true);
@@ -380,6 +447,7 @@ FoldbackStrip::~FoldbackStrip ()
 	fb_level_control = 0;
 	_connections.drop_connections();
 	clear_send_box ();
+	send_blink_connection.disconnect ();
 
 	if (this ==_entered_foldback_strip)
 		_entered_foldback_strip = NULL;
@@ -458,7 +526,11 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	update_fb_level_control();
 
 	BusSendDisplayChanged (boost::shared_ptr<Route> ());
-	show_sends_button->show();
+	_showing_sends = false;
+	_show_sends_button.set_active (false);
+	send_blink_connection.disconnect ();
+
+	_show_sends_button.show();
 
 	delete route_ops_menu;
 	route_ops_menu = 0;
@@ -732,18 +804,6 @@ FoldbackStrip::connect_to_pan ()
 
 	boost::shared_ptr<Pannable> p = _route->pannable ();
 
-	//p->automation_state_changed.connect (panstate_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_state_changed, &panners), gui_context());
-
-	/* This call reduncant, PannerUI::set_panner() connects to _panshell->Changed itself
-	 * However, that only works a panner was previously set.
-	 *
-	 * PannerUI must remain subscribed to _panshell->Changed() in case
-	 * we switch the panner eg. AUX-Send and back
-	 * _route->panner_shell()->Changed() vs _panshell->Changed
-	 */
-	/*if (panners._panner == 0) {
-		panners.panshell_changed ();
-	}*/
 	update_panner_choices();
 }
 
@@ -1215,7 +1275,7 @@ FoldbackStrip::previous_button_button_press (GdkEventButton* ev)
 				}
 			}
 		} else {
-			// only one route do nothing
+			// only one route or none do nothing
 			return true;
 		}
 		//use previous to set route
@@ -1230,6 +1290,42 @@ FoldbackStrip::previous_button_button_press (GdkEventButton* ev)
 	return false;
 }
 
+gboolean
+FoldbackStrip::show_sends_press (GdkEventButton* ev)
+{
+	if (ev->button == 1 || ev->button == 3) {
+
+		if (_showing_sends) {
+			BusSendDisplayChanged (boost::shared_ptr<Route> ()); /* EMIT SIGNAL */
+			_showing_sends = false;
+			_show_sends_button.set_active (false);
+			send_blink_connection.disconnect ();
+		} else {
+			BusSendDisplayChanged (_route); /* EMIT SIGNAL */
+			_showing_sends = true;
+			_show_sends_button.set_active (true);
+			send_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &FoldbackStrip::send_blink));
+
+		}
+		return true;
+	}
+
+	return false;
+}
+
+void
+FoldbackStrip::send_blink (bool onoff)
+{
+	if (!(&_show_sends_button)) {
+		return;
+	}
+
+	if (onoff) {
+		_show_sends_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	} else {
+		_show_sends_button.unset_active_state ();
+	}
+}
 
 gboolean
 FoldbackStrip::next_button_button_press (GdkEventButton* ev)
@@ -1252,7 +1348,7 @@ FoldbackStrip::next_button_button_press (GdkEventButton* ev)
 				}
 			}
 		} else {
-			// only one route do nothing
+			// only one or no route do nothing
 			return true;
 		}
 		//use next to set route
@@ -1513,6 +1609,48 @@ FoldbackStrip::ab_plugins ()
 }
 
 void
+FoldbackStrip::create_selected_sends (bool include_buses)
+{
+	boost::shared_ptr<StripableList> slist (new StripableList);
+	PresentationInfo::Flag fl = PresentationInfo::AudioTrack;
+	if (include_buses) {
+		fl = PresentationInfo::MixerRoutes;
+	}
+	_session->get_stripables (*slist, fl);
+
+	for (StripableList::iterator i = (*slist).begin(); i != (*slist).end(); ++i) {
+		if ((*i)->is_selected() && !(*i)->is_master() && !(*i)->is_monitor()) {
+			boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route>(*i);
+			if (rt) {
+				rt->add_foldback_send (_route);
+			}
+		}
+	}
+
+}
+
+bool
+FoldbackStrip::send_button_press_event (GdkEventButton *ev)
+{
+
+	if (ev->button == 3) {
+		list_send_operations ();
+		sends_menu->popup (3, ev->time);
+		return true;
+	}
+
+	return false;
+
+}
+
+void
+FoldbackStrip::list_send_operations ()
+{
+	delete sends_menu;
+	build_sends_menu ();
+}
+
+void
 FoldbackStrip::build_sends_menu ()
 {
 	using namespace Menu_Helpers;
@@ -1522,19 +1660,11 @@ FoldbackStrip::build_sends_menu ()
 	MenuList& items = sends_menu->items();
 
 	items.push_back (
-		MenuElem(_("Assign all tracks"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PreFader, false))
+		MenuElem(_("Assign selected tracks (prefader)"), sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::create_selected_sends), false))
 		);
 
 	items.push_back (
-		MenuElem(_("Assign all tracks and buses (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PreFader, true))
-		);
-
-	items.push_back (
-		MenuElem(_("Assign selected tracks (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PreFader, false))
-		);
-
-	items.push_back (
-		MenuElem(_("Assign selected tracks and buses (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PreFader, true)));
+		MenuElem(_("Assign selected tracks and buses (prefader)"), sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::create_selected_sends), true)));
 
 	items.push_back (MenuElem(_("Copy track/bus gains to sends"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_from_track)));
 	items.push_back (MenuElem(_("Set sends gain to -inf"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_zero)));
