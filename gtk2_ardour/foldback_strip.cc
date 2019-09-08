@@ -111,6 +111,7 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, \
 	pack_start (_slider, true, true);
 	_slider.show ();
 	level_changed ();
+
 	_adjustment.signal_value_changed().connect (sigc::mem_fun (*this,  &FoldbackSend::level_adjusted));
 	lc->Changed.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::level_changed, this), gui_context ());
 	_send_proc->ActiveChanged.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::send_state_changed, this), gui_context ());
@@ -304,8 +305,24 @@ FoldbackStrip::init ()
 	/* the length of this string determines the width of the foldback strip */
 	longest_label = "longest label";
 
-	output_button.set_text (_("Output"));
-	output_button.set_name ("mixer strip button");
+	_previous_button.set_name ("mixer strip button");
+	_previous_button.set_icon (ArdourIcon::NudgeLeft);
+	_previous_button.set_tweaks (ArdourButton::Square);
+	_next_button.set_name ("mixer strip button");
+	_next_button.set_icon (ArdourIcon::NudgeRight);
+	_next_button.set_tweaks (ArdourButton::Square);
+
+	prev_next_box.pack_start (_previous_button, false, true);
+	prev_next_box.pack_end (_next_button, false, true);
+
+	name_button.set_name ("mixer strip button");
+	name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
+
+	// invertbuttons and box in route_ui
+
+	_show_sends_button.set_name ("send alert button");
+	_show_sends_button.set_text (_("Show Sends"));
+	UI::instance()->set_tip (&_show_sends_button, _("make mixer strips show sends to this bus"), "");
 
 	send_display.set_flags (CAN_FOCUS);
 	send_display.set_spacing (4);
@@ -313,15 +330,16 @@ FoldbackStrip::init ()
 	send_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	send_scroller.add (send_display);
 	send_scroller.get_child()->set_name ("FoldbackBusStripBase");
-	send_scroller.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackStrip::send_button_press_event));
+
+	// panners from route_ui
 
 	insert_box = new ProcessorBox (0, boost::bind (&FoldbackStrip::plugin_selector, this), _pr_selection, 0);
 	insert_box->set_no_show_all ();
 	insert_box->show ();
 	insert_box->set_session (_session);
 
-	send_scroller.show ();
-	send_display.show ();
+	mute_solo_table.set_homogeneous (true);
+	mute_solo_table.set_spacings (2);
 
 	fb_level_control = new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Detent);
 	fb_level_control->set_size_request (PX_SCALE(50), PX_SCALE(50));
@@ -335,43 +353,25 @@ FoldbackStrip::init ()
 	level_table.set_homogeneous (true);
 	level_table.set_name ("FoldbackBusStripBase");
 
-	mute_solo_table.set_homogeneous (true);
-	mute_solo_table.set_spacings (2);
-
-	name_button.set_name ("mixer strip button");
-	name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
-
-	_previous_button.set_name ("mixer strip button");
-	_previous_button.set_icon (ArdourIcon::NudgeLeft);
-	_previous_button.set_tweaks (ArdourButton::Square);
-	_next_button.set_name ("mixer strip button");
-	_next_button.set_icon (ArdourIcon::NudgeRight);
-	_next_button.set_tweaks (ArdourButton::Square);
-
-	_show_sends_button.set_name ("send alert button");
-	_show_sends_button.set_text (_("Show Sends"));
-	UI::instance()->set_tip (&_show_sends_button, _("make mixer strips show sends to this bus"), "");
-	_show_sends_button.signal_button_press_event().connect (sigc::mem_fun(*this, &FoldbackStrip::show_sends_press), false);
-	show_sends_box.pack_start (_show_sends_button, true, true);
-	_show_sends_button.show();
-
-	prev_next_box.pack_start (_previous_button, false, true);
-	prev_next_box.pack_end (_next_button, false, true);
-	_previous_button.show();
-	_next_button.show();
-
+	output_button.set_text (_("Output"));
+	output_button.set_name ("mixer strip button");
 
 	_comment_button.set_name (X_("mixer strip button"));
 	_comment_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
-	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
 
 	global_vpacker.set_border_width (1);
 	global_vpacker.set_spacing (2);
 
+	// Packing is from top down to the send box. Thje send box
+	// needs the most room and takes all left over space
+	// Everything below the send box is packed from the bottom up
+	// the panner is the last thing to pack as it doesn't always show
+	// and packing it below the sendbox means nothing moves when it shows
+	// or hides.
 	global_vpacker.pack_start (prev_next_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_invert_button_box, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (show_sends_box, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (_show_sends_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (send_scroller, true, true);
 #ifndef MIXBUS
 	//add a spacer underneath the foldback bus;
@@ -420,6 +420,9 @@ FoldbackStrip::init ()
 	name_button.signal_button_press_event().connect (sigc::mem_fun(*this, &FoldbackStrip::name_button_button_press), false);
 	_previous_button.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackStrip::previous_button_button_press), false);
 	_next_button.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackStrip::next_button_button_press), false);
+	_show_sends_button.signal_button_press_event().connect (sigc::mem_fun(*this, &FoldbackStrip::show_sends_press), false);
+	send_scroller.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackStrip::send_button_press_event));
+	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
 
 	_width = Wide;
 
@@ -519,11 +522,6 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 
 	mute_solo_table.attach (*mute_button, 0, 1, 0, 1);
 	mute_solo_table.attach (*solo_button, 1, 2, 0, 1);
-	mute_button->show ();
-	solo_button->show ();
-	show_sends_box.show ();
-	prev_next_box.show ();
-	spacer.show();
 	update_fb_level_control();
 
 	BusSendDisplayChanged (boost::shared_ptr<Route> ());
@@ -531,7 +529,10 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	_show_sends_button.set_active (false);
 	send_blink_connection.disconnect ();
 
-	_show_sends_button.show();
+	if (_route->panner_shell()) {
+		update_panner_choices();
+		_route->panner_shell()->Changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::connect_to_pan, this), gui_context());
+	}
 
 	delete route_ops_menu;
 	route_ops_menu = 0;
@@ -541,18 +542,15 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::update_output_display, this), gui_context());
 	_route->io_changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::io_changed_proxy, this), gui_context ());
 
-	if (_route->panner_shell()) {
-		update_panner_choices();
-		_route->panner_shell()->Changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::connect_to_pan, this), gui_context());
-	}
-
 	_route->comment_changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::setup_comment_button, this), gui_context());
 
 	/* now force an update of all the various elements */
 
+	name_changed ();
+	update_send_box ();
+	_session->FBSendsChanged.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::update_send_box, this), gui_context());
 	update_mute_display ();
 	update_solo_display ();
-	name_changed ();
 	comment_changed ();
 	connect_to_pan ();
 	panners.setup_pan ();
@@ -561,21 +559,23 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 
 	add_events (Gdk::BUTTON_RELEASE_MASK);
 
-	insert_box->show ();
-	update_send_box ();
-	_session->FBSendsChanged.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::update_send_box, this), gui_context());
-
-	global_frame.show();
-	global_vpacker.show();
-	mute_solo_table.show();
-	level_table.show();
-	show_sends_box.show_all();
-	send_display.show ();
-	output_button.show();
-	name_button.show();
 	_previous_button.show();
 	_next_button.show();
+	prev_next_box.show ();
+	name_button.show();
+	send_display.show ();
+	send_scroller.show ();
+	_show_sends_button.show();
+	insert_box->show ();
+	mute_button->show ();
+	solo_button->show ();
+	mute_solo_table.show();
+	level_table.show();
+	output_button.show();
 	_comment_button.show();
+	spacer.show();
+	global_frame.show();
+	global_vpacker.show();
 
 	map_frozen();
 

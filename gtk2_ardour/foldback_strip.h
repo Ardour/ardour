@@ -198,7 +198,6 @@ private:
 
 	ArdourWidgets::ArdourButton output_button;
 
-	Gtk::HBox show_sends_box;
 	Gtk::HBox prev_next_box;
 
 	std::string longest_label;
