@@ -342,9 +342,11 @@ FoldbackStrip::init ()
 	name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 
 	_previous_button.set_name ("mixer strip button");
-	_previous_button.set_text (_("Previous"));
+	_previous_button.set_icon (ArdourIcon::NudgeLeft);
+	_previous_button.set_tweaks (ArdourButton::Square);
 	_next_button.set_name ("mixer strip button");
-	_next_button.set_text (_("Next"));
+	_next_button.set_icon (ArdourIcon::NudgeRight);
+	_next_button.set_tweaks (ArdourButton::Square);
 
 	_show_sends_button.set_name ("send alert button");
 	_show_sends_button.set_text (_("Show Sends"));
@@ -353,9 +355,8 @@ FoldbackStrip::init ()
 	show_sends_box.pack_start (_show_sends_button, true, true);
 	_show_sends_button.show();
 
-	prev_next_box.set_homogeneous (true);
-	prev_next_box.pack_start (_previous_button, true, true);
-	prev_next_box.pack_start (_next_button, true, true);
+	prev_next_box.pack_start (_previous_button, false, true);
+	prev_next_box.pack_end (_next_button, false, true);
 	_previous_button.show();
 	_next_button.show();
 
@@ -365,7 +366,7 @@ FoldbackStrip::init ()
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
 
 	global_vpacker.set_border_width (1);
-	global_vpacker.set_spacing (4);
+	global_vpacker.set_spacing (2);
 
 	global_vpacker.pack_start (prev_next_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
