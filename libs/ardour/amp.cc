@@ -148,25 +148,8 @@ Amp::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sampl
 		} else if (target_gain != GAIN_COEFF_UNITY) {
 
 			_current_gain = target_gain;
+			apply_simple_gain (bufs, nframes, _current_gain, _midi_amp);
 
-			if (_midi_amp) {
-				/* don't Trim midi velocity -- only relevant for Midi on Audio tracks */
-				for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
-
-					MidiBuffer& mb (*i);
-
-					for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
-						Evoral::Event<MidiBuffer::TimeType> ev = *m;
-						if (ev.is_note_on()) {
-							scale_midi_velocity (ev, fabsf (_current_gain));
-						}
-					}
-				}
-			}
-
-			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-				apply_gain_to_buffer (i->data(), nframes, _current_gain);
-			}
 		} else {
 			/* unity target gain */
 			_current_gain = target_gain;
@@ -232,13 +215,19 @@ Amp::apply_gain (BufferSet& bufs, samplecnt_t sample_rate, samplecnt_t nframes, 
 
 			MidiBuffer& mb (*i);
 
-			for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
+			for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ) {
 				Evoral::Event<MidiBuffer::TimeType> ev = *m;
 
-				if (ev.is_note_on()) {
-					const gain_t scale = delta * (ev.time() / (double) nframes);
-					scale_midi_velocity (ev, fabsf (initial + scale));
+				if (ev.is_note_on() || ev.is_note_off()) {
+					const gain_t scale = fabsf (initial + delta * (ev.time() / (double) nframes));
+					if (scale < GAIN_COEFF_SMALL) {
+						m = mb.erase (m);
+						continue;
+					} else if (ev.is_note_on()) {
+						scale_midi_velocity (ev, scale);
+					}
 				}
+				++m;
 			}
 
 			/* queue MIDI all-note-off when going silent */
