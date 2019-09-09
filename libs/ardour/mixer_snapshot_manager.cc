@@ -190,13 +190,16 @@ bool MixerSnapshotManager::demote(MixerSnapshot* snapshot) {
 MixerSnapshot* MixerSnapshotManager::get_snapshot_by_name(const string& name, bool global)
 {
     set<MixerSnapshot*> snapshots_list = global ? _global_snapshots : _local_snapshots;
+    MixerSnapshot* snapshot;
 
     set<MixerSnapshot*>::iterator it;
     for(it = snapshots_list.begin(); it != snapshots_list.end(); it++) {
         if((*it)->get_label() == name) {
-            return (*it);
+            snapshot = (*it);
+            break;
         }
     }
+    return snapshot;
 }
 
 void MixerSnapshotManager::create_snapshot(const string& label, const string& desc, RouteList& rl, bool global)

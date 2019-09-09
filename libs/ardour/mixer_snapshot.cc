@@ -416,6 +416,7 @@ void MixerSnapshot::recall()
             bool gain, mute, solo, recenable, select, route_active, monitoring;
             state.node.get_property(X_("used-to-share-gain"), gain);
             state.node.get_property(X_("mute"), mute);
+            state.node.get_property(X_("solo"), solo);
             state.node.get_property(X_("recenable"), recenable);
             state.node.get_property(X_("select"), select);
             state.node.get_property(X_("route-active"), route_active);
