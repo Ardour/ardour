@@ -558,7 +558,6 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	*/
 	EventLoop::register_request_buffer_factory (X_("midiUI"), MidiControlUI::request_factory);
 
-        ProcessThread::init ();
 	/* the + 4 is a bit of a handwave. i don't actually know
 	   how many more per-thread buffer sets we need above
 	   the h/w concurrency, but its definitely > 1 more.
