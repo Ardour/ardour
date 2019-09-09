@@ -23,8 +23,6 @@
 #include <gtkmm/stock.h>
 
 #include "mixer_snapshot_substitution_dialog.h"
-#include "mixer_strip.h"
-#include "mixer_ui.h"
 
 #include "ardour/mixer_snapshot.h"
 #include "ardour/utils.h"
@@ -81,26 +79,11 @@ MixerSnapshotSubstitutionDialog::MixerSnapshotSubstitutionDialog(MixerSnapshot* 
     table->attach(*selection_combo,            1, 2, n, n+1);
     n++;
 
-    vector<MixerSnapshot::State> routes = _snapshot->get_routes();
-    for(vector<MixerSnapshot::State>::iterator i = routes.begin(); i != routes.end(); i++) {
-        string name = (*i).name;
-
-        boost::shared_ptr<Route> new_route (new Route (*_snapshot->get_session(), name));
-        new_route->init();
-
-        //this is too volatile right now but will need to be resolved
-        // new_route->set_state((*i).node, Stateful::loading_state_version);
-
-        MixerStrip* strip = new MixerStrip(*Mixer_UI::instance(), _snapshot->get_session(), new_route, false);
-        route_packer.pack_start(*strip);
-    }
-
     add_button (Stock::CANCEL, RESPONSE_CANCEL);
     add_button (Stock::APPLY, RESPONSE_ACCEPT);
     set_default_response(RESPONSE_ACCEPT);
 
     get_vbox()->pack_start(*table, true, true);
-    get_vbox()->pack_start(route_packer, false, true);
 }
 
 void MixerSnapshotSubstitutionDialog::fill_combo_box(ComboBoxText* box, const string route_name)
