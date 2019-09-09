@@ -102,24 +102,3 @@ void MixerSnapshotSubstitutionDialog::fill_combo_box(ComboBoxText* box, const st
         }
     }
 }
-
-bool MixerSnapshotSubstitutionDialog::state_exists(const string name)
-{
-    vector<MixerSnapshot::State> routes = _snapshot->get_routes();
-
-    for(vector<MixerSnapshot::State>::iterator i = routes.begin(); i != routes.end(); i++) {
-        if((*i).name == name) {
-            return true;
-        }
-    }
-    return false;
-}
-
-MixerSnapshot::State MixerSnapshotSubstitutionDialog::get_state_by_name(const string name) {
-    vector<MixerSnapshot::State> routes = _snapshot->get_routes();
-    for(vector<MixerSnapshot::State>::iterator i = routes.begin(); i != routes.end(); i++) {
-        if((*i).name == name) {
-            return (*i);
-        }
-    }
-}

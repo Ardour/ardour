@@ -65,12 +65,12 @@ struct ColumnInfo {
 };
 
 MixerSnapshotList::MixerSnapshotList (bool global)
-    : add_template_button("Add Snapshot")
-    , add_session_template_button("Add from External")
-    , _window_packer(new VBox())
+    : _window_packer(new VBox())
     , _button_packer(new HBox())
-    , _bug_user(true)
+    , add_template_button(_("Add Snapshot"))
+    , add_session_template_button(_("Add from External"))
     , _external_selector(_("New Snapshot from Session, Template or Other:"), FILE_CHOOSER_ACTION_OPEN)
+    , _bug_user(true)
     , _global(global)
 {
     _snapshot_model = ListStore::create (_columns);
@@ -263,9 +263,9 @@ void MixerSnapshotList::selection_changed ()
         return;
     }
 
-    TreeModel::iterator i = _snapshot_display.get_selection()->get_selected();
-    _snapshot_display.set_sensitive (false);
-    _snapshot_display.set_sensitive (true);
+    // TreeModel::iterator i = _snapshot_display.get_selection()->get_selected();
+    // _snapshot_display.set_sensitive (false);
+    // _snapshot_display.set_sensitive (true);
 }
 
 bool MixerSnapshotList::button_press (GdkEventButton* ev)
