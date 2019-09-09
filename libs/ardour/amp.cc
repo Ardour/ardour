@@ -233,7 +233,9 @@ Amp::apply_gain (BufferSet& bufs, samplecnt_t sample_rate, samplecnt_t nframes, 
 			/* queue MIDI all-note-off when going silent */
 			if (initial > GAIN_COEFF_SMALL && rv <= GAIN_COEFF_SMALL) {
 				for (uint8_t channel = 0; channel <= 0xF; channel++) {
-					uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), ((uint8_t) MIDI_CTL_ALL_NOTES_OFF), 0 };
+					uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), ((uint8_t) MIDI_CTL_SUSTAIN), 0 };
+					mb.push_back (nframes - 1, 3, ev);
+					ev[1] = MIDI_CTL_ALL_NOTES_OFF;
 					mb.push_back (nframes - 1, 3, ev);
 				}
 			}
