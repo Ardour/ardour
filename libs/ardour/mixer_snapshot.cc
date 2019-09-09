@@ -292,9 +292,8 @@ void MixerSnapshot::reassign_masters(boost::shared_ptr<Slavable> slv, XMLNode no
     }
 }
 
-void MixerSnapshot::recall()
+void MixerSnapshot::recall(bool make_tracks /* = false*/)
 {
-
     if(!_session) {
         return;
     }
@@ -390,6 +389,18 @@ void MixerSnapshot::recall()
             // _session->add_command(new MementoCommand<Route>((*route), &bfr, &route->get_state()));
 
             reassign_masters(route, node);
+        } else if(make_tracks) {
+            PresentationInfo::order_t order = PresentationInfo::max_order;
+            string                    name  = state.name;
+            XMLNode&                  node  = sanitize_node(state.node);
+            PlaylistDisposition       disp  = NewPlaylist;
+
+            RouteList rl = _session->new_route_from_template(1, order, node, name, disp);
+
+            //rl can be empty()
+            if(rl.empty()) {
+                continue;
+            }
         }
     }
 

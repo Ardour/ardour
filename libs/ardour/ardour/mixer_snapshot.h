@@ -52,7 +52,7 @@ class LIBARDOUR_API MixerSnapshot
         void snap(ARDOUR::RouteGroup*);
         void snap(boost::shared_ptr<ARDOUR::VCA>);
         void snap(boost::shared_ptr<ARDOUR::Route>);
-        void recall();
+        void recall(bool make_tracks = false);
         void clear();
         void write(const std::string);
         void load(const std::string);

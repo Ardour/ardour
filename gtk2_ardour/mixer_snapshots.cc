@@ -72,6 +72,7 @@ MixerSnapshotList::MixerSnapshotList (bool global)
     , _external_selector(_("New Snapshot from Session, Template or Other:"), FILE_CHOOSER_ACTION_OPEN)
     , _bug_user(true)
     , _global(global)
+    , _make_tracks(false)
 {
     _snapshot_model = ListStore::create (_columns);
     _snapshot_display.set_model (_snapshot_model);
@@ -297,11 +298,16 @@ bool MixerSnapshotList::button_press (GdkEventButton* ev)
         if (iter) {
             MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
 
-            MixerSnapshotSubstitutionDialog* sub_dialog = new MixerSnapshotSubstitutionDialog(snapshot);
-            sub_dialog->signal_response().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotList::substitution_dialog_response), sub_dialog));
-            sub_dialog->show_all();
-            sub_dialog->set_position(WIN_POS_MOUSE);
-            sub_dialog->present();
+            if(!_make_tracks) {
+                MixerSnapshotSubstitutionDialog* sub_dialog = new MixerSnapshotSubstitutionDialog(snapshot);
+                sub_dialog->signal_response().connect(sigc::bind(sigc::mem_fun(*this, &MixerSnapshotList::substitution_dialog_response), sub_dialog));
+                sub_dialog->show_all();
+                sub_dialog->set_position(WIN_POS_MOUSE);
+                sub_dialog->present();
+            } else if(_make_tracks) {
+                snapshot->recall(true);
+                _make_tracks = false;
+            }
 
             return true;
         }

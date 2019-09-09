@@ -60,6 +60,9 @@ public:
 
     void redisplay ();
 
+    bool get_make_tracks() {return _make_tracks;};
+    void set_make_tracks(bool yn) {_make_tracks = yn;};
+
     PBD::ScopedConnectionList connections;
 private:
     Gtk::VBox* _window_packer;
@@ -102,6 +105,7 @@ private:
 
     bool _bug_user;
     bool _global;
+    bool _make_tracks;
 
     void substitution_dialog_response(int, MixerSnapshotSubstitutionDialog*);
 
