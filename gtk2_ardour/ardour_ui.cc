@@ -541,7 +541,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	UIConfiguration::instance().load_rc_file (false);
 
 	_process_thread = new ProcessThread ();
-	_process_thread->init ();
 
 	attach_to_engine ();
 }
