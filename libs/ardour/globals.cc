@@ -672,6 +672,7 @@ ARDOUR::setup_fpu ()
 	}
 
 #if defined(ARCH_X86) && defined(USE_XMMINTRIN)
+	/* see also https://carlh.net/plugins/denormals.php */
 
 	int MXCSR;
 
@@ -716,6 +717,31 @@ ARDOUR::setup_fpu ()
 	}
 
 	_mm_setcsr (MXCSR);
+
+#elif defined(__aarch64__)
+	/* http://infocenter.arm.com/help/topic/com.arm.doc.ddi0488d/CIHCACFF.html
+	 * bit 24: flush-to-zero */
+	if (Config->get_denormal_model() != DenormalNone) {
+		uint64_t cw;
+		__asm__ __volatile__ (
+				"mrs    %0, fpcr           \n"
+				"orr    %0, %0, #0x1000000 \n"
+				"msr    fpcr, %0           \n"
+				"isb                       \n"
+				: "=r"(cw) :: "memory");
+	}
+
+#elif defined(__arm__)
+	/* http://infocenter.arm.com/help/topic/com.arm.doc.dui0068b/BCFHFBGA.html
+	 * bit 24: flush-to-zero */
+	if (Config->get_denormal_model() != DenormalNone) {
+		uint32_t cw;
+		__asm__ __volatile__ (
+				"vmrs   %0, fpscr          \n"
+				"orr    %0, %0, #0x1000000 \n"
+				"vmsr   fpscr, %0          \n"
+				: "=r"(cw) :: "memory")
+	}
 
 #endif
 }
