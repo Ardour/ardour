@@ -132,7 +132,6 @@ class ExportVideoDialog;
 class KeyEditor;
 class LocationUIWindow;
 class LuaScriptManager;
-class MixerSnapshotDialog;
 class RCOptionEditor;
 class RouteParams_UI;
 class SessionOptionEditor;
@@ -727,7 +726,6 @@ private:
 
 	WM::ProxyWithConstructor<SessionOptionEditor> session_option_editor;
 	WM::ProxyWithConstructor<AddVideoDialog> add_video_dialog;
-	WM::ProxyWithConstructor<MixerSnapshotDialog> mixer_snapshot_dialog;
 	WM::ProxyWithConstructor<BundleManager> bundle_manager;
 	WM::ProxyWithConstructor<BigClockWindow> big_clock_window;
 	WM::ProxyWithConstructor<BigTransportWindow> big_transport_window;
@@ -740,7 +738,6 @@ private:
 
 	SessionOptionEditor*    create_session_option_editor ();
 	BundleManager*          create_bundle_manager ();
-	MixerSnapshotDialog*    create_mixer_snapshot_dialog();
 	AddVideoDialog*         create_add_video_dialog ();
 	BigClockWindow*         create_big_clock_window();
 	BigTransportWindow*     create_big_transport_window();
