@@ -1313,6 +1313,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Libjack linking',       conf.env['libjack_link'])
     write_config_text('Libjack metadata',      conf.is_defined ('HAVE_JACK_METADATA'))
     write_config_text('Lua Binding Doc',       conf.is_defined('LUABINDINGDOC'))
+    write_config_text('Lua Commandline Tool',  conf.is_defined('HAVE_READLINE') and not (conf.is_defined('WINDOWS_VST_SUPPORT') and conf.env['build_target'] != 'mingw'))
     write_config_text('LV2 UI embedding',      conf.is_defined('HAVE_SUIL'))
     write_config_text('LV2 support',           conf.is_defined('LV2_SUPPORT'))
     write_config_text('LV2 extensions',        conf.is_defined('LV2_EXTENDED'))
