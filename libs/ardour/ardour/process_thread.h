@@ -37,7 +37,7 @@ public:
 	ProcessThread ();
 	~ProcessThread ();
 
-	static void init();
+	void init();
 
 	void get_buffers ();
 	void drop_buffers ();

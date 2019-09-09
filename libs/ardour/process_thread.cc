@@ -20,6 +20,7 @@
 
 #include <iostream>
 
+#include "ardour/ardour.h"
 #include "ardour/buffer.h"
 #include "ardour/buffer_manager.h"
 #include "ardour/buffer_set.h"
@@ -41,10 +42,13 @@ Glib::Threads::Private<ThreadBuffers> ProcessThread::_private_thread_buffers (re
 void
 ProcessThread::init ()
 {
+	/* denormal protection is per thread */
+	ARDOUR::setup_fpu ();
 }
 
 ProcessThread::ProcessThread ()
 {
+	init ();
 }
 
 ProcessThread::~ProcessThread ()
