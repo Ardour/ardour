@@ -53,6 +53,10 @@
 #include <windows.h> // for LARGE_INTEGER
 #endif
 
+#ifdef HAVE_FFTW35F
+#include <fftw3.h>
+#endif
+
 #ifdef WINDOWS_VST_SUPPORT
 #include <fst.h>
 #endif
@@ -450,6 +454,10 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	if (getenv("ARDOUR_LUA_METATABLES")) {
 		luabridge::Security::setHideMetatables (false);
 	}
+#endif
+
+#ifdef HAVE_FFTW35F
+	fftwf_make_planner_thread_safe ();
 #endif
 
 	if (!PBD::init()) return false;
