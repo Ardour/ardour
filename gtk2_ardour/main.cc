@@ -35,10 +35,6 @@
 #include <sigc++/bind.h>
 #include <gtkmm/settings.h>
 
-#ifdef HAVE_FFTW35F
-#include <fftw3.h>
-#endif
-
 #include <curl/curl.h>
 
 #include "pbd/error.h"
@@ -313,10 +309,6 @@ int main (int argc, char *argv[])
 
 #ifdef LXVST_SUPPORT
 	XInitThreads ();
-#endif
-
-#ifdef HAVE_FFTW35F
-	fftwf_make_planner_thread_safe ();
 #endif
 
 #if ENABLE_NLS

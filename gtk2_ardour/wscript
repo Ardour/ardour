@@ -378,8 +378,6 @@ def configure(conf):
 
     autowaf.check_pkg(conf, 'fftw3f', uselib_store='FFTW3F',
                       mandatory=True)
-    autowaf.check_pkg(conf, 'fftw3f', uselib_store='FFTW35F',
-                      atleast_version='3.3.5', mandatory=False)
     autowaf.check_pkg(conf, 'flac', uselib_store='FLAC',
                       atleast_version='1.2.1')
     autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD',
