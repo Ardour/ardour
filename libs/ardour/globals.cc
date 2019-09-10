@@ -681,7 +681,7 @@ ARDOUR::setup_fpu ()
 #if defined(ARCH_X86) && defined(USE_XMMINTRIN)
 	/* see also https://carlh.net/plugins/denormals.php */
 
-	int MXCSR;
+	unsigned int MXCSR;
 
 	if (!fpu->has_flush_to_zero() && !fpu->has_denormals_are_zero()) {
 		return;
