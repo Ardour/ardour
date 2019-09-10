@@ -188,13 +188,12 @@ setup_hardware_optimization (bool try_optimization)
 
 #ifdef PLATFORM_WINDOWS
 		/* We have AVX-optimized code for Windows */
-
-		if (fpu->has_avx()) {
+		if (fpu->has_avx())
 #else
 		/* AVX code doesn't compile on Linux yet */
-
-		if (false) {
+		if (false)
 #endif
+		{
 			info << "Using AVX optimized routines" << endmsg;
 
 			// AVX SET
@@ -748,7 +747,7 @@ ARDOUR::setup_fpu ()
 				"vmrs   %0, fpscr          \n"
 				"orr    %0, %0, #0x1000000 \n"
 				"vmsr   fpscr, %0          \n"
-				: "=r"(cw) :: "memory")
+				: "=r"(cw) :: "memory");
 	}
 
 #endif
