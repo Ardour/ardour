@@ -2861,6 +2861,8 @@ RCOptionEditor::RCOptionEditor ()
 		dm->set_sensitive(false);
 	}
 
+	dm->set_note (_("Changes may not be effective until audio-engine restart."));
+
 	add_option (_("Audio"), dm);
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Regions")));
