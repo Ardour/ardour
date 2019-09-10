@@ -194,13 +194,11 @@ private:
 	PannerUI     panners;
 
 	Gtk::Table mute_solo_table;
-	Gtk::Table level_table;
+	Gtk::HBox master_box;
 
 	ArdourWidgets::ArdourButton output_button;
 
 	Gtk::HBox prev_next_box;
-
-	std::string longest_label;
 
 	void help_count_plugins (boost::weak_ptr<ARDOUR::Processor>);
 	uint32_t _plugin_insert_cnt;
@@ -287,8 +285,6 @@ private:
 	PBD::ScopedConnection send_gone_connection;
 
 	void reset_strip_style ();
-
-	ARDOUR::DataType guess_main_type(bool for_input, bool favor_connected = true) const;
 
 	void update_io_button ();
 	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);

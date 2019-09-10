@@ -81,7 +81,10 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, \
 	_button.set_led_left (true);
 	_button.signal_led_clicked.connect (sigc::mem_fun (*this, &FoldbackSend::led_clicked));
 	_button.set_name ("processor prefader");
-	_button.set_text (_send_route->name());
+	_button.set_layout_ellipsize_width (Wide * PANGO_SCALE);
+	string s_name = PBD::short_version (_send_route->name (), 8);
+	_button.set_text (s_name);
+	_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	snd_but_pan->pack_start (_button, true, true);
 	_button.set_active (_send_proc->enabled ());
 	_button.show ();
@@ -281,7 +284,6 @@ FoldbackStrip::FoldbackStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Rou
 	, _pr_selection ()
 	, panners (sess)
 	, mute_solo_table (1, 2)
-	, level_table (1, 1)
 	, _plugin_insert_cnt (0)
 	, _comment_button (_("Comments"))
 	, fb_level_control (0)
@@ -302,9 +304,6 @@ FoldbackStrip::init ()
 	comment_area = 0;
 	_width_owner = 0;
 
-	/* the length of this string determines the width of the foldback strip */
-	longest_label = "longest label";
-
 	_previous_button.set_name ("mixer strip button");
 	_previous_button.set_icon (ArdourIcon::NudgeLeft);
 	_previous_button.set_tweaks (ArdourButton::Square);
@@ -317,6 +316,8 @@ FoldbackStrip::init ()
 
 	name_button.set_name ("mixer strip button");
 	name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
+	//name_button.set_layout_ellipsize_width (alloc.get_width() * PANGO_SCALE);
+	name_button.set_layout_ellipsize_width (Wide * PANGO_SCALE);
 
 	// invertbuttons and box in route_ui
 
@@ -332,11 +333,13 @@ FoldbackStrip::init ()
 	send_scroller.get_child()->set_name ("FoldbackBusStripBase");
 
 	// panners from route_ui
+	panners.set_width (Narrow);
 
 	insert_box = new ProcessorBox (0, boost::bind (&FoldbackStrip::plugin_selector, this), _pr_selection, 0);
 	insert_box->set_no_show_all ();
 	insert_box->show ();
 	insert_box->set_session (_session);
+	insert_box->set_width (Wide);
 
 	mute_solo_table.set_homogeneous (true);
 	mute_solo_table.set_spacings (2);
@@ -347,11 +350,12 @@ FoldbackStrip::init ()
 	fb_level_control->set_name ("foldback knob");
 	fb_level_control->set_no_show_all (true);
 
-	level_table.attach (*fb_level_control, 0, 1, 0, 1,FILL,FILL,20,20); //EXPAND
-	level_table.set_spacings (20);
-	level_table.set_row_spacings (20);
-	level_table.set_homogeneous (true);
-	level_table.set_name ("FoldbackBusStripBase");
+	VBox* level_box = manage (new VBox);
+	level_box->pack_start (*fb_level_control, true, false);
+	master_box.pack_start (*level_box, true, false);
+	master_box.set_size_request (PX_SCALE(120), PX_SCALE(100));
+	master_box.set_name ("FoldbackBusStripBase");
+	level_box->show ();
 
 	output_button.set_text (_("Output"));
 	output_button.set_name ("mixer strip button");
@@ -392,7 +396,7 @@ FoldbackStrip::init ()
 #endif
 	global_vpacker.pack_end (_comment_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (output_button, Gtk::PACK_SHRINK);
-	global_vpacker.pack_end (level_table, Gtk::PACK_SHRINK);
+	global_vpacker.pack_end (master_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (mute_solo_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (*insert_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_end (panners, Gtk::PACK_SHRINK);
@@ -570,7 +574,7 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	mute_button->show ();
 	solo_button->show ();
 	mute_solo_table.show();
-	level_table.show();
+	master_box.show();
 	output_button.show();
 	_comment_button.show();
 	spacer.show();
@@ -676,21 +680,7 @@ FoldbackStrip::output_press (GdkEventButton *ev)
 
 		boost::shared_ptr<ARDOUR::BundleList> b = _session->bundles ();
 
-		/* guess the user-intended main type of the route output */
-		DataType intended_type = guess_main_type(false);
-
-		/* try adding the master bus first */
-		boost::shared_ptr<Route> master = _session->master_out();
-		if (master) {
-			maybe_add_bundle_to_output_menu (master->input()->bundle(), current, intended_type);
-		}
-
-		/* then other routes inputs */
-		RouteList copy = _session->get_routelist ();
-		copy.sort (RouteCompareByName ());
-		for (ARDOUR::RouteList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
-			maybe_add_bundle_to_output_menu ((*i)->input()->bundle(), current, intended_type);
-		}
+		DataType intended_type = DataType::AUDIO;
 
 		/* then try adding user bundles, often labeled/grouped physical inputs */
 		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
@@ -709,19 +699,6 @@ FoldbackStrip::output_press (GdkEventButton *ev)
 		if (citems.size() == n_with_separator) {
 			/* no routes added; remove the separator */
 			citems.pop_back ();
-		}
-
-		if (!ARDOUR::Profile->get_mixbus()) {
-			citems.push_back (SeparatorElem());
-
-			for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
-				citems.push_back (
-						MenuElem (
-							string_compose (_("Add %1 port"), (*i).to_i18n_string()),
-							sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::add_output_port), *i)
-							)
-						);
-			}
 		}
 
 		citems.push_back (SeparatorElem());
@@ -760,19 +737,14 @@ FoldbackStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARD
 		return;
 	}
 
-	/* Don't add the monitor input unless we are Master */
+	/* Don't add the monitor input */
 	boost::shared_ptr<Route> monitor = _session->monitor_out();
-	if ((!_route->is_master()) && monitor && b->has_same_ports (monitor->input()->bundle()))
+	if (monitor && b->has_same_ports (monitor->input()->bundle()))
 		return;
 
-	/* It should either match exactly our outputs (if |type| is DataType::NIL)
-	 * or have the same number of |type| channels than our outputs. */
-	if (type == DataType::NIL) {
-		if(b->nchannels() != _route->n_outputs())
-			return;
-	} else {
-		if (b->nchannels().n(type) != _route->n_outputs().n(type))
-			return;
+	/* It should have the same number of |type| channels as our outputs. */
+	if (b->nchannels().n(type) != _route->n_outputs().n(type)) {
+		return;
 	}
 
 	/* Avoid adding duplicates */
@@ -821,53 +793,6 @@ FoldbackStrip::update_panner_choices ()
 	}
 
 	panners.set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
-}
-
-DataType
-FoldbackStrip::guess_main_type(bool for_input, bool favor_connected) const
-{
-	/* The heuristic follows these principles:
-	 *  A) If all ports that the user connected are of the same type, then he
-	 *     very probably intends to use the IO with that type. A common subcase
-	 *     is when the IO has only ports of the same type (connected or not).
-	 *  B) If several types of ports are connected, then we should guess based
-	 *     on the likeliness of the user wanting to use a given type.
-	 *     We assume that the DataTypes are ordered from the most likely to the
-	 *     least likely when iterating or comparing them with "<".
-	 *  C) If no port is connected, the same logic can be applied with all ports
-	 *     instead of connected ones. TODO: Try other ideas, for instance look at
-	 *     the last plugin output when |for_input| is false (note: when StrictIO
-	 *     the outs of the last plugin should be the same as the outs of the route
-	 *     modulo the panner which forwards non-audio anyway).
-	 * All of these constraints are respected by the following algorithm that
-	 * just returns the most likely datatype found in connected ports if any, or
-	 * available ports if any (since if all ports are of the same type, the most
-	 * likely found will be that one obviously). */
-
-	boost::shared_ptr<IO> io = for_input ? _route->input() : _route->output();
-
-	/* Find most likely type among connected ports */
-	if (favor_connected) {
-		DataType type = DataType::NIL; /* NIL is always last so least likely */
-		for (PortSet::iterator p = io->ports().begin(); p != io->ports().end(); ++p) {
-			if (p->connected() && p->type() < type)
-				type = p->type();
-		}
-		if (type != DataType::NIL) {
-			/* There has been a connected port (necessarily non-NIL) */
-			return type;
-		}
-	}
-
-	/* Find most likely type among available ports.
-	 * The iterator stops before NIL. */
-	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		if (io->n_ports().n(*t) > 0)
-			return *t;
-	}
-
-	/* No port at all, return the most likely datatype by default */
-	return DataType::front();
 }
 
 /*
@@ -920,7 +845,7 @@ FoldbackStrip::update_io_button ()
 	uint32_t typed_connection_count = 0;
 	bool each_typed_port_has_one_connection = true;
 
-	DataType dt = guess_main_type(false);
+	DataType dt = DataType::AUDIO;
 	boost::shared_ptr<IO> io = _route->output();
 
 	/* Fill in the tooltip. Also count:
@@ -1402,7 +1327,8 @@ FoldbackStrip::name_changed ()
 {
 
 	name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
-	name_button.set_text (_route->name());
+	string r_name = PBD::short_version (_route->name (), 16);
+	name_button.set_text (r_name);
 
 	set_tooltip (name_button, Gtkmm2ext::markup_escape_text(_route->name()));
 
