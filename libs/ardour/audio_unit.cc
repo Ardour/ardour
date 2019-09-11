@@ -1710,7 +1710,7 @@ AUPlugin::connect_and_run (BufferSet& bufs,
 					continue;
 				}
 				if (buffers->mBuffers[i].mData == 0 || buffers->mBuffers[i].mNumberChannels != 1) {
-					continue
+					continue;
 				}
 				used_outputs.set (i + busoff);
 				Sample* expected_buffer_address = bufs.get_audio (idx).data (offset);
