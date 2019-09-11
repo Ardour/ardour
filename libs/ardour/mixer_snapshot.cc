@@ -515,11 +515,13 @@ void MixerSnapshot::load(const string path)
     root->get_property(X_("flags"), _flags);
     root->get_property(X_("favorite"), fav);
     root->get_property(X_("modified-with"), last_modified_with);
+    root->get_property(X_("name"), label);
     set_favorite(atoi(fav.c_str()));
 
-    XMLNode* route_node = find_named_node(*root, "Routes");
-    XMLNode* group_node = find_named_node(*root, "Groups");
-    XMLNode* vca_node   = find_named_node(*root, "VCAS");
+    XMLNode* route_node = find_named_node(*root, X_("Routes"));
+    XMLNode* group_node = find_named_node(*root, X_("Groups"));
+    XMLNode* vca_node   = find_named_node(*root, X_("VCAS"));
+    XMLNode* desc_node  = find_named_node(*root, X_("description"));
 
     if(route_node) {
         XMLNodeList nlist = route_node->children();
@@ -554,6 +556,13 @@ void MixerSnapshot::load(const string path)
 
             State state {id, name, (**niter)};
             vca_states.push_back(state);
+        }
+    }
+
+    if(desc_node) {
+        XMLNode* node = desc_node->child(X_("text"));
+        if(node) {
+            _description = node->content();
         }
     }
 }
