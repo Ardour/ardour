@@ -321,11 +321,13 @@ FoldbackStrip::init ()
 	_previous_button.set_name ("mixer strip button");
 	_previous_button.set_icon (ArdourIcon::NudgeLeft);
 	_previous_button.set_tweaks (ArdourButton::Square);
+	UI::instance()->set_tip (&_previous_button, _("previous foldback bus"), "");
 	_previous_button.set_sensitive (false);
 
 	_next_button.set_name ("mixer strip button");
 	_next_button.set_icon (ArdourIcon::NudgeRight);
 	_next_button.set_tweaks (ArdourButton::Square);
+	UI::instance()->set_tip (&_next_button, _("next foldback bus"), "");
 	_next_button.set_sensitive (false);
 
 	prev_next_box.pack_start (_previous_button, false, true);
