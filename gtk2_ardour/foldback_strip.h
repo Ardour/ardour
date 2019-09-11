@@ -252,6 +252,7 @@ private:
 
 	gboolean previous_button_button_press (GdkEventButton*);
 	gboolean next_button_button_press (GdkEventButton*);
+	void prev_next_changed ();
 	gboolean show_sends_press (GdkEventButton*);
 	void send_blink (bool);
 

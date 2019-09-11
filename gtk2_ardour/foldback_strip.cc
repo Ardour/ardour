@@ -321,9 +321,12 @@ FoldbackStrip::init ()
 	_previous_button.set_name ("mixer strip button");
 	_previous_button.set_icon (ArdourIcon::NudgeLeft);
 	_previous_button.set_tweaks (ArdourButton::Square);
+	_previous_button.set_sensitive (false);
+
 	_next_button.set_name ("mixer strip button");
 	_next_button.set_icon (ArdourIcon::NudgeRight);
 	_next_button.set_tweaks (ArdourButton::Square);
+	_next_button.set_sensitive (false);
 
 	prev_next_box.pack_start (_previous_button, false, true);
 	prev_next_box.pack_end (_next_button, false, true);
@@ -576,7 +579,7 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	update_output_display ();
 
 	add_events (Gdk::BUTTON_RELEASE_MASK);
-
+	prev_next_changed ();
 	_previous_button.show();
 	_next_button.show();
 	prev_next_box.show ();
@@ -1228,19 +1231,72 @@ FoldbackStrip::previous_button_button_press (GdkEventButton* ev)
 				}
 			}
 		} else {
-			// only one route or none do nothing
+			// only one route do nothing
 			return true;
 		}
 		//use previous to set route
 		if (previous) {
 			set_route (previous);
-		} else {
+		} /*else { no wrap around
 			set_route (last);
-		}
+		}*/
 		return true;
 	}
 
 	return false;
+}
+
+gboolean
+FoldbackStrip::next_button_button_press (GdkEventButton* ev)
+{
+	if (ev->button == 1 || ev->button == 3) {
+		bool past_current = false;
+		StripableList slist;
+		boost::shared_ptr<Route> next = boost::shared_ptr<Route> ();
+		boost::shared_ptr<Route> first = boost::shared_ptr<Route> ();
+		_session->get_stripables (slist, PresentationInfo::FoldbackBus);
+		if (slist.size () > 1) {
+			first = boost::dynamic_pointer_cast<Route> (*(slist.begin()));
+			for (StripableList::iterator s = slist.begin(); s != slist.end(); ++s) {
+				if (past_current) {
+					next = boost::dynamic_pointer_cast<Route> (*s);
+					break;
+				}
+				if ((*s) == _route) {
+					past_current = true;
+				}
+			}
+		} else {
+			// only one route do nothing
+			return true;
+		}
+		//use next to set route
+		if (next) {
+			set_route (next);
+		} /*else { no wrap around
+			set_route (first);
+		}*/
+		return true;
+	}
+
+	return false;
+}
+
+void
+FoldbackStrip::prev_next_changed ()
+{
+	StripableList slist;
+	_session->get_stripables (slist, PresentationInfo::FoldbackBus);
+	if ((slist.size() < 2) || (boost::dynamic_pointer_cast<Stripable> (_route) == *(slist.begin()))) {
+		_previous_button.set_sensitive (false);
+	} else {
+		_previous_button.set_sensitive (true);
+	}
+	if ((slist.size () < 2) || boost::dynamic_pointer_cast<Stripable> (_route) == *(--slist.end())) {
+		_next_button.set_sensitive (false);
+	} else {
+		_next_button.set_sensitive (true);
+	}
 }
 
 gboolean
@@ -1278,42 +1334,6 @@ FoldbackStrip::send_blink (bool onoff)
 	} else {
 		_show_sends_button.unset_active_state ();
 	}
-}
-
-gboolean
-FoldbackStrip::next_button_button_press (GdkEventButton* ev)
-{
-	if (ev->button == 1 || ev->button == 3) {
-		bool past_current = false;
-		StripableList slist;
-		boost::shared_ptr<Route> next = boost::shared_ptr<Route> ();
-		boost::shared_ptr<Route> first = boost::shared_ptr<Route> ();
-		_session->get_stripables (slist, PresentationInfo::FoldbackBus);
-		if (slist.size () > 1) {
-			first = boost::dynamic_pointer_cast<Route> (*(slist.begin()));
-			for (StripableList::iterator s = slist.begin(); s != slist.end(); ++s) {
-				if (past_current) {
-					next = boost::dynamic_pointer_cast<Route> (*s);
-					break;
-				}
-				if ((*s) == _route) {
-					past_current = true;
-				}
-			}
-		} else {
-			// only one or no route do nothing
-			return true;
-		}
-		//use next to set route
-		if (next) {
-			set_route (next);
-		} else {
-			set_route (first);
-		}
-		return true;
-	}
-
-	return false;
 }
 
 void
@@ -1651,6 +1671,7 @@ FoldbackStrip::remove_current_fb ()
 	if (next) {
 		set_route (next);
 		_session->remove_route (old_route);
+		prev_next_changed ();
 	} else {
 		clear_send_box ();
 		RouteUI::self_delete ();
