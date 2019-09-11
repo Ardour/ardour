@@ -1667,17 +1667,19 @@ AUPlugin::connect_and_run (BufferSet& bufs,
 
 		for (uint32_t i = 0; i < cnt; ++i) {
 			buffers->mBuffers[i].mNumberChannels = 1;
-			buffers->mBuffers[i].mDataByteSize = nframes * sizeof (Sample);
-			/* setting this to 0 indicates to the AU that it can provide buffers here
+			/* setting this to 0 indicates to the AU that it *can* provide buffers here
 			 * if necessary. if it can process in-place, it will use the buffers provided
 			 * as input by ::render_callback() above.
 			 *
 			 * a non-null values tells the plugin to render into the buffer pointed
 			 * at by the value.
+			 * https://developer.apple.com/documentation/audiotoolbox/1438430-audiounitrender?language=objc
 			 */
 			if (inplace) {
+				buffers->mBuffers[i].mDataByteSize = 0;
 				buffers->mBuffers[i].mData = 0;
 			} else {
+				buffers->mBuffers[i].mDataByteSize = nframes * sizeof (Sample);
 				bool valid = false;
 				uint32_t idx = out_map.get (DataType::AUDIO, i + busoff, &valid);
 				if (valid) {
@@ -1704,7 +1706,12 @@ AUPlugin::connect_and_run (BufferSet& bufs,
 			for (uint32_t i = 0; i < limit; ++i) {
 				bool valid = false;
 				uint32_t idx = out_map.get (DataType::AUDIO, i + busoff, &valid);
-				if (!valid) continue;
+				if (!valid) {
+					continue;
+				}
+				if (buffers->mBuffers[i].mData == 0 || buffers->mBuffers[i].mNumberChannels != 1) {
+					continue
+				}
 				used_outputs.set (i + busoff);
 				Sample* expected_buffer_address = bufs.get_audio (idx).data (offset);
 				if (expected_buffer_address != buffers->mBuffers[i].mData) {
