@@ -16,8 +16,6 @@
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include <vector>
-
 #include <stdio.h>
 #include <glibmm.h>
 #include <glibmm/miscutils.h>
@@ -25,17 +23,17 @@
 #include "ardour/directory_names.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
-#include "ardour/mixer_snapshot_manager.h"
 #include "ardour/mixer_snapshot.h"
+#include "ardour/mixer_snapshot_manager.h"
 #include "ardour/search_paths.h"
 #include "ardour/session_directory.h"
-#include "ardour/template_utils.h"
 
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"
 #include "pbd/gstdio_compat.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace std;
 
 MixerSnapshotManager::MixerSnapshotManager (Session* s)
@@ -59,42 +57,62 @@ void MixerSnapshotManager::ensure_snapshot_dir(bool global)
     }
 }
 
+void MixerSnapshotManager::find_templates(vector<TemplateInfo>& template_info, bool global)
+{
+    if(!_session) {
+        return;
+    }
+
+    if(!global) {
+        Searchpath searchpath (_session->session_directory().root_path());
+        searchpath.add_subdirectory_to_paths(route_templates_dir_name);
+
+        vector<string> files;
+        const string pattern = "*" + string(template_suffix);
+        find_files_matching_pattern(files, searchpath, pattern);
+
+        if(!files.empty()) {
+            for(vector<string>::const_iterator it = files.begin(); it != files.end(); it++) {
+                const string path = (*it);
+                const string name = basename_nosuffix(path);
+
+                MixerSnapshot* snapshot = new MixerSnapshot(_session, path);
+                const string description = snapshot->get_description();
+                const string modified    = snapshot->get_last_modified_with();
+
+                TemplateInfo info {name, path, description, modified};
+                template_info.push_back(info);
+                delete snapshot;
+            }
+        }
+    } else if(global) {
+        find_route_templates(template_info);
+    }
+}
+
 void MixerSnapshotManager::refresh()
 {
     clear();
-    vector<TemplateInfo> global_templates;
-    find_route_templates(global_templates);
 
+    vector<TemplateInfo> global_templates, local_templates;
+    find_templates(global_templates, true);
+    find_templates(local_templates, false);
+
+    vector<TemplateInfo>::const_iterator it;
     if(!global_templates.empty()) {
-        for(vector<TemplateInfo>::const_iterator it = global_templates.begin(); it != global_templates.end(); it++) {
+        for(it = global_templates.begin(); it != global_templates.end(); it++) {
             TemplateInfo info = (*it);
 
             MixerSnapshot* snap = new MixerSnapshot(_session, info.path);
-            snap->set_label(info.name);
-            snap->set_path(info.path);
             _global_snapshots.insert(snap);
         }
     }
 
-
-    /* this should be in search_paths and then integrated into template_utils
-       but having it be based on the session presents... complications. For now
-       We're just going to construct our own search path.
-    */
-    PBD::Searchpath spath (_session->session_directory().root_path());
-    spath.add_subdirectory_to_paths(route_templates_dir_name);
-
-    vector<string> local_templates;
-    string pattern = "*" + string(template_suffix);
-    find_files_matching_pattern(local_templates, spath, pattern);
-
     if(!local_templates.empty()) {
-        for(vector<string>::const_iterator it = local_templates.begin(); it != local_templates.end(); it++) {
-            const string path  = (*it);
-            const string label = PBD::basename_nosuffix(path);
+        for(it = local_templates.begin(); it != local_templates.end(); it++) {
+            TemplateInfo info = (*it);
 
-            MixerSnapshot* snap = new MixerSnapshot(_session, path);
-            snap->set_label(label);
+            MixerSnapshot* snap = new MixerSnapshot(_session, info.path);
             _local_snapshots.insert(snap);
         }
     }

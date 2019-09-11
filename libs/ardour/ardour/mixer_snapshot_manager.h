@@ -21,11 +21,13 @@
 
 #include <string>
 #include <set>
+#include <vector>
 
 #include <boost/utility.hpp>
 
 #include "ardour/mixer_snapshot.h"
 #include "ardour/session.h"
+#include "ardour/template_utils.h"
 
 #include "pbd/signals.h"
 
@@ -41,6 +43,8 @@ public:
 
     void create_snapshot(const std::string& label, const std::string& desc, RouteList& rl, bool global);
     void create_snapshot(const std::string& label, const std::string& desc, const std::string& from_path, bool global);
+
+    void find_templates(std::vector<ARDOUR::TemplateInfo>&, bool);
 
     bool rename_snapshot(MixerSnapshot*, const std::string&);
     bool remove_snapshot(MixerSnapshot*);
