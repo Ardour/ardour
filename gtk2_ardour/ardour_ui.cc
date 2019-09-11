@@ -4464,6 +4464,7 @@ ARDOUR_UI::add_route_dialog_response (int r)
 		break;
 	case AddRouteDialog::FoldbackBus:
 		session_add_foldback_bus (input_chan.n_audio(), count, name_template);
+		ActionManager::get_toggle_action (X_("Mixer"), X_("ToggleFoldbackStrip"))->set_active (true);
 		break;
 	}
 }

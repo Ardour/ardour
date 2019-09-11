@@ -212,10 +212,12 @@ private:
 	ArdourWidgets::ArdourButton _show_sends_button;
 	ArdourWidgets::ArdourButton _previous_button;
 	ArdourWidgets::ArdourButton _next_button;
+	ArdourWidgets::ArdourButton _hide_button;
 	ArdourWidgets::ArdourButton _comment_button;
 	ArdourWidgets::ArdourKnob*   fb_level_control;
 
 	void setup_comment_button ();
+	void hide_clicked();
 
 	gint output_press (GdkEventButton *);
 	gint output_release (GdkEventButton *);

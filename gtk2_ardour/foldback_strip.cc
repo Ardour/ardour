@@ -321,17 +321,23 @@ FoldbackStrip::init ()
 	_previous_button.set_name ("mixer strip button");
 	_previous_button.set_icon (ArdourIcon::NudgeLeft);
 	_previous_button.set_tweaks (ArdourButton::Square);
-	UI::instance()->set_tip (&_previous_button, _("previous foldback bus"), "");
+	UI::instance()->set_tip (&_previous_button, _("Previous foldback bus"), "");
 	_previous_button.set_sensitive (false);
 
 	_next_button.set_name ("mixer strip button");
 	_next_button.set_icon (ArdourIcon::NudgeRight);
 	_next_button.set_tweaks (ArdourButton::Square);
-	UI::instance()->set_tip (&_next_button, _("next foldback bus"), "");
+	UI::instance()->set_tip (&_next_button, _("Next foldback bus"), "");
 	_next_button.set_sensitive (false);
 
+	_hide_button.set_name ("mixer strip button");
+	_hide_button.set_icon (ArdourIcon::CloseCross);
+	_hide_button.set_tweaks (ArdourButton::Square);
+	set_tooltip (&_hide_button, _("Hide Foldback strip"));
+
 	prev_next_box.pack_start (_previous_button, false, true);
-	prev_next_box.pack_end (_next_button, false, true);
+	prev_next_box.pack_start (_next_button, false, true);
+	prev_next_box.pack_end (_hide_button, false, true);
 
 	name_button.set_name ("mixer strip button");
 	name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
@@ -443,6 +449,7 @@ FoldbackStrip::init ()
 	name_button.signal_button_press_event().connect (sigc::mem_fun(*this, &FoldbackStrip::name_button_button_press), false);
 	_previous_button.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackStrip::previous_button_button_press), false);
 	_next_button.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackStrip::next_button_button_press), false);
+	_hide_button.signal_clicked.connect (sigc::mem_fun(*this, &FoldbackStrip::hide_clicked));
 	_show_sends_button.signal_button_press_event().connect (sigc::mem_fun(*this, &FoldbackStrip::show_sends_press), false);
 	send_scroller.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackStrip::send_button_press_event));
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
@@ -584,6 +591,7 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	prev_next_changed ();
 	_previous_button.show();
 	_next_button.show();
+	_hide_button.show();
 	prev_next_box.show ();
 	name_button.show();
 	send_display.show ();
@@ -1299,6 +1307,14 @@ FoldbackStrip::prev_next_changed ()
 	} else {
 		_next_button.set_sensitive (true);
 	}
+}
+
+void
+FoldbackStrip::hide_clicked()
+{
+	_hide_button.set_sensitive(false);
+	ActionManager::get_toggle_action (X_("Mixer"), X_("ToggleFoldbackStrip"))->set_active (false);
+	_hide_button.set_sensitive(true);
 }
 
 gboolean

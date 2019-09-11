@@ -41,7 +41,7 @@
         <menuitem action='monitor-dim-all'/>
         <menuitem action='monitor-mono'/>
       </menu>
-      
+
       <menu name='Metadata' action='Metadata'>
         <menuitem action='EditMetadata'/>
         <menuitem action='ImportMetadata'/>
@@ -536,6 +536,7 @@
 #endif
       <menuitem action='ToggleVCAPane'/>
       <menuitem action='ToggleMonitorSection'/>
+      <menuitem action='ToggleFoldbackStrip'/>
 
     </menu>
     <menu action = 'WindowMenu'>

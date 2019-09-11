@@ -115,6 +115,7 @@ Mixer_UI::Mixer_UI ()
 	, track_menu (0)
 	, _plugin_selector (0)
 	, foldback_strip (0)
+	, _show_foldback_strip (true)
 	, _strip_width (UIConfiguration::instance().get_default_narrow_ms() ? Narrow : Wide)
 	, _spill_scroll_position (0)
 	, ignore_reorder (false)
@@ -612,6 +613,7 @@ Mixer_UI::add_stripables (StripableList& slist)
 				}
 				if (route->is_foldbackbus ()) {
 					if (foldback_strip) {
+						// last strip created is shown
 						foldback_strip->set_route (route);
 					} else {
 						foldback_strip = new FoldbackStrip (*this, _session, route);
@@ -620,6 +622,13 @@ Mixer_UI::add_stripables (StripableList& slist)
 						out_packer.reorder_child (*foldback_strip, 0);
 						foldback_strip->set_packed (true);
 					}
+					/* config from last run is set before there are any foldback strips
+					 * this takes that setting and applies it after at least one foldback
+					 * strip exists */
+					bool yn = _show_foldback_strip;
+					Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action ("Mixer", "ToggleFoldbackStrip");
+					act->set_active(!yn);
+					act->set_active(yn);
 					continue;
 				}
 
@@ -2070,6 +2079,28 @@ Mixer_UI::showhide_monitor_section (bool yn)
 }
 
 void
+Mixer_UI::toggle_foldback_strip ()
+{
+	Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action ("Mixer", "ToggleFoldbackStrip");
+	showhide_foldback_strip (act->get_active());
+}
+
+
+void
+Mixer_UI::showhide_foldback_strip (bool yn)
+{
+	_show_foldback_strip = yn;
+
+	if (foldback_strip) {
+		if (yn) {
+			foldback_strip->show();
+		} else {
+			foldback_strip->hide();
+		}
+	}
+}
+
+void
 Mixer_UI::toggle_vcas ()
 {
 	Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action ("Mixer", "ToggleVCAPane");
@@ -2331,6 +2362,15 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 	}
 
 	yn = true;
+	node.get_property ("foldback-strip-visible", yn);
+	{
+		Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action (X_("Mixer"), X_("ToggleFoldbackStrip"));
+		/* do it twice to force the change */
+		act->set_active (!yn);
+		act->set_active (yn);
+	}
+
+	yn = true;
 	node.get_property ("show-vca-pane", yn);
 	{
 		Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action (X_("Mixer"), X_("ToggleVCAPane"));
@@ -2443,6 +2483,9 @@ Mixer_UI::get_state ()
 
 	act = ActionManager::get_toggle_action ("Mixer", "ToggleMonitorSection");
 	node->set_property ("monitor-section-visible", act->get_active ());
+
+	act = ActionManager::get_toggle_action ("Mixer", "ToggleFoldbackStrip");
+	node->set_property ("foldback-strip-visible", act->get_active ());
 
 	act = ActionManager::get_toggle_action ("Mixer", "ToggleVCAPane");
 	node->set_property ("show-vca-pane", act->get_active ());
@@ -3357,6 +3400,9 @@ Mixer_UI::register_actions ()
 #endif
 
 	ActionManager::register_toggle_action (group, X_("ToggleMonitorSection"), _("Mixer: Show Monitor Section"), sigc::mem_fun (*this, &Mixer_UI::toggle_monitor_section));
+
+	ActionManager::register_toggle_action (group, X_("ToggleFoldbackStrip"), _("Mixer: Show Foldback Strip"), sigc::mem_fun (*this, &Mixer_UI::toggle_foldback_strip));
+
 }
 
 void

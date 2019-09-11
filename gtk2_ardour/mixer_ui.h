@@ -145,6 +145,9 @@ public:
 	void toggle_monitor_section ();
 	void showhide_monitor_section (bool);
 
+	void toggle_foldback_strip ();
+	void showhide_foldback_strip (bool);
+
 	void toggle_vcas ();
 	void showhide_vcas (bool on);
 
@@ -305,6 +308,7 @@ private:
 	MonitorSection   _monitor_section;
 	PluginSelector *_plugin_selector;
 	FoldbackStrip * foldback_strip;
+	bool _show_foldback_strip;
 
 	void stripable_property_changed (const PBD::PropertyChange& what_changed, boost::weak_ptr<ARDOUR::Stripable> ws);
 	void route_group_property_changed (ARDOUR::RouteGroup *, const PBD::PropertyChange &);
