@@ -1602,7 +1602,7 @@ AUPlugin::connect_and_run (BufferSet& bufs,
 	bool inplace = true; // TODO check plugin-insert in-place ?
 	ChanMapping::Mappings inmap (in_map.mappings ());
 	ChanMapping::Mappings outmap (out_map.mappings ());
-	if (outmap[DataType::AUDIO].size () == 0) {
+	if (outmap[DataType::AUDIO].size () == 0 || inmap[DataType::AUDIO].size() == 0) {
 		inplace = false;
 	}
 	if (inmap[DataType::AUDIO].size() > 0 && inmap != outmap) {
