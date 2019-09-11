@@ -93,6 +93,8 @@ private:
 	void set_gain (float new_gain);
 	void remove_me ();
 
+	void route_property_changed (const PBD::PropertyChange&);
+	void name_changed ();
 	void send_state_changed ();
 	void level_adjusted ();
 	void level_changed ();

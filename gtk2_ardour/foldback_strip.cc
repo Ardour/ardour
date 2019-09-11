@@ -82,8 +82,7 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, \
 	_button.signal_led_clicked.connect (sigc::mem_fun (*this, &FoldbackSend::led_clicked));
 	_button.set_name ("processor prefader");
 	_button.set_layout_ellipsize_width (Wide * PANGO_SCALE);
-	string s_name = PBD::short_version (_send_route->name (), 8);
-	_button.set_text (s_name);
+	name_changed ();
 	_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	snd_but_pan->pack_start (_button, true, true);
 	_button.set_active (_send_proc->enabled ());
@@ -107,8 +106,6 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, \
 	_slider.set_name ("ProcessorControlSlider");
 	_slider.set_text (_("Level"));
 
-
-
 	pack_start (*snd_but_pan, Gtk::PACK_SHRINK);
 	snd_but_pan->show();
 	pack_start (_slider, true, true);
@@ -119,6 +116,7 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, \
 	lc->Changed.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::level_changed, this), gui_context ());
 	_send_proc->ActiveChanged.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::send_state_changed, this), gui_context ());
 	_button.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackSend::button_press));
+	_send_route->PropertyChanged.connect (_connections, invalidator (*this), boost::bind (&FoldbackSend::route_property_changed, this, _1), gui_context());
 
 	show ();
 
@@ -136,6 +134,23 @@ FoldbackSend::~FoldbackSend ()
 	_send_proc = boost::shared_ptr<Processor> ();
 	_send_del = boost::shared_ptr<Delivery> ();
 
+}
+
+void
+FoldbackSend::route_property_changed (const PropertyChange& what_changed)
+{
+	if (what_changed.contains (ARDOUR::Properties::name)) {
+		name_changed ();
+	}
+}
+
+void
+FoldbackSend::name_changed ()
+{
+	string s_name = PBD::short_version (_send_route->name (), 8);
+	_button.set_text (s_name);
+
+	ArdourWidgets::set_tooltip (_button, Gtkmm2ext::markup_escape_text(_send_route->name()));
 }
 
 void
@@ -216,7 +231,6 @@ FoldbackSend::set_tooltip ()
 	std::string tt = ARDOUR::value_as_string (lc->desc(), lc->get_value ());
 	string sm = Gtkmm2ext::markup_escape_text (tt);
 	_slider_persistant_tooltip.set_tip (sm);
-	ArdourWidgets::set_tooltip (_button, Gtkmm2ext::markup_escape_text (sm));
 }
 
 Menu*
@@ -586,6 +600,15 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	show ();
 }
 
+// predicate for sort call in get_sorted_stripables
+struct StripableByPresentationOrder
+{
+	bool operator () (const boost::shared_ptr<Stripable> & a, const boost::shared_ptr<Stripable> & b) const
+	{
+		return a->presentation_info().order() < b->presentation_info().order();
+	}
+};
+
 void
 FoldbackStrip::update_send_box ()
 {
@@ -593,17 +616,28 @@ FoldbackStrip::update_send_box ()
 	if (!_route) {
 		return;
 	}
+	StripableList stripables;
+	stripables.clear ();
+
 	Route::FedBy fed_by = _route->fed_by();
 	for (Route::FedBy::iterator i = fed_by.begin(); i != fed_by.end(); ++i) {
 		if (i->sends_only) {
-			boost::shared_ptr<Route> s_rt (i->r.lock());
-			boost::shared_ptr<Send> snd = s_rt->internal_send_for (_route);
-			if (snd) {
-				FoldbackSend * fb_s = new FoldbackSend (snd, s_rt, _route);
-				send_display.pack_start (*fb_s, Gtk::PACK_SHRINK);
-				fb_s->show ();
-				s_rt->processors_changed.connect (_connections, invalidator (*this), boost::bind (&FoldbackStrip::processors_changed, this, _1), gui_context ());
-			}
+			boost::shared_ptr<Route> rt (i->r.lock());
+			boost::shared_ptr<Stripable> s = boost::dynamic_pointer_cast<Stripable> (rt);
+			stripables.push_back (s);
+		}
+	}
+	stripables.sort (StripableByPresentationOrder());
+	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
+
+		boost::shared_ptr<Stripable> s_sp = *it;
+		boost::shared_ptr<Route> s_rt = boost::dynamic_pointer_cast<Route> (s_sp);
+		boost::shared_ptr<Send> snd = s_rt->internal_send_for (_route);
+		if (snd) {
+			FoldbackSend * fb_s = new FoldbackSend (snd, s_rt, _route);
+			send_display.pack_start (*fb_s, Gtk::PACK_SHRINK);
+			fb_s->show ();
+			s_rt->processors_changed.connect (_connections, invalidator (*this), boost::bind (&FoldbackStrip::processors_changed, this, _1), gui_context ());
 		}
 	}
 }
@@ -631,13 +665,6 @@ FoldbackStrip::set_packed (bool yn)
 {
 	_packed = yn;
 }
-
-
-struct RouteCompareByName {
-	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-		return a->name().compare (b->name()) < 0;
-	}
-};
 
 gint
 FoldbackStrip::output_release (GdkEventButton *ev)
