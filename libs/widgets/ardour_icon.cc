@@ -879,12 +879,71 @@ static void icon_close_cross (cairo_t *cr, const int width, const int height, co
 	const double y = height * .5;
 	const double o = .5 + std::min (x, y) * .4;
 	Gtkmm2ext::set_source_rgba (cr, fg_color);
-	cairo_set_line_width (cr, ceil (.07 * std::min (x, y)));
+	cairo_set_line_width (cr, DEFAULT_LINE_WIDTH);
 	cairo_move_to (cr, x-o, y-o);
 	cairo_line_to (cr, x+o, y+o);
 	cairo_move_to (cr, x+o, y-o);
 	cairo_line_to (cr, x-o, y+o);
 	cairo_stroke (cr);
+}
+
+/** "hide" strike through eye */
+static void icon_hide_eye (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x = width * .5;
+	const double y = height * .5;
+	const double wh = std::min (x, y);
+
+	const double r  = .2 * wh;
+	const double o =  .60 * wh;
+	const double dx = .75 * wh;
+	const double dy = .65 * wh;
+
+	cairo_move_to (cr, x - dx, y);
+	cairo_curve_to (cr, x, y + dy, x, y + dy, x + dx, y);
+	cairo_curve_to (cr, x, y - dy, x, y - dy, x - dx, y);
+	VECTORICONSTROKE (DEFAULT_LINE_WIDTH, fg_color);
+
+	cairo_arc (cr, x, y, r, 0, 2 * M_PI);
+  //cairo_fill (cr);
+	VECTORICONSTROKE (DEFAULT_LINE_WIDTH, fg_color);
+
+	cairo_move_to (cr, x - o, y + o);
+	cairo_line_to (cr, x + o, y - o);
+	VECTORICONSTROKEOUTLINE (DEFAULT_LINE_WIDTH, fg_color);
+}
+
+/** slim "<" */
+static void icon_scroll_left (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x = width * .5;
+	const double y = height * .5;
+	const double wh = std::min (x, y);
+
+	const double tri1 = .2 * wh;
+	const double tri2 = .4 * wh;
+
+	cairo_move_to (cr, x + tri1, y - tri2);
+	cairo_line_to (cr, x - tri2, y);
+	cairo_line_to (cr, x + tri1, y + tri2);
+	VECTORICONSTROKE (DEFAULT_LINE_WIDTH, fg_color);
+}
+
+/** slim ">" */
+static void icon_scroll_right (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+{
+
+	const double x = width * .5;
+	const double y = height * .5;
+	const double wh = std::min (x, y);
+
+	const double tri1 = .2 * wh;
+	const double tri2 = .4 * wh;
+
+	cairo_move_to (cr, x - tri1, y - tri2);
+	cairo_line_to (cr, x + tri2, y);
+	cairo_line_to (cr, x - tri1, y + tri2);
+	VECTORICONSTROKE (DEFAULT_LINE_WIDTH, fg_color);
 }
 
 /** "<" */
@@ -1271,11 +1330,20 @@ ArdourWidgets::ArdourIcon::render (cairo_t *cr,
 		case CloseCross:
 			icon_close_cross (cr, width, height, fg_color);
 			break;
+		case HideEye:
+			icon_hide_eye (cr, width, height, fg_color);
+			break;
 		case StripWidth:
 			icon_strip_width (cr, width, height, fg_color);
 			break;
 		case DinMidi:
 			icon_din_midi (cr, width, height, fg_color);
+			break;
+		case ScrollLeft:
+			icon_scroll_left (cr, width, height, fg_color);
+			break;
+		case ScrollRight:
+			icon_scroll_right (cr, width, height, fg_color);
 			break;
 		case NudgeLeft:
 			icon_nudge_left (cr, width, height, fg_color);
