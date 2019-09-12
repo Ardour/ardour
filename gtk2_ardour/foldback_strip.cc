@@ -311,8 +311,6 @@ void
 FoldbackStrip::init ()
 {
 	_entered_foldback_strip= 0;
-	route_ops_menu = 0;
-	route_select_menu = 0;
 	ignore_comment_edit = false;
 	ignore_toggle = false;
 	comment_area = 0;
@@ -563,11 +561,6 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 		update_panner_choices();
 		_route->panner_shell()->Changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::connect_to_pan, this), gui_context());
 	}
-
-	delete route_ops_menu;
-	route_ops_menu = 0;
-	delete route_select_menu;
-	route_select_menu = 0;
 
 	_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::update_output_display, this), gui_context());
 	_route->io_changed.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::io_changed_proxy, this), gui_context ());
@@ -1145,14 +1138,15 @@ FoldbackStrip::help_count_plugins (boost::weak_ptr<Processor> p)
 		++_plugin_insert_cnt;
 	}
 }
-void
+
+Gtk::Menu*
 FoldbackStrip::build_route_ops_menu ()
 {
 	using namespace Menu_Helpers;
-	route_ops_menu = new Menu;
-	route_ops_menu->set_name ("ArdourContextMenu");
 
-	MenuList& items = route_ops_menu->items();
+	Menu* menu = manage (new Menu);
+	MenuList& items = menu->items ();
+	menu->set_name ("ArdourContextMenu");
 
 	items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
 
@@ -1178,16 +1172,18 @@ FoldbackStrip::build_route_ops_menu ()
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &FoldbackStrip::remove_current_fb)));
+	return menu;
 }
 
-void
+Gtk::Menu*
 FoldbackStrip::build_route_select_menu ()
 {
 	using namespace Menu_Helpers;
-	route_select_menu = new Menu;
-	route_select_menu->set_name ("ArdourContextMenu");
 
-	MenuList& items = route_select_menu->items();
+	Menu* menu = manage (new Menu);
+	MenuList& items = menu->items ();
+	menu->set_name ("ArdourContextMenu");
+
 	StripableList fb_list;
 	_session->get_stripables (fb_list, PresentationInfo::FoldbackBus);
 	for (StripableList::iterator s = fb_list.begin(); s != fb_list.end(); ++s) {
@@ -1198,7 +1194,7 @@ FoldbackStrip::build_route_select_menu ()
 		}
 		items.push_back (MenuElem (route->name (), sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::set_route), route)));
 	}
-
+	return menu;
 }
 
 
@@ -1206,19 +1202,17 @@ gboolean
 FoldbackStrip::name_button_button_press (GdkEventButton* ev)
 {
 	if (ev->button == 1) {
-		list_fb_routes ();
+		Menu* menu = build_route_select_menu ();
 
-		Gtkmm2ext::anchored_menu_popup(route_select_menu, &name_button, "",
+		Gtkmm2ext::anchored_menu_popup(menu, &name_button, "",
 			                               1, ev->time);
 		return true;
 	} else if (ev->button == 3) {
-		list_route_operations ();
-		route_ops_menu->popup (3, ev->time);
+		Menu* r_menu = build_route_ops_menu ();
+		r_menu->popup (3, ev->time);
 		return true;
 	}
-
 	return false;
-
 }
 
 void
@@ -1327,20 +1321,6 @@ FoldbackStrip::send_blink (bool onoff)
 	} else {
 		_show_sends_button.unset_active_state ();
 	}
-}
-
-void
-FoldbackStrip::list_route_operations ()
-{
-	delete route_ops_menu;
-	build_route_ops_menu ();
-}
-
-void
-FoldbackStrip::list_fb_routes ()
-{
-	delete route_select_menu;
-	build_route_select_menu ();
 }
 
 void
@@ -1599,32 +1579,22 @@ FoldbackStrip::create_selected_sends (bool include_buses)
 bool
 FoldbackStrip::send_button_press_event (GdkEventButton *ev)
 {
-
 	if (ev->button == 3) {
-		list_send_operations ();
-		sends_menu->popup (3, ev->time);
+		Menu* menu = build_sends_menu ();
+		menu->popup (3, ev->time);
 		return true;
 	}
-
 	return false;
-
 }
 
-void
-FoldbackStrip::list_send_operations ()
-{
-	delete sends_menu;
-	build_sends_menu ();
-}
-
-void
+Gtk::Menu*
 FoldbackStrip::build_sends_menu ()
 {
 	using namespace Menu_Helpers;
 
-	sends_menu = new Menu;
-	sends_menu->set_name ("ArdourContextMenu");
-	MenuList& items = sends_menu->items();
+	Menu* menu = manage (new Menu);
+	MenuList& items = menu->items ();
+	menu->set_name ("ArdourContextMenu");
 
 	items.push_back (
 		MenuElem(_("Assign selected tracks (prefader)"), sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::create_selected_sends), false))
@@ -1637,6 +1607,7 @@ FoldbackStrip::build_sends_menu ()
 	items.push_back (MenuElem(_("Set sends gain to -inf"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_zero)));
 	items.push_back (MenuElem(_("Set sends gain to 0dB"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_unity)));
 
+	return menu;
 }
 
 Gdk::Color
@@ -1670,6 +1641,4 @@ FoldbackStrip::remove_current_fb ()
 		RouteUI::self_delete ();
 		_session->remove_route (old_route);
 	}
-
-
 }
