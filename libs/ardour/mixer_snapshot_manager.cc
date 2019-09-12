@@ -180,10 +180,11 @@ bool MixerSnapshotManager::promote(MixerSnapshot* snapshot) {
     const string file = snapshot->get_label() + string(template_suffix);
     const string path = Glib::build_filename(_global_path, file);
 
-    //write the snapshot to the new path, and erase the old ptr
+    //write the snapshot to the new path, and erase the old one
     if(move(snapshot, _global_path) && erase(snapshot)) {
-        //push back the new ptr
+        //insert the new snapshot
         _global_snapshots.insert(new MixerSnapshot(_session, path));
+        PromotedSnapshot(*_global_snapshots.end()); /* EMIT SIGNAL */
         return true;
     }
 
