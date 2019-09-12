@@ -80,7 +80,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	set_tooltip (mute_button, _("Mute slaves"));
 	mute_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::mute_release), false);
 
-	hide_button.set_icon (ArdourIcon::CloseCross);
+	hide_button.set_icon (ArdourIcon::HideEye);
 	set_tooltip (&hide_button, _("Hide this VCA strip"));
 
 	hide_button.signal_clicked.connect (sigc::mem_fun(*this, &VCAMasterStrip::hide_clicked));

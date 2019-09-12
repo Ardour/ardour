@@ -182,7 +182,7 @@ MixerStrip::init ()
 	hide_button.set_tweaks (ArdourButton::Square);
 	set_tooltip (width_button, t);
 
-	hide_button.set_icon (ArdourIcon::CloseCross);
+	hide_button.set_icon (ArdourIcon::HideEye);
 	hide_button.set_tweaks (ArdourButton::Square);
 	set_tooltip (&hide_button, _("Hide this mixer strip"));
 
