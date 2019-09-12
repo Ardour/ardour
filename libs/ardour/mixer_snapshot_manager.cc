@@ -225,11 +225,11 @@ bool MixerSnapshotManager::rename(MixerSnapshot* snapshot, const string& new_nam
     const string dir = Glib::path_get_dirname(path);
 
     if (move(snapshot, dir)) {
-    RenamedSnapshot(); /* EMIT SIGNAL */
+        RenamedSnapshot(); /* EMIT SIGNAL */
         ::g_remove(path.c_str());
         //remove the old file
-    return true;
-}
+        return true;
+    }
 
     return false;
 }
@@ -240,26 +240,15 @@ bool MixerSnapshotManager::remove(MixerSnapshot* snapshot) {
     }
 
     const string path = snapshot->get_path();
-    const string dir = Glib::path_get_dirname(path);
-
-    ::g_remove(path.c_str());
-
-    set<MixerSnapshot*>::iterator iter;
-    if(dir == _global_path) {
-        iter = _global_snapshots.find(snapshot);
-        if(iter != _global_snapshots.end()) {
-            delete (*iter);
-            _global_snapshots.erase(iter);
-        }
-    } else if(dir == _local_path) {
-        iter = _local_snapshots.find(snapshot);
-        if(iter != _local_snapshots.end()) {
-            delete (*iter);
-            _local_snapshots.erase(iter);
+    if (Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS)) {
+        if(erase(snapshot)) {
+            ::g_remove(path.c_str());
+            RemovedSnapshot(); /* EMIT SIGNAL */
+            return true;
         }
     }
-    RemovedSnapshot(); /* EMIT SIGNAL */
-    return true;
+
+    return false;
 }
 
 MixerSnapshot* MixerSnapshotManager::get_snapshot_by_name(const string& name, bool global)
