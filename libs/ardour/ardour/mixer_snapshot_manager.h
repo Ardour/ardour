@@ -49,6 +49,9 @@ public:
     bool rename_snapshot(MixerSnapshot*, const std::string&);
     bool remove_snapshot(MixerSnapshot*);
 
+    bool erase(ARDOUR::MixerSnapshot*);
+    bool move(ARDOUR::MixerSnapshot*, const std::string&);
+
     bool promote(ARDOUR::MixerSnapshot*);
     bool demote(ARDOUR::MixerSnapshot*);
 

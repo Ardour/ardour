@@ -118,39 +118,89 @@ void MixerSnapshotManager::refresh()
     }
 }
 
-bool MixerSnapshotManager::promote(MixerSnapshot* snapshot) {
+bool MixerSnapshotManager::erase(MixerSnapshot* snapshot) {
+    if(!snapshot) {
+        return false;
+    }
+
+    set<MixerSnapshot*>::const_iterator iter;
+
+    iter = _global_snapshots.find(snapshot);
+    if(iter != _global_snapshots.end()) {
+        delete (*iter);
+        _global_snapshots.erase(iter);
+        return true;
+    }
+
+    iter = _local_snapshots.find(snapshot);
+    if(iter != _local_snapshots.end()) {
+        delete (*iter);
+        _local_snapshots.erase(iter);
+        return true;
+    }
+    return false;
+}
+
+bool MixerSnapshotManager::move(MixerSnapshot* snapshot, const string& to_path) {
     if(!snapshot) {
         return false;
     }
 
     const string path = snapshot->get_path();
     if(Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS)) {
-        //write out this snapshot to the global path
-        snapshot->write(_global_path);
+        const string dir = Glib::path_get_dirname(path);
 
-        //that might've overwritten a file, erase it's reference
-        const string label = snapshot->get_label();
-
-        MixerSnapshot* old_snapshot = get_snapshot_by_name(label, true);
-        set<MixerSnapshot*>::iterator iter = _global_snapshots.find(old_snapshot);
-        if(iter != _global_snapshots.end()) {
-            delete (*iter);
-            _global_snapshots.erase(iter);
+        //already there
+        if(to_path == dir) {
+            return false;
         }
 
-        //make new snapshot to insert into the global set
-        const string file_name = label + string(template_suffix);
-        const string file_path  = Glib::build_filename(_global_path, file_name);
-
-        MixerSnapshot* new_snap = new MixerSnapshot(_session, file_path);
-        new_snap->set_label(label);
-        new_snap->set_path(file_path);
-
-        //insert the new snapshot
-        _global_snapshots.insert(new_snap);
-        PromotedSnapshot(new_snap); /* EMIT SIGNAL */
+        //local snapshots have no description
+        if(to_path == _local_path) {
+            snapshot->set_description("");
+        }
+        //write this to the new path
+        snapshot->write(to_path);
         return true;
     }
+    return false;
+}
+
+bool MixerSnapshotManager::promote(MixerSnapshot* snapshot) {
+    if(!snapshot) {
+        return false;
+    }
+
+    //build the new file path
+    const string file = snapshot->get_label() + string(template_suffix);
+    const string path = Glib::build_filename(_global_path, file);
+
+    //write the snapshot to the new path, and erase the old ptr
+    if(move(snapshot, _global_path) && erase(snapshot)) {
+        //push back the new ptr
+        _global_snapshots.insert(new MixerSnapshot(_session, path));
+        return true;
+    }
+
+    return false;
+}
+
+bool MixerSnapshotManager::demote(MixerSnapshot* snapshot) {
+    if(!snapshot) {
+        return false;
+    }
+
+    //build the new file path
+    const string file = snapshot->get_label() + string(template_suffix);
+    const string path = Glib::build_filename(_local_path, file);
+
+    //write the snapshot to the new path, and erase the old ptr
+    if(move(snapshot, _local_path) && erase(snapshot)) {
+        //push back the new ptr
+        _local_snapshots.insert(new MixerSnapshot(_session, path));
+        return true;
+    }
+
     return false;
 }
 
@@ -199,10 +249,6 @@ bool MixerSnapshotManager::remove_snapshot(MixerSnapshot* snapshot) {
     }
     RemovedSnapshot(); /* EMIT SIGNAL */
     return true;
-}
-
-bool MixerSnapshotManager::demote(MixerSnapshot* snapshot) {
-    return false;
 }
 
 MixerSnapshot* MixerSnapshotManager::get_snapshot_by_name(const string& name, bool global)
