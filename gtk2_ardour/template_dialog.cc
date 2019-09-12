@@ -887,7 +887,7 @@ RouteTemplateManager::rename_template (TreeModel::iterator& item, const Glib::us
 	SnapshotList sl = _session->snapshot_manager().get_global_snapshots();
 	for(SnapshotList::const_iterator it = sl.begin(); it != sl.end(); it++) {
 		if(old_name == (*it)->get_label()) {
-			_session->snapshot_manager().rename_snapshot((*it), new_name);
+			_session->snapshot_manager().rename((*it), new_name);
 			break;
 		}
 	}
@@ -919,7 +919,7 @@ RouteTemplateManager::delete_selected_template ()
 	SnapshotList sl = _session->snapshot_manager().get_global_snapshots();
 	for(SnapshotList::const_iterator it = sl.begin(); it != sl.end(); it++) {
 		if(file_path == (*it)->get_path()) {
-			_session->snapshot_manager().remove_snapshot((*it));
+			_session->snapshot_manager().remove((*it));
 		}
 	}
 }

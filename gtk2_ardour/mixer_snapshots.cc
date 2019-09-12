@@ -507,7 +507,7 @@ void MixerSnapshotList::rename_snapshot(TreeModel::const_iterator& iter)
                 }
             }
 
-            if(_session->snapshot_manager().rename_snapshot(snapshot, new_name)) {
+            if(_session->snapshot_manager().rename(snapshot, new_name)) {
                 if (new_name.length() > 45) {
                     new_name = new_name.substr(0, 45);
                     new_name.append("...");
@@ -602,7 +602,7 @@ bool MixerSnapshotList::remove_row(Gtk::TreeModel::const_iterator& iter)
         MixerSnapshot* snapshot = (*iter)[_columns.snapshot];
         _snapshot_model->erase((*iter));
         if(snapshot) {
-            _session->snapshot_manager().remove_snapshot(snapshot);
+            _session->snapshot_manager().remove(snapshot);
         }
         return true;
     }

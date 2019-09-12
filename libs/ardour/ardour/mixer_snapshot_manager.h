@@ -46,8 +46,8 @@ public:
 
     void find_templates(std::vector<ARDOUR::TemplateInfo>&, bool);
 
-    bool rename_snapshot(MixerSnapshot*, const std::string&);
-    bool remove_snapshot(MixerSnapshot*);
+    bool rename(MixerSnapshot*, const std::string&);
+    bool remove(MixerSnapshot*);
 
     bool erase(ARDOUR::MixerSnapshot*);
     bool move(ARDOUR::MixerSnapshot*, const std::string&);

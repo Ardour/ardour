@@ -204,7 +204,7 @@ bool MixerSnapshotManager::demote(MixerSnapshot* snapshot) {
     return false;
 }
 
-bool MixerSnapshotManager::rename_snapshot(MixerSnapshot* snapshot, const string& new_name) {
+bool MixerSnapshotManager::rename(MixerSnapshot* snapshot, const string& new_name) {
     if(!snapshot) {
         return false;
     }
@@ -223,7 +223,7 @@ bool MixerSnapshotManager::rename_snapshot(MixerSnapshot* snapshot, const string
     return true;
 }
 
-bool MixerSnapshotManager::remove_snapshot(MixerSnapshot* snapshot) {
+bool MixerSnapshotManager::remove(MixerSnapshot* snapshot) {
     if(!snapshot) {
         return false;
     }
