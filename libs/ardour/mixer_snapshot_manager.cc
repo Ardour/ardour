@@ -23,7 +23,6 @@
 #include "ardour/directory_names.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
-#include "ardour/mixer_snapshot.h"
 #include "ardour/mixer_snapshot_manager.h"
 #include "ardour/search_paths.h"
 #include "ardour/session_directory.h"
@@ -41,6 +40,7 @@ MixerSnapshotManager::MixerSnapshotManager (Session* s)
     if(!s) {
         throw failed_constructor();
     }
+
     _session = s;
 
     _global_path = user_route_template_directory();
