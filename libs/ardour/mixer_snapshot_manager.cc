@@ -200,9 +200,9 @@ bool MixerSnapshotManager::demote(MixerSnapshot* snapshot) {
     const string file = snapshot->get_label() + string(template_suffix);
     const string path = Glib::build_filename(_local_path, file);
 
-    //write the snapshot to the new path, and erase the old ptr
+    //write the snapshot to the new path, and erase the old one
     if(move(snapshot, _local_path) && erase(snapshot)) {
-        //push back the new ptr
+        //insert the new snapshot
         _local_snapshots.insert(new MixerSnapshot(_session, path));
         return true;
     }
@@ -218,15 +218,20 @@ bool MixerSnapshotManager::rename(MixerSnapshot* snapshot, const string& new_nam
     if(new_name.empty()) {
         return false;
     }
-    const string old_path = snapshot->get_path();
-    const string dir = Glib::path_get_dirname(old_path);
+
     snapshot->set_label(new_name);
 
-    const string new_path = Glib::build_filename(dir, snapshot->get_label() + string(template_suffix));
-    ::g_rename(old_path.c_str(), new_path.c_str());
-    snapshot->set_path(new_path);
+    const string path = snapshot->get_path();
+    const string dir = Glib::path_get_dirname(path);
+
+    if (move(snapshot, dir)) {
     RenamedSnapshot(); /* EMIT SIGNAL */
+        ::g_remove(path.c_str());
+        //remove the old file
     return true;
+}
+
+    return false;
 }
 
 bool MixerSnapshotManager::remove(MixerSnapshot* snapshot) {
