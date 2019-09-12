@@ -252,10 +252,10 @@ private:
 	void build_route_select_menu ();
 	void list_fb_routes ();
 
-	gboolean previous_button_button_press (GdkEventButton*);
-	gboolean next_button_button_press (GdkEventButton*);
+	void previous_button_clicked ();
+	void next_button_clicked ();
 	void prev_next_changed ();
-	gboolean show_sends_press (GdkEventButton*);
+	void show_sends_clicked ();
 	void send_blink (bool);
 
 	Gtk::Menu *sends_menu;

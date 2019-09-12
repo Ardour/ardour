@@ -447,10 +447,10 @@ FoldbackStrip::init ()
 	output_button.signal_button_release_event().connect (sigc::mem_fun(*this, &FoldbackStrip::output_release), false);
 
 	name_button.signal_button_press_event().connect (sigc::mem_fun(*this, &FoldbackStrip::name_button_button_press), false);
-	_previous_button.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackStrip::previous_button_button_press), false);
-	_next_button.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackStrip::next_button_button_press), false);
+	_previous_button.signal_clicked.connect (sigc::mem_fun (*this, &FoldbackStrip::previous_button_clicked));
+	_next_button.signal_clicked.connect (sigc::mem_fun (*this, &FoldbackStrip::next_button_clicked));
 	_hide_button.signal_clicked.connect (sigc::mem_fun(*this, &FoldbackStrip::hide_clicked));
-	_show_sends_button.signal_button_press_event().connect (sigc::mem_fun(*this, &FoldbackStrip::show_sends_press), false);
+	_show_sends_button.signal_clicked.connect (sigc::mem_fun(*this, &FoldbackStrip::show_sends_clicked));
 	send_scroller.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackStrip::send_button_press_event));
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
 
@@ -1221,75 +1221,57 @@ FoldbackStrip::name_button_button_press (GdkEventButton* ev)
 
 }
 
-gboolean
-FoldbackStrip::previous_button_button_press (GdkEventButton* ev)
+void
+FoldbackStrip::previous_button_clicked ()
 {
-	if (ev->button == 1 || ev->button == 3) {
-		bool past_current = false;
-		StripableList slist;
-		boost::shared_ptr<Route> previous = boost::shared_ptr<Route> ();
-		boost::shared_ptr<Route> last = boost::shared_ptr<Route> ();
-		_session->get_stripables (slist, PresentationInfo::FoldbackBus);
-		if (slist.size () > 1) {
-			for (StripableList::iterator s = slist.begin(); s != slist.end(); ++s) {
-				last = boost::dynamic_pointer_cast<Route> (*s);
-				if ((*s) == _route) {
-					past_current = true;
-				}
-				if (!past_current) {
-					previous = boost::dynamic_pointer_cast<Route> (*s);
-				}
+	bool past_current = false;
+	StripableList slist;
+	boost::shared_ptr<Route> previous = boost::shared_ptr<Route> ();
+	_session->get_stripables (slist, PresentationInfo::FoldbackBus);
+	if (slist.size () > 1) {
+		for (StripableList::iterator s = slist.begin(); s != slist.end(); ++s) {
+			if ((*s) == _route) {
+				past_current = true;
 			}
-		} else {
-			// only one route do nothing
-			return true;
+			if (!past_current) {
+				previous = boost::dynamic_pointer_cast<Route> (*s);
+			}
 		}
-		//use previous to set route
-		if (previous) {
-			set_route (previous);
-		} /*else { no wrap around
-			set_route (last);
-		}*/
-		return true;
+	} else {
+		// only one route do nothing
+		return;
 	}
-
-	return false;
+	//use previous to set route
+	if (previous) {
+		set_route (previous);
+	}
 }
 
-gboolean
-FoldbackStrip::next_button_button_press (GdkEventButton* ev)
+void
+FoldbackStrip::next_button_clicked ()
 {
-	if (ev->button == 1 || ev->button == 3) {
-		bool past_current = false;
-		StripableList slist;
-		boost::shared_ptr<Route> next = boost::shared_ptr<Route> ();
-		boost::shared_ptr<Route> first = boost::shared_ptr<Route> ();
-		_session->get_stripables (slist, PresentationInfo::FoldbackBus);
-		if (slist.size () > 1) {
-			first = boost::dynamic_pointer_cast<Route> (*(slist.begin()));
-			for (StripableList::iterator s = slist.begin(); s != slist.end(); ++s) {
-				if (past_current) {
-					next = boost::dynamic_pointer_cast<Route> (*s);
-					break;
-				}
-				if ((*s) == _route) {
-					past_current = true;
-				}
+	bool past_current = false;
+	StripableList slist;
+	boost::shared_ptr<Route> next = boost::shared_ptr<Route> ();
+	_session->get_stripables (slist, PresentationInfo::FoldbackBus);
+	if (slist.size () > 1) {
+		for (StripableList::iterator s = slist.begin(); s != slist.end(); ++s) {
+			if (past_current) {
+				next = boost::dynamic_pointer_cast<Route> (*s);
+				break;
 			}
-		} else {
-			// only one route do nothing
-			return true;
+			if ((*s) == _route) {
+				past_current = true;
+			}
 		}
-		//use next to set route
-		if (next) {
-			set_route (next);
-		} /*else { no wrap around
-			set_route (first);
-		}*/
-		return true;
+	} else {
+		// only one route do nothing
+		return;
 	}
-
-	return false;
+	//use next to set route
+	if (next) {
+		set_route (next);
+	}
 }
 
 void
@@ -1317,27 +1299,20 @@ FoldbackStrip::hide_clicked()
 	_hide_button.set_sensitive(true);
 }
 
-gboolean
-FoldbackStrip::show_sends_press (GdkEventButton* ev)
+void
+FoldbackStrip::show_sends_clicked ()
 {
-	if (ev->button == 1 || ev->button == 3) {
-
-		if (_showing_sends) {
-			BusSendDisplayChanged (boost::shared_ptr<Route> ()); /* EMIT SIGNAL */
-			_showing_sends = false;
-			_show_sends_button.set_active (false);
-			send_blink_connection.disconnect ();
-		} else {
-			BusSendDisplayChanged (_route); /* EMIT SIGNAL */
-			_showing_sends = true;
-			_show_sends_button.set_active (true);
-			send_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &FoldbackStrip::send_blink));
-
-		}
-		return true;
+	if (_showing_sends) {
+		BusSendDisplayChanged (boost::shared_ptr<Route> ()); /* EMIT SIGNAL */
+		_showing_sends = false;
+		_show_sends_button.set_active (false);
+		send_blink_connection.disconnect ();
+	} else {
+		BusSendDisplayChanged (_route); /* EMIT SIGNAL */
+		_showing_sends = true;
+		_show_sends_button.set_active (true);
+		send_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &FoldbackStrip::send_blink));
 	}
-
-	return false;
 }
 
 void
