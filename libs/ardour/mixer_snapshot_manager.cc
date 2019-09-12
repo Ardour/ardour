@@ -150,8 +150,11 @@ bool MixerSnapshotManager::move(MixerSnapshot* snapshot, const string& to_path) 
     if(Glib::file_test(path.c_str(), Glib::FILE_TEST_EXISTS)) {
         const string dir = Glib::path_get_dirname(path);
 
+        const string file     = snapshot->get_label() + string(template_suffix);
+        const string new_path = Glib::build_filename(to_path, file);
+
         //already there
-        if(to_path == dir) {
+        if (Glib::file_test(new_path.c_str(), Glib::FILE_TEST_EXISTS)) {
             return false;
         }
 
@@ -161,6 +164,8 @@ bool MixerSnapshotManager::move(MixerSnapshot* snapshot, const string& to_path) 
         }
         //write this to the new path
         snapshot->write(to_path);
+
+        snapshot->set_path(new_path);
         return true;
     }
     return false;
