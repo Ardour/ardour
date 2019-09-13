@@ -127,6 +127,9 @@ Mixer_UI::Mixer_UI ()
 {
 	load_bindings ();
 	register_actions ();
+	Glib::RefPtr<ToggleAction> fb_act = ActionManager::get_toggle_action ("Mixer", "ToggleFoldbackStrip");
+	fb_act->set_sensitive (false);
+
 	_content.set_data ("ardour-bindings", bindings);
 
 	PresentationInfo::Change.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::presentation_info_changed, this, _1), gui_context());
@@ -627,6 +630,7 @@ Mixer_UI::add_stripables (StripableList& slist)
 					 * strip exists */
 					bool yn = _show_foldback_strip;
 					Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action ("Mixer", "ToggleFoldbackStrip");
+					act->set_sensitive (true);
 					act->set_active(!yn);
 					act->set_active(yn);
 					continue;
@@ -754,6 +758,8 @@ Mixer_UI::remove_foldback (FoldbackStrip* strip)
 		/* its all being taken care of */
 		return;
 	}
+	Glib::RefPtr<ToggleAction> act = ActionManager::get_toggle_action ("Mixer", "ToggleFoldbackStrip");
+	act->set_sensitive (false);
 	if (foldback_strip) {
 		foldback_strip->destroy_();
 	}
