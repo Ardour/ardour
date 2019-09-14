@@ -59,13 +59,14 @@ using namespace std;
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
 
 FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, \
-	boost::shared_ptr<ARDOUR::Route> sr,  boost::shared_ptr<ARDOUR::Route> fr)
+	boost::shared_ptr<ARDOUR::Route> sr,  boost::shared_ptr<ARDOUR::Route> fr, uint32_t wd)
 	: _button (ArdourButton::led_default_elements)
 	, _send (snd)
 	, _send_route (sr)
 	, _foldback_route (fr)
 	, _send_proc (snd)
 	, _send_del (snd)
+	, _width (wd)
 	, pan_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
 	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)
 	, _slider (&_adjustment, boost::shared_ptr<PBD::Controllable>(), 0, max(13.f, rintf(13.f * UIConfiguration::instance().get_ui_scale())))
@@ -81,14 +82,15 @@ FoldbackSend::FoldbackSend (boost::shared_ptr<Send> snd, \
 	_button.set_led_left (true);
 	_button.signal_led_clicked.connect (sigc::mem_fun (*this, &FoldbackSend::led_clicked));
 	_button.set_name ("processor prefader");
-	_button.set_layout_ellipsize_width (Wide * PANGO_SCALE);
-	name_changed ();
+	_button.set_layout_ellipsize_width (PX_SCALE(_width) * PANGO_SCALE);
 	_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
+	name_changed ();
 	snd_but_pan->pack_start (_button, true, true);
 	_button.set_active (_send_proc->enabled ());
 	_button.show ();
 
 	if (_foldback_route->input()->n_ports().n_audio() == 2) {
+		_button.set_layout_ellipsize_width (PX_SCALE(_width - 19) * PANGO_SCALE);
 		boost::shared_ptr<Pannable> pannable = _send_del->panner()->pannable();
 		boost::shared_ptr<AutomationControl> ac;
 		ac = pannable->pan_azimuth_control;
@@ -147,8 +149,7 @@ FoldbackSend::route_property_changed (const PropertyChange& what_changed)
 void
 FoldbackSend::name_changed ()
 {
-	string s_name = PBD::short_version (_send_route->name (), 8);
-	_button.set_text (s_name);
+	_button.set_text (_send_route->name ());
 
 	ArdourWidgets::set_tooltip (_button, Gtkmm2ext::markup_escape_text(_send_route->name()));
 }
@@ -295,6 +296,7 @@ FoldbackStrip::FoldbackStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Rou
 	, RouteUI (sess)
 	, _mixer(mx)
 	, _mixer_owned (true)
+	, _width (80)
 	, _pr_selection ()
 	, panners (sess)
 	, mute_solo_table (1, 2)
@@ -314,7 +316,6 @@ FoldbackStrip::init ()
 	ignore_comment_edit = false;
 	ignore_toggle = false;
 	comment_area = 0;
-	_width_owner = 0;
 
 	_previous_button.set_name ("mixer strip button");
 	_previous_button.set_icon (ArdourIcon::ScrollLeft);
@@ -339,8 +340,7 @@ FoldbackStrip::init ()
 
 	name_button.set_name ("mixer strip button");
 	name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
-	//name_button.set_layout_ellipsize_width (alloc.get_width() * PANGO_SCALE);
-	name_button.set_layout_ellipsize_width (Wide * PANGO_SCALE);
+	name_button.set_layout_ellipsize_width (PX_SCALE(_width) * PANGO_SCALE);
 
 	// invertbuttons and box in route_ui
 
@@ -356,7 +356,7 @@ FoldbackStrip::init ()
 	send_scroller.get_child()->set_name ("FoldbackBusStripBase");
 
 	// panners from route_ui
-	panners.set_width (Narrow);
+	panners.set_width (Wide);
 
 	insert_box = new ProcessorBox (0, boost::bind (&FoldbackStrip::plugin_selector, this), _pr_selection, 0);
 	insert_box->set_no_show_all ();
@@ -376,15 +376,18 @@ FoldbackStrip::init ()
 	VBox* level_box = manage (new VBox);
 	level_box->pack_start (*fb_level_control, true, false);
 	master_box.pack_start (*level_box, true, false);
-	master_box.set_size_request (PX_SCALE(120), PX_SCALE(100));
+	master_box.set_size_request (PX_SCALE(_width + 34), PX_SCALE(80));
 	master_box.set_name ("FoldbackBusStripBase");
 	level_box->show ();
 
 	output_button.set_text (_("Output"));
 	output_button.set_name ("mixer strip button");
+	output_button.set_text_ellipsize (Pango::ELLIPSIZE_MIDDLE);
+	output_button.set_layout_ellipsize_width (PX_SCALE(_width) * PANGO_SCALE);
 
 	_comment_button.set_name (X_("mixer strip button"));
 	_comment_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
+	_comment_button.set_layout_ellipsize_width (PX_SCALE(_width) * PANGO_SCALE);
 
 	global_vpacker.set_border_width (1);
 	global_vpacker.set_spacing (2);
@@ -440,7 +443,6 @@ FoldbackStrip::init ()
 	_session->engine().Stopped.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::engine_stopped, this), gui_context());
 	_session->engine().Running.connect (*this, invalidator (*this), boost::bind (&FoldbackStrip::engine_running, this), gui_context());
 
-	output_button.set_text_ellipsize (Pango::ELLIPSIZE_MIDDLE);
 	output_button.signal_button_press_event().connect (sigc::mem_fun(*this, &FoldbackStrip::output_press), false);
 	output_button.signal_button_release_event().connect (sigc::mem_fun(*this, &FoldbackStrip::output_release), false);
 
@@ -451,8 +453,6 @@ FoldbackStrip::init ()
 	_show_sends_button.signal_clicked.connect (sigc::mem_fun(*this, &FoldbackStrip::show_sends_clicked));
 	send_scroller.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackStrip::send_button_press_event));
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
-
-	_width = Wide;
 
 	add_events (Gdk::BUTTON_RELEASE_MASK|
 		    Gdk::ENTER_NOTIFY_MASK|
@@ -640,7 +640,7 @@ FoldbackStrip::update_send_box ()
 		boost::shared_ptr<Route> s_rt = boost::dynamic_pointer_cast<Route> (s_sp);
 		boost::shared_ptr<Send> snd = s_rt->internal_send_for (_route);
 		if (snd) {
-			FoldbackSend * fb_s = new FoldbackSend (snd, s_rt, _route);
+			FoldbackSend * fb_s = new FoldbackSend (snd, s_rt, _route, _width);
 			send_display.pack_start (*fb_s, Gtk::PACK_SHRINK);
 			fb_s->show ();
 			s_rt->processors_changed.connect (_connections, invalidator (*this), boost::bind (&FoldbackStrip::processors_changed, this, _1), gui_context ());
@@ -1345,13 +1345,9 @@ FoldbackStrip::route_property_changed (const PropertyChange& what_changed)
 void
 FoldbackStrip::name_changed ()
 {
-
-	name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
-	string r_name = PBD::short_version (_route->name (), 16);
-	name_button.set_text (r_name);
+	name_button.set_text (_route->name());
 
 	set_tooltip (name_button, Gtkmm2ext::markup_escape_text(_route->name()));
-
 }
 
 void

@@ -75,7 +75,7 @@ class FoldbackSend : public Gtk::VBox
 {
 public:
 	FoldbackSend (boost::shared_ptr<ARDOUR::Send>, \
-		boost::shared_ptr<ARDOUR::Route> sr, boost::shared_ptr<ARDOUR::Route> fr);
+		boost::shared_ptr<ARDOUR::Route> sr, boost::shared_ptr<ARDOUR::Route> fr, uint32_t wd);
 	~FoldbackSend ();
 
 private:
@@ -85,6 +85,7 @@ private:
 	boost::shared_ptr<ARDOUR::Route> _foldback_route;
 	boost::shared_ptr<ARDOUR::Processor> _send_proc;
 	boost::shared_ptr<ARDOUR::Delivery> _send_del;
+	uint32_t _width;
 
 	void led_clicked(GdkEventButton *);
 	gboolean button_press (GdkEventButton*);
@@ -120,8 +121,6 @@ public:
 	Gdk::Color color () const;
 
 	boost::shared_ptr<ARDOUR::Stripable> stripable() const { return RouteUI::stripable(); }
-
-	void* width_owner () const { return _width_owner; }
 
 	PannerUI&       panner_ui()       { return panners; }
 	PluginSelector* plugin_selector();
@@ -178,10 +177,9 @@ private:
 	bool  _embedded;
 	bool  _packed;
 	bool  _mixer_owned;
-	Width _width;
-	void*  _width_owner;
 	ARDOUR::Session* _session;
 	bool _showing_sends;
+	uint32_t _width;
 
 	Gtk::EventBox		spacer;
 	Gtk::VBox			send_display;
