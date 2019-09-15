@@ -535,6 +535,9 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 
 		return;
 	}
+	if (_route) {
+		_route->solo_control()->set_value (0.0, Controllable::NoGroup);
+	}
 
 	RouteUI::set_route (rt);
 
@@ -604,6 +607,7 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	map_frozen();
 
 	show ();
+	set_button_names ();
 }
 
 // predicate for sort call in get_sorted_stripables
@@ -1459,8 +1463,13 @@ FoldbackStrip::set_button_names ()
 		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
 	}
 	if (!Config->get_solo_control_is_listen_control()) {
+		solo_button->set_sensitive (false);
 		solo_button->set_text (_("Solo"));
+		UI::instance()->set_tip (solo_button, _("Foldback Bus solo not possible in SIP mode"), "");
+		solo_button->set_visual_state (Gtkmm2ext::VisualState (Gtkmm2ext::Insensitive));
 	} else {
+		solo_button->set_sensitive (true);
+		UI::instance()->set_tip (solo_button, _("Mute other (non-soloed) tracks"), "");
 		switch (Config->get_listen_position()) {
 		case AfterFaderListen:
 			solo_button->set_text (_("AFL"));
