@@ -118,14 +118,12 @@ public:
 	~FoldbackStrip ();
 
 	std::string name()  const;
-	Gdk::Color color () const;
 
 	boost::shared_ptr<ARDOUR::Stripable> stripable() const { return RouteUI::stripable(); }
 
 	PannerUI&       panner_ui()       { return panners; }
 	PluginSelector* plugin_selector();
 
-	void fast_update ();
 	void set_embedded (bool);
 
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
@@ -147,8 +145,6 @@ public:
 	PBD::Signal1<void, boost::weak_ptr<ARDOUR::Delivery> > DeliveryChanged;
 
 	static PBD::Signal1<void,FoldbackStrip*> CatchDeletion;
-
-	std::string state_id() const;
 
 	void route_active_changed ();
 
@@ -202,9 +198,6 @@ private:
 	void help_count_plugins (boost::weak_ptr<ARDOUR::Processor>);
 	uint32_t _plugin_insert_cnt;
 
-	gint    mark_update_safe ();
-	guint32 mode_switch_in_progress;
-
 	ArdourWidgets::ArdourButton name_button;
 	ArdourWidgets::ArdourButton _show_sends_button;
 	ArdourWidgets::ArdourButton _previous_button;
@@ -239,8 +232,6 @@ private:
 	void processors_changed (ARDOUR::RouteProcessorChange);
 	void clear_send_box ();
 
-	void set_automated_controls_sensitivity (bool yn);
-
 	gboolean name_button_button_press (GdkEventButton*);
 	Gtk::Menu* build_route_ops_menu ();
 	Gtk::Menu* build_route_select_menu ();
@@ -257,18 +248,11 @@ private:
 	void create_selected_sends (bool include_buses);
 	void remove_current_fb ();
 
-	Gtk::Style *passthru_style;
-
-	void show_passthru_color ();
-
 	void route_property_changed (const PBD::PropertyChange&);
 	void name_changed ();
-	void update_speed_display ();
 	void map_frozen ();
 	void hide_processor_editor (boost::weak_ptr<ARDOUR::Processor> processor);
 	void hide_redirect_editors ();
-
-	bool ignore_speed_adjustment;
 
 	static FoldbackStrip* _entered_foldback_strip;
 
@@ -288,9 +272,6 @@ private:
 	bool mixer_strip_enter_event ( GdkEventCrossing * );
 	bool mixer_strip_leave_event ( GdkEventCrossing * );
 
-	void add_output_port (ARDOUR::DataType);
-
-	bool _suspend_menu_callbacks;
 	PBD::ScopedConnectionList _connections;
 
 };

@@ -1115,13 +1115,6 @@ FoldbackStrip::setup_comment_button ()
 }
 
 void
-FoldbackStrip::show_passthru_color ()
-{
-	//reset_strip_style ();
-}
-
-
-void
 FoldbackStrip::help_count_plugins (boost::weak_ptr<Processor> p)
 {
 	boost::shared_ptr<Processor> processor (p.lock ());
@@ -1485,18 +1478,6 @@ FoldbackStrip::plugin_selector()
 	return _mixer.plugin_selector();
 }
 
-string
-FoldbackStrip::state_id () const
-{
-	return string_compose ("strip %1", _route->id().to_s());
-}
-
-void
-FoldbackStrip::add_output_port (DataType t)
-{
-	_route->output()->add_port ("", this, t);
-}
-
 void
 FoldbackStrip::route_active_changed ()
 {
@@ -1604,12 +1585,6 @@ FoldbackStrip::build_sends_menu ()
 	items.push_back (MenuElem(_("Set sends gain to 0dB"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_unity)));
 
 	return menu;
-}
-
-Gdk::Color
-FoldbackStrip::color () const
-{
-	return route_color ();
 }
 
 void
