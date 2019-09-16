@@ -232,6 +232,16 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	virtual bool ok() const = 0;
 
 	/**
+	 * reports to ARDOUR whether it is possible to use this slave
+	 *
+	 * @return - true if the slave can be used.
+	 *
+	 * Only the JACK ("Engine") slave is ever likely to return false,
+	 * if JACK is not being used for the Audio/MIDI backend.
+	 */
+	virtual bool usable() const { return true; }
+
+	/**
 	 * reports to ARDOUR whether the slave is in the process of starting
 	 * to roll
 	 *
@@ -626,6 +636,7 @@ class LIBARDOUR_API Engine_TransportMaster : public TransportMaster
 	void reset (bool with_position);
 	bool locked() const;
 	bool ok() const;
+	bool usable() const;
 	samplecnt_t update_interval () const;
 	samplecnt_t resolution () const { return 1; }
 	bool requires_seekahead () const { return false; }

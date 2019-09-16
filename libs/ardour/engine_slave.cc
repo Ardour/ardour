@@ -47,6 +47,12 @@ Engine_TransportMaster::init ()
 {
 }
 
+bool
+Engine_TransportMaster::usable () const
+{
+	return AudioEngine::instance()->current_backend_name() == X_("JACK");
+}
+
 void
 Engine_TransportMaster::check_backend()
 {

@@ -86,6 +86,8 @@ TransportMastersWidget::TransportMastersWidget ()
 	TransportMasterManager::instance().Added.connect (add_connection, invalidator (*this), boost::bind (&TransportMastersWidget::rebuild, this), gui_context());
 	TransportMasterManager::instance().Removed.connect (remove_connection, invalidator (*this), boost::bind (&TransportMastersWidget::rebuild, this), gui_context());
 
+	AudioEngine::instance()->Running.connect (engine_running_connection, invalidator (*this), boost::bind (&TransportMastersWidget::update_usability, this), gui_context());
+
 	rebuild ();
 }
 
@@ -243,6 +245,19 @@ TransportMastersWidget::rebuild ()
 		}
 
 		r->prop_change (all_change);
+	}
+
+	update_usability ();
+}
+
+void
+TransportMastersWidget::update_usability ()
+{
+	for (vector<Row*>::iterator r= rows.begin(); r != rows.end(); ++r) {
+		const bool usable = (*r)->tm->usable();
+		(*r)->use_button.set_sensitive (usable);
+		(*r)->collect_button.set_sensitive (usable);
+		(*r)->request_options.set_sensitive (usable);
 	}
 }
 
