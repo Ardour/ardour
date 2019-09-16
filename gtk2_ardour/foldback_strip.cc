@@ -363,9 +363,13 @@ FoldbackStrip::init ()
 	insert_box->show ();
 	insert_box->set_session (_session);
 	insert_box->set_width (Wide);
+	insert_box->set_size_request (PX_SCALE(_width + 34), PX_SCALE(100));
 
 	mute_solo_table.set_homogeneous (true);
 	mute_solo_table.set_spacings (2);
+	solo_button->set_text (_("Listen"));
+	mute_solo_table.attach (*solo_button, 0, 2, 0, 1);
+	mute_solo_table.set_size_request (PX_SCALE(_width + 34), PX_SCALE(20));
 
 	fb_level_control = new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Detent);
 	fb_level_control->set_size_request (PX_SCALE(50), PX_SCALE(50));
@@ -543,16 +547,6 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 
 	insert_box->set_route (_route);
 	revert_to_default_display ();
-	if (solo_button->get_parent()) {
-		mute_solo_table.remove (*solo_button);
-	}
-
-	if (mute_button->get_parent()) {
-		mute_solo_table.remove (*mute_button);
-	}
-
-	mute_solo_table.attach (*mute_button, 0, 1, 0, 1);
-	mute_solo_table.attach (*solo_button, 1, 2, 0, 1);
 	update_fb_level_control();
 
 	BusSendDisplayChanged (boost::shared_ptr<Route> ());
@@ -594,7 +588,6 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	send_scroller.show ();
 	_show_sends_button.show();
 	insert_box->show ();
-	mute_button->show ();
 	solo_button->show ();
 	mute_solo_table.show();
 	master_box.show();
@@ -1416,7 +1409,6 @@ FoldbackStrip::drop_send ()
 	send_gone_connection.disconnect ();
 	output_button.set_sensitive (true);
 	set_invert_sensitive (true);
-	mute_button->set_sensitive (true);
 	solo_button->set_sensitive (true);
 	_comment_button.set_sensitive (true);
 	fb_level_control->set_sensitive (true);
@@ -1455,27 +1447,18 @@ void
 FoldbackStrip::set_button_names ()
 {
 
-	mute_button->set_text (_("Mute"));
-
-	if (_route && _route->solo_safe_control()->solo_safe()) {
-		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
-	} else {
-		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
-	}
 	if (!Config->get_solo_control_is_listen_control()) {
-		solo_button->set_sensitive (false);
-		solo_button->set_text (_("Solo"));
-		UI::instance()->set_tip (solo_button, _("Foldback Bus solo not possible in SIP mode"), "");
-		solo_button->set_visual_state (Gtkmm2ext::VisualState (Gtkmm2ext::Insensitive));
+		solo_button->hide ();
 	} else {
 		solo_button->set_sensitive (true);
-		UI::instance()->set_tip (solo_button, _("Mute other (non-soloed) tracks"), "");
+		solo_button->show ();
+		UI::instance()->set_tip (solo_button, _("Listen on monitor"), "");
 		switch (Config->get_listen_position()) {
 		case AfterFaderListen:
-			solo_button->set_text (_("AFL"));
+			solo_button->set_text (_("Listen"));
 			break;
 		case PreFaderListen:
-			solo_button->set_text (_("PFL"));
+			solo_button->set_text (_("Listen"));
 			break;
 		}
 	}
