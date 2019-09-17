@@ -1800,7 +1800,13 @@ Editor::temporal_zoom (samplecnt_t fpp)
 	new_page_size = (samplepos_t) floor (_visible_canvas_width * nfpp);
 	half_page_size = new_page_size / 2;
 
-	switch (zoom_focus) {
+	Editing::ZoomFocus zf = zoom_focus;
+
+	if (zf == ZoomFocusEdit && _edit_point == EditAtMouse) {
+		zf = ZoomFocusMouse;
+	}
+
+	switch (zf) {
 	case ZoomFocusLeft:
 		leftmost_after_zoom = current_leftmost;
 		break;
@@ -1870,9 +1876,7 @@ Editor::temporal_zoom (samplecnt_t fpp)
 	case ZoomFocusEdit:
 		/* try to keep the edit point in the same place */
 		where = get_preferred_edit_position ();
-
-		if (where > 0) {
-
+		{
 			double l = - ((new_page_size * ((where - current_leftmost)/(double)current_page)) - where);
 
 			if (l < 0) {
@@ -1882,10 +1886,6 @@ Editor::temporal_zoom (samplecnt_t fpp)
 			} else {
 				leftmost_after_zoom = (samplepos_t) l;
 			}
-
-		} else {
-			/* edit point not defined */
-			return;
 		}
 		break;
 
