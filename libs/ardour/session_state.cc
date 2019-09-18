@@ -4159,7 +4159,9 @@ Session::config_changed (std::string p, bool ours)
 	} else if (p == "timecode-generator-offset") {
 		ltc_tx_parse_offset();
 	} else if (p == "auto-return-target-list") {
-		follow_playhead_priority ();
+		if (!loading()) {
+			follow_playhead_priority ();
+		}
 	} else if (p == "use-monitor-bus") {
 		/* NB. This is always called when constructing a session,
 		 * after restoring session state (if any),
