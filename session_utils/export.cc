@@ -37,6 +37,8 @@
 #include "ardour/session_metadata.h"
 #include "ardour/broadcast_info.h"
 
+#include "pbd/i18n.h"
+
 using namespace std;
 using namespace ARDOUR;
 using namespace SessionUtils;
