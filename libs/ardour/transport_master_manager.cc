@@ -133,7 +133,7 @@ TransportMasterManager::instance()
 {
 	if (!_instance) {
 		fatal << string_compose (_("programming error:%1"), X_("TransportMasterManager::instance() called without an instance!")) << endmsg;
-		/* NOTREACHED */
+		abort (); /* NOTREACHED */
 	}
 	return *_instance;
 }

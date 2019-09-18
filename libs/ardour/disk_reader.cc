@@ -350,8 +350,8 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					internal_playback_seek (start_sample - playback_sample);
 				} else {
 					cerr << owner()->name() << " playback at " << speed << " not possible: ss = " << start_sample << " ps = " << playback_sample << endl;
-					abort (); // XXX -- now what?
-					/*NOTREACHED*/
+					// XXX -- now what?
+					abort (); /*NOTREACHED*/
 				}
 			}
 

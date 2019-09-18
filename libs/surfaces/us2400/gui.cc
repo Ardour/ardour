@@ -275,7 +275,7 @@ US2400ProtocolGUI::device_dependent_widget ()
 
 		if (!surface) {
 			PBD::fatal << string_compose (_("programming error: %1\n"), string_compose ("n=%1 surface not found!", n)) << endmsg;
-			/*NOTREACHED*/
+			abort (); /*NOTREACHED*/
 		}
 
 		Gtk::ComboBox* input_combo = manage (new Gtk::ComboBox);

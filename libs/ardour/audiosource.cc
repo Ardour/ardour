@@ -396,7 +396,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 			}
 			if (statbuf.st_size < expected_file_size) {
 				fatal << "peak file is still truncated after rebuild" << endmsg;
-				/*NOTREACHED*/
+				abort (); /*NOTREACHED*/
 			}
 		}
 	}

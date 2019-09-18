@@ -87,8 +87,7 @@ PBD::new_debug_bit (const char* name)
 
 	if (_debug_bit >= debug_bits.size()) {
 		cerr << "Too many debug bits defined, offender was " << name << endl;
-		abort ();
-		/*NOTREACHED*/
+		abort (); /*NOTREACHED*/
 	}
 
 	ret.set (_debug_bit++, 1);
