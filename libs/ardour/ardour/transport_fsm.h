@@ -5,6 +5,10 @@
 #undef nil
 #endif
 
+#ifndef BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
+#define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
+#endif
+
 #include <boost/weak_ptr.hpp>
 #include <boost/msm/back/state_machine.hpp>
 #include <boost/msm/back/tools.hpp>
