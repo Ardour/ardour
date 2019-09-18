@@ -37,8 +37,6 @@ typedef smf_tempo_struct smf_tempo_t;
 
 namespace Evoral {
 
-#define THROW_FILE_ERROR throw(FileError)
-
 /** Standard Midi File.
  * Currently only tempo-based time of a given PPQN is supported.
  *
@@ -66,10 +64,10 @@ public:
 	virtual ~SMF();
 
 	static bool test(const std::string& path);
-	int  open(const std::string& path, int track=1) THROW_FILE_ERROR;
+	int  open(const std::string& path, int track=1);
 	// XXX 19200 = 10 * Timecode::BBT_Time::ticks_per_beat
-	int  create(const std::string& path, int track=1, uint16_t ppqn=19200) THROW_FILE_ERROR;
-	void close() THROW_FILE_ERROR;
+	int  create(const std::string& path, int track=1, uint16_t ppqn=19200);
+	void close();
 
 	void seek_to_start() const;
 	int  seek_to_track(int track);
@@ -82,7 +80,7 @@ public:
 
 	void begin_write();
 	void append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, event_id_t note_id);
-	void end_write(std::string const &) THROW_FILE_ERROR;
+	void end_write(std::string const &);
 
 	void flush() {};
 

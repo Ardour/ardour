@@ -116,7 +116,7 @@ SMF::test(const std::string& path)
  *         -2 if the file exists but specified track does not exist
  */
 int
-SMF::open(const std::string& path, int track) THROW_FILE_ERROR
+SMF::open(const std::string& path, int track)
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
 
@@ -187,7 +187,7 @@ SMF::open(const std::string& path, int track) THROW_FILE_ERROR
  *         -2 if the track can not be created
  */
 int
-SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
+SMF::create(const std::string& path, int track, uint16_t ppqn)
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
 
@@ -243,7 +243,7 @@ SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 }
 
 void
-SMF::close() THROW_FILE_ERROR
+SMF::close()
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
 
@@ -470,7 +470,7 @@ SMF::begin_write()
 }
 
 void
-SMF::end_write(string const & path) THROW_FILE_ERROR
+SMF::end_write(string const & path)
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
 

@@ -33,12 +33,12 @@ class TestSMF : public SMF {
 public:
 	std::string path() const { return _path; }
 
-	int open(const std::string& path) THROW_FILE_ERROR {
+	int open(const std::string& path) {
 		_path = path;
 		return SMF::open(path);
 	}
 
-	void close() THROW_FILE_ERROR {
+	void close() {
 		return SMF::close();
 	}
 
