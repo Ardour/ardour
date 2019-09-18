@@ -37,8 +37,6 @@
 #include "ardour/types.h"
 #include "pbd/signals.h"
 
-#include "pbd/i18n.h"
-
 namespace AudioGrapher {
 	class BroadcastInfo;
 }
@@ -178,12 +176,7 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 		  , index_position (0)
 		  {}
 
-		~CDMarkerStatus () {
-			if (!g_file_set_contents (path.c_str(), out.str().c_str(), -1, NULL)) {
-				PBD::error << string_compose(_("Editor: cannot open \"%1\" as export file for CD marker file"), path) << endmsg;
-			}
-
-		}
+		~CDMarkerStatus ();
 
 		/* I/O */
 		std::string         path;

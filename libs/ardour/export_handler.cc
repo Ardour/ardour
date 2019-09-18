@@ -22,8 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ardour/export_handler.h"
-
 #include "pbd/gstdio_compat.h"
 #include <glibmm.h>
 #include <glibmm/convert.h>
@@ -35,6 +33,7 @@
 #include "ardour/audio_port.h"
 #include "ardour/debug.h"
 #include "ardour/export_graph_builder.h"
+#include "ardour/export_handler.h"
 #include "ardour/export_timespan.h"
 #include "ardour/export_channel_configuration.h"
 #include "ardour/export_status.h"
@@ -960,6 +959,12 @@ ExportHandler::cue_escape_cdtext (const std::string& txt)
 	out = '"' + latin1_txt + '"';
 
 	return out;
+}
+
+ExportHandler::CDMarkerStatus::~CDMarkerStatus () {
+	if (!g_file_set_contents (path.c_str(), out.str().c_str(), -1, NULL)) {
+		PBD::error << string_compose(("Editor: cannot open \"%1\" as export file for CD marker file"), path) << endmsg;
+	}
 }
 
 } // namespace ARDOUR
