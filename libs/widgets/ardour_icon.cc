@@ -1315,9 +1315,9 @@ ArdourWidgets::ArdourIcon::render (cairo_t *cr,
 			icon_transport_panic (cr, width, height);
 			break;
 		case TransportStart:
-			/* fall through */
+			/* fallthrough */
 		case TransportEnd:
-			/* fall through */
+			/* fallthrough */
 		case TransportRange:
 			icon_transport_ck (cr, icon, width, height);
 			break;
@@ -1352,9 +1352,9 @@ ArdourWidgets::ArdourIcon::render (cairo_t *cr,
 			icon_nudge_right (cr, width, height, fg_color);
 			break;
 		case ZoomIn:
-			/* fall through */
+			/* fallthrough */
 		case ZoomOut:
-			/* fall through */
+			/* fallthrough */
 		case ZoomFull:
 			icon_zoom (cr, icon, width, height, fg_color);
 			break;

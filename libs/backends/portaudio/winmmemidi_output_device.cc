@@ -432,10 +432,10 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 		switch (h.size) {
 		case 3:
 			message |= (((DWORD)data[2]) << 16);
-		// Fallthrough on purpose.
+			/* fallthrough */
 		case 2:
 			message |= (((DWORD)data[1]) << 8);
-		// Fallthrough on purpose.
+			/* fallthrough */
 		case 1:
 			message |= (DWORD)data[0];
 			result = midiOutShortMsg (m_handle, message);

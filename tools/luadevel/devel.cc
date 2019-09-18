@@ -155,10 +155,11 @@ class LuaTableRef {
 							// invalid userdata -- fall through
 						}
 
-						/* fall through */
+						/* fallthrough */
 					case LUA_TFUNCTION: // no support -- we could... string.format("%q", string.dump(value, true))
 					case LUA_TTABLE: // no nested tables, sorry.
-					case LUA_TNIL: // fallthrough
+					case LUA_TNIL:
+						/* fallthrough */
 					default:
 						// invalid value
 						lua_pop (L, 2);

@@ -493,9 +493,10 @@ Parser::scanner (unsigned char inbyte)
 
 	case NEEDTWOBYTES:
 		/* wait for the second byte */
-		if (msgindex < 3)
+		if (msgindex < 3) {
 			return;
-		/*FALLTHRU*/
+		}
+		/* fallthrough */
 
 	case NEEDONEBYTE:
 		/* We've completed a 1 or 2 byte message. */

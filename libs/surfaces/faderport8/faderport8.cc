@@ -959,7 +959,7 @@ FaderPort8::filter_stripables (StripableList& strips) const
 			break;
 		default:
 			assert (0);
-			// fall through
+			/* fallthrough */
 		case MixAll:
 			allow_master = true;
 			flt = &flt_all;

@@ -322,7 +322,8 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen) const
 					// any discrete vector curves somewhere?
 					assert (0);
 				case ControlList::Curved:
-					// fallthrough, no 2 point spline
+					/* no 2 point spline */
+					/* fallthrough */
 				default: // Linear:
 					for (int i = 0; i < veclen; ++i) {
 						vec[i] = (lx * (m_num / m_den) + m_num * i * dx_num / (m_den * dx_den)) + c;
@@ -342,7 +343,8 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen) const
 					// any discrete vector curves somewhere?
 					assert (0);
 				case ControlList::Curved:
-					// fallthrough, no 2 point spline
+					/* no 2 point spline */
+					/* fallthrough */
 				default: // Linear:
 					vec[0] = interpolate_linear (lval, uval, fraction);
 					break;
@@ -441,7 +443,7 @@ Curve::multipoint_eval (double x) const
 					double x2 = x * x;
 					return ev->coeff[0] + (ev->coeff[1] * x) + (ev->coeff[2] * x2) + (ev->coeff[3] * x2 * x);
 				}
-				/* fall through */
+				/* fallthrough */
 			case ControlList::Linear:
 				return before->value + (vdelta * (tdelta / trange));
 		}

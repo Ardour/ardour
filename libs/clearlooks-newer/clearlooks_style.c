@@ -56,7 +56,7 @@ static ClearlooksStyleClass *clearlooks_style_class;
 static GtkStyleClass *clearlooks_parent_class;
 
 static void
-clearlooks_set_widget_parameters (GtkWidget      *widget,
+clearlooks_set_widget_parameters (GtkWidget            *widget,
                                   const GtkStyle       *style,
                                   GtkStateType          state_type,
                                   WidgetParameters     *params)
@@ -726,11 +726,13 @@ clearlooks_style_draw_box (DRAW_ARGS)
 				{
 					case GTK_PROGRESS_RIGHT_TO_LEFT:
 						tmp.x -= 1;
+						/* fallthrough */
 					case GTK_PROGRESS_LEFT_TO_RIGHT:
 						tmp.width += 1;
 						break;
 					case GTK_PROGRESS_BOTTOM_TO_TOP:
 						tmp.y -= 1;
+						/* fallthrough */
 					case GTK_PROGRESS_TOP_TO_BOTTOM:
 						tmp.height += 1;
 						break;

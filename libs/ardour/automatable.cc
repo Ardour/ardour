@@ -354,7 +354,7 @@ Automatable::protect_automation ()
 			l->set_automation_state (Off);
 			break;
 		case Latch:
-			/* fall through */
+			/* fallthrough */
 		case Touch:
 			l->set_automation_state (Play);
 			break;
