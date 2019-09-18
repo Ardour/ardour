@@ -64,10 +64,6 @@ LTC_TransportMaster::LTC_TransportMaster (std::string const & name)
 	, a3e_timecode (Timecode::timecode_24)
 	, samples_per_timecode_frame (0)
 {
-	if ((_port = AudioEngine::instance()->register_input_port (DataType::AUDIO, string_compose ("%1 in", _name, false, TransportMasterPort))) == 0) {
-		throw failed_constructor();
-	}
-
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("LTC registered %1\n", _port->name()));
 
 	memset (&prev_frame, 0, sizeof(LTCFrameExt));
@@ -82,6 +78,14 @@ void
 LTC_TransportMaster::init ()
 {
 	reset (true);
+}
+
+void
+LTC_TransportMaster::create_port ()
+{
+	if ((_port = AudioEngine::instance()->register_input_port (DataType::AUDIO, string_compose ("%1 in", _name, false, TransportMasterPort))) == 0) {
+		throw failed_constructor();
+	}
 }
 
 void

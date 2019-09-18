@@ -383,6 +383,17 @@ int main() { return 0; }''',
 
     autowaf.set_basic_compiler_flags (conf,flags_dict)
 
+    #
+    # the transition table for the libardour transport state machine
+    # is larger than the default that is hard-coded in boost::mpl.
+    # These need to be defined before any boost headers are used,
+    # and just about the only way to be sure that is true is to define
+    # them on the "command line" here.
+    #
+    cxx_flags.append ('-DBOOST_MPL_CFG_NO_PREPROCESSED_HEADERS')
+    cxx_flags.append ('-DBOOST_MPL_LIMIT_VECTOR_SIZE=30')
+    cxx_flags.append ('-DBOOST_MPL_LIMIT_MAP_SIZE=30')
+    
     if conf.options.asan:
         conf.check_cxx(cxxflags=["-fsanitize=address", "-fno-omit-frame-pointer"], linkflags=["-fsanitize=address"])
         cxx_flags.append('-fsanitize=address')

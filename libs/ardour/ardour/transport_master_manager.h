@@ -33,6 +33,7 @@ class UI_TransportMaster;
 class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 {
   public:
+	static TransportMasterManager& create ();
 	~TransportMasterManager ();
 
 	int set_default_configuration ();
@@ -81,6 +82,8 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 	TransportMasters const & transport_masters() const { return _transport_masters; }
 
 	static const std::string state_node_name;
+
+	void reconnect_ports ();
 
   private:
 	TransportMasterManager();

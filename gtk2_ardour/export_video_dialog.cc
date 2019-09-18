@@ -793,7 +793,7 @@ ExportVideoDialog::launch_export ()
 		}
 	}
 	audio_progress_connection.disconnect();
-	status->finish ();
+	status->finish (TRS_UI);
 	if (status->aborted()) {
 		::g_unlink (_insnd.c_str());
 		delete _transcoder; _transcoder = 0;

@@ -51,8 +51,7 @@ RTTaskList::drop_threads ()
 	for (uint32_t i = 0; i < nt; ++i) {
 		_task_run_sem.signal ();
 	}
-	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i)
-	{
+	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i) {
 		pthread_join (*i, NULL);
 	}
 	_threads.clear ();
@@ -122,7 +121,7 @@ RTTaskList::run ()
 
 		boost::function<void ()> to_run;
 		tm.acquire ();
-		if (_tasklist.size () > 0) {
+		if (!_tasklist.empty ()) {
 			to_run = _tasklist.front();
 			_tasklist.pop_front ();
 		}
@@ -145,20 +144,29 @@ void
 RTTaskList::process (TaskList const& tl)
 {
 	Glib::Threads::Mutex::Lock pm (_process_mutex);
+	Glib::Threads::Mutex::Lock tm (_tasklist_mutex, Glib::Threads::NOT_LOCK);
+
+	tm.acquire ();
 	_tasklist = tl;
+	tm.release ();
+
 	process_tasklist ();
+
+	tm.acquire ();
 	_tasklist.clear ();
+	tm.release ();
 }
 
 void
 RTTaskList::process_tasklist ()
 {
-	if (0 == g_atomic_int_get (&_threads_active) || _threads.size () == 0) {
+//	if (0 == g_atomic_int_get (&_threads_active) || _threads.size () == 0) {
+
 		for (TaskList::iterator i = _tasklist.begin (); i != _tasklist.end(); ++i) {
 			(*i)();
 		}
 		return;
-	}
+//	}
 
 	uint32_t nt = std::min (_threads.size (), _tasklist.size ());
 

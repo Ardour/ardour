@@ -574,6 +574,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
         PannerManager::instance().discover_panners();
 
 	ARDOUR::AudioEngine::create ();
+	TransportMasterManager::create ();
 
 	/* it is unfortunate that we need to include reserved names here that
 	   refer to control surfaces. But there's no way to ensure a complete
@@ -619,14 +620,13 @@ ARDOUR::init_post_engine (uint32_t start_cnt)
 		/* find plugins */
 
 		ARDOUR::PluginManager::instance().refresh (!Config->get_discover_vst_on_start());
-	}
-
-	if (start_cnt == 0) {
 
 		if ((node = Config->control_protocol_state()) != 0) {
 			ControlProtocolManager::instance().set_state (*node, 0 /* here: global-config state */);
 		}
+	}
 
+	if (start_cnt > 0) {
 		TransportMasterManager::instance().restart ();
 	}
 }

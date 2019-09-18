@@ -49,6 +49,7 @@
 #include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
+#include "pbd/i18n.h"
 #include "pbd/md5.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/search_path.h"
@@ -116,7 +117,9 @@
 #include "ardour/speakers.h"
 #include "ardour/tempo.h"
 #include "ardour/ticker.h"
+#include "ardour/transport_fsm.h"
 #include "ardour/transport_master.h"
+#include "ardour/transport_master_manager.h"
 #include "ardour/track.h"
 #include "ardour/types_convert.h"
 #include "ardour/user_bundle.h"
@@ -128,8 +131,6 @@
 #include "midi++/mmc.h"
 
 #include "LuaBridge/LuaBridge.h"
-
-#include "pbd/i18n.h"
 
 #include <glibmm/checksum.h>
 
@@ -189,7 +190,6 @@ Session::Session (AudioEngine &eng,
 	, _base_sample_rate (0)
 	, _nominal_sample_rate (0)
 	, _current_sample_rate (0)
-	, transport_sub_state (0)
 	, _record_status (Disabled)
 	, _transport_sample (0)
 	, _seek_counter (0)
@@ -251,6 +251,7 @@ Session::Session (AudioEngine &eng,
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
 	, _n_lua_scripts (0)
 	, _butler (new Butler (*this))
+	, _transport_fsm (TransportFSM::create (*this))
 	, _post_transport_work (0)
 	, _locations (new Locations (*this))
 	, _ignore_skips_updates (false)
@@ -606,9 +607,13 @@ Session::immediately_post_engine ()
 		_process_graph.reset (new Graph (*this));
 	}
 
-	/* every time we reconnect, recompute worst case output latencies */
+	/* Restart transport FSM */
 
-	_engine.Running.connect_same_thread (*this, boost::bind (&Session::initialize_latencies, this));
+	_transport_fsm->backend()->start ();
+
+	/* every time we reconnect, do stuff ... */
+
+	_engine.Running.connect_same_thread (*this, boost::bind (&Session::engine_running, this));
 
 	if (synced_to_engine()) {
 		_engine.transport_stop ();
@@ -848,7 +853,6 @@ Session::destroy ()
 			case SessionEvent::Skip:
 			case SessionEvent::PunchIn:
 			case SessionEvent::PunchOut:
-			case SessionEvent::StopOnce:
 			case SessionEvent::RangeStop:
 			case SessionEvent::RangeLocate:
 				remove = false;
@@ -879,6 +883,9 @@ Session::destroy ()
 	DEBUG_TRACE (DEBUG::Destruction, "delete selection\n");
 	delete _selection;
 	_selection = 0;
+
+	_transport_fsm->backend()->stop ();
+	_transport_fsm.reset ();
 
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
 
@@ -1584,6 +1591,7 @@ Session::hookup_io ()
 	*/
 
 	AudioEngine::instance()->reconnect_ports ();
+	TransportMasterManager::instance().reconnect_ports ();
 
 	/* Anyone who cares about input state, wake up and do something */
 
@@ -2015,7 +2023,7 @@ void
 Session::_locations_changed (const Locations::LocationList& locations)
 {
 	/* There was some mass-change in the Locations object.
-	 * 
+	 *
 	 * We might be re-adding a location here but it doesn't actually matter
 	 * for all the locations that the Session takes an interest in.
 	 */

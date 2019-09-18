@@ -51,7 +51,7 @@ Sample* DiskReader::_sum_buffer = 0;
 Sample* DiskReader::_mixdown_buffer = 0;
 gain_t* DiskReader::_gain_buffer = 0;
 samplecnt_t DiskReader::midi_readahead = 4096;
-bool DiskReader::_no_disk_output = false;
+gint DiskReader::_no_disk_output (0);
 
 DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, str, f)
@@ -74,8 +74,8 @@ void
 DiskReader::ReaderChannelInfo::resize (samplecnt_t bufsize)
 {
 	delete rbuf;
-	/* touch memory to lock it */
 	rbuf = new PlaybackBuffer<Sample> (bufsize);
+	/* touch memory to lock it */
 	memset (rbuf->buffer(), 0, sizeof (Sample) * rbuf->bufsize());
 }
 
@@ -262,13 +262,14 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 	}
 
-	const gain_t target_gain = (speed == 0.0 || ((ms & MonitoringDisk) == 0)) ? 0.0 : 1.0;
+	const bool declick_out = _session.declick_in_progress();
+	const gain_t target_gain = (declick_out || (speed == 0.0) || ((ms & MonitoringDisk) == 0)) ? 0.0 : 1.0;
 
 	if (!_session.cfg ()->get_use_transport_fades ()) {
 		_declick_amp.set_gain (target_gain);
 	}
 
-	if ((speed == 0.0) && (ms == MonitoringDisk) && _declick_amp.gain () == target_gain) {
+	if (declick_out && (ms == MonitoringDisk) && _declick_amp.gain () == target_gain) {
 		/* no channels, or stopped. Don't accidentally pass any data
 		 * from disk into our outputs (e.g. via interpolation)
 		 */
@@ -348,13 +349,13 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				if (can_internal_playback_seek (start_sample - playback_sample)) {
 					internal_playback_seek (start_sample - playback_sample);
 				} else {
-					cerr << owner()->name() << " playback not possible: ss = " << start_sample << " ps = " << playback_sample << endl;
+					cerr << owner()->name() << " playback at " << speed << " not possible: ss = " << start_sample << " ps = " << playback_sample << endl;
 					abort (); // XXX -- now what?
-					goto midi;
+					/*NOTREACHED*/
 				}
 			}
 
-			if (speed != 0.0) {
+			if (!declick_out) {
 				const samplecnt_t total = chaninfo->rbuf->read (disk_buf.data(), disk_samples_to_consume);
 				if (disk_samples_to_consume > total) {
 					cerr << _name << " Need " << disk_samples_to_consume << " total = " << total << endl;
@@ -384,7 +385,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	/* MIDI data handling */
 
   midi:
-	if (/*!_session.declick_out_pending() && */ bufs.count().n_midi() && _midi_buf) {
+	if (!declick_in_progress() && bufs.count().n_midi() && _midi_buf) {
 		MidiBuffer* dst;
 
 		if (_no_disk_output) {
@@ -482,10 +483,8 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 }
 
 bool
-DiskReader::declick_in_progress () const {
-	/* TODO use an atomic-get.
-	 * this may be called from the butler thread
-	 */
+DiskReader::declick_in_progress () const
+{
 	return _declick_amp.gain() != 0; // declick-out
 }
 
@@ -543,8 +542,6 @@ DiskReader::overwrite_existing_buffers ()
 
 			samplepos_t start = overwrite_sample;
 			samplecnt_t to_read = size;
-
-			cerr << owner()->name() << " over-read: " << to_read << endl;
 
 			if (audio_read ((*chan)->rbuf, sum_buffer.get(), mixdown_buffer.get(), gain_buffer.get(), start, to_read, n, reversed)) {
 				error << string_compose(_("DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"), id(), size, overwrite_sample) << endmsg;
@@ -1167,7 +1164,7 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 
 		Location* loc = _loop_location;
 
-		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (
+		DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose (
 			             "%1 MDS pre-read read %8 offset = %9 @ %4..%5 from %2 write to %3, LOOPED ? %6 .. %7\n", _name,
 			             _midi_buf->get_read_ptr(), _midi_buf->get_write_ptr(), start_sample, end_sample,
 			             (loc ? loc->start() : -1), (loc ? loc->end() : -1), nframes, Port::port_offset()));
@@ -1184,7 +1181,7 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 			Evoral::Range<samplepos_t> loop_range (loc->start(), loc->end() - 1);
 			effective_start = loop_range.squish (start_sample);
 
-			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("looped, effective start adjusted to %1\n", effective_start));
+			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("looped, effective start adjusted to %1\n", effective_start));
 
 			if (effective_start == loc->start()) {
 				/* We need to turn off notes that may extend
@@ -1208,23 +1205,23 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 				first = loc->end() - effective_start;
 				second = nframes - first;
 
-				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read for eff %1 end %2: %3 and %4, cycle offset %5\n",
+				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read for eff %1 end %2: %3 and %4, cycle offset %5\n",
 				                                                      effective_start, loc->end(), first, second));
 
 				if (first) {
-					DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #1, from %1 for %2\n",
+					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read #1, from %1 for %2\n",
 					                                                      effective_start, first));
 					events_read = _midi_buf->read (*target, effective_start, first);
 				}
 
 				if (second) {
-					DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #2, from %1 for %2\n",
+					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read #2, from %1 for %2\n",
 					                                                      loc->start(), second));
 					events_read += _midi_buf->read (*target, loc->start(), second);
 				}
 
 			} else {
-				DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("loop read #3, adjusted start as %1 for %2\n",
+				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read #3, adjusted start as %1 for %2\n",
 				                                                      effective_start, nframes));
 				events_read = _midi_buf->read (*target, effective_start, effective_start + nframes);
 			}
@@ -1233,11 +1230,11 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 			if (n_skipped > 0) {
 				warning << string_compose(_("MidiDiskstream %1: skipped %2 events, possible underflow"), id(), n_skipped) << endmsg;
 			}
-			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("playback buffer read, from %1 to %2 (%3)", start_sample, end_sample, nframes));
+			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer read, from %1 to %2 (%3)", start_sample, end_sample, nframes));
 			events_read = _midi_buf->read (*target, start_sample, end_sample, Port::port_offset ());
 		}
 
-		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (
+		DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose (
 			             "%1 MDS events read %2 range %3 .. %4 rspace %5 wspace %6 r@%7 w@%8\n",
 			             _name, events_read, playback_sample, playback_sample + nframes,
 			             _midi_buf->read_space(), _midi_buf->write_space(),
@@ -1246,7 +1243,7 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 
 	g_atomic_int_add (&_samples_read_from_ringbuffer, nframes);
 
-	if (ms & MonitoringInput) {
+	if (!_no_disk_output && (ms & MonitoringInput)) {
 		dst.merge_from (*target, nframes);
 	}
 
@@ -1285,7 +1282,7 @@ DiskReader::midi_read (samplepos_t& start, samplecnt_t dur, bool reversed)
 
 	assert(_midi_buf);
 
-	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MDS::midi_read @ %1 cnt %2\n", start, dur));
+	DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("MDS::midi_read @ %1 cnt %2\n", start, dur));
 
 	boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack>(_route);
 	MidiChannelFilter* filter = mt ? &mt->playback_filter() : 0;
@@ -1330,7 +1327,7 @@ DiskReader::midi_read (samplepos_t& start, samplecnt_t dur, bool reversed)
 
 		this_read = min (dur,this_read);
 
-		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MDS ::read at %1 for %2 loffset %3\n", effective_start, this_read, loop_offset));
+		DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("MDS ::read at %1 for %2 loffset %3\n", effective_start, this_read, loop_offset));
 
 		if (midi_playlist()->read (*_midi_buf, effective_start, this_read, loop_range, 0, filter) != this_read) {
 			error << string_compose(
@@ -1419,16 +1416,24 @@ DiskReader::refill_midi ()
 }
 
 void
-DiskReader::set_no_disk_output (bool yn)
+DiskReader::dec_no_disk_output ()
 {
-	/* this MUST be called as part of the process call tree, before any
-	   disk readers are invoked. We use it when the session needs the
-	   transport (and thus effective read position for DiskReaders) to keep
-	   advancing as part of syncing up with a transport master, but we
-	   don't want any actual disk output yet because we are still not
-	   synced.
+	/* this is called unconditionally when things happen that ought to end
+	   a period of "no disk output". It's OK for that to happen when there
+	   was no corresponding call to ::inc_no_disk_output(), but we must
+	   stop the value from becoming negative.
 	*/
-	_no_disk_output = yn;
+
+	do {
+		gint v  = g_atomic_int_get (&_no_disk_output);
+		if (v > 0) {
+			if (g_atomic_int_compare_and_exchange (&_no_disk_output, v, v - 1)) {
+				break;
+			}
+		} else {
+			break;
+		}
+	} while (true);
 }
 
 DiskReader::DeclickAmp::DeclickAmp (samplecnt_t sample_rate)
@@ -1459,7 +1464,6 @@ DiskReader::DeclickAmp::apply_gain (AudioBuffer& buf, samplecnt_t n_samples, con
 	uint32_t offset = 0;
 	while (remain > 0) {
 		uint32_t n_proc = remain > max_nproc ? max_nproc : remain;
-		std::cerr << "g = " << g << std::endl;
 		for (uint32_t i = 0; i < n_proc; ++i) {
 			buffer[offset + i] *= g;
 		}

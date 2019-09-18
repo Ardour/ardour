@@ -20,16 +20,12 @@
 #include "ardour/debug.h"
 #include "ardour/disk_reader.h"
 #include "ardour/session.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/transport_master_manager.h"
 
 #include "pbd/boost_debug.cc"
 #include "pbd/i18n.h"
-
-#if __cplusplus > 199711L
-#define local_signbit(x) std::signbit (x)
-#else
-#define local_signbit(x) ((((__int64*)(&z))*) & 0x8000000000000000)
-#endif
+#include "pbd/stateful.h"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -49,6 +45,27 @@ TransportMasterManager::TransportMasterManager()
 TransportMasterManager::~TransportMasterManager ()
 {
 	clear ();
+}
+
+TransportMasterManager&
+TransportMasterManager::create ()
+{
+	assert (!_instance);
+
+	cerr << "TMM::create(), Config = " << Config << " size will be " << sizeof (TransportMasterManager) << endl;
+
+	_instance = new TransportMasterManager;
+
+	XMLNode* tmm_node = Config->extra_xml (X_("TransportMasters"));
+	if (tmm_node) {
+		cerr << " setting state via XML\n";
+		_instance->set_state (*tmm_node, Stateful::current_state_version);
+	} else {
+		cerr << " setting default config\n";
+		_instance->set_default_configuration ();
+	}
+
+	return *_instance;
 }
 
 int
@@ -106,7 +123,7 @@ TransportMasterManager::parameter_changed (std::string const & what)
 	if (what == "external-sync") {
 		if (!_session->config.get_external_sync()) {
 			/* disabled */
-			DiskReader::set_no_disk_output (false);
+			DiskReader::dec_no_disk_output ();
 		}
 	}
 }
@@ -115,7 +132,8 @@ TransportMasterManager&
 TransportMasterManager::instance()
 {
 	if (!_instance) {
-		_instance = new TransportMasterManager();
+		fatal << string_compose (_("programming error:%1"), X_("TransportMasterManager::instance() called without an instance!")) << endmsg;
+		/* NOTREACHED */
 	}
 	return *_instance;
 }
@@ -196,7 +214,7 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 			if (master_dll_initstate == 0) {
 
 				init_transport_master_dll (_master_speed, _master_position);
-				// _master_invalid_this_cycle = true;
+				_master_invalid_this_cycle = true;
 				DEBUG_TRACE (DEBUG::Slave, "no roll3 - still initializing master DLL\n");
 				master_dll_initstate = _master_speed > 0.0 ? 1 : -1;
 
@@ -220,12 +238,12 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 				if (!_session->actively_recording()) {
 					DEBUG_TRACE (DEBUG::Slave, string_compose ("slave delta %1 greater than slave resolution %2 => no disk output\n", delta, _current_master->resolution()));
 					/* run routes as normal, but no disk output */
-					DiskReader::set_no_disk_output (true);
+					DiskReader::inc_no_disk_output ();
 				} else {
-					DiskReader::set_no_disk_output (false);
+					DiskReader::dec_no_disk_output ();
 				}
 			} else {
-				DiskReader::set_no_disk_output (false);
+				DiskReader::dec_no_disk_output ();
 			}
 
 			/* inject DLL with new data */
@@ -330,6 +348,11 @@ TransportMasterManager::add (SyncSource type, std::string const & name, bool rem
 		}
 
 		tm = TransportMaster::factory (type, name, removeable);
+
+		if (!tm) {
+			return -1;
+		}
+
 		boost_debug_shared_ptr_mark_interesting (tm.get(), "tm");
 		ret = add_locked (tm);
 	}
@@ -394,6 +417,10 @@ TransportMasterManager::set_current_locked (boost::shared_ptr<TransportMaster> c
 			warning << string_compose (X_("programming error: attempt to use unknown transport master \"%1\"\n"), c->name());
 			return -1;
 		}
+	}
+
+	if (!c->usable()) {
+		return -1;
 	}
 
 	_current_master = c;
@@ -490,6 +517,7 @@ TransportMasterManager::clear ()
 int
 TransportMasterManager::set_state (XMLNode const & node, int version)
 {
+	PBD::stacktrace (std::cerr, 20);
 	assert (node.name() == state_node_name);
 
 	XMLNodeList const & children = node.children();
@@ -500,11 +528,22 @@ TransportMasterManager::set_state (XMLNode const & node, int version)
 		_current_master.reset ();
 		boost_debug_list_ptrs ();
 
-		_transport_masters.clear ();
+		/* TramsportMasters live for the entire life of the
+		 * program. TransportMasterManager::set_state() should only be
+		 * called at the start of the program, and there should be no
+		 * transport masters at that time.
+		 */
+
+		assert (_transport_masters.empty());
 
 		for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
 
 			boost::shared_ptr<TransportMaster> tm = TransportMaster::factory (**c);
+
+			if (!tm) {
+				continue;
+			}
+
 			boost_debug_shared_ptr_mark_interesting (tm.get(), "tm");
 
 			if (add_locked (tm)) {
@@ -518,8 +557,17 @@ TransportMasterManager::set_state (XMLNode const & node, int version)
 	}
 
 	std::string current_master;
+
 	if (node.get_property (X_("current"), current_master)) {
+
+		/* may fal if current_master is not usable */
+
 		set_current (current_master);
+
+		if (!current()) {
+			set_current (MTC); // always available
+		}
+
 	} else {
 		set_current (MTC);
 	}
@@ -578,14 +626,31 @@ TransportMasterManager::restart ()
 	XMLNode* node;
 
 	if ((node = Config->transport_master_state()) != 0) {
-		if (TransportMasterManager::instance().set_state (*node, Stateful::loading_state_version)) {
-			error << _("Cannot restore transport master manager") << endmsg;
-			/* XXX now what? */
+
+		Glib::Threads::RWLock::ReaderLock lm (lock);
+
+		for (TransportMasters::const_iterator tm = _transport_masters.begin(); tm != _transport_masters.end(); ++tm) {
+			(*tm)->connect_port_using_state ();
+			(*tm)->reset (false);
 		}
+
 	} else {
 		if (TransportMasterManager::instance().set_default_configuration ()) {
 			error << _("Cannot initialize transport master manager") << endmsg;
 			/* XXX now what? */
+		}
+	}
+}
+
+void
+TransportMasterManager::reconnect_ports ()
+{
+	DEBUG_TRACE (DEBUG::Slave, "reconnecting all transport master ports\n");
+	{
+		Glib::Threads::RWLock::ReaderLock lm (lock);
+
+		for (TransportMasters::const_iterator tm = _transport_masters.begin(); tm != _transport_masters.end(); ++tm) {
+			(*tm)->connect_port_using_state ();
 		}
 	}
 }

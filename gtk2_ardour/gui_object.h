@@ -24,8 +24,6 @@
 #include <map>
 #include <string>
 
-#include <boost/variant.hpp>
-
 #include "pbd/xml++.h"
 #include "pbd/id.h"
 

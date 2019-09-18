@@ -1788,6 +1788,8 @@ Playlist::region_changed (const PropertyChange& what_changed, boost::shared_ptr<
 		notify_region_end_trimmed (region);
 	} else if (what_changed.contains (Properties::position) && what_changed.contains (Properties::length)) {
 		notify_region_start_trimmed (region);
+	} else if (what_changed.contains (Properties::start)) {
+		notify_contents_changed ();
 	}
 
 	/* don't notify about layer changes, since we are the only object that can initiate

@@ -29,7 +29,7 @@ using namespace std;
 
 PBD::DebugBits PBD::DEBUG::MidiSourceIO = PBD::new_debug_bit ("midisourceio");
 PBD::DebugBits PBD::DEBUG::MidiPlaylistIO = PBD::new_debug_bit ("midiplaylistio");
-PBD::DebugBits PBD::DEBUG::MidiDiskstreamIO = PBD::new_debug_bit ("mididiskstreamio");
+PBD::DebugBits PBD::DEBUG::MidiDiskIO = PBD::new_debug_bit ("mididiskio");
 PBD::DebugBits PBD::DEBUG::MidiRingBuffer = PBD::new_debug_bit ("midiringbuffer");
 PBD::DebugBits PBD::DEBUG::SnapBBT = PBD::new_debug_bit ("snapbbt");
 PBD::DebugBits PBD::DEBUG::Latency = PBD::new_debug_bit ("latency");
@@ -44,6 +44,8 @@ PBD::DebugBits PBD::DEBUG::MTC = PBD::new_debug_bit ("mtc");
 PBD::DebugBits PBD::DEBUG::LTC = PBD::new_debug_bit ("ltc");
 PBD::DebugBits PBD::DEBUG::TXLTC = PBD::new_debug_bit ("tx-ltc");
 PBD::DebugBits PBD::DEBUG::Transport = PBD::new_debug_bit ("transport");
+PBD::DebugBits PBD::DEBUG::TFSMEvents = PBD::new_debug_bit ("tfsmevents");
+PBD::DebugBits PBD::DEBUG::TFSMState = PBD::new_debug_bit ("tfsmstate");
 PBD::DebugBits PBD::DEBUG::Slave = PBD::new_debug_bit ("slave");
 PBD::DebugBits PBD::DEBUG::SessionEvents = PBD::new_debug_bit ("sessionevents");
 PBD::DebugBits PBD::DEBUG::MidiIO = PBD::new_debug_bit ("midiio");

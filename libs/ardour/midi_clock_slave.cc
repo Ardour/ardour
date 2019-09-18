@@ -58,9 +58,6 @@ MIDIClock_TransportMaster::MIDIClock_TransportMaster (std::string const & name, 
 	, _running (false)
 	, _bpm (0)
 {
-	if ((_port = create_midi_port (string_compose ("%1 in", name))) == 0) {
-		throw failed_constructor();
-	}
 }
 
 MIDIClock_TransportMaster::~MIDIClock_TransportMaster()
@@ -73,6 +70,14 @@ MIDIClock_TransportMaster::init ()
 {
 	midi_clock_count = 0;
 	current.reset ();
+}
+
+void
+MIDIClock_TransportMaster::create_port ()
+{
+	if ((_port = create_midi_port (string_compose ("%1 in", _name))) == 0) {
+		throw failed_constructor();
+	}
 }
 
 void

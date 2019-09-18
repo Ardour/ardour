@@ -346,8 +346,6 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	TransportRequestType request_mask() const { return _request_mask; }
 	void set_request_mask (TransportRequestType);
 
-	void get_current (double&, samplepos_t&, samplepos_t);
-
 	/* this is set at construction, and not changeable later, so it is not
 	 * a property
 	 */
@@ -358,6 +356,8 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	std::string display_name (bool sh/*ort*/ = true) const;
 
 	virtual void unregister_port ();
+	void connect_port_using_state ();
+	virtual void create_port () = 0;
 
   protected:
 	SyncSource      _type;
@@ -384,6 +384,8 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	double b, c;
 
 	boost::shared_ptr<Port>  _port;
+
+	XMLNode port_node;
 
 	PBD::ScopedConnection port_connection;
 	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
@@ -452,6 +454,8 @@ class LIBARDOUR_API MTC_TransportMaster : public TimecodeTransportMaster, public
         std::string position_string() const;
 	std::string delta_string() const;
 
+	void create_port ();
+
   private:
 	PBD::ScopedConnectionList port_connections;
 	PBD::ScopedConnection     config_connection;
@@ -517,6 +521,8 @@ public:
 	Timecode::TimecodeFormat apparent_timecode_format() const;
 	std::string position_string() const;
 	std::string delta_string() const;
+
+	void create_port ();
 
   private:
 	void parse_ltc(const pframes_t, const Sample* const, const samplecnt_t);
@@ -586,6 +592,8 @@ class LIBARDOUR_API MIDIClock_TransportMaster : public TransportMaster, public T
 
 	float bpm() const { return _bpm; }
 
+	void create_port ();
+
   protected:
 	PBD::ScopedConnectionList port_connections;
 
@@ -647,6 +655,8 @@ class LIBARDOUR_API Engine_TransportMaster : public TransportMaster
 
 	std::string position_string() const;
 	std::string delta_string() const;
+
+	void create_port () { }
 
   private:
         AudioEngine& engine;

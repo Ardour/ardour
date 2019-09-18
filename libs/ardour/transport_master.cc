@@ -74,6 +74,7 @@ TransportMaster::TransportMaster (SyncSource t, std::string const & name)
 	, _sclock_synced (Properties::sclock_synced, false)
 	, _collect (Properties::collect, true)
 	, _connected (Properties::connected, false)
+	, port_node (X_(""))
 {
 	register_properties ();
 
@@ -260,7 +261,27 @@ TransportMaster::set_state (XMLNode const & node, int /* version */)
 	XMLNode* pnode = node.child (X_("Port"));
 
 	if (pnode) {
-		XMLNodeList const & children = pnode->children();
+		port_node = *pnode;
+
+		if (AudioEngine::instance()->running()) {
+			connect_port_using_state ();
+		}
+	}
+
+	PropertyChanged (what_changed);
+
+	return 0;
+}
+
+void
+TransportMaster::connect_port_using_state ()
+{
+	if (!_port) {
+		create_port ();
+	}
+
+	if (_port) {
+		XMLNodeList const & children = port_node.children();
 		for (XMLNodeList::const_iterator ci = children.begin(); ci != children.end(); ++ci) {
 
 			XMLProperty const *prop;
@@ -273,10 +294,6 @@ TransportMaster::set_state (XMLNode const & node, int /* version */)
 			}
 		}
 	}
-
-	PropertyChanged (what_changed);
-
-	return 0;
 }
 
 XMLNode&
@@ -360,21 +377,27 @@ TransportMaster::factory (SyncSource type, std::string const& name, bool removea
 
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("factory-construct %1 name %2 removeable %3\n", enum_2_string (type), name, removeable));
 
-	switch (type) {
-	case MTC:
-		tm.reset (new MTC_TransportMaster (name));
-		break;
-	case LTC:
-		tm.reset (new LTC_TransportMaster (name));
-		break;
-	case MIDIClock:
-		tm.reset (new MIDIClock_TransportMaster (name));
-		break;
-	case Engine:
-		tm.reset (new Engine_TransportMaster (*AudioEngine::instance()));
-		break;
-	default:
-		break;
+	try {
+		switch (type) {
+		case MTC:
+			tm.reset (new MTC_TransportMaster (name));
+			break;
+		case LTC:
+			tm.reset (new LTC_TransportMaster (name));
+			break;
+		case MIDIClock:
+			tm.reset (new MIDIClock_TransportMaster (name));
+			break;
+		case Engine:
+			tm.reset (new Engine_TransportMaster (*AudioEngine::instance()));
+			break;
+		default:
+			break;
+		}
+	} catch (...) {
+		error << string_compose (_("Construction of transport master object of type %1 failed"), enum_2_string (type)) << endmsg;
+		std::cerr << string_compose (_("Construction of transport master object of type %1 failed"), enum_2_string (type)) << std::endl;
+		return boost::shared_ptr<TransportMaster>();
 	}
 
 	if (tm) {
@@ -444,7 +467,7 @@ TransportMasterViaMIDI::create_midi_port (std::string const & port_name)
 {
 	boost::shared_ptr<Port> p;
 
-	if ((p = AudioEngine::instance()->register_input_port (DataType::MIDI, port_name)) == 0) {
+	if ((p = AudioEngine::instance()->register_input_port (DataType::MIDI, port_name, false, TransportMasterPort)) == 0) {
 		return boost::shared_ptr<Port> ();
 	}
 
@@ -490,4 +513,3 @@ TimecodeTransportMaster::set_fr2997 (bool yn)
 		PropertyChanged (Properties::fr2997);
 	}
 }
-

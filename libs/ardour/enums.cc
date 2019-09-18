@@ -448,7 +448,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (SessionEvent, SetTimecodeTransmission);
 	REGISTER_CLASS_ENUM (SessionEvent, Skip);
 	REGISTER_CLASS_ENUM (SessionEvent, SetTransportMaster);
-	REGISTER_CLASS_ENUM (SessionEvent, StopOnce);
 	REGISTER_CLASS_ENUM (SessionEvent, AutoLoop);
 	REGISTER (_SessionEvent_Type);
 

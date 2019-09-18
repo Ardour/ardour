@@ -478,8 +478,8 @@ Bundle::connected_to (boost::shared_ptr<Bundle> other, AudioEngine & engine,
 		Bundle::PortList const & other_ports =
 			other->channel_ports (other->type_channel_to_overall(type, i));
 
-		for (Bundle::PortList::const_iterator j = our_ports.begin();
-		                                      j != our_ports.end(); ++j) {
+		for (Bundle::PortList::const_iterator j = our_ports.begin(); j != our_ports.end(); ++j) {
+
 			boost::shared_ptr<Port> p = engine.get_port_by_name(*j);
 
 			for (Bundle::PortList::const_iterator k = other_ports.begin();

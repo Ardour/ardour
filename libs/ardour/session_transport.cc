@@ -32,12 +32,15 @@
 #include <cerrno>
 #include <unistd.h>
 
-#include "pbd/undo.h"
+#include <boost/algorithm/string/erase.hpp>
+
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
-#include "pbd/pthread_utils.h"
+#include "pbd/i18n.h"
 #include "pbd/memento_command.h"
+#include "pbd/pthread_utils.h"
 #include "pbd/stacktrace.h"
+#include "pbd/undo.h"
 
 #include "midi++/mmc.h"
 #include "midi++/port.h"
@@ -54,14 +57,13 @@
 #include "ardour/profile.h"
 #include "ardour/scene_changer.h"
 #include "ardour/session.h"
+#include "ardour/transport_fsm.h"
 #include "ardour/transport_master.h"
 #include "ardour/transport_master_manager.h"
 #include "ardour/tempo.h"
 #include "ardour/operations.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
-
-#include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -80,8 +82,10 @@ using namespace PBD;
 #endif
 
 
+#define TFSM_EVENT(ev) { DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("TFSM(%1)\n", typeid(ev).name())); _transport_fsm->enqueue (ev); }
+
 /* *****************************************************************************
- * REALTIME ACTIONS (to be called on state transtion
+ * REALTIME ACTIONS (to be called on state transitions)
  * ****************************************************************************/
 
 void
@@ -89,14 +93,13 @@ Session::realtime_stop (bool abort, bool clear_state)
 {
 	ENSURE_PROCESS_THREAD;
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("realtime stop @ %1\n", _transport_sample));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("realtime stop @ %1 speed = %2\n", _transport_sample, _transport_speed));
 	PostTransportWork todo = PostTransportWork (0);
 
-	/* assume that when we start, we'll be moving forwards */
-
-	if (_transport_speed < 0.0f) {
+	if (_last_transport_speed < 0.0f) {
 		todo = (PostTransportWork (todo | PostTransportStop | PostTransportReverse));
 		_default_transport_speed = 1.0;
+		DiskReader::inc_no_disk_output (); // for the buffer reversal
 	} else {
 		todo = PostTransportWork (todo | PostTransportStop);
 	}
@@ -127,7 +130,6 @@ Session::realtime_stop (bool abort, bool clear_state)
 		add_post_transport_work (todo);
 	}
 
-	_clear_event_type (SessionEvent::StopOnce);
 	_clear_event_type (SessionEvent::RangeStop);
 	_clear_event_type (SessionEvent::RangeLocate);
 
@@ -156,22 +158,13 @@ Session::realtime_stop (bool abort, bool clear_state)
 		waiting_for_sync_offset = true;
 	}
 
-	transport_sub_state = 0;
-}
-
-void
-Session::realtime_locate ()
-{
-	ENSURE_PROCESS_THREAD;
-
-	boost::shared_ptr<RouteList> r = routes.reader ();
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->realtime_locate ();
+	if (todo) {
+		TFSM_EVENT (TransportFSM::butler_required());
 	}
 }
 
 void
-Session::start_locate (samplepos_t target_sample, bool with_roll, bool with_flush, bool for_loop_enabled, bool force)
+Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, bool for_loop_enabled, bool force, bool with_mmc)
 {
 	ENSURE_PROCESS_THREAD;
 
@@ -195,7 +188,7 @@ Session::start_locate (samplepos_t target_sample, bool with_roll, bool with_flus
 				   will use the incorrect _transport_sample and report an old
 				   and incorrect time to Jack transport
 				*/
-				locate (target_sample, with_roll, with_flush, for_loop_enabled, force);
+				do_locate (target_sample, with_roll, with_flush, for_loop_enabled, force, with_mmc);
 			}
 
 			/* tell JACK to change transport position, and we will
@@ -211,13 +204,13 @@ Session::start_locate (samplepos_t target_sample, bool with_roll, bool with_flus
 		}
 
 	} else {
-		locate (target_sample, with_roll, with_flush, for_loop_enabled, force);
+		do_locate (target_sample, with_roll, with_flush, for_loop_enabled, force, with_mmc);
 	}
 }
 
 /** @param with_mmc true to send a MMC locate command when the locate is done */
 void
-Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, bool for_loop_enabled, bool force, bool with_mmc)
+Session::do_locate (samplepos_t target_sample, bool with_roll, bool with_flush, bool for_loop_enabled, bool force, bool with_mmc)
 {
 	ENSURE_PROCESS_THREAD;
 
@@ -246,11 +239,10 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 			set_transport_speed (1.0, 0, false);
 		}
 		loop_changing = false;
+		TFSM_EVENT (TransportFSM::locate_done());
 		Located (); /* EMIT SIGNAL */
 		return;
 	}
-
-	cerr << "... now doing the actual locate to " << target_sample << " from " << _transport_sample << endl;
 
 	// Update Timecode time
 	_transport_sample = target_sample;
@@ -266,19 +258,30 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	 * we are rolling AND
 	 * no autoplay in effect AND
 	 * we're not going to keep rolling after the locate AND
-	 * !(playing a loop with JACK sync)
+	 * !(playing a loop with JACK sync) AND
+	 * we're not synced to an external transport master
 	 *
 	 */
 
 	bool transport_was_stopped = !transport_rolling();
 
-	if (!transport_was_stopped && (!auto_play_legal || !config.get_auto_play()) && !with_roll && !(synced_to_engine() && play_loop) &&
+	if (!transport_was_stopped &&
+	    (!auto_play_legal || !config.get_auto_play()) &&
+	    !with_roll &&
+	    !(synced_to_engine() && play_loop) &&
 	    (!Profile->get_trx() || !(config.get_external_sync() && !synced_to_engine()))) {
+
 		realtime_stop (false, true); // XXX paul - check if the 2nd arg is really correct
 		transport_was_stopped = true;
+
 	} else {
-		/* otherwise tell the world that we located */
-		realtime_locate ();
+
+		/* Tell all routes to do the RT part of locate */
+
+		boost::shared_ptr<RouteList> r = routes.reader ();
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			(*i)->realtime_locate ();
+		}
 	}
 
 	if (force || !for_loop_enabled || loop_changing) {
@@ -379,7 +382,9 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	}
 
 	if (need_butler) {
-		_butler->schedule_transport_work ();
+		TFSM_EVENT (TransportFSM::butler_required());
+	} else {
+		TFSM_EVENT (TransportFSM::locate_done());
 	}
 
 	loop_changing = false;
@@ -393,6 +398,17 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	_last_roll_location = _last_roll_or_reversal_location =  _transport_sample;
 	if (!synced_to_engine () || _transport_sample == _engine.transport_sample ()) {
 		Located (); /* EMIT SIGNAL */
+	}
+}
+
+void
+Session::post_locate ()
+{
+	if (transport_master_is_external() && !synced_to_engine()) {
+		const samplepos_t current_master_position = TransportMasterManager::instance().get_current_position_in_process_context();
+		if (abs (current_master_position - _transport_sample) > TransportMasterManager::instance().current()->resolution()) {
+			_last_roll_location = _last_roll_or_reversal_location =  _transport_sample;
+		}
 	}
 }
 
@@ -468,7 +484,7 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 				_requested_return_sample = destination_sample;
 			}
 
-			stop_transport (abort);
+			TFSM_EVENT (TransportFSM::stop_transport (abort, false));
 		}
 
 	} else if (transport_stopped() && speed == 1.0) {
@@ -505,7 +521,7 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 			_engine.transport_start ();
 			_count_in_once = false;
 		} else {
-			start_transport ();
+			TFSM_EVENT (TransportFSM::start_transport());
 		}
 
 	} else {
@@ -547,6 +563,7 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 
 		if ((_transport_speed && speed * _transport_speed < 0.0) || (_last_transport_speed * speed < 0.0) || (_last_transport_speed == 0.0 && speed < 0.0)) {
 			todo = PostTransportWork (todo | PostTransportReverse);
+			DiskReader::inc_no_disk_output (); // for the buffer reversal
 			_last_roll_or_reversal_location = _transport_sample;
 		}
 
@@ -559,7 +576,7 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 
 		if (todo) {
 			add_post_transport_work (todo);
-			_butler->schedule_transport_work ();
+			TFSM_EVENT (TransportFSM::butler_required());
 		}
 
 		DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC3 with speed = %1\n", _transport_speed));
@@ -595,14 +612,10 @@ Session::stop_transport (bool abort, bool clear_state)
 	ENSURE_PROCESS_THREAD;
 
 	_count_in_once = false;
-	if (_transport_speed == 0.0f) {
-		return;
-	}
 
-	DEBUG_TRACE (DEBUG::Transport, "time to actually stop\n");
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("time to actually stop with TS @ %1\n", _transport_sample));
 
 	realtime_stop (abort, clear_state);
-	_butler->schedule_transport_work ();
 }
 
 /** Called from the process thread */
@@ -705,14 +718,25 @@ Session::start_transport ()
 	TransportStateChange (); /* EMIT SIGNAL */
 }
 
+bool
+Session::should_roll_after_locate () const
+{
+	/* a locate must previously have been requested and completed */
+
+	return ((!config.get_external_sync() && (auto_play_legal && config.get_auto_play())) && !_exporting) || (post_transport_work() & PostTransportRoll);
+
+}
+
 /** Do any transport work in the audio thread that needs to be done after the
- * transport thread is finished.  Audio thread, realtime safe.
+ * butler thread is finished.  Audio thread, realtime safe.
  */
 void
-Session::post_transport ()
+Session::butler_completed_transport_work ()
 {
 	ENSURE_PROCESS_THREAD;
 	PostTransportWork ptw = post_transport_work ();
+
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler done, RT cleanup for %1\n", enum_2_string (ptw)));
 
 	if (ptw & PostTransportAudition) {
 		if (auditioner && auditioner->auditioning()) {
@@ -722,19 +746,14 @@ Session::post_transport ()
 		}
 	}
 
-	if (ptw & PostTransportStop) {
-
-		transport_sub_state = 0;
+	if (ptw & PostTransportLocate) {
+		post_locate ();
+		TFSM_EVENT (TransportFSM::locate_done());
 	}
 
-	if (ptw & PostTransportLocate) {
-
-		if (((!config.get_external_sync() && (auto_play_legal && config.get_auto_play())) && !_exporting) || (ptw & PostTransportRoll)) {
-			_count_in_once = false;
-			start_transport ();
-		} else {
-			transport_sub_state = 0;
-		}
+	if (ptw & PostTransportAdjustPlaybackBuffering) {
+		/* we blocked output while this happened */
+		DiskReader::dec_no_disk_output ();
 	}
 
 	set_next_event ();
@@ -742,6 +761,20 @@ Session::post_transport ()
 	   know were handled ?
 	*/
 	set_post_transport_work (PostTransportWork (0));
+
+	if (_transport_fsm->waiting_for_butler()) {
+		TFSM_EVENT (TransportFSM::butler_done());
+	}
+
+	DiskReader::dec_no_disk_output ();
+}
+
+void
+Session::schedule_butler_for_transport_work ()
+{
+	assert (_transport_fsm->waiting_for_butler ());
+	DEBUG_TRACE (DEBUG::Butler, "summon butler for transport work\n");
+	_butler->schedule_transport_work ();
 }
 
 bool
@@ -752,7 +785,7 @@ Session::maybe_stop (samplepos_t limit)
 		if (synced_to_engine () && config.get_jack_time_master ()) {
 			_engine.transport_stop ();
 		} else if (!synced_to_engine ()) {
-			stop_transport ();
+			TFSM_EVENT (TransportFSM::stop_transport ());
 		}
 		return true;
 	}
@@ -861,11 +894,11 @@ Session::set_play_loop (bool yn, double speed)
 				   rolling, do not locate to loop start.
 				*/
 				if (!transport_rolling() && (speed != 0.0)) {
-					start_locate (loc->start(), true, true, false, true);
+					TFSM_EVENT (TransportFSM::locate (loc->start(), true, true, false, true));
 				}
 			} else {
 				if (speed != 0.0) {
-					start_locate (loc->start(), true, true, false, true);
+					TFSM_EVENT (TransportFSM::locate (loc->start(), true, true, false, true));
 				}
 			}
 		}
@@ -1114,14 +1147,14 @@ Session::request_cancel_play_range ()
 bool
 Session::solo_selection_active ()
 {
-	if ( _soloSelection.empty() ) {
+	if (_soloSelection.empty()) {
 		return false;
 	}
 	return true;
 }
 
 void
-Session::solo_selection ( StripableList &list, bool new_state  )
+Session::solo_selection (StripableList &list, bool new_state)
 {
 	boost::shared_ptr<ControlList> solo_list (new ControlList);
 	boost::shared_ptr<ControlList> unsolo_list (new ControlList);
@@ -1176,7 +1209,7 @@ Session::butler_transport_work ()
 	PostTransportWork ptw = post_transport_work();
 	uint64_t before;
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler transport work, todo = %1 at %2\n", enum_2_string (ptw), (before = g_get_monotonic_time())));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler transport work, todo = [%1] (0x%3%4%5) at %2\n", enum_2_string (ptw), (before = g_get_monotonic_time()), std::hex, ptw, std::dec));
 
 	if (ptw & PostTransportLocate) {
 
@@ -1311,18 +1344,6 @@ Session::non_realtime_overwrite (int on_entry, bool& finished)
 	}
 }
 
-bool
-Session::declick_in_progress () const
-{
-	boost::shared_ptr<RouteList> rl = routes.reader();
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if ((*i)->declick_in_progress ()) {
-			return true;
-		}
-	}
-	return false;
-}
-
 void
 Session::non_realtime_locate ()
 {
@@ -1370,6 +1391,7 @@ Session::non_realtime_locate ()
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 			(*i)->non_realtime_locate (tf);
 			if (sc != g_atomic_int_get (&_seek_counter)) {
+				std::cerr << "\n\nLOCATE INTERRUPTED BY LOCATE!!!\n\n";
 				goto restart;
 			}
 		}
@@ -1757,7 +1779,7 @@ Session::unset_play_loop ()
 		if (Config->get_seamless_loop()) {
 			/* likely need to flush track buffers: this will locate us to wherever we are */
 			add_post_transport_work (PostTransportLocate);
-			_butler->schedule_transport_work ();
+			TFSM_EVENT (TransportFSM::butler_required());
 		}
 		TransportStateChange (); /* EMIT SIGNAL */
 	}
@@ -1901,27 +1923,37 @@ Session::request_roll_at_and_return (samplepos_t start, samplepos_t return_to)
 void
 Session::engine_halted ()
 {
-	bool ignored;
-
 	/* there will be no more calls to process(), so
 	   we'd better clean up for ourselves, right now.
 
-	   but first, make sure the butler is out of
-	   the picture.
+	   We can't queue SessionEvents because they only get
+	   handled from within a process callback.
 	*/
 
-	if (_butler) {
-		_butler->stop ();
-	}
+	/* this just stops the FSM engine ... it doesn't change the state of
+	 * the FSM directly or anything else ... but the FSM will be
+	 * reinitialized when we call its ::start() method from
+	 * ::engine_running() (if we ever get there)
+	 */
+
+	_transport_fsm->backend()->stop ();
+
+	/* Synchronously do the realtime part of a transport stop.
+	 *
+	 * Calling this will cause the butler to asynchronously run
+	 * ::non_realtime_stop() where the rest of the "stop" work will be
+	 * done.
+	 */
 
 	realtime_stop (false, true);
-	non_realtime_stop (false, 0, ignored);
-	transport_sub_state = 0;
-
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC6 with speed = %1\n", _transport_speed));
-	TransportStateChange (); /* EMIT SIGNAL */
 }
 
+void
+Session::engine_running ()
+{
+	initialize_latencies ();
+	_transport_fsm->backend()->start ();
+}
 
 void
 Session::xrun_recovery ()
@@ -2054,7 +2086,7 @@ Session::sync_source_changed (SyncSource type, samplepos_t pos, pframes_t cycle_
 	   longer valid with a new slave.
 	*/
 
-	DiskReader::set_no_disk_output (false);
+	DiskReader::dec_no_disk_output ();
 
 #if 0
 	we should not be treating specific transport masters as special cases because there maybe > 1 of a particular type
@@ -2100,4 +2132,28 @@ Session::sync_source_changed (SyncSource type, samplepos_t pos, pframes_t cycle_
 	}
 
 	set_dirty();
+}
+
+bool
+Session::transport_stopped() const
+{
+	return _transport_fsm->stopped();
+}
+
+bool
+Session::transport_rolling() const
+{
+	return _transport_speed != 0.0 && _count_in_samples == 0 && _remaining_latency_preroll == 0;
+}
+
+bool
+Session::locate_pending () const
+{
+	return _transport_fsm->locating();
+}
+
+bool
+Session::declick_in_progress () const
+{
+	return _transport_fsm->declick_in_progress();
 }

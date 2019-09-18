@@ -201,7 +201,7 @@ static int export_session (Session *session,
 	}
 	printf("\n");
 
-	status->finish ();
+	status->finish (TRS_UI);
 
 	printf ("* Done.\n");
 	return 0;

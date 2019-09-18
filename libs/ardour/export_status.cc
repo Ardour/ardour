@@ -66,11 +66,11 @@ ExportStatus::abort (bool error_occurred)
 }
 
 void
-ExportStatus::finish ()
+ExportStatus::finish (TransportRequestSource trs)
 {
 	Glib::Threads::Mutex::Lock l (_run_lock);
 	set_running (false);
-	Finished(); /* EMIT SIGNAL */
+	Finished (trs); /* EMIT SIGNAL */
 }
 
 } // namespace ARDOUR

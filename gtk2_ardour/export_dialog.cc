@@ -383,7 +383,7 @@ ExportDialog::show_progress ()
 		}
 	}
 
-	status->finish ();
+	status->finish (TRS_UI);
 
 	if (!status->aborted() && UIConfiguration::instance().get_save_export_mixer_screenshot ()) {
 		ExportProfileManager::TimespanStateList const& timespans = profile_manager->get_timespans();

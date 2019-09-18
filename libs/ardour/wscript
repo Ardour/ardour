@@ -248,6 +248,7 @@ libardour_sources = [
         'track.cc',
         'transient_detector.cc',
         'transform.cc',
+        'transport_fsm.cc',
         'transport_master.cc',
         'transport_master_manager.cc',
         'transpose.cc',

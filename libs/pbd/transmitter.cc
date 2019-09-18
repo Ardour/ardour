@@ -57,8 +57,6 @@ void
 Transmitter::deliver ()
 
 {
-	string foo;
-
 	/* NOTE: this is just a default action for a Transmitter or a
 	   derived class. Any class can override this to produce some
 	   other action when deliver() is called.
@@ -68,8 +66,7 @@ Transmitter::deliver ()
 
 	/* send the SigC++ signal */
 
-	foo = str();
-	(*send) (channel, foo.c_str());
+	(*send) (channel, str().c_str());
 
 	/* XXX when or how can we delete this ? */
 	// delete foo;

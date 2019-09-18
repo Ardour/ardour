@@ -97,8 +97,17 @@ public:
 
 	static void set_midi_readahead_samples (samplecnt_t samples_ahead) { midi_readahead = samples_ahead; }
 
-	static void set_no_disk_output (bool yn);
-	static bool no_disk_output() { return _no_disk_output; }
+	/* inc/dec variants MUST be called as part of the process call tree, before any
+	   disk readers are invoked. We use it when the session needs the
+	   transport (and thus effective read position for DiskReaders) to keep
+	   advancing as part of syncing up with a transport master, but we
+	   don't want any actual disk output yet because we are still not
+	   synced.
+	*/
+
+	static void inc_no_disk_output () { g_atomic_int_inc (&_no_disk_output); }
+	static void dec_no_disk_output();
+	static bool no_disk_output () { return g_atomic_int_get (&_no_disk_output); }
 
 protected:
 	friend class Track;
@@ -156,7 +165,7 @@ private:
 
 	static samplecnt_t _chunk_samples;
 	static samplecnt_t midi_readahead;
-	static bool       _no_disk_output;
+	static gint       _no_disk_output;
 
 	int audio_read (PBD::PlaybackBuffer<Sample>*,
 	                Sample* sum_buffer,

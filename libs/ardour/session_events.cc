@@ -225,7 +225,6 @@ SessionEventManager::merge_event (SessionEvent* ev)
 
 	switch (ev->type) {
 	case SessionEvent::AutoLoop:
-	case SessionEvent::StopOnce:
 		_clear_event_type (ev->type);
 		break;
 	default:

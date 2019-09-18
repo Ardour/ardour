@@ -68,10 +68,6 @@ MTC_TransportMaster::MTC_TransportMaster (std::string const & name)
 	, busy_guard2 (0)
 	, printed_timecode_warning (false)
 {
-	if ((_port = create_midi_port (string_compose ("%1 in", name))) == 0) {
-		throw failed_constructor();
-	}
-
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("MTC registered %1\n", _port->name()));
 
 	init ();
@@ -101,6 +97,14 @@ void
 MTC_TransportMaster::init ()
 {
 	reset (true);
+}
+
+void
+MTC_TransportMaster::create_port ()
+{
+	if ((_port = create_midi_port (string_compose ("%1 in", _name))) == 0) {
+		throw failed_constructor();
+	}
 }
 
 void

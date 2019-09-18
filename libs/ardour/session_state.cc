@@ -4123,7 +4123,6 @@ Session::config_changed (std::string p, bool ours)
 		first_file_data_format_reset = false;
 
 	} else if (p == "external-sync") {
-		std::cerr << "param change, rss to " << TransportMasterManager::instance().current() << std::endl;
 		request_sync_source (TransportMasterManager::instance().current());
 	}  else if (p == "denormal-model") {
 		setup_fpu ();

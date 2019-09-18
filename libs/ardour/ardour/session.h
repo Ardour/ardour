@@ -88,7 +88,7 @@
 #include "ardour/presentation_info.h"
 #include "ardour/route.h"
 #include "ardour/route_graph.h"
-
+#include "ardour/transport_api.h"
 
 class XMLTree;
 class XMLNode;
@@ -167,6 +167,7 @@ class Source;
 class Speakers;
 class TempoMap;
 class TransportMaster;
+struct TransportFSM;
 class Track;
 class UI_TransportMaster;
 class VCAManager;
@@ -186,7 +187,7 @@ private:
 };
 
 /** Ardour Session */
-class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager
+class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager, public TransportAPI
 {
 private:
 
@@ -457,7 +458,8 @@ public:
 	void adjust_capture_buffering();
 
 	bool global_locate_pending() const { return _global_locate_pending; }
-	bool locate_pending() const { return static_cast<bool>(post_transport_work()&PostTransportLocate); }
+	bool locate_pending() const;
+	bool declick_in_progress () const;
 	bool transport_locked () const;
 
 	int wipe ();
@@ -752,8 +754,8 @@ public:
 		return 0;
 	}
 	double transport_speed() const { return _count_in_samples > 0 ? 0. : _transport_speed; }
-	bool   transport_stopped() const { return _transport_speed == 0.0; }
-	bool   transport_rolling() const { return _transport_speed != 0.0 && _count_in_samples == 0 && _remaining_latency_preroll == 0; }
+	bool   transport_stopped() const;
+	bool   transport_rolling() const;
 
 	bool silent () { return _silent; }
 
@@ -1237,6 +1239,16 @@ protected:
 	friend class Route;
 	void update_latency_compensation (bool force = false);
 
+	/* transport API */
+
+	void locate (samplepos_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false, bool with_mmc=true);
+	void stop_transport (bool abort = false, bool clear_state = false);
+	void start_transport ();
+	void butler_completed_transport_work ();
+	void post_locate ();
+	void schedule_butler_for_transport_work ();
+	bool should_roll_after_locate () const;
+
 private:
 	int  create (const std::string& mix_template, BusProfile*);
 	void destroy ();
@@ -1262,7 +1274,6 @@ private:
 	samplecnt_t             _base_sample_rate;     // sample-rate of the session at creation time, "native" SR
 	samplecnt_t             _nominal_sample_rate;  // overridden by audioengine setting
 	samplecnt_t             _current_sample_rate;  // this includes video pullup offset
-	int                      transport_sub_state;
 	mutable gint            _record_status;
 	samplepos_t             _transport_sample;
 	gint                    _seek_counter;
@@ -1357,7 +1368,7 @@ private:
 
 	int  pre_export ();
 	int  stop_audio_export ();
-	void finalize_audio_export ();
+	void finalize_audio_export (TransportRequestSource trs);
 	void finalize_export_internal (bool stop_freewheel);
 	bool _pre_export_mmc_enabled;
 
@@ -1436,11 +1447,11 @@ private:
 
 	Butler* _butler;
 
+	boost::shared_ptr<TransportFSM> _transport_fsm;
+
 	static const PostTransportWork ProcessCannotProceedMask =
 		PostTransportWork (
-			PostTransportReverse|
 			PostTransportAudition|
-			PostTransportStop|
 			PostTransportClearSubstate);
 
 	gint _post_transport_work; /* accessed only atomic ops */
@@ -1671,19 +1682,16 @@ private:
 	int           start_midi_thread ();
 
 	bool should_ignore_transport_request (TransportRequestSource, TransportRequestType) const;
-	bool declick_in_progress () const;
 
 	void set_play_loop (bool yn, double speed);
 	void unset_play_loop ();
 	void overwrite_some_buffers (Track *);
 	void flush_all_inserts ();
 	int  micro_locate (samplecnt_t distance);
-	void locate (samplepos_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false, bool with_mmc=true);
-	void start_locate (samplepos_t, bool with_roll, bool with_flush, bool for_loop_enabled=false, bool force=false);
+
+	void do_locate (samplepos_t, bool with_roll, bool with_flush, bool for_loop_enabled, bool force, bool with_mmc);
 	void force_locate (samplepos_t sample, bool with_roll = false);
 	void set_transport_speed (double speed, samplepos_t destination_sample, bool abort = false, bool clear_state = false, bool as_default = false);
-	void stop_transport (bool abort = false, bool clear_state = false);
-	void start_transport ();
 	void realtime_stop (bool abort, bool clear_state);
 	void realtime_locate ();
 	void non_realtime_start_scrub ();
@@ -1691,8 +1699,8 @@ private:
 	void non_realtime_locate ();
 	void non_realtime_stop (bool abort, int entry_request_count, bool& finished);
 	void non_realtime_overwrite (int entry_request_count, bool& finished);
-	void post_transport ();
 	void engine_halted ();
+	void engine_running ();
 	void xrun_recovery ();
 	void set_track_loop (bool);
 	bool select_playhead_priority_target (samplepos_t&);
