@@ -1392,6 +1392,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\transport_fsm.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\transport_master.cc"
 				>
 			</File>
@@ -2503,6 +2507,14 @@
 			</File>
 			<File
 				RelativePath="..\ardour\transient_detector.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\transport_api.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\transport_fsm.h"
 				>
 			</File>
 			<File
