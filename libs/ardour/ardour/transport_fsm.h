@@ -1,6 +1,10 @@
 #ifndef _ardour_transport_fsm_h_
 #define _ardour_transport_fsm_h_
 
+#ifdef nil
+#undef nil
+#endif
+
 #include <boost/weak_ptr.hpp>
 #include <boost/msm/back/state_machine.hpp>
 #include <boost/msm/back/tools.hpp>
