@@ -22,11 +22,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ardour/export_graph_builder.h"
-
 #include <vector>
 
 #include <glibmm/miscutils.h>
+
+#include "pbd/uuid.h"
+#include "pbd/file_utils.h"
+#include "pbd/cpus.h"
 
 #include "audiographer/process_context.h"
 #include "audiographer/general/chunker.h"
@@ -50,15 +52,13 @@
 #include "ardour/export_failed.h"
 #include "ardour/export_filename.h"
 #include "ardour/export_format_specification.h"
+#include "ardour/export_graph_builder.h"
 #include "ardour/export_timespan.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_metadata.h"
 #include "ardour/sndfile_helpers.h"
 #include "ardour/system_exec.h"
-
-#include "pbd/file_utils.h"
-#include "pbd/cpus.h"
 
 using namespace AudioGrapher;
 using std::string;
