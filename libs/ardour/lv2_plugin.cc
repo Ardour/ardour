@@ -243,6 +243,25 @@ work_respond(LV2_Worker_Respond_Handle handle,
 	        : LV2_WORKER_ERR_UNKNOWN);
 }
 
+static void
+set_port_value(const char* port_symbol,
+               void*       user_data,
+               const void* value,
+               uint32_t    /*size*/,
+               uint32_t    type)
+{
+	LV2Plugin* self = (LV2Plugin*)user_data;
+	if (type != 0 && type != URIMap::instance().urids.atom_Float) {
+		return;  // TODO: Support non-float ports
+	}
+
+	const uint32_t port_index = self->port_index(port_symbol);
+	if (port_index != (uint32_t)-1) {
+		self->set_parameter(port_index, *(const float*)value);
+		self->PresetPortSetValue (port_index, *(const float*)value); /* EMIT SIGNAL */
+	}
+}
+
 #ifdef LV2_EXTENDED
 /* inline display extension */
 void
@@ -659,20 +678,9 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	lilv_nodes_free(optional_features);
 #endif
 
-	// Load default state
-	if (_worker) {
-		/* immediately schedule any work,
-		 * so that state restore later will not find a busy
-		 * worker.  latency_compute_run() flushes any replies
-		 */
-		_worker->set_synchronous(true);
-	}
+	/* Snapshot default state -- http://lv2plug.in/ns/ext/state/#loadDefaultState */
 	LilvState* state = lilv_state_new_from_world(
 		_world.world, _uri_map.urid_map(), lilv_plugin_get_uri(_impl->plugin));
-	if (state && _has_state_interface) {
-		lilv_state_restore(state, _impl->instance, NULL, NULL, 0, NULL);
-	}
-	lilv_state_free(state);
 
 	const uint32_t num_ports = this->num_ports();
 	for (uint32_t i = 0; i < num_ports; ++i) {
@@ -884,6 +892,19 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 
 	load_supported_properties(_property_descriptors);
 	allocate_atom_event_buffers();
+
+	/* Load default state */
+	if (_worker) {
+		/* immediately schedule any work,
+		 * so that state restore later will not find a busy
+		 * worker.  latency_compute_run() flushes any replies
+		 */
+		_worker->set_synchronous(true);
+	}
+	if (state) {
+		lilv_state_restore (state, _impl->instance, set_port_value, this, 0, _features);
+		lilv_state_free(state);
+	}
 }
 
 int
@@ -1502,25 +1523,6 @@ LV2Plugin::find_presets()
 	lilv_node_free(rdfs_label);
 	lilv_node_free(pset_Preset);
 	lilv_node_free(lv2_appliesTo);
-}
-
-static void
-set_port_value(const char* port_symbol,
-               void*       user_data,
-               const void* value,
-               uint32_t    /*size*/,
-               uint32_t    type)
-{
-	LV2Plugin* self = (LV2Plugin*)user_data;
-	if (type != 0 && type != URIMap::instance().urids.atom_Float) {
-		return;  // TODO: Support non-float ports
-	}
-
-	const uint32_t port_index = self->port_index(port_symbol);
-	if (port_index != (uint32_t)-1) {
-		self->set_parameter(port_index, *(const float*)value);
-		self->PresetPortSetValue (port_index, *(const float*)value); /* EMIT SIGNAL */
-	}
 }
 
 bool
