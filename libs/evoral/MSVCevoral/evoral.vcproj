@@ -496,10 +496,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\OldSMF.hpp"
-				>
-			</File>
-			<File
 				RelativePath="..\evoral\Parameter.hpp"
 				>
 			</File>
