@@ -803,7 +803,7 @@ PortManager::cycle_start (pframes_t nframes, Session* s)
 	 *    A single external source-port may be connected to many ardour
 	 *    input-ports. Currently re-sampling is per input.
 	 */
-	if (0 && s && s->rt_tasklist () && fabs (Port::speed_ratio ()) != 1.0) {
+	if (s && s->rt_tasklist () && fabs (Port::speed_ratio ()) != 1.0) {
 		RTTaskList::TaskList tl;
 		for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
 			if (!(p->second->flags() & TransportMasterPort)) {
