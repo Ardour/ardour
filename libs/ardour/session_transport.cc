@@ -76,7 +76,7 @@ using namespace PBD;
 # define ENSURE_PROCESS_THREAD                           \
   do {                                                   \
     if (!AudioEngine::instance()->in_process_thread()) { \
-      PBD::stacktrace (std::cerr, 20);                   \
+      PBD::stacktrace (std::cerr, 30);                   \
     }                                                    \
   } while (0)
 #endif
