@@ -2736,7 +2736,7 @@ If you still wish to proceed, please use the\n\n\
 					msg.run ();
 					return;
 				}
-				/* fall through */
+				/* fallthrough */
 			case 0:
 				_session->remove_pending_capture_state ();
 				break;
@@ -2932,7 +2932,7 @@ If you still wish to proceed, please use the\n\n\
 					msg.run ();
 					return;
 				}
-				/* fall through */
+				/* fallthrough */
 			case 0:
 				_session->remove_pending_capture_state ();
 				break;
@@ -5493,7 +5493,7 @@ ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 			if (!AudioEngine::instance()->running()) {
 				return -1;
 			}
-			// fall through
+			/* fallthrough */
 		default:
 			if (!AudioEngine::instance()->running()) {
 				continue;

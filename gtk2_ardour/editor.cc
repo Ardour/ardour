@@ -4854,7 +4854,7 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 				break;
 			}
 		}
-		/* fallthru */
+		/* fallthrough */
 
 	default:
 	case EditAtMouse:
