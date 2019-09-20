@@ -754,7 +754,11 @@ EngineControl::enable_latency_tab ()
 		Gtk::TreeModel::iterator iter = lm_output_channel_list->append ();
 		Gtk::TreeModel::Row row = *iter;
 		 row[lm_output_channel_cols.port_name] = *i;
-		 row[lm_output_channel_cols.pretty_name] = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*i);
+		 std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*i);
+		 if (pn.empty()) {
+			 pn = (*i).substr ((*i).find (':') + 1);
+		 }
+		 row[lm_output_channel_cols.pretty_name] = pn;
 	}
 	lm_output_channel_combo.set_active (0);
 	lm_output_channel_combo.set_sensitive (true);
@@ -764,7 +768,11 @@ EngineControl::enable_latency_tab ()
 		Gtk::TreeModel::iterator iter = lm_input_channel_list->append ();
 		Gtk::TreeModel::Row row = *iter;
 		 row[lm_input_channel_cols.port_name] = *i;
-		 row[lm_input_channel_cols.pretty_name] = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*i);
+		 std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*i);
+		 if (pn.empty()) {
+			 pn = (*i).substr ((*i).find (':') + 1);
+		 }
+		 row[lm_input_channel_cols.pretty_name] = pn;
 	}
 	lm_input_channel_combo.set_active (0);
 	lm_input_channel_combo.set_sensitive (true);
