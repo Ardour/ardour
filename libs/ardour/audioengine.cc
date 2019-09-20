@@ -898,6 +898,10 @@ AudioEngine::start (bool for_latency)
 		return -1;
 	}
 
+	if (_running && _backend->can_change_systemic_latency_when_running()) {
+		_started_for_latency = for_latency;
+	}
+
 	if (_running) {
 		return 0;
 	}
@@ -963,7 +967,7 @@ AudioEngine::stop (bool for_latency)
 
 	if (for_latency && _backend->can_change_systemic_latency_when_running()) {
 		stop_engine = false;
-		if (_running) {
+		if (_running && _started_for_latency) {
 			_backend->start (false); // keep running, reload latencies
 		}
 	} else {

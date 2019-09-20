@@ -110,7 +110,6 @@ Graph::reset_thread_list ()
 
 	/* For now, we shouldn't be using the graph code if we only have 1 DSP thread */
 	assert (num_threads > 1);
-	assert (AudioEngine::instance ()->process_thread_count () == n_workers);
 
 	/* don't bother doing anything here if we already have the right
 	 * number of threads.
