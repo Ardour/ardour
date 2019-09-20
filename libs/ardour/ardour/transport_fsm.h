@@ -127,27 +127,27 @@ struct TransportFSM
 
 	/* transition actions */
 
-	void schedule_butler_for_transport_work ();
-	void start_playback ();
-	void stop_playback ();
-	void start_saved_locate ();
-	void roll_after_locate ();
-	void start_locate (Event const &);
-	void interrupt_locate (Event const &);
+	void schedule_butler_for_transport_work () const;
+	void start_playback () const;
+	void stop_playback () const;
+	void start_saved_locate () const;
+	void roll_after_locate () const;
+	void start_locate (Event const &) const;
+	void interrupt_locate (Event const &) const;
 	void save_locate_and_start_declick (Event const &);
 	void start_declick (Event const &);
 
 	/* guards */
 
-	bool should_roll_after_locate ();
-	bool should_not_roll_after_locate ()  { return !should_roll_after_locate (); }
+	bool should_roll_after_locate () const;
+	bool should_not_roll_after_locate ()  const { return !should_roll_after_locate (); }
 
   public:
-	bool locating ()                     { return _motion_state == WaitingForLocate; }
-	bool rolling ()                      { return _motion_state == Rolling; }
-	bool stopped ()                      { return _motion_state == Stopped; }
-	bool waiting_for_butler()            { return _butler_state == WaitingForButler; }
-	bool declick_in_progress()           { return _motion_state == DeclickToLocate || _motion_state == DeclickToStop; }
+	bool locating () const           { return _motion_state == WaitingForLocate; }
+	bool rolling () const            { return _motion_state == Rolling; }
+	bool stopped () const            { return _motion_state == Stopped; }
+	bool waiting_for_butler() const  { return _butler_state == WaitingForButler; }
+	bool declick_in_progress() const { return _motion_state == DeclickToLocate || _motion_state == DeclickToStop; }
 
 	void enqueue (Event* ev) {
 		queued_events.push_back (*ev);

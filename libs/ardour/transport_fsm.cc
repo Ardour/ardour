@@ -298,7 +298,7 @@ TransportFSM::process_event (Event& ev)
 /* transition actions */
 
 void
-TransportFSM::start_playback ()
+TransportFSM::start_playback () const
 {
 	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::start_playback\n");
 	api->start_transport();
@@ -313,7 +313,7 @@ TransportFSM::start_declick (Event const & s)
 }
 
 void
-TransportFSM::stop_playback ()
+TransportFSM::stop_playback () const
 {
 	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::stop_playback\n");
 	api->stop_transport (_last_stop.abort, _last_stop.clear_state);
@@ -329,7 +329,7 @@ TransportFSM::save_locate_and_start_declick (Event const & l)
 }
 
 void
-TransportFSM::start_locate (Event const & l)
+TransportFSM::start_locate (Event const & l) const
 {
 	assert (l.type == Locate);
 	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::start_locate\n");
@@ -337,14 +337,14 @@ TransportFSM::start_locate (Event const & l)
 }
 
 void
-TransportFSM::start_saved_locate ()
+TransportFSM::start_saved_locate () const
 {
 	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::start_save\n");
 	api->locate (_last_locate.target, _last_locate.with_roll, _last_locate.with_flush, _last_locate.with_loop, _last_locate.force);
 }
 
 void
-TransportFSM::interrupt_locate (Event const & l)
+TransportFSM::interrupt_locate (Event const & l) const
 {
 	assert (l.type == Locate);
 	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::interrupt\n");
@@ -355,13 +355,13 @@ TransportFSM::interrupt_locate (Event const & l)
 }
 
 void
-TransportFSM::schedule_butler_for_transport_work ()
+TransportFSM::schedule_butler_for_transport_work () const
 {
 	api->schedule_butler_for_transport_work ();
 }
 
 bool
-TransportFSM::should_roll_after_locate ()
+TransportFSM::should_roll_after_locate () const
 {
 	bool ret = api->should_roll_after_locate ();
 	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("tfsm::should_roll_after_locate() ? %1\n", ret));
@@ -369,7 +369,7 @@ TransportFSM::should_roll_after_locate ()
 }
 
 void
-TransportFSM::roll_after_locate ()
+TransportFSM::roll_after_locate () const
 {
 	DEBUG_TRACE (DEBUG::TFSMEvents, "rolling after locate\n");
 	api->start_transport ();
