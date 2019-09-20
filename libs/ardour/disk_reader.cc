@@ -598,10 +598,13 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 
 	g_atomic_int_set (&_pending_overwrite, 0);
 
-	//sample = std::max ((samplecnt_t)0, sample -_session.worst_output_latency ());
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("DiskReader::seek %s %ld -> %ld refill=%d\n", owner()->name().c_str(), playback_sample, sample, complete_refill));
 
-	//printf ("DiskReader::seek %s %ld -> %ld refill=%d\n", owner()->name().c_str(), playback_sample, sample, complete_refill);
-	// TODO: check if we can micro-locate
+	const samplecnt_t distance = sample - playback_sample;
+	if (can_internal_playback_seek (distance)) {
+		internal_playback_seek (distance);
+		return 0;
+	}
 
 	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
 		(*chan)->rbuf->reset ();
