@@ -78,17 +78,7 @@ MTC_TransportMaster::~MTC_TransportMaster()
 	port_connections.drop_connections();
 	config_connection.disconnect();
 
-	while (busy_guard1 != busy_guard2) {
-		/* make sure MIDI parser is not currently calling any callbacks in here,
-		 * else there's a segfault ahead!
-		 *
-		 * XXX this is called from jack rt-context :(
-		 * TODO fix libs/ardour/session_transport.cc:1321 (delete _slave;)
-		 */
-		sched_yield();
-	}
-
-	if (did_reset_tc_format) {
+	if (_session && did_reset_tc_format) {
 		_session->config.set_timecode_format (saved_tc_format);
 	}
 }
