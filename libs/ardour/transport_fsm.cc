@@ -348,7 +348,24 @@ void
 TransportFSM::interrupt_locate (Event const & l) const
 {
 	assert (l.type == Locate);
-	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::interrupt\n");
+	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("tfsm::interrupt to %1 versus %2\n", l.target, _last_locate.target));
+
+	/* Because of snapping (e.g. of mouse position) we could be
+	 * interrupting an existing locate to the same position. If we go ahead
+	 * with this, the code in Session::do_locate() will notice that it's a
+	 * repeat position, will do nothing, will queue a "locate_done" event
+	 * that will arrive in the next process cycle. But this event may be
+	 * processed before the original (real) locate has completed in the
+	 * butler thread, and processing it may transition us back to Rolling
+	 * before some (or even all) tracks are actually ready.
+	 *
+	 * So, we must avoid this from happening, and this seems like the
+	 * simplest way.
+	 */
+
+	if (l.target == _last_locate.target && !l.force) {
+		return;
+	}
 	/* maintain original "with-roll" choice of initial locate, even though
 	 * we are interrupting the locate to start a new one.
 	 */
