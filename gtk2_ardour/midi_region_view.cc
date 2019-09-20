@@ -1403,6 +1403,8 @@ MidiRegionView::display_sysexes()
 		display_periodic_messages = false;
 	}
 
+	const boost::shared_ptr<MidiRegion> mregion (midi_region());
+
 	for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
 		MidiModel::SysExPtr sysex_ptr = *i;
 		Temporal::Beats time = sysex_ptr->time();
@@ -1441,13 +1443,11 @@ MidiRegionView::display_sysexes()
 		}
 
 		// Show unless message is beyond the region bounds
-// XXX REQUIRES APPROPRIATE OPERATORS FOR Temporal::Beats and samplepos? say what?
-#warning paul fix this
-//		if (time - _region->start() >= _region->length() || time < _region->start()) {
-//			sysex->hide();
-//		} else {
-//			sysex->show();
-//		}
+		if (time - mregion->start_beats() >= mregion->length_beats() || time < mregion->start_beats()) {
+			sysex->hide();
+		} else {
+			sysex->show();
+		}
 	}
 }
 
