@@ -110,6 +110,18 @@ TransportFSM::process_events ()
 /* This is the transition table from the original boost::msm
  * implementation of this FSM. It is more easily readable and
  * consultable. Please keep it updated as the FSM changes.
+ *
+ * Here's a hint about how to read each line of this table:
+ *
+ * "if the current state is Start and event Event arrives, new state is Next and we execute Action()"
+ *
+ * with a variant:
+ *
+ * "if the current state is Start and event Event arrives, new state is Next and we execute Action() ***IF*** Guard() returns true"
+ *
+ * This new implementation, however, does not use metaprogramming to achieve all this,
+ * but just uses a large-ish switch() block.
+ *
  */
 
 /*
