@@ -41,7 +41,7 @@ void*
 TransportFSM::FSMEvent::operator new (size_t)
 {
 	return pool->alloc();
-}
+ }
 
 void
 TransportFSM::FSMEvent::operator delete (void *ptr, size_t /*size*/)
@@ -71,13 +71,11 @@ TransportFSM::process_events ()
 	processing++;
 
 	while (!queued_events.empty()) {
-		FSMEvent* ev = queued_events.front();
-		queued_events.pop ();
 
 		MotionState oms = _motion_state;
 		ButlerState obs = _butler_state;
 
-		if (process_event (ev)) { /* event processed successfully */
+		if (process_event (queued_events.front())) { /* event processed successfully */
 
 			if (oms != _motion_state || obs != _butler_state) {
 
@@ -88,9 +86,9 @@ TransportFSM::process_events ()
 				if (!deferred_events.empty() ){
 					DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("processing %1 deferred events\n", deferred_events.size()));
 
-					for (std::list<FSMEvent*>::iterator e = deferred_events.begin(); e != deferred_events.end(); ) {
-						FSMEvent* deferred_ev = *e;
-						if (process_event (deferred_ev)) { /* event processed, remove from deferred */
+					for (EventList::iterator e = deferred_events.begin(); e != deferred_events.end(); ) {
+						FSMEvent* deferred_ev = &(*e);
+						if (process_event (*e)) { /* event processed, remove from deferred */
 							e = deferred_events.erase (e);
 							delete deferred_ev;
 						} else {
@@ -101,6 +99,8 @@ TransportFSM::process_events ()
 			}
 		}
 
+		FSMEvent* ev = &queued_events.front();
+		queued_events.pop_front ();
 		delete ev;
 	}
 
@@ -166,18 +166,18 @@ TransportFSM::current_state () const
 }
 
 void
-TransportFSM::bad_transition (FSMEvent const * ev)
+TransportFSM::bad_transition (FSMEvent const & ev)
 {
-	error << "bad transition, current state = " << current_state() << " event = " << enum_2_string (ev->type) << endmsg;
-	std::cerr << "bad transition, current state = " << current_state() << " event = " << enum_2_string (ev->type) << std::endl;
+	error << "bad transition, current state = " << current_state() << " event = " << enum_2_string (ev.type) << endmsg;
+	std::cerr << "bad transition, current state = " << current_state() << " event = " << enum_2_string (ev.type) << std::endl;
 }
 
 bool
-TransportFSM::process_event (FSMEvent* ev)
+TransportFSM::process_event (FSMEvent& ev)
 {
-	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("process %1\n", enum_2_string (ev->type)));
+	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("process %1\n", enum_2_string (ev.type)));
 
-	switch (ev->type) {
+	switch (ev.type) {
 
 	case StartTransport:
 		switch (_motion_state) {
@@ -305,11 +305,11 @@ TransportFSM::start_playback ()
 }
 
 void
-TransportFSM::start_declick (FSMEvent const * s)
+TransportFSM::start_declick (FSMEvent const & s)
 {
-	assert (s->type == StopTransport);
+	assert (s.type == StopTransport);
 	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::start_declick\n");
-	_last_stop = *s;
+	_last_stop = s;
 }
 
 void
@@ -320,20 +320,20 @@ TransportFSM::stop_playback ()
 }
 
 void
-TransportFSM::save_locate_and_start_declick (FSMEvent const * l)
+TransportFSM::save_locate_and_start_declick (FSMEvent const & l)
 {
-	assert (l->type == Locate);
+	assert (l.type == Locate);
 	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::save_locate_and_stop\n");
-	_last_locate = *l;
+	_last_locate = l;
 	_last_stop = FSMEvent (StopTransport, false, false);
 }
 
 void
-TransportFSM::start_locate (FSMEvent const * l)
+TransportFSM::start_locate (FSMEvent const & l)
 {
-	assert (l->type == Locate);
+	assert (l.type == Locate);
 	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::start_locate\n");
-	api->locate (l->target, l->with_roll, l->with_flush, l->with_loop, l->force);
+	api->locate (l.target, l.with_roll, l.with_flush, l.with_loop, l.force);
 }
 
 void
@@ -344,14 +344,14 @@ TransportFSM::start_saved_locate ()
 }
 
 void
-TransportFSM::interrupt_locate (FSMEvent const * l)
+TransportFSM::interrupt_locate (FSMEvent const & l)
 {
-	assert (l->type == Locate);
+	assert (l.type == Locate);
 	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::interrupt\n");
 	/* maintain original "with-roll" choice of initial locate, even though
 	 * we are interrupting the locate to start a new one.
 	 */
-	api->locate (l->target, _last_locate.with_roll, l->with_flush, l->with_loop, l->force);
+	api->locate (l.target, _last_locate.with_roll, l.with_flush, l.with_loop, l.force);
 }
 
 void
@@ -376,9 +376,9 @@ TransportFSM::roll_after_locate ()
 }
 
 void
-TransportFSM::defer (FSMEvent* ev)
+TransportFSM::defer (FSMEvent& ev)
 {
-	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("Defer %1 during %2\n", enum_2_string (ev->type), current_state()));
+	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("Defer %1 during %2\n", enum_2_string (ev.type), current_state()));
 	deferred_events.push_back (ev);
 }
 

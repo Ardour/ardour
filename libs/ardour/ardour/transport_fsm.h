@@ -4,6 +4,11 @@
 #include <list>
 #include <queue>
 
+#include <boost/intrusive/list.hpp>
+#include <string>
+#include <utility>
+#include <iostream>
+
 #include "pbd/demangle.h"
 #include "pbd/stacktrace.h"
 
@@ -30,7 +35,7 @@ struct TransportFSM
 		LocateDone
 	};
 
-	struct FSMEvent {
+	struct FSMEvent : public boost::intrusive::list_base_hook<> {
 		EventType type;
 		union {
 			bool abort; /* for stop */
@@ -122,10 +127,10 @@ struct TransportFSM
 	void stop_playback ();
 	void start_saved_locate ();
 	void roll_after_locate ();
-	void start_locate (FSMEvent const *);
-	void interrupt_locate (FSMEvent const *);
-	void save_locate_and_start_declick (FSMEvent const *);
-	void start_declick (FSMEvent const *);
+	void start_locate (FSMEvent const &);
+	void interrupt_locate (FSMEvent const &);
+	void save_locate_and_start_declick (FSMEvent const &);
+	void start_declick (FSMEvent const &);
 
 	/* guards */
 
@@ -140,7 +145,7 @@ struct TransportFSM
 	bool declick_in_progress()           { return _motion_state == DeclickToLocate || _motion_state == DeclickToStop; }
 
 	void enqueue (FSMEvent* ev) {
-		queued_events.push (ev);
+		queued_events.push_back (*ev);
 		if (!processing) {
 			process_events ();
 		}
@@ -152,18 +157,19 @@ struct TransportFSM
 	void transition (ButlerState bs);
 
 	void process_events ();
-	bool process_event (FSMEvent *);
+	bool process_event (FSMEvent&);
 
 	FSMEvent _last_locate;
 	FSMEvent _last_stop;
 
 	TransportAPI* api;
-	std::queue<FSMEvent*> queued_events;
-	std::list<FSMEvent*> deferred_events;
+	typedef boost::intrusive::list<FSMEvent> EventList;
+	EventList queued_events;
+	EventList deferred_events;
 	int processing;
 
-	void defer (FSMEvent* ev);
-	void bad_transition (FSMEvent const *);
+	void defer (FSMEvent& ev);
+	void bad_transition (FSMEvent const &);
 };
 
 } /* end namespace ARDOUR */
