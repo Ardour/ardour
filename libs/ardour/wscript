@@ -201,6 +201,7 @@ libardour_sources = [
         'selection.cc',
         'send.cc',
         'session.cc',
+        'session_bundles.cc',
         'session_butler.cc',
         'session_click.cc',
         'session_command.cc',
