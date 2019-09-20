@@ -76,18 +76,6 @@ __declspec(selectany) int _forceAtlDllManifestRTM;
 #endif
 #endif
 
-#define BOOST_MPL_LIMIT_VECTOR_SIZE 30
-#ifdef  NDEBUG
-/* This one needs further investigation as it's */
-/* causing errors in the MSVC Debuggable builds */
-#define BOOST_MPL_LIMIT_MAP_SIZE 30
-
-/* And this one seems dodgy in all builds (it's causing */
-/* various compile issues which change depending on the */
-/* inclusion order of our #included boost header files) */
-//#define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
-#endif
-
 /* 'stdint.h' conflicts with various other libraries so
    let's #include stdint.h first to ensure one consistent
    implementation for commonly used integer types. */
