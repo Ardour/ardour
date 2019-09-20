@@ -63,6 +63,7 @@ TransportFSM::init ()
 {
 	_motion_state = Stopped;
 	_butler_state = NotWaitingForButler;
+	_last_locate.target = max_samplepos;
 }
 
 void
