@@ -313,10 +313,11 @@ TransportFSM::start_declick (Event const & s)
 }
 
 void
-TransportFSM::stop_playback () const
+TransportFSM::stop_playback ()
 {
 	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::stop_playback\n");
 	api->stop_transport (_last_stop.abort, _last_stop.clear_state);
+	_last_locate.target = max_samplepos;
 }
 
 void

@@ -129,7 +129,7 @@ struct TransportFSM
 
 	void schedule_butler_for_transport_work () const;
 	void start_playback () const;
-	void stop_playback () const;
+	void stop_playback ();
 	void start_saved_locate () const;
 	void roll_after_locate () const;
 	void start_locate (Event const &) const;
