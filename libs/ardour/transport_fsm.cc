@@ -29,22 +29,22 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-Pool* TransportFSM::FSMEvent::pool = 0;
+Pool* TransportFSM::Event::pool = 0;
 
 void
-TransportFSM::FSMEvent::init_pool ()
+TransportFSM::Event::init_pool ()
 {
-	pool = new Pool (X_("FSMEvents"), sizeof (FSMEvent), 128);
+	pool = new Pool (X_("Events"), sizeof (Event), 128);
 }
 
 void*
-TransportFSM::FSMEvent::operator new (size_t)
+TransportFSM::Event::operator new (size_t)
 {
 	return pool->alloc();
  }
 
 void
-TransportFSM::FSMEvent::operator delete (void *ptr, size_t /*size*/)
+TransportFSM::Event::operator delete (void *ptr, size_t /*size*/)
 {
 	return pool->release (ptr);
 }
@@ -87,7 +87,7 @@ TransportFSM::process_events ()
 					DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("processing %1 deferred events\n", deferred_events.size()));
 
 					for (EventList::iterator e = deferred_events.begin(); e != deferred_events.end(); ) {
-						FSMEvent* deferred_ev = &(*e);
+						Event* deferred_ev = &(*e);
 						if (process_event (*e)) { /* event processed, remove from deferred */
 							e = deferred_events.erase (e);
 							delete deferred_ev;
@@ -99,7 +99,7 @@ TransportFSM::process_events ()
 			}
 		}
 
-		FSMEvent* ev = &queued_events.front();
+		Event* ev = &queued_events.front();
 		queued_events.pop_front ();
 		delete ev;
 	}
@@ -166,14 +166,14 @@ TransportFSM::current_state () const
 }
 
 void
-TransportFSM::bad_transition (FSMEvent const & ev)
+TransportFSM::bad_transition (Event const & ev)
 {
 	error << "bad transition, current state = " << current_state() << " event = " << enum_2_string (ev.type) << endmsg;
 	std::cerr << "bad transition, current state = " << current_state() << " event = " << enum_2_string (ev.type) << std::endl;
 }
 
 bool
-TransportFSM::process_event (FSMEvent& ev)
+TransportFSM::process_event (Event& ev)
 {
 	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("process %1\n", enum_2_string (ev.type)));
 
@@ -305,7 +305,7 @@ TransportFSM::start_playback ()
 }
 
 void
-TransportFSM::start_declick (FSMEvent const & s)
+TransportFSM::start_declick (Event const & s)
 {
 	assert (s.type == StopTransport);
 	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::start_declick\n");
@@ -320,16 +320,16 @@ TransportFSM::stop_playback ()
 }
 
 void
-TransportFSM::save_locate_and_start_declick (FSMEvent const & l)
+TransportFSM::save_locate_and_start_declick (Event const & l)
 {
 	assert (l.type == Locate);
 	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::save_locate_and_stop\n");
 	_last_locate = l;
-	_last_stop = FSMEvent (StopTransport, false, false);
+	_last_stop = Event (StopTransport, false, false);
 }
 
 void
-TransportFSM::start_locate (FSMEvent const & l)
+TransportFSM::start_locate (Event const & l)
 {
 	assert (l.type == Locate);
 	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::start_locate\n");
@@ -344,7 +344,7 @@ TransportFSM::start_saved_locate ()
 }
 
 void
-TransportFSM::interrupt_locate (FSMEvent const & l)
+TransportFSM::interrupt_locate (Event const & l)
 {
 	assert (l.type == Locate);
 	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::interrupt\n");
@@ -376,7 +376,7 @@ TransportFSM::roll_after_locate ()
 }
 
 void
-TransportFSM::defer (FSMEvent& ev)
+TransportFSM::defer (Event& ev)
 {
 	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("Defer %1 during %2\n", enum_2_string (ev.type), current_state()));
 	deferred_events.push_back (ev);

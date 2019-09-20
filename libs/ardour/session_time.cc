@@ -43,7 +43,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-#define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::FSMEvent (evtype)); }
+#define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::Event (evtype)); }
 
 /* BBT TIME*/
 

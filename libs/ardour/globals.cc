@@ -468,7 +468,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 #endif
 
 	SessionEvent::init_event_pool ();
-	TransportFSM::FSMEvent::init_pool ();
+	TransportFSM::Event::init_pool ();
 
 	Operations::make_operations_quarks ();
 	SessionObject::make_property_quarks ();

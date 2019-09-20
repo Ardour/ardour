@@ -40,7 +40,7 @@ struct TransportFSM
 		LocateDone
 	};
 
-	struct FSMEvent : public boost::intrusive::list_base_hook<> {
+	struct Event : public boost::intrusive::list_base_hook<> {
 		EventType type;
 		union {
 			bool abort; /* for stop */
@@ -55,7 +55,7 @@ struct TransportFSM
 		bool with_loop;
 		bool force;
 
-		FSMEvent (EventType t)
+		Event (EventType t)
 			: type (t)
 			, with_roll (false)
 			, with_flush (false)
@@ -63,14 +63,14 @@ struct TransportFSM
 			, with_loop (false)
 			, force (false)
 		{}
-		FSMEvent (EventType t, bool ab, bool cl)
+		Event (EventType t, bool ab, bool cl)
 			: type (t)
 			, abort (ab)
 			, clear_state (cl)
 		{
 			assert (t == StopTransport);
 		}
-		FSMEvent (EventType t, samplepos_t pos, bool r, bool fl, bool lp, bool f4c)
+		Event (EventType t, samplepos_t pos, bool r, bool fl, bool lp, bool f4c)
 			: type (t)
 			, with_roll (r)
 			, with_flush (fl)
@@ -132,10 +132,10 @@ struct TransportFSM
 	void stop_playback ();
 	void start_saved_locate ();
 	void roll_after_locate ();
-	void start_locate (FSMEvent const &);
-	void interrupt_locate (FSMEvent const &);
-	void save_locate_and_start_declick (FSMEvent const &);
-	void start_declick (FSMEvent const &);
+	void start_locate (Event const &);
+	void interrupt_locate (Event const &);
+	void save_locate_and_start_declick (Event const &);
+	void start_declick (Event const &);
 
 	/* guards */
 
@@ -149,7 +149,7 @@ struct TransportFSM
 	bool waiting_for_butler()            { return _butler_state == WaitingForButler; }
 	bool declick_in_progress()           { return _motion_state == DeclickToLocate || _motion_state == DeclickToStop; }
 
-	void enqueue (FSMEvent* ev) {
+	void enqueue (Event* ev) {
 		queued_events.push_back (*ev);
 		if (!processing) {
 			process_events ();
@@ -162,19 +162,19 @@ struct TransportFSM
 	void transition (ButlerState bs);
 
 	void process_events ();
-	bool process_event (FSMEvent&);
+	bool process_event (Event&);
 
-	FSMEvent _last_locate;
-	FSMEvent _last_stop;
+	Event _last_locate;
+	Event _last_stop;
 
 	TransportAPI* api;
-	typedef boost::intrusive::list<FSMEvent> EventList;
+	typedef boost::intrusive::list<Event> EventList;
 	EventList queued_events;
 	EventList deferred_events;
 	int processing;
 
-	void defer (FSMEvent& ev);
-	void bad_transition (FSMEvent const &);
+	void defer (Event& ev);
+	void bad_transition (Event const &);
 };
 
 } /* end namespace ARDOUR */

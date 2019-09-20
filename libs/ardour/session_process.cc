@@ -59,9 +59,9 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-#define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::FSMEvent (evtype)); }
-#define TFSM_STOP(abort,clear) { _transport_fsm->enqueue (new TransportFSM::FSMEvent (TransportFSM::StopTransport,abort,clear)); }
-#define TFSM_LOCATE(target,roll,flush,loop,force) { _transport_fsm->enqueue (new TransportFSM::FSMEvent (TransportFSM::Locate,target,roll,flush,loop,force)); }
+#define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::Event (evtype)); }
+#define TFSM_STOP(abort,clear) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StopTransport,abort,clear)); }
+#define TFSM_LOCATE(target,roll,flush,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,roll,flush,loop,force)); }
 
 
 /** Called by the audio engine when there is work to be done with JACK.
