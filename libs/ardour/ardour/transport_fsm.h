@@ -22,9 +22,14 @@ class TransportAPI;
 
 struct TransportFSM
 {
-  public:
-	/* events to be delivered to the FSM */
+	/* All code related to this object is expected to be run synchronously
+	 * and single-threaded from the process callback. It can be re-entrant
+	 * if handling one transport state change queues another state change,
+	 * but that is handled explicitly (see the @param processing member and
+	 * its usage).
+	 */
 
+  public:
 	enum EventType {
 		ButlerDone,
 		ButlerRequired,
