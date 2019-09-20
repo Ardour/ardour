@@ -418,7 +418,6 @@ void
 TransportFSM::enqueue (Event* ev)
 {
 	DEBUG_TRACE (DEBUG::TFSMState, string_compose ("queue tfsm event %1\n", enum_2_string (ev->type)));
-	PBD::stacktrace (std::cerr, 30);
 	queued_events.push_back (*ev);
 	if (!processing) {
 		process_events ();
