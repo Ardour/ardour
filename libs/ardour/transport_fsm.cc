@@ -396,3 +396,14 @@ TransportFSM::transition (ButlerState bs)
 	DEBUG_TRACE (DEBUG::TFSMState, string_compose ("Leave %1, enter %2\n", enum_2_string (_butler_state), enum_2_string (bs)));
 	_butler_state = bs;
 }
+
+void
+TransportFSM::enqueue (Event* ev)
+{
+	DEBUG_TRACE (DEBUG::TFSMState, string_compose ("queue tfsm event %1\n", enum_2_string (ev->type)));
+	PBD::stacktrace (std::cerr, 30);
+	queued_events.push_back (*ev);
+	if (!processing) {
+		process_events ();
+	}
+}

@@ -149,12 +149,7 @@ struct TransportFSM
 	bool waiting_for_butler() const  { return _butler_state == WaitingForButler; }
 	bool declick_in_progress() const { return _motion_state == DeclickToLocate || _motion_state == DeclickToStop; }
 
-	void enqueue (Event* ev) {
-		queued_events.push_back (*ev);
-		if (!processing) {
-			process_events ();
-		}
-	}
+	void enqueue (Event* ev);
 
   private:
 
