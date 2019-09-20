@@ -431,10 +431,10 @@ Route::process_output_buffers (BufferSet& bufs,
 	 * Also during remaining_latency_preroll, transport_rolling () is false, but
 	 * we may need to monitor disk instead.
 	 */
-	MonitorState ms = monitoring_state ();
-	bool silence = _have_internal_generator ? false : (ms == MonitoringSilence);
+	const MonitorState ms = monitoring_state ();
+	const bool silent = _have_internal_generator ? false : (ms == MonitoringSilence);
 
-	_main_outs->no_outs_cuz_we_no_monitor (silence);
+	_main_outs->no_outs_cuz_we_no_monitor (silent);
 
 	/* -------------------------------------------------------------------------------------------
 	   DENORMAL CONTROL
