@@ -460,7 +460,7 @@ Session::Session (AudioEngine &eng,
 	StartTimeChanged.connect_same_thread (*this, boost::bind (&Session::start_time_changed, this, _1));
 	EndTimeChanged.connect_same_thread (*this, boost::bind (&Session::end_time_changed, this, _1));
 
-	Send::ChangedLatency.connect_same_thread (*this, boost::bind (&Session::send_latency_compensation_change, this));
+	LatentSend::ChangedLatency.connect_same_thread (*this, boost::bind (&Session::send_latency_compensation_change, this));
 
 	emit_thread_start ();
 	auto_connect_thread_start ();

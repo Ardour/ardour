@@ -49,7 +49,13 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-PBD::Signal0<void> Send::ChangedLatency;
+PBD::Signal0<void> LatentSend::ChangedLatency;
+
+LatentSend::LatentSend ()
+		: _delay_in (0)
+		, _delay_out (0)
+{
+}
 
 string
 Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot, bool ignore_bitslot)
@@ -83,8 +89,6 @@ Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot, bool ignore_b
 Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMaster> mm, Role r, bool ignore_bitslot)
 	: Delivery (s, p, mm, name_and_id_new_send (s, r, _bitslot, ignore_bitslot), r)
 	, _metering (false)
-	, _delay_in (0)
-	, _delay_out (0)
 	, _remove_on_disconnect (false)
 {
 	if (_role == Listen) {
@@ -198,7 +202,7 @@ Send::set_delay_in (samplecnt_t delay)
 }
 
 void
-Send::set_delay_out (samplecnt_t delay)
+Send::set_delay_out (samplecnt_t delay, size_t /*bus*/)
 {
 	if (_delay_out == delay) {
 		return;

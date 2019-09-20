@@ -4115,7 +4115,7 @@ Route::update_signal_latency (bool apply_to_delayline)
 	samplecnt_t l_in  = 0;
 	samplecnt_t l_out = _output->effective_latency ();
 	for (ProcessorList::reverse_iterator i = _processors.rbegin(); i != _processors.rend(); ++i) {
-		if (boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (*i)) {
+		if (boost::shared_ptr<LatentSend> snd = boost::dynamic_pointer_cast<LatentSend> (*i)) {
 			snd->set_delay_in (l_out + _output->latency());
 		}
 
@@ -4155,6 +4155,7 @@ Route::update_signal_latency (bool apply_to_delayline)
 				snd->output ()->set_private_port_latencies (capt_lat_in + l_in, false);
 				/* take send-target's playback latency into account */
 				snd->set_delay_out (snd->output ()->connected_latency (true));
+				/* InternalReturn::set_playback_offset() below, also calls set_delay_out() */
 			}
 		}
 

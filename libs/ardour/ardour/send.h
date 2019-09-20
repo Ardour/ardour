@@ -37,7 +37,32 @@ class Amp;
 class GainControl;
 class DelayLine;
 
-class LIBARDOUR_API Send : public Delivery
+/** Internal Abstraction for Sends (and MixbusSends) */
+class LIBARDOUR_API LatentSend
+{
+public:
+	LatentSend ();
+	virtual ~LatentSend() {}
+
+	samplecnt_t get_delay_in () const { return _delay_in; }
+	samplecnt_t get_delay_out () const { return _delay_out; }
+
+	/* should only be called by Route::update_signal_latency */
+	virtual void set_delay_in (samplecnt_t) = 0;
+
+	/* should only be called by InternalReturn::set_playback_offset
+	 * (via Route::update_signal_latency)
+	 */
+	virtual void set_delay_out (samplecnt_t, size_t bus = 0) = 0;
+
+	static PBD::Signal0<void> ChangedLatency;
+
+protected:
+	samplecnt_t _delay_in;
+	samplecnt_t _delay_out;
+};
+
+class LIBARDOUR_API Send : public Delivery, public LatentSend
 {
 public:
 	Send (Session&, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster>, Delivery::Role r = Delivery::Send, bool ignore_bitslot = false);
@@ -69,13 +94,11 @@ public:
 	bool configure_io (ChanCount in, ChanCount out);
 
 	/* latency compensation */
-	void set_delay_in (samplecnt_t); // should only be called by Route::update_signal_latency
-	void set_delay_out (samplecnt_t);  // should only be called by InternalReturn::set_playback_offset (via Route::update_signal_latency)
+	void set_delay_in (samplecnt_t);
+	void set_delay_out (samplecnt_t, size_t bus = 0);
 	samplecnt_t get_delay_in () const { return _delay_in; }
 	samplecnt_t get_delay_out () const { return _delay_out; }
 	samplecnt_t signal_latency () const;
-
-	static PBD::Signal0<void> ChangedLatency;
 
 	void activate ();
 	void deactivate ();
@@ -106,8 +129,6 @@ private:
 	int set_state_2X (XMLNode const &, int);
 
 	uint32_t    _bitslot;
-	samplecnt_t _delay_in;
-	samplecnt_t _delay_out;
 	bool        _remove_on_disconnect;
 };
 
