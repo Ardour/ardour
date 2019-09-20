@@ -343,22 +343,17 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			AudioBuffer& disk_buf ((ms & MonitoringInput) ? scratch_bufs.get_audio(n) : output);
 
 			if (start_sample != playback_sample && target_gain != 0) {
-#ifndef NDEBUG
-				cerr << owner()->name() << " playback @ " << start_sample << " not aligned with " << playback_sample << " jump " << (start_sample - playback_sample) << endl;
-#endif
 				if (can_internal_playback_seek (start_sample - playback_sample)) {
 					internal_playback_seek (start_sample - playback_sample);
 				} else {
-					cerr << owner()->name() << " playback at " << speed << " not possible: ss = " << start_sample << " ps = " << playback_sample << endl;
-					// XXX -- now what?
-					abort (); /*NOTREACHED*/
+					disk_samples_to_consume = 0; /* will force an underrun below */
 				}
 			}
 
 			if (!declick_out) {
 				const samplecnt_t total = chaninfo->rbuf->read (disk_buf.data(), disk_samples_to_consume);
 				if (disk_samples_to_consume > total) {
-					cerr << _name << " Need " << disk_samples_to_consume << " total = " << total << endl;
+					cerr << _name << " Need " << total << " have only " << disk_samples_to_consume << endl;
 					cerr << "underrun for " << _name << endl;
 					DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 underrun in %2, total space = %3\n",
 					                                            DEBUG_THREAD_SELF, name(), total));
