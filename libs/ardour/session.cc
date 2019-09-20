@@ -251,7 +251,7 @@ Session::Session (AudioEngine &eng,
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
 	, _n_lua_scripts (0)
 	, _butler (new Butler (*this))
-	, _transport_fsm (TransportFSM::create (*this))
+	, _transport_fsm (new TransportFSM (*this))
 	, _post_transport_work (0)
 	, _locations (new Locations (*this))
 	, _ignore_skips_updates (false)
@@ -609,7 +609,7 @@ Session::immediately_post_engine ()
 
 	/* Restart transport FSM */
 
-	_transport_fsm->backend()->start ();
+	_transport_fsm->start ();
 
 	/* every time we reconnect, do stuff ... */
 
@@ -884,8 +884,7 @@ Session::destroy ()
 	delete _selection;
 	_selection = 0;
 
-	_transport_fsm->backend()->stop ();
-	_transport_fsm.reset ();
+	_transport_fsm->stop ();
 
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
 

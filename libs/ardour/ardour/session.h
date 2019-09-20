@@ -1447,7 +1447,7 @@ private:
 
 	Butler* _butler;
 
-	boost::shared_ptr<TransportFSM> _transport_fsm;
+	TransportFSM* _transport_fsm;
 
 	static const PostTransportWork ProcessCannotProceedMask =
 		PostTransportWork (

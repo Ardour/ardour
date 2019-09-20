@@ -59,7 +59,10 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-#define TFSM_EVENT(ev) { DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("TFSM(%1)\n", typeid(ev).name())); _transport_fsm->enqueue (ev); }
+#define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::FSMEvent (evtype)); }
+#define TFSM_STOP(abort,clear) { _transport_fsm->enqueue (new TransportFSM::FSMEvent (TransportFSM::StopTransport,abort,clear)); }
+#define TFSM_LOCATE(target,roll,flush,loop,force) { _transport_fsm->enqueue (new TransportFSM::FSMEvent (TransportFSM::Locate,target,roll,flush,loop,force)); }
+
 
 /** Called by the audio engine when there is work to be done with JACK.
  * @param nframes Number of samples to process.
@@ -127,7 +130,7 @@ Session::process (pframes_t nframes)
 
 	if (!one_or_more_routes_declicking && declick_in_progress()) {
 		/* end of the declick has been reached by all routes */
-		TFSM_EVENT (TransportFSM::declick_done());
+		TFSM_EVENT (TransportFSM::DeclickDone);
 	}
 
 	_engine.main_thread()->drop_buffers ();
@@ -241,7 +244,7 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 			bool b = false;
 
 			if ((ret = (*i)->roll (nframes, start_sample, end_sample, b)) < 0) {
-				TFSM_EVENT (TransportFSM::stop_transport (false, false));
+				TFSM_STOP (false, false);
 				return -1;
 			}
 
@@ -851,7 +854,7 @@ Session::process_event (SessionEvent* ev)
 			/* roll after locate, do not flush, set "with loop"
 			   true only if we are seamless looping
 			*/
-			TFSM_EVENT (TransportFSM::locate (ev->target_sample, true, false, Config->get_seamless_loop(), false));
+			TFSM_LOCATE (ev->target_sample, true, false, Config->get_seamless_loop(), false);
 		}
 		remove = false;
 		del = false;
@@ -859,19 +862,19 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::Locate:
 		/* args: do not roll after locate, do flush, not with loop, force */
-		TFSM_EVENT (TransportFSM::locate (ev->target_sample, false, true, false, ev->yes_or_no));
+		TFSM_LOCATE (ev->target_sample, false, true, false, ev->yes_or_no);
 		_send_timecode_update = true;
 		break;
 
 	case SessionEvent::LocateRoll:
 		/* args: roll after locate, do flush, not with loop, force */
-		TFSM_EVENT (TransportFSM::locate (ev->target_sample, true, true, false, ev->yes_or_no));
+		TFSM_LOCATE (ev->target_sample, true, true, false, ev->yes_or_no);
 		_send_timecode_update = true;
 		break;
 
 	case SessionEvent::Skip:
 		if (Config->get_skip_playback()) {
-			TFSM_EVENT (TransportFSM::locate (ev->target_sample, true, true, false, false));
+			TFSM_LOCATE (ev->target_sample, true, true, false, false);
 			_send_timecode_update = true;
 		}
 		remove = false;
@@ -912,14 +915,14 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::RangeStop:
-		TFSM_EVENT (TransportFSM::stop_transport (ev->yes_or_no, false));
+		TFSM_STOP (ev->yes_or_no, false);
 		remove = false;
 		del = false;
 		break;
 
 	case SessionEvent::RangeLocate:
 		/* args: roll after locate, do flush, not with loop */
-		TFSM_EVENT (TransportFSM::locate (ev->target_sample, true, true, false, false));
+		TFSM_LOCATE (ev->target_sample, true, true, false, false);
 		remove = false;
 		del = false;
 		break;
@@ -1109,7 +1112,7 @@ Session::follow_transport_master (pframes_t nframes)
 		DiskReader::inc_no_disk_output ();
 		if (!_transport_fsm->locating()) {
 			DEBUG_TRACE (DEBUG::Slave, string_compose ("request locate to master position %1\n", slave_transport_sample));
-			TFSM_EVENT (TransportFSM::locate (slave_transport_sample, true, true, false, false));
+			TFSM_LOCATE (slave_transport_sample, true, true, false, false);
 		}
 		return true;
 	}
@@ -1117,12 +1120,12 @@ Session::follow_transport_master (pframes_t nframes)
 	if (slave_speed != 0.0) {
 		if (_transport_speed == 0.0f) {
 			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave starts transport: %1 sample %2 tf %3\n", slave_speed, slave_transport_sample, _transport_sample));
-			TFSM_EVENT (TransportFSM::start_transport ());
+			TFSM_EVENT (TransportFSM::StartTransport);
 		}
 	} else {
 		if (_transport_speed != 0.0f) {
 			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stops transport: %1 sample %2 tf %3\n", slave_speed, slave_transport_sample, _transport_sample));
-			TFSM_EVENT (TransportFSM::stop_transport (false, false));
+			TFSM_STOP (false, false);
 		}
 	}
 

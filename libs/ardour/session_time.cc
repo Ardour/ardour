@@ -43,7 +43,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-#define TFSM_EVENT(ev) { DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("TFSM(%1)\n", typeid(ev).name())); _transport_fsm->enqueue (ev); }
+#define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::FSMEvent (evtype)); }
 
 /* BBT TIME*/
 
@@ -217,7 +217,7 @@ Session::backend_sync_callback (TransportState state, samplepos_t pos)
 	case TransportRolling:
 		// cerr << "SYNC: rolling slave = " << slave << endl;
 		if (slave) {
-			TFSM_EVENT (TransportFSM::start_transport());
+			TFSM_EVENT (TransportFSM::StartTransport);
 		}
 		break;
 

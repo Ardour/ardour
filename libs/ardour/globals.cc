@@ -125,6 +125,7 @@
 #include "ardour/runtime_functions.h"
 #include "ardour/session_event.h"
 #include "ardour/source_factory.h"
+#include "ardour/transport_fsm.h"
 #include "ardour/transport_master_manager.h"
 #ifdef LV2_SUPPORT
 #include "ardour/uri_map.h"
@@ -467,6 +468,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 #endif
 
 	SessionEvent::init_event_pool ();
+	TransportFSM::FSMEvent::init_pool ();
 
 	Operations::make_operations_quarks ();
 	SessionObject::make_property_quarks ();

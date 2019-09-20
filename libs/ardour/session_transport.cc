@@ -82,7 +82,9 @@ using namespace PBD;
 #endif
 
 
-#define TFSM_EVENT(ev) { DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("TFSM(%1)\n", typeid(ev).name())); _transport_fsm->enqueue (ev); }
+#define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::FSMEvent (evtype)); }
+#define TFSM_STOP(abort,clear) { _transport_fsm->enqueue (new TransportFSM::FSMEvent (TransportFSM::StopTransport,abort,clear)); }
+#define TFSM_LOCATE(target,roll,flush,loop,force) { _transport_fsm->enqueue (new TransportFSM::FSMEvent (TransportFSM::Locate,target,roll,flush,loop,force)); }
 
 /* *****************************************************************************
  * REALTIME ACTIONS (to be called on state transitions)
@@ -159,7 +161,7 @@ Session::realtime_stop (bool abort, bool clear_state)
 	}
 
 	if (todo) {
-		TFSM_EVENT (TransportFSM::butler_required());
+		TFSM_EVENT (TransportFSM::ButlerRequired);
 	}
 }
 
@@ -239,7 +241,7 @@ Session::do_locate (samplepos_t target_sample, bool with_roll, bool with_flush, 
 			set_transport_speed (1.0, 0, false);
 		}
 		loop_changing = false;
-		TFSM_EVENT (TransportFSM::locate_done());
+		TFSM_EVENT (TransportFSM::LocateDone);
 		Located (); /* EMIT SIGNAL */
 		return;
 	}
@@ -382,9 +384,9 @@ Session::do_locate (samplepos_t target_sample, bool with_roll, bool with_flush, 
 	}
 
 	if (need_butler) {
-		TFSM_EVENT (TransportFSM::butler_required());
+		TFSM_EVENT (TransportFSM::ButlerRequired);
 	} else {
-		TFSM_EVENT (TransportFSM::locate_done());
+		TFSM_EVENT (TransportFSM::LocateDone);
 	}
 
 	loop_changing = false;
@@ -484,7 +486,7 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 				_requested_return_sample = destination_sample;
 			}
 
-			TFSM_EVENT (TransportFSM::stop_transport (abort, false));
+			TFSM_STOP (abort, false);
 		}
 
 	} else if (transport_stopped() && speed == 1.0) {
@@ -521,7 +523,7 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 			_engine.transport_start ();
 			_count_in_once = false;
 		} else {
-			TFSM_EVENT (TransportFSM::start_transport());
+			TFSM_EVENT (TransportFSM::StartTransport);
 		}
 
 	} else {
@@ -576,7 +578,7 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 
 		if (todo) {
 			add_post_transport_work (todo);
-			TFSM_EVENT (TransportFSM::butler_required());
+			TFSM_EVENT (TransportFSM::ButlerRequired);
 		}
 
 		DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC3 with speed = %1\n", _transport_speed));
@@ -748,7 +750,7 @@ Session::butler_completed_transport_work ()
 
 	if (ptw & PostTransportLocate) {
 		post_locate ();
-		TFSM_EVENT (TransportFSM::locate_done());
+		TFSM_EVENT (TransportFSM::LocateDone);
 	}
 
 	if (ptw & PostTransportAdjustPlaybackBuffering) {
@@ -763,7 +765,7 @@ Session::butler_completed_transport_work ()
 	set_post_transport_work (PostTransportWork (0));
 
 	if (_transport_fsm->waiting_for_butler()) {
-		TFSM_EVENT (TransportFSM::butler_done());
+		TFSM_EVENT (TransportFSM::ButlerDone);
 	}
 
 	DiskReader::dec_no_disk_output ();
@@ -785,7 +787,7 @@ Session::maybe_stop (samplepos_t limit)
 		if (synced_to_engine () && config.get_jack_time_master ()) {
 			_engine.transport_stop ();
 		} else if (!synced_to_engine ()) {
-			TFSM_EVENT (TransportFSM::stop_transport ());
+			TFSM_EVENT (TransportFSM::StopTransport);
 		}
 		return true;
 	}
@@ -894,11 +896,11 @@ Session::set_play_loop (bool yn, double speed)
 				   rolling, do not locate to loop start.
 				*/
 				if (!transport_rolling() && (speed != 0.0)) {
-					TFSM_EVENT (TransportFSM::locate (loc->start(), true, true, false, true));
+					TFSM_LOCATE (loc->start(), true, true, false, true);
 				}
 			} else {
 				if (speed != 0.0) {
-					TFSM_EVENT (TransportFSM::locate (loc->start(), true, true, false, true));
+					TFSM_LOCATE (loc->start(), true, true, false, true);
 				}
 			}
 		}
@@ -1779,7 +1781,7 @@ Session::unset_play_loop ()
 		if (Config->get_seamless_loop()) {
 			/* likely need to flush track buffers: this will locate us to wherever we are */
 			add_post_transport_work (PostTransportLocate);
-			TFSM_EVENT (TransportFSM::butler_required());
+			TFSM_EVENT (TransportFSM::ButlerRequired);
 		}
 		TransportStateChange (); /* EMIT SIGNAL */
 	}
@@ -1936,7 +1938,7 @@ Session::engine_halted ()
 	 * ::engine_running() (if we ever get there)
 	 */
 
-	_transport_fsm->backend()->stop ();
+	_transport_fsm->stop ();
 
 	/* Synchronously do the realtime part of a transport stop.
 	 *
@@ -1952,7 +1954,7 @@ void
 Session::engine_running ()
 {
 	initialize_latencies ();
-	_transport_fsm->backend()->start ();
+	_transport_fsm->start ();
 }
 
 void

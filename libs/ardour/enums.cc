@@ -47,6 +47,7 @@
 #include "ardour/source.h"
 #include "ardour/tempo.h"
 #include "ardour/track.h"
+#include "ardour/transport_fsm.h"
 #include "ardour/transport_master.h"
 #include "ardour/types.h"
 
@@ -151,6 +152,9 @@ setup_enum_writer ()
 	PresentationInfo::Flag _PresentationInfo_Flag;
 	MusicalMode::Type mode;
 	MidiPortFlags _MidiPortFlags;
+	TransportFSM::EventType _TransportFSM_EventType;
+	TransportFSM::MotionState _TransportFSM_MotionState;
+	TransportFSM::ButlerState _TransportFSM_ButlerState;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -793,6 +797,27 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (MusicalMode, Persian);
 	REGISTER_CLASS_ENUM (MusicalMode, Algerian);
 	REGISTER (mode);
+
+	REGISTER_CLASS_ENUM (TransportFSM, ButlerDone);
+	REGISTER_CLASS_ENUM (TransportFSM, ButlerRequired);
+	REGISTER_CLASS_ENUM (TransportFSM, DeclickDone);
+	REGISTER_CLASS_ENUM (TransportFSM, StartTransport);
+	REGISTER_CLASS_ENUM (TransportFSM, StopTransport);
+	REGISTER_CLASS_ENUM (TransportFSM, Locate);
+	REGISTER_CLASS_ENUM (TransportFSM, LocateDone);
+	REGISTER (_TransportFSM_EventType);
+
+	REGISTER_CLASS_ENUM (TransportFSM, Stopped);
+	REGISTER_CLASS_ENUM (TransportFSM, Rolling);
+	REGISTER_CLASS_ENUM (TransportFSM, DeclickToStop);
+	REGISTER_CLASS_ENUM (TransportFSM, DeclickToLocate);
+	REGISTER_CLASS_ENUM (TransportFSM, WaitingForLocate);
+	REGISTER (_TransportFSM_MotionState);
+
+
+	REGISTER_CLASS_ENUM (TransportFSM, NotWaitingForButler);
+	REGISTER_CLASS_ENUM (TransportFSM, WaitingForButler);
+	REGISTER (_TransportFSM_ButlerState);
 }
 
 } /* namespace ARDOUR */

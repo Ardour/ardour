@@ -1,219 +1,169 @@
 #ifndef _ardour_transport_fsm_h_
 #define _ardour_transport_fsm_h_
 
-#ifdef nil
-#undef nil
-#endif
-
-#ifndef BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
-#define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
-#endif
-
-#include <boost/weak_ptr.hpp>
-#include <boost/msm/back/state_machine.hpp>
-#include <boost/msm/back/tools.hpp>
-#include <boost/msm/front/state_machine_def.hpp>
-#include <boost/msm/front/functor_row.hpp>
+#include <list>
+#include <queue>
 
 #include "pbd/demangle.h"
 #include "pbd/stacktrace.h"
 
 #include "ardour/debug.h"
-
-/* state machine */
-namespace msm = boost::msm;
-namespace mpl = boost::mpl;
+#include "ardour/types.h"
 
 namespace ARDOUR
 {
 
 class TransportAPI;
 
-struct TransportFSM : public msm::front::state_machine_def<TransportFSM>
+struct TransportFSM
 {
+  public:
 	/* events to be delivered to the FSM */
 
-	struct butler_done {};
-	struct butler_required {};
-	struct declick_done {};
-	struct start_transport {};
-
-	struct stop_transport {
-		stop_transport (bool ab = false, bool cl = false)
-			: abort (ab)
-			, clear_state (cl) {}
-
-		bool abort;
-		bool clear_state;
+	enum EventType {
+		ButlerDone,
+		ButlerRequired,
+		DeclickDone,
+		StartTransport,
+		StopTransport,
+		Locate,
+		LocateDone
 	};
 
-	struct locate {
-		locate ()
-			: target (0)
-			, with_roll (false)
-			, with_flush (false)
-			, with_loop (false)
-			, force (false) {}
-
-		locate (samplepos_t target, bool roll, bool flush, bool loop, bool f4c)
-			: target (target)
-			, with_roll (roll)
-			, with_flush (flush)
-			, with_loop (loop)
-			, force (f4c) {}
-
+	struct FSMEvent {
+		EventType type;
+		union {
+			bool abort; /* for stop */
+			bool with_roll; /* for locate */
+		};
+		union {
+			bool clear_state; /* for stop */
+			bool with_flush; /* for locate */
+		};
+		/* for locate */
 		samplepos_t target;
-		bool with_roll;
-		bool with_flush;
 		bool with_loop;
 		bool force;
+
+		FSMEvent (EventType t)
+			: type (t)
+			, with_roll (false)
+			, with_flush (false)
+			, target (0)
+			, with_loop (false)
+			, force (false)
+		{}
+		FSMEvent (EventType t, bool ab, bool cl)
+			: type (t)
+			, abort (ab)
+			, clear_state (cl)
+		{
+			assert (t == StopTransport);
+		}
+		FSMEvent (EventType t, samplepos_t pos, bool r, bool fl, bool lp, bool f4c)
+			: type (t)
+			, with_roll (r)
+			, with_flush (fl)
+			, target (pos)
+			, with_loop (lp)
+			, force (f4c)
+		{
+			assert (t == Locate);
+		}
+
+		void* operator new (size_t);
+		void  operator delete (void *ptr, size_t /*size*/);
+
+		static void init_pool ();
+
+          private:
+		static Pool* pool;
+
 	};
 
-	struct locate_done {};
+	TransportFSM (TransportAPI& tapi);
 
-	/* Flags */
+	void start () {
+		init ();
+	}
 
-	struct DeclickInProgress {};
-	struct LocateInProgress {};
-	struct IsRolling {};
-	struct IsStopped {};
-	struct IsWaitingForButler {};
+	void stop () {
+		/* should we do anything here? this method is modelled on the
+		   boost::msm design, but its not clear that we ever need to
+		   do anything like this.
+		*/
+	}
 
-	typedef msm::active_state_switch_before_transition active_state_switch_policy;
+	enum MotionState {
+		Stopped,
+		Rolling,
+		DeclickToStop,
+		DeclickToLocate,
+		WaitingForLocate
+	};
+
+	enum ButlerState {
+		NotWaitingForButler,
+		WaitingForButler
+	};
+
+	std::string current_state () const;
+
+  private:
+	MotionState _motion_state;
+	ButlerState _butler_state;
+
+	void init();
 
 	/* transition actions */
 
-	void start_playback (start_transport const& p);
-	void roll_after_locate (locate_done const& p);
-	void stop_playback (declick_done const& s);
-	void start_locate (locate const& s);
-	void start_saved_locate (declick_done const& s);
-	void interrupt_locate (locate const& s);
-	void schedule_butler_for_transport_work (butler_required const&);
-	void save_locate_and_start_declick (locate const &);
-	void start_declick (stop_transport const &);
+	void schedule_butler_for_transport_work ();
+	void start_playback ();
+	void stop_playback ();
+	void start_saved_locate ();
+	void roll_after_locate ();
+	void start_locate (FSMEvent const *);
+	void interrupt_locate (FSMEvent const *);
+	void save_locate_and_start_declick (FSMEvent const *);
+	void start_declick (FSMEvent const *);
 
 	/* guards */
 
-	bool should_roll_after_locate (locate_done const &);
-	bool should_not_roll_after_locate (locate_done const & e)  { return !should_roll_after_locate (e); }
+	bool should_roll_after_locate ();
+	bool should_not_roll_after_locate ()  { return !should_roll_after_locate (); }
 
-#define define_state(State) \
-	struct State : public msm::front::state<> \
-	{ \
-		template <class Event,class FSM> void on_entry (Event const&, FSM&) { DEBUG_TRACE (PBD::DEBUG::TFSMState, "entering: " # State "\n"); } \
-		template <class Event,class FSM> void on_exit (Event const&, FSM&) { DEBUG_TRACE (PBD::DEBUG::TFSMState, "leaving: " # State "\n"); } \
+  public:
+	bool locating ()                     { return _motion_state == WaitingForLocate; }
+	bool rolling ()                      { return _motion_state == Rolling; }
+	bool stopped ()                      { return _motion_state == Stopped; }
+	bool waiting_for_butler()            { return _butler_state == WaitingForButler; }
+	bool declick_in_progress()           { return _motion_state == DeclickToLocate || _motion_state == DeclickToStop; }
+
+	void enqueue (FSMEvent* ev) {
+		queued_events.push (ev);
+		if (!processing) {
+			process_events ();
+		}
 	}
 
-#define define_state_flag(State,Flag) \
-	struct State : public msm::front::state<> \
-	{ \
-		template <class Event,class FSM> void on_entry (Event const&, FSM&) { DEBUG_TRACE (PBD::DEBUG::TFSMState, "entering: " # State "\n"); } \
-		template <class Event,class FSM> void on_exit (Event const&, FSM&) { DEBUG_TRACE (PBD::DEBUG::TFSMState, "leaving: " # State "\n"); } \
-		typedef mpl::vector1<Flag> flag_list; \
-	}
+  private:
 
-#define define_state_flag2(State,Flag1,Flag2) \
-	struct State : public msm::front::state<> \
-	{ \
-		template <class Event,class FSM> void on_entry (Event const&, FSM&) { DEBUG_TRACE (PBD::DEBUG::TFSMState, "entering: " # State "\n"); } \
-		template <class Event,class FSM> void on_exit (Event const&, FSM&) { DEBUG_TRACE (PBD::DEBUG::TFSMState, "leaving: " # State "\n"); } \
-		typedef mpl::vector2<Flag1,Flag2> flag_list; \
-	}
+	void transition (MotionState ms);
+	void transition (ButlerState bs);
 
-	/* FSM states */
+	void process_events ();
+	bool process_event (FSMEvent *);
 
-	define_state_flag (WaitingForButler, IsWaitingForButler);
-	define_state (NotWaitingForButler);
-	define_state_flag (Stopped,IsStopped);
-	define_state_flag (Rolling,IsRolling);
-	define_state_flag (DeclickToLocate,DeclickInProgress);
-	define_state_flag (WaitingForLocate,LocateInProgress);
-	define_state_flag (DeclickToStop,DeclickInProgress);
-
-	// Pick a back-end
-	typedef msm::back::state_machine<TransportFSM> back;
-
-	boost::weak_ptr<back> wp;
-
-	bool locating ()                     { return backend()->is_flag_active<LocateInProgress>(); }
-	bool locating (declick_done const &) { return locating(); }
-	bool rolling ()                      { return backend()->is_flag_active<IsRolling>(); }
-	bool stopped ()                      { return backend()->is_flag_active<IsStopped>(); }
-	bool waiting_for_butler()            { return backend()->is_flag_active<IsWaitingForButler>(); }
-	bool declick_in_progress()           { return backend()->is_flag_active<DeclickInProgress>(); }
-
-	static boost::shared_ptr<back> create(TransportAPI& api) {
-
-		boost::shared_ptr<back> p (new back ());
-
-		p->wp = p;
-		p->api = &api;
-		return p;
-	}
-
-	boost::shared_ptr<back> backend() { return wp.lock(); }
-
-	template<typename Event> void enqueue (Event const & e) {
-		backend()->process_event (e);
-	}
-
-	/* the initial state */
-	typedef boost::mpl::vector<Stopped,NotWaitingForButler> initial_state;
-
-	/* transition table */
-	typedef TransportFSM T; // makes transition table cleaner
-
-	struct transition_table : mpl::vector<
-		//      Start                Event            Next               Action                Guard
-		//    +----------------------+----------------+------------------+---------------------+----------------------+
-		a_row < Stopped,             start_transport, Rolling,           &T::start_playback                                      >,
-		_row  < Stopped,             stop_transport,  Stopped                                                                    >,
-		a_row < Stopped,             locate,          WaitingForLocate,  &T::start_locate                                        >,
-		g_row < WaitingForLocate,    locate_done,     Stopped,                                  &T::should_not_roll_after_locate >,
-		_row  < Rolling,             butler_done,     Rolling                                                                    >,
-		_row  < Rolling,             start_transport, Rolling                                                                    >,
-		a_row < Rolling,             stop_transport,  DeclickToStop,     &T::start_declick                                       >,
-		a_row < DeclickToStop,       declick_done,    Stopped,           &T::stop_playback                                       >,
-		a_row < Rolling,             locate,          DeclickToLocate,   &T::save_locate_and_start_declick                       >,
-		a_row < DeclickToLocate,     declick_done,    WaitingForLocate,  &T::start_saved_locate                                  >,
-		row   < WaitingForLocate,    locate_done,     Rolling,           &T::roll_after_locate, &T::should_roll_after_locate     >,
-		a_row < NotWaitingForButler, butler_required, WaitingForButler,  &T::schedule_butler_for_transport_work                  >,
-		a_row < WaitingForButler,    butler_required, WaitingForButler,  &T::schedule_butler_for_transport_work                  >,
-		_row  < WaitingForButler,    butler_done,     NotWaitingForButler                                                        >,
-		a_row < WaitingForLocate,    locate,          WaitingForLocate,  &T::interrupt_locate                                    >,
-		a_row < DeclickToLocate,     locate,          DeclickToLocate,   &T::interrupt_locate                                    >,
-
-		// Deferrals
-
-#define defer(start_state,ev) boost::msm::front::Row<start_state, ev, start_state, boost::msm::front::Defer, boost::msm::front::none >
-
-		defer (DeclickToLocate, start_transport),
-		defer (DeclickToLocate, stop_transport),
-		defer (DeclickToStop, start_transport),
-		defer (WaitingForLocate, start_transport),
-		defer (WaitingForLocate, stop_transport)
-
-#undef defer
-		> {};
-
-	typedef int activate_deferred_events;
-
-	locate         _last_locate;
-	stop_transport _last_stop;
+	FSMEvent _last_locate;
+	FSMEvent _last_stop;
 
 	TransportAPI* api;
+	std::queue<FSMEvent*> queued_events;
+	std::list<FSMEvent*> deferred_events;
+	int processing;
 
-	// Replaces the default no-transition response.
-	template <class FSM,class Event>
-	void no_transition(Event const& e, FSM&,int state)
-	{
-		typedef typename boost::msm::back::recursive_get_transition_table<FSM>::type recursive_stt;
-		typedef typename boost::msm::back::generate_state_set<recursive_stt>::type all_states;
-		std::string stateName;
-		boost::mpl::for_each<all_states,boost::msm::wrap<boost::mpl::placeholders::_1> >(boost::msm::back::get_state_name<recursive_stt>(stateName, state));
-		std::cout << "No transition from state: " << PBD::demangle (stateName) << " on event " << typeid(e).name() << std::endl;
-	}
+	void defer (FSMEvent* ev);
+	void bad_transition (FSMEvent const *);
 };
 
 } /* end namespace ARDOUR */
