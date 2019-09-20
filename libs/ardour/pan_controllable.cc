@@ -58,5 +58,12 @@ PanControllable::actually_set_value (double v, Controllable::GroupControlDisposi
 std::string
 PanControllable::get_user_string () const
 {
+	if (!owner) {
+		/* assume PanAzimuthAutomation, 0..1 */
+		float v = get_value ();
+		char buf[32];
+		snprintf(buf, sizeof(buf), "%.0f%%", 100.f * v);
+		return buf;
+	}
 	return owner->value_as_string (boost::dynamic_pointer_cast<const AutomationControl>(shared_from_this()));
 }
