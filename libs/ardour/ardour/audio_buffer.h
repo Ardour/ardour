@@ -57,18 +57,6 @@ public:
 		_written = true;
 	}
 
-	void read_from_with_gain (const Sample* src, samplecnt_t len, gain_t gain, sampleoffset_t dst_offset = 0, sampleoffset_t src_offset = 0) {
-		assert(src != 0);
-		assert(_capacity > 0);
-		assert(len <= _capacity);
-		src += src_offset;
-		for (samplecnt_t n = 0; n < len; ++n) {
-			_data[dst_offset+n] = src[n] * gain;
-		}
-		_silent = false;
-		_written = true;
-	}
-
 	/** Copy samples from src buffer starting at src_offset into self starting at dst_offset
 	 * @param src buffer to read from
 	 * @param len number of samples to copy
