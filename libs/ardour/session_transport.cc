@@ -746,23 +746,28 @@ Session::butler_completed_transport_work ()
 		} else {
 			process_function = &Session::process_with_events;
 		}
+		ptw = PostTransportWork (ptw & ~PostTransportAudition);
+		set_post_transport_work (ptw);
 	}
 
 	if (ptw & PostTransportLocate) {
 		post_locate ();
+		ptw = PostTransportWork (ptw & ~PostTransportLocate);
+		set_post_transport_work (ptw);
 		TFSM_EVENT (TransportFSM::LocateDone);
 	}
 
 	if (ptw & PostTransportAdjustPlaybackBuffering) {
 		/* we blocked output while this happened */
 		DiskReader::dec_no_disk_output ();
+		ptw = PostTransportWork (ptw & ~PostTransportAdjustPlaybackBuffering);
+		set_post_transport_work (ptw);
 	}
 
+	ptw = PostTransportWork (ptw & ~(PostTransportAdjustCaptureBuffering|PostTransportOverWrite));
+	set_post_transport_work (ptw);
+
 	set_next_event ();
-	/* XXX is this really safe? shouldn't we just be unsetting the bits that we actually
-	   know were handled ?
-	*/
-	set_post_transport_work (PostTransportWork (0));
 
 	if (_transport_fsm->waiting_for_butler()) {
 		TFSM_EVENT (TransportFSM::ButlerDone);
@@ -1676,7 +1681,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	/* do this before seeking, because otherwise the tracks will do the wrong thing in seamless loop mode.
 	*/
 
-	if (ptw & PostTransportClearSubstate) {
+	if (ptw & (PostTransportClearSubstate|PostTransportStop)) {
 		unset_play_range ();
 		if (!Config->get_loop_is_mode()) {
 			unset_play_loop ();
@@ -1750,23 +1755,13 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		SaveSessionRequested (_current_snapshot_name);
 	}
 
-	if (ptw & PostTransportStop) {
-		unset_play_range ();
-		if (!Config->get_loop_is_mode()) {
-			unset_play_loop ();
-		}
-	}
-
 	PositionChanged (_transport_sample); /* EMIT SIGNAL */
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC with speed = %1\n", _transport_speed));
 	TransportStateChange (); /* EMIT SIGNAL */
 	AutomationWatch::instance().transport_stop_automation_watches (_transport_sample);
 
-	/* and start it up again if relevant */
-
-	if ((ptw & PostTransportLocate) && !config.get_external_sync()) {
-		request_transport_speed (1.0);
-	}
+	ptw = PostTransportWork (ptw & ~(PostTransportStop|PostTransportClearSubstate));
+	set_post_transport_work (ptw);
 }
 
 void
