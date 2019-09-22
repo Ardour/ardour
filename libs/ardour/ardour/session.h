@@ -1248,6 +1248,7 @@ protected:
 	void post_locate ();
 	void schedule_butler_for_transport_work ();
 	bool should_roll_after_locate () const;
+	double speed() const { return _transport_speed; }
 
 private:
 	int  create (const std::string& mix_template, BusProfile*);
