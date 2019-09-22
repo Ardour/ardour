@@ -116,10 +116,6 @@ Session::realtime_stop (bool abort, bool clear_state)
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("stop complete, auto-return scheduled for return to %1\n", _requested_return_sample));
 
-	/* the duration change is not guaranteed to have happened, but is likely */
-
-	todo = PostTransportWork (todo | PostTransportDuration);
-
 	if (abort) {
 		todo = PostTransportWork (todo | PostTransportAbort);
 	}

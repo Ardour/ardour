@@ -1122,7 +1122,7 @@ public:
 
 	enum PostTransportWork {
 		PostTransportStop               = 0x1,
-		PostTransportDuration           = 0x2,
+		/* PostTransportDuration */
 		PostTransportLocate             = 0x4,
 		PostTransportRoll               = 0x8,
 		PostTransportAbort              = 0x10,
