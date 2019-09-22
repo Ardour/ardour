@@ -31,7 +31,7 @@ using namespace ARDOUR;
 InternalReturn::InternalReturn (Session& s)
 	: Return (s, true)
 {
-        _display_to_user = false;
+	_display_to_user = false;
 }
 
 void
@@ -40,18 +40,19 @@ InternalReturn::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t 
 	if (!_active && !_pending_active) {
 		return;
 	}
+	_active = _pending_active;
 
 	Glib::Threads::Mutex::Lock lm (_sends_mutex, Glib::Threads::TRY_LOCK);
 
-	if (lm.locked ()) {
-		for (list<InternalSend*>::iterator i = _sends.begin(); i != _sends.end(); ++i) {
-			if ((*i)->active () && (!(*i)->source_route() || (*i)->source_route()->active())) {
-				bufs.merge_from ((*i)->get_buffers(), nframes);
-			}
-		}
+	if (!lm.locked ()) {
+		return;
 	}
 
-	_active = _pending_active;
+	for (list<InternalSend*>::iterator i = _sends.begin(); i != _sends.end(); ++i) {
+		if ((*i)->active () && (!(*i)->source_route() || (*i)->source_route()->active())) {
+			bufs.merge_from ((*i)->get_buffers(), nframes);
+		}
+	}
 }
 
 void
