@@ -2184,7 +2184,7 @@ void
 ARDOUR_UI::transport_goto_start ()
 {
 	if (_session) {
-		_session->goto_start();
+		_session->goto_start ();
 
 		/* force displayed area in editor to start no matter
 		   what "follow playhead" setting is.
