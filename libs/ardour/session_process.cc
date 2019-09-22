@@ -81,12 +81,12 @@ Session::process (pframes_t nframes)
 	}
 
 	if (non_realtime_work_pending()) {
-		DEBUG_TRACE (DEBUG::Butler, string_compose ("non-realtime work pending: %1\n", enum_2_string (post_transport_work())));
+		DEBUG_TRACE (DEBUG::Butler, string_compose ("non-realtime work pending: %1 (%2%3%4)\n", enum_2_string (post_transport_work()), std::hex, post_transport_work(), std::dec));
 		if (!_butler->transport_work_requested ()) {
 			DEBUG_TRACE (DEBUG::Butler, string_compose ("done, waiting? %1\n", _transport_fsm->waiting_for_butler()));
 			butler_completed_transport_work ();
 		} else {
-			DEBUG_TRACE (DEBUG::Butler, "not done yet\n");
+			DEBUG_TRACE (DEBUG::Butler, "doesn't seem to have finished yet (from view of RT thread)\n");
 		}
 	}
 
