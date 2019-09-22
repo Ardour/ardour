@@ -59,7 +59,8 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		normal = 1.0f;
 		break;
 	case BusSendEnable:
-		normal = 1.0f;
+		upper  = 1.f;
+		normal = 1.f;
 		toggled = true;
 		break;
 	case TrimAutomation:
