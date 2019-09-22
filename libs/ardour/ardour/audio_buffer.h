@@ -52,7 +52,7 @@ public:
 		assert(src != 0);
 		assert(_capacity > 0);
 		assert(len <= _capacity);
-		memcpy(_data + dst_offset, src + src_offset, sizeof(Sample) * len);
+		copy_vector(_data + dst_offset, src + src_offset, len);
 		_silent = false;
 		_written = true;
 	}
@@ -69,7 +69,13 @@ public:
 		assert(src.type() == DataType::AUDIO);
 		assert(dst_offset + len <= _capacity);
 		assert( src_offset <= ((samplecnt_t) src.capacity()-len));
-		memcpy(_data + dst_offset, ((const AudioBuffer&)src).data() + src_offset, sizeof(Sample) * len);
+
+		if (src.silent()) {
+			memset (_data + dst_offset, 0, sizeof (Sample) * len);
+		} else {
+			copy_vector (_data + dst_offset, ((const AudioBuffer&)src).data() + src_offset, len);
+		}
+
 		if (dst_offset == 0 && src_offset == 0 && len == _capacity) {
 			_silent = src.silent();
 		} else {
@@ -89,7 +95,9 @@ public:
 	void accumulate_from (const AudioBuffer& src, samplecnt_t len, sampleoffset_t dst_offset = 0, sampleoffset_t src_offset = 0) {
 		assert(_capacity > 0);
 		assert(len <= _capacity);
-
+		if (src.silent ()) {
+			return;
+		}
 		Sample*       const dst_raw = _data + dst_offset;
 		const Sample* const src_raw = src.data() + src_offset;
 
@@ -116,11 +124,10 @@ public:
 	/** Accumulate (add) @a len samples @a src starting at @a src_offset into self starting at @dst_offset
 	 * scaling by @a gain_coeff */
 	void accumulate_with_gain_from (const AudioBuffer& src, samplecnt_t len, gain_t gain_coeff, sampleoffset_t dst_offset = 0, sampleoffset_t src_offset = 0) {
-
 		assert(_capacity > 0);
 		assert(len <= _capacity);
 
-		if (src.silent()) {
+		if (src.silent() || gain_coeff == 0) {
 			return;
 		}
 
@@ -155,6 +162,10 @@ public:
 		assert(_capacity > 0);
 		assert(len <= _capacity);
 
+		if (initial == 0 && target == 0) {
+			return;
+		}
+
 		Sample* dst = _data + dst_offset;
 		gain_t  gain_delta = (target - initial)/len;
 
@@ -172,6 +183,13 @@ public:
 	 * @param len number of samples to amplify
 	 */
 	void apply_gain (gain_t gain, samplecnt_t len) {
+		if (gain == 0) {
+			memset (_data, 0, sizeof (Sample) * len);
+			if (len == _capacity) {
+				_silent = true;
+			}
+			return;
+		}
 		apply_gain_to_buffer (_data, len, gain);
 	}
 
