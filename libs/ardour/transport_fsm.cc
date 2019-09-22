@@ -19,8 +19,12 @@
 
 #include <sstream>
 
+#include <boost/none.hpp>
+
 #include "pbd/error.h"
 #include "pbd/i18n.h"
+#include "pbd/pthread_utils.h"
+#include "pbd/stacktrace.h"
 
 #include "ardour/debug.h"
 #include "ardour/session.h"
@@ -130,14 +134,14 @@ TransportFSM::process_events ()
       +----------------------+----------------+------------------+---------------------+---------------------------------+
 a_row < Stopped,             start_transport, Rolling,           &T::start_playback                                      >,
 _row  < Stopped,             stop_transport,  Stopped                                                                    >,
-a_row < Stopped,             locate,          WaitingForLocate,  &T::start_locate                                        >,
+a_row < Stopped,             locate,          WaitingForLocate,  &T::start_locate_while_stopped                          >,
 g_row < WaitingForLocate,    locate_done,     Stopped,                                  &T::should_not_roll_after_locate >,
 _row  < Rolling,             butler_done,     Rolling                                                                    >,
 _row  < Rolling,             start_transport, Rolling                                                                    >,
-a_row < Rolling,             stop_transport,  DeclickToStop,     &T::start_declick                                       >,
+a_row < Rolling,             stop_transport,  DeclickToStop,     &T::start_declick_for_stop                              >,
 a_row < DeclickToStop,       declick_done,    Stopped,           &T::stop_playback                                       >,
-a_row < Rolling,             locate,          DeclickToLocate,   &T::save_locate_and_start_declick                       >,
-a_row < DeclickToLocate,     declick_done,    WaitingForLocate,  &T::start_saved_locate                                  >,
+a_row < Rolling,             locate,          DeclickToLocate,   &T::start_declick_for_locate                            >,
+a_row < DeclickToLocate,     declick_done,    WaitingForLocate,  &T::start_locate_after_declick                          >,
 row   < WaitingForLocate,    locate_done,     Rolling,           &T::roll_after_locate, &T::should_roll_after_locate     >,
 a_row < NotWaitingForButler, butler_required, WaitingForButler,  &T::schedule_butler_for_transport_work                  >,
 a_row < WaitingForButler,    butler_required, WaitingForButler,  &T::schedule_butler_for_transport_work                  >,
@@ -205,7 +209,7 @@ TransportFSM::process_event (Event& ev)
 		switch (_motion_state) {
 		case Rolling:
 			transition (DeclickToStop);
-			start_declick (ev);
+			start_declick_for_stop (ev);
 			break;
 		case Stopped:
 			break;
@@ -223,11 +227,11 @@ TransportFSM::process_event (Event& ev)
 		switch (_motion_state) {
 		case Stopped:
 			transition (WaitingForLocate);
-			start_locate (ev);
+			start_locate_while_stopped (ev);
 			break;
 		case Rolling:
 			transition (DeclickToLocate);
-			save_locate_and_start_declick (ev);
+			start_declick_for_locate (ev);
 			break;
 		case WaitingForLocate:
 		case DeclickToLocate:
@@ -243,6 +247,7 @@ TransportFSM::process_event (Event& ev)
 		case WaitingForLocate:
 			if (should_not_roll_after_locate()) {
 				transition (Stopped);
+				/* already stopped, nothing to do */
 			} else {
 				transition (Rolling);
 				roll_after_locate ();
@@ -257,7 +262,7 @@ TransportFSM::process_event (Event& ev)
 		switch (_motion_state) {
 		case DeclickToLocate:
 			transition (WaitingForLocate);
-			start_saved_locate ();
+			start_locate_after_declick ();
 			break;
 		case DeclickToStop:
 			transition (Stopped);
@@ -299,57 +304,80 @@ TransportFSM::process_event (Event& ev)
 /* transition actions */
 
 void
-TransportFSM::start_playback () const
+TransportFSM::start_playback ()
 {
-	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::start_playback\n");
-	api->start_transport();
-}
+	DEBUG_TRACE (DEBUG::TFSMEvents, "start_playback\n");
 
-void
-TransportFSM::start_declick (Event const & s)
-{
-	assert (s.type == StopTransport);
-	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::start_declick\n");
-	_last_stop = s;
+	_last_locate.target = max_samplepos;
+	current_roll_after_locate_status = boost::none;
+
+	api->start_transport();
 }
 
 void
 TransportFSM::stop_playback ()
 {
-	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::stop_playback\n");
-	api->stop_transport (_last_stop.abort, _last_stop.clear_state);
+	DEBUG_TRACE (DEBUG::TFSMEvents, "stop_playback\n");
+
 	_last_locate.target = max_samplepos;
+	current_roll_after_locate_status = boost::none;
+
+	api->stop_transport (_last_stop.abort, _last_stop.clear_state);
 }
 
 void
-TransportFSM::save_locate_and_start_declick (Event const & l)
+TransportFSM::start_declick_for_stop (Event const & s)
+{
+	assert (s.type == StopTransport);
+	DEBUG_TRACE (DEBUG::TFSMEvents, "start_declick_for_stop\n");
+	_last_stop = s;
+}
+
+void
+TransportFSM::start_declick_for_locate (Event const & l)
 {
 	assert (l.type == Locate);
-	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::save_locate_and_stop\n");
+	DEBUG_TRACE (DEBUG::TFSMEvents, "start_declick_for_locate\n");
 	_last_locate = l;
+
+	if (!current_roll_after_locate_status) {
+		if (l.with_roll) {
+			if (api->speed() != 0.) {
+				current_roll_after_locate_status = true;
+			} else {
+				current_roll_after_locate_status = api->should_roll_after_locate();
+			}
+		} else {
+			current_roll_after_locate_status = (api->speed() != 0.);
+		}
+	}
+
 	_last_stop = Event (StopTransport, false, false);
 }
 
 void
-TransportFSM::start_locate (Event const & l) const
+TransportFSM::start_locate_while_stopped (Event const & l) const
 {
 	assert (l.type == Locate);
-	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::start_locate\n");
-	api->locate (l.target, l.with_roll, l.with_flush, l.with_loop, l.force);
+	DEBUG_TRACE (DEBUG::TFSMEvents, "start_locate_while_stopped\n");
+
+	current_roll_after_locate_status = api->should_roll_after_locate();
+	api->locate (l.target, current_roll_after_locate_status.get(), l.with_flush, l.with_loop, l.force);
 }
 
 void
-TransportFSM::start_saved_locate () const
+TransportFSM::start_locate_after_declick () const
 {
-	DEBUG_TRACE (DEBUG::TFSMEvents, "tfsm::start_save\n");
-	api->locate (_last_locate.target, _last_locate.with_roll, _last_locate.with_flush, _last_locate.with_loop, _last_locate.force);
+	DEBUG_TRACE (DEBUG::TFSMEvents, "start_locate_after_declick\n");
+	const bool roll = current_roll_after_locate_status ? current_roll_after_locate_status.get() : _last_locate.with_roll;
+	api->locate (_last_locate.target, roll, _last_locate.with_flush, _last_locate.with_loop, _last_locate.force);
 }
 
 void
 TransportFSM::interrupt_locate (Event const & l) const
 {
 	assert (l.type == Locate);
-	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("tfsm::interrupt to %1 versus %2\n", l.target, _last_locate.target));
+	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("interrupt to %1 versus %2\n", l.target, _last_locate.target));
 
 	/* Because of snapping (e.g. of mouse position) we could be
 	 * interrupting an existing locate to the same position. If we go ahead
@@ -370,7 +398,7 @@ TransportFSM::interrupt_locate (Event const & l) const
 	/* maintain original "with-roll" choice of initial locate, even though
 	 * we are interrupting the locate to start a new one.
 	 */
-	api->locate (l.target, _last_locate.with_roll, l.with_flush, l.with_loop, l.force);
+	api->locate (l.target, false, l.with_flush, l.with_loop, l.force);
 }
 
 void
@@ -382,15 +410,23 @@ TransportFSM::schedule_butler_for_transport_work () const
 bool
 TransportFSM::should_roll_after_locate () const
 {
-	bool ret = api->should_roll_after_locate ();
-	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("tfsm::should_roll_after_locate() ? %1\n", ret));
-	return ret;
+	bool roll;
+
+	if (current_roll_after_locate_status) {
+		roll = current_roll_after_locate_status.get();
+	} else {
+		roll = api->should_roll_after_locate ();
+	}
+
+	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("should_roll_after_locate() ? %1\n", roll));
+	return roll;
 }
 
 void
 TransportFSM::roll_after_locate () const
 {
 	DEBUG_TRACE (DEBUG::TFSMEvents, "rolling after locate\n");
+	current_roll_after_locate_status = boost::none;
 	api->start_transport ();
 }
 
@@ -404,15 +440,17 @@ TransportFSM::defer (Event& ev)
 void
 TransportFSM::transition (MotionState ms)
 {
-	DEBUG_TRACE (DEBUG::TFSMState, string_compose ("Leave %1, enter %2\n", enum_2_string (_motion_state), enum_2_string (ms)));
+	const MotionState old = _motion_state;
 	_motion_state = ms;
+	DEBUG_TRACE (DEBUG::TFSMState, string_compose ("Leave %1, enter %2\n", enum_2_string (old), current_state()));
 }
 
 void
 TransportFSM::transition (ButlerState bs)
 {
-	DEBUG_TRACE (DEBUG::TFSMState, string_compose ("Leave %1, enter %2\n", enum_2_string (_butler_state), enum_2_string (bs)));
+	const ButlerState old = _butler_state;
 	_butler_state = bs;
+	DEBUG_TRACE (DEBUG::TFSMState, string_compose ("Leave %1, enter %2\n", enum_2_string (old), current_state()));
 }
 
 void

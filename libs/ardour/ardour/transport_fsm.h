@@ -5,6 +5,8 @@
 #include <queue>
 
 #include <boost/intrusive/list.hpp>
+#include <boost/optional.hpp>
+
 #include <string>
 #include <utility>
 #include <iostream>
@@ -128,14 +130,14 @@ struct TransportFSM
 	/* transition actions */
 
 	void schedule_butler_for_transport_work () const;
-	void start_playback () const;
+	void start_playback ();
 	void stop_playback ();
-	void start_saved_locate () const;
+	void start_locate_after_declick () const;
 	void roll_after_locate () const;
-	void start_locate (Event const &) const;
+	void start_locate_while_stopped (Event const &) const;
 	void interrupt_locate (Event const &) const;
-	void save_locate_and_start_declick (Event const &);
-	void start_declick (Event const &);
+	void start_declick_for_locate (Event const &);
+	void start_declick_for_stop (Event const &);
 
 	/* guards */
 
@@ -167,6 +169,7 @@ struct TransportFSM
 	EventList queued_events;
 	EventList deferred_events;
 	int processing;
+	mutable boost::optional<bool> current_roll_after_locate_status;
 
 	void defer (Event& ev);
 	void bad_transition (Event const &);
