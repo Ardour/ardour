@@ -353,6 +353,7 @@ private:
 
 	void on_switch_page (GtkNotebookPage*, guint page_num);
 	bool on_delete_event (GdkEventAny*);
+	void on_response (int);
 
 	void engine_running ();
 	void engine_stopped ();

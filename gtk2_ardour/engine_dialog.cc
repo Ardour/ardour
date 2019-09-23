@@ -3101,13 +3101,30 @@ EngineControl::use_latency_button_clicked ()
 	}
 }
 
+void
+EngineControl::on_response (int rid)
+{
+	/* this gets called if this Dialog is running under gtk_dialog_run()
+	   rather than in the toplevel loop. This happens during program
+	   startup.
+	*/
+
+	if (rid == RESPONSE_DELETE_EVENT) {
+		on_delete_event ((GdkEventAny*) 0);
+		return;
+	}
+
+	ArdourDialog::on_response (rid);
+}
+
 bool
 EngineControl::on_delete_event (GdkEventAny* ev)
 {
-	if (notebook.get_current_page() == 2) {
-		/* currently on latency tab - be sure to clean up */
+	if (lm_running || notebook.get_current_page() == 2) {
+		/* currently measuring latency - be sure to clean up */
 		end_latency_detection ();
 	}
+
 	return ArdourDialog::on_delete_event (ev);
 }
 
