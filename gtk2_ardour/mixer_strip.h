@@ -297,9 +297,6 @@ private:
 
 	static MixerStrip* _entered_mixer_strip;
 
-	void engine_running();
-	void engine_stopped();
-
 	virtual void bus_send_display_changed (boost::shared_ptr<ARDOUR::Route>);
 
 	void set_current_delivery (boost::shared_ptr<ARDOUR::Delivery>);

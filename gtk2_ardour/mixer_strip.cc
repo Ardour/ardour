@@ -366,9 +366,6 @@ MixerStrip::init ()
 	_packed = false;
 	_embedded = false;
 
-	_session->engine().Stopped.connect (*this, invalidator (*this), boost::bind (&MixerStrip::engine_stopped, this), gui_context());
-	_session->engine().Running.connect (*this, invalidator (*this), boost::bind (&MixerStrip::engine_running, this), gui_context());
-
 	input_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::input_press), false);
 	input_button.signal_button_release_event().connect (sigc::mem_fun(*this, &MixerStrip::input_release), false);
 	input_button.signal_size_allocate().connect (sigc::mem_fun (*this, &MixerStrip::input_button_resized));
@@ -2062,16 +2059,6 @@ MixerStrip::reset_strip_style ()
 	}
 }
 
-
-void
-MixerStrip::engine_stopped ()
-{
-}
-
-void
-MixerStrip::engine_running ()
-{
-}
 
 string
 MixerStrip::meter_point_string (MeterPoint mp)
