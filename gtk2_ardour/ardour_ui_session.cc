@@ -65,6 +65,10 @@
 #include "timers.h"
 #include "utils.h"
 
+#ifdef WINDOWS_VST_SUPPORT
+#include <fst.h>
+#endif
+
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
