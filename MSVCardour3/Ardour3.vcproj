@@ -320,6 +320,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\ardour_ui3.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\ardour_ui_access_web.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\ardour_ui_dependents.cc"
 				>
 			</File>
@@ -332,11 +340,35 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\ardour_ui_engine.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\ardour_ui_keys.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\ardour_ui_mixer.cc"
 				>
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\ardour_ui_options.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\ardour_ui_plugins.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\ardour_ui_session.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\ardour_ui_startup.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\ardour_ui_video.cc"
 				>
 			</File>
 			<File
