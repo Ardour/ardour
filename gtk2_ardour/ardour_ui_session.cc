@@ -49,6 +49,7 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/filename_extensions.h"
+#include "ardour/profile.h"
 #include "ardour/session.h"
 #include "ardour/session_utils.h"
 #include "ardour/session_state_utils.h"
@@ -108,6 +109,8 @@ ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& sess
 	BusProfile bus_profile;
 
 	if (nsm) {
+		bus_profile.master_out_channels = 2;
+	} else if ( Profile->get_mixbus()) {
 		bus_profile.master_out_channels = 2;
 	} else {
 		/* get settings from advanced section of NSD */

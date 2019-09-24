@@ -601,7 +601,7 @@ ARDOUR_UI::starting ()
 
 		/* go get a session */
 
-		const bool new_session_required = (ARDOUR_COMMAND_LINE::new_session || brand_new_user);
+		const bool new_session_required = (ARDOUR_COMMAND_LINE::new_session || (!ARDOUR::Profile->get_mixbus() && brand_new_user));
 
 		if (get_session_parameters (false, new_session_required, ARDOUR_COMMAND_LINE::load_template)) {
 			std::cerr << "Cannot get session parameters."<< std::endl;
