@@ -1025,6 +1025,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\session_bundles.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\session_butler.cc"
 				>
 				<FileConfiguration
