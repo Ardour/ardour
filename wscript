@@ -836,6 +836,7 @@ def options(opt):
         '--qm-dsp-include', type='string', action='store',
         dest='qm_dsp_include', default='/usr/include/qm-dsp',
         help='directory where the header files of qm-dsp can be found')
+    opt.add_option ('--use-lld', action='store_true', default=False, dest='use_lld', help='Use LLD linker instead of ld (Linux only)')
 
     for i in children:
         opt.recurse(i)
@@ -1235,9 +1236,21 @@ int main () { return 0; }
     conf.env['BUILD_CORECRAPPITA'] = any('coreaudio' in b for b in backends)
     conf.env['BUILD_PULSEAUDIO'] = any('pulseaudio' in b for b in backends)
 
+    if (Options.options.use_lld):
+        if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
+                print("lld is only for Linux builds")
+        else:
+                try:
+                        conf.find_program ('lld')
+                        conf.env.append_value('LINKFLAGS', '-fuse-ld=lld')
+                        print ("Using the lld linker")
+                except conf.errors.ConfigurationError:
+                        pass
+
     if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
         print("PortAudio Backend is not for Linux")
         sys.exit(1)
+
 
     if sys.platform != 'darwin' and conf.env['BUILD_CORECRAPPITA']:
         print("Coreaudio backend is only available for OSX")
@@ -1409,7 +1422,7 @@ def build(bld):
 
     if bld.is_defined ('BEATBOX'):
         bld.recurse('tools/bb')
-            
+
     bld.install_files (bld.env['CONFDIR'], 'system_config')
 
     bld.install_files (os.path.join (bld.env['DATADIR'], 'templates'), bld.path.ant_glob ('templates/**'), cwd=bld.path.find_dir ('templates'), relative_trick=True)
