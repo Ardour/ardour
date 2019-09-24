@@ -128,7 +128,14 @@ int
 ControlGroup::add_control (boost::shared_ptr<AutomationControl> ac)
 {
 	if (ac->parameter() != _parameter) {
-		return -1;
+		if (_parameter.type () != PluginAutomation) {
+			return -1;
+		}
+		/* allow plugin-automation - first control sets Evoral::parameter */
+		Glib::Threads::RWLock::ReaderLock lm (controls_lock);
+		if (!_controls.empty () && _controls.begin()->second->parameter() != ac->parameter()) {
+			return -1;
+		}
 	}
 
 	std::pair<ControlMap::iterator,bool> res;
