@@ -156,8 +156,6 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	void remove_session (); // not a replacement for SessionHandle::session_going_away()
 	Session* session() const { return _session; }
 
-	void reconnect_session_routes (bool reconnect_inputs = true, bool reconnect_outputs = true);
-
 	class NoBackendAvailable : public std::exception {
 	    public:
 		virtual const char *what() const throw() { return "could not connect to engine backend"; }

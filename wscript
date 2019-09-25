@@ -27,11 +27,6 @@ class i18n_mo(BuildContext):
         cmd = 'i18n_mo'
         fun = 'i18n_mo'
 
-def is_tracks_build(self, *k, **kw):
-        return self.env['PROGRAM_NAME'] == 'Tracks Live'
-
-Context.Context.is_tracks_build = is_tracks_build
-
 compiler_flags_dictionaries= {
     'gcc' : {
         # Flags required when building a debug build
@@ -712,9 +707,6 @@ def create_resource_file(icon):
         print('Could not open gtk2_ardour/windows_icon.rc for writing\n')
         sys.exit(-1)
 
-def is_tracks_build (conf):
-        return conf.env['PROGRAM_NAME'] == 'Tracks Live'
-
 #----------------------------------------------------------------
 
 # Waf stages
@@ -1387,11 +1379,6 @@ def build(bld):
 
     # set up target directories
     lwrcase_dirname = 'ardour' + bld.env['MAJOR']
-
-    if bld.is_tracks_build():
-        bld.env.append_value ('CXXFLAGS', '-DUSE_TRACKS_CODE_FEATURES')
-        bld.env.append_value ('CFLAGS', '-DUSE_TRACKS_CODE_FEATURES')
-        lwrcase_dirname = 'trx'
 
     # configuration files go here
     bld.env['CONFDIR'] = os.path.join(bld.env['SYSCONFDIR'], lwrcase_dirname)

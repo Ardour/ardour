@@ -689,18 +689,6 @@ AudioEngine::remove_session ()
 	remove_all_ports ();
 }
 
-
-void
-AudioEngine::reconnect_session_routes (bool reconnect_inputs, bool reconnect_outputs)
-{
-#ifdef USE_TRACKS_CODE_FEATURES
-	if (_session) {
-		_session->reconnect_existing_routes(true, true, reconnect_inputs, reconnect_outputs);
-	}
-#endif
-}
-
-
 void
 AudioEngine::died ()
 {

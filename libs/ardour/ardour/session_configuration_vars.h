@@ -89,14 +89,3 @@ CONFIG_VARIABLE (bool, show_solo_on_meterbridge, "show-solo-on-meterbridge", fal
 CONFIG_VARIABLE (bool, show_monitor_on_meterbridge, "show-monitor-on-meterbridge", false)
 CONFIG_VARIABLE (bool, show_name_on_meterbridge, "show-name-on-meterbridge", true)
 CONFIG_VARIABLE (uint32_t, meterbridge_label_height,  "meterbridge-label-height", 0)
-
-#ifdef USE_TRACKS_CODE_FEATURES
-/* This variable was not discussed with Ardour developers and is considered
-   weakly conceived. It is also poorly named, since we have "groups" already
-   present in libardour but this variable has nothing to do with it. There
-   should have been more discussion about what was required and the best
-   way to accomplish it.
-*/
-CONFIG_VARIABLE (bool, enable_group_edit, "enable-group-edit", false)
-/* These are GUI-only properties and should not be present in this context */
-#endif

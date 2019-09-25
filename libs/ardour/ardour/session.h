@@ -1232,9 +1232,6 @@ protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
 	void set_sample_rate (samplecnt_t nframes);
-#ifdef USE_TRACKS_CODE_FEATURES
-	void reconnect_existing_routes (bool withLock, bool reconnect_master = true, bool reconnect_inputs = true, bool reconnect_outputs = true);
-#endif
 
 	friend class Route;
 	void update_latency_compensation (bool force = false);

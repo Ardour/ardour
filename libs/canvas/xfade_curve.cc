@@ -28,11 +28,7 @@ using namespace ArdourCanvas;
 using std::min;
 using std::max;
 
-#ifdef USE_TRACKS_CODE_FEATURES
-static const bool show_bg_fades = false;
-#else
 static const bool show_bg_fades = true;
-#endif
 
 XFadeCurve::XFadeCurve (Canvas* c)
 	: Item (c)

@@ -76,9 +76,6 @@ CONFIG_VARIABLE (bool, midi_input_follows_selection, "midi-input-follows-selecti
 CONFIG_VARIABLE (bool, run_all_transport_masters_always, "run-all-transport-masters-always", true)
 CONFIG_VARIABLE (int, mtc_qf_speed_tolerance, "mtc-qf-speed-tolerance", 5)
 CONFIG_VARIABLE (bool, timecode_sync_frame_rate, "timecode-sync-frame-rate", true)
-#ifdef USE_TRACKS_CODE_FEATURES
-CONFIG_VARIABLE (SyncSource, sync_source, "sync-source", MTC)
-#endif
 CONFIG_VARIABLE (bool, send_ltc, "send-ltc", false)
 CONFIG_VARIABLE (bool, ltc_send_continuously, "ltc-send-continuously", true)
 CONFIG_VARIABLE (std::string, ltc_output_port, "ltc-output-port", "")
@@ -120,11 +117,7 @@ CONFIG_VARIABLE (RegionSelectionAfterSplit, region_selection_after_split, "regio
 
 /* monitoring, mute, solo etc */
 
-#ifdef USE_TRACKS_CODE_FEATURES
-CONFIG_VARIABLE (bool, mute_affects_pre_fader, "mute-affects-pre-fader", true)
-#else
 CONFIG_VARIABLE (bool, mute_affects_pre_fader, "mute-affects-pre-fader", false)
-#endif
 CONFIG_VARIABLE (bool, mute_affects_post_fader, "mute-affects-post-fader", true)
 CONFIG_VARIABLE (bool, mute_affects_control_outs, "mute-affects-control-outs", true)
 CONFIG_VARIABLE (bool, mute_affects_main_outs, "mute-affects-main-outs", true)
@@ -169,11 +162,7 @@ CONFIG_VARIABLE (bool, create_xrun_marker, "create-xrun-marker", true)
 CONFIG_VARIABLE (bool, stop_at_session_end, "stop-at-session-end", false)
 CONFIG_VARIABLE (bool, seamless_loop, "seamless-loop", false)
 CONFIG_VARIABLE (float, preroll_seconds, "preroll-seconds", -2.0f)
-#ifdef USE_TRACKS_CODE_FEATURES
-CONFIG_VARIABLE (bool, loop_is_mode, "loop-is-mode", true)
-#else
 CONFIG_VARIABLE (bool, loop_is_mode, "loop-is-mode", false)
-#endif
 CONFIG_VARIABLE (samplecnt_t, preroll, "preroll", 0)
 CONFIG_VARIABLE (samplecnt_t, postroll, "postroll", 0)
 CONFIG_VARIABLE (float, shuttle_speed_factor, "shuttle-speed-factor", 1.0f) // used for MMC shuttle
@@ -183,21 +172,12 @@ CONFIG_VARIABLE (ShuttleUnits, shuttle_units, "shuttle-units", Percentage)
 CONFIG_VARIABLE (float, shuttle_max_speed, "shuttle-max-speed", 8.0f)
 CONFIG_VARIABLE (bool, locate_while_waiting_for_sync, "locate-while-waiting-for-sync", false)
 CONFIG_VARIABLE (bool, disable_disarm_during_roll, "disable-disarm-during-roll", false)
-#ifdef USE_TRACKS_CODE_FEATURES
-CONFIG_VARIABLE (AutoReturnTarget, auto_return_target_list, "auto-return-target-list", AutoReturnTarget(LastLocate) )
-#else
 CONFIG_VARIABLE (AutoReturnTarget, auto_return_target_list, "auto-return-target-list", AutoReturnTarget(LastLocate|RangeSelectionStart|Loop|RegionSelectionStart))
-#endif
 
 /* metering */
 
-#ifdef USE_TRACKS_CODE_FEATURES
-CONFIG_VARIABLE (float, meter_falloff, "meter-falloff", 60.0f)
-CONFIG_VARIABLE (MeterType, meter_type_master, "meter-type-master", MeterPeak)
-#else
 CONFIG_VARIABLE (float, meter_falloff, "meter-falloff", 13.3f)
 CONFIG_VARIABLE (MeterType, meter_type_master, "meter-type-master", MeterK14)
-#endif
 CONFIG_VARIABLE (MeterType, meter_type_track, "meter-type-track", MeterPeak)
 CONFIG_VARIABLE (MeterType, meter_type_bus, "meter-type-bus", MeterPeak)
 

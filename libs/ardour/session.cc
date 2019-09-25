@@ -79,9 +79,6 @@
 #include "ardour/debug.h"
 #include "ardour/disk_reader.h"
 #include "ardour/directory_names.h"
-#ifdef USE_TRACKS_CODE_FEATURES
-#include "ardour/engine_state_controller.h"
-#endif
 #include "ardour/filename_extensions.h"
 #include "ardour/gain_control.h"
 #include "ardour/graph.h"
@@ -168,13 +165,7 @@ PBD::Signal2<void,std::string,std::string> Session::VersionMismatch;
 const samplecnt_t Session::bounce_chunk_size = 8192;
 static void clean_up_session_event (SessionEvent* ev) { delete ev; }
 const SessionEvent::RTeventCallback Session::rt_cleanup (clean_up_session_event);
-
-// seconds should be added after the region exceeds end marker
-#ifdef USE_TRACKS_CODE_FEATURES
-const uint32_t Session::session_end_shift = 5;
-#else
 const uint32_t Session::session_end_shift = 0;
-#endif
 
 /** @param snapshot_name Snapshot name, without .ardour suffix */
 Session::Session (AudioEngine &eng,
@@ -352,9 +343,6 @@ Session::Session (AudioEngine &eng,
 
 		Stateful::loading_state_version = CURRENT_SESSION_FILE_VERSION;
 
-#ifdef USE_TRACKS_CODE_FEATURES
-		sr = EngineStateController::instance()->get_current_sample_rate();
-#endif
 		if (ensure_engine (sr, true)) {
 			destroy ();
 			throw SessionException (_("Cannot connect to audio/midi engine"));
@@ -471,49 +459,6 @@ Session::Session (AudioEngine &eng,
 
 	_engine.set_session (this);
 	_engine.reset_timebase ();
-
-#ifdef USE_TRACKS_CODE_FEATURES
-
-	EngineStateController::instance()->set_session(this);
-
-	if (_is_new ) {
-		if ( ARDOUR::Profile->get_trx () ) {
-
-			/* Waves Tracks: fill session with tracks basing on the amount of inputs.
-			 * each available input must have corresponding track when session starts.
-			 */
-
-			uint32_t how_many (0);
-
-			std::vector<std::string> inputs;
-			EngineStateController::instance()->get_physical_audio_inputs(inputs);
-
-			how_many = inputs.size();
-
-			list<boost::shared_ptr<AudioTrack> > tracks;
-
-			// Track names after driver
-			if (Config->get_tracks_auto_naming() == NameAfterDriver) {
-				string track_name = "";
-				for (std::vector<string>::size_type i = 0; i < inputs.size(); ++i) {
-					string track_name;
-					track_name = inputs[i];
-					replace_all (track_name, "system:capture", "");
-
-					list<boost::shared_ptr<AudioTrack> > single_track = new_audio_track (1, 1, Normal, 0, 1, track_name);
-					tracks.insert(tracks.begin(), single_track.front());
-				}
-			} else { // Default track names
-				tracks = new_audio_track (1, 1, Normal, 0, how_many, string());
-			}
-
-			if (tracks.size() != how_many) {
-				destroy ();
-				throw failed_constructor ();
-			}
-		}
-	}
-#endif
 
 	ensure_subdirs (); // archived or zipped sessions may lack peaks/ analysis/ etc
 
@@ -684,10 +629,6 @@ Session::destroy ()
 	MIDI::Name::MidiPatchManager::instance().remove_search_path(session_directory().midi_patch_path());
 
 	_engine.remove_session ();
-
-#ifdef USE_TRACKS_CODE_FEATURES
-	EngineStateController::instance()->remove_session();
-#endif
 
 	/* deregister all ports - there will be no process or any other
 	 * callbacks from the engine any more.
@@ -2655,254 +2596,6 @@ Session::midi_output_change_handler (IOChange change, void * /*src*/, boost::wea
 	}
 }
 
-#ifdef USE_TRACKS_CODE_FEATURES
-
-static bool
-compare_routes_by_remote_id (const boost::shared_ptr<Route>& route1, const boost::shared_ptr<Route>& route2)
-{
-	return route1->remote_control_id() < route2->remote_control_id();
-}
-
-void
-Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool reconnect_inputs, bool reconnect_outputs)
-{
-	// it is not allowed to perform connection
-	if (!IO::connecting_legal) {
-		return;
-	}
-
-	// if we are deleting routes we will call this once at the end
-	if (_route_deletion_in_progress) {
-		return;
-	}
-
-	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
-
-	if (withLock) {
-		lm.acquire ();
-	}
-
-	// We need to disconnect the route's inputs and outputs first
-	// basing on autoconnect configuration
-	bool reconnectIputs = !(Config->get_input_auto_connect() & ManualConnect) && reconnect_inputs;
-	bool reconnectOutputs = !(Config->get_output_auto_connect() & ManualConnect) && reconnect_outputs;
-
-	ChanCount existing_inputs;
-	ChanCount existing_outputs;
-	count_existing_track_channels (existing_inputs, existing_outputs);
-
-	//ChanCount inputs = ChanCount::ZERO;
-	//ChanCount outputs = ChanCount::ZERO;
-
-	RouteList existing_routes = *routes.reader ();
-	existing_routes.sort (compare_routes_by_remote_id);
-
-	{
-		PBD::Unwinder<bool> protect_ignore_changes (_reconnecting_routes_in_progress, true);
-
-		vector<string> physinputs;
-		vector<string> physoutputs;
-
-		EngineStateController::instance()->get_physical_audio_outputs(physoutputs);
-		EngineStateController::instance()->get_physical_audio_inputs(physinputs);
-
-		uint32_t input_n = 0;
-		uint32_t output_n = 0;
-		RouteList::iterator rIter = existing_routes.begin();
-		const AutoConnectOption current_input_auto_connection (Config->get_input_auto_connect());
-		const AutoConnectOption current_output_auto_connection (Config->get_output_auto_connect());
-		for (; rIter != existing_routes.end(); ++rIter) {
-			if (*rIter == _master_out || *rIter == _monitor_out ) {
-				continue;
-			}
-
-			if (current_output_auto_connection == AutoConnectPhysical) {
-				(*rIter)->amp()->deactivate();
-			} else if (current_output_auto_connection == AutoConnectMaster) {
-				(*rIter)->amp()->activate();
-			}
-
-			if (reconnectIputs) {
-				(*rIter)->input()->disconnect (this); //GZ: check this; could be heavy
-
-				for (uint32_t route_input_n = 0; route_input_n < (*rIter)->n_inputs().get(DataType::AUDIO); ++route_input_n) {
-
-					if (current_input_auto_connection & AutoConnectPhysical) {
-
-						if ( input_n == physinputs.size() ) {
-							break;
-						}
-
-						string port = physinputs[input_n];
-
-						if (port.empty() ) {
-							error << "Physical Input number "<< input_n << " is unavailable and cannot be connected" << endmsg;
-						}
-
-						//GZ: check this; could be heavy
-						(*rIter)->input()->connect ((*rIter)->input()->ports().port(DataType::AUDIO, route_input_n), port, this);
-						++input_n;
-					}
-				}
-			}
-
-			if (reconnectOutputs) {
-
-				//normalize route ouptuts: reduce the amount outputs to be equal to the amount of inputs
-				if (current_output_auto_connection & AutoConnectPhysical) {
-
-					//GZ: check this; could be heavy
-					(*rIter)->output()->disconnect (this);
-					size_t route_inputs_count = (*rIter)->n_inputs().get(DataType::AUDIO);
-
-					//GZ: check this; could be heavy
-					(*rIter)->output()->ensure_io(ChanCount(DataType::AUDIO, route_inputs_count), false, this );
-
-				} else if (current_output_auto_connection & AutoConnectMaster){
-
-					if (!reconnect_master) {
-						continue;
-					}
-
-					//GZ: check this; could be heavy
-					(*rIter)->output()->disconnect (this);
-
-					if (_master_out) {
-						uint32_t master_inputs_count = _master_out->n_inputs().get(DataType::AUDIO);
-						(*rIter)->output()->ensure_io(ChanCount(DataType::AUDIO, master_inputs_count), false, this );
-					} else {
-						error << error << "Master bus is not available" << endmsg;
-						break;
-					}
-				}
-
-				for (uint32_t route_output_n = 0; route_output_n < (*rIter)->n_outputs().get(DataType::AUDIO); ++route_output_n) {
-					if (current_output_auto_connection & AutoConnectPhysical) {
-
-						if ( output_n == physoutputs.size() ) {
-							break;
-						}
-
-						string port = physoutputs[output_n];
-
-						if (port.empty() ) {
-							error << "Physical Output number "<< output_n << " is unavailable and cannot be connected" << endmsg;
-						}
-
-						//GZ: check this; could be heavy
-						(*rIter)->output()->connect ((*rIter)->output()->ports().port(DataType::AUDIO, route_output_n), port, this);
-						++output_n;
-
-					} else if (current_output_auto_connection & AutoConnectMaster) {
-
-						if ( route_output_n == _master_out->n_inputs().get(DataType::AUDIO) ) {
-							break;
-						}
-
-						// connect to master bus
-						string port = _master_out->input()->ports().port(DataType::AUDIO, route_output_n)->name();
-
-						if (port.empty() ) {
-							error << "MasterBus Input number "<< route_output_n << " is unavailable and cannot be connected" << endmsg;
-						}
-
-
-						//GZ: check this; could be heavy
-						(*rIter)->output()->connect ((*rIter)->output()->ports().port(DataType::AUDIO, route_output_n), port, this);
-
-					}
-				}
-			}
-		}
-
-		_master_out->output()->disconnect (this);
-		auto_connect_master_bus ();
-	}
-
-	graph_reordered ();
-
-	session_routes_reconnected (); /* EMIT SIGNAL */
-}
-
-void
-Session::reconnect_midi_scene_ports(bool inputs)
-{
-	if (inputs ) {
-
-		boost::shared_ptr<MidiPort> scene_in_ptr = scene_in();
-		if (scene_in_ptr) {
-			scene_in_ptr->disconnect_all ();
-
-			std::vector<EngineStateController::MidiPortState> midi_port_states;
-			EngineStateController::instance()->get_physical_midi_input_states (midi_port_states);
-
-			std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
-
-			for (; state_iter != midi_port_states.end(); ++state_iter) {
-				if (state_iter->active && state_iter->available && state_iter->scene_connected) {
-					scene_in_ptr->connect (state_iter->name);
-				}
-			}
-		}
-
-	} else {
-
-		boost::shared_ptr<MidiPort> scene_out_ptr = scene_out();
-
-		if (scene_out_ptr ) {
-			scene_out_ptr->disconnect_all ();
-
-			std::vector<EngineStateController::MidiPortState> midi_port_states;
-			EngineStateController::instance()->get_physical_midi_output_states (midi_port_states);
-
-			std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
-
-			for (; state_iter != midi_port_states.end(); ++state_iter) {
-				if (state_iter->active && state_iter->available && state_iter->scene_connected) {
-					scene_out_ptr->connect (state_iter->name);
-				}
-			}
-		}
-	}
-}
-
-void
-Session::reconnect_mmc_ports(bool inputs)
-{
-	if (inputs ) { // get all enabled midi input ports
-
-		boost::shared_ptr<MidiPort> mmc_in_ptr = _midi_ports->mmc_in();
-		if (mmc_in_ptr) {
-			mmc_in_ptr->disconnect_all ();
-			std::vector<std::string> enabled_midi_inputs;
-			EngineStateController::instance()->get_physical_midi_inputs (enabled_midi_inputs);
-
-			std::vector<std::string>::iterator port_iter = enabled_midi_inputs.begin();
-
-			for (; port_iter != enabled_midi_inputs.end(); ++port_iter) {
-				mmc_in_ptr->connect (*port_iter);
-			}
-
-		}
-	} else { // get all enabled midi output ports
-
-		boost::shared_ptr<MidiPort> mmc_out_ptr = _midi_ports->mmc_out();
-		if (mmc_out_ptr ) {
-			mmc_out_ptr->disconnect_all ();
-			std::vector<std::string> enabled_midi_outputs;
-			EngineStateController::instance()->get_physical_midi_outputs (enabled_midi_outputs);
-
-			std::vector<std::string>::iterator port_iter = enabled_midi_outputs.begin();
-
-			for (; port_iter != enabled_midi_outputs.end(); ++port_iter) {
-				mmc_out_ptr->connect (*port_iter);
-			}
-		}
-	}
-}
-
-#endif
-
 bool
 Session::ensure_stripable_sort_order ()
 {
@@ -3737,15 +3430,10 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 
 	/* Re-sort routes to remove the graph's current references to the one that is
 	 * going away, then flush old references out of the graph.
-	 * Wave Tracks: reconnect routes
 	 */
 
-#ifdef USE_TRACKS_CODE_FEATURES
-		reconnect_existing_routes(true, false);
-#else
-		routes.flush (); // maybe unsafe, see below.
-		resort_routes ();
-#endif
+	routes.flush (); // maybe unsafe, see below.
+	resort_routes ();
 
 	if (_process_graph && !deletion_in_progress() && _engine.running()) {
 		_process_graph->clear_other_chain ();
@@ -6951,14 +6639,6 @@ Session::notify_presentation_info_change ()
 	}
 
 	reassign_track_numbers();
-
-#ifdef USE_TRACKS_CODE_FEATURES
-	/* Waves Tracks: for Waves Tracks session it's required to reconnect their IOs
-	 * if track order has been changed by user
-	 */
-	reconnect_existing_routes(true, true);
-#endif
-
 }
 
 bool
@@ -6992,36 +6672,24 @@ void
 Session::set_range_selection (samplepos_t start, samplepos_t end)
 {
 	_range_selection = Evoral::Range<samplepos_t> (start, end);
-#ifdef USE_TRACKS_CODE_FEATURES
-	follow_playhead_priority ();
-#endif
 }
 
 void
 Session::set_object_selection (samplepos_t start, samplepos_t end)
 {
 	_object_selection = Evoral::Range<samplepos_t> (start, end);
-#ifdef USE_TRACKS_CODE_FEATURES
-	follow_playhead_priority ();
-#endif
 }
 
 void
 Session::clear_range_selection ()
 {
 	_range_selection = Evoral::Range<samplepos_t> (-1,-1);
-#ifdef USE_TRACKS_CODE_FEATURES
-	follow_playhead_priority ();
-#endif
 }
 
 void
 Session::clear_object_selection ()
 {
 	_object_selection = Evoral::Range<samplepos_t> (-1,-1);
-#ifdef USE_TRACKS_CODE_FEATURES
-	follow_playhead_priority ();
-#endif
 }
 
 void

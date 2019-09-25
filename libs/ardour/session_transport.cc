@@ -1425,83 +1425,6 @@ Session::non_realtime_locate ()
 	clear_clicks ();
 }
 
-#ifdef USE_TRACKS_CODE_FEATURES
-bool
-Session::select_playhead_priority_target (samplepos_t& jump_to)
-{
-	jump_to = -1;
-
-	AutoReturnTarget autoreturn = Config->get_auto_return_target_list ();
-
-	if (!autoreturn) {
-		return false;
-	}
-
-	if (Profile->get_trx() && transport_rolling() ) {
-		// We're playing, so do nothing.
-		// Next stop will put us where we need to be.
-		return false;
-	}
-
-	/* Note that the order of checking each AutoReturnTarget flag defines
-	   the priority each flag.
-
-	   Ardour/Mixbus: Last Locate
-	                  Range Selection
-	                  Loop Range
-	                  Region Selection
-
-	   Tracks:        Range Selection
-                          Loop Range
-                          Region Selection
-                          Last Locate
-	*/
-
-	if (autoreturn & RangeSelectionStart) {
-		if (!_range_selection.empty()) {
-			jump_to = _range_selection.from;
-		} else {
-			if (transport_rolling ()) {
-				/* Range selection no longer exists, but we're playing,
-				   so do nothing. Next stop will put us where
-				   we need to be.
-				*/
-				return false;
-			}
-		}
-	}
-
-	if (jump_to < 0 && (autoreturn & Loop) && get_play_loop()) {
-		/* don't try to handle loop play when synced to JACK */
-
-		if (!synced_to_engine()) {
-			Location *location = _locations->auto_loop_location();
-
-			if (location) {
-				jump_to = location->start();
-
-				if (Config->get_seamless_loop()) {
-					/* need to get track buffers reloaded */
-					set_track_loop (true);
-				}
-			}
-		}
-	}
-
-	if (jump_to < 0 && (autoreturn & RegionSelectionStart)) {
-		if (!_object_selection.empty()) {
-			jump_to = _object_selection.from;
-		}
-	}
-
-	if (jump_to < 0 && (autoreturn & LastLocate)) {
-		jump_to = _last_roll_location;
-	}
-
-	return jump_to >= 0;
-}
-#else
-
 bool
 Session::select_playhead_priority_target (samplepos_t& jump_to)
 {
@@ -1512,8 +1435,6 @@ Session::select_playhead_priority_target (samplepos_t& jump_to)
 	jump_to = _last_roll_location;
 	return jump_to >= 0;
 }
-
-#endif
 
 void
 Session::follow_playhead_priority ()
