@@ -1239,13 +1239,10 @@ int main () { return 0; }
     if (Options.options.use_lld):
         if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
                 print("lld is only for Linux builds")
+                sys.exit(1)
         else:
-                try:
-                        conf.find_program ('lld')
-                        conf.env.append_value('LINKFLAGS', '-fuse-ld=lld')
-                        print ("Using the lld linker")
-                except conf.errors.ConfigurationError:
-                        pass
+                conf.find_program ('lld')
+                conf.env.append_value('LINKFLAGS', '-fuse-ld=lld')
 
     if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
         print("PortAudio Backend is not for Linux")
@@ -1345,6 +1342,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Translation',           opts.nls)
 #    write_config_text('Tranzport',             opts.tranzport)
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
+    write_config_text('Use LLD linker',        opts.use_lld)
     write_config_text('Windows VST support',   opts.windows_vst)
     write_config_text('Wiimote support',       conf.is_defined('BUILD_WIIMOTE'))
     write_config_text('Windows key',           opts.windows_key)
