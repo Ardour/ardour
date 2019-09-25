@@ -31,15 +31,9 @@ UI_CONFIG_VARIABLE (float, timeline_item_gradient_depth, "timeline-item-gradient
 UI_CONFIG_VARIABLE (bool, all_floating_windows_are_dialogs, "all-floating-windows-are-dialogs", false)
 UI_CONFIG_VARIABLE (bool, floating_monitor_section, "floating-monitor-section", false)
 UI_CONFIG_VARIABLE (bool, transients_follow_front, "transients-follow-front", false)
-#ifdef MIXBUS
-UI_CONFIG_VARIABLE (bool, color_regions_using_track_color, "color-regions-using-track-color", true)
-UI_CONFIG_VARIABLE (uint32_t, vertical_region_gap, "vertical-region-gap", 4)
-UI_CONFIG_VARIABLE (bool, editor_stereo_only_meters, "editor-stereo-only-meters", true)
-#else
 UI_CONFIG_VARIABLE (bool, color_regions_using_track_color, "color-regions-using-track-color", false)
 UI_CONFIG_VARIABLE (uint32_t, vertical_region_gap, "vertical-region-gap", 0)
 UI_CONFIG_VARIABLE (bool, editor_stereo_only_meters, "editor-stereo-only-meters", false)
-#endif
 UI_CONFIG_VARIABLE (bool, show_waveform_clipping, "show-waveform-clipping", true)
 UI_CONFIG_VARIABLE (uint32_t, lock_gui_after_seconds, "lock-gui-after-seconds", 0)
 UI_CONFIG_VARIABLE (ARDOUR::ScreenSaverMode, screen_saver_mode, "screen-saver-mode", InhibitWhileRecording)
@@ -50,11 +44,7 @@ UI_CONFIG_VARIABLE (bool, new_automation_points_on_lane, "new-automation-points-
 UI_CONFIG_VARIABLE (std::string, keyboard_layout, "keyboard-layout", "ansi")
 UI_CONFIG_VARIABLE (std::string, keyboard_layout_name, "keyboard-layout-name", "ansi")
 UI_CONFIG_VARIABLE (std::string, default_bindings, "default-bindings", "ardour")
-#ifdef MIXBUS
-UI_CONFIG_VARIABLE (bool, only_copy_imported_files, "only-copy-imported-files", true)
-#else
 UI_CONFIG_VARIABLE (bool, only_copy_imported_files, "only-copy-imported-files", false)
-#endif
 UI_CONFIG_VARIABLE (bool, autoplay_files, "autoplay-files", false)
 UI_CONFIG_VARIABLE (bool, default_narrow_ms, "default-narrow_ms", false)
 UI_CONFIG_VARIABLE (bool, name_new_markers, "name-new-markers", false)
