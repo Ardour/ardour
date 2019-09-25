@@ -31,7 +31,6 @@ public:
 	enum Element {
 		SmallScreen,
 		SinglePackage,
-		Trx,
 		Mixbus,
 		LastElement,
 	};
@@ -41,9 +40,6 @@ public:
 
     void set_small_screen() { bits[SmallScreen] = true; }
     bool get_small_screen() const { return bits[SmallScreen]; }
-
-    bool get_trx() const { return bits[Trx]; }
-    void set_trx() { bits[Trx] = true; }
 
     bool get_mixbus() const { return bits[Mixbus]; }
     void set_mixbus() { bits[Mixbus] = true; }

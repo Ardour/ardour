@@ -169,18 +169,8 @@ Session::pre_engine_init (string fullpath)
 	_path = canonical_path(fullpath);
 
 	/* is it new ? */
-	if (Profile->get_trx() ) {
-		// Waves TracksLive has a usecase of session replacement with a new one.
-		// We should check session state file (<session_name>.ardour) existance
-		// to determine if the session is new or not
 
-		string full_session_name = Glib::build_filename( fullpath, _name );
-		full_session_name += statefile_suffix;
-
-		_is_new = !Glib::file_test (full_session_name, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
-	} else {
-		_is_new = !Glib::file_test (_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
-	}
+	_is_new = !Glib::file_test (_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
 
 	/* finish initialization that can't be done in a normal C++ constructor
 	   definition.
@@ -597,7 +587,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 	_writable = exists_and_writable (_path);
 
 	if (!session_template.empty()) {
-		string in_path = (ARDOUR::Profile->get_trx () ? session_template : session_template_dir_to_file (session_template));
+		string in_path = session_template_dir_to_file (session_template);
 
 		FILE* in = g_fopen (in_path.c_str(), "rb");
 
@@ -640,11 +630,9 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 
 				_is_new = false;
 
-				if (!ARDOUR::Profile->get_trx()) {
-					/* Copy plugin state files from template to new session */
-					std::string template_plugins = Glib::build_filename (session_template, X_("plugins"));
-					copy_recurse (template_plugins, plugins_dir ());
-				}
+				/* Copy plugin state files from template to new session */
+				std::string template_plugins = Glib::build_filename (session_template, X_("plugins"));
+				copy_recurse (template_plugins, plugins_dir ());
 
 				return 0;
 
@@ -661,22 +649,6 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 			return -1;
 		}
 
-	}
-
-	if (Profile->get_trx()) {
-
-		/* set initial start + end point : ARDOUR::Session::session_end_shift long.
-		 * Remember that this is a brand new session. Sessions
-		 * loaded from saved state will get this range from the saved state.
-		 */
-
-		set_session_range_location (0, 0);
-
-		/* Initial loop location, from absolute zero, length 10 seconds  */
-
-		Location* loc = new Location (*this, 0, 10.0 * _engine.sample_rate(), _("Loop"),  Location::IsAutoLoop, 0);
-		_locations->add (loc, true);
-		set_auto_loop_location (loc);
 	}
 
 	_state_of_the_state = Clean;
@@ -1446,14 +1418,6 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 		loc.add (range);
 		XMLNode& locations_state = loc.get_state();
 
-		if (ARDOUR::Profile->get_trx() && _locations) {
-			// For tracks we need stored the Auto Loop Range and all MIDI markers.
-			for (Locations::LocationList::const_iterator i = _locations->list ().begin (); i != _locations->list ().end (); ++i) {
-				if ((*i)->is_mark () || (*i)->is_auto_loop ()) {
-					locations_state.add_child_nocopy ((*i)->get_state ());
-				}
-			}
-		}
 		node->add_child_nocopy (locations_state);
 
 		/* adding a location above will have marked the session
@@ -2531,31 +2495,25 @@ Session::save_template (const string& template_name, const string& description, 
 		template_dir_path = template_name;
 	}
 
-	if (!ARDOUR::Profile->get_trx()) {
-		if (!replace_existing && Glib::file_test (template_dir_path, Glib::FILE_TEST_EXISTS)) {
-			warning << string_compose(_("Template \"%1\" already exists - new version not created"),
-									  template_dir_path) << endmsg;
-			return -2;
-		}
+	if (!replace_existing && Glib::file_test (template_dir_path, Glib::FILE_TEST_EXISTS)) {
+		warning << string_compose(_("Template \"%1\" already exists - new version not created"),
+		                          template_dir_path) << endmsg;
+		return -2;
+	}
 
-		if (g_mkdir_with_parents (template_dir_path.c_str(), 0755) != 0) {
-			error << string_compose(_("Could not create directory for Session template\"%1\" (%2)"),
-									template_dir_path, g_strerror (errno)) << endmsg;
-			return -1;
-		}
+	if (g_mkdir_with_parents (template_dir_path.c_str(), 0755) != 0) {
+		error << string_compose(_("Could not create directory for Session template\"%1\" (%2)"),
+		                        template_dir_path, g_strerror (errno)) << endmsg;
+		return -1;
 	}
 
 	/* file to write */
 	std::string template_file_path;
 
-	if (ARDOUR::Profile->get_trx()) {
-		template_file_path = template_name;
+	if (absolute_path) {
+		template_file_path = Glib::build_filename (template_dir_path, Glib::path_get_basename (template_dir_path) + template_suffix);
 	} else {
-		if (absolute_path) {
-			template_file_path = Glib::build_filename (template_dir_path, Glib::path_get_basename (template_dir_path) + template_suffix);
-		} else {
-			template_file_path = Glib::build_filename (template_dir_path, template_name + template_suffix);
-		}
+		template_file_path = Glib::build_filename (template_dir_path, template_name + template_suffix);
 	}
 
 	SessionSaveUnderway (); /* EMIT SIGNAL */

@@ -234,20 +234,18 @@ ARDOUR_UI::set_session (Session *s)
 	    _session->master_out() &&
 	    _session->master_out()->n_outputs().n(DataType::AUDIO) > 0) {
 
-		if (!ARDOUR::Profile->get_trx()) {
-			editor_meter = new LevelMeterHBox(_session);
-			editor_meter->set_meter (_session->master_out()->shared_peak_meter().get());
-			editor_meter->clear_meters();
-			editor_meter->setup_meters (30, 10, 6);
-			editor_meter->show();
+		editor_meter = new LevelMeterHBox(_session);
+		editor_meter->set_meter (_session->master_out()->shared_peak_meter().get());
+		editor_meter->clear_meters();
+		editor_meter->setup_meters (30, 10, 6);
+		editor_meter->show();
 
-			editor_meter_table.set_spacings(3);
-			editor_meter_table.attach(*editor_meter,             0,1, 0,1, FILL, FILL);
-			editor_meter_table.attach(editor_meter_peak_display, 0,1, 1,2, FILL, EXPAND|FILL);
+		editor_meter_table.set_spacings(3);
+		editor_meter_table.attach(*editor_meter,             0,1, 0,1, FILL, FILL);
+		editor_meter_table.attach(editor_meter_peak_display, 0,1, 1,2, FILL, EXPAND|FILL);
 
-			editor_meter->show();
-			editor_meter_peak_display.show();
-		}
+		editor_meter->show();
+		editor_meter_peak_display.show();
 
 		ArdourMeter::ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_peak_display));
 		ArdourMeter::ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_route_peak_display));

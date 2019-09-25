@@ -567,7 +567,7 @@ About::About ()
 	const std::string cpu_arch = _("32-bit"); // ARM, ALPHA,..
 #endif
 	std::string codename = CODENAME;
-	if (ARDOUR::Profile->get_mixbus() || ARDOUR::Profile->get_trx()) {
+	if (ARDOUR::Profile->get_mixbus()) {
 		codename = "";
 	}
 

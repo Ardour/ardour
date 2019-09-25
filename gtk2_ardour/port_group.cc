@@ -605,12 +605,10 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 						/* we own this port (named after the program) */
 
-						/* Hide scene ports from non-Tracks Live builds */
-						if (!ARDOUR::Profile->get_trx()) {
-							if (p.find (_("Scene ")) != string::npos) {
-								++s;
-								continue;
-							}
+						/* Hide scene ports for now */
+						if (p.find (_("Scene ")) != string::npos) {
+							++s;
+							continue;
 						}
 
 						extra_program[t].push_back (p);

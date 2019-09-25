@@ -642,14 +642,12 @@ PortManager::reconnect_ports ()
 {
 	boost::shared_ptr<Ports> p = ports.reader ();
 
-	if (!Profile->get_trx()) {
-		/* re-establish connections */
+	/* re-establish connections */
 
-		DEBUG_TRACE (DEBUG::Ports, string_compose ("reconnect %1 ports\n", p->size()));
+	DEBUG_TRACE (DEBUG::Ports, string_compose ("reconnect %1 ports\n", p->size()));
 
-		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-			i->second->reconnect ();
-		}
+	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+		i->second->reconnect ();
 	}
 
 	return 0;

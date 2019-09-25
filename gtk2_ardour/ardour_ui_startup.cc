@@ -112,16 +112,11 @@ ARDOUR_UI::first_idle ()
 	return false;
 }
 
-
 void
 ARDOUR_UI::setup_profile ()
 {
 	if (gdk_screen_width() < 1200 || getenv ("ARDOUR_NARROW_SCREEN")) {
 		Profile->set_small_screen ();
-	}
-
-	if (g_getenv ("TRX")) {
-		Profile->set_trx ();
 	}
 
 	if (g_getenv ("MIXBUS")) {

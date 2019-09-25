@@ -144,14 +144,6 @@ AudioTrack::set_state (const XMLNode& node, int version)
 		_mode = Normal;
 	}
 
-	if (Profile->get_trx() && _mode == Destructive) {
-		/* Tracks does not support destructive tracks and trying to
-		   handle it as a normal track would be wrong.
-		*/
-		error << string_compose (_("%1: this session uses destructive tracks, which are not supported"), PROGRAM_NAME) << endmsg;
-		return -1;
-	}
-
 	if (Track::set_state (node, version)) {
 		return -1;
 	}

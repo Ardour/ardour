@@ -92,7 +92,7 @@ Track::init ()
 
 	DiskIOProcessor::Flag dflags = DiskIOProcessor::Recordable;
 
-	if (_mode == Destructive && !Profile->get_trx()) {
+	if (_mode == Destructive) {
 		dflags = DiskIOProcessor::Flag (dflags | DiskIOProcessor::Destructive);
 	}
 

@@ -630,29 +630,16 @@ Editor::register_actions ()
 
 	no_ruler_shown_update = true;
 
-	if (Profile->get_trx()) {
-		ruler_marker_action->set_active (true);
-		ruler_meter_action->set_active (false);
-		ruler_tempo_action->set_active (false);
-		ruler_range_action->set_active (false);
-		ruler_loop_punch_action->set_active (false);
-		ruler_loop_punch_action->set_active (false);
-		ruler_bbt_action->set_active (true);
-		ruler_cd_marker_action->set_active (false);
-		ruler_timecode_action->set_active (false);
-		ruler_minsec_action->set_active (true);
-	} else {
-		ruler_marker_action->set_active (true);
-		ruler_meter_action->set_active (true);
-		ruler_tempo_action->set_active (true);
-		ruler_range_action->set_active (true);
-		ruler_loop_punch_action->set_active (true);
-		ruler_loop_punch_action->set_active (true);
-		ruler_bbt_action->set_active (true);
-		ruler_cd_marker_action->set_active (true);
-		ruler_timecode_action->set_active (true);
-		ruler_minsec_action->set_active (false);
-	}
+	ruler_marker_action->set_active (true);
+	ruler_meter_action->set_active (true);
+	ruler_tempo_action->set_active (true);
+	ruler_range_action->set_active (true);
+	ruler_loop_punch_action->set_active (true);
+	ruler_loop_punch_action->set_active (true);
+	ruler_bbt_action->set_active (true);
+	ruler_cd_marker_action->set_active (true);
+	ruler_timecode_action->set_active (true);
+	ruler_minsec_action->set_active (false);
 
 	ruler_video_action->set_active (false);
 	xjadeo_proc_action->set_active (false);

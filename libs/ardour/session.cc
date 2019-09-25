@@ -949,12 +949,6 @@ Session::auto_connect_master_bus ()
 		return;
 	}
 
-	// Waves Tracks: Do not connect master bas for Tracks if AutoConnectMaster option is not set
-	// In this case it means "Multi Out" output mode
-	if (ARDOUR::Profile->get_trx() && !(Config->get_output_auto_connect() & AutoConnectMaster) ) {
-		return;
-	}
-
 	/* if requested auto-connect the outputs to the first N physical ports.
 	 */
 
@@ -985,7 +979,7 @@ Session::auto_connect_master_bus ()
 void
 Session::remove_monitor_section ()
 {
-	if (!_monitor_out || Profile->get_trx()) {
+	if (!_monitor_out) {
 		return;
 	}
 
@@ -1056,7 +1050,7 @@ Session::add_monitor_section ()
 		return;
 	}
 
-	if (_monitor_out || !_master_out || Profile->get_trx()) {
+	if (_monitor_out || !_master_out) {
 		return;
 	}
 
@@ -1208,7 +1202,7 @@ Session::reset_monitor_section ()
 {
 	/* Process lock should be held by the caller.*/
 
-	if (!_monitor_out || Profile->get_trx()) {
+	if (!_monitor_out) {
 		return;
 	}
 
@@ -2342,11 +2336,7 @@ Session::default_track_name_pattern (DataType t)
 {
 	switch (t) {
 	case DataType::AUDIO:
-		if (Profile->get_trx()) {
-			return _("Track ");
-		} else {
-			return _("Audio ");
-		}
+		return _("Audio ");
 		break;
 
 	case DataType::MIDI:
@@ -2435,11 +2425,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 	failed:
 	if (!new_routes.empty()) {
 		StateProtector sp (this);
-		if (Profile->get_trx()) {
-			add_routes (new_routes, false, false, false, order);
-		} else {
-			add_routes (new_routes, true, true, false, order);
-		}
+		add_routes (new_routes, true, true, false, order);
 
 		if (instrument) {
 			for (RouteList::iterator r = new_routes.begin(); r != new_routes.end(); ++r) {
@@ -2691,20 +2677,6 @@ Session::new_audio_track (int input_channels, int output_channels, RouteGroup* r
 				track->set_strict_io (true);
 			}
 
-			if (ARDOUR::Profile->get_trx ()) {
-				// TRACKS considers it's not a USE CASE, it's
-				// a piece of behavior of the session model:
-				//
-				// Gain for a newly created route depends on
-				// the current output_auto_connect mode:
-				//
-				//  0 for Stereo Out mode
-				//  0 Multi Out mode
-				if (Config->get_output_auto_connect() & AutoConnectMaster) {
-					track->gain_control()->set_value (dB_to_coefficient (0), Controllable::NoGroup);
-				}
-			}
-
 			BOOST_MARK_TRACK (track);
 
 			{
@@ -2752,11 +2724,7 @@ Session::new_audio_track (int input_channels, int output_channels, RouteGroup* r
 	failed:
 	if (!new_routes.empty()) {
 		StateProtector sp (this);
-		if (Profile->get_trx()) {
-			add_routes (new_routes, false, false, false, order);
-		} else {
-			add_routes (new_routes, true, true, false, order);
-		}
+		add_routes (new_routes, true, true, false, order);
 	}
 
 	return ret;
@@ -2839,9 +2807,8 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 	failure:
 	if (!ret.empty()) {
 		StateProtector sp (this);
-		if (Profile->get_trx()) {
-			add_routes (ret, false, false, false, order);
-		} else if (flags == PresentationInfo::FoldbackBus) {
+
+		if (flags == PresentationInfo::FoldbackBus) {
 			add_routes (ret, false, false, true, order); // no autoconnect
 		} else {
 			add_routes (ret, false, true, true, order); // autoconnect // outputs only
@@ -3081,11 +3048,8 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 	out:
 	if (!ret.empty()) {
 		StateProtector sp (this);
-		if (Profile->get_trx()) {
-			add_routes (ret, false, false, false, insert_at);
-		} else {
-			add_routes (ret, true, true, false, insert_at);
-		}
+
+		add_routes (ret, true, true, false, insert_at);
 	}
 
 	IO::enable_connecting ();
@@ -4746,17 +4710,11 @@ Session::format_audio_source_name (const string& legalized_base, uint32_t nchan,
 	ostringstream sstr;
 	const string ext = native_header_format_extension (config.get_native_file_header_format(), DataType::AUDIO);
 
-	if (Profile->get_trx() && destructive) {
-		sstr << 'T';
-		sstr << setfill ('0') << setw (4) << cnt;
-		sstr << legalized_base;
-	} else {
-		sstr << legalized_base;
+	sstr << legalized_base;
 
-		if (take_required || related_exists) {
-			sstr << '-';
-			sstr << cnt;
-		}
+	if (take_required || related_exists) {
+		sstr << '-';
+		sstr << cnt;
 	}
 
 	if (nchan == 2) {
@@ -6786,16 +6744,6 @@ Session::auto_connect (const AutoConnectRequest& ar)
 			uint32_t nphysical_out = physoutputs.size();
 			for (uint32_t i = ar.output_start.get(*t); i < route->n_outputs().get(*t); ++i) {
 				string port;
-
-				/* Waves Tracks:
-				 * do not create new connections if we reached the limit of physical outputs
-				 * in Multi Out mode
-				 */
-				if (!(Config->get_output_auto_connect() & AutoConnectMaster) &&
-						ARDOUR::Profile->get_trx () &&
-						ar.output_offset.get(*t) == nphysical_out ) {
-					break;
-				}
 
 				if ((*t) == DataType::MIDI && (Config->get_output_auto_connect() & AutoConnectPhysical)) {
 					port = physoutputs[(out_offset.get(*t) + i) % nphysical_out];

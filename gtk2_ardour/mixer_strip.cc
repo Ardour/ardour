@@ -220,10 +220,8 @@ MixerStrip::init ()
 
 	solo_iso_table.set_homogeneous (true);
 	solo_iso_table.set_spacings (2);
-	if (!ARDOUR::Profile->get_trx()) {
-		solo_iso_table.attach (*solo_isolated_led, 0, 1, 0, 1);
-		solo_iso_table.attach (*solo_safe_led, 1, 2, 0, 1);
-	}
+	solo_iso_table.attach (*solo_isolated_led, 0, 1, 0, 1);
+	solo_iso_table.attach (*solo_safe_led, 1, 2, 0, 1);
 	solo_iso_table.show ();
 
 	rec_mon_table.set_homogeneous (true);
@@ -233,9 +231,6 @@ MixerStrip::init ()
 		rec_mon_table.resize (1, 3);
 		rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 1);
 		rec_mon_table.attach (*monitor_disk_button, 2, 3, 0, 1);
-	} else if (!ARDOUR::Profile->get_trx()) {
-		rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 1);
-		rec_mon_table.attach (*monitor_disk_button, 1, 2, 1, 2);
 	}
 	rec_mon_table.show ();
 
@@ -313,13 +308,11 @@ MixerStrip::init ()
 	number_label.set_tweaks (ArdourButton::OccasionalText);
 
 	global_vpacker.set_spacing (2);
-	if (!ARDOUR::Profile->get_trx()) {
-		global_vpacker.pack_start (width_hide_box, Gtk::PACK_SHRINK);
-		global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
-		global_vpacker.pack_start (input_button_box, Gtk::PACK_SHRINK);
-		global_vpacker.pack_start (_invert_button_box, Gtk::PACK_SHRINK);
-		global_vpacker.pack_start (processor_box, true, true);
-	}
+	global_vpacker.pack_start (width_hide_box, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (input_button_box, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (_invert_button_box, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (processor_box, true, true);
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (rec_mon_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (solo_iso_table, Gtk::PACK_SHRINK);
@@ -327,12 +320,8 @@ MixerStrip::init ()
 	global_vpacker.pack_start (gpm, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (control_slave_ui, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (bottom_button_table, Gtk::PACK_SHRINK);
-	if (!ARDOUR::Profile->get_trx()) {
-		global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
-		global_vpacker.pack_start (_comment_button, Gtk::PACK_SHRINK);
-	} else {
-		global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
-	}
+	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (_comment_button, Gtk::PACK_SHRINK);
 
 #ifndef MIXBUS
 	//add a spacer underneath the master bus;
@@ -667,8 +656,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		if (ARDOUR::Profile->get_mixbus()) {
 			rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 1);
 			rec_mon_table.attach (*monitor_disk_button, 2, 3, 0, 1);
-		} else if (ARDOUR::Profile->get_trx()) {
-			rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 2);
 		} else {
 			rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 1);
 			rec_mon_table.attach (*monitor_disk_button, 1, 2, 1, 2);

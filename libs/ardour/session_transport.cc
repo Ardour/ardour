@@ -271,7 +271,7 @@ Session::do_locate (samplepos_t target_sample, bool with_roll, bool with_flush, 
 	    (!auto_play_legal || !config.get_auto_play()) &&
 	    !with_roll &&
 	    !(synced_to_engine() && play_loop) &&
-	    (!Profile->get_trx() || !(config.get_external_sync() && !synced_to_engine()))) {
+	    !(config.get_external_sync() && !synced_to_engine())) {
 
 		realtime_stop (false, true); // XXX paul - check if the 2nd arg is really correct
 		transport_was_stopped = true;

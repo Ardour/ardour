@@ -1748,9 +1748,6 @@ ARDOUR_UI::transport_record (bool roll)
 				msg.run ();
 				return;
 			}
-			if (Profile->get_trx()) {
-				roll = trx_record_enable_all_tracks ();
-			}
 			_session->maybe_enable_record ();
 			if (roll) {
 				transport_roll ();

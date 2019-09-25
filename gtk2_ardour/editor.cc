@@ -533,9 +533,6 @@ Editor::Editor ()
 	meter_label.hide();
 	meter_label.set_no_show_all();
 
-	if (Profile->get_trx()) {
-		mark_label.set_text (_("Markers"));
-	}
 	mark_label.set_name ("EditorRulerLabel");
 	mark_label.set_size_request (-1, (int)timebar_height);
 	mark_label.set_alignment (1.0, 0.5);
@@ -592,9 +589,7 @@ Editor::Editor ()
 
 	HBox* h = manage (new HBox);
 	_group_tabs = new EditorGroupTabs (this);
-	if (!ARDOUR::Profile->get_trx()) {
-		h->pack_start (*_group_tabs, PACK_SHRINK);
-	}
+	h->pack_start (*_group_tabs, PACK_SHRINK);
 	h->pack_start (edit_controls_vbox);
 	controls_layout.add (*h);
 
@@ -716,18 +711,13 @@ Editor::Editor ()
 	_summary_hbox.pack_start (*summary_frame, true, true);
 	_summary_hbox.pack_start (*summary_arrows_right, false, false);
 
-	if (!ARDOUR::Profile->get_trx()) {
-		editor_summary_pane.add (_summary_hbox);
-	}
-
+	editor_summary_pane.add (_summary_hbox);
 	edit_pane.set_check_divider_position (true);
 	edit_pane.add (editor_summary_pane);
-	if (!ARDOUR::Profile->get_trx()) {
-		_editor_list_vbox.pack_start (*_time_info_box, false, false, 0);
-		_editor_list_vbox.pack_start (_the_notebook);
-		edit_pane.add (_editor_list_vbox);
-		edit_pane.set_child_minsize (_editor_list_vbox, 30); /* rough guess at width of notebook tabs */
-	}
+	_editor_list_vbox.pack_start (*_time_info_box, false, false, 0);
+	_editor_list_vbox.pack_start (_the_notebook);
+	edit_pane.add (_editor_list_vbox);
+	edit_pane.set_child_minsize (_editor_list_vbox, 30); /* rough guess at width of notebook tabs */
 
 	edit_pane.set_drag_cursor (*_cursors->expand_left_right);
 	editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
@@ -3098,10 +3088,7 @@ Editor::setup_toolbar ()
 	mouse_mode_size_group->add_widget (nudge_backward_button);
 
 	mouse_mode_hbox->set_spacing (2);
-
-	if (!ARDOUR::Profile->get_trx()) {
-		mouse_mode_hbox->pack_start (smart_mode_button, false, false);
-	}
+	mouse_mode_hbox->pack_start (smart_mode_button, false, false);
 
 	mouse_mode_hbox->pack_start (mouse_move_button, false, false);
 	mouse_mode_hbox->pack_start (mouse_select_button, false, false);
@@ -3111,11 +3098,9 @@ Editor::setup_toolbar ()
 		mouse_mode_hbox->pack_start (mouse_audition_button, false, false);
 	}
 
-	if (!ARDOUR::Profile->get_trx()) {
-		mouse_mode_hbox->pack_start (mouse_timefx_button, false, false);
-		mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
-		mouse_mode_hbox->pack_start (mouse_content_button, false, false);
-	}
+	mouse_mode_hbox->pack_start (mouse_timefx_button, false, false);
+	mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
+	mouse_mode_hbox->pack_start (mouse_content_button, false, false);
 
 	mouse_mode_vbox->pack_start (*mouse_mode_hbox);
 
@@ -3126,12 +3111,10 @@ Editor::setup_toolbar ()
 
 	edit_mode_selector.set_name ("mouse mode button");
 
-	if (!ARDOUR::Profile->get_trx()) {
-		mode_box->pack_start (edit_mode_selector, false, false);
-		mode_box->pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
-		mode_box->pack_start (edit_point_selector, false, false);
-		mode_box->pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
-	}
+	mode_box->pack_start (edit_mode_selector, false, false);
+	mode_box->pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
+	mode_box->pack_start (edit_point_selector, false, false);
+	mode_box->pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
 
 	mode_box->pack_start (*mouse_mode_box, false, false);
 
@@ -3164,9 +3147,6 @@ Editor::setup_toolbar ()
 
 	if (ARDOUR::Profile->get_mixbus()) {
 		_zoom_box.pack_start (zoom_preset_selector, false, false);
-	} else if (ARDOUR::Profile->get_trx()) {
-		mode_box->pack_start (zoom_out_button, false, false);
-		mode_box->pack_start (zoom_in_button, false, false);
 	} else {
 		_zoom_box.pack_start (zoom_out_button, false, false);
 		_zoom_box.pack_start (zoom_in_button, false, false);
@@ -3197,9 +3177,6 @@ Editor::setup_toolbar ()
 
 	if (ARDOUR::Profile->get_mixbus()) {
 		_track_box.pack_start (visible_tracks_selector);
-	} else if (ARDOUR::Profile->get_trx()) {
-		_track_box.pack_start (tav_shrink_button);
-		_track_box.pack_start (tav_expand_button);
 	} else {
 		_track_box.pack_start (visible_tracks_selector);
 		_track_box.pack_start (tav_shrink_button);
@@ -3254,24 +3231,13 @@ Editor::setup_toolbar ()
 	ebox_vpacker.show();
 
 	toolbar_hbox.pack_start (*mode_box, false, false);
-
-	if (!ARDOUR::Profile->get_trx()) {
-
-		toolbar_hbox.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
-
-		toolbar_hbox.pack_start (snap_box, false, false);
-
-		toolbar_hbox.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
-
-		toolbar_hbox.pack_start (*nudge_box, false, false);
-
-		toolbar_hbox.pack_end (_zoom_box, false, false, 2);
-
-		toolbar_hbox.pack_end (*(manage (new ArdourVSpacer ())), false, false, 3);
-
-		toolbar_hbox.pack_end (_track_box, false, false);
-
-	}
+	toolbar_hbox.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
+	toolbar_hbox.pack_start (snap_box, false, false);
+	toolbar_hbox.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
+	toolbar_hbox.pack_start (*nudge_box, false, false);
+	toolbar_hbox.pack_end (_zoom_box, false, false, 2);
+	toolbar_hbox.pack_end (*(manage (new ArdourVSpacer ())), false, false, 3);
+	toolbar_hbox.pack_end (_track_box, false, false);
 
 	toolbar_hbox.show_all ();
 }

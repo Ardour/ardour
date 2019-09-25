@@ -76,11 +76,9 @@ extern "C" ARDOURPANNER_API PanPluginDescriptor*  panner_descriptor () { return 
 Panner1in2out::Panner1in2out (boost::shared_ptr<Pannable> p)
 	: Panner (p)
 {
-        if (!Profile->get_trx () ) {
-            if (!_pannable->has_state ()) {
-	            _pannable->pan_azimuth_control->set_value (0.5, Controllable::NoGroup);
-            }
-        }
+	if (!_pannable->has_state ()) {
+		_pannable->pan_azimuth_control->set_value (0.5, Controllable::NoGroup);
+	}
 
         update ();
 
