@@ -764,7 +764,8 @@ PluginManager::ladspa_discover (string path)
 			set_tags (info->type, info->unique_id, info->category, info->name, FromPlug);
 		}
 
-		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Found LADSPA plugin, name: %1, Inputs: %2, Outputs: %3\n", info->name, info->n_inputs, info->n_outputs));
+		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Found LADSPA plugin, id: %1 name: %2, Inputs: %3, Outputs: %4\n",
+					info->unique_id, info->name, info->n_inputs, info->n_outputs));
 	}
 
 	return 0;
