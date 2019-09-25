@@ -154,6 +154,7 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	virtual boost::shared_ptr<AutomationControl> filter_enable_controllable (bool hp) const = 0;
 
 	virtual boost::shared_ptr<AutomationControl> tape_drive_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	virtual boost::shared_ptr<ReadOnlyControl> tape_drive_mtr_controllable () const { return boost::shared_ptr<ReadOnlyControl>(); }
 
 	/* "well-known" controls for a compressor in this route. Any or all may
 	 * be null.
@@ -185,7 +186,8 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	 */
 	virtual boost::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const = 0;
 	virtual boost::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const = 0;
-	virtual boost::shared_ptr<AutomationControl> send_pan_azi_controllable (uint32_t n) const = 0;
+	virtual boost::shared_ptr<AutomationControl> send_pan_azimuth_controllable (uint32_t n) const = 0;
+	virtual boost::shared_ptr<AutomationControl> send_pan_azimuth_enable_controllable (uint32_t n) const = 0;
 
 	/* for the same value of @param n, this returns the name of the send
 	 * associated with the pair of controllables returned by the above two methods.
@@ -200,6 +202,31 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	 */
 	virtual boost::shared_ptr<AutomationControl> master_send_enable_controllable () const = 0;
 
+	/* well known control for mixbus's correlation meter.
+	 *
+	 * In Ardour, this returns null.
+	 * In Mixbus, it will return a suitable control, or null depending on the route.
+	 * @param mm min/max of the correlation range, true for upper value
+	 */
+	virtual boost::shared_ptr<ReadOnlyControl> master_correlation_mtr_controllable (bool mm) const { return boost::shared_ptr<ReadOnlyControl>(); }
+
+	/* well known control for mixbus's limiter.
+	 *
+	 * In Ardour, this returns null.
+	 * In Mixbus, it will return a suitable control, or null depending on
+	 * the route.
+	 */
+	virtual boost::shared_ptr<AutomationControl> master_limiter_enable_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	virtual boost::shared_ptr<ReadOnlyControl> master_limiter_mtr_controllable () const { return boost::shared_ptr<ReadOnlyControl>(); }
+
+	/* well known control for mixbus's k-meter.
+	 *
+	 * In Ardour, this returns null.
+	 * In Mixbus, it will return a suitable control, or null depending on
+	 * the route.
+	 */
+	virtual boost::shared_ptr<ReadOnlyControl> master_k_mtr_controllable () const { return boost::shared_ptr<ReadOnlyControl>(); }
+
 	virtual bool muted_by_others_soloing () const = 0;
 
 	virtual boost::shared_ptr<MonitorProcessor> monitor_control() const = 0;
@@ -209,6 +236,7 @@ class LIBARDOUR_API Stripable : public SessionObject,
 
   protected:
 	PresentationInfo _presentation_info;
+
 	private:
 	StripableColorDialog* _active_color_picker;
 };

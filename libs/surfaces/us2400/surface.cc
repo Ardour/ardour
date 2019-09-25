@@ -641,12 +641,12 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 			float value = (float)ev->value / 127.0;
 			boost::shared_ptr<Stripable> r = mcp().subview_stripable();
 			if (r && r->is_input_strip()) {
-				boost::shared_ptr<AutomationControl> pc = r->send_pan_azi_controllable (10);
+				boost::shared_ptr<AutomationControl> pc = r->send_pan_azimuth_controllable (10);
 				if (pc) {
 					float v = pc->interface_to_internal(value);
 					pc->set_value (v, PBD::Controllable::NoGroup);
 				}
-				pc = r->send_pan_azi_controllable (11);
+				pc = r->send_pan_azimuth_controllable (11);
 				if (pc) {
 					float v = pc->interface_to_internal(value);
 					pc->set_value (v, PBD::Controllable::NoGroup);

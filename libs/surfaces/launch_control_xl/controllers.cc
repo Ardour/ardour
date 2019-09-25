@@ -1553,7 +1553,7 @@ LaunchControlXL::dm_mb_sends (KnobID k)
 
 
 	if (buttons_down.find(Device) != buttons_down.end()) { // Device button hold
-		ac = first_selected_stripable()->send_pan_azi_controllable(send);
+		ac = first_selected_stripable()->send_pan_azimuth_controllable(send);
 	} else {
 		ac = first_selected_stripable()->send_level_controllable(send);
 	}

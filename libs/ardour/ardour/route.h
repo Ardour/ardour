@@ -169,8 +169,7 @@ public:
 
 	void set_trim (gain_t val, PBD::Controllable::GroupControlDisposition);
 
-	/* controls use set_solo() to modify this route's solo state
-	 */
+	/* controls use set_solo() to modify this route's solo state */
 
 	void clear_all_solo_state ();
 
@@ -513,8 +512,9 @@ public:
 	boost::shared_ptr<Processor> the_instrument() const;
 	InstrumentInfo& instrument_info() { return _instrument_info; }
 
-	/* "well-known" controls for panning. Any or all of these may return
-	 * null.
+
+	/* "well-known" controls.
+	 * Any or all of these may return NULL.
 	 */
 
 	boost::shared_ptr<AutomationControl> pan_azimuth_control() const;
@@ -523,11 +523,6 @@ public:
 	boost::shared_ptr<AutomationControl> pan_frontback_control() const;
 	boost::shared_ptr<AutomationControl> pan_lfe_control() const;
 
-	/* "well-known" controls for an EQ in this route. Any or all may
-	 * be null. eq_band_cnt() must return 0 if there is no EQ present.
-	 * Passing an @param band value >= eq_band_cnt() will guarantee the
-	 * return of a null ptr (or an empty string for eq_band_name()).
-	 */
 	uint32_t eq_band_cnt () const;
 	std::string eq_band_name (uint32_t) const;
 	boost::shared_ptr<AutomationControl> eq_enable_controllable () const;
@@ -536,16 +531,13 @@ public:
 	boost::shared_ptr<AutomationControl> eq_q_controllable (uint32_t band) const;
 	boost::shared_ptr<AutomationControl> eq_shape_controllable (uint32_t band) const;
 
-	//additional HP/LP filters
 	boost::shared_ptr<AutomationControl> filter_freq_controllable (bool hpf) const;
 	boost::shared_ptr<AutomationControl> filter_slope_controllable (bool) const;
 	boost::shared_ptr<AutomationControl> filter_enable_controllable (bool) const;
 
 	boost::shared_ptr<AutomationControl> tape_drive_controllable () const;
+	boost::shared_ptr<ReadOnlyControl>   tape_drive_mtr_controllable () const;
 
-	/* "well-known" controls for a compressor in this route. Any or all may
-	 * be null.
-	 */
 	boost::shared_ptr<AutomationControl> comp_enable_controllable () const;
 	boost::shared_ptr<AutomationControl> comp_threshold_controllable () const;
 	boost::shared_ptr<AutomationControl> comp_speed_controllable () const;
@@ -553,38 +545,23 @@ public:
 	boost::shared_ptr<AutomationControl> comp_makeup_controllable () const;
 	boost::shared_ptr<ReadOnlyControl>   comp_redux_controllable () const;
 
-	/* @param mode must be supplied by the comp_mode_controllable(). All other values
-	 * result in undefined behaviour
-	 */
 	std::string comp_mode_name (uint32_t mode) const;
-	/* @param mode - as for comp mode name. This returns the name for the
-	 * parameter/control accessed via comp_speed_controllable(), which can
-	 * be mode dependent.
-	 */
 	std::string comp_speed_name (uint32_t mode) const;
 
-	/* "well-known" controls for sends to well-known busses in this route. Any or all may
-	 * be null.
-	 *
-	 * In Mixbus, these are the sends that connect to the mixbusses.
-	 * In Ardour, these are user-created sends that connect to user-created
-	 * Aux busses.
-	 */
 	boost::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const;
 	boost::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const;
-	boost::shared_ptr<AutomationControl> send_pan_azi_controllable (uint32_t n) const;
-	/* for the same value of @param n, this returns the name of the send
-	 * associated with the pair of controllables returned by the above two methods.
-	 */
+	boost::shared_ptr<AutomationControl> send_pan_azimuth_controllable (uint32_t n) const;
+	boost::shared_ptr<AutomationControl> send_pan_azimuth_enable_controllable (uint32_t n) const;
+
 	std::string send_name (uint32_t n) const;
 
-	/* well known control that enables/disables sending to the master bus.
-	 *
-	 * In Ardour, this returns null.
-	 * In Mixbus, it will return a suitable control, or null depending on
-	 * the route.
-	 */
 	boost::shared_ptr<AutomationControl> master_send_enable_controllable () const;
+
+	boost::shared_ptr<ReadOnlyControl> master_correlation_mtr_controllable (bool) const;
+
+	boost::shared_ptr<AutomationControl> master_limiter_enable_controllable () const;
+	boost::shared_ptr<ReadOnlyControl> master_limiter_mtr_controllable () const;
+	boost::shared_ptr<ReadOnlyControl> master_k_mtr_controllable () const;
 
 	void protect_automation ();
 
