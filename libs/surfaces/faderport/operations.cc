@@ -205,7 +205,7 @@ FaderPort::use_monitor ()
 }
 
 void
-FaderPort::ardour_pan_azimuth (int delta)
+FaderPort::pan_azimuth (int delta)
 {
 	if (!_current_stripable) {
 		return;
@@ -217,13 +217,7 @@ FaderPort::ardour_pan_azimuth (int delta)
 		return;
 	}
 
-	boost::shared_ptr<Pannable> pannable = r->pannable ();
-
-	if (!pannable) {
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> azimuth = pannable->pan_azimuth_control;
+	boost::shared_ptr<AutomationControl> azimuth = r->pan_azimuth_control ();
 
 	if (!azimuth) {
 		return;
@@ -234,7 +228,7 @@ FaderPort::ardour_pan_azimuth (int delta)
 
 
 void
-FaderPort::ardour_pan_width(int delta)
+FaderPort::pan_width(int delta)
 {
 	if (!_current_stripable) {
 		return;
@@ -246,50 +240,13 @@ FaderPort::ardour_pan_width(int delta)
 		return;
 	}
 
-	boost::shared_ptr<Pannable> pannable = r->pannable ();
-
-	if (!pannable) {
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> width = pannable->pan_width_control;
+	boost::shared_ptr<AutomationControl> width = r->pan_width_control ();
 
 	if (!width) {
 		return;
 	}
 
 	width->set_value (width->interface_to_internal (width->internal_to_interface (width->get_value()) + (delta / encoder_divider)), Controllable::NoGroup);
-}
-
-void
-FaderPort::mixbus_pan (int delta)
-{
-#ifdef MIXBUS
-	if (!_current_stripable) {
-		return;
-	}
-	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_current_stripable);
-
-	if (!r) {
-		return;
-	}
-
-
-	const uint32_t port_channel_post_pan = 2; // gtk2_ardour/mixbus_ports.h
-	boost::shared_ptr<ARDOUR::PluginInsert> plug = r->ch_post();
-
-	if (!plug) {
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> azimuth = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_channel_post_pan)));
-
-	if (!azimuth) {
-		return;
-	}
-
-	azimuth->set_value (azimuth->interface_to_internal (azimuth->internal_to_interface (azimuth->get_value()) + (delta / encoder_divider)), Controllable::NoGroup);
-#endif
 }
 
 void

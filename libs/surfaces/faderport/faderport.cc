@@ -468,14 +468,10 @@ FaderPort::encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb)
 				trim->set_value (dB_to_coefficient (val), Controllable::UseGroup);
 			}
 		} else if (width_modifier && ((button_state & width_modifier) == width_modifier)) {
-			ardour_pan_width (delta);
+			pan_width (delta);
 
 		} else {  // pan/balance
-			if (!Profile->get_mixbus()) {
-				ardour_pan_azimuth (delta);
-			} else {
-				mixbus_pan (delta);
-			}
+			pan_azimuth (delta);
 		}
 	}
 
