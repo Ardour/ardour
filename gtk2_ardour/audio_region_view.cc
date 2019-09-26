@@ -74,8 +74,6 @@
 
 #include "pbd/i18n.h"
 
-#define MUTED_ALPHA 48
-
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
@@ -1564,34 +1562,37 @@ AudioRegionView::set_waveform_colors ()
 void
 AudioRegionView::set_some_waveform_colors (vector<ArdourWaveView::WaveView*>& waves_to_color)
 {
-	Gtkmm2ext::Color fill;
-	Gtkmm2ext::Color outline;
+	Gtkmm2ext::Color fill = fill_color;
+	Gtkmm2ext::Color outline = fill;
+
 	Gtkmm2ext::Color clip = UIConfiguration::instance().color ("clipped waveform");
 	Gtkmm2ext::Color zero = UIConfiguration::instance().color ("zero line");
 
+	/* use track/region color to fill wform */
+	fill = fill_color;
+	fill = UINT_INTERPOLATE (fill, UIConfiguration::instance().color ("waveform fill"), 0.5);
+
+	/* set outline */
+	outline = fill;
+
 	if (_selected) {
-		if (_region->muted()) {
-			/* hide outline with zero alpha */
-			outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("selected waveform outline"), 0);
-			fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("selected waveform fill"), MUTED_ALPHA);
-		} else {
-			outline = UIConfiguration::instance().color ("selected waveform outline");
-			fill = UIConfiguration::instance().color ("selected waveform fill");
-		}
-	} else {
-		if (_recregion) {
-			outline = UIConfiguration::instance().color ("recording waveform outline");
-			fill = UIConfiguration::instance().color ("recording waveform fill");
-		} else {
-			if (_region->muted()) {
-				/* hide outline with zero alpha */
-				outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform outline"), 0);
-				fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), MUTED_ALPHA);
-			} else {
-				outline = UIConfiguration::instance().color ("waveform outline");
-				fill = UIConfiguration::instance().color ("waveform fill");
-			}
-		}
+		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("selected waveform outline"), 0xC0);
+		fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("selected waveform outline"), 0xC0);
+	} else if (_dragging) {
+		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform outline"), 0xC0);
+		fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), 0xC0);
+	} else if (_region->muted()) {
+		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), 80);
+		fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), 0);
+	} else if (!_region->opaque()) {
+		outline = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), 70);
+		fill = UINT_RGBA_CHANGE_A(UIConfiguration::instance().color ("waveform fill"), 70);
+	}
+
+	/* recorded region, override to red */
+	if (_recregion) {
+		outline = UIConfiguration::instance().color ("recording waveform outline");
+		fill = UIConfiguration::instance().color ("recording waveform fill");
 	}
 
 	for (vector<ArdourWaveView::WaveView*>::iterator w = waves_to_color.begin(); w != waves_to_color.end(); ++w) {
