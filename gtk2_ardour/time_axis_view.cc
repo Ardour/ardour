@@ -991,7 +991,9 @@ TimeAxisView::get_selection_rect (uint32_t id)
 
 		rect->rect = new ArdourCanvas::Rectangle (selection_group);
 		CANVAS_DEBUG_NAME (rect->rect, "selection rect");
-		rect->rect->set_outline (false);
+		rect->rect->set_outline (true);
+		rect->rect->set_outline_width (1.0);
+		rect->rect->set_outline_color (UIConfiguration::instance().color ("selection"));
 		rect->rect->set_fill_color (UIConfiguration::instance().color_mod ("selection rect", "selection rect"));
 
 		rect->start_trim = new ArdourCanvas::Rectangle (selection_group);

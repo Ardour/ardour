@@ -683,7 +683,7 @@ TimeAxisViewItem::get_fill_color () const
 	const std::string mod_name = (_dragging ? "dragging region" : fill_color_name);
 
 	if (_selected) {
-		return UIConfiguration::instance().color_mod ("selected region base", mod_name);
+		return UIConfiguration::instance().color ("selected region base");
 	} else if (_recregion) {
 		return UIConfiguration::instance().color ("recording rect");
 	} else if ((!UIConfiguration::instance().get_show_name_highlight() || high_enough_for_name) &&
