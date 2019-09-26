@@ -1169,7 +1169,6 @@ Editor::which_trim_cursor (bool left) const
 	Trimmable::CanTrim ct = entered_regionview->region()->can_trim ();
 
 	if (left) {
-
 		if (ct & Trimmable::FrontTrimEarlier) {
 			return _cursors->left_side_trim;
 		} else {
@@ -1290,15 +1289,12 @@ Editor::which_canvas_cursor(ItemType type) const
 	    mouse_mode == MouseContent) {
 
 		/* find correct cursor to use in object/smart mode */
-
 		switch (type) {
 		case RegionItem:
 		/* We don't choose a cursor for these items on top of a region view,
 		   because this would push a new context on the enter stack which
 		   means switching the region context for things like smart mode
 		   won't actualy change the cursor. */
-		// case RegionViewNameHighlight:
-		// case RegionViewName:
 		// case WaveItem:
 		case StreamItem:
 		case AutomationTrackItem:
@@ -1357,6 +1353,20 @@ Editor::which_canvas_cursor(ItemType type) const
 				cursor = which_trim_cursor (false);
 			else
 				cursor = _cursors->selector;
+			break;
+		case RegionViewName:
+		case RegionViewNameHighlight:
+			/* the trim bar is used for trimming, but we have to determine if we are on the left or right side of the region */
+			cursor = MouseCursors::invalid_cursor ();
+			if (entered_regionview) {
+				samplepos_t where;
+				bool in_track_canvas;
+				if (mouse_sample (where, in_track_canvas)) {
+					samplepos_t start = entered_regionview->region()->first_sample();
+					samplepos_t end = entered_regionview->region()->last_sample();
+					cursor = which_trim_cursor ((where - start) < (end - where));
+				}
+			}
 			break;
 		case StartCrossFadeItem:
 			cursor = _cursors->fade_in;
