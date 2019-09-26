@@ -40,7 +40,7 @@
 #include <gtkmm/stock.h>
 
 #include "pbd/basename.h"
-#include "pbd/i18n.h"
+#include "pbd/localtime_r.h"
 #include "pbd/unwind.h"
 
 #include "gtkmm2ext/application.h"
@@ -69,6 +69,8 @@
 #ifdef WINDOWS_VST_SUPPORT
 #include <fst.h>
 #endif
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
