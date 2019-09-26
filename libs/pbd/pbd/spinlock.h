@@ -41,7 +41,7 @@ public:
 	/* C++11 non-static data member initialization,
 	 * with non-copyable std::atomic ATOMIC_FLAG_INIT
 	 */
-	spinlock_t () : l {BOOST_DETAIL_SPINLOCK_INIT} {};
+	spinlock_t () {}
 #else
 	/* default C++ assign struct's first member */
 	spinlock_t ()
@@ -55,7 +55,11 @@ public:
 	bool try_lock () { return l.try_lock (); }
 
 private:
+#ifdef BOOST_SMART_PTR_DETAIL_SPINLOCK_STD_ATOMIC_HPP_INCLUDED
+	boost::detail::spinlock l = BOOST_DETAIL_SPINLOCK_INIT;
+#else
 	boost::detail::spinlock l;
+#endif
 
 	/* prevent copy construction */
 	spinlock_t (const spinlock_t&);
