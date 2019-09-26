@@ -36,8 +36,6 @@
 #include "gtk2ardour-version.h"
 #endif
 
-#include "pbd/i18n.h"
-
 #include "ardour/monitor_processor.h"
 #include "ardour/session.h"
 #include "ardour/route.h"
@@ -49,6 +47,8 @@
 #include "main_clock.h"
 #include "public_editor.h"
 #include "ui_config.h"
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;

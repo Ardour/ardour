@@ -52,7 +52,6 @@
 
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"
-#include "pbd/i18n.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/filename_extensions.h"
@@ -73,6 +72,8 @@
 #include "public_editor.h"
 #include "splash.h"
 #include "startup.h"
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;

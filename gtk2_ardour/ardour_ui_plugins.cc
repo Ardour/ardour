@@ -38,12 +38,12 @@
 
 #include <gtkmm/progressbar.h>
 
-#include "pbd/i18n.h"
-
 #include "ardour/plugin_manager.h"
 
 #include "ardour_ui.h"
 #include "ui_config.h"
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;

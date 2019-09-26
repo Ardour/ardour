@@ -36,7 +36,6 @@
 #include "gtk2ardour-version.h"
 #endif
 
-#include "pbd/i18n.h"
 #include "pbd/openuri.h"
 
 #include "ardour/audioengine.h"
@@ -44,6 +43,8 @@
 #include "ardour_ui.h"
 #include "engine_dialog.h"
 #include "gui_thread.h"
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;

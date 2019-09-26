@@ -27,10 +27,11 @@
 #include <glibmm.h>
 
 #include "pbd/compose.h"
-#include "pbd/i18n.h"
 #include "pbd/error.h"
 
 #include "ardour_http.h"
+
+#include "pbd/i18n.h"
 
 #ifdef WAF_BUILD
 #include "gtk2ardour-version.h"

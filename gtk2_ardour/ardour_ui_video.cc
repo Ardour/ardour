@@ -41,7 +41,6 @@
 #include <gtkmm/stock.h>
 
 #include "pbd/error.h"
-#include "pbd/i18n.h"
 #include "pbd/openuri.h"
 
 #include "ardour/ltc_file_reader.h"
@@ -55,6 +54,8 @@
 #include "utils_videotl.h"
 #include "transcode_video_dialog.h"
 #include "video_server_dialog.h"
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;
