@@ -42,6 +42,8 @@
 #include <gtkmm/notebook.h>
 #include <gtkmm2ext/utils.h>
 
+#include "widgets/tooltips.h"
+
 #include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
 #include "ardour/mtdm.h"
@@ -98,6 +100,7 @@ EngineControl::EngineControl ()
 	, start_stop_button (_("Stop"))
 	, update_devices_button (_("Refresh Devices"))
 	, use_buffered_io_button (_("Use Buffered I/O"), ArdourButton::led_default_elements)
+	, try_autostart_button (_("Autostart"), ArdourButton::led_default_elements)
 	, lm_measure_label (_("Measure"))
 	, lm_use_button (_("Use results"))
 	, lm_back_button (_("Back to settings ... (ignore results)"))
@@ -307,6 +310,15 @@ EngineControl::EngineControl ()
 	use_buffered_io_button.set_name ("generic button");
 	use_buffered_io_button.set_can_focus(true);
 
+	try_autostart_button.signal_clicked.connect (mem_fun (*this, &EngineControl::try_autostart_button_clicked));
+	try_autostart_button.set_name ("generic button");
+	try_autostart_button.set_can_focus(true);
+	config_parameter_changed ("try-autostart-engine");
+	set_tooltip (try_autostart_button,
+			string_compose (_("Always try these settings when starting %1, if the same device is available"), PROGRAM_NAME));
+
+	ARDOUR::Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&EngineControl::config_parameter_changed, this, _1), gui_context());
+
 	/* Pick up any existing audio setup configuration, if appropriate */
 
 	XMLNode* audio_setup = ARDOUR::Config->extra_xml ("AudioMIDISetup");
@@ -451,6 +463,14 @@ EngineControl::on_map ()
 		set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
 	}
 	ArdourDialog::on_map ();
+}
+
+void
+EngineControl::config_parameter_changed (std::string const & p)
+{
+	if (p == "try-autostart-engine") {
+		try_autostart_button.set_active (ARDOUR::Config->get_try_autostart_engine ());
+	}
 }
 
 bool
@@ -662,6 +682,14 @@ EngineControl::build_full_control_notebook ()
 	basic_packer.attach (midi_option_combo, 1, 2, row, row + 1, SHRINK, (AttachOptions) 0);
 	basic_packer.attach (midi_devices_button, 3, 4, row, row+1, xopt, xopt);
 	row++;
+
+	/* TODO: This button needs some better layout, position (!)
+	 * ideally just below the "start" button.
+	 * but that place is next to "Driver" and occupied by update_devices_button (Windows, Portaudio Only)
+	 * next line after "Device" is the use_buffered_io_button (also Windows only).
+	 * crap.
+	 */
+	basic_packer.attach (try_autostart_button, 3, 4, row, row+1, xopt, xopt);
 }
 
 void
@@ -2761,6 +2789,13 @@ EngineControl::update_devices_button_clicked ()
 	if (backend->update_devices()) {
 		device_list_changed ();
 	}
+}
+
+void
+EngineControl::try_autostart_button_clicked ()
+{
+	ARDOUR::Config->set_try_autostart_engine (!try_autostart_button.get_active ());
+	try_autostart_button.set_active (ARDOUR::Config->get_try_autostart_engine ());
 }
 
 void

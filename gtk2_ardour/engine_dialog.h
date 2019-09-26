@@ -95,6 +95,7 @@ private:
 	ArdourWidgets::ArdourButton start_stop_button;
 	ArdourWidgets::ArdourButton update_devices_button;
 	ArdourWidgets::ArdourButton use_buffered_io_button;
+	ArdourWidgets::ArdourButton try_autostart_button;
 
 	Gtk::Button     connect_disconnect_button;
 
@@ -328,10 +329,12 @@ private:
 
 	void on_show ();
 	void on_map ();
+	void config_parameter_changed (std::string const&);
 	void control_app_button_clicked ();
 	void start_stop_button_clicked ();
 	void update_devices_button_clicked ();
 	void use_buffered_io_button_clicked ();
+	void try_autostart_button_clicked ();
 	void use_latency_button_clicked ();
 	void manage_control_app_sensitivity ();
 	int push_state_to_backend (bool start);
