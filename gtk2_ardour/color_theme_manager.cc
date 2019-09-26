@@ -281,16 +281,15 @@ struct NamedColor {
 	NamedColor (string s, Gtkmm2ext::HSV c) : name (s), color (c) {}
 };
 
-struct SortByHue {
+struct SortNamedColor {
 	bool operator() (NamedColor const & a, NamedColor const & b) {
 		using namespace ArdourCanvas;
+
 		const HSV black (0, 0, 0);
 		if (a.color.is_gray() || b.color.is_gray()) {
 			return black.distance (a.color) < black.distance (b.color);
 		} else {
-			return a.color.h < b.color.h;
-			// const HSV red (rgba_to_color (1.0, 0.0, 0.0, 1.0));
-			// return red.distance (a.color) < red.distance (b.color);
+			return a.name < b.name;
 		}
 	}
 };
@@ -308,7 +307,7 @@ ColorThemeManager::build_palette_canvas (ArdourCanvas::Canvas& canvas, ArdourCan
 	for (UIConfiguration::Colors::const_iterator x = colors.begin(); x != colors.end(); ++x) {
 		nc.push_back (NamedColor (x->first, HSV (x->second)));
 	}
-	SortByHue sorter;
+	SortNamedColor sorter;
 	sort (nc.begin(), nc.end(), sorter);
 
 	const uint32_t color_limit = nc.size();
