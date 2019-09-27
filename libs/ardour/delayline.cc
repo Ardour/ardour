@@ -206,6 +206,10 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 	} else {
 		/* set new delay for MIDI only */
 		_delay = pending_delay;
+
+		/* prepare for the case that an audio-port is added */
+		_woff = _delay;
+		_roff = 0;
 	}
 
 	if (_midi_buf.get ()) {
