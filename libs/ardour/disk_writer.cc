@@ -515,88 +515,91 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 		/* MIDI */
 
-		// Pump entire port buffer into the ring buffer (TODO: split cycles?)
-		MidiBuffer& buf    = bufs.get_midi (0);
-		boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack>(_route);
-		MidiChannelFilter* filter = mt ? &mt->capture_filter() : 0;
+		if (_midi_buf) {
 
-		assert (buf.size() == 0 || _midi_buf);
+			// Pump entire port buffer into the ring buffer (TODO: split cycles?)
+			MidiBuffer& buf    = bufs.get_midi (0);
+			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack>(_route);
+			MidiChannelFilter* filter = mt ? &mt->capture_filter() : 0;
 
-		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
-			Evoral::Event<MidiBuffer::TimeType> ev (*i, false);
-			if (ev.time() + rec_offset > rec_nframes) {
-				break;
-			}
-#ifndef NDEBUG
-			if (DEBUG_ENABLED(DEBUG::MidiIO)) {
-				const uint8_t* __data = ev.buffer();
-				DEBUG_STR_DECL(a);
-				DEBUG_STR_APPEND(a, string_compose ("mididiskstream %1 capture event @ %2 + %3 sz %4 ", this, ev.time(), start_sample, ev.size()));
-				for (size_t i=0; i < ev.size(); ++i) {
-					DEBUG_STR_APPEND(a,hex);
-					DEBUG_STR_APPEND(a,"0x");
-					DEBUG_STR_APPEND(a,(int)__data[i]);
-					DEBUG_STR_APPEND(a,' ');
+			assert (buf.size() == 0 || _midi_buf);
+
+			for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
+				Evoral::Event<MidiBuffer::TimeType> ev (*i, false);
+				if (ev.time() + rec_offset > rec_nframes) {
+					break;
 				}
-				DEBUG_STR_APPEND(a,'\n');
-				DEBUG_TRACE (DEBUG::MidiIO, DEBUG_STR(a).str());
-			}
+#ifndef NDEBUG
+				if (DEBUG_ENABLED(DEBUG::MidiIO)) {
+					const uint8_t* __data = ev.buffer();
+					DEBUG_STR_DECL(a);
+					DEBUG_STR_APPEND(a, string_compose ("mididiskstream %1 capture event @ %2 + %3 sz %4 ", this, ev.time(), start_sample, ev.size()));
+					for (size_t i=0; i < ev.size(); ++i) {
+						DEBUG_STR_APPEND(a,hex);
+						DEBUG_STR_APPEND(a,"0x");
+						DEBUG_STR_APPEND(a,(int)__data[i]);
+						DEBUG_STR_APPEND(a,' ');
+					}
+					DEBUG_STR_APPEND(a,'\n');
+					DEBUG_TRACE (DEBUG::MidiIO, DEBUG_STR(a).str());
+				}
 #endif
-			/* Write events to the capture buffer in samples from session start,
-			   but ignoring looping so event time progresses monotonically.
-			   The source knows the loop length so it knows exactly where the
-			   event occurs in the series of recorded loops and can implement
-			   any desirable behaviour.  We don't want to send event with
-			   transport time here since that way the source can not
-			   reconstruct their actual time; future clever MIDI looping should
-			   probably be implemented in the source instead of here.
-			*/
-			const samplecnt_t loop_offset = _num_captured_loops * loop_length;
-			const samplepos_t event_time = start_sample + loop_offset - _accumulated_capture_offset + ev.time();
-			if (event_time < 0 || event_time < _first_recordable_sample) {
-				/* Event out of range, skip */
-				continue;
-			}
+				/* Write events to the capture buffer in samples from session start,
+				   but ignoring looping so event time progresses monotonically.
+				   The source knows the loop length so it knows exactly where the
+				   event occurs in the series of recorded loops and can implement
+				   any desirable behaviour.  We don't want to send event with
+				   transport time here since that way the source can not
+				   reconstruct their actual time; future clever MIDI looping should
+				   probably be implemented in the source instead of here.
+				*/
+				const samplecnt_t loop_offset = _num_captured_loops * loop_length;
+				const samplepos_t event_time = start_sample + loop_offset - _accumulated_capture_offset + ev.time();
+				if (event_time < 0 || event_time < _first_recordable_sample) {
+					/* Event out of range, skip */
+					continue;
+				}
 
-			bool skip_event = false;
-			if (mt) {
-				/* skip injected immediate/out-of-band events */
-				MidiBuffer const& ieb (mt->immediate_event_buffer());
-				for (MidiBuffer::const_iterator j = ieb.begin(); j != ieb.end(); ++j) {
-					if (*j == ev) {
-						skip_event = true;
+				bool skip_event = false;
+				if (mt) {
+					/* skip injected immediate/out-of-band events */
+					MidiBuffer const& ieb (mt->immediate_event_buffer());
+					for (MidiBuffer::const_iterator j = ieb.begin(); j != ieb.end(); ++j) {
+						if (*j == ev) {
+							skip_event = true;
+						}
 					}
 				}
-			}
-			if (skip_event) {
-				continue;
-			}
+				if (skip_event) {
+					continue;
+				}
 
-			if (!filter || !filter->filter(ev.buffer(), ev.size())) {
-				_midi_buf->write (event_time, ev.event_type(), ev.size(), ev.buffer());
-			}
-		}
-
-		g_atomic_int_add (const_cast<gint*>(&_samples_pending_write), nframes);
-
-		if (buf.size() != 0) {
-			Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex, Glib::Threads::TRY_LOCK);
-
-			if (lm.locked ()) {
-				/* Copy this data into our GUI feed buffer and tell the GUI
-				   that it can read it if it likes.
-				*/
-				_gui_feed_buffer.clear ();
-
-				for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
-					/* This may fail if buf is larger than _gui_feed_buffer, but it's not really
-					   the end of the world if it does.
-					*/
-					_gui_feed_buffer.push_back ((*i).time() + start_sample, (*i).size(), (*i).buffer());
+				if (!filter || !filter->filter(ev.buffer(), ev.size())) {
+					_midi_buf->write (event_time, ev.event_type(), ev.size(), ev.buffer());
 				}
 			}
 
-			DataRecorded (_midi_write_source); /* EMIT SIGNAL */
+			g_atomic_int_add (const_cast<gint*>(&_samples_pending_write), nframes);
+
+			if (buf.size() != 0) {
+				Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex, Glib::Threads::TRY_LOCK);
+
+				if (lm.locked ()) {
+					/* Copy this data into our GUI feed buffer and tell the GUI
+					   that it can read it if it likes.
+					*/
+					_gui_feed_buffer.clear ();
+
+					for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
+						/* This may fail if buf is larger than _gui_feed_buffer, but it's not really
+						   the end of the world if it does.
+						*/
+						_gui_feed_buffer.push_back ((*i).time() + start_sample, (*i).size(), (*i).buffer());
+					}
+				}
+
+				DataRecorded (_midi_write_source); /* EMIT SIGNAL */
+			}
 		}
 
 		_capture_captured += rec_nframes;
