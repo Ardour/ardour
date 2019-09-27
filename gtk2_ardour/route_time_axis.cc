@@ -265,6 +265,9 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	if (ARDOUR::Profile->get_mixbus()) {
 		controls_table.attach (route_group_button, 2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 		controls_table.attach (gm.get_gain_slider(), 3, 5, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
+	} else {
+		controls_table.attach (route_group_button, 4, 5, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (gm.get_gain_slider(), 0, 2, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
 	}
 
 	controls_table.attach (route_group_button, 4, 5, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
@@ -292,11 +295,15 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	if (ARDOUR::Profile->get_mixbus()) {
 		controls_table.attach (automation_button, 1, 2, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
+	} else {
+		controls_table.attach (automation_button, 3, 4, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
 	}
 
 	if (is_track() && track()->mode() == ARDOUR::Normal) {
 		if (ARDOUR::Profile->get_mixbus()) {
 			controls_table.attach (playlist_button, 0, 1, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
+		} else {
+			controls_table.attach (playlist_button, 2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
 		}
 	}
 
