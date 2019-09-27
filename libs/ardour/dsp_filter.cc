@@ -85,7 +85,7 @@ ARDOUR::DSP::process_map (BufferSet* bufs, const ChanMapping& in, const ChanMapp
 			bool valid;
 			const uint32_t idx = out.get (dt, i->second, &valid);
 			if (valid && idx != i->first) {
-				bufs->get (dt, idx).read_from (bufs->get (dt, i->first), nframes, offset, offset);
+				bufs->get_available (dt, idx).read_from (bufs->get_available (dt, i->first), nframes, offset, offset);
 			}
 		}
 	}
@@ -95,7 +95,7 @@ ARDOUR::DSP::process_map (BufferSet* bufs, const ChanMapping& in, const ChanMapp
 			bool valid;
 			in.get_src (dt, i->first, &valid);
 			if (!valid) {
-				bufs->get (dt, i->second).silence (nframes, offset);
+				bufs->get_available (dt, i->second).silence (nframes, offset);
 			}
 		}
 	}

@@ -834,7 +834,7 @@ PluginInsert::inplace_silence_unconnected (BufferSet& bufs, const PinMappings& o
 				}
 			}
 			if (!mapped) {
-				bufs.get (*t, out).silence (nframes, offset);
+				bufs.get_available (*t, out).silence (nframes, offset);
 			}
 		}
 	}
@@ -886,7 +886,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 				uint32_t idx = in_map.p(0).get (*t, i, &valid);
 				if (valid) {
 					assert (idx == 0);
-					bufs.get (*t, i).read_from (bufs.get (*t, first_idx), nframes, offset, offset);
+					bufs.get_available (*t, i).read_from (bufs.get_available (*t, first_idx), nframes, offset, offset);
 				}
 			}
 		}
@@ -969,7 +969,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 				uint32_t in_idx = thru_map.get (*t, out, &valid);
 				uint32_t m = out + natural_input_streams ().get (*t);
 				if (valid) {
-					_delaybuffers.delay (*t, out, inplace_bufs.get (*t, m), bufs.get (*t, in_idx), nframes, offset, offset);
+					_delaybuffers.delay (*t, out, inplace_bufs.get_available (*t, m), bufs.get_available (*t, in_idx), nframes, offset, offset);
 					used_outputs.set (*t, out, 1); // mark as used
 				} else {
 					used_outputs.get (*t, out, &valid);
@@ -977,7 +977,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 						/* the plugin is expected to write here, but may not :(
 						 * (e.g. drumgizmo w/o kit loaded)
 						 */
-						inplace_bufs.get (*t, m).silence (nframes);
+						inplace_bufs.get_available (*t, m).silence (nframes);
 					}
 				}
 			}
@@ -997,9 +997,9 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 					uint32_t in_idx = in_map.p(pc).get (*t, in, &valid);
 					uint32_t m = mapped.get (*t);
 					if (valid) {
-						inplace_bufs.get (*t, m).read_from (bufs.get (*t, in_idx), nframes, offset, offset);
+						inplace_bufs.get_available (*t, m).read_from (bufs.get_available (*t, in_idx), nframes, offset, offset);
 					} else {
-						inplace_bufs.get (*t, m).silence (nframes, offset);
+						inplace_bufs.get_available (*t, m).silence (nframes, offset);
 					}
 					mapped.set (*t, m + 1);
 				}
@@ -1028,11 +1028,11 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 				if (!valid) {
 					nonzero_out.get (*t, out, &valid);
 					if (!valid) {
-						bufs.get (*t, out).silence (nframes, offset);
+						bufs.get_available (*t, out).silence (nframes, offset);
 					}
 				} else {
 					uint32_t m = out + natural_input_streams ().get (*t);
-					bufs.get (*t, out).read_from (inplace_bufs.get (*t, m), nframes, offset, offset);
+					bufs.get_available (*t, out).read_from (inplace_bufs.get_available (*t, m), nframes, offset, offset);
 				}
 			}
 		}
@@ -1105,7 +1105,7 @@ PluginInsert::bypass (BufferSet& bufs, pframes_t nframes)
 		// copy all inputs
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			for (uint32_t in = 0; in < _configured_internal.get (*t); ++in) {
-				inplace_bufs.get (*t, in).read_from (bufs.get (*t, in), nframes, 0, 0);
+				inplace_bufs.get_available (*t, in).read_from (bufs.get_available (*t, in), nframes, 0, 0);
 			}
 		}
 		ARDOUR::ChanMapping used_outputs;
@@ -1115,7 +1115,7 @@ PluginInsert::bypass (BufferSet& bufs, pframes_t nframes)
 				bool valid;
 				uint32_t in_idx = thru_map.get (*t, out, &valid);
 				if (valid) {
-					bufs.get (*t, out).read_from (inplace_bufs.get (*t, in_idx), nframes, 0, 0);
+					bufs.get_available (*t, out).read_from (inplace_bufs.get_available (*t, in_idx), nframes, 0, 0);
 					used_outputs.set (*t, out, 1); // mark as used
 				}
 			}
@@ -1132,7 +1132,7 @@ PluginInsert::bypass (BufferSet& bufs, pframes_t nframes)
 				if (!valid) {
 					continue;
 				}
-				bufs.get (*t, out).read_from (inplace_bufs.get (*t, in_idx), nframes, 0, 0);
+				bufs.get_available (*t, out).read_from (inplace_bufs.get_available (*t, in_idx), nframes, 0, 0);
 				used_outputs.set (*t, out, 1); // mark as used
 			}
 		}
@@ -1145,7 +1145,7 @@ PluginInsert::bypass (BufferSet& bufs, pframes_t nframes)
 				bool valid;
 				used_outputs.get (*t, out, &valid);
 				if (!valid) {
-						bufs.get (*t, out).silence (nframes, 0);
+						bufs.get_available (*t, out).silence (nframes, 0);
 				}
 			}
 		}
@@ -1163,7 +1163,7 @@ PluginInsert::bypass (BufferSet& bufs, pframes_t nframes)
 					uint32_t idx = in_map.get (*t, i, &valid);
 					if (valid) {
 						assert (idx == 0);
-						bufs.get (*t, i).read_from (bufs.get (*t, first_idx), nframes, 0, 0);
+						bufs.get_available (*t, i).read_from (bufs.get_available (*t, first_idx), nframes, 0, 0);
 					}
 				}
 			}
@@ -1175,16 +1175,16 @@ PluginInsert::bypass (BufferSet& bufs, pframes_t nframes)
 				bool valid;
 				uint32_t src_idx = out_map.get_src (*t, out, &valid);
 				if (!valid) {
-					bufs.get (*t, out).silence (nframes, 0);
+					bufs.get_available (*t, out).silence (nframes, 0);
 					continue;
 				}
 				uint32_t in_idx = in_map.get (*t, src_idx, &valid);
 				if (!valid) {
-					bufs.get (*t, out).silence (nframes, 0);
+					bufs.get_available (*t, out).silence (nframes, 0);
 					continue;
 				}
 				if (in_idx != src_idx) {
-					bufs.get (*t, out).read_from (bufs.get (*t, in_idx), nframes, 0, 0);
+					bufs.get_available (*t, out).read_from (bufs.get_available (*t, in_idx), nframes, 0, 0);
 				}
 			}
 		}

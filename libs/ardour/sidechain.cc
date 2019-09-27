@@ -72,7 +72,7 @@ SideChain::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sampl
 		// zero buffers
 		for (DataType::iterator t = DataType::begin (); t != DataType::end (); ++t) {
 			for (uint32_t out = _configured_input.get (*t); out < bufs.count ().get (*t); ++out) {
-				bufs.get (*t, out).silence (nframes);
+				bufs.get_available (*t, out).silence (nframes);
 			}
 		}
 		return;

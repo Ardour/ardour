@@ -87,7 +87,7 @@ ProcessThread::get_silent_buffers (ChanCount count)
 
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		for (size_t i= 0; i < count.get(*t); ++i) {
-			sb->get(*t, i).clear();
+			sb->get_available(*t, i).clear();
 		}
 	}
 
@@ -113,7 +113,7 @@ ProcessThread::get_scratch_buffers (ChanCount count, bool silence)
 	if (silence) {
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			for (uint32_t i = 0; i < sb->count().get(*t); ++i) {
-				sb->get(*t, i).clear();
+				sb->get_available (*t, i).clear();
 			}
 		}
 	}
@@ -159,7 +159,7 @@ ProcessThread::get_route_buffers (ChanCount count, bool silence)
 	if (silence) {
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			for (uint32_t i = 0; i < sb->count().get(*t); ++i) {
-				sb->get(*t, i).clear();
+				sb->get_available (*t, i).clear();
 			}
 		}
 	}

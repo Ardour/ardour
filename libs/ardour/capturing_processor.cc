@@ -55,7 +55,7 @@ CapturingProcessor::run (BufferSet& bufs, samplepos_t, samplepos_t, double, pfra
 	}
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		for (uint32_t b = 0; b < bufs.count().get (*t); ++b) {
-			_delaybuffers.delay (*t, b, capture_buffers.get (*t, b), bufs.get (*t, b), nframes, 0, 0);
+			_delaybuffers.delay (*t, b, capture_buffers.get_available (*t, b), bufs.get_available (*t, b), nframes, 0, 0);
 		}
 	}
 }

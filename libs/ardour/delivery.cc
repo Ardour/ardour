@@ -349,7 +349,7 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 				if (outs.count ().get (*t) <= n) {
 					continue;
 				}
-				b->read_from (outs.get (*t, n++), nframes, (*t == DataType::AUDIO ? 0 : -Port::port_offset()));
+				b->read_from (outs.get_available (*t, n++), nframes, (*t == DataType::AUDIO ? 0 : -Port::port_offset()));
 			}
 		}
 	}

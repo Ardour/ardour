@@ -248,14 +248,14 @@ BufferSet::buffer_capacity(DataType type) const
 }
 
 Buffer&
-BufferSet::get(DataType type, size_t i)
+BufferSet::get_available(DataType type, size_t i)
 {
 	assert(i < _available.get(type));
 	return *_buffers[type][i];
 }
 
 const Buffer&
-BufferSet::get(DataType type, size_t i) const
+BufferSet::get_available(DataType type, size_t i) const
 {
 	assert(i < _available.get(type));
 	return *_buffers[type][i];

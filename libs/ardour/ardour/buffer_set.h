@@ -97,22 +97,22 @@ public:
 
 	size_t buffer_capacity(DataType type) const;
 
-	Buffer&       get(DataType type, size_t i);
-	const Buffer& get(DataType type, size_t i) const;
-
 	AudioBuffer& get_audio(size_t i) {
-		return (AudioBuffer&)get(DataType::AUDIO, i);
+		return (AudioBuffer&)get_available (DataType::AUDIO, i);
 	}
 	const AudioBuffer& get_audio(size_t i) const {
-		return (const AudioBuffer&)get(DataType::AUDIO, i);
+		return (const AudioBuffer&)get_available(DataType::AUDIO, i);
 	}
 
 	MidiBuffer& get_midi(size_t i) {
-		return (MidiBuffer&)get(DataType::MIDI, i);
+		return (MidiBuffer&)get_available(DataType::MIDI, i);
 	}
 	const MidiBuffer& get_midi(size_t i) const {
-		return (const MidiBuffer&)get(DataType::MIDI, i);
+		return (const MidiBuffer&)get_available(DataType::MIDI, i);
 	}
+
+	Buffer&       get_available(DataType type, size_t i);
+	const Buffer& get_available(DataType type, size_t i) const;
 
 #ifdef LV2_SUPPORT
 	/** Get a MIDI buffer translated into an LV2 MIDI buffer for use with
@@ -144,8 +144,8 @@ public:
 	template <typename BS, typename B>
 	class iterator_base {
 	public:
-		B& operator*()  { return (B&)_set.get(_type, _index); }
-		B* operator->() { return &(B&)_set.get(_type, _index); }
+		B& operator*()  { return (B&)_set.get_available(_type, _index); }
+		B* operator->() { return &(B&)_set.get_available(_type, _index); }
 		iterator_base<BS,B>& operator++() { ++_index; return *this; } // yes, prefix only
 		bool operator==(const iterator_base<BS,B>& other) { return (_index == other._index); }
 		bool operator!=(const iterator_base<BS,B>& other) { return (_index != other._index); }
