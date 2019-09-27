@@ -344,10 +344,7 @@ EngineControl::EngineControl ()
 	connect_disconnect_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::connect_disconnect_click));
 
 	connect_disconnect_button.set_no_show_all();
-	use_buffered_io_button.set_no_show_all();
-	update_devices_button.set_no_show_all();
 	start_stop_button.set_no_show_all();
-	midi_devices_button.set_no_show_all();
 }
 
 void
@@ -532,8 +529,6 @@ EngineControl::build_notebook ()
 	engine_status.show();
 
 	basic_packer.attach (start_stop_button, 3, 4, 0, 1, xopt, xopt);
-	basic_packer.attach (update_devices_button, 3, 4, 1, 2, xopt, xopt);
-	basic_packer.attach (use_buffered_io_button, 3, 4, 2, 3, xopt, xopt);
 
 	lm_button_audio.signal_clicked.connect (sigc::mem_fun (*this, &EngineControl::calibrate_audio_latency));
 	lm_button_audio.set_name ("generic button");
@@ -564,6 +559,8 @@ EngineControl::build_full_control_notebook ()
 	vector<string> strings;
 	AttachOptions xopt = AttachOptions (FILL|EXPAND);
 	int row = 1; // row zero == backend combo
+	int btn = 1; // row zero == start_stop_button
+	bool autostart_packed = false;
 
 	/* start packing it up */
 
@@ -595,11 +592,29 @@ EngineControl::build_full_control_notebook ()
 		output_device_combo.set_active_text ("");
 	}
 
+	/* same line as Driver */
+	if (backend->can_use_buffered_io()) {
+		basic_packer.attach (use_buffered_io_button, 3, 4, btn, btn + 1, xopt, xopt);
+		btn++;
+	}
+
+	/* same line as Device(s) */
+	if (backend->can_request_update_devices()) {
+		basic_packer.attach (update_devices_button, 3, 4, btn, btn + 1, xopt, xopt);
+		btn++;
+	}
+
+	/* prefer "try autostart" below "Start" if possible */
+	if (btn < row) {
+		basic_packer.attach (try_autostart_button, 3, 4, btn, btn + 1, xopt, xopt);
+		btn++;
+		autostart_packed = true;
+	}
+
 	label = manage (left_aligned_label (_("Sample rate:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
 	basic_packer.attach (sample_rate_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
 	row++;
-
 
 	label = manage (left_aligned_label (_("Buffer size:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
@@ -616,8 +631,7 @@ EngineControl::build_full_control_notebook ()
 		++ctrl_btn_span;
 	}
 
-	/* button spans 2 or 3 rows */
-
+	/* button spans 2 or 3 rows: Sample rate, Buffer size, Periods */
 	basic_packer.attach (control_app_button, 3, 4, row - ctrl_btn_span, row + 1, xopt, xopt);
 	row++;
 
@@ -645,6 +659,13 @@ EngineControl::build_full_control_notebook ()
 		basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
 		basic_packer.attach (output_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
 		++row;
+	}
+
+	/* Prefere next available vertical slot, 1 row */
+	if (btn < row) {
+		basic_packer.attach (try_autostart_button, 3, 4, btn, btn + 1, xopt, xopt);
+		btn++;
+		autostart_packed = true;
 	}
 
 	input_latency.set_name ("InputLatency");
@@ -683,13 +704,9 @@ EngineControl::build_full_control_notebook ()
 	basic_packer.attach (midi_devices_button, 3, 4, row, row+1, xopt, xopt);
 	row++;
 
-	/* TODO: This button needs some better layout, position (!)
-	 * ideally just below the "start" button.
-	 * but that place is next to "Driver" and occupied by update_devices_button (Windows, Portaudio Only)
-	 * next line after "Device" is the use_buffered_io_button (also Windows only).
-	 * crap.
-	 */
-	basic_packer.attach (try_autostart_button, 3, 4, row, row+1, xopt, xopt);
+	if (!autostart_packed) {
+		basic_packer.attach (try_autostart_button, 3, 4, row, row+1, xopt, xopt);
+	}
 }
 
 void
@@ -908,25 +925,11 @@ EngineControl::update_sensitivity ()
 			update_devices_button.set_sensitive(false);
 			use_buffered_io_button.set_sensitive(false);
 		} else {
-			if (backend->can_request_update_devices()) {
-				update_devices_button.show();
-			} else {
-				update_devices_button.hide();
-			}
-			if (backend->can_use_buffered_io()) {
-				use_buffered_io_button.show();
-			} else {
-				use_buffered_io_button.hide();
-			}
 			start_stop_button.set_text("Start");
-			update_devices_button.set_sensitive(true);
-			use_buffered_io_button.set_sensitive(true);
+			update_devices_button.set_sensitive (backend->can_request_update_devices ());
+			use_buffered_io_button.set_sensitive (backend->can_use_buffered_io ());
 		}
 	} else {
-		update_devices_button.set_sensitive(false);
-		update_devices_button.hide();
-		use_buffered_io_button.set_sensitive(false);
-		use_buffered_io_button.hide();
 		start_stop_button.set_sensitive(false);
 		start_stop_button.hide();
 	}
@@ -1790,9 +1793,9 @@ EngineControl::midi_option_changed ()
 	_midi_devices = new_devices;
 
 	if (_midi_devices.empty()) {
-		midi_devices_button.hide ();
+		midi_devices_button.set_sensitive (false);
 	} else {
-		midi_devices_button.show ();
+		midi_devices_button.set_sensitive (true);
 	}
 }
 
