@@ -764,6 +764,43 @@ ARDOUR_UI_UTILS::rate_as_string (float r)
 	return buf;
 }
 
+string
+ARDOUR_UI_UTILS::samples_as_time_string (samplecnt_t s, float rate, bool show_samples)
+{
+	char buf[32];
+	if (rate <= 0) {
+		snprintf (buf, sizeof (buf), "--");
+	} else if (s == 0) {
+		snprintf (buf, sizeof (buf), "0");
+	} else if (s < 1000 && show_samples) {
+		/* 0 .. 999 spl */
+		snprintf (buf, sizeof (buf), "%ld spl", s);
+	} else if (s < (rate / 1000.f)) {
+		/* 0 .. 999 usec */
+		snprintf (buf, sizeof (buf), "%.0f \u00B5s", s * 1e+6f / rate);
+	} else if (s < (rate / 100.f)) {
+		/* 1.000 .. 9.999 ms */
+		snprintf (buf, sizeof (buf), "%.3f ms", s * 1e+3f / rate);
+	} else if (s < (rate / 10.f)) {
+		/* 1.00 .. 99.99 ms */
+		snprintf (buf, sizeof (buf), "%.2f ms", s * 1e+3f / rate);
+	} else if (s < rate) {
+		/* 100.0 .. 999.9 ms */
+		snprintf (buf, sizeof (buf), "%.1f ms", s * 1e+3f / rate);
+	} else if (s < rate * 10.f) {
+		/* 1.000 s .. 9.999 s */
+		snprintf (buf, sizeof (buf), "%.3f s", s / rate);
+	} else if (s < rate * 90.f) {
+		/* 10.00 s .. 89.99 s */
+		snprintf (buf, sizeof (buf), "%.2f s", s / rate);
+	} else {
+		/* 1m30.0 ...  */
+		snprintf (buf, sizeof (buf), "'%.0fm%.1f", s / (60.f * rate), fmodf (s / rate, 60));
+	}
+	buf[31] = '\0';
+	return buf;
+}
+
 bool
 ARDOUR_UI_UTILS::windows_overlap (Gtk::Window *a, Gtk::Window *b)
 {

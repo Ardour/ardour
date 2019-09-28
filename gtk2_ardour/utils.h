@@ -101,6 +101,7 @@ std::string escape_underscores (std::string const &);
 Gdk::Color unique_random_color (std::list<Gdk::Color> &);
 
 std::string rate_as_string (float r);
+std::string samples_as_time_string (ARDOUR::samplecnt_t s, float r, bool show_samples = false);
 
 bool windows_overlap (Gtk::Window *a, Gtk::Window *b);
 
