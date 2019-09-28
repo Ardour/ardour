@@ -6475,6 +6475,7 @@ Session::update_latency (bool playback)
 	}
 
 	DEBUG_TRACE (DEBUG::Latency, "JACK latency callback: DONE\n");
+	LatencyUpdated (); /* EMIT SIGNAL */
 }
 
 void

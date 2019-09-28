@@ -502,6 +502,8 @@ public:
 	samplecnt_t worst_route_latency () const  { return _worst_route_latency; }
 	samplecnt_t worst_latency_preroll () const;
 
+	PBD::Signal0<void> LatencyUpdated;
+
 	struct SaveAs {
 		std::string new_parent_folder;  /* parent folder where new session folder will be created */
 		std::string new_name;           /* name of newly saved session */
