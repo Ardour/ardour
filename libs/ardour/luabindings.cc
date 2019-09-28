@@ -199,6 +199,7 @@ CLASSKEYS(ARDOUR::ChanMapping);
 CLASSKEYS(ARDOUR::DSP::DspShm);
 CLASSKEYS(ARDOUR::DataType);
 CLASSKEYS(ARDOUR::FluidSynth);
+CLASSKEYS(ARDOUR::Latent);
 CLASSKEYS(ARDOUR::Location);
 CLASSKEYS(ARDOUR::LuaAPI::Vamp);
 CLASSKEYS(ARDOUR::LuaOSC::Address);
@@ -1327,6 +1328,19 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("captured_for", &AudioSource::captured_for)
 		.endClass ()
 
+		.beginWSPtrClass <Latent> ("Latent")
+		.addFunction ("effective_latency", &Latent::effective_latency)
+		.addFunction ("user_latency", &Latent::user_latency)
+		.addFunction ("unset_user_latency", &Latent::unset_user_latency)
+		.addFunction ("set_user_latency", &Latent::set_user_latency)
+		.endClass ()
+
+		.beginClass <Latent> ("PDC")
+		/* cannot reuse "Latent"; weak/shared-ptr refs cannot have static member functions */
+		.addStaticFunction ("zero_latency", &Latent::zero_latency)
+		.addStaticFunction ("force_zero_latency", &Latent::force_zero_latency)
+		.endClass ()
+
 		.deriveWSPtrClass <Automatable, Evoral::ControlSet> ("Automatable")
 		.addCast<Slavable> ("to_slavable")
 		.addFunction ("automation_control", (boost::shared_ptr<AutomationControl>(Automatable::*)(const Evoral::Parameter&, bool))&Automatable::automation_control)
@@ -1374,6 +1388,7 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <Processor, SessionObject> ("Processor")
 		.addCast<Automatable> ("to_automatable")
+		.addCast<Latent> ("to_latent")
 		.addCast<PluginInsert> ("to_insert") // deprecated
 		.addCast<PluginInsert> ("to_plugininsert")
 		.addCast<SideChain> ("to_sidechain")
