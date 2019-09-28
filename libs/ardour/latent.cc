@@ -23,6 +23,7 @@
 using namespace ARDOUR;
 
 bool ARDOUR::Latent::_zero_latency = false;
+PBD::Signal0<void> Latent::DisableSwitchChanged;
 
 Latent::Latent ()
 	: HasLatency ()

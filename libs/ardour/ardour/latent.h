@@ -73,13 +73,18 @@ public:
 	}
 
 	static void force_zero_latency (bool en) {
+		if (_zero_latency == en) {
+			return;
+		}
 		_zero_latency = en;
+		DisableSwitchChanged (); /* EMIT SIGNAL */
 	}
 
 	static bool zero_latency () {
 		return _zero_latency;
 	}
 
+	static PBD::Signal0<void> DisableSwitchChanged;
 	PBD::Signal0<void> LatencyChanged;
 
 protected:
