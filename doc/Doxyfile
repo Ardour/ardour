@@ -760,6 +760,7 @@ WARN_LOGFILE           =
 
 INPUT                  = ../libs/ardour \
                          ../libs/ardouralsautil \
+                         ../libs/backends \
                          ../libs/canvas \
                          ../libs/evoral \
                          ../libs/gtkmm2ext \
@@ -768,14 +769,37 @@ INPUT                  = ../libs/ardour \
                          ../libs/pbd \
                          ../libs/ptformat \
                          ../libs/qm-dsp \
+                         ../libs/surfaces \
                          ../libs/temporal \
+                         ../libs/waveview \
+                         ../libs/widgets \
+                         ../libs/zita-convolver \
+                         ../libs/zita-resampler \
                          ../gtk2_ardour \
                          mainpage.txt
 
 ## audiographer assumes it's documented separately (has it's own @mainpage)
 #                       ../libs/audiographer \
+## tools w/binaries (maybe add those)
+#                       ../headless \
+#                       ../libs/fst \
+#                       ../libs/vfork \
+#                       ../session_utils \
+#                       ../tools/luadevel \
 ## backends includes a lot of irrelevant doc from waves, portaudio
 #                       ../libs/backends \
+## plugins
+#                       ../libs/panners \
+#                       ../libs/plugins \
+## 3rd party libs
+#                       ../libs/appleutility \
+#                       ../libs/clearlooks-newer \
+#                       ../libs/fluidsynth \
+#                       ../libs/hidapi \
+#                       ../libs/lua \
+#                       ../libs/qm-dsp \
+#                       ../libs/vamp-plugins \
+#                       ../libs/vamp-pyin \
 
 
 # This tag can be used to specify the character encoding of the source files
