@@ -496,6 +496,7 @@ private:
 
 	ArdourWidgets::ArdourVSpacer recpunch_spacer;
 	ArdourWidgets::ArdourVSpacer monitoring_spacer;
+	ArdourWidgets::ArdourVSpacer latency_spacer;
 
 	ArdourWidgets::ArdourButton monitor_in_button;
 	ArdourWidgets::ArdourButton monitor_disk_button;
@@ -510,6 +511,13 @@ private:
 	void toggle_external_sync ();
 	void toggle_time_master ();
 	void toggle_video_sync ();
+
+
+	ArdourWidgets::ArdourButton latency_disable_button;
+
+	Gtk::Label route_latency_value;
+	Gtk::Label io_latency_label;
+	Gtk::Label io_latency_value;
 
 	ShuttleControl     shuttle_box;
 	MiniTimeline       mini_timeline;
@@ -827,6 +835,10 @@ private:
 	 *  PluginEqGui::impulse_analysis ().
 	 */
 	ARDOUR::ProcessThread* _process_thread;
+
+	void toggle_latency_switch ();
+	void latency_switch_changed ();
+	void session_latency_updated ();
 
 	void feedback_detected ();
 

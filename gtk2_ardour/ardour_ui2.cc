@@ -95,6 +95,8 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (editor_meter_peak_display, _("Reset All Peak Meters"));
 	set_tip (error_alert_button, _("Show Error Log and acknowledge warnings"));
 
+	set_tip (latency_disable_button, _("Disable all latency compensation. This will result in playback and monitoring to not be out of sync."));
+
 	synchronize_sync_source_and_video_pullup ();
 
 	editor->setup_tooltips ();
@@ -233,6 +235,18 @@ ARDOUR_UI::repack_transport_hbox ()
 		recpunch_spacer.hide ();
 	}
 
+	bool show_pdc = UIConfiguration::instance().get_show_toolbar_latency ();
+	if (show_pdc) {
+		latency_disable_button.show ();
+		route_latency_value.show ();
+		io_latency_value.show ();
+		latency_spacer.show ();
+	} else {
+		latency_disable_button.hide ();
+		route_latency_value.hide ();
+		io_latency_value.hide ();
+		latency_spacer.hide ();
+	}
 }
 
 void
@@ -302,6 +316,12 @@ ARDOUR_UI::setup_transport ()
 	act = ActionManager::get_action ("Transport", "SessionMonitorDisk");
 	monitor_disk_button.set_related_action (act);
 
+	act = ActionManager::get_action ("Main", "ToggleLatencyCompensation");
+	latency_disable_button.set_related_action (act);
+
+	set_size_request_to_display_given_text (route_latency_value, "1000 spl", 0, 0);
+	set_size_request_to_display_given_text (io_latency_value, "1000 spl", 0, 0);
+
 	/* connect signals */
 	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (primary_clock, &MainClock::set), false, 0));
 	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (secondary_clock, &MainClock::set), false, 0));
@@ -350,6 +370,8 @@ ARDOUR_UI::setup_transport ()
 	monitor_disk_button.set_name ("monitor button");
 	auto_input_button.set_name ("transport option button");
 
+	latency_disable_button.set_name ("monitor button");
+
 	sync_button.set_name ("transport active option button");
 
 	/* and widget text */
@@ -362,6 +384,9 @@ ARDOUR_UI::setup_transport ()
 	monitor_in_button.set_text (_("All In"));
 	monitor_disk_button.set_text (_("All Disk"));
 	auto_input_button.set_text (_("Auto-Input"));
+
+	latency_disable_button.set_text (_("Disable PDC"));
+	io_latency_label.set_text (_("I/O Latency:"));
 
 	punch_label.set_text (_("Punch:"));
 	layered_label.set_text (_("Rec:"));
@@ -504,6 +529,20 @@ ARDOUR_UI::setup_transport ()
 	transport_table.attach (monitoring_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
+
+	transport_table.attach (latency_disable_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
+	transport_table.attach (io_latency_label, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, vpadding);
+	++col;
+	transport_table.attach (route_latency_value, TCOL, 0, 1 , SHRINK, EXPAND|FILL, hpadding, vpadding);
+	transport_table.attach (io_latency_value, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, vpadding);
+	++col;
+
+	route_latency_value.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	io_latency_value.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+
+	transport_table.attach (latency_spacer, TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
+	++col;
+
 	transport_table.attach (follow_edits_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
 	transport_table.attach (auto_return_button,  TCOL, 1, 2 , FILL, SHRINK, hpadding, vpadding);
 	++col;
@@ -549,6 +588,10 @@ ARDOUR_UI::setup_transport ()
 	transport_table.attach (mixer_visibility_button,  TCOL, 1, 2 , FILL, SHRINK, hpadding, vpadding);
 	++col;
 
+	/* initialize */
+	latency_switch_changed ();
+	session_latency_updated ();
+
 	repack_transport_hbox ();
 	update_clock_visibility ();
 	/* desensitize */
@@ -562,6 +605,32 @@ ARDOUR_UI::setup_transport ()
 }
 #undef PX_SCALE
 #undef TCOL
+
+
+void
+ARDOUR_UI::latency_switch_changed ()
+{
+	bool pdc_off = ARDOUR::Latent::zero_latency ();
+	if (latency_disable_button.get_active() != pdc_off) {
+		latency_disable_button.set_active (pdc_off);
+	}
+}
+
+void
+ARDOUR_UI::session_latency_updated ()
+{
+	if (!_session) {
+		route_latency_value.set_text ("--");
+		io_latency_value.set_text ("--");
+	} else {
+		samplecnt_t wrl = _session->worst_route_latency ();
+		samplecnt_t wpl = _session->worst_latency_preroll ();
+		float rate      = _session->nominal_sample_rate ();
+
+		route_latency_value.set_text (samples_as_time_string (wrl, rate));
+		io_latency_value.set_text (samples_as_time_string (wpl, rate));
+	}
+}
 
 void
 ARDOUR_UI::soloing_changed (bool onoff)

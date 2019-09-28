@@ -279,6 +279,13 @@ ARDOUR_UI::toggle_editing_space()
 }
 
 void
+ARDOUR_UI::toggle_latency_switch ()
+{
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Main", "ToggleLatencyCompensation");
+	ARDOUR::Latent::force_zero_latency (tact->get_active());
+}
+
+void
 ARDOUR_UI::setup_session_options ()
 {
 	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::parameter_changed, this, _1), gui_context());
@@ -428,6 +435,8 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "show-toolbar-monitoring") {
 		repack_transport_hbox ();
 	} else if (p == "show-toolbar-selclock") {
+		repack_transport_hbox ();
+	} else if (p == "show-toolbar-latency") {
 		repack_transport_hbox ();
 	} else if (p == "show-editor-meter") {
 		repack_transport_hbox ();
