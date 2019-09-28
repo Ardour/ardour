@@ -370,7 +370,7 @@ ARDOUR_UI::setup_transport ()
 	monitor_disk_button.set_name ("monitor button");
 	auto_input_button.set_name ("transport option button");
 
-	latency_disable_button.set_name ("monitor button");
+	latency_disable_button.set_name ("latency button");
 
 	sync_button.set_name ("transport active option button");
 

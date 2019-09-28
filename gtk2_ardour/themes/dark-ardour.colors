@@ -233,6 +233,9 @@
     <ColorAlias name="invert button: led active" alias="color 37"/>
     <ColorAlias name="layered button: fill" alias="color 25"/>
     <ColorAlias name="layered button: fill active" alias="color 48"/>
+    <ColorAlias name="latency button: fill" alias="color 25"/>
+    <ColorAlias name="latency button: fill active" alias="color 42"/>
+    <ColorAlias name="latency button: led active" alias="color 9"/>
     <ColorAlias name="location cd marker" alias="color 38"/>
     <ColorAlias name="location loop" alias="color 39"/>
     <ColorAlias name="location marker" alias="color 32"/>

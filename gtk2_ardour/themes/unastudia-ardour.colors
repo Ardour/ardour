@@ -233,6 +233,9 @@
 		<ColorAlias name="inactive group tab" alias="color 34"/>
 		<ColorAlias name="invert button: fill active" alias="color 1"/>
 		<ColorAlias name="invert button: led active" alias="color 37"/>
+    <ColorAlias name="latency button: fill" alias="color 25"/>
+    <ColorAlias name="latency button: fill active" alias="color 42"/>
+    <ColorAlias name="latency button: led active" alias="color 9"/>
 		<ColorAlias name="location cd marker" alias="color 108"/>
 		<ColorAlias name="location loop" alias="color 108"/>
 		<ColorAlias name="location marker" alias="color 108"/>
