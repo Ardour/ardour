@@ -3054,9 +3054,7 @@ Editor::setup_toolbar ()
 	Glib::RefPtr<SizeGroup> mouse_mode_size_group = SizeGroup::create (SIZE_GROUP_VERTICAL);
 	mouse_mode_size_group->add_widget (smart_mode_button);
 	mouse_mode_size_group->add_widget (mouse_move_button);
-	if (!Profile->get_mixbus()) {
-		mouse_mode_size_group->add_widget (mouse_cut_button);
-	}
+	mouse_mode_size_group->add_widget (mouse_cut_button);
 	mouse_mode_size_group->add_widget (mouse_select_button);
 	mouse_mode_size_group->add_widget (mouse_timefx_button);
 	if (!Profile->get_mixbus()) {
@@ -3093,8 +3091,9 @@ Editor::setup_toolbar ()
 	mouse_mode_hbox->pack_start (mouse_move_button, false, false);
 	mouse_mode_hbox->pack_start (mouse_select_button, false, false);
 
+	mouse_mode_hbox->pack_start (mouse_cut_button, false, false);
+
 	if (!ARDOUR::Profile->get_mixbus()) {
-		mouse_mode_hbox->pack_start (mouse_cut_button, false, false);
 		mouse_mode_hbox->pack_start (mouse_audition_button, false, false);
 	}
 

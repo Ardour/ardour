@@ -531,12 +531,10 @@ Editor::register_actions ()
 	mouse_content_button.set_icon (ArdourWidgets::ArdourIcon::ToolContent);
 	mouse_content_button.set_name ("mouse mode button");
 
-	if(!Profile->get_mixbus()) {
-		act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseCut));
-		mouse_cut_button.set_related_action (act);
-		mouse_cut_button.set_icon (ArdourWidgets::ArdourIcon::ToolCut);
-		mouse_cut_button.set_name ("mouse mode button");
-	}
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseCut));
+	mouse_cut_button.set_related_action (act);
+	mouse_cut_button.set_icon (ArdourWidgets::ArdourIcon::ToolCut);
+	mouse_cut_button.set_name ("mouse mode button");
 
 	ActionManager::register_action (editor_actions, "step-mouse-mode", _("Step Mouse Mode"), sigc::bind (sigc::mem_fun(*this, &Editor::step_mouse_mode), true));
 

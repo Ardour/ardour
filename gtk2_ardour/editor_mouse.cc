@@ -274,7 +274,6 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 	}
 
 	if (ARDOUR::Profile->get_mixbus()) {
-		if (m == MouseCut) m = MouseObject;
 		if (m == MouseAudition) m = MouseRange;
 	}
 
@@ -292,7 +291,6 @@ void
 Editor::mouse_mode_toggled (MouseMode m)
 {
 	if (ARDOUR::Profile->get_mixbus()) {
-		if (m == MouseCut)  m = MouseObject;
 		if (m == MouseAudition)  m = MouseRange;
 	}
 
