@@ -24,13 +24,13 @@
 
 #include "ardour/io.h"
 #include "ardour/panner_manager.h"
-#include "ardour/send.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/send.h"
 
-#include "send_ui.h"
-#include "io_selector.h"
-#include "timers.h"
 #include "gui_thread.h"
+#include "io_selector.h"
+#include "send_ui.h"
+#include "timers.h"
 
 #include "pbd/i18n.h"
 
@@ -86,10 +86,8 @@ SendUI::~SendUI ()
 {
 	_send->set_metering (false);
 
-	/* XXX not clear that we need to do this */
-
-	screen_update_connection.disconnect();
-	fast_screen_update_connection.disconnect();
+	screen_update_connection.disconnect ();
+	fast_screen_update_connection.disconnect ();
 }
 
 void
@@ -97,12 +95,12 @@ SendUI::outs_changed (IOChange change, void* /*ignored*/)
 {
 	ENSURE_GUI_THREAD (*this, &SendUI::outs_changed, change, ignored)
 	if (change.type & IOChange::ConfigurationChanged) {
-		uint32_t const in = _send->pans_required();
-		uint32_t const out = _send->pan_outs();
+		uint32_t const in  = _send->pans_required ();
+		uint32_t const out = _send->pan_outs ();
 		if (_panners._panner == 0) {
-			_panners.set_panner (_send->panner_shell(), _send->panner());
+			_panners.set_panner (_send->panner_shell (), _send->panner ());
 		}
-		_panners.set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
+		_panners.set_available_panners (PannerManager::instance ().PannerManager::get_available_panners (in, out));
 		_panners.setup_pan ();
 		_panners.show_all ();
 		_gpm.setup_meters ();
@@ -117,17 +115,17 @@ SendUI::update ()
 void
 SendUI::fast_update ()
 {
-	if (!is_mapped()) {
+	if (!is_mapped ()) {
 		return;
 	}
 
-	if (Config->get_meter_falloff() > 0.0f) {
+	if (Config->get_meter_falloff () > 0.0f) {
 		_gpm.update_meters ();
 	}
 }
 
 SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session* session)
-	: ArdourWindow (string (_("Send ")) + s->name())
+	: ArdourWindow (string (_("Send ")) + s->name ())
 {
 	ui = new SendUI (this, s, session);
 
@@ -139,7 +137,6 @@ SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session* session)
 
 	ui->show ();
 	hpacker.show ();
-
 }
 
 SendUIWindow::~SendUIWindow ()
