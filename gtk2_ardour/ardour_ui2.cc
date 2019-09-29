@@ -239,11 +239,13 @@ ARDOUR_UI::repack_transport_hbox ()
 	if (show_pdc) {
 		latency_disable_button.show ();
 		route_latency_value.show ();
+		io_latency_label.show ();
 		io_latency_value.show ();
 		latency_spacer.show ();
 	} else {
 		latency_disable_button.hide ();
 		route_latency_value.hide ();
+		io_latency_label.hide ();
 		io_latency_value.hide ();
 		latency_spacer.hide ();
 	}
