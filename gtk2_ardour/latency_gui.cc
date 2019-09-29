@@ -33,6 +33,7 @@
 #include "gtkmm2ext/utils.h"
 
 #include "latency_gui.h"
+#include "utils.h"
 
 #include "pbd/i18n.h"
 
@@ -54,17 +55,8 @@ std::vector<std::string> LatencyGUI::unit_strings;
 std::string
 LatencyBarController::get_label (double&)
 {
-	double const nframes = _latency_gui->adjustment.get_value();
-	std::stringstream s;
-
-	if (nframes < (_latency_gui->sample_rate / 1000.0)) {
-		const samplepos_t nf = (samplepos_t) rint (nframes);
-		s << string_compose (P_("%1 sample", "%1 samples", nf), nf);
-	} else {
-		s << std::fixed << std::setprecision (2) << (nframes / (_latency_gui->sample_rate / 1000.0)) << " ms";
-	}
-
-	return s.str ();
+	return ARDOUR_UI_UTILS::samples_as_time_string (
+			_latency_gui->adjustment.get_value(), _latency_gui->sample_rate, true);
 }
 
 LatencyGUI::LatencyGUI (Latent& l, samplepos_t sr, samplepos_t psz)

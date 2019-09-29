@@ -582,17 +582,9 @@ void
 PlugUIBase::set_latency_label ()
 {
 	samplecnt_t const l = insert->effective_latency ();
-	samplecnt_t const sr = insert->session().sample_rate ();
+	float const sr = insert->session().sample_rate ();
 
-	string t;
-
-	if (l < sr / 1000) {
-		t = string_compose (P_("%1 sample", "%1 samples", l), l);
-	} else {
-		t = string_compose (_("%1 ms"), (float) l / ((float) sr / 1000.0f));
-	}
-
-	latency_button.set_text (t);
+	latency_button.set_text (samples_as_time_string (l, sr, true));
 }
 
 void
