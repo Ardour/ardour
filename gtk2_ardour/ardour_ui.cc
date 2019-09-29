@@ -371,8 +371,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 
 	if (string (VERSIONSTRING).find (".pre") != string::npos) {
-		/* check this is not being run from ./ardev etc. */
-		if (!running_from_source_tree ()) {
+		string fn = Glib::build_filename (user_config_directory(), ".i_swear_that_i_will_heed_the_guidelines_stated_in_the_pre_release_dialog");
+		if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
 			pre_release_dialog ();
 		}
 	}
