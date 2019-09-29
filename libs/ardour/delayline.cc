@@ -28,6 +28,8 @@
 #include "ardour/midi_buffer.h"
 #include "ardour/runtime_functions.h"
 
+#define MAX_BUFFER_SIZE 8192
+
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
@@ -62,6 +64,7 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 	Glib::Threads::Mutex::Lock lm (_set_delay_mutex, Glib::Threads::TRY_LOCK);
 	assert (lm.locked ());
 #endif
+	assert (n_samples <= MAX_BUFFER_SIZE);
 
 	const sampleoffset_t pending_delay = _pending_delay;
 	sampleoffset_t delay_diff = _delay - pending_delay;
@@ -300,7 +303,7 @@ DelayLine::set_delay (samplecnt_t signal_delay)
 			string_compose ("%1 set_delay to %2 samples for %3 channels\n",
 				name (), signal_delay, _configured_output.n_audio ()));
 
-	if (signal_delay + 8192 + 1 > _bsiz) {
+	if (signal_delay + MAX_BUFFER_SIZE + 1 > _bsiz) {
 		allocate_pending_buffers (signal_delay, _configured_output);
 	}
 
@@ -319,7 +322,8 @@ void
 DelayLine::allocate_pending_buffers (samplecnt_t signal_delay, ChanCount const& cc)
 {
 	assert (signal_delay >= 0);
-	samplecnt_t rbs = signal_delay + 8192 + 1;
+	assert (signal_delay >= _pending_delay);
+	samplecnt_t rbs = signal_delay + MAX_BUFFER_SIZE + 1;
 	rbs = std::max (_bsiz, rbs);
 
 	uint64_t power_of_two;
@@ -330,7 +334,6 @@ DelayLine::allocate_pending_buffers (samplecnt_t signal_delay, ChanCount const& 
 		return;
 	}
 
-	_buf.clear ();
 	if (cc.n_audio () == 0) {
 		return;
 	}
@@ -345,23 +348,29 @@ DelayLine::allocate_pending_buffers (samplecnt_t signal_delay, ChanCount const& 
 	AudioDlyBuf::iterator bo = _buf.begin ();
 	AudioDlyBuf::iterator bn = pending_buf.begin ();
 
+	sampleoffset_t offset = (_roff <= _woff) ? 0 : rbs - _bsiz;
+
 	for (; bo != _buf.end () && bn != pending_buf.end(); ++bo, ++bn) {
 		Sample* rbo = (*bo).get ();
 		Sample* rbn = (*bn).get ();
-		if (_roff < _woff) {
+		if (_roff == _woff) {
+			continue;
+		} else if (_roff < _woff) {
 			/* copy data between _roff .. _woff to new buffer */
 			copy_vector (&rbn[_roff], &rbo[_roff], _woff - _roff);
 		} else {
 			/* copy data between _roff .. old_size to end of new buffer, increment _roff
 			 * copy data from 0.._woff to beginning of new buffer
 			 */
-			sampleoffset_t offset = rbs - _bsiz;
 			copy_vector (&rbn[_roff + offset], &rbo[_roff], _bsiz - _roff);
 			copy_vector (rbn, rbo, _woff);
-			_roff += offset;
-			assert (_roff < rbs);
 		}
 	}
+
+	assert ((_roff <= (_woff + signal_delay - _pending_delay) & (rbs -1)) || offset > 0);
+	_roff += offset;
+	assert (_roff < rbs);
+
 	_bsiz = rbs;
 	_bsiz_mask = _bsiz - 1;
 	_buf.swap (pending_buf);
