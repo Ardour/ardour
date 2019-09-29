@@ -68,7 +68,7 @@ class UserBundle;
  * An IO can contain ports of varying types, making routes/inserts/etc with
  * varied combinations of types (eg MIDI and audio) possible.
  */
-class LIBARDOUR_API IO : public SessionObject, public Latent
+class LIBARDOUR_API IO : public SessionObject
 {
 public:
 	static const std::string state_node_name;
@@ -118,8 +118,6 @@ public:
 	bool connected_to (const std::string&) const;
 	bool connected () const;
 	bool physically_connected () const;
-
-	samplecnt_t signal_latency () const { return 0; }
 
 	samplecnt_t latency () const;
 	samplecnt_t public_latency () const;

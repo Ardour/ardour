@@ -563,8 +563,6 @@ IO::state ()
 		node->add_child_nocopy (*pnode);
 	}
 
-	Latent::add_state (node);
-
 	return *node;
 }
 
@@ -638,8 +636,6 @@ IO::set_state (const XMLNode& node, int version)
 		pending_state_node_in = false;
 		ConnectingLegal.connect_same_thread (connection_legal_c, boost::bind (&IO::connecting_became_legal, this));
 	}
-
-	Latent::set_state (node, version);
 
 	return 0;
 }

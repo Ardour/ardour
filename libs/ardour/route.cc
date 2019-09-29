@@ -1164,8 +1164,6 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 				}
 			}
 		}
-
-		_output->unset_user_latency ();
 	}
 
 	reset_instrument_info ();
@@ -1488,8 +1486,6 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 			} else {
 				++i;
 			}
-
-			_output->unset_user_latency ();
 		}
 
 		if (!removed) {
@@ -1617,7 +1613,6 @@ Route::replace_processor (boost::shared_ptr<Processor> old, boost::shared_ptr<Pr
 		}
 
 		sub->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false));
-		_output->unset_user_latency ();
 	}
 
 	reset_instrument_info ();
@@ -1688,8 +1683,6 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 			/* none of those in the requested list were found */
 			return 0;
 		}
-
-		_output->unset_user_latency ();
 
 		if (configure_processors_unlocked (err, &lm)) {
 			pstate.restore ();
@@ -4113,7 +4106,7 @@ Route::update_signal_latency (bool apply_to_delayline)
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
 	samplecnt_t l_in  = 0;
-	samplecnt_t l_out = _output->effective_latency ();
+	samplecnt_t l_out = 0;
 	for (ProcessorList::reverse_iterator i = _processors.rbegin(); i != _processors.rend(); ++i) {
 		if (boost::shared_ptr<LatentSend> snd = boost::dynamic_pointer_cast<LatentSend> (*i)) {
 			snd->set_delay_in (l_out + _output->latency());
@@ -4179,13 +4172,6 @@ Route::update_signal_latency (bool apply_to_delayline)
 	}
 
 	return _signal_latency;
-}
-
-void
-Route::set_user_latency (samplecnt_t nframes)
-{
-	_output->set_user_latency (nframes);
-	_session.update_latency_compensation ();
 }
 
 void

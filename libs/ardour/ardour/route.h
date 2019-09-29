@@ -353,7 +353,6 @@ public:
 	samplecnt_t  set_private_port_latencies (bool playback) const;
 	void         set_public_port_latencies (samplecnt_t, bool playback) const;
 
-	void set_user_latency (samplecnt_t);
 	samplecnt_t signal_latency() const { return _signal_latency; }
 	samplecnt_t playback_latency (bool incl_downstream = false) const;
 
