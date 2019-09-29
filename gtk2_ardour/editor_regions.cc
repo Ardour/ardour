@@ -174,12 +174,12 @@ EditorRegions::EditorRegions (Editor* e)
 	ColumnInfo ci[] = {
 		{ 0,  0,  ALIGN_LEFT,    _("Region"),    _("Region name, with number of channels in []'s") },
 		{ 1,  1,  ALIGN_LEFT,    _("Tags"),      _("Tags") },
-		{ 2, -1,  ALIGN_CENTER, S_("Lock|L"),    _("Region position locked?") },
-		{ 3, -1,  ALIGN_CENTER, S_("Glued|G"),   _("Region position glued to Bars|Beats time?") },
-		{ 4, -1,  ALIGN_CENTER, S_("Mute|M"),    _("Region muted?") },
-		{ 5, -1,  ALIGN_CENTER, S_("Opaque|O"),  _("Region opaque (blocks regions below it from being heard)?") },
-		{ 6, 15,  ALIGN_RIGHT,   _("Start"),     _("Position of start of region") },
-		{ 7,  3,  ALIGN_RIGHT,   _("Length"),    _("Length of the region") },
+		{ 2, 15,  ALIGN_RIGHT,   _("Start"),     _("Position of start of region") },
+		{ 3,  3,  ALIGN_RIGHT,   _("Length"),    _("Length of the region") },
+		{ 4, -1,  ALIGN_CENTER, S_("Lock|L"),    _("Region position locked?") },
+		{ 5, -1,  ALIGN_CENTER, S_("Glued|G"),   _("Region position glued to Bars|Beats time?") },
+		{ 6, -1,  ALIGN_CENTER, S_("Mute|M"),    _("Region muted?") },
+		{ 7, -1,  ALIGN_CENTER, S_("Opaque|O"),  _("Region opaque (blocks regions below it from being heard)?") },
 #ifdef SHOW_REGION_EXTRAS
 		{ 8,  4,  ALIGN_RIGHT,  _("End"),       _("Position of end of region") },
 		{ 9, -1,  ALIGN_RIGHT,  _("Sync"),      _("Position of region sync point, relative to start of the region") },
