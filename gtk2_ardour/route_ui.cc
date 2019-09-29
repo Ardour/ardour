@@ -1927,13 +1927,6 @@ RouteUI::map_frozen ()
 }
 
 void
-RouteUI::adjust_latency ()
-{
-	LatencyDialog dialog (_route->name() + _(" latency"), *(_route->output()), _session->sample_rate(), AudioEngine::instance()->samples_per_cycle());
-}
-
-
-void
 RouteUI::save_as_template_dialog_response (int response, SaveTemplateDialog* d)
 {
 	if (response == RESPONSE_ACCEPT) {

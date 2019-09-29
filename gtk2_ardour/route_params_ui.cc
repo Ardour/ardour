@@ -69,13 +69,11 @@ RouteParams_UI::RouteParams_UI ()
 	_input_iosel = 0;
 	_output_iosel = 0;
 	_active_view = 0;
-	latency_widget = 0;
 
 	using namespace Notebook_Helpers;
 
 	input_frame.set_shadow_type(Gtk::SHADOW_NONE);
 	output_frame.set_shadow_type(Gtk::SHADOW_NONE);
-	latency_frame.set_shadow_type (Gtk::SHADOW_NONE);
 
 	notebook.set_show_tabs (true);
 	notebook.set_show_border (true);
@@ -108,15 +106,11 @@ RouteParams_UI::RouteParams_UI ()
 	notebook.pages().push_back (TabElem (input_frame, _("Inputs")));
 	notebook.pages().push_back (TabElem (output_frame, _("Outputs")));
 	notebook.pages().push_back (TabElem (redir_hpane, _("Plugins, Inserts & Sends")));
-	notebook.pages().push_back (TabElem (latency_frame, _("Latency")));
 
 	notebook.set_name ("InspectorNotebook");
 
 	title_label.set_name ("RouteParamsTitleLabel");
 	update_title();
-
-	latency_packer.set_spacing (18);
-	delay_label.set_alignment (0, 0.5);
 
 	// changeable area
 	route_param_frame.set_name("RouteParamsBaseFrame");
@@ -270,50 +264,6 @@ RouteParams_UI::cleanup_processor_boxes()
 }
 
 void
-RouteParams_UI::refresh_latency ()
-{
-	if (latency_widget) {
-		latency_widget->refresh();
-
-		char buf[128];
-		snprintf (buf, sizeof (buf), _("Latency: %" PRId64 " samples"), _route->signal_latency ());
-		delay_label.set_text (buf);
-	}
-}
-
-void
-RouteParams_UI::cleanup_latency_frame ()
-{
-	if (latency_widget) {
-		latency_frame.remove ();
-		latency_packer.remove (*latency_widget);
-		latency_packer.remove (delay_label);
-		latency_connections.drop_connections ();
-		latency_click_connection.disconnect ();
-
-		delete latency_widget;
-		latency_widget = 0;
-
-	}
-}
-
-void
-RouteParams_UI::setup_latency_frame ()
-{
-	latency_widget = new LatencyGUI (*(_route->output()), _session->sample_rate(), AudioEngine::instance()->samples_per_cycle());
-
-	refresh_latency ();
-
-	latency_packer.pack_start (*latency_widget, false, false);
-	latency_packer.pack_start (delay_label, false, false);
-
-	_route->signal_latency_updated.connect (latency_connections, invalidator (*this), boost::bind (&RouteParams_UI::refresh_latency, this), gui_context());
-
-	latency_frame.add (latency_packer);
-	latency_frame.show_all ();
-}
-
-void
 RouteParams_UI::setup_io_selector()
 {
 	cleanup_io_selector();
@@ -431,7 +381,6 @@ RouteParams_UI::session_going_away ()
 	cleanup_io_selector();
 	cleanup_view();
 	cleanup_processor_boxes();
-	cleanup_latency_frame ();
 
 	_route.reset ((Route*) 0);
 	_processor.reset ((Processor*) 0);
@@ -459,7 +408,6 @@ RouteParams_UI::route_selected()
 			cleanup_processor_boxes();
 			cleanup_view();
 			cleanup_io_selector();
-			cleanup_latency_frame ();
 		}
 
 		// update the other panes with the correct info
@@ -468,7 +416,6 @@ RouteParams_UI::route_selected()
 
 		setup_io_selector();
 		setup_processor_boxes();
-		setup_latency_frame ();
 
 		route->processors_changed.connect (_route_processors_connection, invalidator (*this), boost::bind (&RouteParams_UI::processors_changed, this, _1), gui_context());
 
@@ -485,7 +432,6 @@ RouteParams_UI::route_selected()
 			cleanup_io_selector();
 			cleanup_view();
 			cleanup_processor_boxes();
-			cleanup_latency_frame ();
 
 			_route.reset ((Route*) 0);
 			_processor.reset ((Processor*) 0);

@@ -1764,9 +1764,6 @@ MixerStrip::build_route_ops_menu ()
 	}
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Adjust Latency..."), sigc::mem_fun (*this, &RouteUI::adjust_latency)));
-
-	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Protect Against Denormals"), sigc::mem_fun (*this, &RouteUI::toggle_denormal_protection)));
 	denormal_menu_item = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 	denormal_menu_item->set_active (_route->denormal_protection());

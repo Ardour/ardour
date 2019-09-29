@@ -44,7 +44,6 @@
 #include "ardour_window.h"
 #include "processor_box.h"
 #include "processor_selection.h"
-#include "latency_gui.h"
 
 namespace ARDOUR {
 	class Route;
@@ -93,15 +92,6 @@ private:
 
 	Gtk::VBox                choice_vpacker;
 
-	Gtk::Frame               latency_frame;
-	Gtk::VBox                latency_packer;
-	LatencyGUI*              latency_widget;
-	Gtk::Label               delay_label;
-
-	PBD::ScopedConnectionList latency_connections;
-	sigc::connection          latency_click_connection;
-
-	void refresh_latency ();
 
 	Gtk::ToggleButton input_button;
 	Gtk::ToggleButton output_button;
@@ -163,8 +153,6 @@ private:
 	void setup_io_selector();
 	void cleanup_io_selector();
 	void cleanup_view(bool stopupdate = true);
-	void cleanup_latency_frame ();
-	void setup_latency_frame ();
 
 	void processors_changed (ARDOUR::RouteProcessorChange);
 
