@@ -113,7 +113,7 @@ std::vector<Plugin::PresetRecord>
 MacVSTPluginInfo::get_presets (bool user_only) const
 {
 	std::vector<Plugin::PresetRecord> p;
-#ifndef NO_PLUGIN_STATE
+
 	if (!Config->get_use_macvst ()) {
 		return p;
 	}
@@ -169,8 +169,6 @@ MacVSTPluginInfo::get_presets (bool user_only) const
 		}
 	}
 	delete t;
-#endif
-
 	return p;
 }
 

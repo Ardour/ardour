@@ -633,27 +633,9 @@ PlugUIBase::preset_selected (Plugin::PresetRecord preset)
 	}
 }
 
-#ifdef NO_PLUGIN_STATE
-static bool seen_saving_message = false;
-
-static void show_no_plugin_message()
-{
-	info << string_compose (_("Plugin presets are not supported in this build of %1. Consider paying for a full version"),
-			PROGRAM_NAME)
-	     << endmsg;
-	info << _("To get full access to updates without this limitation\n"
-	          "consider becoming a subscriber for a low cost every month.")
-	     << endmsg;
-	info << X_("https://community.ardour.org/s/subscribe")
-	     << endmsg;
-	ARDOUR_UI::instance()->popup_error(_("Plugin presets are not supported in this build, see the Log window for more information."));
-}
-#endif
-
 void
 PlugUIBase::add_plugin_setting ()
 {
-#ifndef NO_PLUGIN_STATE
 	NewPluginPresetDialog d (plugin, _("New Preset"));
 
 	switch (d.run ()) {
@@ -672,43 +654,23 @@ PlugUIBase::add_plugin_setting ()
 		}
 		break;
 	}
-#else
-	if (!seen_saving_message) {
-		seen_saving_message = true;
-		show_no_plugin_message();
-	}
-#endif
 }
 
 void
 PlugUIBase::save_plugin_setting ()
 {
-#ifndef NO_PLUGIN_STATE
 	string const name = _preset_combo.get_text ();
 	plugin->remove_preset (name);
 	Plugin::PresetRecord const r = plugin->save_preset (name);
 	if (!r.uri.empty ()) {
 		plugin->load_preset (r);
 	}
-#else
-	if (!seen_saving_message) {
-		seen_saving_message = true;
-		show_no_plugin_message();
-	}
-#endif
 }
 
 void
 PlugUIBase::delete_plugin_setting ()
 {
-#ifndef NO_PLUGIN_STATE
 	plugin->remove_preset (_preset_combo.get_text ());
-#else
-	if (!seen_saving_message) {
-		seen_saving_message = true;
-		show_no_plugin_message();
-	}
-#endif
 }
 
 void

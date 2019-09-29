@@ -108,7 +108,7 @@ std::vector<Plugin::PresetRecord>
 LXVSTPluginInfo::get_presets (bool user_only) const
 {
 	std::vector<Plugin::PresetRecord> p;
-#ifndef NO_PLUGIN_STATE
+
 	if (!Config->get_use_lxvst()) {
 		return p;
 	}
@@ -163,9 +163,8 @@ LXVSTPluginInfo::get_presets (bool user_only) const
 			}
 		}
 	}
-	delete t;
-#endif
 
+	delete t;
 	return p;
 }
 

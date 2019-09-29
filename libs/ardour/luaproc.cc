@@ -848,11 +848,9 @@ LuaProc::set_script_from_state (const XMLNode& node)
 int
 LuaProc::set_state (const XMLNode& node, int version)
 {
-#ifndef NO_PLUGIN_STATE
 	XMLNodeList nodes;
 	XMLNodeConstIterator iter;
 	XMLNode *child;
-#endif
 
 	if (_script.empty ()) {
 		if (set_script_from_state (node)) {
@@ -860,7 +858,6 @@ LuaProc::set_state (const XMLNode& node, int version)
 		}
 	}
 
-#ifndef NO_PLUGIN_STATE
 	if (node.name() != state_node_name()) {
 		error << _("Bad node sent to LuaProc::set_state") << endmsg;
 		return -1;
@@ -885,7 +882,6 @@ LuaProc::set_state (const XMLNode& node, int version)
 
 		set_parameter (port_id, value);
 	}
-#endif
 
 	return Plugin::set_state (node, version);
 }

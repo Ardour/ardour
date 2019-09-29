@@ -314,8 +314,6 @@ VSTPlugin::set_state (const XMLNode& node, int version)
 {
 	LocaleGuard lg;
 	int ret = -1;
-
-#ifndef NO_PLUGIN_STATE
 	XMLNode* child;
 
 	if ((child = find_named_node (node, X_("chunk"))) != 0) {
@@ -353,7 +351,6 @@ VSTPlugin::set_state (const XMLNode& node, int version)
 		ret = 0;
 
 	}
-#endif
 
 	Plugin::set_state (node, version);
 	return ret;

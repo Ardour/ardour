@@ -2061,7 +2061,6 @@ AUPlugin::set_state(const XMLNode& node, int version)
 		return -1;
 	}
 
-#ifndef NO_PLUGIN_STATE
 	if (node.children().empty()) {
 		return -1;
 	}
@@ -2097,7 +2096,6 @@ AUPlugin::set_state(const XMLNode& node, int version)
 		}
 		CFRelease (propertyList);
 	}
-#endif
 
 	Plugin::set_state (node, version);
 	return ret;
@@ -2593,7 +2591,7 @@ AUPluginInfo::get_presets (bool user_only) const
 {
 	std::vector<Plugin::PresetRecord> p;
 	boost::shared_ptr<CAComponent> comp;
-#ifndef NO_PLUGIN_STATE
+
 	try {
 		comp = boost::shared_ptr<CAComponent>(new CAComponent(*descriptor));
 		if (!comp->IsValid()) {
@@ -2664,7 +2662,6 @@ AUPluginInfo::get_presets (bool user_only) const
 	CFRelease (presets);
 	unit->Uninitialize ();
 
-#endif // NO_PLUGIN_STATE
 	return p;
 }
 

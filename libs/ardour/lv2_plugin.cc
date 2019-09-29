@@ -2128,8 +2128,6 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 		return -1;
 	}
 
-#ifndef NO_PLUGIN_STATE
-
 	if (version < 3000) {
 		nodes = node.children("port");
 	} else {
@@ -2210,7 +2208,6 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 	if (_session.loading ()) {
 		latency_compute_run();
 	}
-#endif
 
 	return Plugin::set_state(node, version);
 }
@@ -3425,7 +3422,7 @@ std::vector<Plugin::PresetRecord>
 LV2PluginInfo::get_presets (bool /*user_only*/) const
 {
 	std::vector<Plugin::PresetRecord> p;
-#ifndef NO_PLUGIN_STATE
+
 	const LilvPlugin* lp = NULL;
 	try {
 		PluginPtr plugin;
@@ -3468,7 +3465,7 @@ LV2PluginInfo::get_presets (bool /*user_only*/) const
 	lilv_node_free(rdfs_label);
 	lilv_node_free(pset_Preset);
 	lilv_node_free(lv2_appliesTo);
-#endif
+
 	return p;
 }
 

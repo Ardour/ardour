@@ -375,18 +375,14 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 		return set_state_2X (node, version);
 	}
 
-#ifndef NO_PLUGIN_STATE
 	XMLNodeList nodes;
 	XMLNodeConstIterator iter;
 	XMLNode *child;
-#endif
 
 	if (node.name() != state_node_name()) {
 		error << _("Bad node sent to LadspaPlugin::set_state") << endmsg;
 		return -1;
 	}
-
-#ifndef NO_PLUGIN_STATE
 
 	nodes = node.children ("Port");
 
@@ -409,7 +405,6 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 
 		set_parameter (port_id, value);
 	}
-#endif
 
 	latency_compute_run ();
 
@@ -419,7 +414,6 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 int
 LadspaPlugin::set_state_2X (const XMLNode& node, int /* version */)
 {
-#ifndef NO_PLUGIN_STATE
 	XMLNodeList nodes;
 	XMLProperty const * prop;
 	XMLNodeConstIterator iter;
@@ -427,7 +421,6 @@ LadspaPlugin::set_state_2X (const XMLNode& node, int /* version */)
 	const char *port;
 	const char *data;
 	uint32_t port_id;
-#endif
 	LocaleGuard lg;
 
 	if (node.name() != state_node_name()) {
@@ -435,7 +428,6 @@ LadspaPlugin::set_state_2X (const XMLNode& node, int /* version */)
 		return -1;
 	}
 
-#ifndef NO_PLUGIN_STATE
 	nodes = node.children ("port");
 
 	for(iter = nodes.begin(); iter != nodes.end(); ++iter){
@@ -460,7 +452,6 @@ LadspaPlugin::set_state_2X (const XMLNode& node, int /* version */)
 	}
 
 	latency_compute_run ();
-#endif
 
 	return 0;
 }
@@ -721,7 +712,7 @@ std::vector<Plugin::PresetRecord>
 LadspaPluginInfo::get_presets (bool /*user_only*/) const
 {
 	std::vector<Plugin::PresetRecord> p;
-#if (defined HAVE_LRDF && !defined NO_PLUGIN_STATE)
+#ifdef HAVE_LRDF
 	if (!isdigit (unique_id[0])) {
 		return p;
 	}

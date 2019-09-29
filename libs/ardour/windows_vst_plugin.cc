@@ -106,7 +106,7 @@ std::vector<Plugin::PresetRecord>
 WindowsVSTPluginInfo::get_presets (bool user_only) const
 {
 	std::vector<Plugin::PresetRecord> p;
-#ifndef NO_PLUGIN_STATE
+
 	if (!Config->get_use_lxvst()) {
 		return p;
 	}
@@ -130,8 +130,6 @@ WindowsVSTPluginInfo::get_presets (bool user_only) const
 		}
 	}
 	delete t;
-#endif
-
 	return p;
 }
 

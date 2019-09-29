@@ -80,11 +80,6 @@ using namespace PBD;
 
 namespace ARDOUR { class AudioEngine; }
 
-#ifdef NO_PLUGIN_STATE
-static bool seen_get_state_message = false;
-static bool seen_set_state_message = false;
-#endif
-
 PBD::Signal2<void, std::string, Plugin*> Plugin::PresetsChanged;
 
 bool
@@ -321,12 +316,11 @@ Plugin::possible_output () const
 const Plugin::PresetRecord *
 Plugin::preset_by_label (const string& label)
 {
-#ifndef NO_PLUGIN_STATE
 	if (!_have_presets) {
 		find_presets ();
 		_have_presets = true;
 	}
-#endif
+
 	// FIXME: O(n)
 	for (map<string, PresetRecord>::const_iterator i = _presets.begin(); i != _presets.end(); ++i) {
 		if (i->second.label == label) {
@@ -340,12 +334,11 @@ Plugin::preset_by_label (const string& label)
 const Plugin::PresetRecord *
 Plugin::preset_by_uri (const string& uri)
 {
-#ifndef NO_PLUGIN_STATE
 	if (!_have_presets) {
 		find_presets ();
 		_have_presets = true;
 	}
-#endif
+
 	map<string, PresetRecord>::const_iterator pr = _presets.find (uri);
 	if (pr != _presets.end()) {
 		return &pr->second;
@@ -425,7 +418,6 @@ Plugin::get_presets ()
 {
 	vector<PresetRecord> p;
 
-#ifndef NO_PLUGIN_STATE
 	if (!_have_presets) {
 		find_presets ();
 		_have_presets = true;
@@ -434,14 +426,6 @@ Plugin::get_presets ()
 	for (map<string, PresetRecord>::const_iterator i = _presets.begin(); i != _presets.end(); ++i) {
 		p.push_back (i->second);
 	}
-#else
-	if (!seen_set_state_message) {
-		info << string_compose (_("Plugin presets are not supported in this build of %1. Consider paying for a full version"),
-					PROGRAM_NAME)
-		     << endmsg;
-		seen_set_state_message = true;
-	}
-#endif
 
 	return p;
 }
@@ -511,16 +495,7 @@ Plugin::get_state ()
 	root->set_property (X_("last-preset-label"), _last_preset.label);
 	root->set_property (X_("parameter-changed-since-last-preset"), _parameter_changed_since_last_preset);
 
-#ifndef NO_PLUGIN_STATE
 	add_state (root);
-#else
-	if (!seen_get_state_message) {
-		info << string_compose (_("Saving plugin settings is not supported in this build of %1. Consider paying for the full version"),
-					PROGRAM_NAME)
-		     << endmsg;
-		seen_get_state_message = true;
-	}
-#endif
 
 	return *root;
 }
