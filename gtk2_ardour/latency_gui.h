@@ -92,14 +92,4 @@ private:
 	static std::vector<std::string> unit_strings;
 };
 
-class LatencyDialog : public ArdourDialog
-{
-  public:
-	LatencyDialog (const std::string& title, ARDOUR::Latent&, samplepos_t sample_rate, samplepos_t period_size);
-	~LatencyDialog() {}
-
-  private:
-	LatencyGUI lwidget;
-};
-
 #endif /* __gtk2_ardour_latency_gui_h__ */

@@ -163,14 +163,3 @@ LatencyGUI::change_latency_from_button (int dir)
 		adjustment.set_value (adjustment.get_value() - shift);
 	}
 }
-
-LatencyDialog::LatencyDialog (const std::string& title, Latent& l, samplepos_t sr, samplepos_t psz)
-	: ArdourDialog (title, false, true),
-	  lwidget (l, sr, psz)
-{
-	get_vbox()->pack_start (lwidget);
-	add_button (Stock::CLOSE, RESPONSE_CLOSE);
-
-	show_all ();
-	run ();
-}
