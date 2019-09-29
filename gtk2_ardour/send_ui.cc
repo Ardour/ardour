@@ -45,39 +45,41 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
 {
 	assert (_send);
 
+	uint32_t const in  = _send->pans_required ();
+	uint32_t const out = _send->pan_outs ();
+	_panners.set_width (Wide);
+	_panners.set_available_panners (PannerManager::instance ().PannerManager::get_available_panners (in, out));
+	_panners.set_panner (s->panner_shell (), s->panner ());
+
+	_send->set_metering (true);
+	_send->output ()->changed.connect (connections, invalidator (*this), boost::bind (&SendUI::outs_changed, this, _1, _2), gui_context ());
+
+	_gpm.setup_meters ();
+	_gpm.set_fader_name (X_("SendUIFader"));
+	_gpm.set_controls (boost::shared_ptr<Route> (), s->meter (), s->amp (), s->gain_control ());
+
+	_io = Gtk::manage (new IOSelector (parent, session, s->output ()));
+
+	set_name (X_("SendUIFrame"));
+
+	_hbox.pack_start (_gpm, true, true);
+
+	_vbox.set_spacing (5);
+	_vbox.set_border_width (5);
 	_vbox.pack_start (_hbox, false, false, false);
 	_vbox.pack_start (_panners, false, false);
 
-	io = Gtk::manage (new IOSelector (parent, session, s->output()));
-
 	pack_start (_vbox, false, false);
+	pack_start (*_io, true, true);
 
-	pack_start (*io, true, true);
-
-	io->show ();
+	_io->show ();
 	_gpm.show_all ();
 	_panners.show_all ();
 	_vbox.show ();
 	_hbox.show ();
 
-	_send->set_metering (true);
-
-	_send->output()->changed.connect (connections, invalidator (*this), boost::bind (&SendUI::outs_changed, this, _1, _2), gui_context());
-
-	uint32_t const in = _send->pans_required();
-	uint32_t const out = _send->pan_outs();
-
-	_panners.set_width (Wide);
-	_panners.set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
-	_panners.setup_pan ();
-
-	_gpm.setup_meters ();
-	_gpm.set_fader_name (X_("SendUIFader"));
-
-	// screen_update_connection = Timers::rapid_connect (
-	//		sigc::mem_fun (*this, &SendUI::update));
 	fast_screen_update_connection = Timers::super_rapid_connect (
-			sigc::mem_fun (*this, &SendUI::fast_update));
+	    sigc::mem_fun (*this, &SendUI::fast_update));
 }
 
 SendUI::~SendUI ()

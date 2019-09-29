@@ -220,6 +220,8 @@ PannerUI::setup_pan ()
 	int const nouts = _panner ? _panner->out().n_audio() : -1;
 	int const nins = _panner ? _panner->in().n_audio() : -1;
 
+	assert (_panshell);
+
 	if (nouts == _current_nouts
 			&& nins == _current_nins
 			&& _current_uri == _panshell->panner_gui_uri()

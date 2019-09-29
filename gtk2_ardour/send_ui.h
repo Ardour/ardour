@@ -42,8 +42,6 @@ class SendUI : public Gtk::HBox
 	void update ();
 	void fast_update ();
 
-	IOSelector* io;
-
 	boost::shared_ptr<ARDOUR::Send>& send() { return _send; }
 
   private:
@@ -52,6 +50,7 @@ class SendUI : public Gtk::HBox
 	PannerUI                        _panners;
 	Gtk::VBox                       _vbox;
 	Gtk::VBox                       _hbox;
+	IOSelector*                     _io;
 
 	sigc::connection screen_update_connection;
 	sigc::connection fast_screen_update_connection;
