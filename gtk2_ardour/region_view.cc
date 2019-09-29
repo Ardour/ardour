@@ -534,7 +534,7 @@ RegionView::get_fill_color () const
 	Gtkmm2ext::Color f = TimeAxisViewItem::get_fill_color();
 	char const *modname;
 
-	if (_region->opaque() && (!ARDOUR::Profile->get_mixbus() || (!_dragging && !_region->muted ()))) {
+	if (_region->opaque() && ( !_dragging && !_region->muted () )) {
 		modname = "opaque region base";
 	} else {
 		modname = "transparent region base";
