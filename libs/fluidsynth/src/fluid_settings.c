@@ -1047,7 +1047,7 @@ fluid_settings_copystr(fluid_settings_t *settings, const char *name,
  * @since 1.1.0
  *
  * Like fluid_settings_copystr() but allocates a new copy of the string.  Caller
- * owns the string and should free it with free() when done using it.
+ * owns the string and should free it with fluid_free() when done using it.
  */
 int
 fluid_settings_dupstr(fluid_settings_t *settings, const char *name, char **str)
@@ -1116,7 +1116,7 @@ fluid_settings_dupstr(fluid_settings_t *settings, const char *name, char **str)
  * @param settings a settings object
  * @param name a setting's name
  * @param s a string to be tested
- * @return TRUE if the value exists and is equal to 's', FALSE otherwise
+ * @return TRUE if the value exists and is equal to \c s, FALSE otherwise
  */
 int
 fluid_settings_str_equal(fluid_settings_t *settings, const char *name, const char *s)
@@ -1644,7 +1644,7 @@ int fluid_settings_getint_default(fluid_settings_t *settings, const char *name, 
  * @param data any user provided pointer
  * @param func callback function to be called on each iteration
  *
- * @note Starting with FluidSynth 1.1.0 the \a func callback is called for each
+ * @note Starting with FluidSynth 1.1.0 the \p func callback is called for each
  * option in alphabetical order.  Sort order was undefined in previous versions.
  */
 void
@@ -1727,7 +1727,7 @@ fluid_settings_option_count(fluid_settings_t *settings, const char *name)
  * @param name Settings name
  * @param separator String to use between options (NULL to use ", ")
  * @return Newly allocated string or NULL on error (out of memory, not a valid
- *   setting \a name or not a string setting).  Free the string when finished with it.
+ *   setting \p name or not a string setting). Free the string when finished with it by using fluid_free().
  * @since 1.1.0
  */
 char *
@@ -1869,7 +1869,7 @@ fluid_settings_foreach_iter(void *key, void *value, void *data)
  * @param data any user provided pointer
  * @param func callback function to be called on each iteration
  *
- * @note Starting with FluidSynth 1.1.0 the \a func callback is called for each
+ * @note Starting with FluidSynth 1.1.0 the \p func callback is called for each
  * setting in alphabetical order.  Sort order was undefined in previous versions.
  */
 void

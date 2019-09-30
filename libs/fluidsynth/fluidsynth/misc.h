@@ -62,6 +62,7 @@ extern "C" {
 
 FLUIDSYNTH_API int fluid_is_soundfont(const char *filename);
 FLUIDSYNTH_API int fluid_is_midifile(const char *filename);
+FLUIDSYNTH_API void fluid_free(void* ptr);
 
 
 #ifdef __cplusplus

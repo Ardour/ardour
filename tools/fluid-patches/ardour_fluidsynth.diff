@@ -163,7 +163,7 @@ index 4ee072e4b9..1b3fceb342 100644
  typedef struct _fluid_rvoice_mixer_t fluid_rvoice_mixer_t;
  
 diff --git b/libs/fluidsynth/src/fluid_settings.c a/libs/fluidsynth/src/fluid_settings.c
-index 5b2b08748f..1811169846 100644
+index 78532ad2a3..a825603a44 100644
 --- b/libs/fluidsynth/src/fluid_settings.c
 +++ a/libs/fluidsynth/src/fluid_settings.c
 @@ -21,9 +21,6 @@
@@ -191,7 +191,7 @@ index 5b2b08748f..1811169846 100644
  
  static int
 diff --git b/libs/fluidsynth/src/fluid_synth.c a/libs/fluidsynth/src/fluid_synth.c
-index 426d3c4fc0..42064f93d6 100644
+index 3f602b88d1..570a2535cd 100644
 --- b/libs/fluidsynth/src/fluid_synth.c
 +++ a/libs/fluidsynth/src/fluid_synth.c
 @@ -25,7 +25,6 @@
@@ -202,7 +202,7 @@ index 426d3c4fc0..42064f93d6 100644
  
  #ifdef TRAP_ON_FPE
  #define _GNU_SOURCE
-@@ -268,7 +267,7 @@ void fluid_version(int *major, int *minor, int *micro)
+@@ -263,7 +262,7 @@ void fluid_version(int *major, int *minor, int *micro)
   * @return FluidSynth version string, which is internal and should not be
   *   modified or freed.
   */
@@ -211,7 +211,7 @@ index 426d3c4fc0..42064f93d6 100644
  fluid_version_str(void)
  {
      return FLUIDSYNTH_VERSION;
-@@ -5509,7 +5508,7 @@ fluid_synth_set_interp_method(fluid_synth_t *synth, int chan, int interp_method)
+@@ -5472,7 +5471,7 @@ fluid_synth_set_interp_method(fluid_synth_t *synth, int chan, int interp_method)
      }
  
      FLUID_API_RETURN(FLUID_OK);
@@ -220,7 +220,7 @@ index 426d3c4fc0..42064f93d6 100644
  
  /**
   * Get the total count of MIDI channels.
-@@ -6447,6 +6446,7 @@ int fluid_synth_set_channel_type(fluid_synth_t *synth, int chan, int type)
+@@ -6410,6 +6409,7 @@ int fluid_synth_set_channel_type(fluid_synth_t *synth, int chan, int type)
      FLUID_API_RETURN(FLUID_OK);
  }
  
@@ -228,7 +228,7 @@ index 426d3c4fc0..42064f93d6 100644
  /**
   * Return the LADSPA effects instance used by FluidSynth
   *
-@@ -6459,6 +6459,7 @@ fluid_ladspa_fx_t *fluid_synth_get_ladspa_fx(fluid_synth_t *synth)
+@@ -6422,6 +6422,7 @@ fluid_ladspa_fx_t *fluid_synth_get_ladspa_fx(fluid_synth_t *synth)
  
      return synth->ladspa_fx;
  }
@@ -260,10 +260,10 @@ index 0b9758bad5..fe222f7b6f 100644
      enum fluid_iir_filter_flags custom_filter_flags; /**< filter type of the user-defined filter currently used for all voices */
  };
 diff --git b/libs/fluidsynth/src/fluid_sys.c a/libs/fluidsynth/src/fluid_sys.c
-index 5d123883b3..938c05cf22 100644
+index 8128fbba91..f6c56d3995 100644
 --- b/libs/fluidsynth/src/fluid_sys.c
 +++ a/libs/fluidsynth/src/fluid_sys.c
-@@ -205,9 +205,10 @@ fluid_log(int level, const char *fmt, ...)
+@@ -216,9 +216,10 @@ void fluid_free(void* ptr)
   * @param delim String of delimiter chars.
   * @return Pointer to the next token or NULL if no more tokens.
   */

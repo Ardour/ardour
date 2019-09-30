@@ -1151,7 +1151,7 @@ new_fluid_preset_zone(char *name)
 /*
  * delete list of modulators.
  */
-static void delete_fluid_list_mod(fluid_mod_t *mod)
+void delete_fluid_list_mod(fluid_mod_t *mod)
 {
     fluid_mod_t *tmp;
 

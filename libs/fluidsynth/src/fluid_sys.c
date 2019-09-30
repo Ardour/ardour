@@ -193,6 +193,17 @@ fluid_log(int level, const char *fmt, ...)
 }
 
 /**
+ * Convenience wrapper for free() that satisfies at least C90 requirements.
+ * Especially useful when using fluidsynth with programming languages that do not provide malloc() and free().
+ * @note Only use this function when the API documentation explicitly says so. Otherwise use adequate \c delete_fluid_* functions.
+ * @since 2.0.7
+ */
+void fluid_free(void* ptr)
+{
+    free(ptr);
+}
+
+/**
  * An improved strtok, still trashes the input string, but is portable and
  * thread safe.  Also skips token chars at beginning of token string and never
  * returns an empty token (will return NULL if source ends in token chars though).
