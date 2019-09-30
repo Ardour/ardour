@@ -189,8 +189,7 @@ class LIBARDOUR_API PortManager
 	boost::shared_ptr<Port> register_port (DataType type, const std::string& portname, bool input, bool async = false, PortFlags extra_flags = PortFlags (0));
 	void port_registration_failure (const std::string& portname);
 
-	/** List of ports to be used between ::cycle_start() and ::cycle_end()
-	 */
+	/** List of ports to be used between \ref cycle_start() and \ref cycle_end() */
 	boost::shared_ptr<Ports> _cycle_ports;
 
 	void silence (pframes_t nframes, Session *s = 0);

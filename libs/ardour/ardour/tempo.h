@@ -389,23 +389,24 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	TempoSection* next_tempo_section (TempoSection*) const;
 
 	/** add a tempo section locked to pls. ignored values will be set in recompute_tempi()
-	 * @param pulse pulse position of new section. ignored if pls == AudioTime
-	 * @param sample frame position of new section. ignored if pls == MusicTime
-	 * @param type type of new tempo section (Ramp, Constant)
+	 * @param pulse pulse position of new section. ignored if \param pls == AudioTime
+	 * @param sample frame position of new section. ignored if \param pls == MusicTime
+	 * @param pls the position lock style
 	 */
 	TempoSection* add_tempo (const Tempo&, const double& pulse, const samplepos_t sample, PositionLockStyle pls);
 
-	/** add a meter section locked to pls.. ignored values will be set in recompute_meters()
+	/** add a meter section locked to \param pls . ignored values will be set in recompute_meters()
 	 * @param meter the Meter to be added
 	 * @param where bbt position of new section
-	 * @param sample frame position of new section. ignored if pls == MusicTime
-	 * note that @sample may also be ignored if it would create an un-solvable map
+	 * @param sample frame position of new section. ignored if \param pls == MusicTime
+	 *
+	 * note that \param sample may also be ignored if it would create an un-solvable map
 	 * (previous audio-locked tempi may place the requested beat at an earlier time than sample)
 	 * in which case the new meter will be placed at the specified BBT.
-	 * @param  pls the position lock style
+	 * @param pls the position lock style
 	 *
 	 * adding an audio-locked meter will add a meter-locked tempo section at the meter position.
-	 * the meter-locked tempo tempo will be the Tempo at @beat
+	 * the meter-locked tempo tempo will be the Tempo at the beat
 	 */
 	MeterSection* add_meter (const Meter& meter, const Timecode::BBT_Time& where, samplepos_t sample, PositionLockStyle pls);
 

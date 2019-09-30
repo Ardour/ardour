@@ -81,6 +81,7 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @param s Session Handle
 	 * @param id Plugin Name, ID or URI
 	 * @param type Plugin Type
+	 * @param preset name of plugin-preset to load, leave empty "" to not load any preset after instantiation
 	 * @returns Processor or nil
 	 */
 	boost::shared_ptr<ARDOUR::Processor> new_plugin (ARDOUR::Session *s, const std::string& id, ARDOUR::PluginType type, const std::string& preset = "");
@@ -92,7 +93,7 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @param value value to set
 	 * @returns true on success, false on error or out-of-bounds value
 	 */
-	bool set_processor_param (boost::shared_ptr<ARDOUR::Processor> proc, uint32_t which, float val);
+	bool set_processor_param (boost::shared_ptr<ARDOUR::Processor> proc, uint32_t which, float value);
 
 	/** get a plugin control parameter value
 	 *
@@ -116,16 +117,16 @@ namespace ARDOUR { namespace LuaAPI {
 	 *
 	 * This is a wrapper around set_processor_param which looks up the Processor by plugin-insert.
 	 *
-	 * @param proc Plugin-Insert
+	 * @param pi Plugin-Insert
 	 * @param which control-input to set (starting at 0)
 	 * @param value value to set
 	 * @returns true on success, false on error or out-of-bounds value
 	 */
-	bool set_plugin_insert_param (boost::shared_ptr<ARDOUR::PluginInsert> pi, uint32_t which, float val);
+	bool set_plugin_insert_param (boost::shared_ptr<ARDOUR::PluginInsert> pi, uint32_t which, float value);
 
 	/** get a plugin control parameter value
 	 *
-	 * @param proc Plugin-Insert
+	 * @param pi Plugin-Insert
 	 * @param which control port to query (starting at 0, including ports of type input and output)
 	 * @param ok boolean variable contains true or false after call returned. to be checked by caller before using value.
 	 * @returns value
@@ -250,12 +251,12 @@ namespace ARDOUR { namespace LuaAPI {
 			 *
 			 * If the plugin is not yet initialized, initialize() is called.
 			 *
-			 * if @cb is not nil, it is called with the immediate
+			 * if \param fn is not nil, it is called with the immediate
 			 * Vamp::Plugin::Features on every process call.
 			 *
 			 * @param r readable
 			 * @param channel channel to process
-			 * @param fn lua callback function
+			 * @param fn lua callback function or nil
 			 * @return 0 on success
 			 */
 			int analyze (boost::shared_ptr<ARDOUR::Readable> r, uint32_t channel, luabridge::LuaRef fn);

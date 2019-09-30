@@ -109,9 +109,10 @@ class LIBPBD_API SystemExec
 		 * creates an argv array from the given command string, splitting into
 		 * parameters at spaces.
 		 * "\ " is non-splitting space, "\\" (and "\" at end of command) as "\",
-		 * for "%<char>", <char> is looked up in subs and the corresponding string
+		 * for "%<char>", \<char\> is looked up in subs and the corresponding string
 		 * substituted. "%%" (and "%" at end of command)
-		 * returns an argv array suitable for creating a new SystemExec with
+		 *
+		 * @returns an argv array suitable for creating a new SystemExec with
 		 */
 		SystemExec (std::string command, const std::map<char, std::string> subs);
 
@@ -135,10 +136,11 @@ class LIBPBD_API SystemExec
 		 * '1': ignore STDERR of child-program
 		 * '2': merge STDERR into STDOUT and send it with the
 		 *      ReadStdout signal.
+		 * @param _vfork_exec_wrapper path to vfork-wrapper binary
 		 * @return If the process is already running or was launched successfully
 		 * the function returns zero (0). A negative number indicates an error.
 		 */
-		int start (StdErrMode, const char *_vfork_exec_wrapper);
+		int start (StdErrMode stderr_mode, const char *_vfork_exec_wrapper);
 		/** kill running child-process
 		 *
 		 * if a child process exists trt to shut it down by closing its STDIN.
@@ -158,7 +160,7 @@ class LIBPBD_API SystemExec
 		 *
 		 * This function is only useful if you want to control application
 		 * termination yourself (eg timeouts or progress-dialog).
-		 * @param option flags - see waitpid manual
+		 * @param options flags - see waitpid manual
 		 * @return status info from waitpid call (not waitpid's return value)
 		 * or -1 if the child-program is not running.
 		 */
@@ -183,7 +185,7 @@ class LIBPBD_API SystemExec
 		 * @param bytes length of data to write
 		 * @return number of bytes written.
 		 */
-		size_t write_to_stdin (const void* d, size_t bytes=0);
+		size_t write_to_stdin (const void* data, size_t bytes=0);
 
 		/** The ReadStdout signal is emitted when the application writes to STDOUT.
 		 * it passes the written data and its length in bytes as arguments to the bound

@@ -88,10 +88,17 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	virtual int set_block_size (pframes_t /*nframes*/) { return 0; }
 	virtual bool requires_fixed_sized_buffers() const { return false; }
 
-	/** @param result_required true if, on return from this method, @a bufs is required to contain valid data;
-	 *  if false, the method need not bother writing to @a bufs if it doesn't want to.
+	/** The main process function for processors
+	 *
+	 * @param bufs bufferset of data to process in-place
+	 * @param start_sample absolute timeline position in audio-samples to commence processing (latency compensated)
+	 * @param end_sample absolute timeline position in audio-samples, usually start_sample +/- \param nframes
+	 * @param speed transport speed. usually -1, 0, +1
+	 * @param nframes number of audio samples to process
+	 * @param result_required true if, on return from this method, \param bufs is required to contain valid data;
+	 *        if false, the method need not bother writing to @a bufs if it doesn't want to.
 	 */
-	virtual void run (BufferSet& /*bufs*/, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double speed, pframes_t /*nframes*/, bool /*result_required*/) {}
+	virtual void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required) {}
 	virtual void silence (samplecnt_t nframes, samplepos_t start_sample) { automation_run (start_sample, nframes); }
 
 	virtual void activate ()   { _pending_active = true; ActiveChanged(); }

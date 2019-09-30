@@ -192,7 +192,7 @@ namespace ARDOUR { namespace DSP {
 			 *
 			 * @param data pointer to control-data array
 			 * @param val target value
-			 * @param array length
+			 * @param n_samples array length
 			 */
 			void ctrl (float *data, const float val, const uint32_t n_samples);
 			/** update filter cut-off frequency
@@ -282,7 +282,7 @@ namespace ARDOUR { namespace DSP {
 
 			/** query
 			 * @param bin the frequency bin 0 .. window_size / 2
-			 * @param norm gain factor (set equal to @bin for 1/f normalization)
+			 * @param norm gain factor (set equal to \param bin for 1/f normalization)
 			 * @return signal power at given bin (in dBFS)
 			 */
 			float power_at_bin (const uint32_t bin, const float norm = 1.f) const;

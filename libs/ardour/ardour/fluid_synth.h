@@ -34,6 +34,7 @@ namespace ARDOUR {
 			/** instantiate a Synth
 			 *
 			 * @param samplerate samplerate
+			 * @param polyphony polyphony
 			 */
 			FluidSynth (float samplerate, int polyphony = 32);
 			~FluidSynth ();
