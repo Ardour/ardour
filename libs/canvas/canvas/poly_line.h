@@ -21,9 +21,9 @@
 #ifndef __CANVAS_POLY_LINE_H__
 #define __CANVAS_POLY_LINE_H__
 
-#include "canvas/visibility.h"
-#include "canvas/poly_item.h"
 #include "canvas/outline.h"
+#include "canvas/poly_item.h"
+#include "canvas/visibility.h"
 
 namespace ArdourCanvas {
 
@@ -39,10 +39,11 @@ public:
 	virtual void compute_bounding_box () const;
 
 	bool covers (Duple const &) const;
+
 	/**
 	 * Set the distance at which a point will be considered to be covered
 	 * by the line. For the definition of "distance" see
-	 * utils.cc:distance_to_segment_squared()
+	 * utils.cc \ref distance_to_segment_squared()
 	 */
 	void set_covers_threshold (double);
 

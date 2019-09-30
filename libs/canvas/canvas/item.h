@@ -29,11 +29,11 @@
 
 #include "pbd/signals.h"
 
-#include "canvas/visibility.h"
-#include "canvas/types.h"
 #include "canvas/fill.h"
-#include "canvas/outline.h"
 #include "canvas/lookup_table.h"
+#include "canvas/outline.h"
+#include "canvas/types.h"
+#include "canvas/visibility.h"
 
 namespace ArdourCanvas
 {
@@ -61,7 +61,7 @@ public:
 	Item (Item *, Duple const& p);
 	virtual ~Item ();
 
-        void redraw () const;
+	void redraw () const;
 
 	/** Render this item to a Cairo context.
 	 *  @param area Area to draw, in **window** coordinates
@@ -94,11 +94,11 @@ public:
 	 */
 	virtual void add_items_at_point (Duple /*point*/, std::vector<Item const *>& items) const;
 
-        /** Return true if the item covers @param point, false otherwise.
-         *
-         * The point is in window coordinates
-         */
-        virtual bool covers (Duple const &) const;
+	/** Return true if the item covers @param point, false otherwise.
+	 *
+	 * The point is in window coordinates
+	 */
+	virtual bool covers (Duple const &) const;
 
 	/** Update _bounding_box and _bounding_box_dirty */
 	virtual void compute_bounding_box () const = 0;
@@ -114,20 +114,20 @@ public:
 		return _parent;
 	}
 
-        uint32_t depth() const;
-        const Item* closest_ancestor_with (const Item& other) const;
-        bool common_ancestor_within (uint32_t, const Item& other) const;
+	uint32_t depth() const;
+	const Item* closest_ancestor_with (const Item& other) const;
+	bool common_ancestor_within (uint32_t, const Item& other) const;
 
-        /** returns true if this item is an ancestor of @param candidate,
+	/** returns true if this item is an ancestor of @param candidate,
 	 * and false otherwise.
 	 */
-        bool is_ancestor_of (const Item& candidate) const {
+	bool is_ancestor_of (const Item& candidate) const {
 		return candidate.is_descendant_of (*this);
 	}
-        /** returns true if this Item is a descendant of @param candidate,
+	/** returns true if this Item is a descendant of @param candidate,
 	 * and false otherwise.
 	 */
-        bool is_descendant_of (const Item& candidate) const;
+	bool is_descendant_of (const Item& candidate) const;
 
 	void set_position (Duple);
 	void set_x_position (Coord);
@@ -149,15 +149,15 @@ public:
 	void size_allocate (Rect const&);
 
 	/** bounding box is the public API to get the size of the item.
-	   If @param for_own_purposes is false, then it will return the
-	   allocated bounding box (if there is one) in preference to the
-	   one that would naturally be computed by the item.
-	*/
+	 * If @param for_own_purposes is false, then it will return the
+	 * allocated bounding box (if there is one) in preference to the
+	 * one that would naturally be computed by the item.
+	 */
 	Rect bounding_box (bool for_own_purposes = false) const;
 	Rect allocation() const { return _allocation; }
 
-        Coord height() const;
-        Coord width() const;
+	Coord height() const;
+	Coord width() const;
 
 	Duple item_to_parent (Duple const &) const;
 	Rect item_to_parent (Rect const &) const;
@@ -165,27 +165,27 @@ public:
 	Rect parent_to_item (Rect const &) const;
 
 	/* XXX: it's a pity these two aren't the same form as item_to_parent etc.,
-	   but it makes a bit of a mess in the rest of the code if they are not.
-	*/
-        void canvas_to_item (Coord &, Coord &) const;
+	 * but it makes a bit of a mess in the rest of the code if they are not.
+	 */
+	void canvas_to_item (Coord &, Coord &) const;
 	void item_to_canvas (Coord &, Coord &) const;
 
-        Duple canvas_to_item (Duple const&) const;
+	Duple canvas_to_item (Duple const&) const;
 	Rect item_to_canvas (Rect const&) const;
-        Duple item_to_canvas (Duple const&) const;
+	Duple item_to_canvas (Duple const&) const;
 	Rect canvas_to_item (Rect const&) const;
 
-        Duple item_to_window (Duple const&, bool rounded = true) const;
-        Duple window_to_item (Duple const&) const;
-        Rect item_to_window (Rect const&, bool rounded = true) const;
-        Rect window_to_item (Rect const&) const;
+	Duple item_to_window (Duple const&, bool rounded = true) const;
+	Duple window_to_item (Duple const&) const;
+	Rect item_to_window (Rect const&, bool rounded = true) const;
+	Rect window_to_item (Rect const&) const;
 
 	void raise_to_top ();
 	void raise (int);
 	void lower_to_bottom ();
 
 	virtual void hide ();
-        virtual void show ();
+	virtual void show ();
 
 	/** @return true if this item is visible (ie it will be rendered),
 	 *  otherwise false
@@ -213,7 +213,7 @@ public:
 	void add (Item *);
 	void add_front (Item *);
 	void remove (Item *);
-        void clear (bool with_delete = false);
+	void clear (bool with_delete = false);
 	std::list<Item*> const & items () const {
 		return _items;
 	}
@@ -226,25 +226,25 @@ public:
 
 
 	/* This is a sigc++ signal because it is solely
-	   concerned with GUI stuff and is thus single-threaded
-	*/
+		 concerned with GUI stuff and is thus single-threaded
+		 */
 
 	template <class T>
-	struct EventAccumulator {
-		typedef T result_type;
-		template <class U>
-		result_type operator () (U first, U last) {
-			while (first != last) {
-				if (*first) {
-					return true;
+		struct EventAccumulator {
+			typedef T result_type;
+			template <class U>
+				result_type operator () (U first, U last) {
+					while (first != last) {
+						if (*first) {
+							return true;
+						}
+						++first;
+					}
+					return false;
 				}
-				++first;
-			}
-			return false;
-		}
-	};
+		};
 
-        sigc::signal1<bool, GdkEvent*, EventAccumulator<bool> > Event;
+	sigc::signal1<bool, GdkEvent*, EventAccumulator<bool> > Event;
 
 #ifdef CANVAS_DEBUG
 	std::string name;
@@ -260,26 +260,26 @@ public:
 	void start_tooltip_timeout ();
 	void stop_tooltip_timeout ();
 
-        virtual void dump (std::ostream&) const;
-        std::string whatami() const;
+	virtual void dump (std::ostream&) const;
+	std::string whatami() const;
 
 protected:
 	friend class Fill;
 	friend class Outline;
 
-        /** To be called at the beginning of any property change that
+	/** To be called at the beginning of any property change that
 	 *  may alter the bounding box of this item
 	 */
 	void begin_change ();
-        /** To be called at the endof any property change that
+	/** To be called at the endof any property change that
 	 *  may alter the bounding box of this item
 	 */
 	void end_change ();
-        /** To be called at the beginning of any property change that
+	/** To be called at the beginning of any property change that
 	 *  does NOT alter the bounding box of this item
 	 */
 	void begin_visual_change ();
-        /** To be called at the endof any property change that
+	/** To be called at the endof any property change that
 	 *  does NOT alter the bounding box of this item
 	 */
 	void end_visual_change ();
@@ -335,6 +335,5 @@ private:
 extern LIBCANVAS_API std::ostream& operator<< (std::ostream&, const ArdourCanvas::Item&);
 
 }
-
 
 #endif

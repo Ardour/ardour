@@ -19,18 +19,18 @@
 #ifndef __CANVAS_INTERPOLATED_CURVE_H__
 #define __CANVAS_INTERPOLATED_CURVE_H__
 
-#include "canvas/visibility.h"
 #include "canvas/types.h"
+#include "canvas/visibility.h"
 
 namespace ArdourCanvas {
 
 class LIBCANVAS_API InterpolatedCurve
 {
 public:
-    enum SplineType {
-	    CatmullRomUniform,
-	    CatmullRomCentripetal,
-    };
+	enum SplineType {
+		CatmullRomUniform,
+		CatmullRomCentripetal,
+	};
 
 protected:
 
@@ -51,7 +51,7 @@ protected:
 	 * points_per_segment is less than 2.
 	 */
 	static void
-		interpolate (const Points& coordinates, uint32_t points_per_segment, SplineType curve_type, bool closed, Points& results)
+	interpolate (const Points& coordinates, uint32_t points_per_segment, SplineType curve_type, bool closed, Points& results)
 	{
 		if (points_per_segment < 2) {
 			return;
@@ -150,7 +150,7 @@ private:
 	 * position between p1 and p2 to interpolate the value.
 	 */
 	static double
-		__interpolate (double p[4], double time[4], double t)
+	__interpolate (double p[4], double time[4], double t)
 	{
 		const double L01 = p[0] * (time[1] - t) / (time[1] - time[0]) + p[1] * (t - time[0]) / (time[1] - time[0]);
 		const double L12 = p[1] * (time[2] - t) / (time[2] - time[1]) + p[2] * (t - time[1]) / (time[2] - time[1]);
@@ -180,7 +180,7 @@ private:
 	 * between the points defined by index+1 and index+2.
 	 */
 	static void
-		_interpolate (const Points& points, Points::size_type index, int points_per_segment, SplineType curve_type, Points& results)
+	_interpolate (const Points& points, Points::size_type index, int points_per_segment, SplineType curve_type, Points& results)
 	{
 		double x[4];
 		double y[4];

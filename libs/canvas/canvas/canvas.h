@@ -29,18 +29,19 @@
 
 #include <set>
 
-#include <gdkmm/window.h>
-#include <gtkmm/eventbox.h>
 #include <gtkmm/alignment.h>
-#include <cairomm/surface.h>
+#include <gtkmm/eventbox.h>
+#include <gdkmm/window.h>
+
 #include <cairomm/context.h>
+#include <cairomm/surface.h>
 
 #include "pbd/signals.h"
 
 #include "gtkmm2ext/cairo_canvas.h"
 
-#include "canvas/visibility.h"
 #include "canvas/root_group.h"
+#include "canvas/visibility.h"
 
 namespace Gtk {
 	class Window;
@@ -107,7 +108,7 @@ public:
 	/** Called when an item is being destroyed */
 	virtual void item_going_away (Item *, Rect) {}
 	virtual void item_shown_or_hidden (Item *);
-        void item_visual_property_changed (Item*);
+	void item_visual_property_changed (Item*);
 	void item_changed (Item *, Rect);
 	void item_moved (Item *, Rect);
 
@@ -134,22 +135,22 @@ public:
 	virtual Coord height () const = 0;
 
 	/** Store the coordinates of the mouse pointer in window coordinates in
-	   @param winpos. Return true if the position was within the window,
-	   false otherwise.
-	*/
+	 * @param winpos. Return true if the position was within the window,
+	 * false otherwise.
+	 */
 	virtual bool get_mouse_position (Duple& winpos) const = 0;
 
 	/** Signal to be used by items that need to track the mouse position
-	   within the window.
-	*/
+	 * within the window.
+	 */
 	sigc::signal<void,Duple const&> MouseMotion;
 
 	sigc::signal<void> PreRender;
 
 	/** Ensures that the position given by @param winpos (in window
-	    coordinates) is within the current window area, possibly reduced by
-	    @param border.
-	*/
+	 * coordinates) is within the current window area, possibly reduced by
+	 * @param border.
+	 */
 	Duple clamp_to_window (Duple const& winpos, Duple border = Duple());
 
 	void zoomed();
@@ -159,15 +160,15 @@ public:
 	void dump (std::ostream&) const;
 
 	/** Ask the canvas to pick the current item again, and generate
-	    an enter event for it.
-	*/
+	 * an enter event for it.
+	 */
 	virtual void re_enter () = 0;
 
 	virtual void start_tooltip_timeout (Item*) {}
 	virtual void stop_tooltip_timeout () {}
 
 	/** Set the timeout used to display tooltips, in milliseconds
-	 */
+	*/
 	static void set_tooltip_timeout (uint32_t msecs);
 
 	virtual Glib::RefPtr<Pango::Context> get_pango_context() = 0;
@@ -269,7 +270,7 @@ private:
 	Item * _new_current_item;
 	/** the item that is currently grabbed, or 0 */
 	Item * _grabbed_item;
-        /** the item that currently has key focus or 0 */
+	/** the item that currently has key focus or 0 */
 	Item * _focused_item;
 
 	bool _single_exposure;

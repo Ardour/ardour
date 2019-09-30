@@ -20,10 +20,10 @@
 #ifndef __CANVAS_POLYGON_H__
 #define __CANVAS_POLYGON_H__
 
-#include "canvas/visibility.h"
-#include "canvas/poly_item.h"
-#include "canvas/outline.h"
 #include "canvas/fill.h"
+#include "canvas/outline.h"
+#include "canvas/poly_item.h"
+#include "canvas/visibility.h"
 
 namespace ArdourCanvas {
 
@@ -32,18 +32,18 @@ class LIBCANVAS_API Polygon : public PolyItem
 public:
 	Polygon (Canvas*);
 	Polygon (Item*);
-        virtual ~Polygon();
+	virtual ~Polygon();
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;
-        bool covers (Duple const &) const;
+	bool covers (Duple const &) const;
 
-  protected:
-    mutable float* multiple;
-    mutable float* constant;
-    mutable Points::size_type cached_size;
+protected:
+	mutable float* multiple;
+	mutable float* constant;
+	mutable Points::size_type cached_size;
 
-    void cache_shape_computation () const;
+	void cache_shape_computation () const;
 };
 
 }

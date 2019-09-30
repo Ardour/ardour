@@ -19,10 +19,10 @@
 #ifndef __CANVAS_ARC_H__
 #define __CANVAS_ARC_H__
 
-#include "canvas/visibility.h"
+#include "canvas/fill.h"
 #include "canvas/item.h"
 #include "canvas/outline.h"
-#include "canvas/fill.h"
+#include "canvas/visibility.h"
 
 namespace ArdourCanvas {
 
@@ -37,12 +37,12 @@ public:
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;
 
-        void set_center (Duple const &);
+	void set_center (Duple const &);
 	void set_radius (Coord);
 	void set_arc (double degrees);
 	void set_start (double degrees);
 
-        Duple center() const {
+	Duple center() const {
 		return _center;
 	}
 	Coord radius () const {
@@ -51,17 +51,17 @@ public:
 	double arc_degrees () const {
 		return _arc_degrees;
 	}
-        double start_degrees () const {
+	double start_degrees () const {
 		return _start_degrees;
 	}
 
-        bool covers (Duple const &) const;
+	bool covers (Duple const &) const;
 
 private:
-        Duple  _center;
-        Coord  _radius;
-        double _arc_degrees;
-        double _start_degrees;
+	Duple  _center;
+	Coord  _radius;
+	double _arc_degrees;
+	double _start_degrees;
 };
 
 }

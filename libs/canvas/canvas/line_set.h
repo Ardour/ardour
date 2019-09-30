@@ -23,8 +23,8 @@
 
 #include <vector>
 
-#include "canvas/visibility.h"
 #include "canvas/item.h"
+#include "canvas/visibility.h"
 
 namespace ArdourCanvas {
 

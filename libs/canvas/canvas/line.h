@@ -20,29 +20,29 @@
 #ifndef __CANVAS_LINE_H__
 #define __CANVAS_LINE_H__
 
-#include "canvas/visibility.h"
 #include "canvas/item.h"
 #include "canvas/outline.h"
 #include "canvas/poly_line.h"
+#include "canvas/visibility.h"
 
 namespace ArdourCanvas {
 
 class LIBCANVAS_API Line : public Item
 {
-  public:
+public:
 	Line (Canvas*);
 	Line (Item*);
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;
-        bool covers (Duple const &) const;
+	bool covers (Duple const &) const;
 
 	void set (Duple, Duple);
 	void set_x0 (Coord);
 	void set_y0 (Coord);
 	void set_x1 (Coord);
 	void set_y1 (Coord);
-        void set_x (Coord, Coord);
+	void set_x (Coord, Coord);
 
 	Coord x0 () const {
 		return _points[0].x;
