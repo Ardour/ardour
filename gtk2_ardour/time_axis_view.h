@@ -188,6 +188,7 @@ public:
 	 *  @param pos Position to paste to (session samples).
 	 *  @param selection Selection to paste.
 	 *  @param ctx Paste context.
+	 *  @param sub_num music-time sub-division: \c -1: snap to bar, \c 1: exact beat, \c >1: \c (1 \c / \p sub_num \c ) beat-divisions
 	 */
 	virtual bool paste (ARDOUR::samplepos_t pos,
 	                    const Selection&    selection,

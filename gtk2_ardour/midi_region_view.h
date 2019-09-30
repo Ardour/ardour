@@ -161,6 +161,8 @@ public:
 	void delete_sysex (SysEx*);
 
 	/** Change a patch to the next or previous bank/program.
+	 *
+	 * @param patch The patch-change instance (canvas item)
 	 * @param bank If true, step bank, otherwise, step program.
 	 * @param delta Amount to adjust number.
 	 */
@@ -216,8 +218,11 @@ public:
 	void select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend);
 	void toggle_matching_notes (uint8_t notenum, uint16_t channel_mask);
 
-	/** Return true iff the note is within the extent of the region.
+	/** Test if a note is within this region's range
+	 *
+	 * @param note the note to test
 	 * @param visible will be set to true if the note is within the visible note range, false otherwise.
+	 * @return true iff the note is within the (time) extent of the region.
 	 */
 	bool note_in_region_range(const boost::shared_ptr<NoteType> note, bool& visible) const;
 

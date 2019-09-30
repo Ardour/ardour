@@ -158,7 +158,7 @@ protected:
 	};
 
 	std::vector<ArdourWaveView::WaveView *> waves;
-	std::vector<ArdourWaveView::WaveView *> tmp_waves; ///< see ::create_waves()
+	std::vector<ArdourWaveView::WaveView *> tmp_waves; ///< see \ref create_waves()
 
 	std::list<std::pair<samplepos_t, ArdourCanvas::Line*> > feature_lines;
 

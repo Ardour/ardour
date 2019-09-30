@@ -49,8 +49,12 @@ public:
 
 	void set_session (ARDOUR::Session *);
 
-	/** @param g Route group, or 0.
-	 *  @return Menu to be popped up on right-click over the given route group.
+	/** Create route-group context menu
+	 *
+	 * @param g Route group, or 0.
+	 * @param tabArea false if context menu is not for a group tab, show the "create new from" items here.
+	 *                 When true a given group's context menu for the group \p g is displayed.
+	 * @return Menu to be popped up on right-click over the given route group.
 	 */
 	Gtk::Menu* get_menu (ARDOUR::RouteGroup* g, bool tabArea = false);
 
@@ -85,11 +89,12 @@ private:
 	 */
 	virtual void draw_tab (cairo_t* cr, Tab const & t) = 0;
 
-	/** @param x x coordinate
-	 *  @param y y coordinate
-	 *  @return x or y, depending on which is the primary coordinate for this widget.
+	/** Coordinate map (editor, mixer)
+	 * @param x x-coordinate
+	 * @param y y-coordinate
+	 * @return x or y, depending on which is the primary coordinate for this widget.
 	 */
-	virtual double primary_coordinate (double, double) const = 0;
+	virtual double primary_coordinate (double x, double y) const = 0;
 
 	virtual ARDOUR::RouteList routes_for_tab (Tab const * t) const = 0;
 

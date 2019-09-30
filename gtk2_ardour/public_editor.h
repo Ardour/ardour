@@ -191,10 +191,13 @@ public:
 	/** @return Whether the current mouse mode is an "internal" editing mode. */
 	virtual bool internal_editing() const = 0;
 
-	/** Possibly start the audition of a region.  If @param r is 0, or not an AudioRegion
-	 * any current audition is cancelled.  If we are currently auditioning @param r,
-	 * the audition will be cancelled.  Otherwise an audition of @param r will start.
-	 * \param r Region to consider.
+	/** Possibly start the audition of a region.
+	 *
+	 * If \p r is 0, or not an AudioRegion any current audition is cancelled.
+	 * If we are currently auditioning \p r , the audition will be cancelled.
+	 * Otherwise an audition of \p r will start.
+	 *
+	 * @param r Region to consider auditioning
 	 */
 	virtual void consider_auditioning (boost::shared_ptr<ARDOUR::Region> r) = 0;
 

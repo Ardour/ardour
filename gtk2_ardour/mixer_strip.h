@@ -111,7 +111,7 @@ public:
 	void revert_to_default_display ();
 
 	/** @return the delivery that is being edited using our fader; it will be the
-	 *  last send passed to ::show_send, or our route's main out delivery.
+	 *  last send passed to \ref show_send() , or our route's main out delivery.
 	 */
 	boost::shared_ptr<ARDOUR::Delivery> current_delivery () const {
 		return _current_delivery;

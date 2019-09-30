@@ -48,19 +48,21 @@ class TranscodeFfmpeg : public sigc::trackable
 		/** instantiate a new transcoder. If a file-name is given, the file's
 		 * attributes (fps, duration, geometry etc) are read.
 		 *
-		 * @param f path to the video-file to probe or use as input for
-		 * \ref extract_audio and \ref transcode.
+		 * @param f path to the video-file to probe or use as input for \ref extract_audio and \ref transcode .
 		 */
 		TranscodeFfmpeg (std::string f);
 		virtual ~TranscodeFfmpeg ();
-		/** transcode/import a video-file
-		 * @param outfile full-path (incl. file-extension)
-		 * @param outwidth video-width, \c <0 no scaling)
-		 * @param outheight video-height \c <0 use aspect \c \ref outwidth /c / \c aspect-ratio
-		 * @param kbitps video bitrate \c 0 calculate to use 0.7 bits per pixel on average
+
+		/** transcode to (import a video-file)
+		 *
+		 * @param outfile full-path (incl. file-extension) of the file to create
+		 * @param width video-width, if \c <0 no scaling
+		 * @param height video-height, with \c <0 preserve aspect (\p width \c / \c aspect-ratio)
+		 * @param kbitps video bitrate, with \c 0 calculate to use 0.7 bits per pixel on average
 		 * @return \c true if the transcoder process was successfully started.
 		 */
-		bool transcode (std::string, const int outwidth=0, const int outheight=0, const int kbitps =0);
+		bool transcode (std::string outfile, const int width=0, const int height=0, const int kbitps =0);
+
 		/** Extract an audio track from the given input file to a new 32bit float little-endian PCM WAV file.
 		 * @param outfile full-path (incl. file-extension) to .wav file to write
 		 * @param samplerate target samplerate
@@ -69,6 +71,7 @@ class TranscodeFfmpeg : public sigc::trackable
 		 * @return \c true if the transcoder process was successfully started.
 		 */
 		bool extract_audio (std::string outfile, ARDOUR::samplecnt_t samplerate, unsigned int stream=0);
+
 		/** transcode video and mux audio files into a new video-file.
 		 * @param outfile full-path of output file to create (existing files are overwritten)
 		 * @param inf_a filename of input audio-file
@@ -82,6 +85,7 @@ class TranscodeFfmpeg : public sigc::trackable
 		 * @return \c true if the encoder process was successfully started.
 		 */
 		bool encode (std::string outfile, std::string inf_a, std::string inf_v, FFSettings ffs, FFSettings meta, bool map = true);
+
 		/** @return array with default encoder settings */
 		FFSettings default_encoder_settings ();
 		/** @return array with default meta data */
