@@ -820,7 +820,8 @@ INPUT_ENCODING         = UTF-8
 # *.md, *.mm, *.dox, *.py, *.f90, *.f, *.for, *.tcl, *.vhd, *.vhdl, *.ucf,
 # *.qsf, *.as and *.js.
 
-FILE_PATTERNS          =
+FILE_PATTERNS          = *.h *.hpp *.hh
+
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
 # be searched for input files as well.
@@ -2002,7 +2003,7 @@ ENABLE_PREPROCESSING   = YES
 # The default value is: NO.
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
-MACRO_EXPANSION        = NO
+MACRO_EXPANSION        = YES
 
 # If the EXPAND_ONLY_PREDEF and MACRO_EXPANSION tags are both set to YES then
 # the macro expansion is limited to the macros specified with the PREDEFINED and
@@ -2024,7 +2025,7 @@ SEARCH_INCLUDES        = YES
 # preprocessor.
 # This tag requires that the tag SEARCH_INCLUDES is set to YES.
 
-INCLUDE_PATH           =
+INCLUDE_PATH           = ../libs/ardour ../build/libs/pbd
 
 # You can use the INCLUDE_FILE_PATTERNS tag to specify one or more wildcard
 # patterns (like *.h and *.hpp) to filter out the header-files in the
@@ -2042,7 +2043,61 @@ INCLUDE_FILE_PATTERNS  =
 # recursively expanded use the := operator instead of the = operator.
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
-PREDEFINED             =
+PREDEFINED             = \
+                         PROGRAM_NAME="Ardour" \
+                         PROGRAM_VERSION="6" \
+                         LOCALEDIR="/" \
+                         ARCH_X86 \
+                         CONFIG_ARCH="x86_64" \
+                         WAF_BUILD \
+                         CANVAS_COMPATIBILITY=1 \
+                         HAVE_AUBIO=1 \
+                         HAVE_ALSA=1 \
+                         HAVE_GLIB=1 \
+                         HAVE_LIBS_LUA=1 \
+                         HAVE_XML=1 \
+                         PTFORMAT=1 \
+                         HAVE_SAMPLERATE=1 \
+                         HAVE_LV2=1 \
+                         HAVE_LV2_1_10_0=1 \
+                         HAVE_SERD=1 \
+                         HAVE_SORD=1 \
+                         HAVE_SRATOM=1 \
+                         HAVE_LILV=1 \
+                         HAVE_LV2_1_0_0=1 \
+                         HAVE_SUIL=1 \
+                         LV2_SUPPORT=1 \
+                         LV2_EXTENDED=1 \
+                         HAVE_GTK=1 \
+                         HAVE_LIBS_GTKMM2EXT=1 \
+                         HAVE_X11=1  \
+                         LXVST_64BIT=1 \
+                         LXVST_SUPPORT=1 \
+                         HAVE_TAGLIB=1 \
+                         HAVE_POSIX_MEMALIGN=1 \
+                         HAVE_VAMPSDK=1 \
+                         HAVE_VAMPHOSTSDK=1 \
+                         HAVE_RUBBERBAND=1 \
+                         ENABLE_NLS=1 \
+                         HAVE_CURL=1 \
+                         HAVE_LO=1 \
+                         HAVE_LRDF=1 \
+                         _VAMP_NO_PLUGIN_NAMESPACE=1 \
+                         _VAMP_NO_HOST_NAMESPACE=1 \
+                         \
+                         LIBARDOUR_API= \
+                         LIBWIDGETS_API= \
+                         LIBWAVEVIEW_API= \
+                         LIBCANVAS_API= \
+                         LIBCONTROLCP_API= \
+                         ARDOURSURFACE_API= \
+                         LIBGTKMM2EXT_API= \
+                         LIBPBD_API= \
+                         LIBTEMPORAL_API= \
+                         LIBPTFORMAT_API= \
+                         LIBEVORAL_API= \
+                         LIBMIDIPP_API= \
+
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
@@ -2177,7 +2232,7 @@ DOT_NUM_THREADS        = 0
 # The default value is: Helvetica.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-DOT_FONTNAME           = FreeSans
+DOT_FONTNAME           =
 
 # The DOT_FONTSIZE tag can be used to set the size (in points) of the font of
 # dot graphs.
