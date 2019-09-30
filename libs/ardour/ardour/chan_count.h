@@ -58,12 +58,13 @@ public:
 	}
 
 	/** set channel count for given type
-	 * @param type data type
+	 * @param t data type
 	 * @param count number of channels
 	 */
 	void     set(DataType t, uint32_t count) { assert(t != DataType::NIL); _counts[t] = count; }
+
 	/** query channel count for given type
-	 * @param type data type
+	 * @param t data type
 	 * @returns channel count for given type
 	 */
 	uint32_t get(DataType t) const { assert(t != DataType::NIL); return _counts[t]; }
@@ -74,6 +75,7 @@ public:
 	 * @returns number of audio channels
 	 */
 	inline uint32_t n_audio() const { return _counts[DataType::AUDIO]; }
+
 	/** set number of audio channels
 	 * @param a number of audio channels
 	 */
@@ -83,6 +85,7 @@ public:
 	 * @returns number of midi channels
 	 */
 	inline uint32_t n_midi()  const { return _counts[DataType::MIDI]; }
+
 	/** set number of audio channels
 	 * @param m number of midi channels
 	 */

@@ -27,22 +27,24 @@
 
 #include "pbd/libpbd_visibility.h"
 
-/** @file Defines a set of classes to implement Read-Copy-Update.  We do not attempt to define RCU here - use google.
-
-   The design consists of two parts: an RCUManager and an RCUWriter.
+/** @file rcu.h
+ * Define a set of classes to implement Read-Copy-Update.  We do not attempt to define RCU here - use google.
+ *
+ * The design consists of two parts: an RCUManager and an RCUWriter.
 */
 
 /** An RCUManager is an object which takes over management of a pointer to another object.
-   It provides three key methods:
-
-           - reader() : obtains a shared pointer to the managed object that may be used for reading, without synchronization
-	       - write_copy() : obtains a shared pointer to the object that may be used for writing/modification
-	       - update() : accepts a shared pointer to a (presumed) modified instance of the object and causes all
-	                    future reader() and write_copy() calls to use that instance.
-
-   Any existing users of the value returned by reader() can continue to use their copy even as a write_copy()/update() takes place.
-   The RCU manager will manage the various instances of "the managed object" in a way that is transparent to users of the manager
-   and managed object.
+ *
+ * It provides three key methods:
+ *
+ * - reader()     : obtains a shared pointer to the managed object that may be used for reading, without synchronization
+ * - write_copy() : obtains a shared pointer to the object that may be used for writing/modification
+ * - update()     : accepts a shared pointer to a (presumed) modified instance of the object and causes all
+ *                  future reader() and write_copy() calls to use that instance.
+ *
+ * Any existing users of the value returned by reader() can continue to use their copy even as a write_copy()/update() takes place.
+ * The RCU manager will manage the various instances of "the managed object" in a way that is transparent to users of the manager
+ * and managed object.
 */
 template<class T>
 class /*LIBPBD_API*/ RCUManager

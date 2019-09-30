@@ -52,6 +52,22 @@ namespace PBD {
  * Without overriding upper() and lower(), a derived class will function
  * as a control whose value can range between 0 and 1.0.
  *
+ *
+
+ * We express Controllable values in one of three ways:
+ * 1. `user' --- as presented to the user (e.g. dB, Hz, etc.)
+ * 2. `interface' --- as used in some cases for the UI representation
+ * (in order to make controls behave logarithmically).
+ * 3. `internal' --- as passed to a processor, track, plugin, or whatever.
+ *
+ * Note that in some cases user and internal may be the same
+ * (and interface different) e.g. frequency, which is presented
+ * to the user and passed to the processor in linear terms, but
+ * which needs log scaling in the interface.
+ *
+ * In other cases, user and interface may be the same (and internal different)
+ * e.g. gain, which is presented to the user in log terms (dB)
+ * but passed to the processor as a linear quantity.
  */
 class LIBPBD_API Controllable : public PBD::StatefulDestructible, public boost::enable_shared_from_this<Controllable>
 {
@@ -65,47 +81,34 @@ public:
 
 	Controllable (const std::string& name, Flag f = Flag (0));
 
-	/* We express Controllable values in one of three ways:
-	 * 1. `user' --- as presented to the user (e.g. dB, Hz, etc.)
-	 * 2. `interface' --- as used in some cases for the UI representation
-	 * (in order to make controls behave logarithmically).
-	 * 3. `internal' --- as passed to a processor, track, plugin, or whatever.
-	 *
-	 * Note that in some cases user and internal may be the same
-	 * (and interface different) e.g. frequency, which is presented
-	 * to the user and passed to the processor in linear terms, but
-	 * which needs log scaling in the interface.
-	 *
-	 * In other cases, user and interface may be the same (and internal different)
-	 * e.g. gain, which is presented to the user in log terms (dB)
-	 * but passed to the processor as a linear quantity.
-	 */
-
-	/* Within an application, various Controllables might be considered to
+	/** Within an application, various Controllables might be considered to
 	 * be "grouped" in a way that implies that setting 1 of them also
 	 * modifies others in the group.
 	 */
-
 	enum GroupControlDisposition {
-		InverseGroup,  /* set all controls in the same "group" as this one */
-		NoGroup,     /* set only this control */
-		UseGroup,     /* use group settings to decide which group controls are altered */
-		ForGroup     /* this setting is being done *for* the group
-		                (i.e. UseGroup was set in the callchain
-		                somewhere).
-		             */
+		InverseGroup,  /**< set all controls in the same "group" as this one */
+		NoGroup,       /**< set only this control */
+		UseGroup,      /**< use group settings to decide which group controls are altered */
+		ForGroup       /**< this setting is being done *for* the group (i.e. UseGroup was set in the callchain somewhere). */
 	};
 
-	/** Get and Set `internal' value
+	/** Set `internal' value
 	 *
 	 * All derived classes must implement this.
 	 *
-	 * Basic derived classes will ignore @param group_override,
+	 * Basic derived classes will ignore \param group_override
 	 * but more sophisticated children, notably those that
 	 * proxy the value setting logic via an object that is aware of group
 	 * relationships between this control and others, will find it useful.
+	 *
+	 * @param value raw numeric value to set
+	 * @param group_override if and how to propagate value to grouped controls
 	 */
-	virtual void set_value (double, GroupControlDisposition group_override) = 0;
+	virtual void set_value (double value, GroupControlDisposition group_override) = 0;
+
+	/** Get `internal' value
+	 * @return raw value as used for the plugin/processor control port
+	 */
 	virtual double get_value (void) const = 0;
 
 	/** This is used when saving state. By default it just calls
@@ -189,7 +192,7 @@ public:
 	IgnorableControllable () : PBD::Controllable ("ignoreMe") {}
 	~IgnorableControllable () {}
 
-	void set_value (double /*v*/, PBD::Controllable::GroupControlDisposition /* group_override */) {}
+	void set_value (double v, PBD::Controllable::GroupControlDisposition group_override) {}
 	double get_value () const { return 0.0; }
 };
 

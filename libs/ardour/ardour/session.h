@@ -1992,7 +1992,7 @@ private:
 	static bool _disable_all_loaded_plugins;
 	static bool _bypass_all_loaded_plugins;
 
-	mutable bool have_looped; ///< Used in ::audible_sample(*)
+	mutable bool have_looped; ///< Used in \ref audible_sample
 
 	void update_route_record_state ();
 	gint _have_rec_enabled_track;

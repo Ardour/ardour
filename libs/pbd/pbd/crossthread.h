@@ -34,11 +34,11 @@
 
 
 /** A simple abstraction of a mechanism of signalling one thread from another.
- * The signaller calls ::wakeup() to tell the signalled thread to check for
+ * The signaller calls \ref wakeup() to tell the signalled thread to check for
  * work to be done.
  *
- * This implementation provides both ::selectable() for use in direct
- * poll/select-based event loops, and a Glib::IOSource via ::ios() for use
+ * This implementation provides both selectable() for use in direct
+ * poll/select-based event loops, and a Glib::IOSource via ios() for use
  * in Glib main loop based situations.
  */
 
@@ -56,7 +56,7 @@ public:
 	void wakeup();
 
 	/* if the listening thread cares about the precise message
-	 * it is being sent, then ::deliver() can be used to send
+	 * it is being sent, then \ref deliver() can be used to send
 	 * a single byte message rather than a simple wakeup. These
 	 * two mechanisms should not be used on the same CrossThreadChannel
 	 * because there is no way to know which byte value will be used
@@ -64,8 +64,8 @@ public:
 	 */
 	int deliver (char msg);
 
-	/** if using ::deliver() to wakeup the listening thread, then
-	 * the listener should call ::receive() to fetch the message
+	/** if using \ref deliver() to wakeup the listening thread, then
+	 * the listener should call \ref receive() to fetch the message
 	 * type from the channel.
 	 *
 	 * wait = true only make sense for non_blocking channels,

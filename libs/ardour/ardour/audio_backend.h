@@ -175,13 +175,13 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      */
     virtual std::vector<std::string> enumerate_drivers() const { return std::vector<std::string>(); }
 
-    /** Returns zero if the backend can successfully use @param name as the
-     * driver, non-zero otherwise.
+    /** Returns zero if the backend can successfully use \param drivername
+		 * as the driver, non-zero otherwise.
      *
      * Should not be used unless the backend returns true from
      * requires_driver_selection()
      */
-    virtual int set_driver (const std::string& /*drivername*/) { return 0; }
+    virtual int set_driver (const std::string& drivername) { return 0; }
 
     /** used to list device names along with whether or not they are currently
      *  available.
@@ -288,7 +288,7 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
 	virtual bool get_use_buffered_io () { return false; }
 
     /** Returns a collection of float identifying sample rates that are
-     * potentially usable with the hardware identified by @param device.
+     * potentially usable with the hardware identified by \param device .
      * Any of these values may be supplied in other calls to this backend
      * as the desired sample rate to use with the name device, but the
      * requested sample rate may turn out to be unavailable, or become invalid
@@ -296,7 +296,7 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      */
     virtual std::vector<float> available_sample_rates (const std::string& device) const = 0;
 
-    /* backends that support separate input and output devices should
+    /* backends that suppor586t separate input and output devices should
      * implement this function and return an intersection (not union) of available
      * sample rates valid for the given input + output device combination.
      */
@@ -321,7 +321,7 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
     }
 
     /** Returns a collection of uint32 identifying buffer sizes that are
-     * potentially usable with the hardware identified by @param device.
+     * potentially usable with the hardware identified by \param device .
      * Any of these values may be supplied in other calls to this backend
      * as the desired buffer size to use with the name device, but the
      * requested buffer size may turn out to be unavailable, or become invalid
@@ -353,7 +353,7 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
     }
 
     /** Returns the maximum number of input channels that are potentially
-     * usable with the hardware identified by @param device.  Any number from 1
+     * usable with the hardware identified by \param device . Any number from 1
      * to the value returned may be supplied in other calls to this backend as
      * the input channel count to use with the name device, but the requested
      * count may turn out to be unavailable, or become invalid at any time.
@@ -361,7 +361,7 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
     virtual uint32_t available_input_channel_count (const std::string& device) const = 0;
 
     /** Returns the maximum number of output channels that are potentially
-     * usable with the hardware identified by @param device.  Any number from 1
+     * usable with the hardware identified by \param device . Any number from 1
      * to the value returned may be supplied in other calls to this backend as
      * the output channel count to use with the name device, but the requested
      * count may turn out to be unavailable, or become invalid at any time.
@@ -429,7 +429,7 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      */
     virtual int set_buffer_size (uint32_t) = 0;
     /** Set the preferred underlying hardware data layout.
-     * If @param yn is true, then the hardware will interleave
+     * If \param yn is true, then the hardware will interleave
      * samples for successive channels; otherwise, the hardware will store
      * samples for a single channel contiguously.
      *
@@ -506,7 +506,7 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      */
     virtual std::vector<std::string> enumerate_midi_options () const = 0;
 
-    /* Request the use of the MIDI option named @param option, which
+    /* Request the use of the MIDI option named \param option, which
      * should be one of the strings returned by enumerate_midi_options()
      *
      * @return zero if successful, non-zero otherwise
@@ -534,8 +534,8 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      * the most recent calls to set_sample_rate() etc. etc.
      *
      * At some undetermined time after this function is successfully called,
-     * the backend will start calling the ::process_callback() method of
-     * the AudioEngine referenced by @param engine. These calls will
+     * the backend will start calling the process_callback method of
+     * the AudioEngine referenced by \ref engine. These calls will
      * occur in a thread created by and/or under the control of the backend.
      *
      * @param for_latency_measurement if true, the device is being started
@@ -546,9 +546,7 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      * Return zero if successful, negative values otherwise.
      *
      *
-     *
-     *
-     * Why is this non-virtual but ::_start() is virtual ?
+     * Why is this non-virtual but \ref _start() is virtual ?
      * Virtual methods with default parameters create possible ambiguity
      * because a derived class may implement the same method with a different
      * type or value of default parameter.
@@ -566,7 +564,7 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
     /** Stop using the device currently in use.
      *
      * If the function is successfully called, no subsequent calls to the
-     * process_callback() of @param engine will be made after the function
+     * process_callback() of \ref engine will be made after the function
      * returns, until parameters are reset and start() are called again.
      *
      * The backend is considered to be un-configured after a successful
@@ -586,7 +584,7 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
 	virtual int reset_device() = 0;
 
     /** While remaining connected to the device, and without changing its
-     * configuration, start (or stop) calling the process_callback() of @param engine
+     * configuration, start (or stop) calling the process_callback of the engine
      * without waiting for the device. Once process_callback() has returned, it
      * will be called again immediately, thus allowing for faster-than-realtime
      * processing.
@@ -595,11 +593,12 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      * unaltered. However, any physical ports should NOT be used by the
      * process_callback() during freewheeling - the data behaviour is undefined.
      *
-     * If @param start_stop is true, begin this behaviour; otherwise cease this
+     * If \param start_stop is true, begin this behaviour; otherwise cease this
      * behaviour if it currently occuring, and return to calling
-     * process_callback() of @param engine by waiting for the device.
+     * process_callback() of the engine by waiting for the device.
      *
-     * Return zero on success, non-zero otherwise.
+		 * @param start_stop true to engage freewheel processing
+     * @return zero on success, non-zero otherwise.
      */
     virtual int freewheel (bool start_stop) = 0;
 
@@ -613,11 +612,11 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      * Implementations can feel free to smooth the values returned over
      * time (e.g. high pass filtering, or its equivalent).
      */
-    virtual float dsp_load() const  = 0;
+    virtual float dsp_load() const = 0;
 
     /* Transport Control (JACK is the only audio API that currently offers
-       the concept of shared transport control)
-    */
+     * the concept of shared transport control)
+     */
 
     /** Attempt to change the transport state to TransportRolling.
      */
@@ -628,15 +627,15 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
     /** return the current transport state
      */
     virtual TransportState transport_state () const { return TransportStopped; }
-    /** Attempt to locate the transport to @param pos
+    /** Attempt to locate the transport to \param pos
      */
-    virtual void transport_locate (samplepos_t /*pos*/) {}
+    virtual void transport_locate (samplepos_t pos) {}
     /** Return the current transport location, in samples measured
      * from the origin (defined by the transport time master)
      */
     virtual samplepos_t transport_sample() const { return 0; }
 
-    /** If @param yn is true, become the time master for any inter-application transport
+    /** If \param yn is true, become the time master for any inter-application transport
      * timebase, otherwise cease to be the time master for the same.
      *
      * Return zero on success, non-zero otherwise
@@ -644,7 +643,7 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      * JACK is the only currently known audio API with the concept of a shared
      * transport timebase.
      */
-    virtual int set_time_master (bool /*yn*/) { return 0; }
+    virtual int set_time_master (bool yn) { return 0; }
 
     virtual int        usecs_per_cycle () const { return 1000000 * (buffer_size() / sample_rate()); }
     virtual size_t     raw_buffer_size (DataType t) = 0;
@@ -680,11 +679,11 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
     /** Return true if it possible to determine the offset in samples of the
      * first video frame that starts within the current buffer process cycle,
      * measured from the first sample of the cycle. If returning true,
-     * set @param offset to that offset.
+     * set \param offset to that offset.
      *
      * Eg. if it can be determined that the first video frame within the cycle
      * starts 28 samples after the first sample of the cycle, then this method
-     * should return true and set @param offset to 28.
+     * should return true and set \param offset to 28.
      *
      * May be impossible to support outside of JACK, which has specific support
      * (in some cases, hardware support) for this feature.
@@ -692,13 +691,15 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      * Can ONLY be called from within a process() callback tree (which implies
      * that it can only be called by a process thread)
      */
-    virtual bool get_sync_offset (pframes_t& /*offset*/) const { return false; }
+    virtual bool get_sync_offset (pframes_t& offset) const { return false; }
 
     /** Create a new thread suitable for running part of the buffer process
-     * cycle (i.e. Realtime scheduling, memory allocation, etc. etc are all
-     * correctly setup), with a stack size given in bytes by specified @param
-     * stacksize. The thread will begin executing @param func, and will exit
+     * cycle (i.e. Realtime scheduling, memory allocation, stacksize, etc.
+		 * are all correctly setup).
+		 * The thread will begin executing func, and will exit
      * when that function returns.
+		 *
+		 * @param func process function to run
      */
     virtual int create_process_thread (boost::function<void()> func) = 0;
 
@@ -722,7 +723,7 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
 
     virtual void update_latencies () = 0;
 
-    /** Set @param speed and @param position to the current speed and position
+    /** Set \param speed and \param position to the current speed and position
      * indicated by some transport sync signal.  Return whether the current
      * transport state is pending, or finalized.
      *

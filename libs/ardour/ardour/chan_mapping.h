@@ -53,29 +53,30 @@ public:
 	 * @param valid pointer to a boolean. If not NULL it is set to true if the mapping is found, and false otherwise.
 	 * @returns first "from" that matches given "to"
 	 */
-	uint32_t get_src(DataType t, uint32_t to, bool* valid) const;
+	uint32_t get_src(DataType type, uint32_t to, bool* valid) const;
 
 	/** get buffer mapping for given data type and pin
 	 * @param type data type
 	 * @param from numeric source id
 	 * @returns mapped buffer number (or ChanMapping::Invalid)
 	 */
-	uint32_t get (DataType t, uint32_t from) const { return get (t, from, NULL); }
+	uint32_t get (DataType type, uint32_t from) const { return get (type, from, NULL); }
 
 	/** set buffer mapping for given data type
 	 * @param type data type
 	 * @param from numeric source id
 	 * @param to buffer
 	 */
-	void     set(DataType t, uint32_t from, uint32_t to);
-	void     offset_from(DataType t, int32_t delta);
-	void     offset_to(DataType t, int32_t delta);
+	void     set (DataType type, uint32_t from, uint32_t to);
+
+	void     offset_from (DataType t, int32_t delta);
+	void     offset_to (DataType t, int32_t delta);
 
 	/** remove mapping
 	 * @param type data type
 	 * @param from numeric source to remove from mapping
 	 */
-	void     unset(DataType t, uint32_t from);
+	void     unset(DataType type, uint32_t from);
 
 	/** Test mapping matrix for identity
 	 * @param offset per data-type offset to take into account
