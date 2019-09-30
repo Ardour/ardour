@@ -188,7 +188,7 @@ public:
 		return std::vector<std::string> ();
 	}
 
-	/** Returns zero if the backend can successfully use \param drivername
+	/** Returns zero if the backend can successfully use \p drivername
 	 * as the driver, non-zero otherwise.
 	 *
 	 * Should not be used unless the backend returns true from
@@ -337,7 +337,7 @@ public:
 	}
 
 	/** Returns a collection of float identifying sample rates that are
-	 * potentially usable with the hardware identified by \param device .
+	 * potentially usable with the hardware identified by \p device .
 	 * Any of these values may be supplied in other calls to this backend
 	 * as the desired sample rate to use with the name device, but the
 	 * requested sample rate may turn out to be unavailable, or become invalid
@@ -372,7 +372,7 @@ public:
 	}
 
 	/** Returns a collection of uint32 identifying buffer sizes that are
-	 * potentially usable with the hardware identified by \param device .
+	 * potentially usable with the hardware identified by \p device .
 	 * Any of these values may be supplied in other calls to this backend
 	 * as the desired buffer size to use with the name device, but the
 	 * requested buffer size may turn out to be unavailable, or become invalid
@@ -406,7 +406,7 @@ public:
 	}
 
 	/** Returns the maximum number of input channels that are potentially
-	 * usable with the hardware identified by \param device . Any number from 1
+	 * usable with the hardware identified by \p device . Any number from 1
 	 * to the value returned may be supplied in other calls to this backend as
 	 * the input channel count to use with the name device, but the requested
 	 * count may turn out to be unavailable, or become invalid at any time.
@@ -414,7 +414,7 @@ public:
 	virtual uint32_t available_input_channel_count (const std::string& device) const = 0;
 
 	/** Returns the maximum number of output channels that are potentially
-	 * usable with the hardware identified by \param device . Any number from 1
+	 * usable with the hardware identified by \p device . Any number from 1
 	 * to the value returned may be supplied in other calls to this backend as
 	 * the output channel count to use with the name device, but the requested
 	 * count may turn out to be unavailable, or become invalid at any time.
@@ -494,7 +494,7 @@ public:
 	virtual int set_buffer_size (uint32_t) = 0;
 
 	/** Set the preferred underlying hardware data layout.
-	 * If \param yn is true, then the hardware will interleave
+	 * If \p yn is true, then the hardware will interleave
 	 * samples for successive channels; otherwise, the hardware will store
 	 * samples for a single channel contiguously.
 	 *
@@ -588,7 +588,7 @@ public:
 	 */
 	virtual std::vector<std::string> enumerate_midi_options () const = 0;
 
-	/* Request the use of the MIDI option named \param option, which
+	/* Request the use of the MIDI option named \p option, which
 	 * should be one of the strings returned by enumerate_midi_options()
 	 *
 	 * @return zero if successful, non-zero otherwise
@@ -676,7 +676,7 @@ public:
 	 * unaltered. However, any physical ports should NOT be used by the
 	 * process_callback() during freewheeling - the data behaviour is undefined.
 	 *
-	 * If \param start_stop is true, begin this behaviour; otherwise cease this
+	 * If \p start_stop is true, begin this behaviour; otherwise cease this
 	 * behaviour if it currently occuring, and return to calling
 	 * process_callback() of the engine by waiting for the device.
 	 *
@@ -713,7 +713,7 @@ public:
 		return TransportStopped;
 	}
 
-	/** Attempt to locate the transport to \param pos */
+	/** Attempt to locate the transport to \p pos */
 	virtual void transport_locate (samplepos_t pos) {}
 
 	/** Return the current transport location, in samples measured
@@ -724,7 +724,7 @@ public:
 		return 0;
 	}
 
-	/** If \param yn is true, become the time master for any inter-application transport
+	/** If \p yn is true, become the time master for any inter-application transport
 	 * timebase, otherwise cease to be the time master for the same.
 	 *
 	 * Return zero on success, non-zero otherwise
@@ -774,11 +774,11 @@ public:
 	/** Return true if it possible to determine the offset in samples of the
 	 * first video frame that starts within the current buffer process cycle,
 	 * measured from the first sample of the cycle. If returning true,
-	 * set \param offset to that offset.
+	 * set \p offset to that offset.
 	 *
 	 * Eg. if it can be determined that the first video frame within the cycle
 	 * starts 28 samples after the first sample of the cycle, then this method
-	 * should return true and set \param offset to 28.
+	 * should return true and set \p offset to 28.
 	 *
 	 * May be impossible to support outside of JACK, which has specific support
 	 * (in some cases, hardware support) for this feature.
@@ -821,7 +821,7 @@ public:
 
 	virtual void update_latencies () = 0;
 
-	/** Set \param speed and \param position to the current speed and position
+	/** Set \p speed and \p position to the current speed and position
 	 * indicated by some transport sync signal.  Return whether the current
 	 * transport state is pending, or finalized.
 	 *

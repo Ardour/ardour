@@ -91,8 +91,7 @@ public:
 	void existence_check ();
 	virtual void prevent_deletion ();
 
-	/** Rename the file on disk referenced by this source to \param newname
-	 */
+	/** Rename the file on disk referenced by this source to \p newname */
 	int rename (const std::string& name);
 
 	virtual void close () = 0;

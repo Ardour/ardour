@@ -96,7 +96,7 @@ public:
 	 *
 	 * All derived classes must implement this.
 	 *
-	 * Basic derived classes will ignore \param group_override
+	 * Basic derived classes will ignore \p group_override
 	 * but more sophisticated children, notably those that
 	 * proxy the value setting logic via an object that is aware of group
 	 * relationships between this control and others, will find it useful.

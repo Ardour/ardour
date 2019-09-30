@@ -124,7 +124,7 @@ public:
 	/** Query port-flags
 	 *
 	 * @param port \ref PortHandle
-	 * @return the flags of the port referred to by \param port . If the port
+	 * @return the flags of the port referred to by \p port . If the port
 	 *         does not exist, return PortFlags (0)
 	 */
 	virtual PortFlags get_port_flags (PortHandle port) const = 0;
@@ -159,7 +159,7 @@ public:
 	 */
 	virtual int set_port_property (PortHandle, const std::string& key, const std::string& value, const std::string& type) { return -1; }
 
-	/** Return a reference to a port with the fullname \param name .
+	/** Return a reference to a port with the fullname \p name .
 	 *
 	 * @param name Full port-name to lookup
 	 * @return PortHandle if lookup was successful, or an "empty" PortHandle (analogous to a null pointer) if no such port exists.
@@ -167,11 +167,12 @@ public:
 	virtual PortHandle get_port_by_name (const std::string& name) const = 0;
 
 	/** Find the set of ports whose names, types and flags match
-	 * specified values, place the names of each port into \param ports .
+	 * specified values, place the names of each port into \p ports .
 	 *
 	 * @param port_name_pattern match by given pattern. To avoid selecting by name, pass an empty string.
 	 * @param type filter by given type; pass DataType::NIL to match all types.
 	 * @param flags filter by flags, pass PortFlags (0) to avoid selecting by flags.
+	 * @param ports array filled with matching port-names
 	 * @return the count of the number found
 	 */
 	virtual int get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>& ports) const = 0;
@@ -179,14 +180,14 @@ public:
 	/** Lookup data type of a port
 	 *
 	 * @param port \ref PortHandle of the port to lookup.
-	 * @return the Ardour data type handled by the port referred to by \param port .
+	 * @return the Ardour data type handled by the port referred to by \p port .
 	 *         DataType::NIL is returned if the port does not exist.
 	 */
 	virtual DataType port_data_type (PortHandle port) const = 0;
 
 	/** Create a new port whose fullname will be the conjunction of my_name(),
-	 * ":" and \param shortname . The port will handle data specified by \param type
-	 * and will have the flags given by \param flags . If successful,
+	 * ":" and \p shortname . The port will handle data specified by \p type
+	 * and will have the flags given by \p flags . If successful,
 	 *
 	 * @param shortname Name of port to create
 	 * @param type type of port to create
@@ -195,8 +196,8 @@ public:
 	 */
 	virtual PortHandle register_port (const std::string& shortname, ARDOUR::DataType type, ARDOUR::PortFlags flags) = 0;
 
-	/* Destroy the port referred to by \param port, including all resources
-	 * associated with it. This will also disconnect \param port from any ports it
+	/* Destroy the port referred to by \p port, including all resources
+	 * associated with it. This will also disconnect \p port from any ports it
 	 * is connected to.
 	 *
 	 * @param port \ref PortHandle of the port to destroy
@@ -205,8 +206,8 @@ public:
 
 	/* Connection management */
 
-	/** Ensure that data written to the port named by \param src will be
-	 * readable from the port named by \param dst
+	/** Ensure that data written to the port named by \p src will be
+	 * readable from the port named by \p dst
 	 *
 	 * @param src name of source port to connect
 	 * @param dst name of destination (sink) port
@@ -214,8 +215,8 @@ public:
 	 */
 	virtual int   connect (const std::string& src, const std::string& dst) = 0;
 
-	/** Remove any existing connection between the ports named by \param src and
-	 * \param dst
+	/** Remove any existing connection between the ports named by \p src and
+	 * \p dst
 	 *
 	 * @param src name of source port to dis-connect to disconnect from
 	 * @param dst name of destination (sink) port to disconnect
@@ -223,8 +224,8 @@ public:
 	 */
 	virtual int   disconnect (const std::string& src, const std::string& dst) = 0;
 
-	/** Ensure that data written to the port referenced by \param src will be
-	 * readable from the port named by \param dst
+	/** Ensure that data written to the port referenced by \p src will be
+	 * readable from the port named by \p dst
 	 *
 	 * @param src \ref PortHandle of source port to connect
 	 * @param dst \ref PortHandle of destination (sink) port
@@ -232,8 +233,8 @@ public:
 	 */
 	virtual int   connect (PortHandle src, const std::string& dst) = 0;
 
-	/** Remove any existing connection between the port referenced by \param src and
-	 * the port named \param dst
+	/** Remove any existing connection between the port referenced by \p src and
+	 * the port named \p dst
 	 *
 	 * @param src \ref PortHandle of source port to disconnect from
 	 * @param dst \ref PortHandle of destination (sink) port to disconnect
@@ -241,7 +242,7 @@ public:
 	 */
 	virtual int   disconnect (PortHandle src, const std::string& dst) = 0;
 
-	/** Remove all connections between the port referred to by \param port and
+	/** Remove all connections between the port referred to by \p port and
 	 * any other ports.
 	 *
 	 * @param port \ref PortHandle of port to disconnect
@@ -249,11 +250,11 @@ public:
 	 */
 	virtual int   disconnect_all (PortHandle port) = 0;
 
-	/** Test if given \param port is connected
+	/** Test if given \p port is connected
 	 *
 	 * @param port \ref PortHandle of port to test
 	 * @param process_callback_safe true if this method is not called from rt-context of backend callbacks
-	 * @return true if the port referred to by \param port has any connections to other ports. Return false otherwise.
+	 * @return true if the port referred to by \p port has any connections to other ports. Return false otherwise.
 	 */
 	virtual bool  connected (PortHandle port, bool process_callback_safe = true) = 0;
 
@@ -262,24 +263,24 @@ public:
 	 * @param port \ref PortHandle of source port to test
 	 * @param name name of destination to test
 	 * @param process_callback_safe true if this method is not called from rt-context of backend callbacks
-	 * @return true if the port referred to by \param port is connected to the port named by \param name . Return false otherwise.
+	 * @return true if the port referred to by \p port is connected to the port named by \p name . Return false otherwise.
 	 */
 	virtual bool  connected_to (PortHandle port, const std::string& name, bool process_callback_safe = true) = 0;
 
-	/** Test if given \param port is is connected to physical I/O ports.
+	/** Test if given \p port is is connected to physical I/O ports.
 	 *
 	 * @param port \ref PortHandle of source port to test
 	 * @param process_callback_safe true if this method is not called from rt-context of backend callbacks
-	 * @return true if the port referred to by \param port has any connections
+	 * @return true if the port referred to by \p port has any connections
 	 *         to ports marked with the PortFlag IsPhysical. Return false otherwise.
 	 */
 	virtual bool  physically_connected (PortHandle port, bool process_callback_safe = true) = 0;
 
-	/** Test if given \param port is has external connections.
+	/** Test if given \p port is has external connections.
 	 *
 	 * @param port \ref PortHandle of port to test
 	 * @param process_callback_safe true if this method is not called from rt-context of backend callbacks
-	 * @return true if the port referred to by \param port has any connections
+	 * @return true if the port referred to by \p port has any connections
 	 *         to external, not-ardour owned, ports.
 	 */
 	virtual bool  externally_connected (PortHandle port, bool process_callback_safe = true) {
@@ -288,7 +289,7 @@ public:
 	}
 
 	/** Place the names of all ports connected to the port named by
-	 * \param port into \param names .
+	 * \p port into \p names .
 	 *
 	 * @param port \ref PortHandle
 	 * @param names array or returned port-names
@@ -299,17 +300,17 @@ public:
 
 	/* MIDI */
 
-	/** Retrieve a MIDI event from the data at \param port_buffer . The event
-	 * number to be retrieved is given by \param event_index (a value of zero
+	/** Retrieve a MIDI event from the data at \p port_buffer . The event
+	 * number to be retrieved is given by \p event_index (a value of zero
 	 * indicates that the first event in the port_buffer should be retrieved).
 	 *
 	 * The data associated with the event will be copied into the buffer at
-	 * \param buf and the number of bytes written will be stored in \param size .
+	 * \p buf and the number of bytes written will be stored in \p size .
 	 * The timestamp of the event (which is always relative to the start
-	 * of the current process cycle, in samples) will be stored in \param timestamp .
+	 * of the current process cycle, in samples) will be stored in \p timestamp .
 	 *
 	 * @param timestamp time in samples relative to the current cycle start
-	 * @param size number of bytes read into \param buf
+	 * @param size number of bytes read into \p buf
 	 * @param buf raw MIDI data
 	 * @param port_buffer the midi-port buffer
 	 * @param event_index index of event to retrieve
@@ -317,9 +318,9 @@ public:
 	 */
 	virtual int      midi_event_get (pframes_t& timestamp, size_t& size, uint8_t const** buf, void* port_buffer, uint32_t event_index) = 0;
 
-	/** Place a MIDI event consisting of \param size bytes copied from the data
-	 * at \param buffer into the port buffer referred to by \param port_buffer .
-	 * The MIDI event will be marked with a time given by \param timestamp .
+	/** Place a MIDI event consisting of \p size bytes copied from the data
+	 * at \p buffer into the port buffer referred to by \p port_buffer .
+	 * The MIDI event will be marked with a time given by \p timestamp .
 	 *
 	 * Events  must be added monotonically to a port buffer. An attempt to
 	 * add a non-monotonic event (e.g. out-of-order) will cause this method
@@ -328,22 +329,22 @@ public:
 	 * @param port_buffer the midi-port buffer
 	 * @param timestamp time in samples relative to the current cycle start
 	 * @param buffer raw MIDI data to emplace
-	 * @param size number of bytes of \param buffer
+	 * @param size number of bytes of \p buffer
 	 * @return zero on success, non-zero otherwise.
 	 */
 	virtual int      midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size) = 0;
 
-	/** Query the number of MIDI events in the data at \param port_buffer
+	/** Query the number of MIDI events in the data at \p port_buffer
 	 *
 	 * @param port_buffer the midi-port buffer
-	 * @return the number of MIDI events in the data at \param port_buffer
+	 * @return the number of MIDI events in the data at \p port_buffer
 	*/
 	virtual uint32_t get_midi_event_count (void* port_buffer) = 0;
 
-	/** Clear the buffer at \param port_buffer of all MIDI events.
+	/** Clear the buffer at \p port_buffer of all MIDI events.
 	 *
 	 * After a call to this method, an immediate, subsequent call to
-	 * \ref get_midi_event_count with the same \param port_buffer argument must
+	 * \ref get_midi_event_count with the same \p port_buffer argument must
 	 * return zero.
 	 *
 	 * @param port_buffer the buffer to clear
@@ -364,7 +365,7 @@ public:
 
 	/** Increment or decrement the number of requests to monitor the input
 	 * of the hardware channel represented by the port referred to by
-	 * \param port .
+	 * \p port .
 	 *
 	 * If the number of requests rises above zero, input monitoring will
 	 * be enabled (if can_monitor_input() returns true for the implementation).
@@ -379,9 +380,9 @@ public:
 	virtual int   request_input_monitoring (PortHandle port, bool yn) = 0;
 
 	/* Force input monitoring of the hardware channel represented by the port
-	 * referred to by \param port to be on or off, depending on the true/false
-	 * status of \param yn. The request count is ignored when using this
-	 * method, so if this is called with \param yn set to false, input monitoring will
+	 * referred to by \p port to be on or off, depending on the true/false
+	 * status of \p yn. The request count is ignored when using this
+	 * method, so if this is called with \p yn set to false, input monitoring will
 	 * be disabled regardless of the number of requests to enable it.
 	 *
 	 * @param port \ref PortHandle
@@ -390,19 +391,19 @@ public:
 	 */
 	virtual int   ensure_input_monitoring (PortHandle port, bool yn) = 0;
 
-	/** Query status of hardware monitoring for given \param port
+	/** Query status of hardware monitoring for given \p port
 	 *
 	 * @param port \ref PortHandle to test
 	 * @return true if input monitoring is enabled for the hardware channel
-	 *         represented by the port referred to by \param port .
+	 *         represented by the port referred to by \p port .
 	 *         Return false otherwise.
 	 */
 	virtual bool  monitoring_input (PortHandle port) = 0;
 
 	/* Latency management */
 
-	/** Set the latency range for the port referred to by \param port to
-	 * \param r . The playback range will be set if \param for_playback is true,
+	/** Set the latency range for the port referred to by \p port to
+	 * \p r . The playback range will be set if \p for_playback is true,
 	 * otherwise the capture range will be set.
 	 *
 	 * @param port \ref PortHandle to operate on
@@ -414,7 +415,7 @@ public:
 	 */
 	virtual void          set_latency_range (PortHandle port, bool for_playback, LatencyRange r) = 0;
 
-	/** Return the latency range for the port referred to by \param port .
+	/** Return the latency range for the port referred to by \p port .
 	 * The playback range will be returned if @param for_playback is true,
 	 * otherwise the capture range will be returned.
 	 *
@@ -426,15 +427,15 @@ public:
 
 	/* Discovering physical ports */
 
-	/** Return true if the port referred to by \param port has the IsPhysical
+	/** Return true if the port referred to by \p port has the IsPhysical
 	 * flag set. Return false otherwise.
 	 *
 	 * @param port \ref PortHandle to query
 	 */
 	virtual bool      port_is_physical (PortHandle port) const = 0;
 
-	/** Store into \param names the names of all ports with the IsOutput and
-	 * IsPhysical flag set, that handle data of type \param type .
+	/** Store into \p names the names of all ports with the IsOutput and
+	 * IsPhysical flag set, that handle data of type \p type .
 	 *
 	 * This can be used to discover outputs associated with hardware devices.
 	 *

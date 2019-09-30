@@ -92,10 +92,10 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	 *
 	 * @param bufs bufferset of data to process in-place
 	 * @param start_sample absolute timeline position in audio-samples to commence processing (latency compensated)
-	 * @param end_sample absolute timeline position in audio-samples, usually start_sample +/- \param nframes
+	 * @param end_sample absolute timeline position in audio-samples, usually start_sample +/- \p nframes
 	 * @param speed transport speed. usually -1, 0, +1
 	 * @param nframes number of audio samples to process
-	 * @param result_required true if, on return from this method, \param bufs is required to contain valid data;
+	 * @param result_required true if, on return from this method, \p bufs is required to contain valid data;
 	 *        if false, the method need not bother writing to @a bufs if it doesn't want to.
 	 */
 	virtual void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required) {}

@@ -268,7 +268,7 @@ LIBPBD_API void remove_directory (const std::string& dir);
  */
 LIBPBD_API std::string tmp_writable_directory (const char* domain, const std::string& prefix);
 
-/** If \param path exists, unlink it. If it doesn't exist, create it.
+/** If \p path exists, unlink it. If it doesn't exist, create it.
  *
  * @return zero if required action was successful, non-zero otherwise.
  */

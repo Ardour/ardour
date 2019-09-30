@@ -282,7 +282,7 @@ namespace ARDOUR { namespace DSP {
 
 			/** query
 			 * @param bin the frequency bin 0 .. window_size / 2
-			 * @param norm gain factor (set equal to \param bin for 1/f normalization)
+			 * @param norm gain factor (set equal to \p bin for 1/f normalization)
 			 * @return signal power at given bin (in dBFS)
 			 */
 			float power_at_bin (const uint32_t bin, const float norm = 1.f) const;

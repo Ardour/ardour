@@ -86,7 +86,7 @@ public:
 		_written = true;
 	}
 
-	/** Accumulate (add) \param len samples from \param src starting at \param src_offset into self starting at \param dst_offset */
+	/** Accumulate (add) \p len samples from \p src starting at \p src_offset into self starting at \p dst_offset */
 	void merge_from (const Buffer& src, samplecnt_t len, sampleoffset_t dst_offset = 0, sampleoffset_t src_offset = 0)
 	{
 		const AudioBuffer* ab = dynamic_cast<const AudioBuffer*> (&src);
@@ -94,7 +94,7 @@ public:
 		accumulate_from (*ab, len, dst_offset, src_offset);
 	}
 
-	/** Accumulate (add) \param len samples from \param src starting at \param src_offset into self starting at \param dst_offset */
+	/** Accumulate (add) \p len samples from \p src starting at \p src_offset into self starting at \p dst_offset */
 	void accumulate_from (const AudioBuffer& src, samplecnt_t len, sampleoffset_t dst_offset = 0, sampleoffset_t src_offset = 0)
 	{
 		assert (_capacity > 0);
@@ -111,8 +111,8 @@ public:
 		_written = true;
 	}
 
-	/** Accumulate (add) \param len samples of \param src starting at \param src_offset into self
-	 * starting at \param dst_offset
+	/** Accumulate (add) \p len samples of \p src starting at \p src_offset into self
+	 * starting at \p dst_offset
 	 */
 	void accumulate_from (const Sample* src, samplecnt_t len, sampleoffset_t dst_offset = 0, sampleoffset_t src_offset = 0)
 	{
@@ -128,8 +128,8 @@ public:
 		_written = true;
 	}
 
-	/** Accumulate (add) \param len samples if \param src starting at \param src_offset into self
-	 * starting at \param dst_offset scaling by \param gain_coeff
+	/** Accumulate (add) \p len samples if \p src starting at \p src_offset into self
+	 * starting at \p dst_offset scaling by \p gain_coeff
 	 */
 	void accumulate_with_gain_from (const AudioBuffer& src, samplecnt_t len, gain_t gain_coeff, sampleoffset_t dst_offset = 0, sampleoffset_t src_offset = 0)
 	{
@@ -149,8 +149,8 @@ public:
 		_written = true;
 	}
 
-	/** Accumulate (add) \param len samples from the start of \param src_raw into self at \param dst_offset
-	 * scaling by \param gain_coeff
+	/** Accumulate (add) \p len samples from the start of \p src_raw into self at \p dst_offset
+	 * scaling by \p gain_coeff
 	 */
 	void accumulate_with_gain_from (const Sample* src_raw, samplecnt_t len, gain_t gain_coeff, sampleoffset_t dst_offset = 0)
 	{
@@ -165,8 +165,8 @@ public:
 		_written = true;
 	}
 
-	/** Accumulate (add) \param len samples from the start of \param src into self at \param dst_offset
-	 * using a linear gain ramp from \param initial to \param target .
+	/** Accumulate (add) \p len samples from the start of \p src into self at \p dst_offset
+	 * using a linear gain ramp from \p initial to \p target .
 	 */
 	void accumulate_with_ramped_gain_from (const Sample* src, samplecnt_t len, gain_t initial, gain_t target, sampleoffset_t dst_offset = 0)
 	{
@@ -219,7 +219,7 @@ public:
 		_written  = false;
 	}
 
-	/** Reallocate the buffer used internally to handle at least \param nframes of data
+	/** Reallocate the buffer used internally to handle at least \p nframes of data
 	 *
 	 * Constructor MUST have been passed capacity!=0 or this will die (to prevent mem leaks).
 	 */

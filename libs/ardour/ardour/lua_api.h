@@ -251,7 +251,7 @@ namespace ARDOUR { namespace LuaAPI {
 			 *
 			 * If the plugin is not yet initialized, initialize() is called.
 			 *
-			 * if \param fn is not nil, it is called with the immediate
+			 * if \p fn is not nil, it is called with the immediate
 			 * Vamp::Plugin::Features on every process call.
 			 *
 			 * @param r readable
