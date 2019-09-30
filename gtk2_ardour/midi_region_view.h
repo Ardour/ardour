@@ -137,7 +137,7 @@ public:
 	/** Look up the given time and channel in the 'automation' and set keys accordingly.
 	 * @param time the time of the patch change event
 	 * @param channel the MIDI channel of the event
-	 * @key a reference to an instance of MIDI::Name::PatchPrimaryKey whose fields will
+	 * @param key a reference to an instance of MIDI::Name::PatchPrimaryKey whose fields will
 	 *        will be set according to the result of the lookup
 	 */
 	void get_patch_key_at (Temporal::Beats time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key) const;

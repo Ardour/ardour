@@ -20,7 +20,8 @@
 #ifndef __gtk2_ardour_mouse_cursors__
 #define __gtk2_ardour_mouse_cursors__
 
-/** @file Handling of bitmaps to be used for mouse cursors.
+/** @file mouse_cursors.h
+ * Handling of bitmaps to be used for mouse cursors.
  *
  *  Held centrally by the Editor because some cursors are used in several places.
  */
