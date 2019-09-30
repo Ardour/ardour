@@ -209,9 +209,12 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	 *
 	 * @param speed - The transport speed requested
 	 * @param position - The transport position requested
+	 * @param lp last position (used for flywheel)
+	 * @param when last timestamp (used for flywheel)
+	 * @param now monotonic sample time
 	 * @return - The return value is currently ignored (see Session::follow_slave)
 	 */
-	virtual bool speed_and_position (double& speed, samplepos_t& position, samplepos_t & lp, samplepos_t & when, samplepos_t now);
+	virtual bool speed_and_position (double& speed, samplepos_t& position, samplepos_t& lp, samplepos_t& when, samplepos_t now);
 
 	virtual void reset (bool with_position) = 0;
 

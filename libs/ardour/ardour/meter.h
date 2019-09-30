@@ -91,7 +91,7 @@ private:
 
 	/** The number of meters that we are currently handling;
 	 *  may be different to _configured_input and _configured_output
-	 *  as it can be altered outside a ::configure_io by ::reflect_inputs.
+	 *  as it can be altered outside a \ref configure_io by \ref reflect_inputs .
 	 */
 	ChanCount current_meters;
 

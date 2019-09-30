@@ -135,7 +135,7 @@ public:
 	virtual Coord height () const = 0;
 
 	/** Store the coordinates of the mouse pointer in window coordinates in
-	 * @param winpos. Return true if the position was within the window,
+	 * \p winpos . Return true if the position was within the window,
 	 * false otherwise.
 	 */
 	virtual bool get_mouse_position (Duple& winpos) const = 0;
@@ -147,9 +147,9 @@ public:
 
 	sigc::signal<void> PreRender;
 
-	/** Ensures that the position given by @param winpos (in window
+	/** Ensures that the position given by \p winpos (in window
 	 * coordinates) is within the current window area, possibly reduced by
-	 * @param border.
+	 * \p border.
 	 */
 	Duple clamp_to_window (Duple const& winpos, Duple border = Duple());
 

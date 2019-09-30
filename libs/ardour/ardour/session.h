@@ -265,9 +265,11 @@ public:
 	std::string new_audio_source_path_for_embedded (const std::string& existing_path);
 	std::string new_audio_source_path (const std::string&, uint32_t nchans, uint32_t chan, bool destructive, bool take_required);
 	std::string new_midi_source_path (const std::string&, bool need_source_lock = true);
+
 	/** create a new track or bus from a template (XML path)
 	 * @param how_many how many tracks or busses to create
 	 * @param template_path path to xml template file
+	 * @param insert_at position where to add new track, use PresentationInfo::max_order to append at the end.
 	 * @param name name (prefix) of the route to create
 	 * @param pd Playlist disposition
 	 * @return list of newly created routes
@@ -539,6 +541,8 @@ public:
 	 * @param pending save a 'recovery', not full state (default: false)
 	 * @param switch_to_snapshot switch to given snapshot after saving (default: false)
 	 * @param template_only save a session template (default: false)
+	 * @param for_archive save only data relevant for session-archive
+	 * @param only_used_assets skip Sources that are not used, mainly useful with \p for_archive
 	 * @return zero on success
 	 */
 	int save_state (std::string snapshot_name,

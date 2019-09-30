@@ -83,22 +83,23 @@ public:
 	 */
 	virtual void prepare_for_render (Rect const & area) const { }
 
-	/** Adds one or more items to the vector @param items based on their
-	 * covering @param point which is in **window** coordinates
+	/** Adds one or more items to the vector \p items based on their
+	 * covering \p point which is in window coordinates
 	 *
 	 * Note that Item::add_items_at_window_point() is only intended to be
 	 * called on items already looked up in a LookupTable (i.e. by a
-	 * parent) and thus known to cover @param point already.
+	 * parent) and thus known to cover \p point already.
 	 *
 	 * Derived classes may add more items than themselves (e.g. containers).
 	 */
-	virtual void add_items_at_point (Duple /*point*/, std::vector<Item const *>& items) const;
+	virtual void add_items_at_point (Duple point, std::vector<Item const *>& items) const;
 
-	/** Return true if the item covers @param point, false otherwise.
+	/** Test if point is inside the item
 	 *
-	 * The point is in window coordinates
+	 * @param point The point is in window coordinates
+	 * @return true if the item covers \p point , false otherwise.
 	 */
-	virtual bool covers (Duple const &) const;
+	virtual bool covers (Duple const& point) const;
 
 	/** Update _bounding_box and _bounding_box_dirty */
 	virtual void compute_bounding_box () const = 0;
@@ -118,13 +119,14 @@ public:
 	const Item* closest_ancestor_with (const Item& other) const;
 	bool common_ancestor_within (uint32_t, const Item& other) const;
 
-	/** returns true if this item is an ancestor of @param candidate,
+	/** returns true if this item is an ancestor of \p candidate ,
 	 * and false otherwise.
 	 */
 	bool is_ancestor_of (const Item& candidate) const {
 		return candidate.is_descendant_of (*this);
 	}
-	/** returns true if this Item is a descendant of @param candidate,
+
+	/** returns true if this Item is a descendant of \p candidate ,
 	 * and false otherwise.
 	 */
 	bool is_descendant_of (const Item& candidate) const;

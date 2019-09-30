@@ -36,7 +36,7 @@ protected:
 
 	/**
 	 * This method will calculate the Catmull-Rom interpolation curve, returning
-	 * it as a list of Coord coordinate objects.  This method in particular
+	 * it as a list of Coord coordinate objects. This method in particular
 	 * adds the first and last control points which are not visible, but required
 	 * for calculating the spline.
 	 *
@@ -47,6 +47,8 @@ protected:
 	 * point will depend on the spacing between the control points.
 	 * @return The list of interpolated coordinates.
 	 * @param curve_type Chordal (stiff), Uniform(floppy), or Centripetal(medium)
+	 * @param closed Specify if the shape is open or closed
+	 * @param results List of calculated coordinates
 	 * @throws gov.ca.water.shapelite.analysis.CatmullRomException if
 	 * points_per_segment is less than 2.
 	 */
@@ -176,7 +178,7 @@ private:
 	 * or centripetal curve types. Uniform can produce loops, chordal can
 	 * produce large distortions from the original lines, and centripetal is an
 	 * optimal balance without spaces.
-	 * @return the list of coordinates that define the CatmullRom curve
+	 * @param results List of calculated coordinates that define the CatmullRom curve
 	 * between the points defined by index+1 and index+2.
 	 */
 	static void

@@ -87,8 +87,8 @@ public:
 	void set_channel (int);
 	void set_region_start (ARDOUR::sampleoffset_t);
 
-	/** Change the first position drawn by @param pixels.
-	 * @param pixels must be positive. This is used by
+	/** Change the first position drawn by \p pixels .
+	 * \p pixels must be positive. This is used by
 	 * AudioRegionViews in Ardour to avoid drawing the
 	 * first pixel of a waveform, and exists in case
 	 * there are uses for WaveView where we do not

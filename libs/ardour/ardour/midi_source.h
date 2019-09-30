@@ -56,12 +56,13 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	virtual ~MidiSource ();
 
 	/** Write the data in the given time range to another MidiSource
-	 * \param newsrc MidiSource to which data will be written. Should be a
+	 * @param lock Reference to the Mutex to lock before modification
+	 * @param newsrc MidiSource to which data will be written. Should be a
 	 *        new, empty source. If it already has contents, the results are
 	 *        undefined. Source must be writable.
-	 * \param begin time of earliest event that can be written.
-	 * \param end time of latest event that can be written.
-	 * \return zero on success, non-zero if the write failed for any reason.
+	 * @param begin time of earliest event that can be written.
+	 * @param end time of latest event that can be written.
+	 * @return zero on success, non-zero if the write failed for any reason.
 	 */
 	int write_to (const Lock&                   lock,
 	              boost::shared_ptr<MidiSource> newsrc,
@@ -69,12 +70,13 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	              Temporal::Beats               end   = std::numeric_limits<Temporal::Beats>::max());
 
 	/** Export the midi data in the given time range to another MidiSource
-	 * \param newsrc MidiSource to which data will be written. Should be a
+	 * @param lock Reference to the Mutex to lock before modification
+	 * @param newsrc MidiSource to which data will be written. Should be a
 	 *        new, empty source. If it already has contents, the results are
 	 *        undefined. Source must be writable.
-	 * \param begin time of earliest event that can be written.
-	 * \param end time of latest event that can be written.
-	 * \return zero on success, non-zero if the write failed for any reason.
+	 * @param begin time of earliest event that can be written.
+	 * @param end time of latest event that can be written.
+	 * @return zero on success, non-zero if the write failed for any reason.
 	 */
 	int export_write_to (const Lock&                   lock,
 	                     boost::shared_ptr<MidiSource> newsrc,
@@ -83,13 +85,18 @@ class LIBARDOUR_API MidiSource : virtual public Source
 
 	/** Read the data in a given time range from the MIDI source.
 	 * All time stamps in parameters are in audio samples (even if the source has tempo time).
-	 * \param dst Ring buffer where read events are written.
-	 * \param source_start Start position of the SOURCE in this read context.
-	 * \param start Start of range to be read.
-	 * \param cnt Length of range to be read (in audio samples).
-	 * \param loop_range If non-null, all event times will be mapped into this loop range.
-	 * \param tracker an optional pointer to MidiStateTracker object, for note on/off tracking.
-	 * \param filtered Parameters whose MIDI messages will not be returned.
+	 * @param lock Reference to the Mutex to lock before modification
+	 * @param dst Ring buffer where read events are written.
+	 * @param source_start Start position of the SOURCE in this read context.
+	 * @param start Start of range to be read.
+	 * @param cnt Length of range to be read (in audio samples).
+	 * @param loop_range If non-null, all event times will be mapped into this loop range.
+	 * @param cursor Cached iterator to start copying events
+	 * @param filter Channel filter to apply or NULL to disable filter
+	 * @param tracker an optional pointer to MidiStateTracker object, for note on/off tracking.
+	 * @param filtered Parameters whose MIDI messages will not be returned.
+	 * @param pos_beats Start position (quarter note = \p pos_beats - \p start_beats)
+	 * @param start_beats Start position offset
 	 */
 	virtual samplecnt_t midi_read (const Lock&                        lock,
 	                              Evoral::EventSink<samplepos_t>&     dst,
@@ -101,16 +108,17 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	                              MidiStateTracker*                  tracker,
 	                              MidiChannelFilter*                 filter,
 	                              const std::set<Evoral::Parameter>& filtered,
-	                              const double                       pulse,
+	                              const double                       pos_beats,
 	                              const double                       start_beats) const;
 
 	/** Write data from a MidiRingBuffer to this source.
-	 *  @param source Source to read from.
-	 *  @param source_start This source's start position in session samples.
-	 *  @param cnt The length of time to write.
+	 * @param lock Reference to the Mutex to lock before modification
+	 * @param source Source to read from.
+	 * @param source_start This source's start position in session samples.
+	 * @param cnt The length of time to write.
 	 */
 	virtual samplecnt_t midi_write (const Lock&                 lock,
-	                               MidiRingBuffer<samplepos_t>& src,
+	                               MidiRingBuffer<samplepos_t>& source,
 	                               samplepos_t                  source_start,
 	                               samplecnt_t                  cnt);
 
@@ -218,9 +226,10 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	                                  MidiChannelFilter*             filter) const = 0;
 
 	/** Write data to this source from a MidiRingBuffer.
-	 *  @param source Buffer to read from.
-	 *  @param position This source's start position in session samples.
-	 *  @param cnt The duration of this block to write for.
+	 * @param lock Reference to the Mutex to lock before modification
+	 * @param source Buffer to read from.
+	 * @param position This source's start position in session samples.
+	 * @param cnt The duration of this block to write for.
 	 */
 	virtual samplecnt_t write_unlocked (const Lock&                 lock,
 	                                   MidiRingBuffer<samplepos_t>& source,

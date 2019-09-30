@@ -48,6 +48,7 @@ class LIBARDOUR_API ElementImportHandler
 	 * and create respective Elements stored in elements.
 	 *
 	 * @param source XML tree to be parsed
+	 * @param session The Session
 	 * @see elements
 	 */
 	ElementImportHandler (XMLTree const & source, ARDOUR::Session & session)

@@ -61,9 +61,11 @@ public:
 	 * are enqueued to compensate for edits which should be later sent with
 	 * emit() at the start of the next read.
 	 *
+	 * @param tempo_map The tempo-map
 	 * @param cmd Command to compensate for.
 	 * @param origin Timeline position of edited source.
 	 * @param pos Current read position (last read end).
+	 * @param active_notes currently active notes (read/write)
 	 */
 	void prepare(TempoMap&                          tempo_map,
 	             const MidiModel::NoteDiffCommand*  cmd,

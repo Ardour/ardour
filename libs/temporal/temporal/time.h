@@ -120,26 +120,46 @@ timecode_format_sampletime (
     double  sample_sample_rate,
     double timecode_frames_per_second, bool timecode_drop_frames);
 
+/** Convert timecode (frames per second) to audio sample time (samples per second)
+ *
+ * @param timecode Timecode to convert (also includes frame-rate)
+ * @param sample returned corresponding audio sample time
+ * @param use_offset apply offset as given by \p offset_is_negative and \p offset_samples
+ * @param use_subframes use \p subframes_per_frame when converting
+ * @param sample_sample_rate target sample-rate, may include pull up/down
+ * @param subframes_per_frame sub-frames per frame -- must not be 0 if \p use_subframes \c == \c true
+ * @param offset_is_negative true if offset_samples is to be subtracted
+ * @param offset_samples sample offset to add or subtract
+ */
 void LIBTEMPORAL_API
 timecode_to_sample (
-    Timecode::Time& timecode, int64_t& sample,
+    Timecode::Time const& timecode, int64_t& sample,
     bool use_offset, bool use_subframes,
-    /* Note - framerate info is taken from Timecode::Time& */
-    double   sample_sample_rate /**< may include pull up/down */,
-    uint32_t subframes_per_frame /**< must not be 0 if use_subframes==true */,
-    /* optional offset  - can be improved: function pointer to lazily query this*/
+    double   sample_sample_rate,
+    uint32_t subframes_per_frame,
     bool offset_is_negative, int64_t offset_samples);
 
+/** Convert audio sample time (samples per second) to timecode (frames per second)
+ *
+ * @param sample audio sample time to convert
+ * @param timecode resulting Timecode
+ * @param use_offset apply offset as given by \p offset_is_negative and \p offset_samples
+ * @param use_subframes use \p subframes_per_frame when converting
+ * @param timecode_frames_per_second target framerate
+ * @param timecode_drop_frames true if fps uses drop-frame-counting. only valid for \c 29.97 \c = \c 30000/1001 fps
+ * @param sample_sample_rate source sample-rate, may include pull up/down
+ * @param subframes_per_frame sub-frames per frame -- must not be 0 if \p use_subframes \c == \c true
+ * @param offset_is_negative true if offset_samples is to be subtracted
+ * @param offset_samples sample offset to add or subtract
+ */
 void LIBTEMPORAL_API
 sample_to_timecode (
     int64_t sample, Timecode::Time& timecode,
     bool use_offset, bool use_subframes,
-    /* framerate info */
     double   timecode_frames_per_second,
     bool     timecode_drop_frames,
-    double   sample_sample_rate /**< can include pull up/down */,
+    double   sample_sample_rate,
     uint32_t subframes_per_frame,
-    /* optional offset  - can be improved: function pointer to lazily query this*/
     bool offset_is_negative, int64_t offset_samples);
 
 } // namespace Timecode

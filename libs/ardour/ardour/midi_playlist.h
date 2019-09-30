@@ -78,6 +78,7 @@ public:
 	 * @param chan_n Must be 0 (this is the audio-style "channel", where each
 	 * channel is backed by a separate region, not MIDI channels, which all
 	 * exist in the same region and are not handled here).
+	 * @param filter Channel filter to apply or NULL to disable filter
 	 * @return The number of samples read (time, not an event count).
 	 */
 	samplecnt_t read (Evoral::EventSink<samplepos_t>& buf,

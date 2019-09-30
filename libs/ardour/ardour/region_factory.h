@@ -62,7 +62,7 @@ public:
 	*/
 	static PBD::Signal1<void,boost::shared_ptr<Region> >  CheckNewRegion;
 
-	/** create a "pure copy" of Region @param other */
+	/** create a "pure copy" of Region \p other */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<const Region> other, bool announce = false, bool fork = false);
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, bool announce, bool fork) {
 		return create (boost::shared_ptr<const Region>(other), announce, fork);
@@ -75,19 +75,19 @@ public:
 	/** create a region from a multiple sources */
 	static boost::shared_ptr<Region> create (const SourceList &,
 	                                         const PBD::PropertyList&, bool announce = true);
-	/** create a copy of @other starting at zero within @param other's sources */
+	/** create a copy of \p other starting at zero within \p other's sources */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other,
 	                                         const PBD::PropertyList&, bool announce = true);
-	/** create a copy of @param other starting at @param offset within @param other */
+	/** create a copy of \p other starting at \p offset within \p other */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, ARDOUR::MusicSample offset,
 	                                         const PBD::PropertyList&, bool announce = true);
-	/** create a "copy" of @param other but using a different set of sources @param srcs */
+	/** create a "copy" of \p other but using a different set of sources \p srcs */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, const SourceList& srcs,
 	                                         const PBD::PropertyList&, bool announce = true);
 
 	/** create a region with no sources, using XML state */
 	static boost::shared_ptr<Region> create (Session&, XMLNode&, bool);
-	/** create a region with specified sources @param srcs and XML state */
+	/** create a region with specified sources \p srcs and XML state */
 	static boost::shared_ptr<Region> create (SourceList& srcs, const XMLNode&);
 
 	static boost::shared_ptr<Region> get_whole_region_for_source (boost::shared_ptr<ARDOUR::Source>);

@@ -77,10 +77,10 @@ class LIBARDOUR_API Bundle : public PBD::ScopedConnectionList
 	ChanCount nchannels () const;
 	uint32_t n_total () const; /* shortcut for nchannels().n_total() */
 
-	/** @param Channel index.
+	/** @param c Channel index.
 	 *  @return Ports associated with this channel.
 	 */
-	PortList const & channel_ports (uint32_t) const;
+	PortList const & channel_ports (uint32_t c) const;
 
 	void add_channel (std::string const &, DataType);
 	void add_channel (std::string const &, DataType, std::string const &);

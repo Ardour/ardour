@@ -644,7 +644,7 @@ bool parse_timecode_format(std::string tc, Timecode::Time &TC) {
 
 void
 timecode_to_sample(
-	Timecode::Time& timecode, int64_t& sample,
+	Timecode::Time const& timecode, int64_t& sample,
 	bool use_offset, bool use_subframes,
 	/* Note - framerate info is taken from Timecode::Time& */
 	double sample_sample_rate /**< may include pull up/down */,
