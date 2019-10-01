@@ -69,6 +69,11 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 	const sampleoffset_t pending_delay = _pending_delay;
 	sampleoffset_t delay_diff = _delay - pending_delay;
 	const bool pending_flush = _pending_flush;
+
+	if (delay_diff == 0 && _delay == 0) {
+		return;
+	}
+
 	_pending_flush = false;
 
 	// TODO handle pending_flush.
@@ -322,6 +327,18 @@ void
 DelayLine::allocate_pending_buffers (samplecnt_t signal_delay, ChanCount const& cc)
 {
 	assert (signal_delay >= 0);
+#if 1
+	/* If no buffers are required, don't allocate any.
+	 * This may backfire later, allocating buffers on demand
+	 * may take time and cause x-runs.
+	 *
+	 * The default buffersize is 4 * 16kB and - once allocated -
+	 * usually sufficies for the lifetime of the delayline instance.
+	 */
+	if (signal_delay == _pending_delay && signal_delay == 0) {
+		return;
+	}
+#endif
 	samplecnt_t rbs = signal_delay + MAX_BUFFER_SIZE + 1;
 	rbs = std::max (_bsiz, rbs);
 
