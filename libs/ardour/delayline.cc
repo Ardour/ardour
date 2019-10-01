@@ -322,7 +322,6 @@ void
 DelayLine::allocate_pending_buffers (samplecnt_t signal_delay, ChanCount const& cc)
 {
 	assert (signal_delay >= 0);
-	assert (signal_delay >= _pending_delay);
 	samplecnt_t rbs = signal_delay + MAX_BUFFER_SIZE + 1;
 	rbs = std::max (_bsiz, rbs);
 
@@ -367,6 +366,7 @@ DelayLine::allocate_pending_buffers (samplecnt_t signal_delay, ChanCount const& 
 		}
 	}
 
+	assert (signal_delay >= _pending_delay);
 	assert ((_roff <= (_woff + signal_delay - _pending_delay) & (rbs -1)) || offset > 0);
 	_roff += offset;
 	assert (_roff < rbs);
