@@ -256,7 +256,7 @@ public:
 		return boost::shared_ptr<IO> ();
 	}
 
-	PluginType type ();
+	PluginType type () const;
 
 	boost::shared_ptr<ReadOnlyControl> control_output (uint32_t) const;
 

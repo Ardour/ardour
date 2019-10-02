@@ -2957,9 +2957,9 @@ PluginInsert::signal_latency() const
 }
 
 ARDOUR::PluginType
-PluginInsert::type ()
+PluginInsert::type () const
 {
-       return plugin()->get_info()->type;
+	return plugin()->get_info()->type;
 }
 
 PluginInsert::PluginControl::PluginControl (PluginInsert*                     p,
