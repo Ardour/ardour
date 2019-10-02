@@ -36,7 +36,7 @@ public:
 	    , m_alpha(0)
 	    , m_dsp_load(0)
 	{
-
+		m_calc_avg_load = NULL != getenv("ARDOUR_AVG_DSP_LOAD");
 	}
 
 	void set_max_time(double samplerate, uint32_t period_size) {
@@ -73,14 +73,8 @@ public:
 			return;
 		}
 
-#ifndef NDEBUG
-		const bool calc_avg_load = NULL != getenv("ARDOUR_AVG_DSP_LOAD");
-#else
-		const bool calc_avg_load = false;
-#endif
-
 		const float load = (float) elapsed_time_us() / (float)m_max_time_us;
-		if ((calc_avg_load && load > .95f) || (!calc_avg_load && (load > m_dsp_load || load > 1.f))) {
+		if ((m_calc_avg_load && load > .95f) || (!m_calc_avg_load && (load > m_dsp_load || load > 1.f))) {
 			m_dsp_load = load;
 		} else {
 			m_dsp_load = std::min (1.f, m_dsp_load);
@@ -122,6 +116,7 @@ public:
 	int64_t max_timer_error_us() { return 4 * m_max_time_us; }
 
 private: // data
+	bool    m_calc_avg_load;
 	int64_t m_max_time_us;
 	int64_t m_start_timestamp_us;
 	int64_t m_stop_timestamp_us;
