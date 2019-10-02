@@ -20,6 +20,7 @@
 #ifndef ARDOUR_DSP_LOAD_CALCULATOR_H
 #define ARDOUR_DSP_LOAD_CALCULATOR_H
 
+#include <glib.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <cassert>
@@ -36,7 +37,7 @@ public:
 	    , m_alpha(0)
 	    , m_dsp_load(0)
 	{
-		m_calc_avg_load = NULL != getenv("ARDOUR_AVG_DSP_LOAD");
+		m_calc_avg_load = NULL != g_getenv("ARDOUR_AVG_DSP_LOAD");
 	}
 
 	void set_max_time(double samplerate, uint32_t period_size) {
