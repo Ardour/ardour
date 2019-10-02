@@ -118,8 +118,6 @@ public:
 	bool inplace () const { return ! _no_inplace; }
 
 	bool is_channelstrip () const;
-	bool is_nonbypassable () const;
-	bool show_on_ctrl_surface () const;
 
 	void set_input_map (uint32_t, ChanMapping);
 	void set_output_map (uint32_t, ChanMapping);

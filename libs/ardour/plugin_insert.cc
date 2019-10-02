@@ -677,11 +677,6 @@ PluginInsert::activate ()
 void
 PluginInsert::deactivate ()
 {
-#ifdef MIXBUS
-	if (is_nonbypassable ()) {
-		return;
-	}
-#endif
 	_timing_stats.reset ();
 	Processor::deactivate ();
 
@@ -1590,30 +1585,7 @@ PluginInsert::has_midi_thru () const
 bool
 PluginInsert::is_channelstrip () const
 {
-#ifdef MIXBUS
-	return _plugins.front()->is_channelstrip();
-#else
 	return false;
-#endif
-}
-
-bool
-PluginInsert::is_nonbypassable () const
-{
-#ifdef MIXBUS
-	return _plugins.front()->is_nonbypassable ();
-#else
-	return false;
-#endif
-}
-
-bool
-PluginInsert::show_on_ctrl_surface () const
-{
-	if (is_channelstrip () || !is_nonbypassable ()) {
-		return false;
-	}
-	return true;
 }
 
 bool
