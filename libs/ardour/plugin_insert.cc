@@ -932,7 +932,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 			_plugins.front()->connect_and_run (bufs, start, end, speed, mb_in_map, mb_out_map, nframes, offset);
 
 			for (uint32_t out = _configured_in.n_audio (); out < bufs.count().get (DataType::AUDIO); ++out) {
-				bufs.get (DataType::AUDIO, out).silence (nframes, offset);
+				bufs.get_available (DataType::AUDIO, out).silence (nframes, offset);
 			}
 		}
 	} else
