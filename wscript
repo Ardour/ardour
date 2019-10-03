@@ -399,6 +399,10 @@ int main() { return 0; }''',
             conf.env['build_host'] = 'sierra'
         elif re.search ("^17[.]", version) != None:
             conf.env['build_host'] = 'high_sierra'
+        elif re.search ("^18[.]", version) != None:
+            conf.env['build_host'] = 'mojave'
+        elif re.search ("^19[.]", version) != None:
+            conf.env['build_host'] = 'catalina'
         else:
             conf.env['build_host'] = 'irrelevant'
 
@@ -426,8 +430,12 @@ int main() { return 0; }''',
                 conf.env['build_target'] = 'el_capitan'
             elif re.search ("^16[.]", version) != None:
                 conf.env['build_target'] = 'sierra'
+            elif re.search ("^17[.]", version) != None:
+                conf.env['build_target'] = 'high sierra'
+            elif re.search ("^18[.]", version) != None:
+                conf.env['build_target'] = 'mojave'
             else:
-                conf.env['build_target'] = 'high_sierra'
+                conf.env['build_target'] = 'catalina'
         else:
             match = re.search(
                     "(?P<cpu>i[0-6]86|x86_64|powerpc|ppc|ppc64|arm|s390x?)",
@@ -448,11 +456,11 @@ int main() { return 0; }''',
         #
         compiler_flags.append ('-U__STRICT_ANSI__')
 
-    if opt.use_libcpp or conf.env['build_host'] in [ 'el_capitan', 'sierra', 'high_sierra' ]:
+    if opt.use_libcpp or conf.env['build_host'] in [ 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
        cxx_flags.append('--stdlib=libc++')
        linker_flags.append('--stdlib=libc++')
 
-    if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra' ]:
+    if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
         conf.check_cxx(cxxflags=["-std=c++11"])
         cxx_flags.append('-std=c++11')
         if platform == "darwin":
@@ -460,7 +468,7 @@ int main() { return 0; }''',
             # from requiring a full path to requiring just the header name.
             cxx_flags.append('-DCARBON_FLAT_HEADERS')
 
-            if not opt.use_libcpp and not conf.env['build_host'] in [ 'el_capitan', 'sierra', 'high_sierra' ]:
+            if not opt.use_libcpp and not conf.env['build_host'] in [ 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
                 cxx_flags.append('--stdlib=libstdc++')
                 linker_flags.append('--stdlib=libstdc++')
             # Prevents visibility issues in standard headers
@@ -469,7 +477,7 @@ int main() { return 0; }''',
             cxx_flags.append('-DBOOST_NO_AUTO_PTR')
 
 
-    if (is_clang and platform == "darwin") or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra' ]:
+    if (is_clang and platform == "darwin") or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
         # Silence warnings about the non-existing osx clang compiler flags
         # -compatibility_version and -current_version.  These are Waf
         # generated and not needed with clang
@@ -585,7 +593,7 @@ int main() { return 0; }''',
                 ("-DMAC_OS_X_VERSION_MAX_ALLOWED=1090",
                  "-mmacosx-version-min=10.8"))
 
-    elif conf.env['build_target'] in ['el_capitan', 'sierra', 'high_sierra' ]:
+    elif conf.env['build_target'] in ['el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' ]:
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MAX_ALLOWED=1090",
                  "-mmacosx-version-min=10.9"))
@@ -959,9 +967,6 @@ def configure(conf):
         #       off processor type.  Need to add in a check
         #       for that.
         #
-        conf.env.append_value('CXXFLAGS_OSX', '-F/System/Library/Frameworks')
-        conf.env.append_value('CXXFLAGS_OSX', '-F/Library/Frameworks')
-
         conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'AppKit'])
         conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'CoreAudio'])
         conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'CoreAudioKit'])
@@ -1258,6 +1263,12 @@ int main () { return 0; }
         sys.exit(1)
 
     set_compiler_flags (conf, Options.options)
+
+    if conf.env['build_host'] not in [ 'mojave', 'catalina']:
+	    conf.env.append_value('CXXFLAGS_OSX', '-F/System/Library/Frameworks')
+	    print "**** YES ADDING FRAMEOWKRS";
+
+    conf.env.append_value('CXXFLAGS_OSX', '-F/Library/Frameworks')
 
     if sys.platform == 'darwin':
         sub_config_and_use(conf, 'libs/appleutility')
