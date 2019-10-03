@@ -399,10 +399,92 @@ ARDOUR_UI::check_announcements ()
 }
 
 int
+ARDOUR_UI::nsm_init ()
+{
+	const char *nsm_url;
+
+	if ((nsm_url = g_getenv ("NSM_URL")) == 0) {
+		return 0;
+	}
+
+	nsm = new NSM_Client;
+
+	if (nsm->init (nsm_url)) {
+		delete nsm;
+		nsm = 0;
+		error << _("NSM: initialization failed") << endmsg;
+		return -1;
+	}
+
+	/* the ardour executable may have different names:
+	 *
+	 * waf's obj.target for distro versions: eg ardour4, ardourvst4
+	 * Ardour4, Mixbus3 for bundled versions + full path on OSX & windows
+	 * argv[0] does not apply since we need the wrapper-script (not the binary itself)
+	 *
+	 * The wrapper startup script should set the environment variable 'ARDOUR_SELF'
+	 */
+	const char *process_name = g_getenv ("ARDOUR_SELF");
+	nsm->announce (PROGRAM_NAME, ":dirty:", process_name ? process_name : "ardour6");
+
+	unsigned int i = 0;
+	// wait for announce reply from nsm server
+	for ( i = 0; i < 5000; ++i) {
+		nsm->check ();
+
+		Glib::usleep (i);
+		if (nsm->is_active()) {
+			break;
+		}
+	}
+	if (i == 5000) {
+		error << _("NSM server did not announce itself") << endmsg;
+		return -1;
+	}
+	// wait for open command from nsm server
+	for ( i = 0; i < 5000; ++i) {
+		nsm->check ();
+		Glib::usleep (1000);
+		if (nsm->client_id ()) {
+			break;
+		}
+	}
+
+	if (i == 5000) {
+		error << _("NSM: no client ID provided") << endmsg;
+		return -1;
+	}
+
+	if (_session && nsm) {
+		_session->set_nsm_state( nsm->is_active() );
+	} else {
+		error << _("NSM: no session created") << endmsg;
+		return -1;
+	}
+
+	// nsm requires these actions disabled
+	vector<string> action_names;
+	action_names.push_back("SaveAs");
+	action_names.push_back("Rename");
+	action_names.push_back("New");
+	action_names.push_back("Open");
+	action_names.push_back("Recent");
+	action_names.push_back("Close");
+
+	for (vector<string>::const_iterator n = action_names.begin(); n != action_names.end(); ++n) {
+		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Main"), (*n).c_str());
+		if (act) {
+			act->set_sensitive (false);
+		}
+	}
+
+	return 0;
+}
+
+int
 ARDOUR_UI::starting ()
 {
 	Application* app = Application::instance ();
-	const char *nsm_url;
 	bool brand_new_user = ArdourStartup::required ();
 
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
@@ -425,78 +507,8 @@ ARDOUR_UI::starting ()
 		return -1;
 	}
 
-	if ((nsm_url = g_getenv ("NSM_URL")) != 0) {
-		nsm = new NSM_Client;
-		if (!nsm->init (nsm_url)) {
-			/* the ardour executable may have different names:
-			 *
-			 * waf's obj.target for distro versions: eg ardour4, ardourvst4
-			 * Ardour4, Mixbus3 for bundled versions + full path on OSX & windows
-			 * argv[0] does not apply since we need the wrapper-script (not the binary itself)
-			 *
-			 * The wrapper startup script should set the environment variable 'ARDOUR_SELF'
-			 */
-			const char *process_name = g_getenv ("ARDOUR_SELF");
-			nsm->announce (PROGRAM_NAME, ":dirty:", process_name ? process_name : "ardour6");
-
-			unsigned int i = 0;
-			// wait for announce reply from nsm server
-			for ( i = 0; i < 5000; ++i) {
-				nsm->check ();
-
-				Glib::usleep (i);
-				if (nsm->is_active()) {
-					break;
-				}
-			}
-			if (i == 5000) {
-				error << _("NSM server did not announce itself") << endmsg;
-				return -1;
-			}
-			// wait for open command from nsm server
-			for ( i = 0; i < 5000; ++i) {
-				nsm->check ();
-				Glib::usleep (1000);
-				if (nsm->client_id ()) {
-					break;
-				}
-			}
-
-			if (i == 5000) {
-				error << _("NSM: no client ID provided") << endmsg;
-				return -1;
-			}
-
-			if (_session && nsm) {
-				_session->set_nsm_state( nsm->is_active() );
-			} else {
-				error << _("NSM: no session created") << endmsg;
-				return -1;
-			}
-
-			// nsm requires these actions disabled
-			vector<string> action_names;
-			action_names.push_back("SaveAs");
-			action_names.push_back("Rename");
-			action_names.push_back("New");
-			action_names.push_back("Open");
-			action_names.push_back("Recent");
-			action_names.push_back("Close");
-
-			for (vector<string>::const_iterator n = action_names.begin(); n != action_names.end(); ++n) {
-				Glib::RefPtr<Action> act = ActionManager::get_action (X_("Main"), (*n).c_str());
-				if (act) {
-					act->set_sensitive (false);
-				}
-			}
-
-		} else {
-			delete nsm;
-			nsm = 0;
-			error << _("NSM: initialization failed") << endmsg;
-			return -1;
-		}
-
+	if (nsm_init ()) {
+		return -1;
 	} else  {
 
 		if (brand_new_user) {
@@ -661,4 +673,3 @@ ARDOUR_UI::check_memory_locking ()
 	}
 #endif // !__APPLE__
 }
-

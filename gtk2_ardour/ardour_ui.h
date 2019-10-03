@@ -439,6 +439,7 @@ private:
 	SessionDialog *_session_dialog;
 
 	int starting ();
+	int nsm_init ();
 
 	int  ask_about_saving_session (const std::vector<std::string>& actions);
 
