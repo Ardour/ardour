@@ -57,6 +57,7 @@
 
 #include "startup.h"
 #include "opts.h"
+#include "ui_config.h"
 #include "pbd/i18n.h"
 #include "utils.h"
 
@@ -149,16 +150,44 @@ using the program.</span> \
 	foomatic->set_justify (JUSTIFY_FILL);
 	foomatic->set_line_wrap ();
 
-	HBox* hbox = manage (new HBox);
-	HBox* vbox = manage (new HBox);
-
+	VBox* vbox = manage (new VBox);
 	vbox->set_border_width (24);
+	vbox->pack_start (*foomatic, true, true, 12);
 
-	hbox->pack_start (*foomatic, true, true);
-	vbox->pack_start (*hbox, true, true);
+#ifndef __APPLE__
+	Label* barmatic = manage (new Label);
+	barmatic->set_text (_("GUI and Font scaling:"));
+
+	Label* bazmatic = manage (new Label);
+	bazmatic->set_markup (_("<small><i>This can later be changed in Preferences &gt; Appearance.</i></small>"));
+
+	ui_font_scale.append_text (_("100%"));
+	ui_font_scale.append_text (_("150%"));
+	ui_font_scale.append_text (_("200%"));
+	ui_font_scale.append_text (_("250%"));
+	ui_font_scale.set_active_text (_("100%"));
+
+	HBox* hbox = manage (new HBox);
+	HBox* cbox = manage (new HBox);
+
+	hbox->pack_start (*barmatic, false, false);
+	hbox->pack_start (ui_font_scale, false, false);
+	cbox->pack_start (*hbox, true, false);
+
+	vbox->pack_start (*cbox, false, false, 2);
+	vbox->pack_start (*bazmatic, false, false);
+
+	ui_font_scale.show ();
+	barmatic->show ();
+	bazmatic->show ();
+	hbox->show ();
+	cbox->show ();
+
+	guess_default_ui_scale ();
+	ui_font_scale.signal_changed ().connect (sigc::mem_fun (*this, &ArdourStartup::rescale_ui));
+#endif
 
 	foomatic->show ();
-	hbox->show ();
 	vbox->show ();
 
 	new_user_page_index = append_page (*vbox);
@@ -166,6 +195,53 @@ using the program.</span> \
 	set_page_title (*vbox, string_compose (_("Welcome to %1"), PROGRAM_NAME));
 	set_page_header_image (*vbox, icon_pixbuf);
 	set_page_complete (*vbox, true);
+}
+
+void
+ArdourStartup::rescale_ui ()
+{
+	int rn = ui_font_scale.get_active_row_number ();
+	if (rn < 0 ) {
+		return;
+	}
+	float ui_scale = 100 + rn * 50;
+	UIConfiguration::instance ().set_font_scale (1024 * ui_scale);
+	UIConfiguration::instance ().reset_dpi ();
+}
+
+void
+ArdourStartup::guess_default_ui_scale ()
+{
+	gint width = 0;
+	gint height = 0;
+	GdkScreen* screen = gdk_display_get_screen (gdk_display_get_default (), 0);
+	gint n_monitors = gdk_screen_get_n_monitors (screen);
+
+	if (!screen) {
+		return;
+	}
+
+	for (gint i = 0; i < n_monitors; ++i) {
+		GdkRectangle rect;
+		gdk_screen_get_monitor_geometry (screen, i, &rect);
+		width = std::max (width, rect.width);
+		height = std::max (height, rect.height);
+	}
+
+	float wx = width  / 1920.f;
+	float hx = height / 1080.f;
+	float sx = std::min (wx, hx);
+
+	if (sx < 1.25) {
+		ui_font_scale.set_active (0); // 100%
+	} else if (sx < 1.6) {
+		ui_font_scale.set_active (1); // 150%
+	} else if (sx < 2.1) {
+		ui_font_scale.set_active (2); // 200%
+	} else {
+		ui_font_scale.set_active (3); // 250%
+	}
+	rescale_ui ();
 }
 
 void

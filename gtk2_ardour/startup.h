@@ -30,6 +30,7 @@
 #include <gtkmm/box.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/filechooserbutton.h>
+#include <gtkmm/comboboxtext.h>
 
 #include "ardour/utils.h"
 
@@ -67,6 +68,11 @@ private:
 
 	void setup_first_time_config_page ();
 	void config_changed ();
+
+	/* Welcome */
+	Gtk::ComboBoxText ui_font_scale;
+	void rescale_ui ();
+	void guess_default_ui_scale ();
 
 	/* first page */
 	Gtk::FileChooserButton* default_dir_chooser;
