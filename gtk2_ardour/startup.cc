@@ -33,8 +33,7 @@
 
 #include "pbd/gstdio_compat.h"
 
-#include <gtkmm/main.h>
-#include <gtkmm/filechooser.h>
+#include <gtkmm.h>
 
 #include "pbd/failed_constructor.h"
 #include "pbd/scoped_file_descriptor.h"
@@ -58,7 +57,6 @@
 
 #include "startup.h"
 #include "opts.h"
-#include "engine_dialog.h"
 #include "pbd/i18n.h"
 #include "utils.h"
 
