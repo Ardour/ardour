@@ -46,12 +46,12 @@ SessionArchiveDialog::SessionArchiveDialog ()
 	encode_selector.append_text (_("None"));
 	encode_selector.append_text (_("FLAC 16bit"));
 	encode_selector.append_text (_("FLAC 24bit"));
-	encode_selector.set_active_text ("FLAC 16bit"); // TODO remember
+	encode_selector.set_active_text (_("FLAC 16bit")); // TODO remember
 
 	compression_selector.append_text (_("None"));
 	compression_selector.append_text (_("Fast"));
 	compression_selector.append_text (_("Good"));
-	compression_selector.set_active_text ("Good"); // TODO remember
+	compression_selector.set_active_text (_("Good")); // TODO remember
 
 	Gtk::Table* table = manage (new Gtk::Table ());
 	table->set_col_spacings (10);
