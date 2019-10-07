@@ -36,6 +36,7 @@
 #include "ardour/io.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
+#include "ardour/selection.h"
 
 #include "export_channel_selector.h"
 #include "route_sorter.h"
@@ -700,6 +701,8 @@ TrackExportChannelSelector::fill_list()
 	track_list->clear();
 	RouteList routes = _session->get_routelist();
 
+	CoreSelection const& cs (_session->selection());
+
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
 		if (!boost::dynamic_pointer_cast<Track>(*it)) {
 			// not a track, must be a bus
@@ -712,7 +715,7 @@ TrackExportChannelSelector::fill_list()
 			}
 
 			// not monitor or master bus
-			add_track (*it);
+			add_track (*it, cs.selected (*it));
 		}
 	}
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
@@ -721,18 +724,18 @@ TrackExportChannelSelector::fill_list()
 				// don't include inactive tracks
 				continue;
 			}
-			add_track (*it);
+			add_track (*it, cs.selected (*it));
 		}
 	}
 }
 
 void
-TrackExportChannelSelector::add_track (boost::shared_ptr<Route> route)
+TrackExportChannelSelector::add_track (boost::shared_ptr<Route> route, bool selected)
 {
 	Gtk::TreeModel::iterator iter = track_list->append();
 	Gtk::TreeModel::Row row = *iter;
 
-	row[track_cols.selected] = false;
+	row[track_cols.selected] = selected;
 	row[track_cols.label] = route->name();
 	row[track_cols.route] = route;
 	row[track_cols.order_key] = route->presentation_info().order();

@@ -256,7 +256,7 @@ class TrackExportChannelSelector : public ExportChannelSelector
   private:
 
 	void fill_list();
-	void add_track (boost::shared_ptr<ARDOUR::Route> route);
+	void add_track (boost::shared_ptr<ARDOUR::Route> route, bool selected);
 	void update_config();
 	ChannelConfigList configs;
 
