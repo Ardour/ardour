@@ -337,23 +337,23 @@ AutomationControl::commit_transaction (bool did_write)
 
 /* take control-value and return UI range [0..1] */
 double
-AutomationControl::internal_to_interface (double val) const
+AutomationControl::internal_to_interface (double val, bool rotary) const
 {
 	// XXX maybe optimize. _desc.from_interface() has
 	// a switch-statement depending on AutomationType.
-	return _desc.to_interface (val);
+	return _desc.to_interface (val, rotary);
 }
 
 /* map GUI range [0..1] to control-value */
 double
-AutomationControl::interface_to_internal (double val) const
+AutomationControl::interface_to_internal (double val, bool rotary) const
 {
 	if (!isfinite_local (val)) {
 		assert (0);
 		val = 0;
 	}
 	// XXX maybe optimize. see above.
-	return _desc.from_interface (val);
+	return _desc.from_interface (val, rotary);
 }
 
 std::string

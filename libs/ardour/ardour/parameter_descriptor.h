@@ -61,8 +61,12 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 	 * interface value, using settings from Evoral::ParameterDescriptor.
 	 *
 	 * default for AutomationControl::internal_to_interface ();
+	 *
+	 * @param v the control-value to convert
+	 * @param rotary set to true if the GUI control is a rotary knob
+	 * @return interface value in range 0..1
 	 */
-	float to_interface (float) const;
+	float to_interface (float v, bool rotary = false) const;
 
 	/** normalized [0..1] to control-value range
 	 *
@@ -70,8 +74,12 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 	 * using settings from Evoral::ParameterDescriptor.
 	 *
 	 * default for AutomationControl::interface_to_internal ();
+	 *
+	 * @param v the value in range 0..1 to on convert
+	 * @param rotary set to true if the GUI control is a rotary knob
+	 * @return control-value in range lower..upper
 	 */
-	float from_interface (float) const;
+	float from_interface (float v, bool rotary = false) const;
 
 	bool  is_linear () const;
 	float compute_delta (float from, float to) const;

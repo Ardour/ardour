@@ -113,8 +113,8 @@ public:
 	double normal()  const { return _desc.normal; }
 	bool   toggled() const { return _desc.toggled; }
 
-	double internal_to_interface (double i) const;
-	double interface_to_internal (double i) const;
+	double internal_to_interface (double, bool rotary = false) const;
+	double interface_to_internal (double, bool rotary = false) const;
 
 	virtual std::string get_user_string() const;
 

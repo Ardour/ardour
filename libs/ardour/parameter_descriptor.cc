@@ -306,7 +306,7 @@ ParameterDescriptor::midi_note_num (const std::string& name)
 }
 
 float
-ParameterDescriptor::to_interface (float val) const
+ParameterDescriptor::to_interface (float val, bool rotary) const
 {
 	val = std::min (upper, std::max (lower, val));
 	switch(type) {
@@ -323,6 +323,12 @@ ParameterDescriptor::to_interface (float val) const
 			}
 			break;
 		case PanAzimuthAutomation:
+			if (rotary) {
+				val = val;
+			} else {
+				val = 1.0 - val;
+			}
+			break;
 		case PanElevationAutomation:
 			val = val;
 			break;
@@ -356,7 +362,7 @@ ParameterDescriptor::to_interface (float val) const
 }
 
 float
-ParameterDescriptor::from_interface (float val) const
+ParameterDescriptor::from_interface (float val, bool rotary) const
 {
 	val = std::max (0.f, std::min (1.f, val));
 
@@ -374,6 +380,12 @@ ParameterDescriptor::from_interface (float val) const
 			}
 			break;
 		case PanAzimuthAutomation:
+			if (rotary) {
+				val = val;
+			} else {
+				val = 1.0 - val;
+			}
+			break;
 		case PanElevationAutomation:
 			 val = val;
 			break;

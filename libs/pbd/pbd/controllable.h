@@ -119,8 +119,15 @@ public:
 	virtual double get_save_value () const { return get_value(); }
 
 	/** Conversions between `internal', 'interface', and 'user' values */
-	virtual double internal_to_interface (double i) const {return  (i-lower())/(upper() - lower());}  //by default, the interface range is just a linear interpolation between lower and upper values
-	virtual double interface_to_internal (double i) const {return lower() + i*(upper() - lower());}
+	virtual double internal_to_interface (double i, bool rotary = false) const {
+		/* by default, the interface range is just a linear
+		 * interpolation between lower and upper values */
+		return  (i-lower())/(upper() - lower());
+	}
+
+	virtual double interface_to_internal (double i, bool rotary = false) const {
+		return lower() + i*(upper() - lower());
+	}
 
 	/** Get and Set `interface' value  (typically, fraction of knob travel) */
 	virtual float get_interface() const { return (internal_to_interface(get_value())); }
