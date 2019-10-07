@@ -146,14 +146,17 @@ AutomationController::create(const Evoral::Parameter&             param,
                              boost::shared_ptr<AutomationControl> ac,
                              bool use_knob)
 {
-	const double lo        = ac->internal_to_interface(desc.lower);
-	const double up        = ac->internal_to_interface(desc.upper);
-	const double normal    = ac->internal_to_interface(desc.normal);
-	const double smallstep = ac->internal_to_interface(desc.lower + desc.smallstep) - lo;
-	const double largestep = ac->internal_to_interface(desc.lower + desc.largestep) - lo;
+	const double lo        = ac->internal_to_interface(desc.lower, true);
+	const double up        = ac->internal_to_interface(desc.upper, true);
+	const double normal    = ac->internal_to_interface(desc.normal, true);
+	const double smallstep = fabs (ac->internal_to_interface(desc.lower + desc.smallstep, true) - lo);
+	const double largestep = fabs (ac->internal_to_interface(desc.lower + desc.largestep, true) - lo);
+
+	assert (std::min(lo, up) == 0);
+	assert (std::max(lo, up) == 1.0);
 
 	Gtk::Adjustment* adjustment = manage (
-		new Gtk::Adjustment (normal, lo, up, smallstep, largestep));
+		new Gtk::Adjustment (normal, std::min(lo, up), std::max(lo, up), smallstep, largestep));
 
 	assert (ac);
 	assert(ac->parameter() == param);
@@ -170,7 +173,7 @@ AutomationController::automation_state_changed ()
 void
 AutomationController::display_effective_value ()
 {
-	double const interface_value = _controllable->internal_to_interface(_controllable->get_value());
+	double const interface_value = _controllable->internal_to_interface(_controllable->get_value(), true);
 
 	if (_grabbed) {
 		/* we cannot use _controllable->touching() here
@@ -191,7 +194,7 @@ void
 AutomationController::value_adjusted ()
 {
 	if (!_ignore_change) {
-		const double new_val = _controllable->interface_to_internal(_adjustment->get_value());
+		const double new_val = _controllable->interface_to_internal(_adjustment->get_value(), true);
 		if (_controllable->user_double() != new_val) {
 			_controllable->set_value (new_val, Controllable::NoGroup);
 		}
