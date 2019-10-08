@@ -495,7 +495,7 @@ LuaWindow::save_script ()
 	// 5) construct filename -- TODO ask user for name, ask to replace file.
 	do {
 		char tme[80];
-		char buf[80];
+		char buf[100];
 		time_t t = time(0);
 		struct tm * timeinfo = localtime (&t);
 		strftime (tme, sizeof(tme), "%s", timeinfo);
