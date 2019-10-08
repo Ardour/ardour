@@ -44,12 +44,13 @@ public:
 
 	static bool required ();
 
-	gint response () const {
-		return  _response;
-	}
+	/* It's not a dialog so we have to fake this to make it behave like a
+	 * dialog. This allows the StartupFSM to treat everything similarly.
+	 */
+
+	sigc::signal1<void,int>& signal_response() { return _signal_response; }
 
 private:
-	gint _response;
 	bool config_modified;
 	bool new_user;
 
@@ -57,8 +58,6 @@ private:
 	void on_cancel ();
 	bool on_delete_event (GdkEventAny*);
 	void discover_plugins ();
-
-	static ArdourStartup *the_startup;
 
 	Glib::RefPtr<Gdk::Pixbuf> icon_pixbuf;
 
@@ -115,6 +114,8 @@ private:
 	gint final_page_index;
 
 	void move_along_now ();
+
+	sigc::signal1<void,int> _signal_response;
 };
 
 #endif /* __gtk2_ardour_startup_h__ */

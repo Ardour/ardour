@@ -69,11 +69,8 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
-ArdourStartup* ArdourStartup::the_startup = 0;
-
 ArdourStartup::ArdourStartup ()
-	: _response (RESPONSE_OK)
-	, config_modified (false)
+	: config_modified (false)
 	, default_dir_chooser (0)
 	, monitor_via_hardware_button (string_compose (_("Use an external mixer or the hardware mixer of your audio interface.\n"
 							 "%1 will play NO role in monitoring"), PROGRAM_NAME))
@@ -115,8 +112,6 @@ ArdourStartup::ArdourStartup ()
 	setup_monitoring_choice_page ();
 	setup_monitor_section_choice_page ();
 	setup_final_page ();
-
-	the_startup = this;
 }
 
 ArdourStartup::~ArdourStartup ()
@@ -452,15 +447,13 @@ ArdourStartup::discover_plugins () {
 void
 ArdourStartup::on_cancel ()
 {
-	_response = RESPONSE_CANCEL;
-	gtk_main_quit ();
+	_signal_response (int (RESPONSE_CANCEL));
 }
 
 bool
 ArdourStartup::on_delete_event (GdkEventAny*)
 {
-	_response = RESPONSE_CLOSE;
-	gtk_main_quit ();
+	_signal_response (int (RESPONSE_CLOSE));
 	return true;
 }
 
@@ -501,8 +494,7 @@ ArdourStartup::on_apply ()
 
 	}
 
-	_response = RESPONSE_OK;
-	gtk_main_quit ();
+	_signal_response (int (RESPONSE_OK));
 }
 
 
