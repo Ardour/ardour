@@ -699,6 +699,7 @@ struct RouteProcessorChange {
 };
 
 struct BusProfile {
+	BusProfile() : master_out_channels (0) {}
 	uint32_t master_out_channels; /* how many channels for the master bus, 0: no master bus */
 };
 
