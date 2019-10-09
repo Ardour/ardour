@@ -186,7 +186,7 @@ SessionDialog::clear_given ()
 }
 
 uint32_t
-SessionDialog::meta_master_bus_profile (std::string script_path) const
+SessionDialog::meta_master_bus_profile (std::string script_path)
 {
 	if (!Glib::file_test (script_path, Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR)) {
 		return UINT32_MAX;

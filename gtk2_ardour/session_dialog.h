@@ -191,7 +191,7 @@ private:
 	void disable_plugins_clicked ();
 
 	/* meta-template */
-	uint32_t meta_master_bus_profile (std::string script) const;
+	static uint32_t meta_master_bus_profile (std::string script);
 
 	/* always there */
 
