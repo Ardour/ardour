@@ -36,11 +36,11 @@
 
 class EngineControl;
 
-class ArdourStartup : public Gtk::Assistant
+class NewUserWizard : public Gtk::Assistant
 {
 public:
-	ArdourStartup ();
-	~ArdourStartup ();
+	NewUserWizard ();
+	~NewUserWizard ();
 
 	static bool required ();
 

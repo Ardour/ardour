@@ -71,7 +71,6 @@
 #include "pingback.h"
 #include "public_editor.h"
 #include "splash.h"
-#include "startup.h"
 
 #include "pbd/i18n.h"
 

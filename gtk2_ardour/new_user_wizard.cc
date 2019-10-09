@@ -55,7 +55,7 @@
 
 #include "gtkmm2ext/utils.h"
 
-#include "startup.h"
+#include "new_user_wizard.h"
 #include "opts.h"
 #include "ui_config.h"
 #include "pbd/i18n.h"
@@ -69,7 +69,7 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
-ArdourStartup::ArdourStartup ()
+NewUserWizard::NewUserWizard ()
 	: config_modified (false)
 	, default_dir_chooser (0)
 	, monitor_via_hardware_button (string_compose (_("Use an external mixer or the hardware mixer of your audio interface.\n"
@@ -114,12 +114,12 @@ ArdourStartup::ArdourStartup ()
 	setup_final_page ();
 }
 
-ArdourStartup::~ArdourStartup ()
+NewUserWizard::~NewUserWizard ()
 {
 }
 
 bool
-ArdourStartup::required ()
+NewUserWizard::required ()
 {
 	if (Glib::file_test (ARDOUR::been_here_before_path (), Glib::FILE_TEST_EXISTS)) {
 		return false;
@@ -129,7 +129,7 @@ ArdourStartup::required ()
 }
 
 void
-ArdourStartup::setup_new_user_page ()
+NewUserWizard::setup_new_user_page ()
 {
 	Label* foomatic = manage (new Label);
 
@@ -179,7 +179,7 @@ using the program.</span> \
 	cbox->show ();
 
 	guess_default_ui_scale ();
-	ui_font_scale.signal_changed ().connect (sigc::mem_fun (*this, &ArdourStartup::rescale_ui));
+	ui_font_scale.signal_changed ().connect (sigc::mem_fun (*this, &NewUserWizard::rescale_ui));
 #endif
 
 	foomatic->show ();
@@ -193,7 +193,7 @@ using the program.</span> \
 }
 
 void
-ArdourStartup::rescale_ui ()
+NewUserWizard::rescale_ui ()
 {
 	int rn = ui_font_scale.get_active_row_number ();
 	if (rn < 0 ) {
@@ -205,7 +205,7 @@ ArdourStartup::rescale_ui ()
 }
 
 void
-ArdourStartup::guess_default_ui_scale ()
+NewUserWizard::guess_default_ui_scale ()
 {
 	gint width = 0;
 	gint height = 0;
@@ -240,7 +240,7 @@ ArdourStartup::guess_default_ui_scale ()
 }
 
 void
-ArdourStartup::default_dir_changed ()
+NewUserWizard::default_dir_changed ()
 {
 	Config->set_default_session_parent_dir (default_dir_chooser->get_filename());
 	// make new session folder chooser point to the new default
@@ -249,13 +249,13 @@ ArdourStartup::default_dir_changed ()
 }
 
 void
-ArdourStartup::config_changed ()
+NewUserWizard::config_changed ()
 {
 	config_modified = true;
 }
 
 void
-ArdourStartup::setup_first_time_config_page ()
+NewUserWizard::setup_first_time_config_page ()
 {
 	default_dir_chooser = manage (new FileChooserButton (string_compose (_("Default folder for %1 sessions"), PROGRAM_NAME),
 							     FILE_CHOOSER_ACTION_SELECT_FOLDER));
@@ -281,7 +281,7 @@ Where would you like new %1 sessions to be stored by default?\n\n\
 	cerr << "set default folder to " << poor_mans_glob (Config->get_default_session_parent_dir()) << endl;
 	Gtkmm2ext::add_volume_shortcuts (*default_dir_chooser);
 	default_dir_chooser->set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
-	default_dir_chooser->signal_current_folder_changed().connect (sigc::mem_fun (*this, &ArdourStartup::default_dir_changed));
+	default_dir_chooser->signal_current_folder_changed().connect (sigc::mem_fun (*this, &NewUserWizard::default_dir_changed));
 	default_dir_chooser->show ();
 
 	vbox->show_all ();
@@ -297,7 +297,7 @@ Where would you like new %1 sessions to be stored by default?\n\n\
 }
 
 void
-ArdourStartup::setup_monitoring_choice_page ()
+NewUserWizard::setup_monitoring_choice_page ()
 {
 	mon_vbox.set_spacing (18);
 	mon_vbox.set_border_width (24);
@@ -332,8 +332,8 @@ Please choose whichever one is right for your setup.\n\n\
 	set_page_title (mon_vbox, _("Monitoring Choices"));
 	set_page_header_image (mon_vbox, icon_pixbuf);
 
-	monitor_via_hardware_button.signal_toggled().connect (sigc::mem_fun (*this, &ArdourStartup::config_changed));
-	monitor_via_ardour_button.signal_toggled().connect (sigc::mem_fun (*this, &ArdourStartup::config_changed));
+	monitor_via_hardware_button.signal_toggled().connect (sigc::mem_fun (*this, &NewUserWizard::config_changed));
+	monitor_via_ardour_button.signal_toggled().connect (sigc::mem_fun (*this, &NewUserWizard::config_changed));
 
 	/* user could just click on "Forward" if default
 	 * choice is correct.
@@ -343,7 +343,7 @@ Please choose whichever one is right for your setup.\n\n\
 }
 
 void
-ArdourStartup::setup_monitor_section_choice_page ()
+NewUserWizard::setup_monitor_section_choice_page ()
 {
 	mon_sec_vbox.set_spacing (18);
 	mon_sec_vbox.set_border_width (24);
@@ -388,8 +388,8 @@ greater control in monitoring without affecting the mix."));
 		no_monitor_section_button.set_active (true);
 	}
 
-	use_monitor_section_button.signal_toggled().connect (sigc::mem_fun (*this, &ArdourStartup::config_changed));
-	no_monitor_section_button.signal_toggled().connect (sigc::mem_fun (*this, &ArdourStartup::config_changed));
+	use_monitor_section_button.signal_toggled().connect (sigc::mem_fun (*this, &NewUserWizard::config_changed));
+	no_monitor_section_button.signal_toggled().connect (sigc::mem_fun (*this, &NewUserWizard::config_changed));
 
 	monitor_section_label.set_markup(_("<i>You can change this preference at any time via the Preferences dialog.\nYou can also add or remove the monitor section to/from any session.</i>\n\n\
 <i>If you do not understand what this is about, just accept the default.</i>"));
@@ -413,11 +413,11 @@ greater control in monitoring without affecting the mix."));
 }
 
 void
-ArdourStartup::setup_final_page ()
+NewUserWizard::setup_final_page ()
 {
 	string msg = string_compose (_("%1 is ready for use"), PROGRAM_NAME);
 
-	plugin_disco_button.signal_clicked().connect (sigc::mem_fun(*this, &ArdourStartup::discover_plugins));
+	plugin_disco_button.signal_clicked().connect (sigc::mem_fun(*this, &NewUserWizard::discover_plugins));
 	plugin_disco_button.set_label (_("Scan for Plugins"));
 	plugin_disco_button.show ();
 
@@ -439,26 +439,26 @@ ArdourStartup::setup_final_page ()
 }
 
 void
-ArdourStartup::discover_plugins () {
+NewUserWizard::discover_plugins () {
 	plugin_disco_button.set_sensitive (false);
 	PluginManager::instance().refresh();
 }
 
 void
-ArdourStartup::on_cancel ()
+NewUserWizard::on_cancel ()
 {
 	_signal_response (int (RESPONSE_CANCEL));
 }
 
 bool
-ArdourStartup::on_delete_event (GdkEventAny*)
+NewUserWizard::on_delete_event (GdkEventAny*)
 {
 	_signal_response (int (RESPONSE_CLOSE));
 	return true;
 }
 
 void
-ArdourStartup::on_apply ()
+NewUserWizard::on_apply ()
 {
 	/* file-chooser button does not emit 'current_folder_changed' signal
 	 * when a folder from the dropdown or the sidebar is chosen.
@@ -499,7 +499,7 @@ ArdourStartup::on_apply ()
 
 
 void
-ArdourStartup::move_along_now ()
+NewUserWizard::move_along_now ()
 {
 	on_apply ();
 }
