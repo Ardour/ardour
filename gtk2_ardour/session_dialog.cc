@@ -319,6 +319,13 @@ SessionDialog::session_template_name ()
 	return string();
 }
 
+void
+SessionDialog::clear_name ()
+{
+	recent_session_display.get_selection()->unselect_all();
+	new_name_entry.set_text (string());
+}
+
 std::string
 SessionDialog::session_name (bool& should_be_new)
 {

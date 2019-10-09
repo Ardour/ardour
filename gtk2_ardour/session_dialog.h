@@ -69,6 +69,7 @@ public:
 		_provided_session_name = session_name;
 		_provided_session_path = session_path;
 	}
+	void clear_name ();
 
 private:
 	bool new_only;
