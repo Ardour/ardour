@@ -3244,7 +3244,7 @@ EngineControl::connect_disconnect_click()
 		}
 		start_engine ();
 		if (!ARDOUR_UI::instance()->the_session ()) {
-			ArdourDialog::on_response (RESPONSE_OK);
+			ArdourDialog::response (RESPONSE_OK);
 		}
 	}
 }
