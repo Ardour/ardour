@@ -305,6 +305,9 @@ LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
 	if (pi->controls().size() > 0) {
 		_ardour_buttons_box.pack_end (reset_button, false, false, 4);
 	}
+	if (has_descriptive_presets ()) {
+		_ardour_buttons_box.pack_end (preset_browser_button, false, false);
+	}
 	_ardour_buttons_box.pack_end (delete_button, false, false);
 	_ardour_buttons_box.pack_end (save_button, false, false);
 	_ardour_buttons_box.pack_end (add_button, false, false);

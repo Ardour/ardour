@@ -431,7 +431,9 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	smaller_hbox->pack_start (add_button, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
 	smaller_hbox->pack_start (delete_button, false, false);
-
+	if (has_descriptive_presets ()) {
+		smaller_hbox->pack_start (preset_browser_button, false, false);
+	}
 #if 0
 	/* one day these might be useful with an AU plugin, but not yet */
 	smaller_hbox->pack_start (automation_mode_label, false, false);

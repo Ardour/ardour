@@ -45,6 +45,9 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> insert, boost:
 	if (insert->controls().size() > 0) {
 		box->pack_end (reset_button, false, false, 4);
 	}
+	if (has_descriptive_presets ()) {
+		box->pack_end (preset_browser_button, false, false);
+	}
 	box->pack_end (delete_button, false, false);
 	box->pack_end (save_button, false, false);
 	box->pack_end (add_button, false, false);

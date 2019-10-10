@@ -115,6 +115,9 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	smaller_hbox->pack_start (add_button, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
 	smaller_hbox->pack_start (delete_button, false, false);
+	if (pi->controls().size() > 0 && has_descriptive_presets ()) {
+		smaller_hbox->pack_start (preset_browser_button, false, false);
+	}
 	if (pi->controls().size() > 0) {
 		smaller_hbox->pack_start (reset_button, false, false, 4);
 	}
