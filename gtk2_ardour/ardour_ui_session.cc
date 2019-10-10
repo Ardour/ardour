@@ -44,6 +44,7 @@
 #include "pbd/unwind.h"
 
 #include "gtkmm2ext/application.h"
+#include "gtkmm2ext/doi.h"
 
 #include "widgets/prompter.h"
 
@@ -127,75 +128,12 @@ ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& sess
 	return 0;
 }
 
+/** This is only ever used once Ardour is already running with a session
+ * loaded. The startup case is handled by StartupFSM
+ */
 void
-ARDOUR_UI::load_from_application_api (const std::string& path)
+ARDOUR_UI::start_session_load ()
 {
-	/* OS X El Capitan (and probably later) now somehow passes the command
-	   line arguments to an app via the openFile delegate protocol. Ardour
-	   already does its own command line processing, and having both
-	   pathways active causes crashes. So, if the command line was already
-	   set, do nothing here.
-	*/
-
-	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
-		return;
-	}
-
-	ARDOUR_COMMAND_LINE::session_name = path;
-
-	/* Cancel SessionDialog if it's visible to make OSX delegates work.
-	 *
-	 * ARDOUR_UI::starting connects app->ShouldLoad signal and then shows a SessionDialog
-	 * race-condition:
-	 *  - ShouldLoad does not arrive in time, ARDOUR_COMMAND_LINE::session_name is empty:
-	 *    -> ARDOUR_UI::get_session_parameters starts a SessionDialog.
-	 *  - ShouldLoad signal arrives, this function is called and sets ARDOUR_COMMAND_LINE::session_name
-	 *    -> SessionDialog is not displayed
-	 */
-
-	if (_session_dialog) {
-		std::string session_name = basename_nosuffix (ARDOUR_COMMAND_LINE::session_name);
-		std::string session_path = path;
-		if (Glib::file_test (session_path, Glib::FILE_TEST_IS_REGULAR)) {
-			session_path = Glib::path_get_dirname (session_path);
-		}
-		// signal the existing dialog in ARDOUR_UI::get_session_parameters()
-		_session_dialog->set_provided_session (session_name, session_path);
-		_session_dialog->response (RESPONSE_NONE);
-		_session_dialog->hide();
-		return;
-	}
-
-	int rv;
-	if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
-		/* /path/to/foo => /path/to/foo, foo */
-		rv = load_session (path, basename_nosuffix (path));
-	} else {
-		/* /path/to/foo/foo.ardour => /path/to/foo, foo */
-		rv =load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
-	}
-
-	// if load_session fails -> pop up SessionDialog.
-	if (rv) {
-		ARDOUR_COMMAND_LINE::session_name = "";
-
-		if (get_session_parameters (true, false)) {
-			exit (EXIT_FAILURE);
-		}
-	}
-}
-
-/** @param quit_on_cancel true if exit() should be called if the user clicks `cancel' in the new session dialog */
-int
-ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, string load_template)
-{
-	string session_name;
-	string session_path;
-	string template_name;
-	int ret = -1;
-	bool likely_new = false;
-	bool cancel_not_quit;
-
 	/* deal with any existing DIRTY session now, rather than later. don't
 	 * treat a non-dirty session this way, so that it stays visible
 	 * as we bring up the new session dialog.
@@ -205,251 +143,165 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		ARDOUR_UI::instance()->video_timeline->sync_session_state();
 	}
 
-	/* if there is already a session, relabel the button
-	   on the SessionDialog so that we don't Quit directly
-	*/
-	cancel_not_quit = (_session != 0) && !quit_on_cancel;
-
 	if (_session && _session->dirty()) {
 		if (unload_session (false)) {
 			/* unload cancelled by user */
-			return 0;
-		}
-		ARDOUR_COMMAND_LINE::session_name = "";
-	}
-
-	if (!load_template.empty()) {
-		should_be_new = true;
-		template_name = load_template;
-	}
-
-	session_path = ARDOUR_COMMAND_LINE::session_name;
-
-	if (!session_path.empty()) {
-
-		if (Glib::file_test (session_path.c_str(), Glib::FILE_TEST_EXISTS)) {
-
-			session_name = basename_nosuffix (ARDOUR_COMMAND_LINE::session_name);
-
-			if (Glib::file_test (session_path.c_str(), Glib::FILE_TEST_IS_REGULAR)) {
-				/* session/snapshot file, change path to be dir */
-				session_path = Glib::path_get_dirname (session_path);
-			}
-		} else {
-
-			/* session (file or folder) does not exist ... did the
-			 * user give us a path or just a name?
-			 */
-
-			if (session_path.find (G_DIR_SEPARATOR) == string::npos) {
-				/* user gave session name with no path info, use
-				   default session folder.
-				*/
-				session_name = ARDOUR_COMMAND_LINE::session_name;
-				session_path = Glib::build_filename (Config->get_default_session_parent_dir (), session_name);
-			} else {
-				session_name = basename_nosuffix (ARDOUR_COMMAND_LINE::session_name);
-			}
+			return;
 		}
 	}
 
-	SessionDialog session_dialog (should_be_new, session_name, session_path, load_template, cancel_not_quit);
+	SessionDialog* session_dialog = new SessionDialog (false, string(), Config->get_default_session_parent_dir(), string(), true);
+	session_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::session_dialog_response_handler), session_dialog));
+	session_dialog->present ();
+}
 
-	_session_dialog = &session_dialog;
-	while (ret != 0) {
+void
+ARDOUR_UI::session_dialog_response_handler (int response, SessionDialog* session_dialog)
+{
+	string session_name;
+	string session_path;
+	string template_name;
+	bool likely_new = false;
 
-		if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
+	session_path = "";
+	session_name = "";
 
-			/* if they named a specific statefile, use it, otherwise they are
-			   just giving a session folder, and we want to use it as is
-			   to find the session.
-			*/
+	switch (response) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
+		return; /* back to main event loop */
+	}
 
-			string::size_type suffix = ARDOUR_COMMAND_LINE::session_name.find (statefile_suffix);
+	session_name = session_dialog->session_name (likely_new);
+	session_path = session_dialog->session_folder ();
 
-			if (suffix != string::npos) {
-				session_path = Glib::path_get_dirname (ARDOUR_COMMAND_LINE::session_name);
-				session_name = ARDOUR_COMMAND_LINE::session_name.substr (0, suffix);
-				session_name = Glib::path_get_basename (session_name);
-			} else {
-				session_path = ARDOUR_COMMAND_LINE::session_name;
-				session_name = Glib::path_get_basename (ARDOUR_COMMAND_LINE::session_name);
-			}
-		} else {
-			session_path = "";
-			session_name = "";
-			session_dialog.clear_given ();
+	if (nsm) {
+		likely_new = true;
+	}
+
+	/* could be an archived session, so test for that and use the
+	 * result if it was
+	 */
+
+	if (!likely_new) {
+		int rv = ARDOUR::inflate_session (session_name, Config->get_default_session_parent_dir(), session_path, session_name);
+
+		if (rv < 0) {
+			MessageDialog msg (*session_dialog, string_compose (_("Extracting session-archive failed: %1"), inflate_error (rv)));
+			msg.run ();
+			return; /* back to main event loop */
+		} else if (rv == 0) {
+			session_dialog->set_provided_session (session_name, session_path);
 		}
+	}
 
-		if (session_name.empty()) {
-			/* need the dialog to get the name (at least) from the user */
-			switch (session_dialog.run()) {
-			case RESPONSE_ACCEPT:
-				break;
-			case RESPONSE_NONE:
-				/* this is used for async * app->ShouldLoad(). */
-				continue; // while loop
-				break;
-			default:
-				if (quit_on_cancel) {
-					ARDOUR_UI::finish ();
-					Gtkmm2ext::Application::instance()->cleanup();
-					ARDOUR::cleanup ();
-					pthread_cancel_all ();
-					return -1; // caller is responsible to call exit()
-				} else {
-					return ret;
-				}
-			}
+	string::size_type suffix = session_name.find (statefile_suffix);
 
-			session_dialog.hide ();
-		}
+	if (suffix != string::npos) {
+		session_name = session_name.substr (0, suffix);
+	}
 
-		/* if we run the startup dialog again, offer more than just "new session" */
+	/* this shouldn't happen, but we catch it just in case it does */
 
-		should_be_new = false;
+	if (session_name.empty()) {
+		return; /* back to main event loop */
+	}
 
-		session_name = session_dialog.session_name (likely_new);
-		session_path = session_dialog.session_folder ();
+	if (session_dialog->use_session_template()) {
+		template_name = session_dialog->session_template_name();
+		_session_is_new = true;
+	}
 
-		if (nsm) {
-			likely_new = true;
-		}
-
-		if (!likely_new) {
-			int rv = ARDOUR::inflate_session (session_name,
-					Config->get_default_session_parent_dir(), session_path, session_name);
-			if (rv < 0) {
-				MessageDialog msg (session_dialog,
-					string_compose (_("Extracting session-archive failed: %1"), inflate_error (rv)));
-				msg.run ();
-				continue;
-			}
-			else if (rv == 0) {
-				session_dialog.set_provided_session (session_name, session_path);
-			}
-		}
-
-		// XXX check archive, inflate
-		string::size_type suffix = session_name.find (statefile_suffix);
-
-		if (suffix != string::npos) {
-			session_name = session_name.substr (0, suffix);
-		}
-
-		/* this shouldn't happen, but we catch it just in case it does */
-
-		if (session_name.empty()) {
-			continue;
-		}
-
-		if (session_dialog.use_session_template()) {
-			template_name = session_dialog.session_template_name();
-			_session_is_new = true;
-		}
-
-		if (session_name[0] == G_DIR_SEPARATOR ||
+	if (session_name[0] == G_DIR_SEPARATOR ||
 #ifdef PLATFORM_WINDOWS
-		   (session_name.length() > 3 && session_name[1] == ':' && session_name[2] == G_DIR_SEPARATOR)
+	    (session_name.length() > 3 && session_name[1] == ':' && session_name[2] == G_DIR_SEPARATOR)
 #else
-		   (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == G_DIR_SEPARATOR) ||
-		   (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == G_DIR_SEPARATOR)
+	    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == G_DIR_SEPARATOR) ||
+	    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == G_DIR_SEPARATOR)
 #endif
 		)
-		{
+	{
 
-			/* absolute path or cwd-relative path specified for session name: infer session folder
-			   from what was given.
-			*/
+		/* absolute path or cwd-relative path specified for session name: infer session folder
+		   from what was given.
+		*/
 
-			session_path = Glib::path_get_dirname (session_name);
-			session_name = Glib::path_get_basename (session_name);
+		session_path = Glib::path_get_dirname (session_name);
+		session_name = Glib::path_get_basename (session_name);
 
-		} else {
+	} else {
 
-			session_path = session_dialog.session_folder();
+		session_path = session_dialog->session_folder();
 
-			char illegal = Session::session_name_is_legal (session_name);
+		char illegal = Session::session_name_is_legal (session_name);
 
-			if (illegal) {
-				MessageDialog msg (session_dialog,
-				                   string_compose (_("To ensure compatibility with various systems\n"
-				                                     "session names may not contain a '%1' character"),
-				                                   illegal));
-				msg.run ();
-				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
-				continue;
-			}
-		}
-
-		if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
-
-
-			if (likely_new && !nsm) {
-
-				std::string existing = Glib::build_filename (session_path, session_name);
-
-				if (!ask_about_loading_existing_session (existing)) {
-					ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
-					continue;
-				}
-			}
-
-			_session_is_new = false;
-
-		} else {
-
-			if (!likely_new) {
-				pop_back_splash (session_dialog);
-				MessageDialog msg (string_compose (_("There is no existing session at \"%1\""), session_path));
-				msg.run ();
-				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
-				continue;
-			}
-
-			char illegal = Session::session_name_is_legal(session_name);
-
-			if (illegal) {
-				pop_back_splash (session_dialog);
-				MessageDialog msg (session_dialog, string_compose(_("To ensure compatibility with various systems\n"
-				                                                    "session names may not contain a '%1' character"), illegal));
-				msg.run ();
-				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
-				continue;
-			}
-
-			_session_is_new = true;
-		}
-
-		if (!template_name.empty() && template_name.substr (0, 11) == "urn:ardour:") {
-
-			ret = build_session_from_dialog (session_dialog, session_path, session_name);
-			meta_session_setup (template_name.substr (11));
-
-		} else if (likely_new && template_name.empty()) {
-
-			ret = build_session_from_dialog (session_dialog, session_path, session_name);
-
-		} else {
-
-			ret = load_session (session_path, session_name, template_name);
-
-			if (ret == -2) {
-				/* not connected to the AudioEngine, so quit to avoid an infinite loop */
-				exit (EXIT_FAILURE);
-			}
-
-			/* clear this to avoid endless attempts to load the
-			   same session.
-			*/
-
-			ARDOUR_COMMAND_LINE::session_name = "";
+		if (illegal) {
+			MessageDialog msg (*session_dialog,
+			                   string_compose (_("To ensure compatibility with various systems\n"
+			                                     "session names may not contain a '%1' character"),
+			                                   illegal));
+			msg.run ();
+			return; /* back to main event loop */
 		}
 	}
 
-	_session_dialog = NULL;
+	if (Glib::file_test (session_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
 
-	return ret;
+
+		if (likely_new && !nsm) {
+
+			std::string existing = Glib::build_filename (session_path, session_name);
+
+			if (!ask_about_loading_existing_session (existing)) {
+				return; /* back to main event loop */
+			}
+		}
+
+		_session_is_new = false;
+
+	} else {
+
+		if (!likely_new) {
+			pop_back_splash (*session_dialog);
+			MessageDialog msg (string_compose (_("There is no existing session at \"%1\""), session_path));
+			msg.run ();
+			return; /* back to main event loop */
+		}
+
+		char illegal = Session::session_name_is_legal(session_name);
+
+		if (illegal) {
+			pop_back_splash (*session_dialog);
+			MessageDialog msg (*session_dialog, string_compose(_("To ensure compatibility with various systems\n"
+			                                                    "session names may not contain a '%1' character"), illegal));
+			msg.run ();
+			return; /* back to main event loop */
+
+		}
+
+		_session_is_new = true;
+	}
+
+
+	/* OK, parameters provided ... good to go. */
+
+	session_dialog->hide ();
+	delete_when_idle (session_dialog);
+
+	if (!template_name.empty() && template_name.substr (0, 11) == "urn:ardour:") {
+
+		build_session_from_dialog (*session_dialog, session_path, session_name);
+		meta_session_setup (template_name.substr (11));
+
+	} else if (likely_new) {
+
+		build_session_from_dialog (*session_dialog, session_path, session_name);
+
+	} else {
+
+		load_session (session_path, session_name, template_name);
+	}
 }
 
 void
@@ -463,11 +315,7 @@ ARDOUR_UI::close_session()
 		return;
 	}
 
-	ARDOUR_COMMAND_LINE::session_name = "";
-
-	if (get_session_parameters (true, false)) {
-		exit (EXIT_FAILURE);
-	}
+	start_session_load ();
 }
 
 
