@@ -499,7 +499,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 }
 
 int
-ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name, BusProfile* bus_profile)
+ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name, BusProfile const * bus_profile)
 {
 	Session *new_session;
 	int x;
