@@ -35,6 +35,7 @@
 
 #include <gtkmm.h>
 
+#include "pbd/basename.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/scoped_file_descriptor.h"
 #include "pbd/file_utils.h"
@@ -439,7 +440,8 @@ NewUserWizard::setup_final_page ()
 }
 
 void
-NewUserWizard::discover_plugins () {
+NewUserWizard::discover_plugins ()
+{
 	plugin_disco_button.set_sensitive (false);
 	PluginManager::instance().refresh();
 }
@@ -492,6 +494,42 @@ NewUserWizard::on_apply ()
 		*/
 		PBD::ScopedFileDescriptor fout (g_open (been_here_before_path ().c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666));
 
+	}
+
+	if (ARDOUR::Profile->get_mixbus () && Config->get_copy_demo_sessions ()) {
+		std::string dspd (Config->get_default_session_parent_dir());
+		Searchpath ds (ARDOUR::ardour_data_search_path());
+		ds.add_subdirectory_to_paths ("sessions");
+		vector<string> demos;
+		find_files_matching_pattern (demos, ds, ARDOUR::session_archive_suffix);
+
+		ARDOUR::RecentSessions rs;
+		ARDOUR::read_recent_sessions (rs);
+
+		for (vector<string>::iterator i = demos.begin(); i != demos.end (); ++i) {
+			/* "demo-session" must be inside "demo-session.<session_archive_suffix>" */
+			std::string name = basename_nosuffix (basename_nosuffix (*i));
+			std::string path = Glib::build_filename (dspd, name);
+			/* skip if session-dir already exists */
+			if (Glib::file_test(path.c_str(), Glib::FILE_TEST_IS_DIR)) {
+				continue;
+			}
+			/* skip sessions that are already in 'recent'.
+			 * eg. a new user changed <session-default-dir> shorly after installation
+			 */
+			for (ARDOUR::RecentSessions::iterator r = rs.begin(); r != rs.end(); ++r) {
+				if ((*r).first == name) {
+					continue;
+				}
+			}
+			try {
+				PBD::FileArchive ar (*i);
+				if (0 == ar.inflate (dspd)) {
+					store_recent_sessions (name, path);
+					info << string_compose (_("Copied Demo Session %1."), name) << endmsg;
+				}
+			} catch (...) {}
+		}
 	}
 
 	_signal_response (int (RESPONSE_OK));
