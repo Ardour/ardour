@@ -58,9 +58,9 @@ using std::vector;
 StartupFSM::StartupFSM (EngineControl& amd)
 	: session_existing_sample_rate (0)
 	, session_is_new (false)
-	, new_user (true /*NewUserWizard::required()*/)
+	, new_user (NewUserWizard::required())
 	, new_session (true)
-	, _state (NeedWizard)
+	, _state (new_user ? NeedWizard : NeedSessionPath)
 	, new_user_wizard (0)
 	, audiomidi_dialog (amd)
 	, session_dialog (0)
@@ -116,7 +116,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 	const bool new_session_required = (ARDOUR_COMMAND_LINE::new_session || (!ARDOUR::Profile->get_mixbus() && new_user));
 	int csp;
 
-	std::cerr << "SFSM state = " << _state << " r = " << response << " did " << dialog_id << std::endl;
+	std::cerr << "SFSM state = " << _state << " r = " << response << " did " << dialog_id << " nSR " << new_session_required << std::endl;
 
 	switch (_state) {
 	case NeedSessionPath:
@@ -184,6 +184,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 			switch (response) {
 			case RESPONSE_OK:
 			case RESPONSE_ACCEPT:
+				PBD::stacktrace (std::cerr, 40);
 				csp = check_session_parameters (new_session_required);
 				std::cerr << "csp = " << csp << std::endl;
 				switch (csp) {
@@ -291,6 +292,8 @@ StartupFSM::get_session_parameters_from_path (string const & path, string const 
 
 	if (Glib::file_test (path.c_str(), Glib::FILE_TEST_EXISTS)) {
 
+		session_is_new = false;
+
 		if (new_session_required) {
 			/* wait! it already exists */
 
@@ -306,14 +309,18 @@ StartupFSM::get_session_parameters_from_path (string const & path, string const 
 		if (Glib::file_test (path.c_str(), Glib::FILE_TEST_IS_REGULAR)) {
 			/* session/snapshot file, change path to be dir */
 			session_path = Glib::path_get_dirname (path);
+		} else {
+			session_path = path;
 		}
 
 		float sr;
 		SampleFormat fmt;
 		string program_version;
 
-		if (Session::get_info_from_path (session_path, sr, fmt, program_version)) {
-			/* exists but we can't read it */
+		const string statefile_path = Glib::build_filename (session_path, session_name + ARDOUR::statefile_suffix);
+		if (Session::get_info_from_path (statefile_path, sr, fmt, program_version)) {
+			/* exists but we can't read it correctly */
+			error << string_compose (_("Cannot get existing session information from %1"), statefile_path) << endmsg;
 			return false;
 		}
 
@@ -335,6 +342,7 @@ StartupFSM::get_session_parameters_from_path (string const & path, string const 
 		session_path = Glib::build_filename (Config->get_default_session_parent_dir (), session_name);
 	} else {
 		session_name = basename_nosuffix (path);
+		session_path = path;
 	}
 
 
@@ -389,6 +397,15 @@ StartupFSM::get_session_parameters_from_path (string const & path, string const 
 	 */
 
 	session_existing_sample_rate = 0;
+	session_is_new = true;
+
+	/* this is an arbitrary default value but since the user insists on
+	 * starting a new session from the command line, it will do as well as
+	 * any other possible value. I mean, seriously, what else could it be
+	 * by default?
+	 */
+
+	bus_profile.master_out_channels = 2;
 
 	return true;
 }
@@ -529,13 +546,21 @@ StartupFSM::check_session_parameters (bool must_be_new)
 	float sr;
 	SampleFormat fmt;
 	string program_version;
+	const string statefile_path = Glib::build_filename (session_path, session_name + ARDOUR::statefile_suffix);
 
-	if (!session_is_new && Session::get_info_from_path (session_path, sr, fmt, program_version)) {
-		/* exists but we can't read it */
-		return -1;
+	if (!session_is_new) {
+
+		if (Session::get_info_from_path (statefile_path, sr, fmt, program_version)) {
+			/* exists but we can't read it */
+			return -1;
+		}
+
+		session_existing_sample_rate = sr;
+
+	} else {
+
+		bus_profile.master_out_channels = session_dialog->master_channel_count ();
 	}
-
-	session_existing_sample_rate = sr;
 
 	return 0;
 }
