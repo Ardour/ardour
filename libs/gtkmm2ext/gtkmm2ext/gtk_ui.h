@@ -152,16 +152,6 @@ public:
 
 	Gtk::Main& main() const { return *theMain; }
 
-	template<class T> static bool idle_delete (T *obj) { delete obj; return false; }
-	template<class T> static void delete_when_idle (T *obj) {
-		Glib::signal_idle().connect (bind (slot (&UI::idle_delete<T>), obj));
-	}
-
-	template<class T> void delete_in_self (T *obj) {
-		call_slot (boost::bind (&UI::delete_in_self, this, obj));
-	}
-
-
 	/* starting is sent just before we enter the main loop,
 	 * stopping just after we return from it (at the top level)
 	 */
