@@ -485,9 +485,8 @@ EngineControl::try_autostart ()
 bool
 EngineControl::start_engine ()
 {
-	if (push_state_to_backend(true) != 0) {
-		MessageDialog msg(*this,
-		                  ARDOUR::AudioEngine::instance()->get_last_backend_error());
+	if (push_state_to_backend (true) != 0) {
+		MessageDialog msg (*this, ARDOUR::AudioEngine::instance()->get_last_backend_error());
 		msg.run();
 		return false;
 	}
@@ -2757,6 +2756,14 @@ EngineControl::control_app_button_clicked ()
 }
 
 void
+EngineControl::on_response (int)
+{
+	/* we do nothing when our response signal is emitted ... that's the
+	 * responsibility of whoever displayed us.
+	 */
+}
+
+void
 EngineControl::start_stop_button_clicked ()
 {
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
@@ -2768,16 +2775,13 @@ EngineControl::start_stop_button_clicked ()
 	if (ARDOUR::AudioEngine::instance()->running()) {
 		ARDOUR::AudioEngine::instance()->stop ();
 	} else {
-		if (!ARDOUR_UI::instance()->the_session ()) {
-			pop_splash ();
-			hide ();
-			ARDOUR::GUIIdle ();
-		}
+		/* whoever displayed this dialog is expected to do its own
+		   check on whether or not the engine is running.
+		*/
 		start_engine ();
-		if (!ARDOUR_UI::instance()->the_session ()) {
-			ArdourDialog::on_response (RESPONSE_OK);
-		}
 	}
+
+	response (RESPONSE_OK);
 }
 
 void
@@ -3137,22 +3141,6 @@ EngineControl::use_latency_button_clicked ()
 		/* back to settings page */
 		notebook.set_current_page (0);
 	}
-}
-
-void
-EngineControl::on_response (int rid)
-{
-	/* this gets called if this Dialog is running under gtk_dialog_run()
-	   rather than in the toplevel loop. This happens during program
-	   startup.
-	*/
-
-	if (rid == RESPONSE_DELETE_EVENT) {
-		on_delete_event ((GdkEventAny*) 0);
-		return;
-	}
-
-	ArdourDialog::on_response (rid);
 }
 
 bool
