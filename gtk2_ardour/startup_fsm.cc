@@ -114,9 +114,6 @@ void
 StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_id)
 {
 	const bool new_session_required = (ARDOUR_COMMAND_LINE::new_session || (!ARDOUR::Profile->get_mixbus() && new_user));
-	int csp;
-
-	std::cerr << "SFSM state = " << _state << " r = " << response << " did " << dialog_id << " nSR " << new_session_required << std::endl;
 
 	switch (_state) {
 	case NeedSessionPath:
@@ -184,10 +181,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 			switch (response) {
 			case RESPONSE_OK:
 			case RESPONSE_ACCEPT:
-				PBD::stacktrace (std::cerr, 40);
-				csp = check_session_parameters (new_session_required);
-				std::cerr << "csp = " << csp << std::endl;
-				switch (csp) {
+				switch (check_session_parameters (new_session_required)) {
 				case -1:
 					/* Unrecoverable error */
 					_signal_response (ExitProgram);
@@ -227,16 +221,15 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 	case NeedEngineParams:
 		switch (dialog_id) {
 		case AudioMIDISetup:
-			std::cerr << "AMS done, r = " << response << std::endl;
 			switch (response) {
 			case RESPONSE_OK:
 			case RESPONSE_ACCEPT:
-				audiomidi_dialog.hide ();
-				current_dialog_connection.disconnect();
-				/* fallthru */
-			case RESPONSE_DELETE_EVENT:
 				if (AudioEngine::instance()->running()) {
+					audiomidi_dialog.hide ();
+					current_dialog_connection.disconnect();
 					_signal_response (LoadSession);
+				} else {
+					/* just keep going */
 				}
 				break;
 			default:
