@@ -55,8 +55,6 @@ public:
 	SessionDialog ();
 	~SessionDialog ();
 
-	void clear_given ();
-
 	std::string session_name (bool& should_be_new);
 	std::string session_folder ();
 
@@ -65,16 +63,11 @@ public:
 
 	uint32_t master_channel_count();
 
-	void set_provided_session(const std::string& session_name, const std::string& session_path) {
-		_provided_session_name = session_name;
-		_provided_session_path = session_path;
-	}
+	void set_provided_session (std::string const & name, std::string const & path);
 	void clear_name ();
 
 private:
 	bool new_only;
-	std::string _provided_session_name;
-	std::string _provided_session_path;
 
 	bool on_delete_event (GdkEventAny*);
 

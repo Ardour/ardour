@@ -81,8 +81,6 @@ using namespace ARDOUR_UI_UTILS;
 SessionDialog::SessionDialog (bool require_new, const std::string& session_name, const std::string& session_path, const std::string& template_name, bool cancel_not_quit)
 	: ArdourDialog (_("Session Setup"), true, true)
 	, new_only (require_new)
-	, _provided_session_name (session_name)
-	, _provided_session_path (session_path)
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
 	, _existing_session_chooser_used (false)
 {
@@ -148,8 +146,6 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 SessionDialog::SessionDialog ()
 	: ArdourDialog (_("Recent Sessions"), true, true)
 	, new_only (false)
-	, _provided_session_name ("")
-	, _provided_session_path ("")
 	, _existing_session_chooser_used (false) // caller must check should_be_new
 {
 	get_vbox()->set_spacing (6);
@@ -176,13 +172,6 @@ SessionDialog::SessionDialog ()
 
 SessionDialog::~SessionDialog()
 {
-}
-
-void
-SessionDialog::clear_given ()
-{
-	_provided_session_path = "";
-	_provided_session_name = "";
 }
 
 uint32_t
@@ -259,10 +248,6 @@ SessionDialog::use_session_template () const
 		return false;
 	}
 
-	if (!load_template_override.empty()) {
-		return true;
-	}
-
 	if (template_chooser.get_selection()->count_selected_rows() > 0) {
 		return true;
 	}
@@ -273,39 +258,6 @@ SessionDialog::use_session_template () const
 std::string
 SessionDialog::session_template_name ()
 {
-	if (!load_template_override.empty()) {
-		/* compare to SessionDialog::populate_session_templates */
-
-		/* compare by name (path may or may not be UTF-8) */
-		vector<TemplateInfo> templates;
-		find_session_templates (templates, false);
-		for (vector<TemplateInfo>::iterator x = templates.begin(); x != templates.end(); ++x) {
-			if ((*x).name == load_template_override) {
-				return (*x).path;
-			}
-		}
-
-		/* look up script by name */
-		LuaScriptList scripts (LuaScripting::instance ().scripts (LuaScriptInfo::SessionInit));
-		LuaScriptList& as (LuaScripting::instance ().scripts (LuaScriptInfo::EditorAction));
-		for (LuaScriptList::const_iterator s = as.begin(); s != as.end(); ++s) {
-			if ((*s)->subtype & LuaScriptInfo::SessionSetup) {
-				scripts.push_back (*s);
-			}
-		}
-		std::sort (scripts.begin(), scripts.end(), LuaScripting::Sorter());
-		for (LuaScriptList::const_iterator s = scripts.begin(); s != scripts.end(); ++s) {
-			if ((*s)->name == load_template_override) {
-				return "urn:ardour:" + (*s)->path;
-			}
-		}
-
-		/* this will produce a more or less meaninful error later:
-		 * "ERROR: Could not open session template [abs-path to user-config dir]"
-		 */
-		return Glib::build_filename (ARDOUR::user_template_directory (), load_template_override);
-	}
-
 	if (template_chooser.get_selection()->count_selected_rows() > 0) {
 
 		TreeIter const iter = template_chooser.get_selection()->get_selected();
@@ -329,14 +281,6 @@ SessionDialog::clear_name ()
 std::string
 SessionDialog::session_name (bool& should_be_new)
 {
-	if (!_provided_session_name.empty()) {
-		/* user gave name on cmdline/invocation. Did they also specify
-		   that it must be a new session?
-		*/
-		should_be_new = new_only;
-		return _provided_session_name;
-	}
-
 	/* Try recent session selection */
 
 	TreeIter iter = recent_session_display.get_selection()->get_selected();
@@ -365,10 +309,6 @@ SessionDialog::session_name (bool& should_be_new)
 std::string
 SessionDialog::session_folder ()
 {
-	if (!_provided_session_path.empty()) {
-		return _provided_session_path;
-	}
-
 	/* Try recent session selection */
 
 	TreeIter iter = recent_session_display.get_selection()->get_selected();
@@ -664,12 +604,6 @@ SessionDialog::setup_new_session_page ()
 	name_hbox->pack_start (*name_label, false, true);
 	name_hbox->pack_start (new_name_entry, true, true);
 
-	//check to see if a session name was provided on command line
-	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
-		new_name_entry.set_text  (Glib::path_get_basename (ARDOUR_COMMAND_LINE::session_name));
-		open_button->set_sensitive (true);
-	}
-
 	new_name_entry.signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::new_name_changed));
 	new_name_entry.signal_activate().connect (sigc::mem_fun (*this, &SessionDialog::new_name_activated));
 
@@ -681,10 +615,7 @@ SessionDialog::setup_new_session_page ()
 	folder_box->pack_start (*new_folder_label, false, false);
 	folder_box->pack_start (new_folder_chooser, true, true);
 
-	//determine the text in the new folder selector
-	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
-		new_folder_chooser.set_current_folder (poor_mans_glob (Glib::path_get_dirname (ARDOUR_COMMAND_LINE::session_name)));
-	} else if (ARDOUR_UI::instance()->the_session ()) {
+	if (ARDOUR_UI::instance()->the_session ()) {
 		// point the new session file chooser at the parent directory of the current session
 		string session_parent_dir = Glib::path_get_dirname(ARDOUR_UI::instance()->the_session()->path());
 		new_folder_chooser.set_current_folder (session_parent_dir);
@@ -1151,4 +1082,14 @@ SessionDialog::on_delete_event (GdkEventAny* ev)
 {
 	response (RESPONSE_CANCEL);
 	return ArdourDialog::on_delete_event (ev);
+}
+
+void
+SessionDialog::set_provided_session (string const & name, string const & path)
+{
+	/* Note: path is required to be the full path to the session file, not
+	   just the folder name
+	*/
+	new_name_entry.set_text (name);
+	existing_session_chooser.set_current_folder (Glib::path_get_dirname (path));
 }
