@@ -61,6 +61,7 @@ namespace ArdourWidgets { namespace ArdourIcon {
 		PsetAdd,
 		PsetSave,
 		PsetDelete,
+		PsetBrowse,
 		PluginReset,
 		PluginBypass,
 		PluginPinout,

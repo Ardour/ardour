@@ -1119,6 +1119,32 @@ static void icon_save_arrow_box (cairo_t *cr, const int width, const int height,
 	VECTORICONSTROKE (lw, fg_color);
 }
 
+static void icon_list_browse (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x = width * .5;
+	const double y = height * .5;
+	const double d = std::min (x, y) * .5;
+	const double r = std::min (x, y) * .1;
+	const double l = std::min (x, y) * .2;
+	const double lw = DEFAULT_LINE_WIDTH;
+
+  Gtkmm2ext::set_source_rgba (cr, fg_color);
+	cairo_arc (cr, x-d, y-d, r, 0, 2. * M_PI);
+	cairo_fill (cr);
+	cairo_arc (cr, x-d, y, r, 0, 2. * M_PI);
+	cairo_fill (cr);
+	cairo_arc (cr, x-d, y+d, r, 0, 2. * M_PI);
+	cairo_fill (cr);
+
+	cairo_move_to (cr, x - l, rint (y - d) + .5);
+	cairo_line_to (cr, x + d, rint (y - d) + .5);
+	cairo_move_to (cr, x - l, rint (y)     + .5);
+	cairo_line_to (cr, x + d, rint (y)     + .5);
+	cairo_move_to (cr, x - l, rint (y + d) + .5);
+	cairo_line_to (cr, x + d, rint (y + d) + .5);
+	VECTORICONSTROKE(lw, fg_color);
+}
+
 static void icon_on_off (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
 {
 	const double x = width * .5;
@@ -1397,6 +1423,9 @@ ArdourWidgets::ArdourIcon::render (cairo_t *cr,
 			break;
 		case PsetDelete:
 			icon_no_parking (cr, width, height, fg_color);
+			break;
+		case PsetBrowse:
+			icon_list_browse (cr, width, height, fg_color);
 			break;
 		case PluginReset:
 			icon_reset_knob (cr, width, height, fg_color);
