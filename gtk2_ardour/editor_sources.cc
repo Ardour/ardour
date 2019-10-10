@@ -873,6 +873,5 @@ EditorSources::get_state () const
 void
 EditorSources::set_state (const XMLNode & node)
 {
-	bool changed = false;
 
 }
