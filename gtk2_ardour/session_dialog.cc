@@ -728,8 +728,7 @@ SessionDialog::redisplay_recent_sessions ()
 
 	int session_snapshot_count = 0;
 
-	for (vector<std::string>::const_iterator i = session_directories.begin(); i != session_directories.end(); ++i)
-	{
+	for (vector<std::string>::const_iterator i = session_directories.begin(); i != session_directories.end(); ++i) {
 		std::vector<std::string> state_file_paths;
 
 		// now get available states for this session
