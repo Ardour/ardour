@@ -36,7 +36,7 @@ AudioBackend::get_error_string (ErrorCode error_code)
 	case BackendReinitializationError:
 		return _("Failed to reinitialize audio backend");
 	case AudioDeviceOpenError:
-		return _("Failed to open audio device");
+		return _("Failed to open audio device\n(Typically caused by hardware parameter settings)");
 	case AudioDeviceCloseError:
 		return _("Failed to close audio device");
 	case AudioDeviceInvalidError:
