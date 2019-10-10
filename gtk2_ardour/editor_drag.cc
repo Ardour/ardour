@@ -2878,8 +2878,6 @@ TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<Region
 void
 TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 {
-	TimeAxisView* tvp = &_primary->get_time_axis_view ();
-
 	samplepos_t const region_start = _primary->region()->position();
 	samplepos_t const region_end = _primary->region()->last_sample();
 	samplecnt_t const region_length = _primary->region()->length();
@@ -2939,7 +2937,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 {
 	RegionView* rv = _primary;
 
-	TimeAxisView* tvp = &_primary->get_time_axis_view ();
 	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
 	sampleoffset_t sample_delta = 0;
 
