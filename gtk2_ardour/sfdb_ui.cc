@@ -1711,7 +1711,6 @@ bool
 SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths)
 {
 	std::string tmpdir(Glib::build_filename (s->session_directory().sound_path(), "linktest"));
-	bool ret = false;
 
 	if (g_mkdir (tmpdir.c_str(), 0744)) {
 		if (errno != EEXIST) {
@@ -1730,11 +1729,9 @@ SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths
 		}
 	}
 
-	ret = true;
-
-  out:
 	g_rmdir (tmpdir.c_str());
-	return ret;
+
+	return true;
 }
 
 SoundFileChooser::SoundFileChooser (string title, ARDOUR::Session* s)
