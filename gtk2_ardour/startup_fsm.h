@@ -48,6 +48,7 @@ class StartupFSM : public sigc::trackable
 	~StartupFSM ();
 
 	void start ();
+	void end ();
 
 	std::string session_path;
 	std::string session_name;
@@ -63,14 +64,12 @@ class StartupFSM : public sigc::trackable
 	sigc::signal1<void,Result>& signal_response() { return _signal_response; }
 
 	bool brand_new_user() const { return new_user; }
-	
+
   private:
 	enum MainState {
 		NeedWizard,
 		NeedSessionPath,
-		NeedSessionSR,
 		NeedEngineParams,
-		NeedEngine
 	};
 
 	bool new_user;

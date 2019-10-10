@@ -103,6 +103,13 @@ StartupFSM::start ()
 	}
 }
 
+
+void
+StartupFSM::end()
+{
+
+}
+
 void
 StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_id)
 {
@@ -241,12 +248,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 		}
 
 	case NeedWizard:
-		break;
-
-	case NeedSessionSR:
-		break;
-
-	case NeedEngine:
+		/* ERROR */
 		break;
 	}
 }
