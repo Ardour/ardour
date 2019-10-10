@@ -338,7 +338,6 @@ static void icon_tool_audition (cairo_t *cr, const int width, const int height)
 	cairo_set_line_width (cr, 1.0);
 	cairo_stroke (cr);
 
-
 	cairo_save (cr);
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
 	cairo_set_source_rgba (cr, 1, 1, 1, 1);
@@ -487,7 +486,6 @@ static void icon_tav_expand (cairo_t *cr, const int width, const int height)
 	cairo_fill (cr);
 }
 
-
 /*****************************************************************************
  * Record enable (transport & track header).
  *
@@ -582,7 +580,6 @@ static void icon_rec_tape (cairo_t *cr, const int width, const int height, const
 	cairo_arc (cr, 0, 0, r *.15, 0, 2 * M_PI); // hole in the middle
 	cairo_fill (cr);
 }
-
 
 /*****************************************************************************
  * Transport buttons, foreground is always white
@@ -756,7 +753,6 @@ static void icon_transport_metronom (cairo_t *cr, const int width, const int hei
 	cairo_fill (cr);
 }
 
-
 /*****************************************************************************
  * Zoom: In "+", Out "-" and Full "[]"
  */
@@ -865,8 +861,6 @@ static void icon_zoom_expand (cairo_t *cr, const int width, const int height)
 	cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
 	cairo_fill (cr);
 }
-
-
 
 /*****************************************************************************
  * Misc buttons
@@ -1190,7 +1184,6 @@ static void icon_bypass (cairo_t *cr, const int width, const int height, const u
 	cairo_arc_negative (cr, x, y0, r, 0, M_PI);
 	VECTORICONSTROKE(pt, fg_color);
 }
-
 
 static void icon_reset_knob (cairo_t *cr, const int width, const int height, const uint32_t fg_color)
 {
