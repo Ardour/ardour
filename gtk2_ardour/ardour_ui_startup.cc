@@ -484,13 +484,21 @@ ARDOUR_UI::sfsm_response (StartupFSM::Result r)
 {
 	switch (r) {
 	case StartupFSM::ExitProgram:
+		cerr << "ExitProgram\n";
 		queue_finish ();
 		break;
 	case StartupFSM::LoadSession:
+		cerr << "LoadSession\n";
 		_initial_verbose_plugin_scan = false;
-		load_session_from_startup_fsm ();
+		if (load_session_from_startup_fsm () == 0) {
+			startup_fsm->end();
+			delete startup_fsm;
+			startup_fsm = 0;
+			startup_done ();
+		}
 		break;
 	case StartupFSM::DoNothing:
+		cerr << "DoNothing\n";
 		break;
 	}
 }
@@ -532,35 +540,32 @@ ARDOUR_UI::starting ()
 	return 0;
 }
 
-void
+int
 ARDOUR_UI::load_session_from_startup_fsm ()
 {
-	string session_path = startup_fsm->session_path;
-	string session_name = startup_fsm->session_name;
-	string session_template = startup_fsm->session_template;
-	bool   session_is_new = startup_fsm->session_is_new;
-	BusProfile bus_profile = startup_fsm->bus_profile;
+	const string session_path = startup_fsm->session_path;
+	const string session_name = startup_fsm->session_name;
+	const string session_template = startup_fsm->session_template;
+	const bool   session_is_new = startup_fsm->session_is_new;
+	const BusProfile bus_profile = startup_fsm->bus_profile;
 
 	std::cerr  << " loading from " << session_path << " as " << session_name << " templ " << session_template << " is_new " << session_is_new << " bp " << bus_profile.master_out_channels << std::endl;
 
 	if (session_is_new) {
 
 		if (build_session (session_path, session_name, &bus_profile)) {
+			return -1;
 		}
 
 		if (!session_template.empty() && session_template.substr (0, 11) == "urn:ardour:") {
 			meta_session_setup (session_template.substr (11));
 		}
 
-	} else {
-
-		int ret = load_session (session_path, session_name, session_template);
-
-		if (ret == -2) {
-			/* not connected to the AudioEngine, so quit to avoid an infinite loop */
-			exit (EXIT_FAILURE);
-		}
+		return 0;
 	}
+
+	return load_session (session_path, session_name, session_template);
+
 }
 
 void

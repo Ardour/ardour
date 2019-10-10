@@ -225,7 +225,7 @@ public:
 	void session_dialog_response_handler (int response, SessionDialog* session_dialog);
 	int  build_session_from_dialog (SessionDialog&, const std::string& session_name, const std::string& session_path);
 	bool ask_about_loading_existing_session (const std::string& session_path);
-	void load_session_from_startup_fsm ();
+	int load_session_from_startup_fsm ();
 
 	/// @return true if session was successfully unloaded.
 	int unload_session (bool hide_stuff = false);
