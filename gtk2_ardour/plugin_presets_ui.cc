@@ -67,6 +67,7 @@ PluginPresetsUI::PluginPresetsUI (boost::shared_ptr<PluginInsert> insert)
 	plugin->PresetAdded.connect (_preset_connections, invalidator (*this), boost::bind (&PluginPresetsUI::update_preset_list, this), gui_context ());
 	plugin->PresetRemoved.connect (_preset_connections, invalidator (*this), boost::bind (&PluginPresetsUI::update_preset_list, this), gui_context ());
 	plugin->PresetLoaded.connect (_preset_connections, invalidator (*this), boost::bind (&PluginPresetsUI::update_preset_list, this), gui_context ());
+	plugin->PresetDirty.connect (_preset_connections, invalidator (*this), boost::bind (&PluginPresetsUI::update_preset_list, this), gui_context ());
 
 	update_preset_list ();
 }
@@ -91,9 +92,11 @@ PluginPresetsUI::update_preset_list ()
 
 	bool found_active = false;
 
+	bool const modified = plugin->parameter_changed_since_last_preset ();
+
 	for (std::vector<Plugin::PresetRecord>::const_iterator i = presets.begin (); i != presets.end (); ++i) {
 		Gtk::TreeModel::Row row = *(_plugin_preset_model->append ());
-		if (p.uri == i->uri) {
+		if (p.uri == i->uri && !modified) {
 			row[_plugin_preset_columns.name] = string_compose ("<span weight=\"bold\"  background=\"green\">%1</span>", Gtkmm2ext::markup_escape_text (i->label));
 			found_active = true;
 		} else {
@@ -105,7 +108,7 @@ PluginPresetsUI::update_preset_list ()
 
 	{
 		Gtk::TreeModel::Row row = *(_plugin_preset_model->prepend ());
-		if (found_active) {
+		if (found_active || modified) {
 			row[_plugin_preset_columns.name] = _("(none)");
 		} else {
 			row[_plugin_preset_columns.name] = string_compose ("<span weight=\"bold\"  background=\"green\">%1</span>", _("(none)"));
@@ -122,7 +125,6 @@ PluginPresetsUI::update_preset_list ()
 			break;
 		}
 	}
-
 }
 
 void
