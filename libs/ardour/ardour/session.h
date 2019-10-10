@@ -205,7 +205,7 @@ public:
 	Session (AudioEngine&,
 	         const std::string& fullpath,
 	         const std::string& snapshot_name,
-	         BusProfile* bus_profile = 0,
+	         BusProfile const * bus_profile = 0,
 	         std::string mix_template = "");
 
 	virtual ~Session ();
@@ -1254,7 +1254,7 @@ protected:
 	double speed() const { return _transport_speed; }
 
 private:
-	int  create (const std::string& mix_template, BusProfile*);
+	int  create (const std::string& mix_template, BusProfile const *);
 	void destroy ();
 
 	static guint _name_id_counter;

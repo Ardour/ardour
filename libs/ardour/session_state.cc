@@ -573,7 +573,7 @@ Session::ensure_subdirs ()
  *  Caller must not hold process lock.
  */
 int
-Session::create (const string& session_template, BusProfile* bus_profile)
+Session::create (const string& session_template, BusProfile const * bus_profile)
 {
 	if (g_mkdir_with_parents (_path.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session folder \"%1\" (%2)"), _path, strerror (errno)) << endmsg;

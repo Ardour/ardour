@@ -171,7 +171,7 @@ const uint32_t Session::session_end_shift = 0;
 Session::Session (AudioEngine &eng,
                   const string& fullpath,
                   const string& snapshot_name,
-                  BusProfile* bus_profile,
+                  BusProfile const * bus_profile,
                   string mix_template)
 	: _playlists (new SessionPlaylists)
 	, _engine (eng)
