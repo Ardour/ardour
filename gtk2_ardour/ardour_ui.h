@@ -91,6 +91,7 @@
 #include "enums.h"
 #include "mini_timeline.h"
 #include "shuttle_control.h"
+#include "startup_fsm.h"
 #include "transport_control.h"
 #include "transport_control_ui.h"
 #include "visibility_group.h"
@@ -223,6 +224,7 @@ public:
 	int get_session_parameters (bool quit_on_cancel, bool should_be_new = false, std::string load_template = "");
 	int  build_session_from_dialog (SessionDialog&, const std::string& session_name, const std::string& session_path);
 	bool ask_about_loading_existing_session (const std::string& session_path);
+	void load_session_from_startup_fsm ();
 
 	/// @return true if session was successfully unloaded.
 	int unload_session (bool hide_stuff = false);
@@ -438,8 +440,12 @@ private:
 	static ARDOUR_UI *theArdourUI;
 	SessionDialog *_session_dialog;
 
+	StartupFSM* startup_fsm;
+
 	int starting ();
 	int nsm_init ();
+	void startup_done ();
+	void sfsm_response (StartupFSM::Result);
 
 	int  ask_about_saving_session (const std::vector<std::string>& actions);
 

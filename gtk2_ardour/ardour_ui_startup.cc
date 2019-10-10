@@ -57,7 +57,6 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/profile.h"
-#include "ardour/recent_sessions.h"
 
 #include "gtkmm2ext/application.h"
 
@@ -480,27 +479,37 @@ ARDOUR_UI::nsm_init ()
 	return 0;
 }
 
+void
+ARDOUR_UI::sfsm_response (StartupFSM::Result r)
+{
+	switch (r) {
+	case StartupFSM::ExitProgram:
+		queue_finish ();
+		break;
+	case StartupFSM::LoadSession:
+		_initial_verbose_plugin_scan = false;
+		load_session_from_startup_fsm ();
+		break;
+	case StartupFSM::DoNothing:
+		break;
+	}
+}
+
 int
 ARDOUR_UI::starting ()
 {
-	Application* app = Application::instance ();
-	bool brand_new_user = ArdourStartup::required ();
-
-	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
-	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::load_from_application_api));
-
 	if (ARDOUR_COMMAND_LINE::check_announcements) {
 		check_announcements ();
 	}
-
-	app->ready ();
 
 	/* we need to create this early because it may need to set the
 	 *  audio backend end up.
 	 */
 
+	EngineControl* amd;
+
 	try {
-		audio_midi_setup.get (true);
+		amd = dynamic_cast<EngineControl*> (audio_midi_setup.get (true));
 	} catch (...) {
 		std::cerr << "audio-midi engine setup failed."<< std::endl;
 		return -1;
@@ -510,68 +519,53 @@ ARDOUR_UI::starting ()
 		return -1;
 	} else  {
 
-		if (brand_new_user) {
+
+		startup_fsm = new StartupFSM (*amd);
+		startup_fsm->start ();
+		startup_fsm->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::sfsm_response));
+
+		if (startup_fsm->brand_new_user()) {
 			_initial_verbose_plugin_scan = true;
-			ArdourStartup s;
-			s.present ();
-			main().run();
-			s.hide ();
-			_initial_verbose_plugin_scan = false;
-			switch (s.response ()) {
-			case Gtk::RESPONSE_OK:
-				break;
-			default:
-				return -1;
-			}
-		}
-
-		// TODO: maybe IFF brand_new_user
-		if (ARDOUR::Profile->get_mixbus () && Config->get_copy_demo_sessions ()) {
-			std::string dspd (Config->get_default_session_parent_dir());
-			Searchpath ds (ARDOUR::ardour_data_search_path());
-			ds.add_subdirectory_to_paths ("sessions");
-			vector<string> demos;
-			find_files_matching_pattern (demos, ds, ARDOUR::session_archive_suffix);
-
-			ARDOUR::RecentSessions rs;
-			ARDOUR::read_recent_sessions (rs);
-
-			for (vector<string>::iterator i = demos.begin(); i != demos.end (); ++i) {
-				/* "demo-session" must be inside "demo-session.<session_archive_suffix>" */
-				std::string name = basename_nosuffix (basename_nosuffix (*i));
-				std::string path = Glib::build_filename (dspd, name);
-				/* skip if session-dir already exists */
-				if (Glib::file_test(path.c_str(), Glib::FILE_TEST_IS_DIR)) {
-					continue;
-				}
-				/* skip sessions that are already in 'recent'.
-				 * eg. a new user changed <session-default-dir> shorly after installation
-				 */
-				for (ARDOUR::RecentSessions::iterator r = rs.begin(); r != rs.end(); ++r) {
-					if ((*r).first == name) {
-						continue;
-					}
-				}
-				try {
-					PBD::FileArchive ar (*i);
-					if (0 == ar.inflate (dspd)) {
-						store_recent_sessions (name, path);
-						info << string_compose (_("Copied Demo Session %1."), name) << endmsg;
-					}
-				} catch (...) {}
-			}
-		}
-
-		/* go get a session */
-
-		const bool new_session_required = (ARDOUR_COMMAND_LINE::new_session || (!ARDOUR::Profile->get_mixbus() && brand_new_user));
-
-		if (get_session_parameters (false, new_session_required, ARDOUR_COMMAND_LINE::load_template)) {
-			std::cerr << "Cannot get session parameters."<< std::endl;
-			return -1;
 		}
 	}
 
+	return 0;
+}
+
+void
+ARDOUR_UI::load_session_from_startup_fsm ()
+{
+	string session_path = startup_fsm->session_path;
+	string session_name = startup_fsm->session_name;
+	string session_template = startup_fsm->session_template;
+	bool   session_is_new = startup_fsm->session_is_new;
+	BusProfile bus_profile = startup_fsm->bus_profile;
+
+	std::cerr  << " loading from " << session_path << " as " << session_name << " templ " << session_template << " is_new " << session_is_new << " bp " << bus_profile.master_out_channels << std::endl;
+
+	if (session_is_new) {
+
+		if (build_session (session_path, session_name, &bus_profile)) {
+		}
+
+		if (!session_template.empty() && session_template.substr (0, 11) == "urn:ardour:") {
+			meta_session_setup (session_template.substr (11));
+		}
+
+	} else {
+
+		int ret = load_session (session_path, session_name, session_template);
+
+		if (ret == -2) {
+			/* not connected to the AudioEngine, so quit to avoid an infinite loop */
+			exit (EXIT_FAILURE);
+		}
+	}
+}
+
+void
+ARDOUR_UI::startup_done ()
+{
 	use_config ();
 
 	WM::Manager::instance().show_visible ();
@@ -582,10 +576,6 @@ ARDOUR_UI::starting ()
 	_status_bar_visibility.update ();
 
 	BootMessage (string_compose (_("%1 is ready for use"), PROGRAM_NAME));
-
-	/* all other dialogs are created conditionally */
-
-	return 0;
 }
 
 void
