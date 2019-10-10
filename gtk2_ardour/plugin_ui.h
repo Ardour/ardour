@@ -132,6 +132,8 @@ protected:
 	ArdourWidgets::ArdourButton save_button;
 	/** a button to delete the current preset (if it is a user one) */
 	ArdourWidgets::ArdourButton delete_button;
+	/** a button to show a preset browser */
+	ArdourWidgets::ArdourButton preset_browser_button;
 	/** a button to delete the reset the plugin params */
 	ArdourWidgets::ArdourButton reset_button;
 	/** a button to bypass the plugin */
@@ -166,6 +168,7 @@ protected:
 	PluginEqGui* eqgui;
 	PluginLoadStatsGui* stats_gui;
 	PluginPresetsUI* preset_gui;
+	ArdourWindow* preset_dialog;
 
 	Gtk::Image* focus_out_image;
 	Gtk::Image* focus_in_image;
@@ -176,6 +179,7 @@ protected:
 	void save_plugin_setting ();
 	void delete_plugin_setting ();
 	void reset_plugin_parameters ();
+	void browse_presets ();
 	void manage_pins ();
 	bool focus_toggled(GdkEventButton*);
 	bool bypass_button_release(GdkEventButton*);

@@ -466,6 +466,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	, add_button (_("Add"))
 	, save_button (_("Save"))
 	, delete_button (_("Delete"))
+	, preset_browser_button (_("Preset Browser"))
 	, reset_button (_("Reset"))
 	, bypass_button (ArdourButton::led_default_elements)
 	, pin_management_button (_("Pinout"))
@@ -477,6 +478,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	, eqgui (0)
 	, stats_gui (0)
 	, preset_gui (0)
+	, preset_dialog (0)
 {
 	_preset_modified.set_size_request (16, -1);
 	_preset_combo.set_text("(default)");
@@ -484,6 +486,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	set_tooltip (add_button, _("Save a new preset"));
 	set_tooltip (save_button, _("Save the current preset"));
 	set_tooltip (delete_button, _("Delete the current preset"));
+	set_tooltip (preset_browser_button, _("Show Preset Browser Dialog"));
 	set_tooltip (reset_button, _("Reset parameters to default (if no parameters are in automation play mode)"));
 	set_tooltip (pin_management_button, _("Show Plugin Pin Management Dialog"));
 	set_tooltip (bypass_button, _("Disable signal processing by the plugin"));
@@ -507,6 +510,10 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	delete_button.set_name ("generic button");
 	delete_button.set_icon (ArdourIcon::PsetDelete);
 	delete_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::delete_plugin_setting));
+
+	preset_browser_button.set_name ("generic button");
+	preset_browser_button.set_icon (ArdourIcon::PsetBrowse);
+	preset_browser_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::browse_presets));
 
 	reset_button.set_name ("generic button");
 	reset_button.set_icon (ArdourIcon::PluginReset);
@@ -568,6 +575,7 @@ PlugUIBase::~PlugUIBase()
 	delete preset_gui;
 	delete latency_gui;
 	delete latency_dialog;
+	delete preset_dialog;
 }
 
 void
@@ -695,6 +703,28 @@ PlugUIBase::has_descriptive_presets () const
 		}
 	}
 	return false;
+}
+
+void
+PlugUIBase::browse_presets ()
+{
+	if (!preset_dialog) {
+		if (preset_gui) {
+			/* Do not allow custom window, if preset_gui is used.
+			 * e.g. generic-plugin UI.
+			 */
+			return;
+		}
+		preset_dialog = new ArdourWindow (_("Select Preset"));
+		preset_dialog->set_keep_above (true);
+		Window* win = dynamic_cast<Window*> (preset_browser_button.get_toplevel ());
+		if (win) {
+			preset_dialog->set_transient_for (*win);
+		}
+		preset_gui = new PluginPresetsUI (insert);
+		preset_dialog->add (*preset_gui);
+	}
+	preset_dialog->show_all ();
 }
 
 void
