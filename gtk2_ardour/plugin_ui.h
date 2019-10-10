@@ -188,6 +188,8 @@ protected:
 	void preset_added_or_removed ();
 	void update_preset_modified ();
 
+	bool has_descriptive_presets () const;
+
 	PBD::ScopedConnection death_connection;
 	PBD::ScopedConnection active_connection;
 	PBD::ScopedConnection preset_added_connection;

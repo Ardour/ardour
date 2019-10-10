@@ -685,6 +685,18 @@ PlugUIBase::reset_plugin_parameters ()
 	insert->reset_parameters_to_default ();
 }
 
+bool
+PlugUIBase::has_descriptive_presets () const
+{
+	std::vector<Plugin::PresetRecord> presets = insert->plugin()->get_presets();
+	for (std::vector<Plugin::PresetRecord>::const_iterator i = presets.begin(); i != presets.end(); ++i) {
+		if (i->valid && !i->description.empty()) {
+			return true;
+		}
+	}
+	return false;
+}
+
 void
 PlugUIBase::manage_pins ()
 {

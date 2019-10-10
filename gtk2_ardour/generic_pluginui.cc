@@ -424,15 +424,7 @@ GenericPluginUI::build ()
 	}
 
 	if (control_uis.empty ()) {
-		std::vector<Plugin::PresetRecord> presets = insert->plugin()->get_presets();
-		bool show_preset_browser = false;
-		for (std::vector<Plugin::PresetRecord>::const_iterator i = presets.begin(); i != presets.end(); ++i) {
-			if (i->valid && !i->description.empty()) {
-				show_preset_browser = true;
-				break;
-			}
-		}
-		if (show_preset_browser) {
+		if (has_descriptive_presets ()) {
 			preset_gui = new PluginPresetsUI (insert);
 			hpacker.pack_start (*preset_gui, true, true);
 		}
