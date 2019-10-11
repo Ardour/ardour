@@ -142,7 +142,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 			if (NewUserWizard::required()) {
 				show_new_user_wizard ();
 			} else {
-				show_session_dialog (new_session_required);
+				dialog_response_handler (RESPONSE_OK, NewUserDialog);
 			}
 			break;
 		}
