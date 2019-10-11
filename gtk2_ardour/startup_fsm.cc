@@ -128,6 +128,8 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 {
 	const bool new_session_required = (ARDOUR_COMMAND_LINE::new_session || (!ARDOUR::Profile->get_mixbus() && new_user));
 
+  restart:
+
 	switch (_state) {
 	case NeedPreRelease:
 		switch (dialog_id) {
@@ -142,7 +144,12 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 			if (NewUserWizard::required()) {
 				show_new_user_wizard ();
 			} else {
-				dialog_response_handler (RESPONSE_OK, NewUserDialog);
+				/* act as if we had just finished with the new
+				   user wizard. goto preferred over reentrancy.
+				*/
+				dialog_id = NewUserDialog;
+				response = RESPONSE_OK;
+				goto restart;
 			}
 			break;
 		}
