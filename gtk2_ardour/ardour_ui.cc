@@ -580,7 +580,7 @@ Full information on all the above can be found on the support page at\n\
 	d.get_vbox()->set_border_width (12);
 	d.get_vbox()->pack_start (*label, false, false, 12);
 	d.get_vbox()->show_all ();
-
+	d.set_position (WIN_POS_CENTER);
 	d.run ();
 }
 

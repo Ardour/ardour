@@ -252,6 +252,7 @@ StartupFSM::show_new_user_wizard ()
 {
 	new_user_wizard = new NewUserWizard;
 	current_dialog_connection = new_user_wizard->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &StartupFSM::dialog_response_handler), NewUserDialog));
+	new_user_wizard->set_position (WIN_POS_CENTER);
 	new_user_wizard->present ();
 }
 
@@ -259,6 +260,7 @@ void
 StartupFSM::show_session_dialog ()
 {
 	current_dialog_connection = session_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &StartupFSM::dialog_response_handler), NewSessionDialog));
+	session_dialog->set_position (WIN_POS_CENTER);
 	session_dialog->present ();
 }
 
@@ -266,6 +268,7 @@ void
 StartupFSM::show_audiomidi_dialog ()
 {
 	current_dialog_connection = audiomidi_dialog.signal_response().connect (sigc::bind (sigc::mem_fun (*this, &StartupFSM::dialog_response_handler), AudioMIDISetup));
+	audiomidi_dialog.set_position (WIN_POS_CENTER);
 	audiomidi_dialog.present ();
 }
 
