@@ -34,10 +34,11 @@ class ARDOUR_UI;
 class Splash : public Gtk::Window
 {
 public:
-	Splash ();
 	~Splash ();
 
-	static Splash* instance() { return the_splash; }
+	static Splash* instance();
+	static void drop();
+	static bool exists ();
 
 	void display ();
 	void pop_back_for (Gtk::Window&);
@@ -51,6 +52,7 @@ public:
 	void hide ();
 
 private:
+	Splash ();
 	static Splash* the_splash;
 
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf;

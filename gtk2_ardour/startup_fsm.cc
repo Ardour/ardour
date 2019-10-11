@@ -42,6 +42,7 @@
 #include "gtkmm2ext/application.h"
 #include <gtkmm2ext/doi.h>
 
+#include "ardour_ui.h"
 #include "engine_dialog.h"
 #include "new_user_wizard.h"
 #include "opts.h"
@@ -569,7 +570,7 @@ StartupFSM::check_session_parameters (bool must_be_new)
 		/* does not exist at present */
 
 		if (!requested_new) {
-			// pop_back_splash (session_dialog);
+			ARDOUR_UI::pop_back_splash (*session_dialog);
 			MessageDialog msg (string_compose (_("There is no existing session at \"%1\""), session_path));
 			msg.run ();
 			session_dialog->clear_name();
@@ -714,7 +715,7 @@ StartupFSM::ask_about_loading_existing_session (const std::string& session_path)
 	msg.set_title (_("Open Existing Session"));
 	msg.set_wmclass (X_("existing_session"), PROGRAM_NAME);
 	msg.set_position (Gtk::WIN_POS_CENTER);
-	// pop_back_splash (msg);
+	ARDOUR_UI::pop_back_splash (msg);
 
 	switch (msg.run()) {
 	case RESPONSE_YES:
@@ -761,3 +762,4 @@ Full information on all the above can be found on the support page at\n\
 	pre_release_dialog->set_position (WIN_POS_CENTER);
 	pre_release_dialog->present ();
 }
+

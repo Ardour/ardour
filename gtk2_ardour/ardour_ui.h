@@ -190,8 +190,8 @@ public:
 
 	bool run_startup (bool should_be_new, std::string load_template);
 
-	void show_splash ();
 	void hide_splash ();
+	static void pop_back_splash (Gtk::Window&);
 
 	void launch_chat ();
 	void launch_manual ();
@@ -752,10 +752,6 @@ private:
 	uint32_t rec_enabled_streams;
 	void count_recenabled_streams (ARDOUR::Route&);
 
-	Splash* splash;
-
-	void pop_back_splash (Gtk::Window&);
-
 	/* cleanup */
 
 	Gtk::MenuItem *cleanup_item;
@@ -819,8 +815,6 @@ private:
 	void display_message (const char* prefix, gint prefix_len, Glib::RefPtr<Gtk::TextBuffer::Tag>, Glib::RefPtr<Gtk::TextBuffer::Tag>, const char* msg);
 	Gtk::Label status_bar_label;
 	bool status_bar_button_press (GdkEventButton*);
-
-	void loading_message (const std::string& msg);
 
 	PBD::ScopedConnectionList forever_connections;
 	PBD::ScopedConnection halt_connection;

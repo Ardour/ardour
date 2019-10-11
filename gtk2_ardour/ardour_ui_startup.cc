@@ -325,40 +325,10 @@ ARDOUR_UI::keyboard_settings () const
 	return node;
 }
 
-
-void
-ARDOUR_UI::loading_message (const std::string& msg)
-{
-	if (ARDOUR_COMMAND_LINE::no_splash) {
-		return;
-	}
-
-	if (!splash) {
-		show_splash ();
-	}
-
-	splash->message (msg);
-}
-
-void
-ARDOUR_UI::show_splash ()
-{
-	if (splash == 0) {
-		try {
-			splash = new Splash;
-		} catch (...) {
-			return;
-		}
-	}
-
-	splash->display ();
-}
-
 void
 ARDOUR_UI::hide_splash ()
 {
-	delete splash;
-	splash = 0;
+	Splash::drop ();
 }
 
 void

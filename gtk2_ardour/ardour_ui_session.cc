@@ -352,7 +352,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		}
 	}
 
-	loading_message (string_compose (_("Please wait while %1 loads your session"), PROGRAM_NAME));
+	BootMessage (string_compose (_("Please wait while %1 loads your session"), PROGRAM_NAME));
 
 	try {
 		new_session = new Session (*AudioEngine::instance(), path, snap_name, 0, mix_template);

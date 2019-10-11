@@ -48,6 +48,28 @@ using namespace ARDOUR;
 
 Splash* Splash::the_splash = 0;
 
+Splash*
+Splash::instance()
+{
+	if (!the_splash) {
+		the_splash = new Splash;
+	}
+	return the_splash;
+}
+
+bool
+Splash::exists ()
+{
+	return the_splash;
+}
+
+void
+Splash::drop ()
+{
+	delete the_splash;
+	the_splash = 0;
+}
+
 Splash::Splash ()
 {
 	assert (the_splash == 0);
@@ -208,6 +230,9 @@ Splash::expose (GdkEventExpose* ev)
 void
 Splash::boot_message (std::string msg)
 {
+	if (!is_visible()) {
+		display ();
+	}
 	message (msg);
 }
 
