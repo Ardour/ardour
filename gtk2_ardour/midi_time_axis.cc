@@ -1269,6 +1269,7 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 	case MidiPgmChangeAutomation:
 	case MidiPitchBenderAutomation:
 	case MidiChannelPressureAutomation:
+	case MidiNotePressureAutomation:
 	case MidiSystemExclusiveAutomation:
 		/* These controllers are region "automation" - they are owned
 		 * by regions (and their MidiModels), not by the track. As a
