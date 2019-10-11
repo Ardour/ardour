@@ -147,16 +147,16 @@ AutomationController::create(const Evoral::Parameter&             param,
                              bool use_knob)
 {
 	const double lo        = ac->internal_to_interface(desc.lower, true);
-	const double up        = ac->internal_to_interface(desc.upper, true);
 	const double normal    = ac->internal_to_interface(desc.normal, true);
 	const double smallstep = fabs (ac->internal_to_interface(desc.lower + desc.smallstep, true) - lo);
 	const double largestep = fabs (ac->internal_to_interface(desc.lower + desc.largestep, true) - lo);
 
-	assert (std::min(lo, up) == 0);
-	assert (std::max(lo, up) == 1.0);
+	/* even though internal_to_interface() may not generate the full range
+	 * 0..1, the interface range is 0..1 by definition,  so just hard code
+	 * that.
+	 */
 
-	Gtk::Adjustment* adjustment = manage (
-		new Gtk::Adjustment (normal, std::min(lo, up), std::max(lo, up), smallstep, largestep));
+	Gtk::Adjustment* adjustment = manage (new Gtk::Adjustment (normal, 0.0, 1.0, smallstep, largestep));
 
 	assert (ac);
 	assert(ac->parameter() == param);
