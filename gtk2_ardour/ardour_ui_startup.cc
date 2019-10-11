@@ -497,9 +497,6 @@ ARDOUR_UI::sfsm_response (StartupFSM::Result r)
 			startup_done ();
 		}
 		break;
-	case StartupFSM::DoNothing:
-		cerr << "DoNothing\n";
-		break;
 	}
 }
 

@@ -370,13 +370,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	}
 
 
-	if (string (VERSIONSTRING).find (".pre") != string::npos) {
-		string fn = Glib::build_filename (user_config_directory(), ".i_swear_that_i_will_heed_the_guidelines_stated_in_the_pre_release_dialog");
-		if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
-			pre_release_dialog ();
-		}
-	}
-
 	if (theArdourUI == 0) {
 		theArdourUI = this;
 	}
@@ -547,41 +540,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	_process_thread = new ProcessThread ();
 
 	attach_to_engine ();
-}
-
-void
-ARDOUR_UI::pre_release_dialog ()
-{
-	ArdourDialog d (_("Pre-Release Warning"), true, false);
-	d.add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
-
-	Label* label = manage (new Label);
-	label->set_markup (string_compose (_("<b>Welcome to this pre-release build of %1 %2</b>\n\n\
-There are still several issues and bugs to be worked on,\n\
-as well as general workflow improvements, before this can be considered\n\
-release software. So, a few guidelines:\n\
-\n\
-1) Please do <b>NOT</b> use this software with the expectation that it is stable or reliable\n\
-   though it may be so, depending on your workflow.\n\
-2) Please wait for a helpful writeup of new features.\n\
-3) <b>Please do NOT use the forums at ardour.org to report issues</b>.\n\
-4) <b>Please do NOT file bugs for this alpha-development versions at this point in time</b>.\n\
-   There is no bug triaging before the initial development concludes and\n\
-   reporting issue for incomplete, ongoing work-in-progress is mostly useless.\n\
-5) Please <b>DO</b> join us on IRC for real time discussions about %1 %2. You\n\
-   can get there directly from within the program via the Help->Chat menu option.\n\
-6) Please <b>DO</b> submit patches for issues after discussing them on IRC.\n\
-\n\
-Full information on all the above can be found on the support page at\n\
-\n\
-                http://ardour.org/support\n\
-"), PROGRAM_NAME, VERSIONSTRING));
-
-	d.get_vbox()->set_border_width (12);
-	d.get_vbox()->pack_start (*label, false, false, 12);
-	d.get_vbox()->show_all ();
-	d.set_position (WIN_POS_CENTER);
-	d.run ();
 }
 
 GlobalPortMatrixWindow*

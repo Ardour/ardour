@@ -21,6 +21,7 @@
 #include <gtkmm/dialog.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/messagedialog.h>
+#include <gtkmm/stock.h>
 
 #include "pbd/basename.h"
 #include "pbd/file_archive.h"
@@ -47,6 +48,10 @@
 #include "session_dialog.h"
 #include "startup_fsm.h"
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-version.h"
+#endif
+
 using namespace ARDOUR;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -64,7 +69,15 @@ StartupFSM::StartupFSM (EngineControl& amd)
 	, new_user_wizard (0)
 	, audiomidi_dialog (amd)
 	, session_dialog (0)
+	, pre_release_dialog (0)
 {
+	if (string (VERSIONSTRING).find (".pre") != string::npos) {
+		string fn = Glib::build_filename (user_config_directory(), ".i_swear_that_i_will_heed_the_guidelines_stated_in_the_pre_release_dialog");
+		if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+			_state = NeedPreRelease;
+		}
+	}
+
 	Application* app = Application::instance ();
 
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &StartupFSM::queue_finish));
@@ -91,9 +104,9 @@ StartupFSM::queue_finish ()
 void
 StartupFSM::start ()
 {
-	if (new_user) {
-		/* show new user wizard */
-		_state = NeedSessionPath;
+	if (_state == NeedPreRelease) {
+		show_pre_release_dialog ();
+	} else if (new_user) {
 		show_new_user_wizard ();
 	} else {
 		/* pretend we just showed the new user wizard and we're done
@@ -116,6 +129,25 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 	const bool new_session_required = (ARDOUR_COMMAND_LINE::new_session || (!ARDOUR::Profile->get_mixbus() && new_user));
 
 	switch (_state) {
+	case NeedPreRelease:
+		switch (dialog_id) {
+		case PreReleaseDialog:
+		default:
+			/* any response value from the pre-release dialog means
+			   "move along now"
+			*/
+			delete_when_idle (pre_release_dialog);
+			pre_release_dialog = 0;
+			_state = NeedSessionPath;
+			if (NewUserWizard::required()) {
+				show_new_user_wizard ();
+			} else {
+				show_session_dialog (new_session_required);
+			}
+			break;
+		}
+		break;
+
 	case NeedSessionPath:
 		switch (dialog_id) {
 		case NewUserDialog:
@@ -145,8 +177,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 				session_template = string();
 
 				_state = NeedSessionPath;
-				session_dialog = new SessionDialog (new_session_required, string(), string(), string(), false);
-				show_session_dialog ();
+				show_session_dialog (new_session_required);
 
 			} else {
 
@@ -171,8 +202,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 					 */
 
 					_state = NeedSessionPath;
-					session_dialog = new SessionDialog (new_session_required, session_name, session_path, session_template, false);
-					show_session_dialog ();
+					show_session_dialog (new_session_required);
 				}
 			}
 			break;
@@ -240,9 +270,11 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 			/* ERROR */
 			break;
 		}
+		break;
 
 	case NeedWizard:
-		/* ERROR */
+		show_new_user_wizard ();
+		_state = NeedSessionPath;
 		break;
 	}
 }
@@ -257,8 +289,9 @@ StartupFSM::show_new_user_wizard ()
 }
 
 void
-StartupFSM::show_session_dialog ()
+StartupFSM::show_session_dialog (bool new_session_required)
 {
+	session_dialog = new SessionDialog (new_session_required, session_name, session_path, session_template, false);
 	current_dialog_connection = session_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &StartupFSM::dialog_response_handler), NewSessionDialog));
 	session_dialog->set_position (WIN_POS_CENTER);
 	session_dialog->present ();
@@ -682,4 +715,42 @@ StartupFSM::ask_about_loading_existing_session (const std::string& session_path)
 		break;
 	}
 	return false;
+}
+
+void
+StartupFSM::show_pre_release_dialog ()
+{
+	pre_release_dialog = new ArdourDialog  (_("Pre-Release Warning"), true, false);
+	pre_release_dialog->add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
+
+	Label* label = manage (new Label);
+	label->set_markup (string_compose (_("<span size=\"x-large\" weight=\"bold\">Welcome to this pre-release build of %1 %2</span>\n\n\
+<span size=\"large\">There are still several issues and bugs to be worked on,\n\
+as well as general workflow improvements, before this can be considered\n\
+release software. So, a few guidelines:\n\
+\n\
+1) Please do <b>NOT</b> use this software with the expectation that it is stable or reliable\n\
+   though it may be so, depending on your workflow.\n\
+2) Please wait for a helpful writeup of new features.\n\
+3) <b>Please do NOT use the forums at ardour.org to report issues</b>.\n\
+4) <b>Please do NOT file bugs for this alpha-development versions at this point in time</b>.\n\
+   There is no bug triaging before the initial development concludes and\n\
+   reporting issue for incomplete, ongoing work-in-progress is mostly useless.\n\
+5) Please <b>DO</b> join us on IRC for real time discussions about %1 %2. You\n\
+   can get there directly from within the program via the Help->Chat menu option.\n\
+6) Please <b>DO</b> submit patches for issues after discussing them on IRC.\n\
+\n\
+Full information on all the above can be found on the support page at\n\
+\n\
+                http://ardour.org/support</span>\n\
+"), PROGRAM_NAME, VERSIONSTRING));
+
+
+	pre_release_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (this, &StartupFSM::dialog_response_handler), PreReleaseDialog));
+
+	pre_release_dialog->get_vbox()->set_border_width (12);
+	pre_release_dialog->get_vbox()->pack_start (*label, false, false, 12);
+	pre_release_dialog->get_vbox()->show_all ();
+	pre_release_dialog->set_position (WIN_POS_CENTER);
+	pre_release_dialog->present ();
 }

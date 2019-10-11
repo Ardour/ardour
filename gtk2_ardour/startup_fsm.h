@@ -33,6 +33,7 @@ class StartupFSM : public sigc::trackable
 {
   public:
 	enum DialogID {
+		PreReleaseDialog,
 		NewUserDialog,
 		NewSessionDialog,
 		AudioMIDISetup
@@ -41,7 +42,6 @@ class StartupFSM : public sigc::trackable
 	enum Result {
 		LoadSession,
 		ExitProgram,
-		DoNothing, /* seriously? how can this be an option */
 	};
 
 	StartupFSM (EngineControl&);
@@ -67,6 +67,7 @@ class StartupFSM : public sigc::trackable
 
   private:
 	enum MainState {
+		NeedPreRelease,
 		NeedWizard,
 		NeedSessionPath,
 		NeedEngineParams,
@@ -80,8 +81,10 @@ class StartupFSM : public sigc::trackable
 	void dialog_response_handler (int response, DialogID);
 
 	void show_new_user_wizard ();
-	void show_session_dialog ();
+	void show_session_dialog (bool new_session_required);
 	void show_audiomidi_dialog ();
+	void show_pre_release_dialog ();
+
 	void copy_demo_sessions ();
 	void load_from_application_api (std::string const &);
 	bool get_session_parameters_from_command_line (bool new_session_required);
@@ -93,7 +96,7 @@ class StartupFSM : public sigc::trackable
 	NewUserWizard* new_user_wizard;
 	EngineControl& audiomidi_dialog;
 	SessionDialog* session_dialog;
-
+	ArdourDialog* pre_release_dialog;
 	sigc::connection current_dialog_connection;
 
 	sigc::signal1<void,Result> _signal_response;

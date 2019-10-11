@@ -899,7 +899,6 @@ private:
 
 	void escape ();
 	void close_current_dialog ();
-	void pre_release_dialog ();
 
 	bool bind_lua_action_script (GdkEventButton*, int);
 	void update_action_script_btn (int i, const std::string&);
