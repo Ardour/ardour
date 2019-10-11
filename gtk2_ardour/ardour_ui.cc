@@ -864,7 +864,7 @@ ARDOUR_UI::~ARDOUR_UI ()
 void
 ARDOUR_UI::pop_back_splash (Gtk::Window& win)
 {
-	if (Splash::instance()) {
+	if (Splash::exists()) {
 		Splash::instance()->pop_back_for (win);
 	}
 }
