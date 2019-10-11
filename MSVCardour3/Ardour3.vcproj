@@ -900,6 +900,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\new_user_wizard.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\normalize_dialog.cc"
 				>
 			</File>
@@ -1208,7 +1212,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\startup.cc"
+				RelativePath="..\gtk2_ardour\startup_fsm.cc"
 				>
 			</File>
 			<File
@@ -1982,6 +1986,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\new_user_wizard.h"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\normalize_dialog.h"
 				>
 			</File>
@@ -2334,7 +2342,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\startup.h"
+				RelativePath="..\gtk2_ardour\startup_fsm.h"
 				>
 			</File>
 			<File
