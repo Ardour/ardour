@@ -322,8 +322,6 @@ Session::Session (AudioEngine &eng,
 	, _selection (new CoreSelection (*this))
 	, _global_locate_pending (false)
 {
-	uint32_t sr = 0;
-
 	created_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 
 	pthread_mutex_init (&_rt_emit_mutex, 0);
@@ -339,19 +337,12 @@ Session::Session (AudioEngine &eng,
 
 	setup_lua ();
 
+	assert (AudioEngine::instance()->running());
+	immediately_post_engine ();
+
 	if (_is_new) {
 
 		Stateful::loading_state_version = CURRENT_SESSION_FILE_VERSION;
-
-		if (ensure_engine (sr, true)) {
-			destroy ();
-			throw SessionException (_("Cannot connect to audio/midi engine"));
-		}
-
-		// set samplerate for plugins added early
-		// e.g from templates or MB channelstrip
-		set_block_size (_engine.samples_per_cycle());
-		set_sample_rate (_engine.sample_rate());
 
 		if (create (mix_template, bus_profile)) {
 			destroy ();
@@ -388,27 +379,10 @@ Session::Session (AudioEngine &eng,
 		if (load_state (_current_snapshot_name)) {
 			throw SessionException (_("Failed to load state"));
 		}
-
-		/* try to get sample rate from XML state so that we
-		 * can influence the SR if we set up the audio
-		 * engine.
-		 */
-
-		if (state_tree) {
-			XMLProperty const * prop;
-			XMLNode const * root (state_tree->root());
-			if ((prop = root->property (X_("sample-rate"))) != 0) {
-				sr = atoi (prop->value());
-			}
-		}
-
-		if (ensure_engine (sr, false)) {
-			destroy ();
-			throw SessionException (_("Cannot connect to audio/midi engine"));
-		}
 	}
 
 	int err = post_engine_init ();
+
 	if (err) {
 		destroy ();
 		switch (err) {
@@ -504,39 +478,6 @@ Session::init_name_id_counter (guint n)
 }
 
 int
-Session::ensure_engine (uint32_t desired_sample_rate, bool isnew)
-{
-	if (_engine.current_backend() == 0) {
-		/* backend is unknown ... */
-		boost::optional<int> r = AudioEngineSetupRequired (desired_sample_rate);
-		if (r.get_value_or (-1) != 0) {
-			return -1;
-		}
-	} else if (!isnew && _engine.running() && _engine.sample_rate () == desired_sample_rate) {
-		/* keep engine */
-	} else if (_engine.setup_required()) {
-		/* backend is known, but setup is needed */
-		boost::optional<int> r = AudioEngineSetupRequired (desired_sample_rate);
-		if (r.get_value_or (-1) != 0) {
-			return -1;
-		}
-	} else if (!_engine.running()) {
-		if (_engine.start()) {
-			return -1;
-		}
-	}
-
-	/* at this point the engine should be running */
-
-	if (!_engine.running()) {
-		return -1;
-	}
-
-	return immediately_post_engine ();
-
-}
-
-int
 Session::immediately_post_engine ()
 {
 	/* Do various initializations that should take place directly after we
@@ -585,6 +526,11 @@ Session::immediately_post_engine ()
 	/* TODO, connect in different thread. (PortRegisteredOrUnregistered may be in RT context)
 	 * can we do that? */
 	 _engine.PortRegisteredOrUnregistered.connect_same_thread (*this, boost::bind (&Session::setup_bundles, this));
+
+	// set samplerate for plugins added early
+	// e.g from templates or MB channelstrip
+	set_block_size (_engine.samples_per_cycle());
+	set_sample_rate (_engine.sample_rate());
 
 	return 0;
 }
