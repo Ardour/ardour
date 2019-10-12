@@ -120,11 +120,6 @@ static MyEventLoop *event_loop = NULL;
 /* ****************************************************************************/
 /* internal helper fn and callbacks */
 
-static int do_audio_midi_setup (uint32_t desired_sample_rate)
-{
-	return AudioEngine::instance ()->start ();
-}
-
 static void init ()
 {
 	if (!ARDOUR::init (false, true, localedir)) {
@@ -143,8 +138,6 @@ static void init ()
 	lua_receiver.listen_to (info);
 	lua_receiver.listen_to (fatal);
 	lua_receiver.listen_to (warning);
-
-	ARDOUR::Session::AudioEngineSetupRequired.connect_same_thread (engine_connections, &do_audio_midi_setup);
 }
 
 static void set_session (ARDOUR::Session *s)
