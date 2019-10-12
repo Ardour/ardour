@@ -808,11 +808,6 @@ public:
 	int remove_last_capture ();
 	void get_last_capture_sources (std::list<boost::shared_ptr<Source> >&);
 
-	/** handlers should return 0 for "everything OK", and any other value for
-	 * "cannot setup audioengine".
-	 */
-	static PBD::Signal1<int,uint32_t> AudioEngineSetupRequired;
-
 	/** handlers should return -1 for "stop cleanup",
 	    0 for "yes, delete this playlist",
 	    1 for "no, don't delete this playlist".
