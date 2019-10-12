@@ -92,6 +92,7 @@ class StartupFSM : public sigc::trackable
 	void queue_finish ();
 	bool ask_about_loading_existing_session (const std::string& session_path);
 	int  check_session_parameters (bool must_be_new);
+	void start_audio_midi_setup ();
 
 	NewUserWizard* new_user_wizard;
 	EngineControl& audiomidi_dialog;

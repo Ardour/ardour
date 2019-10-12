@@ -231,15 +231,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 					 */
 					break;
 				case 0:
-					_state = NeedEngineParams;
-					session_dialog->hide ();
-					delete session_dialog;
-					session_dialog = 0;
-					current_dialog_connection.disconnect();
-					if (!session_is_new && session_existing_sample_rate > 0) {
-						audiomidi_dialog.set_desired_sample_rate (session_existing_sample_rate);
-					}
-					show_audiomidi_dialog ();
+					start_audio_midi_setup ();
 					break;
 				}
 				break;
@@ -311,6 +303,57 @@ StartupFSM::show_audiomidi_dialog ()
 	current_dialog_connection = audiomidi_dialog.signal_response().connect (sigc::bind (sigc::mem_fun (*this, &StartupFSM::dialog_response_handler), AudioMIDISetup));
 	audiomidi_dialog.set_position (WIN_POS_CENTER);
 	audiomidi_dialog.present ();
+}
+
+void
+StartupFSM::start_audio_midi_setup ()
+{
+	bool setup_required = false;
+
+	if (AudioEngine::instance()->current_backend() == 0) {
+		/* backend is unknown ... */
+		setup_required = true;
+
+	} else if (session_is_new && AudioEngine::instance()->running() && AudioEngine::instance()->sample_rate () == session_existing_sample_rate) {
+		/* keep engine */
+
+		warning << "A running engine should not be possible at this point" << endmsg;
+
+	} else if (AudioEngine::instance()->setup_required()) {
+		/* backend is known, but setup is needed */
+		setup_required = true;
+
+	} else if (!AudioEngine::instance()->running()) {
+		/* should always be true during startup */
+		if (AudioEngine::instance()->start()) {
+			setup_required = true;
+		}
+	}
+
+	if (setup_required) {
+		_state = NeedEngineParams;
+		if (session_dialog) {
+			session_dialog->hide ();
+			delete_when_idle (session_dialog);
+			session_dialog = 0;
+		}
+		current_dialog_connection.disconnect();
+		if (!session_is_new && session_existing_sample_rate > 0) {
+			audiomidi_dialog.set_desired_sample_rate (session_existing_sample_rate);
+		}
+		show_audiomidi_dialog ();
+	} else {
+		/* XXX should we reset _state to something meaningul here (e.g. "Done")? */
+
+		if (session_dialog) {
+			session_dialog->hide ();
+			delete_when_idle (session_dialog);
+			session_dialog = 0;
+		}
+
+		current_dialog_connection.disconnect ();
+		_signal_response (LoadSession);
+	}
 }
 
 bool
@@ -762,4 +805,3 @@ Full information on all the above can be found on the support page at\n\
 	pre_release_dialog->set_position (WIN_POS_CENTER);
 	pre_release_dialog->present ();
 }
-
