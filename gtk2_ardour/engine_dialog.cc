@@ -3183,6 +3183,8 @@ EngineControl::engine_running ()
 void
 EngineControl::engine_stopped ()
 {
+	std::cerr << "\n\n !!! engine stopped !!!\n\n\n";
+	PBD::stacktrace (std::cerr, 30);
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	assert (backend);
 
