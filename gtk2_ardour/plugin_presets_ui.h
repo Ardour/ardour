@@ -39,12 +39,39 @@ public:
 
 private:
 	void update_preset_list ();
+	void filter_presets ();
 	void preset_selected ();
-	void row_activated (Gtk::TreeModel::Path, Gtk::TreeViewColumn*);
+	void preset_row_activated (Gtk::TreeModel::Path, Gtk::TreeViewColumn*);
 	void load_preset ();
 
 	boost::shared_ptr<ARDOUR::PluginInsert> _insert;
 	PBD::ScopedConnectionList _preset_connections;
+
+	struct PluginPreset {
+		PluginPreset (ARDOUR::Plugin::PresetRecord const& p, std::string const& b = "", std::string const& t = "")
+			: _preset_record (p)
+			, _bank (b)
+			, _type (t)
+		{ }
+		ARDOUR::Plugin::PresetRecord _preset_record;
+		std::string _bank;
+		std::string _type;
+
+		bool operator< (PluginPreset const& o) const {
+        return _preset_record.label < o._preset_record.label;
+    }
+	};
+
+	std::vector<PluginPreset> _pps;
+
+	struct TagFilterModelColumns : public Gtk::TreeModel::ColumnRecord {
+		TagFilterModelColumns () {
+			add (name);
+			add (count);
+		}
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<size_t> count;
+	};
 
 	struct PluginPresetModelColumns : public Gtk::TreeModel::ColumnRecord {
 		PluginPresetModelColumns () {
@@ -58,12 +85,22 @@ private:
 		Gtk::TreeModelColumn<ARDOUR::Plugin::PresetRecord> plugin_preset;
 	};
 
-	ArdourWidgets::ArdourButton  _load_button;
+	TagFilterModelColumns        _filter_banks_columns;
+	Gtk::TreeView                _filter_banks_display;
+	Glib::RefPtr<Gtk::TreeStore> _filter_banks_model;
+	Gtk::ScrolledWindow          _banks_scroller;
+
+	TagFilterModelColumns        _filter_types_columns;
+	Gtk::TreeView                _filter_types_display;
+	Glib::RefPtr<Gtk::TreeStore> _filter_types_model;
+	Gtk::ScrolledWindow          _types_scroller;
 
 	PluginPresetModelColumns     _plugin_preset_columns;
 	Gtk::TreeView                _plugin_preset_display;
 	Glib::RefPtr<Gtk::TreeStore> _plugin_preset_model;
 	Gtk::ScrolledWindow          _preset_scroller;
+
+	ArdourWidgets::ArdourButton  _load_button;
 	Gtk::TextView                _preset_desc;
 };
 
