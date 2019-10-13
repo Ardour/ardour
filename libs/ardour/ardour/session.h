@@ -1485,7 +1485,6 @@ private:
 	void             auto_loop_changed (Location *);
 	void             auto_loop_declick_range (Location *, samplepos_t &, samplepos_t &);
 
-	int  ensure_engine (uint32_t desired_sample_rate, bool);
 	void pre_engine_init (std::string path);
 	int  post_engine_init ();
 	int  immediately_post_engine ();
