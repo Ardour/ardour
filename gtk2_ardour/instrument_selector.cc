@@ -18,6 +18,7 @@
 
 #include "pbd/convert.h"
 #include "pbd/enumwriter.h"
+#include "ardour/chan_count.h"
 #include "ardour/plugin_manager.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "instrument_selector.h"
@@ -124,12 +125,20 @@ InstrumentSelector::build_instrument_list()
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end();) {
 		PluginInfoPtr p = *i;
 		++i;
+		
+		std::string name = p->name;
+		
+		/* in the instrument menu,we need to differentiate the different output configs here*/
+		int n_outs = p->n_outputs.n_audio();
+		if (n_outs > 2) {
+			name += string_compose( " (%1 outs)", n_outs);
+		}
+		
+		/*if a plugin appears in multiple types, we need to differentiate the different types here */
 		bool suffix_type = prev == p->name;
 		if (!suffix_type && i != all_plugs.end() && (*i)->name == p->name) {
 			suffix_type = true;
 		}
-
-		row = *(_instrument_list->append());
 		if (suffix_type) {
 			std::string pt;
 			switch (p->type) {
@@ -144,10 +153,12 @@ InstrumentSelector::build_instrument_list()
 				default:
 					pt = enum_2_string (p->type);
 			}
-			row[_instrument_list_columns.name]   = p->name + " (" + pt + ")";
-		} else {
-			row[_instrument_list_columns.name]   = p->name;
+			name += " (" + pt + ")";
 		}
+
+		row = *(_instrument_list->append());
+		row[_instrument_list_columns.name] = name;
+
 		row[_instrument_list_columns.info_ptr] = p;
 		if (p->unique_id == "https://community.ardour.org/node/7596") {
 			_reasonable_synth_id = n;
