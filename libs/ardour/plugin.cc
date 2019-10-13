@@ -300,6 +300,7 @@ Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 
 	Plugin::IOPortDescription iod (ss.str());
 	iod.group_name = gn.str();
+	iod.group_channel = id % 2;
 	return iod;
 }
 
