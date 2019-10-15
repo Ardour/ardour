@@ -53,7 +53,7 @@ MidiBuffer::~MidiBuffer()
 }
 
 void
-MidiBuffer::resize(size_t size)
+MidiBuffer::resize (size_t size)
 {
 	if (_data && size < _capacity) {
 
@@ -65,11 +65,15 @@ MidiBuffer::resize(size_t size)
 		return;
 	}
 
-	cache_aligned_free (_data);
+	uint8_t* old_data = _data;
 
 	cache_aligned_malloc ((void**) &_data, size);
 
-	_size = 0;
+	if (_size) {
+		memcpy (_data, old_data, _size);
+	}
+
+	cache_aligned_free (old_data);
 	_capacity = size;
 
 	assert(_data);
@@ -222,6 +226,8 @@ MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 	return true;
 }
 
+extern PBD::Timing minsert;
+
 bool
 MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 {
@@ -233,7 +239,7 @@ MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 	const size_t bytes_to_merge = stamp_size + ev.size();
 
 	if (_size + bytes_to_merge >= _capacity) {
-		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
+		cerr << string_compose ("MidiBuffer::push_back failed (buffer is full: size: %1 capacity %2 new bytes %3)", _size, _capacity, bytes_to_merge) << endl;
 		PBD::stacktrace (cerr, 20);
 		return false;
 	}
@@ -254,8 +260,10 @@ MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 		insert_offset = m.offset;
 		break;
 	}
+
 	if (insert_offset == -1) {
-		return push_back(ev);
+		bool r = push_back(ev);
+		return r;
 	}
 
 	// don't use memmove - it may use malloc(!)
@@ -279,6 +287,20 @@ MidiBuffer::write(TimeType time, Evoral::EventType type, uint32_t size, const ui
 	insert_event(Evoral::Event<TimeType>(type, time, size, const_cast<uint8_t*>(buf)));
 	return size;
 }
+
+uint32_t
+MidiBuffer::append(TimeType time, Evoral::EventType type, uint32_t size, const uint8_t* buf)
+{
+	const size_t bytes_to_merge = sizeof(TimeType) + size;
+
+	if (_size + bytes_to_merge >= _capacity) {
+		resize (_capacity + 8192);
+	}
+
+	return push_back (time, size, buf);
+}
+
+
 
 /** Reserve space for a new event in the buffer.
  *

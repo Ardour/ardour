@@ -118,6 +118,11 @@ class LIBARDOUR_API MidiRegion : public Region
 
 	void clobber_sources (boost::shared_ptr<MidiSource> source);
 
+	int dump_to (Evoral::EventSink<samplepos_t>& dst,
+	              uint32_t                        chan_n,
+	              NoteMode                        mode,
+	              MidiChannelFilter*              filter) const;
+
   protected:
 
 	virtual bool can_trim_start_before_source_start () const {

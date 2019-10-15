@@ -380,7 +380,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	/* MIDI data handling */
 
   midi:
-	if (!declick_in_progress() && bufs.count().n_midi() && _midi_buf) {
+	if (!declick_in_progress() && bufs.count().n_midi()) {
 		MidiBuffer* dst;
 
 		if (_no_disk_output) {
@@ -427,55 +427,9 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			}
 		}
 
-		if (_playlists[DataType::MIDI]) {
-			/* MIDI butler needed part */
-
-			uint32_t samples_read = g_atomic_int_get(const_cast<gint*>(&_samples_read_from_ringbuffer));
-			uint32_t samples_written = g_atomic_int_get(const_cast<gint*>(&_samples_written_to_ringbuffer));
-
-			/*
-			  cerr << name() << " MDS written: " << samples_written << " - read: " << samples_read <<
-			  " = " << samples_written - samples_read
-			  << " + " << disk_samples_to_consume << " < " << midi_readahead << " = " << need_butler << ")" << endl;
-			*/
-
-			/* samples_read will generally be less than samples_written, but
-			 * immediately after an overwrite, we can end up having read some data
-			 * before we've written any. we don't need to trip an assert() on this,
-			 * but we do need to check so that the decision on whether or not we
-			 * need the butler is done correctly.
-			 */
-
-			/* furthermore..
-			 *
-			 * Doing heavy GUI operations[1] can stall also the butler.
-			 * The RT-thread meanwhile will happily continue and
-			 * ‘samples_read’ (from buffer to output) will become larger
-			 * than ‘samples_written’ (from disk to buffer).
-			 *
-			 * The disk-stream is now behind..
-			 *
-			 * In those cases the butler needs to be summed to refill the buffer (done now)
-			 * AND we need to skip (samples_read - samples_written). ie remove old events
-			 * before playback_sample from the rinbuffer.
-			 *
-			 * [1] one way to do so is described at #6170.
-			 * For me just popping up the context-menu on a MIDI-track header
-			 * of a track with a large (think beethoven :) midi-region also did the
-			 * trick. The playhead stalls for 2 or 3 sec, until the context-menu shows.
-			 *
-			 * In both cases the root cause is that redrawing MIDI regions on the GUI is still very slow
-			 * and can stall
-			 */
-			if (samples_read <= samples_written) {
-				if ((samples_written - samples_read) + disk_samples_to_consume < midi_readahead) {
-					butler_required = true;
-				}
-			} else {
-				butler_required = true;
-			}
-
-		}
+		/* All of MIDI is in RAM, no need to call the butler unless we
+		 * have to overwrite buffers because of a playlist change.
+		 */
 
 		_need_butler = butler_required;
 	}
@@ -493,6 +447,8 @@ bool
 DiskReader::pending_overwrite () const {
 	return g_atomic_int_get (&_pending_overwrite) != 0;
 }
+
+PBD::Timing minsert;
 
 void
 DiskReader::set_pending_overwrite ()
@@ -553,25 +509,21 @@ DiskReader::overwrite_existing_buffers ()
 
   midi:
 
-	if (_midi_buf && _playlists[DataType::MIDI]) {
+	if (_playlists[DataType::MIDI]) {
 
-		/* Clear the playback buffer contents.  This is safe as long as the butler
-		   thread is suspended, which it should be.
-		*/
-		_midi_buf->reset ();
-		_midi_buf->reset_tracker ();
+		minsert.reset();minsert.start();
+		_mbuf.clear(); midi_playlist()->dump (_mbuf, 0);
+		minsert.update(); cerr << "Reading " << name()  << " took " << minsert.elapsed() << " microseconds, final size = " << _mbuf.size() << endl;
 
-		g_atomic_int_set (&_samples_read_from_ringbuffer, 0);
-		g_atomic_int_set (&_samples_written_to_ringbuffer, 0);
-
+#if 0
 		/* Resolve all currently active notes in the playlist.  This is more
 		   aggressive than it needs to be: ideally we would only resolve what is
 		   absolutely necessary, but this seems difficult and/or impossible without
 		   having the old data or knowing what change caused the overwrite.
 		*/
 		midi_playlist()->resolve_note_trackers (*_midi_buf, overwrite_sample);
+#endif
 
-		midi_read (overwrite_sample, _chunk_samples, false);
 		file_sample[DataType::MIDI] = overwrite_sample; // overwrite_sample was adjusted by ::midi_read() to the new position
 	}
 
@@ -616,20 +568,6 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 		(*chan)->rbuf->reset ();
 	}
 
-	if (g_atomic_int_get (&_samples_read_from_ringbuffer) == 0) {
-		/* we haven't read anything since the last seek,
-		   so flush all note trackers to prevent
-		   wierdness
-		*/
-		reset_tracker ();
-	}
-
-	if (_midi_buf) {
-		_midi_buf->reset();
-	}
-	g_atomic_int_set(&_samples_read_from_ringbuffer, 0);
-	g_atomic_int_set(&_samples_written_to_ringbuffer, 0);
-
 	playback_sample = sample;
 	file_sample[DataType::AUDIO] = sample;
 	file_sample[DataType::MIDI] = sample;
@@ -663,16 +601,9 @@ DiskReader::can_internal_playback_seek (sampleoffset_t distance)
 		}
 	}
 
-	if (distance < 0) {
-		return true; // XXX TODO un-seek MIDI
-	}
+	/* 2. MIDI can always seek any distance */
 
-	/* 2. MIDI */
-
-	uint32_t samples_read    = g_atomic_int_get(&_samples_read_from_ringbuffer);
-	uint32_t samples_written = g_atomic_int_get(&_samples_written_to_ringbuffer);
-
-	return ((samples_written - samples_read) < distance);
+	return true;
 }
 
 void
@@ -1120,9 +1051,11 @@ DiskReader::move_processor_automation (boost::weak_ptr<Processor> p, list< Evora
 void
 DiskReader::reset_tracker ()
 {
+#if 0
 	if (_midi_buf) {
 		_midi_buf->reset_tracker ();
 	}
+#endif
 
 	boost::shared_ptr<MidiPlaylist> mp (midi_playlist());
 
@@ -1134,9 +1067,11 @@ DiskReader::reset_tracker ()
 void
 DiskReader::resolve_tracker (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time)
 {
+#if 0
 	if (_midi_buf) {
 		_midi_buf->resolve_tracker(buffer, time);
 	}
+#endif
 
 	boost::shared_ptr<MidiPlaylist> mp (midi_playlist());
 
@@ -1154,7 +1089,9 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 	MidiBuffer* target;
 	samplepos_t nframes = ::llabs (end_sample - start_sample);
 
-	assert (_midi_buf);
+	if (_mbuf.size() == 0) {
+		return;
+	}
 
 	if ((ms & MonitoringInput) == 0) {
 		/* Route::process_output_buffers() clears the buffer as-needed */
@@ -1167,15 +1104,6 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 		/* disk data needed */
 
 		Location* loc = _loop_location;
-
-		DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose (
-			             "%1 MDS pre-read read %8 offset = %9 @ %4..%5 from %2 write to %3, LOOPED ? %6 .. %7\n", _name,
-			             _midi_buf->get_read_ptr(), _midi_buf->get_write_ptr(), start_sample, end_sample,
-			             (loc ? loc->start() : -1), (loc ? loc->end() : -1), nframes, Port::port_offset()));
-
-		//cerr << "======== PRE ========\n";
-		//_midi_buf->dump (cerr);
-		//cerr << "----------------\n";
 
 		size_t events_read = 0;
 
@@ -1192,7 +1120,7 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 				   beyond the loop end.
 				*/
 
-				_midi_buf->resolve_tracker (*target, 0);
+				// _midi_buf->resolve_tracker (*target, 0);
 			}
 
 			/* for split-cycles we need to offset the events */
@@ -1215,37 +1143,28 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 				if (first) {
 					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read #1, from %1 for %2\n",
 					                                                      effective_start, first));
-					events_read = _midi_buf->read (*target, effective_start, first);
+					events_read = _mbuf.read (*target, effective_start, effective_start + first);
 				}
 
 				if (second) {
 					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read #2, from %1 for %2\n",
 					                                                      loc->start(), second));
-					events_read += _midi_buf->read (*target, loc->start(), second);
+					events_read += _mbuf.read (*target, loc->start(), loc->start() + second);
 				}
 
 			} else {
 				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read #3, adjusted start as %1 for %2\n",
-				                                                      effective_start, nframes));
-				events_read = _midi_buf->read (*target, effective_start, effective_start + nframes);
+				                                                effective_start, nframes));
+				events_read = _mbuf.read (*target, effective_start, effective_start + nframes);
 			}
 		} else {
-			const size_t n_skipped = _midi_buf->skip_to (start_sample);
-			if (n_skipped > 0) {
-				warning << string_compose(_("MidiDiskstream %1: skipped %2 events, possible underflow"), id(), n_skipped) << endmsg;
-			}
 			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer read, from %1 to %2 (%3)", start_sample, end_sample, nframes));
-			events_read = _midi_buf->read (*target, start_sample, end_sample, Port::port_offset ());
+			events_read = _mbuf.read (*target, start_sample, end_sample, Port::port_offset ());
 		}
 
-		DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose (
-			             "%1 MDS events read %2 range %3 .. %4 rspace %5 wspace %6 r@%7 w@%8\n",
-			             _name, events_read, playback_sample, playback_sample + nframes,
-			             _midi_buf->read_space(), _midi_buf->write_space(),
-			             _midi_buf->get_read_ptr(), _midi_buf->get_write_ptr()));
+		DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("%1 MDS events read %2 range %3 .. %4\n", _name, events_read, playback_sample, playback_sample + nframes));
 	}
 
-	g_atomic_int_add (&_samples_read_from_ringbuffer, nframes);
 
 	if (!_no_disk_output && (ms & MonitoringInput)) {
 		dst.merge_from (*target, nframes);
@@ -1265,158 +1184,20 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 		cerr << "----------------\n";
 	}
 #endif
-#if 0
-	cerr << "======== MIDI Disk Buffer ========\n";
-	_midi_buf->dump (cerr);
-	cerr << "----------------\n";
-#endif
 }
 
 /** @a start is set to the new sample position (TIME) read up to */
 int
 DiskReader::midi_read (samplepos_t& start, samplecnt_t dur, bool reversed)
 {
-	samplecnt_t this_read   = 0;
-	samplepos_t loop_end    = 0;
-	samplepos_t loop_start  = 0;
-	samplecnt_t loop_length = 0;
-	Location*  loc         = _loop_location;
-	samplepos_t effective_start = start;
-	Evoral::Range<samplepos_t>*  loop_range (0);
-
-	assert(_midi_buf);
-
-	DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("MDS::midi_read @ %1 cnt %2\n", start, dur));
-
-	boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack>(_route);
-	MidiChannelFilter* filter = mt ? &mt->playback_filter() : 0;
-	sampleoffset_t loop_offset = 0;
-
-	if (!reversed && loc) {
-		get_location_times (loc, &loop_start, &loop_end, &loop_length);
-	}
-
-	while (dur) {
-
-		/* take any loop into account. we can't read past the end of the loop. */
-
-		if (loc && !reversed) {
-
-			if (!loop_range) {
-				loop_range = new Evoral::Range<samplepos_t> (loop_start, loop_end-1); // inclusive semantics require -1
-			}
-
-			/* if we are (seamlessly) looping, ensure that the first sample we read is at the correct
-			   position within the loop.
-			*/
-
-			effective_start = loop_range->squish (effective_start);
-
-			if ((loop_end - effective_start) <= dur) {
-				/* too close to end of loop to read "dur", so
-				   shorten it.
-				*/
-				this_read = loop_end - effective_start;
-			} else {
-				this_read = dur;
-			}
-
-		} else {
-			this_read = dur;
-		}
-
-		if (this_read == 0) {
-			break;
-		}
-
-		this_read = min (dur,this_read);
-
-		DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("MDS ::read at %1 for %2 loffset %3\n", effective_start, this_read, loop_offset));
-
-		if (midi_playlist()->read (*_midi_buf, effective_start, this_read, loop_range, 0, filter) != this_read) {
-			error << string_compose(
-					_("MidiDiskstream %1: cannot read %2 from playlist at sample %3"),
-					id(), this_read, start) << endmsg;
-			return -1;
-		}
-
-		g_atomic_int_add (&_samples_written_to_ringbuffer, this_read);
-
-		if (reversed) {
-
-			// Swap note ons with note offs here.  etc?
-			// Fully reversing MIDI requires look-ahead (well, behind) to find previous
-			// CC values etc.  hard.
-
-		} else {
-
-			/* adjust passed-by-reference argument (note: this is
-			   monotonic and does not reflect looping.
-			*/
-			start += this_read;
-
-			/* similarly adjust effective_start, but this may be
-			   readjusted for seamless looping as we continue around
-			   the loop.
-			*/
-			effective_start += this_read;
-		}
-
-		dur -= this_read;
-	}
-
 	return 0;
 }
 
 int
 DiskReader::refill_midi ()
 {
-	if (!_playlists[DataType::MIDI] || !_midi_buf) {
-		return 0;
-	}
-
-	const size_t  write_space = _midi_buf->write_space();
-	const bool reversed    = _session.transport_speed() < 0.0f;
-
-	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("MIDI refill, write space = %1 file sample = %2\n", write_space, file_sample[DataType::MIDI]));
-
-	/* no space to write */
-	if (write_space == 0) {
-		return 0;
-	}
-
-	if (reversed) {
-		return 0;
-	}
-
-	/* at end: nothing to do */
-
-	samplepos_t ffm = file_sample[DataType::MIDI];
-
-	if (ffm == max_samplepos) {
-		return 0;
-	}
-
-	int ret = 0;
-	const uint32_t samples_read = g_atomic_int_get (&_samples_read_from_ringbuffer);
-	const uint32_t samples_written = g_atomic_int_get (&_samples_written_to_ringbuffer);
-
-	if ((samples_read < samples_written) && (samples_written - samples_read) >= midi_readahead) {
-		return 0;
-	}
-
-	samplecnt_t to_read = midi_readahead - ((samplecnt_t)samples_written - (samplecnt_t)samples_read);
-
-	to_read = min (to_read, (samplecnt_t) (max_samplepos - ffm));
-	to_read = min (to_read, (samplecnt_t) write_space);
-
-	if (midi_read (ffm, to_read, reversed)) {
-		ret = -1;
-	}
-
-	file_sample[DataType::MIDI] = ffm;
-
-	return ret;
+	/* nothing to do ... it's all in RAM thanks to overwrite */
+	return 0;
 }
 
 void

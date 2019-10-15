@@ -34,6 +34,7 @@
 #include "pbd/file_utils.h"
 #include "pbd/stl_delete.h"
 #include "pbd/strsplit.h"
+#include "pbd/timing.h"
 
 #include "pbd/gstdio_compat.h"
 #include <glibmm/miscutils.h>
@@ -212,6 +213,8 @@ SMFSource::close ()
 {
 	/* nothing to do: file descriptor is never kept open */
 }
+
+extern PBD::Timing minsert;
 
 /** All stamps in audio samples */
 samplecnt_t

@@ -88,6 +88,8 @@ public:
 	                 uint32_t                         chan_n = 0,
 	                 MidiChannelFilter*               filter = NULL);
 
+	void dump (Evoral::EventSink<samplepos_t>&, MidiChannelFilter*);
+
 	int set_state (const XMLNode&, int version);
 
 	bool destroy_region (boost::shared_ptr<Region>);

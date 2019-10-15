@@ -28,7 +28,9 @@
 #include "pbd/rcu.h"
 
 #include "ardour/interpolation.h"
+#include "ardour/midi_buffer.h"
 #include "ardour/processor.h"
+#include "ardour/rt_midibuffer.h"
 
 namespace PBD {
 	template<class T> class PlaybackBuffer;
@@ -190,6 +192,8 @@ protected:
 	MidiRingBuffer<samplepos_t>*  _midi_buf;
 	gint                         _samples_written_to_ringbuffer;
 	gint                         _samples_read_from_ringbuffer;
+
+	RTMidiBuffer _mbuf;
 
 	static void get_location_times (const Location* location, samplepos_t* start, samplepos_t* end, samplepos_t* length);
 };

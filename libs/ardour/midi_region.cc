@@ -481,6 +481,79 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 	return to_read;
 }
 
+
+int
+MidiRegion::dump_to (Evoral::EventSink<samplepos_t>& dst,
+                     uint32_t                        chan_n,
+                     NoteMode                        mode,
+                     MidiChannelFilter*              filter) const
+{
+	sampleoffset_t internal_offset = 0;
+
+	/* precondition: caller has verified that we cover the desired section */
+
+	assert(chan_n == 0);
+
+	if (muted()) {
+		return 0; /* read nothing */
+	}
+
+
+	/* dump pulls from zero to infinity ... */
+
+	if (_position) {
+		/* we are starting the read from before the start of the region */
+		internal_offset = 0;
+	} else {
+		/* we are starting the read from after the start of the region */
+		internal_offset = -_position;
+	}
+
+	if (internal_offset >= _length) {
+		return 0; /* read nothing */
+	}
+
+	boost::shared_ptr<MidiSource> src = midi_source(chan_n);
+
+	Glib::Threads::Mutex::Lock lm(src->mutex());
+
+	src->set_note_mode(lm, mode);
+
+#if 0
+	cerr << "MR " << name () << " read @ " << position << " + " << to_read
+	     << " dur was " << dur
+	     << " len " << _length
+	     << " l-io " << (_length - internal_offset)
+	     << " _position = " << _position
+	     << " _start = " << _start
+	     << " intoffset = " << internal_offset
+	     << " quarter_note = " << quarter_note()
+	     << " start_beat = " << _start_beats
+	     << endl;
+#endif
+
+	MidiCursor cursor;
+
+	/* This call reads events from a source and writes them to `dst' timed in session samples */
+
+	src->midi_read (
+		lm, // source lock
+		dst, // destination buffer
+		_position - _start, // start position of the source in session samples
+		_start + internal_offset, // where to start reading in the source
+		max_samplecnt,
+		0,
+		cursor,
+		0,
+		filter,
+		_filtered_parameters,
+		quarter_note(),
+		_start_beats);
+
+	return 0;
+}
+
+
 XMLNode&
 MidiRegion::state ()
 {
