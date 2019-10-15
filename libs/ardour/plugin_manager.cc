@@ -264,6 +264,72 @@ PluginManager::~PluginManager()
 	}
 }
 
+struct PluginInfoPtrNameSorter {
+	bool operator () (PluginInfoPtr const& a, PluginInfoPtr const& b) const {
+		return PBD::downcase (a->name) < PBD::downcase (b->name);
+	}
+};
+
+void
+PluginManager::detect_name_ambiguities (PluginInfoList* pil)
+{
+	if (!pil) {
+		return;
+	}
+	pil->sort (PluginInfoPtrNameSorter ());
+
+	for (PluginInfoList::iterator i = pil->begin(); i != pil->end();) {
+		 PluginInfoPtr& p = *i;
+		 ++i;
+		 if (i != pil->end() && (*i)->name == p->name) {
+			 /* mark name as ambiguous IFF ambiguity can be resolved
+				* by listing number of audio outputs.
+				* This is used in the instrument selector.
+				*/
+			 bool r = p->n_outputs.n_audio() != (*i)->n_outputs.n_audio();
+			 p->multichannel_name_ambiguity = r;
+			 (*i)->multichannel_name_ambiguity = r;
+		 }
+	}
+}
+
+void
+PluginManager::detect_type_ambiguities (PluginInfoList& pil)
+{
+	PluginInfoList dup;
+	pil.sort (PluginInfoPtrNameSorter ());
+	for (PluginInfoList::iterator i = pil.begin(); i != pil.end(); ++i) {
+		switch (dup.size ()) {
+			case 0:
+				break;
+			case 1:
+				if (dup.back()->name != (*i)->name) {
+					dup.clear ();
+				}
+				break;
+			default:
+				if (dup.back()->name != (*i)->name) {
+					/* found multiple plugins with same name */
+					bool typediff = false;
+					for (PluginInfoList::iterator j = dup.begin(); j != dup.end(); ++j) {
+						if (dup.front()->type != (*j)->type) {
+							typediff = true;
+							break;
+						}
+					}
+					if (typediff) {
+						for (PluginInfoList::iterator j = dup.begin(); j != dup.end(); ++j) {
+							(*j)->plugintype_name_ambiguity = true;
+						}
+					}
+					dup.clear ();
+				}
+				break;
+		}
+		dup.push_back (*i);
+	}
+}
+
 void
 PluginManager::refresh (bool cache_only)
 {
@@ -372,6 +438,40 @@ PluginManager::refresh (bool cache_only)
 	PluginListChanged (); /* EMIT SIGNAL */
 	PluginScanMessage(X_("closeme"), "", false);
 	_cancel_scan = false;
+
+	BootMessage (_("Indexing Plugins..."));
+
+	detect_name_ambiguities (_windows_vst_plugin_info);
+	detect_name_ambiguities (_lxvst_plugin_info);
+	detect_name_ambiguities (_mac_vst_plugin_info);
+	detect_name_ambiguities (_au_plugin_info);
+	detect_name_ambiguities (_ladspa_plugin_info);
+	detect_name_ambiguities (_lv2_plugin_info);
+	detect_name_ambiguities (_lua_plugin_info);
+
+	PluginInfoList all_plugs;
+	if (_windows_vst_plugin_info) {
+		all_plugs.insert(all_plugs.end(), _windows_vst_plugin_info->begin(), _windows_vst_plugin_info->end());
+	}
+	if (_lxvst_plugin_info) {
+		all_plugs.insert(all_plugs.end(), _lxvst_plugin_info->begin(), _lxvst_plugin_info->end());
+	}
+	if (_mac_vst_plugin_info) {
+		all_plugs.insert(all_plugs.end(), _mac_vst_plugin_info->begin(), _mac_vst_plugin_info->end());
+	}
+	if (_au_plugin_info) {
+		all_plugs.insert(all_plugs.end(), _au_plugin_info->begin(), _au_plugin_info->end());
+	}
+	if (_ladspa_plugin_info) {
+		all_plugs.insert(all_plugs.end(), _ladspa_plugin_info->begin(), _ladspa_plugin_info->end());
+	}
+	if (_lv2_plugin_info) {
+		all_plugs.insert(all_plugs.end(), _lv2_plugin_info->begin(), _lv2_plugin_info->end());
+	}
+	if (_lua_plugin_info) {
+		all_plugs.insert(all_plugs.end(), _lua_plugin_info->begin(), _lua_plugin_info->end());
+	}
+	detect_type_ambiguities (all_plugs);
 }
 
 void

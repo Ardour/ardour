@@ -193,6 +193,9 @@ private:
 	bool _cancel_scan;
 	bool _cancel_timeout;
 
+	void detect_name_ambiguities (ARDOUR::PluginInfoList*);
+	void detect_type_ambiguities (ARDOUR::PluginInfoList&);
+
 	void ladspa_refresh ();
 	void lua_refresh ();
 	void lua_refresh_cb ();

@@ -303,7 +303,6 @@ public:
 	/** Emitted for preset-load to set a control-port */
 	PBD::Signal2<void, uint32_t, float> PresetPortSetValue;
 
-
 	/** @return true if plugin has a custom plugin GUI */
 	virtual bool has_editor () const = 0;
 
@@ -455,7 +454,12 @@ find_plugin (ARDOUR::Session&, std::string unique_id, ARDOUR::PluginType);
 class LIBARDOUR_API PluginInfo
 {
 public:
-	PluginInfo () {}
+	PluginInfo ()
+	        : multichannel_name_ambiguity (false)
+	        , plugintype_name_ambiguity (false)
+	        , index (0)
+	{}
+
 	virtual ~PluginInfo () {}
 
 	std::string        name;
@@ -465,6 +469,9 @@ public:
 	ChanCount          n_inputs;
 	ChanCount          n_outputs;
 	ARDOUR::PluginType type;
+
+	bool multichannel_name_ambiguity;
+	bool plugintype_name_ambiguity;
 
 	std::string unique_id;
 
@@ -491,7 +498,7 @@ public:
 
 protected:
 	friend class PluginManager;
-	uint32_t index;
+	uint32_t index; //< used for LADSPA, index in module
 };
 
 } // namespace ARDOUR
