@@ -18,9 +18,10 @@
 
 #include "pbd/convert.h"
 #include "pbd/enumwriter.h"
-#include "ardour/chan_count.h"
+
 #include "ardour/plugin_manager.h"
 #include "gtkmm2ext/gui_thread.h"
+
 #include "instrument_selector.h"
 
 #include "pbd/i18n.h"
