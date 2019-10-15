@@ -311,15 +311,22 @@ PluginManager::detect_type_ambiguities (PluginInfoList& pil)
 				if (dup.back()->name != (*i)->name) {
 					/* found multiple plugins with same name */
 					bool typediff = false;
+					bool chandiff = false;
 					for (PluginInfoList::iterator j = dup.begin(); j != dup.end(); ++j) {
 						if (dup.front()->type != (*j)->type) {
 							typediff = true;
-							break;
 						}
+						chandiff |= (*j)->multichannel_name_ambiguity;
 					}
 					if (typediff) {
 						for (PluginInfoList::iterator j = dup.begin(); j != dup.end(); ++j) {
 							(*j)->plugintype_name_ambiguity = true;
+							/* show multi-channel information for consistency, when other types display it.
+							 * eg. "Foo 8 outs, VST", "Foo 12 outs, VST", "Foo <=12 outs, AU"
+							 */
+							if (chandiff) {
+								(*j)->multichannel_name_ambiguity = true;
+							}
 						}
 					}
 					dup.clear ();
