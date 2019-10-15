@@ -157,7 +157,7 @@ public:
 	virtual bool can_record() { return false; }
 
 	void non_realtime_transport_stop (samplepos_t now, bool flush);
-	void realtime_handle_transport_stopped ();
+	virtual void realtime_handle_transport_stopped ();
 
 	virtual void realtime_locate () {}
 	virtual void non_realtime_locate (samplepos_t);

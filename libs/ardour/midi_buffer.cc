@@ -288,20 +288,6 @@ MidiBuffer::write(TimeType time, Evoral::EventType type, uint32_t size, const ui
 	return size;
 }
 
-uint32_t
-MidiBuffer::append(TimeType time, Evoral::EventType type, uint32_t size, const uint8_t* buf)
-{
-	const size_t bytes_to_merge = sizeof(TimeType) + size;
-
-	if (_size + bytes_to_merge >= _capacity) {
-		resize (_capacity + 8192);
-	}
-
-	return push_back (time, size, buf);
-}
-
-
-
 /** Reserve space for a new event in the buffer.
  *
  * This call is for copying MIDI directly into the buffer, the data location
