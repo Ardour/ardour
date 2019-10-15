@@ -211,6 +211,12 @@ class LIBARDOUR_API LuaPluginInfo : public PluginInfo
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;
 
 	bool reconfigurable_io() const { return true; }
+	uint32_t max_configurable_ouputs () const {
+		return _max_outputs;
+	}
+
+	private:
+	uint32_t _max_outputs;
 };
 
 typedef boost::shared_ptr<LuaPluginInfo> LuaPluginInfoPtr;

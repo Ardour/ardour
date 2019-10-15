@@ -2549,11 +2549,7 @@ AUPlugin::has_editor () const
 AUPluginInfo::AUPluginInfo (boost::shared_ptr<CAComponentDescription> d)
 	: descriptor (d)
 	, version (0)
-{
-	type = ARDOUR::AudioUnit;
-}
-
-AUPluginInfo::~AUPluginInfo ()
+	, max_outputs (0)
 {
 	type = ARDOUR::AudioUnit;
 }
@@ -2922,6 +2918,8 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 
 		const int rv = cached_io_configuration (info->unique_id, info->version, cacomp, info->cache, info->name);
 
+		info.max_outputs = 0;
+
 		if (rv == 0) {
 			/* here we have to map apple's wildcard system to a simple pair
 			   of values. in ::can_do() we use the whole system, but here
@@ -2936,8 +2934,18 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			   info to the user, which should perhaps be revisited.
 			*/
 
-			int32_t possible_in = info->cache.io_configs.front().first;
-			int32_t possible_out = info->cache.io_configs.front().second;
+			const vector<pair<int,int> >& ioc (info->cache.io_configs);
+			for (vector<pair<int,int> >::const_iterator i = ioc.begin(); i != ioc.end(); ++i) {
+				int32_t possible_out = i->second;
+				if (possible_out < 0) {
+					continue;
+				} else if (possible_out > info.max_outputs) {
+					info.max_outputs = possible_out;
+				}
+			}
+
+			int32_t possible_in = ioc.front().first;
+			int32_t possible_out = ioc.font().second;
 
 			if (possible_in > 0) {
 				info->n_inputs.set (DataType::AUDIO, possible_in);

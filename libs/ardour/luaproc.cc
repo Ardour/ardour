@@ -1232,6 +1232,8 @@ LuaPluginInfo::LuaPluginInfo (LuaScriptInfoPtr lsi) {
 	n_outputs.set (DataType::AUDIO, 1);
 	type = Lua;
 
+	// TODO, parse script, get 'dsp_ioconfig', see can_support_io_configuration()
+	_max_outputs = 0;
 }
 
 PluginPtr

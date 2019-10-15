@@ -496,6 +496,12 @@ public:
 	/* @return true if the plugin can change its inputs or outputs on demand. */
 	virtual bool reconfigurable_io () const { return false; }
 
+	/* max [re]configurable outputs (if finite, 0 otherwise) */
+	virtual uint32_t max_configurable_ouputs () const
+	{
+		return n_outputs.n_audio();
+	}
+
 protected:
 	friend class PluginManager;
 	uint32_t index; //< used for LADSPA, index in module

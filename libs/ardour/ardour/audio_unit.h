@@ -245,7 +245,7 @@ struct LIBARDOUR_API AUPluginCachedInfo {
 class LIBARDOUR_API AUPluginInfo : public PluginInfo {
   public:
 	 AUPluginInfo (boost::shared_ptr<CAComponentDescription>);
-	~AUPluginInfo ();
+	~AUPluginInfo () {}
 
 	PluginPtr load (Session& session);
 
@@ -263,6 +263,7 @@ class LIBARDOUR_API AUPluginInfo : public PluginInfo {
 	AUPluginCachedInfo cache;
 
 	bool reconfigurable_io() const { return true; }
+	uint32_t max_configurable_ouputs () const { return max_outputs; }
 
 	static void clear_cache ();
 	static PluginInfoList* discover (bool scan_only);
@@ -274,6 +275,7 @@ class LIBARDOUR_API AUPluginInfo : public PluginInfo {
   private:
 	boost::shared_ptr<CAComponentDescription> descriptor;
 	UInt32 version;
+	uint32_t max_outputs;
 	static FILE * _crashlog_fd;
 	static bool _scan_only;
 
