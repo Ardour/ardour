@@ -122,24 +122,27 @@ InstrumentSelector::build_instrument_list()
 
 	uint32_t n = 1;
 	std::string prev;
-	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end();) {
+	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i, ++n) {
 		PluginInfoPtr p = *i;
-		++i;
 		
-		std::string name = p->name;
-		
-		/* in the instrument menu,we need to differentiate the different output configs here*/
-		int n_outs = p->n_outputs.n_audio();
+		std::string suffix;
+
+#ifdef MIXBUS
 		if (n_outs > 2) {
-			name += string_compose( " (%1 outs)", n_outs);
+			suffix = string_compose(_("%1 outs"), n_outs);
 		}
-		
-		/*if a plugin appears in multiple types, we need to differentiate the different types here */
-		bool suffix_type = prev == p->name;
-		if (!suffix_type && i != all_plugs.end() && (*i)->name == p->name) {
-			suffix_type = true;
+#else
+		if (p->multichannel_name_ambiguity) {
+			int n_outs = p->n_outputs.n_audio();
+			if (n_outs > 2) {
+				suffix = string_compose(_("%1 outs"), n_outs);
+			} else if (n_outs == 2) {
+				suffix = _("stereo");
+			}
 		}
-		if (suffix_type) {
+#endif
+
+		if (p->plugintype_name_ambiguity) {
 			std::string pt;
 			switch (p->type) {
 				case AudioUnit:
@@ -153,7 +156,15 @@ InstrumentSelector::build_instrument_list()
 				default:
 					pt = enum_2_string (p->type);
 			}
-			name += " (" + pt + ")";
+			if (!suffix.empty ()) {
+				suffix += ", ";
+			}
+			suffix += pt;
+		}
+
+		std::string name = p->name;
+		if (!suffix.empty ()) {
+			name += " (" + suffix + ")";
 		}
 
 		row = *(_instrument_list->append());
@@ -167,7 +178,6 @@ InstrumentSelector::build_instrument_list()
 			_gmsynth_id = n;
 		}
 		prev = p->name;
-		n++;
 	}
 }
 
