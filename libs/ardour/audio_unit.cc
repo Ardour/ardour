@@ -2918,7 +2918,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 
 		const int rv = cached_io_configuration (info->unique_id, info->version, cacomp, info->cache, info->name);
 
-		info.max_outputs = 0;
+		info->max_outputs = 0;
 
 		if (rv == 0) {
 			/* here we have to map apple's wildcard system to a simple pair
@@ -2939,13 +2939,13 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 				int32_t possible_out = i->second;
 				if (possible_out < 0) {
 					continue;
-				} else if (possible_out > info.max_outputs) {
-					info.max_outputs = possible_out;
+				} else if (possible_out > info->max_outputs) {
+					info->max_outputs = possible_out;
 				}
 			}
 
 			int32_t possible_in = ioc.front().first;
-			int32_t possible_out = ioc.font().second;
+			int32_t possible_out = ioc.front().second;
 
 			if (possible_in > 0) {
 				info->n_inputs.set (DataType::AUDIO, possible_in);
