@@ -38,6 +38,7 @@
 #include "pbd/xml++.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/basename.h"
+#include "pbd/timing.h"
 
 #include "evoral/Control.hpp"
 #include "evoral/EventSink.hpp"
@@ -241,6 +242,7 @@ MidiSource::midi_read (const Lock&                        lm,
 
 	cursor.last_read_end = start + cnt;
 
+	samplepos_t time_samples = 0;
 	// Copy events in [start, start + cnt) into dst
 	for (; i != _model->end(); ++i) {
 
@@ -277,7 +279,7 @@ MidiSource::midi_read (const Lock&                        lm,
 				   destroying events in the model during read. */
 				Evoral::Event<Temporal::Beats> ev(*i, true);
 				if (!filter->filter(ev.buffer(), ev.size())) {
-					dst.write(time_samples, ev.event_type(), ev.size(), ev.buffer());
+					dst.write (time_samples, ev.event_type(), ev.size(), ev.buffer());
 				} else {
 					DEBUG_TRACE (DEBUG::MidiSourceIO,
 					             string_compose ("%1: filter event @ %2 type %3 size %4\n",

@@ -202,7 +202,7 @@ MidiPlaylist::read (Evoral::EventSink<samplepos_t>& dst,
 
 		/* Read from region into target. */
 		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("read from %1 at %2 for %3 LR %4 .. %5\n",
-		                                                    mr->name(), start, dur, 
+		                                                    mr->name(), start, dur,
 		                                                    (loop_range ? loop_range->from : -1),
 		                                                    (loop_range ? loop_range->to : -1)));
 		mr->read_at (tgt, start, dur, loop_range, tracker->cursor, chan_n, _note_mode, &tracker->tracker, filter);
@@ -488,4 +488,63 @@ MidiPlaylist::contained_automation()
 	}
 
 	return ret;
+}
+
+void
+MidiPlaylist::dump (Evoral::EventSink<samplepos_t>& dst, MidiChannelFilter* filter)
+{
+	typedef pair<MidiStateTracker*,samplepos_t> TrackerInfo;
+
+	Playlist::RegionReadLock rl (this);
+
+	DEBUG_TRACE (DEBUG::MidiPlaylistIO, "---- MidiPlaylist::dump-----\n");
+
+	std::vector< boost::shared_ptr<Region> > regs;
+
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+
+		/* check for the case of solo_selection */
+
+		if (_session.solo_selection_active() && SoloSelectedActive() && !SoloSelectedListIncludes ((const Region*) &(**i))) {
+			continue;
+		}
+
+		regs.push_back (*i);
+	}
+
+	/* If we are reading from a single region, we can read directly into dst.  Otherwise,
+	   we read into a temporarily list, sort it, then write that to dst.
+	*/
+	Evoral::EventList<samplepos_t>  evlist;
+	Evoral::EventSink<samplepos_t>& tgt = (regs.size() == 1) ? dst : evlist;
+
+	DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1 regions to read, direct: %2\n", regs.size(), (regs.size() == 1)));
+
+	for (vector<boost::shared_ptr<Region> >::iterator i = regs.begin(); i != regs.end(); ++i) {
+
+		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(*i);
+
+		if (!mr) {
+			continue;
+		}
+
+		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("dump from %1 at %2\n", mr->name()));
+		mr->dump_to (tgt, 0, _note_mode, filter);
+	}
+
+	if (!evlist.empty()) {
+		/* We've read from multiple regions into evlist, sort the event list by time. */
+		EventsSortByTimeAndType<samplepos_t> cmp;
+		evlist.sort (cmp);
+
+		/* Copy ordered events from event list to dst. */
+		for (Evoral::EventList<samplepos_t>::iterator e = evlist.begin(); e != evlist.end(); ++e) {
+			Evoral::Event<samplepos_t>* ev (*e);
+			dst.write (ev->time(), ev->event_type(), ev->size(), ev->buffer());
+			delete ev;
+		}
+	}
+
+	DEBUG_TRACE (DEBUG::MidiPlaylistIO, "---- End MidiPlaylist::dump ----\n");
+
 }
