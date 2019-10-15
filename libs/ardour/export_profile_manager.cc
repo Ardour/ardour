@@ -408,7 +408,7 @@ ExportProfileManager::init_timespans (XMLNodeList nodes)
 		// Add session as default selection
 		Location * session_range;
 
-		if ((session_range = session.locations()->session_range_location()) != 0) {
+		if ((session_range = session.locations()->session_range_location()) == 0) {
 			return false;
 		}
 
