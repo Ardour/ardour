@@ -130,13 +130,21 @@ InstrumentSelector::build_instrument_list()
 #ifdef MIXBUS
 		uint32_t n_outs = p->max_configurable_ouputs ();
 		if (n_outs > 2) {
-			suffix = string_compose(_("%1 outs"), n_outs);
+			if (p->reconfigurable_io ()) {
+				suffix = string_compose(_("\u2264 %1 outs"), n_outs);
+			} else {
+				suffix = string_compose(_("%1 outs"), n_outs);
+			}
 		}
 #else
 		if (p->multichannel_name_ambiguity) {
 			uint32_t n_outs = p->max_configurable_ouputs ();
 			if (n_outs > 2) {
-				suffix = string_compose(_("%1 outs"), n_outs);
+				if (p->reconfigurable_io ()) {
+					suffix = string_compose(_("\u2264 %1 outs"), n_outs);
+				} else {
+					suffix = string_compose(_("%1 outs"), n_outs);
+				}
 			} else if (n_outs == 2) {
 				suffix = _("stereo");
 			}
