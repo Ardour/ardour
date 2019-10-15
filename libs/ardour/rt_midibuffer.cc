@@ -39,7 +39,6 @@ RTMidiBuffer::RTMidiBuffer (size_t capacity)
 {
 	if (capacity) {
 		resize (capacity);
-		clear ();
 	}
 }
 
@@ -137,7 +136,6 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, samplec
 
 		if (write_loc == 0) {
 			DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("MidiRingBuffer: overflow in destination MIDI buffer, stopped after %1 events, dst size = %2\n", count, dst.size()));
-			cerr << string_compose ("MidiRingBuffer: overflow in destination MIDI buffer, stopped after %1 events, dst size = %1\n", count, dst.size()) << endl;
 			break;
 		}
 
