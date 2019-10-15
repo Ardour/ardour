@@ -392,8 +392,8 @@ ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (ARDOUR::Session * se
 	range_id (range_id)
 {
 	range_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
-	range_view.append_column_editable (_("RT"), range_cols.realtime);
-	range_view.append_column_editable (_("Range"), range_cols.name);
+	range_view.append_column_editable (_("RT"), range_cols.realtime); // 0
+	range_view.append_column_editable (_("Range"), range_cols.name); // 1
 
 	if (Gtk::CellRendererToggle * renderer = dynamic_cast<Gtk::CellRendererToggle *> (range_view.get_column_cell_renderer (0))) {
 		renderer->signal_toggled().connect (sigc::hide (sigc::mem_fun (*this, &ExportTimespanSelectorSingle::update_timespans)));
@@ -406,22 +406,22 @@ ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (ARDOUR::Session * se
 	Gtk::CellRendererText * label_render = Gtk::manage (new Gtk::CellRendererText());
 	Gtk::TreeView::Column * label_col = Gtk::manage (new Gtk::TreeView::Column (_("Time Span"), *label_render));
 	label_col->add_attribute (label_render->property_markup(), range_cols.label);
-	range_view.append_column (*label_col);
+	range_view.append_column (*label_col); // 2
 
-	range_view.append_column (_("Length"), range_cols.length);
-	range_view.append_column (_("Creation Date"), range_cols.date);
+	range_view.append_column (_("Length"), range_cols.length); // 3
+	range_view.append_column (_("Creation Date"), range_cols.date); // 4
 
-	Gtk::TreeViewColumn* range_col = range_view.get_column(2); // range name column
-	range_col->set_sort_column(4); // set sort name
+	Gtk::TreeViewColumn* range_col = range_view.get_column (1); // "Range"
+	range_col->set_sort_column (range_cols.name);
 
-	Gtk::TreeViewColumn* time_span_col = range_view.get_column(3); // time span column
-	time_span_col->set_sort_column(9); //set sort start
+	Gtk::TreeViewColumn* time_span_col = range_view.get_column (2); // "Time Span"
+	time_span_col->set_sort_column (range_cols.start);
 
-	Gtk::TreeViewColumn* date_col = range_view.get_column(5); // date column
-	date_col->set_sort_column(7); // set sort as the timestamp
+	Gtk::TreeViewColumn* length_col = range_view.get_column (3); // "Length"
+	length_col->set_sort_column (range_cols.length_actual);
 
-	Gtk::TreeViewColumn* length_col = range_view.get_column(4); // length column
-	length_col->set_sort_column(8); //set sort length_actual
+	Gtk::TreeViewColumn* date_col = range_view.get_column (4); // "Creation Date"
+	date_col->set_sort_column (range_cols.timestamp);
 }
 
 void
@@ -520,22 +520,22 @@ ExportTimespanSelectorMultiple::ExportTimespanSelectorMultiple (ARDOUR::Session 
 	Gtk::CellRendererText * label_render = Gtk::manage (new Gtk::CellRendererText());
 	Gtk::TreeView::Column * label_col = Gtk::manage (new Gtk::TreeView::Column (_("Time Span"), *label_render));
 	label_col->add_attribute (label_render->property_markup(), range_cols.label);
-	range_view.append_column (*label_col);
+	range_view.append_column (*label_col); // 3
 
-	range_view.append_column (_("Length"), range_cols.length);
-	range_view.append_column (_("Creation Date"), range_cols.date);
+	range_view.append_column (_("Length"), range_cols.length); // 4
+	range_view.append_column (_("Creation Date"), range_cols.date); // 5
 
-	Gtk::TreeViewColumn* range_col = range_view.get_column(2); // range name column
-	range_col->set_sort_column(4); // set sort name
+	Gtk::TreeViewColumn* range_col = range_view.get_column (2); // "Range"
+	range_col->set_sort_column (range_cols.name);
 
-	Gtk::TreeViewColumn* time_span_col = range_view.get_column(3); // time span column
-	time_span_col->set_sort_column(9); //set sort start
+	Gtk::TreeViewColumn* time_span_col = range_view.get_column (3); // "Time Span"
+	time_span_col->set_sort_column (range_cols.start);
 
-	Gtk::TreeViewColumn* date_col = range_view.get_column(5); // date column
-	date_col->set_sort_column(7); // set sort as the timestamp
+	Gtk::TreeViewColumn* length_col = range_view.get_column (4); // "Length"
+	length_col->set_sort_column (range_cols.length_actual);
 
-	Gtk::TreeViewColumn* length_col = range_view.get_column(4); // length column
-	length_col->set_sort_column(8); //set sort length_actual
+	Gtk::TreeViewColumn* date_col = range_view.get_column (5); // "Creation Date"
+	date_col->set_sort_column (range_cols.timestamp);
 }
 
 void
