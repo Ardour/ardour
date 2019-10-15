@@ -135,6 +135,8 @@ public:
 	bool input_active () const;
 	PBD::Signal0<void> InputActiveChanged;
 
+	void realtime_handle_transport_stopped ();
+
 protected:
 
 	XMLNode& state (bool save_template);

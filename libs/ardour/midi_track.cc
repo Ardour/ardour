@@ -360,7 +360,7 @@ MidiTrack::realtime_locate ()
 		(*i)->realtime_locate ();
 	}
 
-	_disk_reader->reset_tracker ();
+	_disk_reader->resolve_tracker (_immediate_events, Port::port_offset());
 }
 
 void
@@ -863,4 +863,11 @@ void
 MidiTrack::filter_input (BufferSet& bufs)
 {
 	_capture_filter.filter (bufs);
+}
+
+void
+MidiTrack::realtime_handle_transport_stopped ()
+{
+	Route::realtime_handle_transport_stopped ();
+	_disk_reader->resolve_tracker (_immediate_events, Port::port_offset());
 }

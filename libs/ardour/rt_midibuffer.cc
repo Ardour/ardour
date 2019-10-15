@@ -26,6 +26,7 @@
 
 #include "ardour/debug.h"
 #include "ardour/midi_buffer.h"
+#include "ardour/midi_state_tracker.h"
 #include "ardour/rt_midibuffer.h"
 
 using namespace std;
@@ -74,6 +75,26 @@ RTMidiBuffer::resize (size_t size)
 	assert(_data);
 }
 
+void
+RTMidiBuffer::dump (uint32_t cnt)
+{
+	for (Map::iterator iter = _map.begin(); iter != _map.end() && cnt; ++iter, --cnt) {
+
+		uint8_t* addr = &_data[iter->second];
+		TimeType evtime = iter->first;
+		uint32_t size = *(reinterpret_cast<Evoral::EventType*>(addr));
+		addr += sizeof (size);
+
+		cerr << "@ " << evtime << " sz=" << size << '\t';
+
+		cerr << hex;
+		for (size_t i =0 ; i < size; ++i) {
+			cerr << "0x" << hex << (int)addr[i] << dec << '/' << (int)addr[i] << ' ';
+		}
+		cerr << dec << endl;
+	}
+}
+
 uint32_t
 RTMidiBuffer::write (TimeType time, Evoral::EventType /*type*/, uint32_t size, const uint8_t* buf)
 {
@@ -99,7 +120,7 @@ RTMidiBuffer::write (TimeType time, Evoral::EventType /*type*/, uint32_t size, c
 }
 
 uint32_t
-RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, samplecnt_t offset)
+RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiStateTracker& tracker, samplecnt_t offset)
 {
 	Map::iterator iter = _map.lower_bound (start);
 	uint32_t count = 0;
@@ -142,6 +163,7 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, samplec
 		DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("read event sz %1 @ %2\n", size, unadjusted_time));
 
 		memcpy (write_loc, addr, size);
+		tracker.track (addr);
 
 		++iter;
 		++count;

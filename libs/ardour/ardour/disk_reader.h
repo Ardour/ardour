@@ -24,6 +24,7 @@
 
 #include "ardour/disk_io.h"
 #include "ardour/midi_buffer.h"
+#include "ardour/midi_state_tracker.h"
 
 namespace ARDOUR
 {
@@ -160,6 +161,7 @@ private:
 
 	DeclickAmp     _declick_amp;
 	sampleoffset_t _declick_offs;
+	MidiStateTracker _tracker;
 
 	int _do_refill_with_alloc (bool partial_fill);
 

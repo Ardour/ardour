@@ -157,6 +157,11 @@ DiskReader::set_state (const XMLNode& node, int version)
 void
 DiskReader::realtime_handle_transport_stopped ()
 {
+	/* can't do the resolve here because we don't have a place to put the
+	 * note resolving data. Defer to
+	 * MidiTrack::realtime_handle_transport_stopped() which will call
+	 * ::resolve_tracker() and put the output in its _immediate_events store.
+	 */
 }
 
 void
@@ -389,7 +394,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			dst = &bufs.get_midi (0);
 		}
 
-		if ((ms & MonitoringDisk) && !still_locating) {
+		if ((ms & MonitoringDisk) && !still_locating && speed) {
 			get_midi_playback (*dst, start_sample, end_sample, ms, scratch_bufs, speed, disk_samples_to_consume);
 		}
 	}
@@ -511,20 +516,9 @@ DiskReader::overwrite_existing_buffers ()
 
 	if (_playlists[DataType::MIDI]) {
 
-		minsert.reset();minsert.start();
+		minsert.reset(); minsert.start();
 		_mbuf.clear(); midi_playlist()->dump (_mbuf, 0);
 		minsert.update(); cerr << "Reading " << name()  << " took " << minsert.elapsed() << " microseconds, final size = " << _mbuf.size() << endl;
-
-#if 0
-		/* Resolve all currently active notes in the playlist.  This is more
-		   aggressive than it needs to be: ideally we would only resolve what is
-		   absolutely necessary, but this seems difficult and/or impossible without
-		   having the old data or knowing what change caused the overwrite.
-		*/
-		midi_playlist()->resolve_note_trackers (*_midi_buf, overwrite_sample);
-#endif
-
-		file_sample[DataType::MIDI] = overwrite_sample; // overwrite_sample was adjusted by ::midi_read() to the new position
 	}
 
 	g_atomic_int_set (&_pending_overwrite, 0);
@@ -1051,33 +1045,13 @@ DiskReader::move_processor_automation (boost::weak_ptr<Processor> p, list< Evora
 void
 DiskReader::reset_tracker ()
 {
-#if 0
-	if (_midi_buf) {
-		_midi_buf->reset_tracker ();
-	}
-#endif
-
-	boost::shared_ptr<MidiPlaylist> mp (midi_playlist());
-
-	if (mp) {
-		mp->reset_note_trackers ();
-	}
+	_tracker.reset ();
 }
 
 void
 DiskReader::resolve_tracker (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time)
 {
-#if 0
-	if (_midi_buf) {
-		_midi_buf->resolve_tracker(buffer, time);
-	}
-#endif
-
-	boost::shared_ptr<MidiPlaylist> mp (midi_playlist());
-
-	if (mp) {
-		mp->reset_note_trackers ();
-	}
+	_tracker.resolve_notes (buffer, time);
 }
 
 /** Writes playback events from playback_sample for nframes to dst, translating time stamps
@@ -1120,7 +1094,7 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 				   beyond the loop end.
 				*/
 
-				// _midi_buf->resolve_tracker (*target, 0);
+				_tracker.resolve_notes (*target, 0);
 			}
 
 			/* for split-cycles we need to offset the events */
@@ -1143,23 +1117,23 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 				if (first) {
 					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read #1, from %1 for %2\n",
 					                                                      effective_start, first));
-					events_read = _mbuf.read (*target, effective_start, effective_start + first);
+					events_read = _mbuf.read (*target, effective_start, effective_start + first, _tracker);
 				}
 
 				if (second) {
 					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read #2, from %1 for %2\n",
 					                                                      loc->start(), second));
-					events_read += _mbuf.read (*target, loc->start(), loc->start() + second);
+					events_read += _mbuf.read (*target, loc->start(), loc->start() + second, _tracker);
 				}
 
 			} else {
 				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read #3, adjusted start as %1 for %2\n",
 				                                                effective_start, nframes));
-				events_read = _mbuf.read (*target, effective_start, effective_start + nframes);
+				events_read = _mbuf.read (*target, effective_start, effective_start + nframes, _tracker);
 			}
 		} else {
 			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer read, from %1 to %2 (%3)", start_sample, end_sample, nframes));
-			events_read = _mbuf.read (*target, start_sample, end_sample, Port::port_offset ());
+			events_read = _mbuf.read (*target, start_sample, end_sample, _tracker, Port::port_offset ());
 		}
 
 		DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("%1 MDS events read %2 range %3 .. %4\n", _name, events_read, playback_sample, playback_sample + nframes));
