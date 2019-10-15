@@ -501,12 +501,6 @@ Plugin::get_state ()
 	return *root;
 }
 
-void
-Plugin::set_info (PluginInfoPtr info)
-{
-	_info = info;
-}
-
 std::string
 Plugin::parameter_label (uint32_t which) const
 {
