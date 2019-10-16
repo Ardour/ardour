@@ -120,10 +120,8 @@ RTMidiBuffer::write (TimeType time, Evoral::EventType /*type*/, uint32_t size, c
 {
 	/* This buffer stores only MIDI, we don't care about the value of "type" */
 
-	const size_t bytes_to_merge = sizeof (time) + sizeof (uint32_t);
-
-	if (_size + bytes_to_merge > _capacity) {
-		resize (_capacity + 8192); // XXX 8192 is completely arbitrary
+	if (_size == _capacity) {
+		resize (_capacity + 1024); // XXX 1024 is completely arbitrary
 	}
 
 	_data[_size].timestamp = time;
