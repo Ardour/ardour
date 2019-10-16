@@ -50,7 +50,6 @@ const string DiskIOProcessor::state_node_name = X_("DiskIOProcessor");
 DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
 	: Processor (s, str)
 	, _flags (f)
-	, i_am_the_modifier (false)
 	, _slaved (false)
 	, in_set_state (false)
 	, playback_sample (0)
