@@ -24,6 +24,8 @@
 #include "pbd/debug.h"
 #include "pbd/stacktrace.h"
 
+#include "evoral/midi_util.h"
+
 #include "ardour/debug.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_state_tracker.h"
@@ -37,6 +39,9 @@ RTMidiBuffer::RTMidiBuffer (size_t capacity)
 	: _size (0)
 	, _capacity (0)
 	, _data (0)
+	, _pool_size (0)
+	, _pool_capacity (0)
+	, _pool (0)
 {
 	if (capacity) {
 		resize (capacity);
@@ -46,6 +51,7 @@ RTMidiBuffer::RTMidiBuffer (size_t capacity)
 RTMidiBuffer::~RTMidiBuffer()
 {
 	cache_aligned_free (_data);
+	cache_aligned_free (_pool);
 }
 
 void
@@ -61,35 +67,49 @@ RTMidiBuffer::resize (size_t size)
 		return;
 	}
 
-	uint8_t* old_data = _data;
+	Item* old_data = _data;
 
-	cache_aligned_malloc ((void**) &_data, size);
+	cache_aligned_malloc ((void**) &_data, size * sizeof (Item));
 
 	if (_size) {
 		memcpy (_data, old_data, _size);
+		cache_aligned_free (old_data);
 	}
 
-	cache_aligned_free (old_data);
 	_capacity = size;
-
-	assert(_data);
 }
 
 void
 RTMidiBuffer::dump (uint32_t cnt)
 {
-	for (Map::iterator iter = _map.begin(); iter != _map.end() && cnt; ++iter, --cnt) {
+	for (uint32_t i = 0; i < _size && i < cnt; ++i) {
 
-		uint8_t* addr = &_data[iter->second];
-		TimeType evtime = iter->first;
-		uint32_t size = *(reinterpret_cast<Evoral::EventType*>(addr));
-		addr += sizeof (size);
+		Item* item = &_data[i];
+		uint8_t* addr;
+		uint32_t size;
 
-		cerr << "@ " << evtime << " sz=" << size << '\t';
+		if (item->bytes[0]) {
+
+			/* more than 3 bytes ... indirect */
+
+			uint32_t offset = item->offset & ~(1<<(sizeof(uint8_t)-1));
+			Blob* blob = reinterpret_cast<Blob*> (&_pool[offset]);
+
+			size = blob->size;
+			addr = blob->data;
+
+		} else {
+
+			size = Evoral::midi_event_size (item->bytes[1]);
+			addr = &item->bytes[1];
+
+		}
+
+		cerr << "@ " << item->timestamp << " sz=" << size << '\t';
 
 		cerr << hex;
-		for (size_t i =0 ; i < size; ++i) {
-			cerr << "0x" << hex << (int)addr[i] << dec << '/' << (int)addr[i] << ' ';
+		for (size_t j =0 ; j < size; ++j) {
+			cerr << "0x" << hex << (int)addr[j] << dec << '/' << (int)addr[i] << ' ';
 		}
 		cerr << dec << endl;
 	}
@@ -100,58 +120,101 @@ RTMidiBuffer::write (TimeType time, Evoral::EventType /*type*/, uint32_t size, c
 {
 	/* This buffer stores only MIDI, we don't care about the value of "type" */
 
-	const size_t bytes_to_merge = sizeof (size) + size;
+	const size_t bytes_to_merge = sizeof (time) + sizeof (uint32_t);
 
 	if (_size + bytes_to_merge > _capacity) {
 		resize (_capacity + 8192); // XXX 8192 is completely arbitrary
 	}
 
-	_map.insert (make_pair (time, _size));
+	_data[_size].timestamp = time;
 
-	uint8_t* addr = &_data[_size];
+	if (size > 3) {
 
-	*(reinterpret_cast<uint32_t*>(addr)) = size;
-	addr += sizeof (size);
-	memcpy (addr, buf, size);
+		uint32_t off = store_blob (size, buf);
 
-	_size += bytes_to_merge;
+		/* this indicates that the data (more than 3 bytes) is not inline */
+		_data[_size].offset = (off | (1<<(sizeof(uint8_t)-1)));
+
+	} else {
+
+		assert ((int) size == Evoral::midi_event_size (buf[0]));
+
+		/* this indicates that the data (up to 3 bytes) is inline */
+		_data[_size].bytes[0] = 0;
+
+		switch (size) {
+		case 3:
+			_data[_size].bytes[3] = buf[2];
+			/* fallthru */
+		case 2:
+			_data[_size].bytes[2] = buf[1];
+			/* fallthru */
+		case 1:
+			_data[_size].bytes[1] = buf[0];
+			break;
+		}
+	}
+
+	++_size;
 
 	return size;
 }
 
+static
+bool
+item_timestamp_earlier (ARDOUR::RTMidiBuffer::Item const & item, samplepos_t time)
+{
+	return item.timestamp < time;
+}
+
+
+
 uint32_t
 RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiStateTracker& tracker, samplecnt_t offset)
 {
-	Map::iterator iter = _map.lower_bound (start);
+	Item* iend = _data+_size;
+	Item* item = lower_bound (_data, iend, start, item_timestamp_earlier);
 	uint32_t count = 0;
+
 #ifndef NDEBUG
 	TimeType unadjusted_time;
 #endif
 
-	DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("read from %1 .. %2\n", start, end));
+	DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("read from %1 .. %2 .. initial index = %3 (time = %4)\n", start, end, item, item->timestamp));
 
-	while ((iter != _map.end()) && (iter->first < end)) {
+	while ((item < iend) && (item->timestamp < end)) {
 
-		/* the event consists of a size followed by bytes of MIDI
-		 * data. It begins at _data[iter->second], which was stored in
-		 * our map when we wrote the event into the data structure.
-		 */
-
-		uint8_t* addr = &_data[iter->second];
-		TimeType evtime = iter->first;
+		TimeType evtime = item->timestamp;
 
 #ifndef NDEBUG
 		unadjusted_time = evtime;
 #endif
-		uint32_t size = *(reinterpret_cast<Evoral::EventType*>(addr));
-		addr += sizeof (size);
-
 		/* Adjust event times to be relative to 'start', taking
 		 * 'offset' into account.
 		 */
 
 		evtime -= start;
 		evtime += offset;
+
+		uint32_t size;
+		uint8_t* addr;
+
+		if (item->bytes[0]) {
+
+			/* more than 3 bytes ... indirect */
+
+			uint32_t offset = item->offset & ~(1<<(sizeof(uint8_t)-1));
+			Blob* blob = reinterpret_cast<Blob*> (&_pool[offset]);
+
+			size = blob->size;
+			addr = blob->data;
+
+		} else {
+
+			size = Evoral::midi_event_size (item->bytes[1]);
+			addr = &item->bytes[1];
+
+		}
 
 		uint8_t* write_loc = dst.reserve (evtime, size);
 
@@ -160,15 +223,56 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiSta
 			break;
 		}
 
-		DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("read event sz %1 @ %2\n", size, unadjusted_time));
-
 		memcpy (write_loc, addr, size);
+
+		DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("read event sz %1 @ %2\n", size, unadjusted_time));
 		tracker.track (addr);
 
-		++iter;
+		++item;
 		++count;
 	}
 
 	DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("total events found for %1 .. %2 = %3\n", start, end, count));
 	return count;
+}
+
+uint32_t
+RTMidiBuffer::alloc_blob (uint32_t size)
+{
+	if (_pool_size + size > _pool_capacity) {
+		uint8_t* old_pool = _pool;
+
+		_pool_capacity += size * 4;
+
+		cache_aligned_malloc ((void **) &_pool, _pool_capacity * 2);
+		memcpy (_pool, old_pool, _pool_size);
+		cache_aligned_free (old_pool);
+	}
+
+	uint32_t offset = _pool_size;
+	_pool_size += size;
+
+	return offset;
+}
+
+uint32_t
+RTMidiBuffer::store_blob (uint32_t size, uint8_t const * data)
+{
+	uint32_t offset = alloc_blob (size);
+	uint8_t* addr = &_pool[offset];
+
+	*(reinterpret_cast<uint32_t*> (addr)) = size;
+	addr += sizeof (size);
+	memcpy (addr, data, size);
+
+	return offset;
+}
+
+void
+RTMidiBuffer::clear ()
+{
+	/* mark main array as empty */
+	_size = 0;
+	/* free the entire current pool size, if any */
+	_pool_size = 0;
 }

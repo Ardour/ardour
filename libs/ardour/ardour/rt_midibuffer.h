@@ -43,7 +43,7 @@ class LIBARDOUR_API RTMidiBuffer : public Evoral::EventSink<samplepos_t>
 	RTMidiBuffer (size_t capacity);
 	~RTMidiBuffer();
 
-	void clear() { _size = 0; }
+	void clear();
 	void resize(size_t);
 	size_t size() const { return _size; }
 
@@ -52,12 +52,36 @@ class LIBARDOUR_API RTMidiBuffer : public Evoral::EventSink<samplepos_t>
 
 	void dump (uint32_t);
 
+	struct Item {
+		samplepos_t timestamp;
+		union {
+			uint8_t  bytes[4];
+			uint32_t offset;
+		};
+	};
+
   private:
+
+	struct Blob {
+		uint32_t size;
+		uint8_t data[0];
+	};
+
+	/* The main store. Holds Items (timestamp+up to 3 bytes of data OR
+	 * offset into secondary storage below)
+	 */
+
 	size_t _size;
 	size_t _capacity;
-	uint8_t* _data; ///< event data
-	typedef std::multimap<TimeType,size_t> Map;
-	Map _map;
+	Item*  _data;
+
+	/* secondary blob storage. Holds Blobs (arbitrary size + data) */
+
+	uint32_t alloc_blob (uint32_t size);
+	uint32_t store_blob (uint32_t size, uint8_t const * data);
+	uint32_t _pool_size;
+	uint32_t _pool_capacity;
+	uint8_t* _pool;
 };
 
 } // namespace ARDOUR
