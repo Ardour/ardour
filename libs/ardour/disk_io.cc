@@ -56,9 +56,9 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
 	, _need_butler (false)
 	, channels (new ChannelList)
 	, _midi_buf (0)
-	, _mbuf (0)
 	, _samples_written_to_ringbuffer (0)
 	, _samples_read_from_ringbuffer (0)
+	, _mbuf (0)
 {
 	set_display_to_user (false);
 }
