@@ -118,7 +118,6 @@ protected:
 
 protected:
 	Flag         _flags;
-	uint32_t      i_am_the_modifier;
 	bool         _slaved;
 	bool          in_set_state;
 	samplepos_t   playback_sample;
