@@ -82,6 +82,8 @@ RTMidiBuffer::resize (size_t size)
 void
 RTMidiBuffer::dump (uint32_t cnt)
 {
+	cerr << this << " total items: " << _size << " within " << _capacity << " blob pool: " << _pool_capacity << " used " << _pool_size << endl;
+
 	for (uint32_t i = 0; i < _size && i < cnt; ++i) {
 
 		Item* item = &_data[i];
