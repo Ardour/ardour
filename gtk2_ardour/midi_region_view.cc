@@ -1084,8 +1084,6 @@ MidiRegionView::apply_diff (bool as_subcommand, bool was_copy)
 		}
 	}
 
-	midi_view()->midi_track()->midi_playlist()->region_edited (_region, _note_diff_command);
-
 	if (as_subcommand) {
 		_model->apply_command_as_subcommand (*trackview.session(), _note_diff_command);
 	} else {
@@ -1100,8 +1098,11 @@ MidiRegionView::apply_diff (bool as_subcommand, bool was_copy)
 	}
 
 	_marked_for_velocity.clear();
+
 	if (commit) {
 		trackview.editor().commit_reversible_command ();
+		/* XXX the GUI should NOT be responsible for causing this call tree */
+		midi_view()->midi_track()->region_edited (_region);
 	}
 }
 

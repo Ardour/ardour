@@ -100,15 +100,6 @@ public:
 
 	std::set<Evoral::Parameter> contained_automation();
 
-	/** Handle a region edit during read.
-	 *
-	 * This must be called before the command is applied to the model.  Events
-	 * are injected into the playlist output to compensate for edits to active
-	 * notes and maintain coherent output and tracker state.
-	 */
-	void region_edited(boost::shared_ptr<Region>         region,
-	                   const MidiModel::NoteDiffCommand* cmd);
-
 	/** Clear all note trackers. */
 	void reset_note_trackers ();
 

@@ -871,3 +871,11 @@ MidiTrack::realtime_handle_transport_stopped ()
 	Route::realtime_handle_transport_stopped ();
 	_disk_reader->resolve_tracker (_immediate_events, Port::port_offset());
 }
+
+void
+MidiTrack::region_edited(boost::shared_ptr<Region> region)
+
+{
+	cerr << "MIDI region " << region->name() << " edited, queue reload\n";
+	_session.request_overwrite_buffer (boost::dynamic_pointer_cast<Track> (shared_from_this()));
+}
