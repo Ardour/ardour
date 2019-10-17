@@ -35,6 +35,7 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
+#include "ardour/track.h"
 
 #include "pbd/i18n.h"
 
@@ -343,18 +344,18 @@ DiskIOProcessor::ChannelInfo::~ChannelInfo ()
 }
 
 void
-DiskIOProcessor::drop_route ()
+DiskIOProcessor::drop_track ()
 {
-	_route.reset ();
+	_track.reset ();
 }
 
 void
-DiskIOProcessor::set_route (boost::shared_ptr<Route> r)
+DiskIOProcessor::set_track (boost::shared_ptr<Track> t)
 {
-	_route = r;
+	_track = t;
 
-	if (_route) {
-		_route->DropReferences.connect_same_thread (*this, boost::bind (&DiskIOProcessor::drop_route, this));
+	if (_track) {
+		_track->DropReferences.connect_same_thread (*this, boost::bind (&DiskIOProcessor::drop_track, this));
 	}
 }
 

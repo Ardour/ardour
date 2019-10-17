@@ -927,7 +927,7 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::Overwrite:
-		overwrite_some_buffers (static_cast<Track*>(ev->ptr));
+		overwrite_some_buffers (ev->track);
 		break;
 
 	case SessionEvent::Audition:

@@ -43,8 +43,7 @@ class AudioPlaylist;
 class Location;
 class MidiPlaylist;
 class Playlist;
-class Route;
-class Route;
+class Track;
 class Session;
 
 template<typename T> class MidiRingBuffer;
@@ -64,8 +63,8 @@ public:
 	DiskIOProcessor (Session&, const std::string& name, Flag f);
 	virtual ~DiskIOProcessor ();
 
-	void set_route (boost::shared_ptr<Route>);
-	void drop_route ();
+	void set_track (boost::shared_ptr<Track>);
+	void drop_track ();
 
 	static void set_buffering_parameters (BufferingPreset bp);
 
@@ -122,7 +121,7 @@ protected:
 	bool          in_set_state;
 	samplepos_t   playback_sample;
 	bool         _need_butler;
-	boost::shared_ptr<Route> _route;
+	boost::shared_ptr<Track> _track;
 
 	void init ();
 

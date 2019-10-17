@@ -74,28 +74,29 @@ Session::schedule_capture_buffering_adjustment ()
 }
 
 void
-Session::request_overwrite_buffer (boost::shared_ptr<Route> r)
+Session::request_overwrite_buffer (boost::shared_ptr<Track> t)
 {
-	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (r);
 	if (!t) {
 		return;
 	}
 
 	SessionEvent *ev = new SessionEvent (SessionEvent::Overwrite, SessionEvent::Add, SessionEvent::Immediate, 0, 0, 0.0);
-	ev->set_ptr (t.get());
+	ev->set_track (t);
 	queue_event (ev);
 }
 
 /** Process thread. */
 void
-Session::overwrite_some_buffers (Track* t)
+Session::overwrite_some_buffers (boost::shared_ptr<Route> r)
 {
 	if (actively_recording()) {
 		return;
 	}
 
-	if (t) {
 
+	if (r) {
+		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (r);
+		assert (t);
 		t->set_pending_overwrite ();
 
 	} else {

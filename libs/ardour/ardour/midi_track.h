@@ -130,6 +130,7 @@ public:
 	MonitorState get_auto_monitoring_state () const;
 
 	MidiBuffer const& immediate_event_buffer () const { return _immediate_event_buffer; }
+	MidiRingBuffer<samplepos_t>& immediate_events () { return _immediate_events; }
 
 	void set_input_active (bool);
 	bool input_active () const;
