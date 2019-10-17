@@ -36,6 +36,7 @@
 #include "ardour/midi_source.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/region_factory.h"
+#include "ardour/rt_midibuffer.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/types.h"
@@ -491,7 +492,7 @@ MidiPlaylist::contained_automation()
 }
 
 void
-MidiPlaylist::dump (Evoral::EventSink<samplepos_t>& dst, MidiChannelFilter* filter)
+MidiPlaylist::render (RTMidiBuffer& dst, MidiChannelFilter* filter)
 {
 	typedef pair<MidiStateTracker*,samplepos_t> TrackerInfo;
 
@@ -516,7 +517,13 @@ MidiPlaylist::dump (Evoral::EventSink<samplepos_t>& dst, MidiChannelFilter* filt
 	   we read into a temporarily list, sort it, then write that to dst.
 	*/
 	Evoral::EventList<samplepos_t>  evlist;
-	Evoral::EventSink<samplepos_t>& tgt = (regs.size() == 1) ? dst : evlist;
+	Evoral::EventSink<samplepos_t>* tgt;
+
+	if (regs.size() == 1) {
+		tgt = &dst;
+	} else {
+		tgt = &evlist;
+	}
 
 	DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1 regions to read, direct: %2\n", regs.size(), (regs.size() == 1)));
 
@@ -529,7 +536,7 @@ MidiPlaylist::dump (Evoral::EventSink<samplepos_t>& dst, MidiChannelFilter* filt
 		}
 
 		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("dump from %1 at %2\n", mr->name()));
-		mr->dump_to (tgt, 0, _note_mode, filter);
+		mr->render (*tgt, 0, _note_mode, filter);
 	}
 
 	if (!evlist.empty()) {

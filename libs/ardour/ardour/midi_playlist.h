@@ -48,6 +48,7 @@ namespace ARDOUR
 class BeatsSamplesConverter;
 class MidiChannelFilter;
 class MidiRegion;
+class RTMidiBuffer;
 class Session;
 class Source;
 
@@ -88,7 +89,7 @@ public:
 	                 uint32_t                         chan_n = 0,
 	                 MidiChannelFilter*               filter = NULL);
 
-	void dump (Evoral::EventSink<samplepos_t>&, MidiChannelFilter*);
+	void render (RTMidiBuffer&, MidiChannelFilter*);
 
 	int set_state (const XMLNode&, int version);
 

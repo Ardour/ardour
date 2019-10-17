@@ -25,6 +25,8 @@
 
 #include <map>
 
+#include <glibmm/threads.h>
+
 #include "evoral/Event.hpp"
 #include "evoral/EventSink.hpp"
 #include "ardour/types.h"
@@ -82,6 +84,8 @@ class LIBARDOUR_API RTMidiBuffer : public Evoral::EventSink<samplepos_t>
 	uint32_t _pool_size;
 	uint32_t _pool_capacity;
 	uint8_t* _pool;
+
+	mutable Glib::Threads::RWLock _lock;
 };
 
 } // namespace ARDOUR
