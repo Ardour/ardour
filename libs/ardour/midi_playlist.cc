@@ -519,8 +519,12 @@ MidiPlaylist::render (RTMidiBuffer& dst, MidiChannelFilter* filter)
 	Evoral::EventList<samplepos_t>  evlist;
 	Evoral::EventSink<samplepos_t>* tgt;
 
+	/* RAII */
+	RTMidiBuffer::WriteProtectRender wpr (dst);
+
 	if (regs.size() == 1) {
 		tgt = &dst;
+		wpr.acquire ();
 	} else {
 		tgt = &evlist;
 	}
@@ -545,6 +549,9 @@ MidiPlaylist::render (RTMidiBuffer& dst, MidiChannelFilter* filter)
 		evlist.sort (cmp);
 
 		/* Copy ordered events from event list to dst. */
+
+		wpr.acquire ();
+
 		for (Evoral::EventList<samplepos_t>::iterator e = evlist.begin(); e != evlist.end(); ++e) {
 			Evoral::Event<samplepos_t>* ev (*e);
 			dst.write (ev->time(), ev->event_type(), ev->size(), ev->buffer());
@@ -552,6 +559,8 @@ MidiPlaylist::render (RTMidiBuffer& dst, MidiChannelFilter* filter)
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::MidiPlaylistIO, "---- End MidiPlaylist::dump ----\n");
 
+	/* no need to release - RAII with WriteProtectRender takes care of it */
+
+	DEBUG_TRACE (DEBUG::MidiPlaylistIO, "---- End MidiPlaylist::dump ----\n");
 }
