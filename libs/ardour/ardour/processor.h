@@ -44,7 +44,6 @@ namespace ARDOUR {
 
 class Location;
 class Session;
-class Route;
 
 /** A mixer strip element - plugin, send, meter, etc */
 class LIBARDOUR_API Processor : public SessionObject, public Automatable, public Latent
