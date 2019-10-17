@@ -483,10 +483,10 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 
 
 int
-MidiRegion::dump_to (Evoral::EventSink<samplepos_t>& dst,
-                     uint32_t                        chan_n,
-                     NoteMode                        mode,
-                     MidiChannelFilter*              filter) const
+MidiRegion::render (Evoral::EventSink<samplepos_t>& dst,
+                    uint32_t                        chan_n,
+                    NoteMode                        mode,
+                    MidiChannelFilter*              filter) const
 {
 	sampleoffset_t internal_offset = 0;
 
