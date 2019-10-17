@@ -500,6 +500,7 @@ MidiPlaylist::render (RTMidiBuffer& dst, MidiChannelFilter* filter)
 	if (regs.size() == 1) {
 		tgt = &dst;
 		wpr.acquire ();
+		dst.clear ();
 	} else {
 		tgt = &evlist;
 	}
@@ -526,6 +527,7 @@ MidiPlaylist::render (RTMidiBuffer& dst, MidiChannelFilter* filter)
 		/* Copy ordered events from event list to dst. */
 
 		wpr.acquire ();
+		dst.clear ();
 
 		for (Evoral::EventList<samplepos_t>::iterator e = evlist.begin(); e != evlist.end(); ++e) {
 			Evoral::Event<samplepos_t>* ev (*e);
