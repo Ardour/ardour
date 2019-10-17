@@ -111,6 +111,16 @@ public:
 	void                       set_descriptor(const ParameterDescriptor& d) { _desc = d; }
 
 	EventList::size_type size() const { return _events.size(); }
+
+	/** @return time-stamp of first or last event in the list */
+	double when (bool at_start) const {
+		Glib::Threads::RWLock::ReaderLock lm (_lock);
+		if (_events.empty()) {
+			return 0.0;
+		}
+		return at_start ? _events.front()->when : _events.back()->when;
+	}
+
 	double length() const {
 		Glib::Threads::RWLock::ReaderLock lm (_lock);
 		return _events.empty() ? 0.0 : _events.back()->when;
