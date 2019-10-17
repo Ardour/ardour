@@ -73,12 +73,12 @@ Track::~Track ()
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("track %1 destructor\n", _name));
 
 	if (_disk_reader) {
-		_disk_reader->set_route (boost::shared_ptr<Route>());
+		_disk_reader->set_track (boost::shared_ptr<Track>());
 		_disk_reader.reset ();
 	}
 
 	if (_disk_writer) {
-		_disk_writer->set_route (boost::shared_ptr<Route>());
+		_disk_writer->set_track (boost::shared_ptr<Track>());
 		_disk_writer.reset ();
 	}
 }
@@ -98,12 +98,12 @@ Track::init ()
 
 	_disk_reader.reset (new DiskReader (_session, name(), dflags));
 	_disk_reader->set_block_size (_session.get_block_size ());
-	_disk_reader->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
+	_disk_reader->set_track (boost::dynamic_pointer_cast<Track> (shared_from_this()));
 	_disk_reader->set_owner (this);
 
 	_disk_writer.reset (new DiskWriter (_session, name(), dflags));
 	_disk_writer->set_block_size (_session.get_block_size ());
-	_disk_writer->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
+	_disk_writer->set_track (boost::dynamic_pointer_cast<Track> (shared_from_this()));
 	_disk_writer->set_owner (this);
 
 	set_align_choice_from_io ();

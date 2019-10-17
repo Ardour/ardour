@@ -519,7 +519,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 			// Pump entire port buffer into the ring buffer (TODO: split cycles?)
 			MidiBuffer& buf    = bufs.get_midi (0);
-			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack>(_route);
+			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack>(_track);
 			MidiChannelFilter* filter = mt ? &mt->capture_filter() : 0;
 
 			assert (buf.size() == 0 || _midi_buf);
@@ -1294,9 +1294,9 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 	_last_capture_sources.insert (_last_capture_sources.end(), midi_srcs.begin(), midi_srcs.end());
 
 
-	if (_route) {
-		_route->use_captured_sources (audio_srcs, capture_info);
-		_route->use_captured_sources (midi_srcs, capture_info);
+	if (_track) {
+		_track->use_captured_sources (audio_srcs, capture_info);
+		_track->use_captured_sources (midi_srcs, capture_info);
 	}
 
 	mark_write_completed = true;

@@ -32,6 +32,7 @@ namespace ARDOUR
 class Playlist;
 class AudioPlaylist;
 class MidiPlaylist;
+
 template<typename T> class MidiRingBuffer;
 
 class LIBARDOUR_API DiskReader : public DiskIOProcessor

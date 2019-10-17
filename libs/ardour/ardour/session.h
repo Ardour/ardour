@@ -456,7 +456,7 @@ public:
 	void allow_auto_play (bool yn);
 	void request_transport_speed (double speed, bool as_default = true, TransportRequestSource origin = TRS_UI);
 	void request_transport_speed_nonzero (double, bool as_default = true, TransportRequestSource origin = TRS_UI);
-	void request_overwrite_buffer (boost::shared_ptr<Route>);
+	void request_overwrite_buffer (boost::shared_ptr<Track>);
 	void adjust_playback_buffering();
 	void adjust_capture_buffering();
 
@@ -1685,7 +1685,7 @@ private:
 
 	void set_play_loop (bool yn, double speed);
 	void unset_play_loop ();
-	void overwrite_some_buffers (Track *);
+	void overwrite_some_buffers (boost::shared_ptr<Route>);
 	void flush_all_inserts ();
 	int  micro_locate (samplecnt_t distance);
 

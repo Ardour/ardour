@@ -213,7 +213,7 @@ void
 DiskReader::playlist_modified ()
 {
 	if (!overwrite_queued) {
-		_session.request_overwrite_buffer (_route);
+		_session.request_overwrite_buffer (_track);
 		overwrite_queued = true;
 	}
 }
@@ -237,7 +237,7 @@ DiskReader::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
 	*/
 
         if (!overwrite_queued && (prior_playlist || _session.loading())) {
-		_session.request_overwrite_buffer (_route);
+		_session.request_overwrite_buffer (_track);
 		overwrite_queued = true;
 	}
 
@@ -252,7 +252,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	ChannelList::iterator chan;
 	sampleoffset_t disk_samples_to_consume;
-	MonitorState ms = _route->monitoring_state ();
+	MonitorState ms = _track->monitoring_state ();
 
 	if (_active) {
 		if (!_pending_active) {
@@ -467,6 +467,12 @@ DiskReader::set_pending_overwrite ()
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 		(*chan)->rbuf->read_flush ();
 	}
+
+	boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (_track);
+	if (mt) {
+		resolve_tracker (mt->immediate_events(), _session.audible_sample());
+	}
+
 	g_atomic_int_set (&_pending_overwrite, 1);
 }
 
@@ -976,7 +982,7 @@ DiskReader::playlist_ranges_moved (list< Evoral::RangeMove<samplepos_t> > const 
 		return;
 	}
 
-	if (!_route || Config->get_automation_follows_regions () == false) {
+	if (!_track || Config->get_automation_follows_regions () == false) {
 		return;
 	}
 
@@ -990,7 +996,7 @@ DiskReader::playlist_ranges_moved (list< Evoral::RangeMove<samplepos_t> > const 
 	}
 
 	/* move panner automation */
-	boost::shared_ptr<Pannable> pannable = _route->pannable();
+	boost::shared_ptr<Pannable> pannable = _track->pannable();
         Evoral::ControlSet::Controls& c (pannable->controls());
 
         for (Evoral::ControlSet::Controls::iterator ci = c.begin(); ci != c.end(); ++ci) {
@@ -1010,7 +1016,7 @@ DiskReader::playlist_ranges_moved (list< Evoral::RangeMove<samplepos_t> > const 
                 }
         }
 	/* move processor automation */
-        _route->foreach_processor (boost::bind (&DiskReader::move_processor_automation, this, _1, movements_samples));
+        _track->foreach_processor (boost::bind (&DiskReader::move_processor_automation, this, _1, movements_samples));
 }
 
 void

@@ -37,6 +37,7 @@ namespace ARDOUR {
 
 class TransportMaster;
 class Region;
+class Track;
 
 class LIBARDOUR_API SessionEvent {
 public:
@@ -80,11 +81,11 @@ public:
 	double     speed;
 
 	union {
-		void*            ptr;
 		bool             yes_or_no;
 		samplepos_t      target2_sample;
-		Route*           route;
 	};
+
+	boost::shared_ptr<Track> track;
 
 	union {
 		bool second_yes_or_no;
@@ -113,8 +114,8 @@ public:
 
 	SessionEvent (Type t, Action a, samplepos_t when, samplepos_t where, double spd, bool yn = false, bool yn2 = false, bool yn3 = false);
 
-	void set_ptr (void* p) {
-		ptr = p;
+	void set_track (boost::shared_ptr<Track> t) {
+		track = t;
 	}
 
 	bool before (const SessionEvent& other) const {
