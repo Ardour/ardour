@@ -63,6 +63,7 @@ class LIBARDOUR_API RTMidiBuffer : public Evoral::EventSink<samplepos_t>
 	};
 
   private:
+	friend struct WriteProtectRender;
 
 	struct Blob {
 		uint32_t size;
@@ -85,7 +86,17 @@ class LIBARDOUR_API RTMidiBuffer : public Evoral::EventSink<samplepos_t>
 	uint32_t _pool_capacity;
 	uint8_t* _pool;
 
-	mutable Glib::Threads::RWLock _lock;
+	Glib::Threads::RWLock _lock;
+
+  public:
+	class WriteProtectRender {
+          public:
+		WriteProtectRender (RTMidiBuffer& rtm) : lm (rtm._lock, Glib::Threads::NOT_LOCK) {}
+		void acquire () { lm.acquire(); }
+
+          private:
+		Glib::Threads::RWLock::WriterLock lm;
+	};
 };
 
 } // namespace ARDOUR
