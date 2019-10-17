@@ -157,6 +157,7 @@ private:
 	samplepos_t   overwrite_sample;
 	mutable gint  _pending_overwrite;
 	bool          overwrite_queued;
+	bool          run_must_resolve;
 	IOChange      input_change_pending;
 	samplepos_t   file_sample[DataType::num_types];
 

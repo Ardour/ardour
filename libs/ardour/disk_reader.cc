@@ -57,6 +57,7 @@ DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, str, f)
 	, overwrite_sample (0)
 	, overwrite_queued (false)
+	, run_must_resolve (false)
 	, _declick_amp (s.nominal_sample_rate ())
 	, _declick_offs (0)
 {
@@ -253,6 +254,14 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	ChannelList::iterator chan;
 	sampleoffset_t disk_samples_to_consume;
 	MonitorState ms = _track->monitoring_state ();
+
+	if (run_must_resolve) {
+		boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (_track);
+		assert (mt);
+		cerr << _track->name() << " resolving " << _tracker.on() << " notes @ " << start_sample << endl;
+		resolve_tracker (mt->immediate_events(), start_sample);
+		run_must_resolve = false;
+	}
 
 	if (_active) {
 		if (!_pending_active) {
@@ -453,8 +462,6 @@ DiskReader::pending_overwrite () const {
 	return g_atomic_int_get (&_pending_overwrite) != 0;
 }
 
-PBD::Timing minsert;
-
 void
 DiskReader::set_pending_overwrite ()
 {
@@ -468,12 +475,8 @@ DiskReader::set_pending_overwrite ()
 		(*chan)->rbuf->read_flush ();
 	}
 
-	boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (_track);
-	if (mt) {
-		resolve_tracker (mt->immediate_events(), _session.audible_sample());
-	}
-
 	g_atomic_int_set (&_pending_overwrite, 1);
+	run_must_resolve = true;
 }
 
 bool
@@ -522,12 +525,11 @@ DiskReader::overwrite_existing_buffers ()
 
 	if (_playlists[DataType::MIDI]) {
 
-		minsert.reset();
+		PBD::Timing minsert;
 		minsert.start();
 		midi_playlist()->render (_mbuf, 0);
 		minsert.update();
-		cerr << "Reading " << name()  << " took " << minsert.elapsed() << " microseconds, final size = " << _mbuf.size() << endl;
-		_mbuf.dump (40);
+		//cerr << "Reading " << name()  << " took " << minsert.elapsed() << " microseconds, final size = " << _mbuf.size() << endl;
 	}
 
 	g_atomic_int_set (&_pending_overwrite, 0);
@@ -1073,6 +1075,7 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 	samplepos_t nframes = ::llabs (end_sample - start_sample);
 
 	if (_mbuf.size() == 0) {
+		/* no data to read, so do nothing */
 		return;
 	}
 
@@ -1083,7 +1086,8 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 		target = &scratch_bufs.get_midi (0);
 	}
 
-	if (ms & MonitoringDisk) {
+	if (!pending_overwrite() && (ms & MonitoringDisk)) {
+
 		/* disk data needed */
 
 		Location* loc = _loop_location;

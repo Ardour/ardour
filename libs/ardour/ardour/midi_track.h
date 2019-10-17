@@ -137,6 +137,7 @@ public:
 	PBD::Signal0<void> InputActiveChanged;
 
 	void realtime_handle_transport_stopped ();
+	void region_edited (boost::shared_ptr<Region>);
 
 protected:
 

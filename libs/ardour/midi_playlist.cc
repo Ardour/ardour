@@ -252,31 +252,6 @@ MidiPlaylist::read (Evoral::EventSink<samplepos_t>& dst,
 }
 
 void
-MidiPlaylist::region_edited(boost::shared_ptr<Region>         region,
-                            const MidiModel::NoteDiffCommand* cmd)
-{
-	typedef MidiModel::NoteDiffCommand Command;
-
-	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
-	if (!mr || !_session.transport_rolling()) {
-		return;
-	}
-
-	/* Take write lock to prevent concurrency with read(). */
-	Playlist::RegionWriteLock lock(this);
-
-	NoteTrackers::iterator t = _note_trackers.find(mr.get());
-	if (t == _note_trackers.end()) {
-		return; /* Region is not currently active, nothing to do. */
-	}
-
-	/* Queue any necessary edit compensation events. */
-	t->second->fixer.prepare(
-		_session.tempo_map(), cmd, mr->position() - mr->start(),
-		_read_end, t->second->cursor.active_notes);
-}
-
-void
 MidiPlaylist::reset_note_trackers ()
 {
 	Playlist::RegionWriteLock rl (this, false);
