@@ -88,7 +88,8 @@ namespace ARDOUR {
 static void
 reverse_curve (boost::shared_ptr<Evoral::ControlList> dst, boost::shared_ptr<const Evoral::ControlList> src)
 {
-	size_t len = src->back()->when;
+	size_t len = src->when(false);
+	// TODO read-lock of src (!)
 	for (Evoral::ControlList::const_reverse_iterator it = src->rbegin(); it!=src->rend(); it++) {
 		dst->fast_simple_add (len - (*it)->when, (*it)->value);
 	}
@@ -353,7 +354,7 @@ AudioRegion::post_set (const PropertyChange& /*ignored*/)
 	/* return to default fades if the existing ones are too long */
 
 	if (_left_of_split) {
-		if (_fade_in->back()->when >= _length) {
+		if (_fade_in->when(false) >= _length) {
 			set_default_fade_in ();
 		}
 		set_default_fade_out ();
@@ -361,7 +362,7 @@ AudioRegion::post_set (const PropertyChange& /*ignored*/)
 	}
 
 	if (_right_of_split) {
-		if (_fade_out->back()->when >= _length) {
+		if (_fade_out->when(false) >= _length) {
 			set_default_fade_out ();
 		}
 
@@ -538,7 +539,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 
 	if (_fade_in_active && _session.config.get_use_region_fades()) {
 
-		samplecnt_t fade_in_length = (samplecnt_t) _fade_in->back()->when;
+		samplecnt_t fade_in_length = (samplecnt_t) _fade_in->when(false);
 
 		/* see if this read is within the fade in */
 
@@ -570,7 +571,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 		 *
 		 */
 
-		fade_interval_start = max (internal_offset, _length - samplecnt_t (_fade_out->back()->when));
+		fade_interval_start = max (internal_offset, _length - samplecnt_t (_fade_out->when(false)));
 		samplecnt_t fade_interval_end = min(internal_offset + to_read, _length.val());
 
 		if (fade_interval_end > fade_interval_start) {
@@ -661,7 +662,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 
 	if (fade_out_limit != 0) {
 
-		samplecnt_t const curve_offset = fade_interval_start - (_length - _fade_out->back()->when);
+		samplecnt_t const curve_offset = fade_interval_start - (_length - _fade_out->when(false));
 
 		if (is_opaque) {
 			if (_inverse_fade_out) {
@@ -996,13 +997,13 @@ AudioRegion::fade_range (samplepos_t start, samplepos_t end)
 void
 AudioRegion::set_fade_in_shape (FadeShape shape)
 {
-	set_fade_in (shape, (samplecnt_t) _fade_in->back()->when);
+	set_fade_in (shape, (samplecnt_t) _fade_in->when(false));
 }
 
 void
 AudioRegion::set_fade_out_shape (FadeShape shape)
 {
-	set_fade_out (shape, (samplecnt_t) _fade_out->back()->when);
+	set_fade_out (shape, (samplecnt_t) _fade_out->when(false));
 }
 
 void
@@ -1237,13 +1238,13 @@ AudioRegion::set_fade_out_active (bool yn)
 bool
 AudioRegion::fade_in_is_default () const
 {
-	return _fade_in->size() == 2 && _fade_in->front()->when == 0 && _fade_in->back()->when == 64;
+	return _fade_in->size() == 2 && _fade_in->when(true) == 0 && _fade_in->when(false) == 64;
 }
 
 bool
 AudioRegion::fade_out_is_default () const
 {
-	return _fade_out->size() == 2 && _fade_out->front()->when == 0 && _fade_out->back()->when == 64;
+	return _fade_out->size() == 2 && _fade_out->when(true) == 0 && _fade_out->when(false) == 64;
 }
 
 void
@@ -1293,12 +1294,12 @@ AudioRegion::recompute_at_end ()
 	if (_left_of_split) {
 		set_default_fade_out ();
 		_left_of_split = false;
-	} else if (_fade_out->back()->when > _length) {
+	} else if (_fade_out->when(false) > _length) {
 		_fade_out->extend_to (_length);
 		send_change (PropertyChange (Properties::fade_out));
 	}
 
-	if (_fade_in->back()->when > _length) {
+	if (_fade_in->when(false) > _length) {
 		_fade_in->extend_to (_length);
 		send_change (PropertyChange (Properties::fade_in));
 	}
@@ -1318,12 +1319,12 @@ AudioRegion::recompute_at_start ()
 	if (_right_of_split) {
 		set_default_fade_in ();
 		_right_of_split = false;
-	} else if (_fade_in->back()->when > _length) {
+	} else if (_fade_in->when(false) > _length) {
 		_fade_in->extend_to (_length);
 		send_change (PropertyChange (Properties::fade_in));
 	}
 
-	if (_fade_out->back()->when > _length) {
+	if (_fade_out->when(false) > _length) {
 		_fade_out->extend_to (_length);
 		send_change (PropertyChange (Properties::fade_out));
 	}
@@ -1957,7 +1958,7 @@ AudioRegion::find_silence (Sample threshold, samplecnt_t min_length, samplecnt_t
 Evoral::Range<samplepos_t>
 AudioRegion::body_range () const
 {
-	return Evoral::Range<samplepos_t> (first_sample() + _fade_in->back()->when + 1, last_sample() - _fade_out->back()->when);
+	return Evoral::Range<samplepos_t> (first_sample() + _fade_in->when(false) + 1, last_sample() - _fade_out->when(false));
 }
 
 boost::shared_ptr<Region>
