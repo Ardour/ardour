@@ -35,7 +35,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-RTMidiBuffer::RTMidiBuffer (size_t capacity)
+RTMidiBuffer::RTMidiBuffer ()
 	: _size (0)
 	, _capacity (0)
 	, _data (0)
@@ -43,9 +43,6 @@ RTMidiBuffer::RTMidiBuffer (size_t capacity)
 	, _pool_capacity (0)
 	, _pool (0)
 {
-	if (capacity) {
-		resize (capacity);
-	}
 }
 
 RTMidiBuffer::~RTMidiBuffer()
@@ -102,16 +99,17 @@ RTMidiBuffer::dump (uint32_t cnt)
 
 		} else {
 
+			/* MIDI data is in bytes[1..3] (variable depending on message type */
 			size = Evoral::midi_event_size (item->bytes[1]);
 			addr = &item->bytes[1];
 
 		}
 
-		cerr << "@ " << item->timestamp << " sz=" << size << '\t';
+		cerr << i << " @ " << item->timestamp << " sz=" << size << '\t';
 
 		cerr << hex;
 		for (size_t j =0 ; j < size; ++j) {
-			cerr << "0x" << hex << (int)addr[j] << dec << '/' << (int)addr[i] << ' ';
+			cerr << "0x" << hex << (int)addr[j] << dec << '/' << (int)addr[j] << ' ';
 		}
 		cerr << dec << endl;
 	}
@@ -184,7 +182,7 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiSta
 	TimeType unadjusted_time;
 #endif
 
-	DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("read from %1 .. %2 .. initial index = %3 (time = %4)\n", start, end, item, item->timestamp));
+	DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("read from %1 .. %2 .. initial index = %3 (time = %4) (range in list of  %7 %5..%6)\n", start, end, item - _data, item->timestamp, _data->timestamp, iend->timestamp, _size));
 
 	while ((item < iend) && (item->timestamp < end)) {
 

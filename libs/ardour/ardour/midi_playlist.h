@@ -36,6 +36,7 @@
 #include "ardour/playlist.h"
 #include "evoral/Note.hpp"
 #include "evoral/Parameter.hpp"
+#include "ardour/rt_midibuffer.h"
 
 namespace Evoral {
 template<typename Time> class EventSink;
@@ -48,7 +49,6 @@ namespace ARDOUR
 class BeatsSamplesConverter;
 class MidiChannelFilter;
 class MidiRegion;
-class RTMidiBuffer;
 class Session;
 class Source;
 
@@ -89,7 +89,8 @@ public:
 	                 uint32_t                         chan_n = 0,
 	                 MidiChannelFilter*               filter = NULL);
 
-	void render (RTMidiBuffer&, MidiChannelFilter*);
+	void render (MidiChannelFilter*);
+	RTMidiBuffer* rendered();
 
 	int set_state (const XMLNode&, int version);
 
@@ -131,6 +132,8 @@ private:
 	NoteTrackers _note_trackers;
 	NoteMode     _note_mode;
 	samplepos_t  _read_end;
+
+	RTMidiBuffer _rendered;
 };
 
 } /* namespace ARDOUR */

@@ -42,7 +42,7 @@ class LIBARDOUR_API RTMidiBuffer : public Evoral::EventSink<samplepos_t>
   public:
 	typedef samplepos_t TimeType;
 
-	RTMidiBuffer (size_t capacity);
+	RTMidiBuffer ();
 	~RTMidiBuffer();
 
 	void clear();

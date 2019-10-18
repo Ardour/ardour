@@ -189,6 +189,8 @@ private:
 
 	sampleoffset_t calculate_playback_distance (pframes_t);
 
+	RTMidiBuffer* rt_midibuffer();
+
 	void get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, samplepos_t end_sample, MonitorState, BufferSet&, double speed, samplecnt_t distance);
 };
 

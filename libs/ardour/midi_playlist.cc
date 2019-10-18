@@ -467,7 +467,7 @@ MidiPlaylist::contained_automation()
 }
 
 void
-MidiPlaylist::render (RTMidiBuffer& dst, MidiChannelFilter* filter)
+MidiPlaylist::render (MidiChannelFilter* filter)
 {
 	typedef pair<MidiStateTracker*,samplepos_t> TrackerInfo;
 
@@ -488,19 +488,19 @@ MidiPlaylist::render (RTMidiBuffer& dst, MidiChannelFilter* filter)
 		regs.push_back (*i);
 	}
 
-	/* If we are reading from a single region, we can read directly into dst.  Otherwise,
-	   we read into a temporarily list, sort it, then write that to dst.
+	/* If we are reading from a single region, we can read directly into _rendered.  Otherwise,
+	   we read into a temporarily list, sort it, then write that to _rendered.
 	*/
 	Evoral::EventList<samplepos_t>  evlist;
 	Evoral::EventSink<samplepos_t>* tgt;
 
 	/* RAII */
-	RTMidiBuffer::WriteProtectRender wpr (dst);
+	RTMidiBuffer::WriteProtectRender wpr (_rendered);
 
 	if (regs.size() == 1) {
-		tgt = &dst;
+		tgt = &_rendered;
 		wpr.acquire ();
-		dst.clear ();
+		_rendered.clear ();
 	} else {
 		tgt = &evlist;
 	}
@@ -524,14 +524,14 @@ MidiPlaylist::render (RTMidiBuffer& dst, MidiChannelFilter* filter)
 		EventsSortByTimeAndType<samplepos_t> cmp;
 		evlist.sort (cmp);
 
-		/* Copy ordered events from event list to dst. */
+		/* Copy ordered events from event list to _rendered. */
 
 		wpr.acquire ();
-		dst.clear ();
+		_rendered.clear ();
 
 		for (Evoral::EventList<samplepos_t>::iterator e = evlist.begin(); e != evlist.end(); ++e) {
 			Evoral::Event<samplepos_t>* ev (*e);
-			dst.write (ev->time(), ev->event_type(), ev->size(), ev->buffer());
+			_rendered.write (ev->time(), ev->event_type(), ev->size(), ev->buffer());
 			delete ev;
 		}
 	}
@@ -539,5 +539,11 @@ MidiPlaylist::render (RTMidiBuffer& dst, MidiChannelFilter* filter)
 
 	/* no need to release - RAII with WriteProtectRender takes care of it */
 
-	DEBUG_TRACE (DEBUG::MidiPlaylistIO, "---- End MidiPlaylist::dump ----\n");
+	DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("---- End MidiPlaylist::render, events: %1\n", _rendered.size()));
+}
+
+RTMidiBuffer*
+MidiPlaylist::rendered ()
+{
+	return &_rendered;
 }
