@@ -523,13 +523,16 @@ DiskReader::overwrite_existing_buffers ()
 
   midi:
 
-	if (_playlists[DataType::MIDI]) {
+	RTMidiBuffer* mbuf = rt_midibuffer ();
 
+	if (mbuf) {
 		PBD::Timing minsert;
 		minsert.start();
-		midi_playlist()->render (_mbuf, 0);
+		midi_playlist()->render (0);
 		minsert.update();
-		//cerr << "Reading " << name()  << " took " << minsert.elapsed() << " microseconds, final size = " << _mbuf.size() << endl;
+		assert (midi_playlist()->rendered());
+		//cerr << "Reading " << name()  << " took " << minsert.elapsed() << " microseconds, final size = " << midi_playlist()->rendered()->size() << endl;
+		//midi_playlist()->rendered()->dump (100);
 	}
 
 	g_atomic_int_set (&_pending_overwrite, 0);
@@ -1074,7 +1077,9 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 	MidiBuffer* target;
 	samplepos_t nframes = ::llabs (end_sample - start_sample);
 
-	if (_mbuf.size() == 0) {
+	RTMidiBuffer* mbuf = rt_midibuffer();
+
+	if (!mbuf || (mbuf->size() == 0)) {
 		/* no data to read, so do nothing */
 		return;
 	}
@@ -1086,13 +1091,13 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 		target = &scratch_bufs.get_midi (0);
 	}
 
+	size_t events_read = 0;
+
 	if (!pending_overwrite() && (ms & MonitoringDisk)) {
 
 		/* disk data needed */
 
 		Location* loc = _loop_location;
-
-		size_t events_read = 0;
 
 		if (loc) {
 			samplepos_t effective_start;
@@ -1130,23 +1135,23 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 				if (first) {
 					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read #1, from %1 for %2\n",
 					                                                      effective_start, first));
-					events_read = _mbuf.read (*target, effective_start, effective_start + first, _tracker);
+					events_read = mbuf->read (*target, effective_start, effective_start + first, _tracker);
 				}
 
 				if (second) {
 					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read #2, from %1 for %2\n",
 					                                                      loc->start(), second));
-					events_read += _mbuf.read (*target, loc->start(), loc->start() + second, _tracker);
+					events_read += mbuf->read (*target, loc->start(), loc->start() + second, _tracker);
 				}
 
 			} else {
 				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read #3, adjusted start as %1 for %2\n",
 				                                                effective_start, nframes));
-				events_read = _mbuf.read (*target, effective_start, effective_start + nframes, _tracker);
+				events_read = mbuf->read (*target, effective_start, effective_start + nframes, _tracker);
 			}
 		} else {
 			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer read, from %1 to %2 (%3)", start_sample, end_sample, nframes));
-			events_read = _mbuf.read (*target, start_sample, end_sample, _tracker, Port::port_offset ());
+			events_read = mbuf->read (*target, start_sample, end_sample, _tracker, Port::port_offset ());
 		}
 
 		DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("%1 MDS events read %2 range %3 .. %4\n", _name, events_read, playback_sample, playback_sample + nframes));
@@ -1257,4 +1262,23 @@ DiskReader::DeclickAmp::apply_gain (AudioBuffer& buf, samplecnt_t n_samples, con
 	} else {
 		_g = g;
 	}
+}
+
+RTMidiBuffer*
+DiskReader::rt_midibuffer ()
+{
+	boost::shared_ptr<Playlist> pl = _playlists[DataType::MIDI];
+
+	if (!pl) {
+		return 0;
+	}
+
+	boost::shared_ptr<MidiPlaylist> mpl = boost::dynamic_pointer_cast<MidiPlaylist> (pl);
+
+	if (!mpl) {
+		/* error, but whatever ... */
+		return 0;
+	}
+
+	return mpl->rendered();
 }

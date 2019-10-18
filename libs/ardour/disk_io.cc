@@ -59,7 +59,6 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
 	, _midi_buf (0)
 	, _samples_written_to_ringbuffer (0)
 	, _samples_read_from_ringbuffer (0)
-	, _mbuf (0)
 {
 	set_display_to_user (false);
 }
@@ -190,7 +189,6 @@ DiskIOProcessor::configure_io (ChanCount in, ChanCount out)
 	if (in.n_midi() > 0 && !_midi_buf) {
 		const size_t size = _session.butler()->midi_diskstream_buffer_size();
 		_midi_buf = new MidiRingBuffer<samplepos_t>(size);
-		_mbuf.resize (1048576);
 		changed = true;
 	}
 
