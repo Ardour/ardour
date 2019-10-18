@@ -139,8 +139,6 @@ public:
 	void realtime_handle_transport_stopped ();
 	void region_edited (boost::shared_ptr<Region>);
 
-	int use_playlist (DataType, boost::shared_ptr<Playlist>);
-
 protected:
 
 	XMLNode& state (bool save_template);
