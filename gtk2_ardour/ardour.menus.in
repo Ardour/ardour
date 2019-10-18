@@ -591,6 +591,7 @@
       <menuitem action='ManageTemplates'/>
       <menuitem action='toggle-key-editor'/>
       <separator/>
+      <menuitem action='toggle-virtual-keyboard'/>
       <menuitem action='NewMIDITracer'/>
       <menuitem action='toggle-log-window'/>
       <separator/>

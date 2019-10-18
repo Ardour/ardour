@@ -82,6 +82,7 @@
 #include "time_info_box.h"
 #include "timers.h"
 #include "transport_masters_dialog.h"
+#include "virtual_keyboard_window.h"
 
 #include "pbd/i18n.h"
 
@@ -101,6 +102,10 @@ ARDOUR_UI::set_session (Session *s)
 
 	if (big_transport_window) {
 		big_transport_window->set_session (s);
+	}
+
+	if (virtual_keyboard_window) {
+		virtual_keyboard_window->set_session (s);
 	}
 
 	if (!_session) {
@@ -887,6 +892,14 @@ ARDOUR_UI::create_big_transport_window ()
 	return btw;
 }
 
+VirtualKeyboardWindow*
+ARDOUR_UI::create_virtual_keyboard_window ()
+{
+	VirtualKeyboardWindow* vkbd = new VirtualKeyboardWindow ();
+	vkbd->set_session (_session);
+	return vkbd;
+}
+
 void
 ARDOUR_UI::handle_locations_change (Location *)
 {
@@ -912,6 +925,9 @@ ARDOUR_UI::tabbed_window_state_event_handler (GdkEventWindowState* ev, void* obj
 			if (big_transport_window) {
 				big_transport_window->set_transient_for (*editor->own_window());
 			}
+			if (virtual_keyboard_window) {
+				virtual_keyboard_window->set_transient_for (*editor->own_window());
+			}
 		}
 
 	} else if (object == mixer) {
@@ -923,6 +939,9 @@ ARDOUR_UI::tabbed_window_state_event_handler (GdkEventWindowState* ev, void* obj
 			}
 			if (big_transport_window) {
 				big_transport_window->set_transient_for (*mixer->own_window());
+			}
+			if (virtual_keyboard_window) {
+				virtual_keyboard_window->set_transient_for (*mixer->own_window());
 			}
 		}
 	}

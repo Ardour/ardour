@@ -117,6 +117,7 @@
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
 #include "transport_masters_dialog.h"
+#include "virtual_keyboard_window.h"
 #else
 class About;
 class AddRouteDialog;
@@ -137,6 +138,7 @@ class GlobalPortMatrixWindow;
 class IdleOMeter;
 class PluginDSPLoadWindow;
 class TransportMastersWindow;
+class VirtualKeyboardWindow;
 #endif
 
 class VideoTimeLine;
@@ -720,6 +722,7 @@ private:
 	WM::ProxyWithConstructor<BundleManager> bundle_manager;
 	WM::ProxyWithConstructor<BigClockWindow> big_clock_window;
 	WM::ProxyWithConstructor<BigTransportWindow> big_transport_window;
+	WM::ProxyWithConstructor<VirtualKeyboardWindow> virtual_keyboard_window;
 	WM::ProxyWithConstructor<GlobalPortMatrixWindow> audio_port_matrix;
 	WM::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
 	WM::ProxyWithConstructor<KeyEditor> key_editor;
@@ -731,6 +734,7 @@ private:
 	AddVideoDialog*         create_add_video_dialog ();
 	BigClockWindow*         create_big_clock_window();
 	BigTransportWindow*     create_big_transport_window();
+	VirtualKeyboardWindow*  create_virtual_keyboard_window();
 	GlobalPortMatrixWindow* create_global_port_matrix (ARDOUR::DataType);
 	KeyEditor*              create_key_editor ();
 

@@ -205,6 +205,7 @@ typedef uint64_t microseconds_t;
 #include "utils.h"
 #include "utils_videotl.h"
 #include "video_server_dialog.h"
+#include "virtual_keyboard_window.h"
 #include "add_video_dialog.h"
 #include "transcode_video_dialog.h"
 
@@ -337,6 +338,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, bundle_manager (X_("bundle-manager"), _("Bundle Manager"), boost::bind (&ARDOUR_UI::create_bundle_manager, this))
 	, big_clock_window (X_("big-clock"), _("Big Clock"), boost::bind (&ARDOUR_UI::create_big_clock_window, this))
 	, big_transport_window (X_("big-transport"), _("Transport Controls"), boost::bind (&ARDOUR_UI::create_big_transport_window, this))
+	, virtual_keyboard_window (X_("virtual-keyboard"), _("Virtual Keyboard"), boost::bind (&ARDOUR_UI::create_virtual_keyboard_window, this))
 	, audio_port_matrix (X_("audio-connection-manager"), _("Audio Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::AUDIO))
 	, midi_port_matrix (X_("midi-connection-manager"), _("MIDI Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::MIDI))
 	, key_editor (X_("key-editor"), _("Keyboard Shortcuts"), boost::bind (&ARDOUR_UI::create_key_editor, this))
@@ -494,6 +496,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		location_ui.set_state (*ui_xml, 0);
 		big_clock_window.set_state (*ui_xml, 0);
 		big_transport_window.set_state (*ui_xml, 0);
+		virtual_keyboard_window.set_state (*ui_xml, 0);
 		audio_port_matrix.set_state (*ui_xml, 0);
 		midi_port_matrix.set_state (*ui_xml, 0);
 		export_video_dialog.set_state (*ui_xml, 0);
@@ -519,6 +522,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&location_ui);
 	WM::Manager::instance().register_window (&big_clock_window);
 	WM::Manager::instance().register_window (&big_transport_window);
+	WM::Manager::instance().register_window (&virtual_keyboard_window);
 	WM::Manager::instance().register_window (&audio_port_matrix);
 	WM::Manager::instance().register_window (&midi_port_matrix);
 	WM::Manager::instance().register_window (&idleometer);

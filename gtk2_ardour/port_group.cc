@@ -489,6 +489,18 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		}
 	}
 
+	/* virtual keyboard */
+	if ((type == DataType::MIDI || type == DataType::NIL)) {
+		AudioEngine* ae = AudioEngine::instance();
+		if (!inputs) {
+			boost::shared_ptr<Bundle> vm (new Bundle (_("Virtual MIDI"), inputs));
+			vm->add_channel (
+				_("Virtual Keyboard"), DataType::MIDI, ae->make_port_name_non_relative (session->vkbd_output_port()->name())
+				);
+			program->add_bundle (vm);
+		}
+	}
+
 	/* our sync ports */
 
 	if ((type == DataType::MIDI || type == DataType::NIL)) {
