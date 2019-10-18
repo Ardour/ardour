@@ -64,6 +64,9 @@ struct _PianoKeyboard
 	struct PKNote  notes[NNOTES];
 	/* Table used to translate from PC keyboard character to MIDI note number. */
 	GHashTable*    key_bindings;
+	int            min_velocity;
+	int            max_velocity;
+	int            key_velocity;
 };
 
 struct _PianoKeyboardClass
@@ -83,6 +86,7 @@ void piano_keyboard_set_monophonic (PianoKeyboard *pk, gboolean monophonic);
 void piano_keyboard_set_octave (PianoKeyboard *pk, int octave);
 
 gboolean piano_keyboard_set_keyboard_layout (PianoKeyboard *pk, const char *layout);
+void piano_keyboard_set_velocities (PianoKeyboard *pk, int min_vel, int max_vel, int key_vel);
 
 G_END_DECLS
 

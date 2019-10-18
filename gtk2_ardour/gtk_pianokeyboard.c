@@ -139,7 +139,7 @@ draw_note(PianoKeyboard *pk, cairo_t* cr, int note)
 }
 
 static int
-press_key(PianoKeyboard *pk, int key)
+press_key(PianoKeyboard *pk, int key, int vel)
 {
 	assert(key >= 0);
 	assert(key < NNOTES);
@@ -164,7 +164,7 @@ press_key(PianoKeyboard *pk, int key)
 
 	pk->notes[key].pressed = 1;
 
-	g_signal_emit_by_name(GTK_WIDGET(pk), "note-on", key);
+	g_signal_emit_by_name(GTK_WIDGET(pk), "note-on", key, vel);
 	queue_note_draw(pk, key);
 
 	return 1;
@@ -405,8 +405,7 @@ keyboard_event_handler(GtkWidget *mk, GdkEventKey *event, gpointer ignored)
 	assert(note < NNOTES);
 
 	if (event->type == GDK_KEY_PRESS) {
-		press_key(pk, note);
-
+		press_key(pk, note, pk->key_velocity);
 	} else if (event->type == GDK_KEY_RELEASE) {
 		release_key(pk, note);
 	}
@@ -441,6 +440,22 @@ get_note_for_xy(PianoKeyboard *pk, int x, int y)
 	return -1;
 }
 
+static int
+get_velocity_for_note_at_y(PianoKeyboard *pk, int note, int y)
+{
+	if (note < 0) {
+		return 0;
+	}
+	int vel = pk->min_velocity + (pk->max_velocity - pk->min_velocity) * y / pk->notes[note].h;
+
+	if (vel < 1) {
+		return 1;
+	} else if (vel > 127) {
+		return 127;
+	}
+	return vel;
+}
+
 static gboolean
 mouse_button_event_handler(PianoKeyboard *pk, GdkEventButton *event, gpointer ignored)
 {
@@ -464,7 +479,7 @@ mouse_button_event_handler(PianoKeyboard *pk, GdkEventButton *event, gpointer ig
 		if (pk->note_being_pressed_using_mouse >= 0)
 			release_key(pk, pk->note_being_pressed_using_mouse);
 
-		press_key(pk, note);
+		press_key(pk, note, get_velocity_for_note_at_y (pk, note, y));
 		pk->note_being_pressed_using_mouse = note;
 
 	} else if (event->type == GDK_BUTTON_RELEASE) {
@@ -493,13 +508,16 @@ mouse_motion_event_handler(PianoKeyboard *pk, GdkEventMotion *event, gpointer ig
 	if ((event->state & GDK_BUTTON1_MASK) == 0)
 		return TRUE;
 
-	note = get_note_for_xy(pk, event->x, event->y);
+	int		x = event->x;
+	int		y = event->y;
+
+	note = get_note_for_xy(pk, x, y);
 
 	if (note != pk->note_being_pressed_using_mouse && note >= 0) {
-
-		if (pk->note_being_pressed_using_mouse >= 0)
+		if (pk->note_being_pressed_using_mouse >= 0) {
 			release_key(pk, pk->note_being_pressed_using_mouse);
-		press_key(pk, note);
+		}
+		press_key(pk, note, get_velocity_for_note_at_y (pk, note, y));
 		pk->note_being_pressed_using_mouse = note;
 	}
 
@@ -610,6 +628,42 @@ piano_keyboard_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 	}
 }
 
+typedef void (*GMarshalFunc_VOID__INT_INT) (gpointer data1,
+                                            gint arg1,
+                                            gint arg2,
+                                            gpointer data2);
+static void
+g_cclosure_user_marshal_VOID__INT_INT (GClosure     *closure,
+                                       GValue       *return_value G_GNUC_UNUSED,
+                                       guint         n_param_values,
+                                       const GValue *param_values,
+                                       gpointer      invocation_hint G_GNUC_UNUSED,
+                                       gpointer      marshal_data)
+{
+  GCClosure *cc = (GCClosure *) closure;
+  gpointer data1, data2;
+  GMarshalFunc_VOID__INT_INT callback;
+
+  g_return_if_fail (n_param_values == 3);
+
+  if (G_CCLOSURE_SWAP_DATA (closure))
+    {
+      data1 = closure->data;
+      data2 = g_value_peek_pointer (param_values + 0);
+    }
+  else
+    {
+      data1 = g_value_peek_pointer (param_values + 0);
+      data2 = closure->data;
+    }
+  callback = (GMarshalFunc_VOID__INT_INT) (marshal_data ? marshal_data : cc->callback);
+
+  callback (data1,
+            (param_values + 1)->data[0].v_int,
+            (param_values + 2)->data[0].v_int,
+            data2);
+}
+
 static void
 piano_keyboard_class_init(PianoKeyboardClass *klass)
 {
@@ -618,7 +672,7 @@ piano_keyboard_class_init(PianoKeyboardClass *klass)
 	/* Set up signals. */
 	piano_keyboard_signals[NOTE_ON_SIGNAL] = g_signal_new ("note-on",
 		G_TYPE_FROM_CLASS (klass), (GSignalFlags)(G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION),
-		0, NULL, NULL, g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 1, G_TYPE_INT);
+		0, NULL, NULL, g_cclosure_user_marshal_VOID__INT_INT, G_TYPE_NONE, 2, G_TYPE_INT, G_TYPE_INT);
 
 	piano_keyboard_signals[NOTE_OFF_SIGNAL] = g_signal_new ("note-off",
 		G_TYPE_FROM_CLASS (klass), (GSignalFlags)(G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION),
@@ -687,6 +741,10 @@ piano_keyboard_new(void)
 	pk->last_key = 0;
 	pk->monophonic = FALSE;
 
+	pk->min_velocity = 1;
+	pk->max_velocity = 127;
+	pk->key_velocity = 100;
+
 	memset((void *)pk->notes, 0, sizeof(struct PKNote) * NNOTES);
 
 	pk->key_bindings = g_hash_table_new(g_str_hash, g_str_equal);
@@ -705,6 +763,19 @@ void
 piano_keyboard_set_monophonic(PianoKeyboard *pk, gboolean monophonic)
 {
 	pk->monophonic = monophonic;
+}
+
+void
+piano_keyboard_set_velocities(PianoKeyboard *pk, int min_vel, int max_vel, int key_vel)
+{
+	if (min_vel <= max_vel && min_vel > 0 && max_vel < 128) {
+		pk->min_velocity = min_vel;
+		pk->max_velocity = max_vel;
+	}
+
+	if (key_vel > 0 && key_vel < 128) {
+		pk->key_velocity = key_vel;
+	}
 }
 
 void

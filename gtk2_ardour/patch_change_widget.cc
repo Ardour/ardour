@@ -477,7 +477,7 @@ PatchChangeWidget::audition_next ()
 }
 
 void
-PatchChangeWidget::_note_on_event_handler(GtkWidget*, int note, gpointer arg)
+PatchChangeWidget::_note_on_event_handler(GtkWidget*, int note, int, gpointer arg)
 {
 	((PatchChangeWidget*)arg)->note_on_event_handler(note, false);
 }

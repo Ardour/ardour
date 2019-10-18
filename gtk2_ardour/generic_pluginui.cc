@@ -1392,7 +1392,7 @@ GenericPluginUI::toggle_pianokeyboard ()
 }
 
 void
-GenericPluginUI::_note_on_event_handler(GtkWidget*, int note, gpointer arg)
+GenericPluginUI::_note_on_event_handler(GtkWidget*, int note, int, gpointer arg)
 {
 	((GenericPluginUI*)arg)->note_on_event_handler(note);
 }
