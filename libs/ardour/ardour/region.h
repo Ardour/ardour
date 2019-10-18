@@ -71,7 +71,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float>             shift;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<PositionLockStyle> position_lock_style;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint64_t>          layering_index;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<std::string>		tags;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<std::string>	tags;
 };
 
 class Playlist;
