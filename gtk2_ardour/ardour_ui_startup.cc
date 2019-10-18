@@ -452,6 +452,7 @@ ARDOUR_UI::nsm_init ()
 void
 ARDOUR_UI::sfsm_response (StartupFSM::Result r)
 {
+	std::cerr << "sfsm::R (" << r << ")\n";
 	switch (r) {
 	case StartupFSM::ExitProgram:
 		cerr << "ExitProgram\n";
@@ -496,10 +497,19 @@ ARDOUR_UI::starting ()
 
 
 		startup_fsm = new StartupFSM (*amd);
-		startup_fsm->start ();
 		startup_fsm->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::sfsm_response));
 
-		if (startup_fsm->brand_new_user()) {
+		/* Note: entire startup process could happen in this one call
+		 * if:
+		 *
+		 * 1) not a new user
+		 * 2) session name provided on command line (and valid)
+		 * 3) no audio/MIDI setup required
+		 */
+
+		startup_fsm->start ();
+
+		if (startup_fsm && startup_fsm->brand_new_user()) {
 			_initial_verbose_plugin_scan = true;
 		}
 	}

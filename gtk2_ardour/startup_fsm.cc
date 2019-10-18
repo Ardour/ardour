@@ -199,7 +199,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 						audiomidi_dialog.set_desired_sample_rate (session_existing_sample_rate);
 					}
 
-					show_audiomidi_dialog ();
+					start_audio_midi_setup ();
 
 				} else {
 
