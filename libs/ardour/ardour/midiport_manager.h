@@ -93,6 +93,12 @@ public:
 		return _midi_clock_output_port;
 	}
 
+	/* Virtual MIDI keyboard output */
+	boost::shared_ptr<ARDOUR::Port> vkbd_output_port () const
+	{
+		return boost::dynamic_pointer_cast<MidiPort> (_vkbd_out);
+	}
+
 	void                set_midi_port_states (const XMLNodeList&);
 	std::list<XMLNode*> get_midi_port_states () const;
 
@@ -106,6 +112,7 @@ protected:
 	boost::shared_ptr<Port> _mmc_out;
 	boost::shared_ptr<Port> _scene_in;
 	boost::shared_ptr<Port> _scene_out;
+	boost::shared_ptr<Port> _vkbd_out;
 
 	/* synchronously handled ports: ARDOUR::MidiPort */
 	boost::shared_ptr<MidiPort> _mtc_output_port;

@@ -77,6 +77,9 @@ MidiPortManager::create_ports ()
 	_scene_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("Scene in"), true);
 	_scene_out = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("Scene out"), true);
 
+	_vkbd_out = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("Virtual Keyboard"), true);
+	boost::dynamic_pointer_cast<AsyncMIDIPort>(_vkbd_out)->set_flush_at_cycle_start (true);
+
 	/* Now register ports used to send positional sync data (MTC and MIDI Clock) */
 
 	boost::shared_ptr<ARDOUR::Port> p;
@@ -102,6 +105,7 @@ MidiPortManager::set_midi_port_states (const XMLNodeList&nodes)
 	ports.insert (make_pair (_midi_out->name(), _midi_out));
 	ports.insert (make_pair (_mmc_in->name(), _mmc_in));
 	ports.insert (make_pair (_mmc_out->name(), _mmc_out));
+	ports.insert (make_pair (_vkbd_out->name(), _vkbd_out));
 	ports.insert (make_pair (_scene_out->name(), _scene_out));
 	ports.insert (make_pair (_scene_in->name(), _scene_in));
 
@@ -132,6 +136,7 @@ MidiPortManager::get_midi_port_states () const
 	ports.insert (make_pair (_midi_out->name(), _midi_out));
 	ports.insert (make_pair (_mmc_in->name(), _mmc_in));
 	ports.insert (make_pair (_mmc_out->name(), _mmc_out));
+	ports.insert (make_pair (_vkbd_out->name(), _vkbd_out));
 	ports.insert (make_pair (_scene_out->name(), _scene_out));
 	ports.insert (make_pair (_scene_in->name(), _scene_in));
 
