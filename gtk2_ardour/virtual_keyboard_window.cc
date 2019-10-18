@@ -92,7 +92,7 @@ VirtualKeyboardWindow::note_on_event_handler (int note)
 	ev[0] = (MIDI_CMD_NOTE_ON | channel);
 	ev[1] = note;
 	ev[2] = _piano_velocity.get_value_as_int ();
-	boost::dynamic_pointer_cast<ARDOUR::AsyncMIDIPort>(_session->vkbd_output_port())->write (ev, 3, 0);
+	_session->vkbd_output_port()->write (ev, 3, 0);
 }
 
 void
@@ -107,5 +107,5 @@ VirtualKeyboardWindow::note_off_event_handler (int note)
 	ev[0] = (MIDI_CMD_NOTE_OFF | channel);
 	ev[1] = note;
 	ev[2] = 0;
-	boost::dynamic_pointer_cast<ARDOUR::AsyncMIDIPort>(_session->vkbd_output_port())->write (ev, 3, 0);
+	_session->vkbd_output_port()->write (ev, 3, 0);
 }

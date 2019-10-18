@@ -26,6 +26,7 @@
 
 #include "midi++/mmc.h"
 
+#include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/auditioner.h"
 #include "ardour/bundle.h"
@@ -490,15 +491,12 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	}
 
 	/* virtual keyboard */
-	if ((type == DataType::MIDI || type == DataType::NIL)) {
+	if (!inputs && (type == DataType::MIDI || type == DataType::NIL)) {
+		boost::shared_ptr<ARDOUR::Port> ap = boost::dynamic_pointer_cast<ARDOUR::Port> (session->vkbd_output_port());
 		AudioEngine* ae = AudioEngine::instance();
-		if (!inputs) {
-			boost::shared_ptr<Bundle> vm (new Bundle (_("Virtual MIDI"), inputs));
-			vm->add_channel (
-				_("Virtual Keyboard"), DataType::MIDI, ae->make_port_name_non_relative (session->vkbd_output_port()->name())
-				);
-			program->add_bundle (vm);
-		}
+		boost::shared_ptr<Bundle> vm (new Bundle (_("Virtual MIDI"), inputs));
+		vm->add_channel (_("Virtual Keyboard"), DataType::MIDI, ae->make_port_name_non_relative (ap->name()));
+		program->add_bundle (vm);
 	}
 
 	/* our sync ports */
