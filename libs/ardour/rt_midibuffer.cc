@@ -72,7 +72,7 @@ RTMidiBuffer::resize (size_t size)
 	cache_aligned_malloc ((void**) &_data, size * sizeof (Item));
 
 	if (_size) {
-		memcpy (_data, old_data, _size);
+		memcpy (_data, old_data, _size * sizeof (Item));
 		cache_aligned_free (old_data);
 	}
 
@@ -248,8 +248,8 @@ RTMidiBuffer::alloc_blob (uint32_t size)
 
 		_pool_capacity += size * 4;
 
-		cache_aligned_malloc ((void **) &_pool, _pool_capacity * 2);
-		memcpy (_pool, old_pool, _pool_size);
+		cache_aligned_malloc ((void **) &_pool, (_pool_capacity * sizeof (Blob)));
+		memcpy (_pool, old_pool, _pool_size * sizeof (Blob));
 		cache_aligned_free (old_pool);
 	}
 
