@@ -123,14 +123,7 @@ MidiPlaylist::read (Evoral::EventSink<samplepos_t>& dst,
 
 	Playlist::RegionReadLock rl (this);
 
-	DEBUG_TRACE (DEBUG::MidiPlaylistIO,
-	             string_compose ("---- MidiPlaylist::read %1 .. %2 (%3 trackers) ----\n",
-	                             start, start + dur, _note_trackers.size()));
-
-	/* First, emit any queued edit fixup events at start. */
-	for (NoteTrackers::iterator t = _note_trackers.begin(); t != _note_trackers.end(); ++t) {
-		t->second->fixer.emit(dst, _read_end, t->second->tracker);
-	}
+	DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("---- MidiPlaylist::read %1 .. %2 ----\n", start, start + dur));
 
 	/* Find relevant regions that overlap [start..end] */
 	const samplepos_t                         end = start + dur - 1;
@@ -184,52 +177,20 @@ MidiPlaylist::read (Evoral::EventSink<samplepos_t>& dst,
 			continue;
 		}
 
-		/* Get the existing note tracker for this region, or create a new one. */
-		NoteTrackers::iterator           t           = _note_trackers.find (mr.get());
-		bool                             new_tracker = false;
-		boost::shared_ptr<RegionTracker> tracker;
-		if (t == _note_trackers.end()) {
-			tracker     = boost::shared_ptr<RegionTracker>(new RegionTracker);
-			new_tracker = true;
-			DEBUG_TRACE (DEBUG::MidiPlaylistIO,
-			             string_compose ("\tPre-read %1 (%2 .. %3): new tracker\n",
-			                             mr->name(), mr->position(), mr->last_sample()));
-		} else {
-			tracker = t->second;
-			DEBUG_TRACE (DEBUG::MidiPlaylistIO,
-			             string_compose ("\tPre-read %1 (%2 .. %3): %4 active notes\n",
-			                             mr->name(), mr->position(), mr->last_sample(), tracker->tracker.on()));
-		}
+		MidiCursor cursor; // XXX remove me
 
 		/* Read from region into target. */
 		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("read from %1 at %2 for %3 LR %4 .. %5\n",
 		                                                    mr->name(), start, dur,
 		                                                    (loop_range ? loop_range->from : -1),
 		                                                    (loop_range ? loop_range->to : -1)));
-		mr->read_at (tgt, start, dur, loop_range, tracker->cursor, chan_n, _note_mode, &tracker->tracker, filter);
-		DEBUG_TRACE (DEBUG::MidiPlaylistIO,
-		             string_compose ("\tPost-read: %1 active notes\n", tracker->tracker.on()));
+		mr->read_at (tgt, start, dur, loop_range, cursor, chan_n, _note_mode, 0, filter);
 
 		if (find (ended.begin(), ended.end(), *i) != ended.end()) {
 			/* Region ended within the read range, so resolve any active notes
 			   (either stuck notes in the data, or notes that end after the end
 			   of the region). */
-			DEBUG_TRACE (DEBUG::MidiPlaylistIO,
-			             string_compose ("\t%1 ended, resolve notes and delete (%2) tracker\n",
-			                             mr->name(), ((new_tracker) ? "new" : "old")));
-
-			tracker->tracker.resolve_notes (tgt, loop_range ? loop_range->squish ((*i)->last_sample()) : (*i)->last_sample());
-			tracker->cursor.invalidate (false);
-			if (!new_tracker) {
-				_note_trackers.erase (t);
-			}
-
-		} else {
-
-			if (new_tracker) {
-				_note_trackers.insert (make_pair (mr.get(), tracker));
-				DEBUG_TRACE (DEBUG::MidiPlaylistIO, "\tadded tracker to trackers\n");
-			}
+			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1 ended, resolve notes and delete\n", mr->name()));
 		}
 	}
 
@@ -254,29 +215,16 @@ MidiPlaylist::read (Evoral::EventSink<samplepos_t>& dst,
 void
 MidiPlaylist::reset_note_trackers ()
 {
-	Playlist::RegionWriteLock rl (this, false);
-
-	DEBUG_TRACE (DEBUG::MidiTrackers, string_compose ("%1 reset all note trackers\n", name()));
-	_note_trackers.clear ();
 }
 
 void
 MidiPlaylist::resolve_note_trackers (Evoral::EventSink<samplepos_t>& dst, samplepos_t time)
 {
-	Playlist::RegionWriteLock rl (this, false);
-
-	for (NoteTrackers::iterator n = _note_trackers.begin(); n != _note_trackers.end(); ++n) {
-		n->second->tracker.resolve_notes(dst, time);
-	}
-	DEBUG_TRACE (DEBUG::MidiTrackers, string_compose ("%1 resolve all note trackers\n", name()));
-	_note_trackers.clear ();
 }
 
 void
 MidiPlaylist::remove_dependents (boost::shared_ptr<Region> region)
 {
-	/* MIDI regions have no dependents (crossfades) but we might be tracking notes */
-	_note_trackers.erase(region.get());
 }
 
 void
@@ -352,11 +300,6 @@ MidiPlaylist::destroy_region (boost::shared_ptr<Region> region)
 			}
 
 			i = tmp;
-		}
-
-		NoteTrackers::iterator t = _note_trackers.find(region.get());
-		if (t != _note_trackers.end()) {
-			_note_trackers.erase(t);
 		}
 	}
 
