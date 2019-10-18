@@ -28,11 +28,12 @@
 
 #include <boost/utility.hpp>
 
+#include "evoral/Parameter.hpp"
+
 #include "ardour/ardour.h"
 #include "ardour/midi_cursor.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_state_tracker.h"
-#include "ardour/note_fixer.h"
 #include "ardour/playlist.h"
 #include "evoral/Note.hpp"
 #include "evoral/Parameter.hpp"
@@ -116,20 +117,8 @@ protected:
 	void region_going_away (boost::weak_ptr<Region> region);
 
 private:
-	typedef Evoral::Note<Temporal::Beats> Note;
-	typedef Evoral::Event<samplepos_t>   Event;
-
-	struct RegionTracker : public boost::noncopyable {
-		MidiCursor       cursor;   ///< Cursor (iterator and read state)
-		MidiStateTracker tracker;  ///< Active note tracker
-		NoteFixer        fixer;    ///< Edit compensation
-	};
-
-	typedef std::map< Region*, boost::shared_ptr<RegionTracker> > NoteTrackers;
-
 	void dump () const;
 
-	NoteTrackers _note_trackers;
 	NoteMode     _note_mode;
 	samplepos_t  _read_end;
 
