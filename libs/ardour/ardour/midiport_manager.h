@@ -25,8 +25,8 @@
 
 #include "pbd/rcu.h"
 
-#include "midi++/types.h"
 #include "midi++/port.h"
+#include "midi++/types.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/midi_port.h"
@@ -37,12 +37,13 @@ namespace ARDOUR {
 class MidiPort;
 class Port;
 
-class LIBARDOUR_API MidiPortManager {
-  public:
-    MidiPortManager();
-    virtual ~MidiPortManager ();
+class LIBARDOUR_API MidiPortManager
+{
+public:
+	MidiPortManager ();
+	virtual ~MidiPortManager ();
 
-    /* Ports used for control. These are read/written to outside of the
+	/* Ports used for control. These are read/written to outside of the
      * process callback (asynchronously with respect to when data
      * actually arrives).
      *
@@ -52,44 +53,67 @@ class LIBARDOUR_API MidiPortManager {
      * callback.
      */
 
-    boost::shared_ptr<ARDOUR::Port> midi_input_port () const { return _midi_in; }
-    boost::shared_ptr<ARDOUR::Port> midi_output_port () const { return _midi_out; }
+	boost::shared_ptr<ARDOUR::Port> midi_input_port () const
+	{
+		return _midi_in;
+	}
+	boost::shared_ptr<ARDOUR::Port> midi_output_port () const
+	{
+		return _midi_out;
+	}
 
-    boost::shared_ptr<ARDOUR::Port> mmc_input_port() const { return boost::dynamic_pointer_cast<MidiPort>(_mmc_in); }
-    boost::shared_ptr<ARDOUR::Port> mmc_output_port() const { return boost::dynamic_pointer_cast<MidiPort>(_mmc_out); }
+	boost::shared_ptr<ARDOUR::Port> mmc_input_port () const
+	{
+		return boost::dynamic_pointer_cast<MidiPort> (_mmc_in);
+	}
+	boost::shared_ptr<ARDOUR::Port> mmc_output_port () const
+	{
+		return boost::dynamic_pointer_cast<MidiPort> (_mmc_out);
+	}
 
-    boost::shared_ptr<ARDOUR::Port> scene_input_port() const { return boost::dynamic_pointer_cast<MidiPort>(_scene_in); }
-    boost::shared_ptr<ARDOUR::Port> scene_output_port() const { return boost::dynamic_pointer_cast<MidiPort>(_scene_out); }
+	boost::shared_ptr<ARDOUR::Port> scene_input_port () const
+	{
+		return boost::dynamic_pointer_cast<MidiPort> (_scene_in);
+	}
+	boost::shared_ptr<ARDOUR::Port> scene_output_port () const
+	{
+		return boost::dynamic_pointer_cast<MidiPort> (_scene_out);
+	}
 
-    /* Ports used to send synchronization. These have their output handled inside the
-     * process callback.
-     */
+	/* Ports used to send synchronization. These have their output handled inside the
+	 * process callback.
+	 */
 
-    boost::shared_ptr<MidiPort> mtc_output_port() const { return _mtc_output_port; }
-    boost::shared_ptr<MidiPort> midi_clock_output_port() const { return _midi_clock_output_port; }
+	boost::shared_ptr<MidiPort> mtc_output_port () const
+	{
+		return _mtc_output_port;
+	}
+	boost::shared_ptr<MidiPort> midi_clock_output_port () const
+	{
+		return _midi_clock_output_port;
+	}
 
-    void set_midi_port_states (const XMLNodeList&);
-    std::list<XMLNode*> get_midi_port_states () const;
+	void                set_midi_port_states (const XMLNodeList&);
+	std::list<XMLNode*> get_midi_port_states () const;
 
-    PBD::Signal0<void> PortsChanged;
+	PBD::Signal0<void> PortsChanged;
 
-  protected:
-    /* asynchronously handled ports: ARDOUR::AsyncMIDIPort */
-    boost::shared_ptr<Port> _midi_in;
-    boost::shared_ptr<Port> _midi_out;
-    boost::shared_ptr<Port> _mmc_in;
-    boost::shared_ptr<Port> _mmc_out;
-    boost::shared_ptr<Port> _scene_in;
-    boost::shared_ptr<Port> _scene_out;
+protected:
+	/* asynchronously handled ports: ARDOUR::AsyncMIDIPort */
+	boost::shared_ptr<Port> _midi_in;
+	boost::shared_ptr<Port> _midi_out;
+	boost::shared_ptr<Port> _mmc_in;
+	boost::shared_ptr<Port> _mmc_out;
+	boost::shared_ptr<Port> _scene_in;
+	boost::shared_ptr<Port> _scene_out;
 
-    /* synchronously handled ports: ARDOUR::MidiPort */
-    boost::shared_ptr<MidiPort> _mtc_output_port;
-    boost::shared_ptr<MidiPort> _midi_clock_output_port;
+	/* synchronously handled ports: ARDOUR::MidiPort */
+	boost::shared_ptr<MidiPort> _mtc_output_port;
+	boost::shared_ptr<MidiPort> _midi_clock_output_port;
 
-    void create_ports ();
-
+	void create_ports ();
 };
 
-} // namespace MIDI
+} // namespace ARDOUR
 
-#endif  // __midi_port_manager_h__
+#endif

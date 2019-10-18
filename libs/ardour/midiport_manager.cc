@@ -62,8 +62,7 @@ MidiPortManager::~MidiPortManager ()
 void
 MidiPortManager::create_ports ()
 {
-	/* this method is idempotent
-	 */
+	/* this method is idempotent */
 
 	if (_midi_in) {
 		return;
@@ -78,8 +77,7 @@ MidiPortManager::create_ports ()
 	_scene_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("Scene in"), true);
 	_scene_out = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("Scene out"), true);
 
-	/* Now register ports used to send positional sync data (MTC and MIDI Clock)
-	 */
+	/* Now register ports used to send positional sync data (MTC and MIDI Clock) */
 
 	boost::shared_ptr<ARDOUR::Port> p;
 
