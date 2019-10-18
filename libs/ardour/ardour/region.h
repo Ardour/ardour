@@ -72,6 +72,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<PositionLockStyle> position_lock_style;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint64_t>          layering_index;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<std::string>	tags;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>		contents; // type doesn't matter here
 };
 
 class Playlist;
@@ -468,6 +469,7 @@ private:
 	PBD::EnumProperty<PositionLockStyle> _position_lock_style;
 	PBD::Property<uint64_t>    _layering_index;
 	PBD::Property<std::string> _tags;
+	PBD::Property<bool>        _contents; // type is irrelevant
 
 	samplecnt_t             _last_length;
 	samplepos_t             _last_position;

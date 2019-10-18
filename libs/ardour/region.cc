@@ -81,6 +81,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<PositionLockStyle> position_lock_style;
 		PBD::PropertyDescriptor<uint64_t> layering_index;
 		PBD::PropertyDescriptor<std::string> tags;
+		PBD::PropertyDescriptor<bool> contents;
 	}
 }
 
@@ -143,6 +144,8 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for layering_index = %1\n",	Properties::layering_index.property_id));
 	Properties::tags.property_id = g_quark_from_static_string (X_("tags"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for tags = %1\n", 	Properties::tags.property_id));
+	Properties::contents.property_id = g_quark_from_static_string (X_("contents"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for contents = %1\n", 	Properties::contents.property_id));
 }
 
 void
@@ -176,6 +179,7 @@ Region::register_properties ()
 	add_property (_position_lock_style);
 	add_property (_layering_index);
 	add_property (_tags);
+	add_property (_contents);
 }
 
 #define REGION_DEFAULT_STATE(s,l) \
@@ -209,7 +213,8 @@ Region::register_properties ()
 	, _shift (Properties::shift, 1.0) \
 	, _position_lock_style (Properties::position_lock_style, _type == DataType::AUDIO ? AudioTime : MusicTime) \
 	, _layering_index (Properties::layering_index, 0) \
-	, _tags (Properties::tags, "")
+	, _tags (Properties::tags, "") \
+	, _contents (Properties::contents, false)
 
 #define REGION_COPY_STATE(other) \
 	  _sync_marked (Properties::sync_marked, other->_sync_marked) \
@@ -244,7 +249,8 @@ Region::register_properties ()
 	, _shift (Properties::shift, other->_shift) \
 	, _position_lock_style (Properties::position_lock_style, other->_position_lock_style) \
 	, _layering_index (Properties::layering_index, other->_layering_index) \
-	, _tags (Properties::tags, other->_tags)
+	, _tags (Properties::tags, other->_tags) \
+	, _contents (Properties::contents, other->_contents)
 
 /* derived-from-derived constructor (no sources in constructor) */
 Region::Region (Session& s, samplepos_t start, samplecnt_t length, const string& name, DataType type)
