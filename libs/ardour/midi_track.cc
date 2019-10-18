@@ -873,9 +873,7 @@ MidiTrack::realtime_handle_transport_stopped ()
 }
 
 void
-MidiTrack::region_edited(boost::shared_ptr<Region> region)
+MidiTrack::playlist_contents_changed ()
 
 {
-	cerr << "MIDI region " << region->name() << " edited, queue reload\n";
-	_session.request_overwrite_buffer (boost::dynamic_pointer_cast<Track> (shared_from_this()));
 }

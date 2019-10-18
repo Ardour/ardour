@@ -1101,8 +1101,6 @@ MidiRegionView::apply_diff (bool as_subcommand, bool was_copy)
 
 	if (commit) {
 		trackview.editor().commit_reversible_command ();
-		/* XXX the GUI should NOT be responsible for causing this call tree */
-		midi_view()->midi_track()->region_edited (_region);
 	}
 }
 
