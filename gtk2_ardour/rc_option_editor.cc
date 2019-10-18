@@ -2006,10 +2006,6 @@ MidiPortOptions::refill_midi_ports (bool for_input, Gtk::TreeView& view)
 
 	for (vector<string>::const_iterator s = ports.begin(); s != ports.end(); ++s) {
 
-		if (AudioEngine::instance()->port_is_mine (*s)) {
-			continue;
-		}
-
 		PortManager::MidiPortInformation mpi (AudioEngine::instance()->midi_port_information (*s));
 
 		if (!mpi.exists) {
