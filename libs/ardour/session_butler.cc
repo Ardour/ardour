@@ -45,7 +45,9 @@ using namespace PBD;
 void
 Session::adjust_playback_buffering ()
 {
-        request_stop (false, false);
+	if (!loading()) {
+		request_stop (false, false);
+	}
 	SessionEvent *ev = new SessionEvent (SessionEvent::AdjustPlaybackBuffering, SessionEvent::Add, SessionEvent::Immediate, 0, 0, 0.0);
 	queue_event (ev);
 }
@@ -53,7 +55,9 @@ Session::adjust_playback_buffering ()
 void
 Session::adjust_capture_buffering ()
 {
-        request_stop (false, false);
+	if (!loading()) {
+		request_stop (false, false);
+	}
 	SessionEvent *ev = new SessionEvent (SessionEvent::AdjustCaptureBuffering, SessionEvent::Add, SessionEvent::Immediate, 0, 0, 0.0);
 	queue_event (ev);
 }
