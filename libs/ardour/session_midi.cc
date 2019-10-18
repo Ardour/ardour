@@ -692,7 +692,7 @@ Session::scene_input_port () const
 	return _midi_ports->scene_input_port ();
 }
 
-boost::shared_ptr<ARDOUR::Port>
+boost::shared_ptr<AsyncMIDIPort>
 Session::vkbd_output_port () const
 {
 	return _midi_ports->vkbd_output_port ();

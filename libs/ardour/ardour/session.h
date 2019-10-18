@@ -118,6 +118,7 @@ class Curve;
 namespace ARDOUR {
 
 class Amp;
+class AsyncMIDIPort;
 class AudioEngine;
 class AudioFileSource;
 class AudioRegion;
@@ -1200,7 +1201,8 @@ public:
 	boost::shared_ptr<Port> mmc_input_port () const;
 	boost::shared_ptr<Port> scene_input_port () const;
 	boost::shared_ptr<Port> scene_output_port () const;
-	boost::shared_ptr<Port> vkbd_output_port () const;
+
+	boost::shared_ptr<AsyncMIDIPort> vkbd_output_port () const;
 
 	/* synchronous MIDI ports used for synchronization */
 

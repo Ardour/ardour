@@ -34,6 +34,7 @@
 
 namespace ARDOUR {
 
+class AsyncMIDIPort;
 class MidiPort;
 class Port;
 
@@ -94,10 +95,7 @@ public:
 	}
 
 	/* Virtual MIDI keyboard output */
-	boost::shared_ptr<ARDOUR::Port> vkbd_output_port () const
-	{
-		return boost::dynamic_pointer_cast<MidiPort> (_vkbd_out);
-	}
+	boost::shared_ptr<AsyncMIDIPort> vkbd_output_port () const;
 
 	void                set_midi_port_states (const XMLNodeList&);
 	std::list<XMLNode*> get_midi_port_states () const;

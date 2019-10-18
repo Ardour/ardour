@@ -147,4 +147,8 @@ MidiPortManager::get_midi_port_states () const
 	return s;
 }
 
-
+boost::shared_ptr<AsyncMIDIPort>
+MidiPortManager::vkbd_output_port () const
+{
+	return boost::dynamic_pointer_cast<AsyncMIDIPort> (_vkbd_out);
+}
