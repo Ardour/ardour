@@ -205,12 +205,6 @@ DiskReader::adjust_buffering ()
 }
 
 void
-DiskReader::playlist_changed (const PropertyChange&)
-{
-	playlist_modified ();
-}
-
-void
 DiskReader::playlist_modified ()
 {
 	if (!overwrite_queued) {
@@ -237,6 +231,8 @@ DiskReader::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
 	   take care of the buffer refill.
 	*/
 
+        cerr << "DR " << _track->name() << " using playlist, loading ? " << _session.loading() << endl;
+
         if (!overwrite_queued && (prior_playlist || _session.loading())) {
 		_session.request_overwrite_buffer (_track);
 		overwrite_queued = true;
@@ -258,7 +254,6 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	if (run_must_resolve) {
 		boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (_track);
 		if (mt) {
-			cerr << _track->name() << " resolving " << _tracker.on() << " notes @ " << start_sample << endl;
 			resolve_tracker (mt->immediate_events(), start_sample);
 		}
 		run_must_resolve = false;
@@ -532,8 +527,8 @@ DiskReader::overwrite_existing_buffers ()
 		midi_playlist()->render (0);
 		minsert.update();
 		assert (midi_playlist()->rendered());
-		//cerr << "Reading " << name()  << " took " << minsert.elapsed() << " microseconds, final size = " << midi_playlist()->rendered()->size() << endl;
-		//midi_playlist()->rendered()->dump (100);
+		// cerr << "Reading " << name()  << " took " << minsert.elapsed() << " microseconds, final size = " << midi_playlist()->rendered()->size() << endl;
+		// midi_playlist()->rendered()->dump (100);
 	}
 
 	g_atomic_int_set (&_pending_overwrite, 0);

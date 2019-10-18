@@ -541,7 +541,7 @@ MidiRegion::render (Evoral::EventSink<samplepos_t>& dst,
 		dst, // destination buffer
 		_position - _start, // start position of the source in session samples
 		_start + internal_offset, // where to start reading in the source
-		max_samplecnt,
+		_start + internal_offset + _length,
 		0,
 		cursor,
 		0,
@@ -670,7 +670,16 @@ MidiRegion::model_changed ()
 		);
 
 	model()->ContentsShifted.connect_same_thread (_model_shift_connection, boost::bind (&MidiRegion::model_shifted, this, _1));
+	model()->ContentsChanged.connect_same_thread (_model_changed_connection, boost::bind (&MidiRegion::model_contents_changed, this));
 }
+
+void
+MidiRegion::model_contents_changed ()
+{
+	std::cerr << "MIDI Region " << name() << " contents changed\n";
+	send_change (Properties::contents);
+}
+
 void
 MidiRegion::model_shifted (double qn_distance)
 {
@@ -685,6 +694,7 @@ MidiRegion::model_shifted (double qn_distance)
 		_start = new_start;
 		what_changed.add (Properties::start);
 		what_changed.add (Properties::start_beats);
+		what_changed.add (Properties::contents);
 		send_change (what_changed);
 	} else {
 		_ignore_shift = false;

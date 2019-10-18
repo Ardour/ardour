@@ -416,7 +416,7 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 
 	Playlist::RegionReadLock rl (this);
 
-	DEBUG_TRACE (DEBUG::MidiPlaylistIO, "---- MidiPlaylist::dump-----\n");
+	DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("---- MidiPlaylist::render (regions: %1)-----\n", regions.size()));
 
 	std::vector< boost::shared_ptr<Region> > regs;
 
@@ -458,7 +458,7 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 			continue;
 		}
 
-		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("dump from %1 at %2\n", mr->name()));
+		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("render from %1\n", mr->name()));
 		mr->render (*tgt, 0, _note_mode, filter);
 	}
 

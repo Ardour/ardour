@@ -139,6 +139,8 @@ public:
 	void realtime_handle_transport_stopped ();
 	void region_edited (boost::shared_ptr<Region>);
 
+	int use_playlist (DataType, boost::shared_ptr<Playlist>);
+
 protected:
 
 	XMLNode& state (bool save_template);
@@ -174,6 +176,9 @@ private:
 	/** Update automation controls to reflect any changes in buffers. */
 	void update_controls (BufferSet const& bufs);
 	void restore_controls ();
+
+	void playlist_contents_changed ();
+	PBD::ScopedConnection playlist_content_change_connection;
 };
 
 } /* namespace ARDOUR*/

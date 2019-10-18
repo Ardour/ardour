@@ -128,7 +128,6 @@ protected:
 
 	void resolve_tracker (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time);
 
-	void playlist_changed (const PBD::PropertyChange&);
 	int use_playlist (DataType, boost::shared_ptr<Playlist>);
 	void playlist_ranges_moved (std::list< Evoral::RangeMove<samplepos_t> > const &, bool);
 

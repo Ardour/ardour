@@ -1772,14 +1772,18 @@ Playlist::region_changed (const PropertyChange& what_changed, boost::shared_ptr<
 	our_interests.add (Properties::muted);
 	our_interests.add (Properties::layer);
 	our_interests.add (Properties::opaque);
+	our_interests.add (Properties::contents);
 
 	bounds.add (Properties::start);
 	bounds.add (Properties::position);
 	bounds.add (Properties::length);
 
+	bool send_contents = false;
+
 	if (what_changed.contains (bounds)) {
 		region_bounds_changed (what_changed, region);
 		save = !(_splicing || _nudging);
+		send_contents = true;
 	}
 
 	if (what_changed.contains (Properties::position) && !what_changed.contains (Properties::length)) {
@@ -1788,8 +1792,6 @@ Playlist::region_changed (const PropertyChange& what_changed, boost::shared_ptr<
 		notify_region_end_trimmed (region);
 	} else if (what_changed.contains (Properties::position) && what_changed.contains (Properties::length)) {
 		notify_region_start_trimmed (region);
-	} else if (what_changed.contains (Properties::start)) {
-		notify_contents_changed ();
 	}
 
 	/* don't notify about layer changes, since we are the only object that can initiate
@@ -1798,6 +1800,10 @@ Playlist::region_changed (const PropertyChange& what_changed, boost::shared_ptr<
 
 	if (what_changed.contains (our_interests)) {
 		save = true;
+	}
+
+	if (send_contents || save) {
+		notify_contents_changed ();
 	}
 
 	mark_session_dirty ();
