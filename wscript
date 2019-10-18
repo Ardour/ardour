@@ -871,8 +871,7 @@ def configure(conf):
         # but first make sure that all build-hosts (incl. OSX-10.5/PPC) have that python lib.
         # lazy approach: just use major version 2.X.X
         if itstool != "itstool" or version[0] < "2":
-            print("--freedesktop requires itstool > 2.0.0 to translate files.")
-            sys.exit(-1)
+            conf.fatal("--freedesktop requires itstool > 2.0.0 to translate files.")
 
     conf.env['VERSION'] = VERSION
     conf.env['MAJOR'] = MAJOR
@@ -1222,8 +1221,7 @@ int main () { return 0; }
         backends += ['dummy']
 
     if not backends:
-        print("Must configure and build at least one backend")
-        sys.exit(1)
+        conf.fatal("Must configure and build at least one backend")
 
     conf.env['BACKENDS'] = backends
     conf.env['BUILD_JACKBACKEND'] = any('jack' in b for b in backends)
@@ -1235,32 +1233,26 @@ int main () { return 0; }
 
     if (Options.options.use_lld):
         if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
-                print("lld is only for Linux builds")
-                sys.exit(1)
+                conf.fatal("lld is only for Linux builds")
         else:
                 conf.find_program ('lld')
                 conf.env.append_value('LINKFLAGS', '-fuse-ld=lld')
 
     if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
-        print("PortAudio Backend is not for Linux")
-        sys.exit(1)
+        conf.fatal("PortAudio Backend is not for Linux")
 
 
     if sys.platform != 'darwin' and conf.env['BUILD_CORECRAPPITA']:
-        print("Coreaudio backend is only available for OSX")
-        sys.exit(1)
+        conf.fatal("Coreaudio backend is only available for OSX")
 
     if re.search ("linux", sys.platform) == None and conf.env['BUILD_ALSABACKEND']:
-        print("ALSA Backend is only available on Linux")
-        sys.exit(1)
+        conf.fatal("ALSA Backend is only available on Linux")
 
     if re.search ("linux", sys.platform) == None and conf.env['BUILD_PULSEAUDIO']:
-        print("Pulseaudio Backend is only available on Linux")
-        sys.exit(1)
+        conf.fatal("Pulseaudio Backend is only available on Linux")
 
     if conf.env['BUILD_PULSEAUDIO'] and not conf.is_defined('HAVE_PULSEAUDIO'):
-        print("Pulseaudio Backend requires libpulse-dev")
-        sys.exit(1)
+        conf.fatal("Pulseaudio Backend requires libpulse-dev")
 
     set_compiler_flags (conf, Options.options)
 
