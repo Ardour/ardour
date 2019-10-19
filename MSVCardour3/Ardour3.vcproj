@@ -1376,6 +1376,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\virtual_keyboard_window.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\visibility_group.cc"
 				>
 			</File>
@@ -2515,6 +2519,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\video_tool_paths.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\virtual_keyboard_window.h"
 				>
 			</File>
 			<File
