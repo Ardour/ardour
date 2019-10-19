@@ -533,6 +533,7 @@ MidiRegion::render (Evoral::EventSink<samplepos_t>& dst,
 #endif
 
 	MidiCursor cursor;
+	MidiStateTracker tracker;
 
 	/* This call reads events from a source and writes them to `dst' timed in session samples */
 
@@ -544,11 +545,17 @@ MidiRegion::render (Evoral::EventSink<samplepos_t>& dst,
 		_start + internal_offset + _length,
 		0,
 		cursor,
-		0,
+		&tracker,
 		filter,
 		_filtered_parameters,
 		quarter_note(),
 		_start_beats);
+
+	/* resolve any notes that were "cut off" by the end of the region. The
+	 * Note-Off's get inserted at the end of the region
+	 */
+
+	tracker.resolve_notes (dst, _position - _start + _length);
 
 	return 0;
 }
