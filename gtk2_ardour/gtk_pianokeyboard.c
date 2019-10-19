@@ -596,7 +596,7 @@ recompute_dimensions(PianoKeyboard *pk)
 			/* This note is black key. */
 			pk->notes[note].x = pk->widget_margin + white_key * key_width - black_key_width / 2;
 			pk->notes[note].w = black_key_width;
-			pk->notes[note].h = height / 2;
+			pk->notes[note].h = height * .6;
 			pk->notes[note].white = 0;
 
 			continue;
