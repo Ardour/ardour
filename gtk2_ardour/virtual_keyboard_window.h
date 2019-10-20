@@ -19,6 +19,7 @@
 #ifndef _virtual_keyboard_window_h_
 #define _virtual_keyboard_window_h_
 
+#include <gtkmm/box.h>
 #include <gtkmm/spinbutton.h>
 
 #include "pbd/signals.h"
@@ -85,10 +86,6 @@ public:
 	VirtualKeyboardWindow ();
 	~VirtualKeyboardWindow ();
 
-protected:
-	void on_unmap ();
-	bool on_key_press_event (GdkEventKey*);
-
 private:
 	static void _note_on_event_handler (GtkWidget*, int note, int vel, gpointer arg)
 	{
@@ -100,28 +97,48 @@ private:
 		static_cast<VirtualKeyboardWindow*>(arg)->note_off_event_handler(note);
 	}
 
+	void on_unmap ();
+	bool on_key_press_event (GdkEventKey*);
+
 	void note_on_event_handler  (int, int);
 	void note_off_event_handler (int);
 	void control_change_event_handler (int, int);
 
 	void select_keyboard_layout (int);
 	void update_velocity_settings (int);
+	void bank_patch ();
 	void update_sensitivity ();
-	bool yaxis_velocity_button_release (GdkEventButton* ev);
+	bool toggle_config (GdkEventButton*);
+	bool toggle_bankpatch (GdkEventButton*);
+	bool toggle_yaxis_velocity (GdkEventButton*);
+	bool send_panic_message (GdkEventButton*);
 
 	PianoKeyboard*  _piano;
 	Gtk::Widget*    _pianomm;
 	Gtk::SpinButton _piano_channel;
 
+	Gtk::SpinButton _bank_msb;
+	Gtk::SpinButton _bank_lsb;
+	Gtk::SpinButton _patchpgm;
+
+	Gtk::HBox* _cfg_box;
+	Gtk::HBox* _pgm_box;
+
+	ArdourWidgets::ArdourButton   _cfg_display;
+	ArdourWidgets::ArdourButton   _pgm_display;
 	ArdourWidgets::ArdourButton   _yaxis_velocity;
+	ArdourWidgets::ArdourButton   _send_panic;
 	ArdourWidgets::ArdourDropdown _keyboard_layout;
 
 	Gtk::SpinButton _piano_key_velocity;
 	Gtk::SpinButton _piano_min_velocity;
 	Gtk::SpinButton _piano_max_velocity;
 
-	boost::shared_ptr<VKBDControl> _cc7;
-	ArdourWidgets::ArdourKnob _cc7_knob;
+#define VKBD_NCTRLS 8
+
+	boost::shared_ptr<VKBDControl> _cc[VKBD_NCTRLS];
+	ArdourWidgets::ArdourKnob*     _cc_knob[VKBD_NCTRLS];
+	ArdourWidgets::ArdourDropdown  _cc_key[VKBD_NCTRLS];
 
 	PBD::ScopedConnectionList _cc_connections;
 };
