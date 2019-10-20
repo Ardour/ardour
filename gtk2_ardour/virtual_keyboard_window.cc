@@ -64,7 +64,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 				sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), 1)));
 	_keyboard_layout.AddMenuElem (MenuElem ("AZERTY",
 				sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), 2)));
-	_keyboard_layout.set_text (_("QWERTY"));
+	_keyboard_layout.set_active (_("QWERTY"));
 
 	_cfg_display.set_active (false);
 	_pgm_display.set_active (false);
@@ -137,7 +137,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 			sprintf (key, "%d", c);
 			_cc_key[i].append_text_item (key);
 		}
-		_cc_key[i].set_text (default_cc[i]);
+		_cc_key[i].set_active (default_cc[i]);
 
 		tbl->attach (*_cc_knob[i], i+3, i+4, 0, 1, SHRINK, SHRINK, 4, 2);
 		tbl->attach (_cc_key[i]  , i+3, i+4, 1, 2, SHRINK, SHRINK, 4, 2);
@@ -243,7 +243,7 @@ VirtualKeyboardWindow::set_state (const XMLNode &root)
 	std::string layout;
 	if (node->get_property(X_("Layout"), layout)) {
 		piano_keyboard_set_keyboard_layout (_piano, layout.c_str());
-		_keyboard_layout.set_text (layout);
+		_keyboard_layout.set_active (layout);
 	}
 
 	for (int i = 0; i < VKBD_NCTRLS; ++i) {
@@ -251,7 +251,7 @@ VirtualKeyboardWindow::set_state (const XMLNode &root)
 		sprintf (buf, "CC-%d", i);
 		std::string cckey;
 		if (node->get_property(buf, cckey)) {
-			_cc_key[i].set_text (cckey);
+			_cc_key[i].set_active (cckey);
 		}
 	}
 
@@ -297,15 +297,12 @@ VirtualKeyboardWindow::select_keyboard_layout (int l)
 		default:
 		case 0:
 			piano_keyboard_set_keyboard_layout (_piano, "QWERTY");
-			_keyboard_layout.set_text (_("QWERTY"));
 			break;
 		case 1:
 			piano_keyboard_set_keyboard_layout (_piano, "QWERTZ");
-			_keyboard_layout.set_text (_("QWERTZ"));
 			break;
 		case 2:
 			piano_keyboard_set_keyboard_layout (_piano, "AZERTY");
-			_keyboard_layout.set_text (_("AZERTY"));
 			break;
 	}
 }
