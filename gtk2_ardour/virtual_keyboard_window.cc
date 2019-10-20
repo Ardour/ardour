@@ -20,6 +20,7 @@
 
 #include "pbd/convert.h"
 #include "ardour/async_midi_port.h"
+#include "ardour/session.h"
 #include "widgets/tooltips.h"
 
 #include "ardour_ui.h"
@@ -57,11 +58,11 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	piano_keyboard_set_keyboard_layout (_piano, "QWERTY");
 
 	using namespace Menu_Helpers;
-	_keyboard_layout.AddMenuElem (MenuElem (_("QWERTY"),
+	_keyboard_layout.AddMenuElem (MenuElem ("QWERTY",
 				sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), 0)));
-	_keyboard_layout.AddMenuElem (MenuElem (_("QWERTZ"),
+	_keyboard_layout.AddMenuElem (MenuElem ("QWERTZ",
 				sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), 1)));
-	_keyboard_layout.AddMenuElem (MenuElem (_("AZERTY"),
+	_keyboard_layout.AddMenuElem (MenuElem ("AZERTY",
 				sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), 2)));
 	_keyboard_layout.set_text (_("QWERTY"));
 
@@ -195,6 +196,85 @@ VirtualKeyboardWindow::~VirtualKeyboardWindow ()
 {
 	delete _pianomm;
 	delete _pitch_slider_tooltip;
+}
+
+void
+VirtualKeyboardWindow::set_session (ARDOUR::Session* s)
+{
+	ArdourWindow::set_session (s);
+
+	if (!_session) {
+		return;
+	}
+
+	XMLNode* node = _session->instant_xml(X_("VirtualKeyboard"));
+	if (node) {
+		set_state (*node);
+	}
+}
+
+XMLNode&
+VirtualKeyboardWindow::get_state ()
+{
+	XMLNode* node = new XMLNode (X_("VirtualKeyboard"));
+	node->set_property (X_("YAxisVelocity"), _yaxis_velocity.get_active());
+	node->set_property (X_("Layout"), _keyboard_layout.get_text ());
+	node->set_property (X_("Channel"), _piano_channel.get_value_as_int ());
+	node->set_property (X_("MinVelocity"), _piano_min_velocity.get_value_as_int ());
+	node->set_property (X_("MaxVelocity"), _piano_max_velocity.get_value_as_int ());
+	node->set_property (X_("KeyVelocity"), _piano_key_velocity.get_value_as_int ());
+	for (int i = 0; i < VKBD_NCTRLS; ++i) {
+		char buf[16];
+		sprintf (buf, "CC-%d", i);
+		node->set_property (buf, _cc_key[i].get_text());
+	}
+	return *node;
+}
+
+void
+VirtualKeyboardWindow::set_state (const XMLNode &root)
+{
+	if (root.name() != "VirtualKeyboard") {
+		return;
+	}
+
+	XMLNode const* node = &root;
+
+	std::string layout;
+	if (node->get_property(X_("Layout"), layout)) {
+		piano_keyboard_set_keyboard_layout (_piano, layout.c_str());
+		_keyboard_layout.set_text (layout);
+	}
+
+	for (int i = 0; i < VKBD_NCTRLS; ++i) {
+		char buf[16];
+		sprintf (buf, "CC-%d", i);
+		std::string cckey;
+		if (node->get_property(buf, cckey)) {
+			_cc_key[i].set_text (cckey);
+		}
+	}
+
+	bool a;
+	if (node->get_property(X_("YAxisVelocity"), a)) {
+	_yaxis_velocity.set_active (a);
+	}
+
+	int v;
+	if (node->get_property(X_("Channel"), v)) {
+		_piano_channel.set_value (v);
+	}
+	if (node->get_property(X_("MinVelocity"), v)) {
+		_piano_min_velocity.set_value (v);
+	}
+	if (node->get_property(X_("MaxVelocity"), v)) {
+		_piano_max_velocity.set_value (v);
+	}
+	if (node->get_property(X_("KeyVelocity"), v)) {
+		_piano_key_velocity.set_value (v);
+	}
+
+	update_velocity_settings (0);
 }
 
 void

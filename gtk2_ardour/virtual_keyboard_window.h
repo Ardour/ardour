@@ -89,6 +89,11 @@ public:
 	VirtualKeyboardWindow ();
 	~VirtualKeyboardWindow ();
 
+	void set_session (ARDOUR::Session*);
+
+	XMLNode& get_state ();
+	void set_state (const XMLNode &);
+
 private:
 	static void _note_on_event_handler (GtkWidget*, int note, int vel, gpointer arg)
 	{

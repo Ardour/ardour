@@ -68,6 +68,7 @@
 #include "location_ui.h"
 #include "main_clock.h"
 #include "rc_option_editor.h"
+#include "virtual_keyboard_window.h"
 
 #include <gtkmm2ext/application.h>
 
@@ -871,6 +872,9 @@ ARDOUR_UI::save_ardour_state ()
 		if (location_ui) {
 			_session->add_instant_xml (location_ui->ui().get_state ());
 		}
+		if (virtual_keyboard_window) {
+			_session->add_instant_xml (virtual_keyboard_window->get_state());
+		}
 	} else {
 		Config->add_instant_xml (main_window_node);
 		Config->add_instant_xml (enode);
@@ -879,6 +883,9 @@ ARDOUR_UI::save_ardour_state ()
 		Config->add_instant_xml (bnode);
 		if (location_ui) {
 			Config->add_instant_xml (location_ui->ui().get_state ());
+		}
+		if (virtual_keyboard_window) {
+			Config->add_instant_xml (virtual_keyboard_window->get_state());
 		}
 	}
 
