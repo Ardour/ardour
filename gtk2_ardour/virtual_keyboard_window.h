@@ -25,9 +25,12 @@
 #include "pbd/signals.h"
 #include "pbd/controllable.h"
 
+#include "gtkmm2ext/persistent_tooltip.h"
+
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_dropdown.h"
 #include "widgets/ardour_knob.h"
+#include "widgets/slider_controller.h"
 
 #include "ardour_window.h"
 #include "gtk_pianokeyboard.h"
@@ -38,10 +41,10 @@ namespace ARDOUR {
 
 class VKBDControl : public PBD::Controllable {
 public:
-	VKBDControl (const std::string& name, double normal = 127)
+	VKBDControl (const std::string& name, double normal = 127, double upper = 127)
 		: PBD::Controllable (name, Flag(0))
 		, _lower (0)
-		, _upper (127)
+		, _upper (upper)
 		, _normal (normal)
 		, _value (normal)
 	{}
@@ -103,11 +106,13 @@ private:
 	void note_on_event_handler  (int, int);
 	void note_off_event_handler (int);
 	void control_change_event_handler (int, int);
+	void pitch_bend_event_handler (int);
 
 	void select_keyboard_layout (int);
 	void update_velocity_settings (int);
 	void bank_patch ();
 	void update_sensitivity ();
+	void pitch_slider_adjusted ();
 	bool toggle_config (GdkEventButton*);
 	bool toggle_bankpatch (GdkEventButton*);
 	bool toggle_yaxis_velocity (GdkEventButton*);
@@ -133,6 +138,11 @@ private:
 	Gtk::SpinButton _piano_key_velocity;
 	Gtk::SpinButton _piano_min_velocity;
 	Gtk::SpinButton _piano_max_velocity;
+
+	boost::shared_ptr<VKBDControl>    _pitchbend;
+	Gtk::Adjustment                   _pitch_adjustment;
+	ArdourWidgets::VSliderController* _pitch_slider;
+	Gtkmm2ext::PersistentTooltip*     _pitch_slider_tooltip;
 
 #define VKBD_NCTRLS 8
 

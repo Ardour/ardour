@@ -48,6 +48,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	, _piano_key_velocity (*manage (new Adjustment (100, 1, 127, 1, 16)))
 	, _piano_min_velocity (*manage (new Adjustment (1  , 1, 127, 1, 16)))
 	, _piano_max_velocity (*manage (new Adjustment (127, 1, 127, 1, 16)))
+	, _pitch_adjustment (8192, 0, 16383, 1, 256)
 {
 	_piano = (PianoKeyboard*)piano_keyboard_new();
 	_pianomm = Glib::wrap((GtkWidget*)_piano);
@@ -68,8 +69,16 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_pgm_display.set_active (false);
 	_yaxis_velocity.set_active (false);
 
-	set_tooltip (_send_panic, "Send MIDI Panic message for current channel");
+	_pitchbend = boost::shared_ptr<VKBDControl> (new VKBDControl ("PB", 8192, 16383));
+	_pitch_slider = manage (new VSliderController(&_pitch_adjustment, _pitchbend, 0, PX_SCALE (15)));
+	_pitch_slider_tooltip = new Gtkmm2ext::PersistentTooltip (_pitch_slider);
+	_pitch_adjustment.signal_value_changed().connect (
+			sigc::mem_fun (*this, &VirtualKeyboardWindow::pitch_slider_adjusted));
+	_pitchbend->ValueChanged.connect_same_thread (_cc_connections,
+			boost::bind (&VirtualKeyboardWindow::pitch_bend_event_handler, this, _1));
 
+	set_tooltip (_send_panic, "Send MIDI Panic message for current channel");
+	_pitch_slider_tooltip->set_tip ("Pitchbend: 8192");
 
 	/* config */
 	HBox* cfg_box = manage (new HBox);
@@ -107,13 +116,12 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	tbl->attach (_piano_channel, 0, 1, 0, 1, SHRINK, SHRINK, 4, 0);
 	tbl->attach (*manage (new Label (_("Channel"))), 0, 1, 1, 2, SHRINK, SHRINK, 4, 0);
 	tbl->attach (*manage (new ArdourVSpacer), 1, 2, 0, 2, SHRINK, FILL, 4, 0);
-
-	// TODO: pitchbend
+	tbl->attach (*_pitch_slider, 2, 3, 0, 2, SHRINK, FILL, 4, 0);
 
 	const char* default_cc[VKBD_NCTRLS] = { "7", "8", "1", "11", "91", "92", "93", "94" };
 
 	for (int i = 0; i < VKBD_NCTRLS; ++i) {
-		_cc[i] = boost::shared_ptr<VKBDControl> (new VKBDControl ("CC7", 127));
+		_cc[i] = boost::shared_ptr<VKBDControl> (new VKBDControl ("CC"));
 		_cc_knob[i] = manage(new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Flags (0)));
 		_cc_knob[i]->set_controllable (_cc[i]);
 		_cc_knob[i]->set_size_request (PX_SCALE(21), PX_SCALE(21));
@@ -130,8 +138,8 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 		}
 		_cc_key[i].set_text (default_cc[i]);
 
-		tbl->attach (*_cc_knob[i], i+2, i+3, 0, 1, SHRINK, SHRINK, 4, 2);
-		tbl->attach (_cc_key[i]  , i+2, i+3, 1, 2, SHRINK, SHRINK, 4, 2);
+		tbl->attach (*_cc_knob[i], i+3, i+4, 0, 1, SHRINK, SHRINK, 4, 2);
+		tbl->attach (_cc_key[i]  , i+3, i+4, 1, 2, SHRINK, SHRINK, 4, 2);
 
 		_cc[i]->ValueChanged.connect_same_thread (_cc_connections,
 				boost::bind (&VirtualKeyboardWindow::control_change_event_handler, this, i, _1));
@@ -186,6 +194,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 VirtualKeyboardWindow::~VirtualKeyboardWindow ()
 {
 	delete _pianomm;
+	delete _pitch_slider_tooltip;
 }
 
 void
@@ -330,6 +339,16 @@ VirtualKeyboardWindow::update_sensitivity ()
 }
 
 void
+VirtualKeyboardWindow::pitch_slider_adjusted ()
+{
+	_pitchbend->set_value (_pitch_adjustment.get_value (), PBD::Controllable::NoGroup);
+	char buf[64];
+	snprintf(buf, sizeof(buf), "Pitchbend: %.0f", _pitch_adjustment.get_value());
+	_pitch_slider_tooltip->set_tip (buf);
+}
+
+
+void
 VirtualKeyboardWindow::note_on_event_handler (int note, int velocity)
 {
 	_pianomm->grab_focus ();
@@ -338,7 +357,7 @@ VirtualKeyboardWindow::note_on_event_handler (int note, int velocity)
 	}
 	uint8_t channel = _piano_channel.get_value_as_int () - 1;
 	uint8_t ev[3];
-	ev[0] = (MIDI_CMD_NOTE_ON | channel);
+	ev[0] = MIDI_CMD_NOTE_ON | channel;
 	ev[1] = note;
 	ev[2] = velocity;
 	_session->vkbd_output_port()->write (ev, 3, 0);
@@ -353,7 +372,7 @@ VirtualKeyboardWindow::note_off_event_handler (int note)
 
 	uint8_t channel = _piano_channel.get_value_as_int () - 1;
 	uint8_t ev[3];
-	ev[0] = (MIDI_CMD_NOTE_OFF | channel);
+	ev[0] = MIDI_CMD_NOTE_OFF | channel;
 	ev[1] = note;
 	ev[2] = 0;
 	_session->vkbd_output_port()->write (ev, 3, 0);
@@ -362,13 +381,30 @@ VirtualKeyboardWindow::note_off_event_handler (int note)
 void
 VirtualKeyboardWindow::control_change_event_handler (int key, int val)
 {
+	if (!_session) {
+		return;
+	}
 	assert (key >= 0 && key < VKBD_NCTRLS);
 	int ctrl = PBD::atoi (_cc_key[key].get_text());
 	assert (ctrl > 0 && ctrl < 127);
 	uint8_t channel = _piano_channel.get_value_as_int () - 1;
 	uint8_t ev[3];
-	ev[0] = (MIDI_CMD_CONTROL | channel);
+	ev[0] = MIDI_CMD_CONTROL | channel;
 	ev[1] = ctrl;
 	ev[2] = val;
+	_session->vkbd_output_port()->write (ev, 3, 0);
+}
+
+void
+VirtualKeyboardWindow::pitch_bend_event_handler (int val)
+{
+	if (!_session) {
+		return;
+	}
+	uint8_t channel = _piano_channel.get_value_as_int () - 1;
+	uint8_t ev[3];
+	ev[0] = MIDI_CMD_BENDER | channel;
+	ev[1] = val & 0x7f;
+	ev[2] = (val >> 7) & 0x7f;
 	_session->vkbd_output_port()->write (ev, 3, 0);
 }
