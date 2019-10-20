@@ -80,6 +80,22 @@ ArdourDropdown::on_button_press_event (GdkEventButton* ev)
 	return true;
 }
 
+void
+ArdourDropdown::set_active (std::string const& text)
+{
+	using namespace Menu_Helpers;
+	const MenuList& items = _menu.items ();
+	int c = 0;
+	for (MenuList::const_iterator i = items.begin(); i != items.end(); ++i, ++c) {
+		if (i->get_label() == text) {
+			_menu.set_active(c);
+			_menu.activate_item(*i);
+			break;
+		}
+	}
+	set_text (text);
+}
+
 bool
 ArdourDropdown::on_scroll_event (GdkEventScroll* ev)
 {
