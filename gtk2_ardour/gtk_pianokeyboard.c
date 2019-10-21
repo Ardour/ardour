@@ -34,7 +34,15 @@
 #include <assert.h>
 #include <string.h>
 #include <stdint.h>
+#include <math.h>
+
 #include <cairo/cairo.h>
+#include <pango/pango.h>
+#include <pango/pangocairo.h>
+
+#ifndef M_PI
+#  define M_PI 3.14159265358979323846
+#endif
 
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
@@ -125,9 +133,9 @@ draw_note(PianoKeyboard *pk, cairo_t* cr, int note)
 		}
 	} else if (pk->highlight_grand_piano_range && (note < PIANO_MIN_NOTE || note > PIANO_MAX_NOTE)) {
 		if (is_white) {
-			cairo_set_source_rgb (cr, 0.8, 0.8, 0.8);
+			cairo_set_source_rgb (cr, 0.7, 0.7, 0.7);
 		} else {
-			cairo_set_source_rgb (cr, 0.2, 0.2, 0.2);
+			cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
 		}
 	} else {
 		if (is_white) {
@@ -148,6 +156,30 @@ draw_note(PianoKeyboard *pk, cairo_t* cr, int note)
 
 	if (pk->enable_keyboard_cue) {
 		draw_keyboard_cue (pk, cr);
+	}
+
+	if (pk->print_note_label && (note % 12) == 0) {
+		int tw, th;
+		char buf[32];
+		sprintf (buf, "ArdourMono %dpx", MAX (10, MIN (20, MIN (w / 2 + 3, h / 7))));
+		PangoFontDescription* font = pango_font_description_from_string (buf);
+		sprintf (buf, "C%2d", (note / 12) - 1);
+		PangoLayout* pl = pango_cairo_create_layout(cr);
+		pango_layout_set_font_description(pl, font);
+		pango_layout_set_text (pl, buf, -1);
+		pango_layout_set_alignment (pl, PANGO_ALIGN_LEFT);
+		pango_layout_get_pixel_size (pl, &tw, &th);
+
+		if (th < w && tw < h * .3) {
+			cairo_save(cr);
+			cairo_move_to (cr, x + (w - th) / 2, h - 3);
+			cairo_rotate (cr, M_PI / -2.0);
+			cairo_set_source_rgba (cr, .0, .0, .0, 1.0);
+			pango_cairo_show_layout(cr, pl);
+			cairo_restore(cr);
+		}
+		g_object_unref(pl);
+		pango_font_description_free (font);
 	}
 
 	/* We need to redraw black keys that partially obscure the white one. */
@@ -854,11 +886,12 @@ piano_keyboard_new(void)
 	pk->sustain_new_notes = 0;
 	pk->enable_keyboard_cue = FALSE;
 	pk->highlight_grand_piano_range = FALSE;
+	pk->print_note_label = FALSE;
 	pk->octave = 4;
 	pk->octave_range = 7;
 	pk->note_being_pressed_using_mouse = -1;
-	pk->min_note = PIANO_MIN_NOTE;
-	pk->max_note = PIANO_MAX_NOTE;
+	pk->min_note = 0;
+	pk->max_note = 127;
 	pk->last_key = 0;
 	pk->monophonic = FALSE;
 
@@ -885,6 +918,13 @@ void
 piano_keyboard_set_grand_piano_highlight (PianoKeyboard *pk, gboolean enabled)
 {
 	pk->highlight_grand_piano_range = enabled;
+	gtk_widget_queue_draw(GTK_WIDGET(pk));
+}
+
+void
+piano_keyboard_show_note_label (PianoKeyboard *pk, gboolean enabled)
+{
+	pk->print_note_label = enabled;
 	gtk_widget_queue_draw(GTK_WIDGET(pk));
 }
 
@@ -992,7 +1032,7 @@ piano_keyboard_set_octave_range (PianoKeyboard *pk, int octave_range)
 			pk->min_note = (pk->octave + 0) * 12;
 			break;
 		case 6:
-			pk->min_note = (pk->octave + 1) * 12;
+			pk->min_note = (pk->octave - 1) * 12;
 			break;
 		case 7:
 		case 8:
@@ -1024,13 +1064,11 @@ piano_keyboard_set_octave_range (PianoKeyboard *pk, int octave_range)
 		pk->min_note = MAX (0, pk->max_note - octave_range * 12);
 	}
 
-	printf ("Oct: %d, Range: %d  MIDI %d .. %d\n", pk->octave, octave_range, pk->min_note, pk->max_note);
-
 	recompute_dimensions(pk);
 	gtk_widget_queue_draw(GTK_WIDGET(pk));
 }
 
-gboolean
+void
 piano_keyboard_set_keyboard_layout(PianoKeyboard *pk, const char *layout)
 {
 	assert(layout);
@@ -1048,9 +1086,6 @@ piano_keyboard_set_keyboard_layout(PianoKeyboard *pk, const char *layout)
 		bind_keys_dvorak(pk);
 
 	} else {
-		/* Unknown layout name. */
-		return TRUE;
+		assert (0);
 	}
-
-	return FALSE;
 }

@@ -59,6 +59,7 @@ struct _PianoKeyboard
 	int            sustain_new_notes;
 	gboolean       enable_keyboard_cue;
 	gboolean       highlight_grand_piano_range;
+	gboolean       print_note_label;
 	int            octave;
 	int            octave_range;
 	int            widget_margin;
@@ -89,11 +90,12 @@ void piano_keyboard_set_note_on (PianoKeyboard *pk, int note);
 void piano_keyboard_set_note_off (PianoKeyboard *pk, int note);
 void piano_keyboard_set_keyboard_cue (PianoKeyboard *pk, gboolean enabled);
 void piano_keyboard_set_grand_piano_highlight (PianoKeyboard *pk, gboolean enabled);
+void piano_keyboard_show_note_label (PianoKeyboard *pk, gboolean enabled);
 void piano_keyboard_set_monophonic (PianoKeyboard *pk, gboolean monophonic);
 void piano_keyboard_set_octave (PianoKeyboard *pk, int octave);
 void piano_keyboard_set_octave_range(PianoKeyboard *pk, int octave_range);
 
-gboolean piano_keyboard_set_keyboard_layout (PianoKeyboard *pk, const char *layout);
+void piano_keyboard_set_keyboard_layout (PianoKeyboard* pk, const char* layout);
 void piano_keyboard_set_velocities (PianoKeyboard *pk, int min_vel, int max_vel, int key_vel);
 
 G_END_DECLS

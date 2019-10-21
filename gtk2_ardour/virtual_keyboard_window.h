@@ -113,7 +113,7 @@ private:
 	void control_change_event_handler (int, int);
 	void pitch_bend_event_handler (int);
 
-	void select_keyboard_layout (int);
+	void select_keyboard_layout (std::string const&);
 	void update_velocity_settings (int);
 	void update_octave_key ();
 	void update_octave_range ();
@@ -125,6 +125,7 @@ private:
 	bool toggle_yaxis_velocity (GdkEventButton*);
 	bool toggle_highlight_piano (GdkEventButton*);
 	bool toggle_highlight_key (GdkEventButton*);
+	bool toggle_note_label (GdkEventButton*);
 	bool send_panic_message (GdkEventButton*);
 
 	PianoKeyboard*  _piano;
@@ -143,6 +144,7 @@ private:
 	ArdourWidgets::ArdourButton   _yaxis_velocity;
 	ArdourWidgets::ArdourButton   _highlight_grand_piano;
 	ArdourWidgets::ArdourButton   _highlight_key_range;
+	ArdourWidgets::ArdourButton   _show_note_label;
 	ArdourWidgets::ArdourButton   _send_panic;
 	ArdourWidgets::ArdourDropdown _keyboard_layout;
 
