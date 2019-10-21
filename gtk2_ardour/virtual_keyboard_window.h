@@ -22,8 +22,8 @@
 #include <gtkmm/box.h>
 #include <gtkmm/spinbutton.h>
 
-#include "pbd/signals.h"
 #include "pbd/controllable.h"
+#include "pbd/signals.h"
 
 #include "gtkmm2ext/persistent_tooltip.h"
 
@@ -39,10 +39,11 @@ namespace ARDOUR {
 	class Session;
 }
 
-class VKBDControl : public PBD::Controllable {
+class VKBDControl : public PBD::Controllable
+{
 public:
 	VKBDControl (const std::string& name, double normal = 127, double upper = 127)
-		: PBD::Controllable (name, Flag(0))
+		: PBD::Controllable (name, Flag (0))
 		, _lower (0)
 		, _upper (upper)
 		, _normal (normal)
@@ -50,25 +51,23 @@ public:
 	{}
 
 	/* Controllable API */
-	void set_value (double v, PBD::Controllable::GroupControlDisposition gcd) {
+	void set_value (double v, PBD::Controllable::GroupControlDisposition gcd)
+	{
 		if (v != _value) {
 			_value = std::max (_lower, std::min (_upper, v));
-			Changed (true, gcd); /* EMIT SIGNAL */
+			Changed (true, gcd);        /* EMIT SIGNAL */
 			ValueChanged ((int)_value); /* EMIT SIGNAL */
 		}
-	}
-
-	double get_value () const {
-		return _value;
 	}
 
 	std::string get_user_string () const
 	{
 		char buf[32];
-		sprintf (buf, "%.0f", get_value());
-		return std::string(buf);
+		sprintf (buf, "%.0f", get_value ());
+		return std::string (buf);
 	}
 
+	double get_value () const { return _value; }
 	double lower () const { return _lower; }
 	double upper () const { return _upper; }
 	double normal () const { return _normal; }
@@ -82,7 +81,6 @@ protected:
 	double _value;
 };
 
-
 class VirtualKeyboardWindow : public ArdourWindow
 {
 public:
@@ -92,23 +90,23 @@ public:
 	void set_session (ARDOUR::Session*);
 
 	XMLNode& get_state ();
-	void set_state (const XMLNode &);
+	void     set_state (const XMLNode&);
 
 private:
 	static void _note_on_event_handler (GtkWidget*, int note, int vel, gpointer arg)
 	{
-		static_cast<VirtualKeyboardWindow*>(arg)->note_on_event_handler(note, vel);
+		static_cast<VirtualKeyboardWindow*> (arg)->note_on_event_handler (note, vel);
 	}
 
-	static void _note_off_event_handler (GtkWidget*, int note, gpointer arg) 
+	static void _note_off_event_handler (GtkWidget*, int note, gpointer arg)
 	{
-		static_cast<VirtualKeyboardWindow*>(arg)->note_off_event_handler(note);
+		static_cast<VirtualKeyboardWindow*> (arg)->note_off_event_handler (note);
 	}
 
 	void on_unmap ();
 	bool on_key_press_event (GdkEventKey*);
 
-	void note_on_event_handler  (int, int);
+	void note_on_event_handler (int, int);
 	void note_off_event_handler (int);
 	void control_change_event_handler (int, int);
 	void pitch_bend_event_handler (int);
