@@ -115,12 +115,16 @@ private:
 
 	void select_keyboard_layout (int);
 	void update_velocity_settings (int);
+	void update_octave_key ();
+	void update_octave_range ();
 	void bank_patch ();
 	void update_sensitivity ();
 	void pitch_slider_adjusted ();
 	bool toggle_config (GdkEventButton*);
 	bool toggle_bankpatch (GdkEventButton*);
 	bool toggle_yaxis_velocity (GdkEventButton*);
+	bool toggle_highlight_piano (GdkEventButton*);
+	bool toggle_highlight_key (GdkEventButton*);
 	bool send_panic_message (GdkEventButton*);
 
 	PianoKeyboard*  _piano;
@@ -137,12 +141,17 @@ private:
 	ArdourWidgets::ArdourButton   _cfg_display;
 	ArdourWidgets::ArdourButton   _pgm_display;
 	ArdourWidgets::ArdourButton   _yaxis_velocity;
+	ArdourWidgets::ArdourButton   _highlight_grand_piano;
+	ArdourWidgets::ArdourButton   _highlight_key_range;
 	ArdourWidgets::ArdourButton   _send_panic;
 	ArdourWidgets::ArdourDropdown _keyboard_layout;
 
 	Gtk::SpinButton _piano_key_velocity;
 	Gtk::SpinButton _piano_min_velocity;
 	Gtk::SpinButton _piano_max_velocity;
+
+	Gtk::SpinButton _piano_octave_key;
+	Gtk::SpinButton _piano_octave_range;
 
 	boost::shared_ptr<VKBDControl>    _pitchbend;
 	Gtk::Adjustment                   _pitch_adjustment;

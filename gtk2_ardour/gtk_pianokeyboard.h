@@ -35,7 +35,9 @@ G_BEGIN_DECLS
 typedef struct _PianoKeyboard             PianoKeyboard;
 typedef struct _PianoKeyboardClass        PianoKeyboardClass;
 
-#define NNOTES (127)
+#define NNOTES (128)
+#define PIANO_MIN_NOTE 21
+#define PIANO_MAX_NOTE 108
 
 #define OCTAVE_MIN (-1)
 #define OCTAVE_MAX (7)
@@ -55,10 +57,14 @@ struct _PianoKeyboard
 	GtkDrawingArea da;
 	int            maybe_stop_sustained_notes;
 	int            sustain_new_notes;
-	int            enable_keyboard_cue;
+	gboolean       enable_keyboard_cue;
+	gboolean       highlight_grand_piano_range;
 	int            octave;
+	int            octave_range;
 	int            widget_margin;
 	int            note_being_pressed_using_mouse;
+	int            min_note;
+	int            max_note;
 	int            last_key;
 	gboolean       monophonic;
 	struct PKNote  notes[NNOTES];
@@ -81,9 +87,11 @@ void piano_keyboard_sustain_press (PianoKeyboard *pk);
 void piano_keyboard_sustain_release (PianoKeyboard *pk);
 void piano_keyboard_set_note_on (PianoKeyboard *pk, int note);
 void piano_keyboard_set_note_off (PianoKeyboard *pk, int note);
-void piano_keyboard_set_keyboard_cue (PianoKeyboard *pk, int enabled);
+void piano_keyboard_set_keyboard_cue (PianoKeyboard *pk, gboolean enabled);
+void piano_keyboard_set_grand_piano_highlight (PianoKeyboard *pk, gboolean enabled);
 void piano_keyboard_set_monophonic (PianoKeyboard *pk, gboolean monophonic);
 void piano_keyboard_set_octave (PianoKeyboard *pk, int octave);
+void piano_keyboard_set_octave_range(PianoKeyboard *pk, int octave_range);
 
 gboolean piano_keyboard_set_keyboard_layout (PianoKeyboard *pk, const char *layout);
 void piano_keyboard_set_velocities (PianoKeyboard *pk, int min_vel, int max_vel, int key_vel);

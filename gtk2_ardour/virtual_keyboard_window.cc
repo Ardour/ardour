@@ -37,18 +37,22 @@ using namespace ArdourWidgets;
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
 
 VirtualKeyboardWindow::VirtualKeyboardWindow ()
-	: ArdourWindow (_("Virtual Keyboard"))
+	: ArdourWindow (_("Virtual MIDI Keyboard"))
 	, _piano_channel (*manage (new Adjustment (1, 1, 16, 1, 1)))
 	, _bank_msb (*manage (new Adjustment (0, 0, 127, 1, 16)))
 	, _bank_lsb (*manage (new Adjustment (0, 0, 127, 1, 16)))
 	, _patchpgm (*manage (new Adjustment (1, 1, 128, 1, 16)))
 	, _cfg_display ("Config", ArdourButton::led_default_elements)
 	, _pgm_display ("Bank/Patch", ArdourButton::led_default_elements)
-	, _yaxis_velocity ("Y-Axis Click Velocity", ArdourButton::led_default_elements)
+	, _yaxis_velocity ("Y-Axis", ArdourButton::led_default_elements)
+	, _highlight_grand_piano ("Grand Piano", ArdourButton::led_default_elements)
+	, _highlight_key_range ("Key Bindings", ArdourButton::led_default_elements)
 	, _send_panic ("Panic", ArdourButton::default_elements)
 	, _piano_key_velocity (*manage (new Adjustment (100, 1, 127, 1, 16)))
 	, _piano_min_velocity (*manage (new Adjustment (1  , 1, 127, 1, 16)))
 	, _piano_max_velocity (*manage (new Adjustment (127, 1, 127, 1, 16)))
+	, _piano_octave_key (*manage (new Adjustment (4, -1, 7, 1, 1)))
+	, _piano_octave_range (*manage (new Adjustment (7, 2, 11, 1, 1)))
 	, _pitch_adjustment (8192, 0, 16383, 1, 256)
 {
 	_piano = (PianoKeyboard*)piano_keyboard_new();
@@ -64,11 +68,15 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 				sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), 1)));
 	_keyboard_layout.AddMenuElem (MenuElem ("AZERTY",
 				sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), 2)));
+	_keyboard_layout.AddMenuElem (MenuElem ("DVORAK",
+				sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), 3)));
 	_keyboard_layout.set_active (_("QWERTY"));
 
 	_cfg_display.set_active (false);
 	_pgm_display.set_active (false);
 	_yaxis_velocity.set_active (false);
+	_highlight_grand_piano.set_active (false);
+	_highlight_key_range.set_active (false);
 
 	_pitchbend = boost::shared_ptr<VKBDControl> (new VKBDControl ("PB", 8192, 16383));
 	_pitch_slider = manage (new VSliderController(&_pitch_adjustment, _pitchbend, 0, PX_SCALE (15)));
@@ -78,21 +86,50 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_pitchbend->ValueChanged.connect_same_thread (_cc_connections,
 			boost::bind (&VirtualKeyboardWindow::pitch_bend_event_handler, this, _1));
 
+	set_tooltip (_highlight_grand_piano, "Shade keys outside the range of a Grand Piano (A0-C8).");
+	set_tooltip (_highlight_key_range, "Indicate which notes can be controlled by keyboard-shortcuts.");
+	set_tooltip (_yaxis_velocity, "When enabled, mouse-click y-axis position defines the velocity.");
+
+	set_tooltip (_piano_octave_key, "The center octave, and lowest octave for keyboard control.");
+	set_tooltip (_piano_octave_range, "Available octave range, centered around the key-octave.");
+	set_tooltip (_keyboard_layout, "Keyboard layout to use for keyboard control.");
+
+	set_tooltip (_piano_key_velocity, "The default velocity to use with keyboard control, and when y-axis click-position is disabled.");
+	set_tooltip (_piano_min_velocity, "Velocity to use when clicking at the top-end of a key.");
+	set_tooltip (_piano_max_velocity, "Velocity to use when clicking at the bottom-end of a key.");
+
 	set_tooltip (_send_panic, "Send MIDI Panic message for current channel");
+
 	_pitch_slider_tooltip->set_tip ("Pitchbend: 8192");
 
 	/* config */
-	HBox* cfg_box = manage (new HBox);
-	cfg_box->set_spacing (4);
-	cfg_box->pack_start (*manage (new Label (_("Key Velocity:"))), false, false);
-	cfg_box->pack_start (_piano_key_velocity, false, false);
-	cfg_box->pack_start (_yaxis_velocity, false, false, 8);
-	cfg_box->pack_start (*manage (new Label (_("Min Velocity:"))), false, false);
-	cfg_box->pack_start (_piano_min_velocity, false, false);
-	cfg_box->pack_start (*manage (new Label (_("Max Velocity:"))), false, false);
-	cfg_box->pack_start (_piano_max_velocity, false, false);
-	cfg_box->pack_start (_keyboard_layout, false, false, 8);
-	cfg_box->show_all ();
+	Table* cfg_tbl = manage (new Table);
+	cfg_tbl->attach (_yaxis_velocity,                      0, 1, 0, 1, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (*manage (new Label (_("Velocity:"))), 0, 1, 1, 2, SHRINK, SHRINK, 4, 0);
+
+	cfg_tbl->attach (_piano_min_velocity,                  1, 2, 0, 1, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (*manage (new Label (_("Min"))),       1, 2, 1, 2, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (_piano_max_velocity,                  2, 3, 0, 1, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (*manage (new Label (_("Max"))),       2, 3, 1, 2, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (_piano_key_velocity,                  3, 4, 0, 1, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (*manage (new Label (_("Key"))),       3, 4, 1, 2, SHRINK, SHRINK, 4, 0);
+
+	cfg_tbl->attach (*manage (new ArdourVSpacer),          4, 5, 0, 2, SHRINK, FILL,   4, 0);
+
+	cfg_tbl->attach (_piano_octave_key,                    5, 6, 0, 1, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (*manage (new Label (_("Octave"))),    5, 6, 1, 2, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (_piano_octave_range,                  6, 7, 0, 1, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (*manage (new Label (_("Range"))),     6, 7, 1, 2, SHRINK, SHRINK, 4, 0);
+
+	cfg_tbl->attach (*manage (new ArdourVSpacer),          7, 8, 0, 2, SHRINK, FILL,   4, 0);
+
+	cfg_tbl->attach (_highlight_grand_piano,               8, 9, 0, 1, FILL,   SHRINK, 4, 2);
+	cfg_tbl->attach (_highlight_key_range,                 8, 9, 1, 2, FILL,   SHRINK, 4, 2);
+
+	cfg_tbl->attach (*manage (new ArdourVSpacer),          9,10, 0, 2, SHRINK, FILL,   4, 0);
+
+	cfg_tbl->attach (_keyboard_layout,                    10,11, 0, 2, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->show_all ();
 
 	/* bank/patch */
 	Table* pgm_tbl = manage (new Table);
@@ -156,7 +193,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	box1->pack_start (*box2, false, false);
 
 	_cfg_box = manage (new HBox ());
-	_cfg_box->pack_start (*cfg_box, true, false);
+	_cfg_box->pack_start (*cfg_tbl, true, false);
 	_cfg_box->set_no_show_all (true);
 
 	_pgm_box = manage (new HBox ());
@@ -178,9 +215,14 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_piano_min_velocity.signal_value_changed ().connect (sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::update_velocity_settings), 1));
 	_piano_max_velocity.signal_value_changed ().connect (sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::update_velocity_settings), 2));
 
+	_piano_octave_key.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::update_octave_key));
+	_piano_octave_range.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::update_octave_range));
+
 	_cfg_display.signal_button_release_event().connect (sigc::mem_fun(*this, &VirtualKeyboardWindow::toggle_config), false);
 	_pgm_display.signal_button_release_event().connect (sigc::mem_fun(*this, &VirtualKeyboardWindow::toggle_bankpatch), false);
 	_yaxis_velocity.signal_button_release_event().connect (sigc::mem_fun(*this, &VirtualKeyboardWindow::toggle_yaxis_velocity), false);
+	_highlight_grand_piano.signal_button_release_event().connect (sigc::mem_fun(*this, &VirtualKeyboardWindow::toggle_highlight_piano), false);
+	_highlight_key_range.signal_button_release_event().connect (sigc::mem_fun(*this, &VirtualKeyboardWindow::toggle_highlight_key), false);
 	_send_panic.signal_button_release_event().connect (sigc::mem_fun(*this, &VirtualKeyboardWindow::send_panic_message), false);
 
 	g_signal_connect (G_OBJECT (_piano), "note-on", G_CALLBACK (VirtualKeyboardWindow::_note_on_event_handler), this);
@@ -304,6 +346,9 @@ VirtualKeyboardWindow::select_keyboard_layout (int l)
 		case 2:
 			piano_keyboard_set_keyboard_layout (_piano, "AZERTY");
 			break;
+		case 3:
+			piano_keyboard_set_keyboard_layout (_piano, "DVORAK");
+			break;
 	}
 }
 
@@ -333,11 +378,41 @@ VirtualKeyboardWindow::toggle_bankpatch (GdkEventButton*)
 	return false;
 }
 
+void
+VirtualKeyboardWindow::update_octave_key ()
+{
+	piano_keyboard_set_octave (_piano, _piano_octave_key.get_value_as_int ());
+}
+
+void
+VirtualKeyboardWindow::update_octave_range ()
+{
+	piano_keyboard_set_octave_range (_piano, _piano_octave_range.get_value_as_int ());
+}
+
 bool
 VirtualKeyboardWindow::toggle_yaxis_velocity (GdkEventButton*)
 {
 	_yaxis_velocity.set_active (!_yaxis_velocity.get_active ());
 	update_velocity_settings (0);
+	return false;
+}
+
+bool
+VirtualKeyboardWindow::toggle_highlight_piano (GdkEventButton*)
+{
+	bool a = ! _highlight_grand_piano.get_active ();
+	_highlight_grand_piano.set_active (a);
+	piano_keyboard_set_grand_piano_highlight (_piano, a);
+	return false;
+}
+
+bool
+VirtualKeyboardWindow::toggle_highlight_key (GdkEventButton*)
+{
+	bool a = ! _highlight_key_range.get_active ();
+	_highlight_key_range.set_active (a);
+	piano_keyboard_set_keyboard_cue (_piano, a);
 	return false;
 }
 
