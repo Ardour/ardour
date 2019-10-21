@@ -2437,6 +2437,11 @@ MackieControlProtocol::first_selected_stripable () const
 			return s;
 		}
 
+		/* if it's a single-fader surface, it should follow the selection */
+		if (_device_info.single_fader_follows_selection()) {
+			return s;
+		}
+
 		/* stripable is not mapped. thus, the currently selected stripable is
 		 * not on the surfaces, and so from our perspective, there is
 		 * no currently selected stripable.

@@ -62,6 +62,7 @@ DeviceInfo::DeviceInfo()
 	, _is_qcon(false)
 	, _has_meters (true)
 	, _has_separate_meters (false)
+	, _single_fader_follows_selection (false)
 	, _device_type (MCU)
 	, _name (X_("Mackie Control Universal Pro"))
 {
@@ -254,6 +255,8 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		if (!child->get_property ("value", _strip_cnt)) {
 			_strip_cnt = 8;
 		}
+		if (_strip_cnt==1)
+			_single_fader_follows_selection = true;
 	} else {
 		return -1;
 	}
@@ -422,6 +425,12 @@ bool
 DeviceInfo::has_meters() const
 {
 	return _has_meters;
+}
+
+bool
+DeviceInfo::single_fader_follows_selection() const
+{
+	return _single_fader_follows_selection;
 }
 
 bool

@@ -83,6 +83,7 @@ class DeviceInfo
 	bool is_qcon() const;
 	bool has_meters() const;
 	bool has_separate_meters() const;
+	bool single_fader_follows_selection() const;
 	const std::string& name() const;
 
 	static std::map<std::string,DeviceInfo> device_info;
@@ -113,6 +114,7 @@ class DeviceInfo
 	bool     _is_qcon;
 	bool     _has_meters;
 	bool     _has_separate_meters;
+	bool     _single_fader_follows_selection;
 	DeviceType _device_type;
 	std::string _name;
 	std::string _global_button_name;
