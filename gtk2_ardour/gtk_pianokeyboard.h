@@ -25,15 +25,15 @@
 
 G_BEGIN_DECLS
 
-#define TYPE_PIANO_KEYBOARD               (piano_keyboard_get_type ())
-#define PIANO_KEYBOARD(obj)               (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PIANO_KEYBOARD, PianoKeyboard))
-#define PIANO_KEYBOARD_CLASS(klass)       (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PIANO_KEYBOARD, PianoKeyboardClass))
-#define IS_PIANO_KEYBOARD(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_PIANO_KEYBOARD))
-#define IS_PIANO_KEYBOARD_CLASS(klass)    (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_PIANO_KEYBOARD))
-#define PIANO_KEYBOARD_GET_CLASS(obj)     (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_PIANO_KEYBOARD, PianoKeyboardClass))
+#define TYPE_PIANO_KEYBOARD            (piano_keyboard_get_type ())
+#define PIANO_KEYBOARD(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), TYPE_PIANO_KEYBOARD, PianoKeyboard))
+#define PIANO_KEYBOARD_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_PIANO_KEYBOARD, PianoKeyboardClass))
+#define IS_PIANO_KEYBOARD(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), TYPE_PIANO_KEYBOARD))
+#define IS_PIANO_KEYBOARD_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_PIANO_KEYBOARD))
+#define PIANO_KEYBOARD_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_PIANO_KEYBOARD, PianoKeyboardClass))
 
-typedef struct _PianoKeyboard             PianoKeyboard;
-typedef struct _PianoKeyboardClass        PianoKeyboardClass;
+typedef struct _PianoKeyboard      PianoKeyboard;
+typedef struct _PianoKeyboardClass PianoKeyboardClass;
 
 #define NNOTES (128)
 #define PIANO_MIN_NOTE 21
@@ -52,8 +52,7 @@ struct PKNote {
 	int white;     /* 1 if key is white; 0 otherwise. */
 };
 
-struct _PianoKeyboard
-{
+struct _PianoKeyboard {
 	GtkDrawingArea da;
 	int            maybe_stop_sustained_notes;
 	int            sustain_new_notes;
@@ -69,34 +68,31 @@ struct _PianoKeyboard
 	int            last_key;
 	gboolean       monophonic;
 	struct PKNote  notes[NNOTES];
-	/* Table used to translate from PC keyboard character to MIDI note number. */
-	GHashTable*    key_bindings;
+	GHashTable*    key_bindings; /**< Table used to translate from PC keyboard character to MIDI note number. */
 	int            min_velocity;
 	int            max_velocity;
 	int            key_velocity;
 };
 
-struct _PianoKeyboardClass
-{
+struct _PianoKeyboardClass {
 	GtkDrawingAreaClass parent_class;
 };
 
 GType piano_keyboard_get_type (void) G_GNUC_CONST;
 GtkWidget* piano_keyboard_new (void);
 
-void piano_keyboard_sustain_press (PianoKeyboard *pk);
-void piano_keyboard_sustain_release (PianoKeyboard *pk);
-void piano_keyboard_set_note_on (PianoKeyboard *pk, int note);
-void piano_keyboard_set_note_off (PianoKeyboard *pk, int note);
-void piano_keyboard_set_keyboard_cue (PianoKeyboard *pk, gboolean enabled);
-void piano_keyboard_set_grand_piano_highlight (PianoKeyboard *pk, gboolean enabled);
-void piano_keyboard_show_note_label (PianoKeyboard *pk, gboolean enabled);
-void piano_keyboard_set_monophonic (PianoKeyboard *pk, gboolean monophonic);
-void piano_keyboard_set_octave (PianoKeyboard *pk, int octave);
-void piano_keyboard_set_octave_range(PianoKeyboard *pk, int octave_range);
-
+void piano_keyboard_sustain_press (PianoKeyboard* pk);
+void piano_keyboard_sustain_release (PianoKeyboard* pk);
+void piano_keyboard_set_note_on (PianoKeyboard* pk, int note);
+void piano_keyboard_set_note_off (PianoKeyboard* pk, int note);
+void piano_keyboard_set_keyboard_cue (PianoKeyboard* pk, gboolean enabled);
+void piano_keyboard_set_grand_piano_highlight (PianoKeyboard* pk, gboolean enabled);
+void piano_keyboard_show_note_label (PianoKeyboard* pk, gboolean enabled);
+void piano_keyboard_set_monophonic (PianoKeyboard* pk, gboolean monophonic);
+void piano_keyboard_set_octave (PianoKeyboard* pk, int octave);
+void piano_keyboard_set_octave_range (PianoKeyboard* pk, int octave_range);
 void piano_keyboard_set_keyboard_layout (PianoKeyboard* pk, const char* layout);
-void piano_keyboard_set_velocities (PianoKeyboard *pk, int min_vel, int max_vel, int key_vel);
+void piano_keyboard_set_velocities (PianoKeyboard* pk, int min_vel, int max_vel, int key_vel);
 
 G_END_DECLS
 
