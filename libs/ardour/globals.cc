@@ -625,7 +625,9 @@ ARDOUR::init_post_engine (uint32_t start_cnt)
 
 		/* find plugins */
 
-		ARDOUR::PluginManager::instance().refresh (!Config->get_discover_vst_on_start());
+		if (!running_from_gui) {
+			ARDOUR::PluginManager::instance().refresh (false);
+		}
 
 		if ((node = Config->control_protocol_state()) != 0) {
 			ControlProtocolManager::instance().set_state (*node, 0 /* here: global-config state */);
