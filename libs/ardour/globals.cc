@@ -164,6 +164,7 @@ PBD::Signal3<bool,std::string,std::string,int> ARDOUR::CopyConfigurationFiles;
 std::map<std::string, bool> ARDOUR::reserved_io_names;
 
 static bool have_old_configuration_files = false;
+static bool running_from_gui = false;
 
 namespace ARDOUR {
 extern void setup_enum_writer ();
@@ -444,11 +445,13 @@ ARDOUR::handle_old_configuration_files (boost::function<bool (std::string const&
 }
 
 bool
-ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir)
+ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir, bool with_gui)
 {
 	if (libardour_initialized) {
 		return true;
 	}
+
+	running_from_gui = with_gui;
 
 #ifndef NDEBUG
 	if (getenv("ARDOUR_LUA_METATABLES")) {
