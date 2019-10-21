@@ -39,6 +39,7 @@ using namespace ArdourWidgets;
 VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	: ArdourWindow (_("Virtual MIDI Keyboard"))
 	, _piano_channel (*manage (new Adjustment (1, 1, 16, 1, 1)))
+	, _transpose_output (*manage (new Adjustment (0, -12, 12, 1, 1)))
 	, _bank_msb (*manage (new Adjustment (0, 0, 127, 1, 16)))
 	, _bank_lsb (*manage (new Adjustment (0, 0, 127, 1, 16)))
 	, _patchpgm (*manage (new Adjustment (1, 1, 128, 1, 16)))
@@ -162,7 +163,8 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 
 	const char* default_cc[VKBD_NCTRLS] = { "7", "8", "1", "11", "91", "92", "93", "94" };
 
-	for (int i = 0; i < VKBD_NCTRLS; ++i) {
+	int col = 3;
+	for (int i = 0; i < VKBD_NCTRLS; ++i, ++col) {
 		_cc[i]      = boost::shared_ptr<VKBDControl> (new VKBDControl ("CC"));
 		_cc_knob[i] = manage (new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Flags (0)));
 		_cc_knob[i]->set_controllable (_cc[i]);
@@ -180,12 +182,17 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 		}
 		_cc_key[i].set_active (default_cc[i]);
 
-		tbl->attach (*_cc_knob[i], i + 3, i + 4, 0, 1, SHRINK, SHRINK, 4, 2);
-		tbl->attach (_cc_key[i],   i + 3, i + 4, 1, 2, SHRINK, SHRINK, 4, 2);
+		tbl->attach (*_cc_knob[i], col, col + 1, 0, 1, SHRINK, SHRINK, 4, 2);
+		tbl->attach (_cc_key[i],   col, col + 1, 1, 2, SHRINK, SHRINK, 4, 2);
 
 		_cc[i]->ValueChanged.connect_same_thread (_cc_connections,
 		                                          boost::bind (&VirtualKeyboardWindow::control_change_event_handler, this, i, _1));
 	}
+
+	tbl->attach (*manage (new ArdourVSpacer), col, col + 1, 0, 2, SHRINK, FILL, 4, 0);
+	++col;
+	tbl->attach (_transpose_output,                      col, col + 1, 0, 1, SHRINK, SHRINK, 4, 0);
+	tbl->attach (*manage (new Label (_("Transpose"))),   col, col + 1, 1, 2, SHRINK, SHRINK, 4, 0);
 
 	/* main layout */
 	Box* box1 = manage (new HBox ());
@@ -271,6 +278,7 @@ VirtualKeyboardWindow::get_state ()
 	node->set_property (X_("ShowNoteLabel"), _show_note_label.get_active ());
 	node->set_property (X_("Layout"), _keyboard_layout.get_text ());
 	node->set_property (X_("Channel"), _piano_channel.get_value_as_int ());
+	node->set_property (X_("Transpose"), _transpose_output.get_value_as_int ());
 	node->set_property (X_("MinVelocity"), _piano_min_velocity.get_value_as_int ());
 	node->set_property (X_("MaxVelocity"), _piano_max_velocity.get_value_as_int ());
 	node->set_property (X_("KeyVelocity"), _piano_key_velocity.get_value_as_int ());
@@ -328,6 +336,9 @@ VirtualKeyboardWindow::set_state (const XMLNode& root)
 	int v;
 	if (node->get_property (X_("Channel"), v)) {
 		_piano_channel.set_value (v);
+	}
+	if (node->get_property (X_("Transpose"), v)) {
+		_transpose_output.set_value (v);
 	}
 	if (node->get_property (X_("MinVelocity"), v)) {
 		_piano_min_velocity.set_value (v);
@@ -531,6 +542,10 @@ VirtualKeyboardWindow::note_on_event_handler (int note, int velocity)
 	if (!_session) {
 		return;
 	}
+	note += _transpose_output.get_value_as_int ();
+	if (note < 0 || note > 127) {
+		return;
+	}
 	uint8_t channel = _piano_channel.get_value_as_int () - 1;
 	uint8_t ev[3];
 	ev[0] = MIDI_CMD_NOTE_ON | channel;
@@ -545,7 +560,10 @@ VirtualKeyboardWindow::note_off_event_handler (int note)
 	if (!_session) {
 		return;
 	}
-
+	note += _transpose_output.get_value_as_int ();
+	if (note < 0 || note > 127) {
+		return;
+	}
 	uint8_t channel = _piano_channel.get_value_as_int () - 1;
 	uint8_t ev[3];
 	ev[0] = MIDI_CMD_NOTE_OFF | channel;

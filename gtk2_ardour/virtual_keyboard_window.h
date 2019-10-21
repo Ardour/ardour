@@ -130,6 +130,8 @@ private:
 	Gtk::Widget*    _pianomm;
 	Gtk::SpinButton _piano_channel;
 
+	Gtk::SpinButton _transpose_output;
+
 	Gtk::SpinButton _bank_msb;
 	Gtk::SpinButton _bank_lsb;
 	Gtk::SpinButton _patchpgm;
