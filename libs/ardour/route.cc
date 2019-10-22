@@ -3081,11 +3081,6 @@ Route::set_processor_state (XMLNode const & node, XMLProperty const* prop, Proce
 			} else {
 				processor.reset (new PluginInsert (_session));
 				processor->set_owner (this);
-				if (_strict_io) {
-					boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(processor);
-					pi->set_strict_io (true);
-				}
-
 			}
 		} else if (prop->value() == "port") {
 
@@ -3108,8 +3103,14 @@ Route::set_processor_state (XMLNode const & node, XMLProperty const* prop, Proce
 			processor.reset (new UnknownProcessor (_session, node));
 		}
 
-		/* subscribe to Sidechain IO changes */
+		/* set strict I/O only after loading plugin state, because
+		 * individual plugins may override this */
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (processor);
+		if (pi && _strict_io) {
+			pi->set_strict_io (true);
+		}
+
+		/* subscribe to Sidechain IO changes */
 		if (pi && pi->has_sidechain ()) {
 			pi->sidechain_input ()->changed.connect_same_thread (*this, boost::bind (&Route::sidechain_change_handler, this, _1, _2));
 		}
