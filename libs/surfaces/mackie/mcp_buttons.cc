@@ -270,6 +270,11 @@ MackieControlProtocol::cursor_down_release (Button&)
 LedState
 MackieControlProtocol::channel_left_press (Button &)
 {
+	if (_device_info.single_fader_follows_selection()) {
+		access_action ("Editor/select-prev-route");
+		return on;
+	}
+
 	if (_subview_mode != None) {
 		return none;
 	}
@@ -291,6 +296,11 @@ MackieControlProtocol::channel_left_release (Button &)
 LedState
 MackieControlProtocol::channel_right_press (Button &)
 {
+	if (_device_info.single_fader_follows_selection()) {
+		access_action ("Editor/select-next-route");
+		return on;
+	}
+
 	if (_subview_mode != None) {
 		return none;
 	}

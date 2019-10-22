@@ -255,10 +255,14 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		if (!child->get_property ("value", _strip_cnt)) {
 			_strip_cnt = 8;
 		}
-		if (_strip_cnt==1)
-			_single_fader_follows_selection = true;
 	} else {
 		return -1;
+	}
+
+	if ((child = node.child ("SingleFaderFollowsSelection")) != 0) {
+		child->get_property ("value", _single_fader_follows_selection);
+	} else {
+		_single_fader_follows_selection = false;
 	}
 
 	if ((child = node.child ("Extenders")) != 0) {

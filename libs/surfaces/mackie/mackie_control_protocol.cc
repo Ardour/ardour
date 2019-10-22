@@ -2407,6 +2407,27 @@ MackieControlProtocol::stripable_selection_changed ()
 		(*si)->update_strip_selection ();
 	}
 
+	/* if we are following the Gui, find the selected strips and map them here */
+	if (_device_info.single_fader_follows_selection()) {
+
+		Sorted sorted = get_sorted_stripables();
+
+		Sorted::iterator r = sorted.begin();
+		for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
+			vector<boost::shared_ptr<Stripable> > stripables;
+			uint32_t added = 0;
+
+			for (; r != sorted.end() && added < (*si)->n_strips (false); ++r, ++added) {
+				if ((*r)->is_selected()) {
+					stripables.push_back (*r);
+				}
+			}
+
+			(*si)->map_stripables (stripables);
+		}
+		return;
+	}
+
 	boost::shared_ptr<Stripable> s = first_selected_stripable ();
 	if (s) {
 		check_fader_automation_state ();
@@ -2434,11 +2455,6 @@ MackieControlProtocol::first_selected_stripable () const
 		/* check it is on one of our surfaces */
 
 		if (is_mapped (s)) {
-			return s;
-		}
-
-		/* if it's a single-fader surface, it should follow the selection */
-		if (_device_info.single_fader_follows_selection()) {
 			return s;
 		}
 

@@ -2,7 +2,7 @@
 <MackieProtocolDevice>
   <Name value="Behringer X-Touch One"/>
   <DeviceType value="MCU"/>
-  <Strips value="1"/>
+  <Strips value="8"/>
   <MasterFader value="no"/>
   <TimecodeDisplay value="yes"/>
   <TwoCharacterDisplay value="yes"/>
@@ -12,4 +12,5 @@
   <JogWheel value="yes"/>
   <TouchSenseFaders value="yes"/>
   <HasSeparateMeters value="yes"/>
+  <SingleFaderFollowsSelection value="yes"/>
 </MackieProtocolDevice>
