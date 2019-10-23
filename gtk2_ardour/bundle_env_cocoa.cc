@@ -86,11 +86,12 @@ fixup_bundle_environment (int argc, char* argv[], string & localedir)
 
 	no_app_nap ();
 
-	if (!g_getenv ("ARDOUR_BUNDLED")) {
-		return;
+	if (g_getenv ("ARDOUR_SELF")) {
+		g_setenv ("ARDOUR_SELF", argv[0]);
 	}
-
-	EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency (true, "PREBUNDLE_ENV"));
+	if (g_getenv ("PREBUNDLE_ENV")) {
+		EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency (true, "PREBUNDLE_ENV"));
+	}
 
 	set_language_preference ();
 
