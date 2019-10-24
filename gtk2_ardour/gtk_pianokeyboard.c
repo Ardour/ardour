@@ -70,8 +70,9 @@ enum {
 static guint piano_keyboard_signals[LAST_SIGNAL] = { 0 };
 
 static void
-draw_keyboard_cue (PianoKeyboard* pk, cairo_t* cr)
+draw_keyboard_cue (PianoKeyboard* pk, cairo_t* cr, int note)
 {
+#if 0
 	int w = pk->notes[0].w;
 	int h = pk->notes[0].h;
 
@@ -94,6 +95,48 @@ draw_keyboard_cue (PianoKeyboard* pk, cairo_t* cr)
 	cairo_move_to (cr, pk->notes[first_note_in_higher_row].x + 3, h - 9);
 	cairo_line_to (cr, pk->notes[last_note_in_higher_row].x + w - 3, h - 9);
 	cairo_stroke (cr);
+#endif
+
+	int nkey = note - pk->octave * 12;
+	if (nkey < 0 || nkey >= NNOTES) {
+		return;
+	}
+	if (!pk->note_bindings[nkey]) {
+		return;
+	}
+
+	// TODO Cache PangoFontDescription for each expose call.
+	// TODO display above note/octave label if both are visible
+	int is_white = pk->notes[note].white;
+	int x        = pk->notes[note].x;
+	int w        = pk->notes[note].w;
+	int h        = pk->notes[note].h;
+
+	int  tw, th;
+	char buf[32];
+	sprintf (buf, "ArdourMono %dpx", MAX (8, MIN (20, w / 2 + 3)));
+	PangoFontDescription* font = pango_font_description_from_string (buf);
+	snprintf(buf, 16, "%lc", gdk_keyval_to_unicode (gdk_keyval_to_upper (gdk_keyval_from_name (pk->note_bindings[nkey]))));
+	PangoLayout* pl = pango_cairo_create_layout (cr);
+	pango_layout_set_font_description (pl, font);
+	pango_layout_set_text (pl, buf, -1);
+	pango_layout_set_alignment (pl, PANGO_ALIGN_LEFT);
+	pango_layout_get_pixel_size (pl, &tw, &th);
+
+	if (is_white) {
+		cairo_set_source_rgba (cr, 0.0, 0.0, 0.5, 1.0);
+	} else {
+		cairo_set_source_rgba (cr, 1.0, 1.0, 0.5, 1.0);
+	}
+
+	if (tw < w) {
+		cairo_save (cr);
+		cairo_move_to (cr, x + (w - tw) / 2, h - th - 5);
+		pango_cairo_show_layout (cr, pl);
+		cairo_restore (cr);
+	}
+	g_object_unref (pl);
+	pango_font_description_free (font);
 }
 
 static void
@@ -155,10 +198,9 @@ draw_note (PianoKeyboard* pk, cairo_t* cr, int note)
 	cairo_stroke (cr);
 
 	if (pk->enable_keyboard_cue) {
-		draw_keyboard_cue (pk, cr);
+		draw_keyboard_cue (pk, cr, note);
 	}
-
-	if (pk->print_note_label && (note % 12) == 0) {
+	else if (pk->print_note_label && (note % 12) == 0) {
 		int  tw, th;
 		char buf[32];
 		sprintf (buf, "ArdourMono %dpx", MAX (10, MIN (20, MIN (w / 2 + 3, h / 7))));
@@ -304,6 +346,7 @@ bind_key (PianoKeyboard* pk, const char* key, int note)
 	assert (pk->key_bindings != NULL);
 
 	g_hash_table_insert (pk->key_bindings, (const gpointer)key, (gpointer) ((intptr_t)note));
+	pk->note_bindings[note] = key;
 }
 
 static void
@@ -312,6 +355,7 @@ clear_notes (PianoKeyboard* pk)
 	assert (pk->key_bindings != NULL);
 
 	g_hash_table_remove_all (pk->key_bindings);
+	memset (pk->note_bindings, 0, sizeof (pk->note_bindings));
 }
 
 static void
@@ -1083,4 +1127,5 @@ piano_keyboard_set_keyboard_layout (PianoKeyboard* pk, const char* layout)
 	} else {
 		assert (0);
 	}
+	gtk_widget_queue_draw (GTK_WIDGET (pk));
 }
