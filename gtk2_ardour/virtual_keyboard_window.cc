@@ -82,6 +82,8 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_highlight_key_range.set_active (false);
 	_show_note_label.set_active (true);
 
+	_send_panic.set_can_focus (false);
+
 	_pitchbend            = boost::shared_ptr<VKBDControl> (new VKBDControl ("PB", 8192, 16383));
 	_pitch_slider         = manage (new VSliderController (&_pitch_adjustment, _pitchbend, 0, PX_SCALE (15)));
 	_pitch_slider_tooltip = new Gtkmm2ext::PersistentTooltip (_pitch_slider);
@@ -105,6 +107,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	set_tooltip (_send_panic, "Send MIDI Panic message for current channel");
 
 	_pitch_slider_tooltip->set_tip ("Pitchbend: 8192");
+	_pitch_slider->set_can_focus (false);
 
 	/* config */
 	Table* cfg_tbl = manage (new Table);
@@ -361,6 +364,13 @@ VirtualKeyboardWindow::set_state (const XMLNode& root)
 	update_octave_key ();
 }
 
+bool
+VirtualKeyboardWindow::on_focus_in_event (GdkEventFocus *ev)
+{
+	_pianomm->grab_focus ();
+	return ArdourWindow::on_focus_in_event(ev);
+}
+
 void
 VirtualKeyboardWindow::on_unmap ()
 {
@@ -371,6 +381,7 @@ VirtualKeyboardWindow::on_unmap ()
 bool
 VirtualKeyboardWindow::on_key_press_event (GdkEventKey* ev)
 {
+	_pianomm->grab_focus ();
 	return ARDOUR_UI_UTILS::relay_key_press (ev, this);
 }
 
@@ -411,12 +422,14 @@ void
 VirtualKeyboardWindow::update_octave_key ()
 {
 	piano_keyboard_set_octave (_piano, _piano_octave_key.get_value_as_int ());
+	_pianomm->grab_focus ();
 }
 
 void
 VirtualKeyboardWindow::update_octave_range ()
 {
 	piano_keyboard_set_octave_range (_piano, _piano_octave_range.get_value_as_int ());
+	_pianomm->grab_focus ();
 }
 
 bool
@@ -524,6 +537,7 @@ VirtualKeyboardWindow::update_sensitivity ()
 	bool c = _yaxis_velocity.get_active ();
 	_piano_min_velocity.set_sensitive (c);
 	_piano_max_velocity.set_sensitive (c);
+	_pianomm->grab_focus ();
 }
 
 void

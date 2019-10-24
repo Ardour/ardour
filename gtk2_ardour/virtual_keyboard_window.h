@@ -92,6 +92,9 @@ public:
 	XMLNode& get_state ();
 	void     set_state (const XMLNode&);
 
+protected:
+	bool on_focus_in_event (GdkEventFocus*);
+
 private:
 	static void _note_on_event_handler (GtkWidget*, int note, int vel, gpointer arg)
 	{
