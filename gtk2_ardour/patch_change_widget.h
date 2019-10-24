@@ -99,11 +99,9 @@ private:
 	uint8_t                     _audition_note_num;
 	bool                        _audition_note_on;
 
-	PianoKeyboard* _piano;
-	Gtk::Widget*   _pianomm;
+	PianoKeyboard _piano;
 
-	static void _note_on_event_handler (GtkWidget*, int, int, gpointer);
-	static void _note_off_event_handler (GtkWidget*, int, gpointer);
+	void _note_on_event_handler (int, int);
 	void note_on_event_handler (int, bool for_audition);
 	void note_off_event_handler (int);
 };

@@ -96,16 +96,6 @@ protected:
 	bool on_focus_in_event (GdkEventFocus*);
 
 private:
-	static void _note_on_event_handler (GtkWidget*, int note, int vel, gpointer arg)
-	{
-		static_cast<VirtualKeyboardWindow*> (arg)->note_on_event_handler (note, vel);
-	}
-
-	static void _note_off_event_handler (GtkWidget*, int note, gpointer arg)
-	{
-		static_cast<VirtualKeyboardWindow*> (arg)->note_off_event_handler (note);
-	}
-
 	void on_unmap ();
 	bool on_key_press_event (GdkEventKey*);
 
@@ -129,8 +119,7 @@ private:
 	bool toggle_note_label (GdkEventButton*);
 	bool send_panic_message (GdkEventButton*);
 
-	PianoKeyboard*  _piano;
-	Gtk::Widget*    _pianomm;
+	PianoKeyboard   _piano;
 	Gtk::SpinButton _piano_channel;
 
 	Gtk::SpinButton _transpose_output;

@@ -51,9 +51,6 @@ class StepEntry : public ArdourWindow
 
 	void set_step_editor (StepEditor*);
 
-	void note_off_event_handler (int note);
-	void rest_event_handler ();
-
 	Temporal::Beats note_length();
 	uint8_t note_velocity() const;
 	uint8_t note_channel() const;
@@ -65,6 +62,9 @@ class StepEntry : public ArdourWindow
   private:
 	static StepEntry* _instance;
 	StepEntry ();
+
+	void note_off_event_handler (int note);
+	void rest_event_handler ();
 
 	Temporal::Beats _current_note_length;
 	uint8_t _current_note_velocity;
@@ -140,8 +140,8 @@ class StepEntry : public ArdourWindow
 	void velocity_value_change ();
 	void length_value_change ();
 
-	PianoKeyboard* _piano;
-	Gtk::Widget* piano;
+	PianoKeyboard _piano;
+
 	StepEditor*   se;
 
 	void bank_click ();

@@ -319,14 +319,11 @@ private:
 
 	Gtk::Expander   _plugin_pianokeyboard_expander;
 	PianoKeyboard*  _piano;
-	Gtk::Widget*    _pianomm;
 	Gtk::VBox       _pianobox;
 	Gtk::SpinButton _piano_velocity;
 	Gtk::SpinButton _piano_channel;
 
-	static void _note_on_event_handler (GtkWidget*, int, int, gpointer);
-	static void _note_off_event_handler (GtkWidget*, int, gpointer);
-	void note_on_event_handler (int);
+	void note_on_event_handler (int, int);
 	void note_off_event_handler (int);
 
 	void toggle_pianokeyboard ();

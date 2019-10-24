@@ -57,12 +57,10 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	, _piano_octave_range (*manage (new Adjustment (7, 2, 11, 1, 1)))
 	, _pitch_adjustment (8192, 0, 16383, 1, 256)
 {
-	_piano   = (PianoKeyboard*)piano_keyboard_new ();
-	_pianomm = Glib::wrap ((GtkWidget*)_piano);
-	_pianomm->set_flags (Gtk::CAN_FOCUS);
-	_pianomm->add_events (Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
-	piano_keyboard_set_keyboard_layout (_piano, "QWERTY");
-	piano_keyboard_show_note_label (_piano, true);
+	_piano.set_flags (Gtk::CAN_FOCUS);
+
+	_piano.set_keyboard_layout(PianoKeyboard::QWERTY);
+	_piano.show_note_label (true);
 
 	using namespace Menu_Helpers;
 	_keyboard_layout.AddMenuElem (MenuElem ("QWERTY",
@@ -218,7 +216,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	vbox->pack_start (*box1, false, false, 4);
 	vbox->pack_start (*_pgm_box, false, false, 4);
 	vbox->pack_start (*_cfg_box, false, false, 4);
-	vbox->pack_start (*_pianomm, true, true);
+	vbox->pack_start (_piano, true, true);
 	add (*vbox);
 
 	_bank_msb.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::bank_patch));
@@ -240,8 +238,9 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_show_note_label.signal_button_release_event ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::toggle_note_label), false);
 	_send_panic.signal_button_release_event ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::send_panic_message), false);
 
-	g_signal_connect (G_OBJECT (_piano), "note-on", G_CALLBACK (VirtualKeyboardWindow::_note_on_event_handler), this);
-	g_signal_connect (G_OBJECT (_piano), "note-off", G_CALLBACK (VirtualKeyboardWindow::_note_off_event_handler), this);
+
+	_piano.NoteOn.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::note_on_event_handler));
+	_piano.NoteOff.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::note_off_event_handler));
 
 	update_velocity_settings (0);
 	update_octave_range ();
@@ -252,7 +251,6 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 
 VirtualKeyboardWindow::~VirtualKeyboardWindow ()
 {
-	delete _pianomm;
 	delete _pitch_slider_tooltip;
 }
 
@@ -306,8 +304,7 @@ VirtualKeyboardWindow::set_state (const XMLNode& root)
 
 	std::string layout;
 	if (node->get_property (X_("Layout"), layout)) {
-		piano_keyboard_set_keyboard_layout (_piano, layout.c_str ());
-		_keyboard_layout.set_active (layout);
+		select_keyboard_layout (layout);
 	}
 
 	for (int i = 0; i < VKBD_NCTRLS; ++i) {
@@ -325,15 +322,15 @@ VirtualKeyboardWindow::set_state (const XMLNode& root)
 	}
 	if (node->get_property (X_("HighlightGrandPiano"), a)) {
 		_highlight_grand_piano.set_active (a);
-		piano_keyboard_set_grand_piano_highlight (_piano, a);
+		_piano.set_grand_piano_highlight (a);
 	}
 	if (node->get_property (X_("HighlightKeyRange"), a)) {
 		_highlight_key_range.set_active (a);
-		piano_keyboard_set_keyboard_cue (_piano, a);
+		_piano.set_keyboard_cue (a);
 	}
 	if (node->get_property (X_("ShowNoteLabel"), a)) {
 		_show_note_label.set_active (a);
-		piano_keyboard_show_note_label (_piano, a);
+		_piano.show_note_label (a);
 	}
 
 	int v;
@@ -367,7 +364,7 @@ VirtualKeyboardWindow::set_state (const XMLNode& root)
 bool
 VirtualKeyboardWindow::on_focus_in_event (GdkEventFocus *ev)
 {
-	_pianomm->grab_focus ();
+	_piano.grab_focus ();
 	return ArdourWindow::on_focus_in_event(ev);
 }
 
@@ -381,15 +378,22 @@ VirtualKeyboardWindow::on_unmap ()
 bool
 VirtualKeyboardWindow::on_key_press_event (GdkEventKey* ev)
 {
-	_pianomm->grab_focus ();
+	_piano.grab_focus ();
 	return ARDOUR_UI_UTILS::relay_key_press (ev, this);
 }
 
 void
 VirtualKeyboardWindow::select_keyboard_layout (std::string const& l)
 {
-	piano_keyboard_set_keyboard_layout (_piano, l.c_str ());
-	_keyboard_layout.set_active (l);
+	if (l == "QWERTY") {
+		_piano.set_keyboard_layout (PianoKeyboard::QWERTY);
+	} else if (l == "QWERTZ") {
+		_piano.set_keyboard_layout (PianoKeyboard::QWERTZ);
+	} else if (l == "AZERTY") {
+		_piano.set_keyboard_layout (PianoKeyboard::AZERTY);
+	} else if (l == "DVORAK") {
+		_piano.set_keyboard_layout (PianoKeyboard::DVORAK);
+	}
 }
 
 bool
@@ -421,15 +425,15 @@ VirtualKeyboardWindow::toggle_bankpatch (GdkEventButton*)
 void
 VirtualKeyboardWindow::update_octave_key ()
 {
-	piano_keyboard_set_octave (_piano, _piano_octave_key.get_value_as_int ());
-	_pianomm->grab_focus ();
+	_piano.set_octave (_piano_octave_key.get_value_as_int ());
+	_piano.grab_focus ();
 }
 
 void
 VirtualKeyboardWindow::update_octave_range ()
 {
-	piano_keyboard_set_octave_range (_piano, _piano_octave_range.get_value_as_int ());
-	_pianomm->grab_focus ();
+	_piano.set_octave_range (_piano_octave_range.get_value_as_int ());
+	_piano.grab_focus ();
 }
 
 bool
@@ -445,7 +449,7 @@ VirtualKeyboardWindow::toggle_highlight_piano (GdkEventButton*)
 {
 	bool a = !_highlight_grand_piano.get_active ();
 	_highlight_grand_piano.set_active (a);
-	piano_keyboard_set_grand_piano_highlight (_piano, a);
+	_piano.set_grand_piano_highlight (a);
 	return false;
 }
 
@@ -454,7 +458,7 @@ VirtualKeyboardWindow::toggle_highlight_key (GdkEventButton*)
 {
 	bool a = !_highlight_key_range.get_active ();
 	_highlight_key_range.set_active (a);
-	piano_keyboard_set_keyboard_cue (_piano, a);
+	_piano.set_keyboard_cue (a);
 	return false;
 }
 
@@ -463,7 +467,7 @@ VirtualKeyboardWindow::toggle_note_label (GdkEventButton*)
 {
 	bool a = !_show_note_label.get_active ();
 	_show_note_label.set_active (a);
-	piano_keyboard_show_note_label (_piano, a);
+	_piano.show_note_label (a);
 	return false;
 }
 
@@ -518,15 +522,13 @@ VirtualKeyboardWindow::update_velocity_settings (int ctrl)
 	}
 
 	if (_yaxis_velocity.get_active ()) {
-		piano_keyboard_set_velocities (_piano,
-		                               _piano_min_velocity.get_value_as_int (),
-		                               _piano_max_velocity.get_value_as_int (),
-		                               _piano_key_velocity.get_value_as_int ());
+		_piano.set_velocities (_piano_min_velocity.get_value_as_int (),
+		                       _piano_max_velocity.get_value_as_int (),
+		                       _piano_key_velocity.get_value_as_int ());
 	} else {
-		piano_keyboard_set_velocities (_piano,
-		                               _piano_key_velocity.get_value_as_int (),
-		                               _piano_key_velocity.get_value_as_int (),
-		                               _piano_key_velocity.get_value_as_int ());
+		_piano.set_velocities (_piano_key_velocity.get_value_as_int (),
+		                       _piano_key_velocity.get_value_as_int (),
+		                       _piano_key_velocity.get_value_as_int ());
 	}
 	update_sensitivity ();
 }
@@ -537,7 +539,7 @@ VirtualKeyboardWindow::update_sensitivity ()
 	bool c = _yaxis_velocity.get_active ();
 	_piano_min_velocity.set_sensitive (c);
 	_piano_max_velocity.set_sensitive (c);
-	_pianomm->grab_focus ();
+	_piano.grab_focus ();
 }
 
 void
@@ -552,7 +554,7 @@ VirtualKeyboardWindow::pitch_slider_adjusted ()
 void
 VirtualKeyboardWindow::note_on_event_handler (int note, int velocity)
 {
-	_pianomm->grab_focus ();
+	_piano.grab_focus ();
 	if (!_session) {
 		return;
 	}

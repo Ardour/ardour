@@ -31,12 +31,11 @@ public:
 
 	uint8_t note_number() const { return _note_number; }
 
-	void note_on_event_handler(int note);
-
 private:
-	PianoKeyboard* _piano;
-	Gtk::Widget*   _pianomm;
-	uint8_t        _note_number;
+	PianoKeyboard _piano;
+	uint8_t       _note_number;
+
+	void note_on_event_handler(int, int);
 };
 
 #endif /* __gtk2_ardour_note_select_dialog_h__ */

@@ -88,7 +88,6 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	, is_scrollable(scrollable)
 	, _plugin_pianokeyboard_expander (_("MIDI Keyboard"))
 	, _piano (0)
-	, _pianomm (0)
 	, _piano_velocity (*manage (new Adjustment (100, 1, 127, 1, 16)))
 	, _piano_channel (*manage (new Adjustment (0, 1, 16, 1, 1)))
 {
@@ -140,13 +139,11 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	VBox* v1_box = manage (new VBox);
 	VBox* v2_box = manage (new VBox);
 	if (pi->is_instrument ()) {
-		_piano = (PianoKeyboard*)piano_keyboard_new();
-		_pianomm = Glib::wrap((GtkWidget*)_piano);
-		_pianomm->set_flags(Gtk::CAN_FOCUS);
-		_pianomm->add_events(Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
+		_piano = new PianoKeyboard ();
+		_piano->set_flags(Gtk::CAN_FOCUS);
 
-		g_signal_connect (G_OBJECT (_piano), "note-on", G_CALLBACK (GenericPluginUI::_note_on_event_handler), this);
-		g_signal_connect (G_OBJECT (_piano), "note-off", G_CALLBACK (GenericPluginUI::_note_off_event_handler), this);
+		_piano->NoteOn.connect (sigc::mem_fun (*this, &GenericPluginUI::note_on_event_handler));
+		_piano->NoteOff.connect (sigc::mem_fun (*this, &GenericPluginUI::note_off_event_handler));
 
 		HBox* box = manage (new HBox);
 		box->pack_start (*manage (new Label (_("Channel:"))), false, false);
@@ -159,7 +156,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 		_pianobox.set_spacing (4);
 		_pianobox.pack_start (*box2, true, true);
-		_pianobox.pack_start (*_pianomm, true, true);
+		_pianobox.pack_start (*_piano, true, true);
 
 		_plugin_pianokeyboard_expander.set_expanded(false);
 		_plugin_pianokeyboard_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &GenericPluginUI::toggle_pianokeyboard));
@@ -236,7 +233,7 @@ GenericPluginUI::~GenericPluginUI ()
 		screen_update_connection.disconnect();
 	}
 	delete automation_menu;
-	delete _pianomm;
+	delete _piano;
 }
 
 void
@@ -1392,22 +1389,10 @@ GenericPluginUI::toggle_pianokeyboard ()
 }
 
 void
-GenericPluginUI::_note_on_event_handler(GtkWidget*, int note, int, gpointer arg)
-{
-	((GenericPluginUI*)arg)->note_on_event_handler(note);
-}
-
-void
-GenericPluginUI::_note_off_event_handler(GtkWidget*, int note, gpointer arg)
-{
-	((GenericPluginUI*)arg)->note_off_event_handler(note);
-}
-
-void
-GenericPluginUI::note_on_event_handler (int note)
+GenericPluginUI::note_on_event_handler (int note, int)
 {
 	MidiTrack* mt = dynamic_cast<MidiTrack*> (insert->owner());
-	_pianomm->grab_focus ();
+	_piano->grab_focus ();
 	uint8_t channel = _piano_channel.get_value_as_int () - 1;
 	uint8_t event[3];
 	event[0] = (MIDI_CMD_NOTE_ON | channel);

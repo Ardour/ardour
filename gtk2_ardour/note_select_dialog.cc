@@ -23,33 +23,26 @@
 
 #include "pbd/i18n.h"
 
-static void
-_note_on_event_handler(GtkWidget* /*widget*/, int note, int, gpointer arg)
-{
-	((NoteSelectDialog*)arg)->note_on_event_handler(note);
-}
-
-NoteSelectDialog::NoteSelectDialog()
+NoteSelectDialog::NoteSelectDialog ()
 	: ArdourDialog (_("Select Note"))
-	, _piano((PianoKeyboard*)piano_keyboard_new())
-	, _pianomm(Glib::wrap((GtkWidget*)_piano))
 	, _note_number(60)
 {
-	_pianomm->set_flags(Gtk::CAN_FOCUS);
-	_pianomm->show();
-	g_signal_connect(G_OBJECT(_piano), "note-on", G_CALLBACK(_note_on_event_handler), this);
-	piano_keyboard_set_monophonic(_piano, TRUE);
-	piano_keyboard_sustain_press(_piano);
+	_piano.set_flags(Gtk::CAN_FOCUS);
+	_piano.show();
+	_piano.NoteOn.connect (sigc::mem_fun (*this, &NoteSelectDialog::note_on_event_handler));
 
-	get_vbox()->pack_start(*_pianomm);
+	_piano.set_monophonic (true);
+	_piano.sustain_press ();
+
+	get_vbox()->pack_start(_piano);
+
 	add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	add_button(Gtk::Stock::OK, Gtk::RESPONSE_ACCEPT);
 	set_default_response(Gtk::RESPONSE_ACCEPT);
 }
 
 void
-NoteSelectDialog::note_on_event_handler(int note)
+NoteSelectDialog::note_on_event_handler(int note, int)
 {
-	printf("NOTE: %d\n", note);
 	_note_number = note;
 }
