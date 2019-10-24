@@ -173,8 +173,6 @@ private:
 	ARDOUR::PluginPtr load_plugin (ARDOUR::PluginInfoPtr);
 	bool show_this_plugin (const ARDOUR::PluginInfoPtr&, const std::string&);
 
-	void setup_search_string (std::string&);
-
 	void favorite_changed (const std::string& path);
 	void hidden_changed (const std::string& path);
 	bool in_row_change;

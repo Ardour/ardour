@@ -31,6 +31,7 @@
 #include <map>
 
 #include <algorithm>
+#include <boost/tokenizer.hpp>
 
 #include <gtkmm/button.h>
 #include <gtkmm/comboboxtext.h>
@@ -352,6 +353,27 @@ PluginSelector::added_row_clicked(GdkEventButton* event)
 		btn_remove_clicked();
 }
 
+
+static void
+setup_search_string (string& searchstr)
+{
+	transform (searchstr.begin(), searchstr.end(), searchstr.begin(), ::toupper);
+}
+
+static bool
+match_search_strings (string const& haystack, string const& needle)
+{
+	boost::char_separator<char> sep (" ");
+	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	tokenizer t (needle, sep);
+	for (tokenizer::iterator ti = t.begin(); ti != t.end(); ++ti) {
+		if (haystack.find (*ti) == string::npos) {
+			return false;
+		}
+	}
+	return true;
+}
+
 bool
 PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& searchstr)
 {
@@ -361,22 +383,16 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 
 	if (!searchstr.empty()) {
 
-		std::string compstr;
-
 		if (_search_name_checkbox->get_active()) { /* name contains */
-			compstr = info->name;
-			transform (compstr.begin(), compstr.end(), compstr.begin(), ::toupper);
-			if (compstr.find (searchstr) != string::npos) {
-				maybe_show = true;
-			}
+			std::string compstr = info->name;
+			setup_search_string (compstr);
+			maybe_show |= match_search_strings (compstr, searchstr);
 		}
 
 		if (_search_tags_checkbox->get_active()) { /* tag contains */
-			compstr = manager.get_tags_as_string (info);
-			transform (compstr.begin(), compstr.end(), compstr.begin(), ::toupper);
-			if (compstr.find (searchstr) != string::npos) {
-				maybe_show = true;
-			}
+			std::string compstr = manager.get_tags_as_string (info);
+			setup_search_string (compstr);
+			maybe_show |= match_search_strings (compstr, searchstr);
 		}
 
 		if (!maybe_show) {
@@ -459,13 +475,6 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 }
 
 void
-PluginSelector::setup_search_string (string& searchstr)
-{
-	searchstr = search_entry.get_text ();
-	transform (searchstr.begin(), searchstr.end(), searchstr.begin(), ::toupper);
-}
-
-void
 PluginSelector::set_sensitive_widgets ()
 {
 	if (_search_ignore_checkbox->get_active() && !search_entry.get_text().empty()) {
@@ -503,8 +512,6 @@ PluginSelector::refill ()
 		return;
 	}
 
-	std::string searchstr;
-
 	in_row_change = true;
 
 	plugin_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
@@ -518,6 +525,7 @@ PluginSelector::refill ()
 
 	plugin_model->clear ();
 
+	std::string searchstr = search_entry.get_text ();
 	setup_search_string (searchstr);
 
 	ladspa_refiller (searchstr);
