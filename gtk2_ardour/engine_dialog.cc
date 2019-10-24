@@ -2209,8 +2209,7 @@ EngineControl::set_current_state (const State& state)
 
 	boost::shared_ptr<ARDOUR::AudioBackend> backend;
 
-	if (!(backend = ARDOUR::AudioEngine::instance ()->set_backend (
-	          state->backend, downcase (std::string(PROGRAM_NAME)), ""))) {
+	if (!(backend = ARDOUR::AudioEngine::instance ()->set_backend (state->backend, downcase (std::string (PROGRAM_NAME)), ""))) {
 		DEBUG_ECONTROL (string_compose ("Unable to set backend to %1", state->backend));
 		// this shouldn't happen as the invalid backend names should have been
 		// removed from the list of states.
