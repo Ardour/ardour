@@ -428,7 +428,8 @@ NewUserWizard::setup_final_page ()
 
 	VBox* vbox = manage (new VBox);
 	vbox->pack_start (*final_label, true, true);
-	if (!Profile->get_mixbus()) {
+	/* Mixbus sets this parameter to true by default, Ardour sets it to false */
+	if (!Config->get_discover_vst_on_start()) {
 		vbox->pack_start (plugin_disco_button, true, false);
 	}
 	vbox->show ();
