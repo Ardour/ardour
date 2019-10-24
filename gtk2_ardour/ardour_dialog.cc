@@ -126,11 +126,13 @@ ArdourDialog::on_show ()
 
 	// never allow the splash screen to obscure any dialog
 
-	Splash* spl = Splash::instance();
+	if (Splash::exists()) {
+		Splash* spl = Splash::instance();
 
-	if (spl && spl->is_visible()) {
-		spl->pop_back_for (*this);
-		_splash_pushed = true;
+		if (spl->is_visible()) {
+			spl->pop_back_for (*this);
+			_splash_pushed = true;
+		}
 	}
 }
 
