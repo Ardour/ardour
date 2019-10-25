@@ -379,14 +379,14 @@ VirtualKeyboardWindow::on_unmap ()
 bool
 VirtualKeyboardWindow::on_key_press_event (GdkEventKey* ev)
 {
-	_piano.grab_focus ();
-
 	/* try propagate unmodified events first */
 	if ((ev->state & 0xf) == 0) {
 		if (gtk_window_propagate_key_event (gobj(), ev)) {
 			return true;
 		}
 	}
+
+	_piano.grab_focus ();
 
 	/* handle up/down */
 	if (ev->type == GDK_KEY_PRESS) {
