@@ -38,8 +38,6 @@ using namespace ArdourWidgets;
 
 VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	: ArdourWindow (_("Virtual MIDI Keyboard"))
-	, _piano_channel (*manage (new Adjustment (1, 1, 16, 1, 1)))
-	, _transpose_output (*manage (new Adjustment (0, -12, 12, 1, 1)))
 	, _bank_msb (*manage (new Adjustment (0, 0, 127, 1, 16)))
 	, _bank_lsb (*manage (new Adjustment (0, 0, 127, 1, 16)))
 	, _patchpgm (*manage (new Adjustment (1, 1, 128, 1, 16)))
@@ -63,6 +61,17 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_piano.set_annotate_octave (true);
 	_piano.set_grand_piano_highlight (false);
 
+	for (int c = 0; c < 16; ++c) {
+		char buf[16];
+		sprintf (buf, "%d", c + 1);
+		_midi_channel.append_text_item (buf);
+	}
+	for (int t = -12; t < 13; ++t) {
+		char buf[16];
+		sprintf (buf, "%d", t);
+		_transpose_output.append_text_item (buf);
+	}
+
 	using namespace Menu_Helpers;
 	_keyboard_layout.AddMenuElem (MenuElem ("QWERTY",
 	                                        sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "QWERTY")));
@@ -72,7 +81,10 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	                                        sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "AZERTY")));
 	_keyboard_layout.AddMenuElem (MenuElem ("DVORAK",
 	                                        sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "DVORAK")));
+
 	_keyboard_layout.set_active ("QWERTY");
+	_midi_channel.set_active ("1");
+	_transpose_output.set_active ("0");
 
 	_cfg_display.set_active (false);
 	_pgm_display.set_active (false);
@@ -158,7 +170,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 
 	/* settings */
 	Table* tbl = manage (new Table);
-	tbl->attach (_piano_channel, 0, 1, 0, 1, SHRINK, SHRINK, 4, 0);
+	tbl->attach (_midi_channel, 0, 1, 0, 1, SHRINK, SHRINK, 4, 0);
 	tbl->attach (*manage (new Label (_("Channel"))), 0, 1, 1, 2, SHRINK, SHRINK, 4, 0);
 	tbl->attach (*manage (new ArdourVSpacer), 1, 2, 0, 2, SHRINK, FILL, 4, 0);
 	tbl->attach (*_pitch_slider, 2, 3, 0, 2, SHRINK, FILL, 4, 0);
@@ -279,8 +291,8 @@ VirtualKeyboardWindow::get_state ()
 	node->set_property (X_("HighlightKeyRange"), _highlight_key_range.get_active ());
 	node->set_property (X_("ShowNoteLabel"), _show_note_label.get_active ());
 	node->set_property (X_("Layout"), _keyboard_layout.get_text ());
-	node->set_property (X_("Channel"), _piano_channel.get_value_as_int ());
-	node->set_property (X_("Transpose"), _transpose_output.get_value_as_int ());
+	node->set_property (X_("Channel"), _midi_channel.get_text ());
+	node->set_property (X_("Transpose"), _transpose_output.get_text ());
 	node->set_property (X_("MinVelocity"), _piano_min_velocity.get_value_as_int ());
 	node->set_property (X_("MaxVelocity"), _piano_max_velocity.get_value_as_int ());
 	node->set_property (X_("KeyVelocity"), _piano_key_velocity.get_value_as_int ());
@@ -317,6 +329,17 @@ VirtualKeyboardWindow::set_state (const XMLNode& root)
 		}
 	}
 
+	std::string s;
+	if (node->get_property (X_("Channel"), s)) {
+		uint8_t channel = PBD::atoi (_midi_channel.get_text ());
+		if (channel > 0 && channel < 17) {
+			_midi_channel.set_active (s);
+		}
+	}
+	if (node->get_property (X_("Transpose"), s)) {
+		_transpose_output.set_active (s);
+	}
+
 	bool a;
 	if (node->get_property (X_("YAxisVelocity"), a)) {
 		_yaxis_velocity.set_active (a);
@@ -335,12 +358,6 @@ VirtualKeyboardWindow::set_state (const XMLNode& root)
 	}
 
 	int v;
-	if (node->get_property (X_("Channel"), v)) {
-		_piano_channel.set_value (v);
-	}
-	if (node->get_property (X_("Transpose"), v)) {
-		_transpose_output.set_value (v);
-	}
 	if (node->get_property (X_("MinVelocity"), v)) {
 		_piano_min_velocity.set_value (v);
 	}
@@ -495,7 +512,7 @@ VirtualKeyboardWindow::toggle_note_label (GdkEventButton*)
 bool
 VirtualKeyboardWindow::send_panic_message (GdkEventButton*)
 {
-	uint8_t channel = _piano_channel.get_value_as_int () - 1;
+	uint8_t channel = PBD::atoi (_midi_channel.get_text ()) - 1;
 	uint8_t ev[3];
 	ev[0] = MIDI_CMD_CONTROL | channel;
 	ev[1] = MIDI_CTL_SUSTAIN;
@@ -515,7 +532,7 @@ VirtualKeyboardWindow::bank_patch ()
 	int lsb = _bank_lsb.get_value_as_int ();
 	int pgm = _patchpgm.get_value_as_int () - 1;
 
-	uint8_t channel = _piano_channel.get_value_as_int () - 1;
+	uint8_t channel = PBD::atoi (_midi_channel.get_text ()) - 1;
 	uint8_t ev[3];
 	ev[0] = MIDI_CMD_CONTROL | channel;
 	ev[1] = MIDI_CTL_MSB_BANK;
@@ -579,11 +596,11 @@ VirtualKeyboardWindow::note_on_event_handler (int note, int velocity)
 	if (!_session) {
 		return;
 	}
-	note += _transpose_output.get_value_as_int ();
+	note += PBD::atoi (_transpose_output.get_text ());
 	if (note < 0 || note > 127) {
 		return;
 	}
-	uint8_t channel = _piano_channel.get_value_as_int () - 1;
+	uint8_t channel = PBD::atoi (_midi_channel.get_text ()) - 1;
 	uint8_t ev[3];
 	ev[0] = MIDI_CMD_NOTE_ON | channel;
 	ev[1] = note;
@@ -597,11 +614,11 @@ VirtualKeyboardWindow::note_off_event_handler (int note)
 	if (!_session) {
 		return;
 	}
-	note += _transpose_output.get_value_as_int ();
+	note += PBD::atoi (_transpose_output.get_text ());
 	if (note < 0 || note > 127) {
 		return;
 	}
-	uint8_t channel = _piano_channel.get_value_as_int () - 1;
+	uint8_t channel = PBD::atoi (_midi_channel.get_text ()) - 1;
 	uint8_t ev[3];
 	ev[0] = MIDI_CMD_NOTE_OFF | channel;
 	ev[1] = note;
@@ -618,7 +635,7 @@ VirtualKeyboardWindow::control_change_event_handler (int key, int val)
 	assert (key >= 0 && key < VKBD_NCTRLS);
 	int ctrl = PBD::atoi (_cc_key[key].get_text ());
 	assert (ctrl > 0 && ctrl < 127);
-	uint8_t channel = _piano_channel.get_value_as_int () - 1;
+	uint8_t channel = PBD::atoi (_midi_channel.get_text ()) - 1;
 	uint8_t ev[3];
 	ev[0] = MIDI_CMD_CONTROL | channel;
 	ev[1] = ctrl;
@@ -632,7 +649,7 @@ VirtualKeyboardWindow::pitch_bend_event_handler (int val)
 	if (!_session) {
 		return;
 	}
-	uint8_t channel = _piano_channel.get_value_as_int () - 1;
+	uint8_t channel = PBD::atoi (_midi_channel.get_text ()) - 1;
 	uint8_t ev[3];
 	ev[0] = MIDI_CMD_BENDER | channel;
 	ev[1] = val & 0x7f;

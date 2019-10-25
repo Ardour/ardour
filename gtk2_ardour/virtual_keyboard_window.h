@@ -120,9 +120,9 @@ private:
 	bool send_panic_message (GdkEventButton*);
 
 	APianoKeyboard  _piano;
-	Gtk::SpinButton _piano_channel;
 
-	Gtk::SpinButton _transpose_output;
+	ArdourWidgets::ArdourDropdown  _midi_channel;
+	ArdourWidgets::ArdourDropdown  _transpose_output;
 
 	Gtk::SpinButton _bank_msb;
 	Gtk::SpinButton _bank_lsb;
