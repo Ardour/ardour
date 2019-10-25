@@ -201,10 +201,8 @@ PluginScanDialog::message_handler (std::string type, std::string plugin, bool ca
 		hide();
 		connections.drop_connections ();
 	} else {
-		if (verbose) {
-			message.set_text (type + ": " + Glib::path_get_basename(plugin));
-			show();
-		}
+		message.set_text (type + ": " + Glib::path_get_basename(plugin));
+		show();
 	}
 
 	if (!can_cancel || !cancelled) {

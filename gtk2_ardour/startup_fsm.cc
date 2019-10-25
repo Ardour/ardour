@@ -341,7 +341,7 @@ StartupFSM::show_plugin_scan_dialog ()
 	*/
 
 	const bool cache_only = (!Config->get_discover_vst_on_start() || Profile->get_mixbus());
-	const bool verbose = (new_user || Config->get_discover_vst_on_start());
+	const bool verbose = new_user;
 
 	plugin_scan_dialog = new PluginScanDialog (cache_only, verbose);
 	current_dialog_connection = plugin_scan_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &StartupFSM::dialog_response_handler), PluginDialog));
