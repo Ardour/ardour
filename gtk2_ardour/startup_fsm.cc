@@ -225,8 +225,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 			/* any response value from the pre-release dialog means
 			   "move along now"
 			*/
-			Gtk::Widget* w = pre_release_dialog;
-			end_dialog (&w);
+			end_dialog (&pre_release_dialog);
 
 			if (NewUserWizard::required()) {
 				show_new_user_dialog ();
