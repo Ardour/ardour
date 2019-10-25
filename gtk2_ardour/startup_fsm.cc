@@ -340,7 +340,10 @@ StartupFSM::show_plugin_scan_dialog ()
 	   that we run here, during startup, should only use the existing plugin cache (if any).
 	*/
 
-	plugin_scan_dialog = new PluginScanDialog ((!Config->get_discover_vst_on_start() || Profile->get_mixbus()), new_user);
+	const bool cache_only = (!Config->get_discover_vst_on_start() || Profile->get_mixbus());
+	const bool verbose = (new_user || Config->get_discover_vst_on_start());
+
+	plugin_scan_dialog = new PluginScanDialog (cache_only, verbose);
 	current_dialog_connection = plugin_scan_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &StartupFSM::dialog_response_handler), PluginDialog));
 	plugin_scan_dialog->set_position (WIN_POS_CENTER);
 
@@ -353,7 +356,6 @@ StartupFSM::show_plugin_scan_dialog ()
 	plugin_scan_dialog->start();
 	DEBUG_TRACE (DEBUG::GuiStartup, "plugin dialog done\n");
 }
-
 
 void
 StartupFSM::show_new_user_dialog ()
