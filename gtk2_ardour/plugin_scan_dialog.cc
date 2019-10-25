@@ -170,6 +170,8 @@ PluginScanDialog::plugin_scan_timeout (int timeout)
 void
 PluginScanDialog::message_handler (std::string type, std::string plugin, bool can_cancel)
 {
+	DEBUG_TRACE (DEBUG::GuiStartup, string_compose (X_("plugin scan message: %1 cancel? %2\n"), type, can_cancel));
+
 	if (type == X_("closeme") && !is_mapped()) {
 		return;
 	}
@@ -194,8 +196,10 @@ PluginScanDialog::message_handler (std::string type, std::string plugin, bool ca
 		hide();
 		connections.drop_connections ();
 	} else {
-		message.set_text (type + ": " + Glib::path_get_basename(plugin));
-		show();
+		if (verbose) {
+			message.set_text (type + ": " + Glib::path_get_basename(plugin));
+			show();
+		}
 	}
 
 	if (!can_cancel || !cancelled) {
