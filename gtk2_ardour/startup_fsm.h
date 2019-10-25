@@ -25,9 +25,11 @@
 
 #include "ardour/types.h"
 
+class ArdourDialog;
 class NewUserWizard;
 class EngineControl;
 class SessionDialog;
+class PluginScanDialog;
 
 class StartupFSM : public sigc::trackable
 {
@@ -36,7 +38,8 @@ class StartupFSM : public sigc::trackable
 		PreReleaseDialog,
 		NewUserDialog,
 		NewSessionDialog,
-		AudioMIDISetup
+		AudioMIDISetup,
+		PluginDialog
 	};
 
 	enum Result {
@@ -44,11 +47,19 @@ class StartupFSM : public sigc::trackable
 		ExitProgram,
 	};
 
+	enum MainState {
+		WaitingForPreRelease,
+		WaitingForNewUser,
+		WaitingForSessionPath,
+		WaitingForEngineParams,
+		WaitingForPlugins
+	};
+
 	StartupFSM (EngineControl&);
 	~StartupFSM ();
 
 	void start ();
-	void end ();
+	void reset ();
 
 	std::string session_path;
 	std::string session_name;
@@ -66,24 +77,21 @@ class StartupFSM : public sigc::trackable
 	bool brand_new_user() const { return new_user; }
 
   private:
-	enum MainState {
-		NeedPreRelease,
-		NeedWizard,
-		NeedSessionPath,
-		NeedEngineParams,
-	};
-
 	bool new_user;
-	bool new_session;
+	bool new_session_required;
 
 	MainState _state;
 
+	void set_state (MainState);
 	void dialog_response_handler (int response, DialogID);
+	template<typename T> void end_dialog (T**);
+	template<typename T> void end_dialog (T&);
 
-	void show_new_user_wizard ();
+	void show_new_user_dialog ();
 	void show_session_dialog (bool new_session_required);
 	void show_audiomidi_dialog ();
 	void show_pre_release_dialog ();
+	void show_plugin_scan_dialog ();
 
 	void copy_demo_sessions ();
 	void load_from_application_api (std::string const &);
@@ -93,11 +101,19 @@ class StartupFSM : public sigc::trackable
 	bool ask_about_loading_existing_session (const std::string& session_path);
 	int  check_session_parameters (bool must_be_new);
 	void start_audio_midi_setup ();
+	void engine_running ();
 
-	NewUserWizard* new_user_wizard;
+	/* the Audio/MIDI dialog needs to be persistent and is thus owned by
+	 * ARDOUR_UI and we use it by reference. All other dialogs can be
+	 * created and destroyed within the scope of startup.
+	 */
+
 	EngineControl& audiomidi_dialog;
+	NewUserWizard* new_user_dialog;
 	SessionDialog* session_dialog;
 	ArdourDialog* pre_release_dialog;
+	PluginScanDialog* plugin_scan_dialog;
+
 	sigc::connection current_dialog_connection;
 
 	sigc::signal1<void,Result> _signal_response;

@@ -43,10 +43,13 @@
 #include <gtkmm2ext/doi.h>
 
 #include "ardour_ui.h"
+#include "debug.h"
 #include "engine_dialog.h"
 #include "new_user_wizard.h"
 #include "opts.h"
+#include "plugin_scan_dialog.h"
 #include "session_dialog.h"
+#include "splash.h"
 #include "startup_fsm.h"
 
 #ifdef WAF_BUILD
@@ -65,17 +68,25 @@ StartupFSM::StartupFSM (EngineControl& amd)
 	: session_existing_sample_rate (0)
 	, session_is_new (false)
 	, new_user (NewUserWizard::required())
-	, new_session (true)
-	, _state (new_user ? NeedWizard : NeedSessionPath)
-	, new_user_wizard (0)
+	, new_session_required (ARDOUR_COMMAND_LINE::new_session || (!ARDOUR::Profile->get_mixbus() && new_user))
+	, _state (new_user ? WaitingForNewUser : WaitingForSessionPath)
 	, audiomidi_dialog (amd)
+	, new_user_dialog (0)
 	, session_dialog (0)
 	, pre_release_dialog (0)
+	, plugin_scan_dialog (0)
 {
+	/* note that our initial state can be any of:
+	 *
+	 * WaitingForPreRelease:  if this is a pre-release build of Ardour and the user has not testified to their fidelity to our creed
+	 * WaitingForNewUser:     if this is the first time any version appears to have been run on this machine by this user
+	 * WaitingForSessionPath: if the previous two conditions are not true
+	 */
+
 	if (string (VERSIONSTRING).find (".pre") != string::npos) {
 		string fn = Glib::build_filename (user_config_directory(), ".i_swear_that_i_will_heed_the_guidelines_stated_in_the_pre_release_dialog");
 		if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
-			_state = NeedPreRelease;
+			set_state (WaitingForPreRelease);
 		}
 	}
 
@@ -83,17 +94,14 @@ StartupFSM::StartupFSM (EngineControl& amd)
 
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &StartupFSM::queue_finish));
 	app->ShouldLoad.connect (sigc::mem_fun (*this, &StartupFSM::load_from_application_api));
-
-	/* this may cause the delivery of ShouldLoad etc if we were invoked in
-	 * particular ways. It will happen when the event loop runs again.
-	 */
-
-	app->ready ();
 }
 
 StartupFSM::~StartupFSM ()
 {
 	delete session_dialog;
+	delete pre_release_dialog;
+	delete plugin_scan_dialog;
+	delete new_user_dialog;
 }
 
 void
@@ -105,116 +113,149 @@ StartupFSM::queue_finish ()
 void
 StartupFSM::start ()
 {
-	if (_state == NeedPreRelease) {
+	/* get the splash screen visible, if it isn't yet */
+	Splash::instance()->pop_front();
+	/* make it all happen on-screen */
+	ARDOUR_UI::instance()->flush_pending ();
+
+	DEBUG_TRACE (DEBUG::GuiStartup, string_compose (X_("State at startup: %1\n"), enum_2_string (_state)));
+
+	switch (_state) {
+	case WaitingForPreRelease:
 		show_pre_release_dialog ();
-	} else if (new_user) {
-		show_new_user_wizard ();
-	} else {
-		/* pretend we just showed the new user wizard and we're done
-		   with it
-		*/
-		dialog_response_handler (RESPONSE_OK, NewUserDialog);
+		break;
+	case WaitingForNewUser:
+		show_new_user_dialog ();
+		break;
+	case WaitingForSessionPath:
+		if (ARDOUR_COMMAND_LINE::session_name.empty()) {
+
+			/* nothing given on the command line ... show new session dialog */
+
+			show_session_dialog (new_session_required);
+
+		} else {
+
+			if (get_session_parameters_from_command_line (new_session_required)) {
+
+				/* command line arguments all OK. Get engine parameters */
+
+				if (!new_session_required && session_existing_sample_rate > 0) {
+					audiomidi_dialog.set_desired_sample_rate (session_existing_sample_rate);
+				}
+
+				start_audio_midi_setup ();
+
+			} else {
+
+				/* command line arguments not good. Use
+				 * dialog, but prime the dialog with
+				 * the information we set up in
+				 * get_session_parameters_from_command_line()
+				 */
+
+				show_session_dialog (new_session_required);
+			}
+		}
+		break;
+	default:
+		fatal << string_compose (_("Programming error: %1"), string_compose (X_("impossible starting state in StartupFSM (%1)"), enum_2_string (_state))) << endmsg;
+		std::cerr << string_compose (_("Programming error: %1"), string_compose (X_("impossible starting state in StartupFSM (%1)"), enum_2_string (_state))) << std::endl;
+		/* NOTREACHED */
+		abort ();
 	}
+
+	DEBUG_TRACE (DEBUG::GuiStartup, string_compose (X_("State after startup: %1\n"), enum_2_string (_state)));
+
+	/* this may cause the delivery of ShouldLoad etc if we were invoked in
+	 * particular ways. It will happen when the event loop runs again.
+	 */
+
+	Application::instance()->ready ();
 }
 
+void
+StartupFSM::reset()
+{
+	show_session_dialog (new_session_required);
+}
 
 void
-StartupFSM::end()
+StartupFSM::set_state (MainState ms)
 {
+	DEBUG_TRACE (DEBUG::GuiStartup, string_compose (X_("new state: %1\n"), enum_2_string (ms)));
+	_state = ms;
+}
 
+template<typename T> void
+StartupFSM::end_dialog (T** d)
+{
+	assert (d);
+	assert (*d);
+
+	end_dialog (**d);
+	delete_when_idle (*d);
+	*d = 0;
+}
+
+template<typename T> void
+StartupFSM::end_dialog (T& d)
+{
+	d.hide ();
+	current_dialog_connection.disconnect ();
 }
 
 void
 StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_id)
 {
-	const bool new_session_required = (ARDOUR_COMMAND_LINE::new_session || (!ARDOUR::Profile->get_mixbus() && new_user));
+	DEBUG_TRACE (DEBUG::GuiStartup, string_compose ("Response %1 from %2 (nsr: %3 / nu: %4)\n", enum_2_string (Gtk::ResponseType (response)), enum_2_string (dialog_id), new_session_required, new_user));
 
-  restart:
+	/* Notes:
+	 *
+	 * 1) yes, a brand new user might have specified a command line
+	 * argument naming a new session. We ignore it. You're new to Ardour?
+	 * We want to guide you through the startup.
+	 */
 
 	switch (_state) {
-	case NeedPreRelease:
+	case WaitingForPreRelease:
 		switch (dialog_id) {
 		case PreReleaseDialog:
 		default:
 			/* any response value from the pre-release dialog means
 			   "move along now"
 			*/
-			delete_when_idle (pre_release_dialog);
-			pre_release_dialog = 0;
-			_state = NeedSessionPath;
+			Gtk::Widget* w = pre_release_dialog;
+			end_dialog (&w);
+
 			if (NewUserWizard::required()) {
-				show_new_user_wizard ();
+				show_new_user_dialog ();
 			} else {
-				/* act as if we had just finished with the new
-				   user wizard. goto preferred over reentrancy.
-				*/
-				dialog_id = NewUserDialog;
-				response = RESPONSE_OK;
-				goto restart;
+				show_session_dialog (new_session_required);
 			}
 			break;
 		}
 		break;
 
-	case NeedSessionPath:
+	case WaitingForNewUser:
 		switch (dialog_id) {
 		case NewUserDialog:
-
-			current_dialog_connection.disconnect ();
-			delete_when_idle (new_user_wizard);
-
 			switch (response) {
 			case RESPONSE_OK:
+				end_dialog (&new_user_dialog);
+				show_session_dialog (new_session_required);
 				break;
 			default:
-				exit (1);
+				_signal_response (ExitProgram);
 			}
-
-			/* new user wizard done, now lets get session params
-			 * either from the command line (if given) or a dialog
-			 * (if nothing given on the command line or if the
-			 * command line arguments don't work for some reason
-			 */
-
-			if (ARDOUR_COMMAND_LINE::session_name.empty()) {
-
-				/* nothing given on the command line ... show new session dialog */
-
-				session_path = string();
-				session_name = string();
-				session_template = string();
-
-				_state = NeedSessionPath;
-				show_session_dialog (new_session_required);
-
-			} else {
-
-				if (get_session_parameters_from_command_line (new_session_required)) {
-
-					/* command line arguments all OK. Get engine parameters */
-
-					_state = NeedEngineParams;
-
-					if (!new_session_required && session_existing_sample_rate > 0) {
-						audiomidi_dialog.set_desired_sample_rate (session_existing_sample_rate);
-					}
-
-					start_audio_midi_setup ();
-
-				} else {
-
-					/* command line arguments not good. Use
-					 * dialog, but prime the dialog with
-					 * the information we set up in
-					 * get_session_parameters_from_command_line()
-					 */
-
-					_state = NeedSessionPath;
-					show_session_dialog (new_session_required);
-				}
-			}
+		default:
+			/* ERROR */
 			break;
+		}
+		break;
 
+	case WaitingForSessionPath:
+		switch (dialog_id) {
 		case NewSessionDialog:
 			switch (response) {
 			case RESPONSE_OK:
@@ -224,14 +265,15 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 					/* Unrecoverable error */
 					_signal_response (ExitProgram);
 					break;
+				case 0:
+					end_dialog (&session_dialog);
+					start_audio_midi_setup ();
+					break;
 				case 1:
 					/* do nothing - keep dialog up for a
 					 * retry. Errors were addressed by
 					 * ::check_session_parameters()
 					 */
-					break;
-				case 0:
-					start_audio_midi_setup ();
 					break;
 				}
 				break;
@@ -248,16 +290,15 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 		}
 		break;
 
-	case NeedEngineParams:
+	case WaitingForEngineParams:
 		switch (dialog_id) {
 		case AudioMIDISetup:
 			switch (response) {
 			case RESPONSE_OK:
 			case RESPONSE_ACCEPT:
 				if (AudioEngine::instance()->running()) {
-					audiomidi_dialog.hide ();
-					current_dialog_connection.disconnect();
-					_signal_response (LoadSession);
+					end_dialog (audiomidi_dialog);
+					engine_running ();
 				} else {
 					/* just keep going */
 				}
@@ -272,25 +313,63 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 		}
 		break;
 
-	case NeedWizard:
-		show_new_user_wizard ();
-		_state = NeedSessionPath;
-		break;
+	case WaitingForPlugins:
+		switch (dialog_id) {
+		case PluginDialog:
+			end_dialog (&plugin_scan_dialog);
+			switch (response) {
+			case RESPONSE_OK:
+				_signal_response (LoadSession);
+				break;
+			default:
+				_signal_response (ExitProgram);
+				break;
+			}
+		default:
+			/* ERROR */
+			break;
+		}
 	}
 }
 
 void
-StartupFSM::show_new_user_wizard ()
+StartupFSM::show_plugin_scan_dialog ()
 {
-	new_user_wizard = new NewUserWizard;
-	current_dialog_connection = new_user_wizard->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &StartupFSM::dialog_response_handler), NewUserDialog));
-	new_user_wizard->set_position (WIN_POS_CENTER);
-	new_user_wizard->present ();
+	set_state (WaitingForPlugins);
+
+	/* if the user does not ask to discover VSTs at startup, or if this is Mixbus, then the plugin scan
+	   that we run here, during startup, should only use the existing plugin cache (if any).
+	*/
+
+	plugin_scan_dialog = new PluginScanDialog ((!Config->get_discover_vst_on_start() || Profile->get_mixbus()), new_user);
+	current_dialog_connection = plugin_scan_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &StartupFSM::dialog_response_handler), PluginDialog));
+	plugin_scan_dialog->set_position (WIN_POS_CENTER);
+
+	/* We don't show the plugin scan dialog by default. It will appear using it's own code if/when plugins are discovered, if required.
+	 *
+	 * See also comments in PluginScanDialog::start() to understand the absurd complexities behind this call.
+	 */
+
+	DEBUG_TRACE (DEBUG::GuiStartup, string_compose ("starting plugin dialog, cache only ? %1\n", !Config->get_discover_vst_on_start()));
+	plugin_scan_dialog->start();
+	DEBUG_TRACE (DEBUG::GuiStartup, "plugin dialog done\n");
+}
+
+
+void
+StartupFSM::show_new_user_dialog ()
+{
+	set_state (WaitingForNewUser);
+	new_user_dialog = new NewUserWizard;
+	current_dialog_connection = new_user_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &StartupFSM::dialog_response_handler), NewUserDialog));
+	new_user_dialog->set_position (WIN_POS_CENTER);
+	new_user_dialog->present ();
 }
 
 void
 StartupFSM::show_session_dialog (bool new_session_required)
 {
+	set_state (WaitingForSessionPath);
 	session_dialog = new SessionDialog (new_session_required, session_name, session_path, session_template, false);
 	current_dialog_connection = session_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &StartupFSM::dialog_response_handler), NewSessionDialog));
 	session_dialog->set_position (WIN_POS_CENTER);
@@ -300,6 +379,7 @@ StartupFSM::show_session_dialog (bool new_session_required)
 void
 StartupFSM::show_audiomidi_dialog ()
 {
+	set_state (WaitingForEngineParams);
 	current_dialog_connection = audiomidi_dialog.signal_response().connect (sigc::bind (sigc::mem_fun (*this, &StartupFSM::dialog_response_handler), AudioMIDISetup));
 	audiomidi_dialog.set_position (WIN_POS_CENTER);
 	audiomidi_dialog.present ();
@@ -331,29 +411,41 @@ StartupFSM::start_audio_midi_setup ()
 	}
 
 	if (setup_required) {
-		_state = NeedEngineParams;
-		if (session_dialog) {
-			session_dialog->hide ();
-			delete_when_idle (session_dialog);
-			session_dialog = 0;
-		}
-		current_dialog_connection.disconnect();
 		if (!session_is_new && session_existing_sample_rate > 0) {
 			audiomidi_dialog.set_desired_sample_rate (session_existing_sample_rate);
 		}
 		show_audiomidi_dialog ();
+		DEBUG_TRACE (DEBUG::GuiStartup, "audiomidi shown and waiting\n");
 	} else {
-		/* XXX should we reset _state to something meaningul here (e.g. "Done")? */
 
-		if (session_dialog) {
-			session_dialog->hide ();
-			delete_when_idle (session_dialog);
-			session_dialog = 0;
-		}
-
-		current_dialog_connection.disconnect ();
-		_signal_response (LoadSession);
+		DEBUG_TRACE (DEBUG::GuiStartup, "engine already running, audio/MIDI setup dialog not required\n");
+		engine_running ();
 	}
+}
+
+void
+StartupFSM::engine_running ()
+{
+	DEBUG_TRACE (DEBUG::GuiStartup, "engine running, start plugin scan then attach UI to engine\n");
+
+	/* This may be very slow. See comments in PluginScanDialog::start() */
+	show_plugin_scan_dialog ();
+
+	DEBUG_TRACE (DEBUG::GuiStartup, "attach UI to engine\n");
+
+	/* This may be very slow: it will run the GUI's post-engine
+	   initialization which is essentially unbounded in time/scope of what
+	   it can do.
+	*/
+
+	ARDOUR_UI::instance()->attach_to_engine ();
+
+	/* now that we've done the plugin scan AND attached the UI to the engine, we can
+	   proceed with the next (final) steps of startup. This uses the same response
+	   signal mechanism we use for the other dialogs.
+	*/
+
+	plugin_scan_dialog->response (RESPONSE_OK);
 }
 
 bool
@@ -739,7 +831,7 @@ StartupFSM::load_from_application_api (const std::string& path)
 	 * main event loop is doing.
 	 */
 
-	_state = NeedSessionPath;
+	set_state (WaitingForSessionPath);
 }
 
 bool
@@ -797,7 +889,7 @@ Full information on all the above can be found on the support page at\n\
 "), PROGRAM_NAME, VERSIONSTRING));
 
 
-	pre_release_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (this, &StartupFSM::dialog_response_handler), PreReleaseDialog));
+	current_dialog_connection = pre_release_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (this, &StartupFSM::dialog_response_handler), PreReleaseDialog));
 
 	pre_release_dialog->get_vbox()->set_border_width (12);
 	pre_release_dialog->get_vbox()->pack_start (*label, false, false, 12);
