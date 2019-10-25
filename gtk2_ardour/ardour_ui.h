@@ -420,7 +420,6 @@ private:
 	NSM_Client*    nsm;
 	bool          _was_dirty;
 	bool          _mixer_on_top;
-	bool          _initial_verbose_plugin_scan;
 
 	Gtk::Menu*    _shared_popup_menu;
 
