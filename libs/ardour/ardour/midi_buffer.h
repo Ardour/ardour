@@ -53,8 +53,8 @@ public:
 
 	void skip_to (TimeType when);
 
-	bool     push_back(const Evoral::Event<TimeType>& event);
-	bool     push_back(TimeType time, size_t size, const uint8_t* data);
+	bool push_back(const Evoral::Event<TimeType>& event);
+	bool push_back(TimeType time, size_t size, const uint8_t* data);
 
 	uint8_t* reserve(TimeType time, size_t size);
 
