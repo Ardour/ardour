@@ -30,8 +30,8 @@
 
 #include <glibmm/threads.h>
 
-#include "evoral/ControlList.hpp"
-#include "evoral/Parameter.hpp"
+#include "evoral/ControlList.h"
+#include "evoral/Parameter.h"
 
 #include "pbd/undo.h"
 #include "pbd/xml++.h"

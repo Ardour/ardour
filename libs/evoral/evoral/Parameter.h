@@ -26,7 +26,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "evoral/visibility.h"
-#include "evoral/types.hpp"
+#include "evoral/types.h"
 
 namespace Evoral {
 

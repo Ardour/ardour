@@ -48,7 +48,7 @@
 
 #include "pbd/id.h"
 
-#include "evoral/Range.hpp"
+#include "evoral/Range.h"
 
 #include "ardour/chan_count.h"
 #include "ardour/plugin_types.h"
@@ -124,7 +124,7 @@ enum InsertMergePolicy {
 	InsertMergeExtend   ///< extend new (or old) to the range of old+new
 };
 
-/** See evoral/Parameter.hpp
+/** See evoral/Parameter.h
  *
  * When you add things here, you REALLY SHOULD add a case clause to
  * the constructor of ParameterDescriptor, unless the Controllables

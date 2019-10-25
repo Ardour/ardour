@@ -29,7 +29,7 @@
 #include "pbd/enumwriter.h"
 #include "midi++/types.h"
 
-#include "evoral/Range.hpp" // shouldn't Evoral have its own enum registration?
+#include "evoral/Range.h" // shouldn't Evoral have its own enum registration?
 
 #include "ardour/delivery.h"
 #include "ardour/disk_io.h"

@@ -34,7 +34,7 @@
 #include "ardour/parameter_types.h"
 #include "ardour/evoral_types_convert.h"
 #include "ardour/types_convert.h"
-#include "evoral/Curve.hpp"
+#include "evoral/Curve.h"
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
 #include "pbd/enumwriter.h"

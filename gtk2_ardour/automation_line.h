@@ -33,7 +33,7 @@
 
 #include <sigc++/signal.h>
 
-#include "evoral/TimeConverter.hpp"
+#include "evoral/TimeConverter.h"
 
 #include "pbd/undo.h"
 #include "pbd/statefuldestructible.h"

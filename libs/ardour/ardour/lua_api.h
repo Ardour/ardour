@@ -24,7 +24,7 @@
 #include <boost/shared_ptr.hpp>
 #include <vamp-hostsdk/Plugin.h>
 
-#include "evoral/Note.hpp"
+#include "evoral/Note.h"
 
 #include "ardour/libardour_visibility.h"
 

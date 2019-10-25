@@ -40,11 +40,11 @@
 #include <iostream>
 #include <utility>
 
-#include "evoral/ControlList.hpp"
-#include "evoral/Curve.hpp"
-#include "evoral/ParameterDescriptor.hpp"
-#include "evoral/TypeMap.hpp"
-#include "evoral/types.hpp"
+#include "evoral/ControlList.h"
+#include "evoral/Curve.h"
+#include "evoral/ParameterDescriptor.h"
+#include "evoral/TypeMap.h"
+#include "evoral/types.h"
 
 #include "pbd/control_math.h"
 #include "pbd/compose.h"

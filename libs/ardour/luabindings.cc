@@ -27,9 +27,9 @@
 
 #include "temporal/bbt_time.h"
 
-#include "evoral/Control.hpp"
-#include "evoral/ControlList.hpp"
-#include "evoral/Range.hpp"
+#include "evoral/Control.h"
+#include "evoral/ControlList.h"
+#include "evoral/Range.h"
 
 #include "ardour/amp.h"
 #include "ardour/async_midi_port.h"

@@ -39,8 +39,8 @@
 #include "ardour/source_factory.h"
 #include "ardour/tempo.h"
 
-#include "evoral/Note.hpp"
-#include "evoral/Sequence.hpp"
+#include "evoral/Note.h"
+#include "evoral/Sequence.h"
 
 #include "common.h"
 

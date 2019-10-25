@@ -34,7 +34,7 @@
 #include "ardour/types.h"
 
 #if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT
-#include "evoral/Event.hpp"
+#include "evoral/Event.h"
 struct _VstEvents;
 typedef struct _VstEvents VstEvents;
 struct _VstMidiEvent;

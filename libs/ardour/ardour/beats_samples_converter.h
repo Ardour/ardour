@@ -17,7 +17,7 @@
  */
 
 #include "temporal/beats.h"
-#include "evoral/TimeConverter.hpp"
+#include "evoral/TimeConverter.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"

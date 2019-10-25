@@ -32,7 +32,7 @@
 
 #include "canvas/canvas.h"
 
-#include "evoral/Curve.hpp"
+#include "evoral/Curve.h"
 #include "ardour/session_handle.h"
 
 #include "ardour_dialog.h"

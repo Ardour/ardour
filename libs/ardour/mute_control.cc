@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "evoral/ControlList.hpp"
+#include "evoral/ControlList.h"
 
 #include "ardour/mute_master.h"
 #include "ardour/session.h"

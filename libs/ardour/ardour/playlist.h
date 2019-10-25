@@ -45,7 +45,7 @@
 #include "pbd/sequence_property.h"
 #include "pbd/stacktrace.h"
 
-#include "evoral/Range.hpp"
+#include "evoral/Range.h"
 
 #include "ardour/ardour.h"
 #include "ardour/region.h"

@@ -23,7 +23,7 @@
 #include "pbd/compose.h"
 #include "pbd/stacktrace.h"
 
-#include "evoral/EventSink.hpp"
+#include "evoral/EventSink.h"
 
 #include "ardour/debug.h"
 #include "ardour/midi_source.h"

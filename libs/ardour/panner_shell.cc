@@ -42,7 +42,7 @@
 #include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
 
-#include "evoral/Curve.hpp"
+#include "evoral/Curve.h"
 
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"

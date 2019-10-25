@@ -28,7 +28,7 @@
 #include "pbd/signals.h"
 
 #include "temporal/beats.h"
-#include "evoral/Sequence.hpp"
+#include "evoral/Sequence.h"
 
 #include "ardour/types.h"
 

@@ -41,7 +41,7 @@
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
 
-#include "evoral/Curve.hpp"
+#include "evoral/Curve.h"
 
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"

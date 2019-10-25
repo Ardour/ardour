@@ -29,7 +29,7 @@
 #include <cstdio>
 
 #if __clang__
-#include "evoral/Note.hpp"
+#include "evoral/Note.h"
 #endif
 
 #include "pbd/compose.h"
@@ -37,13 +37,13 @@
 
 #include "temporal/beats.h"
 
-#include "evoral/Control.hpp"
-#include "evoral/ControlList.hpp"
-#include "evoral/ControlSet.hpp"
-#include "evoral/EventSink.hpp"
-#include "evoral/ParameterDescriptor.hpp"
-#include "evoral/Sequence.hpp"
-#include "evoral/TypeMap.hpp"
+#include "evoral/Control.h"
+#include "evoral/ControlList.h"
+#include "evoral/ControlSet.h"
+#include "evoral/EventSink.h"
+#include "evoral/ParameterDescriptor.h"
+#include "evoral/Sequence.h"
+#include "evoral/TypeMap.h"
 #include "evoral/midi_util.h"
 
 #include "pbd/i18n.h"

@@ -25,8 +25,8 @@
 #include <iostream>
 #include <utility>
 
-#include "evoral/EventList.hpp"
-#include "evoral/Control.hpp"
+#include "evoral/EventList.h"
+#include "evoral/Control.h"
 
 #include "ardour/beats_samples_converter.h"
 #include "ardour/debug.h"

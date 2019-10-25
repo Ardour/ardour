@@ -40,7 +40,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/convert.h"
 
-#include "evoral/Curve.hpp"
+#include "evoral/Curve.h"
 
 #include "ardour/audioregion.h"
 #include "ardour/session.h"

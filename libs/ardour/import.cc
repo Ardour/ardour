@@ -47,7 +47,7 @@
 #include "pbd/basename.h"
 #include "pbd/convert.h"
 
-#include "evoral/SMF.hpp"
+#include "evoral/SMF.h"
 
 #include "ardour/analyser.h"
 #include "ardour/ardour.h"

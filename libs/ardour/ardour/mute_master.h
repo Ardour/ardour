@@ -27,7 +27,7 @@
 #include "pbd/signals.h"
 #include "pbd/stateful.h"
 
-#include "evoral/Parameter.hpp"
+#include "evoral/Parameter.h"
 
 #include "ardour/session_handle.h"
 #include "ardour/types.h"

@@ -23,7 +23,7 @@
 
 #include "gtkmm2ext/keyboard.h"
 
-#include "evoral/Note.hpp"
+#include "evoral/Note.h"
 
 #include "canvas/text.h"
 

@@ -26,7 +26,7 @@
 #include <vector>
 
 #include "temporal/beats.h"
-#include "evoral/Range.hpp"
+#include "evoral/Range.h"
 
 #include "pbd/string_convert.h"
 

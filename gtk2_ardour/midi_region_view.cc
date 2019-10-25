@@ -48,9 +48,9 @@
 #include "ardour/operations.h"
 #include "ardour/session.h"
 
-#include "evoral/Parameter.hpp"
-#include "evoral/Event.hpp"
-#include "evoral/Control.hpp"
+#include "evoral/Parameter.h"
+#include "evoral/Event.h"
+#include "evoral/Control.h"
 #include "evoral/midi_util.h"
 
 #include "canvas/debug.h"

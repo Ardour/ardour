@@ -20,7 +20,7 @@
 #define __ardour_midi_automation_list_binder_h__
 
 #include "pbd/memento_command.h"
-#include "evoral/Parameter.hpp"
+#include "evoral/Parameter.h"
 #include "ardour/session.h"
 
 namespace ARDOUR {

@@ -29,7 +29,7 @@
 #include <stdint.h>
 
 #include "evoral/midi_events.h"
-#include "evoral/types.hpp"
+#include "evoral/types.h"
 #include "evoral/visibility.h"
 
 /** If this is not defined, all methods of MidiEvent are RT safe

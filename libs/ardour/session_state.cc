@@ -71,7 +71,7 @@
 #include "midi++/mmc.h"
 #include "midi++/port.h"
 
-#include "evoral/SMF.hpp"
+#include "evoral/SMF.h"
 
 #include "pbd/basename.h"
 #include "pbd/debug.h"

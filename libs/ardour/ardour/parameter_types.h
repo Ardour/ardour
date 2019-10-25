@@ -22,7 +22,7 @@
 #include <stdint.h>
 
 #include "ardour/types.h"
-#include "evoral/Parameter.hpp"
+#include "evoral/Parameter.h"
 #include "evoral/midi_events.h"
 
 namespace ARDOUR {

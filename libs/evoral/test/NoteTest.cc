@@ -1,6 +1,6 @@
 #include "NoteTest.hpp"
 #include "temporal/beats.h"
-#include "evoral/Note.hpp"
+#include "evoral/Note.h"
 #include <stdlib.h>
 
 CPPUNIT_TEST_SUITE_REGISTRATION (NoteTest);

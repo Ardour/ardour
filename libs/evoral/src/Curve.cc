@@ -31,8 +31,8 @@
 
 #include "pbd/control_math.h"
 
-#include "evoral/Curve.hpp"
-#include "evoral/ControlList.hpp"
+#include "evoral/Curve.h"
+#include "evoral/ControlList.h"
 
 using namespace std;
 using namespace sigc;

@@ -40,8 +40,8 @@
 #include "ardour/types.h"
 #include "ardour/variant.h"
 
-#include "evoral/Note.hpp"
-#include "evoral/Sequence.hpp"
+#include "evoral/Note.h"
+#include "evoral/Sequence.h"
 
 namespace ARDOUR {
 

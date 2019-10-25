@@ -33,7 +33,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
 
-#include "evoral/Control.hpp"
+#include "evoral/Control.h"
 
 #include "midi++/events.h"
 

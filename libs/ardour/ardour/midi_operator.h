@@ -24,7 +24,7 @@
 #include <string>
 
 #include "temporal/beats.h"
-#include "evoral/Sequence.hpp"
+#include "evoral/Sequence.h"
 
 class Command;
 

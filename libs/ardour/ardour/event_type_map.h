@@ -24,9 +24,9 @@
 #include <map>
 #include <string>
 
-#include "evoral/TypeMap.hpp"
-#include "evoral/ControlList.hpp"
-#include "evoral/ParameterDescriptor.hpp"
+#include "evoral/TypeMap.h"
+#include "evoral/ControlList.h"
+#include "evoral/ParameterDescriptor.h"
 
 #include "ardour/libardour_visibility.h"
 

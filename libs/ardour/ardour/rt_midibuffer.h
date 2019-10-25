@@ -27,8 +27,8 @@
 
 #include <glibmm/threads.h>
 
-#include "evoral/Event.hpp"
-#include "evoral/EventSink.hpp"
+#include "evoral/Event.h"
+#include "evoral/EventSink.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {

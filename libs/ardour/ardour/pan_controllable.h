@@ -24,7 +24,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "evoral/Parameter.hpp"
+#include "evoral/Parameter.h"
 
 #include "ardour/automation_control.h"
 #include "ardour/automation_list.h"

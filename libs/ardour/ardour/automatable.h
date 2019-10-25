@@ -31,7 +31,7 @@
 #include "pbd/rcu.h"
 #include "pbd/signals.h"
 
-#include "evoral/ControlSet.hpp"
+#include "evoral/ControlSet.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/slavable.h"

@@ -30,8 +30,8 @@
 
 #include "libsmf/smf.h"
 
-#include "evoral/Event.hpp"
-#include "evoral/SMF.hpp"
+#include "evoral/Event.h"
+#include "evoral/SMF.h"
 #include "evoral/midi_util.h"
 
 #ifdef COMPILER_MSVC

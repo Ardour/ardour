@@ -3,11 +3,11 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "temporal/beats.h"
-#include "evoral/Sequence.hpp"
-#include "evoral/TypeMap.hpp"
-#include "evoral/EventSink.hpp"
+#include "evoral/Sequence.h"
+#include "evoral/TypeMap.h"
+#include "evoral/EventSink.h"
 #include "evoral/midi_events.h"
-#include "evoral/Control.hpp"
+#include "evoral/Control.h"
 
 using namespace Evoral;
 

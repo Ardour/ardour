@@ -24,8 +24,8 @@
 
 #include "pbd/ringbufferNPT.h"
 
-#include "evoral/EventSink.hpp"
-#include "evoral/types.hpp"
+#include "evoral/EventSink.h"
+#include "evoral/types.h"
 
 namespace ARDOUR {
 

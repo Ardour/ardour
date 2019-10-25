@@ -30,8 +30,8 @@
 #include "pbd/signals.h"
 
 #include "evoral/visibility.h"
-#include "evoral/Parameter.hpp"
-#include "evoral/ControlList.hpp"
+#include "evoral/Parameter.h"
+#include "evoral/ControlList.h"
 
 namespace Evoral {
 
