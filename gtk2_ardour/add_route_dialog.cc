@@ -111,7 +111,7 @@ AddRouteDialog::AddRouteDialog ()
 
 		builtin_types.push_back (
 		   std::pair<string,string> (_("MIDI Tracks"), std::string () +
-		     _(" Use these settings to create one or more MIDI tracks.") + "\n\n" +
+		     _("Use these settings to create one or more MIDI tracks.") + "\n\n" +
 		     _("You may select:") + "\n" +
 		     "* " + _("The number of tracks to add") + "\n" +
 		     "* " + _("A name for the track(s)") + "\n" +
