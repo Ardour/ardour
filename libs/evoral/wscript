@@ -68,13 +68,13 @@ def build(bld):
 
     libsmf = bld(features = 'c cstlib')
     libsmf.source = '''
-            src/libsmf/smf.c
-            src/libsmf/smf_decode.c
-            src/libsmf/smf_load.c
-            src/libsmf/smf_save.c
-            src/libsmf/smf_tempo.c
+            libsmf/smf.c
+            libsmf/smf_decode.c
+            libsmf/smf_load.c
+            libsmf/smf_save.c
+            libsmf/smf_tempo.c
     '''
-    libsmf.export_includes = ['./src/libsmf']
+    libsmf.export_includes = ['./libsmf']
     libsmf.defines      = ['SMF_VERSION="1.2"', 'LIBSMF_DLL_EXPORTS']
     libsmf.includes     = ['./src']
     libsmf.name         = 'libsmf'
@@ -87,16 +87,16 @@ def build(bld):
         libsmf.cflags       = [ bld.env['compiler_flags_dict']['pic'] ]
 
     lib_source = '''
-            src/Control.cc
-            src/ControlList.cc
-            src/ControlSet.cc
-            src/Curve.cc
-            src/Event.cc
-            src/Note.cc
-            src/SMF.cc
-            src/Sequence.cc
-            src/TimeConverter.cc
-            src/debug.cc
+            Control.cc
+            ControlList.cc
+            ControlSet.cc
+            Curve.cc
+            Event.cc
+            Note.cc
+            SMF.cc
+            Sequence.cc
+            TimeConverter.cc
+            debug.cc
     '''
 
     # Library
