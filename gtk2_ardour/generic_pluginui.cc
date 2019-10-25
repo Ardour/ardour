@@ -139,7 +139,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	VBox* v1_box = manage (new VBox);
 	VBox* v2_box = manage (new VBox);
 	if (pi->is_instrument ()) {
-		_piano = new PianoKeyboard ();
+		_piano = new APianoKeyboard ();
 		_piano->set_flags(Gtk::CAN_FOCUS);
 
 		_piano->NoteOn.connect (sigc::mem_fun (*this, &GenericPluginUI::note_on_event_handler));

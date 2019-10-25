@@ -60,7 +60,7 @@
 
 #include "ardour_window.h"
 #include "automation_controller.h"
-#include "gtk_pianokeyboard.h"
+#include "pianokeyboard.h"
 
 namespace ARDOUR {
 	class PluginInsert;
@@ -318,7 +318,7 @@ private:
 	Gtk::ScrolledWindow scroller;
 
 	Gtk::Expander   _plugin_pianokeyboard_expander;
-	PianoKeyboard*  _piano;
+	APianoKeyboard* _piano;
 	Gtk::VBox       _pianobox;
 	Gtk::SpinButton _piano_velocity;
 	Gtk::SpinButton _piano_channel;

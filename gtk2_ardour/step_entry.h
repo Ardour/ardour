@@ -28,7 +28,7 @@
 #include <gtkmm2ext/bindings.h>
 
 #include "ardour_window.h"
-#include "gtk_pianokeyboard.h"
+#include "pianokeyboard.h"
 
 class StepEditor;
 
@@ -140,7 +140,7 @@ class StepEntry : public ArdourWindow
 	void velocity_value_change ();
 	void length_value_change ();
 
-	PianoKeyboard _piano;
+	APianoKeyboard _piano;
 
 	StepEditor*   se;
 

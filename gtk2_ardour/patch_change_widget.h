@@ -32,7 +32,7 @@
 #include "widgets/ardour_dropdown.h"
 
 #include "ardour_dialog.h"
-#include "gtk_pianokeyboard.h"
+#include "pianokeyboard.h"
 
 class PatchChangeWidget : public Gtk::VBox
 {
@@ -99,7 +99,7 @@ private:
 	uint8_t                     _audition_note_num;
 	bool                        _audition_note_on;
 
-	PianoKeyboard _piano;
+	APianoKeyboard _piano;
 
 	void _note_on_event_handler (int, int);
 	void note_on_event_handler (int, bool for_audition);

@@ -22,7 +22,7 @@
 
 #include <stdint.h>
 #include "ardour_dialog.h"
-#include "gtk_pianokeyboard.h"
+#include "pianokeyboard.h"
 
 class NoteSelectDialog : public ArdourDialog
 {
@@ -32,8 +32,8 @@ public:
 	uint8_t note_number() const { return _note_number; }
 
 private:
-	PianoKeyboard _piano;
-	uint8_t       _note_number;
+	APianoKeyboard _piano;
+	uint8_t        _note_number;
 
 	void note_on_event_handler(int, int);
 };

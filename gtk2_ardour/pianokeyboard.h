@@ -17,19 +17,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __PIANO_KEYBOARD_H__
-#define __PIANO_KEYBOARD_H__
+#ifndef _PIANO_KEYBOARD_H_
+#define _PIANO_KEYBOARD_H_
 
 #include <map>
 #include <gtkmm/drawingarea.h>
 
 #define NNOTES (128)
 
-class PianoKeyboard : public Gtk::DrawingArea
+class APianoKeyboard : public Gtk::DrawingArea
 {
 public:
-	PianoKeyboard ();
-	~PianoKeyboard ();
+	APianoKeyboard ();
+	~APianoKeyboard ();
 
 	sigc::signal<void, int, int> NoteOn;
 	sigc::signal<void, int>      NoteOff;
@@ -141,4 +141,5 @@ private:
 	PangoFontDescription* _font_cue;
 	PangoFontDescription* _font_octave;
 };
-#endif /* __PIANO_KEYBOARD_H__ */
+
+#endif

@@ -1,34 +1,21 @@
-/*-
+/* Piano-keyboard based on jack-keyboard
+ *
+ * Copyright (C) 2019 Robin Gareus <robin@gareus.org>
  * Copyright (c) 2007, 2008 Edward Tomasz Napierała <trasz@FreeBSD.org>
- * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- */
-
-/*
- * This is piano_keyboard, piano keyboard-like GTK+ widget.  It contains
- * no MIDI-specific code.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * For questions and comments, contact Edward Tomasz Napierala <trasz@FreeBSD.org>.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <assert.h>
@@ -43,7 +30,7 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-#include "gtk_pianokeyboard.h"
+#include "pianokeyboard.h"
 
 #ifndef M_PI
 #  define M_PI 3.14159265358979323846
@@ -66,7 +53,7 @@
 #define OCTAVE_MAX (7)
 
 void
-PianoKeyboard::annotate_layout (cairo_t* cr, int note) const
+APianoKeyboard::annotate_layout (cairo_t* cr, int note) const
 {
 	int nkey = note - _octave * 12;
 
@@ -111,7 +98,7 @@ PianoKeyboard::annotate_layout (cairo_t* cr, int note) const
 }
 
 void
-PianoKeyboard::annotate_note (cairo_t* cr, int note) const
+APianoKeyboard::annotate_note (cairo_t* cr, int note) const
 {
 	assert ((note % 12) == 0);
 
@@ -152,7 +139,7 @@ PianoKeyboard::annotate_note (cairo_t* cr, int note) const
 }
 
 void
-PianoKeyboard::draw_note (cairo_t* cr, int note) const
+APianoKeyboard::draw_note (cairo_t* cr, int note) const
 {
 	if (note < _min_note || note > _max_note) {
 		return;
@@ -211,13 +198,13 @@ PianoKeyboard::draw_note (cairo_t* cr, int note) const
 }
 
 void
-PianoKeyboard::queue_note_draw (int note)
+APianoKeyboard::queue_note_draw (int note)
 {
 	queue_draw_area (_notes[note].x, 0, _notes[note].w, _notes[note].h);
 }
 
 void
-PianoKeyboard::press_key (int key, int vel)
+APianoKeyboard::press_key (int key, int vel)
 {
 	assert (key >= 0);
 	assert (key < NNOTES);
@@ -253,7 +240,7 @@ PianoKeyboard::press_key (int key, int vel)
 }
 
 void
-PianoKeyboard::release_key (int key)
+APianoKeyboard::release_key (int key)
 {
 	assert (key >= 0);
 	assert (key < NNOTES);
@@ -279,7 +266,7 @@ PianoKeyboard::release_key (int key)
 }
 
 void
-PianoKeyboard::stop_unsustained_notes ()
+APianoKeyboard::stop_unsustained_notes ()
 {
 	for (int i = 0; i < NNOTES; ++i) {
 		if (_notes[i].pressed && !_notes[i].sustained) {
@@ -291,7 +278,7 @@ PianoKeyboard::stop_unsustained_notes ()
 }
 
 void
-PianoKeyboard::stop_sustained_notes ()
+APianoKeyboard::stop_sustained_notes ()
 {
 	for (int i = 0; i < NNOTES; ++i) {
 		if (_notes[i].sustained) {
@@ -304,7 +291,7 @@ PianoKeyboard::stop_sustained_notes ()
 }
 
 int
-PianoKeyboard::key_binding (const char* key) const
+APianoKeyboard::key_binding (const char* key) const
 {
 	if (_key_bindings.find (key) != _key_bindings.end ()) {
 		return _key_bindings.at (key);
@@ -313,21 +300,21 @@ PianoKeyboard::key_binding (const char* key) const
 }
 
 void
-PianoKeyboard::bind_key (const char* key, int note)
+APianoKeyboard::bind_key (const char* key, int note)
 {
 	_key_bindings[key]   = note;
 	_note_bindings[note] = key;
 }
 
 void
-PianoKeyboard::clear_notes ()
+APianoKeyboard::clear_notes ()
 {
 	_key_bindings.clear ();
 	_note_bindings.clear ();
 }
 
 void
-PianoKeyboard::bind_keys_qwerty ()
+APianoKeyboard::bind_keys_qwerty ()
 {
 	clear_notes ();
 
@@ -370,7 +357,7 @@ PianoKeyboard::bind_keys_qwerty ()
 }
 
 void
-PianoKeyboard::bind_keys_qwertz ()
+APianoKeyboard::bind_keys_qwertz ()
 {
 	bind_keys_qwerty ();
 
@@ -380,7 +367,7 @@ PianoKeyboard::bind_keys_qwertz ()
 }
 
 void
-PianoKeyboard::bind_keys_azerty ()
+APianoKeyboard::bind_keys_azerty ()
 {
 	clear_notes ();
 
@@ -423,7 +410,7 @@ PianoKeyboard::bind_keys_azerty ()
 }
 
 void
-PianoKeyboard::bind_keys_dvorak ()
+APianoKeyboard::bind_keys_dvorak ()
 {
 	clear_notes ();
 
@@ -476,7 +463,7 @@ PianoKeyboard::bind_keys_dvorak ()
 }
 
 bool
-PianoKeyboard::on_key_press_event (GdkEventKey* event)
+APianoKeyboard::on_key_press_event (GdkEventKey* event)
 {
 	int   note;
 	char* key;
@@ -528,13 +515,13 @@ PianoKeyboard::on_key_press_event (GdkEventKey* event)
 }
 
 bool
-PianoKeyboard::on_key_release_event (GdkEventKey* event)
+APianoKeyboard::on_key_release_event (GdkEventKey* event)
 {
 	return on_key_press_event (event);
 }
 
 int
-PianoKeyboard::get_note_for_xy (int x, int y) const
+APianoKeyboard::get_note_for_xy (int x, int y) const
 {
 	int height = get_height ();
 	int note;
@@ -565,7 +552,7 @@ PianoKeyboard::get_note_for_xy (int x, int y) const
 }
 
 int
-PianoKeyboard::get_velocity_for_note_at_y (int note, int y) const
+APianoKeyboard::get_velocity_for_note_at_y (int note, int y) const
 {
 	if (note < 0) {
 		return 0;
@@ -581,7 +568,7 @@ PianoKeyboard::get_velocity_for_note_at_y (int note, int y) const
 }
 
 bool
-PianoKeyboard::on_button_press_event (GdkEventButton* event)
+APianoKeyboard::on_button_press_event (GdkEventButton* event)
 {
 	int x = event->x;
 	int y = event->y;
@@ -618,13 +605,13 @@ PianoKeyboard::on_button_press_event (GdkEventButton* event)
 }
 
 bool
-PianoKeyboard::on_button_release_event (GdkEventButton* event)
+APianoKeyboard::on_button_release_event (GdkEventButton* event)
 {
 	return on_button_press_event (event);
 }
 
 bool
-PianoKeyboard::on_motion_notify_event (GdkEventMotion* event)
+APianoKeyboard::on_motion_notify_event (GdkEventMotion* event)
 {
 	int note;
 
@@ -648,7 +635,7 @@ PianoKeyboard::on_motion_notify_event (GdkEventMotion* event)
 }
 
 bool
-PianoKeyboard::on_expose_event (GdkEventExpose* event)
+APianoKeyboard::on_expose_event (GdkEventExpose* event)
 {
 	cairo_t* cr = gdk_cairo_create (GDK_DRAWABLE (get_window ()->gobj ()));
 	cairo_rectangle (cr, event->area.x, event->area.y, event->area.width, event->area.height);
@@ -686,14 +673,14 @@ PianoKeyboard::on_expose_event (GdkEventExpose* event)
 }
 
 void
-PianoKeyboard::on_size_request (Gtk::Requisition* requisition)
+APianoKeyboard::on_size_request (Gtk::Requisition* requisition)
 {
 	requisition->width  = PIANO_KEYBOARD_DEFAULT_WIDTH;
 	requisition->height = PIANO_KEYBOARD_DEFAULT_HEIGHT;
 }
 
 int
-PianoKeyboard::is_black (int key) const
+APianoKeyboard::is_black (int key) const
 {
 	int note_in_octave = key % 12;
 	switch (note_in_octave) {
@@ -710,7 +697,7 @@ PianoKeyboard::is_black (int key) const
 }
 
 double
-PianoKeyboard::black_key_left_shift (int key) const
+APianoKeyboard::black_key_left_shift (int key) const
 {
 	int note_in_octave = key % 12;
 	switch (note_in_octave) {
@@ -731,7 +718,7 @@ PianoKeyboard::black_key_left_shift (int key) const
 }
 
 void
-PianoKeyboard::recompute_dimensions ()
+APianoKeyboard::recompute_dimensions ()
 {
 	int note;
 	int number_of_white_keys = 0;
@@ -781,13 +768,13 @@ PianoKeyboard::recompute_dimensions ()
 }
 
 void
-PianoKeyboard::on_size_allocate (Gtk::Allocation& allocation)
+APianoKeyboard::on_size_allocate (Gtk::Allocation& allocation)
 {
 	DrawingArea::on_size_allocate (allocation);
 	recompute_dimensions ();
 }
 
-PianoKeyboard::PianoKeyboard ()
+APianoKeyboard::APianoKeyboard ()
 {
 	using namespace Gdk;
 	add_events (KEY_PRESS_MASK | KEY_RELEASE_MASK | BUTTON_PRESS_MASK | BUTTON_RELEASE_MASK | POINTER_MOTION_MASK | POINTER_MOTION_HINT_MASK);
@@ -812,40 +799,40 @@ PianoKeyboard::PianoKeyboard ()
 	bind_keys_qwerty ();
 }
 
-PianoKeyboard::~PianoKeyboard ()
+APianoKeyboard::~APianoKeyboard ()
 {
 }
 
 void
-PianoKeyboard::set_keyboard_cue (bool enabled)
+APianoKeyboard::set_keyboard_cue (bool enabled)
 {
 	_enable_keyboard_cue = enabled;
 	queue_draw ();
 }
 
 void
-PianoKeyboard::set_grand_piano_highlight (bool enabled)
+APianoKeyboard::set_grand_piano_highlight (bool enabled)
 {
 	_highlight_grand_piano_range = enabled;
 	queue_draw ();
 }
 
 void
-PianoKeyboard::show_note_label (bool enabled)
+APianoKeyboard::show_note_label (bool enabled)
 {
 	_print_note_label = enabled;
 	queue_draw ();
 }
 
 void
-PianoKeyboard::set_monophonic (bool monophonic)
+APianoKeyboard::set_monophonic (bool monophonic)
 {
 
 	_monophonic = monophonic;
 }
 
 void
-PianoKeyboard::set_velocities (int min_vel, int max_vel, int key_vel)
+APianoKeyboard::set_velocities (int min_vel, int max_vel, int key_vel)
 {
 	if (min_vel <= max_vel && min_vel > 0 && max_vel < 128) {
 		_min_velocity = min_vel;
@@ -858,7 +845,7 @@ PianoKeyboard::set_velocities (int min_vel, int max_vel, int key_vel)
 }
 
 void
-PianoKeyboard::sustain_press ()
+APianoKeyboard::sustain_press ()
 {
 	if (!_sustain_new_notes) {
 		_sustain_new_notes          = true;
@@ -867,7 +854,7 @@ PianoKeyboard::sustain_press ()
 }
 
 void
-PianoKeyboard::sustain_release ()
+APianoKeyboard::sustain_release ()
 {
 	if (_maybe_stop_sustained_notes) {
 		stop_sustained_notes ();
@@ -876,7 +863,7 @@ PianoKeyboard::sustain_release ()
 }
 
 void
-PianoKeyboard::set_note_on (int note)
+APianoKeyboard::set_note_on (int note)
 {
 	if (!_notes[note].pressed) {
 		_notes[note].pressed = true;
@@ -885,7 +872,7 @@ PianoKeyboard::set_note_on (int note)
 }
 
 void
-PianoKeyboard::set_note_off (int note)
+APianoKeyboard::set_note_off (int note)
 {
 	if (_notes[note].pressed || _notes[note].sustained) {
 		_notes[note].pressed   = false;
@@ -895,7 +882,7 @@ PianoKeyboard::set_note_off (int note)
 }
 
 void
-PianoKeyboard::set_octave (int octave)
+APianoKeyboard::set_octave (int octave)
 {
 	stop_unsustained_notes ();
 
@@ -910,7 +897,7 @@ PianoKeyboard::set_octave (int octave)
 }
 
 void
-PianoKeyboard::set_octave_range (int octave_range)
+APianoKeyboard::set_octave_range (int octave_range)
 {
 	stop_unsustained_notes ();
 
@@ -978,7 +965,7 @@ PianoKeyboard::set_octave_range (int octave_range)
 }
 
 void
-PianoKeyboard::set_keyboard_layout (Layout layout)
+APianoKeyboard::set_keyboard_layout (Layout layout)
 {
 	switch (layout) {
 		case QWERTY:

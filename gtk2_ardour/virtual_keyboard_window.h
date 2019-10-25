@@ -33,7 +33,7 @@
 #include "widgets/slider_controller.h"
 
 #include "ardour_window.h"
-#include "gtk_pianokeyboard.h"
+#include "pianokeyboard.h"
 
 namespace ARDOUR {
 	class Session;
@@ -119,7 +119,7 @@ private:
 	bool toggle_note_label (GdkEventButton*);
 	bool send_panic_message (GdkEventButton*);
 
-	PianoKeyboard   _piano;
+	APianoKeyboard  _piano;
 	Gtk::SpinButton _piano_channel;
 
 	Gtk::SpinButton _transpose_output;

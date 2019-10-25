@@ -59,7 +59,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 {
 	_piano.set_flags (Gtk::CAN_FOCUS);
 
-	_piano.set_keyboard_layout (PianoKeyboard::QWERTY);
+	_piano.set_keyboard_layout (APianoKeyboard::QWERTY);
 	_piano.show_note_label (true);
 
 	using namespace Menu_Helpers;
@@ -386,13 +386,13 @@ void
 VirtualKeyboardWindow::select_keyboard_layout (std::string const& l)
 {
 	if (l == "QWERTY") {
-		_piano.set_keyboard_layout (PianoKeyboard::QWERTY);
+		_piano.set_keyboard_layout (APianoKeyboard::QWERTY);
 	} else if (l == "QWERTZ") {
-		_piano.set_keyboard_layout (PianoKeyboard::QWERTZ);
+		_piano.set_keyboard_layout (APianoKeyboard::QWERTZ);
 	} else if (l == "AZERTY") {
-		_piano.set_keyboard_layout (PianoKeyboard::AZERTY);
+		_piano.set_keyboard_layout (APianoKeyboard::AZERTY);
 	} else if (l == "DVORAK") {
-		_piano.set_keyboard_layout (PianoKeyboard::DVORAK);
+		_piano.set_keyboard_layout (APianoKeyboard::DVORAK);
 	}
 }
 
