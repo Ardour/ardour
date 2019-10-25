@@ -623,10 +623,15 @@ ARDOUR::init_post_engine (uint32_t start_cnt)
 
 	if (start_cnt == 0) {
 
-		/* find plugins */
-
 		if (!running_from_gui) {
-			ARDOUR::PluginManager::instance().refresh (false);
+
+			/* find plugins, but only using the existing cache (i.e. do
+			 * not discover new ones. GUIs are responsible for
+			 * invoking this themselves after the engine is
+			 * started, with whatever options they want.
+			 */
+
+			ARDOUR::PluginManager::instance().refresh (true);
 		}
 
 		if ((node = Config->control_protocol_state()) != 0) {
