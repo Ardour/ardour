@@ -86,9 +86,9 @@ PluginScanDialog::start ()
 	 * Plugin discovery must take place in the main thread of the
 	 * process. This is not true for all plugin APIs but it is true for
 	 * VST.  For AU, although plugins themselves do not care, Apple decided
-	 * that Cocoa must be "invoked" from the main thread, so if the plugin
-	 * decides to show any kind of "registration" GUI, then again,
-	 * discovery must be done in the main thread.
+	 * that Cocoa must be "invoked" from the main thread. Since the plugin
+	 * might show a "registration" GUI, discovery must be done
+	 * in the main thread.
 	 *
 	 * This means that the PluginManager::refresh() call MUST be made from
 	 * the main thread (typically the GUI thread, but certainly the thread
