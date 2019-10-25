@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <gtkmm/dialog.h>
+
 #include "pbd/enumwriter.h"
 
 #include "widgets/ardour_icon.h"
@@ -28,12 +30,14 @@
 #include "editing.h"
 #include "enums.h"
 #include "editor_items.h"
+#include "startup_fsm.h"
 
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 using namespace Editing;
 using namespace ArdourWidgets;
+using namespace Gtk;
 
 void
 setup_gtk_ardour_enums ()
@@ -53,6 +57,9 @@ setup_gtk_ardour_enums ()
 	ZoomFocus zoom_focus;
 	ItemType item_type;
 	MouseMode mouse_mode;
+	StartupFSM::MainState startup_state;
+	StartupFSM::DialogID startup_dialog;
+	Gtk::ResponseType dialog_response;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -183,4 +190,30 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM(MouseContent);
 	REGISTER (mouse_mode);
 
+	REGISTER_CLASS_ENUM (StartupFSM, WaitingForPreRelease);
+	REGISTER_CLASS_ENUM (StartupFSM, WaitingForNewUser);
+	REGISTER_CLASS_ENUM (StartupFSM, WaitingForSessionPath);
+	REGISTER_CLASS_ENUM (StartupFSM, WaitingForEngineParams);
+	REGISTER_CLASS_ENUM (StartupFSM, WaitingForPlugins);
+	REGISTER (startup_state);
+
+	REGISTER_CLASS_ENUM (StartupFSM, PreReleaseDialog);
+	REGISTER_CLASS_ENUM (StartupFSM, NewUserDialog);
+	REGISTER_CLASS_ENUM (StartupFSM, NewSessionDialog);
+	REGISTER_CLASS_ENUM (StartupFSM, AudioMIDISetup);
+	REGISTER_CLASS_ENUM (StartupFSM, PluginDialog);
+	REGISTER (startup_dialog);
+
+	REGISTER_ENUM (RESPONSE_NONE);
+	REGISTER_ENUM (RESPONSE_REJECT);
+	REGISTER_ENUM (RESPONSE_ACCEPT);
+	REGISTER_ENUM (RESPONSE_DELETE_EVENT);
+	REGISTER_ENUM (RESPONSE_OK);
+	REGISTER_ENUM (RESPONSE_CANCEL);
+	REGISTER_ENUM (RESPONSE_CLOSE);
+	REGISTER_ENUM (RESPONSE_YES);
+	REGISTER_ENUM (RESPONSE_NO);
+	REGISTER_ENUM (RESPONSE_APPLY);
+	REGISTER_ENUM (RESPONSE_HELP);
+	REGISTER (dialog_response);
 }
