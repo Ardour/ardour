@@ -62,6 +62,7 @@
 
 #include "ambiguous_file_dialog.h"
 #include "ardour_ui.h"
+#include "debug.h"
 #include "engine_dialog.h"
 #include "keyboard.h"
 #include "missing_file_dialog.h"
@@ -452,21 +453,23 @@ ARDOUR_UI::nsm_init ()
 void
 ARDOUR_UI::sfsm_response (StartupFSM::Result r)
 {
-	std::cerr << "sfsm::R (" << r << ")\n";
+	DEBUG_TRACE (DEBUG::GuiStartup, string_compose (X_("startup FSM response %1\n"), r));
+
 	switch (r) {
 	case StartupFSM::ExitProgram:
-		cerr << "ExitProgram\n";
 		queue_finish ();
 		break;
+
 	case StartupFSM::LoadSession:
-		cerr << "LoadSession\n";
-		_initial_verbose_plugin_scan = false;
+
 		if (load_session_from_startup_fsm () == 0) {
-			startup_fsm->end();
 			delete startup_fsm;
 			startup_fsm = 0;
 			startup_done ();
+		} else {
+			startup_fsm->reset ();
 		}
+
 		break;
 	}
 }
@@ -508,10 +511,6 @@ ARDOUR_UI::starting ()
 		 */
 
 		startup_fsm->start ();
-
-		if (startup_fsm && startup_fsm->brand_new_user()) {
-			_initial_verbose_plugin_scan = true;
-		}
 	}
 
 	return 0;
