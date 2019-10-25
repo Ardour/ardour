@@ -381,6 +381,8 @@ public:
 
 	std::map<std::string, std::string> route_setup_info (const std::string& script_path);
 
+	void gui_idle_handler ();
+
 protected:
 	friend class PublicEditor;
 
@@ -775,12 +777,6 @@ private:
 	void disk_speed_dialog_gone (int ignored_response, Gtk::MessageDialog*);
 	void disk_overrun_handler ();
 	void disk_underrun_handler ();
-	void gui_idle_handler ();
-
-	void cancel_plugin_scan ();
-	void cancel_plugin_timeout ();
-	void plugin_scan_dialog (std::string type, std::string plugin, bool);
-	void plugin_scan_timeout (int);
 
 	void session_format_mismatch (std::string, std::string);
 
