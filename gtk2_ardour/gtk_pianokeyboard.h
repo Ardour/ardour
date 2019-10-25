@@ -21,16 +21,9 @@
 #define __PIANO_KEYBOARD_H__
 
 #include <map>
-
-#include <glib.h>
 #include <gtkmm/drawingarea.h>
 
 #define NNOTES (128)
-#define PIANO_MIN_NOTE 21
-#define PIANO_MAX_NOTE 108
-
-#define OCTAVE_MIN (-1)
-#define OCTAVE_MAX (7)
 
 class PianoKeyboard : public Gtk::DrawingArea
 {
@@ -51,11 +44,14 @@ public:
 
 	void sustain_press ();
 	void sustain_release ();
+
 	void set_note_on (int note);
 	void set_note_off (int note);
+
 	void set_keyboard_cue (bool enabled);
 	void set_grand_piano_highlight (bool enabled);
 	void show_note_label (bool enabled);
+
 	void set_monophonic (bool monophonic);
 	void set_octave (int octave);
 	void set_octave_range (int octave_range);
@@ -74,15 +70,18 @@ protected:
 	void on_size_allocate (Gtk::Allocation&);
 
 private:
-	void draw_keyboard_cue (cairo_t* cr, int note);
+	void annotate_layout (cairo_t* cr, int note) const;
+	void annotate_note (cairo_t* cr, int note) const;
+	void draw_note (cairo_t* cr, int note) const;
+
 	void queue_note_draw (int note);
-	void draw_note (cairo_t* cr, int note);
-	int  press_key (int key, int vel);
-	int  release_key (int key);
-	void release_key ();
-	void stop_unsustained_notes ();
+
+	void press_key (int key, int vel);
+	void release_key (int key);
 	void stop_sustained_notes ();
-	int  key_binding (const char* key);
+	void stop_unsustained_notes ();
+
+	int  key_binding (const char* key) const;
 	void bind_key (const char* key, int note);
 	void clear_notes ();
 
@@ -137,5 +136,9 @@ private:
 
 	std::map<std::string, int> _key_bindings;  /**< Table used to translate from PC keyboard character to MIDI note number. */
 	std::map<int, std::string> _note_bindings; /**< Table to translate from MIDI note number to PC keyboard character. */
+
+	/* these are only valid during expose/draw */
+	PangoFontDescription* _font_cue;
+	PangoFontDescription* _font_octave;
 };
 #endif /* __PIANO_KEYBOARD_H__ */

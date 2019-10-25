@@ -60,35 +60,16 @@
 #define PIANO_KEYBOARD_DEFAULT_WIDTH 730
 #define PIANO_KEYBOARD_DEFAULT_HEIGHT 70
 
+#define PIANO_MIN_NOTE 21
+#define PIANO_MAX_NOTE 108
+#define OCTAVE_MIN (-1)
+#define OCTAVE_MAX (7)
+
 void
-PianoKeyboard::draw_keyboard_cue (cairo_t* cr, int note)
+PianoKeyboard::annotate_layout (cairo_t* cr, int note) const
 {
-#if 0
-	int w = _notes[0].w;
-	int h = _notes[0].h;
-
-	int first_note_in_lower_row  = (_octave + 1) * 12;
-	int last_note_in_lower_row   = (_octave + 2) * 12 - 1;
-	int first_note_in_higher_row = (_octave + 2) * 12;
-	int last_note_in_higher_row  = (_octave + 3) * 12 + 4;
-
-	first_note_in_lower_row  = MIN (127, MAX (0, first_note_in_lower_row));
-	last_note_in_lower_row   = MIN (127, MAX (0, last_note_in_lower_row));
-	first_note_in_higher_row = MIN (127, MAX (0, first_note_in_higher_row));
-	last_note_in_higher_row  = MIN (127, MAX (0, last_note_in_higher_row));
-
-	cairo_set_source_rgb (cr, 1.0f, 0.0f, 0.0f);
-	cairo_move_to (cr, _notes[first_note_in_lower_row].x + 3, h - 6);
-	cairo_line_to (cr, _notes[last_note_in_lower_row].x + w - 3, h - 6);
-	cairo_stroke (cr);
-
-	cairo_set_source_rgb (cr, 0.0f, 0.0f, 1.0f);
-	cairo_move_to (cr, _notes[first_note_in_higher_row].x + 3, h - 9);
-	cairo_line_to (cr, _notes[last_note_in_higher_row].x + w - 3, h - 9);
-	cairo_stroke (cr);
-#endif
-
 	int nkey = note - _octave * 12;
+
 	if (nkey < 0 || nkey >= NNOTES) {
 		return;
 	}
@@ -96,25 +77,21 @@ PianoKeyboard::draw_keyboard_cue (cairo_t* cr, int note)
 		return;
 	}
 
-	// TODO Cache PangoFontDescription for each expose call.
-	// TODO display above note/octave label if both are visible
-	int is_white = _notes[note].white;
-	int x        = _notes[note].x;
-	int w        = _notes[note].w;
-	int h        = _notes[note].h;
+	int x = _notes[note].x;
+	int w = _notes[note].w;
+	int h = _notes[note].h;
 
 	int  tw, th;
 	char buf[32];
-	sprintf (buf, "ArdourMono %dpx", MAX (8, MIN (20, w / 2 + 3)));
-	PangoFontDescription* font = pango_font_description_from_string (buf);
-	snprintf (buf, 16, "%lc", gdk_keyval_to_unicode (gdk_keyval_to_upper (gdk_keyval_from_name (_note_bindings[nkey].c_str ()))));
+	snprintf (buf, 16, "%lc",
+			gdk_keyval_to_unicode (gdk_keyval_to_upper (gdk_keyval_from_name (_note_bindings.at(nkey).c_str ()))));
 	PangoLayout* pl = pango_cairo_create_layout (cr);
-	pango_layout_set_font_description (pl, font);
+	pango_layout_set_font_description (pl, _font_cue);
 	pango_layout_set_text (pl, buf, -1);
 	pango_layout_set_alignment (pl, PANGO_ALIGN_LEFT);
 	pango_layout_get_pixel_size (pl, &tw, &th);
 
-	if (is_white) {
+	if (_notes[note].white) {
 		cairo_set_source_rgba (cr, 0.0, 0.0, 0.5, 1.0);
 	} else {
 		cairo_set_source_rgba (cr, 1.0, 1.0, 0.5, 1.0);
@@ -122,30 +99,60 @@ PianoKeyboard::draw_keyboard_cue (cairo_t* cr, int note)
 
 	if (tw < w) {
 		cairo_save (cr);
-		cairo_move_to (cr, x + (w - tw) / 2, h - th - 5);
+		if (_notes[note].white) {
+			cairo_move_to (cr, x + (w - tw) / 2, h * 2 / 3 + 3);
+		} else {
+			cairo_move_to (cr, x + (w - tw) / 2, h - th - 3);
+		}
 		pango_cairo_show_layout (cr, pl);
 		cairo_restore (cr);
 	}
 	g_object_unref (pl);
-	pango_font_description_free (font);
 }
 
 void
-PianoKeyboard::queue_note_draw (int note)
+PianoKeyboard::annotate_note (cairo_t* cr, int note) const
 {
-	Gdk::Rectangle            rect;
-	Glib::RefPtr<Gdk::Window> win = get_window ();
+	assert ((note % 12) == 0);
 
-	rect.set_x (_notes[note].x);
-	rect.set_y (0);
-	rect.set_width (_notes[note].w);
-	rect.set_height (_notes[note].h);
+	int x = _notes[note].x;
+	int w = _notes[note].w;
+	int h = _notes[note].h;
 
-	win->invalidate_rect (rect, true); // ->  queue_draw_area ()
+	int  tw, th;
+	char buf[32];
+	sprintf (buf, "C%2d", (note / 12) - 1);
+	PangoLayout* pl = pango_cairo_create_layout (cr);
+	pango_layout_set_font_description (pl, _font_octave);
+	pango_layout_set_text (pl, buf, -1);
+	pango_layout_set_alignment (pl, PANGO_ALIGN_LEFT);
+	pango_layout_get_pixel_size (pl, &tw, &th);
+
+	if (th < w && tw < h * .3) {
+		cairo_save (cr);
+		cairo_move_to (cr, x + (w - th) / 2, h - 3);
+		cairo_rotate (cr, M_PI / -2.0);
+
+		cairo_set_line_width (cr, 1.0);
+		cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
+		pango_cairo_show_layout (cr, pl);
+
+#if 0
+		cairo_rel_move_to (cr, -.5, -.5);
+		pango_cairo_update_layout (cr, pl);
+		cairo_set_source_rgba (cr, 1, 1, 1, 0.3);
+		pango_cairo_layout_path (cr, pl);
+		cairo_set_line_width (cr, 1.5);
+		cairo_stroke (cr);
+#endif
+
+		cairo_restore (cr);
+	}
+	g_object_unref (pl);
 }
 
 void
-PianoKeyboard::draw_note (cairo_t* cr, int note)
+PianoKeyboard::draw_note (cairo_t* cr, int note) const
 {
 	if (note < _min_note || note > _max_note) {
 		return;
@@ -185,30 +192,12 @@ PianoKeyboard::draw_note (cairo_t* cr, int note)
 	cairo_rectangle (cr, x, 0, w, h);
 	cairo_stroke (cr);
 
-	if (_enable_keyboard_cue) {
-		draw_keyboard_cue (cr, note);
-	} else if (_print_note_label && (note % 12) == 0) {
-		int  tw, th;
-		char buf[32];
-		sprintf (buf, "ArdourMono %dpx", MAX (10, MIN (20, MIN (w / 2 + 3, h / 7))));
-		PangoFontDescription* font = pango_font_description_from_string (buf);
-		sprintf (buf, "C%2d", (note / 12) - 1);
-		PangoLayout* pl = pango_cairo_create_layout (cr);
-		pango_layout_set_font_description (pl, font);
-		pango_layout_set_text (pl, buf, -1);
-		pango_layout_set_alignment (pl, PANGO_ALIGN_LEFT);
-		pango_layout_get_pixel_size (pl, &tw, &th);
+	if (_print_note_label && (note % 12) == 0) {
+		annotate_note (cr, note);
+	}
 
-		if (th < w && tw < h * .3) {
-			cairo_save (cr);
-			cairo_move_to (cr, x + (w - th) / 2, h - 3);
-			cairo_rotate (cr, M_PI / -2.0);
-			cairo_set_source_rgba (cr, .0, .0, .0, 1.0);
-			pango_cairo_show_layout (cr, pl);
-			cairo_restore (cr);
-		}
-		g_object_unref (pl);
-		pango_font_description_free (font);
+	if (_enable_keyboard_cue) {
+		annotate_layout (cr, note);
 	}
 
 	/* We need to redraw black keys that partially obscure the white one. */
@@ -221,7 +210,13 @@ PianoKeyboard::draw_note (cairo_t* cr, int note)
 	}
 }
 
-int
+void
+PianoKeyboard::queue_note_draw (int note)
+{
+	queue_draw_area (_notes[note].x, 0, _notes[note].w, _notes[note].h);
+}
+
+void
 PianoKeyboard::press_key (int key, int vel)
 {
 	assert (key >= 0);
@@ -230,31 +225,34 @@ PianoKeyboard::press_key (int key, int vel)
 	_maybe_stop_sustained_notes = false;
 
 	/* This is for keyboard autorepeat protection. */
-	if (_notes[key].pressed)
-		return 0;
+	if (_notes[key].pressed) {
+		return;
+	}
 
 	if (_sustain_new_notes) {
-		_notes[key].sustained = 1;
+		_notes[key].sustained = true;
 	} else {
-		_notes[key].sustained = 0;
+		_notes[key].sustained = false;
 	}
 
 	if (_monophonic && _last_key != key) {
-		_notes[_last_key].pressed   = 0;
-		_notes[_last_key].sustained = 0;
+		bool signal_off = _notes[_last_key].pressed || _notes[_last_key].sustained;
+		_notes[_last_key].pressed = false;
+		_notes[_last_key].sustained = false;
+		if (signal_off) {
+			NoteOff (_last_key); /* EMIT SIGNAL */
+		}
 		queue_note_draw (_last_key);
 	}
 	_last_key = key;
 
-	_notes[key].pressed = 1;
+	_notes[key].pressed = true;
 
 	NoteOn (key, vel); /* EMIT SIGNAL */
 	queue_note_draw (key);
-
-	return 1;
 }
 
-int
+void
 PianoKeyboard::release_key (int key)
 {
 	assert (key >= 0);
@@ -262,31 +260,30 @@ PianoKeyboard::release_key (int key)
 
 	_maybe_stop_sustained_notes = false;
 
-	if (!_notes[key].pressed)
-		return 0;
-
-	if (_sustain_new_notes) {
-		_notes[key].sustained = 1;
+	if (!_notes[key].pressed) {
+		return;
 	}
 
-	_notes[key].pressed = 0;
+	if (_sustain_new_notes) {
+		_notes[key].sustained = true;
+	}
 
-	if (_notes[key].sustained)
-		return 0;
+	_notes[key].pressed = false;
+
+	if (_notes[key].sustained) {
+		return;
+	}
 
 	NoteOff (key); /* EMIT SIGNAL */
 	queue_note_draw (key);
-
-	return 1;
 }
 
 void
 PianoKeyboard::stop_unsustained_notes ()
 {
-	int i;
-	for (i = 0; i < NNOTES; ++i) {
+	for (int i = 0; i < NNOTES; ++i) {
 		if (_notes[i].pressed && !_notes[i].sustained) {
-			_notes[i].pressed = 0;
+			_notes[i].pressed = false;
 			NoteOff (i); /* EMIT SIGNAL */
 			queue_note_draw (i);
 		}
@@ -296,11 +293,10 @@ PianoKeyboard::stop_unsustained_notes ()
 void
 PianoKeyboard::stop_sustained_notes ()
 {
-	int i;
-	for (i = 0; i < NNOTES; ++i) {
+	for (int i = 0; i < NNOTES; ++i) {
 		if (_notes[i].sustained) {
-			_notes[i].pressed   = 0;
-			_notes[i].sustained = 0;
+			_notes[i].pressed   = false;
+			_notes[i].sustained = false;
 			NoteOff (i); /* EMIT SIGNAL */
 			queue_note_draw (i);
 		}
@@ -308,7 +304,7 @@ PianoKeyboard::stop_sustained_notes ()
 }
 
 int
-PianoKeyboard::key_binding (const char* key)
+PianoKeyboard::key_binding (const char* key) const
 {
 	if (_key_bindings.find (key) != _key_bindings.end ()) {
 		return _key_bindings.at (key);
@@ -658,6 +654,12 @@ PianoKeyboard::on_expose_event (GdkEventExpose* event)
 	cairo_rectangle (cr, event->area.x, event->area.y, event->area.width, event->area.height);
 	cairo_clip (cr);
 
+	char buf[32];
+	sprintf (buf, "ArdourMono %dpx", MAX (8, MIN (20, _notes[1].w / 2 + 3)));
+	_font_cue = pango_font_description_from_string (buf);
+	sprintf (buf, "ArdourMono %dpx", MAX (10, MIN (20, MIN (_notes[0].w / 2 + 3, _notes[0].h / 7))));
+	_font_octave = pango_font_description_from_string (buf);
+
 	for (int i = 0; i < NNOTES; ++i) {
 		GdkRectangle r;
 
@@ -675,6 +677,9 @@ PianoKeyboard::on_expose_event (GdkEventExpose* event)
 				break;
 		}
 	}
+
+	pango_font_description_free (_font_cue);
+	pango_font_description_free (_font_octave);
 
 	cairo_destroy (cr);
 	return true;
@@ -835,6 +840,7 @@ PianoKeyboard::show_note_label (bool enabled)
 void
 PianoKeyboard::set_monophonic (bool monophonic)
 {
+
 	_monophonic = monophonic;
 }
 
@@ -872,8 +878,8 @@ PianoKeyboard::sustain_release ()
 void
 PianoKeyboard::set_note_on (int note)
 {
-	if (_notes[note].pressed == 0) {
-		_notes[note].pressed = 1;
+	if (!_notes[note].pressed) {
+		_notes[note].pressed = true;
 		queue_note_draw (note);
 	}
 }
@@ -882,8 +888,8 @@ void
 PianoKeyboard::set_note_off (int note)
 {
 	if (_notes[note].pressed || _notes[note].sustained) {
-		_notes[note].pressed   = 0;
-		_notes[note].sustained = 0;
+		_notes[note].pressed   = false;
+		_notes[note].sustained = false;
 		queue_note_draw (note);
 	}
 }
