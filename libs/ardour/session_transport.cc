@@ -1869,7 +1869,6 @@ Session::engine_halted ()
 void
 Session::engine_running ()
 {
-	initialize_latencies ();
 	_transport_fsm->start ();
 }
 
@@ -1907,8 +1906,8 @@ Session::route_processors_changed (RouteProcessorChange c)
 		return;
 	}
 
-	update_latency_compensation ();
 	resort_routes ();
+	update_latency_compensation ();
 
 	set_dirty ();
 }

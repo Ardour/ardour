@@ -3016,9 +3016,6 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 
 	graph_reordered ();
 
-	update_latency (false);
-	update_latency (true);
-
 	set_dirty();
 
 	if (save) {
@@ -5222,7 +5219,7 @@ Session::graph_reordered ()
 	/* force all diskstreams to update their capture offset values to
 	 * reflect any changes in latencies within the graph.
 	 */
-	update_route_latency (false, true);
+	update_latency_compensation (true);
 }
 
 /** @return Number of samples that there is disk space available to write,
@@ -6387,7 +6384,11 @@ restart:
 void
 Session::update_latency (bool playback)
 {
-	DEBUG_TRACE (DEBUG::Latency, string_compose ("JACK latency callback: %1\n", (playback ? "PLAYBACK" : "CAPTURE")));
+	/* called only from AudioEngine::latency_callback.
+	 * but may indirectly be triggered from
+	 * Session::update_latency_compensation -> _engine.update_latencies
+	 */
+	DEBUG_TRACE (DEBUG::LatencyCompensation, string_compose ("Engine latency callback: %1\n", (playback ? "PLAYBACK" : "CAPTURE")));
 
 	if (inital_connect_or_deletion_in_progress () || _adding_routes_in_progress || _route_deletion_in_progress) {
 		return;
@@ -6412,32 +6413,24 @@ Session::update_latency (bool playback)
 	}
 
 	if (playback) {
+		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
 		set_worst_output_latency ();
 		update_route_latency (true, true);
 	} else {
+		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
 		set_worst_input_latency ();
 		update_route_latency (false, false);
 	}
 
-	DEBUG_TRACE (DEBUG::Latency, "JACK latency callback: DONE\n");
+	DEBUG_TRACE (DEBUG::LatencyCompensation, "Engine latency callback: DONE\n");
 	LatencyUpdated (); /* EMIT SIGNAL */
-}
-
-void
-Session::initialize_latencies ()
-{
-	{
-		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
-		update_latency (false);
-		update_latency (true);
-	}
-
-	set_worst_io_latencies ();
 }
 
 void
 Session::set_worst_io_latencies ()
 {
+	DEBUG_TRACE (DEBUG::LatencyCompensation, "Session::set_worst_io_latencies\n");
+	Glib::Threads::Mutex::Lock lx (_update_latency_lock);
 	set_worst_output_latency ();
 	set_worst_input_latency ();
 }
@@ -6463,7 +6456,7 @@ Session::set_worst_output_latency ()
 
 	_worst_output_latency = max (_worst_output_latency, _click_io->latency());
 
-	DEBUG_TRACE (DEBUG::Latency, string_compose ("Worst output latency: %1\n", _worst_output_latency));
+	DEBUG_TRACE (DEBUG::LatencyCompensation, string_compose ("Worst output latency: %1\n", _worst_output_latency));
 }
 
 void
@@ -6485,7 +6478,7 @@ Session::set_worst_input_latency ()
 		_worst_input_latency = max (_worst_input_latency, (*i)->input()->latency());
 	}
 
-	DEBUG_TRACE (DEBUG::Latency, string_compose ("Worst input latency: %1\n", _worst_input_latency));
+	DEBUG_TRACE (DEBUG::LatencyCompensation, string_compose ("Worst input latency: %1\n", _worst_input_latency));
 }
 
 void
@@ -6506,20 +6499,25 @@ Session::update_latency_compensation (bool force_whole_graph)
 		return;
 	}
 
+	DEBUG_TRACE (DEBUG::LatencyCompensation, string_compose ("update_latency_compensation %1\n", (force_whole_graph ? "of whole graph" : "")));
+
 	bool some_track_latency_changed = update_route_latency (false, false);
 
 	if (some_track_latency_changed || force_whole_graph)  {
+		DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: delegate to engine\n");
 		_engine.update_latencies ();
 		/* above call will ask the backend up update its latencies, which
 		 * eventually will trigger  AudioEngine::latency_callback () and
 		 * call Session::update_latency ()
 		 */
 	} else {
+		DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: directly apply to routes\n");
 		boost::shared_ptr<RouteList> r = routes.reader ();
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			(*i)->apply_latency_compensation ();
 		}
 	}
+	DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: DONE\n");
 }
 
 char

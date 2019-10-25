@@ -1314,7 +1314,6 @@ private:
 	void add_monitor_section ();
 	void remove_monitor_section ();
 
-	void initialize_latencies ();
 	void update_latency (bool playback);
 	bool update_route_latency (bool reverse, bool apply_to_delayline);
 
