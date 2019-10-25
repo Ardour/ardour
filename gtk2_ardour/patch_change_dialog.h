@@ -22,7 +22,7 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/comboboxtext.h>
 
-#include "evoral/PatchChange.hpp"
+#include "evoral/PatchChange.h"
 #include "ardour_dialog.h"
 #include "audio_clock.h"
 

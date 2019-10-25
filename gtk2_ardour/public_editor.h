@@ -47,7 +47,7 @@
 
 #include "temporal/beats.h"
 
-#include "evoral/Note.hpp"
+#include "evoral/Note.h"
 
 #include "ardour/session_handle.h"
 

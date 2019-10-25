@@ -27,8 +27,8 @@
 #include "pbd/signals.h"
 
 #include "evoral/visibility.h"
-#include "evoral/Parameter.hpp"
-#include "evoral/ParameterDescriptor.hpp"
+#include "evoral/Parameter.h"
+#include "evoral/ParameterDescriptor.h"
 
 namespace Evoral {
 

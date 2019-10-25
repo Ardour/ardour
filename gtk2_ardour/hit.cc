@@ -19,7 +19,7 @@
 
 #include "temporal/beats.h"
 
-#include "evoral/Note.hpp"
+#include "evoral/Note.h"
 
 #include "canvas/polygon.h"
 #include "canvas/debug.h"

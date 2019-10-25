@@ -22,7 +22,7 @@
 #include <glib.h>
 
 #include "temporal/beats.h"
-#include "evoral/Event.hpp"
+#include "evoral/Event.h"
 
 namespace Evoral {
 

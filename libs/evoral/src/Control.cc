@@ -21,10 +21,10 @@
 
 #include <iostream>
 
-#include "evoral/Control.hpp"
-#include "evoral/ControlList.hpp"
-#include "evoral/ParameterDescriptor.hpp"
-#include "evoral/TypeMap.hpp"
+#include "evoral/Control.h"
+#include "evoral/ControlList.h"
+#include "evoral/ParameterDescriptor.h"
+#include "evoral/TypeMap.h"
 
 namespace Evoral {
 

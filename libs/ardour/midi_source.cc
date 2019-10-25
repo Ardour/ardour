@@ -40,8 +40,8 @@
 #include "pbd/basename.h"
 #include "pbd/timing.h"
 
-#include "evoral/Control.hpp"
-#include "evoral/EventSink.hpp"
+#include "evoral/Control.h"
+#include "evoral/EventSink.h"
 
 #include "ardour/debug.h"
 #include "ardour/file_source.h"

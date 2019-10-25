@@ -26,7 +26,7 @@
 #include <set>
 
 #include "evoral/visibility.h"
-#include "evoral/types.hpp"
+#include "evoral/types.h"
 
 struct smf_struct;
 struct smf_track_struct;

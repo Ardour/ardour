@@ -31,8 +31,8 @@
 
 #include "pbd/controllable.h"
 
-#include "evoral/types.hpp"
-#include "evoral/Control.hpp"
+#include "evoral/types.h"
+#include "evoral/Control.h"
 
 #include "ardour/automation_list.h"
 #include "ardour/control_group_member.h"

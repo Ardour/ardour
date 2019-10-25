@@ -22,8 +22,8 @@
 #define EVORAL_PATCH_CHANGE_HPP
 
 #include "evoral/visibility.h"
-#include "evoral/Event.hpp"
-#include "evoral/Event.hpp"
+#include "evoral/Event.h"
+#include "evoral/Event.h"
 
 namespace Evoral {
 

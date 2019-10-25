@@ -23,7 +23,7 @@
 #include "pbd/enum_convert.h"
 
 #include "temporal/beats.h"
-#include "evoral/ControlList.hpp"
+#include "evoral/ControlList.h"
 
 namespace PBD {
 

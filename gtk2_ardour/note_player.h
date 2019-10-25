@@ -24,7 +24,7 @@
 #include <boost/shared_ptr.hpp>
 #include <sigc++/trackable.h>
 
-#include "evoral/Note.hpp"
+#include "evoral/Note.h"
 
 namespace ARDOUR {
 	class MidiTrack;

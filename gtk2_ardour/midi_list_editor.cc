@@ -24,7 +24,7 @@
 #include <gtkmm/cellrenderercombo.h>
 
 #include "evoral/midi_util.h"
-#include "evoral/Note.hpp"
+#include "evoral/Note.h"
 
 #include "ardour/beats_samples_converter.h"
 #include "ardour/midi_model.h"

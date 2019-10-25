@@ -23,9 +23,9 @@
 #ifndef __ardour_midi_buffer_h__
 #define __ardour_midi_buffer_h__
 
-#include "evoral/EventSink.hpp"
+#include "evoral/EventSink.h"
 #include "evoral/midi_util.h"
-#include "evoral/types.hpp"
+#include "evoral/types.h"
 
 #include "midi++/event.h"
 

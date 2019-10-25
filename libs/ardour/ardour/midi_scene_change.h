@@ -19,7 +19,7 @@
 #ifndef __libardour_midi_scene_change_h__
 #define __libardour_midi_scene_change_h__
 
-#include "evoral/PatchChange.hpp"
+#include "evoral/PatchChange.h"
 
 #include "pbd/signals.h"
 

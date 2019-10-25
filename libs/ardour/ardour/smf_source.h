@@ -25,7 +25,7 @@
 
 #include <cstdio>
 #include <time.h>
-#include "evoral/SMF.hpp"
+#include "evoral/SMF.h"
 #include "ardour/midi_source.h"
 #include "ardour/file_source.h"
 

@@ -26,7 +26,7 @@
 #include "pbd/memento_command.h"
 #include "pbd/types_convert.h"
 
-#include "evoral/Curve.hpp"
+#include "evoral/Curve.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/runtime_functions.h"

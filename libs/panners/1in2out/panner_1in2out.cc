@@ -39,7 +39,7 @@
 #include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
 
-#include "evoral/Curve.hpp"
+#include "evoral/Curve.h"
 
 #include "ardour/session.h"
 #include "ardour/panner.h"

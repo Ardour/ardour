@@ -32,7 +32,7 @@
 #include "ardour/session_playlists.h"
 #include "ardour/source.h"
 #include "ardour/tempo.h"
-#include "evoral/Curve.hpp"
+#include "evoral/Curve.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/id.h"

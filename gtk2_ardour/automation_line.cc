@@ -51,7 +51,7 @@
 #include "ardour/parameter_types.h"
 #include "ardour/tempo.h"
 
-#include "evoral/Curve.hpp"
+#include "evoral/Curve.h"
 
 #include "canvas/debug.h"
 

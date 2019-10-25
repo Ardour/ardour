@@ -22,7 +22,7 @@
 #include <list>
 
 #include "ardour/automation_list.h"
-#include "evoral/Parameter.hpp"
+#include "evoral/Parameter.h"
 
 class AutomationSelection : public std::list<boost::shared_ptr<ARDOUR::AutomationList> > {
 public:

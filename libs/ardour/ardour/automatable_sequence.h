@@ -20,7 +20,7 @@
 #ifndef __ardour_automatable_sequence_h__
 #define __ardour_automatable_sequence_h__
 
-#include "evoral/Sequence.hpp"
+#include "evoral/Sequence.h"
 #include "ardour/automatable.h"
 #include "ardour/event_type_map.h"
 

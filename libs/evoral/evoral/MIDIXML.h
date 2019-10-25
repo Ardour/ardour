@@ -19,7 +19,7 @@
 #ifndef EVORAL_MIDI_XML_HPP
 #define EVORAL_MIDI_XML_HPP
 
-#include "evoral/Event.hpp"
+#include "evoral/Event.h"
 #include "pbd/xml++.h"
 
 namespace Evoral {

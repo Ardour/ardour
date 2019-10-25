@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "evoral/Event.hpp"
+#include "evoral/Event.h"
 #include "midi++/channel.h"
 #include "midi++/parser.h"
 #include "midi++/port.h"

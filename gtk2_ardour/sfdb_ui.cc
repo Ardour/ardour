@@ -57,7 +57,7 @@
 
 #include <gtkmm2ext/utils.h>
 
-#include "evoral/SMF.hpp"
+#include "evoral/SMF.h"
 
 #include "ardour/audio_library.h"
 #include "ardour/auditioner.h"

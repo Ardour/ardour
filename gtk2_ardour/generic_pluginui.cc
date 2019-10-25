@@ -43,7 +43,7 @@
 #include "pbd/failed_constructor.h"
 
 #include "evoral/midi_events.h"
-#include "evoral/PatchChange.hpp"
+#include "evoral/PatchChange.h"
 
 #include "midi++/midnam_patch.h"
 

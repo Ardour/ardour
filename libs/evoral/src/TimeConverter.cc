@@ -21,8 +21,8 @@
 #include "temporal/beats.h"
 #include "temporal/types.h"
 
-#include "evoral/TimeConverter.hpp"
-#include "evoral/types.hpp"
+#include "evoral/TimeConverter.h"
+#include "evoral/types.h"
 
 namespace Evoral {
 

@@ -1,7 +1,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <boost/shared_ptr.hpp>
-#include "evoral/ControlList.hpp"
+#include "evoral/ControlList.h"
 
 class CurveTest : public CppUnit::TestFixture
 {

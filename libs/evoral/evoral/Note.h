@@ -27,7 +27,7 @@
 #include <stdint.h>
 
 #include "evoral/visibility.h"
-#include "evoral/Event.hpp"
+#include "evoral/Event.h"
 
 namespace Evoral {
 

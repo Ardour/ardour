@@ -22,7 +22,7 @@
 #include <string>
 #include <iostream>
 
-#include "evoral/Parameter.hpp"
+#include "evoral/Parameter.h"
 
 #include "pbd/property_basics.h"
 #include "pbd/ringbuffer.h"

@@ -21,7 +21,7 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/region.h"
 #include "ardour/audioregion.h"
-#include "evoral/Curve.hpp"
+#include "evoral/Curve.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION (CombineRegionsTest);
 

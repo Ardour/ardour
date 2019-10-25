@@ -25,7 +25,7 @@
 #include <cmath>
 #include <algorithm>
 
-#include "evoral/Curve.hpp"
+#include "evoral/Curve.h"
 
 #include "ardour/amp.h"
 #include "ardour/audio_buffer.h"

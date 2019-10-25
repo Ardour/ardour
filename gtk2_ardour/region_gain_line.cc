@@ -22,7 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "evoral/Curve.hpp"
+#include "evoral/Curve.h"
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
 

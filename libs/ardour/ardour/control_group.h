@@ -29,7 +29,7 @@
 
 #include "pbd/controllable.h"
 
-#include "evoral/Parameter.hpp"
+#include "evoral/Parameter.h"
 
 #include "ardour/automation_control.h"
 #include "ardour/types.h"

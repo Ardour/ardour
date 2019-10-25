@@ -29,8 +29,8 @@
 #ifdef LV2_SUPPORT
 #include "ardour/uri_map.h"
 #endif
-#include "evoral/Parameter.hpp"
-#include "evoral/ParameterDescriptor.hpp"
+#include "evoral/Parameter.h"
+#include "evoral/ParameterDescriptor.h"
 #include "evoral/midi_events.h"
 #include "pbd/error.h"
 #include "pbd/compose.h"

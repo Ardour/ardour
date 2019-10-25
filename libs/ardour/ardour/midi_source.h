@@ -29,8 +29,8 @@
 #include <boost/enable_shared_from_this.hpp>
 #include "pbd/stateful.h"
 #include "pbd/xml++.h"
-#include "evoral/Sequence.hpp"
-#include "evoral/Range.hpp"
+#include "evoral/Sequence.h"
+#include "evoral/Range.h"
 #include "ardour/ardour.h"
 #include "ardour/buffer.h"
 #include "ardour/midi_cursor.h"

@@ -24,7 +24,7 @@
 #include <utility>
 
 #include "ardour/data_type.h"
-#include "evoral/Parameter.hpp"
+#include "evoral/Parameter.h"
 
 /** A count of various GUI items.
  *

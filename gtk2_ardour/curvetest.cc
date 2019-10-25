@@ -23,7 +23,7 @@
 #include <unistd.h>
 
 #include "ardour/automation_list.h"
-#include "evoral/Curve.hpp"
+#include "evoral/Curve.h"
 
 using namespace std;
 using namespace ARDOUR;

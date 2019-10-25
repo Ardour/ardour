@@ -43,7 +43,7 @@
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
 
-#include "evoral/Parameter.hpp"
+#include "evoral/Parameter.h"
 
 #include "ardour/types.h"
 #include "ardour/presentation_info.h"

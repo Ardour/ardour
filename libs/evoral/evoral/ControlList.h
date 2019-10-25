@@ -35,9 +35,9 @@
 #include "pbd/signals.h"
 
 #include "evoral/visibility.h"
-#include "evoral/Range.hpp"
-#include "evoral/Parameter.hpp"
-#include "evoral/ParameterDescriptor.hpp"
+#include "evoral/Range.h"
+#include "evoral/Parameter.h"
+#include "evoral/ParameterDescriptor.h"
 
 namespace Evoral {
 

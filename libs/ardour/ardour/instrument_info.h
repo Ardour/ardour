@@ -26,7 +26,7 @@
 
 #include "pbd/signals.h"
 
-#include "evoral/Parameter.hpp"
+#include "evoral/Parameter.h"
 
 #include "midi++/libmidi_visibility.h"
 #include "ardour/libardour_visibility.h"

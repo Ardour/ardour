@@ -23,8 +23,8 @@
 #include "ardour/types.h"
 #include "ardour/variant.h"
 
-#include "evoral/Parameter.hpp"
-#include "evoral/ParameterDescriptor.hpp"
+#include "evoral/Parameter.h"
+#include "evoral/ParameterDescriptor.h"
 
 namespace ARDOUR {
 

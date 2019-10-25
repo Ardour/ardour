@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "evoral/Note.hpp"
+#include "evoral/Note.h"
 
 #include "canvas/note.h"
 #include "canvas/debug.h"

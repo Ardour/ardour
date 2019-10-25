@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2009-2013 Paul Davis <paul@linuxaudiosystems.com>
- * Copyright (C) 2009-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2013 Paul Davis <paul@linuxaudiosystems.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,35 +17,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef EVORAL_EVENT_LIST_HPP
-#define EVORAL_EVENT_LIST_HPP
+#ifndef EVORAL_EVENT_SINK_HPP
+#define EVORAL_EVENT_SINK_HPP
 
-#include <list>
-
-#include "evoral/Event.hpp"
-#include "evoral/EventSink.hpp"
 #include "evoral/visibility.h"
+#include "evoral/types.h"
 
 namespace Evoral {
 
-
-/** A list of events (generic time-stamped binary "blobs").
- *
- * Used when we need an unsorted list of Events that is also an EventSink. Absolutely nothing more.
+/** Pure virtual base for anything you can write events to.
  */
 template<typename Time>
-class /*LIBEVORAL_API*/ EventList : public std::list<Evoral::Event<Time> *>, public Evoral::EventSink<Time> {
+class /*LIBEVORAL_API*/ EventSink {
 public:
-	EventList() {}
-
-	uint32_t write(Time  time, EventType  type, uint32_t  size, const uint8_t* buf) {
-		this->push_back(new Evoral::Event<Time>(
-			          type, time, size, const_cast<uint8_t*>(buf), true)); // Event copies buffer
-		return size;
-	}
+	virtual ~EventSink() {}
+	virtual uint32_t write(Time time, EventType type, uint32_t size, const uint8_t* buf) = 0;
 };
 
 
 } // namespace Evoral
 
-#endif // EVORAL_EVENT_LIST_HPP
+#endif // EVORAL_EVENT_SINK_HPP
+

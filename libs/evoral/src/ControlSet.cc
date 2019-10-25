@@ -20,10 +20,10 @@
 
 #include <iostream>
 #include <limits>
-#include "evoral/ControlSet.hpp"
-#include "evoral/ControlList.hpp"
-#include "evoral/Control.hpp"
-#include "evoral/Event.hpp"
+#include "evoral/ControlSet.h"
+#include "evoral/ControlList.h"
+#include "evoral/Control.h"
+#include "evoral/Event.h"
 
 using namespace std;
 

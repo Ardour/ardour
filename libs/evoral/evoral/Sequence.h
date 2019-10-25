@@ -32,10 +32,10 @@
 #include <glibmm/threads.h>
 
 #include "evoral/visibility.h"
-#include "evoral/Note.hpp"
-#include "evoral/ControlSet.hpp"
-#include "evoral/ControlList.hpp"
-#include "evoral/PatchChange.hpp"
+#include "evoral/Note.h"
+#include "evoral/ControlSet.h"
+#include "evoral/ControlList.h"
+#include "evoral/PatchChange.h"
 
 namespace Evoral {
 

@@ -24,7 +24,7 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "temporal/beats.h"
-#include "evoral/SMF.hpp"
+#include "evoral/SMF.h"
 #include "SequenceTest.hpp"
 
 using namespace Evoral;

@@ -25,7 +25,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "pbd/stateful.h"
-#include "evoral/Parameter.hpp"
+#include "evoral/Parameter.h"
 
 #include "ardour/automatable.h"
 #include "ardour/session_handle.h"

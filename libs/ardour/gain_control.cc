@@ -22,7 +22,7 @@
 #include "pbd/convert.h"
 #include "pbd/strsplit.h"
 
-#include "evoral/Curve.hpp"
+#include "evoral/Curve.h"
 
 #include "ardour/dB.h"
 #include "ardour/gain_control.h"

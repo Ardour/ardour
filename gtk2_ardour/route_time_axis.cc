@@ -49,7 +49,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/stateful_diff_command.h"
 
-#include "evoral/Parameter.hpp"
+#include "evoral/Parameter.h"
 
 #include "ardour/amp.h"
 #include "ardour/meter.h"

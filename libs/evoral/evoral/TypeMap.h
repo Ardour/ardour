@@ -24,7 +24,7 @@
 #include <string>
 
 #include "evoral/visibility.h"
-#include "evoral/types.hpp"
+#include "evoral/types.h"
 
 namespace Evoral {
 

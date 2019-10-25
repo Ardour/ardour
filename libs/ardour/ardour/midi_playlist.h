@@ -28,15 +28,15 @@
 
 #include <boost/utility.hpp>
 
-#include "evoral/Parameter.hpp"
+#include "evoral/Parameter.h"
 
 #include "ardour/ardour.h"
 #include "ardour/midi_cursor.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/playlist.h"
-#include "evoral/Note.hpp"
-#include "evoral/Parameter.hpp"
+#include "evoral/Note.h"
+#include "evoral/Parameter.h"
 #include "ardour/rt_midibuffer.h"
 
 namespace Evoral {

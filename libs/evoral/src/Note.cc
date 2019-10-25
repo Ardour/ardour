@@ -22,7 +22,7 @@
 #include <limits>
 #include <glib.h>
 #ifndef COMPILER_MSVC
-#include "evoral/Note.hpp"
+#include "evoral/Note.h"
 #endif
 
 #include "temporal/beats.h"

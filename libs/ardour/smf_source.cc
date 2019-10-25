@@ -40,8 +40,8 @@
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 
-#include "evoral/Control.hpp"
-#include "evoral/SMF.hpp"
+#include "evoral/Control.h"
+#include "evoral/SMF.h"
 
 #include "ardour/debug.h"
 #include "ardour/midi_channel_filter.h"
