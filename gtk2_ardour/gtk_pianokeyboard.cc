@@ -92,7 +92,7 @@ PianoKeyboard::draw_keyboard_cue (cairo_t* cr, int note)
 	if (nkey < 0 || nkey >= NNOTES) {
 		return;
 	}
-	if (_note_bindings.find (nkey) == _note_bindings.end()) {
+	if (_note_bindings.find (nkey) == _note_bindings.end ()) {
 		return;
 	}
 
@@ -107,7 +107,7 @@ PianoKeyboard::draw_keyboard_cue (cairo_t* cr, int note)
 	char buf[32];
 	sprintf (buf, "ArdourMono %dpx", MAX (8, MIN (20, w / 2 + 3)));
 	PangoFontDescription* font = pango_font_description_from_string (buf);
-	snprintf(buf, 16, "%lc", gdk_keyval_to_unicode (gdk_keyval_to_upper (gdk_keyval_from_name (_note_bindings[nkey].c_str()))));
+	snprintf (buf, 16, "%lc", gdk_keyval_to_unicode (gdk_keyval_to_upper (gdk_keyval_from_name (_note_bindings[nkey].c_str ()))));
 	PangoLayout* pl = pango_cairo_create_layout (cr);
 	pango_layout_set_font_description (pl, font);
 	pango_layout_set_text (pl, buf, -1);
@@ -133,15 +133,15 @@ PianoKeyboard::draw_keyboard_cue (cairo_t* cr, int note)
 void
 PianoKeyboard::queue_note_draw (int note)
 {
-	Gdk::Rectangle rect;
-	Glib::RefPtr<Gdk::Window> win = get_window();
+	Gdk::Rectangle            rect;
+	Glib::RefPtr<Gdk::Window> win = get_window ();
 
 	rect.set_x (_notes[note].x);
 	rect.set_y (0);
 	rect.set_width (_notes[note].w);
 	rect.set_height (_notes[note].h);
 
-	win->invalidate_rect(rect, true); // ->  queue_draw_area ()
+	win->invalidate_rect (rect, true); // ->  queue_draw_area ()
 }
 
 void
@@ -187,8 +187,7 @@ PianoKeyboard::draw_note (cairo_t* cr, int note)
 
 	if (_enable_keyboard_cue) {
 		draw_keyboard_cue (cr, note);
-	}
-	else if (_print_note_label && (note % 12) == 0) {
+	} else if (_print_note_label && (note % 12) == 0) {
 		int  tw, th;
 		char buf[32];
 		sprintf (buf, "ArdourMono %dpx", MAX (10, MIN (20, MIN (w / 2 + 3, h / 7))));
@@ -311,7 +310,7 @@ PianoKeyboard::stop_sustained_notes ()
 int
 PianoKeyboard::key_binding (const char* key)
 {
-	if (_key_bindings.find (key) != _key_bindings.end()) {
+	if (_key_bindings.find (key) != _key_bindings.end ()) {
 		return _key_bindings.at (key);
 	}
 	return -1;
@@ -320,7 +319,7 @@ PianoKeyboard::key_binding (const char* key)
 void
 PianoKeyboard::bind_key (const char* key, int note)
 {
-	_key_bindings[key] = note;
+	_key_bindings[key]   = note;
 	_note_bindings[note] = key;
 }
 
@@ -487,7 +486,7 @@ PianoKeyboard::on_key_press_event (GdkEventKey* event)
 	char* key;
 	guint keyval;
 
-	GdkKeymapKey   kk;
+	GdkKeymapKey kk;
 
 	/* We're not using event->keyval, because we need keyval with level set to 0.
 	   E.g. if user holds Shift and presses '7', we want to get a '7', not '&'. */
@@ -605,7 +604,7 @@ PianoKeyboard::on_button_press_event (GdkEventButton* event)
 			release_key (_note_being_pressed_using_mouse);
 		}
 
-		press_key (note, get_velocity_for_note_at_y ( note, y));
+		press_key (note, get_velocity_for_note_at_y (note, y));
 		_note_being_pressed_using_mouse = note;
 
 	} else if (event->type == GDK_BUTTON_RELEASE) {
@@ -758,8 +757,8 @@ PianoKeyboard::recompute_dimensions ()
 		if (is_black (note)) {
 			/* This note is black key. */
 			_notes[note].x = widget_margin +
-			                    (white_key * key_width) -
-			                    (black_key_width * black_key_left_shift (note));
+			                 (white_key * key_width) -
+			                 (black_key_width * black_key_left_shift (note));
 			_notes[note].w     = black_key_width;
 			_notes[note].h     = (height * 2) / 3;
 			_notes[note].white = 0;
@@ -786,7 +785,7 @@ PianoKeyboard::on_size_allocate (Gtk::Allocation& allocation)
 PianoKeyboard::PianoKeyboard ()
 {
 	using namespace Gdk;
-	add_events (KEY_PRESS_MASK|KEY_RELEASE_MASK|BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK|POINTER_MOTION_MASK|POINTER_MOTION_HINT_MASK);
+	add_events (KEY_PRESS_MASK | KEY_RELEASE_MASK | BUTTON_PRESS_MASK | BUTTON_RELEASE_MASK | POINTER_MOTION_MASK | POINTER_MOTION_HINT_MASK);
 
 	_maybe_stop_sustained_notes     = false;
 	_sustain_new_notes              = false;
@@ -955,7 +954,7 @@ PianoKeyboard::set_octave_range (int octave_range)
 
 	if (_min_note < 3) {
 		upper_offset = 0;
-		_min_note = 0;
+		_min_note    = 0;
 	} else if (_octave_range > 5) {
 		/* extend down to A */
 		upper_offset = 3;
@@ -988,7 +987,6 @@ PianoKeyboard::set_keyboard_layout (Layout layout)
 		case DVORAK:
 			bind_keys_dvorak ();
 			break;
-
 	}
 	queue_draw ();
 }

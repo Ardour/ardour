@@ -59,7 +59,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 {
 	_piano.set_flags (Gtk::CAN_FOCUS);
 
-	_piano.set_keyboard_layout(PianoKeyboard::QWERTY);
+	_piano.set_keyboard_layout (PianoKeyboard::QWERTY);
 	_piano.show_note_label (true);
 
 	using namespace Menu_Helpers;
@@ -362,10 +362,10 @@ VirtualKeyboardWindow::set_state (const XMLNode& root)
 }
 
 bool
-VirtualKeyboardWindow::on_focus_in_event (GdkEventFocus *ev)
+VirtualKeyboardWindow::on_focus_in_event (GdkEventFocus* ev)
 {
 	_piano.grab_focus ();
-	return ArdourWindow::on_focus_in_event(ev);
+	return ArdourWindow::on_focus_in_event (ev);
 }
 
 void

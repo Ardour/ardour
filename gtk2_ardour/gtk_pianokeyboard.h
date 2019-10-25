@@ -40,7 +40,7 @@ public:
 
 	sigc::signal<void, int, int> NoteOn;
 	sigc::signal<void, int>      NoteOff;
-	sigc::signal<void >          Rest;
+	sigc::signal<void>           Rest;
 
 	enum Layout {
 		QWERTY,
@@ -63,8 +63,8 @@ public:
 	void set_velocities (int min_vel, int max_vel, int key_vel);
 
 protected:
-	bool on_key_press_event  (GdkEventKey *);
-	bool on_key_release_event  (GdkEventKey *);
+	bool on_key_press_event (GdkEventKey*);
+	bool on_key_release_event (GdkEventKey*);
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
 	bool on_motion_notify_event (GdkEventMotion*);
@@ -74,16 +74,15 @@ protected:
 	void on_size_allocate (Gtk::Allocation&);
 
 private:
-
 	void draw_keyboard_cue (cairo_t* cr, int note);
 	void queue_note_draw (int note);
 	void draw_note (cairo_t* cr, int note);
-	int press_key (int key, int vel);
-	int release_key (int key);
+	int  press_key (int key, int vel);
+	int  release_key (int key);
 	void release_key ();
 	void stop_unsustained_notes ();
 	void stop_sustained_notes ();
-	int key_binding (const char* key);
+	int  key_binding (const char* key);
 	void bind_key (const char* key, int note);
 	void clear_notes ();
 
@@ -95,27 +94,27 @@ private:
 	int get_note_for_xy (int x, int y) const;
 	int get_velocity_for_note_at_y (int note, int y) const;
 
-	int is_black (int key) const;
+	int    is_black (int key) const;
 	double black_key_left_shift (int key) const;
 
 	void recompute_dimensions ();
 
 	struct PKNote {
 		PKNote ()
-			: pressed (false)
-			, sustained (false)
-			, white (false)
-			, x (0)
-			, w (0)
-			, h (0)
+		        : pressed (false)
+		        , sustained (false)
+		        , white (false)
+		        , x (0)
+		        , w (0)
+		        , h (0)
 		{}
 
-		bool pressed;   /* 1 if key is in pressed down state. */
-		bool sustained; /* 1 if note is sustained. */
-		bool white;     /* 1 if key is white; 0 otherwise. */
-		int x;         /* Distance between the left edge of the key * and the left edge of the widget, in pixels. */
-		int w;         /* Width of the key, in pixels. */
-		int h;         /* Height of the key, in pixels. */
+		bool pressed;   /* true if key is in pressed down state. */
+		bool sustained; /* true if note is sustained. */
+		bool white;     /* true if key is white; 0 otherwise. */
+		int  x;         /* Distance between the left edge of the key and the left edge of the widget, in pixels. */
+		int  w;         /* Width of the key, in pixels. */
+		int  h;         /* Height of the key, in pixels. */
 	};
 
 	bool _maybe_stop_sustained_notes;
@@ -136,7 +135,7 @@ private:
 
 	PKNote _notes[NNOTES];
 
-	std::map<std::string, int> _key_bindings; /**< Table used to translate from PC keyboard character to MIDI note number. */
+	std::map<std::string, int> _key_bindings;  /**< Table used to translate from PC keyboard character to MIDI note number. */
 	std::map<int, std::string> _note_bindings; /**< Table to translate from MIDI note number to PC keyboard character. */
 };
 #endif /* __PIANO_KEYBOARD_H__ */
