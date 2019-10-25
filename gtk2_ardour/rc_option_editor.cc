@@ -74,6 +74,7 @@
 #include "keyboard.h"
 #include "meter_patterns.h"
 #include "midi_tracer.h"
+#include "plugin_scan_dialog.h"
 #include "rc_option_editor.h"
 #include "sfdb_ui.h"
 #include "transport_masters_dialog.h"
@@ -4104,12 +4105,14 @@ RCOptionEditor::parameter_changed (string const & p)
 		_plugin_prefer_inline->set_sensitive (UIConfiguration::instance().get_open_gui_after_adding_plugin() && UIConfiguration::instance().get_show_inline_display_by_default());
 #endif
 	} else if (p == "conceal-lv1-if-lv2-exists") {
-		PluginManager::instance().refresh (true);
+		plugin_scan_refresh ();
 	}
 }
 
 void RCOptionEditor::plugin_scan_refresh () {
-	PluginManager::instance().refresh();
+	/* first argument says discover new plugins, second means be verbose */
+	PluginScanDialog psd (true, true);
+	psd.start ();
 }
 
 void RCOptionEditor::clear_vst_cache () {

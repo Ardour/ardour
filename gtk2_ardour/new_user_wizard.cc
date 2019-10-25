@@ -60,6 +60,7 @@
 #include "opts.h"
 #include "ui_config.h"
 #include "pbd/i18n.h"
+#include "plugin_scan_dialog.h"
 #include "utils.h"
 
 using namespace std;
@@ -444,7 +445,8 @@ void
 NewUserWizard::discover_plugins ()
 {
 	plugin_disco_button.set_sensitive (false);
-	PluginManager::instance().refresh();
+	PluginScanDialog psd (false, true);
+	psd.start ();
 }
 
 void
