@@ -60,7 +60,8 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_piano.set_flags (Gtk::CAN_FOCUS);
 
 	_piano.set_keyboard_layout (APianoKeyboard::QWERTY);
-	_piano.show_note_label (true);
+	_piano.set_annotate_octave (true);
+	_piano.set_grand_piano_highlight (false);
 
 	using namespace Menu_Helpers;
 	_keyboard_layout.AddMenuElem (MenuElem ("QWERTY",
@@ -90,11 +91,11 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_pitchbend->ValueChanged.connect_same_thread (_cc_connections, boost::bind (&VirtualKeyboardWindow::pitch_bend_event_handler, this, _1));
 
 	set_tooltip (_highlight_grand_piano, "Shade keys outside the range of a Grand Piano (A0-C8).");
-	set_tooltip (_highlight_key_range, "Indicate which notes can be controlled by keyboard-shortcuts.");
+	set_tooltip (_highlight_key_range, "When enabled, indicate keyboard-shortcuts on the piano-keys.");
 	set_tooltip (_show_note_label, "When enabled, print octave number on C-Keys");
 	set_tooltip (_yaxis_velocity, "When enabled, mouse-click y-axis position defines the velocity.");
 
-	set_tooltip (_piano_octave_key, "The center octave, and lowest octave for keyboard control.");
+	set_tooltip (_piano_octave_key, "The center octave, and lowest octave for keyboard control. Change with Arrow left/right.");
 	set_tooltip (_piano_octave_range, "Available octave range, centered around the key-octave.");
 	set_tooltip (_keyboard_layout, "Keyboard layout to use for keyboard control.");
 
@@ -326,11 +327,11 @@ VirtualKeyboardWindow::set_state (const XMLNode& root)
 	}
 	if (node->get_property (X_("HighlightKeyRange"), a)) {
 		_highlight_key_range.set_active (a);
-		_piano.set_keyboard_cue (a);
+		_piano.set_annotate_layout (a);
 	}
 	if (node->get_property (X_("ShowNoteLabel"), a)) {
 		_show_note_label.set_active (a);
-		_piano.show_note_label (a);
+		_piano.set_annotate_octave (a);
 	}
 
 	int v;
@@ -379,6 +380,26 @@ bool
 VirtualKeyboardWindow::on_key_press_event (GdkEventKey* ev)
 {
 	_piano.grab_focus ();
+
+	/* try propagate unmodified events first */
+	if ((ev->state & 0xf) == 0) {
+		if (gtk_window_propagate_key_event (gobj(), ev)) {
+			return true;
+		}
+	}
+
+	/* handle up/down */
+	if (ev->type == GDK_KEY_PRESS) {
+		if (ev->keyval == GDK_KEY_Left) {
+			_piano_octave_key.set_value (_piano_octave_key.get_value_as_int () - 1);
+			return true;
+		}
+		if (ev->keyval == GDK_KEY_Right) {
+			_piano_octave_key.set_value (_piano_octave_key.get_value_as_int () + 1);
+			return true;
+		}
+	}
+
 	return ARDOUR_UI_UTILS::relay_key_press (ev, this);
 }
 
@@ -458,7 +479,7 @@ VirtualKeyboardWindow::toggle_highlight_key (GdkEventButton*)
 {
 	bool a = !_highlight_key_range.get_active ();
 	_highlight_key_range.set_active (a);
-	_piano.set_keyboard_cue (a);
+	_piano.set_annotate_layout (a);
 	return false;
 }
 
@@ -467,7 +488,7 @@ VirtualKeyboardWindow::toggle_note_label (GdkEventButton*)
 {
 	bool a = !_show_note_label.get_active ();
 	_show_note_label.set_active (a);
-	_piano.show_note_label (a);
+	_piano.set_annotate_octave (a);
 	return false;
 }
 

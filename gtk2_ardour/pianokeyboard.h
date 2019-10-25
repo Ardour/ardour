@@ -48,9 +48,9 @@ public:
 	void set_note_on (int note);
 	void set_note_off (int note);
 
-	void set_keyboard_cue (bool enabled);
 	void set_grand_piano_highlight (bool enabled);
-	void show_note_label (bool enabled);
+	void set_annotate_layout (bool enabled);
+	void set_annotate_octave (bool enabled);
 
 	void set_monophonic (bool monophonic);
 	void set_octave (int octave);
@@ -118,9 +118,9 @@ private:
 
 	bool _maybe_stop_sustained_notes;
 	bool _sustain_new_notes;
-	bool _enable_keyboard_cue;
 	bool _highlight_grand_piano_range;
-	bool _print_note_label;
+	bool _annotate_layout;
+	bool _annotate_octave;
 	int  _octave;
 	int  _octave_range;
 	int  _note_being_pressed_using_mouse;

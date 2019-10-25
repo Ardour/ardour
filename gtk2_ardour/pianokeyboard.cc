@@ -108,7 +108,7 @@ APianoKeyboard::annotate_note (cairo_t* cr, int note) const
 
 	int  tw, th;
 	char buf[32];
-	sprintf (buf, "C%2d", (note / 12) - 1);
+	sprintf (buf, "C%d", (note / 12) - 1);
 	PangoLayout* pl = pango_cairo_create_layout (cr);
 	pango_layout_set_font_description (pl, _font_octave);
 	pango_layout_set_text (pl, buf, -1);
@@ -179,11 +179,11 @@ APianoKeyboard::draw_note (cairo_t* cr, int note) const
 	cairo_rectangle (cr, x, 0, w, h);
 	cairo_stroke (cr);
 
-	if (_print_note_label && (note % 12) == 0) {
+	if (_annotate_octave && (note % 12) == 0) {
 		annotate_note (cr, note);
 	}
 
-	if (_enable_keyboard_cue) {
+	if (_annotate_layout) {
 		annotate_layout (cr, note);
 	}
 
@@ -482,7 +482,6 @@ APianoKeyboard::on_key_press_event (GdkEventKey* event)
 	key = gdk_keyval_name (gdk_keyval_to_lower (keyval));
 
 	if (key == NULL) {
-		g_message ("gtk_keyval_name() returned NULL; please report this.");
 		return false;
 	}
 
@@ -495,9 +494,9 @@ APianoKeyboard::on_key_press_event (GdkEventKey* event)
 	if (note == 128) {
 		if (event->type == GDK_KEY_RELEASE) {
 			Rest (); /* EMIT SIGNAL */
+			return true;
 		}
-
-		return true;
+		return false;
 	}
 
 	note += _octave * 12;
@@ -510,7 +509,6 @@ APianoKeyboard::on_key_press_event (GdkEventKey* event)
 	} else if (event->type == GDK_KEY_RELEASE) {
 		release_key (note);
 	}
-
 	return true;
 }
 
@@ -644,7 +642,7 @@ APianoKeyboard::on_expose_event (GdkEventExpose* event)
 	char buf[32];
 	sprintf (buf, "ArdourMono %dpx", MAX (8, MIN (20, _notes[1].w / 2 + 3)));
 	_font_cue = pango_font_description_from_string (buf);
-	sprintf (buf, "ArdourMono %dpx", MAX (10, MIN (20, MIN (_notes[0].w / 2 + 3, _notes[0].h / 7))));
+	sprintf (buf, "ArdourMono %dpx", MAX (8, MIN (20, MIN (_notes[0].w * 11 / 15 , _notes[0].h / 7))));
 	_font_octave = pango_font_description_from_string (buf);
 
 	for (int i = 0; i < NNOTES; ++i) {
@@ -781,9 +779,9 @@ APianoKeyboard::APianoKeyboard ()
 
 	_maybe_stop_sustained_notes     = false;
 	_sustain_new_notes              = false;
-	_enable_keyboard_cue            = false;
-	_highlight_grand_piano_range    = false;
-	_print_note_label               = false;
+	_highlight_grand_piano_range    = true;
+	_annotate_layout                = false;
+	_annotate_octave                = false;
 	_octave                         = 4;
 	_octave_range                   = 7;
 	_note_being_pressed_using_mouse = -1;
@@ -804,13 +802,6 @@ APianoKeyboard::~APianoKeyboard ()
 }
 
 void
-APianoKeyboard::set_keyboard_cue (bool enabled)
-{
-	_enable_keyboard_cue = enabled;
-	queue_draw ();
-}
-
-void
 APianoKeyboard::set_grand_piano_highlight (bool enabled)
 {
 	_highlight_grand_piano_range = enabled;
@@ -818,9 +809,16 @@ APianoKeyboard::set_grand_piano_highlight (bool enabled)
 }
 
 void
-APianoKeyboard::show_note_label (bool enabled)
+APianoKeyboard::set_annotate_layout (bool enabled)
 {
-	_print_note_label = enabled;
+	_annotate_layout = enabled;
+	queue_draw ();
+}
+
+void
+APianoKeyboard::set_annotate_octave (bool enabled)
+{
+	_annotate_octave = enabled;
 	queue_draw ();
 }
 
