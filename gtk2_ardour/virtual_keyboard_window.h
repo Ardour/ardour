@@ -114,9 +114,6 @@ private:
 	bool toggle_config (GdkEventButton*);
 	bool toggle_bankpatch (GdkEventButton*);
 	bool toggle_yaxis_velocity (GdkEventButton*);
-	bool toggle_highlight_piano (GdkEventButton*);
-	bool toggle_highlight_key (GdkEventButton*);
-	bool toggle_note_label (GdkEventButton*);
 	bool send_panic_message (GdkEventButton*);
 
 	APianoKeyboard  _piano;
@@ -134,11 +131,9 @@ private:
 	ArdourWidgets::ArdourButton   _cfg_display;
 	ArdourWidgets::ArdourButton   _pgm_display;
 	ArdourWidgets::ArdourButton   _yaxis_velocity;
-	ArdourWidgets::ArdourButton   _highlight_grand_piano;
-	ArdourWidgets::ArdourButton   _highlight_key_range;
-	ArdourWidgets::ArdourButton   _show_note_label;
 	ArdourWidgets::ArdourButton   _send_panic;
 	ArdourWidgets::ArdourDropdown _keyboard_layout;
+	ArdourWidgets::ArdourDropdown _keyboard_annotations;
 
 	Gtk::SpinButton _piano_key_velocity;
 	Gtk::SpinButton _piano_min_velocity;

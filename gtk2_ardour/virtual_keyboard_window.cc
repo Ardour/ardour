@@ -18,9 +18,13 @@
 
 #include <gtkmm/box.h>
 
+
+#include "pbd/convert.h"
+
 #include "ardour/async_midi_port.h"
 #include "ardour/session.h"
-#include "pbd/convert.h"
+
+#include "gtkmm2ext/utils.h"
 #include "widgets/tooltips.h"
 
 #include "ardour_ui.h"
@@ -44,9 +48,6 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	, _cfg_display ("Config", ArdourButton::led_default_elements)
 	, _pgm_display ("Bank/Patch", ArdourButton::led_default_elements)
 	, _yaxis_velocity ("Y-Axis", ArdourButton::led_default_elements)
-	, _highlight_grand_piano ("Grand Piano", ArdourButton::led_default_elements)
-	, _highlight_key_range ("Key Bindings", ArdourButton::led_default_elements)
-	, _show_note_label ("Label C Key", ArdourButton::led_default_elements)
 	, _send_panic ("Panic", ArdourButton::default_elements)
 	, _piano_key_velocity (*manage (new Adjustment (100, 1, 127, 1, 16)))
 	, _piano_min_velocity (*manage (new Adjustment (  1, 1, 127, 1, 16)))
@@ -60,6 +61,8 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_piano.set_keyboard_layout (APianoKeyboard::QWERTY);
 	_piano.set_annotate_octave (true);
 	_piano.set_grand_piano_highlight (false);
+	_piano.set_annotate_layout (true);
+	_piano.set_annotate_octave (true);
 
 	for (int c = 0; c < 16; ++c) {
 		char buf[16];
@@ -73,15 +76,14 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	}
 
 	using namespace Menu_Helpers;
-	_keyboard_layout.AddMenuElem (MenuElem ("QWERTY",
-	                                        sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "QWERTY")));
-	_keyboard_layout.AddMenuElem (MenuElem ("QWERTZ",
-	                                        sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "QWERTZ")));
-	_keyboard_layout.AddMenuElem (MenuElem ("AZERTY",
-	                                        sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "AZERTY")));
-	_keyboard_layout.AddMenuElem (MenuElem ("DVORAK",
-	                                        sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "DVORAK")));
+	_keyboard_layout.AddMenuElem (MenuElem ("QWERTY", sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "QWERTY")));
+	_keyboard_layout.AddMenuElem (MenuElem ("QWERTZ", sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "QWERTZ")));
+	_keyboard_layout.AddMenuElem (MenuElem ("AZERTY", sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "AZERTY")));
+	_keyboard_layout.AddMenuElem (MenuElem ("DVORAK", sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "DVORAK")));
+	_keyboard_layout.AddMenuElem (MenuElem ("QWERTY Single", sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "QWERTY Single")));
+	_keyboard_layout.AddMenuElem (MenuElem ("QWERTZ Single", sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "QWERTZ Single")));
 
+	Gtkmm2ext::set_size_request_to_display_given_text_width (_keyboard_layout, "QWERTZ Single", 2, 0);
 	_keyboard_layout.set_active ("QWERTY");
 	_midi_channel.set_active ("1");
 	_transpose_output.set_active ("0");
@@ -89,9 +91,6 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_cfg_display.set_active (false);
 	_pgm_display.set_active (false);
 	_yaxis_velocity.set_active (false);
-	_highlight_grand_piano.set_active (false);
-	_highlight_key_range.set_active (false);
-	_show_note_label.set_active (true);
 
 	_send_panic.set_can_focus (false);
 
@@ -102,9 +101,6 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_pitch_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::pitch_slider_adjusted));
 	_pitchbend->ValueChanged.connect_same_thread (_cc_connections, boost::bind (&VirtualKeyboardWindow::pitch_bend_event_handler, this, _1));
 
-	set_tooltip (_highlight_grand_piano, "Shade keys outside the range of a Grand Piano (A0-C8).");
-	set_tooltip (_highlight_key_range, "When enabled, indicate keyboard-shortcuts on the piano-keys.");
-	set_tooltip (_show_note_label, "When enabled, print octave number on C-Keys");
 	set_tooltip (_yaxis_velocity, "When enabled, mouse-click y-axis position defines the velocity.");
 
 	set_tooltip (_piano_octave_key, "The center octave, and lowest octave for keyboard control. Change with Arrow left/right.");
@@ -122,32 +118,26 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 
 	/* config */
 	Table* cfg_tbl = manage (new Table);
-	cfg_tbl->attach (_yaxis_velocity,                      0,  1, 0, 1, SHRINK, SHRINK, 4, 0);
-	cfg_tbl->attach (*manage (new Label (_("Velocity:"))), 0,  1, 1, 2, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (_yaxis_velocity,                      0, 1, 0, 1, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (*manage (new Label (_("Velocity:"))), 0, 1, 1, 2, SHRINK, SHRINK, 4, 0);
 
-	cfg_tbl->attach (_piano_min_velocity,                  1,  2, 0, 1, SHRINK, SHRINK, 4, 0);
-	cfg_tbl->attach (*manage (new Label (_("Min"))),       1,  2, 1, 2, SHRINK, SHRINK, 4, 0);
-	cfg_tbl->attach (_piano_max_velocity,                  2,  3, 0, 1, SHRINK, SHRINK, 4, 0);
-	cfg_tbl->attach (*manage (new Label (_("Max"))),       2,  3, 1, 2, SHRINK, SHRINK, 4, 0);
-	cfg_tbl->attach (_piano_key_velocity,                  3,  4, 0, 1, SHRINK, SHRINK, 4, 0);
-	cfg_tbl->attach (*manage (new Label (_("Key"))),       3,  4, 1, 2, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (_piano_min_velocity,                  1, 2, 0, 1, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (*manage (new Label (_("Min"))),       1, 2, 1, 2, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (_piano_max_velocity,                  2, 3, 0, 1, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (*manage (new Label (_("Max"))),       2, 3, 1, 2, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (_piano_key_velocity,                  3, 4, 0, 1, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (*manage (new Label (_("Key"))),       3, 4, 1, 2, SHRINK, SHRINK, 4, 0);
 
-	cfg_tbl->attach (*manage (new ArdourVSpacer),          4,  5, 0, 2, SHRINK, FILL,   4, 0);
+	cfg_tbl->attach (*manage (new ArdourVSpacer),          4, 5, 0, 2, SHRINK, FILL,   4, 0);
 
-	cfg_tbl->attach (_piano_octave_key,                    5,  6, 0, 1, SHRINK, SHRINK, 4, 0);
-	cfg_tbl->attach (*manage (new Label (_("Octave"))),    5,  6, 1, 2, SHRINK, SHRINK, 4, 0);
-	cfg_tbl->attach (_piano_octave_range,                  6,  7, 0, 1, SHRINK, SHRINK, 4, 0);
-	cfg_tbl->attach (*manage (new Label (_("Range"))),     6,  7, 1, 2, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (_piano_octave_key,                    5, 6, 0, 1, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (*manage (new Label (_("Octave"))),    5, 6, 1, 2, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (_piano_octave_range,                  6, 7, 0, 1, SHRINK, SHRINK, 4, 0);
+	cfg_tbl->attach (*manage (new Label (_("Range"))),     6, 7, 1, 2, SHRINK, SHRINK, 4, 0);
 
-	cfg_tbl->attach (*manage (new ArdourVSpacer),          7,  8, 0, 2, SHRINK, FILL,   4, 0);
+	cfg_tbl->attach (*manage (new ArdourVSpacer),          7, 8, 0, 2, SHRINK, FILL,   4, 0);
 
-	cfg_tbl->attach (_highlight_grand_piano,               8,  9, 0, 1, FILL,   SHRINK, 4, 1);
-	cfg_tbl->attach (_highlight_key_range,                 8,  9, 1, 2, FILL,   SHRINK, 4, 1);
-
-	cfg_tbl->attach (*manage (new ArdourVSpacer),          9, 10, 0, 2, SHRINK, FILL,   4, 0);
-
-	cfg_tbl->attach (_show_note_label,                    10, 11, 0, 1, FILL,   SHRINK, 4, 1);
-	cfg_tbl->attach (_keyboard_layout,                    10, 11, 1, 2, FILL,   SHRINK, 4, 1);
+	cfg_tbl->attach (_keyboard_layout,                     8, 9, 0, 2, FILL,   SHRINK, 4, 1);
 	cfg_tbl->show_all ();
 
 	/* bank/patch */
@@ -246,9 +236,6 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_cfg_display.signal_button_release_event ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::toggle_config), false);
 	_pgm_display.signal_button_release_event ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::toggle_bankpatch), false);
 	_yaxis_velocity.signal_button_release_event ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::toggle_yaxis_velocity), false);
-	_highlight_grand_piano.signal_button_release_event ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::toggle_highlight_piano), false);
-	_highlight_key_range.signal_button_release_event ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::toggle_highlight_key), false);
-	_show_note_label.signal_button_release_event ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::toggle_note_label), false);
 	_send_panic.signal_button_release_event ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::send_panic_message), false);
 
 
@@ -287,9 +274,6 @@ VirtualKeyboardWindow::get_state ()
 {
 	XMLNode* node = new XMLNode (X_("VirtualKeyboard"));
 	node->set_property (X_("YAxisVelocity"), _yaxis_velocity.get_active ());
-	node->set_property (X_("HighlightGrandPiano"), _highlight_grand_piano.get_active ());
-	node->set_property (X_("HighlightKeyRange"), _highlight_key_range.get_active ());
-	node->set_property (X_("ShowNoteLabel"), _show_note_label.get_active ());
 	node->set_property (X_("Layout"), _keyboard_layout.get_text ());
 	node->set_property (X_("Channel"), _midi_channel.get_text ());
 	node->set_property (X_("Transpose"), _transpose_output.get_text ());
@@ -343,18 +327,6 @@ VirtualKeyboardWindow::set_state (const XMLNode& root)
 	bool a;
 	if (node->get_property (X_("YAxisVelocity"), a)) {
 		_yaxis_velocity.set_active (a);
-	}
-	if (node->get_property (X_("HighlightGrandPiano"), a)) {
-		_highlight_grand_piano.set_active (a);
-		_piano.set_grand_piano_highlight (a);
-	}
-	if (node->get_property (X_("HighlightKeyRange"), a)) {
-		_highlight_key_range.set_active (a);
-		_piano.set_annotate_layout (a);
-	}
-	if (node->get_property (X_("ShowNoteLabel"), a)) {
-		_show_note_label.set_active (a);
-		_piano.set_annotate_octave (a);
 	}
 
 	int v;
@@ -423,6 +395,7 @@ VirtualKeyboardWindow::on_key_press_event (GdkEventKey* ev)
 void
 VirtualKeyboardWindow::select_keyboard_layout (std::string const& l)
 {
+	_keyboard_layout.set_active (l);
 	if (l == "QWERTY") {
 		_piano.set_keyboard_layout (APianoKeyboard::QWERTY);
 	} else if (l == "QWERTZ") {
@@ -431,7 +404,14 @@ VirtualKeyboardWindow::select_keyboard_layout (std::string const& l)
 		_piano.set_keyboard_layout (APianoKeyboard::AZERTY);
 	} else if (l == "DVORAK") {
 		_piano.set_keyboard_layout (APianoKeyboard::DVORAK);
+	} else if (l == "QWERTY Single") {
+		_piano.set_keyboard_layout (APianoKeyboard::S_QWERTY);
+	} else if (l == "QWERTZ Single") {
+		_piano.set_keyboard_layout (APianoKeyboard::S_QWERTZ);
+	} else {
+	_keyboard_layout.set_active ("QWERTY");
 	}
+	_piano.grab_focus ();
 }
 
 bool
@@ -471,6 +451,7 @@ void
 VirtualKeyboardWindow::update_octave_range ()
 {
 	_piano.set_octave_range (_piano_octave_range.get_value_as_int ());
+	_piano.set_grand_piano_highlight (_piano_octave_range.get_value_as_int () > 3);
 	_piano.grab_focus ();
 }
 
@@ -479,33 +460,6 @@ VirtualKeyboardWindow::toggle_yaxis_velocity (GdkEventButton*)
 {
 	_yaxis_velocity.set_active (!_yaxis_velocity.get_active ());
 	update_velocity_settings (0);
-	return false;
-}
-
-bool
-VirtualKeyboardWindow::toggle_highlight_piano (GdkEventButton*)
-{
-	bool a = !_highlight_grand_piano.get_active ();
-	_highlight_grand_piano.set_active (a);
-	_piano.set_grand_piano_highlight (a);
-	return false;
-}
-
-bool
-VirtualKeyboardWindow::toggle_highlight_key (GdkEventButton*)
-{
-	bool a = !_highlight_key_range.get_active ();
-	_highlight_key_range.set_active (a);
-	_piano.set_annotate_layout (a);
-	return false;
-}
-
-bool
-VirtualKeyboardWindow::toggle_note_label (GdkEventButton*)
-{
-	bool a = !_show_note_label.get_active ();
-	_show_note_label.set_active (a);
-	_piano.set_annotate_octave (a);
 	return false;
 }
 

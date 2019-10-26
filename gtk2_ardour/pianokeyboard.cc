@@ -734,6 +734,12 @@ APianoKeyboard::on_size_request (Gtk::Requisition* requisition)
 {
 	requisition->width  = PIANO_KEYBOARD_DEFAULT_WIDTH;
 	requisition->height = PIANO_KEYBOARD_DEFAULT_HEIGHT;
+	if (_annotate_layout) {
+		requisition->height += 16;
+	}
+	if (_annotate_octave) {
+		requisition->height += 24;
+	}
 }
 
 int
