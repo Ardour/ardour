@@ -218,14 +218,10 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiSta
 
 		}
 
-		uint8_t* write_loc = dst.reserve (evtime, size);
-
-		if (write_loc == 0) {
+		if (!dst.push_back (evtime, size, addr)) {
 			DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("MidiRingBuffer: overflow in destination MIDI buffer, stopped after %1 events, dst size = %2\n", count, dst.size()));
 			break;
 		}
-
-		memcpy (write_loc, addr, size);
 
 		DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("read event sz %1 @ %2\n", size, unadjusted_time));
 		tracker.track (addr);
