@@ -462,6 +462,65 @@ APianoKeyboard::bind_keys_dvorak ()
 #endif
 }
 
+void
+APianoKeyboard::bind_keys_basic_qwerty ()
+{
+	clear_notes ();
+
+	bind_key ("space", 128);
+
+	/* simple - middle rows only */
+	bind_key ("a", 12); /* C0 */
+	bind_key ("w", 13);
+	bind_key ("s", 14);
+	bind_key ("e", 15);
+	bind_key ("d", 16);
+	bind_key ("f", 17);
+	bind_key ("t", 18);
+	bind_key ("g", 19);
+	bind_key ("y", 20);
+	bind_key ("h", 21);
+	bind_key ("u", 22);
+	bind_key ("j", 23);
+
+	bind_key ("k", 24); /* C1 */
+	bind_key ("o", 25);
+	bind_key ("l", 26);
+	bind_key ("p", 27);
+	bind_key ("semicolon", 28);
+	bind_key ("apostrophe", 29);
+}
+
+void
+APianoKeyboard::bind_keys_basic_qwertz ()
+{
+	clear_notes ();
+
+	bind_key ("space", 128);
+
+	/* simple - middle rows only */
+	bind_key ("a", 12); /* C0 */
+	bind_key ("w", 13);
+	bind_key ("s", 14);
+	bind_key ("e", 15);
+	bind_key ("d", 16);
+	bind_key ("f", 17);
+	bind_key ("t", 18);
+	bind_key ("g", 19);
+	bind_key ("z", 20);
+	bind_key ("h", 21);
+	bind_key ("u", 22);
+	bind_key ("j", 23);
+
+	bind_key ("k", 24); /* C1 */
+	bind_key ("o", 25);
+	bind_key ("l", 26);
+	bind_key ("p", 27);
+	bind_key ("semicolon", 28);
+	bind_key ("apostrophe", 29);
+}
+
+
 bool
 APianoKeyboard::on_key_press_event (GdkEventKey* event)
 {
@@ -825,7 +884,6 @@ APianoKeyboard::set_annotate_octave (bool enabled)
 void
 APianoKeyboard::set_monophonic (bool monophonic)
 {
-
 	_monophonic = monophonic;
 }
 
@@ -977,6 +1035,12 @@ APianoKeyboard::set_keyboard_layout (Layout layout)
 			break;
 		case DVORAK:
 			bind_keys_dvorak ();
+			break;
+		case S_QWERTY:
+			bind_keys_basic_qwerty ();
+			break;
+		case S_QWERTZ:
+			bind_keys_basic_qwertz ();
 			break;
 	}
 	queue_draw ();

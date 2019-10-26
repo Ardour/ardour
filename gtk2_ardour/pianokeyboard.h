@@ -39,7 +39,9 @@ public:
 		QWERTY,
 		QWERTZ,
 		AZERTY,
-		DVORAK
+		DVORAK,
+		S_QWERTY,
+		S_QWERTZ
 	};
 
 	void sustain_press ();
@@ -89,6 +91,9 @@ private:
 	void bind_keys_qwertz ();
 	void bind_keys_azerty ();
 	void bind_keys_dvorak ();
+
+	void bind_keys_basic_qwerty ();
+	void bind_keys_basic_qwertz ();
 
 	int get_note_for_xy (int x, int y) const;
 	int get_velocity_for_note_at_y (int note, int y) const;
