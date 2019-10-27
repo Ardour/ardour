@@ -141,6 +141,7 @@ private:
 
 	std::map<std::string, int> _key_bindings;  /**< Table used to translate from PC keyboard character to MIDI note number. */
 	std::map<int, std::string> _note_bindings; /**< Table to translate from MIDI note number to PC keyboard character. */
+	std::map<std::string, int> _note_stack;
 
 	/* these are only valid during expose/draw */
 	PangoFontDescription* _font_cue;

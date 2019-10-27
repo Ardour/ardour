@@ -293,7 +293,7 @@ APianoKeyboard::stop_sustained_notes ()
 int
 APianoKeyboard::key_binding (const char* key) const
 {
-	if (_key_bindings.find (key) != _key_bindings.end ()) {
+	if (key && _key_bindings.find (key) != _key_bindings.end ()) {
 		return _key_bindings.at (key);
 	}
 	return -1;
@@ -520,14 +520,9 @@ APianoKeyboard::bind_keys_basic_qwertz ()
 	bind_key ("apostrophe", 29);
 }
 
-
-bool
-APianoKeyboard::on_key_press_event (GdkEventKey* event)
+static char*
+get_keycode (GdkEventKey* event)
 {
-	int   note;
-	char* key;
-	guint keyval;
-
 	GdkKeymapKey kk;
 
 	/* We're not using event->keyval, because we need keyval with level set to 0.
@@ -536,45 +531,56 @@ APianoKeyboard::on_key_press_event (GdkEventKey* event)
 	kk.level   = 0;
 	kk.group   = 0;
 
-	keyval = gdk_keymap_lookup_key (NULL, &kk);
+	guint keyval = gdk_keymap_lookup_key (NULL, &kk);
+	return gdk_keyval_name (gdk_keyval_to_lower (keyval));
+}
 
-	key = gdk_keyval_name (gdk_keyval_to_lower (keyval));
-
-	if (key == NULL) {
-		return false;
-	}
-
-	note = key_binding (key);
+bool
+APianoKeyboard::on_key_press_event (GdkEventKey* event)
+{
+	char* key = get_keycode (event);
+	int note = key_binding (key);
 
 	if (note < 0) {
 		return false;
 	}
 
 	if (note == 128) {
-		if (event->type == GDK_KEY_RELEASE) {
-			Rest (); /* EMIT SIGNAL */
-			return true;
-		}
+		/* Rest is used on release */
 		return false;
 	}
 
 	note += _octave * 12;
 
+	assert (key);
 	assert (note >= 0);
 	assert (note < NNOTES);
 
-	if (event->type == GDK_KEY_PRESS) {
-		press_key (note, _key_velocity);
-	} else if (event->type == GDK_KEY_RELEASE) {
-		release_key (note);
-	}
+	_note_stack[key] = note;
+
+	press_key (note, _key_velocity);
+
 	return true;
 }
 
 bool
 APianoKeyboard::on_key_release_event (GdkEventKey* event)
 {
-	return on_key_press_event (event);
+	char* key = get_keycode (event);
+
+	if (key_binding (key) == 128) {
+		Rest (); /* EMIT SIGNAL */
+		return true;
+	}
+
+	if (_note_stack.find (key) == _note_stack.end ()) {
+		return key_binding (key) != -1;
+	}
+
+	release_key (_note_stack.at(key));
+	_note_stack.erase (key);
+
+	return true;
 }
 
 int
@@ -946,8 +952,6 @@ APianoKeyboard::set_note_off (int note)
 void
 APianoKeyboard::set_octave (int octave)
 {
-	stop_unsustained_notes ();
-
 	if (octave < -1) {
 		octave = -1;
 	} else if (octave > 7) {
@@ -961,8 +965,6 @@ APianoKeyboard::set_octave (int octave)
 void
 APianoKeyboard::set_octave_range (int octave_range)
 {
-	stop_unsustained_notes ();
-
 	if (octave_range < 2) {
 		octave_range = 2;
 	}
