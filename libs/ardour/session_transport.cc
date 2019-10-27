@@ -764,7 +764,13 @@ Session::butler_completed_transport_work ()
 		set_post_transport_work (ptw);
 	}
 
-	ptw = PostTransportWork (ptw & ~(PostTransportAdjustCaptureBuffering|PostTransportOverWrite));
+	bool start_after_butler_done_msg = false;
+
+	if (ptw & PostTransportReverse) {
+		start_after_butler_done_msg = true;
+	}
+
+	ptw = PostTransportWork (ptw & ~(PostTransportAdjustCaptureBuffering|PostTransportOverWrite|PostTransportReverse));
 	set_post_transport_work (ptw);
 
 	set_next_event ();
@@ -774,6 +780,13 @@ Session::butler_completed_transport_work ()
 	}
 
 	DiskReader::dec_no_disk_output ();
+
+	if (start_after_butler_done_msg) {
+		if (_transport_speed) {
+			/* reversal is done ... tell TFSM that it is time to start*/
+			TFSM_EVENT (TransportFSM::StartTransport);
+		}
+	}
 }
 
 void
