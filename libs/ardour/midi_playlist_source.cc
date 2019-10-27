@@ -139,7 +139,19 @@ MidiPlaylistSource::read_unlocked (const Lock& lock,
 		return 0;
 	}
 
-	return mp->read (dst, start, cnt, loop_range);
+	/* XXX paul says on Oct 26 2019:
+
+	   rgareus: so to clarify now that i have better perspective: the API i want to get rid of is MidiPlaylist::read() ; everything that used it (i.e. the DiskReader) should use MidiPlaylist::rendered()->read()
+	   rgareus: but a "read" operation is also a "write" operation: you have to put the data somewhere
+	   rgareus: the only other user of MidiPlaylist::read() was MidiPlaylistSource (unsurprisingly), which as I noted is not even (really) used
+	   rgareus: ::rendered() returns a ptr-to-RT_MidiBuffer, which has a read method which expects to write into a MidiBuffer, using push_back()
+	   rgareus: but MidiPlaylistSource::read() is given an EventSink<samplepos_t> as the destination, and this does not (currently) have ::push_back(), only ::write() (which is willing to deal with inserts rather than appends)
+	   rgareus: so, this is the API "mess" I'm trying to clean up. simple solution: since we don't use MidiPlaylistSource just comment out the line and forget about it for now, then remove MidiPlaylist::read() and move on
+
+	   This represents that decision, for now.
+	*/
+
+	return cnt; // mp->read (dst, start, cnt, loop_range);
 }
 
 samplecnt_t
@@ -190,4 +202,3 @@ MidiPlaylistSource::empty () const
 {
 	return !_playlist || _playlist->empty();
 }
-
