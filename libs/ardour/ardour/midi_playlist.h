@@ -71,25 +71,6 @@ public:
 
 	~MidiPlaylist ();
 
-	/** Read a range from the playlist into an event sink.
-	 *
-	 * @param buf Destination for events.
-	 * @param start First sample of read range.
-	 * @param cnt Number of samples in read range.
-	 * @param loop_range If non-null, all event times will be mapped into this loop range.
-	 * @param chan_n Must be 0 (this is the audio-style "channel", where each
-	 * channel is backed by a separate region, not MIDI channels, which all
-	 * exist in the same region and are not handled here).
-	 * @param filter Channel filter to apply or NULL to disable filter
-	 * @return The number of samples read (time, not an event count).
-	 */
-	samplecnt_t read (Evoral::EventSink<samplepos_t>& buf,
-	                 samplepos_t                      start,
-	                 samplecnt_t                      cnt,
-	                 Evoral::Range<samplepos_t>*      loop_range,
-	                 uint32_t                         chan_n = 0,
-	                 MidiChannelFilter*               filter = NULL);
-
 	void render (MidiChannelFilter*);
 	RTMidiBuffer* rendered();
 

@@ -497,7 +497,9 @@ MidiTrack::export_stuff (BufferSet&                   buffers,
 	mpl->reset_note_trackers (); // TODO once at start and end ?
 
 	buffers.get_midi(0).clear();
-	if (mpl->read(buffers.get_midi(0), start, nframes, 0) != nframes) {
+	MidiStateTracker ignored;
+
+	if (mpl->rendered()->read(buffers.get_midi(0), start, nframes, ignored, 0) != nframes) {
 		return -1;
 	}
 
