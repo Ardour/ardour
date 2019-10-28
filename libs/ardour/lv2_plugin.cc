@@ -182,6 +182,7 @@ public:
 	LilvNode* time_Position;
 	LilvNode* time_beatsPerMin;
 	LilvNode* ui_GtkUI;
+	LilvNode* ui_X11UI;
 	LilvNode* ui_external;
 	LilvNode* ui_externalkx;
 	LilvNode* units_hz;
@@ -848,18 +849,35 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	if (lilv_uis_size(uis) > 0) {
 #ifdef HAVE_SUIL
 		// Look for embeddable UI
-		LILV_FOREACH(uis, u, uis) {
-			const LilvUI*   this_ui      = lilv_uis_get(uis, u);
-			const LilvNode* this_ui_type = NULL;
-			if (lilv_ui_is_supported(this_ui,
-			                         suil_ui_supported,
-			                         _world.ui_GtkUI,
-			                         &this_ui_type)) {
-				// TODO: Multiple UI support
-				_impl->ui      = this_ui;
-				_impl->ui_type = this_ui_type;
+		// TODO: Multiple UI support
+		const LilvUI*   this_ui      = NULL;
+		const LilvNode* this_ui_type = NULL;
+		// Always prefer X11 UIs...
+		LILV_FOREACH(uis, i, uis) {
+			const LilvUI* ui = lilv_uis_get(uis, i);
+			if (lilv_ui_is_a(ui, _world.ui_X11UI)) {
+				this_ui      = ui;
+				this_ui_type = _world.ui_X11UI;
 				break;
 			}
+		}
+		// then anything else...
+		if (this_ui_type == NULL) {
+			LILV_FOREACH(uis, i, uis) {
+				const LilvUI* ui = lilv_uis_get(uis, i);
+				if (lilv_ui_is_supported(ui,
+									suil_ui_supported,
+									_world.ui_GtkUI,
+									&this_ui_type)) {
+					this_ui = ui;
+					break;
+				}
+			}
+		}
+		// Found one that is supported by SUIL?...
+		if (this_ui_type != NULL) {
+			_impl->ui      = this_ui;
+			_impl->ui_type = this_ui_type;
 		}
 #else
 		// Look for Gtk native UI
@@ -3266,6 +3284,7 @@ LV2World::LV2World()
 	time_Position      = lilv_new_uri(world, LV2_TIME__Position);
 	time_beatsPerMin   = lilv_new_uri(world, LV2_TIME__beatsPerMinute);
 	ui_GtkUI           = lilv_new_uri(world, LV2_UI__GtkUI);
+	ui_X11UI           = lilv_new_uri(world, LV2_UI__X11UI);
 	ui_external        = lilv_new_uri(world, "http://lv2plug.in/ns/extensions/ui#external");
 	ui_externalkx      = lilv_new_uri(world, "http://kxstudio.sf.net/ns/lv2ext/external-ui#Widget");
 	units_unit         = lilv_new_uri(world, LV2_UNITS__unit);
@@ -3318,6 +3337,7 @@ LV2World::~LV2World()
 	lilv_node_free(units_render);
 	lilv_node_free(ui_externalkx);
 	lilv_node_free(ui_external);
+	lilv_node_free(ui_X11UI);
 	lilv_node_free(ui_GtkUI);
 	lilv_node_free(time_beatsPerMin);
 	lilv_node_free(time_Position);
