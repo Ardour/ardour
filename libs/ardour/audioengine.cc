@@ -1299,6 +1299,7 @@ AudioEngine::thread_init_callback (void* arg)
 int
 AudioEngine::sync_callback (TransportState state, samplepos_t position)
 {
+	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose (X_("sync callback %1, %2\n"), state, position));
 	if (_session) {
 		return _session->backend_sync_callback (state, position);
 	}
@@ -1308,12 +1309,14 @@ AudioEngine::sync_callback (TransportState state, samplepos_t position)
 void
 AudioEngine::freewheel_callback (bool onoff)
 {
+	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose (X_("freewheel callback onoff %1\n"), onoff));
 	_freewheeling = onoff;
 }
 
 void
 AudioEngine::latency_callback (bool for_playback)
 {
+	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose (X_("latency callback playback ? %1\n"), for_playback));
 	if (_session) {
 		_session->update_latency (for_playback);
 	}
@@ -1330,6 +1333,7 @@ AudioEngine::update_latencies ()
 void
 AudioEngine::halted_callback (const char* why)
 {
+	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose (X_("halted callback why: [%1]\n"), why));
 	if (_in_destructor) {
 		/* everything is under control */
 		return;

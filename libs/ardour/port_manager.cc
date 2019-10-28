@@ -656,6 +656,8 @@ PortManager::reconnect_ports ()
 void
 PortManager::connect_callback (const string& a, const string& b, bool conn)
 {
+	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose (X_("connect callback %1 + %2 connected ? %3\n"), a, b, conn));
+
 	boost::shared_ptr<Port> port_a;
 	boost::shared_ptr<Port> port_b;
 	Ports::iterator x;
@@ -695,6 +697,8 @@ PortManager::connect_callback (const string& a, const string& b, bool conn)
 void
 PortManager::registration_callback ()
 {
+	DEBUG_TRACE (DEBUG::BackendCallbacks, "port registration callback\n");
+
 	if (!_port_remove_in_progress) {
 
 		{
@@ -767,6 +771,8 @@ PortManager::my_name() const
 int
 PortManager::graph_order_callback ()
 {
+	DEBUG_TRACE (DEBUG::BackendCallbacks, "graph order callback\n");
+
 	if (!_port_remove_in_progress) {
 		GraphReordered(); /* EMIT SIGNAL */
 	}
