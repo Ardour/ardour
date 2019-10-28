@@ -3013,6 +3013,16 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 		error << _("Adding new tracks/busses failed") << endmsg;
 	}
 
+	/* During the route additions there will have been potentially several
+	 * signals emitted to indicate the new graph. ::graph_reordered() will
+	 * have ignored all of them because _adding_routes_in_progress was
+	 * true.
+	 *
+	 * We still need the effects of ::graph_reordered(), but we didn't want
+	 * it called multiple times during the addition of multiple routes. Now
+	 * that the addition is done, call it explicitly.
+	 */
+
 	graph_reordered ();
 
 	set_dirty();
