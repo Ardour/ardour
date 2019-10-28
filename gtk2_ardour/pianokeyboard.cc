@@ -60,7 +60,9 @@ APianoKeyboard::annotate_layout (cairo_t* cr, int note) const
 	if (nkey < 0 || nkey >= NNOTES) {
 		return;
 	}
-	if (_note_bindings.find (nkey) == _note_bindings.end ()) {
+
+	std::map<int, std::string>::const_iterator kv = _note_bindings.find (nkey);
+	if (kv == _note_bindings.end ()) {
 		return;
 	}
 
@@ -71,7 +73,7 @@ APianoKeyboard::annotate_layout (cairo_t* cr, int note) const
 	int  tw, th;
 	char buf[32];
 	snprintf (buf, 16, "%lc",
-			gdk_keyval_to_unicode (gdk_keyval_to_upper (gdk_keyval_from_name (_note_bindings.at(nkey).c_str ()))));
+			gdk_keyval_to_unicode (gdk_keyval_to_upper (gdk_keyval_from_name (kv->second.c_str ()))));
 	PangoLayout* pl = pango_cairo_create_layout (cr);
 	pango_layout_set_font_description (pl, _font_cue);
 	pango_layout_set_text (pl, buf, -1);
@@ -293,8 +295,9 @@ APianoKeyboard::stop_sustained_notes ()
 int
 APianoKeyboard::key_binding (const char* key) const
 {
-	if (key && _key_bindings.find (key) != _key_bindings.end ()) {
-		return _key_bindings.at (key);
+	std::map<std::string, int>::const_iterator kv;
+	if (key && (kv = _key_bindings.find (key)) != _key_bindings.end ()) {
+		return kv->second;
 	}
 	return -1;
 }
@@ -568,16 +571,21 @@ APianoKeyboard::on_key_release_event (GdkEventKey* event)
 {
 	char* key = get_keycode (event);
 
+	if (!key) {
+		return false;
+	}
+
 	if (key_binding (key) == 128) {
 		Rest (); /* EMIT SIGNAL */
 		return true;
 	}
 
-	if (_note_stack.find (key) == _note_stack.end ()) {
+	std::map<std::string, int>::const_iterator kv = _note_stack.find (key);
+	if (kv == _note_stack.end ()) {
 		return key_binding (key) != -1;
 	}
 
-	release_key (_note_stack.at(key));
+	release_key (kv->second);
 	_note_stack.erase (key);
 
 	return true;
