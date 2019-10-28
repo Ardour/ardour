@@ -855,15 +855,18 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		// Always prefer X11 UIs...
 		LILV_FOREACH(uis, i, uis) {
 			const LilvUI* ui = lilv_uis_get(uis, i);
-			if (lilv_ui_is_a(ui, _world.ui_X11UI)) {
-				this_ui      = ui;
-				this_ui_type = _world.ui_X11UI;
+			if (lilv_ui_is_a(ui, _world.ui_X11UI) &&
+			    lilv_ui_is_supported (ui,
+			                          suil_ui_supported,
+			                          world.ui_GtkUI,
+			                          &this_ui_type)) {
+				this_ui = ui;
 				break;
 			}
 		}
 #endif
-		// then anything else...
-		if (this_ui_type == NULL) {
+		// Then anything else...
+		if (this_ui == NULL) {
 			LILV_FOREACH(uis, i, uis) {
 				const LilvUI* ui = lilv_uis_get(uis, i);
 				if (lilv_ui_is_supported (ui,
@@ -876,7 +879,7 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 			}
 		}
 		// Found one that is supported by SUIL?...
-		if (this_ui_type != NULL) {
+		if (this_ui != NULL) {
 			_impl->ui      = this_ui;
 			_impl->ui_type = this_ui_type;
 		}
