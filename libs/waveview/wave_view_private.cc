@@ -379,9 +379,14 @@ WaveViewThreads::start_threads ()
 {
 	assert (!_threads.size());
 
-	int num_cpus = hardware_concurrency ();
+	const int num_cpus = hardware_concurrency ();
 
-	uint32_t num_threads = std::max (1, num_cpus - 1);
+	/* the upper limit of 8 here is entirely arbitrary. It just doesn't
+	 * seem worthwhile having "ncpus" of low priority threads for
+	 * rendering waveforms into the cache.
+	 */
+
+	uint32_t num_threads = std::min (8, std::max (1, num_cpus - 1));
 
 	for (uint32_t i = 0; i != num_threads; ++i) {
 		boost::shared_ptr<WaveViewDrawingThread> new_thread (new WaveViewDrawingThread ());
