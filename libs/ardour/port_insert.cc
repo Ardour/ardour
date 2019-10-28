@@ -236,7 +236,7 @@ PortInsert::signal_latency() const
 
 	if (_measured_latency == 0) {
 		return _session.engine().samples_per_cycle()
-		       + _input->connected_latency (false);
+		       + _input->connected_latency (false)
 		       + _output->connected_latency (true);
 	} else {
 		return _measured_latency;
