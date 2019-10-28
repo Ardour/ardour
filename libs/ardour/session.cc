@@ -6534,6 +6534,9 @@ Session::update_latency_compensation (bool force_whole_graph)
 		 * those cases this call will return until the backend latency
 		 * callback is complete.
 		 */
+		if (!AudioEngine::instance()->in_process_thread()) {
+			_engine.update_latencies ();
+		}
 	} else {
 		DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: directly apply to routes\n");
 		boost::shared_ptr<RouteList> r = routes.reader ();
