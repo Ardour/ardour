@@ -1535,7 +1535,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 			(*i)->non_realtime_transport_stop (_transport_sample, !(ptw & PostTransportLocate));
 		}
 
-		update_latency_compensation ();
+		update_latency_compensation (false, false);
 	}
 
 	/* If we are not synced to a "true" external master, and we're not
@@ -1920,7 +1920,7 @@ Session::route_processors_changed (RouteProcessorChange c)
 	}
 
 	resort_routes ();
-	update_latency_compensation ();
+	update_latency_compensation (false, false);
 
 	set_dirty ();
 }

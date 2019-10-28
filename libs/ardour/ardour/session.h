@@ -1238,7 +1238,7 @@ protected:
 	void set_sample_rate (samplecnt_t nframes);
 
 	friend class Route;
-	void update_latency_compensation (bool force = false);
+	void update_latency_compensation (bool force, bool called_from_backend);
 
 	/* transport API */
 
@@ -1401,7 +1401,7 @@ private:
 	boost::scoped_ptr<SessionDirectory> _session_dir;
 
 	void hookup_io ();
-	void graph_reordered ();
+	void graph_reordered (bool called_from_backend);
 
 	/** current snapshot name, without the .ardour suffix */
 	void set_snapshot_name (const std::string &);

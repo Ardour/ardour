@@ -1343,7 +1343,7 @@ Session::hookup_io ()
 	   graph reorder event.
 	*/
 
-	graph_reordered ();
+	graph_reordered (false);
 
 	/* update the full solo state, which can't be
 	   correctly determined on a per-route basis, but
@@ -3023,7 +3023,7 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 	 * that the addition is done, call it explicitly.
 	 */
 
-	graph_reordered ();
+	graph_reordered (false);
 
 	set_dirty();
 
@@ -3251,7 +3251,7 @@ Session::add_internal_send (boost::shared_ptr<Route> dest, boost::shared_ptr<Pro
 
 	sender->add_aux_send (dest, before);
 
-	graph_reordered ();
+	graph_reordered (false);
 }
 
 void
@@ -3341,7 +3341,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 	}
 
 	update_route_solo_state ();
-	update_latency_compensation ();
+	update_latency_compensation (false, false);
 	set_dirty();
 
 	/* Re-sort routes to remove the graph's current references to the one that is
@@ -5213,7 +5213,7 @@ Session::is_auditioning () const
 }
 
 void
-Session::graph_reordered ()
+Session::graph_reordered (bool called_from_backend)
 {
 	/* don't do this stuff if we are setting up connections
 	   from a set_state() call or creating new tracks. Ditto for deletion.
@@ -5228,7 +5228,7 @@ Session::graph_reordered ()
 	/* force all diskstreams to update their capture offset values to
 	 * reflect any changes in latencies within the graph.
 	 */
-	update_latency_compensation (true);
+	update_latency_compensation (true, called_from_backend);
 }
 
 /** @return Number of samples that there is disk space available to write,
@@ -6491,7 +6491,7 @@ Session::set_worst_input_latency ()
 }
 
 void
-Session::update_latency_compensation (bool force_whole_graph)
+Session::update_latency_compensation (bool force_whole_graph, bool called_from_backend)
 {
 	/* Called to update Ardour's internal latency values and compensation
 	 * planning. Typically case is from within ::graph_reordered()
@@ -6519,8 +6519,11 @@ Session::update_latency_compensation (bool force_whole_graph)
 
 	if (some_track_latency_changed || force_whole_graph)  {
 		DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: delegate to engine\n");
+
 		/* cannot hold lock while engine initiates a full latency callback */
+
 		lx.release ();
+
 		/* next call will ask the backend up update its latencies.
 		 *
 		 * The semantics of how the backend does this are not well
@@ -6533,10 +6536,17 @@ Session::update_latency_compensation (bool force_whole_graph)
 		 * this call. Others (JACK1) will do so synchronously, and in
 		 * those cases this call will return until the backend latency
 		 * callback is complete.
+		 *
+		 * Further, if this is called as part of a backend callback,
+		 * then we have to follow the JACK1 rule that we cannot call
+		 * back into the backend during such a callback (otherwise
+		 * deadlock ensues).
 		 */
-		if (!AudioEngine::instance()->in_process_thread()) {
+
+		if (!called_from_backend) {
 			_engine.update_latencies ();
 		}
+
 	} else {
 		DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: directly apply to routes\n");
 		boost::shared_ptr<RouteList> r = routes.reader ();
@@ -6825,7 +6835,7 @@ Session::auto_connect_thread_run ()
 			 */
 			while (g_atomic_int_and (&_latency_recompute_pending, 0)) {
 				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-				update_latency_compensation ();
+				update_latency_compensation (false, false);
 			}
 		}
 
