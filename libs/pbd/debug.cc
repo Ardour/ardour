@@ -60,6 +60,7 @@ DebugBits PBD::DEBUG::Timing = PBD::new_debug_bit ("timing");
 DebugBits PBD::DEBUG::Threads = PBD::new_debug_bit ("threads");
 DebugBits PBD::DEBUG::Locale = PBD::new_debug_bit ("locale");
 DebugBits PBD::DEBUG::StringConvert = PBD::new_debug_bit ("stringconvert");
+DebugBits PBD::DEBUG::DebugTimestamps = PBD::new_debug_bit ("debugtimestamps");
 
 /* These are debug bits that are used by backends. Since these are loaded dynamically,
    after command-line parsing, defining them in code that is part of the backend
@@ -98,6 +99,9 @@ PBD::new_debug_bit (const char* name)
 void
 PBD::debug_print (const char* prefix, string str)
 {
+	if ((PBD::debug_bits & DEBUG::DebugTimestamps).any()) {
+		cout << g_get_monotonic_time() << ' ';
+	}
 	cout << prefix << ": " << str;
 }
 
