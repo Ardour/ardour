@@ -846,10 +846,9 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	delete[] params;
 
 	LilvUIs* uis = lilv_plugin_get_uis(plugin);
+
 	if (lilv_uis_size(uis) > 0) {
 #ifdef HAVE_SUIL
-		// Look for embeddable UI
-		// TODO: Multiple UI support
 		const LilvUI*   this_ui      = NULL;
 		const LilvNode* this_ui_type = NULL;
 		// Always prefer X11 UIs...
@@ -865,10 +864,10 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		if (this_ui_type == NULL) {
 			LILV_FOREACH(uis, i, uis) {
 				const LilvUI* ui = lilv_uis_get(uis, i);
-				if (lilv_ui_is_supported(ui,
-									suil_ui_supported,
-									_world.ui_GtkUI,
-									&this_ui_type)) {
+				if (lilv_ui_is_supported (ui,
+				                         suil_ui_supported,
+				                         _world.ui_GtkUI,
+				                         &this_ui_type)) {
 					this_ui = ui;
 					break;
 				}
