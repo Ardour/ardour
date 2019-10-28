@@ -6493,9 +6493,14 @@ Session::set_worst_input_latency ()
 void
 Session::update_latency_compensation (bool force_whole_graph)
 {
+	/* Called to update Ardour's internal latency values and compensation
+	 * planning. Typically case is from within ::graph_reordered()
+	 */
+
 	if (inital_connect_or_deletion_in_progress ()) {
 		return;
 	}
+
 	/* this lock is not usually contended, but under certain conditions,
 	 * update_latency_compensation may be called concurrently.
 	 * e.g. drag/drop copy a latent plugin while rolling.
@@ -6516,10 +6521,18 @@ Session::update_latency_compensation (bool force_whole_graph)
 		DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: delegate to engine\n");
 		/* cannot hold lock while engine initiates a full latency callback */
 		lx.release ();
-		_engine.update_latencies ();
-		/* above call will ask the backend up update its latencies, which
-		 * eventually will trigger  AudioEngine::latency_callback () and
-		 * call Session::update_latency ()
+		/* next call will ask the backend up update its latencies.
+		 *
+		 * The semantics of how the backend does this are not well
+		 * defined (Oct 2019).
+		 *
+		 * In all cases, eventually AudioEngine::latency_callback() is
+		 * invoked, which will call Session::update_latency().
+		 *
+		 * Some backends will do that asynchronously with respect to
+		 * this call. Others (JACK1) will do so synchronously, and in
+		 * those cases this call will return until the backend latency
+		 * callback is complete.
 		 */
 	} else {
 		DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: directly apply to routes\n");
