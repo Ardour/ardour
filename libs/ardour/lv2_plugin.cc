@@ -851,6 +851,7 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 #ifdef HAVE_SUIL
 		const LilvUI*   this_ui      = NULL;
 		const LilvNode* this_ui_type = NULL;
+#if ! (defined(__APPLE__) || defined(PLATFORM_WINDOWS))
 		// Always prefer X11 UIs...
 		LILV_FOREACH(uis, i, uis) {
 			const LilvUI* ui = lilv_uis_get(uis, i);
@@ -860,6 +861,7 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 				break;
 			}
 		}
+#endif
 		// then anything else...
 		if (this_ui_type == NULL) {
 			LILV_FOREACH(uis, i, uis) {
