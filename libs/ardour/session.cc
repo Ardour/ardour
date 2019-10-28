@@ -6514,6 +6514,8 @@ Session::update_latency_compensation (bool force_whole_graph)
 
 	if (some_track_latency_changed || force_whole_graph)  {
 		DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: delegate to engine\n");
+		/* cannot hold lock while engine initiates a full latency callback */
+		lx.release ();
 		_engine.update_latencies ();
 		/* above call will ask the backend up update its latencies, which
 		 * eventually will trigger  AudioEngine::latency_callback () and
