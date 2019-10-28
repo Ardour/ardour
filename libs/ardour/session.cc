@@ -562,11 +562,6 @@ Session::destroy ()
 	/* shutdown control surface protocols while we still have ports
 	 * and the engine to move data to any devices.
 	 */
-
-	/* remove I/O objects before unsetting the engine session */
-	_click_io.reset ();
-	_ltc_output.reset ();
-
 	ControlProtocolManager::instance().drop_protocols ();
 
 	/* stop auto dis/connecting */
@@ -581,6 +576,10 @@ Session::destroy ()
 	 */
 
 	Port::PortDrop (); /* EMIT SIGNAL */
+
+	/* remove I/O objects that we (the session) own */
+	_click_io.reset ();
+	_ltc_output.reset ();
 
 	{
 		Glib::Threads::Mutex::Lock lm (controllables_lock);
