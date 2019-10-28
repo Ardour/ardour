@@ -6518,7 +6518,6 @@ Session::update_latency_compensation (bool force_whole_graph, bool called_from_b
 	bool some_track_latency_changed = update_route_latency (false, false);
 
 	if (some_track_latency_changed || force_whole_graph)  {
-		DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: delegate to engine\n");
 
 		/* cannot hold lock while engine initiates a full latency callback */
 
@@ -6544,9 +6543,11 @@ Session::update_latency_compensation (bool force_whole_graph, bool called_from_b
 		 */
 
 		if (!called_from_backend) {
+			DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: delegate to engine\n");
 			_engine.update_latencies ();
+		} else {
+			DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation called from engine, don't call back into engine\n");
 		}
-
 	} else {
 		DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: directly apply to routes\n");
 		boost::shared_ptr<RouteList> r = routes.reader ();
