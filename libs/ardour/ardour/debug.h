@@ -95,6 +95,7 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits Push2;
 		LIBARDOUR_API extern DebugBits US2400;
 		LIBARDOUR_API extern DebugBits LaunchControlXL;
+		LIBARDOUR_API extern DebugBits BackendCallbacks;
 
 	}
 }
