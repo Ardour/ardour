@@ -356,10 +356,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\ardour_ui_plugins.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\ardour_ui_session.cc"
 				>
 			</File>
@@ -696,10 +692,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\gtk_pianokeyboard.c"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\gui_object.cc"
 				>
 			</File>
@@ -972,6 +964,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\pianokeyboard.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\pingback.cc"
 				>
 			</File>
@@ -1001,6 +997,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\plugin_presets_ui.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\plugin_scan_dialog.cc"
 				>
 			</File>
 			<File
@@ -1762,10 +1762,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\gtk_pianokeyboard.h"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\gui_object.h"
 				>
 			</File>
@@ -2066,6 +2062,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\pianokeyboard.h"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\pingback.h"
 				>
 			</File>
@@ -2103,6 +2103,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\plugin_presets_ui.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\plugin_scan_dialog.h"
 				>
 			</File>
 			<File
