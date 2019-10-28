@@ -280,7 +280,7 @@ Session::post_engine_init ()
 		/* crossfades require sample rate knowledge */
 
 		SndFileSource::setup_standard_crossfades (*this, sample_rate());
-		_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this, false));
+		_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this, true));
 		_engine.MidiSelectionPortsChanged.connect_same_thread (*this, boost::bind (&Session::rewire_midi_selection_ports, this));
 
 		DiskReader::allocate_working_buffers();
