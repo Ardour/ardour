@@ -858,7 +858,7 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 			if (lilv_ui_is_a(ui, _world.ui_X11UI) &&
 			    lilv_ui_is_supported (ui,
 			                          suil_ui_supported,
-			                          world.ui_GtkUI,
+			                          _world.ui_GtkUI,
 			                          &this_ui_type)) {
 				this_ui = ui;
 				break;
