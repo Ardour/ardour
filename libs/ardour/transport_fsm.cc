@@ -80,7 +80,19 @@ TransportFSM::process_events ()
 		MotionState oms = _motion_state;
 		ButlerState obs = _butler_state;
 
-		if (process_event (queued_events.front())) { /* event processed successfully */
+		Event* ev = &queued_events.front();
+		bool deferred;
+
+		/* must remove from the queued_events list now, because
+		 * process_event() may defer the event. This will lead to
+		 * insertion into the deferred_events list, and its not possible
+		 * with intrusive lists to be present in two lists at once
+		 * (without additional hooks).
+		 */
+
+		queued_events.pop_front ();
+
+		if (process_event (*ev, false, deferred)) { /* event processed successfully */
 
 			if (oms != _motion_state || obs != _butler_state) {
 
@@ -93,7 +105,8 @@ TransportFSM::process_events ()
 
 					for (EventList::iterator e = deferred_events.begin(); e != deferred_events.end(); ) {
 						Event* deferred_ev = &(*e);
-						if (process_event (*e)) { /* event processed, remove from deferred */
+						bool deferred2;
+						if (process_event (*e, true, deferred2)) { /* event processed, remove from deferred */
 							e = deferred_events.erase (e);
 							delete deferred_ev;
 						} else {
@@ -104,9 +117,9 @@ TransportFSM::process_events ()
 			}
 		}
 
-		Event* ev = &queued_events.front();
-		queued_events.pop_front ();
-		delete ev;
+		if (!deferred) {
+			delete ev;
+		}
 	}
 
 	processing--;
@@ -178,9 +191,11 @@ TransportFSM::bad_transition (Event const & ev)
 }
 
 bool
-TransportFSM::process_event (Event& ev)
+TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 {
 	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("process %1\n", enum_2_string (ev.type)));
+
+	deferred = false;
 
 	switch (ev.type) {
 
@@ -194,10 +209,16 @@ TransportFSM::process_event (Event& ev)
 			break;
 		case DeclickToLocate:
 		case WaitingForLocate:
-			defer (ev);
+			if (!already_deferred) {
+				defer (ev);
+				deferred = true;
+			}
 			break;
 		case DeclickToStop:
-			defer (ev);
+			if (!already_deferred) {
+				defer (ev);
+				deferred = true;
+			}
 			break;
 		default:
 			bad_transition (ev); return false;
@@ -215,7 +236,10 @@ TransportFSM::process_event (Event& ev)
 			break;
 		case DeclickToLocate:
 		case WaitingForLocate:
-			defer (ev);
+			if (!already_deferred) {
+				defer (ev);
+				deferred = true;
+			}
 			break;
 		default:
 			bad_transition (ev); return false;
@@ -224,6 +248,12 @@ TransportFSM::process_event (Event& ev)
 		break;
 
 	case Locate:
+		DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("locate, with roll = %1 flush = %2 target = %3 loop %4 force %5\n",
+		                                                ev.with_roll,
+		                                                ev.with_flush,
+		                                                ev.target,
+		                                                ev.with_loop,
+		                                                ev.force));
 		switch (_motion_state) {
 		case Stopped:
 			transition (WaitingForLocate);

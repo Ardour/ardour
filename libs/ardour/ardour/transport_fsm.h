@@ -159,7 +159,7 @@ struct TransportFSM
 	void transition (ButlerState bs);
 
 	void process_events ();
-	bool process_event (Event&);
+	bool process_event (Event&, bool was_deferred, bool& deferred);
 
 	Event _last_locate;
 	Event _last_stop;
