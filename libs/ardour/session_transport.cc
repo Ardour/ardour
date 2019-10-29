@@ -911,6 +911,8 @@ Session::set_play_loop (bool yn, double speed)
 			   args: positition, roll=true, flush=true, with_loop=false, force buffer refill if seamless looping
 			*/
 
+			add_post_transport_work (PostTransportRoll);
+
 			if (Config->get_loop_is_mode()) {
 				/* loop IS a transport mode: if already
 				   rolling, do not locate to loop start.
