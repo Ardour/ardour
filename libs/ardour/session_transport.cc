@@ -766,11 +766,11 @@ Session::butler_completed_transport_work ()
 
 	bool start_after_butler_done_msg = false;
 
-	if (ptw & PostTransportReverse) {
+	if ((ptw & (PostTransportReverse|PostTransportRoll))) {
 		start_after_butler_done_msg = true;
 	}
 
-	ptw = PostTransportWork (ptw & ~(PostTransportAdjustCaptureBuffering|PostTransportOverWrite|PostTransportReverse));
+	ptw = PostTransportWork (ptw & ~(PostTransportAdjustCaptureBuffering|PostTransportOverWrite|PostTransportReverse|PostTransportRoll));
 	set_post_transport_work (ptw);
 
 	set_next_event ();
@@ -854,6 +854,8 @@ Session::set_play_loop (bool yn, double speed)
 {
 	ENSURE_PROCESS_THREAD;
 	/* Called from event-handling context */
+
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("set_play_loop (%1, %2)\n", yn, speed));
 
 	Location *loc;
 
