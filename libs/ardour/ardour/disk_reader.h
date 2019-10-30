@@ -176,7 +176,6 @@ private:
 	                float*  gain_buffer,
 	                samplepos_t& start, samplecnt_t cnt,
 	                int channel, bool reversed);
-	int midi_read (samplepos_t& start, samplecnt_t cnt, bool reversed);
 
 	static Sample* _sum_buffer;
 	static Sample* _mixdown_buffer;

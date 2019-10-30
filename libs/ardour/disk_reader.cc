@@ -1173,13 +1173,6 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 #endif
 }
 
-/** @a start is set to the new sample position (TIME) read up to */
-int
-DiskReader::midi_read (samplepos_t& start, samplecnt_t dur, bool reversed)
-{
-	return 0;
-}
-
 int
 DiskReader::refill_midi ()
 {
