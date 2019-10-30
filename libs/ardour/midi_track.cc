@@ -453,8 +453,7 @@ MidiTrack::snapshot_out_of_band_data (samplecnt_t nframes)
 
 	assert (nframes > 0);
 
-	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 has %2 of immediate events to deliver\n",
-				name(), _immediate_events.read_space()));
+	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 has %2 of immediate events to deliver\n", name(), _immediate_events.read_space()));
 
 	/* write as many of the immediate events as we can, but give "true" as
 	 * the last argument ("stop on overflow in destination") so that we'll
