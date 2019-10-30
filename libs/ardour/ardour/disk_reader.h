@@ -183,7 +183,6 @@ private:
 
 	int refill (Sample* sum_buffer, Sample* mixdown_buffer, float* gain_buffer, samplecnt_t fill_level);
 	int refill_audio (Sample* sum_buffer, Sample *mixdown_buffer, float *gain_buffer, samplecnt_t fill_level);
-	int refill_midi ();
 
 	sampleoffset_t calculate_playback_distance (pframes_t);
 
