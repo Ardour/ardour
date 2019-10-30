@@ -528,7 +528,6 @@ DiskReader::overwrite_existing_buffers ()
 		minsert.update();
 		assert (midi_playlist()->rendered());
 		// cerr << "Reading " << name()  << " took " << minsert.elapsed() << " microseconds, final size = " << midi_playlist()->rendered()->size() << endl;
-		// midi_playlist()->rendered()->dump (100);
 	}
 
 	g_atomic_int_set (&_pending_overwrite, 0);
