@@ -762,31 +762,20 @@ DiskReader::_do_refill_with_alloc (bool partial_fill)
 	   the smallest sample value .. 4MB = 2M samples (16 bit).
 	*/
 
-	{
-		boost::scoped_array<Sample> sum_buf (new Sample[2*1048576]);
-		boost::scoped_array<Sample> mix_buf (new Sample[2*1048576]);
-		boost::scoped_array<float>  gain_buf (new float[2*1048576]);
+	boost::scoped_array<Sample> sum_buf (new Sample[2*1048576]);
+	boost::scoped_array<Sample> mix_buf (new Sample[2*1048576]);
+	boost::scoped_array<float>  gain_buf (new float[2*1048576]);
 
-		int ret = refill_audio (sum_buf.get(), mix_buf.get(), gain_buf.get(), (partial_fill ? _chunk_samples : 0));
-
-		if (ret) {
-			return ret;
-		}
-	}
-
-	return refill_midi ();
+	return refill_audio (sum_buf.get(), mix_buf.get(), gain_buf.get(), (partial_fill ? _chunk_samples : 0));
 }
 
 int
 DiskReader::refill (Sample* sum_buffer, Sample* mixdown_buffer, float* gain_buffer, samplecnt_t fill_level)
 {
-	int ret = refill_audio (sum_buffer, mixdown_buffer, gain_buffer, fill_level);
-
-	if (ret) {
-		return ret;
-	}
-
-	return refill_midi ();
+	/* nothing to do here for MIDI - the entire playlist has been rendered
+	 * into RAM already.
+	 */
+	return refill_audio (sum_buffer, mixdown_buffer, gain_buffer, fill_level);
 }
 
 
@@ -1171,13 +1160,6 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 		cerr << "----------------\n";
 	}
 #endif
-}
-
-int
-DiskReader::refill_midi ()
-{
-	/* nothing to do ... it's all in RAM thanks to overwrite */
-	return 0;
 }
 
 void
