@@ -1153,7 +1153,7 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 	}
 
 
-	if (!_no_disk_output && (ms & MonitoringInput)) {
+	if (!pending_overwrite() && !_no_disk_output && (ms & MonitoringInput)) {
 		dst.merge_from (*target, nframes);
 	}
 
