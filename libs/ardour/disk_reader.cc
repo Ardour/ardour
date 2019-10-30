@@ -1073,9 +1073,9 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 	MidiBuffer* target;
 	samplepos_t nframes = ::llabs (end_sample - start_sample);
 
-	RTMidiBuffer* mbuf = rt_midibuffer();
+	RTMidiBuffer* rtmb = rt_midibuffer();
 
-	if (!mbuf || (mbuf->size() == 0)) {
+	if (!rtmb || (rtmb->size() == 0)) {
 		/* no data to read, so do nothing */
 		return;
 	}
@@ -1131,23 +1131,23 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 				if (first) {
 					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read #1, from %1 for %2\n",
 					                                                      effective_start, first));
-					events_read = mbuf->read (*target, effective_start, effective_start + first, _tracker);
+					events_read = rtmb->read (*target, effective_start, effective_start + first, _tracker);
 				}
 
 				if (second) {
 					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read #2, from %1 for %2\n",
 					                                                      loc->start(), second));
-					events_read += mbuf->read (*target, loc->start(), loc->start() + second, _tracker);
+					events_read += rtmb->read (*target, loc->start(), loc->start() + second, _tracker);
 				}
 
 			} else {
 				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read #3, adjusted start as %1 for %2\n",
 				                                                effective_start, nframes));
-				events_read = mbuf->read (*target, effective_start, effective_start + nframes, _tracker);
+				events_read = rtmb->read (*target, effective_start, effective_start + nframes, _tracker);
 			}
 		} else {
 			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer read, from %1 to %2 (%3)", start_sample, end_sample, nframes));
-			events_read = mbuf->read (*target, start_sample, end_sample, _tracker, Port::port_offset ());
+			events_read = rtmb->read (*target, start_sample, end_sample, _tracker, Port::port_offset ());
 		}
 
 		DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("%1 MDS events read %2 range %3 .. %4\n", _name, events_read, playback_sample, playback_sample + nframes));
