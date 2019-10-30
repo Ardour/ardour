@@ -130,14 +130,14 @@ RTMidiBuffer::write (TimeType time, Evoral::EventType /*type*/, uint32_t size, c
 
 		uint32_t off = store_blob (size, buf);
 
-		/* this indicates that the data (more than 3 bytes) is not inline */
+		/* non-zero MSbit indicates that the data (more than 3 bytes) is not inline */
 		_data[_size].offset = (off | (1<<(sizeof(uint8_t)-1)));
 
 	} else {
 
 		assert ((int) size == Evoral::midi_event_size (buf[0]));
 
-		/* this indicates that the data (up to 3 bytes) is inline */
+		/* zero MSbit indicates that the data (up to 3 bytes) is inline */
 		_data[_size].bytes[0] = 0;
 
 		switch (size) {
