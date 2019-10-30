@@ -394,8 +394,13 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 	 *     enough room below the button;
 	 *  c) align the bottom of the menu with the top of the button if there is
 	 *     enough room above the button;
-	 *  d) align the bottom of the menu with the bottom of the monitor if there
-	 *     is enough room, but avoid moving the menu to another monitor */
+	 *  d) try aligning the selected menu item again, this time with scrollbars;
+     *  e) if there is no selected menu item, align the menu above the button or
+     *     below the button, depending on where there is more space.
+     * For the d) and e) cases, the menu contents will be aligned as told, but
+     * the menu itself will be bigger than that to accomodate the menu items
+     * that are scrolled out of view, thanks to |push_in = true|.
+     *    */
 
 	const MenuList& items = menu->items ();
 	int offset = 0;
@@ -411,16 +416,20 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 	if (i != items.end() &&
 	    y - offset >= monitor.get_y() &&
 	    y - offset + menu_req.height <= monitor.get_y() + monitor.get_height()) {
-		y -= offset;
+		y -= offset; /* a) */
 	} else if (y + allocation.get_height() + menu_req.height <= monitor.get_y() + monitor.get_height()) {
-		y += allocation.get_height(); /* a) */
+		y += allocation.get_height(); /* b) */
 	} else if ((y - menu_req.height) >= monitor.get_y()) {
-		y -= menu_req.height; /* b) */
+		y -= menu_req.height; /* c) */
+	} else if (i != items.end()) {
+		y -= offset; /* d) */
+	} else if (monitor.get_height() - allocation.get_height() >= 2*(y - monitor.get_y())) {
+		y += allocation.get_height(); /* e), more space below */
 	} else {
-		y = monitor.get_y() + max(0, monitor.get_height() - menu_req.height);
+		y -= menu_req.height; /* e), more space above */
 	}
 
-	push_in = false;
+	push_in = true;
 }
 
 void
