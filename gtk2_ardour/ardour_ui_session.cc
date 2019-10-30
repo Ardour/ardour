@@ -150,7 +150,7 @@ ARDOUR_UI::start_session_load ()
 		}
 	}
 
-	SessionDialog* session_dialog = new SessionDialog (false, string(), Config->get_default_session_parent_dir(), string(), true);
+	SessionDialog* session_dialog = new SessionDialog (true, string(), Config->get_default_session_parent_dir(), string(), true);
 	session_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::session_dialog_response_handler), session_dialog));
 	session_dialog->present ();
 }
