@@ -2757,10 +2757,14 @@ EngineControl::control_app_button_clicked ()
 void
 EngineControl::on_response (int r)
 {
-	/* we do nothing when our response signal is emitted ... that's the
-	 * responsibility of whoever displayed us.
+	/* Do not run ArdourDialog::on_response() which will hide us. Leave
+	 * that to whoever invoked us, if they wish to hide us after "start".
+	 *
+	 * StartupFSM does hide us after response(); Window > Audio/MIDI Setup
+	 * does not.
 	 */
-	ArdourDialog::on_response (r);
+	pop_splash ();
+	Gtk::Dialog::on_response (r);
 }
 
 void
