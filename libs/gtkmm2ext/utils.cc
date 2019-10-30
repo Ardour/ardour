@@ -315,7 +315,7 @@ Gtkmm2ext::pixbuf_from_string(const string& name, const Pango::FontDescription& 
 	return buf;
 }
 
-void
+static void
 _position_menu_anchored (int& x, int& y, bool& push_in,
                                    const Gtk::Menu* const menu,
                                    Gtk::Widget* const anchor,
