@@ -146,6 +146,8 @@ PluginSetupDialog::setup_output_presets ()
 
 	if (have_matching_io) {
 		select_output_preset (_cur_outputs.n_audio ());
+	} else if (ppc.size() == 1 && _pi->strict_io ()) {
+		select_output_preset (*ppc.begin ());
 	} else {
 		select_output_preset (0);
 	}
