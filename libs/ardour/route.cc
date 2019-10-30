@@ -2119,6 +2119,44 @@ Route::apply_processor_order (const ProcessorList& new_order)
 
 	/* If the meter is in a custom position, find it and make a rough note of its position */
 	maybe_note_meter_position ();
+
+	/* if any latent plugins were re-ordered and sends or side-chains are present
+	 * in the signal-flow, a full latency-recompute is needed.
+	 *
+	 * The Session will be informed about the new order via
+	 *  processors_changed()
+	 * and test if a full latency-recompute is required by comparing
+	 * _signal_latency != ::update_signal_latency();
+	 *
+	 * Since the route's latency itself does not initially change by
+	 * re-ordering, we need to force this:
+	 */
+	bool need_latency_recompute = false;
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		if (boost::shared_ptr<PortInsert> pi = boost::dynamic_pointer_cast<PortInsert> (*i)) {
+			need_latency_recompute = true;
+			break;
+		} else if (boost::shared_ptr<LatentSend> snd = boost::dynamic_pointer_cast<LatentSend> (*i)) {
+			need_latency_recompute = true;
+			break;
+		} else if (boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) {
+			if (boost::shared_ptr<IO> pio = pi->sidechain_input ()) {
+				need_latency_recompute = true;
+				break;
+			}
+		}
+	}
+	if (need_latency_recompute) {
+		/* force a change, the correct value will be set
+		 * ::update_signal_latency() will be called via
+		 *
+		 * SIGNAL processors_changed () ->
+		 * -> Session::route_processors_changed ()
+		 * -> Session::update_latency_compensation ()
+		 * -> Route::::update_signal_latency ()
+		 */
+	_signal_latency = 0;
+	}
 }
 
 void
