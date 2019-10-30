@@ -100,9 +100,10 @@ void
 PBD::debug_print (const char* prefix, string str)
 {
 	if ((PBD::debug_bits & DEBUG::DebugTimestamps).any()) {
-		cout << g_get_monotonic_time() << ' ';
+		printf ("%ld %s: %s", g_get_monotonic_time(), prefix, str.c_str());
+	} else {
+		printf ("%s: %s", prefix, str.c_str());
 	}
-	cout << prefix << ": " << str;
 }
 
 int
