@@ -2051,7 +2051,7 @@ Route::apply_processor_order (const ProcessorList& new_order)
 	/* "new_order" is an ordered list of processors to be positioned according to "placement".
 	 * NOTE: all processors in "new_order" MUST be marked as display_to_user(). There maybe additional
 	 * processors in the current actual processor list that are hidden. Any visible processors
-	 *  in the current list but not in "new_order" will be assumed to be deleted.
+	 * in the current list but not in "new_order" will be assumed to be deleted.
 	 */
 
 	/* "as_it_will_be" and "_processors" are lists of shared pointers.
@@ -2073,17 +2073,17 @@ Route::apply_processor_order (const ProcessorList& new_order)
 	while (niter !=  new_order.end()) {
 
 		/* if the next processor in the old list is invisible (i.e. should not be in the new order)
-		   then append it to the temp list.
-
-		   Otherwise, see if the next processor in the old list is in the new list. if not,
-		   its been deleted. If its there, append it to the temp list.
-		   */
+		 * then append it to the temp list.
+		 *
+		 * Otherwise, see if the next processor in the old list is in the new list. if not,
+		 * its been deleted. If its there, append it to the temp list.
+		 */
 
 		if (oiter == _processors.end()) {
 
 			/* no more elements in the old list, so just stick the rest of
-			   the new order onto the temp list.
-			   */
+			 * the new order onto the temp list.
+			 */
 
 			as_it_will_be.insert (as_it_will_be.end(), niter, new_order.end());
 			while (niter != new_order.end()) {
