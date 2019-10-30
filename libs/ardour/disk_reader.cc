@@ -1058,9 +1058,6 @@ DiskReader::resolve_tracker (Evoral::EventSink<samplepos_t>& buffer, samplepos_t
 void
 DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, samplepos_t end_sample, MonitorState ms, BufferSet& scratch_bufs, double speed, samplecnt_t disk_samples_to_consume)
 {
-	MidiBuffer* target;
-	samplepos_t nframes = ::llabs (end_sample - start_sample);
-
 	RTMidiBuffer* rtmb = rt_midibuffer();
 
 	if (!rtmb || (rtmb->size() == 0)) {
@@ -1068,82 +1065,54 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 		return;
 	}
 
-	if ((ms & MonitoringInput) == 0) {
-		/* Route::process_output_buffers() clears the buffer as-needed */
-		target = &dst;
-	} else {
+	MidiBuffer* target;
+
+	if (ms & MonitoringInput) {
+		/* data from disk needs to be *merged* not written into the
+		   dst, because it may contain input data that we want to
+		   monitor. Since RTMidiBuffer currently (Oct 2019) has no
+		   suitable method, put the disk data into a scratch buffer and
+		   then merge later.
+		*/
+
 		target = &scratch_bufs.get_midi (0);
+	} else {
+		/* No need to preserve the contents of the input buffer. But
+		 * Route::process_output_buffers() clears the buffer as-needed
+		 * so know we do not need to clear it.
+		 */
+		target = &dst;
 	}
 
-	size_t events_read = 0;
+	/* Note: do not fetch any data from disk if we're moving
+	 * backwards. TODO: reverse MIDI
+	 */
 
-	if (!pending_overwrite() && (ms & MonitoringDisk)) {
+	if (!pending_overwrite() && !_no_disk_output && (end_sample >= start_sample)) {
 
-		/* disk data needed */
+		const samplepos_t nframes = ::llabs (end_sample - start_sample);
 
-		Location* loc = _loop_location;
+		if (ms & MonitoringDisk) {
 
-		if (loc) {
-			samplepos_t effective_start;
+			/* disk data needed
+			 *
+			 * NOTE: we will never be asked to read across loop location
+			 * boundaries - the session splits processing at the
+			 * loop end.
+			 */
 
-			Evoral::Range<samplepos_t> loop_range (loc->start(), loc->end() - 1);
-			effective_start = loop_range.squish (start_sample);
-
-			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("looped, effective start adjusted to %1\n", effective_start));
-
-			if (effective_start == loc->start()) {
-				/* We need to turn off notes that may extend
-				   beyond the loop end.
-				*/
-
-				_tracker.resolve_notes (*target, 0);
-			}
-
-			/* for split-cycles we need to offset the events */
-
-			if (loc->end() >= effective_start && loc->end() < effective_start + nframes) {
-
-				/* end of loop is within the range we are reading, so
-				   split the read in two, and lie about the location
-				   for the 2nd read
-				*/
-
-				samplecnt_t first, second;
-
-				first = loc->end() - effective_start;
-				second = nframes - first;
-
-				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read for eff %1 end %2: %3 and %4, cycle offset %5\n",
-				                                                      effective_start, loc->end(), first, second));
-
-				if (first) {
-					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read #1, from %1 for %2\n",
-					                                                      effective_start, first));
-					events_read = rtmb->read (*target, effective_start, effective_start + first, _tracker);
-				}
-
-				if (second) {
-					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read #2, from %1 for %2\n",
-					                                                      loc->start(), second));
-					events_read += rtmb->read (*target, loc->start(), loc->start() + second, _tracker);
-				}
-
-			} else {
-				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("loop read #3, adjusted start as %1 for %2\n",
-				                                                effective_start, nframes));
-				events_read = rtmb->read (*target, effective_start, effective_start + nframes, _tracker);
-			}
-		} else {
 			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer read, from %1 to %2 (%3)", start_sample, end_sample, nframes));
-			events_read = rtmb->read (*target, start_sample, end_sample, _tracker, Port::port_offset ());
+			size_t events_read = rtmb->read (*target, start_sample, end_sample, _tracker, Port::port_offset ());
+			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("%1 MDS events read %2 range %3 .. %4\n", _name, events_read, playback_sample, playback_sample + nframes));
 		}
 
-		DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("%1 MDS events read %2 range %3 .. %4\n", _name, events_read, playback_sample, playback_sample + nframes));
-	}
-
-
-	if (!pending_overwrite() && !_no_disk_output && (ms & MonitoringInput)) {
-		dst.merge_from (*target, nframes);
+		if (ms & MonitoringInput) {
+			/* merges data from disk (in "target", which is a scratch
+			   buffer in this case) into the actual destination buffer
+			   (which holds existing input data).
+			*/
+			dst.merge_from (*target, nframes);
+		}
 	}
 
 #if 0
