@@ -395,12 +395,12 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 	 *  c) align the bottom of the menu with the top of the button if there is
 	 *     enough room above the button;
 	 *  d) try aligning the selected menu item again, this time with scrollbars;
-     *  e) if there is no selected menu item, align the menu above the button or
-     *     below the button, depending on where there is more space.
-     * For the d) and e) cases, the menu contents will be aligned as told, but
-     * the menu itself will be bigger than that to accomodate the menu items
-     * that are scrolled out of view, thanks to |push_in = true|.
-     *    */
+	 *  e) if there is no selected menu item, align the menu above the button or
+	 *     below the button, depending on where there is more space.
+	 * For the d) and e) cases, the menu contents will be aligned as told, but
+	 * the menu itself will be bigger than that to accomodate the menu items
+	 * that are scrolled out of view, thanks to |push_in = true|.
+	 */
 
 	const MenuList& items = menu->items ();
 	int offset = 0;
