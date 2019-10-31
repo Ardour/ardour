@@ -317,7 +317,7 @@ Gtkmm2ext::pixbuf_from_string(const string& name, const Pango::FontDescription& 
 
 static void
 _position_menu_anchored (int& x, int& y, bool& push_in,
-                                   const Gtk::Menu* const menu,
+                                   Gtk::Menu* const menu,
                                    Gtk::Widget* const anchor,
                                    const std::string& selected)
 {
@@ -424,10 +424,13 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 		y -= menu_req.height; /* c) */
 	} else if (i != items.end()) {
 		y -= offset; /* d) */
+		menu->gobj()->upper_arrow_visible = 1; /* work around a gtk bug for the first show */
 	} else if (monitor.get_height() - allocation.get_height() >= 2*(y - monitor.get_y())) {
 		y += allocation.get_height(); /* e), more space below */
+		menu->gobj()->upper_arrow_visible = 1; /* work around a gtk bug for the first show */
 	} else {
 		y -= menu_req.height; /* e), more space above */
+		menu->gobj()->upper_arrow_visible = 1; /* work around a gtk bug for the first show */
 	}
 
 	push_in = true;
