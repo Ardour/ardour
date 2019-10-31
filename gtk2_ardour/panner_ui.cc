@@ -151,21 +151,16 @@ PannerUI::build_astate_menu ()
 	/** TRANSLATORS: this is `Manual' in the sense of automation not being played,
 	    so that changes to pan must be done by hand.
 	*/
-	pan_astate_menu->items().push_back (MenuElem (S_("Automation|Manual"), sigc::bind (
-			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
-			(AutoState) ARDOUR::Off)));
-	pan_astate_menu->items().push_back (MenuElem (_("Play"), sigc::bind (
-			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
-			(AutoState) Play)));
-	pan_astate_menu->items().push_back (MenuElem (_("Write"), sigc::bind (
-			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
-			(AutoState) Write)));
-	pan_astate_menu->items().push_back (MenuElem (_("Touch"), sigc::bind (
-			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
-			(AutoState) Touch)));
-	pan_astate_menu->items().push_back (MenuElem (_("Latch"), sigc::bind (
-			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
-			(AutoState) Latch)));
+	pan_astate_menu->items().push_back (MenuElem (GainMeterBase::astate_string (ARDOUR::Off),
+			sigc::bind ( sigc::mem_fun (_panner.get(), &Panner::set_automation_state), (AutoState) ARDOUR::Off)));
+	pan_astate_menu->items().push_back (MenuElem (GainMeterBase::astate_string (ARDOUR::Play),
+			sigc::bind ( sigc::mem_fun (_panner.get(), &Panner::set_automation_state), (AutoState) Play)));
+	pan_astate_menu->items().push_back (MenuElem (GainMeterBase::astate_string (ARDOUR::Write),
+			sigc::bind ( sigc::mem_fun (_panner.get(), &Panner::set_automation_state), (AutoState) Write)));
+	pan_astate_menu->items().push_back (MenuElem (GainMeterBase::astate_string (ARDOUR::Touch),
+			sigc::bind (sigc::mem_fun (_panner.get(), &Panner::set_automation_state), (AutoState) Touch)));
+	pan_astate_menu->items().push_back (MenuElem (GainMeterBase::astate_string (ARDOUR::Latch),
+			sigc::bind ( sigc::mem_fun (_panner.get(), &Panner::set_automation_state), (AutoState) Latch)));
 
 }
 

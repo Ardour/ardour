@@ -122,15 +122,15 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	}
 	smaller_hbox->pack_start (bypass_button, false, true, 4);
 
-	automation_manual_all_button.set_text(_("Manual"));
+	automation_manual_all_button.set_text (GainMeterBase::astate_string (ARDOUR::Off));
 	automation_manual_all_button.set_name (X_("generic button"));
-	automation_play_all_button.set_text(_("Play"));
+	automation_play_all_button.set_text (GainMeterBase::astate_string (ARDOUR::Play));
 	automation_play_all_button.set_name (X_("generic button"));
-	automation_write_all_button.set_text(_("Write"));
+	automation_write_all_button.set_text (GainMeterBase::astate_string (ARDOUR::Write));
 	automation_write_all_button.set_name (X_("generic button"));
-	automation_touch_all_button.set_text(_("Touch"));
+	automation_touch_all_button.set_text (GainMeterBase::astate_string (ARDOUR::Touch));
 	automation_touch_all_button.set_name (X_("generic button"));
-	automation_latch_all_button.set_text(_("Touch"));
+	automation_latch_all_button.set_text (GainMeterBase::astate_string (ARDOUR::Latch));
 	automation_latch_all_button.set_name (X_("generic button"));
 
 	constraint_hbox->set_spacing (5);
