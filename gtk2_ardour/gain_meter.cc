@@ -780,27 +780,20 @@ GainMeterBase::short_astate_string (AutoState state)
 string
 GainMeterBase::_astate_string (AutoState state, bool shrt)
 {
-	string sstr;
-
 	switch (state) {
-	case ARDOUR::Off:
-		sstr = shrt ? S_("Manual|M") : S_("Automation|Manual");
-		break;
-	case Play:
-		sstr = shrt ? S_("Play|P") : _("Play");
-		break;
-	case Touch:
-		sstr = shrt ? S_("Trim|T") : _("Write");
-		break;
-	case Latch:
-		sstr = shrt ? S_("Latch|L") : _("Touch");
-		break;
-	case Write:
-		sstr = shrt ? S_("Write|W"): _("Latch");
-		break;
+		case ARDOUR::Off:
+			return shrt ? S_("Manual|M") : S_("Automation|Manual");
+		case Play:
+			return shrt ? S_("Play|P") : _("Play");
+		case Touch:
+			return shrt ? S_("Touch|T") : _("Touch");
+		case Latch:
+			return shrt ? S_("Latch|L") : _("Latch");
+		case Write:
+			return shrt ? S_("Write|W"): _("Write");
 	}
-
-	return sstr;
+	assert (0);
+	return "???";
 }
 
 string
