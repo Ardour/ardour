@@ -819,7 +819,7 @@ GainMeterBase::meterpt_string (MeterPoint mp)
 			return _("Custom");
 	}
 	assert (0);
-	return _("Custom"); // make gcc happy
+	return "???"; // make gcc and _FrnchFrgg_ happy
 }
 
 void
