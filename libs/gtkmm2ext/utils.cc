@@ -410,6 +410,7 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 		const Label* label_widget = dynamic_cast<const Label*>(i->get_child());
 		if (label_widget && selected == ((std::string) label_widget->get_label())) {
 			offset += (i->size_request().height - allocation.get_height()) / 2;
+			menu->select_item(*i);
 			break;
 		}
 		offset += i->size_request().height;
