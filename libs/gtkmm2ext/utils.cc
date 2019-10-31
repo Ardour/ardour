@@ -433,6 +433,24 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 		menu->gobj()->upper_arrow_visible = 1; /* work around a gtk bug for the first show */
 	}
 
+	/* Workaround a bug in GTK where they don't tweak the scroll offset by the arrow height
+	 * if the scroll offset is negative. See the condition at:
+	 * https://gitlab.gnome.org/GNOME/gtk/blob/2.24.32/gtk/gtkmenu.c#L4395
+	 * and the computation of scroll_offset at:
+	 * https://gitlab.gnome.org/GNOME/gtk/blob/2.24.32/gtk/gtkmenu.c#L4360
+	 * */
+	int arrow_height;
+	GtkArrowPlacement arrow_placement;
+	gtk_widget_style_get (GTK_WIDGET (menu->gobj()),
+	        "scroll-arrow-vlength", &arrow_height,
+	        "arrow_placement", &arrow_placement,
+	        NULL);
+	int scroll_tweak = menu_req.height - monitor.get_height();
+	int scroll_offset = scroll_tweak + monitor.get_y() + monitor.get_height() - y - menu_req.height;
+	if (arrow_placement != GTK_ARROWS_END && scroll_tweak > 0 && scroll_offset < 0) {
+		y -= arrow_height;
+	}
+
 	push_in = true;
 }
 
