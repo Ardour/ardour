@@ -365,7 +365,7 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 			x += allocation.get_width() - menu_req.width;
 		} else if (x + menu_req.width <= monitor.get_x() + monitor.get_width()) {
 			/* b) align menu left and button left: nothing to do*/
-		} else if (menu_req.width > monitor.get_width()) {
+		} else if (menu_req.width <= monitor.get_width()) {
 			/* c) align menu left and screen left, guaranteed to fit */
 			x = monitor.get_x();
 		} else {
@@ -378,7 +378,7 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 		} else if (monitor.get_x() <= x + allocation.get_width() - menu_req.width) {
 			/* b) align menu right and button right */
 			x += allocation.get_width() - menu_req.width;
-		} else if (menu_req.width > monitor.get_width()) {
+		} else if (menu_req.width <= monitor.get_width()) {
 			/* c) align menu right and screen right, guaranteed to fit */
 			x = monitor.get_x() + monitor.get_width() - menu_req.width;
 		} else {
