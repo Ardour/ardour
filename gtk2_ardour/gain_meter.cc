@@ -182,21 +182,22 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	meter_point_menu.set_reserve_toggle_size(false);
 
 	meter_point_menu.items().clear ();
-	meter_point_menu.items().push_back (MenuElem(_("Input"),
+	meter_point_menu.items().push_back (MenuElem(meterpt_string(MeterInput),
 	 sigc::bind (sigc::mem_fun (*this,
 	 &GainMeterBase::meter_point_clicked), (MeterPoint) MeterInput)));
-	meter_point_menu.items().push_back (MenuElem(_("Pre Fader"),
+	meter_point_menu.items().push_back (MenuElem(meterpt_string(MeterPreFader),
 	 sigc::bind (sigc::mem_fun (*this,
 	 &GainMeterBase::meter_point_clicked), (MeterPoint) MeterPreFader)));
-	meter_point_menu.items().push_back (MenuElem(_("Post Fader"),
+	meter_point_menu.items().push_back (MenuElem(meterpt_string (MeterPostFader),
 	 sigc::bind (sigc::mem_fun (*this,
 	 &GainMeterBase::meter_point_clicked), (MeterPoint) MeterPostFader)));
-	meter_point_menu.items().push_back (MenuElem(_("Output"),
+	meter_point_menu.items().push_back (MenuElem(meterpt_string (MeterOutput),
 	 sigc::bind (sigc::mem_fun (*this,
 	 &GainMeterBase::meter_point_clicked), (MeterPoint) MeterOutput)));
-	meter_point_menu.items().push_back (MenuElem(_("Custom"),
+	meter_point_menu.items().push_back (MenuElem(meterpt_string (MeterCustom),
 	 sigc::bind (sigc::mem_fun (*this,
 	 &GainMeterBase::meter_point_clicked), (MeterPoint) MeterCustom)));
+
 	meter_point_button.signal_button_press_event().connect (sigc::mem_fun (*this, &GainMeter::meter_press), false);
 
 	gain_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &GainMeterBase::fader_moved));
@@ -263,15 +264,15 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 
 		gain_astate_menu.items().clear ();
 
-		gain_astate_menu.items().push_back (MenuElem (S_("Automation|Manual"),
+		gain_astate_menu.items().push_back (MenuElem (astate_string (ARDOUR::Off),
 							      sigc::bind (sigc::mem_fun (*this, &GainMeterBase::set_gain_astate), (AutoState) ARDOUR::Off)));
-		gain_astate_menu.items().push_back (MenuElem (_("Play"),
+		gain_astate_menu.items().push_back (MenuElem (astate_string (ARDOUR::Play),
 							      sigc::bind (sigc::mem_fun (*this, &GainMeterBase::set_gain_astate), (AutoState) ARDOUR::Play)));
-		gain_astate_menu.items().push_back (MenuElem (_("Write"),
+		gain_astate_menu.items().push_back (MenuElem (astate_string (ARDOUR::Write),
 							      sigc::bind (sigc::mem_fun (*this, &GainMeterBase::set_gain_astate), (AutoState) ARDOUR::Write)));
-		gain_astate_menu.items().push_back (MenuElem (_("Touch"),
+		gain_astate_menu.items().push_back (MenuElem (astate_string (ARDOUR::Touch),
 							      sigc::bind (sigc::mem_fun (*this, &GainMeterBase::set_gain_astate), (AutoState) ARDOUR::Touch)));
-		gain_astate_menu.items().push_back (MenuElem (_("Latch"),
+		gain_astate_menu.items().push_back (MenuElem (astate_string (ARDOUR::Latch),
 							      sigc::bind (sigc::mem_fun (*this, &GainMeterBase::set_gain_astate), (AutoState) ARDOUR::Latch)));
 
 		connections.push_back (gain_automation_state_button.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_automation_state_button_event), false));
@@ -682,7 +683,8 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 				}
 				Gtkmm2ext::anchored_menu_popup(&meter_point_menu,
 				                               &meter_point_button,
-				                               "", 1, ev->time);
+				                               meterpt_string (_route->meter_point()),
+				                               1, ev->time);
 				break;
 			default:
 				break;
@@ -752,7 +754,8 @@ GainMeterBase::gain_automation_state_button_event (GdkEventButton *ev)
 			gain_astate_propagate = Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier | Keyboard::TertiaryModifier));
 			Gtkmm2ext::anchored_menu_popup(&gain_astate_menu,
 			                               &gain_automation_state_button,
-			                               "", 1, ev->time);
+			                               astate_string(_control->alist()->automation_state()),
+			                               1, ev->time);
 			break;
 		default:
 			break;
@@ -781,38 +784,49 @@ GainMeterBase::_astate_string (AutoState state, bool shrt)
 
 	switch (state) {
 	case ARDOUR::Off:
-		sstr = (shrt ? "M" : S_("Manual|M"));
+		sstr = shrt ? S_("Manual|M") : S_("Automation|Manual");
 		break;
 	case Play:
-		sstr = (shrt ? "P" : S_("Play|P"));
+		sstr = shrt ? S_("Play|P") : _("Play");
 		break;
 	case Touch:
-		sstr = (shrt ? "T" : S_("Trim|T"));
+		sstr = shrt ? S_("Trim|T") : _("Write");
 		break;
 	case Latch:
-		sstr = (shrt ? "L" : S_("Latch|L"));
+		sstr = shrt ? S_("Latch|L") : _("Touch");
 		break;
 	case Write:
-		sstr = (shrt ? "W" : S_("Write|W"));
+		sstr = shrt ? S_("Write|W"): _("Latch");
 		break;
 	}
 
 	return sstr;
 }
 
+string
+GainMeterBase::meterpt_string (MeterPoint mp)
+{
+	switch (mp) {
+		case MeterInput:
+			return _("Input");
+		case MeterPreFader:
+			return _("Pre Fader");
+		case MeterPostFader:
+			return _("Post Fader");
+		case MeterOutput:
+			return _("Output");
+		case MeterCustom:
+			return _("Custom");
+	}
+	assert (0);
+	return _("Custom"); // make gcc happy
+}
+
 void
 GainMeterBase::gain_automation_state_changed ()
 {
 	ENSURE_GUI_THREAD (*this, &GainMeterBase::gain_automation_state_changed);
-
-	switch (_width) {
-	case Wide:
-		gain_automation_state_button.set_text (astate_string(_control->alist()->automation_state()));
-		break;
-	case Narrow:
-		gain_automation_state_button.set_text (short_astate_string(_control->alist()->automation_state()));
-		break;
-	}
+	gain_automation_state_button.set_text (short_astate_string(_control->alist()->automation_state()));
 
 	const bool automation_watch_required = (_control->alist()->automation_state() != ARDOUR::Off);
 

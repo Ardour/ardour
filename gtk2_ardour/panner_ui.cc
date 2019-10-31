@@ -37,6 +37,7 @@
 
 #include "widgets/tooltips.h"
 
+#include "gain_meter.h"
 #include "panner_ui.h"
 #include "panner2d.h"
 #include "gui_thread.h"
@@ -526,15 +527,7 @@ void
 PannerUI::pan_automation_state_changed ()
 {
 	boost::shared_ptr<Pannable> pannable (_panner->pannable());
-
-	switch (_width) {
-	case Wide:
-		pan_automation_state_button.set_label (astate_string(pannable->automation_state()));
-		break;
-	case Narrow:
-		pan_automation_state_button.set_label (short_astate_string(pannable->automation_state()));
-		break;
-	}
+	pan_automation_state_button.set_label (GainMeterBase::short_astate_string(pannable->automation_state()));
 
 	bool x = (pannable->automation_state() != ARDOUR::Off);
 
@@ -545,44 +538,6 @@ PannerUI::pan_automation_state_changed ()
 	}
 
 	update_pan_sensitive ();
-}
-
-string
-PannerUI::astate_string (AutoState state)
-{
-	return _astate_string (state, false);
-}
-
-string
-PannerUI::short_astate_string (AutoState state)
-{
-	return _astate_string (state, true);
-}
-
-string
-PannerUI::_astate_string (AutoState state, bool shrt)
-{
-	string sstr;
-
-	switch (state) {
-	case ARDOUR::Off:
-		sstr = (shrt ? "M" : S_("Manual|M"));
-		break;
-	case Play:
-		sstr = (shrt ? "P" : S_("Play|P"));
-		break;
-	case Touch:
-		sstr = (shrt ? "T" : S_("Touch|T"));
-		break;
-	case Latch:
-		sstr = (shrt ? "L" : S_("Latch|L"));
-		break;
-	case Write:
-		sstr = (shrt ? "W" : S_("Write|W"));
-		break;
-	}
-
-	return sstr;
 }
 
 void

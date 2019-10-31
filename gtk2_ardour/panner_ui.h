@@ -144,10 +144,6 @@ private:
 	void pan_automation_state_changed();
 	gint pan_automation_state_button_event (GdkEventButton *);
 
-	std::string astate_string (ARDOUR::AutoState);
-	std::string short_astate_string (ARDOUR::AutoState);
-	std::string _astate_string (ARDOUR::AutoState, bool);
-
 	void start_touch (boost::weak_ptr<ARDOUR::AutomationControl>);
 	void stop_touch (boost::weak_ptr<ARDOUR::AutomationControl>);
 

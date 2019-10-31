@@ -876,30 +876,9 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 	cui->automate_button.set_active((state != ARDOUR::Off));
 
 	if (cui->short_autostate) {
-		cui->automate_button.set_text (
-				GainMeterBase::astate_string (state));
-		return;
-	}
-
-	switch (state & (ARDOUR::Off|Play|Touch|Write|Latch)) {
-	case ARDOUR::Off:
-		cui->automate_button.set_text (S_("Automation|Manual"));
-		break;
-	case Play:
-		cui->automate_button.set_text (_("Play"));
-		break;
-	case Write:
-		cui->automate_button.set_text (_("Write"));
-		break;
-	case Touch:
-		cui->automate_button.set_text (_("Touch"));
-		break;
-	case Latch:
-		cui->automate_button.set_text (_("Latch"));
-		break;
-	default:
-		cui->automate_button.set_text (_("???"));
-		break;
+		cui->automate_button.set_text (GainMeterBase::short_astate_string (state));
+	} else {
+		cui->automate_button.set_text (GainMeterBase::astate_string (state));
 	}
 }
 
@@ -1215,19 +1194,20 @@ GenericPluginUI::astate_button_event (GdkEventButton* ev, ControlUI* cui)
 	MenuList& items (automation_menu->items());
 
 	items.clear ();
-	items.push_back (MenuElem (S_("Automation|Manual"),
+	items.push_back (MenuElem (GainMeterBase::astate_string (ARDOUR::Off),
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) ARDOUR::Off, cui)));
-	items.push_back (MenuElem (_("Play"),
+	items.push_back (MenuElem (GainMeterBase::astate_string (Play),
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Play, cui)));
-	items.push_back (MenuElem (_("Write"),
+	items.push_back (MenuElem (GainMeterBase::astate_string (Write),
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Write, cui)));
-	items.push_back (MenuElem (_("Touch"),
+	items.push_back (MenuElem (GainMeterBase::astate_string (Touch),
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Touch, cui)));
-	items.push_back (MenuElem (_("Latch"),
+	items.push_back (MenuElem (GainMeterBase::astate_string (Latch),
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Latch, cui)));
 
-	anchored_menu_popup(automation_menu, &cui->automate_button, cui->automate_button.get_text(),
-	                    1, ev->time);
+	anchored_menu_popup (automation_menu, &cui->automate_button,
+	                     GainMeterBase::astate_string (insert->get_parameter_automation_state (cui->parameter())),
+	                     1, ev->time);
 
 	return true;
 }

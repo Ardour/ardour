@@ -782,19 +782,17 @@ MixerStrip::set_width_enum (Width w, void* owner)
 
 	const float scale = std::max(1.f, UIConfiguration::instance().get_ui_scale());
 
+	gpm.gain_automation_state_button.set_text (GainMeterBase::short_astate_string (gain_automation->automation_state()));
+
+	if (_route->panner()) {
+		((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (GainMeterBase::short_astate_string (_route->panner()->automation_state()));
+	}
+
 	switch (w) {
 	case Wide:
 
 		if (show_sends_button)  {
 			show_sends_button->set_text (_("Aux"));
-		}
-
-		gpm.gain_automation_state_button.set_text (
-				gpm.astate_string(gain_automation->automation_state()));
-
-		if (_route->panner()) {
-			((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (
-					panners.astate_string(_route->panner()->automation_state()));
 		}
 
 		{
@@ -811,14 +809,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 			show_sends_button->set_text (_("Snd"));
 		}
 
-		gpm.gain_automation_state_button.set_text (
-				gpm.short_astate_string(gain_automation->automation_state()));
 		gain_meter().setup_meters (); // recalc meter width
-
-		if (_route->panner()) {
-			((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (
-			panners.short_astate_string(_route->panner()->automation_state()));
-		}
 
 		{
 			// panners expect an even number of horiz. pixels

@@ -107,6 +107,7 @@ public:
 	 */
 	PBD::Signal1<bool, GdkEventButton *> LevelMeterButtonPress;
 
+	static std::string meterpt_string (ARDOUR::MeterPoint);
 	static std::string astate_string (ARDOUR::AutoState);
 	static std::string short_astate_string (ARDOUR::AutoState);
 	static std::string _astate_string (ARDOUR::AutoState, bool);
