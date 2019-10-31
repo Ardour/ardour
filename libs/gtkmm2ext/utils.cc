@@ -409,6 +409,7 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 	for ( ; i != items.end(); ++i) {
 		const Label* label_widget = dynamic_cast<const Label*>(i->get_child());
 		if (label_widget && selected == ((std::string) label_widget->get_label())) {
+			offset += (i->size_request().height - allocation.get_height()) / 2;
 			break;
 		}
 		offset += i->size_request().height;
@@ -416,13 +417,13 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 	if (i != items.end() &&
 	    y - offset >= monitor.get_y() &&
 	    y - offset + menu_req.height <= monitor.get_y() + monitor.get_height()) {
-		y += allocation.get_height() / 2 - i->size_request().height / 2 - offset; /* a) */
+		y -= offset; /* a) */
 	} else if (y + allocation.get_height() + menu_req.height <= monitor.get_y() + monitor.get_height()) {
 		y += allocation.get_height(); /* b) */
 	} else if ((y - menu_req.height) >= monitor.get_y()) {
 		y -= menu_req.height; /* c) */
 	} else if (i != items.end()) {
-		y += allocation.get_height() / 2 - i->size_request().height / 2 - offset; /* d) */
+		y -= offset; /* d) */
 	} else if (monitor.get_height() - allocation.get_height() >= 2*(y - monitor.get_y())) {
 		y += allocation.get_height(); /* e), more space below */
 	} else {
