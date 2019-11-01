@@ -155,7 +155,7 @@
     <ColorAlias name="gtk_processor_prefader" alias="widget ruddy"/>
     <ColorAlias name="gtk_processor_prefader_frame" alias="widget ruddy"/>
     <ColorAlias name="gtk_send_bg" alias="bg darker"/>
-    <ColorAlias name="gtk_send_fg" alias="bg darker"/>
+    <ColorAlias name="gtk_send_fg" alias="widget blue"/>
     <ColorAlias name="gtk_solo" alias="alert green"/>
     <ColorAlias name="gtk_somewhat_bright_indicator" alias="contrast2"/>
     <ColorAlias name="gtk_texts" alias="gray 90"/>
