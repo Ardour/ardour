@@ -404,6 +404,12 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			playback_sample += disk_samples_to_consume;
 		}
 
+		Location* loc = _loop_location;
+		if (loc) {
+			Evoral::Range<samplepos_t> loop_range (loc->start(), loc->end() - 1);
+			playback_sample = loop_range.squish (playback_sample);
+		}
+
 		if (_playlists[DataType::AUDIO]) {
 			if (!c->empty()) {
 				if (_slaved) {
