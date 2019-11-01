@@ -340,13 +340,11 @@ Session::do_locate (samplepos_t target_sample, bool with_roll, bool with_flush, 
 				if (!Config->get_loop_is_mode()) {
 					set_play_loop (false, _transport_speed);
 				} else {
-					if (Config->get_seamless_loop()) {
-						/* this will make the non_realtime_locate() in the butler
-						   which then causes seek() in tracks actually do the right
-						   thing.
-						*/
-						set_track_loop (false);
-					}
+					/* this will make the non_realtime_locate() in the butler
+					   which then causes seek() in tracks actually do the right
+					   thing.
+					*/
+					set_track_loop (false);
 				}
 
 			} else if (_transport_sample == al->start()) {
@@ -502,10 +500,8 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 			if (location != 0) {
 				if (_transport_sample != location->start()) {
 
-					if (Config->get_seamless_loop()) {
-						/* force tracks to do their thing */
-						set_track_loop (true);
-					}
+					/* force tracks to do their thing */
+					set_track_loop (true);
 
 					/* jump to start and then roll from there */
 
@@ -864,9 +860,9 @@ Session::set_play_loop (bool yn, double speed)
 		return;
 	}
 
-	if (yn && Config->get_seamless_loop() && synced_to_engine()) {
+	if (yn && synced_to_engine()) {
 		warning << string_compose (
-			_("Seamless looping cannot be supported while %1 is using JACK transport.\n"
+			_("Looping cannot be supported while %1 is using JACK transport.\n"
 			  "Recommend changing the configured options"), PROGRAM_NAME)
 			<< endmsg;
 		return;
@@ -881,18 +877,13 @@ Session::set_play_loop (bool yn, double speed)
 
 			unset_play_range ();
 
-			if (Config->get_seamless_loop()) {
-				if (!Config->get_loop_is_mode()) {
-					/* set all tracks to use internal looping */
-					set_track_loop (true);
-				} else {
-					/* we will do this in the locate to the start OR when we hit the end
-					 * of the loop for the first time
-					 */
-				}
+			if (!Config->get_loop_is_mode()) {
+				/* set all tracks to use internal looping */
+				set_track_loop (true);
 			} else {
-				/* set all tracks to NOT use internal looping */
-				set_track_loop (false);
+				/* we will do this in the locate to the start OR when we hit the end
+				 * of the loop for the first time
+				 */
 			}
 
 			/* Put the delick and loop events in into the event list.  The declick event will
@@ -1129,6 +1120,7 @@ Session::request_play_loop (bool yn, bool change_transport_roll)
 	queue_event (ev);
 
 	if (yn) {
+
 		if (!change_transport_roll) {
 			if (!transport_rolling()) {
 				/* we're not changing transport state, but we do want
@@ -1139,7 +1131,7 @@ Session::request_play_loop (bool yn, bool change_transport_roll)
 			}
 		}
 	} else {
-		if (!change_transport_roll && Config->get_seamless_loop() && transport_rolling()) {
+		if (!change_transport_roll && transport_rolling()) {
 			// request an immediate locate to refresh the tracks
 			// after disabling looping
 			request_locate (_transport_sample-1, false);
@@ -1237,7 +1229,7 @@ Session::butler_transport_work ()
 
 	if (ptw & PostTransportLocate) {
 
-		if (get_play_loop() && !Config->get_seamless_loop()) {
+		if (get_play_loop()) {
 
 			DEBUG_TRACE (DEBUG::Butler, "flush loop recording fragment to disk\n");
 
@@ -1383,8 +1375,7 @@ Session::non_realtime_locate ()
 			 */
 			set_track_loop (false);
 
-		} else if (loc && Config->get_seamless_loop() &&
-		           ((loc->start() <= _transport_sample) || (loc->end() > _transport_sample))) {
+		} else if (loc && ((loc->start() <= _transport_sample) || (loc->end() > _transport_sample))) {
 
 			/* jumping to start of loop. This  might have been done before but it is
 			 * idempotent and cheap. Doing it here ensures that when we start playback
@@ -1709,13 +1700,9 @@ Session::unset_play_loop ()
 		play_loop = false;
 		clear_events (SessionEvent::AutoLoop);
 		set_track_loop (false);
-
-
-		if (Config->get_seamless_loop()) {
-			/* likely need to flush track buffers: this will locate us to wherever we are */
-			add_post_transport_work (PostTransportLocate);
-			TFSM_EVENT (TransportFSM::ButlerRequired);
-		}
+		/* likely need to flush track buffers: this will locate us to wherever we are */
+		add_post_transport_work (PostTransportLocate);
+		TFSM_EVENT (TransportFSM::ButlerRequired);
 		TransportStateChange (); /* EMIT SIGNAL */
 	}
 }
@@ -1998,17 +1985,6 @@ Session::sync_source_changed (SyncSource type, samplepos_t pos, pframes_t cycle_
 	/* Runs in process() context */
 
 	boost::shared_ptr<TransportMaster> master = TransportMasterManager::instance().current();
-
-	/* save value of seamless from before the switch */
-	_was_seamless = Config->get_seamless_loop ();
-
-	if (type == Engine) {
-		/* JACK cannot support seamless looping at present */
-		Config->set_seamless_loop (false);
-	} else {
-		/* reset to whatever the value was before we last switched slaves */
-		Config->set_seamless_loop (_was_seamless);
-	}
 
 	if (master->can_loop()) {
 		request_play_loop (false);

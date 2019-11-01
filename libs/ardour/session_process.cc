@@ -851,10 +851,9 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::AutoLoop:
 		if (play_loop) {
-			/* roll after locate, do not flush, set "with loop"
-			   true only if we are seamless looping
+			/* roll after locate, do not flush, set "for loop end" true
 			*/
-			TFSM_LOCATE (ev->target_sample, true, false, Config->get_seamless_loop(), false);
+			TFSM_LOCATE (ev->target_sample, true, false, true, false);
 		}
 		remove = false;
 		del = false;

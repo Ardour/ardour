@@ -3178,19 +3178,6 @@ RCOptionEditor::RCOptionEditor ()
 					       "<b>When disabled</b> the loop button starts playing the loop, but stop then cancels loop playback")));
 	add_option (_("Transport"), bo);
 
-	bo = new BoolOption (
-		     "seamless-loop",
-		     _("Do seamless looping (not possible when slaved to MTC, LTC etc)"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_seamless_loop),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_seamless_loop)
-		     );
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-					    string_compose (_("<b>When enabled</b> this will loop by reading ahead and wrapping around at the loop point, "
-							      "preventing any need to do a transport locate at the end of the loop\n\n"
-							      "<b>When disabled</b> looping is done by locating back to the start of the loop when %1 reaches the end "
-							      "which will often cause a small click or delay"), PROGRAM_NAME));
-	add_option (_("Transport"), bo);
-
 	add_option (_("Transport"), new OptionEditorHeading (_("Dropout (xrun) Handling")));
 	bo = new BoolOption (
 		     "stop-recording-on-xrun",

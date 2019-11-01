@@ -238,10 +238,7 @@ BasicUI::transport_play (bool from_last_start)
 			/* XXX it is not possible to just leave seamless loop and keep
 			   playing at present (nov 4th 2009)
 			*/
-			if (!Config->get_seamless_loop()) {
-				/* stop loop playback and stop rolling */
-				session->request_play_loop (false, true);
-			} else if (rolling) {
+			if (rolling) {
 				/* stop loop playback but keep rolling */
 				session->request_play_loop (false, false);
 			}

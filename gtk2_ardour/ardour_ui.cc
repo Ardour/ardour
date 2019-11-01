@@ -1754,16 +1754,8 @@ ARDOUR_UI::transport_roll ()
 		*/
 
 		if (!Config->get_loop_is_mode()) {
-			/* XXX it is not possible to just leave seamless loop and keep
-			   playing at present (nov 4th 2009)
-			*/
-			if (!Config->get_seamless_loop()) {
-				/* stop loop playback and stop rolling */
-				_session->request_play_loop (false, true);
-			} else if (rolling) {
-				/* stop loop playback but keep rolling */
-				_session->request_play_loop (false, false);
-			}
+			/* stop loop playback but keep transport state */
+			_session->request_play_loop (false, false);
 		}
 
 	} else if (_session->get_play_range () ) {
@@ -1819,16 +1811,11 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 				_session->request_play_loop (false, affect_transport);
 
 			} else {
-				if (Config->get_seamless_loop()) {
-					/* the disk buffers contain copies of the loop - we can't
-					   just keep playing, so stop the transport. the user
-					   can restart as they wish.
-					*/
-					affect_transport = true;
-				} else {
-					/* disk buffers are normal, so we can keep playing */
-					affect_transport = false;
-				}
+				/* the disk buffers contain copies of the loop - we can't
+				   just keep playing, so stop the transport. the user
+				   can restart as they wish.
+				*/
+				affect_transport = true;
 				_session->request_play_loop (false, affect_transport);
 			}
 		} else if (_session->get_play_range ()) {

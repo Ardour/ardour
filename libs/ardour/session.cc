@@ -206,7 +206,6 @@ Session::Session (AudioEngine &eng,
 	, _listen_cnt (0)
 	, _solo_isolated_cnt (0)
 	, _writable (false)
-	, _was_seamless (Config->get_seamless_loop ())
 	, _under_nsm_control (false)
 	, _xrun_count (0)
 	, transport_master_tracking_state (Stopped)
@@ -1559,7 +1558,7 @@ Session::set_auto_loop_location (Location* location)
 
 	location->set_auto_loop (true, this);
 
-	if (Config->get_loop_is_mode() && play_loop && Config->get_seamless_loop()) {
+	if (Config->get_loop_is_mode() && play_loop) {
 		// set all tracks to use internal looping
 		boost::shared_ptr<RouteList> rl = routes.reader ();
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
