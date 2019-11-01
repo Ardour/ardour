@@ -2368,6 +2368,12 @@ RouteUI::fan_out (bool to_busses, bool group)
 	route->output ()->disconnect (this);
 	route->panner_shell ()->set_bypassed (true);
 
+	boost::shared_ptr<AutomationControl> msac = route->master_send_enable_controllable ();
+	if (msac) {
+		msac->start_touch (msac->session().transport_sample());
+		msac->set_value (0, PBD::Controllable::NoGroup);
+	}
+
 	RouteList to_group;
 	for (uint32_t p = 0; p < n_outputs; ++p) {
 		const Plugin::IOPortDescription& pd (plugin->describe_io_port (DataType::AUDIO, false, p));
