@@ -160,7 +160,6 @@ CONFIG_VARIABLE (bool, plugins_stop_with_transport, "plugins-stop-with-transport
 CONFIG_VARIABLE (bool, stop_recording_on_xrun, "stop-recording-on-xrun", false)
 CONFIG_VARIABLE (bool, create_xrun_marker, "create-xrun-marker", true)
 CONFIG_VARIABLE (bool, stop_at_session_end, "stop-at-session-end", false)
-CONFIG_VARIABLE (bool, seamless_loop, "seamless-loop", false)
 CONFIG_VARIABLE (float, preroll_seconds, "preroll-seconds", -2.0f)
 CONFIG_VARIABLE (bool, loop_is_mode, "loop-is-mode", false)
 CONFIG_VARIABLE (samplecnt_t, preroll, "preroll", 0)
