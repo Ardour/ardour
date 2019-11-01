@@ -480,7 +480,7 @@ Session::process_with_events (pframes_t nframes)
 	assert (_transport_speed == 0 || _transport_speed == 1.0 || _transport_speed == -1.0);
 
 	samples_moved = (samplecnt_t) nframes * _transport_speed;
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("plan to move transport by %1 (%2 @ %3)\n", samples_moved, nframes, _transport_speed));
+	// DEBUG_TRACE (DEBUG::Transport, string_compose ("plan to move transport by %1 (%2 @ %3)\n", samples_moved, nframes, _transport_speed));
 
 	end_sample = _transport_sample + samples_moved;
 
@@ -530,13 +530,13 @@ Session::process_with_events (pframes_t nframes)
 
 			this_nframes = nframes; /* real (jack) time relative */
 			samples_moved = (samplecnt_t) floor (_transport_speed * nframes); /* transport relative */
-			DEBUG_TRACE (DEBUG::Transport, string_compose ("sub-loop plan to move transport by %1 (%2 @ %3)\n", samples_moved, nframes, _transport_speed));
+			// DEBUG_TRACE (DEBUG::Transport, string_compose ("sub-loop plan to move transport by %1 (%2 @ %3)\n", samples_moved, nframes, _transport_speed));
 
 			/* running an event, position transport precisely to its time */
 			if (this_event && this_event->action_sample <= end_sample && this_event->action_sample >= _transport_sample) {
 				/* this isn't quite right for reverse play */
 				samples_moved = (samplecnt_t) (this_event->action_sample - _transport_sample);
-				DEBUG_TRACE (DEBUG::Transport, string_compose ("sub-loop2 (for %4)plan to move transport by %1 (%2 @ %3)\n", samples_moved, nframes, _transport_speed, enum_2_string (this_event->type)));
+				// DEBUG_TRACE (DEBUG::Transport, string_compose ("sub-loop2 (for %4)plan to move transport by %1 (%2 @ %3)\n", samples_moved, nframes, _transport_speed, enum_2_string (this_event->type)));
 				this_nframes = abs (floor(samples_moved / _transport_speed));
 			}
 
