@@ -132,7 +132,7 @@ ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& sess
  * loaded. The startup case is handled by StartupFSM
  */
 void
-ARDOUR_UI::start_session_load ()
+ARDOUR_UI::start_session_load (bool create_new)
 {
 	/* deal with any existing DIRTY session now, rather than later. don't
 	 * treat a non-dirty session this way, so that it stays visible
@@ -150,7 +150,7 @@ ARDOUR_UI::start_session_load ()
 		}
 	}
 
-	SessionDialog* session_dialog = new SessionDialog (true, string(), Config->get_default_session_parent_dir(), string(), true);
+	SessionDialog* session_dialog = new SessionDialog (create_new, string(), Config->get_default_session_parent_dir(), string(), true);
 	session_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::session_dialog_response_handler), session_dialog));
 	session_dialog->present ();
 }
@@ -315,7 +315,7 @@ ARDOUR_UI::close_session()
 		return;
 	}
 
-	start_session_load ();
+	start_session_load (false);
 }
 
 
