@@ -162,7 +162,7 @@ Session::realtime_stop (bool abort, bool clear_state)
 }
 
 void
-Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, bool for_loop_enabled, bool force, bool with_mmc)
+Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, bool for_loop_end, bool force, bool with_mmc)
 {
 	ENSURE_PROCESS_THREAD;
 
@@ -186,7 +186,7 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 				   will use the incorrect _transport_sample and report an old
 				   and incorrect time to Jack transport
 				*/
-				do_locate (target_sample, with_roll, with_flush, for_loop_enabled, force, with_mmc);
+				do_locate (target_sample, with_roll, with_flush, for_loop_end, force, with_mmc);
 			}
 
 			/* tell JACK to change transport position, and we will
@@ -202,13 +202,13 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 		}
 
 	} else {
-		do_locate (target_sample, with_roll, with_flush, for_loop_enabled, force, with_mmc);
+		do_locate (target_sample, with_roll, with_flush, for_loop_end, force, with_mmc);
 	}
 }
 
 /** @param with_mmc true to send a MMC locate command when the locate is done */
 void
-Session::do_locate (samplepos_t target_sample, bool with_roll, bool with_flush, bool for_loop_enabled, bool force, bool with_mmc)
+Session::do_locate (samplepos_t target_sample, bool with_roll, bool with_flush, bool for_loop_end, bool force, bool with_mmc)
 {
 	ENSURE_PROCESS_THREAD;
 
@@ -222,10 +222,10 @@ Session::do_locate (samplepos_t target_sample, bool with_roll, bool with_flush, 
 	 * changes in the value of _transport_sample.
 	 */
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1, roll %2 flush %3 loop-enabled %4 force %5 mmc %6\n",
-	                                               target_sample, with_roll, with_flush, for_loop_enabled, force, with_mmc));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1, roll %2 flush %3 for loop end %4 force %5 mmc %6\n",
+	                                               target_sample, with_roll, with_flush, for_loop_end, force, with_mmc));
 
-	if (!force && _transport_sample == target_sample && !loop_changing && !for_loop_enabled) {
+	if (!force && _transport_sample == target_sample && !loop_changing && !for_loop_end) {
 
 		/* already at the desired position. Not forced to locate,
 		   the loop isn't changing, so unless we're told to
@@ -286,7 +286,7 @@ Session::do_locate (samplepos_t target_sample, bool with_roll, bool with_flush, 
 		}
 	}
 
-	if (force || !for_loop_enabled || loop_changing) {
+	if (force || !for_loop_end || loop_changing) {
 
 		PostTransportWork todo = PostTransportLocate;
 
@@ -384,7 +384,13 @@ Session::do_locate (samplepos_t target_sample, bool with_roll, bool with_flush, 
 	if (need_butler) {
 		TFSM_EVENT (TransportFSM::ButlerRequired);
 	} else {
-		TFSM_EVENT (TransportFSM::LocateDone);
+		if (!for_loop_end) {
+			/* loop end locates do not trigger a state transition
+			   in the TFSM, because we do not change transport
+			   state nor do we wait for the butler.
+			*/
+			TFSM_EVENT (TransportFSM::LocateDone);
+		}
 	}
 
 	loop_changing = false;

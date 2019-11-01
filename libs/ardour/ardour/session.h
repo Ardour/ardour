@@ -1242,7 +1242,7 @@ protected:
 
 	/* transport API */
 
-	void locate (samplepos_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false, bool with_mmc=true);
+	void locate (samplepos_t, bool with_roll, bool with_flush, bool for_loop_end=false, bool force=false, bool with_mmc=true);
 	void stop_transport (bool abort = false, bool clear_state = false);
 	void start_transport ();
 	void butler_completed_transport_work ();
@@ -1689,7 +1689,7 @@ private:
 	void flush_all_inserts ();
 	int  micro_locate (samplecnt_t distance);
 
-	void do_locate (samplepos_t, bool with_roll, bool with_flush, bool for_loop_enabled, bool force, bool with_mmc);
+	void do_locate (samplepos_t, bool with_roll, bool with_flush, bool for_loop_end, bool force, bool with_mmc);
 	void force_locate (samplepos_t sample, bool with_roll = false);
 	void set_transport_speed (double speed, samplepos_t destination_sample, bool abort = false, bool clear_state = false, bool as_default = false);
 	void realtime_stop (bool abort, bool clear_state);
