@@ -260,8 +260,17 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 			start_locate_while_stopped (ev);
 			break;
 		case Rolling:
-			transition (DeclickToLocate);
-			start_declick_for_locate (ev);
+			if (ev.with_loop) {
+				/* no state transitions. Just do a realtime
+				   locate and continue rolling. Note that
+				   ev.with_roll is ignored and assumed to be
+				   true because we're looping.
+				*/
+				locate_for_loop (ev);
+			} else {
+				transition (DeclickToLocate);
+				start_declick_for_locate (ev);
+			}
 			break;
 		case WaitingForLocate:
 		case DeclickToLocate:
@@ -393,6 +402,15 @@ TransportFSM::start_locate_while_stopped (Event const & l) const
 
 	current_roll_after_locate_status = api->should_roll_after_locate();
 	api->locate (l.target, current_roll_after_locate_status.get(), l.with_flush, l.with_loop, l.force);
+}
+
+void
+TransportFSM::locate_for_loop (Event const & l)
+{
+	assert (l.type == Locate);
+	DEBUG_TRACE (DEBUG::TFSMEvents, "locate_for_loop\n");
+	current_roll_after_locate_status = l.with_roll;
+	api->locate (l.target, l.with_roll, l.with_flush, l.with_loop, l.force);
 }
 
 void

@@ -133,6 +133,7 @@ struct TransportFSM
 	void start_playback ();
 	void stop_playback ();
 	void start_locate_after_declick () const;
+	void locate_for_loop (Event const &);
 	void roll_after_locate () const;
 	void start_locate_while_stopped (Event const &) const;
 	void interrupt_locate (Event const &) const;
