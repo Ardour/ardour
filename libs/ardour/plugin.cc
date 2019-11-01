@@ -250,7 +250,7 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 	}
 #endif
 
-	return PluginPtr ((Plugin*) 0);
+	return PluginPtr ();
 }
 
 ChanCount

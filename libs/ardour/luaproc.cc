@@ -199,6 +199,9 @@ LuaProc::lua_print (std::string s) {
 bool
 LuaProc::load_script ()
 {
+	if (_script.empty ()) {
+		return true;
+	}
 	assert (!_lua_dsp); // don't allow to re-initialize
 	LuaPluginInfoPtr lpi;
 

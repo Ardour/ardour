@@ -2656,8 +2656,9 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		boost::shared_ptr<LuaProc> lp (new LuaProc (_session.engine(), _session, ""));
 		XMLNode *ls = node.child (lp->state_node_name().c_str());
 		if (ls && lp) {
-			lp->set_script_from_state (*ls);
-			plugin = lp;
+			if (0 == lp->set_script_from_state (*ls)) {
+				plugin = lp;
+			}
 		}
 	}
 
