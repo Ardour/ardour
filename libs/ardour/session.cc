@@ -1431,33 +1431,45 @@ void
 Session::auto_loop_changed (Location* location)
 {
 	replace_event (SessionEvent::AutoLoop, location->end(), location->start());
-	samplepos_t dcp;
-	samplecnt_t dcl;
-	auto_loop_declick_range (location, dcp, dcl);
 
-	bool rolling = transport_rolling ();
+	const bool rolling = transport_rolling ();
 
-	if (rolling && play_loop) {
+	if (rolling) {
 
-		if (_transport_sample < location->start() || _transport_sample > location->end()) {
-			// relocate to beginning of loop
-			clear_events (SessionEvent::LocateRoll);
-			request_locate (location->start(), true);
+		if (play_loop) {
 
+			if (_transport_sample < location->start() || _transport_sample > location->end()) {
+				// new loop range excludes current transport
+				// sample => relocate to beginning of loop
+				request_locate (location->start(), true);
+
+			} else if (!loop_changing) {
+
+				// schedule a locate-roll to refill the diskstreams at the
+				// previous loop end
+
+				loop_changing = true;
+
+				if (location->end() > last_loopend) {
+					clear_events (SessionEvent::LocateRoll);
+					SessionEvent *ev = new SessionEvent (SessionEvent::LocateRoll, SessionEvent::Add, last_loopend, last_loopend, 0, true);
+					queue_event (ev);
+				}
+			}
 		}
+
 	} else {
-		clear_events (SessionEvent::AutoLoop);
-	}
 
-	/* possibly move playhead if not rolling; if we are rolling we'll move
-	   to the loop start on stop if that is appropriate.
-	 */
+		/* possibly move playhead if not rolling; if we are rolling we'll move
+		   to the loop start on stop if that is appropriate.
+		*/
 
-	samplepos_t pos;
+		samplepos_t pos;
 
-	if (!rolling && select_playhead_priority_target (pos)) {
-		if (pos == location->start()) {
-			request_locate (pos);
+		if (select_playhead_priority_target (pos)) {
+			if (pos == location->start()) {
+				request_locate (pos);
+			}
 		}
 	}
 
