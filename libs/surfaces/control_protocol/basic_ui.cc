@@ -29,6 +29,7 @@
 #include "ardour/session.h"
 #include "ardour/location.h"
 #include "ardour/tempo.h"
+#include "ardour/transport_master_manager.h"
 #include "ardour/utils.h"
 
 #include "control_protocol/basic_ui.h"
@@ -205,6 +206,8 @@ BasicUI::transport_stop ()
 void
 BasicUI::transport_play (bool from_last_start)
 {
+	/* ::toggle_roll() is smarter and preferred */
+
 	if (!session) {
 		return;
 	}
@@ -486,12 +489,65 @@ BasicUI::toggle_click ()
 }
 
 void
-BasicUI::toggle_roll ()
+BasicUI::toggle_roll (bool roll_out_of_bounded_mode)
 {
-	if (session->transport_rolling()) {
-		transport_stop ();
-	} else {
-		transport_play (false);
+	/* TO BE KEPT IN SYNC WITH ARDOUR_UI::toggle_roll() */
+
+	if (!session) {
+		return;
+	}
+
+	if (session->is_auditioning()) {
+		session->cancel_audition ();
+		return;
+	}
+
+	if (session->config.get_external_sync()) {
+		switch (TransportMasterManager::instance().current()->type()) {
+		case Engine:
+			break;
+		default:
+			/* transport controlled by the master */
+			return;
+		}
+	}
+
+	bool rolling = session->transport_rolling();
+
+	if (rolling) {
+
+		if (roll_out_of_bounded_mode) {
+			/* drop out of loop/range playback but leave transport rolling */
+
+			if (session->get_play_loop()) {
+
+				if (session->actively_recording()) {
+					/* actually stop transport because
+					   otherwise the captured data will make
+					   no sense.
+					*/
+					session->request_play_loop (false, true);
+
+				} else {
+					session->request_play_loop (false, false);
+				}
+
+			} else if (session->get_play_range ()) {
+
+				session->request_cancel_play_range ();
+			}
+
+		} else {
+			session->request_stop (true, true);
+		}
+
+	} else { /* not rolling */
+
+		if (session->get_play_loop() && Config->get_loop_is_mode()) {
+			session->request_locate (session->locations()->auto_loop_location()->start(), true);
+		} else {
+			session->request_transport_speed (1.0f);
+		}
 	}
 }
 
