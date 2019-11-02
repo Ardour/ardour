@@ -675,9 +675,8 @@ StereoPanner::on_key_press_event (GdkEventKey* ev)
 void
 StereoPanner::set_colors ()
 {
-	colors[Normal].fill = UIConfiguration::instance().color_mod ("stereo panner fill", "panner fill");
-	// colors[Normal].outline = UIConfiguration::instance().color ("stereo panner outline");
-	colors[Normal].outline = Gtkmm2ext::HSV (colors[Normal].fill).outline().color ();
+	colors[Normal].fill = UIConfiguration::instance().color ("stereo panner fill");
+	colors[Normal].outline = UIConfiguration::instance().color ("stereo panner outline");
 	colors[Normal].text = UIConfiguration::instance().color ("stereo panner text");
 	colors[Normal].background = UIConfiguration::instance().color ("stereo panner bg");
 	colors[Normal].rule = UIConfiguration::instance().color ("stereo panner rule");
@@ -688,10 +687,10 @@ StereoPanner::set_colors ()
 	colors[Mono].background = UIConfiguration::instance().color ("stereo panner mono bg");
 	colors[Mono].rule = UIConfiguration::instance().color ("stereo panner rule");
 
-	colors[Inverted].fill = UIConfiguration::instance().color_mod ("stereo panner inverted fill", "stereo panner inverted");
+	colors[Inverted].fill = UIConfiguration::instance().color ("stereo panner inverted fill");
 	colors[Inverted].outline = UIConfiguration::instance().color ("stereo panner inverted outline");
 	colors[Inverted].text = UIConfiguration::instance().color ("stereo panner inverted text");
-	colors[Inverted].background = UIConfiguration::instance().color_mod ("stereo panner inverted bg", "stereo panner inverted bg");
+	colors[Inverted].background = UIConfiguration::instance().color ("stereo panner inverted bg");
 	colors[Inverted].rule = UIConfiguration::instance().color ("stereo panner rule");
 }
 
