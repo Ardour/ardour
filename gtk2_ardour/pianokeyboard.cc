@@ -211,8 +211,6 @@ APianoKeyboard::press_key (int key, int vel)
 	assert (key >= 0);
 	assert (key < NNOTES);
 
-	_maybe_stop_sustained_notes = false;
-
 	/* This is for keyboard autorepeat protection. */
 	if (_notes[key].pressed) {
 		return;
@@ -246,8 +244,6 @@ APianoKeyboard::release_key (int key)
 {
 	assert (key >= 0);
 	assert (key < NNOTES);
-
-	_maybe_stop_sustained_notes = false;
 
 	if (!_notes[key].pressed) {
 		return;
@@ -284,8 +280,10 @@ APianoKeyboard::stop_sustained_notes ()
 {
 	for (int i = 0; i < NNOTES; ++i) {
 		if (_notes[i].sustained) {
-			_notes[i].pressed   = false;
 			_notes[i].sustained = false;
+			if (_notes[i].pressed) {
+				continue;
+			}
 			NoteOff (i); /* EMIT SIGNAL */
 			queue_note_draw (i);
 		}
@@ -322,6 +320,7 @@ APianoKeyboard::bind_keys_qwerty ()
 	clear_notes ();
 
 	bind_key ("space", 128);
+	bind_key ("Tab", 129);
 
 	/* Lower keyboard row - "zxcvbnm". */
 	bind_key ("z", 12); /* C0 */
@@ -375,6 +374,7 @@ APianoKeyboard::bind_keys_azerty ()
 	clear_notes ();
 
 	bind_key ("space", 128);
+	bind_key ("Tab", 129);
 
 	/* Lower keyboard row - "wxcvbn,". */
 	bind_key ("w", 12); /* C0 */
@@ -418,6 +418,7 @@ APianoKeyboard::bind_keys_dvorak ()
 	clear_notes ();
 
 	bind_key ("space", 128);
+	bind_key ("Tab", 129);
 
 	/* Lower keyboard row - ";qjkxbm". */
 	bind_key ("semicolon", 12); /* C0 */
@@ -471,6 +472,7 @@ APianoKeyboard::bind_keys_basic_qwerty ()
 	clear_notes ();
 
 	bind_key ("space", 128);
+	bind_key ("Tab", 129);
 
 	/* simple - middle rows only */
 	bind_key ("a", 12); /* C0 */
@@ -500,6 +502,7 @@ APianoKeyboard::bind_keys_basic_qwertz ()
 	clear_notes ();
 
 	bind_key ("space", 128);
+	bind_key ("Tab", 129);
 
 	/* simple - middle rows only */
 	bind_key ("a", 12); /* C0 */
@@ -551,6 +554,10 @@ APianoKeyboard::on_key_press_event (GdkEventKey* event)
 	if (note == 128) {
 		/* Rest is used on release */
 		return false;
+	}
+	if (note == 129) {
+		toggle_sustain ();
+		return true;
 	}
 
 	note += _octave * 12;
@@ -856,7 +863,6 @@ APianoKeyboard::APianoKeyboard ()
 	using namespace Gdk;
 	add_events (KEY_PRESS_MASK | KEY_RELEASE_MASK | BUTTON_PRESS_MASK | BUTTON_RELEASE_MASK | POINTER_MOTION_MASK | POINTER_MOTION_HINT_MASK);
 
-	_maybe_stop_sustained_notes     = false;
 	_sustain_new_notes              = false;
 	_highlight_grand_piano_range    = true;
 	_annotate_layout                = false;
@@ -921,21 +927,33 @@ APianoKeyboard::set_velocities (int min_vel, int max_vel, int key_vel)
 }
 
 void
+APianoKeyboard::toggle_sustain ()
+{
+	if (_sustain_new_notes) {
+		sustain_release ();
+	} else {
+		sustain_press ();
+	}
+}
+
+void
 APianoKeyboard::sustain_press ()
 {
-	if (!_sustain_new_notes) {
-		_sustain_new_notes          = true;
-		_maybe_stop_sustained_notes = true;
+	if (_sustain_new_notes) {
+		return;
 	}
+	_sustain_new_notes = true;
+	SustainChanged (true); /* EMIT SIGNAL */
 }
 
 void
 APianoKeyboard::sustain_release ()
 {
-	if (_maybe_stop_sustained_notes) {
-		stop_sustained_notes ();
+	stop_sustained_notes ();
+	if (_sustain_new_notes) {
+		_sustain_new_notes = false;
+		SustainChanged (false); /* EMIT SIGNAL */
 	}
-	_sustain_new_notes = false;
 }
 
 void

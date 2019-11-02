@@ -34,6 +34,7 @@ public:
 	sigc::signal<void, int, int> NoteOn;
 	sigc::signal<void, int>      NoteOff;
 	sigc::signal<void>           Rest;
+	sigc::signal<void,bool>      SustainChanged;
 
 	enum Layout {
 		QWERTY,
@@ -78,6 +79,7 @@ private:
 
 	void queue_note_draw (int note);
 
+	void toggle_sustain ();
 	void press_key (int key, int vel);
 	void release_key (int key);
 	void stop_sustained_notes ();
@@ -121,7 +123,6 @@ private:
 		int  h;         /* Height of the key, in pixels. */
 	};
 
-	bool _maybe_stop_sustained_notes;
 	bool _sustain_new_notes;
 	bool _highlight_grand_piano_range;
 	bool _annotate_layout;

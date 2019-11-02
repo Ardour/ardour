@@ -378,6 +378,9 @@ VirtualKeyboardWindow::on_key_press_event (GdkEventKey* ev)
 	_piano.grab_focus ();
 
 	/* handle up/down */
+	// XXX consider to handle these in APianoKeyboard::on_key_press_event
+	// and use signals. -- also subscribe SustainChanged, indicate sustain.
+	// TODO: pitch-bend shortcuts
 	if (ev->type == GDK_KEY_PRESS) {
 		if (ev->keyval == GDK_KEY_Left) {
 			_piano_octave_key.set_value (_piano_octave_key.get_value_as_int () - 1);
