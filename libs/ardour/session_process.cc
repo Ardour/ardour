@@ -883,7 +883,8 @@ Session::process_event (SessionEvent* ev)
 	case SessionEvent::LocateRollLocate:
 		// locate is handled by ::request_roll_at_and_return()
 		_requested_return_sample = ev->target_sample;
-		request_locate (ev->target2_sample, true);
+		TFSM_LOCATE (ev->target2_sample, true, true, false, false);
+		_send_timecode_update = true;
 		break;
 
 
