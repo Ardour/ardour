@@ -338,7 +338,7 @@ Session::do_locate (samplepos_t target_sample, bool with_roll, bool with_flush, 
 				have_looped = false;
 
 				if (!Config->get_loop_is_mode()) {
-					set_play_loop (false, _transport_speed);
+					set_play_loop (false);
 				} else {
 					/* this will make the non_realtime_locate() in the butler
 					   which then causes seek() in tracks actually do the right
@@ -852,12 +852,12 @@ Session::flush_all_inserts ()
 }
 
 void
-Session::set_play_loop (bool yn, double speed)
+Session::set_play_loop (bool yn)
 {
 	ENSURE_PROCESS_THREAD;
 	/* Called from event-handling context */
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("set_play_loop (%1, %2)\n", yn, speed));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("set_play_loop (%1)\n", yn));
 
 	Location *loc;
 
@@ -882,45 +882,15 @@ Session::set_play_loop (bool yn, double speed)
 		if (loc) {
 
 			unset_play_range ();
+			/* set all tracks to use internal looping */
+			set_track_loop (true);
 
-			if (!Config->get_loop_is_mode()) {
-				/* set all tracks to use internal looping */
-				set_track_loop (true);
-			} else {
-				/* we will do this in the locate to the start OR when we hit the end
-				 * of the loop for the first time
-				 */
-			}
-
-			/* Put the delick and loop events in into the event list.  The declick event will
-			   cause a de-clicking fade-out just before the end of the loop, and it will also result
-			   in a fade-in when the loop restarts.  The AutoLoop event will peform the actual loop.
-			*/
-
-			samplepos_t dcp;
-			samplecnt_t dcl;
-			auto_loop_declick_range (loc, dcp, dcl);
 			merge_event (new SessionEvent (SessionEvent::AutoLoop, SessionEvent::Replace, loc->end(), loc->start(), 0.0f));
 
-			/* if requested to roll, locate to start of loop and
-			 * roll but ONLY if we're not already rolling.
+			if (!Config->get_loop_is_mode()) {
+				/* args: positition, roll=true, flush=true, for_loop_end=false, force buffer, refill  looping */
 
-			   args: positition, roll=true, flush=true, with_loop=false, force buffer refill if seamless looping
-			*/
-
-			add_post_transport_work (PostTransportRoll);
-
-			if (Config->get_loop_is_mode()) {
-				/* loop IS a transport mode: if already
-				   rolling, do not locate to loop start.
-				*/
-				if (!transport_rolling() && (speed != 0.0)) {
-					TFSM_LOCATE (loc->start(), true, true, false, true);
-				}
-			} else {
-				if (speed != 0.0) {
-					TFSM_LOCATE (loc->start(), true, true, false, true);
-				}
+				TFSM_LOCATE (loc->start(), true, true, false, true);
 			}
 		}
 

@@ -846,7 +846,7 @@ Session::process_event (SessionEvent* ev)
 
 	switch (ev->type) {
 	case SessionEvent::SetLoop:
-		set_play_loop (ev->yes_or_no, ev->speed);
+		set_play_loop (ev->yes_or_no);
 		break;
 
 	case SessionEvent::AutoLoop:
