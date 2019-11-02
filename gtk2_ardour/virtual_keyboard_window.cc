@@ -45,10 +45,10 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	, _bank_msb (*manage (new Adjustment (0, 0, 127, 1, 16)))
 	, _bank_lsb (*manage (new Adjustment (0, 0, 127, 1, 16)))
 	, _patchpgm (*manage (new Adjustment (1, 1, 128, 1, 16)))
-	, _cfg_display ("Config", ArdourButton::led_default_elements)
-	, _pgm_display ("Bank/Patch", ArdourButton::led_default_elements)
-	, _yaxis_velocity ("Y-Axis", ArdourButton::led_default_elements)
-	, _send_panic ("Panic", ArdourButton::default_elements)
+	, _cfg_display (S_("Virtual keyboard|Config"), ArdourButton::led_default_elements)
+	, _pgm_display (_("Bank/Patch"), ArdourButton::led_default_elements)
+	, _yaxis_velocity (_("Y-Axis"), ArdourButton::led_default_elements)
+	, _send_panic (_("Panic"), ArdourButton::default_elements)
 	, _piano_key_velocity (*manage (new Adjustment (100, 1, 127, 1, 16)))
 	, _piano_min_velocity (*manage (new Adjustment (  1, 1, 127, 1, 16)))
 	, _piano_max_velocity (*manage (new Adjustment (127, 1, 127, 1, 16)))
@@ -76,15 +76,15 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	}
 
 	using namespace Menu_Helpers;
-	_keyboard_layout.AddMenuElem (MenuElem ("QWERTY", sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "QWERTY")));
-	_keyboard_layout.AddMenuElem (MenuElem ("QWERTZ", sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "QWERTZ")));
-	_keyboard_layout.AddMenuElem (MenuElem ("AZERTY", sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "AZERTY")));
-	_keyboard_layout.AddMenuElem (MenuElem ("DVORAK", sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "DVORAK")));
-	_keyboard_layout.AddMenuElem (MenuElem ("QWERTY Single", sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "QWERTY Single")));
-	_keyboard_layout.AddMenuElem (MenuElem ("QWERTZ Single", sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "QWERTZ Single")));
+	_keyboard_layout.AddMenuElem (MenuElem (_("QWERTY"), sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "QWERTY")));
+	_keyboard_layout.AddMenuElem (MenuElem (_("QWERTZ"), sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "QWERTZ")));
+	_keyboard_layout.AddMenuElem (MenuElem (_("AZERTY"), sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "AZERTY")));
+	_keyboard_layout.AddMenuElem (MenuElem (_("DVORAK"), sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "DVORAK")));
+	_keyboard_layout.AddMenuElem (MenuElem (_("QWERTY Single"), sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "QWERTY Single")));
+	_keyboard_layout.AddMenuElem (MenuElem (_("QWERTZ Single"), sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "QWERTZ Single")));
 
-	Gtkmm2ext::set_size_request_to_display_given_text_width (_keyboard_layout, "QWERTZ Single", 2, 0);
-	_keyboard_layout.set_active ("QWERTY");
+	Gtkmm2ext::set_size_request_to_display_given_text_width (_keyboard_layout, _("QWERTZ Single"), 2, 0); // Longest Text
+	_keyboard_layout.set_active (_("QWERTY"));
 	_midi_channel.set_active ("1");
 	_transpose_output.set_active ("0");
 
@@ -101,19 +101,19 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_pitch_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::pitch_slider_adjusted));
 	_pitchbend->ValueChanged.connect_same_thread (_cc_connections, boost::bind (&VirtualKeyboardWindow::pitch_bend_event_handler, this, _1));
 
-	set_tooltip (_yaxis_velocity, "When enabled, mouse-click y-axis position defines the velocity.");
+	set_tooltip (_yaxis_velocity, _("When enabled, mouse-click y-axis position defines the velocity."));
 
-	set_tooltip (_piano_octave_key, "The center octave, and lowest octave for keyboard control. Change with Arrow left/right.");
-	set_tooltip (_piano_octave_range, "Available octave range, centered around the key-octave.");
-	set_tooltip (_keyboard_layout, "Keyboard layout to use for keyboard control.");
+	set_tooltip (_piano_octave_key, _("The center octave, and lowest octave for keyboard control. Change with Arrow left/right."));
+	set_tooltip (_piano_octave_range, _("Available octave range, centered around the key-octave."));
+	set_tooltip (_keyboard_layout, _("Keyboard layout to use for keyboard control."));
 
-	set_tooltip (_piano_key_velocity, "The default velocity to use with keyboard control, and when y-axis click-position is disabled.");
-	set_tooltip (_piano_min_velocity, "Velocity to use when clicking at the top-end of a key.");
-	set_tooltip (_piano_max_velocity, "Velocity to use when clicking at the bottom-end of a key.");
+	set_tooltip (_piano_key_velocity, _("The default velocity to use with keyboard control, and when y-axis click-position is disabled."));
+	set_tooltip (_piano_min_velocity, _("Velocity to use when clicking at the top-end of a key."));
+	set_tooltip (_piano_max_velocity, _("Velocity to use when clicking at the bottom-end of a key."));
 
-	set_tooltip (_send_panic, "Send MIDI Panic message for current channel");
+	set_tooltip (_send_panic, _("Send MIDI Panic message for current channel"));
 
-	_pitch_slider_tooltip->set_tip ("Pitchbend: 8192");
+	_pitch_slider_tooltip->set_tip (_("Pitchbend: ") + std::string ("8192"));
 	_pitch_slider->set_can_focus (false);
 
 	/* config */
@@ -539,8 +539,8 @@ VirtualKeyboardWindow::pitch_slider_adjusted ()
 {
 	_pitchbend->set_value (_pitch_adjustment.get_value (), PBD::Controllable::NoGroup);
 	char buf[64];
-	snprintf (buf, sizeof (buf), "Pitchbend: %.0f", _pitch_adjustment.get_value ());
-	_pitch_slider_tooltip->set_tip (buf);
+	snprintf (buf, sizeof (buf), "%.0f", _pitch_adjustment.get_value ());
+	_pitch_slider_tooltip->set_tip (_("Pitchbend: ") + std::string(buf));
 }
 
 void
