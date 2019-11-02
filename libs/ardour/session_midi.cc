@@ -746,10 +746,6 @@ Session::rewire_selected_midi (boost::shared_ptr<MidiTrack> new_midi_target)
 
 	if (!msp.empty()) {
 
-		if (old_midi_target) {
-			old_midi_target->input()->disconnect (this);
-		}
-
 		for (vector<string>::const_iterator p = msp.begin(); p != msp.end(); ++p) {
 			PortManager::MidiPortInformation mpi (AudioEngine::instance()->midi_port_information (*p));
 
