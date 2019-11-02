@@ -1098,7 +1098,7 @@ Session::request_play_loop (bool yn, bool change_transport_roll)
 	if (yn) {
 
 		if (!change_transport_roll) {
-			if (!transport_rolling()) {
+			if (!Config->get_loop_is_mode() && !transport_rolling()) {
 				/* we're not changing transport state, but we do want
 				   to set up position for the new loop. Don't
 				   do this if we're rolling already.
