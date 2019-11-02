@@ -1798,49 +1798,49 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 	}
 
 	bool rolling = _session->transport_rolling();
-	bool affect_transport = true;
 
-	if (rolling && roll_out_of_bounded_mode) {
-		/* drop out of loop/range playback but leave transport rolling */
-		if (_session->get_play_loop()) {
-			if (_session->actively_recording()) {
+	if (rolling) {
 
-				/* just stop using the loop, then actually stop
-				 * below
-				 */
-				_session->request_play_loop (false, affect_transport);
+		if (roll_out_of_bounded_mode) {
+			/* drop out of loop/range playback but leave transport rolling */
 
-			} else {
-				/* the disk buffers contain copies of the loop - we can't
-				   just keep playing, so stop the transport. the user
-				   can restart as they wish.
-				*/
-				affect_transport = true;
-				_session->request_play_loop (false, affect_transport);
+			if (_session->get_play_loop()) {
+
+				if (_session->actively_recording()) {
+					/* actually stop transport because
+					   otherwise the captured data will make
+					   no sense.
+					*/
+					_session->request_play_loop (false, true);
+
+				} else {
+					_session->request_play_loop (false, false);
+				}
+
+			} else if (_session->get_play_range ()) {
+
+				_session->request_cancel_play_range ();
 			}
-		} else if (_session->get_play_range ()) {
-			affect_transport = false;
-			_session->request_play_range (0, true);
-		}
-	}
 
-	if (affect_transport) {
-		if (rolling) {
+		} else {
 			_session->request_stop (with_abort, true);
+		}
 
-		} else if (!with_abort) { /* with_abort == true means the
-		                           * command was intended to stop
-		                           * transport, not start.
-		                           */
+	} else { /* not rolling */
 
-			/* the only external sync condition we can be in here
-			 * would be Engine (JACK) sync, in which case we still
-			 * want to do this.
-			 */
+		if (with_abort) { /* with_abort == true means the command was intended to stop transport, not start. */
+			return;
+		}
 
-			if (UIConfiguration::instance().get_follow_edits() && ( editor->get_selection().time.front().start == _session->transport_sample() ) ) {  //if playhead is exactly at the start of a range, we can assume it was placed there by follow_edits
-				_session->request_play_range (&editor->get_selection().time, true);
-				_session->set_requested_return_sample( editor->get_selection().time.front().start );  //force an auto-return here
+		if (_session->get_play_loop() && Config->get_loop_is_mode()) {
+			_session->request_locate (_session->locations()->auto_loop_location()->start(), true);
+		} else {
+			if (UIConfiguration::instance().get_follow_edits()) {
+				list<AudioRange>& range = editor->get_selection().time;
+				if (range.front().start == _session->transport_sample()) { // if playhead is exactly at the start of a range, we assume it was placed there by follow_edits
+					_session->request_play_range (&range, true);
+					_session->set_requested_return_sample (range.front().start);  //force an auto-return here
+				}
 			}
 			_session->request_transport_speed (1.0f);
 		}
