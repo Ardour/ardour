@@ -400,7 +400,7 @@ TransportFSM::start_locate_while_stopped (Event const & l) const
 	assert (l.type == Locate);
 	DEBUG_TRACE (DEBUG::TFSMEvents, "start_locate_while_stopped\n");
 
-	current_roll_after_locate_status = api->should_roll_after_locate();
+	current_roll_after_locate_status = l.with_roll ? true : api->should_roll_after_locate();
 	api->locate (l.target, current_roll_after_locate_status.get(), l.with_flush, l.with_loop, l.force);
 }
 
