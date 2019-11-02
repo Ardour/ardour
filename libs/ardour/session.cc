@@ -1440,7 +1440,7 @@ Session::auto_loop_changed (Location* location)
 
 			if (_transport_sample < location->start() || _transport_sample > location->end()) {
 				// new loop range excludes current transport
-				// sample => relocate to beginning of loop
+				// sample => relocate to beginning of loop and roll.
 				request_locate (location->start(), true);
 
 			} else if (!loop_changing) {
