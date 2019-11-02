@@ -95,13 +95,14 @@ PluginSetupDialog::PluginSetupDialog (boost::shared_ptr<ARDOUR::Route> r, boost:
 		f->add (*box);
 		tbl->attach (*f, 1, 2, row, row + 1, EXPAND|FILL, SHRINK, 0, 8);
 		_fan_out.signal_clicked.connect (sigc::mem_fun (*this, &PluginSetupDialog::toggle_fan_out));
+		_fan_out.set_active (true);
 	} else {
 		_pi->set_preset_out (_pi->natural_output_streams ());
 		update_sensitivity (_pi->natural_output_streams ().n_audio ());
+		_fan_out.set_active (false);
 	}
 
 	_keep_mapping.set_active (false);
-	_fan_out.set_active (false);
 	apply_mapping ();
 
 	add_button (Stock::ADD, 0);
