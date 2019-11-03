@@ -127,16 +127,20 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 			/* check that the event is in the acceptable time range */
 			if ((timestamp <  (_global_port_buffer_offset)) ||
 			    (timestamp >= (_global_port_buffer_offset + nframes))) {
-				// XXX this is normal after a split cycles:
-				// The engine buffer contains the data for the complete cycle, but
-				// only the part after _global_port_buffer_offset is needed.
+				/* XXX this is normal after a split cycles XXX
+				 * The engine buffer contains the data for the complete cycle, but
+				 * only the part after _global_port_buffer_offset is needed. */
 #ifndef NDEBUG
-				cerr << "Dropping incoming MIDI at time " << timestamp << "; offset="
+				cerr << "Ignored incoming MIDI at time " << timestamp << "; offset="
 				     << _global_port_buffer_offset << " limit="
 				     << (_global_port_buffer_offset + nframes)
 				     << " = (" << _global_port_buffer_offset
 				     << " + " << nframes
-				     << ")\n";
+				     << ")";
+				for (size_t xx = 0; xx < size; ++xx) {
+					cerr << ' ' << hex << (int) buf[xx];
+				}
+				cerr << dec << endl;
 #endif
 				continue;
 			}
@@ -304,18 +308,17 @@ MidiPort::flush_buffers (pframes_t nframes)
 			}
 #endif
 
-			assert (ev.time() < (nframes + _global_port_buffer_offset));
-
-			if (ev.time() >= _global_port_buffer_offset) {
+			if (   ev.time() >= _global_port_buffer_offset
+			    && ev.time() < _global_port_buffer_offset + nframes) {
 				pframes_t tme = floor (ev.time() / _speed_ratio);
 				if (port_engine.midi_event_put (port_buffer, tme, ev.buffer(), ev.size()) != 0) {
-					cerr << "write failed, dropped event, time "
-					     << ev.time()
-							 << " > " << _global_port_buffer_offset << endl;
+					cerr << "write failed, dropped event, time " << ev.time() << endl;
 				}
 			} else {
-				cerr << "drop flushed event on the floor, time " << ev.time()
-				     << " too early for " << _global_port_buffer_offset;
+				cerr << "Dropped outgoing MIDI event. time " << ev.time()
+				     << " out of range [" << _global_port_buffer_offset
+				     << " .. " << _global_port_buffer_offset + nframes
+				     << "]";
 				for (size_t xx = 0; xx < ev.size(); ++xx) {
 					cerr << ' ' << hex << (int) ev.buffer()[xx];
 				}
@@ -323,8 +326,7 @@ MidiPort::flush_buffers (pframes_t nframes)
 			}
 		}
 
-		/* done.. the data has moved to the port buffer, mark it so
-		 */
+		/* done.. the data has moved to the port buffer, mark it so */
 
 		_buffer->clear ();
 	}
