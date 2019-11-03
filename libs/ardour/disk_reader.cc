@@ -317,7 +317,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	if (!result_required || ((ms & MonitoringDisk) == 0) || still_locating || _no_disk_output) {
 
-		/* no need for actual disk data, just advance read pointer and return */
+		/* no need for actual disk data, just advance read pointer */
 
 		if (!still_locating || _no_disk_output) {
 			for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
