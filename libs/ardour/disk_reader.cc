@@ -254,7 +254,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	if (run_must_resolve) {
 		boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (_track);
 		if (mt) {
-			resolve_tracker (mt->immediate_events(), start_sample);
+			resolve_tracker (mt->immediate_events(), 0);
 		}
 		run_must_resolve = false;
 	}
