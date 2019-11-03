@@ -505,15 +505,15 @@ Session::process_with_events (pframes_t nframes)
 			return;
 		}
 
-		if (!_exporting && !timecode_transmission_suspended()) {
-			send_midi_time_code_for_cycle (_transport_sample, end_sample, nframes);
-		}
-
-		ltc_tx_send_time_code_for_cycle (_transport_sample, end_sample, _target_transport_speed, _transport_speed, nframes);
 
 		samplepos_t stop_limit = compute_stop_limit ();
 
 		if (maybe_stop (stop_limit)) {
+			if (!_exporting && !timecode_transmission_suspended()) {
+				send_midi_time_code_for_cycle (_transport_sample, end_sample, nframes);
+			}
+			ltc_tx_send_time_code_for_cycle (_transport_sample, end_sample, _target_transport_speed, _transport_speed, nframes);
+
 			no_roll (nframes);
 			return;
 		}
@@ -543,6 +543,12 @@ Session::process_with_events (pframes_t nframes)
 			try_run_lua (this_nframes);
 
 			if (this_nframes) {
+
+				if (!_exporting && !timecode_transmission_suspended()) {
+					send_midi_time_code_for_cycle (_transport_sample, _transport_sample + samples_moved, this_nframes);
+				}
+
+				ltc_tx_send_time_code_for_cycle (_transport_sample,  _transport_sample + samples_moved, _target_transport_speed, _transport_speed, this_nframes);
 
 				click (_transport_sample, this_nframes);
 

@@ -558,7 +558,7 @@ Session::send_midi_time_code_for_cycle (samplepos_t start_sample, samplepos_t en
 		assert (out_stamp < nframes);
 
 		MidiBuffer& mb (_midi_ports->mtc_output_port()->get_midi_buffer(nframes));
-		if (!mb.push_back (out_stamp, 2, mtc_msg)) {
+		if (!mb.push_back (Port::port_offset () + out_stamp, 2, mtc_msg)) {
 			error << string_compose(_("Session: cannot send quarter-frame MTC message (%1)"), strerror (errno))
 			      << endmsg;
 			return -1;
