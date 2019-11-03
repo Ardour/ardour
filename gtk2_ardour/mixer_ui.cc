@@ -3150,6 +3150,9 @@ Mixer_UI::refill_favorite_plugins ()
 #ifdef MACVST_SUPPORT
 	refiller (plugs, mgr.mac_vst_plugin_info ());
 #endif
+#ifdef VST3_SUPPORT
+	refiller (plugs, mgr.vst3_plugin_info ());
+#endif
 #ifdef AUDIOUNIT_SUPPORT
 	refiller (plugs, mgr.au_plugin_info ());
 #endif

@@ -64,6 +64,9 @@
 #include "ardour/mac_vst_plugin.h"
 #include "vst_plugin_ui.h"
 #endif
+#ifdef VST3_SUPPORT
+#include "ardour/vst3_plugin.h"
+#endif
 
 #include "ardour_window.h"
 #include "ardour_ui.h"
@@ -132,6 +135,10 @@ PluginUIWindow::PluginUIWindow (
 
 		case ARDOUR::LV2:
 			have_gui = create_lv2_editor (insert);
+			break;
+
+		case ARDOUR::VST3:
+			have_gui = false; // TODO
 			break;
 
 		default:

@@ -109,6 +109,9 @@ InstrumentSelector::build_instrument_list()
 #ifdef AUDIOUNIT_SUPPORT
 	all_plugs.insert(all_plugs.end(), manager.au_plugin_info().begin(), manager.au_plugin_info().end());
 #endif
+#ifdef VST3_SUPPORT
+	all_plugs.insert(all_plugs.end(), manager.vst3_plugin_info().begin(), manager.vst3_plugin_info().end());
+#endif
 
 	all_plugs.remove_if (invalid_instrument);
 	all_plugs.sort (pluginsort);
