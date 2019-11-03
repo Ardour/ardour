@@ -384,7 +384,7 @@ DelayLine::allocate_pending_buffers (samplecnt_t signal_delay, ChanCount const& 
 	}
 
 	assert (signal_delay >= _pending_delay);
-	assert ((_roff <= (_woff + signal_delay - _pending_delay) & (rbs -1)) || offset > 0);
+	assert ((_roff <= ((_woff + signal_delay - _pending_delay) & (rbs -1))) || offset > 0);
 	_roff += offset;
 	assert (_roff < rbs);
 
