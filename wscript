@@ -806,6 +806,10 @@ def options(opt):
                     help='Compile with support for linuxVST plugins')
     opt.add_option('--no-lxvst', action='store_false', dest='lxvst',
                     help='Compile without support for linuxVST plugins')
+    opt.add_option('--vst3', action='store_true', default=True, dest='vst3',
+                    help='Compile with support for VST3 plugins')
+    opt.add_option('--no-vst3', action='store_false', dest='vst3',
+                    help='Compile without support for VST3 plugins')
     opt.add_option('--no-lrdf', action='store_true', dest='no_lrdf',
                     help='Compile without support for LRDF LADSPA data even if present')
     opt.add_option('--nls', action='store_true', default=True, dest='nls',
@@ -1244,6 +1248,9 @@ int main () { return 0; }
         else:
             conf.define('LXVST_SUPPORT', 1)
             conf.env['LXVST_SUPPORT'] = True
+    if opts.vst3:
+            conf.define('VST3_SUPPORT', 1)
+            conf.env['VST3_SUPPORT'] = True
     conf.env['WINDOWS_KEY'] = opts.windows_key
     if opts.rt_alloc_debug:
         conf.define('DEBUG_RT_ALLOC', 1)
@@ -1424,6 +1431,7 @@ const char* const ardour_config_info = "\\n\\
 #    write_config_text('Tranzport',             opts.tranzport)
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
     write_config_text('Use LLD linker',        opts.use_lld)
+    write_config_text('VST3 support',          conf.is_defined('VST3_SUPPORT'))
     write_config_text('Windows VST support',   opts.windows_vst)
     write_config_text('Wiimote support',       conf.is_defined('BUILD_WIIMOTE'))
     write_config_text('Windows key',           opts.windows_key)

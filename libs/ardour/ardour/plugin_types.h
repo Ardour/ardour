@@ -29,6 +29,7 @@ namespace ARDOUR {
 		LXVST,
 		MacVST,
 		Lua,
+		VST3,
 	};
 
 }

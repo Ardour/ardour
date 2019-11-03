@@ -413,6 +413,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (LXVST);
 	REGISTER_ENUM (MacVST);
 	REGISTER_ENUM (Lua);
+	REGISTER_ENUM (VST3);
 	REGISTER (_PluginType);
 
 	REGISTER_ENUM (MTC);

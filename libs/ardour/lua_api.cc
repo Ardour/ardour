@@ -125,6 +125,9 @@ ARDOUR::LuaAPI::list_plugins ()
 #ifdef LXVST_SUPPORT
 	all_plugs.insert (all_plugs.end (), manager.lxvst_plugin_info ().begin (), manager.lxvst_plugin_info ().end ());
 #endif
+#ifdef VST3_SUPPORT
+	all_plugs.insert (all_plugs.end (), manager.vst3_plugin_info ().begin (), manager.vst3_plugin_info ().end ());
+#endif
 #ifdef AUDIOUNIT_SUPPORT
 	all_plugs.insert (all_plugs.end (), manager.au_plugin_info ().begin (), manager.au_plugin_info ().end ());
 #endif
@@ -149,6 +152,9 @@ ARDOUR::LuaAPI::new_plugin_info (const string& name, ARDOUR::PluginType type)
 #endif
 #ifdef LXVST_SUPPORT
 	all_plugs.insert (all_plugs.end (), manager.lxvst_plugin_info ().begin (), manager.lxvst_plugin_info ().end ());
+#endif
+#ifdef VST3_SUPPORT
+	all_plugs.insert (all_plugs.end (), manager.vst3_plugin_info ().begin (), manager.vst3_plugin_info ().end ());
 #endif
 #ifdef AUDIOUNIT_SUPPORT
 	all_plugs.insert (all_plugs.end (), manager.au_plugin_info ().begin (), manager.au_plugin_info ().end ());

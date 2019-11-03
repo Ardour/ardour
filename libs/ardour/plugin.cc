@@ -234,6 +234,12 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 		break;
 #endif
 
+#ifdef VST3_SUPPORT
+	case ARDOUR::VST3:
+		plugs = mgr.vst3_plugin_info();
+		break;
+#endif
+
 #ifdef AUDIOUNIT_SUPPORT
 	case ARDOUR::AudioUnit:
 		plugs = mgr.au_plugin_info();

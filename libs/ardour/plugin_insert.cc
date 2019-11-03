@@ -56,6 +56,10 @@
 #include "ardour/mac_vst_plugin.h"
 #endif
 
+#ifdef VST3_SUPPORT
+#include "ardour/vst3_plugin.h"
+#endif
+
 #ifdef AUDIOUNIT_SUPPORT
 #include "ardour/audio_unit.h"
 #endif
@@ -539,6 +543,7 @@ PluginInsert::create_automatable_parameters ()
 	}
 
 	if (_bypass_port != UINT32_MAX) {
+		_inverted_bypass_enable = type () == VST3;
 		boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, _bypass_port));
 		if (0 == (ac->flags () & Controllable::NotAutomatable)) {
 			ac->alist()->automation_state_changed.connect_same_thread (*this, boost::bind (&PluginInsert::bypassable_changed, this));
@@ -1441,6 +1446,9 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 #ifdef MACVST_SUPPORT
 	boost::shared_ptr<MacVSTPlugin> mvp;
 #endif
+#ifdef VST3_SUPPORT
+	boost::shared_ptr<VST3Plugin> vst3;
+#endif
 #ifdef AUDIOUNIT_SUPPORT
 	boost::shared_ptr<AUPlugin> ap;
 #endif
@@ -1462,6 +1470,10 @@ PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 #ifdef MACVST_SUPPORT
 	} else if ((mvp = boost::dynamic_pointer_cast<MacVSTPlugin> (other)) != 0) {
 		return boost::shared_ptr<Plugin> (new MacVSTPlugin (*mvp));
+#endif
+#ifdef VST3_SUPPORT
+	} else if ((vst3 = boost::dynamic_pointer_cast<VST3Plugin> (other)) != 0) {
+		return boost::shared_ptr<Plugin> (new VST3Plugin (*vst3));
 #endif
 #ifdef AUDIOUNIT_SUPPORT
 	} else if ((ap = boost::dynamic_pointer_cast<AUPlugin> (other)) != 0) {
@@ -2616,6 +2628,8 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		type = ARDOUR::AudioUnit;
 	} else if (str == X_("luaproc")) {
 		type = ARDOUR::Lua;
+	} else if (str == X_("vst3")) {
+		type = ARDOUR::VST3;
 	} else {
 		error << string_compose (_("unknown plugin type %1 in plugin insert state"), str) << endmsg;
 		return -1;

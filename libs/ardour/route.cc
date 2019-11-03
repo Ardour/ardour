@@ -3188,6 +3188,7 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 		           prop->value() == "mac-vst" ||
 		           prop->value() == "lxvst" ||
 		           prop->value() == "luaproc" ||
+		           prop->value() == "vst3" ||
 		           prop->value() == "audiounit") {
 
 			if (_session.get_disable_all_loaded_plugins ()) {

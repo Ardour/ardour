@@ -56,6 +56,7 @@ public:
 	const ARDOUR::PluginInfoList& lv2_plugin_info ();
 	const ARDOUR::PluginInfoList& au_plugin_info ();
 	const ARDOUR::PluginInfoList& lua_plugin_info ();
+	const ARDOUR::PluginInfoList& vst3_plugin_info ();
 
 	void refresh (bool cache_only = false);
 	void cancel_plugin_scan();
@@ -210,6 +211,7 @@ private:
 	ARDOUR::PluginInfoList* _windows_vst_plugin_info;
 	ARDOUR::PluginInfoList* _lxvst_plugin_info;
 	ARDOUR::PluginInfoList* _mac_vst_plugin_info;
+	ARDOUR::PluginInfoList* _vst3_plugin_info;
 	ARDOUR::PluginInfoList* _ladspa_plugin_info;
 	ARDOUR::PluginInfoList* _lv2_plugin_info;
 	ARDOUR::PluginInfoList* _au_plugin_info;
@@ -238,6 +240,7 @@ private:
 	void windows_vst_refresh (bool cache_only = false);
 	void mac_vst_refresh (bool cache_only = false);
 	void lxvst_refresh (bool cache_only = false);
+	void vst3_refresh (bool cache_only = false);
 
 	void add_lrdf_data (const std::string &path);
 	void add_ladspa_presets ();
@@ -255,6 +258,9 @@ private:
 
 	int mac_vst_discover_from_path (std::string path, bool cache_only = false);
 	int mac_vst_discover (std::string path, bool cache_only = false);
+
+	int vst3_discover_from_path (std::string const& path, bool cache_only = false);
+	int vst3_discover (std::string const& path, bool cache_only = false);
 
 	int lxvst_discover_from_path (std::string path, bool cache_only = false);
 	int lxvst_discover (std::string path, bool cache_only = false);

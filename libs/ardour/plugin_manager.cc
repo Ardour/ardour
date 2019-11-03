@@ -40,6 +40,12 @@
 #include <lrdf.h>
 #endif
 
+#if defined PLATFORM_WINDOWS && defined VST3_SUPPORT
+#include <windows.h>
+#include <shlobj.h> // CSIDL_*
+#include "pbd/windows_special_dirs.h"
+#endif
+
 #ifdef WINDOWS_VST_SUPPORT
 #include "ardour/vst_info_file.h"
 #include "fst.h"
@@ -108,6 +114,10 @@
 #include <Carbon/Carbon.h>
 #endif
 
+#ifdef VST3_SUPPORT
+#include "ardour/vst3_plugin.h"
+#endif
+
 #include "pbd/error.h"
 #include "pbd/stl_delete.h"
 
@@ -135,6 +145,7 @@ PluginManager::PluginManager ()
 	: _windows_vst_plugin_info(0)
 	, _lxvst_plugin_info(0)
 	, _mac_vst_plugin_info(0)
+	, _vst3_plugin_info(0)
 	, _ladspa_plugin_info(0)
 	, _lv2_plugin_info(0)
 	, _au_plugin_info(0)
@@ -255,6 +266,7 @@ PluginManager::~PluginManager()
 		delete _windows_vst_plugin_info;
 		delete _lxvst_plugin_info;
 		delete _mac_vst_plugin_info;
+		delete _vst3_plugin_info;
 		delete _ladspa_plugin_info;
 		delete _lv2_plugin_info;
 		delete _au_plugin_info;
@@ -430,6 +442,15 @@ PluginManager::refresh (bool cache_only)
 		}
 #endif
 
+#ifdef VST3_SUPPORT
+	if (cache_only) {
+		BootMessage (_("Scanning VST3 Plugins"));
+	} else {
+		BootMessage (_("Discovering VST3 Plugins"));
+	}
+	vst3_refresh (cache_only);
+#endif
+
 #ifdef AUDIOUNIT_SUPPORT
 	if (cache_only) {
 		BootMessage (_("Scanning AU Plugins"));
@@ -453,6 +474,7 @@ PluginManager::refresh (bool cache_only)
 	detect_name_ambiguities (_ladspa_plugin_info);
 	detect_name_ambiguities (_lv2_plugin_info);
 	detect_name_ambiguities (_lua_plugin_info);
+	detect_name_ambiguities (_vst3_plugin_info);
 
 	PluginInfoList all_plugs;
 	if (_windows_vst_plugin_info) {
@@ -463,6 +485,9 @@ PluginManager::refresh (bool cache_only)
 	}
 	if (_mac_vst_plugin_info) {
 		all_plugs.insert(all_plugs.end(), _mac_vst_plugin_info->begin(), _mac_vst_plugin_info->end());
+	}
+	if (_vst3_plugin_info) {
+		all_plugs.insert(all_plugs.end(), _vst3_plugin_info->begin(), _vst3_plugin_info->end());
 	}
 	if (_au_plugin_info) {
 		all_plugs.insert(all_plugs.end(), _au_plugin_info->begin(), _au_plugin_info->end());
@@ -1420,6 +1445,107 @@ PluginManager::lxvst_discover (string path, bool cache_only)
 
 #endif // LXVST_SUPPORT
 
+#ifdef VST3_SUPPORT
+
+void
+PluginManager::vst3_refresh (bool cache_only)
+{
+	if (_vst3_plugin_info) {
+		_vst3_plugin_info->clear ();
+	} else {
+		_vst3_plugin_info = new ARDOUR::PluginInfoList();
+	}
+
+#ifdef __APPLE__
+	vst3_discover_from_path ("~/Library/Audio/Plug-Ins/VST3:/Library/Audio/Plug-Ins/VST3", cache_only);
+#elif defined PLATFORM_WINDOWS
+	std::string prog = PBD::get_win_special_folder_path (CSIDL_PROGRAM_FILES);
+	vst3_discover_from_path (Glib::build_filename (prog, "Common Files", "VST3"), cache_only);
+#else
+	vst3_discover_from_path ("~/.vst3:/usr/local/lib/vst3:/usr/lib/vst3", cache_only);
+#endif
+}
+
+static bool vst3_filter (const string& str, void*)
+{
+	return str[0] != '.' && (str.length() > 4 && str.find (".vst3") == (str.length() - 5));
+}
+
+int
+PluginManager::vst3_discover_from_path (string const& path, bool cache_only)
+{
+	if (Session::get_disable_all_loaded_plugins ()) {
+		info << _("Disabled VST3 scan (safe mode)") << endmsg;
+		return -1;
+	}
+
+	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("VST3: search along: [%1]\n", path));
+
+	Searchpath paths (path);
+	vector<string> plugin_objects;
+
+	find_paths_matching_filter (plugin_objects, paths, vst3_filter, 0, false, true, true);
+
+	for (vector<string>::iterator i = plugin_objects.begin(); i != plugin_objects.end (); ++i) {
+		ARDOUR::PluginScanMessage(_("VST3"), *i, !(cache_only || cancelled()));
+		vst3_discover (*i, cache_only || cancelled ());
+	}
+
+	return cancelled() ? -1 : 0;
+}
+
+static std::string vst3_bindir () {
+#ifdef __APPLE__
+	return "MacOS";
+#elif defined PLATFORM_WINDOWS
+# if defined __x86_64__ || defined _M_X64
+	return "x86_64-win";
+# else
+	return "x86-win";
+# endif
+#else // Linux
+# if defined __x86_64__ || defined _M_X64
+	return "x86_64-linux";
+# elif defined __i386__  || defined _M_IX86
+	return "i386-linux";
+#endif
+	// ARM, PPC ?
+#endif
+	return "";
+}
+
+static std::string vst3_suffix () {
+#ifdef __APPLE__
+	return "";
+#elif defined PLATFORM_WINDOWS
+	return ".vst3";
+#else // Linux
+	return ".so";
+#endif
+}
+
+int
+PluginManager::vst3_discover (string const& path, bool cache_only)
+{
+	string module_path;
+	if (!Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
+		module_path = path;
+	} else {
+		module_path = Glib::build_filename (path, "Contents",
+				vst3_bindir (), basename_nosuffix (path) + vst3_suffix ());
+	}
+	if (!Glib::file_test (module_path, Glib::FILE_TEST_IS_REGULAR)) {
+		cerr << "VST3 not a valid bundle: '" << module_path << "'\n";
+		return -1;
+	}
+	ARDOUR::PluginScanMessage(_("VST3"), module_path, !(cache_only || cancelled()));
+	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("VST3: discover %1 (%2)\n", path, module_path));
+
+	return 0;
+}
+
+#endif // VST3_SUPPORT
+
 
 PluginManager::PluginStatusType
 PluginManager::get_status (const PluginInfoPtr& pi) const
@@ -1461,6 +1587,9 @@ PluginManager::save_statuses ()
 			break;
 		case MacVST:
 			ofs << "MacVST";
+			break;
+		case VST3:
+			ofs << "VST3";
 			break;
 		case Lua:
 			ofs << "Lua";
@@ -1558,6 +1687,8 @@ PluginManager::load_statuses ()
 			type = MacVST;
 		} else if (stype == "Lua") {
 			type = Lua;
+		} else if (stype == "VST3") {
+			type = VST3;
 		} else {
 			error << string_compose (_("unknown plugin type \"%1\" - ignored"), stype)
 			      << endmsg;
@@ -2089,6 +2220,17 @@ PluginManager::au_plugin_info ()
 #ifdef AUDIOUNIT_SUPPORT
 	if (_au_plugin_info) {
 		return *_au_plugin_info;
+	}
+#endif
+	return _empty_plugin_info;
+}
+
+const ARDOUR::PluginInfoList&
+PluginManager::vst3_plugin_info ()
+{
+#ifdef VST3_SUPPORT
+	if (_vst3_plugin_info) {
+		return *_vst3_plugin_info;
 	}
 #endif
 	return _empty_plugin_info;

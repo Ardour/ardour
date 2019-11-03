@@ -1896,6 +1896,7 @@ LuaBindings::common (lua_State* L)
 		.addConst ("LXVST", ARDOUR::PluginType(LXVST))
 		.addConst ("MacVST", ARDOUR::PluginType(MacVST))
 		.addConst ("Lua", ARDOUR::PluginType(Lua))
+		.addConst ("VST3", ARDOUR::PluginType(VST3))
 		.endNamespace ()
 
 		.beginNamespace ("PresentationInfo")
