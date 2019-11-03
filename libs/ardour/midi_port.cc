@@ -308,6 +308,9 @@ MidiPort::flush_buffers (pframes_t nframes)
 			}
 #endif
 
+			// XXX consider removing this check for optimized builds
+			// and just send 'em all, at cycle_end
+			// see AudioEngine::split_cycle (), PortManager::cycle_end()
 			if (   ev.time() >= _global_port_buffer_offset
 			    && ev.time() < _global_port_buffer_offset + nframes) {
 				pframes_t tme = floor (ev.time() / _speed_ratio);

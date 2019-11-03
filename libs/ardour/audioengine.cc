@@ -146,11 +146,37 @@ AudioEngine::split_cycle (pframes_t offset)
 {
 	/* caller must hold process lock */
 
+	boost::shared_ptr<Ports> p = ports.reader();
+
+	/* This is mainly for the benefit of rt-control ports (MTC, MClk)
+	 *
+	 * Normally ports are flushed by the route:
+	 *   ARDOUR::MidiPort::flush_buffers(unsigned int)
+	 *   ARDOUR::Delivery::flush_buffers(long)
+	 *   ARDOUR::Route::flush_processor_buffers_locked(long)
+	 *   ARDOUR::Route::run_route(long, long, unsigned int, bool, bool)
+	 *   ...
+	 *
+	 * This is required so that route -> route connections work during
+	 * normal processing.
+	 *
+	 * However some non-route ports may contain MIDI events
+	 * from current Port::port_offset() .. Port::port_offset() + offset.
+	 * If those events are not pushed to ports before the cycle split,
+	 * MidiPort::flush_buffers will drop them (event time is out of bounds).
+	 *
+	 * TODO: for optimized builds MidiPort::flush_buffers() could
+	 * be relaxed, ignore ev->time() checks, and simply send
+	 * all events as-is.
+	 */
+	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+		i->second->flush_buffers (offset);
+	}
+
 	Port::increment_global_port_buffer_offset (offset);
 
 	/* tell all Ports that we're going to start a new (split) cycle */
 
-	boost::shared_ptr<Ports> p = ports.reader();
 
 	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
 		i->second->cycle_split ();

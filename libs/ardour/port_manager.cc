@@ -845,7 +845,9 @@ PortManager::cycle_end (pframes_t nframes, Session* s)
 	}
 
 	for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
-		p->second->flush_buffers (nframes);
+		/* AudioEngine::split_cycle flushes buffers until Port::port_offset.
+		 * Now only flush remaining events (after Port::port_offset) */
+		p->second->flush_buffers (nframes - Port::port_offset ());
 	}
 
 	_cycle_ports.reset ();
