@@ -556,7 +556,7 @@ APianoKeyboard::on_key_press_event (GdkEventKey* event)
 		return false;
 	}
 	if (note == 129) {
-		toggle_sustain ();
+		sustain_press ();
 		return true;
 	}
 
@@ -582,14 +582,20 @@ APianoKeyboard::on_key_release_event (GdkEventKey* event)
 		return false;
 	}
 
-	if (key_binding (key) == 128) {
+	int note = key_binding (key);
+
+	if (note == 128) {
 		Rest (); /* EMIT SIGNAL */
+		return true;
+	}
+	if (note == 129) {
+		sustain_release ();
 		return true;
 	}
 
 	std::map<std::string, int>::const_iterator kv = _note_stack.find (key);
 	if (kv == _note_stack.end ()) {
-		return key_binding (key) != -1;
+		return note != -1;
 	}
 
 	release_key (kv->second);
@@ -923,16 +929,6 @@ APianoKeyboard::set_velocities (int min_vel, int max_vel, int key_vel)
 
 	if (key_vel > 0 && key_vel < 128) {
 		_key_velocity = key_vel;
-	}
-}
-
-void
-APianoKeyboard::toggle_sustain ()
-{
-	if (_sustain_new_notes) {
-		sustain_release ();
-	} else {
-		sustain_press ();
 	}
 }
 

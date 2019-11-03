@@ -79,7 +79,6 @@ private:
 
 	void queue_note_draw (int note);
 
-	void toggle_sustain ();
 	void press_key (int key, int vel);
 	void release_key (int key);
 	void stop_sustained_notes ();
