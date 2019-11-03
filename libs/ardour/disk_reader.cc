@@ -522,9 +522,14 @@ DiskReader::overwrite_existing_buffers ()
 	RTMidiBuffer* mbuf = rt_midibuffer ();
 
 	if (mbuf) {
+		boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack>(_track);
+		MidiChannelFilter* filter = mt ? &mt->playback_filter() : 0;
+
 		PBD::Timing minsert;
 		minsert.start();
-		midi_playlist()->render (0);
+
+		midi_playlist()->render (filter);
+
 		minsert.update();
 		assert (midi_playlist()->rendered());
 		// cerr << "Reading " << name()  << " took " << minsert.elapsed() << " microseconds, final size = " << midi_playlist()->rendered()->size() << endl;
