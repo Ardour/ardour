@@ -363,7 +363,7 @@ MidiTrack::realtime_locate ()
 		(*i)->realtime_locate ();
 	}
 
-	_disk_reader->resolve_tracker (_immediate_events, Port::port_offset());
+	_disk_reader->resolve_tracker (_immediate_events, 0);
 }
 
 void
