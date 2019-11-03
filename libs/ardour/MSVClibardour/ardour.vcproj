@@ -820,10 +820,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\note_fixer.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\onset_detector.cc"
 				>
 			</File>
@@ -989,6 +985,10 @@
 			</File>
 			<File
 				RelativePath="..\route_group_member.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\rt_midibuffer.cc"
 				>
 			</File>
 			<File
@@ -2094,10 +2094,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\ardour\note_fixer.h"
-				>
-			</File>
-			<File
 				RelativePath="..\ardour\onset_detector.h"
 				>
 			</File>
@@ -2295,6 +2291,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\route_group_specialized.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\rt_midibuffer.h"
 				>
 			</File>
 			<File
