@@ -251,14 +251,6 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	sampleoffset_t disk_samples_to_consume;
 	MonitorState ms = _track->monitoring_state ();
 
-	if (run_must_resolve) {
-		boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (_track);
-		if (mt) {
-			resolve_tracker (mt->immediate_events(), 0);
-		}
-		run_must_resolve = false;
-	}
-
 	if (_active) {
 		if (!_pending_active) {
 			_active = false;
@@ -387,22 +379,24 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 	}
 
+  midi:
 	/* MIDI data handling */
 
-  midi:
-	if (!declick_in_progress() && bufs.count().n_midi()) {
-		MidiBuffer* dst;
+	if (bufs.count().n_midi()) {
 
-		if (_no_disk_output) {
-			dst = &scratch_bufs.get_midi(0);
-		} else {
-			dst = &bufs.get_midi (0);
+		MidiBuffer& dst (bufs.get_midi (0));
+
+		if (run_must_resolve) {
+			resolve_tracker (dst, 0);
+			run_must_resolve = false;
 		}
 
-		if ((ms & MonitoringDisk) && !still_locating && speed) {
-			get_midi_playback (*dst, start_sample, end_sample, ms, scratch_bufs, speed, disk_samples_to_consume);
+		if (!_no_disk_output && !declick_in_progress() && (ms & MonitoringDisk) && !still_locating && speed) {
+			get_midi_playback (dst, start_sample, end_sample, ms, scratch_bufs, speed, disk_samples_to_consume);
 		}
 	}
+
+	/* decide if we need the butler */
 
 	if (!still_locating) {
 
