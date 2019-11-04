@@ -142,7 +142,7 @@ AudioEngine::create ()
 }
 
 void
-AudioEngine::split_cycle (pframes_t offset)
+AudioEngine::split_cycle (pframes_t nframes)
 {
 	/* caller must hold process lock */
 
@@ -161,7 +161,7 @@ AudioEngine::split_cycle (pframes_t offset)
 	 * normal processing.
 	 *
 	 * However some non-route ports may contain MIDI events
-	 * from current Port::port_offset() .. Port::port_offset() + offset.
+	 * from current Port::port_offset() .. Port::port_offset() + nframes.
 	 * If those events are not pushed to ports before the cycle split,
 	 * MidiPort::flush_buffers will drop them (event time is out of bounds).
 	 *
@@ -170,10 +170,10 @@ AudioEngine::split_cycle (pframes_t offset)
 	 * all events as-is.
 	 */
 	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-		i->second->flush_buffers (offset);
+		i->second->flush_buffers (nframes);
 	}
 
-	Port::increment_global_port_buffer_offset (offset);
+	Port::increment_global_port_buffer_offset (nframes);
 
 	/* tell all Ports that we're going to start a new (split) cycle */
 
