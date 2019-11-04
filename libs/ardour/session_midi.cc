@@ -456,7 +456,7 @@ Session::send_full_time_code (samplepos_t const t, MIDI::pframes_t nframes)
 	// Send message at offset 0, sent time is for the start of this cycle
 
 	MidiBuffer& mb (_midi_ports->mtc_output_port()->get_midi_buffer (nframes));
-	mb.push_back (Port::port_offset(), sizeof (msg), msg);
+	mb.push_back (0, sizeof (msg), msg);
 
 	_pframes_since_last_mtc = 0;
 	return 0;
@@ -558,7 +558,7 @@ Session::send_midi_time_code_for_cycle (samplepos_t start_sample, samplepos_t en
 		assert (out_stamp < nframes);
 
 		MidiBuffer& mb (_midi_ports->mtc_output_port()->get_midi_buffer(nframes));
-		if (!mb.push_back (Port::port_offset () + out_stamp, 2, mtc_msg)) {
+		if (!mb.push_back (out_stamp, 2, mtc_msg)) {
 			error << string_compose(_("Session: cannot send quarter-frame MTC message (%1)"), strerror (errno))
 			      << endmsg;
 			return -1;
@@ -598,12 +598,7 @@ Session::send_midi_time_code_for_cycle (samplepos_t start_sample, samplepos_t en
 void
 Session::send_immediate_mmc (MachineControlCommand c)
 {
-	if (AudioEngine::instance()->in_process_thread()) {
-		_mmc->send (c, Port::port_offset());
-	} else {
-		_mmc->send (c, 0);
-	}
-
+	_mmc->send (c, 0);
 }
 
 bool

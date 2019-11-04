@@ -96,11 +96,6 @@ MidiBuffer::copy(MidiBuffer const * const copy)
 }
 
 
-/** Read events from @a src starting at time @a offset into the START of this buffer, for
- * time duration @a nframes.  Relative time, where 0 = start of buffer.
- *
- * Note that offset and nframes refer to sample time, NOT buffer offsets or event counts.
- */
 void
 MidiBuffer::read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t dst_offset, sampleoffset_t /* src_offset*/)
 {
@@ -110,11 +105,10 @@ MidiBuffer::read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t ds
 	const MidiBuffer& msrc = (const MidiBuffer&) src;
 
 	assert (_capacity >= msrc.size());
+	assert (dst_offset == 0); /* there is no known scenario in Nov 2019 where this should be false */
 
-	if (dst_offset == 0) {
-		clear ();
-		assert (_size == 0);
-	}
+	clear ();
+	assert (_size == 0);
 
 	for (MidiBuffer::const_iterator i = msrc.begin(); i != msrc.end(); ++i) {
 		const Evoral::Event<TimeType> ev(*i, false);
@@ -129,9 +123,10 @@ MidiBuffer::read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t ds
 			   Check it is within range of this (split) cycle, then shift.
 			*/
 			if (ev.time() >= 0 && ev.time() < nframes) {
-				push_back (ev.time() + dst_offset, ev.size(), ev.buffer());
+				push_back (ev.time(), ev.size(), ev.buffer());
 			} else {
-				cerr << "\t!!!! MIDI event @ " <<  ev.time() << " skipped, not within range 0 .. " << nframes << ": ";
+				cerr << "\t!!!! MIDI event @ " <<  ev.time() << " skipped, not within range 0 .. " << nframes << endl;
+				PBD::stacktrace (cerr, 30);
 			}
 		} else {
 			/* Negative offset: shifting events from global/port
@@ -143,12 +138,12 @@ MidiBuffer::read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t ds
 			   Shift first, then check it is within range of this
 			   (split) cycle.
 			*/
-			const samplepos_t evtime = ev.time() + dst_offset;
+			const samplepos_t evtime = ev.time();
 
 			if (evtime >= 0 && evtime < nframes) {
 				push_back (evtime, ev.size(), ev.buffer());
 			} else {
-				cerr << "\t!!!! MIDI event @ " <<  evtime << " (based on " << ev.time() << " + " << dst_offset << ") skipped, not within range 0 .. " << nframes << ": ";
+				cerr << "\t!!!! MIDI event @ " <<  evtime << " (based on " << ev.time() << ") skipped, not within range 0 .. " << nframes << ": ";
 			}
 		}
 	}

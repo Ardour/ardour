@@ -309,7 +309,7 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			if (*t != DataType::AUDIO && bufs.count().get(*t) > 0) {
-				_output->copy_to_outputs (bufs, *t, nframes, Port::port_offset());
+				_output->copy_to_outputs (bufs, *t, nframes, 0);
 			}
 		}
 
@@ -328,7 +328,7 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			if (*t != DataType::AUDIO && bufs.count().get(*t) > 0) {
-				_output->copy_to_outputs (bufs, *t, nframes, Port::port_offset());
+				_output->copy_to_outputs (bufs, *t, nframes, 0);
 			}
 		}
 	}
@@ -349,7 +349,7 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 				if (outs.count ().get (*t) <= n) {
 					continue;
 				}
-				b->read_from (outs.get_available (*t, n++), nframes, (*t == DataType::AUDIO ? 0 : -Port::port_offset()));
+				b->read_from (outs.get_available (*t, n++), nframes, 0);
 			}
 		}
 	}

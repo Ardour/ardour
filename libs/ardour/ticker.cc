@@ -329,7 +329,7 @@ MidiClockTicker::send_midi_clock_event (pframes_t offset, pframes_t nframes)
 	static uint8_t msg = MIDI_CMD_COMMON_CLOCK;
 
 	MidiBuffer& mb (_midi_port->get_midi_buffer (nframes));
-	mb.push_back (offset + Port::port_offset(), 1, &msg);
+	mb.push_back (offset, 1, &msg);
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Tick with offset %1\n", offset));
 }
@@ -343,7 +343,7 @@ MidiClockTicker::send_start_event (pframes_t offset, pframes_t nframes)
 
 	static uint8_t msg = { MIDI_CMD_COMMON_START };
 	MidiBuffer& mb (_midi_port->get_midi_buffer (nframes));
-	mb.push_back (offset + Port::port_offset(), 1, &msg);
+	mb.push_back (offset, 1, &msg);
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Start %1\n", _last_tick));
 }
@@ -357,7 +357,7 @@ MidiClockTicker::send_continue_event (pframes_t offset, pframes_t nframes)
 
 	static uint8_t msg = { MIDI_CMD_COMMON_CONTINUE };
 	MidiBuffer& mb (_midi_port->get_midi_buffer (nframes));
-	mb.push_back (offset + Port::port_offset(), 1, &msg);
+	mb.push_back (offset, 1, &msg);
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Continue %1\n", _last_tick));
 }
@@ -371,7 +371,7 @@ MidiClockTicker::send_stop_event (pframes_t offset, pframes_t nframes)
 
 	static uint8_t msg = MIDI_CMD_COMMON_STOP;
 	MidiBuffer& mb (_midi_port->get_midi_buffer (nframes));
-	mb.push_back (offset + Port::port_offset(), 1, &msg);
+	mb.push_back (offset, 1, &msg);
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Stop %1\n", _last_tick));
 }
@@ -395,9 +395,8 @@ MidiClockTicker::send_position_event (uint32_t midi_beats, pframes_t offset, pfr
 	msg[2] = midi_beats >> 7;
 
 	MidiBuffer& mb (_midi_port->get_midi_buffer (nframes));
-	mb.push_back (offset + Port::port_offset(), 3, &msg[0]);
+	mb.push_back (offset, 3, &msg[0]);
 
-	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Song Position Sent: %1 to %2 (events now %3, buf = %4)\n", midi_beats, _midi_port->name(),
-						       mb.size(), &mb));
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Song Position Sent: %1 to %2 (events now %3, buf = %4)\n", midi_beats, _midi_port->name(), mb.size(), &mb));
 
 }

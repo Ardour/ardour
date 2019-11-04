@@ -273,12 +273,13 @@ MidiPort::flush_buffers (pframes_t nframes)
 
 			const Evoral::Event<MidiBuffer::TimeType> ev (*i, false);
 
+			const samplepos_t adjusted_time = ev.time() + _global_port_buffer_offset;
 
 			if (sends_output() && _trace_parser) {
 				uint8_t const * const buf = ev.buffer();
 				const samplepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();
 
-				_trace_parser->set_timestamp (now + ev.time());
+				_trace_parser->set_timestamp (now + adjusted_time);
 
 				uint32_t limit = ev.size();
 
@@ -295,8 +296,8 @@ MidiPort::flush_buffers (pframes_t nframes)
 				const Session* s = AudioEngine::instance()->session();
 				const samplepos_t now = (s ? s->transport_sample() : 0);
 				DEBUG_STR_DECL(a);
-				DEBUG_STR_APPEND(a, string_compose ("MidiPort %7 %1 pop event    @ %2 (global %4, within %5 gpbo %6 sz %3 ", _buffer, ev.time(), ev.size(),
-				                                    now + ev.time(), nframes, _global_port_buffer_offset, name()));
+				DEBUG_STR_APPEND(a, string_compose ("MidiPort %7 %1 pop event    @ %2[%7] (global %4, within %5 gpbo %6 sz %3 ", _buffer, adjusted_time, ev.size(),
+				                                    now + adjusted_time, nframes, _global_port_buffer_offset, name(), ev.time()));
 				for (size_t i=0; i < ev.size(); ++i) {
 					DEBUG_STR_APPEND(a,hex);
 					DEBUG_STR_APPEND(a,"0x");
@@ -311,14 +312,13 @@ MidiPort::flush_buffers (pframes_t nframes)
 			// XXX consider removing this check for optimized builds
 			// and just send 'em all, at cycle_end
 			// see AudioEngine::split_cycle (), PortManager::cycle_end()
-			if (   ev.time() >= _global_port_buffer_offset
-			    && ev.time() < _global_port_buffer_offset + nframes) {
-				pframes_t tme = floor (ev.time() / _speed_ratio);
+			if ((adjusted_time >= _global_port_buffer_offset) && (adjusted_time < _global_port_buffer_offset + nframes)) {
+				pframes_t tme = floor (adjusted_time / _speed_ratio);
 				if (port_engine.midi_event_put (port_buffer, tme, ev.buffer(), ev.size()) != 0) {
-					cerr << "write failed, dropped event, time " << ev.time() << endl;
+					cerr << "write failed, dropped event, time " << adjusted_time << '/' << ev.time() << endl;
 				}
 			} else {
-				cerr << "Dropped outgoing MIDI event. time " << ev.time()
+				cerr << "Dropped outgoing MIDI event. time " << adjusted_time << '/' << ev.time() 
 				     << " out of range [" << _global_port_buffer_offset
 				     << " .. " << _global_port_buffer_offset + nframes
 				     << "]";

@@ -1100,8 +1100,8 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 			 * loop end.
 			 */
 
-			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer read, from %1 to %2 (%3)", start_sample, end_sample, nframes));
-			size_t events_read = rtmb->read (*target, start_sample, end_sample, _tracker, Port::port_offset ());
+			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer read, from %1 to %2 (%3)\n", start_sample, end_sample, nframes));
+			size_t events_read = rtmb->read (*target, start_sample, end_sample, _tracker);
 			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("%1 MDS events read %2 range %3 .. %4\n", _name, events_read, playback_sample, playback_sample + nframes));
 		}
 

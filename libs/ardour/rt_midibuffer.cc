@@ -223,7 +223,7 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiSta
 			break;
 		}
 
-		DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("read event sz %1 @ %2\n", size, unadjusted_time));
+		DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("read event sz %1 @ %2 (=> %3 via -%4 +%5\n", size, unadjusted_time, evtime, start, offset));
 		tracker.track (addr);
 
 		++item;

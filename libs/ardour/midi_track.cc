@@ -462,12 +462,12 @@ MidiTrack::snapshot_out_of_band_data (samplecnt_t nframes)
 	 * the last argument ("stop on overflow in destination") so that we'll
 	 * ship the rest out next time.
 	 *
-	 * the Port::port_offset() + (nframes-1) argument puts all these events at the last
+	 * the (nframes-1) argument puts all these events at the last
 	 * possible position of the output buffer, so that we do not
-	 * violate monotonicity when writing. Port::port_offset() will
-	 * be non-zero if we're in a split process cycle.
+	 * violate monotonicity when writing.
 	 */
-	_immediate_events.read (_immediate_event_buffer, 0, 1, Port::port_offset() + nframes - 1, true);
+
+	_immediate_events.read (_immediate_event_buffer, 0, 1, nframes - 1, true);
 }
 
 void
@@ -821,7 +821,7 @@ MidiTrack::act_on_mute ()
 		}
 
 		/* Resolve active notes. */
-		_disk_reader->resolve_tracker(_immediate_events, Port::port_offset());
+		_disk_reader->resolve_tracker (_immediate_events, 0);
 	}
 }
 
@@ -873,7 +873,7 @@ void
 MidiTrack::realtime_handle_transport_stopped ()
 {
 	Route::realtime_handle_transport_stopped ();
-	_disk_reader->resolve_tracker (_immediate_events, Port::port_offset());
+	_disk_reader->resolve_tracker (_immediate_events, 0);
 }
 
 void
