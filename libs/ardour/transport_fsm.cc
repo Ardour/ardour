@@ -188,6 +188,7 @@ TransportFSM::bad_transition (Event const & ev)
 {
 	error << "bad transition, current state = " << current_state() << " event = " << enum_2_string (ev.type) << endmsg;
 	std::cerr << "bad transition, current state = " << current_state() << " event = " << enum_2_string (ev.type) << std::endl;
+	PBD::stacktrace (std::cerr, 30);
 }
 
 bool
@@ -261,11 +262,21 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 			break;
 		case Rolling:
 			if (ev.with_loop) {
-				/* no state transitions. Just do a realtime
-				   locate and continue rolling. Note that
-				   ev.with_roll is ignored and assumed to be
-				   true because we're looping.
-				*/
+				/* we will finish the locate synchronously, so
+				 * that after returning from
+				 * ::locate_for_loop() we will already have
+				 * received (and re-entrantly handled)
+				 * LocateDone and returned back to Rolling.
+				 *
+				 * This happens because we only need to do a
+				 * realtime locate and continue rolling. No
+				 * disk I/O is required - the loop is
+				 * automically present in buffers already.
+				 *
+				 * Note that ev.with_roll is ignored and
+				 * assumed to be true because we're looping.
+				 */
+				transition (WaitingForLocate);
 				locate_for_loop (ev);
 			} else {
 				transition (DeclickToLocate);

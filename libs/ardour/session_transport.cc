@@ -384,13 +384,7 @@ Session::do_locate (samplepos_t target_sample, bool with_roll, bool with_flush, 
 	if (need_butler) {
 		TFSM_EVENT (TransportFSM::ButlerRequired);
 	} else {
-		if (!for_loop_end) {
-			/* loop end locates do not trigger a state transition
-			   in the TFSM, because we do not change transport
-			   state nor do we wait for the butler.
-			*/
-			TFSM_EVENT (TransportFSM::LocateDone);
-		}
+		TFSM_EVENT (TransportFSM::LocateDone);
 	}
 
 	loop_changing = false;
