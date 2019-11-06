@@ -428,8 +428,21 @@ StartupFSM::start_audio_midi_setup ()
 		if (!session_is_new && session_existing_sample_rate > 0) {
 			audiomidi_dialog.set_desired_sample_rate (session_existing_sample_rate);
 		}
+
+		if (!session_is_new && (Config->get_try_autostart_engine () || g_getenv ("ARDOUR_TRY_AUTOSTART_ENGINE"))) {
+
+			audiomidi_dialog.try_autostart ();
+
+			if (ARDOUR::AudioEngine::instance()->running()) {
+				DEBUG_TRACE (DEBUG::GuiStartup, "autostart successful, audio/MIDI setup dialog not required\n");
+				engine_running ();
+				return;
+			}
+		}
+
 		show_audiomidi_dialog ();
 		DEBUG_TRACE (DEBUG::GuiStartup, "audiomidi shown and waiting\n");
+
 	} else {
 
 		DEBUG_TRACE (DEBUG::GuiStartup, "engine already running, audio/MIDI setup dialog not required\n");
