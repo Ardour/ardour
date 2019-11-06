@@ -140,6 +140,11 @@ Route::weakroute () {
 int
 Route::init ()
 {
+	/* default master bus to use strict i/o */
+	if (is_master()) {
+		_strict_io = true;
+	}
+
 	/* add standard controls */
 
 	_gain_control.reset (new GainControl (_session, GainAutomation));
