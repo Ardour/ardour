@@ -390,14 +390,8 @@ Mixer_UI::~Mixer_UI ()
 {
 	monitor_section_detached ();
 
-	StripableList fb;
-	_session->get_stripables (fb, PresentationInfo::FoldbackBus);
-	if (fb.size()) {
-		if (foldback_strip) {
-			delete foldback_strip;
-			foldback_strip = 0;
-		}
-	}
+	delete foldback_strip;
+	foldback_strip = 0;
 	delete _plugin_selector;
 	delete track_menu;
 }
