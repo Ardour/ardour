@@ -1089,20 +1089,51 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 
 	if (!pending_overwrite() && !_no_disk_output && (end_sample >= start_sample)) {
 
-		const samplepos_t nframes = ::llabs (end_sample - start_sample);
+		const samplecnt_t nframes = end_sample - start_sample;
 
 		if (ms & MonitoringDisk) {
 
 			/* disk data needed
-			 *
-			 * NOTE: we will never be asked to read across loop location
-			 * boundaries - the session splits processing at the
-			 * loop end.
 			 */
 
-			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer read, from %1 to %2 (%3)\n", start_sample, end_sample, nframes));
-			size_t events_read = rtmb->read (*target, start_sample, end_sample, _tracker);
-			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("%1 MDS events read %2 range %3 .. %4\n", _name, events_read, playback_sample, playback_sample + nframes));
+			Location* loc = _loop_location;
+
+			if (loc) {
+				/* Evoral::Range has inclusive range semantics. Ugh. Hence the -1 */
+				const Evoral::Range<samplepos_t> loop_range (loc->start(), loc->end() - 1);
+				samplepos_t effective_start = start_sample;
+				samplecnt_t cnt = nframes;
+
+				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("LOOP read, loop is %1..%2 range is %3..%4\n", loc->start(), loc->end(), start_sample, end_sample));
+
+				do {
+
+					samplepos_t effective_end;
+
+					effective_start = loop_range.squish (effective_start);
+					effective_end = min (effective_start + cnt, loc->end());
+
+					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer LOOP read, from %1 to %2 (%3)\n", effective_start, effective_end, (effective_end - effective_start)));
+
+					size_t events_read = rtmb->read (*target, effective_start, effective_end, _tracker);
+					cnt -= (effective_end - effective_start);
+
+					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("%1 MDS events LOOP read %2 range %3 .. %4 cnt now %5\n", _name, events_read, effective_start, effective_end, cnt));
+
+
+					if (cnt) {
+						/* We re going to have to read across the loop end. Resolve any notes the extend across the loop end
+						 */
+						_tracker.resolve_notes (*target, loc->end() - 1);
+					}
+
+				} while (cnt);
+
+			} else {
+				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer read, from %1 to %2 (%3)\n", start_sample, end_sample, nframes));
+				size_t events_read = rtmb->read (*target, start_sample, end_sample, _tracker);
+				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("%1 MDS events read %2 range %3 .. %4\n", _name, events_read, playback_sample, playback_sample + nframes));
+			}
 		}
 
 		if (ms & MonitoringInput) {
