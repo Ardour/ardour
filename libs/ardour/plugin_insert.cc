@@ -3234,10 +3234,10 @@ PluginInsert::realtime_handle_transport_stopped ()
 }
 
 void
-PluginInsert::realtime_locate ()
+PluginInsert::realtime_locate (bool for_loop_end)
 {
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-		(*i)->realtime_locate ();
+		(*i)->realtime_locate (for_loop_end);
 	}
 }
 

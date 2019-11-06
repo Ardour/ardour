@@ -1693,7 +1693,7 @@ private:
 	void force_locate (samplepos_t sample, bool with_roll = false);
 	void set_transport_speed (double speed, samplepos_t destination_sample, bool abort = false, bool clear_state = false, bool as_default = false);
 	void realtime_stop (bool abort, bool clear_state);
-	void realtime_locate ();
+	void realtime_locate (bool);
 	void non_realtime_start_scrub ();
 	void non_realtime_set_speed ();
 	void non_realtime_locate ();

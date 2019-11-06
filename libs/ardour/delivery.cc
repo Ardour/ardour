@@ -520,13 +520,13 @@ Delivery::non_realtime_transport_stop (samplepos_t now, bool flush)
 }
 
 void
-Delivery::realtime_locate ()
+Delivery::realtime_locate (bool for_loop_end)
 {
 	if (_output) {
 		PortSet& ports (_output->ports());
 
 		for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
-			i->realtime_locate ();
+			i->realtime_locate (for_loop_end);
 		}
 	}
 }

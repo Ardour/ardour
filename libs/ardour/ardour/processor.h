@@ -115,7 +115,7 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	virtual ChanCount output_streams() const { return _configured_output; }
 
 	virtual void realtime_handle_transport_stopped () {}
-	virtual void realtime_locate () {}
+	virtual void realtime_locate (bool) {}
 
 	virtual void set_loop (Location *loc) { _loop_location = loc; }
 

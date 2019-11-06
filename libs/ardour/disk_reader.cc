@@ -166,8 +166,12 @@ DiskReader::realtime_handle_transport_stopped ()
 }
 
 void
-DiskReader::realtime_locate ()
+DiskReader::realtime_locate (bool for_loop_end)
 {
+	if (!for_loop_end) {
+		boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack>(_track);
+		_tracker.resolve_notes (mt->immediate_events(), 0);
+	}
 }
 
 float
@@ -1122,14 +1126,13 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 					cnt -= this_read;
 					effective_start += this_read;
 
-					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("%1 MDS events LOOP read %2 range %3 .. %4 cnt now %5\n", _name, events_read, effective_start, effective_end, cnt));
-
+					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("%1 MDS events LOOP read %2 cnt now %3\n", _name, events_read, cnt));
 
 					if (cnt) {
 						/* We re going to have to read across the loop end. Resolve any notes the extend across the loop end.
 						 * Time is relative to start_sample.
 						 */
-						_tracker.resolve_notes (*target, (loc->end() - 1) - start_sample);
+						_tracker.resolve_notes (*target, effective_end - start_sample);
 					}
 
 				} while (cnt);

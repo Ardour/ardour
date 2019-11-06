@@ -84,7 +84,7 @@ public:
 	void flush_buffers (samplecnt_t nframes);
 	void no_outs_cuz_we_no_monitor(bool);
 	void non_realtime_transport_stop (samplepos_t now, bool flush);
-	void realtime_locate ();
+	void realtime_locate (bool);
 
 	BufferSet& output_buffers() { return *_output_buffers; }
 

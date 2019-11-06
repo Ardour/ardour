@@ -50,7 +50,7 @@ public:
 
 	void run (BufferSet& /*bufs*/, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double speed, pframes_t /*nframes*/, bool /*result_required*/);
 	void realtime_handle_transport_stopped ();
-	void realtime_locate ();
+	void realtime_locate (bool);
 	bool overwrite_existing_buffers ();
 	void set_pending_overwrite ();
 

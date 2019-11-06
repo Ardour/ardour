@@ -46,7 +46,7 @@ public:
 
 	void flush_buffers (pframes_t nframes);
 	void transport_stopped ();
-	void realtime_locate ();
+	void realtime_locate (bool);
 	void reset ();
 	void require_resolve ();
 

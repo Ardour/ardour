@@ -159,7 +159,7 @@ public:
 	void non_realtime_transport_stop (samplepos_t now, bool flush);
 	virtual void realtime_handle_transport_stopped ();
 
-	virtual void realtime_locate () {}
+	virtual void realtime_locate (bool) {}
 	virtual void non_realtime_locate (samplepos_t);
 	void set_loop (ARDOUR::Location *);
 

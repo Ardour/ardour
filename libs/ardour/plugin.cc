@@ -391,7 +391,7 @@ Plugin::realtime_handle_transport_stopped ()
 }
 
 void
-Plugin::realtime_locate ()
+Plugin::realtime_locate (bool)
 {
 	resolve_midi ();
 }

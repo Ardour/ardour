@@ -190,7 +190,7 @@ public:
 			);
 
 	void realtime_handle_transport_stopped ();
-	void realtime_locate ();
+	void realtime_locate (bool);
 	void monitoring_changed ();
 
 	bool load_preset (Plugin::PresetRecord);

@@ -43,7 +43,7 @@ public:
 
 	int init ();
 
-	void realtime_locate ();
+	void realtime_locate (bool);
 	void non_realtime_locate (samplepos_t);
 
 	bool can_be_record_enabled ();

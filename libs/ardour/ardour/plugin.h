@@ -174,7 +174,7 @@ public:
 	bool write_immediate_event (size_t size, const uint8_t* buf);
 
 	void realtime_handle_transport_stopped ();
-	void realtime_locate ();
+	void realtime_locate (bool);
 	void monitoring_changed ();
 
 	struct UILayoutHint {

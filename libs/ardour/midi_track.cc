@@ -351,7 +351,7 @@ MidiTrack::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, sample
 }
 
 void
-MidiTrack::realtime_locate ()
+MidiTrack::realtime_locate (bool for_loop_end)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 
@@ -360,10 +360,8 @@ MidiTrack::realtime_locate ()
 	}
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		(*i)->realtime_locate ();
+		(*i)->realtime_locate (for_loop_end);
 	}
-
-	_disk_reader->resolve_tracker (_immediate_events, 0);
 }
 
 void

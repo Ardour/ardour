@@ -122,7 +122,7 @@ public:
 	virtual Buffer& get_buffer (pframes_t nframes) = 0;
 	virtual void flush_buffers (pframes_t /*nframes*/) {}
 	virtual void transport_stopped () {}
-	virtual void realtime_locate () {}
+	virtual void realtime_locate (bool for_loop_end) {}
 	virtual void set_buffer_size (pframes_t) {}
 
 	bool physically_connected () const;

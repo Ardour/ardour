@@ -357,7 +357,7 @@ MidiPort::transport_stopped ()
 }
 
 void
-MidiPort::realtime_locate ()
+MidiPort::realtime_locate (bool)
 {
 	_resolve_required = true;
 }

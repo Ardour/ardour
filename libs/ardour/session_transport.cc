@@ -282,7 +282,7 @@ Session::do_locate (samplepos_t target_sample, bool with_roll, bool with_flush, 
 
 		boost::shared_ptr<RouteList> r = routes.reader ();
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			(*i)->realtime_locate ();
+			(*i)->realtime_locate (for_loop_end);
 		}
 	}
 
