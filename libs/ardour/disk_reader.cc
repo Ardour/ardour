@@ -1126,9 +1126,10 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 
 
 					if (cnt) {
-						/* We re going to have to read across the loop end. Resolve any notes the extend across the loop end
+						/* We re going to have to read across the loop end. Resolve any notes the extend across the loop end.
+						 * Time is relative to start_sample.
 						 */
-						_tracker.resolve_notes (*target, loc->end() - 1);
+						_tracker.resolve_notes (*target, (loc->end() - 1) - start_sample);
 					}
 
 				} while (cnt);
