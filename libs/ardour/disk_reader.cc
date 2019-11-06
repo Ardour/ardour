@@ -1112,11 +1112,15 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 
 					effective_start = loop_range.squish (effective_start);
 					effective_end = min (effective_start + cnt, loc->end());
+					assert (effective_end > effective_start);
 
-					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer LOOP read, from %1 to %2 (%3)\n", effective_start, effective_end, (effective_end - effective_start)));
+					const samplecnt_t this_read = effective_end - effective_start;
+
+					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer LOOP read, from %1 to %2 (%3)\n", effective_start, effective_end, this_read));
 
 					size_t events_read = rtmb->read (*target, effective_start, effective_end, _tracker);
-					cnt -= (effective_end - effective_start);
+					cnt -= this_read;
+					effective_start += this_read;
 
 					DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("%1 MDS events LOOP read %2 range %3 .. %4 cnt now %5\n", _name, events_read, effective_start, effective_end, cnt));
 
