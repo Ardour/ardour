@@ -132,6 +132,7 @@ Gtk::Window* Keyboard::pre_dialog_active_window = 0;
 /* set this to initially contain the modifiers we care about, then track changes in ::set_edit_modifier() etc. */
 GdkModifierType Keyboard::RelevantModifierKeyMask;
 sigc::signal0<void> Keyboard::RelevantModifierKeysChanged;
+sigc::signal1<void,Gtk::Window*> Keyboard::HideMightMeanQuit;
 
 void
 Keyboard::magic_widget_grab_focus ()
@@ -342,6 +343,9 @@ void
 Keyboard::close_current_dialog ()
 {
 	if (current_window) {
+
+		HideMightMeanQuit (current_window); /* EMIT SIGNAL */
+
 		current_window->hide ();
 		current_window = 0;
 

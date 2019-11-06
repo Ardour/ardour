@@ -188,6 +188,7 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 
 	sigc::signal0<void> ZoomVerticalModifierReleased;
 	static sigc::signal0<void> RelevantModifierKeysChanged;
+	static sigc::signal1<void,Gtk::Window*> HideMightMeanQuit;
 
   protected:
 	static Keyboard* _the_keyboard;
