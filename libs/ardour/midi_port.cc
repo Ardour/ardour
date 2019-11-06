@@ -127,20 +127,29 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 			/* check that the event is in the acceptable time range */
 			if ((timestamp <  (_global_port_buffer_offset)) ||
 			    (timestamp >= (_global_port_buffer_offset + nframes))) {
-				/* XXX this is normal after a split cycles XXX
-				 * The engine buffer contains the data for the complete cycle, but
-				 * only the part after _global_port_buffer_offset is needed. */
+				/* This is normal after a split cycles.
+				 *
+				 * The engine buffer contains the data for the
+				 * complete cycle, but only the part after
+				 * _global_port_buffer_offset is needed.
+				 *
+				 * But of course ... if
+				 * _global_port_buffer_offset is zero,
+				 * something wierd is happening.
+				 */
 #ifndef NDEBUG
-				cerr << "Ignored incoming MIDI at time " << timestamp << "; offset="
-				     << _global_port_buffer_offset << " limit="
-				     << (_global_port_buffer_offset + nframes)
-				     << " = (" << _global_port_buffer_offset
-				     << " + " << nframes
-				     << ")";
-				for (size_t xx = 0; xx < size; ++xx) {
-					cerr << ' ' << hex << (int) buf[xx];
+				if (_global_port_buffer_offset == 0) {
+					cerr << "Ignored incoming MIDI at time " << timestamp << "; offset="
+					     << _global_port_buffer_offset << " limit="
+					     << (_global_port_buffer_offset + nframes)
+					     << " = (" << _global_port_buffer_offset
+					     << " + " << nframes
+					     << ")";
+					for (size_t xx = 0; xx < size; ++xx) {
+						cerr << ' ' << hex << (int) buf[xx];
+					}
+					cerr << dec << endl;
 				}
-				cerr << dec << endl;
 #endif
 				continue;
 			}
