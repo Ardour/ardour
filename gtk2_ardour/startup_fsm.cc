@@ -41,6 +41,7 @@
 
 #include "gtkmm2ext/application.h"
 #include <gtkmm2ext/doi.h>
+#include <gtkmm2ext/keyboard.h>
 
 #include "ardour_ui.h"
 #include "debug.h"
@@ -94,6 +95,8 @@ StartupFSM::StartupFSM (EngineControl& amd)
 
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &StartupFSM::queue_finish));
 	app->ShouldLoad.connect (sigc::mem_fun (*this, &StartupFSM::load_from_application_api));
+
+	Gtkmm2ext::Keyboard::HideMightMeanQuit.connect (sigc::mem_fun (*this, &StartupFSM::dialog_hidden));
 }
 
 StartupFSM::~StartupFSM ()
@@ -102,6 +105,16 @@ StartupFSM::~StartupFSM ()
 	delete pre_release_dialog;
 	delete plugin_scan_dialog;
 	delete new_user_dialog;
+}
+
+void
+StartupFSM::dialog_hidden (Gtk::Window* /* ignored */)
+{
+	/* since this object only exists during startup, any attempt to close
+	 * any dialog that we manage with Ctrl/Cmd-w is assumed to indicate a
+	 * desire to quit on the part of the user.
+	 */
+	queue_finish ();
 }
 
 void

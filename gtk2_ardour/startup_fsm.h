@@ -117,6 +117,8 @@ class StartupFSM : public sigc::trackable
 	sigc::connection current_dialog_connection;
 
 	sigc::signal1<void,Result> _signal_response;
+
+	void dialog_hidden (Gtk::Window*);
 };
 
 #endif /* __gtk2_ardour_startup_fsm_h__ */
