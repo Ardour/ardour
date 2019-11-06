@@ -5960,8 +5960,6 @@ Route::set_disk_io_point (DiskIOPoint diop)
 {
 	bool display = false;
 
-	cerr << "set disk io to " << enum_2_string (diop) << endl;
-
 	switch (diop) {
 	case DiskIOCustom:
 		display = true;
