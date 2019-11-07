@@ -88,6 +88,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	, _maps_from_state (false)
 	, _latency_changed (false)
 	, _bypass_port (UINT32_MAX)
+	, _inverted_bypass_enable (false)
 	, _stat_reset (0)
 {
 	/* the first is the master */
@@ -716,7 +717,7 @@ PluginInsert::enable (bool yn)
 			activate ();
 		}
 		boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, _bypass_port));
-		const double val = yn ? 1.0 : 0.0;
+		const double val = yn ^ _inverted_bypass_enable ? 1.0 : 0.0;
 		ac->set_value (val, Controllable::NoGroup);
 
 #ifdef ALLOW_VST_BYPASS_TO_FAIL // yet unused, see also vst_plugin.cc
@@ -748,7 +749,7 @@ PluginInsert::enabled () const
 		return Processor::enabled ();
 	} else {
 		boost::shared_ptr<const AutomationControl> ac = boost::const_pointer_cast<AutomationControl> (automation_control (Evoral::Parameter (PluginAutomation, 0, _bypass_port)));
-		return (ac->get_value () > 0 && _pending_active);
+		return ((ac->get_value () > 0) ^ _inverted_bypass_enable) && _pending_active;
 	}
 }
 

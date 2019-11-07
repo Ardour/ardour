@@ -426,6 +426,7 @@ private:
 	void latency_changed ();
 	bool _latency_changed;
 	uint32_t _bypass_port;
+	bool     _inverted_bypass_enable;
 
 	typedef std::map<uint32_t, boost::shared_ptr<ReadOnlyControl> >CtrlOutMap;
 	CtrlOutMap _control_outputs;
