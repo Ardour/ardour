@@ -471,18 +471,6 @@ EngineControl::config_parameter_changed (std::string const & p)
 }
 
 bool
-EngineControl::try_autostart ()
-{
-	if (!start_stop_button.get_sensitive()) {
-		return false;
-	}
-	if (ARDOUR::AudioEngine::instance()->running()) {
-		return true;
-	}
-	return start_engine ();
-}
-
-bool
 EngineControl::start_engine ()
 {
 	if (push_state_to_backend (true) != 0) {

@@ -425,19 +425,33 @@ StartupFSM::start_audio_midi_setup ()
 	}
 
 	if (setup_required) {
-		if (!session_is_new && session_existing_sample_rate > 0) {
-			audiomidi_dialog.set_desired_sample_rate (session_existing_sample_rate);
-		}
+
+		/* Note: if autostart is enabled, and starting the engine is
+		 * successful, but the session SR differs, there will be no
+		 * chance to reset it.
+		 *
+		 * We could change this trivially with a call to
+		 * AudioEngine::set_sample_rate(), but that opens a can of
+		 * worms about policy, UX, GUI and more, because it isn't clear
+		 * whether that's the correct thing to do. So for now (Nov
+		 * 2019) we simply try the autostart if the user asked for it,
+		 * and if necessary a session SR mismatch dialog will appear
+		 * during loading.
+		 */
 
 		if (!session_is_new && (Config->get_try_autostart_engine () || g_getenv ("ARDOUR_TRY_AUTOSTART_ENGINE"))) {
 
-			audiomidi_dialog.try_autostart ();
-
-			if (ARDOUR::AudioEngine::instance()->running()) {
-				DEBUG_TRACE (DEBUG::GuiStartup, "autostart successful, audio/MIDI setup dialog not required\n");
-				engine_running ();
-				return;
+			if (!AudioEngine::instance()->start ()) {
+				if (ARDOUR::AudioEngine::instance()->running()) {
+					DEBUG_TRACE (DEBUG::GuiStartup, "autostart successful, audio/MIDI setup dialog not required\n");
+					engine_running ();
+					return;
+				}
 			}
+		}
+
+		if (!session_is_new && session_existing_sample_rate > 0) {
+			audiomidi_dialog.set_desired_sample_rate (session_existing_sample_rate);
 		}
 
 		show_audiomidi_dialog ();

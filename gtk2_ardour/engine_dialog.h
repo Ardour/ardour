@@ -55,7 +55,6 @@ public:
 	bool set_state (const XMLNode&);
 
 	void set_desired_sample_rate (uint32_t);
-	bool try_autostart ();
 
 private:
 	Gtk::Notebook notebook;
