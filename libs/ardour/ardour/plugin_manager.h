@@ -42,10 +42,15 @@ namespace ARDOUR {
 
 class Plugin;
 
+#ifdef VST3_SUPPORT
+struct VST3Info;
+#endif
+
 class LIBARDOUR_API PluginManager : public boost::noncopyable {
 public:
 	static PluginManager& instance();
 	static std::string scanner_bin_path;
+	static std::string vst3_scanner_bin_path;
 
 	~PluginManager ();
 
@@ -65,6 +70,8 @@ public:
 	void clear_vst_blacklist ();
 	void clear_au_cache ();
 	void clear_au_blacklist ();
+	void clear_vst3_cache ();
+	void clear_vst3_blacklist ();
 
 	const std::string get_default_windows_vst_path() const { return windows_vst_path; }
 	const std::string get_default_lxvst_path() const { return lxvst_path; }
@@ -77,8 +84,8 @@ public:
 	 */
 	static std::string plugin_type_name (const PluginType, bool short_name = true);
 
-	bool cancelled () { return _cancel_scan; }
-	bool no_timeout () { return _cancel_timeout; }
+	bool cancelled () const { return _cancel_scan; }
+	bool no_timeout () const { return _cancel_timeout; }
 
 	void reset_stats ();
 	void stats_use_plugin (PluginInfoPtr const&);
@@ -228,6 +235,8 @@ private:
 	void detect_name_ambiguities (ARDOUR::PluginInfoList*);
 	void detect_type_ambiguities (ARDOUR::PluginInfoList&);
 
+	void conceal_duplicates (ARDOUR::PluginInfoList*, ARDOUR::PluginInfoList*);
+
 	void load_statuses ();
 	void load_tags ();
 	void load_stats ();
@@ -261,6 +270,10 @@ private:
 
 	int vst3_discover_from_path (std::string const& path, bool cache_only = false);
 	int vst3_discover (std::string const& path, bool cache_only = false);
+#ifdef VST3_SUPPORT
+	void vst3_plugin (std::string const& module_path, VST3Info const&);
+	bool run_vst3_scanner_app (std::string bundle_path) const;
+#endif
 
 	int lxvst_discover_from_path (std::string path, bool cache_only = false);
 	int lxvst_discover (std::string path, bool cache_only = false);
