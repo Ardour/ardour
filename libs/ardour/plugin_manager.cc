@@ -115,6 +115,8 @@
 #endif
 
 #ifdef VST3_SUPPORT
+#include "pbd/basename.h"
+#include "ardour/vst3_module.h"
 #include "ardour/vst3_plugin.h"
 #endif
 
@@ -1532,7 +1534,7 @@ PluginManager::vst3_discover (string const& path, bool cache_only)
 		module_path = path;
 	} else {
 		module_path = Glib::build_filename (path, "Contents",
-				vst3_bindir (), basename_nosuffix (path) + vst3_suffix ());
+				vst3_bindir (), PBD::basename_nosuffix (path) + vst3_suffix ());
 	}
 	if (!Glib::file_test (module_path, Glib::FILE_TEST_IS_REGULAR)) {
 		cerr << "VST3 not a valid bundle: '" << module_path << "'\n";
@@ -1540,6 +1542,13 @@ PluginManager::vst3_discover (string const& path, bool cache_only)
 	}
 	ARDOUR::PluginScanMessage(_("VST3"), module_path, !(cache_only || cancelled()));
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("VST3: discover %1 (%2)\n", path, module_path));
+
+	try {
+		boost::shared_ptr<VST3PluginModule> m = VST3PluginModule::load (module_path);
+	} catch (...) {
+		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Cannot load VST3 at '%1'\n", path));
+		return -1;
+	}
 
 	return 0;
 }

@@ -460,7 +460,7 @@ def build(bld):
         obj.defines += [ 'MACVST_SUPPORT' ]
 
     if bld.is_defined('VST3_SUPPORT'):
-        obj.source += [ 'vst3_plugin.cc' ]
+        obj.source += [ 'vst3_plugin.cc', 'vst3_module.cc' ]
         obj.defines += [ 'VST3_SUPPORT' ]
 
     if bld.is_defined('HAVE_COREAUDIO'):
