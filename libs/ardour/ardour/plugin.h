@@ -463,6 +463,7 @@ public:
 	bool plugintype_name_ambiguity;
 
 	std::string unique_id;
+	uint32_t index; //< used for LADSPA & VST3, index in module
 
 	virtual PluginPtr load (Session& session) = 0;
 
@@ -493,7 +494,6 @@ public:
 
 protected:
 	friend class PluginManager;
-	uint32_t index; //< used for LADSPA, index in module
 };
 
 } // namespace ARDOUR
