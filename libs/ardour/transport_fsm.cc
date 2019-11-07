@@ -421,6 +421,7 @@ TransportFSM::locate_for_loop (Event const & l)
 	assert (l.type == Locate);
 	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("locate_for_loop, wl = %1\n", l.with_loop));
 	current_roll_after_locate_status = l.with_roll;
+	_last_locate = l;
 	api->locate (l.target, l.with_roll, l.with_flush, l.with_loop, l.force);
 }
 
@@ -484,9 +485,11 @@ TransportFSM::should_roll_after_locate () const
 void
 TransportFSM::roll_after_locate () const
 {
-	DEBUG_TRACE (DEBUG::TFSMEvents, "rolling after locate\n");
+	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("rolling after locate, was for_loop ? %1\n", _last_locate.with_loop));
 	current_roll_after_locate_status = boost::none;
-	api->start_transport ();
+	if (!_last_locate.with_loop) {
+		api->start_transport ();
+	}
 }
 
 void
