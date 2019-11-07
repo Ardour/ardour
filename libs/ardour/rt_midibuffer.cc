@@ -180,9 +180,10 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiSta
 
 #ifndef NDEBUG
 	TimeType unadjusted_time;
+	Item* last = iend; --last;
 #endif
 
-	DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("read from %1 .. %2 .. initial index = %3 (time = %4) (range in list of  %7 %5..%6)\n", start, end, item - _data, item->timestamp, _data->timestamp, iend->timestamp, _size));
+	DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("read from %1 .. %2 .. initial index = %3 (time = %4) (range in list of  %7 %5..%6)\n", start, end, item - _data, item->timestamp, _data->timestamp, last->timestamp, _size));
 
 	while ((item < iend) && (item->timestamp < end)) {
 

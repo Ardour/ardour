@@ -391,9 +391,13 @@ Plugin::realtime_handle_transport_stopped ()
 }
 
 void
-Plugin::realtime_locate (bool)
+Plugin::realtime_locate (bool for_loop_end)
 {
-	resolve_midi ();
+	std::cerr << name() << " RL fle = " << for_loop_end << std::endl;
+
+	//if (!for_loop_end) {
+		resolve_midi ();
+//}
 }
 
 void

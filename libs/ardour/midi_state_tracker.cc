@@ -119,6 +119,8 @@ MidiStateTracker::resolve_notes (MidiBuffer &dst, samplepos_t time)
 		return;
 	}
 
+	PBD::stacktrace (std::cerr, 20);
+
 	for (int channel = 0; channel < 16; ++channel) {
 		for (int note = 0; note < 128; ++note) {
 			while (_active_notes[note + 128 * channel]) {
