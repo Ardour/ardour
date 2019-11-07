@@ -53,43 +53,6 @@ using namespace ArdourWidgets;
 using namespace Gtk;
 using namespace std;
 
-int
-ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
-{
-	audio_midi_setup->set_desired_sample_rate (desired_sample_rate);
-	audio_midi_setup->set_position (WIN_POS_CENTER);
-
-	if (desired_sample_rate != 0) {
-		if (Config->get_try_autostart_engine () || g_getenv ("ARDOUR_TRY_AUTOSTART_ENGINE")) {
-			audio_midi_setup->try_autostart ();
-			if (ARDOUR::AudioEngine::instance()->running()) {
-				return 0;
-			}
-		}
-	}
-
-	while (true) {
-		int response = audio_midi_setup->run();
-		switch (response) {
-		case Gtk::RESPONSE_DELETE_EVENT:
-			// after latency callibration engine may run,
-			// Running() signal was emitted, but dialog will not
-			// have emitted a response. The user needs to close
-			// the dialog -> Gtk::RESPONSE_DELETE_EVENT
-			if (!AudioEngine::instance()->running()) {
-				return -1;
-			}
-			/* fallthrough */
-		default:
-			if (!AudioEngine::instance()->running()) {
-				continue;
-			}
-			audio_midi_setup->hide ();
-			return 0;
-		}
-	}
-}
-
 void
 ARDOUR_UI::audioengine_became_silent ()
 {

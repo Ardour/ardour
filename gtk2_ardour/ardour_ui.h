@@ -865,7 +865,6 @@ private:
 	std::string _announce_string;
 	void check_announcements ();
 
-	int do_audio_midi_setup (uint32_t);
 	void audioengine_became_silent ();
 
 	DuplicateRouteDialog* duplicate_routes_dialog;
