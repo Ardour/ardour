@@ -41,6 +41,15 @@ using namespace PBD;
 
 Pool Click::pool ("click", sizeof (Click), 1024);
 
+/* pre-allocated vector for grid-point-lookup.
+ *
+ * Since Session::click() is never called concurrently
+ * from different threads, this can be static-global.
+ * (session.h does not include tempo.h so making this
+ *  a Session member variable is tricky.)
+ */
+static vector<TempoMap::BBTPoint> _click_points;
+
 void
 Session::add_click (samplepos_t pos, bool emphasis)
 {
@@ -113,16 +122,16 @@ Session::click (samplepos_t cycle_start, samplecnt_t nframes)
 
 		const samplepos_t end = start + move;
 
-		vector<TempoMap::BBTPoint> points; // TODO use mempool allocator
-		_tempo_map->get_grid (points, start, end);
+		_click_points.clear ();
+		_tempo_map->get_grid (_click_points, start, end);
 
-		if (distance (points.begin(), points.end()) == 0) {
+		if (distance (_click_points.begin(), _click_points.end()) == 0) {
 			start += move;
 			remain -= move;
 			continue;
 		}
 
-		for (vector<TempoMap::BBTPoint>::iterator i = points.begin(); i != points.end(); ++i) {
+		for (vector<TempoMap::BBTPoint>::iterator i = _click_points.begin(); i != _click_points.end(); ++i) {
 			if ((*i).sample < start || (*i).sample >= end) {
 				// FIXME: TempoMap::get_grid() returns duplicates and out of range points
 				continue;
@@ -295,6 +304,7 @@ Session::setup_click_sounds (Sample** data, Sample const * default_data, samplec
 void
 Session::setup_click_sounds (int which)
 {
+	_click_points.reserve (8);
 	clear_clicks ();
 
 	if (which == 0 || which == 1) {
