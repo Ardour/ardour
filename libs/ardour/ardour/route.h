@@ -389,11 +389,12 @@ public:
 	PBD::Signal1<void,RouteProcessorChange> processors_changed;
 	PBD::Signal0<void> fan_out; // used to signal the GUI to fan-out (track-creation)
 	PBD::Signal1<void,void*> record_enable_changed;
+	/** a processor's latency has changed
+	 * (emitted from PluginInsert::latency_changed)
+	 */
 	PBD::Signal0<void> processor_latency_changed;
 	/** the metering point has changed */
 	PBD::Signal0<void> meter_change;
-	/** a processor's latency has changed */
-	PBD::Signal0<void> signal_latency_changed;
 	/** route has updated its latency compensation */
 	PBD::Signal0<void> signal_latency_updated;
 

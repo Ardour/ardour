@@ -4211,10 +4211,6 @@ Route::update_signal_latency (bool apply_to_delayline)
 		apply_latency_compensation ();
 	}
 
-	if (_signal_latency != l_out) {
-		signal_latency_changed (); /* EMIT SIGNAL */
-	}
-
 	return _signal_latency;
 }
 
