@@ -248,7 +248,9 @@ Session::do_locate (samplepos_t target_sample, bool with_roll, bool with_flush, 
 	// thread(s?) can restart.
 	g_atomic_int_inc (&_seek_counter);
 	_last_roll_or_reversal_location = target_sample;
-	_remaining_latency_preroll = worst_latency_preroll ();
+	if (!for_loop_end) {
+		_remaining_latency_preroll = worst_latency_preroll ();
+	}
 	timecode_time(_transport_sample, transmitting_timecode_time); // XXX here?
 
 	/* do "stopped" stuff if:
