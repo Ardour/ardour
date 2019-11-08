@@ -838,6 +838,7 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 			} else {
 				_shadow_data[i] = 0;
 			}
+			_control_data[i] = _shadow_data[i];
 		} else {
 			_defaults[i] = 0.0f;
 		}
