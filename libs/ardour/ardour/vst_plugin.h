@@ -87,7 +87,7 @@ public:
 	const char * maker () const;
 	int32_t version () const;
 	uint32_t parameter_count () const;
-	bool print_parameter (uint32_t, char*, uint32_t len) const;
+	bool print_parameter (uint32_t, std::string&) const;
 
 	bool has_editor () const;
 

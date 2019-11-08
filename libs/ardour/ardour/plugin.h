@@ -110,7 +110,7 @@ public:
 	virtual std::string                 describe_parameter (Evoral::Parameter) = 0;
 	virtual std::string                 state_node_name () const               = 0;
 
-	virtual bool print_parameter (uint32_t, char*, uint32_t len) const { return false; }
+	virtual bool print_parameter (uint32_t, std::string&) const { return false; }
 
 	virtual bool parameter_is_audio (uint32_t) const   = 0;
 	virtual bool parameter_is_control (uint32_t) const = 0;
