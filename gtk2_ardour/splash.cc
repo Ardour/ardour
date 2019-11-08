@@ -151,7 +151,9 @@ Splash::pop_back_for (Gtk::Window& win)
 	hide();
 #else
 	set_keep_above (false);
-	get_window()->restack (win.get_window(), false);
+	if (is_mapped()) {
+		get_window()->restack (win.get_window(), false);
+	}
 #endif
 }
 
