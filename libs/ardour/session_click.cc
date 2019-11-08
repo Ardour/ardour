@@ -102,7 +102,7 @@ Session::click (samplepos_t cycle_start, samplecnt_t nframes)
 	while (remain > 0) {
 		samplecnt_t move = remain;
 
-		Location* loop_location = locations()->auto_loop_location ();
+		Location* loop_location = get_play_loop () ? locations()->auto_loop_location () : NULL;
 		if (loop_location) {
 			const samplepos_t loop_start = loop_location->start ();
 			const samplepos_t loop_end = loop_location->end ();
@@ -132,10 +132,7 @@ Session::click (samplepos_t cycle_start, samplecnt_t nframes)
 		}
 
 		for (vector<TempoMap::BBTPoint>::iterator i = _click_points.begin(); i != _click_points.end(); ++i) {
-			if ((*i).sample < start || (*i).sample >= end) {
-				// FIXME: TempoMap::get_grid() returns duplicates and out of range points
-				continue;
-			}
+			assert ((*i).sample >= start && (*i).sample < end);
 			switch ((*i).beat) {
 				case 1:
 					add_click ((*i).sample, true);
@@ -176,7 +173,7 @@ Session::run_click (samplepos_t start, samplepos_t nframes)
 
 	/* given a large output latency, `start' can be offset by by > 1 cycle.
 	 * and needs to be mapped back into the loop-range */
-	Location* loop_location = locations()->auto_loop_location ();
+	Location* loop_location = get_play_loop () ? locations()->auto_loop_location () : NULL;
 	bool crossloop = false;
 	samplecnt_t span = nframes;
 	if (loop_location) {
