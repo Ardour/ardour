@@ -2840,6 +2840,11 @@ what you would like to do.\n"), PROGRAM_NAME));
 void
 ARDOUR_UI::store_clock_modes ()
 {
+	if (session_load_in_progress) {
+		/* Do not overwrite clock modes while loading them (with a session) */
+		return;
+	}
+
 	XMLNode* node = new XMLNode(X_("ClockModes"));
 
 	for (vector<AudioClock*>::iterator x = AudioClock::clocks.begin(); x != AudioClock::clocks.end(); ++x) {
