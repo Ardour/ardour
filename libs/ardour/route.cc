@@ -4140,9 +4140,20 @@ Route::add_export_point()
 samplecnt_t
 Route::update_signal_latency (bool apply_to_delayline)
 {
-	// TODO: bail out if !active() and set/assume _signal_latency = 0,
-	// here or in Session::* ? -> also zero send latencies,
-	// and make sure that re-enabling a route updates things again...
+	if (!active()) {
+		_signal_latency = 0;
+		/* mark all send are inactive, set internal-return "delay-out" to zero. */
+		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+			if (boost::shared_ptr<LatentSend> snd = boost::dynamic_pointer_cast<LatentSend> (*i)) {
+				snd->set_delay_in (0);
+			}
+			if (boost::shared_ptr<InternalReturn> rtn = boost::dynamic_pointer_cast<InternalReturn> (*i)) {
+				rtn->set_playback_offset (0);
+			}
+			// TODO sidechain inputs?!
+		}
+		return 0;
+	}
 
 	samplecnt_t capt_lat_in = _input->connected_latency (false);
 	samplecnt_t play_lat_out = _output->connected_latency (true);
@@ -4474,6 +4485,9 @@ Route::set_active (bool yn, void* src)
 		_input->set_active (yn);
 		_output->set_active (yn);
 		flush_processors ();
+		if (_active || _signal_latency > 0) {
+			processor_latency_changed (); /* EMIT SIGNAL */
+		}
 		active_changed (); // EMIT SIGNAL
 		_session.set_dirty ();
 	}
