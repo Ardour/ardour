@@ -4139,7 +4139,6 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 	int32_t cnt = ceil (beat_at_minute_locked (_metrics, minute_at_sample (lower)));
-	samplecnt_t pos = 0;
 	/* although the map handles negative beats, bbt doesn't. */
 	if (cnt < 0.0) {
 		cnt = 0.0;
@@ -4149,13 +4148,18 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 		return;
 	}
 	if (bar_mod == 0) {
-		while (pos >= 0 && pos < upper) {
-			pos = sample_at_minute (minute_at_beat_locked (_metrics, cnt));
+		while (true) {
+			samplecnt_t pos = sample_at_minute (minute_at_beat_locked (_metrics, cnt));
+			if (pos >= upper) {
+				break;
+			}
 			const MeterSection meter = meter_section_at_minute_locked (_metrics, minute_at_sample (pos));
 			const BBT_Time bbt = bbt_at_beat_locked (_metrics, cnt);
 			const double qn = pulse_at_beat_locked (_metrics, cnt) * 4.0;
 
-			points.push_back (BBTPoint (meter, tempo_at_minute_locked (_metrics, minute_at_sample (pos)), pos, bbt.bars, bbt.beats, qn));
+			if (pos >= lower) {
+				points.push_back (BBTPoint (meter, tempo_at_minute_locked (_metrics, minute_at_sample (pos)), pos, bbt.bars, bbt.beats, qn));
+			}
 			++cnt;
 		}
 	} else {
@@ -4168,12 +4172,17 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 			++bbt.bars;
 		}
 
-		while (pos >= 0 && pos < upper) {
-			pos = sample_at_minute (minute_at_bbt_locked (_metrics, bbt));
+		while (true) {
+			samplecnt_t pos = sample_at_minute (minute_at_bbt_locked (_metrics, bbt));
+			if (pos >= upper) {
+				break;
+			}
 			const MeterSection meter = meter_section_at_minute_locked (_metrics, minute_at_sample (pos));
 			const double qn = pulse_at_bbt_locked (_metrics, bbt) * 4.0;
 
-			points.push_back (BBTPoint (meter, tempo_at_minute_locked (_metrics, minute_at_sample (pos)), pos, bbt.bars, bbt.beats, qn));
+			if (pos >= lower) {
+				points.push_back (BBTPoint (meter, tempo_at_minute_locked (_metrics, minute_at_sample (pos)), pos, bbt.bars, bbt.beats, qn));
+			}
 			bbt.bars += bar_mod;
 		}
 	}
