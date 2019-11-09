@@ -18,13 +18,15 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <cstdio>
+
 #include "pbd/file_utils.h"
 #include "pbd/convert.h"
+#include "ardour/filesystem_paths.h"
+
 #include "gui_thread.h"
 #include "timers.h"
 #include "utils.h"
-
-#include <stdio.h>
 #include "public_editor.h"
 #include "editor.h"
 #include "video_monitor.h"
@@ -130,7 +132,14 @@ VideoMonitor::open (std::string filename)
 	manually_seeked_frame = 0;
 	osdmode = 10; // 1: frameno, 2: timecode, 8: box
 	starting = 15;
+
+	std::string ardour_mono_file;
+	if (find_file (ARDOUR::ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
+		process->write_to_stdin("osd font "+ ardour_mono_file  +"\n");
+	}
+
 	process->write_to_stdin("load " + filename + "\n");
+
 	process->write_to_stdin("set fps -1\n");
 	process->write_to_stdin("window resize 100%\n");
 	process->write_to_stdin("window ontop on\n");
@@ -151,6 +160,7 @@ VideoMonitor::open (std::string filename)
 	process->write_to_stdin("notify settings\n");
 	process->write_to_stdin("window letterbox on\n");
 	process->write_to_stdin("osd mode 10\n");
+
 	for(XJSettings::const_iterator it = xjadeo_settings.begin(); it != xjadeo_settings.end(); ++it) {
 		if (skip_setting(it->first)) { continue; }
 		process->write_to_stdin(it->first + " " + it->second + "\n");
@@ -382,7 +392,7 @@ VideoMonitor::parse_output (std::string d, size_t /*s*/)
 						xjadeo_settings["window letterbox"] = value;
 					} else if(key ==  "osdmode") {
 						knownstate |= 1;
-						osdmode = atoi(value);
+						osdmode = atoi(value) & ~0x40;
 						if (starting || atoi(xjadeo_settings["osd mode"]) != osdmode) {
 							if (!starting && _session) _session->set_dirty ();
 							if ((osdmode & 1) == 1) { UiState("xjadeo-window-osd-frame-on"); }
