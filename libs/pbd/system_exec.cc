@@ -401,6 +401,15 @@ SystemExec::write_to_stdin (std::string const& d, size_t len)
 	return write_to_stdin ((const void*)data, len);
 }
 
+size_t
+SystemExec::write_to_stdin (const char* data, size_t len)
+{
+	if (len == 0) {
+		len = strlen (data);
+	}
+	return write_to_stdin ((const void*)data, len);
+}
+
 #ifdef PLATFORM_WINDOWS /* Windows Process */
 
 /* HELPER FUNCTIONS */

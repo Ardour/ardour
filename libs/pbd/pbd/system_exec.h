@@ -181,6 +181,14 @@ class LIBPBD_API SystemExec
 		size_t write_to_stdin (std::string const& d, size_t len=0);
 
 		/** write into child-program's STDIN
+		 * @param d text to write
+		 * @param len length of data to write, if it is 0 (zero), d.length() is
+		 * used to determine the number of bytes to transmit.
+		 * @return number of bytes written.
+		 */
+		size_t write_to_stdin (const char* d, size_t len=0);
+
+		/** write into child-program's STDIN
 		 * @param data data to write
 		 * @param bytes length of data to write
 		 * @return number of bytes written.
