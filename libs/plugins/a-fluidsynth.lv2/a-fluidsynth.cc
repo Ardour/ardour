@@ -581,7 +581,8 @@ run (LV2_Handle instance, uint32_t n_samples)
 		inform_ui (self);
 
 #ifdef LV2_EXTENDED
-		self->midnam->update (self->midnam->handle);
+		if (self->midnam)
+			self->midnam->update (self->midnam->handle);
 #endif
 	}
 
