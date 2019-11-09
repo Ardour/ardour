@@ -1547,6 +1547,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 		RouteTimeAxisView* dest_rtv = 0;
 
 		if (i->view->region()->locked() || (i->view->region()->video_locked() && !_ignore_video_lock)) {
+			++i;
 			continue;
 		}
 
