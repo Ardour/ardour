@@ -211,7 +211,10 @@ ARDOUR_UI::update_transport_clocks (samplepos_t pos)
 	if (big_clock_window) {
 		big_clock->set (pos);
 	}
-	ARDOUR_UI::instance()->video_timeline->manual_seek_video_monitor(pos);
+
+	if (!editor->preview_video_drag_active ()) {
+		ARDOUR_UI::instance()->video_timeline->manual_seek_video_monitor(pos);
+	}
 }
 
 

@@ -75,6 +75,7 @@
 #include "patch_change.h"
 #include "ui_config.h"
 #include "verbose_cursor.h"
+#include "video_timeline.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -137,6 +138,16 @@ DragManager::set (Drag* d, GdkEvent* e, Gdk::Cursor* c)
 	d->set_manager (this);
 	_drags.push_back (d);
 	start_grab (e, c);
+}
+
+bool
+DragManager::preview_video () const {
+	for (list<Drag*>::const_iterator i = _drags.begin(); i != _drags.end(); ++i) {
+		if ((*i)->preview_video ()) {
+			return true;
+		}
+	}
+	return false;
 }
 
 void
@@ -230,6 +241,8 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, bool trackview_only)
 	, _drags (0)
 	, _item (i)
 	, _pointer_sample_offset (0)
+	, _video_sample_offset (0)
+	, _preview_video (false)
 	, _x_constrained (false)
 	, _y_constrained (false)
 	, _was_rolling (false)
@@ -277,6 +290,10 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	_raw_grab_sample = _editor->canvas_event_sample (event, &_grab_x, &_grab_y);
 
 	setup_pointer_sample_offset ();
+	setup_video_sample_offset ();
+	if (! UIConfiguration::instance ().get_preview_video_frame_on_drag ()) {
+		_preview_video = false;
+	}
 	_grab_sample = adjusted_sample (_raw_grab_sample, event).sample;
 	_last_pointer_sample = _grab_sample;
 	_last_pointer_x = _grab_x;
@@ -530,6 +547,14 @@ Drag::show_verbose_cursor_text (string const & text)
 	_editor->verbose_cursor()->show ();
 }
 
+void
+Drag::show_view_preview (samplepos_t sample)
+{
+	if (_preview_video) {
+		ARDOUR_UI::instance()->video_timeline->manual_seek_video_monitor (sample);
+	}
+}
+
 boost::shared_ptr<Region>
 Drag::add_midi_region (MidiTimeAxisView* view, bool commit)
 {
@@ -619,6 +644,21 @@ RegionDrag::find_time_axis_view (TimeAxisView* t) const
 	return i;
 }
 
+void
+RegionDrag::setup_video_sample_offset ()
+{
+	if (_views.empty ()) {
+		_preview_video = true;
+		return;
+	}
+	samplepos_t first_sync = _views.begin()->view->region()->sync_position ();
+	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+		first_sync = std::min (first_sync, i->view->region()->sync_position ());
+	}
+	_video_sample_offset = first_sync + _pointer_sample_offset - raw_grab_sample ();
+	_preview_video = true;
+}
+
 RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b)
 	: RegionDrag (e, i, p, v)
 	, _brushing (b)
@@ -641,6 +681,7 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	setup_snap_delta (_last_position);
 
 	show_verbose_cursor_time (_last_position.sample);
+	show_view_preview (_last_position.sample + _video_sample_offset);
 
 	pair<TimeAxisView*, double> const tv = _editor->trackview_by_y_position (current_pointer_y ());
 	if (tv.first) {
@@ -1221,6 +1262,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 	if (x_delta != 0 && !_brushing) {
 		show_verbose_cursor_time (_last_position.sample);
+		show_view_preview (_last_position.sample + _video_sample_offset);
 	}
 
 	/* keep track of pointer movement */
@@ -2888,6 +2930,7 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_contents_modifier ())) {
 		/* Move the contents of the region around without changing the region bounds */
 		_operation = ContentsTrim;
+		_preview_video = false;
 		Drag::start_grab (event, _editor->cursors()->trimmer);
 	} else {
 		/* These will get overridden for a point trim.*/
@@ -2926,6 +2969,7 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		show_verbose_cursor_time (pf);
 		break;
 	}
+	show_view_preview (_operation == StartTrim ? region_start : region_end);
 
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 		i->view->region()->suspend_property_changes ();
@@ -3101,6 +3145,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		// show_verbose_cursor_time (sample_delta);
 		break;
 	}
+	show_view_preview ((_operation == StartTrim ? rv->region()->position() : rv->region()->last_sample()));
 }
 
 void
@@ -4093,6 +4138,7 @@ FadeInDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	setup_snap_delta (MusicSample (r->position(), 0));
 
 	show_verbose_cursor_duration (r->position(), r->position() + r->fade_in()->back()->when, 32);
+	show_view_preview (r->position() + r->fade_in()->back()->when);
 }
 
 void
@@ -4135,6 +4181,7 @@ FadeInDrag::motion (GdkEvent* event, bool)
 	}
 
 	show_verbose_cursor_duration (region->position(), region->position() + fade_length, 32);
+	show_view_preview (region->position() + fade_length);
 }
 
 void
@@ -4219,6 +4266,7 @@ FadeOutDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	setup_snap_delta (MusicSample (r->last_sample(), 0));
 
 	show_verbose_cursor_duration (r->last_sample() - r->fade_out()->back()->when, r->last_sample());
+	show_view_preview (r->fade_out()->back()->when);
 }
 
 void
@@ -4260,6 +4308,7 @@ FadeOutDrag::motion (GdkEvent* event, bool)
 	}
 
 	show_verbose_cursor_duration (region->last_sample() - fade_length, region->last_sample());
+	show_view_preview (region->last_sample() - fade_length);
 }
 
 void
@@ -4377,6 +4426,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	} else {
 		show_verbose_cursor_time (location->end());
 	}
+	show_view_preview ((is_start ? location->start() : location->end()) + _video_sample_offset);
 	setup_snap_delta (MusicSample (is_start ? location->start() : location->end(), 0));
 
 	Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
@@ -4469,6 +4519,13 @@ MarkerDrag::setup_pointer_sample_offset ()
 	bool is_start;
 	Location *location = _editor->find_location_from_marker (_marker, is_start);
 	_pointer_sample_offset = raw_grab_sample() - (is_start ? location->start() : location->end());
+}
+
+void
+MarkerDrag::setup_video_sample_offset ()
+{
+	_video_sample_offset = 0;
+	_preview_video = true;
 }
 
 void
@@ -4615,6 +4672,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 	assert (!_copied_locations.empty());
 
 	show_verbose_cursor_time (newframe);
+	show_view_preview (newframe + _video_sample_offset);
 	_editor->set_snapped_cursor_position(newframe);
 }
 
@@ -5253,6 +5311,7 @@ TimeFXDrag::TimeFXDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, std::li
 	: RegionDrag (e, i, p, v)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TimeFXDrag\n");
+	_preview_video = false;
 }
 
 void

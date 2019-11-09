@@ -596,7 +596,7 @@ Editor::drag_active () const
 bool
 Editor::preview_video_drag_active () const
 {
-	return false;
+	return _drags->preview_video ();
 }
 
 bool

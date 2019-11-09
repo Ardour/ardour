@@ -473,7 +473,9 @@ void
 VideoMonitor::srsupdate ()
 {
 	if (!_session) { return; }
-	if (editor->dragging_playhead()) { return ;}
+	if (editor->dragging_playhead() || editor->preview_video_drag_active()) {
+		return;
+	}
 	manual_seek(_session->audible_sample(), false, NO_OFFSET);
 }
 
