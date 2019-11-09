@@ -310,6 +310,16 @@ instantiate (const LV2_Descriptor*     descriptor,
 		return NULL;
 	}
 
+#ifdef LV2_EXTENDED
+	if (!self->midnam) {
+		lv2_log_warning (&self->logger, "a-fluidsynth.lv2: Host does not support midnam:update\n");
+	}
+
+	if (!self->bankpatch) {
+		lv2_log_warning (&self->logger, "a-fluidsynth.lv2: Host does not support bankpatch:notify\n");
+	}
+#endif
+
 	/* initialize fluid synth */
 	self->settings = new_fluid_settings ();
 
