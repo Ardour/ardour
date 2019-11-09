@@ -493,6 +493,9 @@ public:
 		return _drags;
 	}
 
+	bool drag_active () const;
+	bool preview_video_drag_active () const;
+
 	void maybe_autoscroll (bool, bool, bool);
 	bool autoscroll_active() const;
 

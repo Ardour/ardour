@@ -447,6 +447,8 @@ public:
 	virtual TrackViewList const & get_track_views () const = 0;
 
 	virtual DragManager* drags () const = 0;
+	virtual bool drag_active () const = 0;
+	virtual bool preview_video_drag_active () const = 0;
 	virtual void maybe_autoscroll (bool, bool, bool from_headers) = 0;
 	virtual void stop_canvas_autoscroll () = 0;
 	virtual bool autoscroll_active() const = 0;
