@@ -4098,7 +4098,7 @@ RCOptionEditor::parameter_changed (string const & p)
 
 void RCOptionEditor::plugin_scan_refresh () {
 	/* first argument says discover new plugins, second means be verbose */
-	PluginScanDialog psd (true, true);
+	PluginScanDialog psd (false, true);
 	psd.start ();
 }
 
