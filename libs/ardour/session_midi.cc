@@ -750,7 +750,7 @@ Session::rewire_selected_midi (boost::shared_ptr<MidiTrack> new_midi_target)
 			 * functionality.
 			 */
 
-			if (!(mpi.properties & MidiPortControl)) {
+			if (MidiPortControl != mpi.properties) {
 				/* disconnect the port from everything */
 				AudioEngine::instance()->disconnect (*p);
 			}
