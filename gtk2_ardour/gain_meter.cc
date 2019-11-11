@@ -162,6 +162,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	gain_automation_state_button.set_name ("mixer strip button");
 
 	set_tooltip (gain_automation_state_button, _("Fader automation mode"));
+	set_tooltip (peak_display, _("dBFS - Digital Peak Hold. Click to reset."));
 
 	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
 
