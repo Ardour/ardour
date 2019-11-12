@@ -17,6 +17,7 @@
  */
 
 #include <gtkmm/box.h>
+#include <gtkmm/frame.h>
 
 #include "gtkmm2ext/utils.h"
 
@@ -72,9 +73,13 @@ PluginPresetsUI::PluginPresetsUI (boost::shared_ptr<PluginInsert> insert)
 	_preset_desc.set_editable (false);
 	_preset_desc.set_can_focus (false);
 	_preset_desc.set_wrap_mode (WRAP_WORD);
-	_preset_desc.set_size_request (400,200);
+	_preset_desc.set_size_request (300,200);
 	_preset_desc.set_name (X_("TextOnBackground"));
-	_preset_desc.set_border_width (6);
+	_preset_desc.set_border_width (15);
+
+	Frame* frame = manage (new Frame);
+	frame->set_label (_("Description"));
+	frame->add (_preset_desc);
 
 	_preset_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 	_preset_scroller.add (_plugin_preset_display);
@@ -89,7 +94,7 @@ PluginPresetsUI::PluginPresetsUI (boost::shared_ptr<PluginInsert> insert)
 
 	attach (*filter_box,      0, 1, 0, 2, FILL, EXPAND|FILL, 2, 0);
 	attach (_preset_scroller, 1, 2, 0, 2, FILL, EXPAND|FILL, 2, 0);
-	attach (_preset_desc,     2, 3, 0, 1, EXPAND|FILL, EXPAND|FILL, 2, 0);
+	attach (*frame,           2, 3, 0, 1, EXPAND|FILL, EXPAND|FILL, 2, 4);
 	attach (_load_button,     2, 3, 1, 2, FILL, SHRINK, 2, 0);
 
 	boost::shared_ptr<Plugin> plugin (_insert->plugin ());
