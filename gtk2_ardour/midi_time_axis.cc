@@ -366,6 +366,21 @@ MidiTimeAxisView::setup_midnam_patches ()
 	PatchManager& patch_manager = PatchManager::instance();
 
 	_midnam_model_selector.clear_items ();
+
+	if (_route) {
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ());
+		if (pi && pi->plugin ()->has_midnam ()) {
+			std::string model_name = pi->plugin ()->midnam_model ();
+
+			Menu_Helpers::MenuElem elem = Gtk::Menu_Helpers::MenuElem(
+					_("Plugin Provided"),
+					sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::model_changed),
+						model_name));
+
+			_midnam_model_selector.AddMenuElem(elem);
+		}
+	}
+
 	for (PatchManager::DeviceNamesByMaker::const_iterator m = patch_manager.devices_by_manufacturer().begin();
 			m != patch_manager.devices_by_manufacturer().end(); ++m) {
 		Menu*                   menu  = Gtk::manage(new Menu);
@@ -406,11 +421,9 @@ MidiTimeAxisView::update_patch_selector ()
 	typedef MIDI::Name::MidiPatchManager PatchManager;
 	PatchManager& patch_manager = PatchManager::instance();
 
-	bool pluginprovided = false;
 	if (_route) {
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ());
 		if (pi && pi->plugin ()->has_midnam ()) {
-			pluginprovided = true;
 			std::string model_name = pi->plugin ()->midnam_model ();
 			if (gui_property (X_("midnam-model-name")) != model_name) {
 				model_changed (model_name);
@@ -418,7 +431,7 @@ MidiTimeAxisView::update_patch_selector ()
 		}
 	}
 
-	if (patch_manager.all_models().empty() || pluginprovided) {
+	if (patch_manager.all_models().empty()) {
 		_midnam_model_selector.hide ();
 		_midnam_custom_device_mode_selector.hide ();
 	} else {
@@ -433,10 +446,16 @@ MidiTimeAxisView::model_changed(const std::string& model)
 {
 	set_gui_property (X_("midnam-model-name"), model);
 
-	const std::list<std::string> device_modes = MIDI::Name::MidiPatchManager::instance()
-		.custom_device_mode_names_by_model(model);
+	typedef MIDI::Name::MidiPatchManager PatchManager;
+	PatchManager& patch_manager = PatchManager::instance();
 
-	_midnam_model_selector.set_text(model);
+	const std::list<std::string> device_modes = patch_manager.custom_device_mode_names_by_model(model);
+
+	if (patch_manager.is_custom_model (model)) {
+		_midnam_model_selector.set_text(_("Plugin Provided"));
+	} else {
+		_midnam_model_selector.set_text(model);
+	}
 	_midnam_custom_device_mode_selector.clear_items();
 
 	for (std::list<std::string>::const_iterator i = device_modes.begin();
