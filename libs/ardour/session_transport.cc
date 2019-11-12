@@ -244,6 +244,7 @@ Session::do_locate (samplepos_t target_sample, bool with_roll, bool with_flush, 
 
 	// Update Timecode time
 	_transport_sample = target_sample;
+	_nominal_jack_transport_sample = boost::none;
 	// Bump seek counter so that any in-process locate in the butler
 	// thread(s?) can restart.
 	g_atomic_int_inc (&_seek_counter);

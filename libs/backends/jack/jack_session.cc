@@ -115,7 +115,13 @@ JACKSession::timebase_callback (jack_transport_state_t /*state*/,
 {
 	Timecode::BBT_Time bbt;
 	TempoMap& tempo_map (_session->tempo_map());
-	samplepos_t tf = _session->transport_sample ();
+	samplepos_t tf;
+
+	/* see commit msg for e2c26e1b9 and Session::start_locate() for
+	   details.
+	*/
+
+	tf = _session->nominal_jack_transport_sample().value_or (_session->transport_sample());
 
 	/* BBT info */
 
@@ -191,4 +197,3 @@ JACKSession::timebase_callback (jack_transport_state_t /*state*/,
 	}
 #endif
 }
-
