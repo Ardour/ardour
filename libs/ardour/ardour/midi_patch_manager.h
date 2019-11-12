@@ -64,6 +64,7 @@ public:
 	bool add_custom_midnam (const std::string& id, const std::string& midnam);
 	bool update_custom_midnam (const std::string& id, const std::string& midnam);
 	bool remove_custom_midnam (const std::string& id);
+	bool is_custom_model (const std::string& model) const;
 
 	void add_search_path (const PBD::Searchpath& search_path);
 

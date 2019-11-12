@@ -99,6 +99,13 @@ MidiPatchManager::update_custom_midnam (const std::string& id, const std::string
 	return add_custom_midnam (id, midnam);
 }
 
+bool
+MidiPatchManager::is_custom_model (const std::string& model) const
+{
+	boost::shared_ptr<MIDINameDocument> midnam = document_by_model (model);
+	return (midnam && midnam->file_path().substr(0, 7) == "custom:");
+}
+
 void
 MidiPatchManager::add_midnam_files_from_directory(const std::string& directory_path)
 {
