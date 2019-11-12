@@ -64,8 +64,6 @@ LTC_TransportMaster::LTC_TransportMaster (std::string const & name)
 	, a3e_timecode (Timecode::timecode_24)
 	, samples_per_timecode_frame (0)
 {
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("LTC registered %1\n", _port->name()));
-
 	memset (&prev_frame, 0, sizeof(LTCFrameExt));
 
 	resync_latency();

@@ -68,8 +68,6 @@ MTC_TransportMaster::MTC_TransportMaster (std::string const & name)
 	, busy_guard2 (0)
 	, printed_timecode_warning (false)
 {
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("MTC registered %1\n", _port->name()));
-
 	init ();
 }
 
