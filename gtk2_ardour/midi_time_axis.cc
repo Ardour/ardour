@@ -374,12 +374,21 @@ MidiTimeAxisView::setup_midnam_patches ()
 		// Build manufacturer submenu
 		for (MIDI::Name::MIDINameDocument::MasterDeviceNamesList::const_iterator n = m->second.begin();
 				n != m->second.end(); ++n) {
+
+			if (patch_manager.is_custom_model (n->first)) {
+				continue;
+			}
+
 			Menu_Helpers::MenuElem elem = Gtk::Menu_Helpers::MenuElem(
 					n->first.c_str(),
 					sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::model_changed),
 						n->first.c_str()));
 
 			items.push_back(elem);
+		}
+		if (items.empty ()) {
+			delete menu;
+			continue;
 		}
 
 		// Add manufacturer submenu to selector
