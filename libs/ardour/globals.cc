@@ -639,9 +639,7 @@ ARDOUR::init_post_engine (uint32_t start_cnt)
 		}
 	}
 
-	if (start_cnt > 0) {
-		TransportMasterManager::instance().restart ();
-	}
+	TransportMasterManager::instance().restart ();
 }
 
 void

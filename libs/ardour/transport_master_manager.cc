@@ -52,11 +52,10 @@ TransportMasterManager::create ()
 {
 	assert (!_instance);
 
-	cerr << "TMM::create(), Config = " << Config << " size will be " << sizeof (TransportMasterManager) << endl;
-
 	_instance = new TransportMasterManager;
 
-	XMLNode* tmm_node = Config->extra_xml (X_("TransportMasters"));
+	XMLNode* tmm_node = Config->transport_master_state ();
+
 	if (tmm_node) {
 		cerr << " setting state via XML\n";
 		_instance->set_state (*tmm_node, Stateful::current_state_version);
@@ -556,21 +555,11 @@ TransportMasterManager::set_state (XMLNode const & node, int version)
 		}
 	}
 
-	std::string current_master;
+	/* fallback choice, lives on until ::restart() is called after the
+	 * engine is running.
+	 */
 
-	if (node.get_property (X_("current"), current_master)) {
-
-		/* may fal if current_master is not usable */
-
-		set_current (current_master);
-
-		if (!current()) {
-			set_current (MTC); // always available
-		}
-
-	} else {
-		set_current (MTC);
-	}
+	set_current (MTC);
 
 	return 0;
 }
@@ -627,11 +616,26 @@ TransportMasterManager::restart ()
 
 	if ((node = Config->transport_master_state()) != 0) {
 
-		Glib::Threads::RWLock::ReaderLock lm (lock);
+		{
+			Glib::Threads::RWLock::ReaderLock lm (lock);
 
-		for (TransportMasters::const_iterator tm = _transport_masters.begin(); tm != _transport_masters.end(); ++tm) {
-			(*tm)->connect_port_using_state ();
-			(*tm)->reset (false);
+			for (TransportMasters::const_iterator tm = _transport_masters.begin(); tm != _transport_masters.end(); ++tm) {
+				(*tm)->connect_port_using_state ();
+				(*tm)->reset (false);
+			}
+		}
+
+		/* engine is running, connections are viable ... try to set current */
+
+		std::string current_master;
+
+		if (node->get_property (X_("current"), current_master)) {
+
+			/* may fal if current_master is not usable */
+
+			cerr << "RESTART: Setting TM to " << current_master << endl;
+
+			set_current (current_master);
 		}
 
 	} else {
