@@ -96,8 +96,10 @@ Engine_TransportMaster::speed_and_position (double& sp, samplepos_t& position, s
 	 * called synchronously with the engine.
 	 */
 
-	if (backend && backend->speed_and_position (sp, position)) {
-		return true;
+	if (backend) {
+		_starting = backend->speed_and_position (sp, position);
+	} else {
+		_starting = false;
 	}
 
 	lp = now;
@@ -105,7 +107,7 @@ Engine_TransportMaster::speed_and_position (double& sp, samplepos_t& position, s
 
 	_current_delta = 0;
 
-	return false;
+	return true;
 }
 
 std::string
