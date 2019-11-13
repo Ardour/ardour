@@ -175,7 +175,7 @@ AutomationWatch::timer ()
 										(*aw)->alist()->automation_write()));
 				(*aw)->list()->set_in_write_pass (false);
 				if ( (*aw)->alist()->automation_write() ) {
-					(*aw)->list()->set_in_write_pass (true, time);
+					(*aw)->list()->set_in_write_pass (true, true, time);
 				}
 			}
 		}
