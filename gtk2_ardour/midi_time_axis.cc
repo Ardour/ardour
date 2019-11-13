@@ -426,6 +426,10 @@ MidiTimeAxisView::update_patch_selector ()
 		if (pi && pi->plugin ()->has_midnam ()) {
 			std::string model_name = pi->plugin ()->midnam_model ();
 			if (gui_property (X_("midnam-model-name")) != model_name) {
+				/* ensure that "Plugin Provided" is prefixed at the top of the list */
+				if (_midnam_model_selector.items().empty () || _midnam_model_selector.items().begin()->get_label() != _("Plugin Provided")) {
+					setup_midnam_patches ();
+				}
 				model_changed (model_name);
 			}
 		}
@@ -436,7 +440,9 @@ MidiTimeAxisView::update_patch_selector ()
 		_midnam_custom_device_mode_selector.hide ();
 	} else {
 		_midnam_model_selector.show ();
-		_midnam_custom_device_mode_selector.show ();
+		if (_midnam_custom_device_mode_selector.items().size() > 1) {
+			_midnam_custom_device_mode_selector.show ();
+		}
 	}
 }
 
