@@ -247,10 +247,6 @@ AutomationControl::set_automation_state (AutoState as)
 		const double val = get_value ();
 
 		alist()->set_automation_state (as);
-		if (_desc.toggled) {
-			Changed (false, Controllable::NoGroup); // notify slaves, update boolean masters
-			return;  // No watch for boolean automation
-		}
 
 		if (as == Write) {
 			AutomationWatch::instance().add_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
