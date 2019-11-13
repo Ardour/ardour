@@ -289,9 +289,7 @@ AutomationControl::start_touch (double when)
 		 */
 		AutomationControl::actually_set_value (get_value (), Controllable::NoGroup);
 		alist()->start_touch (when);
-		if (!_desc.toggled) {
-			AutomationWatch::instance().add_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
-		}
+		AutomationWatch::instance().add_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
 		set_touching (true);
 	}
 }
@@ -306,14 +304,16 @@ AutomationControl::stop_touch (double when)
 	if (alist()->automation_state() == Latch && _session.transport_rolling ()) {
 		return;
 	}
+	if (alist()->automation_state() == Touch && _desc.toggled) {
+		/* Toggle buttons always latch */
+		return;
+	}
 
 	set_touching (false);
 
 	if (alist()->automation_state() & (Touch | Latch)) {
 		alist()->stop_touch (when);
-		if (!_desc.toggled) {
-			AutomationWatch::instance().remove_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
-		}
+		AutomationWatch::instance().remove_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
 	}
 }
 
