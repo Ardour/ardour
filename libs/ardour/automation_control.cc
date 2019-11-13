@@ -304,7 +304,7 @@ AutomationControl::stop_touch (double when)
 	if (alist()->automation_state() == Latch && _session.transport_rolling ()) {
 		return;
 	}
-	if (alist()->automation_state() == Touch && _desc.toggled) {
+	if (alist()->automation_state() == Touch && _session.transport_rolling () && _desc.toggled) {
 		/* Toggle buttons always latch */
 		return;
 	}
