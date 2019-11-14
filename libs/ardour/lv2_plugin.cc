@@ -447,6 +447,8 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	_latency_control_port   = 0;
 	_next_cycle_start       = std::numeric_limits<samplepos_t>::max();
 	_next_cycle_speed       = 1.0;
+	_next_cycle_beat        = 0.0;
+	_current_bpm            = 0.0;
 	_seq_size               = _engine.raw_buffer_size(DataType::MIDI);
 	_state_version          = 0;
 	_was_activated          = false;
