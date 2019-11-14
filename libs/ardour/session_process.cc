@@ -166,7 +166,7 @@ Session::no_roll (pframes_t nframes)
 {
 	PT_TIMING_CHECK (4);
 
-	samplepos_t end_sample = _transport_sample + nframes; // FIXME: varispeed + no_roll ??
+	samplepos_t end_sample = _transport_sample + floor (nframes * _transport_speed);
 	int ret = 0;
 	boost::shared_ptr<RouteList> r = routes.reader ();
 

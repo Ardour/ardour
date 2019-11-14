@@ -1294,7 +1294,7 @@ PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t 
 
 		samplecnt_t cnt = min (((samplecnt_t) ceil (next_event.when) - start), (samplecnt_t) nframes);
 
-		connect_and_run (bufs, start, start + cnt, speed, cnt, offset, true); // XXX (start + cnt) * speed
+		connect_and_run (bufs, start, start + cnt * speed, speed, cnt, offset, true);
 
 		nframes -= cnt;
 		offset += cnt;
@@ -1310,7 +1310,7 @@ PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t 
 	/* cleanup anything that is left to do */
 
 	if (nframes) {
-		connect_and_run (bufs, start, start + nframes, speed, nframes, offset, true);
+		connect_and_run (bufs, start, start + nframes * speed, speed, nframes, offset, true);
 	}
 }
 
