@@ -207,6 +207,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	double        _next_cycle_speed; ///< Expected start sample of next run cycle
 	double        _next_cycle_beat;  ///< Expected bar_beat of next run cycle
 	double        _current_bpm;
+	double        _prev_time_scale;  ///< previous Port::speed_ratio
 	PBD::ID       _insert_id;
 	std::string   _plugin_state_dir;
 	uint32_t      _bpm_control_port_index;

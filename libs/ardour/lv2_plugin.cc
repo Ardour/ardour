@@ -449,6 +449,7 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	_next_cycle_speed       = 1.0;
 	_next_cycle_beat        = 0.0;
 	_current_bpm            = 0.0;
+	_prev_time_scale        = 0.0;
 	_seq_size               = _engine.raw_buffer_size(DataType::MIDI);
 	_state_version          = 0;
 	_was_activated          = false;
@@ -2574,6 +2575,7 @@ write_position(LV2_Atom_Forge*     forge,
                const TempoMetric&  t,
                Timecode::BBT_Time& bbt,
                double              speed,
+               double              time_scale,
                double              bpm,
                samplepos_t         position,
                samplecnt_t         offset)
@@ -2600,6 +2602,8 @@ write_position(LV2_Atom_Forge*     forge,
 	lv2_atom_forge_float(forge, t.meter().divisions_per_bar());
 	lv2_atom_forge_key(forge, urids.time_beatsPerMinute);
 	lv2_atom_forge_float(forge, bpm);
+	lv2_atom_forge_key(forge, urids.time_scale);
+	lv2_atom_forge_float(forge, time_scale);
 #else
 	lv2_atom_forge_blank(forge, &frame, 1, urids.time_Position);
 	lv2_atom_forge_property_head(forge, urids.time_frame, 0);
@@ -2617,6 +2621,8 @@ write_position(LV2_Atom_Forge*     forge,
 	lv2_atom_forge_float(forge, t.meter().divisions_per_bar());
 	lv2_atom_forge_property_head(forge, urids.time_beatsPerMinute, 0);
 	lv2_atom_forge_float(forge, bpm);
+	lv2_atom_forge_key(forge, urids.time_scale);
+	lv2_atom_forge_float(forge, time_scale);
 #endif
 
 	LV2_Evbuf_Iterator    end  = lv2_evbuf_end(buf);
@@ -2725,6 +2731,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 			if (valid && (flags & PORT_INPUT)) {
 				if ((flags & PORT_POSITION)) {
 					Timecode::BBT_Time bbt (tmap.bbt_at_sample (start));
+					double time_scale = Port::speed_ratio ();
 					double bpm = tmap.tempo_at_sample (start).note_types_per_minute();
 					double beatpos = (bbt.bars - 1) * tmetric.meter().divisions_per_bar()
 					               + (bbt.beats - 1)
@@ -2732,11 +2739,12 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					beatpos *= tmetric.meter().note_divisor() / 4.0;
 					if (start != _next_cycle_start ||
 							speed != _next_cycle_speed ||
+							time_scale != _prev_time_scale ||
 							rint (1000 * beatpos) != rint(1000 * _next_cycle_beat) ||
 							bpm != _current_bpm) {
 						// Transport or Tempo has changed, write position at cycle start
 						write_position(&_impl->forge, _ev_buffers[port_index],
-								tmetric, bbt, speed, bpm, start, 0);
+								tmetric, bbt, speed, time_scale,  bpm, start, 0);
 					}
 				}
 
@@ -2770,8 +2778,8 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 						bbt = tmap.bbt_at_sample (metric->sample());
 						double bpm = tmap.tempo_at_sample (start/*XXX*/).note_types_per_minute();
 						write_position(&_impl->forge, _ev_buffers[port_index],
-						               tmetric, bbt, speed, bpm,
-						               metric->sample(),
+						               tmetric, bbt, speed, Port::speed_ratio (),
+						               bpm, metric->sample(),
 						               metric->sample() - start);
 						++metric_i;
 					}
@@ -3035,6 +3043,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	// Update expected transport information for next cycle so we can detect changes
 	_next_cycle_speed = speed;
 	_next_cycle_start = end;
+	_prev_time_scale = Port::speed_ratio ();
 
 	{
 		/* keep track of lv2:timePosition like plugins can do.

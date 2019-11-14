@@ -59,6 +59,7 @@ URIMap::URIDs::init(URIMap& uri_map)
 	time_beatsPerMinute = uri_map.uri_to_id("http://lv2plug.in/ns/ext/time#beatsPerMinute");
 	time_frame          = uri_map.uri_to_id("http://lv2plug.in/ns/ext/time#frame");
 	time_speed          = uri_map.uri_to_id("http://lv2plug.in/ns/ext/time#speed");
+	time_scale          = uri_map.uri_to_id("http://ardour.org/lv2/time#scale"); // XXX
 	patch_Get           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#Get");
 	patch_Set           = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#Set");
 	patch_property      = uri_map.uri_to_id("http://lv2plug.in/ns/ext/patch#property");
