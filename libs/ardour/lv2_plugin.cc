@@ -2740,7 +2740,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					if (start != _next_cycle_start ||
 							speed != _next_cycle_speed ||
 							time_scale != _prev_time_scale ||
-							rint (1000 * beatpos) != rint(1000 * _next_cycle_beat) ||
+							rint (100 * beatpos) != rint(100 * _next_cycle_beat) ||
 							bpm != _current_bpm) {
 						// Transport or Tempo has changed, write position at cycle start
 						write_position(&_impl->forge, _ev_buffers[port_index],
