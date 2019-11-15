@@ -500,14 +500,6 @@ Session::immediately_post_engine ()
 
 	_engine.Running.connect_same_thread (*this, boost::bind (&Session::engine_running, this));
 
-	if (synced_to_engine()) {
-		_engine.transport_stop ();
-	}
-
-	if (config.get_jack_time_master()) {
-		_engine.transport_locate (_transport_sample);
-	}
-
 	try {
 		BootMessage (_("Set up LTC"));
 		setup_ltc ();

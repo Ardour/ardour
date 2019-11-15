@@ -369,6 +369,12 @@ Session::post_engine_init ()
 		_locations->removed.connect_same_thread (*this, boost::bind (&Session::location_removed, this, _1));
 		_locations->changed.connect_same_thread (*this, boost::bind (&Session::locations_changed, this));
 
+		if (synced_to_engine()) {
+			_engine.transport_stop ();
+		}
+
+		// send_full_time_code (0);
+
 	} catch (AudioEngine::PortRegistrationFailure& err) {
 		error << err.what() << endmsg;
 		return -5;
@@ -381,9 +387,6 @@ Session::post_engine_init ()
 	}
 
 	BootMessage (_("Reset Remote Controls"));
-
-	// send_full_time_code (0);
-	_engine.transport_locate (0);
 
 	send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdMmcReset));
 	send_immediate_mmc (MIDI::MachineControlCommand (Timecode::Time ()));
