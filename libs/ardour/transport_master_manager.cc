@@ -204,7 +204,23 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 		return 1.0;
 	}
 
-	if (_master_speed != 0.0) {
+	if (_current_master->sample_clock_synced()) {
+
+		/* No master DLL required. Speed identified by the master is
+		 * our speed, quantized to {1.0, 0.0, -1.0}
+		 */
+
+		if (_master_speed > 0.0f) {
+			engine_speed = 1.0f;
+		} else if (_master_speed < 0.0f) {
+			engine_speed = -1.0f;
+		} else {
+			engine_speed = 0.0f;
+		}
+
+		DEBUG_TRACE (DEBUG::Slave, string_compose ("S-clock synced master speed %1 used as %2\n", _master_speed, engine_speed));
+
+	} else if (_master_speed != 0.0) {
 
 		samplepos_t delta = _master_position;
 
@@ -262,18 +278,6 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 			/* provide a .1% deadzone to lock the speed */
 			if (fabs (engine_speed - 1.0) <= 0.001) {
 				engine_speed = 1.0;
-			}
-
-			if (_current_master->sample_clock_synced() && engine_speed != 0.0f) {
-
-				/* if the master is synced to our audio interface via word-clock or similar, then we assume that its speed is binary: 0.0 or 1.0
-				   (since our sample clock cannot change with respect to it).
-				*/
-				if (engine_speed > 0.0) {
-					engine_speed = 1.0;
-				} else if (engine_speed < 0.0) {
-					engine_speed = -1.0;
-				}
 			}
 
 			/* speed is set, we're locked, and good to go */
