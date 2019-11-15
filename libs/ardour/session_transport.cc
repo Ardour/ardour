@@ -898,7 +898,8 @@ Session::should_ignore_transport_request (TransportRequestSource src, TransportR
 }
 
 bool
-Session::synced_to_engine() const {
+Session::synced_to_engine() const
+{
 	return config.get_external_sync() && TransportMasterManager::instance().current()->type() == Engine;
 }
 
