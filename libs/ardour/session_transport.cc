@@ -679,7 +679,9 @@ Session::start_transport ()
 bool
 Session::should_roll_after_locate () const
 {
-	/* a locate must previously have been requested and completed */
+	/* a locate must previously have been requested and completed before
+	 * this answer can be considered correct
+	 */
 
 	return ((!config.get_external_sync() && (auto_play_legal && config.get_auto_play())) && !_exporting) || (post_transport_work() & PostTransportRoll);
 
