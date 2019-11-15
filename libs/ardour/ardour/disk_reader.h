@@ -107,7 +107,7 @@ public:
 	   synced.
 	*/
 
-	static void inc_no_disk_output () { g_atomic_int_inc (&_no_disk_output); }
+	static void inc_no_disk_output ();
 	static void dec_no_disk_output();
 	static bool no_disk_output () { return g_atomic_int_get (&_no_disk_output); }
 

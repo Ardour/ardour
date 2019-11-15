@@ -1171,6 +1171,11 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 	}
 #endif
 }
+void
+DiskReader::inc_no_disk_output ()
+{
+	g_atomic_int_inc (&_no_disk_output);
+}
 
 void
 DiskReader::dec_no_disk_output ()
