@@ -29,6 +29,7 @@
 #include "pbd/error.h"
 
 #include "ardour/audioengine.h"
+#include "ardour/debug.h"
 #include "ardour/session.h"
 #include "ardour/types.h"
 
@@ -1212,6 +1213,9 @@ JACKAudioBackend::speed_and_position (double& speed, samplepos_t& position)
 	}
 
 	position = pos.frame;
+
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: speed %1 position %2 starting %3\n", speed, position, starting));
+
 	return starting;
 }
 
