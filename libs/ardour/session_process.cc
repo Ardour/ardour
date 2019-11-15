@@ -1105,22 +1105,47 @@ Session::follow_transport_master (pframes_t nframes)
 	slave_transport_sample = tmm.get_current_position_in_process_context ();
 	delta = _transport_sample - slave_transport_sample;
 
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("session at %1, master at %2, delta: %3 res: %4\n", _transport_sample, slave_transport_sample, delta, tmm.current()->resolution()));
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("session at %1, master at %2, delta: %3 res: %4 TFSM state %5\n", _transport_sample, slave_transport_sample, delta, tmm.current()->resolution(), _transport_fsm->current_state()));
 
-	/* This is a heuristic rather than a strictly provable rule. The idea
-	 * is that if we're "far away" from the master, we should locate to its
-	 * current position, and then varispeed to sync with it.
-	 *
-	 * On the other hand, if we're close to it, just varispeed.
-	 */
+	if (tmm.current()->type() == Engine) {
 
-	if (!actively_recording() && abs (delta) > (5 * current_block_size)) {
-		DiskReader::inc_no_disk_output ();
-		if (!_transport_fsm->locating()) {
-			DEBUG_TRACE (DEBUG::Slave, string_compose ("request locate to master position %1\n", slave_transport_sample));
-			TFSM_LOCATE (slave_transport_sample, true, true, false, false);
+		/* JACK Transport: if we're not aligned with the current JACK
+		 * time, then jump to it
+		 */
+
+		if (delta && !actively_recording()) {
+
+			if (!locate_pending() && !declick_in_progress()) {
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: jump to master position %1\n", slave_transport_sample));
+				/* for JACK transport always consider the state after the locate to be stopped */
+				TFSM_LOCATE (slave_transport_sample, false, true, false, false);
+			} else {
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK Transport: locate already in process, sts = %1\n", slave_transport_sample));
+			}
+
 		}
-		return true;
+
+	} else {
+
+		/* This is a heuristic rather than a strictly provable rule. The idea
+		 * is that if we're "far away" from the master, we should locate to its
+		 * current position, and then varispeed to sync with it.
+		 *
+		 * On the other hand, if we're close to it, just varispeed.
+		 */
+
+		if (!actively_recording() && abs (delta) > (5 * current_block_size)) {
+			DiskReader::inc_no_disk_output ();
+
+			if (!locate_pending() && !declick_in_progress()) {
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("request locate to master position %1\n", slave_transport_sample));
+				/* note that for non-JACK transport masters, we assume that the transport state (rolling,stopped) after the locate 
+				 * remains unchanged (2nd argument, "roll-after-locate")
+				 */
+				TFSM_LOCATE (slave_transport_sample, slave_speed != 0, true, false, false);
+			}
+			return true;
+		}
 	}
 
 	if (slave_speed != 0.0) {
@@ -1128,7 +1153,9 @@ Session::follow_transport_master (pframes_t nframes)
 			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave starts transport: %1 sample %2 tf %3\n", slave_speed, slave_transport_sample, _transport_sample));
 			TFSM_EVENT (TransportFSM::StartTransport);
 		}
-	} else {
+
+	} else if (!tmm.current()->starting()) { /* master stopped, not in "starting" state */
+
 		if (_transport_speed != 0.0f) {
 			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stops transport: %1 sample %2 tf %3\n", slave_speed, slave_transport_sample, _transport_sample));
 			TFSM_STOP (false, false);
@@ -1140,7 +1167,7 @@ Session::follow_transport_master (pframes_t nframes)
 	 * output but continue to varispeed to get in sync.
 	 */
 
-	if (!actively_recording() && abs (delta) > tmm.current()->resolution()) {
+	if ((tmm.current()->type() != Engine) && !actively_recording() && abs (delta) > tmm.current()->resolution()) {
 		/* just varispeed to chase the master, and be silent till we're synced */
 		DiskReader::inc_no_disk_output ();
 		return true;
