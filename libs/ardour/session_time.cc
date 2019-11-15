@@ -186,19 +186,12 @@ Session::timecode_time (Timecode::Time &t)
 int
 Session::backend_sync_callback (TransportState state, samplepos_t pos)
 {
-	bool slave = synced_to_engine();
-	// cerr << "Session::backend_sync_callback() _transport_sample: " << _transport_sample << " pos: " << pos << " audible_sample: " << audible_sample() << endl;
-
-	if (slave) {
-		// cerr << "Session::backend_sync_callback() emitting Located()" << endl;
-		Located (); /* EMIT SIGNAL */
-	}
+	bool slaved = synced_to_engine();
 
 	switch (state) {
 	case TransportStopped:
-		if (slave && _transport_sample != pos && post_transport_work() == 0) {
-			request_locate (pos, false);
-			// cerr << "SYNC: stopped, locate to " << pos << " from " << _transport_sample << endl;
+		if (slaved && (_transport_sample != pos) && (post_transport_work() == 0)) {
+			//cerr << "SYNC: stopped, need locate to " << pos << " from " << _transport_sample << endl;
 			return false;
 		} else {
 			// cerr << "SYNC: stopped, nothing to do" << endl;
@@ -206,19 +199,20 @@ Session::backend_sync_callback (TransportState state, samplepos_t pos)
 		}
 
 	case TransportStarting:
-		// cerr << "SYNC: starting @ " << pos << " a@ " << _transport_sample << " our work = " <<  post_transport_work() << " pos matches ? " << (_transport_sample == pos) << endl;
-		if (slave) {
-			return _transport_sample == pos && post_transport_work() == 0;
+		if (slaved) {
+			const int ready_to_roll = _transport_sample == pos && !locate_pending() && !declick_in_progress() && (remaining_latency_preroll() == 0);
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK Transport: ts %1 = %2 lp = %3 dip = %4 rlp = %5 RES: %6\n", _transport_sample, pos, locate_pending(), declick_in_progress(), remaining_latency_preroll(), ready_to_roll));
+			return ready_to_roll;
 		} else {
+			/* we're not participating, so just say we are in sync
+			   to stop interfering with other components of the engine
+			   transport (JACK) system.
+			*/
 			return true;
 		}
 		break;
 
 	case TransportRolling:
-		// cerr << "SYNC: rolling slave = " << slave << endl;
-		if (slave) {
-			TFSM_EVENT (TransportFSM::StartTransport);
-		}
 		break;
 
 	default:
