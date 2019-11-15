@@ -760,9 +760,9 @@ Session::maybe_stop (samplepos_t limit)
 {
 	ENSURE_PROCESS_THREAD;
 	if ((_transport_speed > 0.0f && _transport_sample >= limit) || (_transport_speed < 0.0f && _transport_sample == 0)) {
-		if (synced_to_engine () && config.get_jack_time_master ()) {
+		if (synced_to_engine ()) {
 			_engine.transport_stop ();
-		} else if (!synced_to_engine ()) {
+		} else {
 			TFSM_EVENT (TransportFSM::StopTransport);
 		}
 		return true;
