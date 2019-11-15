@@ -161,6 +161,7 @@ Session::realtime_stop (bool abort, bool clear_state)
 	}
 }
 
+/** @param with_mmc true to send a MMC locate command when the locate is done */
 void
 Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, bool for_loop_end, bool force, bool with_mmc)
 {
@@ -170,47 +171,6 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 		error << _("Locate called for negative sample position - ignored") << endmsg;
 		return;
 	}
-
-	if (synced_to_engine()) {
-
-		double sp;
-		samplepos_t pos;
-		samplepos_t ignore1, ignore2;
-
-		transport_master()->speed_and_position (sp, pos, ignore1, ignore2, 0);
-
-		if (target_sample != pos) {
-
-			if (config.get_jack_time_master()) {
-				/* actually locate now, since otherwise jack_timebase_callback
-				   will use the incorrect _transport_sample and report an old
-				   and incorrect time to Jack transport
-				*/
-				do_locate (target_sample, with_roll, with_flush, for_loop_end, force, with_mmc);
-			}
-
-			/* tell JACK to change transport position, and we will
-			   follow along later in ::follow_slave()
-			*/
-
-			_engine.transport_locate (target_sample);
-
-			if (sp != 1.0f && with_roll) {
-				_engine.transport_start ();
-			}
-
-		}
-
-	} else {
-		do_locate (target_sample, with_roll, with_flush, for_loop_end, force, with_mmc);
-	}
-}
-
-/** @param with_mmc true to send a MMC locate command when the locate is done */
-void
-Session::do_locate (samplepos_t target_sample, bool with_roll, bool with_flush, bool for_loop_end, bool force, bool with_mmc)
-{
-	ENSURE_PROCESS_THREAD;
 
 	bool need_butler = false;
 
@@ -479,7 +439,6 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 				_count_in_once = false;
 				unset_play_loop ();
 			}
-			_engine.transport_stop ();
 		} else {
 			bool const auto_return_enabled = (!config.get_external_sync() && (Config->get_auto_return_target_list() || abort));
 
@@ -487,13 +446,16 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 				_requested_return_sample = destination_sample;
 			}
 
-			TFSM_STOP (abort, false);
 		}
 
+		TFSM_STOP (abort, false);
+
 	} else if (transport_stopped() && speed == 1.0) {
+
 		if (as_default) {
 			_default_transport_speed = speed;
 		}
+
 		/* we are stopped and we want to start rolling at speed 1 */
 
 		if (Config->get_loop_is_mode() && play_loop) {
@@ -518,12 +480,7 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 			set_track_monitor_input_status (false);
 		}
 
-		if (synced_to_engine()) {
-			_engine.transport_start ();
-			_count_in_once = false;
-		} else {
-			TFSM_EVENT (TransportFSM::StartTransport);
-		}
+		TFSM_EVENT (TransportFSM::StartTransport);
 
 	} else {
 
