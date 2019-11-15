@@ -431,7 +431,9 @@ TransportFSM::locate_for_loop (Event const & l)
 void
 TransportFSM::start_locate_after_declick () const
 {
-	DEBUG_TRACE (DEBUG::TFSMEvents, "start_locate_after_declick\n");
+	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("start_locate_after_declick, have crals ? %1 roll will be %2\n", (bool) current_roll_after_locate_status,
+	                                                current_roll_after_locate_status ? current_roll_after_locate_status.get() : _last_locate.with_roll));
+
 	const bool roll = current_roll_after_locate_status ? current_roll_after_locate_status.get() : _last_locate.with_roll;
 	api->locate (_last_locate.target, roll, _last_locate.with_flush, _last_locate.with_loop, _last_locate.force);
 }
