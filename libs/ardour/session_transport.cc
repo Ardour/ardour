@@ -45,6 +45,7 @@
 #include "midi++/mmc.h"
 #include "midi++/port.h"
 
+#include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
 #include "ardour/auditioner.h"
 #include "ardour/automation_watch.h"
@@ -913,9 +914,19 @@ Session::request_sync_source (boost::shared_ptr<TransportMaster> tm)
 void
 Session::request_transport_speed (double speed, bool as_default, TransportRequestSource origin)
 {
+	if (synced_to_engine()) {
+		if (speed != 0) {
+			_engine.transport_start ();
+		} else {
+			_engine.transport_stop ();
+		}
+		return;
+	}
+
 	if (should_ignore_transport_request (origin, TR_Speed)) {
 		return;
 	}
+
 	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, speed);
 	ev->third_yes_or_no = as_default; // as_default
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport speed = %1 as default = %2\n", speed, as_default));
@@ -943,6 +954,11 @@ Session::request_transport_speed_nonzero (double speed, bool as_default, Transpo
 void
 Session::request_stop (bool abort, bool clear_state, TransportRequestSource origin)
 {
+	if (synced_to_engine()) {
+		_engine.transport_stop ();
+		return;
+	}
+
 	if (should_ignore_transport_request (origin, TR_Stop)) {
 		return;
 	}
@@ -955,6 +971,11 @@ Session::request_stop (bool abort, bool clear_state, TransportRequestSource orig
 void
 Session::request_locate (samplepos_t target_sample, bool with_roll, TransportRequestSource origin)
 {
+	if (synced_to_engine()) {
+		_engine.transport_locate (target_sample);
+		return;
+	}
+
 	if (should_ignore_transport_request (origin, TR_Locate)) {
 		return;
 	}
