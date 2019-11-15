@@ -174,6 +174,7 @@ struct TransportFSM
 
 	void defer (Event& ev);
 	void bad_transition (Event const &);
+	void set_roll_after (bool) const;
 };
 
 } /* end namespace ARDOUR */

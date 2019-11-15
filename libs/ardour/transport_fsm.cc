@@ -384,22 +384,24 @@ TransportFSM::start_declick_for_stop (Event const & s)
 }
 
 void
+TransportFSM::set_roll_after (bool with_roll) const
+{
+	if (with_roll == true) {
+		current_roll_after_locate_status = true;
+	} else if (with_roll == false) {
+		current_roll_after_locate_status = false;
+	}
+}
+
+void
 TransportFSM::start_declick_for_locate (Event const & l)
 {
 	assert (l.type == Locate);
-	DEBUG_TRACE (DEBUG::TFSMEvents, "start_declick_for_locate\n");
+	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("start_declick_for_locate, crals %1 with_roll %2 speed %3 sral %4\n", (bool) current_roll_after_locate_status, l.with_roll, api->speed(), api->should_roll_after_locate()));
 	_last_locate = l;
 
 	if (!current_roll_after_locate_status) {
-		if (l.with_roll) {
-			if (api->speed() != 0.) {
-				current_roll_after_locate_status = true;
-			} else {
-				current_roll_after_locate_status = api->should_roll_after_locate();
-			}
-		} else {
-			current_roll_after_locate_status = (api->speed() != 0.);
-		}
+		set_roll_after (l.with_roll);
 	}
 
 	_last_stop = Event (StopTransport, false, false);
@@ -411,7 +413,8 @@ TransportFSM::start_locate_while_stopped (Event const & l) const
 	assert (l.type == Locate);
 	DEBUG_TRACE (DEBUG::TFSMEvents, "start_locate_while_stopped\n");
 
-	current_roll_after_locate_status = l.with_roll ? true : api->should_roll_after_locate();
+	set_roll_after (l.with_roll);
+
 	api->locate (l.target, current_roll_after_locate_status.get(), l.with_flush, l.with_loop, l.force);
 }
 
@@ -420,7 +423,7 @@ TransportFSM::locate_for_loop (Event const & l)
 {
 	assert (l.type == Locate);
 	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("locate_for_loop, wl = %1\n", l.with_loop));
-	current_roll_after_locate_status = l.with_roll;
+	set_roll_after (l.with_roll);
 	_last_locate = l;
 	api->locate (l.target, l.with_roll, l.with_flush, l.with_loop, l.force);
 }
