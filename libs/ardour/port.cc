@@ -645,7 +645,12 @@ Port::set_state (const XMLNode& node, int)
 /*static*/ void
 Port::set_speed_ratio (double s) {
 	/* see VMResampler::set_rratio() for min/max range */
-	_speed_ratio = std::min ((double) Config->get_max_transport_speed(), std::max (0.02, fabs (s)));
+	if (s == 0.0) {
+		/* no resampling when stopped */
+		_speed_ratio = 1.0;
+	} else {
+		_speed_ratio = std::min ((double) Config->get_max_transport_speed(), std::max (0.02, fabs (s)));
+	}
 }
 
 /*static*/ void
