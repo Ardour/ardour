@@ -378,12 +378,6 @@ MIDIClock_TransportMaster::ok() const
 	return true;
 }
 
-bool
-MIDIClock_TransportMaster::starting() const
-{
-	return false;
-}
-
 ARDOUR::samplecnt_t
 MIDIClock_TransportMaster::update_interval() const
 {

@@ -583,7 +583,6 @@ class LIBARDOUR_API MIDIClock_TransportMaster : public TransportMaster, public T
 	void reset (bool with_pos);
 	bool locked() const;
 	bool ok() const;
-	bool starting() const;
 
 	samplecnt_t update_interval () const;
 	samplecnt_t resolution () const;
