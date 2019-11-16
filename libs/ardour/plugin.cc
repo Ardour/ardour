@@ -393,9 +393,7 @@ Plugin::realtime_handle_transport_stopped ()
 void
 Plugin::realtime_locate (bool for_loop_end)
 {
-	if (!for_loop_end) {
-		resolve_midi ();
-	}
+	resolve_midi ();
 }
 
 void
