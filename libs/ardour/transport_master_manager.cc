@@ -637,8 +637,6 @@ TransportMasterManager::restart ()
 
 			/* may fal if current_master is not usable */
 
-			cerr << "RESTART: Setting TM to " << current_master << endl;
-
 			set_current (current_master);
 		}
 
