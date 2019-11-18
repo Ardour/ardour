@@ -1483,8 +1483,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
 			(*i)->non_realtime_transport_stop (_transport_sample, !(ptw & PostTransportLocate));
 		}
-
-		update_latency_compensation (false, false);
 	}
 
 	/* If we are not synced to a "true" external master, and we're not
