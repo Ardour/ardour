@@ -625,7 +625,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	/* MIDI BUTLER REQUIRED CODE */
 
-	if (_playlists[DataType::MIDI] && _midi_buf && (_midi_buf->read_space() < _midi_buf->bufsize() / 2)) {
+	if (_playlists[DataType::MIDI] && _midi_buf && (_midi_buf->read_space() >= _midi_buf->bufsize() / 2)) {
 		_need_butler = true;
 	}
 
