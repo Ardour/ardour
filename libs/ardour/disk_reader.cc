@@ -782,7 +782,7 @@ DiskReader::refill (Sample* sum_buffer, Sample* mixdown_buffer, float* gain_buff
 		return -1;
 	}
 
-	if ((_session.transport_speed() < 0.0f) != rt_midibuffer()->reversed()) {
+	if (rt_midibuffer() && (_session.transport_speed() < 0.0f) != rt_midibuffer()->reversed()) {
 		rt_midibuffer()->reverse ();
 	}
 
