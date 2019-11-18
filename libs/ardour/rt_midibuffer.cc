@@ -17,6 +17,7 @@
  */
 
 #include <iostream>
+#include <algorithm>    // std::reverse
 
 #include "pbd/malign.h"
 #include "pbd/compose.h"
@@ -39,6 +40,7 @@ RTMidiBuffer::RTMidiBuffer ()
 	: _size (0)
 	, _capacity (0)
 	, _data (0)
+	, _reversed (false)
 	, _pool_size (0)
 	, _pool_capacity (0)
 	, _pool (0)
@@ -74,6 +76,78 @@ RTMidiBuffer::resize (size_t size)
 	}
 
 	_capacity = size;
+}
+
+bool
+RTMidiBuffer::reversed () const
+{
+	return _reversed;
+}
+
+void
+RTMidiBuffer::reverse ()
+{
+	if (_size == 0) {
+		return;
+	}
+
+	Item* previous_note_on[16][128];
+	uint8_t note_num;
+	uint8_t channel;
+	int32_t i;
+
+	memset (previous_note_on, 0, sizeof (Item*) * 16 * 128);
+
+	if (_reversed) {
+		i = _size - 1;
+	} else {
+		i = 0;
+	}
+
+	/* iterate from start to end, or end-to-start, depending on current
+	 * _reversed status. Find each note on, and swap it with the relevant
+	 * note off.
+	 */
+
+	while ((_reversed && (i >= 0)) || (!_reversed && (i < (int32_t) _size))) {
+
+		Item* item = &_data[i];
+
+		if (!item->bytes[0]) {
+			/* event is 3 bytes or less, so regular MIDI data */
+			switch (item->bytes[1] & 0xf0) { /* status byte */
+			case MIDI_CMD_NOTE_ON:
+				note_num = item->bytes[2];
+				channel = item->bytes[1] & 0xf;
+				if (!previous_note_on[channel][note_num]) {
+					previous_note_on[channel][note_num] = item;
+				} else {
+					std::cerr << "error: note is already on! ... ignored\n";
+				}
+				break;
+			case MIDI_CMD_NOTE_OFF: /* note off */
+				note_num = item->bytes[2];
+				channel = item->bytes[1] & 0xf;
+				if (previous_note_on[channel][note_num]) {
+					swap (item->bytes[1], previous_note_on[channel][note_num]->bytes[1]);
+					previous_note_on[channel][note_num] = 0;
+				} else {
+					std::cerr << "discovered note off without preceding note on... ignored\n";
+				}
+				break;
+			default:
+				break;
+			}
+		}
+
+		if (_reversed) {
+			--i;
+		} else {
+			++i;
+		}
+	}
+
+	_reversed = !_reversed;
 }
 
 void
@@ -165,6 +239,13 @@ item_timestamp_earlier (ARDOUR::RTMidiBuffer::Item const & item, samplepos_t tim
 	return item.timestamp < time;
 }
 
+static
+bool
+item_item_earlier (ARDOUR::RTMidiBuffer::Item const & item, ARDOUR::RTMidiBuffer::Item const & other)
+{
+	return item.timestamp < other.timestamp;
+}
+
 uint32_t
 RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiStateTracker& tracker, samplecnt_t offset)
 {
@@ -174,18 +255,38 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiSta
 		return 0;
 	}
 
-	Item* iend = _data+_size;
-	Item* item = lower_bound (_data, iend, start, item_timestamp_earlier);
+	Item* iend;
+	Item* item;
 	uint32_t count = 0;
+	bool reverse;
+
+	if (start < end) {
+		iend = _data+_size;
+		item = lower_bound (_data, iend, start, item_timestamp_earlier);
+		reverse = false;
+	} else {
+		iend = _data;
+		--iend; /* yes, this is technically "illegal" but we will never indirect */
+		Item* uend = _data+_size;
+		Item foo;
+		foo.timestamp = start;
+		item = upper_bound (_data, uend, foo, item_item_earlier);
+
+		if (item == uend) {
+			--item;
+		}
+
+		reverse = true;
+	}
 
 #ifndef NDEBUG
 	TimeType unadjusted_time;
-	Item* last = iend; --last;
+	Item* last = &_data[_size-1];
 #endif
 
 	DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("read from %1 .. %2 .. initial index = %3 (time = %4) (range in list of  %7 %5..%6)\n", start, end, item - _data, item->timestamp, _data->timestamp, last->timestamp, _size));
 
-	while ((item < iend) && (item->timestamp < end)) {
+	while ((item != iend) && ((reverse && (item->timestamp > end)) || (!reverse && (item->timestamp < end)))) {
 
 		TimeType evtime = item->timestamp;
 
@@ -196,7 +297,12 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiSta
 		 * 'offset' into account.
 		 */
 
-		evtime -= start;
+		if (reverse) {
+			evtime = start - evtime;
+		} else {
+			evtime -= start;
+		}
+
 		evtime += offset;
 
 		uint32_t size;
@@ -227,7 +333,11 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiSta
 		DEBUG_TRACE (DEBUG::MidiRingBuffer, string_compose ("read event sz %1 @ %2 (=> %3 via -%4 +%5\n", size, unadjusted_time, evtime, start, offset));
 		tracker.track (addr);
 
-		++item;
+		if (reverse) {
+			--item;
+		} else {
+			++item;
+		}
 		++count;
 	}
 

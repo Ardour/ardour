@@ -53,6 +53,8 @@ class LIBARDOUR_API RTMidiBuffer : public Evoral::EventSink<samplepos_t>
 	uint32_t read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiStateTracker& tracker, samplecnt_t offset = 0);
 
 	void dump (uint32_t);
+	void reverse ();
+	bool reversed() const;
 
 	struct Item {
 		samplepos_t timestamp;
@@ -77,7 +79,7 @@ class LIBARDOUR_API RTMidiBuffer : public Evoral::EventSink<samplepos_t>
 	size_t _size;
 	size_t _capacity;
 	Item*  _data;
-
+	bool   _reversed;
 	/* secondary blob storage. Holds Blobs (arbitrary size + data) */
 
 	uint32_t alloc_blob (uint32_t size);
