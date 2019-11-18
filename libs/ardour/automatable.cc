@@ -661,18 +661,13 @@ Automatable::find_next_ac_event (boost::shared_ptr<AutomationControl> c, double 
 		sc->find_next_event (start, end, next_event);
 	}
 
-	Evoral::ControlList::const_iterator i;
 	boost::shared_ptr<const Evoral::ControlList> alist (c->list());
 	Evoral::ControlEvent cp (start, 0.0f);
 	if (!alist) {
 		return;
 	}
 
-	for (i = lower_bound (alist->begin(), alist->end(), &cp, Evoral::ControlList::time_comparator); i != alist->end() && (*i)->when < end; ++i) {
-		if ((*i)->when > start) {
-			break;
-		}
-	}
+	Evoral::ControlList::const_iterator i = upper_bound (alist->begin(), alist->end(), &cp, Evoral::ControlList::time_comparator);
 
 	if (i != alist->end() && (*i)->when < end) {
 		if ((*i)->when < next_event.when) {
