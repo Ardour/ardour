@@ -1292,13 +1292,14 @@ PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t 
 
 	while (nframes) {
 
-		samplecnt_t cnt = min (((samplecnt_t) ceil (next_event.when) - start), (samplecnt_t) nframes);
+		samplecnt_t cnt = min ((samplecnt_t) ceil (fabs (next_event.when - start)), (samplecnt_t) nframes);
+		assert (cnt > 0);
 
 		connect_and_run (bufs, start, start + cnt * speed, speed, cnt, offset, true);
 
 		nframes -= cnt;
 		offset += cnt;
-		start += cnt;
+		start += cnt * speed;
 
 		map_loop_range (start, end);
 
