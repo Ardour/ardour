@@ -384,4 +384,6 @@ RTMidiBuffer::clear ()
 	_size = 0;
 	/* free the entire current pool size, if any */
 	_pool_size = 0;
+	/* rendering new data .. it will not be reversed */
+	_reversed = false;
 }
