@@ -778,10 +778,15 @@ DiskReader::_do_refill_with_alloc (bool partial_fill)
 int
 DiskReader::refill (Sample* sum_buffer, Sample* mixdown_buffer, float* gain_buffer, samplecnt_t fill_level)
 {
-	/* nothing to do here for MIDI - the entire playlist has been rendered
-	 * into RAM already.
-	 */
-	return refill_audio (sum_buffer, mixdown_buffer, gain_buffer, fill_level);
+	if (refill_audio (sum_buffer, mixdown_buffer, gain_buffer, fill_level)) {
+		return -1;
+	}
+
+	if ((_session.transport_speed() < 0.0f) != rt_midibuffer()->reversed()) {
+		rt_midibuffer()->reverse ();
+	}
+
+	return 0;
 }
 
 
@@ -1090,13 +1095,9 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 		target = &dst;
 	}
 
-	/* Note: do not fetch any data from disk if we're moving
-	 * backwards. TODO: reverse MIDI
-	 */
+	if (!pending_overwrite() && !_no_disk_output) {
 
-	if (!pending_overwrite() && !_no_disk_output && (end_sample >= start_sample)) {
-
-		const samplecnt_t nframes = end_sample - start_sample;
+		const samplecnt_t nframes = abs (end_sample - start_sample);
 
 		if (ms & MonitoringDisk) {
 
