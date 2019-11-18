@@ -620,13 +620,17 @@ Automatable::clear_controls ()
 bool
 Automatable::find_next_event (double start, double end, Evoral::ControlEvent& next_event, bool only_active) const
 {
-	next_event.when = std::numeric_limits<double>::max();
+	next_event.when = start <= end ? std::numeric_limits<double>::max() : 0;
 
 	if (only_active) {
 		boost::shared_ptr<ControlList> cl = _automated_controls.reader ();
 		for (ControlList::const_iterator ci = cl->begin(); ci != cl->end(); ++ci) {
 			if ((*ci)->automation_playback()) {
-				find_next_ac_event (*ci, start, end, next_event);
+				if (start <= end) {
+					find_next_ac_event (*ci, start, end, next_event);
+				} else {
+					find_prev_ac_event (*ci, start, end, next_event);
+				}
 			}
 		}
 	} else {
@@ -634,16 +638,22 @@ Automatable::find_next_event (double start, double end, Evoral::ControlEvent& ne
 			boost::shared_ptr<AutomationControl> c
 				= boost::dynamic_pointer_cast<AutomationControl>(li->second);
 			if (c) {
-				find_next_ac_event (c, start, end, next_event);
+				if (start <= end) {
+					find_next_ac_event (c, start, end, next_event);
+				} else {
+					find_prev_ac_event (c, start, end, next_event);
+				}
 			}
 		}
 	}
-	return next_event.when != std::numeric_limits<double>::max();
+	return next_event.when != (start <= end ? std::numeric_limits<double>::max() : 0);
 }
 
 void
 Automatable::find_next_ac_event (boost::shared_ptr<AutomationControl> c, double start, double end, Evoral::ControlEvent& next_event) const
 {
+	assert (start <= end);
+
 	boost::shared_ptr<SlavableAutomationControl> sc
 		= boost::dynamic_pointer_cast<SlavableAutomationControl>(c);
 
@@ -668,5 +678,32 @@ Automatable::find_next_ac_event (boost::shared_ptr<AutomationControl> c, double 
 		if ((*i)->when < next_event.when) {
 			next_event.when = (*i)->when;
 		}
+	}
+}
+
+void
+Automatable::find_prev_ac_event (boost::shared_ptr<AutomationControl> c, double start, double end, Evoral::ControlEvent& next_event) const
+{
+	assert (start > end);
+	boost::shared_ptr<SlavableAutomationControl> sc
+		= boost::dynamic_pointer_cast<SlavableAutomationControl>(c);
+
+	if (sc) {
+		sc->find_next_event (start, end, next_event);
+	}
+
+	boost::shared_ptr<const Evoral::ControlList> alist (c->list());
+	if (!alist) {
+		return;
+	}
+
+	Evoral::ControlEvent cp (end, 0.0f);
+	Evoral::ControlList::const_iterator i = upper_bound (alist->begin(), alist->end(), &cp, Evoral::ControlList::time_comparator);
+
+	while (i != alist->end() && (*i)->when < start) {
+		if ((*i)->when > next_event.when) {
+			next_event.when = (*i)->when;
+		}
+		++i;
 	}
 }
