@@ -210,7 +210,7 @@ class PangoLayout {
 		 * @param width The desired width in Pango units, or -1 to indicate that no
 		 * wrapping or ellipsization should be performed.
 		 */
-		void set_width (int width) {
+		void set_width (float width) {
 			_layout->set_width (width * PANGO_SCALE);
 		}
 
