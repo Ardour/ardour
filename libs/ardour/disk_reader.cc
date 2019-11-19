@@ -345,6 +345,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 
 		const float initial_declick_gain = _declick_amp.gain ();
+		const sampleoffset_t declick_offs = _declick_offs;
 
 		for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
 
@@ -387,7 +388,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				   to ::run()
 				*/
 
-				const samplecnt_t total = chaninfo->rbuf->read (disk_buf.data(), nframes, false, _declick_offs);
+				const samplecnt_t total = chaninfo->rbuf->read (disk_buf.data(), nframes, false, declick_offs);
 
 				if (n == 0) {
 					_declick_offs += total;
