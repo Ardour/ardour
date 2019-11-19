@@ -249,8 +249,7 @@ DiskReader::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
 }
 
 void
-DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
-                 double speed, pframes_t nframes, bool result_required)
+DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required)
 {
 	uint32_t n;
 	boost::shared_ptr<ChannelList> c = channels.reader();
@@ -258,6 +257,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	sampleoffset_t disk_samples_to_consume;
 	MonitorState ms = _track->monitoring_state ();
 
+	// std::cerr << name() << " run " << start_sample << " .. " << end_sample << " speed = " << speed << std::endl;
 	if (_active) {
 		if (!_pending_active) {
 			_active = false;
@@ -271,16 +271,17 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 	}
 
-	const bool declick_out = _session.declick_in_progress();
-	const gain_t target_gain = (declick_out || (speed == 0.0) || ((ms & MonitoringDisk) == 0)) ? 0.0 : 1.0;
+	const gain_t target_gain = ((speed == 0.0) || ((ms & MonitoringDisk) == 0)) ? 0.0 : 1.0;
+	const bool declicked_out = (_declick_amp.gain() == target_gain) && target_gain == 0.0;
+	const bool declick_out = (_declick_amp.gain() != target_gain) && target_gain == 0.0;
 
 	if (!_session.cfg ()->get_use_transport_fades ()) {
 		_declick_amp.set_gain (target_gain);
 	}
 
-	if (declick_out && (ms == MonitoringDisk) && _declick_amp.gain () == target_gain) {
-		/* no channels, or stopped. Don't accidentally pass any data
-		 * from disk into our outputs (e.g. via interpolation)
+	if (declicked_out && (ms == MonitoringDisk)) {
+		/* Stopped and declicking has finished. Don't accidentally pass
+		 * any data from disk into our outputs (e.g. via interpolation)
 		 */
 		return;
 	}
@@ -301,12 +302,11 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		goto midi;
 	}
 
-	if (_declick_amp.gain () != target_gain && target_gain == 0) {
+	if (declick_out) {
 		/* fade-out */
-#if 0
-		printf ("DR fade-out speed=%.1f gain=%.3f off=%ld start=%ld playpos=%ld (%s)\n",
-				speed, _declick_amp.gain (), _declick_offs, start_sample, playback_sample, owner()->name().c_str());
-#endif
+
+		// printf ("DR fade-out speed=%.1f gain=%.3f off=%ld start=%ld playpos=%ld (%s)\n", speed, _declick_amp.gain (), _declick_offs, start_sample, playback_sample, owner()->name().c_str());
+
 		ms = MonitorState (ms | MonitoringDisk);
 		assert (result_required);
 		result_required = true;
@@ -360,7 +360,9 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			}
 
 			if (!declick_out) {
+
 				const samplecnt_t total = chaninfo->rbuf->read (disk_buf.data(), disk_samples_to_consume);
+
 				if (disk_samples_to_consume > total) {
 					cerr << _name << " Need " << total << " have only " << disk_samples_to_consume << endl;
 					cerr << "underrun for " << _name << endl;
@@ -369,10 +371,23 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					Underrun ();
 					return;
 				}
-			} else if (_declick_amp.gain () != target_gain) {
+
+			} else if (_declick_amp.gain() != target_gain) {
+
 				assert (target_gain == 0);
+
+				/* note that this is a non-committing read: it
+				   retrieves data from the ringbuffer but does not
+				   advance the read pointer. As a result,
+				   subsequent calls (as we declick) need to
+				   pass in an offset describing where to read
+				   from. We maintain _declick_offs across calls
+				   to ::run()
+				*/
+
 				const samplecnt_t total = chaninfo->rbuf->read (disk_buf.data(), nframes, false, _declick_offs);
 				_declick_offs += total;
+
 			}
 
 			_declick_amp.apply_gain (disk_buf, nframes, target_gain);
@@ -445,7 +460,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		_need_butler = butler_required;
 	}
 
-	// DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 reader run, needs butler = %2\n", name(), _need_butler));
+	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 reader run, needs butler = %2\n", name(), _need_butler));
 }
 
 bool
@@ -1225,6 +1240,7 @@ DiskReader::DeclickAmp::apply_gain (AudioBuffer& buf, samplecnt_t n_samples, con
 	const int max_nproc = 16;
 	uint32_t remain = n_samples;
 	uint32_t offset = 0;
+
 	while (remain > 0) {
 		uint32_t n_proc = remain > max_nproc ? max_nproc : remain;
 		for (uint32_t i = 0; i < n_proc; ++i) {
