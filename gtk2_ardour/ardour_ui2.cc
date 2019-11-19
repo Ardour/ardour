@@ -480,6 +480,10 @@ ARDOUR_UI::setup_transport ()
 	button_height_size_group->add_widget (monitor_disk_button);
 	button_height_size_group->add_widget (auto_input_button);
 
+	for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
+		button_height_size_group->add_widget (action_script_call_btn[i]);
+	}
+
 	Glib::RefPtr<SizeGroup> clock1_size_group = SizeGroup::create (SIZE_GROUP_HORIZONTAL);
 	clock1_size_group->add_widget (*primary_clock->left_btn());
 	clock1_size_group->add_widget (*primary_clock->right_btn());
@@ -583,8 +587,12 @@ ARDOUR_UI::setup_transport ()
 	++col;
 
 	/* lua script action buttons */
-	transport_table.attach (action_script_table, TCOL, 0, 2, SHRINK, EXPAND|FILL, 1, 0);
-	++col;
+	for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
+		const int r = i % 2;
+		const int c = col + i / 2;
+		transport_table.attach (action_script_call_btn[i], c, c + 1, r, r + 1, FILL, SHRINK, 1, vpadding);
+	}
+	col += MAX_LUA_ACTION_BUTTONS / 2;
 
 	transport_table.attach (editor_visibility_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
 	transport_table.attach (mixer_visibility_button,  TCOL, 1, 2 , FILL, SHRINK, hpadding, vpadding);

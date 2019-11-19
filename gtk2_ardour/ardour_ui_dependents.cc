@@ -303,7 +303,7 @@ ARDOUR_UI::setup_windows ()
 		std::string const a = string_compose (X_("script-action-%1"), i + 1);
 		Glib::RefPtr<Action> act = ActionManager::get_action(X_("LuaAction"), a.c_str());
 		assert (act);
-		action_script_call_btn[i].set_text (string_compose ("%1", i+1));
+		action_script_call_btn[i].set_text (string_compose ("%1%2", std::hex, i+1));
 		action_script_call_btn[i].set_related_action (act);
 		action_script_call_btn[i].signal_button_press_event().connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::bind_lua_action_script), i), false);
 		if (act->get_sensitive ()) {
@@ -311,12 +311,9 @@ ARDOUR_UI::setup_windows ()
 		} else {
 			action_script_call_btn[i].set_visual_state (Gtkmm2ext::VisualState (action_script_call_btn[i].visual_state() | Gtkmm2ext::Insensitive));
 		}
-		const int row = i % 2;
-		const int col = i / 2;
-		action_script_table.attach (action_script_call_btn[i], col, col + 1, row, row + 1, EXPAND, EXPAND, 1, 0);
+		action_script_call_btn[i].set_sizing_text ("|||");
 		action_script_call_btn[i].set_no_show_all ();
 	}
-	action_script_table.show ();
 
 	setup_transport();
 	build_menu_bar ();

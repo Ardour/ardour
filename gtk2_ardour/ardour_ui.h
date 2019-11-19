@@ -548,7 +548,6 @@ private:
 	ArdourWidgets::ArdourButton error_alert_button;
 
 	ArdourWidgets::ArdourButton action_script_call_btn[MAX_LUA_ACTION_BUTTONS];
-	Gtk::Table action_script_table;
 
 	Gtk::VBox alert_box;
 	Gtk::Table editor_meter_table;
