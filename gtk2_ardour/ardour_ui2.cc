@@ -463,7 +463,7 @@ ARDOUR_UI::setup_transport ()
 	button_height_size_group->add_widget (*secondary_clock->right_btn());
 
 	button_height_size_group->add_widget (transport_ctrl.size_button ());
-//	button_height_size_group->add_widget (sync_button);
+	button_height_size_group->add_widget (sync_button);
 	button_height_size_group->add_widget (auto_return_button);
 
 	//tab selections
@@ -479,6 +479,9 @@ ARDOUR_UI::setup_transport ()
 	button_height_size_group->add_widget (monitor_in_button);
 	button_height_size_group->add_widget (monitor_disk_button);
 	button_height_size_group->add_widget (auto_input_button);
+
+	// PDC
+	button_height_size_group->add_widget (latency_disable_button);
 
 	for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
 		button_height_size_group->add_widget (action_script_call_btn[i]);
@@ -537,10 +540,10 @@ ARDOUR_UI::setup_transport ()
 
 
 	transport_table.attach (latency_disable_button, TCOL, 0, 1 , FILL, SHRINK, hpadding, vpadding);
-	transport_table.attach (io_latency_label, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, vpadding);
+	transport_table.attach (io_latency_label, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, 0);
 	++col;
-	transport_table.attach (route_latency_value, TCOL, 0, 1 , SHRINK, EXPAND|FILL, hpadding, vpadding);
-	transport_table.attach (io_latency_value, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, vpadding);
+	transport_table.attach (route_latency_value, TCOL, 0, 1 , SHRINK, EXPAND|FILL, hpadding, 0);
+	transport_table.attach (io_latency_value, TCOL, 1, 2 , SHRINK, EXPAND|FILL, hpadding, 0);
 	++col;
 
 	route_latency_value.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
