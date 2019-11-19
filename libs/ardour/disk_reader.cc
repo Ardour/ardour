@@ -344,6 +344,8 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			scaling = 1.0;
 		}
 
+		const float initial_declick_gain = _declick_amp.gain ();
+
 		for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
 
 			ChannelInfo* chaninfo (*chan);
@@ -390,7 +392,16 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 			}
 
+			/* reset _declick_amp to the correct gain before
+			 * processing this channel.
+			 */
+
+			_declick_amp.set_gain (initial_declick_gain);
 			_declick_amp.apply_gain (disk_buf, nframes, target_gain);
+
+			/* _declick_amp is now left with the correct gain after
+			 * processing nframes
+			 */
 
 			Amp::apply_simple_gain (disk_buf, nframes, scaling);
 
