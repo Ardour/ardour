@@ -388,8 +388,10 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				*/
 
 				const samplecnt_t total = chaninfo->rbuf->read (disk_buf.data(), nframes, false, _declick_offs);
-				_declick_offs += total;
 
+				if (n == 0) {
+					_declick_offs += total;
+				}
 			}
 
 			/* reset _declick_amp to the correct gain before
