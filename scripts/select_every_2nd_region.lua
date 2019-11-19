@@ -43,6 +43,7 @@ end end
 
 function icon (params) return function (ctx, width, height, fg)
 	local wh = math.min (width, height) * .5
+	ctx:translate (math.floor (width * .5 - wh), math.floor (height * .5 - wh))
 
 	ctx:set_line_width (1)
 	ctx:rectangle (wh * .25, wh * .75, wh * 1.5 , .5 * wh)

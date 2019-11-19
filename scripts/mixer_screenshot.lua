@@ -25,6 +25,7 @@ end end
 
 function icon (params) return function (ctx, width, height, fg)
 	local wh = math.min (width, height) * .5
+	ctx:translate (math.floor (width * .5 - wh), math.floor (height * .5 - wh))
 
 	ctx:rectangle (wh * .6, wh * .6, wh * .8, wh * .8)
 	ctx:set_source_rgba (.1, .1, .1, 1)

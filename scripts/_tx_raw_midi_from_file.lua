@@ -111,7 +111,7 @@ end end
 
 function icon (params) return function (ctx, width, height, fg)
 	ctx:set_source_rgba (ARDOUR.LuaAPI.color_to_rgba (fg))
-	local txt = Cairo.PangoLayout (ctx, "ArdourMono ".. math.ceil(math.min (width, height) * .5) .. "px")
+	local txt = Cairo.PangoLayout (ctx, "ArdourMono ".. math.ceil(math.min (width, height) * .45) .. "px")
 	txt:set_text ("S")
 	ctx:move_to (1, 1)
 	txt:show_in_cairo_context (ctx)

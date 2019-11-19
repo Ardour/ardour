@@ -75,6 +75,7 @@ function icon (params) return function (ctx, width, height, fg)
 		ctx:fill ()
 	end
 
+	ctx:translate (math.floor (width * .5 - wh), math.floor (height * .5 - wh))
 	ctx:rectangle (wh - wh * .6, wh - .7 * wh, wh * 1.2, .5 * wh)
 	stroke_outline (.7)
 

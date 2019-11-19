@@ -176,14 +176,14 @@ function factory (unused_params)
 end
 
 function icon (params) return function (ctx, width, height, fg)
-	local wh = math.min (width, height) * .5
-	local x0 = math.ceil (wh * .2)
-	local x1 = math.floor (wh * 1.8)
+	local yc = height * .5
+	local x0 = math.ceil (width * .1)
+	local x1 = math.floor (width * .9)
 	ctx:set_line_width (1)
 	ctx:set_source_rgba (ARDOUR.LuaAPI.color_to_rgba (fg))
-	ctx:move_to (x0, wh * 1.5)
+	ctx:move_to (x0, yc * 1.5)
 	for x = x0, x1 do
-		ctx:line_to (x, wh + math.cos (3 * math.pi * (x-x0) / (x1-x0)) * wh * .5)
+		ctx:line_to (x, yc + math.cos (3 * math.pi * (x-x0) / (x1-x0)) * yc * .5)
 	end
 	ctx:stroke ()
 end end

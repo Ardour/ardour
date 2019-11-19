@@ -121,7 +121,7 @@ function factory () return function ()
 end end
 
 function icon (params) return function (ctx, width, height, fg)
-	local txt = Cairo.PangoLayout (ctx, "ArdourMono ".. math.ceil (width * .45) .. "px")
+	local txt = Cairo.PangoLayout (ctx, "ArdourMono ".. math.ceil (height / 3) .. "px")
 	txt:set_text ("CC\nPA")
 	local tw, th = txt:get_pixel_size ()
 	ctx:set_source_rgba (ARDOUR.LuaAPI.color_to_rgba (fg))
