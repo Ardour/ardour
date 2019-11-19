@@ -231,7 +231,7 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 		switch (_motion_state) {
 		case Rolling:
 			transition (DeclickToStop);
-			start_declick_for_stop (ev);
+			stop_playback ();
 			break;
 		case Stopped:
 			break;
@@ -316,7 +316,7 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 			break;
 		case DeclickToStop:
 			transition (Stopped);
-			stop_playback ();
+			/* transport already stopped */
 			break;
 		default:
 			bad_transition (ev); return false;
@@ -373,14 +373,6 @@ TransportFSM::stop_playback ()
 	current_roll_after_locate_status = boost::none;
 
 	api->stop_transport (_last_stop.abort, _last_stop.clear_state);
-}
-
-void
-TransportFSM::start_declick_for_stop (Event const & s)
-{
-	assert (s.type == StopTransport);
-	DEBUG_TRACE (DEBUG::TFSMEvents, "start_declick_for_stop\n");
-	_last_stop = s;
 }
 
 void

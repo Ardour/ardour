@@ -138,7 +138,6 @@ struct TransportFSM
 	void start_locate_while_stopped (Event const &) const;
 	void interrupt_locate (Event const &) const;
 	void start_declick_for_locate (Event const &);
-	void start_declick_for_stop (Event const &);
 
 	/* guards */
 
