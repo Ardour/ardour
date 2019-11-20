@@ -49,6 +49,7 @@
 #include "ardour/debug.h"
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
+#include "ardour/monitor_control.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/route_group.h"
 #include "ardour/selection.h"
@@ -3403,6 +3404,8 @@ Mixer_UI::register_actions ()
 
 	ActionManager::register_toggle_action (group, X_("ToggleFoldbackStrip"), _("Mixer: Show Foldback Strip"), sigc::mem_fun (*this, &Mixer_UI::toggle_foldback_strip));
 
+	ActionManager::register_toggle_action (group, X_("toggle-disk-monitor"), _("Toggle Disk Monitoring"), sigc::bind (sigc::mem_fun (*this, &Mixer_UI::toggle_monitor_action), MonitorDisk, false, false));
+	ActionManager::register_toggle_action (group, X_("toggle-input-monitor"), _("Toggle Input Monitoring"), sigc::bind (sigc::mem_fun (*this, &Mixer_UI::toggle_monitor_action), MonitorInput, false, false));
 }
 
 void
@@ -3689,4 +3692,36 @@ Mixer_UI::screenshot (std::string const& filename)
 		out_packer.pack_start (*master, false, false);
 	}
 	return true;
+}
+
+void
+Mixer_UI::toggle_monitor_action (MonitorChoice monitor_choice, bool group_override, bool all)
+{
+	MonitorChoice mc;
+	boost::shared_ptr<RouteList> rl;
+
+	for (AxisViewSelection::iterator i = _selection.axes.begin(); i != _selection.axes.end(); ++i) {
+		boost::shared_ptr<ARDOUR::Route> rt = boost::dynamic_pointer_cast<ARDOUR::Route> ((*i)->stripable());
+
+		if (rt->monitoring_control()->monitoring_choice() & monitor_choice) {
+			mc = MonitorChoice (rt->monitoring_control()->monitoring_choice() & ~monitor_choice);
+		} else {
+			mc = MonitorChoice (rt->monitoring_control()->monitoring_choice() | monitor_choice);
+		}
+
+		if (all) {
+			/* Primary-Tertiary-click applies change to all routes */
+			rl = _session->get_routes ();
+			_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::NoGroup);
+		} else if (group_override) {
+			rl.reset (new RouteList);
+			rl->push_back (rt);
+			_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::InverseGroup);
+		} else {
+			rl.reset (new RouteList);
+			rl->push_back (rt);
+			_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::UseGroup);
+		}
+
+	}
 }

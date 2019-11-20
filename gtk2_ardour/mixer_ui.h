@@ -158,6 +158,8 @@ public:
 
 	bool screenshot (std::string const&);
 
+	void toggle_monitor_action (ARDOUR::MonitorChoice monitor_choice, bool group_override = false, bool all = false);
+
 protected:
 	void set_axis_targets_for_operation ();
 	ARDOUR::AutomationControlSet selected_gaincontrols ();
