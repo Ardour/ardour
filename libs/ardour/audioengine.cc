@@ -447,11 +447,18 @@ AudioEngine::process_callback (pframes_t nframes)
 		} else {
 			pframes_t remain = Port::cycle_nframes ();
 			while (remain > 0) {
+				/* keep track of split_cycle() calls by Session::process */
+				samplecnt_t poff = Port::port_offset ();
 				pframes_t nf = std::min (remain, nframes);
 				_session->process (nf);
 				remain -= nf;
 				if (remain > 0) {
-					split_cycle (nf);
+					/* calculate split-cycle offset */
+					samplecnt_t delta = Port::port_offset () - poff;
+					assert (delta >= 0 && delta <= nf);
+					if (nf > delta) {
+						split_cycle (nf - delta);
+					}
 				}
 			}
 		}
