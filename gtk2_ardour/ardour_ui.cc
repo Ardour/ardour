@@ -1329,13 +1329,13 @@ ARDOUR_UI::update_disk_space()
 	if (!opt_samples) {
 		/* Available space is unknown */
 		format_disk_space_label (-1);
-	} else if (opt_samples.get_value_or (0) == max_samplecnt) {
+	} else if (opt_samples.value_or (0) == max_samplecnt) {
 		format_disk_space_label (max_samplecnt);
 	} else {
 		rec_enabled_streams = 0;
 		_session->foreach_route (this, &ARDOUR_UI::count_recenabled_streams, false);
 
-		samplecnt_t samples = opt_samples.get_value_or (0);
+		samplecnt_t samples = opt_samples.value_or (0);
 
 		if (rec_enabled_streams) {
 			samples /= rec_enabled_streams;
