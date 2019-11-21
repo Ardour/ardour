@@ -187,7 +187,7 @@ Parser::process_mtc_quarter_frame (MIDI::byte *msg)
 
 			boost::optional<bool> res = mtc_skipped ();
 
-			if (res.get_value_or (false)) {
+			if (res.value_or (false)) {
 
 				/* no error, reset next expected frame */
 

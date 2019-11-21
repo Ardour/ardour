@@ -390,7 +390,7 @@ Parser::scanner (unsigned char inbyte)
 	if (rtmsg) {
 		boost::optional<int> res = edit (&inbyte, 1);
 
-		if (res.get_value_or (1) >= 0 && !_offline) {
+		if (res.value_or (1) >= 0 && !_offline) {
 			realtime_msg (inbyte);
 		}
 
@@ -427,7 +427,7 @@ Parser::scanner (unsigned char inbyte)
 
 			boost::optional<int> res = edit (msgbuf, msgindex);
 
-			if (res.get_value_or (1) >= 0) {
+			if (res.value_or (1) >= 0) {
 				if (!possible_mmc (msgbuf, msgindex) || _mmc_forward) {
 					if (!possible_mtc (msgbuf, msgindex) || _mtc_forward) {
 						if (!_offline) {
@@ -503,7 +503,7 @@ Parser::scanner (unsigned char inbyte)
 
                 edit_result = edit (msgbuf, msgindex);
 
-		if (edit_result.get_value_or (1)) {
+		if (edit_result.value_or (1)) {
 
 			/* message not cancelled by an editor */
 

@@ -961,7 +961,7 @@ Session::load_state (string snapshot_name)
 		/* there is pending state from a crashed capture attempt */
 
 		boost::optional<int> r = AskAboutPendingState();
-		if (r.get_value_or (1)) {
+		if (r.value_or (1)) {
 			state_was_pending = true;
 		}
 	}
@@ -1540,7 +1540,7 @@ Session::set_state (const XMLNode& node, int version)
 		assert (AudioEngine::instance()->running ());
 		if (_base_sample_rate != AudioEngine::instance()->sample_rate ()) {
 			boost::optional<int> r = AskAboutSampleRateMismatch (_base_sample_rate, _current_sample_rate);
-			if (r.get_value_or (0)) {
+			if (r.value_or (0)) {
 				goto out;
 			}
 		}
@@ -2376,7 +2376,7 @@ retry:
 			}
 
 			if (!no_questions_about_missing_files) {
-				user_choice = MissingFile (this, err.path, err.type).get_value_or (-1);
+				user_choice = MissingFile (this, err.path, err.type).value_or (-1);
 			} else {
 				user_choice = -2;
 			}
@@ -3217,7 +3217,7 @@ int
 Session::ask_about_playlist_deletion (boost::shared_ptr<Playlist> p)
 {
 	boost::optional<int> r = AskAboutPlaylistDeletion (p);
-	return r.get_value_or (1);
+	return r.value_or (1);
 }
 
 void

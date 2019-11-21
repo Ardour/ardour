@@ -231,7 +231,7 @@ IO::remove_port (boost::shared_ptr<Port> port, void* src)
 	after.set (port->type(), after.get (port->type()) - 1);
 
 	boost::optional<bool> const r = PortCountChanging (after); /* EMIT SIGNAL */
-	if (r.get_value_or (false)) {
+	if (r.value_or (false)) {
 		return -1;
 	}
 
@@ -1398,7 +1398,7 @@ IO::enable_connecting ()
 	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock());
 	connecting_legal = true;
 	boost::optional<int> r = ConnectingLegal ();
-	return r.get_value_or (0);
+	return r.value_or (0);
 }
 
 void

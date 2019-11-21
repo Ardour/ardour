@@ -296,7 +296,7 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 
 			/* more than one match: ask the user */
 
-                        int which = FileSource::AmbiguousFileName (path, de_duped_hits).get_value_or (-1);
+                        int which = FileSource::AmbiguousFileName (path, de_duped_hits).value_or (-1);
 
                         if (which < 0) {
                                 goto out;

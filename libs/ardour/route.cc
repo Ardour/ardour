@@ -1076,7 +1076,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 
 		if (flags != None) {
 			boost::optional<int> rv = PluginSetup (boost::dynamic_pointer_cast<Route>(shared_from_this ()), pi, flags);  /* EMIT SIGNAL */
-			int mode = rv.get_value_or (0);
+			int mode = rv.value_or (0);
 			switch (mode & 3) {
 				case 1:
 					to_skip.push_back (*i); // don't add this one;
