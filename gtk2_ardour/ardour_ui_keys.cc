@@ -40,6 +40,7 @@
 #include "debug.h"
 #include "keyboard.h"
 #include "public_editor.h"
+#include "virtual_keyboard_window.h"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -53,6 +54,12 @@ ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* event_window)
 {
 	Gtkmm2ext::Bindings* bindings = 0;
 	Gtk::Window* window = 0;
+
+	if (virtual_keyboard_window && virtual_keyboard_window->is_visible()) {
+		if (gtk_window_propagate_key_event (virtual_keyboard_window->gobj(), ev)) {
+			return true;
+		}
+	}
 
 	/* until we get ardour bindings working, we are not handling key
 	 * releases yet.
