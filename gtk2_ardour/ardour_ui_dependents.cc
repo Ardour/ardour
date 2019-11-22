@@ -36,6 +36,7 @@
 #include "pbd/i18n.h"
 
 #include "ardour/session.h"
+#include "ardour/lv2_plugin.h"
 
 #include "gtkmm2ext/bindings.h"
 
@@ -56,6 +57,9 @@
 #include "opts.h"
 #include "utils.h"
 
+#ifdef GDK_WINDOWING_X11
+#include <gdk/gdkx.h>
+#endif
 
 using namespace Gtk;
 using namespace PBD;
@@ -389,6 +393,11 @@ ARDOUR_UI::setup_windows ()
 	 * deprecating the old set_window_creation_hook() method, but oh well...
 	 */
 	g_signal_connect (_tabs.gobj(), "create-window", (GCallback) ::tab_window_root_drop, this);
+
+#ifdef GDK_WINDOWING_X11
+	/* allow externalUIs to be transient, on top of the main window */
+	LV2Plugin::set_main_window_id (GDK_DRAWABLE_XID(_main_window.get_window()->gobj()));
+#endif
 
 	return 0;
 }
