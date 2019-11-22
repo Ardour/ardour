@@ -995,6 +995,10 @@ PluginManager::windows_vst_refresh (bool cache_only)
 	}
 
 	windows_vst_discover_from_path (Config->get_plugin_path_vst(), cache_only);
+	if (!cache_only) {
+		/* ensure that VST path is flushed to disk */
+		Config->save_state();
+	}
 }
 
 static bool windows_vst_filter (const string& str, void * /*arg*/)
@@ -1185,6 +1189,10 @@ PluginManager::mac_vst_refresh (bool cache_only)
 	}
 
 	mac_vst_discover_from_path ("~/Library/Audio/Plug-Ins/VST:/Library/Audio/Plug-Ins/VST", cache_only);
+	if (!cache_only) {
+		/* ensure that VST path is flushed to disk */
+		Config->save_state();
+	}
 }
 
 static bool mac_vst_filter (const string& str)
@@ -1306,6 +1314,10 @@ PluginManager::lxvst_refresh (bool cache_only)
 	}
 
 	lxvst_discover_from_path (Config->get_plugin_path_lxvst(), cache_only);
+	if (!cache_only) {
+		/* ensure that VST path is flushed to disk */
+		Config->save_state();
+	}
 }
 
 static bool lxvst_filter (const string& str, void *)
