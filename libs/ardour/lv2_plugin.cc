@@ -128,10 +128,11 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-bool     LV2Plugin::force_state_save = false;
-uint32_t LV2Plugin::_ui_background_color = 0x000000ff; // RGBA
-uint32_t LV2Plugin::_ui_foreground_color = 0xffffffff; // RGBA
-float    LV2Plugin::_ui_scale_factor = 1.0;
+bool          LV2Plugin::force_state_save = false;
+uint32_t      LV2Plugin::_ui_background_color = 0x000000ff; // RGBA
+uint32_t      LV2Plugin::_ui_foreground_color = 0xffffffff; // RGBA
+float         LV2Plugin::_ui_scale_factor = 1.0;
+unsigned long LV2Plugin::_ui_transient_win_id = 0;
 
 class LV2World : boost::noncopyable {
 public:
@@ -531,6 +532,7 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 #endif
 
 	LV2_URID atom_Int   = _uri_map.uri_to_id(LV2_ATOM__Int);
+	LV2_URID atom_Long  = _uri_map.uri_to_id(LV2_ATOM__Long);
 	LV2_URID atom_Float = _uri_map.uri_to_id(LV2_ATOM__Float);
 
 	static const int32_t _min_block_length = 1;   // may happen during split-cycles
@@ -565,6 +567,8 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		  sizeof(int32_t), atom_Int, &_ui_foreground_color },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/extensions/ui#scaleFactor"),
 		  sizeof(float), atom_Float, &_ui_scale_factor },
+		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://kxstudio.sf.net/ns/lv2ext/props#TransientWindowId"),
+		  sizeof(int32_t), atom_Long, &_ui_transient_win_id },
 		{ LV2_OPTIONS_INSTANCE, 0, 0, 0, 0, NULL }
 	};
 
