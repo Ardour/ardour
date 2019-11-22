@@ -275,8 +275,7 @@ Meterbridge::on_key_release_event (GdkEventKey* ev)
 	if (gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
 		return true;
 	}
-	/* don't forward releases */
-	return true;
+	return relay_key_press (ev, this);
 }
 
 bool

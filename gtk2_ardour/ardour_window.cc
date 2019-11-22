@@ -72,6 +72,20 @@ ArdourWindow::on_key_press_event (GdkEventKey* ev)
 }
 
 bool
+ArdourWindow::on_key_release_event (GdkEventKey* ev)
+{
+	bool handled = Gtk::Window::on_key_press_event (ev);
+
+	if (!handled) {
+		if (!get_modal()) {
+			handled = relay_key_press (ev, this);
+		}
+	}
+
+	return handled;
+}
+
+bool
 ArdourWindow::on_focus_in_event (GdkEventFocus *ev)
 {
 	Keyboard::the_keyboard().focus_in_window (ev, this);

@@ -439,13 +439,13 @@ PluginUIWindow::on_key_release_event (GdkEventKey *event)
 		if (_pluginui) {
 			if (_pluginui->non_gtk_gui()) {
 				_pluginui->forward_key_event (event);
+				return true;
 			}
 		}
 	} else {
 		gtk_window_propagate_key_event (GTK_WINDOW(gobj()), event);
 	}
-	/* don't forward releases */
-	return true;
+	return relay_key_press (event, this);
 }
 
 void

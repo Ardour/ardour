@@ -47,6 +47,7 @@ protected:
 	bool on_focus_out_event (GdkEventFocus*);
 	bool on_delete_event (GdkEventAny *);
 	bool on_key_press_event (GdkEventKey*);
+	bool on_key_release_event (GdkEventKey*);
 	void on_unmap ();
 
 private:
