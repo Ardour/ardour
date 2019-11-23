@@ -1411,6 +1411,10 @@ Session::auto_punch_changed (Location* location)
 void
 Session::auto_loop_changed (Location* location)
 {
+	if (!location) {
+		return;
+	}
+
 	replace_event (SessionEvent::AutoLoop, location->end(), location->start());
 
 	const bool rolling = transport_rolling ();
