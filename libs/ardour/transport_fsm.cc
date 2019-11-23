@@ -151,8 +151,8 @@ a_row < Stopped,             locate,          WaitingForLocate,  &T::start_locat
 g_row < WaitingForLocate,    locate_done,     Stopped,                                  &T::should_not_roll_after_locate >,
 _row  < Rolling,             butler_done,     Rolling                                                                    >,
 _row  < Rolling,             start_transport, Rolling                                                                    >,
-a_row < Rolling,             stop_transport,  DeclickToStop,     &T::start_declick_for_stop                              >,
-a_row < DeclickToStop,       declick_done,    Stopped,           &T::stop_playback                                       >,
+a_row < Rolling,             stop_transport,  DeclickToStop,     &T::stop_playback                                       >,
+a_row < DeclickToStop,       declick_done,    Stopped,                                                                   >,
 a_row < Rolling,             locate,          DeclickToLocate,   &T::start_declick_for_locate                            >,
 a_row < DeclickToLocate,     declick_done,    WaitingForLocate,  &T::start_locate_after_declick                          >,
 row   < WaitingForLocate,    locate_done,     Rolling,           &T::roll_after_locate, &T::should_roll_after_locate     >,
@@ -253,7 +253,7 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 		                                                ev.with_roll,
 		                                                ev.with_flush,
 		                                                ev.target,
-		                                                ev.with_loop,
+		                                                ev.for_loop_end,
 		                                                ev.force));
 		switch (_motion_state) {
 		case Stopped:
@@ -261,7 +261,7 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 			start_locate_while_stopped (ev);
 			break;
 		case Rolling:
-			if (ev.with_loop) {
+			if (ev.for_loop_end) {
 				/* we will finish the locate synchronously, so
 				 * that after returning from
 				 * ::locate_for_loop() we will already have
@@ -407,17 +407,17 @@ TransportFSM::start_locate_while_stopped (Event const & l) const
 
 	set_roll_after (l.with_roll);
 
-	api->locate (l.target, current_roll_after_locate_status.get(), l.with_flush, l.with_loop, l.force);
+	api->locate (l.target, current_roll_after_locate_status.get(), l.with_flush, l.for_loop_end, l.force);
 }
 
 void
 TransportFSM::locate_for_loop (Event const & l)
 {
 	assert (l.type == Locate);
-	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("locate_for_loop, wl = %1\n", l.with_loop));
+	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("locate_for_loop, wl = %1\n", l.for_loop_end));
 	set_roll_after (l.with_roll);
 	_last_locate = l;
-	api->locate (l.target, l.with_roll, l.with_flush, l.with_loop, l.force);
+	api->locate (l.target, l.with_roll, l.with_flush, l.for_loop_end, l.force);
 }
 
 void
@@ -427,7 +427,7 @@ TransportFSM::start_locate_after_declick () const
 	                                                current_roll_after_locate_status ? current_roll_after_locate_status.get() : _last_locate.with_roll));
 
 	const bool roll = current_roll_after_locate_status ? current_roll_after_locate_status.get() : _last_locate.with_roll;
-	api->locate (_last_locate.target, roll, _last_locate.with_flush, _last_locate.with_loop, _last_locate.force);
+	api->locate (_last_locate.target, roll, _last_locate.with_flush, _last_locate.for_loop_end, _last_locate.force);
 }
 
 void
@@ -455,7 +455,7 @@ TransportFSM::interrupt_locate (Event const & l) const
 	/* maintain original "with-roll" choice of initial locate, even though
 	 * we are interrupting the locate to start a new one.
 	 */
-	api->locate (l.target, false, l.with_flush, l.with_loop, l.force);
+	api->locate (l.target, false, l.with_flush, l.for_loop_end, l.force);
 }
 
 void
@@ -482,9 +482,9 @@ TransportFSM::should_roll_after_locate () const
 void
 TransportFSM::roll_after_locate () const
 {
-	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("rolling after locate, was for_loop ? %1\n", _last_locate.with_loop));
+	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("rolling after locate, was for_loop ? %1\n", _last_locate.for_loop_end));
 	current_roll_after_locate_status = boost::none;
-	if (!_last_locate.with_loop) {
+	if (!_last_locate.for_loop_end) {
 		api->start_transport ();
 	}
 }

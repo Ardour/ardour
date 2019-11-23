@@ -22,6 +22,8 @@
 
 #include "pbd/i18n.h"
 
+#include "evoral/Curve.h"
+
 #include "ardour/disk_io.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_state_tracker.h"
@@ -53,6 +55,7 @@ public:
 	void realtime_locate (bool);
 	bool overwrite_existing_buffers ();
 	void set_pending_overwrite ();
+	void set_loop (Location *);
 
 	int set_state (const XMLNode&, int version);
 
@@ -96,6 +99,7 @@ public:
 	void reset_tracker ();
 
 	bool declick_in_progress () const;
+	void reload_loop ();
 
 	static void set_midi_readahead_samples (samplecnt_t samples_ahead) { midi_readahead = samples_ahead; }
 
@@ -110,18 +114,30 @@ public:
 	static void inc_no_disk_output ();
 	static void dec_no_disk_output();
 	static bool no_disk_output () { return g_atomic_int_get (&_no_disk_output); }
+	static void reset_loop_declick (Location*, samplecnt_t sample_rate);
+	static void alloc_loop_declick (samplecnt_t sample_rate);
 
 protected:
 	friend class Track;
 	friend class MidiTrack;
 
-	struct ReaderChannelInfo : public DiskIOProcessor::ChannelInfo {
-		ReaderChannelInfo (samplecnt_t buffer_size)
+	struct ReaderChannelInfo : public DiskIOProcessor::ChannelInfo
+	{
+		ReaderChannelInfo (samplecnt_t buffer_size, samplecnt_t preloop_size)
 			: DiskIOProcessor::ChannelInfo (buffer_size)
+			, pre_loop_buffer (0)
+			, pre_loop_buffer_size (0)
 		{
 			resize (buffer_size);
+			resize_preloop (preloop_size);
 		}
+		~ReaderChannelInfo() { delete [] pre_loop_buffer; }
+
 		void resize (samplecnt_t);
+		void resize_preloop (samplecnt_t);
+
+		Sample* pre_loop_buffer;
+		samplecnt_t pre_loop_buffer_size;
 	};
 
 	XMLNode& state ();
@@ -138,7 +154,7 @@ protected:
 		public:
 			DeclickAmp (samplecnt_t sample_rate);
 
-			void apply_gain (AudioBuffer& buf, samplecnt_t n_samples, const float target);
+		void apply_gain (AudioBuffer& buf, samplecnt_t n_samples, const float target, sampleoffset_t buffer_offset = 0);
 
 			float gain () const { return _g; }
 			void set_gain (float g) { _g = g; }
@@ -147,6 +163,22 @@ protected:
 			float _a;
 			float _l;
 			float _g;
+	};
+
+	class Declicker {
+          public:
+		Declicker ();
+		~Declicker ();
+
+		void alloc (samplecnt_t sr, bool fadein);
+
+		void run (Sample* buf, samplepos_t start, samplepos_t end);
+		void reset (samplepos_t start, samplepos_t end, bool fadein, samplecnt_t sr);
+
+		samplepos_t fade_start;
+		samplepos_t fade_end;
+		samplecnt_t fade_length;
+		Sample* vec;
 	};
 
 private:
@@ -170,12 +202,18 @@ private:
 	static samplecnt_t midi_readahead;
 	static gint       _no_disk_output;
 
+	static Declicker loop_declick_in;
+	static Declicker loop_declick_out;
+	static samplecnt_t loop_fade_length;
+
 	int audio_read (PBD::PlaybackBuffer<Sample>*,
 	                Sample* sum_buffer,
 	                Sample* mixdown_buffer,
 	                float*  gain_buffer,
 	                samplepos_t& start, samplecnt_t cnt,
-	                int channel, bool reversed);
+	                ReaderChannelInfo* rci,
+	                int channel,
+	                bool reversed);
 
 	static Sample* _sum_buffer;
 	static Sample* _mixdown_buffer;
@@ -189,6 +227,7 @@ private:
 	RTMidiBuffer* rt_midibuffer();
 
 	void get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, samplepos_t end_sample, MonitorState, BufferSet&, double speed, samplecnt_t distance);
+	void maybe_xfade_loop (Sample*, samplepos_t read_start, samplepos_t read_end, ReaderChannelInfo*);
 };
 
 } // namespace

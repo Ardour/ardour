@@ -1675,6 +1675,8 @@ Session::set_track_loop (bool yn)
 			(*i)->set_loop (yn ? loc : 0);
 		}
 	}
+
+	DiskReader::reset_loop_declick (loc, nominal_sample_rate());
 }
 
 samplecnt_t

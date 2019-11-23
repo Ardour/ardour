@@ -3176,7 +3176,23 @@ RCOptionEditor::RCOptionEditor ()
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    (_("<b>When enabled</b> the loop button does not start playback but forces playback to always play the loop\n\n"
 					       "<b>When disabled</b> the loop button starts playing the loop, but stop then cancels loop playback")));
+
+
 	add_option (_("Transport"), bo);
+
+
+	ComboOption<LoopFadeChoice>* lca = new ComboOption<LoopFadeChoice> (
+		     "loop-fade-choice",
+		     _("Loop Fades"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_loop_fade_choice),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_loop_fade_choice)
+		     );
+	lca->add (NoLoopFade, _("No fades at loop boundaries"));
+	lca->add (EndLoopFade, _("Fade out at loop end"));
+	lca->add (BothLoopFade, _("Fade in at loop start & Fade out at loop end"));
+	lca->add (XFadeLoop, _("Cross-fade loop end and start"));
+	add_option (_("Transport"), lca);
+	Gtkmm2ext::UI::instance()->set_tip (lca->tip_widget(), _("Options for fades/crossfades at loop boundaries"));
 
 	add_option (_("Transport"), new OptionEditorHeading (_("Dropout (xrun) Handling")));
 	bo = new BoolOption (

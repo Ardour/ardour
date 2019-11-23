@@ -23,6 +23,8 @@
 #include "pbd/memento_command.h"
 #include "pbd/playback_buffer.h"
 
+#include "evoral/Range.h"
+
 #include "ardour/amp.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioplaylist.h"
@@ -52,6 +54,9 @@ Sample* DiskReader::_mixdown_buffer = 0;
 gain_t* DiskReader::_gain_buffer = 0;
 samplecnt_t DiskReader::midi_readahead = 4096;
 gint DiskReader::_no_disk_output (0);
+DiskReader::Declicker DiskReader::loop_declick_in;
+DiskReader::Declicker DiskReader::loop_declick_out;
+samplecnt_t DiskReader::loop_fade_length (0);
 
 DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, str, f)
@@ -80,11 +85,25 @@ DiskReader::ReaderChannelInfo::resize (samplecnt_t bufsize)
 	memset (rbuf->buffer(), 0, sizeof (Sample) * rbuf->bufsize());
 }
 
+void
+DiskReader::ReaderChannelInfo::resize_preloop (samplecnt_t bufsize)
+{
+	if (bufsize == 0) {
+		return;
+	}
+
+	if (bufsize > pre_loop_buffer_size) {
+		delete [] pre_loop_buffer;
+		pre_loop_buffer = new Sample[bufsize];
+		pre_loop_buffer_size = bufsize;
+	}
+}
+
 int
 DiskReader::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_many)
 {
 	while (how_many--) {
-		c->push_back (new ReaderChannelInfo (_session.butler()->audio_diskstream_playback_buffer_size()));
+		c->push_back (new ReaderChannelInfo (_session.butler()->audio_diskstream_playback_buffer_size(), loop_fade_length));
 		DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: new reader channel, write space = %2 read = %3\n",
 		                                            name(),
 		                                            c->back()->rbuf->write_space(),
@@ -540,7 +559,9 @@ DiskReader::overwrite_existing_buffers ()
 			samplepos_t start = overwrite_sample;
 			samplecnt_t to_read = size;
 
-			if (audio_read ((*chan)->rbuf, sum_buffer.get(), mixdown_buffer.get(), gain_buffer.get(), start, to_read, n, reversed)) {
+			ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (*chan);
+
+			if (audio_read ((*chan)->rbuf, sum_buffer.get(), mixdown_buffer.get(), gain_buffer.get(), start, to_read, rci, n, reversed)) {
 				error << string_compose(_("DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"), id(), size, overwrite_sample) << endmsg;
 				goto midi;
 			}
@@ -689,6 +710,7 @@ DiskReader::audio_read (PBD::PlaybackBuffer<Sample>*rb,
                         Sample* mixdown_buffer,
                         float* gain_buffer,
                         samplepos_t& start, samplecnt_t cnt,
+                        ReaderChannelInfo* rci,
                         int channel, bool reversed)
 {
 	samplecnt_t this_read = 0;
@@ -758,9 +780,34 @@ DiskReader::audio_read (PBD::PlaybackBuffer<Sample>*rb,
 
 		this_read = min (cnt, this_read);
 
+		/* note that the mixdown and gain buffers are purely for the
+		 * internal use of the playlist, and cannot be considered
+		 * useful after the return from AudioPlayback::read()
+		 */
+
 		if (audio_playlist()->read (sum_buffer, mixdown_buffer, gain_buffer, start, this_read, channel) != this_read) {
 			error << string_compose(_("DiskReader %1: cannot read %2 from playlist at sample %3"), id(), this_read, start) << endmsg;
 			return -1;
+		}
+
+		if (loc) {
+
+			/* Looping: do something (maybe) about the loop boundaries */
+
+			switch (Config->get_loop_fade_choice()) {
+			case NoLoopFade:
+				break;
+			case BothLoopFade:
+				loop_declick_in.run (sum_buffer, start, start + this_read);
+				loop_declick_out.run (sum_buffer, start, start + this_read);
+				break;
+			case EndLoopFade:
+				loop_declick_out.run (sum_buffer, start, start + this_read);
+				break;
+			case XFadeLoop:
+				maybe_xfade_loop (sum_buffer, start, start + this_read, rci);
+				break;
+			}
 		}
 
 		if (reversed) {
@@ -968,7 +1015,8 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 		// cerr << owner()->name() << " to-read: " << to_read << endl;
 
 		if (to_read) {
-			if (audio_read (chan->rbuf, sum_buffer, mixdown_buffer, gain_buffer, file_sample_tmp, to_read, chan_n, reversed)) {
+			ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (chan);
+			if (audio_read (chan->rbuf, sum_buffer, mixdown_buffer, gain_buffer, file_sample_tmp, to_read, rci, chan_n, reversed)) {
 				error << string_compose(_("DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"), id(), to_read, ffa) << endmsg;
 				ret = -1;
 				goto out;
@@ -1236,7 +1284,7 @@ DiskReader::DeclickAmp::DeclickAmp (samplecnt_t sample_rate)
 }
 
 void
-DiskReader::DeclickAmp::apply_gain (AudioBuffer& buf, samplecnt_t n_samples, const float target)
+DiskReader::DeclickAmp::apply_gain (AudioBuffer& buf, samplecnt_t n_samples, const float target, sampleoffset_t buffer_offset)
 {
 	if (n_samples == 0) {
 		return;
@@ -1244,6 +1292,7 @@ DiskReader::DeclickAmp::apply_gain (AudioBuffer& buf, samplecnt_t n_samples, con
 	float g = _g;
 
 	if (g == target) {
+		assert (buffer_offset == 0);
 		Amp::apply_simple_gain (buf, n_samples, target, 0);
 		return;
 	}
@@ -1253,7 +1302,7 @@ DiskReader::DeclickAmp::apply_gain (AudioBuffer& buf, samplecnt_t n_samples, con
 
 	const int max_nproc = 16;
 	uint32_t remain = n_samples;
-	uint32_t offset = 0;
+	uint32_t offset = buffer_offset;
 
 	while (remain > 0) {
 		uint32_t n_proc = remain > max_nproc ? max_nproc : remain;
@@ -1280,6 +1329,232 @@ DiskReader::DeclickAmp::apply_gain (AudioBuffer& buf, samplecnt_t n_samples, con
 	}
 }
 
+DiskReader::Declicker::Declicker ()
+	: fade_start (0)
+	, fade_end (0)
+	, fade_length (0)
+	, vec (0)
+{
+}
+
+DiskReader::Declicker::~Declicker ()
+{
+	delete vec;
+}
+
+void
+DiskReader::Declicker::alloc (samplecnt_t sr, bool fadein)
+{
+	delete [] vec;
+	vec = new Sample[loop_fade_length];
+
+	const float a = 1024.0f / sr;
+
+	/* build a psuedo-exponential (linear-volume) shape for the fade */
+
+	samplecnt_t n;
+
+#define GAIN_COEFF_DELTA (1e-5)
+
+	if (fadein) {
+		gain_t g = 0.0;
+		for (n = 0; (n < sr) && ((1.0 - g) > GAIN_COEFF_DELTA); ++n) {
+			vec[n] = g;
+			g += a * (1.0 - g);
+		}
+	} else {
+		gain_t g = 1.0;
+		for (n = 0; (n < sr) && (g > GAIN_COEFF_DELTA); ++n) {
+			vec[n] = g;
+			g += a * -g;
+		}
+	}
+
+	fade_length = n;
+
+	/* zero out the rest just to be safe */
+
+	memset (&vec[n], 0, sizeof (gain_t) * (loop_fade_length - n));
+
+#undef GAIN_COEFF_DELTA
+}
+
+void
+DiskReader::Declicker::reset (samplepos_t loop_start, samplepos_t loop_end, bool fadein, samplecnt_t sr)
+{
+	if (loop_start == loop_end) {
+		fade_start = 0;
+		fade_end = 0;
+		return;
+	}
+
+	/* adjust the position of the fade (this is absolute (global) timeline units) */
+
+	if (fadein) {
+		fade_start = loop_start;
+		fade_end = loop_start + fade_length;
+	} else {
+		fade_start = loop_end - fade_length;
+		fade_end = loop_end;
+	}
+
+}
+
+void
+DiskReader::Declicker::run (Sample* buf, samplepos_t read_start, samplepos_t read_end)
+{
+	samplecnt_t n;     /* how many samples to process */
+	sampleoffset_t bo; /* offset into buffer */
+	sampleoffset_t vo; /* offset into gain vector */
+
+	if (fade_start == fade_end) {
+		return;
+	}
+
+	/* Determine how the read range overlaps with the fade range, so we can determine which part of the fade gain vector
+	   to apply to which part of the buffer.
+	*/
+
+	switch (Evoral::coverage (fade_start, fade_end, read_start, read_end)) {
+
+	case Evoral::OverlapInternal:
+		/* note: start and end points cannot coincide (see evoral/Range.h)
+		 *
+		 * read range is entirely within fade range
+		 */
+		bo = 0;
+		vo = read_start - fade_start;
+		n = read_end - read_start;
+		break;
+
+	case Evoral::OverlapExternal:
+		/* read range extends on either side of fade range
+		 *
+		 * External allows coincidental start & end points, so check for that
+		 */
+		if (fade_start == read_start && fade_end == read_end) {
+			/* fade entire read ... this is SO unlikely ! */
+			bo = 0;
+			vo = 0;
+			n = fade_end - fade_start;
+		} else {
+			bo = fade_start - read_start;
+			vo = 0;
+			n = fade_end - fade_start;
+		}
+		break;
+
+	case Evoral::OverlapStart:
+		/* read range starts before and ends within fade or at same end as fade */
+		n = fade_end - read_start;
+		vo = 0;
+		bo = fade_start - read_start;
+		break;
+
+	case Evoral::OverlapEnd:
+		/* read range starts within fade range, but possibly at it's end, so check */
+		if (read_start == fade_end) {
+			/* nothing to do */
+			return;
+		}
+		bo = 0;
+		vo = read_start - fade_start;
+		n = fade_end - read_start;
+		break;
+
+	case Evoral::OverlapNone:
+		/* no overlap ... nothing to do */
+		return;
+	}
+
+	Sample* b = &buf[bo];
+	gain_t* g = &vec[vo];
+
+	for (sampleoffset_t i = 0; i < n; ++i) {
+		b[i] *= g[i];
+	}
+}
+
+void
+DiskReader::maybe_xfade_loop (Sample* buf, samplepos_t read_start, samplepos_t read_end, ReaderChannelInfo* chan)
+{
+	samplecnt_t n;     /* how many samples to process */
+	sampleoffset_t bo; /* offset into buffer */
+	sampleoffset_t vo; /* offset into gain vector */
+
+	const samplepos_t fade_start = loop_declick_out.fade_start;
+	const samplepos_t fade_end = loop_declick_out.fade_end;
+
+	if (fade_start == fade_end) {
+		return;
+	}
+
+	/* Determine how the read range overlaps with the fade range, so we can determine which part of the fade gain vector
+	   to apply to which part of the buffer.
+	*/
+
+	switch (Evoral::coverage (fade_start, fade_end, read_start, read_end)) {
+
+	case Evoral::OverlapInternal:
+		/* note: start and end points cannot coincide (see evoral/Range.h)
+		 *
+		 * read range is entirely within fade range
+		 */
+		bo = 0;
+		vo = read_start - fade_start;
+		n = read_end - read_start;
+		break;
+
+	case Evoral::OverlapExternal:
+		/* read range extends on either side of fade range
+		 *
+		 * External allows coincidental start & end points, so check for that
+		 */
+		if (fade_start == read_start && fade_end == read_end) {
+			/* fade entire read ... this is SO unlikely ! */
+			bo = 0;
+			vo = 0;
+			n = fade_end - fade_start;
+		} else {
+			bo = fade_start - read_start;
+			vo = 0;
+			n = fade_end - fade_start;
+		}
+		break;
+
+	case Evoral::OverlapStart:
+		/* read range starts before and ends within fade or at same end as fade */
+		n = fade_end - read_start;
+		vo = 0;
+		bo = fade_start - read_start;
+		break;
+
+	case Evoral::OverlapEnd:
+		/* read range starts within fade range, but possibly at it's end, so check */
+		if (read_start == fade_end) {
+			/* nothing to do */
+			return;
+		}
+		bo = 0;
+		vo = read_start - fade_start;
+		n = fade_end - read_start;
+		break;
+
+	case Evoral::OverlapNone:
+		/* no overlap ... nothing to do */
+		return;
+	}
+
+	Sample* b    = &buf[bo];                   /* data to be faded out */
+	Sample* sbuf = &chan->pre_loop_buffer[vo]; /* pre-loop (maybe silence) to be faded in */
+	gain_t* og   = &loop_declick_out.vec[vo];  /* fade out gain vector */
+	gain_t* ig   = &loop_declick_in.vec[vo];   /* fade in gain vector */
+
+	for (sampleoffset_t i = 0; i < n; ++i) {
+		b[i] = (b[i] * og[i]) + (sbuf[i] * ig[i]);
+	}
+}
+
 RTMidiBuffer*
 DiskReader::rt_midibuffer ()
 {
@@ -1297,4 +1572,61 @@ DiskReader::rt_midibuffer ()
 	}
 
 	return mpl->rendered();
+}
+
+void
+DiskReader::alloc_loop_declick (samplecnt_t sr)
+{
+	loop_fade_length = lrintf (ceil (-log (1e-5) / (1024.f/sr)));
+	loop_declick_in.alloc (sr, true);
+	loop_declick_out.alloc (sr, false);
+}
+
+void
+DiskReader::reset_loop_declick (Location* loc, samplecnt_t sr)
+{
+	if (loc) {
+		loop_declick_in.reset (loc->start(), loc->end(), true, sr);
+		loop_declick_out.reset (loc->start(), loc->end(), false, sr);
+	} else {
+		loop_declick_in.reset (0, 0, true, sr);
+		loop_declick_out.reset (0, 0, false, sr);
+	}
+}
+
+void
+DiskReader::set_loop (Location* loc)
+{
+	Processor::set_loop (loc);
+
+	if (!loc) {
+		return;
+	}
+
+	reload_loop ();
+}
+
+void
+DiskReader::reload_loop ()
+{
+	Location* loc = _loop_location;
+	boost::scoped_array<Sample> mix_buf (new Sample [loop_fade_length]);
+	boost::scoped_array<Sample> gain_buf (new Sample [loop_fade_length]);
+
+	boost::shared_ptr<ChannelList> c = channels.reader();
+	uint32_t channel = 0;
+
+	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan, ++channel) {
+
+		ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (*chan);
+
+		rci->resize_preloop (loop_fade_length);
+
+		if (loc->start() > loop_fade_length) {
+			audio_playlist()->read (rci->pre_loop_buffer, mix_buf.get(), gain_buf.get(), loc->start() - loop_declick_out.fade_length, loop_declick_out.fade_length, channel);
+		} else {
+			memset (rci->pre_loop_buffer, 0, sizeof (Sample) * loop_fade_length);
+		}
+
+	}
 }

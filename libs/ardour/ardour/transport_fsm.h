@@ -54,7 +54,7 @@ struct TransportFSM
 		};
 		/* for locate */
 		samplepos_t target;
-		bool with_loop;
+		bool for_loop_end;
 		bool force;
 
 		Event (EventType t)
@@ -62,7 +62,7 @@ struct TransportFSM
 			, with_roll (false)
 			, with_flush (false)
 			, target (0)
-			, with_loop (false)
+			, for_loop_end (false)
 			, force (false)
 		{}
 		Event (EventType t, bool ab, bool cl)
@@ -77,7 +77,7 @@ struct TransportFSM
 			, with_roll (r)
 			, with_flush (fl)
 			, target (pos)
-			, with_loop (lp)
+			, for_loop_end (lp)
 			, force (f4c)
 		{
 			assert (t == Locate);

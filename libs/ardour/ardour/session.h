@@ -1486,7 +1486,6 @@ private:
 
 	PBD::ScopedConnectionList loop_connections;
 	void             auto_loop_changed (Location *);
-	void             auto_loop_declick_range (Location *, samplepos_t &, samplepos_t &);
 
 	void pre_engine_init (std::string path);
 	int  post_engine_init ();

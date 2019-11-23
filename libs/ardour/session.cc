@@ -1408,17 +1408,6 @@ Session::auto_punch_changed (Location* location)
 	auto_punch_end_changed (location);
 }
 
-/** @param loc A loop location.
- *  @param pos Filled in with the start time of the required fade-out (in session samples).
- *  @param length Filled in with the length of the required fade-out.
- */
-void
-Session::auto_loop_declick_range (Location* loc, samplepos_t & pos, samplepos_t & length)
-{
-	pos = max (loc->start(), loc->end() - 64);
-	length = loc->end() - pos;
-}
-
 void
 Session::auto_loop_changed (Location* location)
 {
@@ -1429,6 +1418,12 @@ Session::auto_loop_changed (Location* location)
 	if (rolling) {
 
 		if (play_loop) {
+
+			boost::shared_ptr<RouteList> r = routes.reader ();
+
+			for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+				(*i)->reload_loop ();
+			}
 
 			if (_transport_sample < location->start() || _transport_sample > location->end()) {
 				// new loop range excludes current transport
@@ -1534,9 +1529,6 @@ Session::set_auto_loop_location (Location* location)
 		loop_connections.drop_connections ();
 		existing->set_auto_loop (false, this);
 		remove_event (existing->end(), SessionEvent::AutoLoop);
-		samplepos_t dcp;
-		samplecnt_t dcl;
-		auto_loop_declick_range (existing, dcp, dcl);
 		auto_loop_location_changed (0);
 	}
 
@@ -1971,6 +1963,10 @@ Session::set_sample_rate (samplecnt_t frames_per_second)
 
 	clear_clicks ();
 	reset_write_sources (false);
+
+	DiskReader::alloc_loop_declick (nominal_sample_rate());
+	Location* loc = _locations->auto_loop_location ();
+	DiskReader::reset_loop_declick (loc, nominal_sample_rate());
 
 	// XXX we need some equivalent to this, somehow
 	// SndFileSource::setup_standard_crossfades (frames_per_second);

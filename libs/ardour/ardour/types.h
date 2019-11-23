@@ -785,6 +785,13 @@ struct CaptureInfo {
 	samplecnt_t samples;
 };
 
+enum LoopFadeChoice {
+	NoLoopFade,
+	EndLoopFade,
+	BothLoopFade,
+	XFadeLoop,
+};
+
 typedef std::vector<CaptureInfo*> CaptureInfos;
 
 } // namespace ARDOUR
