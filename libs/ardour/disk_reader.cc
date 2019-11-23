@@ -601,17 +601,9 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
-#ifndef NDEBUG
-	if (_declick_amp.gain() != 0) {
-		/* this should not happen. new transport should postponse seeking
-		 * until de-click is complete */
-		printf ("LOCATE WITHOUT DECLICK (gain=%f) at %ld seek-to %ld\n", _declick_amp.gain (), playback_sample, sample);
-		//return -1;
-	}
 	if (sample == playback_sample && !complete_refill) {
 		return 0; // XXX double-check this
 	}
-#endif
 
 	g_atomic_int_set (&_pending_overwrite, 0);
 
