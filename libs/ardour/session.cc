@@ -1415,15 +1415,15 @@ Session::auto_loop_changed (Location* location)
 
 	const bool rolling = transport_rolling ();
 
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		(*i)->reload_loop ();
+	}
+
 	if (rolling) {
 
 		if (play_loop) {
-
-			boost::shared_ptr<RouteList> r = routes.reader ();
-
-			for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-				(*i)->reload_loop ();
-			}
 
 			if (_transport_sample < location->start() || _transport_sample > location->end()) {
 				// new loop range excludes current transport

@@ -4148,6 +4148,10 @@ Session::config_changed (std::string p, bool ours)
 				remove_monitor_section ();
 			}
 		}
+	} else if (p == "loop-fade-choice") {
+		cerr << "LFC change, change auto-loop\n";
+		last_loopend = 0; /* force locate to refill buffers with new loop boundary data */
+		auto_loop_changed (_locations->auto_loop_location());
 	}
 
 	set_dirty ();

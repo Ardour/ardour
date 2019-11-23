@@ -794,6 +794,8 @@ DiskReader::audio_read (PBD::PlaybackBuffer<Sample>*rb,
 
 			/* Looping: do something (maybe) about the loop boundaries */
 
+			cerr << name() << " Read with lfc  = " << enum_2_string (Config->get_loop_fade_choice()) << endl;
+
 			switch (Config->get_loop_fade_choice()) {
 			case NoLoopFade:
 				break;
