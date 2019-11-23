@@ -349,9 +349,8 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 		TFSM_EVENT (TransportFSM::ButlerRequired);
 	} else {
 		TFSM_EVENT (TransportFSM::LocateDone);
+		loop_changing = false;
 	}
-
-	loop_changing = false;
 
 	_send_timecode_update = true;
 
@@ -713,6 +712,7 @@ Session::butler_completed_transport_work ()
 		post_locate ();
 		ptw = PostTransportWork (ptw & ~PostTransportLocate);
 		set_post_transport_work (ptw);
+		loop_changing = false;
 		TFSM_EVENT (TransportFSM::LocateDone);
 	}
 
@@ -1564,7 +1564,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	if (ptw & (PostTransportClearSubstate|PostTransportStop)) {
 		unset_play_range ();
-		if (!Config->get_loop_is_mode()) {
+		if (!loop_changing && !Config->get_loop_is_mode()) {
 			unset_play_loop ();
 		}
 	}
