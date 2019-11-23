@@ -866,7 +866,7 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::Locate:
-		/* args: do not roll after locate, do flush, not with loop, force */
+		/* args: do not roll after locate, clear state, not for loop, force */
 		TFSM_LOCATE (ev->target_sample, false, true, false, ev->yes_or_no);
 		_send_timecode_update = true;
 		break;
