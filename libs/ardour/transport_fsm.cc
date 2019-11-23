@@ -395,8 +395,7 @@ TransportFSM::start_declick_for_locate (Event const & l)
 	if (!current_roll_after_locate_status) {
 		set_roll_after (l.with_roll);
 	}
-
-	_last_stop = Event (StopTransport, false, false);
+	api->stop_transport (false, false);
 }
 
 void
