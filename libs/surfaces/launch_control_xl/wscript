@@ -30,8 +30,7 @@ def build(bld):
     obj.defines = ['PACKAGE="ardour_launch_control_xl"']
     obj.defines += ['ARDOURSURFACE_DLL_EXPORTS']
     obj.defines += ['VERSIONSTRING="' + bld.env['VERSION'] + '"']
-    obj.includes = ['.', './launch_control_xl']
-    obj.includes += bld.env['INCLUDES_XML']
+    obj.includes = ['.', './launch_control_xl'] + bld.env['INCLUDES_XML']
     obj.name = 'libardour_launch_control_xl'
     obj.target = 'ardour_launch_control_xl'
     obj.uselib = 'GTKMM SIGCPP'

@@ -159,8 +159,7 @@ def build(bld):
         obj.source += 'debug_rt_alloc.c'
 
     obj.export_includes = ['.']
-    obj.includes = ['.']
-    obj.includes += bld.env['INCLUDES_XML']
+    obj.includes = ['.'] + bld.env['INCLUDES_XML']
     obj.name         = 'libpbd'
     obj.target       = 'pbd'
     obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM ARCHIVE CURL'
