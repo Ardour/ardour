@@ -16,7 +16,7 @@ def build(bld):
         obj.install_path = None
         obj.source    = [ 'bb.cc', 'gui.cc', 'misc.cc' ]
         obj.target    = 'bb'
-        obj.includes  = ['.', '../libs']
+        obj.includes = '. ../libs /usr/include/libxml2'
         obj.ldflags   = ['-no-undefined']
         obj.use       = [ 'libardour', 'libevoral', ]
         obj.uselib    = ' JACK GTKMM '
