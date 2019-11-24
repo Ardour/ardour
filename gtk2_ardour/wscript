@@ -622,6 +622,8 @@ def build(bld):
         obj.source    = list(gtk2_ardour_sources)
         obj.target = 'ardour-' + str (bld.env['VERSION'])
         obj.includes = ['.']
+        obj.includes += bld.env['INCLUDES_LILV']
+        obj.ldflags = ['-l' + lib for lib in bld.env['LIB_LILV']]
         obj.ldflags = ['-no-undefined']
 
         if bld.is_defined('WINDOWS_VST_SUPPORT'):
