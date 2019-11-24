@@ -38,7 +38,7 @@ def build(bld):
         obj.cflags = [ bld.env['compiler_flags_dict']['pic'] ]
         
     obj.export_includes     = ['.']
-    obj.includes     = ['.']
+    obj.includes = '. /usr/include/glib-2.0 /usr/lib/glib-2.0/include'
     obj.name         = 'libptformat'
     obj.target       = 'ptformat'
     obj.use          = 'libpbd'
