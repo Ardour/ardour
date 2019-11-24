@@ -24,7 +24,7 @@ def build(bld):
     obj.export_includes = ['./contourdesign']
     obj.defines      = [ 'PACKAGE="ardour_contourdesign"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
-    obj.includes = '. ../libs ../../widgets /usr/include/libxml2'
+    obj.includes = ['.', '../libs', '../../widgets', bld.env['INCLUDES_XML']]
     obj.name         = 'libardour_contourdesign'
     obj.target       = 'ardour_contourdesign'
     obj.uselib       = 'GTKMM USB'
