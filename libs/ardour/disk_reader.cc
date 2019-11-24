@@ -1599,6 +1599,10 @@ DiskReader::set_loop (Location* loc)
 void
 DiskReader::reload_loop ()
 {
+	if (!_loop_location) {
+		return;
+	}
+
 	Location* loc = _loop_location;
 	boost::scoped_array<Sample> mix_buf (new Sample [loop_fade_length]);
 	boost::scoped_array<Sample> gain_buf (new Sample [loop_fade_length]);
