@@ -27,7 +27,7 @@ def build(bld):
     obj.export_includes = ['.']
     obj.defines      = [ 'PACKAGE="ardour_osc"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
-    obj.includes     = ['.', './osc']
+    obj.includes = '. ./osc /usr/include/libxml2'
     obj.name         = 'libardour_osc'
     obj.target       = 'ardour_osc'
     obj.uselib       = 'LO GTKMM GTK GDK'
