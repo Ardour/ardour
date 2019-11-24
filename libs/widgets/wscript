@@ -74,7 +74,8 @@ def build(bld):
         obj.defines      = [ ]
 
     obj.export_includes = ['.']
-    obj.includes = '. /usr/include/glib-2.0 /usr/lib/glib-2.0/include'
+    obj.includes = ['.']
+    obj.includes += bld.env['INCLUDES_GLIB']
     obj.uselib       = 'SIGCPP CAIROMM GTKMM BOOST XML'
     obj.use          = [ 'libpbd', 'libgtkmm2ext' ]
     obj.name         = 'libwidgets'

@@ -39,7 +39,8 @@ def build(bld):
     obj.defines      = [ 'PACKAGE="ardour_push2"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.defines     += [ 'VERSIONSTRING="' + bld.env['VERSION'] + '"' ]
-    obj.includes = ['.', './push2', bld.env['INCLUDES_XML']]
+    obj.includes = ['.', './push2']
+    obj.includes += bld.env['INCLUDES_XML']
     obj.name         = 'libardour_push2'
     obj.target       = 'ardour_push2'
     obj.uselib       = 'CAIROMM PANGOMM USB GTKMM SIGCPP'
