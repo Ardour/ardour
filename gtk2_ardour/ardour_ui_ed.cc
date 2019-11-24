@@ -873,7 +873,9 @@ ARDOUR_UI::save_ardour_state ()
 			_session->add_instant_xml (location_ui->ui().get_state ());
 		}
 		if (virtual_keyboard_window) {
-			_session->add_instant_xml (virtual_keyboard_window->get_state());
+			XMLNode& vkstate (virtual_keyboard_window->get_state());
+			vkstate.add_child_nocopy (virtual_keyboard_window.get_state ());
+			_session->add_instant_xml (vkstate);
 		}
 	} else {
 		Config->add_instant_xml (main_window_node);
@@ -885,7 +887,9 @@ ARDOUR_UI::save_ardour_state ()
 			Config->add_instant_xml (location_ui->ui().get_state ());
 		}
 		if (virtual_keyboard_window) {
-			Config->add_instant_xml (virtual_keyboard_window->get_state());
+			XMLNode& vkstate (virtual_keyboard_window->get_state());
+			vkstate.add_child_nocopy (virtual_keyboard_window.get_state ());
+			_session->add_instant_xml (vkstate);
 		}
 	}
 
