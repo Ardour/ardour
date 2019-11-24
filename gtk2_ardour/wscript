@@ -509,7 +509,6 @@ def build(bld):
         obj.source    = list(gtk2_ardour_sources)
         obj.target    = 'luadoc'
         obj.includes  = ['.', '../libs']
-        obj.ldflags   = ['-no-undefined']
         obj.use       = [
                 'libpbd',
                 'libardour',
@@ -549,7 +548,6 @@ def build(bld):
 #        obj.source    = [ 'ardour_button.cc', 'ui_config.cc', 'tooltips.cc' ]
 #        obj.target    = 'canvas_test'
 #        obj.includes  = ['.', '../libs']
-#        obj.ldflags   = ['-no-undefined']
 #        obj.use       = [
 #                'libpbd',
 #                'libardour',
@@ -624,7 +622,6 @@ def build(bld):
         obj.includes = ['.']
         obj.includes += bld.env['INCLUDES_LILV']
         obj.ldflags = ['-l' + lib for lib in bld.env['LIB_LILV']]
-        obj.ldflags = ['-no-undefined']
 
         if bld.is_defined('WINDOWS_VST_SUPPORT'):
         # Windows VST support mingw
