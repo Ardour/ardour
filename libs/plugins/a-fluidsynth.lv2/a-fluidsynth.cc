@@ -514,7 +514,7 @@ run (LV2_Handle instance, uint32_t n_samples)
 			}
 		}
 		else if (ev->body.type == self->midi_MidiEvent) {
-			if (ev->body.size > 3 || ev->time.frames >= n_samples) {
+			if (ev->body.size > 3 || ev->time.frames >= n_samples || self->reinit_in_progress) {
 				continue;
 			}
 
