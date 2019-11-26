@@ -154,6 +154,7 @@ Editor::undo (uint32_t n)
 	if (_drags->active ()) {
 		_drags->abort ();
 	}
+	paste_count = 0;
 
 	if (_session) {
 		_session->undo (n);
@@ -178,6 +179,7 @@ Editor::redo (uint32_t n)
 	if (_drags->active ()) {
 		_drags->abort ();
 	}
+	paste_count = 0;
 
 	if (_session) {
 	_session->redo (n);
