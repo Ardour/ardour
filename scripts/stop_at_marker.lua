@@ -26,15 +26,14 @@ function factory ()
 			return
 		end
 
-		-- since ardour may split the process cycle for events,
-		-- n_samples may be smaller.
-		local blk = Session:get_block_size ()
 
 		-- transport stop can only happen on a process-cycle boundary.
 		-- This callback happens from within the process callback,
 		-- so we need to queue it ahead of time.
-		if (pos + n_samples + blk >= m and pos + n_samples < m) then
-			Session:request_transport_speed (0.0, true)
+		local blk = Session:get_block_size ()
+		if (pos + blk<= m and pos + blk + n_samples > m ) then
+			-- TODO use session event API, schedule stop at marker's time
+			Session:request_transport_speed (0.0, true, ARDOUR.TransportRequestSource.TRS_Engine)
 		end
 	end
 end
