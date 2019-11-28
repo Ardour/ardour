@@ -24,15 +24,15 @@ def build(bld):
     module_pat = re.sub('^lib', '', bld.env.cshlib_PATTERN)
     module_ext = module_pat[module_pat.rfind('.'):]
 
-    if bld.is_defined ('HAVE_LV2'):
+    if bld.is_defined('HAVE_LV2'):
         # Build RDF files
         for i in ['manifest.ttl', 'a-exp.ttl', 'a-exp#stereo.ttl']:
-            bld(features     = 'subst',
-                source       = i + '.in',
-                target       = '../../LV2/%s/%s' % (bundle, i),
-                install_path = '${LV2DIR}/%s' % bundle,
-                chmod        = Utils.O644,
-                LIB_EXT      = module_ext)
+            obj = bld(features='subst')
+            obj.source = i + '.in'
+            obj.target = '../../LV2/%s/%s' % (bundle, i)
+            obj.install_path = '${LV2DIR}/%s' % bundle
+            obj.chmod = Utils.O644
+            obj.LIB_EXT = module_ext
 
         # Build plugin library
         obj = bld(features     = 'c cshlib',
