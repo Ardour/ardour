@@ -1,6 +1,6 @@
 ardour {
 	["type"]    = "dsp",
-	name        = "Midi Generator",
+	name        = "MIDI Generator",
 	category    = "Example", -- "Utility"
 	license     = "MIT",
 	author      = "Ardour Lua Task Force",
