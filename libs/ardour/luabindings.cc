@@ -352,32 +352,27 @@ LuaBindings::stddef (lua_State* L)
 		.beginStdList <std::string> ("StringList")
 		.endClass ()
 
-	// std::vector<std::string>
 		.beginStdVector <std::string> ("StringVector")
 		.endClass ()
 
-	// std::vector<float>
 		.beginStdVector <float> ("FloatVector")
 		.endClass ()
 
-	// register float array (uint8_t*)
-		.registerArray <uint8_t> ("ByteArray")
+		.beginStdVector <uint8_t> ("ByteVector")
+		.endClass ()
 
-	// register float array (float*)
-		.registerArray <float> ("FloatArray")
-
-	// register float array (int32_t*)
-		.registerArray <int32_t> ("IntArray")
-
-	// std::vector<float*>
 		.beginStdVector <float*> ("FloatArrayVector")
 		.endClass ()
+
+		.registerArray <uint8_t> ("ByteArray")
+		.registerArray <float> ("FloatArray")
+		.registerArray <int32_t> ("IntArray")
 
 		// samplepos_t, sampleoffset_t lists e.g. AnalysisFeatureList
 		.beginStdList <int64_t> ("Int64List")
 		.endClass ()
 
-	// TODO std::set
+		// TODO std::set
 		.endNamespace ();
 }
 

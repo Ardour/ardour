@@ -1938,10 +1938,10 @@ public:
     return beginConstStdVector<T> (name)
       .addVoidConstructor ()
       .addFunction ("push_back", (void (LT::*)(const T&))&LT::push_back)
+      .addFunction ("clear", (void (LT::*)())&LT::clear)
+      .addExtCFunction ("to_array", &CFunc::vectorToArray<T, LT>)
       .addExtCFunction ("add", &CFunc::tableToList<T, LT>);
   }
-
-
 
   //----------------------------------------------------------------------------
 

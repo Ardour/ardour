@@ -1148,6 +1148,17 @@ struct CFunc
     if (!t) { return luaL_error (L, "cannot derefencee shared_ptr"); }
     return tableToListHelper<T, C> (L, t->get());
   }
+  //--------------------------------------------------------------------------
+
+
+  template <class T, class C>
+  static int vectorToArray (lua_State *L)
+  {
+    C * const t = Userdata::get<C> (L, 1, false);
+    T * a = &((*t)[0]);
+    Stack <T*>::push (L, a);
+    return 1;
+  }
 
   //--------------------------------------------------------------------------
   template <class T, class C>
