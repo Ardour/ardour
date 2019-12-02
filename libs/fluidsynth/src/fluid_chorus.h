@@ -49,7 +49,6 @@ typedef enum
  */
 fluid_chorus_t *new_fluid_chorus(fluid_real_t sample_rate);
 void delete_fluid_chorus(fluid_chorus_t *chorus);
-int fluid_chorus_init(fluid_chorus_t *chorus);
 void fluid_chorus_reset(fluid_chorus_t *chorus);
 
 void fluid_chorus_set(fluid_chorus_t *chorus, int set, int nr, fluid_real_t level,

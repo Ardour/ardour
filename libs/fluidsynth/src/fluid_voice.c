@@ -825,7 +825,7 @@ fluid_voice_update_param(fluid_voice_t *voice, int gen)
                 voice->root_pitch = voice->sample->origpitch * 100.0f - voice->sample->pitchadj;
             }
 
-            x = (fluid_ct2hz(voice->root_pitch) * ((fluid_real_t) voice->output_rate / voice->sample->samplerate));
+            x = (fluid_ct2hz_real(voice->root_pitch) * ((fluid_real_t) voice->output_rate / voice->sample->samplerate));
         }
         else
         {
@@ -838,7 +838,7 @@ fluid_voice_update_param(fluid_voice_t *voice, int gen)
                 voice->root_pitch = 0;
             }
 
-            x = fluid_ct2hz(voice->root_pitch);
+            x = fluid_ct2hz_real(voice->root_pitch);
         }
 
         /* voice->pitch depends on voice->root_pitch, so calculate voice->pitch now */

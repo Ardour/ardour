@@ -26,7 +26,7 @@
 static void fluid_rvoice_noteoff_LOCAL(fluid_rvoice_t *voice, unsigned int min_ticks);
 
 /**
- * @return -1 if voice has finished, 0 if it's currently quiet, 1 otherwise
+ * @return -1 if voice is quiet, 0 if voice has finished, 1 otherwise
  */
 static FLUID_INLINE int
 fluid_rvoice_calc_amp(fluid_rvoice_t *voice)
@@ -357,7 +357,7 @@ fluid_rvoice_write(fluid_rvoice_t *voice, fluid_real_t *dsp_buf)
 
     if(count <= 0)
     {
-        return count;
+        return count; /* return -1 if voice is quiet, 0 if voice has finished */
     }
 
     /******************* phase **********************/

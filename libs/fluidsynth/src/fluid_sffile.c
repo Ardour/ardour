@@ -30,6 +30,10 @@
 #include <sndfile.h>
 #endif
 
+#if LIBINSTPATCH_SUPPORT
+#include <libinstpatch/libinstpatch.h>
+#endif
+
 /*=================================sfload.c========================
   Borrowed from Smurf SoundFont Editor by Josh Green
   =================================================================*/
@@ -326,11 +330,13 @@ static int fluid_sffile_read_wav(SFData *sf, unsigned int start, unsigned int en
 
 /**
  * Check if a file is a SoundFont file.
- * @param filename Path to the file to check
- * @return TRUE if it could be a SoundFont, FALSE otherwise
  *
- * @note The current implementation only checks for the "RIFF" and "sfbk" headers in
- * the file. It is useful to distinguish between SoundFont and other (e.g. MIDI) files.
+ * If fluidsynth was built with DLS support, this function will also identify DLS files.
+ * @param filename Path to the file to check
+ * @return TRUE if it could be a SF2, SF3 or DLS file, FALSE otherwise
+ *
+ * @note This function only checks whether header(s) in the RIFF chunk are present.
+ * A call to fluid_synth_sfload() might still fail.
  */
 int fluid_is_soundfont(const char *filename)
 {
@@ -344,7 +350,7 @@ int fluid_is_soundfont(const char *filename)
         {
             return retcode;
         }
-        
+
         if(FLUID_FREAD(&fcc, sizeof(fcc), 1, fp) != 1)
         {
             break;
@@ -366,6 +372,21 @@ int fluid_is_soundfont(const char *filename)
         }
 
         retcode = (fcc == SFBK_FCC);
+        if(retcode)
+        {
+            break;  // seems to be SF2, stop here
+        }
+#ifdef LIBINSTPATCH_SUPPORT
+        else
+        {
+            IpatchFileHandle *fhandle = ipatch_file_identify_open(filename, NULL);
+            if(fhandle != NULL)
+            {
+                retcode = (ipatch_file_identify(fhandle->file, NULL) == IPATCH_TYPE_DLS_FILE);
+                ipatch_file_close(fhandle);
+            }
+        }
+#endif
     }
     while(0);
 
@@ -775,7 +796,7 @@ static int process_info(SFData *sf, int size)
             if((chunk.id != ICMT_FCC && chunk.size > 256) || (chunk.size > 65536) || (chunk.size % 2))
             {
                 FLUID_LOG(FLUID_ERR, "INFO sub chunk %.4s has invalid chunk size of %d bytes",
-                          &chunk.id, chunk.size);
+                          (char*)&chunk.id, chunk.size);
                 return FALSE;
             }
 
@@ -909,19 +930,19 @@ static int pdtahelper(SFData *sf, unsigned int expid, unsigned int reclen, SFChu
 
     if(chunk->id != expid)
     {
-        FLUID_LOG(FLUID_ERR, "Expected PDTA sub-chunk '%.4s' found invalid id instead", &expid);
+        FLUID_LOG(FLUID_ERR, "Expected PDTA sub-chunk '%.4s' found invalid id instead", (char*)&expid);
         return FALSE;
     }
 
     if(chunk->size % reclen)  /* valid chunk size? */
     {
-        FLUID_LOG(FLUID_ERR, "'%.4s' chunk size is not a multiple of %d bytes", &expid, reclen);
+        FLUID_LOG(FLUID_ERR, "'%.4s' chunk size is not a multiple of %d bytes", (char*)&expid, reclen);
         return FALSE;
     }
 
     if((*size -= chunk->size) < 0)
     {
-        FLUID_LOG(FLUID_ERR, "'%.4s' chunk size exceeds remaining PDTA chunk size", &expid);
+        FLUID_LOG(FLUID_ERR, "'%.4s' chunk size exceeds remaining PDTA chunk size", (char*)&expid);
         return FALSE;
     }
 
@@ -2580,7 +2601,7 @@ static int fluid_sffile_read_vorbis(SFData *sf, unsigned int start_byte, unsigne
     sfdata.end = end_byte;
     sfdata.offset = 0;
 
-    memset(&sfinfo, 0, sizeof(sfinfo));
+    FLUID_MEMSET(&sfinfo, 0, sizeof(sfinfo));
 
     /* Seek to beginning of Ogg Vorbis data in Soundfont */
     if(sf->fcbs->fseek(sf->sffd, sf->samplepos + start_byte, SEEK_SET) == FLUID_FAILED)
@@ -2594,12 +2615,12 @@ static int fluid_sffile_read_vorbis(SFData *sf, unsigned int start_byte, unsigne
 
     if(!sndfile)
     {
-        FLUID_LOG(FLUID_ERR, sf_strerror(sndfile));
+        FLUID_LOG(FLUID_ERR, "%s", sf_strerror(sndfile));
         return -1;
     }
 
     // Empty sample
-    if(!sfinfo.frames || !sfinfo.channels)
+    if(sfinfo.frames <= 0 || sfinfo.channels <= 0)
     {
         FLUID_LOG(FLUID_DBG, "Empty decompressed sample");
         *data = NULL;
@@ -2607,7 +2628,12 @@ static int fluid_sffile_read_vorbis(SFData *sf, unsigned int start_byte, unsigne
         return 0;
     }
 
-    /* FIXME: ensure that the decompressed WAV data is 16-bit mono? */
+    // Mono sample
+    if(sfinfo.channels != 1)
+    {
+        FLUID_LOG(FLUID_DBG, "Unsupported channel count %d in ogg sample", sfinfo.channels);
+        goto error_exit;
+    }
 
     wav_data = FLUID_ARRAY(short, sfinfo.frames * sfinfo.channels);
 
@@ -2617,11 +2643,11 @@ static int fluid_sffile_read_vorbis(SFData *sf, unsigned int start_byte, unsigne
         goto error_exit;
     }
 
-    /* Automatically decompresses the Ogg Vorbis data to 16-bit WAV */
+    /* Automatically decompresses the Ogg Vorbis data to 16-bit PCM */
     if(sf_readf_short(sndfile, wav_data, sfinfo.frames) < sfinfo.frames)
     {
         FLUID_LOG(FLUID_DBG, "Decompression failed!");
-        FLUID_LOG(FLUID_ERR, sf_strerror(sndfile));
+        FLUID_LOG(FLUID_ERR, "%s", sf_strerror(sndfile));
         goto error_exit;
     }
 

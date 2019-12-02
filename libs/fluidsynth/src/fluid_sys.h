@@ -124,6 +124,8 @@ typedef gint32   int32_t;
 typedef guint32  uint32_t;
 typedef gint64   int64_t;
 typedef guint64  uint64_t;
+typedef guintptr uintptr_t;
+typedef gintptr  intptr_t;
 
 #endif
 
@@ -168,10 +170,14 @@ typedef guint64  uint64_t;
 
 
 #define FLUID_INLINE              inline
-#define FLUID_POINTER_TO_UINT     GPOINTER_TO_UINT
-#define FLUID_UINT_TO_POINTER     GUINT_TO_POINTER
-#define FLUID_POINTER_TO_INT      GPOINTER_TO_INT
-#define FLUID_INT_TO_POINTER      GINT_TO_POINTER
+
+/* Integer<->pointer conversion */
+#define FLUID_POINTER_TO_UINT(x)  ((unsigned int)(uintptr_t)(x))
+#define FLUID_UINT_TO_POINTER(x)  ((void *)(uintptr_t)(x))
+#define FLUID_POINTER_TO_INT(x)   ((signed int)(intptr_t)(x))
+#define FLUID_INT_TO_POINTER(x)   ((void *)(intptr_t)(x))
+
+/* Endian detection */
 #define FLUID_IS_BIG_ENDIAN       (G_BYTE_ORDER == G_BIG_ENDIAN)
 
 #define FLUID_LE32TOH(x)          GINT32_FROM_LE(x)
@@ -197,6 +203,11 @@ char *fluid_strtok(char **str, const char *delim);
 
 typedef int socklen_t;
 #endif
+
+/**
+    Time functions
+
+ */
 
 unsigned int fluid_curtime(void);
 double fluid_utime(void);

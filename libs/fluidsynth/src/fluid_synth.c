@@ -117,7 +117,6 @@ static int fluid_synth_set_important_channels(fluid_synth_t *synth, const char *
 
 
 /* Callback handlers for real-time settings */
-static void fluid_synth_handle_sample_rate(void *data, const char *name, double value);
 static void fluid_synth_handle_gain(void *data, const char *name, double value);
 static void fluid_synth_handle_polyphony(void *data, const char *name, int value);
 static void fluid_synth_handle_device_id(void *data, const char *name, int value);
@@ -197,7 +196,7 @@ void fluid_synth_settings(fluid_settings_t *settings)
     fluid_settings_register_int(settings, "synth.chorus.active", 1, 0, 1, FLUID_HINT_TOGGLED);
     fluid_settings_register_int(settings, "synth.chorus.nr", FLUID_CHORUS_DEFAULT_N, 0, 99, 0);
     fluid_settings_register_num(settings, "synth.chorus.level", FLUID_CHORUS_DEFAULT_LEVEL, 0.0f, 10.0f, 0);
-    fluid_settings_register_num(settings, "synth.chorus.speed", FLUID_CHORUS_DEFAULT_SPEED, 0.29f, 5.0f, 0);
+    fluid_settings_register_num(settings, "synth.chorus.speed", FLUID_CHORUS_DEFAULT_SPEED, 0.1f, 5.0f, 0);
     fluid_settings_register_num(settings, "synth.chorus.depth", FLUID_CHORUS_DEFAULT_DEPTH, 0.0f, 256.0f, 0);
 
     fluid_settings_register_int(settings, "synth.ladspa.active", 0, 0, 1, FLUID_HINT_TOGGLED);
@@ -431,6 +430,10 @@ fluid_synth_init(void)
 
 
     /* SF2.01 page 57 section 8.4.10 MIDI Pitch Wheel to Initial Pitch ... */
+    /* Initial Pitch is not a "standard" generator, because it isn't mentioned in the
+       list of generators in the SF2 specifications. That's why destination Initial Pitch
+       is replaced here by fine tune generator.
+     */
     fluid_mod_set_source1(&default_pitch_bend_mod, FLUID_MOD_PITCHWHEEL, /* Index=14 */
                           FLUID_MOD_GC                              /* CC =0 */
                           | FLUID_MOD_LINEAR                        /* type=0 */
@@ -443,7 +446,8 @@ fluid_synth_init(void)
                           | FLUID_MOD_UNIPOLAR                                /* P=0 */
                           | FLUID_MOD_POSITIVE                                /* D=0 */
                          );
-    fluid_mod_set_dest(&default_pitch_bend_mod, GEN_PITCH);                 /* Destination: Initial pitch */
+    /* Also see the comment in gen.h about GEN_PITCH */
+    fluid_mod_set_dest(&default_pitch_bend_mod, GEN_FINETUNE);              /* Destination: Fine Tune */
     fluid_mod_set_amount(&default_pitch_bend_mod, 12700.0);                 /* Amount: 12700 cents */
 
 
@@ -589,8 +593,10 @@ static FLUID_INLINE unsigned int fluid_synth_get_min_note_length_LOCAL(fluid_syn
  * @param settings Configuration parameters to use (used directly).
  * @return New FluidSynth instance or NULL on error
  *
- * @note The settings parameter is used directly and should not be modified
- * or freed independently.
+ * @note The @p settings parameter is used directly and should freed after
+ * the synth has been deleted. Further note that you may modify FluidSettings of the
+ * @p settings instance. However, only those FluidSettings marked as 'realtime' will
+ * affect the synth immediately.
  */
 fluid_synth_t *
 new_fluid_synth(fluid_settings_t *settings)
@@ -647,8 +653,6 @@ new_fluid_synth(fluid_settings_t *settings)
     fluid_settings_getnum_float(settings, "synth.overflow.important", &synth->overflow.important);
 
     /* register the callbacks */
-    fluid_settings_callback_num(settings, "synth.sample-rate",
-                                fluid_synth_handle_sample_rate, synth);
     fluid_settings_callback_num(settings, "synth.gain",
                                 fluid_synth_handle_gain, synth);
     fluid_settings_callback_int(settings, "synth.polyphony",
@@ -1126,6 +1130,10 @@ fluid_synth_error(fluid_synth_t *synth)
 
 /**
  * Send a note-on event to a FluidSynth object.
+ *
+ * This function will take care of proper legato playing. If a note on channel @p chan is
+ * already playing at the given key @p key, it will be released (even if it is sustained).
+ * In other words, overlapping notes are not allowed.
  * @param synth FluidSynth instance
  * @param chan MIDI channel number (0 to MIDI channel count - 1)
  * @param key MIDI note number (0-127)
@@ -3046,20 +3054,31 @@ fluid_synth_update_presets(fluid_synth_t *synth)
     }
 }
 
-/* Handler for synth.sample-rate setting. */
-static void
-fluid_synth_handle_sample_rate(void *data, const char *name, double value)
-{
-    fluid_synth_t *synth = (fluid_synth_t *)data;
-    fluid_synth_set_sample_rate(synth, (float) value);
-}
-
-
 /**
- * Set sample rate of the synth.
- * @note This function should only be used when no voices or notes are active.
+ * Set up an event to change the sample-rate of the synth during the next rendering call.
+ * @warning This function is broken-by-design! Don't use it! Instead, specify the sample-rate when creating the synth.
+ * @deprecated As of fluidsynth 2.1.0 this function has been deprecated.
+ * Changing the sample-rate is generally not considered to be a real-time use-case, as it always produces some audible artifact ("click", "pop") on the dry sound and effects (because LFOs for chorus and reverb need to be reinitialized).
+ * The sample-rate change may also require memory allocation deep down in the effect units.
+ * However, this memory allocation may fail and there is no way for the caller to know that, because the actual change of the sample-rate is executed during rendering.
+ * This function cannot (must not) do the sample-rate change itself, otherwise the synth needs to be locked down, causing rendering to block.
+ * Esp. do not use this function if this @p synth instance is used by an audio driver, because the audio driver cannot be notified by this sample-rate change.
+ * Long story short: don't use it.
+ * @code{.cpp}
+    fluid_synth_t* synth; // assume initialized
+    // [...]
+    // sample-rate change needed? Delete the audio driver, if any.
+    delete_fluid_audio_driver(adriver);
+    // then delete the synth
+    delete_fluid_synth(synth);
+    // update the sample-rate
+    fluid_settings_setnum(settings, "synth.sample-rate", 22050.0);
+    // and re-create objects
+    synth = new_fluid_synth(settings);
+    adriver = new_fluid_audio_driver(settings, synth);
+ * @endcode
  * @param synth FluidSynth instance
- * @param sample_rate New sample rate (Hz)
+ * @param sample_rate New sample-rate (Hz)
  * @since 1.1.2
  */
 void
@@ -3382,6 +3401,8 @@ fluid_synth_nwrite_float(fluid_synth_t *synth, int len,
     fluid_return_val_if_fail(synth != NULL, FLUID_FAILED);
     fluid_return_val_if_fail(left != NULL, FLUID_FAILED);
     fluid_return_val_if_fail(right != NULL, FLUID_FAILED);
+    fluid_return_val_if_fail(len >= 0, FLUID_FAILED);
+    fluid_return_val_if_fail(len != 0, FLUID_OK); // to avoid raising FE_DIVBYZERO below
 
     /* First, take what's still available in the buffer */
     count = 0;
@@ -3666,6 +3687,8 @@ fluid_synth_process_LOCAL(fluid_synth_t *synth, int len, int nfx, float *fx[],
     fluid_return_val_if_fail(synth != NULL, FLUID_FAILED);
     fluid_return_val_if_fail(nfx % 2 == 0, FLUID_FAILED);
     fluid_return_val_if_fail(nout % 2 == 0, FLUID_FAILED);
+    fluid_return_val_if_fail(len >= 0, FLUID_FAILED);
+    fluid_return_val_if_fail(len != 0, FLUID_OK); // to avoid raising FE_DIVBYZERO below
 
     nfxchan = synth->effects_channels;
     nfxunits = synth->effects_groups;
@@ -3798,9 +3821,19 @@ fluid_synth_write_float(fluid_synth_t *synth, int len,
                         void *lout, int loff, int lincr,
                         void *rout, int roff, int rincr)
 {
-    int i, j, k, l;
-    float *left_out = (float *) lout;
-    float *right_out = (float *) rout;
+    return fluid_synth_write_float_LOCAL(synth, len, lout, loff, lincr, rout, roff, rincr, fluid_synth_render_blocks);
+}
+
+int
+fluid_synth_write_float_LOCAL(fluid_synth_t *synth, int len,
+                              void *lout, int loff, int lincr,
+                              void *rout, int roff, int rincr,
+                              int (*block_render_func)(fluid_synth_t *, int)
+                             )
+{
+    int n, cur, size;
+    float *left_out = (float *) lout + loff;
+    float *right_out = (float *) rout + roff;
     fluid_real_t *left_in;
     fluid_real_t *right_in;
     double time = fluid_utime();
@@ -3811,28 +3844,60 @@ fluid_synth_write_float(fluid_synth_t *synth, int len,
     fluid_return_val_if_fail(synth != NULL, FLUID_FAILED);
     fluid_return_val_if_fail(lout != NULL, FLUID_FAILED);
     fluid_return_val_if_fail(rout != NULL, FLUID_FAILED);
+    fluid_return_val_if_fail(len >= 0, FLUID_FAILED);
+    fluid_return_val_if_fail(len != 0, FLUID_OK); // to avoid raising FE_DIVBYZERO below
 
     fluid_rvoice_mixer_set_mix_fx(synth->eventhandler->mixer, 1);
-    l = synth->cur;
     fluid_rvoice_mixer_get_bufs(synth->eventhandler->mixer, &left_in, &right_in);
 
-    for(i = 0, j = loff, k = roff; i < len; i++, l++, j += lincr, k += rincr)
+    size = len;
+    cur = synth->cur;
+
+    do
     {
         /* fill up the buffers as needed */
-        if(l >= synth->curmax)
+        if(cur >= synth->curmax)
         {
-            int blocksleft = (len - i + FLUID_BUFSIZE - 1) / FLUID_BUFSIZE;
-            synth->curmax = FLUID_BUFSIZE * fluid_synth_render_blocks(synth, blocksleft);
+            int blocksleft = (size + FLUID_BUFSIZE - 1) / FLUID_BUFSIZE;
+            synth->curmax = FLUID_BUFSIZE * block_render_func(synth, blocksleft);
             fluid_rvoice_mixer_get_bufs(synth->eventhandler->mixer, &left_in, &right_in);
-
-            l = 0;
+            cur = 0;
         }
 
-        left_out[j] = (float) left_in[0 * FLUID_BUFSIZE * FLUID_MIXER_MAX_BUFFERS_DEFAULT + l];
-        right_out[k] = (float) right_in[0 * FLUID_BUFSIZE * FLUID_MIXER_MAX_BUFFERS_DEFAULT + l];
-    }
+        /* calculate amount of available samples */
+        n = synth->curmax - cur;
 
-    synth->cur = l;
+        /* keep track of emitted samples */
+        if(n > size)
+        {
+            n = size;
+        }
+
+        size -= n;
+
+        /* update pointers to current position */
+        left_in  += cur + n;
+        right_in += cur + n;
+
+        /* set final cursor position */
+        cur += n;
+
+        /* reverse index */
+        n = 0 - n;
+
+        do
+        {
+            *left_out = (float) left_in[n];
+            *right_out = (float) right_in[n];
+
+            left_out += lincr;
+            right_out += rincr;
+        }
+        while(++n < 0);
+    }
+    while(size);
+
+    synth->cur = cur;
 
     time = fluid_utime() - time;
     cpu_load = 0.5 * (fluid_atomic_float_get(&synth->cpu_load) + time * synth->sample_rate / len / 10000.0);
@@ -3924,43 +3989,77 @@ fluid_synth_write_s16(fluid_synth_t *synth, int len,
                       void *lout, int loff, int lincr,
                       void *rout, int roff, int rincr)
 {
-    int i, j, k, cur;
-    int16_t *left_out = lout;
-    int16_t *right_out = rout;
+    int di, n, cur, size;
+    int16_t *left_out = (int16_t *)lout + loff;
+    int16_t *right_out = (int16_t *)rout + roff;
     fluid_real_t *left_in;
     fluid_real_t *right_in;
     double time = fluid_utime();
-    int di;
     float cpu_load;
 
     fluid_profile_ref_var(prof_ref);
 
+    fluid_return_val_if_fail(synth != NULL, FLUID_FAILED);
+    fluid_return_val_if_fail(lout != NULL, FLUID_FAILED);
+    fluid_return_val_if_fail(rout != NULL, FLUID_FAILED);
+    fluid_return_val_if_fail(len >= 0, FLUID_FAILED);
+    fluid_return_val_if_fail(len != 0, FLUID_OK); // to avoid raising FE_DIVBYZERO below
+
     fluid_rvoice_mixer_set_mix_fx(synth->eventhandler->mixer, 1);
     fluid_rvoice_mixer_get_bufs(synth->eventhandler->mixer, &left_in, &right_in);
 
+    size = len;
     cur = synth->cur;
     di = synth->dither_index;
 
-    for(i = 0, j = loff, k = roff; i < len; i++, cur++, j += lincr, k += rincr)
+    do
     {
-
         /* fill up the buffers as needed */
         if(cur >= synth->curmax)
         {
-            int blocksleft = (len - i + FLUID_BUFSIZE - 1) / FLUID_BUFSIZE;
+            int blocksleft = (size + FLUID_BUFSIZE - 1) / FLUID_BUFSIZE;
             synth->curmax = FLUID_BUFSIZE * fluid_synth_render_blocks(synth, blocksleft);
             fluid_rvoice_mixer_get_bufs(synth->eventhandler->mixer, &left_in, &right_in);
             cur = 0;
         }
 
-        left_out[j] = round_clip_to_i16(left_in[0 * FLUID_BUFSIZE * FLUID_MIXER_MAX_BUFFERS_DEFAULT + cur] * 32766.0f + rand_table[0][di]);
-        right_out[k] = round_clip_to_i16(right_in[0 * FLUID_BUFSIZE * FLUID_MIXER_MAX_BUFFERS_DEFAULT + cur] * 32766.0f + rand_table[1][di]);
+        /* calculate amount of available samples */
+        n = synth->curmax - cur;
 
-        if(++di >= DITHER_SIZE)
+        /* keep track of emitted samples */
+        if(n > size)
         {
-            di = 0;
+            n = size;
         }
+
+        size -= n;
+
+        /* update pointers to current position */
+        left_in  += cur + n;
+        right_in += cur + n;
+
+        /* set final cursor position */
+        cur += n;
+
+        /* reverse index */
+        n = 0 - n;
+
+        do
+        {
+            *left_out = round_clip_to_i16(left_in[n] * 32766.0f + rand_table[0][di]);
+            *right_out = round_clip_to_i16(right_in[n] * 32766.0f + rand_table[1][di]);
+
+            left_out  += lincr;
+            right_out += rincr;
+
+            if(++di >= DITHER_SIZE)
+            {
+                di = 0;
+            }
+        }
+        while(++n < 0);
     }
+    while(size);
 
     synth->cur = cur;
     synth->dither_index = di;	/* keep dither buffer continous */
@@ -5185,9 +5284,9 @@ fluid_synth_set_chorus_on(fluid_synth_t *synth, int on)
  * @param nr Chorus voice count (0-99, CPU time consumption proportional to
  *   this value)
  * @param level Chorus level (0.0-10.0)
- * @param speed Chorus speed in Hz (0.29-5.0)
- * @param depth_ms Chorus depth (max value depends on synth sample rate,
- *   0.0-21.0 is safe for sample rate values up to 96KHz)
+ * @param speed Chorus speed in Hz (0.1-5.0)
+ * @param depth_ms Chorus depth (max value depends on synth sample-rate,
+ *   0.0-21.0 is safe for sample-rate values up to 96KHz)
  * @param type Chorus waveform type (#fluid_chorus_mod)
  * @return #FLUID_OK on success, #FLUID_FAILED otherwise
  */
@@ -5243,19 +5342,6 @@ int fluid_synth_set_chorus_type(fluid_synth_t *synth, int type)
     return fluid_synth_set_chorus_full(synth, FLUID_CHORUS_SET_TYPE, 0, 0, 0, 0, type);
 }
 
-/**
- * Set one or more chorus parameters.
- * @param synth FluidSynth instance
- * @param set Flags indicating which chorus parameters to set (#fluid_chorus_set_t)
- * @param nr Chorus voice count (0-99, CPU time consumption proportional to
- *   this value)
- * @param level Chorus level (0.0-10.0)
- * @param speed Chorus speed in Hz (0.29-5.0)
- * @param depth_ms Chorus depth (max value depends on synth sample rate,
- *   0.0-21.0 is safe for sample rate values up to 96KHz)
- * @param type Chorus waveform type (#fluid_chorus_mod)
- * @return #FLUID_OK on success, #FLUID_FAILED otherwise
- */
 int
 fluid_synth_set_chorus_full(fluid_synth_t *synth, int set, int nr, double level,
                             double speed, double depth_ms, int type)
@@ -5312,7 +5398,7 @@ fluid_synth_set_chorus_full(fluid_synth_t *synth, int set, int nr, double level,
 /**
  * Get chorus voice number (delay line count) value.
  * @param synth FluidSynth instance
- * @return Chorus voice count (0-99)
+ * @return Chorus voice count
  */
 int
 fluid_synth_get_chorus_nr(fluid_synth_t *synth)
@@ -5328,7 +5414,7 @@ fluid_synth_get_chorus_nr(fluid_synth_t *synth)
 /**
  * Get chorus level.
  * @param synth FluidSynth instance
- * @return Chorus level value (0.0-10.0)
+ * @return Chorus level value
  */
 double
 fluid_synth_get_chorus_level(fluid_synth_t *synth)
@@ -5344,7 +5430,7 @@ fluid_synth_get_chorus_level(fluid_synth_t *synth)
 /**
  * Get chorus speed in Hz.
  * @param synth FluidSynth instance
- * @return Chorus speed in Hz (0.29-5.0)
+ * @return Chorus speed in Hz
  */
 double
 fluid_synth_get_chorus_speed(fluid_synth_t *synth)

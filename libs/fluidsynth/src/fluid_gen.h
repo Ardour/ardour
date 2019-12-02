@@ -27,7 +27,7 @@
 typedef struct _fluid_gen_info_t
 {
     char num;		/* Generator number */
-    char init;		/* Does the generator need to be initialized (cfr. fluid_voice_init()) */
+    char init;		/* Does the generator need to be initialized (not used) */
     char nrpn_scale;	/* The scale to convert from NRPN (cfr. fluid_gen_map_nrpn()) */
     float min;		/* The minimum value */
     float max;		/* The maximum value */

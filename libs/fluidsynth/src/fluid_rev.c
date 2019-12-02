@@ -75,25 +75,26 @@
  * the building of a lot of resonances in the reverberation tail even when
  * using only 8 delays lines (NBR_DELAYS = 8) (default).
  *
- * Although 8 lines give good result, using 12 delays lines brings the overall
- * frequency density quality a bit higher. This quality augmentation is noticeable
- * particularly when using long reverb time (roomsize = 1) on solo instrument with
- * long release time. Of course the cpu load augmentation is +50% relatively
- * to 8 lines.
+ * The frequency density (often called "modal density" is one property that
+ * contributes to sound quality. Although 8 lines give good result, using 12 delays
+ * lines brings the overall frequency density quality a bit higher.
+ * This quality augmentation is noticeable particularly when using long reverb time
+ * (roomsize = 1) on solo instrument with long release time. Of course the cpu load
+ * augmentation is +50% relatively to 8 lines.
  *
  * As a general rule the reverberation tail quality is easier to perceive by ear
  * when using:
  * - percussive instruments (i.e piano and others).
  * - long reverb time (roomsize = 1).
  * - no damping (damp = 0).
- *
+ * - Using headphone. Avoid using loud speaker, you will be quickly misguided by the
+ *   natural reverberation of the room in which you are.
  *
  * The cpu load for 8 lines is a bit lower than for freeverb (- 3%),
  * but higher for 12 lines (+ 41%).
  *
  *
- * The memory consumption is less than for freeverb. This saves 147480 bytes
- * for 8 lines (- 72%) and 110152 bytes for 12 lines (- 54 %).
+ * The memory consumption is less than for freeverb
  * (see the results table below).
  *
  * Two macros are usable at compiler time:
@@ -113,18 +114,22 @@
  * Note: the cpu load in % are relative each to other. These values are
  * given by the fluidsynth profile commands.
  * --------------------------------------------------------------------------
- * reverb    | NBR_DELAYS     | Performances    | memory size     | quality
- *           |                | (cpu_load: %)   | (bytes)         |
+ * reverb    | NBR_DELAYS     | Performances    | memory size       | quality
+ *           |                | (cpu_load: %)   | (bytes)(see note) |
  * ==========================================================================
- * freeverb  | 2 x 8 comb     |  0.670 %        | 204616          | ringing
- *           | 2 x 4 all-pass |                 |                 |
+ * freeverb  | 2 x 8 comb     |  0.670 %        | 204616            | ringing
+ *           | 2 x 4 all-pass |                 |                   |
  * ----------|---------------------------------------------------------------
- *    FDN    | 8              |  0.650 %        | 57136           | far less
- * modulated |                |(feeverb - 3%)   |(freeverb - 72%) | ringing
+ *    FDN    | 8              |  0.650 %        | 112160            | far less
+ * modulated |                |(feeverb - 3%)   | (55% freeverb)    | ringing
  *           |---------------------------------------------------------------
- *           | 12             |  0.942 %        | 94464           | best than
- *           |                |(freeverb + 41%) |(freeverb - 54%) | 8 lines
+ *           | 12             |  0.942 %        | 168240            | best than
+ *           |                |(freeverb + 41%) | (82 %freeverb)    | 8 lines
  *---------------------------------------------------------------------------
+ *
+ * Note:
+ * Values in this column is the memory consumption for sample rate <= 44100Hz.
+ * For sample rate > 44100Hz , multiply these values by (sample rate / 44100Hz).
  *
  *
  *----------------------------------------------------------------------------
@@ -173,6 +178,8 @@
     roomsize parameter.
   - DENORMALISING enable denormalising handling.
 -----------------------------------------------------------------------------*/
+//#define INFOS_PRINT /* allows message to be printed on the console. */
+
 /* Number of delay lines (must be only 8 or 12)
   8 is the default.
  12 produces a better quality but is +50% cpu expensive
@@ -297,16 +304,6 @@ a flatter response on comb filter. So the input gain is set to 0.1 rather 1.0. *
     #define DELAY_L10 1171
     #define DELAY_L11 1187
 #endif
-
-/* Delay lines length table (in samples) */
-static const int delay_length[NBR_DELAYS] =
-{
-    DELAY_L0, DELAY_L1, DELAY_L2, DELAY_L3,
-    DELAY_L4, DELAY_L5, DELAY_L6, DELAY_L7,
-#if (NBR_DELAYS == 12)
-    DELAY_L8, DELAY_L9, DELAY_L10, DELAY_L11
-#endif
-};
 
 
 /*---------------------------------------------------------------------------*/
@@ -613,6 +610,16 @@ static int set_mod_delay_line(mod_delay_line *mdl,
 }
 
 /*-----------------------------------------------------------------------------
+ Return norminal delay length
+
+ @param mdl, pointer on modulated delay line.
+-----------------------------------------------------------------------------*/
+static int get_mod_delay_line_length(mod_delay_line *mdl)
+{
+    return (mdl->dl.size - mdl->mod_depth - INTERP_SAMPLES_NBR);
+}
+
+/*-----------------------------------------------------------------------------
  Reads the sample value out of the modulated delay line.
  @param mdl, pointer on modulated delay line.
  @return the sample value.
@@ -738,6 +745,7 @@ static void update_rev_time_damping(fluid_late *late,
 {
     int i;
     fluid_real_t sample_period = 1 / late->samplerate; /* Sampling period */
+    int delay_length;               /* delay length */
     fluid_real_t dc_rev_time;       /* Reverb time at 0 Hz (in seconds) */
 
     fluid_real_t alpha, alpha2;
@@ -756,8 +764,9 @@ static void update_rev_time_damping(fluid_late *late,
               Computes dc_rev_time
         ------------------------------------------*/
         dc_rev_time = GET_DC_REV_TIME(roomsize);
+        delay_length = get_mod_delay_line_length(&late->mod_delay_lines[NBR_DELAYS - 1]);
         /* computes gi_tmp from dc_rev_time using relation E2 */
-        gi_tmp = FLUID_POW(10, -3 * delay_length[NBR_DELAYS - 1] *
+        gi_tmp = FLUID_POW(10, -3 * delay_length *
                            sample_period / dc_rev_time); /* E2 */
 #else
         /*   roomsize parameters have the same response that Freeverb, that is:
@@ -768,16 +777,18 @@ static void update_rev_time_damping(fluid_late *late,
              Computes dc_rev_time
             ------------------------------------------*/
             fluid_real_t gi_min, gi_max;
+
             /* values gi_min et gi_max are computed using E2 for the line with
               maximum delay */
-            gi_max = FLUID_POW(10, (-3 * delay_length[NBR_DELAYS - 1] / MAX_DC_REV_TIME) *
-                               sample_period); /* E2 */
-            gi_min = FLUID_POW(10, (-3 * delay_length[NBR_DELAYS - 1] / MIN_DC_REV_TIME) *
-                               sample_period); /* E2 */
+            delay_length = get_mod_delay_line_length(&late->mod_delay_lines[NBR_DELAYS - 1]);
+            gi_max = FLUID_POW(10, (-3 * delay_length / MAX_DC_REV_TIME) *
+                                    sample_period); /* E2 */
+            gi_min = FLUID_POW(10, (-3 * delay_length / MIN_DC_REV_TIME) *
+                                    sample_period); /* E2 */
             /* gi = f(roomsize, gi_max, gi_min) */
             gi_tmp = gi_min + roomsize * (gi_max - gi_min);
             /* Computes T60DC from gi using inverse of relation E2.*/
-            dc_rev_time = -3 * FLUID_M_LN10 * delay_length[NBR_DELAYS - 1] * sample_period / FLUID_LOGF(gi_tmp);
+            dc_rev_time = -3 * FLUID_M_LN10 * delay_length * sample_period / FLUID_LOGF(gi_tmp);
         }
 #endif /* ROOMSIZE_RESPONSE_LINEAR */
         /*--------------------------------------------
@@ -809,12 +820,16 @@ static void update_rev_time_damping(fluid_late *late,
     /* updates damping  coefficients of all lines (gi , ai) from dc_rev_time, alpha */
     for(i = 0; i < NBR_DELAYS; i++)
     {
+        fluid_real_t gi, ai;
+
+        /* delay length */
+        delay_length = get_mod_delay_line_length(&late->mod_delay_lines[i]);
+
         /* iir low pass filter gain */
-        fluid_real_t gi = FLUID_POW(10, -3 * delay_length[i] *
-                                    sample_period / dc_rev_time);
+        gi = FLUID_POW(10, -3 * delay_length * sample_period / dc_rev_time);
 
         /* iir low pass filter feedback gain */
-        fluid_real_t ai = (20.f / 80.f) * FLUID_LOGF(gi) * (1.f - 1.f / alpha2);
+        ai = (20.f / 80.f) * FLUID_LOGF(gi) * (1.f - 1.f / alpha2);
 
         /* b0 = gi * (1 - ai),  a1 = - ai */
         set_fdn_delay_lpf(&late->mod_delay_lines[i].dl.damping,
@@ -830,6 +845,7 @@ static void update_rev_time_damping(fluid_late *late,
 static void update_stereo_coefficient(fluid_late *late, fluid_real_t wet1)
 {
     int i;
+    fluid_real_t wet;
 
     for(i = 0; i < NBR_DELAYS; i++)
     {
@@ -852,26 +868,23 @@ static void update_stereo_coefficient(fluid_late *late, fluid_real_t wet1)
                        11|-1   -1|
         */
 
-        late->out_left_gain[i] = wet1;
+        /* for left line: 00,  ,02,  ,04,  ,06,  ,08,  ,10,  ,12,... left_gain = +1 */
+        /* for left line:   ,01,  ,03,  ,05,  ,07,  ,09,  ,11,...    left_gain = -1 */
+        wet = wet1;
+        if(i & 1)
+        {
+            wet = -wet1;
+        }
+        late->out_left_gain[i] = wet;
 
-        /*  Sets Left coefficients first */
-        if(i % 2) /* Left is 1,-1, 1,-1, 1,-1,.... */
+        /* for right line: 00,01,      ,04,05,     ,08,09,     ,12,13  right_gain = +1 */
+        /* for right line:      ,02 ,03,     ,06,07,     ,10,11,...    right_gain = -1 */
+        wet = wet1;
+        if(i & 2)
         {
-            late->out_left_gain[i] *= -1;
+            wet = -wet1;
         }
-
-        /* Now sets right gain as function of Left */
-        /* for right line 1,2,5,6,9,10,13,14, right = - left */
-        if((i == 1) || (i == 2) || (i == 5) || (i == 6) || (i == 9) || (i == 10) || (i == 13) || (i == 14))
-        {
-            /* Right is reverse of Left */
-            late->out_right_gain[i] = -1 * late->out_left_gain[i];
-        }
-        else /* for Right : line 0,3,4,7,8,11,12,15 */
-        {
-            /* Right is same as Left */
-            late->out_right_gain[i] = late->out_left_gain[i];
-        }
+        late->out_right_gain[i] = wet;
     }
 }
 
@@ -892,29 +905,78 @@ static void delete_fluid_rev_late(fluid_late *late)
 }
 
 /*-----------------------------------------------------------------------------
- Creates the fdn reverb.
+ Creates all modulated lines.
  @param late, pointer on the fnd late reverb to initialize.
- @param sample_rate the sample rate.
+ @param sample_rate, the audio sample rate.
  @return FLUID_OK if success, FLUID_FAILED otherwise.
 -----------------------------------------------------------------------------*/
-static int create_fluid_rev_late(fluid_late *late, fluid_real_t sample_rate)
+static int create_mod_delay_lines(fluid_late *late, fluid_real_t sample_rate)
 {
+    /* Delay lines length table (in samples) */
+    static const int delay_length[NBR_DELAYS] =
+    {
+        DELAY_L0, DELAY_L1, DELAY_L2, DELAY_L3,
+        DELAY_L4, DELAY_L5, DELAY_L6, DELAY_L7,
+    #if (NBR_DELAYS == 12)
+        DELAY_L8, DELAY_L9, DELAY_L10, DELAY_L11
+    #endif
+    };
+
     int result; /* return value */
     int i;
 
-    FLUID_MEMSET(late, 0,  sizeof(fluid_late));
+    /*
+      1)"modal density" is one property that contributes to the quality of the reverb tail.
+        The more is the modal density, the less are unwanted resonant frequencies
+        build during the decay time: modal density = total delay / sample rate.
 
-    late->samplerate = sample_rate;
+        Delay line's length given by static table delay_length[] is nominal
+        to get minimum modal density of 0.15 at sample rate 44100Hz.
+        Here we set length_factor to 2 to mutiply this nominal modal
+        density by 2. This leads to a default modal density of 0.15 * 2 = 0.3 for
+        sample rate <= 44100.
 
-    /*--------------------------------------------------------------------------
-      First initialize the modulated delay lines
+        For sample rate > 44100, length_factor is multiplied by
+        sample_rate / 44100. This ensures that the default modal density keeps inchanged.
+        (Without this compensation, the default modal density would be diminished for
+        new sample rate change above 44100Hz).
+
+      2)Modulated delay line contributes to diminish resonnant frequencies (often called "ringing").
+        Modulation depth (mod_depth) is set to nominal value of MOD_DEPTH at sample rate 44100Hz.
+        For sample rate > 44100, mod_depth is multiplied by sample_rate / 44100. This ensures
+        that the effect of modulated delay line keeps inchanged.
     */
-
-    for(i = 0; i < NBR_DELAYS; i++)
+    fluid_real_t length_factor = 2.0f;
+    fluid_real_t mod_depth = MOD_DEPTH;
+    if(sample_rate > 44100.0f)
     {
-        /* sets local delay lines's parameters */
+        fluid_real_t sample_rate_factor = sample_rate/44100.0f;
+        length_factor *= sample_rate_factor;
+        mod_depth *= sample_rate_factor;
+    }
+#ifdef INFOS_PRINT // allows message to be printed on the console.
+    printf("length_factor:%f, mod_depth:%f\n", length_factor, mod_depth);
+    /* Print: modal density and total memory bytes */
+    {
+        int i;
+        int total_delay; /* total delay in samples */
+        for (i = 0, total_delay = 0; i < NBR_DELAYS; i++)
+        {
+            total_delay += length_factor * delay_length[i];
+        }
+
+        /* modal density and total memory bytes */
+        printf("modal density:%f, total memory:%d bytes\n",
+                total_delay / sample_rate , total_delay * sizeof(fluid_real_t));
+    }
+#endif
+
+    for(i = 0; i < NBR_DELAYS; i++) /* for each delay line */
+    {
+        /* allocate delay line and set local delay lines's parameters */
         result = set_mod_delay_line(&late->mod_delay_lines[i],
-                                    delay_length[i], MOD_DEPTH, MOD_RATE);
+                                    delay_length[i] * length_factor,
+                                    mod_depth, MOD_RATE);
 
         if(result == FLUID_FAILED)
         {
@@ -926,12 +988,33 @@ static int create_fluid_rev_late(fluid_late *late, fluid_real_t sample_rate)
         */
         set_mod_frequency(&late->mod_delay_lines[i].mod,
                           MOD_FREQ * MOD_RATE,
-                          sample_rate,
+                          late->samplerate,
                           (float)(MOD_PHASE * i));
     }
+    return FLUID_OK;
+}
 
-    /*-----------------------------------------------------------------------*/
-    update_stereo_coefficient(late, 1.0f);
+/*-----------------------------------------------------------------------------
+ Creates the fdn reverb.
+ @param late, pointer on the fnd late reverb to initialize.
+ @param sample_rate the sample rate.
+ @return FLUID_OK if success, FLUID_FAILED otherwise.
+-----------------------------------------------------------------------------*/
+static int create_fluid_rev_late(fluid_late *late, fluid_real_t sample_rate)
+{
+    FLUID_MEMSET(late, 0,  sizeof(fluid_late));
+
+    late->samplerate = sample_rate;
+
+    /*--------------------------------------------------------------------------
+      First initialize the modulated delay lines
+    */
+
+    if(create_mod_delay_lines(late, sample_rate) == FLUID_FAILED)
+    {
+        return FLUID_FAILED;
+    }
+
     return FLUID_OK;
 }
 
@@ -982,7 +1065,7 @@ fluid_revmodel_update(fluid_revmodel_t *rev)
     /* integrates wet1 in stereo coefficient (this will save one multiply) */
     update_stereo_coefficient(&rev->late, rev->wet1);
 
-    if(rev->wet1 > 0.0)
+    if(rev->wet1 > 0.0f)
     {
         rev->wet2 /= rev->wet1;
     }
@@ -996,7 +1079,10 @@ fluid_revmodel_update(fluid_revmodel_t *rev)
 -----------------------------------------------------------------------------*/
 
 /*
-* Creates a reverb.
+* Creates a reverb. One created the reverb have no parameters set, so
+* fluid_revmodel_set() must be called at least one time after calling
+* new_fluid_revmodel().
+*
 * @param sample_rate sample rate in Hz.
 * @return pointer on the new reverb or NULL if memory error.
 * Reverb API.
@@ -1024,7 +1110,15 @@ new_fluid_revmodel(fluid_real_t sample_rate)
 
 /*
 * free the reverb.
-* @param pointer on rev to free.
+* Note that while the reverb is used by calling any fluid_revmodel_processXXX()
+* function, calling delete_fluid_revmodel() isn't multi task safe because
+* delay line are freed. To deal properly with this issue follow the steps:
+*
+* 1) Stop reverb processing (i.e disable calling of any fluid_revmodel_processXXX().
+*    reverb functions.
+* 2) Delete the reverb by calling delete_fluid_revmodel().
+*
+* @param rev pointer on reverb to free.
 * Reverb API.
 */
 void
@@ -1036,7 +1130,14 @@ delete_fluid_revmodel(fluid_revmodel_t *rev)
 }
 
 /*
-* Sets one or more reverb parameters.
+* Sets one or more reverb parameters. Note this must be called at least one
+* time after calling new_fluid_revmodel().
+*
+* Note that while the reverb is used by calling any fluid_revmodel_processXXX()
+* function, calling fluid_revmodel_set() could produce audible clics.
+* If this is a problem, optionnaly call fluid_revmodel_reset() before calling
+* fluid_revmodel_set().
+*
 * @param rev Reverb instance.
 * @param set One or more flags from #fluid_revmodel_set_t indicating what
 *   parameters to set (#FLUID_REVMODEL_SET_ALL to set all parameters).
@@ -1084,31 +1185,43 @@ fluid_revmodel_set(fluid_revmodel_t *rev, int set, fluid_real_t roomsize,
 
 /*
 * Applies a sample rate change on the reverb.
+* Note that while the reverb is used by calling any fluid_revmodel_processXXX()
+* function, calling fluid_revmodel_samplerate_change() isn't multi task safe because
+* delay line are memory reallocated. To deal properly with this issue follow
+* the steps:
+* 1) Stop reverb processing (i.e disable calling of any fluid_revmodel_processXXX().
+*    reverb functions.
+* 2) Change sample rate by calling fluid_revmodel_samplerate_change().
+* 3) Restart reverb processing (i.e enabling calling of any fluid_revmodel_processXXX()
+*    reverb functions.
+*
+* Another solution is to substitute step (2):
+* 2.1) delete the reverb by calling delete_fluid_revmodel().
+* 2.2) create the reverb by calling new_fluid_revmodel().
+*
 * @param rev the reverb.
 * @param sample_rate new sample rate value.
-*
+* @return FLUID_OK if success, FLUID_FAILED otherwise (memory error).
 * Reverb API.
 */
-void
+int
 fluid_revmodel_samplerate_change(fluid_revmodel_t *rev, fluid_real_t sample_rate)
 {
-    int i;
+    rev->late.samplerate = sample_rate; /* new sample rate value */
 
-    /* updates modulator frequency according to sample rate change */
-    for(i = 0; i < NBR_DELAYS; i++)
+    /* free all delay lines */
+    delete_fluid_rev_late(&rev->late);
+
+    /* create all delay lines */
+    if(create_mod_delay_lines(&rev->late, sample_rate) == FLUID_FAILED)
     {
-        set_mod_frequency(&rev->late.mod_delay_lines[i].mod,
-                          MOD_FREQ * MOD_RATE,
-                          sample_rate,
-                          (float)(MOD_PHASE * i));
+        return FLUID_FAILED; /* memory error */
     }
 
     /* updates damping filter coefficients according to sample rate change */
-    rev->late.samplerate = sample_rate;
     update_rev_time_damping(&rev->late, rev->roomsize, rev->damp);
 
-    /* clears all delay lines */
-    fluid_revmodel_init(rev);
+    return FLUID_OK;
 }
 
 /*

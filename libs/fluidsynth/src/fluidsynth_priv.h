@@ -181,12 +181,14 @@ typedef void (*fluid_rvoice_function_t)(void *obj, const fluid_rvoice_param_t pa
 #endif
 
 /* Memory allocation */
-#define FLUID_MALLOC(_n)             malloc(_n)
+#define FLUID_MALLOC(_n)             fluid_alloc(_n)
 #define FLUID_REALLOC(_p,_n)         realloc(_p,_n)
-#define FLUID_NEW(_t)                (_t*)malloc(sizeof(_t))
-#define FLUID_ARRAY_ALIGNED(_t,_n,_a) (_t*)malloc((_n)*sizeof(_t) + ((unsigned int)_a - 1u))
-#define FLUID_ARRAY(_t,_n)           FLUID_ARRAY_ALIGNED(_t,_n,1u)
 #define FLUID_FREE(_p)               fluid_free(_p)
+#define FLUID_NEW(_t)                (_t*)FLUID_MALLOC(sizeof(_t))
+#define FLUID_ARRAY_ALIGNED(_t,_n,_a) (_t*)FLUID_MALLOC((_n)*sizeof(_t) + ((unsigned int)_a - 1u))
+#define FLUID_ARRAY(_t,_n)           FLUID_ARRAY_ALIGNED(_t,_n,1u)
+
+void* fluid_alloc(size_t len);
 
 /* File access */
 #define FLUID_FOPEN(_f,_m)           fopen(_f,_m)
@@ -273,7 +275,7 @@ do { strncpy(_dst,_src,_n); \
 #define FLUID_LOG                    fluid_log
 #endif
 
-#ifdef DEBUG
+#if defined(DEBUG) && !defined(NDEBUG)
 #define FLUID_ASSERT(a) g_assert(a)
 #else
 #define FLUID_ASSERT(a)

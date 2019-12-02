@@ -216,6 +216,11 @@ int fluid_synth_set_gen2(fluid_synth_t *synth, int chan,
 int
 fluid_synth_process_LOCAL(fluid_synth_t *synth, int len, int nfx, float *fx[],
                     int nout, float *out[], int (*block_render_func)(fluid_synth_t *, int));
+int
+fluid_synth_write_float_LOCAL(fluid_synth_t *synth, int len,
+                        void *lout, int loff, int lincr,
+                        void *rout, int roff, int rincr,
+                        int (*block_render_func)(fluid_synth_t *, int));
 /*
  * misc
  */

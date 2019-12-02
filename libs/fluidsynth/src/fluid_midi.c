@@ -180,7 +180,7 @@ fluid_file_read_full(fluid_file fp, size_t *length)
         return NULL;
     }
 
-    FLUID_LOG(FLUID_DBG, "File load: Allocating %d bytes", buflen);
+    FLUID_LOG(FLUID_DBG, "File load: Allocating %lu bytes", buflen);
     buffer = FLUID_MALLOC(buflen);
 
     if(buffer == NULL)
@@ -193,7 +193,7 @@ fluid_file_read_full(fluid_file fp, size_t *length)
 
     if(n != buflen)
     {
-        FLUID_LOG(FLUID_ERR, "Only read %d bytes; expected %d", n,
+        FLUID_LOG(FLUID_ERR, "Only read %lu bytes; expected %lu", n,
                   buflen);
         FLUID_FREE(buffer);
         return NULL;

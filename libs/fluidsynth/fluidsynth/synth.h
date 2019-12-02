@@ -32,13 +32,13 @@ extern "C" {
  * @brief Embeddable SoundFont synthesizer
  *
  * You create a new synthesizer with new_fluid_synth() and you destroy
- * if with delete_fluid_synth(). Use the settings structure to specify
+ * it with delete_fluid_synth(). Use the fluid_settings_t structure to specify
  * the synthesizer characteristics.
  *
  * You have to load a SoundFont in order to hear any sound. For that
  * you use the fluid_synth_sfload() function.
  *
- * You can use the audio driver functions described below to open
+ * You can use the audio driver functions to open
  * the audio device and create a background audio thread.
  *
  * The API for sending MIDI events is probably what you expect:
@@ -244,7 +244,7 @@ const char *fluid_synth_error(fluid_synth_t *synth);
 enum fluid_synth_add_mod
 {
     FLUID_SYNTH_OVERWRITE,        /**< Overwrite any existing matching modulator */
-    FLUID_SYNTH_ADD,              /**< Add (sum) modulator amounts */
+    FLUID_SYNTH_ADD,              /**< Sum up modulator amounts */
 };
 
 FLUIDSYNTH_API int fluid_synth_add_default_mod(fluid_synth_t *synth, const fluid_mod_t *mod, int mode);
@@ -296,7 +296,7 @@ enum fluid_iir_filter_type
 };
 
 /**
- * Specifies optional settings to use for the custom IIR filter
+ * Specifies optional settings to use for the custom IIR filter. Can be bitwise ORed.
  */
 enum fluid_iir_filter_flags
 {

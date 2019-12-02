@@ -359,14 +359,14 @@ get_dest_buf(fluid_rvoice_buffers_t *buffers, int index,
 }
 
 /**
- * Mix data down to buffers
+ * Mix samples down from internal dsp_buf to output buffers
  *
  * @param buffers Destination buffer(s)
  * @param dsp_buf Mono sample source
- * @param start_block Block to start mixing at
+ * @param start_block starting sample in dsp_buf
  * @param sample_count number of samples to mix following \c start_block
  * @param dest_bufs Array of buffers to mixdown to
- * @param dest_bufcount Length of dest_bufs
+ * @param dest_bufcount Length of dest_bufs (i.e count of buffers)
  */
 static void
 fluid_rvoice_buffers_mix(fluid_rvoice_buffers_t *buffers,
@@ -374,9 +374,11 @@ fluid_rvoice_buffers_mix(fluid_rvoice_buffers_t *buffers,
                          int start_block, int sample_count,
                          fluid_real_t **dest_bufs, int dest_bufcount)
 {
+    /* buffers count to mixdown to */
     int bufcount = buffers->count;
     int i, dsp_i;
 
+    /* if there is nothing to mix, return immediatly */
     if(sample_count <= 0 || dest_bufcount <= 0)
     {
         return;
@@ -385,6 +387,7 @@ fluid_rvoice_buffers_mix(fluid_rvoice_buffers_t *buffers,
     FLUID_ASSERT((uintptr_t)dsp_buf % FLUID_DEFAULT_ALIGNMENT == 0);
     FLUID_ASSERT((uintptr_t)(&dsp_buf[start_block * FLUID_BUFSIZE]) % FLUID_DEFAULT_ALIGNMENT == 0);
 
+    /* mixdown for each buffer */
     for(i = 0; i < bufcount; i++)
     {
         fluid_real_t *FLUID_RESTRICT buf = get_dest_buf(buffers, i, dest_bufs, dest_bufcount);
@@ -397,11 +400,17 @@ fluid_rvoice_buffers_mix(fluid_rvoice_buffers_t *buffers,
 
         FLUID_ASSERT((uintptr_t)buf % FLUID_DEFAULT_ALIGNMENT == 0);
 
+        /* mixdown sample_count samples in the current buffer buf
+           Note, that this loop could be unrolled by FLUID_BUFSIZE elements */
         #pragma omp simd aligned(dsp_buf,buf:FLUID_DEFAULT_ALIGNMENT)
-
-        for(dsp_i = (start_block * FLUID_BUFSIZE); dsp_i < sample_count; dsp_i++)
+        for(dsp_i = 0; dsp_i < sample_count; dsp_i++)
         {
-            buf[dsp_i] += amp * dsp_buf[dsp_i];
+            // Index by blocks (not by samples) to let the compiler know that we always start accessing
+            // buf and dsp_buf at the FLUID_BUFSIZE*sizeof(fluid_real_t) byte boundary and never somewhere
+            // in between.
+            // A good compiler should understand: Aha, so I don't need to add a peel loop when vectorizing
+            // this loop. Great.
+            buf[start_block * FLUID_BUFSIZE + dsp_i] += amp * dsp_buf[start_block * FLUID_BUFSIZE + dsp_i];
         }
     }
 }
@@ -416,30 +425,42 @@ fluid_mixer_buffers_render_one(fluid_mixer_buffers_t *buffers,
                                fluid_rvoice_t *rvoice, fluid_real_t **dest_bufs,
                                unsigned int dest_bufcount, fluid_real_t *src_buf, int blockcount)
 {
-    int i, total_samples = 0, start_block = 0;
+    int i, total_samples = 0, last_block_mixed = 0;
 
     for(i = 0; i < blockcount; i++)
     {
+        /* render one block in src_buf */
         int s = fluid_rvoice_write(rvoice, &src_buf[FLUID_BUFSIZE * i]);
-
         if(s == -1)
         {
-            start_block += s;
-            s = FLUID_BUFSIZE;
+            /* the voice is silent, mix back all the previously rendered sound */
+            fluid_rvoice_buffers_mix(&rvoice->buffers, src_buf, last_block_mixed,
+                                     total_samples - (last_block_mixed*FLUID_BUFSIZE),
+                                     dest_bufs, dest_bufcount);
+
+            last_block_mixed = i+1; /* future block start index to mix from */
+            total_samples += FLUID_BUFSIZE; /* accumulate samples count rendered */
         }
-
-        total_samples += s;
-
-        if(s < FLUID_BUFSIZE)
+        else
         {
-            break;
+            /* the voice wasn't quiet. Some samples have been rendered [0..FLUID_BUFSIZE] */
+            total_samples += s;
+            if(s < FLUID_BUFSIZE)
+            {
+                /* voice has finished */
+                break;
+            }
         }
     }
 
-    fluid_rvoice_buffers_mix(&rvoice->buffers, src_buf, -start_block, total_samples - ((-start_block)*FLUID_BUFSIZE), dest_bufs, dest_bufcount);
+    /* Now mix the remaining blocks from last_block_mixed to total_sample */
+    fluid_rvoice_buffers_mix(&rvoice->buffers, src_buf, last_block_mixed,
+                             total_samples - (last_block_mixed*FLUID_BUFSIZE),
+                             dest_bufs, dest_bufcount);
 
     if(total_samples < blockcount * FLUID_BUFSIZE)
     {
+        /* voice has finished */
         fluid_finish_rvoice(buffers, rvoice);
     }
 }
@@ -601,7 +622,7 @@ fluid_mixer_buffers_zero(fluid_mixer_buffers_t *buffers, int current_blockcount)
 static int
 fluid_mixer_buffers_init(fluid_mixer_buffers_t *buffers, fluid_rvoice_mixer_t *mixer)
 {
-    const int samplecount = FLUID_BUFSIZE * FLUID_MIXER_MAX_BUFFERS_DEFAULT;
+    static const int samplecount = FLUID_BUFSIZE * FLUID_MIXER_MAX_BUFFERS_DEFAULT;
 
     buffers->mixer = mixer;
     buffers->buf_count = mixer->buffers.buf_count;
