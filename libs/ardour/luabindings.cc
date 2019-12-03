@@ -234,6 +234,7 @@ CLASSKEYS(Evoral::ControlEvent);
 
 
 CLASSKEYS(std::vector<std::string>);
+CLASSKEYS(std::vector<uint8_t>);
 CLASSKEYS(std::vector<float>);
 CLASSKEYS(std::vector<float*>);
 CLASSKEYS(std::vector<double>);
