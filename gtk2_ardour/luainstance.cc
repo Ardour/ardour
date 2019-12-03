@@ -62,41 +62,6 @@
 
 static const char* ui_scripts_file_name = "ui_scripts";
 
-#ifdef PLATFORM_WINDOWS
-/* see libs/ardour/luabindings.cc for details */
-
-template <class T>
-void const*
-luabridge::ClassInfo<T>::getStaticKey ()
-{
-	static char value;
-	return &value;
-}
-
-template <class T>
-void const*
-luabridge::ClassInfo<T>::getClassKey ()
-{
-	static char value;
-	return &value;
-}
-
-template <class T>
-void const*
-luabridge::ClassInfo<T>::getConstKey ()
-{
-	static char value;
-	return &value;
-}
-
-#define CLASSKEYS(CLS) \
-	template void const* luabridge::ClassInfo< CLS >::getStaticKey(); \
-	template void const* luabridge::ClassInfo< CLS >::getClassKey();  \
-	template void const* luabridge::ClassInfo< CLS >::getConstKey();
-
-CLASSKEYS(std::vector<double>);
-#endif
-
 namespace LuaCairo {
 /** wrap RefPtr< Cairo::ImageSurface >
  *
@@ -607,6 +572,7 @@ LuaInstance::bind_cairo (lua_State* L)
 	 */
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("C")
+		.registerArray <double> ("DoubleArray")
 		.beginStdVector <double> ("DoubleVector")
 		.endClass ()
 		.endNamespace ();

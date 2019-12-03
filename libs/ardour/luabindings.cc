@@ -184,6 +184,7 @@ CLASSKEYS(std::bitset<49ul>); // LuaSignal::LAST_SIGNAL
 
 CLASSKEYS(void);
 CLASSKEYS(float);
+CLASSKEYS(double);
 CLASSKEYS(unsigned char);
 
 CLASSKEYS(ArdourMarker*);
