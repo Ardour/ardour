@@ -160,8 +160,6 @@ function factory (params) return function ()
 --]]
 	end -- print_help()
 
-	-- get options
-	local p = params or {}
 	local n_paste  = 1
 	assert (n_paste > 0)
 
