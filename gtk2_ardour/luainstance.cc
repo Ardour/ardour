@@ -89,6 +89,11 @@ luabridge::ClassInfo<T>::getConstKey ()
 	return &value;
 }
 
+#define CLASSKEYS(CLS) \
+	template void const* luabridge::ClassInfo< CLS >::getStaticKey(); \
+	template void const* luabridge::ClassInfo< CLS >::getClassKey();  \
+	template void const* luabridge::ClassInfo< CLS >::getConstKey();
+
 CLASSKEYS(std::vector<double>);
 #endif
 
