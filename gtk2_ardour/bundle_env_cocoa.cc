@@ -157,22 +157,38 @@ void load_custom_fonts()
 	 */
 
 #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
-	std::string ardour_mono_file;
+	std::string font_file;
 
-	if (!find_file (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
+	if (!find_file (ardour_data_search_path(), "ArdourMono.ttf", font_file)) {
 		cerr << _("Cannot find ArdourMono TrueType font") << endl;
+	} else {
+		CFStringRef ttf;
+		CFURLRef fontURL;
+		CFErrorRef error;
+		ttf = CFStringCreateWithBytes(
+				kCFAllocatorDefault, (UInt8*) font_file.c_str(),
+				font_file.length(),
+				kCFStringEncodingUTF8, FALSE);
+		fontURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, ttf, kCFURLPOSIXPathStyle, TRUE);
+		if (CTFontManagerRegisterFontsForURL(fontURL, kCTFontManagerScopeProcess, &error) != true) {
+			cerr << _("Cannot load ArdourMono TrueType font.") << endl;
+		}
 	}
 
-	CFStringRef ttf;
-	CFURLRef fontURL;
-	CFErrorRef error;
-	ttf = CFStringCreateWithBytes(
-			kCFAllocatorDefault, (UInt8*) ardour_mono_file.c_str(),
-			ardour_mono_file.length(),
-			kCFStringEncodingUTF8, FALSE);
-	fontURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, ttf, kCFURLPOSIXPathStyle, TRUE);
-	if (CTFontManagerRegisterFontsForURL(fontURL, kCTFontManagerScopeProcess, &error) != true) {
-		cerr << _("Cannot load ArdourMono TrueType font.") << endl;
+	if (!find_file (ardour_data_search_path(), "ArdourSans.ttf", font_file)) {
+		cerr << _("Cannot find ArdourSans TrueType font") << endl;
+	} else {
+		CFStringRef ttf;
+		CFURLRef fontURL;
+		CFErrorRef error;
+		ttf = CFStringCreateWithBytes(
+				kCFAllocatorDefault, (UInt8*) font_file.c_str(),
+				font_file.length(),
+				kCFStringEncodingUTF8, FALSE);
+		fontURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, ttf, kCFURLPOSIXPathStyle, TRUE);
+		if (CTFontManagerRegisterFontsForURL(fontURL, kCTFontManagerScopeProcess, &error) != true) {
+			cerr << _("Cannot load ArdourSerif TrueType font.") << endl;
+		}
 	}
 #endif
 }

@@ -484,22 +484,29 @@ fixup_bundle_environment (int argc, char* argv[], string & localedir)
 
 void load_custom_fonts()
 {
-	std::string ardour_mono_file;
+	FcConfig* config = FcInitLoadConfigAndFonts();
 
-	if (!find_file (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
+	std::string font_file;
+
+	if (!find_file (ardour_data_search_path(), "ArdourMono.ttf", font_file)) {
 		cerr << _("Cannot find ArdourMono TrueType font") << endl;
+	} else {
+		FcBool ret = FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(font_file.c_str()));
+		if (ret == FcFalse) {
+			cerr << _("Cannot load ArdourMono TrueType font.") << endl;
+		}
 	}
 
-	FcConfig *config = FcInitLoadConfigAndFonts();
-	FcBool ret = FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(ardour_mono_file.c_str()));
-
-	if (ret == FcFalse) {
-		cerr << _("Cannot load ArdourMono TrueType font.") << endl;
+	if (!find_file (ardour_data_search_path(), "ArdourSans.ttf", font_file)) {
+		cerr << _("Cannot find ArdourSans TrueType font") << endl;
+	} else {
+		FcBool ret = FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(font_file.c_str()));
+		if (ret == FcFalse) {
+			cerr << _("Cannot load ArdourSans TrueType font.") << endl;
+		}
 	}
 
-	ret = FcConfigSetCurrent(config);
-
-	if (ret == FcFalse) {
+	if (FcFalse == FcConfigSetCurrent(config)) {
 		cerr << _("Failed to set fontconfig configuration.") << endl;
 	}
 }

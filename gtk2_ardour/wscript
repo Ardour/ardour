@@ -910,6 +910,7 @@ def build(bld):
     # Icons/Images
     bld.install_files(os.path.join (bld.env['DATADIR'], 'icons'), bld.path.ant_glob('icons/*.png'))
     bld.install_files(bld.env['DATADIR'], 'ArdourMono.ttf')
+    bld.install_files(bld.env['DATADIR'], 'ArdourSerif.ttf')
 
     # Application/Product specific resources (icon, splash)
     pgmname = bld.env['PROGRAM_NAME']

@@ -94,42 +94,55 @@ fixup_bundle_environment (int, char* [], string & localedir)
 static __cdecl void
 unload_custom_fonts()
 {
-	std::string ardour_mono_file;
-	if (!find_file (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
-		return;
+	std::string font_file;
+	if (find_file (ardour_data_search_path(), "ArdourMono.ttf", font_file)) {
+		RemoveFontResource(font_file.c_str());
 	}
-	RemoveFontResource(ardour_mono_file.c_str());
+	if (find_file (ardour_data_search_path(), "ArdourSerif.ttf", font_file)) {
+		RemoveFontResource(font_file.c_str());
+	}
 }
 
 void
 load_custom_fonts()
 {
 	std::string ardour_mono_file;
+	std::string ardour_sans_file;
 
 	if (!find_file (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
 		cerr << _("Cannot find ArdourMono TrueType font") << endl;
+	}
+
+	if (!find_file (ardour_data_search_path(), "ArdourSans.ttf", ardour_sans_file)) {
+		cerr << _("Cannot find ArdourSans TrueType font") << endl;
+	}
+
+	if (ardour_mono_file.empty () && ardour_sans_file.empty ()) {
 		return;
 	}
 
 	if (pango_font_map_get_type() == PANGO_TYPE_FT2_FONT_MAP) {
 		FcConfig *config = FcInitLoadConfigAndFonts();
-		FcBool ret = FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(ardour_mono_file.c_str()));
 
-		if (ret == FcFalse) {
+		if (!ardour_mono_file.empty () && FcFalse == FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(ardour_mono_file.c_str()))) {
 			cerr << _("Cannot load ArdourMono TrueType font.") << endl;
 		}
 
-		ret = FcConfigSetCurrent(config);
+		if (!ardour_sans_file.empty () && FcFalse == FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(ardour_sans_file.c_str()))) {
+			cerr << _("Cannot load ArdourSans TrueType font.") << endl;
+		}
 
-		if (ret == FcFalse) {
+		if (FcFalse == FcConfigSetCurrent(config)) {
 			cerr << _("Failed to set fontconfig configuration.") << endl;
 		}
 	} else {
 		// pango with win32 backend
 		if (0 == AddFontResource(ardour_mono_file.c_str())) {
 			cerr << _("Cannot register ArdourMono TrueType font with windows gdi.") << endl;
-		} else {
-			atexit (&unload_custom_fonts);
 		}
+		if (0 == AddFontResource(ardour_sans_file.c_str())) {
+			cerr << _("Cannot register ArdourSans TrueType font with windows gdi.") << endl;
+		}
+		atexit (&unload_custom_fonts);
 	}
 }
