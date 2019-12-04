@@ -647,6 +647,7 @@ cp ../../system_config $Etc/system_config
 cp ../../gtk2_ardour/icons/*.png ${Shared}/icons
 cp -r ../../gtk2_ardour/icons/cursor_* ${Shared}/icons/
 cp ../../gtk2_ardour/ArdourMono.ttf $Shared
+cp ../../gtk2_ardour/ArdourSerif.ttf $Shared
 cp ../../gtk2_ardour/resources/${APPNAME}-* ${Shared}/resources/
 
 # Themes: only install those named for this app
