@@ -315,7 +315,7 @@ ARDOUR_UI::setup_windows ()
 		} else {
 			action_script_call_btn[i].set_visual_state (Gtkmm2ext::VisualState (action_script_call_btn[i].visual_state() | Gtkmm2ext::Insensitive));
 		}
-		action_script_call_btn[i].set_sizing_text ("|||");
+		action_script_call_btn[i].set_sizing_text ("88");
 		action_script_call_btn[i].set_no_show_all ();
 	}
 
