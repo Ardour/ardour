@@ -21,6 +21,7 @@
 
 UI_CONFIG_VARIABLE (std::string, icon_set, "icon-set", "default")
 UI_CONFIG_VARIABLE (std::string, ui_rc_file, "ui-rc-file", "clearlooks.rc")
+UI_CONFIG_VARIABLE (std::string, ui_font_family, "ui-font-family", "Sans")
 UI_CONFIG_VARIABLE (std::string, color_file, "color-file", "dark")
 UI_CONFIG_VARIABLE (bool, flat_buttons, "flat-buttons", false)
 UI_CONFIG_VARIABLE (bool, boxy_buttons, "boxy-buttons", false)

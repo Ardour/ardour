@@ -822,11 +822,20 @@ def build(bld):
         key = font_sym
         font_subst_dict[key] = text
 
+    font_subst_dict['FONTFAMILY'] = ''
     # RC file
 
     obj              = bld(features = 'subst')
     obj.source       = [ 'clearlooks.rc.in' ]
     obj.target       = 'clearlooks.rc'
+    obj.install_path = bld.env['CONFDIR']
+    set_subst_dict(obj, font_subst_dict)
+
+    font_subst_dict['FONTFAMILY'] = 'ArdourSans'
+
+    obj              = bld(features = 'subst')
+    obj.source       = [ 'clearlooks.rc.in' ]
+    obj.target       = 'clearlooks.ardoursans.rc'
     obj.install_path = bld.env['CONFDIR']
     set_subst_dict(obj, font_subst_dict)
 

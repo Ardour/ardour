@@ -277,7 +277,8 @@ ARDOUR_UI_UTILS::sanitized_font (std::string const& name)
 	Pango::FontDescription fd (name);
 
 	if (fd.get_family().empty()) {
-		fd.set_family ("Sans");
+		/* default: "Sans" or "ArdourSans" */
+		fd.set_family (UIConfiguration::instance ().get_ui_font_family ());
 	}
 
 	return fd;

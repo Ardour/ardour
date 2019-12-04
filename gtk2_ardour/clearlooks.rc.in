@@ -282,12 +282,12 @@ style "status_bar_box"
 
 style "very_small_text"
 {
-	font_name = "@FONT_SMALLER@"
+	font_name = "@FONTFAMILY@ @FONT_SMALLER@"
 }
 
 style "small_text"
 {
-	font_name = "@FONT_SMALL@"
+	font_name = "@FONTFAMILY@ @FONT_SMALL@"
 }
 
 style "small_clock"
@@ -297,22 +297,22 @@ style "small_clock"
 
 style "small_italic_text"
 {
-	font_name = "italic @FONT_SMALL@"
+	font_name = "@FONTFAMILY@ italic @FONT_SMALL@"
 }
 
 style "small_bold_text"
 {
-	font_name = "bold @FONT_SMALL@"
+	font_name = "@FONTFAMILY@ bold @FONT_SMALL@"
 }
 
 style "medium_bold_text"
 {
-	font_name = "bold @FONT_NORMAL@"
+	font_name = "@FONTFAMILY@ bold @FONT_NORMAL@"
 }
 
 style "medium_text"
 {
-	font_name = "@FONT_NORMAL@"
+	font_name = "@FONTFAMILY@ @FONT_NORMAL@"
 }
 
 style "medium_monospace_text"
@@ -329,12 +329,12 @@ style "red_medium_text" = "medium_text"
 
 style "large_bold_text"
 {
-	font_name = "bold @FONT_LARGE@"
+	font_name = "@FONTFAMILY@ bold @FONT_LARGE@"
 }
 
 style "big_text"
 {
-        font_name = "@FONT_BIG@"
+        font_name = "@FONTFAMILY@ @FONT_BIG@"
 }
 
 style "bigger_clock"
@@ -344,7 +344,7 @@ style "bigger_clock"
 
 style "larger_text"
 {
-	font_name = "@FONT_LARGE@"
+	font_name = "@FONTFAMILY@ @FONT_LARGE@"
 }
 
 style "massive_clock"
@@ -354,7 +354,7 @@ style "massive_clock"
 
 style "big_bold_text"
 {
-	font_name = "bold @FONT_LARGER@"
+	font_name = "@FONTFAMILY@ bold @FONT_LARGER@"
 }
 
 style "plugin_name_text" = "big_bold_text"
