@@ -852,7 +852,7 @@ Session::process_event (SessionEvent* ev)
 
 	switch (ev->type) {
 	case SessionEvent::SetLoop:
-		set_play_loop (ev->yes_or_no);
+		set_play_loop (ev->yes_or_no, true);
 		break;
 
 	case SessionEvent::AutoLoop:
@@ -935,6 +935,10 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::Overwrite:
 		overwrite_some_buffers (ev->track);
+		break;
+
+	case SessionEvent::OverwriteAll:
+		overwrite_some_buffers (boost::shared_ptr<Route>());
 		break;
 
 	case SessionEvent::Audition:

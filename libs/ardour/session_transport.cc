@@ -302,7 +302,7 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 				have_looped = false;
 
 				if (!Config->get_loop_is_mode()) {
-					set_play_loop (false);
+					set_play_loop (false, false);
 				} else {
 					/* this will make the non_realtime_locate() in the butler
 					   which then causes seek() in tracks actually do the right
@@ -808,62 +808,9 @@ Session::flush_all_inserts ()
 	}
 }
 
-void
-Session::set_play_loop (bool yn)
-{
-	ENSURE_PROCESS_THREAD;
-	/* Called from event-handling context */
-
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("set_play_loop (%1)\n", yn));
-
-	Location *loc;
-
-	if (yn == play_loop || (actively_recording() && yn) || (loc = _locations->auto_loop_location()) == 0) {
-		/* nothing to do, or can't change loop status while recording */
-		return;
-	}
-
-	if (yn && synced_to_engine()) {
-		warning << string_compose (
-			_("Looping cannot be supported while %1 is using JACK transport.\n"
-			  "Recommend changing the configured options"), PROGRAM_NAME)
-			<< endmsg;
-		return;
-	}
-
-	if (yn) {
-
-		play_loop = true;
-		have_looped = false;
-
-		if (loc) {
-
-			unset_play_range ();
-			/* set all tracks to use internal looping */
-			set_track_loop (true);
-
-			merge_event (new SessionEvent (SessionEvent::AutoLoop, SessionEvent::Replace, loc->end(), loc->start(), 0.0f));
-
-			if (!Config->get_loop_is_mode()) {
-				/* args: positition, roll=true, flush=true, for_loop_end=false, force buffer, refill  looping */
-
-				TFSM_LOCATE (loc->start(), true, true, false, true);
-			}
-		}
-
-	} else {
-
-		unset_play_loop ();
-	}
-
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC2 with speed = %1\n", _transport_speed));
-	TransportStateChange ();
-}
-
 /* *****************************************************************************
  * END REALTIME ACTIONS
  * ****************************************************************************/
-
 
 void
 Session::add_post_transport_work (PostTransportWork ptw)
@@ -1069,28 +1016,9 @@ Session::request_play_loop (bool yn, bool change_transport_roll)
 		target_speed = transport_speed ();
 	}
 
-	ev = new SessionEvent (SessionEvent::SetLoop, SessionEvent::Add, SessionEvent::Immediate, 0, target_speed, yn);
+	ev = new SessionEvent (SessionEvent::SetLoop, SessionEvent::Add, SessionEvent::Immediate, 0, target_speed, yn, change_transport_roll);
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request set loop = %1, change roll state ? %2\n", yn, change_transport_roll));
 	queue_event (ev);
-
-	if (yn) {
-
-		if (!change_transport_roll) {
-			if (!Config->get_loop_is_mode() && !transport_rolling()) {
-				/* we're not changing transport state, but we do want
-				   to set up position for the new loop. Don't
-				   do this if we're rolling already.
-				*/
-				request_locate (location->start(), false);
-			}
-		}
-	} else {
-		if (!change_transport_roll && transport_rolling()) {
-			// request an immediate locate to refresh the tracks
-			// after disabling looping
-			request_locate (_transport_sample-1, false);
-		}
-	}
 }
 
 void
@@ -1646,15 +1574,74 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 }
 
 void
-Session::unset_play_loop ()
+Session::set_play_loop (bool yn, bool change_transport_state)
+{
+	ENSURE_PROCESS_THREAD;
+	/* Called from event-handling context */
+
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("set_play_loop (%1)\n", yn));
+
+	Location *loc;
+
+	if (yn == play_loop || (actively_recording() && yn) || (loc = _locations->auto_loop_location()) == 0) {
+		/* nothing to do, or can't change loop status while recording */
+		return;
+	}
+
+	if (yn && synced_to_engine()) {
+		warning << string_compose (
+			_("Looping cannot be supported while %1 is using JACK transport.\n"
+			  "Recommend changing the configured options"), PROGRAM_NAME)
+			<< endmsg;
+		return;
+	}
+
+	if (yn) {
+
+		play_loop = true;
+		have_looped = false;
+
+		if (loc) {
+
+			unset_play_range ();
+			/* set all tracks to use internal looping */
+			set_track_loop (true);
+
+			merge_event (new SessionEvent (SessionEvent::AutoLoop, SessionEvent::Replace, loc->end(), loc->start(), 0.0f));
+
+			if (!Config->get_loop_is_mode() && !transport_rolling()) {
+				/* args: positition, roll=true, flush=true, for_loop_end=false, force buffer, refill  looping */
+
+				TFSM_LOCATE (loc->start(), true, true, false, true);
+			}
+		}
+
+	} else {
+
+		unset_play_loop ();
+	}
+
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC2 with speed = %1\n", _transport_speed));
+	TransportStateChange ();
+}
+
+void
+Session::unset_play_loop (bool change_transport_state)
 {
 	if (play_loop) {
+
 		play_loop = false;
 		clear_events (SessionEvent::AutoLoop);
 		set_track_loop (false);
+
 		/* likely need to flush track buffers: this will locate us to wherever we are */
-		add_post_transport_work (PostTransportLocate);
-		TFSM_EVENT (TransportFSM::ButlerRequired);
+
+		if (change_transport_state && transport_rolling ()) {
+			TFSM_EVENT (TransportFSM::StopTransport);
+		}
+
+		overwrite_some_buffers (boost::shared_ptr<Route>());
+
 		TransportStateChange (); /* EMIT SIGNAL */
 	}
 }

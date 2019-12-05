@@ -1683,8 +1683,8 @@ private:
 
 	bool should_ignore_transport_request (TransportRequestSource, TransportRequestType) const;
 
-	void set_play_loop (bool yn);
-	void unset_play_loop ();
+	void set_play_loop (bool yn, bool change_transport_state);
+	void unset_play_loop (bool change_transport_state = false);
 	void overwrite_some_buffers (boost::shared_ptr<Route>);
 	void flush_all_inserts ();
 	int  micro_locate (samplecnt_t distance);

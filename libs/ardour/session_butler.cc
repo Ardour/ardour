@@ -89,10 +89,15 @@ Session::request_overwrite_buffer (boost::shared_ptr<Track> t)
 	queue_event (ev);
 }
 
-/** Process thread. */
 void
 Session::overwrite_some_buffers (boost::shared_ptr<Route> r)
 {
+	/* this is called from the process thread while handling queued
+	 * SessionEvents. Therefore neither playback sample or read offsets in
+	 * tracks will change while we "queue" them all for an upcoming
+	 * overwrite.
+	 */
+
 	if (actively_recording()) {
 		return;
 	}
