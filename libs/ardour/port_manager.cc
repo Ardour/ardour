@@ -1281,6 +1281,8 @@ PortManager::fill_midi_port_info_locked ()
 
 			if (port_is_control_only (*p)) {
 				flags = MidiPortControl;
+			} else if (*p == _backend->my_name() + ":" + _("Virtual Keyboard")) {
+				flags = MidiPortFlags(MidiPortSelection | MidiPortMusic);
 			}
 
 			MidiPortInformation mpi (_backend->name(), *p, true, flags, true);
