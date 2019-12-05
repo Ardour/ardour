@@ -151,10 +151,19 @@ protected:
 		ChannelInfo (samplecnt_t buffer_size);
 		virtual ~ChannelInfo ();
 
-		/** A random-access ringbuffer for data to be played back.
-		 * written to in the butler thread, read from in the process thread.
+		/** A pair of random-access ringbuffers for data to be played back.
+		 * written to in the butler thread, read from in the process
+		 * thread.
+		 *
+		 * 
 		 */
-		PBD::PlaybackBuffer<Sample>* rbuf;
+		PBD::PlaybackBuffer<Sample>* _rbuf[2];
+		/* This returns a pointer to the correct PlaybackBuffer to use
+		   for reading from within process context.
+		*/
+		PBD::PlaybackBuffer<Sample>* rbuf();
+		gint current_rbuf;
+		gint read_switch_rbuf;
 
 		/** A ringbuffer for data to be recorded back, written to in the
 		 * process thread, read from in the butler thread.

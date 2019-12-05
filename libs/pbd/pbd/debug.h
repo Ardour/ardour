@@ -72,6 +72,7 @@ namespace PBD {
 }
 
 #ifndef NDEBUG
+
 #define DEBUG_TRACE(bits,str) if (((bits) & PBD::debug_bits).any()) { PBD::debug_print (# bits, str); }
 #define DEBUG_STR_DECL(id) std::stringstream __debug_str ## id;
 #define DEBUG_STR(id) __debug_str ## id
