@@ -149,7 +149,7 @@ Analyser::process (ProcessContext<float> const & ctx)
 	}
 
 	float const * const data = ctx.data ();
-	for (unsigned int c = 0; c < _channels, c < _dbtp_plugins.size (); ++c) {
+	for (unsigned int c = 0; c < _channels && c < _dbtp_plugins.size (); ++c) {
 		for (s = 0; s < n_samples; ++s) {
 			_bufs[0][s] = data[s * _channels + c];
 		}
@@ -247,7 +247,7 @@ Analyser::result ()
 	}
 
 	const unsigned cmask = _result.n_channels - 1; // [0, 1]
-	for (unsigned int c = 0; c < _channels, c < _dbtp_plugins.size (); ++c) {
+	for (unsigned int c = 0; c < _channels && c < _dbtp_plugins.size (); ++c) {
 		Vamp::Plugin::FeatureSet features = _dbtp_plugins.at(c)->getRemainingFeatures ();
 		if (!features.empty () && features.size () == 2) {
 			_result.have_dbtp = true;

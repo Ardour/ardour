@@ -121,7 +121,7 @@ LoudnessReader::process (ProcessContext<float> const & ctx)
 		}
 	}
 
-	for (unsigned int c = processed_channels; c < _channels, c < _dbtp_plugins.size (); ++c) {
+	for (unsigned int c = processed_channels; c < _channels && c < _dbtp_plugins.size (); ++c) {
 		samplecnt_t s;
 		float const * const d = ctx.data ();
 		for (s = 0; s < n_samples; ++s) {
@@ -154,7 +154,7 @@ LoudnessReader::get_normalize_gain (float target_lufs, float target_dbtp)
 		}
 	}
 
-	for (unsigned int c = 0; c < _channels, c < _dbtp_plugins.size(); ++c) {
+	for (unsigned int c = 0; c < _channels && c < _dbtp_plugins.size(); ++c) {
 		Vamp::Plugin::FeatureSet features = _dbtp_plugins.at(c)->getRemainingFeatures ();
 		if (!features.empty () && features.size () == 2) {
 			const float dbtp = features[0][0].values[0];
