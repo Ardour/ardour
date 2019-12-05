@@ -937,10 +937,6 @@ Session::process_event (SessionEvent* ev)
 		overwrite_some_buffers (ev->track);
 		break;
 
-	case SessionEvent::OverwriteAll:
-		overwrite_some_buffers (boost::shared_ptr<Route>());
-		break;
-
 	case SessionEvent::Audition:
 		set_audition (ev->region);
 		// drop reference to region
