@@ -324,8 +324,8 @@ DiskIOProcessor::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist
 }
 
 DiskIOProcessor::ChannelInfo::ChannelInfo (samplecnt_t bufsize)
-	: current_rbuf (0)
-	, read_switch_rbuf (0)
+	: _process_rbuf (0)
+	, _switch_rbuf (0)
 	, wbuf (0)
 	, capture_transition_buf (0)
 	, curr_capture_cnt (0)
@@ -347,10 +347,40 @@ DiskIOProcessor::ChannelInfo::~ChannelInfo ()
 }
 
 PlaybackBuffer<Sample>*
-DiskIOProcessor::ChannelInfo::rbuf()
+DiskIOProcessor::ChannelInfo::process_rbuf()
 {
-	return _rbuf[0];
+	return _rbuf[g_atomic_int_get (&_process_rbuf)];
 }
+
+PlaybackBuffer<Sample>*
+DiskIOProcessor::ChannelInfo::other_rbuf()
+{
+	return _rbuf[!g_atomic_int_get (&_process_rbuf)];
+}
+
+void
+DiskIOProcessor::ChannelInfo::maybe_switch_rbuf ()
+{
+	if (!g_atomic_int_get (&_switch_rbuf)) {
+		return;
+	}
+
+	while (true) {
+		gint current_process_rbuf = g_atomic_int_get (&_process_rbuf);
+
+		if (g_atomic_int_compare_and_exchange (&_process_rbuf, current_process_rbuf, !_process_rbuf)) {
+			g_atomic_int_set (&_switch_rbuf, 0);
+			break;
+		}
+	}
+}
+
+void
+DiskIOProcessor::ChannelInfo::queue_switch_rbuf ()
+{
+	g_atomic_int_set (&_switch_rbuf, 1);
+}
+
 
 void
 DiskIOProcessor::drop_track ()

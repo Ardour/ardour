@@ -85,8 +85,8 @@ DiskReader::ReaderChannelInfo::resize (samplecnt_t bufsize)
 	_rbuf[0] = new PlaybackBuffer<Sample> (bufsize);
 	/* touch memory to lock it */
 	memset (_rbuf[0]->buffer(), 0, sizeof (Sample) * _rbuf[0]->bufsize());
-	g_atomic_int_set (&current_rbuf, 0);
-	g_atomic_int_set (&read_switch_rbuf, 0);
+	g_atomic_int_set (&_process_rbuf, 0);
+	g_atomic_int_set (&_switch_rbuf, 0);
 
 	/* the alternate rbuf is lazily allocated in ::overwrite_existing_buffers() */
 }
@@ -112,8 +112,8 @@ DiskReader::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_many)
 		c->push_back (new ReaderChannelInfo (_session.butler()->audio_diskstream_playback_buffer_size(), loop_fade_length));
 		DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: new reader channel, write space = %2 read = %3\n",
 		                                            name(),
-		                                            c->back()->rbuf()->write_space(),
-		                                            c->back()->rbuf()->read_space()));
+		                                            c->back()->process_rbuf()->write_space(),
+		                                            c->back()->process_rbuf()->read_space()));
 	}
 
 	return 0;
@@ -222,7 +222,7 @@ DiskReader::buffer_load () const
 		return 1.0;
 	}
 
-	PBD::PlaybackBuffer<Sample>* b = c->front()->rbuf();
+	PBD::PlaybackBuffer<Sample>* b = c->front()->process_rbuf();
 	return (float) ((double) b->read_space() / (double) b->bufsize());
 }
 
@@ -343,7 +343,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 		if (!still_locating || _no_disk_output) {
 			for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-				(*chan)->rbuf()->increment_read_ptr (disk_samples_to_consume);
+				(*chan)->process_rbuf()->increment_read_ptr (disk_samples_to_consume);
 			}
 		}
 
@@ -392,7 +392,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 			if (!declick_out) {
 
-				const samplecnt_t total = chaninfo->rbuf()->read (disk_buf.data(), disk_samples_to_consume);
+				const samplecnt_t total = chaninfo->process_rbuf()->read (disk_buf.data(), disk_samples_to_consume);
 
 				if (disk_samples_to_consume > total) {
 					cerr << _name << " Need " << total << " have only " << disk_samples_to_consume << endl;
@@ -416,7 +416,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				   to ::run()
 				*/
 
-				const samplecnt_t total = chaninfo->rbuf()->read (disk_buf.data(), nframes, false, declick_offs);
+				const samplecnt_t total = chaninfo->process_rbuf()->read (disk_buf.data(), nframes, false, declick_offs);
 
 				if (n == 0) {
 					_declick_offs += total;
@@ -476,13 +476,13 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		if (_playlists[DataType::AUDIO]) {
 			if (!c->empty()) {
 				if (_slaved) {
-					if (c->front()->rbuf()->write_space() >= c->front()->rbuf()->bufsize() / 2) {
-						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: slaved, write space = %2 of %3\n", name(), c->front()->rbuf()->write_space(), c->front()->rbuf()->bufsize()));
+					if (c->front()->process_rbuf()->write_space() >= c->front()->process_rbuf()->bufsize() / 2) {
+						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: slaved, write space = %2 of %3\n", name(), c->front()->process_rbuf()->write_space(), c->front()->process_rbuf()->bufsize()));
 						butler_required = true;
 					}
 				} else {
-					if ((samplecnt_t) c->front()->rbuf()->write_space() >= _chunk_samples) {
-						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: write space = %2 of %3\n", name(), c->front()->rbuf()->write_space(),
+					if ((samplecnt_t) c->front()->process_rbuf()->write_space() >= _chunk_samples) {
+						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: write space = %2 of %3\n", name(), c->front()->process_rbuf()->write_space(),
 						                                            _chunk_samples));
 						butler_required = true;
 					}
@@ -521,7 +521,7 @@ DiskReader::set_pending_overwrite ()
 
 	boost::shared_ptr<ChannelList> c = channels.reader ();
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-		(*chan)->rbuf()->read_flush ();
+		(*chan)->process_rbuf()->read_flush ();
 	}
 
 	g_atomic_int_set (&_pending_overwrite, 1);
@@ -544,7 +544,7 @@ DiskReader::overwrite_existing_buffers ()
 		const bool reversed = _session.transport_speed() < 0.0f;
 
 		/* assume all are the same size */
-		samplecnt_t size = c->front()->rbuf()->write_space ();
+		samplecnt_t size = c->front()->process_rbuf()->write_space ();
 		assert (size > 0);
 
 		boost::scoped_array<Sample> sum_buffer (new Sample[size]);
@@ -565,7 +565,7 @@ DiskReader::overwrite_existing_buffers ()
 
 			ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (*chan);
 
-			if (audio_read ((*chan)->rbuf(), sum_buffer.get(), mixdown_buffer.get(), gain_buffer.get(), start, to_read, rci, n, reversed)) {
+			if (audio_read ((*chan)->process_rbuf(), sum_buffer.get(), mixdown_buffer.get(), gain_buffer.get(), start, to_read, rci, n, reversed)) {
 				error << string_compose(_("DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"), id(), size, overwrite_sample) << endmsg;
 				goto midi;
 			}
@@ -620,7 +620,7 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 	}
 
 	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
-		(*chan)->rbuf()->reset ();
+		(*chan)->process_rbuf()->reset ();
 	}
 
 	playback_sample = sample;
@@ -651,7 +651,7 @@ DiskReader::can_internal_playback_seek (sampleoffset_t distance)
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	for (chan = c->begin(); chan != c->end(); ++chan) {
-		if (!(*chan)->rbuf()->can_seek (distance)) {
+		if (!(*chan)->process_rbuf()->can_seek (distance)) {
 			return false;
 		}
 	}
@@ -674,9 +674,9 @@ DiskReader::internal_playback_seek (sampleoffset_t distance)
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	for (chan = c->begin(); chan != c->end(); ++chan) {
 		if (distance < 0) {
-			off = 0 - (sampleoffset_t) (*chan)->rbuf()->decrement_read_ptr (::llabs (distance));
+			off = 0 - (sampleoffset_t) (*chan)->process_rbuf()->decrement_read_ptr (::llabs (distance));
 		} else {
-			off = (*chan)->rbuf()->increment_read_ptr (distance);
+			off = (*chan)->process_rbuf()->increment_read_ptr (distance);
 		}
 	}
 
@@ -896,7 +896,7 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 	assert(mixdown_buffer);
 	assert(gain_buffer);
 
-	samplecnt_t total_space = c->front()->rbuf()->write_space();
+	samplecnt_t total_space = c->front()->process_rbuf()->write_space();
 
 	if (total_space == 0) {
 		DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: no space to refill\n", name()));
@@ -934,7 +934,7 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 	   work with.
 	*/
 
-	if (_slaved && total_space < (samplecnt_t) (c->front()->rbuf()->bufsize() / 2)) {
+	if (_slaved && total_space < (samplecnt_t) (c->front()->process_rbuf()->bufsize() / 2)) {
 		DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: not enough to refill while slaved\n", this));
 		return 0;
 	}
@@ -947,7 +947,7 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 			/* at start: nothing to do but fill with silence */
 			for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
 				ChannelInfo* chan (*i);
-				chan->rbuf()->write_zero (chan->rbuf()->write_space ());
+				chan->process_rbuf()->write_zero (chan->process_rbuf()->write_space ());
 			}
 			return 0;
 		}
@@ -966,7 +966,7 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 			/* at end: nothing to do but fill with silence */
 			for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
 				ChannelInfo* chan (*i);
-				chan->rbuf()->write_zero (chan->rbuf()->write_space ());
+				chan->process_rbuf()->write_zero (chan->process_rbuf()->write_space ());
 			}
 			return 0;
 		}
@@ -1004,7 +1004,7 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 		file_sample_tmp = ffa;
 		samplecnt_t ts = total_space;
 
-		samplecnt_t to_read = min (ts, (samplecnt_t) chan->rbuf()->write_space ());
+		samplecnt_t to_read = min (ts, (samplecnt_t) chan->process_rbuf()->write_space ());
 		to_read = min (to_read, samples_to_read);
 		assert (to_read >= 0);
 
@@ -1012,7 +1012,7 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 
 		if (to_read) {
 			ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (chan);
-			if (audio_read (chan->rbuf(), sum_buffer, mixdown_buffer, gain_buffer, file_sample_tmp, to_read, rci, chan_n, reversed)) {
+			if (audio_read (chan->process_rbuf(), sum_buffer, mixdown_buffer, gain_buffer, file_sample_tmp, to_read, rci, chan_n, reversed)) {
 				error << string_compose(_("DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"), id(), to_read, ffa) << endmsg;
 				ret = -1;
 				goto out;
@@ -1023,7 +1023,7 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 			/* not sure if action is needed,
 			 * we'll later hit the "to close to the end" case
 			 */
-			//chan->rbuf()->write_zero (zero_fill);
+			//chan->process_rbuf()->write_zero (zero_fill);
 		}
 	}
 
