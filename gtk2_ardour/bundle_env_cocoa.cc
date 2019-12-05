@@ -187,7 +187,7 @@ void load_custom_fonts()
 				kCFStringEncodingUTF8, FALSE);
 		fontURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, ttf, kCFURLPOSIXPathStyle, TRUE);
 		if (CTFontManagerRegisterFontsForURL(fontURL, kCTFontManagerScopeProcess, &error) != true) {
-			cerr << _("Cannot load ArdourSerif TrueType font.") << endl;
+			cerr << _("Cannot load ArdourSans TrueType font.") << endl;
 		}
 	}
 #endif

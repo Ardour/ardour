@@ -98,7 +98,7 @@ unload_custom_fonts()
 	if (find_file (ardour_data_search_path(), "ArdourMono.ttf", font_file)) {
 		RemoveFontResource(font_file.c_str());
 	}
-	if (find_file (ardour_data_search_path(), "ArdourSerif.ttf", font_file)) {
+	if (find_file (ardour_data_search_path(), "ArdourSans.ttf", font_file)) {
 		RemoveFontResource(font_file.c_str());
 	}
 }
