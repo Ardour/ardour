@@ -356,6 +356,13 @@ APianoKeyboard::bind_keys_qwerty ()
 	bind_key ("o", 38);
 	bind_key ("0", 39);
 	bind_key ("p", 40);
+
+	/* ignore */
+	bind_key ("a", -2);
+	bind_key ("f", -3);
+	bind_key ("1", -4);
+	bind_key ("4", -5);
+	bind_key ("8", -6);
 }
 
 void
@@ -547,7 +554,10 @@ APianoKeyboard::on_key_press_event (GdkEventKey* event)
 	char* key = get_keycode (event);
 	int note = key_binding (key);
 
-	if (note < 0) {
+	if (note < -1) {
+		return true;
+	}
+	else if (note < 0) {
 		return false;
 	}
 
@@ -590,6 +600,9 @@ APianoKeyboard::on_key_release_event (GdkEventKey* event)
 	}
 	if (note == 129) {
 		sustain_release ();
+		return true;
+	}
+	if (note < -1) {
 		return true;
 	}
 
