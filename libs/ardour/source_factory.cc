@@ -248,27 +248,23 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 		if (!(flags & Destructive)) {
 
 			try {
-
 				Source* src = new SndFileSource (s, path, chn, flags);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 				// boost_debug_shared_ptr_mark_interesting (src, "Source");
 #endif
 				boost::shared_ptr<Source> ret (src);
-
 				if (setup_peakfile (ret, defer_peaks)) {
 					return boost::shared_ptr<Source>();
 				}
-
 				ret->check_for_analysis_data_on_disk ();
 				if (announce) {
 					SourceCreated (ret);
 				}
 				return ret;
-			}
+			} catch (failed_constructor& err) { }
 
-			catch (failed_constructor& err) {
 #ifdef HAVE_COREAUDIO
-
+			try {
 				Source* src = new CoreAudioSource (s, path, chn, flags);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 				// boost_debug_shared_ptr_mark_interesting (src, "Source");
@@ -282,15 +278,14 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 					SourceCreated (ret);
 				}
 				return ret;
-
-#else
-				throw; // rethrow
+			} catch (...) { }
 #endif
-			}
 
 		} else {
 			// eh?
 		}
+
+		throw failed_constructor ();
 
 	} else if (type == DataType::MIDI) {
 
