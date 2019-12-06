@@ -649,6 +649,13 @@ Editor::embed_sndfiles (vector<string>            paths,
 			return -3;
 		}
 
+		if (!finfo.seekable) {
+			MessageDialog msg ( string_compose ( _("%1\nThis audiofile cannot be embedded. It must be imported!"), short_path (path, 40)), false, Gtk::MESSAGE_ERROR);
+			msg.set_position (WIN_POS_MOUSE);
+			msg.run ();
+			return -2;
+		}
+
 		if (check_sample_rate  && (finfo.samplerate != (int) _session->sample_rate())) {
 			vector<string> choices;
 

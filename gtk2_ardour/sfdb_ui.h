@@ -325,7 +325,7 @@ private:
 	Gtk::VBox block_four;
 
 	bool check_info (const std::vector<std::string>& paths,
-	                 bool& same_size, bool& src_needed, bool& multichannel);
+	                 bool& same_size, bool& src_needed, bool& multichannel, bool& must_copy);
 
 	static bool check_link_status (const ARDOUR::Session*, const std::vector<std::string>& paths);
 
