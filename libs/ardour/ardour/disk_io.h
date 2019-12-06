@@ -111,6 +111,10 @@ public:
 
 	virtual void adjust_buffering() = 0;
 
+	Glib::Threads::Mutex rbuf_lock;
+	void queue_switch_rbuf ();
+	void switch_rbufs ();
+
 protected:
 	friend class Auditioner;
 	virtual int  seek (samplepos_t which_sample, bool complete_refill = false) = 0;
@@ -143,6 +147,10 @@ protected:
 		samplepos_t       capture_val; ///< The start or end file sample position
 	};
 
+	bool _switch_rbuf;
+	int  process_rbuf;
+	int  other_rbuf;
+
 	/** Information about one audio channel, playback or capture
 	 * (depending on the derived class)
 	 */
@@ -157,19 +165,7 @@ protected:
 		 *
 		 *
 		 */
-		PBD::PlaybackBuffer<Sample>* _rbuf[2];
-		gint _process_rbuf;
-		gint _switch_rbuf;
-		/* This returns a pointer to the correct PlaybackBuffer to use
-		   for reading from within process context.
-		*/
-		PBD::PlaybackBuffer<Sample>* process_rbuf ();
-		/* This returns a pointer to the correct PlaybackBuffer to use
-		   for writing to within butler context.
-		*/
-		PBD::PlaybackBuffer<Sample>* other_rbuf();
-		void queue_switch_rbuf ();
-		void maybe_switch_rbuf ();
+		PBD::PlaybackBuffer<Sample>* rbuf[2];
 
 		/** A ringbuffer for data to be recorded back, written to in the
 		 * process thread, read from in the butler thread.

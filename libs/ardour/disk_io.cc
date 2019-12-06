@@ -55,6 +55,9 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
 	, in_set_state (false)
 	, playback_sample (0)
 	, _need_butler (false)
+	, _switch_rbuf (false)
+	, process_rbuf (0)
+	, other_rbuf (1)
 	, channels (new ChannelList)
 	, _midi_buf (0)
 	, _samples_written_to_ringbuffer (0)
@@ -324,63 +327,51 @@ DiskIOProcessor::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist
 }
 
 DiskIOProcessor::ChannelInfo::ChannelInfo (samplecnt_t bufsize)
-	: _process_rbuf (0)
-	, _switch_rbuf (0)
-	, wbuf (0)
+	: wbuf (0)
 	, capture_transition_buf (0)
 	, curr_capture_cnt (0)
 {
-	_rbuf[0] = 0;
-	_rbuf[1] = 0;
+	rbuf[0] = 0;
+	rbuf[1] = 0;
 }
 
 DiskIOProcessor::ChannelInfo::~ChannelInfo ()
 {
-	delete _rbuf[0];
-	delete _rbuf[1];
+	delete rbuf[0];
+	delete rbuf[1];
 	delete wbuf;
 	delete capture_transition_buf;
-	_rbuf[0] = 0;
-	_rbuf[1] = 0;
+	rbuf[0] = 0;
+	rbuf[1] = 0;
 	wbuf = 0;
 	capture_transition_buf = 0;
 }
 
-PlaybackBuffer<Sample>*
-DiskIOProcessor::ChannelInfo::process_rbuf()
+void
+DiskIOProcessor::queue_switch_rbuf ()
 {
-	return _rbuf[g_atomic_int_get (&_process_rbuf)];
-}
-
-PlaybackBuffer<Sample>*
-DiskIOProcessor::ChannelInfo::other_rbuf()
-{
-	return _rbuf[!g_atomic_int_get (&_process_rbuf)];
+	/* must hold _rbuf_lock */
+	_switch_rbuf = true;
 }
 
 void
-DiskIOProcessor::ChannelInfo::maybe_switch_rbuf ()
+DiskIOProcessor::switch_rbufs ()
 {
-	if (!g_atomic_int_get (&_switch_rbuf)) {
-		return;
+	/* must hold _rbuf_lock */
+	assert (_switch_rbuf);
+
+	std::swap (process_rbuf, other_rbuf);
+
+	boost::shared_ptr<ChannelList> c = channels.reader();
+
+	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+		(*chan)->rbuf[other_rbuf]->reset ();
+		cerr << name() << " after switch/reset, other has " << (*chan)->rbuf[other_rbuf]->write_space() << " of " << (*chan)->rbuf[other_rbuf]->bufsize() << endl;
 	}
 
-	while (true) {
-		gint current_process_rbuf = g_atomic_int_get (&_process_rbuf);
-
-		if (g_atomic_int_compare_and_exchange (&_process_rbuf, current_process_rbuf, !_process_rbuf)) {
-			g_atomic_int_set (&_switch_rbuf, 0);
-			break;
-		}
-	}
+	_switch_rbuf = false;
+	cerr << "switched, pbuf now " << process_rbuf << " size " << c->front()->rbuf[process_rbuf]->bufsize() << " other " << other_rbuf << " size " << c->front()->rbuf[other_rbuf]->bufsize() << endl;
 }
-
-void
-DiskIOProcessor::ChannelInfo::queue_switch_rbuf ()
-{
-	g_atomic_int_set (&_switch_rbuf, 1);
-}
-
 
 void
 DiskIOProcessor::drop_track ()
