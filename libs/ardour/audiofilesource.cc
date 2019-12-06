@@ -52,6 +52,7 @@
 
 #include "ardour/audiofilesource.h"
 #include "ardour/debug.h"
+#include "ardour/mp3filesource.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/session.h"
 #include "ardour/filename_extensions.h"
@@ -203,6 +204,10 @@ AudioFileSource::get_soundfile_info (const string& path, SoundFileInfo& _info, s
 		return true;
 	}
 #endif // HAVE_COREAUDIO
+
+	if (Mp3FileSource::get_soundfile_info (path, _info, error_msg) == 0) {
+		return true;
+	}
 
 	return false;
 }

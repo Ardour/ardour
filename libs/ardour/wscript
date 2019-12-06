@@ -148,6 +148,8 @@ libardour_sources = [
         'mode.cc',
         'monitor_control.cc',
         'monitor_processor.cc',
+        'mp3fileimportable.cc',
+        'mp3filesource.cc',
         'mtc_slave.cc',
         'mtdm.cc',
         'muteable.cc',

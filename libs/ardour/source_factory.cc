@@ -34,6 +34,7 @@
 #include "ardour/boost_debug.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_playlist_source.h"
+#include "ardour/mp3filesource.h"
 #include "ardour/source.h"
 #include "ardour/source_factory.h"
 #include "ardour/sndfilesource.h"
@@ -280,6 +281,19 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 				return ret;
 			} catch (...) { }
 #endif
+
+			/* only create mp3s for audition: no announce, no peaks */
+			if (!announce && (!AudioFileSource::get_build_peakfiles () || defer_peaks)) {
+				try {
+					Source* src = new Mp3FileSource (s, path, chn, flags);
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
+					// boost_debug_shared_ptr_mark_interesting (src, "Source");
+#endif
+					boost::shared_ptr<Source> ret (src);
+					return ret;
+
+				} catch (failed_constructor& err) { }
+			}
 
 		} else {
 			// eh?

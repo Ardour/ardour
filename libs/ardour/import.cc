@@ -54,6 +54,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
 #include "ardour/import_status.h"
+#include "ardour/mp3fileimportable.h"
 #include "ardour/region_factory.h"
 #include "ardour/resampled_source.h"
 #include "ardour/runtime_functions.h"
@@ -109,6 +110,18 @@ open_importable_source (const string& path, samplecnt_t samplerate, ARDOUR::SrcQ
 		return boost::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));
 	} catch (...) { }
 #endif
+
+	/* libsndfile and CoreAudioFile failed, try minimp3-decoder */
+	try {
+		boost::shared_ptr<Mp3FileImportableSource> source(new Mp3FileImportableSource(path));
+
+		if (source->samplerate() == samplerate) {
+			return source;
+		}
+
+		/* rewrap as a resampled source */
+		return boost::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));
+	} catch (...) { }
 
 	throw failed_constructor ();
 }
