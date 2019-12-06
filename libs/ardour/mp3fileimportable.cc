@@ -74,7 +74,6 @@ Mp3FileImportableSource::Mp3FileImportableSource (const string& path)
 		CloseHandle (map_handle);
 		close (_fd);
 		throw failed_constructor ();
-		return -1;
 	}
 	_map_addr = (const uint8_t*)view_handle;
 	CloseHandle (map_handle);
