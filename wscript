@@ -384,6 +384,12 @@ int main() { return 0; }''',
         cxx_flags.append('-fno-omit-frame-pointer')
         linker_flags.append('-fsanitize=address')
 
+    if conf.options.tsan:
+        conf.check_cxx(cxxflags=["-fsanitize=thread", "-fno-omit-frame-pointer"], linkflags=["-fsanitize=thread"])
+        c_flags.extend(('-fsanitize=thread', '-fno-omit-frame-pointer'))
+        cxx_flags.extend(('-fsanitize=thread', '-fno-omit-frame-pointer'))
+        linker_flags.append('-fsanitize=thread')
+
     if opt.gprofile:
         debug_flags = [ flags_dict['gprofile'] ]
 
@@ -828,6 +834,8 @@ def options(opt):
                     help='use libc++ instead of default or auto-detected stdlib')
     opt.add_option('--address-sanitizer', action='store_true', default=False, dest='asan',
                     help='Turn on AddressSanitizer (requires GCC >= 4.8 or clang >= 3.1)')
+    opt.add_option('--thread-sanitizer', action='store_true', default=False, dest='tsan',
+                    help='Turn on ThreadSanitizer (requires GCC >= 4.8 or clang, and 64bit CPU)')
     opt.add_option('--ptformat', action='store_true', default=False, dest='ptformat',
                     help='Turn on PT session import option')
     opt.add_option('--no-threaded-waveviews', action='store_true', default=False, dest='no_threaded_waveviews',
