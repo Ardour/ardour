@@ -36,6 +36,7 @@ struct LIBARDOUR_API SoundFileInfo {
 	int64_t     length;
 	std::string format_name;
 	int64_t     timecode;
+	bool        seekable; // non-seekable files must be converted/imported
 };
 
 class LIBARDOUR_API AudioFileSource : public AudioSource, public FileSource {

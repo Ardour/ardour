@@ -1117,6 +1117,7 @@ SndFileSource::get_soundfile_info (const string& path, SoundFileInfo& info, stri
         }
 
 	info.timecode = binfo.load_from_file (sf) ? binfo.get_time_reference() : 0;
+	info.seekable = true;
 
 	sf_close (sf);
 

@@ -282,6 +282,7 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string&)
 
 	_info.samplerate = absd.mSampleRate;
 	_info.channels   = absd.mChannelsPerFrame;
+	_info.seekable   = true;
 
 	size = sizeof(_info.length);
 	if (ExtAudioFileGetProperty(af, kExtAudioFileProperty_FileLengthFrames, &size, &_info.length) != noErr) {
