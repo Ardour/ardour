@@ -158,7 +158,12 @@ Mp3FileImportableSource::seek (samplepos_t pos)
 	}
 
 	while (_read_position + _n_frames <= pos) {
-		if (!decode_mp3 ()) {
+		/* skip ahead, until the frame before the target,
+		 * then start decoding. This provides sufficient
+		 * context to prevent audible hiccups, while still
+		 * providing fast and accurate seeking.
+		 */
+		if (!decode_mp3 (_read_position + 3 * _n_frames <= pos)) {
 			break;
 		}
 		_read_position += _n_frames;
