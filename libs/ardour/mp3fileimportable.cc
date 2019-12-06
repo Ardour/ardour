@@ -93,7 +93,17 @@ Mp3FileImportableSource::Mp3FileImportableSource (const string& path)
 		throw failed_constructor ();
 	}
 
+	/* estimate length, fixed bitrate */
 	_length = _n_frames * _map_length / _info.frame_bytes;
+
+#if 1 /* detect accurate length by parsing frame headers */
+	_length = _n_frames;
+	while (decode_mp3 (true)) {
+		_length += _n_frames;
+	}
+	_read_position = _length;
+	seek (0);
+#endif
 }
 
 Mp3FileImportableSource::~Mp3FileImportableSource ()
@@ -116,11 +126,11 @@ Mp3FileImportableSource::unmap_mem ()
 }
 
 int
-Mp3FileImportableSource::decode_mp3 ()
+Mp3FileImportableSource::decode_mp3 (bool parse_only)
 {
 	_pcm_off = 0;
 	do {
-		_n_frames = mp3dec_decode_frame (&_mp3d, _buffer, _remain, _pcm, &_info);
+		_n_frames = mp3dec_decode_frame (&_mp3d, _buffer, _remain, parse_only ? NULL :_pcm, &_info);
 		_buffer += _info.frame_bytes;
 		_remain -= _info.frame_bytes;
 		if (_n_frames) {
@@ -154,7 +164,7 @@ Mp3FileImportableSource::seek (samplepos_t pos)
 		_read_position += _n_frames;
 	}
 
-	if (_n_frames >= 0) {
+	if (_n_frames > 0) {
 		_pcm_off = _info.channels * (pos - _read_position);
 		_n_frames -= pos - _read_position;
 		_read_position = pos;

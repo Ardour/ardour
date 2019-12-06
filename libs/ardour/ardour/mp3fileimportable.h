@@ -58,7 +58,7 @@ public:
 
 private:
 	void unmap_mem ();
-	int  decode_mp3 ();
+	int  decode_mp3 (bool parse_only = false);
 
 	mp3dec_t            _mp3d;
 	mp3dec_frame_info_t _info;
