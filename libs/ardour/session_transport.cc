@@ -1569,7 +1569,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	TransportStateChange (); /* EMIT SIGNAL */
 	AutomationWatch::instance().transport_stop_automation_watches (_transport_sample);
 
-	ptw = PostTransportWork (ptw & ~(PostTransportStop|PostTransportClearSubstate));
+	ptw = PostTransportWork (ptw & ~(PostTransportAbort|PostTransportStop|PostTransportClearSubstate));
 	set_post_transport_work (ptw);
 }
 
