@@ -331,6 +331,9 @@ AudioFileSource::safe_audio_file_extension(const string& file)
 		".vwe", ".VWE",
 		".w64", ".W64",
 		".wav", ".WAV",
+		/* minimp3 can read mp2, mp3 */
+		".mp2", ".MP2",
+		".mp3", ".MP3",
 #ifdef HAVE_COREAUDIO
 		".aac", ".AAC",
 		".adts", ".ADTS",
@@ -339,8 +342,6 @@ AudioFileSource::safe_audio_file_extension(const string& file)
 		".mpa", ".MPA",
 		".mpeg", ".MPEG",
 		".mp1", ".MP1",
-		".mp2", ".MP2",
-		".mp3", ".MP3",
 		".mp4", ".MP4",
 		".m4a", ".M4A",
 		".sd2", ".SD2", // libsndfile supports sd2 also, but the resource fork is required to open.
