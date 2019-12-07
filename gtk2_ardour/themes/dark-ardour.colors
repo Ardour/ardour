@@ -437,7 +437,7 @@
     <ColorAlias name="transport delta clock: edited text" alias="contrast2"/>
     <ColorAlias name="transport delta clock: text" alias="contrast2"/>
     <ColorAlias name="transport drag rect" alias="gray 50"/>
-    <ColorAlias name="transport loop rect" alias="gray 20"/>
+    <ColorAlias name="transport loop rect" alias="alert green"/>
     <ColorAlias name="transport marker bar" alias="widget bg"/>
     <ColorAlias name="transport option button: fill active" alias="bg"/>
     <ColorAlias name="transport option button: led active" alias="alert orange"/>
