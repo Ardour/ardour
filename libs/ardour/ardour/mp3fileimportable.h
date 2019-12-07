@@ -27,8 +27,11 @@
 
 namespace ARDOUR {
 
-#if defined ( __i386__) || defined  (__PPC__)
-#define MINIMP3_NO_SIMD // for portability
+/* 64bit CPUs always have SSE2, armhf/aarch64 has NEON,
+ * except apple/OSX does not provide immintrin.h
+ */
+#if defined ( __i386__) || defined  (__PPC__) || defined (__APPLE__)
+#define MINIMP3_NO_SIMD // disable for portability
 #endif
 
 #define MINIMP3_NONSTANDARD_BUT_LOGICAL
