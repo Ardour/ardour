@@ -99,9 +99,6 @@ CoreAudioSource::init_cafile ()
 		af.SetClientFormat (client_format);
 
 	} catch (CAXException& cax) {
-
-		error << string_compose(_("CoreAudioSource: cannot open file \"%1\" for %2"),
-					_path, (writable() ? "read+write" : "reading")) << endmsg;
 		throw failed_constructor ();
 	}
 }

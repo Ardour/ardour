@@ -295,6 +295,7 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 			// eh?
 		}
 
+		error << string_compose(_("AudioFileSource: cannot open file \"%1\" "), path) << endmsg;
 		throw failed_constructor ();
 
 	} else if (type == DataType::MIDI) {
