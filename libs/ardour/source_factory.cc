@@ -42,7 +42,7 @@
 #include "ardour/smf_source.h"
 #include "ardour/session.h"
 
-#ifdef  HAVE_COREAUDIO
+#ifdef HAVE_COREAUDIO
 #include "ardour/coreaudiosource.h"
 #endif
 
@@ -183,7 +183,6 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 
 		} else {
 
-
 			try {
 				Source* src = new SndFileSource (s, node);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
@@ -196,15 +195,11 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 				ret->check_for_analysis_data_on_disk ();
 				SourceCreated (ret);
 				return ret;
-			}
-
-			catch (failed_constructor& err) {
+			} catch (failed_constructor& err) { }
 
 #ifdef HAVE_COREAUDIO
-
-				/* this is allowed to throw */
-
-				Source *src = new CoreAudioSource (s, node);
+			try {
+				Source* src = new CoreAudioSource (s, node);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 				// boost_debug_shared_ptr_mark_interesting (src, "Source");
 #endif
@@ -217,11 +212,12 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 				ret->check_for_analysis_data_on_disk ();
 				SourceCreated (ret);
 				return ret;
-#else
-				throw; // rethrow
+			} catch (...) { }
 #endif
-			}
+			/* this is allowed to throw */
+			throw failed_constructor ();
 		}
+
 	} else if (type == DataType::MIDI) {
 		try {
 			boost::shared_ptr<SMFSource> src (new SMFSource (s, node));
