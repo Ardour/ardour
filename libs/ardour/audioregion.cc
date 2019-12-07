@@ -56,9 +56,6 @@
 #include "ardour/progress.h"
 
 #include "ardour/sndfilesource.h"
-#ifdef HAVE_COREAUDIO
-#include "ardour/coreaudiosource.h"
-#endif // HAVE_COREAUDIO
 
 #include "pbd/i18n.h"
 #include <locale.h>
@@ -1602,34 +1599,6 @@ AudioRegion::audio_source (uint32_t n) const
 {
 	// Guaranteed to succeed (use a static cast for speed?)
 	return boost::dynamic_pointer_cast<AudioSource>(source(n));
-}
-
-uint32_t
-AudioRegion::get_related_audio_file_channel_count () const
-{
-    uint32_t chan_count = 0;
-    for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-
-        boost::shared_ptr<SndFileSource> sndf = boost::dynamic_pointer_cast<SndFileSource>(*i);
-        if (sndf ) {
-
-            if (sndf->channel_count() > chan_count) {
-                chan_count = sndf->channel_count();
-            }
-        }
-#ifdef HAVE_COREAUDIO
-        else {
-            boost::shared_ptr<CoreAudioSource> cauf = boost::dynamic_pointer_cast<CoreAudioSource>(*i);
-            if (cauf) {
-                if (cauf->channel_count() > chan_count) {
-                    chan_count = cauf->channel_count();
-                }
-            }
-        }
-#endif // HAVE_COREAUDIO
-    }
-
-    return chan_count;
 }
 
 void
