@@ -1105,7 +1105,11 @@ SndFileSource::get_soundfile_info (const string& path, SoundFileInfo& info, stri
         }
 
 	info.timecode = binfo.load_from_file (sf) ? binfo.get_time_reference() : 0;
-	info.seekable = true;
+
+	/* Mark Ogg/Vorbis files as not seekable, require conversion on import */
+	int const type = sf_info.format & SF_FORMAT_TYPEMASK;
+	int const sub = sf_info.format & SF_FORMAT_SUBMASK;
+	info.seekable = (type != SF_FORMAT_OGG && sub != SF_FORMAT_VORBIS);
 
 	sf_close (sf);
 
