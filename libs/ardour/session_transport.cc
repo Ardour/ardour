@@ -1609,10 +1609,17 @@ Session::set_play_loop (bool yn, bool change_transport_state)
 
 			merge_event (new SessionEvent (SessionEvent::AutoLoop, SessionEvent::Replace, loc->end(), loc->start(), 0.0f));
 
-			if (!Config->get_loop_is_mode() && !transport_rolling()) {
+			if (!Config->get_loop_is_mode()) {
 				/* args: positition, roll=true, flush=true, for_loop_end=false, force buffer, refill  looping */
-
+				/* set this so that when/if we stop for locate,
+				   we do not call unset_play_loop(). This is a
+				   crude mechanism. Got a better idea?
+				*/
+				loop_changing = true;
 				TFSM_LOCATE (loc->start(), true, true, false, true);
+			} else if (!transport_rolling()) {
+				/* loop-is-mode: not rolling, just locate to loop start */
+				TFSM_LOCATE (loc->start(), false, true, false, true);
 			}
 		}
 
