@@ -48,6 +48,7 @@ Pannable::Pannable (Session& s)
 	, pan_frontback_control (new PanControllable (s, "", this, PanFrontBackAutomation))
 	, pan_lfe_control (new PanControllable (s, "", this, PanLFEAutomation))
 	, _auto_state (Off)
+	, _touching (0)
 	, _has_state (false)
 	, _responding_to_control_auto_state_change (0)
 {
