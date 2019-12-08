@@ -33,8 +33,9 @@
 #include "pbd/error.h"
 #include "ardour/mp3fileimportable.h"
 
-using namespace ARDOUR;
 using namespace std;
+
+namespace ARDOUR {
 
 Mp3FileImportableSource::Mp3FileImportableSource (const string& path)
 	: _fd (-1)
@@ -234,4 +235,6 @@ Mp3FileImportableSource::read_unlocked (Sample* dst, samplepos_t start, samplecn
 		}
 	}
 	return dst_off;
+}
+
 }
