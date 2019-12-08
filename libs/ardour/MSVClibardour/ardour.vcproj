@@ -800,6 +800,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\mp3fileimportable.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\mp3filesource.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\mtc_slave.cc"
 				>
 			</File>
@@ -2066,6 +2074,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\minimp3.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\mix.h"
 				>
 			</File>
@@ -2079,6 +2091,14 @@
 			</File>
 			<File
 				RelativePath="..\ardour\movable.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\mp3fileimportable.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\mp3filesource.h"
 				>
 			</File>
 			<File

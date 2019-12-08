@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)giomm32$(GlibmmDllSuffix)D.lib $(DllPrefix)glibmm32$(GlibmmDllSuffix)D.lib pthreadVCE2.lib archive_static32D.lib $(DllPrefix)gio32$(GlibDllSuffix)D.lib $(DllPrefix)glib32$(GlibDllSuffix)D.lib $(DllPrefix)gobject32$(GlibDllSuffix)D.lib $(DllPrefix)sigc++32-2.0D.lib $(DllPrefix)curlD.lib libxml2D.lib libsndfile-1D.lib iconvD.lib zlib1D.lib intlD.lib winmm.lib ws2_32.lib dbghelp.lib"
+				AdditionalDependencies="boost-regex32D.lib $(DllPrefix)giomm32$(GlibmmDllSuffix)D.lib $(DllPrefix)glibmm32$(GlibmmDllSuffix)D.lib pthreadVCE2.lib archive_static32D.lib $(DllPrefix)gio32$(GlibDllSuffix)D.lib $(DllPrefix)glib32$(GlibDllSuffix)D.lib $(DllPrefix)gobject32$(GlibDllSuffix)D.lib $(DllPrefix)sigc++32-2.0D.lib $(DllPrefix)curlD.lib libxml2D.lib libsndfile-1D.lib iconvD.lib zlib1D.lib intlD.lib winmm.lib ws2_32.lib dbghelp.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32D.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				GenerateDebugInformation="true"
@@ -143,7 +143,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)giomm32$(GlibmmDllSuffix).lib $(DllPrefix)glibmm32$(GlibmmDllSuffix).lib pthreadVCE2.lib archive_static32.lib $(DllPrefix)gio32$(GlibDllSuffix).lib $(DllPrefix)glib32$(GlibDllSuffix).lib $(DllPrefix)gobject32$(GlibDllSuffix).lib $(DllPrefix)sigc++32-2.0.lib $(DllPrefix)curl.lib libxml2.lib libsndfile-1.lib iconv.lib zlib1.lib intl.lib winmm.lib ws2_32.lib"
+				AdditionalDependencies="boost-regex32.lib $(DllPrefix)giomm32$(GlibmmDllSuffix).lib $(DllPrefix)glibmm32$(GlibmmDllSuffix).lib pthreadVCE2.lib archive_static32.lib $(DllPrefix)gio32$(GlibDllSuffix).lib $(DllPrefix)glib32$(GlibDllSuffix).lib $(DllPrefix)gobject32$(GlibDllSuffix).lib $(DllPrefix)sigc++32-2.0.lib $(DllPrefix)curl.lib libxml2.lib libsndfile-1.lib iconv.lib zlib1.lib intl.lib winmm.lib ws2_32.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				SubSystem="2"
@@ -187,7 +187,7 @@
 			<Tool
 				Name="VCPreBuildEventTool"
 				Description="Prepare configuration file(s)"
-				CommandLine="python &quot;../../../libs/pbd/pbd/signals.py&quot; &quot;../../../libs/pbd/pbd/signals_generated.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\ptw32\pthread.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\ptw32\pthread.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\sys\targetsxs.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\sys\targetsxs.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\sys\time.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\sys\time.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\float_cast.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\float_cast.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\libcharset.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\libcharset.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\localcharset.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\localcharset.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\misc.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\misc.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\pthread.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\pthread.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\sched.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\sched.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\semaphore.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\semaphore.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\unistd.h.input&quot; &quot;$(GenericIncludeFolder)\unistd.h&quot;&#x0D;&#x0A;cd ..\..\..&#x0D;&#x0A;perl msvc32-fixup.pl&#x0D;&#x0A;"
+				CommandLine="python &quot;../../../libs/pbd/pbd/signals.py&quot; &quot;../../../libs/pbd/pbd/signals_generated.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\ptw32\pthread.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\ptw32\pthread.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\sys\targetsxs.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\sys\targetsxs.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\sys\time.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\sys\time.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\float_cast.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\float_cast.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\libcharset.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\libcharset.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\localcharset.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\localcharset.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\misc.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\misc.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\pthread.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\pthread.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\sched.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\sched.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\ardourext\semaphore.h.input&quot; &quot;$(GenericIncludeFolder)\ardourext\semaphore.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\immintrin.h.input&quot; &quot;$(GenericIncludeFolder)\immintrin.h&quot;&#x0D;&#x0A;copy /Y &quot;..\..\..\msvc_extra_headers\unistd.h.input&quot; &quot;$(GenericIncludeFolder)\unistd.h&quot;&#x0D;&#x0A;cd ..\..\..&#x0D;&#x0A;perl msvc32-fixup.pl&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -225,7 +225,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)giomm32$(GlibmmDllSuffix)RDC.lib $(DllPrefix)glibmm32$(GlibmmDllSuffix)RDC.lib pthreadVCE2.lib archive_static32RDC.lib $(DllPrefix)gio32$(GlibDllSuffix)RDC.lib $(DllPrefix)glib32$(GlibDllSuffix)RDC.lib $(DllPrefix)gobject32$(GlibDllSuffix)RDC.lib $(DllPrefix)sigc++32-2.0RDC.lib $(DllPrefix)curlRDC.lib libxml2RDC.lib libsndfile-1.lib iconvRDC.lib zlib1RDC.lib intlRDC.lib winmm.lib ws2_32.lib"
+				AdditionalDependencies="boost-regex32RDC.lib $(DllPrefix)giomm32$(GlibmmDllSuffix)RDC.lib $(DllPrefix)glibmm32$(GlibmmDllSuffix)RDC.lib pthreadVCE2.lib archive_static32RDC.lib $(DllPrefix)gio32$(GlibDllSuffix)RDC.lib $(DllPrefix)glib32$(GlibDllSuffix)RDC.lib $(DllPrefix)gobject32$(GlibDllSuffix)RDC.lib $(DllPrefix)sigc++32-2.0RDC.lib $(DllPrefix)curlRDC.lib libxml2RDC.lib libsndfile-1.lib iconvRDC.lib zlib1RDC.lib intlRDC.lib winmm.lib ws2_32.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32RDC.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				GenerateDebugInformation="true"
