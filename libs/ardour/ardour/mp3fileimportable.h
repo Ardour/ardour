@@ -67,7 +67,7 @@ private:
 	mp3dec_frame_info_t _info;
 	samplecnt_t         _length;
 
-int              _fd;
+	int            _fd;
 	const uint8_t* _map_addr;
 	size_t         _map_length;
 

@@ -119,7 +119,7 @@ Mp3FileImportableSource::unmap_mem ()
 		UnmapViewOfFile (_map_addr);
 	}
 #else
-	munmap ((void*) _map_addr, _map_length);
+	munmap ((void*)_map_addr, _map_length);
 #endif
 	close (_fd);
 	_map_addr = 0;
@@ -130,7 +130,7 @@ Mp3FileImportableSource::decode_mp3 (bool parse_only)
 {
 	_pcm_off = 0;
 	do {
-		_n_frames = mp3dec_decode_frame (&_mp3d, _buffer, _remain, parse_only ? NULL :_pcm, &_info);
+		_n_frames = mp3dec_decode_frame (&_mp3d, _buffer, _remain, parse_only ? NULL : _pcm, &_info);
 		_buffer += _info.frame_bytes;
 		_remain -= _info.frame_bytes;
 		if (_n_frames) {
@@ -149,10 +149,10 @@ Mp3FileImportableSource::seek (samplepos_t pos)
 
 	/* rewind, then decode to pos */
 	if (pos < _read_position) {
-		_buffer = _map_addr;
-		_remain = _map_length;
+		_buffer        = _map_addr;
+		_remain        = _map_length;
 		_read_position = 0;
-		_pcm_off = 0;
+		_pcm_off       = 0;
 		mp3dec_init (&_mp3d);
 		decode_mp3 ();
 	}
@@ -212,7 +212,7 @@ Mp3FileImportableSource::read_unlocked (Sample* dst, samplepos_t start, samplecn
 		seek (start);
 	}
 
-	size_t dst_off = 0;
+	size_t      dst_off = 0;
 	samplecnt_t remain = cnt;
 
 	while (remain > 0) {
