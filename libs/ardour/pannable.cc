@@ -48,11 +48,12 @@ Pannable::Pannable (Session& s)
 	, pan_frontback_control (new PanControllable (s, "", this, PanFrontBackAutomation))
 	, pan_lfe_control (new PanControllable (s, "", this, PanLFEAutomation))
 	, _auto_state (Off)
-	, _touching (0)
 	, _has_state (false)
 	, _responding_to_control_auto_state_change (0)
 {
 	//boost_debug_shared_ptr_mark_interesting (this, "pannable");
+
+	g_atomic_int_set (&_touching, 0);
 
 	add_control (pan_azimuth_control);
 	add_control (pan_elevation_control);
