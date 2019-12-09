@@ -513,6 +513,24 @@ Route::process_output_buffers (BufferSet& bufs,
 			pspeed = 0;
 		}
 
+		/* Note: plugin latency may change. The plugin does inform the session via
+		 * processor_latency_changed(). But the session may not yet have gotten around to
+		 * update the actual worste-case and update this track's _signal_latency.
+		 * So there can be cases where adding up all latencies may not equal _signal_latency.
+		 *
+		 * Also running a plugin may change the plugin's latency, so we need to
+		 * add the latency first. Otherwise this can lead to bistable case
+		 * in case of automation playback. e.g.
+		 *
+		 * cycle 1: run (t): automation (t) = on: -> increase latency
+		 * cycle 2: run (t-latency): automation (t-latency) = off -> decrease latency
+		 * reapeat.
+		 */
+
+		if ((*i)->active ()) {
+			latency += (*i)->effective_latency ();
+		}
+
 		if (speed < 0) {
 			(*i)->run (bufs, start_sample + latency, end_sample + latency, pspeed, nframes, *i != _processors.back());
 		} else {
@@ -520,16 +538,6 @@ Route::process_output_buffers (BufferSet& bufs,
 		}
 
 		bufs.set_count ((*i)->output_streams());
-
-		/* Note: plugin latency may change. While the plugin does inform the session via
-		 * processor_latency_changed(). But the session may not yet have gotten around to
-		 * update the actual worste-case and update this track's _signal_latency.
-		 *
-		 * So there can be cases where adding up all latencies may not equal _signal_latency.
-		 */
-		if ((*i)->active ()) {
-			latency += (*i)->effective_latency ();
-		}
 
 		if (re_inject_oob_data) {
 			write_out_of_band_data (bufs, nframes);
