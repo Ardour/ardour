@@ -242,7 +242,6 @@ MidiSource::midi_read (const Lock&                        lm,
 
 	cursor.last_read_end = start + cnt;
 
-	samplepos_t time_samples = 0;
 	// Copy events in [start, start + cnt) into dst
 	for (; i != _model->end(); ++i) {
 
