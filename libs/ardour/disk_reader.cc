@@ -553,7 +553,8 @@ DiskReader::overwrite_existing_buffers ()
 
 	Glib::Threads::Mutex::Lock lm (rbuf_lock);
 
-	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 overwriting existing buffers at %2\n", overwrite_sample));
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 overwriting existing buffers at %2\n", name(), overwrite_sample));
+	cerr << string_compose ("%1 overwriting existing buffers at %2\n", name(), overwrite_sample) << endl;
 
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
