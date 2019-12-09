@@ -580,7 +580,7 @@ check_smf_event_is_identical(const smf_event_t *a, const smf_event_t *b)
 {
 	CHECK(a->event_number == b->event_number);
 	CHECK(a->delta_time_pulses == b->delta_time_pulses);
-	CHECK(abs((long)(a->time_pulses - b->time_pulses)) <= 2);
+	CHECK(labs((long)(a->time_pulses - b->time_pulses)) <= 2);
 	CHECK(fabs(a->time_seconds - b->time_seconds) <= 0.01);
 	CHECK(a->track_number == b->track_number);
 	CHECK(a->midi_buffer_length == b->midi_buffer_length);
