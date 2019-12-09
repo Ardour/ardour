@@ -401,6 +401,12 @@ def configure(conf):
     autowaf.check_pkg(conf, 'pangoft2', uselib_store='PANGOFT2', atleast_version='1.36.8', mandatory=False)
     autowaf.check_pkg(conf, 'fontconfig', uselib_store='FONTCONFIG')
 
+    if conf.env.CC_NAME == 'gcc' and Options.options.strict:
+        conf.define('GLIB_DISABLE_DEPRECATION_WARNINGS', 1)
+        for var in ['CFLAGS', 'CXXFLAGS']:
+            for lib in ['GTK', 'GTKMM']:
+                for d in conf.env['INCLUDES_' + lib]:
+                    conf.env.append_value(var, ['-isystem', d])
 
     if sys.platform == 'darwin':
         retval = conf.run_c_code (code='#include <AppKit/NSWindow.h>\n\
