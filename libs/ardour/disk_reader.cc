@@ -60,6 +60,9 @@ samplecnt_t DiskReader::loop_fade_length (0);
 
 DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, str, f)
+	, _switch_rbuf (false)
+	, process_rbuf (0)
+	, other_rbuf (1)
 	, overwrite_sample (0)
 	, overwrite_queued (false)
 	, run_must_resolve (false)
@@ -349,6 +352,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 		if (!still_locating || _no_disk_output) {
 			for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+				assert ((*chan)->rbuf[process_rbuf]);
 				(*chan)->rbuf[process_rbuf]->increment_read_ptr (disk_samples_to_consume);
 			}
 		}
@@ -573,28 +577,26 @@ DiskReader::overwrite_existing_buffers ()
 		boost::scoped_array<Sample> mixdown_buffer (new Sample[size]);
 		boost::scoped_array<float> gain_buffer (new float[size]);
 
-		/* reduce size so that we can fill the buffer correctly (ringbuffers
-		 * can only handle size-1, otherwise they appear to be empty)
-		 */
-		size--;
-
-		uint32_t n=0;
+		samplecnt_t to_read = c->front()->rbuf[other_rbuf]->write_space();
+		uint32_t n = 0;
 
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan, ++n) {
 
 			samplepos_t start = overwrite_sample;
-			samplecnt_t to_read = size;
 
 			ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (*chan);
 
 			PlaybackBuffer<Sample>* rbuf = (*chan)->rbuf[other_rbuf];
 
+			cerr << name() << ' ' << n << " overwrite read into " << other_rbuf << " @ " << overwrite_sample << " tr " << to_read << " ws " << (*chan)->rbuf[other_rbuf]->write_space() << endl;
+
 			if (audio_read (rbuf, sum_buffer.get(), mixdown_buffer.get(), gain_buffer.get(), start, to_read, rci, n, reversed)) {
 				error << string_compose(_("DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"), id(), size, overwrite_sample) << endmsg;
 				goto midi;
 			}
-
 		}
+
+		new_file_sample = overwrite_sample + to_read;
 
 		queue_switch_rbuf ();
 	}
@@ -850,7 +852,7 @@ DiskReader::audio_read (PBD::PlaybackBuffer<Sample>*rb,
 		samplecnt_t written;
 
 		if ((written = rb->write (sum_buffer, this_read)) != this_read) {
-			cerr << owner()->name() << " Ringbuffer Write overrun (tried " << this_read << " wrote " << written << ')' << endl;
+			cerr << owner()->name() << " Ringbuffer Write overrun on (tried " << this_read << " wrote " << written << ')' << endl;
 		}
 
 		cnt -= this_read;
@@ -1040,6 +1042,7 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 
 		if (to_read) {
 			ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (chan);
+			cerr << name() << ' ' << chan_n << " refill read into " << process_rbuf << " @ " << file_sample_tmp << " tr " << to_read << "  ts was " << ts << "scnt " << samples_to_read << " ws " << chan->rbuf[process_rbuf]->write_space() << endl;
 			if (audio_read (chan->rbuf[process_rbuf], sum_buffer, mixdown_buffer, gain_buffer, file_sample_tmp, to_read, rci, chan_n, reversed)) {
 				error << string_compose(_("DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"), id(), to_read, ffa) << endmsg;
 				ret = -1;
@@ -1658,3 +1661,31 @@ DiskReader::reload_loop ()
 
 	}
 }
+void
+DiskReader::queue_switch_rbuf ()
+{
+	/* must hold _rbuf_lock */
+	_switch_rbuf = true;
+}
+
+void
+DiskReader::switch_rbufs ()
+{
+	/* must hold _rbuf_lock */
+	assert (_switch_rbuf);
+
+	std::swap (process_rbuf, other_rbuf);
+
+	boost::shared_ptr<ChannelList> c = channels.reader();
+
+	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+		(*chan)->rbuf[other_rbuf]->reset ();
+		cerr << name() << " after switch/reset, other has " << (*chan)->rbuf[other_rbuf]->write_space() << " of " << (*chan)->rbuf[other_rbuf]->bufsize() << endl;
+	}
+
+	_switch_rbuf = false;
+	file_sample[DataType::AUDIO] = new_file_sample;
+
+	cerr << "switched, pbuf now " << process_rbuf << " size " << c->front()->rbuf[process_rbuf]->bufsize() << " other " << other_rbuf << " size " << c->front()->rbuf[other_rbuf]->bufsize() << endl;
+}
+

@@ -55,9 +55,6 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
 	, in_set_state (false)
 	, playback_sample (0)
 	, _need_butler (false)
-	, _switch_rbuf (false)
-	, process_rbuf (0)
-	, other_rbuf (1)
 	, channels (new ChannelList)
 	, _midi_buf (0)
 	, _samples_written_to_ringbuffer (0)
@@ -345,32 +342,6 @@ DiskIOProcessor::ChannelInfo::~ChannelInfo ()
 	rbuf[1] = 0;
 	wbuf = 0;
 	capture_transition_buf = 0;
-}
-
-void
-DiskIOProcessor::queue_switch_rbuf ()
-{
-	/* must hold _rbuf_lock */
-	_switch_rbuf = true;
-}
-
-void
-DiskIOProcessor::switch_rbufs ()
-{
-	/* must hold _rbuf_lock */
-	assert (_switch_rbuf);
-
-	std::swap (process_rbuf, other_rbuf);
-
-	boost::shared_ptr<ChannelList> c = channels.reader();
-
-	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-		(*chan)->rbuf[other_rbuf]->reset ();
-		cerr << name() << " after switch/reset, other has " << (*chan)->rbuf[other_rbuf]->write_space() << " of " << (*chan)->rbuf[other_rbuf]->bufsize() << endl;
-	}
-
-	_switch_rbuf = false;
-	cerr << "switched, pbuf now " << process_rbuf << " size " << c->front()->rbuf[process_rbuf]->bufsize() << " other " << other_rbuf << " size " << c->front()->rbuf[other_rbuf]->bufsize() << endl;
 }
 
 void

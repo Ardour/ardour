@@ -111,10 +111,6 @@ public:
 
 	virtual void adjust_buffering() = 0;
 
-	Glib::Threads::Mutex rbuf_lock;
-	void queue_switch_rbuf ();
-	void switch_rbufs ();
-
 protected:
 	friend class Auditioner;
 	virtual int  seek (samplepos_t which_sample, bool complete_refill = false) = 0;
@@ -146,10 +142,6 @@ protected:
 		TransitionType   type;
 		samplepos_t       capture_val; ///< The start or end file sample position
 	};
-
-	bool _switch_rbuf;
-	int  process_rbuf;
-	int  other_rbuf;
 
 	/** Information about one audio channel, playback or capture
 	 * (depending on the derived class)

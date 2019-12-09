@@ -117,6 +117,10 @@ public:
 	static void reset_loop_declick (Location*, samplecnt_t sample_rate);
 	static void alloc_loop_declick (samplecnt_t sample_rate);
 
+	Glib::Threads::Mutex rbuf_lock;
+	void queue_switch_rbuf ();
+	void switch_rbufs ();
+
 protected:
 	friend class Track;
 	friend class MidiTrack;
@@ -182,10 +186,11 @@ protected:
 	};
 
 private:
-	/** The number of samples by which this diskstream's output should be delayed
-	    with respect to the transport sample.  This is used for latency compensation.
-	*/
+	bool         _switch_rbuf;
+	int           process_rbuf;
+	int           other_rbuf;
 	samplepos_t   overwrite_sample;
+	samplepos_t   new_file_sample;
 	mutable gint  _pending_overwrite;
 	bool          overwrite_queued;
 	bool          run_must_resolve;
@@ -228,6 +233,8 @@ private:
 
 	void get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, samplepos_t end_sample, MonitorState, BufferSet&, double speed, samplecnt_t distance);
 	void maybe_xfade_loop (Sample*, samplepos_t read_start, samplepos_t read_end, ReaderChannelInfo*);
+
+
 };
 
 } // namespace
