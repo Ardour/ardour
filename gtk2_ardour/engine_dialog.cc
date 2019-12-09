@@ -1024,7 +1024,7 @@ EngineControl::refresh_midi_display (std::string focus)
 
 		m = manage (new ArdourButton ((*p)->name, ArdourButton::led_default_elements));
 		m->set_name ("midi device");
-		m->set_can_focus (Gtk::CAN_FOCUS);
+		m->set_can_focus (true);
 		m->add_events (Gdk::BUTTON_RELEASE_MASK);
 		m->set_active (enabled);
 		m->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &EngineControl::midi_device_enabled_toggled), m, *p));
