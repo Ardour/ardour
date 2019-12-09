@@ -338,6 +338,9 @@ ArdourMarker::set_selected (bool s)
 {
 	_selected = s;
 	setup_line ();
+
+	mark->set_fill_color (_selected ? UIConfiguration::instance().color ("entered marker") : _color);
+	mark->set_outline_color ( _selected ? UIConfiguration::instance().color ("entered marker") : _color );
 }
 
 void
@@ -514,8 +517,9 @@ void
 ArdourMarker::set_color_rgba (uint32_t c)
 {
 	_color = c;
-	mark->set_fill_color (_color);
-	mark->set_outline_color (_color);
+
+	mark->set_fill_color (_selected ? UIConfiguration::instance().color ("entered marker") : _color);
+	mark->set_outline_color ( _selected ? UIConfiguration::instance().color ("entered marker") : _color );
 
 	if (_track_canvas_line && !_selected) {
 		_track_canvas_line->set_outline_color (_color);
