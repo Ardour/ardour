@@ -253,6 +253,11 @@ public:
 		return this->_current;
 	}
 
+	Property<T>& operator=(Property<T> const& v) {
+		this->set (v);
+		return *this;
+	}
+
 private:
         friend class PropertyFactory;
 

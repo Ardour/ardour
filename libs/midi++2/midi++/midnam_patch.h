@@ -52,6 +52,11 @@ public:
 		, _program(std::max(0, std::min(program_num, 127)))
 	{}
 
+	inline PatchPrimaryKey(const PatchPrimaryKey& id)
+		: _bank(id._bank)
+		, _program(id._program)
+	{}
+
 	inline PatchPrimaryKey& operator=(const PatchPrimaryKey& id) {
 		_bank    = id._bank;
 		_program = id._program;

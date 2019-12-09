@@ -53,6 +53,12 @@ struct JumpDistance {
 	JumpDistance () : value (1.0), unit (BEATS) {}
 	JumpDistance (double v, JumpUnit u) : value (v), unit (u) {}
 	JumpDistance (const JumpDistance& o) : value (o.value), unit (o.unit) {}
+	JumpDistance& operator= (const JumpDistance& o) {
+		value = o.value;
+		unit = o.unit;
+		return *this;
+	}
+
 	double value;
 	JumpUnit unit;
 };

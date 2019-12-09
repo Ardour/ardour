@@ -67,6 +67,22 @@ ChanMapping::ChanMapping (const XMLNode& node)
 	}
 }
 
+
+ChanMapping ChanMapping::operator=(const ChanMapping& other)
+{
+	_mappings.clear();
+
+	const ChanMapping::Mappings& mp (other.mappings());
+	for (Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
+		for (TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
+			set (tm->first, i->first, i->second);
+		}
+	}
+
+	_mappings = other._mappings;
+	return *this;
+}
+
 uint32_t
 ChanMapping::get(DataType t, uint32_t from, bool* valid) const
 {

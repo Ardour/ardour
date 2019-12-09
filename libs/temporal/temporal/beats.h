@@ -37,6 +37,7 @@ public:
 	LIBTEMPORAL_API static const int32_t PPQN = 1920;
 
 	Beats() : _beats(0), _ticks(0) {}
+	Beats(const Beats& other) : _beats(other._beats), _ticks(other._ticks) {}
 
 	/** Normalize so ticks is within PPQN. */
 	void normalize() {

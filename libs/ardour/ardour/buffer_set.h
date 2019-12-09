@@ -144,6 +144,8 @@ public:
 	template <typename BS, typename B>
 	class iterator_base {
 	public:
+		iterator_base(const iterator_base& other)
+			: _set(other._set), _type(other._type), _index(other._index) {}
 		B& operator*()  { return (B&)_set.get_available(_type, _index); }
 		B* operator->() { return &(B&)_set.get_available(_type, _index); }
 		iterator_base<BS,B>& operator++() { ++_index; return *this; } // yes, prefix only

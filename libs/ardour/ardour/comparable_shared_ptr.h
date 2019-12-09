@@ -42,6 +42,8 @@ class /*LIBARDOUR_API*/ ComparableSharedPtr : public boost::shared_ptr<T>
 
 	ComparableSharedPtr (ComparableSharedPtr const & r) : boost::shared_ptr<T> (r) {}
 
+	ComparableSharedPtr& operator=(const ComparableSharedPtr& r) { *this = r; return *this; }
+
 	template<class Y>
 	ComparableSharedPtr(ComparableSharedPtr<Y> const & r) : boost::shared_ptr<T> (r) {}
 

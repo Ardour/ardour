@@ -45,6 +45,8 @@ public:
 	ChanMapping(const ChanMapping&);
 	ChanMapping(const XMLNode& node);
 
+	ChanMapping operator=(const ChanMapping&);
+
 	uint32_t get(DataType t, uint32_t from, bool* valid) const;
 
 	/** reverse lookup
