@@ -35,7 +35,7 @@ PBD::demangle_symbol (const std::string& mangled_symbol)
 		std::string demangled_symbol (realname);
 		free (realname);
 		return demangled_symbol;
-	} catch (std::exception) {
+	} catch (const std::exception&) {
 
 	}
 #endif
