@@ -1430,24 +1430,26 @@ Session::auto_loop_changed (Location* location)
 
 		if (play_loop) {
 
-			/* Set this so that when/if we have to stop the
-			 * transport for a locate, we know that it is triggered
-			 * by loop-changing, and we do not cancel play loop
-			 */
-
-			loop_changing = true;
-
 			if (_transport_sample < location->start() || _transport_sample > location->end()) {
-				// new loop range excludes current transport
-				// sample => relocate to beginning of loop and roll.
 
+				/* new loop range excludes current transport
+				 * sample => relocate to beginning of loop and roll.
+				 */
+
+				/* Set this so that when/if we have to stop the
+				 * transport for a locate, we know that it is triggered
+				 * by loop-changing, and we do not cancel play loop
+				 */
+
+				loop_changing = true;
 				request_locate (location->start(), true);
 
+			} else {
+
+				// schedule a buffer overwrite to refill buffers with the new loop.
+
+				request_overwrite_buffer (boost::shared_ptr<Track>());
 			}
-
-			// schedule a buffer overwrite to refill buffers with the new loop.
-
-			request_overwrite_buffer (boost::shared_ptr<Track>());
 		}
 
 	} else {
