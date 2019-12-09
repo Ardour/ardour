@@ -242,13 +242,14 @@ Glib::RefPtr<Pango::Context>
 Push2Canvas::get_pango_context ()
 {
 	if (!pango_context) {
-		PangoFontMap* map = pango_cairo_font_map_get_default ();
+		PangoFontMap* map = pango_cairo_font_map_new ();
 		if (!map) {
 			error << _("Default Cairo font map is null!") << endmsg;
 			return Glib::RefPtr<Pango::Context> ();
 		}
 
 		PangoContext* context = pango_font_map_create_context (map);
+		pango_cairo_context_set_resolution (context, 96);
 
 		if (!context) {
 			error << _("cannot create new PangoContext from cairo font map") << endmsg;
