@@ -378,11 +378,7 @@ TransportFSM::stop_playback ()
 void
 TransportFSM::set_roll_after (bool with_roll) const
 {
-	if (with_roll == true) {
-		current_roll_after_locate_status = true;
-	} else if (with_roll == false) {
-		current_roll_after_locate_status = false;
-	}
+	current_roll_after_locate_status = with_roll;
 }
 
 void
@@ -404,7 +400,7 @@ TransportFSM::start_locate_while_stopped (Event const & l) const
 	assert (l.type == Locate);
 	DEBUG_TRACE (DEBUG::TFSMEvents, "start_locate_while_stopped\n");
 
-	set_roll_after (l.with_roll);
+	set_roll_after (l.with_roll || api->should_roll_after_locate());
 
 	api->locate (l.target, current_roll_after_locate_status.get(), l.with_flush, l.for_loop_end, l.force);
 }
@@ -470,6 +466,7 @@ TransportFSM::should_roll_after_locate () const
 
 	if (current_roll_after_locate_status) {
 		roll = current_roll_after_locate_status.get();
+		current_roll_after_locate_status = boost::none; // used it
 	} else {
 		roll = api->should_roll_after_locate ();
 	}
@@ -483,9 +480,7 @@ TransportFSM::roll_after_locate () const
 {
 	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("rolling after locate, was for_loop ? %1\n", _last_locate.for_loop_end));
 	current_roll_after_locate_status = boost::none;
-	if (!_last_locate.for_loop_end) {
-		api->start_transport ();
-	}
+	api->start_transport ();
 }
 
 void
