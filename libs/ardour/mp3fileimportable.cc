@@ -120,7 +120,7 @@ Mp3FileImportableSource::unmap_mem ()
 		UnmapViewOfFile (_map_addr);
 	}
 #else
-	munmap ((void*)_map_addr, _map_length);
+	munmap (const_cast<unsigned char*>(_map_addr), _map_length);
 #endif
 	close (_fd);
 	_map_addr = 0;
@@ -175,7 +175,7 @@ Mp3FileImportableSource::seek (samplepos_t pos)
 		_n_frames -= pos - _read_position;
 		_read_position = pos;
 	}
-	assert (_pcm_off >= 0 && _pcm_off < MINIMP3_MAX_SAMPLES_PER_FRAME);
+	assert (_pcm_off < MINIMP3_MAX_SAMPLES_PER_FRAME);
 }
 
 samplecnt_t
