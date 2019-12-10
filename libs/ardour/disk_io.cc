@@ -324,22 +324,19 @@ DiskIOProcessor::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist
 }
 
 DiskIOProcessor::ChannelInfo::ChannelInfo (samplecnt_t bufsize)
-	: wbuf (0)
+	: rbuf (0)
+	, wbuf (0)
 	, capture_transition_buf (0)
 	, curr_capture_cnt (0)
 {
-	rbuf[0] = 0;
-	rbuf[1] = 0;
 }
 
 DiskIOProcessor::ChannelInfo::~ChannelInfo ()
 {
-	delete rbuf[0];
-	delete rbuf[1];
+	delete rbuf;
 	delete wbuf;
 	delete capture_transition_buf;
-	rbuf[0] = 0;
-	rbuf[1] = 0;
+	rbuf = 0;
 	wbuf = 0;
 	capture_transition_buf = 0;
 }

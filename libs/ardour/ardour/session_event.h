@@ -83,6 +83,7 @@ public:
 	union {
 		bool             yes_or_no;
 		samplepos_t      target2_sample;
+		OverwriteReason  overwrite;
 	};
 
 	boost::shared_ptr<Track> track;

@@ -78,15 +78,16 @@ Session::schedule_capture_buffering_adjustment ()
 }
 
 void
-Session::request_overwrite_buffer (boost::shared_ptr<Track> t)
+Session::request_overwrite_buffer (boost::shared_ptr<Track> t, OverwriteReason why)
 {
 	SessionEvent *ev = new SessionEvent (SessionEvent::Overwrite, SessionEvent::Add, SessionEvent::Immediate, 0, 0, 0.0);
 	ev->set_track (t);
+	ev->overwrite = why;
 	queue_event (ev);
 }
 
 void
-Session::overwrite_some_buffers (boost::shared_ptr<Route> r)
+Session::overwrite_some_buffers (boost::shared_ptr<Route> r, OverwriteReason why)
 {
 	/* this is called from the process thread while handling queued
 	 * SessionEvents. Therefore neither playback sample or read offsets in
@@ -102,7 +103,7 @@ Session::overwrite_some_buffers (boost::shared_ptr<Route> r)
 	if (r) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (r);
 		assert (t);
-		t->set_pending_overwrite ();
+		t->set_pending_overwrite (why);
 
 	} else {
 
@@ -110,7 +111,7 @@ Session::overwrite_some_buffers (boost::shared_ptr<Route> r)
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 			if (tr) {
-				tr->set_pending_overwrite ();
+				tr->set_pending_overwrite (why);
 			}
 		}
 	}

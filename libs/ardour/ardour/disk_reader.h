@@ -54,7 +54,7 @@ public:
 	void realtime_handle_transport_stopped ();
 	void realtime_locate (bool);
 	bool overwrite_existing_buffers ();
-	void set_pending_overwrite ();
+	void set_pending_overwrite (OverwriteReason);
 	void set_loop (Location *);
 
 	int set_state (const XMLNode&, int version);
@@ -118,8 +118,6 @@ public:
 	static void alloc_loop_declick (samplecnt_t sample_rate);
 
 	Glib::Threads::Mutex rbuf_lock;
-	void queue_switch_rbuf ();
-	void switch_rbufs ();
 
 protected:
 	friend class Track;
@@ -186,10 +184,8 @@ protected:
 	};
 
 private:
-	bool         _switch_rbuf;
-	int           process_rbuf;
-	int           other_rbuf;
 	samplepos_t   overwrite_sample;
+	sampleoffset_t overwrite_offset;
 	samplepos_t   new_file_sample;
 	mutable gint  _pending_overwrite;
 	bool          overwrite_queued;
@@ -211,14 +207,13 @@ private:
 	static Declicker loop_declick_out;
 	static samplecnt_t loop_fade_length;
 
-	int audio_read (PBD::PlaybackBuffer<Sample>*,
-	                Sample* sum_buffer,
-	                Sample* mixdown_buffer,
-	                float*  gain_buffer,
-	                samplepos_t& start, samplecnt_t cnt,
-	                ReaderChannelInfo* rci,
-	                int channel,
-	                bool reversed);
+	samplecnt_t audio_read (Sample* sum_buffer,
+	                        Sample* mixdown_buffer,
+	                        float*  gain_buffer,
+	                        samplepos_t& start, samplecnt_t cnt,
+	                        ReaderChannelInfo* rci,
+	                        int channel,
+	                        bool reversed);
 
 	static Sample* _sum_buffer;
 	static Sample* _mixdown_buffer;
@@ -234,7 +229,8 @@ private:
 	void get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, samplepos_t end_sample, MonitorState, BufferSet&, double speed, samplecnt_t distance);
 	void maybe_xfade_loop (Sample*, samplepos_t read_start, samplepos_t read_end, ReaderChannelInfo*);
 
-
+	bool overwrite_existing_audio ();
+	bool overwrite_existing_midi ();
 };
 
 } // namespace

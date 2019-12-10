@@ -137,7 +137,7 @@ public:
 	float capture_buffer_load () const;
 	int do_refill ();
 	int do_flush (RunContext, bool force = false);
-	void set_pending_overwrite ();
+	void set_pending_overwrite (OverwriteReason);
 	int seek (samplepos_t, bool complete_refill = false);
 	bool can_internal_playback_seek (samplecnt_t);
 	void internal_playback_seek (samplecnt_t);

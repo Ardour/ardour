@@ -503,9 +503,9 @@ Track::do_flush (RunContext c, bool force)
 }
 
 void
-Track::set_pending_overwrite ()
+Track::set_pending_overwrite (OverwriteReason why)
 {
-	_disk_reader->set_pending_overwrite ();
+	_disk_reader->set_pending_overwrite (why);
 }
 
 int

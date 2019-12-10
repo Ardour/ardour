@@ -792,6 +792,12 @@ enum LoopFadeChoice {
 	XFadeLoop,
 };
 
+enum OverwriteReason {
+	PlaylistModified,
+	LoopDisabled,
+	LoopChanged,
+};
+
 typedef std::vector<CaptureInfo*> CaptureInfos;
 
 } // namespace ARDOUR

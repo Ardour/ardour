@@ -119,6 +119,13 @@ public:
 	guint write (T const * src, guint cnt);
 	/* write-thead */
 	guint write_zero (guint cnt);
+	/* read-thead */
+	guint increment_write_ptr (guint cnt)
+	{
+		cnt = std::min (cnt, write_space ());
+		g_atomic_int_set (&write_idx, (g_atomic_int_get (&write_idx) + cnt) & size_mask);
+		return cnt;
+	}
 
 	/* read-thead */
 	void read_flush ()
@@ -170,6 +177,9 @@ public:
 			return true;
 		}
 	}
+
+	guint read_ptr() const { return read_idx; }
+	guint reserved_size() const { return reserved; }
 
 private:
 	T *buf;

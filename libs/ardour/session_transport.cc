@@ -1647,7 +1647,7 @@ Session::unset_play_loop (bool change_transport_state)
 			TFSM_EVENT (TransportFSM::StopTransport);
 		}
 
-		overwrite_some_buffers (boost::shared_ptr<Route>());
+		overwrite_some_buffers (boost::shared_ptr<Route>(), LoopDisabled);
 
 		TransportStateChange (); /* EMIT SIGNAL */
 	}
