@@ -262,7 +262,7 @@ DiskReader::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
 	*/
 
         if (!overwrite_queued && (prior_playlist || _session.loading())) {
-	        _session.request_overwrite_buffer (_track, PlaylistModified);
+	        _session.request_overwrite_buffer (_track, PlaylistChanged);
 		overwrite_queued = true;
 	}
 
@@ -453,7 +453,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			run_must_resolve = false;
 		}
 
-		if (!_no_disk_output && !declick_in_progress() && (ms & MonitoringDisk) && !still_locating && speed) {
+		if (!_no_disk_output && !declick_in_progress() && (ms & MonitoringDisk) && !still_locating && midi_data_available && speed) {
 			get_midi_playback (dst, start_sample, end_sample, ms, scratch_bufs, speed, disk_samples_to_consume);
 		}
 	}
@@ -627,13 +627,13 @@ DiskReader::overwrite_existing_buffers ()
 	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 overwriting existing buffers at %2\n", owner()->name(), overwrite_sample));
 	bool ret = true;
 
-	if (g_atomic_int_get (&_pending_overwrite) & (PlaylistModified|LoopDisabled|LoopChanged)) {
+	if (g_atomic_int_get (&_pending_overwrite) & (PlaylistModified|LoopDisabled|LoopChanged|PlaylistChanged)) {
 		if (!overwrite_existing_audio ()) {
 			ret = false;
 		}
 	}
 
-	if (g_atomic_int_get (&_pending_overwrite) & (LoopChanged|LoopDisabled)) {
+	if (g_atomic_int_get (&_pending_overwrite) & (LoopChanged|LoopDisabled|PlaylistChanged)) {
 		if (!overwrite_existing_midi ()) {
 			ret = false;
 		}
@@ -1057,8 +1057,6 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 		if (to_read) {
 			ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (chan);
 			samplecnt_t nread;
-
-			cerr << name() << ' ' << chan_n << " refill read  @ " << file_sample_tmp << " tr " << to_read << "  ts was " << ts << "scnt " << samples_to_read << " ws " << chan->rbuf->write_space() << endl;
 
 			if (!_playlists[DataType::AUDIO]) {
 
