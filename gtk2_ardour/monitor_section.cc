@@ -341,6 +341,8 @@ MonitorSection::MonitorSection ()
 	 * LAYOUT  top to bottom
 	 */
 
+	Gtk::Label *top_spacer = manage (new Gtk::Label);
+
 	// solo, iso information
 	HBox* rude_box = manage (new HBox);
 	rude_box->set_spacing (PX_SCALE(4));
@@ -430,6 +432,7 @@ MonitorSection::MonitorSection ()
 	 * TOP LEVEL LAYOUT
 	 */
 	vpacker.set_border_width (PX_SCALE(3));
+	vpacker.pack_start (*top_spacer,          false, false, PX_SCALE(3));
 	vpacker.pack_start (*rude_box,            false, false, PX_SCALE(3));
 	vpacker.pack_start (rude_audition_button, false, false, 0);
 	vpacker.pack_start (*solo_tbl,            false, false, PX_SCALE(8));
