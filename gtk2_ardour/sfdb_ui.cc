@@ -122,7 +122,7 @@ string2importmode (string const & str)
 		return ImportAsTrack;
 	} else if (str == _("to selected tracks")) {
 		return ImportToTrack;
-	} else if (str == _("to region list")) {
+	} else if (str == _("to source list")) {
 		return ImportAsRegion;
 	} else if (str == _("as new tape tracks")) {
 		return ImportAsTapeTrack;
@@ -142,7 +142,7 @@ importmode2string (ImportMode mode)
 	case ImportToTrack:
 		return _("to selected tracks");
 	case ImportAsRegion:
-		return _("to region list");
+		return _("to source list");
 	case ImportAsTapeTrack:
 		return _("as new tape tracks");
 	}
