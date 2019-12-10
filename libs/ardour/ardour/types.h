@@ -793,9 +793,10 @@ enum LoopFadeChoice {
 };
 
 enum OverwriteReason {
-	PlaylistModified,
-	LoopDisabled,
-	LoopChanged,
+	PlaylistChanged = 0x1,   // actual playlist was swapped/reset
+	PlaylistModified = 0x2,  // contents of playlist changed
+	LoopDisabled = 0x4,
+	LoopChanged = 0x8,
 };
 
 typedef std::vector<CaptureInfo*> CaptureInfos;
