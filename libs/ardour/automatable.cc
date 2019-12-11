@@ -274,7 +274,7 @@ Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter le
 			boost::shared_ptr<AutomationControl> existing = automation_control (param);
 
 			if (existing) {
-				existing->alist()->set_state (**niter, 3000);
+				existing->alist()->set_state (**niter, Stateful::loading_state_version);
 			} else {
 				boost::shared_ptr<Evoral::Control> newcontrol = control_factory(param);
 				add_control (newcontrol);
