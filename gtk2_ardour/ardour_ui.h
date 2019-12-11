@@ -212,6 +212,8 @@ public:
 	void finish();
 
 	int load_session (const std::string& path, const std::string& snapshot, std::string mix_template = std::string());
+	int load_session_stage_two (const std::string& path, const std::string& snapshot, std::string mix_template = std::string());
+	void audio_midi_setup_reconfigure_done (int response, std::string path, std::string snapshot, std::string mix_template);
 	bool session_load_in_progress;
 	int build_session (const std::string& path, const std::string& snapshot, ARDOUR::BusProfile const *);
 	bool session_is_new() const { return _session_is_new; }

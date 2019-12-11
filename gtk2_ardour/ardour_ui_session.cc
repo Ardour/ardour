@@ -337,20 +337,65 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 	}
 	PBD::Unwinder<bool> lsu (session_load_in_progress, true);
 
-	Session *new_session;
 	int unload_status;
-	int retval = -1;
+	bool had_session = false;
 
 	if (_session) {
+		had_session = true;
+
 		unload_status = unload_session ();
 
-		if (unload_status < 0) {
-			goto out;
-		} else if (unload_status > 0) {
-			retval = 0;
-			goto out;
+		if (unload_status != 0) {
+			hide_splash ();
+			return -1;
 		}
 	}
+
+	if (had_session) {
+		float sr;
+		SampleFormat sf;
+		string pv;
+
+		Session::get_info_from_path (Glib::build_filename (path, snap_name + statefile_suffix), sr, sf, pv);
+
+		/* this will stop the engine if the SR is different */
+
+		audio_midi_setup->set_desired_sample_rate (sr);
+
+		if (!AudioEngine::instance()->running()) {
+			audio_midi_setup->set_position (WIN_POS_CENTER);
+			audio_midi_setup->present ();
+			audio_midi_setup->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::audio_midi_setup_reconfigure_done), path, snap_name, mix_template));
+			/* not done yet, but we're avoiding modal dialogs */
+			return 0;
+		}
+	}
+
+	return load_session_stage_two (path, snap_name, mix_template);
+}
+
+void
+ARDOUR_UI::audio_midi_setup_reconfigure_done (int response, std::string path, std::string snap_name, std::string mix_template)
+{
+	switch (response) {
+	case Gtk::RESPONSE_DELETE_EVENT:
+		break;
+	default:
+		if (!AudioEngine::instance()->running()) {
+			return; // keep dialog visible, maybe try again
+		}
+	}
+
+	audio_midi_setup->hide();
+
+	(void) load_session_stage_two (path, snap_name, mix_template);
+}
+
+int
+ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& snap_name, std::string mix_template)
+{
+	Session *new_session;
+	int retval = -1;
 
 	BootMessage (string_compose (_("Please wait while %1 loads your session"), PROGRAM_NAME));
 
