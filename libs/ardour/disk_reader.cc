@@ -526,7 +526,7 @@ DiskReader::set_pending_overwrite (OverwriteReason why)
 		overwrite_offset = c->front()->rbuf->read_ptr();
 	}
 
-	if (why & (PlaylistModified|PlaylistChanged)) {
+	if (why & (LoopChanged|PlaylistModified|PlaylistChanged)) {
 		run_must_resolve = true;
 	}
 
