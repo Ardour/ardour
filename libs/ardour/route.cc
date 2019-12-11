@@ -2691,7 +2691,7 @@ Route::set_state (const XMLNode& node, int version)
 
 	_initial_io_setup = false;
 
-	set_processor_state (processor_state);
+	set_processor_state (processor_state, version);
 
 	// this looks up the internal instrument in processors
 	reset_instrument_info();
@@ -2988,7 +2988,7 @@ Route::set_processor_state_2X (XMLNodeList const & nList, int version)
 }
 
 void
-Route::set_processor_state (const XMLNode& node)
+Route::set_processor_state (const XMLNode& node, int version)
 {
 	const XMLNodeList &nlist = node.children();
 	XMLNodeConstIterator niter;
@@ -3037,7 +3037,7 @@ Route::set_processor_state (const XMLNode& node)
 			_disk_writer->set_state (**niter, Stateful::current_state_version);
 			new_order.push_back (_disk_writer);
 		} else {
-			set_processor_state (**niter, prop, new_order, must_configure);
+			set_processor_state (**niter, version, prop, new_order, must_configure);
 		}
 	}
 
@@ -3096,14 +3096,14 @@ Route::set_processor_state (const XMLNode& node)
 }
 
 bool
-Route::set_processor_state (XMLNode const & node, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure)
+Route::set_processor_state (XMLNode const& node, int version, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure)
 {
 	ProcessorList::iterator o;
 
 	for (o = _processors.begin(); o != _processors.end(); ++o) {
 		XMLProperty const * id_prop = node.property(X_("id"));
 		if (id_prop && (*o)->id() == id_prop->value()) {
-			(*o)->set_state (node, Stateful::current_state_version);
+			(*o)->set_state (node, version);
 			new_order.push_back (*o);
 			break;
 		}
@@ -3149,7 +3149,7 @@ Route::set_processor_state (XMLNode const & node, XMLProperty const* prop, Proce
 			return false;
 		}
 
-		if (processor->set_state (node, Stateful::current_state_version) != 0) {
+		if (processor->set_state (node, version) != 0) {
 			/* This processor could not be configured.  Turn it into a UnknownProcessor */
 			processor.reset (new UnknownProcessor (_session, node));
 		}

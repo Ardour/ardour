@@ -65,7 +65,7 @@ public:
 
 	MeterState metering_state () const;
 
-	bool set_processor_state (XMLNode const & node, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure);
+	bool set_processor_state (XMLNode const& node, int version, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure);
 
 	bool declick_in_progress () const;
 

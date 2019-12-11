@@ -850,9 +850,9 @@ Track::metering_state () const
 }
 
 bool
-Track::set_processor_state (XMLNode const & node, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure)
+Track::set_processor_state (XMLNode const& node, int version, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure)
 {
-	if (Route::set_processor_state (node, prop, new_order, must_configure)) {
+	if (Route::set_processor_state (node, version, prop, new_order, must_configure)) {
 		return true;
 	}
 
@@ -860,13 +860,13 @@ Track::set_processor_state (XMLNode const & node, XMLProperty const* prop, Proce
 
 	if (prop->value() == "diskreader") {
 		if (_disk_reader) {
-			_disk_reader->set_state (node, Stateful::current_state_version);
+			_disk_reader->set_state (node, version);
 			new_order.push_back (_disk_reader);
 			return true;
 		}
 	} else if (prop->value() == "diskwriter") {
 		if (_disk_writer) {
-			_disk_writer->set_state (node, Stateful::current_state_version);
+			_disk_writer->set_state (node, version);
 			new_order.push_back (_disk_writer);
 			return true;
 		}
