@@ -526,6 +526,10 @@ DiskReader::set_pending_overwrite (OverwriteReason why)
 		overwrite_offset = c->front()->rbuf->read_ptr();
 	}
 
+	if (why & (PlaylistModified|PlaylistChanged)) {
+		run_must_resolve = true;
+	}
+
 	while (true) {
 		OverwriteReason current = OverwriteReason (g_atomic_int_get (&_pending_overwrite));
 		OverwriteReason next = OverwriteReason (current | why);
@@ -534,7 +538,6 @@ DiskReader::set_pending_overwrite (OverwriteReason why)
 		}
 	}
 
-	run_must_resolve = true;
 }
 
 bool
@@ -633,7 +636,7 @@ DiskReader::overwrite_existing_buffers ()
 		}
 	}
 
-	if (g_atomic_int_get (&_pending_overwrite) & (LoopChanged|LoopDisabled|PlaylistChanged)) {
+	if (g_atomic_int_get (&_pending_overwrite) & (PlaylistModified|PlaylistChanged)) {
 		if (!overwrite_existing_midi ()) {
 			ret = false;
 		}
