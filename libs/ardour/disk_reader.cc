@@ -60,7 +60,6 @@ samplecnt_t DiskReader::loop_fade_length (0);
 DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, str, f)
 	, overwrite_sample (0)
-	, overwrite_queued (false)
 	, run_must_resolve (false)
 	, _declick_amp (s.nominal_sample_rate ())
 	, _declick_offs (0)
@@ -233,10 +232,7 @@ DiskReader::adjust_buffering ()
 void
 DiskReader::playlist_modified ()
 {
-	if (!overwrite_queued) {
-		_session.request_overwrite_buffer (_track, PlaylistModified);
-		overwrite_queued = true;
-	}
+	_session.request_overwrite_buffer (_track, PlaylistModified);
 }
 
 int
@@ -257,9 +253,8 @@ DiskReader::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
 	   take care of the buffer refill.
 	*/
 
-        if (!overwrite_queued && (prior_playlist || _session.loading())) {
+        if ((g_atomic_int_get (&_pending_overwrite) & PlaylistChanged) || prior_playlist) {
 	        _session.request_overwrite_buffer (_track, PlaylistChanged);
-		overwrite_queued = true;
 	}
 
 	return 0;
@@ -639,7 +634,6 @@ DiskReader::overwrite_existing_buffers ()
 		}
 	}
 
-	overwrite_queued = false;
 	g_atomic_int_set (&_pending_overwrite, 0);
 
 	return ret;

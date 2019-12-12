@@ -184,7 +184,6 @@ private:
 	sampleoffset_t overwrite_offset;
 	samplepos_t   new_file_sample;
 	mutable gint  _pending_overwrite;
-	bool          overwrite_queued;
 	bool          run_must_resolve;
 	IOChange      input_change_pending;
 	samplepos_t   file_sample[DataType::num_types];
