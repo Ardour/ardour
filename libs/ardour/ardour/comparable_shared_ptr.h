@@ -42,7 +42,7 @@ class /*LIBARDOUR_API*/ ComparableSharedPtr : public boost::shared_ptr<T>
 
 	ComparableSharedPtr (ComparableSharedPtr const & r) : boost::shared_ptr<T> (r) {}
 
-	ComparableSharedPtr& operator=(ComparableSharedPtr const& r) BOOST_SP_NOEXCEPT {
+	ComparableSharedPtr& operator=(ComparableSharedPtr const& r) {
 		boost::shared_ptr<T>(r).swap(*this);
 		return *this;
 	}
