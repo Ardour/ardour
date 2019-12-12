@@ -1009,35 +1009,6 @@ AutomationTimeAxisView::set_state (const XMLNode&, int /*version*/)
 	return 0;
 }
 
-void
-AutomationTimeAxisView::what_has_visible_automation (const boost::shared_ptr<Automatable>& automatable, set<Evoral::Parameter>& visible)
-{
-	/* this keeps "knowledge" of how we store visibility information
-	   in XML private to this class.
-	*/
-
-	assert (automatable);
-
-	Automatable::Controls& controls (automatable->controls());
-
-	for (Automatable::Controls::iterator i = controls.begin(); i != controls.end(); ++i) {
-
-		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (i->second);
-
-		if (ac && ac->alist()) {
-
-			const XMLNode* gui_node = ac->extra_xml ("GUI");
-
-			if (gui_node) {
-				bool shown;
-				if (gui_node->get_property ("shown", shown) && shown) {
-					visible.insert (i->first);
-				}
-			}
-		}
-	}
-}
-
 
 /** @return true if this view has any automation data to display */
 bool

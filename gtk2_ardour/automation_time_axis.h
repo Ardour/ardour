@@ -133,8 +133,6 @@ public:
 		return _show_regions;
 	}
 
-	static void what_has_visible_automation (const boost::shared_ptr<ARDOUR::Automatable>& automatable, std::set<Evoral::Parameter>& visible);
-
 protected:
 	/* Note that for MIDI controller "automation" (in regions), all of these
 	 * may be set.  In this case, _automatable is likely _route so the

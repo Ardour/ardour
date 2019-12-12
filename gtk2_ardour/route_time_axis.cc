@@ -2100,9 +2100,6 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 
 	items.clear ();
 
-	std::set<Evoral::Parameter> has_visible_automation;
-	AutomationTimeAxisView::what_has_visible_automation (processor, has_visible_automation);
-
 	for (std::set<Evoral::Parameter>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
 
 		ProcessorAutomationNode* pan;
@@ -2119,10 +2116,6 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 
 		_subplugin_menu_map[*i] = mitem;
 
-		if (has_visible_automation.find((*i)) != has_visible_automation.end()) {
-			mitem->set_active(true);
-		}
-
 		if ((pan = find_processor_automation_node (processor, *i)) == 0) {
 
 			/* new item */
@@ -2135,6 +2128,12 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 
 			pan->menu_item = mitem;
 
+		}
+
+		boost::shared_ptr<AutomationTimeAxisView> atav = automation_child (*i);
+		bool visible;
+		if (atav && atav->get_gui_property ("visible", visible)) {
+			mitem->set_active(true);
 		}
 
 		mitem->signal_toggled().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::processor_menu_item_toggled), rai, pan));
