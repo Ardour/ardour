@@ -117,6 +117,8 @@ public:
 	void refresh (bool run_scan = false);
 	PBD::Signal0<void> scripts_changed;
 
+	LuaScriptInfoPtr by_name (const std::string&, LuaScriptInfo::ScriptType);
+
 	static LuaScriptInfoPtr script_info (const std::string &script);
 	static bool try_compile (const std::string&, const LuaScriptParamList&);
 	static std::string get_factory_bytecode (const std::string&, const std::string& ffn = "factory", const std::string& fp = "f");

@@ -337,6 +337,18 @@ LuaScripting::scripts (LuaScriptInfo::ScriptType type) {
 	return _empty_script_info; // make some compilers happy
 }
 
+LuaScriptInfoPtr
+LuaScripting::by_name (const std::string& name, LuaScriptInfo::ScriptType type)
+{
+	LuaScriptList lsl (scripts (type));
+	printf ("CHECKING %d scripts\n", lsl.size());
+	for (LuaScriptList::const_iterator s = lsl.begin(); s != lsl.end(); ++s) {
+		if ((*s)->name == name) {
+			return (*s);
+		}
+	}
+	return LuaScriptInfoPtr();
+}
 
 std::string
 LuaScriptInfo::type2str (const ScriptType t) {
