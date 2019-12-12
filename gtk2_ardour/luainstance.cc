@@ -1320,6 +1320,7 @@ LuaInstance::load_state ()
 {
 	std::string uiscripts;
 	if (!find_file (ardour_config_search_path(), ui_scripts_file_name, uiscripts)) {
+		pre_seed_scripts ();
 		return -1;
 	}
 	XMLTree tree;
@@ -1464,6 +1465,24 @@ LuaInstance::set_state (const XMLNode& node)
 	}
 
 	return 0;
+}
+
+void
+LuaInstance::pre_seed_scripts ()
+{
+	LuaScriptInfoPtr spi = LuaScripting::instance ().by_name ("Mixer Screenshot", LuaScriptInfo::EditorAction);
+	int id = 0;
+	if (spi) {
+		try {
+			std::string script = Glib::file_get_contents (spi->path);
+			LuaState ls;
+			register_classes (ls.getState ());
+			LuaScriptParamList lsp = LuaScriptParams::script_params (ls, spi->path, "action_params");
+			LuaScriptParamPtr lspp (new LuaScriptParam("x-script-origin", "", spi->path, false, true));
+			lsp.push_back (lspp);
+			set_lua_action (id++, "Mixer Screenshot", script, lsp);
+		} catch (...) { }
+	}
 }
 
 bool

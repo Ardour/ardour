@@ -155,6 +155,7 @@ private:
 	void init ();
 	void set_dirty ();
 	void session_going_away ();
+	void pre_seed_scripts ();
 
 	LuaState lua;
 
