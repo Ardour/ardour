@@ -683,7 +683,6 @@ MidiRegion::model_changed ()
 void
 MidiRegion::model_contents_changed ()
 {
-	std::cerr << "MIDI Region " << name() << " contents changed\n";
 	send_change (Properties::contents);
 }
 
