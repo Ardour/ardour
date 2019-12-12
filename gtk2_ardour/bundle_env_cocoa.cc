@@ -95,7 +95,14 @@ fixup_bundle_environment (int argc, char* argv[], string & localedir)
 
 	set_language_preference ();
 
-	setup_logging ();
+	/* if running from a bundle, stdout/stderr will be redirect to null, so
+	 * we want ASL logging. If not, we're probably running in a terminal
+	 * and we don't want ASL logging.
+	 */
+
+	if (g_getenv ("ARDOUR_BUNDLED")) {
+		setup_logging ();
+	}
 
 	char execpath[MAXPATHLEN+1];
 	uint32_t pathsz = sizeof (execpath);
