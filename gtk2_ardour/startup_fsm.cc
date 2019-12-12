@@ -141,35 +141,7 @@ StartupFSM::start ()
 		show_new_user_dialog ();
 		break;
 	case WaitingForSessionPath:
-		if (ARDOUR_COMMAND_LINE::session_name.empty()) {
-
-			/* nothing given on the command line ... show new session dialog */
-
-			show_session_dialog (new_session_required);
-
-		} else {
-
-			if (get_session_parameters_from_command_line (new_session_required)) {
-
-				/* command line arguments all OK. Get engine parameters */
-
-				if (!new_session_required && session_existing_sample_rate > 0) {
-					audiomidi_dialog.set_desired_sample_rate (session_existing_sample_rate);
-				}
-
-				start_audio_midi_setup ();
-
-			} else {
-
-				/* command line arguments not good. Use
-				 * dialog, but prime the dialog with
-				 * the information we set up in
-				 * get_session_parameters_from_command_line()
-				 */
-
-				show_session_dialog (new_session_required);
-			}
-		}
+		handle_waiting_for_session_path ();
 		break;
 	default:
 		fatal << string_compose (_("Programming error: %1"), string_compose (X_("impossible starting state in StartupFSM (%1)"), enum_2_string (_state))) << endmsg;
@@ -243,7 +215,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 			if (NewUserWizard::required()) {
 				show_new_user_dialog ();
 			} else {
-				show_session_dialog (new_session_required);
+				handle_waiting_for_session_path ();
 			}
 			break;
 		}
@@ -340,6 +312,40 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 		default:
 			/* ERROR */
 			break;
+		}
+	}
+}
+
+void
+StartupFSM::handle_waiting_for_session_path ()
+{
+	if (ARDOUR_COMMAND_LINE::session_name.empty()) {
+
+		/* nothing given on the command line ... show new session dialog */
+
+		show_session_dialog (new_session_required);
+
+	} else {
+
+		if (get_session_parameters_from_command_line (new_session_required)) {
+
+			/* command line arguments all OK. Get engine parameters */
+
+			if (!new_session_required && session_existing_sample_rate > 0) {
+				audiomidi_dialog.set_desired_sample_rate (session_existing_sample_rate);
+			}
+
+			start_audio_midi_setup ();
+
+		} else {
+
+			/* command line arguments not good. Use
+			 * dialog, but prime the dialog with
+			 * the information we set up in
+			 * get_session_parameters_from_command_line()
+			 */
+
+			show_session_dialog (new_session_required);
 		}
 	}
 }

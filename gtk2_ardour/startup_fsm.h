@@ -102,6 +102,7 @@ class StartupFSM : public sigc::trackable
 	int  check_session_parameters (bool must_be_new);
 	void start_audio_midi_setup ();
 	void engine_running ();
+	void handle_waiting_for_session_path ();
 
 	/* the Audio/MIDI dialog needs to be persistent and is thus owned by
 	 * ARDOUR_UI and we use it by reference. All other dialogs can be
