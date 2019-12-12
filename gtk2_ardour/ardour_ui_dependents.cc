@@ -405,10 +405,11 @@ ARDOUR_UI::setup_windows ()
 bool
 ARDOUR_UI::bind_lua_action_script (GdkEventButton*ev, int i)
 {
-	if (ev->button != 3) {
+	LuaInstance *li = LuaInstance::instance();
+	std::string name;
+	if (ev->button != 3 && !(ev->button == 1 && !li->lua_action_name (i, name))) {
 		return false;
 	}
-	LuaInstance *li = LuaInstance::instance();
 	if (Gtkmm2ext::Keyboard::modifier_state_equals (ev->state, Gtkmm2ext::Keyboard::TertiaryModifier)) {
 		li->remove_lua_action (i);
 	} else {
