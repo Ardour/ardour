@@ -97,7 +97,7 @@ int
 DiskWriter::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_many)
 {
 	while (how_many--) {
-		c->push_back (new WriterChannelInfo (_session.butler()->audio_diskstream_capture_buffer_size()));
+		c->push_back (new WriterChannelInfo (_session.butler()->audio_capture_buffer_size()));
 		DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: new writer channel, write space = %2 read = %3\n",
 		                                            name(),
 		                                            c->back()->wbuf->write_space(),
@@ -1446,7 +1446,7 @@ DiskWriter::adjust_buffering ()
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-		(*chan)->resize (_session.butler()->audio_diskstream_capture_buffer_size());
+		(*chan)->resize (_session.butler()->audio_capture_buffer_size());
 	}
 }
 

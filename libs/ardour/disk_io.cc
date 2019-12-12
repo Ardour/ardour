@@ -187,7 +187,7 @@ DiskIOProcessor::configure_io (ChanCount in, ChanCount out)
 	}
 
 	if (in.n_midi() > 0 && !_midi_buf) {
-		const size_t size = _session.butler()->midi_diskstream_buffer_size();
+		const size_t size = _session.butler()->midi_buffer_size();
 		_midi_buf = new MidiRingBuffer<samplepos_t>(size);
 		changed = true;
 	}

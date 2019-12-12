@@ -62,9 +62,9 @@ class LIBARDOUR_API Butler : public SessionHandleRef
 
         void map_parameters ();
 
-	samplecnt_t audio_diskstream_capture_buffer_size() const { return audio_dstream_capture_buffer_size; }
-	samplecnt_t audio_diskstream_playback_buffer_size() const { return audio_dstream_playback_buffer_size; }
-	uint32_t midi_diskstream_buffer_size()  const { return midi_dstream_buffer_size; }
+	samplecnt_t audio_capture_buffer_size() const { return _audio_capture_buffer_size; }
+	samplecnt_t audio_playback_buffer_size() const { return _audio_playback_buffer_size; }
+	uint32_t midi_buffer_size()  const { return _midi_buffer_size; }
 
 	bool flush_tracks_to_disk_after_locate (boost::shared_ptr<RouteList>, uint32_t& errors);
 
@@ -85,9 +85,9 @@ class LIBARDOUR_API Butler : public SessionHandleRef
         Glib::Threads::Cond   paused;
 	bool         should_run;
 	mutable gint should_do_transport_work;
-	samplecnt_t   audio_dstream_capture_buffer_size;
-	samplecnt_t   audio_dstream_playback_buffer_size;
-	uint32_t     midi_dstream_buffer_size;
+	samplecnt_t  _audio_capture_buffer_size;
+	samplecnt_t  _audio_playback_buffer_size;
+	uint32_t     _midi_buffer_size;
 	PBD::RingBuffer<CrossThreadPool*> pool_trash;
 
 private:

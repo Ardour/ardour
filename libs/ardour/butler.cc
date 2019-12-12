@@ -50,9 +50,9 @@ Butler::Butler(Session& s)
 	: SessionHandleRef (s)
 	, thread()
 	, have_thread (false)
-	, audio_dstream_capture_buffer_size(0)
-	, audio_dstream_playback_buffer_size(0)
-	, midi_dstream_buffer_size(0)
+	, _audio_capture_buffer_size(0)
+	, _audio_playback_buffer_size(0)
+	, _midi_buffer_size(0)
 	, pool_trash(16)
 	, _xthread (true)
 {
@@ -83,18 +83,18 @@ Butler::config_changed (std::string p)
 		_session.adjust_playback_buffering ();
 		if (Config->get_buffering_preset() == Custom) {
 			/* size is in Samples, not bytes */
-			audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.sample_rate());
+			_audio_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.sample_rate());
 			_session.adjust_playback_buffering ();
 		}
 	} else if (p == "capture-buffer-seconds") {
 		if (Config->get_buffering_preset() == Custom) {
-			audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.sample_rate());
+			_audio_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.sample_rate());
 			_session.adjust_capture_buffering ();
 		}
 	} else if (p == "buffering-preset") {
 		DiskIOProcessor::set_buffering_parameters (Config->get_buffering_preset());
-		audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.sample_rate());
-		audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.sample_rate());
+		_audio_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.sample_rate());
+		_audio_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.sample_rate());
 		_session.adjust_capture_buffering ();
 		_session.adjust_playback_buffering ();
 	} else if (p == "midi-readahead") {
@@ -110,14 +110,14 @@ Butler::start_thread()
 
 	/* size is in Samples, not bytes */
 	const float rate = (float)_session.sample_rate();
-	audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * rate);
-	audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * rate);
+	_audio_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * rate);
+	_audio_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * rate);
 
 	/* size is in bytes
 	 * XXX: AudioEngine needs to tell us the MIDI buffer size
 	 * (i.e. how many MIDI bytes we might see in a cycle)
 	 */
-	midi_dstream_buffer_size = (uint32_t) floor (Config->get_midi_track_buffer_seconds() * rate);
+	_midi_buffer_size = (uint32_t) floor (Config->get_midi_track_buffer_seconds() * rate);
 
 	DiskReader::set_midi_readahead_samples ((samplecnt_t) (Config->get_midi_readahead() * rate));
 
