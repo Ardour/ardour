@@ -97,8 +97,6 @@ Butler::config_changed (std::string p)
 		_audio_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.sample_rate());
 		_session.adjust_capture_buffering ();
 		_session.adjust_playback_buffering ();
-	} else if (p == "midi-readahead") {
-		DiskReader::set_midi_readahead_samples ((samplecnt_t) (Config->get_midi_readahead() * _session.sample_rate()));
 	}
 }
 
@@ -118,8 +116,6 @@ Butler::start_thread()
 	 * (i.e. how many MIDI bytes we might see in a cycle)
 	 */
 	_midi_buffer_size = (uint32_t) floor (Config->get_midi_track_buffer_seconds() * rate);
-
-	DiskReader::set_midi_readahead_samples ((samplecnt_t) (Config->get_midi_readahead() * rate));
 
 	should_run = false;
 

@@ -2880,16 +2880,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("MIDI"), new OptionEditorHeading (_("Buffering")));
 
-	add_option (_("MIDI"),
-		    new SpinOption<float> (
-			    "midi-readahead",
-			    _("MIDI read-ahead time (seconds)"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_readahead),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_readahead),
-			    0.1, 10, 0.05, 1,
-			    "", 1.0, 2
-			    ));
-
 	add_option (_("MIDI"), new OptionEditorHeading (_("Session")));
 
 	add_option (_("MIDI"),

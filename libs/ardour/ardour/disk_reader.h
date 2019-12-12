@@ -101,8 +101,6 @@ public:
 	bool declick_in_progress () const;
 	void reload_loop ();
 
-	static void set_midi_readahead_samples (samplecnt_t samples_ahead) { midi_readahead = samples_ahead; }
-
 	/* inc/dec variants MUST be called as part of the process call tree, before any
 	   disk readers are invoked. We use it when the session needs the
 	   transport (and thus effective read position for DiskReaders) to keep
@@ -200,7 +198,6 @@ private:
 	int _do_refill_with_alloc (bool partial_fill);
 
 	static samplecnt_t _chunk_samples;
-	static samplecnt_t midi_readahead;
 	static gint       _no_disk_output;
 
 	static Declicker loop_declick_in;

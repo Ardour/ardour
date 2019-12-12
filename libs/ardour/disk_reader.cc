@@ -52,7 +52,6 @@ PBD::Signal0<void> DiskReader::Underrun;
 Sample* DiskReader::_sum_buffer = 0;
 Sample* DiskReader::_mixdown_buffer = 0;
 gain_t* DiskReader::_gain_buffer = 0;
-samplecnt_t DiskReader::midi_readahead = 4096;
 gint DiskReader::_no_disk_output (0);
 DiskReader::Declicker DiskReader::loop_declick_in;
 DiskReader::Declicker DiskReader::loop_declick_out;
