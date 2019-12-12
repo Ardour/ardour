@@ -536,15 +536,23 @@ APianoKeyboard::bind_keys_basic_qwertz ()
 static char*
 get_keycode (GdkEventKey* event)
 {
-	GdkKeymapKey kk;
-
 	/* We're not using event->keyval, because we need keyval with level set to 0.
 	   E.g. if user holds Shift and presses '7', we want to get a '7', not '&'. */
+
+#ifdef __APPLE__
+	/* gdkkeys-quartz.c does not implement gdk_keymap_lookup_key */
+	guint keyval;
+	gdk_keymap_translate_keyboard_state (NULL, event->hardware_keycode,
+	                                     (GdkModifierType)0, 0,
+	                                     &keyval, NULL, NULL, NULL);
+#else
+	GdkKeymapKey kk;
 	kk.keycode = event->hardware_keycode;
 	kk.level   = 0;
 	kk.group   = 0;
 
 	guint keyval = gdk_keymap_lookup_key (NULL, &kk);
+#endif
 	return gdk_keyval_name (gdk_keyval_to_lower (keyval));
 }
 
