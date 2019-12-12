@@ -58,7 +58,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 {
 	_piano.set_flags (Gtk::CAN_FOCUS);
 
-	_piano.set_keyboard_layout (APianoKeyboard::QWERTY);
+	_piano.set_keyboard_layout (APianoKeyboard::S_QWERTY);
 	_piano.set_annotate_octave (true);
 	_piano.set_grand_piano_highlight (false);
 	_piano.set_annotate_layout (true);
@@ -84,7 +84,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_keyboard_layout.AddMenuElem (MenuElem (_("QWERTZ Single"), sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::select_keyboard_layout), "QWERTZ Single")));
 
 	Gtkmm2ext::set_size_request_to_display_given_text_width (_keyboard_layout, _("QWERTZ Single"), 2, 0); // Longest Text
-	_keyboard_layout.set_active (_("QWERTY"));
+	_keyboard_layout.set_active (_("QWERTY Single"));
 	_midi_channel.set_active ("1");
 	_transpose_output.set_active ("0");
 
