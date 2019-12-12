@@ -642,6 +642,7 @@ DiskReader::overwrite_existing_buffers ()
 		}
 	}
 
+	overwrite_queued = false;
 	g_atomic_int_set (&_pending_overwrite, 0);
 
 	return ret;

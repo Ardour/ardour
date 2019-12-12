@@ -1786,6 +1786,10 @@ Playlist::region_changed (const PropertyChange& what_changed, boost::shared_ptr<
 		send_contents = true;
 	}
 
+	if (what_changed.contains (Properties::contents)) {
+		send_contents = true;
+	}
+
 	if (what_changed.contains (Properties::position) && !what_changed.contains (Properties::length)) {
 		notify_region_moved (region);
 	} else if (!what_changed.contains (Properties::position) && what_changed.contains (Properties::length)) {
