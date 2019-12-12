@@ -66,7 +66,6 @@ void
 Session::schedule_playback_buffering_adjustment ()
 {
 	add_post_transport_work (PostTransportAdjustPlaybackBuffering);
-	DiskReader::inc_no_disk_output ();
 	_butler->schedule_transport_work ();
 }
 

@@ -716,20 +716,13 @@ Session::butler_completed_transport_work ()
 		TFSM_EVENT (TransportFSM::LocateDone);
 	}
 
-	if (ptw & PostTransportAdjustPlaybackBuffering) {
-		/* we blocked output while this happened */
-		DiskReader::dec_no_disk_output ();
-		ptw = PostTransportWork (ptw & ~PostTransportAdjustPlaybackBuffering);
-		set_post_transport_work (ptw);
-	}
-
 	bool start_after_butler_done_msg = false;
 
 	if ((ptw & (PostTransportReverse|PostTransportRoll))) {
 		start_after_butler_done_msg = true;
 	}
 
-	ptw = PostTransportWork (ptw & ~(PostTransportAdjustCaptureBuffering|PostTransportOverWrite|PostTransportReverse|PostTransportRoll));
+	ptw = PostTransportWork (ptw & ~(PostTransportAdjustPlaybackBuffering|PostTransportAdjustCaptureBuffering|PostTransportOverWrite|PostTransportReverse|PostTransportRoll));
 	set_post_transport_work (ptw);
 
 	set_next_event ();
@@ -1147,6 +1140,9 @@ Session::butler_transport_work ()
 	}
 
 	if (ptw & PostTransportAdjustPlaybackBuffering) {
+		/* need to prevent concurrency with ARDOUR::Reader::run(),
+		 * DiskWriter::adjust_buffering() re-allocates the ringbuffer */
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 			if (tr) {
