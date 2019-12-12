@@ -533,7 +533,7 @@ APianoKeyboard::bind_keys_basic_qwertz ()
 	bind_key ("apostrophe", 29);
 }
 
-static char*
+static const char*
 get_keycode (GdkEventKey* event)
 {
 	/* We're not using event->keyval, because we need keyval with level set to 0.
@@ -559,7 +559,7 @@ get_keycode (GdkEventKey* event)
 bool
 APianoKeyboard::on_key_press_event (GdkEventKey* event)
 {
-	char* key = get_keycode (event);
+	char const* key = get_keycode (event);
 	int note = key_binding (key);
 
 	if (note < -1) {
@@ -594,7 +594,7 @@ APianoKeyboard::on_key_press_event (GdkEventKey* event)
 bool
 APianoKeyboard::on_key_release_event (GdkEventKey* event)
 {
-	char* key = get_keycode (event);
+	char const* key = get_keycode (event);
 
 	if (!key) {
 		return false;
