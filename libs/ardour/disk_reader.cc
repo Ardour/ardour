@@ -78,8 +78,6 @@ DiskReader::~DiskReader ()
 void
 DiskReader::ReaderChannelInfo::resize (samplecnt_t bufsize)
 {
-	/* caller must hold rbuf lock */
-
 	delete rbuf; rbuf = 0;
 
 	rbuf = new PlaybackBuffer<Sample> (bufsize);
@@ -225,7 +223,6 @@ DiskReader::buffer_load () const
 void
 DiskReader::adjust_buffering ()
 {
-	Glib::Threads::Mutex::Lock lm (rbuf_lock);
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {

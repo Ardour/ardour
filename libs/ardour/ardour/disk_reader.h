@@ -115,8 +115,6 @@ public:
 	static void reset_loop_declick (Location*, samplecnt_t sample_rate);
 	static void alloc_loop_declick (samplecnt_t sample_rate);
 
-	Glib::Threads::Mutex rbuf_lock;
-
 protected:
 	friend class Track;
 	friend class MidiTrack;
