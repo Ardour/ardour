@@ -626,7 +626,8 @@ DiskReader::overwrite_existing_buffers ()
 {
 	/* called from butler thread */
 
-	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 overwriting existing buffers at %2\n", owner()->name(), overwrite_sample));
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 overwriting existing buffers at %2 (because %3%4%5\n", owner()->name(), overwrite_sample, std::hex, g_atomic_int_get (&_pending_overwrite), std::dec));
+
 	bool ret = true;
 
 	if (g_atomic_int_get (&_pending_overwrite) & (PlaylistModified|LoopDisabled|LoopChanged|PlaylistChanged)) {
