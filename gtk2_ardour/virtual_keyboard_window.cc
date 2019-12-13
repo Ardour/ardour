@@ -425,7 +425,12 @@ VirtualKeyboardWindow::toggle_config (GdkEventButton* ev)
 	if (a) {
 		_cfg_box->show ();
 	} else {
+		const int child_height = _cfg_box->get_height ();
 		_cfg_box->hide ();
+		Gtk::Requisition wr;
+		get_size (wr.width, wr.height);
+		wr.height -= child_height;
+		resize (wr.width, wr.height);
 	}
 	return false;
 }
@@ -438,7 +443,12 @@ VirtualKeyboardWindow::toggle_bankpatch (GdkEventButton*)
 	if (a) {
 		_pgm_box->show ();
 	} else {
+		const int child_height = _pgm_box->get_height ();
 		_pgm_box->hide ();
+		Gtk::Requisition wr;
+		get_size (wr.width, wr.height);
+		wr.height -= child_height;
+		resize (wr.width, wr.height);
 	}
 	return false;
 }
