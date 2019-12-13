@@ -17,9 +17,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <os/log.h>
+#include <unistd.h>
+
 #include <string>
 #include <vector>
 #include <cerrno>
+#include <cstdio>
 #include <cstring>
 
 #include <glib.h>
@@ -32,9 +36,9 @@
 #include "ardour/filesystem_paths.h"
 
 #include "pbd/epa.h"
+#include "pbd/file_utils.h"
 #include "pbd/search_path.h"
 #include "pbd/pathexpand.h"
-#include "pbd/file_utils.h"
 
 #include "bundle_env.h"
 
@@ -53,30 +57,36 @@ extern void set_language_preference (); // cocoacarbon.mm
 extern void no_app_nap (); // cocoacarbon.mm
 
 static void
-setup_logging(void)
+setup_logging (void)
 {
-	/* The ASL API has evolved since it was introduced in 10.4. If ASL_LOG_DESCRIPTOR_WRITE is not available,
-	   then we're not interested in doing any of this, since its only purpose is to get stderr/stdout to
-	   appear in the Console.
-	*/
-#ifdef ASL_LOG_DESCRIPTOR_WRITE
-	aslmsg msg;
-	aslclient c = asl_open (PROGRAM_NAME, "com.apple.console", 0);
+	char path[PATH_MAX+1];
+	snprintf (path, sizeof (path), "%s/stderr.log", user_config_directory().c_str());
 
-	msg = asl_new(ASL_TYPE_MSG);
-	asl_set(msg, ASL_KEY_FACILITY, "com.apple.console");
-	asl_set(msg, ASL_KEY_LEVEL, ASL_STRING_NOTICE);
-	asl_set(msg, ASL_KEY_READ_UID, "-1");
+	int efd = ::open (path, O_CREAT|O_WRONLY|O_TRUNC, 0644);
 
-	int fd = dup(2);
-	//asl_set_filter(c, ASL_FILTER_MASK_UPTO(ASL_LEVEL_DEBUG));
-	asl_add_log_file(c, fd);
-	asl_log(c, NULL, ASL_LEVEL_INFO, string_compose ("Hello world from %1", PROGRAM_NAME).c_str());
-	asl_log_descriptor(c, msg, ASL_LEVEL_INFO, 1,  ASL_LOG_DESCRIPTOR_WRITE);
-	asl_log_descriptor(c, msg, ASL_LEVEL_INFO, 2, ASL_LOG_DESCRIPTOR_WRITE);
-#else
-#warning This build host has an older ASL API, so no console logging in this build.
-#endif
+	if (efd >= 0) {
+		if (dup2 (efd, STDERR_FILENO) < 0) {
+			os_log (OS_LOG_DEFAULT, "cannot dup stderr on %d (%s)", efd, strerror (errno));
+			::exit (12);
+		}
+	} else {
+		os_log (OS_LOG_DEFAULT, "cannot open %s (%s)", path, strerror(errno));
+		::exit (11);
+	}
+
+	snprintf (path, sizeof (path), "%s/stdout.log", user_config_directory().c_str());
+
+	int ofd = ::open (path, O_CREAT|O_WRONLY|O_TRUNC, 0644);
+
+	if (ofd >= 0) {
+		if (dup2 (ofd, STDOUT_FILENO) < 0) {
+			os_log (OS_LOG_DEFAULT, "cannot dup stdout on %d (%s)", ofd, strerror (errno));
+			::exit (14);
+		}
+	} else {
+		os_log (OS_LOG_DEFAULT, "cannot open %s (%s)", path, strerror(errno));
+		::exit (13);
+	}
 }
 
 void
@@ -100,7 +110,7 @@ fixup_bundle_environment (int argc, char* argv[], string & localedir)
 	 * and we don't want ASL logging.
 	 */
 
-	if (g_getenv ("ARDOUR_BUNDLED")) {
+	if (g_getenv ("ARDOUR_BUNDLED") || g_getenv ("ARDOUR_LOGGING")) {
 		setup_logging ();
 	}
 
@@ -173,7 +183,7 @@ void load_custom_fonts()
 		CFURLRef fontURL;
 		CFErrorRef error;
 		ttf = CFStringCreateWithBytes(
-				kCFAllocatorDefault, (UInt8*) font_file.c_str(),
+				kCFAllocatorDefault, (const UInt8*) font_file.c_str(),
 				font_file.length(),
 				kCFStringEncodingUTF8, FALSE);
 		fontURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, ttf, kCFURLPOSIXPathStyle, TRUE);
@@ -189,7 +199,7 @@ void load_custom_fonts()
 		CFURLRef fontURL;
 		CFErrorRef error;
 		ttf = CFStringCreateWithBytes(
-				kCFAllocatorDefault, (UInt8*) font_file.c_str(),
+				kCFAllocatorDefault, (const UInt8*) font_file.c_str(),
 				font_file.length(),
 				kCFStringEncodingUTF8, FALSE);
 		fontURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, ttf, kCFURLPOSIXPathStyle, TRUE);
