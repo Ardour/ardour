@@ -1388,7 +1388,7 @@ DiskReader::Declicker::Declicker ()
 
 DiskReader::Declicker::~Declicker ()
 {
-	delete vec;
+	delete [] vec;
 }
 
 void
