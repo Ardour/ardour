@@ -358,6 +358,13 @@ int main (int argc, char *argv[])
 		exit (EXIT_FAILURE);
 	}
 
+	{
+		const char *adf;
+		if ((adf = g_getenv ("ARDOUR_DEBUG_FLAGS"))) {
+			PBD::parse_debug_options (adf);
+		}
+	}
+
 	cout << PROGRAM_NAME
 	     << VERSIONSTRING
 	     << _(" (built using ")
