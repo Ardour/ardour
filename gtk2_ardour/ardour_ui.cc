@@ -2000,6 +2000,9 @@ ARDOUR_UI::map_transport_state ()
 {
 	if (!_session) {
 		layered_button.set_sensitive (false);
+		if (UIConfiguration::instance().get_screen_saver_mode () == InhibitWhileRecording) {
+			inhibit_screensaver (false);
+		}
 		return;
 	}
 
