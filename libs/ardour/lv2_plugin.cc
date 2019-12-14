@@ -213,6 +213,7 @@ public:
 	LilvNode* auto_automation_controlled; // lv2:portProperty
 	LilvNode* auto_automation_controller; // lv2:portProperty
 	LilvNode* inline_display_in_gui; // lv2:optionalFeature
+	LilvNode* inline_mixer_control; // lv2:PortProperty
 #endif
 
 private:
@@ -2279,6 +2280,10 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	desc.enumeration = lilv_port_has_property(_impl->plugin, port, _world.lv2_enumeration);
 	desc.scale_points = get_scale_points(which);
 
+#ifdef LV2_EXTENDED
+	desc.inline_ctrl = lilv_port_has_property(_impl->plugin, port, _world.inline_mixer_control);
+#endif
+
 	if (steps) {
 		desc.rangesteps = lilv_node_as_float (steps);
 	}
@@ -3323,6 +3328,7 @@ LV2World::LV2World()
 	auto_automation_controlled  = lilv_new_uri(world, LV2_AUTOMATE_URI__controlled);
 	auto_automation_controller  = lilv_new_uri(world, LV2_AUTOMATE_URI__controller);
 	inline_display_in_gui       = lilv_new_uri(world, LV2_INLINEDISPLAY__in_gui);
+	inline_mixer_control        = lilv_new_uri(world, "http://ardour.org/lv2/ext#inlineMixerControl");
 #endif
 	bufz_powerOf2BlockLength = lilv_new_uri(world, LV2_BUF_SIZE__powerOf2BlockLength);
 	bufz_fixedBlockLength    = lilv_new_uri(world, LV2_BUF_SIZE__fixedBlockLength);
@@ -3346,6 +3352,8 @@ LV2World::~LV2World()
 	lilv_node_free(auto_automation_control);
 	lilv_node_free(auto_automation_controlled);
 	lilv_node_free(auto_automation_controller);
+	lilv_node_free(inline_display_in_gui);
+	lilv_node_free(inline_mixer_control);
 #endif
 	lilv_node_free(patch_Message);
 	lilv_node_free(opts_requiredOptions);

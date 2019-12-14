@@ -112,6 +112,7 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 	bool                           integer_step;
 	bool                           sr_dependent;
 	bool                           enumeration;
+	bool                           inline_ctrl;
 };
 
 } // namespace ARDOUR

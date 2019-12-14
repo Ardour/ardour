@@ -53,8 +53,10 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 	/* Note: defaults in Evoral::ParameterDescriptor */
 
 	switch((AutomationType)parameter.type()) {
-	case GainAutomation:
 	case BusSendLevel:
+		inline_ctrl = true;
+		/* fallthrough */
+	case GainAutomation:
 		upper  = Config->get_max_gain();
 		normal = 1.0f;
 		break;
@@ -150,6 +152,7 @@ ParameterDescriptor::ParameterDescriptor()
 	, integer_step(false)
 	, sr_dependent(false)
 	, enumeration(false)
+	, inline_ctrl(false)
 {}
 
 void

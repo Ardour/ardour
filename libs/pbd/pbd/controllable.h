@@ -73,10 +73,11 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible, public boost::
 {
 public:
 	enum Flag {
-		Toggle = 0x1,
-		GainLike = 0x2,
-		RealTime = 0x4,
-		NotAutomatable = 0x8,
+		Toggle         = 0x01,
+		GainLike       = 0x02,
+		RealTime       = 0x04,
+		NotAutomatable = 0x08,
+		InlineControl  = 0x10,
 	};
 
 	Controllable (const std::string& name, Flag f = Flag (0));
