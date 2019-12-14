@@ -190,6 +190,8 @@ Automatable::describe_parameter (Evoral::Parameter param)
 
 	if (param == Evoral::Parameter(GainAutomation)) {
 		return _("Fader");
+	} else if (param.type() == BusSendLevel) {
+		return _("Send");
 	} else if (param.type() == TrimAutomation) {
 		return _("Trim");
 	} else if (param.type() == MuteAutomation) {
@@ -541,6 +543,8 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	} else if (param.type() == GainAutomation) {
 		control = new GainControl(_a_session, param);
 	} else if (param.type() == TrimAutomation) {
+		control = new GainControl(_a_session, param);
+	} else if (param.type() == BusSendLevel) {
 		control = new GainControl(_a_session, param);
 	} else if (param.type() == PanAzimuthAutomation || param.type() == PanWidthAutomation || param.type() == PanElevationAutomation) {
 		Pannable* pannable = dynamic_cast<Pannable*>(this);

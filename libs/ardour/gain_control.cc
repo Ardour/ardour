@@ -38,7 +38,7 @@ using namespace std;
 GainControl::GainControl (Session& session, const Evoral::Parameter &param, boost::shared_ptr<AutomationList> al)
 	: SlavableAutomationControl (session, param, ParameterDescriptor(param),
 	                             al ? al : boost::shared_ptr<AutomationList> (new AutomationList (param)),
-	                             param.type() == GainAutomation ? X_("gaincontrol") : X_("trimcontrol"),
+	                             (param.type() == GainAutomation || param.type() == BusSendLevel) ? X_("gaincontrol") : X_("trimcontrol"),
 	                             Controllable::GainLike)
 {
 }

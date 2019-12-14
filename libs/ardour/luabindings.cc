@@ -1865,6 +1865,7 @@ LuaBindings::common (lua_State* L)
 
 		.beginNamespace ("AutomationType")
 		.addConst ("GainAutomation", ARDOUR::AutomationType(GainAutomation))
+		.addConst ("BusSendLevel", ARDOUR::AutomationType(BusSendLevel))
 		.addConst ("PluginAutomation", ARDOUR::AutomationType(PluginAutomation))
 		.addConst ("SoloAutomation", ARDOUR::AutomationType(SoloAutomation))
 		.addConst ("SoloIsolateAutomation", ARDOUR::AutomationType(SoloIsolateAutomation))

@@ -885,6 +885,7 @@ Strip::do_parameter_display (ARDOUR::ParameterDescriptor const& desc, float val,
 
 	switch (desc.type) {
 	case GainAutomation:
+	case BusSendLevel:
 	case TrimAutomation:
 		// we can't use value_as_string() that'll suffix "dB" and also use "-inf" w/o space :(
 		if (val == 0.0) {
@@ -894,24 +895,6 @@ Strip::do_parameter_display (ARDOUR::ParameterDescriptor const& desc, float val,
 			snprintf (buf, sizeof (buf), "%6.1f", dB);
 			pending_display[1] = buf;
 			screen_hold = true;
-		}
-		break;
-
-	case BusSendLevel:
-		if (Profile->get_mixbus()) {  //Mixbus sends are already stored in dB
-			// TODO remove after merge - PluginAutomation w/print_fmt
-			snprintf (buf, sizeof (buf), "%2.1f", val);
-			pending_display[1] = buf;
-			screen_hold = true;
-		} else {
-			if (val == 0.0) {
-				pending_display[1] = " -inf ";
-			} else {
-				float dB = accurate_coefficient_to_dB (val);
-				snprintf (buf, sizeof (buf), "%6.1f", dB);
-				pending_display[1] = buf;
-				screen_hold = true;
-			}
 		}
 		break;
 

@@ -101,7 +101,7 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 	//boost_debug_shared_ptr_mark_interesting (this, "send");
 
 	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation)));
-	_gain_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(GainAutomation), gl));
+	_gain_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(BusSendLevel), gl));
 	add_control (_gain_control);
 
 	_amp.reset (new Amp (_session, _("Fader"), _gain_control, true));

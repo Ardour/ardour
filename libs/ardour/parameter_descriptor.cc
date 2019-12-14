@@ -195,7 +195,7 @@ ParameterDescriptor::update_steps()
 	if (unit == ParameterDescriptor::MIDI_NOTE) {
 		step      = smallstep = 1;  // semitone
 		largestep = 12;             // octave
-	} else if (type == GainAutomation || type == TrimAutomation) {
+	} else if (type == GainAutomation || type == TrimAutomation || type == BusSendLevel) {
 		/* dB_coeff_step gives a step normalized for [0, max_gain].  This is
 		   like "slider position", so we convert from "slider position" to gain
 		   to have the correct unit here. */
