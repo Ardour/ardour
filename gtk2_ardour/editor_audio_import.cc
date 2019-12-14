@@ -52,6 +52,7 @@
 #include "ardour/utils.h"
 #include "pbd/memento_command.h"
 
+#include "ardour_message.h"
 #include "ardour_ui.h"
 #include "cursor_context.h"
 #include "editor.h"
@@ -81,7 +82,7 @@ void
 Editor::add_external_audio_action (ImportMode mode_hint)
 {
 	if (_session == 0) {
-		MessageDialog msg (_("You can't import or embed an audiofile until you have a session loaded."));
+		ArdourMessageDialog msg (_("You can't import or embed an audiofile until you have a session loaded."));
 		msg.run ();
 		return;
 	}
@@ -103,7 +104,7 @@ Editor::external_audio_dialog ()
 	uint32_t midi_track_cnt;
 
 	if (_session == 0) {
-		MessageDialog msg (_("You can't import or embed an audiofile until you have a session loaded."));
+		ArdourMessageDialog msg (_("You can't import or embed an audiofile until you have a session loaded."));
 		msg.run ();
 		return;
 	}
@@ -184,7 +185,7 @@ Editor::check_whether_and_how_to_import(string path, bool all_or_nothing)
 			message = string_compose (_("The session already contains a source file named %1.  Do you want to import %2 as a new source, or skip it?"), wave_name, wave_name);
 
 		}
-		MessageDialog dialog(message, false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE, true);
+		ArdourMessageDialog dialog(message, false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE, true);
 
 		if (all_or_nothing) {
 			// disabled
@@ -198,10 +199,7 @@ Editor::check_whether_and_how_to_import(string path, bool all_or_nothing)
 
 		//dialog.add_button("Skip all", 4); // All or rest?
 
-		dialog.show();
-
 		function = dialog.run ();
-
 		dialog.hide();
 	}
 
@@ -650,8 +648,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 		}
 
 		if (!finfo.seekable) {
-			MessageDialog msg ( string_compose ( _("%1\nThis audiofile cannot be embedded. It must be imported!"), short_path (path, 40)), false, Gtk::MESSAGE_ERROR);
-			msg.set_position (WIN_POS_MOUSE);
+			ArdourMessageDialog msg (string_compose (_("%1\nThis audiofile cannot be embedded. It must be imported!"), short_path (path, 40)), false, Gtk::MESSAGE_ERROR);
 			msg.run ();
 			return -2;
 		}

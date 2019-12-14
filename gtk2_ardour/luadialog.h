@@ -21,10 +21,11 @@
 
 #include <cassert>
 #include <gtkmm/table.h>
-#include <gtkmm/messagedialog.h>
 #include <gtkmm/progressbar.h>
 
 #include "LuaBridge/LuaBridge.h"
+
+#include "ardour_message.h"
 
 namespace LuaDialog {
 
@@ -49,7 +50,7 @@ private:
 	static Gtk::ButtonsType to_gtk_bt (ButtonType bt);
 	static Gtk::MessageType to_gtk_mt (MessageType mt);
 
-	Gtk::MessageDialog _message_dialog;
+	ArdourMessageDialog _message_dialog;
 };
 
 class LuaDialogWidget {

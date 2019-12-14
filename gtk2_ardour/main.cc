@@ -59,6 +59,7 @@
 #include <gtkmm2ext/application.h>
 #include <gtkmm2ext/utils.h>
 
+#include "ardour_message.h"
 #include "ardour_ui.h"
 #include "ui_config.h"
 #include "opts.h"
@@ -96,10 +97,10 @@ static string localedir (LOCALEDIR);
 void
 gui_jack_error ()
 {
-	MessageDialog win (string_compose (_("%1 could not connect to the audio backend."), PROGRAM_NAME),
-	                   false,
-	                   Gtk::MESSAGE_INFO,
-	                   Gtk::BUTTONS_NONE);
+	ArdourMessageDialog win (string_compose (_("%1 could not connect to the audio backend."), PROGRAM_NAME),
+	                         false,
+	                         Gtk::MESSAGE_INFO,
+	                         Gtk::BUTTONS_NONE);
 
 	win.add_button (Stock::QUIT, RESPONSE_CLOSE);
 	win.set_default_response (RESPONSE_CLOSE);
@@ -143,7 +144,7 @@ tell_about_backend_death (void* /* ignored */)
 {
 	if (AudioEngine::instance()->processed_samples() == 0) {
 		/* died during startup */
-		MessageDialog msg (string_compose (_("The audio backend (%1) has failed, or terminated"), AudioEngine::instance()->current_backend_name()), false);
+		ArdourMessageDialog msg (string_compose (_("The audio backend (%1) has failed, or terminated"), AudioEngine::instance()->current_backend_name()), false);
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		msg.set_secondary_text (string_compose (_(
 "%2 exited unexpectedly, and without notifying %1.\n\
@@ -162,7 +163,7 @@ Click OK to exit %1."), PROGRAM_NAME, AudioEngine::instance()->current_backend_n
 		MessageDialog msg (string_compose (_("The audio backend (%1) has failed, or terminated"), AudioEngine::instance()->current_backend_name()), false);
 		msg.set_secondary_text (string_compose (_("%2 exited unexpectedly, and without notifying %1."),
 							 PROGRAM_NAME, AudioEngine::instance()->current_backend_name()));
-		msg.present ();
+		msg.run ();
 	}
 	return false; /* do not call again */
 }
@@ -255,7 +256,7 @@ static void command_line_parse_error (int *argc, char** argv[]) {
 	// an MSVC app, let the user know we encountered a parsing error.
 	Gtk::Main app(argc, argv); // Calls 'gtk_init()'
 
-	Gtk::MessageDialog dlgReportParseError (string_compose (_("\n   %1 could not understand your command line      "), PROGRAM_NAME),
+	ArdourMessageDialog dlgReportParseError (string_compose (_("\n   %1 could not understand your command line      "), PROGRAM_NAME),
 			false, MESSAGE_ERROR, BUTTONS_CLOSE, true);
 	dlgReportParseError.set_title (string_compose (_("An error was encountered while launching %1"), PROGRAM_NAME));
 	dlgReportParseError.run ();

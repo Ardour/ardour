@@ -39,6 +39,7 @@
 #include "pbd/i18n.h"
 #include "pbd/openuri.h"
 
+#include "ardour_message.h"
 #include "ardour_ui.h"
 
 using namespace ARDOUR;
@@ -49,7 +50,7 @@ using namespace std;
 void
 ARDOUR_UI::launch_chat ()
 {
-	MessageDialog dialog(_("<b>Just ask and wait for an answer.\nIt may take from minutes to hours.</b>"), true);
+	ArdourMessageDialog dialog(_("<b>Just ask and wait for an answer.\nIt may take from minutes to hours.</b>"), true);
 
 	dialog.set_title (_("About the Chat"));
 	dialog.set_secondary_text (_("When you're inside the chat just ask your question and wait for an answer. The chat is occupied by real people with real lives so many of them are passively online and might not read your question before minutes or hours later.\nSo please be patient and wait for an answer.\n\nYou should just leave the chat window open and check back regularly until someone has answered your question."));

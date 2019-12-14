@@ -29,8 +29,6 @@
 
 #include <boost/scoped_ptr.hpp>
 
-#include <gtkmm/messagedialog.h>
-
 #include "pbd/error.h"
 #include "pbd/locale_guard.h"
 #include "pbd/xml++.h"
@@ -57,6 +55,7 @@
 
 #include "opts.h"
 #include "debug.h"
+#include "ardour_message.h"
 #include "ardour_ui.h"
 #include "engine_dialog.h"
 #include "gui_thread.h"
@@ -130,7 +129,7 @@ EngineControl::EngineControl ()
 	vector<const ARDOUR::AudioBackendInfo*> backends = ARDOUR::AudioEngine::instance()->available_backends();
 
 	if (backends.empty()) {
-		MessageDialog msg (string_compose (_("No audio/MIDI backends detected. %1 cannot run\n\n(This is a build/packaging/system error. It should never happen.)"), PROGRAM_NAME));
+		ArdourMessageDialog msg (string_compose (_("No audio/MIDI backends detected. %1 cannot run\n\n(This is a build/packaging/system error. It should never happen.)"), PROGRAM_NAME));
 		msg.run ();
 		throw failed_constructor ();
 	}
@@ -474,7 +473,7 @@ bool
 EngineControl::start_engine ()
 {
 	if (push_state_to_backend (true) != 0) {
-		MessageDialog msg (*this, ARDOUR::AudioEngine::instance()->get_last_backend_error());
+		ArdourMessageDialog msg (*this, ARDOUR::AudioEngine::instance()->get_last_backend_error());
 		msg.run();
 		return false;
 	}
@@ -485,8 +484,7 @@ bool
 EngineControl::stop_engine (bool for_latency)
 {
 	if (ARDOUR::AudioEngine::instance()->stop(for_latency)) {
-		MessageDialog msg(*this,
-		                  ARDOUR::AudioEngine::instance()->get_last_backend_error());
+		ArdourMessageDialog msg(*this, ARDOUR::AudioEngine::instance()->get_last_backend_error());
 		msg.run();
 		return false;
 	}
@@ -759,13 +757,13 @@ EngineControl::enable_latency_tab ()
 	ARDOUR::AudioEngine::instance()->get_physical_inputs (type, inputs);
 
 	if (!ARDOUR::AudioEngine::instance()->running()) {
-		MessageDialog msg (_("Failed to start or connect to audio-engine.\n\nLatency calibration requires a working audio interface."));
+		ArdourMessageDialog msg (_("Failed to start or connect to audio-engine.\n\nLatency calibration requires a working audio interface."));
 		notebook.set_current_page (0);
 		msg.run ();
 		return;
 	}
 	else if (inputs.empty() || outputs.empty()) {
-		MessageDialog msg (_("Your selected audio configuration is playback- or capture-only.\n\nLatency calibration requires playback and capture"));
+		ArdourMessageDialog msg (_("Your selected audio configuration is playback- or capture-only.\n\nLatency calibration requires playback and capture"));
 		notebook.set_current_page (0);
 		msg.run ();
 		return;

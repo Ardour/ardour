@@ -41,6 +41,7 @@
 #include "gtkmm2ext/bindings.h"
 
 #include "actions.h"
+#include "ardour_message.h"
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "meterbridge.h"
@@ -205,11 +206,11 @@ ARDOUR_UI::idle_ask_about_quit ()
 	} else {
 		/* no session or session not dirty, but still ask anyway */
 
-		Gtk::MessageDialog msg (string_compose (_("Quit %1?"), PROGRAM_NAME),
-		                        false, /* no markup */
-		                        Gtk::MESSAGE_INFO,
-		                        Gtk::BUTTONS_YES_NO,
-		                        true); /* modal */
+		ArdourMessageDialog msg (string_compose (_("Quit %1?"), PROGRAM_NAME),
+		                         false, /* no markup */
+		                         Gtk::MESSAGE_INFO,
+		                         Gtk::BUTTONS_YES_NO,
+		                         true); /* modal */
 		msg.set_default_response (Gtk::RESPONSE_YES);
 
 		if (msg.run() == Gtk::RESPONSE_YES) {

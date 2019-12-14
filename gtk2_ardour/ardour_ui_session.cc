@@ -56,6 +56,7 @@
 #include "ardour/session_state_utils.h"
 #include "ardour/session_directory.h"
 
+#include "ardour_message.h"
 #include "ardour_ui.h"
 #include "engine_dialog.h"
 #include "missing_plugin_dialog.h"
@@ -85,18 +86,16 @@ ARDOUR_UI::ask_about_loading_existing_session (const std::string& session_path)
 {
 	std::string str = string_compose (_("This session\n%1\nalready exists. Do you want to open it?"), session_path);
 
-	MessageDialog msg (str,
-			   false,
-			   Gtk::MESSAGE_WARNING,
-			   Gtk::BUTTONS_YES_NO,
-			   true);
-
+	ArdourMessageDialog msg (str,
+	                         false,
+	                         Gtk::MESSAGE_WARNING,
+	                         Gtk::BUTTONS_YES_NO,
+	                         true);
 
 	msg.set_name (X_("OpenExistingDialog"));
 	msg.set_title (_("Open Existing Session"));
 	msg.set_wmclass (X_("existing_session"), PROGRAM_NAME);
 	msg.set_position (Gtk::WIN_POS_CENTER);
-	pop_back_splash (msg);
 
 	switch (msg.run()) {
 	case RESPONSE_YES:
@@ -188,7 +187,7 @@ ARDOUR_UI::session_dialog_response_handler (int response, SessionDialog* session
 		int rv = ARDOUR::inflate_session (session_name, Config->get_default_session_parent_dir(), session_path, session_name);
 
 		if (rv < 0) {
-			MessageDialog msg (*session_dialog, string_compose (_("Extracting session-archive failed: %1"), inflate_error (rv)));
+			ArdourMessageDialog msg (*session_dialog, string_compose (_("Extracting session-archive failed: %1"), inflate_error (rv)));
 			msg.run ();
 			return; /* back to main event loop */
 		} else if (rv == 0) {
@@ -237,10 +236,10 @@ ARDOUR_UI::session_dialog_response_handler (int response, SessionDialog* session
 		char illegal = Session::session_name_is_legal (session_name);
 
 		if (illegal) {
-			MessageDialog msg (*session_dialog,
-			                   string_compose (_("To ensure compatibility with various systems\n"
-			                                     "session names may not contain a '%1' character"),
-			                                   illegal));
+			ArdourMessageDialog msg (*session_dialog,
+			                         string_compose (_("To ensure compatibility with various systems\n"
+			                                           "session names may not contain a '%1' character"),
+			                                         illegal));
 			msg.run ();
 			return; /* back to main event loop */
 		}
@@ -263,8 +262,7 @@ ARDOUR_UI::session_dialog_response_handler (int response, SessionDialog* session
 	} else {
 
 		if (!likely_new) {
-			pop_back_splash (*session_dialog);
-			MessageDialog msg (string_compose (_("There is no existing session at \"%1\""), session_path));
+			ArdourMessageDialog msg (string_compose (_("There is no existing session at \"%1\""), session_path));
 			msg.run ();
 			return; /* back to main event loop */
 		}
@@ -272,9 +270,8 @@ ARDOUR_UI::session_dialog_response_handler (int response, SessionDialog* session
 		char illegal = Session::session_name_is_legal(session_name);
 
 		if (illegal) {
-			pop_back_splash (*session_dialog);
-			MessageDialog msg (*session_dialog, string_compose(_("To ensure compatibility with various systems\n"
-			                                                    "session names may not contain a '%1' character"), illegal));
+			ArdourMessageDialog msg (*session_dialog, string_compose(_("To ensure compatibility with various systems\n"
+			                                                           "session names may not contain a '%1' character"), illegal));
 			msg.run ();
 			return; /* back to main event loop */
 
@@ -407,19 +404,16 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 
 	catch (AudioEngine::PortRegistrationFailure const& err) {
 
-		MessageDialog msg (err.what(),
-				   true,
-				   Gtk::MESSAGE_INFO,
-				   Gtk::BUTTONS_CLOSE);
+		ArdourMessageDialog msg (err.what(),
+		                         true,
+		                         Gtk::MESSAGE_INFO,
+		                         Gtk::BUTTONS_CLOSE);
 
 		msg.set_title (_("Port Registration Error"));
 		msg.set_secondary_text (_("Click the Close button to try again."));
 		msg.set_position (Gtk::WIN_POS_CENTER);
-		pop_back_splash (msg);
-		msg.present ();
 
 		int response = msg.run ();
-
 		msg.hide ();
 
 		switch (response) {
@@ -431,17 +425,15 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		goto out;
 	}
 	catch (SessionException const& e) {
-		MessageDialog msg (string_compose(
-			                   _("Session \"%1 (snapshot %2)\" did not load successfully:\n%3"),
-			                   path, snap_name, e.what()),
-		                   true,
-		                   Gtk::MESSAGE_INFO,
-		                   BUTTONS_OK);
+		ArdourMessageDialog msg (string_compose(
+			                         _("Session \"%1 (snapshot %2)\" did not load successfully:\n%3"),
+			                         path, snap_name, e.what()),
+		                         true,
+		                         Gtk::MESSAGE_INFO,
+		                         BUTTONS_OK);
 
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
-		pop_back_splash (msg);
-		msg.present ();
 
 		dump_errors (cerr);
 
@@ -452,17 +444,15 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 	}
 	catch (...) {
 
-		MessageDialog msg (string_compose(
+		ArdourMessageDialog msg (string_compose(
 		                           _("Session \"%1 (snapshot %2)\" did not load successfully."),
 		                           path, snap_name),
-		                   true,
-		                   Gtk::MESSAGE_INFO,
-		                   BUTTONS_OK);
+		                         true,
+		                         Gtk::MESSAGE_INFO,
+		                         BUTTONS_OK);
 
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
-		pop_back_splash (msg);
-		msg.present ();
 
 		dump_errors (cerr);
 
@@ -481,15 +471,13 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 	}
 
 	if (!new_session->writable()) {
-		MessageDialog msg (_("This session has been opened in read-only mode.\n\nYou will not be able to record or save."),
-				   true,
-				   Gtk::MESSAGE_INFO,
-				   BUTTONS_OK);
+		ArdourMessageDialog msg (_("This session has been opened in read-only mode.\n\nYou will not be able to record or save."),
+		                         true,
+		                         Gtk::MESSAGE_INFO,
+		                         BUTTONS_OK);
 
 		msg.set_title (_("Read-only Session"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
-		pop_back_splash (msg);
-		msg.present ();
 		(void) msg.run ();
 		msg.hide ();
 	}
@@ -567,10 +555,9 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 		cerr << "Here are the errors associated with this failed session:\n";
 		dump_errors (cerr);
 		cerr << "---------\n";
-		MessageDialog msg (string_compose(_("Could not create session in \"%1\": %2"), path, e.what()));
+		ArdourMessageDialog msg (string_compose(_("Could not create session in \"%1\": %2"), path, e.what()));
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
-		pop_back_splash (msg);
 		msg.run ();
 		return -1;
 	}
@@ -578,10 +565,9 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 		cerr << "Here are the errors associated with this failed session:\n";
 		dump_errors (cerr);
 		cerr << "---------\n";
-		MessageDialog msg (string_compose(_("Could not create session in \"%1\""), path));
+		ArdourMessageDialog msg (string_compose(_("Could not create session in \"%1\""), path));
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
-		pop_back_splash (msg);
 		msg.run ();
 		return -1;
 	}
@@ -635,12 +621,11 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 				break;
 			case 1:
 				if (save_state_canfail ("")) {
-					MessageDialog msg (_main_window,
+					ArdourMessageDialog msg (_main_window,
 							string_compose (_("\
 %1 was unable to save your session.\n\n\
 If you still wish to proceed, please use the\n\n\
 \"Don't save now\" option."), PROGRAM_NAME));
-					pop_back_splash(msg);
 					msg.run ();
 					return;
 				}
@@ -715,7 +700,7 @@ ARDOUR_UI::rename_session ()
 			char illegal = Session::session_name_is_legal (name);
 
 			if (illegal) {
-				MessageDialog msg (string_compose (_("To ensure compatibility with various systems\n"
+				ArdourMessageDialog msg (string_compose (_("To ensure compatibility with various systems\n"
 				                                     "session names may not contain a '%1' character"), illegal));
 				msg.run ();
 				goto again;
@@ -723,8 +708,7 @@ ARDOUR_UI::rename_session ()
 
 			switch (_session->rename (name)) {
 			case -1: {
-				MessageDialog msg (_("That name is already in use by another directory/folder. Please try again."));
-				msg.set_position (WIN_POS_MOUSE);
+				ArdourMessageDialog msg (_("That name is already in use by another directory/folder. Please try again."));
 				msg.run ();
 				goto again;
 				break;
@@ -732,8 +716,7 @@ ARDOUR_UI::rename_session ()
 			case 0:
 				break;
 			default: {
-				MessageDialog msg (_("Renaming this session failed.\nThings could be seriously messed up at this point"));
-				msg.set_position (WIN_POS_MOUSE);
+				ArdourMessageDialog msg (_("Renaming this session failed.\nThings could be seriously messed up at this point"));
 				msg.run ();
 				break;
 			}
@@ -785,12 +768,11 @@ ARDOUR_UI::save_session_as ()
 				break;
 			case 1:
 				if (save_state_canfail ("")) {
-					MessageDialog msg (_main_window,
+					ArdourMessageDialog msg (_main_window,
 							string_compose (_("\
 %1 was unable to save your session.\n\n\
 If you still wish to proceed, please use the\n\n\
 \"Don't save now\" option."), PROGRAM_NAME));
-					pop_back_splash(msg);
 					msg.run ();
 					return;
 				}
@@ -861,7 +843,7 @@ If you still wish to proceed, please use the\n\n\
 
 	if (_session->save_as (sa)) {
 		/* ERROR MESSAGE */
-		MessageDialog msg (string_compose (_("Save As failed: %1"), sa.failure_message));
+		ArdourMessageDialog msg (string_compose (_("Save As failed: %1"), sa.failure_message));
 		msg.run ();
 	}
 
@@ -900,7 +882,7 @@ ARDOUR_UI::archive_session ()
 	}
 
 	if (_session->archive_session (sad.target_folder(), sad.name(), sad.encode_option (), sad.compression_level (), sad.only_used_sources (), &sad)) {
-		MessageDialog msg (_("Session Archiving failed."));
+		ArdourMessageDialog msg (_("Session Archiving failed."));
 		msg.run ();
 	}
 }
@@ -935,8 +917,8 @@ ARDOUR_UI::process_snapshot_session_prompter (Prompter& prompter, bool switch_to
 	if (do_save) {
 		char illegal = Session::session_name_is_legal(snapname);
 		if (illegal) {
-			MessageDialog msg (string_compose (_("To ensure compatibility with various systems\n"
-			                                     "snapshot names may not contain a '%1' character"), illegal));
+			ArdourMessageDialog msg (string_compose (_("To ensure compatibility with various systems\n"
+			                                           "snapshot names may not contain a '%1' character"), illegal));
 			msg.run ();
 			return false;
 		}
@@ -1026,8 +1008,8 @@ ARDOUR_UI::open_session ()
 			load_session (path, name);
 		}
 		else if (rv < 0) {
-			MessageDialog msg (_main_window,
-					string_compose (_("Extracting session-archive failed: %1"), inflate_error (rv)));
+			ArdourMessageDialog msg (_main_window,
+			                         string_compose (_("Extracting session-archive failed: %1"), inflate_error (rv)));
 			msg.run ();
 		}
 		else if (ARDOUR::find_session (session_path, path, name, isnew) == 0) {

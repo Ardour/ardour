@@ -151,6 +151,7 @@ typedef uint64_t microseconds_t;
 #include "actions.h"
 #include "add_route_dialog.h"
 #include "ambiguous_file_dialog.h"
+#include "ardour_message.h"
 #include "ardour_ui.h"
 #include "audio_clock.h"
 #include "audio_region_view.h"
@@ -228,14 +229,15 @@ sigc::signal<void> ARDOUR_UI::CloseAllDialogs;
 static bool
 ask_about_configuration_copy (string const & old_dir, string const & new_dir, int version)
 {
-	MessageDialog msg (string_compose (_("%1 %2.x has discovered configuration files from %1 %3.x.\n\n"
-	                                     "Would you like these files to be copied and used for %1 %2.x?\n\n"
-	                                     "(This will require you to restart %1.)"),
-	                                   PROGRAM_NAME, PROGRAM_VERSION, version),
-	                   false, /* no markup */
-	                   Gtk::MESSAGE_INFO,
-	                   Gtk::BUTTONS_YES_NO,
-	                   true /* modal, though it hardly matters since it is the only window */
+	ArdourMessageDialog msg (string_compose (
+	                          _("%1 %2.x has discovered configuration files from %1 %3.x.\n\n"
+	                            "Would you like these files to be copied and used for %1 %2.x?\n\n"
+	                            "(This will require you to restart %1.)"),
+	                             PROGRAM_NAME, PROGRAM_VERSION, version),
+	                         false, /* no markup */
+	                         Gtk::MESSAGE_INFO,
+	                         Gtk::BUTTONS_YES_NO,
+	                         true /* modal, though it hardly matters since it is the only window */
 	);
 
 	msg.set_default_response (Gtk::RESPONSE_YES);
@@ -363,7 +365,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 			/* "touch" the been-here-before path now that config has been migrated */
 			PBD::ScopedFileDescriptor fout (g_open (been_here_before_path ().c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666));
 		}
-		MessageDialog msg (string_compose (_("Your configuration files were copied. You can now restart %1."), PROGRAM_NAME), true);
+		ArdourMessageDialog msg (string_compose (_("Your configuration files were copied. You can now restart %1."), PROGRAM_NAME), true);
 		msg.run ();
 		/* configuration was modified, exit immediately */
 		_exit (EXIT_SUCCESS);
@@ -615,8 +617,7 @@ was not fast enough. Try to restart\n\
 the audio backend and save the session."), PROGRAM_NAME);
 	}
 
-	MessageDialog msg (_main_window, msgstr);
-	pop_back_splash (msg);
+	ArdourMessageDialog msg (_main_window, msgstr);
 	msg.run ();
 
 	if (free_reason) {
@@ -1002,12 +1003,11 @@ ARDOUR_UI::finish()
 				/* use the default name */
 				if (save_state_canfail ("")) {
 					/* failed - don't quit */
-					MessageDialog msg (_main_window,
+					ArdourMessageDialog msg (_main_window,
 							   string_compose (_("\
 %1 was unable to save your session.\n\n\
 If you still wish to quit, please use the\n\n\
 \"Just quit\" option."), PROGRAM_NAME));
-					pop_back_splash(msg);
 					msg.run ();
 					return;
 				}
@@ -1555,12 +1555,11 @@ ARDOUR_UI::session_add_foldback_bus (int32_t channels, uint32_t how_many, string
 void
 ARDOUR_UI::display_insufficient_ports_message ()
 {
-	MessageDialog msg (_main_window,
+	ArdourMessageDialog msg (_main_window,
 			string_compose (_("There are insufficient ports available\n\
 to create a new track or bus.\n\
 You should save %1, exit and\n\
 restart with more ports."), PROGRAM_NAME));
-	pop_back_splash (msg);
 	msg.run ();
 }
 
@@ -1700,7 +1699,7 @@ ARDOUR_UI::transport_record (bool roll)
 		switch (_session->record_status()) {
 		case Session::Disabled:
 			if (_session->ntracks() == 0) {
-				MessageDialog msg (_main_window, _("Please create one or more tracks before trying to record.\nYou can do this with the \"Add Track or Bus\" option in the Session menu."));
+				ArdourMessageDialog msg (_main_window, _("Please create one or more tracks before trying to record.\nYou can do this with the \"Add Track or Bus\" option in the Session menu."));
 				msg.run ();
 				return;
 			}
@@ -2325,11 +2324,11 @@ ARDOUR_UI::display_cleanup_results (ARDOUR::CleanupReport& rep, const gchar* lis
 	removed = rep.paths.size();
 
 	if (removed == 0) {
-		MessageDialog msgd (_main_window,
-		                    _("No files were ready for clean-up"),
-		                    true,
-		                    Gtk::MESSAGE_INFO,
-		                    Gtk::BUTTONS_OK);
+		ArdourMessageDialog msgd (_main_window,
+		                          _("No files were ready for clean-up"),
+		                          true,
+		                          Gtk::MESSAGE_INFO,
+		                          Gtk::BUTTONS_OK);
 		msgd.set_title (_("Clean-up"));
 		msgd.set_secondary_text (_("If this seems surprising, \n\
 check for any existing snapshots.\n\
@@ -2468,10 +2467,10 @@ ARDOUR_UI::cleanup ()
 	}
 
 
-	MessageDialog checker (_("Are you sure you want to clean-up?"),
-				true,
-				Gtk::MESSAGE_QUESTION,
-				Gtk::BUTTONS_NONE);
+	ArdourMessageDialog checker (_("Are you sure you want to clean-up?"),
+	                             true,
+	                             Gtk::MESSAGE_QUESTION,
+	                             Gtk::BUTTONS_NONE);
 
 	checker.set_title (_("Clean-up"));
 
@@ -2747,7 +2746,7 @@ ARDOUR_UI::disk_overrun_handler ()
 
 	if (!have_disk_speed_dialog_displayed) {
 		have_disk_speed_dialog_displayed = true;
-		MessageDialog* msg = new MessageDialog (_main_window, string_compose (_("\
+		ArdourMessageDialog* msg = new ArdourMessageDialog (_main_window, string_compose (_("\
 The disk system on your computer\n\
 was not able to keep up with %1.\n\
 \n\
@@ -2775,7 +2774,7 @@ ARDOUR_UI::disk_underrun_handler ()
 
 	if (!have_disk_speed_dialog_displayed) {
 		have_disk_speed_dialog_displayed = true;
-		MessageDialog* msg = new MessageDialog (
+		ArdourMessageDialog* msg = new ArdourMessageDialog (
 			_main_window, string_compose (_("The disk system on your computer\n\
 was not able to keep up with %1.\n\
 \n\
@@ -2797,13 +2796,8 @@ void
 ARDOUR_UI::session_dialog (std::string msg)
 {
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::session_dialog, msg)
-
-	MessageDialog* d;
-
-	d = new MessageDialog (msg, false, MESSAGE_INFO, BUTTONS_OK, true);
-	d->show_all ();
-	d->run ();
-	delete d;
+	ArdourMessageDialog d (msg, false, MESSAGE_INFO, BUTTONS_OK, true);
+	d.run ();
 }
 
 int

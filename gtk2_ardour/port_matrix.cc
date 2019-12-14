@@ -22,6 +22,7 @@
  */
 
 #include <iostream>
+
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/label.h>
@@ -30,20 +31,24 @@
 #include <gtkmm/menu_elems.h>
 #include <gtkmm/window.h>
 #include <gtkmm/stock.h>
-#include <gtkmm/messagedialog.h>
+
 #include "ardour/bundle.h"
 #include "ardour/types.h"
 #include "ardour/session.h"
 #include "ardour/route.h"
 #include "ardour/audioengine.h"
+
 #include "gtkmm2ext/utils.h"
+
+#include "ardour_dialog.h"
+#include "ardour_message.h"
+#include "gui_thread.h"
 #include "port_matrix.h"
 #include "port_matrix_body.h"
 #include "port_matrix_component.h"
-#include "ardour_dialog.h"
-#include "pbd/i18n.h"
-#include "gui_thread.h"
 #include "utils.h"
+
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;
@@ -733,7 +738,7 @@ PortMatrix::add_channel (boost::shared_ptr<Bundle> b, DataType t)
 	if (io) {
 		int const r = io->add_port ("", this, t);
 		if (r == -1) {
-			Gtk::MessageDialog msg (_("It is not possible to add a port here."));
+			ArdourMessageDialog msg (_("It is not possible to add a port here."));
 			msg.set_title (_("Cannot add port"));
 			msg.run ();
 		}

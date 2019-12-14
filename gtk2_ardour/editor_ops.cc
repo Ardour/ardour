@@ -82,6 +82,7 @@
 #include "canvas/canvas.h"
 
 #include "actions.h"
+#include "ardour_message.h"
 #include "ardour_ui.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
@@ -3991,7 +3992,7 @@ Editor::freeze_route ()
 	}
 
 	if (!clicked_routeview->track()->bounceable (clicked_routeview->track()->main_outs(), true)) {
-		MessageDialog d (
+		ArdourMessageDialog d (
 			_("This track/bus cannot be frozen because the signal adds or loses channels before reaching the outputs.\n"
 			  "This is typically caused by plugins that generate stereo output from mono input or vice versa.")
 			);
@@ -4001,9 +4002,9 @@ Editor::freeze_route ()
 	}
 
 	if (clicked_routeview->track()->has_external_redirects()) {
-		MessageDialog d (string_compose (_("<b>%1</b>\n\nThis track has at least one send/insert/return as part of its signal flow.\n\n"
-		                                   "Freezing will only process the signal as far as the first send/insert/return."),
-		                                 clicked_routeview->track()->name()), true, MESSAGE_INFO, BUTTONS_NONE, true);
+		ArdourMessageDialog d (string_compose (_("<b>%1</b>\n\nThis track has at least one send/insert/return as part of its signal flow.\n\n"
+		                                         "Freezing will only process the signal as far as the first send/insert/return."),
+		                                       clicked_routeview->track()->name()), true, MESSAGE_INFO, BUTTONS_NONE, true);
 
 		d.add_button (_("Freeze anyway"), Gtk::RESPONSE_OK);
 		d.add_button (_("Don't freeze"), Gtk::RESPONSE_CANCEL);
@@ -4052,7 +4053,7 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
 
 			if (rtv && rtv->track() && replace && enable_processing && !rtv->track()->bounceable (rtv->track()->main_outs(), false)) {
-				MessageDialog d (
+				ArdourMessageDialog d (
 					_("You can't perform this operation because the processing of the signal "
 					  "will cause one or more of the tracks to end up with a region with more channels than this track has inputs.\n\n"
 					  "You can do this without processing, which is a different operation.")
@@ -7048,10 +7049,10 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 
 	if (positions.size() > 20 && can_ferret) {
 		std::string msgstr = string_compose (_("You are about to split\n%1\ninto %2 pieces.\nThis could take a long time."), r->name(), positions.size() + 1);
-		MessageDialog msg (msgstr,
-				   false,
-				   Gtk::MESSAGE_INFO,
-				   Gtk::BUTTONS_OK_CANCEL);
+		ArdourMessageDialog msg (msgstr,
+		                         false,
+		                         Gtk::MESSAGE_INFO,
+		                         Gtk::BUTTONS_OK_CANCEL);
 
 		if (can_ferret) {
 			msg.add_button (_("Call for the Ferret!"), RESPONSE_APPLY);
@@ -7061,8 +7062,6 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 		}
 
 		msg.set_title (_("Excessive split?"));
-		msg.present ();
-
 		int response = msg.run();
 		msg.hide ();
 
@@ -7636,19 +7635,17 @@ Editor::_remove_tracks ()
 	}
 
 	if (special_bus && !Config->get_allow_special_bus_removal()) {
-		MessageDialog msg (_("That would be bad news ...."),
-		                   false,
-		                   Gtk::MESSAGE_INFO,
-		                   Gtk::BUTTONS_OK);
-		msg.set_secondary_text (string_compose (_(
-			                                        "Removing the master or monitor bus is such a bad idea\n\
+		ArdourMessageDialog msg (_("That would be bad news ...."),
+		                         false,
+		                         Gtk::MESSAGE_INFO,
+		                         Gtk::BUTTONS_OK);
+		msg.set_secondary_text (string_compose (_("Removing the master or monitor bus is such a bad idea\n\
 that %1 is not going to allow it.\n\
 \n\
 If you really want to do this sort of thing\n\
 edit your ardour.rc file to set the\n\
 \"allow-special-bus-removal\" option to be \"yes\""), PROGRAM_NAME));
 
-		msg.present ();
 		msg.run ();
 		return;
 	}
@@ -7764,17 +7761,15 @@ void
 Editor::do_insert_time ()
 {
 	if (selection->tracks.empty()) {
-		MessageDialog msg (_("You must first select some tracks to Insert Time."),
-				   true, MESSAGE_INFO, BUTTONS_OK, true);
-		msg.set_position (WIN_POS_MOUSE);
+		ArdourMessageDialog msg (_("You must first select some tracks to Insert Time."),
+	                           true, MESSAGE_INFO, BUTTONS_OK, true);
 		msg.run ();
 		return;
 	}
 
 	if (Config->get_edit_mode() == Lock) {
-		MessageDialog msg (_("You cannot insert time in Lock Edit mode."),
-				   true, MESSAGE_INFO, BUTTONS_OK, true);
-		msg.set_position (WIN_POS_MOUSE);
+		ArdourMessageDialog msg (_("You cannot insert time in Lock Edit mode."),
+		                         true, MESSAGE_INFO, BUTTONS_OK, true);
 		msg.run ();
 		return;
 	}
@@ -7939,17 +7934,15 @@ void
 Editor::do_remove_time ()
 {
 	if (selection->tracks.empty()) {
-		MessageDialog msg (_("You must first select some tracks to Remove Time."),
-				   true, MESSAGE_INFO, BUTTONS_OK, true);
-		msg.set_position (WIN_POS_MOUSE);
+		ArdourMessageDialog msg (_("You must first select some tracks to Remove Time."),
+		                         true, MESSAGE_INFO, BUTTONS_OK, true);
 		msg.run ();
 		return;
 	}
 
 	if (Config->get_edit_mode() == Lock) {
-		MessageDialog msg (_("You cannot remove time in Lock Edit mode."),
-				   true, MESSAGE_INFO, BUTTONS_OK, true);
-		msg.set_position (WIN_POS_MOUSE);
+		ArdourMessageDialog msg (_("You cannot remove time in Lock Edit mode."),
+		                         true, MESSAGE_INFO, BUTTONS_OK, true);
 		msg.run ();
 		return;
 	}
@@ -8178,7 +8171,8 @@ Editor::fit_tracks (TrackViewList & tracks)
 	double first_y_pos = DBL_MAX;
 
 	if (h < TimeAxisView::preset_height (HeightSmall)) {
-		MessageDialog msg (_("There are too many tracks to fit in the current window"));
+		ArdourMessageDialog msg (_("There are too many tracks to fit in the current window"));
+		msg.run ();
 		/* too small to be displayed */
 		return;
 	}

@@ -40,6 +40,7 @@
 
 #include "ardour/audioengine.h"
 
+#include "ardour_message.h"
 #include "ardour_ui.h"
 #include "engine_dialog.h"
 #include "gui_thread.h"
@@ -56,11 +57,11 @@ using namespace std;
 void
 ARDOUR_UI::audioengine_became_silent ()
 {
-	MessageDialog msg (string_compose (_("This is a free/demo copy of %1. It has just switched to silent mode."), PROGRAM_NAME),
-	                   true,
-	                   Gtk::MESSAGE_WARNING,
-	                   Gtk::BUTTONS_NONE,
-	                   true);
+	ArdourMessageDialog msg (string_compose (_("This is a free/demo copy of %1. It has just switched to silent mode."), PROGRAM_NAME),
+	                         true,
+	                         Gtk::MESSAGE_WARNING,
+	                         Gtk::BUTTONS_NONE,
+	                         true);
 
 	msg.set_title (string_compose (_("%1 is now silent"), PROGRAM_NAME));
 
@@ -123,7 +124,7 @@ void
 ARDOUR_UI::halt_on_xrun_message ()
 {
 	cerr << "HALT on xrun\n";
-	MessageDialog msg (_main_window, _("Recording was stopped because your system could not keep up."));
+	ArdourMessageDialog msg (_main_window, _("Recording was stopped because your system could not keep up."));
 	msg.run ();
 }
 
@@ -149,11 +150,10 @@ bool
 ARDOUR_UI::check_audioengine (Gtk::Window& parent)
 {
 	if (!AudioEngine::instance()->running()) {
-		MessageDialog msg (parent, string_compose (
-		                           _("%1 is not connected to any audio backend.\n"
-		                           "You cannot open or close sessions in this condition"),
-		                           PROGRAM_NAME));
-		pop_back_splash (msg);
+		ArdourMessageDialog msg (parent, string_compose (
+		                                 _("%1 is not connected to any audio backend.\n"
+		                                 "You cannot open or close sessions in this condition"),
+		                                 PROGRAM_NAME));
 		msg.run ();
 		return false;
 	}

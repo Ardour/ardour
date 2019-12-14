@@ -35,6 +35,7 @@
 #include "gtkmm2ext/utils.h"
 #include "widgets/prompter.h"
 
+#include "ardour_message.h"
 #include "gui_thread.h"
 #include "session_import_dialog.h"
 #include "ui_config.h"
@@ -134,7 +135,7 @@ SessionImportDialog::load_session (const string& filename)
 		if (ElementImportHandler::dirty()) {
 			// Warn user
 			string txt = _("Some elements had errors in them. Please see the log for details");
-			MessageDialog msg (txt, false, MESSAGE_WARNING, BUTTONS_OK, true);
+			ArdourMessageDialog msg (txt, false, MESSAGE_WARNING, BUTTONS_OK, true);
 			msg.run();
 		}
 	}
@@ -218,7 +219,7 @@ SessionImportDialog::do_merge ()
 	if (ElementImportHandler::errors()) {
 		// Warn user
 		string txt = _("Some elements had errors in them. Please see the log for details");
-		MessageDialog msg (txt, false, MESSAGE_WARNING, BUTTONS_OK, true);
+		ArdourMessageDialog msg (txt, false, MESSAGE_WARNING, BUTTONS_OK, true);
 		msg.run();
 	}
 }
@@ -234,7 +235,7 @@ SessionImportDialog::update (string path)
 		{
 			// Prompt user for verification
 			string txt = _("This will select all elements of this type!");
-			MessageDialog msg (txt, false, MESSAGE_QUESTION, BUTTONS_OK_CANCEL, true);
+			ArdourMessageDialog msg (txt, false, MESSAGE_QUESTION, BUTTONS_OK_CANCEL, true);
 			if (msg.run() == RESPONSE_CANCEL) {
 				(*cell)[sb_cols.queued] = false;
 				return;
@@ -274,7 +275,7 @@ SessionImportDialog::show_info(const TreeModel::Path& path, TreeViewColumn*)
 	TreeModel::iterator cell = session_browser.get_model()->get_iter (path);
 	string info = (*cell)[sb_cols.info];
 
-	MessageDialog msg (info, false, MESSAGE_INFO, BUTTONS_OK, true);
+	ArdourMessageDialog msg (info, false, MESSAGE_INFO, BUTTONS_OK, true);
 	msg.run();
 }
 
@@ -311,7 +312,7 @@ SessionImportDialog::open_rename_dialog (string text, string name)
 bool
 SessionImportDialog::open_prompt_dialog (string text)
 {
-	MessageDialog msg (text, false, MESSAGE_QUESTION, BUTTONS_OK_CANCEL, true);
+	ArdourMessageDialog msg (text, false, MESSAGE_QUESTION, BUTTONS_OK_CANCEL, true);
 	if (msg.run() == RESPONSE_OK) {
 		return true;
 	}

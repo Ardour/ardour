@@ -61,6 +61,7 @@
 #include "gtkmm2ext/application.h"
 
 #include "ambiguous_file_dialog.h"
+#include "ardour_message.h"
 #include "ardour_ui.h"
 #include "debug.h"
 #include "engine_dialog.h"
@@ -168,12 +169,12 @@ ARDOUR_UI::session_format_mismatch (std::string xml_path, std::string backup_pat
 	const char* start_mono = "<tt>";
 	const char* end_mono = "</tt>";
 
-	MessageDialog msg (string_compose (_("%4This is a session from an older version of %3%5\n\n"
-	                                     "%3 has copied the old session file\n\n%6%1%7\n\nto\n\n%6%2%7\n\n"
-	                                     "From now on, use the backup copy with older versions of %3"),
-	                                   xml_path, backup_path, PROGRAM_NAME,
-	                                   start_big, end_big,
-	                                   start_mono, end_mono), true);
+	ArdourMessageDialog msg (string_compose (_("%4This is a session from an older version of %3%5\n\n"
+	                                           "%3 has copied the old session file\n\n%6%1%7\n\nto\n\n%6%2%7\n\n"
+	                                           "From now on, use the backup copy with older versions of %3"),
+	                                         xml_path, backup_path, PROGRAM_NAME,
+	                                         start_big, end_big,
+	                                         start_mono, end_mono), true);
 
 	msg.run ();
 }
@@ -215,7 +216,7 @@ audio may be played at the wrong sample rate.\n"), desired, PROGRAM_NAME, actual
 void
 ARDOUR_UI::sr_mismatch_message (samplecnt_t desired, samplecnt_t actual)
 {
-	MessageDialog msg (string_compose (_("\
+	ArdourMessageDialog msg (string_compose (_("\
 This session was created with a sample rate of %1 Hz, but\n\
 %2 is currently running at %3 Hz.\n\
 Audio will be recorded and played at the wrong sample rate.\n\
@@ -617,7 +618,7 @@ ARDOUR_UI::check_memory_locking ()
 
 			if (ram == 0 || ((double) limits.rlim_cur / ram) < 0.75) {
 
-				MessageDialog msg (
+				ArdourMessageDialog msg (
 					string_compose (
 						_("WARNING: Your system has a limit for maximum amount of locked memory. "
 						  "This might cause %1 to run out of memory before your system "
@@ -642,8 +643,6 @@ ARDOUR_UI::check_memory_locking ()
 				cb.show();
 				vbox->show();
 				hbox.show ();
-
-				pop_back_splash (msg);
 
 				msg.run ();
 

@@ -43,6 +43,7 @@
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/keyboard.h>
 
+#include "ardour_message.h"
 #include "ardour_ui.h"
 #include "debug.h"
 #include "engine_dialog.h"
@@ -634,7 +635,7 @@ StartupFSM::check_session_parameters (bool must_be_new)
 
 		int rv = ARDOUR::inflate_session (session_name, Config->get_default_session_parent_dir(), session_path, session_name);
 		if (rv < 0) {
-			MessageDialog msg (*session_dialog, string_compose (_("Extracting session-archive failed: %1"), inflate_error (rv)));
+			ArdourMessageDialog msg (*session_dialog, string_compose (_("Extracting session-archive failed: %1"), inflate_error (rv)));
 			msg.run ();
 
 			return 1;
@@ -701,10 +702,10 @@ StartupFSM::check_session_parameters (bool must_be_new)
 	const char illegal = Session::session_name_is_legal (session_name);
 
 	if (illegal) {
-		MessageDialog msg (*session_dialog,
-		                   string_compose (_("To ensure compatibility with various systems\n"
-		                                     "session names may not contain a '%1' character"),
-		                                   illegal));
+		ArdourMessageDialog msg (*session_dialog,
+		                         string_compose (_("To ensure compatibility with various systems\n"
+		                                           "session names may not contain a '%1' character"),
+		                                         illegal));
 		msg.run ();
 		ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
 		return 1; /* keep running dialog */
@@ -734,8 +735,7 @@ StartupFSM::check_session_parameters (bool must_be_new)
 		/* does not exist at present */
 
 		if (!requested_new) {
-			ARDOUR_UI::pop_back_splash (*session_dialog);
-			MessageDialog msg (string_compose (_("There is no existing session at \"%1\""), session_path));
+			ArdourMessageDialog msg (string_compose (_("There is no existing session at \"%1\""), session_path));
 			msg.run ();
 			session_dialog->clear_name();
 			return 1;
@@ -830,18 +830,17 @@ StartupFSM::ask_about_loading_existing_session (const std::string& session_path)
 {
 	std::string str = string_compose (_("This session\n%1\nalready exists. Do you want to open it?"), session_path);
 
-	MessageDialog msg (str,
-			   false,
-			   Gtk::MESSAGE_WARNING,
-			   Gtk::BUTTONS_YES_NO,
-			   true);
+	ArdourMessageDialog msg (str,
+	                         false,
+	                         Gtk::MESSAGE_WARNING,
+	                         Gtk::BUTTONS_YES_NO,
+	                         true);
 
 
 	msg.set_name (X_("OpenExistingDialog"));
 	msg.set_title (_("Open Existing Session"));
 	msg.set_wmclass (X_("existing_session"), PROGRAM_NAME);
 	msg.set_position (Gtk::WIN_POS_CENTER);
-	ARDOUR_UI::pop_back_splash (msg);
 
 	switch (msg.run()) {
 	case RESPONSE_YES:

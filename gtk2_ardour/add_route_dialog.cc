@@ -49,6 +49,7 @@
 
 #include "LuaBridge/LuaBridge.h"
 
+#include "ardour_message.h"
 #include "add_route_dialog.h"
 #include "ardour_ui.h"
 #include "route_group_dialog.h"
@@ -670,10 +671,9 @@ AddRouteDialog::track_type_chosen ()
 		break;
 	case MixedTrack:
 		{
-			MessageDialog msg (_("Audio+MIDI tracks are intended for use <b>ONLY</b> with plugins that use both audio and MIDI input data.\n\n"
-					     "Use a normal audio or MIDI track if you do not plan to use such a plugin."),
-					   true, MESSAGE_INFO, BUTTONS_OK, true);
-			msg.set_position (WIN_POS_MOUSE);
+			ArdourMessageDialog msg (_("Audio+MIDI tracks are intended for use <b>ONLY</b> with plugins that use both audio and MIDI input data.\n\n"
+			                           "Use a normal audio or MIDI track if you do not plan to use such a plugin."),
+			                         true, MESSAGE_INFO, BUTTONS_OK, true);
 			msg.run ();
 		}
 
