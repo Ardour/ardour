@@ -812,55 +812,17 @@ StartupFSM::copy_demo_sessions ()
 void
 StartupFSM::load_from_application_api (const std::string& path)
 {
-	/* macOS El Capitan (and probably later) now somehow passes the command
-	   line arguments to an app via the openFile delegate protocol. Ardour
-	   already does its own command line processing, and having both
-	   pathways active causes crashes. So, if the command line was already
-	   set, do nothing here.
-	*/
-
 	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 		return;
 	}
 
-	/* Cancel SessionDialog if it's visible to make macOS delegates work.
-	 *
-	 * there's a race condition here: we connect to app->ShouldLoad
-	 * and then at some point (might) show a session dialog. The race is
-	 * caused by the non-deterministic interaction between the macOS event
-	 * loop(s) and the GDK one(s).
-	 *
-	 *  - ShouldLoad does not arrive before we show the session dialog
-	 *          -> here we should hide the session dialog, then use the
-	 *             supplied path as if it was provided on the command line
-	 *  - ShouldLoad signal arrives before we show a session dialog
-	 *          -> don't bother showing the session dialog, just use the
-	 *             supplied path as if it was provided on the command line
-	 *
+	/* just set this as if it was given on the command line, rather than
+	 * supplied via some desktop system (e.g. macOS application delegate
+	 * and "openFile". Note that this relies on this being invoked before
+	 * StartupFSM::start().
 	 */
 
-	if (session_dialog) {
-		session_dialog->hide ();
-		delete_when_idle (session_dialog);
-		session_dialog = 0;
-	}
-
-	/* no command line argument given ... must just be via
-	 * desktop/finder/window manager API (e.g. double click on "foo.ardour"
-	 * icon)
-	 */
-
-	if (get_session_parameters_from_path (path, string(), false)) {
-		_signal_response (LoadSession);
-		return;
-	}
-
-	/* given parameters failed for some reason. This is probably true
-	 * anyway, but force it to be true and then carry on with whatever the
-	 * main event loop is doing.
-	 */
-
-	set_state (WaitingForSessionPath);
+	ARDOUR_COMMAND_LINE::session_name = path;
 }
 
 bool
