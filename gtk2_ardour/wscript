@@ -33,6 +33,7 @@ gtk2_ardour_sources = [
         'analysis_window.cc',
         'ardour_dialog.cc',
         'ardour_http.cc',
+        'ardour_message.cc',
         'ardour_ui.cc',
         'ardour_ui2.cc',
         'ardour_ui3.cc',
