@@ -193,7 +193,6 @@ public:
 	bool run_startup (bool should_be_new, std::string load_template);
 
 	void hide_splash ();
-	static void pop_back_splash (Gtk::Window&);
 
 	void launch_chat ();
 	void launch_manual ();

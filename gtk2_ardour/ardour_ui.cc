@@ -857,14 +857,6 @@ ARDOUR_UI::~ARDOUR_UI ()
 #endif
 }
 
-void
-ARDOUR_UI::pop_back_splash (Gtk::Window& win)
-{
-	if (Splash::exists()) {
-		Splash::instance()->pop_back_for (win);
-	}
-}
-
 gint
 ARDOUR_UI::configure_timeout ()
 {
