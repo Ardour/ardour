@@ -87,7 +87,16 @@ setup_logging (void)
 void
 fixup_bundle_environment (int argc, char* argv[], string & localedir)
 {
-	/* do this even for non-bundle runtimes */
+	/* if running from a bundle, stdout/stderr will be redirect to null by
+	 * launchd. That's not useful for anyone, so fix that. Use the same
+	 * mechanism is not running from a bundle, but ARDOUR_LOGGING is
+	 * set. This allows us to test the stderr/stdout redirects directly
+	 * from ./ardev.
+	 */
+
+	if (g_getenv ("ARDOUR_BUNDLED") || g_getenv ("ARDOUR_LOGGING")) {
+		setup_logging ();
+	}
 
 	no_app_nap ();
 
@@ -99,15 +108,6 @@ fixup_bundle_environment (int argc, char* argv[], string & localedir)
 	}
 
 	set_language_preference ();
-
-	/* if running from a bundle, stdout/stderr will be redirect to null, so
-	 * we want ASL logging. If not, we're probably running in a terminal
-	 * and we don't want ASL logging.
-	 */
-
-	if (g_getenv ("ARDOUR_BUNDLED") || g_getenv ("ARDOUR_LOGGING")) {
-		setup_logging ();
-	}
 
 	char execpath[MAXPATHLEN+1];
 	uint32_t pathsz = sizeof (execpath);
