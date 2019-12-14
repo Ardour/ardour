@@ -551,6 +551,15 @@ ARDOUR_UI::load_session_from_startup_fsm ()
 void
 ARDOUR_UI::startup_done ()
 {
+	/* ShouldQuit is a desktop environment mechanism that tells the
+	   application it should exit for reasons external to the application
+	   itself.
+
+	   During startup, startupFSM handles ShouldQuit. But it is done now,
+	   and we have to take over responsibility.
+	*/
+	Application::instance()->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
+
 	use_config ();
 
 	WM::Manager::instance().show_visible ();
