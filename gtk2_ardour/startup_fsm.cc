@@ -151,12 +151,6 @@ StartupFSM::start ()
 	}
 
 	DEBUG_TRACE (DEBUG::GuiStartup, string_compose (X_("State after startup: %1\n"), enum_2_string (_state)));
-
-	/* this may cause the delivery of ShouldLoad etc if we were invoked in
-	 * particular ways. It will happen when the event loop runs again.
-	 */
-
-	Application::instance()->ready ();
 }
 
 void
