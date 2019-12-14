@@ -17,7 +17,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <os/log.h>
 #include <unistd.h>
 
 #include <string>
@@ -66,11 +65,9 @@ setup_logging (void)
 
 	if (efd >= 0) {
 		if (dup2 (efd, STDERR_FILENO) < 0) {
-			os_log (OS_LOG_DEFAULT, "cannot dup stderr on %d (%s)", efd, strerror (errno));
 			::exit (12);
 		}
 	} else {
-		os_log (OS_LOG_DEFAULT, "cannot open %s (%s)", path, strerror(errno));
 		::exit (11);
 	}
 
@@ -80,11 +77,9 @@ setup_logging (void)
 
 	if (ofd >= 0) {
 		if (dup2 (ofd, STDOUT_FILENO) < 0) {
-			os_log (OS_LOG_DEFAULT, "cannot dup stdout on %d (%s)", ofd, strerror (errno));
 			::exit (14);
 		}
 	} else {
-		os_log (OS_LOG_DEFAULT, "cannot open %s (%s)", path, strerror(errno));
 		::exit (13);
 	}
 }
