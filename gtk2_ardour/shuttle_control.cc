@@ -157,7 +157,13 @@ ShuttleControl::on_size_allocate (Gtk::Allocation& alloc)
 void
 ShuttleControl::map_transport_state ()
 {
-	float speed = _session->actual_speed ();
+	float speed;
+
+	if (!_session) {
+		speed = 0.0;
+	} else {
+		speed = _session->actual_speed ();
+	}
 
 	if ( (fabsf( speed - last_speed_displayed) < 0.005f) // dead-zone
 	     && !( speed == 1.f && last_speed_displayed != 1.f)
@@ -261,6 +267,10 @@ ShuttleControl::build_shuttle_context_menu ()
 void
 ShuttleControl::reset_speed ()
 {
+	if (!_session) {
+		return;
+	}
+
 	if (_session->transport_rolling()) {
 		_session->request_transport_speed (1.0, true);
 	} else {
@@ -552,10 +562,13 @@ ShuttleControl::use_shuttle_fract (bool force, bool zero_ok)
 	}
 
 	requested_speed = speed;
-	if (zero_ok) {
-		_session->request_transport_speed (speed, Config->get_shuttle_behaviour() == Wheel);
-	} else {
-		_session->request_transport_speed_nonzero (speed, Config->get_shuttle_behaviour() == Wheel);
+
+	if (_session) {
+		if (zero_ok) {
+			_session->request_transport_speed (speed, Config->get_shuttle_behaviour() == Wheel);
+		} else {
+			_session->request_transport_speed_nonzero (speed, Config->get_shuttle_behaviour() == Wheel);
+		}
 	}
 }
 
