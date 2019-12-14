@@ -1035,7 +1035,8 @@ ProcessorEntry::Control::set_state (XMLNode const * node)
 			set_visible (visible);
 		}
 	} else {
-		set_visible (false);
+		boost::shared_ptr<AutomationControl> c = _control.lock ();
+		set_visible (c && (c->flags () & Controllable::InlineControl));
 	}
 }
 
@@ -2896,29 +2897,14 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 	boost::shared_ptr<UnknownProcessor> stub = boost::dynamic_pointer_cast<UnknownProcessor> (processor);
 
 	//faders and meters are not deletable, copy/paste-able, so they shouldn't be selectable
-	if (!send && !plugin_insert && !ext && !stub)
+	if (!send && !plugin_insert && !ext && !stub) {
 		e->set_selectable(false);
-
-	bool mark_send_visible = false;
-	if (send && _parent_strip) {
-		/* show controls of new sends by default */
-		GUIObjectState& st = _parent_strip->gui_object_state ();
-		XMLNode* strip = st.get_or_add_node (_parent_strip->state_id ());
-		assert (strip);
-		/* check if state exists, if not it must be a new send */
-		if (!st.get_node(strip, e->state_id())) {
-			mark_send_visible = true;
-		}
 	}
 
 	/* Set up this entry's state from the GUIObjectState */
 	XMLNode* proc = entry_gui_object_state (e);
 	if (proc) {
 		e->set_control_state (proc);
-	}
-
-	if (mark_send_visible) {
-		e->show_all_controls ();
 	}
 
 	if (plugin_insert
