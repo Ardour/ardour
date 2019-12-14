@@ -53,12 +53,16 @@ private:
 	void refill_processors ();
 	void drop_references ();
 	void clear_all_stats ();
+	void sort_by_stats (bool);
 	void add_processor_to_display (boost::weak_ptr<ARDOUR::Processor>, std::string const&);
 	void clear_processor_stats (boost::weak_ptr<ARDOUR::Processor>);
 
 	Gtk::ScrolledWindow _scroller;
 	Gtk::VBox _box;
+	Gtk::HBox _ctrlbox;
 	ArdourWidgets::ArdourButton _reset_button;
+	ArdourWidgets::ArdourButton _sort_avg_button;
+	ArdourWidgets::ArdourButton _sort_max_button;
 
 	PBD::ScopedConnectionList _processor_connections;
 	PBD::ScopedConnectionList _route_connections;

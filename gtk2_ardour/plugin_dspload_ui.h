@@ -37,6 +37,9 @@ public:
 	void start_updating ();
 	void stop_updating ();
 
+	double dsp_avg () const { return _valid ? _avg : -1; }
+	double dsp_max () const { return _valid ? _max : -1; }
+
 private:
 	void update_cpu_label ();
 	bool draw_bar (GdkEventExpose*);

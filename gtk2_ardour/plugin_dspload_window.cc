@@ -33,6 +33,8 @@ using namespace ARDOUR;
 PluginDSPLoadWindow::PluginDSPLoadWindow ()
 	: ArdourWindow (_("Plugin DSP Load"))
 	, _reset_button (_("Reset All Stats"))
+	, _sort_avg_button (_("Sort by Average Load"))
+	, _sort_max_button (_("Sort by Worst-Case Load"))
 {
 	_scroller.set_border_width (0);
 	_scroller.set_shadow_type (Gtk::SHADOW_NONE);
@@ -40,7 +42,12 @@ PluginDSPLoadWindow::PluginDSPLoadWindow ()
 	_scroller.add (_box);
 
 	_reset_button.set_name ("generic button");
+	_sort_avg_button.set_name ("generic button");
+	_sort_max_button.set_name ("generic button");
+
 	_reset_button.signal_clicked.connect (sigc::mem_fun (*this, &PluginDSPLoadWindow::clear_all_stats));
+	_sort_avg_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginDSPLoadWindow::sort_by_stats), true));
+	_sort_max_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PluginDSPLoadWindow::sort_by_stats), false));
 
 	add (_scroller);
 	_box.show ();
@@ -49,6 +56,11 @@ PluginDSPLoadWindow::PluginDSPLoadWindow ()
 	Gtk::Viewport* viewport = (Gtk::Viewport*) _scroller.get_child();
 	viewport->set_shadow_type(Gtk::SHADOW_NONE);
 	viewport->set_border_width(0);
+
+	_ctrlbox.pack_end (_reset_button, Gtk::PACK_SHRINK, 2);
+	_ctrlbox.pack_end (_sort_avg_button, Gtk::PACK_SHRINK, 2);
+	_ctrlbox.pack_end (_sort_max_button, Gtk::PACK_SHRINK, 2);
+	_ctrlbox.show_all ();
 }
 
 PluginDSPLoadWindow::~PluginDSPLoadWindow ()
@@ -98,6 +110,37 @@ PluginDSPLoadWindow::clear_all_stats ()
 	}
 }
 
+struct DSPLoadSorter
+{
+	bool _avg;
+	DSPLoadSorter (bool avg) : _avg (avg) {}
+	bool operator() (PluginLoadStatsGui* a, PluginLoadStatsGui* b) {
+		return _avg ? (a->dsp_avg () < b->dsp_avg ()) : (a->dsp_max () < b->dsp_max ());
+	}
+};
+
+void
+PluginDSPLoadWindow::sort_by_stats (bool avg)
+{
+	std::list<PluginLoadStatsGui*> pl;
+	std::list<Gtk::Widget*> children = _box.get_children ();
+	for (std::list<Gtk::Widget*>::iterator child = children.begin(); child != children.end(); ++child) {
+		Gtk::Frame* frame = dynamic_cast<Gtk::Frame*>(*child);
+		if (!frame) continue;
+		PluginLoadStatsGui* plsg = dynamic_cast<PluginLoadStatsGui*>(frame->get_child());
+		if (plsg) {
+			pl.push_back (plsg);
+		}
+	}
+	pl.sort (DSPLoadSorter (avg));
+	uint32_t pos = 0;
+	for (std::list<PluginLoadStatsGui*>::iterator i = pl.begin(); i != pl.end(); ++i, ++pos) {
+		Gtk::Container* p = (*i)->get_parent();
+		assert (p);
+		_box.reorder_child (*p, pos);
+	}
+}
+
 void
 PluginDSPLoadWindow::drop_references ()
 {
@@ -105,7 +148,7 @@ PluginDSPLoadWindow::drop_references ()
 	for (std::list<Gtk::Widget*>::iterator child = children.begin(); child != children.end(); ++child) {
 		(*child)->hide ();
 		_box.remove (**child);
-		if (*child != &_reset_button) {
+		if (*child != &_ctrlbox) {
 			delete *child;
 		}
 	}
@@ -144,8 +187,8 @@ PluginDSPLoadWindow::refill_processors ()
 		_box.add (*Gtk::manage (new Gtk::Label (_("No Plugins"))));
 		_box.show_all ();
 	} else if (_box.get_children().size() > 1) {
-		_box.pack_start (_reset_button, Gtk::PACK_SHRINK, 2);
-		_reset_button.show ();
+		_box.pack_start (_ctrlbox, Gtk::PACK_SHRINK, 2);
+		_ctrlbox.show ();
 	}
 }
 
