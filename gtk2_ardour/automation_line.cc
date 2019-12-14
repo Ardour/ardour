@@ -201,6 +201,7 @@ AutomationLine::get_uses_gain_mapping () const
 {
 	switch (_desc.type) {
 		case GainAutomation:
+		case BusSendLevel:
 		case EnvelopeAutomation:
 		case TrimAutomation:
 			return true;
@@ -389,6 +390,7 @@ AutomationLine::string_to_fraction (string const & s) const
 
 	switch (_desc.type) {
 		case GainAutomation:
+		case BusSendLevel:
 		case EnvelopeAutomation:
 		case TrimAutomation:
 			if (s == "-inf") { /* translation */
