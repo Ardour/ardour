@@ -477,9 +477,13 @@ ARDOUR_UI::sfsm_response (StartupFSM::Result r)
 int
 ARDOUR_UI::starting ()
 {
+	Application* app = Application::instance();
+
 	if (ARDOUR_COMMAND_LINE::check_announcements) {
 		check_announcements ();
 	}
+
+	app->ready ();
 
 	/* we need to create this early because it may need to set the
 	 *  audio backend end up.
