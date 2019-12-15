@@ -50,6 +50,8 @@ public:
 	static samplecnt_t default_chunk_samples ();
 	static void set_chunk_samples (samplecnt_t n) { _chunk_samples = n; }
 
+	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
+
 	void run (BufferSet& /*bufs*/, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double speed, pframes_t /*nframes*/, bool /*result_required*/);
 	void realtime_handle_transport_stopped ();
 	void realtime_locate (bool);
