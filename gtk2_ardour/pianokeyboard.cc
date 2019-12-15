@@ -30,6 +30,8 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
+#include "gtkmm2ext/keyboard.h"
+
 #include "pianokeyboard.h"
 
 #ifndef M_PI
@@ -559,6 +561,10 @@ get_keycode (GdkEventKey* event)
 bool
 APianoKeyboard::on_key_press_event (GdkEventKey* event)
 {
+	 if (Gtkmm2ext::Keyboard::modifier_state_contains (event->state, Gtkmm2ext::Keyboard::PrimaryModifier)) {
+		 return false;
+	 }
+
 	char const* key = get_keycode (event);
 	int note = key_binding (key);
 
@@ -594,6 +600,9 @@ APianoKeyboard::on_key_press_event (GdkEventKey* event)
 bool
 APianoKeyboard::on_key_release_event (GdkEventKey* event)
 {
+	 if (Gtkmm2ext::Keyboard::modifier_state_contains (event->state, Gtkmm2ext::Keyboard::PrimaryModifier)) {
+		 return false;
+	 }
 	char const* key = get_keycode (event);
 
 	if (!key) {
