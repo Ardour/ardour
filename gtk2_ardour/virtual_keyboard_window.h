@@ -98,11 +98,13 @@ protected:
 private:
 	void on_unmap ();
 	bool on_key_press_event (GdkEventKey*);
+	bool on_key_release_event (GdkEventKey*);
 
 	void note_on_event_handler (int, int);
 	void note_off_event_handler (int);
 	void control_change_event_handler (int, int);
 	void pitch_bend_event_handler (int);
+	void pitch_bend_release ();
 
 	void select_keyboard_layout (std::string const&);
 	void update_velocity_settings (int);

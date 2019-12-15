@@ -100,6 +100,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 
 	_pitch_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::pitch_slider_adjusted));
 	_pitchbend->ValueChanged.connect_same_thread (_cc_connections, boost::bind (&VirtualKeyboardWindow::pitch_bend_event_handler, this, _1));
+	_pitch_slider->StopGesture.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::pitch_bend_release));
 
 	set_tooltip (_yaxis_velocity, _("When enabled, mouse-click y-axis position defines the velocity."));
 
@@ -382,17 +383,62 @@ VirtualKeyboardWindow::on_key_press_event (GdkEventKey* ev)
 	// and use signals. -- also subscribe SustainChanged, indicate sustain.
 	// TODO: pitch-bend shortcuts
 	if (ev->type == GDK_KEY_PRESS) {
-		if (ev->keyval == GDK_KEY_Left) {
-			_piano_octave_key.set_value (_piano_octave_key.get_value_as_int () - 1);
-			return true;
-		}
-		if (ev->keyval == GDK_KEY_Right) {
-			_piano_octave_key.set_value (_piano_octave_key.get_value_as_int () + 1);
-			return true;
+		switch (ev->keyval) {
+			case GDK_KEY_Left:
+				_piano_octave_key.set_value (_piano_octave_key.get_value_as_int () - 1);
+				return true;
+			case GDK_KEY_Right:
+				_piano_octave_key.set_value (_piano_octave_key.get_value_as_int () + 1);
+				return true;
+			case GDK_KEY_F1:
+				_pitch_adjustment.set_value (0);
+				return true;
+			case GDK_KEY_F2:
+				_pitch_adjustment.set_value (4096);
+				return true;
+			case GDK_KEY_F3:
+				_pitch_adjustment.set_value (12288);
+				return true;
+			case GDK_KEY_F4:
+				_pitch_adjustment.set_value (16383);
+				return true;
+			default:
+				break;
 		}
 	}
 
 	return ARDOUR_UI_UTILS::relay_key_press (ev, this);
+}
+
+bool
+VirtualKeyboardWindow::on_key_release_event (GdkEventKey* ev)
+{
+	/* try propagate unmodified events first */
+	if ((ev->state & 0xf) == 0) {
+		if (gtk_window_propagate_key_event (gobj(), ev)) {
+			return true;
+		}
+	}
+
+	_piano.grab_focus ();
+
+	if (ev->type == GDK_KEY_RELEASE) {
+		switch (ev->keyval) {
+			case GDK_KEY_F1:
+				/* fallthrough */
+			case GDK_KEY_F2:
+				/* fallthrough */
+			case GDK_KEY_F3:
+				/* fallthrough */
+			case GDK_KEY_F4:
+				_pitch_adjustment.set_value (8192);
+				return true;
+			default:
+				break;
+		}
+	}
+
+	return ArdourWindow::on_key_release_event (ev);
 }
 
 void
@@ -622,4 +668,10 @@ VirtualKeyboardWindow::pitch_bend_event_handler (int val)
 	ev[1] = val & 0x7f;
 	ev[2] = (val >> 7) & 0x7f;
 	_session->vkbd_output_port ()->write (ev, 3, 0);
+}
+
+void
+VirtualKeyboardWindow::pitch_bend_release ()
+{
+	_pitch_adjustment.set_value (8192);
 }
