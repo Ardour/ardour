@@ -103,8 +103,11 @@ private:
 	void note_on_event_handler (int, int);
 	void note_off_event_handler (int);
 	void control_change_event_handler (int, int);
+
 	void pitch_bend_event_handler (int);
 	void pitch_bend_release ();
+	void pitch_bend_update_tooltip (int);
+	void pitch_slider_adjusted ();
 
 	void select_keyboard_layout (std::string const&);
 	void update_velocity_settings (int);
@@ -112,7 +115,6 @@ private:
 	void update_octave_range ();
 	void bank_patch ();
 	void update_sensitivity ();
-	void pitch_slider_adjusted ();
 	bool toggle_config (GdkEventButton*);
 	bool toggle_bankpatch (GdkEventButton*);
 	bool toggle_yaxis_velocity (GdkEventButton*);

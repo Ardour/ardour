@@ -20,6 +20,7 @@
 
 
 #include "pbd/convert.h"
+#include "pbd/compose.h"
 
 #include "ardour/async_midi_port.h"
 #include "ardour/session.h"
@@ -114,7 +115,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 
 	set_tooltip (_send_panic, _("Send MIDI Panic message for current channel"));
 
-	_pitch_slider_tooltip->set_tip (_("Pitchbend: ") + std::string ("8192"));
+	pitch_bend_update_tooltip (8192);
 	_pitch_slider->set_can_focus (false);
 
 	/* config */
@@ -597,10 +598,19 @@ void
 VirtualKeyboardWindow::pitch_slider_adjusted ()
 {
 	_pitchbend->set_value (_pitch_adjustment.get_value (), PBD::Controllable::NoGroup);
-	char buf[64];
-	snprintf (buf, sizeof (buf), "%.0f", _pitch_adjustment.get_value ());
-	_pitch_slider_tooltip->set_tip (_("Pitchbend: ") + std::string(buf));
+	pitch_bend_update_tooltip (_pitch_adjustment.get_value ());
 }
+
+void
+VirtualKeyboardWindow::pitch_bend_update_tooltip (int value)
+{
+	_pitch_slider_tooltip->set_tip (string_compose (
+	      _("Pitchbend: %1\n"
+	        "Use mouse-drag for sprung mode,\n"
+	        "mouse-wheel for presisent bends.\n"
+	        "F1-F4 keys jump to select values."), value));
+}
+
 
 void
 VirtualKeyboardWindow::note_on_event_handler (int note, int velocity)
