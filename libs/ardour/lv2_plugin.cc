@@ -3554,15 +3554,17 @@ LV2PluginInfo::discover()
 		LILV_FOREACH(nodes, i, required_features) {
 				const char* rf = lilv_node_as_uri (lilv_nodes_get (required_features, i));
 				bool ok = false;
+				if (!strcmp (rf, "http://lv2plug.in/ns/lv2core#isLive")) { ok = true; }
 				if (!strcmp (rf, "http://lv2plug.in/ns/ext/instance-access")) { ok = true; }
 				if (!strcmp (rf, "http://lv2plug.in/ns/ext/data-access")) { ok = true; }
 				if (!strcmp (rf, LV2_STATE__makePath)) { ok = true; }
+				if (!strcmp (rf, LV2_STATE__mapPath)) { ok = true; }
+				if (!strcmp (rf, "http://lv2plug.in/ns/ext/state#threadSafeRestore")) { ok = true; }
+				if (!strcmp (rf, LV2_STATE_PREFIX "loadDefaultState")) { ok = true; }
 				if (!strcmp (rf, LV2_LOG__log)) { ok = true; }
 				if (!strcmp (rf, LV2_WORKER__schedule)) { ok = true; }
-				if (!strcmp (rf, LV2_STATE_PREFIX "loadDefaultState")) { ok = true; }
 				if (!strcmp (rf, LV2_URID_MAP_URI)) { ok = true; }
 				if (!strcmp (rf, LV2_URID_UNMAP_URI)) { ok = true; }
-				if (!strcmp (rf, "http://lv2plug.in/ns/lv2core#isLive")) { ok = true; }
 				if (!strcmp (rf, LV2_BUF_SIZE__boundedBlockLength)) { ok = true; }
 				if (!strcmp (rf, "http://lv2plug.in/ns/ext/buf-size#coarseBlockLength" /*LV2_BUF_SIZE__coarseBlockLength*/)) { ok = true; }
 				if (!strcmp (rf, LV2_OPTIONS__options)) { ok = true; }
