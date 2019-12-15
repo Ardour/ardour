@@ -392,6 +392,7 @@ VirtualKeyboardWindow::on_key_press_event (GdkEventKey* ev)
 				_piano_octave_key.set_value (_piano_octave_key.get_value_as_int () + 1);
 				return true;
 			case GDK_KEY_F1:
+			case GDK_KEY_Down:
 				_pitch_adjustment.set_value (0);
 				return true;
 			case GDK_KEY_F2:
@@ -401,6 +402,7 @@ VirtualKeyboardWindow::on_key_press_event (GdkEventKey* ev)
 				_pitch_adjustment.set_value (12288);
 				return true;
 			case GDK_KEY_F4:
+			case GDK_KEY_Up:
 				_pitch_adjustment.set_value (16383);
 				return true;
 			default:
@@ -432,6 +434,10 @@ VirtualKeyboardWindow::on_key_release_event (GdkEventKey* ev)
 			case GDK_KEY_F3:
 				/* fallthrough */
 			case GDK_KEY_F4:
+				/* fallthrough */
+			case GDK_KEY_Up:
+				/* fallthrough */
+			case GDK_KEY_Down:
 				_pitch_adjustment.set_value (8192);
 				return true;
 			default:
@@ -608,7 +614,8 @@ VirtualKeyboardWindow::pitch_bend_update_tooltip (int value)
 	      _("Pitchbend: %1\n"
 	        "Use mouse-drag for sprung mode,\n"
 	        "mouse-wheel for presisent bends.\n"
-	        "F1-F4 keys jump to select values."), value));
+	        "F1-F4 and arrow-up/down keys jump\n"
+	        "to select values."), value));
 }
 
 
