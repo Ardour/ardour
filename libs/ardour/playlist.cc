@@ -2289,8 +2289,9 @@ Playlist::set_state (const XMLNode& node, int version)
 		_set_sort_id ();
 	}
 
-	/* XXX legacy session: fix up later */
+	/* XXX legacy session: fix up later - :: update_orig_2X() */
 	node.get_property (X_("orig-diskstream-id"), _orig_track_id);
+	node.get_property (X_("orig_diskstream_id"), _orig_track_id);
 
 	node.get_property (X_("orig-track-id"), _orig_track_id);
 	node.get_property (X_("frozen"), _frozen);

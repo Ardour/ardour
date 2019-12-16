@@ -75,6 +75,8 @@ private:
 	void track (bool, boost::weak_ptr<Playlist>);
 	void update_tracking ();
 
+	void update_orig_2X (PBD::ID, PBD::ID);
+
 	void find_equivalent_playlist_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >& result);
 	void update_after_tempo_map_change ();
 	void add_state (XMLNode*, bool save_template, bool include_unused);

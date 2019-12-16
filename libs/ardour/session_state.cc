@@ -1685,6 +1685,20 @@ Session::set_state (const XMLNode& node, int version)
 		_vca_manager->set_state (*child, version);
 	}
 
+	if (version < 3000) {
+		if ((child = find_named_node (node, "DiskStreams"))) {
+			for (XMLNodeList::const_iterator n = child->children ().begin (); n != child->children ().end (); ++n) {
+				if ((*n)->name() == "AudioDiskstream" || (*n)->name() == "DiskStream") {
+					std::string diskstream_id;
+					std::string playlist_name;
+					if ((*n)->get_property ("playlist", playlist_name) && (*n)->get_property ("id", diskstream_id)) {
+						_diskstreams_2X [PBD::ID(diskstream_id)] = playlist_name;
+					}
+				}
+			}
+		}
+	}
+
 	if ((child = find_named_node (node, "Routes")) == 0) {
 		error << _("Session: XML state has no routes section") << endmsg;
 		goto out;
@@ -1694,6 +1708,8 @@ Session::set_state (const XMLNode& node, int version)
 
 	/* Now that we Tracks have been loaded and playlists are assigned */
 	_playlists->update_tracking ();
+
+	_diskstreams_2X.clear ();
 
 	/* Now that we have Routes and masters loaded, connect them if appropriate */
 
@@ -1941,12 +1957,15 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 
 	if (ds_prop) {
 
-		/* see comment in current ::set_state() regarding diskstream
-		 * state and DiskReader/DiskWRiter.
-		 */
+		PBD::ID ds_id (ds_prop->value ());
+		std::string playlist_name = _diskstreams_2X[ds_id];
 
-		error << _("Could not find diskstream for route") << endmsg;
-		return boost::shared_ptr<Route> ();
+		boost::shared_ptr<Playlist> pl = playlists()->by_name (playlist_name);
+
+		if (playlist_name.empty () || !pl) {
+			error << _("Could not find diskstream for route") << endmsg;
+			return boost::shared_ptr<Route> ();
+		}
 
 		boost::shared_ptr<Track> track;
 
@@ -1960,9 +1979,14 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 			return ret;
 		}
 
+		track->use_playlist (DataType::AUDIO, pl);
+
 		if (track->set_state (node, version)) {
 			return ret;
 		}
+
+		pl->set_orig_track_id (track->id());
+		playlists()->update_orig_2X (ds_id, track->id());
 
 		BOOST_MARK_TRACK (track);
 		ret = track;

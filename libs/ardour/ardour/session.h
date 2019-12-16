@@ -1817,6 +1817,9 @@ private:
 	/* CURVES and AUTOMATION LISTS */
 	std::map<PBD::ID, AutomationList*> automation_lists;
 
+	/** load 2.X Sessions. Diskstream-ID to playlist-name mapping */
+	std::map<PBD::ID, std::string> _diskstreams_2X;
+
 	/* DEFAULT FADE CURVES */
 
 	float default_fade_steepness;

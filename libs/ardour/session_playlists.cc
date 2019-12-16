@@ -245,6 +245,24 @@ SessionPlaylists::unassigned (std::list<boost::shared_ptr<Playlist> > & list)
 }
 
 void
+SessionPlaylists::update_orig_2X (PBD::ID old_orig, PBD::ID new_orig)
+{
+	Glib::Threads::Mutex::Lock lm (lock);
+
+	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		if ((*i)->get_orig_track_id() == old_orig) {
+			(*i)->set_orig_track_id (new_orig);
+		}
+	}
+
+	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+		if ((*i)->get_orig_track_id() == old_orig) {
+			(*i)->set_orig_track_id (new_orig);
+		}
+	}
+}
+
+void
 SessionPlaylists::get (vector<boost::shared_ptr<Playlist> >& s) const
 {
 	Glib::Threads::Mutex::Lock lm (lock);
