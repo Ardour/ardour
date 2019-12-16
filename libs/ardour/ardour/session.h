@@ -1318,6 +1318,7 @@ private:
 	void update_latency (bool playback);
 	bool update_route_latency (bool reverse, bool apply_to_delayline);
 
+	void initialize_latencies ();
 	void set_worst_io_latencies ();
 	void set_worst_output_latency ();
 	void set_worst_input_latency ();

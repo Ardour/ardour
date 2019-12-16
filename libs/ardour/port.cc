@@ -382,6 +382,7 @@ Port::set_private_latency_range (LatencyRange& range, bool playback)
 			             name(),
 			             _private_playback_latency.min,
 			             _private_playback_latency.max));
+		PBD::stacktrace (std::cerr, 20);
 	} else {
 		_private_capture_latency = range;
 		DEBUG_TRACE (DEBUG::Latency, string_compose (

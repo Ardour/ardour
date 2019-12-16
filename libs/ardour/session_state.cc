@@ -365,6 +365,10 @@ Session::post_engine_init ()
 
 		_state_of_the_state = StateOfTheState (_state_of_the_state & ~(CannotSave | Dirty));
 
+		/* update latencies */
+
+		initialize_latencies ();
+
 		_locations->added.connect_same_thread (*this, boost::bind (&Session::location_added, this, _1));
 		_locations->removed.connect_same_thread (*this, boost::bind (&Session::location_removed, this, _1));
 		_locations->changed.connect_same_thread (*this, boost::bind (&Session::locations_changed, this));

@@ -492,6 +492,10 @@ Session::immediately_post_engine ()
 		_process_graph.reset (new Graph (*this));
 	}
 
+	/* every time we reconnect, recompute worst case output latencies */
+
+	_engine.Running.connect_same_thread (*this, boost::bind (&Session::initialize_latencies, this));
+
 	/* Restart transport FSM */
 
 	_transport_fsm->start ();
@@ -6326,6 +6330,18 @@ Session::unknown_processors () const
 	p.unique ();
 
 	return p;
+}
+
+void
+Session::initialize_latencies ()
+{
+        {
+                Glib::Threads::Mutex::Lock lm (_engine.process_lock());
+                update_latency (false);
+                update_latency (true);
+        }
+
+        set_worst_io_latencies ();
 }
 
 void
