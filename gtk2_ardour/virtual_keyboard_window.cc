@@ -555,9 +555,9 @@ void
 VirtualKeyboardWindow::octave_key_event_handler (bool up)
 {
 	if (up) {
-		_piano_octave_key.set_value (_piano_octave_key.get_value_as_int () - 1);
-	} else {
 		_piano_octave_key.set_value (_piano_octave_key.get_value_as_int () + 1);
+	} else {
+		_piano_octave_key.set_value (_piano_octave_key.get_value_as_int () - 1);
 	}
 }
 
@@ -570,7 +570,7 @@ VirtualKeyboardWindow::pitch_bend_key_event_handler (int target, bool interpolat
 	if (interpolate) {
 		_pitch_bend_target = target;
 		if (!_bender_connection.connected ()){
-			_bender_connection =  Glib::signal_timeout().connect (sigc::mem_fun(*this, &VirtualKeyboardWindow::pitch_bend_timeout), 50 /*ms*/);
+			_bender_connection =  Glib::signal_timeout().connect (sigc::mem_fun(*this, &VirtualKeyboardWindow::pitch_bend_timeout), 40 /*ms*/);
 		} else {
 		}
 		return;
