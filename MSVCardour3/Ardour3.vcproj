@@ -312,6 +312,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\ardour_message.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\ardour_ui.cc"
 				>
 			</File>
@@ -1443,6 +1447,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\ardour_http.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\ardour_message.h"
 				>
 			</File>
 			<File
