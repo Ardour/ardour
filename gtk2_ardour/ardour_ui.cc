@@ -1709,7 +1709,11 @@ ARDOUR_UI::transport_record (bool roll)
 			break;
 
 		case Session::Enabled:
-			_session->disable_record (false, true);
+			if (roll) {
+				transport_roll();
+			} else {
+				_session->disable_record (false, true);
+			}
 		}
 	}
 }
