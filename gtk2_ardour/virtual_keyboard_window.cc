@@ -392,7 +392,6 @@ VirtualKeyboardWindow::on_key_press_event (GdkEventKey* ev)
 				_piano_octave_key.set_value (_piano_octave_key.get_value_as_int () + 1);
 				return true;
 			case GDK_KEY_F1:
-			case GDK_KEY_Down:
 				_pitch_adjustment.set_value (0);
 				return true;
 			case GDK_KEY_F2:
@@ -402,8 +401,13 @@ VirtualKeyboardWindow::on_key_press_event (GdkEventKey* ev)
 				_pitch_adjustment.set_value (12288);
 				return true;
 			case GDK_KEY_F4:
-			case GDK_KEY_Up:
 				_pitch_adjustment.set_value (16383);
+				return true;
+			case GDK_KEY_Down:
+				_pitch_adjustment.set_value (std::max(0., _pitch_adjustment.get_value() - 1024));
+				return true;
+			case GDK_KEY_Up:
+				_pitch_adjustment.set_value (std::min(16383., _pitch_adjustment.get_value() + 1024));
 				return true;
 			default:
 				break;
