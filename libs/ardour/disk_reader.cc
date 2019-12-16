@@ -253,7 +253,7 @@ DiskReader::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
 	   take care of the buffer refill.
 	*/
 
-        if ((g_atomic_int_get (&_pending_overwrite) & PlaylistChanged) || prior_playlist) {
+        if (!(g_atomic_int_get (&_pending_overwrite) & PlaylistChanged) || prior_playlist) {
 	        _session.request_overwrite_buffer (_track, PlaylistChanged);
 	}
 
