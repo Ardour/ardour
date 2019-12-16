@@ -167,8 +167,6 @@ public:
 
 	void shift (samplepos_t, samplecnt_t);
 
-	void set_trim (gain_t val, PBD::Controllable::GroupControlDisposition);
-
 	/* controls use set_solo() to modify this route's solo state */
 
 	void clear_all_solo_state ();

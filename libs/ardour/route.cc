@@ -312,13 +312,6 @@ Route::ensure_track_or_route_name (string newname) const
 	return newname;
 }
 
-void
-Route::set_trim (gain_t val, Controllable::GroupControlDisposition /* group override */)
-{
-	// TODO route group, see set_gain()
-	// _trim_control->route_set_value (val);
-}
-
 /** Process this route for one (sub) cycle (process thread)
  *
  * @param bufs Scratch buffers to use for the signal path
