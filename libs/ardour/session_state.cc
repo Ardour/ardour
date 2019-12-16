@@ -4523,6 +4523,12 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 		return -1;
 	}
 
+	if ((parse_stateful_loading_version(version) / 1000L) <= 2) {
+		/* sample-format '0' is implicit */
+		data_format = FormatFloat;
+		found_data_format = true;
+	}
+
 	node = node->children;
 	while (node != NULL) {
 		 if (!strcmp((const char*) node->name, "ProgramVersion")) {
