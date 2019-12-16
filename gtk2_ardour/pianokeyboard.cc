@@ -559,10 +559,67 @@ get_keycode (GdkEventKey* event)
 }
 
 bool
+APianoKeyboard::handle_fixed_keys (GdkEventKey* ev)
+{
+	if (ev->type == GDK_KEY_PRESS) {
+		switch (ev->keyval) {
+			case GDK_KEY_Left:
+				SwitchOctave (false);
+				return true;
+			case GDK_KEY_Right:
+				SwitchOctave (true);
+				return true;
+			case GDK_KEY_F1:
+				PitchBend (0, false);
+				return true;
+			case GDK_KEY_F2:
+				PitchBend (4096, false);
+				return true;
+			case GDK_KEY_F3:
+				PitchBend (12288, false);
+				return true;
+			case GDK_KEY_F4:
+				PitchBend (16383, false);
+				return true;
+			case GDK_KEY_Down:
+				PitchBend (0, true);
+				return true;
+			case GDK_KEY_Up:
+				PitchBend (16383, true);
+				return true;
+			default:
+				break;
+		}
+	} else if (ev->type == GDK_KEY_RELEASE) {
+		switch (ev->keyval) {
+			case GDK_KEY_F1:
+				/* fallthrough */
+			case GDK_KEY_F2:
+				/* fallthrough */
+			case GDK_KEY_F3:
+				/* fallthrough */
+			case GDK_KEY_F4:
+				/* fallthrough */
+			case GDK_KEY_Up:
+				/* fallthrough */
+			case GDK_KEY_Down:
+				PitchBend (8192, false);
+				return true;
+			default:
+				break;
+		}
+	}
+	return false;
+}
+
+bool
 APianoKeyboard::on_key_press_event (GdkEventKey* event)
 {
 	 if (Gtkmm2ext::Keyboard::modifier_state_contains (event->state, Gtkmm2ext::Keyboard::PrimaryModifier)) {
 		 return false;
+	 }
+	 if (handle_fixed_keys (event)) {
+		 return true;
 	 }
 
 	char const* key = get_keycode (event);
@@ -603,6 +660,10 @@ APianoKeyboard::on_key_release_event (GdkEventKey* event)
 	 if (Gtkmm2ext::Keyboard::modifier_state_contains (event->state, Gtkmm2ext::Keyboard::PrimaryModifier)) {
 		 return false;
 	 }
+	 if (handle_fixed_keys (event)) {
+		 return true;
+	 }
+
 	char const* key = get_keycode (event);
 
 	if (!key) {

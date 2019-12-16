@@ -243,6 +243,8 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 
 	_piano.NoteOn.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::note_on_event_handler));
 	_piano.NoteOff.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::note_off_event_handler));
+	_piano.SwitchOctave.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::octave_key_event_handler));
+	_piano.PitchBend.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::pitch_bend_key_event_handler));
 
 	update_velocity_settings (0);
 	update_octave_range ();
@@ -379,41 +381,6 @@ VirtualKeyboardWindow::on_key_press_event (GdkEventKey* ev)
 
 	_piano.grab_focus ();
 
-	/* handle up/down */
-	// XXX consider to handle these in APianoKeyboard::on_key_press_event
-	// and use signals. -- also subscribe SustainChanged, indicate sustain.
-	// TODO: pitch-bend shortcuts
-	if (ev->type == GDK_KEY_PRESS) {
-		switch (ev->keyval) {
-			case GDK_KEY_Left:
-				_piano_octave_key.set_value (_piano_octave_key.get_value_as_int () - 1);
-				return true;
-			case GDK_KEY_Right:
-				_piano_octave_key.set_value (_piano_octave_key.get_value_as_int () + 1);
-				return true;
-			case GDK_KEY_F1:
-				_pitch_adjustment.set_value (0);
-				return true;
-			case GDK_KEY_F2:
-				_pitch_adjustment.set_value (4096);
-				return true;
-			case GDK_KEY_F3:
-				_pitch_adjustment.set_value (12288);
-				return true;
-			case GDK_KEY_F4:
-				_pitch_adjustment.set_value (16383);
-				return true;
-			case GDK_KEY_Down:
-				_pitch_adjustment.set_value (std::max(0., _pitch_adjustment.get_value() - 1024));
-				return true;
-			case GDK_KEY_Up:
-				_pitch_adjustment.set_value (std::min(16383., _pitch_adjustment.get_value() + 1024));
-				return true;
-			default:
-				break;
-		}
-	}
-
 	return ARDOUR_UI_UTILS::relay_key_press (ev, this);
 }
 
@@ -428,26 +395,6 @@ VirtualKeyboardWindow::on_key_release_event (GdkEventKey* ev)
 	}
 
 	_piano.grab_focus ();
-
-	if (ev->type == GDK_KEY_RELEASE) {
-		switch (ev->keyval) {
-			case GDK_KEY_F1:
-				/* fallthrough */
-			case GDK_KEY_F2:
-				/* fallthrough */
-			case GDK_KEY_F3:
-				/* fallthrough */
-			case GDK_KEY_F4:
-				/* fallthrough */
-			case GDK_KEY_Up:
-				/* fallthrough */
-			case GDK_KEY_Down:
-				_pitch_adjustment.set_value (8192);
-				return true;
-			default:
-				break;
-		}
-	}
 
 	return ArdourWindow::on_key_release_event (ev);
 }
@@ -602,6 +549,51 @@ VirtualKeyboardWindow::update_sensitivity ()
 	_piano_min_velocity.set_sensitive (c);
 	_piano_max_velocity.set_sensitive (c);
 	_piano.grab_focus ();
+}
+
+void
+VirtualKeyboardWindow::octave_key_event_handler (bool up)
+{
+	if (up) {
+		_piano_octave_key.set_value (_piano_octave_key.get_value_as_int () - 1);
+	} else {
+		_piano_octave_key.set_value (_piano_octave_key.get_value_as_int () + 1);
+	}
+}
+
+void
+VirtualKeyboardWindow::pitch_bend_key_event_handler (int target, bool interpolate)
+{
+	if (_pitch_adjustment.get_value() == target) {
+		return;
+	}
+	if (interpolate) {
+		_pitch_bend_target = target;
+		if (!_bender_connection.connected ()){
+			_bender_connection =  Glib::signal_timeout().connect (sigc::mem_fun(*this, &VirtualKeyboardWindow::pitch_bend_timeout), 50 /*ms*/);
+		} else {
+		}
+		return;
+	}
+		_bender_connection.disconnect ();
+	_pitch_adjustment.set_value (target);
+	_pitch_bend_target = target;
+}
+
+bool
+VirtualKeyboardWindow::pitch_bend_timeout ()
+{
+	int cur = _pitch_adjustment.get_value();
+	int target;
+	if (cur < _pitch_bend_target) {
+		target = std::min (_pitch_bend_target, cur + 1024);
+	} else if (cur > _pitch_bend_target) {
+		target = std::max (_pitch_bend_target, cur - 1024);
+	} else {
+		target = _pitch_bend_target;
+	}
+	_pitch_adjustment.set_value (target);
+	return _pitch_bend_target != target;
 }
 
 void

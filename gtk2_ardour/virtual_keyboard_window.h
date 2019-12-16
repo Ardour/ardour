@@ -104,6 +104,10 @@ private:
 	void note_off_event_handler (int);
 	void control_change_event_handler (int, int);
 
+	void octave_key_event_handler (bool);
+	void pitch_bend_key_event_handler (int, bool);
+	bool pitch_bend_timeout ();
+
 	void pitch_bend_event_handler (int);
 	void pitch_bend_release ();
 	void pitch_bend_update_tooltip (int);
@@ -158,6 +162,9 @@ private:
 	ArdourWidgets::ArdourDropdown  _cc_key[VKBD_NCTRLS];
 
 	PBD::ScopedConnectionList _cc_connections;
+
+	sigc::connection _bender_connection;
+	int              _pitch_bend_target;
 };
 
 #endif

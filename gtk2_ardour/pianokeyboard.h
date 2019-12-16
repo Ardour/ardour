@@ -31,10 +31,12 @@ public:
 	APianoKeyboard ();
 	~APianoKeyboard ();
 
-	sigc::signal<void, int, int> NoteOn;
-	sigc::signal<void, int>      NoteOff;
-	sigc::signal<void>           Rest;
-	sigc::signal<void,bool>      SustainChanged;
+	sigc::signal<void, int, int>  NoteOn;
+	sigc::signal<void, int>       NoteOff;
+	sigc::signal<void>            Rest;
+	sigc::signal<void,bool>       SustainChanged;
+	sigc::signal<void, int, bool> PitchBend;
+	sigc::signal<void, bool>      SwitchOctave;
 
 	enum Layout {
 		QWERTY,
@@ -78,6 +80,8 @@ private:
 	void draw_note (cairo_t* cr, int note) const;
 
 	void queue_note_draw (int note);
+
+	bool handle_fixed_keys (GdkEventKey*);
 
 	void press_key (int key, int vel);
 	void release_key (int key);
