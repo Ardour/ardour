@@ -1963,8 +1963,7 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 		boost::shared_ptr<Playlist> pl = playlists()->by_name (playlist_name);
 
 		if (playlist_name.empty () || !pl) {
-			error << _("Could not find diskstream for route") << endmsg;
-			return boost::shared_ptr<Route> ();
+			warning << string_compose (_("Could not find diskstream for diskream-id: '%1', playlist: '%2'"), ds_prop->value (), playlist_name) << endmsg;
 		}
 
 		boost::shared_ptr<Track> track;
@@ -1979,14 +1978,18 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 			return ret;
 		}
 
-		track->use_playlist (DataType::AUDIO, pl);
+		if (pl) {
+			track->use_playlist (DataType::AUDIO, pl);
+		}
 
 		if (track->set_state (node, version)) {
 			return ret;
 		}
 
-		pl->set_orig_track_id (track->id());
-		playlists()->update_orig_2X (ds_id, track->id());
+		if (pl) {
+			pl->set_orig_track_id (track->id());
+			playlists()->update_orig_2X (ds_id, track->id());
+		}
 
 		BOOST_MARK_TRACK (track);
 		ret = track;
