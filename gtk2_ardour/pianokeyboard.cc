@@ -599,11 +599,12 @@ APianoKeyboard::handle_fixed_keys (GdkEventKey* ev)
 			case GDK_KEY_F3:
 				/* fallthrough */
 			case GDK_KEY_F4:
-				/* fallthrough */
+				PitchBend (8192, false);
+				break;
 			case GDK_KEY_Up:
 				/* fallthrough */
 			case GDK_KEY_Down:
-				PitchBend (8192, false);
+				PitchBend (8192, true);
 				return true;
 			default:
 				break;

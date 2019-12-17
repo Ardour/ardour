@@ -564,14 +564,17 @@ VirtualKeyboardWindow::octave_key_event_handler (bool up)
 void
 VirtualKeyboardWindow::pitch_bend_key_event_handler (int target, bool interpolate)
 {
-	if (_pitch_adjustment.get_value() == target) {
+	int cur = _pitch_adjustment.get_value();
+	if (cur == target) {
 		return;
 	}
 	if (interpolate) {
 		_pitch_bend_target = target;
-		if (!_bender_connection.connected ()){
-			_bender_connection =  Glib::signal_timeout().connect (sigc::mem_fun(*this, &VirtualKeyboardWindow::pitch_bend_timeout), 40 /*ms*/);
-		} else {
+		if (!_bender_connection.connected ()) {
+			float tc = _pitch_bend_target == 8192 ? .35 : .51;
+			cur = rintf (cur + tc * (_pitch_bend_target - cur));
+			_pitch_adjustment.set_value (cur);
+			_bender_connection =  Glib::signal_timeout().connect (sigc::mem_fun(*this, &VirtualKeyboardWindow::pitch_bend_timeout), 20 /*ms*/);
 		}
 		return;
 	}
@@ -584,16 +587,16 @@ bool
 VirtualKeyboardWindow::pitch_bend_timeout ()
 {
 	int cur = _pitch_adjustment.get_value();
-	int target;
-	if (cur < _pitch_bend_target) {
-		target = std::min (_pitch_bend_target, cur + 1024);
-	} else if (cur > _pitch_bend_target) {
-		target = std::max (_pitch_bend_target, cur - 1024);
-	} else {
-		target = _pitch_bend_target;
+
+	/* a spring would be 2nd order with overshoot,
+	 * but we assume it's critically damped */
+	float tc = _pitch_bend_target == 8192 ? .35 : .51;
+	cur = rintf (cur + tc * (_pitch_bend_target - cur));
+	if (abs (cur - _pitch_bend_target) < 2) {
+		cur = _pitch_bend_target;
 	}
-	_pitch_adjustment.set_value (target);
-	return _pitch_bend_target != target;
+	_pitch_adjustment.set_value (cur);
+	return _pitch_bend_target != cur;
 }
 
 void
