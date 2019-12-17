@@ -40,6 +40,8 @@
 
 #include <gtkmm/messagedialog.h>
 
+#include "pbd/unwind.h"
+
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/menu_elems.h"
@@ -114,6 +116,8 @@ using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
 
 ProcessorBox*  ProcessorBox::_current_processor_box = 0;
+bool           ProcessorBox::_ignore_disk_io_change = false;
+
 RefPtr<Action> ProcessorBox::paste_action;
 RefPtr<Action> ProcessorBox::cut_action;
 RefPtr<Action> ProcessorBox::copy_action;
@@ -2276,6 +2280,10 @@ ProcessorBox::show_processor_menu (int arg)
 	manage_pins_action->set_sensitive (pi != 0);
 	if (boost::dynamic_pointer_cast<Track>(_route)) {
 		disk_io_action->set_sensitive (true);
+		PBD::Unwinder<bool> uw (_ignore_disk_io_change, true);
+		ActionManager::get_toggle_action (X_("ProcessorMenu"), "disk-io-prefader")->set_active (_route->disk_io_point () == DiskIOPreFader);
+		ActionManager::get_toggle_action (X_("ProcessorMenu"), "disk-io-postfader")->set_active (_route->disk_io_point () == DiskIOPostFader);
+		ActionManager::get_toggle_action (X_("ProcessorMenu"), "disk-io-custom")->set_active (_route->disk_io_point () == DiskIOCustom);
 	} else {
 		disk_io_action->set_sensitive (false);
 	}
@@ -3841,9 +3849,9 @@ ProcessorBox::register_actions ()
 
 	/* Disk IO stuff */
 	disk_io_action = ActionManager::register_action (processor_box_actions, X_("disk-io-menu"), _("Disk I/O ..."));
-	ActionManager::register_action (processor_box_actions, X_("disk-io-prefader"), _("Pre-Fader."), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOPreFader));
-	ActionManager::register_action (processor_box_actions, X_("disk-io-postfader"), _("Post-Fader."), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOPostFader));
-	ActionManager::register_action (processor_box_actions, X_("disk-io-custom"), _("Custom."), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOCustom));
+	ActionManager::register_toggle_action (processor_box_actions, X_("disk-io-prefader"), _("Pre-Fader"), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOPreFader));
+	ActionManager::register_toggle_action (processor_box_actions, X_("disk-io-postfader"), _("Post-Fader"), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOPostFader));
+	ActionManager::register_toggle_action (processor_box_actions, X_("disk-io-custom"), _("Custom"), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOCustom));
 
 	/* show editors */
 	edit_action = ActionManager::register_action (
@@ -3880,6 +3888,9 @@ void
 ProcessorBox::rb_set_disk_io_position (DiskIOPoint diop)
 {
 	if (_current_processor_box == 0) {
+		return;
+	}
+	if (_ignore_disk_io_change) {
 		return;
 	}
 

@@ -628,6 +628,8 @@ private:
 
 	XMLNode* entry_gui_object_state (ProcessorEntry *);
 	PBD::ScopedConnection amp_config_connection;
+
+	static bool _ignore_disk_io_change;
 };
 
 #endif /* __ardour_gtk_processor_box__ */
