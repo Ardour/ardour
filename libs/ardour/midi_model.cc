@@ -1684,8 +1684,12 @@ MidiModel::set_midi_source (boost::shared_ptr<MidiSource> s)
 void
 MidiModel::source_interpolation_changed (Evoral::Parameter p, Evoral::ControlList::InterpolationStyle s)
 {
-	Glib::Threads::Mutex::Lock lm (_control_lock);
-	control(p)->list()->set_interpolation (s);
+	{
+		Glib::Threads::Mutex::Lock lm (_control_lock);
+		control(p)->list()->set_interpolation (s);
+	}
+	/* re-read MIDI */
+	ContentsChanged (); /* EMIT SIGNAL */
 }
 
 /** A ControlList has signalled that its interpolation style has changed.  Again, in order to keep
@@ -1703,9 +1707,13 @@ MidiModel::control_list_interpolation_changed (Evoral::Parameter p, Evoral::Cont
 void
 MidiModel::source_automation_state_changed (Evoral::Parameter p, AutoState s)
 {
-	Glib::Threads::Mutex::Lock lm (_control_lock);
-	boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (control(p)->list ());
-	al->set_automation_state (s);
+	{
+		Glib::Threads::Mutex::Lock lm (_control_lock);
+		boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (control(p)->list ());
+		al->set_automation_state (s);
+	}
+	/* re-read MIDI */
+	ContentsChanged (); /* EMIT SIGNAL */
 }
 
 void
