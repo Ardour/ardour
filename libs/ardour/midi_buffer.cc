@@ -113,38 +113,11 @@ MidiBuffer::read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t ds
 	for (MidiBuffer::const_iterator i = msrc.begin(); i != msrc.end(); ++i) {
 		const Evoral::Event<TimeType> ev(*i, false);
 
-		if (dst_offset >= 0) {
-			/* Positive offset: shifting events from internal
-			   buffer view of time (always relative to to start of
-			   current possibly split cycle) to from global/port
-			   view of time (always relative to start of process
-			   cycle).
-
-			   Check it is within range of this (split) cycle, then shift.
-			*/
-			if (ev.time() >= 0 && ev.time() < nframes) {
-				push_back (ev.time(), ev.size(), ev.buffer());
-			} else {
-				cerr << "\t!!!! MIDI event @ " <<  ev.time() << " skipped, not within range 0 .. " << nframes << endl;
-				PBD::stacktrace (cerr, 30);
-			}
+		if (ev.time() >= 0 && ev.time() < nframes) {
+			push_back (ev.time(), ev.size(), ev.buffer());
 		} else {
-			/* Negative offset: shifting events from global/port
-			   view of time (always relative to start of process
-			   cycle) back to internal buffer view of time (always
-			   relative to to start of current possibly split
-			   cycle.
-
-			   Shift first, then check it is within range of this
-			   (split) cycle.
-			*/
-			const samplepos_t evtime = ev.time();
-
-			if (evtime >= 0 && evtime < nframes) {
-				push_back (evtime, ev.size(), ev.buffer());
-			} else {
-				cerr << "\t!!!! MIDI event @ " <<  evtime << " (based on " << ev.time() << ") skipped, not within range 0 .. " << nframes << ": ";
-			}
+			cerr << "\t!!!! MIDI event @ " <<  ev.time() << " skipped, not within range 0 .. " << nframes << endl;
+			PBD::stacktrace (cerr, 30);
 		}
 	}
 

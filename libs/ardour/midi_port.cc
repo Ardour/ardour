@@ -101,6 +101,7 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 	}
 
 	if (receives_input () && _input_active) {
+		_buffer->clear ();
 
 		void* buffer = port_engine.get_buffer (_port_handle, nframes);
 		const pframes_t event_count = port_engine.get_midi_event_count (buffer);
@@ -153,6 +154,8 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 #endif
 				continue;
 			}
+
+			timestamp -= _global_port_buffer_offset;
 
 			if ((buf[0] & 0xF0) == 0x90 && buf[2] == 0) {
 				/* normalize note on with velocity 0 to proper note off */
@@ -288,7 +291,7 @@ MidiPort::flush_buffers (pframes_t nframes)
 				uint8_t const * const buf = ev.buffer();
 				const samplepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();
 
-				_trace_parser->set_timestamp (now + adjusted_time);
+				_trace_parser->set_timestamp (now + adjusted_time / _speed_ratio);
 
 				uint32_t limit = ev.size();
 
@@ -327,7 +330,9 @@ MidiPort::flush_buffers (pframes_t nframes)
 					cerr << "write failed, dropped event, time " << adjusted_time << '/' << ev.time() << endl;
 				}
 			} else {
-				cerr << "Dropped outgoing MIDI event. time " << adjusted_time << '/' << ev.time() 
+				pframes_t tme = floor (adjusted_time / _speed_ratio);
+				cerr << "Dropped outgoing MIDI event. time " << adjusted_time
+				     << " (" << ev.time() << ") @" << _speed_ratio << " = " << tme
 				     << " out of range [" << _global_port_buffer_offset
 				     << " .. " << _global_port_buffer_offset + nframes
 				     << "]";
