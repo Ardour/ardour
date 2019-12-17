@@ -153,6 +153,7 @@ _row  < Rolling,             butler_done,     Rolling                           
 _row  < Rolling,             start_transport, Rolling                                                                    >,
 a_row < Rolling,             stop_transport,  DeclickToStop,     &T::stop_playback                                       >,
 a_row < DeclickToStop,       declick_done,    Stopped,                                                                   >,
+a_row < DeclickToStop,       stop_transport,  DeclickToStop                                                              >,
 a_row < Rolling,             locate,          DeclickToLocate,   &T::start_declick_for_locate                            >,
 a_row < DeclickToLocate,     declick_done,    WaitingForLocate,  &T::start_locate_after_declick                          >,
 row   < WaitingForLocate,    locate_done,     Rolling,           &T::roll_after_locate, &T::should_roll_after_locate     >,
@@ -241,6 +242,9 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 				defer (ev);
 				deferred = true;
 			}
+			break;
+		case DeclickToStop:
+			/* already doing it */
 			break;
 		default:
 			bad_transition (ev); return false;
