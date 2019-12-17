@@ -37,8 +37,8 @@ public:
 	void start_updating ();
 	void stop_updating ();
 
-	double dsp_avg () const { return _valid ? _avg : -1; }
-	double dsp_max () const { return _valid ? _max : -1; }
+	double   dsp_avg () const { return _valid ? _avg : -1; }
+	uint64_t dsp_max () const { return _valid ? _max : 0; }
 
 private:
 	void update_cpu_label ();
