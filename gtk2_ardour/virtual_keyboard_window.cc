@@ -135,15 +135,6 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	cfg_tbl->attach (*manage (new Label (_("Min"))),       1, 2, 1, 2, SHRINK, SHRINK, 4, 0);
 	cfg_tbl->attach (_piano_max_velocity,                  2, 3, 0, 1, SHRINK, SHRINK, 4, 0);
 	cfg_tbl->attach (*manage (new Label (_("Max"))),       2, 3, 1, 2, SHRINK, SHRINK, 4, 0);
-	cfg_tbl->attach (_piano_key_velocity,                  3, 4, 0, 1, SHRINK, SHRINK, 4, 0);
-	cfg_tbl->attach (*manage (new Label (_("Key"))),       3, 4, 1, 2, SHRINK, SHRINK, 4, 0);
-
-	cfg_tbl->attach (*manage (new ArdourVSpacer),          4, 5, 0, 2, SHRINK, FILL,   4, 0);
-
-	cfg_tbl->attach (_piano_octave_key,                    5, 6, 0, 1, SHRINK, SHRINK, 4, 0);
-	cfg_tbl->attach (*manage (new Label (_("Octave"))),    5, 6, 1, 2, SHRINK, SHRINK, 4, 0);
-	cfg_tbl->attach (_piano_octave_range,                  6, 7, 0, 1, SHRINK, SHRINK, 4, 0);
-	cfg_tbl->attach (*manage (new Label (_("Range"))),     6, 7, 1, 2, SHRINK, SHRINK, 4, 0);
 
 	cfg_tbl->attach (*manage (new ArdourVSpacer),          7, 8, 0, 2, SHRINK, FILL,   4, 0);
 
@@ -165,7 +156,6 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	pgm_tbl->attach (*manage (new Label (_("LSB"))),   3, 4, 1, 2, SHRINK, SHRINK, 4, 0);
 	pgm_tbl->attach (*manage (new Label (_("PGM"))),   4, 5, 1, 2, SHRINK, SHRINK, 4, 0);
 	pgm_tbl->attach (*manage (new ArdourVSpacer),      5, 6, 0, 2, SHRINK, FILL,   4, 0);
-	pgm_tbl->attach (_send_panic,                      6, 7, 0, 2, SHRINK, SHRINK, 4, 0);
 	pgm_tbl->show_all ();
 
 	/* settings */
@@ -204,10 +194,27 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 		                                          boost::bind (&VirtualKeyboardWindow::control_change_knob_event_handler, this, i, _1));
 	}
 
-	tbl->attach (*manage (new ArdourVSpacer), col, col + 1, 0, 2, SHRINK, FILL, 4, 0);
+	tbl->attach (*manage (new ArdourVSpacer),       col, col + 1, 0, 2, SHRINK, FILL, 4, 0);
 	++col;
-	tbl->attach (_transpose_output,                      col, col + 1, 0, 1, SHRINK, SHRINK, 4, 0);
-	tbl->attach (*manage (new Label (_("Transpose"))),   col, col + 1, 1, 2, SHRINK, SHRINK, 4, 0);
+	tbl->attach (_piano_octave_key,                 col, col + 1, 0, 1, SHRINK, SHRINK, 4, 0);
+	tbl->attach (*manage (new Label (_("Octave"))), col, col + 1, 1, 2, SHRINK, SHRINK, 4, 0);
+	++col;
+	tbl->attach (_piano_octave_range,               col, col + 1, 0, 1, SHRINK, SHRINK, 4, 0);
+	tbl->attach (*manage (new Label (_("Range"))),  col, col + 1, 1, 2, SHRINK, SHRINK, 4, 0);
+	++col;
+
+	tbl->attach (*manage (new ArdourVSpacer),     col, col + 1, 0, 2, SHRINK, FILL, 4, 0);
+	++col;
+	tbl->attach (_piano_key_velocity,             col, col + 1, 0, 1, SHRINK, SHRINK, 4, 0);
+	tbl->attach (*manage (new Label (_("Vel."))), col, col + 1, 1, 2, SHRINK, SHRINK, 4, 0);
+	++col;
+
+	tbl->attach (*manage (new ArdourVSpacer),          col, col + 1, 0, 2, SHRINK, FILL, 4, 0);
+	++col;
+	tbl->attach (_transpose_output,                    col, col + 1, 0, 1, SHRINK, SHRINK, 4, 0);
+	tbl->attach (*manage (new Label (_("Transpose"))), col, col + 1, 1, 2, SHRINK, SHRINK, 4, 0);
+	++col;
+	tbl->attach (_send_panic,                      col, col + 1, 0, 2, SHRINK, SHRINK, 4, 0);
 
 	/* main layout */
 	Box* box1 = manage (new HBox ());
