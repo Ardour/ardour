@@ -103,6 +103,10 @@ private:
 	void note_on_event_handler (int, int);
 	void note_off_event_handler (int);
 	void control_change_event_handler (int, int);
+	void control_change_knob_event_handler (int, int);
+
+	void modwheel_update_tooltip (int);
+	void modwheel_slider_adjusted ();
 
 	void octave_key_event_handler (bool);
 	void pitch_bend_key_event_handler (int, bool);
@@ -119,6 +123,8 @@ private:
 	void update_octave_range ();
 	void bank_patch ();
 	void update_sensitivity ();
+	void cc_key_changed (size_t);
+	void update_cc (size_t, int);
 	bool toggle_config (GdkEventButton*);
 	bool toggle_bankpatch (GdkEventButton*);
 	bool toggle_yaxis_velocity (GdkEventButton*);
@@ -155,7 +161,11 @@ private:
 	ArdourWidgets::VSliderController* _pitch_slider;
 	Gtkmm2ext::PersistentTooltip*     _pitch_slider_tooltip;
 
-#define VKBD_NCTRLS 8
+	boost::shared_ptr<VKBDControl>    _modwheel;
+	Gtk::Adjustment                   _modwheel_adjustment;
+	ArdourWidgets::VSliderController* _modwheel_slider;
+	Gtkmm2ext::PersistentTooltip*     _modwheel_tooltip;
+#define VKBD_NCTRLS 4
 
 	boost::shared_ptr<VKBDControl> _cc[VKBD_NCTRLS];
 	ArdourWidgets::ArdourKnob*     _cc_knob[VKBD_NCTRLS];

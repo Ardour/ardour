@@ -56,6 +56,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	, _piano_octave_key (*manage (new Adjustment (4, -1, 7, 1, 1)))
 	, _piano_octave_range (*manage (new Adjustment (7, 2, 11, 1, 1)))
 	, _pitch_adjustment (8192, 0, 16383, 1, 256)
+	, _modwheel_adjustment (0, 0, 127, 1, 8)
 {
 	_piano.set_flags (Gtk::CAN_FOCUS);
 
@@ -99,9 +100,16 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_pitch_slider         = manage (new VSliderController (&_pitch_adjustment, _pitchbend, 0, PX_SCALE (15)));
 	_pitch_slider_tooltip = new Gtkmm2ext::PersistentTooltip (_pitch_slider);
 
+	_modwheel         = boost::shared_ptr<VKBDControl> (new VKBDControl ("MW", 0, 127));
+	_modwheel_slider  = manage (new VSliderController (&_modwheel_adjustment, _modwheel, 0, PX_SCALE (15)));
+	_modwheel_tooltip = new Gtkmm2ext::PersistentTooltip (_modwheel_slider);
+
 	_pitch_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::pitch_slider_adjusted));
 	_pitchbend->ValueChanged.connect_same_thread (_cc_connections, boost::bind (&VirtualKeyboardWindow::pitch_bend_event_handler, this, _1));
 	_pitch_slider->StopGesture.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::pitch_bend_release));
+
+	_modwheel_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::modwheel_slider_adjusted));
+	_modwheel->ValueChanged.connect_same_thread (_cc_connections, boost::bind (&VirtualKeyboardWindow::control_change_event_handler, this, 1, _1));
 
 	set_tooltip (_yaxis_velocity, _("When enabled, mouse-click y-axis position defines the velocity."));
 
@@ -166,19 +174,19 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	tbl->attach (*manage (new Label (_("Channel"))), 0, 1, 1, 2, SHRINK, SHRINK, 4, 0);
 	tbl->attach (*manage (new ArdourVSpacer), 1, 2, 0, 2, SHRINK, FILL, 4, 0);
 	tbl->attach (*_pitch_slider, 2, 3, 0, 2, SHRINK, FILL, 4, 0);
+	tbl->attach (*_modwheel_slider, 3, 4, 0, 2, SHRINK, FILL, 4, 0);
 
-	const char* default_cc[VKBD_NCTRLS] = { "7", "8", "1", "11", "91", "92", "93", "94" };
+	const int default_cc[VKBD_NCTRLS] = { 7, 8, 91, 93};
 
-	int col = 3;
-	for (int i = 0; i < VKBD_NCTRLS; ++i, ++col) {
+	int col = 4;
+	for (size_t i = 0; i < VKBD_NCTRLS; ++i, ++col) {
 		_cc[i]      = boost::shared_ptr<VKBDControl> (new VKBDControl ("CC"));
 		_cc_knob[i] = manage (new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Flags (0)));
 		_cc_knob[i]->set_controllable (_cc[i]);
 		_cc_knob[i]->set_size_request (PX_SCALE (21), PX_SCALE (21));
-		_cc_knob[i]->set_tooltip_prefix (_("CC: "));
 		_cc_knob[i]->set_name ("monitor section knob");
 
-		for (int c = 1; c < 120; ++c) {
+		for (int c = 2; c < 120; ++c) {
 			if (c == 32) {
 				continue;
 			}
@@ -186,13 +194,14 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 			sprintf (key, "%d", c);
 			_cc_key[i].append_text_item (key);
 		}
-		_cc_key[i].set_active (default_cc[i]);
+		update_cc (i, default_cc[i]);
 
 		tbl->attach (*_cc_knob[i], col, col + 1, 0, 1, SHRINK, SHRINK, 4, 2);
 		tbl->attach (_cc_key[i],   col, col + 1, 1, 2, SHRINK, SHRINK, 4, 2);
 
+		_cc_key[i].StateChanged.connect (sigc::bind (sigc::mem_fun (*this, &VirtualKeyboardWindow::cc_key_changed), i));
 		_cc[i]->ValueChanged.connect_same_thread (_cc_connections,
-		                                          boost::bind (&VirtualKeyboardWindow::control_change_event_handler, this, i, _1));
+		                                          boost::bind (&VirtualKeyboardWindow::control_change_knob_event_handler, this, i, _1));
 	}
 
 	tbl->attach (*manage (new ArdourVSpacer), col, col + 1, 0, 2, SHRINK, FILL, 4, 0);
@@ -313,7 +322,7 @@ VirtualKeyboardWindow::set_state (const XMLNode& root)
 		sprintf (buf, "CC-%d", i);
 		std::string cckey;
 		if (node->get_property (buf, cckey)) {
-			_cc_key[i].set_active (cckey);
+			update_cc (i, PBD::atoi (cckey));
 		}
 	}
 
@@ -552,6 +561,27 @@ VirtualKeyboardWindow::update_sensitivity ()
 }
 
 void
+VirtualKeyboardWindow::cc_key_changed (size_t i)
+{
+	int ctrl = PBD::atoi (_cc_key[i].get_text ());
+	update_cc (i, ctrl);
+}
+
+void
+VirtualKeyboardWindow::update_cc (size_t i, int cc)
+{
+	assert (i < VKBD_NCTRLS);
+	if (cc < 0 || cc > 120) {
+		return;
+	}
+	char buf[16];
+	sprintf (buf, "%d", cc);
+	_cc_key[i].set_active (buf);
+	_cc_knob[i]->set_tooltip_prefix (string_compose (_("CC-%1: "), cc));
+	// TODO update _cc[i]->normal
+}
+
+void
 VirtualKeyboardWindow::octave_key_event_handler (bool up)
 {
 	if (up) {
@@ -617,6 +647,18 @@ VirtualKeyboardWindow::pitch_bend_update_tooltip (int value)
 	        "to select values."), value));
 }
 
+void
+VirtualKeyboardWindow::modwheel_slider_adjusted ()
+{
+	_modwheel->set_value (_modwheel_adjustment.get_value (), PBD::Controllable::NoGroup);
+	modwheel_update_tooltip (_modwheel_adjustment.get_value ());
+}
+
+void
+VirtualKeyboardWindow::modwheel_update_tooltip (int value)
+{
+	_modwheel_tooltip->set_tip (string_compose (_("Modulation: %1"), value));
+}
 
 void
 VirtualKeyboardWindow::note_on_event_handler (int note, int velocity)
@@ -656,19 +698,25 @@ VirtualKeyboardWindow::note_off_event_handler (int note)
 }
 
 void
-VirtualKeyboardWindow::control_change_event_handler (int key, int val)
+VirtualKeyboardWindow::control_change_knob_event_handler (int key, int val)
+{
+	assert (key >= 0 && key < VKBD_NCTRLS);
+	int ctrl = PBD::atoi (_cc_key[key].get_text ());
+	assert (ctrl > 0 && ctrl < 127);
+	control_change_event_handler (ctrl, val);
+}
+
+void
+VirtualKeyboardWindow::control_change_event_handler (int ctrl, int val)
 {
 	if (!_session) {
 		return;
 	}
-	assert (key >= 0 && key < VKBD_NCTRLS);
-	int ctrl = PBD::atoi (_cc_key[key].get_text ());
-	assert (ctrl > 0 && ctrl < 127);
 	uint8_t channel = PBD::atoi (_midi_channel.get_text ()) - 1;
 	uint8_t ev[3];
 	ev[0] = MIDI_CMD_CONTROL | channel;
-	ev[1] = ctrl;
-	ev[2] = val;
+	ev[1] = ctrl & 0x7f;
+	ev[2] = val & 0x7f;
 	_session->vkbd_output_port ()->write (ev, 3, 0);
 }
 
