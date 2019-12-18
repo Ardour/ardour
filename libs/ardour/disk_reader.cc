@@ -1662,11 +1662,16 @@ DiskReader::reload_loop ()
 		return;
 	}
 
+	boost::shared_ptr<ChannelList> c = channels.reader();
+
+	if (c->empty() || !_playlists[DataType::MIDI]) {
+		return;
+	}
+
 	Location* loc = _loop_location;
 	boost::scoped_array<Sample> mix_buf (new Sample [loop_fade_length]);
 	boost::scoped_array<Sample> gain_buf (new Sample [loop_fade_length]);
 
-	boost::shared_ptr<ChannelList> c = channels.reader();
 	uint32_t channel = 0;
 
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan, ++channel) {
