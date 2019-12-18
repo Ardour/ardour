@@ -57,7 +57,6 @@ private:
 	void on_apply ();
 	void on_cancel ();
 	bool on_delete_event (GdkEventAny*);
-	void discover_plugins ();
 
 	Glib::RefPtr<Gdk::Pixbuf> icon_pixbuf;
 
@@ -98,7 +97,6 @@ private:
 	/* final page */
 
 	void setup_final_page ();
-	Gtk::Button plugin_disco_button;
 
 	/* always there */
 

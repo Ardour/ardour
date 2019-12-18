@@ -60,7 +60,6 @@
 #include "opts.h"
 #include "ui_config.h"
 #include "pbd/i18n.h"
-#include "plugin_scan_dialog.h"
 #include "utils.h"
 
 using namespace std;
@@ -419,34 +418,18 @@ NewUserWizard::setup_final_page ()
 {
 	string msg = string_compose (_("%1 is ready for use"), PROGRAM_NAME);
 
-	plugin_disco_button.signal_clicked().connect (sigc::mem_fun(*this, &NewUserWizard::discover_plugins));
-	plugin_disco_button.set_label (_("Scan for Plugins"));
-	plugin_disco_button.show ();
-
 	Gtk::Label* final_label = manage (new Label);
 	final_label->set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", msg));
 	final_label->show ();
 
 	VBox* vbox = manage (new VBox);
 	vbox->pack_start (*final_label, true, true);
-	/* Mixbus sets this parameter to true by default, Ardour sets it to false */
-	if (!Config->get_discover_vst_on_start()) {
-		vbox->pack_start (plugin_disco_button, true, false);
-	}
 	vbox->show ();
 
 	final_page_index = append_page (*vbox);
 	set_page_complete (*vbox, true);
 	set_page_header_image (*vbox, icon_pixbuf);
 	set_page_type (*vbox, ASSISTANT_PAGE_CONFIRM);
-}
-
-void
-NewUserWizard::discover_plugins ()
-{
-	plugin_disco_button.set_sensitive (false);
-	PluginScanDialog psd (false, true);
-	psd.start ();
 }
 
 void
