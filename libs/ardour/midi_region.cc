@@ -528,7 +528,7 @@ MidiRegion::render (Evoral::EventSink<samplepos_t>& dst,
 	     << " start_beat = " << _start_beats
 	     << " a1 " << _position - _start
 	     << " a2 " << _start + internal_offset
-	     << " a3 " << _start + internal_offset + _length
+	     << " a3 " << _length
 	     << endl;
 #endif
 
