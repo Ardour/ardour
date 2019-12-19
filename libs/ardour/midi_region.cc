@@ -519,16 +519,16 @@ MidiRegion::render (Evoral::EventSink<samplepos_t>& dst,
 
 	src->set_note_mode(lm, mode);
 
-#if 0
-	cerr << "MR " << name () << " read @ " << position << " + " << to_read
-	     << " dur was " << dur
-	     << " len " << _length
-	     << " l-io " << (_length - internal_offset)
+#if 1
+	cerr << "MR " << name () << " render "
 	     << " _position = " << _position
 	     << " _start = " << _start
 	     << " intoffset = " << internal_offset
 	     << " quarter_note = " << quarter_note()
 	     << " start_beat = " << _start_beats
+	     << " a1 " << _position - _start
+	     << " a2 " << _start + internal_offset
+	     << " a3 " << _start + internal_offset + _length
 	     << endl;
 #endif
 
