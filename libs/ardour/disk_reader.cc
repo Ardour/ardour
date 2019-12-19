@@ -309,7 +309,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		disk_samples_to_consume = nframes;
 	}
 
-	if (c->empty()) {
+	if (c->empty() || !_playlists[DataType::AUDIO]) {
 		/* do nothing with audio */
 		goto midi;
 	}
