@@ -542,7 +542,7 @@ MidiRegion::render (Evoral::EventSink<samplepos_t>& dst,
 		dst, // destination buffer
 		_position - _start, // start position of the source in session samples
 		_start + internal_offset, // where to start reading in the source
-		_start + internal_offset + _length,
+		_length, // length to read
 		0,
 		cursor,
 		&tracker,
