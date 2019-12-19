@@ -146,6 +146,8 @@ public:
 
 	const DeviceNamesByMaker& devices_by_manufacturer() const { return _devices_by_manufacturer; }
 
+	void load_midnams_in_thread ();
+
 private:
 	bool load_midi_name_document(const std::string& file_path);
 	bool add_midi_name_document(boost::shared_ptr<MIDINameDocument>);
@@ -161,6 +163,11 @@ private:
 	MIDINameDocument::MasterDeviceNamesList _master_devices_by_model;
 	DeviceNamesByMaker                      _devices_by_manufacturer;
 	MasterDeviceNames::Models               _all_models;
+
+	bool no_patch_changed_messages;
+	pthread_t _midnam_load_thread;
+	static void* _midnam_load (void *);
+	void load_midnams ();
 };
 
 } // namespace Name
@@ -168,3 +175,4 @@ private:
 } // namespace MIDI
 
 #endif /* MIDI_PATCH_MANAGER_H_ */
+

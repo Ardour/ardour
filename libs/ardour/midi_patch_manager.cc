@@ -24,8 +24,10 @@
 
 #include <glibmm/fileutils.h>
 
-#include "pbd/file_utils.h"
 #include "pbd/error.h"
+#include "pbd/file_utils.h"
+#include "pbd/pthread_utils.h"
+#include "pbd/unwind.h"
 
 #include "ardour/midi_patch_manager.h"
 
@@ -42,8 +44,9 @@ using namespace PBD;
 MidiPatchManager* MidiPatchManager::_manager = 0;
 
 MidiPatchManager::MidiPatchManager ()
+	: no_patch_changed_messages (false)
 {
-	add_search_path(midi_patch_search_path ());
+	add_search_path (midi_patch_search_path ());
 }
 
 void
@@ -63,8 +66,6 @@ MidiPatchManager::add_search_path (const Searchpath& search_path)
 		if (!Glib::file_test (*i, Glib::FILE_TEST_IS_DIR)) {
 			continue;
 		}
-
-		add_midnam_files_from_directory (*i);
 
 		_search_path.add_directory (*i);
 	}
@@ -112,10 +113,7 @@ MidiPatchManager::add_midnam_files_from_directory(const std::string& directory_p
 	vector<std::string> result;
 	find_files_matching_pattern (result, directory_path, "*.midnam");
 
-	info << string_compose(
-			P_("Loading %1 MIDI patch from %2", "Loading %1 MIDI patches from %2", result.size()),
-			result.size(), directory_path)
-	     << endmsg;
+	info << string_compose (P_("Loading %1 MIDI patch from %2", "Loading %1 MIDI patches from %2", result.size()), result.size(), directory_path) << endmsg;
 
 	for (vector<std::string>::const_iterator i = result.begin(); i != result.end(); ++i) {
 		load_midi_name_document (*i);
@@ -212,9 +210,10 @@ MidiPatchManager::add_midi_name_document (boost::shared_ptr<MIDINameDocument> do
 		assert(_master_devices_by_model.count(device->first) == 1);
 	}
 
-	if (added) {
+	if (added && !no_patch_changed_messages) {
 		PatchesChanged(); /* EMIT SIGNAL */
 	}
+
 	return added;
 }
 
@@ -253,4 +252,31 @@ MidiPatchManager::remove_midi_name_document (const std::string& file_path, bool 
 		PatchesChanged(); /* EMIT SIGNAL */
 	}
 	return removed;
+}
+
+void*
+MidiPatchManager::_midnam_load (void* arg)
+{
+	MidiPatchManager* mpm = (MidiPatchManager *) arg;
+	mpm->load_midnams ();
+	return 0;
+}
+
+void
+MidiPatchManager::load_midnams ()
+{
+	{
+		PBD::Unwinder<bool> npc (no_patch_changed_messages, true);
+		for (Searchpath::const_iterator i = _search_path.begin(); i != _search_path.end(); ++i) {
+			add_midnam_files_from_directory (*i);
+		}
+	}
+
+	PatchesChanged (); /* EMIT SIGNAL */
+}
+
+void
+MidiPatchManager::load_midnams_in_thread ()
+{
+	pthread_create_and_store (X_("midnam"), &_midnam_load_thread, _midnam_load, this);
 }

@@ -397,9 +397,8 @@ Session::post_engine_init ()
 
 	ltc_tx_initialize();
 
-	BootMessage (_("Loading MIDNAM Patch files"));
-
 	MIDI::Name::MidiPatchManager::instance().add_search_path (session_directory().midi_patch_path() );
+	MIDI::Name::MidiPatchManager::instance().load_midnams_in_thread ();
 	/* initial program change will be delivered later; see ::config_changed() */
 
 	_state_of_the_state = Clean;
