@@ -233,7 +233,7 @@ public:
 
 	template<typename Number>
 	Beats operator*(Number factor) const {
-		return Beats(_beats * factor, _ticks * factor);
+		return ticks ((_beats * PPQN + _ticks) * factor);
 	}
 
 	template<typename Number>
