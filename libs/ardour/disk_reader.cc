@@ -1664,7 +1664,7 @@ DiskReader::reload_loop ()
 
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
-	if (c->empty() || !_playlists[DataType::MIDI]) {
+	if (c->empty() || !_playlists[DataType::AUDIO]) {
 		return;
 	}
 
