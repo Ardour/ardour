@@ -135,7 +135,7 @@ MidiStretch::run (boost::shared_ptr<Region> r, Progress*)
 		}
 
 #ifdef DEBUG_MIDI_STRETCH
-		cout << "STRETCH " << i->time() << " TO " << (i->time() - r_start) * mtfrac << "\n";
+		cout << "STRETCH " << i->time() << " OFFSET FROM START @ " << r_start << " = " << (i->time() - r_start) << " TO " << (i->time() - r_start) * mtfrac << "\n";
 #endif
 
 		const MidiModel::TimeType new_time = (i->time() - r_start) * mtfrac;
