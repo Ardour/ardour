@@ -45,6 +45,7 @@ UI_CONFIG_VARIABLE (bool, new_automation_points_on_lane, "new-automation-points-
 UI_CONFIG_VARIABLE (std::string, keyboard_layout, "keyboard-layout", "ansi")
 UI_CONFIG_VARIABLE (std::string, keyboard_layout_name, "keyboard-layout-name", "ansi")
 UI_CONFIG_VARIABLE (std::string, default_bindings, "default-bindings", "ardour")
+UI_CONFIG_VARIABLE (std::string, vkeybd_layout, "vkeybd-layout", "QWERTY Single")
 UI_CONFIG_VARIABLE (bool, only_copy_imported_files, "only-copy-imported-files", false)
 UI_CONFIG_VARIABLE (bool, autoplay_files, "autoplay-files", false)
 UI_CONFIG_VARIABLE (bool, default_narrow_ms, "default-narrow_ms", false)

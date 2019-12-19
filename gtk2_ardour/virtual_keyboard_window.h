@@ -100,6 +100,8 @@ private:
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
 
+	void parameter_changed (std::string const&);
+
 	void note_on_event_handler (int, int);
 	void note_off_event_handler (int);
 	void control_change_event_handler (int, int);
@@ -118,41 +120,20 @@ private:
 	void pitch_slider_adjusted ();
 
 	void select_keyboard_layout (std::string const&);
-	void update_velocity_settings (int);
+	void update_velocity_settings ();
 	void update_octave_key ();
 	void update_octave_range ();
-	void bank_patch ();
-	void update_sensitivity ();
 	void cc_key_changed (size_t);
 	void update_cc (size_t, int);
-	bool toggle_config (GdkEventButton*);
-	bool toggle_bankpatch (GdkEventButton*);
-	bool toggle_yaxis_velocity (GdkEventButton*);
 	bool send_panic_message (GdkEventButton*);
 
 	APianoKeyboard  _piano;
 
 	ArdourWidgets::ArdourDropdown  _midi_channel;
 	ArdourWidgets::ArdourDropdown  _transpose_output;
-
-	Gtk::SpinButton _bank_msb;
-	Gtk::SpinButton _bank_lsb;
-	Gtk::SpinButton _patchpgm;
-
-	Gtk::HBox* _cfg_box;
-	Gtk::HBox* _pgm_box;
-
-	ArdourWidgets::ArdourButton   _cfg_display;
-	ArdourWidgets::ArdourButton   _pgm_display;
-	ArdourWidgets::ArdourButton   _yaxis_velocity;
-	ArdourWidgets::ArdourButton   _send_panic;
-	ArdourWidgets::ArdourDropdown _keyboard_layout;
-	ArdourWidgets::ArdourDropdown _keyboard_annotations;
+	ArdourWidgets::ArdourButton    _send_panic;
 
 	Gtk::SpinButton _piano_key_velocity;
-	Gtk::SpinButton _piano_min_velocity;
-	Gtk::SpinButton _piano_max_velocity;
-
 	Gtk::SpinButton _piano_octave_key;
 	Gtk::SpinButton _piano_octave_range;
 

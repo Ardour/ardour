@@ -2586,6 +2586,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor/Modifiers"), new KeyboardOptions);
 	add_option (_("Editor/Modifiers"), new OptionEditorBlank ());
 
+
 	/* MIXER -- SOLO AND MUTE */
 
 	add_option (_("Mixer"), new OptionEditorHeading (_("Solo")));
@@ -2900,6 +2901,26 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_sound_midi_notes),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_sound_midi_notes)
 		     ));
+
+	add_option (_("MIDI"), new OptionEditorHeading (_("Virtual Keyboard")));
+
+	ComboOption<std::string>* vkeybdlayout = new ComboOption<std::string> (
+		"vkeybd-layout",
+		_("Virtual Keyboard Layout"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_vkeybd_layout),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_vkeybd_layout)
+		);
+
+	vkeybdlayout->add ("QWERTY", _("QWERTY"));
+	vkeybdlayout->add ("QWERTZ", _("QWERTZ"));
+	vkeybdlayout->add ("AZERTY", _("AZERTY"));
+	vkeybdlayout->add ("AZERTY", _("AZERTY"));
+	vkeybdlayout->add ("DVORAK", _("DVORAK"));
+	vkeybdlayout->add ("QWERTY Single", _("QWERTY Single"));
+	vkeybdlayout->add ("QWERTZ Single", _("QWERTZ Single"));
+
+	add_option (_("MIDI"), vkeybdlayout);
+
 
 	/* Click */
 
