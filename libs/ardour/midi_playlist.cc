@@ -339,45 +339,50 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 	/* RAII */
 	RTMidiBuffer::WriteProtectRender wpr (_rendered);
 
-	if (regs.size() == 1) {
-		tgt = &_rendered;
+	if (regs.empty()) {
 		wpr.acquire ();
 		_rendered.clear ();
 	} else {
-		tgt = &evlist;
-	}
 
-	DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1 regions to read, direct: %2\n", regs.size(), (regs.size() == 1)));
-
-	for (vector<boost::shared_ptr<Region> >::iterator i = regs.begin(); i != regs.end(); ++i) {
-
-		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(*i);
-
-		if (!mr) {
-			continue;
+		if (regs.size() == 1) {
+			tgt = &_rendered;
+			wpr.acquire ();
+			_rendered.clear ();
+		} else {
+			tgt = &evlist;
 		}
 
-		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("render from %1\n", mr->name()));
-		mr->render (*tgt, 0, _note_mode, filter);
-	}
+		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1 regions to read, direct: %2\n", regs.size(), (regs.size() == 1)));
 
-	if (!evlist.empty()) {
-		/* We've read from multiple regions into evlist, sort the event list by time. */
-		EventsSortByTimeAndType<samplepos_t> cmp;
-		evlist.sort (cmp);
+		for (vector<boost::shared_ptr<Region> >::iterator i = regs.begin(); i != regs.end(); ++i) {
 
-		/* Copy ordered events from event list to _rendered. */
+			boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(*i);
 
-		wpr.acquire ();
-		_rendered.clear ();
+			if (!mr) {
+				continue;
+			}
 
-		for (Evoral::EventList<samplepos_t>::iterator e = evlist.begin(); e != evlist.end(); ++e) {
-			Evoral::Event<samplepos_t>* ev (*e);
-			_rendered.write (ev->time(), ev->event_type(), ev->size(), ev->buffer());
-			delete ev;
+			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("render from %1\n", mr->name()));
+			mr->render (*tgt, 0, _note_mode, filter);
+		}
+
+		if (!evlist.empty()) {
+			/* We've read from multiple regions into evlist, sort the event list by time. */
+			EventsSortByTimeAndType<samplepos_t> cmp;
+			evlist.sort (cmp);
+
+			/* Copy ordered events from event list to _rendered. */
+
+			wpr.acquire ();
+			_rendered.clear ();
+
+			for (Evoral::EventList<samplepos_t>::iterator e = evlist.begin(); e != evlist.end(); ++e) {
+				Evoral::Event<samplepos_t>* ev (*e);
+				_rendered.write (ev->time(), ev->event_type(), ev->size(), ev->buffer());
+				delete ev;
+			}
 		}
 	}
-
 
 	/* no need to release - RAII with WriteProtectRender takes care of it */
 
