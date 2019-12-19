@@ -91,6 +91,10 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_modwheel_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::modwheel_slider_adjusted));
 	_modwheel->ValueChanged.connect_same_thread (_cc_connections, boost::bind (&VirtualKeyboardWindow::control_change_event_handler, this, 1, _1));
 
+	_piano_key_velocity.set_numeric (true);
+	_piano_octave_key.set_numeric (true);
+	_piano_octave_range.set_numeric (true);
+
 	set_tooltip (_piano_octave_key, _("The center octave, and lowest octave for keyboard control. Change with Arrow left/right."));
 	set_tooltip (_piano_octave_range, _("Available octave range, centered around the key-octave."));
 	set_tooltip (_piano_key_velocity, _("The default velocity to use with keyboard control, and when y-axis click-position is disabled."));
