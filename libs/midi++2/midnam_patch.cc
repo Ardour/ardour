@@ -118,7 +118,7 @@ int
 Patch::set_state (const XMLTree& tree, const XMLNode& node)
 {
 	if (node.name() != "Patch") {
-		cerr << "Incorrect node type '" << node.name() << "' handed to Patch" << endl;
+		cerr << "Incorrect node type '" << node.name() << "' handed to Patch" << " contents " << node.content() << endl;
 		return -1;
 	}
 
@@ -843,13 +843,17 @@ MasterDeviceNames::set_state(const XMLTree& tree, const XMLNode&)
 	     i != patch_name_lists->end();
 	     ++i) {
 
+		string n; (*i)->get_property ("Name", n);
+
 		PatchNameList patch_name_list;
 		const XMLNodeList patches = (*i)->children();
 
 		for (XMLNodeList::const_iterator p = patches.begin(); p != patches.end(); ++p) {
 			boost::shared_ptr<Patch> patch (new Patch ());
-			patch->set_state(tree, *(*p));
-			patch_name_list.push_back(patch);
+			// cerr << "Let's try: "; (*(*p)).dump (cerr); cerr << endl;
+			if (0 == patch->set_state(tree, *(*p))) {
+				patch_name_list.push_back(patch);
+			}
 		}
 
 		if (!patch_name_list.empty()) {
@@ -1097,4 +1101,3 @@ const char* general_midi_program_names[128] = {
 } //namespace Name
 
 } //namespace MIDI
-
