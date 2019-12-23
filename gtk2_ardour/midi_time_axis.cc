@@ -274,12 +274,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_midi_controls_box.set_homogeneous(false);
 	_midi_controls_box.set_border_width (2);
 
-	MIDI::Name::MidiPatchManager::instance().PatchesChanged.connect (*this, invalidator (*this),
-			boost::bind (&MidiTimeAxisView::setup_midnam_patches, this),
-			gui_context());
-
-	setup_midnam_patches ();
-	update_patch_selector ();
+	MIDI::Name::MidiPatchManager::instance().maybe_use (*this, invalidator (*this), boost::bind (&MidiTimeAxisView::use_midnam_info, this), gui_context());
 
 	model_changed (gui_property(X_("midnam-model-name")));
 	custom_device_mode_changed (gui_property(X_("midnam-custom-device-mode")));
@@ -357,6 +352,15 @@ MidiTimeAxisView::check_step_edit ()
 {
 	ensure_step_editor ();
 	_step_editor->check_step_edit ();
+}
+
+
+void
+MidiTimeAxisView::use_midnam_info ()
+{
+	std::cerr << "Using MIDNAM info from " << pthread_name() << endl;
+	setup_midnam_patches ();
+	update_patch_selector ();
 }
 
 void

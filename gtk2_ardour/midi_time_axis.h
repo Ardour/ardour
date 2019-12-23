@@ -112,6 +112,7 @@ public:
 	uint8_t get_channel_for_add () const;
 
 	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&);
+	void use_midnam_info ();
 
 protected:
 	void start_step_editing ();
