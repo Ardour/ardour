@@ -265,13 +265,20 @@ MidiPatchManager::_midnam_load (void* arg)
 void
 MidiPatchManager::load_midnams ()
 {
+	/* really there's only going to be one x-thread request/signal before
+	   this thread exits but we'll say 8 just to be sure.
+	*/
+
+	PBD::notify_event_loops_about_thread_creation (pthread_self(), "midi-patch-manager", 8);
+
 	{
+		Glib::Threads::Mutex::Lock lm (_lock);
 		PBD::Unwinder<bool> npc (no_patch_changed_messages, true);
 		for (Searchpath::const_iterator i = _search_path.begin(); i != _search_path.end(); ++i) {
 			add_midnam_files_from_directory (*i);
 		}
 	}
-
+	
 	PatchesChanged (); /* EMIT SIGNAL */
 }
 
@@ -279,4 +286,24 @@ void
 MidiPatchManager::load_midnams_in_thread ()
 {
 	pthread_create_and_store (X_("midnam"), &_midnam_load_thread, _midnam_load, this);
+}
+
+void
+MidiPatchManager::maybe_use (PBD::ScopedConnectionList& cl,
+                             PBD::EventLoop::InvalidationRecord* ir,
+                             const boost::function<void()> & midnam_info_method,
+                             PBD::EventLoop* event_loop)
+{
+	{
+		Glib::Threads::Mutex::Lock lm (_lock);
+
+		if (!_documents.empty()) {
+			/* already have documents loaded, so call closure to use them */
+			midnam_info_method ();
+		}
+
+		/* if/when they ever change, call the closure (maybe multiple times) */
+
+		PatchesChanged.connect (cl, ir, midnam_info_method, event_loop);
+	}
 }
