@@ -44,9 +44,6 @@ using namespace ArdourWidgets;
 VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	: ArdourWindow (_("Virtual MIDI Keyboard"))
 	, _send_panic (_("Panic"), ArdourButton::default_elements)
-	, _piano_key_velocity (*manage (new Adjustment (100, 1, 127, 1, 16)))
-	, _piano_octave_key (*manage (new Adjustment (4, -1, 7, 1, 1)))
-	, _piano_octave_range (*manage (new Adjustment (7, 2, 11, 1, 1)))
 	, _pitch_adjustment (8192, 0, 16383, 1, 256)
 	, _modwheel_adjustment (0, 0, 127, 1, 8)
 {
@@ -65,6 +62,21 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 		sprintf (buf, "%d", c + 1);
 		_midi_channel.append_text_item (buf);
 	}
+	for (int v = 1; v < 128; ++v) {
+		char buf[16];
+		sprintf (buf, "%d", v);
+		_piano_velocity.append_text_item (buf);
+	}
+	for (int k = -1; k < 8; ++k) {
+		char buf[16];
+		sprintf (buf, "%d", k);
+		_piano_octave_key.append_text_item (buf);
+	}
+	for (int r = 2; r < 12; ++r) {
+		char buf[16];
+		sprintf (buf, "%d", r);
+		_piano_octave_range.append_text_item (buf);
+	}
 	for (int t = -12; t < 13; ++t) {
 		char buf[16];
 		sprintf (buf, "%d", t);
@@ -72,9 +84,10 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	}
 
 	_midi_channel.set_active ("1");
+	_piano_velocity.set_active ("100");
+	_piano_octave_key.set_active ("4");
+	_piano_octave_range.set_active ("7");
 	_transpose_output.set_active ("0");
-
-	_send_panic.set_can_focus (false);
 
 	_pitchbend            = boost::shared_ptr<VKBDControl> (new VKBDControl ("PB", 8192, 16383));
 	_pitch_slider         = manage (new VSliderController (&_pitch_adjustment, _pitchbend, 0, PX_SCALE (15)));
@@ -84,27 +97,24 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_modwheel_slider  = manage (new VSliderController (&_modwheel_adjustment, _modwheel, 0, PX_SCALE (15)));
 	_modwheel_tooltip = new Gtkmm2ext::PersistentTooltip (_modwheel_slider);
 
-	_pitch_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::pitch_slider_adjusted));
-	_pitchbend->ValueChanged.connect_same_thread (_cc_connections, boost::bind (&VirtualKeyboardWindow::pitch_bend_event_handler, this, _1));
-	_pitch_slider->StopGesture.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::pitch_bend_release));
-
-	_modwheel_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::modwheel_slider_adjusted));
-	_modwheel->ValueChanged.connect_same_thread (_cc_connections, boost::bind (&VirtualKeyboardWindow::control_change_event_handler, this, 1, _1));
-
-	_piano_key_velocity.set_numeric (true);
-	_piano_octave_key.set_numeric (true);
-	_piano_octave_range.set_numeric (true);
-
+	/* tooltips */
+	set_tooltip (_midi_channel, _("Set the MIDI Channel of the produced MIDI events"));
 	set_tooltip (_piano_octave_key, _("The center octave, and lowest octave for keyboard control. Change with Arrow left/right."));
 	set_tooltip (_piano_octave_range, _("Available octave range, centered around the key-octave."));
-	set_tooltip (_piano_key_velocity, _("The default velocity to use with keyboard control, and when y-axis click-position is disabled."));
+	set_tooltip (_piano_velocity, _("The default velocity to use with keyboard control, and when y-axis click-position is disabled."));
+	set_tooltip (_transpose_output, _("Chromatic transpose note events. Notes transposed outside the range of 0,,127 are discarded."));
 
 	set_tooltip (_send_panic, _("Send MIDI Panic message for current channel"));
 
+	modwheel_update_tooltip (0);
 	pitch_bend_update_tooltip (8192);
+
+	/* prevent focus grab, let MIDI keyboard to handle key events */
+	_send_panic.set_can_focus (false);
+	_modwheel_slider->set_can_focus (false);
 	_pitch_slider->set_can_focus (false);
 
-	/* settings */
+	/* layout */
 	Table* tbl = manage (new Table);
 	tbl->attach (_midi_channel, 0, 1, 0, 1, SHRINK, SHRINK, 4, 0);
 	tbl->attach (*manage (new Label (_("Channel"))), 0, 1, 1, 2, SHRINK, SHRINK, 4, 0);
@@ -151,7 +161,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 
 	tbl->attach (*manage (new ArdourVSpacer),     col, col + 1, 0, 2, SHRINK, FILL, 4, 0);
 	++col;
-	tbl->attach (_piano_key_velocity,             col, col + 1, 0, 1, SHRINK, SHRINK, 4, 0);
+	tbl->attach (_piano_velocity,                 col, col + 1, 0, 1, SHRINK, SHRINK, 4, 0);
 	tbl->attach (*manage (new Label (_("Vel."))), col, col + 1, 1, 2, SHRINK, SHRINK, 4, 0);
 	++col;
 
@@ -171,18 +181,29 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	vbox->pack_start (_piano, true, true);
 	add (*vbox);
 
-	_piano_key_velocity.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::update_velocity_settings));
+	/* GUI signals */
 
-	_piano_octave_key.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::update_octave_key));
-	_piano_octave_range.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::update_octave_range));
+	_pitch_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::pitch_slider_adjusted));
+	_pitchbend->ValueChanged.connect_same_thread (_cc_connections, boost::bind (&VirtualKeyboardWindow::pitch_bend_event_handler, this, _1));
+	_pitch_slider->StopGesture.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::pitch_bend_release));
+
+	_modwheel_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::modwheel_slider_adjusted));
+	_modwheel->ValueChanged.connect_same_thread (_cc_connections, boost::bind (&VirtualKeyboardWindow::control_change_event_handler, this, 1, _1));
+
+	_piano_velocity.StateChanged.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::update_velocity_settings));
+	_piano_octave_key.StateChanged.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::update_octave_key));
+	_piano_octave_range.StateChanged.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::update_octave_range));
 
 	_send_panic.signal_button_release_event ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::send_panic_message), false);
 
+	/* piano keyboard signals */
 
 	_piano.NoteOn.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::note_on_event_handler));
 	_piano.NoteOff.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::note_off_event_handler));
 	_piano.SwitchOctave.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::octave_key_event_handler));
 	_piano.PitchBend.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::pitch_bend_key_event_handler));
+
+	/* initialize GUI */
 
 	update_velocity_settings ();
 	update_octave_range ();
@@ -224,9 +245,9 @@ VirtualKeyboardWindow::get_state ()
 	XMLNode* node = new XMLNode (X_("VirtualKeyboard"));
 	node->set_property (X_("Channel"), _midi_channel.get_text ());
 	node->set_property (X_("Transpose"), _transpose_output.get_text ());
-	node->set_property (X_("KeyVelocity"), _piano_key_velocity.get_value_as_int ());
-	node->set_property (X_("Octave"), _piano_octave_key.get_value_as_int ());
-	node->set_property (X_("Range"), _piano_octave_range.get_value_as_int ());
+	node->set_property (X_("KeyVelocity"), _piano_velocity.get_text ());
+	node->set_property (X_("Octave"), _piano_octave_key.get_text ());
+	node->set_property (X_("Range"), _piano_octave_range.get_text ());
 	for (int i = 0; i < VKBD_NCTRLS; ++i) {
 		char buf[16];
 		sprintf (buf, "CC-%d", i);
@@ -253,7 +274,6 @@ VirtualKeyboardWindow::set_state (const XMLNode& root)
 		}
 	}
 
-	int v;
 	std::string s;
 	if (node->get_property (X_("Channel"), s)) {
 		uint8_t channel = PBD::atoi (_midi_channel.get_text ());
@@ -264,14 +284,14 @@ VirtualKeyboardWindow::set_state (const XMLNode& root)
 	if (node->get_property (X_("Transpose"), s)) {
 		_transpose_output.set_active (s);
 	}
-	if (node->get_property (X_("KeyVelocity"), v)) {
-		_piano_key_velocity.set_value (v);
+	if (node->get_property (X_("KeyVelocity"), s)) {
+		_piano_velocity.set_active (s);
 	}
-	if (node->get_property (X_("Octave"), v)) {
-		_piano_octave_key.set_value (v);
+	if (node->get_property (X_("Octave"), s)) {
+		_piano_octave_key.set_active (s);
 	}
-	if (node->get_property (X_("Range"), v)) {
-		_piano_octave_range.set_value (v);
+	if (node->get_property (X_("Range"), s)) {
+		_piano_octave_range.set_active (s);
 	}
 
 	update_velocity_settings ();
@@ -345,15 +365,15 @@ VirtualKeyboardWindow::select_keyboard_layout (std::string const& l)
 void
 VirtualKeyboardWindow::update_octave_key ()
 {
-	_piano.set_octave (_piano_octave_key.get_value_as_int ());
+	_piano.set_octave (PBD::atoi (_piano_octave_key.get_text ()));
 	_piano.grab_focus ();
 }
 
 void
 VirtualKeyboardWindow::update_octave_range ()
 {
-	_piano.set_octave_range (_piano_octave_range.get_value_as_int ());
-	_piano.set_grand_piano_highlight (_piano_octave_range.get_value_as_int () > 3);
+	_piano.set_octave_range (PBD::atoi (_piano_octave_range.get_text ()));
+	_piano.set_grand_piano_highlight (PBD::atoi (_piano_octave_range.get_text ()) > 3);
 	_piano.grab_focus ();
 }
 
@@ -376,9 +396,8 @@ VirtualKeyboardWindow::send_panic_message (GdkEventButton*)
 void
 VirtualKeyboardWindow::update_velocity_settings ()
 {
-	_piano.set_velocities (_piano_key_velocity.get_value_as_int (),
-	                       _piano_key_velocity.get_value_as_int (),
-	                       _piano_key_velocity.get_value_as_int ());
+	int v = PBD::atoi (_piano_velocity.get_text ());
+	_piano.set_velocities (v, v, v);
 }
 
 void
@@ -405,11 +424,11 @@ VirtualKeyboardWindow::update_cc (size_t i, int cc)
 void
 VirtualKeyboardWindow::octave_key_event_handler (bool up)
 {
-	if (up) {
-		_piano_octave_key.set_value (_piano_octave_key.get_value_as_int () + 1);
-	} else {
-		_piano_octave_key.set_value (_piano_octave_key.get_value_as_int () - 1);
-	}
+	int k = PBD::atoi (_piano_octave_key.get_text ()) + (up ? 1 : -1);
+	k = std::min (7, std::max (-1, k));
+	char buf[16];
+	sprintf (buf, "%d", k);
+	_piano_octave_key.set_active (buf);
 }
 
 void

@@ -130,12 +130,11 @@ private:
 	APianoKeyboard  _piano;
 
 	ArdourWidgets::ArdourDropdown  _midi_channel;
+	ArdourWidgets::ArdourDropdown  _piano_velocity;
+	ArdourWidgets::ArdourDropdown  _piano_octave_key;
+	ArdourWidgets::ArdourDropdown  _piano_octave_range;
 	ArdourWidgets::ArdourDropdown  _transpose_output;
 	ArdourWidgets::ArdourButton    _send_panic;
-
-	Gtk::SpinButton _piano_key_velocity;
-	Gtk::SpinButton _piano_octave_key;
-	Gtk::SpinButton _piano_octave_range;
 
 	boost::shared_ptr<VKBDControl>    _pitchbend;
 	Gtk::Adjustment                   _pitch_adjustment;
