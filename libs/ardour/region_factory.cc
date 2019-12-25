@@ -94,7 +94,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, bo
 		/* pure copy constructor - no property list */
 		if (announce) {
 			map_add (ret);
-			CheckNewRegion (ret);
+			CheckNewRegion (ret); /* EMIT SIGNAL */
 		}
 	}
 
@@ -135,7 +135,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 
 		if (announce) {
 			map_add (ret);
-			CheckNewRegion (ret);
+			CheckNewRegion (ret); /* EMIT SIGNAL */
 		}
 	}
 
@@ -176,7 +176,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, MusicSample offset, con
 
 		if (announce) {
 			map_add (ret);
-			CheckNewRegion (ret);
+			CheckNewRegion (ret); /* EMIT SIGNAL */
 		}
 	}
 
@@ -217,7 +217,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 
 		if (announce) {
 			map_add (ret);
-			CheckNewRegion (ret);
+			CheckNewRegion (ret); /* EMIT SIGNAL */
 		}
 	}
 
@@ -261,7 +261,7 @@ RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool a
 
 		if (announce) {
 			map_add (ret);
-			CheckNewRegion (ret);
+			CheckNewRegion (ret); /* EMIT SIGNAL */
 		}
 	}
 
@@ -306,7 +306,7 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 			   description is coming from XML.
 			*/
 
-			CheckNewRegion (ret);
+			CheckNewRegion (ret); /* EMIT SIGNAL */
 		}
 	}
 
