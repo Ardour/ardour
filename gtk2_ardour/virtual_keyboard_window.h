@@ -126,6 +126,7 @@ private:
 	void cc_key_changed (size_t);
 	void update_cc (size_t, int);
 	bool send_panic_message (GdkEventButton*);
+	bool on_velocity_scroll_event (GdkEventScroll*);
 
 	APianoKeyboard  _piano;
 

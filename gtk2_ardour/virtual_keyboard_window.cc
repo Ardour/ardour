@@ -62,11 +62,22 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 		sprintf (buf, "%d", c + 1);
 		_midi_channel.append_text_item (buf);
 	}
-	for (int v = 1; v < 128; ++v) {
+
+#if 0
+	for (int v = 0; v <= 128; v += 16) {
 		char buf[16];
-		sprintf (buf, "%d", v);
+		sprintf (buf, "%d", std::min (127, std::max (1, v)));
 		_piano_velocity.append_text_item (buf);
 	}
+#else
+	_piano_velocity.append_text_item ("8");
+	_piano_velocity.append_text_item ("32");
+	_piano_velocity.append_text_item ("64");
+	_piano_velocity.append_text_item ("82");
+	_piano_velocity.append_text_item ("100");
+	_piano_velocity.append_text_item ("127");
+#endif
+
 	for (int k = -1; k < 8; ++k) {
 		char buf[16];
 		sprintf (buf, "%d", k);
@@ -101,7 +112,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	set_tooltip (_midi_channel, _("Set the MIDI Channel of the produced MIDI events"));
 	set_tooltip (_piano_octave_key, _("The center octave, and lowest octave for keyboard control. Change with Arrow left/right."));
 	set_tooltip (_piano_octave_range, _("Available octave range, centered around the key-octave."));
-	set_tooltip (_piano_velocity, _("The default velocity to use with keyboard control, and when y-axis click-position is disabled."));
+	set_tooltip (_piano_velocity, _("The velocity to use with keyboard control. Use mouse-scroll for fine-grained control"));
 	set_tooltip (_transpose_output, _("Chromatic transpose note events. Notes transposed outside the range of 0,,127 are discarded."));
 
 	set_tooltip (_send_panic, _("Send MIDI Panic message for current channel"));
@@ -161,8 +172,8 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 
 	tbl->attach (*manage (new ArdourVSpacer),     col, col + 1, 0, 2, SHRINK, FILL, 4, 0);
 	++col;
-	tbl->attach (_piano_velocity,                 col, col + 1, 0, 1, SHRINK, SHRINK, 4, 0);
-	tbl->attach (*manage (new Label (_("Vel."))), col, col + 1, 1, 2, SHRINK, SHRINK, 4, 0);
+	tbl->attach (_piano_velocity,                     col, col + 1, 0, 1, SHRINK, SHRINK, 4, 0);
+	tbl->attach (*manage (new Label (_("Velocity"))), col, col + 1, 1, 2, SHRINK, SHRINK, 4, 0);
 	++col;
 
 	tbl->attach (*manage (new ArdourVSpacer),          col, col + 1, 0, 2, SHRINK, FILL, 4, 0);
@@ -181,6 +192,10 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	vbox->pack_start (_piano, true, true);
 	add (*vbox);
 
+	set_size_request_to_display_given_text (_piano_octave_key,   "88", 19, 2);
+	set_size_request_to_display_given_text (_piano_octave_range, "88", 19, 2);
+	set_size_request_to_display_given_text (_piano_velocity,    "888", 19, 2);
+
 	/* GUI signals */
 
 	_pitch_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::pitch_slider_adjusted));
@@ -195,6 +210,9 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_piano_octave_range.StateChanged.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::update_octave_range));
 
 	_send_panic.signal_button_release_event ().connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::send_panic_message), false);
+
+	_piano_velocity.disable_scrolling ();
+	_piano_velocity.signal_scroll_event().connect (sigc::mem_fun(*this, &VirtualKeyboardWindow::on_velocity_scroll_event), false);
 
 	/* piano keyboard signals */
 
@@ -391,6 +409,26 @@ VirtualKeyboardWindow::send_panic_message (GdkEventButton*)
 	ev[1] = MIDI_CTL_RESET_CONTROLLERS;
 	_session->vkbd_output_port ()->write (ev, 3, 0);
 	return false;
+}
+
+bool
+VirtualKeyboardWindow::on_velocity_scroll_event (GdkEventScroll* ev)
+{
+	int v = PBD::atoi (_piano_velocity.get_text ());
+	switch (ev->direction) {
+		case GDK_SCROLL_DOWN:
+			v = std::min (127, v + 1);
+			break;
+		case GDK_SCROLL_UP:
+			v = std::max (1, v - 1);
+			break;
+		default:
+			return false;
+	}
+	char buf[16];
+	sprintf (buf, "%d", v);
+	_piano_velocity.set_active (buf);
+	return true;
 }
 
 void
