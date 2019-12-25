@@ -120,6 +120,7 @@ private:
 
 	void add_source (boost::shared_ptr<ARDOUR::Region>);
 	void remove_source (boost::shared_ptr<ARDOUR::Source>);
+	void remove_weak_source (boost::weak_ptr<ARDOUR::Source>);
 
 	void clock_format_changed ();
 

@@ -287,12 +287,21 @@ EditorSources::set_session (ARDOUR::Session* s)
 		
 		ARDOUR::RegionFactory::CheckNewRegion.connect (add_source_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::add_source, this, _1), gui_context());
 
-		s->SourceRemoved.connect (remove_source_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::remove_source, this, _1), gui_context());
+		s->SourceRemoved.connect (remove_source_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::remove_weak_source, this, _1), gui_context());
 
 		redisplay();
 
 	} else {
 		clear();
+	}
+}
+
+void
+EditorSources::remove_weak_source (boost::weak_ptr<ARDOUR::Source> src)
+{
+	boost::shared_ptr<ARDOUR::Source> source = src.lock();
+	if (source) {
+		remove_source (source);
 	}
 }
 
