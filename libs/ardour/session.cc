@@ -4242,11 +4242,11 @@ Session::find_whole_file_parent (boost::shared_ptr<Region const> child) const
 }
 
 int
-Session::destroy_sources (list<boost::shared_ptr<Source> > srcs)
+Session::destroy_sources (list<boost::shared_ptr<Source> > const& srcs)
 {
 	set<boost::shared_ptr<Region> > relevant_regions;
 
-	for (list<boost::shared_ptr<Source> >::iterator s = srcs.begin(); s != srcs.end(); ++s) {
+	for (list<boost::shared_ptr<Source> >::const_iterator s = srcs.begin(); s != srcs.end(); ++s) {
 		RegionFactory::get_regions_using_source (*s, relevant_regions);
 	}
 
@@ -4267,7 +4267,7 @@ Session::destroy_sources (list<boost::shared_ptr<Source> > srcs)
 		r = tmp;
 	}
 
-	for (list<boost::shared_ptr<Source> >::iterator s = srcs.begin(); s != srcs.end(); ) {
+	for (list<boost::shared_ptr<Source> >::const_iterator s = srcs.begin(); s != srcs.end(); ++s) {
 
 		{
 			Glib::Threads::Mutex::Lock ls (source_lock);
@@ -4278,8 +4278,6 @@ Session::destroy_sources (list<boost::shared_ptr<Source> > srcs)
 		(*s)->mark_for_remove ();
 		(*s)->drop_references ();
 		SourceRemoved(*s);
-
-		s = srcs.erase (s);
 	}
 
 	return 0;

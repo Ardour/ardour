@@ -805,7 +805,7 @@ public:
 	int  cleanup_sources (CleanupReport&);
 	int  cleanup_trash_sources (CleanupReport&);
 
-	int destroy_sources (std::list<boost::shared_ptr<Source> >);
+	int destroy_sources (std::list<boost::shared_ptr<Source> > const&);
 
 	int remove_last_capture ();
 	void get_last_capture_sources (std::list<boost::shared_ptr<Source> >&);
