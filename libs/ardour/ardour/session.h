@@ -1783,8 +1783,8 @@ private:
 public:
 
 	/* Emited when a new source is added to the session */
-	PBD::Signal1< void, boost::shared_ptr<Source> > SourceAdded;
-	PBD::Signal1< void, boost::shared_ptr<Source> > SourceRemoved;
+	PBD::Signal1< void, boost::weak_ptr<Source> > SourceAdded;
+	PBD::Signal1< void, boost::weak_ptr<Source> > SourceRemoved;
 
 	typedef std::map<PBD::ID,boost::shared_ptr<Source> > SourceMap;
 
