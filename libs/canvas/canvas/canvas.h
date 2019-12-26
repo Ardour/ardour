@@ -173,6 +173,11 @@ public:
 
 	virtual Glib::RefPtr<Pango::Context> get_pango_context() = 0;
 
+	/** Redirect drawing to an intermediate (image) surface.
+	 * see also https://www.cairographics.org/manual/cairo-cairo-t.html#cairo-push-group
+	 */
+	void use_intermediate_surface (bool yn = true);
+
 protected:
 	Root             _root;
 	Gtkmm2ext::Color _bg_color;
@@ -187,7 +192,7 @@ protected:
 
 	std::list<ScrollGroup*> scrollers;
 
-	bool _use_image_surface;
+	bool _use_intermediate_surface;
 };
 
 /** A canvas which renders onto a GTK EventBox */
@@ -263,8 +268,6 @@ private:
 	void item_going_away (Item *, Rect);
 	void item_shown_or_hidden (Item *);
 	bool send_leave_event (Item const *, double, double) const;
-
-	Cairo::RefPtr<Cairo::Surface> canvas_image;
 
 	/** Item currently chosen for event delivery based on pointer position */
 	Item * _current_item;

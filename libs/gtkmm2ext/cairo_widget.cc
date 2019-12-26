@@ -58,9 +58,9 @@ CairoWidget::CairoWidget ()
 {
 	_name_proxy.connect (sigc::mem_fun (*this, &CairoWidget::on_name_changed));
 #ifdef USE_CAIRO_IMAGE_SURFACE
-	_use_image_surface = true;
+	_use_intermediate_surface = true;
 #else
-	_use_image_surface = NULL != getenv("ARDOUR_IMAGE_SURFACE");
+	_use_intermediate_surface = NULL != getenv("ARDOUR_IMAGE_SURFACE");
 #endif
 }
 
@@ -82,8 +82,7 @@ CairoWidget::set_canvas_widget ()
 	ensure_style ();
 	gtk_widget_set_realized (GTK_WIDGET(gobj()), true);
 	_canvas_widget = true;
-	_use_image_surface = false;
-	image_surface.clear ();
+	_use_intermediate_surface = false;
 }
 
 void
@@ -98,13 +97,9 @@ CairoWidget::use_nsglview ()
 }
 
 void
-CairoWidget::use_image_surface (bool yn)
+CairoWidget::use_intermediate_surface (bool yn)
 {
-	if (_use_image_surface == yn) {
-		return;
-	}
-	image_surface.clear ();
-	_use_image_surface = yn;
+	_use_intermediate_surface = yn;
 }
 
 int
@@ -163,14 +158,9 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 		return true;
 	}
 #endif
-	Cairo::RefPtr<Cairo::Context> cr;
-	if (_use_image_surface) {
-		if (!image_surface) {
-			image_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
-		}
-		cr = Cairo::Context::create (image_surface);
-	} else {
-		cr = get_window()->create_cairo_context ();
+	Cairo::RefPtr<Cairo::Context> cr = get_window()->create_cairo_context ();
+	if (_use_intermediate_surface) {
+		cr->push_group ();
 	}
 
 	cr->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
@@ -198,15 +188,9 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 
 	render (cr, &expose_area);
 
-	if (_use_image_surface) {
-		image_surface->flush();
-		/* now blit our private surface back to the GDK one */
-		Cairo::RefPtr<Cairo::Context> window_context = get_window()->create_cairo_context ();
-		window_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-		window_context->clip ();
-		window_context->set_source (image_surface, 0, 0);
-		window_context->set_operator (Cairo::OPERATOR_SOURCE);
-		window_context->paint ();
+	if (_use_intermediate_surface) {
+		cr->pop_group_to_source ();
+		cr->paint ();
 	}
 
 	return true;
@@ -259,11 +243,6 @@ CairoWidget::on_size_allocate (Gtk::Allocation& alloc)
 		Gtk::EventBox::on_size_allocate (alloc);
 	} else {
 		memcpy (&_allocation, &alloc, sizeof(Gtk::Allocation));
-	}
-
-	if (_use_image_surface) {
-		image_surface.clear ();
-		image_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, alloc.get_width(), alloc.get_height());
 	}
 
 	if (_canvas_widget) {
