@@ -22,10 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#if !defined USE_CAIRO_IMAGE_SURFACE && !defined NDEBUG
-#define OPTIONAL_CAIRO_IMAGE_SURFACE
-#endif
-
 /** @file  canvas/canvas.cc
  *  @brief Implementation of the main canvas classes.
  */
@@ -63,6 +59,11 @@ Canvas::Canvas ()
 	, _bg_color (Gtkmm2ext::rgba_to_color (0, 1.0, 0.0, 1.0))
 	, _last_render_start_timestamp(0)
 {
+#ifdef USE_CAIRO_IMAGE_SURFACE
+	_use_image_surface = true;
+#else
+	_use_image_surface = NULL != getenv("ARDOUR_IMAGE_SURFACE");
+#endif
 	set_epoch ();
 }
 
@@ -839,18 +840,11 @@ void
 GtkCanvas::on_size_allocate (Gtk::Allocation& a)
 {
 	EventBox::on_size_allocate (a);
-#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
-	if (getenv("ARDOUR_IMAGE_SURFACE")) {
-#endif
-#if defined USE_CAIRO_IMAGE_SURFACE || defined OPTIONAL_CAIRO_IMAGE_SURFACE
-	/* allocate an image surface as large as the canvas itself */
-
-	canvas_image.clear ();
-	canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, a.get_width(), a.get_height());
-#endif
-#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
+	if (_use_image_surface) {
+		/* allocate an image surface as large as the canvas itself */
+		canvas_image.clear ();
+		canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, a.get_width(), a.get_height());
 	}
-#endif
 
 #ifdef __APPLE__
 	if (_nsglview) {
@@ -885,27 +879,15 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	const int64_t start = g_get_monotonic_time ();
 #endif
 
-#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
 	Cairo::RefPtr<Cairo::Context> draw_context;
-	Cairo::RefPtr<Cairo::Context> window_context;
-	if (getenv("ARDOUR_IMAGE_SURFACE")) {
+	if (_use_image_surface) {
 		if (!canvas_image) {
 			canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
 		}
 		draw_context = Cairo::Context::create (canvas_image);
-		window_context = get_window()->create_cairo_context ();
 	} else {
 		draw_context = get_window()->create_cairo_context ();
 	}
-#elif defined USE_CAIRO_IMAGE_SURFACE
-	if (!canvas_image) {
-		canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
-	}
-	Cairo::RefPtr<Cairo::Context> draw_context = Cairo::Context::create (canvas_image);
-	Cairo::RefPtr<Cairo::Context> window_context = get_window()->create_cairo_context ();
-#else
-	Cairo::RefPtr<Cairo::Context> draw_context = get_window()->create_cairo_context ();
-#endif
 
 	draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	draw_context->clip();
@@ -953,21 +935,16 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	draw_context->paint ();
 #endif
 
-#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
-	if (getenv("ARDOUR_IMAGE_SURFACE")) {
-#endif
-#if defined USE_CAIRO_IMAGE_SURFACE || defined OPTIONAL_CAIRO_IMAGE_SURFACE
+	if (_use_image_surface) {
+		canvas_image->flush ();
 		/* now blit our private surface back to the GDK one */
-
+		Cairo::RefPtr<Cairo::Context> window_context = get_window()->create_cairo_context ();
 		window_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 		window_context->clip ();
 		window_context->set_source (canvas_image, 0, 0);
 		window_context->set_operator (Cairo::OPERATOR_SOURCE);
 		window_context->paint ();
-#endif
-#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
 	}
-#endif
 
 #ifdef CANVAS_PROFILE
 	const int64_t end = g_get_monotonic_time ();

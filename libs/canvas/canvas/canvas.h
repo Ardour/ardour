@@ -186,6 +186,8 @@ protected:
 	virtual void pick_current_item (Duple const &, int state) = 0;
 
 	std::list<ScrollGroup*> scrollers;
+
+	bool _use_image_surface;
 };
 
 /** A canvas which renders onto a GTK EventBox */

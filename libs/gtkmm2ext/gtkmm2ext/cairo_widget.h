@@ -40,6 +40,7 @@ public:
 
 	void set_canvas_widget ();
 	void use_nsglview ();
+	void use_image_surface (bool yn = true);
 
 	/* swizzle Gtk::Widget methods for Canvas::Widget */
 	void queue_draw ();
@@ -141,13 +142,14 @@ protected:
 
 	static sigc::slot<void,Gtk::Widget*> focus_handler;
 
-  private:
+private:
 	Cairo::RefPtr<Cairo::Surface> image_surface;
 	Glib::SignalProxyProperty _name_proxy;
 	sigc::connection _parent_style_change;
 	Widget * _current_parent;
 	bool _canvas_widget;
 	void* _nsglview;
+	bool _use_image_surface;
 	Gdk::Rectangle _allocation;
 
 };
