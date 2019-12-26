@@ -398,6 +398,7 @@ VirtualKeyboardWindow::update_octave_range ()
 bool
 VirtualKeyboardWindow::send_panic_message (GdkEventButton*)
 {
+	_piano.reset ();
 	uint8_t channel = PBD::atoi (_midi_channel.get_text ()) - 1;
 	uint8_t ev[3];
 	ev[0] = MIDI_CMD_CONTROL | channel;

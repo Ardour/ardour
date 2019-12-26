@@ -52,6 +52,7 @@ public:
 
 	void set_note_on (int note);
 	void set_note_off (int note);
+	void reset ();
 
 	void set_grand_piano_highlight (bool enabled);
 	void set_annotate_layout (bool enabled);

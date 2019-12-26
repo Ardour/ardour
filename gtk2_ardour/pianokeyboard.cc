@@ -1045,6 +1045,13 @@ APianoKeyboard::sustain_release ()
 }
 
 void
+APianoKeyboard::reset ()
+{
+	sustain_release ();
+	stop_unsustained_notes ();
+}
+
+void
 APianoKeyboard::set_note_on (int note)
 {
 	if (!_notes[note].pressed) {
