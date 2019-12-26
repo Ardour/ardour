@@ -20,10 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#if !defined USE_CAIRO_IMAGE_SURFACE && !defined NDEBUG
-#define OPTIONAL_CAIRO_IMAGE_SURFACE
-#endif
-
 #include <iostream>
 #include <sstream>
 #include <unistd.h>
@@ -204,7 +200,7 @@ UIConfiguration::pre_gui_init ()
 		g_setenv ("FORCE_BUGGY_GRADIENTS", "1", 1);
 	}
 #endif
-#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
+#ifndef USE_CAIRO_IMAGE_SURFACE
 	if (get_cairo_image_surface()) {
 		g_setenv ("ARDOUR_IMAGE_SURFACE", "1", 1);
 	}

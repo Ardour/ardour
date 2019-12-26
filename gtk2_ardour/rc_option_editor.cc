@@ -29,10 +29,6 @@
 #include "gtk2ardour-config.h"
 #endif
 
-#if !defined USE_CAIRO_IMAGE_SURFACE && !defined NDEBUG
-#define OPTIONAL_CAIRO_IMAGE_SURFACE
-#endif
-
 #include <cairo/cairo.h>
 
 #include <boost/algorithm/string.hpp>
@@ -3597,11 +3593,11 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Plugins"), new OptionEditorBlank ());
 
 	/* INTERFACE */
-#if (defined OPTIONAL_CAIRO_IMAGE_SURFACE || defined CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE)
+#if (!defined USE_CAIRO_IMAGE_SURFACE || defined CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE)
 	add_option (_("Appearance"), new OptionEditorHeading (_("Graphics Acceleration")));
 #endif
 
-#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
+#ifndef USE_CAIRO_IMAGE_SURFACE
 	BoolOption* bgc = new BoolOption (
 		"cairo-image-surface",
 		_("Disable Graphics Hardware Acceleration (requires restart)"),
