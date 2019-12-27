@@ -1117,7 +1117,7 @@ Session::follow_transport_master (pframes_t nframes)
 
 			if (!locate_pending() && !declick_in_progress()) {
 				DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: jump to master position %1\n", slave_transport_sample));
-				/* for JACK transport always consider the state after the locate to be stopped */
+				/* for JACK transport always stop after the locate (2nd argument == false) */
 				TFSM_LOCATE (slave_transport_sample, false, true, false, false);
 			} else {
 				DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK Transport: locate already in process, sts = %1\n", slave_transport_sample));
