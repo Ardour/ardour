@@ -1349,7 +1349,6 @@ private:
 		Running  /* lock achieved, master is generating meaningful speed & position */
 	};
 
-	TransportMasterState transport_master_tracking_state;
 	samplepos_t master_wait_end;
 	void track_transport_master (float slave_speed, samplepos_t slave_transport_sample);
 	bool follow_transport_master (pframes_t nframes);

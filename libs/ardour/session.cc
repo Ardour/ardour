@@ -208,7 +208,6 @@ Session::Session (AudioEngine &eng,
 	, _writable (false)
 	, _under_nsm_control (false)
 	, _xrun_count (0)
-	, transport_master_tracking_state (Stopped)
 	, master_wait_end (0)
 	, post_export_sync (false)
 	, post_export_position (0)

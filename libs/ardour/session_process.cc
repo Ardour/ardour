@@ -1189,6 +1189,5 @@ Session::follow_transport_master (pframes_t nframes)
 void
 Session::reset_slave_state ()
 {
-	transport_master_tracking_state = Stopped;
 	DiskReader::dec_no_disk_output ();
 }
