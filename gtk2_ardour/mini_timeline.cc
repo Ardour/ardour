@@ -57,6 +57,7 @@ MiniTimeline::MiniTimeline ()
 {
 	add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
 
+	use_intermediate_surface ();
 	_layout = Pango::Layout::create (get_pango_context());
 
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &MiniTimeline::set_colors));
