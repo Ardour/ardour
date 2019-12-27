@@ -1092,8 +1092,8 @@ Session::follow_transport_master (pframes_t nframes)
 {
 	TransportMasterManager& tmm (TransportMasterManager::instance());
 
-	double slave_speed;
-	samplepos_t slave_transport_sample;
+	double master_speed;
+	samplepos_t master_transport_sample;
 	sampleoffset_t delta;
 
 	if (tmm.master_invalid_this_cycle()) {
@@ -1101,11 +1101,11 @@ Session::follow_transport_master (pframes_t nframes)
 		goto noroll;
 	}
 
-	slave_speed = tmm.get_current_speed_in_process_context();
-	slave_transport_sample = tmm.get_current_position_in_process_context ();
-	delta = _transport_sample - slave_transport_sample;
+	master_speed = tmm.get_current_speed_in_process_context();
+	master_transport_sample = tmm.get_current_position_in_process_context ();
+	delta = _transport_sample - master_transport_sample;
 
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("session at %1, master at %2, delta: %3 res: %4 TFSM state %5\n", _transport_sample, slave_transport_sample, delta, tmm.current()->resolution(), _transport_fsm->current_state()));
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("session at %1, master at %2, delta: %3 res: %4 TFSM state %5\n", _transport_sample, master_transport_sample, delta, tmm.current()->resolution(), _transport_fsm->current_state()));
 
 	if (tmm.current()->type() == Engine) {
 
@@ -1116,11 +1116,11 @@ Session::follow_transport_master (pframes_t nframes)
 		if (delta && !actively_recording()) {
 
 			if (!locate_pending() && !declick_in_progress()) {
-				DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: jump to master position %1\n", slave_transport_sample));
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: jump to master position %1\n", master_transport_sample));
 				/* for JACK transport always stop after the locate (2nd argument == false) */
-				TFSM_LOCATE (slave_transport_sample, false, true, false, false);
+				TFSM_LOCATE (master_transport_sample, false, true, false, false);
 			} else {
-				DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK Transport: locate already in process, sts = %1\n", slave_transport_sample));
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK Transport: locate already in process, sts = %1\n", master_transport_sample));
 			}
 
 		}
@@ -1135,29 +1135,31 @@ Session::follow_transport_master (pframes_t nframes)
 		 */
 
 		if (!actively_recording() && abs (delta) > (5 * current_block_size)) {
+
 			DiskReader::inc_no_disk_output ();
 
 			if (!locate_pending() && !declick_in_progress()) {
-				DEBUG_TRACE (DEBUG::Slave, string_compose ("request locate to master position %1\n", slave_transport_sample));
-				/* note that for non-JACK transport masters, we assume that the transport state (rolling,stopped) after the locate 
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("request locate to master position %1\n", master_transport_sample));
+				/* note that for non-JACK transport masters, we assume that the transport state (rolling,stopped) after the locate
 				 * remains unchanged (2nd argument, "roll-after-locate")
 				 */
-				TFSM_LOCATE (slave_transport_sample, slave_speed != 0, true, false, false);
+				TFSM_LOCATE (master_transport_sample, master_speed != 0, true, false, false);
 			}
+
 			return true;
 		}
 	}
 
-	if (slave_speed != 0.0) {
+	if (master_speed != 0.0) {
 		if (_transport_speed == 0.0f) {
-			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave starts transport: %1 sample %2 tf %3\n", slave_speed, slave_transport_sample, _transport_sample));
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave starts transport: %1 sample %2 tf %3\n", master_speed, master_transport_sample, _transport_sample));
 			TFSM_EVENT (TransportFSM::StartTransport);
 		}
 
 	} else if (!tmm.current()->starting()) { /* master stopped, not in "starting" state */
 
 		if (_transport_speed != 0.0f) {
-			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stops transport: %1 sample %2 tf %3\n", slave_speed, slave_transport_sample, _transport_sample));
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stops transport: %1 sample %2 tf %3\n", master_speed, master_transport_sample, _transport_sample));
 			TFSM_STOP (false, false);
 		}
 	}
