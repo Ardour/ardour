@@ -616,12 +616,12 @@ APianoKeyboard::handle_fixed_keys (GdkEventKey* ev)
 bool
 APianoKeyboard::on_key_press_event (GdkEventKey* event)
 {
-	 if (Gtkmm2ext::Keyboard::modifier_state_contains (event->state, Gtkmm2ext::Keyboard::PrimaryModifier)) {
-		 return false;
-	 }
-	 if (handle_fixed_keys (event)) {
-		 return true;
-	 }
+	if (Gtkmm2ext::Keyboard::modifier_state_contains (event->state, Gtkmm2ext::Keyboard::PrimaryModifier)) {
+		return false;
+	}
+	if (handle_fixed_keys (event)) {
+		return true;
+	}
 
 	char const* key = get_keycode (event);
 	int note = key_binding (key);
@@ -658,12 +658,12 @@ APianoKeyboard::on_key_press_event (GdkEventKey* event)
 bool
 APianoKeyboard::on_key_release_event (GdkEventKey* event)
 {
-	 if (Gtkmm2ext::Keyboard::modifier_state_contains (event->state, Gtkmm2ext::Keyboard::PrimaryModifier)) {
-		 return false;
-	 }
-	 if (handle_fixed_keys (event)) {
-		 return true;
-	 }
+	if (Gtkmm2ext::Keyboard::modifier_state_contains (event->state, Gtkmm2ext::Keyboard::PrimaryModifier)) {
+		return false;
+	}
+	if (handle_fixed_keys (event)) {
+		return true;
+	}
 
 	char const* key = get_keycode (event);
 
