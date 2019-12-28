@@ -156,7 +156,8 @@ setup_enum_writer ()
 	TransportFSM::MotionState _TransportFSM_MotionState;
 	TransportFSM::ButlerState _TransportFSM_ButlerState;
 	LoopFadeChoice _LoopFadeChooice;
-	
+	TransportState _TransportState;
+
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
@@ -826,6 +827,12 @@ setup_enum_writer ()
 	REGISTER_ENUM (BothLoopFade);
 	REGISTER_ENUM (XFadeLoop);
 	REGISTER (_LoopFadeChooice);
+
+	REGISTER_ENUM (TransportStopped);
+	REGISTER_ENUM (TransportRolling);
+	REGISTER_ENUM (TransportLooping);
+	REGISTER_ENUM (TransportStarting);
+	REGISTER (_TransportState);
 }
 
 } /* namespace ARDOUR */
