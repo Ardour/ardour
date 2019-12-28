@@ -161,7 +161,7 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 	_transport_sample = position;
 
 	if (!region_export) {
-		_remaining_latency_preroll = worst_latency_preroll ();
+		_remaining_latency_preroll = worst_latency_preroll_buffer_size_ceil ();
 	} else {
 		_remaining_latency_preroll = 0;
 	}

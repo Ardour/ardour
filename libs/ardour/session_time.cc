@@ -187,28 +187,39 @@ int
 Session::backend_sync_callback (TransportState state, samplepos_t pos)
 {
 	bool slaved = synced_to_engine();
+	int ready = true;
+
+	// cerr << "SYNC state = " << enum_2_string (state) << endl;
 
 	switch (state) {
 	case TransportStopped:
-		if (slaved && (_transport_sample != pos) && (post_transport_work() == 0)) {
-			//cerr << "SYNC: stopped, need locate to " << pos << " from " << _transport_sample << endl;
-			return false;
+		if (slaved && (_transport_sample != pos) && !locate_pending()) {
+			/* we need to locate. This will be picked up in
+			 * Session::follow_transport_master and the locate will
+			 * be initiated there.
+			*/
+			// cerr << "SYNC: stopped, need locate to " << pos << " from " << _transport_sample << endl;
+			ready = false;
 		} else {
 			// cerr << "SYNC: stopped, nothing to do" << endl;
-			return true;
 		}
+		break;
 
 	case TransportStarting:
 		if (slaved) {
-			const int ready_to_roll = _transport_sample == pos && !locate_pending() && !declick_in_progress() && (remaining_latency_preroll() == 0);
-			DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK Transport: ts %1 = %2 lp = %3 dip = %4 rlp = %5 RES: %6\n", _transport_sample, pos, locate_pending(), declick_in_progress(), remaining_latency_preroll(), ready_to_roll));
-			return ready_to_roll;
+			/* JACK is stopped (though starting). Our position
+			 * should be a buffer-size-rounded
+			 * worst_latency_preroll() ahead of JACK.
+			 */
+			const samplepos_t matching = pos + worst_latency_preroll_buffer_size_ceil ();
+
+			ready = (_transport_sample == matching) && !locate_pending() && !declick_in_progress() && (remaining_latency_preroll() == 0);
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK Transport: ts %1 = %2 lp = %3 dip = %4 rlp = %5 RES: %6\n", _transport_sample, pos, locate_pending(), declick_in_progress(), remaining_latency_preroll(), ready));
 		} else {
 			/* we're not participating, so just say we are in sync
 			   to stop interfering with other components of the engine
 			   transport (JACK) system.
 			*/
-			return true;
 		}
 		break;
 
@@ -216,11 +227,11 @@ Session::backend_sync_callback (TransportState state, samplepos_t pos)
 		break;
 
 	default:
-		error << string_compose (_("Unknown transport state %1 in sync callback"), state)
-		      << endmsg;
+		error << string_compose (_("Unknown transport state %1 in sync callback"), state) << endmsg;
 	}
 
-	return true;
+	// cerr << "SYNC, ready ? " << ready << endl;
+	return ready;
 }
 
 

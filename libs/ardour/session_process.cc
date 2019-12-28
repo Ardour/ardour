@@ -346,7 +346,7 @@ Session::process_with_events (pframes_t nframes)
 
 	assert (_count_in_samples == 0 || _remaining_latency_preroll == 0 || _count_in_samples == _remaining_latency_preroll);
 
-	// DEBUG_TRACE (DEBUG::Transport, string_compose ("Running count in/latency preroll of %1 & %2\n", _count_in_samples, _remaining_latency_preroll));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Running count in/latency preroll of %1 & %2\n", _count_in_samples, _remaining_latency_preroll));
 
 	while (_count_in_samples > 0 || _remaining_latency_preroll > 0) {
 		samplecnt_t ns;
@@ -1109,20 +1109,43 @@ Session::follow_transport_master (pframes_t nframes)
 
 	if (tmm.current()->type() == Engine) {
 
-		/* JACK Transport: if we're not aligned with the current JACK
-		 * time, then jump to it
-		 */
+		/* JACK Transport. */
 
-		if (delta && !actively_recording()) {
+		if (master_speed == 0) {
 
-			if (!locate_pending() && !declick_in_progress()) {
-				DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: jump to master position %1\n", master_transport_sample));
-				/* for JACK transport always stop after the locate (2nd argument == false) */
-				TFSM_LOCATE (master_transport_sample, false, true, false, false);
-			} else {
-				DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK Transport: locate already in process, sts = %1\n", master_transport_sample));
+			if (!actively_recording()) {
+
+				const samplecnt_t wlp = worst_latency_preroll_buffer_size_ceil ();
+
+				if (delta != wlp) {
+
+					/* if we're not aligned with the current JACK * time, then jump to it */
+
+					if (!locate_pending() && !declick_in_progress() && !tmm.current()->starting()) {
+
+						const samplepos_t locate_target = master_transport_sample + wlp;
+						DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: jump to master position %1 by locating to %2\n", master_transport_sample, locate_target));
+						/* for JACK transport always stop after the locate (2nd argument == false) */
+						TFSM_LOCATE (locate_target, false, true, false, false);
+
+					} else {
+						DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK Transport: locate already in process, sts = %1\n", master_transport_sample));
+					}
+				}
 			}
 
+		} else {
+
+			if (_transport_speed) {
+				/* master is rolling, and we're rolling ... with JACK we should always be perfectly in sync, so ... WTF? */
+				if (delta) {
+					if (remaining_latency_preroll() && worst_latency_preroll()) {
+						/* our transport position is not moving because we're doing latency alignment. Nothing in particular to do */
+					} else {
+						cerr << "\n\n\n IMPOSSIBLE! OUT OF SYNC WITH JACK TRANSPORT (rlp = " << remaining_latency_preroll() << " wlp " << worst_latency_preroll() << ")\n\n\n";
+					}
+				}
+			}
 		}
 
 	} else {

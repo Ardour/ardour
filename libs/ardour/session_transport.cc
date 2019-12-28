@@ -211,7 +211,7 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	g_atomic_int_inc (&_seek_counter);
 	_last_roll_or_reversal_location = target_sample;
 	if (!for_loop_end) {
-		_remaining_latency_preroll = worst_latency_preroll ();
+		_remaining_latency_preroll = worst_latency_preroll_buffer_size_ceil ();
 	}
 	timecode_time(_transport_sample, transmitting_timecode_time); // XXX here?
 
@@ -585,7 +585,7 @@ Session::start_transport ()
 
 	_last_roll_location = _transport_sample;
 	_last_roll_or_reversal_location = _transport_sample;
-	_remaining_latency_preroll = worst_latency_preroll ();
+	_remaining_latency_preroll = worst_latency_preroll_buffer_size_ceil ();
 
 	have_looped = false;
 
