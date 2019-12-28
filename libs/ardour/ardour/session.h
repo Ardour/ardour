@@ -504,6 +504,7 @@ public:
 	samplecnt_t worst_input_latency () const  { return _worst_input_latency; }
 	samplecnt_t worst_route_latency () const  { return _worst_route_latency; }
 	samplecnt_t worst_latency_preroll () const;
+	samplecnt_t worst_latency_preroll_buffer_size_ceil () const;
 
 	PBD::Signal0<void> LatencyUpdated;
 
