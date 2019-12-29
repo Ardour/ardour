@@ -20,6 +20,7 @@
 #ifndef __ardour_parameter_descriptor_h__
 #define __ardour_parameter_descriptor_h__
 
+#include "pbd/natsort.h"
 #include "ardour/types.h"
 #include "ardour/variant.h"
 
@@ -28,7 +29,13 @@
 
 namespace ARDOUR {
 
-typedef std::map<const std::string, const float> ScalePoints;
+struct CompareNumericallyLess {
+	bool operator() (std::string const& a, std::string const& b) const {
+		return PBD::numerically_less (a.c_str(), b.c_str());
+	}
+};
+
+typedef std::map<const std::string, const float, CompareNumericallyLess> ScalePoints;
 
 /** Descriptor of a parameter or control.
  *
