@@ -25,6 +25,91 @@
 namespace PBD {
 
 inline bool
+is_integer (const char* i)
+{
+	return isdigit (*i) || (*i == '-' && isdigit (i[1]));
+}
+
+/* return scale factor for SI metric prefix x 1000
+ * (to allow milli for integers)
+ */
+inline int64_t
+order_of_magnitude (const char* i)
+{
+	if (!is_integer (i)) {
+		return 0;
+	}
+	while (isdigit (*++i)) ;
+	if (!*i) {
+		return 1e3;
+	}
+	switch (*i) {
+		case 'm':
+			return 1;
+		case 'c':
+			return 10;
+		case 'd':
+			return 100;
+		case 'k':
+			/* fallthrough */
+		case 'K':
+			return 1e6;
+		case 'M':
+			return 1e9;
+		case 'G':
+			return 1e12;
+		case 'T':
+			return 1e15;
+	}
+	return 1e3;
+}
+
+/* this method sorts negative integers before
+ * positive ones, and also handles hexadecimal
+ * numbers when prefixed with "0x" or "0X".
+ * SI metric prefixes for integers are handled.
+ * (floating point, and rational numbers are
+ *  not directy handled)
+ */
+inline bool
+numerically_less (const char* a, const char* b)
+{
+	const char* d_a = NULL;
+	const char* d_b = NULL;
+
+	for (;*a && *b; ++a, ++b) {
+		if (is_integer (a) && is_integer (b) && !d_a) {
+			d_a = a; d_b = b;
+			continue;
+		}
+		if (d_a) {
+			const int64_t ia = strtoll (d_a, NULL, 0) * order_of_magnitude (d_a);
+			const int64_t ib = strtoll (d_b, NULL, 0) * order_of_magnitude (d_b);
+			if (ia != ib) {
+				return ia < ib;
+			}
+		}
+		d_a = d_b = NULL;
+		if (*a == *b) {
+			continue;
+		}
+		return *a < *b;
+	}
+
+	if (d_a) {
+		return strtoll (d_a, NULL, 0) * order_of_magnitude (d_a) < strtoll (d_b, NULL, 0) * order_of_magnitude (d_b);
+	}
+
+	/* if we reach here, either strings are same length and equal
+	 * or one is longer than the other.
+	 */
+
+	if (*a) { return false; }
+	if (*b) { return true; }
+	return false; // equal
+}
+
+inline bool
 naturally_less (const char* a, const char* b)
 {
 	const char* d_a = NULL;
@@ -45,7 +130,7 @@ naturally_less (const char* a, const char* b)
 		d_a = d_b = NULL;
 		if (*a == *b) {
 			continue;
-		}                                                                                                                                                                                          
+		}
 		return *a < *b;
 	}
 
