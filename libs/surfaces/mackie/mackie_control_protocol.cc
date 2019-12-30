@@ -486,6 +486,8 @@ MackieControlProtocol::set_active (bool yn)
 		redisplay_connection = redisplay_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::redisplay));
 		redisplay_timeout->attach (main_loop()->get_context());
 
+		notify_transport_state_changed ();
+
 	} else {
 
 		BaseUI::quit ();
@@ -1342,11 +1344,11 @@ MackieControlProtocol::notify_transport_state_changed()
 	}
 
 	// switch various play and stop buttons on / off
-	update_global_button (Button::Loop, session->get_play_loop());
-	update_global_button (Button::Play, session->transport_speed() == 1.0);
-	update_global_button (Button::Stop, session->transport_stopped ());
-	update_global_button (Button::Rewind, session->transport_speed() < 0.0);
-	update_global_button (Button::Ffwd, session->transport_speed() > 1.0);
+	update_global_button (Button::Loop, loop_button_onoff ());
+	update_global_button (Button::Play, play_button_onoff ());
+	update_global_button (Button::Stop, stop_button_onoff ());
+	update_global_button (Button::Rewind, rewind_button_onoff ());
+	update_global_button (Button::Ffwd, ffwd_button_onoff ());
 
 	// sometimes a return to start leaves time code at old time
 	_timecode_last = string (10, ' ');

@@ -472,7 +472,7 @@ MackieControlProtocol::marker_release (Button &)
 
 	samplepos_t where = session->audible_sample();
 
-	if (session->transport_stopped() && session->locations()->mark_at (where, session->sample_rate() / 100.0)) {
+	if (session->transport_stopped_or_stopping() && session->locations()->mark_at (where, session->sample_rate() / 100.0)) {
 		return off;
 	}
 
@@ -501,7 +501,7 @@ MackieControlProtocol::stop_press (Button &)
 LedState
 MackieControlProtocol::stop_release (Button &)
 {
-	return session->transport_stopped();
+	return session->transport_stopped_or_stopping();
 }
 
 LedState
