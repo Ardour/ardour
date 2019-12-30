@@ -1625,7 +1625,7 @@ Session::set_play_loop (bool yn, bool change_transport_state)
 	}
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC2 with speed = %1\n", _transport_speed));
-	TransportStateChange ();
+	TransportStateChange (); /* EMIT SIGNAL */
 }
 
 void
@@ -1765,7 +1765,7 @@ Session::set_play_range (list<AudioRange>& range, bool leave_rolling)
 	merge_event (ev);
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC5 with speed = %1\n", _transport_speed));
-	TransportStateChange ();
+	TransportStateChange (); /* EMIT SIGNAL */
 }
 
 void
