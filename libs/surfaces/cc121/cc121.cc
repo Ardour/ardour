@@ -680,7 +680,7 @@ CC121::map_transport_state ()
 		start_blinking (Play);
 	}
 
-	get_button (Stop).set_led_state (_output_port, session->transport_stopped ());
+	get_button (Stop).set_led_state (_output_port, session->transport_stopped_or_stopping ());
 	get_button (Rewind).set_led_state (_output_port, session->transport_speed() < 0.0);
 	get_button (Ffwd).set_led_state (_output_port, session->transport_speed() > 1.0);
 	get_button (Jog).set_led_state (_output_port, _jogmode == scroll);

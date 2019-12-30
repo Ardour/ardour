@@ -588,7 +588,7 @@ FaderPort8::button_encoder ()
 				 * the current position and we're not rolling.
 				 */
 				samplepos_t where = session->audible_sample();
-				if (session->transport_stopped() && session->locations()->mark_at (where, session->sample_rate() / 100.0)) {
+				if (session->transport_stopped_or_stopping() && session->locations()->mark_at (where, session->sample_rate() / 100.0)) {
 					return;
 				}
 
