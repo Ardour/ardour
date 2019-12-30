@@ -38,12 +38,6 @@ MidiPortManager::MidiPortManager ()
 MidiPortManager::~MidiPortManager ()
 {
 	Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock());
-	if (_midi_in) {
-		AudioEngine::instance()->unregister_port (_midi_in);
-	}
-	if (_midi_out) {
-		AudioEngine::instance()->unregister_port (_midi_out);
-	}
 	if (_scene_in) {
 		AudioEngine::instance()->unregister_port (_scene_in);
 	}
@@ -64,12 +58,9 @@ MidiPortManager::create_ports ()
 {
 	/* this method is idempotent */
 
-	if (_midi_in) {
+	if (_mmc_in) {
 		return;
 	}
-
-	_midi_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("MIDI control in"), true);
-	_midi_out = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("MIDI control out"), true);
 
 	_mmc_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, X_("MMC in"), true);
 	_mmc_out = AudioEngine::instance()->register_output_port (DataType::MIDI, X_("MMC out"), true);
@@ -101,8 +92,6 @@ MidiPortManager::set_midi_port_states (const XMLNodeList&nodes)
 
 	ports.insert (make_pair (_mtc_output_port->name(), _mtc_output_port));
 	ports.insert (make_pair (_midi_clock_output_port->name(), _midi_clock_output_port));
-	ports.insert (make_pair (_midi_in->name(), _midi_in));
-	ports.insert (make_pair (_midi_out->name(), _midi_out));
 	ports.insert (make_pair (_mmc_in->name(), _mmc_in));
 	ports.insert (make_pair (_mmc_out->name(), _mmc_out));
 	ports.insert (make_pair (_vkbd_out->name(), _vkbd_out));
@@ -132,8 +121,6 @@ MidiPortManager::get_midi_port_states () const
 
 	ports.insert (make_pair (_mtc_output_port->name(), _mtc_output_port));
 	ports.insert (make_pair (_midi_clock_output_port->name(), _midi_clock_output_port));
-	ports.insert (make_pair (_midi_in->name(), _midi_in));
-	ports.insert (make_pair (_midi_out->name(), _midi_out));
 	ports.insert (make_pair (_mmc_in->name(), _mmc_in));
 	ports.insert (make_pair (_mmc_out->name(), _mmc_out));
 	ports.insert (make_pair (_vkbd_out->name(), _vkbd_out));

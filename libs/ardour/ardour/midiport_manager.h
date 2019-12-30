@@ -54,15 +54,6 @@ public:
      * callback.
      */
 
-	boost::shared_ptr<ARDOUR::Port> midi_input_port () const
-	{
-		return _midi_in;
-	}
-	boost::shared_ptr<ARDOUR::Port> midi_output_port () const
-	{
-		return _midi_out;
-	}
-
 	boost::shared_ptr<ARDOUR::Port> mmc_input_port () const
 	{
 		return boost::dynamic_pointer_cast<MidiPort> (_mmc_in);
@@ -104,8 +95,6 @@ public:
 
 protected:
 	/* asynchronously handled ports: ARDOUR::AsyncMIDIPort */
-	boost::shared_ptr<Port> _midi_in;
-	boost::shared_ptr<Port> _midi_out;
 	boost::shared_ptr<Port> _mmc_in;
 	boost::shared_ptr<Port> _mmc_out;
 	boost::shared_ptr<Port> _scene_in;

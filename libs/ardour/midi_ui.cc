@@ -119,11 +119,6 @@ MidiControlUI::reset_ports ()
 	vector<boost::shared_ptr<AsyncMIDIPort> > ports;
 	boost::shared_ptr<AsyncMIDIPort> p;
 
-	if ((p = boost::dynamic_pointer_cast<AsyncMIDIPort> (_session.midi_input_port()))) {
-		ports.push_back (p);
-	}
-
-
 	if ((p = boost::dynamic_pointer_cast<AsyncMIDIPort> (_session.mmc_input_port()))) {
 		ports.push_back (p);
 	}

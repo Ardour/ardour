@@ -652,18 +652,6 @@ Session::start_midi_thread ()
 }
 
 boost::shared_ptr<ARDOUR::Port>
-Session::midi_input_port () const
-{
-	return _midi_ports->midi_input_port ();
-}
-
-boost::shared_ptr<ARDOUR::Port>
-Session::midi_output_port () const
-{
-	return _midi_ports->midi_output_port ();
-}
-
-boost::shared_ptr<ARDOUR::Port>
 Session::mmc_output_port () const
 {
 	return _midi_ports->mmc_output_port ();

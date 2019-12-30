@@ -78,8 +78,8 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	, _threshold (10)
 	, gui (0)
 {
-	_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort> (s.midi_input_port ());
-	_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort> (s.midi_output_port ());
+	// _input_port = boost::dynamic_pointer_cast<AsyncMIDIPort> (s.midi_input_port ());
+	// _output_port = boost::dynamic_pointer_cast<AsyncMIDIPort> (s.midi_output_port ());
 
 	_input_bundle.reset (new ARDOUR::Bundle (_("Generic MIDI Control In"), true));
 	_output_bundle.reset (new ARDOUR::Bundle (_("Generic MIDI Control Out"), false));

@@ -1198,8 +1198,6 @@ public:
 
 	/* asynchronous MIDI control ports */
 
-	boost::shared_ptr<Port> midi_input_port () const;
-	boost::shared_ptr<Port> midi_output_port () const;
 	boost::shared_ptr<Port> mmc_output_port () const;
 	boost::shared_ptr<Port> mmc_input_port () const;
 	boost::shared_ptr<Port> scene_input_port () const;
