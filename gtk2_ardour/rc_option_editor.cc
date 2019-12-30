@@ -3218,11 +3218,9 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Transport"), bo);
 
 
-	/* SYNC */
+	add_option (_("Transport"), new OptionEditorHeading (_("Transport Masters")));
 
-	add_option (_("Sync"), new OptionEditorHeading (_("Transport Masters")));
-
-	add_option (_("Sync"), new WidgetOption (X_("foo"), X_("Transport Masters"), _transport_masters_widget));
+	add_option (_("Transport"), new WidgetOption (X_("foo"), X_("Transport Masters"), _transport_masters_widget));
 
 	_sync_framerate = new BoolOption (
 		     "timecode-sync-frame-rate",
@@ -3238,11 +3236,11 @@ RCOptionEditor::RCOptionEditor ()
 				   "Instead the frame rate indication in the main clock will flash red and %1 will convert between the external "
 				   "timecode standard and the session standard."), PROGRAM_NAME));
 
-	add_option (_("Sync"), _sync_framerate);
+	add_option (_("Transport"), _sync_framerate);
 
-	add_option (_("Sync/LTC"), new OptionEditorHeading (_("Linear Timecode (LTC) Generator")));
+	add_option (_("Transport/LTC"), new OptionEditorHeading (_("Linear Timecode (LTC) Generator")));
 
-	add_option (_("Sync/LTC"),
+	add_option (_("Transport/LTC"),
 		    new BoolOption (
 			    "send-ltc",
 			    _("Enable LTC generator"),
@@ -3259,7 +3257,7 @@ RCOptionEditor::RCOptionEditor ()
 	Gtkmm2ext::UI::instance()->set_tip
 		(_ltc_send_continuously->tip_widget(),
 		 string_compose (_("<b>When enabled</b> %1 will continue to send LTC information even when the transport (playhead) is not moving"), PROGRAM_NAME));
-	add_option (_("Sync/LTC"), _ltc_send_continuously);
+	add_option (_("Transport/LTC"), _ltc_send_continuously);
 
 	_ltc_volume_slider = new HSliderOption("ltcvol", _("LTC generator level [dBFS]"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_output_volume),
@@ -3271,11 +3269,11 @@ RCOptionEditor::RCOptionEditor ()
 		(_ltc_volume_slider->tip_widget(),
 		 _("Specify the Peak Volume of the generated LTC signal in dBFS. A good value is  0dBu ^= -18dBFS in an EBU calibrated system"));
 
-	add_option (_("Sync/LTC"), _ltc_volume_slider);
+	add_option (_("Transport/LTC"), _ltc_volume_slider);
 
-	add_option (_("Sync/MIDI"), new OptionEditorHeading (_("MIDI Beat Clock (Mclk) Generator")));
+	add_option (_("Transport/MIDI"), new OptionEditorHeading (_("MIDI Beat Clock (Mclk) Generator")));
 
-	add_option (_("Sync/MIDI"),
+	add_option (_("Transport/MIDI"),
 		    new BoolOption (
 			    "send-midi-clock",
 			    _("Enable Mclk generator"),
@@ -3283,9 +3281,9 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_midi_clock)
 			    ));
 
-	add_option (_("Sync/MIDI"), new OptionEditorHeading (_("MIDI Time Code (MTC) Generator")));
+	add_option (_("Transport/MIDI"), new OptionEditorHeading (_("MIDI Time Code (MTC) Generator")));
 
-	add_option (_("Sync/MIDI"),
+	add_option (_("Transport/MIDI"),
 		    new BoolOption (
 			    "send-mtc",
 			    _("Enable MTC Generator"),
@@ -3293,7 +3291,7 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mtc)
 			    ));
 
-	add_option (_("Sync/MIDI"),
+	add_option (_("Transport/MIDI"),
 		    new SpinOption<int> (
 			    "mtc-qf-speed-tolerance",
 			    _("Percentage either side of normal transport speed to transmit MTC"),
@@ -3302,9 +3300,9 @@ RCOptionEditor::RCOptionEditor ()
 			    0, 20, 1, 5
 			    ));
 
-	add_option (_("Sync/MIDI"), new OptionEditorHeading (_("MIDI Machine Control (MMC)")));
+	add_option (_("Transport/MIDI"), new OptionEditorHeading (_("MIDI Machine Control (MMC)")));
 
-	add_option (_("Sync/MIDI"),
+	add_option (_("Transport/MIDI"),
 		    new BoolOption (
 			    "mmc-control",
 			    _("Respond to MMC commands"),
@@ -3312,7 +3310,7 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_control)
 			    ));
 
-	add_option (_("Sync/MIDI"),
+	add_option (_("Transport/MIDI"),
 		    new BoolOption (
 			    "send-mmc",
 			    _("Send MMC commands"),
@@ -3320,7 +3318,7 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mmc)
 			    ));
 
-	add_option (_("Sync/MIDI"),
+	add_option (_("Transport/MIDI"),
 	     new SpinOption<uint8_t> (
 		     "mmc-receive-device-id",
 		     _("Inbound MMC device ID"),
@@ -3329,7 +3327,7 @@ RCOptionEditor::RCOptionEditor ()
 		     0, 127, 1, 10
 		     ));
 
-	add_option (_("Sync/MIDI"),
+	add_option (_("Transport/MIDI"),
 	     new SpinOption<uint8_t> (
 		     "mmc-send-device-id",
 		     _("Outbound MMC device ID"),
