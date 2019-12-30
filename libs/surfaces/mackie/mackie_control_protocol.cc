@@ -940,7 +940,7 @@ MackieControlProtocol::create_surfaces ()
 				ipm->mcp = this;
 				ipm->port = &input_port;
 
-				g_source_set_callback (surface->input_source, (GSourceFunc) ipmidi_input_handler, ipm, NULL);
+				g_source_set_callback (surface->input_source, G_SOURCE_FUNC (ipmidi_input_handler), ipm, NULL);
 				g_source_attach (surface->input_source, main_loop()->get_context()->gobj());
 			}
 		}
