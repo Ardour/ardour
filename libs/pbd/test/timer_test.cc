@@ -10,6 +10,10 @@
 #include <windows.h>
 #endif
 
+#ifndef G_SOURCE_FUNC
+#define G_SOURCE_FUNC(f) ((GSourceFunc) (void (*)(void)) (f))
+#endif
+
 CPPUNIT_TEST_SUITE_REGISTRATION (TimerTest);
 
 using namespace std;
