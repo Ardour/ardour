@@ -21,6 +21,7 @@
 
 #include <ctype.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 namespace PBD {
 
@@ -83,8 +84,8 @@ numerically_less (const char* a, const char* b)
 			continue;
 		}
 		if (d_a) {
-			const int64_t ia = strtoll (d_a, NULL, 0) * order_of_magnitude (d_a);
-			const int64_t ib = strtoll (d_b, NULL, 0) * order_of_magnitude (d_b);
+			const int64_t ia = strtol (d_a, NULL, 0) * order_of_magnitude (d_a);
+			const int64_t ib = strtol (d_b, NULL, 0) * order_of_magnitude (d_b);
 			if (ia != ib) {
 				return ia < ib;
 			}
