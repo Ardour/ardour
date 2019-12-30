@@ -100,6 +100,10 @@ fixup_bundle_environment (int argc, char* argv[], string & localedir)
 
 	no_app_nap ();
 
+	if (!g_getenv ("ARDOUR_BUNDLED")) {
+		return;
+	}
+
 	if (g_getenv ("ARDOUR_SELF")) {
 		g_setenv ("ARDOUR_SELF", argv[0], 1);
 	}
