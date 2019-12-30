@@ -148,6 +148,7 @@ struct TransportFSM
 	bool locating () const           { return _motion_state == WaitingForLocate; }
 	bool rolling () const            { return _motion_state == Rolling; }
 	bool stopped () const            { return _motion_state == Stopped; }
+	bool stopping () const           { return _motion_state == DeclickToStop; }
 	bool waiting_for_butler() const  { return _butler_state == WaitingForButler; }
 	bool declick_in_progress() const { return _motion_state == DeclickToLocate || _motion_state == DeclickToStop; }
 

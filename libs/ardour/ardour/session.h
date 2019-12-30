@@ -764,6 +764,7 @@ public:
 	}
 	double transport_speed() const { return _count_in_samples > 0 ? 0. : _transport_speed; }
 	bool   transport_stopped() const;
+	bool   transport_stopped_or_stopping() const;
 	bool   transport_rolling() const;
 
 	bool silent () { return _silent; }

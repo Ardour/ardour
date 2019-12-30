@@ -2001,6 +2001,12 @@ Session::transport_stopped() const
 }
 
 bool
+Session::transport_stopped_or_stopping() const
+{
+	return _transport_fsm->stopped() || _transport_fsm->stopping();
+}
+
+bool
 Session::transport_rolling() const
 {
 	return _transport_speed != 0.0 && _count_in_samples == 0 && _remaining_latency_preroll == 0;
