@@ -346,7 +346,7 @@ Session::process_with_events (pframes_t nframes)
 
 	assert (_count_in_samples == 0 || _remaining_latency_preroll == 0 || _count_in_samples == _remaining_latency_preroll);
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("Running count in/latency preroll of %1 & %2\n", _count_in_samples, _remaining_latency_preroll));
+	// DEBUG_TRACE (DEBUG::Transport, string_compose ("Running count in/latency preroll of %1 & %2\n", _count_in_samples, _remaining_latency_preroll));
 
 	while (_count_in_samples > 0 || _remaining_latency_preroll > 0) {
 		samplecnt_t ns;
