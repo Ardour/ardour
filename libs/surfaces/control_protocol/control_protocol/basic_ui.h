@@ -151,6 +151,12 @@ class LIBCONTROLCP_API BasicUI {
 	void timecode_to_sample (Timecode::Time& timecode, samplepos_t & sample, bool use_offset, bool use_subframes) const;
 	void sample_to_timecode (samplepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
 
+	bool stop_button_onoff() const;
+	bool play_button_onoff() const;
+	bool ffwd_button_onoff() const;
+	bool rewind_button_onoff() const;
+	bool loop_button_onoff() const;
+
   protected:
 	BasicUI ();
 	ARDOUR::Session* session;

@@ -188,7 +188,7 @@ BasicUI::remove_marker_at_playhead ()
 void
 BasicUI::rewind ()
 {
-	session->request_transport_speed (session->transport_speed() - 1.5);
+	session->request_transport_speed (session->actual_speed() - 1.5);
 }
 
 void
@@ -201,6 +201,36 @@ void
 BasicUI::transport_stop ()
 {
 	session->request_transport_speed (0.0);
+}
+
+bool
+BasicUI::stop_button_onoff () const
+{
+	return session->transport_stopped_or_stopping ();
+}
+
+bool
+BasicUI::play_button_onoff () const
+{
+	return session->actual_speed() == 1.0;
+}
+
+bool
+BasicUI::ffwd_button_onoff () const
+{
+	return session->actual_speed() > 1.0;
+}
+
+bool
+BasicUI::rewind_button_onoff () const
+{
+	return session->actual_speed() < 0.0;
+}
+
+bool
+BasicUI::loop_button_onoff () const
+{
+	return session->get_play_loop();
 }
 
 void
