@@ -1062,10 +1062,10 @@ US2400Protocol::notify_transport_state_changed()
 	}
 
 	// switch various play and stop buttons on / off
-	update_global_button (Button::Play, session->transport_speed() == 1.0);
-	update_global_button (Button::Stop, session->transport_stopped_or_stopping ());
-	update_global_button (Button::Rewind, session->transport_speed() < 0.0);
-	update_global_button (Button::Ffwd, session->transport_speed() > 1.0);
+	update_global_button (Button::Play, play_button_onoff());
+	update_global_button (Button::Stop, stop_button_onoff());
+	update_global_button (Button::Rewind, rewind_button_onoff());
+	update_global_button (Button::Ffwd, ffwd_button_onoff());
 
 	// sometimes a return to start leaves time code at old time
 	_timecode_last = string (10, ' ');
