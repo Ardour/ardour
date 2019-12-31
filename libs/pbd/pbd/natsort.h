@@ -98,7 +98,7 @@ numerically_less (const char* a, const char* b)
 	}
 
 	if (d_a) {
-		return strtoll (d_a, NULL, 0) * order_of_magnitude (d_a) < strtoll (d_b, NULL, 0) * order_of_magnitude (d_b);
+		return strtol (d_a, NULL, 0) * order_of_magnitude (d_a) < strtol (d_b, NULL, 0) * order_of_magnitude (d_b);
 	}
 
 	/* if we reach here, either strings are same length and equal
