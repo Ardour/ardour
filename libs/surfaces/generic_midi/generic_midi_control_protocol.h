@@ -25,6 +25,9 @@
 #include <list>
 #include <glibmm/threads.h>
 
+#define ABSTRACT_UI_EXPORTS
+#include "pbd/abstract_ui.h"
+
 #include "ardour/types.h"
 #include "ardour/port.h"
 
@@ -48,10 +51,22 @@ class MIDIControllable;
 class MIDIFunction;
 class MIDIAction;
 
-class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
+struct GenericMIDIRequest : public BaseUI::BaseRequestObject {
+public:
+	GenericMIDIRequest () {}
+	~GenericMIDIRequest () {}
+};
+
+
+class GenericMidiControlProtocol : public ARDOUR::ControlProtocol, public AbstractUI<GenericMIDIRequest> {
 public:
 	GenericMidiControlProtocol (ARDOUR::Session&);
 	virtual ~GenericMidiControlProtocol();
+
+	void do_request (GenericMIDIRequest*);
+	int stop ();
+
+	void thread_init ();
 
 	int set_active (bool yn);
 	static bool probe() { return true; }
@@ -169,7 +184,6 @@ private:
 	int connection_state;
 	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
 	PBD::ScopedConnection port_connection;
-	void connected();
 
 	std::string _current_binding;
 	uint32_t _bank_size;
@@ -185,7 +199,11 @@ private:
 	mutable void *gui;
 	void build_gui ();
 
+	PBD::ScopedConnectionList midi_connections;
 
+	bool midi_input_handler (Glib::IOCondition ioc, boost::weak_ptr<ARDOUR::AsyncMIDIPort> port);
+	void start_midi_handling ();
+	void stop_midi_handling ();
 };
 
 #endif /* ardour_generic_midi_control_protocol_h */
