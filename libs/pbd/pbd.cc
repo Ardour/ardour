@@ -36,6 +36,7 @@
 #include "pbd/id.h"
 #include "pbd/enumwriter.h"
 #include "pbd/fpu.h"
+#include "pbd/xml++.h"
 
 #ifdef PLATFORM_WINDOWS
 #include <winsock2.h>
@@ -129,6 +130,14 @@ PBD::init ()
 	setup_libpbd_enums ();
 
 	set_debug_options_from_env ();
+
+	/* this call is made by any call to XMLTree::read() and its cousins. It
+	   sets the handling of blank space to match the libxml2 standard,
+	   rather than the libxml1 version. Without this, the behavior is
+	   defined by whoever calls it first.
+	*/
+
+	xmlKeepBlanksDefault (0);
 
 	libpbd_initialized = true;
 	return true;
