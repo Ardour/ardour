@@ -316,7 +316,8 @@ dispatch_x_events (XEvent* event, VSTState* vstfx)
 any Xevents to all the UI callbacks plugins 'may' have registered on their
 windows, that is if they don't manage their own UIs **/
 
-void* gui_event_loop (void* ptr)
+static void*
+gui_event_loop (void* ptr)
 {
 	VSTState* vstfx;
 	int LXVST_sched_timer_interval = 40; //ms, 25fps
@@ -622,6 +623,11 @@ int vstfx_create_editor (VSTState* vstfx)
 
 	int x_size = 1;
 	int y_size = 1;
+
+	if (!LXVST_XDisplay) {
+		vstfx_error ("** ERROR ** VSTFX: No X11 Display available for plugin UI");
+		return -1;
+	}
 
 	/* Note: vstfx->lock is held while this function is called */
 
