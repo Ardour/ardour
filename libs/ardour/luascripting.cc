@@ -341,7 +341,6 @@ LuaScriptInfoPtr
 LuaScripting::by_name (const std::string& name, LuaScriptInfo::ScriptType type)
 {
 	LuaScriptList lsl (scripts (type));
-	printf ("CHECKING %d scripts\n", lsl.size());
 	for (LuaScriptList::const_iterator s = lsl.begin(); s != lsl.end(); ++s) {
 		if ((*s)->name == name) {
 			return (*s);
