@@ -280,6 +280,16 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 {
 	if (_session) {
 		ARDOUR_UI::instance()->video_timeline->sync_session_state();
+
+		/* Unconditionally save session-specific GUI settings:
+		 * Playhead position, zoom/scroll with stationary PH,
+		 * window and pane positions, etc.
+		 *
+		 * While many GUI operations immediately cause an instant.xml
+		 * save, changing the playhead-pos in particular does not,
+		 * nor mark the session dirty.
+		 */
+		save_ardour_state ();
 	}
 
 	if (_session && _session->dirty()) {
