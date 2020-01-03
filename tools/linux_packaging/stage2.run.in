@@ -221,6 +221,16 @@ case `uname -m` in
 		echo "Architecture is x86_64"
 		ARCH='x86_64'
 		;;
+	arm|armv7l|aarch32)
+		echo "Architecture is armhf"
+		ARCH='armhf'
+		NOABICHECK=1
+		;;;
+	aarch64|armv8b)
+		echo "Architecture is arm64"
+		ARCH='arm64'
+		NOABICHECK=1
+		;;
 	*)
 		echo ""
 		echo "!!! ERROR !!! - Unknown architecture `uname -m`"
@@ -314,11 +324,11 @@ else
 	fi
 fi
 
-#############################
-# Determine C11 stdlibc++ ABI
-#############################
+###############################
+# Determine C++11 stdlibc++ ABI
+###############################
 
-if test -z "$ABI"; then
+if test -z "$ABI" -a -z "$NOABICHECK"; then
 	if %REPLACE_GCC5%; then
 		# Ardour was compiled with gcc5, warn on gcc4 systems
 		if ! "${PKG_PATH}/.gcc-glibmm-abi-check" --gcc5; then
