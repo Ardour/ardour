@@ -606,8 +606,6 @@ DiskReader::overwrite_existing_audio ()
 
 		Sample* buf = (*chan)->rbuf->buffer();
 		ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (*chan);
-		samplecnt_t nn;
-		Sample smp = 0.5;
 
 		if (chunk1_cnt) {
 			if (audio_read (buf + chunk1_offset, mixdown_buffer.get(), gain_buffer.get(), start, chunk1_cnt, rci, n, reversed) != chunk1_cnt)  {
@@ -624,7 +622,7 @@ DiskReader::overwrite_existing_audio ()
 			}
 		}
 	}
-1
+
 	return ret;
 }
 
