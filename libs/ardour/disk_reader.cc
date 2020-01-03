@@ -269,7 +269,6 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	sampleoffset_t disk_samples_to_consume;
 	MonitorState ms = _track->monitoring_state ();
 
-	// std::cerr << name() << " run " << start_sample << " .. " << end_sample << " speed = " << speed << std::endl;
 	if (_active) {
 		if (!_pending_active) {
 			_active = false;
@@ -430,7 +429,9 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 	}
 
+
   midi:
+
 	/* MIDI data handling */
 
 	const bool midi_data_available = !(pending_overwrite() & PlaylistModified);
@@ -509,12 +510,45 @@ DiskReader::pending_overwrite () const
 void
 DiskReader::set_pending_overwrite (OverwriteReason why)
 {
+	boost::shared_ptr<ChannelList> c = channels.reader ();
+
 	/* called from audio thread, so we can use the read ptr and playback sample as we wish */
 
-	overwrite_sample = playback_sample;
-	boost::shared_ptr<ChannelList> c = channels.reader ();
 	if (!c->empty ()) {
+
+		const samplecnt_t reserved_size = c->front()->rbuf->reserved_size();
+		const samplecnt_t bufsize = c->front()->rbuf->bufsize ();
+
+		overwrite_sample = playback_sample - reserved_size;
+
 		overwrite_offset = c->front()->rbuf->read_ptr();
+
+		if (overwrite_offset > reserved_size) {
+
+			/*
+			  |----------------------------------------------------------------------|
+	                               ^               ^
+	                               RRRRRRRRRRRRRRRRoverwrite_offset  (old read_ptr)
+	                  |<- second ->|<------------------ first chunk ------------------------>|
+
+	                  Fill the the end of the buffer ("first chunk"), above
+			*/
+
+			overwrite_offset -= reserved_size;
+
+		} else {
+
+			/*
+			  |----------------------------------------------------------------------|
+	                  RRRRRRRRE^                                                     RRRRRRRRR
+	                           overwrite_offset  (old read_ptr)
+	                  |<                second chunk                                >|<first>|
+
+	                  Fill the end of the buffer ("R1R1R1" aka "first" above)
+			*/
+
+			overwrite_offset = bufsize - (reserved_size - overwrite_offset);
+		}
 	}
 
 	if (why & (LoopChanged|PlaylistModified|PlaylistChanged)) {
@@ -542,13 +576,27 @@ DiskReader::overwrite_existing_audio ()
 
 	const bool reversed = _session.transport_speed() < 0.0f;
 
-	/* assume all are the same size */
+	sampleoffset_t chunk1_offset;
+	samplecnt_t    chunk1_cnt;
+	samplecnt_t    chunk2_cnt;
 
-	samplecnt_t size = c->front()->rbuf->bufsize () - c->front()->rbuf->reserved_size() - 1;
-	assert (size > 0);
+	const samplecnt_t bufsize = c->front()->rbuf->bufsize ();
 
-	boost::scoped_array<Sample> mixdown_buffer (new Sample[size]);
-	boost::scoped_array<float> gain_buffer (new float[size]);
+	chunk1_offset = overwrite_offset;
+	chunk1_cnt = bufsize - overwrite_offset;
+
+	if (chunk1_cnt == bufsize) {
+		chunk1_cnt--;
+		chunk2_cnt = 0;
+	} else {
+		chunk2_cnt = bufsize - 1 - chunk1_cnt;
+	}
+
+	/* this is a complete buffer fill */
+	assert (chunk1_cnt + chunk2_cnt == bufsize - 1);
+
+	boost::scoped_array<Sample> mixdown_buffer (new Sample[bufsize]);
+	boost::scoped_array<float> gain_buffer (new float[bufsize]);
 	uint32_t n = 0;
 	bool ret = true;
 
@@ -556,38 +604,27 @@ DiskReader::overwrite_existing_audio ()
 
 		samplepos_t start = overwrite_sample;
 
-		/* to fill the buffer without resetting the playback sample, we need to
-		   do it one or two chunks (normally two).
-
-		   |----------------------------------------------------------------------|
-		                     ^               ^
-		                         RESERVED    overwrite_offset  (old read_ptr)
-		   |<- second chunk->|<-------------><---- first chunk ------------------>|
-
-		*/
-
-		samplecnt_t to_read = size - overwrite_offset;
 		Sample* buf = (*chan)->rbuf->buffer();
 		ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (*chan);
-		samplecnt_t nread;
+		samplecnt_t nn;
+		Sample smp = 0.5;
 
-		if ((nread = audio_read (buf + overwrite_offset, mixdown_buffer.get(), gain_buffer.get(), start, to_read, rci, n, reversed)) != to_read)  {
-			error << string_compose(_("DiskReader %1: when overwriting(1), cannot read %2 from playlist at sample %3"), id(), to_read, overwrite_sample) << endmsg;
-			ret = false;
-			continue;
+		if (chunk1_cnt) {
+			if (audio_read (buf + chunk1_offset, mixdown_buffer.get(), gain_buffer.get(), start, chunk1_cnt, rci, n, reversed) != chunk1_cnt)  {
+				error << string_compose(_("DiskReader %1: when overwriting(1), cannot read %2 from playlist at sample %3"), id(), chunk1_cnt, overwrite_sample) << endmsg;
+				ret = false;
+				continue;
+			}
 		}
 
-		if (size > to_read) {
-
-			to_read = size - to_read;
-
-			if ((nread = audio_read (buf, mixdown_buffer.get(), gain_buffer.get(), start, to_read, rci, n, reversed)) != to_read) {
-				error << string_compose(_("DiskReader %1: when overwriting(2), cannot read %2 from playlist at sample %3"), id(), to_read, overwrite_sample) << endmsg;
+		if (chunk2_cnt) {
+			if (audio_read (buf, mixdown_buffer.get(), gain_buffer.get(), start, chunk2_cnt, rci, n, reversed) != chunk2_cnt) {
+				error << string_compose(_("DiskReader %1: when overwriting(2), cannot read %2 from playlist at sample %3"), id(), chunk2_cnt, overwrite_sample) << endmsg;
 				ret = false;
 			}
 		}
 	}
-
+1
 	return ret;
 }
 
