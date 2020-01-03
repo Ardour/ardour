@@ -279,6 +279,7 @@ private:
 	Item * _focused_item;
 
 	bool _single_exposure;
+	bool _use_image_surface;
 
 	sigc::connection tooltip_timeout_connection;
 	Item* current_tooltip_item;
@@ -291,6 +292,7 @@ private:
 	bool _in_dtor;
 
 	void* _nsglview;
+	Cairo::RefPtr<Cairo::Surface> _canvas_image;
 };
 
 /** A GTK::Alignment with a GtkCanvas inside it plus some Gtk::Adjustments for

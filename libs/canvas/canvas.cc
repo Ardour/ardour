@@ -58,11 +58,12 @@ Canvas::Canvas ()
 	: _root (this)
 	, _bg_color (Gtkmm2ext::rgba_to_color (0, 1.0, 0.0, 1.0))
 	, _last_render_start_timestamp(0)
+	, _use_intermediate_surface (false)
 {
-#if (defined USE_CAIRO_IMAGE_SURFACE || defined __APPLE__)
+#ifdef __APPLE__
 	_use_intermediate_surface = true;
 #else
-	_use_intermediate_surface = NULL != getenv("ARDOUR_IMAGE_SURFACE");
+	_use_intermediate_surface = NULL != g_getenv("ARDOUR_INTERMEDIATE_SURFACE");
 #endif
 	set_epoch ();
 }
@@ -70,6 +71,9 @@ Canvas::Canvas ()
 void
 Canvas::use_intermediate_surface (bool yn)
 {
+	if (_use_intermediate_surface == yn) {
+		return;
+	}
 	_use_intermediate_surface = yn;
 }
 
@@ -442,12 +446,19 @@ GtkCanvas::GtkCanvas ()
 	, _new_current_item (0)
 	, _grabbed_item (0)
 	, _focused_item (0)
-	, _single_exposure (1)
+	, _single_exposure (true)
+	, _use_image_surface (false)
 	, current_tooltip_item (0)
 	, tooltip_window (0)
 	, _in_dtor (false)
 	, _nsglview (0)
 {
+#ifdef USE_CAIRO_IMAGE_SURFACE /* usually Windows builds */
+	_use_image_surface = true
+#else
+	_use_image_surface = NULL != g_getenv("ARDOUR_IMAGE_SURFACE");
+#endif
+
 	/* these are the events we want to know about */
 	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK |
 		    Gdk::SCROLL_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK |
@@ -847,6 +858,11 @@ GtkCanvas::on_size_allocate (Gtk::Allocation& a)
 {
 	EventBox::on_size_allocate (a);
 
+	if (_use_image_surface) {
+		_canvas_image.clear ();
+		_canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, a.get_width(), a.get_height());
+	}
+
 #ifdef __APPLE__
 	if (_nsglview) {
 		gint xx, yy;
@@ -880,7 +896,15 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	const int64_t start = g_get_monotonic_time ();
 #endif
 
-	Cairo::RefPtr<Cairo::Context> draw_context = get_window()->create_cairo_context ();
+	Cairo::RefPtr<Cairo::Context> draw_context;
+	if (_use_image_surface) {
+		if (!_canvas_image) {
+			_canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
+		}
+		draw_context = Cairo::Context::create (_canvas_image);
+	} else {
+		draw_context = get_window()->create_cairo_context ();
+	}
 
 	draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	draw_context->clip();
@@ -901,7 +925,7 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	 *
 	 * Fixing this for good likely involves changes to GdkQuartzWindow, GdkQuartzView
 	 */
-	if (_use_intermediate_surface) {
+	if (_use_intermediate_surface && !_use_image_surface) {
 		draw_context->push_group ();
 	}
 
@@ -911,7 +935,7 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	draw_context->fill ();
 
 	/* render canvas */
-	if ( _single_exposure ) {
+	if (_single_exposure) {
 
 		Canvas::render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
 
@@ -927,10 +951,19 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 		g_free (rects);
 	}
 
-	if (_use_intermediate_surface) {
+	if (_use_image_surface) {
+		_canvas_image->flush ();
+		Cairo::RefPtr<Cairo::Context> window_context = get_window()->create_cairo_context ();
+		window_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+		window_context->clip ();
+		window_context->set_source (_canvas_image, 0, 0);
+		window_context->set_operator (Cairo::OPERATOR_SOURCE);
+		window_context->paint ();
+	} else if (_use_intermediate_surface) {
 		draw_context->pop_group_to_source ();
 		draw_context->paint ();
 	}
+
 
 #ifdef CANVAS_PROFILE
 	const int64_t end = g_get_monotonic_time ();
