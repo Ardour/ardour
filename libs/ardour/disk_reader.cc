@@ -568,6 +568,61 @@ DiskReader::set_pending_overwrite (OverwriteReason why)
 bool
 DiskReader::overwrite_existing_audio ()
 {
+	/* This is a tricky and/or clever little method. Let's try to describe
+	 * precisely what it does.
+	 *
+	 * Our goal is to completely overwrite the playback buffers for each
+	 * audio channel with new data. The wrinkle is that we want to preserve
+	 * the EXACT mapping between a given timeline position and buffer
+	 * offset that existed when we requested an overwrite. That is, if the
+	 * Nth position in the buffer contained the sample corresponding to
+	 * timeline position T, then once this is complete that condition
+	 * should still hold. The actual value of the sample (and even when it
+	 * corresponds to any actual material on disk - it may just be silence)
+	 * may change, but this buffer_offset<->timeline_position mapping must
+	 * remain constant.
+	 *
+	 * Why do this? There are many reasons. A trivial example is that the
+	 * region gain level for one region has been changed, and the user
+	 * should be able to hear the result.
+	 *
+	 * In ::set_pending_overwrite() (above) we stored a sample and a buffer
+	 * offset. These corresponded to the next sample to be played and the
+	 * buffer position holding that sample. We were able to determine this
+	 * pair atomically because ::set_pending_overwrite() is called from
+	 * within process context, and thus neither playback_sample nor the
+	 * buffer read ptr can change while it runs. We computed the earliest
+	 * sample/timeline position in the buffer (at the start of the reserved
+	 * zone, if any) and its corresponding buffer offset.
+	 *
+	 * Here, we will refill the buffer, starting with the sample and buffer
+	 * offset computed by ::set_pending_overwrite(). Typically this will
+	 * take two reads from the playlist, because our read will be "split"
+	 * by the end of the buffer (i.e. we fill from some mid-buffer point to
+	 * the end, then fill from the start to the mid-buffer point, as is
+	 * common with ring buffers).
+	 *
+	 * Note that the process thread may indeed access the buffer while we
+	 * are doing this. There is a strong likelihood of colliding read/write
+	 * between this thread (the butler) and a process thread. But we don't
+	 * care: we know that the samples being read/written will correspond to
+	 * the same timeline position, and that the user has just done
+	 * something forcing us to update the value(s). Given that a Sample is
+	 * currently (and likely forever) a floating point value, and that on
+	 * many/most architectures, a store for a floating point value is
+	 * non-atomic, there is some chance of the process read reading a
+	 * sample value while it is being written. This could theoretically
+	 * cause a brief glitch, but no more or less than any other
+	 * "discontinuity" in the sample's value will.
+	 *
+	 * It goes without saying that this relies on being serialized within
+	 * the butler thread with respect any other buffer write operation
+	 * (e.g. via ::refill()). It should also be noted that it has no effect
+	 * at all on the write-related members of the playback buffer - we
+	 * simply replace the contents of the buffer.
+	 */
+
+
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	if (c->empty () || !_playlists[DataType::AUDIO]) {
