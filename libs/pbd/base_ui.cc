@@ -136,10 +136,6 @@ BaseUI::request_handler (Glib::IOCondition ioc)
 {
 	/* check the request pipe */
 
-	if (ioc & ~IO_IN) {
-		_main_loop->quit ();
-	}
-
 	if (ioc & IO_IN) {
 		request_channel.drain ();
 
@@ -151,6 +147,10 @@ BaseUI::request_handler (Glib::IOCondition ioc)
 
 		DEBUG_TRACE (DEBUG::EventLoop, string_compose ("%1: request handler\n", event_loop_name()));
 		handle_ui_requests ();
+	}
+
+	if (ioc & ~(IO_IN|IO_PRI)) {
+		_main_loop->quit ();
 	}
 
 	return true;
