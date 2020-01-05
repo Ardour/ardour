@@ -489,6 +489,10 @@ public:
 	void abort_reversible_command ();
 	void commit_reversible_command ();
 
+	MixerStrip* get_current_mixer_strip () const {
+		return current_mixer_strip;
+	}
+
 	DragManager* drags () const {
 		return _drags;
 	}

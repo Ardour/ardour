@@ -86,6 +86,7 @@ class DragManager;
 class Editor;
 class ArdourMarker;
 class MeterMarker;
+class MixerStrip;
 class MouseCursors;
 class PlaylistSelector;
 class PluginSelector;
@@ -445,6 +446,8 @@ public:
 
 	virtual TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const = 0;
 	virtual TrackViewList const & get_track_views () const = 0;
+
+	virtual MixerStrip* get_current_mixer_strip () const = 0;
 
 	virtual DragManager* drags () const = 0;
 	virtual bool drag_active () const = 0;
