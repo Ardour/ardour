@@ -454,7 +454,7 @@ GtkCanvas::GtkCanvas ()
 	, _nsglview (0)
 {
 #ifdef USE_CAIRO_IMAGE_SURFACE /* usually Windows builds */
-	_use_image_surface = true
+	_use_image_surface = true;
 #else
 	_use_image_surface = NULL != g_getenv("ARDOUR_IMAGE_SURFACE");
 #endif
