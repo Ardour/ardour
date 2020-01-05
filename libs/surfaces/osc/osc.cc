@@ -684,12 +684,12 @@ OSC::register_callbacks()
 bool
 OSC::osc_input_handler (IOCondition ioc, lo_server srv)
 {
-	if (ioc & ~IO_IN) {
-		return false;
-	}
-
 	if (ioc & IO_IN) {
 		lo_server_recv (srv);
+	}
+
+	if (ioc & ~(IO_IN|IO_PRI)) {
+		return false;
 	}
 
 	return true;
