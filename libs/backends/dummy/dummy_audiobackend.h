@@ -123,11 +123,13 @@ class DummyPort {
 		void _disconnect (DummyPort* , bool);
 
 	protected:
-		// random number generator
+		/* random number generator */
 		void setup_random_number_generator ();
 		inline float    randf ();
 		inline uint32_t randi ();
 		uint32_t _rseed;
+		/* engine time */
+		pframes_t pulse_position () const;
 
 		// signal generator
 		volatile bool _gen_cycle;
@@ -162,6 +164,7 @@ class DummyAudioPort : public DummyPort {
 			SineSweepSwell,
 			SquareSweep,
 			SquareSweepSwell,
+			OneHz,
 			LTC,
 			Loopback,
 		};
@@ -389,6 +392,7 @@ class DummyAudioBackend : public AudioBackend {
 		enum MidiPortMode {
 			MidiNoEvents,
 			MidiGenerator,
+			MidiOneHz,
 			MidiLoopback,
 			MidiToAudio,
 		};
