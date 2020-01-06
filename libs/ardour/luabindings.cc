@@ -177,6 +177,7 @@ CLASSINFO(TimeAxisViewItem);
 CLASSINFO(TimeSelection);
 CLASSINFO(TrackSelection);
 CLASSINFO(TrackViewList);
+CLASSINFO(UIConfiguration);
 
 
 /* this needs to match gtk2_ardour/luasignal.h */
@@ -314,8 +315,6 @@ CLASSKEYS(LuaCairo::PangoLayout);
 CLASSKEYS(LuaDialog::Message);
 CLASSKEYS(LuaDialog::Dialog);
 CLASSKEYS(LuaDialog::ProgressWindow);
-
-CLASSKEYS(UIConfiguration);
 
 #endif // end windows special case
 
