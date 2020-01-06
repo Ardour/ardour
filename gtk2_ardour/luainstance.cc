@@ -56,6 +56,7 @@
 #include "selection.h"
 #include "script_selector.h"
 #include "timers.h"
+#include "ui_config.h"
 #include "utils_videotl.h"
 
 #include "pbd/i18n.h"
@@ -401,6 +402,12 @@ namespace LuaMixer {
 static void mixer_screenshot (const std::string& fn) {
 	Mixer_UI::instance()->screenshot (fn);
 }
+
+/** Access libardour global configuration */
+static UIConfiguration* _ui_config () {
+	return &UIConfiguration::instance();
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1067,6 +1074,21 @@ LuaInstance::register_classes (lua_State* L)
 		.endNamespace ()
 
 		.addCFunction ("actionlist", &lua_actionlist)
+
+
+		.beginClass <UIConfiguration> ("UIConfiguration")
+#undef  UI_CONFIG_VARIABLE
+#define UI_CONFIG_VARIABLE(Type,var,name,value) \
+		.addFunction ("get_" # var, &UIConfiguration::get_##var) \
+		.addFunction ("set_" # var, &UIConfiguration::set_##var) \
+		.addProperty (#var, &UIConfiguration::get_##var, &UIConfiguration::set_##var)
+
+#include "ui_config_vars.h"
+
+#undef UI_CONFIG_VARIABLE
+		.endClass()
+
+		.addFunction ("config", &_ui_config)
 
 		.endNamespace () // end ArdourUI
 
