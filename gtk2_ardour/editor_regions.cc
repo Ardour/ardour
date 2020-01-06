@@ -512,6 +512,11 @@ EditorRegions::redisplay ()
 		return;
 	}
 
+	//store sort column id and type for later
+	int sort_col_id;
+	Gtk::SortType sort_type;
+	_model->get_sort_column_id(sort_id, type);
+
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore> (0));
 	_model->clear ();
 	_model->set_sort_column (-2, SORT_ASCENDING); //Disable sorting to gain performance
@@ -520,7 +525,7 @@ EditorRegions::redisplay ()
 
 	RegionFactory::foreach_region (sigc::mem_fun (*this, &EditorRegions::add_region));
 
-	_model->set_sort_column (0, SORT_ASCENDING); // renabale sorting
+	_model->set_sort_column (sort_col_id, sort_type); // renabale sorting
 	_display.set_model (_model);
 }
 
