@@ -105,7 +105,6 @@
 #include "ardour/lv2_plugin.h"
 #endif
 #include "ardour/midi_model.h"
-#include "ardour/midi_patch_manager.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_scene_changer.h"
 #include "ardour/midi_source.h"
@@ -396,10 +395,6 @@ Session::post_engine_init ()
 	send_immediate_mmc (MIDI::MachineControlCommand (Timecode::Time ()));
 
 	ltc_tx_initialize();
-
-	MIDI::Name::MidiPatchManager::instance().add_search_path (session_directory().midi_patch_path() );
-	MIDI::Name::MidiPatchManager::instance().load_midnams_in_thread ();
-	/* initial program change will be delivered later; see ::config_changed() */
 
 	_state_of_the_state = Clean;
 

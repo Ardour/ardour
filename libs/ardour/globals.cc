@@ -111,6 +111,7 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_ui.h"
+#include "ardour/midi_patch_manager.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/mix.h"
 #include "ardour/operations.h"
@@ -610,6 +611,8 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	reserved_io_names[_("FaderPort8 Send")] = false;
 	reserved_io_names[_("FaderPort16 Recv")] = false;
 	reserved_io_names[_("FaderPort16 Send")] = false;
+
+	MIDI::Name::MidiPatchManager::instance().load_midnams_in_thread ();
 
 	libardour_initialized = true;
 
