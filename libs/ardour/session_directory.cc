@@ -221,12 +221,6 @@ SessionDirectory::midi_path () const
 }
 
 const std::string
-SessionDirectory::midi_patch_path () const
-{
-	return Glib::build_filename (sources_root(), midi_patch_dir_name);
-}
-
-const std::string
 SessionDirectory::video_path () const
 {
 	return Glib::build_filename (sources_root(), video_dir_name);

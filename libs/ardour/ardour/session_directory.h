@@ -80,13 +80,6 @@ public:
 	const std::string midi_path () const;
 
 	/**
-	 * @return the absolute path to the directory in which
-	 * the session stores MIDNAM patch files, ie
-	 * root_path()/interchange/session_name/patchfiles
-	 */
-	const std::string midi_patch_path () const;
-
-	/**
 	 * @return The absolute path to the directory in which all
 	 * peak files are stored for a session.
 	 */

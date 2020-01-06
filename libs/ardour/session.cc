@@ -561,8 +561,6 @@ Session::destroy ()
 	/* stop auto dis/connecting */
 	auto_connect_thread_terminate ();
 
-	MIDI::Name::MidiPatchManager::instance().remove_search_path(session_directory().midi_patch_path());
-
 	_engine.remove_session ();
 
 	/* deregister all ports - there will be no process or any other
