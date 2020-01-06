@@ -53,7 +53,7 @@ public:
 	typedef std::map<std::string, boost::shared_ptr<MIDINameDocument> >    MidiNameDocuments;
 	typedef std::map<std::string, MIDINameDocument::MasterDeviceNamesList> DeviceNamesByMaker;
 
-	virtual ~MidiPatchManager() { _manager = 0; }
+        ~MidiPatchManager();
 
 	static MidiPatchManager& instance() {
 		if (_manager == 0) {
@@ -172,8 +172,8 @@ private:
 
 	Glib::Threads::Mutex _lock;
 	bool no_patch_changed_messages;
-	pthread_t _midnam_load_thread;
-	static void* _midnam_load (void *);
+	bool stop_thread;
+	Glib::Threads::Thread* _midnam_load_thread;
 	void load_midnams ();
 };
 

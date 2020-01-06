@@ -45,8 +45,17 @@ MidiPatchManager* MidiPatchManager::_manager = 0;
 
 MidiPatchManager::MidiPatchManager ()
 	: no_patch_changed_messages (false)
+	, stop_thread (false)
 {
 	add_search_path (midi_patch_search_path ());
+}
+
+MidiPatchManager::~MidiPatchManager ()
+{
+	_manager = 0;
+
+	stop_thread = true;
+	_midnam_load_thread->join ();
 }
 
 void
@@ -116,6 +125,9 @@ MidiPatchManager::add_midnam_files_from_directory(const std::string& directory_p
 	info << string_compose (P_("Loading %1 MIDI patch from %2", "Loading %1 MIDI patches from %2", result.size()), result.size(), directory_path) << endmsg;
 
 	for (vector<std::string>::const_iterator i = result.begin(); i != result.end(); ++i) {
+		if (stop_thread) {
+			break;
+		}
 		load_midi_name_document (*i);
 	}
 }
@@ -142,8 +154,8 @@ MidiPatchManager::remove_midnam_files_from_directory(const std::string& director
 	find_files_matching_pattern (result, directory_path, "*.midnam");
 
 	info << string_compose(
-			P_("Unloading %1 MIDI patch from %2", "Unloading %1 MIDI patches from %2", result.size()),
-			result.size(), directory_path)
+		P_("Unloading %1 MIDI patch from %2", "Unloading %1 MIDI patches from %2", result.size()),
+		result.size(), directory_path)
 	     << endmsg;
 
 	for (vector<std::string>::const_iterator i = result.begin(); i != result.end(); ++i) {
@@ -181,7 +193,7 @@ MidiPatchManager::add_midi_name_document (boost::shared_ptr<MIDINameDocument> do
 {
 	bool added = false;
 	for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
-	         document->master_device_names_by_model().begin();
+		     document->master_device_names_by_model().begin();
 	     device != document->master_device_names_by_model().end();
 	     ++device) {
 		if (_documents.find(device->first) != _documents.end()) {
@@ -202,7 +214,7 @@ MidiPatchManager::add_midi_name_document (boost::shared_ptr<MIDINameDocument> do
 			_devices_by_manufacturer.insert(std::make_pair(manufacturer, empty));
 		}
 		_devices_by_manufacturer[manufacturer].insert(
-		    std::make_pair(device->first, device->second));
+			std::make_pair(device->first, device->second));
 
 		added = true;
 		// TODO: handle this gracefully.
@@ -231,7 +243,7 @@ MidiPatchManager::remove_midi_name_document (const std::string& file_path, bool 
 			_documents.erase(i++);
 
 			for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
-			         document->master_device_names_by_model().begin();
+				     document->master_device_names_by_model().begin();
 			     device != document->master_device_names_by_model().end();
 			     ++device) {
 
@@ -254,14 +266,6 @@ MidiPatchManager::remove_midi_name_document (const std::string& file_path, bool 
 	return removed;
 }
 
-void*
-MidiPatchManager::_midnam_load (void* arg)
-{
-	MidiPatchManager* mpm = (MidiPatchManager *) arg;
-	mpm->load_midnams ();
-	return 0;
-}
-
 void
 MidiPatchManager::load_midnams ()
 {
@@ -278,14 +282,14 @@ MidiPatchManager::load_midnams ()
 			add_midnam_files_from_directory (*i);
 		}
 	}
-	
+
 	PatchesChanged (); /* EMIT SIGNAL */
 }
 
 void
 MidiPatchManager::load_midnams_in_thread ()
 {
-	pthread_create_and_store (X_("midnam"), &_midnam_load_thread, _midnam_load, this);
+	_midnam_load_thread = Glib::Threads::Thread::create (sigc::mem_fun (*this, &MidiPatchManager::load_midnams));
 }
 
 void
