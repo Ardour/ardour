@@ -315,6 +315,8 @@ CLASSKEYS(LuaDialog::Message);
 CLASSKEYS(LuaDialog::Dialog);
 CLASSKEYS(LuaDialog::ProgressWindow);
 
+CLASSKEYS(UIConfiguration);
+
 #endif // end windows special case
 
 /* Some notes on Lua bindings for libardour and friends
