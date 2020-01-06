@@ -85,13 +85,17 @@ XMLTree::read_internal(bool validate)
 		_doc = 0;
 	}
 
+	/* Calling this prevents libxml2 from treating whitespace as active
+	   nodes. It needs to be called before we create a parser context.
+	*/
+	xmlKeepBlanksDefault(0);
+
 	/* create a parser context */
 	xmlParserCtxtPtr ctxt = xmlNewParserCtxt();
 	if (ctxt == NULL) {
 		return false;
 	}
 
-	xmlKeepBlanksDefault(0);
 	/* parse the file, activating the DTD validation option */
 	if (validate) {
 		_doc = xmlCtxtReadFile(ctxt, _filename.c_str(), NULL, XML_PARSE_DTDVALID);
