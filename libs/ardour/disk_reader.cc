@@ -1327,8 +1327,9 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 				const Evoral::Range<samplepos_t> loop_range (loc->start(), loc->end() - 1);
 				samplepos_t effective_start = start_sample;
 				samplecnt_t cnt = nframes;
+				sampleoffset_t offset = 0;
 
-				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("LOOP read, loop is %1..%2 range is %3..%4\n", loc->start(), loc->end(), start_sample, end_sample));
+				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("LOOP read, loop is %1..%2 range is %3..%4 nf %5\n", loc->start(), loc->end(), start_sample, end_sample, nframes));
 
 				do {
 
@@ -1352,6 +1353,7 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 						/* We re going to have to read across the loop end. Resolve any notes the extend across the loop end.
 						 * Time is relative to start_sample.
 						 */
+						DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("read crosses loop end, resolve @ %1\n", effective_end - start_sample));
 						_tracker.resolve_notes (*target, effective_end - start_sample);
 					}
 
