@@ -365,8 +365,10 @@ Port::set_public_latency_range (LatencyRange const& range, bool playback) const
 			r.min *= _speed_ratio;
 			r.max *= _speed_ratio;
 #endif
-			r.min += (_resampler_quality - 1);
-			r.max += (_resampler_quality - 1);
+			if (type () == DataType::AUDIO) {
+				r.min += (_resampler_quality - 1);
+				r.max += (_resampler_quality - 1);
+			}
 		}
 		port_engine.set_latency_range (_port_handle, playback, r);
 	}
@@ -429,8 +431,10 @@ Port::public_latency_range (bool /*playback*/) const
 			r.min /= _speed_ratio;
 			r.max /= _speed_ratio;
 #endif
-			r.min += (_resampler_quality - 1);
-			r.max += (_resampler_quality - 1);
+			if (type () == DataType::AUDIO) {
+				r.min += (_resampler_quality - 1);
+				r.max += (_resampler_quality - 1);
+			}
 		}
 
 		DEBUG_TRACE (DEBUG::Latency, string_compose (
@@ -476,8 +480,10 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 						lr.min /= _speed_ratio;
 						lr.max /= _speed_ratio;
 #endif
-						lr.min += (_resampler_quality - 1);
-						lr.max += (_resampler_quality - 1);
+						if (type () == DataType::AUDIO) {
+							lr.min += (_resampler_quality - 1);
+							lr.max += (_resampler_quality - 1);
+						}
 					}
 
 					DEBUG_TRACE (DEBUG::Latency, string_compose (
