@@ -165,7 +165,7 @@ RTMidiBuffer::dump (uint32_t cnt)
 
 			/* more than 3 bytes ... indirect */
 
-			uint32_t offset = item->offset & ~(1<<(sizeof(uint8_t)-1));
+			uint32_t offset = item->offset & ~(1<<(CHAR_BIT-1));
 			Blob* blob = reinterpret_cast<Blob*> (&_pool[offset]);
 
 			size = blob->size;
@@ -205,7 +205,7 @@ RTMidiBuffer::write (TimeType time, Evoral::EventType /*type*/, uint32_t size, c
 		uint32_t off = store_blob (size, buf);
 
 		/* non-zero MSbit indicates that the data (more than 3 bytes) is not inline */
-		_data[_size].offset = (off | (1<<(sizeof(uint8_t)-1)));
+		_data[_size].offset = (off | (1<<(CHAR_BIT-1)));
 
 	} else {
 
@@ -312,7 +312,7 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiSta
 
 			/* more than 3 bytes ... indirect */
 
-			uint32_t offset = item->offset & ~(1<<(sizeof(uint8_t)-1));
+			uint32_t offset = item->offset & ~(1<<(CHAR_BIT-1));
 			Blob* blob = reinterpret_cast<Blob*> (&_pool[offset]);
 
 			size = blob->size;
