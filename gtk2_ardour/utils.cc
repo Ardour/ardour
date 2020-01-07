@@ -775,7 +775,7 @@ ARDOUR_UI_UTILS::samples_as_time_string (samplecnt_t s, float rate, bool show_sa
 		snprintf (buf, sizeof (buf), "0");
 	} else if (s < 1000 && show_samples) {
 		/* 0 .. 999 spl */
-		snprintf (buf, sizeof (buf), PRId64" spl", s);
+		snprintf (buf, sizeof (buf), "%" PRId64" spl", s);
 	} else if (s < (rate / 1000.f)) {
 		/* 0 .. 999 usec */
 		snprintf (buf, sizeof (buf), "%.0f \u00B5s", s * 1e+6f / rate);
