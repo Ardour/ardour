@@ -1668,8 +1668,6 @@ PluginManager::save_plugin_order_file (XMLNode &elem) const
 {
 	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "plugin_order");
 
-	info << string_compose (_("Saving plugin order file %1"), path) << endmsg;
-
 	XMLTree tree;
 	tree.set_root (&elem);
 	if (!tree.write (path)) {
