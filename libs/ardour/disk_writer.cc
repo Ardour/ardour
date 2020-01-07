@@ -991,7 +991,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 
 		if (force_flush) {
 			/* push out everything we have, right now */
-			to_write = UINT32_MAX;
+			to_write = total;
 		} else {
 			to_write = _chunk_samples;
 		}
