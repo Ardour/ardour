@@ -318,12 +318,12 @@ Source::inc_use_count ()
 {
     g_atomic_int_inc (&_use_count);
 
-	try {
-		boost::shared_ptr<Source> sptr = shared_from_this();
-		SourcePropertyChanged (sptr);
-	} catch (...) {
-		/* no shared_ptr available, relax; */
-	}
+    try {
+	    boost::shared_ptr<Source> sptr = shared_from_this();
+	    SourcePropertyChanged (sptr);
+    } catch (...) {
+	    /* no shared_ptr available, relax; */
+    }
 }
 
 void
