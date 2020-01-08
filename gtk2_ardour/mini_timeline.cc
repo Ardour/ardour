@@ -57,7 +57,6 @@ MiniTimeline::MiniTimeline ()
 {
 	add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
 
-	use_intermediate_surface ();
 	_layout = Pango::Layout::create (get_pango_context());
 
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &MiniTimeline::set_colors));
@@ -510,6 +509,8 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		return;
 	}
 
+	cairo_push_group (cr);
+
 	const int width = get_width ();
 	const int height = get_height ();
 
@@ -521,6 +522,8 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	cairo_clip (cr);
 
 	if (_session == 0) {
+		cairo_pop_group_to_source (cr);
+		cairo_paint (cr);
 		return;
 	}
 
@@ -662,6 +665,9 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	cairo_rel_line_to (cr,  3,  4);
 	cairo_close_path (cr);
 	cairo_fill (cr);
+
+	cairo_pop_group_to_source (cr);
+	cairo_paint (cr);
 }
 
 void
