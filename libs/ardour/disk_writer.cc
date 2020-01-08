@@ -166,7 +166,7 @@ DiskWriter::check_record_status (samplepos_t transport_sample, double speed, boo
 			_last_recordable_sample = max_samplepos;
 		}
 
-		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: @ %2 (STS: %3) CS:%4 FRS: %5 IL: %7, OL: %8 CO: %r9 PO: %10 WOL: %11 WIL: %12\n",
+		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: @ %2 (STS: %3) CS:%4 FRS: %5 IL: %7, OL: %8 CO: %9 PO: %10 WOL: %11 WIL: %12\n",
 		                                                      name(),
 		                                                      transport_sample,
 		                                                      _session.transport_sample(),
