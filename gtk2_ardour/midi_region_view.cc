@@ -1756,12 +1756,11 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 	const double session_source_start = _region->quarter_note() - mr->start_beats();
 	const samplepos_t note_start_samples = map.sample_at_quarter_note (note->time().to_double() + session_source_start) - _region->position();
 
-	const double x0 = trackview.editor().sample_to_pixel (note_start_samples);
+	const double x0 = max (0.,trackview.editor().sample_to_pixel (note_start_samples));
 	double x1;
 	const double y0 = 1 + floor(note_to_y(note->note()));
 	double y1;
 
-	/* trim note display to not overlap the end of its region */
 	if (note->length().to_double() > 0.0) {
 		double note_end_time = note->end_time().to_double();
 
