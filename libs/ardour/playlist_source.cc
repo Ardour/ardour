@@ -52,6 +52,7 @@ PlaylistSource::PlaylistSource (Session& s, const ID& orig, const std::string& n
 	_flags = Flag (_flags & ~(Writable|CanRename|Removable|RemovableIfEmpty|RemoveAtDestroy|Destructive));
 
 	_playlist = p;
+	_playlist->use ();
 	_playlist_offset = begin;
 	_playlist_length = len;
 
@@ -72,6 +73,7 @@ PlaylistSource::PlaylistSource (Session& s, const XMLNode& node)
 
 PlaylistSource::~PlaylistSource ()
 {
+	_playlist->release ();
 }
 
 void
