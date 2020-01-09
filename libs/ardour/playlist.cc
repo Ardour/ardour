@@ -3177,6 +3177,10 @@ Playlist::combine (const RegionList& r)
 
 	boost::shared_ptr<Region> compound_region = RegionFactory::create (parent_region, plist, true);
 
+	for (SourceList::iterator s = sources.begin(); s != sources.end(); ++s) {
+		boost::dynamic_pointer_cast<PlaylistSource>(*s)->set_owner (compound_region->id());
+	}
+
 	/* remove all the selected regions from the current playlist */
 
 	freeze ();

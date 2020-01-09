@@ -37,10 +37,14 @@ public:
 	int set_state (const XMLNode&, int version);
 	boost::shared_ptr<const Playlist> playlist() const { return _playlist; }
 	const PBD::ID& original() const { return _original; }
+	const PBD::ID& owner() const { return _owner; }
+
+	void set_owner (PBD::ID const & id);
 
 protected:
 	boost::shared_ptr<Playlist> _playlist;
 	PBD::ID                     _original;
+	PBD::ID                     _owner;
 	sampleoffset_t              _playlist_offset;
 	samplecnt_t                 _playlist_length;
 

@@ -47,6 +47,7 @@ PlaylistSource::PlaylistSource (Session& s, const ID& orig, const std::string& n
 	: Source (s, type, name)
 	, _playlist (p)
 	, _original (orig)
+	, _owner (0) /* zero is never a legal ID for an object */
 {
 	/* PlaylistSources are never writable, renameable, removable or destructive */
 	_flags = Flag (_flags & ~(Writable|CanRename|Removable|RemovableIfEmpty|RemoveAtDestroy|Destructive));
@@ -77,12 +78,24 @@ PlaylistSource::~PlaylistSource ()
 }
 
 void
+PlaylistSource::set_owner (PBD::ID const &id)
+{
+	if (_owner == 0) {
+		_owner = id;
+	}
+}
+
+void
 PlaylistSource::add_state (XMLNode& node)
 {
 	node.set_property ("playlist", _playlist->id ());
 	node.set_property ("offset", _playlist_offset);
 	node.set_property ("length", _playlist_length);
 	node.set_property ("original", _original);
+
+	if (_owner != 0) {
+		node.set_property ("owner", _owner);
+	}
 
 	node.add_child_nocopy (_playlist->get_state());
 }
@@ -138,6 +151,12 @@ PlaylistSource::set_state (const XMLNode& node, int /*version*/)
 	if (!node.get_property (X_("original"), _original)) {
 		throw failed_constructor ();
 	}
+
+	/* this is allowed to fail. It either means an older session file
+	   format, or a PlaylistSource that wasn't created for a combined
+	   region (whose ID would be stored in _owner).
+	*/
+	node.get_property (X_("owner"), _owner);
 
 	_level = _playlist->max_source_level () + 1;
 
