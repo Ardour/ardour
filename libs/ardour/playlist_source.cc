@@ -82,7 +82,7 @@ PlaylistSource::add_state (XMLNode& node)
 	node.set_property ("playlist", _playlist->id ());
 	node.set_property ("offset", _playlist_offset);
 	node.set_property ("length", _playlist_length);
-	node.set_property ("original", id());
+	node.set_property ("original", _original);
 
 	node.add_child_nocopy (_playlist->get_state());
 }
@@ -135,16 +135,9 @@ PlaylistSource::set_state (const XMLNode& node, int /*version*/)
 		throw failed_constructor ();
 	}
 
-	/* XXX not quite sure why we set our ID back to the "original" one
-	   here. october 2011, paul
-	*/
-
-	std::string str;
-	if (!node.get_property (X_("original"), str)) {
+	if (!node.get_property (X_("original"), _original)) {
 		throw failed_constructor ();
 	}
-
-	set_id (str);
 
 	_level = _playlist->max_source_level () + 1;
 
