@@ -3248,7 +3248,9 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 	   the original regions that we find, and add them
 	   instead.
 	*/
-	bool same_playlist = (pls->original() == id());
+
+	const bool need_copies = (boost::dynamic_pointer_cast<PlaylistSource> (pls)->owner() != target->id()) ||
+		(pls->original() != id());
 
 	for (RegionList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
 
@@ -3270,7 +3272,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 			adjusted_end = adjusted_start + target->length();
 		}
 
-		if (!same_playlist) {
+		if (need_copies) {
 			samplepos_t pos = original->position();
 			/* make a copy, but don't announce it */
 			original = RegionFactory::create (original, false);
