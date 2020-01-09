@@ -3238,7 +3238,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 	RegionFactory::CompoundAssociations& cassocs (RegionFactory::compound_associations());
 	sampleoffset_t move_offset = 0;
 
-	/* there are two possibilities here:
+	/* there are three possibilities here:
 	   1) the playlist that the playlist source was based on
 	   is us, so just add the originals (which belonged to
 	   us anyway) back in the right place.
@@ -3247,6 +3247,10 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 	   is NOT us, so we need to make copies of each of
 	   the original regions that we find, and add them
 	   instead.
+
+	   3) target region is a copy of a compount region previously
+	   created. In this case we will also need to make copies ot each of
+	   the original regions, and add them instead.
 	*/
 
 	const bool need_copies = (boost::dynamic_pointer_cast<PlaylistSource> (pls)->owner() != target->id()) ||
