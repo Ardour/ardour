@@ -552,9 +552,7 @@ LV2PluginUI::resizable()
 int
 LV2PluginUI::package(Gtk::Window& win)
 {
-	if (_external_ui_ptr) {
-		_win_ptr = &win;
-	} else {
+	if (!_external_ui_ptr) {
 		/* forward configure events to plugin window */
 		win.signal_configure_event().connect(
 			sigc::mem_fun(*this, &LV2PluginUI::configure_handler));

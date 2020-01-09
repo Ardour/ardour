@@ -96,7 +96,6 @@ private:
 	LV2_Feature                          _lv2ui_request_feature;
 	struct lv2_external_ui*              _external_ui_ptr;
 	LV2_Feature                          _parent_feature;
-	Gtk::Window*                         _win_ptr;
 	void*                                _inst;
 	typedef std::set<uint32_t> Updates;
 	Updates                              _updates;
