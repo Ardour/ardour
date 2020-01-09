@@ -211,10 +211,8 @@ public:
 	void finish();
 
 	int load_session (const std::string& path, const std::string& snapshot, std::string mix_template = std::string());
-	int load_session_stage_two (const std::string& path, const std::string& snapshot, std::string mix_template = std::string());
-	void audio_midi_setup_reconfigure_done (int response, std::string path, std::string snapshot, std::string mix_template);
 	bool session_load_in_progress;
-	int build_session (const std::string& path, const std::string& snapshot, ARDOUR::BusProfile const *);
+	int build_session (std::string const& path, std::string const& snapshot, std::string const& session_template, ARDOUR::BusProfile const&, bool from_startup_fsm = false);
 	bool session_is_new() const { return _session_is_new; }
 
 	ARDOUR::Session* the_session() { return _session; }
@@ -226,7 +224,7 @@ public:
 
 	void start_session_load (bool create_new);
 	void session_dialog_response_handler (int response, SessionDialog* session_dialog);
-	int  build_session_from_dialog (SessionDialog&, const std::string& session_name, const std::string& session_path);
+	void build_session_from_dialog (SessionDialog&, std::string const& session_name, std::string const& session_path, std::string const& session_template);
 	bool ask_about_loading_existing_session (const std::string& session_path);
 	int load_session_from_startup_fsm ();
 
@@ -452,7 +450,13 @@ private:
 	void startup_done ();
 	void sfsm_response (StartupFSM::Result);
 
-	int  ask_about_saving_session (const std::vector<std::string>& actions);
+	int ask_about_saving_session (const std::vector<std::string>& actions);
+
+	void audio_midi_setup_reconfigure_done (int response, std::string path, std::string snapshot, std::string mix_template);
+	int  load_session_stage_two (const std::string& path, const std::string& snapshot, std::string mix_template = std::string());
+	void audio_midi_setup_for_new_session_done (int response, std::string path, std::string snapshot, std::string session_template, ARDOUR::BusProfile const&);
+	int  build_session_stage_two (std::string const& path, std::string const& snapshot, std::string const& session_template, ARDOUR::BusProfile const&);
+	sigc::connection _engine_dialog_connection;
 
 	void save_session_at_its_request (std::string);
 	/* periodic safety backup, to be precise */

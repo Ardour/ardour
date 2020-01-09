@@ -105,8 +105,8 @@ ARDOUR_UI::ask_about_loading_existing_session (const std::string& session_path)
 	return false;
 }
 
-int
-ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& session_path, const std::string& session_name)
+void
+ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& session_path, const std::string& session_name, std::string const& session_template)
 {
 	BusProfile bus_profile;
 
@@ -119,12 +119,7 @@ ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& sess
 		bus_profile.master_out_channels = (uint32_t) sd.master_channel_count();
 	}
 
-	// NULL profile: no master, no monitor
-	if (build_session (session_path, session_name, bus_profile.master_out_channels > 0 ? &bus_profile : NULL)) {
-		return -1;
-	}
-
-	return 0;
+	build_session (session_path, session_name, session_template, bus_profile);
 }
 
 /** This is only ever used once Ardour is already running with a session
@@ -286,14 +281,9 @@ ARDOUR_UI::session_dialog_response_handler (int response, SessionDialog* session
 	session_dialog->hide ();
 	delete_when_idle (session_dialog);
 
-	if (!template_name.empty() && template_name.substr (0, 11) == "urn:ardour:") {
+	if (!template_name.empty() || likely_new) {
 
-		build_session_from_dialog (*session_dialog, session_path, session_name);
-		meta_session_setup (template_name.substr (11));
-
-	} else if (likely_new) {
-
-		build_session_from_dialog (*session_dialog, session_path, session_name);
+		build_session_from_dialog (*session_dialog, session_path, session_name, template_name);
 
 	} else {
 
@@ -362,7 +352,8 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		if (!AudioEngine::instance()->running()) {
 			audio_midi_setup->set_position (WIN_POS_CENTER);
 			audio_midi_setup->present ();
-			audio_midi_setup->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::audio_midi_setup_reconfigure_done), path, snap_name, mix_template));
+			_engine_dialog_connection.disconnect ();
+			_engine_dialog_connection = audio_midi_setup->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::audio_midi_setup_reconfigure_done), path, snap_name, mix_template));
 			/* not done yet, but we're avoiding modal dialogs */
 			return 0;
 		}
@@ -532,9 +523,8 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 }
 
 int
-ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name, BusProfile const * bus_profile)
+ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name, const std::string& session_template, BusProfile const& bus_profile, bool from_startup_fsm)
 {
-	Session *new_session;
 	int x;
 
 	x = unload_session ();
@@ -547,10 +537,54 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 
 	_session_is_new = true;
 
-	try {
-		new_session = new Session (*AudioEngine::instance(), path, snap_name, bus_profile);
+	/* when running from startup FSM all is fine,
+	 * engine should be running and the FSM will also have
+	 * asked for the SR (even if try-autostart-engine is set)
+	 */
+	if (from_startup_fsm && AudioEngine::instance()->running ()) {
+		return build_session_stage_two (path, snap_name, session_template, bus_profile);
 	}
 
+	/* Ask for the Sample-rate to use with the new session */
+	audio_midi_setup->set_position (WIN_POS_CENTER);
+	audio_midi_setup->set_modal ();
+	audio_midi_setup->present ();
+	_engine_dialog_connection.disconnect ();
+	_engine_dialog_connection = audio_midi_setup->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::audio_midi_setup_for_new_session_done), path, snap_name, session_template, bus_profile));
+
+	/* not done yet, but we're avoiding modal dialogs */
+	return 0;
+}
+
+
+void
+ARDOUR_UI::audio_midi_setup_for_new_session_done (int response, std::string path, std::string snap_name, std::string template_name, BusProfile const& bus_profile)
+{
+	switch (response) {
+		case Gtk::RESPONSE_DELETE_EVENT:
+			audio_midi_setup->set_modal (false);
+			break;
+		default:
+			break;
+	}
+
+	if (!AudioEngine::instance()->running()) {
+		return; // keep dialog visible, maybe try again
+	}
+	audio_midi_setup->set_modal (false);
+	audio_midi_setup->hide();
+
+	build_session_stage_two (path, snap_name, template_name, bus_profile);
+}
+
+int
+ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& snap_name, std::string const& session_template, BusProfile const& bus_profile)
+{
+	Session* new_session;
+
+	try {
+		new_session = new Session (*AudioEngine::instance(), path, snap_name, bus_profile.master_out_channels > 0 ? &bus_profile : NULL);
+	}
 	catch (SessionException const& e) {
 		cerr << "Here are the errors associated with this failed session:\n";
 		dump_errors (cerr);
@@ -600,6 +634,10 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	set_session (new_session);
 
 	new_session->save_state(new_session->name());
+
+	if (!session_template.empty() && session_template.substr (0, 11) == "urn:ardour:") {
+		meta_session_setup (session_template.substr (11));
+	}
 
 	return 0;
 }

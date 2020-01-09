@@ -534,14 +534,9 @@ ARDOUR_UI::load_session_from_startup_fsm ()
 
 	if (session_is_new) {
 
-		if (build_session (session_path, session_name, &bus_profile)) {
+		if (build_session (session_path, session_name, session_template, bus_profile, true)) {
 			return -1;
 		}
-
-		if (!session_template.empty() && session_template.substr (0, 11) == "urn:ardour:") {
-			meta_session_setup (session_template.substr (11));
-		}
-
 		return 0;
 	}
 
