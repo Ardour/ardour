@@ -3261,7 +3261,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 		}
 
 		boost::shared_ptr<Region> original (ca->second);
-		cassocs.erase(ca);
+
 		bool modified_region;
 
 		if (i == rl.begin()) {
