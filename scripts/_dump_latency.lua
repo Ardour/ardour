@@ -5,7 +5,7 @@ ardour { ["type"] = "Snippet", name = "Dump Latency",
 
 function factory () return function ()
 	local all_procs = true
-	local show_ports = false
+	local show_ports = true
 
 	print (" -- Session --")
 	print ("Worst Output Latency:  ", Session:worst_output_latency ())
@@ -58,5 +58,20 @@ function factory () return function ()
 			lp[1].min, lp[1].max, ppl.min, ppl.max, bpl.min, bpl.max,
 			lc[1].min, lc[1].max, pcl.min, pcl.max, bcl.min, bcl.max))
 		end
+		_, t = a:get_ports (ARDOUR.DataType("midi"), ARDOUR.PortList())
+		-- table 't' holds argument references. t[2] is the PortList
+		for p in t[2]:iter() do
+			local lp = p:get_connected_latency_range (ARDOUR.LatencyRange(), true)
+			local lc = p:get_connected_latency_range (ARDOUR.LatencyRange(), false)
+			local ppl = p:private_latency_range (true)
+			local pcl = p:private_latency_range (false)
+			local bpl = p:public_latency_range (true)
+			local bcl = p:public_latency_range (false)
+			print (string.format ("%-30s  play: (%4d, %4d) (%4d, %4d) (%4d, %4d)  capt: (%4d, %4d) (%4d, %4d) (%4d, %4d)",
+			p:name(),
+			lp[1].min, lp[1].max, ppl.min, ppl.max, bpl.min, bpl.max,
+			lc[1].min, lc[1].max, pcl.min, pcl.max, bcl.min, bcl.max))
+		end
 	end
+	collectgarbage ()
 end end
