@@ -544,6 +544,10 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	if (from_startup_fsm && AudioEngine::instance()->running ()) {
 		return build_session_stage_two (path, snap_name, session_template, bus_profile);
 	}
+	/* Sample-rate cannot be changed when JACK is running */
+	if (!ARDOUR::AudioEngine::instance()->setup_required () && AudioEngine::instance()->running ()) {
+		return build_session_stage_two (path, snap_name, session_template, bus_profile);
+	}
 
 	/* Ask for the Sample-rate to use with the new session */
 	audio_midi_setup->set_position (WIN_POS_CENTER);
