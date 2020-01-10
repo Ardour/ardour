@@ -1194,10 +1194,10 @@ MidiRegionView::redisplay_model()
 		const samplecnt_t zoom = trackview.editor().get_current_zoom();
 		if (zoom != _last_display_zoom) {
 			/* Update resolved canvas notes to reflect changes in zoom without
-			   touching model.  Leave active notes (with length 0) alone since
+			   touching model.  Leave active notes (with length max) alone since
 			   they are being extended. */
 			for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-				if (i->second->note()->length() > 0) {
+				if (i->second->note()->end_time() != std::numeric_limits<Temporal::Beats>::max()) {
 					update_note(i->second);
 				}
 			}
@@ -1626,7 +1626,7 @@ MidiRegionView::end_write()
 /** Resolve an active MIDI note (while recording).
  */
 void
-MidiRegionView::resolve_note(uint8_t note, Temporal::Beats end_time)
+MidiRegionView::resolve_note (uint8_t note, Temporal::Beats end_time)
 {
 	if (midi_view()->note_mode() != Sustained) {
 		return;
@@ -1635,11 +1635,10 @@ MidiRegionView::resolve_note(uint8_t note, Temporal::Beats end_time)
 	if (_active_notes && _active_notes[note]) {
 		/* Set note length so update_note() works.  Note this is a local note
 		   for recording, not from a model, so we can safely mess with it. */
-		_active_notes[note]->note()->set_length(
-			end_time - _active_notes[note]->note()->time());
+		_active_notes[note]->note()->set_length (end_time - _active_notes[note]->note()->time());
 
 		/* End time is relative to the region being recorded. */
-		const samplepos_t end_time_samples = region_beats_to_region_samples(end_time);
+		const samplepos_t end_time_samples = region_beats_to_region_samples (end_time);
 
 		_active_notes[note]->set_x1 (trackview.editor().sample_to_pixel(end_time_samples));
 		_active_notes[note]->set_outline_all ();
@@ -1659,8 +1658,7 @@ MidiRegionView::extend_active_notes()
 
 	for (unsigned i = 0; i < 128; ++i) {
 		if (_active_notes[i]) {
-			_active_notes[i]->set_x1(
-				trackview.editor().sample_to_pixel(_region->length()));
+			_active_notes[i]->set_x1 (trackview.editor().sample_to_pixel(_region->length()));
 		}
 	}
 }
@@ -1761,10 +1759,11 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 	const double y0 = 1 + floor(note_to_y(note->note()));
 	double y1;
 
-	if (note->length().to_double() > 0.0) {
+	if (note->end_time() != std::numeric_limits<Temporal::Beats>::max()) {
+
 		double note_end_time = note->end_time().to_double();
 
-		if (note_end_time > mr->start_beats() + mr->length_beats()) {
+		if (note->end_time() > mr->start_beats() + mr->length_beats()) {
 			note_end_time = mr->start_beats() + mr->length_beats();
 		}
 
@@ -1780,7 +1779,7 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 	ev->set (ArdourCanvas::Rect (x0, y0, x1, y1));
 	ev->set_velocity (note->velocity()/127.0);
 
-	if (!note->length()) {
+	if (note->end_time() == std::numeric_limits<Temporal::Beats>::max())  {
 		if (_active_notes && note->note() < 128) {
 			Note* const old_rect = _active_notes[note->note()];
 			if (old_rect) {
@@ -1839,9 +1838,9 @@ MidiRegionView::update_hit (Hit* ev, bool update_ghost_regions)
 
 /** Add a MIDI note to the view (with length).
  *
- * If in sustained mode, notes with length 0 will be considered active
- * notes, and resolve_note should be called when the corresponding note off
- * event arrives, to properly display the note.
+ * If in sustained mode, notes with an end at numeric_limits<Beats>::max() will be
+ * considered active notes, and resolve_note should be called when the
+ * corresponding note off event arrives, to properly display the note.
  */
 NoteBase*
 MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
@@ -4213,8 +4212,9 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 			ev.time() - src->natural_position() + _region->start());
 
 		if (ev.type() == MIDI_CMD_NOTE_ON) {
-			boost::shared_ptr<NoteType> note (
-				new NoteType (ev.channel(), time_beats, Temporal::Beats(), ev.note(), ev.velocity()));
+			boost::shared_ptr<NoteType> note (new NoteType (ev.channel(), time_beats, std::numeric_limits<Temporal::Beats>::max() - time_beats, ev.note(), ev.velocity()));
+
+			assert (note->end_time() == std::numeric_limits<Temporal::Beats>::max());
 
 			add_note (note, true);
 
