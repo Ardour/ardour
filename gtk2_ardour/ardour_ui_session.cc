@@ -549,6 +549,15 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 		return build_session_stage_two (path, snap_name, session_template, bus_profile);
 	}
 
+	/* Work-around missing "OK" button:
+	 * When the engine is running. The way to proceed w/o engine re-start
+	 * is to simply close the dialog. This is not obvious.
+	 *
+	 * Ideally an engine restart should be avoided since it can invalidate
+	 * latency-calibration.
+	 */
+	ARDOUR::AudioEngine::instance()->stop();
+
 	/* Ask for the Sample-rate to use with the new session */
 	audio_midi_setup->set_position (WIN_POS_CENTER);
 	audio_midi_setup->set_modal ();
