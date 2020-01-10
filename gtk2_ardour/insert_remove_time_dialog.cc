@@ -97,7 +97,7 @@ InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 
 	get_vbox()->pack_start (*table);
 
-	_all_playlists.set_label (_("Apply to all the track's playlists"));
+	_all_playlists.set_label (_("Apply to all playlists of the selected track(s)"));
 	get_vbox()->pack_start (_all_playlists);
 
 	_move_glued.set_label (_("Move glued-to-musical-time regions (MIDI regions)"));
