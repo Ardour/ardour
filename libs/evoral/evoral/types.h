@@ -57,8 +57,6 @@ enum EventType {
 /** Type of a parameter (opaque, mapped by application, e.g. gain) */
 typedef uint32_t ParameterType;
 
-class Beats;
-
 } // namespace Evoral
 
 namespace PBD {
