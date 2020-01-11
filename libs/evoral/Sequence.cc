@@ -664,7 +664,7 @@ Sequence<Time>::end_write (StuckNoteOption option, Time when)
 		typename Notes::iterator next = n;
 		++next;
 
-		if (!(*n)->length()) {
+		if ((*n)->end_time() == std::numeric_limits<Temporal::Beats>::max()) {
 			switch (option) {
 			case Relax:
 				break;
@@ -997,7 +997,11 @@ Sequence<Time>::append_note_on_unlocked (const Event<Time>& ev, event_id_t evid)
 		return;
 	}
 
-	NotePtr note(new Note<Time>(ev.channel(), ev.time(), Time(), ev.note(), ev.velocity()));
+	/* nascent (incoming notes without a note-off ...yet) have a duration
+	   that extends to Beats::max()
+	*/
+	NotePtr note(new Note<Time>(ev.channel(), ev.time(), std::numeric_limits<Temporal::Beats>::max() - ev.time(), ev.note(), ev.velocity()));
+	assert (note->end_time() == std::numeric_limits<Temporal::Beats>::max());
 	note->set_id (evid);
 
 	add_note_unlocked (note);
