@@ -47,6 +47,7 @@
 #include "port_matrix_body.h"
 #include "port_matrix_component.h"
 #include "utils.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -113,6 +114,8 @@ PortMatrix::PortMatrix (Window* parent, Session* session, DataType type)
 	_vspacer.show ();
 	_vnotebook.show ();
 	_hnotebook.show ();
+
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &PortMatrix::parameter_changed));
 }
 
 PortMatrix::~PortMatrix ()
@@ -1255,4 +1258,12 @@ PortMatrix::key_press (GdkEventKey* k)
 	}
 
 	return false;
+}
+
+void
+PortMatrix::parameter_changed (string p)
+{
+	if (p == "font-scale") {
+		setup ();
+	}
 }

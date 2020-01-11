@@ -21,6 +21,7 @@
 #include "port_matrix_component.h"
 #include "port_matrix.h"
 #include "port_matrix_body.h"
+#include "ui_config.h"
 
 using namespace std;
 
@@ -81,6 +82,7 @@ PortMatrixComponent::get_pixmap (GdkDrawable *drawable)
 
 		/* render */
 		cairo_t* cr = gdk_cairo_create (_pixmap);
+		cairo_set_font_size (cr, UIConfiguration::instance().get_ui_scale() * 10);
 		render (cr);
 		cairo_destroy (cr);
 
@@ -214,4 +216,10 @@ PortMatrixComponent::position_to_channel (double p, double, boost::shared_ptr<co
 	}
 
 	return ARDOUR::BundleChannel (boost::shared_ptr<ARDOUR::Bundle> (), -1);
+}
+
+uint32_t
+PortMatrixComponent::grid_spacing ()
+{
+	return UIConfiguration::instance().get_ui_scale() * 24;
 }

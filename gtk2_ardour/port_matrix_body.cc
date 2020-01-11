@@ -28,6 +28,7 @@
 #include "port_matrix_column_labels.h"
 #include "port_matrix_row_labels.h"
 #include "port_matrix_grid.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -73,6 +74,7 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 		/* nothing to connect */
 
 		cairo_t* cr = gdk_cairo_create (get_window()->gobj());
+		cairo_set_font_size (cr, UIConfiguration::instance().get_ui_scale() * 10);
 
 		cairo_set_source_rgb (cr, 0, 0, 0);
 		cairo_rectangle (cr, 0, 0, _alloc_width, _alloc_height);
@@ -130,6 +132,7 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 	}
 
 	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
+	cairo_set_font_size (cr, UIConfiguration::instance().get_ui_scale() * 10);
 
 	for (list<PortMatrixComponent*>::iterator i = _components.begin(); i != _components.end(); ++i) {
 		cairo_save (cr);

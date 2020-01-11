@@ -27,6 +27,7 @@
 #include "port_matrix_column_labels.h"
 #include "port_matrix.h"
 #include "port_matrix_body.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -44,6 +45,7 @@ PortMatrixColumnLabels::compute_dimensions ()
 {
 	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, 200, 200);
 	cairo_t* cr = cairo_create (surface);
+	cairo_set_font_size (cr, UIConfiguration::instance().get_ui_scale() * 10);
 
 	/* width of the longest bundle name */
 	_longest_bundle_name = 0;

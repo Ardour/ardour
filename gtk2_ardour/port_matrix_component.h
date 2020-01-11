@@ -76,9 +76,7 @@ public:
 	}
 
 	/** @return grid spacing */
-	static uint32_t grid_spacing () {
-		return 24;
-	}
+	static uint32_t grid_spacing ();
 
 protected:
 

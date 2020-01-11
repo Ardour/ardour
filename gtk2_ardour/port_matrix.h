@@ -206,6 +206,7 @@ private:
 	void update_tab_highlighting ();
 	std::pair<int, int> check_flip () const;
 	bool can_flip () const;
+	void parameter_changed (std::string);
 
 	Gtk::Window* _parent;
 
