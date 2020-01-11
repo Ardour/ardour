@@ -4845,10 +4845,6 @@ Route::setup_invisible_processors ()
 		amp = find (new_processors.begin(), new_processors.end(), _amp);
 	}
 
-	/* and the processor after the amp */
-
-	ProcessorList::iterator after_amp = amp;
-	++after_amp;
 
 	/* Pre-fader METER */
 
@@ -4865,7 +4861,6 @@ Route::setup_invisible_processors ()
 	new_processors.push_back (_main_outs);
 
 	/* iterator for the main outs */
-
 	ProcessorList::iterator main = new_processors.end();
 	--main;
 
@@ -4873,11 +4868,8 @@ Route::setup_invisible_processors ()
 
 	if (_meter && (_meter_point == MeterOutput || _meter_point == MeterPostFader)) {
 		assert (!_meter->display_to_user ());
-
 		/* add the processor just before or just after the main outs */
-
 		ProcessorList::iterator meter_point = main;
-
 		if (_meter_point == MeterOutput) {
 			++meter_point;
 		}
@@ -4893,6 +4885,9 @@ Route::setup_invisible_processors ()
 	/* MONITOR SEND */
 
 	if (_monitor_send && !is_monitor ()) {
+		ProcessorList::iterator after_amp = amp;
+		++after_amp;
+
 		assert (!_monitor_send->display_to_user ());
 		switch (Config->get_listen_position ()) {
 		case PreFaderListen:
@@ -4912,7 +4907,7 @@ Route::setup_invisible_processors ()
 				new_processors.insert (after_amp, _monitor_send);
 				break;
 			case AFLFromAfterProcessors:
-				new_processors.insert (new_processors.end(), _monitor_send);
+				new_processors.insert (main, _monitor_send);
 				break;
 			}
 			_monitor_send->set_can_pan (true);
