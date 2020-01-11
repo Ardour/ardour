@@ -1759,7 +1759,15 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 	const double y0 = 1 + floor(note_to_y(note->note()));
 	double y1;
 
-	if (note->end_time() != std::numeric_limits<Temporal::Beats>::max()) {
+	if (note->length() == 0) {
+
+		/* special case actual zero-length notes */
+
+		x1 = x0 + 1.;
+
+	} else if (note->end_time() != std::numeric_limits<Temporal::Beats>::max()) {
+
+		/* normal note */
 
 		double note_end_time = note->end_time().to_double();
 
@@ -1770,7 +1778,11 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 		const samplepos_t note_end_samples = map.sample_at_quarter_note (session_source_start + note_end_time) - _region->position();
 
 		x1 = std::max(1., trackview.editor().sample_to_pixel (note_end_samples)) - 1;
+
 	} else {
+
+		/* nascent note currently being recorded, noteOff has not yet arrived */
+
 		x1 = std::max(1., trackview.editor().sample_to_pixel (_region->length())) - 1;
 	}
 
@@ -4212,6 +4224,7 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 			ev.time() - src->natural_position() + _region->start());
 
 		if (ev.type() == MIDI_CMD_NOTE_ON) {
+
 			boost::shared_ptr<NoteType> note (new NoteType (ev.channel(), time_beats, std::numeric_limits<Temporal::Beats>::max() - time_beats, ev.note(), ev.velocity()));
 
 			assert (note->end_time() == std::numeric_limits<Temporal::Beats>::max());
