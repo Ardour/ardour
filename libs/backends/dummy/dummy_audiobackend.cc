@@ -1714,7 +1714,7 @@ DummyPort::pulse_position () const
 {
 	samplecnt_t sr = _dummy_backend.sample_rate ();
 	samplepos_t st = _dummy_backend.sample_time_at_cycle_start();
-	return st % sr;
+	return (sr - (st % sr)) % sr;
 }
 
 /******************************************************************************/
