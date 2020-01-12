@@ -1348,11 +1348,12 @@ ARDOUR_UI::update_timecode_format ()
 		boost::shared_ptr<TimecodeTransportMaster> tcmaster;
 		boost::shared_ptr<TransportMaster> tm = TransportMasterManager::instance().current();
 
-		if ((tm->type() == LTC || tm->type() == MTC) && (tcmaster = boost::dynamic_pointer_cast<TimecodeTransportMaster>(tm)) != 0) {
+		if ((tm->type() == LTC || tm->type() == MTC) && (tcmaster = boost::dynamic_pointer_cast<TimecodeTransportMaster>(tm)) != 0 && tm->locked()) {
 			matching = (tcmaster->apparent_timecode_format() == _session->config.get_timecode_format());
 		} else {
 			matching = true;
 		}
+
 
 		snprintf (buf, sizeof (buf), S_("Timecode|TC: <span foreground=\"%s\">%s</span>"),
 			  matching ? X_("green") : X_("red"),
