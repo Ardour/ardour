@@ -866,7 +866,7 @@ ARDOUR_UI::sync_button_clicked (GdkEventButton* ev)
 	}
 
 	show_tabbable (rc_option_editor);
-	rc_option_editor->set_current_page (_("Sync"));
+	rc_option_editor->set_current_page (_("Transport"));
 	return true;
 }
 
