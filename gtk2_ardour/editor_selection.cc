@@ -1597,8 +1597,8 @@ Editor::region_selection_changed ()
 		nudge_backward_button.set_name ("nudge button");
 	} else {
 		/* nudge marker or playhead */
-		nudge_forward_button.set_name ("generic button");
-		nudge_backward_button.set_name ("generic button");
+		nudge_forward_button.set_name ("transport button");
+		nudge_backward_button.set_name ("transport button");
 	}
 
 	//there are a few global Editor->Select actions which select regions even if you aren't in Object mode.

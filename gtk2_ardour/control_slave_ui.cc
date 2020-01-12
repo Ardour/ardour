@@ -52,7 +52,7 @@ ControlSlaveUI::ControlSlaveUI (Session* s)
 	Gtkmm2ext::UI::instance()->set_tip (*this, _("VCA Assign"));
 
 	initial_button.set_no_show_all (true);
-	initial_button.set_name (X_("vca assign"));
+	initial_button.set_name (X_("vca assign button"));
 	initial_button.set_text (_("-VCAs-"));
 	initial_button.show ();
 	initial_button.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
@@ -225,7 +225,7 @@ ControlSlaveUI::add_vca_button (boost::shared_ptr<VCA> vca)
 	ArdourButton* vca_button = manage (new ArdourButton (ArdourButton::default_elements));
 
 	vca_button->set_no_show_all (true);
-	vca_button->set_name (X_("vca assign"));
+	vca_button->set_name (X_("vca assign button"));
 	vca_button->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	vca_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &ControlSlaveUI::specific_vca_button_release), vca->number()), false);
 	vca_button->set_text (PBD::to_string (vca->number()));

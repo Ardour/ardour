@@ -308,6 +308,7 @@ ARDOUR_UI::setup_windows ()
 		std::string const a = string_compose (X_("script-action-%1"), i + 1);
 		Glib::RefPtr<Action> act = ActionManager::get_action(X_("LuaAction"), a.c_str());
 		assert (act);
+		action_script_call_btn[i].set_name ("lua action button");
 		action_script_call_btn[i].set_text (string_compose ("%1%2", std::hex, i+1));
 		action_script_call_btn[i].set_related_action (act);
 		action_script_call_btn[i].signal_button_press_event().connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::bind_lua_action_script), i), false);

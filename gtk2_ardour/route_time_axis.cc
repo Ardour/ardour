@@ -184,7 +184,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	route_group_button.set_name ("route button");
 	playlist_button.set_name ("route button");
 	automation_button.set_name ("route button");
-
+	
 	route_group_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::route_group_click), false);
 	playlist_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::playlist_click), false);
 	automation_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::automation_click), false);

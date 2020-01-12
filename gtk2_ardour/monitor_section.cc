@@ -209,6 +209,8 @@ MonitorSection::MonitorSection ()
 	set_tooltip (*solo_boost_control, _("Gain increase for soloed signals (0dB is normal)"));
 
 	solo_boost_display = new ArdourDisplay ();
+	set_tooltip (*solo_boost_display, _("Gain increase for soloed signals (0dB is normal)"));
+	solo_boost_display->set_name("monitor section button");
 	solo_boost_display->set_size_request (PX_SCALE(68), PX_SCALE(20));
 	solo_boost_display->add_controllable_preset(_("0 dB"), 0.0);
 	solo_boost_display->add_controllable_preset(_("3 dB"), 3.0);
@@ -225,7 +227,8 @@ MonitorSection::MonitorSection ()
 	set_tooltip (*solo_cut_control, _("Gain reduction non-soloed signals\nA value above -inf dB causes \"solo-in-front\""));
 
 	solo_cut_display = new ArdourDisplay ();
-	solo_cut_display->set_name("monitor section dropdown"); // XXX
+	set_tooltip (*solo_cut_display, _("Gain reduction non-soloed signals\nA value above -inf dB causes \"solo-in-front\""));
+	solo_cut_display->set_name("monitor section button");
 	solo_cut_display->set_size_request (PX_SCALE(68), PX_SCALE(20));
 	solo_cut_display->add_controllable_preset(_("0 dB"), 0.0);
 	solo_cut_display->add_controllable_preset(_("-6 dB"), -6.0);
@@ -243,6 +246,8 @@ MonitorSection::MonitorSection ()
 	set_tooltip (*dim_control, _("Gain reduction to use when dimming monitor outputs"));
 
 	dim_display = new ArdourDisplay ();
+	set_tooltip (*dim_display, _("Gain reduction to use when dimming monitor outputs"));
+	dim_display->set_name ("monitor section button");
 	dim_display->set_size_request (PX_SCALE(68), PX_SCALE(20));
 	dim_display->add_controllable_preset(_("0 dB"), 0.0);
 	dim_display->add_controllable_preset(_("-3 dB"), -3.0);
@@ -288,6 +293,7 @@ MonitorSection::MonitorSection ()
 	gain_control->set_size_request (PX_SCALE(60), PX_SCALE(60));
 
 	gain_display = new ArdourDisplay ();
+	gain_display->set_name("monitor section button");
 	gain_display->set_size_request (PX_SCALE(68), PX_SCALE(20));
 	gain_display->add_controllable_preset(_("0 dB"), 0.0);
 	gain_display->add_controllable_preset(_("-3 dB"), -3.0);
@@ -301,7 +307,7 @@ MonitorSection::MonitorSection ()
 
 	output_button = new ArdourButton ();
 	output_button->set_text (_("Output"));
-	output_button->set_name (X_("monitor section cut")); // XXX
+	output_button->set_name (X_("monitor section button"));
 	output_button->set_text_ellipsize (Pango::ELLIPSIZE_MIDDLE);
 	output_button->set_layout_ellipsize_width (PX_SCALE(128) * PANGO_SCALE);
 
