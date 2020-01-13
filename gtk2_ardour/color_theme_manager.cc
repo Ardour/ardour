@@ -283,14 +283,7 @@ struct NamedColor {
 
 struct SortNamedColor {
 	bool operator() (NamedColor const & a, NamedColor const & b) {
-		using namespace ArdourCanvas;
-
-		const HSV black (0, 0, 0);
-		if (a.color.is_gray() || b.color.is_gray()) {
-			return black.distance (a.color) < black.distance (b.color);
-		} else {
-			return a.name < b.name;
-		}
+		return a.name < b.name;
 	}
 };
 
