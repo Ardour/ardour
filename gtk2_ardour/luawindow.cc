@@ -329,6 +329,7 @@ LuaWindow::run_script ()
 			append_text (string_compose (_("C++ Exception: %1"), "..."));
 		}
 	}
+	lua->collect_garbage ();
 }
 
 void

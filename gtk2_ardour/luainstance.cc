@@ -1432,7 +1432,7 @@ LuaInstance::session_going_away ()
 
 	lua_State* L = lua.getState();
 	LuaBindings::set_session (L, _session);
-	lua.do_command ("collectgarbage();");
+	lua.collect_garbage ();
 }
 
 void
