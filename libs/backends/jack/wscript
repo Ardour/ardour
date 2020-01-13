@@ -80,8 +80,8 @@ def build(bld):
     obj.use      = 'libardour libpbd ardouralsautil'
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
     if bld.env['build_target'] != 'mingw':
-        obj.cxxflags = [  bld.env['compiler_flags_dict']['pic'] ]
-        obj.cflags = [ bld.env['compiler_flags_dict']['pic'] ]
+        obj.cxxflags = [ bld.env['compiler_flags_dict']['pic'] ]
+        obj.cflags   = [ bld.env['compiler_flags_dict']['pic'] ]
     else:
         obj.cxxflags = [ ]
         obj.cflags   = [ ]

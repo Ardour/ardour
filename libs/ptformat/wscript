@@ -34,8 +34,8 @@ def build(bld):
         obj.defines = [ 'LIBPTFORMAT_DLL_EXPORTS=1' ]
     else:
         obj = bld.stdlib (source = [ 'ptformat.cc' ])
-        obj.cxxflags = [  bld.env['compiler_flags_dict']['pic'] ]
-        obj.cflags = [ bld.env['compiler_flags_dict']['pic'] ]
+        obj.cxxflags = [ bld.env['compiler_flags_dict']['pic'] ]
+        obj.cflags   = [ bld.env['compiler_flags_dict']['pic'] ]
         
     obj.export_includes     = ['.']
     obj.includes     = ['.']

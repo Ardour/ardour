@@ -383,7 +383,7 @@ def build(bld):
         obj.defines      = [ 'LIBARDOUR_DLL_EXPORTS=1' ]
     else:
         obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=sources)
-        obj.cxxflags     = [  bld.env['compiler_flags_dict']['pic'] ]
+        obj.cxxflags     = [ bld.env['compiler_flags_dict']['pic'] ]
         obj.cflags       = [ bld.env['compiler_flags_dict']['pic'] ]
         obj.defines      = []
 

@@ -40,9 +40,9 @@ def build(bld):
         obj.defines      = [ 'LIBTEMPORAL_DLL_EXPORTS=1' ]
     else:
         obj = bld.stlib(features = 'cxx cxxstlib', source=temporal_sources)
-        obj.cxxflags = [  bld.env['compiler_flags_dict']['pic'] ]
-        obj.cflags = [ bld.env['compiler_flags_dict']['pic'] ]
-        obj.defines      = [ ]
+        obj.cxxflags = [ bld.env['compiler_flags_dict']['pic'] ]
+        obj.cflags   = [ bld.env['compiler_flags_dict']['pic'] ]
+        obj.defines  = [ ]
 
     obj.export_includes = ['.']
     obj.includes     = ['.']

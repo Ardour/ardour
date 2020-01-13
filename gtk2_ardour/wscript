@@ -617,7 +617,7 @@ def build(bld):
         obj.includes  = [ '../libs/fst', '.' ]
         obj.name      = 'libgtk2_ardour'
         obj.target    = 'gtk2_ardour'
-        obj.cflags = [ bld.env['compiler_flags_dict']['pic'] ]
+        obj.cflags    = [ bld.env['compiler_flags_dict']['pic'] ]
 
     else:
         # just the normal executable version of the GTK GUI
