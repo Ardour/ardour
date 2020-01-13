@@ -1095,7 +1095,7 @@ LuaAPI::Rubberband::finalize ()
 
 	/* this is the same as RBEffect::finish, Filter::finish */
 	SourceList sl;
-	for (std::vector<boost::shared_ptr<AudioSource>>::iterator i = _asrc.begin (); i != _asrc.end (); ++i) {
+	for (std::vector<boost::shared_ptr<AudioSource> >::iterator i = _asrc.begin (); i != _asrc.end (); ++i) {
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (*i);
 		assert (afs);
 		afs->done_with_peakfile_writes ();
@@ -1140,7 +1140,7 @@ void
 LuaAPI::Rubberband::cleanup (bool abort)
 {
 	if (abort) {
-		for (std::vector<boost::shared_ptr<AudioSource>>::iterator i = _asrc.begin (); i != _asrc.end (); ++i) {
+		for (std::vector<boost::shared_ptr<AudioSource> >::iterator i = _asrc.begin (); i != _asrc.end (); ++i) {
 			(*i)->mark_for_remove ();
 		}
 	}
