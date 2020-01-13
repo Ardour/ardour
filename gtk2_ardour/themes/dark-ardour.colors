@@ -45,10 +45,6 @@
     <Color name="widget bg" value="4F4D4Dff"/>  <!--generic button; slightly different than bg color-->
     <Color name="widget blue" value="526d94ff"/>
     <Color name="widget blue darker" value="20242aff"/>
-    <Color name="widget brown" value="3b3123ff"/>
-    <Color name="widget brown2" value="383125ff"/>
-    <Color name="widget cream darker" value="665C4Dff"/>
-    <Color name="widget cream" value="BFBAABff"/>
     <Color name="widget gray" value="595755ff"/>
     <Color name="widget green" value="617552ff"/>
     <Color name="widget green darker" value="3C403AFF"/>
@@ -79,9 +75,9 @@
     <ColorAlias name="clock: cursor" alias="contrast clock"/>
     <ColorAlias name="clock: edited text" alias="contrast clock"/>
     <ColorAlias name="clock: text" alias="contrast clock"/>
-    <ColorAlias name="comment button: fill" alias="bg"/>
+    <ColorAlias name="comment button: fill" alias="widget bg"/>
     <ColorAlias name="control point fill" alias="alert green"/>
-    <ColorAlias name="control point outline" alias="meter color3"/>
+    <ColorAlias name="control point outline" alias="alert green"/>
     <ColorAlias name="control point selected fill" alias="alert orange"/>
     <ColorAlias name="control point selected outline" alias="alert red"/>
     <ColorAlias name="covered region" alias="gray 30"/>
@@ -165,6 +161,7 @@
     <ColorAlias name="inactive crossfade" alias="contrast1"/>
     <ColorAlias name="inactive fade handle" alias="gray 70"/>
     <ColorAlias name="inactive group tab" alias="bg"/>
+    <ColorAlias name="invert button: fill" alias="widget bg"/>
     <ColorAlias name="invert button: fill active" alias="alert blue"/>
     <ColorAlias name="invert button: led active" alias="alert green"/>
     <ColorAlias name="latency button: fill" alias="widget gray"/>
@@ -177,8 +174,10 @@
     <ColorAlias name="location marker" alias="contrast clock"/>
     <ColorAlias name="location punch" alias="alert ruddy"/>
     <ColorAlias name="location range" alias="alert green"/>
-    <ColorAlias name="lock button: fill active" alias="bg"/>
+    <ColorAlias name="lock button: fill active" alias="widget bg"/>
     <ColorAlias name="lock button: led active" alias="alert red"/>
+    <ColorAlias name="lua action button: fill" alias="bg"/>
+    <ColorAlias name="lua action button: fill" alias="widget bg"/>
     <ColorAlias name="marker bar" alias="gray 30"/>
     <ColorAlias name="marker bar separator" alias="bg darkest"/>
     <ColorAlias name="marker drag line" alias="contrast clock"/>
@@ -186,7 +185,7 @@
     <ColorAlias name="marker track" alias="gray 80"/>
     <ColorAlias name="master monitor section button active: fill" alias="widget ruddy"/>
     <ColorAlias name="master monitor section button active: fill active" alias="alert yellow"/>
-    <ColorAlias name="master monitor section button normal: fill active" alias="bg"/>
+    <ColorAlias name="master monitor section button normal: fill active" alias="widget bg"/>
     <ColorAlias name="measure line bar" alias="white"/>
     <ColorAlias name="measure line beat" alias="widget blue"/>
     <ColorAlias name="meter background bottom" alias="gray 20"/>
@@ -199,7 +198,7 @@
     <ColorAlias name="meterbridge label: fill active" alias="gray 20"/>
     <ColorAlias name="meterbridge label: led" alias="alert red"/>
     <ColorAlias name="meterbridge label: led active" alias="alert red"/>
-    <ColorAlias name="meterbridge peakindicator: fill" alias="bg"/>
+    <ColorAlias name="meterbridge peakindicator: fill" alias="widget bg"/>
     <ColorAlias name="meterbridge peakindicator: fill active" alias="alert red"/>
     <ColorAlias name="meterbridge peakindicator: led" alias="alert red"/>
     <ColorAlias name="meterbridge peakindicator: led active" alias="alert red"/>
@@ -227,7 +226,7 @@
     <ColorAlias name="midi meter color6" alias="midi meter 55"/>
     <ColorAlias name="midi meter color7" alias="midi meter 56"/>
     <ColorAlias name="midi meter color8" alias="midi meter 56"/>
-    <ColorAlias name="midi meter color9" alias="alert green"/>
+    <ColorAlias name="midi meter color9" alias="midi meter 56"/>
     <ColorAlias name="midi note inactive channel" alias="black"/>
     <ColorAlias name="midi note max" alias="alert green"/>
     <ColorAlias name="midi note mid" alias="alert yellow"/>
@@ -241,12 +240,15 @@
     <ColorAlias name="midi sysex fill" alias="contrast1"/>
     <ColorAlias name="midi sysex outline" alias="contrast2"/>
     <ColorAlias name="midi track base" alias="widget green darker"/>
+    <ColorAlias name="mixer strip button: fill" alias="widget bg"/>
     <ColorAlias name="mixer strip button: fill active" alias="bg darker"/>
     <ColorAlias name="mixer strip button: led active" alias="alert orange"/>
     <ColorAlias name="mixer strip name button: fill active" alias="bg darkest"/>
     <ColorAlias name="mixer strip name button: led active" alias="alert orange"/>
+    <ColorAlias name="monitor button: fill" alias="widget bg"/>
     <ColorAlias name="monitor button: fill active" alias="alert orange"/>
     <ColorAlias name="monitor button: led active" alias="alert ruddy"/>
+    <ColorAlias name="monitor section button: fill" alias="widget bg"/>
     <ColorAlias name="monitor section dim: fill" alias="widget bg"/>
     <ColorAlias name="monitor section dim: fill active" alias="alert orange"/>
     <ColorAlias name="monitor section dim: led active" alias="alert green"/>
@@ -256,7 +258,8 @@
     <ColorAlias name="monitor section mono: fill" alias="widget bg"/>
     <ColorAlias name="monitor section mono: fill active" alias="alert blue"/>
     <ColorAlias name="monitor section mono: led active" alias="alert green"/>
-    <ColorAlias name="monitor section processors present: fill" alias="bg"/>
+    <ColorAlias name="monitor section processors present: fill" alias="alert orange"/>
+    <ColorAlias name="monitor section processors toggle: fill" alias="bg"/>
     <ColorAlias name="monitor section processors toggle: fill active" alias="bg"/>
     <ColorAlias name="monitor section solo model: fill" alias="widget bg"/>
     <ColorAlias name="monitor section solo model: fill active" alias="bg"/>
@@ -270,6 +273,7 @@
     <ColorAlias name="mono panner position fill" alias="contrast less"/>
     <ColorAlias name="mono panner position outline" alias="bg"/>
     <ColorAlias name="mono panner text" alias="black"/>
+    <ColorAlias name="mouse mode button: fill" alias="widget bg"/>
     <ColorAlias name="mouse mode button: fill active" alias="alert green"/>
     <ColorAlias name="mouse mode button: led active" alias="alert orange"/>
     <ColorAlias name="mute button: fill" alias="widget bg"/>
@@ -277,15 +281,15 @@
     <ColorAlias name="mute button: led active" alias="alert yellow"/>
     <ColorAlias name="name highlight fill" alias="alert blue"/>
     <ColorAlias name="name highlight outline" alias="bg darker"/>
-    <ColorAlias name="nudge button: fill" alias="bg"/>
-    <ColorAlias name="nudge button: fill active" alias="bg"/>
+    <ColorAlias name="nudge button: fill" alias="widget bg"/>
+    <ColorAlias name="nudge button: fill active" alias="widget bg"/>
     <ColorAlias name="nudge button: led active" alias="alert orange"/>
     <ColorAlias name="nudge clock: background" alias="bg darkest"/>
     <ColorAlias name="nudge clock: cursor" alias="contrast clock"/>
     <ColorAlias name="nudge clock: edited text" alias="contrast clock"/>
     <ColorAlias name="nudge clock: text" alias="contrast clock"/>
-    <ColorAlias name="page switch button: fill" alias="widget gray"/>
-    <ColorAlias name="page switch button: fill active" alias="gray 80"/>
+    <ColorAlias name="page switch button: fill" alias="widget bg"/>
+    <ColorAlias name="page switch button: fill active" alias="alert green"/>
     <ColorAlias name="patch change button: fill" alias="widget bg"/>
     <ColorAlias name="patch change button: fill active" alias="widget blue"/>
     <ColorAlias name="patch change dim button: fill" alias="gray 20"/>
@@ -325,7 +329,7 @@
     <ColorAlias name="processor sidechain: led active" alias="alert green"/>
     <ColorAlias name="processor stub: fill" alias="gray 20"/>
     <ColorAlias name="processor stub: fill active" alias="gray 20"/>
-    <ColorAlias name="punch button: fill" alias="bg"/>
+    <ColorAlias name="punch button: fill" alias="widget bg"/>
     <ColorAlias name="punch button: fill active" alias="alert ruddy"/>
     <ColorAlias name="punch button: led active" alias="alert red"/>
     <ColorAlias name="punch clock: background" alias="bg darkest"/>
@@ -337,15 +341,17 @@
     <ColorAlias name="range drag rect" alias="alert ruddy"/>
     <ColorAlias name="range marker bar" alias="gray 20"/>
     <ColorAlias name="record enable button: fill active" alias="alert ruddy"/>
-    <ColorAlias name="record enable button: led active" alias="alert ruddy"/>
+    <ColorAlias name="record enable button: led active" alias="alert red"/>
     <ColorAlias name="recording rect" alias="alert ruddy"/>
     <ColorAlias name="recording waveform fill" alias="white"/>
     <ColorAlias name="recording waveform outline" alias="gray 20"/>
     <ColorAlias name="region list automatic" alias="contrast less"/>
     <ColorAlias name="region list missing source" alias="alert red"/>
     <ColorAlias name="region list whole file" alias="alert cyan"/>
+    <ColorAlias name="route button: fill" alias="widget bg"/>
     <ColorAlias name="route button: fill active" alias="bg darkest"/>
     <ColorAlias name="route button: led active" alias="alert orange"/>
+    <ColorAlias name="route rec button: led active" alias="alert red"/>
     <ColorAlias name="rubber band rect" alias="gray 70"/>
     <ColorAlias name="rude audition: fill" alias="widget bg"/>
     <ColorAlias name="rude audition: fill active" alias="alert ruddy"/>
@@ -390,10 +396,10 @@
     <ColorAlias name="solo button: fill active" alias="alert green"/>
     <ColorAlias name="solo button: led active" alias="alert green"/>
     <ColorAlias name="solo isolate: fill" alias="widget bg"/>
-    <ColorAlias name="solo isolate: fill active" alias="bg"/>
+    <ColorAlias name="solo isolate: fill active" alias="widget bg"/>
     <ColorAlias name="solo isolate: led active" alias="alert ruddy"/>
     <ColorAlias name="solo safe: fill" alias="widget bg"/>
-    <ColorAlias name="solo safe: fill active" alias="bg"/>
+    <ColorAlias name="solo safe: fill active" alias="widget bg"/>
     <ColorAlias name="solo safe: led active" alias="alert ruddy"/>
     <ColorAlias name="stereo panner bg" alias="bg darkest"/>
     <ColorAlias name="stereo panner fill" alias="widget blue"/>
@@ -424,8 +430,10 @@
     <ColorAlias name="tracknumber label: fill" alias="bg"/>
     <ColorAlias name="tracknumber label: fill active" alias="gray 20"/>
     <ColorAlias name="tracknumber label: led active" alias="alert red"/>
+    <ColorAlias name="transport active option button: fill" alias="widget bg"/>
     <ColorAlias name="transport active option button: fill active" alias="alert green"/>
     <ColorAlias name="transport active option button: led active" alias="alert orange"/>
+    <ColorAlias name="transport button: fill" alias="widget bg"/>
     <ColorAlias name="transport button: fill active" alias="alert green"/>
     <ColorAlias name="transport button: led active" alias="alert orange"/>
     <ColorAlias name="transport clock: background" alias="bg darkest"/>
@@ -439,10 +447,11 @@
     <ColorAlias name="transport drag rect" alias="gray 50"/>
     <ColorAlias name="transport loop rect" alias="alert green"/>
     <ColorAlias name="transport marker bar" alias="widget bg"/>
-    <ColorAlias name="transport option button: fill active" alias="bg"/>
+    <ColorAlias name="transport option button: fill" alias="widget bg"/>
+    <ColorAlias name="transport option button: fill active" alias="widget bg"/>
     <ColorAlias name="transport option button: led active" alias="alert orange"/>
     <ColorAlias name="transport punch rect" alias="widget ruddy"/>
-    <ColorAlias name="transport recenable button: fill" alias="bg"/>
+    <ColorAlias name="transport recenable button: fill" alias="widget bg"/>
     <ColorAlias name="transport recenable button: fill active" alias="alert ruddy"/>
     <ColorAlias name="transport recenable button: led active" alias="alert red"/>
     <ColorAlias name="trim handle" alias="alert blue"/>
@@ -450,11 +459,13 @@
     <ColorAlias name="trim knob" alias="widget bg"/>
     <ColorAlias name="trim knob: arc end" alias="alert blue"/>
     <ColorAlias name="trim knob: arc start" alias="widget gray"/>
+    <ColorAlias name="vca assign button: fill" alias="widget bg"/>
     <ColorAlias name="verbose canvas cursor" alias="contrast clock"/>
     <ColorAlias name="video timeline bar" alias="gray 20"/>
     <ColorAlias name="waveform fill" alias="white"/>
     <ColorAlias name="waveform outline" alias="black"/>
     <ColorAlias name="zero line" alias="gray 50"/>
+    <ColorAlias name="zoom button: fill" alias="widget bg"/>
     <ColorAlias name="zoom button: fill active" alias="alert green"/>
     <ColorAlias name="zoom button: led active" alias="alert orange"/>  </ColorAliases>
   <Modifiers>
