@@ -233,11 +233,13 @@ ARDOUR_UI::set_session (Session *s)
 		editor_meter_table.remove(*editor_meter);
 		delete editor_meter;
 		editor_meter = 0;
-		editor_meter_peak_display.hide();
 	}
 
 	if (editor_meter_table.get_parent()) {
 		transport_hbox.remove (editor_meter_table);
+	}
+	if (editor_meter_peak_display.get_parent ()) {
+		editor_meter_table.remove (editor_meter_peak_display);
 	}
 
 	if (_session &&
