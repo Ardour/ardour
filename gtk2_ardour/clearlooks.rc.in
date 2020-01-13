@@ -933,9 +933,9 @@ style "inspector_track_list_display" = "track_list_display"
 
 style "processor_list" = "very_small_text"
 {
-	bg[NORMAL] = @darkest
+	bg[NORMAL] = @bases
 	bg[ACTIVE] = shade (1.8, @fg_selected)
-	fg[ACTIVE] = @darkest
+	fg[ACTIVE] = @bases
 }
 
 # MixerPanZone:
