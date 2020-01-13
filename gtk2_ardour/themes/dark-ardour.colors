@@ -95,8 +95,8 @@
     <ColorAlias name="feedback alert: fill" alias="widget bg"/>
     <ColorAlias name="feedback alert: fill active" alias="alert red"/>
     <ColorAlias name="feedback alert: led active" alias="alert red"/>
-    <ColorAlias name="foldback knob" alias="widget gray"/>
-    <ColorAlias name="foldback knob: fill" alias="widget gray"/>
+    <ColorAlias name="foldback knob" alias="widget bg"/>
+    <ColorAlias name="foldback knob: fill" alias="widget bg"/>
     <ColorAlias name="foldback knob: arc end" alias="alert blue"/>
     <ColorAlias name="foldback knob: arc start" alias="widget blue"/>
     <ColorAlias name="frame handle" alias="bg darker"/>
@@ -164,7 +164,7 @@
     <ColorAlias name="invert button: fill" alias="widget bg"/>
     <ColorAlias name="invert button: fill active" alias="alert blue"/>
     <ColorAlias name="invert button: led active" alias="alert green"/>
-    <ColorAlias name="latency button: fill" alias="widget gray"/>
+    <ColorAlias name="latency button: fill" alias="widget bg"/>
     <ColorAlias name="latency button: fill active" alias="alert ruddy"/>
     <ColorAlias name="latency button: led active" alias="alert ruddy"/>
     <ColorAlias name="layered button: fill" alias="widget bg"/>
@@ -305,8 +305,8 @@
     <ColorAlias name="plugin bypass button: led active" alias="alert orange"/>
     <ColorAlias name="pluginlist filter button: fill active" alias="widget bg"/>
     <ColorAlias name="pluginlist hide button: led active" alias="alert cyan"/>
-    <ColorAlias name="pluginui toggle: fill" alias="contrast selection"/>
-    <ColorAlias name="pluginui toggle: fill active" alias="alert red"/>
+    <ColorAlias name="pluginui toggle: fill" alias="widget bg"/>
+    <ColorAlias name="pluginui toggle: fill active" alias="widget blue"/>
     <ColorAlias name="processor automation line" alias="bg darker"/>
     <ColorAlias name="processor auxfeedback: fill" alias="contrast2"/>
     <ColorAlias name="processor auxfeedback: led active" alias="alert green"/>
@@ -347,7 +347,7 @@
     <ColorAlias name="recording waveform outline" alias="gray 20"/>
     <ColorAlias name="region list automatic" alias="contrast less"/>
     <ColorAlias name="region list missing source" alias="alert red"/>
-    <ColorAlias name="region list whole file" alias="alert cyan"/>
+    <ColorAlias name="region list whole file" alias="gray 90"/>
     <ColorAlias name="route button: fill" alias="widget bg"/>
     <ColorAlias name="route button: fill active" alias="bg darkest"/>
     <ColorAlias name="route button: led active" alias="alert orange"/>
@@ -458,7 +458,7 @@
     <ColorAlias name="trim handle locked" alias="alert ruddy"/>
     <ColorAlias name="trim knob" alias="widget bg"/>
     <ColorAlias name="trim knob: arc end" alias="alert blue"/>
-    <ColorAlias name="trim knob: arc start" alias="widget gray"/>
+    <ColorAlias name="trim knob: arc start" alias="widget bg"/>
     <ColorAlias name="vca assign button: fill" alias="widget bg"/>
     <ColorAlias name="verbose canvas cursor" alias="contrast clock"/>
     <ColorAlias name="video timeline bar" alias="gray 20"/>
