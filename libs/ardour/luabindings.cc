@@ -2446,6 +2446,16 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("process", &ARDOUR::LuaAPI::Vamp::process)
 		.endClass ()
 
+		.beginClass <ARDOUR::LuaAPI::Rubberband> ("Rubberband")
+		.addConstructor <void (*) (boost::shared_ptr<AudioRegion>, bool)> ()
+		.addFunction ("set_strech_and_pitch", &ARDOUR::LuaAPI::Rubberband::set_strech_and_pitch)
+		.addFunction ("set_mapping", &ARDOUR::LuaAPI::Rubberband::set_mapping)
+		.addFunction ("process", &ARDOUR::LuaAPI::Rubberband::process)
+		.addFunction ("readable_length", &ARDOUR::LuaAPI::Rubberband::readable_length)
+		.addFunction ("n_channels", &ARDOUR::LuaAPI::Rubberband::n_channels)
+		.addFunction ("readable", &ARDOUR::LuaAPI::Rubberband::readable)
+		.endClass ()
+
 		.endNamespace () // end LuaAPI
 		.endNamespace ();// end ARDOUR
 

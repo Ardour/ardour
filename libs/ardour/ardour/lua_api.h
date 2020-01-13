@@ -22,12 +22,15 @@
 #include <string>
 #include <lo/lo.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
+#include <rubberband/RubberBandStretcher.h>
 #include <vamp-hostsdk/Plugin.h>
 
 #include "evoral/Note.h"
 
 #include "ardour/libardour_visibility.h"
 
+#include "ardour/audioregion.h"
 #include "ardour/midi_model.h"
 #include "ardour/processor.h"
 #include "ardour/session.h"
@@ -304,6 +307,48 @@ namespace ARDOUR { namespace LuaAPI {
 			samplecnt_t     _stepsize;
 			bool            _initialized;
 
+	};
+
+	class Rubberband : public Readable , public boost::enable_shared_from_this<Rubberband>
+	{
+		public:
+			Rubberband (boost::shared_ptr<AudioRegion>, bool percussive);
+			~Rubberband ();
+			bool set_strech_and_pitch (double stretch_ratio, double pitch_ratio);
+			bool set_mapping (luabridge::LuaRef tbl);
+			boost::shared_ptr<AudioRegion> process (luabridge::LuaRef cb);
+			boost::shared_ptr<Readable> readable ();
+
+			/* readable API */
+			samplecnt_t readable_length () const { return _read_len; }
+			uint32_t n_channels () const { return _n_channels; }
+			samplecnt_t read (Sample*, samplepos_t pos, samplecnt_t cnt, int channel) const;
+
+		private:
+			Rubberband (Rubberband const&); // no copy construction
+			bool read_region (bool study);
+			bool retrieve (float**);
+			void cleanup (bool abort);
+			boost::shared_ptr<AudioRegion> finalize ();
+
+			boost::shared_ptr<AudioRegion> _region;
+
+			uint32_t    _n_channels;
+			samplecnt_t _read_len;
+			samplecnt_t _read_start;
+			samplecnt_t _read_offset;
+
+			std::vector<boost::shared_ptr<AudioSource> > _asrc;
+
+			RubberBand::RubberBandStretcher _rbs;
+			std::map<size_t, size_t>        _mapping;
+
+			double _stretch_ratio;
+			double _pitch_ratio;
+
+			luabridge::LuaRef*            _cb;
+			boost::shared_ptr<Rubberband> _self;
+			static const samplecnt_t      _bufsize;
 	};
 
 	boost::shared_ptr<Evoral::Note<Temporal::Beats> >
