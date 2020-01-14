@@ -163,6 +163,14 @@ private:
 		Gtk::TreeModelColumn<bool>           active;
 	};
 
+	Gtk::TreeViewColumn* rec_state_column;
+	Gtk::TreeViewColumn* rec_safe_column;
+	Gtk::TreeViewColumn* input_active_column;
+	Gtk::TreeViewColumn* mute_state_column;
+	Gtk::TreeViewColumn* solo_state_column;
+	Gtk::TreeViewColumn* solo_safe_state_column;
+	Gtk::TreeViewColumn* solo_isolate_state_column;
+
 	Gtk::ScrolledWindow _scroller;
 	Gtk::TreeView _display;
 	Glib::RefPtr<Gtk::ListStore> _model;
