@@ -92,6 +92,7 @@ private:
 	void active_changed (std::string const &);
 	void reordered (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const &, int *);
 	bool button_press (GdkEventButton *);
+	bool button_release (GdkEventButton *);
 	void route_property_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Stripable>);
 	void handle_gui_changes (std::string const &, void *);
 	bool idle_update_mute_rec_solo_etc ();
@@ -170,6 +171,9 @@ private:
 	Gtk::TreeViewColumn* solo_state_column;
 	Gtk::TreeViewColumn* solo_safe_state_column;
 	Gtk::TreeViewColumn* solo_isolate_state_column;
+	Gtk::TreeViewColumn* name_column;
+	Gtk::TreeViewColumn* visible_column;
+	Gtk::TreeViewColumn* active_column;
 
 	Gtk::ScrolledWindow _scroller;
 	Gtk::TreeView _display;
@@ -181,6 +185,7 @@ private:
 
 	bool _ignore_reorder;
 	bool _ignore_selection_change;
+	bool column_does_not_select;
 	bool _no_redisplay;
 	bool _adding_routes;
 	bool _route_deletion_in_progress;
@@ -191,6 +196,8 @@ private:
 	Gtk::Menu* _menu;
 	Gtk::Widget* old_focus;
 	Gtk::CellEditable* name_editable;
+
+	bool select_function (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool);
 
 	bool key_press (GdkEventKey* ev);
 	bool focus_in (GdkEventFocus*);
