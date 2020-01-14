@@ -479,8 +479,6 @@ EditorRoutes::on_tv_mute_enable_toggled (std::string const & path_string)
 		return;
 	}
 
-	cerr << "Mute toggled for " << stv->stripable()->name() << endl;
-
 	boost::shared_ptr<AutomationControl> ac (stv->stripable()->mute_control());
 
 	if (ac) {
