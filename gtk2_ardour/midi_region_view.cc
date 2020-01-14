@@ -1759,7 +1759,7 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 	const double y0 = 1 + floor(note_to_y(note->note()));
 	double y1;
 
-	if (note->length() == 0) {
+	if (note->length() == Temporal::Beats()) {
 
 		/* special case actual zero-length notes */
 
