@@ -6,9 +6,10 @@ ardour {
 description = [[
 Create a 'swing feel' in selected regions.
 
-Analyze beat-position from the selected audio regions,
-then time-stretch the audio and move 8th notes back in
-time while keeping 1/4 note beats in place.
+The beat position of selected audio regions is analyzed,
+then the audio is time-stretched, moving 8th notes back in
+time while keeping 1/4-note beats in place to produce
+a rhythmic swing style.
 
 (This script also servers as example for both VAMP
 analysis as well as Rubberband region stretching.)
@@ -61,10 +62,11 @@ function factory () return function ()
 		-- create Rubberband stretcher
 		local rb = ARDOUR.LuaAPI.Rubberband (ar, false)
 
-		-- the rubberband-filter also implements the readable API to read from
-		-- the master-source of the given audio-region (ignoring any prior time-stretch
-		-- or pitch-shiting).
+		-- the rubberband-filter also implements the readable API.
 		-- https://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:Readable
+		-- This allows to read from the master-source of the given audio-region.
+		-- Any prior time-stretch or pitch-shift are ignored when reading, however
+		-- processing retains the previous settings
 		local max_pos = rb:readable ():readable_length ()
 
 		-- prepare table to hold analysis results
@@ -73,9 +75,9 @@ function factory () return function ()
 		local beat_map = {}
 		local prev_beat = 0
 
+		-- construct a progress-dialog with cancle button
 		local pdialog = LuaDialog.ProgressWindow ("Rubberband", true)
-
-		-- callback to handle Vamp-Plugin analysis results
+		-- progress dialog callbacks
 		function vamp_callback (_, pos)
 			return pdialog:progress (pos / max_pos, "Analyzing")
 		end
@@ -85,6 +87,7 @@ function factory () return function ()
 
 		-- run VAMP plugin, analyze the first channel of the audio-region
 		vamp:analyze (rb:readable (), 0, vamp_callback)
+
 		-- getRemainingFeatures returns a http://manual.ardour.org/lua-scripting/class_reference/#Vamp:Plugin:FeatureSet
 		-- get the first output. here: Beats, estimated beat locations & beat-number
 		-- "fl" is-a http://manual.ardour.org/lua-scripting/class_reference/#Vamp:Plugin:FeatureList
@@ -104,7 +107,7 @@ function factory () return function ()
 			end
 			prev_beat = fn
 		end
-		-- reset the plugin (prepare for next iteration)
+		-- reset the plugin state (prepare for next iteration)
 		vamp:reset ()
 
 		if pdialog:canceled () then goto out end
@@ -115,10 +118,11 @@ function factory () return function ()
 			goto next
 		end
 
-		-- now stretch the region
-		rb:set_strech_and_pitch (1, 1)
-		rb:set_mapping (beat_map)
+		-- configure rubberband stretch tool
+		rb:set_strech_and_pitch (1, 1) -- no overall stretching, no pitch-shift
+		rb:set_mapping (beat_map) -- apply beat-map from/to
 
+		-- now stretch the region
 		local nar = rb:process (rb_progress)
 
 		if pdialog:canceled () then goto out end
@@ -155,6 +159,17 @@ function factory () return function ()
 		Session:abort_reversible_command ()
 	end
 
+	-- clean up, unload vamp plugin
 	vamp = nil
 	collectgarbage ()
+end end
+
+
+function icon (params) return function (ctx, width, height, fg)
+	local txt = Cairo.PangoLayout (ctx, "ArdourMono ".. math.ceil(width * .7) .. "px")
+	txt:set_text ("\u{266b}\u{266a}") -- 8th note symbols
+	local tw, th = txt:get_pixel_size ()
+	ctx:set_source_rgba (ARDOUR.LuaAPI.color_to_rgba (fg))
+	ctx:move_to (.5 * (width - tw), .5 * (height - th))
+	txt:show_in_cairo_context (ctx)
 end end
