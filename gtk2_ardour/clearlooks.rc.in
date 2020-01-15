@@ -1065,6 +1065,12 @@ style "vca_label_bar" = "medium_bold_text"
 	fg[NORMAL] = @lightest
 }
 
+style "ardour_treeviews" = "default"
+{
+	# used to draw the border of checkboxes
+	bg[NORMAL] = @somewhat_bright_indicator
+}
+
 class "GtkWidget" style:highest "default"
 class "GtkSpinButton" style:highest "spin_button"
 class "GtkEntry" style "entry"                          # not :highest to allow instances to override this
@@ -1074,6 +1080,7 @@ class "GtkButton" style:highest "ardour_button"
 class "GtkCheckButton" style:highest "ardour_button"
 class "GtkArrow" style:highest "tearoff_arrow"
 class "GtkProgressBar" style:highest "ardour_progressbars"
+class "GtkTreeView" style:highest "ardour_treeviews"
 
 widget "*VerboseCanvasCursor" style:highest "verbose_canvas_cursor"
 widget "*MarkerText" style:highest "marker_text"
