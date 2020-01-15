@@ -40,6 +40,7 @@
 #include "gtkmm2ext/utils.h"
 #include "waveview/wave_view.h"
 
+#include "ardour_message.h"
 #include "audio_clock.h"
 #include "ardour_ui.h"
 #include "actions.h"
@@ -60,7 +61,7 @@ ARDOUR_UI::toggle_external_sync()
 {
 	if (_session) {
 		if (_session->config.get_video_pullup() != 0.0f && (TransportMasterManager::instance().current()->type() == Engine)) {
-			MessageDialog msg (_("It is not possible to use JACK as the the sync source\n when the pull up/down setting is non-zero."));
+			ArdourMessageDialog msg (_("It is not possible to use JACK as the the sync source\n when the pull up/down setting is non-zero."));
 			msg.run ();
 			return;
 		}

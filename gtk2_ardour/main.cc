@@ -160,7 +160,7 @@ Click OK to exit %1."), PROGRAM_NAME, AudioEngine::instance()->current_backend_n
 
 		/* engine has already run, so this is a mid-session backend death */
 
-		MessageDialog msg (string_compose (_("The audio backend (%1) has failed, or terminated"), AudioEngine::instance()->current_backend_name()), false);
+		ArdourMessageDialog msg (string_compose (_("The audio backend (%1) has failed, or terminated"), AudioEngine::instance()->current_backend_name()), false);
 		msg.set_secondary_text (string_compose (_("%2 exited unexpectedly, and without notifying %1."),
 							 PROGRAM_NAME, AudioEngine::instance()->current_backend_name()));
 		msg.run ();

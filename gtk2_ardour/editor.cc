@@ -102,6 +102,7 @@
 
 #include "actions.h"
 #include "analysis_window.h"
+#include "ardour_message.h"
 #include "audio_clock.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
@@ -5183,11 +5184,11 @@ Editor::show_rhythm_ferret ()
 void
 Editor::first_idle ()
 {
-	MessageDialog* dialog = 0;
+	ArdourMessageDialog* dialog = 0;
 
 	if (track_views.size() > 1) {
 		Timers::TimerSuspender t;
-		dialog = new MessageDialog (
+		dialog = new ArdourMessageDialog (
 			string_compose (_("Please wait while %1 loads visual data."), PROGRAM_NAME),
 			true
 			);
