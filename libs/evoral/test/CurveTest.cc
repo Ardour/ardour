@@ -1,4 +1,4 @@
-#include "CurveTest.hpp"
+#include "CurveTest.h"
 #include "evoral/ControlList.h"
 #include "evoral/Curve.h"
 #include <stdlib.h>

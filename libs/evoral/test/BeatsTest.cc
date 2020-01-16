@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include "BeatsTest.hpp"
+#include "BeatsTest.h"
 #include "temporal/beats.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION(BeatsTest);

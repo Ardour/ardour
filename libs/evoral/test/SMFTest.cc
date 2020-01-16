@@ -1,4 +1,4 @@
-#include "SMFTest.hpp"
+#include "SMFTest.h"
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>

@@ -1,4 +1,4 @@
-#include "SequenceTest.hpp"
+#include "SequenceTest.h"
 #include <cassert>
 
 CPPUNIT_TEST_SUITE_REGISTRATION(SequenceTest);
