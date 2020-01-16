@@ -25,7 +25,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "temporal/beats.h"
 #include "evoral/SMF.h"
-#include "SequenceTest.hpp"
+#include "SequenceTest.h"
 
 using namespace Evoral;
 

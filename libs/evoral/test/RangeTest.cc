@@ -1,4 +1,4 @@
-#include "RangeTest.hpp"
+#include "RangeTest.h"
 #include "evoral/Range.h"
 #include <stdlib.h>
 

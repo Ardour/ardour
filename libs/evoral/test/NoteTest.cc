@@ -1,4 +1,4 @@
-#include "NoteTest.hpp"
+#include "NoteTest.h"
 #include "temporal/beats.h"
 #include "evoral/Note.h"
 #include <stdlib.h>
