@@ -100,13 +100,7 @@ ARDOUR_UI::first_idle ()
 		editor->first_idle();
 	}
 
-	/* in 1 second, hide the splash screen
-	 *
-	 * Consider hiding it *now*. If a user opens opens a dialog
-	 * during that one second while the splash is still visible,
-	 * the dialog will push-back the splash.
-	 * Closing the dialog later will pop it back.
-	 */
+	/* in 1 second, hide the splash screen */
 	Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 1000);
 
 	Keyboard::set_can_save_keybindings (true);

@@ -87,7 +87,7 @@ void
 ArdourDialog::pop_splash ()
 {
 	if (_splash_pushed) {
-		Splash* spl = Splash::instance();
+		Splash* spl = Splash::exists () ? Splash::instance() : NULL;
 
 		if (spl) {
 			spl->pop_front();
