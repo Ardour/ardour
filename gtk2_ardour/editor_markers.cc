@@ -1768,7 +1768,7 @@ Editor::goto_nth_marker (int n)
 	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
 		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_session_range()) {
 			if (n == 0) {
-				_session->request_locate ((*i)->start(), DoTheRightThing);
+				_session->request_locate ((*i)->start(), RollIfAppropriate);
 				break;
 			}
 			--n;

@@ -418,7 +418,7 @@ TransportFSM::compute_should_roll (LocateTransportDisposition ltd) const
 		return true;
 	case MustStop:
 		return false;
-	case DoTheRightThing:
+	case RollIfAppropriate:
 		if (rolling()) {
 			return true;
 		} else {

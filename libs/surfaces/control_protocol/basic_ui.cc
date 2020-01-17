@@ -330,7 +330,7 @@ BasicUI::prev_marker ()
 	samplepos_t pos = session->locations()->first_mark_before (session->transport_sample());
 
 	if (pos >= 0) {
-		session->request_locate (pos, DoTheRightThing);
+		session->request_locate (pos, RollIfAppropriate);
 	} else {
 		session->goto_start ();
 	}
@@ -342,7 +342,7 @@ BasicUI::next_marker ()
 	samplepos_t pos = session->locations()->first_mark_after (session->transport_sample());
 
 	if (pos >= 0) {
-		session->request_locate (pos, DoTheRightThing);
+		session->request_locate (pos, RollIfAppropriate);
 	} else {
 		session->goto_end();
 	}
@@ -425,7 +425,7 @@ BasicUI::locate (samplepos_t where, LocateTransportDisposition ltd)
 void
 BasicUI::locate (samplepos_t where, bool roll)
 {
-	session->request_locate (where, roll ? MustRoll : DoTheRightThing);
+	session->request_locate (where, roll ? MustRoll : RollIfAppropriate);
 }
 
 void
@@ -695,7 +695,7 @@ BasicUI::goto_nth_marker (int n)
 	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
 		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_session_range()) {
 			if (n == 0) {
-				session->request_locate ((*i)->start(), DoTheRightThing);
+				session->request_locate ((*i)->start(), RollIfAppropriate);
 				break;
 			}
 			--n;

@@ -837,7 +837,7 @@ setup_enum_writer ()
 
 	REGISTER_ENUM (MustStop);
 	REGISTER_ENUM (MustRoll);
-	REGISTER_ENUM (DoTheRightThing);
+	REGISTER_ENUM (RollIfAppropriate);
 	REGISTER (_LocateTransportDisposition);
 }
 

@@ -6093,9 +6093,9 @@ void
 Session::goto_start (bool and_roll)
 {
 	if (_session_range_location) {
-		request_locate (_session_range_location->start(), and_roll ? MustRoll : DoTheRightThing);
+		request_locate (_session_range_location->start(), and_roll ? MustRoll : RollIfAppropriate);
 	} else {
-		request_locate (0, and_roll ? MustRoll : DoTheRightThing);
+		request_locate (0, and_roll ? MustRoll : RollIfAppropriate);
 	}
 }
 

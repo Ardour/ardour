@@ -930,7 +930,7 @@ Session::request_locate (samplepos_t target_sample, LocateTransportDisposition l
 	case MustStop:
 		type = SessionEvent::Locate;
 		break;
-	case DoTheRightThing:
+	case RollIfAppropriate:
 		if (config.get_auto_play()) {
 			type = SessionEvent::LocateRoll;
 		} else {

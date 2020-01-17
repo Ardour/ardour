@@ -802,7 +802,7 @@ enum OverwriteReason {
 enum LocateTransportDisposition {
 	MustRoll,
 	MustStop,
-	DoTheRightThing
+	RollIfAppropriate
 };
 
 typedef std::vector<CaptureInfo*> CaptureInfos;
