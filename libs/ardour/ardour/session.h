@@ -444,7 +444,7 @@ public:
 	void request_roll_at_and_return (samplepos_t start, samplepos_t return_to);
 	void request_bounded_roll (samplepos_t start, samplepos_t end);
 	void request_stop (bool abort = false, bool clear_state = false, TransportRequestSource origin = TRS_UI);
-	void request_locate (samplepos_t sample, bool with_roll = false, TransportRequestSource origin = TRS_UI);
+	void request_locate (samplepos_t sample, LocateTransportDisposition ltd = DoTheRightThing, TransportRequestSource origin = TRS_UI);
 
 	void request_play_loop (bool yn, bool leave_rolling = false);
 	bool get_play_loop () const { return play_loop; }

@@ -1443,7 +1443,7 @@ Session::auto_loop_changed (Location* location)
 				 */
 
 				loop_changing = true;
-				request_locate (location->start(), true);
+				request_locate (location->start(), MustRoll);
 
 			} else {
 
@@ -6083,9 +6083,9 @@ void
 Session::goto_end ()
 {
 	if (_session_range_location) {
-		request_locate (_session_range_location->end(), false);
+		request_locate (_session_range_location->end(), MustStop);
 	} else {
-		request_locate (0, false);
+		request_locate (0, MustStop);
 	}
 }
 
@@ -6093,9 +6093,9 @@ void
 Session::goto_start (bool and_roll)
 {
 	if (_session_range_location) {
-		request_locate (_session_range_location->start(), and_roll);
+		request_locate (_session_range_location->start(), and_roll ? MustRoll : DoTheRightThing);
 	} else {
-		request_locate (0, and_roll);
+		request_locate (0, and_roll ? MustRoll : DoTheRightThing);
 	}
 }
 

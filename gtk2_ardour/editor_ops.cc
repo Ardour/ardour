@@ -1351,7 +1351,7 @@ Editor::cursor_align (bool playhead_to_edit)
 			return;
 		}
 
-		_session->request_locate (selection->markers.front()->position(), _session->transport_rolling());
+		_session->request_locate (selection->markers.front()->position(), DoTheRightThing);
 
 	} else {
 		const int32_t divisions = get_grid_music_divisions (0);
@@ -2445,7 +2445,7 @@ Editor::jump_forward_to_mark ()
 		return;
 	}
 
-	_session->request_locate (pos, _session->transport_rolling());
+	_session->request_locate (pos, DoTheRightThing);
 }
 
 void
@@ -2469,7 +2469,7 @@ Editor::jump_backward_to_mark ()
 		return;
 	}
 
-	_session->request_locate (pos, _session->transport_rolling());
+	_session->request_locate (pos, DoTheRightThing);
 }
 
 void
@@ -2640,13 +2640,13 @@ Editor::transition_to_rolling (bool fwd)
 void
 Editor::play_from_start ()
 {
-	_session->request_locate (_session->current_start_sample(), true);
+	_session->request_locate (_session->current_start_sample(), MustRoll);
 }
 
 void
 Editor::play_from_edit_point ()
 {
-	_session->request_locate (get_preferred_edit_position(), true);
+	_session->request_locate (get_preferred_edit_position(), MustRoll);
 }
 
 void
@@ -2658,7 +2658,7 @@ Editor::play_from_edit_point_and_return ()
 	start_sample = get_preferred_edit_position (EDIT_IGNORE_PHEAD);
 
 	if (_session->transport_rolling()) {
-		_session->request_locate (start_sample, false);
+		_session->request_locate (start_sample, MustStop);
 		return;
 	}
 
@@ -2739,7 +2739,7 @@ Editor::play_with_preroll ()
 		} else {
 			start = 0;
 		}
-		_session->request_locate (start, true);
+		_session->request_locate (start, MustRoll);
 		_session->set_requested_return_sample (ph);  //force auto-return to return to playhead location, without the preroll
 	}
 }
@@ -2781,7 +2781,7 @@ Editor::loop_location (Location& location)
 		tll->set (location.start(), location.end());
 
 		// enable looping, reposition and start rolling
-		_session->request_locate (tll->start(), true);
+		_session->request_locate (tll->start(), MustRoll);
 		_session->request_play_loop (true);
 	}
 }
@@ -6520,7 +6520,7 @@ void
 Editor::set_playhead_cursor ()
 {
 	if (entered_marker) {
-		_session->request_locate (entered_marker->position(), _session->transport_rolling());
+		_session->request_locate (entered_marker->position(), DoTheRightThing);
 	} else {
 		MusicSample where (0, 0);
 		bool ignored;
@@ -6532,7 +6532,7 @@ Editor::set_playhead_cursor ()
 		snap_to (where);
 
 		if (_session) {
-			_session->request_locate (where.sample, _session->transport_rolling());
+			_session->request_locate (where.sample, DoTheRightThing);
 		}
 	}
 
@@ -6639,7 +6639,7 @@ Editor::set_loop_from_region (bool play)
 	set_loop_range (start, end, _("set loop range from region"));
 
 	if (play) {
-		_session->request_locate (start, true);
+		_session->request_locate (start, MustRoll);
 		_session->request_play_loop (true);
 	}
 }
@@ -7525,7 +7525,7 @@ Editor::playhead_backward_to_grid ()
 			}
 		}
 
-		_session->request_locate (pos.sample, _session->transport_rolling());
+		_session->request_locate (pos.sample, DoTheRightThing);
 	}
 
 	/* keep PH visible in window */

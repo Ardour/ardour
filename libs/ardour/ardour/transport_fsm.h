@@ -46,7 +46,7 @@ struct TransportFSM
 		EventType type;
 		union {
 			bool abort; /* for stop */
-			bool with_roll; /* for locate */
+			LocateTransportDisposition ltd; /* for locate */
 		};
 		union {
 			bool clear_state; /* for stop */
@@ -59,7 +59,7 @@ struct TransportFSM
 
 		Event (EventType t)
 			: type (t)
-			, with_roll (false)
+			, ltd (MustStop)
 			, with_flush (false)
 			, target (0)
 			, for_loop_end (false)
@@ -72,9 +72,9 @@ struct TransportFSM
 		{
 			assert (t == StopTransport);
 		}
-		Event (EventType t, samplepos_t pos, bool r, bool fl, bool lp, bool f4c)
+		Event (EventType t, samplepos_t pos, LocateTransportDisposition l, bool fl, bool lp, bool f4c)
 			: type (t)
-			, with_roll (r)
+			, ltd (l)
 			, with_flush (fl)
 			, target (pos)
 			, for_loop_end (lp)
@@ -175,6 +175,7 @@ struct TransportFSM
 	void defer (Event& ev);
 	void bad_transition (Event const &);
 	void set_roll_after (bool) const;
+	bool compute_should_roll (LocateTransportDisposition) const;
 };
 
 } /* end namespace ARDOUR */

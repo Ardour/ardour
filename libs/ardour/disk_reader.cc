@@ -492,7 +492,9 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		_need_butler = butler_required;
 	}
 
-	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 reader run, needs butler = %2\n", name(), _need_butler));
+	if (_need_butler) {
+		DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 reader run, needs butler = %2\n", name(), _need_butler));
+	}
 }
 
 bool
@@ -1126,6 +1128,9 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: will refill %2 channels with %3 samples\n", name(), c->size(), total_space));
 
 	samplepos_t file_sample_tmp = ffa;
+
+	// int64_t before = g_get_monotonic_time ();
+	// int64_t elapsed;
 
 	for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
 

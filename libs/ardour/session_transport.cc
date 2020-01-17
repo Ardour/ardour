@@ -85,7 +85,7 @@ using namespace PBD;
 
 #define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::Event (evtype)); }
 #define TFSM_STOP(abort,clear) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StopTransport,abort,clear)); }
-#define TFSM_LOCATE(target,roll,flush,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,roll,flush,loop,force)); }
+#define TFSM_LOCATE(target,ltd,flush,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,ltd,flush,loop,force)); }
 
 /* *****************************************************************************
  * REALTIME ACTIONS (to be called on state transitions)
@@ -470,7 +470,7 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 
 					/* jump to start and then roll from there */
 
-					request_locate (location->start(), true);
+					request_locate (location->start(), MustRoll);
 					return;
 				}
 			}
@@ -910,7 +910,7 @@ Session::request_stop (bool abort, bool clear_state, TransportRequestSource orig
 }
 
 void
-Session::request_locate (samplepos_t target_sample, bool with_roll, TransportRequestSource origin)
+Session::request_locate (samplepos_t target_sample, LocateTransportDisposition ltd, TransportRequestSource origin)
 {
 	if (synced_to_engine()) {
 		_engine.transport_locate (target_sample);
@@ -921,8 +921,27 @@ Session::request_locate (samplepos_t target_sample, bool with_roll, TransportReq
 		return;
 	}
 
-	SessionEvent *ev = new SessionEvent (with_roll ? SessionEvent::LocateRoll : SessionEvent::Locate, SessionEvent::Add, SessionEvent::Immediate, target_sample, 0, false);
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request locate to %1\n", target_sample));
+	SessionEvent::Type type;
+
+	switch (ltd) {
+	case MustRoll:
+		type = SessionEvent::LocateRoll;
+		break;
+	case MustStop:
+		type = SessionEvent::Locate;
+		break;
+	case DoTheRightThing:
+		if (config.get_auto_play()) {
+			type = SessionEvent::LocateRoll;
+		} else {
+			type = SessionEvent::Locate;
+		}
+		break;
+	}
+
+	SessionEvent *ev = new SessionEvent (type, SessionEvent::Add, SessionEvent::Immediate, target_sample, 0, false);
+	ev->locate_transport_disposition = ltd;
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request locate to %1 ltd = %2\n", target_sample, enum_2_string (ltd)));
 	queue_event (ev);
 }
 
@@ -954,7 +973,7 @@ Session::request_preroll_record_trim (samplepos_t rec_in, samplecnt_t preroll)
 	samplepos_t pos = std::max ((samplepos_t)0, rec_in - preroll);
 	_preroll_record_trim_len = preroll;
 	maybe_enable_record ();
-	request_locate (pos, true);
+	request_locate (pos, MustRoll);
 	set_requested_return_sample (rec_in);
 }
 
@@ -1367,7 +1386,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		_have_captured = true;
 	}
 
-	DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: DS stop\n"));
+	DEBUG_TRACE (DEBUG::Transport, X_("Butler post-transport-work, non realtime stop\n"));
 
 	if (abort && did_record) {
 		/* no reason to save the session file when we remove sources
@@ -1612,10 +1631,10 @@ Session::set_play_loop (bool yn, bool change_transport_state)
 				   crude mechanism. Got a better idea?
 				*/
 				loop_changing = true;
-				TFSM_LOCATE (loc->start(), true, true, false, true);
+				TFSM_LOCATE (loc->start(), MustRoll, true, false, true);
 			} else if (!transport_rolling()) {
 				/* loop-is-mode: not rolling, just locate to loop start */
-				TFSM_LOCATE (loc->start(), false, true, false, true);
+				TFSM_LOCATE (loc->start(), MustStop, true, false, true);
 			}
 		}
 

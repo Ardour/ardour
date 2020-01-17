@@ -1131,7 +1131,7 @@ Editor::control_scroll (float fraction)
 bool
 Editor::deferred_control_scroll (samplepos_t /*target*/)
 {
-	_session->request_locate (*_control_scroll_target, _session->transport_rolling());
+	_session->request_locate (*_control_scroll_target, DoTheRightThing);
 	/* reset for next stream */
 	_control_scroll_target = boost::none;
 	_dragging_playhead = false;

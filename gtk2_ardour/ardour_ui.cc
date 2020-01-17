@@ -1611,7 +1611,7 @@ ARDOUR_UI::transport_goto_wallclock ()
 		samples += tmnow.tm_min * (60 * sample_rate);
 		samples += tmnow.tm_sec * sample_rate;
 
-		_session->request_locate (samples, _session->transport_rolling ());
+		_session->request_locate (samples, DoTheRightThing);
 
 		/* force displayed area in editor to start no matter
 		   what "follow playhead" setting is.
@@ -1829,7 +1829,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		}
 
 		if (_session->get_play_loop() && Config->get_loop_is_mode()) {
-			_session->request_locate (_session->locations()->auto_loop_location()->start(), true);
+			_session->request_locate (_session->locations()->auto_loop_location()->start(), MustRoll);
 		} else {
 			if (UIConfiguration::instance().get_follow_edits()) {
 				list<AudioRange>& range = editor->get_selection().time;

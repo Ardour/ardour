@@ -253,8 +253,8 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 		break;
 
 	case Locate:
-		DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("locate, with roll = %1 flush = %2 target = %3 loop %4 force %5\n",
-		                                                ev.with_roll,
+		DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("locate, ltd = %1 flush = %2 target = %3 loop %4 force %5\n",
+		                                                enum_2_string (ev.ltd),
 		                                                ev.with_flush,
 		                                                ev.target,
 		                                                ev.for_loop_end,
@@ -277,7 +277,7 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 				 * disk I/O is required - the loop is
 				 * automically present in buffers already.
 				 *
-				 * Note that ev.with_roll is ignored and
+				 * Note that ev.ltd is ignored and
 				 * assumed to be true because we're looping.
 				 */
 				transition (WaitingForLocate);
@@ -389,11 +389,12 @@ void
 TransportFSM::start_declick_for_locate (Event const & l)
 {
 	assert (l.type == Locate);
-	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("start_declick_for_locate, crals %1 with_roll %2 speed %3 sral %4\n", (bool) current_roll_after_locate_status, l.with_roll, api->speed(), api->should_roll_after_locate()));
+	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("start_declick_for_locate, crals %1 ltd %2 speed %3 sral %4\n", (bool) current_roll_after_locate_status,
+	                                                enum_2_string (l.ltd), api->speed(), api->should_roll_after_locate()));
 	_last_locate = l;
 
 	if (!current_roll_after_locate_status) {
-		set_roll_after (l.with_roll);
+		set_roll_after (compute_should_roll (l.ltd));
 	}
 	api->stop_transport (false, false);
 }
@@ -404,9 +405,29 @@ TransportFSM::start_locate_while_stopped (Event const & l) const
 	assert (l.type == Locate);
 	DEBUG_TRACE (DEBUG::TFSMEvents, "start_locate_while_stopped\n");
 
-	set_roll_after (l.with_roll || api->should_roll_after_locate());
+	set_roll_after (compute_should_roll (l.ltd));
 
 	api->locate (l.target, current_roll_after_locate_status.get(), l.with_flush, l.for_loop_end, l.force);
+}
+
+bool
+TransportFSM::compute_should_roll (LocateTransportDisposition ltd) const
+{
+	switch (ltd) {
+	case MustRoll:
+		return true;
+	case MustStop:
+		return false;
+	case DoTheRightThing:
+		if (rolling()) {
+			return true;
+		} else {
+			return api->should_roll_after_locate ();
+		}
+		break;
+	}
+	/*NOTREACHED*/
+	return true;
 }
 
 void
@@ -414,18 +435,20 @@ TransportFSM::locate_for_loop (Event const & l)
 {
 	assert (l.type == Locate);
 	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("locate_for_loop, wl = %1\n", l.for_loop_end));
-	set_roll_after (l.with_roll);
+
+	const bool should_roll = compute_should_roll (l.ltd);
+
 	_last_locate = l;
-	api->locate (l.target, l.with_roll, l.with_flush, l.for_loop_end, l.force);
+	api->locate (l.target, should_roll, l.with_flush, l.for_loop_end, l.force);
 }
 
 void
 TransportFSM::start_locate_after_declick () const
 {
 	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("start_locate_after_declick, have crals ? %1 roll will be %2\n", (bool) current_roll_after_locate_status,
-	                                                current_roll_after_locate_status ? current_roll_after_locate_status.get() : _last_locate.with_roll));
+	                                                current_roll_after_locate_status ? current_roll_after_locate_status.get() : compute_should_roll (_last_locate.ltd)));
 
-	const bool roll = current_roll_after_locate_status ? current_roll_after_locate_status.get() : _last_locate.with_roll;
+	const bool roll = current_roll_after_locate_status ? current_roll_after_locate_status.get() : compute_should_roll (_last_locate.ltd);
 	api->locate (_last_locate.target, roll, _last_locate.with_flush, _last_locate.for_loop_end, _last_locate.force);
 }
 

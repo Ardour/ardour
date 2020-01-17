@@ -799,6 +799,12 @@ enum OverwriteReason {
 	LoopChanged = 0x8,
 };
 
+enum LocateTransportDisposition {
+	MustRoll,
+	MustStop,
+	DoTheRightThing
+};
+
 typedef std::vector<CaptureInfo*> CaptureInfos;
 
 } // namespace ARDOUR
