@@ -648,7 +648,7 @@ UI::display_message (const char *prefix, gint /*prefix_len*/, RefPtr<TextBuffer:
 	time_t n = time (NULL);
 	struct tm local_time;
 	localtime_r (&n, &local_time);
-	strftime (timebuf, sizeof(timebuf), "%FT%H.%M.%S ", &local_time);
+	strftime (timebuf, sizeof(timebuf), "%FT%H:%M:%S ", &local_time);
 
 	buffer->insert_with_tag(buffer->end(), timebuf, ptag);
 	buffer->insert_with_tag(buffer->end(), prefix, ptag);
