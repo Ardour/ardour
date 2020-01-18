@@ -1731,6 +1731,15 @@ MackieControlProtocol::subview_mode_would_be_ok (SubViewMode mode, boost::shared
 		if (r) {
 			return true;
 		}
+		break;
+		
+	case Plugin:
+		if (r) {
+			boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (r);
+			if (route && route->nth_plugin(0)) {
+				return true;
+			}
+		}
 	}
 
 	return false;
@@ -1787,6 +1796,8 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Strip
 					break;
 				case TrackView:
 					msg = _("no track view possible");
+				case Plugin:
+					msg = ("no plugins in selected track/bus");
 				default:
 					break;
 				}
@@ -1866,6 +1877,14 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Strip
 		update_global_button (Button::Eq, off);
 		update_global_button (Button::Dyn, off);
 		update_global_button (Button::Track, on);
+		update_global_button (Button::Pan, off);
+		break;
+	case MackieControlProtocol::Plugin:
+		update_global_button (Button::Send, off);
+		update_global_button (Button::Plugin, on);
+		update_global_button (Button::Eq, off);
+		update_global_button (Button::Dyn, off);
+		update_global_button (Button::Track, off);
 		update_global_button (Button::Pan, off);
 		break;
 	}

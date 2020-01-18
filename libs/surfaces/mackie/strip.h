@@ -190,6 +190,9 @@ private:
 
 	void notify_trackview_change (ARDOUR::AutomationType, uint32_t band, bool force);
 	void setup_trackview_vpot (boost::shared_ptr<ARDOUR::Stripable>);
+	
+	void notify_plugin_change (ARDOUR::AutomationType, uint32_t band, bool force);
+	void setup_plugin_vpot (boost::shared_ptr<ARDOUR::Stripable>);
 };
 
 }
