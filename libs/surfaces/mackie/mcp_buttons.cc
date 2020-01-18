@@ -731,7 +731,8 @@ MackieControlProtocol::pan_release (Button &)
 LedState
 MackieControlProtocol::plugin_press (Button &)
 {
-	return off;
+	set_subview_mode (Plugin, first_selected_stripable());
+	return none;
 }
 LedState
 MackieControlProtocol::plugin_release (Button &)

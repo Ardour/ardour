@@ -1395,6 +1395,14 @@ Strip::subview_mode_changed ()
 		}
 		eq_band = -1;
 		break;
+	case MackieControlProtocol::Plugin:
+		if (r) {
+			setup_plugin_vpot (r);
+		} else {
+			/* leave it as it was */
+		}
+		eq_band = -1;
+		break;
 	}
 }
 
@@ -1685,6 +1693,41 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 	}
 
 	_vpot->set_control (pc);
+}
+
+void
+Strip::setup_plugin_vpot (boost::shared_ptr<ARDOUR::Stripable> r)
+{
+	if (!r) {
+		return;
+	}
+	
+	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (r);
+	if (!route) {
+		return;
+	}
+
+	const uint32_t global_pos = _surface->mcp().global_index (*this);
+
+	if (global_pos >= 8) {
+		/* nothing to control */
+		_vpot->set_control (boost::shared_ptr<AutomationControl>());
+		pending_display[0] = string();
+		pending_display[1] = string();
+		return;
+	}
+	
+	boost::shared_ptr<Processor> plugin = route->nth_plugin(global_pos);
+	
+	if (plugin) {
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("plugin of strip %1 is %2\n", global_pos, plugin->display_name()));
+		pending_display[0] = string_compose("Ins%1Pl", global_pos + 1);
+		pending_display[1] = plugin->display_name();
+	}
+	else {
+		pending_display[0] = "";
+		pending_display[1] = "";
+	}
 }
 
 void
