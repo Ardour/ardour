@@ -668,37 +668,7 @@ Strip::vselect_event (Button&, ButtonState bs)
 			return;
 		}
 
-		if (_surface->mcp().subview_mode() != MackieControlProtocol::Sends) {
-
-			boost::shared_ptr<AutomationControl> control = _vpot->control ();
-			if (!control) {
-				return;
-			}
-
-			Controllable::GroupControlDisposition gcd;
-			if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
-				gcd = Controllable::InverseGroup;
-			} else {
-				gcd = Controllable::UseGroup;
-			}
-
-			if (control->toggled()) {
-				if (control->toggled()) {
-					control->set_value (!control->get_value(), gcd);
-				}
-
-			} else if (control->desc().enumeration || control->desc().integer_step) {
-
-				double val = control->get_value ();
-				if (val <= control->upper() - 1.0) {
-					control->set_value (val + 1.0, gcd);
-				} else {
-					control->set_value (control->lower(), gcd);
-				}
-			}
-
-		} else {
-
+		if (_surface->mcp().subview_mode() == MackieControlProtocol::Sends) {
 			/* Send mode: press enables/disables the relevant
 			 * send, but the vpot is bound to the send-level so we
 			 * need to lookup the enable/disable control
@@ -733,6 +703,45 @@ Strip::vselect_event (Button&, ButtonState bs)
 						control = _stripable->send_level_controllable (global_pos);
 						do_parameter_display (control->desc(), control->get_value()); // BusSendLevel
 					}
+				}
+			}
+		} else if (_surface->mcp().subview_mode() == MackieControlProtocol::Plugin) {
+			/* Plugin mode: press selects the plugin shown on the strip's LCD */
+			boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
+			if (r) {
+				boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (r);
+				if (route) {
+					const uint32_t global_pos = _surface->mcp().global_index (*this);
+					boost::shared_ptr<Processor> proc = route->nth_plugin(global_pos);
+					proc->ShowUI();
+				}
+			}
+		} else {
+
+			boost::shared_ptr<AutomationControl> control = _vpot->control ();
+			if (!control) {
+				return;
+			}
+
+			Controllable::GroupControlDisposition gcd;
+			if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
+				gcd = Controllable::InverseGroup;
+			} else {
+				gcd = Controllable::UseGroup;
+			}
+
+			if (control->toggled()) {
+				if (control->toggled()) {
+					control->set_value (!control->get_value(), gcd);
+				}
+
+			} else if (control->desc().enumeration || control->desc().integer_step) {
+
+				double val = control->get_value ();
+				if (val <= control->upper() - 1.0) {
+					control->set_value (val + 1.0, gcd);
+				} else {
+					control->set_value (control->lower(), gcd);
 				}
 			}
 		}
