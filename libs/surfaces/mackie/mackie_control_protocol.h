@@ -106,7 +106,8 @@ class MackieControlProtocol
 		Dynamics,
 		Sends,
 		TrackView,
-		Plugin,
+		PluginSelect,
+		PluginEdit,
 	};
 
 	enum FlipMode {

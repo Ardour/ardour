@@ -705,8 +705,8 @@ Strip::vselect_event (Button&, ButtonState bs)
 					}
 				}
 			}
-		} else if (_surface->mcp().subview_mode() == MackieControlProtocol::Plugin) {
-			/* Plugin mode: press selects the plugin shown on the strip's LCD */
+		} else if (_surface->mcp().subview_mode() == MackieControlProtocol::PluginSelect) {
+			/* PluginSelect mode: press selects the plugin shown on the strip's LCD */
 			boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
 			if (r) {
 				boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (r);
@@ -1404,7 +1404,7 @@ Strip::subview_mode_changed ()
 		}
 		eq_band = -1;
 		break;
-	case MackieControlProtocol::Plugin:
+	case MackieControlProtocol::PluginSelect:
 		if (r) {
 			setup_plugin_vpot (r);
 		} else {
