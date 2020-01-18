@@ -1082,9 +1082,9 @@ DiskWriter::reset_write_sources (bool mark_write_complete, bool /*force*/)
 int
 DiskWriter::use_new_write_source (DataType dt, uint32_t n)
 {
-	if (dt == DataType::MIDI) {
+	_accumulated_capture_offset = 0;
 
-		_accumulated_capture_offset = 0;
+	if (dt == DataType::MIDI) {
 		_midi_write_source.reset();
 
 		try {
