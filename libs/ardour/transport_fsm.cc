@@ -418,7 +418,10 @@ TransportFSM::compute_should_roll (LocateTransportDisposition ltd) const
 	case MustStop:
 		return false;
 	case RollIfAppropriate:
-		if (rolling()) {
+		/* by the time we call this, if we were rolling before the
+		   locate, we've already transitioned into DeclickToLocate
+		*/
+		if (_motion_state == DeclickToLocate) {
 			return true;
 		} else {
 			return api->should_roll_after_locate ();
