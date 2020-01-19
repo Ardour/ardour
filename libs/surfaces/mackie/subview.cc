@@ -22,17 +22,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
-#include "ardour/route.h"
-#include "ardour/stripable.h"
 
-#include "subview.h"
+#include "ardour/monitor_control.h"
+#include "ardour/phase_control.h"
+#include "ardour/route.h"
+#include "ardour/solo_isolate_control.h"
+#include "ardour/stripable.h"
+#include "ardour/track.h"
+
 #include "mackie_control_protocol.h"
+#include "pot.h"
+#include "strip.h"
+#include "subview.h"
+#include "surface.h"
  
 using namespace ARDOUR;
-
-namespace ArdourSurface {
-
-namespace Mackie {
+using namespace ArdourSurface;
+using namespace Mackie;
+	
+#define ui_context() MackieControlProtocol::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
 
 SubviewFactory* SubviewFactory::_instance = 0;
 
@@ -130,6 +138,14 @@ void NoneSubview::update_global_buttons(MackieControlProtocol* mcp)
 	mcp->update_global_button (Button::Pan, on);
 }
 
+void NoneSubview::setup_vpot(Surface* surface, 
+		Strip* strip,
+		Pot* vpot, 
+		std::string pending_display[2])
+{
+	
+}
+
 
 
 EQSubview::EQSubview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable) 
@@ -161,6 +177,14 @@ void EQSubview::update_global_buttons(MackieControlProtocol* mcp)
 	mcp->update_global_button (Button::Dyn, off);
 	mcp->update_global_button (Button::Track, off);
 	mcp->update_global_button (Button::Pan, off);
+}
+
+void EQSubview::setup_vpot(Surface* surface, 
+		Strip* strip,
+		Pot* vpot, 
+		std::string pending_display[2])
+{
+	
 }
 
 
@@ -196,6 +220,14 @@ void DynamicsSubview::update_global_buttons(MackieControlProtocol* mcp)
 	mcp->update_global_button (Button::Pan, off);
 }
 
+void DynamicsSubview::setup_vpot(Surface* surface, 
+		Strip* strip,
+		Pot* vpot, 
+		std::string pending_display[2])
+{
+	
+}
+
 
 
 SendsSubview::SendsSubview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable) 
@@ -229,6 +261,14 @@ void SendsSubview::update_global_buttons(MackieControlProtocol* mcp)
 	mcp->update_global_button (Button::Pan, off);
 }
 
+void SendsSubview::setup_vpot(Surface* surface, 
+		Strip* strip,
+		Pot* vpot, 
+		std::string pending_display[2])
+{
+	
+}
+
 
 
 TrackViewSubview::TrackViewSubview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable) 
@@ -260,6 +300,161 @@ void TrackViewSubview::update_global_buttons(MackieControlProtocol* mcp)
 	mcp->update_global_button (Button::Dyn, off);
 	mcp->update_global_button (Button::Track, on);
 	mcp->update_global_button (Button::Pan, off);
+}
+
+void TrackViewSubview::setup_vpot(
+		Surface* surface, 
+		Strip* strip, 
+		Pot* vpot, 
+		std::string pending_display[2])
+{
+	const uint32_t strip_position_on_surface = surface->mcp().global_index (*strip);
+	
+	if (strip_position_on_surface >= 8) {
+		/* nothing to control */
+		vpot->set_control (boost::shared_ptr<AutomationControl>());
+		pending_display[0] = std::string();
+		pending_display[1] = std::string();
+		return;
+	}
+	
+	// local pointer to strip members
+	if (_strips_surface != surface) {
+		_strips_surface = surface;
+	}
+	_strips[strip_position_on_surface] = strip;
+	_strip_vpots[strip_position_on_surface] = vpot;
+	_strips_pending_displays[strip_position_on_surface] = pending_display;
+	
+	if (!_subview_stripable) {
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> pc;
+	boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (_subview_stripable);
+
+	switch (strip_position_on_surface) {
+	case 0:
+		pc = _subview_stripable->trim_control ();
+		if (pc) {
+			pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&TrackViewSubview::notify_change, this, TrimAutomation, strip_position_on_surface, false), ui_context());
+			pending_display[0] = "Trim";
+			notify_change (TrimAutomation, strip_position_on_surface, true);
+		}
+		break;
+	case 1:
+		if (track) {
+			pc = track->monitoring_control();
+			if (pc) {
+				pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&TrackViewSubview::notify_change, this, MonitoringAutomation, strip_position_on_surface, false), ui_context());
+				pending_display[0] = "Mon";
+				notify_change (MonitoringAutomation, strip_position_on_surface, true);
+			}
+		}
+		break;
+	case 2:
+		pc = _subview_stripable->solo_isolate_control ();
+		if (pc) {
+			pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&TrackViewSubview::notify_change, this, SoloIsolateAutomation, strip_position_on_surface, false), ui_context());
+			notify_change (SoloIsolateAutomation, strip_position_on_surface, true);
+			pending_display[0] = "S-Iso";
+		}
+		break;
+	case 3:
+		pc = _subview_stripable->solo_safe_control ();
+		if (pc) {
+			pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&TrackViewSubview::notify_change, this, SoloSafeAutomation, strip_position_on_surface, false), ui_context());
+			notify_change (SoloSafeAutomation, strip_position_on_surface, true);
+			pending_display[0] = "S-Safe";
+		}
+		break;
+	case 4:
+		pc = _subview_stripable->phase_control();
+		if (pc) {
+			pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&TrackViewSubview::notify_change, this, PhaseAutomation, strip_position_on_surface, false), ui_context());
+			notify_change (PhaseAutomation, strip_position_on_surface, true);
+			pending_display[0] = "Phase";
+		}
+		break;
+	case 5:
+		// pc = _subview_stripable->trim_control ();
+		break;
+	case 6:
+		// pc = _subview_stripable->trim_control ();
+		break;
+	case 7:
+		// pc = _subview_stripable->trim_control ();
+		break;
+	}
+	
+	if (!pc) {
+		pending_display[0] = std::string();
+		pending_display[1] = std::string();
+		return;
+	}
+
+	vpot->set_control (pc);
+}
+
+void
+TrackViewSubview::notify_change (AutomationType type, uint32_t strip_position_on_surface, bool force_update)
+{
+	if (!_subview_stripable) {
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> control;
+	boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (_subview_stripable);
+	bool screen_hold = false;
+
+	switch (type) {
+		case TrimAutomation:
+			control = _subview_stripable->trim_control();
+			screen_hold = true;
+			break;
+		case SoloIsolateAutomation:
+			control = _subview_stripable->solo_isolate_control ();
+			break;
+		case SoloSafeAutomation:
+			control = _subview_stripable->solo_safe_control ();
+			break;
+		case MonitoringAutomation:
+			if (track) {
+				control = track->monitoring_control();
+				screen_hold = true;
+			}
+			break;
+		case PhaseAutomation:
+			control = _subview_stripable->phase_control ();
+			screen_hold = true;
+			break;
+		default:
+			break;
+	}
+
+	if (control) {
+		float val = control->get_value();
+
+		/* Note: all of the displayed controllables require the display
+		 * of their *actual* ("internal") value, not the version mapped
+		 * into the normalized 0..1.0 ("interface") range.
+		 */
+
+		//do_parameter_display (control->desc(), val, screen_hold);
+		{
+			_strips_pending_displays[strip_position_on_surface][1] = Strip::format_paramater_for_display(control->desc(), val, _strips[strip_position_on_surface]->stripable(), screen_hold);
+	
+			if (screen_hold) {
+				/* we just queued up a parameter to be displayed.
+					1 second from now, switch back to vpot mode display.
+				*/
+				_strips[strip_position_on_surface]->block_vpot_mode_display_for (1000);
+			}
+		}
+		
+		/* update pot/encoder */
+		_strips_surface->write (_strip_vpots[strip_position_on_surface]->set (control->internal_to_interface (val), true, Pot::wrap));
+	}
 }
 
 
@@ -298,6 +493,14 @@ void PluginSelectSubview::update_global_buttons(MackieControlProtocol* mcp)
 	mcp->update_global_button (Button::Pan, off);
 }
 
+void PluginSelectSubview::setup_vpot(Surface* surface, 
+		Strip* strip,
+		Pot* vpot, 
+		std::string pending_display[2])
+{
+	
+}
+
 
 PluginEditSubview::PluginEditSubview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable) 
 	: Subview(subview_stripable)
@@ -326,5 +529,11 @@ void PluginEditSubview::update_global_buttons(MackieControlProtocol* mcp)
 	mcp->update_global_button (Button::Pan, off);
 }
 
+void PluginEditSubview::setup_vpot(Surface* surface, 
+		Strip* strip,
+		Pot* vpot, 
+		std::string pending_display[2])
+{
+	
 }
-}
+

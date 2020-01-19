@@ -32,7 +32,10 @@ class MackieControlProtocol;
 
 namespace Mackie {
 
+class Pot;
+class Strip;
 class Subview;
+class Surface;
 
 class SubviewFactory {
   public:
@@ -60,6 +63,10 @@ class Subview {
 	}
 	
 	virtual void update_global_buttons(MackieControlProtocol* mcp) = 0;
+	virtual void setup_vpot(Surface* surface, 
+		Strip* strip, 
+		Pot* vpot, 
+		std::string pending_display[2]) = 0;
 	
 	static bool subview_mode_would_be_ok (SubViewMode, boost::shared_ptr<ARDOUR::Stripable>, std::string& reason_why_not);
 	boost::shared_ptr<ARDOUR::Stripable> subview_stripable() const { return _subview_stripable; }
@@ -93,7 +100,12 @@ class NoneSubview : public Subview {
 	
 	virtual SubViewMode subview_mode () const { return SubViewMode::None; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
+	
 	virtual void update_global_buttons(MackieControlProtocol* mcp);
+	virtual void setup_vpot(Surface* surface, 
+		Strip* strip,
+		Pot* vpot, 
+		std::string pending_display[2]);
 };
 
 class EQSubview : public Subview {
@@ -104,6 +116,10 @@ class EQSubview : public Subview {
 	virtual SubViewMode subview_mode () const { return SubViewMode::EQ; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
 	virtual void update_global_buttons(MackieControlProtocol* mcp);
+	virtual void setup_vpot(Surface* surface, 
+		Strip* strip,
+		Pot* vpot, 
+		std::string pending_display[2]);
 };
 
 class DynamicsSubview : public Subview {
@@ -114,6 +130,10 @@ class DynamicsSubview : public Subview {
 	virtual SubViewMode subview_mode () const { return SubViewMode::Dynamics; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
 	virtual void update_global_buttons(MackieControlProtocol* mcp);
+	virtual void setup_vpot(Surface* surface, 
+		Strip* strip,
+		Pot* vpot, 
+		std::string pending_display[2]);
 };
 
 class SendsSubview : public Subview {
@@ -124,6 +144,10 @@ class SendsSubview : public Subview {
 	virtual SubViewMode subview_mode () const { return SubViewMode::Sends; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
 	virtual void update_global_buttons(MackieControlProtocol* mcp);
+	virtual void setup_vpot(Surface* surface, 
+		Strip* strip,
+		Pot* vpot, 
+		std::string pending_display[2]);
 };
 
 class TrackViewSubview : public Subview {
@@ -134,6 +158,17 @@ class TrackViewSubview : public Subview {
 	virtual SubViewMode subview_mode () const { return SubViewMode::TrackView; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
 	virtual void update_global_buttons(MackieControlProtocol* mcp);
+	virtual void setup_vpot(Surface* surface,
+		Strip* strip,
+		Pot* vpot, 
+		std::string pending_display[2]);
+	void notify_change (ARDOUR::AutomationType, uint32_t strip_position_on_surface, bool force);
+	
+	Surface* _strips_surface;
+	Strip* _strips[8];
+	Pot* _strip_vpots[8];
+	std::string* _strips_pending_displays[8];
+	PBD::ScopedConnectionList subview_connections;
 };
 
 class PluginSelectSubview : public Subview {
@@ -144,6 +179,10 @@ class PluginSelectSubview : public Subview {
 	virtual SubViewMode subview_mode () const { return SubViewMode::PluginSelect; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
 	virtual void update_global_buttons(MackieControlProtocol* mcp);
+	virtual void setup_vpot(Surface* surface, 
+		Strip* strip,
+		Pot* vpot, 
+		std::string pending_display[2]);
 };
 
 class PluginEditSubview : public Subview {
@@ -154,6 +193,10 @@ class PluginEditSubview : public Subview {
 	virtual SubViewMode subview_mode () const { return SubViewMode::PluginEdit; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
 	virtual void update_global_buttons(MackieControlProtocol* mcp);
+	virtual void setup_vpot(Surface* surface, 
+		Strip* strip,
+		Pot* vpot, 
+		std::string pending_display[2]);
 };
 
 }

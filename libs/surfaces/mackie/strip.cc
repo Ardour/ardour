@@ -888,9 +888,14 @@ Strip::handle_button (Button& button, ButtonState bs)
 	}
 }
 
-void
-Strip::do_parameter_display (ARDOUR::ParameterDescriptor const& desc, float val, bool screen_hold)
+std::string
+Strip::format_paramater_for_display(
+		ARDOUR::ParameterDescriptor const& desc, 
+		float val, 
+		boost::shared_ptr<ARDOUR::Stripable> stripable_for_non_mixbus_azimuth_automation, 
+		bool& overwrite_screen_hold)
 {
+	std::string formatted_parameter_display;
 	char buf[16];
 
 	switch (desc.type) {
@@ -899,12 +904,12 @@ Strip::do_parameter_display (ARDOUR::ParameterDescriptor const& desc, float val,
 	case TrimAutomation:
 		// we can't use value_as_string() that'll suffix "dB" and also use "-inf" w/o space :(
 		if (val == 0.0) {
-			pending_display[1] = " -inf ";
+			formatted_parameter_display = " -inf ";
 		} else {
 			float dB = accurate_coefficient_to_dB (val);
 			snprintf (buf, sizeof (buf), "%6.1f", dB);
-			pending_display[1] = buf;
-			screen_hold = true;
+			formatted_parameter_display = buf;
+			overwrite_screen_hold = true;
 		}
 		break;
 
@@ -912,26 +917,34 @@ Strip::do_parameter_display (ARDOUR::ParameterDescriptor const& desc, float val,
 		if (Profile->get_mixbus()) {
 			// XXX no _stripable check?
 			snprintf (buf, sizeof (buf), "%2.1f", val);
-			pending_display[1] = buf;
-			screen_hold = true;
+			formatted_parameter_display = buf;
+			overwrite_screen_hold = true;
 		} else {
-			if (_stripable) {
-				boost::shared_ptr<AutomationControl> pa = _stripable->pan_azimuth_control();
+			if (stripable_for_non_mixbus_azimuth_automation) {
+				boost::shared_ptr<AutomationControl> pa = stripable_for_non_mixbus_azimuth_automation->pan_azimuth_control();
 				if (pa) {
-					pending_display[1] = pa->get_user_string ();
-					screen_hold = true;
+					formatted_parameter_display = pa->get_user_string ();
+					overwrite_screen_hold = true;
 				}
 			}
 		}
 		break;
 	default:
-		pending_display[1] = ARDOUR::value_as_string (desc, val);
-		if (pending_display[1].size () < 6) { // left-padding, right-align
-			pending_display[1].insert (0, 6 - pending_display[1].size (), ' ');
+		formatted_parameter_display = ARDOUR::value_as_string (desc, val);
+		if (formatted_parameter_display.size () < 6) { // left-padding, right-align
+			formatted_parameter_display.insert (0, 6 - formatted_parameter_display.size (), ' ');
 		}
 		break;
 	}
+	
+	return formatted_parameter_display;
+}
 
+void
+Strip::do_parameter_display (ARDOUR::ParameterDescriptor const& desc, float val, bool screen_hold)
+{
+	pending_display[1] = format_paramater_for_display(desc, val, _stripable, screen_hold);
+	
 	if (screen_hold) {
 		/* we just queued up a parameter to be displayed.
 		   1 second from now, switch back to vpot mode display.
@@ -1398,11 +1411,7 @@ Strip::subview_mode_changed ()
 		eq_band = -1;
 		break;
 	case SubViewMode::TrackView:
-		if (r) {
-			setup_trackview_vpot (r);
-		} else {
-			/* leave it as it was */
-		}
+		_surface->mcp().subview()->setup_vpot(_surface, this, _vpot, pending_display);
 		eq_band = -1;
 		break;
 	case SubViewMode::PluginSelect:
