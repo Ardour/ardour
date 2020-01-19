@@ -60,6 +60,7 @@
 #include "ardour/value_as_string.h"
 
 #include "mackie_control_protocol.h"
+#include "subview.h"
 #include "surface_port.h"
 #include "surface.h"
 #include "strip.h"
@@ -256,7 +257,7 @@ Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 
 	_pan_mode = PanAzimuthAutomation;
 
-	if (_surface->mcp().subview_mode() == MackieControlProtocol::None) {
+	if (_surface->mcp().subview()->subview_mode() == SubViewMode::None) {
 		set_vpot_parameter (_pan_mode);
 	}
 
@@ -395,9 +396,9 @@ Strip::update_selection_state ()
 void
 Strip::show_stripable_name ()
 {
-	MackieControlProtocol::SubViewMode svm = _surface->mcp().subview_mode();
+	SubViewMode svm = _surface->mcp().subview()->subview_mode();
 
-	if (svm != MackieControlProtocol::None) {
+	if (svm != SubViewMode::None) {
 		/* subview mode is responsible for upper line */
 		return;
 	}
@@ -419,14 +420,14 @@ Strip::show_stripable_name ()
 void
 Strip::notify_send_level_change (uint32_t send_num, bool force_update)
 {
-	boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
+	boost::shared_ptr<Stripable> r = _surface->mcp().subview()->subview_stripable();
 
 	if (!r) {
 		/* not in subview mode */
 		return;
 	}
 
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::Sends) {
+	if (_surface->mcp().subview()->subview_mode() != SubViewMode::Sends) {
 		/* no longer in Sends subview mode */
 		return;
 	}
@@ -450,14 +451,14 @@ Strip::notify_send_level_change (uint32_t send_num, bool force_update)
 void
 Strip::notify_trackview_change (AutomationType type, uint32_t send_num, bool force_update)
 {
-	boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
+	boost::shared_ptr<Stripable> r = _surface->mcp().subview()->subview_stripable();
 
 	if (!r) {
 		/* not in subview mode */
 		return;
 	}
 
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::TrackView) {
+	if (_surface->mcp().subview()->subview_mode() != SubViewMode::TrackView) {
 		/* no longer in TrackViewsubview mode */
 		return;
 	}
@@ -508,14 +509,14 @@ Strip::notify_trackview_change (AutomationType type, uint32_t send_num, bool for
 void
 Strip::notify_eq_change (boost::weak_ptr<AutomationControl> pc, bool force_update)
 {
-	boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
+	boost::shared_ptr<Stripable> r = _surface->mcp().subview()->subview_stripable();
 
 	if (!r) {
 		/* not in subview mode */
 		return;
 	}
 
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::EQ) {
+	if (_surface->mcp().subview()->subview_mode() != SubViewMode::EQ) {
 		/* no longer in EQ subview mode */
 		return;
 	}
@@ -532,14 +533,14 @@ Strip::notify_eq_change (boost::weak_ptr<AutomationControl> pc, bool force_updat
 void
 Strip::notify_dyn_change (boost::weak_ptr<AutomationControl> pc, bool force_update, bool propagate_mode)
 {
-	boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
+	boost::shared_ptr<Stripable> r = _surface->mcp().subview()->subview_stripable();
 
 	if (!r) {
 		/* not in subview mode */
 		return;
 	}
 
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::Dynamics) {
+	if (_surface->mcp().subview()->subview_mode() != SubViewMode::Dynamics) {
 		/* no longer in EQ subview mode */
 		return;
 	}
@@ -660,7 +661,7 @@ Strip::select_event (Button&, ButtonState bs)
 void
 Strip::vselect_event (Button&, ButtonState bs)
 {
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
+	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
 
 		/* most subview modes: vpot press acts like a button for toggle parameters */
 
@@ -668,14 +669,14 @@ Strip::vselect_event (Button&, ButtonState bs)
 			return;
 		}
 
-		if (_surface->mcp().subview_mode() == MackieControlProtocol::Sends) {
+		if (_surface->mcp().subview()->subview_mode() == SubViewMode::Sends) {
 			/* Send mode: press enables/disables the relevant
 			 * send, but the vpot is bound to the send-level so we
 			 * need to lookup the enable/disable control
 			 * explicitly.
 			 */
 
-			boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
+			boost::shared_ptr<Stripable> r = _surface->mcp().subview()->subview_stripable();
 
 			if (r) {
 
@@ -705,9 +706,9 @@ Strip::vselect_event (Button&, ButtonState bs)
 					}
 				}
 			}
-		} else if (_surface->mcp().subview_mode() == MackieControlProtocol::PluginSelect) {
+		} else if (_surface->mcp().subview()->subview_mode() == SubViewMode::PluginSelect) {
 			/* PluginSelect mode: press selects the plugin shown on the strip's LCD */
-			boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
+			boost::shared_ptr<Stripable> r = _surface->mcp().subview()->subview_stripable();
 			if (r) {
 				boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (r);
 				if (route) {
@@ -1115,7 +1116,7 @@ Strip::update_meter ()
 		return;
 	}
 
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
+	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
 		return;
 	}
 
@@ -1203,7 +1204,7 @@ Strip::unlock_controls ()
 string
 Strip::vpot_mode_string ()
 {
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
+	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
 		return string();
 	}
 
@@ -1240,7 +1241,7 @@ Strip::vpot_mode_string ()
 void
 Strip::flip_mode_changed ()
 {
-	if (_surface->mcp().subview_mode() == MackieControlProtocol::Sends) {
+	if (_surface->mcp().subview()->subview_mode() == SubViewMode::Sends) {
 
 		boost::shared_ptr<AutomationControl> pot_control = _vpot->control();
 		boost::shared_ptr<AutomationControl> fader_control = _fader->control();
@@ -1291,7 +1292,7 @@ Strip::return_to_vpot_mode_display ()
 	   back the mode where it shows what the VPot controls.
 	*/
 
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
+	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
 		/* do nothing - second line shows value of current subview parameter */
 		return;
 	} else if (_stripable) {
@@ -1322,7 +1323,7 @@ Strip::next_pot_mode ()
 	}
 
 
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
+	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
 		return;
 	}
 
@@ -1354,12 +1355,12 @@ Strip::next_pot_mode ()
 void
 Strip::subview_mode_changed ()
 {
-	boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
+	boost::shared_ptr<Stripable> r = _surface->mcp().subview()->subview_stripable();
 
 	subview_connections.drop_connections ();
 
-	switch (_surface->mcp().subview_mode()) {
-	case MackieControlProtocol::None:
+	switch (_surface->mcp().subview()->subview_mode()) {
+	case SubViewMode::None:
 		set_vpot_parameter (_pan_mode);
 		/* need to show strip name again */
 		show_stripable_name ();
@@ -1371,7 +1372,7 @@ Strip::subview_mode_changed ()
 		eq_band = -1;
 		break;
 
-	case MackieControlProtocol::EQ:
+	case SubViewMode::EQ:
 		if (r) {
 			setup_eq_vpot (r);
 		} else {
@@ -1379,7 +1380,7 @@ Strip::subview_mode_changed ()
 		}
 		break;
 
-	case MackieControlProtocol::Dynamics:
+	case SubViewMode::Dynamics:
 		if (r) {
 			setup_dyn_vpot (r);
 		} else {
@@ -1388,7 +1389,7 @@ Strip::subview_mode_changed ()
 		eq_band = -1;
 		break;
 
-	case MackieControlProtocol::Sends:
+	case SubViewMode::Sends:
 		if (r) {
 			setup_sends_vpot (r);
 		} else {
@@ -1396,7 +1397,7 @@ Strip::subview_mode_changed ()
 		}
 		eq_band = -1;
 		break;
-	case MackieControlProtocol::TrackView:
+	case SubViewMode::TrackView:
 		if (r) {
 			setup_trackview_vpot (r);
 		} else {
@@ -1404,7 +1405,7 @@ Strip::subview_mode_changed ()
 		}
 		eq_band = -1;
 		break;
-	case MackieControlProtocol::PluginSelect:
+	case SubViewMode::PluginSelect:
 		if (r) {
 			setup_plugin_vpot (r);
 		} else {
@@ -1798,7 +1799,7 @@ Strip::reset_saved_values ()
 void
 Strip::notify_metering_state_changed()
 {
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
+	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
 		return;
 	}
 

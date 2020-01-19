@@ -1,0 +1,162 @@
+/*
+ * Copyright (C) 2006-2007 John Anderson
+ * Copyright (C) 2012-2015 Paul Davis <paul@linuxaudiosystems.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#ifndef __ardour_mackie_control_protocol_subview_h__
+#define __ardour_mackie_control_protocol_subview_h__
+
+#include <boost/smart_ptr.hpp>
+
+#include "ardour/types.h"
+
+#include "subview_modes.h"
+
+namespace ArdourSurface {
+
+class MackieControlProtocol;
+
+namespace Mackie {
+
+class Subview;
+
+class SubviewFactory {
+  public:
+	static SubviewFactory* instance();
+	
+	boost::shared_ptr<Subview> create_subview(SubViewMode svm, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+  protected:
+	SubviewFactory();
+  private:
+	static SubviewFactory* _instance;
+};
+
+
+/**
+	This implements the subviews of the Mackie control in a Strategy pattern
+*/
+class Subview {
+  public:
+	Subview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	virtual ~Subview();
+	
+	virtual SubViewMode subview_mode () const {
+		std::cerr << "TEMP METHOD subview_mode () CALLED (should be pure virtual)" << std::endl;
+		return _subview_mode;
+	}
+	
+	virtual void update_global_buttons(MackieControlProtocol* mcp) = 0;
+	
+	static bool subview_mode_would_be_ok (SubViewMode, boost::shared_ptr<ARDOUR::Stripable>, std::string& reason_why_not);
+	boost::shared_ptr<ARDOUR::Stripable> subview_stripable() const { return _subview_stripable; }
+	
+	void notify_subview_stripable_deleted ();
+	
+	PBD::ScopedConnectionList& subview_stripable_connections() { return _subview_stripable_connections; }
+	
+	
+	// remove this when refactoring mcp::set_subview_mode()
+	void set_subview_stripable(boost::shared_ptr<ARDOUR::Stripable> r) { 
+		std::cerr << "TEMP METHOD set_subview_stripable CALLED (should not exist)" << std::endl;
+		_subview_stripable = r; 
+	}
+	
+	void set_subview_mode(SubViewMode m) { 
+		std::cerr << "TEMP METHOD set_subview_mode CALLED (should not exist)" << std::endl;
+		_subview_mode = m; 
+	}
+	
+  protected:
+	SubViewMode                          _subview_mode;
+	boost::shared_ptr<ARDOUR::Stripable> _subview_stripable;
+	PBD::ScopedConnectionList _subview_stripable_connections;
+};
+
+class NoneSubview : public Subview {
+  public:
+	NoneSubview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	virtual ~NoneSubview();
+	
+	virtual SubViewMode subview_mode () const { return SubViewMode::None; }
+	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
+	virtual void update_global_buttons(MackieControlProtocol* mcp);
+};
+
+class EQSubview : public Subview {
+  public:
+	EQSubview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	virtual ~EQSubview();
+	
+	virtual SubViewMode subview_mode () const { return SubViewMode::EQ; }
+	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
+	virtual void update_global_buttons(MackieControlProtocol* mcp);
+};
+
+class DynamicsSubview : public Subview {
+  public:
+	DynamicsSubview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	virtual ~DynamicsSubview();
+	
+	virtual SubViewMode subview_mode () const { return SubViewMode::Dynamics; }
+	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
+	virtual void update_global_buttons(MackieControlProtocol* mcp);
+};
+
+class SendsSubview : public Subview {
+  public:
+	SendsSubview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	virtual ~SendsSubview();
+	
+	virtual SubViewMode subview_mode () const { return SubViewMode::Sends; }
+	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
+	virtual void update_global_buttons(MackieControlProtocol* mcp);
+};
+
+class TrackViewSubview : public Subview {
+  public:
+	TrackViewSubview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	virtual ~TrackViewSubview();
+	
+	virtual SubViewMode subview_mode () const { return SubViewMode::TrackView; }
+	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
+	virtual void update_global_buttons(MackieControlProtocol* mcp);
+};
+
+class PluginSelectSubview : public Subview {
+  public:
+	PluginSelectSubview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	virtual ~PluginSelectSubview();
+	
+	virtual SubViewMode subview_mode () const { return SubViewMode::PluginSelect; }
+	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
+	virtual void update_global_buttons(MackieControlProtocol* mcp);
+};
+
+class PluginEditSubview : public Subview {
+  public:
+	PluginEditSubview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	virtual ~PluginEditSubview();
+	
+	virtual SubViewMode subview_mode () const { return SubViewMode::PluginEdit; }
+	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
+	virtual void update_global_buttons(MackieControlProtocol* mcp);
+};
+
+}
+}
+
+#endif /* __ardour_mackie_control_protocol_subview_h__ */

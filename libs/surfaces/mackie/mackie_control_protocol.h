@@ -46,6 +46,7 @@
 #include "timer.h"
 #include "device_info.h"
 #include "device_profile.h"
+#include "subview_modes.h"
 
 namespace ARDOUR {
 	class AutomationControl;
@@ -59,6 +60,7 @@ namespace MIDI {
 namespace ArdourSurface {
 
 namespace Mackie {
+	class Subview;
 	class Surface;
 	class Control;
 	class SurfacePort;
@@ -100,16 +102,6 @@ class MackieControlProtocol
 		Plugins,
 	};
 
-	enum SubViewMode {
-		None,
-		EQ,
-		Dynamics,
-		Sends,
-		TrackView,
-		PluginSelect,
-		PluginEdit,
-	};
-
 	enum FlipMode {
 		Normal, /* fader controls primary, vpot controls secondary */
 		Mirror, /* fader + vpot control secondary */
@@ -136,9 +128,7 @@ class MackieControlProtocol
 
 	FlipMode flip_mode () const { return _flip_mode; }
 	ViewMode view_mode () const { return _view_mode; }
-	SubViewMode subview_mode () const { return _subview_mode; }
-	static bool subview_mode_would_be_ok (SubViewMode, boost::shared_ptr<ARDOUR::Stripable>);
-	boost::shared_ptr<ARDOUR::Stripable> subview_stripable() const;
+	boost::shared_ptr<Mackie::Subview> subview() { return _subview; }
 	bool zoom_mode () const { return modifier_state() & MODIFIER_ZOOM; }
 	bool     metering_active () const { return _metering_active; }
 
@@ -153,7 +143,7 @@ class MackieControlProtocol
 	void set_automation_state (ARDOUR::AutoState);
 
 	void set_view_mode (ViewMode);
-	int set_subview_mode (SubViewMode, boost::shared_ptr<ARDOUR::Stripable>);
+	int set_subview_mode (Mackie::SubViewMode, boost::shared_ptr<ARDOUR::Stripable>);
 	void set_flip_mode (FlipMode);
 	void display_view_mode ();
 
@@ -313,7 +303,6 @@ class MackieControlProtocol
 	PBD::ScopedConnectionList audio_engine_connections;
 	PBD::ScopedConnectionList session_connections;
 	PBD::ScopedConnectionList stripable_connections;
-	PBD::ScopedConnectionList subview_stripable_connections;
 	PBD::ScopedConnectionList gui_connections;
 	PBD::ScopedConnectionList fader_automation_connections;
 	// timer for two quick marker left presses
@@ -331,8 +320,7 @@ class MackieControlProtocol
 	bool                     _scrub_mode;
 	FlipMode                 _flip_mode;
 	ViewMode                 _view_mode;
-	SubViewMode              _subview_mode;
-	boost::shared_ptr<ARDOUR::Stripable> _subview_stripable;
+	boost::shared_ptr<Mackie::Subview> _subview;
 	int                      _current_selected_track;
 	int                      _modifier_state;
 	ButtonMap                 button_map;
