@@ -54,8 +54,7 @@ TransportFSM::Event::operator delete (void *ptr, size_t /*size*/)
 }
 
 TransportFSM::TransportFSM (TransportAPI& tapi)
-	: _last_locate (Locate)
-	, _last_stop (StopTransport)
+	: _last_locate (Locate, 0, MustRoll, false, false, false) /* all but first argument don't matter */
 	, api (&tapi)
 	, processing (0)
 {
@@ -232,7 +231,7 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 		switch (_motion_state) {
 		case Rolling:
 			transition (DeclickToStop);
-			stop_playback ();
+			stop_playback (ev);
 			break;
 		case Stopped:
 			break;
@@ -369,14 +368,14 @@ TransportFSM::start_playback ()
 }
 
 void
-TransportFSM::stop_playback ()
+TransportFSM::stop_playback (Event const & s)
 {
 	DEBUG_TRACE (DEBUG::TFSMEvents, "stop_playback\n");
 
 	_last_locate.target = max_samplepos;
 	current_roll_after_locate_status = boost::none;
 
-	api->stop_transport (_last_stop.abort, _last_stop.clear_state);
+	api->stop_transport (s.abort, s.clear_state);
 }
 
 void

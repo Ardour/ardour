@@ -64,7 +64,10 @@ struct TransportFSM
 			, target (0)
 			, for_loop_end (false)
 			, force (false)
-		{}
+		{
+			assert (t != StopTransport);
+			assert (t != Locate);
+		}
 		Event (EventType t, bool ab, bool cl)
 			: type (t)
 			, abort (ab)
@@ -131,7 +134,7 @@ struct TransportFSM
 
 	void schedule_butler_for_transport_work () const;
 	void start_playback ();
-	void stop_playback ();
+	void stop_playback (Event const &);
 	void start_locate_after_declick () const;
 	void locate_for_loop (Event const &);
 	void roll_after_locate () const;
@@ -163,7 +166,6 @@ struct TransportFSM
 	bool process_event (Event&, bool was_deferred, bool& deferred);
 
 	Event _last_locate;
-	Event _last_stop;
 
 	TransportAPI* api;
 	typedef boost::intrusive::list<Event> EventList;
