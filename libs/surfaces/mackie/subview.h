@@ -57,11 +57,7 @@ class Subview {
 	Subview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual ~Subview();
 	
-	virtual SubViewMode subview_mode () const {
-		std::cerr << "TEMP METHOD subview_mode () CALLED (should be pure virtual)" << std::endl;
-		return _subview_mode;
-	}
-	
+	virtual SubViewMode subview_mode () const = 0;	
 	virtual void update_global_buttons(MackieControlProtocol* mcp) = 0;
 	virtual void setup_vpot(Surface* surface, 
 		Strip* strip, 
@@ -74,18 +70,6 @@ class Subview {
 	void notify_subview_stripable_deleted ();
 	
 	PBD::ScopedConnectionList& subview_stripable_connections() { return _subview_stripable_connections; }
-	
-	
-	// remove this when refactoring mcp::set_subview_mode()
-	void set_subview_stripable(boost::shared_ptr<ARDOUR::Stripable> r) { 
-		std::cerr << "TEMP METHOD set_subview_stripable CALLED (should not exist)" << std::endl;
-		_subview_stripable = r; 
-	}
-	
-	void set_subview_mode(SubViewMode m) { 
-		std::cerr << "TEMP METHOD set_subview_mode CALLED (should not exist)" << std::endl;
-		_subview_mode = m; 
-	}
 	
   protected:
 	SubViewMode                          _subview_mode;
