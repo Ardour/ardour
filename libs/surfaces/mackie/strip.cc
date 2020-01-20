@@ -110,7 +110,6 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	, _metering_active (true)
 	, _block_screen_redisplay_until (0)
 	, return_to_vpot_mode_display_at (UINT64_MAX)
-	, eq_band (-1)
 	, _pan_mode (PanAzimuthAutomation)
 	, _last_gain_position_written (-1.0)
 	, _last_pan_azi_position_written (-1.0)
@@ -445,30 +444,6 @@ Strip::notify_send_level_change (uint32_t send_num, bool force_update)
 			/* update pot/encoder */
 			_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 		}
-	}
-}
-
-void
-Strip::notify_eq_change (boost::weak_ptr<AutomationControl> pc, bool force_update)
-{
-	boost::shared_ptr<Stripable> r = _surface->mcp().subview()->subview_stripable();
-
-	if (!r) {
-		/* not in subview mode */
-		return;
-	}
-
-	if (_surface->mcp().subview()->subview_mode() != SubViewMode::EQ) {
-		/* no longer in EQ subview mode */
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> control = pc.lock ();
-	if (control) {
-		float val = control->get_value();
-		do_parameter_display (control->desc(), val, true);
-		/* update pot/encoder */
-		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 	}
 }
 
@@ -1324,15 +1299,10 @@ Strip::subview_mode_changed ()
 			_surface->write (_fader->set_position (0.0));
 		}
 		notify_metering_state_changed ();
-		eq_band = -1;
 		break;
 
 	case SubViewMode::EQ:
-		if (r) {
-			setup_eq_vpot (r);
-		} else {
-			/* leave it as it was */
-		}
+		_surface->mcp().subview()->setup_vpot(this, _vpot, pending_display);
 		break;
 
 	case SubViewMode::Dynamics:
@@ -1341,7 +1311,6 @@ Strip::subview_mode_changed ()
 		} else {
 			/* leave it as it was */
 		}
-		eq_band = -1;
 		break;
 
 	case SubViewMode::Sends:
@@ -1350,11 +1319,9 @@ Strip::subview_mode_changed ()
 		} else {
 			/* leave it as it was */
 		}
-		eq_band = -1;
 		break;
 	case SubViewMode::TrackView:
-		_surface->mcp().subview()->setup_vpot(_surface, this, _vpot, pending_display);
-		eq_band = -1;
+		_surface->mcp().subview()->setup_vpot(this, _vpot, pending_display);
 		break;
 	case SubViewMode::PluginSelect:
 		if (r) {
@@ -1362,7 +1329,6 @@ Strip::subview_mode_changed ()
 		} else {
 			/* leave it as it was */
 		}
-		eq_band = -1;
 		break;
 	}
 }
@@ -1430,119 +1396,6 @@ Strip::setup_dyn_vpot (boost::shared_ptr<Stripable> r)
 	}
 
 	notify_dyn_change (boost::weak_ptr<AutomationControl>(pc), true, false);
-}
-
-void
-Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
-{
-	boost::shared_ptr<AutomationControl> pc;
-	string pot_id;
-
-#ifdef MIXBUS
-	const uint32_t global_pos = _surface->mcp().global_index (*this);
-	int eq_band = -1;
-	std::string band_name;
-	if (r->is_input_strip ()) {
-
-#ifdef MIXBUS32C
-		switch (global_pos) {
-			case 0:
-			case 2:
-			case 4:
-			case 6:
-				eq_band = global_pos / 2;
-				pc = r->eq_freq_controllable (eq_band);
-				band_name = r->eq_band_name (eq_band);
-				pot_id = band_name + "Freq";
-				break;
-			case 1:
-			case 3:
-			case 5:
-			case 7:
-				eq_band = global_pos / 2;
-				pc = r->eq_gain_controllable (eq_band);
-				band_name = r->eq_band_name (eq_band);
-				pot_id = band_name + "Gain";
-				break;
-			case 8: 
-				pc = r->eq_shape_controllable(0);  //low band "bell" button
-				band_name = "lo";
-				pot_id = band_name + " Shp";
-				break;
-			case 9:
-				pc = r->eq_shape_controllable(3);  //high band "bell" button
-				band_name = "hi";
-				pot_id = band_name + " Shp";
-				break;
-			case 10:
-				pc = r->eq_enable_controllable();
-				pot_id = "EQ";
-				break;
-		}
-
-#else  //regular Mixbus channel EQ
-
-		switch (global_pos) {
-			case 0:
-			case 2:
-			case 4:
-				eq_band = global_pos / 2;
-				pc = r->eq_gain_controllable (eq_band);
-				band_name = r->eq_band_name (eq_band);
-				pot_id = band_name + "Gain";
-				break;
-			case 1:
-			case 3:
-			case 5:
-				eq_band = global_pos / 2;
-				pc = r->eq_freq_controllable (eq_band);
-				band_name = r->eq_band_name (eq_band);
-				pot_id = band_name + "Freq";
-				break;
-			case 6:
-				pc = r->eq_enable_controllable();
-				pot_id = "EQ";
-				break;
-			case 7:
-				pc = r->filter_freq_controllable(true);
-				pot_id = "HP Freq";
-				break;
-		}
-
-#endif
-
-	} else {  //mixbus or master bus ( these are currently the same for MB & 32C )
-		switch (global_pos) {
-			case 0:
-			case 1:
-			case 2:
-				eq_band = global_pos;
-				pc = r->eq_gain_controllable (eq_band);
-				band_name = r->eq_band_name (eq_band);
-				pot_id = band_name + "Gain";
-				break;
-		}
-	}
-#endif
-
-	//If a controllable was found, connect it up, and put the labels in the display.
-	if (pc) {
-		pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_eq_change, this, boost::weak_ptr<AutomationControl>(pc), false), ui_context());
-		_vpot->set_control (pc);
-
-		if (!pot_id.empty()) {
-			pending_display[0] = pot_id;
-		} else {
-			pending_display[0] = string();
-		}
-		
-	} else {  //no controllable was found;  just clear this knob
-		_vpot->set_control (boost::shared_ptr<AutomationControl>());
-		pending_display[0] = string();
-		pending_display[1] = string();
-	}
-	
-	notify_eq_change (boost::weak_ptr<AutomationControl>(pc), true);
 }
 
 void

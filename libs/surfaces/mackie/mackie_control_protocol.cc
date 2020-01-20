@@ -141,7 +141,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 	
-	_subview = Mackie::SubviewFactory::instance()->create_subview(SubViewMode::None, boost::shared_ptr<Stripable>());
+	_subview = Mackie::SubviewFactory::instance()->create_subview(SubViewMode::None, *this, boost::shared_ptr<Stripable>());
 
 	DeviceInfo::reload_device_info ();
 	DeviceProfile::reload_device_profiles ();
@@ -1758,7 +1758,7 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Strip
 		return -1;
 	}
 	
-	_subview = Mackie::SubviewFactory::instance()->create_subview(sm, r);
+	_subview = Mackie::SubviewFactory::instance()->create_subview(sm, *this, r);
 	/* Catch the current subview stripable going away */
 	if (_subview->subview_stripable()) {
 		_subview->subview_stripable()->DropReferences.connect (_subview->subview_stripable_connections(), MISSING_INVALIDATOR,
@@ -1767,7 +1767,7 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Strip
 	}
 
 	redisplay_subview_mode ();
-	_subview->update_global_buttons(this);
+	_subview->update_global_buttons();
 
 	return 0;
 }

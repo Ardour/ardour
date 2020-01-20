@@ -144,7 +144,6 @@ private:
 	PBD::ScopedConnectionList stripable_connections;
 	PBD::ScopedConnectionList subview_connections;
 	PBD::ScopedConnectionList send_connections;
-	int       eq_band;
 
 	ARDOUR::AutomationType  _pan_mode;
 
@@ -184,9 +183,6 @@ private:
 	void reset_saved_values ();
 
 	bool is_midi_track () const;
-
-	void notify_eq_change (boost::weak_ptr<ARDOUR::AutomationControl>, bool force);
-	void setup_eq_vpot (boost::shared_ptr<ARDOUR::Stripable>);
 
 	void notify_dyn_change (boost::weak_ptr<ARDOUR::AutomationControl>, bool force, bool propagate_mode_change);
 	void setup_dyn_vpot (boost::shared_ptr<ARDOUR::Stripable>);
