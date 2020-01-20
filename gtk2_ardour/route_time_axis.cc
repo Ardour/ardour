@@ -288,6 +288,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	update_track_number_visibility();
+	route_active_changed();
 	label_view ();
 
 	if (ARDOUR::Profile->get_mixbus()) {
@@ -424,6 +425,9 @@ RouteTimeAxisView::label_view ()
 	if (x != name_label.get_text ()) {
 		name_label.set_text (x);
 	}
+
+	inactive_label.set_text (string_compose("(%1)", x));
+
 	const int64_t track_number = _route->track_number ();
 	if (track_number == 0) {
 		number_label.set_text ("");
