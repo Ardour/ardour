@@ -80,67 +80,6 @@ def apply_copy(self):
 			tsk.debug()
 			raise Errors.WafError('task without an environment')
 
-def subst_func(tsk):
-	"Substitutes variables in a .in file"
-
-	m4_re = re.compile('@(\w+)@', re.M)
-
-	code = tsk.inputs[0].read() #Utils.readf(infile)
-
-	# replace all % by %% to prevent errors by % signs in the input file while string formatting
-	code = code.replace('%', '%%')
-
-	s = m4_re.sub(r'%(\1)s', code)
-
-	env = tsk.env
-	di = getattr(tsk, 'dict', {}) or getattr(tsk.generator, 'dict', {})
-	if not di:
-		names = m4_re.findall(code)
-		for i in names:
-			di[i] = env.get_flat(i) or env.get_flat(i.upper())
-
-	tsk.outputs[0].write(s % di)
-
-@feature('subst')
-@before_method('process_source')
-def apply_subst(self):
-	Utils.def_attrs(self, fun=subst_func)
-	lst = self.to_list(self.source)
-	self.meths.remove('process_source')
-
-	self.dict = getattr(self, 'dict', {})
-
-	for filename in lst:
-		node = self.path.find_resource(filename)
-		if not node: raise Errors.WafError('cannot find input file %s for processing' % filename)
-
-		if self.target:
-			newnode = self.path.find_or_declare(self.target)
-		else:
-			newnode = node.change_ext('')
-
-		try:
-			self.dict = self.dict.get_merged_dict()
-		except AttributeError:
-			pass
-
-		if self.dict and not self.env['DICT_HASH']:
-			self.env = self.env.derive()
-			keys = list(self.dict.keys())
-			keys.sort()
-			lst = [self.dict[x] for x in keys]
-			self.env['DICT_HASH'] = str(Utils.h_list(lst))
-
-		tsk = self.create_task('copy', node, newnode)
-		tsk.fun = self.fun
-		tsk.dict = self.dict
-		tsk.dep_vars = ['DICT_HASH']
-		tsk.chmod = getattr(self, 'chmod', Utils.O644)
-
-		if not tsk.env:
-			tsk.debug()
-			raise Errors.WafError('task without an environment')
-
 ####################
 ## command-output ####
 ####################
