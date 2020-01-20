@@ -184,9 +184,6 @@ private:
 
 	bool is_midi_track () const;
 
-	void notify_dyn_change (boost::weak_ptr<ARDOUR::AutomationControl>, bool force, bool propagate_mode_change);
-	void setup_dyn_vpot (boost::shared_ptr<ARDOUR::Stripable>);
-
 	void notify_send_level_change (uint32_t band, bool force);
 	void setup_sends_vpot (boost::shared_ptr<ARDOUR::Stripable>);
 	

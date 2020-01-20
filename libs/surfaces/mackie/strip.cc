@@ -448,40 +448,6 @@ Strip::notify_send_level_change (uint32_t send_num, bool force_update)
 }
 
 void
-Strip::notify_dyn_change (boost::weak_ptr<AutomationControl> pc, bool force_update, bool propagate_mode)
-{
-	boost::shared_ptr<Stripable> r = _surface->mcp().subview()->subview_stripable();
-
-	if (!r) {
-		/* not in subview mode */
-		return;
-	}
-
-	if (_surface->mcp().subview()->subview_mode() != SubViewMode::Dynamics) {
-		/* no longer in EQ subview mode */
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> control= pc.lock ();
-	bool reset_all = false;
-
-	if (propagate_mode && reset_all) {
-		_surface->subview_mode_changed ();
-	}
-
-	if (control) {
-		float val = control->get_value();
-		if (control == r->comp_mode_controllable ()) {
-			pending_display[1] = r->comp_mode_name (val);
-		} else {
-			do_parameter_display (control->desc(), val, true);
-		}
-		/* update pot/encoder */
-		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
-	}
-}
-
-void
 Strip::notify_panner_azi_changed (bool force_update)
 {
 	if (!_stripable) {
@@ -1306,11 +1272,7 @@ Strip::subview_mode_changed ()
 		break;
 
 	case SubViewMode::Dynamics:
-		if (r) {
-			setup_dyn_vpot (r);
-		} else {
-			/* leave it as it was */
-		}
+		_surface->mcp().subview()->setup_vpot(this, _vpot, pending_display);
 		break;
 
 	case SubViewMode::Sends:
@@ -1331,71 +1293,6 @@ Strip::subview_mode_changed ()
 		}
 		break;
 	}
-}
-
-void
-Strip::setup_dyn_vpot (boost::shared_ptr<Stripable> r)
-{
-	if (!r) {
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> tc = r->comp_threshold_controllable ();
-	boost::shared_ptr<AutomationControl> sc = r->comp_speed_controllable ();
-	boost::shared_ptr<AutomationControl> mc = r->comp_mode_controllable ();
-	boost::shared_ptr<AutomationControl> kc = r->comp_makeup_controllable ();
-	boost::shared_ptr<AutomationControl> ec = r->comp_enable_controllable ();
-
-#ifdef MIXBUS32C	//Mixbus32C needs to spill the filter controls into the comp section
-	boost::shared_ptr<AutomationControl> hpfc = r->filter_freq_controllable (true);
-	boost::shared_ptr<AutomationControl> lpfc = r->filter_freq_controllable (false);
-	boost::shared_ptr<AutomationControl> fec = r->filter_enable_controllable (true); // shared HP/LP
-#endif
-
-	uint32_t pos = _surface->mcp().global_index (*this);
-
-	/* we will control the pos-th available parameter, from the list in the
-	 * order shown above.
-	 */
-
-	vector<std::pair<boost::shared_ptr<AutomationControl>, std::string > > available;
-	vector<AutomationType> params;
-
-	if (tc) { available.push_back (std::make_pair (tc, "Thresh")); }
-	if (sc) { available.push_back (std::make_pair (sc, mc ? r->comp_speed_name (mc->get_value()) : "Speed")); }
-	if (mc) { available.push_back (std::make_pair (mc, "Mode")); }
-	if (kc) { available.push_back (std::make_pair (kc, "Makeup")); }
-	if (ec) { available.push_back (std::make_pair (ec, "on/off")); }
-
-#ifdef MIXBUS32C	//Mixbus32C needs to spill the filter controls into the comp section
-	if (hpfc) { available.push_back (std::make_pair (hpfc, "HPF")); }
-	if (lpfc) { available.push_back (std::make_pair (lpfc, "LPF")); }
-	if (fec)  { available.push_back (std::make_pair (fec, "FiltIn")); }
-#endif
-
-	if (pos >= available.size()) {
-		/* this knob is not needed to control the available parameters */
-		_vpot->set_control (boost::shared_ptr<AutomationControl>());
-		pending_display[0] = string();
-		pending_display[1] = string();
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> pc;
-
-	pc = available[pos].first;
-	string pot_id = available[pos].second;
-
-	pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_dyn_change, this, boost::weak_ptr<AutomationControl>(pc), false, true), ui_context());
-	_vpot->set_control (pc);
-
-	if (!pot_id.empty()) {
-		pending_display[0] = pot_id;
-	} else {
-		pending_display[0] = string();
-	}
-
-	notify_dyn_change (boost::weak_ptr<AutomationControl>(pc), true, false);
 }
 
 void
