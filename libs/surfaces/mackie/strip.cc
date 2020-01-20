@@ -417,37 +417,6 @@ Strip::show_stripable_name ()
 }
 
 void
-Strip::notify_send_level_change (uint32_t send_num, bool force_update)
-{
-	boost::shared_ptr<Stripable> r = _surface->mcp().subview()->subview_stripable();
-
-	if (!r) {
-		/* not in subview mode */
-		return;
-	}
-
-	if (_surface->mcp().subview()->subview_mode() != SubViewMode::Sends) {
-		/* no longer in Sends subview mode */
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> control = r->send_level_controllable (send_num);
-	if (!control) {
-		return;
-	}
-
-	if (control) {
-		float val = control->get_value();
-		do_parameter_display (control->desc (), val); // BusSendLevel
-
-		if (_vpot->control() == control) {
-			/* update pot/encoder */
-			_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
-		}
-	}
-}
-
-void
 Strip::notify_panner_azi_changed (bool force_update)
 {
 	if (!_stripable) {
@@ -1268,92 +1237,12 @@ Strip::subview_mode_changed ()
 		break;
 
 	case SubViewMode::EQ:
-		_surface->mcp().subview()->setup_vpot(this, _vpot, pending_display);
-		break;
-
 	case SubViewMode::Dynamics:
-		_surface->mcp().subview()->setup_vpot(this, _vpot, pending_display);
-		break;
-
 	case SubViewMode::Sends:
-		if (r) {
-			setup_sends_vpot (r);
-		} else {
-			/* leave it as it was */
-		}
-		break;
 	case SubViewMode::TrackView:
+	case SubViewMode::PluginSelect:
 		_surface->mcp().subview()->setup_vpot(this, _vpot, pending_display);
 		break;
-	case SubViewMode::PluginSelect:
-		if (r) {
-			setup_plugin_vpot (r);
-		} else {
-			/* leave it as it was */
-		}
-		break;
-	}
-}
-
-void
-Strip::setup_sends_vpot (boost::shared_ptr<Stripable> r)
-{
-	if (!r) {
-		return;
-	}
-
-	const uint32_t global_pos = _surface->mcp().global_index (*this);
-
-	boost::shared_ptr<AutomationControl> pc = r->send_level_controllable (global_pos);
-
-	if (!pc) {
-		/* nothing to control */
-		_vpot->set_control (boost::shared_ptr<AutomationControl>());
-		pending_display[0] = string();
-		pending_display[1] = string();
-		return;
-	}
-
-	pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_send_level_change, this, global_pos, false), ui_context());
-	_vpot->set_control (pc);
-
-	pending_display[0] = PBD::short_version (r->send_name (global_pos), 6);
-
-	notify_send_level_change (global_pos, true);
-}
-
-void
-Strip::setup_plugin_vpot (boost::shared_ptr<ARDOUR::Stripable> r)
-{
-	if (!r) {
-		return;
-	}
-	
-	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (r);
-	if (!route) {
-		return;
-	}
-
-	const uint32_t global_pos = _surface->mcp().global_index (*this);
-
-	if (global_pos >= 8) {
-		/* nothing to control */
-		_vpot->set_control (boost::shared_ptr<AutomationControl>());
-		pending_display[0] = string();
-		pending_display[1] = string();
-		return;
-	}
-	
-	boost::shared_ptr<Processor> plugin = route->nth_plugin(global_pos);
-	
-	if (plugin) {
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("plugin of strip %1 is %2\n", global_pos, plugin->display_name()));
-		pending_display[0] = string_compose("Ins%1Pl", global_pos + 1);
-		pending_display[1] = plugin->display_name();
-	}
-	else {
-		pending_display[0] = "";
-		pending_display[1] = "";
 	}
 }
 
