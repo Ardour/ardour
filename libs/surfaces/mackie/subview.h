@@ -114,7 +114,7 @@ class EQSubview : public Subview {
 		Strip* strip,
 		Pot* vpot, 
 		std::string pending_display[2]);
-	void notify_change (boost::weak_ptr<ARDOUR::AutomationControl>, uint32_t strip_position_on_surface, bool force);
+	void notify_change (boost::weak_ptr<ARDOUR::AutomationControl>, uint32_t global_strip_position, bool force);
 };
 
 class DynamicsSubview : public Subview {
@@ -129,6 +129,7 @@ class DynamicsSubview : public Subview {
 		Strip* strip,
 		Pot* vpot, 
 		std::string pending_display[2]);
+	void notify_change (boost::weak_ptr<ARDOUR::AutomationControl>, uint32_t global_strip_position, bool force, bool propagate_mode_change);
 };
 
 class SendsSubview : public Subview {
@@ -157,7 +158,7 @@ class TrackViewSubview : public Subview {
 		Strip* strip,
 		Pot* vpot, 
 		std::string pending_display[2]);
-	void notify_change (ARDOUR::AutomationType, uint32_t strip_position_on_surface, bool force);
+	void notify_change (ARDOUR::AutomationType, uint32_t global_strip_position, bool force);
 };
 
 class PluginSelectSubview : public Subview {

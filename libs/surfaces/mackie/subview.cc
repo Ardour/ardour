@@ -423,7 +423,123 @@ void DynamicsSubview::setup_vpot(
 		Pot* vpot, 
 		std::string pending_display[2])
 {
+	const uint32_t global_strip_position = _mcp.global_index (*strip);
+	store_pointers(strip, vpot, pending_display, global_strip_position);
 	
+	if (!_subview_stripable) {
+		return;
+	}
+	
+	boost::shared_ptr<AutomationControl> tc = _subview_stripable->comp_threshold_controllable ();
+	boost::shared_ptr<AutomationControl> sc = _subview_stripable->comp_speed_controllable ();
+	boost::shared_ptr<AutomationControl> mc = _subview_stripable->comp_mode_controllable ();
+	boost::shared_ptr<AutomationControl> kc = _subview_stripable->comp_makeup_controllable ();
+	boost::shared_ptr<AutomationControl> ec = _subview_stripable->comp_enable_controllable ();
+
+#ifdef MIXBUS32C	//Mixbus32C needs to spill the filter controls into the comp section
+	boost::shared_ptr<AutomationControl> hpfc = _subview_stripable->filter_freq_controllable (true);
+	boost::shared_ptr<AutomationControl> lpfc = _subview_stripable->filter_freq_controllable (false);
+	boost::shared_ptr<AutomationControl> fec = _subview_stripable->filter_enable_controllable (true); // shared HP/LP
+#endif
+
+	/* we will control the global_strip_position-th available parameter, from the list in the
+	 * order shown above.
+	 */
+
+	std::vector<std::pair<boost::shared_ptr<AutomationControl>, std::string > > available;
+	std::vector<AutomationType> params;
+
+	if (tc) { available.push_back (std::make_pair (tc, "Thresh")); }
+	if (sc) { available.push_back (std::make_pair (sc, mc ? _subview_stripable->comp_speed_name (mc->get_value()) : "Speed")); }
+	if (mc) { available.push_back (std::make_pair (mc, "Mode")); }
+	if (kc) { available.push_back (std::make_pair (kc, "Makeup")); }
+	if (ec) { available.push_back (std::make_pair (ec, "on/off")); }
+
+#ifdef MIXBUS32C	//Mixbus32C needs to spill the filter controls into the comp section
+	if (hpfc) { available.push_back (std::make_pair (hpfc, "HPF")); }
+	if (lpfc) { available.push_back (std::make_pair (lpfc, "LPF")); }
+	if (fec)  { available.push_back (std::make_pair (fec, "FiltIn")); }
+#endif
+
+	if (global_strip_position >= available.size()) {
+		/* this knob is not needed to control the available parameters */
+		vpot->set_control (boost::shared_ptr<AutomationControl>());
+		pending_display[0] = std::string();
+		pending_display[1] = std::string();
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> pc;
+
+	pc = available[global_strip_position].first;
+	std::string pot_id = available[global_strip_position].second;
+
+	pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, boost::bind (&DynamicsSubview::notify_change, this, boost::weak_ptr<AutomationControl>(pc), global_strip_position, false, true), ui_context());
+	vpot->set_control (pc);
+
+	if (!pot_id.empty()) {
+		pending_display[0] = pot_id;
+	} else {
+		pending_display[0] = std::string();
+	}
+
+	notify_change (boost::weak_ptr<AutomationControl>(pc), global_strip_position, true, false);
+}
+
+void
+DynamicsSubview::notify_change (boost::weak_ptr<ARDOUR::AutomationControl> pc, uint32_t global_strip_position, bool force, bool propagate_mode) 
+{
+	if (!_subview_stripable) {
+		return;
+	}
+	
+	Strip* strip = 0;
+	Pot* vpot = 0;
+	std::string* pending_display = 0;
+	if (!retrieve_pointers(&strip, &vpot, &pending_display, global_strip_position))
+	{
+		return;
+	}
+	
+	if (!strip || !vpot || !pending_display)
+	{
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> control= pc.lock ();
+	bool reset_all = false;
+
+	if (propagate_mode && reset_all) {
+		// @TODO: this line can never be reached due to reset_all being set to false. What was intended here?
+		strip->surface()->subview_mode_changed ();
+	}
+
+	if (control) {
+		float val = control->get_value();
+		if (control == _subview_stripable->comp_mode_controllable ()) {
+			pending_display[1] = _subview_stripable->comp_mode_name (val);
+		} else {
+			//do_parameter_display (control->desc(), val, true);
+			{
+				bool screen_hold = true;
+				pending_display[1] = Strip::format_paramater_for_display(
+						control->desc(), 
+						val, 
+						strip->stripable(), 
+						screen_hold
+					);
+		
+				if (screen_hold) {
+					/* we just queued up a parameter to be displayed.
+						1 second from now, switch back to vpot mode display.
+					*/
+					strip->block_vpot_mode_display_for (1000);
+				}
+			}
+		}
+		/* update pot/encoder */
+		strip->surface()->write (vpot->set (control->internal_to_interface (val), true, Pot::wrap));
+	}
 }
 
 
