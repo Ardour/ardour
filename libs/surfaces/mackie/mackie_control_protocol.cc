@@ -2344,7 +2344,7 @@ MackieControlProtocol::stripable_selection_changed ()
 		 * set_subview_mode() will fail, and we will reset to None.
 		 */
 
-		if (set_subview_mode (_subview->subview_mode(), s)) {
+		if (!set_subview_mode (_subview->subview_mode(), s)) {
 			set_subview_mode (Mackie::SubViewMode::None, boost::shared_ptr<Stripable>());
 		}
 
