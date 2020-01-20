@@ -1389,7 +1389,7 @@ Editor::set_session (Session *t)
 
 	/* catch up with the playhead */
 
-	_session->request_locate (playhead_cursor->current_sample ());
+	_session->request_locate (playhead_cursor->current_sample (), MustStop);
 	_pending_initial_locate = true;
 
 	update_title ();
