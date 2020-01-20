@@ -22,6 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
  
+ 
+#include "pbd/convert.h"
 
 #include "ardour/debug.h"
 #include "ardour/monitor_control.h"
@@ -136,8 +138,6 @@ Subview::store_pointers(Strip* strip, Pot* vpot, std::string* pending_display, u
 		return;
 	}
 	
-	std::cout << "-> Strip[" << global_strip_position << "] = " << strip << std::endl;
-	
 	_strips_over_all_surfaces[global_strip_position] = strip;
 	_strip_vpots_over_all_surfaces[global_strip_position] = vpot;
 	_strip_pending_displays_over_all_surfaces[global_strip_position] = pending_display;
@@ -152,8 +152,6 @@ Subview::retrieve_pointers(Strip** strip, Pot** vpot, std::string** pending_disp
 	{
 		return false;
 	}
-	
-	std::cout << "<- Strip[" << global_strip_position << "] = " << _strips_over_all_surfaces[global_strip_position] << std::endl;
 	
 	*strip = _strips_over_all_surfaces[global_strip_position];
 	*vpot = _strip_vpots_over_all_surfaces[global_strip_position];
@@ -576,7 +574,81 @@ void SendsSubview::setup_vpot(
 		Pot* vpot, 
 		std::string pending_display[2])
 {
+	const uint32_t global_strip_position = _mcp.global_index (*strip);
+	store_pointers(strip, vpot, pending_display, global_strip_position);
 	
+	if (!_subview_stripable) {
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> pc = _subview_stripable->send_level_controllable (global_strip_position);
+
+	if (!pc) {
+		/* nothing to control */
+		vpot->set_control (boost::shared_ptr<AutomationControl>());
+		pending_display[0] = std::string();
+		pending_display[1] = std::string();
+		return;
+	}
+
+	pc->Changed.connect (_subview_connections, MISSING_INVALIDATOR, boost::bind (&SendsSubview::notify_send_level_change, this, global_strip_position, false), ui_context());
+	vpot->set_control (pc);
+
+	pending_display[0] = PBD::short_version (_subview_stripable->send_name (global_strip_position), 6);
+
+	notify_send_level_change (global_strip_position, true);
+}
+
+void
+SendsSubview::notify_send_level_change (uint32_t global_strip_position, bool force)
+{
+	if (!_subview_stripable) {
+		return;
+	}
+	
+	Strip* strip = 0;
+	Pot* vpot = 0;
+	std::string* pending_display = 0;
+	if (!retrieve_pointers(&strip, &vpot, &pending_display, global_strip_position))
+	{
+		return;
+	}
+	
+	if (!strip || !vpot || !pending_display)
+	{
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> control = _subview_stripable->send_level_controllable (global_strip_position);
+	if (!control) {
+		return;
+	}
+
+	if (control) {
+		float val = control->get_value();
+		//do_parameter_display (control->desc (), val); // BusSendLevel
+		{
+			bool screen_hold = false;
+			pending_display[1] = Strip::format_paramater_for_display(
+					control->desc(), 
+					val, 
+					strip->stripable(), 
+					screen_hold
+				);
+	
+			if (screen_hold) {
+				/* we just queued up a parameter to be displayed.
+					1 second from now, switch back to vpot mode display.
+				*/
+				strip->block_vpot_mode_display_for (1000);
+			}
+		}
+
+		if (vpot->control() == control) {
+			/* update pot/encoder */
+			strip->surface()->write (vpot->set (control->internal_to_interface (val), true, Pot::wrap));
+		}
+	}
 }
 
 
@@ -692,8 +764,6 @@ TrackViewSubview::notify_change (AutomationType type, uint32_t global_strip_posi
 		return;
 	}
 	
-	DEBUG_TRACE (DEBUG::MackieControl, "1\n");
-	
 	Strip* strip = 0;
 	Pot* vpot = 0;
 	std::string* pending_display = 0;
@@ -702,14 +772,10 @@ TrackViewSubview::notify_change (AutomationType type, uint32_t global_strip_posi
 		return;
 	}
 	
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip: %1, pot: %2, disp: %3\n", strip, vpot, pending_display));
-	
 	if (!strip || !vpot || !pending_display)
 	{
 		return;
 	}
-	
-	DEBUG_TRACE (DEBUG::MackieControl, "3\n");
 
 	boost::shared_ptr<AutomationControl> control;
 	boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (_subview_stripable);
@@ -803,7 +869,29 @@ void PluginSelectSubview::setup_vpot(
 		Pot* vpot, 
 		std::string pending_display[2])
 {
+	const uint32_t global_strip_position = _mcp.global_index (*strip);
+	store_pointers(strip, vpot, pending_display, global_strip_position);
 	
+	if (!_subview_stripable) {
+		return;
+	}
+	
+	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (_subview_stripable);
+	if (!route) {
+		return;
+	}
+	
+	boost::shared_ptr<Processor> plugin = route->nth_plugin(global_strip_position);
+	
+	if (plugin) {
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("plugin of strip %1 is %2\n", global_strip_position, plugin->display_name()));
+		pending_display[0] = string_compose("Ins%1Pl", global_strip_position + 1);
+		pending_display[1] = plugin->display_name();
+	}
+	else {
+		pending_display[0] = "";
+		pending_display[1] = "";
+	}
 }
 
 

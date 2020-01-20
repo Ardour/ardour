@@ -144,6 +144,7 @@ class SendsSubview : public Subview {
 		Strip* strip,
 		Pot* vpot, 
 		std::string pending_display[2]);
+	void notify_send_level_change (uint32_t global_strip_position, bool force);
 };
 
 class TrackViewSubview : public Subview {
