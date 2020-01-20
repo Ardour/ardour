@@ -41,7 +41,8 @@ class SubviewFactory {
   public:
 	static SubviewFactory* instance();
 	
-	boost::shared_ptr<Subview> create_subview(SubViewMode svm, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	boost::shared_ptr<Subview> create_subview(SubViewMode svm, 
+		MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
   protected:
 	SubviewFactory();
   private:
@@ -54,12 +55,12 @@ class SubviewFactory {
 */
 class Subview {
   public:
-	Subview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	Subview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual ~Subview();
 	
-	virtual SubViewMode subview_mode () const = 0;	
-	virtual void update_global_buttons(MackieControlProtocol* mcp) = 0;
-	virtual void setup_vpot(Surface* surface, 
+	virtual SubViewMode subview_mode () const = 0;
+	virtual void update_global_buttons() = 0;
+	virtual void setup_vpot(
 		Strip* strip, 
 		Pot* vpot, 
 		std::string pending_display[2]) = 0;
@@ -72,21 +73,30 @@ class Subview {
 	PBD::ScopedConnectionList& subview_stripable_connections() { return _subview_stripable_connections; }
 	
   protected:
-	SubViewMode                          _subview_mode;
+	void init_strip_vectors();
+	void store_pointers(Strip* strip, Pot* vpot, std::string* pending_display, uint32_t global_strip_position);
+	bool retrieve_pointers(Strip** strip, Pot** vpot, std::string** pending_display, uint32_t global_strip_position);
+  
+	MackieControlProtocol& _mcp;
 	boost::shared_ptr<ARDOUR::Stripable> _subview_stripable;
 	PBD::ScopedConnectionList _subview_stripable_connections;
+	
+	std::vector<Strip*> _strips_over_all_surfaces;
+	std::vector<Pot*> _strip_vpots_over_all_surfaces;
+	std::vector<std::string*> _strip_pending_displays_over_all_surfaces;
+	PBD::ScopedConnectionList _subview_connections;
 };
 
 class NoneSubview : public Subview {
   public:
-	NoneSubview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	NoneSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual ~NoneSubview();
 	
 	virtual SubViewMode subview_mode () const { return SubViewMode::None; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
 	
-	virtual void update_global_buttons(MackieControlProtocol* mcp);
-	virtual void setup_vpot(Surface* surface, 
+	virtual void update_global_buttons();
+	virtual void setup_vpot( 
 		Strip* strip,
 		Pot* vpot, 
 		std::string pending_display[2]);
@@ -94,27 +104,28 @@ class NoneSubview : public Subview {
 
 class EQSubview : public Subview {
   public:
-	EQSubview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	EQSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual ~EQSubview();
 	
 	virtual SubViewMode subview_mode () const { return SubViewMode::EQ; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
-	virtual void update_global_buttons(MackieControlProtocol* mcp);
-	virtual void setup_vpot(Surface* surface, 
+	virtual void update_global_buttons();
+	virtual void setup_vpot(
 		Strip* strip,
 		Pot* vpot, 
 		std::string pending_display[2]);
+	void notify_change (boost::weak_ptr<ARDOUR::AutomationControl>, uint32_t strip_position_on_surface, bool force);
 };
 
 class DynamicsSubview : public Subview {
   public:
-	DynamicsSubview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	DynamicsSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual ~DynamicsSubview();
 	
 	virtual SubViewMode subview_mode () const { return SubViewMode::Dynamics; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
-	virtual void update_global_buttons(MackieControlProtocol* mcp);
-	virtual void setup_vpot(Surface* surface, 
+	virtual void update_global_buttons();
+	virtual void setup_vpot(
 		Strip* strip,
 		Pot* vpot, 
 		std::string pending_display[2]);
@@ -122,13 +133,13 @@ class DynamicsSubview : public Subview {
 
 class SendsSubview : public Subview {
   public:
-	SendsSubview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	SendsSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual ~SendsSubview();
 	
 	virtual SubViewMode subview_mode () const { return SubViewMode::Sends; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
-	virtual void update_global_buttons(MackieControlProtocol* mcp);
-	virtual void setup_vpot(Surface* surface, 
+	virtual void update_global_buttons();
+	virtual void setup_vpot(
 		Strip* strip,
 		Pot* vpot, 
 		std::string pending_display[2]);
@@ -136,34 +147,28 @@ class SendsSubview : public Subview {
 
 class TrackViewSubview : public Subview {
   public:
-	TrackViewSubview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	TrackViewSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual ~TrackViewSubview();
 	
 	virtual SubViewMode subview_mode () const { return SubViewMode::TrackView; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
-	virtual void update_global_buttons(MackieControlProtocol* mcp);
-	virtual void setup_vpot(Surface* surface,
+	virtual void update_global_buttons();
+	virtual void setup_vpot(
 		Strip* strip,
 		Pot* vpot, 
 		std::string pending_display[2]);
 	void notify_change (ARDOUR::AutomationType, uint32_t strip_position_on_surface, bool force);
-	
-	Surface* _strips_surface;
-	Strip* _strips[8];
-	Pot* _strip_vpots[8];
-	std::string* _strips_pending_displays[8];
-	PBD::ScopedConnectionList subview_connections;
 };
 
 class PluginSelectSubview : public Subview {
   public:
-	PluginSelectSubview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	PluginSelectSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual ~PluginSelectSubview();
 	
 	virtual SubViewMode subview_mode () const { return SubViewMode::PluginSelect; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
-	virtual void update_global_buttons(MackieControlProtocol* mcp);
-	virtual void setup_vpot(Surface* surface, 
+	virtual void update_global_buttons();
+	virtual void setup_vpot(
 		Strip* strip,
 		Pot* vpot, 
 		std::string pending_display[2]);
@@ -171,13 +176,13 @@ class PluginSelectSubview : public Subview {
 
 class PluginEditSubview : public Subview {
   public:
-	PluginEditSubview(boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	PluginEditSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual ~PluginEditSubview();
 	
 	virtual SubViewMode subview_mode () const { return SubViewMode::PluginEdit; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
-	virtual void update_global_buttons(MackieControlProtocol* mcp);
-	virtual void setup_vpot(Surface* surface, 
+	virtual void update_global_buttons();
+	virtual void setup_vpot(
 		Strip* strip,
 		Pot* vpot, 
 		std::string pending_display[2]);
