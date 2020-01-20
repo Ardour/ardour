@@ -946,10 +946,11 @@ Session::request_locate (samplepos_t target_sample, LocateTransportDisposition l
 }
 
 void
-Session::force_locate (samplepos_t target_sample, bool with_roll)
+Session::force_locate (samplepos_t target_sample, LocateTransportDisposition ltd)
 {
-	SessionEvent *ev = new SessionEvent (with_roll ? SessionEvent::LocateRoll : SessionEvent::Locate, SessionEvent::Add, SessionEvent::Immediate, target_sample, 0, true);
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request forced locate to %1\n", target_sample));
+	SessionEvent *ev = new SessionEvent (SessionEvent::Locate, SessionEvent::Add, SessionEvent::Immediate, target_sample, 0, true);
+	ev->locate_transport_disposition = ltd;
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request forced locate to %1 roll %2\n", target_sample, enum_2_string (ltd)));
 	queue_event (ev);
 }
 
