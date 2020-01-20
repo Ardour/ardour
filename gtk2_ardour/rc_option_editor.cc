@@ -2733,14 +2733,14 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Signal Flow"), mm);
 
 	bo = new BoolOption (
-		     "tape-machine-mode",
-		     _("Tape machine mode"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_tape_machine_mode),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_tape_machine_mode)
+		     "auto-input-does-talkback",
+		     _("Auto Input does 'talkback'"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_input_does_talkback),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_input_does_talkback)
 		     );
 	add_option (_("Signal Flow"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			string_compose (_("<b>When enabled</b> %1 will not monitor a track's input if the transport is stopped."),
+			string_compose (_("<b>When enabled,</b> and Transport->Auto-Input is enabled, %1 will always monitor audio inputs when transport is stopped, even if tracks aren't armed."),
 					PROGRAM_NAME));
 
 	if (!Profile->get_mixbus()) {
