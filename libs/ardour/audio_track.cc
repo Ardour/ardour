@@ -81,7 +81,7 @@ AudioTrack::get_auto_monitoring_state () const
 	bool const track_rec = _disk_writer->record_enabled ();
 	bool const auto_input = _session.config.get_auto_input ();
 	bool const software_monitor = Config->get_monitoring_model() == SoftwareMonitoring;
-	bool const tape_machine_mode = Config->get_tape_machine_mode ();
+	bool const auto_input_does_talkback = Config->get_auto_input_does_talkback ();
 	bool session_rec;
 
 	/* I suspect that just use actively_recording() is good enough all the
@@ -118,11 +118,7 @@ AudioTrack::get_auto_monitoring_state () const
 
 	} else {
 
-		if (tape_machine_mode) {
-
-			return MonitoringDisk;
-
-		} else {
+		if (auto_input_does_talkback) {
 
 			if (!roll && auto_input) { 
 				return software_monitor ? MonitoringInput : MonitoringSilence;
@@ -130,6 +126,9 @@ AudioTrack::get_auto_monitoring_state () const
 				return MonitoringDisk;
 			}
 
+		} else {
+
+			return MonitoringDisk;
 		}
 	}
 
