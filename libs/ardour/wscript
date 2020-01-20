@@ -479,7 +479,7 @@ def build(bld):
             avx_cxxflags = list(bld.env['CXXFLAGS'])
             avx_cxxflags.append (bld.env['compiler_flags_dict']['avx'])
             avx_cxxflags.append (bld.env['compiler_flags_dict']['pic'])
-            bld(features = 'cxx',
+            bld(features = 'cxx cxxstlib asm',
                 source   = avx_sources,
                 cxxflags = avx_cxxflags,
                 includes = [ '.' ],

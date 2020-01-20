@@ -401,20 +401,15 @@ def configure(conf):
                     conf.env.append_value(var, ['-isystem', d])
 
     if sys.platform == 'darwin':
-        retval = conf.run_c_code (code='#include <AppKit/NSWindow.h>\n\
-        int main(void) { (void) NSWindowWillStartLiveResizeNotification; return 0; }\n',
-                                  env = conf.env.derive (),
-                                  features = [ 'c' ],
-                                  compiler = 'cc',
-                                  compile_filename='test.m',
-                                  mandatory = False,
-            )
-
-        if retval == 0:
-            autowaf.display_msg (conf, 'Checking for Cocoa live resizing constants', 'ok')
-            conf.define ('HAVE_COCOA_LIVE_RESIZING', 1)
-        else:
-            autowaf.display_msg (conf, 'Checking for Cocoa live resizing constants', 'too old - AU plugin windows will be fixed size')
+        conf.check(
+                msg              ='Checking for Cocoa live resizing constants',
+                fragment         = '#include <AppKit/NSWindow.h>\n int main(void) { (void) NSWindowWillStartLiveResizeNotification; return 0; }\n',
+                define_name      = 'HAVE_COCOA_LIVE_RESIZING',
+                uselib_store     = 'COCOA_LIVE_RESIZING',
+                compiler         = 'cc',
+                compile_filename = 'test.m',
+                execute          = True,
+                mandatory        = False)
 
     conf.write_config_header('gtk2ardour-config.h', remove=False)
 
@@ -507,7 +502,6 @@ def build(bld):
         obj.source    = list(gtk2_ardour_sources)
         obj.target    = 'luadoc'
         obj.includes  = ['.', '../libs']
-        obj.ldflags   = ['-no-undefined']
         obj.use       = [
                 'libpbd',
                 'libardour',
@@ -547,7 +541,6 @@ def build(bld):
 #        obj.source    = [ 'ardour_button.cc', 'ui_config.cc', 'tooltips.cc' ]
 #        obj.target    = 'canvas_test'
 #        obj.includes  = ['.', '../libs']
-#        obj.ldflags   = ['-no-undefined']
 #        obj.use       = [
 #                'libpbd',
 #                'libardour',
@@ -618,9 +611,8 @@ def build(bld):
             obj = bld (features = 'cxx c cxxprogram')
         # operate on copy to avoid adding sources twice
         obj.source    = list(gtk2_ardour_sources)
-        obj.target = 'ardour-' + str (bld.env['VERSION'])
-        obj.includes = ['.']
-        obj.ldflags = ['-no-undefined']
+        obj.target    = 'ardour-' + str (bld.env['VERSION'])
+        obj.includes  = ['.']
 
         if bld.is_defined('WINDOWS_VST_SUPPORT'):
         # Windows VST support mingw
@@ -649,7 +641,7 @@ def build(bld):
         ]
     obj.install_path = bld.env['DLLDIR']
     obj.linkflags    = ''
-    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML '
+    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML LILV'
 
     if sys.platform == 'darwin':
         obj.uselib += ' AUDIOUNITS OSX '
