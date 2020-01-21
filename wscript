@@ -11,6 +11,13 @@ from waflib.Tools import winres
 from waflib.Build import Context
 from waflib.Build import BuildContext
 
+# Fixup OSX 10.5/10.6 builds
+# prefer gcc, g++ 4.x over ancient clang-1.5
+from waflib.Tools.compiler_c import c_compiler
+from waflib.Tools.compiler_cxx import cxx_compiler
+c_compiler['darwin'] = ['gcc', 'clang' ]
+cxx_compiler['darwin'] = ['g++', 'clang++' ]
+
 class i18n(BuildContext):
         cmd = 'i18n'
         fun = 'i18n'
