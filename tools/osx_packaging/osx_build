@@ -472,7 +472,7 @@ while [ true ] ; do
 			strip -u -r -arch all $file &>/dev/null
 		fi
 
-		deps=`otool -L $file | awk '{print $1}' | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | grep -v 'libjack\.' | grep -v "$(basename $file)"`
+		deps=`otool -L $file | awk '{print $1}' | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | grep -v 'libjack\.' | egrep -v "$(basename $file .dylib).*.dylib"`
 		# echo -n "."
 		for dep in $deps ; do
 			base=`basename $dep`

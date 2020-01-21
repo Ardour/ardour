@@ -81,7 +81,8 @@ DEPSTACK_ROOT="$PREFIX" \
 	--dist-target=mingw \
 	--also-include=${PREFIX}/include \
 	$ARDOURCFG \
-	--prefix=${PREFIX}
+	--prefix=${PREFIX} \
+	--libdir=${PREFIX}/lib
 
 ./waf ${CONCURRENCY}
 

@@ -943,6 +943,12 @@ def configure(conf):
         conf.env.append_value ('CXXFLAGS', '-DSILENCE_AFTER')
         conf.define ('FREEBIE', 1)
 
+    # set explicit LIBDIR, otherwise mingw/windows builds use
+    # conf.env.LIBDIR = conf.env.BINDIR and `waf install` fails
+    # because $BINDIR/ardour6 is the main binary, and $LIBDIR/ardour6/ a directory
+    if Options.options.libdir:
+        conf.env.LIBDIR = Options.options.libdir
+
     if Options.options.lv2dir:
         conf.env['LV2DIR'] = Options.options.lv2dir
     else:
@@ -1298,6 +1304,17 @@ int main () { return 0; }
 
     # Fix utterly braindead FLAC include path to not smash assert.h
     conf.env['INCLUDES_FLAC'] = []
+
+    if sys.platform == 'darwin':
+        # override waf's -install_name added in
+        # waflib/Tools/ccroot.py when -dynamiclib is used
+        if conf.env.LINKFLAGS_cshlib:
+            conf.env.LINKFLAGS_cshlib = [];
+            conf.env.LDFLAGS_cshlib = ['-dynamiclib']
+
+        if conf.env.LINKFLAGS_cxxshlib:
+            conf.env.LINKFLAGS_cxxshlib = [];
+            conf.env.LDFLAGS_cxxshlib = ['-dynamiclib']
 
     config_text = open('libs/ardour/config_text.cc', "w")
     config_text.write('''#include "ardour/ardour.h"

@@ -202,6 +202,7 @@ cp gtk2_ardour/icons/cursor_square/* $DESTDIR/share/${LOWERCASE_DIRNAME}/icons/
 # clean build-dir after depoyment
 echo " === bundle completed, cleaning up"
 ./waf uninstall
+find $DESTDIR -name "*.dll.a" | xargs rm
 echo " === complete"
 du -sh $DESTDIR
 
