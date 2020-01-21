@@ -77,7 +77,7 @@ def build(bld):
             obj.linkflags = ['-mwindows']
             obj.use = [ 'libpbd', 'vstwin' ]
         else:
-            obj.uselib = ['GIOMM', 'DL']
+            obj.uselib = ['GIOMM', 'DL', 'OSX']
             obj.use = [ 'libpbd' ]
 
     obj.includes  = [ '../pbd/', '../ardour/', '.' ]

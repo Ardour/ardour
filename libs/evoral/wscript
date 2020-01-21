@@ -114,7 +114,7 @@ def build(bld):
     obj.includes       = ['.', './src']
     obj.name           = 'libevoral'
     obj.target         = 'evoral'
-    obj.uselib         = 'GLIBMM GTHREAD SMF XML LIBPBD'
+    obj.uselib         = 'GLIBMM GTHREAD SMF XML LIBPBD OSX'
     obj.use            = 'libsmf libpbd'
     obj.vnum           = EVORAL_LIB_VERSION
     obj.install_path   = bld.env['LIBDIR']
