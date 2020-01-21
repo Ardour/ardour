@@ -1781,7 +1781,7 @@ LV2Plugin::write_from_ui(uint32_t       index,
 	}
 
 	if (!write_to(_from_ui, index, protocol, size, body)) {
-		error << "Error writing from UI to plugin" << endmsg;
+		error << string_compose (_("LV2<%1>: Error writing from UI to plugin"), name()) << endmsg;
 		return false;
 	}
 	return true;
@@ -1794,7 +1794,7 @@ LV2Plugin::write_to_ui(uint32_t       index,
                        const uint8_t* body)
 {
 	if (!write_to(_to_ui, index, protocol, size, body)) {
-		error << "Error writing from plugin to UI" << endmsg;
+		error << string_compose (_("LV2<%1>: Error writing from plugin to UI"), name()) << endmsg;
 		return false;
 	}
 	return true;
@@ -1870,10 +1870,10 @@ void
 LV2Plugin::set_property(uint32_t key, const Variant& value)
 {
 	if (_patch_port_in_index == (uint32_t)-1) {
-		error << "LV2: set_property called with unset patch_port_in_index" << endmsg;
+		error << string_compose (_("LV2<1>: set_property called with unset patch_port_in_index"), name ()) << endmsg;
 		return;
 	} else if (value.type() == Variant::NOTHING) {
-		error << "LV2: set_property called with void value" << endmsg;
+		error << string_compose (_("LV2<1>: set_property called with void value"), name ()) << endmsg;
 		return;
 	}
 
@@ -2008,16 +2008,16 @@ LV2Plugin::load_supported_properties(PropertyDescriptors& descs)
 		const LilvNode* prop  = lilv_nodes_get(properties, p);
 		LilvNode*       range = get_value(lworld, prop, _world.rdfs_range);
 		if (!range) {
-			warning << string_compose(_("LV2: property <%1> has no range datatype, ignoring"),
-			                          lilv_node_as_uri(prop)) << endmsg;
+			warning << string_compose(_("LV2<%1>: property <%2> has no range datatype, ignoring"),
+			                          name(), lilv_node_as_uri(prop)) << endmsg;
 			continue;
 		}
 
 		// Convert range to variant type (TODO: support for multiple range types)
 		Variant::Type datatype;
 		if (!uri_to_variant_type(lilv_node_as_uri(range), datatype)) {
-			error << string_compose(_("LV2: property <%1> has unsupported datatype <%1>"),
-			                        lilv_node_as_uri(prop), lilv_node_as_uri(range)) << endmsg;
+			error << string_compose(_("LV2<%1>: property <%2> has unsupported datatype <%3>"),
+			                        name(), lilv_node_as_uri(prop), lilv_node_as_uri(range)) << endmsg;
 			continue;
 		}
 
@@ -2098,12 +2098,12 @@ LV2Plugin::emit_to_ui(void* controller, UIMessageSink sink)
 	while (read_space > sizeof(UIMessage)) {
 		UIMessage msg;
 		if (_to_ui->read((uint8_t*)&msg, sizeof(msg)) != sizeof(msg)) {
-			error << "Error reading from Plugin=>UI RingBuffer" << endmsg;
+			error << string_compose (_("LV2<%1>: Error reading message header from Plugin => UI RingBuffer"), name()) << endmsg;
 			break;
 		}
 		vector<uint8_t> body(msg.size);
 		if (_to_ui->read(&body[0], msg.size) != msg.size) {
-			error << "Error reading from Plugin=>UI RingBuffer" << endmsg;
+			error << string_compose (_("LV2<%1>: Error reading message body from Plugin => UI RingBuffer"), name()) << endmsg;
 			break;
 		}
 
@@ -2155,7 +2155,7 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 	LocaleGuard          lg;
 
 	if (node.name() != state_node_name()) {
-		error << _("Bad node sent to LV2Plugin::set_state") << endmsg;
+		error << string_compose (_("LV2<%1>: Bad node sent to LV2Plugin::set_state"), name()) << endmsg;
 		return -1;
 	}
 
@@ -2171,7 +2171,7 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 
 		std::string sym;
 		if (!child->get_property("symbol", sym)) {
-			warning << _("LV2: port has no symbol, ignored") << endmsg;
+			warning << string_compose (_("LV2<%1>: port has no symbol '%2', ignored"), name(), sym) << endmsg;
 			continue;
 		}
 
@@ -2182,13 +2182,13 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 		if (i != _port_indices.end()) {
 			port_id = i->second;
 		} else {
-			warning << _("LV2: port has unknown index, ignored") << endmsg;
+			warning << string_compose (_("LV2<%1>: port '%2' has known index, ignored "), name(), sym) << endmsg;
 			continue;
 		}
 
 		float val;
 		if (!child->get_property("value", val)) {
-			warning << _("LV2: port has no value, ignored") << endmsg;
+			warning << string_compose (_("LV2<%1>: port no value, ignored "), name(), sym) << endmsg;
 			continue;
 		}
 
@@ -2248,7 +2248,7 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 {
 	const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, which);
 	if (!port) {
-		error << string_compose("LV2: get descriptor of non-existent port %1", which)
+		error << string_compose("LV2<%1>: get descriptor of non-existent port %2", name(), which)
 		      << endmsg;
 		return 1;
 	}
@@ -2815,12 +2815,12 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 		while (read_space > sizeof(UIMessage)) {
 			UIMessage msg;
 			if (_from_ui->read((uint8_t*)&msg, sizeof(msg)) != sizeof(msg)) {
-				error << "Error reading from UI=>Plugin RingBuffer" << endmsg;
+				error << string_compose (_("LV2<%1>: Error reading message header from UI => Plugin RingBuffer"), name()) << endmsg;
 				break;
 			}
 			vector<uint8_t> body(msg.size);
 			if (_from_ui->read(&body[0], msg.size) != msg.size) {
-				error << "Error reading from UI=>Plugin RingBuffer" << endmsg;
+				error << string_compose (_("LV2<%1>: Error reading message body from UI => Plugin RingBuffer"), name()) << endmsg;
 				break;
 			}
 			if (msg.protocol == URIMap::instance().urids.atom_eventTransfer) {
@@ -2832,7 +2832,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 					error << "Failed to write data to LV2 event buffer\n";
 				}
 			} else {
-				error << "Received unknown message type from UI" << endmsg;
+				error << string_compose (_("LV2<%1>: Received unknown message type from UI"), name()) << endmsg;
 			}
 			read_space -= sizeof(UIMessage) + msg.size;
 		}
