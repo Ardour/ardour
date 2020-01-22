@@ -154,6 +154,8 @@ class LIBARDOUR_API MidiRegion : public Region
 	void recompute_at_start ();
 	void recompute_at_end ();
 
+	bool set_name (const std::string & str);
+
 	void set_position_internal (samplepos_t pos, bool allow_bbt_recompute, const int32_t sub_num);
 	void set_position_music_internal (double qn);
 	void set_length_internal (samplecnt_t len, const int32_t sub_num);

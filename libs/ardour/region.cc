@@ -447,13 +447,13 @@ Region::set_playlist (boost::weak_ptr<Playlist> wpl)
 bool
 Region::set_name (const std::string& str)
 {
-	if (_name != str) {
-		SessionObject::set_name(str); // EMIT SIGNAL NameChanged()
-		assert(_name == str);
-
-		send_change (Properties::name);
+	if (_name == str) {
+		return true;
 	}
 
+	SessionObject::set_name (str); // EMIT SIGNAL NameChanged()
+	assert (_name == str);
+	send_change (Properties::name);
 	return true;
 }
 

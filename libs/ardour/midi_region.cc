@@ -823,3 +823,17 @@ MidiRegion::trim_to_internal (samplepos_t position, samplecnt_t length, const in
 		send_change (what_changed);
 	}
 }
+
+bool
+MidiRegion::set_name (const std::string& str)
+{
+	if (_name == str) {
+		return true;
+	}
+
+	if (Session::session_name_is_legal (str) != 0) {
+		return false;
+	}
+
+	return Region::set_name (str);
+}
