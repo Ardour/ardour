@@ -722,7 +722,18 @@ Session::butler_completed_transport_work ()
 		start_after_butler_done_msg = true;
 	}
 
-	ptw = PostTransportWork (ptw & ~(PostTransportAdjustPlaybackBuffering|PostTransportAdjustCaptureBuffering|PostTransportOverWrite|PostTransportReverse|PostTransportRoll));
+	/* the butler finished its work so clear all PostTransportWork flags
+	 * reflecting things it may have done.
+	 */
+
+	ptw = PostTransportWork (ptw & ~(PostTransportAdjustPlaybackBuffering|
+	                                 PostTransportAdjustCaptureBuffering|
+	                                 PostTransportOverWrite|
+	                                 PostTransportReverse|
+	                                 PostTransportRoll|
+	                                 PostTransportAbort|
+	                                 PostTransportStop|
+	                                 PostTransportClearSubstate));
 	set_post_transport_work (ptw);
 
 	set_next_event ();
@@ -1239,7 +1250,7 @@ Session::butler_transport_work ()
 
 	g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose (X_("Butler transport work all done after %1 usecs @ %2 trw = %3\n"), g_get_monotonic_time() - before, _transport_sample, _butler->transport_work_requested()));
+	DEBUG_TRACE (DEBUG::Transport, string_compose (X_("Butler transport work all done after %1 usecs @ %2 ptw %3 trw = %4\n"), g_get_monotonic_time() - before, _transport_sample, enum_2_string (post_transport_work()), _butler->transport_work_requested()));
 }
 
 void
@@ -1513,8 +1524,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		}
 	}
 
-	/* this for() block can be put inside the previous if() and has the effect of ... ??? what */
-
 	{
 		DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: locate\n"));
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -1584,9 +1593,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC with speed = %1\n", _transport_speed));
 	TransportStateChange (); /* EMIT SIGNAL */
 	AutomationWatch::instance().transport_stop_automation_watches (_transport_sample);
-
-	ptw = PostTransportWork (ptw & ~(PostTransportAbort|PostTransportStop|PostTransportClearSubstate));
-	set_post_transport_work (ptw);
 }
 
 void
