@@ -1129,7 +1129,9 @@ Session::butler_transport_work ()
 	int on_entry = g_atomic_int_get (&_butler->should_do_transport_work);
 	bool finished = true;
 	PostTransportWork ptw = post_transport_work();
+#ifndef NDEBUG
 	uint64_t before;
+#endif
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler transport work, todo = [%1] (0x%3%4%5) at %2\n", enum_2_string (ptw), (before = g_get_monotonic_time()), std::hex, ptw, std::dec));
 
