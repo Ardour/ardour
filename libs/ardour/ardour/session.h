@@ -1127,19 +1127,15 @@ public:
 
 	enum PostTransportWork {
 		PostTransportStop               = 0x1,
-		/* PostTransportDuration */
-		PostTransportLocate             = 0x4,
-		PostTransportRoll               = 0x8,
-		PostTransportAbort              = 0x10,
-		PostTransportOverWrite          = 0x20,
-		/* PostTransportSpeed           = 0x40, */
-		PostTransportAudition           = 0x80,
-		PostTransportReverse            = 0x100,
-		/* PostTransportInputChange     = 0x200, */
-		/*PostTransportCurveRealloc       = 0x400, */
-		PostTransportClearSubstate      = 0x800,
-		PostTransportAdjustPlaybackBuffering  = 0x1000,
-		PostTransportAdjustCaptureBuffering   = 0x2000
+		PostTransportLocate             = 0x2,
+		PostTransportRoll               = 0x4,
+		PostTransportAbort              = 0x8,
+		PostTransportOverWrite          = 0x10,
+		PostTransportAudition           = 0x20,
+		PostTransportReverse            = 0x40,
+		PostTransportClearSubstate      = 0x80,
+		PostTransportAdjustPlaybackBuffering  = 0x100,
+		PostTransportAdjustCaptureBuffering   = 0x200
 	};
 
 	boost::shared_ptr<SessionPlaylists> playlists () const { return _playlists; }
