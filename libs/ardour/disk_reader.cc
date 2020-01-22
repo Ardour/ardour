@@ -740,8 +740,17 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
+	if (c->empty()) {
+		return 0;
+	}
+
 	if (sample == playback_sample && !complete_refill) {
-		return 0; // XXX double-check this
+		return 0;
+	}
+
+	if (abs (sample - playback_sample) < (c->front()->rbuf->reserved_size() / 6)) {
+		/* we're close enough. Note: this is a heuristic */
+		return 0;
 	}
 
 	g_atomic_int_set (&_pending_overwrite, 0);
