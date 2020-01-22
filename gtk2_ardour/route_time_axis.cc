@@ -468,6 +468,11 @@ RouteTimeAxisView::update_track_number_visibility ()
 }
 
 void
+RouteTimeAxisView::route_active_changed ()
+{
+}
+
+void
 RouteTimeAxisView::parameter_changed (string const & p)
 {
 	if (p == "track-name-number") {

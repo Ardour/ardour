@@ -2437,6 +2437,7 @@ MixerStrip::add_output_port (DataType t)
 void
 MixerStrip::route_active_changed ()
 {
+	RouteUI::route_active_changed ();
 	reset_strip_style ();
 }
 

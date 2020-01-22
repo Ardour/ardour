@@ -1359,7 +1359,7 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 void
 MidiTimeAxisView::route_active_changed ()
 {
-	RouteUI::route_active_changed ();
+	RouteTimeAxisView::route_active_changed ();
 	update_control_names();
 
 	if (!_route->active()) {
