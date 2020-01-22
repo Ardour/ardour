@@ -291,6 +291,7 @@ public:
 	virtual void new_playlists (TimeAxisView*) = 0;
 	virtual void copy_playlists (TimeAxisView*) = 0;
 	virtual void clear_playlists (TimeAxisView*) = 0;
+	virtual void select_all_visible_lanes () = 0;
 	virtual void select_all_tracks () = 0;
 	virtual void deselect_all () = 0;
 	virtual void invert_selection () = 0;

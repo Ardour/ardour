@@ -1256,7 +1256,7 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 		if (_editor.get_selection().selected (this)) {
 			_editor.get_selection().clear_tracks ();
 		} else {
-			_editor.select_all_tracks ();
+			_editor.select_all_visible_lanes ();
 		}
 
 		_editor.commit_reversible_selection_op ();
