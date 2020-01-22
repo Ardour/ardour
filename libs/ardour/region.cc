@@ -473,7 +473,6 @@ Region::set_selected_for_solo(bool yn)
 
 		_soloSelected = yn;
 	}
-	
 }
 
 void
