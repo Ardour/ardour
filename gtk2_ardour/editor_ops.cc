@@ -2943,8 +2943,12 @@ Editor::rename_region ()
 	std::string str = entry.get_text();
 	strip_whitespace_edges (str);
 	if (!str.empty()) {
-		rs.front()->region()->set_name (str);
-		_regions->redisplay ();
+		if (!rs.front()->region()->set_name (str)) {
+			ArdourMessageDialog msg (_("Rename failed. Check for characters such as '/' or ':'"));
+			msg.run ();
+		} else {
+			_regions->redisplay ();
+		}
 	}
 }
 
