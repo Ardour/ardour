@@ -447,10 +447,12 @@ RouteTimeAxisView::update_track_number_visibility ()
 	}
 
 	if (number_label.get_parent()) {
-		controls_table.remove (number_label);
+		number_label.get_parent()->remove (number_label);
 	}
 	if (show_label) {
-		if (ARDOUR::Profile->get_mixbus()) {
+		if (!_route->active()) {
+			inactive_table.attach (number_label, 0, 1, 0, 1, Gtk::SHRINK, Gtk::EXPAND|Gtk::FILL, 1, 0);
+		} else if (ARDOUR::Profile->get_mixbus()) {
 			controls_table.attach (number_label, 3, 4, 0, 1, Gtk::SHRINK, Gtk::EXPAND|Gtk::FILL, 1, 0);
 		} else {
 			controls_table.attach (number_label, 0, 1, 0, 1, Gtk::SHRINK, Gtk::EXPAND|Gtk::FILL, 1, 0);
@@ -470,6 +472,8 @@ RouteTimeAxisView::update_track_number_visibility ()
 void
 RouteTimeAxisView::route_active_changed ()
 {
+	RouteUI::route_active_changed ();
+	update_track_number_visibility ();
 }
 
 void
