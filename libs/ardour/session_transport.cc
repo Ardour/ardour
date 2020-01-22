@@ -723,18 +723,9 @@ Session::butler_completed_transport_work ()
 	}
 
 	/* the butler finished its work so clear all PostTransportWork flags
-	 * reflecting things it may have done.
 	 */
 
-	ptw = PostTransportWork (ptw & ~(PostTransportAdjustPlaybackBuffering|
-	                                 PostTransportAdjustCaptureBuffering|
-	                                 PostTransportOverWrite|
-	                                 PostTransportReverse|
-	                                 PostTransportRoll|
-	                                 PostTransportAbort|
-	                                 PostTransportStop|
-	                                 PostTransportClearSubstate));
-	set_post_transport_work (ptw);
+	set_post_transport_work (PostTransportWork (0));
 
 	set_next_event ();
 
