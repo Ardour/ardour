@@ -44,7 +44,6 @@ function factory () return function ()
 				-- iterate over the audio sample data
 				for i = 0, s do
 					if math.abs (d[i]) > 0 then
-						print ("nonzero at", pos + i)
 						if (nonzeropos < 0 or pos + i < nonzeropos) then
 							nonzeropos = pos + i
 						end
@@ -69,7 +68,7 @@ function factory () return function ()
 
 	if (msg ~= "") then
 		local md = LuaDialog.Message ("First Non Zero Sample", msg, LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close)
-		print (md:run())
+		md:run()
 	end
 
 end end
