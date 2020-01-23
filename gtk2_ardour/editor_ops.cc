@@ -8173,8 +8173,8 @@ Editor::fit_tracks (TrackViewList & tracks)
 	if (h < TimeAxisView::preset_height (HeightSmall)) {
 		ArdourMessageDialog msg (_("There are too many tracks to fit in the current window"));
 		msg.run ();
-		/* too small to be displayed */
-		return;
+		/* too small to be displayed, just use smallest possible */
+		h = HeightSmall;
 	}
 
 	undo_visual_stack.push_back (current_visual_state (true));
