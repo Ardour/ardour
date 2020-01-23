@@ -755,7 +755,7 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 
 	g_atomic_int_set (&_pending_overwrite, 0);
 
-	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("DiskReader::seek %s %ld -> %ld refill=%d\n", owner()->name().c_str(), playback_sample, sample, complete_refill));
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("DiskReader::seek %1 %2 -> %3 refill=%4\n", owner()->name().c_str(), playback_sample, sample, complete_refill));
 
 	const samplecnt_t distance = sample - playback_sample;
 	if (!complete_refill && can_internal_playback_seek (distance)) {
