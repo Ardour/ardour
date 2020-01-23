@@ -183,8 +183,8 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	 * changes in the value of _transport_sample.
 	 */
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1, roll %2 flush %3 for loop end %4 force %5 mmc %6\n",
-	                                               target_sample, with_roll, with_flush, for_loop_end, force, with_mmc));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1 ts = %7, roll %2 flush %3 for loop end %4 force %5 mmc %6\n",
+	                                               target_sample, with_roll, with_flush, for_loop_end, force, with_mmc, _transport_sample));
 
 	if (!force && _transport_sample == target_sample && !loop_changing && !for_loop_end) {
 
@@ -198,6 +198,7 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 			set_transport_speed (1.0, 0, false);
 		}
 		loop_changing = false;
+		cerr << "Send LD1\n";
 		TFSM_EVENT (TransportFSM::LocateDone);
 		Located (); /* EMIT SIGNAL */
 		return;
@@ -348,6 +349,7 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	if (need_butler) {
 		TFSM_EVENT (TransportFSM::ButlerRequired);
 	} else {
+		cerr << "Send LD2\n";
 		TFSM_EVENT (TransportFSM::LocateDone);
 		loop_changing = false;
 	}
@@ -713,6 +715,7 @@ Session::butler_completed_transport_work ()
 		ptw = PostTransportWork (ptw & ~PostTransportLocate);
 		set_post_transport_work (ptw);
 		loop_changing = false;
+		cerr << "Send LD3\n";
 		TFSM_EVENT (TransportFSM::LocateDone);
 	}
 
