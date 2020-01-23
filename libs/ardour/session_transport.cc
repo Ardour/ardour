@@ -2038,6 +2038,12 @@ Session::locate_pending () const
 }
 
 bool
+Session::locate_initiated() const
+{
+	return _transport_fsm->declicking_for_locate() || _transport_fsm->locating();
+}
+
+bool
 Session::declick_in_progress () const
 {
 	return _transport_fsm->declick_in_progress();

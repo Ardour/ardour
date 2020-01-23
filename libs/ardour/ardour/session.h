@@ -462,6 +462,7 @@ public:
 
 	bool global_locate_pending() const { return _global_locate_pending; }
 	bool locate_pending() const;
+	bool locate_initiated() const;
 	bool declick_in_progress () const;
 	bool transport_locked () const;
 
