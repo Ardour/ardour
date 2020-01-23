@@ -1439,7 +1439,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	 * location, or just back to the start of the last roll.
 	 */
 
-	if (transport_master_no_external_or_using_engine() && !(ptw & PostTransportLocate)) {
+	if (transport_master_no_external_or_using_engine() && !locate_initiated()) {
 
 		bool do_locate = false;
 
@@ -1517,8 +1517,10 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		}
 	}
 
-	{
+	if (!_transport_fsm->declicking_for_locate()) {
+
 		DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: locate\n"));
+
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler PTW: locate on %1\n", (*i)->name()));
 			(*i)->non_realtime_locate (_transport_sample);
@@ -1529,9 +1531,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 				return;
 			}
 		}
-	}
 
-	{
 		VCAList v = _vca_manager->vcas ();
 		for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
 			(*i)->non_realtime_locate (_transport_sample);

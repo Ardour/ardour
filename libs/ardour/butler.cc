@@ -204,6 +204,18 @@ Butler::thread_work ()
 			DEBUG_TRACE (DEBUG::Butler, string_compose ("do transport work @ %1\n", g_get_monotonic_time()));
 			_session.butler_transport_work ();
 			DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttransport work complete @ %1, twr = %2\n", g_get_monotonic_time(), transport_work_requested()));
+
+			if (_session.locate_initiated()) {
+				/* we have done the "stop" required for a
+				   locate (DeclickToLocate state in TFSM), but
+				   once that finishes we're going to do a locate,
+				   so do not bother with buffer refills at this
+				   time.
+				*/
+				DEBUG_TRACE (DEBUG::Butler, string_compose ("\tlocate pending, so just pause @ %1 till woken again\n", g_get_monotonic_time()));
+				paused.signal ();
+				continue;
+			}
 		}
 
 		sampleoffset_t audition_seek;
