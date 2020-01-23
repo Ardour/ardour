@@ -160,6 +160,7 @@ struct TransportFSM
 	bool stopping () const           { return _motion_state == DeclickToStop; }
 	bool waiting_for_butler() const  { return _butler_state == WaitingForButler; }
 	bool declick_in_progress() const { return _motion_state == DeclickToLocate || _motion_state == DeclickToStop; }
+	bool declicking_for_locate() const { return _motion_state == DeclickToLocate; }
 
 	void enqueue (Event* ev);
 
