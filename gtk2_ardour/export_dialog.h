@@ -114,6 +114,8 @@ private:
 
 	void do_export ();
 
+	void maybe_set_session_dirty ();
+
 	void update_realtime_selection ();
 	void parameter_changed (std::string const&);
 
@@ -147,6 +149,8 @@ private:
 	sigc::connection        progress_connection;
 
 	float previous_progress; // Needed for gtk bug workaround
+
+	bool _initialized;
 
 	void soundcloud_upload_progress(double total, double now, std::string title);
 
