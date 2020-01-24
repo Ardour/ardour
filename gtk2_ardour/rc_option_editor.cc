@@ -3695,7 +3695,6 @@ RCOptionEditor::RCOptionEditor ()
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_name)
 			));
 
-#ifndef MIXBUS // hide this setting in Mixbus. Always on, 4px
 	ComboOption<uint32_t>* gap = new ComboOption<uint32_t> (
 		     "vertical-region-gap",
 		     _("Add a visual gap below Audio Regions"),
@@ -3706,7 +3705,6 @@ RCOptionEditor::RCOptionEditor ()
 	gap->add (2, _("Small"));
 	gap->add (4, _("Large"));
 	add_option (_("Appearance/Editor"), gap);
-#endif
 
 	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("Waveforms")));
 
