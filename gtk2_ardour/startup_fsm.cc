@@ -276,6 +276,8 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 			case RESPONSE_OK:
 			case RESPONSE_ACCEPT:
 				if (AudioEngine::instance()->running()) {
+					/* prevent double clicks from changing engine state */
+					audiomidi_dialog.set_ui_sensitive (false);
 					end_dialog (audiomidi_dialog);
 					engine_running ();
 				} else {
