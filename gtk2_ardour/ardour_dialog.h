@@ -50,11 +50,13 @@ public:
 	void on_unmap ();
 	void on_show ();
 	virtual void on_response (int);
+	void set_ui_sensitive (bool);
 
 protected:
 	void pop_splash ();
 	void close_self ();
 
+	bool _sensitive;
 private:
 	WM::ProxyTemporary* proxy;
 	bool _splash_pushed;

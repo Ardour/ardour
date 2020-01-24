@@ -39,6 +39,7 @@ using namespace ARDOUR_UI_UTILS;
 
 ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
 	: Dialog (title, modal, use_seperator)
+	, _sensitive (true)
 	, proxy (0)
 	, _splash_pushed (false)
 {
@@ -48,6 +49,7 @@ ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
 
 ArdourDialog::ArdourDialog (Gtk::Window& parent, string title, bool modal, bool use_seperator)
 	: Dialog (title, parent, modal, use_seperator)
+	, _sensitive (true)
 	, proxy (0)
 	, _splash_pushed (false)
 {
@@ -134,6 +136,8 @@ ArdourDialog::on_show ()
 			_splash_pushed = true;
 		}
 	}
+
+	_sensitive = true;
 }
 
 bool
@@ -160,4 +164,10 @@ ArdourDialog::init ()
 
 	proxy = new WM::ProxyTemporary (get_title(), this);
 	WM::Manager::instance().register_window (proxy);
+}
+
+void
+ArdourDialog::set_ui_sensitive (bool yn)
+{
+	_sensitive = yn;
 }
