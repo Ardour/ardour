@@ -91,6 +91,7 @@
     <ColorAlias name="entered marker" alias="widget:orange"/>
     <ColorAlias name="feedback alert: fill" alias="widget:bg"/>
     <ColorAlias name="feedback alert: fill active" alias="alert:red"/>
+    <ColorAlias name="feedback alert: alt active" alias="alert:ruddy"/>
     <ColorAlias name="feedback alert: led active" alias="alert:red"/>
     <ColorAlias name="foldback knob" alias="widget:bg"/>
     <ColorAlias name="foldback knob: fill" alias="widget:bg"/>
