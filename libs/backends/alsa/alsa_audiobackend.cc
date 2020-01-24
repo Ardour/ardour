@@ -892,7 +892,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		} else {
 		 _n_inputs = std::min (_n_inputs, _pcmi->ncapt ());
 		}
-		PBD::warning << _("AlsaAudioBackend: adjusted input channel count to match device.") << endmsg;
+		PBD::info << _("AlsaAudioBackend: adjusted input channel count to match device.") << endmsg;
 	}
 
 	if (_pcmi->fsize() != _samples_per_period) {
