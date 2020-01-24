@@ -439,7 +439,7 @@ TransportFSM::locate_for_loop (Event const & l)
 	DEBUG_TRACE (DEBUG::TFSMEvents, string_compose ("locate_for_loop, wl = %1\n", l.for_loop_end));
 
 	const bool should_roll = compute_should_roll (l.ltd);
-
+	current_roll_after_locate_status = should_roll;
 	_last_locate = l;
 	api->locate (l.target, should_roll, l.with_flush, l.for_loop_end, l.force);
 }
