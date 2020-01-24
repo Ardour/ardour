@@ -14,7 +14,7 @@
     <Color name="theme:bg2" value="0x444444ff"/>  <!--ruler base-->
     <Color name="theme:contrasting" value="0xff6100ff"/>  <!--play head-->
     <Color name="theme:contrasting clock" value="0xf0f0f0ff"/>  <!--big clock: text-->
-    <Color name="theme:contrasting less" value="0xbba34cff"/>  <!--gtk_bg_tooltip-->
+    <Color name="theme:contrasting less" value="0xE3DABAff"/>  <!--gtk_bg_tooltip-->
     <Color name="theme:contrasting selection" value="0x8d8d8dff"/>  <!--gtk_bg_selected-->
     <Color name="theme:contrasting alt" value="0x8cd8f8ff"/>  <!--secondary delta clock: text-->
     <Color name="neutral:backgroundest" value="000000ff"/>  <!--border color-->
@@ -25,7 +25,7 @@
     <Color name="neutral:foreground" value="0xeeeeecff"/>  <!--gtk_foreground-->
     <Color name="neutral:foregroundest" value="ffffffff"/>  <!--grid line major-->
     <Color name="widget:bg" value="0x9e9e9eff"/>    <!--generic button-->
-    <Color name="widget:blue" value="0x505050ff"/>  <!--processor fader: fill-->
+    <Color name="widget:blue" value="0x5550A0ff"/>  <!--processor fader: fill-->
     <Color name="widget:blue darker" value="0x404145ff"/>  <!--gtk_audio_bus-->
     <Color name="widget:gray" value="0x636363ff"/>  <!--gtk_processor_fader-->
     <Color name="widget:green" value="0x8d8d8dff"/>  <!--gtk_processor_postfader,  gtk_midi_track-->
@@ -130,7 +130,7 @@
     <ColorAlias name="gtk_darkest" alias="theme:bg2"/>
     <ColorAlias name="gtk_entry_cursor" alias="alert:red"/>
     <ColorAlias name="gtk_fg_selected" alias="theme:bg2"/>
-    <ColorAlias name="gtk_fg_tooltip" alias="neutral:background"/>
+    <ColorAlias name="gtk_fg_tooltip" alias="neutral:backgroundest"/>
     <ColorAlias name="gtk_foldback_bg" alias="theme:bg1"/>
     <ColorAlias name="gtk_foreground" alias="neutral:foreground"/>
     <ColorAlias name="gtk_light_text_on_dark" alias="neutral:foreground2"/>

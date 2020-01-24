@@ -25,7 +25,7 @@
     <Color name="neutral:foreground" value="0xffffffff"/>  <!--gtk_foreground-->
     <Color name="neutral:foregroundest" value="ffffffff"/>  <!--grid line major-->
     <Color name="widget:bg" value="0x9e9e9eff"/>    <!--generic button-->
-    <Color name="widget:blue" value="0x505050ff"/>  <!--processor fader: fill-->
+    <Color name="widget:blue" value="0x5550A0ff"/>  <!--processor fader: fill-->
     <Color name="widget:blue darker" value="0x202020ff"/>  <!--gtk_audio_bus-->
     <Color name="widget:gray" value="0x636363ff"/>  <!--gtk_processor_fader-->
     <Color name="widget:green" value="0x969696ff"/>  <!--gtk_processor_postfader,  gtk_midi_track-->
@@ -130,7 +130,7 @@
     <ColorAlias name="gtk_darkest" alias="theme:bg2"/>
     <ColorAlias name="gtk_entry_cursor" alias="alert:red"/>
     <ColorAlias name="gtk_fg_selected" alias="theme:bg2"/>
-    <ColorAlias name="gtk_fg_tooltip" alias="neutral:background"/>
+    <ColorAlias name="gtk_fg_tooltip" alias="neutral:backgroundest"/>
     <ColorAlias name="gtk_foldback_bg" alias="theme:bg1"/>
     <ColorAlias name="gtk_foreground" alias="neutral:foreground"/>
     <ColorAlias name="gtk_light_text_on_dark" alias="neutral:foreground2"/>
