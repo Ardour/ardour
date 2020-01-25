@@ -1,4 +1,5 @@
 gtk-button-images = 0							      # [ Default value: 1 ] Show stock icons on buttons.
+gtk-theme-name = Ardour # override default gtk-default theme, "MS-Windows" vs "Raleigh" (Linux, Mac)
 
 style "default" = "medium_text"
 {
