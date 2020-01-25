@@ -31,7 +31,7 @@ def build(bld):
             obj.target = '../../LV2/%s/%s' % (bundle, i)
             obj.install_path = '${LV2DIR}/%s' % bundle
             obj.chmod = Utils.O644
-            obj.dict = {'LIB_EXT': module_ext}
+            obj.LIB_EXT = module_ext
 
         # Build plugin library
         obj = bld(features     = 'cxx cshlib',
