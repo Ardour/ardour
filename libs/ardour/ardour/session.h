@@ -2033,8 +2033,6 @@ private:
 	void rt_set_controls (boost::shared_ptr<ControlList>, double val, PBD::Controllable::GroupControlDisposition group_override);
 	void rt_clear_all_solo_state (boost::shared_ptr<RouteList>, bool yn, PBD::Controllable::GroupControlDisposition group_override);
 
-	void set_session_range_location (samplepos_t, samplepos_t);
-
 	void setup_midi_machine_control ();
 
 	void step_edit_status_change (bool);

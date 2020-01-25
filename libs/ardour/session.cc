@@ -1512,18 +1512,18 @@ Session::set_auto_punch_location (Location* location)
 void
 Session::set_session_extents (samplepos_t start, samplepos_t end)
 {
-	Location* existing;
-	if ((existing = _locations->session_range_location()) == 0) {
-		//if there is no existing session, we need to make a new session location  (should never happen)
-		existing = new Location (*this, 0, 0, _("session"), Location::IsSessionRange, 0);
-	}
-
 	if (end <= start) {
 		error << _("Session: you can't use that location for session start/end)") << endmsg;
 		return;
 	}
 
-	existing->set( start, end );
+	Location* existing;
+	if ((existing = _locations->session_range_location()) == 0) {
+		_session_range_location = new Location (*this, start, end, _("session"), Location::IsSessionRange, 0);
+		_locations->add (_session_range_location);
+	} else {
+		existing->set( start, end );
+	}
 
 	set_dirty();
 }
@@ -4176,7 +4176,7 @@ Session::maybe_update_session_range (samplepos_t a, samplepos_t b)
 
 	if (_session_range_location == 0) {
 
-		set_session_range_location (a, b + session_end_marker_shift_samples);
+		set_session_extents (a, b + session_end_marker_shift_samples);
 
 	} else {
 
@@ -6109,13 +6109,6 @@ samplepos_t
 Session::current_end_sample () const
 {
 	return _session_range_location ? _session_range_location->end() : 0;
-}
-
-void
-Session::set_session_range_location (samplepos_t start, samplepos_t end)
-{
-	_session_range_location = new Location (*this, start, end, _("session"), Location::IsSessionRange, 0);
-	_locations->add (_session_range_location);
 }
 
 void
