@@ -2267,8 +2267,8 @@ Editor::set_session_start_from_playhead ()
 		return;
 
 	Location* loc;
-	if ((loc = _session->locations()->session_range_location()) == 0) {  //should never happen
-		_session->set_session_extents (_session->audible_sample(), _session->audible_sample());
+	if ((loc = _session->locations()->session_range_location()) == 0) {
+		_session->set_session_extents (_session->audible_sample(), _session->audible_sample() + 3 * 60 * _session->sample_rate());
 	} else {
 		XMLNode &before = loc->get_state();
 
@@ -2294,7 +2294,7 @@ Editor::set_session_end_from_playhead ()
 
 	Location* loc;
 	if ((loc = _session->locations()->session_range_location()) == 0) {  //should never happen
-		_session->set_session_extents (_session->audible_sample(), _session->audible_sample());
+		_session->set_session_extents (0, _session->audible_sample());
 	} else {
 		XMLNode &before = loc->get_state();
 
