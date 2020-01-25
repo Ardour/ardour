@@ -2092,7 +2092,7 @@ clearlooks_draw_checkbox (cairo_t *cr,
                           const CheckboxParameters *checkbox,
                           int x, int y, int width, int height)
 {
-	const CairoColor *border;
+	CairoColor border;
 	const CairoColor *dot;
 	gboolean inconsistent = FALSE;
 	gboolean draw_bullet = (checkbox->shadow_type == (ClearlooksShadowType)GTK_SHADOW_IN);
@@ -2102,12 +2102,16 @@ clearlooks_draw_checkbox (cairo_t *cr,
 
 	if (widget->disabled)
 	{
-		border = &colors->shade[5];
+		border = colors->shade[5];
 		dot    = &colors->shade[6];
 	}
 	else
 	{
-		border = &colors->shade[6];
+		if (checkbox->in_cell) {
+			ge_mix_color (&colors->text[GTK_STATE_NORMAL], &colors->shade[6], 0.7, &border);
+		} else {
+			border = colors->shade[6];
+		}
 		dot    = &colors->text[GTK_STATE_NORMAL];
 	}
 
@@ -2133,7 +2137,7 @@ clearlooks_draw_checkbox (cairo_t *cr,
 		cairo_fill_preserve (cr);
 	}
 
-	ge_cairo_set_color (cr, border);
+	ge_cairo_set_color (cr, &border);
 	cairo_stroke (cr);
 
 	if (draw_bullet)
