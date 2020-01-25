@@ -198,7 +198,6 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 			set_transport_speed (1.0, 0, false);
 		}
 		loop_changing = false;
-		cerr << "Send LD1\n";
 		TFSM_EVENT (TransportFSM::LocateDone);
 		Located (); /* EMIT SIGNAL */
 		return;
@@ -349,7 +348,6 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	if (need_butler) {
 		TFSM_EVENT (TransportFSM::ButlerRequired);
 	} else {
-		cerr << "Send LD2\n";
 		TFSM_EVENT (TransportFSM::LocateDone);
 		loop_changing = false;
 	}
@@ -715,7 +713,6 @@ Session::butler_completed_transport_work ()
 		ptw = PostTransportWork (ptw & ~PostTransportLocate);
 		set_post_transport_work (ptw);
 		loop_changing = false;
-		cerr << "Send LD3\n";
 		TFSM_EVENT (TransportFSM::LocateDone);
 	}
 
