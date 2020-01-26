@@ -585,7 +585,9 @@ Session::start_transport ()
 
 	_last_roll_location = _transport_sample;
 	_last_roll_or_reversal_location = _transport_sample;
-	_remaining_latency_preroll = worst_latency_preroll_buffer_size_ceil ();
+	if (!have_looped) {
+		_remaining_latency_preroll = worst_latency_preroll_buffer_size_ceil ();
+	}
 
 	have_looped = false;
 
