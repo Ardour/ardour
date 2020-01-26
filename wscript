@@ -1057,7 +1057,7 @@ def configure(conf):
                 conf.check_cc(
                         msg="Checking for function 'dlopen' in dlfcn.h",
                         fragment = "#include <dlfcn.h>\n int main(void) { dlopen (\"\", 0); return 0;}\n",
-                        linkflags='-ldl', uselib_store='DL', execute = False)
+                        lib='dl', uselib_store='DL', execute = False)
 
     conf.check_cxx(fragment = "#include <boost/version.hpp>\n#if !defined (BOOST_VERSION) || BOOST_VERSION < 105600\n#error boost >= 1.56 is not available\n#endif\nint main(void) { return 0; }\n",
               execute = False,
