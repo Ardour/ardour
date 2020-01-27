@@ -216,6 +216,12 @@ Session::run_click (samplepos_t start, samplepos_t nframes)
 			 * clicks at loop-start into account */
 			const samplepos_t loop_start = loop_location->start ();
 			internal_offset = clk->start - loop_start + span;
+		} else {
+			/* this can happen when locating
+			 * with an active click */
+			delete clk;
+			i = clicks.erase (i);
+			continue;
 		}
 
 		if (internal_offset >= nframes) {
