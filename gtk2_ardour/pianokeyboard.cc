@@ -917,6 +917,8 @@ APianoKeyboard::recompute_dimensions ()
 		}
 	}
 
+	assert (number_of_white_keys > 0);
+
 	int width  = get_width ();
 	int height = get_height ();
 
