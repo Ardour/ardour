@@ -150,7 +150,7 @@ def build(bld):
         '''
         obj.includes     = ['.', './src']
         obj.use          = 'libevoral_static'
-        obj.uselib       = 'CPPUNIT SNDFILE LIBPBD'
+        obj.uselib       = 'GLIBMM GTHREAD SMF XML LIBPBD OSX CPPUNIT'
         obj.target       = 'run-tests'
         obj.name         = 'libevoral-tests'
         obj.install_path = ''

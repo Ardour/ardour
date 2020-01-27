@@ -214,9 +214,9 @@ def build(bld):
             testobj.source += [ 'test/windows_timer_utils_test.cc' ]
         testobj.target       = 'run-tests'
         testobj.includes     = obj.includes + ['test', '../pbd']
-        testobj.uselib       = 'CPPUNIT XML SNDFILE'
+        testobj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM ARCHIVE CURL XML OSX CPPUNIT'
         testobj.use          = 'libpbd'
         testobj.name         = 'libpbd-tests'
         testobj.defines      = [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
         if sys.platform != 'darwin' and bld.env['build_target'] != 'mingw':
-            testobj.linkflags    = ['-lrt']
+            testobj.lib      = ['rt']
