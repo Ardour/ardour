@@ -2182,7 +2182,7 @@ EngineControl::set_state (const XMLNode& root)
 	for (StateList::const_iterator i = states.begin(); i != states.end(); ++i) {
 
 		if ((*i)->active) {
-			return set_current_state (*i);
+			return set_current_state (*i) && 0 == push_state_to_backend (false);
 		}
 	}
 	return false;
@@ -2284,6 +2284,7 @@ EngineControl::set_current_state (const State& state)
 	output_latency.set_value (state->output_latency);
 	midi_option_combo.set_active_text (state->midi_option);
 	use_buffered_io_button.set_active (state->use_buffered_io);
+
 	return true;
 }
 
