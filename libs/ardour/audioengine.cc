@@ -896,12 +896,22 @@ void
 AudioEngine::drop_backend ()
 {
 	if (_backend) {
+		/* see also ::stop() */
 		_backend->stop ();
-		// Stopped is needed for Graph to explicitly terminate threads
+		_running = false;
+		if (_session && !_session->loading() && !_session->deletion_in_progress()) {
+			// it's not a halt, but should be handled the same way:
+			// disable record, stop transport and I/O processign but save the data.
+			_session->engine_halted ();
+		}
+		Port::PortDrop (); /* EMIT SIGNAL */
+		TransportMasterManager& tmm (TransportMasterManager::instance());
+		tmm.engine_stopped ();
+
+		/* Stopped is needed for Graph to explicitly terminate threads */
 		Stopped (); /* EMIT SIGNAL */
 		_backend->drop_device ();
 		_backend.reset ();
-		_running = false;
 	}
 }
 
