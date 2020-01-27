@@ -625,7 +625,7 @@ Session::start_transport ()
 	if (!_engine.freewheeling()) {
 		Timecode::Time time;
 		timecode_time_subframes (_transport_sample, time);
-		if (transport_master()->type() == MTC) {
+		if (transport_master()->type() != MTC) { // why not when slaved to MTC?
 			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
 		}
 
@@ -1550,7 +1550,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		// need to queue this in the next RT cycle
 		_send_timecode_update = true;
 
-		if (transport_master()->type() == MTC) {
+		if (transport_master()->type() != MTC) { // why?
 			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
 
 			/* This (::non_realtime_stop()) gets called by main
