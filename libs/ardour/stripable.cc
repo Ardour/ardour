@@ -129,7 +129,10 @@ Stripable::is_selected() const
 bool
 Stripable::Sorter::operator() (boost::shared_ptr<ARDOUR::Stripable> a, boost::shared_ptr<ARDOUR::Stripable> b)
 {
-	if (a->presentation_info().flags () == b->presentation_info().flags ()) {
+	const PresentationInfo::Flag a_flag = a->presentation_info().flags ();
+	const PresentationInfo::Flag b_flag = b->presentation_info().flags ();
+
+	if (a_flag == b_flag) {
 		return a->presentation_info().order() < b->presentation_info().order();
 	}
 
@@ -148,34 +151,34 @@ Stripable::Sorter::operator() (boost::shared_ptr<ARDOUR::Stripable> a, boost::sh
 	 * Mixbus-Mixer : [Track|Bus] (0) < Mixbus (1) < Master (2) < VCA (3)
 	 */
 
-	if (a->presentation_info().flags () & ARDOUR::PresentationInfo::VCA) {
+	if (a_flag & ARDOUR::PresentationInfo::VCA) {
 		cmp_a = 3;
 	}
 #ifdef MIXBUS
-	else if (a->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut) {
+	else if (a_flag & ARDOUR::PresentationInfo::MasterOut) {
 		cmp_a = _mixer_order ? 2 : 4;
 	}
-	else if ((a->presentation_info().flags () & ARDOUR::PresentationInfo::Mixbus) || a->mixbus()) {
+	else if (a_flag & ARDOUR::PresentationInfo::Mixbus) {
 		cmp_a = 1;
 	}
 #endif
-	else if (_mixer_order && (a->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut)) {
+	else if (_mixer_order && (a_flag & ARDOUR::PresentationInfo::MasterOut)) {
 		cmp_a = 4;
 	}
 
 
-	if (b->presentation_info().flags () & ARDOUR::PresentationInfo::VCA) {
+	if (b_flag & ARDOUR::PresentationInfo::VCA) {
 		cmp_b = 3;
 	}
 #ifdef MIXBUS
-	else if (b->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut) {
+	else if (b_flag & ARDOUR::PresentationInfo::MasterOut) {
 		cmp_b = _mixer_order ? 2 : 4;
 	}
-	else if ((b->presentation_info().flags () & ARDOUR::PresentationInfo::Mixbus) || b->mixbus()) {
+	else if (b_flag & ARDOUR::PresentationInfo::Mixbus) {
 		cmp_b = 1;
 	}
 #endif
-	else if (_mixer_order && (b->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut)) {
+	else if (_mixer_order && (b_flag & ARDOUR::PresentationInfo::MasterOut)) {
 		cmp_b = 4;
 	}
 
