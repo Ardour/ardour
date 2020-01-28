@@ -2875,8 +2875,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* MIDI */
 
-	add_option (_("MIDI"), new OptionEditorHeading (_("Buffering")));
-
 	add_option (_("MIDI"), new OptionEditorHeading (_("Session")));
 
 	add_option (_("MIDI"),
@@ -2917,6 +2915,19 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("MIDI"), vkeybdlayout);
 
+	/* MIDI PORTs */
+	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Port Options")));
+
+	add_option (_("MIDI"),
+		    new BoolOption (
+			    "midi-input-follows-selection",
+			    _("MIDI input follows MIDI track selection"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_input_follows_selection),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_input_follows_selection)
+			    ));
+
+	add_option (_("MIDI"), new MidiPortOptions ());
+	add_option (_("MIDI"), new OptionEditorBlank ());
 
 	/* Click */
 
@@ -3342,19 +3353,6 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Control Surfaces"), new OptionEditorHeading (_("Control Surfaces")));
 	add_option (_("Control Surfaces"), new ControlSurfacesOptions ());
 
-	/* MIDI PORTs */
-	add_option (_("MIDI Ports"), new OptionEditorHeading (_("MIDI Port Options")));
-
-	add_option (_("MIDI Ports"),
-		    new BoolOption (
-			    "midi-input-follows-selection",
-			    _("MIDI input follows MIDI track selection"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_input_follows_selection),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_input_follows_selection)
-			    ));
-
-	add_option (_("MIDI Ports"), new MidiPortOptions ());
-	add_option (_("MIDI Ports"), new OptionEditorBlank ());
 
 	/* PLUGINS */
 
