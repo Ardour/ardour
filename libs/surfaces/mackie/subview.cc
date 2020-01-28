@@ -28,6 +28,8 @@
 #include "ardour/debug.h"
 #include "ardour/monitor_control.h"
 #include "ardour/phase_control.h"
+#include "ardour/plugin.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/route.h"
 #include "ardour/solo_isolate_control.h"
 #include "ardour/stripable.h"
@@ -71,10 +73,8 @@ boost::shared_ptr<Subview> SubviewFactory::create_subview(
 			return boost::make_shared<SendsSubview>(mcp, subview_stripable);
 		case SubViewMode::TrackView:
 			return boost::make_shared<TrackViewSubview>(mcp, subview_stripable);
-		case SubViewMode::PluginSelect:
-			return boost::make_shared<PluginSelectSubview>(mcp, subview_stripable);
-		case SubViewMode::PluginEdit:
-			return boost::make_shared<PluginEditSubview>(mcp, subview_stripable);
+		case SubViewMode::Plugin:
+			return boost::make_shared<PluginSubview>(mcp, subview_stripable);
 		case SubViewMode::None:
 		default:
 			return boost::make_shared<NoneSubview>(mcp, subview_stripable);
@@ -148,10 +148,8 @@ Subview::subview_mode_would_be_ok (SubViewMode mode, boost::shared_ptr<Stripable
 		return DynamicsSubview::subview_mode_would_be_ok(r, reason_why_not);
 	case SubViewMode::TrackView:
 		return TrackViewSubview::subview_mode_would_be_ok(r, reason_why_not);
-	case SubViewMode::PluginSelect:
-		return PluginSelectSubview::subview_mode_would_be_ok(r, reason_why_not);
-	case SubViewMode::PluginEdit:
-		return PluginEditSubview::subview_mode_would_be_ok(r, reason_why_not);
+	case SubViewMode::Plugin:
+		return PluginSubview::subview_mode_would_be_ok(r, reason_why_not);
 	}
 
 	return false;
@@ -945,14 +943,16 @@ TrackViewSubview::notify_change (AutomationType type, uint32_t global_strip_posi
 
 
 
-PluginSelectSubview::PluginSelectSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable) 
+PluginSubview::PluginSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable) 
 	: Subview(mcp, subview_stripable)
+{
+	_plugin_subview_state = boost::make_shared<PluginSelect>(*this);
+}
+
+PluginSubview::~PluginSubview() 
 {}
 
-PluginSelectSubview::~PluginSelectSubview() 
-{}
-
-bool PluginSelectSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not) 
+bool PluginSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not) 
 {
 	if (r) {
 		boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (r);
@@ -965,7 +965,7 @@ bool PluginSelectSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::St
 	return false;
 }
 
-void PluginSelectSubview::update_global_buttons() 
+void PluginSubview::update_global_buttons() 
 {
 	_mcp.update_global_button (Button::Send, off);
 	_mcp.update_global_button (Button::Plugin, on);
@@ -975,19 +975,74 @@ void PluginSelectSubview::update_global_buttons()
 	_mcp.update_global_button (Button::Pan, off);
 }
 
-void PluginSelectSubview::setup_vpot(
+void PluginSubview::setup_vpot(
 		Strip* strip,
 		Pot* vpot, 
 		std::string pending_display[2])
 {
 	const uint32_t global_strip_position = _mcp.global_index (*strip);
 	store_pointers(strip, vpot, pending_display, global_strip_position);
-	
-	if (!_subview_stripable) {
+	_plugin_subview_state->setup_vpot(strip, vpot, pending_display, global_strip_position, _subview_stripable);
+}
+
+void PluginSubview::handle_vselect_event(uint32_t global_strip_position) 
+{
+	_plugin_subview_state->handle_vselect_event(global_strip_position, _subview_stripable);
+}
+
+void PluginSubview::set_state(boost::shared_ptr<PluginSubviewState> new_state)
+{
+	_plugin_subview_state = new_state;
+
+	const uint32_t num_strips = _strips_over_all_surfaces.size();
+	for (uint32_t strip_index = 0; strip_index < num_strips; strip_index++)
+	{
+		Strip* strip = 0;
+		Pot* vpot = 0;
+		std::string* pending_display = 0;
+		if (!retrieve_pointers(&strip, &vpot, &pending_display, strip_index))
+		{
+			return;
+		}
+		
+		if (!strip || !vpot || !pending_display)
+		{
+			return;
+		}
+		_plugin_subview_state->setup_vpot(strip, vpot, pending_display, strip_index, _subview_stripable);
+	}
+}
+
+
+
+
+PluginSubviewState::PluginSubviewState(PluginSubview& context)
+  : _context(context)
+{}
+
+PluginSubviewState::~PluginSubviewState()
+{}
+
+
+PluginSelect::PluginSelect(PluginSubview& context)
+  : PluginSubviewState(context)
+{}
+
+PluginSelect::~PluginSelect()
+{}
+
+void PluginSelect::setup_vpot(
+	    Strip* strip,
+		Pot* vpot, 
+		std::string pending_display[2],
+		uint32_t global_strip_position,
+		boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
+{
+	if (!subview_stripable) {
 		return;
 	}
 	
-	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (_subview_stripable);
+	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (subview_stripable);
 	if (!route) {
 		return;
 	}
@@ -1005,51 +1060,57 @@ void PluginSelectSubview::setup_vpot(
 	}
 }
 
-void PluginSelectSubview::handle_vselect_event(uint32_t global_strip_position) 
+void PluginSelect::handle_vselect_event(uint32_t global_strip_position,
+		boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
 {
 	/* PluginSelect mode: press selects the plugin shown on the strip's LCD */
-	if (!_subview_stripable) {
+	if (!subview_stripable) {
 		return;
 	}
 	
-	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (_subview_stripable);
+	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (subview_stripable);
 	if (!route) {
 		return;
 	}
 	
 	boost::shared_ptr<Processor> processor = route->nth_plugin(global_strip_position);
+	boost::shared_ptr<PluginInsert> plugin = boost::dynamic_pointer_cast<PluginInsert>(processor);
 	processor->ShowUI();
+	if (plugin) {
+		_context.set_state(boost::make_shared<PluginEdit>(_context, plugin));
+	}
 }
 
 
-PluginEditSubview::PluginEditSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable) 
-	: Subview(mcp, subview_stripable)
+PluginEdit::PluginEdit(PluginSubview& context, boost::shared_ptr<PluginInsert> subview_plugin)
+  : PluginSubviewState(context)
+  , _subview_plugin(subview_plugin)
 {}
 
-PluginEditSubview::~PluginEditSubview() 
+PluginEdit::~PluginEdit() 
 {}
 
-bool PluginEditSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not) 
-{
-	reason_why_not = "pluginedit subview not yet implemented";
-	return false;
-}
-
-void PluginEditSubview::update_global_buttons() 
-{
-	_mcp.update_global_button (Button::Send, off);
-	_mcp.update_global_button (Button::Plugin, on);
-	_mcp.update_global_button (Button::Eq, off);
-	_mcp.update_global_button (Button::Dyn, off);
-	_mcp.update_global_button (Button::Track, off);
-	_mcp.update_global_button (Button::Pan, off);
-}
-
-void PluginEditSubview::setup_vpot(
+void PluginEdit::setup_vpot(
 		Strip* strip,
 		Pot* vpot, 
-		std::string pending_display[2])
+		std::string pending_display[2],
+		uint32_t global_strip_position,
+		boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
 {
+	boost::shared_ptr<ARDOUR::Plugin> plugin = _subview_plugin->plugin(0);
 	
+	if (plugin) {
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("parameter of strip %1 is %2\n", global_strip_position, plugin->get_parameter_docs(global_strip_position)));
+		pending_display[0] = plugin->get_parameter_docs(global_strip_position);
+		pending_display[1] = plugin->get_parameter(global_strip_position);
+	}
+	else {
+		pending_display[0] = "";
+		pending_display[1] = "";
+	}
+}
+
+void PluginEdit::handle_vselect_event(uint32_t global_strip_position, boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
+{
 }
 

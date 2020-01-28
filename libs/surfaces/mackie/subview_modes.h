@@ -30,8 +30,7 @@ enum SubViewMode {
 	Dynamics,
 	Sends,
 	TrackView,
-	PluginSelect,
-	PluginEdit,
+	Plugin,
 };
 
 }

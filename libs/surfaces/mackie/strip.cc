@@ -1157,7 +1157,7 @@ Strip::subview_mode_changed ()
 	case SubViewMode::Dynamics:
 	case SubViewMode::Sends:
 	case SubViewMode::TrackView:
-	case SubViewMode::PluginSelect:
+	case SubViewMode::Plugin:
 		_surface->mcp().subview()->setup_vpot(this, _vpot, pending_display);
 		break;
 	}
