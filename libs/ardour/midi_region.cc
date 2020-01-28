@@ -555,7 +555,7 @@ MidiRegion::render (Evoral::EventSink<samplepos_t>& dst,
 	 * Note-Off's get inserted at the end of the region
 	 */
 
-	tracker.resolve_notes (dst, _position - _start + _length);
+	tracker.resolve_notes (dst, (_position - _start) + (_start + internal_offset + _length));
 
 	return 0;
 }
