@@ -2804,11 +2804,11 @@ ARDOUR_UI::pending_state_dialog ()
 	Image* image = manage (new Image (Stock::DIALOG_QUESTION, ICON_SIZE_DIALOG));
 	ArdourDialog dialog (_("Crash Recovery"), true);
 	Label  message (string_compose (_("\
-This session appears to have been in the\n\
-middle of recording when %1 or\n\
-the computer was shutdown.\n\
+This session appears to have been modified\n\
+without save, or in middle of recording when\n\
+%1 or the computer was shutdown.\n\
 \n\
-%1 can recover any captured audio for\n\
+%1 can recover any changes for\n\
 you, or it can ignore it. Please decide\n\
 what you would like to do.\n"), PROGRAM_NAME));
 	image->set_alignment(ALIGN_CENTER, ALIGN_TOP);
