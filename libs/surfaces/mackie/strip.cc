@@ -514,93 +514,12 @@ void
 Strip::vselect_event (Button&, ButtonState bs)
 {
 	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
-
 		/* most subview modes: vpot press acts like a button for toggle parameters */
-
 		if (bs != press) {
 			return;
 		}
-
-		if (_surface->mcp().subview()->subview_mode() == SubViewMode::Sends) {
-			/* Send mode: press enables/disables the relevant
-			 * send, but the vpot is bound to the send-level so we
-			 * need to lookup the enable/disable control
-			 * explicitly.
-			 */
-
-			boost::shared_ptr<Stripable> r = _surface->mcp().subview()->subview_stripable();
-
-			if (r) {
-
-				const uint32_t global_pos = _surface->mcp().global_index (*this);
-				boost::shared_ptr<AutomationControl> control = r->send_enable_controllable (global_pos);
-
-				if (control) {
-					bool currently_enabled = (bool) control->get_value();
-					Controllable::GroupControlDisposition gcd;
-
-					if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
-						gcd = Controllable::InverseGroup;
-					} else {
-						gcd = Controllable::UseGroup;
-					}
-
-					control->set_value (!currently_enabled, gcd);
-
-					if (currently_enabled) {
-						/* we just turned it off */
-						pending_display[1] = "off";
-					} else {
-						/* we just turned it on, show the level
-						*/
-						control = _stripable->send_level_controllable (global_pos);
-						do_parameter_display (control->desc(), control->get_value()); // BusSendLevel
-					}
-				}
-			}
-		} else if (_surface->mcp().subview()->subview_mode() == SubViewMode::PluginSelect) {
-			/* PluginSelect mode: press selects the plugin shown on the strip's LCD */
-			boost::shared_ptr<Stripable> r = _surface->mcp().subview()->subview_stripable();
-			if (r) {
-				boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (r);
-				if (route) {
-					const uint32_t global_pos = _surface->mcp().global_index (*this);
-					boost::shared_ptr<Processor> proc = route->nth_plugin(global_pos);
-					proc->ShowUI();
-				}
-			}
-		} else {
-
-			boost::shared_ptr<AutomationControl> control = _vpot->control ();
-			if (!control) {
-				return;
-			}
-
-			Controllable::GroupControlDisposition gcd;
-			if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
-				gcd = Controllable::InverseGroup;
-			} else {
-				gcd = Controllable::UseGroup;
-			}
-
-			if (control->toggled()) {
-				if (control->toggled()) {
-					control->set_value (!control->get_value(), gcd);
-				}
-
-			} else if (control->desc().enumeration || control->desc().integer_step) {
-
-				double val = control->get_value ();
-				if (val <= control->upper() - 1.0) {
-					control->set_value (val + 1.0, gcd);
-				} else {
-					control->set_value (control->lower(), gcd);
-				}
-			}
-		}
-
-		/* done with this event in subview mode */
-
+		
+		_surface->mcp().subview()->handle_vselect_event(_surface->mcp().global_index (*this));
 		return;
 	}
 

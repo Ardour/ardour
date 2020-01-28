@@ -91,6 +91,49 @@ Subview::Subview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable
 
 Subview::~Subview() {}
 
+void Subview::handle_vselect_event(uint32_t global_strip_position) 
+{
+	Strip* strip = 0;
+	Pot* vpot = 0;
+	std::string* pending_display = 0;
+	if (!retrieve_pointers(&strip, &vpot, &pending_display, global_strip_position))
+	{
+		return;
+	}
+	
+	if (!strip || !vpot || !pending_display)
+	{
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> control = vpot->control ();
+	if (!control) {
+		return;
+	}
+
+	Controllable::GroupControlDisposition gcd;
+	if (_mcp.main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
+		gcd = Controllable::InverseGroup;
+	} else {
+		gcd = Controllable::UseGroup;
+	}
+
+	if (control->toggled()) {
+		if (control->toggled()) {
+			control->set_value (!control->get_value(), gcd);
+		}
+
+	} else if (control->desc().enumeration || control->desc().integer_step) {
+
+		double val = control->get_value ();
+		if (val <= control->upper() - 1.0) {
+			control->set_value (val + 1.0, gcd);
+		} else {
+			control->set_value (control->lower(), gcd);
+		}
+	}
+}
+
 bool
 Subview::subview_mode_would_be_ok (SubViewMode mode, boost::shared_ptr<Stripable> r, std::string& reason_why_not)
 {
@@ -651,6 +694,74 @@ SendsSubview::notify_send_level_change (uint32_t global_strip_position, bool for
 	}
 }
 
+void SendsSubview::handle_vselect_event(uint32_t global_strip_position)
+{
+	/* Send mode: press enables/disables the relevant
+		* send, but the vpot is bound to the send-level so we
+		* need to lookup the enable/disable control
+		* explicitly.
+		*/
+
+	if (!_subview_stripable)
+	{
+		return;
+	}
+
+	Strip* strip = 0;
+	Pot* vpot = 0;
+	std::string* pending_display = 0;
+	if (!retrieve_pointers(&strip, &vpot, &pending_display, global_strip_position))
+	{
+		return;
+	}
+
+	if (!strip || !pending_display)
+	{
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> control = _subview_stripable->send_enable_controllable(global_strip_position);
+
+	if (control) {
+		bool currently_enabled = (bool) control->get_value();
+		Controllable::GroupControlDisposition gcd;
+
+		if (_mcp.main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
+			gcd = Controllable::InverseGroup;
+		} else {
+			gcd = Controllable::UseGroup;
+		}
+
+		control->set_value (!currently_enabled, gcd);
+
+		if (currently_enabled) {
+			/* we just turned it off */
+			pending_display[1] = "off";
+		} else {
+			/* we just turned it on, show the level
+			*/
+			control = _subview_stripable->send_level_controllable (global_strip_position);
+			//do_parameter_display (control->desc(), control->get_value()); // BusSendLevel
+			{
+				bool screen_hold = false;
+				pending_display[1] = Strip::format_paramater_for_display(
+						control->desc(), 
+						control->get_value(), 
+						strip->stripable(), 
+						screen_hold
+					);
+		
+				if (screen_hold) {
+					/* we just queued up a parameter to be displayed.
+						1 second from now, switch back to vpot mode display.
+					*/
+					strip->block_vpot_mode_display_for (1000);
+				}
+			}
+		}
+	}
+}
+
 
 
 TrackViewSubview::TrackViewSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable> subview_stripable) 
@@ -892,6 +1003,22 @@ void PluginSelectSubview::setup_vpot(
 		pending_display[0] = "";
 		pending_display[1] = "";
 	}
+}
+
+void PluginSelectSubview::handle_vselect_event(uint32_t global_strip_position) 
+{
+	/* PluginSelect mode: press selects the plugin shown on the strip's LCD */
+	if (!_subview_stripable) {
+		return;
+	}
+	
+	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (_subview_stripable);
+	if (!route) {
+		return;
+	}
+	
+	boost::shared_ptr<Processor> processor = route->nth_plugin(global_strip_position);
+	processor->ShowUI();
 }
 
 
