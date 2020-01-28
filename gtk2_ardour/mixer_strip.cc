@@ -1697,7 +1697,7 @@ MixerStrip::build_route_ops_menu ()
 #ifdef MIXBUS
 				&& !_route->mixbus()
 #endif
-			 ) {
+		   ) {
 			if (Profile->get_mixbus()) {
 				items.push_back (SeparatorElem());
 			}
@@ -1713,16 +1713,23 @@ MixerStrip::build_route_ops_menu ()
 		items.push_back (SeparatorElem());
 	}
 
-	items.push_back (CheckMenuElem (_("Active")));
-	Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
-	i->set_active (active);
-	i->set_sensitive(! _session->transport_rolling());
-	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), !_route->active(), false));
+	if ((!_route->is_master() || !active)
+#ifdef MIXBUS
+			&& !_route->mixbus()
+#endif
+	   )
+	{
+		items.push_back (CheckMenuElem (_("Active")));
+		Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
+		i->set_active (active);
+		i->set_sensitive (!_session->transport_rolling());
+		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), !_route->active(), false));
+	}
 
 	if (active && !Profile->get_mixbus ()) {
 		items.push_back (SeparatorElem());
 		items.push_back (CheckMenuElem (_("Strict I/O")));
-		i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
+		Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 		i->set_active (_route->strict_io());
 		i->signal_activate().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*_route, &Route::set_strict_io), !_route->strict_io())));
 	}
