@@ -1776,12 +1776,9 @@ MixerStrip::build_route_ops_menu ()
 		if (!_route->is_master()) {
 			items.push_back (SeparatorElem());
 			items.push_back (MenuElem (_("Duplicate..."), sigc::mem_fun (*this, &RouteUI::duplicate_selected_routes)));
+			items.push_back (SeparatorElem());
+			items.push_back (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
 		}
-	}
-
-	if (active) {
-		items.push_back (SeparatorElem());
-		items.push_back (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
 	}
 }
 
