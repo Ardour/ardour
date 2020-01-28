@@ -64,6 +64,7 @@ class Subview {
 		Strip* strip, 
 		Pot* vpot, 
 		std::string pending_display[2]) = 0;
+	virtual void handle_vselect_event(uint32_t global_strip_position);
 	
 	static bool subview_mode_would_be_ok (SubViewMode, boost::shared_ptr<ARDOUR::Stripable>, std::string& reason_why_not);
 	boost::shared_ptr<ARDOUR::Stripable> subview_stripable() const { return _subview_stripable; }
@@ -145,6 +146,8 @@ class SendsSubview : public Subview {
 		Pot* vpot, 
 		std::string pending_display[2]);
 	void notify_send_level_change (uint32_t global_strip_position, bool force);
+
+	virtual void handle_vselect_event(uint32_t global_strip_position);
 };
 
 class TrackViewSubview : public Subview {
@@ -174,6 +177,7 @@ class PluginSelectSubview : public Subview {
 		Strip* strip,
 		Pot* vpot, 
 		std::string pending_display[2]);
+	virtual void handle_vselect_event(uint32_t global_strip_position);
 };
 
 class PluginEditSubview : public Subview {
