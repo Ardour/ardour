@@ -579,8 +579,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		solo_button->hide ();
 		mute_button->show ();
 		rec_mon_table.hide ();
-		solo_iso_table.set_sensitive(false);
-		control_slave_ui.set_sensitive(false);
 		if (monitor_section_button == 0) {
 			Glib::RefPtr<Action> act = ActionManager::get_action ("Mixer", "ToggleMonitorSection");
 			_session->MonitorChanged.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::monitor_changed, this), gui_context());
@@ -602,8 +600,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		mute_button->show ();
 		solo_button->show ();
 		rec_mon_table.show ();
-		solo_iso_table.set_sensitive(true);
-		control_slave_ui.set_sensitive(true);
 	}
 
 	hide_master_spacer (false);
@@ -747,6 +743,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	map_frozen();
 
 	show ();
+	update_sensitivity ();
 }
 
 void
@@ -1678,45 +1675,51 @@ MixerStrip::build_route_ops_menu ()
 	route_ops_menu = new Menu;
 	route_ops_menu->set_name ("ArdourContextMenu");
 
+	bool active = _route->active () || ARDOUR::Profile->get_mixbus();
+
 	MenuList& items = route_ops_menu->items();
 
-	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
+	if (active) {
 
-	items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
+		items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &RouteUI::choose_color)));
 
-	items.push_back (MenuElem (_("Inputs..."), sigc::mem_fun (*this, &RouteUI::edit_input_configuration)));
+		items.push_back (MenuElem (_("Comments..."), sigc::mem_fun (*this, &RouteUI::open_comment_editor)));
 
-	items.push_back (MenuElem (_("Outputs..."), sigc::mem_fun (*this, &RouteUI::edit_output_configuration)));
+		items.push_back (MenuElem (_("Inputs..."), sigc::mem_fun (*this, &RouteUI::edit_input_configuration)));
 
-	if (!Profile->get_mixbus()) {
+		items.push_back (MenuElem (_("Outputs..."), sigc::mem_fun (*this, &RouteUI::edit_output_configuration)));
+
+		if (!Profile->get_mixbus()) {
+			items.push_back (SeparatorElem());
+		}
+
+		if (!_route->is_master()
+#ifdef MIXBUS
+				&& !_route->mixbus()
+#endif
+			 ) {
+			if (Profile->get_mixbus()) {
+				items.push_back (SeparatorElem());
+			}
+			items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun(*this, &RouteUI::save_as_template)));
+		}
+
+		if (!Profile->get_mixbus()) {
+			items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
+			/* do not allow rename if the track is record-enabled */
+			items.back().set_sensitive (!is_track() || !track()->rec_enable_control()->get_value());
+		}
+
 		items.push_back (SeparatorElem());
 	}
 
-	if (!_route->is_master()
-#ifdef MIXBUS
-			&& !_route->mixbus()
-#endif
-			) {
-		if (Profile->get_mixbus()) {
-			items.push_back (SeparatorElem());
-		}
-		items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun(*this, &RouteUI::save_as_template)));
-	}
-
-	if (!Profile->get_mixbus()) {
-		items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
-		/* do not allow rename if the track is record-enabled */
-		items.back().set_sensitive (!is_track() || !track()->rec_enable_control()->get_value());
-	}
-
-	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active")));
 	Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
-	i->set_active (_route->active());
+	i->set_active (active);
 	i->set_sensitive(! _session->transport_rolling());
 	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), !_route->active(), false));
 
-	if (!Profile->get_mixbus ()) {
+	if (active && !Profile->get_mixbus ()) {
 		items.push_back (SeparatorElem());
 		items.push_back (CheckMenuElem (_("Strict I/O")));
 		i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
@@ -1724,7 +1727,7 @@ MixerStrip::build_route_ops_menu ()
 		i->signal_activate().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*_route, &Route::set_strict_io), !_route->strict_io())));
 	}
 
-	if (is_track()) {
+	if (active && is_track()) {
 		items.push_back (SeparatorElem());
 
 		Gtk::Menu* dio_menu = new Menu;
@@ -1738,17 +1741,17 @@ MixerStrip::build_route_ops_menu ()
 
 	_plugin_insert_cnt = 0;
 	_route->foreach_processor (sigc::mem_fun (*this, &MixerStrip::help_count_plugins));
-	if (_plugin_insert_cnt > 0) {
+	if (active && _plugin_insert_cnt > 0) {
 		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Pin Connections..."), sigc::mem_fun (*this, &RouteUI::manage_pins)));
 	}
 
-	if (boost::dynamic_pointer_cast<MidiTrack>(_route) || _route->the_instrument ()) {
+	if (active && (boost::dynamic_pointer_cast<MidiTrack>(_route) || _route->the_instrument ())) {
 		items.push_back (MenuElem (_("Patch Selector..."),
 					sigc::mem_fun(*this, &RouteUI::select_midi_patch)));
 	}
 
-	if (_route->the_instrument () && _route->the_instrument ()->output_streams().n_audio() > 2) {
+	if (active && _route->the_instrument () && _route->the_instrument ()->output_streams().n_audio() > 2) {
 		// TODO ..->n_audio() > 1 && separate_output_groups) hard to check here every time.
 		items.push_back (MenuElem (_("Fan out to Busses"), sigc::bind (sigc::mem_fun (*this, &RouteUI::fan_out), true, true)));
 		items.push_back (MenuElem (_("Fan out to Tracks"), sigc::bind (sigc::mem_fun (*this, &RouteUI::fan_out), false, true)));
@@ -1759,27 +1762,26 @@ MixerStrip::build_route_ops_menu ()
 	denormal_menu_item = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 	denormal_menu_item->set_active (_route->denormal_protection());
 
-	if (_route) {
-		/* note that this relies on selection being shared across editor and
-		   mixer (or global to the backend, in the future), which is the only
-		   sane thing for users anyway.
-		*/
-
-		StripableTimeAxisView* stav = PublicEditor::instance().get_stripable_time_axis_by_id (_route->id());
-		if (stav) {
-			Selection& selection (PublicEditor::instance().get_selection());
-			if (!selection.selected (stav)) {
-				selection.set (stav);
-			}
-
-			if (!_route->is_master()) {
-				items.push_back (SeparatorElem());
-				items.push_back (MenuElem (_("Duplicate..."), sigc::mem_fun (*this, &RouteUI::duplicate_selected_routes)));
-			}
-
-			items.push_back (SeparatorElem());
-			items.push_back (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
+	/* note that this relies on selection being shared across editor and
+	 * mixer (or global to the backend, in the future), which is the only
+	 * sane thing for users anyway.
+	 */
+	StripableTimeAxisView* stav = PublicEditor::instance().get_stripable_time_axis_by_id (_route->id());
+	if (active && stav) {
+		Selection& selection (PublicEditor::instance().get_selection());
+		if (!selection.selected (stav)) {
+			selection.set (stav);
 		}
+
+		if (!_route->is_master()) {
+			items.push_back (SeparatorElem());
+			items.push_back (MenuElem (_("Duplicate..."), sigc::mem_fun (*this, &RouteUI::duplicate_selected_routes)));
+		}
+	}
+
+	if (active) {
+		items.push_back (SeparatorElem());
+		items.push_back (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
 	}
 }
 
@@ -1960,6 +1962,9 @@ MixerStrip::map_frozen ()
 
 	boost::shared_ptr<AudioTrack> at = audio_track();
 
+	bool en   = _route->active () || ARDOUR::Profile->get_mixbus();
+	bool send = _current_delivery && boost::dynamic_pointer_cast<Send>(_current_delivery) != 0;
+
 	if (at) {
 		switch (at->freeze_state()) {
 		case AudioTrack::Frozen:
@@ -1967,12 +1972,11 @@ MixerStrip::map_frozen ()
 			hide_redirect_editors ();
 			break;
 		default:
-			processor_box.set_sensitive (true);
-			// XXX need some way, maybe, to retoggle redirect editors
+			processor_box.set_sensitive (en && !send);
 			break;
 		}
 	} else {
-		processor_box.set_sensitive (true);
+		processor_box.set_sensitive (en && !send);
 	}
 	RouteUI::map_frozen ();
 }
@@ -2166,25 +2170,7 @@ MixerStrip::drop_send ()
 	}
 
 	send_gone_connection.disconnect ();
-	input_button.set_sensitive (true);
-	output_button.set_sensitive (true);
-	group_button.set_sensitive (true);
-	set_invert_sensitive (true);
-	gpm.meter_point_button.set_sensitive (true);
-	mute_button->set_sensitive (true);
-	solo_button->set_sensitive (true);
-	solo_isolated_led->set_sensitive (true);
-	solo_safe_led->set_sensitive (true);
-	monitor_input_button->set_sensitive (true);
-	monitor_disk_button->set_sensitive (true);
-	_comment_button.set_sensitive (true);
-	trim_control.set_sensitive (true);
-	if (midi_input_enable_button) {
-		midi_input_enable_button->set_sensitive (true);
-	}
-	control_slave_ui.set_sensitive (true);
 	RouteUI::check_rec_enable_sensitivity ();
-	set_button_names (); // update solo button visual state
 }
 
 void
@@ -2192,6 +2178,7 @@ MixerStrip::set_current_delivery (boost::shared_ptr<Delivery> d)
 {
 	_current_delivery = d;
 	DeliveryChanged (_current_delivery);
+	update_sensitivity ();
 }
 
 void
@@ -2218,28 +2205,6 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	panner_ui().setup_pan ();
 	panner_ui().set_send_drawing_mode (true);
 	panner_ui().show_all ();
-
-	input_button.set_sensitive (false);
-	group_button.set_sensitive (false);
-	set_invert_sensitive (false);
-	gpm.meter_point_button.set_sensitive (false);
-	mute_button->set_sensitive (false);
-	solo_button->set_sensitive (false);
-	rec_enable_button->set_sensitive (false);
-	solo_isolated_led->set_sensitive (false);
-	solo_safe_led->set_sensitive (false);
-	monitor_input_button->set_sensitive (false);
-	monitor_disk_button->set_sensitive (false);
-	_comment_button.set_sensitive (false);
-	trim_control.set_sensitive (false);
-	if (midi_input_enable_button) {
-		midi_input_enable_button->set_sensitive (false);
-	}
-	control_slave_ui.set_sensitive (false);
-
-	if (boost::dynamic_pointer_cast<InternalSend>(send)) {
-		output_button.set_sensitive (false);
-	}
 
 	reset_strip_style ();
 }
@@ -2280,7 +2245,7 @@ MixerStrip::set_button_names ()
 			monitor_section_button->set_text (_("Mon"));
 		}
 
-		if (_route && _route->solo_safe_control()->solo_safe()) {
+		if ((_route && _route->solo_safe_control()->solo_safe()) || !solo_button->get_sensitive()) {
 			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
 		} else {
 			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
@@ -2309,7 +2274,7 @@ MixerStrip::set_button_names ()
 			monitor_section_button->set_text (S_("Mon|O"));
 		}
 
-		if (_route && _route->solo_safe_control()->solo_safe()) {
+		if ((_route && _route->solo_safe_control()->solo_safe()) || !solo_button->get_sensitive()) {
 			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
 		} else {
 			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
@@ -2439,6 +2404,46 @@ MixerStrip::route_active_changed ()
 {
 	RouteUI::route_active_changed ();
 	reset_strip_style ();
+	update_sensitivity ();
+}
+
+void
+MixerStrip::update_sensitivity ()
+{
+	bool en   = _route->active () || ARDOUR::Profile->get_mixbus();
+	bool send = _current_delivery && boost::dynamic_pointer_cast<Send>(_current_delivery) != 0;
+	bool aux  = _current_delivery && boost::dynamic_pointer_cast<InternalSend>(_current_delivery) != 0;
+
+	if (route()->is_master()) {
+		solo_iso_table.set_sensitive (false);
+		control_slave_ui.set_sensitive (false);
+	} else {
+		solo_iso_table.set_sensitive (en && !send);
+		control_slave_ui.set_sensitive (en && !send);
+	}
+
+	input_button.set_sensitive (en && !send);
+	group_button.set_sensitive (en && !send);
+	set_invert_sensitive (en && !send);
+	gpm.meter_point_button.set_sensitive (en && !send);
+	mute_button->set_sensitive (en && !send);
+	solo_button->set_sensitive (en && !send);
+	solo_isolated_led->set_sensitive (en && !send);
+	solo_safe_led->set_sensitive (en && !send);
+	monitor_input_button->set_sensitive (en && !send);
+	monitor_disk_button->set_sensitive (en && !send);
+	_comment_button.set_sensitive (en && !send);
+	trim_control.set_sensitive (en && !send);
+	control_slave_ui.set_sensitive (en && !send);
+
+	if (midi_input_enable_button) {
+		midi_input_enable_button->set_sensitive (en && !send);
+	}
+
+	output_button.set_sensitive (en && !aux);
+
+	map_frozen ();
+	set_button_names (); // update solo button visual state
 }
 
 void

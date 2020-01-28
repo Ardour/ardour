@@ -305,6 +305,7 @@ private:
 	PBD::ScopedConnection send_gone_connection;
 
 	void reset_strip_style ();
+	void update_sensitivity ();
 
 	ARDOUR::DataType guess_main_type(bool for_input, bool favor_connected = true) const;
 
