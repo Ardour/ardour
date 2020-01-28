@@ -761,7 +761,7 @@ Session::maybe_stop (samplepos_t limit)
 		if (synced_to_engine ()) {
 			_engine.transport_stop ();
 		} else {
-			TFSM_EVENT (TransportFSM::StopTransport);
+			TFSM_EVENT (TransportFSM::StopTransport, false, false);
 		}
 		return true;
 	}
