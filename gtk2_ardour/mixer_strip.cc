@@ -1724,19 +1724,18 @@ MixerStrip::build_route_ops_menu ()
 		i->set_active (active);
 		i->set_sensitive (!_session->transport_rolling());
 		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_active), !_route->active(), false));
+		items.push_back (SeparatorElem());
 	}
 
 	if (active && !Profile->get_mixbus ()) {
-		items.push_back (SeparatorElem());
 		items.push_back (CheckMenuElem (_("Strict I/O")));
 		Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 		i->set_active (_route->strict_io());
 		i->signal_activate().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*_route, &Route::set_strict_io), !_route->strict_io())));
+		items.push_back (SeparatorElem());
 	}
 
 	if (active && is_track()) {
-		items.push_back (SeparatorElem());
-
 		Gtk::Menu* dio_menu = new Menu;
 		MenuList& dio_items = dio_menu->items();
 		dio_items.push_back (MenuElem (_("Record Pre-Fader"), sigc::bind (sigc::mem_fun (*this, &RouteUI::set_disk_io_point), DiskIOPreFader)));
@@ -1744,12 +1743,12 @@ MixerStrip::build_route_ops_menu ()
 		dio_items.push_back (MenuElem (_("Custom Record+Playback Positions"), sigc::bind (sigc::mem_fun (*this, &RouteUI::set_disk_io_point), DiskIOCustom)));
 
 		items.push_back (MenuElem (_("Disk I/O..."), *dio_menu));
+		items.push_back (SeparatorElem());
 	}
 
 	_plugin_insert_cnt = 0;
 	_route->foreach_processor (sigc::mem_fun (*this, &MixerStrip::help_count_plugins));
 	if (active && _plugin_insert_cnt > 0) {
-		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Pin Connections..."), sigc::mem_fun (*this, &RouteUI::manage_pins)));
 	}
 
@@ -1762,9 +1761,9 @@ MixerStrip::build_route_ops_menu ()
 		// TODO ..->n_audio() > 1 && separate_output_groups) hard to check here every time.
 		items.push_back (MenuElem (_("Fan out to Busses"), sigc::bind (sigc::mem_fun (*this, &RouteUI::fan_out), true, true)));
 		items.push_back (MenuElem (_("Fan out to Tracks"), sigc::bind (sigc::mem_fun (*this, &RouteUI::fan_out), false, true)));
+		items.push_back (SeparatorElem());
 	}
 
-	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Protect Against Denormals"), sigc::mem_fun (*this, &RouteUI::toggle_denormal_protection)));
 	denormal_menu_item = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 	denormal_menu_item->set_active (_route->denormal_protection());
