@@ -3165,9 +3165,9 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		const Temporal::Beats x_beats = Temporal::Beats (e_qaf - quarter_note_start);
 
 		if (at_front && x_beats < canvas_note->note()->end_time()) {
-			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::StartTime, x_beats - (sign * snap_delta_beats));
-			Temporal::Beats len = canvas_note->note()->time() - x_beats + (sign * snap_delta_beats);
-			len += canvas_note->note()->length();
+			const Temporal::Beats new_start = x_beats - (sign * snap_delta_beats);
+			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::StartTime, new_start);
+			Temporal::Beats len = canvas_note->note()->end_time() - new_start;
 
 			if (!!len) {
 				note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::Length, len);
