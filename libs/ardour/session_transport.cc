@@ -761,7 +761,7 @@ Session::maybe_stop (samplepos_t limit)
 		if (synced_to_engine ()) {
 			_engine.transport_stop ();
 		} else {
-			TFSM_EVENT (TransportFSM::StopTransport, false, false);
+			TFSM_STOP (false, false);
 		}
 		return true;
 	}
@@ -1661,7 +1661,7 @@ Session::unset_play_loop (bool change_transport_state)
 		/* likely need to flush track buffers: this will locate us to wherever we are */
 
 		if (change_transport_state && transport_rolling ()) {
-			TFSM_EVENT (TransportFSM::StopTransport);
+			TFSM_STOP (false, false);
 		}
 
 		overwrite_some_buffers (boost::shared_ptr<Route>(), LoopDisabled);
