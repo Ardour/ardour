@@ -5049,7 +5049,7 @@ Session::setup_lua ()
 			"       remove (n)"
 			"      end"
 			"   end"
-			"   collectgarbage()"
+			"   collectgarbage(\"step\")"
 			"  end"
 			""
 			"  local cleanup = function ()"
