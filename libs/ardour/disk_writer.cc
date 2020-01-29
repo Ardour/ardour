@@ -463,6 +463,17 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				*/
 				_capture_captured     = start_sample - loop_start;
 				_capture_start_sample = loop_start;
+				if (_capture_captured > 0) {
+					/* when enabling record while already looping,
+					 * zero fill region back to loop-start.
+					 */
+					for (chan = c->begin(), n = 0; chan != c->end(); ++chan, ++n) {
+						ChannelInfo* chaninfo (*chan);
+						for (samplecnt_t s = 0; s < _capture_captured; ++s) {
+							chaninfo->wbuf->write_one (0); // TODO: optimize
+						}
+					}
+				}
 			}
 
 			if (_midi_write_source) {
