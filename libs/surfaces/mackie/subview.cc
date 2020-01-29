@@ -991,6 +991,16 @@ void PluginSubview::handle_vselect_event(uint32_t global_strip_position)
 	_plugin_subview_state->handle_vselect_event(global_strip_position, _subview_stripable);
 }
 
+bool PluginSubview::handle_cursor_right_press() 
+{
+	return _plugin_subview_state->handle_cursor_right_press();
+}
+	
+bool PluginSubview::handle_cursor_left_press()
+{
+	return _plugin_subview_state->handle_cursor_left_press();
+}
+
 void PluginSubview::set_state(boost::shared_ptr<PluginSubviewState> new_state)
 {
 	_plugin_subview_state = new_state;
@@ -1019,7 +1029,10 @@ void PluginSubview::set_state(boost::shared_ptr<PluginSubviewState> new_state)
 
 PluginSubviewState::PluginSubviewState(PluginSubview& context)
   : _context(context)
-{}
+  , _bank_size(context.mcp().n_strips())
+  , _current_bank(0)
+{
+}
 
 PluginSubviewState::~PluginSubviewState()
 {}
@@ -1033,6 +1046,31 @@ PluginSubviewState::shorten_display_text(const std::string& text, std::string::s
 	
 	return PBD::short_version (text, target_length);
 }
+
+bool PluginSubviewState::handle_cursor_right_press() 
+{
+	_current_bank = _current_bank + 1;
+	bank_changed();
+	return true;
+}
+	
+bool PluginSubviewState::handle_cursor_left_press()
+{
+	if (_current_bank >= 1)
+	{
+		_current_bank = _current_bank - 1;
+	}
+	bank_changed();
+	return true;
+}
+
+uint32_t PluginSubviewState::calculate_virtual_strip_position(uint32_t strip_index)
+{
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("virtual strip = %1 * %2 + %3 = %4\n",
+								   _current_bank, _bank_size, strip_index, _current_bank * _bank_size + strip_index));
+	return _current_bank * _bank_size + strip_index;
+}
+
 
 
 PluginSelect::PluginSelect(PluginSubview& context)
@@ -1057,12 +1095,14 @@ void PluginSelect::setup_vpot(
 	if (!route) {
 		return;
 	}
+
+	uint32_t virtual_strip_position = calculate_virtual_strip_position(global_strip_position);
 	
-	boost::shared_ptr<Processor> plugin = route->nth_plugin(global_strip_position);
+	boost::shared_ptr<Processor> plugin = route->nth_plugin(virtual_strip_position);
 	
 	if (plugin) {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("plugin of strip %1 is %2\n", global_strip_position, plugin->display_name()));
-		pending_display[0] = string_compose("Ins%1Pl", global_strip_position + 1);
+		pending_display[0] = string_compose("Ins%1Pl", virtual_strip_position + 1);
 		pending_display[1] = PluginSubviewState::shorten_display_text(plugin->display_name(), 6);
 	}
 	else {
@@ -1083,14 +1123,22 @@ void PluginSelect::handle_vselect_event(uint32_t global_strip_position,
 	if (!route) {
 		return;
 	}
+
+	uint32_t virtual_strip_position = calculate_virtual_strip_position(global_strip_position);
 	
-	boost::shared_ptr<Processor> processor = route->nth_plugin(global_strip_position);
+	boost::shared_ptr<Processor> processor = route->nth_plugin(virtual_strip_position);
 	boost::shared_ptr<PluginInsert> plugin = boost::dynamic_pointer_cast<PluginInsert>(processor);
 	processor->ShowUI();
 	if (plugin) {
 		_context.set_state(boost::make_shared<PluginEdit>(_context, plugin));
 	}
 }
+
+void PluginSelect::bank_changed()
+{
+	_context.mcp().redisplay_subview_mode();
+}
+
 
 
 PluginEdit::PluginEdit(PluginSubview& context, boost::shared_ptr<PluginInsert> subview_plugin)
@@ -1129,8 +1177,10 @@ void PluginEdit::setup_vpot(
 		uint32_t global_strip_position,
 		boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
 {
-	if (global_strip_position < _plugin_input_parameter_indices.size()) {
-		uint32_t plugin_parameter_index = _plugin_input_parameter_indices[global_strip_position];
+	uint32_t virtual_strip_position = calculate_virtual_strip_position(global_strip_position);
+
+	if (virtual_strip_position < _plugin_input_parameter_indices.size()) {
+		uint32_t plugin_parameter_index = _plugin_input_parameter_indices[virtual_strip_position];
 		bool ok = false;
 		uint32_t controlid = _subview_plugin->nth_parameter(plugin_parameter_index, ok);
 		if (!ok) {
@@ -1163,7 +1213,7 @@ void PluginEdit::setup_vpot(
 }
 
 
-void PluginEdit::notify_parameter_change(Strip* strip, Pot* vpot, std::string pending_display[2], uint32_t global_strip_position) 
+void PluginEdit::notify_parameter_change(Strip* strip, Pot* vpot, std::string pending_display[2], uint32_t /*global_strip_position*/) 
 {
 	boost::shared_ptr<AutomationControl> control = vpot->control();
 	if (!control) 
@@ -1183,5 +1233,10 @@ void PluginEdit::notify_parameter_change(Strip* strip, Pot* vpot, std::string pe
 
 void PluginEdit::handle_vselect_event(uint32_t global_strip_position, boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
 {
+}
+
+void PluginEdit::bank_changed()
+{
+	_context.mcp().redisplay_subview_mode();
 }
 

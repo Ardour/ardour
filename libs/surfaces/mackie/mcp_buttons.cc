@@ -160,6 +160,12 @@ MackieControlProtocol::right_release (Button &)
 LedState
 MackieControlProtocol::cursor_left_press (Button& )
 {
+	bool press_handled_by_subview = _subview->handle_cursor_left_press();
+	if (press_handled_by_subview)
+	{
+		return off;
+	}
+
 	if (zoom_mode()) {
 
 		if (main_modifier_state() & MODIFIER_OPTION) {
@@ -194,6 +200,12 @@ MackieControlProtocol::cursor_left_release (Button&)
 LedState
 MackieControlProtocol::cursor_right_press (Button& )
 {
+	bool press_handled_by_subview = _subview->handle_cursor_right_press();
+	if (press_handled_by_subview)
+	{
+		return off;
+	}
+
 	if (zoom_mode()) {
 
 		if (main_modifier_state() & MODIFIER_OPTION) {
