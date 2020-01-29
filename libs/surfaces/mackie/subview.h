@@ -72,6 +72,7 @@ class Subview {
 	void notify_subview_stripable_deleted ();
 	
 	PBD::ScopedConnectionList& subview_stripable_connections() { return _subview_stripable_connections; }
+	PBD::ScopedConnectionList& subview_connections() { return _subview_connections; }
 	
   protected:
 	void init_strip_vectors();
@@ -199,6 +200,7 @@ class PluginSubviewState {
 		uint32_t global_strip_position,
 		boost::shared_ptr<ARDOUR::Stripable> subview_stripable) = 0;
 	virtual void handle_vselect_event(uint32_t global_strip_position, boost::shared_ptr<ARDOUR::Stripable> subview_stripable) = 0;
+	static std::string shorten_display_text(const std::string& text, std::string::size_type target_length);
 
   protected:
     PluginSubview& _context;
@@ -231,8 +233,13 @@ class PluginEdit : public PluginSubviewState {
 		uint32_t global_strip_position,
 		boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual void handle_vselect_event(uint32_t global_strip_position, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	void notify_parameter_change(Strip* strip, Pot* vpot, std::string pending_display[2], uint32_t global_strip_position);
 
-	boost::shared_ptr<ARDOUR::PluginInsert> _subview_plugin;
+	void init(boost::shared_ptr<ARDOUR::PluginInsert> plugin_insert);
+
+	boost::shared_ptr<ARDOUR::PluginInsert> _subview_plugin_insert;
+	boost::shared_ptr<ARDOUR::Plugin> _subview_plugin;
+	std::vector<uint32_t> _plugin_input_parameter_indices;
 };
 
 }

@@ -528,7 +528,8 @@ void DynamicsSubview::setup_vpot(
 void
 DynamicsSubview::notify_change (boost::weak_ptr<ARDOUR::AutomationControl> pc, uint32_t global_strip_position, bool force, bool propagate_mode) 
 {
-	if (!_subview_stripable) {
+	if (!_subview_stripable) 
+	{
 		return;
 	}
 	
@@ -1023,6 +1024,16 @@ PluginSubviewState::PluginSubviewState(PluginSubview& context)
 PluginSubviewState::~PluginSubviewState()
 {}
 
+std::string
+PluginSubviewState::shorten_display_text(const std::string& text, std::string::size_type target_length) 
+{
+	if (text.length() <= target_length) {
+		return text;
+	} 
+	
+	return PBD::short_version (text, target_length);
+}
+
 
 PluginSelect::PluginSelect(PluginSubview& context)
   : PluginSubviewState(context)
@@ -1052,7 +1063,7 @@ void PluginSelect::setup_vpot(
 	if (plugin) {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("plugin of strip %1 is %2\n", global_strip_position, plugin->display_name()));
 		pending_display[0] = string_compose("Ins%1Pl", global_strip_position + 1);
-		pending_display[1] = plugin->display_name();
+		pending_display[1] = PluginSubviewState::shorten_display_text(plugin->display_name(), 6);
 	}
 	else {
 		pending_display[0] = "";
@@ -1084,11 +1095,32 @@ void PluginSelect::handle_vselect_event(uint32_t global_strip_position,
 
 PluginEdit::PluginEdit(PluginSubview& context, boost::shared_ptr<PluginInsert> subview_plugin)
   : PluginSubviewState(context)
-  , _subview_plugin(subview_plugin)
-{}
+  , _subview_plugin_insert(subview_plugin)
+{
+	init(subview_plugin);
+}
 
 PluginEdit::~PluginEdit() 
 {}
+
+void PluginEdit::init(boost::shared_ptr<PluginInsert> plugin_insert)
+{
+	_subview_plugin = plugin_insert->plugin();
+	_plugin_input_parameter_indices.clear();
+
+	bool ok = false;
+	// put only input controls into a vector
+	uint32_t nplug_params = _subview_plugin->parameter_count();
+	for (uint32_t ppi = 0; ppi < nplug_params; ++ppi) {
+		uint32_t controlid = _subview_plugin->nth_parameter(ppi, ok);
+		if (!ok) {
+			continue;
+		}
+		if (_subview_plugin->parameter_is_input(controlid)) {
+			_plugin_input_parameter_indices.push_back(ppi);
+		}
+	}
+}
 
 void PluginEdit::setup_vpot(
 		Strip* strip,
@@ -1097,17 +1129,56 @@ void PluginEdit::setup_vpot(
 		uint32_t global_strip_position,
 		boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
 {
-	boost::shared_ptr<ARDOUR::Plugin> plugin = _subview_plugin->plugin(0);
-	
-	if (plugin) {
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("parameter of strip %1 is %2\n", global_strip_position, plugin->get_parameter_docs(global_strip_position)));
-		pending_display[0] = plugin->get_parameter_docs(global_strip_position);
-		pending_display[1] = plugin->get_parameter(global_strip_position);
+	if (global_strip_position < _plugin_input_parameter_indices.size()) {
+		uint32_t plugin_parameter_index = _plugin_input_parameter_indices[global_strip_position];
+		bool ok = false;
+		uint32_t controlid = _subview_plugin->nth_parameter(plugin_parameter_index, ok);
+		if (!ok) {
+			vpot->set_control (boost::shared_ptr<AutomationControl>());
+			pending_display[0] = std::string();
+			pending_display[1] = std::string();
+		}
+
+		boost::shared_ptr<AutomationControl> c = _subview_plugin_insert->automation_control(Evoral::Parameter(PluginAutomation, 0, controlid));
+		//If a controllable was found, connect it up, and put the labels in the display.
+		if (c) {
+			c->Changed.connect (_context.subview_connections(), MISSING_INVALIDATOR, boost::bind (&PluginEdit::notify_parameter_change, this, strip, vpot, pending_display, global_strip_position), ui_context());
+			vpot->set_control (c);
+			ParameterDescriptor pd;
+			_subview_plugin->get_parameter_descriptor(controlid, pd);
+			pending_display[0] = PluginSubviewState::shorten_display_text(pd.label, 6);	
+		} else {  //no controllable was found;  just clear this knob
+			vpot->set_control (boost::shared_ptr<AutomationControl>());
+			pending_display[0] = std::string();
+			pending_display[1] = std::string();
+			return;
+		}
+
+		notify_parameter_change (strip, vpot, pending_display, global_strip_position);
 	}
 	else {
 		pending_display[0] = "";
 		pending_display[1] = "";
 	}
+}
+
+
+void PluginEdit::notify_parameter_change(Strip* strip, Pot* vpot, std::string pending_display[2], uint32_t global_strip_position) 
+{
+	boost::shared_ptr<AutomationControl> control = vpot->control();
+	if (!control) 
+	{
+		return;
+	}
+
+	float val = control->get_value();
+	{
+		bool screen_hold = false;
+		pending_display[1] = Strip::format_paramater_for_display(control->desc(), val, _context.subview_stripable(), screen_hold);
+	}
+	
+	/* update pot/encoder */
+	strip->surface()->write(vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 }
 
 void PluginEdit::handle_vselect_event(uint32_t global_strip_position, boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
