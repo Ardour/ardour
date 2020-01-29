@@ -977,15 +977,17 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 		                                                      _name, (*ci)->start, (*ci)->samples, region_name));
 
 
-		// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->samples << " add a region\n";
+		// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->samples << " start: " << (*ci)->loop_offset << " add MIDI region\n";
 
 		try {
 			PropertyList plist;
 
 			/* start of this region is the offset between the start of its capture and the start of the whole pass */
-			plist.add (Properties::start, (*ci)->start - initial_capture);
+			samplecnt_t start_off = (*ci)->start - initial_capture + (*ci)->loop_offset;
+			plist.add (Properties::start, start_off);
 			plist.add (Properties::length, (*ci)->samples);
 			plist.add (Properties::length_beats, converter.from((*ci)->samples).to_double());
+			plist.add (Properties::start_beats, converter.from(start_off).to_double());
 			plist.add (Properties::name, region_name);
 
 			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));

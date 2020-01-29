@@ -783,6 +783,7 @@ enum MidiTempoMapDisposition {
 struct CaptureInfo {
 	samplepos_t start;
 	samplecnt_t samples;
+	samplecnt_t loop_offset;
 };
 
 enum LoopFadeChoice {

@@ -463,6 +463,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				*/
 				_capture_captured     = start_sample - loop_start;
 				_capture_start_sample = loop_start;
+				_first_recordable_sample = loop_start;
 				if (_capture_captured > 0) {
 					/* when enabling record while already looping,
 					 * zero fill region back to loop-start.
@@ -694,6 +695,16 @@ DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
 
 	ci->start =  _capture_start_sample;
 	ci->samples = _capture_captured;
+
+	if (_loop_location) {
+		samplepos_t loop_start  = 0;
+		samplepos_t loop_end    = 0;
+		samplepos_t loop_length = 0;
+		get_location_times (_loop_location, &loop_start, &loop_end, &loop_length);
+		ci->loop_offset = _num_captured_loops * loop_length;
+	} else {
+		ci->loop_offset = 0;
+	}
 
 	DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("Finish capture, add new CI, %1 + %2\n", ci->start, ci->samples));
 
@@ -1024,7 +1035,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 			to_write = _chunk_samples;
 		}
 
-		if (record_enabled() && ((total > _chunk_samples) || force_flush)) {
+		if ((total > _chunk_samples) || force_flush) {
 			Source::Lock lm(_midi_write_source->mutex());
 			if (_midi_write_source->midi_write (lm, *_midi_buf, get_capture_start_sample (0), to_write) != to_write) {
 				error << string_compose(_("MidiDiskstream %1: cannot write to disk"), id()) << endmsg;
@@ -1348,7 +1359,6 @@ DiskWriter::transport_looped (samplepos_t transport_sample)
 	if (_capture_captured) {
 		_transport_looped = true;
 		_transport_loop_sample = transport_sample;
-		_first_recordable_sample = transport_sample;
 	}
 }
 
