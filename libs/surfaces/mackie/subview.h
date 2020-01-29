@@ -60,6 +60,7 @@ class Subview {
 	
 	virtual SubViewMode subview_mode () const = 0;
 	virtual void update_global_buttons() = 0;
+	virtual bool permit_flipping_faders_and_pots() { return false; }
 	virtual void setup_vpot(
 		Strip* strip, 
 		Pot* vpot, 
@@ -83,6 +84,7 @@ class Subview {
 	void init_strip_vectors();
 	void store_pointers(Strip* strip, Pot* vpot, std::string* pending_display, uint32_t global_strip_position);
 	bool retrieve_pointers(Strip** strip, Pot** vpot, std::string** pending_display, uint32_t global_strip_position);
+	void do_parameter_display(std::string& display, const ARDOUR::ParameterDescriptor& pd, float param_val, Strip* strip, bool screen_hold);
   
 	MackieControlProtocol& _mcp;
 	boost::shared_ptr<ARDOUR::Stripable> _subview_stripable;
@@ -147,6 +149,7 @@ class SendsSubview : public Subview {
 	virtual SubViewMode subview_mode () const { return SubViewMode::Sends; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
 	virtual void update_global_buttons();
+	virtual bool permit_flipping_faders_and_pots() { return true; }
 	virtual void setup_vpot(
 		Strip* strip,
 		Pot* vpot, 
@@ -181,6 +184,7 @@ class PluginSubview : public Subview {
 	virtual SubViewMode subview_mode () const { return SubViewMode::Plugin; }
 	static bool subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not);
 	virtual void update_global_buttons();
+	virtual bool permit_flipping_faders_and_pots();
 	virtual void setup_vpot(
 		Strip* strip,
 		Pot* vpot, 
@@ -200,6 +204,7 @@ class PluginSubviewState {
     PluginSubviewState(PluginSubview& context);
 	virtual ~PluginSubviewState();
     
+	virtual bool permit_flipping_faders_and_pots() { return false; }
 	virtual void setup_vpot(
 		Strip* strip,
 		Pot* vpot, 
@@ -240,6 +245,7 @@ class PluginEdit : public PluginSubviewState {
 	PluginEdit(PluginSubview& context, boost::shared_ptr<ARDOUR::PluginInsert> subview_plugin);
 	virtual ~PluginEdit();
 	
+	virtual bool permit_flipping_faders_and_pots() { return true; }
 	virtual void setup_vpot(
 		Strip* strip,
 		Pot* vpot, 
