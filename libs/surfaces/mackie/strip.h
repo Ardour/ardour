@@ -142,8 +142,6 @@ private:
 	uint64_t return_to_vpot_mode_display_at;
 	boost::shared_ptr<ARDOUR::Stripable> _stripable;
 	PBD::ScopedConnectionList stripable_connections;
-	PBD::ScopedConnectionList subview_connections;
-	PBD::ScopedConnectionList send_connections;
 
 	ARDOUR::AutomationType  _pan_mode;
 

@@ -1139,8 +1139,6 @@ Strip::next_pot_mode ()
 void
 Strip::subview_mode_changed ()
 {
-	subview_connections.drop_connections ();
-
 	switch (_surface->mcp().subview()->subview_mode()) {
 	case SubViewMode::None:
 		set_vpot_parameter (_pan_mode);
