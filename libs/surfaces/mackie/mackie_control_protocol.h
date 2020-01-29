@@ -144,6 +144,7 @@ class MackieControlProtocol
 
 	void set_view_mode (ViewMode);
 	int set_subview_mode (Mackie::SubViewMode, boost::shared_ptr<ARDOUR::Stripable>);
+	bool redisplay_subview_mode ();
 	void set_flip_mode (FlipMode);
 	void display_view_mode ();
 
@@ -346,7 +347,6 @@ class MackieControlProtocol
 	int create_surfaces ();
 	bool periodic();
 	bool redisplay();
-	bool redisplay_subview_mode ();
 	bool hui_heartbeat ();
 	void build_gui ();
 	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);

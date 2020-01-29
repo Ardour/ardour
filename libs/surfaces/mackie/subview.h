@@ -65,11 +65,16 @@ class Subview {
 		Pot* vpot, 
 		std::string pending_display[2]) = 0;
 	virtual void handle_vselect_event(uint32_t global_strip_position);
+	// returns true if press was handled in the subview, default is false
+	virtual bool handle_cursor_right_press() { return false; }
+	// returns true if press was handled in the subview, default is false
+	virtual bool handle_cursor_left_press() { return false; }
 	
 	static bool subview_mode_would_be_ok (SubViewMode, boost::shared_ptr<ARDOUR::Stripable>, std::string& reason_why_not);
 	boost::shared_ptr<ARDOUR::Stripable> subview_stripable() const { return _subview_stripable; }
 	
 	void notify_subview_stripable_deleted ();
+	MackieControlProtocol& mcp() { return _mcp; }
 	
 	PBD::ScopedConnectionList& subview_stripable_connections() { return _subview_stripable_connections; }
 	PBD::ScopedConnectionList& subview_connections() { return _subview_connections; }
@@ -181,6 +186,8 @@ class PluginSubview : public Subview {
 		Pot* vpot, 
 		std::string pending_display[2]);
 	virtual void handle_vselect_event(uint32_t global_strip_position);
+	virtual bool handle_cursor_right_press();
+	virtual bool handle_cursor_left_press();
 
 	void set_state(boost::shared_ptr<PluginSubviewState> new_state);
 
@@ -201,9 +208,16 @@ class PluginSubviewState {
 		boost::shared_ptr<ARDOUR::Stripable> subview_stripable) = 0;
 	virtual void handle_vselect_event(uint32_t global_strip_position, boost::shared_ptr<ARDOUR::Stripable> subview_stripable) = 0;
 	static std::string shorten_display_text(const std::string& text, std::string::size_type target_length);
+	virtual bool handle_cursor_right_press();
+	virtual bool handle_cursor_left_press();
+	virtual void bank_changed() = 0;
 
   protected:
+	uint32_t calculate_virtual_strip_position(uint32_t strip_index);
+
     PluginSubview& _context;
+	const uint32_t _bank_size;
+	uint32_t _current_bank;
 };
 
 class PluginSelect : public PluginSubviewState {
@@ -218,7 +232,7 @@ class PluginSelect : public PluginSubviewState {
 		uint32_t global_strip_position,
 		boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual void handle_vselect_event(uint32_t global_strip_position, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
-
+	virtual void bank_changed();
 };
 
 class PluginEdit : public PluginSubviewState {
@@ -233,8 +247,9 @@ class PluginEdit : public PluginSubviewState {
 		uint32_t global_strip_position,
 		boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
 	virtual void handle_vselect_event(uint32_t global_strip_position, boost::shared_ptr<ARDOUR::Stripable> subview_stripable);
+	virtual void bank_changed();
+	
 	void notify_parameter_change(Strip* strip, Pot* vpot, std::string pending_display[2], uint32_t global_strip_position);
-
 	void init(boost::shared_ptr<ARDOUR::PluginInsert> plugin_insert);
 
 	boost::shared_ptr<ARDOUR::PluginInsert> _subview_plugin_insert;
