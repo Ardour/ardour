@@ -1025,7 +1025,7 @@ Strip::vpot_mode_string ()
 void
 Strip::flip_mode_changed ()
 {
-	if (_surface->mcp().subview()->subview_mode() == SubViewMode::Sends) {
+	if (_surface->mcp().subview()->permit_flipping_faders_and_pots()) {
 
 		boost::shared_ptr<AutomationControl> pot_control = _vpot->control();
 		boost::shared_ptr<AutomationControl> fader_control = _fader->control();

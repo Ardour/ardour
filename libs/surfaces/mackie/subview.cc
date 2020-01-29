@@ -100,11 +100,6 @@ void Subview::handle_vselect_event(uint32_t global_strip_position)
 	{
 		return;
 	}
-	
-	if (!strip || !vpot || !pending_display)
-	{
-		return;
-	}
 
 	boost::shared_ptr<AutomationControl> control = vpot->control ();
 	if (!control) {
@@ -197,7 +192,30 @@ Subview::retrieve_pointers(Strip** strip, Pot** vpot, std::string** pending_disp
 	*strip = _strips_over_all_surfaces[global_strip_position];
 	*vpot = _strip_vpots_over_all_surfaces[global_strip_position];
 	*pending_display = _strip_pending_displays_over_all_surfaces[global_strip_position];
+
+	if (!strip || !vpot || !pending_display)
+	{
+		return false;
+	}
+
 	return true;
+}
+
+void Subview::do_parameter_display(std::string& display, const ParameterDescriptor& pd, float param_val, Strip* strip, bool screen_hold)
+{
+	display = Strip::format_paramater_for_display(
+			pd, 
+			param_val, 
+			strip->stripable(), 
+			screen_hold
+		);
+
+	if (screen_hold) {
+		/* we just queued up a parameter to be displayed.
+			1 second from now, switch back to vpot mode display.
+		*/
+		strip->block_vpot_mode_display_for (1000);
+	}
 }
 
 
@@ -211,6 +229,7 @@ NoneSubview::~NoneSubview()
 
 bool NoneSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not) 
 {
+	// always possible
 	return true;
 }
 
@@ -229,7 +248,7 @@ void NoneSubview::setup_vpot(
 		Pot* vpot, 
 		std::string pending_display[2])
 {
-	
+	// nothing to be done here. All pots are set in strip.cc
 }
 
 
@@ -396,33 +415,11 @@ void EQSubview::notify_change (boost::weak_ptr<ARDOUR::AutomationControl> pc, ui
 	{
 		return;
 	}
-	
-	if (!strip || !vpot || !pending_display)
-	{
-		return;
-	}
 
 	boost::shared_ptr<AutomationControl> control = pc.lock ();
 	if (control) {
 		float val = control->get_value();
-		//do_parameter_display (control->desc(), val, true);
-		{
-			bool screen_hold = true;
-			pending_display[1] = Strip::format_paramater_for_display(
-					control->desc(), 
-					val, 
-					strip->stripable(), 
-					screen_hold
-				);
-	
-			if (screen_hold) {
-				/* we just queued up a parameter to be displayed.
-					1 second from now, switch back to vpot mode display.
-				*/
-				strip->block_vpot_mode_display_for (1000);
-			}
-		}
-		
+		do_parameter_display(pending_display[1], control->desc(), val, strip, true);
 		/* update pot/encoder */
 		strip->surface()->write (vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 	}
@@ -540,11 +537,6 @@ DynamicsSubview::notify_change (boost::weak_ptr<ARDOUR::AutomationControl> pc, u
 	{
 		return;
 	}
-	
-	if (!strip || !vpot || !pending_display)
-	{
-		return;
-	}
 
 	boost::shared_ptr<AutomationControl> control= pc.lock ();
 	bool reset_all = false;
@@ -559,23 +551,7 @@ DynamicsSubview::notify_change (boost::weak_ptr<ARDOUR::AutomationControl> pc, u
 		if (control == _subview_stripable->comp_mode_controllable ()) {
 			pending_display[1] = _subview_stripable->comp_mode_name (val);
 		} else {
-			//do_parameter_display (control->desc(), val, true);
-			{
-				bool screen_hold = true;
-				pending_display[1] = Strip::format_paramater_for_display(
-						control->desc(), 
-						val, 
-						strip->stripable(), 
-						screen_hold
-					);
-		
-				if (screen_hold) {
-					/* we just queued up a parameter to be displayed.
-						1 second from now, switch back to vpot mode display.
-					*/
-					strip->block_vpot_mode_display_for (1000);
-				}
-			}
+			do_parameter_display(pending_display[1], control->desc(), val, strip, true);
 		}
 		/* update pot/encoder */
 		strip->surface()->write (vpot->set (control->internal_to_interface (val), true, Pot::wrap));
@@ -655,11 +631,6 @@ SendsSubview::notify_send_level_change (uint32_t global_strip_position, bool for
 	{
 		return;
 	}
-	
-	if (!strip || !vpot || !pending_display)
-	{
-		return;
-	}
 
 	boost::shared_ptr<AutomationControl> control = _subview_stripable->send_level_controllable (global_strip_position);
 	if (!control) {
@@ -668,23 +639,7 @@ SendsSubview::notify_send_level_change (uint32_t global_strip_position, bool for
 
 	if (control) {
 		float val = control->get_value();
-		//do_parameter_display (control->desc (), val); // BusSendLevel
-		{
-			bool screen_hold = false;
-			pending_display[1] = Strip::format_paramater_for_display(
-					control->desc(), 
-					val, 
-					strip->stripable(), 
-					screen_hold
-				);
-	
-			if (screen_hold) {
-				/* we just queued up a parameter to be displayed.
-					1 second from now, switch back to vpot mode display.
-				*/
-				strip->block_vpot_mode_display_for (1000);
-			}
-		}
+		do_parameter_display(pending_display[1], control->desc(), val, strip, false);
 
 		if (vpot->control() == control) {
 			/* update pot/encoder */
@@ -714,11 +669,6 @@ void SendsSubview::handle_vselect_event(uint32_t global_strip_position)
 		return;
 	}
 
-	if (!strip || !pending_display)
-	{
-		return;
-	}
-
 	boost::shared_ptr<AutomationControl> control = _subview_stripable->send_enable_controllable(global_strip_position);
 
 	if (control) {
@@ -740,23 +690,7 @@ void SendsSubview::handle_vselect_event(uint32_t global_strip_position)
 			/* we just turned it on, show the level
 			*/
 			control = _subview_stripable->send_level_controllable (global_strip_position);
-			//do_parameter_display (control->desc(), control->get_value()); // BusSendLevel
-			{
-				bool screen_hold = false;
-				pending_display[1] = Strip::format_paramater_for_display(
-						control->desc(), 
-						control->get_value(), 
-						strip->stripable(), 
-						screen_hold
-					);
-		
-				if (screen_hold) {
-					/* we just queued up a parameter to be displayed.
-						1 second from now, switch back to vpot mode display.
-					*/
-					strip->block_vpot_mode_display_for (1000);
-				}
-			}
+			do_parameter_display(pending_display[1], control->desc(), control->get_value(), strip, false);
 		}
 	}
 }
@@ -881,11 +815,6 @@ TrackViewSubview::notify_change (AutomationType type, uint32_t global_strip_posi
 	{
 		return;
 	}
-	
-	if (!strip || !vpot || !pending_display)
-	{
-		return;
-	}
 
 	boost::shared_ptr<AutomationControl> control;
 	boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (_subview_stripable);
@@ -917,25 +846,8 @@ TrackViewSubview::notify_change (AutomationType type, uint32_t global_strip_posi
 	}
 
 	if (control) {
-		float val = control->get_value();
-
-		/* Note: all of the displayed controllables require the display
-		 * of their *actual* ("internal") value, not the version mapped
-		 * into the normalized 0..1.0 ("interface") range.
-		 */
-
-		//do_parameter_display (control->desc(), val, screen_hold);
-		{
-			pending_display[1] = Strip::format_paramater_for_display(control->desc(), val, strip->stripable(), screen_hold);
-			DEBUG_TRACE (DEBUG::MackieControl, pending_display[1]);
-	
-			if (screen_hold) {
-				/* we just queued up a parameter to be displayed.
-					1 second from now, switch back to vpot mode display.
-				*/
-				strip->block_vpot_mode_display_for (1000);
-			}
-		}
+		float val = control->get_value();		
+		do_parameter_display(pending_display[1], control->desc(), val, strip, screen_hold);
 		
 		/* update pot/encoder */
 		strip->surface()->write (vpot->set (control->internal_to_interface (val), true, Pot::wrap));
@@ -976,6 +888,11 @@ void PluginSubview::update_global_buttons()
 	_mcp.update_global_button (Button::Pan, off);
 }
 
+bool PluginSubview::permit_flipping_faders_and_pots() 
+{ 
+	return _plugin_subview_state->permit_flipping_faders_and_pots(); 
+}
+
 void PluginSubview::setup_vpot(
 		Strip* strip,
 		Pot* vpot, 
@@ -1012,11 +929,6 @@ void PluginSubview::set_state(boost::shared_ptr<PluginSubviewState> new_state)
 		Pot* vpot = 0;
 		std::string* pending_display = 0;
 		if (!retrieve_pointers(&strip, &vpot, &pending_display, strip_index))
-		{
-			return;
-		}
-		
-		if (!strip || !vpot || !pending_display)
 		{
 			return;
 		}
@@ -1066,8 +978,6 @@ bool PluginSubviewState::handle_cursor_left_press()
 
 uint32_t PluginSubviewState::calculate_virtual_strip_position(uint32_t strip_index)
 {
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("virtual strip = %1 * %2 + %3 = %4\n",
-								   _current_bank, _bank_size, strip_index, _current_bank * _bank_size + strip_index));
 	return _current_bank * _bank_size + strip_index;
 }
 
@@ -1239,4 +1149,3 @@ void PluginEdit::bank_changed()
 {
 	_context.mcp().redisplay_subview_mode();
 }
-
