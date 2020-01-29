@@ -2054,7 +2054,6 @@ RouteTimeAxisView::add_existing_processor_automation_curves (boost::weak_ptr<Pro
 		boost::shared_ptr<AutomationLine> al;
 
 		if ((al = find_processor_automation_curve (processor, param)) != 0) {
-#warning NOT REACHED -- bug?
 			al->queue_reset ();
 		} else {
 			add_processor_automation_curve (processor, param);
@@ -2269,7 +2268,7 @@ RouteTimeAxisView::find_processor_automation_curve (boost::shared_ptr<Processor>
 
 	if ((pan = find_processor_automation_node (processor, what)) != 0) {
 		if (pan->view) {
-			pan->view->line();
+			return pan->view->line();
 		}
 	}
 
