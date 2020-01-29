@@ -38,6 +38,7 @@ def build(bld):
     obj.includes     = ['.', './tranzport']
     obj.name         = 'libardour_tranzport'
     obj.target       = 'ardour_tranzport'
+    obj.uselib       = 'XML OSX'
     obj.use          = 'libardour libardour_cp'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 

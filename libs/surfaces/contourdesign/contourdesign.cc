@@ -557,7 +557,7 @@ ContourDesignControlProtocol::prev_marker_keep_rolling ()
 	samplepos_t pos = session->locations()->first_mark_before (session->transport_sample());
 
 	if (pos >= 0) {
-		session->request_locate (pos, _keep_rolling && session->transport_rolling());
+		session->request_locate (pos, RollIfAppropriate);
 	} else {
 		session->goto_start ();
 	}
@@ -569,7 +569,7 @@ ContourDesignControlProtocol::next_marker_keep_rolling ()
 	samplepos_t pos = session->locations()->first_mark_after (session->transport_sample());
 
 	if (pos >= 0) {
-		session->request_locate (pos, _keep_rolling && session->transport_rolling());
+		session->request_locate (pos, RollIfAppropriate);
 	} else {
 		session->goto_end();
 	}
@@ -592,7 +592,7 @@ ContourDesignControlProtocol::jog_event_forward ()
 void
 ContourDesignControlProtocol::jump_forward (JumpDistance dist)
 {
-	bool kr = _keep_rolling && session->transport_rolling ();
+	LocateTransportDisposition kr = _keep_rolling ? RollIfAppropriate : MustStop;
 	switch (dist.unit) {
 	case SECONDS: jump_by_seconds (dist.value, kr); break;
 	case BEATS: jump_by_beats (dist.value, kr); break;

@@ -28,6 +28,7 @@
 #include <boost/unordered_map.hpp>
 
 #include <gtkmm/label.h>
+#include <gtkmm/table.h>
 #include <gdkmm/color.h>
 
 #include "pbd/xml++.h"
@@ -122,6 +123,9 @@ protected:
 	static std::list<Gdk::Color> used_colors;
 
 	Gtk::Label name_label;
+
+	Gtk::Label inactive_label;
+	Gtk::Table inactive_table;
 
 	mutable boost::unordered_map<std::string, std::string> property_hashtable;
 }; /* class AxisView */

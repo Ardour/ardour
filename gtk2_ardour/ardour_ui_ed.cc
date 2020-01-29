@@ -645,6 +645,8 @@ ARDOUR_UI::install_dependent_actions ()
 	act = ActionManager::register_action (common_actions, "alt-finish-range", _("Finish Range"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::keyboard_selection_finish), false, Editing::EDIT_IGNORE_NONE));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (common_actions, "select-all-visible-lanes", _("Select All Visible Lanes"), sigc::mem_fun(editor, &PublicEditor::select_all_visible_lanes));
+	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, "select-all-tracks", _("Select All Tracks"), sigc::mem_fun(editor, &PublicEditor::select_all_tracks));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (common_actions, "deselect-all", _("Deselect All"), sigc::mem_fun(editor, &PublicEditor::deselect_all));

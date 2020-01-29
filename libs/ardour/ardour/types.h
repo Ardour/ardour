@@ -783,6 +783,7 @@ enum MidiTempoMapDisposition {
 struct CaptureInfo {
 	samplepos_t start;
 	samplecnt_t samples;
+	samplecnt_t loop_offset;
 };
 
 enum LoopFadeChoice {
@@ -797,6 +798,12 @@ enum OverwriteReason {
 	PlaylistModified = 0x2,  // contents of playlist changed
 	LoopDisabled = 0x4,
 	LoopChanged = 0x8,
+};
+
+enum LocateTransportDisposition {
+	MustRoll,
+	MustStop,
+	RollIfAppropriate
 };
 
 typedef std::vector<CaptureInfo*> CaptureInfos;

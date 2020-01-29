@@ -555,7 +555,7 @@ MidiRegion::render (Evoral::EventSink<samplepos_t>& dst,
 	 * Note-Off's get inserted at the end of the region
 	 */
 
-	tracker.resolve_notes (dst, _position - _start + _length);
+	tracker.resolve_notes (dst, (_position - _start) + (_start + internal_offset + _length));
 
 	return 0;
 }
@@ -822,4 +822,18 @@ MidiRegion::trim_to_internal (samplepos_t position, samplecnt_t length, const in
 	if (!what_changed.empty()) {
 		send_change (what_changed);
 	}
+}
+
+bool
+MidiRegion::set_name (const std::string& str)
+{
+	if (_name == str) {
+		return true;
+	}
+
+	if (Session::session_name_is_legal (str) != 0) {
+		return false;
+	}
+
+	return Region::set_name (str);
 }

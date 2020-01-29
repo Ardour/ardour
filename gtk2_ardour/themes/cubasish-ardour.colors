@@ -91,10 +91,11 @@
     <ColorAlias name="entered marker" alias="widget:orange"/>
     <ColorAlias name="feedback alert: fill" alias="widget:bg"/>
     <ColorAlias name="feedback alert: fill active" alias="alert:red"/>
+    <ColorAlias name="feedback alert: alt active" alias="alert:ruddy"/>
     <ColorAlias name="feedback alert: led active" alias="alert:red"/>
     <ColorAlias name="foldback knob" alias="widget:bg"/>
     <ColorAlias name="foldback knob: fill" alias="widget:bg"/>
-    <ColorAlias name="foldback knob: arc end" alias="alert:blue"/>
+    <ColorAlias name="foldback knob: arc end" alias="widget:blue"/>
     <ColorAlias name="foldback knob: arc start" alias="widget:blue"/>
     <ColorAlias name="frame handle" alias="theme:bg1"/>
     <ColorAlias name="gain line" alias="alert:green"/>
@@ -250,7 +251,7 @@
     <ColorAlias name="monitor section dim: fill active" alias="alert:orange"/>
     <ColorAlias name="monitor section dim: led active" alias="alert:green"/>
     <ColorAlias name="monitor section knob" alias="widget:bg"/>
-    <ColorAlias name="monitor section knob: arc end" alias="alert:blue"/>
+    <ColorAlias name="monitor section knob: arc end" alias="widget:blue"/>
     <ColorAlias name="monitor section knob: arc start" alias="widget:blue"/>
     <ColorAlias name="monitor section mono: fill" alias="widget:bg"/>
     <ColorAlias name="monitor section mono: fill active" alias="alert:blue"/>
@@ -310,8 +311,8 @@
     <ColorAlias name="processor control button: fill" alias="neutral:background"/>
     <ColorAlias name="processor control button: fill active" alias="neutral:background2"/>
     <ColorAlias name="processor control button: led active" alias="widget:blue"/>
-    <ColorAlias name="processor control knob" alias="theme:contrasting selection"/>
-    <ColorAlias name="processor control knob: arc end" alias="alert:blue"/>
+    <ColorAlias name="processor control knob" alias="theme:bg"/>
+    <ColorAlias name="processor control knob: arc end" alias="widget:blue"/>
     <ColorAlias name="processor control knob: arc start" alias="widget:blue"/>
     <ColorAlias name="processor fader: fill" alias="widget:blue"/>
     <ColorAlias name="processor fader: fill active" alias="widget:blue"/>
@@ -454,8 +455,8 @@
     <ColorAlias name="trim handle" alias="alert:blue"/>
     <ColorAlias name="trim handle locked" alias="alert:ruddy"/>
     <ColorAlias name="trim knob" alias="widget:bg"/>
-    <ColorAlias name="trim knob: arc end" alias="alert:blue"/>
-    <ColorAlias name="trim knob: arc start" alias="widget:bg"/>
+    <ColorAlias name="trim knob: arc end" alias="widget:blue"/>
+    <ColorAlias name="trim knob: arc start" alias="widget:blue"/>
     <ColorAlias name="vca assign button: fill" alias="widget:bg"/>
     <ColorAlias name="verbose canvas cursor" alias="theme:contrasting clock"/>
     <ColorAlias name="video timeline bar" alias="neutral:background2"/>

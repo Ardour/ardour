@@ -629,6 +629,7 @@ MonitorSection::set_session (Session* s)
 
 			if (_ui_initialized) {
 				update_processor_box ();
+				update_output_display ();
 			}
 
 			SYNCHRONIZE_TOGGLE_ACTION (ActionManager::get_toggle_action (X_("Monitor"), "UseMonitorSection"), true);

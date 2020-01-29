@@ -444,7 +444,7 @@ public:
 	void request_roll_at_and_return (samplepos_t start, samplepos_t return_to);
 	void request_bounded_roll (samplepos_t start, samplepos_t end);
 	void request_stop (bool abort = false, bool clear_state = false, TransportRequestSource origin = TRS_UI);
-	void request_locate (samplepos_t sample, bool with_roll = false, TransportRequestSource origin = TRS_UI);
+	void request_locate (samplepos_t sample, LocateTransportDisposition ltd = RollIfAppropriate, TransportRequestSource origin = TRS_UI);
 
 	void request_play_loop (bool yn, bool leave_rolling = false);
 	bool get_play_loop () const { return play_loop; }
@@ -462,6 +462,7 @@ public:
 
 	bool global_locate_pending() const { return _global_locate_pending; }
 	bool locate_pending() const;
+	bool locate_initiated() const;
 	bool declick_in_progress () const;
 	bool transport_locked () const;
 
@@ -1127,19 +1128,15 @@ public:
 
 	enum PostTransportWork {
 		PostTransportStop               = 0x1,
-		/* PostTransportDuration */
-		PostTransportLocate             = 0x4,
-		PostTransportRoll               = 0x8,
-		PostTransportAbort              = 0x10,
-		PostTransportOverWrite          = 0x20,
-		/* PostTransportSpeed           = 0x40, */
-		PostTransportAudition           = 0x80,
-		PostTransportReverse            = 0x100,
-		/* PostTransportInputChange     = 0x200, */
-		/*PostTransportCurveRealloc       = 0x400, */
-		PostTransportClearSubstate      = 0x800,
-		PostTransportAdjustPlaybackBuffering  = 0x1000,
-		PostTransportAdjustCaptureBuffering   = 0x2000
+		PostTransportLocate             = 0x2,
+		PostTransportRoll               = 0x4,
+		PostTransportAbort              = 0x8,
+		PostTransportOverWrite          = 0x10,
+		PostTransportAudition           = 0x20,
+		PostTransportReverse            = 0x40,
+		PostTransportClearSubstate      = 0x80,
+		PostTransportAdjustPlaybackBuffering  = 0x100,
+		PostTransportAdjustCaptureBuffering   = 0x200
 	};
 
 	boost::shared_ptr<SessionPlaylists> playlists () const { return _playlists; }
@@ -1686,7 +1683,7 @@ private:
 	void flush_all_inserts ();
 	int  micro_locate (samplecnt_t distance);
 
-	void force_locate (samplepos_t sample, bool with_roll = false);
+	void force_locate (samplepos_t sample, LocateTransportDisposition);
 	void set_transport_speed (double speed, samplepos_t destination_sample, bool abort = false, bool clear_state = false, bool as_default = false);
 	void realtime_stop (bool abort, bool clear_state);
 	void realtime_locate (bool);
@@ -2035,8 +2032,6 @@ private:
 
 	void rt_set_controls (boost::shared_ptr<ControlList>, double val, PBD::Controllable::GroupControlDisposition group_override);
 	void rt_clear_all_solo_state (boost::shared_ptr<RouteList>, bool yn, PBD::Controllable::GroupControlDisposition group_override);
-
-	void set_session_range_location (samplepos_t, samplepos_t);
 
 	void setup_midi_machine_control ();
 

@@ -162,7 +162,7 @@ This mode provides many different operations on both regions and control points,
 @edit|Editor/redo|<@PRIMARY@>r|redo
 @trans|Transport/Record|<@TERTIARY@>r|engage record
 @mmode|MouseMode/set-mouse-mode-timefx|t|timefx mode
-@gselect|Common/select-all-tracks|<@PRIMARY@>t|select all tracks
+@gselect|Common/select-all-visible-lanes|<@PRIMARY@>t|select all visible lanes
 @edit|Editor/alternate-redo|<@PRIMARY@>y|redo
 @select|Editor/select-all-between-cursors|<@PRIMARY@>u|all enclosed by edit range
 @select|Editor/select-all-within-cursors|u|all present in edit range

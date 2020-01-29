@@ -247,11 +247,11 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 			for (cnt = 0; cnt < 999999; ++cnt) {
 				if (nchans == 1) {
 					snprintf (s, sizeof(s), "%s/%s_%" PRIu32 ".wav", sound_directory.c_str(),
-						  legalize_for_path(region->name()).c_str(), cnt);
+						  legalize_for_universal_path(region->name()).c_str(), cnt);
 				}
 				else {
 					snprintf (s, sizeof(s), "%s/%s_%" PRIu32 "-%" PRId32 ".wav", sound_directory.c_str(),
-						  legalize_for_path(region->name()).c_str(), cnt, n);
+						  legalize_for_universal_path(region->name()).c_str(), cnt, n);
 				}
 
 				path = s;
@@ -388,11 +388,11 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 		for (cnt = 0; cnt < 999999; ++cnt) {
 			if (channels == 1) {
 				snprintf (s, sizeof(s), "%s/%s_%" PRIu32 ".wav", sound_directory.c_str(),
-					  legalize_for_path(playlist.name()).c_str(), cnt);
+					  legalize_for_universal_path(playlist.name()).c_str(), cnt);
 			}
 			else {
 				snprintf (s, sizeof(s), "%s/%s_%" PRIu32 "-%" PRId32 ".wav", sound_directory.c_str(),
-					  legalize_for_path(playlist.name()).c_str(), cnt, n);
+					  legalize_for_universal_path(playlist.name()).c_str(), cnt, n);
 			}
 
 			if (!Glib::file_test (s, Glib::FILE_TEST_EXISTS)) {

@@ -728,7 +728,7 @@ MiniTimeline::on_button_release_event (GdkEventButton *ev)
 	if (ev->y <= PADDING + _marker_height) {
 		for (JumpList::const_iterator i = _jumplist.begin (); i != _jumplist.end(); ++i) {
 			if (i->left <= ev->x && ev->x <= i->right) {
-				_session->request_locate (i->to, _session->transport_rolling ());
+				_session->request_locate (i->to, RollIfAppropriate);
 				return true;
 			}
 		}
@@ -736,7 +736,7 @@ MiniTimeline::on_button_release_event (GdkEventButton *ev)
 
 	if (ev->button == 1) {
 		samplepos_t when = _last_update_sample + (ev->x - get_width() * .5) / _px_per_sample;
-		_session->request_locate (std::max ((samplepos_t)0, when), _session->transport_rolling ());
+		_session->request_locate (std::max ((samplepos_t)0, when), RollIfAppropriate);
 	}
 
 	return true;
@@ -818,6 +818,6 @@ MiniTimeline::on_scroll_event (GdkEventScroll *ev)
 			return true;
 			break;
 	}
-	_session->request_locate (std::max ((samplepos_t)0, when), _session->transport_rolling ());
+	_session->request_locate (std::max ((samplepos_t)0, when), RollIfAppropriate);
 	return true;
 }

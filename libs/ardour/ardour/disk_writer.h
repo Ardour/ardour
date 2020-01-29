@@ -169,6 +169,8 @@ private:
 	void check_record_status (samplepos_t transport_sample, double speed, bool can_record);
 	void finish_capture (boost::shared_ptr<ChannelList> c);
 
+	void loop (samplepos_t);
+
 	CaptureInfos                 capture_info;
 	mutable Glib::Threads::Mutex capture_info_lock;
 
@@ -186,6 +188,9 @@ private:
 	volatile gint _samples_pending_write;
 	volatile gint _num_captured_loops;
 	samplepos_t   _accumulated_capture_offset;
+
+	bool          _transport_looped;
+	samplepos_t   _transport_loop_sample;
 
 	boost::shared_ptr<SMFSource> _midi_write_source;
 

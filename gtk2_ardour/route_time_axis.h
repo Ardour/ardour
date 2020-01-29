@@ -207,6 +207,7 @@ protected:
 
 	void take_name_changed (void *src);
 	void route_property_changed (const PBD::PropertyChange&);
+	void route_active_changed ();
 	bool name_entry_changed (std::string const&);
 
 	virtual void toggle_channel_selector () {}

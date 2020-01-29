@@ -147,7 +147,8 @@ MidiRingBuffer<T>::skip_to(samplepos_t start)
 	while (this->read_space() >= prefix_size) {
 
 		uint8_t peekbuf[prefix_size];
-		this->peek (peekbuf, prefix_size);
+		bool r = this->peek (peekbuf, prefix_size);
+		assert (r);
 
 		ev_time = *(reinterpret_cast<T*>((uintptr_t)peekbuf));
 		ev_size = *(reinterpret_cast<uint32_t*>((uintptr_t)(peekbuf + sizeof(T) + sizeof (Evoral::EventType))));
@@ -163,7 +164,7 @@ MidiRingBuffer<T>::skip_to(samplepos_t start)
 		this->increment_read_ptr (prefix_size);
 
 		uint8_t status;
-		bool r = this->peek (&status, sizeof(uint8_t));
+		r = this->peek (&status, sizeof(uint8_t));
 		assert (r); // If this failed, buffer is corrupt, all hope is lost
 
 		++count;

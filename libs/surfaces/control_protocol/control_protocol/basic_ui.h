@@ -70,12 +70,13 @@ class LIBCONTROLCP_API BasicUI {
 	void set_transport_speed (double speed);
 	double get_transport_speed ();
 
-	void jump_by_seconds (double sec, bool with_roll = false);
-	void jump_by_bars (double bars, bool with_roll = false);
-	void jump_by_beats (double beats, bool with_roll = false);
+	void jump_by_seconds (double sec, ARDOUR::LocateTransportDisposition ltd = ARDOUR::RollIfAppropriate);
+	void jump_by_bars (double bars, ARDOUR::LocateTransportDisposition ltd = ARDOUR::RollIfAppropriate);
+	void jump_by_beats (double beats, ARDOUR::LocateTransportDisposition ltd = ARDOUR::RollIfAppropriate);
 
 	ARDOUR::samplepos_t transport_sample ();
-	void locate (ARDOUR::samplepos_t sample, bool play = false);
+	void locate (ARDOUR::samplepos_t sample, ARDOUR::LocateTransportDisposition ltd);
+	void locate (ARDOUR::samplepos_t sample, bool);
 	bool locating ();
 	bool locked ();
 

@@ -1,4 +1,9 @@
-ardour { ["type"] = "Snippet", name = "Set Region Gain" }
+ardour {
+	["type"] = "EditorAction",
+	name = "Find non zero audio sample",
+	author = "Ardour Team",
+	description = [[Find the position of first non-zero audio sample in selected regions.]]
+}
 
 function factory () return function ()
 	-- get Editor GUI Selection
@@ -8,10 +13,7 @@ function factory () return function ()
 	-- allocate a buffer (float* in C)
 	-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:DSP:DspShm
 	local cmem = ARDOUR.DSP.DspShm (8192)
-
-	-- prepare undo operation
-	Session:begin_reversible_command ("Lua Region Gain")
-	local add_undo = false -- keep track if something has changed
+	local msg = ""
 
 	-- iterate over selected regions
 	-- http://manual.ardour.org/lua-scripting/class_reference/#ArdourUI:RegionSelection
@@ -28,7 +30,7 @@ function factory () return function ()
 		local n_samples = rd:readable_length ()
 		local n_channels = rd:n_channels ()
 
-		local peak = 0 -- the audio peak to be calculated
+		local nonzeropos = -1
 
 		-- iterate over all channels in Audio Region
 		for c = 0, n_channels -1 do
@@ -36,47 +38,37 @@ function factory () return function ()
 			repeat
 				-- read at most 8K samples of channel 'c' starting at 'pos'
 				local s = rd:read (cmem:to_float (0), pos, 8192, c)
-				pos = pos + s
 				-- access the raw audio data
 				-- http://manual.ardour.org/lua-scripting/class_reference/#C:FloatArray
 				local d = cmem:to_float (0):array()
 				-- iterate over the audio sample data
 				for i = 0, s do
-					if math.abs (d[i]) > peak then
-						peak = math.abs (d[i])
+					if math.abs (d[i]) > 0 then
+						if (nonzeropos < 0 or pos + i < nonzeropos) then
+							nonzeropos = pos + i
+						end
+						break
 					end
 				end
+				pos = pos + s
+				if (nonzeropos >= 0 and pos > nonzeropos) then
+					break
+				end
 			until s < 8192
-			assert (pos == n_samples)
 		end
 
-		if (peak > 0) then
-			print ("Region:", r:name (), "peak:", 20 * math.log (peak) / math.log(10), "dBFS")
+		if (nonzeropos >= 0) then
+			msg = msg .. string.format("%s: %d\n", r:name (), nonzeropos + r:position())
 		else
-			print ("Region:", r:name (), " is silent")
-		end
-
-		-- normalize region
-		if (peak > 0) then
-			-- prepare for undo
-			r:to_stateful ():clear_changes ()
-			-- apply gain
-			r:to_audioregion (): set_scale_amplitude (1 / peak)
-			-- save changes (if any) to undo command
-			if not Session:add_stateful_diff_command (r:to_statefuldestructible ()):empty () then
-				add_undo = true
-			end
+			msg = msg .. "Region: '%s' is silent\n"
 		end
 
 		::next::
 	end
 
-	-- all done. now commit the combined undo operation
-	if add_undo then
-		-- the 'nil' command here means to use all collected diffs
-		Session:commit_reversible_command (nil)
-	else
-		Session:abort_reversible_command ()
+	if (msg ~= "") then
+		local md = LuaDialog.Message ("First Non Zero Sample", msg, LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close)
+		md:run()
 	end
 
 end end

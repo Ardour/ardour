@@ -2733,14 +2733,14 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Signal Flow"), mm);
 
 	bo = new BoolOption (
-		     "tape-machine-mode",
-		     _("Tape machine mode"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_tape_machine_mode),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_tape_machine_mode)
+		     "auto-input-does-talkback",
+		     _("Auto Input does 'talkback'"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_input_does_talkback),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_input_does_talkback)
 		     );
 	add_option (_("Signal Flow"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			string_compose (_("<b>When enabled</b> %1 will not monitor a track's input if the transport is stopped."),
+			string_compose (_("<b>When enabled,</b> and Transport->Auto-Input is enabled, %1 will always monitor audio inputs when transport is stopped, even if tracks aren't armed."),
 					PROGRAM_NAME));
 
 	if (!Profile->get_mixbus()) {
@@ -2875,8 +2875,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* MIDI */
 
-	add_option (_("MIDI"), new OptionEditorHeading (_("Buffering")));
-
 	add_option (_("MIDI"), new OptionEditorHeading (_("Session")));
 
 	add_option (_("MIDI"),
@@ -2917,6 +2915,19 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("MIDI"), vkeybdlayout);
 
+	/* MIDI PORTs */
+	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Port Options")));
+
+	add_option (_("MIDI"),
+		    new BoolOption (
+			    "midi-input-follows-selection",
+			    _("MIDI input follows MIDI track selection"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_input_follows_selection),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_input_follows_selection)
+			    ));
+
+	add_option (_("MIDI"), new MidiPortOptions ());
+	add_option (_("MIDI"), new OptionEditorBlank ());
 
 	/* Click */
 
@@ -3342,19 +3353,6 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Control Surfaces"), new OptionEditorHeading (_("Control Surfaces")));
 	add_option (_("Control Surfaces"), new ControlSurfacesOptions ());
 
-	/* MIDI PORTs */
-	add_option (_("MIDI Ports"), new OptionEditorHeading (_("MIDI Port Options")));
-
-	add_option (_("MIDI Ports"),
-		    new BoolOption (
-			    "midi-input-follows-selection",
-			    _("MIDI input follows MIDI track selection"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_input_follows_selection),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_input_follows_selection)
-			    ));
-
-	add_option (_("MIDI Ports"), new MidiPortOptions ());
-	add_option (_("MIDI Ports"), new OptionEditorBlank ());
 
 	/* PLUGINS */
 
@@ -3695,7 +3693,6 @@ RCOptionEditor::RCOptionEditor ()
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_name)
 			));
 
-#ifndef MIXBUS // hide this setting in Mixbus. Always on, 4px
 	ComboOption<uint32_t>* gap = new ComboOption<uint32_t> (
 		     "vertical-region-gap",
 		     _("Add a visual gap below Audio Regions"),
@@ -3706,7 +3703,6 @@ RCOptionEditor::RCOptionEditor ()
 	gap->add (2, _("Small"));
 	gap->add (4, _("Large"));
 	add_option (_("Appearance/Editor"), gap);
-#endif
 
 	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("Waveforms")));
 

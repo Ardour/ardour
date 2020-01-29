@@ -76,6 +76,8 @@ EventRingBuffer<Time>::peek (uint8_t* buf, size_t size)
 		return false;
 	}
 
+	assert (vec.len[0] > 0 || vec.len[1] > 0);
+
 	if (vec.len[0] > 0) {
 		memcpy (buf, vec.buf[0], std::min (vec.len[0], size));
 	}

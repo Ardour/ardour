@@ -367,7 +367,6 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			AudioBuffer& disk_buf ((ms & MonitoringInput) ? scratch_bufs.get_audio(n) : output);
 
 			if (start_sample != playback_sample && target_gain != 0) {
-				cerr << name() << " Not at start (" << start_sample << ") ps = " << playback_sample << " iseek (" << start_sample - playback_sample << endl;
 				if (can_internal_playback_seek (start_sample - playback_sample)) {
 					internal_playback_seek (start_sample - playback_sample);
 				} else {
@@ -492,7 +491,9 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		_need_butler = butler_required;
 	}
 
-	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 reader run, needs butler = %2\n", name(), _need_butler));
+	if (_need_butler) {
+		DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 reader run, needs butler = %2\n", name(), _need_butler));
+	}
 }
 
 bool
@@ -739,13 +740,22 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
+	if (c->empty()) {
+		return 0;
+	}
+
 	if (sample == playback_sample && !complete_refill) {
-		return 0; // XXX double-check this
+		return 0;
+	}
+
+	if (abs (sample - playback_sample) < (c->front()->rbuf->reserved_size() / 6)) {
+		/* we're close enough. Note: this is a heuristic */
+		return 0;
 	}
 
 	g_atomic_int_set (&_pending_overwrite, 0);
 
-	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("DiskReader::seek %s %ld -> %ld refill=%d\n", owner()->name().c_str(), playback_sample, sample, complete_refill));
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("DiskReader::seek %1 %2 -> %3 refill=%4\n", owner()->name().c_str(), playback_sample, sample, complete_refill));
 
 	const samplecnt_t distance = sample - playback_sample;
 	if (!complete_refill && can_internal_playback_seek (distance)) {
@@ -1126,6 +1136,9 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: will refill %2 channels with %3 samples\n", name(), c->size(), total_space));
 
 	samplepos_t file_sample_tmp = ffa;
+
+	// int64_t before = g_get_monotonic_time ();
+	// int64_t elapsed;
 
 	for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
 

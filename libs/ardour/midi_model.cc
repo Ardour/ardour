@@ -455,40 +455,34 @@ MidiModel::NoteDiffCommand::marshal_note(const NotePtr note)
 Evoral::Sequence<MidiModel::TimeType>::NotePtr
 MidiModel::NoteDiffCommand::unmarshal_note (XMLNode *xml_note)
 {
-	Evoral::event_id_t id;
+	Evoral::event_id_t id = -1;
 	if (!xml_note->get_property ("id", id)) {
 		error << "note information missing ID value" << endmsg;
-		id = -1;
 	}
 
-	uint8_t note;
+	uint8_t note = 127;
 	if (!xml_note->get_property("note", note)) {
 		warning << "note information missing note value" << endmsg;
-		note = 127;
 	}
 
-	uint8_t channel;
+	uint8_t channel = 0;
 	if (!xml_note->get_property("channel", channel)) {
 		warning << "note information missing channel" << endmsg;
-		channel = 0;
 	}
 
-	MidiModel::TimeType time;
+	MidiModel::TimeType time = MidiModel::TimeType();
 	if (!xml_note->get_property("time", time)) {
 		warning << "note information missing time" << endmsg;
-		time = MidiModel::TimeType();
 	}
 
-	MidiModel::TimeType length;
+	MidiModel::TimeType length = MidiModel::TimeType(1);
 	if (!xml_note->get_property("length", length)) {
 		warning << "note information missing length" << endmsg;
-		length = MidiModel::TimeType(1);
 	}
 
-	uint8_t velocity;
+	uint8_t velocity = 127;
 	if (!xml_note->get_property("velocity", velocity)) {
 		warning << "note information missing velocity" << endmsg;
-		velocity = 127;
 	}
 
 	NotePtr note_ptr(new Evoral::Note<TimeType>(channel, time, length, note, velocity));

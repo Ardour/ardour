@@ -4104,7 +4104,7 @@ CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	Session* s = _editor->session ();
 	if (s) {
-		s->request_locate (_editor->playhead_cursor->current_sample (), _was_rolling);
+		s->request_locate (_editor->playhead_cursor->current_sample (), _was_rolling ? MustRoll : MustStop);
 		_editor->_pending_locate_request = true;
 		s->request_resume_timecode_transmission ();
 	}
@@ -6002,7 +6002,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 
 			/* didn't drag, so just locate */
 
-			_editor->session()->request_locate (grab_sample(), _editor->session()->transport_rolling());
+			_editor->session()->request_locate (grab_sample(), RollIfAppropriate);
 
 		} else if (_operation == CreateCDMarker) {
 

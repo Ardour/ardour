@@ -346,6 +346,6 @@ Session::finalize_audio_export (TransportRequestSource trs)
 	if (post_export_sync) {
 		config.set_external_sync (true);
 	} else {
-		request_locate (post_export_position, false, trs);
+		request_locate (post_export_position, MustStop, trs);
 	}
 }

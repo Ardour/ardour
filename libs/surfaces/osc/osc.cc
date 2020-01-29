@@ -3369,7 +3369,7 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 				for (Locations::LocationList::const_iterator l = ll.begin(); l != ll.end(); ++l) {
 					if ((*l)->is_mark ()) {
 						if (strcmp (&argv[0]->s, (*l)->name().c_str()) == 0) {
-							session->request_locate ((*l)->start (), false);
+							session->request_locate ((*l)->start (), MustStop);
 							return 0;
 						} else if ((*l)->start () == session->transport_sample()) {
 							cur_mark = (*l);
@@ -3406,7 +3406,7 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 	std::sort (lm.begin(), lm.end(), location_marker_sort);
 	// go there
 	if (marker < lm.size()) {
-		session->request_locate (lm[marker].when, false);
+		session->request_locate (lm[marker].when, MustStop);
 		return 0;
 	}
 	// we were unable to deal with things
@@ -6202,7 +6202,7 @@ OSC::periodic (void)
 			scrub_speed = 0;
 			session->request_transport_speed (0);
 			// locate to the place PH was at last tick
-			session->request_locate (scrub_place, false);
+			session->request_locate (scrub_place, MustStop);
 		}
 	}
 	for (uint32_t it = 0; it < _surface.size(); it++) {

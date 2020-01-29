@@ -61,7 +61,7 @@ using namespace std;
 
 #define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::Event (evtype)); }
 #define TFSM_STOP(abort,clear) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StopTransport,abort,clear)); }
-#define TFSM_LOCATE(target,roll,flush,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,roll,flush,loop,force)); }
+#define TFSM_LOCATE(target,ltd,flush,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,ltd,flush,loop,force)); }
 
 
 /** Called by the audio engine when there is work to be done with JACK.
@@ -859,7 +859,7 @@ Session::process_event (SessionEvent* ev)
 		if (play_loop) {
 			/* roll after locate, do not flush, set "for loop end" true
 			*/
-			TFSM_LOCATE (ev->target_sample, true, false, true, false);
+			TFSM_LOCATE (ev->target_sample, MustRoll, false, true, false);
 		}
 		remove = false;
 		del = false;
@@ -867,19 +867,19 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::Locate:
 		/* args: do not roll after locate, clear state, not for loop, force */
-		TFSM_LOCATE (ev->target_sample, false, true, false, ev->yes_or_no);
+		TFSM_LOCATE (ev->target_sample, ev->locate_transport_disposition, true, false, ev->yes_or_no);
 		_send_timecode_update = true;
 		break;
 
 	case SessionEvent::LocateRoll:
 		/* args: roll after locate, clear state if not looping, not for loop, force */
-		TFSM_LOCATE (ev->target_sample, true, !play_loop, false, ev->yes_or_no);
+		TFSM_LOCATE (ev->target_sample, ev->locate_transport_disposition, !play_loop, false, ev->yes_or_no);
 		_send_timecode_update = true;
 		break;
 
 	case SessionEvent::Skip:
 		if (Config->get_skip_playback()) {
-			TFSM_LOCATE (ev->target_sample, true, true, false, false);
+			TFSM_LOCATE (ev->target_sample, MustRoll, true, false, false);
 			_send_timecode_update = true;
 		}
 		remove = false;
@@ -889,7 +889,7 @@ Session::process_event (SessionEvent* ev)
 	case SessionEvent::LocateRollLocate:
 		// locate is handled by ::request_roll_at_and_return()
 		_requested_return_sample = ev->target_sample;
-		TFSM_LOCATE (ev->target2_sample, true, true, false, false);
+		TFSM_LOCATE (ev->target2_sample, MustRoll, true, false, false);
 		_send_timecode_update = true;
 		break;
 
@@ -928,7 +928,7 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::RangeLocate:
 		/* args: roll after locate, do flush, not with loop */
-		TFSM_LOCATE (ev->target_sample, true, true, false, false);
+		TFSM_LOCATE (ev->target_sample, MustRoll, true, false, false);
 		remove = false;
 		del = false;
 		break;
@@ -1126,7 +1126,7 @@ Session::follow_transport_master (pframes_t nframes)
 						const samplepos_t locate_target = master_transport_sample + wlp;
 						DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: jump to master position %1 by locating to %2\n", master_transport_sample, locate_target));
 						/* for JACK transport always stop after the locate (2nd argument == false) */
-						TFSM_LOCATE (locate_target, false, true, false, false);
+						TFSM_LOCATE (locate_target, MustStop, true, false, false);
 
 					} else {
 						DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK Transport: locate already in process, sts = %1\n", master_transport_sample));
@@ -1166,7 +1166,7 @@ Session::follow_transport_master (pframes_t nframes)
 				/* note that for non-JACK transport masters, we assume that the transport state (rolling,stopped) after the locate
 				 * remains unchanged (2nd argument, "roll-after-locate")
 				 */
-				TFSM_LOCATE (master_transport_sample, master_speed != 0, true, false, false);
+				TFSM_LOCATE (master_transport_sample, (master_speed != 0) ? MustRoll : MustStop, true, false, false);
 			}
 
 			return true;

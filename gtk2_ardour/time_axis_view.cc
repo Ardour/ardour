@@ -158,6 +158,10 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	name_label.set_width_chars (12);
 	set_tooltip (name_label, _("Track/Bus name (double click to edit)"));
 
+	inactive_label.set_name (X_("TrackNameEditor"));
+	inactive_label.set_alignment (0.0, 0.5);
+	set_tooltip (inactive_label, _("This track is inactive. (right-click to activate)"));
+
 	{
 		boost::scoped_ptr<Gtk::Entry> an_entry (new FocusEntry);
 		an_entry->set_name (X_("TrackNameEditor"));
@@ -184,6 +188,10 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();
+
+	inactive_table.set_border_width (4);  //try to match the offset of the label on an "active" track
+	inactive_table.attach (inactive_label, 1, 2, 0, 1,  Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK, 0, 0);
+	controls_vbox.pack_start (inactive_table, false, false);
 
 	controls_vbox.pack_start (controls_table, false, false);
 	controls_vbox.show ();

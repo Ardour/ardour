@@ -3079,7 +3079,8 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 				}
 			}
 
-			len = std::max(Temporal::Beats(1 / 512.0), len);
+			/* minimum length resulting from a trim is 1 tick */
+			len = std::max (Temporal::Beats (0,1), len);
 
 			char buf[16];
 			snprintf (buf, sizeof (buf), "%.3g beats", len.to_double());
@@ -3165,9 +3166,9 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		const Temporal::Beats x_beats = Temporal::Beats (e_qaf - quarter_note_start);
 
 		if (at_front && x_beats < canvas_note->note()->end_time()) {
-			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::StartTime, x_beats - (sign * snap_delta_beats));
-			Temporal::Beats len = canvas_note->note()->time() - x_beats + (sign * snap_delta_beats);
-			len += canvas_note->note()->length();
+			const Temporal::Beats new_start = x_beats - (sign * snap_delta_beats);
+			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::StartTime, new_start);
+			Temporal::Beats len = canvas_note->note()->end_time() - new_start;
 
 			if (!!len) {
 				note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::Length, len);
@@ -3175,8 +3176,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		if (!at_front) {
-			Temporal::Beats len = std::max(Temporal::Beats(1 / 512.0),
-						     x_beats - canvas_note->note()->time() - (sign * snap_delta_beats));
+			Temporal::Beats len = std::max (Temporal::Beats(0, 1), x_beats - canvas_note->note()->time() - (sign * snap_delta_beats));
 			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::Length, len);
 		}
 

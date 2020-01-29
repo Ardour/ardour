@@ -86,7 +86,7 @@ def build(bld):
     utils = bld.path.ant_glob('*.cc', excl=['example.cc', 'common.cc'])
 
     for util in utils:
-        fn = str(util)[:-3]
+        fn = os.path.splitext(os.path.basename(str(util)))[0]
         build_ardour_util(bld, fn)
         if bld.env['build_target'] != 'mingw':
             bld.symlink_as(bld.env['BINDIR'] + '/' + pgmprefix + "-" + fn, bld.env['LIBDIR'] + '/utils/ardour-util.sh')

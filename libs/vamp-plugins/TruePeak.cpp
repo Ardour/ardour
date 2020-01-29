@@ -18,6 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -392,6 +393,7 @@ TruePeakdsp::process (float const *d, int n)
 
 	float x = 0;
 	float v;
+	assert (_buf);
 	float *b = _buf;
 	while (n--) {
 		v = fabsf(*b++);

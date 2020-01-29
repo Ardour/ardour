@@ -330,7 +330,7 @@ BasicUI::prev_marker ()
 	samplepos_t pos = session->locations()->first_mark_before (session->transport_sample());
 
 	if (pos >= 0) {
-		session->request_locate (pos, session->transport_rolling());
+		session->request_locate (pos, RollIfAppropriate);
 	} else {
 		session->goto_start ();
 	}
@@ -342,7 +342,7 @@ BasicUI::next_marker ()
 	samplepos_t pos = session->locations()->first_mark_after (session->transport_sample());
 
 	if (pos >= 0) {
-		session->request_locate (pos, session->transport_rolling());
+		session->request_locate (pos, RollIfAppropriate);
 	} else {
 		session->goto_end();
 	}
@@ -417,13 +417,19 @@ BasicUI::transport_sample ()
 }
 
 void
-BasicUI::locate (samplepos_t where, bool roll_after_locate)
+BasicUI::locate (samplepos_t where, LocateTransportDisposition ltd)
 {
-	session->request_locate (where, roll_after_locate);
+	session->request_locate (where, ltd);
 }
 
 void
-BasicUI::jump_by_seconds (double secs, bool with_roll)
+BasicUI::locate (samplepos_t where, bool roll)
+{
+	session->request_locate (where, roll ? MustRoll : RollIfAppropriate);
+}
+
+void
+BasicUI::jump_by_seconds (double secs, LocateTransportDisposition ltd)
 {
 	samplepos_t current = session->transport_sample();
 	double s = (double) current / (double) session->nominal_sample_rate();
@@ -434,11 +440,11 @@ BasicUI::jump_by_seconds (double secs, bool with_roll)
 	}
 	s = s * session->nominal_sample_rate();
 
-	session->request_locate (floor(s), with_roll);
+	session->request_locate (floor(s), ltd);
 }
 
 void
-BasicUI::jump_by_bars (double bars, bool with_roll)
+BasicUI::jump_by_bars (double bars, LocateTransportDisposition ltd)
 {
 	TempoMap& tmap (session->tempo_map());
 	Timecode::BBT_Time bbt (tmap.bbt_at_sample (session->transport_sample()));
@@ -452,18 +458,18 @@ BasicUI::jump_by_bars (double bars, bool with_roll)
 	any.type = AnyTime::BBT;
 	any.bbt.bars = bars;
 
-	session->request_locate (session->convert_to_samples (any), with_roll);
+	session->request_locate (session->convert_to_samples (any), ltd);
 }
 
 void
-BasicUI::jump_by_beats (double beats, bool with_roll)
+BasicUI::jump_by_beats (double beats, LocateTransportDisposition ltd)
 {
 	TempoMap& tmap (session->tempo_map ());
 	double qn_goal = tmap.quarter_note_at_sample (session->transport_sample ()) + beats;
 	if (qn_goal < 0.0) {
 		qn_goal = 0.0;
 	}
-	session->request_locate (tmap.sample_at_quarter_note (qn_goal), with_roll);
+	session->request_locate (tmap.sample_at_quarter_note (qn_goal), ltd);
 }
 
 void
@@ -574,7 +580,7 @@ BasicUI::toggle_roll (bool roll_out_of_bounded_mode)
 	} else { /* not rolling */
 
 		if (session->get_play_loop() && Config->get_loop_is_mode()) {
-			session->request_locate (session->locations()->auto_loop_location()->start(), true);
+			session->request_locate (session->locations()->auto_loop_location()->start(), MustRoll);
 		} else {
 			session->request_transport_speed (1.0f);
 		}
@@ -689,7 +695,7 @@ BasicUI::goto_nth_marker (int n)
 	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
 		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_session_range()) {
 			if (n == 0) {
-				session->request_locate ((*i)->start(), session->transport_rolling());
+				session->request_locate ((*i)->start(), RollIfAppropriate);
 				break;
 			}
 			--n;
