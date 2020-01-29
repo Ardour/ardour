@@ -309,7 +309,7 @@ while (<SOURCE>) {
 if ($make_accelmap) {
     print "<BindingSet name=\"" . $bindings_name . "\">\n";
     
-    foreach $owner (keys %owner_bindings) {
+    foreach $owner (sort keys %owner_bindings) {
 	print " <Bindings name=\"$owner\">\n  <Press>\n";
 	$bindings = $owner_bindings{$owner};
 	shift (@$bindings); # remove initial empty element

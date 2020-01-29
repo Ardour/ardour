@@ -2913,6 +2913,7 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 	XMLNode* proc = entry_gui_object_state (e);
 	if (proc) {
 		e->set_control_state (proc);
+		update_gui_object_state (e); /* save updated state (InlineControl) */
 	}
 
 	if (plugin_insert

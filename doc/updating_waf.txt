@@ -1,15 +1,20 @@
-Download waf (https://waf.io/)
-
-autowaf.py is present in the tools directory of the Ardour source code.
-a patch for C++11/clang can be found in tools/waflib.patch (needed for waf 1.8.19)
-
-Current waf is build as follows;
+# Download waf (https://waf.io/)
+#
+# autowaf.py and misc.py are present in the tools directory of the Ardour source code.
+# - waf-str.patch is needed for py2/py3 compatible install_dir:
+#  * in py2 paths are byte-arrays and would need to be converted using .encode("utf-8")
+#    (otherwise waf expands them /t/o/p/a/t/h/s/l/i/k/e/t/h/i/s)
+#  * however py3 cannot handled encoded arrays:
+#    (TypeError: cannot use a string pattern on a bytes-like object)
+#
+# Current waf is build as follows:
 
 ARDOURSRC=`pwd`
 cd /tmp
-curl https://waf.io/waf-1.6.11.tar.bz2 | tar xj
-cd waf-1.6.11
+curl https://waf.io/waf-2.0.19.tar.bz2 | tar xj
+cd waf-2.0.19
 
-patch -p1 < $ARDOURSRC/tools/waflib.patch
-./waf-light -v --make-waf --tools=misc,doxygen,$ARDOURSRC/tools/autowaf.py --prelude=''
+patch -p1 < $ARDOURSRC/tools/waf-str.patch
+
+./waf-light -v --make-waf --tools=misc,doxygen,$ARDOURSRC/tools/autowaf.py,$ARDOURSRC/tools/misc.py --prelude=''
 cp ./waf $ARDOURSRC/waf

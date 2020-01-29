@@ -349,7 +349,7 @@ def enoify (major, minor):
             return "\\n\\\"Music for Airplay\\\"" # 1981 Compilation
         elif minor == 9:
             return "\\n\\\"On Land\\\"" # 1982
-        elif minor == 10:  # 6.0 ??
+        elif minor == 10:
             return "\\n\\\"Atmospheres and Soundtracks\\\"" # 1983
         elif minor == 11:
             return "\\n\\\"More Music for Films\\\"" # 1983
@@ -360,21 +360,12 @@ def enoify (major, minor):
             return "\\n\\\"The Pearl\\\"" # 1984 Collaborative
         elif minor == 1:
             return "\\n\\\"Begegnungen\\\"" # 1984 Compilation
-        ### From now on, no more compilations, names are not suitable
         elif minor == 2:
             return "\\n\\\"Thursday Afternoon\\\"" # 1985
         elif minor == 3:
-            return "\\n\\\"Music for Films III\\\"" # 1988 Collaborative
+            return "\\n\\\"Hybrid\\\"" # 1985 Collaborative
         elif minor == 4:
-            return "\\n\\\"Wrong Way Up\\\"" # 1990 Collaborative
-        elif minor == 5:
-            return "\\n\\\"Nerve Net\\\"" # 1992
-        elif minor == 6:
-            return "\\n\\\"The Shutov Assembly\\\"" # 1992
-        elif minor == 7:
-            return "\\n\\\"Neroli\\\"" # 1993
-        elif minor == 8:
-            return "\\n\\\"Headcandy\\\"" # 1994
+            return "\\n\\\"Old Land\\\"" # 1985 Compilation
     return "\\\"\\\""
 
 def options(opt):
@@ -410,20 +401,15 @@ def configure(conf):
                     conf.env.append_value(var, ['-isystem', d])
 
     if sys.platform == 'darwin':
-        retval = conf.run_c_code (code='#include <AppKit/NSWindow.h>\n\
-        int main(void) { (void) NSWindowWillStartLiveResizeNotification; return 0; }\n',
-                                  env = conf.env.derive (),
-                                  features = [ 'c' ],
-                                  compiler = 'cc',
-                                  compile_filename='test.m',
-                                  mandatory = False,
-            )
-
-        if retval == 0:
-            autowaf.display_msg (conf, 'Checking for Cocoa live resizing constants', 'ok')
-            conf.define ('HAVE_COCOA_LIVE_RESIZING', 1)
-        else:
-            autowaf.display_msg (conf, 'Checking for Cocoa live resizing constants', 'too old - AU plugin windows will be fixed size')
+        conf.check(
+                msg              ='Checking for Cocoa live resizing constants',
+                fragment         = '#include <AppKit/NSWindow.h>\n int main(void) { (void) NSWindowWillStartLiveResizeNotification; return 0; }\n',
+                define_name      = 'HAVE_COCOA_LIVE_RESIZING',
+                uselib_store     = 'COCOA_LIVE_RESIZING',
+                compiler         = 'cc',
+                compile_filename = 'test.m',
+                execute          = True,
+                mandatory        = False)
 
     conf.write_config_header('gtk2ardour-config.h', remove=False)
 
@@ -516,7 +502,6 @@ def build(bld):
         obj.source    = list(gtk2_ardour_sources)
         obj.target    = 'luadoc'
         obj.includes  = ['.', '../libs']
-        obj.ldflags   = ['-no-undefined']
         obj.use       = [
                 'libpbd',
                 'libardour',
@@ -556,7 +541,6 @@ def build(bld):
 #        obj.source    = [ 'ardour_button.cc', 'ui_config.cc', 'tooltips.cc' ]
 #        obj.target    = 'canvas_test'
 #        obj.includes  = ['.', '../libs']
-#        obj.ldflags   = ['-no-undefined']
 #        obj.use       = [
 #                'libpbd',
 #                'libardour',
@@ -627,9 +611,8 @@ def build(bld):
             obj = bld (features = 'cxx c cxxprogram')
         # operate on copy to avoid adding sources twice
         obj.source    = list(gtk2_ardour_sources)
-        obj.target = 'ardour-' + str (bld.env['VERSION'])
-        obj.includes = ['.']
-        obj.ldflags = ['-no-undefined']
+        obj.target    = 'ardour-' + str (bld.env['VERSION'])
+        obj.includes  = ['.']
 
         if bld.is_defined('WINDOWS_VST_SUPPORT'):
         # Windows VST support mingw
@@ -658,7 +641,7 @@ def build(bld):
         ]
     obj.install_path = bld.env['DLLDIR']
     obj.linkflags    = ''
-    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML '
+    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML LILV'
 
     if sys.platform == 'darwin':
         obj.uselib += ' AUDIOUNITS OSX '
@@ -914,7 +897,7 @@ def build(bld):
     # NATIVE ARDOUR BINDING FILES
     # explicitly state the use of perl here so that it works on windows too
     #
-    a_rule = 'perl ../tools/fmt-bindings --platform="%s" --winkey="%s" --accelmap ${SRC[0].abspath()} >${TGT}' % (sys.platform, bld.env['WINDOWS_KEY'] )
+    a_rule = 'perl %s/tools/fmt-bindings --platform="%s" --winkey="%s" --accelmap ${SRC[0].abspath()} >${TGT}' % (bld.top_dir, sys.platform, bld.env['WINDOWS_KEY'] )
     for b in [ 'ardour' ] :
         obj = bld(
             target = b + '.keys',

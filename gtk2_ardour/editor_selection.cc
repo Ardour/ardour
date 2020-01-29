@@ -177,6 +177,20 @@ Editor::extend_selection_to_track (TimeAxisView& view)
 void
 Editor::select_all_tracks ()
 {
+	TrackViewList tracks;
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*i);
+		if ( rtv && rtv->route()->is_track() ) {
+			tracks.push_back (*i);
+		}
+	}
+	PBD::Unwinder<bool> uw (_track_selection_change_without_scroll, true);
+	selection->set (tracks);
+}
+
+void
+Editor::select_all_visible_lanes ()
+{
 	TrackViewList visible_views;
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		if ((*i)->marked_for_display()) {
@@ -1893,7 +1907,7 @@ Editor::set_selection_from_range (Location& loc)
 	// if no tracks are selected, enable all tracks
 	// (_something_ has to be selected for any range selection, otherwise the user won't see anything)
 	if (selection->tracks.empty()) {
-		select_all_tracks();
+		select_all_visible_lanes();
 	}
 
 	commit_reversible_selection_op ();

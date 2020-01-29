@@ -52,9 +52,7 @@ def build(bld):
         obj.target = 'ardour-vst-scanner'
         obj.chmod  = Utils.O755
         obj.install_path = os.path.join(bld.env['LIBDIR'])
-        obj.dict   = {
-            'VERSION' : bld.env['VERSION'],
-                }
+        obj.VERSION = bld.env['VERSION']
 
         obj = bld (features = 'c cxx cxxprogram wine')
         obj.source = (
@@ -77,7 +75,7 @@ def build(bld):
             obj.linkflags = ['-mwindows']
             obj.use = [ 'libpbd', 'vstwin' ]
         else:
-            obj.uselib = ['GIOMM', 'DL']
+            obj.uselib = ['GIOMM', 'DL', 'OSX']
             obj.use = [ 'libpbd' ]
 
     obj.includes  = [ '../pbd/', '../ardour/', '.' ]

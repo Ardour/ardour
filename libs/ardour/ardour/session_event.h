@@ -91,6 +91,7 @@ public:
 	union {
 		bool second_yes_or_no;
 		double control_value;
+		LocateTransportDisposition locate_transport_disposition;
 	};
 
 	union {

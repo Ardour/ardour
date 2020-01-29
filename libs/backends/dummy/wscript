@@ -25,7 +25,7 @@ def build(bld):
     obj.name     = 'dummy_audiobackend'
     obj.target   = 'dummy_audiobackend'
     obj.use      = 'libardour libpbd libltc'
-    obj.uselib   = 'GLIBMM XML'
+    obj.uselib   = 'GLIBMM XML OSX'
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
     obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
                    'ARDOURBACKEND_DLL_EXPORTS'

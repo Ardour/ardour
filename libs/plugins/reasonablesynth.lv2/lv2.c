@@ -100,13 +100,15 @@ instantiate (const LV2_Descriptor*     descriptor,
 	synth_init(self->synth, rate);
 
 #ifndef PLATFORM_WINDOWS // easter egg is for sane platforms with native support for localtime_r only
-	struct tm date;
-	time_t now;
-	time(&now);
-	localtime_r(&now, &date);
-	if (getenv("ITSXMAS") || (date.tm_mon == 11 /*dec*/ && date.tm_mday == 25)) {
-		printf("reasonable synth.lv2 says: happy holidays!\n");
-		self->xmas = true;
+	if (!getenv("HEATHEN")) {
+		struct tm date;
+		time_t now;
+		time(&now);
+		localtime_r(&now, &date);
+		if (getenv("ITSXMAS") || (date.tm_mon == 11 /*dec*/ && date.tm_mday == 25)) {
+			printf("reasonable synth.lv2 says: happy holidays!\n");
+			self->xmas = true;
+		}
 	}
 #endif
 

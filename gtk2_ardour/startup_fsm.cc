@@ -276,6 +276,8 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 			case RESPONSE_OK:
 			case RESPONSE_ACCEPT:
 				if (AudioEngine::instance()->running()) {
+					/* prevent double clicks from changing engine state */
+					audiomidi_dialog.set_ui_sensitive (false);
 					end_dialog (audiomidi_dialog);
 					engine_running ();
 				} else {
@@ -298,7 +300,25 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 			end_dialog (&plugin_scan_dialog);
 			switch (response) {
 			case RESPONSE_OK:
-				_signal_response (LoadSession);
+				if (AudioEngine::instance()->running()) {
+					_signal_response (LoadSession);
+				} else {
+					/* Engine died unexpectedly (it was
+					 * running after
+					 * WaitingForEngineParams).  Nothing to
+					 * do but go back to the audio/MIDI
+					 * setup. It would be nice, perhaps, to
+					 * show an extra message indicating
+					 * that something is not right.
+					 */
+					ArdourMessageDialog msg (_("Ardour's audioengine has stopped running unexpectedly.\nSomething is probably wrong with your audio/MIDI device settings."));
+					msg.set_position (WIN_POS_CENTER);
+					msg.run();
+					/* This has been shown before, so we do
+					 *  not need start_audio_midi_setup ();
+					 */
+					show_audiomidi_dialog ();
+				}
 				break;
 			default:
 				_signal_response (ExitProgram);

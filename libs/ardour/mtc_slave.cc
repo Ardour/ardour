@@ -431,7 +431,7 @@ MTC_TransportMaster::update_mtc_time (const MIDI::byte *msg, bool was_full, samp
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("update_mtc_time: full TC %1 or outside window %2 MTC %3\n", was_full, outside_window (mtc_frame), mtc_frame));
 		_session->set_requested_return_sample (-1);
 		_session->request_transport_speed (0, TRS_MTC);
-		_session->request_locate (mtc_frame, false, TRS_MTC);
+		_session->request_locate (mtc_frame, MustStop, TRS_MTC);
 		update_mtc_status (MIDI::MTC_Stopped);
 		reset (false);
 		reset_window (mtc_frame);

@@ -436,7 +436,7 @@ Session::session_loaded ()
 	/* Now, finally, we can fill the playback buffers */
 
 	BootMessage (_("Filling playback buffers"));
-	force_locate (_transport_sample, false);
+	force_locate (_transport_sample, MustStop);
 }
 
 string

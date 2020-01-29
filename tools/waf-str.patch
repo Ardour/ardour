@@ -1,0 +1,11 @@
+--- a/waflib/Build.py	2020-01-21 15:01:13.864899388 +0100
++++ b/waflib/Build.py	2020-01-21 15:01:59.573030630 +0100
+@@ -953,7 +953,7 @@
+ 	tsk.link = kw.get('link', '') or kw.get('install_from', '')
+ 	tsk.relative_trick = kw.get('relative_trick', False)
+ 	tsk.type = kw['type']
+-	tsk.install_to = tsk.dest = kw['install_to']
++	tsk.install_to = tsk.dest = str(kw['install_to'])
+ 	tsk.install_from = kw['install_from']
+ 	tsk.relative_base = kw.get('cwd') or kw.get('relative_base', self.path)
+ 	tsk.install_user = kw.get('install_user')

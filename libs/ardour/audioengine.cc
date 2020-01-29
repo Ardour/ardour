@@ -424,6 +424,27 @@ AudioEngine::process_callback (pframes_t nframes)
 		const double engine_speed = tmm.pre_process_transport_masters (nframes, sample_time_at_cycle_start());
 		Port::set_speed_ratio (engine_speed);
 		DEBUG_TRACE (DEBUG::Slave, string_compose ("transport master (current=%1) gives speed %2 (ports using %3)\n", tmm.current() ? tmm.current()->name() : string("[]"), engine_speed, Port::speed_ratio()));
+#if 0 // USE FOR DEBUG ONLY
+		/* use with Dummy backend, engine pulse and
+		 * scripts/_find_nonzero_sample.lua
+		 * to correlate with recorded region alignment.
+		 */
+		static bool was_rolling = false;
+		bool is_rolling = _session->transport_rolling();
+		if (!was_rolling && is_rolling) {
+			samplepos_t stacs = sample_time_at_cycle_start ();
+			samplecnt_t sr = sample_rate ();
+			samplepos_t tp = _session->transport_sample ();
+			/* Note: this does not take Port latency into account:
+			 * - always add 12 samples (Port::_resampler_quality)
+			 * - ExistingMaterial: subtract playback latency from engine-pulse
+			 *   We assume the player listens and plays along. Recorded region is moved
+			 *   back by playback_latency
+			 */
+			printf (" ******** Starting play at %ld, next pulse: %ld\n", stacs, ((sr - (stacs % sr)) %sr) + tp);
+		}
+		was_rolling = is_rolling;
+#endif
 	}
 
 	/* tell all relevant objects that we're starting a new cycle */
@@ -875,12 +896,22 @@ void
 AudioEngine::drop_backend ()
 {
 	if (_backend) {
+		/* see also ::stop() */
 		_backend->stop ();
-		// Stopped is needed for Graph to explicitly terminate threads
+		_running = false;
+		if (_session && !_session->loading() && !_session->deletion_in_progress()) {
+			// it's not a halt, but should be handled the same way:
+			// disable record, stop transport and I/O processign but save the data.
+			_session->engine_halted ();
+		}
+		Port::PortDrop (); /* EMIT SIGNAL */
+		TransportMasterManager& tmm (TransportMasterManager::instance());
+		tmm.engine_stopped ();
+
+		/* Stopped is needed for Graph to explicitly terminate threads */
 		Stopped (); /* EMIT SIGNAL */
 		_backend->drop_device ();
 		_backend.reset ();
-		_running = false;
 	}
 }
 

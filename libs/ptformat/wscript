@@ -42,6 +42,7 @@ def build(bld):
     obj.name         = 'libptformat'
     obj.target       = 'ptformat'
     obj.use          = 'libpbd'
+    obj.uselib       = 'GLIBMM'
     obj.vnum         = LIBPTFORMAT_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
     obj.defines     += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]

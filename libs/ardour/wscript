@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
-from waflib import Options
+from waflib import Options, Task, Tools
 import os
 import sys
 import re
@@ -373,6 +373,11 @@ def build(bld):
     # micro increment <=> no interface changes
     LIBARDOUR_LIB_VERSION = "3.0.0"
 
+    # remove '${DEFINES_ST:DEFINES}' from run_str.
+    # x86_64-w64-mingw32-as (mingw) -D flag is for debug messages
+    if bld.env['build_target'] == 'mingw':
+        class asm(Task.classes['asm']): run_str = '${AS} ${ASFLAGS} ${ASMPATH_ST:INCPATHS} ${AS_SRC_F}${SRC} ${AS_TGT_F}${TGT}'
+
     # operate on copy to avoid adding sources twice
     sources = list(libardour_sources)
 
@@ -479,7 +484,7 @@ def build(bld):
             avx_cxxflags = list(bld.env['CXXFLAGS'])
             avx_cxxflags.append (bld.env['compiler_flags_dict']['avx'])
             avx_cxxflags.append (bld.env['compiler_flags_dict']['pic'])
-            bld(features = 'cxx',
+            bld(features = 'cxx cxxstlib asm',
                 source   = avx_sources,
                 cxxflags = avx_cxxflags,
                 includes = [ '.' ],
@@ -504,7 +509,7 @@ def build(bld):
         testcommon.includes     = obj.includes + ['test', '../pbd', '..']
         testcommon.source       = ['test/testrunner.cc', 'test/test_needing_session.cc',
                                    'test/dummy_lxvst.cc', 'test/audio_region_test.cc', 'test/test_util.cc', 'test/test_ui.cc']
-        testcommon.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
+        testcommon.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD', 'OSX', 'FFTW3F',
                                    'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
         testcommon.use          = ['libpbd','libmidipp','libevoral',
                                    'libaudiographer','libardour']
@@ -581,7 +586,7 @@ def build(bld):
         load_save_session.includes  = obj.includes
         load_save_session.includes.append ('test')
         load_save_session.uselib    = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
-                             'SAMPLERATE','XML','LRDF','COREAUDIO']
+                             'SAMPLERATE','XML','LRDF','COREAUDIO', 'FFTW3F']
         load_save_session.use       = ['libpbd','libmidipp','libardour']
         load_save_session.name      = 'libardour-load-save-session'
         load_save_session.target    = 'load-save-session'
@@ -606,7 +611,7 @@ def build(bld):
             profilingobj.includes  = obj.includes
             profilingobj.includes.append ('test')
             profilingobj.uselib    = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
-                             'SAMPLERATE','XML','LRDF','COREAUDIO']
+                             'SAMPLERATE','XML','LRDF','COREAUDIO', 'FFTW3F']
             profilingobj.use       = ['libpbd','libmidipp','libardour']
             profilingobj.name      = 'libardour-profiling'
             profilingobj.target    = p
@@ -622,7 +627,7 @@ def create_ardour_test_program(bld, includes, name, target, sources):
     testobj              = bld(features = 'cxx cxxprogram')
     testobj.includes     = includes + ['test', '../pbd', '..']
     testobj.source       = sources
-    testobj.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
+    testobj.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD', 'FFTW3F',
                             'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
     testobj.use          = ['libpbd','libmidipp','libevoral',
                             'libaudiographer','libardour','testcommon']

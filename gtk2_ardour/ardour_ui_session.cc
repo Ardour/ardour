@@ -352,7 +352,6 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		if (!AudioEngine::instance()->running()) {
 			audio_midi_setup->set_position (WIN_POS_CENTER);
 			audio_midi_setup->present ();
-			_engine_dialog_connection.disconnect ();
 			_engine_dialog_connection = audio_midi_setup->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::audio_midi_setup_reconfigure_done), path, snap_name, mix_template));
 			/* not done yet, but we're avoiding modal dialogs */
 			return 0;
@@ -365,6 +364,8 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 void
 ARDOUR_UI::audio_midi_setup_reconfigure_done (int response, std::string path, std::string snap_name, std::string mix_template)
 {
+	_engine_dialog_connection.disconnect ();
+
 	switch (response) {
 	case Gtk::RESPONSE_DELETE_EVENT:
 		break;
@@ -562,7 +563,6 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	audio_midi_setup->set_position (WIN_POS_CENTER);
 	audio_midi_setup->set_modal ();
 	audio_midi_setup->present ();
-	_engine_dialog_connection.disconnect ();
 	_engine_dialog_connection = audio_midi_setup->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::audio_midi_setup_for_new_session_done), path, snap_name, session_template, bus_profile));
 
 	/* not done yet, but we're avoiding modal dialogs */
@@ -573,6 +573,8 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 void
 ARDOUR_UI::audio_midi_setup_for_new_session_done (int response, std::string path, std::string snap_name, std::string template_name, BusProfile const& bus_profile)
 {
+	_engine_dialog_connection.disconnect ();
+
 	switch (response) {
 		case Gtk::RESPONSE_DELETE_EVENT:
 			audio_midi_setup->set_modal (false);
@@ -596,7 +598,7 @@ ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& 
 	Session* new_session;
 
 	try {
-		new_session = new Session (*AudioEngine::instance(), path, snap_name, bus_profile.master_out_channels > 0 ? &bus_profile : NULL);
+		new_session = new Session (*AudioEngine::instance(), path, snap_name, bus_profile.master_out_channels > 0 ? &bus_profile : NULL, session_template);
 	}
 	catch (SessionException const& e) {
 		cerr << "Here are the errors associated with this failed session:\n";

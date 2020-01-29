@@ -22,7 +22,7 @@ def build(bld):
     obj.name         = 'libardour_pan1in2out'
     obj.target       = 'pan1in2out'
     obj.use          = 'libardour libardour_cp libpbd'
-    obj.uselib       = 'GLIBMM XML'
+    obj.uselib       = 'GLIBMM XML OSX'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'panners')
 
 def shutdown():

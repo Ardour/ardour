@@ -70,6 +70,7 @@ MidiBuffer::resize (size_t size)
 	cache_aligned_malloc ((void**) &_data, size);
 
 	if (_size) {
+		assert (old_data);
 		memcpy (_data, old_data, _size);
 	}
 

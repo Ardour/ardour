@@ -2182,7 +2182,7 @@ EngineControl::set_state (const XMLNode& root)
 	for (StateList::const_iterator i = states.begin(); i != states.end(); ++i) {
 
 		if ((*i)->active) {
-			return set_current_state (*i);
+			return set_current_state (*i) && 0 == push_state_to_backend (false);
 		}
 	}
 	return false;
@@ -2284,6 +2284,7 @@ EngineControl::set_current_state (const State& state)
 	output_latency.set_value (state->output_latency);
 	midi_option_combo.set_active_text (state->midi_option);
 	use_buffered_io_button.set_active (state->use_buffered_io);
+
 	return true;
 }
 
@@ -2731,6 +2732,10 @@ EngineControl::get_output_device_name () const
 void
 EngineControl::control_app_button_clicked ()
 {
+	if (!_sensitive) {
+		return;
+	}
+
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 
 	if (!backend) {
@@ -2756,6 +2761,10 @@ EngineControl::on_response (int r)
 void
 EngineControl::start_stop_button_clicked ()
 {
+	if (!_sensitive) {
+		return;
+	}
+
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 
 	if (!backend) {
@@ -2777,6 +2786,10 @@ EngineControl::start_stop_button_clicked ()
 void
 EngineControl::update_devices_button_clicked ()
 {
+	if (!_sensitive) {
+		return;
+	}
+
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 
 	if (!backend) {
@@ -2791,6 +2804,10 @@ EngineControl::update_devices_button_clicked ()
 void
 EngineControl::try_autostart_button_clicked ()
 {
+	if (!_sensitive) {
+		return;
+	}
+
 	ARDOUR::Config->set_try_autostart_engine (!try_autostart_button.get_active ());
 	try_autostart_button.set_active (ARDOUR::Config->get_try_autostart_engine ());
 }
@@ -2798,6 +2815,10 @@ EngineControl::try_autostart_button_clicked ()
 void
 EngineControl::use_buffered_io_button_clicked ()
 {
+	if (!_sensitive) {
+		return;
+	}
+
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 
 	if (!backend) {
@@ -3079,6 +3100,10 @@ EngineControl::end_latency_detection ()
 void
 EngineControl::latency_button_clicked ()
 {
+	if (!_sensitive) {
+		return;
+	}
+
 	if (!lm_running) {
 		start_latency_detection ();
 	} else {
@@ -3089,6 +3114,10 @@ EngineControl::latency_button_clicked ()
 void
 EngineControl::latency_back_button_clicked ()
 {
+	if (!_sensitive) {
+		return;
+	}
+
 	ARDOUR::AudioEngine::instance()->stop_latency_detection ();
 	notebook.set_current_page(0);
 }
@@ -3096,6 +3125,10 @@ EngineControl::latency_back_button_clicked ()
 void
 EngineControl::use_latency_button_clicked ()
 {
+	if (!_sensitive) {
+		return;
+	}
+
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	if (_measure_midi) {
 		ARDOUR::MIDIDM* mididm = ARDOUR::AudioEngine::instance()->mididm ();

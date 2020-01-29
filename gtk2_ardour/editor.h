@@ -772,6 +772,7 @@ private:
 	void catch_vanishing_regionview (RegionView*);
 
 	void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
+	void select_all_visible_lanes ();
 	void select_all_tracks ();
 	bool select_all_internal_edit (Selection::Operation);
 

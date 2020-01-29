@@ -289,7 +289,17 @@ AudioTimeAxisView::hide_all_automation (bool apply_to_selection)
 void
 AudioTimeAxisView::route_active_changed ()
 {
+	RouteTimeAxisView::route_active_changed();
 	update_control_names ();
+
+	if (!_route->active()) {
+		controls_table.hide();
+		inactive_table.show_all();
+		RouteTimeAxisView::hide_all_automation();
+	} else {
+		inactive_table.hide();
+		controls_table.show();
+	}
 }
 
 void

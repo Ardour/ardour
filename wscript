@@ -11,6 +11,13 @@ from waflib.Tools import winres
 from waflib.Build import Context
 from waflib.Build import BuildContext
 
+# Fixup OSX 10.5/10.6 builds
+# prefer gcc, g++ 4.x over ancient clang-1.5
+from waflib.Tools.compiler_c import c_compiler
+from waflib.Tools.compiler_cxx import cxx_compiler
+c_compiler['darwin'] = ['gcc', 'clang' ]
+cxx_compiler['darwin'] = ['g++', 'clang++' ]
+
 class i18n(BuildContext):
         cmd = 'i18n'
         fun = 'i18n'
@@ -936,6 +943,12 @@ def configure(conf):
         conf.env.append_value ('CXXFLAGS', '-DSILENCE_AFTER')
         conf.define ('FREEBIE', 1)
 
+    # set explicit LIBDIR, otherwise mingw/windows builds use
+    # conf.env.LIBDIR = conf.env.BINDIR and `waf install` fails
+    # because $BINDIR/ardour6 is the main binary, and $LIBDIR/ardour6/ a directory
+    if Options.options.libdir:
+        conf.env.LIBDIR = Options.options.libdir
+
     if Options.options.lv2dir:
         conf.env['LV2DIR'] = Options.options.lv2dir
     else:
@@ -1036,9 +1049,15 @@ def configure(conf):
     if Options.options.dist_target != 'mingw':
         if Options.options.dist_target != 'msvc' and re.search ("openbsd", sys.platform) == None:
             if re.search ("freebsd", sys.platform) != None:
-                conf.check_cc(function_name='dlopen', header_name='dlfcn.h', uselib_store='DL')
+                conf.check_cc(
+                        msg="Checking for function 'dlopen' in dlfcn.h",
+                        fragment = "#include <dlfcn.h>\n int main(void) { dlopen (\"\", 0); return 0;}\n",
+                        uselib_store='DL', execute = False)
             else:
-                conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
+                conf.check_cc(
+                        msg="Checking for function 'dlopen' in dlfcn.h",
+                        fragment = "#include <dlfcn.h>\n int main(void) { dlopen (\"\", 0); return 0;}\n",
+                        lib='dl', uselib_store='DL', execute = False)
 
     conf.check_cxx(fragment = "#include <boost/version.hpp>\n#if !defined (BOOST_VERSION) || BOOST_VERSION < 105600\n#error boost >= 1.56 is not available\n#endif\nint main(void) { return 0; }\n",
               execute = False,
@@ -1285,6 +1304,17 @@ int main () { return 0; }
 
     # Fix utterly braindead FLAC include path to not smash assert.h
     conf.env['INCLUDES_FLAC'] = []
+
+    if sys.platform == 'darwin':
+        # override waf's -install_name added in
+        # waflib/Tools/ccroot.py when -dynamiclib is used
+        if conf.env.LINKFLAGS_cshlib:
+            conf.env.LINKFLAGS_cshlib = [];
+            conf.env.LDFLAGS_cshlib = ['-dynamiclib']
+
+        if conf.env.LINKFLAGS_cxxshlib:
+            conf.env.LINKFLAGS_cxxshlib = [];
+            conf.env.LDFLAGS_cxxshlib = ['-dynamiclib']
 
     config_text = open('libs/ardour/config_text.cc', "w")
     config_text.write('''#include "ardour/ardour.h"

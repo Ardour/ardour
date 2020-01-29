@@ -676,7 +676,7 @@ Sequence<Time>::end_write (StuckNoteOption option, Time when)
 				if (when <= (*n)->time()) {
 					cerr << "WARNING: Stuck note resolution - end time @ "
 					     << when << " is before note on: " << (**n) << endl;
-					_notes.erase (*n);
+					_notes.erase (n);
 				} else {
 					(*n)->set_length (when - (*n)->time());
 					cerr << "WARNING: resolved note-on with no note-off to generate " << (**n) << endl;

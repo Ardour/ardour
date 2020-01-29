@@ -1351,7 +1351,7 @@ Editor::cursor_align (bool playhead_to_edit)
 			return;
 		}
 
-		_session->request_locate (selection->markers.front()->position(), _session->transport_rolling());
+		_session->request_locate (selection->markers.front()->position(), RollIfAppropriate);
 
 	} else {
 		const int32_t divisions = get_grid_music_divisions (0);
@@ -2267,8 +2267,8 @@ Editor::set_session_start_from_playhead ()
 		return;
 
 	Location* loc;
-	if ((loc = _session->locations()->session_range_location()) == 0) {  //should never happen
-		_session->set_session_extents (_session->audible_sample(), _session->audible_sample());
+	if ((loc = _session->locations()->session_range_location()) == 0) {
+		_session->set_session_extents (_session->audible_sample(), _session->audible_sample() + 3 * 60 * _session->sample_rate());
 	} else {
 		XMLNode &before = loc->get_state();
 
@@ -2294,7 +2294,7 @@ Editor::set_session_end_from_playhead ()
 
 	Location* loc;
 	if ((loc = _session->locations()->session_range_location()) == 0) {  //should never happen
-		_session->set_session_extents (_session->audible_sample(), _session->audible_sample());
+		_session->set_session_extents (0, _session->audible_sample());
 	} else {
 		XMLNode &before = loc->get_state();
 
@@ -2445,7 +2445,7 @@ Editor::jump_forward_to_mark ()
 		return;
 	}
 
-	_session->request_locate (pos, _session->transport_rolling());
+	_session->request_locate (pos, RollIfAppropriate);
 }
 
 void
@@ -2469,7 +2469,7 @@ Editor::jump_backward_to_mark ()
 		return;
 	}
 
-	_session->request_locate (pos, _session->transport_rolling());
+	_session->request_locate (pos, RollIfAppropriate);
 }
 
 void
@@ -2640,13 +2640,13 @@ Editor::transition_to_rolling (bool fwd)
 void
 Editor::play_from_start ()
 {
-	_session->request_locate (_session->current_start_sample(), true);
+	_session->request_locate (_session->current_start_sample(), MustRoll);
 }
 
 void
 Editor::play_from_edit_point ()
 {
-	_session->request_locate (get_preferred_edit_position(), true);
+	_session->request_locate (get_preferred_edit_position(), MustRoll);
 }
 
 void
@@ -2658,7 +2658,7 @@ Editor::play_from_edit_point_and_return ()
 	start_sample = get_preferred_edit_position (EDIT_IGNORE_PHEAD);
 
 	if (_session->transport_rolling()) {
-		_session->request_locate (start_sample, false);
+		_session->request_locate (start_sample, MustStop);
 		return;
 	}
 
@@ -2739,7 +2739,7 @@ Editor::play_with_preroll ()
 		} else {
 			start = 0;
 		}
-		_session->request_locate (start, true);
+		_session->request_locate (start, MustRoll);
 		_session->set_requested_return_sample (ph);  //force auto-return to return to playhead location, without the preroll
 	}
 }
@@ -2781,7 +2781,7 @@ Editor::loop_location (Location& location)
 		tll->set (location.start(), location.end());
 
 		// enable looping, reposition and start rolling
-		_session->request_locate (tll->start(), true);
+		_session->request_locate (tll->start(), MustRoll);
 		_session->request_play_loop (true);
 	}
 }
@@ -2943,8 +2943,12 @@ Editor::rename_region ()
 	std::string str = entry.get_text();
 	strip_whitespace_edges (str);
 	if (!str.empty()) {
-		rs.front()->region()->set_name (str);
-		_regions->redisplay ();
+		if (!rs.front()->region()->set_name (str)) {
+			ArdourMessageDialog msg (_("Rename failed. Check for characters such as '/' or ':'"));
+			msg.run ();
+		} else {
+			_regions->redisplay ();
+		}
 	}
 }
 
@@ -6520,7 +6524,7 @@ void
 Editor::set_playhead_cursor ()
 {
 	if (entered_marker) {
-		_session->request_locate (entered_marker->position(), _session->transport_rolling());
+		_session->request_locate (entered_marker->position(), RollIfAppropriate);
 	} else {
 		MusicSample where (0, 0);
 		bool ignored;
@@ -6532,7 +6536,7 @@ Editor::set_playhead_cursor ()
 		snap_to (where);
 
 		if (_session) {
-			_session->request_locate (where.sample, _session->transport_rolling());
+			_session->request_locate (where.sample, RollIfAppropriate);
 		}
 	}
 
@@ -6639,7 +6643,7 @@ Editor::set_loop_from_region (bool play)
 	set_loop_range (start, end, _("set loop range from region"));
 
 	if (play) {
-		_session->request_locate (start, true);
+		_session->request_locate (start, MustRoll);
 		_session->request_play_loop (true);
 	}
 }
@@ -7525,7 +7529,7 @@ Editor::playhead_backward_to_grid ()
 			}
 		}
 
-		_session->request_locate (pos.sample, _session->transport_rolling());
+		_session->request_locate (pos.sample, RollIfAppropriate);
 	}
 
 	/* keep PH visible in window */
@@ -8173,8 +8177,8 @@ Editor::fit_tracks (TrackViewList & tracks)
 	if (h < TimeAxisView::preset_height (HeightSmall)) {
 		ArdourMessageDialog msg (_("There are too many tracks to fit in the current window"));
 		msg.run ();
-		/* too small to be displayed */
-		return;
+		/* too small to be displayed, just use smallest possible */
+		h = HeightSmall;
 	}
 
 	undo_visual_stack.push_back (current_visual_state (true));

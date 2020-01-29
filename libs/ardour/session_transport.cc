@@ -85,7 +85,7 @@ using namespace PBD;
 
 #define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::Event (evtype)); }
 #define TFSM_STOP(abort,clear) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StopTransport,abort,clear)); }
-#define TFSM_LOCATE(target,roll,flush,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,roll,flush,loop,force)); }
+#define TFSM_LOCATE(target,ltd,flush,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,ltd,flush,loop,force)); }
 
 /* *****************************************************************************
  * REALTIME ACTIONS (to be called on state transitions)
@@ -183,8 +183,8 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	 * changes in the value of _transport_sample.
 	 */
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1, roll %2 flush %3 for loop end %4 force %5 mmc %6\n",
-	                                               target_sample, with_roll, with_flush, for_loop_end, force, with_mmc));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1 ts = %7, roll %2 flush %3 for loop end %4 force %5 mmc %6\n",
+	                                               target_sample, with_roll, with_flush, for_loop_end, force, with_mmc, _transport_sample));
 
 	if (!force && _transport_sample == target_sample && !loop_changing && !for_loop_end) {
 
@@ -470,7 +470,7 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 
 					/* jump to start and then roll from there */
 
-					request_locate (location->start(), true);
+					request_locate (location->start(), MustRoll);
 					return;
 				}
 			}
@@ -585,7 +585,9 @@ Session::start_transport ()
 
 	_last_roll_location = _transport_sample;
 	_last_roll_or_reversal_location = _transport_sample;
-	_remaining_latency_preroll = worst_latency_preroll_buffer_size_ceil ();
+	if (!have_looped) {
+		_remaining_latency_preroll = worst_latency_preroll_buffer_size_ceil ();
+	}
 
 	have_looped = false;
 
@@ -623,7 +625,7 @@ Session::start_transport ()
 	if (!_engine.freewheeling()) {
 		Timecode::Time time;
 		timecode_time_subframes (_transport_sample, time);
-		if (transport_master()->type() == MTC) {
+		if (transport_master()->type() != MTC) { // why not when slaved to MTC?
 			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
 		}
 
@@ -722,8 +724,10 @@ Session::butler_completed_transport_work ()
 		start_after_butler_done_msg = true;
 	}
 
-	ptw = PostTransportWork (ptw & ~(PostTransportAdjustPlaybackBuffering|PostTransportAdjustCaptureBuffering|PostTransportOverWrite|PostTransportReverse|PostTransportRoll));
-	set_post_transport_work (ptw);
+	/* the butler finished its work so clear all PostTransportWork flags
+	 */
+
+	set_post_transport_work (PostTransportWork (0));
 
 	set_next_event ();
 
@@ -757,7 +761,7 @@ Session::maybe_stop (samplepos_t limit)
 		if (synced_to_engine ()) {
 			_engine.transport_stop ();
 		} else {
-			TFSM_EVENT (TransportFSM::StopTransport);
+			TFSM_STOP (false, false);
 		}
 		return true;
 	}
@@ -910,7 +914,7 @@ Session::request_stop (bool abort, bool clear_state, TransportRequestSource orig
 }
 
 void
-Session::request_locate (samplepos_t target_sample, bool with_roll, TransportRequestSource origin)
+Session::request_locate (samplepos_t target_sample, LocateTransportDisposition ltd, TransportRequestSource origin)
 {
 	if (synced_to_engine()) {
 		_engine.transport_locate (target_sample);
@@ -921,16 +925,36 @@ Session::request_locate (samplepos_t target_sample, bool with_roll, TransportReq
 		return;
 	}
 
-	SessionEvent *ev = new SessionEvent (with_roll ? SessionEvent::LocateRoll : SessionEvent::Locate, SessionEvent::Add, SessionEvent::Immediate, target_sample, 0, false);
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request locate to %1\n", target_sample));
+	SessionEvent::Type type;
+
+	switch (ltd) {
+	case MustRoll:
+		type = SessionEvent::LocateRoll;
+		break;
+	case MustStop:
+		type = SessionEvent::Locate;
+		break;
+	case RollIfAppropriate:
+		if (config.get_auto_play()) {
+			type = SessionEvent::LocateRoll;
+		} else {
+			type = SessionEvent::Locate;
+		}
+		break;
+	}
+
+	SessionEvent *ev = new SessionEvent (type, SessionEvent::Add, SessionEvent::Immediate, target_sample, 0, false);
+	ev->locate_transport_disposition = ltd;
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request locate to %1 ltd = %2\n", target_sample, enum_2_string (ltd)));
 	queue_event (ev);
 }
 
 void
-Session::force_locate (samplepos_t target_sample, bool with_roll)
+Session::force_locate (samplepos_t target_sample, LocateTransportDisposition ltd)
 {
-	SessionEvent *ev = new SessionEvent (with_roll ? SessionEvent::LocateRoll : SessionEvent::Locate, SessionEvent::Add, SessionEvent::Immediate, target_sample, 0, true);
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request forced locate to %1\n", target_sample));
+	SessionEvent *ev = new SessionEvent (SessionEvent::Locate, SessionEvent::Add, SessionEvent::Immediate, target_sample, 0, true);
+	ev->locate_transport_disposition = ltd;
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request forced locate to %1 roll %2\n", target_sample, enum_2_string (ltd)));
 	queue_event (ev);
 }
 
@@ -954,7 +978,7 @@ Session::request_preroll_record_trim (samplepos_t rec_in, samplecnt_t preroll)
 	samplepos_t pos = std::max ((samplepos_t)0, rec_in - preroll);
 	_preroll_record_trim_len = preroll;
 	maybe_enable_record ();
-	request_locate (pos, true);
+	request_locate (pos, MustRoll);
 	set_requested_return_sample (rec_in);
 }
 
@@ -1098,7 +1122,9 @@ Session::butler_transport_work ()
 	int on_entry = g_atomic_int_get (&_butler->should_do_transport_work);
 	bool finished = true;
 	PostTransportWork ptw = post_transport_work();
+#ifndef NDEBUG
 	uint64_t before;
+#endif
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler transport work, todo = [%1] (0x%3%4%5) at %2\n", enum_2_string (ptw), (before = g_get_monotonic_time()), std::hex, ptw, std::dec));
 
@@ -1219,7 +1245,7 @@ Session::butler_transport_work ()
 
 	g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose (X_("Butler transport work all done after %1 usecs @ %2 trw = %3\n"), g_get_monotonic_time() - before, _transport_sample, _butler->transport_work_requested()));
+	DEBUG_TRACE (DEBUG::Transport, string_compose (X_("Butler transport work all done after %1 usecs @ %2 ptw %3 trw = %4\n"), g_get_monotonic_time() - before, _transport_sample, enum_2_string (post_transport_work()), _butler->transport_work_requested()));
 }
 
 void
@@ -1367,7 +1393,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		_have_captured = true;
 	}
 
-	DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: DS stop\n"));
+	DEBUG_TRACE (DEBUG::Transport, X_("Butler post-transport-work, non realtime stop\n"));
 
 	if (abort && did_record) {
 		/* no reason to save the session file when we remove sources
@@ -1415,7 +1441,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	 * location, or just back to the start of the last roll.
 	 */
 
-	if (transport_master_no_external_or_using_engine() && !(ptw & PostTransportLocate)) {
+	if (transport_master_no_external_or_using_engine() && !locate_initiated()) {
 
 		bool do_locate = false;
 
@@ -1493,10 +1519,10 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		}
 	}
 
-	/* this for() block can be put inside the previous if() and has the effect of ... ??? what */
+	if (!_transport_fsm->declicking_for_locate()) {
 
-	{
 		DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: locate\n"));
+
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler PTW: locate on %1\n", (*i)->name()));
 			(*i)->non_realtime_locate (_transport_sample);
@@ -1507,9 +1533,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 				return;
 			}
 		}
-	}
 
-	{
 		VCAList v = _vca_manager->vcas ();
 		for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
 			(*i)->non_realtime_locate (_transport_sample);
@@ -1526,7 +1550,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		// need to queue this in the next RT cycle
 		_send_timecode_update = true;
 
-		if (transport_master()->type() == MTC) {
+		if (transport_master()->type() != MTC) { // why?
 			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
 
 			/* This (::non_realtime_stop()) gets called by main
@@ -1564,9 +1588,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC with speed = %1\n", _transport_speed));
 	TransportStateChange (); /* EMIT SIGNAL */
 	AutomationWatch::instance().transport_stop_automation_watches (_transport_sample);
-
-	ptw = PostTransportWork (ptw & ~(PostTransportAbort|PostTransportStop|PostTransportClearSubstate));
-	set_post_transport_work (ptw);
 }
 
 void
@@ -1612,10 +1633,10 @@ Session::set_play_loop (bool yn, bool change_transport_state)
 				   crude mechanism. Got a better idea?
 				*/
 				loop_changing = true;
-				TFSM_LOCATE (loc->start(), true, true, false, true);
+				TFSM_LOCATE (loc->start(), MustRoll, true, false, true);
 			} else if (!transport_rolling()) {
 				/* loop-is-mode: not rolling, just locate to loop start */
-				TFSM_LOCATE (loc->start(), false, true, false, true);
+				TFSM_LOCATE (loc->start(), MustStop, true, false, true);
 			}
 		}
 
@@ -1640,7 +1661,7 @@ Session::unset_play_loop (bool change_transport_state)
 		/* likely need to flush track buffers: this will locate us to wherever we are */
 
 		if (change_transport_state && transport_rolling ()) {
-			TFSM_EVENT (TransportFSM::StopTransport);
+			TFSM_STOP (false, false);
 		}
 
 		overwrite_some_buffers (boost::shared_ptr<Route>(), LoopDisabled);
@@ -2016,6 +2037,12 @@ bool
 Session::locate_pending () const
 {
 	return _transport_fsm->locating();
+}
+
+bool
+Session::locate_initiated() const
+{
+	return _transport_fsm->declicking_for_locate() || _transport_fsm->locating();
 }
 
 bool

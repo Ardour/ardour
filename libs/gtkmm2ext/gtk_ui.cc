@@ -36,6 +36,7 @@
 #include "pbd/error.h"
 #include "pbd/touchable.h"
 #include "pbd/failed_constructor.h"
+#include "pbd/localtime_r.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/replace_all.h"
 
@@ -643,6 +644,13 @@ UI::display_message (const char *prefix, gint /*prefix_len*/, RefPtr<TextBuffer:
 {
 	RefPtr<TextBuffer> buffer (errors->text().get_buffer());
 
+	char timebuf[128];
+	time_t n = time (NULL);
+	struct tm local_time;
+	localtime_r (&n, &local_time);
+	strftime (timebuf, sizeof(timebuf), "%FT%H:%M:%S ", &local_time);
+
+	buffer->insert_with_tag(buffer->end(), timebuf, ptag);
 	buffer->insert_with_tag(buffer->end(), prefix, ptag);
 	buffer->insert_with_tag(buffer->end(), msg, mtag);
 	buffer->insert_with_tag(buffer->end(), "\n", mtag);

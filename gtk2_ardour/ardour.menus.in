@@ -185,6 +185,7 @@
       <menu action="SelectMenu">
         <menuitem action='select-all-objects'/>
         <menuitem action='select-all-tracks'/>
+        <menuitem action='select-all-visible-lanes'/>
         <menuitem action='deselect-all'/>
         <menuitem action='invert-selection'/>
         <separator/>

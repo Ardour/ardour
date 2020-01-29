@@ -29,7 +29,7 @@ def build(bld):
     obj.name     = 'coreaudio_backend'
     obj.target   = 'coreaudio_backend'
     obj.use      = 'libardour libpbd'
-    obj.uselib   = 'GLIBMM XML'
+    obj.uselib   = 'GLIBMM XML OSX'
     obj.framework = [ 'CoreAudio', 'AudioToolbox', 'CoreServices' ]
     if bld.env['build_target'] not in [ 'lion', 'el_capitan' ] and (not bld.env['build_arch'] == "ppc"):
         obj.framework += [ 'CoreMidi' ]

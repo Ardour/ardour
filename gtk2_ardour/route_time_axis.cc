@@ -288,6 +288,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	update_track_number_visibility();
+	route_active_changed();
 	label_view ();
 
 	if (ARDOUR::Profile->get_mixbus()) {
@@ -424,6 +425,9 @@ RouteTimeAxisView::label_view ()
 	if (x != name_label.get_text ()) {
 		name_label.set_text (x);
 	}
+
+	inactive_label.set_text (string_compose("(%1)", x));
+
 	const int64_t track_number = _route->track_number ();
 	if (track_number == 0) {
 		number_label.set_text ("");
@@ -443,10 +447,12 @@ RouteTimeAxisView::update_track_number_visibility ()
 	}
 
 	if (number_label.get_parent()) {
-		controls_table.remove (number_label);
+		number_label.get_parent()->remove (number_label);
 	}
 	if (show_label) {
-		if (ARDOUR::Profile->get_mixbus()) {
+		if (!_route->active()) {
+			inactive_table.attach (number_label, 0, 1, 0, 1, Gtk::SHRINK, Gtk::EXPAND|Gtk::FILL, 1, 0);
+		} else if (ARDOUR::Profile->get_mixbus()) {
 			controls_table.attach (number_label, 3, 4, 0, 1, Gtk::SHRINK, Gtk::EXPAND|Gtk::FILL, 1, 0);
 		} else {
 			controls_table.attach (number_label, 0, 1, 0, 1, Gtk::SHRINK, Gtk::EXPAND|Gtk::FILL, 1, 0);
@@ -461,6 +467,13 @@ RouteTimeAxisView::update_track_number_visibility ()
 	} else {
 		number_label.hide ();
 	}
+}
+
+void
+RouteTimeAxisView::route_active_changed ()
+{
+	RouteUI::route_active_changed ();
+	update_track_number_visibility ();
 }
 
 void
@@ -1243,7 +1256,7 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 		if (_editor.get_selection().selected (this)) {
 			_editor.get_selection().clear_tracks ();
 		} else {
-			_editor.select_all_tracks ();
+			_editor.select_all_visible_lanes ();
 		}
 
 		_editor.commit_reversible_selection_op ();

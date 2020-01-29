@@ -44,37 +44,46 @@ struct TransportFSM
 
 	struct Event : public boost::intrusive::list_base_hook<> {
 		EventType type;
-		union {
-			bool abort; /* for stop */
-			bool with_roll; /* for locate */
-		};
-		union {
-			bool clear_state; /* for stop */
-			bool with_flush; /* for locate */
-		};
+		/* for stop */
+		bool abort;
+		bool clear_state;
 		/* for locate */
+		LocateTransportDisposition ltd;
+		bool with_flush;
 		samplepos_t target;
 		bool for_loop_end;
 		bool force;
 
 		Event (EventType t)
 			: type (t)
-			, with_roll (false)
+			, abort (false)
+			, clear_state (false)
+			, ltd (MustStop)
 			, with_flush (false)
 			, target (0)
 			, for_loop_end (false)
 			, force (false)
-		{}
+		{
+			assert (t != StopTransport);
+			assert (t != Locate);
+		}
 		Event (EventType t, bool ab, bool cl)
 			: type (t)
 			, abort (ab)
 			, clear_state (cl)
+			, ltd (MustStop)
+			, with_flush (false)
+			, target (0)
+			, for_loop_end (false)
+			, force (false)
 		{
 			assert (t == StopTransport);
 		}
-		Event (EventType t, samplepos_t pos, bool r, bool fl, bool lp, bool f4c)
+		Event (EventType t, samplepos_t pos, LocateTransportDisposition l, bool fl, bool lp, bool f4c)
 			: type (t)
-			, with_roll (r)
+			, abort (false)
+			, clear_state (false)
+			, ltd (l)
 			, with_flush (fl)
 			, target (pos)
 			, for_loop_end (lp)
@@ -131,7 +140,7 @@ struct TransportFSM
 
 	void schedule_butler_for_transport_work () const;
 	void start_playback ();
-	void stop_playback ();
+	void stop_playback (Event const &);
 	void start_locate_after_declick () const;
 	void locate_for_loop (Event const &);
 	void roll_after_locate () const;
@@ -151,6 +160,7 @@ struct TransportFSM
 	bool stopping () const           { return _motion_state == DeclickToStop; }
 	bool waiting_for_butler() const  { return _butler_state == WaitingForButler; }
 	bool declick_in_progress() const { return _motion_state == DeclickToLocate || _motion_state == DeclickToStop; }
+	bool declicking_for_locate() const { return _motion_state == DeclickToLocate; }
 
 	void enqueue (Event* ev);
 
@@ -163,7 +173,6 @@ struct TransportFSM
 	bool process_event (Event&, bool was_deferred, bool& deferred);
 
 	Event _last_locate;
-	Event _last_stop;
 
 	TransportAPI* api;
 	typedef boost::intrusive::list<Event> EventList;
@@ -175,6 +184,7 @@ struct TransportFSM
 	void defer (Event& ev);
 	void bad_transition (Event const &);
 	void set_roll_after (bool) const;
+	bool compute_should_roll (LocateTransportDisposition) const;
 };
 
 } /* end namespace ARDOUR */

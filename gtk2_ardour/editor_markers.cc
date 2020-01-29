@@ -1179,15 +1179,15 @@ Editor::marker_menu_play_from ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			_session->request_locate (l->start(), true);
+			_session->request_locate (l->start(), MustRoll);
 		}
 		else {
 			//_session->request_bounded_roll (l->start(), l->end());
 
 			if (is_start) {
-				_session->request_locate (l->start(), true);
+				_session->request_locate (l->start(), MustRoll);
 			} else {
-				_session->request_locate (l->end(), true);
+				_session->request_locate (l->end(), MustRoll);
 			}
 		}
 	}
@@ -1209,13 +1209,13 @@ Editor::marker_menu_set_playhead ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			_session->request_locate (l->start(), false);
+			_session->request_locate (l->start(), MustStop);
 		}
 		else {
 			if (is_start) {
-				_session->request_locate (l->start(), false);
+				_session->request_locate (l->start(), MustStop);
 			} else {
-				_session->request_locate (l->end(), false);
+				_session->request_locate (l->end(), MustStop);
 			}
 		}
 	}
@@ -1330,7 +1330,7 @@ Editor::marker_menu_play_range ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			_session->request_locate (l->start(), true);
+			_session->request_locate (l->start(), MustRoll);
 		}
 		else {
 			_session->request_bounded_roll (l->start(), l->end());
@@ -1356,7 +1356,7 @@ Editor::marker_menu_loop_range ()
 		if (l != transport_loop_location()) {
 			set_loop_range (l->start(), l->end(), _("loop range from marker"));
 		}
-		_session->request_locate (l->start(), true);
+		_session->request_locate (l->start(), MustRoll);
 		_session->request_play_loop (true);
 	}
 }
@@ -1768,7 +1768,7 @@ Editor::goto_nth_marker (int n)
 	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
 		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_session_range()) {
 			if (n == 0) {
-				_session->request_locate ((*i)->start(), _session->transport_rolling());
+				_session->request_locate ((*i)->start(), RollIfAppropriate);
 				break;
 			}
 			--n;

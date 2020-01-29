@@ -143,9 +143,9 @@ Region::make_property_quarks ()
 	Properties::layering_index.property_id = g_quark_from_static_string (X_("layering-index"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for layering_index = %1\n",	Properties::layering_index.property_id));
 	Properties::tags.property_id = g_quark_from_static_string (X_("tags"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for tags = %1\n", 	Properties::tags.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for tags = %1\n",	Properties::tags.property_id));
 	Properties::contents.property_id = g_quark_from_static_string (X_("contents"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for contents = %1\n", 	Properties::contents.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for contents = %1\n",	Properties::contents.property_id));
 }
 
 void
@@ -320,10 +320,10 @@ Region::Region (boost::shared_ptr<const Region> other)
 	/* sync pos is relative to start of file. our start-in-file is now zero,
 	 * so set our sync position to whatever the the difference between
 	 * _start and _sync_pos was in the other region.
-	 * 
+	 *
 	 * result is that our new sync pos points to the same point in our source(s)
 	 * as the sync in the other region did in its source(s).
-	 * 
+	 *
 	 * since we start at zero in our source(s), it is not possible to use a sync point that
 	 * is before the start. reset it to _start if that was true in the other region.
 	 */
@@ -346,7 +346,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 }
 
 /** Create a new Region from part of an existing one.
- * 
+ *
  * the start within \a other is given by \a offset
  * (i.e. relative to the start of \a other's sources, the start is \a offset + \a other.start()
  */
@@ -447,13 +447,13 @@ Region::set_playlist (boost::weak_ptr<Playlist> wpl)
 bool
 Region::set_name (const std::string& str)
 {
-	if (_name != str) {
-		SessionObject::set_name(str); // EMIT SIGNAL NameChanged()
-		assert(_name == str);
-
-		send_change (Properties::name);
+	if (_name == str) {
+		return true;
 	}
 
+	SessionObject::set_name (str); // EMIT SIGNAL NameChanged()
+	assert (_name == str);
+	send_change (Properties::name);
 	return true;
 }
 
@@ -473,7 +473,6 @@ Region::set_selected_for_solo(bool yn)
 
 		_soloSelected = yn;
 	}
-	
 }
 
 void
@@ -685,7 +684,7 @@ Region::set_position_internal (samplepos_t pos, bool allow_bbt_recompute, const 
 
 		/* check that the new _position wouldn't make the current
 		 * length impossible - if so, change the length.
-		 * 
+		 *
 		 * XXX is this the right thing to do?
 		 */
 		if (max_samplepos - _length < _position) {
@@ -738,7 +737,7 @@ Region::set_position_music_internal (double qn)
 
 		/* check that the new _position wouldn't make the current
 		 * length impossible - if so, change the length.
-		 * 
+		 *
 		 * XXX is this the right thing to do?
 		 */
 		if (max_samplepos - _length < _position) {
@@ -765,7 +764,7 @@ Region::set_initial_position (samplepos_t pos)
 
 		/* check that the new _position wouldn't make the current
 		 * length impossible - if so, change the length.
-		 * 
+		 *
 		 * XXX is this the right thing to do?
 		 */
 
@@ -1999,4 +1998,3 @@ Region::latest_possible_sample () const
 
 	return _position + (minlen - _start) - 1;
 }
-

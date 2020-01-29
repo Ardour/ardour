@@ -58,7 +58,7 @@ Editor::keyboard_selection_finish (bool /*add*/, Editing::EditIgnoreOption ign)
 
 		//if no tracks are selected and we're working from the keyboard, enable all tracks (_something_ has to be selected for any range selection)
 		if ( (_edit_point == EditAtPlayhead) && selection->tracks.empty() )
-			select_all_tracks();
+			select_all_visible_lanes();
 
 		selection->set (start.sample, end);
 
@@ -95,7 +95,7 @@ Editor::keyboard_selection_begin (Editing::EditIgnoreOption ign)
 
 		//if no tracks are selected and we're working from the keyboard, enable all tracks (_something_ has to be selected for any range selection)
 		if ( selection->tracks.empty() )
-			select_all_tracks();
+			select_all_visible_lanes();
 
 		selection->set (start.sample, end.sample);
 

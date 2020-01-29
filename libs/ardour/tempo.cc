@@ -3407,11 +3407,12 @@ TempoMap::gui_stretch_tempo (TempoSection* ts, const samplepos_t sample, const s
 		if (ts_copy->clamped()) {
 			TempoSection* next_t = next_tempo_section_locked (future_map, ts_copy);
 			TempoSection* prev_to_ts_copy = previous_tempo_section_locked (future_map, ts_copy);
+			assert (prev_to_ts_copy);
 			/* the change in samples is the result of changing the slope of at most 2 previous tempo sections.
 			 * constant to constant is straightforward, as the tempo prev to ts_copy has constant slope.
 			 */
 			double contribution = 0.0;
-			if (next_t && prev_to_ts_copy && prev_to_ts_copy->type() == TempoSection::Ramp) {
+			if (next_t && prev_to_ts_copy->type() == TempoSection::Ramp) {
 				contribution = (ts_copy->pulse() - prev_to_ts_copy->pulse()) / (double) (next_t->pulse() - prev_to_ts_copy->pulse());
 			}
 			samplepos_t const fr_off = end_sample - sample;

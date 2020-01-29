@@ -94,6 +94,7 @@ def build(bld):
                             os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
     if sys.platform == 'darwin':
         obj.source += ['gtkapplication_quartz.mm', 'nsglview.mm']
+        obj.uselib += ' OSX'
     else:
         obj.source += ['gtkapplication_x11.c']
 

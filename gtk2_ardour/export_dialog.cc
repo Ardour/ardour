@@ -62,6 +62,7 @@ ExportDialog::ExportDialog (PublicEditor & editor, std::string title, ARDOUR::Ex
   , list_files_label (_("<span color=\"#ffa755\">Some already existing files will be overwritten.</span>"), Gtk::ALIGN_RIGHT)
   , list_files_button (_("List files"))
   , previous_progress (0)
+  , _initialized (false)
 { }
 
 ExportDialog::~ExportDialog ()
@@ -114,8 +115,18 @@ ExportDialog::set_session (ARDOUR::Session* s)
 	channel_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_realtime_selection));
 	file_notebook->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings_and_example_filename));
 
+	/* Catch major selection changes, and set the session dirty */
+
+	preset_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::maybe_set_session_dirty));
+	timespan_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::maybe_set_session_dirty));
+	channel_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::maybe_set_session_dirty));
+	channel_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::maybe_set_session_dirty));
+	file_notebook->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::maybe_set_session_dirty));
+
 	update_warnings_and_example_filename ();
 	update_realtime_selection ();
+
+	_initialized = true;
 
 	_session->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&ExportDialog::parameter_changed, this, _1), gui_context());
 }
@@ -225,6 +236,17 @@ ExportDialog::sync_with_manager ()
 
 	update_warnings_and_example_filename ();
 	update_realtime_selection ();
+}
+
+
+void
+ExportDialog::maybe_set_session_dirty ()
+{
+	/* Presumably after all initialization is finished, sync_with_manager means that something important changed. */
+	/* Let's prompt the user to save the session; otherwise these Export settings changes would be lost on re-open */
+	if (_initialized) {
+		_session->set_dirty();
+	}
 }
 
 void

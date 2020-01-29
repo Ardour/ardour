@@ -47,7 +47,6 @@ def build(bld):
     obj.name            = 'zita-convolver'
     obj.target          = 'zita-convolver'
     obj.vnum            = ZCONVOLVER_LIB_VERSION
-    obj.install_path    = bld.env['LIBDIR']
     obj.uselib          = 'FFTW3F'
     obj.defines         = [ 'PACKAGE="' + I18N_PACKAGE + '"', 'ENABLE_VECTOR_MODE', '_POSIX_PTHREAD_SEMANTICS', '_REENTRANT' ]
 

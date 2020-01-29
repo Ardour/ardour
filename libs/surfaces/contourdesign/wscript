@@ -27,7 +27,7 @@ def build(bld):
     obj.includes     = ['.', '../libs', '../../widgets']
     obj.name         = 'libardour_contourdesign'
     obj.target       = 'ardour_contourdesign'
-    obj.uselib       = 'GTKMM USB'
+    obj.uselib       = 'GTKMM USB XML OSX'
     obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd libwidgets'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 
