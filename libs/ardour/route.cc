@@ -2494,8 +2494,12 @@ Route::state (bool save_template)
 
 		std::string modified_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 		child->set_property("modified-with", modified_with);
-		node->set_property("version", CURRENT_SESSION_FILE_VERSION);
 	}
+
+	/* This is needed for templates and when duplicating routes, in which case
+	 * the route-state is directly passed to new_route_from_template().
+	 */
+	node->set_property("version", CURRENT_SESSION_FILE_VERSION);
 
 	node->set_property (X_("id"), id ());
 	node->set_property (X_("name"), name());
@@ -2590,9 +2594,6 @@ Route::state (bool save_template)
 int
 Route::set_state (const XMLNode& node, int version)
 {
-	/* when loading a template, use the version of the Route (if available) */
-	node.get_property (X_("version"), version);
-
 	if (version < 3000) {
 		return set_state_2X (node, version);
 	}

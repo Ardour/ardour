@@ -177,8 +177,6 @@ Track::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	node.get_property (X_("version"), version);
-
 	if (version >= 3000 && version < 6000) {
 		if (XMLNode* ds_node = find_named_node (node, "Diskstream")) {
 			std::string name;
