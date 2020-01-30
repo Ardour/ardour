@@ -5596,7 +5596,7 @@ Session::undo (uint32_t n)
 	if (actively_recording()) {
 		return;
 	}
-
+	StateProtector stp (this);
 	_history.undo (n);
 }
 
@@ -5607,5 +5607,6 @@ Session::redo (uint32_t n)
 		return;
 	}
 
+	StateProtector stp (this);
 	_history.redo (n);
 }
