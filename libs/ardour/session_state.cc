@@ -765,9 +765,9 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	/* template and archive are exclusive */
 	assert (!template_only || !for_archive);
 	/* switch_to_snapshot needs a new name and can't be pending */
-	assert (!switch_to_snapshot || (!snapshot_name.empty () && !pending && !template_only && !for_archive));
+	assert (!switch_to_snapshot || (!snapshot_name.empty () && snapshot_name != _current_snapshot_name && !pending && !template_only && !for_archive));
 	/* pending saves are for current snapshot only */
-	assert (!pending || (snapshot_name.empty () && !template_only && !for_archive));
+	assert (!pending || ((snapshot_name.empty () || snapshot_name == _current_snapshot_name) && !template_only && !for_archive));
 
 	XMLTree tree;
 	std::string xml_path(_session_dir->root_path());
@@ -786,7 +786,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	if (g_atomic_int_get(&_suspend_save)) {
 		/* StateProtector cannot be used for templates or save-as */
-		assert (!template_only && !switch_to_snapshot && !for_archive && snapshot_name.empty ());
+		assert (!template_only && !switch_to_snapshot && !for_archive && (snapshot_name.empty () || snapshot_name == _current_snapshot_name));
 		if (pending) {
 			_save_queued_pending = true;
 		} else {
