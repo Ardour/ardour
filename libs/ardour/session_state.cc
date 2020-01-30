@@ -785,10 +785,20 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	}
 
 	if (g_atomic_int_get(&_suspend_save)) {
-		_save_queued = true;
+		/* StateProtector cannot be used for templates or save-as */
+		assert (!template_only && !switch_to_snapshot && !for_archive && snapshot_name.empty ());
+		if (pending) {
+			_save_queued_pending = true;
+		} else {
+			_save_queued = true;
+		}
 		return 1;
 	}
-	_save_queued = false;
+	if (pending) {
+		_save_queued_pending = false;
+	} else {
+		_save_queued = false;
+	}
 
 	snapshot_t fork_state = NormalSave;
 	if (!snapshot_name.empty() && snapshot_name != _current_snapshot_name && !template_only && !pending && !for_archive) {

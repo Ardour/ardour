@@ -628,6 +628,10 @@ public:
 						_session->_save_queued = false;
 						_session->save_state ("");
 					}
+					while (_session->_save_queued_pending) {
+						_session->_save_queued_pending = false;
+						_session->save_state ("", true);
+					}
 				}
 			}
 		private:
@@ -1413,6 +1417,8 @@ private:
 	friend class    StateProtector;
 	gint            _suspend_save; /* atomic */
 	volatile bool   _save_queued;
+	volatile bool   _save_queued_pending;
+
 	Glib::Threads::Mutex save_state_lock;
 	Glib::Threads::Mutex save_source_lock;
 	Glib::Threads::Mutex peak_cleanup_lock;
