@@ -760,6 +760,15 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 {
 	DEBUG_TRACE (DEBUG::Locale, string_compose ("Session::save_state locale '%1'\n", setlocale (LC_NUMERIC, NULL)));
 
+	/* only_used_assets is only possible when archiving */
+	assert (!only_used_assets || for_archive);
+	/* template and archive are exclusive */
+	assert (!template_only || !for_archive);
+	/* switch_to_snapshot needs a new name and can't be pending */
+	assert (!switch_to_snapshot || (!snapshot_name.empty () && !pending && !template_only && !for_archive));
+	/* pending saves are for current snapshot only */
+	assert (!pending || (snapshot_name.empty () && !template_only && !for_archive));
+
 	XMLTree tree;
 	std::string xml_path(_session_dir->root_path());
 
