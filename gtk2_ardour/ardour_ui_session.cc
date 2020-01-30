@@ -597,8 +597,10 @@ ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& 
 {
 	Session* new_session;
 
+	bool meta_session = !session_template.empty() && session_template.substr (0, 11) == "urn:ardour:";
+
 	try {
-		new_session = new Session (*AudioEngine::instance(), path, snap_name, bus_profile.master_out_channels > 0 ? &bus_profile : NULL, session_template);
+		new_session = new Session (*AudioEngine::instance(), path, snap_name, bus_profile.master_out_channels > 0 ? &bus_profile : NULL, meta_session ? "" : session_template);
 	}
 	catch (SessionException const& e) {
 		cerr << "Here are the errors associated with this failed session:\n";
@@ -650,7 +652,7 @@ ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& 
 
 	new_session->save_state(new_session->name());
 
-	if (!session_template.empty() && session_template.substr (0, 11) == "urn:ardour:") {
+	if (meta_session) {
 		meta_session_setup (session_template.substr (11));
 	}
 
