@@ -24,6 +24,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/convolver.h"
+#include "ardour/readable.h"
 #include "ardour/session.h"
 #include "ardour/srcfilesource.h"
 #include "ardour/source_factory.h"
@@ -48,41 +49,15 @@ Convolver::Convolver (
 	, _offset (0)
 	, _configured (false)
 {
-	ARDOUR::SoundFileInfo sf_info;
-	std::string error_msg;
-
-	if (!AudioFileSource::get_soundfile_info (path, sf_info, error_msg)) {
-		PBD::error << string_compose(_("Convolver: cannot open IR \"%1\": %2"), path, error_msg) << endmsg;
-		throw failed_constructor ();
-	}
-
-	if (sf_info.length > 0x1000000 /*2^24*/) {
-		PBD::error << string_compose(_("Convolver: IR \"%1\" file too long."), path) << endmsg;
-		throw failed_constructor ();
-	}
-
-	for (unsigned int n = 0; n < sf_info.channels; ++n) {
-		try {
-			boost::shared_ptr<AudioFileSource> afs;
-			afs = boost::dynamic_pointer_cast<AudioFileSource> (
-					SourceFactory::createExternal (DataType::AUDIO, _session,
-						path, n,
-						Source::Flag (ARDOUR::AudioFileSource::NoPeakFile), false));
-
-			if (afs->sample_rate() != _session.nominal_sample_rate()) {
-				boost::shared_ptr<SrcFileSource> sfs (new SrcFileSource(_session, afs, ARDOUR::SrcBest));
-				_readables.push_back(sfs);
-			} else {
-				_readables.push_back (afs);
-			}
-		} catch (failed_constructor& err) {
-			PBD::error << string_compose(_("Convolver: Could not open IR \"%1\"."), path) << endmsg;
-			throw failed_constructor ();
-		}
-	}
+	_readables = Readable::load (_session, path);
 
 	if (_readables.empty ()) {
 		PBD::error << string_compose (_("Convolver: IR \"%1\" no usable audio-channels sound."), path) << endmsg;
+		throw failed_constructor ();
+	}
+
+	if (_readables[0]->readable_length () > 0x1000000 /*2^24*/) {
+		PBD::error << string_compose(_("Convolver: IR \"%1\" file too long."), path) << endmsg;
 		throw failed_constructor ();
 	}
 
