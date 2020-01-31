@@ -247,6 +247,7 @@ CLASSKEYS(std::list<Evoral::ControlEvent*>);
 CLASSKEYS(std::vector<ARDOUR::Plugin::PresetRecord>);
 CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Processor> >);
 CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Source> >);
+CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Readable> >);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::PluginInfo> >); // PluginInfoList
 
 CLASSKEYS(std::list<ArdourMarker*>);
@@ -1197,6 +1198,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("read", &Readable::read)
 		.addFunction ("readable_length", &Readable::readable_length)
 		.addFunction ("n_channels", &Readable::n_channels)
+		.addStaticFunction ("load", &Readable::load)
 		.endClass ()
 
 		.deriveWSPtrClass <Region, SessionObject> ("Region")
@@ -1688,6 +1690,10 @@ LuaBindings::common (lua_State* L)
 
 		// typedef std::vector<boost::shared_ptr<Source> > Region::SourceList
 		.beginStdVector <boost::shared_ptr<Source> > ("SourceList")
+		.endClass ()
+
+		// typedef std::vector<boost::shared_ptr<Readable> >
+		.beginStdVector <boost::shared_ptr<Readable> > ("ReadableList")
 		.endClass ()
 
 		// from SessionPlaylists: std::vector<boost::shared_ptr<Playlist > >
