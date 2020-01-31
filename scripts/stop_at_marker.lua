@@ -27,10 +27,22 @@ function factory ()
 			return
 		end
 
-		-- due to "first_mark_after" m is always > pos:
+		-- due to `first_mark_after(pos)` "m" is always > "pos":
 		-- assert(pos < m)
-		-- so in the cycle that crosses "m" we need to stop at 'm'
+		--
+		-- This callback happens from within the process callback:
+		--
+		-- this cycle's end = next cycle start = pos + n_samples.
+		--
+		-- Note that if "m" is exactly at cycle's end, that marker
+		-- will be at "pos" in the next cycle. Since we ask for
+		-- "first_mark_after pos", the marker would not be found.
+		--
+		-- So even though "pos + n_samples" is barely reached,
+		-- we need to stop at "m" in the cycle that crosses or ends at "m".
 		if (pos + n_samples >= m) then
+			-- asking to locate to "m" ensures that playback continues at "m"
+			-- and the same marker will not be taken into account.
 			Session:request_locate (m, ARDOUR.LocateTransportDisposition.MustStop, ARDOUR.TransportRequestSource.TRS_Engine)
 		end
 	end
