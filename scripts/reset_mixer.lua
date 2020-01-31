@@ -114,38 +114,48 @@ function factory() return function()
 		end
 
 		local i = 0
+		local queue = {}
 		repeat
+			-- Plugins are queued to not invalidate this loop
 			local proc = route:nth_processor(i)
 			if not(proc:isnil()) then
-
 				if prefs["plugins"] then
 					local insert = proc:to_insert()
 					if not(insert:isnil()) then
 						if insert:is_channelstrip() or not(insert:display_to_user()) then
 							ARDOUR.LuaAPI.reset_processor_to_default(insert)
 						else
-							if prefs["plugins"] == "remove" then
-								route:remove_processor(proc, nil, true)
-							else
-								insert:deactivate()
-							end
+							queue[#queue + 1] = proc
 						end
 					end
 				end
-
 				if prefs["io"] then
 					local io_proc = proc:to_ioprocessor()
 					if not(io_proc:isnil()) then
-						if prefs["io"] == "remove" then
-							route:remove_processor(proc, nil, true)
-						else
-							io_proc:deactivate()
-						end
+						queue[#queue + 1] = proc
 					end
 				end
 			end
 			i = i + 1
 		until proc:isnil()
+		
+		-- Deal with queue now
+		for _, proc in pairs(queue) do
+			if not(proc:to_insert():isnil()) then
+				if prefs["plugins"] == "remove" then
+					route:remove_processor(proc, nil, true)
+				elseif prefs["plugins"] == "bypass" then
+					proc:deactivate()
+				end
+			end
+			if not(proc:to_ioprocessor():isnil()) then
+				if prefs["io"] == "remove" then
+					route:remove_processor(proc, nil, true)
+				elseif prefs["io"] == "bypass" then
+					proc:deactivate()
+				end
+			end
+		end
 	end
 
 	local pref = LuaDialog.Dialog("Reset Mixer", dlg):run()
