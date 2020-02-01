@@ -41,6 +41,7 @@
 #include "ardour/audio_port.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioplaylist.h"
+#include "ardour/audiorom.h"
 #include "ardour/buffer_set.h"
 #include "ardour/beats_samples_converter.h"
 #include "ardour/chan_mapping.h"
@@ -260,6 +261,7 @@ CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Stripable> >);
 CLASSKEYS(boost::shared_ptr<std::list<boost::shared_ptr<ARDOUR::Route> > >);
 
 CLASSKEYS(boost::shared_ptr<ARDOUR::AudioRegion>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::AudioRom>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::AudioSource>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Automatable>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::AutomatableSequence<Temporal::Beats> >);
@@ -1199,6 +1201,10 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("readable_length", &Readable::readable_length)
 		.addFunction ("n_channels", &Readable::n_channels)
 		.addStaticFunction ("load", &Readable::load)
+		.endClass ()
+
+		.deriveWSPtrClass <AudioRom, Readable> ("AudioRom")
+		.addStaticFunction ("new_rom", &AudioRom::new_rom)
 		.endClass ()
 
 		.deriveWSPtrClass <Region, SessionObject> ("Region")
