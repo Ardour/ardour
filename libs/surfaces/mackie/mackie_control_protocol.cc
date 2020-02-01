@@ -1722,7 +1722,7 @@ MackieControlProtocol::redisplay_subview_mode ()
 	return false;
 }
 
-int
+bool
 MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Stripable> r)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("set subview mode %1 with stripable %2, current flip mode %3\n", sm, (r ? r->name() : string ("null")), _flip_mode));
@@ -1755,7 +1755,7 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Strip
 			}
 		}
 
-		return -1;
+		return false;
 	}
 	
 	_subview = Mackie::SubviewFactory::instance()->create_subview(sm, *this, r);
@@ -1769,7 +1769,7 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Strip
 	redisplay_subview_mode ();
 	_subview->update_global_buttons();
 
-	return 0;
+	return true;
 }
 
 void
@@ -1789,6 +1789,7 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 	}
 
 	/* leave subview mode, whatever it was */
+	DEBUG_TRACE (DEBUG::MackieControl, "\t\t\tsubview mode reset in MackieControlProtocol::set_view_mode \n");
 	set_subview_mode (Mackie::SubViewMode::None, boost::shared_ptr<Stripable>());
 	display_view_mode ();
 }
