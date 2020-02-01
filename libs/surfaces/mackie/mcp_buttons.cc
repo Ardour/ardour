@@ -781,7 +781,7 @@ MackieControlProtocol::dyn_release (Button &)
 LedState
 MackieControlProtocol::flip_press (Button &)
 {
-	if (_subview->subview_mode() == Mackie::SubViewMode::Sends) {
+	if (_subview->permit_flipping_faders_and_pots()) {
 		if (_flip_mode != Normal) {
 			set_flip_mode (Normal);
 		} else {
