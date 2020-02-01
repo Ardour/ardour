@@ -89,7 +89,28 @@ Subview::Subview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOUR::Stripable
 	init_strip_vectors();
 }
 
-Subview::~Subview() {}
+Subview::~Subview() 
+{
+	reset_all_vpot_controls();
+}
+
+void
+Subview::reset_all_vpot_controls()
+{
+	for (std::vector<Pot*>::iterator iter = _strip_vpots_over_all_surfaces.begin(); iter != _strip_vpots_over_all_surfaces.end(); ) {
+		std::vector<Pot*>::iterator tmp;
+
+		tmp = iter;
+		++tmp;
+
+		if (*iter != 0)
+		{
+			(*iter)->set_control (boost::shared_ptr<AutomationControl>());
+		}
+
+		iter = tmp;
+	}
+}
 
 void Subview::handle_vselect_event(uint32_t global_strip_position) 
 {
