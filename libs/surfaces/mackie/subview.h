@@ -95,6 +95,8 @@ class Subview {
 	std::vector<Pot*> _strip_vpots_over_all_surfaces;
 	std::vector<std::string*> _strip_pending_displays_over_all_surfaces;
 	PBD::ScopedConnectionList _subview_connections;
+  private:
+	void reset_all_vpot_controls();
 };
 
 class NoneSubview : public Subview {
