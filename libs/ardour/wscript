@@ -38,6 +38,7 @@ libardour_sources = [
         'audiofile_tagger.cc',
         'audiofilesource.cc',
         'audioregion.cc',
+        'audiorom.cc',
         'audiosource.cc',
         'auditioner.cc',
         'automatable.cc',
