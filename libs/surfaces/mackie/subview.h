@@ -80,11 +80,12 @@ class Subview {
 	PBD::ScopedConnectionList& subview_stripable_connections() { return _subview_stripable_connections; }
 	PBD::ScopedConnectionList& subview_connections() { return _subview_connections; }
 	
+	void do_parameter_display(std::string& display, const ARDOUR::ParameterDescriptor& pd, float param_val, Strip* strip, bool screen_hold);
+	
   protected:
 	void init_strip_vectors();
 	void store_pointers(Strip* strip, Pot* vpot, std::string* pending_display, uint32_t global_strip_position);
 	bool retrieve_pointers(Strip** strip, Pot** vpot, std::string** pending_display, uint32_t global_strip_position);
-	void do_parameter_display(std::string& display, const ARDOUR::ParameterDescriptor& pd, float param_val, Strip* strip, bool screen_hold);
   
 	MackieControlProtocol& _mcp;
 	boost::shared_ptr<ARDOUR::Stripable> _subview_stripable;
@@ -218,7 +219,7 @@ class PluginSubviewState {
 	virtual void bank_changed() = 0;
 
   protected:
-	uint32_t calculate_virtual_strip_position(uint32_t strip_index);
+	uint32_t calculate_virtual_strip_position(uint32_t strip_index) const;
 
     PluginSubview& _context;
 	const uint32_t _bank_size;
@@ -257,6 +258,8 @@ class PluginEdit : public PluginSubviewState {
 	
 	void notify_parameter_change(Strip* strip, Pot* vpot, std::string pending_display[2], uint32_t global_strip_position);
 	void init(boost::shared_ptr<ARDOUR::PluginInsert> plugin_insert);
+	
+	boost::shared_ptr<ARDOUR::AutomationControl> parameter_control(uint32_t global_strip_position) const;
 
 	boost::shared_ptr<ARDOUR::PluginInsert> _subview_plugin_insert;
 	boost::shared_ptr<ARDOUR::Plugin> _subview_plugin;

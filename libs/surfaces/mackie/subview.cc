@@ -976,7 +976,7 @@ bool PluginSubviewState::handle_cursor_left_press()
 	return true;
 }
 
-uint32_t PluginSubviewState::calculate_virtual_strip_position(uint32_t strip_index)
+uint32_t PluginSubviewState::calculate_virtual_strip_position(uint32_t strip_index) const
 {
 	return _current_bank * _bank_size + strip_index;
 }
@@ -1080,6 +1080,22 @@ void PluginEdit::init(boost::shared_ptr<PluginInsert> plugin_insert)
 	}
 }
 
+boost::shared_ptr<AutomationControl> PluginEdit::parameter_control(uint32_t global_strip_position) const
+{
+	uint32_t virtual_strip_position = calculate_virtual_strip_position(global_strip_position);
+	if (virtual_strip_position >= _plugin_input_parameter_indices.size()) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+	
+	uint32_t plugin_parameter_index = _plugin_input_parameter_indices[virtual_strip_position];
+	bool ok = false;
+	uint32_t controlid = _subview_plugin->nth_parameter(plugin_parameter_index, ok);
+	if (!ok) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+	return _subview_plugin_insert->automation_control(Evoral::Parameter(PluginAutomation, 0, controlid));
+}
+
 void PluginEdit::setup_vpot(
 		Strip* strip,
 		Pot* vpot, 
@@ -1087,58 +1103,37 @@ void PluginEdit::setup_vpot(
 		uint32_t global_strip_position,
 		boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
 {
-	uint32_t virtual_strip_position = calculate_virtual_strip_position(global_strip_position);
+	boost::shared_ptr<AutomationControl> c = parameter_control(global_strip_position);
 
-	if (virtual_strip_position < _plugin_input_parameter_indices.size()) {
-		uint32_t plugin_parameter_index = _plugin_input_parameter_indices[virtual_strip_position];
-		bool ok = false;
-		uint32_t controlid = _subview_plugin->nth_parameter(plugin_parameter_index, ok);
-		if (!ok) {
-			vpot->set_control (boost::shared_ptr<AutomationControl>());
-			pending_display[0] = std::string();
-			pending_display[1] = std::string();
-		}
-
-		boost::shared_ptr<AutomationControl> c = _subview_plugin_insert->automation_control(Evoral::Parameter(PluginAutomation, 0, controlid));
-		//If a controllable was found, connect it up, and put the labels in the display.
-		if (c) {
-			c->Changed.connect (_context.subview_connections(), MISSING_INVALIDATOR, boost::bind (&PluginEdit::notify_parameter_change, this, strip, vpot, pending_display, global_strip_position), ui_context());
-			vpot->set_control (c);
-			ParameterDescriptor pd;
-			_subview_plugin->get_parameter_descriptor(controlid, pd);
-			pending_display[0] = PluginSubviewState::shorten_display_text(pd.label, 6);	
-		} else {  //no controllable was found;  just clear this knob
-			vpot->set_control (boost::shared_ptr<AutomationControl>());
-			pending_display[0] = std::string();
-			pending_display[1] = std::string();
-			return;
-		}
-
-		notify_parameter_change (strip, vpot, pending_display, global_strip_position);
+	if (!c) {
+		vpot->set_control (boost::shared_ptr<AutomationControl>());
+		pending_display[0] = std::string();
+		pending_display[1] = std::string();
+		return;
 	}
-	else {
-		pending_display[0] = "";
-		pending_display[1] = "";
-	}
+
+	c->Changed.connect (_context.subview_connections(), MISSING_INVALIDATOR, boost::bind (&PluginEdit::notify_parameter_change, this, strip, vpot, pending_display, global_strip_position), ui_context());
+	vpot->set_control (c);
+	pending_display[0] = PluginSubviewState::shorten_display_text(c->desc().label, 6);
+	notify_parameter_change (strip, vpot, pending_display, global_strip_position);
 }
 
 
-void PluginEdit::notify_parameter_change(Strip* strip, Pot* vpot, std::string pending_display[2], uint32_t /*global_strip_position*/) 
+void PluginEdit::notify_parameter_change(Strip* strip, Pot* vpot, std::string pending_display[2], uint32_t global_strip_position) 
 {
-	boost::shared_ptr<AutomationControl> control = vpot->control();
-	if (!control) 
+	boost::shared_ptr<AutomationControl> control = parameter_control(global_strip_position);
+	if (!control)
 	{
 		return;
 	}
 
 	float val = control->get_value();
-	{
-		bool screen_hold = false;
-		pending_display[1] = Strip::format_paramater_for_display(control->desc(), val, _context.subview_stripable(), screen_hold);
-	}
+	_context.do_parameter_display(pending_display[1], control->desc(), val, strip, false);
 	
-	/* update pot/encoder */
-	strip->surface()->write(vpot->set (control->internal_to_interface (val), true, Pot::wrap));
+	if (vpot->control() == control) {
+		/* update pot/encoder */
+		strip->surface()->write(vpot->set (control->internal_to_interface (val), true, Pot::wrap));
+	}
 }
 
 void PluginEdit::handle_vselect_event(uint32_t global_strip_position, boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
