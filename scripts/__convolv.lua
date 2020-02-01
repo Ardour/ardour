@@ -52,7 +52,7 @@ function dsp_run (ins, outs, n_samples)
 	end
 
 	if #outs == 1 then
-		conv:run (outs[1], n_samples)
+		conv:run_mono (outs[1], n_samples)
 	else
 		conv:run_stereo (outs[1], outs[2], n_samples)
 	end
