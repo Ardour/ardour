@@ -126,7 +126,7 @@ Editor::external_pt_dialog ()
 void *
 Editor::_import_pt_thread (void *arg)
 {
-	SessionEvent::create_per_thread_pool ("import pt events", 64);
+	SessionEvent::create_per_thread_pool ("import pt events", 2048);
 
 	Editor *ed = (Editor *) arg;
 	return ed->import_pt_thread ();
