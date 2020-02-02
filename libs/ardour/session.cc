@@ -231,6 +231,7 @@ Session::Session (AudioEngine &eng,
 	, _state_of_the_state (StateOfTheState (CannotSave | InitialConnecting | Loading))
 	, _suspend_save (0)
 	, _save_queued (false)
+	, _save_queued_pending (false)
 	, _last_roll_location (0)
 	, _last_roll_or_reversal_location (0)
 	, _last_record_location (0)
