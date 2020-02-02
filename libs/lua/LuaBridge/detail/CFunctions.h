@@ -1050,6 +1050,7 @@ struct CFunc
   static int array_index (lua_State* L) {
     T** parray = (T**) luaL_checkudata (L, 1, typeid(T).name());
     int const index = luabridge::Stack<int>::get (L, 2);
+    assert (index > 0);
     luabridge::Stack<T>::push (L, (*parray)[index-1]);
     return 1;
   }
@@ -1060,6 +1061,7 @@ struct CFunc
     T** parray = (T**) luaL_checkudata (L, 1, typeid(T).name());
     int const index = luabridge::Stack<int>::get (L, 2);
     T const value = luabridge::Stack<T>::get (L, 3);
+    assert (index > 0);
     (*parray)[index-1] = value;
     return 0;
   }
