@@ -8,7 +8,6 @@ ardour {
 
 function factory() return function()
 	local sp_radio_buttons = {Bypass="bypass", Remove="remove", Nothing=false}
-	local am_radio_buttons = {}
 	local dlg = {
 		{type="label", align="left", colspan="3", title="Please select below the items you want to reset:" },
 		{type="label", align="left", colspan="3", title="(Warning: this cannot be undone!)\n" },
@@ -111,7 +110,22 @@ function factory() return function()
 		until route:send_enable_controllable(i):isnil()
 	end
 
-	function reset_plugins(route, prefs)
+	function reset_plugin_automation(plugin, state)
+		if plugin:to_insert():isnil() then
+			return
+		end
+
+		local plugin = plugin:to_insert()
+		local pc = plugin:plugin(0):parameter_count()
+		for c = 0, pc do
+			local ac = plugin:to_automatable():automation_control(Evoral.Parameter(ARDOUR.AutomationType.PluginAutomation, 0, c), false)
+			if not(ac:isnil()) then
+				ac:set_automation_state(state)
+			end
+		end
+	end
+
+	function reset_plugins(route, prefs, auto)
 		if route:isnil() then
 			return
 		end
@@ -122,6 +136,9 @@ function factory() return function()
 			-- Plugins are queued to not invalidate this loop
 			local proc = route:nth_processor(i)
 			if not(proc:isnil()) then
+				if prefs["auto"] then
+					reset_plugin_automation(proc, auto)
+				end
 				if prefs["plugins"] then
 					local insert = proc:to_insert()
 					if not(insert:isnil()) then
@@ -177,7 +194,7 @@ function factory() return function()
 		if pref["eq"]    then reset_eq_controls(route, disp, auto) end
 		if pref["comp"]  then reset_comp_controls(route, disp, auto) end
 		if pref["sends"] then reset_send_controls(route, disp, auto) end
-		reset_plugins(route, pref)
+		reset_plugins(route, pref, auto)
 
 		if pref["rec"] then
 			reset(route:rec_enable_control(), disp, auto)
