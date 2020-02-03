@@ -24,6 +24,7 @@
  
  
 #include "pbd/convert.h"
+#include "pbd/failed_constructor.h"
 
 #include "ardour/debug.h"
 #include "ardour/monitor_control.h"
@@ -892,7 +893,7 @@ void PluginSubview::connect_processors_changed_signal()
 	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (_subview_stripable);
 	if (route)
 	{
-		route->processors_changed.connect(_subview_connections, MISSING_INVALIDATOR, boost::bind (&PluginSubview::hanlde_processors_changed, this), ui_context());	
+		route->processors_changed.connect(_subview_connections, MISSING_INVALIDATOR, boost::bind (&PluginSubview::handle_processors_changed, this), ui_context());	
 	}
 }
 
@@ -1076,7 +1077,7 @@ void PluginSelect::handle_vselect_event(uint32_t global_strip_position,
 	boost::shared_ptr<PluginInsert> plugin = boost::dynamic_pointer_cast<PluginInsert>(processor);
 	processor->ShowUI();
 	if (plugin) {
-		_context.set_state(boost::make_shared<PluginEdit>(_context, plugin));
+		_context.set_state(boost::make_shared<PluginEdit>(_context, boost::weak_ptr<PluginInsert>(plugin)));
 	}
 }
 
@@ -1087,30 +1088,41 @@ void PluginSelect::bank_changed()
 
 
 
-PluginEdit::PluginEdit(PluginSubview& context, boost::shared_ptr<PluginInsert> subview_plugin)
+PluginEdit::PluginEdit(PluginSubview& context, boost::weak_ptr<PluginInsert> weak_subview_plugin_insert)
   : PluginSubviewState(context)
-  , _subview_plugin_insert(subview_plugin)
+  , _weak_subview_plugin_insert(weak_subview_plugin_insert)
 {
-	init(subview_plugin);
+	try {
+		init();
+	}
+	catch (...) {
+		throw failed_constructor();
+	}
 }
 
 PluginEdit::~PluginEdit() 
 {}
 
-void PluginEdit::init(boost::shared_ptr<PluginInsert> plugin_insert)
+void PluginEdit::init()
 {
-	_subview_plugin = plugin_insert->plugin();
+	boost::shared_ptr<PluginInsert> plugin_insert = _weak_subview_plugin_insert.lock();
+	_weak_subview_plugin = boost::weak_ptr<ARDOUR::Plugin>(plugin_insert->plugin());
+	boost::shared_ptr<ARDOUR::Plugin> subview_plugin = _weak_subview_plugin.lock();
 	_plugin_input_parameter_indices.clear();
+	
+	if (!subview_plugin) {
+		return;
+	}
 
 	bool ok = false;
 	// put only input controls into a vector
-	uint32_t nplug_params = _subview_plugin->parameter_count();
+	uint32_t nplug_params = subview_plugin->parameter_count();
 	for (uint32_t ppi = 0; ppi < nplug_params; ++ppi) {
-		uint32_t controlid = _subview_plugin->nth_parameter(ppi, ok);
+		uint32_t controlid = subview_plugin->nth_parameter(ppi, ok);
 		if (!ok) {
 			continue;
 		}
-		if (_subview_plugin->parameter_is_input(controlid)) {
+		if (subview_plugin->parameter_is_input(controlid)) {
 			_plugin_input_parameter_indices.push_back(ppi);
 		}
 	}
@@ -1123,13 +1135,47 @@ boost::shared_ptr<AutomationControl> PluginEdit::parameter_control(uint32_t glob
 		return boost::shared_ptr<AutomationControl>();
 	}
 	
+	boost::shared_ptr<PluginInsert> plugin_insert = _weak_subview_plugin_insert.lock();
+	boost::shared_ptr<ARDOUR::Plugin> subview_plugin = _weak_subview_plugin.lock();
+	if (!plugin_insert || !subview_plugin) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+	
 	uint32_t plugin_parameter_index = _plugin_input_parameter_indices[virtual_strip_position];
 	bool ok = false;
-	uint32_t controlid = _subview_plugin->nth_parameter(plugin_parameter_index, ok);
+	uint32_t controlid = subview_plugin->nth_parameter(plugin_parameter_index, ok);
 	if (!ok) {
 		return boost::shared_ptr<AutomationControl>();
 	}
-	return _subview_plugin_insert->automation_control(Evoral::Parameter(PluginAutomation, 0, controlid));
+	return plugin_insert->automation_control(Evoral::Parameter(PluginAutomation, 0, controlid));
+}
+
+bool PluginEdit::plugin_went_away() const
+{
+	// is shared_ptr reset?
+	boost::shared_ptr<PluginInsert> plugin_insert = _weak_subview_plugin_insert.lock();
+	boost::shared_ptr<ARDOUR::Plugin> subview_plugin = _weak_subview_plugin.lock();
+	if (!plugin_insert || !subview_plugin) {
+		return true;
+	}
+	
+	// is plugin not registered with stripable any more?
+	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (_context.subview_stripable());
+	if (!route) {
+		return true;
+	}
+	
+	if (!route->processor_by_id(plugin_insert->id())) {
+		// plugin_insert is not registered with route any more -> it was removed
+		return true;
+	}
+	
+	return false;
+}
+
+void PluginEdit::switch_to_plugin_select_state()
+{
+	_context.set_state(boost::make_shared<PluginSelect>(_context));
 }
 
 void PluginEdit::setup_vpot(
@@ -1139,6 +1185,11 @@ void PluginEdit::setup_vpot(
 		uint32_t global_strip_position,
 		boost::shared_ptr<ARDOUR::Stripable> subview_stripable)
 {
+	if (plugin_went_away()) {
+		switch_to_plugin_select_state();
+		return;
+	}
+	
 	boost::shared_ptr<AutomationControl> c = parameter_control(global_strip_position);
 
 	if (!c) {
