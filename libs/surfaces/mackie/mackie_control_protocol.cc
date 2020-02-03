@@ -2348,7 +2348,10 @@ MackieControlProtocol::stripable_selection_changed ()
 		if (!set_subview_mode (_subview->subview_mode(), s)) {
 			set_subview_mode (Mackie::SubViewMode::None, boost::shared_ptr<Stripable>());
 		}
-
+	}
+	else {
+		// none selected or not on surface
+		set_subview_mode(Mackie::SubViewMode::None, boost::shared_ptr<Stripable>());
 	}
 }
 
