@@ -881,10 +881,25 @@ PluginSubview::PluginSubview(MackieControlProtocol& mcp, boost::shared_ptr<ARDOU
 	: Subview(mcp, subview_stripable)
 {
 	_plugin_subview_state = boost::make_shared<PluginSelect>(*this);
+	connect_processors_changed_signal();
 }
 
 PluginSubview::~PluginSubview() 
 {}
+
+void PluginSubview::connect_processors_changed_signal()
+{
+	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (_subview_stripable);
+	if (route)
+	{
+		route->processors_changed.connect(_subview_connections, MISSING_INVALIDATOR, boost::bind (&PluginSubview::hanlde_processors_changed, this), ui_context());	
+	}
+}
+
+void PluginSubview::handle_processors_changed()
+{
+	_mcp.redisplay_subview_mode();
+}
 
 bool PluginSubview::subview_mode_would_be_ok (boost::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not) 
 {
