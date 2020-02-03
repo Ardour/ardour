@@ -8,6 +8,7 @@ ardour {
 
 function factory() return function()
 	local sp_radio_buttons = {Bypass="bypass", Remove="remove", Nothing=false}
+	local am_radio_buttons = {}
 	local dlg = {
 		{type="label", align="left", colspan="3", title="Please select below the items you want to reset:" },
 		{type="label", align="left", colspan="3", title="(Warning: this cannot be undone!)\n" },
@@ -31,7 +32,9 @@ function factory() return function()
 
 		{type="heading", align="center", colspan="3", title="Misc." },
 		{type="checkbox", key="auto",    colspan="3", title = "Automation (switch to manual mode)" },
+		{type="checkbox", key="rec",    colspan="3", title = "Disable Record" },
 		{type="checkbox", key="groups",  colspan="3", title = "Groups"                             },
+		{type="checkbox", key="vcas",    colspan="3", title = "VCAs (unassign all)"                },
 	}
 
 	function reset(ctrl, disp, auto)
@@ -176,6 +179,11 @@ function factory() return function()
 		if pref["sends"] then reset_send_controls(route, disp, auto) end
 		reset_plugins(route, pref)
 
+		if pref["rec"] then
+			reset(route:rec_enable_control(), disp, auto)
+			reset(route:rec_safe_control(), disp, auto)
+		end
+
 		if pref["fader"] then
 			reset(route:gain_control(), disp, auto)
 		end
@@ -202,6 +210,15 @@ function factory() return function()
 			reset(route:pan_frontback_control(), disp, auto)
 			reset(route:pan_lfe_control(), disp, auto)
 			reset(route:pan_width_control(), disp, auto)
+		end
+
+		if pref["vcas"] then
+			local slave = route:to_slavable()
+			if not(slave:isnil()) then
+				for vca in Session:vca_manager():vcas():iter() do
+					slave:unassign(vca)
+				end
+			end
 		end
 	end
 
