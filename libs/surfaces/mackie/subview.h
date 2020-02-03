@@ -248,7 +248,7 @@ class PluginSelect : public PluginSubviewState {
 
 class PluginEdit : public PluginSubviewState {
   public:
-	PluginEdit(PluginSubview& context, boost::shared_ptr<ARDOUR::PluginInsert> subview_plugin);
+	PluginEdit(PluginSubview& context, boost::weak_ptr<ARDOUR::PluginInsert> weak_subview_plugin);
 	virtual ~PluginEdit();
 	
 	virtual bool permit_flipping_faders_and_pots() { return true; }
@@ -262,12 +262,14 @@ class PluginEdit : public PluginSubviewState {
 	virtual void bank_changed();
 	
 	void notify_parameter_change(Strip* strip, Pot* vpot, std::string pending_display[2], uint32_t global_strip_position);
-	void init(boost::shared_ptr<ARDOUR::PluginInsert> plugin_insert);
+	void init();
+	bool plugin_went_away() const;
+	void switch_to_plugin_select_state();
 	
 	boost::shared_ptr<ARDOUR::AutomationControl> parameter_control(uint32_t global_strip_position) const;
 
-	boost::shared_ptr<ARDOUR::PluginInsert> _subview_plugin_insert;
-	boost::shared_ptr<ARDOUR::Plugin> _subview_plugin;
+	boost::weak_ptr<ARDOUR::PluginInsert> _weak_subview_plugin_insert;
+	boost::weak_ptr<ARDOUR::Plugin> _weak_subview_plugin;
 	std::vector<uint32_t> _plugin_input_parameter_indices;
 };
 
