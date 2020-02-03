@@ -199,6 +199,9 @@ class PluginSubview : public Subview {
 	void set_state(boost::shared_ptr<PluginSubviewState> new_state);
 
   protected:
+	void connect_processors_changed_signal();
+	void handle_processors_changed();
+  
     boost::shared_ptr<PluginSubviewState> _plugin_subview_state;
 };
 
