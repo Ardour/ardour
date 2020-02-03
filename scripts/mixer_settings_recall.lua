@@ -13,8 +13,8 @@ ardour {
 	]]
 }
 
-function factory () 
-	
+function factory ()
+
 	local acoraida_monicas_last_used_recall_file
 
 	return function ()
@@ -160,6 +160,7 @@ function factory ()
 				local group_name = instance["group_name"]
 				local name  = instance["route_name"]
 				local gc, tc, pc = instance["gain_control"], instance["trim_control"], instance["pan_control"]
+				local sends = instance["sends"]
 
 				if not(substitution == instance["route_id"]) then
 					print('SUBSTITUTION FOR: ', name, substitution, Session:route_by_id(PBD.ID(substitution)):name())
@@ -171,6 +172,28 @@ function factory ()
 				local rt = Session:route_by_id(r_id)
 				if rt:isnil() then rt = Session:route_by_name(name) end
 				if rt:isnil() then goto nextline end
+
+				if sends then
+					for i, data in pairs(sends) do
+						i = i-1
+						for j, ctrl in pairs({
+							rt:send_level_controllable(i),
+							rt:send_enable_controllable(i),
+							rt:send_pan_azimuth_controllable(i),
+							rt:send_pan_azimuth_enable_controllable(i),
+						}) do
+							if not(ctrl:isnil()) then
+								local value = data[j]
+								if value then
+									if debug then
+										print("Setting " .. ctrl:name() .. " to value " .. value)
+									end
+									ctrl:set_value(value, PBD.GroupControlDisposition.NoGroup)
+								end
+							end
+						end
+					end
+				end
 
 				local cur_group_id = route_groupid_interrogate(rt)
 				if not(group) and (cur_group_id) then

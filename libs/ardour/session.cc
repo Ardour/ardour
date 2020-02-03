@@ -231,6 +231,7 @@ Session::Session (AudioEngine &eng,
 	, _state_of_the_state (StateOfTheState (CannotSave | InitialConnecting | Loading))
 	, _suspend_save (0)
 	, _save_queued (false)
+	, _save_queued_pending (false)
 	, _last_roll_location (0)
 	, _last_roll_or_reversal_location (0)
 	, _last_record_location (0)
@@ -2948,7 +2949,23 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 			*/
 			node_copy.remove_node_and_delete (X_("Controllable"), X_("name"), X_("solo"));
 
-			boost::shared_ptr<Route> route (XMLRouteFactory (node_copy, Stateful::loading_state_version));
+			/* New v6 templates do have a version in the Route-Template,
+			 * we assume that all older, unversioned templates are
+			 * from Ardour 5.x
+			 * when Stateful::loading_state_version was 3002
+			 */
+			int version = 3002;
+			node.get_property (X_("version"), version);
+
+			boost::shared_ptr<Route> route;
+
+			if (version < 3000) {
+				route = XMLRouteFactory_2X (node_copy, version);
+			} else if (version < 5000) {
+				route = XMLRouteFactory_3X (node_copy, version);
+			} else {
+				route = XMLRouteFactory (node_copy, version);
+			}
 
 			if (route == 0) {
 				error << _("Session: cannot create track/bus from template description") << endmsg;

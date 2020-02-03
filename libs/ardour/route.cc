@@ -2496,6 +2496,11 @@ Route::state (bool save_template)
 		child->set_property("modified-with", modified_with);
 	}
 
+	/* This is needed for templates and when duplicating routes, in which case
+	 * the route-state is directly passed to new_route_from_template().
+	 */
+	node->set_property("version", CURRENT_SESSION_FILE_VERSION);
+
 	node->set_property (X_("id"), id ());
 	node->set_property (X_("name"), name());
 	node->set_property (X_("default-type"), _default_type);
@@ -2993,41 +2998,41 @@ Route::set_processor_state (const XMLNode& node, int version)
 		XMLProperty* prop = (*niter)->property ("type");
 
 		if (prop->value() == "amp") {
-			_amp->set_state (**niter, Stateful::current_state_version);
+			_amp->set_state (**niter, version);
 			new_order.push_back (_amp);
 		} else if (prop->value() == "trim") {
-			_trim->set_state (**niter, Stateful::current_state_version);
+			_trim->set_state (**niter, version);
 			new_order.push_back (_trim);
 		} else if (prop->value() == "meter") {
-			_meter->set_state (**niter, Stateful::current_state_version);
+			_meter->set_state (**niter, version);
 			new_order.push_back (_meter);
 		} else if (prop->value() == "polarity") {
-			_polarity->set_state (**niter, Stateful::current_state_version);
+			_polarity->set_state (**niter, version);
 			new_order.push_back (_polarity);
 		} else if (prop->value() == "delay") {
 			// skip -- internal
 		} else if (prop->value() == "main-outs") {
-			_main_outs->set_state (**niter, Stateful::current_state_version);
+			_main_outs->set_state (**niter, version);
 		} else if (prop->value() == "intreturn") {
 			if (!_intreturn) {
 				_intreturn.reset (new InternalReturn (_session));
 				must_configure = true;
 			}
-			_intreturn->set_state (**niter, Stateful::current_state_version);
+			_intreturn->set_state (**niter, version);
 		} else if (is_monitor() && prop->value() == "monitor") {
 			if (!_monitor_control) {
 				_monitor_control.reset (new MonitorProcessor (_session));
 				must_configure = true;
 			}
-			_monitor_control->set_state (**niter, Stateful::current_state_version);
+			_monitor_control->set_state (**niter, version);
 		} else if (prop->value() == "capture") {
 			/* CapturingProcessor should never be restored, it's always
 			   added explicitly when needed */
 		} else if (prop->value() == "diskreader" && _disk_reader) {
-			_disk_reader->set_state (**niter, Stateful::current_state_version);
+			_disk_reader->set_state (**niter, version);
 			new_order.push_back (_disk_reader);
 		} else if (prop->value() == "diskwriter" && _disk_writer) {
-			_disk_writer->set_state (**niter, Stateful::current_state_version);
+			_disk_writer->set_state (**niter, version);
 			new_order.push_back (_disk_writer);
 		} else {
 			set_processor_state (**niter, version, prop, new_order, must_configure);

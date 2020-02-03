@@ -2314,7 +2314,7 @@ ARDOUR_UI::meta_session_setup (const std::string& script_path)
 }
 
 void
-ARDOUR_UI::display_cleanup_results (ARDOUR::CleanupReport& rep, const gchar* list_title, const bool msg_delete)
+ARDOUR_UI::display_cleanup_results (ARDOUR::CleanupReport const& rep, const gchar* list_title, const bool msg_delete)
 {
 	size_t removed;
 
@@ -2421,7 +2421,7 @@ will release an additional %3 %4bytes of disk space.\n", removed),
 	dhbox.pack_start (*dimage, true, false, 5);
 	dhbox.pack_start (txt, true, false, 5);
 
-	for (vector<string>::iterator i = rep.paths.begin(); i != rep.paths.end(); ++i) {
+	for (vector<string>::const_iterator i = rep.paths.begin(); i != rep.paths.end(); ++i) {
 		TreeModel::Row row = *(results_model->append());
 		row[results_columns.visible_name] = *i;
 		row[results_columns.fullpath] = *i;

@@ -765,7 +765,7 @@ private:
 
 	Gtk::MenuItem *cleanup_item;
 
-	void display_cleanup_results (ARDOUR::CleanupReport& rep, const gchar* list_title, const bool msg_delete);
+	void display_cleanup_results (ARDOUR::CleanupReport const& rep, const gchar* list_title, const bool msg_delete);
 	void cleanup ();
 	void cleanup_peakfiles ();
 	void flush_trash ();

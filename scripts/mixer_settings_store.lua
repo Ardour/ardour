@@ -125,34 +125,35 @@ function factory () return function ()
 		empty_last_store(path)
 
 		local route_string = [[instance = {
-			 route_id = %d,
-			 route_name = '%s',
-			 gain_control = %s,
-			 trim_control = %s,
-			 pan_control = %s,
-			 muted = %s,
-			 soloed = %s,
-			 order = {%s},
-			 cache = {%s},
-			 group = %s,
-			 group_name = '%s',
-			 pi_order = %d
+			route_id = %d,
+			route_name = '%s',
+			gain_control = %s,
+			trim_control = %s,
+			pan_control = %s,
+			sends = {%s},
+			muted = %s,
+			soloed = %s,
+			order = {%s},
+			cache = {%s},
+			group = %s,
+			group_name = '%s',
+			pi_order = %d
 		}]]
 
 		local group_string = [[instance = {
-			 group_id = %s,
-			 name = '%s',
-			 routes = {%s},
+			group_id = %s,
+			name = '%s',
+			routes = {%s},
 		}]]
 
 		local processor_string = [[instance = {
-			 plugin_id = %d,
-			 type = %d,
-			 display_name = '%s',
-			 owned_by_route_name = '%s',
-			 owned_by_route_id = %d,
-			 parameters = {%s},
-			 active = %s,
+			plugin_id = %d,
+			type = %d,
+			display_name = '%s',
+			owned_by_route_name = '%s',
+			owned_by_route_id = %d,
+			parameters = {%s},
+			active = %s,
 		}]]
 
 		local group_route_string = " [%d] = %s,"
@@ -161,9 +162,9 @@ function factory () return function ()
 		local params_string      = " [%d] = %s,"
 
 		--ensure easy-to-read formatting doesn't make it through
-		local route_string     = string.gsub(route_string, "[\n\t]", "")
-		local group_string     = string.gsub(group_string, "[\n\t]", "")
-		local processor_string = string.gsub(processor_string, "[\n\t]", "")
+		local route_string     = string.gsub(route_string, "[\n\t%s]", "")
+		local group_string     = string.gsub(group_string, "[\n\t%s]", "")
+		local processor_string = string.gsub(processor_string, "[\n\t%s]", "")
 
 		local sel = Editor:get_selection ()
 		local groups_to_write = {}
@@ -227,6 +228,32 @@ function factory () return function ()
 			local pan = r:pan_azimuth_control()
 			if pan:isnil() then pan = false else pan = pan:get_value() end --sometimes a route doesn't have pan, like the master.
 
+			-- Get send information, if any.
+			local send_string = ""
+			local i = 0
+			repeat
+				local fmt = "{%s, %s, %s, %s}"
+				string.gsub(fmt, "[\n\t]", "")
+				local values = {}
+				for j, ctrl in pairs({
+					r:send_level_controllable(i),
+					r:send_enable_controllable(i),
+					r:send_pan_azimuth_controllable(i),
+					r:send_pan_azimuth_enable_controllable(i),
+				}) do
+					if not(ctrl:isnil()) then
+						values[#values + 1] = ctrl:get_value()
+					else
+						values[#values + 1] = "nil"
+					end
+				end
+				send_string = send_string .. string.format(fmt, table.unpack(values))
+				send_string = send_string .. ","
+				i = i + 1
+			until r:send_enable_controllable(i):isnil()
+
+			print(send_string)
+
 			local order_nmbr = 0
 			local tmp_order_str, tmp_cache_str = "", ""
 			for p in order:iter() do
@@ -251,6 +278,7 @@ function factory () return function ()
 					ARDOUR.LuaAPI.ascii_dtostr(r:gain_control():get_value()),
 					ARDOUR.LuaAPI.ascii_dtostr(r:trim_control():get_value()),
 					tostring(pan),
+					send_string,
 					r:muted(),
 					r:soloed(),
 					tmp_order_str,
