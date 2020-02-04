@@ -2617,6 +2617,26 @@ Route::set_state (const XMLNode& node, int version)
 
 	Stripable::set_state (node, version);
 
+	/*  "This should never happen"
+	Stripable's job is to save/recall the PresentationInfo flags for bus/track audio/midi VCA etc.
+	But I found a case where no "type" flag is set, so the strip never shows up on any UI.
+	Since I don't know the source of the error, I have to assume that it could happen again.
+	So: if a stripable doesn't have any flags set, populate them from our audio/midi track/bus identity.
+	*/
+	PresentationInfo::Flag file_flags = _presentation_info.flags();
+	if ( !(file_flags & PresentationInfo::TypeMask) ) {
+		if (dynamic_cast<AudioTrack*>(this)) {
+			_presentation_info.set_flags ( PresentationInfo::Flag (file_flags | PresentationInfo::AudioTrack) );
+		}
+		else if (dynamic_cast<MidiTrack*>(this)) {
+			_presentation_info.set_flags ( PresentationInfo::Flag (file_flags | PresentationInfo::MidiTrack) );
+		}
+		else if (dynamic_cast<Route*>(this)) {
+			//no idea what this is, so let's call it an audio bus
+			_presentation_info.set_flags ( PresentationInfo::Flag (file_flags | PresentationInfo::AudioBus) );
+		}
+	}
+
 	node.get_property (X_("strict-io"), _strict_io);
 
 	if (is_monitor()) {
