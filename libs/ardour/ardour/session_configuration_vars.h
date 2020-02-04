@@ -36,7 +36,7 @@ CONFIG_VARIABLE (SampleFormat, native_file_data_format,  "native-file-data-forma
 CONFIG_VARIABLE (HeaderFormat, native_file_header_format,  "native-file-header-format", ARDOUR::WAVE)
 CONFIG_VARIABLE (bool, auto_play, "auto-play", false)
 CONFIG_VARIABLE (bool, auto_return, "auto-return", false)
-CONFIG_VARIABLE (bool, auto_input, "auto-input", false)
+CONFIG_VARIABLE (bool, auto_input, "auto-input", true)
 CONFIG_VARIABLE (bool, punch_in, "punch-in", false)
 CONFIG_VARIABLE (bool, punch_out, "punch-out", false)
 CONFIG_VARIABLE (bool, count_in, "count-in", false)
