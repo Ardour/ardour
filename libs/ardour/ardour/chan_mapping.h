@@ -106,8 +106,8 @@ public:
 	typedef std::map<uint32_t, uint32_t>    TypeMapping;
 	typedef std::map<DataType, TypeMapping> Mappings;
 
-	Mappings       mappings()       { return _mappings; }
-	const Mappings mappings() const { return _mappings; }
+	Mappings        mappings()       { return _mappings; }
+	const Mappings& mappings() const { return _mappings; }
 
 	bool operator==(const ChanMapping& other) const {
 		return (_mappings == other._mappings);
