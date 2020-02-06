@@ -84,6 +84,7 @@ public:
 		}
 
 	void set_gui_property (const std::string& property_name, const std::string& value);
+	void remove_gui_property (const std::string& property_name);
 
 	void set_gui_property (const std::string& property_name, const char* value) {
 		set_gui_property (property_name, std::string(value));
