@@ -375,24 +375,17 @@ MidiTimeAxisView::setup_midnam_patches ()
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ());
 		if (pi && pi->plugin ()->has_midnam ()) {
 			std::string model_name = pi->plugin ()->midnam_model ();
-
-			Menu_Helpers::MenuElem elem = Gtk::Menu_Helpers::MenuElem(
-					_("Plugin Provided"),
-					sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::model_changed),
-						model_name));
-
+			Menu_Helpers::MenuElem elem = Gtk::Menu_Helpers::MenuElem(_("Plugin Provided"), sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::model_changed), model_name));
 			_midnam_model_selector.AddMenuElem(elem);
 		}
 	}
 
-	for (PatchManager::DeviceNamesByMaker::const_iterator m = patch_manager.devices_by_manufacturer().begin();
-			m != patch_manager.devices_by_manufacturer().end(); ++m) {
+	for (PatchManager::DeviceNamesByMaker::const_iterator m = patch_manager.devices_by_manufacturer().begin(); m != patch_manager.devices_by_manufacturer().end(); ++m) {
 		Menu*                   menu  = Gtk::manage(new Menu);
 		Menu_Helpers::MenuList& items = menu->items();
 
 		// Build manufacturer submenu
-		for (MIDI::Name::MIDINameDocument::MasterDeviceNamesList::const_iterator n = m->second.begin();
-				n != m->second.end(); ++n) {
+		for (MIDI::Name::MIDINameDocument::MasterDeviceNamesList::const_iterator n = m->second.begin(); n != m->second.end(); ++n) {
 
 			if (patch_manager.is_custom_model (n->first)) {
 				continue;
@@ -918,8 +911,7 @@ MidiTimeAxisView::get_device_names()
 
 	const std::string model = gui_property (X_("midnam-model-name"));
 
-	boost::shared_ptr<MIDINameDocument> midnam = MidiPatchManager::instance()
-		.document_by_model(model);
+	boost::shared_ptr<MIDINameDocument> midnam = MidiPatchManager::instance() .document_by_model(model);
 	if (midnam) {
 		return midnam->master_device_names(model);
 	} else {
