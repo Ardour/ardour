@@ -1106,10 +1106,7 @@ LV2Plugin::read_midnam () {
 	}
 	char* midnam = _midname_interface->midnam ((void*)_impl->instance->lv2_handle);
 	if (midnam) {
-		std::stringstream ss;
-		ss << (void*)this;
-		ss << unique_id();
-		rv = MIDI::Name::MidiPatchManager::instance().update_custom_midnam (ss.str(), midnam);
+		rv = MIDI::Name::MidiPatchManager::instance().update_custom_midnam (midnam_model(), midnam);
 	}
 #ifndef NDEBUG
 	if (rv) {
