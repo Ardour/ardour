@@ -198,6 +198,9 @@ private:
 	bool info_scroller_update();
 	sigc::connection info_scroller_connection;
 	void updates_button_clicked ();
+
+	int inital_height;
+	int inital_width;
 };
 
 #endif /* __gtk2_ardour_session_dialog_h__ */

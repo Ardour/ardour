@@ -141,6 +141,8 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 			recent_label.hide ();
 		}
 	}
+	inital_height = get_height();
+	inital_width = get_width();
 }
 
 SessionDialog::SessionDialog ()
@@ -517,6 +519,7 @@ SessionDialog::back_button_pressed (GdkEventButton*)
 	get_vbox()->remove (session_new_vbox);
 	back_button->set_sensitive (false);
 	get_vbox()->pack_start (ic_vbox);
+	resize(inital_height, inital_width);
 
 	return true;
 }
