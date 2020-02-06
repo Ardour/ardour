@@ -254,7 +254,10 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	if (gui_property (X_("midnam-model-name")).empty()) {
-		set_gui_property (X_("midnam-model-name"), "Generic");
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ());
+		if (!pi || !pi->plugin ()->has_midnam ()) {
+			set_gui_property (X_("midnam-model-name"), "Generic");
+		}
 	}
 
 	if (gui_property (X_("midnam-custom-device-mode")).empty()) {
@@ -276,7 +279,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	MIDI::Name::MidiPatchManager::instance().maybe_use (*this, invalidator (*this), boost::bind (&MidiTimeAxisView::use_midnam_info, this), gui_context());
 
-	model_changed (gui_property(X_("midnam-model-name")));
+	maybe_trigger_model_change ();
 	custom_device_mode_changed (gui_property(X_("midnam-custom-device-mode")));
 
 	controls_vbox.pack_start(_midi_controls_box, false, false);
@@ -358,7 +361,6 @@ MidiTimeAxisView::check_step_edit ()
 void
 MidiTimeAxisView::use_midnam_info ()
 {
-	std::cerr << "Using MIDNAM info from " << pthread_name() << endl;
 	setup_midnam_patches ();
 	update_patch_selector ();
 }
@@ -413,24 +415,42 @@ MidiTimeAxisView::setup_midnam_patches ()
 }
 
 void
+MidiTimeAxisView::maybe_trigger_model_change ()
+{
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ());
+
+	if (pi && pi->plugin ()->has_midnam ()) {
+
+		const std::string model_name = pi->plugin ()->midnam_model ();
+		const std::string saved_model_name = gui_property (X_("midnam-model-name"));
+
+		if (!saved_model_name.empty()) {
+			assert (saved_model_name != model_name);
+			/* user changed the MIDNAM model to something
+			   other than the plugin provided one. We
+			   should use that, and not the "plugin
+			   provided" label.
+			*/
+			model_changed (saved_model_name);
+
+		} else {
+			/* ensure that "Plugin Provided" is prefixed at the top of the list */
+			model_changed (model_name);
+			if (_midnam_model_selector.items().empty () || _midnam_model_selector.items().begin()->get_label() != _("Plugin Provided")) {
+				setup_midnam_patches ();
+			}
+		}
+	}
+}
+
+void
 MidiTimeAxisView::update_patch_selector ()
 {
 	typedef MIDI::Name::MidiPatchManager PatchManager;
 	PatchManager& patch_manager = PatchManager::instance();
 
 	if (_route) {
-		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ());
-		if (pi && pi->plugin ()->has_midnam ()) {
-			std::string model_name = pi->plugin ()->midnam_model ();
-			if (gui_property (X_("midnam-model-name")) != model_name) {
-				/* user changed the MIDNAM model to something
-				   other than the plugin provided one. We
-				   should use that, and not the "plugin
-				   provided" label.
-				*/
-				model_changed (gui_property (X_("midnam-model-name")));
-			}
-		}
+		maybe_trigger_model_change ();
 	}
 
 	if (patch_manager.all_models().empty()) {
@@ -448,17 +468,21 @@ MidiTimeAxisView::update_patch_selector ()
 void
 MidiTimeAxisView::model_changed(const std::string& model)
 {
-	set_gui_property (X_("midnam-model-name"), model);
-
 	typedef MIDI::Name::MidiPatchManager PatchManager;
 	PatchManager& patch_manager = PatchManager::instance();
 
-	const std::list<std::string> device_modes = patch_manager.custom_device_mode_names_by_model(model);
+	const std::list<std::string> device_modes = patch_manager.custom_device_mode_names_by_model (model);
 
 	if (patch_manager.is_custom_model (model)) {
-		_midnam_model_selector.set_text(_("Plugin Provided"));
+		_midnam_model_selector.set_text (_("Plugin Provided"));
+		/* Do not store the actual model name, because it will
+		 * (potentially, at least) be unique to this instance of the
+		 * host (this program).
+		 */
+		remove_gui_property (X_("midnam-model-name"));
 	} else {
 		_midnam_model_selector.set_text(model);
+		set_gui_property (X_("midnam-model-name"), model);
 	}
 	_midnam_custom_device_mode_selector.clear_items();
 
@@ -909,7 +933,14 @@ MidiTimeAxisView::get_device_names()
 {
 	using namespace MIDI::Name;
 
-	const std::string model = gui_property (X_("midnam-model-name"));
+	std::string model = gui_property (X_("midnam-model-name"));
+
+	if (model.empty()) {
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ());
+		if (pi && pi->plugin ()->has_midnam ()) {
+			model = pi->plugin ()->midnam_model ();
+		}
+	}
 
 	boost::shared_ptr<MIDINameDocument> midnam = MidiPatchManager::instance() .document_by_model(model);
 	if (midnam) {
