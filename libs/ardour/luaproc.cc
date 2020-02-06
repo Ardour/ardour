@@ -651,7 +651,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 	try {
 		if (_lua_does_channelmapping) {
 			// run the DSP function
-			(*_lua_dsp)(&bufs, in, out, nframes, offset);
+			(*_lua_dsp)(&bufs, &in, &out, nframes, offset);
 		} else {
 			// map buffers
 			BufferSet& silent_bufs  = _session.get_silent_buffers (ChanCount (DataType::AUDIO, 1));
