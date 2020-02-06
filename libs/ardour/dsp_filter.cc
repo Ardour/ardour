@@ -78,6 +78,7 @@ void
 ARDOUR::DSP::process_map (BufferSet* bufs, const ChanMapping& in, const ChanMapping& out, pframes_t nframes, samplecnt_t offset, const DataType& dt)
 {
 	const ChanMapping::Mappings& im (in.mappings());
+	const ChanMapping::Mappings& om (out.mappings());
 
 	for (ChanMapping::Mappings::const_iterator tm = im.begin(); tm != im.end(); ++tm) {
 		if (tm->first != dt) { continue; }
@@ -100,6 +101,17 @@ ARDOUR::DSP::process_map (BufferSet* bufs, const ChanMapping& in, const ChanMapp
 		}
 	}
 
+	/* reverse lookup (in case input map is empty */
+	for (ChanMapping::Mappings::const_iterator tm = om.begin(); tm != om.end(); ++tm) {
+		if (tm->first != dt) { continue; }
+		for (ChanMapping::TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
+			bool valid;
+			in.get_src (dt, i->first, &valid);
+			if (!valid) {
+				bufs->get_available (dt, i->second).silence (nframes, offset);
+			}
+		}
+	}
 }
 
 LowPass::LowPass (double samplerate, float freq)
