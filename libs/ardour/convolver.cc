@@ -24,19 +24,21 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
+#include "ardour/chan_mapping.h"
 #include "ardour/convolver.h"
 #include "ardour/dsp_filter.h"
 #include "ardour/readable.h"
 #include "ardour/session.h"
 #include "ardour/source_factory.h"
 #include "ardour/srcfilesource.h"
+#include "ardour/types.h"
 
 #include "pbd/i18n.h"
 
+using namespace ARDOUR;
 using namespace ARDOUR::DSP;
 using namespace ArdourZita;
 
-using ARDOUR::Session;
 Convolution::Convolution (Session& session, uint32_t n_in, uint32_t n_out)
     : SessionHandleRef (session)
     , _n_samples (0)

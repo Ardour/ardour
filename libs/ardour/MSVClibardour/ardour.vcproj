@@ -352,6 +352,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\audiorom.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\audiosource.cc"
 				>
 			</File>
@@ -937,6 +941,10 @@
 			</File>
 			<File
 				RelativePath="..\rc_configuration.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\readable.cc"
 				>
 			</File>
 			<File
@@ -1575,6 +1583,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\audioregion.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\audiorom.h"
 				>
 			</File>
 			<File

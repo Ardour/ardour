@@ -52,7 +52,9 @@
 //#define TLSF_STATISTIC 1
 
 #ifndef USE_PRINTF
+#if TLSF_STATISTIC
 #define USE_PRINTF      (1)
+#endif
 #endif
 
 #include <assert.h>
@@ -138,9 +140,11 @@
 # define ERROR_MSG(fmt, args...) printf(fmt, ## args)
 #else
 # if !defined(PRINT_MSG)
-#  define PRINT_MSG(fmt, args...)
+#  if TLSF_STATISTIC
+#    define PRINT_MSG(fmt, args...)
+#  endif
 # endif
-# if !defined(ERROR_MSG)
+# if !defined(ERROR_MSG) && !defined(COMPILER_MSVC)
 #  define ERROR_MSG(fmt, args...)
 # endif
 #endif
