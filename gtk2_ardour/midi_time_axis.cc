@@ -489,8 +489,12 @@ MidiTimeAxisView::model_changed(const std::string& model)
 		_midnam_custom_device_mode_selector.AddMenuElem (Gtk::Menu_Helpers::MenuElem(*i, sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed), *i)));
 	}
 
-	if (!device_modes.empty()) {
-		custom_device_mode_changed(device_modes.front());
+	if (gui_property (X_("midnam-custom-device-mode")).empty()) {
+		if (!device_modes.empty()) {
+			custom_device_mode_changed (device_modes.front());
+		}
+	} else {
+		custom_device_mode_changed (gui_property (X_("midnam-custom-device-mode")));
 	}
 
 	if (device_modes.size() > 1) {
