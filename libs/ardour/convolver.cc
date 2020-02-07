@@ -35,11 +35,10 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
 using namespace ARDOUR::DSP;
 using namespace ArdourZita;
 
-Convolution::Convolution (Session& session, uint32_t n_in, uint32_t n_out)
+Convolution::Convolution (ARDOUR::Session& session, uint32_t n_in, uint32_t n_out)
     : SessionHandleRef (session)
     , _n_samples (0)
     , _max_size (0)
@@ -218,7 +217,7 @@ Convolution::run (BufferSet& bufs, ChanMapping const& in_map, ChanMapping const&
 /* ****************************************************************************/
 
 Convolver::Convolver (
-    Session&           session,
+    ARDOUR::Session&   session,
     std::string const& path,
     IRChannelConfig    irc,
     IRSettings         irs)
