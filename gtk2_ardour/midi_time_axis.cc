@@ -263,8 +263,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	if (gui_property (X_("midnam-custom-device-mode")).empty()) {
 		boost::shared_ptr<MIDI::Name::MasterDeviceNames> device_names = get_device_names();
 		if (device_names) {
-			set_gui_property (X_("midnam-custom-device-mode"),
-			                  *device_names->custom_device_mode_names().begin());
+			set_gui_property (X_("midnam-custom-device-mode"), *device_names->custom_device_mode_names().begin());
 		}
 	}
 
@@ -486,12 +485,8 @@ MidiTimeAxisView::model_changed(const std::string& model)
 	}
 	_midnam_custom_device_mode_selector.clear_items();
 
-	for (std::list<std::string>::const_iterator i = device_modes.begin();
-	     i != device_modes.end(); ++i) {
-		_midnam_custom_device_mode_selector.AddMenuElem(
-			Gtk::Menu_Helpers::MenuElem(
-				*i, sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed),
-				               *i)));
+	for (std::list<std::string>::const_iterator i = device_modes.begin(); i != device_modes.end(); ++i) {
+		_midnam_custom_device_mode_selector.AddMenuElem (Gtk::Menu_Helpers::MenuElem(*i, sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed), *i)));
 	}
 
 	if (!device_modes.empty()) {
@@ -920,12 +915,12 @@ MidiTimeAxisView::get_device_mode()
 	using namespace MIDI::Name;
 
 	boost::shared_ptr<MasterDeviceNames> device_names = get_device_names();
+
 	if (!device_names) {
 		return boost::shared_ptr<MIDI::Name::CustomDeviceMode>();
 	}
 
-	return device_names->custom_device_mode_by_name(
-		gui_property (X_("midnam-custom-device-mode")));
+	return device_names->custom_device_mode_by_name(gui_property (X_("midnam-custom-device-mode")));
 }
 
 boost::shared_ptr<MIDI::Name::MasterDeviceNames>
