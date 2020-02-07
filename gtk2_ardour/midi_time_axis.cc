@@ -483,6 +483,7 @@ MidiTimeAxisView::model_changed(const std::string& model)
 		_midnam_model_selector.set_text(model);
 		set_gui_property (X_("midnam-model-name"), model);
 	}
+
 	_midnam_custom_device_mode_selector.clear_items();
 
 	for (std::list<std::string>::const_iterator i = device_modes.begin(); i != device_modes.end(); ++i) {
