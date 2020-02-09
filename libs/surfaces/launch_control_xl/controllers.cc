@@ -879,8 +879,9 @@ LaunchControlXL::knob_pan(uint8_t n)
 	}
 
 
-	if (ac && check_pick_up(knob, ac)) {
-		ac->set_value ( ac->interface_to_internal( knob->value() / 127.0), PBD::Controllable::UseGroup );
+	if (ac && check_pick_up_rev(knob, ac)) {
+		DEBUG_TRACE (DEBUG::LaunchControlXL, string_compose ("knob->value: '%1'\n", (int) knob->value()));
+		ac->set_value (ac->interface_to_internal ((127 - knob->value()) / 127.0), PBD::Controllable::UseGroup);
 	}
 }
 

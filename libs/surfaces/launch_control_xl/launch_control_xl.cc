@@ -620,6 +620,13 @@ LaunchControlXL::check_pick_up(boost::shared_ptr<Controller> controller, boost::
 	return ( abs( controller->value() / 127.0 -  ac->internal_to_interface(ac->get_value()) ) < 0.007875 );
 }
 
+bool
+LaunchControlXL::check_pick_up_rev (boost::shared_ptr<Controller> controller, boost::shared_ptr<AutomationControl> ac)
+{
+	/* returns false until 127 minus the controller value matches with the current setting of the stripable's ac */
+	return (abs ((127 - controller->value()) / 127.0  - ac->internal_to_interface (ac->get_value())) < 0.007875);
+}
+
 void
 LaunchControlXL::handle_midi_controller_message (MIDI::Parser& parser, MIDI::EventTwoBytes* ev, MIDI::channel_t chan)
 {
