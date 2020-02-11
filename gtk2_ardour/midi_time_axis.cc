@@ -1229,11 +1229,14 @@ MidiTimeAxisView::show_all_automation (bool apply_to_selection)
 
 			// Show automation for all controllers named in midnam file
 			boost::shared_ptr<MasterDeviceNames> device_names = get_device_names();
-			if (gui_property (X_("midnam-model-name")) != DEFAULT_MIDNAM_MODEL &&
-			     device_names && !device_names->controls().empty()) {
+
+			if (gui_property (X_("midnam-model-name")) != DEFAULT_MIDNAM_MODEL && device_names && !device_names->controls().empty()) {
+
 				const std::string device_mode       = gui_property (X_("midnam-custom-device-mode"));
 				const uint16_t    selected_channels = midi_track()->get_playback_channel_mask();
+
 				for (uint32_t chn = 0; chn < 16; ++chn) {
+
 					if ((selected_channels & (0x0001 << chn)) == 0) {
 						// Channel not in use
 						continue;
