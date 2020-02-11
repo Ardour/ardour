@@ -255,13 +255,6 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		}
 	}
 
-	if (gui_property (X_("midnam-model-name")).empty()) {
-		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ());
-		if (!pi || !pi->plugin ()->has_midnam ()) {
-			set_gui_property (X_("midnam-model-name"), DEFAULT_MIDNAM_MODEL);
-		}
-	}
-
 	if (gui_property (X_("midnam-custom-device-mode")).empty()) {
 		boost::shared_ptr<MIDI::Name::MasterDeviceNames> device_names = get_device_names();
 		if (device_names) {
