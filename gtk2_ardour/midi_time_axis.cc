@@ -113,6 +113,8 @@ using namespace std;
 static const uint32_t MIDI_CONTROLS_BOX_MIN_HEIGHT = 160;
 static const uint32_t KEYBOARD_MIN_HEIGHT = 130;
 
+#define DEFAULT_MIDNAM_MODEL (X_("Generic"))
+
 MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanvas::Canvas& canvas)
 	: SessionHandlePtr (sess)
 	, RouteTimeAxisView (ed, sess, canvas)
@@ -256,7 +258,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	if (gui_property (X_("midnam-model-name")).empty()) {
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ());
 		if (!pi || !pi->plugin ()->has_midnam ()) {
-			set_gui_property (X_("midnam-model-name"), "Generic");
+			set_gui_property (X_("midnam-model-name"), DEFAULT_MIDNAM_MODEL);
 		}
 	}
 
@@ -409,7 +411,7 @@ MidiTimeAxisView::setup_midnam_patches ()
 	}
 
 	if (!get_device_names()) {
-		model_changed ("Generic");
+		model_changed (DEFAULT_MIDNAM_MODEL);
 	}
 }
 
@@ -465,12 +467,21 @@ MidiTimeAxisView::update_patch_selector ()
 
 
 void
-MidiTimeAxisView::model_changed(const std::string& model)
+MidiTimeAxisView::model_changed (const std::string& m)
 {
 	typedef MIDI::Name::MidiPatchManager PatchManager;
 	PatchManager& patch_manager = PatchManager::instance();
+	std::string model (m);
 
-	const std::list<std::string> device_modes = patch_manager.custom_device_mode_names_by_model (model);
+	std::list<std::string> device_modes = patch_manager.custom_device_mode_names_by_model (model);
+
+	if (device_modes.empty()) {
+		model = DEFAULT_MIDNAM_MODEL;
+		device_modes = patch_manager.custom_device_mode_names_by_model (model);
+		assert (!device_modes.empty());
+	}
+
+	const std::string current_mode = gui_property (X_("midname-custom-device-mode"));
 
 	if (patch_manager.is_custom_model (model)) {
 		_midnam_model_selector.set_text (_("Plugin Provided"));
@@ -490,25 +501,20 @@ MidiTimeAxisView::model_changed(const std::string& model)
 		_midnam_custom_device_mode_selector.AddMenuElem (Gtk::Menu_Helpers::MenuElem(*i, sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed), *i)));
 	}
 
-	if (gui_property (X_("midnam-custom-device-mode")).empty()) {
-		if (!device_modes.empty()) {
-			custom_device_mode_changed (device_modes.front());
-		}
+	if (current_mode.empty()) {
+		custom_device_mode_changed (device_modes.front());
 	} else {
-		custom_device_mode_changed (gui_property (X_("midnam-custom-device-mode")));
+		if (find (device_modes.begin(), device_modes.end(), current_mode) == device_modes.end()) {
+			custom_device_mode_changed (device_modes.front());
+		} else {
+			custom_device_mode_changed (current_mode);
+		}
 	}
 
 	if (device_modes.size() > 1) {
 		_midnam_custom_device_mode_selector.show();
 	} else {
 		_midnam_custom_device_mode_selector.hide();
-	}
-
-	// now this is a real bad hack
-	if (device_modes.size() > 0) {
-		_route->instrument_info().set_external_instrument (model, device_modes.front());
-	} else {
-		_route->instrument_info().set_external_instrument (model, "");
 	}
 
 	// Rebuild controller menu
@@ -528,7 +534,7 @@ MidiTimeAxisView::custom_device_mode_changed(const std::string& mode)
 	const std::string model = gui_property (X_("midnam-model-name"));
 
 	set_gui_property (X_("midnam-custom-device-mode"), mode);
-	_midnam_custom_device_mode_selector.set_text(mode);
+	_midnam_custom_device_mode_selector.set_text (mode);
 	_route->instrument_info().set_external_instrument (model, mode);
 }
 
@@ -1223,7 +1229,7 @@ MidiTimeAxisView::show_all_automation (bool apply_to_selection)
 
 			// Show automation for all controllers named in midnam file
 			boost::shared_ptr<MasterDeviceNames> device_names = get_device_names();
-			if (gui_property (X_("midnam-model-name")) != "Generic" &&
+			if (gui_property (X_("midnam-model-name")) != DEFAULT_MIDNAM_MODEL &&
 			     device_names && !device_names->controls().empty()) {
 				const std::string device_mode       = gui_property (X_("midnam-custom-device-mode"));
 				const uint16_t    selected_channels = midi_track()->get_playback_channel_mask();
