@@ -2378,7 +2378,6 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 	failed:
 	if (!new_routes.empty()) {
 		StateProtector sp (this);
-		add_routes (new_routes, true, true, false, order);
 
 		if (instrument) {
 			for (RouteList::iterator r = new_routes.begin(); r != new_routes.end(); ++r) {
@@ -2402,6 +2401,8 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 				}
 			}
 		}
+
+		add_routes (new_routes, true, true, false, order);
 	}
 
 	return ret;
