@@ -894,11 +894,6 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 		processor->activate ();
 	}
 
-	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (processor);
-	if (pi) {
-		pi->update_sidechain_name ();
-	}
-
 	return 0;
 }
 
@@ -1143,6 +1138,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 			}
 
 			if (pi && pi->has_sidechain ()) {
+				pi->update_sidechain_name ();
 				pi->sidechain_input ()->changed.connect_same_thread (*this, boost::bind (&Route::sidechain_change_handler, this, _1, _2));
 			}
 

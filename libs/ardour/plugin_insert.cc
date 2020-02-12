@@ -222,7 +222,7 @@ PluginInsert::add_sidechain (uint32_t n_audio, uint32_t n_midi)
 	} else if (owner()) {
 		n << "SC " << owner()->name() << "/" << name() << " " << Session::next_name_id ();
 	} else {
-		n << "tobeRenamed";
+		n << "toBeRenamed" << id().to_s();
 	}
 	SideChain *sc = new SideChain (_session, n.str ());
 	_sidechain = boost::shared_ptr<SideChain> (sc);
