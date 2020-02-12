@@ -1513,13 +1513,13 @@ DiskReader::Declicker::alloc (samplecnt_t sr, bool fadein)
 
 	if (fadein) {
 		gain_t g = 0.0;
-		for (n = 0; (n < sr) && ((1.0 - g) > GAIN_COEFF_DELTA); ++n) {
+		for (n = 0; (n < loop_fade_length) && ((1.f - g) > GAIN_COEFF_DELTA); ++n) {
 			vec[n] = g;
 			g += a * (1.0 - g);
 		}
 	} else {
 		gain_t g = 1.0;
-		for (n = 0; (n < sr) && (g > GAIN_COEFF_DELTA); ++n) {
+		for (n = 0; (n < loop_fade_length) && (g > GAIN_COEFF_DELTA); ++n) {
 			vec[n] = g;
 			g += a * -g;
 		}
