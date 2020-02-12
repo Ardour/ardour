@@ -607,6 +607,11 @@ FaderPort8::controller_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 #else
 		encoder_parameter (tb->value & dir_mask ? true : false, tb->value & step_mask);
 #endif
+		/* if Shift key is held while turning Pan/Param, don't lock shift. */
+		if (_shift_pressed > 0 && !_shift_lock) {
+			_shift_connection.disconnect ();
+			_shift_lock = false;
+		}
 	}
 }
 
