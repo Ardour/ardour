@@ -1528,6 +1528,8 @@ DiskReader::Declicker::alloc (samplecnt_t sr, bool fadein)
 		}
 	}
 
+	assert (n < loop_fade_length);
+
 	fade_length = n;
 
 	/* zero out the rest just to be safe */
@@ -1733,7 +1735,7 @@ DiskReader::rt_midibuffer ()
 void
 DiskReader::alloc_loop_declick (samplecnt_t sr)
 {
-	loop_fade_length = lrintf (ceil (-log (GAIN_COEFF_DELTA) / (1024. / sr)));
+	loop_fade_length = lrintf (ceil (-log (GAIN_COEFF_DELTA / 2.) / (1024. / sr)));
 	loop_declick_in.alloc (sr, true);
 	loop_declick_out.alloc (sr, false);
 }
