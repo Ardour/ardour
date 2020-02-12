@@ -255,13 +255,6 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		}
 	}
 
-	if (gui_property (X_("midnam-custom-device-mode")).empty()) {
-		boost::shared_ptr<MIDI::Name::MasterDeviceNames> device_names = get_device_names();
-		if (device_names) {
-			set_gui_property (X_("midnam-custom-device-mode"), *device_names->custom_device_mode_names().begin());
-		}
-	}
-
 	ArdourWidgets::set_tooltip (_midnam_model_selector, _("External MIDI Device"));
 	ArdourWidgets::set_tooltip (_midnam_custom_device_mode_selector, _("External Device Mode"));
 
