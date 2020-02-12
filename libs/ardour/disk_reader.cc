@@ -1431,6 +1431,11 @@ DiskReader::dec_no_disk_output ()
 	} while (true);
 }
 
+/* min gain difference for de-click and loop-fadess
+ * (-60dB difference to target)
+ */
+#define GAIN_COEFF_DELTA (1e-5)
+
 DiskReader::DeclickAmp::DeclickAmp (samplecnt_t sample_rate)
 {
 	_a = 4550.f / (gain_t)sample_rate;
@@ -1477,7 +1482,7 @@ DiskReader::DeclickAmp::apply_gain (AudioBuffer& buf, samplecnt_t n_samples, con
 		offset += n_proc;
 	}
 
-	if (fabsf (g - target) < /* GAIN_COEFF_DELTA */ 1e-5) {
+	if (fabsf (g - target) < GAIN_COEFF_DELTA) {
 		_g = target;
 	} else {
 		_g = g;
@@ -1509,8 +1514,6 @@ DiskReader::Declicker::alloc (samplecnt_t sr, bool fadein)
 
 	samplecnt_t n;
 
-#define GAIN_COEFF_DELTA (1e-5)
-
 	if (fadein) {
 		gain_t g = 0.0;
 		for (n = 0; (n < loop_fade_length) && ((1.f - g) > GAIN_COEFF_DELTA); ++n) {
@@ -1530,8 +1533,6 @@ DiskReader::Declicker::alloc (samplecnt_t sr, bool fadein)
 	/* zero out the rest just to be safe */
 
 	memset (&vec[n], 0, sizeof (gain_t) * (loop_fade_length - n));
-
-#undef GAIN_COEFF_DELTA
 }
 
 void
@@ -1732,10 +1733,12 @@ DiskReader::rt_midibuffer ()
 void
 DiskReader::alloc_loop_declick (samplecnt_t sr)
 {
-	loop_fade_length = lrintf (ceil (-log (1e-5) / (1024.f/sr)));
+	loop_fade_length = lrintf (ceil (-log (GAIN_COEFF_DELTA) / (1024. / sr)));
 	loop_declick_in.alloc (sr, true);
 	loop_declick_out.alloc (sr, false);
 }
+
+#undef GAIN_COEFF_DELTA
 
 void
 DiskReader::reset_loop_declick (Location* loc, samplecnt_t sr)
