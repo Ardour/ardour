@@ -120,7 +120,9 @@ ARDOUR::get_jack_audio_driver_names (vector<string>& audio_driver_names)
 	audio_driver_names.push_back (alsa_driver_name);
 #endif
 	audio_driver_names.push_back (oss_driver_name);
+#if defined(__NetBSD__) || defined(__sun)
 	audio_driver_names.push_back (sun_driver_name);
+#endif
 	audio_driver_names.push_back (freebob_driver_name);
 	audio_driver_names.push_back (ffado_driver_name);
 #endif
