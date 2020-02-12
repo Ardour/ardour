@@ -495,9 +495,7 @@ private:
 	void connect_to_parser();
 	void handle_button_message(boost::shared_ptr<Button> button, MIDI::EventTwoBytes *);
 
-	bool check_pick_up(boost::shared_ptr<Controller> controller, boost::shared_ptr<ARDOUR::AutomationControl> ac);
-	bool check_pick_up_rev(boost::shared_ptr<Controller> controller, boost::shared_ptr<ARDOUR::AutomationControl> ac);
-
+	bool check_pick_up(boost::shared_ptr<Controller> controller, boost::shared_ptr<ARDOUR::AutomationControl> ac, bool rotary = false);
 
 	void handle_midi_controller_message(MIDI::Parser &, MIDI::EventTwoBytes *, MIDI::channel_t chan);
 	void handle_midi_note_on_message(MIDI::Parser &, MIDI::EventTwoBytes *, MIDI::channel_t chan);
