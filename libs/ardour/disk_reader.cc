@@ -499,7 +499,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 bool
 DiskReader::declick_in_progress () const
 {
-	return _declick_amp.gain() != 0; // declick-out
+	return _session.cfg()->get_use_transport_fades() && (_declick_amp.gain() != 0); // declick-out
 }
 
 bool
