@@ -648,7 +648,7 @@ int main() { return 0; }''',
     if opt.stl_debug:
         cxx_flags.append("-D_GLIBCXX_DEBUG")
 
-    if re.search ("freebsd", sys.platform) != None or re.search ("openbsd", sys.platform) != None:
+    if re.search ("bsd", sys.platform) != None:
         linker_flags.append('-lexecinfo')
 
     if conf.env['DEBUG_RT_ALLOC']:
@@ -1047,7 +1047,7 @@ def configure(conf):
 
     # executing a test program is n/a when cross-compiling
     if Options.options.dist_target != 'mingw':
-        if Options.options.dist_target != 'msvc' and re.search ("openbsd", sys.platform) == None:
+        if Options.options.dist_target != 'msvc' and re.search ("(open|net)bsd", sys.platform) == None:
             if re.search ("freebsd", sys.platform) != None:
                 conf.check_cc(
                         msg="Checking for function 'dlopen' in dlfcn.h",
