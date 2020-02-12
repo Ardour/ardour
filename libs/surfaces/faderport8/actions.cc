@@ -431,9 +431,9 @@ FaderPort8::handle_encoder_pan (int steps)
 			if (steps == 0) {
 				ac->set_value (ac->normal(), PBD::Controllable::UseGroup);
 			} else {
-				double v = ac->internal_to_interface (ac->get_value());
+				double v = ac->internal_to_interface (ac->get_value(), true);
 				v = std::max (0.0, std::min (1.0, v + steps * .01));
-				ac->set_value (ac->interface_to_internal(v), PBD::Controllable::UseGroup);
+				ac->set_value (ac->interface_to_internal(v, true), PBD::Controllable::UseGroup);
 			}
 		}
 	}
@@ -450,7 +450,7 @@ FaderPort8::handle_encoder_link (int steps)
 		return;
 	}
 
-	double v = ac->internal_to_interface (ac->get_value());
+	double v = ac->internal_to_interface (ac->get_value(), true);
 	ac->start_touch (ac->session().transport_sample());
 
 	if (steps == 0) {
@@ -468,7 +468,7 @@ FaderPort8::handle_encoder_link (int steps)
 	} else {
 		v = std::max (0.0, std::min (1.0, v + steps * .01));
 	}
-	ac->set_value (ac->interface_to_internal(v), PBD::Controllable::UseGroup);
+	ac->set_value (ac->interface_to_internal(v, true), PBD::Controllable::UseGroup);
 }
 
 
