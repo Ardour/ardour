@@ -623,7 +623,7 @@ ARDOUR_UI::check_memory_locking ()
 						  "You can view the memory limit with 'ulimit -l', "
 						  "and it is normally controlled by %2"),
 						PROGRAM_NAME,
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__NetBSD__)
 						X_("/etc/login.conf")
 #else
 						X_(" /etc/security/limits.conf")
