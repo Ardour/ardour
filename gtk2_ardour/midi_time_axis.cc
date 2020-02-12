@@ -421,7 +421,10 @@ MidiTimeAxisView::maybe_trigger_model_change ()
 			model_changed (saved_model_name);
 
 		} else {
-			/* ensure that "Plugin Provided" is prefixed at the top of the list */
+			/* user has not explicitly set MIDNAM model, and
+			 * there's a plugin provided MIDNAM. Ensure that
+			 * "Plugin Provided" is prefixed at the top of the list
+			 */
 			model_changed (model_name);
 			if (_midnam_model_selector.items().empty () || _midnam_model_selector.items().begin()->get_label() != _("Plugin Provided")) {
 				setup_midnam_patches ();
