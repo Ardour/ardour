@@ -1966,7 +1966,6 @@ MixerStrip::map_frozen ()
 	boost::shared_ptr<AudioTrack> at = audio_track();
 
 	bool en   = _route->active () || ARDOUR::Profile->get_mixbus();
-	bool send = _current_delivery && boost::dynamic_pointer_cast<Send>(_current_delivery) != 0;
 
 	if (at) {
 		switch (at->freeze_state()) {
@@ -1975,11 +1974,11 @@ MixerStrip::map_frozen ()
 			hide_redirect_editors ();
 			break;
 		default:
-			processor_box.set_sensitive (en && !send);
+			processor_box.set_sensitive (en);
 			break;
 		}
 	} else {
-		processor_box.set_sensitive (en && !send);
+		processor_box.set_sensitive (en);
 	}
 	RouteUI::map_frozen ();
 }
