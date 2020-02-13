@@ -50,6 +50,7 @@ public:
 	~LCXLGUI ();
 
 	void toggle_fader8master ();
+	void toggle_ctrllowersends ();
 
 private:
 	LaunchControlXL& lcxl;
@@ -61,6 +62,7 @@ private:
 	Gtk::ComboBox output_combo;
 	Gtk::Image    image;
 	Gtk::CheckButton fader8master_button;
+	Gtk::CheckButton ctrllowersends_button;
 
 	void update_port_combos ();
 	PBD::ScopedConnection connection_change_connection;

@@ -126,6 +126,18 @@ LCXLGUI::LCXLGUI (LaunchControlXL& p)
 	row++;
 
 	/* User Settings */
+#ifdef MIXBUS32C
+	l = manage (new Gtk::Label (_("Control sends 7-12 in Mixer Mode")));
+	l->set_alignment (1.0, 0.5);
+	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (ctrllowersends_button);
+	table.attach (*align, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0),0,0);
+	ctrllowersends_button.set_active (lcxl.ctrllowersends());
+	ctrllowersends_button.signal_toggled().connect (sigc::mem_fun (*this, &LCXLGUI::toggle_ctrllowersends));
+	row++;
+#endif
 
 	l = manage (new Gtk::Label (_("Fader 8 Master")));
 	l->set_alignment (1.0, 0.5);
@@ -289,3 +301,13 @@ LCXLGUI::toggle_fader8master ()
 	lcxl.set_fader8master (!lcxl.fader8master());
 	DEBUG_TRACE(DEBUG::LaunchControlXL, string_compose("use_fader8master IS: %1\n", lcxl.fader8master()));
 }
+
+#ifdef MIXBUS32C
+void
+LCXLGUI::toggle_ctrllowersends ()
+{
+	DEBUG_TRACE(DEBUG::LaunchControlXL, string_compose("ctrllowersends WAS: %1\n", lcxl.ctrllowersends()));
+	lcxl.set_ctrllowersends (!lcxl.ctrllowersends());
+	DEBUG_TRACE(DEBUG::LaunchControlXL, string_compose("ctrllowersends IS: %1\n", lcxl.ctrllowersends()));
+}
+#endif
