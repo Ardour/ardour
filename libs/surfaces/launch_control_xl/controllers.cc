@@ -1152,8 +1152,8 @@ LaunchControlXL::dm_pan_azi (KnobID k)
 
 	ac = first_selected_stripable()->pan_azimuth_control();
 
-	if (ac && check_pick_up(knob, ac)) {
-		ac->set_value ( ac->interface_to_internal( knob->value() / 127.0), PBD::Controllable::UseGroup );
+	if (ac && check_pick_up(knob, ac, true)) {
+		ac->set_value (ac->interface_to_internal((knob->value() / 127.0), true), PBD::Controllable::UseGroup);
 	}
 }
 
