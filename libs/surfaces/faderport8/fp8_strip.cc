@@ -615,7 +615,7 @@ FP8Strip::periodic_update_meter ()
 		}
 	} else if (_pan_ctrl) {
 		have_panner = _base.show_panner ();
-		float panpos = _pan_ctrl->internal_to_interface (_pan_ctrl->get_value());
+		float panpos = _pan_ctrl->internal_to_interface (_pan_ctrl->get_value(), true);
 		int val = std::min (127.f, std::max (0.f, panpos * 128.f));
 		set_bar_mode (have_panner ? 1 : 4); // Bipolar or Off
 		if (val != _last_barpos && have_panner) {
