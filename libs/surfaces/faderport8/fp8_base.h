@@ -110,6 +110,9 @@ public:
 
 		 for  (size_t i = 0; i < txt.size(); ++i)
 		 {
+			 if (txt[i] < 0) {
+				 continue;
+			 }
 			 d.push_back (txt[i]);
 			 if (i >= 8) {
 				 break;
