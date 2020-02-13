@@ -4089,6 +4089,10 @@ ProcessorBox::edit_aux_send (boost::shared_ptr<Processor> processor)
 	if (boost::dynamic_pointer_cast<InternalSend> (processor) == 0) {
 		return false;
 	}
+	if (ARDOUR::Profile->get_mixbus()) {
+		/* don't allow editing sends, ignore switch to send-edit */
+		return true;
+	}
 
 	if (_parent_strip) {
 		boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
