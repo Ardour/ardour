@@ -325,6 +325,9 @@ Session::post_engine_init ()
 			for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 				(*i)->configure_processors (0);
 			}
+			/* release process-lock, ProcessorChangeBlocker may trigger
+			 * latency-callback from non-rt thread which may take the lock */
+			lx.release ();
 		}
 
 		/* Reset all panners */
