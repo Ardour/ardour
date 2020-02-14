@@ -367,8 +367,14 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			AudioBuffer& disk_buf ((ms & MonitoringInput) ? scratch_bufs.get_audio(n) : output);
 
 			if (start_sample != playback_sample && target_gain != 0) {
-				if (can_internal_playback_seek (start_sample - playback_sample)) {
-					internal_playback_seek (start_sample - playback_sample);
+				samplepos_t ss = start_sample;
+				Location* loc = _loop_location;
+				if (loc) {
+					Evoral::Range<samplepos_t> loop_range (loc->start(), loc->end() - 1);
+					ss = loop_range.squish (playback_sample);
+				}
+				if (can_internal_playback_seek (ss - playback_sample)) {
+					internal_playback_seek (ss - playback_sample);
 				} else {
 					disk_samples_to_consume = 0; /* will force an underrun below */
 				}
