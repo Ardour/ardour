@@ -44,7 +44,7 @@
 #include "lv2_external_ui.h"
 
 #include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
-#ifndef LV2_1_14_0
+#if 0
 typedef struct _LV2UI_Request_Parameter {
 	LV2UI_Feature_Handle handle;
 	uint32_t (*request)(LV2UI_Feature_Handle handle, LV2_URID key);
@@ -92,8 +92,10 @@ private:
 	struct lv2_external_ui_host          _external_ui_host;
 	LV2_Feature                          _external_ui_feature;
 	LV2_Feature                          _external_kxui_feature;
+#if 0
 	LV2UI_Request_Parameter              _lv2ui_request_paramater;
 	LV2_Feature                          _lv2ui_request_feature;
+#endif
 	struct lv2_external_ui*              _external_ui_ptr;
 	LV2_Feature                          _parent_feature;
 	void*                                _inst;

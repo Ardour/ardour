@@ -340,12 +340,14 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		features[fi] = features_src[fi];
 	}
 
+#if 0
 	_lv2ui_request_paramater.handle = this;
 	_lv2ui_request_paramater.request = LV2PluginUI::request_parameter;
 	_lv2ui_request_feature.URI  = LV2_UI_PREFIX "requestParameter";
 	_lv2ui_request_feature.data = &_lv2ui_request_paramater;
 
 	features[fi++] = &_lv2ui_request_feature;
+#endif
 
 	Gtk::Alignment* container = NULL;
 	if (is_external_ui) {
@@ -378,7 +380,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	}
 
 	features[fi] = NULL;
-	assert (fi == features_count + (is_external_ui ? 3 : 2));
+	assert (fi == features_count + (is_external_ui ? 2 : 1));
 
 	if (!ui_host) {
 		ui_host = suil_host_new(LV2PluginUI::write_from_ui,
