@@ -59,6 +59,7 @@
 #include "ardour_message.h"
 #include "ardour_ui.h"
 #include "engine_dialog.h"
+#include "missing_filesource_dialog.h"
 #include "missing_plugin_dialog.h"
 #include "opts.h"
 #include "public_editor.h"
@@ -454,6 +455,13 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		goto out;
 	}
 
+	{
+		list<string> const u = new_session->missing_filesources (DataType::MIDI);
+		if (!u.empty()) {
+			MissingFileSourceDialog d (_session, u, DataType::MIDI);
+			d.run ();
+		}
+	}
 	{
 		list<string> const u = new_session->unknown_processors ();
 		if (!u.empty()) {
