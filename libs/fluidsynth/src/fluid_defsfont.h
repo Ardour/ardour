@@ -143,7 +143,6 @@ int fluid_defsfont_add_preset(fluid_defsfont_t *defsfont, fluid_defpreset_t *def
 struct _fluid_defpreset_t
 {
     fluid_defpreset_t *next;
-    fluid_defsfont_t *defsfont;           /* the soundfont this preset belongs to */
     char name[21];                        /* the name of the preset */
     unsigned int bank;                    /* the bank number */
     unsigned int num;                     /* the preset number */
@@ -151,7 +150,7 @@ struct _fluid_defpreset_t
     fluid_preset_zone_t *zone;               /* the chained list of preset zones */
 };
 
-fluid_defpreset_t *new_fluid_defpreset(fluid_defsfont_t *defsfont);
+fluid_defpreset_t *new_fluid_defpreset(void);
 void delete_fluid_defpreset(fluid_defpreset_t *defpreset);
 fluid_defpreset_t *fluid_defpreset_next(fluid_defpreset_t *defpreset);
 int fluid_defpreset_import_sfont(fluid_defpreset_t *defpreset, SFPreset *sfpreset, fluid_defsfont_t *defsfont);
@@ -179,6 +178,7 @@ struct _fluid_preset_zone_t
 };
 
 fluid_preset_zone_t *new_fluid_preset_zone(char *name);
+void delete_fluid_list_mod(fluid_mod_t *mod);
 void delete_fluid_preset_zone(fluid_preset_zone_t *zone);
 fluid_preset_zone_t *fluid_preset_zone_next(fluid_preset_zone_t *zone);
 int fluid_preset_zone_import_sfont(fluid_preset_zone_t *zone, SFZone *sfzone, fluid_defsfont_t *defssfont);
@@ -196,7 +196,7 @@ struct _fluid_inst_t
 };
 
 fluid_inst_t *new_fluid_inst(void);
-fluid_inst_t *fluid_inst_import_sfont(fluid_preset_zone_t *preset_zone, SFInst *sfinst, fluid_defsfont_t *defsfont);
+fluid_inst_t *fluid_inst_import_sfont(SFInst *sfinst, fluid_defsfont_t *defsfont);
 void delete_fluid_inst(fluid_inst_t *inst);
 int fluid_inst_set_global_zone(fluid_inst_t *inst, fluid_inst_zone_t *zone);
 int fluid_inst_add_zone(fluid_inst_t *inst, fluid_inst_zone_t *zone);

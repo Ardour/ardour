@@ -1,21 +1,22 @@
 /*
-    Copyright (C) 2007 Tim Mayberry
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2007-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2008-2015 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2014-2015 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef PBD_FILE_UTILS_INCLUDED
 #define PBD_FILE_UTILS_INCLUDED
@@ -49,10 +50,9 @@ get_paths (std::vector<std::string>& result,
 
 /**
  * Get a list of files in a Searchpath.
- * @note paths in result will be absolute.
  *
- * @param path A Searchpath
- * @param result A vector of paths to files.
+ * @param paths A Searchpath
+ * @param result A vector of absolute paths to files.
  */
 LIBPBD_API void
 get_files (std::vector<std::string>& result,
@@ -108,11 +108,11 @@ find_file (const Searchpath& search_path,
 
 /**
  * Find files in paths that match a regular expression
- * @note This function does not recurse.
  *
- * @param result A vector in which to place the resulting matches.
+ * @param results A vector in which to place the resulting matches.
  * @param paths A Searchpath
  * @param regexp A regular expression
+ * @param recurse Search directories recursively
  */
 LIBPBD_API void
 find_files_matching_regex (std::vector<std::string>& results,
@@ -124,7 +124,7 @@ find_files_matching_regex (std::vector<std::string>& results,
  * Find paths in a Searchpath that match a supplied filter(functor)
  * @note results include files and directories.
  *
- * @param result A vector in which to place the resulting matches.
+ * @param results A vector in which to place the resulting matches.
  * @param paths A Searchpath
  * @param filter A functor to use to filter paths
  * @param arg additonal argument to filter if required
@@ -145,7 +145,7 @@ find_paths_matching_filter (std::vector<std::string>& results,
  * Find paths in a Searchpath that match a supplied filter(functor)
  * @note results include only files.
  *
- * @param result A vector in which to place the resulting matches.
+ * @param results A vector in which to place the resulting matches.
  * @param paths A Searchpath
  * @param filter A functor to use to filter paths
  * @param arg additonal argument to filter if required
@@ -182,12 +182,17 @@ LIBPBD_API void copy_files(const std::string & from_path, const std::string & to
 LIBPBD_API void copy_recurse(const std::string & from_path, const std::string & to_dir);
 
 /**
- * Update the access and modification times of file at @path, creating file if it
- * doesn't already exist.
- * @path file path to touch
+ * Update the access and modification times of file at path, creating file
+ * if it doesn't already exist.
+ * @param path file path to touch
  * @return true if file exists or was created and access time updated.
  */
 LIBPBD_API bool touch_file (const std::string& path);
+
+/** try hard-link a file
+ * @return true if file was successfully linked
+ */
+LIBPBD_API bool hard_link (const std::string& existing_file, const std::string& new_path);
 
 /**
  * Take a (possibly) relative path and make it absolute
@@ -196,7 +201,7 @@ LIBPBD_API bool touch_file (const std::string& path);
 LIBPBD_API std::string get_absolute_path (const std::string &);
 
 /**
- * The equivalent of ::realpath on POSIX systems, on Windows hard
+ * The equivalent of realpath on POSIX systems, on Windows hard
  * links/junctions etc are not resolved.
  */
 LIBPBD_API std::string canonical_path (const std::string& path);
@@ -234,7 +239,7 @@ LIBPBD_API bool exists_and_writable(const std::string & p);
  *
  * @param dir The directory to clear of files.
  * @param size of removed files in bytes.
- * @param list of files that were removed.
+ * @param removed_files list of files that were removed.
  */
 LIBPBD_API int clear_directory (const std::string& dir, size_t* size = 0,
                                 std::vector<std::string>* removed_files = 0);
@@ -263,12 +268,11 @@ LIBPBD_API void remove_directory (const std::string& dir);
  */
 LIBPBD_API std::string tmp_writable_directory (const char* domain, const std::string& prefix);
 
-/** If @param path exists, unlink it. If it doesn't exist, create it.
+/** If \p path exists, unlink it. If it doesn't exist, create it.
  *
  * @return zero if required action was successful, non-zero otherwise.
  */
-
-LIBPBD_API int toggle_file_existence (std::string const &);
+LIBPBD_API int toggle_file_existence (std::string const & path);
 
 } // namespace PBD
 

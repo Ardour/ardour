@@ -30,57 +30,87 @@
 #include <sndfile.h>
 #endif
 
+#if LIBINSTPATCH_SUPPORT
+#include <libinstpatch/libinstpatch.h>
+#endif
+
 /*=================================sfload.c========================
   Borrowed from Smurf SoundFont Editor by Josh Green
   =================================================================*/
 
+/* FOURCC definitions */
+#define RIFF_FCC    FLUID_FOURCC('R','I','F','F')
+#define LIST_FCC    FLUID_FOURCC('L','I','S','T')
+#define SFBK_FCC    FLUID_FOURCC('s','f','b','k')
+#define INFO_FCC    FLUID_FOURCC('I','N','F','O')
+#define SDTA_FCC    FLUID_FOURCC('s','d','t','a')
+#define PDTA_FCC    FLUID_FOURCC('p','d','t','a') /* info/sample/preset */
+
+#define IFIL_FCC    FLUID_FOURCC('i','f','i','l')
+#define ISNG_FCC    FLUID_FOURCC('i','s','n','g')
+#define INAM_FCC    FLUID_FOURCC('I','N','A','M')
+#define IROM_FCC    FLUID_FOURCC('i','r','o','m') /* info ids (1st byte of info strings) */
+#define IVER_FCC    FLUID_FOURCC('i','v','e','r')
+#define ICRD_FCC    FLUID_FOURCC('I','C','R','D')
+#define IENG_FCC    FLUID_FOURCC('I','E','N','G')
+#define IPRD_FCC    FLUID_FOURCC('I','P','R','D') /* more info ids */
+#define ICOP_FCC    FLUID_FOURCC('I','C','O','P')
+#define ICMT_FCC    FLUID_FOURCC('I','C','M','T')
+#define ISFT_FCC    FLUID_FOURCC('I','S','F','T') /* and yet more info ids */
+
+#define SNAM_FCC    FLUID_FOURCC('s','n','a','m')
+#define SMPL_FCC    FLUID_FOURCC('s','m','p','l') /* sample ids */
+#define PHDR_FCC    FLUID_FOURCC('p','h','d','r')
+#define PBAG_FCC    FLUID_FOURCC('p','b','a','g')
+#define PMOD_FCC    FLUID_FOURCC('p','m','o','d')
+#define PGEN_FCC    FLUID_FOURCC('p','g','e','n') /* preset ids */
+#define IHDR_FCC    FLUID_FOURCC('i','n','s','t')
+#define IBAG_FCC    FLUID_FOURCC('i','b','a','g')
+#define IMOD_FCC    FLUID_FOURCC('i','m','o','d')
+#define IGEN_FCC    FLUID_FOURCC('i','g','e','n') /* instrument ids */
+#define SHDR_FCC    FLUID_FOURCC('s','h','d','r') /* sample info */
+#define SM24_FCC    FLUID_FOURCC('s','m','2','4')
+
+/* Set when the FCC code is unknown */
+#define UNKN_ID     FLUID_N_ELEMENTS(idlist)
+
 /*
-   functions for loading data from sfont files, with appropriate byte swapping
-   on big endian machines. Sfont IDs are not swapped because the ID read is
-   equivalent to the matching ID list in memory regardless of LE/BE machine
-*/
-
-/* sf file chunk IDs */
-enum
+ * This declares a uint32_t array containing the SF2 chunk identifiers.
+ */
+static const uint32_t idlist[] =
 {
-    UNKN_ID,
-    RIFF_ID,
-    LIST_ID,
-    SFBK_ID,
-    INFO_ID,
-    SDTA_ID,
-    PDTA_ID, /* info/sample/preset */
+    RIFF_FCC,
+    LIST_FCC,
+    SFBK_FCC,
+    INFO_FCC,
+    SDTA_FCC,
+    PDTA_FCC,
 
-    IFIL_ID,
-    ISNG_ID,
-    INAM_ID,
-    IROM_ID, /* info ids (1st byte of info strings) */
-    IVER_ID,
-    ICRD_ID,
-    IENG_ID,
-    IPRD_ID, /* more info ids */
-    ICOP_ID,
-    ICMT_ID,
-    ISFT_ID, /* and yet more info ids */
+    IFIL_FCC,
+    ISNG_FCC,
+    INAM_FCC,
+    IROM_FCC,
+    IVER_FCC,
+    ICRD_FCC,
+    IENG_FCC,
+    IPRD_FCC,
+    ICOP_FCC,
+    ICMT_FCC,
+    ISFT_FCC,
 
-    SNAM_ID,
-    SMPL_ID, /* sample ids */
-    PHDR_ID,
-    PBAG_ID,
-    PMOD_ID,
-    PGEN_ID, /* preset ids */
-    IHDR_ID,
-    IBAG_ID,
-    IMOD_ID,
-    IGEN_ID, /* instrument ids */
-    SHDR_ID, /* sample info */
-    SM24_ID
+    SNAM_FCC,
+    SMPL_FCC,
+    PHDR_FCC,
+    PBAG_FCC,
+    PMOD_FCC,
+    PGEN_FCC,
+    IHDR_FCC,
+    IBAG_FCC,
+    IMOD_FCC,
+    IGEN_FCC,
+    SHDR_FCC,
+    SM24_FCC
 };
-
-static const char idlist[] = {"RIFFLISTsfbkINFOsdtapdtaifilisngINAMiromiverICRDIENGIPRD"
-                              "ICOPICMTISFTsnamsmplphdrpbagpmodpgeninstibagimodigenshdrsm24"
-                             };
-
 
 /* generator types */
 typedef enum
@@ -183,8 +213,6 @@ static const unsigned short invalid_preset_gen[] =
 };
 
 
-#define CHNKIDSTR(id) &idlist[(id - 1) * 4]
-
 /* sfont file chunk sizes */
 #define SF_PHDR_SIZE (38)
 #define SF_BAG_SIZE  (4)
@@ -284,7 +312,7 @@ static int load_shdr(SFData *sf, unsigned int size);
 static int fixup_pgen(SFData *sf);
 static int fixup_igen(SFData *sf);
 
-static int chunkid(unsigned int id);
+static int chunkid(uint32_t id);
 static int read_listchunk(SFData *sf, SFChunk *chunk);
 static int pdtahelper(SFData *sf, unsigned int expid, unsigned int reclen, SFChunk *chunk, int *size);
 static int preset_compare_func(void *a, void *b);
@@ -299,6 +327,73 @@ static void delete_zone(SFZone *zone);
 
 static int fluid_sffile_read_vorbis(SFData *sf, unsigned int start_byte, unsigned int end_byte, short **data);
 static int fluid_sffile_read_wav(SFData *sf, unsigned int start, unsigned int end, short **data, char **data24);
+
+/**
+ * Check if a file is a SoundFont file.
+ *
+ * If fluidsynth was built with DLS support, this function will also identify DLS files.
+ * @param filename Path to the file to check
+ * @return TRUE if it could be a SF2, SF3 or DLS file, FALSE otherwise
+ *
+ * @note This function only checks whether header(s) in the RIFF chunk are present.
+ * A call to fluid_synth_sfload() might still fail.
+ */
+int fluid_is_soundfont(const char *filename)
+{
+    FILE    *fp;
+    uint32_t fcc;
+    int      retcode = FALSE;
+
+    do
+    {
+        if((fp = fluid_file_open(filename, NULL)) == NULL)
+        {
+            return retcode;
+        }
+
+        if(FLUID_FREAD(&fcc, sizeof(fcc), 1, fp) != 1)
+        {
+            break;
+        }
+
+        if(fcc != RIFF_FCC)
+        {
+            break;
+        }
+
+        if(FLUID_FSEEK(fp, 4, SEEK_CUR))
+        {
+            break;
+        }
+
+        if(FLUID_FREAD(&fcc, sizeof(fcc), 1, fp) != 1)
+        {
+            break;
+        }
+
+        retcode = (fcc == SFBK_FCC);
+        if(retcode)
+        {
+            break;  // seems to be SF2, stop here
+        }
+#ifdef LIBINSTPATCH_SUPPORT
+        else
+        {
+            IpatchFileHandle *fhandle = ipatch_file_identify_open(filename, NULL);
+            if(fhandle != NULL)
+            {
+                retcode = (ipatch_file_identify(fhandle->file, NULL) == IPATCH_TYPE_DLS_FILE);
+                ipatch_file_close(fhandle);
+            }
+        }
+#endif
+    }
+    while(0);
+
+    FLUID_FCLOSE(fp);
+
+    return retcode;
+}
 
 /*
  * Open a SoundFont file and parse it's contents into a SFData structure.
@@ -486,22 +581,20 @@ void fluid_sffile_close(SFData *sf)
  */
 
 /* sound font file load functions */
-static int chunkid(unsigned int id)
+static int chunkid(uint32_t id)
 {
     unsigned int i;
-    const unsigned int *p;
 
-    p = (const unsigned int *)&idlist;
-
-    for(i = 0; i < sizeof(idlist) / sizeof(int); i++, p += 1)
+    for(i = 0; i < FLUID_N_ELEMENTS(idlist); i++)
     {
-        if(*p == id)
+        if(idlist[i] == id)
         {
-            return (i + 1);
+            break;
         }
     }
 
-    return UNKN_ID;
+    /* Return chunk id or UNKN_ID if not found */
+    return i;
 }
 
 static int load_header(SFData *sf)
@@ -510,7 +603,7 @@ static int load_header(SFData *sf)
 
     READCHUNK(sf, &chunk); /* load RIFF chunk */
 
-    if(chunkid(chunk.id) != RIFF_ID)
+    if(chunk.id != RIFF_FCC)
     {
         /* error if not RIFF */
         FLUID_LOG(FLUID_ERR, "Not a RIFF file");
@@ -519,7 +612,7 @@ static int load_header(SFData *sf)
 
     READID(sf, &chunk.id); /* load file ID */
 
-    if(chunkid(chunk.id) != SFBK_ID)
+    if(chunk.id != SFBK_FCC)
     {
         /* error if not SFBK_ID */
         FLUID_LOG(FLUID_ERR, "Not a SoundFont file");
@@ -538,7 +631,7 @@ static int load_header(SFData *sf)
         return FALSE;
     }
 
-    if(chunkid(chunk.id) != INFO_ID)
+    if(chunk.id != INFO_FCC)
     {
         FLUID_LOG(FLUID_ERR, "Invalid ID found when expecting INFO chunk");
         return FALSE;
@@ -555,7 +648,7 @@ static int load_header(SFData *sf)
         return FALSE;
     }
 
-    if(chunkid(chunk.id) != SDTA_ID)
+    if(chunk.id != SDTA_FCC)
     {
         FLUID_LOG(FLUID_ERR, "Invalid ID found when expecting SAMPLE chunk");
         return FALSE;
@@ -572,7 +665,7 @@ static int load_header(SFData *sf)
         return FALSE;
     }
 
-    if(chunkid(chunk.id) != PDTA_ID)
+    if(chunk.id != PDTA_FCC)
     {
         FLUID_LOG(FLUID_ERR, "Invalid ID found when expecting HYDRA chunk");
         return FALSE;
@@ -617,7 +710,7 @@ static int read_listchunk(SFData *sf, SFChunk *chunk)
 {
     READCHUNK(sf, chunk); /* read list chunk */
 
-    if(chunkid(chunk->id) != LIST_ID)  /* error if ! list chunk */
+    if(chunk->id != LIST_FCC)  /* error if ! list chunk */
     {
         FLUID_LOG(FLUID_ERR, "Invalid chunk id in level 0 parse");
         return FALSE;
@@ -631,8 +724,11 @@ static int read_listchunk(SFData *sf, SFChunk *chunk)
 static int process_info(SFData *sf, int size)
 {
     SFChunk chunk;
-    unsigned char id;
-    char *item;
+    union
+    {
+        char *chr;
+        uint32_t *fcc;
+    } item;
     unsigned short ver;
 
     while(size > 0)
@@ -640,9 +736,7 @@ static int process_info(SFData *sf, int size)
         READCHUNK(sf, &chunk);
         size -= 8;
 
-        id = chunkid(chunk.id);
-
-        if(id == IFIL_ID)
+        if(chunk.id == IFIL_FCC)
         {
             /* sound font version chunk? */
             if(chunk.size != 4)
@@ -683,7 +777,7 @@ static int process_info(SFData *sf, int size)
                 return FALSE;
             }
         }
-        else if(id == IVER_ID)
+        else if(chunk.id == IVER_FCC)
         {
             /* ROM version chunk? */
             if(chunk.size != 4)
@@ -697,34 +791,35 @@ static int process_info(SFData *sf, int size)
             READW(sf, ver);
             sf->romver.minor = ver;
         }
-        else if(id != UNKN_ID)
+        else if(chunkid(chunk.id) != UNKN_ID)
         {
-            if((id != ICMT_ID && chunk.size > 256) || (chunk.size > 65536) || (chunk.size % 2))
+            if((chunk.id != ICMT_FCC && chunk.size > 256) || (chunk.size > 65536) || (chunk.size % 2))
             {
                 FLUID_LOG(FLUID_ERR, "INFO sub chunk %.4s has invalid chunk size of %d bytes",
-                          &chunk.id, chunk.size);
+                          (char*)&chunk.id, chunk.size);
                 return FALSE;
             }
 
-            /* alloc for chunk id and da chunk */
-            if(!(item = FLUID_MALLOC(chunk.size + 1)))
+            /* alloc for chunk fcc and da chunk */
+            if(!(item.fcc = FLUID_MALLOC(chunk.size + sizeof(uint32_t) + 1)))
             {
                 FLUID_LOG(FLUID_ERR, "Out of memory");
                 return FALSE;
             }
 
             /* attach to INFO list, fluid_sffile_close will cleanup if FAIL occurs */
-            sf->info = fluid_list_append(sf->info, item);
+            sf->info = fluid_list_append(sf->info, item.fcc);
 
-            *(unsigned char *)item = id;
+            /* save chunk fcc and update pointer to data value */
+            *item.fcc++ = chunk.id;
 
-            if(sf->fcbs->fread(&item[1], chunk.size, sf->sffd) == FLUID_FAILED)
+            if(sf->fcbs->fread(item.chr, chunk.size, sf->sffd) == FLUID_FAILED)
             {
                 return FALSE;
             }
 
-            /* force terminate info item (don't forget uint8 info ID) */
-            *(item + chunk.size) = '\0';
+            /* force terminate info item */
+            item.chr[chunk.size] = '\0';
         }
         else
         {
@@ -757,7 +852,7 @@ static int process_sdta(SFData *sf, unsigned int size)
     READCHUNK(sf, &chunk);
     size -= 8;
 
-    if(chunkid(chunk.id) != SMPL_ID)
+    if(chunk.id != SMPL_FCC)
     {
         FLUID_LOG(FLUID_ERR, "Expected SMPL chunk found invalid id instead");
         return FALSE;
@@ -790,7 +885,7 @@ static int process_sdta(SFData *sf, unsigned int size)
             READCHUNK(sf, &chunk);
             size -= 8;
 
-            if(chunkid(chunk.id) == SM24_ID)
+            if(chunk.id == SM24_FCC)
             {
                 int sm24size, sdtahalfsize;
 
@@ -830,29 +925,24 @@ ret:
 
 static int pdtahelper(SFData *sf, unsigned int expid, unsigned int reclen, SFChunk *chunk, int *size)
 {
-    unsigned int id;
-    const char *expstr;
-
-    expstr = CHNKIDSTR(expid); /* in case we need it */
-
     READCHUNK(sf, chunk);
     *size -= 8;
 
-    if((id = chunkid(chunk->id)) != expid)
+    if(chunk->id != expid)
     {
-        FLUID_LOG(FLUID_ERR, "Expected PDTA sub-chunk '%.4s' found invalid id instead", expstr);
+        FLUID_LOG(FLUID_ERR, "Expected PDTA sub-chunk '%.4s' found invalid id instead", (char*)&expid);
         return FALSE;
     }
 
     if(chunk->size % reclen)  /* valid chunk size? */
     {
-        FLUID_LOG(FLUID_ERR, "'%.4s' chunk size is not a multiple of %d bytes", expstr, reclen);
+        FLUID_LOG(FLUID_ERR, "'%.4s' chunk size is not a multiple of %d bytes", (char*)&expid, reclen);
         return FALSE;
     }
 
     if((*size -= chunk->size) < 0)
     {
-        FLUID_LOG(FLUID_ERR, "'%.4s' chunk size exceeds remaining PDTA chunk size", expstr);
+        FLUID_LOG(FLUID_ERR, "'%.4s' chunk size exceeds remaining PDTA chunk size", (char*)&expid);
         return FALSE;
     }
 
@@ -863,7 +953,7 @@ static int process_pdta(SFData *sf, int size)
 {
     SFChunk chunk;
 
-    if(!pdtahelper(sf, PHDR_ID, SF_PHDR_SIZE, &chunk, &size))
+    if(!pdtahelper(sf, PHDR_FCC, SF_PHDR_SIZE, &chunk, &size))
     {
         return FALSE;
     }
@@ -873,7 +963,7 @@ static int process_pdta(SFData *sf, int size)
         return FALSE;
     }
 
-    if(!pdtahelper(sf, PBAG_ID, SF_BAG_SIZE, &chunk, &size))
+    if(!pdtahelper(sf, PBAG_FCC, SF_BAG_SIZE, &chunk, &size))
     {
         return FALSE;
     }
@@ -883,7 +973,7 @@ static int process_pdta(SFData *sf, int size)
         return FALSE;
     }
 
-    if(!pdtahelper(sf, PMOD_ID, SF_MOD_SIZE, &chunk, &size))
+    if(!pdtahelper(sf, PMOD_FCC, SF_MOD_SIZE, &chunk, &size))
     {
         return FALSE;
     }
@@ -893,7 +983,7 @@ static int process_pdta(SFData *sf, int size)
         return FALSE;
     }
 
-    if(!pdtahelper(sf, PGEN_ID, SF_GEN_SIZE, &chunk, &size))
+    if(!pdtahelper(sf, PGEN_FCC, SF_GEN_SIZE, &chunk, &size))
     {
         return FALSE;
     }
@@ -903,7 +993,7 @@ static int process_pdta(SFData *sf, int size)
         return FALSE;
     }
 
-    if(!pdtahelper(sf, IHDR_ID, SF_IHDR_SIZE, &chunk, &size))
+    if(!pdtahelper(sf, IHDR_FCC, SF_IHDR_SIZE, &chunk, &size))
     {
         return FALSE;
     }
@@ -913,7 +1003,7 @@ static int process_pdta(SFData *sf, int size)
         return FALSE;
     }
 
-    if(!pdtahelper(sf, IBAG_ID, SF_BAG_SIZE, &chunk, &size))
+    if(!pdtahelper(sf, IBAG_FCC, SF_BAG_SIZE, &chunk, &size))
     {
         return FALSE;
     }
@@ -923,7 +1013,7 @@ static int process_pdta(SFData *sf, int size)
         return FALSE;
     }
 
-    if(!pdtahelper(sf, IMOD_ID, SF_MOD_SIZE, &chunk, &size))
+    if(!pdtahelper(sf, IMOD_FCC, SF_MOD_SIZE, &chunk, &size))
     {
         return FALSE;
     }
@@ -933,7 +1023,7 @@ static int process_pdta(SFData *sf, int size)
         return FALSE;
     }
 
-    if(!pdtahelper(sf, IGEN_ID, SF_GEN_SIZE, &chunk, &size))
+    if(!pdtahelper(sf, IGEN_FCC, SF_GEN_SIZE, &chunk, &size))
     {
         return FALSE;
     }
@@ -943,7 +1033,7 @@ static int process_pdta(SFData *sf, int size)
         return FALSE;
     }
 
-    if(!pdtahelper(sf, SHDR_ID, SF_SHDR_SIZE, &chunk, &size))
+    if(!pdtahelper(sf, SHDR_FCC, SF_SHDR_SIZE, &chunk, &size))
     {
         return FALSE;
     }
@@ -987,6 +1077,7 @@ static int load_phdr(SFData *sf, int size)
             FLUID_LOG(FLUID_ERR, "Out of memory");
             return FALSE;
         }
+
         sf->preset = fluid_list_append(sf->preset, preset);
         preset->zone = NULL; /* In case of failure, fluid_sffile_close can cleanup */
         READSTR(sf, &preset->name); /* possible read failure ^ */
@@ -1078,6 +1169,7 @@ static int load_pbag(SFData *sf, int size)
                 FLUID_LOG(FLUID_ERR, "Out of memory");
                 return FALSE;
             }
+
             p2->data = z;
             z->gen = NULL; /* Init gen and mod before possible failure, */
             z->mod = NULL; /* to ensure proper cleanup (fluid_sffile_close) */
@@ -1211,6 +1303,7 @@ static int load_pmod(SFData *sf, int size)
                     FLUID_LOG(FLUID_ERR, "Out of memory");
                     return FALSE;
                 }
+
                 p3->data = m;
                 READW(sf, m->src);
                 READW(sf, m->dest);
@@ -1367,6 +1460,7 @@ static int load_pgen(SFData *sf, int size)
                             FLUID_LOG(FLUID_ERR, "Out of memory");
                             return FALSE;
                         }
+
                         p3->data = g;
                         g->id = genid;
                     }
@@ -1508,6 +1602,7 @@ static int load_ihdr(SFData *sf, int size)
             FLUID_LOG(FLUID_ERR, "Out of memory");
             return FALSE;
         }
+
         sf->inst = fluid_list_append(sf->inst, p);
         p->zone = NULL; /* For proper cleanup if fail (fluid_sffile_close) */
         p->idx = i;
@@ -1593,6 +1688,7 @@ static int load_ibag(SFData *sf, int size)
                 FLUID_LOG(FLUID_ERR, "Out of memory");
                 return FALSE;
             }
+
             p2->data = z;
             z->gen = NULL; /* In case of failure, */
             z->mod = NULL; /* fluid_sffile_close can clean up */
@@ -1727,6 +1823,7 @@ static int load_imod(SFData *sf, int size)
                     FLUID_LOG(FLUID_ERR, "Out of memory");
                     return FALSE;
                 }
+
                 p3->data = m;
                 READW(sf, m->src);
                 READW(sf, m->dest);
@@ -1872,6 +1969,7 @@ static int load_igen(SFData *sf, int size)
                             FLUID_LOG(FLUID_ERR, "Out of memory");
                             return FALSE;
                         }
+
                         p3->data = g;
                         g->id = genid;
                     }
@@ -2011,6 +2109,7 @@ static int load_shdr(SFData *sf, unsigned int size)
             FLUID_LOG(FLUID_ERR, "Out of memory");
             return FALSE;
         }
+
         sf->sample = fluid_list_append(sf->sample, p);
         READSTR(sf, &p->name);
         READD(sf, p->start);
@@ -2138,7 +2237,7 @@ static void delete_preset(SFPreset *preset)
     }
 
     delete_fluid_list(preset->zone);
-    
+
     FLUID_FREE(preset);
 }
 
@@ -2162,7 +2261,7 @@ static void delete_inst(SFInst *inst)
     }
 
     delete_fluid_list(inst->zone);
-    
+
     FLUID_FREE(inst);
 }
 
@@ -2502,7 +2601,7 @@ static int fluid_sffile_read_vorbis(SFData *sf, unsigned int start_byte, unsigne
     sfdata.end = end_byte;
     sfdata.offset = 0;
 
-    memset(&sfinfo, 0, sizeof(sfinfo));
+    FLUID_MEMSET(&sfinfo, 0, sizeof(sfinfo));
 
     /* Seek to beginning of Ogg Vorbis data in Soundfont */
     if(sf->fcbs->fseek(sf->sffd, sf->samplepos + start_byte, SEEK_SET) == FLUID_FAILED)
@@ -2516,12 +2615,12 @@ static int fluid_sffile_read_vorbis(SFData *sf, unsigned int start_byte, unsigne
 
     if(!sndfile)
     {
-        FLUID_LOG(FLUID_ERR, sf_strerror(sndfile));
+        FLUID_LOG(FLUID_ERR, "%s", sf_strerror(sndfile));
         return -1;
     }
 
     // Empty sample
-    if(!sfinfo.frames || !sfinfo.channels)
+    if(sfinfo.frames <= 0 || sfinfo.channels <= 0)
     {
         FLUID_LOG(FLUID_DBG, "Empty decompressed sample");
         *data = NULL;
@@ -2529,7 +2628,12 @@ static int fluid_sffile_read_vorbis(SFData *sf, unsigned int start_byte, unsigne
         return 0;
     }
 
-    /* FIXME: ensure that the decompressed WAV data is 16-bit mono? */
+    // Mono sample
+    if(sfinfo.channels != 1)
+    {
+        FLUID_LOG(FLUID_DBG, "Unsupported channel count %d in ogg sample", sfinfo.channels);
+        goto error_exit;
+    }
 
     wav_data = FLUID_ARRAY(short, sfinfo.frames * sfinfo.channels);
 
@@ -2539,11 +2643,11 @@ static int fluid_sffile_read_vorbis(SFData *sf, unsigned int start_byte, unsigne
         goto error_exit;
     }
 
-    /* Automatically decompresses the Ogg Vorbis data to 16-bit WAV */
+    /* Automatically decompresses the Ogg Vorbis data to 16-bit PCM */
     if(sf_readf_short(sndfile, wav_data, sfinfo.frames) < sfinfo.frames)
     {
         FLUID_LOG(FLUID_DBG, "Decompression failed!");
-        FLUID_LOG(FLUID_ERR, sf_strerror(sndfile));
+        FLUID_LOG(FLUID_ERR, "%s", sf_strerror(sndfile));
         goto error_exit;
     }
 

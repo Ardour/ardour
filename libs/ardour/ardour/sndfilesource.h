@@ -1,21 +1,26 @@
 /*
-    Copyright (C) 2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2006-2008 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2006-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2006-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2010 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2016-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __sndfile_source_h__
 #define __sndfile_source_h__
@@ -60,8 +65,6 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	int flush_header ();
 	void flush ();
 
-	samplepos_t natural_position () const;
-
 	samplepos_t last_capture_start_sample() const;
 	void mark_capture_start (samplepos_t);
 	void mark_capture_end ();
@@ -81,7 +84,7 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	void close ();
 
 	void set_path (const std::string& p);
-	void set_header_timeline_position ();
+	void set_header_natural_position ();
 
 	samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const;
 	samplecnt_t write_unlocked (Sample *dst, samplecnt_t cnt);
@@ -100,17 +103,18 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	/* destructive */
 
 	static samplecnt_t xfade_samples;
+
 	static gain_t* out_coefficient;
 	static gain_t* in_coefficient;
 
-	bool          _capture_start;
-	bool          _capture_end;
-	samplepos_t     capture_start_sample;
-	samplepos_t     file_pos; // unit is samples
+	bool           _capture_start;
+	bool           _capture_end;
+	samplepos_t    capture_start_sample;
+	samplepos_t    file_pos; // unit is samples
 	Sample*        xfade_buf;
 
 	samplecnt_t crossfade (Sample* data, samplecnt_t cnt, int dir);
-	void set_timeline_position (samplepos_t);
+	void set_natural_position (samplepos_t);
 	samplecnt_t destructive_write_unlocked (Sample *dst, samplecnt_t cnt);
 	samplecnt_t nondestructive_write_unlocked (Sample *dst, samplecnt_t cnt);
 	void handle_header_position_change ();

@@ -20,19 +20,13 @@ def configure(conf):
     autowaf.set_recursive()
     autowaf.configure(conf)
 
-    if conf.is_tracks_build():
-        panners = [ '1in2out', 'vbap', 'stereobalance' ]
-    else:
-        panners = [ '2in2out', '1in2out', 'vbap', 'stereobalance' ]
+    panners = [ '2in2out', '1in2out', 'vbap', 'stereobalance' ]
 
     for i in panners:
         sub_config_and_use(conf, i)
 
 def build(bld):
-    if bld.is_tracks_build():
-        panners = [ '1in2out', 'vbap', 'stereobalance' ]
-    else:
-        panners = [ '2in2out', '1in2out', 'vbap', 'stereobalance' ]
+    panners = [ '2in2out', '1in2out', 'vbap', 'stereobalance' ]
 
     for i in panners:
         bld.recurse(i)

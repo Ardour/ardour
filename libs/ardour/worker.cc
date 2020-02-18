@@ -1,21 +1,21 @@
 /*
-  Copyright (C) 2012-2016 Paul Davis
-  Author: David Robillard
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2012-2016 David Robillard <d@drobilla.net>
+ * Copyright (C) 2012-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -61,6 +61,7 @@ Worker::schedule(uint32_t size, const void* data)
 {
 	if (_synchronous || !_requests) {
 		_workee->work(*this, size, data);
+		emit_responses ();
 		return true;
 	}
 	if (_requests->write_space() < size + sizeof(size)) {
@@ -167,11 +168,11 @@ Worker::run()
 			if (buf) {
 				buf_size = size;
 			} else {
-				PBD::error << "Worker: Error allocating memory"
-				           << endmsg;
-				buf_size = 0; // TODO: This is probably fatal
+				PBD::fatal << "Worker: Error allocating memory" << endmsg;
+				abort(); /*NOTREACHED*/
 			}
 		}
+		assert (buf);
 
 		if (_requests->read((uint8_t*)buf, size) < size) {
 			PBD::error << "Worker: Error reading body from request ring"

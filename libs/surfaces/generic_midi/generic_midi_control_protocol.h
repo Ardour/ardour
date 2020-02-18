@@ -1,27 +1,32 @@
 /*
-    Copyright (C) 2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2009 David Robillard <d@drobilla.net>
+ * Copyright (C) 2006-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef ardour_generic_midi_control_protocol_h
 #define ardour_generic_midi_control_protocol_h
 
 #include <list>
 #include <glibmm/threads.h>
+
+#define ABSTRACT_UI_EXPORTS
+#include "pbd/abstract_ui.h"
 
 #include "ardour/types.h"
 #include "ardour/port.h"
@@ -39,17 +44,29 @@ namespace ARDOUR {
 }
 
 namespace MIDI {
-    class Port;
+	class Port;
 }
 
 class MIDIControllable;
 class MIDIFunction;
 class MIDIAction;
 
-class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
-  public:
+struct GenericMIDIRequest : public BaseUI::BaseRequestObject {
+public:
+	GenericMIDIRequest () {}
+	~GenericMIDIRequest () {}
+};
+
+
+class GenericMidiControlProtocol : public ARDOUR::ControlProtocol, public AbstractUI<GenericMIDIRequest> {
+public:
 	GenericMidiControlProtocol (ARDOUR::Session&);
 	virtual ~GenericMidiControlProtocol();
+
+	void do_request (GenericMIDIRequest*);
+	int stop ();
+
+	void thread_init ();
 
 	int set_active (bool yn);
 	static bool probe() { return true; }
@@ -68,7 +85,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 
 	boost::shared_ptr<PBD::Controllable> lookup_controllable (std::string const &) const;
 
-	void maybe_start_touch (PBD::Controllable*);
+	void maybe_start_touch (boost::shared_ptr<PBD::Controllable>);
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
@@ -110,7 +127,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 
 	PBD::Signal0<void> ConnectionChange;
 
-  private:
+private:
 	boost::shared_ptr<ARDOUR::Bundle> _input_bundle;
 	boost::shared_ptr<ARDOUR::Bundle> _output_bundle;
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _input_port;
@@ -144,16 +161,13 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	};
 	typedef std::list<MIDIPendingControllable* > MIDIPendingControllables;
 	MIDIPendingControllables pending_controllables;
-        Glib::Threads::Mutex controllables_lock;
-        Glib::Threads::Mutex pending_lock;
+	Glib::Threads::Mutex controllables_lock;
+	Glib::Threads::Mutex pending_lock;
 
-	bool start_learning (PBD::Controllable*);
-	void stop_learning (PBD::Controllable*);
+	bool start_learning (boost::weak_ptr<PBD::Controllable>);
+	void stop_learning (boost::weak_ptr<PBD::Controllable>);
 
 	void learning_stopped (MIDIControllable*);
-
-	void create_binding (PBD::Controllable*, int, int);
-	void delete_binding (PBD::Controllable*);
 
 	MIDIControllable* create_binding (const XMLNode&);
 	MIDIFunction* create_function (const XMLNode&);
@@ -170,7 +184,6 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	int connection_state;
 	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
 	PBD::ScopedConnection port_connection;
-	void connected();
 
 	std::string _current_binding;
 	uint32_t _bank_size;
@@ -186,7 +199,11 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	mutable void *gui;
 	void build_gui ();
 
+	PBD::ScopedConnectionList midi_connections;
 
+	bool midi_input_handler (Glib::IOCondition ioc, boost::weak_ptr<ARDOUR::AsyncMIDIPort> port);
+	void start_midi_handling ();
+	void stop_midi_handling ();
 };
 
 #endif /* ardour_generic_midi_control_protocol_h */

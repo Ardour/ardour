@@ -1,21 +1,22 @@
 /*
-    Copyright (C) 2016 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2016-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2016-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2018 Len Ovens <len@ovenwerks.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __libardour_presentation_info_h__
 #define __libardour_presentation_info_h__
@@ -73,13 +74,12 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	 * There are several pathways for the order being set:
 	 *
 	 *   - object created during session loading from XML
-	 *           - numeric order will be set during ::set_state(), based on
-	 *           - type will be set during ctor call
+	 *   - numeric order will be set during ::set_state(), based on
+	 *   - type will be set during ctor call
 	 *
 	 *   - object created in response to user request
-	 *		- numeric order will be set by Session, before adding
-	 *		     to container.
-	 *		- type set during ctor call
+	 *   - numeric order will be set by Session, before adding to container.
+	 *   - type set during ctor call
 	 *
 	 *
 	 * OBJECT IDENTITY
@@ -111,25 +111,32 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 		MasterOut = 0x20,
 		MonitorOut = 0x40,
 		Auditioner = 0x80,
+#ifdef MIXBUS
+		Mixbus = 0x1000,
+#endif
 		/* These are for sharing Stripable states between the GUI and other
 		 * user interfaces/control surfaces
 		 */
 		Hidden = 0x100,
+#ifdef MIXBUS
+		MixbusEditorHidden = 0x800,
+#endif
 		/* single bit indicates that the group order is set */
 		OrderSet = 0x400,
+
 		/* bus type for monitor mixes */
-		ListenBus = 0x2000,
+		FoldbackBus = 0x2000,
 
 		/* special mask to delect out "state" bits */
 		StatusMask = (Hidden),
 		/* special mask to delect select type bits */
-		TypeMask = (AudioBus|AudioTrack|MidiTrack|MidiBus|VCA|MasterOut|MonitorOut|Auditioner|ListenBus)
+		TypeMask = (AudioBus|AudioTrack|MidiTrack|MidiBus|VCA|MasterOut|MonitorOut|Auditioner|FoldbackBus)
 	};
 
 	static const Flag AllStripables; /* mask to use for any route or VCA (but not auditioner) */
-	static const Flag MixerStripables; /* mask to use for any route or VCA (but not auditioner or Listenbus) */
+	static const Flag MixerStripables; /* mask to use for any route or VCA (but not auditioner or foldbackbus) */
 	static const Flag AllRoutes; /* mask to use for any route include master+monitor, but not auditioner */
-	static const Flag MixerRoutes; /* mask to use for any route include master+monitor, but not auditioner or ListenBus*/
+	static const Flag MixerRoutes; /* mask to use for any route include master+monitor, but not auditioner or foldbackbus*/
 	static const Flag Route;     /* mask for any route (bus or track */
 	static const Flag Track;     /* mask to use for any track */
 	static const Flag Bus;       /* mask to use for any bus */

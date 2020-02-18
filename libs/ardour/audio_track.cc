@@ -1,28 +1,34 @@
 /*
-    Copyright (C) 2002 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2002-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005-2006 Jesse Chappell <jesse@essej.net>
+ * Copyright (C) 2006-2009 Sampo Savolainen <v2@iki.fi>
+ * Copyright (C) 2006-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015-2018 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2016 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <boost/scoped_array.hpp>
 
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
 
-#include "evoral/Curve.hpp"
+#include "evoral/Curve.h"
 
 #include "ardour/amp.h"
 #include "ardour/audio_buffer.h"
@@ -75,7 +81,7 @@ AudioTrack::get_auto_monitoring_state () const
 	bool const track_rec = _disk_writer->record_enabled ();
 	bool const auto_input = _session.config.get_auto_input ();
 	bool const software_monitor = Config->get_monitoring_model() == SoftwareMonitoring;
-	bool const tape_machine_mode = Config->get_tape_machine_mode ();
+	bool const auto_input_does_talkback = Config->get_auto_input_does_talkback ();
 	bool session_rec;
 
 	/* I suspect that just use actively_recording() is good enough all the
@@ -112,11 +118,7 @@ AudioTrack::get_auto_monitoring_state () const
 
 	} else {
 
-		if (tape_machine_mode) {
-
-			return MonitoringDisk;
-
-		} else {
+		if (auto_input_does_talkback) {
 
 			if (!roll && auto_input) { 
 				return software_monitor ? MonitoringInput : MonitoringSilence;
@@ -124,6 +126,9 @@ AudioTrack::get_auto_monitoring_state () const
 				return MonitoringDisk;
 			}
 
+		} else {
+
+			return MonitoringDisk;
 		}
 	}
 
@@ -138,21 +143,13 @@ AudioTrack::set_state (const XMLNode& node, int version)
 		_mode = Normal;
 	}
 
-	if (Profile->get_trx() && _mode == Destructive) {
-		/* Tracks does not support destructive tracks and trying to
-		   handle it as a normal track would be wrong.
-		*/
-		error << string_compose (_("%1: this session uses destructive tracks, which are not supported"), PROGRAM_NAME) << endmsg;
-		return -1;
-	}
-
 	if (Track::set_state (node, version)) {
 		return -1;
 	}
 
 	pending_state = const_cast<XMLNode*> (&node);
 
-	if (_session.state_of_the_state() & Session::Loading) {
+	if (_session.loading ()) {
 		_session.StateReady.connect_same_thread (*this, boost::bind (&AudioTrack::set_state_part_two, this));
 	} else {
 		set_state_part_two ();
@@ -214,7 +211,7 @@ AudioTrack::set_state_part_two ()
 		_freeze_record.processor_info.clear ();
 
 		if ((prop = fnode->property (X_("playlist"))) != 0) {
-			boost::shared_ptr<Playlist> pl = _session.playlists->by_name (prop->value());
+			boost::shared_ptr<Playlist> pl = _session.playlists()->by_name (prop->value());
 			if (pl) {
 				_freeze_record.playlist = boost::dynamic_pointer_cast<AudioPlaylist> (pl);
 				_freeze_record.playlist->use();
@@ -379,7 +376,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 		candidate = string_compose ("<F%2>%1", _freeze_record.playlist->name(), n);
 
-		if (_session.playlists->by_name (candidate) == 0) {
+		if (_session.playlists()->by_name (candidate) == 0) {
 			new_playlist_name = candidate;
 			break;
 		}
@@ -441,7 +438,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 	PropertyList plist;
 
 	plist.add (Properties::start, 0);
-	plist.add (Properties::length, srcs[0]->length(srcs[0]->timeline_position()));
+	plist.add (Properties::length, srcs[0]->length(srcs[0]->natural_position()));
 	plist.add (Properties::name, region_name);
 	plist.add (Properties::whole_file, true);
 

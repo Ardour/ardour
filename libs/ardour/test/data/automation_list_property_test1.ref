@@ -6,8 +6,8 @@
     </from>
     <to>
       <AutomationList automation-id="fadein" id="163" interpolation-style="Linear" state="Off">
-        <events>1 2
-3 4
+        <events>1 0.5
+3 2
 </events>
       </AutomationList>
     </to>

@@ -1,15 +1,21 @@
-/* a-comp
- * Copyright (C) 2016 Damien Zammit <damien@zamaudio.com>
+/*
+ * Copyright (C) 2016-2017 Damien Zammit <damien@zamaudio.com>
+ * Copyright (C) 2016-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2017-2019 Johannes Mueller <github@johannes-mueller.org>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <math.h>
@@ -55,10 +61,8 @@ typedef enum {
 	ACOMP_GAINR,
 	ACOMP_INLEVEL,
 	ACOMP_OUTLEVEL,
-
 	ACOMP_SIDECHAIN,
 	ACOMP_ENABLE,
-	ACOMP_FULL_INLINEDISP,
 
 	ACOMP_A0,
 	ACOMP_A1,
@@ -78,10 +82,8 @@ typedef struct {
 	float* gainr;
 	float* outlevel;
 	float* inlevel;
-
 	float* sidechain;
 	float* enable;
-	float* full_inline_display;
 
 	float* input0;
 	float* input1;
@@ -114,8 +116,6 @@ typedef struct {
 	float v_lvl_in;
 	float v_lvl_out;
 	float v_state_x;
-
-	bool v_full_inline_display;
 
 	float v_peakdb;
 	uint32_t peakdb_samples;
@@ -197,9 +197,6 @@ connect_port(LV2_Handle instance,
 			break;
 		case ACOMP_ENABLE:
 			acomp->enable = (float*)data;
-			break;
-		case ACOMP_FULL_INLINEDISP:
-			acomp->full_inline_display = (float*)data;
 			break;
 		default:
 			break;
@@ -355,12 +352,6 @@ run(LV2_Handle instance, uint32_t n_samples)
 		acomp->v_makeup = makeup;
 		acomp->need_expose = true;
 	}
-
-	bool full_inline = *acomp->full_inline_display > 0.5;
-	if (full_inline != acomp->v_full_inline_display) {
-		acomp->v_full_inline_display = full_inline;
-		acomp->need_expose = true;
-	}
 #endif
 
 	float in_peak_db = -160.f;
@@ -376,6 +367,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 		Lyg = 0.f;
 		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
 		Lxg = sanitize_denormal(Lxg);
+
 		if (Lxg > in_peak_db) {
 			in_peak_db = Lxg;
 		}
@@ -614,8 +606,8 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 	AComp* self = (AComp*)instance;
 
 	uint32_t h = MIN (w, max_h);
-	if (w < 200 && !self->v_full_inline_display) {
-		h = MIN (40, max_h);
+	if (w < 200) {
+		h = 40;
 	}
 
 	if (!self->display || self->w != w || self->h != h) {
@@ -627,7 +619,7 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 
 	cairo_t* cr = cairo_create (self->display);
 
-	if (w >= 200 || self->v_full_inline_display) {
+	if (w >= 200) {
 		render_inline_full (cr, self);
 	} else {
 		render_inline_only_bars (cr, self);

@@ -1,22 +1,20 @@
 /*
-	Copyright (C) 2006,2007 John Anderson
-	Copyright (C) 2012 Paul Davis
-	Copyright (C) 2017 Ben Loftis
-
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; either version 2 of the License, or
-	(at your option) any later version.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2017 Ben Loftis <ben@harrisonconsoles.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cstdlib>
 #include <cstring>
@@ -109,11 +107,12 @@ DeviceInfo::logic_control_buttons ()
 void
 DeviceInfo::shared_buttons ()
 {
-//	US-2499 button notes:
-//	CHAN button sends nothing.  it inititates a dumb 0..127 knob mode for the 24 knobs
-//	PAN sends the regular pan/surround message.  this tells our strips to send the pan knob position
-//	AUX1-6  all send the same 0x29 + 0x21 message, I believe the surface uses this to captures knob info, somehow
-	
+	/* US-2499 button notes:
+	 * CHAN button sends nothing.  it inititates a dumb 0..127 knob mode for the 24 knobs
+	 * PAN sends the regular pan/surround message.  this tells our strips to send the pan knob position
+	 * AUX1-6  all send the same 0x29 + 0x21 message, I believe the surface uses this to captures knob info, somehow
+	 */
+
 	_global_buttons[Button::Pan] = GlobalButtonInfo ("Pan/Surround", "assignment", 0x2a);  // US-2400:  this is sent (on&off in one msg) from the Pan button
 
 	_global_buttons[Button::Left] = GlobalButtonInfo ("Bank Left", "bank", 0x2e);
@@ -300,7 +299,7 @@ static Searchpath
 devinfo_search_path ()
 {
 	bool devinfo_path_defined = false;
-        std::string spath_env (Glib::getenv (devinfo_env_variable_name, devinfo_path_defined));
+	std::string spath_env (Glib::getenv (devinfo_env_variable_name, devinfo_path_defined));
 
 	if (devinfo_path_defined) {
 		return spath_env;

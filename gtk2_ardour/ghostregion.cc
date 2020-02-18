@@ -1,23 +1,30 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis
+ * Copyright (C) 2005-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005 Karsten Wiese <fzuuzf@googlemail.com>
+ * Copyright (C) 2005 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2007 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2008-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2016-2017 Nick Mainsbridge <mainsbridge@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
-
-#include "evoral/Note.hpp"
+#include "evoral/Note.h"
 
 #include "ardour/parameter_descriptor.h"
 
@@ -44,14 +51,14 @@ using namespace Editing;
 using namespace ARDOUR;
 using ArdourCanvas::Duple;
 
-GhostRegion::GhostRegion(RegionView& rv,
-                         ArdourCanvas::Container* parent,
-                         TimeAxisView& tv,
-                         TimeAxisView& source_tv,
-                         double initial_pos)
-    : parent_rv(rv)
-    , trackview(tv)
-    , source_trackview(source_tv)
+GhostRegion::GhostRegion (RegionView& rv,
+                          ArdourCanvas::Container* parent,
+                          TimeAxisView& tv,
+                          TimeAxisView& source_tv,
+                          double initial_pos)
+	: parent_rv(rv)
+	, trackview(tv)
+	, source_trackview(source_tv)
 {
 	group = new ArdourCanvas::Container (parent);
 	CANVAS_DEBUG_NAME (group, "ghost region");
@@ -116,11 +123,11 @@ GhostRegion::is_automation_ghost()
 	return (dynamic_cast<AutomationTimeAxisView*>(&trackview)) != 0;
 }
 
-AudioGhostRegion::AudioGhostRegion(RegionView& rv,
-                                   TimeAxisView& tv,
-                                   TimeAxisView& source_tv,
-                                   double initial_unit_pos)
-    : GhostRegion(rv, tv.ghost_group(), tv, source_tv, initial_unit_pos)
+AudioGhostRegion::AudioGhostRegion (RegionView& rv,
+                                    TimeAxisView& tv,
+                                    TimeAxisView& source_tv,
+                                    double initial_unit_pos)
+	: GhostRegion(rv, tv.ghost_group(), tv, source_tv, initial_unit_pos)
 {
 
 }
@@ -181,10 +188,10 @@ MidiGhostRegion::MidiGhostRegion(MidiRegionView& rv,
                                  TimeAxisView& tv,
                                  TimeAxisView& source_tv,
                                  double initial_unit_pos)
-    : GhostRegion(rv, tv.ghost_group(), tv, source_tv, initial_unit_pos)
-    , _note_group (new ArdourCanvas::Container (group))
-    ,  parent_mrv (rv)
-    , _optimization_iterator(events.end())
+	: GhostRegion(rv, tv.ghost_group(), tv, source_tv, initial_unit_pos)
+	, _note_group (new ArdourCanvas::Container (group))
+	,  parent_mrv (rv)
+	, _optimization_iterator(events.end())
 {
 	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
@@ -200,14 +207,14 @@ MidiGhostRegion::MidiGhostRegion(MidiRegionView& rv,
                                  MidiStreamView& msv,
                                  TimeAxisView& source_tv,
                                  double initial_unit_pos)
-    : GhostRegion(rv,
-                  msv.midi_underlay_group,
-                  msv.trackview(),
-                  source_tv,
-                  initial_unit_pos)
-    , _note_group (new ArdourCanvas::Container (group))
-    , 	parent_mrv (rv)
-    , _optimization_iterator(events.end())
+	: GhostRegion (rv,
+	               msv.midi_underlay_group,
+	               msv.trackview(),
+	               source_tv,
+	               initial_unit_pos)
+	, _note_group (new ArdourCanvas::Container (group))
+	, parent_mrv (rv)
+	, _optimization_iterator(events.end())
 {
 	_outline = UIConfiguration::instance().color ("ghost track midi outline");
 
@@ -465,7 +472,6 @@ MidiGhostRegion::redisplay_model ()
  *  representation of it.
  *  @return Our Event, or 0 if not found.
  */
-
 MidiGhostRegion::GhostEvent *
 MidiGhostRegion::find_event (boost::shared_ptr<NoteType> parent)
 {

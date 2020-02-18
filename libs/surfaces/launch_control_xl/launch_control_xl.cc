@@ -1,20 +1,23 @@
 /*
-  Copyright (C) 2016 Paul Davis
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2018-2019 Jan Lentfer <jan.lentfer@web.de>
+ * Copyright (C) 2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2018 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2018 Térence Clastres <t.clastres@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <stdlib.h>
 #include <pthread.h>
@@ -77,6 +80,7 @@ LaunchControlXL::LaunchControlXL (ARDOUR::Session& s)
 	, _fader8master (false)
 	, _device_mode (false)
 #ifdef MIXBUS32C
+	, _ctrllowersends (false)
 	, _fss_is_mixbus (false)
 #endif
 	, _refresh_leds_flag (false)
@@ -161,6 +165,11 @@ LaunchControlXL::begin_using_device ()
 	if (fader8master()) {
 		set_fader8master (fader8master());
 	}
+#ifdef MIXBUS32C
+	if (ctrllowersends()) {
+		set_ctrllowersends (ctrllowersends());
+	}
+#endif
 
 	return 0;
 }
@@ -271,6 +280,7 @@ LaunchControlXL::init_buttons()
 void
 LaunchControlXL::init_buttons (ButtonID buttons[], uint8_t i)
 {
+	DEBUG_TRACE (DEBUG::LaunchControlXL, "init_buttons buttons[]\n");
 	for (uint8_t n = 0; n < i; ++n) {
 		boost::shared_ptr<TrackButton> button = boost::dynamic_pointer_cast<TrackButton> (id_note_button_map[buttons[n]]);
 		if (button) {
@@ -307,6 +317,7 @@ LaunchControlXL::init_buttons (ButtonID buttons[], uint8_t i)
 void
 LaunchControlXL::init_buttons (bool startup)
 {
+	DEBUG_TRACE (DEBUG::LaunchControlXL, "init_buttons (bool startup)\n");
 	if (startup && !device_mode()) {
 		switch_bank(bank_start);
 		return;
@@ -609,10 +620,10 @@ LaunchControlXL::handle_button_message(boost::shared_ptr<Button> button, MIDI::E
 
 
 bool
-LaunchControlXL::check_pick_up(boost::shared_ptr<Controller> controller, boost::shared_ptr<AutomationControl> ac)
+LaunchControlXL::check_pick_up(boost::shared_ptr<Controller> controller, boost::shared_ptr<AutomationControl> ac, bool rotary)
 {
 	/* returns false until the controller value matches with the current setting of the stripable's ac */
-	return ( abs( controller->value() / 127.0 -  ac->internal_to_interface(ac->get_value()) ) < 0.007875 );
+	return (abs (controller->value() / 127.0 - ac->internal_to_interface(ac->get_value(), rotary)) < 0.007875);
 }
 
 void
@@ -765,6 +776,9 @@ LaunchControlXL::get_state()
 
 	child = new XMLNode (X_("Configuration"));
 	child->set_property ("fader8master", fader8master());
+#ifdef MIXBUS32C
+	child->set_property ("ctrllowersends", ctrllowersends());
+#endif
 	node.add_child_nocopy (*child);
 
 	return node;
@@ -800,6 +814,9 @@ LaunchControlXL::set_state (const XMLNode & node, int version)
 	if ((child = node.child (X_("Configuration"))) !=0) {
 		/* this should propably become a for-loop at some point */
 		child->get_property ("fader8master", _fader8master);
+#ifdef MIXBUS32C
+		child->get_property ("ctrllowersends", _ctrllowersends);
+#endif
 	}
 
 	return retval;
@@ -879,19 +896,26 @@ LaunchControlXL::input_port()
 void
 LaunchControlXL::stripable_selection_changed ()
 {
+	DEBUG_TRACE (DEBUG::LaunchControlXL, "Stripable Selection changed\n");
 	if (!device_mode()) {
 		switch_bank (bank_start);
 	} else {
 #ifdef MIXBUS32C
 		if (first_selected_stripable()) {
+			DEBUG_TRACE (DEBUG::LaunchControlXL, "32C special handling. Checking if stripable type changed\n");
 			bool fss_unchanged;
 			fss_unchanged = (fss_is_mixbus() == (first_selected_stripable()->mixbus() || first_selected_stripable()->is_master()));
-				if (!fss_unchanged) {
+			if (!fss_unchanged) {
+				DEBUG_TRACE (DEBUG::LaunchControlXL, "32C special handling: Stripable type DID CHANGE\n");
 				reset(template_number());
 				build_maps();
-				store_fss_type();
+			} else {
+				DEBUG_TRACE (DEBUG::LaunchControlXL, "32C special handling: Stripable type DID NOT CHANGE\n");
 			}
+		} else {
+			reset(template_number());
 		}
+		store_fss_type();
 #endif
 		init_knobs_and_buttons();
 		init_dm_callbacks();
@@ -990,6 +1014,8 @@ LaunchControlXL::filter_stripables(StripableList& strips) const
 	FilterFunction flt;
 
 	switch ((int)template_number()) {
+		default:
+			/* FALLTHROUGH */
 		case 8:
 			flt = &flt_default;
 			break;
@@ -1017,8 +1043,9 @@ LaunchControlXL::filter_stripables(StripableList& strips) const
 		case 13:
 			flt = &flt_selected;
 			break;
-		case 14:	// Factory Template 7 behaves strange
-			break;  // don't map it to anyhting
+		case 14:	// Factory Template 7 behaves strange, don't map it to anyhting
+			flt = &flt_default;
+			break;
 		case 15:
 			flt = &flt_mains;
 			break;
@@ -1083,7 +1110,6 @@ LaunchControlXL::switch_bank (uint32_t base)
 		if (n == stripable_counter) { /* last strip +1 -> another bank exists */
 			DEBUG_TRACE (DEBUG::LaunchControlXL, string_compose ("StripableList iterator - n: %1. Filling next_base\n", n));
 			next_base = *strip;
-			bank_start = base;
 			break;
 		}
 
@@ -1094,6 +1120,8 @@ LaunchControlXL::switch_bank (uint32_t base)
 		/* not even the first stripable exists, do nothing */
 		DEBUG_TRACE (DEBUG::LaunchControlXL, "not even first stripable exists.. returning\n");
 		return;
+	} else {
+		bank_start = base;
 	}
 
 	if (sl && sr) {
@@ -1207,10 +1235,14 @@ LaunchControlXL::store_fss_type()
 {
 	if (first_selected_stripable()) {
 		if (first_selected_stripable()->mixbus() || first_selected_stripable()->is_master()) {
+			DEBUG_TRACE (DEBUG::LaunchControlXL, "Storing fss is mixbus: true\n");
 			_fss_is_mixbus = true;
 		} else {
+			DEBUG_TRACE (DEBUG::LaunchControlXL, "Storing fss is mixbus: false\n");
 			_fss_is_mixbus = false;
 		}
+	} else {
+		_fss_is_mixbus = false;
 	}
 }
 #endif
@@ -1222,6 +1254,7 @@ LaunchControlXL::init_device_mode()
 	init_knobs();
 	init_buttons(false);
 #ifdef MIXBUS32C
+	set_ctrllowersends(false);
 	store_fss_type();
 #endif
 	init_dm_callbacks();
@@ -1287,6 +1320,9 @@ LaunchControlXL::set_device_mode (bool yn)
 	if (device_mode()) {
 		init_device_mode();
 	} else {
+#ifdef MIXBUS32C
+		set_ctrllowersends(ctrllowersends());
+#endif
 		switch_bank (bank_start);
 	}
 }
@@ -1310,10 +1346,37 @@ LaunchControlXL::set_fader8master (bool yn)
 	switch_bank (bank_start);
 }
 
+#ifdef MIXBUS32C
+void
+LaunchControlXL::set_ctrllowersends (bool yn)
+{
+
+	_ctrllowersends = yn;
+
+	if (device_mode()) { return; }
+
+	/* reinit the send bank */
+	if (_ctrllowersends) {
+		_send_bank_base = 6;
+	} else {
+		_send_bank_base = 0;
+	}
+	set_send_bank(0);
+}
+#endif
+
 void
 LaunchControlXL::set_send_bank (int offset)
 {
-	if ((_send_bank_base == 0 && offset < 0) || (_send_bank_base == 4 && offset > 0)) {
+
+	int lowersendsoffset = 0;
+
+#ifdef MIXBUS32C
+	if (ctrllowersends() && !device_mode()) {
+		lowersendsoffset = 6;
+	}
+#endif
+	if ((_send_bank_base == (0 + lowersendsoffset)  && offset < 0) || (_send_bank_base == (4 + lowersendsoffset) && offset > 0)) {
 		return;
 	}
 
@@ -1328,7 +1391,7 @@ LaunchControlXL::set_send_bank (int offset)
 	}
 
 	_send_bank_base = _send_bank_base + offset;
-	_send_bank_base = max (0, min (4, _send_bank_base));
+	_send_bank_base = max (0 + lowersendsoffset, min (4 + lowersendsoffset, _send_bank_base));
 
 	DEBUG_TRACE (DEBUG::LaunchControlXL, string_compose ("set_send_bank - _send_bank_base: %1 \n", send_bank_base()));
 
@@ -1346,16 +1409,22 @@ LaunchControlXL::set_send_bank (int offset)
 	switch (_send_bank_base) {
 		case 0:
 		case 1:
+		case 6:
+		case 7:
 			write (sbu->state_msg(false));
 			write (sbd->state_msg(true));
 			break;
 		case 2:
 		case 3:
+		case 8:
+		case 9:
 			write (sbu->state_msg(true));
 			write (sbd->state_msg(true));
 			break;
 		case 4:
 		case 5:
+		case 10:
+		case 11:
 			write (sbu->state_msg(true));
 			write (sbd->state_msg(false));
 			break;

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Linn</Manufacturer>
+    <Model>AdrenaLinn II</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="User Presets">
+        <PatchNameList>
+          <Patch Number="U00" Name="Boogie Dual Rectifier" ProgramChange="0"/>
+          <Patch Number="U01" Name="Marshall JTM-50" ProgramChange="1"/>
+          <Patch Number="U02" Name="Fender Bassman" ProgramChange="2"/>
+          <Patch Number="U03" Name="Boogie Mark IV" ProgramChange="3"/>
+          <Patch Number="U04" Name="Hendrix tone" ProgramChange="4"/>
+          <Patch Number="U05" Name="Beat-synched Tremolo, amp" ProgramChange="5"/>
+          <Patch Number="U06" Name="Beat-synched Flanging, amp" ProgramChange="6"/>
+          <Patch Number="U07" Name="Beat-synched filter sweep, amp" ProgramChange="7"/>
+          <Patch Number="U08" Name="Beat-synched Rotary, amp" ProgramChange="8"/>
+          <Patch Number="U09" Name="Beat-synched Random Filter, amp" ProgramChange="9"/>
+          <Patch Number="U10" Name="Rock filter sequence" ProgramChange="10"/>
+          <Patch Number="U11" Name="Lo-fi trash sequence" ProgramChange="11"/>
+          <Patch Number="U12" Name="ReggaeTremolo sequence" ProgramChange="12"/>
+          <Patch Number="U13" Name="Random Flanger" ProgramChange="13"/>
+          <Patch Number="U14" Name="Arpeggiator sequence" ProgramChange="14"/>
+          <Patch Number="U15" Name="Auto-wah" ProgramChange="15"/>
+          <Patch Number="U16" Name="Auto-wah, amp" ProgramChange="16"/>
+          <Patch Number="U17" Name="Talk box" ProgramChange="17"/>
+          <Patch Number="U18" Name="One bar overdub delay" ProgramChange="18"/>
+          <Patch Number="U19" Name="Processed drumbeat" ProgramChange="19"/>
+          <Patch Number="U20" Name="Deluxe Reverb" ProgramChange="20"/>
+          <Patch Number="U21" Name="Tweed Deluxe" ProgramChange="21"/>
+          <Patch Number="U22" Name="Twin Reverb" ProgramChange="22"/>
+          <Patch Number="U23" Name="Marshall JTM-45" ProgramChange="23"/>
+          <Patch Number="U24" Name="Marshall JTM 800" ProgramChange="24"/>
+          <Patch Number="U25" Name="Hiwatt DR103" ProgramChange="25"/>
+          <Patch Number="U26" Name="Vox AC-30 Top Boost" ProgramChange="26"/>
+          <Patch Number="U27" Name="Vox AC-15" ProgramChange="27"/>
+          <Patch Number="U28" Name="Budda Twinmaster" ProgramChange="28"/>
+          <Patch Number="U29" Name="Matchless Cheiftain" ProgramChange="29"/>
+          <Patch Number="U30" Name="Roland Jazz Chorus" ProgramChange="30"/>
+          <Patch Number="U31" Name="Soldano SLO 100" ProgramChange="31"/>
+          <Patch Number="U32" Name="Roger Linn Design thin" ProgramChange="32"/>
+          <Patch Number="U33" Name="Roger Linn Design blues" ProgramChange="33"/>
+          <Patch Number="U34" Name="Roger Linn Design deep" ProgramChange="34"/>
+          <Patch Number="U35" Name="Roger Linn Design bright" ProgramChange="35"/>
+          <Patch Number="U36" Name="Roger Linn Design rectified" ProgramChange="36"/>
+          <Patch Number="U37" Name="Classic Fuzz" ProgramChange="37"/>
+          <Patch Number="U38" Name="Ocrtave Fuzz" ProgramChange="38"/>
+          <Patch Number="U39" Name="Clean preamp" ProgramChange="39"/>
+          <Patch Number="U40" Name="Tremolo, 1/8s" ProgramChange="40"/>
+          <Patch Number="U41" Name="Tremolo, 1/16s" ProgramChange="41"/>
+          <Patch Number="U42" Name="Gated tremolo" ProgramChange="42"/>
+          <Patch Number="U43" Name="Wah tremolo" ProgramChange="43"/>
+          <Patch Number="U44" Name="Downsweep filter tremolo" ProgramChange="44"/>
+          <Patch Number="U45" Name="Flanger, 4 measure" ProgramChange="45"/>
+          <Patch Number="U46" Name="Flanger, 1 measure" ProgramChange="46"/>
+          <Patch Number="U47" Name="Rotary speaker, slow" ProgramChange="47"/>
+          <Patch Number="U48" Name="Rotary speaker, fast" ProgramChange="48"/>
+          <Patch Number="U49" Name="Chorus" ProgramChange="49"/>
+          <Patch Number="U50" Name="Auto pan, 1/8s" ProgramChange="50"/>
+          <Patch Number="U51" Name="Slow filter sweep" ProgramChange="51"/>
+          <Patch Number="U52" Name="Phaser" ProgramChange="52"/>
+          <Patch Number="U53" Name="Sample &amp; hold filter" ProgramChange="53"/>
+          <Patch Number="U54" Name="Random flanger, 1/8s" ProgramChange="54"/>
+          <Patch Number="U55" Name="Uni-Vibe" ProgramChange="55"/>
+          <Patch Number="U56" Name="Vibrato, amp and delay" ProgramChange="56"/>
+          <Patch Number="U57" Name="Gently weeping guitar" ProgramChange="57"/>
+          <Patch Number="U58" Name="2 bar synch delay" ProgramChange="58"/>
+          <Patch Number="U59" Name="You, too, can use synch delay" ProgramChange="59"/>
+          <Patch Number="U60" Name="Power rock" ProgramChange="60"/>
+          <Patch Number="U61" Name="Synchopated rock" ProgramChange="61"/>
+          <Patch Number="U62" Name="Rubber band" ProgramChange="62"/>
+          <Patch Number="U63" Name="Dreamy filter" ProgramChange="63"/>
+          <Patch Number="U64" Name="Lo-fi space guy" ProgramChange="64"/>
+          <Patch Number="U65" Name="Reso-house" ProgramChange="65"/>
+          <Patch Number="U66" Name="Rock sweep" ProgramChange="66"/>
+          <Patch Number="U67" Name="Rock bubbles" ProgramChange="67"/>
+          <Patch Number="U68" Name="Sweep the four" ProgramChange="68"/>
+          <Patch Number="U69" Name="Sample &amp; hold filter" ProgramChange="69"/>
+          <Patch Number="U70" Name="Rock Island (bass) Line" ProgramChange="70"/>
+          <Patch Number="U71" Name="70s synth line" ProgramChange="71"/>
+          <Patch Number="U72" Name="Step flanger" ProgramChange="72"/>
+          <Patch Number="U73" Name="Harmonic Minor" ProgramChange="73"/>
+          <Patch Number="U74" Name="Take Five (and flatten it)" ProgramChange="74"/>
+          <Patch Number="U75" Name="Augmented" ProgramChange="75"/>
+          <Patch Number="U76" Name="Octaves" ProgramChange="76"/>
+          <Patch Number="U77" Name="Trem-o-rock" ProgramChange="77"/>
+          <Patch Number="U78" Name="Synchro-trem" ProgramChange="78"/>
+          <Patch Number="U79" Name="Ping-pong tremolo" ProgramChange="79"/>
+          <Patch Number="U80" Name="Envelope wah" ProgramChange="80"/>
+          <Patch Number="U81" Name="Inverted wah" ProgramChange="81"/>
+          <Patch Number="U82" Name="Auto wah, soft" ProgramChange="82"/>
+          <Patch Number="U83" Name="Cars filter" ProgramChange="83"/>
+          <Patch Number="U84" Name="Guitar synth" ProgramChange="84"/>
+          <Patch Number="U85" Name="Talk box" ProgramChange="85"/>
+          <Patch Number="U86" Name="Envelope talk box" ProgramChange="86"/>
+          <Patch Number="U87" Name="Peak hold filter" ProgramChange="87"/>
+          <Patch Number="U88" Name="Peak hold flanger" ProgramChange="88"/>
+          <Patch Number="U89" Name="Volume swell, amp" ProgramChange="89"/>
+          <Patch Number="U90" Name="Volume swell" ProgramChange="90"/>
+          <Patch Number="U91" Name="Hammer-on" ProgramChange="91"/>
+          <Patch Number="U92" Name="Rubber strings" ProgramChange="92"/>
+          <Patch Number="U93" Name="Ascending 3rds" ProgramChange="93"/>
+          <Patch Number="U94" Name="Trip hop" ProgramChange="94"/>
+          <Patch Number="U95" Name="Rockeggio" ProgramChange="95"/>
+          <Patch Number="U96" Name="Warehouse" ProgramChange="96"/>
+          <Patch Number="U97" Name="Industrial" ProgramChange="97"/>
+          <Patch Number="U98" Name="Rock fours" ProgramChange="98"/>
+          <Patch Number="U99" Name="Blank preset (initialized)" ProgramChange="99"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

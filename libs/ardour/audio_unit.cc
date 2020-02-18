@@ -1,22 +1,26 @@
 /*
-    Copyright (C) 2006-2009 Paul Davis
-    Some portions Copyright (C) Sophia Poirier.
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2016 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2010 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2017 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2015-2016 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2018 Julien "_FrnchFrgg_" RIVAUD <frnchfrgg@free.fr>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <sstream>
 #include <fstream>
@@ -452,6 +456,7 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	, transport_sample (0)
 	, transport_speed (0)
 	, last_transport_speed (0.0)
+	, preset_holdoff (0)
 {
 	if (!preset_search_path_initialized) {
 		Glib::ustring p = Glib::get_home_dir();
@@ -493,9 +498,15 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 	, transport_sample (0)
 	, transport_speed (0)
 	, last_transport_speed (0.0)
+	, preset_holdoff (0)
 
 {
 	init ();
+
+	XMLNode root (other.state_node_name ());
+	other.add_state (&root);
+	set_state (root, Stateful::loading_state_version);
+
 	for (size_t i = 0; i < descriptors.size(); ++i) {
 		set_parameter (i, other.get_parameter (i));
 	}
@@ -952,7 +963,7 @@ AUPlugin::default_value (uint32_t port)
 }
 
 samplecnt_t
-AUPlugin::signal_latency () const
+AUPlugin::plugin_latency () const
 {
 	guint lat = g_atomic_int_get (&_current_latency);;
 	if (lat == UINT_MAX) {
@@ -1321,9 +1332,7 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 #endif
 
 	// preferred setting (provided by plugin_insert)
-	const int preferred_out = out.n_audio ();
-	bool found = false;
-	bool exact_match = false;
+	const int32_t preferred_out = out.n_audio ();
 
 	/* kAudioUnitProperty_SupportedNumChannels
 	 * https://developer.apple.com/library/mac/documentation/MusicAudio/Conceptual/AudioUnitProgrammingGuide/TheAudioUnit/TheAudioUnit.html#//apple_ref/doc/uid/TP40003278-CH12-SW20
@@ -1351,40 +1360,23 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 	 *    Up to four input channels and up to eight output channels
 	 */
 
-	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
-
-		int32_t possible_in = i->first;
-		int32_t possible_out = i->second;
-
-		if ((possible_in == audio_in) && (possible_out == preferred_out)) {
-			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: %1 in %2 out to match in %3 out %4\n",
-						possible_in, possible_out,
-						in, out));
-
-			// exact match
-			_output_configs.insert (preferred_out);
-			exact_match = true;
-			found = true;
-			break;
-		}
-	}
-
-	/* now allow potentially "imprecise" matches */
 	int32_t audio_out = -1;
 	float penalty = 9999;
-	int used_possible_in = 0;
+	int32_t used_possible_in = 0;
+	bool found = false;
 #if defined (__clang__)
-#	pragma clang diagnostic push
-#	pragma clang diagnostic ignored "-Wtautological-compare"
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wtautological-compare"
 #endif
 
-#define FOUNDCFG(nch) {                            \
-  float p = fabsf ((float)(nch) - preferred_out);  \
-  _output_configs.insert (nch);                    \
-  if ((nch) > preferred_out) { p *= 1.1; }         \
+#define FOUNDCFG_PENALTY(in, out, p) {             \
+  _output_configs.insert (out);                    \
   if (p < penalty) {                               \
     used_possible_in = possible_in;                \
-    audio_out = (nch);                             \
+    audio_out = (out);                             \
+    if (imprecise) {                               \
+      imprecise->set (DataType::AUDIO, (in));      \
+    }                                              \
     penalty = p;                                   \
     found = true;                                  \
     variable_inputs = possible_in < 0;             \
@@ -1392,14 +1384,30 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
   }                                                \
 }
 
+#define FOUNDCFG_IMPRECISE(in, out) {              \
+  const float p =                                  \
+      fabsf ((float)(out) - preferred_out) *       \
+          (((out) > preferred_out) ? 1.1 : 1)      \
+      + fabsf ((float)(in) - audio_in) *           \
+          (((in) > audio_in) ? 275 : 250);         \
+  FOUNDCFG_PENALTY(in, out, p);                    \
+}
+
+#define FOUNDCFG(out)                              \
+  FOUNDCFG_IMPRECISE(audio_in, out)
+
 #define ANYTHINGGOES                               \
   _output_configs.insert (0);
 
 #define UPTO(nch) {                                \
-  for (int n = 1; n <= nch; ++n) {                 \
+  for (int32_t n = 1; n <= nch; ++n) {             \
     _output_configs.insert (n);                    \
   }                                                \
 }
+
+	if (imprecise) {
+		*imprecise = in;
+	}
 
 	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
 
@@ -1408,45 +1416,38 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 
 		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tpossible in %1 possible out %2\n", possible_in, possible_out));
 
+		/* exact match */
+		if ((possible_in == audio_in) && (possible_out == preferred_out)) {
+			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: %1 in %2 out to match in %3 out %4\n",
+						possible_in, possible_out,
+						in, out));
+			/* Set penalty so low that this output configuration
+			 * will trump any other one */
+			FOUNDCFG_PENALTY(audio_in, preferred_out, -1);
+			break;
+		}
+
 		if (possible_out == 0) {
 			warning << string_compose (_("AU %1 has zero outputs - configuration ignored"), name()) << endmsg;
 			/* XXX surely this is just a send? (e.g. AUNetSend) */
 			continue;
 		}
 
-		if (possible_in == 0) {
-			/* no inputs, generators & instruments */
-			if (possible_out == -1) {
-				/* any configuration possible, provide stereo output */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out == -2) {
-				/* invalid, should be (0, -1) */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out < -2) {
-				/* variable number of outputs up to -N, */
-				FOUNDCFG (min (-possible_out, preferred_out));
-				UPTO (-possible_out);
-			} else {
-				/* exact number of outputs */
-				FOUNDCFG (possible_out);
-			}
-		}
-
-		if (possible_in == -1) {
+		/* now allow potentially "imprecise" matches */
+		if (possible_in == -1 || possible_in == -2) {
 			/* wildcard for input */
-			if (possible_out == -1) {
-				/* out must match in */
+			if (possible_out == possible_in) {
+				/* either both -1 or both -2 (invalid and
+				 * interpreted as both -1): out must match in */
 				FOUNDCFG (audio_in);
-			} else if (possible_out == -2) {
-				/* any configuration possible, pick matching */
+			} else if (possible_out == -3 - possible_in) {
+				/* one is -1, the other is -2: any output configuration
+				 * possible, pick what the insert prefers */
 				FOUNDCFG (preferred_out);
 				ANYTHINGGOES;
 			} else if (possible_out < -2) {
-				/* explicitly variable number of outputs, pick maximum */
-				FOUNDCFG (max (-possible_out, preferred_out));
-				/* and try min, too, in case the penalty is lower */
+				/* variable number of outputs up to -N,
+				 * invalid if in == -2 but we accept it anyway */
 				FOUNDCFG (min (-possible_out, preferred_out));
 				UPTO (-possible_out)
 			} else {
@@ -1455,97 +1456,39 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 			}
 		}
 
-		if (possible_in == -2) {
-			if (possible_out == -1) {
-				/* any configuration possible, pick matching */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out == -2) {
-				/* invalid. interpret as (-1, -1) */
-				FOUNDCFG (preferred_out);
+		if (possible_in < -2 || possible_in >= 0) {
+			/* specified number, exact or up to */
+			int32_t desired_in;
+			if (possible_in >= 0) {
+				/* configuration can only match possible_in */
+				desired_in = possible_in;
+			} else {
+				/* configuration can match up to -possible_in */
+				desired_in = min (-possible_in, audio_in);
+			}
+			if (!imprecise && audio_in != desired_in) {
+				/* skip that configuration, it cannot match
+				 * the required audio input count, and we
+				 * cannot ask for change via \imprecise */
+			} else if (possible_out == -1 || possible_out == -2) {
+				/* any output configuration possible
+				 * out == -2 is invalid, interpreted as out == -1
+				 * Really imprecise only if desired_in != audio_in */
+				FOUNDCFG_IMPRECISE (desired_in, preferred_out);
 				ANYTHINGGOES;
 			} else if (possible_out < -2) {
-				/* invalid,  interpret as (<-2, <-2)
-				 * variable number of outputs up to -N, */
-				FOUNDCFG (min (-possible_out, preferred_out));
+				/* variable number of outputs up to -N
+				 * not specified if in > 0, but we accept it anyway
+				 * Really imprecise only if desired_in != audio_in */
+				FOUNDCFG_IMPRECISE (desired_in, min (-possible_out, preferred_out));
 				UPTO (-possible_out)
 			} else {
-				/* exact number of outputs */
-				FOUNDCFG (possible_out);
+				/* exact number of outputs
+				 * Really imprecise only if desired_in != audio_in */
+				FOUNDCFG_IMPRECISE (desired_in, possible_out);
 			}
 		}
 
-		if (possible_in < -2) {
-			/* explicit variable number of inputs */
-			if (audio_in > -possible_in && imprecise != NULL) {
-				// hide inputs ports
-				imprecise->set (DataType::AUDIO, -possible_in);
-			}
-
-			if (audio_in > -possible_in && imprecise == NULL) {
-				/* request is too large */
-			} else if (possible_out == -1) {
-				/* any output configuration possible */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out == -2) {
-				/* invalid. interpret as (<-2, -1) */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out < -2) {
-				/* variable number of outputs up to -N, */
-				FOUNDCFG (min (-possible_out, preferred_out));
-				UPTO (-possible_out)
-			} else {
-				/* exact number of outputs */
-				FOUNDCFG (possible_out);
-			}
-		}
-
-		if (possible_in && (possible_in == audio_in)) {
-			/* exact number of inputs ... must match obviously */
-			if (possible_out == -1) {
-				/* any output configuration possible */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out == -2) {
-				/* plugins shouldn't really use (>0,-2), interpret as (>0,-1) */
-				FOUNDCFG (preferred_out);
-				ANYTHINGGOES;
-			} else if (possible_out < -2) {
-				/* > 0, < -2 is not specified
-				 * interpret as up to -N */
-				FOUNDCFG (min (-possible_out, preferred_out));
-				UPTO (-possible_out)
-			} else {
-				/* exact number of outputs */
-				FOUNDCFG (possible_out);
-			}
-		}
-	}
-
-	if (!found && imprecise) {
-		/* try harder */
-		for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
-			int32_t possible_in = i->first;
-			int32_t possible_out = i->second;
-
-			assert (possible_in > 0); // all other cases will have been matched above
-			assert (possible_out !=0 || possible_in !=0); // already handled above
-
-			imprecise->set (DataType::AUDIO, possible_in);
-			if (possible_out == -1 || possible_out == -2) {
-				FOUNDCFG (2);
-			} else if (possible_out < -2) {
-				/* explicitly variable number of outputs, pick maximum */
-				FOUNDCFG (min (-possible_out, preferred_out));
-			} else {
-				/* exact number of outputs */
-				FOUNDCFG (possible_out);
-			}
-			// ideally we'll also find the closest, best matching
-			// input configuration with minimal output penalty...
-		}
 	}
 
 	if (!found) {
@@ -1553,22 +1496,17 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 		return false;
 	}
 
-	if (exact_match) {
-		out.set (DataType::MIDI, 0); // currently always zero
-		out.set (DataType::AUDIO, preferred_out);
-	} else {
-		if (used_possible_in < -2 && audio_in == 0) {
-			// input-port count cannot be zero, use as many ports
-			// as outputs, but at most abs(possible_in)
-			audio_input_cnt = max (1, min (audio_out, -used_possible_in));
-		}
-		out.set (DataType::MIDI, 0); /// XXX
-		out.set (DataType::AUDIO, audio_out);
+	if (used_possible_in < -2 && audio_in == 0) {
+		// input-port count cannot be zero, use as many ports
+		// as outputs, but at most abs(possible_in)
+		audio_input_cnt = max (1, min (audio_out, -used_possible_in));
 	}
+	out.set (DataType::MIDI, 0); /// XXX currently always zero
+	out.set (DataType::AUDIO, audio_out);
 	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: in %1 out %2\n", in, out));
 
 #if defined (__clang__)
-#	pragma clang diagnostic pop
+# pragma clang diagnostic pop
 #endif
 	return true;
 }
@@ -1651,6 +1589,10 @@ AUPlugin::connect_and_run (BufferSet& bufs,
 	AudioTimeStamp ts;
 	OSErr err;
 
+	if (preset_holdoff > 0) {
+		preset_holdoff -= std::min (nframes, preset_holdoff);
+	}
+
 	if (requires_fixed_size_buffers() && (nframes != _last_nframes)) {
 		unit->GlobalReset();
 		_last_nframes = nframes;
@@ -1660,7 +1602,7 @@ AUPlugin::connect_and_run (BufferSet& bufs,
 	bool inplace = true; // TODO check plugin-insert in-place ?
 	ChanMapping::Mappings inmap (in_map.mappings ());
 	ChanMapping::Mappings outmap (out_map.mappings ());
-	if (outmap[DataType::AUDIO].size () == 0) {
+	if (outmap[DataType::AUDIO].size () == 0 || inmap[DataType::AUDIO].size() == 0) {
 		inplace = false;
 	}
 	if (inmap[DataType::AUDIO].size() > 0 && inmap != outmap) {
@@ -1725,17 +1667,19 @@ AUPlugin::connect_and_run (BufferSet& bufs,
 
 		for (uint32_t i = 0; i < cnt; ++i) {
 			buffers->mBuffers[i].mNumberChannels = 1;
-			buffers->mBuffers[i].mDataByteSize = nframes * sizeof (Sample);
-			/* setting this to 0 indicates to the AU that it can provide buffers here
+			/* setting this to 0 indicates to the AU that it *can* provide buffers here
 			 * if necessary. if it can process in-place, it will use the buffers provided
 			 * as input by ::render_callback() above.
 			 *
 			 * a non-null values tells the plugin to render into the buffer pointed
 			 * at by the value.
+			 * https://developer.apple.com/documentation/audiotoolbox/1438430-audiounitrender?language=objc
 			 */
 			if (inplace) {
+				buffers->mBuffers[i].mDataByteSize = 0;
 				buffers->mBuffers[i].mData = 0;
 			} else {
+				buffers->mBuffers[i].mDataByteSize = nframes * sizeof (Sample);
 				bool valid = false;
 				uint32_t idx = out_map.get (DataType::AUDIO, i + busoff, &valid);
 				if (valid) {
@@ -1762,7 +1706,12 @@ AUPlugin::connect_and_run (BufferSet& bufs,
 			for (uint32_t i = 0; i < limit; ++i) {
 				bool valid = false;
 				uint32_t idx = out_map.get (DataType::AUDIO, i + busoff, &valid);
-				if (!valid) continue;
+				if (!valid) {
+					continue;
+				}
+				if (buffers->mBuffers[i].mData == 0 || buffers->mBuffers[i].mNumberChannels != 1) {
+					continue;
+				}
 				used_outputs.set (i + busoff);
 				Sample* expected_buffer_address = bufs.get_audio (idx).data (offset);
 				if (expected_buffer_address != buffers->mBuffers[i].mData) {
@@ -2024,19 +1973,6 @@ AUPlugin::describe_parameter (Evoral::Parameter param)
 	}
 }
 
-void
-AUPlugin::print_parameter (uint32_t param, char* buf, uint32_t len) const
-{
-	// NameValue stuff here
-	if (buf && len) {
-		if (param < parameter_count()) {
-			snprintf (buf, len, "%.3f", get_parameter (param));
-		} else {
-			strcat (buf, "0");
-		}
-	}
-}
-
 bool
 AUPlugin::parameter_is_audio (uint32_t) const
 {
@@ -2125,7 +2061,6 @@ AUPlugin::set_state(const XMLNode& node, int version)
 		return -1;
 	}
 
-#ifndef NO_PLUGIN_STATE
 	if (node.children().empty()) {
 		return -1;
 	}
@@ -2161,7 +2096,6 @@ AUPlugin::set_state(const XMLNode& node, int version)
 		}
 		CFRelease (propertyList);
 	}
-#endif
 
 	Plugin::set_state (node, version);
 	return ret;
@@ -2170,8 +2104,6 @@ AUPlugin::set_state(const XMLNode& node, int version)
 bool
 AUPlugin::load_preset (PresetRecord r)
 {
-	Plugin::load_preset (r);
-
 	bool ret = false;
 	CFPropertyListRef propertyList;
 	Glib::ustring path;
@@ -2217,13 +2149,39 @@ AUPlugin::load_preset (PresetRecord r)
 			AUParameterListenerNotify (NULL, NULL, &changedUnit);
 		}
 	}
+	if (ret) {
+		preset_holdoff = std::max (_session.get_block_size() * 2.0, _session.sample_rate() * .2);
+	}
 
-	return ret;
+	return ret && Plugin::load_preset (r);
 }
 
 void
-AUPlugin::do_remove_preset (std::string)
+AUPlugin::do_remove_preset (std::string preset_name)
 {
+	vector<Glib::ustring> v;
+
+	std::string m = maker();
+	std::string n = name();
+
+	strip_whitespace_edges (m);
+	strip_whitespace_edges (n);
+
+	v.push_back (Glib::get_home_dir());
+	v.push_back ("Library");
+	v.push_back ("Audio");
+	v.push_back ("Presets");
+	v.push_back (m);
+	v.push_back (n);
+	v.push_back (preset_name + preset_suffix);
+
+	Glib::ustring user_preset_path = Glib::build_filename (v);
+
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Deleting Preset file %1\n", user_preset_path));
+
+	if (g_unlink (user_preset_path.c_str())) {
+		error << string_compose (X_("Could not delete preset at \"%1\": %2"), user_preset_path, strerror (errno)) << endmsg;
+	}
 }
 
 string
@@ -2279,7 +2237,7 @@ AUPlugin::do_save_preset (string preset_name)
 
 	DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Saving Preset to %1\n", user_preset_path));
 
-	return string ("file:///") + user_preset_path;
+	return user_preset_path;
 }
 
 //-----------------------------------------------------------------------------
@@ -2556,7 +2514,7 @@ AUPlugin::find_presets ()
 		*/
 
 		if (check_and_get_preset_name (get_comp()->Comp(), path, preset_name)) {
-			user_preset_map[preset_name] = "file:///" + path;
+			user_preset_map[preset_name] = path;
 			DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Preset File: %1 > %2\n", preset_name, path));
 		} else {
 			DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU INVALID Preset: %1 > %2\n", preset_name, path));
@@ -2574,10 +2532,7 @@ AUPlugin::find_presets ()
 	/* add factory presets */
 
 	for (FactoryPresetMap::iterator i = factory_preset_map.begin(); i != factory_preset_map.end(); ++i) {
-		/* XXX: dubious -- deleting & re-adding a preset -> same URI
-		 * good that we don't support deleting AU presets :)
-		 */
-		string const uri = PBD::to_string<uint32_t> (_presets.size ());
+		string const uri = string_compose ("AU2:%1", std::setw(4), std::setfill('0'), i->second);
 		_presets.insert (make_pair (uri, Plugin::PresetRecord (uri, i->first, false)));
 		DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Adding Factory Preset: %1 > %2\n", i->first, i->second));
 	}
@@ -2594,11 +2549,7 @@ AUPlugin::has_editor () const
 AUPluginInfo::AUPluginInfo (boost::shared_ptr<CAComponentDescription> d)
 	: descriptor (d)
 	, version (0)
-{
-	type = ARDOUR::AudioUnit;
-}
-
-AUPluginInfo::~AUPluginInfo ()
+	, max_outputs (0)
 {
 	type = ARDOUR::AudioUnit;
 }
@@ -2636,7 +2587,7 @@ AUPluginInfo::get_presets (bool user_only) const
 {
 	std::vector<Plugin::PresetRecord> p;
 	boost::shared_ptr<CAComponent> comp;
-#ifndef NO_PLUGIN_STATE
+
 	try {
 		comp = boost::shared_ptr<CAComponent>(new CAComponent(*descriptor));
 		if (!comp->IsValid()) {
@@ -2707,7 +2658,6 @@ AUPluginInfo::get_presets (bool user_only) const
 	CFRelease (presets);
 	unit->Uninitialize ();
 
-#endif // NO_PLUGIN_STATE
 	return p;
 }
 
@@ -2968,6 +2918,8 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 
 		const int rv = cached_io_configuration (info->unique_id, info->version, cacomp, info->cache, info->name);
 
+		info->max_outputs = 0;
+
 		if (rv == 0) {
 			/* here we have to map apple's wildcard system to a simple pair
 			   of values. in ::can_do() we use the whole system, but here
@@ -2982,8 +2934,18 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			   info to the user, which should perhaps be revisited.
 			*/
 
-			int32_t possible_in = info->cache.io_configs.front().first;
-			int32_t possible_out = info->cache.io_configs.front().second;
+			const vector<pair<int,int> >& ioc (info->cache.io_configs);
+			for (vector<pair<int,int> >::const_iterator i = ioc.begin(); i != ioc.end(); ++i) {
+				int32_t possible_out = i->second;
+				if (possible_out < 0) {
+					continue;
+				} else if (possible_out > info->max_outputs) {
+					info->max_outputs = possible_out;
+				}
+			}
+
+			int32_t possible_in = ioc.front().first;
+			int32_t possible_out = ioc.front().second;
 
 			if (possible_in > 0) {
 				info->n_inputs.set (DataType::AUDIO, possible_in);
@@ -3083,7 +3045,7 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 		 * bus configs as incremental options.
 		 */
 		Boolean* isWritable = 0;
-		UInt32	dataSize = 0;
+		UInt32   dataSize   = 0;
 		OSStatus result = AudioUnitGetPropertyInfo (unit.AU(),
 				kAudioUnitProperty_SupportedNumChannels,
 				kAudioUnitScope_Global, 0,
@@ -3479,7 +3441,11 @@ AUPlugin::parameter_change_listener (void* /*arg*/, void* src, const AudioUnitEv
                 /* whenever we change a parameter, we request that we are NOT notified of the change, so anytime we arrive here, it
                    means that something else (i.e. the plugin GUI) made the change.
                 */
-                ParameterChangedExternally (i->second, new_value);
+                if (preset_holdoff > 0) {
+	                ParameterChangedExternally (i->second, new_value);
+                } else {
+                        Plugin::parameter_changed_externally (i->second, new_value);
+		}
                 break;
         default:
                 break;

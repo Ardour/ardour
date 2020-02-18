@@ -1,19 +1,19 @@
 /*
  * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef __gtkardour_patch_change_widget_h__
@@ -32,7 +32,7 @@
 #include "widgets/ardour_dropdown.h"
 
 #include "ardour_dialog.h"
-#include "gtk_pianokeyboard.h"
+#include "pianokeyboard.h"
 
 class PatchChangeWidget : public Gtk::VBox
 {
@@ -99,11 +99,9 @@ private:
 	uint8_t                     _audition_note_num;
 	bool                        _audition_note_on;
 
-	PianoKeyboard* _piano;
-	Gtk::Widget*   _pianomm;
+	APianoKeyboard _piano;
 
-	static void _note_on_event_handler (GtkWidget*, int, gpointer);
-	static void _note_off_event_handler (GtkWidget*, int, gpointer);
+	void _note_on_event_handler (int, int);
 	void note_on_event_handler (int, bool for_audition);
 	void note_off_event_handler (int);
 };

@@ -1,19 +1,19 @@
 /*
- * Copyright (C) 2016 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2018 Paul Davis <paul@linuxaudiosystems.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include "ardour/session.h"
@@ -49,29 +49,20 @@ Maschine2::connect_signals ()
 	session->history().Changed.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&Maschine2::notify_history_changed, this), this);
 
 	/* Actions */
-	Glib::RefPtr<Gtk::Action> act;
+	Glib::RefPtr<Gtk::ToggleAction> tact;
+	Glib::RefPtr<Gtk::RadioAction> ract;
 #if 0
-	act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
-	if (act) {
-		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic (act);
-		tact->signal_toggled ().connect (sigc::mem_fun (*this, &Maschine2::notify_grid_change));
-	}
+	tact = ActionManager::find_toggle_action (X_("Editor"), X_("ToggleMeasureVisibility"));
+	tact->signal_toggled ().connect (sigc::mem_fun (*this, &Maschine2::notify_grid_change));
 #endif
-	act = ActionManager::get_action (X_("Editor"), X_("snap-off"));
-	if (act) {
-		Glib::RefPtr<Gtk::RadioAction> ract = Glib::RefPtr<Gtk::RadioAction>::cast_dynamic (act);
-		ract->signal_toggled ().connect (sigc::mem_fun (*this, &Maschine2::notify_snap_change));
-	}
-	act = ActionManager::get_action (X_("Editor"), X_("snap-magnetic"));
-	if (act) {
-		Glib::RefPtr<Gtk::RadioAction> ract = Glib::RefPtr<Gtk::RadioAction>::cast_dynamic (act);
-		ract->signal_toggled ().connect (sigc::mem_fun (*this, &Maschine2::notify_snap_change));
-	}
-	act = ActionManager::get_action (X_("Editor"), X_("snap-normal"));
-	if (act) {
-		Glib::RefPtr<Gtk::RadioAction> ract = Glib::RefPtr<Gtk::RadioAction>::cast_dynamic (act);
-		ract->signal_toggled ().connect (sigc::mem_fun (*this, &Maschine2::notify_snap_change));
-	}
+	ract = ActionManager::find_radio_action (X_("Editor"), X_("snap-off"));
+	ract->signal_toggled ().connect (sigc::mem_fun (*this, &Maschine2::notify_snap_change));
+
+	ract = ActionManager::find_radio_action (X_("Editor"), X_("snap-magnetic"));
+	ract->signal_toggled ().connect (sigc::mem_fun (*this, &Maschine2::notify_snap_change));
+
+	ract = ActionManager::find_radio_action (X_("Editor"), X_("snap-normal"));
+	ract->signal_toggled ().connect (sigc::mem_fun (*this, &Maschine2::notify_snap_change));
 
 	/* Surface events */
 	_ctrl->button (M2Contols::Play)->released.connect_same_thread (button_connections, boost::bind (&Maschine2::button_play, this));
@@ -167,11 +158,8 @@ Maschine2::notify_parameter_changed (std::string param)
 void
 Maschine2::notify_grid_change ()
 {
-	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
-	if (act) {
-		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic (act);
-		_ctrl->button (M2Contols::Grid)->set_color (tact->get_active () ? COLOR_WHITE : 0);
-	}
+	Glib::RefPtr<Gtk::ToggleAction> tact = ActionManager::find_toggle_action (X_("Editor"), X_("ToggleMeasureVisibility"));
+	_ctrl->button (M2Contols::Grid)->set_color (tact->get_active () ? COLOR_WHITE : 0);
 }
 #endif
 
@@ -183,16 +171,10 @@ Maschine2::notify_snap_change ()
 		return;
 	}
 
-	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("snap-magnetic"));
-	if (act) {
-		Glib::RefPtr<Gtk::RadioAction> ract = Glib::RefPtr<Gtk::RadioAction>::cast_dynamic (act);
-		if (ract->get_active ()) { rgba = COLOR_GRAY; }
-	}
-	act = ActionManager::get_action (X_("Editor"), X_("snap-normal"));
-	if (act) {
-		Glib::RefPtr<Gtk::RadioAction> ract = Glib::RefPtr<Gtk::RadioAction>::cast_dynamic (act);
-		if (ract->get_active ()) { rgba = COLOR_WHITE; }
-	}
+	Glib::RefPtr<Gtk::RadioAction> ract = ActionManager::find_radio_action (X_("Editor"), X_("snap-magnetic"));
+	if (ract->get_active ()) { rgba = COLOR_GRAY; }
+	ract = ActionManager::find_radio_action (X_("Editor"), X_("snap-normal"));
+	if (ract->get_active ()) { rgba = COLOR_WHITE; }
 
 	_ctrl->button (M2Contols::Grid)->set_color (rgba);
 }
@@ -257,11 +239,8 @@ Maschine2::button_action (const std::string& group, const std::string& item)
 void
 Maschine2::button_grid ()
 {
-	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
-	if (act) {
-		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic (act);
-		tact->set_active (!tact->get_active ());
-	}
+	Glib::RefPtr<Gtk::ToggleAction> tact = ActionManager::find_toggle_action (X_("Editor"), X_("ToggleMeasureVisibility"));
+	tact->set_active (!tact->get_active ());
 }
 #endif
 
@@ -288,34 +267,18 @@ Maschine2::button_snap_released ()
 	_ctrl->button (M2Contols::Grid)->set_blinking (false);
 
 	const char* action = 0;
-	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("snap-off"));
-	if (act) {
-		Glib::RefPtr<Gtk::RadioAction> ract = Glib::RefPtr<Gtk::RadioAction>::cast_dynamic (act);
-		if (ract->get_active ()) { action = "snap-normal"; }
-	}
 
-	act = ActionManager::get_action (X_("Editor"), X_("snap-normal"));
-	if (act) {
-		Glib::RefPtr<Gtk::RadioAction> ract = Glib::RefPtr<Gtk::RadioAction>::cast_dynamic (act);
-		if (ract->get_active ()) { action = "snap-magnetic"; }
-	}
+	Glib::RefPtr<Gtk::RadioAction> ract = ActionManager::find_radio_action (X_("Editor"), X_("snap-off"));
+	if (ract->get_active ()) { action = "snap-normal"; }
 
-	act = ActionManager::get_action (X_("Editor"), X_("snap-magnetic"));
-	if (act) {
-		Glib::RefPtr<Gtk::RadioAction> ract = Glib::RefPtr<Gtk::RadioAction>::cast_dynamic (act);
-		if (ract->get_active ()) { action = "snap-off"; }
-	}
+	ract = ActionManager::find_radio_action (X_("Editor"), X_("snap-normal"));
+	if (ract->get_active ()) { action = "snap-magnetic"; }
 
-	if (!action) {
-		assert (0);
-		return;
-	}
+	ract = ActionManager::find_radio_action (X_("Editor"), X_("snap-magnetic"));
+	if (ract->get_active ()) { action = "snap-off"; }
 
-	act = ActionManager::get_action (X_("Editor"), action);
-	if (act) {
-		Glib::RefPtr<Gtk::RadioAction> ract = Glib::RefPtr<Gtk::RadioAction>::cast_dynamic (act);
-		ract->set_active (true);
-	}
+	ract = ActionManager::find_radio_action (X_("Editor"), action);
+	ract->set_active (true);
 }
 
 /* Master mode + state -- main encoder fn */

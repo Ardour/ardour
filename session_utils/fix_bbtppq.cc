@@ -1,20 +1,22 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2016-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2017 Paul Davis <paul@linuxaudiosystems.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <iostream>
 #include <cstdlib>
@@ -37,8 +39,8 @@
 #include "ardour/source_factory.h"
 #include "ardour/tempo.h"
 
-#include "evoral/Note.hpp"
-#include "evoral/Sequence.hpp"
+#include "evoral/Note.h"
+#include "evoral/Sequence.h"
 
 #include "common.h"
 
@@ -76,7 +78,7 @@ write_bbt_source_to_source (boost::shared_ptr<MidiSource>  bbt_source, boost::sh
 
 	bbt_source->model()->set_percussive (old_percussive);
 	source->mark_streaming_write_completed (source_lock);
-	source->set_timeline_position (bbt_source->timeline_position());
+	source->set_natural_position (bbt_source->natural_position());
 
 	return true;
 }
@@ -332,7 +334,7 @@ apply_one_source_per_source_fix (Session* session)
 	return true;
 }
 
-static void usage (int status) {
+static void usage () {
 	// help2man compatible format (standard GNU help-text)
 	printf (UTILNAME " - convert an ardour session with 5.0 - 5.3 midi sources to be compatible with 5.4.\n\n");
 	printf ("Usage: " UTILNAME " [ OPTIONS ] <session-dir> <snapshot-name>\n\n");
@@ -387,7 +389,7 @@ If a MIDI session only contains quarter note meter divisors, it will be unaffect
 
 	printf ("Report bugs to <http://tracker.ardour.org/>\n"
 	        "Website: <http://ardour.org/>\n");
-	::exit (status);
+	::exit (EXIT_SUCCESS);
 }
 
 int main (int argc, char* argv[])
@@ -415,29 +417,28 @@ int main (int argc, char* argv[])
 
 		case 'o':
 			outfile = optarg;
-			if (outfile.empty()) {
-				usage (0);
-			}
 			break;
 
 		case 'V':
 			printf ("ardour-utils version %s\n\n", VERSIONSTRING);
 			printf ("Copyright (C) GPL 2015 Robin Gareus <robin@gareus.org>\n");
-			exit (0);
+			exit (EXIT_SUCCESS);
 			break;
 
 		case 'h':
-			usage (0);
+			usage ();
 			break;
 
 		default:
-			usage (EXIT_FAILURE);
+			cerr << "Error: unrecognized option. See --help for usage information.\n";
+			::exit (EXIT_FAILURE);
 			break;
 		}
 	}
 
 	if (optind + 2 > argc) {
-		usage (EXIT_FAILURE);
+		cerr << "Error: Missing parameter. See --help for usage information.\n";
+		::exit (EXIT_FAILURE);
 	}
 
 	SessionDirectory* session_dir = new SessionDirectory (argv[optind]);

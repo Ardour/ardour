@@ -1,21 +1,25 @@
 /*
-    Copyright (C) 2001 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2001-2016 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2011-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013 Colin Fletcher <colin.m.fletcher@googlemail.com>
+ * Copyright (C) 2015-2016 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2015-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <vector>
 
@@ -128,6 +132,7 @@ Gtk::Window* Keyboard::pre_dialog_active_window = 0;
 /* set this to initially contain the modifiers we care about, then track changes in ::set_edit_modifier() etc. */
 GdkModifierType Keyboard::RelevantModifierKeyMask;
 sigc::signal0<void> Keyboard::RelevantModifierKeysChanged;
+sigc::signal1<void,Gtk::Window*> Keyboard::HideMightMeanQuit;
 
 void
 Keyboard::magic_widget_grab_focus ()
@@ -338,6 +343,9 @@ void
 Keyboard::close_current_dialog ()
 {
 	if (current_window) {
+
+		HideMightMeanQuit (current_window); /* EMIT SIGNAL */
+
 		current_window->hide ();
 		current_window = 0;
 
@@ -396,7 +404,7 @@ Keyboard::leave_window (GdkEventCrossing *ev, Gtk::Window* /*win*/)
 
 		case GDK_NOTIFY_VIRTUAL:
 			DEBUG_TRACE (DEBUG::Keyboard, "VIRTUAL crossing ... out\n");
-			/* fallthru */
+			/* fallthrough */
 
 		default:
 			DEBUG_TRACE (DEBUG::Keyboard, "REAL crossing ... out\n");

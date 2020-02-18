@@ -1,5 +1,4 @@
-/* alsa/ardour dbus device request tool
- *
+/*
  * Copyright (C) 2014 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -12,9 +11,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 // NB generate man-page with
@@ -57,17 +56,17 @@ static int stdin_available(void) {
 	return errno != EBADF;
 }
 
-static void print_version(int status) {
+static void print_version () {
 	printf (ARD_PROG_NAME " " VERSION "\n\n");
 	printf (
 		"Copyright (C) 2014 Robin Gareus <robin@gareus.org>\n"
 		"This is free software; see the source for copying conditions.  There is NO\n"
 		"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
 		);
-	exit (status);
+	exit (EXIT_SUCCESS);
 }
 
-static void usage(int status) {
+static void usage () {
 	printf (ARD_PROG_NAME " - DBus Audio Reservation Utility.\n");
 	printf ("Usage: " ARD_PROG_NAME " [ OPTIONS ] <Audio-Device-ID>\n");
 	printf ("Options:\n\
@@ -104,7 +103,7 @@ Examples:\n\
 \n");
 
 	printf ("Report bugs to Robin Gareus <robin@gareus.org>\n");
-	exit (status);
+	exit (EXIT_SUCCESS);
 }
 
 static struct option const long_options[] =
@@ -164,7 +163,7 @@ int main(int argc, char **argv) {
 		switch (c) {
 			case 'h':
 				free(name);
-				usage(EXIT_SUCCESS);
+				usage ();
 				break;
 			case 'n':
 				free(name);
@@ -179,21 +178,23 @@ int main(int argc, char **argv) {
 				break;
 			case 'V':
 				free(name);
-				print_version(EXIT_SUCCESS);
+				print_version ();
 				break;
 			case 'w':
 				release_wait_for_signal = 1;
 				break;
 			default:
 				free(name);
-				usage(EXIT_FAILURE);
+				fprintf (stderr, "Error: unrecognized option. See --help for usage information.\n");
+				exit (EXIT_FAILURE);
 				break;
 		}
 	}
 
 	if (optind + 1 != argc) {
+		fprintf (stderr, "Error: Missing parameter. See --help for usage information.\n");
 		free(name);
-		usage(EXIT_FAILURE);
+		return EXIT_FAILURE;
 	}
 	const char *device_name = argv[optind];
 

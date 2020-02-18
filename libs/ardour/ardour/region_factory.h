@@ -1,21 +1,25 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2000-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2006-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2015-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2017 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2018-2019 Ben Loftis <ben@harrisonconsoles.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_region_factory_h__
 #define __ardour_region_factory_h__
@@ -58,7 +62,7 @@ public:
 	*/
 	static PBD::Signal1<void,boost::shared_ptr<Region> >  CheckNewRegion;
 
-	/** create a "pure copy" of Region @param other */
+	/** create a "pure copy" of Region \p other */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<const Region> other, bool announce = false, bool fork = false);
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, bool announce, bool fork) {
 		return create (boost::shared_ptr<const Region>(other), announce, fork);
@@ -71,21 +75,23 @@ public:
 	/** create a region from a multiple sources */
 	static boost::shared_ptr<Region> create (const SourceList &,
 	                                         const PBD::PropertyList&, bool announce = true);
-	/** create a copy of @other starting at zero within @param other's sources */
+	/** create a copy of \p other starting at zero within \p other's sources */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other,
 	                                         const PBD::PropertyList&, bool announce = true);
-	/** create a copy of @param other starting at @param offset within @param other */
+	/** create a copy of \p other starting at \p offset within \p other */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, ARDOUR::MusicSample offset,
 	                                         const PBD::PropertyList&, bool announce = true);
-	/** create a "copy" of @param other but using a different set of sources @param srcs */
+	/** create a "copy" of \p other but using a different set of sources \p srcs */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, const SourceList& srcs,
 	                                         const PBD::PropertyList&, bool announce = true);
 
 	/** create a region with no sources, using XML state */
 	static boost::shared_ptr<Region> create (Session&, XMLNode&, bool);
-	/** create a region with specified sources @param srcs and XML state */
+	/** create a region with specified sources \p srcs and XML state */
 	static boost::shared_ptr<Region> create (SourceList& srcs, const XMLNode&);
 
+	static boost::shared_ptr<Region> get_whole_region_for_source (boost::shared_ptr<ARDOUR::Source>);
+	
 	static void get_regions_using_source (boost::shared_ptr<Source>, std::set<boost::shared_ptr<Region> >& );
 	static void remove_regions_using_source (boost::shared_ptr<Source>);
 
@@ -93,6 +99,15 @@ public:
 	static void delete_all_regions ();
 	static const RegionMap& regions() { return region_map; }
 	static uint32_t nregions ();
+	
+	static void foreach_region (boost::function<void( boost::shared_ptr<Region> )> f) {
+		Glib::Threads::Mutex::Lock ls (region_map_lock);
+		for (RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
+			f ( (*i).second );
+		}
+	}
+	
+
 
 	static int region_name (std::string &, std::string, bool new_level = false);
 	static std::string new_region_name (std::string);

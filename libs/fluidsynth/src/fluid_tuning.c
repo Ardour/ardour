@@ -20,7 +20,6 @@
 
 
 #include "fluid_tuning.h"
-#include "fluidsynth_priv.h"
 #include "fluid_sys.h"
 
 

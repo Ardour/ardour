@@ -58,10 +58,12 @@ def build(bld):
         'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
         ]
     obj.install_path = bld.env['LIBDIR']
-    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD OGG CURL DL XML'
-    obj.uselib       += ' FFTW3F'
-    obj.uselib       += ' AUDIOUNITS OSX LO '
-    obj.uselib       += ' TAGLIB '
+    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GIOMM GTHREAD OGG CURL DL XML'
+    obj.uselib       += ' AUDIOUNITS OSX'
+    obj.uselib       += ' FFTW3F LO TAGLIB LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
+
+    if bld.is_defined('HAVE_SUIL'):
+        obj.uselib += ' SUIL'
 
     if sys.platform == 'darwin':
         obj.uselib += ' AUDIOUNITS OSX'
@@ -74,26 +76,3 @@ def build(bld):
 
     if bld.is_defined('NEED_INTL'):
         obj.linkflags = ' -lintl'
-
-    # Wrappers
-
-    wrapper_subst_dict = {
-            'INSTALL_PREFIX' : bld.env['PREFIX'],
-            'LIBDIR'         : os.path.normpath(bld.env['LIBDIR']),
-            'DATADIR'        : os.path.normpath(bld.env['DATADIR']),
-            'CONFDIR'        : os.path.normpath(bld.env['CONFDIR']),
-            'LIBS'           : 'build/libs',
-            'VERSION'        : bld.env['VERSION'],
-            'EXECUTABLE'     : 'build/headless/hardour-' + str(bld.env['VERSION'])
-    }
-
-    def set_subst_dict(obj, dict):
-        for i in dict:
-            setattr(obj, i, dict[i])
-
-    obj              = bld(features = 'subst')
-    obj.source       = 'hardev_common.sh.in'
-    obj.target       = 'hardev_common_waf.sh'
-    obj.chmod        = Utils.O755
-    obj.dict         = wrapper_subst_dict
-    set_subst_dict(obj, wrapper_subst_dict)

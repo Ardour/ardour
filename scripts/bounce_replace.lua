@@ -44,7 +44,7 @@ function factory (params) return function ()
 		-- remove old region..
 		playlist:remove_region (r);
 		-- ..and add the newly bounced one
-		playlist:add_region (region, r:position (), 1, false, 0, false)
+		playlist:add_region (region, r:position (), 1, false, 0, 0, false)
 
 		-- create a diff of the performed work, add it to the session's undo stack
 		-- and check if it is not empty
@@ -75,6 +75,7 @@ function icon (params) return function (ctx, width, height, fg)
 		ctx:fill ()
 	end
 
+	ctx:translate (math.floor (width * .5 - wh), math.floor (height * .5 - wh))
 	ctx:rectangle (wh - wh * .6, wh - .7 * wh, wh * 1.2, .5 * wh)
 	stroke_outline (.7)
 

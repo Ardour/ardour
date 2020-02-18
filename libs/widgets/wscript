@@ -69,13 +69,13 @@ def build(bld):
         obj.defines      = [ 'LIBWIDGETS_DLL_EXPORTS=1' ]
     else:
         obj = bld.stlib(features = 'cxx cxxstlib', source=widgets_sources)
-        obj.cxxflags = [  bld.env['compiler_flags_dict']['pic'] ]
-        obj.cflags = [ bld.env['compiler_flags_dict']['pic'] ]
+        obj.cxxflags = [ bld.env['compiler_flags_dict']['pic'] ]
+        obj.cflags   = [ bld.env['compiler_flags_dict']['pic'] ]
         obj.defines      = [ ]
 
     obj.export_includes = ['.']
-    obj.includes     = ['.']
-    obj.uselib       = 'SIGCPP CAIROMM GTKMM BOOST XML'
+    obj.includes = ['.'] + bld.env['INCLUDES_GLIB']
+    obj.uselib       = 'SIGCPP CAIROMM GTKMM BOOST XML OSX'
     obj.use          = [ 'libpbd', 'libgtkmm2ext' ]
     obj.name         = 'libwidgets'
     obj.target       = 'widgets'

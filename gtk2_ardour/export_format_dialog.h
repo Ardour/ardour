@@ -1,22 +1,24 @@
 /*
-    Copyright (C) 2008 Paul Davis
-    Author: Sakari Bergen
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2008-2013 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009 David Robillard <d@drobilla.net>
+ * Copyright (C) 2011-2012 Sakari Bergen <sakari.bergen@beatwaves.net>
+ * Copyright (C) 2013-2014 Colin Fletcher <colin.m.fletcher@googlemail.com>
+ * Copyright (C) 2015-2018 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __export_format_dialog_h__
 #define __export_format_dialog_h__
@@ -145,7 +147,9 @@ private:
 	void update_time (ARDOUR::AnyTime & time, AudioClock const & clock);
 
 	void update_src_quality_selection ();
+	void update_codec_quality_selection ();
 	void update_tagging_selection ();
+	void set_codec_quality_selection ();
 
 	/*** Encoding options */
 
@@ -158,8 +162,10 @@ private:
 	void show_ogg_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatOggVorbis> ptr);
 	void show_flac_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatFLAC> ptr);
 	void show_bwf_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatBWF> ptr);
+	void show_ffmpeg_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatFFMPEG> ptr);
 
 	void fill_sample_format_lists (boost::shared_ptr<ARDOUR::HasSampleFormat> ptr);
+	void fill_codec_quality_lists (boost::shared_ptr<ARDOUR::HasCodecQuality> ptr);
 
 	/*** GUI components ***/
 
@@ -342,6 +348,22 @@ private:
 
 	Gtk::TreeView sample_format_view;
 	Gtk::TreeView dither_type_view;
+
+
+	/* codec quality combo */
+
+	struct CodecQualityCols : public Gtk::TreeModelColumnRecord
+	{
+	public:
+		Gtk::TreeModelColumn<int>          quality;
+		Gtk::TreeModelColumn<std::string>  label;
+
+		CodecQualityCols () { add(quality); add(label); }
+	};
+	CodecQualityCols             codec_quality_cols;
+	Glib::RefPtr<Gtk::ListStore> codec_quality_list;
+
+	Gtk::ComboBox   codec_quality_combo;
 
 	/* Tagging */
 

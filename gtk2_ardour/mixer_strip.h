@@ -1,20 +1,27 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2005-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2006-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2006 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2007-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2017 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2016-2017 Julien "_FrnchFrgg_" RIVAUD <frnchfrgg@free.fr>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_mixer_strip__
 #define __ardour_mixer_strip__
@@ -104,7 +111,7 @@ public:
 	void revert_to_default_display ();
 
 	/** @return the delivery that is being edited using our fader; it will be the
-	 *  last send passed to ::show_send, or our route's main out delivery.
+	 *  last send passed to \ref show_send() , or our route's main out delivery.
 	 */
 	boost::shared_ptr<ARDOUR::Delivery> current_delivery () const {
 		return _current_delivery;
@@ -113,6 +120,9 @@ public:
 	bool mixer_owned () const {
 		return _mixer_owned;
 	}
+
+	/* used for screenshots */
+	void hide_master_spacer (bool);
 
 	void hide_things ();
 
@@ -187,6 +197,7 @@ private:
 
 	void meter_changed ();
 	void monitor_changed ();
+	void monitor_section_added_or_removed ();
 
 	ArdourWidgets::ArdourButton input_button;
 	ArdourWidgets::ArdourButton output_button;
@@ -286,9 +297,6 @@ private:
 
 	static MixerStrip* _entered_mixer_strip;
 
-	void engine_running();
-	void engine_stopped();
-
 	virtual void bus_send_display_changed (boost::shared_ptr<ARDOUR::Route>);
 
 	void set_current_delivery (boost::shared_ptr<ARDOUR::Delivery>);
@@ -297,6 +305,7 @@ private:
 	PBD::ScopedConnection send_gone_connection;
 
 	void reset_strip_style ();
+	void update_sensitivity ();
 
 	ARDOUR::DataType guess_main_type(bool for_input, bool favor_connected = true) const;
 

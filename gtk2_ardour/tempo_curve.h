@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2016-2017 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2017-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 #ifndef __gtk_ardour_tempo_curve_h__
 #define __gtk_ardour_tempo_curve_h__
 
@@ -35,8 +54,8 @@ public:
 	void set_color_rgba (uint32_t rgba);
 	samplepos_t position() const { return sample_position; }
 
-	ArdourCanvas::Container * get_parent() { return _parent; }
-	void reparent (ArdourCanvas::Container & parent);
+	ArdourCanvas::Container* get_parent() { return _parent; }
+	void reparent (ArdourCanvas::Container& parent);
 
 	void hide ();
 	void show ();
@@ -49,28 +68,31 @@ public:
 protected:
 	PublicEditor& editor;
 
-	ArdourCanvas::Container* _parent;
-	ArdourCanvas::Container *group;
-	ArdourCanvas::Points *points;
+	ArdourCanvas::Container*   _parent;
+	ArdourCanvas::Container*    group;
+	ArdourCanvas::Points*       points;
 	ArdourCanvas::FramedCurve* _curve;
 
 	double        unit_position;
-	samplepos_t    sample_position;
-	samplepos_t    _end_sample;
+	samplepos_t   sample_position;
+	samplepos_t  _end_sample;
 	bool         _shown;
 	double       _canvas_height;
 	uint32_t     _color;
 
 	void reposition ();
+
 private:
-	double       _min_tempo;
-	double       _max_tempo;
 	/* disallow copy construction */
 	TempoCurve (TempoCurve const &);
-	TempoCurve & operator= (TempoCurve const &);
-	ARDOUR::TempoSection& _tempo;
-	ArdourCanvas::Text *_start_text;
-	ArdourCanvas::Text *_end_text;
 
+	TempoCurve & operator= (TempoCurve const &);
+
+	double _min_tempo;
+	double _max_tempo;
+
+	ARDOUR::TempoSection& _tempo;
+	ArdourCanvas::Text*   _start_text;
+	ArdourCanvas::Text*   _end_text;
 };
 #endif /* __gtk_ardour_tempo_curve_h__ */

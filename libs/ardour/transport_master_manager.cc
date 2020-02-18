@@ -1,34 +1,31 @@
 /*
- * Copyright (C) 2018 Paul Davis (paul@linuxaudiosystems.com)
+ * Copyright (C) 2018-2019 Paul Davis <paul@linuxaudiosystems.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
 #include "ardour/disk_reader.h"
 #include "ardour/session.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/transport_master_manager.h"
 
+#include "pbd/boost_debug.cc"
 #include "pbd/i18n.h"
-
-#if __cplusplus > 199711L
-#define local_signbit(x) std::signbit (x)
-#else
-#define local_signbit(x) ((((__int64*)(&z))*) & 0x8000000000000000)
-#endif
+#include "pbd/stateful.h"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -50,23 +47,48 @@ TransportMasterManager::~TransportMasterManager ()
 	clear ();
 }
 
+TransportMasterManager&
+TransportMasterManager::create ()
+{
+	assert (!_instance);
+
+	_instance = new TransportMasterManager;
+
+	XMLNode* tmm_node = Config->transport_master_state ();
+
+	if (tmm_node) {
+		cerr << " setting state via XML\n";
+		_instance->set_state (*tmm_node, Stateful::current_state_version);
+	} else {
+		cerr << " setting default config\n";
+		_instance->set_default_configuration ();
+	}
+
+	return *_instance;
+}
+
 int
 TransportMasterManager::set_default_configuration ()
 {
 	try {
+
+		clear ();
+
 		/* setup default transport masters. Most people will never need any
 		   others
 		*/
+
 		add (Engine, X_("JACK Transport"), false);
 		add (MTC, X_("MTC"), false);
 		add (LTC, X_("LTC"), false);
 		add (MIDIClock, X_("MIDI Clock"), false);
+
 	} catch (...) {
 		return -1;
 	}
 
 	_current_master = _transport_masters.back();
-
+	cerr << "default current master (back) is " << _current_master->name() << endl;
 	return 0;
 }
 
@@ -100,7 +122,7 @@ TransportMasterManager::parameter_changed (std::string const & what)
 	if (what == "external-sync") {
 		if (!_session->config.get_external_sync()) {
 			/* disabled */
-			DiskReader::set_no_disk_output (false);
+			DiskReader::dec_no_disk_output ();
 		}
 	}
 }
@@ -109,7 +131,8 @@ TransportMasterManager&
 TransportMasterManager::instance()
 {
 	if (!_instance) {
-		_instance = new TransportMasterManager();
+		fatal << string_compose (_("programming error:%1"), X_("TransportMasterManager::instance() called without an instance!")) << endmsg;
+		abort (); /* NOTREACHED */
 	}
 	return *_instance;
 }
@@ -181,7 +204,23 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 		return 1.0;
 	}
 
-	if (_master_speed != 0.0) {
+	if (_current_master->sample_clock_synced()) {
+
+		/* No master DLL required. Speed identified by the master is
+		 * our speed, quantized to {1.0, 0.0, -1.0}
+		 */
+
+		if (_master_speed > 0.0f) {
+			engine_speed = 1.0f;
+		} else if (_master_speed < 0.0f) {
+			engine_speed = -1.0f;
+		} else {
+			engine_speed = 0.0f;
+		}
+
+		DEBUG_TRACE (DEBUG::Slave, string_compose ("S-clock synced master speed %1 used as %2\n", _master_speed, engine_speed));
+
+	} else if (_master_speed != 0.0) {
 
 		samplepos_t delta = _master_position;
 
@@ -190,7 +229,7 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 			if (master_dll_initstate == 0) {
 
 				init_transport_master_dll (_master_speed, _master_position);
-				// _master_invalid_this_cycle = true;
+				_master_invalid_this_cycle = true;
 				DEBUG_TRACE (DEBUG::Slave, "no roll3 - still initializing master DLL\n");
 				master_dll_initstate = _master_speed > 0.0 ? 1 : -1;
 
@@ -214,12 +253,12 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 				if (!_session->actively_recording()) {
 					DEBUG_TRACE (DEBUG::Slave, string_compose ("slave delta %1 greater than slave resolution %2 => no disk output\n", delta, _current_master->resolution()));
 					/* run routes as normal, but no disk output */
-					DiskReader::set_no_disk_output (true);
+					DiskReader::inc_no_disk_output ();
 				} else {
-					DiskReader::set_no_disk_output (false);
+					DiskReader::dec_no_disk_output ();
 				}
 			} else {
-				DiskReader::set_no_disk_output (false);
+				DiskReader::dec_no_disk_output ();
 			}
 
 			/* inject DLL with new data */
@@ -239,18 +278,6 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 			/* provide a .1% deadzone to lock the speed */
 			if (fabs (engine_speed - 1.0) <= 0.001) {
 				engine_speed = 1.0;
-			}
-
-			if (_current_master->sample_clock_synced() && engine_speed != 0.0f) {
-
-				/* if the master is synced to our audio interface via word-clock or similar, then we assume that its speed is binary: 0.0 or 1.0
-				   (since our sample clock cannot change with respect to it).
-				*/
-				if (engine_speed > 0.0) {
-					engine_speed = 1.0;
-				} else if (engine_speed < 0.0) {
-					engine_speed = -1.0;
-				}
 			}
 
 			/* speed is set, we're locked, and good to go */
@@ -324,6 +351,12 @@ TransportMasterManager::add (SyncSource type, std::string const & name, bool rem
 		}
 
 		tm = TransportMaster::factory (type, name, removeable);
+
+		if (!tm) {
+			return -1;
+		}
+
+		boost_debug_shared_ptr_mark_interesting (tm.get(), "tm");
 		ret = add_locked (tm);
 	}
 
@@ -382,8 +415,14 @@ TransportMasterManager::remove (std::string const & name)
 int
 TransportMasterManager::set_current_locked (boost::shared_ptr<TransportMaster> c)
 {
-	if (find (_transport_masters.begin(), _transport_masters.end(), c) == _transport_masters.end()) {
-		warning << string_compose (X_("programming error: attempt to use unknown transport master named \"%1\"\n"), c->name());
+	if (c) {
+		if (find (_transport_masters.begin(), _transport_masters.end(), c) == _transport_masters.end()) {
+			warning << string_compose (X_("programming error: attempt to use unknown transport master \"%1\"\n"), c->name());
+			return -1;
+		}
+	}
+
+	if (!c->usable()) {
 		return -1;
 	}
 
@@ -393,7 +432,7 @@ TransportMasterManager::set_current_locked (boost::shared_ptr<TransportMaster> c
 
 	master_dll_initstate = 0;
 
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("current transport master set to %1\n", c->name()));
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("current transport master set to %1\n", (c ? c->name() : string ("none"))));
 
 	return 0;
 }
@@ -471,6 +510,7 @@ TransportMasterManager::clear ()
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
+		_current_master.reset ();
 		_transport_masters.clear ();
 	}
 
@@ -480,22 +520,34 @@ TransportMasterManager::clear ()
 int
 TransportMasterManager::set_state (XMLNode const & node, int version)
 {
+	PBD::stacktrace (std::cerr, 20);
 	assert (node.name() == state_node_name);
 
 	XMLNodeList const & children = node.children();
 
-
-	if (!children.empty()) {
-		_transport_masters.clear ();
-	}
-
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
 
+		_current_master.reset ();
+		boost_debug_list_ptrs ();
+
+		/* TramsportMasters live for the entire life of the
+		 * program. TransportMasterManager::set_state() should only be
+		 * called at the start of the program, and there should be no
+		 * transport masters at that time.
+		 */
+
+		assert (_transport_masters.empty());
 
 		for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
 
 			boost::shared_ptr<TransportMaster> tm = TransportMaster::factory (**c);
+
+			if (!tm) {
+				continue;
+			}
+
+			boost_debug_shared_ptr_mark_interesting (tm.get(), "tm");
 
 			if (add_locked (tm)) {
 				continue;
@@ -507,12 +559,11 @@ TransportMasterManager::set_state (XMLNode const & node, int version)
 		}
 	}
 
-	std::string current_master;
-	if (node.get_property (X_("current"), current_master)) {
-		set_current (current_master);
-	} else {
-		set_current (MTC);
-	}
+	/* fallback choice, lives on until ::restart() is called after the
+	 * engine is running.
+	 */
+
+	set_current (MTC);
 
 	return 0;
 }
@@ -547,4 +598,65 @@ TransportMasterManager::master_by_type (SyncSource src) const
 	}
 
 	return boost::shared_ptr<TransportMaster> ();
+}
+
+void
+TransportMasterManager::engine_stopped ()
+{
+	DEBUG_TRACE (DEBUG::Slave, "engine stopped, reset all transport masters\n");
+	{
+		Glib::Threads::RWLock::ReaderLock lm (lock);
+
+		for (TransportMasters::const_iterator tm = _transport_masters.begin(); tm != _transport_masters.end(); ++tm) {
+			(*tm)->reset (false);
+		}
+	}
+}
+
+void
+TransportMasterManager::restart ()
+{
+	XMLNode* node;
+
+	if ((node = Config->transport_master_state()) != 0) {
+
+		{
+			Glib::Threads::RWLock::ReaderLock lm (lock);
+
+			for (TransportMasters::const_iterator tm = _transport_masters.begin(); tm != _transport_masters.end(); ++tm) {
+				(*tm)->connect_port_using_state ();
+				(*tm)->reset (false);
+			}
+		}
+
+		/* engine is running, connections are viable ... try to set current */
+
+		std::string current_master;
+
+		if (node->get_property (X_("current"), current_master)) {
+
+			/* may fal if current_master is not usable */
+
+			set_current (current_master);
+		}
+
+	} else {
+		if (TransportMasterManager::instance().set_default_configuration ()) {
+			error << _("Cannot initialize transport master manager") << endmsg;
+			/* XXX now what? */
+		}
+	}
+}
+
+void
+TransportMasterManager::reconnect_ports ()
+{
+	DEBUG_TRACE (DEBUG::Slave, "reconnecting all transport master ports\n");
+	{
+		Glib::Threads::RWLock::ReaderLock lm (lock);
+
+		for (TransportMasters::const_iterator tm = _transport_masters.begin(); tm != _transport_masters.end(); ++tm) {
+			(*tm)->connect_port_using_state ();
+		}
+	}
 }

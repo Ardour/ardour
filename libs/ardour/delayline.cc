@@ -1,21 +1,20 @@
 /*
-    Copyright (C) 2006, 2013 Paul Davis
-    Copyright (C) 2013, 2014 Robin Gareus <robin@gareus.org>
-
-    This program is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the Free
-    Software Foundation; either version 2 of the License, or (at your option)
-    any later version.
-
-    This program is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
-
-    You should have received a copy of the GNU General Public License along
-    with this program; if not, write to the Free Software Foundation, Inc.,
-    675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2014-2017 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <assert.h>
 #include <cmath>
@@ -28,6 +27,8 @@
 #include "ardour/delayline.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/runtime_functions.h"
+
+#define MAX_BUFFER_SIZE 8192
 
 using namespace std;
 using namespace PBD;
@@ -63,10 +64,16 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 	Glib::Threads::Mutex::Lock lm (_set_delay_mutex, Glib::Threads::TRY_LOCK);
 	assert (lm.locked ());
 #endif
+	assert (n_samples <= MAX_BUFFER_SIZE);
 
 	const sampleoffset_t pending_delay = _pending_delay;
 	sampleoffset_t delay_diff = _delay - pending_delay;
 	const bool pending_flush = _pending_flush;
+
+	if (delay_diff == 0 && _delay == 0) {
+		return;
+	}
+
 	_pending_flush = false;
 
 	// TODO handle pending_flush.
@@ -207,6 +214,10 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 	} else {
 		/* set new delay for MIDI only */
 		_delay = pending_delay;
+
+		/* prepare for the case that an audio-port is added */
+		_woff = _delay;
+		_roff = 0;
 	}
 
 	if (_midi_buf.get ()) {
@@ -297,7 +308,7 @@ DelayLine::set_delay (samplecnt_t signal_delay)
 			string_compose ("%1 set_delay to %2 samples for %3 channels\n",
 				name (), signal_delay, _configured_output.n_audio ()));
 
-	if (signal_delay + 8192 + 1 > _bsiz) {
+	if (signal_delay + MAX_BUFFER_SIZE + 1 > _bsiz) {
 		allocate_pending_buffers (signal_delay, _configured_output);
 	}
 
@@ -316,7 +327,19 @@ void
 DelayLine::allocate_pending_buffers (samplecnt_t signal_delay, ChanCount const& cc)
 {
 	assert (signal_delay >= 0);
-	samplecnt_t rbs = signal_delay + 8192 + 1;
+#if 1
+	/* If no buffers are required, don't allocate any.
+	 * This may backfire later, allocating buffers on demand
+	 * may take time and cause x-runs.
+	 *
+	 * The default buffersize is 4 * 16kB and - once allocated -
+	 * usually sufficies for the lifetime of the delayline instance.
+	 */
+	if (signal_delay == _pending_delay && signal_delay == 0) {
+		return;
+	}
+#endif
+	samplecnt_t rbs = signal_delay + MAX_BUFFER_SIZE + 1;
 	rbs = std::max (_bsiz, rbs);
 
 	uint64_t power_of_two;
@@ -327,7 +350,6 @@ DelayLine::allocate_pending_buffers (samplecnt_t signal_delay, ChanCount const& 
 		return;
 	}
 
-	_buf.clear ();
 	if (cc.n_audio () == 0) {
 		return;
 	}
@@ -342,23 +364,30 @@ DelayLine::allocate_pending_buffers (samplecnt_t signal_delay, ChanCount const& 
 	AudioDlyBuf::iterator bo = _buf.begin ();
 	AudioDlyBuf::iterator bn = pending_buf.begin ();
 
+	sampleoffset_t offset = (_roff <= _woff) ? 0 : rbs - _bsiz;
+
 	for (; bo != _buf.end () && bn != pending_buf.end(); ++bo, ++bn) {
 		Sample* rbo = (*bo).get ();
 		Sample* rbn = (*bn).get ();
-		if (_roff < _woff) {
+		if (_roff == _woff) {
+			continue;
+		} else if (_roff < _woff) {
 			/* copy data between _roff .. _woff to new buffer */
 			copy_vector (&rbn[_roff], &rbo[_roff], _woff - _roff);
 		} else {
 			/* copy data between _roff .. old_size to end of new buffer, increment _roff
 			 * copy data from 0.._woff to beginning of new buffer
 			 */
-			sampleoffset_t offset = rbs - _bsiz;
 			copy_vector (&rbn[_roff + offset], &rbo[_roff], _bsiz - _roff);
 			copy_vector (rbn, rbo, _woff);
-			_roff += offset;
-			assert (_roff < rbs);
 		}
 	}
+
+	assert (signal_delay >= _pending_delay);
+	assert ((_roff <= ((_woff + signal_delay - _pending_delay) & (rbs -1))) || offset > 0);
+	_roff += offset;
+	assert (_roff < rbs);
+
 	_bsiz = rbs;
 	_bsiz_mask = _bsiz - 1;
 	_buf.swap (pending_buf);

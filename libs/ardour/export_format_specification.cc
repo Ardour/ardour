@@ -1,22 +1,25 @@
 /*
-    Copyright (C) 2008 Paul Davis
-    Author: Sakari Bergen
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2008-2013 Sakari Bergen <sakari.bergen@beatwaves.net>
+ * Copyright (C) 2008-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2013-2014 Colin Fletcher <colin.m.fletcher@googlemail.com>
+ * Copyright (C) 2016-2018 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include "ardour/export_format_specification.h"
 
@@ -131,9 +134,9 @@ ExportFormatSpecification::Time::set_state (const XMLNode & node)
 
 ExportFormatSpecification::ExportFormatSpecification (Session & s)
 	: session (s)
-
 	, has_sample_format (false)
 	, supports_tagging (false)
+	, _has_codec_quality (false)
 	, _has_broadcast_info (false)
 	, _channel_limit (0)
 	, _dither_type (D_None)
@@ -156,6 +159,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 	, _soundcloud_upload (false)
 	, _command ("")
 	, _analyse (true)
+	, _codec_quality (0)
 {
 	format_ids.insert (F_None);
 	endiannesses.insert (E_FileDefault);
@@ -166,9 +170,9 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 
 ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const & state)
 	: session (s)
-
 	, has_sample_format (false)
 	, supports_tagging (false)
+	, _has_codec_quality (false)
 	, _has_broadcast_info (false)
 	, _channel_limit (0)
 	, _dither_type (D_None)
@@ -191,6 +195,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const
 	, _soundcloud_upload (false)
 	, _command ("")
 	, _analyse (true)
+	, _codec_quality (0)
 {
 	_silence_beginning.type = Time::Timecode;
 	_silence_end.type = Time::Timecode;
@@ -203,8 +208,13 @@ ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification 
 	, session (other.session)
 	, _silence_beginning (other.session)
 	, _silence_end (other.session)
+	, _with_toc (other._with_toc)
+	, _with_cue (other._with_cue)
+	, _with_mp4chaps (other._with_mp4chaps)
 	, _soundcloud_upload (false)
+	, _command (other._command)
 	, _analyse (other._analyse)
+	, _codec_quality (other._codec_quality)
 {
 	if (modify_name) {
 		set_name (other.name() + " (copy)");
@@ -214,8 +224,8 @@ ExportFormatSpecification::ExportFormatSpecification (ExportFormatSpecification 
 
 	_format_name = other._format_name;
 	has_sample_format = other.has_sample_format;
-
 	supports_tagging = other.supports_tagging;
+	_has_codec_quality = other._has_codec_quality;
 	_has_broadcast_info = other._has_broadcast_info;
 	_channel_limit = other._channel_limit;
 
@@ -276,6 +286,11 @@ ExportFormatSpecification::get_state ()
 
 	node = root->add_child ("SRCQuality");
 	node->set_property ("quality", src_quality());
+
+	if (_has_codec_quality) {
+		node = root->add_child ("CodecQuality");
+		node->set_property ("quality", codec_quality());
+	}
 
 	XMLNode * enc_opts = root->add_child ("EncodingOptions");
 
@@ -382,6 +397,28 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 
 	if ((child = root.child ("SRCQuality"))) {
 		child->get_property ("quality", _src_quality);
+	}
+
+	if ((child = root.child ("CodecQuality"))) {
+		child->get_property ("quality", _codec_quality);
+		_has_codec_quality = true;
+	} else {
+		_has_codec_quality = false;
+	}
+
+	/* fixup codec quality for old states */
+	if (!_has_codec_quality) {
+		/* We'd need an instance of ExportFormatManager to look up
+		 * defaults for a given type -- in the future there may even be
+		 * difference qualities depending on sub-type, so we just
+		 * hardcode them here for the time being.
+		 */
+		if (format_id() == F_FFMPEG) {
+			_codec_quality = -2; // ExportFormatOggVorbis::default_codec_quality();
+		}
+		else if (format_id() == F_Ogg) {
+			_codec_quality = 40; // ExportFormatFFMPEG::default_codec_quality();
+		}
 	}
 
 	/* Encoding options */
@@ -508,7 +545,10 @@ void
 ExportFormatSpecification::set_format (boost::shared_ptr<ExportFormat> format)
 {
 	if (format) {
-		set_format_id (format->get_format_id ());
+		FormatId new_fmt = format->get_format_id ();
+		bool fmt_changed = format_id() != new_fmt;
+		set_format_id (new_fmt);
+
 		set_type (format->get_type());
 		set_extension (format->extension());
 
@@ -524,6 +564,13 @@ ExportFormatSpecification::set_format (boost::shared_ptr<ExportFormat> format)
 			_has_broadcast_info = true;
 		}
 
+		_has_codec_quality = format->has_codec_quality();
+		if (!_has_codec_quality) {
+			_codec_quality = 0;
+		} else if (fmt_changed) {
+			_codec_quality = boost::dynamic_pointer_cast<HasCodecQuality> (format)->default_codec_quality();
+		}
+
 		supports_tagging = format->supports_tagging ();
 		_channel_limit = format->get_channel_limit();
 
@@ -536,6 +583,7 @@ ExportFormatSpecification::set_format (boost::shared_ptr<ExportFormat> format)
 		has_sample_format = false;
 		supports_tagging = false;
 		_channel_limit = 0;
+		_codec_quality = 0;
 		_format_name = "";
 	}
 }

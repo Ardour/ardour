@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Line 6</Manufacturer>
+    <Model>Bass PODxt</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Program">
+        <PatchNameList>
+          <Patch Number="MAN" Name="Manual" ProgramChange="0"/>
+          <Patch Number="1A" Name="Classic Rock" ProgramChange="1"/>
+          <Patch Number="1B" Name="Sub Machine" ProgramChange="2"/>
+          <Patch Number="1C" Name="Slap Happy" ProgramChange="3"/>
+          <Patch Number="1D" Name="Fuzzy Wuzzy" ProgramChange="4"/>
+          <Patch Number="2A" Name="RnB Standard" ProgramChange="5"/>
+          <Patch Number="2B" Name="4 the Love of $" ProgramChange="6"/>
+          <Patch Number="2C" Name="California" ProgramChange="7"/>
+          <Patch Number="2D" Name="SoCal Metal" ProgramChange="8"/>
+          <Patch Number="3A" Name="Direct Inject" ProgramChange="9"/>
+          <Patch Number="3B" Name="Pepperland" ProgramChange="10"/>
+          <Patch Number="3C" Name="White Album" ProgramChange="11"/>
+          <Patch Number="3D" Name="Auto Wah" ProgramChange="12"/>
+          <Patch Number="4A" Name="Jazz Deluxe" ProgramChange="13"/>
+          <Patch Number="4B" Name="It's Sabotage" ProgramChange="14"/>
+          <Patch Number="4C" Name="Huge 360" ProgramChange="15"/>
+          <Patch Number="4D" Name="Spinner" ProgramChange="16"/>
+          <Patch Number="5A" Name="Phat Rez" ProgramChange="17"/>
+          <Patch Number="5B" Name="Have a Cigar" ProgramChange="18"/>
+          <Patch Number="5C" Name="Adam and Eve" ProgramChange="19"/>
+          <Patch Number="5D" Name="Pub Brawler" ProgramChange="20"/>
+          <Patch Number="6A" Name="Synth Harmony" ProgramChange="21"/>
+          <Patch Number="6B" Name="Live Spoonful" ProgramChange="22"/>
+          <Patch Number="6C" Name="Love/Haight" ProgramChange="23"/>
+          <Patch Number="6D" Name="Twin Peaks" ProgramChange="24"/>
+          <Patch Number="7A" Name="Prog Metal Chops" ProgramChange="25"/>
+          <Patch Number="7B" Name="Club Tone" ProgramChange="26"/>
+          <Patch Number="7C" Name="1 of These Days" ProgramChange="27"/>
+          <Patch Number="7D" Name="Furry Friend" ProgramChange="28"/>
+          <Patch Number="8A" Name="Big Bottom" ProgramChange="29"/>
+          <Patch Number="8B" Name="Sample and Hold" ProgramChange="30"/>
+          <Patch Number="8C" Name="NIB" ProgramChange="31"/>
+          <Patch Number="8D" Name="The Fish" ProgramChange="32"/>
+          <Patch Number="9A" Name="FingerDefinition" ProgramChange="33"/>
+          <Patch Number="9B" Name="Monolythic Synth" ProgramChange="34"/>
+          <Patch Number="9C" Name="Silverface Bass" ProgramChange="35"/>
+          <Patch Number="9D" Name="Broken Speaker" ProgramChange="36"/>
+          <Patch Number="10A" Name="Classic Jazz" ProgramChange="37"/>
+          <Patch Number="10B" Name="Metal Shop" ProgramChange="38"/>
+          <Patch Number="10C" Name="Tom Sawyer" ProgramChange="39"/>
+          <Patch Number="10D" Name="Memphis Bottom" ProgramChange="40"/>
+          <Patch Number="11A" Name="Super Thor" ProgramChange="41"/>
+          <Patch Number="11B" Name="Seattle Coffee" ProgramChange="42"/>
+          <Patch Number="11C" Name="Saturn Octave" ProgramChange="43"/>
+          <Patch Number="11D" Name="Detroit Groove" ProgramChange="44"/>
+          <Patch Number="12A" Name="Ten Tube Tone" ProgramChange="45"/>
+          <Patch Number="12B" Name="Dub King" ProgramChange="46"/>
+          <Patch Number="12C" Name="All Right Now" ProgramChange="47"/>
+          <Patch Number="12D" Name="Green Onions" ProgramChange="48"/>
+          <Patch Number="13A" Name="Live at Leeds" ProgramChange="49"/>
+          <Patch Number="13B" Name="Pulse" ProgramChange="50"/>
+          <Patch Number="13C" Name="Double Show" ProgramChange="51"/>
+          <Patch Number="13D" Name="Clean Hiway" ProgramChange="52"/>
+          <Patch Number="14A" Name="Fretless Chorus" ProgramChange="53"/>
+          <Patch Number="14B" Name="Woodstock" ProgramChange="54"/>
+          <Patch Number="14C" Name="Dopplerganger" ProgramChange="55"/>
+          <Patch Number="14D" Name="Union Jack" ProgramChange="56"/>
+          <Patch Number="15A" Name="PapaRollingStone" ProgramChange="57"/>
+          <Patch Number="15B" Name="Tweed Clean" ProgramChange="58"/>
+          <Patch Number="15C" Name="CrownOfCreation" ProgramChange="59"/>
+          <Patch Number="15D" Name="Strung Out Synth" ProgramChange="60"/>
+          <Patch Number="16A" Name="User 1" ProgramChange="61"/>
+          <Patch Number="16B" Name="User 2" ProgramChange="60"/>
+          <Patch Number="16C" Name="User 3" ProgramChange="63"/>
+          <Patch Number="16D" Name="User 4" ProgramChange="64"/>
+          <Patch Number="TUN" Name="Tuner" ProgramChange="65"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

@@ -1,0 +1,566 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JV-90</Model>
+    <Model>JV-1000</Model>
+    <PatchNameList Name="EXP Asia Rhythm Sets">
+      <Patch Number="01" Name="India Set" ProgramChange="0"/>
+      <Patch Number="02" Name="China Set" ProgramChange="1"/>
+      <Patch Number="03" Name="Gamelan Set1" ProgramChange="2"/>
+      <Patch Number="04" Name="Gamelan Set2" ProgramChange="3"/>
+      <Patch Number="05" Name="Far East Set" ProgramChange="4"/>
+      <Patch Number="06" Name="PopAsiaSet 1" ProgramChange="5"/>
+      <Patch Number="07" Name="PopAsiaSet 2" ProgramChange="6"/>
+      <Patch Number="08" Name="TeknoAsiaSet" ProgramChange="7"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Asia A">
+      <Patch Number="EA11" Name="Asia Phrase" ProgramChange="0"/>
+      <Patch Number="EA12" Name="TablaBy Menu" ProgramChange="1"/>
+      <Patch Number="EA13" Name="Dholak Menu" ProgramChange="2"/>
+      <Patch Number="EA14" Name="Dhol Menu" ProgramChange="3"/>
+      <Patch Number="EA15" Name="Gamelan Menu" ProgramChange="4"/>
+      <Patch Number="EA16" Name="GamlnPrcMenu" ProgramChange="5"/>
+      <Patch Number="EA17" Name="ChinaPrcMenu" ProgramChange="6"/>
+      <Patch Number="EA18" Name="JapanPrcMenu" ProgramChange="7"/>
+      <Patch Number="EA21" Name="KoreaPrcMenu" ProgramChange="8"/>
+      <Patch Number="EA22" Name="Sitar w/Drn" ProgramChange="9"/>
+      <Patch Number="EA23" Name="St.Sitar" ProgramChange="10"/>
+      <Patch Number="EA24" Name="Sitar Guru" ProgramChange="11"/>
+      <Patch Number="EA25" Name="Sitar Echo" ProgramChange="12"/>
+      <Patch Number="EA26" Name="Situarist" ProgramChange="13"/>
+      <Patch Number="EA27" Name="Tabla&amp;Sitar " ProgramChange="14"/>
+      <Patch Number="EA28" Name="Eastern Trio" ProgramChange="15"/>
+      <Patch Number="EA31" Name="New Delhi" ProgramChange="16"/>
+      <Patch Number="EA32" Name="Jammin in A" ProgramChange="17"/>
+      <Patch Number="EA33" Name="Sorgho Field" ProgramChange="18"/>
+      <Patch Number="EA34" Name="St.Santur" ProgramChange="19"/>
+      <Patch Number="EA35" Name="Santur 2" ProgramChange="20"/>
+      <Patch Number="EA36" Name="Vel.Santur" ProgramChange="21"/>
+      <Patch Number="EA37" Name="Santur Atk" ProgramChange="22"/>
+      <Patch Number="EA38" Name="Santur VSw" ProgramChange="23"/>
+      <Patch Number="EA41" Name="Santur+trm" ProgramChange="24"/>
+      <Patch Number="EA42" Name="Santur Trem" ProgramChange="25"/>
+      <Patch Number="EA43" Name="Dusty Room" ProgramChange="26"/>
+      <Patch Number="EA44" Name="Santur Add" ProgramChange="27"/>
+      <Patch Number="EA45" Name="Chung Ruan" ProgramChange="28"/>
+      <Patch Number="EA46" Name="Ruang Guitar" ProgramChange="29"/>
+      <Patch Number="EA47" Name="Ruan Vel.Trm" ProgramChange="30"/>
+      <Patch Number="EA48" Name="Unison Ens." ProgramChange="31"/>
+      <Patch Number="EA51" Name="ChoChungRuan" ProgramChange="32"/>
+      <Patch Number="EA52" Name="JC ChungRuan" ProgramChange="33"/>
+      <Patch Number="EA53" Name="MellowGuitar" ProgramChange="34"/>
+      <Patch Number="EA54" Name="Bright Ruan" ProgramChange="35"/>
+      <Patch Number="EA55" Name="ChungRuanTrm" ProgramChange="36"/>
+      <Patch Number="EA56" Name="Chung Gang" ProgramChange="37"/>
+      <Patch Number="EA57" Name="St.PiPa" ProgramChange="38"/>
+      <Patch Number="EA58" Name="Pi Pa 1" ProgramChange="39"/>
+      <Patch Number="EA61" Name="Pi Pa 2" ProgramChange="40"/>
+      <Patch Number="EA62" Name="PiPa Vel.Trm" ProgramChange="41"/>
+      <Patch Number="EA63" Name="Hybrid PiPa" ProgramChange="42"/>
+      <Patch Number="EA64" Name="China Duo 1" ProgramChange="43"/>
+      <Patch Number="EA65" Name="China Duo 2" ProgramChange="44"/>
+      <Patch Number="EA66" Name="Asian Scene" ProgramChange="45"/>
+      <Patch Number="EA67" Name="St.Gu Zheng" ProgramChange="46"/>
+      <Patch Number="EA68" Name="Gu Zheng 1" ProgramChange="47"/>
+      <Patch Number="EA71" Name="Gu Zheng 2" ProgramChange="48"/>
+      <Patch Number="EA72" Name="Gu Zheng Pik" ProgramChange="49"/>
+      <Patch Number="EA73" Name="Zheng Zen" ProgramChange="50"/>
+      <Patch Number="EA74" Name="GuZheng Echo" ProgramChange="51"/>
+      <Patch Number="EA75" Name="PickedOctave" ProgramChange="52"/>
+      <Patch Number="EA76" Name="Zengwire" ProgramChange="53"/>
+      <Patch Number="EA77" Name="Yang Qin" ProgramChange="54"/>
+      <Patch Number="EA78" Name="YangQin Pick" ProgramChange="55"/>
+      <Patch Number="EA81" Name="YangQin Trem" ProgramChange="56"/>
+      <Patch Number="EA82" Name="MembrainPick" ProgramChange="57"/>
+      <Patch Number="EA83" Name="Ricelands" ProgramChange="58"/>
+      <Patch Number="EA84" Name="Sanshin" ProgramChange="59"/>
+      <Patch Number="EA85" Name="Sanshin Comp" ProgramChange="60"/>
+      <Patch Number="EA86" Name="SanshinCombo" ProgramChange="61"/>
+      <Patch Number="EA87" Name="Er Hu" ProgramChange="62"/>
+      <Patch Number="EA88" Name="Er Hu Solo" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Asia B">
+      <Patch Number="EB11" Name="St.ErHu" ProgramChange="64"/>
+      <Patch Number="EB12" Name="Rosin &amp; ErHu" ProgramChange="65"/>
+      <Patch Number="EB13" Name="ErHu &amp; Str" ProgramChange="66"/>
+      <Patch Number="EB14" Name="ErHu Ensembl" ProgramChange="67"/>
+      <Patch Number="EB15" Name="Indian Flute" ProgramChange="68"/>
+      <Patch Number="EB16" Name="Indar Flute" ProgramChange="69"/>
+      <Patch Number="EB17" Name="India SoloFl" ProgramChange="70"/>
+      <Patch Number="EB18" Name="Sad Indflute" ProgramChange="71"/>
+      <Patch Number="EB21" Name="2 Flutists" ProgramChange="72"/>
+      <Patch Number="EB22" Name="Bamboo Flute" ProgramChange="73"/>
+      <Patch Number="EB23" Name="Qu Di" ProgramChange="74"/>
+      <Patch Number="EB24" Name="Qu Di&amp;Flute" ProgramChange="75"/>
+      <Patch Number="EB25" Name="Qu Di Vibro" ProgramChange="76"/>
+      <Patch Number="EB26" Name="Bang Di" ProgramChange="77"/>
+      <Patch Number="EB27" Name="Bang Di x3" ProgramChange="78"/>
+      <Patch Number="EB28" Name="Bang Di Blow" ProgramChange="79"/>
+      <Patch Number="EB31" Name="BangDelay" ProgramChange="80"/>
+      <Patch Number="EB32" Name="Flute&amp;Acomp." ProgramChange="81"/>
+      <Patch Number="EB33" Name="Island Major" ProgramChange="82"/>
+      <Patch Number="EB34" Name="Chna Bs/Pipe" ProgramChange="83"/>
+      <Patch Number="EB35" Name="Lonely Vibro" ProgramChange="84"/>
+      <Patch Number="EB36" Name="Absolution 1" ProgramChange="85"/>
+      <Patch Number="EB37" Name="WorldAmbient" ProgramChange="86"/>
+      <Patch Number="EB38" Name="BangDiDreams" ProgramChange="87"/>
+      <Patch Number="EB41" Name="Double Duo's" ProgramChange="88"/>
+      <Patch Number="EB42" Name="EastHighland" ProgramChange="89"/>
+      <Patch Number="EB43" Name="Absolution" ProgramChange="90"/>
+      <Patch Number="EB44" Name="BooshOfGhost" ProgramChange="91"/>
+      <Patch Number="EB45" Name="Sheng    VSw" ProgramChange="92"/>
+      <Patch Number="EB46" Name="Sheng" ProgramChange="93"/>
+      <Patch Number="EB47" Name="Suona    VSw" ProgramChange="94"/>
+      <Patch Number="EB48" Name="Suona" ProgramChange="95"/>
+      <Patch Number="EB51" Name="Suona Fifths" ProgramChange="96"/>
+      <Patch Number="EB52" Name="Soft Gangsa" ProgramChange="97"/>
+      <Patch Number="EB53" Name="JeGong" ProgramChange="98"/>
+      <Patch Number="EB54" Name="Jegogan" ProgramChange="99"/>
+      <Patch Number="EB55" Name="St.Jegogan" ProgramChange="100"/>
+      <Patch Number="EB56" Name="Jublag" ProgramChange="101"/>
+      <Patch Number="EB57" Name="St.Jublag" ProgramChange="102"/>
+      <Patch Number="EB58" Name="Jublag Vibe" ProgramChange="103"/>
+      <Patch Number="EB61" Name="Gamelan Orch" ProgramChange="104"/>
+      <Patch Number="EB62" Name="Reyong" ProgramChange="105"/>
+      <Patch Number="EB63" Name="St.Reyong" ProgramChange="106"/>
+      <Patch Number="EB64" Name="Reyong" ProgramChange="107"/>
+      <Patch Number="EB65" Name="CustomReyong" ProgramChange="108"/>
+      <Patch Number="EB66" Name="Reyong Side" ProgramChange="109"/>
+      <Patch Number="EB67" Name="Pemade" ProgramChange="110"/>
+      <Patch Number="EB68" Name="St.Pemade" ProgramChange="111"/>
+      <Patch Number="EB71" Name="Pemade" ProgramChange="112"/>
+      <Patch Number="EB72" Name="Pemade Pangs" ProgramChange="113"/>
+      <Patch Number="EB73" Name="Kemong" ProgramChange="114"/>
+      <Patch Number="EB74" Name="Kane" ProgramChange="115"/>
+      <Patch Number="EB75" Name="Kane Split" ProgramChange="116"/>
+      <Patch Number="EB76" Name="East Wood" ProgramChange="117"/>
+      <Patch Number="EB77" Name="St.Kajar" ProgramChange="118"/>
+      <Patch Number="EB78" Name="Kelontuk" ProgramChange="119"/>
+      <Patch Number="EB81" Name="Ching Mute" ProgramChange="120"/>
+      <Patch Number="EB82" Name="Ching Open" ProgramChange="121"/>
+      <Patch Number="EB83" Name="Temple Bell" ProgramChange="122"/>
+      <Patch Number="EB84" Name="Gong Soft" ProgramChange="123"/>
+      <Patch Number="EB85" Name="Velo Gong" ProgramChange="124"/>
+      <Patch Number="EB86" Name="China Gong" ProgramChange="125"/>
+      <Patch Number="EB87" Name="Furin Bell" ProgramChange="126"/>
+      <Patch Number="EB88" Name="JapaneseBell" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Asia C">
+      <Patch Number="EC11" Name="Hybrid Bells" ProgramChange="0"/>
+      <Patch Number="EC12" Name="GentleBreeze" ProgramChange="1"/>
+      <Patch Number="EC13" Name="Kaleidoscope" ProgramChange="2"/>
+      <Patch Number="EC14" Name="BellsInBreez" ProgramChange="3"/>
+      <Patch Number="EC15" Name="Ruan Rhodes" ProgramChange="4"/>
+      <Patch Number="EC16" Name="Jegogan EP" ProgramChange="5"/>
+      <Patch Number="EC17" Name="AsianFantasy" ProgramChange="6"/>
+      <Patch Number="EC18" Name="WindBellPad" ProgramChange="7"/>
+      <Patch Number="EC21" Name="AsianSndTrk" ProgramChange="8"/>
+      <Patch Number="EC22" Name="Domo Arigato" ProgramChange="9"/>
+      <Patch Number="EC23" Name="Tellerai" ProgramChange="10"/>
+      <Patch Number="EC24" Name="Mattai Bells" ProgramChange="11"/>
+      <Patch Number="EC25" Name="Bellteran" ProgramChange="12"/>
+      <Patch Number="EC26" Name="Rayong Man" ProgramChange="13"/>
+      <Patch Number="EC27" Name="Sainted" ProgramChange="14"/>
+      <Patch Number="EC28" Name="Monsoon" ProgramChange="15"/>
+      <Patch Number="EC31" Name="Asian Pad" ProgramChange="16"/>
+      <Patch Number="EC32" Name="Welcoming" ProgramChange="17"/>
+      <Patch Number="EC33" Name="Hindron Pick" ProgramChange="18"/>
+      <Patch Number="EC34" Name="Asian Attack" ProgramChange="19"/>
+      <Patch Number="EC35" Name="Klang QuDi" ProgramChange="20"/>
+      <Patch Number="EC36" Name="Krystaline" ProgramChange="21"/>
+      <Patch Number="EC37" Name="Ethno Strum" ProgramChange="22"/>
+      <Patch Number="EC38" Name="GuZheng Flng" ProgramChange="23"/>
+      <Patch Number="EC41" Name="Kemong Ens." ProgramChange="24"/>
+      <Patch Number="EC42" Name="AsiaEthnosaw" ProgramChange="25"/>
+      <Patch Number="EC43" Name="Rezkomp Osia" ProgramChange="26"/>
+      <Patch Number="EC44" Name="DropOfRain 2" ProgramChange="27"/>
+      <Patch Number="EC45" Name="Dholakaan" ProgramChange="28"/>
+      <Patch Number="EC46" Name="JpnWdBlock 1" ProgramChange="29"/>
+      <Patch Number="EC47" Name="JpnWdBlock 2" ProgramChange="30"/>
+      <Patch Number="EC48" Name="HyoshigiDlak" ProgramChange="31"/>
+      <Patch Number="EC51" Name="ChansFunHous" ProgramChange="32"/>
+      <Patch Number="EC52" Name="Sheng Lead" ProgramChange="33"/>
+      <Patch Number="EC53" Name="Suona Lead" ProgramChange="34"/>
+      <Patch Number="EC54" Name="Jublag Lead" ProgramChange="35"/>
+      <Patch Number="EC55" Name="Asian Lead" ProgramChange="36"/>
+      <Patch Number="EC56" Name="ErHu SynLead" ProgramChange="37"/>
+      <Patch Number="EC57" Name="Lo HuErr" ProgramChange="38"/>
+      <Patch Number="EC58" Name="GookeriSplit" ProgramChange="39"/>
+      <Patch Number="EC61" Name="China Breeze" ProgramChange="40"/>
+      <Patch Number="EC62" Name="Asia Worlds" ProgramChange="41"/>
+      <Patch Number="EC63" Name="Massai Trems" ProgramChange="42"/>
+      <Patch Number="EC64" Name="Breathy Trem" ProgramChange="43"/>
+      <Patch Number="EC65" Name="Santoranin" ProgramChange="44"/>
+      <Patch Number="EC66" Name="WindEnsemble" ProgramChange="45"/>
+      <Patch Number="EC67" Name="Blow Strings" ProgramChange="46"/>
+      <Patch Number="EC68" Name="Bang Di Str" ProgramChange="47"/>
+      <Patch Number="EC71" Name="Twilight" ProgramChange="48"/>
+      <Patch Number="EC72" Name="Sacred Glass" ProgramChange="49"/>
+      <Patch Number="EC73" Name="BangQuDiWave" ProgramChange="50"/>
+      <Patch Number="EC74" Name="DeepSuona" ProgramChange="51"/>
+      <Patch Number="EC75" Name="Passion Pad" ProgramChange="52"/>
+      <Patch Number="EC76" Name="QuDi 5thPad" ProgramChange="53"/>
+      <Patch Number="EC77" Name="Indian Pad" ProgramChange="54"/>
+      <Patch Number="EC78" Name="Sitar 5th" ProgramChange="55"/>
+      <Patch Number="EC81" Name="Plateau Pad" ProgramChange="56"/>
+      <Patch Number="EC82" Name="Ghost Winds" ProgramChange="57"/>
+      <Patch Number="EC83" Name="FlangedWind" ProgramChange="58"/>
+      <Patch Number="EC84" Name="Slo Eastspin" ProgramChange="59"/>
+      <Patch Number="EC85" Name="FlutterFloot" ProgramChange="60"/>
+      <Patch Number="EC86" Name="Dreams in C" ProgramChange="61"/>
+      <Patch Number="EC87" Name="GamelanDream" ProgramChange="62"/>
+      <Patch Number="EC88" Name="Phantom Pad" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Asia D">
+      <Patch Number="ED11" Name="TourDream" ProgramChange="64"/>
+      <Patch Number="ED12" Name="China Groove" ProgramChange="65"/>
+      <Patch Number="ED13" Name="China Arp" ProgramChange="66"/>
+      <Patch Number="ED14" Name="Heart Strums" ProgramChange="67"/>
+      <Patch Number="ED15" Name="Ho Ho Yooh" ProgramChange="68"/>
+      <Patch Number="ED16" Name="Ho Yo Moan" ProgramChange="69"/>
+      <Patch Number="ED17" Name="Tiger Dance" ProgramChange="70"/>
+      <Patch Number="ED18" Name="Kashmir" ProgramChange="71"/>
+      <Patch Number="ED21" Name="Suona Slide" ProgramChange="72"/>
+      <Patch Number="ED22" Name="Suona Drone" ProgramChange="73"/>
+      <Patch Number="ED23" Name="HeartOfSpace" ProgramChange="74"/>
+      <Patch Number="ED24" Name="SoundChaser" ProgramChange="75"/>
+      <Patch Number="ED25" Name="Sakooa-Sanda" ProgramChange="76"/>
+      <Patch Number="ED26" Name="RunningStar" ProgramChange="77"/>
+      <Patch Number="ED27" Name="PrimrosePath" ProgramChange="78"/>
+      <Patch Number="ED28" Name="VariablSpeed" ProgramChange="79"/>
+      <Patch Number="ED31" Name="One Alam" ProgramChange="80"/>
+      <Patch Number="ED32" Name="E Space" ProgramChange="81"/>
+      <Patch Number="ED33" Name="N Space" ProgramChange="82"/>
+      <Patch Number="ED34" Name="Toy Twister" ProgramChange="83"/>
+      <Patch Number="ED35" Name="Clockfactory" ProgramChange="84"/>
+      <Patch Number="ED36" Name="MleniumDrone" ProgramChange="85"/>
+      <Patch Number="ED37" Name="HauntdForest" ProgramChange="86"/>
+      <Patch Number="ED38" Name="Ghost Kids" ProgramChange="87"/>
+      <Patch Number="ED41" Name="Dark River" ProgramChange="88"/>
+      <Patch Number="ED42" Name="Tolls" ProgramChange="89"/>
+      <Patch Number="ED43" Name="Crowd" ProgramChange="90"/>
+      <Patch Number="ED44" Name="Asian Slide" ProgramChange="91"/>
+      <Patch Number="ED45" Name="Big Yawning" ProgramChange="92"/>
+      <Patch Number="ED46" Name="Dino Baby C7" ProgramChange="93"/>
+      <Patch Number="ED47" Name="Lab Work" ProgramChange="94"/>
+      <Patch Number="ED48" Name="Digi Cyclone" ProgramChange="95"/>
+      <Patch Number="ED51" Name="AsianMystery" ProgramChange="96"/>
+      <Patch Number="ED52" Name="By The Sea" ProgramChange="97"/>
+      <Patch Number="ED53" Name="122:GamelnP1" ProgramChange="98"/>
+      <Patch Number="ED54" Name="78:GamelnP2" ProgramChange="99"/>
+      <Patch Number="ED55" Name="78:Korea Ph" ProgramChange="100"/>
+      <Patch Number="ED56" Name="118:ChinaPh1" ProgramChange="101"/>
+      <Patch Number="ED57" Name="132:ChinaPh2" ProgramChange="102"/>
+      <Patch Number="ED58" Name="118:TablaByP" ProgramChange="103"/>
+      <Patch Number="ED61" Name="92:DholakPh" ProgramChange="104"/>
+      <Patch Number="ED62" Name="120:Dhol Ph" ProgramChange="105"/>
+      <Patch Number="ED63" Name="Sanba" ProgramChange="106"/>
+      <Patch Number="ED64" Name="Sanba    VSw" ProgramChange="107"/>
+      <Patch Number="ED65" Name="St.Shou Bo" ProgramChange="108"/>
+      <Patch Number="ED66" Name="BigBazar" ProgramChange="109"/>
+      <Patch Number="ED67" Name="St.HuYinLuo" ProgramChange="110"/>
+      <Patch Number="ED68" Name="KwaengwariVS" ProgramChange="111"/>
+      <Patch Number="ED71" Name="ChinaCymbal" ProgramChange="112"/>
+      <Patch Number="ED72" Name="Slaps Tablan" ProgramChange="113"/>
+      <Patch Number="ED73" Name="Custom Tabla" ProgramChange="114"/>
+      <Patch Number="ED74" Name="TablaBySplit" ProgramChange="115"/>
+      <Patch Number="ED75" Name="Dholak Split" ProgramChange="116"/>
+      <Patch Number="ED76" Name="Dhol Split" ProgramChange="117"/>
+      <Patch Number="ED77" Name="Gongan Split" ProgramChange="118"/>
+      <Patch Number="ED78" Name="Wadon Split" ProgramChange="119"/>
+      <Patch Number="ED81" Name="Taiko Split" ProgramChange="120"/>
+      <Patch Number="ED82" Name="Tsuzumi" ProgramChange="121"/>
+      <Patch Number="ED83" Name="Velo Tsuzumi" ProgramChange="122"/>
+      <Patch Number="ED84" Name="Tsuzumi/Yooh" ProgramChange="123"/>
+      <Patch Number="ED85" Name="Taiko Phs" ProgramChange="124"/>
+      <Patch Number="ED86" Name="Japan 1" ProgramChange="125"/>
+      <Patch Number="ED87" Name="Japan 2" ProgramChange="126"/>
+      <Patch Number="ED88" Name="China" ProgramChange="127"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JV-1010</Model>
+    <Model>JV-1080</Model>
+    <Model>JV-2080</Model>
+    <Model>XP-50</Model>
+    <Model>XP-80</Model>
+    <Model>XV-5080</Model>
+    <Model>XV-3080</Model>
+    <Model>XV-88</Model>
+    <Model>Fantom</Model>
+    <PatchNameList Name="EXP Asia: Rhythm Kits">
+      <Patch Number="001" Name="India Set" ProgramChange="0"/>
+      <Patch Number="002" Name="China Set" ProgramChange="1"/>
+      <Patch Number="003" Name="Gamelan Set1" ProgramChange="2"/>
+      <Patch Number="004" Name="Gamelan Set2" ProgramChange="3"/>
+      <Patch Number="005" Name="Far East Set" ProgramChange="4"/>
+      <Patch Number="006" Name="PopAsiaSet 1" ProgramChange="5"/>
+      <Patch Number="007" Name="PopAsiaSet 2" ProgramChange="6"/>
+      <Patch Number="008" Name="TeknoAsiaSet" ProgramChange="7"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Asia: Patches 001-128">
+      <Patch Number="001" Name="Asia Phrase" ProgramChange="0"/>
+      <Patch Number="002" Name="TablaBy Menu" ProgramChange="1"/>
+      <Patch Number="003" Name="Dholak Menu" ProgramChange="2"/>
+      <Patch Number="004" Name="Dhol Menu" ProgramChange="3"/>
+      <Patch Number="005" Name="Gamelan Menu" ProgramChange="4"/>
+      <Patch Number="006" Name="GamlnPrcMenu" ProgramChange="5"/>
+      <Patch Number="007" Name="ChinaPrcMenu" ProgramChange="6"/>
+      <Patch Number="008" Name="JapanPrcMenu" ProgramChange="7"/>
+      <Patch Number="009" Name="KoreaPrcMenu" ProgramChange="8"/>
+      <Patch Number="010" Name="Sitar w/Drn" ProgramChange="9"/>
+      <Patch Number="011" Name="St.Sitar" ProgramChange="10"/>
+      <Patch Number="012" Name="Sitar Guru" ProgramChange="11"/>
+      <Patch Number="013" Name="Sitar Echo" ProgramChange="12"/>
+      <Patch Number="014" Name="Situarist" ProgramChange="13"/>
+      <Patch Number="015" Name="Tabla&amp;Sitar " ProgramChange="14"/>
+      <Patch Number="016" Name="Eastern Trio" ProgramChange="15"/>
+      <Patch Number="017" Name="New Delhi" ProgramChange="16"/>
+      <Patch Number="018" Name="Jammin in A" ProgramChange="17"/>
+      <Patch Number="019" Name="Sorgho Field" ProgramChange="18"/>
+      <Patch Number="020" Name="St.Santur" ProgramChange="19"/>
+      <Patch Number="021" Name="Santur 2" ProgramChange="20"/>
+      <Patch Number="022" Name="Vel.Santur" ProgramChange="21"/>
+      <Patch Number="023" Name="Santur Atk" ProgramChange="22"/>
+      <Patch Number="024" Name="Santur VSw" ProgramChange="23"/>
+      <Patch Number="025" Name="Santur+trm" ProgramChange="24"/>
+      <Patch Number="026" Name="Santur Trem" ProgramChange="25"/>
+      <Patch Number="027" Name="Dusty Room" ProgramChange="26"/>
+      <Patch Number="028" Name="Santur Add" ProgramChange="27"/>
+      <Patch Number="029" Name="Chung Ruan" ProgramChange="28"/>
+      <Patch Number="030" Name="Ruang Guitar" ProgramChange="29"/>
+      <Patch Number="031" Name="Ruan Vel.Trm" ProgramChange="30"/>
+      <Patch Number="032" Name="Unison Ens." ProgramChange="31"/>
+      <Patch Number="033" Name="ChoChungRuan" ProgramChange="32"/>
+      <Patch Number="034" Name="JC ChungRuan" ProgramChange="33"/>
+      <Patch Number="035" Name="MellowGuitar" ProgramChange="34"/>
+      <Patch Number="036" Name="Bright Ruan" ProgramChange="35"/>
+      <Patch Number="037" Name="ChungRuanTrm" ProgramChange="36"/>
+      <Patch Number="038" Name="Chung Gang" ProgramChange="37"/>
+      <Patch Number="039" Name="St.PiPa" ProgramChange="38"/>
+      <Patch Number="040" Name="Pi Pa 1" ProgramChange="39"/>
+      <Patch Number="041" Name="Pi Pa 2" ProgramChange="40"/>
+      <Patch Number="042" Name="PiPa Vel.Trm" ProgramChange="41"/>
+      <Patch Number="043" Name="Hybrid PiPa" ProgramChange="42"/>
+      <Patch Number="044" Name="China Duo 1" ProgramChange="43"/>
+      <Patch Number="045" Name="China Duo 2" ProgramChange="44"/>
+      <Patch Number="046" Name="Asian Scene" ProgramChange="45"/>
+      <Patch Number="047" Name="St.Gu Zheng" ProgramChange="46"/>
+      <Patch Number="048" Name="Gu Zheng 1" ProgramChange="47"/>
+      <Patch Number="049" Name="Gu Zheng 2" ProgramChange="48"/>
+      <Patch Number="050" Name="Gu Zheng Pik" ProgramChange="49"/>
+      <Patch Number="051" Name="Zheng Zen" ProgramChange="50"/>
+      <Patch Number="052" Name="GuZheng Echo" ProgramChange="51"/>
+      <Patch Number="053" Name="PickedOctave" ProgramChange="52"/>
+      <Patch Number="054" Name="Zengwire" ProgramChange="53"/>
+      <Patch Number="055" Name="Yang Qin" ProgramChange="54"/>
+      <Patch Number="056" Name="YangQin Pick" ProgramChange="55"/>
+      <Patch Number="057" Name="YangQin Trem" ProgramChange="56"/>
+      <Patch Number="058" Name="MembrainPick" ProgramChange="57"/>
+      <Patch Number="059" Name="Ricelands" ProgramChange="58"/>
+      <Patch Number="060" Name="Sanshin" ProgramChange="59"/>
+      <Patch Number="061" Name="Sanshin Comp" ProgramChange="60"/>
+      <Patch Number="062" Name="SanshinCombo" ProgramChange="61"/>
+      <Patch Number="063" Name="Er Hu" ProgramChange="62"/>
+      <Patch Number="064" Name="Er Hu Solo" ProgramChange="63"/>
+      <Patch Number="065" Name="St.ErHu" ProgramChange="64"/>
+      <Patch Number="066" Name="Rosin &amp; ErHu" ProgramChange="65"/>
+      <Patch Number="067" Name="ErHu &amp; Str" ProgramChange="66"/>
+      <Patch Number="068" Name="ErHu Ensembl" ProgramChange="67"/>
+      <Patch Number="069" Name="Indian Flute" ProgramChange="68"/>
+      <Patch Number="070" Name="Indar Flute" ProgramChange="69"/>
+      <Patch Number="071" Name="India SoloFl" ProgramChange="70"/>
+      <Patch Number="072" Name="Sad Indflute" ProgramChange="71"/>
+      <Patch Number="073" Name="2 Flutists" ProgramChange="72"/>
+      <Patch Number="074" Name="Bamboo Flute" ProgramChange="73"/>
+      <Patch Number="075" Name="Qu Di" ProgramChange="74"/>
+      <Patch Number="076" Name="Qu Di&amp;Flute" ProgramChange="75"/>
+      <Patch Number="077" Name="Qu Di Vibro" ProgramChange="76"/>
+      <Patch Number="078" Name="Bang Di" ProgramChange="77"/>
+      <Patch Number="079" Name="Bang Di x3" ProgramChange="78"/>
+      <Patch Number="080" Name="Bang Di Blow" ProgramChange="79"/>
+      <Patch Number="081" Name="BangDelay" ProgramChange="80"/>
+      <Patch Number="082" Name="Flute&amp;Acomp." ProgramChange="81"/>
+      <Patch Number="083" Name="Island Major" ProgramChange="82"/>
+      <Patch Number="084" Name="Chna Bs/Pipe" ProgramChange="83"/>
+      <Patch Number="085" Name="Lonely Vibro" ProgramChange="84"/>
+      <Patch Number="086" Name="Absolution 1" ProgramChange="85"/>
+      <Patch Number="087" Name="WorldAmbient" ProgramChange="86"/>
+      <Patch Number="088" Name="BangDiDreams" ProgramChange="87"/>
+      <Patch Number="089" Name="Double Duo's" ProgramChange="88"/>
+      <Patch Number="090" Name="EastHighland" ProgramChange="89"/>
+      <Patch Number="091" Name="Absolution" ProgramChange="90"/>
+      <Patch Number="092" Name="BooshOfGhost" ProgramChange="91"/>
+      <Patch Number="093" Name="Sheng    VSw" ProgramChange="92"/>
+      <Patch Number="094" Name="Sheng" ProgramChange="93"/>
+      <Patch Number="095" Name="Suona    VSw" ProgramChange="94"/>
+      <Patch Number="096" Name="Suona" ProgramChange="95"/>
+      <Patch Number="097" Name="Suona Fifths" ProgramChange="96"/>
+      <Patch Number="098" Name="Soft Gangsa" ProgramChange="97"/>
+      <Patch Number="099" Name="JeGong" ProgramChange="98"/>
+      <Patch Number="100" Name="Jegogan" ProgramChange="99"/>
+      <Patch Number="101" Name="St.Jegogan" ProgramChange="100"/>
+      <Patch Number="102" Name="Jublag" ProgramChange="101"/>
+      <Patch Number="103" Name="St.Jublag" ProgramChange="102"/>
+      <Patch Number="104" Name="Jublag Vibe" ProgramChange="103"/>
+      <Patch Number="105" Name="Gamelan Orch" ProgramChange="104"/>
+      <Patch Number="106" Name="Reyong" ProgramChange="105"/>
+      <Patch Number="107" Name="St.Reyong" ProgramChange="106"/>
+      <Patch Number="108" Name="Reyong" ProgramChange="107"/>
+      <Patch Number="109" Name="CustomReyong" ProgramChange="108"/>
+      <Patch Number="110" Name="Reyong Side" ProgramChange="109"/>
+      <Patch Number="111" Name="Pemade" ProgramChange="110"/>
+      <Patch Number="112" Name="St.Pemade" ProgramChange="111"/>
+      <Patch Number="113" Name="Pemade" ProgramChange="112"/>
+      <Patch Number="114" Name="Pemade Pangs" ProgramChange="113"/>
+      <Patch Number="115" Name="Kemong" ProgramChange="114"/>
+      <Patch Number="116" Name="Kane" ProgramChange="115"/>
+      <Patch Number="117" Name="Kane Split" ProgramChange="116"/>
+      <Patch Number="118" Name="East Wood" ProgramChange="117"/>
+      <Patch Number="119" Name="St.Kajar" ProgramChange="118"/>
+      <Patch Number="120" Name="Kelontuk" ProgramChange="119"/>
+      <Patch Number="121" Name="Ching Mute" ProgramChange="120"/>
+      <Patch Number="122" Name="Ching Open" ProgramChange="121"/>
+      <Patch Number="123" Name="Temple Bell" ProgramChange="122"/>
+      <Patch Number="124" Name="Gong Soft" ProgramChange="123"/>
+      <Patch Number="125" Name="Velo Gong" ProgramChange="124"/>
+      <Patch Number="126" Name="China Gong" ProgramChange="125"/>
+      <Patch Number="127" Name="Furin Bell" ProgramChange="126"/>
+      <Patch Number="128" Name="JapaneseBell" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Asia: Patches 129-256">
+      <Patch Number="129" Name="Hybrid Bells" ProgramChange="0"/>
+      <Patch Number="130" Name="GentleBreeze" ProgramChange="1"/>
+      <Patch Number="131" Name="Kaleidoscope" ProgramChange="2"/>
+      <Patch Number="132" Name="BellsInBreez" ProgramChange="3"/>
+      <Patch Number="133" Name="Ruan Rhodes" ProgramChange="4"/>
+      <Patch Number="134" Name="Jegogan EP" ProgramChange="5"/>
+      <Patch Number="135" Name="AsianFantasy" ProgramChange="6"/>
+      <Patch Number="136" Name="WindBellPad" ProgramChange="7"/>
+      <Patch Number="137" Name="AsianSndTrk" ProgramChange="8"/>
+      <Patch Number="138" Name="Domo Arigato" ProgramChange="9"/>
+      <Patch Number="139" Name="Tellerai" ProgramChange="10"/>
+      <Patch Number="140" Name="Mattai Bells" ProgramChange="11"/>
+      <Patch Number="141" Name="Bellteran" ProgramChange="12"/>
+      <Patch Number="142" Name="Rayong Man" ProgramChange="13"/>
+      <Patch Number="143" Name="Sainted" ProgramChange="14"/>
+      <Patch Number="144" Name="Monsoon" ProgramChange="15"/>
+      <Patch Number="145" Name="Asian Pad" ProgramChange="16"/>
+      <Patch Number="146" Name="Welcoming" ProgramChange="17"/>
+      <Patch Number="147" Name="Hindron Pick" ProgramChange="18"/>
+      <Patch Number="148" Name="Asian Attack" ProgramChange="19"/>
+      <Patch Number="149" Name="Klang QuDi" ProgramChange="20"/>
+      <Patch Number="150" Name="Krystaline" ProgramChange="21"/>
+      <Patch Number="151" Name="Ethno Strum" ProgramChange="22"/>
+      <Patch Number="152" Name="GuZheng Flng" ProgramChange="23"/>
+      <Patch Number="153" Name="Kemong Ens." ProgramChange="24"/>
+      <Patch Number="154" Name="AsiaEthnosaw" ProgramChange="25"/>
+      <Patch Number="155" Name="Rezkomp Osia" ProgramChange="26"/>
+      <Patch Number="156" Name="DropOfRain 2" ProgramChange="27"/>
+      <Patch Number="157" Name="Dholakaan" ProgramChange="28"/>
+      <Patch Number="158" Name="JpnWdBlock 1" ProgramChange="29"/>
+      <Patch Number="159" Name="JpnWdBlock 2" ProgramChange="30"/>
+      <Patch Number="160" Name="HyoshigiDlak" ProgramChange="31"/>
+      <Patch Number="161" Name="ChansFunHous" ProgramChange="32"/>
+      <Patch Number="162" Name="Sheng Lead" ProgramChange="33"/>
+      <Patch Number="163" Name="Suona Lead" ProgramChange="34"/>
+      <Patch Number="164" Name="Jublag Lead" ProgramChange="35"/>
+      <Patch Number="165" Name="Asian Lead" ProgramChange="36"/>
+      <Patch Number="166" Name="ErHu SynLead" ProgramChange="37"/>
+      <Patch Number="167" Name="Lo HuErr" ProgramChange="38"/>
+      <Patch Number="168" Name="GookeriSplit" ProgramChange="39"/>
+      <Patch Number="169" Name="China Breeze" ProgramChange="40"/>
+      <Patch Number="170" Name="Asia Worlds" ProgramChange="41"/>
+      <Patch Number="171" Name="Massai Trems" ProgramChange="42"/>
+      <Patch Number="172" Name="Breathy Trem" ProgramChange="43"/>
+      <Patch Number="173" Name="Santoranin" ProgramChange="44"/>
+      <Patch Number="174" Name="WindEnsemble" ProgramChange="45"/>
+      <Patch Number="175" Name="Blow Strings" ProgramChange="46"/>
+      <Patch Number="176" Name="Bang Di Str" ProgramChange="47"/>
+      <Patch Number="177" Name="Twilight" ProgramChange="48"/>
+      <Patch Number="178" Name="Sacred Glass" ProgramChange="49"/>
+      <Patch Number="179" Name="BangQuDiWave" ProgramChange="50"/>
+      <Patch Number="180" Name="DeepSuona" ProgramChange="51"/>
+      <Patch Number="181" Name="Passion Pad" ProgramChange="52"/>
+      <Patch Number="182" Name="QuDi 5thPad" ProgramChange="53"/>
+      <Patch Number="183" Name="Indian Pad" ProgramChange="54"/>
+      <Patch Number="184" Name="Sitar 5th" ProgramChange="55"/>
+      <Patch Number="185" Name="Plateau Pad" ProgramChange="56"/>
+      <Patch Number="186" Name="Ghost Winds" ProgramChange="57"/>
+      <Patch Number="187" Name="FlangedWind" ProgramChange="58"/>
+      <Patch Number="188" Name="Slo Eastspin" ProgramChange="59"/>
+      <Patch Number="189" Name="FlutterFloot" ProgramChange="60"/>
+      <Patch Number="190" Name="Dreams in C" ProgramChange="61"/>
+      <Patch Number="191" Name="GamelanDream" ProgramChange="62"/>
+      <Patch Number="192" Name="Phantom Pad" ProgramChange="63"/>
+      <Patch Number="193" Name="TourDream" ProgramChange="64"/>
+      <Patch Number="194" Name="China Groove" ProgramChange="65"/>
+      <Patch Number="195" Name="China Arp" ProgramChange="66"/>
+      <Patch Number="196" Name="Heart Strums" ProgramChange="67"/>
+      <Patch Number="197" Name="Ho Ho Yooh" ProgramChange="68"/>
+      <Patch Number="198" Name="Ho Yo Moan" ProgramChange="69"/>
+      <Patch Number="199" Name="Tiger Dance" ProgramChange="70"/>
+      <Patch Number="200" Name="Kashmir" ProgramChange="71"/>
+      <Patch Number="201" Name="Suona Slide" ProgramChange="72"/>
+      <Patch Number="202" Name="Suona Drone" ProgramChange="73"/>
+      <Patch Number="203" Name="HeartOfSpace" ProgramChange="74"/>
+      <Patch Number="204" Name="SoundChaser" ProgramChange="75"/>
+      <Patch Number="205" Name="Sakooa-Sanda" ProgramChange="76"/>
+      <Patch Number="206" Name="RunningStar" ProgramChange="77"/>
+      <Patch Number="207" Name="PrimrosePath" ProgramChange="78"/>
+      <Patch Number="208" Name="VariablSpeed" ProgramChange="79"/>
+      <Patch Number="209" Name="One Alam" ProgramChange="80"/>
+      <Patch Number="210" Name="E Space" ProgramChange="81"/>
+      <Patch Number="211" Name="N Space" ProgramChange="82"/>
+      <Patch Number="212" Name="Toy Twister" ProgramChange="83"/>
+      <Patch Number="213" Name="Clockfactory" ProgramChange="84"/>
+      <Patch Number="214" Name="MleniumDrone" ProgramChange="85"/>
+      <Patch Number="215" Name="HauntdForest" ProgramChange="86"/>
+      <Patch Number="216" Name="Ghost Kids" ProgramChange="87"/>
+      <Patch Number="217" Name="Dark River" ProgramChange="88"/>
+      <Patch Number="218" Name="Tolls" ProgramChange="89"/>
+      <Patch Number="219" Name="Crowd" ProgramChange="90"/>
+      <Patch Number="220" Name="Asian Slide" ProgramChange="91"/>
+      <Patch Number="221" Name="Big Yawning" ProgramChange="92"/>
+      <Patch Number="222" Name="Dino Baby C7" ProgramChange="93"/>
+      <Patch Number="223" Name="Lab Work" ProgramChange="94"/>
+      <Patch Number="224" Name="Digi Cyclone" ProgramChange="95"/>
+      <Patch Number="225" Name="AsianMystery" ProgramChange="96"/>
+      <Patch Number="226" Name="By The Sea" ProgramChange="97"/>
+      <Patch Number="227" Name="122:GamelnP1" ProgramChange="98"/>
+      <Patch Number="228" Name="78:GamelnP2" ProgramChange="99"/>
+      <Patch Number="229" Name="78:Korea Ph" ProgramChange="100"/>
+      <Patch Number="230" Name="118:ChinaPh1" ProgramChange="101"/>
+      <Patch Number="231" Name="132:ChinaPh2" ProgramChange="102"/>
+      <Patch Number="232" Name="118:TablaByP" ProgramChange="103"/>
+      <Patch Number="233" Name="92:DholakPh" ProgramChange="104"/>
+      <Patch Number="234" Name="120:Dhol Ph" ProgramChange="105"/>
+      <Patch Number="235" Name="Sanba" ProgramChange="106"/>
+      <Patch Number="236" Name="Sanba    VSw" ProgramChange="107"/>
+      <Patch Number="237" Name="St.Shou Bo" ProgramChange="108"/>
+      <Patch Number="238" Name="BigBazar" ProgramChange="109"/>
+      <Patch Number="239" Name="St.HuYinLuo" ProgramChange="110"/>
+      <Patch Number="240" Name="KwaengwariVS" ProgramChange="111"/>
+      <Patch Number="241" Name="ChinaCymbal" ProgramChange="112"/>
+      <Patch Number="242" Name="Slaps Tablan" ProgramChange="113"/>
+      <Patch Number="243" Name="Custom Tabla" ProgramChange="114"/>
+      <Patch Number="244" Name="TablaBySplit" ProgramChange="115"/>
+      <Patch Number="245" Name="Dholak Split" ProgramChange="116"/>
+      <Patch Number="246" Name="Dhol Split" ProgramChange="117"/>
+      <Patch Number="247" Name="Gongan Split" ProgramChange="118"/>
+      <Patch Number="248" Name="Wadon Split" ProgramChange="119"/>
+      <Patch Number="249" Name="Taiko Split" ProgramChange="120"/>
+      <Patch Number="250" Name="Tsuzumi" ProgramChange="121"/>
+      <Patch Number="251" Name="Velo Tsuzumi" ProgramChange="122"/>
+      <Patch Number="252" Name="Tsuzumi/Yooh" ProgramChange="123"/>
+      <Patch Number="253" Name="Taiko Phs" ProgramChange="124"/>
+      <Patch Number="254" Name="Japan 1" ProgramChange="125"/>
+      <Patch Number="255" Name="Japan 2" ProgramChange="126"/>
+      <Patch Number="256" Name="China" ProgramChange="127"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

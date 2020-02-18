@@ -6,7 +6,7 @@ import sys
 
 # Variables for 'waf dist'
 APPNAME = 'liblua'
-VERSION = "5.3.4"
+VERSION = "5.3.5"
 I18N_PACKAGE = 'liblua'
 
 # Mandatory variables
@@ -21,8 +21,8 @@ def configure(conf):
     autowaf.configure(conf)
 
 def build(bld):
-    obj=bld.stlib (source = ['lua.cc', 'luastate.cc'],
-                   cflags = [ bld.env['compiler_flags_dict']['pic'] ],
+    obj=bld.stlib (source   = ['lua.cc', 'luastate.cc'],
+                   cflags   = [ bld.env['compiler_flags_dict']['pic'] ],
                    cxxflags = [ bld.env['compiler_flags_dict']['pic'] ],
                    includes = ['.'],
                    export_includes = ['.'],

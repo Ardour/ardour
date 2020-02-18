@@ -60,9 +60,9 @@ private:
 	const static int STATUS_ONLINE = 0x01;
 	const static int STATUS_OK = 0x00;
 
-        const static int LIGHTS = 7;
-        const static int ROWS = 2;
-        const static int COLUMNS = 20;
+	const static int LIGHTS = 7;
+	const static int ROWS = 2;
+	const static int COLUMNS = 20;
 	const static uint8_t WheelDirectionThreshold = 0x7f;
 
 	enum LightID {
@@ -136,12 +136,12 @@ private:
 	};
 
 	enum BlingMode {
-	        BlingOff,
-	        BlingKit,
-	        BlingRotating,
-	        BlingPairs,
-	        BlingRows,
-	        BlingFlashAll,
+		BlingOff,
+		BlingKit,
+		BlingRotating,
+		BlingPairs,
+		BlingRows,
+		BlingFlashAll,
 		BlingEnter,
 		BlingExit
 	};
@@ -170,17 +170,17 @@ private:
 
 	ARDOUR::gain_t  gain_fraction;
 
-        Glib::Threads::Mutex update_lock;
+	Glib::Threads::Mutex update_lock;
 
-        std::bitset<ROWS*COLUMNS> screen_invalid;
+	std::bitset<ROWS*COLUMNS> screen_invalid;
 	char screen_current[ROWS][COLUMNS];
 	char screen_pending[ROWS][COLUMNS];
 	char screen_flash[ROWS][COLUMNS];
 
-        std::bitset<LIGHTS> lights_invalid;
-        std::bitset<LIGHTS> lights_current;
-        std::bitset<LIGHTS> lights_pending;
-        std::bitset<LIGHTS> lights_flash;
+	std::bitset<LIGHTS> lights_invalid;
+	std::bitset<LIGHTS> lights_current;
+	std::bitset<LIGHTS> lights_pending;
+	std::bitset<LIGHTS> lights_flash;
 
 	int32_t       last_notify;
 	char           last_notify_msg[COLUMNS+1];
@@ -193,7 +193,7 @@ private:
 	uint32_t       last_mins;
 	uint32_t       last_secs;
 	uint32_t       last_samples;
-	samplepos_t     last_where;
+	samplepos_t    last_where;
 	ARDOUR::gain_t last_track_gain;
 	uint32_t       last_meter_fill;
 	struct timeval last_wheel_motion;
@@ -210,7 +210,7 @@ private:
 	int load_config(char *name = "default");
 	int save(char *name);
 	int load(char *name);
-        void print (int row, int col, const char* text);
+	void print (int row, int col, const char* text);
 	void print_noretry (int row, int col, const char* text);
 	void notify(const char *msg);
 
@@ -247,10 +247,10 @@ private:
 	// Commands to write to the lcd
 
 	int  lcd_init();
-        bool lcd_damage();
+	bool lcd_damage();
 	bool lcd_isdamaged();
 
-        bool lcd_damage(int row, int col = 0, int length = COLUMNS);
+	bool lcd_damage(int row, int col = 0, int length = COLUMNS);
 	bool lcd_isdamaged(int row, int col = 0, int length = COLUMNS);
 
 	int  lcd_flush();

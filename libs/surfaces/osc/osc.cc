@@ -1,5 +1,13 @@
 /*
- * Copyright (C) 2006 Paul Davis
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2012-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015-2016 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2015-2018 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2015 Johannes Mueller <github@johannes-mueller.org>
+ * Copyright (C) 2016-2018 Len Ovens <len@ovenwerks.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,10 +19,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <cstdio>
@@ -677,12 +684,12 @@ OSC::register_callbacks()
 bool
 OSC::osc_input_handler (IOCondition ioc, lo_server srv)
 {
-	if (ioc & ~IO_IN) {
-		return false;
-	}
-
 	if (ioc & IO_IN) {
 		lo_server_recv (srv);
+	}
+
+	if (ioc & ~(IO_IN|IO_PRI)) {
+		return false;
 	}
 
 	return true;
@@ -1224,7 +1231,7 @@ OSC::routes_list (lo_message msg)
 			} else if (boost::dynamic_pointer_cast<Route>(s) && !boost::dynamic_pointer_cast<Track>(s)) {
 				if (!(s->presentation_info().flags() & PresentationInfo::MidiBus)) {
 					// r->feeds (session->master_out()) may make more sense
-					if (r->direct_feeds_according_to_reality (session->master_out())) {
+					if (session->master_out() && r->direct_feeds_according_to_reality (session->master_out())) {
 						// this is a bus
 						lo_message_add_string (reply, "B");
 					} else {
@@ -1809,49 +1816,56 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 				} else {
 					linkid = argv[8]->i;
 				}
+				/* fallthrough */
 			case 8:
 				if (types[7] == 'f') {
 					linkset = (int) argv[7]->f;
 				} else {
 					linkset = argv[7]->i;
 				}
+				/* fallthrough */
 			case 7:
 				if (types[6] == 'f') {
 					port = (int) argv[6]->f;
 				} else {
 					port = argv[6]->i;
 				}
+				/* fallthrough */
 			case 6:
 				if (types[5] == 'f') {
 					pi_page = (int) argv[5]->f;
 				} else {
 					pi_page = argv[5]->i;
 				}
+				/* fallthrough */
 			case 5:
 				if (types[4] == 'f') {
 					se_page = (int) argv[4]->f;
 				} else {
 					se_page = argv[4]->i;
 				}
+				/* fallthrough */
 			case 4:
 				if (types[3] == 'f') {
 					fadermode = (int) argv[3]->f;
 				} else {
 					fadermode = argv[3]->i;
 				}
+				/* fallthrough */
 			case 3:
 				if (types[2] == 'f') {
 					feedback = (int) argv[2]->f;
 				} else {
 					feedback = argv[2]->i;
 				}
-				// [[fallthrough]]; old compiler doesn't like
+				/* fallthrough */
 			case 2:
 				if (types[1] == 'f') {
 					strip_types = (int) argv[1]->f;
 				} else {
 					strip_types = argv[1]->i;
 				}
+				/* fallthrough */
 			case 1:
 				if (types[0] == 'f') {
 					bank_size = (int) argv[0]->f;
@@ -3355,7 +3369,7 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 				for (Locations::LocationList::const_iterator l = ll.begin(); l != ll.end(); ++l) {
 					if ((*l)->is_mark ()) {
 						if (strcmp (&argv[0]->s, (*l)->name().c_str()) == 0) {
-							session->request_locate ((*l)->start (), false);
+							session->request_locate ((*l)->start (), MustStop);
 							return 0;
 						} else if ((*l)->start () == session->transport_sample()) {
 							cur_mark = (*l);
@@ -3392,7 +3406,7 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 	std::sort (lm.begin(), lm.end(), location_marker_sort);
 	// go there
 	if (marker < lm.size()) {
-		session->request_locate (lm[marker].when, false);
+		session->request_locate (lm[marker].when, MustStop);
 		return 0;
 	}
 	// we were unable to deal with things
@@ -4275,7 +4289,7 @@ OSC::sel_comment (char *newcomment, lo_message msg) {
 }
 
 int
-OSC::sel_new_personal_send (char *listener, lo_message msg)
+OSC::sel_new_personal_send (char *foldback, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
@@ -4288,24 +4302,24 @@ OSC::sel_new_personal_send (char *listener, lo_message msg)
 			return -1;
 		}
 	}
-	/* if a listenbus called listener exists use it
-	 * other wise create create it. Then create a personal send from
+	/* if a foldbackbus called foldback exists use it
+	 * other wise create it. Then create a foldback send from
 	 * this route to that bus.
 	 */
-	string listenbus = listener;
-	string listen_name = listenbus;
-	if (listenbus.find ("- monitor") == string::npos) {
-		listen_name = string_compose ("%1 - monitor", listenbus);
+	string foldbackbus = foldback;
+	string foldback_name = foldbackbus;
+	if (foldbackbus.find ("- FB") == string::npos) {
+		foldback_name = string_compose ("%1 - FB", foldbackbus);
 	}
-	boost::shared_ptr<Route> lsn_rt = session->route_by_name (listen_name);
+	boost::shared_ptr<Route> lsn_rt = session->route_by_name (foldback_name);
 	if (!lsn_rt) {
-		// doesn't exist but check if raw name does and is listenbus
-		boost::shared_ptr<Route> raw_rt = session->route_by_name (listenbus);
-		if (raw_rt && raw_rt->is_listenbus()) {
+		// doesn't exist but check if raw name does and is foldbackbus
+		boost::shared_ptr<Route> raw_rt = session->route_by_name (foldbackbus);
+		if (raw_rt && raw_rt->is_foldbackbus()) {
 			lsn_rt = raw_rt;
 		} else {
-			// create the listenbus
-			RouteList list = session->new_audio_route (2, 2, 0, 1, listen_name, PresentationInfo::ListenBus, (uint32_t) -1);
+			// create the foldbackbus
+			RouteList list = session->new_audio_route (1, 1, 0, 1, foldback_name, PresentationInfo::FoldbackBus, (uint32_t) -1);
 			lsn_rt = *(list.begin());
 			lsn_rt->presentation_info().set_hidden (true);
 			session->set_dirty();
@@ -4318,7 +4332,7 @@ OSC::sel_new_personal_send (char *listener, lo_message msg)
 			bool s_only = true;
 			if (!rt->feeds (lsn_rt, &s_only)) {
 				// create send
-				rt->add_personal_send (lsn_rt);
+				rt->add_foldback_send (lsn_rt);
 				//boost::shared_ptr<Send> snd = rt->internal_send_for (aux);
 				session->dirty ();
 				return 0;
@@ -4329,7 +4343,7 @@ OSC::sel_new_personal_send (char *listener, lo_message msg)
 			PBD::warning << "OSC: new_send - can't send to self." << endmsg;
 		}
 	} else {
-		PBD::warning << "OSC: new_send - no ListenBus to send to." << endmsg;
+		PBD::warning << "OSC: new_send - no FoldbackBus to send to." << endmsg;
 	}
 
 	return -1;
@@ -6188,7 +6202,7 @@ OSC::periodic (void)
 			scrub_speed = 0;
 			session->request_transport_speed (0);
 			// locate to the place PH was at last tick
-			session->request_locate (scrub_place, false);
+			session->request_locate (scrub_place, MustStop);
 		}
 	}
 	for (uint32_t it = 0; it < _surface.size(); it++) {
@@ -6349,15 +6363,17 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue, uint32_t custom, Sor
 				sorted.push_back (s);
 			} else if (types[4] && boost::dynamic_pointer_cast<VCA>(s)) {
 				sorted.push_back (s);
-			} else  if (types[7] && s->is_listenbus()) {
-				sorted.push_back (s);
+			} else  if (s->is_foldbackbus()) {
+				if (types[7]) {
+					sorted.push_back (s);
+				}
 			} else
 #ifdef MIXBUS
 			if (types[2] && Profile->get_mixbus() && s->mixbus()) {
 				sorted.push_back (s);
 			} else
 #endif
-			if ((types[2] || types[3]) && boost::dynamic_pointer_cast<Route>(s) && !boost::dynamic_pointer_cast<Track>(s)) {
+			if (boost::dynamic_pointer_cast<Route>(s) && !boost::dynamic_pointer_cast<Track>(s)) {
 				boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(s);
 				if (!(s->presentation_info().flags() & PresentationInfo::MidiBus)) {
 					// note some older sessions will show midibuses as busses
@@ -6377,7 +6393,9 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue, uint32_t custom, Sor
 	if (!custom) {
 		// Master/Monitor might be anywhere... we put them at the end - Sorry ;)
 		if (types[5]) {
-			sorted.push_back (session->master_out());
+			if (session->master_out()) {
+				sorted.push_back (session->master_out());
+			}
 		}
 		if (types[6]) {
 			if (session->monitor_out()) {
@@ -6439,15 +6457,15 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 			name = &argv[0]->s;
 			dest_1 = &argv[1]->s;
 			dest_2 = &argv[2]->s;
-			ret = cue_new_aux (name, dest_1, dest_2, msg);
+			ret = cue_new_aux (name, dest_1, dest_2, 2, msg);
 		} else if (argc == 2 && types[0] == 's' && types[1] == 's') {
 			name = &argv[0]->s;
 			dest_1 = &argv[1]->s;
 			dest_2 = dest_1;
-			ret = cue_new_aux (name, dest_1, dest_2, msg);
+			ret = cue_new_aux (name, dest_1, dest_2, 1, msg);
 		} else if (argc == 1 && types[0] == 's') {
 			name = &argv[0]->s;
-			ret = cue_new_aux (name, dest_1, dest_2, msg);
+			ret = cue_new_aux (name, dest_1, dest_2, 1, msg);
 		} else {
 			PBD::warning << "OSC: new_aux has wrong number or type of parameters." << endmsg;
 		}
@@ -6460,12 +6478,6 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 			ret = cue_new_send (rt_name, msg);
 		} else {
 			PBD::warning << "OSC: new_send has wrong number or type of parameters." << endmsg;
-		}
-	}
-	else if (!strncmp (path, X_("/cue/hide_aux"), 13)) {
-		// hide our Aux bus
-		if (argc) {
-			ret = cue_hide (value, msg);
 		}
 	}
 	else if (!strncmp (path, X_("/cue/next_aux"), 13)) {
@@ -6568,31 +6580,31 @@ OSC::_cue_set (uint32_t aux, lo_address addr)
 }
 
 int
-OSC::cue_new_aux (string name, string dest_1, string dest_2, lo_message msg)
+OSC::cue_new_aux (string name, string dest_1, string dest_2, uint32_t count, lo_message msg)
 {
 	// create a new bus named name - monitor
 	RouteList list;
 	boost::shared_ptr<Stripable> aux;
-	name = string_compose ("%1 - monitor", name);
-	list = session->new_audio_route (2, 2, 0, 1, name, PresentationInfo::ListenBus, (uint32_t) -1);
+	name = string_compose ("%1 - FB", name);
+	list = session->new_audio_route (count, count, 0, 1, name, PresentationInfo::FoldbackBus, (uint32_t) -1);
 	aux = *(list.begin());
 	if (aux) {
 		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(aux);
 		if (dest_1.size()) {
+			PortSet& ports = r->output()->ports ();
 			if (atoi( dest_1.c_str())) {
 				dest_1 = string_compose ("system:playback_%1", dest_1);
 			}
-			if (atoi( dest_2.c_str())) {
-				dest_2 = string_compose ("system:playback_%1", dest_2);
-			}
-			PortSet& ports = r->output()->ports ();
-			PortSet::iterator i = ports.begin();
-			++i;
 			r->output ()->connect (*(ports.begin()), dest_1, this);
-			r->output ()->connect (*(i), dest_2, this);
+			if (count == 2) {
+				if (atoi( dest_2.c_str())) {
+					dest_2 = string_compose ("system:playback_%1", dest_2);
+				}
+				PortSet::iterator i = ports.begin();
+				++i;
+				r->output ()->connect (*(i), dest_2, this);
+			}
 		}
-		aux->presentation_info().set_hidden (true);
-
 		cue_set ((uint32_t) -1, msg);
 		session->set_dirty();
 		return 0;
@@ -6613,7 +6625,7 @@ OSC::cue_new_send (string rt_name, lo_message msg)
 				bool s_only = true;
 				if (!rt_send->feeds (aux, &s_only)) {
 					// create send
-					rt_send->add_personal_send (aux);
+					rt_send->add_foldback_send (aux);
 					boost::shared_ptr<Send> snd = rt_send->internal_send_for (aux);
 					session->dirty ();
 					return 0;
@@ -6628,26 +6640,6 @@ OSC::cue_new_send (string rt_name, lo_message msg)
 		}
 	} else {
 		PBD::warning << "OSC: new_send - monitoring not set, select aux first." << endmsg;
-	}
-	return 1;
-}
-
-int
-OSC::cue_hide (float state, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg), true);
-	if (sur->cue) {
-		boost::shared_ptr<Route> aux = boost::dynamic_pointer_cast<Route> (get_strip (sur->aux, get_address(msg)));
-		if (aux) {
-			if (aux->is_hidden () != (bool) state) {
-				aux->presentation_info().set_hidden ((bool) state);
-			}
-			return 0;
-		} else {
-			PBD::warning << "OSC: hide_aux - No Aux found." << endmsg;
-		}
-	} else {
-		PBD::warning << "OSC: hide_aux - monitoring not set, select aux first." << endmsg;
 	}
 	return 1;
 }
@@ -6920,10 +6912,7 @@ OSC::Sorted
 OSC::cue_get_sorted_stripables(boost::shared_ptr<Stripable> aux, uint32_t id, lo_message msg)
 {
 	Sorted sorted;
-	// fetch all stripables
-	StripableList stripables;
 
-	session->get_stripables (stripables, PresentationInfo::MixerStripables);
 	boost::shared_ptr<Route> aux_rt = boost::dynamic_pointer_cast<Route> (aux);
 	Route::FedBy fed_by = aux_rt->fed_by();
 	for (Route::FedBy::iterator i = fed_by.begin(); i != fed_by.end(); ++i) {

@@ -1,22 +1,21 @@
 /*
-    Copyright (C) 2008 Paul Davis
-    Author: Sampo Savolainen
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2008 Sampo Savolainen <v2@iki.fi>
+ * Copyright (C) 2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 #include "fft.h"
 
 #include <stdlib.h>
@@ -76,15 +75,18 @@ FFT::analyze(ARDOUR::Sample *input, WindowingType windowing_type)
 
 #define Re (_fftOutput[i])
 #define Im (_fftOutput[_window_size-i])
-       	for (uint32_t i=1; i < _data_size - 1; i++) {
+	for (uint32_t i = 1; i < _data_size - 1; ++i) {
 
 		power = (Re * Re) + (Im * Im);
-		phase = atanf(Im / Re);
-
-		if (Re < 0.0 && Im > 0.0) {
-			phase += M_PI;
-		} else if (Re < 0.0 && Im < 0.0) {
-			phase -= M_PI;
+		if (power < 1e-16) {
+			phase = 0;
+		} else {
+			phase = atanf (Im / Re);
+			if (Re < 0.0 && Im > 0.0) {
+				phase += M_PI;
+			} else if (Re < 0.0 && Im < 0.0) {
+				phase -= M_PI;
+			}
 		}
 
 		_power_at_bin[i] += power;
@@ -95,10 +97,10 @@ FFT::analyze(ARDOUR::Sample *input, WindowingType windowing_type)
 }
 
 void
-FFT::calculate()
+FFT::calculate ()
 {
 	if (_iterations > 1) {
-	       	for (uint32_t i=0; i < _data_size - 1; i++) {
+		for (uint32_t i=0; i < _data_size - 1; i++) {
 			_power_at_bin[i] /= (float)_iterations;
 			_phase_at_bin[i] /= (float)_iterations;
 		}
@@ -106,31 +108,30 @@ FFT::calculate()
 	}
 }
 
-float *
-FFT::get_hann_window()
+float*
+FFT::get_hann_window ()
 {
-	if (_hann_window)
+	if (_hann_window) {
 		return _hann_window;
+	}
 
-
-        _hann_window = (float *) malloc(sizeof(float) * _window_size);
+	_hann_window = (float*) malloc (sizeof (float) * _window_size);
 
 	double sum = 0.0;
 
-        for (uint32_t i=0; i < _window_size; i++) {
-                _hann_window[i]=0.81f * ( 0.5f - (0.5f * (float) cos(2.0f * M_PI * (float)i / (float)(_window_size))));
-                sum += _hann_window[i];
-        }
+	for (uint32_t i = 0; i < _window_size; ++i) {
+		_hann_window[i] = 0.81f * (0.5f - (0.5f * (float) cos (2.0f * M_PI * (float)i / (float)(_window_size))));
+		sum += _hann_window[i];
+	}
 
-        double isum = 1.0 / sum;
+	double isum = 1.0 / sum;
 
-        for (uint32_t i=0; i < _window_size; i++) {
-                _hann_window[i] *= isum;
-        }
+	for (uint32_t i = 0; i < _window_size; ++i) {
+		_hann_window[i] *= isum;
+	}
 
 	return _hann_window;
 }
-
 
 FFT::~FFT()
 {

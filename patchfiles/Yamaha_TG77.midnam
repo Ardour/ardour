@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Yamaha</Manufacturer>
+    <Model>TG77</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Preset 1 A">
+        <MIDICommands>
+          <ProgramChange Number="121"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="A01" Name="SP|Cosmo" ProgramChange="0"/>
+          <Patch Number="A02" Name="SP:Metroid" ProgramChange="1"/>
+          <Patch Number="A03" Name="SP:Diamond" ProgramChange="2"/>
+          <Patch Number="A04" Name="SP.Sqrpad" ProgramChange="3"/>
+          <Patch Number="A05" Name="SP|Arianne" ProgramChange="4"/>
+          <Patch Number="A06" Name="SP:Sawpad" ProgramChange="5"/>
+          <Patch Number="A07" Name="SP:Darkpad" ProgramChange="6"/>
+          <Patch Number="A08" Name="SP|Mystery" ProgramChange="7"/>
+          <Patch Number="A09" Name="SP.Padfaze" ProgramChange="8"/>
+          <Patch Number="A10" Name="SP:Twilite" ProgramChange="9"/>
+          <Patch Number="A11" Name="SP|Annapad" ProgramChange="10"/>
+          <Patch Number="A12" Name="AP.Ivory" ProgramChange="11"/>
+          <Patch Number="A13" Name="AP|CP77" ProgramChange="12"/>
+          <Patch Number="A14" Name="AP|Bright" ProgramChange="13"/>
+          <Patch Number="A15" Name="AP|Hammer" ProgramChange="14"/>
+          <Patch Number="A16" Name="AP|Grand" ProgramChange="15"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset 1 B">
+        <MIDICommands>
+          <ProgramChange Number="121"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="B01" Name="BR:Plucky" ProgramChange="16"/>
+          <Patch Number="B02" Name="BR|BigBand" ProgramChange="17"/>
+          <Patch Number="B03" Name="BR:1980" ProgramChange="18"/>
+          <Patch Number="B04" Name="BR|Trmpets" ProgramChange="19"/>
+          <Patch Number="B05" Name="BR.ModSyn" ProgramChange="20"/>
+          <Patch Number="B06" Name="BR|Ensembl" ProgramChange="21"/>
+          <Patch Number="B07" Name="BR|FrHorn" ProgramChange="22"/>
+          <Patch Number="B08" Name="BR|Soul" ProgramChange="23"/>
+          <Patch Number="B09" Name="BR.FMBite" ProgramChange="24"/>
+          <Patch Number="B10" Name="EP|IceRing" ProgramChange="25"/>
+          <Patch Number="B11" Name="EP.Synbord" ProgramChange="26"/>
+          <Patch Number="B12" Name="EP.GS77" ProgramChange="27"/>
+          <Patch Number="B13" Name="EP|Knocker" ProgramChange="28"/>
+          <Patch Number="B14" Name="EP:Beltine" ProgramChange="29"/>
+          <Patch Number="B15" Name="EP|Dynomod" ProgramChange="30"/>
+          <Patch Number="B16" Name="EP.Urbane" ProgramChange="31"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset 1 C">
+        <MIDICommands>
+          <ProgramChange Number="121"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="C01" Name="ME:St.Mick" ProgramChange="32"/>
+          <Patch Number="C02" Name="ME|Blade" ProgramChange="33"/>
+          <Patch Number="C03" Name="ME|Forest" ProgramChange="34"/>
+          <Patch Number="C04" Name="ME.Gargoyl" ProgramChange="35"/>
+          <Patch Number="C05" Name="ME|Pikloop" ProgramChange="36"/>
+          <Patch Number="C06" Name="ME|Aquavox" ProgramChange="37"/>
+          <Patch Number="C07" Name="ME:Alps" ProgramChange="38"/>
+          <Patch Number="C08" Name="ME.Cycles" ProgramChange="39"/>
+          <Patch Number="C09" Name="WN.Bluharp" ProgramChange="40"/>
+          <Patch Number="C10" Name="WN|Tenor" ProgramChange="41"/>
+          <Patch Number="C11" Name="WN|Clarino" ProgramChange="42"/>
+          <Patch Number="C12" Name="WN|AltoSax" ProgramChange="43"/>
+          <Patch Number="C13" Name="WN|Moothie" ProgramChange="44"/>
+          <Patch Number="C14" Name="WN|Saxion" ProgramChange="45"/>
+          <Patch Number="C15" Name="WN.Flute" ProgramChange="46"/>
+          <Patch Number="C16" Name="WN|Ohboy" ProgramChange="47"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset 1 D">
+        <MIDICommands>
+          <ProgramChange Number="121"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="D01" Name="ST.Ripper" ProgramChange="48"/>
+          <Patch Number="D02" Name="ST:Violins" ProgramChange="49"/>
+          <Patch Number="D03" Name="ST|Section" ProgramChange="50"/>
+          <Patch Number="D04" Name="ST.SynStrg" ProgramChange="51"/>
+          <Patch Number="D05" Name="ST.Chamber" ProgramChange="52"/>
+          <Patch Number="D06" Name="BA|Frtless" ProgramChange="53"/>
+          <Patch Number="D07" Name="BA|Starred" ProgramChange="54"/>
+          <Patch Number="D08" Name="BA.HardOne" ProgramChange="55"/>
+          <Patch Number="D09" Name="BA:VC1" ProgramChange="56"/>
+          <Patch Number="D10" Name="BA:VC2" ProgramChange="57"/>
+          <Patch Number="D11" Name="BA.VC3" ProgramChange="58"/>
+          <Patch Number="D12" Name="BA.Rox" ProgramChange="59"/>
+          <Patch Number="D13" Name="BA|Woodbas" ProgramChange="60"/>
+          <Patch Number="D14" Name="BA.Round" ProgramChange="61"/>
+          <Patch Number="D15" Name="BA:Erix" ProgramChange="62"/>
+          <Patch Number="D16" Name="BA.FMFrtls" ProgramChange="63"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset 2 A">
+        <MIDICommands>
+          <ProgramChange Number="118"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="A01" Name="SC:Neworld" ProgramChange="0"/>
+          <Patch Number="A02" Name="SC.Stratos" ProgramChange="1"/>
+          <Patch Number="A03" Name="SC.Ripples" ProgramChange="2"/>
+          <Patch Number="A04" Name="SC.Digitak" ProgramChange="3"/>
+          <Patch Number="A05" Name="SC.Hone" ProgramChange="4"/>
+          <Patch Number="A06" Name="SC:Spaces" ProgramChange="5"/>
+          <Patch Number="A07" Name="SC|Sybaby" ProgramChange="6"/>
+          <Patch Number="A08" Name="SC|Icedrop" ProgramChange="7"/>
+          <Patch Number="A09" Name="SC|Wired" ProgramChange="8"/>
+          <Patch Number="A10" Name="SL.Gnome" ProgramChange="9"/>
+          <Patch Number="A11" Name="SL.SawMono" ProgramChange="10"/>
+          <Patch Number="A12" Name="SL:SqrMono" ProgramChange="11"/>
+          <Patch Number="A13" Name="SL.Pro77" ProgramChange="12"/>
+          <Patch Number="A14" Name="SL.Nester" ProgramChange="13"/>
+          <Patch Number="A15" Name="SL:Eazy" ProgramChange="14"/>
+          <Patch Number="A16" Name="SL:Lips" ProgramChange="15"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset 2 B">
+        <MIDICommands>
+          <ProgramChange Number="118"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="B01" Name="KY|Bosh" ProgramChange="16"/>
+          <Patch Number="B02" Name="KY|Wahclav" ProgramChange="17"/>
+          <Patch Number="B03" Name="KY.Wires" ProgramChange="18"/>
+          <Patch Number="B04" Name="KY:Tradclv" ProgramChange="19"/>
+          <Patch Number="B05" Name="KY.Thumper" ProgramChange="20"/>
+          <Patch Number="B06" Name="KY|Modclav" ProgramChange="21"/>
+          <Patch Number="B07" Name="PL.Sitar" ProgramChange="22"/>
+          <Patch Number="B08" Name="PL.Harp" ProgramChange="23"/>
+          <Patch Number="B09" Name="PL|Saratog" ProgramChange="24"/>
+          <Patch Number="B10" Name="PL|Steel" ProgramChange="25"/>
+          <Patch Number="B11" Name="PL|Twelve" ProgramChange="26"/>
+          <Patch Number="B12" Name="PL|Shonuff" ProgramChange="27"/>
+          <Patch Number="B13" Name="PL|MutGtr" ProgramChange="28"/>
+          <Patch Number="B14" Name="PL.Guitar" ProgramChange="29"/>
+          <Patch Number="B15" Name="PL.Shami" ProgramChange="30"/>
+          <Patch Number="B16" Name="PL:Koto" ProgramChange="31"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset 2 C">
+        <MIDICommands>
+          <ProgramChange Number="118"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="C01" Name="OR.YC45D" ProgramChange="32"/>
+          <Patch Number="C02" Name="OR|Pipes" ProgramChange="33"/>
+          <Patch Number="C03" Name="OR:Jazzman" ProgramChange="34"/>
+          <Patch Number="C04" Name="OR.Combo" ProgramChange="35"/>
+          <Patch Number="C05" Name="PC.Marimba" ProgramChange="36"/>
+          <Patch Number="C06" Name="PC|OzHamer" ProgramChange="37"/>
+          <Patch Number="C07" Name="PC:Tobago" ProgramChange="38"/>
+          <Patch Number="C08" Name="PC.Vibes" ProgramChange="39"/>
+          <Patch Number="C09" Name="PC|Glass" ProgramChange="40"/>
+          <Patch Number="C10" Name="PC|Island" ProgramChange="41"/>
+          <Patch Number="C11" Name="PC|GrtWall" ProgramChange="42"/>
+          <Patch Number="C12" Name="CH.Itopia" ProgramChange="43"/>
+          <Patch Number="C13" Name="CH:GaChoir" ProgramChange="44"/>
+          <Patch Number="C14" Name="CH:Chamber" ProgramChange="45"/>
+          <Patch Number="C15" Name="CH|Spirit" ProgramChange="46"/>
+          <Patch Number="C16" Name="CH:ChorMst" ProgramChange="47"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset 2 D">
+        <MIDICommands>
+          <ProgramChange Number="118"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="D01" Name="SE*Goto&gt;1" ProgramChange="48"/>
+          <Patch Number="D02" Name="SE.Xpander" ProgramChange="49"/>
+          <Patch Number="D03" Name="SE*Inferno" ProgramChange="50"/>
+          <Patch Number="D04" Name="SE*Them!!!" ProgramChange="51"/>
+          <Patch Number="D05" Name="OR*Gassman" ProgramChange="52"/>
+          <Patch Number="D06" Name="BR*ZapBras" ProgramChange="53"/>
+          <Patch Number="D07" Name="BR*BrasOrc" ProgramChange="54"/>
+          <Patch Number="D08" Name="PL*Stairwy" ProgramChange="55"/>
+          <Patch Number="D09" Name="ST*Widestg" ProgramChange="56"/>
+          <Patch Number="D10" Name="ST*Symflow" ProgramChange="57"/>
+          <Patch Number="D11" Name="ST*Quartet" ProgramChange="58"/>
+          <Patch Number="D12" Name="ST*Tutti" ProgramChange="59"/>
+          <Patch Number="D13" Name="ME*Voyager" ProgramChange="60"/>
+          <Patch Number="D14" Name="ME*Galaxia" ProgramChange="61"/>
+          <Patch Number="D15" Name="DR Both" ProgramChange="62"/>
+          <Patch Number="D16" Name="DR Group2" ProgramChange="63"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Internal A">
+        <MIDICommands>
+          <ProgramChange Number="119"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="A01" Name="SP|Cosmo" ProgramChange="0"/>
+          <Patch Number="A02" Name="SP:Metroid" ProgramChange="1"/>
+          <Patch Number="A03" Name="SP:Diamond" ProgramChange="2"/>
+          <Patch Number="A04" Name="SP.Sqrpad" ProgramChange="3"/>
+          <Patch Number="A05" Name="SP|Arianne" ProgramChange="4"/>
+          <Patch Number="A06" Name="SP:Sawpad" ProgramChange="5"/>
+          <Patch Number="A07" Name="SP:Darkpad" ProgramChange="6"/>
+          <Patch Number="A08" Name="SP|Mystery" ProgramChange="7"/>
+          <Patch Number="A09" Name="SP.Padfaze" ProgramChange="8"/>
+          <Patch Number="A10" Name="SP:Twilite" ProgramChange="9"/>
+          <Patch Number="A11" Name="SP|Annapad" ProgramChange="10"/>
+          <Patch Number="A12" Name="AP.Ivory" ProgramChange="11"/>
+          <Patch Number="A13" Name="AP|CP77" ProgramChange="12"/>
+          <Patch Number="A14" Name="AP|Bright" ProgramChange="13"/>
+          <Patch Number="A15" Name="AP|Hammer" ProgramChange="14"/>
+          <Patch Number="A16" Name="AP|Grand" ProgramChange="15"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Internal B">
+        <MIDICommands>
+          <ProgramChange Number="119"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="B01" Name="BR:Plucky" ProgramChange="16"/>
+          <Patch Number="B02" Name="BR|BigBand" ProgramChange="17"/>
+          <Patch Number="B03" Name="BR:1980" ProgramChange="18"/>
+          <Patch Number="B04" Name="BR|Trmpets" ProgramChange="19"/>
+          <Patch Number="B05" Name="BR.ModSyn" ProgramChange="20"/>
+          <Patch Number="B06" Name="BR|Ensembl" ProgramChange="21"/>
+          <Patch Number="B07" Name="BR|FrHorn" ProgramChange="22"/>
+          <Patch Number="B08" Name="BR|Soul" ProgramChange="23"/>
+          <Patch Number="B09" Name="BR.FMBite" ProgramChange="24"/>
+          <Patch Number="B10" Name="EP|IceRing" ProgramChange="25"/>
+          <Patch Number="B11" Name="EP.Synbord" ProgramChange="26"/>
+          <Patch Number="B12" Name="EP.GS77" ProgramChange="27"/>
+          <Patch Number="B13" Name="EP|Knocker" ProgramChange="28"/>
+          <Patch Number="B14" Name="EP:Beltine" ProgramChange="29"/>
+          <Patch Number="B15" Name="EP|Dynomod" ProgramChange="30"/>
+          <Patch Number="B16" Name="EP.Urbane" ProgramChange="31"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Internal C">
+        <MIDICommands>
+          <ProgramChange Number="119"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="C01" Name="ME:St.Mick" ProgramChange="32"/>
+          <Patch Number="C02" Name="ME|Blade" ProgramChange="33"/>
+          <Patch Number="C03" Name="ME|Forest" ProgramChange="34"/>
+          <Patch Number="C04" Name="ME.Gargoyl" ProgramChange="35"/>
+          <Patch Number="C05" Name="ME|Pikloop" ProgramChange="36"/>
+          <Patch Number="C06" Name="ME|Aquavox" ProgramChange="37"/>
+          <Patch Number="C07" Name="ME:Alps" ProgramChange="38"/>
+          <Patch Number="C08" Name="ME.Cycles" ProgramChange="39"/>
+          <Patch Number="C09" Name="WN.Bluharp" ProgramChange="40"/>
+          <Patch Number="C10" Name="WN|Tenor" ProgramChange="41"/>
+          <Patch Number="C11" Name="WN|Clarino" ProgramChange="42"/>
+          <Patch Number="C12" Name="WN|AltoSax" ProgramChange="43"/>
+          <Patch Number="C13" Name="WN|Moothie" ProgramChange="44"/>
+          <Patch Number="C14" Name="WN|Saxion" ProgramChange="45"/>
+          <Patch Number="C15" Name="WN.Flute" ProgramChange="46"/>
+          <Patch Number="C16" Name="WN|Ohboy" ProgramChange="47"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Internal D">
+        <MIDICommands>
+          <ProgramChange Number="119"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="D01" Name="ST.Ripper" ProgramChange="48"/>
+          <Patch Number="D02" Name="ST:Violins" ProgramChange="49"/>
+          <Patch Number="D03" Name="ST|Section" ProgramChange="50"/>
+          <Patch Number="D04" Name="ST.SynStrg" ProgramChange="51"/>
+          <Patch Number="D05" Name="ST.Chamber" ProgramChange="52"/>
+          <Patch Number="D06" Name="BA|Frtless" ProgramChange="53"/>
+          <Patch Number="D07" Name="BA|Starred" ProgramChange="54"/>
+          <Patch Number="D08" Name="BA.HardOne" ProgramChange="55"/>
+          <Patch Number="D09" Name="BA:VC1" ProgramChange="56"/>
+          <Patch Number="D10" Name="BA:VC2" ProgramChange="57"/>
+          <Patch Number="D11" Name="BA.VC3" ProgramChange="58"/>
+          <Patch Number="D12" Name="BA.Rox" ProgramChange="59"/>
+          <Patch Number="D13" Name="BA|Woodbas" ProgramChange="60"/>
+          <Patch Number="D14" Name="BA.Round" ProgramChange="61"/>
+          <Patch Number="D15" Name="BA:Erix" ProgramChange="62"/>
+          <Patch Number="D16" Name="BA.FMFrtls" ProgramChange="63"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

@@ -22,7 +22,7 @@ test_search_path ()
 		std::vector<std::string> path_tok;
 		path_tok.push_back (g_win32_get_package_installation_directory_of_module(NULL));
 		path_tok.push_back ("share");
-		path_tok.push_back ("ardour3");
+		path_tok.push_back ("ardour6"); // XXX lwrcase_dirname
 		path_tok.push_back ("patchfiles");
 		return Glib::build_filename (path_tok);
 	}
@@ -35,7 +35,7 @@ MidnamTest::protools_patchfile_test()
 {
     std::string test_file_path;
 
-    CPPUNIT_ASSERT(find_file (test_search_path (), "Roland_SC-88_Pro.midnam", test_file_path));
+    CPPUNIT_ASSERT(find_file (test_search_path (), "Roland_SC_88_Pro.midnam", test_file_path));
     XMLTree xmldoc(test_file_path);
     boost::shared_ptr<XMLSharedNodeList> result = xmldoc.find(
             "//MIDINameDocument");
@@ -103,7 +103,7 @@ MidnamTest::yamaha_PSRS900_patchfile_test()
 {
     std::string test_file_path;
 
-    CPPUNIT_ASSERT(find_file (test_search_path (), "Yamaha_PSR-S900.midnam", test_file_path));
+    CPPUNIT_ASSERT(find_file (test_search_path (), "Yamaha_PSR_S900.midnam", test_file_path));
     XMLTree xmldoc(test_file_path);
     boost::shared_ptr<XMLSharedNodeList> result = xmldoc.find(
             "//MIDINameDocument");
@@ -190,6 +190,12 @@ MidnamTest::load_all_midnams_test ()
         XMLTree xmldoc(*i);
         boost::shared_ptr<XMLSharedNodeList> result = xmldoc.find("//MIDINameDocument");
         CPPUNIT_ASSERT(result->size() == 1);
+
+        result = xmldoc.find("//ExtendingDeviceNames");
+        if (result->size() != 0) {
+          cout << "  ... skipped (ExtendingDeviceNames)" << endl;
+          continue;
+        }
 
         result = xmldoc.find("//MasterDeviceNames");
         CPPUNIT_ASSERT(result->size() == 1);

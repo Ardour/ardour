@@ -1,22 +1,26 @@
 /*
-    Copyright (C) 1999 Paul Barton-Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id$
-*/
+ * Copyright (C) 1999-2016 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005-2008 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2010-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2011-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2014-2016 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016 Julien "_FrnchFrgg_" RIVAUD <frnchfrgg@free.fr>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <map>
 #include <algorithm>
@@ -311,9 +315,9 @@ Gtkmm2ext::pixbuf_from_string(const string& name, const Pango::FontDescription& 
 	return buf;
 }
 
-void
+static void
 _position_menu_anchored (int& x, int& y, bool& push_in,
-                                   const Gtk::Menu* const menu,
+                                   Gtk::Menu* const menu,
                                    Gtk::Widget* const anchor,
                                    const std::string& selected)
 {
@@ -361,7 +365,7 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 			x += allocation.get_width() - menu_req.width;
 		} else if (x + menu_req.width <= monitor.get_x() + monitor.get_width()) {
 			/* b) align menu left and button left: nothing to do*/
-		} else if (menu_req.width > monitor.get_width()) {
+		} else if (menu_req.width <= monitor.get_width()) {
 			/* c) align menu left and screen left, guaranteed to fit */
 			x = monitor.get_x();
 		} else {
@@ -374,7 +378,7 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 		} else if (monitor.get_x() <= x + allocation.get_width() - menu_req.width) {
 			/* b) align menu right and button right */
 			x += allocation.get_width() - menu_req.width;
-		} else if (menu_req.width > monitor.get_width()) {
+		} else if (menu_req.width <= monitor.get_width()) {
 			/* c) align menu right and screen right, guaranteed to fit */
 			x = monitor.get_x() + monitor.get_width() - menu_req.width;
 		} else {
@@ -390,8 +394,13 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 	 *     enough room below the button;
 	 *  c) align the bottom of the menu with the top of the button if there is
 	 *     enough room above the button;
-	 *  d) align the bottom of the menu with the bottom of the monitor if there
-	 *     is enough room, but avoid moving the menu to another monitor */
+	 *  d) try aligning the selected menu item again, this time with scrollbars;
+	 *  e) if there is no selected menu item, align the menu above the button or
+	 *     below the button, depending on where there is more space.
+	 * For the d) and e) cases, the menu contents will be aligned as told, but
+	 * the menu itself will be bigger than that to accomodate the menu items
+	 * that are scrolled out of view, thanks to |push_in = true|.
+	 */
 
 	const MenuList& items = menu->items ();
 	int offset = 0;
@@ -400,6 +409,8 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 	for ( ; i != items.end(); ++i) {
 		const Label* label_widget = dynamic_cast<const Label*>(i->get_child());
 		if (label_widget && selected == ((std::string) label_widget->get_label())) {
+			offset += (i->size_request().height - allocation.get_height()) / 2;
+			menu->select_item(*i);
 			break;
 		}
 		offset += i->size_request().height;
@@ -407,16 +418,41 @@ _position_menu_anchored (int& x, int& y, bool& push_in,
 	if (i != items.end() &&
 	    y - offset >= monitor.get_y() &&
 	    y - offset + menu_req.height <= monitor.get_y() + monitor.get_height()) {
-		y -= offset;
+		y -= offset; /* a) */
 	} else if (y + allocation.get_height() + menu_req.height <= monitor.get_y() + monitor.get_height()) {
-		y += allocation.get_height(); /* a) */
+		y += allocation.get_height(); /* b) */
 	} else if ((y - menu_req.height) >= monitor.get_y()) {
-		y -= menu_req.height; /* b) */
+		y -= menu_req.height; /* c) */
+	} else if (i != items.end()) {
+		y -= offset; /* d) */
+		menu->gobj()->upper_arrow_visible = 1; /* work around a gtk bug for the first show */
+	} else if (monitor.get_height() - allocation.get_height() >= 2*(y - monitor.get_y())) {
+		y += allocation.get_height(); /* e), more space below */
+		menu->gobj()->upper_arrow_visible = 1; /* work around a gtk bug for the first show */
 	} else {
-		y = monitor.get_y() + max(0, monitor.get_height() - menu_req.height);
+		y -= menu_req.height; /* e), more space above */
+		menu->gobj()->upper_arrow_visible = 1; /* work around a gtk bug for the first show */
 	}
 
-	push_in = false;
+	/* Workaround a bug in GTK where they don't tweak the scroll offset by the arrow height
+	 * if the scroll offset is negative. See the condition at:
+	 * https://gitlab.gnome.org/GNOME/gtk/blob/2.24.32/gtk/gtkmenu.c#L4395
+	 * and the computation of scroll_offset at:
+	 * https://gitlab.gnome.org/GNOME/gtk/blob/2.24.32/gtk/gtkmenu.c#L4360
+	 * */
+	int arrow_height;
+	GtkArrowPlacement arrow_placement;
+	gtk_widget_style_get (GTK_WIDGET (menu->gobj()),
+	        "scroll-arrow-vlength", &arrow_height,
+	        "arrow_placement", &arrow_placement,
+	        NULL);
+	int scroll_tweak = menu_req.height - monitor.get_height();
+	int scroll_offset = scroll_tweak + monitor.get_y() + monitor.get_height() - y - menu_req.height;
+	if (arrow_placement != GTK_ARROWS_END && scroll_tweak > 0 && scroll_offset < 0) {
+		y -= arrow_height;
+	}
+
+	push_in = true;
 }
 
 void
@@ -798,6 +834,19 @@ Gtkmm2ext::rounded_top_right_rectangle (cairo_t* cr, double x, double y, double 
 	cairo_line_to (cr, x+w,y+h); // Move to E
 	cairo_line_to (cr, x,y+h); // Line to F
 	cairo_line_to (cr, x,y); // Line to A
+}
+
+void
+Gtkmm2ext::add_reflection (cairo_t* cr, double w, double h)
+{
+	cairo_pattern_t* convex_pattern = cairo_pattern_create_linear (0.0, 0, 0.3, h * 0.7);
+	cairo_pattern_add_color_stop_rgba (convex_pattern, 0.0,  1, 1, 1, 0.10);
+	cairo_pattern_add_color_stop_rgba (convex_pattern, 0.79, 1, 1, 1, 0.03);
+	cairo_pattern_add_color_stop_rgba (convex_pattern, 1.0,  1, 1, 1, 0.0);
+	cairo_set_source (cr, convex_pattern);
+	Gtkmm2ext::rounded_rectangle (cr, 2, 2, w - 4, h - 4, 4);
+	cairo_fill (cr);
+	cairo_pattern_destroy(convex_pattern);
 }
 
 Glib::RefPtr<Gdk::Window>

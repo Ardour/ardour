@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Kurzweil</Manufacturer>
+    <Model>K2500</Model>
+    <Model>K2600</Model>
+    <PatchNameList Name="Orchsetral ROM">
+      <Patch Number="900" Name="TotalCntrl Orch1" ProgramChange="0"/>
+      <Patch Number="901" Name="TotalCntrl Orch2" ProgramChange="1"/>
+      <Patch Number="902" Name="BaroqueOrchestra" ProgramChange="2"/>
+      <Patch Number="903" Name="Oboe&amp;Flute w/Str" ProgramChange="3"/>
+      <Patch Number="904" Name="Horn&amp;Flute w/Str" ProgramChange="4"/>
+      <Patch Number="905" Name="Trp&amp;Horns w/Str" ProgramChange="5"/>
+      <Patch Number="906" Name="Piccolo" ProgramChange="6"/>
+      <Patch Number="907" Name="Orchestral Flute" ProgramChange="7"/>
+      <Patch Number="908" Name="Solo Flute" ProgramChange="8"/>
+      <Patch Number="909" Name="Orchestral Oboe" ProgramChange="9"/>
+      <Patch Number="910" Name="Solo Oboe" ProgramChange="10"/>
+      <Patch Number="911" Name="2nd Oboe" ProgramChange="11"/>
+      <Patch Number="912" Name="Orch EnglishHorn" ProgramChange="12"/>
+      <Patch Number="913" Name="Solo EnglishHorn" ProgramChange="13"/>
+      <Patch Number="914" Name="Orch Clarinet" ProgramChange="14"/>
+      <Patch Number="915" Name="Solo Clarinet" ProgramChange="15"/>
+      <Patch Number="916" Name="Orch Bassoon" ProgramChange="16"/>
+      <Patch Number="917" Name="Solo Bassoon" ProgramChange="17"/>
+      <Patch Number="918" Name="Woodwinds 1" ProgramChange="18"/>
+      <Patch Number="919" Name="Woodwinds 2" ProgramChange="19"/>
+      <Patch Number="920" Name="Dynamic Trumpet" ProgramChange="20"/>
+      <Patch Number="921" Name="Copland Sft Trp" ProgramChange="21"/>
+      <Patch Number="922" Name="Orch Trumpet" ProgramChange="22"/>
+      <Patch Number="923" Name="Soft Trumpet" ProgramChange="23"/>
+      <Patch Number="924" Name="Strght Mute Trp" ProgramChange="24"/>
+      <Patch Number="925" Name="French Horn MW" ProgramChange="25"/>
+      <Patch Number="926" Name="Slow Horn" ProgramChange="26"/>
+      <Patch Number="927" Name="F Horn Con Sord" ProgramChange="27"/>
+      <Patch Number="928" Name="F Horn a2 MW" ProgramChange="28"/>
+      <Patch Number="929" Name="French Horn Sec1" ProgramChange="29"/>
+      <Patch Number="930" Name="French Horn Sec2" ProgramChange="30"/>
+      <Patch Number="931" Name="Solo Trombone" ProgramChange="31"/>
+      <Patch Number="932" Name="Tuba" ProgramChange="32"/>
+      <Patch Number="933" Name="Dyn Hi Brass" ProgramChange="33"/>
+      <Patch Number="934" Name="Dyn Lo Brass" ProgramChange="34"/>
+      <Patch Number="935" Name="Dyn Brass &amp; Horn" ProgramChange="35"/>
+      <Patch Number="936" Name="Soaring Brass" ProgramChange="36"/>
+      <Patch Number="937" Name="MarcatoViolin MW" ProgramChange="37"/>
+      <Patch Number="938" Name="Solo Violin" ProgramChange="38"/>
+      <Patch Number="939" Name="2nd Violin" ProgramChange="39"/>
+      <Patch Number="940" Name="Orch Viola" ProgramChange="40"/>
+      <Patch Number="941" Name="Solo Viola" ProgramChange="41"/>
+      <Patch Number="942" Name="Slow Viola" ProgramChange="42"/>
+      <Patch Number="943" Name="MarcatoCello MW" ProgramChange="43"/>
+      <Patch Number="944" Name="Solo Cello" ProgramChange="44"/>
+      <Patch Number="945" Name="Slow Cello" ProgramChange="45"/>
+      <Patch Number="946" Name="Arco Dbl Bass" ProgramChange="46"/>
+      <Patch Number="947" Name="Slow Arco Bass" ProgramChange="47"/>
+      <Patch Number="948" Name="Brt Dbl Bass" ProgramChange="48"/>
+      <Patch Number="949" Name="Touch Strings" ProgramChange="49"/>
+      <Patch Number="950" Name="Fast Strings MW" ProgramChange="50"/>
+      <Patch Number="951" Name="Chamber Section" ProgramChange="51"/>
+      <Patch Number="952" Name="Sfz Strings MW" ProgramChange="52"/>
+      <Patch Number="953" Name="Sweet Strings" ProgramChange="53"/>
+      <Patch Number="954" Name="Baroque Strg Ens" ProgramChange="54"/>
+      <Patch Number="955" Name="Big String Ens" ProgramChange="55"/>
+      <Patch Number="956" Name="Bass String Sec" ProgramChange="56"/>
+      <Patch Number="957" Name="Pizzicato String" ProgramChange="57"/>
+      <Patch Number="958" Name="Wet Pizz" ProgramChange="58"/>
+      <Patch Number="959" Name="Arco &amp; Pizz" ProgramChange="59"/>
+      <Patch Number="960" Name="Classical Guitar" ProgramChange="60"/>
+      <Patch Number="961" Name="Virtuoso Guitar" ProgramChange="61"/>
+      <Patch Number="962" Name="Acoustic Bass" ProgramChange="62"/>
+      <Patch Number="963" Name="Snappy Jazz Bass" ProgramChange="63"/>
+      <Patch Number="964" Name="Dynamic Harp" ProgramChange="64"/>
+      <Patch Number="965" Name="Harp w/8ve CTL" ProgramChange="65"/>
+      <Patch Number="966" Name="Harp Arps" ProgramChange="66"/>
+      <Patch Number="967" Name="Celesta" ProgramChange="67"/>
+      <Patch Number="968" Name="Pipes" ProgramChange="68"/>
+      <Patch Number="969" Name="Pedal Pipes" ProgramChange="69"/>
+      <Patch Number="970" Name="Church Bells" ProgramChange="70"/>
+      <Patch Number="971" Name="Glockenspiel" ProgramChange="71"/>
+      <Patch Number="972" Name="Xylophone" ProgramChange="72"/>
+      <Patch Number="973" Name="Chimes" ProgramChange="73"/>
+      <Patch Number="974" Name="Timpani/Chimes" ProgramChange="74"/>
+      <Patch Number="975" Name="Timpani" ProgramChange="75"/>
+      <Patch Number="976" Name="Timpani &amp; Perc" ProgramChange="76"/>
+      <Patch Number="977" Name="Big Drum Corp" ProgramChange="77"/>
+      <Patch Number="978" Name="Orch Percussion1" ProgramChange="78"/>
+      <Patch Number="979" Name="Orch Percussion2" ProgramChange="79"/>
+      <Patch Number="980" Name="Jam Corp" ProgramChange="80"/>
+      <Patch Number="981" Name="Conga &amp; Perc" ProgramChange="81"/>
+      <Patch Number="982" Name="Woody Jam Rack" ProgramChange="82"/>
+      <Patch Number="983" Name="Metal Garden" ProgramChange="83"/>
+      <Patch Number="984" Name="Hot Tamali Kit" ProgramChange="84"/>
+      <Patch Number="985" Name="Funk Kit" ProgramChange="85"/>
+      <Patch Number="986" Name="Magic Guitar" ProgramChange="86"/>
+      <Patch Number="987" Name="Glass Bow" ProgramChange="87"/>
+      <Patch Number="988" Name="Synth Orch" ProgramChange="88"/>
+      <Patch Number="989" Name="Nooage InstaHarp" ProgramChange="89"/>
+      <Patch Number="990" Name="AC Dream" ProgramChange="90"/>
+      <Patch Number="991" Name="Synth Dulcimer" ProgramChange="91"/>
+      <Patch Number="992" Name="Glistener" ProgramChange="92"/>
+      <Patch Number="993" Name="Afro Multi CTL" ProgramChange="93"/>
+      <Patch Number="994" Name="Tranquil Sleigh" ProgramChange="94"/>
+      <Patch Number="995" Name="Batman Strings" ProgramChange="95"/>
+      <Patch Number="996" Name="Ethnoo Lead" ProgramChange="96"/>
+      <Patch Number="997" Name="Orch Pad CTL" ProgramChange="97"/>
+      <Patch Number="998" Name="Choral Sleigh" ProgramChange="98"/>
+      <Patch Number="999" Name="Pad Nine" ProgramChange="99"/>
+    </PatchNameList>
+    <PatchNameList Name="Contemporary ROM">
+      <Patch Number="800" Name="Jungle Jam" ProgramChange="0"/>
+      <Patch Number="801" Name="Mbira Stack" ProgramChange="1"/>
+      <Patch Number="802" Name="Ritual Metals" ProgramChange="2"/>
+      <Patch Number="803" Name="Prepared Mbira" ProgramChange="3"/>
+      <Patch Number="804" Name="Balinesque" ProgramChange="4"/>
+      <Patch Number="805" Name="Ambient Bells" ProgramChange="5"/>
+      <Patch Number="806" Name="World Jam 1" ProgramChange="6"/>
+      <Patch Number="807" Name="World Jam 2" ProgramChange="7"/>
+      <Patch Number="808" Name="India Jam" ProgramChange="8"/>
+      <Patch Number="809" Name="Slo Wood Flute" ProgramChange="9"/>
+      <Patch Number="810" Name="Hybrid Pan Flute" ProgramChange="10"/>
+      <Patch Number="811" Name="Chiff Brass Lead" ProgramChange="11"/>
+      <Patch Number="812" Name="Bell Players" ProgramChange="12"/>
+      <Patch Number="813" Name="Prs Koto" ProgramChange="13"/>
+      <Patch Number="814" Name="Medicine Man" ProgramChange="14"/>
+      <Patch Number="815" Name="Mbira" ProgramChange="15"/>
+      <Patch Number="816" Name="Kotobira" ProgramChange="16"/>
+      <Patch Number="817" Name="Cartoon Perc" ProgramChange="17"/>
+      <Patch Number="818" Name="CowGogiBell" ProgramChange="18"/>
+      <Patch Number="819" Name="Perc Pan Lead" ProgramChange="19"/>
+      <Patch Number="820" Name="Trippy Organ" ProgramChange="20"/>
+      <Patch Number="821" Name="Koto Followers" ProgramChange="21"/>
+      <Patch Number="822" Name="Hybrid Horn" ProgramChange="22"/>
+      <Patch Number="823" Name="Dyno EP Lead" ProgramChange="23"/>
+      <Patch Number="824" Name="ParaKoto" ProgramChange="24"/>
+      <Patch Number="825" Name="Super Clav" ProgramChange="25"/>
+      <Patch Number="826" Name="StrataClav" ProgramChange="26"/>
+      <Patch Number="827" Name="Touch Clav" ProgramChange="27"/>
+      <Patch Number="828" Name="Bad Klav" ProgramChange="28"/>
+      <Patch Number="829" Name="Rad Rotor" ProgramChange="29"/>
+      <Patch Number="830" Name="B-2001" ProgramChange="30"/>
+      <Patch Number="831" Name="Perc Organ" ProgramChange="31"/>
+      <Patch Number="832" Name="Drawbar Organ CS" ProgramChange="32"/>
+      <Patch Number="833" Name="Bebop Alto Sax" ProgramChange="33"/>
+      <Patch Number="834" Name="Soft Alto Sax" ProgramChange="34"/>
+      <Patch Number="835" Name="Soprano Sax" ProgramChange="35"/>
+      <Patch Number="836" Name="Low Soft Sax" ProgramChange="36"/>
+      <Patch Number="837" Name="Air Reeds CS" ProgramChange="37"/>
+      <Patch Number="838" Name="Jazz Muted Trp" ProgramChange="38"/>
+      <Patch Number="839" Name="Jazz Lab Band" ProgramChange="39"/>
+      <Patch Number="840" Name="Harmon Section" ProgramChange="40"/>
+      <Patch Number="841" Name="Sfz Cres Brass" ProgramChange="41"/>
+      <Patch Number="842" Name="Neo Stabs" ProgramChange="42"/>
+      <Patch Number="843" Name="Gtr Jazz Band" ProgramChange="43"/>
+      <Patch Number="844" Name="Full Rock Band" ProgramChange="44"/>
+      <Patch Number="845" Name="World Rave Kit" ProgramChange="45"/>
+      <Patch Number="846" Name="Punch Gate Kit" ProgramChange="46"/>
+      <Patch Number="847" Name="Shadow Kit" ProgramChange="47"/>
+      <Patch Number="848" Name="Fat Traps" ProgramChange="48"/>
+      <Patch Number="849" Name="Generator Kit" ProgramChange="49"/>
+      <Patch Number="850" Name="Shudder Kit" ProgramChange="50"/>
+      <Patch Number="851" Name="Crowd Stomper" ProgramChange="51"/>
+      <Patch Number="852" Name="Econo Kit" ProgramChange="52"/>
+      <Patch Number="853" Name="EDrum Kit 1" ProgramChange="53"/>
+      <Patch Number="854" Name="EDrum Kit 2" ProgramChange="54"/>
+      <Patch Number="855" Name="Dog Chases Tail" ProgramChange="55"/>
+      <Patch Number="856" Name="Saw Loop Factory" ProgramChange="56"/>
+      <Patch Number="857" Name="Two Live Bass" ProgramChange="57"/>
+      <Patch Number="858" Name="Dual/Tri Bass" ProgramChange="58"/>
+      <Patch Number="859" Name="Clav-o-Bass" ProgramChange="59"/>
+      <Patch Number="860" Name="ChirpBass" ProgramChange="60"/>
+      <Patch Number="861" Name="DigiBass" ProgramChange="61"/>
+      <Patch Number="862" Name="Mono Synth Bass" ProgramChange="62"/>
+      <Patch Number="863" Name="Touch MiniBass" ProgramChange="63"/>
+      <Patch Number="864" Name="Ostinato Bass" ProgramChange="64"/>
+      <Patch Number="865" Name="House Bass" ProgramChange="65"/>
+      <Patch Number="866" Name="Dubb Bass" ProgramChange="66"/>
+      <Patch Number="867" Name="Straight Strat" ProgramChange="67"/>
+      <Patch Number="868" Name="Chorus Gtr" ProgramChange="68"/>
+      <Patch Number="869" Name="Strataguitar" ProgramChange="69"/>
+      <Patch Number="870" Name="Elect 12 String" ProgramChange="70"/>
+      <Patch Number="871" Name="Dyn Jazz Guitar" ProgramChange="71"/>
+      <Patch Number="872" Name="Pedal Steel" ProgramChange="72"/>
+      <Patch Number="873" Name="Strummer DistGtr" ProgramChange="73"/>
+      <Patch Number="874" Name="Rock Axe" ProgramChange="74"/>
+      <Patch Number="875" Name="Hammeron" ProgramChange="75"/>
+      <Patch Number="876" Name="Rock Axe Mono" ProgramChange="76"/>
+      <Patch Number="877" Name="Attack Stack" ProgramChange="77"/>
+      <Patch Number="878" Name="SkinnyLead" ProgramChange="78"/>
+      <Patch Number="879" Name="Q Sweep SynClav" ProgramChange="79"/>
+      <Patch Number="880" Name="Anna Mini" ProgramChange="80"/>
+      <Patch Number="881" Name="Ballad Stack" ProgramChange="81"/>
+      <Patch Number="882" Name="Big Stack" ProgramChange="82"/>
+      <Patch Number="883" Name="BrazKnuckles" ProgramChange="83"/>
+      <Patch Number="884" Name="Hybrid Breath" ProgramChange="84"/>
+      <Patch Number="885" Name="Hybrid Stack" ProgramChange="85"/>
+      <Patch Number="886" Name="Eye Saw" ProgramChange="86"/>
+      <Patch Number="887" Name="Mello Hyb Brass" ProgramChange="87"/>
+      <Patch Number="888" Name="Sizzl E Pno" ProgramChange="88"/>
+      <Patch Number="889" Name="My JayDee" ProgramChange="89"/>
+      <Patch Number="890" Name="Slo SynthOrch" ProgramChange="90"/>
+      <Patch Number="891" Name="SpaceStation" ProgramChange="91"/>
+      <Patch Number="892" Name="Glass Web" ProgramChange="92"/>
+      <Patch Number="893" Name="Circus Music" ProgramChange="93"/>
+      <Patch Number="894" Name="Mandala" ProgramChange="94"/>
+      <Patch Number="895" Name="Slow Strat" ProgramChange="95"/>
+      <Patch Number="896" Name="Fluid Koto" ProgramChange="96"/>
+      <Patch Number="897" Name="Koreana Pad" ProgramChange="97"/>
+      <Patch Number="898" Name="Tangerine" ProgramChange="98"/>
+      <Patch Number="899" Name="Planet 9" ProgramChange="99"/>
+    </PatchNameList>
+    <PatchNameList Name="Stereo Dynamic Piano ROM">
+      <Patch Number="700" Name="New Classical 1" ProgramChange="0"/>
+      <Patch Number="701" Name="New Classical 2" ProgramChange="1"/>
+      <Patch Number="702" Name="Classical Grand 3" ProgramChange="2"/>
+      <Patch Number="703" Name="DynGrand ClosMic" ProgramChange="3"/>
+      <Patch Number="704" Name="Jazz Grand" ProgramChange="4"/>
+      <Patch Number="705" Name="Bright Grand" ProgramChange="5"/>
+      <Patch Number="706" Name="Songwriter∂s Pno" ProgramChange="6"/>
+      <Patch Number="707" Name="Soft Grand" ProgramChange="7"/>
+      <Patch Number="708" Name="Ballad Grand" ProgramChange="8"/>
+      <Patch Number="709" Name="FM &amp; Grand" ProgramChange="9"/>
+      <Patch Number="710" Name="Hardhammer Piano" ProgramChange="10"/>
+      <Patch Number="711" Name="Stage Grand St" ProgramChange="11"/>
+      <Patch Number="712" Name="Jazz Grand Mono" ProgramChange="12"/>
+      <Patch Number="713" Name="Rock Grand Mono" ProgramChange="13"/>
+      <Patch Number="714" Name="GrPno &amp; Strings" ProgramChange="14"/>
+      <Patch Number="715" Name="GrPno &amp; Pad" ProgramChange="15"/>
+      <Patch Number="716" Name="Grand &amp; Rich Pad" ProgramChange="16"/>
+      <Patch Number="717" Name="Dyn Pno&amp;Pad" ProgramChange="17"/>
+      <Patch Number="718" Name="In Canyon w/Str" ProgramChange="18"/>
+      <Patch Number="719" Name="Mello w/Voxpad" ProgramChange="19"/>
+      <Patch Number="720" Name="String Chaser" ProgramChange="20"/>
+      <Patch Number="721" Name="Bowed Piano" ProgramChange="21"/>
+      <Patch Number="722" Name="GPno &amp; Puff" ProgramChange="22"/>
+      <Patch Number="723" Name="SynGrand &amp; EPno" ProgramChange="23"/>
+      <Patch Number="724" Name="Twang Grand" ProgramChange="24"/>
+      <Patch Number="725" Name="AlternativePiano" ProgramChange="25"/>
+      <Patch Number="726" Name="Affected Grand" ProgramChange="26"/>
+      <Patch Number="727" Name="Robot Grand" ProgramChange="27"/>
+      <Patch Number="728" Name="Distorted Grand" ProgramChange="28"/>
+      <Patch Number="729" Name="Way in the Grand" ProgramChange="29"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

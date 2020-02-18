@@ -1,20 +1,22 @@
 /*
-    Copyright (C) 2016 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2016-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2016-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2018 Len Ovens <len@ovenwerks.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <sstream>
 #include <typeinfo>
@@ -115,7 +117,7 @@ const PresentationInfo::order_t PresentationInfo::max_order = UINT32_MAX;
 const PresentationInfo::Flag PresentationInfo::Bus = PresentationInfo::Flag (PresentationInfo::AudioBus|PresentationInfo::MidiBus);
 const PresentationInfo::Flag PresentationInfo::Track = PresentationInfo::Flag (PresentationInfo::AudioTrack|PresentationInfo::MidiTrack);
 const PresentationInfo::Flag PresentationInfo::Route = PresentationInfo::Flag (PresentationInfo::Bus|PresentationInfo::Track);
-const PresentationInfo::Flag PresentationInfo::AllRoutes = PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::MasterOut|PresentationInfo::MonitorOut|PresentationInfo::ListenBus);
+const PresentationInfo::Flag PresentationInfo::AllRoutes = PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::MasterOut|PresentationInfo::MonitorOut|PresentationInfo::FoldbackBus);
 const PresentationInfo::Flag PresentationInfo::MixerRoutes = PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::MasterOut|PresentationInfo::MonitorOut);
 const PresentationInfo::Flag PresentationInfo::AllStripables = PresentationInfo::Flag (PresentationInfo::AllRoutes|PresentationInfo::VCA);
 const PresentationInfo::Flag PresentationInfo::MixerStripables = PresentationInfo::Flag (PresentationInfo::MixerRoutes|PresentationInfo::VCA);
@@ -123,12 +125,12 @@ const PresentationInfo::Flag PresentationInfo::MixerStripables = PresentationInf
 void
 PresentationInfo::make_property_quarks ()
 {
-        Properties::selected.property_id = g_quark_from_static_string (X_("selected"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for selected = %1\n",	Properties::selected.property_id));
-        Properties::color.property_id = g_quark_from_static_string (X_("color"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for color = %1\n",	Properties::color.property_id));
-        Properties::order.property_id = g_quark_from_static_string (X_("order"));
-        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for order = %1\n",	Properties::order.property_id));
+	Properties::selected.property_id = g_quark_from_static_string (X_("selected"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for selected = %1\n", Properties::selected.property_id));
+	Properties::color.property_id = g_quark_from_static_string (X_("color"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for color = %1\n", Properties::color.property_id));
+	Properties::order.property_id = g_quark_from_static_string (X_("order"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for order = %1\n", Properties::order.property_id));
 }
 
 PresentationInfo::PresentationInfo (Flag f)

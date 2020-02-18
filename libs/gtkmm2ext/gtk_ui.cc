@@ -1,22 +1,27 @@
 /*
-    Copyright (C) 1999-2005 Paul Barton-Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id$
-*/
+ * Copyright (C) 1999-2019 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2006-2007 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2007-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2011 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cmath>
 #include <fcntl.h>
@@ -31,6 +36,7 @@
 #include "pbd/error.h"
 #include "pbd/touchable.h"
 #include "pbd/failed_constructor.h"
+#include "pbd/localtime_r.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/replace_all.h"
 
@@ -109,7 +115,7 @@ UI::UI (string application_name, string thread_name, int *argc, char ***argv)
 	errors = new TextViewer (800,600);
 	errors->text().set_editable (false);
 	errors->text().set_name ("ErrorText");
-	errors->signal_unmap().connect (sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), X_("<Actions>/Editor/toggle-log-window")));
+	errors->signal_unmap().connect (sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), X_("Editor/toggle-log-window")));
 
 	Glib::set_application_name (application_name);
 
@@ -594,7 +600,7 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 	default:
 		/* no choice but to use text/console output here */
 		cerr << "programmer error in UI::check_error_messages (channel = " << chn << ")\n";
-		::exit (1);
+		::exit (EXIT_FAILURE);
 	}
 
 	errors->text().get_buffer()->begin_user_action();
@@ -617,27 +623,14 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 void
 UI::show_errors ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-log-window"));
-	if (!act) {
-		return;
-	}
-
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-        if (tact) {
-                tact->set_active ();
-        }
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("toggle-log-window"));
+	tact->set_active ();
 }
 
 void
 UI::toggle_errors ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-log-window"));
-	if (!act) {
-		return;
-	}
-
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("toggle-log-window"));
 	if (tact->get_active()) {
 		errors->set_position (WIN_POS_MOUSE);
 		errors->show ();
@@ -651,6 +644,13 @@ UI::display_message (const char *prefix, gint /*prefix_len*/, RefPtr<TextBuffer:
 {
 	RefPtr<TextBuffer> buffer (errors->text().get_buffer());
 
+	char timebuf[128];
+	time_t n = time (NULL);
+	struct tm local_time;
+	localtime_r (&n, &local_time);
+	strftime (timebuf, sizeof(timebuf), "%FT%H:%M:%S ", &local_time);
+
+	buffer->insert_with_tag(buffer->end(), timebuf, ptag);
 	buffer->insert_with_tag(buffer->end(), prefix, ptag);
 	buffer->insert_with_tag(buffer->end(), msg, mtag);
 	buffer->insert_with_tag(buffer->end(), "\n", mtag);

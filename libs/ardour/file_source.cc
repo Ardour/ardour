@@ -1,21 +1,24 @@
 /*
-    Copyright (C) 2006-2009 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2016 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2012-2017 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2015-2018 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <vector>
 
@@ -116,8 +119,6 @@ FileSource::removable () const
 int
 FileSource::init (const string& pathstr, bool must_exist)
 {
-	_timeline_position = 0;
-
 	if (Stateful::loading_state_version < 3000) {
 		if (!find_2X (_session, _type, pathstr, must_exist, _file_is_new, _channel, _path)) {
 			throw MissingSource (pathstr, _type);
@@ -295,7 +296,7 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
 
 			/* more than one match: ask the user */
 
-                        int which = FileSource::AmbiguousFileName (path, de_duped_hits).get_value_or (-1);
+                        int which = FileSource::AmbiguousFileName (path, de_duped_hits).value_or (-1);
 
                         if (which < 0) {
                                 goto out;

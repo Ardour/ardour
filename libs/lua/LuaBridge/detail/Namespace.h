@@ -1304,6 +1304,22 @@ private:
       return addConstructor <void (*) ()> ();
     }
 
+    template <class FP>
+    WSPtrClass <T>& addStaticFunction (char const* name, FP const fp)
+    {
+      FUNDOC ("Static Member Function", name, FP)
+      set_shared_class ();
+      new (lua_newuserdata (L, sizeof (fp))) FP (fp);
+      lua_pushcclosure (L, &CFunc::Call <FP>::f, 1);
+      rawsetfield (L, -2, name);
+
+      set_weak_class ();
+      new (lua_newuserdata (L, sizeof (fp))) FP (fp);
+      lua_pushcclosure (L, &CFunc::Call <FP>::f, 1);
+      rawsetfield (L, -2, name);
+      return *this;
+    }
+
     WSPtrClass <T>& addNilPtrConstructor ()
     {
       FUNDOC ("Weak/Shared Pointer NIL Constructor", "", void (*) ())
@@ -1872,8 +1888,8 @@ public:
       .addFunction ("empty", &LT::empty)
       .addFunction ("size", &LT::size)
       .addFunction ("reverse", &LT::reverse)
-      .addFunction ("front", static_cast<const T& (LT::*)() const>(&LT::front))
-      .addFunction ("back", static_cast<const T& (LT::*)() const>(&LT::back))
+      .addFunction ("front", static_cast<T& (LT::*)()>(&LT::front))
+      .addFunction ("back", static_cast<T& (LT::*)()>(&LT::back))
       .addExtCFunction ("iter", &CFunc::listIter<T, LT>)
       .addExtCFunction ("table", &CFunc::listToTable<T, LT>);
   }
@@ -1911,7 +1927,7 @@ public:
     typedef std::list<TP> LT;
     return beginConstStdCPtrList<T> (name)
       .addFunction ("unique", (void (LT::*)())&LT::unique)
-      .addFunction ("push_back", (void (LT::*)(const TP&))&LT::push_back);
+      .addExtCFunction ("push_back", &CFunc::pushbackptr<T, LT>);
   }
 
 
@@ -1938,10 +1954,10 @@ public:
     return beginConstStdVector<T> (name)
       .addVoidConstructor ()
       .addFunction ("push_back", (void (LT::*)(const T&))&LT::push_back)
+      .addFunction ("clear", (void (LT::*)())&LT::clear)
+      .addExtCFunction ("to_array", &CFunc::vectorToArray<T, LT>)
       .addExtCFunction ("add", &CFunc::tableToList<T, LT>);
   }
-
-
 
   //----------------------------------------------------------------------------
 

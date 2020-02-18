@@ -1,22 +1,26 @@
 /*
-    Copyright (C) 2008 Paul Davis
-    Author: Sakari Bergen
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2008-2013 Sakari Bergen <sakari.bergen@beatwaves.net>
+ * Copyright (C) 2008-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2012-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014 Nick Mainsbridge <mainsbridge@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cassert>
 #include <stdexcept>
@@ -158,7 +162,6 @@ ExportProfileManager::prepare_for_export ()
 		     ++format_it, ++filename_it) {
 
 			ExportFilenamePtr filename = (*filename_it)->filename;
-//			filename->include_timespan = (ts_list->size() > 1); Disabled for now...
 
 			boost::shared_ptr<BroadcastInfo> b;
 			if ((*format_it)->format->has_broadcast_info()) {
@@ -405,13 +408,9 @@ ExportProfileManager::init_timespans (XMLNodeList nodes)
 		// Add session as default selection
 		Location * session_range;
 
-		if (Profile->get_trx()) {
-			session_range = (session.get_play_loop () ? session.locations()->auto_loop_location () : session.locations()->session_range_location());
-		} else {
-			session_range = session.locations()->session_range_location();
+		if ((session_range = session.locations()->session_range_location()) == 0) {
+			return false;
 		}
-
-		if (!session_range) { return false; }
 
 		ExportTimespanPtr timespan = handler->add_timespan();
 		timespan->set_name (session_range->name());
@@ -661,6 +660,23 @@ ExportProfileManager::remove_format_profile (ExportFormatSpecPtr format)
 	FormatListChanged ();
 }
 
+void
+ExportProfileManager::revert_format_profile (ExportFormatSpecPtr format)
+{
+	FileMap::iterator it;
+	if ((it = format_file_map.find (format->id())) == format_file_map.end()) {
+		return;
+	}
+
+	XMLTree tree;
+	if (!tree.read (it->second.c_str())) {
+		return;
+	}
+
+	format->set_state (*tree.root());
+	FormatListChanged ();
+}
+
 ExportFormatSpecPtr
 ExportProfileManager::get_new_format (ExportFormatSpecPtr original)
 {
@@ -763,6 +779,13 @@ ExportProfileManager::load_format_from_disk (std::string const & path)
 
 	ExportFormatSpecPtr format = handler->add_format (*root);
 
+	if (format->format_id() == ExportFormatBase::F_FFMPEG) {
+		std::string unused;
+		if (!ArdourVideoToolPaths::transcoder_exe (unused, unused)) {
+			error << string_compose (_("Ignored format '%1': encoder is not avilable"), path) << endmsg;
+			return;
+		}
+	}
 	/* Handle id to filename mapping and don't add duplicates to list */
 
 	FilePair pair (format->id(), path);
@@ -919,8 +942,6 @@ ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
 
 	/* Check filenames */
 
-//	filename->include_timespan = (timespans->size() > 1); Disabled for now...
-
 	std::list<string> paths;
 	build_filenames(paths, filename, timespans, channel_config, format);
 
@@ -954,6 +975,8 @@ ExportProfileManager::check_format (ExportFormatSpecPtr format, uint32_t channel
 	switch (format->type()) {
 	  case ExportFormatBase::T_Sndfile:
 		return check_sndfile_format (format, channels);
+	  case ExportFormatBase::T_FFMPEG:
+		return true;
 
 	  default:
 		throw ExportFailed (X_("Invalid format given for ExportFileFactory::check!"));

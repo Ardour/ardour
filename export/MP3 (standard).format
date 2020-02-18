@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportFormatSpecification name="MP3 (standard)" id="5a92bc30-ad31-4e51-82d4-66f0b5d2f9df" with-cue="0" with-toc="0" with-mp4chaps="0" command="" analyse="1" soundcloud-upload="0">
+  <Encoding id="F_FFMPEG" type="T_FFMPEG" extension="mp3" name="MP3" has-sample-format="0" channel-limit="256"/>
+  <SampleRate rate="SR_Session"/>
+  <SRCQuality quality="SRC_SincBest"/>
+  <CodecQuality quality="-2"/>
+  <EncodingOptions>
+    <Option name="sample-format" value="SF_Float"/>
+    <Option name="dithering" value="D_None"/>
+    <Option name="tag-metadata" value="0"/>
+    <Option name="tag-support" value="1"/>
+    <Option name="broadcast-info" value="0"/>
+  </EncodingOptions>
+  <Processing>
+    <Normalize enabled="0" loudness="0" dbfs="0" lufs="-23" dbtp="-1"/>
+    <Silence>
+      <Start>
+        <Trim enabled="0"/>
+        <Add enabled="0">
+          <Duration format="Timecode" hours="0" minutes="0" seconds="0" frames="0"/>
+        </Add>
+      </Start>
+      <End>
+        <Trim enabled="0"/>
+        <Add enabled="0">
+          <Duration format="Timecode" hours="0" minutes="0" seconds="0" frames="0"/>
+        </Add>
+      </End>
+    </Silence>
+  </Processing>
+</ExportFormatSpecification>

@@ -1,21 +1,27 @@
 /*
-    Copyright (C) 2000 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2006 Hans Fugal <hans@fugal.net>
+ * Copyright (C) 2007-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2015-2017 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2015-2017 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 Colin Fletcher <colin.m.fletcher@googlemail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_tempo_h__
 #define __ardour_tempo_h__
@@ -383,23 +389,24 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	TempoSection* next_tempo_section (TempoSection*) const;
 
 	/** add a tempo section locked to pls. ignored values will be set in recompute_tempi()
-	 * @param pulse pulse position of new section. ignored if pls == AudioTime
-	 * @param sample frame position of new section. ignored if pls == MusicTime
-	 * @param type type of new tempo section (Ramp, Constant)
+	 * @param pulse pulse position of new section. ignored if \p pls == AudioTime
+	 * @param sample frame position of new section. ignored if \p pls == MusicTime
+	 * @param pls the position lock style
 	 */
 	TempoSection* add_tempo (const Tempo&, const double& pulse, const samplepos_t sample, PositionLockStyle pls);
 
-	/** add a meter section locked to pls.. ignored values will be set in recompute_meters()
+	/** add a meter section locked to \p pls . ignored values will be set in recompute_meters()
 	 * @param meter the Meter to be added
 	 * @param where bbt position of new section
-	 * @param sample frame position of new section. ignored if pls == MusicTime
-	 * note that @sample may also be ignored if it would create an un-solvable map
+	 * @param sample frame position of new section. ignored if \p pls == MusicTime
+	 *
+	 * note that \p sample may also be ignored if it would create an un-solvable map
 	 * (previous audio-locked tempi may place the requested beat at an earlier time than sample)
 	 * in which case the new meter will be placed at the specified BBT.
-	 * @param  pls the position lock style
+	 * @param pls the position lock style
 	 *
 	 * adding an audio-locked meter will add a meter-locked tempo section at the meter position.
-	 * the meter-locked tempo tempo will be the Tempo at @beat
+	 * the meter-locked tempo tempo will be the Tempo at the beat
 	 */
 	MeterSection* add_meter (const Meter& meter, const Timecode::BBT_Time& where, samplepos_t sample, PositionLockStyle pls);
 
@@ -590,7 +597,7 @@ private:
 	static Meter    _default_meter;
 
 	Metrics                       _metrics;
-	samplecnt_t                    _sample_rate;
+	samplecnt_t                   _sample_rate;
 	mutable Glib::Threads::RWLock lock;
 
 	void recompute_tempi (Metrics& metrics);

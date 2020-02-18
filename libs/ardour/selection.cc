@@ -1,21 +1,21 @@
 /*
-  Copyright (C) 2017 Paul Davis
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2017-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2017-2018 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <vector>
 
@@ -92,7 +92,7 @@ CoreSelection::select_adjacent_stripable (bool mixer_order, bool routes_only,
 	RouteGroup* group = 0;
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (last_selected);
 
-	if (r && r->route_group() && r->route_group()->is_select()) {
+	if (r && r->route_group() && r->route_group()->is_select() && r->route_group()->is_active()) {
 		group = r->route_group();
 	}
 
@@ -179,7 +179,7 @@ CoreSelection::select_stripable_and_maybe_group (boost::shared_ptr<Stripable> s,
 
 			if (!not_allowed_in_group || !r->route_group() || r->route_group() != not_allowed_in_group) {
 
-				if (r->route_group() && r->route_group()->is_select()) {
+				if (r->route_group() && r->route_group()->is_select() && r->route_group()->is_active()) {
 					boost::shared_ptr<RouteList> rl = r->route_group()->route_list ();
 					for (RouteList::iterator ri = rl->begin(); ri != rl->end(); ++ri) {
 						if (*ri != r) {

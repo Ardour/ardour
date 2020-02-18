@@ -7,26 +7,6 @@
   <MasterDeviceNames>
     <Manufacturer>MMA</Manufacturer>
     <Model>Generic</Model>
-    <CustomDeviceMode Name="MIDI">
-      <ChannelNameSetAssignments>
-        <ChannelNameSetAssign Channel="1" NameSet="MIDI Voices"/>
-        <ChannelNameSetAssign Channel="2" NameSet="MIDI Voices"/>
-        <ChannelNameSetAssign Channel="3" NameSet="MIDI Voices"/>
-        <ChannelNameSetAssign Channel="4" NameSet="MIDI Voices"/>
-        <ChannelNameSetAssign Channel="5" NameSet="MIDI Voices"/>
-        <ChannelNameSetAssign Channel="6" NameSet="MIDI Voices"/>
-        <ChannelNameSetAssign Channel="7" NameSet="MIDI Voices"/>
-        <ChannelNameSetAssign Channel="8" NameSet="MIDI Voices"/>
-        <ChannelNameSetAssign Channel="9" NameSet="MIDI Voices"/>
-        <ChannelNameSetAssign Channel="10" NameSet="MIDI Voices"/>
-        <ChannelNameSetAssign Channel="11" NameSet="MIDI Voices"/>
-        <ChannelNameSetAssign Channel="12" NameSet="MIDI Voices"/>
-        <ChannelNameSetAssign Channel="13" NameSet="MIDI Voices"/>
-        <ChannelNameSetAssign Channel="14" NameSet="MIDI Voices"/>
-        <ChannelNameSetAssign Channel="15" NameSet="MIDI Voices"/>
-        <ChannelNameSetAssign Channel="16" NameSet="MIDI Voices"/>
-      </ChannelNameSetAssignments>
-    </CustomDeviceMode>
     <CustomDeviceMode Name="General MIDI">
       <ChannelNameSetAssignments>
         <ChannelNameSetAssign Channel="1" NameSet="General MIDI Voices"/>
@@ -45,6 +25,26 @@
         <ChannelNameSetAssign Channel="14" NameSet="General MIDI Voices"/>
         <ChannelNameSetAssign Channel="15" NameSet="General MIDI Voices"/>
         <ChannelNameSetAssign Channel="16" NameSet="General MIDI Voices"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <CustomDeviceMode Name="MIDI">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="MIDI Voices"/>
+        <ChannelNameSetAssign Channel="2" NameSet="MIDI Voices"/>
+        <ChannelNameSetAssign Channel="3" NameSet="MIDI Voices"/>
+        <ChannelNameSetAssign Channel="4" NameSet="MIDI Voices"/>
+        <ChannelNameSetAssign Channel="5" NameSet="MIDI Voices"/>
+        <ChannelNameSetAssign Channel="6" NameSet="MIDI Voices"/>
+        <ChannelNameSetAssign Channel="7" NameSet="MIDI Voices"/>
+        <ChannelNameSetAssign Channel="8" NameSet="MIDI Voices"/>
+        <ChannelNameSetAssign Channel="9" NameSet="MIDI Voices"/>
+        <ChannelNameSetAssign Channel="10" NameSet="MIDI Voices"/>
+        <ChannelNameSetAssign Channel="11" NameSet="MIDI Voices"/>
+        <ChannelNameSetAssign Channel="12" NameSet="MIDI Voices"/>
+        <ChannelNameSetAssign Channel="13" NameSet="MIDI Voices"/>
+        <ChannelNameSetAssign Channel="14" NameSet="MIDI Voices"/>
+        <ChannelNameSetAssign Channel="15" NameSet="MIDI Voices"/>
+        <ChannelNameSetAssign Channel="16" NameSet="MIDI Voices"/>
       </ChannelNameSetAssignments>
     </CustomDeviceMode>
     <ChannelNameSet Name="MIDI Voices">

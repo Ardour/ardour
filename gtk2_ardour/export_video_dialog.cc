@@ -1,22 +1,24 @@
 /*
-    Copyright (C) 2010 Paul Davis
-    Author: Robin Gareus <robin@gareus.org>
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2013-2015 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2013-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 André Nusser <andre.nusser@googlemail.com>
+ * Copyright (C) 2016 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 #include <cstdio>
 #include <string>
 #include <sstream>
@@ -154,7 +156,6 @@ ExportVideoDialog::ExportVideoDialog ()
 	path_hbox->pack_start (*l, false, false, 2);
 	vbox->pack_start (*path_hbox, false, false, 2);
 
-	insnd_combo.append_text (string_compose (_("from session start marker to session end marker"), PROGRAM_NAME));
 	outfn_path_entry.set_width_chars(38);
 
 	l = manage (new Label (_("<b>Settings:</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
@@ -335,6 +336,11 @@ ExportVideoDialog::apply_state (TimeSelection &tme, bool range)
 
 	// TODO remember setting for export-range.. somehow, (let explicit range override)
 	sampleoffset_t av_offset = ARDOUR_UI::instance()->video_timeline->get_offset();
+
+	insnd_combo.remove_all ();
+
+	insnd_combo.append_text (_("from session start marker to session end marker"));
+
 	if (av_offset < 0 ) {
 		insnd_combo.append_text (_("from 00:00:00:00 to the video end"));
 	} else {
@@ -787,7 +793,7 @@ ExportVideoDialog::launch_export ()
 		}
 	}
 	audio_progress_connection.disconnect();
-	status->finish ();
+	status->finish (TRS_UI);
 	if (status->aborted()) {
 		::g_unlink (_insnd.c_str());
 		delete _transcoder; _transcoder = 0;
@@ -1000,30 +1006,11 @@ ExportVideoDialog::encode_pass (int pass)
 		_transcoder->set_avoffset(av_offset / (double)_session->nominal_sample_rate());
 	}
 
-	TranscodeFfmpeg::FFSettings meta = _transcoder->default_meta_data();
+	/* NOTE: type (MetaDataMap) == type (FFSettings) == map<string, string> */
+	ARDOUR::SessionMetadata::MetaDataMap meta = _transcoder->default_meta_data();
 	if (meta_checkbox.get_active()) {
 		ARDOUR::SessionMetadata * session_data = ARDOUR::SessionMetadata::Metadata();
-		if (session_data->year() > 0 ) {
-			std::ostringstream osstream; osstream << session_data->year();
-			meta["year"] = osstream.str();
-		}
-		if (session_data->track_number() > 0 ) {
-			std::ostringstream osstream; osstream << session_data->track_number();
-			meta["track"] = osstream.str();
-		}
-		if (session_data->disc_number() > 0 ) {
-			std::ostringstream osstream; osstream << session_data->disc_number();
-			meta["disc"] = osstream.str();
-		}
-		if (!session_data->title().empty())     {meta["title"] = session_data->title();}
-		if (!session_data->artist().empty())    {meta["author"] = session_data->artist();}
-		if (!session_data->album_artist().empty()) {meta["album_artist"] = session_data->album_artist();}
-		if (!session_data->album().empty())     {meta["album"] = session_data->album();}
-		if (!session_data->genre().empty())     {meta["genre"] = session_data->genre();}
-		if (!session_data->composer().empty())  {meta["composer"] = session_data->composer();}
-		if (!session_data->comment().empty())   {meta["comment"] = session_data->comment();}
-		if (!session_data->copyright().empty()) {meta["copyright"] = session_data->copyright();}
-		if (!session_data->subtitle().empty())  {meta["description"] = session_data->subtitle();}
+		session_data->av_export_tag (meta);
 	}
 
 #if 1 /* tentative debug mode */
@@ -1272,6 +1259,7 @@ void
 ExportVideoDialog::open_outfn_dialog ()
 {
 	Gtk::FileChooserDialog dialog(_("Save Exported Video File"), Gtk::FILE_CHOOSER_ACTION_SAVE);
+	Gtkmm2ext::add_volume_shortcuts (dialog);
 	dialog.set_filename (outfn_path_entry.get_text());
 
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -1292,6 +1280,7 @@ void
 ExportVideoDialog::open_invid_dialog ()
 {
 	Gtk::FileChooserDialog dialog(_("Save Exported Video File"), Gtk::FILE_CHOOSER_ACTION_SAVE);
+	Gtkmm2ext::add_volume_shortcuts (dialog);
 	dialog.set_filename (invid_path_entry.get_text());
 
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);

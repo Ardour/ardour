@@ -1,19 +1,19 @@
 /*
- * Copyright (C) 2018 Paul Davis (paul@linuxaudiosystems.com)
+ * Copyright (C) 2018-2019 Paul Davis <paul@linuxaudiosystems.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef __ardour_transport_master_manager_h__
@@ -33,9 +33,12 @@ class UI_TransportMaster;
 class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 {
   public:
+	static TransportMasterManager& create ();
 	~TransportMasterManager ();
 
 	int set_default_configuration ();
+	void restart ();
+	void engine_stopped ();
 
 	static TransportMasterManager& instance();
 	/* this method is not thread-safe and is intended to be used only
@@ -79,6 +82,8 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 	TransportMasters const & transport_masters() const { return _transport_masters; }
 
 	static const std::string state_node_name;
+
+	void reconnect_ports ();
 
   private:
 	TransportMasterManager();

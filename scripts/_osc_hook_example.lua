@@ -28,7 +28,7 @@ end
 
 function factory (params)
 	return function (signal, ref, ...)
-		local uri = params["unique"] or "osc.udp://localhost:7890"
+		local uri = params["uri"] or "osc.udp://localhost:7890"
 		local tx = ARDOUR.LuaOSC.Address (uri)
 		-- debug print (stdout)
 		-- print (signal, ref, ...)
@@ -44,8 +44,8 @@ function factory (params)
 			obj,pch = ...
 			tx:send ("/region_property_changed", "sTTiii",
 				obj:name (),
-				(pch:containsFramePos (ARDOUR.Properties.Start)),
-				(pch:containsFramePos (ARDOUR.Properties.Length)),
+				(pch:containsSamplePos (ARDOUR.Properties.Start)),
+				(pch:containsSamplePos (ARDOUR.Properties.Length)),
 				obj:position (), obj:start (), obj:length ())
 		end
 	end

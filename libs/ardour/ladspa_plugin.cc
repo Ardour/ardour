@@ -1,21 +1,27 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2000-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005-2006 Sampo Savolainen <v2@iki.fi>
+ * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2006-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2017 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2008-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013 John Emmas <john@creativepost.co.uk>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifdef WAF_BUILD
 #include "libardour-config.h"
@@ -91,27 +97,27 @@ LadspaPlugin::init (string module_path, uint32_t index, samplecnt_t rate)
 	_was_activated = false;
 
 	if (!(*_module)) {
-		error << _("LADSPA: Unable to open module: ") << Glib::Module::get_last_error() << endmsg;
+		warning << _("LADSPA: Unable to open module: ") << Glib::Module::get_last_error() << endmsg;
 		delete _module;
 		throw failed_constructor();
 	}
 
 	if (!_module->get_symbol("ladspa_descriptor", func)) {
-		error << _("LADSPA: module has no descriptor function.") << endmsg;
+		warning << _("LADSPA: module has no descriptor function.") << endmsg;
 		throw failed_constructor();
 	}
 
 	dfunc = (LADSPA_Descriptor_Function)func;
 
 	if ((_descriptor = dfunc (index)) == 0) {
-		error << _("LADSPA: plugin has gone away since discovery!") << endmsg;
+		warning << _("LADSPA: plugin has gone away since discovery!") << endmsg;
 		throw failed_constructor();
 	}
 
 	_index = index;
 
 	if (LADSPA_IS_INPLACE_BROKEN(_descriptor->Properties)) {
-		error << string_compose(_("LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"), _descriptor->Name) << endmsg;
+		info << string_compose(_("LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"), _descriptor->Name) << endmsg;
 		throw failed_constructor();
 	}
 
@@ -369,18 +375,14 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 		return set_state_2X (node, version);
 	}
 
-#ifndef NO_PLUGIN_STATE
 	XMLNodeList nodes;
 	XMLNodeConstIterator iter;
 	XMLNode *child;
-#endif
 
 	if (node.name() != state_node_name()) {
 		error << _("Bad node sent to LadspaPlugin::set_state") << endmsg;
 		return -1;
 	}
-
-#ifndef NO_PLUGIN_STATE
 
 	nodes = node.children ("Port");
 
@@ -403,7 +405,6 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 
 		set_parameter (port_id, value);
 	}
-#endif
 
 	latency_compute_run ();
 
@@ -413,7 +414,6 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 int
 LadspaPlugin::set_state_2X (const XMLNode& node, int /* version */)
 {
-#ifndef NO_PLUGIN_STATE
 	XMLNodeList nodes;
 	XMLProperty const * prop;
 	XMLNodeConstIterator iter;
@@ -421,7 +421,6 @@ LadspaPlugin::set_state_2X (const XMLNode& node, int /* version */)
 	const char *port;
 	const char *data;
 	uint32_t port_id;
-#endif
 	LocaleGuard lg;
 
 	if (node.name() != state_node_name()) {
@@ -429,7 +428,6 @@ LadspaPlugin::set_state_2X (const XMLNode& node, int /* version */)
 		return -1;
 	}
 
-#ifndef NO_PLUGIN_STATE
 	nodes = node.children ("port");
 
 	for(iter = nodes.begin(); iter != nodes.end(); ++iter){
@@ -454,7 +452,6 @@ LadspaPlugin::set_state_2X (const XMLNode& node, int /* version */)
 	}
 
 	latency_compute_run ();
-#endif
 
 	return 0;
 }
@@ -526,12 +523,8 @@ LadspaPlugin::describe_parameter (Evoral::Parameter which)
 }
 
 ARDOUR::samplecnt_t
-LadspaPlugin::signal_latency () const
+LadspaPlugin::plugin_latency () const
 {
-	if (_user_latency) {
-		return _user_latency;
-	}
-
 	if (_latency_control_port) {
 		return (samplecnt_t) floor (*_latency_control_port);
 	} else {
@@ -617,18 +610,6 @@ bool
 LadspaPlugin::parameter_is_input (uint32_t param) const
 {
 	return LADSPA_IS_PORT_INPUT(port_descriptor (param));
-}
-
-void
-LadspaPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
-{
-	if (buf && len) {
-		if (param < parameter_count()) {
-			snprintf (buf, len, "%.3f", get_parameter (param));
-		} else {
-			strcat (buf, "0");
-		}
-	}
 }
 
 boost::shared_ptr<ScalePoints>
@@ -731,7 +712,7 @@ std::vector<Plugin::PresetRecord>
 LadspaPluginInfo::get_presets (bool /*user_only*/) const
 {
 	std::vector<Plugin::PresetRecord> p;
-#if (defined HAVE_LRDF && !defined NO_PLUGIN_STATE)
+#ifdef HAVE_LRDF
 	if (!isdigit (unique_id[0])) {
 		return p;
 	}

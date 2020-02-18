@@ -1,22 +1,26 @@
 /*
-    Copyright (C) 2008 Paul Davis
-    Author: Hans Baier
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2008-2013 Hans Baier <hansfbaier@googlemail.com>
+ * Copyright (C) 2009-2010 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2019 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2012-2013 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2018 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2015-2016 Nick Mainsbridge <mainsbridge@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cmath>
 #include <errno.h>
@@ -54,9 +58,6 @@ MIDIClock_TransportMaster::MIDIClock_TransportMaster (std::string const & name, 
 	, _running (false)
 	, _bpm (0)
 {
-	if ((_port = create_midi_port (string_compose ("%1 in", name))) == 0) {
-		throw failed_constructor();
-	}
 }
 
 MIDIClock_TransportMaster::~MIDIClock_TransportMaster()
@@ -69,6 +70,14 @@ MIDIClock_TransportMaster::init ()
 {
 	midi_clock_count = 0;
 	current.reset ();
+}
+
+void
+MIDIClock_TransportMaster::create_port ()
+{
+	if ((_port = create_midi_port (string_compose ("%1 in", _name))) == 0) {
+		throw failed_constructor();
+	}
 }
 
 void
@@ -88,7 +97,7 @@ MIDIClock_TransportMaster::set_session (Session *session)
 		parser.stop.connect_same_thread (port_connections, boost::bind (&MIDIClock_TransportMaster::stop, this, _1, _2));
 		parser.position.connect_same_thread (port_connections, boost::bind (&MIDIClock_TransportMaster::position, this, _1, _2, _3, _4));
 
-		reset ();
+		reset (true);
 	}
 }
 
@@ -284,18 +293,22 @@ MIDIClock_TransportMaster::start (Parser& /*parser*/, samplepos_t timestamp)
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("MIDIClock_TransportMaster got start message at time %1 engine time %2 transport_sample %3\n", timestamp, ENGINE->sample_time(), _session->transport_sample()));
 
 	if (!_running) {
-		reset();
+		reset(true);
 		_running = true;
 		current.update (_session->transport_sample(), timestamp, 0);
 	}
 }
 
 void
-MIDIClock_TransportMaster::reset ()
+MIDIClock_TransportMaster::reset (bool with_position)
 {
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("MidiClock Master reset(): calculated filter for period size %2\n", ENGINE->samples_per_cycle()));
 
-	current.update (_session->transport_sample(), 0, 0);
+	if (with_position) {
+		current.update (_session->transport_sample(), 0, 0);
+	} else {
+		current.reset ();
+	}
 
 	_running = false;
 	_current_delta = 0;
@@ -365,12 +378,6 @@ MIDIClock_TransportMaster::ok() const
 	return true;
 }
 
-bool
-MIDIClock_TransportMaster::starting() const
-{
-	return false;
-}
-
 ARDOUR::samplecnt_t
 MIDIClock_TransportMaster::update_interval() const
 {
@@ -409,3 +416,11 @@ MIDIClock_TransportMaster::delta_string() const
 	}
 	return std::string(delta);
 }
+
+void
+MIDIClock_TransportMaster::unregister_port ()
+{
+	_midi_port.reset ();
+	TransportMaster::unregister_port ();
+}
+

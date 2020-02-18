@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Ensoniq</Manufacturer>
+    <Model>ESQ-1</Model>
+    <Model>ESQ-M</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Patches">
+        <PatchNameList>
+          <Patch Number="001" Name="PIANO1" ProgramChange="0"/>
+          <Patch Number="002" Name="ORGAN1" ProgramChange="1"/>
+          <Patch Number="003" Name="3TRUMS" ProgramChange="2"/>
+          <Patch Number="004" Name="VELBAS" ProgramChange="3"/>
+          <Patch Number="005" Name="SLDRUM" ProgramChange="4"/>
+          <Patch Number="006" Name="SLOSTR" ProgramChange="5"/>
+          <Patch Number="007" Name="MIXED" ProgramChange="6"/>
+          <Patch Number="008" Name="SINPAD" ProgramChange="7"/>
+          <Patch Number="009" Name="WAVBEL" ProgramChange="8"/>
+          <Patch Number="010" Name="4XFADE" ProgramChange="9"/>
+          <Patch Number="011" Name="BL PNO" ProgramChange="10"/>
+          <Patch Number="012" Name="CLAV 1" ProgramChange="11"/>
+          <Patch Number="013" Name="HEVBRS" ProgramChange="12"/>
+          <Patch Number="014" Name="SYNBAZ" ProgramChange="13"/>
+          <Patch Number="015" Name="SNAPS1" ProgramChange="14"/>
+          <Patch Number="016" Name="BRASTR" ProgramChange="15"/>
+          <Patch Number="017" Name="SAX 1 " ProgramChange="16"/>
+          <Patch Number="018" Name="MOODS" ProgramChange="17"/>
+          <Patch Number="019" Name="HI-RES" ProgramChange="18"/>
+          <Patch Number="020" Name="ECHO1 " ProgramChange="19"/>
+          <Patch Number="021" Name="PIANO2" ProgramChange="20"/>
+          <Patch Number="022" Name="ICYORG" ProgramChange="21"/>
+          <Patch Number="023" Name="ANABRS" ProgramChange="22"/>
+          <Patch Number="024" Name="PLKMTL" ProgramChange="23"/>
+          <Patch Number="025" Name="SHAKER" ProgramChange="24"/>
+          <Patch Number="026" Name="MRIMBA" ProgramChange="25"/>
+          <Patch Number="027" Name="HARP2" ProgramChange="26"/>
+          <Patch Number="028" Name="MINI M " ProgramChange="27"/>
+          <Patch Number="029" Name="BOTTLS" ProgramChange="28"/>
+          <Patch Number="030" Name="NOISTR" ProgramChange="29"/>
+          <Patch Number="031" Name="DIGPNO" ProgramChange="30"/>
+          <Patch Number="032" Name="ISLAND" ProgramChange="31"/>
+          <Patch Number="033" Name="PLKBRS" ProgramChange="32"/>
+          <Patch Number="034" Name="KLUNKS" ProgramChange="33"/>
+          <Patch Number="035" Name="KICK  " ProgramChange="34"/>
+          <Patch Number="036" Name="KALMBA" ProgramChange="35"/>
+          <Patch Number="037" Name="+KOTO2" ProgramChange="36"/>
+          <Patch Number="038" Name="2 COOL" ProgramChange="37"/>
+          <Patch Number="039" Name="TRIBEL" ProgramChange="38"/>
+          <Patch Number="040" Name="K+SIMS" ProgramChange="39"/>
+          <Patch Number="041" Name="CART-A" ProgramChange="40"/>
+          <Patch Number="042" Name="CART-A" ProgramChange="41"/>
+          <Patch Number="043" Name="CART-A" ProgramChange="42"/>
+          <Patch Number="044" Name="CART-A" ProgramChange="43"/>
+          <Patch Number="045" Name="CART-A" ProgramChange="44"/>
+          <Patch Number="046" Name="CART-A" ProgramChange="45"/>
+          <Patch Number="047" Name="CART-A" ProgramChange="46"/>
+          <Patch Number="048" Name="CART-A" ProgramChange="47"/>
+          <Patch Number="049" Name="CART-A" ProgramChange="48"/>
+          <Patch Number="050" Name="CART-A" ProgramChange="49"/>
+          <Patch Number="051" Name="CART-A" ProgramChange="50"/>
+          <Patch Number="052" Name="CART-A" ProgramChange="51"/>
+          <Patch Number="053" Name="CART-A" ProgramChange="52"/>
+          <Patch Number="054" Name="CART-A" ProgramChange="53"/>
+          <Patch Number="055" Name="CART-A" ProgramChange="54"/>
+          <Patch Number="056" Name="CART-A" ProgramChange="55"/>
+          <Patch Number="057" Name="CART-A" ProgramChange="56"/>
+          <Patch Number="058" Name="CART-A" ProgramChange="57"/>
+          <Patch Number="059" Name="CART-A" ProgramChange="58"/>
+          <Patch Number="060" Name="CART-A" ProgramChange="59"/>
+          <Patch Number="061" Name="CART-A" ProgramChange="60"/>
+          <Patch Number="062" Name="CART-A" ProgramChange="61"/>
+          <Patch Number="063" Name="CART-A" ProgramChange="62"/>
+          <Patch Number="064" Name="CART-A" ProgramChange="63"/>
+          <Patch Number="065" Name="CART-A" ProgramChange="64"/>
+          <Patch Number="066" Name="CART-A" ProgramChange="65"/>
+          <Patch Number="067" Name="CART-A" ProgramChange="66"/>
+          <Patch Number="068" Name="CART-A" ProgramChange="67"/>
+          <Patch Number="069" Name="CART-A" ProgramChange="68"/>
+          <Patch Number="070" Name="CART-A" ProgramChange="69"/>
+          <Patch Number="071" Name="CART-A" ProgramChange="70"/>
+          <Patch Number="072" Name="CART-A" ProgramChange="71"/>
+          <Patch Number="073" Name="CART-A" ProgramChange="72"/>
+          <Patch Number="074" Name="CART-A" ProgramChange="73"/>
+          <Patch Number="075" Name="CART-A" ProgramChange="74"/>
+          <Patch Number="076" Name="CART-A" ProgramChange="75"/>
+          <Patch Number="077" Name="CART-A" ProgramChange="76"/>
+          <Patch Number="078" Name="CART-A" ProgramChange="77"/>
+          <Patch Number="079" Name="CART-A" ProgramChange="78"/>
+          <Patch Number="080" Name="CART-A" ProgramChange="79"/>
+          <Patch Number="081" Name="CART-B" ProgramChange="80"/>
+          <Patch Number="082" Name="CART-B" ProgramChange="81"/>
+          <Patch Number="083" Name="CART-B" ProgramChange="82"/>
+          <Patch Number="084" Name="CART-B" ProgramChange="83"/>
+          <Patch Number="085" Name="CART-B" ProgramChange="84"/>
+          <Patch Number="086" Name="CART-B" ProgramChange="85"/>
+          <Patch Number="087" Name="CART-B" ProgramChange="86"/>
+          <Patch Number="088" Name="CART-B" ProgramChange="87"/>
+          <Patch Number="089" Name="CART-B" ProgramChange="88"/>
+          <Patch Number="090" Name="CART-B" ProgramChange="89"/>
+          <Patch Number="091" Name="CART-B" ProgramChange="90"/>
+          <Patch Number="092" Name="CART-B" ProgramChange="91"/>
+          <Patch Number="093" Name="CART-B" ProgramChange="92"/>
+          <Patch Number="094" Name="CART-B" ProgramChange="93"/>
+          <Patch Number="095" Name="CART-B" ProgramChange="94"/>
+          <Patch Number="096" Name="CART-B" ProgramChange="95"/>
+          <Patch Number="097" Name="CART-B" ProgramChange="96"/>
+          <Patch Number="098" Name="CART-B" ProgramChange="97"/>
+          <Patch Number="099" Name="CART-B" ProgramChange="98"/>
+          <Patch Number="100" Name="CART-B" ProgramChange="99"/>
+          <Patch Number="101" Name="CART-B" ProgramChange="100"/>
+          <Patch Number="102" Name="CART-B" ProgramChange="101"/>
+          <Patch Number="103" Name="CART-B" ProgramChange="102"/>
+          <Patch Number="104" Name="CART-B" ProgramChange="103"/>
+          <Patch Number="105" Name="CART-B" ProgramChange="104"/>
+          <Patch Number="106" Name="CART-B" ProgramChange="105"/>
+          <Patch Number="107" Name="CART-B" ProgramChange="106"/>
+          <Patch Number="108" Name="CART-B" ProgramChange="107"/>
+          <Patch Number="109" Name="CART-B" ProgramChange="108"/>
+          <Patch Number="110" Name="CART-B" ProgramChange="109"/>
+          <Patch Number="111" Name="CART-B" ProgramChange="110"/>
+          <Patch Number="112" Name="CART-B" ProgramChange="111"/>
+          <Patch Number="113" Name="CART-B" ProgramChange="112"/>
+          <Patch Number="114" Name="CART-B" ProgramChange="113"/>
+          <Patch Number="115" Name="CART-B" ProgramChange="114"/>
+          <Patch Number="116" Name="CART-B" ProgramChange="115"/>
+          <Patch Number="117" Name="CART-B" ProgramChange="116"/>
+          <Patch Number="118" Name="CART-B" ProgramChange="117"/>
+          <Patch Number="119" Name="CART-B" ProgramChange="118"/>
+          <Patch Number="120" Name="CART-B" ProgramChange="119"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

@@ -1,20 +1,22 @@
 /*
-    Copyright (C) 2016 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2018 Jan Lentfer <jan.lentfer@web.de>
+ * Copyright (C) 2018 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2018 Térence Clastres <t.clastres@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_launch_control_h__
 #define __ardour_launch_control_h__
@@ -394,6 +396,9 @@ public:
 	bool device_mode () const { return _device_mode; }
 
 #ifdef MIXBUS32C
+	void set_ctrllowersends (bool yn);
+	bool ctrllowersends () const { return _ctrllowersends; }
+
 	void store_fss_type();
 	bool fss_is_mixbus() const { return _fss_is_mixbus; }
 #endif
@@ -414,6 +419,7 @@ private:
 	bool _fader8master;
 	bool _device_mode;
 #ifdef MIXBUS32C
+	bool _ctrllowersends;
 	bool _fss_is_mixbus;
 #endif
 	bool _refresh_leds_flag;
@@ -493,7 +499,7 @@ private:
 	void connect_to_parser();
 	void handle_button_message(boost::shared_ptr<Button> button, MIDI::EventTwoBytes *);
 
-	bool check_pick_up(boost::shared_ptr<Controller> controller, boost::shared_ptr<ARDOUR::AutomationControl> ac);
+	bool check_pick_up(boost::shared_ptr<Controller> controller, boost::shared_ptr<ARDOUR::AutomationControl> ac, bool rotary = false);
 
 	void handle_midi_controller_message(MIDI::Parser &, MIDI::EventTwoBytes *, MIDI::channel_t chan);
 	void handle_midi_note_on_message(MIDI::Parser &, MIDI::EventTwoBytes *, MIDI::channel_t chan);

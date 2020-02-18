@@ -1,21 +1,25 @@
 /*
-    Copyright (C) 2008-2012 Paul Davis
-    Author: David Robillard
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2008-2016 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2012-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2017 Johannes Mueller <github@johannes-mueller.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_lv2_plugin_h__
 #define __ardour_lv2_plugin_h__
@@ -59,7 +63,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	LV2Plugin (ARDOUR::AudioEngine& engine,
 	           ARDOUR::Session&     session,
 	           const void*          c_plugin,
-	           samplecnt_t           sample_rate);
+	           samplecnt_t          sample_rate);
 	LV2Plugin (const LV2Plugin &);
 	~LV2Plugin ();
 
@@ -74,8 +78,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	uint32_t    num_ports () const;
 	uint32_t    parameter_count () const;
 	float       default_value (uint32_t port);
-	samplecnt_t  max_latency () const;
-	samplecnt_t  signal_latency () const;
+	samplecnt_t max_latency () const;
 	void        set_parameter (uint32_t port, float val);
 	float       get_parameter (uint32_t port) const;
 	std::string get_docs() const;
@@ -110,6 +113,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	int set_block_size (pframes_t);
 	bool requires_fixed_sized_buffers () const;
+	bool connect_all_audio_outputs () const;
 
 	int connect_and_run (BufferSet& bufs,
 	                     samplepos_t start, samplepos_t end, double speed,
@@ -118,10 +122,6 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	std::string describe_parameter (Evoral::Parameter);
 	std::string state_node_name () const { return "lv2"; }
-
-	void print_parameter (uint32_t param,
-	                      char*    buf,
-	                      uint32_t len) const;
 
 	bool parameter_is_audio (uint32_t) const;
 	bool parameter_is_control (uint32_t) const;
@@ -172,7 +172,22 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	void                       set_property(uint32_t key, const Variant& value);
 	const PropertyDescriptors& get_supported_properties() const { return _property_descriptors; }
 	const ParameterDescriptor& get_property_descriptor(uint32_t id) const;
+	Variant                    get_property_value (uint32_t) const;
 	void                       announce_property_values();
+
+	/* LV2 Option Options */
+	static void set_global_ui_background_color (uint32_t c) {
+		_ui_background_color = c;
+	}
+	static void set_global_ui_foreground_color (uint32_t c) {
+		_ui_foreground_color = c;
+	}
+	static void set_global_ui_scale_factor (float s) {
+		_ui_scale_factor = s;
+	}
+	static void set_main_window_id (unsigned long id) {
+		_ui_transient_win_id = id;
+	}
 
   private:
 	struct Impl;
@@ -181,28 +196,32 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	LV2_Feature** _features;
 	Worker*       _worker;
 	Worker*       _state_worker;
-	samplecnt_t    _sample_rate;
+	samplecnt_t   _sample_rate;
+	float         _fsample_rate;
 	float*        _control_data;
 	float*        _shadow_data;
 	float*        _defaults;
 	LV2_Evbuf**   _ev_buffers;
 	LV2_Evbuf**   _atom_ev_buffers;
-	float*        _bpm_control_port;  ///< Special input set by ardour
-	float*        _freewheel_control_port;  ///< Special input set by ardour
-	float*        _latency_control_port;  ///< Special output set by ardour
-	samplepos_t    _next_cycle_start;  ///< Expected start sample of next run cycle
-	double        _next_cycle_speed;  ///< Expected start sample of next run cycle
+	float*        _bpm_control_port; ///< Special input set by ardour
+	float*        _freewheel_control_port; ///< Special input set by ardour
+	float*        _latency_control_port; ///< Special output set by ardour
+	samplepos_t   _next_cycle_start; ///< Expected start sample of next run cycle
+	double        _next_cycle_speed; ///< Expected start sample of next run cycle
 	double        _next_cycle_beat;  ///< Expected bar_beat of next run cycle
 	double        _current_bpm;
+	double        _prev_time_scale;  ///< previous Port::speed_ratio
 	PBD::ID       _insert_id;
 	std::string   _plugin_state_dir;
+	uint32_t      _bpm_control_port_index;
 	uint32_t      _patch_port_in_index;
 	uint32_t      _patch_port_out_index;
 	URIMap&       _uri_map;
 	bool          _no_sample_accurate_ctrl;
+	bool          _connect_all_audio_outputs;
 	bool          _can_write_automation;
-	samplecnt_t    _max_latency;
-	samplecnt_t    _current_latency;
+	samplecnt_t   _max_latency;
+	samplecnt_t   _current_latency;
 
 	friend const void* lv2plugin_get_port_value(const char* port_symbol,
 	                                            void*       user_data,
@@ -230,6 +249,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	std::vector<PortFlags>         _port_flags;
 	std::vector<size_t>            _port_minimumSize;
 	std::map<std::string,uint32_t> _port_indices;
+
+	std::map<uint32_t, Variant>    _property_values;
 
 	PropertyDescriptors _property_descriptors;
 
@@ -293,7 +314,6 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 		if (chn > 15) return UINT32_MAX;
 		return _bankpatch[chn];
 	}
-
 #endif
 
 	typedef struct {
@@ -315,7 +335,11 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 #endif
 
 	// Options passed to plugin
-	int32_t _seq_size;
+	int32_t              _seq_size;
+	static uint32_t      _ui_background_color;
+	static uint32_t      _ui_foreground_color;
+	static float         _ui_scale_factor;
+	static unsigned long _ui_transient_win_id;
 
 	mutable unsigned _state_version;
 
@@ -346,6 +370,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	std::string midnam_model ();
 	bool _midnam_dirty;
 #endif
+
+	samplecnt_t plugin_latency () const;
 
 	void latency_compute_run ();
 	std::string do_save_preset (std::string);

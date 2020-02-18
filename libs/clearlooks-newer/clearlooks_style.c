@@ -56,7 +56,7 @@ static ClearlooksStyleClass *clearlooks_style_class;
 static GtkStyleClass *clearlooks_parent_class;
 
 static void
-clearlooks_set_widget_parameters (GtkWidget      *widget,
+clearlooks_set_widget_parameters (GtkWidget            *widget,
                                   const GtkStyle       *style,
                                   GtkStateType          state_type,
                                   WidgetParameters     *params)
@@ -200,16 +200,16 @@ clearlooks_style_draw_shadow (DRAW_ARGS)
 	else if (DETAIL ("frame"))
 	{
 		WidgetParameters params;
-		FrameParameters  sample;
-		sample.shadow  = shadow_type;
-		sample.gap_x   = -1;                 /* No gap will be drawn */
-		sample.border  = &colors->shade[4];
+		FrameParameters  frame;
+		frame.shadow  = shadow_type;
+		frame.gap_x   = -1;                 /* No gap will be drawn */
+		frame.border  = &colors->shade[4];
 
 		clearlooks_set_widget_parameters (widget, style, state_type, &params);
 		params.corners = CR_CORNER_NONE;
 
 		if (widget && !g_str_equal ("XfcePanelWindow", gtk_widget_get_name (gtk_widget_get_toplevel (widget))))
-			STYLE_FUNCTION(draw_sample) (cr, colors, &params, &sample,
+			STYLE_FUNCTION(draw_frame) (cr, colors, &params, &frame,
 			                       x, y, width, height);
 	}
 	else if (DETAIL ("scrolled_window") || DETAIL ("viewport") || detail == NULL)
@@ -223,15 +223,15 @@ clearlooks_style_draw_shadow (DRAW_ARGS)
 	else
 	{
 		WidgetParameters params;
-		FrameParameters sample;
+		FrameParameters frame;
 
-		sample.shadow = shadow_type;
-		sample.gap_x  = -1;
-		sample.border = &colors->shade[5];
+		frame.shadow = shadow_type;
+		frame.gap_x  = -1;
+		frame.border = &colors->shade[5];
 		clearlooks_set_widget_parameters (widget, style, state_type, &params);
 		params.corners = CR_CORNER_ALL;
 
-		STYLE_FUNCTION(draw_sample) (cr, colors, &params, &sample, x, y, width, height);
+		STYLE_FUNCTION(draw_frame) (cr, colors, &params, &frame, x, y, width, height);
 	}
 
 	cairo_destroy (cr);
@@ -255,14 +255,14 @@ clearlooks_style_draw_box_gap (DRAW_ARGS,
 	if (DETAIL ("notebook"))
 	{
 		WidgetParameters params;
-		FrameParameters  sample;
+		FrameParameters  frame;
 		gboolean start, end;
 
-		sample.shadow    = shadow_type;
-		sample.gap_side  = gap_side;
-		sample.gap_x     = gap_x;
-		sample.gap_width = gap_width;
-		sample.border    = &colors->shade[5];
+		frame.shadow    = shadow_type;
+		frame.gap_side  = gap_side;
+		frame.gap_x     = gap_x;
+		frame.gap_width = gap_width;
+		frame.border    = &colors->shade[5];
 
 		clearlooks_set_widget_parameters (widget, style, state_type, &params);
 
@@ -315,7 +315,7 @@ clearlooks_style_draw_box_gap (DRAW_ARGS,
 		ge_cairo_set_color (cr, &colors->bg[GTK_STATE_NORMAL]);
 		cairo_fill (cr);
 
-		STYLE_FUNCTION(draw_sample) (cr, colors, &params, &sample,
+		STYLE_FUNCTION(draw_frame) (cr, colors, &params, &frame,
 		                       x, y, width, height);
 	}
 	else
@@ -726,11 +726,13 @@ clearlooks_style_draw_box (DRAW_ARGS)
 				{
 					case GTK_PROGRESS_RIGHT_TO_LEFT:
 						tmp.x -= 1;
+						/* fallthrough */
 					case GTK_PROGRESS_LEFT_TO_RIGHT:
 						tmp.width += 1;
 						break;
 					case GTK_PROGRESS_BOTTOM_TO_TOP:
 						tmp.y -= 1;
+						/* fallthrough */
 					case GTK_PROGRESS_TOP_TO_BOTTOM:
 						tmp.height += 1;
 						break;
@@ -853,7 +855,7 @@ clearlooks_style_draw_box (DRAW_ARGS)
 
 		clearlooks_set_widget_parameters (widget, style, state_type, &params);
 
-		STYLE_FUNCTION(draw_menu_sample) (cr, colors, &params, x, y, width, height);
+		STYLE_FUNCTION(draw_menu_frame) (cr, colors, &params, x, y, width, height);
 	}
 	else if (DETAIL ("hseparator") || DETAIL ("vseparator"))
 	{
@@ -1101,19 +1103,19 @@ clearlooks_style_draw_shadow_gap (DRAW_ARGS,
 	if (DETAIL ("frame"))
 	{
 		WidgetParameters params;
-		FrameParameters  sample;
+		FrameParameters  frame;
 
-		sample.shadow    = shadow_type;
-		sample.gap_side  = gap_side;
-		sample.gap_x     = gap_x;
-		sample.gap_width = gap_width;
-		sample.border    = &colors->shade[5];
+		frame.shadow    = shadow_type;
+		frame.gap_side  = gap_side;
+		frame.gap_x     = gap_x;
+		frame.gap_width = gap_width;
+		frame.border    = &colors->shade[5];
 
 		clearlooks_set_widget_parameters (widget, style, state_type, &params);
 
 		params.corners = CR_CORNER_ALL;
 
-		STYLE_FUNCTION(draw_sample) (cr, colors, &params, &sample,
+		STYLE_FUNCTION(draw_frame) (cr, colors, &params, &frame,
 		                       x, y, width, height);
 	}
 	else

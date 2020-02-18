@@ -184,12 +184,10 @@ typedef void (*fluid_sfont_iteration_start_t)(fluid_sfont_t *sfont);
 /**
  * Virtual SoundFont preset iteration function.
  * @param sfont Virtual SoundFont
- * @param preset Caller supplied uninitialized buffer to fill in with current preset information
  * @return NULL when no more presets are available, otherwise the a pointer to the current preset
  *
- * Should store preset information to the caller supplied \a preset structure
- * and advance the internal iteration state to the next preset for subsequent
- * calls.
+ * Returns preset information to the caller. The returned buffer is only valid until a subsequent
+ * call to this function.
  */
 typedef fluid_preset_t *(*fluid_sfont_iteration_next_t)(fluid_sfont_t *sfont);
 

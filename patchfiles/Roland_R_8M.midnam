@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>R-8M</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="R-8M">
+        <PatchNameList>
+          <Patch Number="01" Name="Standard" ProgramChange="0"/>
+          <Patch Number="02" Name="BeefKit" ProgramChange="1"/>
+          <Patch Number="03" Name="DoomKit" ProgramChange="2"/>
+          <Patch Number="04" Name="HouseKit" ProgramChange="3"/>
+          <Patch Number="05" Name="Stereo1" ProgramChange="4"/>
+          <Patch Number="06" Name="Flange1" ProgramChange="5"/>
+          <Patch Number="07" Name="GetFunky" ProgramChange="6"/>
+          <Patch Number="08" Name="JunkYard" ProgramChange="7"/>
+          <Patch Number="09" Name="Cowntry1" ProgramChange="8"/>
+          <Patch Number="10" Name="Jahzz" ProgramChange="9"/>
+          <Patch Number="11" Name="BigRockr" ProgramChange="10"/>
+          <Patch Number="12" Name="JustPerc" ProgramChange="11"/>
+          <Patch Number="13" Name="MondoKit" ProgramChange="12"/>
+          <Patch Number="14" Name="Studio" ProgramChange="13"/>
+          <Patch Number="15" Name="Cowntry2" ProgramChange="14"/>
+          <Patch Number="16" Name="Stereo2" ProgramChange="15"/>
+          <Patch Number="17" Name="OldieKit" ProgramChange="16"/>
+          <Patch Number="18" Name="Flange2" ProgramChange="17"/>
+          <Patch Number="19" Name="Flange3" ProgramChange="18"/>
+          <Patch Number="20" Name="LatinSet" ProgramChange="19"/>
+          <Patch Number="21" Name="FATSO" ProgramChange="20"/>
+          <Patch Number="22" Name="Contemp Perc Card" ProgramChange="21"/>
+          <Patch Number="23" Name="Jazz Brush Card" ProgramChange="22"/>
+          <Patch Number="24" Name="Snd FX Card" ProgramChange="23"/>
+          <Patch Number="25" Name="Electronic Card" ProgramChange="24"/>
+          <Patch Number="26" Name="Jazz Card" ProgramChange="25"/>
+          <Patch Number="27" Name="Ethnic Perc Card" ProgramChange="26"/>
+          <Patch Number="28" Name="Mallet Card" ProgramChange="27"/>
+          <Patch Number="29" Name="Dry Card" ProgramChange="28"/>
+          <Patch Number="30" Name="Pwr Drums Card" ProgramChange="29"/>
+          <Patch Number="31" Name="User1" ProgramChange="30"/>
+          <Patch Number="32" Name="User2" ProgramChange="31"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

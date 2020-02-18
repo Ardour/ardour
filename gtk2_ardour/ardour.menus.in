@@ -34,6 +34,14 @@
       </menu>
       <separator/>
       <menuitem action='toggle-session-options-editor'/>
+
+      <menu name='MonitorMenu' action='MonitorMenu'>
+        <menuitem action='UseMonitorSection'/>
+        <menuitem action='monitor-cut-all'/>
+        <menuitem action='monitor-dim-all'/>
+        <menuitem action='monitor-mono'/>
+      </menu>
+
       <menu name='Metadata' action='Metadata'>
         <menuitem action='EditMetadata'/>
         <menuitem action='ImportMetadata'/>
@@ -41,7 +49,8 @@
       <menu name='Cleanup' action='Cleanup'>
         <menuitem action='bring-into-session'/>
         <menuitem action='CleanupPeakFiles'/>
-        <menuitem action='CleanupUnused'/>
+        <menuitem action='CleanupUnusedSources'/>
+        <menuitem action='CleanupUnusedRegions'/>
         <menuitem action='FlushWastebasket'/>
       </menu>
 #ifdef __APPLE__
@@ -77,17 +86,16 @@
 #endif
 
       <separator/>
-      <menuitem action='set-loop-from-edit-range'/>
-      <menuitem action='set-punch-from-edit-range'/>
-      <menuitem action='set-session-from-edit-range'/>
-
-      <separator/>
       <menuitem action='Forward'/>
       <menuitem action='Rewind'/>
       <menuitem action='TransitionToRoll'/>
       <menuitem action='TransitionToReverse'/>
       <separator/>
 
+      <separator/>
+      <menuitem action='set-loop-from-edit-range'/>
+      <menuitem action='set-punch-from-edit-range'/>
+      <menuitem action='set-session-from-edit-range'/>
 
       <menu action="MovePlayHeadMenu">
         <menuitem action='set-playhead'/>
@@ -146,6 +154,7 @@
       </menu>
 
       <separator/>
+      <menuitem action='ToggleTimeMaster'/>
       <menuitem action='TogglePunch'/>
       <menuitem action='TogglePunchIn'/>
       <menuitem action='TogglePunchOut'/>
@@ -176,6 +185,7 @@
       <menu action="SelectMenu">
         <menuitem action='select-all-objects'/>
         <menuitem action='select-all-tracks'/>
+        <menuitem action='select-all-visible-lanes'/>
         <menuitem action='deselect-all'/>
         <menuitem action='invert-selection'/>
         <separator/>
@@ -227,6 +237,7 @@
         <menuitem action='toggle-region-fade-out'/>
       </menu>
       <separator/>
+      <menuitem action='tag-last-capture'/>
       <menuitem action='remove-last-capture'/>
       <separator/>
       <menu action="EditPointMenu">
@@ -284,16 +295,19 @@
     </menu>
 
     <menu name='RegionMenu' action='RegionMenu'>
-      <menuitem action='insert-region-from-region-list'/>
+      <menuitem action='insert-region-from-source-list'/>
       <menuitem action='play-selected-regions'/>
+      <menuitem action='tag-selected-regions'/>
       <menuitem action='loop-region'/>
       <menuitem action='rename-region'/>
       <menuitem action='show-region-properties'/>
       <menuitem action='loudness-analyze-region'/>
       <menuitem action='spectral-analyze-region'/>
       <menu action='RegionMenuEdit'>
+#ifndef MIXBUS
         <menuitem action='combine-regions'/>
         <menuitem action='uncombine-regions'/>
+#endif
         <menuitem action='pitch-shift-region'/>
         <menuitem action='split-region-at-transients'/>
         <menuitem action='split-multichannel-region'/>
@@ -512,15 +526,19 @@
 
       <menuitem action='show-editor-mixer'/>
       <menuitem action='show-editor-list'/>
+
+      <menuitem action='ToggleSummary'/>
+      <menuitem action='ToggleGroupTabs'/>
+      <menuitem action='show-marker-lines'/>
+
+      <separator/>
       <menuitem action='ToggleMixerList'/>
-      <menuitem action='ToggleMonitorSection'/>
 #ifdef MIXBUS
       <menuitem action='ToggleMixbusPane'/>
 #endif
       <menuitem action='ToggleVCAPane'/>
-      <menuitem action='ToggleSummary'/>
-      <menuitem action='ToggleGroupTabs'/>
-      <menuitem action='show-marker-lines'/>
+      <menuitem action='ToggleMonitorSection'/>
+      <menuitem action='ToggleFoldbackStrip'/>
 
     </menu>
     <menu action = 'WindowMenu'>
@@ -559,6 +577,7 @@
 #if 0
       <menuitem action='toggle-speaker-config'/>
 #endif
+      <menuitem action='toggle-plugin-dsp-load'/>
 #if 0
       <menuitem action='toggle-idle-o-meter'/>
 #endif
@@ -574,10 +593,7 @@
       <menuitem action='ManageTemplates'/>
       <menuitem action='toggle-key-editor'/>
       <separator/>
-#ifdef MIXBUS
-      <menuitem action='license-manager'/>
-      <separator/>
-#endif
+      <menuitem action='toggle-virtual-keyboard'/>
       <menuitem action='NewMIDITracer'/>
       <menuitem action='toggle-log-window'/>
       <separator/>
@@ -587,10 +603,11 @@
       <menuitem action='toggle-about'/>
 #endif
 #ifdef MIXBUS
-      <menuitem action='reference'/>
+      <menuitem action='website'/>
       <menuitem action='manual'/>
+      <menuitem action='reference'/>
+      <menuitem action='videos'/>
       <menuitem action='forums'/>
-      <menuitem action='chat'/>
 #else
       <menuitem action='chat'/>
       <menuitem action='manual'/>
@@ -654,9 +671,9 @@
     <menuitem action='send_options'/>
     <separator/>
     <menu action="disk-io-menu">
-        <menuitem action='disk-io-prefader'/>
-	<menuitem action='disk-io-postfader'/>
-	<menuitem action='disk-io-custom'/>
+      <menuitem action='disk-io-prefader'/>
+      <menuitem action='disk-io-postfader'/>
+      <menuitem action='disk-io-custom'/>
     </menu>
     <separator/>
     <menuitem action='clear'/>
@@ -692,26 +709,6 @@
 
   <popup name='RegionListMenu' accelerators='true'>
     <menuitem action='rlAudition'/>
-    <menuitem action='rlHide'/>
-    <menuitem action='rlShow'/>
-    <separator/>
-    <menuitem action='rlShowAll'/>
-    <menuitem action='rlShowAuto'/>
-    <menu name='Sort' action='RegionListSort'>
-      <menuitem action='SortAscending'/>
-      <menuitem action='SortDescending'/>
-      <separator/>
-      <menuitem action='SortByRegionName'/>
-      <menuitem action='SortByRegionLength'/>
-      <menuitem action='SortByRegionPosition'/>
-      <menuitem action='SortByRegionTimestamp'/>
-      <menuitem action='SortByRegionStartinFile'/>
-      <menuitem action='SortByRegionEndinFile'/>
-      <menuitem action='SortBySourceFileName'/>
-      <menuitem action='SortBySourceFileLength'/>
-      <menuitem action='SortBySourceFileCreationDate'/>
-      <menuitem action='SortBySourceFilesystem'/>
-    </menu>
     <separator/>
     <menuitem action='addExternalAudioToRegionList'/>
     <separator/>
@@ -720,6 +717,7 @@
 
   <popup name='PopupRegionMenu' action='PopupRegionMenu' accelerators='true'>
     <menuitem action='play-selected-regions'/>
+    <menuitem action='tag-selected-regions'/>
     <menuitem action='loop-region'/>
     <menuitem action='rename-region'/>
     <menuitem action='show-region-properties'/>
@@ -810,7 +808,6 @@
     <menuitem action='spectral-analyze-region'/>
     <separator/>
     <menuitem action='remove-region'/>
-
   </popup>
 
 </ui>

@@ -35,8 +35,6 @@ SessionTest::new_session ()
 
 	CPPUNIT_ASSERT (new_session);
 
-	new_session->save_state ("");
-
 	delete new_session;
 	stop_and_destroy_backend ();
 }
@@ -66,8 +64,6 @@ SessionTest::new_session_from_template ()
 				bus_profile, session_template_dir);
 
 	CPPUNIT_ASSERT (new_session);
-
-	new_session->save_state ("");
 
 	delete new_session;
 	stop_and_destroy_backend ();
@@ -114,8 +110,6 @@ SessionTest::open_session_utf8_path ()
 			session = new Session (*AudioEngine::instance(), new_session_dir, session_name);
 
 			CPPUNIT_ASSERT (session);
-
-			session->save_state ("");
 
 		} catch(...) {
 			new_session_failed = true;

@@ -1,19 +1,20 @@
 /*
- * Copyright (C) 2016 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2016-2018 Robin Gareus <robin@gareus.org>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <algorithm>
@@ -182,10 +183,14 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			clock->set (info.timecode * src_coef + 0.5, true);
 			t->attach (*clock, 3, 4, 3, 4);
 		} else if (with_file) {
-			l = manage (new Label (_("Error:"), ALIGN_END));
-			t->attach (*l, 0, 1, 1, 2);
-			l = manage (new Label (errmsg, ALIGN_START));
-			t->attach (*l, 1, 4, 1, 2);
+			with_file = false;
+			/* Note: errmsg can have size = 1, and contain "\0\0" */
+			if (!errmsg.empty() && 0 != strlen(errmsg.c_str())) {
+				l = manage (new Label (_("Error:"), ALIGN_END));
+				t->attach (*l, 0, 1, 1, 2);
+				l = manage (new Label (errmsg, ALIGN_START));
+				t->attach (*l, 1, 4, 1, 2);
+			}
 		}
 
 		int w, h;
@@ -986,7 +991,7 @@ ExportReport::audition (std::string path, unsigned n_chn, int page)
 	PBD::PropertyList plist;
 
 	plist.add (ARDOUR::Properties::start, 0);
-	plist.add (ARDOUR::Properties::length, srclist[0]->length(srclist[0]->timeline_position()));
+	plist.add (ARDOUR::Properties::length, srclist[0]->length(srclist[0]->natural_position()));
 	plist.add (ARDOUR::Properties::name, rname);
 	plist.add (ARDOUR::Properties::layer, 0);
 

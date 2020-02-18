@@ -1,0 +1,589 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Kurzweil</Manufacturer>
+    <Model>1200 Pro II</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <DeviceModeEnable>
+        <MIDICommands>
+          <ProgramChange Number="100"/>
+        </MIDICommands>
+      </DeviceModeEnable>
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="000 Bank">
+        <MIDICommands>
+          <ProgramChange Number="100"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="000" Name="No Prg" ProgramChange="0"/>
+          <Patch Number="001" Name="No Prg" ProgramChange="1"/>
+          <Patch Number="002" Name="No Prg" ProgramChange="2"/>
+          <Patch Number="003" Name="No Prg" ProgramChange="3"/>
+          <Patch Number="004" Name="No Prg" ProgramChange="4"/>
+          <Patch Number="005" Name="No Prg" ProgramChange="5"/>
+          <Patch Number="006" Name="No Prg" ProgramChange="6"/>
+          <Patch Number="007" Name="No Prg" ProgramChange="7"/>
+          <Patch Number="008" Name="No Prg" ProgramChange="8"/>
+          <Patch Number="009" Name="No Prg" ProgramChange="9"/>
+          <Patch Number="010" Name="No Prg" ProgramChange="10"/>
+          <Patch Number="011" Name="No Prg" ProgramChange="11"/>
+          <Patch Number="012" Name="No Prg" ProgramChange="12"/>
+          <Patch Number="013" Name="No Prg" ProgramChange="13"/>
+          <Patch Number="014" Name="No Prg" ProgramChange="14"/>
+          <Patch Number="015" Name="No Prg" ProgramChange="15"/>
+          <Patch Number="016" Name="No Prg" ProgramChange="16"/>
+          <Patch Number="017" Name="No Prg" ProgramChange="17"/>
+          <Patch Number="018" Name="No Prg" ProgramChange="18"/>
+          <Patch Number="019" Name="No Prg" ProgramChange="19"/>
+          <Patch Number="020" Name="No Prg" ProgramChange="20"/>
+          <Patch Number="021" Name="No Prg" ProgramChange="21"/>
+          <Patch Number="022" Name="No Prg" ProgramChange="22"/>
+          <Patch Number="023" Name="No Prg" ProgramChange="23"/>
+          <Patch Number="024" Name="No Prg" ProgramChange="24"/>
+          <Patch Number="025" Name="No Prg" ProgramChange="25"/>
+          <Patch Number="026" Name="No Prg" ProgramChange="26"/>
+          <Patch Number="027" Name="No Prg" ProgramChange="27"/>
+          <Patch Number="028" Name="No Prg" ProgramChange="28"/>
+          <Patch Number="029" Name="No Prg" ProgramChange="29"/>
+          <Patch Number="030" Name="No Prg" ProgramChange="30"/>
+          <Patch Number="031" Name="No Prg" ProgramChange="31"/>
+          <Patch Number="032" Name="No Prg" ProgramChange="32"/>
+          <Patch Number="033" Name="No Prg" ProgramChange="33"/>
+          <Patch Number="034" Name="No Prg" ProgramChange="34"/>
+          <Patch Number="035" Name="No Prg" ProgramChange="35"/>
+          <Patch Number="036" Name="No Prg" ProgramChange="36"/>
+          <Patch Number="037" Name="No Prg" ProgramChange="37"/>
+          <Patch Number="038" Name="No Prg" ProgramChange="38"/>
+          <Patch Number="039" Name="No Prg" ProgramChange="39"/>
+          <Patch Number="040" Name="No Prg" ProgramChange="40"/>
+          <Patch Number="041" Name="No Prg" ProgramChange="41"/>
+          <Patch Number="042" Name="No Prg" ProgramChange="42"/>
+          <Patch Number="043" Name="No Prg" ProgramChange="43"/>
+          <Patch Number="044" Name="No Prg" ProgramChange="44"/>
+          <Patch Number="045" Name="No Prg" ProgramChange="45"/>
+          <Patch Number="046" Name="No Prg" ProgramChange="46"/>
+          <Patch Number="047" Name="No Prg" ProgramChange="47"/>
+          <Patch Number="048" Name="No Prg" ProgramChange="48"/>
+          <Patch Number="049" Name="No Prg" ProgramChange="49"/>
+          <Patch Number="050" Name="No Prg" ProgramChange="50"/>
+          <Patch Number="051" Name="No Prg" ProgramChange="51"/>
+          <Patch Number="052" Name="No Prg" ProgramChange="52"/>
+          <Patch Number="053" Name="No Prg" ProgramChange="53"/>
+          <Patch Number="054" Name="No Prg" ProgramChange="54"/>
+          <Patch Number="055" Name="No Prg" ProgramChange="55"/>
+          <Patch Number="056" Name="No Prg" ProgramChange="56"/>
+          <Patch Number="057" Name="No Prg" ProgramChange="57"/>
+          <Patch Number="058" Name="No Prg" ProgramChange="58"/>
+          <Patch Number="059" Name="No Prg" ProgramChange="59"/>
+          <Patch Number="060" Name="No Prg" ProgramChange="60"/>
+          <Patch Number="061" Name="No Prg" ProgramChange="61"/>
+          <Patch Number="062" Name="No Prg" ProgramChange="62"/>
+          <Patch Number="063" Name="No Prg" ProgramChange="63"/>
+          <Patch Number="064" Name="No Prg" ProgramChange="64"/>
+          <Patch Number="065" Name="No Prg" ProgramChange="65"/>
+          <Patch Number="066" Name="No Prg" ProgramChange="66"/>
+          <Patch Number="067" Name="No Prg" ProgramChange="67"/>
+          <Patch Number="068" Name="No Prg" ProgramChange="68"/>
+          <Patch Number="069" Name="No Prg" ProgramChange="69"/>
+          <Patch Number="070" Name="No Prg" ProgramChange="70"/>
+          <Patch Number="071" Name="No Prg" ProgramChange="71"/>
+          <Patch Number="072" Name="No Prg" ProgramChange="72"/>
+          <Patch Number="073" Name="No Prg" ProgramChange="73"/>
+          <Patch Number="074" Name="No Prg" ProgramChange="74"/>
+          <Patch Number="075" Name="No Prg" ProgramChange="75"/>
+          <Patch Number="076" Name="No Prg" ProgramChange="76"/>
+          <Patch Number="077" Name="No Prg" ProgramChange="77"/>
+          <Patch Number="078" Name="No Prg" ProgramChange="78"/>
+          <Patch Number="079" Name="No Prg" ProgramChange="79"/>
+          <Patch Number="080" Name="No Prg" ProgramChange="80"/>
+          <Patch Number="081" Name="No Prg" ProgramChange="81"/>
+          <Patch Number="082" Name="No Prg" ProgramChange="82"/>
+          <Patch Number="083" Name="No Prg" ProgramChange="83"/>
+          <Patch Number="084" Name="No Prg" ProgramChange="84"/>
+          <Patch Number="085" Name="No Prg" ProgramChange="85"/>
+          <Patch Number="086" Name="No Prg" ProgramChange="86"/>
+          <Patch Number="087" Name="No Prg" ProgramChange="87"/>
+          <Patch Number="088" Name="No Prg" ProgramChange="88"/>
+          <Patch Number="089" Name="No Prg" ProgramChange="89"/>
+          <Patch Number="090" Name="No Prg" ProgramChange="90"/>
+          <Patch Number="091" Name="No Prg" ProgramChange="91"/>
+          <Patch Number="092" Name="No Prg" ProgramChange="92"/>
+          <Patch Number="093" Name="No Prg" ProgramChange="93"/>
+          <Patch Number="094" Name="No Prg" ProgramChange="94"/>
+          <Patch Number="095" Name="No Prg" ProgramChange="95"/>
+          <Patch Number="096" Name="No Prg" ProgramChange="96"/>
+          <Patch Number="097" Name="No Prg" ProgramChange="97"/>
+          <Patch Number="098" Name="No Prg" ProgramChange="98"/>
+          <Patch Number="099" Name="No Prg" ProgramChange="99"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="100 Bank">
+        <MIDICommands>
+          <ProgramChange Number="101"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="100" Name="No Prg" ProgramChange="0"/>
+          <Patch Number="101" Name="No Prg" ProgramChange="1"/>
+          <Patch Number="102" Name="No Prg" ProgramChange="2"/>
+          <Patch Number="103" Name="No Prg" ProgramChange="3"/>
+          <Patch Number="104" Name="No Prg" ProgramChange="4"/>
+          <Patch Number="105" Name="No Prg" ProgramChange="5"/>
+          <Patch Number="106" Name="No Prg" ProgramChange="6"/>
+          <Patch Number="107" Name="No Prg" ProgramChange="7"/>
+          <Patch Number="108" Name="No Prg" ProgramChange="8"/>
+          <Patch Number="109" Name="No Prg" ProgramChange="9"/>
+          <Patch Number="110" Name="No Prg" ProgramChange="10"/>
+          <Patch Number="111" Name="No Prg" ProgramChange="11"/>
+          <Patch Number="112" Name="No Prg" ProgramChange="12"/>
+          <Patch Number="113" Name="No Prg" ProgramChange="13"/>
+          <Patch Number="114" Name="No Prg" ProgramChange="14"/>
+          <Patch Number="115" Name="No Prg" ProgramChange="15"/>
+          <Patch Number="116" Name="No Prg" ProgramChange="16"/>
+          <Patch Number="117" Name="No Prg" ProgramChange="17"/>
+          <Patch Number="118" Name="No Prg" ProgramChange="18"/>
+          <Patch Number="119" Name="No Prg" ProgramChange="19"/>
+          <Patch Number="120" Name="No Prg" ProgramChange="20"/>
+          <Patch Number="121" Name="No Prg" ProgramChange="21"/>
+          <Patch Number="122" Name="No Prg" ProgramChange="22"/>
+          <Patch Number="123" Name="No Prg" ProgramChange="23"/>
+          <Patch Number="124" Name="No Prg" ProgramChange="24"/>
+          <Patch Number="125" Name="No Prg" ProgramChange="25"/>
+          <Patch Number="126" Name="No Prg" ProgramChange="26"/>
+          <Patch Number="127" Name="No Prg" ProgramChange="27"/>
+          <Patch Number="128" Name="No Prg" ProgramChange="28"/>
+          <Patch Number="129" Name="No Prg" ProgramChange="29"/>
+          <Patch Number="130" Name="No Prg" ProgramChange="30"/>
+          <Patch Number="131" Name="No Prg" ProgramChange="31"/>
+          <Patch Number="132" Name="No Prg" ProgramChange="32"/>
+          <Patch Number="133" Name="No Prg" ProgramChange="33"/>
+          <Patch Number="134" Name="No Prg" ProgramChange="34"/>
+          <Patch Number="135" Name="No Prg" ProgramChange="35"/>
+          <Patch Number="136" Name="No Prg" ProgramChange="36"/>
+          <Patch Number="137" Name="No Prg" ProgramChange="37"/>
+          <Patch Number="138" Name="No Prg" ProgramChange="38"/>
+          <Patch Number="139" Name="No Prg" ProgramChange="39"/>
+          <Patch Number="140" Name="No Prg" ProgramChange="40"/>
+          <Patch Number="141" Name="No Prg" ProgramChange="41"/>
+          <Patch Number="142" Name="No Prg" ProgramChange="42"/>
+          <Patch Number="143" Name="No Prg" ProgramChange="43"/>
+          <Patch Number="144" Name="No Prg" ProgramChange="44"/>
+          <Patch Number="145" Name="No Prg" ProgramChange="45"/>
+          <Patch Number="146" Name="No Prg" ProgramChange="46"/>
+          <Patch Number="147" Name="No Prg" ProgramChange="47"/>
+          <Patch Number="148" Name="No Prg" ProgramChange="48"/>
+          <Patch Number="149" Name="No Prg" ProgramChange="49"/>
+          <Patch Number="150" Name="No Prg" ProgramChange="50"/>
+          <Patch Number="151" Name="No Prg" ProgramChange="51"/>
+          <Patch Number="152" Name="No Prg" ProgramChange="52"/>
+          <Patch Number="153" Name="No Prg" ProgramChange="53"/>
+          <Patch Number="154" Name="No Prg" ProgramChange="54"/>
+          <Patch Number="155" Name="No Prg" ProgramChange="55"/>
+          <Patch Number="156" Name="No Prg" ProgramChange="56"/>
+          <Patch Number="157" Name="No Prg" ProgramChange="57"/>
+          <Patch Number="158" Name="No Prg" ProgramChange="58"/>
+          <Patch Number="159" Name="No Prg" ProgramChange="59"/>
+          <Patch Number="160" Name="No Prg" ProgramChange="60"/>
+          <Patch Number="161" Name="No Prg" ProgramChange="61"/>
+          <Patch Number="162" Name="No Prg" ProgramChange="62"/>
+          <Patch Number="163" Name="No Prg" ProgramChange="63"/>
+          <Patch Number="164" Name="No Prg" ProgramChange="64"/>
+          <Patch Number="165" Name="No Prg" ProgramChange="65"/>
+          <Patch Number="166" Name="No Prg" ProgramChange="66"/>
+          <Patch Number="167" Name="No Prg" ProgramChange="67"/>
+          <Patch Number="168" Name="No Prg" ProgramChange="68"/>
+          <Patch Number="169" Name="No Prg" ProgramChange="69"/>
+          <Patch Number="170" Name="No Prg" ProgramChange="70"/>
+          <Patch Number="171" Name="No Prg" ProgramChange="71"/>
+          <Patch Number="172" Name="No Prg" ProgramChange="72"/>
+          <Patch Number="173" Name="No Prg" ProgramChange="73"/>
+          <Patch Number="174" Name="No Prg" ProgramChange="74"/>
+          <Patch Number="175" Name="No Prg" ProgramChange="75"/>
+          <Patch Number="176" Name="No Prg" ProgramChange="76"/>
+          <Patch Number="177" Name="No Prg" ProgramChange="77"/>
+          <Patch Number="178" Name="No Prg" ProgramChange="78"/>
+          <Patch Number="179" Name="No Prg" ProgramChange="79"/>
+          <Patch Number="180" Name="No Prg" ProgramChange="80"/>
+          <Patch Number="181" Name="No Prg" ProgramChange="81"/>
+          <Patch Number="182" Name="No Prg" ProgramChange="82"/>
+          <Patch Number="183" Name="No Prg" ProgramChange="83"/>
+          <Patch Number="184" Name="No Prg" ProgramChange="84"/>
+          <Patch Number="185" Name="No Prg" ProgramChange="85"/>
+          <Patch Number="186" Name="No Prg" ProgramChange="86"/>
+          <Patch Number="187" Name="No Prg" ProgramChange="87"/>
+          <Patch Number="188" Name="No Prg" ProgramChange="88"/>
+          <Patch Number="189" Name="No Prg" ProgramChange="89"/>
+          <Patch Number="190" Name="No Prg" ProgramChange="90"/>
+          <Patch Number="191" Name="No Prg" ProgramChange="91"/>
+          <Patch Number="192" Name="No Prg" ProgramChange="92"/>
+          <Patch Number="193" Name="No Prg" ProgramChange="93"/>
+          <Patch Number="194" Name="No Prg" ProgramChange="94"/>
+          <Patch Number="195" Name="No Prg" ProgramChange="95"/>
+          <Patch Number="196" Name="No Prg" ProgramChange="96"/>
+          <Patch Number="197" Name="No Prg" ProgramChange="97"/>
+          <Patch Number="198" Name="No Prg" ProgramChange="98"/>
+          <Patch Number="199" Name="No Prg" ProgramChange="99"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="200 Bank">
+        <MIDICommands>
+          <ProgramChange Number="102"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="200" Name="No Prg" ProgramChange="0"/>
+          <Patch Number="201" Name="Orch Solo Violin" ProgramChange="1"/>
+          <Patch Number="202" Name="Solo Violin 2" ProgramChange="2"/>
+          <Patch Number="203" Name="Slow Violin" ProgramChange="3"/>
+          <Patch Number="204" Name="Fast Legato Vln" ProgramChange="4"/>
+          <Patch Number="205" Name="Prs Solo Vln" ProgramChange="5"/>
+          <Patch Number="206" Name="Electric Violin" ProgramChange="6"/>
+          <Patch Number="207" Name="Echoplex E Vln" ProgramChange="7"/>
+          <Patch Number="208" Name="Orch Solo Cello" ProgramChange="8"/>
+          <Patch Number="209" Name="Solo Cello" ProgramChange="9"/>
+          <Patch Number="210" Name="FastLegatoCello" ProgramChange="10"/>
+          <Patch Number="211" Name="Prs Solo Cello" ProgramChange="11"/>
+          <Patch Number="212" Name="SoloStr&gt;Harmnics" ProgramChange="12"/>
+          <Patch Number="213" Name="Hall Cel/ Vln1" ProgramChange="13"/>
+          <Patch Number="214" Name="String Section 2" ProgramChange="14"/>
+          <Patch Number="215" Name="Chamber Orch" ProgramChange="15"/>
+          <Patch Number="216" Name="Cello/ Slo Str" ProgramChange="16"/>
+          <Patch Number="217" Name="Slo Str/ Violin" ProgramChange="17"/>
+          <Patch Number="218" Name="Bowed Strings" ProgramChange="18"/>
+          <Patch Number="219" Name="Medium Strings" ProgramChange="19"/>
+          <Patch Number="220" Name="Slow Strings" ProgramChange="20"/>
+          <Patch Number="221" Name="Attack Ctl Strings" ProgramChange="21"/>
+          <Patch Number="222" Name="Stereo SloString" ProgramChange="22"/>
+          <Patch Number="223" Name="Strings Slocatave" ProgramChange="23"/>
+          <Patch Number="224" Name="Triple Strings" ProgramChange="24"/>
+          <Patch Number="225" Name="Flanged Strings" ProgramChange="25"/>
+          <Patch Number="226" Name=" Bright Strings" ProgramChange="26"/>
+          <Patch Number="227" Name="Hrd Atk Strings" ProgramChange="27"/>
+          <Patch Number="228" Name="Pizzicato Strings" ProgramChange="28"/>
+          <Patch Number="229" Name="Underwater Pizz" ProgramChange="29"/>
+          <Patch Number="230" Name="Boomin' Pizz" ProgramChange="30"/>
+          <Patch Number="231" Name="Far Away Pizz" ProgramChange="31"/>
+          <Patch Number="232" Name="U-Choose-It Perc" ProgramChange="32"/>
+          <Patch Number="233" Name="Perc Strings" ProgramChange="33"/>
+          <Patch Number="234" Name="Tremolo Strings" ProgramChange="34"/>
+          <Patch Number="235" Name="VTrgSfz&gt;Trem Str" ProgramChange="35"/>
+          <Patch Number="236" Name="Orchestra 1" ProgramChange="36"/>
+          <Patch Number="237" Name="SloStr&amp;Horn/ Trp" ProgramChange="37"/>
+          <Patch Number="238" Name="Open Trumpet" ProgramChange="38"/>
+          <Patch Number="239" Name="Open Trumpet 2" ProgramChange="39"/>
+          <Patch Number="240" Name="Prs LeadTrumpets" ProgramChange="40"/>
+          <Patch Number="241" Name="Prs Solo Trumpet" ProgramChange="41"/>
+          <Patch Number="242" Name="Muted Trumpet" ProgramChange="42"/>
+          <Patch Number="243" Name="Trumpet &amp; Mutes" ProgramChange="43"/>
+          <Patch Number="244" Name="Solo Trombone" ProgramChange="44"/>
+          <Patch Number="245" Name="VTrig Growl Bone" ProgramChange="45"/>
+          <Patch Number="246" Name="Open Trombone" ProgramChange="46"/>
+          <Patch Number="247" Name="Prs Unison Brass" ProgramChange="47"/>
+          <Patch Number="248" Name="Prs BrassSection" ProgramChange="48"/>
+          <Patch Number="249" Name="Brass Section 2" ProgramChange="49"/>
+          <Patch Number="250" Name="SfzBrassPrsSwell" ProgramChange="50"/>
+          <Patch Number="251" Name="Solo Soft Tenor" ProgramChange="51"/>
+          <Patch Number="252" Name="Fast Legato Tenor" ProgramChange="52"/>
+          <Patch Number="253" Name="Damp Soft Tenor" ProgramChange="53"/>
+          <Patch Number="254" Name="Medium Tenor Sax" ProgramChange="54"/>
+          <Patch Number="255" Name="Jazz Saxophone" ProgramChange="55"/>
+          <Patch Number="256" Name="Dual Tenor w/Vib" ProgramChange="56"/>
+          <Patch Number="257" Name="Prs Dual Tenor" ProgramChange="57"/>
+          <Patch Number="258" Name="Growl Tenor Sax" ProgramChange="58"/>
+          <Patch Number="259" Name="Soft &amp; Med Tenor" ProgramChange="59"/>
+          <Patch Number="260" Name="Trp &amp;SofTen &amp;Mut" ProgramChange="60"/>
+          <Patch Number="261" Name="Bone &amp; 2 Tenors" ProgramChange="61"/>
+          <Patch Number="262" Name="Big Band 2" ProgramChange="62"/>
+          <Patch Number="263" Name="Big Band 5" ProgramChange="63"/>
+          <Patch Number="264" Name="JzTenor/Bonesax" ProgramChange="64"/>
+          <Patch Number="265" Name="VTrig Sfz Band" ProgramChange="65"/>
+          <Patch Number="266" Name="Prs Unison Band" ProgramChange="66"/>
+          <Patch Number="267" Name="Canyon Horns" ProgramChange="67"/>
+          <Patch Number="268" Name="Canyon Orch" ProgramChange="68"/>
+          <Patch Number="269" Name="Horn Pad" ProgramChange="69"/>
+          <Patch Number="270" Name="Mellow Pad" ProgramChange="70"/>
+          <Patch Number="271" Name="Prs Sax Pad 1" ProgramChange="71"/>
+          <Patch Number="272" Name="Ambient Synth" ProgramChange="72"/>
+          <Patch Number="273" Name="Prs Synth Horns" ProgramChange="73"/>
+          <Patch Number="274" Name="Space Pad" ProgramChange="74"/>
+          <Patch Number="275" Name="Balloon Skin" ProgramChange="75"/>
+          <Patch Number="276" Name="Cellophone" ProgramChange="76"/>
+          <Patch Number="277" Name="Squeeze Box" ProgramChange="77"/>
+          <Patch Number="278" Name="Music Box" ProgramChange="78"/>
+          <Patch Number="279" Name="Synthinet" ProgramChange="79"/>
+          <Patch Number="280" Name="SterTrem Harpsi" ProgramChange="80"/>
+          <Patch Number="281" Name="Syntharpsichord" ProgramChange="81"/>
+          <Patch Number="282" Name="Hammered E Vlns" ProgramChange="82"/>
+          <Patch Number="283" Name="Pluck This" ProgramChange="83"/>
+          <Patch Number="284" Name="Thongs on Bamboo" ProgramChange="84"/>
+          <Patch Number="285" Name="PluckHorns" ProgramChange="85"/>
+          <Patch Number="286" Name="Nasty Analog" ProgramChange="86"/>
+          <Patch Number="287" Name="Click Organ" ProgramChange="87"/>
+          <Patch Number="288" Name="Generic Synth 1" ProgramChange="88"/>
+          <Patch Number="289" Name="Pitzine Gurgls" ProgramChange="89"/>
+          <Patch Number="290" Name="Pitzine Whistle" ProgramChange="90"/>
+          <Patch Number="291" Name="Echoness" ProgramChange="91"/>
+          <Patch Number="292" Name="Synth Bass Clav" ProgramChange="92"/>
+          <Patch Number="293" Name="Ostinato" ProgramChange="93"/>
+          <Patch Number="294" Name="Killer Bees" ProgramChange="94"/>
+          <Patch Number="295" Name="Falling Flutes" ProgramChange="95"/>
+          <Patch Number="296" Name="Saxocopters" ProgramChange="96"/>
+          <Patch Number="297" Name="Salt and Pepper" ProgramChange="97"/>
+          <Patch Number="298" Name="Square Pad" ProgramChange="98"/>
+          <Patch Number="299" Name="Stereo Sweep" ProgramChange="99"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="300 Bank">
+        <MIDICommands>
+          <ProgramChange Number="103"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="300" Name="No Prg" ProgramChange="0"/>
+          <Patch Number="301" Name="Resonance Man" ProgramChange="1"/>
+          <Patch Number="302" Name="Nuageux" ProgramChange="2"/>
+          <Patch Number="303" Name="Fat Synth" ProgramChange="3"/>
+          <Patch Number="304" Name="Water Winds" ProgramChange="4"/>
+          <Patch Number="305" Name="EPno &amp; FatSynth" ProgramChange="5"/>
+          <Patch Number="306" Name="Clav Prs Synth" ProgramChange="6"/>
+          <Patch Number="307" Name="Prs Cook Synth" ProgramChange="7"/>
+          <Patch Number="308" Name="Quack Soprano" ProgramChange="8"/>
+          <Patch Number="309" Name="Pipes" ProgramChange="9"/>
+          <Patch Number="310" Name="Pipes &amp; Reeds" ProgramChange="10"/>
+          <Patch Number="311" Name="Full Organ" ProgramChange="11"/>
+          <Patch Number="312" Name="Warm Organ" ProgramChange="12"/>
+          <Patch Number="313" Name="Lik a Mini" ProgramChange="13"/>
+          <Patch Number="314" Name="Analog Lead" ProgramChange="14"/>
+          <Patch Number="315" Name="Electric Lead" ProgramChange="15"/>
+          <Patch Number="316" Name="Portalead" ProgramChange="16"/>
+          <Patch Number="317" Name="Tap Flute" ProgramChange="17"/>
+          <Patch Number="318" Name="Plucked  Flute" ProgramChange="18"/>
+          <Patch Number="319" Name="Plucked Sine" ProgramChange="19"/>
+          <Patch Number="320" Name="Plucksynth" ProgramChange="20"/>
+          <Patch Number="321" Name="Plucky Bells" ProgramChange="21"/>
+          <Patch Number="322" Name="Tubular" ProgramChange="22"/>
+          <Patch Number="323" Name="Steel Drums" ProgramChange="23"/>
+          <Patch Number="324" Name="Fusion Brass" ProgramChange="24"/>
+          <Patch Number="325" Name="Synth Orchestra" ProgramChange="25"/>
+          <Patch Number="326" Name="Oriental Dreams" ProgramChange="26"/>
+          <Patch Number="327" Name="Fade-in Strings" ProgramChange="27"/>
+          <Patch Number="328" Name="Flute Mallete" ProgramChange="28"/>
+          <Patch Number="329" Name="Sweet Horns" ProgramChange="29"/>
+          <Patch Number="330" Name="Soft Alto Sax" ProgramChange="30"/>
+          <Patch Number="331" Name="Prs Soft Alto" ProgramChange="31"/>
+          <Patch Number="332" Name="VTrig Soft Alto" ProgramChange="32"/>
+          <Patch Number="333" Name="Hall Alto" ProgramChange="33"/>
+          <Patch Number="334" Name="Med Alto Sax" ProgramChange="34"/>
+          <Patch Number="335" Name="Prs Growl Alto" ProgramChange="35"/>
+          <Patch Number="336" Name="Solo Alto Sax" ProgramChange="36"/>
+          <Patch Number="337" Name="Baritone Sax" ProgramChange="37"/>
+          <Patch Number="338" Name="Prs Bright Bari" ProgramChange="38"/>
+          <Patch Number="339" Name="Dirty Bari" ProgramChange="39"/>
+          <Patch Number="340" Name="Solo Bari" ProgramChange="40"/>
+          <Patch Number="341" Name="Soprano Sax" ProgramChange="41"/>
+          <Patch Number="342" Name="Legato Soprano" ProgramChange="42"/>
+          <Patch Number="343" Name="Prs Soprano" ProgramChange="43"/>
+          <Patch Number="344" Name="Wah Soprano" ProgramChange="44"/>
+          <Patch Number="345" Name="ExtRange Prs Sax" ProgramChange="45"/>
+          <Patch Number="346" Name="Brass Stabs" ProgramChange="46"/>
+          <Patch Number="347" Name="VTrig Stabs" ProgramChange="47"/>
+          <Patch Number="348" Name="Triple Stabs" ProgramChange="48"/>
+          <Patch Number="349" Name="Soft Sax Section" ProgramChange="49"/>
+          <Patch Number="350" Name="Bari&amp;Tenor/Altos" ProgramChange="50"/>
+          <Patch Number="351" Name="Polished Brass" ProgramChange="51"/>
+          <Patch Number="352" Name="Prs Big Band" ProgramChange="52"/>
+          <Patch Number="353" Name="SfzBand w/Bari" ProgramChange="53"/>
+          <Patch Number="354" Name="Space Trumpet" ProgramChange="54"/>
+          <Patch Number="355" Name="Flute" ProgramChange="55"/>
+          <Patch Number="356" Name="Legato Flute" ProgramChange="56"/>
+          <Patch Number="357" Name="Wendy's Flute" ProgramChange="57"/>
+          <Patch Number="358" Name="Orch Piccolo" ProgramChange="58"/>
+          <Patch Number="359" Name="Flootz" ProgramChange="59"/>
+          <Patch Number="360" Name="Jungle Flute" ProgramChange="60"/>
+          <Patch Number="361" Name="Canyon Flute" ProgramChange="61"/>
+          <Patch Number="362" Name="Oboe" ProgramChange="62"/>
+          <Patch Number="363" Name="Orch Oboe" ProgramChange="63"/>
+          <Patch Number="364" Name="Press Solo Oboe" ProgramChange="64"/>
+          <Patch Number="365" Name="Env Ctl Oboe" ProgramChange="65"/>
+          <Patch Number="366" Name="Bassoon" ProgramChange="66"/>
+          <Patch Number="367" Name="Orch Bassoon" ProgramChange="67"/>
+          <Patch Number="368" Name="Prs Solo Bassoon" ProgramChange="68"/>
+          <Patch Number="369" Name="Ambient Bsn/Oboe" ProgramChange="69"/>
+          <Patch Number="370" Name="Clarinet" ProgramChange="70"/>
+          <Patch Number="371" Name="Orch Clarinet" ProgramChange="71"/>
+          <Patch Number="372" Name="Solo Clarinet" ProgramChange="72"/>
+          <Patch Number="373" Name="Oboe &amp; Flute" ProgramChange="73"/>
+          <Patch Number="374" Name="Woodwind Splits" ProgramChange="74"/>
+          <Patch Number="375" Name="AtkCtl Woodwinds" ProgramChange="75"/>
+          <Patch Number="376" Name="Cl&amp;Bsn /Dyn Str" ProgramChange="76"/>
+          <Patch Number="377" Name="Bsn&amp;FHrn/ Ob&amp;Fl" ProgramChange="77"/>
+          <Patch Number="378" Name="French Horn" ProgramChange="78"/>
+          <Patch Number="379" Name="Orch Dyn FHorn" ProgramChange="79"/>
+          <Patch Number="380" Name="Prs FHornSection" ProgramChange="80"/>
+          <Patch Number="381" Name="Dry FHornSection" ProgramChange="81"/>
+          <Patch Number="382" Name="Mello Brass Pad" ProgramChange="82"/>
+          <Patch Number="383" Name="Quick Horns" ProgramChange="83"/>
+          <Patch Number="384" Name="Canyon FHrn/ Vln" ProgramChange="84"/>
+          <Patch Number="385" Name="Str/ Horns/Str" ProgramChange="85"/>
+          <Patch Number="386" Name="Timpani" ProgramChange="86"/>
+          <Patch Number="387" Name="Dynamic Timpani" ProgramChange="87"/>
+          <Patch Number="388" Name="Bass/OrchTimpani" ProgramChange="88"/>
+          <Patch Number="389" Name="BaroqueOrchestra" ProgramChange="89"/>
+          <Patch Number="390" Name="ClassicOrchestra" ProgramChange="90"/>
+          <Patch Number="391" Name="TotalOrchestra" ProgramChange="91"/>
+          <Patch Number="392" Name="TuningNote/Click" ProgramChange="92"/>
+          <Patch Number="393" Name="No Prg" ProgramChange="93"/>
+          <Patch Number="394" Name="No Prg" ProgramChange="94"/>
+          <Patch Number="395" Name="No Prg" ProgramChange="95"/>
+          <Patch Number="396" Name="No Prg" ProgramChange="96"/>
+          <Patch Number="397" Name="No Prg" ProgramChange="97"/>
+          <Patch Number="398" Name="No Prg" ProgramChange="98"/>
+          <Patch Number="399" Name="No Prg" ProgramChange="99"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="400 Bank">
+        <MIDICommands>
+          <ProgramChange Number="104"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="400" Name="No Prg" ProgramChange="0"/>
+          <Patch Number="401" Name="No Prg" ProgramChange="1"/>
+          <Patch Number="402" Name="No Prg" ProgramChange="2"/>
+          <Patch Number="403" Name="No Prg" ProgramChange="3"/>
+          <Patch Number="404" Name="No Prg" ProgramChange="4"/>
+          <Patch Number="405" Name="No Prg" ProgramChange="5"/>
+          <Patch Number="406" Name="No Prg" ProgramChange="6"/>
+          <Patch Number="407" Name="No Prg" ProgramChange="7"/>
+          <Patch Number="408" Name="No Prg" ProgramChange="8"/>
+          <Patch Number="409" Name="No Prg" ProgramChange="9"/>
+          <Patch Number="410" Name="No Prg" ProgramChange="10"/>
+          <Patch Number="411" Name="No Prg" ProgramChange="11"/>
+          <Patch Number="412" Name="No Prg" ProgramChange="12"/>
+          <Patch Number="413" Name="No Prg" ProgramChange="13"/>
+          <Patch Number="414" Name="No Prg" ProgramChange="14"/>
+          <Patch Number="415" Name="No Prg" ProgramChange="15"/>
+          <Patch Number="416" Name="No Prg" ProgramChange="16"/>
+          <Patch Number="417" Name="No Prg" ProgramChange="17"/>
+          <Patch Number="418" Name="No Prg" ProgramChange="18"/>
+          <Patch Number="419" Name="No Prg" ProgramChange="19"/>
+          <Patch Number="420" Name="No Prg" ProgramChange="20"/>
+          <Patch Number="421" Name="No Prg" ProgramChange="21"/>
+          <Patch Number="422" Name="No Prg" ProgramChange="22"/>
+          <Patch Number="423" Name="No Prg" ProgramChange="23"/>
+          <Patch Number="424" Name="No Prg" ProgramChange="24"/>
+          <Patch Number="425" Name="No Prg" ProgramChange="25"/>
+          <Patch Number="426" Name="No Prg" ProgramChange="26"/>
+          <Patch Number="427" Name="No Prg" ProgramChange="27"/>
+          <Patch Number="428" Name="No Prg" ProgramChange="28"/>
+          <Patch Number="429" Name="No Prg" ProgramChange="29"/>
+          <Patch Number="430" Name="No Prg" ProgramChange="30"/>
+          <Patch Number="431" Name="No Prg" ProgramChange="31"/>
+          <Patch Number="432" Name="No Prg" ProgramChange="32"/>
+          <Patch Number="433" Name="No Prg" ProgramChange="33"/>
+          <Patch Number="434" Name="No Prg" ProgramChange="34"/>
+          <Patch Number="435" Name="No Prg" ProgramChange="35"/>
+          <Patch Number="436" Name="No Prg" ProgramChange="36"/>
+          <Patch Number="437" Name="No Prg" ProgramChange="37"/>
+          <Patch Number="438" Name="No Prg" ProgramChange="38"/>
+          <Patch Number="439" Name="No Prg" ProgramChange="39"/>
+          <Patch Number="440" Name="No Prg" ProgramChange="40"/>
+          <Patch Number="441" Name="No Prg" ProgramChange="41"/>
+          <Patch Number="442" Name="No Prg" ProgramChange="42"/>
+          <Patch Number="443" Name="No Prg" ProgramChange="43"/>
+          <Patch Number="444" Name="No Prg" ProgramChange="44"/>
+          <Patch Number="445" Name="No Prg" ProgramChange="45"/>
+          <Patch Number="446" Name="No Prg" ProgramChange="46"/>
+          <Patch Number="447" Name="No Prg" ProgramChange="47"/>
+          <Patch Number="448" Name="No Prg" ProgramChange="48"/>
+          <Patch Number="449" Name="No Prg" ProgramChange="49"/>
+          <Patch Number="450" Name="No Prg" ProgramChange="50"/>
+          <Patch Number="451" Name="No Prg" ProgramChange="51"/>
+          <Patch Number="452" Name="No Prg" ProgramChange="52"/>
+          <Patch Number="453" Name="No Prg" ProgramChange="53"/>
+          <Patch Number="454" Name="No Prg" ProgramChange="54"/>
+          <Patch Number="455" Name="No Prg" ProgramChange="55"/>
+          <Patch Number="456" Name="No Prg" ProgramChange="56"/>
+          <Patch Number="457" Name="No Prg" ProgramChange="57"/>
+          <Patch Number="458" Name="No Prg" ProgramChange="58"/>
+          <Patch Number="459" Name="No Prg" ProgramChange="59"/>
+          <Patch Number="460" Name="No Prg" ProgramChange="60"/>
+          <Patch Number="461" Name="No Prg" ProgramChange="61"/>
+          <Patch Number="462" Name="No Prg" ProgramChange="62"/>
+          <Patch Number="463" Name="No Prg" ProgramChange="63"/>
+          <Patch Number="464" Name="No Prg" ProgramChange="64"/>
+          <Patch Number="465" Name="No Prg" ProgramChange="65"/>
+          <Patch Number="466" Name="No Prg" ProgramChange="66"/>
+          <Patch Number="467" Name="No Prg" ProgramChange="67"/>
+          <Patch Number="468" Name="No Prg" ProgramChange="68"/>
+          <Patch Number="469" Name="No Prg" ProgramChange="69"/>
+          <Patch Number="470" Name="No Prg" ProgramChange="70"/>
+          <Patch Number="471" Name="No Prg" ProgramChange="71"/>
+          <Patch Number="472" Name="No Prg" ProgramChange="72"/>
+          <Patch Number="473" Name="No Prg" ProgramChange="73"/>
+          <Patch Number="474" Name="No Prg" ProgramChange="74"/>
+          <Patch Number="475" Name="No Prg" ProgramChange="75"/>
+          <Patch Number="476" Name="No Prg" ProgramChange="76"/>
+          <Patch Number="477" Name="No Prg" ProgramChange="77"/>
+          <Patch Number="478" Name="No Prg" ProgramChange="78"/>
+          <Patch Number="479" Name="No Prg" ProgramChange="79"/>
+          <Patch Number="480" Name="No Prg" ProgramChange="80"/>
+          <Patch Number="481" Name="No Prg" ProgramChange="81"/>
+          <Patch Number="482" Name="No Prg" ProgramChange="82"/>
+          <Patch Number="483" Name="No Prg" ProgramChange="83"/>
+          <Patch Number="484" Name="No Prg" ProgramChange="84"/>
+          <Patch Number="485" Name="No Prg" ProgramChange="85"/>
+          <Patch Number="486" Name="No Prg" ProgramChange="86"/>
+          <Patch Number="487" Name="No Prg" ProgramChange="87"/>
+          <Patch Number="488" Name="No Prg" ProgramChange="88"/>
+          <Patch Number="489" Name="No Prg" ProgramChange="89"/>
+          <Patch Number="490" Name="No Prg" ProgramChange="90"/>
+          <Patch Number="491" Name="No Prg" ProgramChange="91"/>
+          <Patch Number="492" Name="No Prg" ProgramChange="92"/>
+          <Patch Number="493" Name="No Prg" ProgramChange="93"/>
+          <Patch Number="494" Name="No Prg" ProgramChange="94"/>
+          <Patch Number="495" Name="No Prg" ProgramChange="95"/>
+          <Patch Number="496" Name="No Prg" ProgramChange="96"/>
+          <Patch Number="497" Name="No Prg" ProgramChange="97"/>
+          <Patch Number="498" Name="No Prg" ProgramChange="98"/>
+          <Patch Number="499" Name="No Prg" ProgramChange="99"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

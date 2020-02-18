@@ -1,21 +1,23 @@
 /*
-    Copyright (C) 2009-2010 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2007-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2017 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_processor_h__
 #define __ardour_processor_h__
@@ -42,7 +44,6 @@ namespace ARDOUR {
 
 class Location;
 class Session;
-class Route;
 
 /** A mixer strip element - plugin, send, meter, etc */
 class LIBARDOUR_API Processor : public SessionObject, public Automatable, public Latent
@@ -86,10 +87,17 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	virtual int set_block_size (pframes_t /*nframes*/) { return 0; }
 	virtual bool requires_fixed_sized_buffers() const { return false; }
 
-	/** @param result_required true if, on return from this method, @a bufs is required to contain valid data;
-	 *  if false, the method need not bother writing to @a bufs if it doesn't want to.
+	/** The main process function for processors
+	 *
+	 * @param bufs bufferset of data to process in-place
+	 * @param start_sample absolute timeline position in audio-samples to commence processing (latency compensated)
+	 * @param end_sample absolute timeline position in audio-samples, usually start_sample +/- \p nframes
+	 * @param speed transport speed. usually -1, 0, +1
+	 * @param nframes number of audio samples to process
+	 * @param result_required true if, on return from this method, \p bufs is required to contain valid data;
+	 *        if false, the method need not bother writing to @a bufs if it doesn't want to.
 	 */
-	virtual void run (BufferSet& /*bufs*/, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double speed, pframes_t /*nframes*/, bool /*result_required*/) {}
+	virtual void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required) {}
 	virtual void silence (samplecnt_t nframes, samplepos_t start_sample) { automation_run (start_sample, nframes); }
 
 	virtual void activate ()   { _pending_active = true; ActiveChanged(); }
@@ -107,7 +115,7 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	virtual ChanCount output_streams() const { return _configured_output; }
 
 	virtual void realtime_handle_transport_stopped () {}
-	virtual void realtime_locate () {}
+	virtual void realtime_locate (bool) {}
 
 	virtual void set_loop (Location *loc) { _loop_location = loc; }
 

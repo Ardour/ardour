@@ -1,0 +1,1081 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JD-990</Model>
+    <PatchNameList Name="EXP Orchestral 1-64">
+      <Patch Number="I-11" Name="Warm Violins" ProgramChange="0"/>
+      <Patch Number="I-12" Name="Slow Vlns 1" ProgramChange="1"/>
+      <Patch Number="I-13" Name="Vlns+Vlas 1" ProgramChange="2"/>
+      <Patch Number="I-14" Name="Vl Sect mono" ProgramChange="3"/>
+      <Patch Number="I-15" Name="Arco Violins" ProgramChange="4"/>
+      <Patch Number="I-16" Name="Marcato Vls1" ProgramChange="5"/>
+      <Patch Number="I-17" Name="Vlns+Vlas 2" ProgramChange="6"/>
+      <Patch Number="I-18" Name="Agitato Vls1" ProgramChange="7"/>
+      <Patch Number="I-21" Name="Rosin Pad 1" ProgramChange="8"/>
+      <Patch Number="I-22" Name="Dry Mid-High" ProgramChange="9"/>
+      <Patch Number="I-23" Name="Natural Vlns" ProgramChange="10"/>
+      <Patch Number="I-24" Name="Sad Vln Sect" ProgramChange="11"/>
+      <Patch Number="I-25" Name="Marcato Vas" ProgramChange="12"/>
+      <Patch Number="I-26" Name="Arco Violas" ProgramChange="13"/>
+      <Patch Number="I-27" Name="Thick Violas" ProgramChange="14"/>
+      <Patch Number="I-28" Name="Va Sect f" ProgramChange="15"/>
+      <Patch Number="I-31" Name="Va Small Sec" ProgramChange="16"/>
+      <Patch Number="I-32" Name="Agitato Vas1" ProgramChange="17"/>
+      <Patch Number="I-33" Name="Sad Violas" ProgramChange="18"/>
+      <Patch Number="I-34" Name="Fast Cellos1" ProgramChange="19"/>
+      <Patch Number="I-35" Name="Vcs Legato 1" ProgramChange="20"/>
+      <Patch Number="I-36" Name="Marcato Vcs1" ProgramChange="21"/>
+      <Patch Number="I-37" Name="Small Vc Sec" ProgramChange="22"/>
+      <Patch Number="I-38" Name="Agitato Vcs 1" ProgramChange="23"/>
+      <Patch Number="I-41" Name="Small Cellos" ProgramChange="24"/>
+      <Patch Number="I-42" Name="Sad CelloSec" ProgramChange="25"/>
+      <Patch Number="I-43" Name="Cb Sect ff" ProgramChange="26"/>
+      <Patch Number="I-44" Name="Wide Basses" ProgramChange="27"/>
+      <Patch Number="I-45" Name="mf Basses" ProgramChange="28"/>
+      <Patch Number="I-46" Name="Agitato Cbs1" ProgramChange="29"/>
+      <Patch Number="I-47" Name="Vcs+Cbs" ProgramChange="30"/>
+      <Patch Number="I-48" Name="2 Basses" ProgramChange="31"/>
+      <Patch Number="I-51" Name="Euro Strings" ProgramChange="32"/>
+      <Patch Number="I-52" Name="Rich Strings" ProgramChange="33"/>
+      <Patch Number="I-53" Name="Multi Strs 1" ProgramChange="34"/>
+      <Patch Number="I-54" Name="VlsVasVcsCbs" ProgramChange="35"/>
+      <Patch Number="I-55" Name="Bright Strs" ProgramChange="36"/>
+      <Patch Number="I-56" Name="Classicl Str" ProgramChange="37"/>
+      <Patch Number="I-57" Name="Full Strings" ProgramChange="38"/>
+      <Patch Number="I-58" Name="Med Str Sec" ProgramChange="39"/>
+      <Patch Number="I-61" Name="Small Strngs" ProgramChange="40"/>
+      <Patch Number="I-62" Name="Strings Arco" ProgramChange="41"/>
+      <Patch Number="I-63" Name="Vivace Strs" ProgramChange="42"/>
+      <Patch Number="I-64" Name="Agitato STR1" ProgramChange="43"/>
+      <Patch Number="I-65" Name="LowSTR Attak" ProgramChange="44"/>
+      <Patch Number="I-66" Name="Bad Guy STR" ProgramChange="45"/>
+      <Patch Number="I-67" Name="Ominous" ProgramChange="46"/>
+      <Patch Number="I-68" Name="Lo Express" ProgramChange="47"/>
+      <Patch Number="I-71" Name="DramaStrings" ProgramChange="48"/>
+      <Patch Number="I-72" Name="Solo Vln 1/" ProgramChange="49"/>
+      <Patch Number="I-73" Name="Solo Vln 2" ProgramChange="50"/>
+      <Patch Number="I-74" Name="Chorus Vln" ProgramChange="51"/>
+      <Patch Number="I-75" Name="Stereo Vln" ProgramChange="52"/>
+      <Patch Number="I-76" Name="Agitato Vln 1" ProgramChange="53"/>
+      <Patch Number="I-77" Name="Solo Vla 1/" ProgramChange="54"/>
+      <Patch Number="I-78" Name="Solo Vla 2" ProgramChange="55"/>
+      <Patch Number="I-81" Name="Chorus Viola" ProgramChange="56"/>
+      <Patch Number="I-82" Name="Stereo Viola" ProgramChange="57"/>
+      <Patch Number="I-83" Name="Agitato Vla" ProgramChange="58"/>
+      <Patch Number="I-84" Name="Solo Vc 1/" ProgramChange="59"/>
+      <Patch Number="I-85" Name="Solo Vc 2" ProgramChange="60"/>
+      <Patch Number="I-86" Name="Stereo Cello" ProgramChange="61"/>
+      <Patch Number="I-87" Name="Chorus Cello" ProgramChange="62"/>
+      <Patch Number="I-88" Name="Marcato Vc 1" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Orchestral 65-128">
+      <Patch Number="I-11" Name="Solo Cb 1/" ProgramChange="0"/>
+      <Patch Number="I-12" Name="Solo Cb 2" ProgramChange="1"/>
+      <Patch Number="I-13" Name="Marcato Cb 1" ProgramChange="2"/>
+      <Patch Number="I-14" Name="Chamber Ens1" ProgramChange="3"/>
+      <Patch Number="I-15" Name="Chamber Ens2" ProgramChange="4"/>
+      <Patch Number="I-16" Name="Vln+Vla Dble" ProgramChange="5"/>
+      <Patch Number="I-17" Name="Vln+Vc Dbl1" ProgramChange="6"/>
+      <Patch Number="I-18" Name="Vla+Vc Dbl2" ProgramChange="7"/>
+      <Patch Number="I-21" Name="Vla+Vc Dble" ProgramChange="8"/>
+      <Patch Number="I-22" Name="Pizzicato 1" ProgramChange="9"/>
+      <Patch Number="I-23" Name="Mono Pizz" ProgramChange="10"/>
+      <Patch Number="I-24" Name="Pizzicato 2" ProgramChange="11"/>
+      <Patch Number="I-25" Name="Room Pizz" ProgramChange="12"/>
+      <Patch Number="I-26" Name="Hall Pizz" ProgramChange="13"/>
+      <Patch Number="I-27" Name="Tight Pizz" ProgramChange="14"/>
+      <Patch Number="I-28" Name="Short Pizz" ProgramChange="15"/>
+      <Patch Number="I-31" Name="STR Marcato1" ProgramChange="16"/>
+      <Patch Number="I-32" Name="Oct Marcato" ProgramChange="17"/>
+      <Patch Number="I-33" Name="Lower Marc!!" ProgramChange="18"/>
+      <Patch Number="I-34" Name="Big Marc!" ProgramChange="19"/>
+      <Patch Number="I-35" Name="STR Spiccato" ProgramChange="20"/>
+      <Patch Number="I-36" Name="Fast Attacks" ProgramChange="21"/>
+      <Patch Number="I-37" Name="Flute" ProgramChange="22"/>
+      <Patch Number="I-38" Name="Flute V-Sw" ProgramChange="23"/>
+      <Patch Number="I-41" Name="Piccolo" ProgramChange="24"/>
+      <Patch Number="I-42" Name="Piccolo Flt" ProgramChange="25"/>
+      <Patch Number="I-43" Name="Recorder" ProgramChange="26"/>
+      <Patch Number="I-44" Name="Oboe 1" ProgramChange="27"/>
+      <Patch Number="I-45" Name="Oboe 2" ProgramChange="28"/>
+      <Patch Number="I-46" Name="Oboe 3" ProgramChange="29"/>
+      <Patch Number="I-47" Name="Oboe 4" ProgramChange="30"/>
+      <Patch Number="I-48" Name="Oboe 5" ProgramChange="31"/>
+      <Patch Number="I-51" Name="English Hrn1" ProgramChange="32"/>
+      <Patch Number="I-52" Name="English Hrn2" ProgramChange="33"/>
+      <Patch Number="I-53" Name="English Hrn3" ProgramChange="34"/>
+      <Patch Number="I-54" Name="Bassoon 1" ProgramChange="35"/>
+      <Patch Number="I-55" Name="Bassoon 2" ProgramChange="36"/>
+      <Patch Number="I-56" Name="Clarinet 1" ProgramChange="37"/>
+      <Patch Number="I-57" Name="Clarinet 2" ProgramChange="38"/>
+      <Patch Number="I-58" Name="Bs Clarinet1" ProgramChange="39"/>
+      <Patch Number="I-61" Name="BS Clarinet2" ProgramChange="40"/>
+      <Patch Number="I-62" Name="Trumpet 1" ProgramChange="41"/>
+      <Patch Number="I-63" Name="Trumpet 2" ProgramChange="42"/>
+      <Patch Number="I-64" Name="Trumpet 3" ProgramChange="43"/>
+      <Patch Number="I-65" Name="Flugelhorn 1" ProgramChange="44"/>
+      <Patch Number="I-66" Name="Flugelhorn 2" ProgramChange="45"/>
+      <Patch Number="I-67" Name="Cornet 1" ProgramChange="46"/>
+      <Patch Number="I-68" Name="Cornet 2" ProgramChange="47"/>
+      <Patch Number="I-71" Name="Solo Tb 1" ProgramChange="48"/>
+      <Patch Number="I-72" Name="Solo Tb 2" ProgramChange="49"/>
+      <Patch Number="I-73" Name="Solo Tb 3/" ProgramChange="50"/>
+      <Patch Number="I-74" Name="Solo Tb 4/" ProgramChange="51"/>
+      <Patch Number="I-75" Name="Bs Tb 1" ProgramChange="52"/>
+      <Patch Number="I-76" Name="BS Tb 2/" ProgramChange="53"/>
+      <Patch Number="I-77" Name="Harmon Mute 1" ProgramChange="54"/>
+      <Patch Number="I-78" Name="Harmon Mute 2" ProgramChange="55"/>
+      <Patch Number="I-81" Name="Tuba 1" ProgramChange="56"/>
+      <Patch Number="I-82" Name="Tuba 2" ProgramChange="57"/>
+      <Patch Number="I-83" Name="Solo F.Horn1" ProgramChange="58"/>
+      <Patch Number="I-84" Name="Solo F.Horn2" ProgramChange="59"/>
+      <Patch Number="I-85" Name="Sml F.Hrm sc" ProgramChange="60"/>
+      <Patch Number="I-86" Name="Horn Sect 1/" ProgramChange="61"/>
+      <Patch Number="I-87" Name="F.Horn sc x4" ProgramChange="62"/>
+      <Patch Number="I-88" Name="Fr.Hrn sfz" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Orchestral 129-192">
+      <Patch Number="I-11" Name="F.Hrn Sect2/" ProgramChange="0"/>
+      <Patch Number="I-12" Name="F.Hrn Sect3" ProgramChange="1"/>
+      <Patch Number="I-13" Name="F.Hrn Sect4" ProgramChange="2"/>
+      <Patch Number="I-14" Name="F.Hrn Sect5/" ProgramChange="3"/>
+      <Patch Number="I-15" Name="F.Hrn Sect6" ProgramChange="4"/>
+      <Patch Number="I-16" Name="F.Hrn Sect7" ProgramChange="5"/>
+      <Patch Number="I-17" Name="F.Hrn Sect8" ProgramChange="6"/>
+      <Patch Number="I-18" Name="MuteHrn Sect" ProgramChange="7"/>
+      <Patch Number="I-21" Name="Horn+Wood 1" ProgramChange="8"/>
+      <Patch Number="I-22" Name="Horn+Wood 2" ProgramChange="9"/>
+      <Patch Number="I-23" Name="Horn+Wood 3" ProgramChange="10"/>
+      <Patch Number="I-24" Name="Wood Sect 1" ProgramChange="11"/>
+      <Patch Number="I-25" Name="Wood Sect 2" ProgramChange="12"/>
+      <Patch Number="I-26" Name="Wood Sect 3" ProgramChange="13"/>
+      <Patch Number="I-27" Name="Wood Sect 4" ProgramChange="14"/>
+      <Patch Number="I-28" Name="2 Oboes" ProgramChange="15"/>
+      <Patch Number="I-31" Name="Oboe + Cla" ProgramChange="16"/>
+      <Patch Number="I-32" Name="Flt + Piccl" ProgramChange="17"/>
+      <Patch Number="I-33" Name="Flute + Cla" ProgramChange="18"/>
+      <Patch Number="I-34" Name="Bassoon+EHrn" ProgramChange="19"/>
+      <Patch Number="I-35" Name="Hi Woodwinds" ProgramChange="20"/>
+      <Patch Number="I-36" Name="WoodwindSplt" ProgramChange="21"/>
+      <Patch Number="I-37" Name="Multi Reed" ProgramChange="22"/>
+      <Patch Number="I-38" Name="4 Trombones" ProgramChange="23"/>
+      <Patch Number="I-41" Name="Tb Sect 1" ProgramChange="24"/>
+      <Patch Number="I-42" Name="Tb + Tp" ProgramChange="25"/>
+      <Patch Number="I-43" Name="4 Trumpets" ProgramChange="26"/>
+      <Patch Number="I-44" Name="3 Trumpets" ProgramChange="27"/>
+      <Patch Number="I-45" Name="Brass ff 1" ProgramChange="28"/>
+      <Patch Number="I-46" Name="Brass ff 2" ProgramChange="29"/>
+      <Patch Number="I-47" Name="Brass ff 3" ProgramChange="30"/>
+      <Patch Number="I-48" Name="McArther Brs" ProgramChange="31"/>
+      <Patch Number="I-51" Name="Big Bones" ProgramChange="32"/>
+      <Patch Number="I-52" Name="BassBoneSect" ProgramChange="33"/>
+      <Patch Number="I-53" Name="Brass Swell1" ProgramChange="34"/>
+      <Patch Number="I-54" Name="Full Brs 1" ProgramChange="35"/>
+      <Patch Number="I-55" Name="Brass Sect1/" ProgramChange="36"/>
+      <Patch Number="I-56" Name="Brass Ens 1" ProgramChange="37"/>
+      <Patch Number="I-57" Name="Brass Ens 2" ProgramChange="38"/>
+      <Patch Number="I-58" Name="Brass Ens 3" ProgramChange="39"/>
+      <Patch Number="I-61" Name="Brass Ens 4" ProgramChange="40"/>
+      <Patch Number="I-62" Name="Brass Ens 5" ProgramChange="41"/>
+      <Patch Number="I-63" Name="Brass Ens 6" ProgramChange="42"/>
+      <Patch Number="I-64" Name="Brass Ens 7" ProgramChange="43"/>
+      <Patch Number="I-65" Name="Brass Ens 8" ProgramChange="44"/>
+      <Patch Number="I-66" Name="Horn Strings" ProgramChange="45"/>
+      <Patch Number="I-67" Name="Full Orch.1" ProgramChange="46"/>
+      <Patch Number="I-68" Name="Full Orch.2" ProgramChange="47"/>
+      <Patch Number="I-71" Name="Full Orch.3" ProgramChange="48"/>
+      <Patch Number="I-72" Name="Full Orch.4" ProgramChange="49"/>
+      <Patch Number="I-73" Name="Maj Hit 1" ProgramChange="50"/>
+      <Patch Number="I-74" Name="Min Hit 1" ProgramChange="51"/>
+      <Patch Number="I-75" Name="Dim Hit 1" ProgramChange="52"/>
+      <Patch Number="I-76" Name="Major Stab!" ProgramChange="53"/>
+      <Patch Number="I-77" Name="Maj Hit 2" ProgramChange="54"/>
+      <Patch Number="I-78" Name="Min Hit 2" ProgramChange="55"/>
+      <Patch Number="I-81" Name="Classical Gt" ProgramChange="56"/>
+      <Patch Number="I-82" Name="Harp 1" ProgramChange="57"/>
+      <Patch Number="I-83" Name="Harp 2" ProgramChange="58"/>
+      <Patch Number="I-84" Name="Plucked Harp" ProgramChange="59"/>
+      <Patch Number="I-85" Name="Harp StrumMj" ProgramChange="60"/>
+      <Patch Number="I-86" Name="Harp StrumMn" ProgramChange="61"/>
+      <Patch Number="I-87" Name="Water Harp" ProgramChange="62"/>
+      <Patch Number="I-88" Name="ClasclPiano1" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Orchestral 193-255">
+      <Patch Number="I-11" Name="ClasclPiano2" ProgramChange="0"/>
+      <Patch Number="I-12" Name="ClasclPiano3" ProgramChange="1"/>
+      <Patch Number="I-13" Name="ClasclPiano4" ProgramChange="2"/>
+      <Patch Number="I-14" Name="Harpsichord1" ProgramChange="3"/>
+      <Patch Number="I-15" Name="Harpsichord2" ProgramChange="4"/>
+      <Patch Number="I-16" Name="Harpsichord3" ProgramChange="5"/>
+      <Patch Number="I-17" Name="Harpsichord4" ProgramChange="6"/>
+      <Patch Number="I-18" Name="Celesta 1" ProgramChange="7"/>
+      <Patch Number="I-21" Name="Celesta 2" ProgramChange="8"/>
+      <Patch Number="I-22" Name="Celesta 3" ProgramChange="9"/>
+      <Patch Number="I-23" Name="Glockenleste" ProgramChange="10"/>
+      <Patch Number="I-24" Name="Marimba" ProgramChange="11"/>
+      <Patch Number="I-25" Name="BassMarimba1" ProgramChange="12"/>
+      <Patch Number="I-26" Name="BassMarimba2" ProgramChange="13"/>
+      <Patch Number="I-27" Name="Vibe" ProgramChange="14"/>
+      <Patch Number="I-28" Name="Xylophone 1" ProgramChange="15"/>
+      <Patch Number="I-31" Name="Xylophone 2" ProgramChange="16"/>
+      <Patch Number="I-32" Name="Xylophone 3" ProgramChange="17"/>
+      <Patch Number="I-33" Name="Glocken 1" ProgramChange="18"/>
+      <Patch Number="I-34" Name="Glocken 2" ProgramChange="19"/>
+      <Patch Number="I-35" Name="ChuchBells1" ProgramChange="20"/>
+      <Patch Number="I-36" Name="ChuchBells2" ProgramChange="21"/>
+      <Patch Number="I-37" Name="ChuchBells3" ProgramChange="22"/>
+      <Patch Number="I-38" Name="TubulaBells1" ProgramChange="23"/>
+      <Patch Number="I-41" Name="TubulaBells2" ProgramChange="24"/>
+      <Patch Number="I-42" Name="Big Tubulars" ProgramChange="25"/>
+      <Patch Number="I-43" Name="Dawning" ProgramChange="26"/>
+      <Patch Number="I-44" Name="MalletStack1" ProgramChange="27"/>
+      <Patch Number="I-45" Name="MalletStack2" ProgramChange="28"/>
+      <Patch Number="I-46" Name="MalletStack3" ProgramChange="29"/>
+      <Patch Number="I-47" Name="MalletStack4" ProgramChange="30"/>
+      <Patch Number="I-48" Name="MalletStack5" ProgramChange="31"/>
+      <Patch Number="I-51" Name="MalletStack6" ProgramChange="32"/>
+      <Patch Number="I-52" Name="MalletStack7" ProgramChange="33"/>
+      <Patch Number="I-53" Name="Choir 1" ProgramChange="34"/>
+      <Patch Number="I-54" Name="Choir 2" ProgramChange="35"/>
+      <Patch Number="I-55" Name="Snare Drum" ProgramChange="36"/>
+      <Patch Number="I-56" Name="ConcertSNR1/" ProgramChange="37"/>
+      <Patch Number="I-57" Name="ConcertSNR2/" ProgramChange="38"/>
+      <Patch Number="I-58" Name="SNR Roll/" ProgramChange="39"/>
+      <Patch Number="I-61" Name="Concert BD1" ProgramChange="40"/>
+      <Patch Number="I-62" Name="Concert BD2/" ProgramChange="41"/>
+      <Patch Number="I-63" Name="BD Roll/" ProgramChange="42"/>
+      <Patch Number="I-64" Name="Timpani 1/" ProgramChange="43"/>
+      <Patch Number="I-65" Name="Timpani 2/" ProgramChange="44"/>
+      <Patch Number="I-66" Name="Timpani 3" ProgramChange="45"/>
+      <Patch Number="I-67" Name="Timpani 4/" ProgramChange="46"/>
+      <Patch Number="I-68" Name="Tam Tam" ProgramChange="47"/>
+      <Patch Number="I-71" Name="Gong" ProgramChange="48"/>
+      <Patch Number="I-73" Name="Piatti!!" ProgramChange="49"/>
+      <Patch Number="I-73" Name="Sleigh Bells" ProgramChange="50"/>
+      <Patch Number="I-74" Name="Slapstick/" ProgramChange="51"/>
+      <Patch Number="I-75" Name="Wind Chimes1" ProgramChange="52"/>
+      <Patch Number="I-76" Name="Wind Chimes2" ProgramChange="53"/>
+      <Patch Number="I-77" Name="Tambourine/" ProgramChange="54"/>
+      <Patch Number="I-78" Name="Castanets/" ProgramChange="55"/>
+      <Patch Number="I-81" Name="Rhythm Set" ProgramChange="56"/>
+      <Patch Number="I-82" Name="Perc Hit 1" ProgramChange="57"/>
+      <Patch Number="I-83" Name="Perc Hit 2/" ProgramChange="58"/>
+      <Patch Number="I-84" Name="Perc Hit 3" ProgramChange="59"/>
+      <Patch Number="I-85" Name="Presenting!" ProgramChange="60"/>
+      <Patch Number="I-86" Name="Presto!" ProgramChange="61"/>
+      <Patch Number="I-87" Name="Christmas!!!" ProgramChange="62"/>
+      <Patch Number="I-88" Name="Patch 88" ProgramChange="63"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JV-80</Model>
+    <Model>JV-880</Model>
+    <PatchNameList Name="EXP Orchestral 1st(64)">
+      <Patch Number="i01" Name="Warm Violins" ProgramChange="0"/>
+      <Patch Number="i02" Name="Slow Vlns 1" ProgramChange="1"/>
+      <Patch Number="i03" Name="Vlns+Vlas 1" ProgramChange="2"/>
+      <Patch Number="i04" Name="Vl Sect mono" ProgramChange="3"/>
+      <Patch Number="i05" Name="Arco Violins" ProgramChange="4"/>
+      <Patch Number="i06" Name="Marcato Vls1" ProgramChange="5"/>
+      <Patch Number="i07" Name="Vlns+Vlas 2" ProgramChange="6"/>
+      <Patch Number="i08" Name="Agitato Vls1" ProgramChange="7"/>
+      <Patch Number="i09" Name="Rosin Pad 1" ProgramChange="8"/>
+      <Patch Number="i10" Name="Dry Mid-High" ProgramChange="9"/>
+      <Patch Number="i11" Name="Natural Vlns" ProgramChange="10"/>
+      <Patch Number="i12" Name="Sad Vln Sect" ProgramChange="11"/>
+      <Patch Number="i13" Name="Marcato Vas" ProgramChange="12"/>
+      <Patch Number="i14" Name="Arco Violas" ProgramChange="13"/>
+      <Patch Number="i15" Name="Thick Violas" ProgramChange="14"/>
+      <Patch Number="i16" Name="Va Sect f" ProgramChange="15"/>
+      <Patch Number="i17" Name="Va Small Sec" ProgramChange="16"/>
+      <Patch Number="i18" Name="Agitato Vas1" ProgramChange="17"/>
+      <Patch Number="i19" Name="Sad Violas" ProgramChange="18"/>
+      <Patch Number="i20" Name="Fast Cellos1" ProgramChange="19"/>
+      <Patch Number="i21" Name="Vcs Legato 1" ProgramChange="20"/>
+      <Patch Number="i22" Name="Marcato Vcs1" ProgramChange="21"/>
+      <Patch Number="i23" Name="Small Vc Sec" ProgramChange="22"/>
+      <Patch Number="i24" Name="Agitato Vcs 1" ProgramChange="23"/>
+      <Patch Number="i25" Name="Small Cellos" ProgramChange="24"/>
+      <Patch Number="i26" Name="Sad CelloSec" ProgramChange="25"/>
+      <Patch Number="i27" Name="Cb Sect ff" ProgramChange="26"/>
+      <Patch Number="i28" Name="Wide Basses" ProgramChange="27"/>
+      <Patch Number="i29" Name="mf Basses" ProgramChange="28"/>
+      <Patch Number="i30" Name="Agitato Cbs1" ProgramChange="29"/>
+      <Patch Number="i31" Name="Vcs+Cbs" ProgramChange="30"/>
+      <Patch Number="i32" Name="2 Basses" ProgramChange="31"/>
+      <Patch Number="i33" Name="Euro Strings" ProgramChange="32"/>
+      <Patch Number="i34" Name="Rich Strings" ProgramChange="33"/>
+      <Patch Number="i35" Name="Multi Strs 1" ProgramChange="34"/>
+      <Patch Number="i36" Name="VlsVasVcsCbs" ProgramChange="35"/>
+      <Patch Number="i37" Name="Bright Strs" ProgramChange="36"/>
+      <Patch Number="i38" Name="Classicl Str" ProgramChange="37"/>
+      <Patch Number="i39" Name="Full Strings" ProgramChange="38"/>
+      <Patch Number="i40" Name="Med Str Sec" ProgramChange="39"/>
+      <Patch Number="i41" Name="Small Strngs" ProgramChange="40"/>
+      <Patch Number="i42" Name="Strings Arco" ProgramChange="41"/>
+      <Patch Number="i43" Name="Vivace Strs" ProgramChange="42"/>
+      <Patch Number="i44" Name="Agitato STR1" ProgramChange="43"/>
+      <Patch Number="i45" Name="LowSTR Attak" ProgramChange="44"/>
+      <Patch Number="i46" Name="Bad Guy STR" ProgramChange="45"/>
+      <Patch Number="i47" Name="Ominous" ProgramChange="46"/>
+      <Patch Number="i48" Name="Lo Express" ProgramChange="47"/>
+      <Patch Number="i49" Name="DramaStrings" ProgramChange="48"/>
+      <Patch Number="i50" Name="Solo Vln 1/" ProgramChange="49"/>
+      <Patch Number="i51" Name="Solo Vln 2" ProgramChange="50"/>
+      <Patch Number="i52" Name="Chorus Vln" ProgramChange="51"/>
+      <Patch Number="i53" Name="Stereo Vln" ProgramChange="52"/>
+      <Patch Number="i54" Name="Agitato Vln 1" ProgramChange="53"/>
+      <Patch Number="i55" Name="Solo Vla 1/" ProgramChange="54"/>
+      <Patch Number="i56" Name="Solo Vla 2" ProgramChange="55"/>
+      <Patch Number="i57" Name="Chorus Viola" ProgramChange="56"/>
+      <Patch Number="i58" Name="Stereo Viola" ProgramChange="57"/>
+      <Patch Number="i59" Name="Agitato Vla" ProgramChange="58"/>
+      <Patch Number="i60" Name="Solo Vc 1/" ProgramChange="59"/>
+      <Patch Number="i61" Name="Solo Vc 2" ProgramChange="60"/>
+      <Patch Number="i62" Name="Stereo Cello" ProgramChange="61"/>
+      <Patch Number="i63" Name="Chorus Cello" ProgramChange="62"/>
+      <Patch Number="i64" Name="Marcato Vc 1" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Orchestral 2nd(64)">
+      <Patch Number="i01" Name="Solo Cb 1/" ProgramChange="0"/>
+      <Patch Number="i02" Name="Solo Cb 2" ProgramChange="1"/>
+      <Patch Number="i03" Name="Marcato Cb 1" ProgramChange="2"/>
+      <Patch Number="i04" Name="Chamber Ens1" ProgramChange="3"/>
+      <Patch Number="i05" Name="Chamber Ens2" ProgramChange="4"/>
+      <Patch Number="i06" Name="Vln+Vla Dble" ProgramChange="5"/>
+      <Patch Number="i07" Name="Vln+Vc Dbl1" ProgramChange="6"/>
+      <Patch Number="i08" Name="Vla+Vc Dbl2" ProgramChange="7"/>
+      <Patch Number="i09" Name="Vla+Vc Dble" ProgramChange="8"/>
+      <Patch Number="i10" Name="Pizzicato 1" ProgramChange="9"/>
+      <Patch Number="i11" Name="Mono Pizz" ProgramChange="10"/>
+      <Patch Number="i12" Name="Pizzicato 2" ProgramChange="11"/>
+      <Patch Number="i13" Name="Room Pizz" ProgramChange="12"/>
+      <Patch Number="i14" Name="Hall Pizz" ProgramChange="13"/>
+      <Patch Number="i15" Name="Tight Pizz" ProgramChange="14"/>
+      <Patch Number="i16" Name="Short Pizz" ProgramChange="15"/>
+      <Patch Number="i17" Name="STR Marcato1" ProgramChange="16"/>
+      <Patch Number="i18" Name="Oct Marcato" ProgramChange="17"/>
+      <Patch Number="i19" Name="Lower Marc!!" ProgramChange="18"/>
+      <Patch Number="i20" Name="Big Marc!" ProgramChange="19"/>
+      <Patch Number="i21" Name="STR Spiccato" ProgramChange="20"/>
+      <Patch Number="i22" Name="Fast Attacks" ProgramChange="21"/>
+      <Patch Number="i23" Name="Flute" ProgramChange="22"/>
+      <Patch Number="i24" Name="Flute V-Sw" ProgramChange="23"/>
+      <Patch Number="i25" Name="Piccolo" ProgramChange="24"/>
+      <Patch Number="i26" Name="Piccolo Flt" ProgramChange="25"/>
+      <Patch Number="i27" Name="Recorder" ProgramChange="26"/>
+      <Patch Number="i28" Name="Oboe 1" ProgramChange="27"/>
+      <Patch Number="i29" Name="Oboe 2" ProgramChange="28"/>
+      <Patch Number="i30" Name="Oboe 3" ProgramChange="29"/>
+      <Patch Number="i31" Name="Oboe 4" ProgramChange="30"/>
+      <Patch Number="i32" Name="Oboe 5" ProgramChange="31"/>
+      <Patch Number="i33" Name="English Hrn1" ProgramChange="32"/>
+      <Patch Number="i34" Name="English Hrn2" ProgramChange="33"/>
+      <Patch Number="i35" Name="English Hrn3" ProgramChange="34"/>
+      <Patch Number="i36" Name="Bassoon 1" ProgramChange="35"/>
+      <Patch Number="i37" Name="Bassoon 2" ProgramChange="36"/>
+      <Patch Number="i38" Name="Clarinet 1" ProgramChange="37"/>
+      <Patch Number="i39" Name="Clarinet 2" ProgramChange="38"/>
+      <Patch Number="i40" Name="Bs Clarinet1" ProgramChange="39"/>
+      <Patch Number="i41" Name="BS Clarinet2" ProgramChange="40"/>
+      <Patch Number="i42" Name="Trumpet 1" ProgramChange="41"/>
+      <Patch Number="i43" Name="Trumpet 2" ProgramChange="42"/>
+      <Patch Number="i44" Name="Trumpet 3" ProgramChange="43"/>
+      <Patch Number="i45" Name="Flugelhorn 1" ProgramChange="44"/>
+      <Patch Number="i46" Name="Flugelhorn 2" ProgramChange="45"/>
+      <Patch Number="i47" Name="Cornet 1" ProgramChange="46"/>
+      <Patch Number="i48" Name="Cornet 2" ProgramChange="47"/>
+      <Patch Number="i49" Name="Solo Tb 1" ProgramChange="48"/>
+      <Patch Number="i50" Name="Solo Tb 2" ProgramChange="49"/>
+      <Patch Number="i51" Name="Solo Tb 3/" ProgramChange="50"/>
+      <Patch Number="i52" Name="Solo Tb 4/" ProgramChange="51"/>
+      <Patch Number="i53" Name="Bs Tb 1" ProgramChange="52"/>
+      <Patch Number="i54" Name="BS Tb 2/" ProgramChange="53"/>
+      <Patch Number="i55" Name="Harmon Mute 1" ProgramChange="54"/>
+      <Patch Number="i56" Name="Harmon Mute 2" ProgramChange="55"/>
+      <Patch Number="i57" Name="Tuba 1" ProgramChange="56"/>
+      <Patch Number="i58" Name="Tuba 2" ProgramChange="57"/>
+      <Patch Number="i59" Name="Solo F.Horn1" ProgramChange="58"/>
+      <Patch Number="i60" Name="Solo F.Horn2" ProgramChange="59"/>
+      <Patch Number="i61" Name="Sml F.Hrm sc" ProgramChange="60"/>
+      <Patch Number="i62" Name="Horn Sect 1/" ProgramChange="61"/>
+      <Patch Number="i63" Name="F.Horn sc x4" ProgramChange="62"/>
+      <Patch Number="i64" Name="Fr.Hrn sfz" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Orchestral 3rd(64)">
+      <Patch Number="i01" Name="F.Hrn Sect2/" ProgramChange="0"/>
+      <Patch Number="i02" Name="F.Hrn Sect3" ProgramChange="1"/>
+      <Patch Number="i03" Name="F.Hrn Sect4" ProgramChange="2"/>
+      <Patch Number="i04" Name="F.Hrn Sect5/" ProgramChange="3"/>
+      <Patch Number="i05" Name="F.Hrn Sect6" ProgramChange="4"/>
+      <Patch Number="i06" Name="F.Hrn Sect7" ProgramChange="5"/>
+      <Patch Number="i07" Name="F.Hrn Sect8" ProgramChange="6"/>
+      <Patch Number="i08" Name="MuteHrn Sect" ProgramChange="7"/>
+      <Patch Number="i09" Name="Horn+Wood 1" ProgramChange="8"/>
+      <Patch Number="i10" Name="Horn+Wood 2" ProgramChange="9"/>
+      <Patch Number="i11" Name="Horn+Wood 3" ProgramChange="10"/>
+      <Patch Number="i12" Name="Wood Sect 1" ProgramChange="11"/>
+      <Patch Number="i13" Name="Wood Sect 2" ProgramChange="12"/>
+      <Patch Number="i14" Name="Wood Sect 3" ProgramChange="13"/>
+      <Patch Number="i15" Name="Wood Sect 4" ProgramChange="14"/>
+      <Patch Number="i16" Name="2 Oboes" ProgramChange="15"/>
+      <Patch Number="i17" Name="Oboe + Cla" ProgramChange="16"/>
+      <Patch Number="i18" Name="Flt + Piccl" ProgramChange="17"/>
+      <Patch Number="i19" Name="Flute + Cla" ProgramChange="18"/>
+      <Patch Number="i20" Name="Bassoon+EHrn" ProgramChange="19"/>
+      <Patch Number="i21" Name="Hi Woodwinds" ProgramChange="20"/>
+      <Patch Number="i22" Name="WoodwindSplt" ProgramChange="21"/>
+      <Patch Number="i23" Name="Multi Reed" ProgramChange="22"/>
+      <Patch Number="i24" Name="4 Trombones" ProgramChange="23"/>
+      <Patch Number="i25" Name="Tb Sect 1" ProgramChange="24"/>
+      <Patch Number="i26" Name="Tb + Tp" ProgramChange="25"/>
+      <Patch Number="i27" Name="4 Trumpets" ProgramChange="26"/>
+      <Patch Number="i28" Name="3 Trumpets" ProgramChange="27"/>
+      <Patch Number="i29" Name="Brass ff 1" ProgramChange="28"/>
+      <Patch Number="i30" Name="Brass ff 2" ProgramChange="29"/>
+      <Patch Number="i31" Name="Brass ff 3" ProgramChange="30"/>
+      <Patch Number="i32" Name="McArther Brs" ProgramChange="31"/>
+      <Patch Number="i33" Name="Big Bones" ProgramChange="32"/>
+      <Patch Number="i34" Name="BassBoneSect" ProgramChange="33"/>
+      <Patch Number="i35" Name="Brass Swell1" ProgramChange="34"/>
+      <Patch Number="i36" Name="Full Brs 1" ProgramChange="35"/>
+      <Patch Number="i37" Name="Brass Sect1/" ProgramChange="36"/>
+      <Patch Number="i38" Name="Brass Ens 1" ProgramChange="37"/>
+      <Patch Number="i39" Name="Brass Ens 2" ProgramChange="38"/>
+      <Patch Number="i40" Name="Brass Ens 3" ProgramChange="39"/>
+      <Patch Number="i41" Name="Brass Ens 4" ProgramChange="40"/>
+      <Patch Number="i42" Name="Brass Ens 5" ProgramChange="41"/>
+      <Patch Number="i43" Name="Brass Ens 6" ProgramChange="42"/>
+      <Patch Number="i44" Name="Brass Ens 7" ProgramChange="43"/>
+      <Patch Number="i45" Name="Brass Ens 8" ProgramChange="44"/>
+      <Patch Number="i46" Name="Horn Strings" ProgramChange="45"/>
+      <Patch Number="i47" Name="Full Orch.1" ProgramChange="46"/>
+      <Patch Number="i48" Name="Full Orch.2" ProgramChange="47"/>
+      <Patch Number="i49" Name="Full Orch.3" ProgramChange="48"/>
+      <Patch Number="i50" Name="Full Orch.4" ProgramChange="49"/>
+      <Patch Number="i51" Name="Maj Hit 1" ProgramChange="50"/>
+      <Patch Number="i52" Name="Min Hit 1" ProgramChange="51"/>
+      <Patch Number="i53" Name="Dim Hit 1" ProgramChange="52"/>
+      <Patch Number="i54" Name="Major Stab!" ProgramChange="53"/>
+      <Patch Number="i55" Name="Maj Hit 2" ProgramChange="54"/>
+      <Patch Number="i56" Name="Min Hit 2" ProgramChange="55"/>
+      <Patch Number="i57" Name="Classical Gt" ProgramChange="56"/>
+      <Patch Number="i58" Name="Harp 1" ProgramChange="57"/>
+      <Patch Number="i59" Name="Harp 2" ProgramChange="58"/>
+      <Patch Number="i60" Name="Plucked Harp" ProgramChange="59"/>
+      <Patch Number="i61" Name="Harp StrumMj" ProgramChange="60"/>
+      <Patch Number="i62" Name="Harp StrumMn" ProgramChange="61"/>
+      <Patch Number="i63" Name="Water Harp" ProgramChange="62"/>
+      <Patch Number="i64" Name="ClasclPiano1" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Orchestral 4th(64)">
+      <Patch Number="i01" Name="ClasclPiano2" ProgramChange="0"/>
+      <Patch Number="i02" Name="ClasclPiano3" ProgramChange="1"/>
+      <Patch Number="i03" Name="ClasclPiano4" ProgramChange="2"/>
+      <Patch Number="i04" Name="Harpsichord1" ProgramChange="3"/>
+      <Patch Number="i05" Name="Harpsichord2" ProgramChange="4"/>
+      <Patch Number="i06" Name="Harpsichord3" ProgramChange="5"/>
+      <Patch Number="i07" Name="Harpsichord4" ProgramChange="6"/>
+      <Patch Number="i08" Name="Celesta 1" ProgramChange="7"/>
+      <Patch Number="i09" Name="Celesta 2" ProgramChange="8"/>
+      <Patch Number="i10" Name="Celesta 3" ProgramChange="9"/>
+      <Patch Number="i11" Name="Glockenleste" ProgramChange="10"/>
+      <Patch Number="i12" Name="Marimba" ProgramChange="11"/>
+      <Patch Number="i13" Name="BassMarimba1" ProgramChange="12"/>
+      <Patch Number="i14" Name="BassMarimba2" ProgramChange="13"/>
+      <Patch Number="i15" Name="Vibe" ProgramChange="14"/>
+      <Patch Number="i16" Name="Xylophone 1" ProgramChange="15"/>
+      <Patch Number="i17" Name="Xylophone 2" ProgramChange="16"/>
+      <Patch Number="i18" Name="Xylophone 3" ProgramChange="17"/>
+      <Patch Number="i19" Name="Glocken 1" ProgramChange="18"/>
+      <Patch Number="i20" Name="Glocken 2" ProgramChange="19"/>
+      <Patch Number="i21" Name="ChuchBells1" ProgramChange="20"/>
+      <Patch Number="i22" Name="ChuchBells2" ProgramChange="21"/>
+      <Patch Number="i23" Name="ChuchBells3" ProgramChange="22"/>
+      <Patch Number="i24" Name="TubulaBells1" ProgramChange="23"/>
+      <Patch Number="i25" Name="TubulaBells2" ProgramChange="24"/>
+      <Patch Number="i26" Name="Big Tubulars" ProgramChange="25"/>
+      <Patch Number="i27" Name="Dawning" ProgramChange="26"/>
+      <Patch Number="i28" Name="MalletStack1" ProgramChange="27"/>
+      <Patch Number="i29" Name="MalletStack2" ProgramChange="28"/>
+      <Patch Number="i30" Name="MalletStack3" ProgramChange="29"/>
+      <Patch Number="i31" Name="MalletStack4" ProgramChange="30"/>
+      <Patch Number="i32" Name="MalletStack5" ProgramChange="31"/>
+      <Patch Number="i33" Name="MalletStack6" ProgramChange="32"/>
+      <Patch Number="i34" Name="MalletStack7" ProgramChange="33"/>
+      <Patch Number="i35" Name="Choir 1" ProgramChange="34"/>
+      <Patch Number="i36" Name="Choir 2" ProgramChange="35"/>
+      <Patch Number="i37" Name="Snare Drum" ProgramChange="36"/>
+      <Patch Number="i38" Name="ConcertSNR1/" ProgramChange="37"/>
+      <Patch Number="i39" Name="ConcertSNR2/" ProgramChange="38"/>
+      <Patch Number="i40" Name="SNR Roll/" ProgramChange="39"/>
+      <Patch Number="i41" Name="Concert BD1" ProgramChange="40"/>
+      <Patch Number="i42" Name="Concert BD2/" ProgramChange="41"/>
+      <Patch Number="i43" Name="BD Roll/" ProgramChange="42"/>
+      <Patch Number="i44" Name="Timpani 1/" ProgramChange="43"/>
+      <Patch Number="i45" Name="Timpani 2/" ProgramChange="44"/>
+      <Patch Number="i46" Name="Timpani 3" ProgramChange="45"/>
+      <Patch Number="i47" Name="Timpani 4/" ProgramChange="46"/>
+      <Patch Number="i48" Name="Tam Tam" ProgramChange="47"/>
+      <Patch Number="i49" Name="Gong" ProgramChange="48"/>
+      <Patch Number="i50" Name="Piatti!!" ProgramChange="49"/>
+      <Patch Number="i51" Name="Sleigh Bells" ProgramChange="50"/>
+      <Patch Number="i52" Name="Slapstick/" ProgramChange="51"/>
+      <Patch Number="i53" Name="Wind Chimes1" ProgramChange="52"/>
+      <Patch Number="i54" Name="Wind Chimes2" ProgramChange="53"/>
+      <Patch Number="i55" Name="Tambourine/" ProgramChange="54"/>
+      <Patch Number="i56" Name="Castanets/" ProgramChange="55"/>
+      <Patch Number="i57" Name="Rhythm Set" ProgramChange="56"/>
+      <Patch Number="i58" Name="Perc Hit 1" ProgramChange="57"/>
+      <Patch Number="i59" Name="Perc Hit 2/" ProgramChange="58"/>
+      <Patch Number="i60" Name="Perc Hit 3" ProgramChange="59"/>
+      <Patch Number="i61" Name="Presenting!" ProgramChange="60"/>
+      <Patch Number="i62" Name="Presto!" ProgramChange="61"/>
+      <Patch Number="i63" Name="Christmas!!!" ProgramChange="62"/>
+      <Patch Number="i64" Name="Patch 88" ProgramChange="63"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JV-90</Model>
+    <Model>JV-1000</Model>
+    <PatchNameList Name="EXP Orchestral A">
+      <Patch Number="EA11" Name="Warm Violins" ProgramChange="0"/>
+      <Patch Number="EA12" Name="Slow Vlns 1" ProgramChange="1"/>
+      <Patch Number="EA13" Name="Vlns+Vlas 1" ProgramChange="2"/>
+      <Patch Number="EA14" Name="Vl Sect mono" ProgramChange="3"/>
+      <Patch Number="EA15" Name="Arco Violins" ProgramChange="4"/>
+      <Patch Number="EA16" Name="Marcato Vls1" ProgramChange="5"/>
+      <Patch Number="EA17" Name="Vlns+Vlas 2" ProgramChange="6"/>
+      <Patch Number="EA18" Name="Agitato Vls1" ProgramChange="7"/>
+      <Patch Number="EA21" Name="Rosin Pad 1" ProgramChange="8"/>
+      <Patch Number="EA22" Name="Dry Mid-High" ProgramChange="9"/>
+      <Patch Number="EA23" Name="Natural Vlns" ProgramChange="10"/>
+      <Patch Number="EA24" Name="Sad Vln Sect" ProgramChange="11"/>
+      <Patch Number="EA25" Name="Marcato Vas" ProgramChange="12"/>
+      <Patch Number="EA26" Name="Arco Violas" ProgramChange="13"/>
+      <Patch Number="EA27" Name="Thick Violas" ProgramChange="14"/>
+      <Patch Number="EA28" Name="Va Sect f" ProgramChange="15"/>
+      <Patch Number="EA31" Name="Va Small Sec" ProgramChange="16"/>
+      <Patch Number="EA32" Name="Agitato Vas1" ProgramChange="17"/>
+      <Patch Number="EA33" Name="Sad Violas" ProgramChange="18"/>
+      <Patch Number="EA34" Name="Fast Cellos1" ProgramChange="19"/>
+      <Patch Number="EA35" Name="Vcs Legato 1" ProgramChange="20"/>
+      <Patch Number="EA36" Name="Marcato Vcs1" ProgramChange="21"/>
+      <Patch Number="EA37" Name="Small Vc Sec" ProgramChange="22"/>
+      <Patch Number="EA38" Name="Agitato Vcs 1" ProgramChange="23"/>
+      <Patch Number="EA41" Name="Small Cellos" ProgramChange="24"/>
+      <Patch Number="EA42" Name="Sad CelloSec" ProgramChange="25"/>
+      <Patch Number="EA43" Name="Cb Sect ff" ProgramChange="26"/>
+      <Patch Number="EA44" Name="Wide Basses" ProgramChange="27"/>
+      <Patch Number="EA45" Name="mf Basses" ProgramChange="28"/>
+      <Patch Number="EA46" Name="Agitato Cbs1" ProgramChange="29"/>
+      <Patch Number="EA47" Name="Vcs+Cbs" ProgramChange="30"/>
+      <Patch Number="EA48" Name="2 Basses" ProgramChange="31"/>
+      <Patch Number="EA51" Name="Euro Strings" ProgramChange="32"/>
+      <Patch Number="EA52" Name="Rich Strings" ProgramChange="33"/>
+      <Patch Number="EA53" Name="Multi Strs 1" ProgramChange="34"/>
+      <Patch Number="EA54" Name="VlsVasVcsCbs" ProgramChange="35"/>
+      <Patch Number="EA55" Name="Bright Strs" ProgramChange="36"/>
+      <Patch Number="EA56" Name="Classicl Str" ProgramChange="37"/>
+      <Patch Number="EA57" Name="Full Strings" ProgramChange="38"/>
+      <Patch Number="EA58" Name="Med Str Sec" ProgramChange="39"/>
+      <Patch Number="EA61" Name="Small Strngs" ProgramChange="40"/>
+      <Patch Number="EA62" Name="Strings Arco" ProgramChange="41"/>
+      <Patch Number="EA63" Name="Vivace Strs" ProgramChange="42"/>
+      <Patch Number="EA64" Name="Agitato STR1" ProgramChange="43"/>
+      <Patch Number="EA65" Name="LowSTR Attak" ProgramChange="44"/>
+      <Patch Number="EA66" Name="Bad Guy STR" ProgramChange="45"/>
+      <Patch Number="EA67" Name="Ominous" ProgramChange="46"/>
+      <Patch Number="EA68" Name="Lo Express" ProgramChange="47"/>
+      <Patch Number="EA71" Name="DramaStrings" ProgramChange="48"/>
+      <Patch Number="EA72" Name="Solo Vln 1/" ProgramChange="49"/>
+      <Patch Number="EA73" Name="Solo Vln 2" ProgramChange="50"/>
+      <Patch Number="EA74" Name="Chorus Vln" ProgramChange="51"/>
+      <Patch Number="EA75" Name="Stereo Vln" ProgramChange="52"/>
+      <Patch Number="EA76" Name="Agitato Vln 1" ProgramChange="53"/>
+      <Patch Number="EA77" Name="Solo Vla 1/" ProgramChange="54"/>
+      <Patch Number="EA78" Name="Solo Vla 2" ProgramChange="55"/>
+      <Patch Number="EA81" Name="Chorus Viola" ProgramChange="56"/>
+      <Patch Number="EA82" Name="Stereo Viola" ProgramChange="57"/>
+      <Patch Number="EA83" Name="Agitato Vla" ProgramChange="58"/>
+      <Patch Number="EA84" Name="Solo Vc 1/" ProgramChange="59"/>
+      <Patch Number="EA85" Name="Solo Vc 2" ProgramChange="60"/>
+      <Patch Number="EA86" Name="Stereo Cello" ProgramChange="61"/>
+      <Patch Number="EA87" Name="Chorus Cello" ProgramChange="62"/>
+      <Patch Number="EA88" Name="Marcato Vc 1" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Orchestral B">
+      <Patch Number="EB11" Name="Solo Cb 1/" ProgramChange="64"/>
+      <Patch Number="EB12" Name="Solo Cb 2" ProgramChange="65"/>
+      <Patch Number="EB13" Name="Marcato Cb 1" ProgramChange="66"/>
+      <Patch Number="EB14" Name="Chamber Ens1" ProgramChange="67"/>
+      <Patch Number="EB15" Name="Chamber Ens2" ProgramChange="68"/>
+      <Patch Number="EB16" Name="Vln+Vla Dble" ProgramChange="69"/>
+      <Patch Number="EB17" Name="Vln+Vc Dbl1" ProgramChange="70"/>
+      <Patch Number="EB18" Name="Vla+Vc Dbl2" ProgramChange="71"/>
+      <Patch Number="EB21" Name="Vla+Vc Dble" ProgramChange="72"/>
+      <Patch Number="EB22" Name="Pizzicato 1" ProgramChange="73"/>
+      <Patch Number="EB23" Name="Mono Pizz" ProgramChange="74"/>
+      <Patch Number="EB24" Name="Pizzicato 2" ProgramChange="75"/>
+      <Patch Number="EB25" Name="Room Pizz" ProgramChange="76"/>
+      <Patch Number="EB26" Name="Hall Pizz" ProgramChange="77"/>
+      <Patch Number="EB27" Name="Tight Pizz" ProgramChange="78"/>
+      <Patch Number="EB28" Name="Short Pizz" ProgramChange="79"/>
+      <Patch Number="EB31" Name="STR Marcato1" ProgramChange="80"/>
+      <Patch Number="EB32" Name="Oct Marcato" ProgramChange="81"/>
+      <Patch Number="EB33" Name="Lower Marc!!" ProgramChange="82"/>
+      <Patch Number="EB34" Name="Big Marc!" ProgramChange="83"/>
+      <Patch Number="EB35" Name="STR Spiccato" ProgramChange="84"/>
+      <Patch Number="EB36" Name="Fast Attacks" ProgramChange="85"/>
+      <Patch Number="EB37" Name="Flute" ProgramChange="86"/>
+      <Patch Number="EB38" Name="Flute V-Sw" ProgramChange="87"/>
+      <Patch Number="EB41" Name="Piccolo" ProgramChange="88"/>
+      <Patch Number="EB42" Name="Piccolo Flt" ProgramChange="89"/>
+      <Patch Number="EB43" Name="Recorder" ProgramChange="90"/>
+      <Patch Number="EB44" Name="Oboe 1" ProgramChange="91"/>
+      <Patch Number="EB45" Name="Oboe 2" ProgramChange="92"/>
+      <Patch Number="EB46" Name="Oboe 3" ProgramChange="93"/>
+      <Patch Number="EB47" Name="Oboe 4" ProgramChange="94"/>
+      <Patch Number="EB48" Name="Oboe 5" ProgramChange="95"/>
+      <Patch Number="EB51" Name="English Hrn1" ProgramChange="96"/>
+      <Patch Number="EB52" Name="English Hrn2" ProgramChange="97"/>
+      <Patch Number="EB53" Name="English Hrn3" ProgramChange="98"/>
+      <Patch Number="EB54" Name="Bassoon 1" ProgramChange="99"/>
+      <Patch Number="EB55" Name="Bassoon 2" ProgramChange="100"/>
+      <Patch Number="EB56" Name="Clarinet 1" ProgramChange="101"/>
+      <Patch Number="EB57" Name="Clarinet 2" ProgramChange="102"/>
+      <Patch Number="EB58" Name="Bs Clarinet1" ProgramChange="103"/>
+      <Patch Number="EB61" Name="BS Clarinet2" ProgramChange="104"/>
+      <Patch Number="EB62" Name="Trumpet 1" ProgramChange="105"/>
+      <Patch Number="EB63" Name="Trumpet 2" ProgramChange="106"/>
+      <Patch Number="EB64" Name="Trumpet 3" ProgramChange="107"/>
+      <Patch Number="EB65" Name="Flugelhorn 1" ProgramChange="108"/>
+      <Patch Number="EB66" Name="Flugelhorn 2" ProgramChange="109"/>
+      <Patch Number="EB67" Name="Cornet 1" ProgramChange="110"/>
+      <Patch Number="EB68" Name="Cornet 2" ProgramChange="111"/>
+      <Patch Number="EB71" Name="Solo Tb 1" ProgramChange="112"/>
+      <Patch Number="EB72" Name="Solo Tb 2" ProgramChange="113"/>
+      <Patch Number="EB73" Name="Solo Tb 3/" ProgramChange="114"/>
+      <Patch Number="EB74" Name="Solo Tb 4/" ProgramChange="115"/>
+      <Patch Number="EB75" Name="Bs Tb 1" ProgramChange="116"/>
+      <Patch Number="EB76" Name="BS Tb 2/" ProgramChange="117"/>
+      <Patch Number="EB77" Name="Harmon Mute 1" ProgramChange="118"/>
+      <Patch Number="EB78" Name="Harmon Mute 2" ProgramChange="119"/>
+      <Patch Number="EB81" Name="Tuba 1" ProgramChange="120"/>
+      <Patch Number="EB82" Name="Tuba 2" ProgramChange="121"/>
+      <Patch Number="EB83" Name="Solo F.Horn1" ProgramChange="122"/>
+      <Patch Number="EB84" Name="Solo F.Horn2" ProgramChange="123"/>
+      <Patch Number="EB85" Name="Sml F.Hrm sc" ProgramChange="124"/>
+      <Patch Number="EB86" Name="Horn Sect 1/" ProgramChange="125"/>
+      <Patch Number="EB87" Name="F.Horn sc x4" ProgramChange="126"/>
+      <Patch Number="EB88" Name="Fr.Hrn sfz" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Orchestral C">
+      <Patch Number="EC11" Name="F.Hrn Sect2/" ProgramChange="0"/>
+      <Patch Number="EC12" Name="F.Hrn Sect3" ProgramChange="1"/>
+      <Patch Number="EC13" Name="F.Hrn Sect4" ProgramChange="2"/>
+      <Patch Number="EC14" Name="F.Hrn Sect5/" ProgramChange="3"/>
+      <Patch Number="EC15" Name="F.Hrn Sect6" ProgramChange="4"/>
+      <Patch Number="EC16" Name="F.Hrn Sect7" ProgramChange="5"/>
+      <Patch Number="EC17" Name="F.Hrn Sect8" ProgramChange="6"/>
+      <Patch Number="EC18" Name="MuteHrn Sect" ProgramChange="7"/>
+      <Patch Number="EC21" Name="Horn+Wood 1" ProgramChange="8"/>
+      <Patch Number="EC22" Name="Horn+Wood 2" ProgramChange="9"/>
+      <Patch Number="EC23" Name="Horn+Wood 3" ProgramChange="10"/>
+      <Patch Number="EC24" Name="Wood Sect 1" ProgramChange="11"/>
+      <Patch Number="EC25" Name="Wood Sect 2" ProgramChange="12"/>
+      <Patch Number="EC26" Name="Wood Sect 3" ProgramChange="13"/>
+      <Patch Number="EC27" Name="Wood Sect 4" ProgramChange="14"/>
+      <Patch Number="EC28" Name="2 Oboes" ProgramChange="15"/>
+      <Patch Number="EC31" Name="Oboe + Cla" ProgramChange="16"/>
+      <Patch Number="EC32" Name="Flt + Piccl" ProgramChange="17"/>
+      <Patch Number="EC33" Name="Flute + Cla" ProgramChange="18"/>
+      <Patch Number="EC34" Name="Bassoon+EHrn" ProgramChange="19"/>
+      <Patch Number="EC35" Name="Hi Woodwinds" ProgramChange="20"/>
+      <Patch Number="EC36" Name="WoodwindSplt" ProgramChange="21"/>
+      <Patch Number="EC37" Name="Multi Reed" ProgramChange="22"/>
+      <Patch Number="EC38" Name="4 Trombones" ProgramChange="23"/>
+      <Patch Number="EC41" Name="Tb Sect 1" ProgramChange="24"/>
+      <Patch Number="EC42" Name="Tb + Tp" ProgramChange="25"/>
+      <Patch Number="EC43" Name="4 Trumpets" ProgramChange="26"/>
+      <Patch Number="EC44" Name="3 Trumpets" ProgramChange="27"/>
+      <Patch Number="EC45" Name="Brass ff 1" ProgramChange="28"/>
+      <Patch Number="EC46" Name="Brass ff 2" ProgramChange="29"/>
+      <Patch Number="EC47" Name="Brass ff 3" ProgramChange="30"/>
+      <Patch Number="EC48" Name="McArther Brs" ProgramChange="31"/>
+      <Patch Number="EC51" Name="Big Bones" ProgramChange="32"/>
+      <Patch Number="EC52" Name="BassBoneSect" ProgramChange="33"/>
+      <Patch Number="EC53" Name="Brass Swell1" ProgramChange="34"/>
+      <Patch Number="EC54" Name="Full Brs 1" ProgramChange="35"/>
+      <Patch Number="EC55" Name="Brass Sect1/" ProgramChange="36"/>
+      <Patch Number="EC56" Name="Brass Ens 1" ProgramChange="37"/>
+      <Patch Number="EC57" Name="Brass Ens 2" ProgramChange="38"/>
+      <Patch Number="EC58" Name="Brass Ens 3" ProgramChange="39"/>
+      <Patch Number="EC61" Name="Brass Ens 4" ProgramChange="40"/>
+      <Patch Number="EC62" Name="Brass Ens 5" ProgramChange="41"/>
+      <Patch Number="EC63" Name="Brass Ens 6" ProgramChange="42"/>
+      <Patch Number="EC64" Name="Brass Ens 7" ProgramChange="43"/>
+      <Patch Number="EC65" Name="Brass Ens 8" ProgramChange="44"/>
+      <Patch Number="EC66" Name="Horn Strings" ProgramChange="45"/>
+      <Patch Number="EC67" Name="Full Orch.1" ProgramChange="46"/>
+      <Patch Number="EC68" Name="Full Orch.2" ProgramChange="47"/>
+      <Patch Number="EC71" Name="Full Orch.3" ProgramChange="48"/>
+      <Patch Number="EC72" Name="Full Orch.4" ProgramChange="49"/>
+      <Patch Number="EC73" Name="Maj Hit 1" ProgramChange="50"/>
+      <Patch Number="EC74" Name="Min Hit 1" ProgramChange="51"/>
+      <Patch Number="EC75" Name="Dim Hit 1" ProgramChange="52"/>
+      <Patch Number="EC76" Name="Major Stab!" ProgramChange="53"/>
+      <Patch Number="EC77" Name="Maj Hit 2" ProgramChange="54"/>
+      <Patch Number="EC78" Name="Min Hit 2" ProgramChange="55"/>
+      <Patch Number="EC81" Name="Classical Gt" ProgramChange="56"/>
+      <Patch Number="EC82" Name="Harp 1" ProgramChange="57"/>
+      <Patch Number="EC83" Name="Harp 2" ProgramChange="58"/>
+      <Patch Number="EC84" Name="Plucked Harp" ProgramChange="59"/>
+      <Patch Number="EC85" Name="Harp StrumMj" ProgramChange="60"/>
+      <Patch Number="EC86" Name="Harp StrumMn" ProgramChange="61"/>
+      <Patch Number="EC87" Name="Water Harp" ProgramChange="62"/>
+      <Patch Number="EC88" Name="ClasclPiano1" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Orchestral D">
+      <Patch Number="ED11" Name="ClasclPiano2" ProgramChange="64"/>
+      <Patch Number="ED12" Name="ClasclPiano3" ProgramChange="65"/>
+      <Patch Number="ED13" Name="ClasclPiano4" ProgramChange="66"/>
+      <Patch Number="ED14" Name="Harpsichord1" ProgramChange="67"/>
+      <Patch Number="ED15" Name="Harpsichord2" ProgramChange="68"/>
+      <Patch Number="ED16" Name="Harpsichord3" ProgramChange="69"/>
+      <Patch Number="ED17" Name="Harpsichord4" ProgramChange="70"/>
+      <Patch Number="ED18" Name="Celesta 1" ProgramChange="71"/>
+      <Patch Number="ED21" Name="Celesta 2" ProgramChange="72"/>
+      <Patch Number="ED22" Name="Celesta 3" ProgramChange="73"/>
+      <Patch Number="ED23" Name="Glockenleste" ProgramChange="74"/>
+      <Patch Number="ED24" Name="Marimba" ProgramChange="75"/>
+      <Patch Number="ED25" Name="BassMarimba1" ProgramChange="76"/>
+      <Patch Number="ED26" Name="BassMarimba2" ProgramChange="77"/>
+      <Patch Number="ED27" Name="Vibe" ProgramChange="78"/>
+      <Patch Number="ED28" Name="Xylophone 1" ProgramChange="79"/>
+      <Patch Number="ED31" Name="Xylophone 2" ProgramChange="80"/>
+      <Patch Number="ED32" Name="Xylophone 3" ProgramChange="81"/>
+      <Patch Number="ED33" Name="Glocken 1" ProgramChange="82"/>
+      <Patch Number="ED34" Name="Glocken 2" ProgramChange="83"/>
+      <Patch Number="ED35" Name="ChuchBells1" ProgramChange="84"/>
+      <Patch Number="ED36" Name="ChuchBells2" ProgramChange="85"/>
+      <Patch Number="ED37" Name="ChuchBells3" ProgramChange="86"/>
+      <Patch Number="ED38" Name="TubulaBells1" ProgramChange="87"/>
+      <Patch Number="ED41" Name="TubulaBells2" ProgramChange="88"/>
+      <Patch Number="ED42" Name="Big Tubulars" ProgramChange="89"/>
+      <Patch Number="ED43" Name="Dawning" ProgramChange="90"/>
+      <Patch Number="ED44" Name="MalletStack1" ProgramChange="91"/>
+      <Patch Number="ED45" Name="MalletStack2" ProgramChange="92"/>
+      <Patch Number="ED46" Name="MalletStack3" ProgramChange="93"/>
+      <Patch Number="ED47" Name="MalletStack4" ProgramChange="94"/>
+      <Patch Number="ED48" Name="MalletStack5" ProgramChange="95"/>
+      <Patch Number="ED51" Name="MalletStack6" ProgramChange="96"/>
+      <Patch Number="ED52" Name="MalletStack7" ProgramChange="97"/>
+      <Patch Number="ED53" Name="Choir 1" ProgramChange="98"/>
+      <Patch Number="ED54" Name="Choir 2" ProgramChange="99"/>
+      <Patch Number="ED55" Name="Snare Drum" ProgramChange="100"/>
+      <Patch Number="ED56" Name="ConcertSNR1/" ProgramChange="101"/>
+      <Patch Number="ED57" Name="ConcertSNR2/" ProgramChange="102"/>
+      <Patch Number="ED58" Name="SNR Roll/" ProgramChange="103"/>
+      <Patch Number="ED61" Name="Concert BD1" ProgramChange="104"/>
+      <Patch Number="ED62" Name="Concert BD2/" ProgramChange="105"/>
+      <Patch Number="ED63" Name="BD Roll/" ProgramChange="106"/>
+      <Patch Number="ED64" Name="Timpani 1/" ProgramChange="107"/>
+      <Patch Number="ED65" Name="Timpani 2/" ProgramChange="108"/>
+      <Patch Number="ED66" Name="Timpani 3" ProgramChange="109"/>
+      <Patch Number="ED67" Name="Timpani 4/" ProgramChange="110"/>
+      <Patch Number="ED68" Name="Tam Tam" ProgramChange="111"/>
+      <Patch Number="ED71" Name="Gong" ProgramChange="112"/>
+      <Patch Number="ED73" Name="Piatti!!" ProgramChange="113"/>
+      <Patch Number="ED73" Name="Sleigh Bells" ProgramChange="114"/>
+      <Patch Number="ED74" Name="Slapstick/" ProgramChange="115"/>
+      <Patch Number="ED75" Name="Wind Chimes1" ProgramChange="116"/>
+      <Patch Number="ED76" Name="Wind Chimes2" ProgramChange="117"/>
+      <Patch Number="ED77" Name="Tambourine/" ProgramChange="118"/>
+      <Patch Number="ED78" Name="Castanets/" ProgramChange="119"/>
+      <Patch Number="ED81" Name="Rhythm Set" ProgramChange="120"/>
+      <Patch Number="ED82" Name="Perc Hit 1" ProgramChange="121"/>
+      <Patch Number="ED83" Name="Perc Hit 2/" ProgramChange="122"/>
+      <Patch Number="ED84" Name="Perc Hit 3" ProgramChange="123"/>
+      <Patch Number="ED85" Name="Presenting!" ProgramChange="124"/>
+      <Patch Number="ED86" Name="Presto!" ProgramChange="125"/>
+      <Patch Number="ED87" Name="Christmas!!!" ProgramChange="126"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JV-1010</Model>
+    <Model>JV-1080</Model>
+    <Model>JV-2080</Model>
+    <Model>XP-50</Model>
+    <Model>XP-80</Model>
+    <Model>XV-5080</Model>
+    <Model>XV-3080</Model>
+    <Model>XV-88</Model>
+    <Model>Fantom</Model>
+    <PatchNameList Name="EXP Orchestral: Patches 001-128">
+      <Patch Number="001" Name="Warm Violins" ProgramChange="0"/>
+      <Patch Number="002" Name="Slow Vlns 1" ProgramChange="1"/>
+      <Patch Number="003" Name="Vlns+Vlas 1" ProgramChange="2"/>
+      <Patch Number="004" Name="Vl Sect mono" ProgramChange="3"/>
+      <Patch Number="005" Name="Arco Violins" ProgramChange="4"/>
+      <Patch Number="006" Name="Marcato Vls1" ProgramChange="5"/>
+      <Patch Number="007" Name="Vlns+Vlas 2" ProgramChange="6"/>
+      <Patch Number="008" Name="Agitato Vls1" ProgramChange="7"/>
+      <Patch Number="009" Name="Rosin Pad 1" ProgramChange="8"/>
+      <Patch Number="010" Name="Dry Mid-High" ProgramChange="9"/>
+      <Patch Number="011" Name="Natural Vlns" ProgramChange="10"/>
+      <Patch Number="012" Name="Sad Vln Sect" ProgramChange="11"/>
+      <Patch Number="013" Name="Marcato Vas" ProgramChange="12"/>
+      <Patch Number="014" Name="Arco Violas" ProgramChange="13"/>
+      <Patch Number="015" Name="Thick Violas" ProgramChange="14"/>
+      <Patch Number="016" Name="Va Sect f" ProgramChange="15"/>
+      <Patch Number="017" Name="Va Small Sec" ProgramChange="16"/>
+      <Patch Number="018" Name="Agitato Vas1" ProgramChange="17"/>
+      <Patch Number="019" Name="Sad Violas" ProgramChange="18"/>
+      <Patch Number="020" Name="Fast Cellos1" ProgramChange="19"/>
+      <Patch Number="021" Name="Vcs Legato 1" ProgramChange="20"/>
+      <Patch Number="022" Name="Marcato Vcs1" ProgramChange="21"/>
+      <Patch Number="023" Name="Small Vc Sec" ProgramChange="22"/>
+      <Patch Number="024" Name="Agitato Vcs 1" ProgramChange="23"/>
+      <Patch Number="025" Name="Small Cellos" ProgramChange="24"/>
+      <Patch Number="026" Name="Sad CelloSec" ProgramChange="25"/>
+      <Patch Number="027" Name="Cb Sect ff" ProgramChange="26"/>
+      <Patch Number="028" Name="Wide Basses" ProgramChange="27"/>
+      <Patch Number="029" Name="mf Basses" ProgramChange="28"/>
+      <Patch Number="030" Name="Agitato Cbs1" ProgramChange="29"/>
+      <Patch Number="031" Name="Vcs+Cbs" ProgramChange="30"/>
+      <Patch Number="032" Name="2 Basses" ProgramChange="31"/>
+      <Patch Number="033" Name="Euro Strings" ProgramChange="32"/>
+      <Patch Number="034" Name="Rich Strings" ProgramChange="33"/>
+      <Patch Number="035" Name="Multi Strs 1" ProgramChange="34"/>
+      <Patch Number="036" Name="VlsVasVcsCbs" ProgramChange="35"/>
+      <Patch Number="037" Name="Bright Strs" ProgramChange="36"/>
+      <Patch Number="038" Name="Classicl Str" ProgramChange="37"/>
+      <Patch Number="039" Name="Full Strings" ProgramChange="38"/>
+      <Patch Number="040" Name="Med Str Sec" ProgramChange="39"/>
+      <Patch Number="041" Name="Small Strngs" ProgramChange="40"/>
+      <Patch Number="042" Name="Strings Arco" ProgramChange="41"/>
+      <Patch Number="043" Name="Vivace Strs" ProgramChange="42"/>
+      <Patch Number="044" Name="Agitato STR1" ProgramChange="43"/>
+      <Patch Number="045" Name="LowSTR Attak" ProgramChange="44"/>
+      <Patch Number="046" Name="Bad Guy STR" ProgramChange="45"/>
+      <Patch Number="047" Name="Ominous" ProgramChange="46"/>
+      <Patch Number="048" Name="Lo Express" ProgramChange="47"/>
+      <Patch Number="049" Name="DramaStrings" ProgramChange="48"/>
+      <Patch Number="050" Name="Solo Vln 1/" ProgramChange="49"/>
+      <Patch Number="051" Name="Solo Vln 2" ProgramChange="50"/>
+      <Patch Number="052" Name="Chorus Vln" ProgramChange="51"/>
+      <Patch Number="053" Name="Stereo Vln" ProgramChange="52"/>
+      <Patch Number="054" Name="Agitato Vln 1" ProgramChange="53"/>
+      <Patch Number="055" Name="Solo Vla 1/" ProgramChange="54"/>
+      <Patch Number="056" Name="Solo Vla 2" ProgramChange="55"/>
+      <Patch Number="057" Name="Chorus Viola" ProgramChange="56"/>
+      <Patch Number="058" Name="Stereo Viola" ProgramChange="57"/>
+      <Patch Number="059" Name="Agitato Vla" ProgramChange="58"/>
+      <Patch Number="060" Name="Solo Vc 1/" ProgramChange="59"/>
+      <Patch Number="061" Name="Solo Vc 2" ProgramChange="60"/>
+      <Patch Number="062" Name="Stereo Cello" ProgramChange="61"/>
+      <Patch Number="063" Name="Chorus Cello" ProgramChange="62"/>
+      <Patch Number="064" Name="Marcato Vc 1" ProgramChange="63"/>
+      <Patch Number="065" Name="Solo Cb 1/" ProgramChange="64"/>
+      <Patch Number="066" Name="Solo Cb 2" ProgramChange="65"/>
+      <Patch Number="067" Name="Marcato Cb 1" ProgramChange="66"/>
+      <Patch Number="068" Name="Chamber Ens1" ProgramChange="67"/>
+      <Patch Number="069" Name="Chamber Ens2" ProgramChange="68"/>
+      <Patch Number="070" Name="Vln+Vla Dble" ProgramChange="69"/>
+      <Patch Number="071" Name="Vln+Vc Dbl1" ProgramChange="70"/>
+      <Patch Number="072" Name="Vla+Vc Dbl2" ProgramChange="71"/>
+      <Patch Number="073" Name="Vla+Vc Dble" ProgramChange="72"/>
+      <Patch Number="074" Name="Pizzicato 1" ProgramChange="73"/>
+      <Patch Number="075" Name="Mono Pizz" ProgramChange="74"/>
+      <Patch Number="076" Name="Pizzicato 2" ProgramChange="75"/>
+      <Patch Number="077" Name="Room Pizz" ProgramChange="76"/>
+      <Patch Number="078" Name="Hall Pizz" ProgramChange="77"/>
+      <Patch Number="079" Name="Tight Pizz" ProgramChange="78"/>
+      <Patch Number="080" Name="Short Pizz" ProgramChange="79"/>
+      <Patch Number="081" Name="STR Marcato1" ProgramChange="80"/>
+      <Patch Number="082" Name="Oct Marcato" ProgramChange="81"/>
+      <Patch Number="083" Name="Lower Marc!!" ProgramChange="82"/>
+      <Patch Number="084" Name="Big Marc!" ProgramChange="83"/>
+      <Patch Number="085" Name="STR Spiccato" ProgramChange="84"/>
+      <Patch Number="086" Name="Fast Attacks" ProgramChange="85"/>
+      <Patch Number="087" Name="Flute" ProgramChange="86"/>
+      <Patch Number="088" Name="Flute V-Sw" ProgramChange="87"/>
+      <Patch Number="089" Name="Piccolo" ProgramChange="88"/>
+      <Patch Number="090" Name="Piccolo Flt" ProgramChange="89"/>
+      <Patch Number="091" Name="Recorder" ProgramChange="90"/>
+      <Patch Number="092" Name="Oboe 1" ProgramChange="91"/>
+      <Patch Number="093" Name="Oboe 2" ProgramChange="92"/>
+      <Patch Number="094" Name="Oboe 3" ProgramChange="93"/>
+      <Patch Number="095" Name="Oboe 4" ProgramChange="94"/>
+      <Patch Number="096" Name="Oboe 5" ProgramChange="95"/>
+      <Patch Number="097" Name="English Hrn1" ProgramChange="96"/>
+      <Patch Number="098" Name="English Hrn2" ProgramChange="97"/>
+      <Patch Number="099" Name="English Hrn3" ProgramChange="98"/>
+      <Patch Number="100" Name="Bassoon 1" ProgramChange="99"/>
+      <Patch Number="101" Name="Bassoon 2" ProgramChange="100"/>
+      <Patch Number="102" Name="Clarinet 1" ProgramChange="101"/>
+      <Patch Number="103" Name="Clarinet 2" ProgramChange="102"/>
+      <Patch Number="104" Name="Bs Clarinet1" ProgramChange="103"/>
+      <Patch Number="105" Name="BS Clarinet2" ProgramChange="104"/>
+      <Patch Number="106" Name="Trumpet 1" ProgramChange="105"/>
+      <Patch Number="107" Name="Trumpet 2" ProgramChange="106"/>
+      <Patch Number="108" Name="Trumpet 3" ProgramChange="107"/>
+      <Patch Number="109" Name="Flugelhorn 1" ProgramChange="108"/>
+      <Patch Number="110" Name="Flugelhorn 2" ProgramChange="109"/>
+      <Patch Number="111" Name="Cornet 1" ProgramChange="110"/>
+      <Patch Number="112" Name="Cornet 2" ProgramChange="111"/>
+      <Patch Number="113" Name="Solo Tb 1" ProgramChange="112"/>
+      <Patch Number="114" Name="Solo Tb 2" ProgramChange="113"/>
+      <Patch Number="115" Name="Solo Tb 3/" ProgramChange="114"/>
+      <Patch Number="116" Name="Solo Tb 4/" ProgramChange="115"/>
+      <Patch Number="117" Name="Bs Tb 1" ProgramChange="116"/>
+      <Patch Number="118" Name="BS Tb 2/" ProgramChange="117"/>
+      <Patch Number="119" Name="Harmon Mute 1" ProgramChange="118"/>
+      <Patch Number="120" Name="Harmon Mute 2" ProgramChange="119"/>
+      <Patch Number="121" Name="Tuba 1" ProgramChange="120"/>
+      <Patch Number="122" Name="Tuba 2" ProgramChange="121"/>
+      <Patch Number="123" Name="Solo F.Horn1" ProgramChange="122"/>
+      <Patch Number="124" Name="Solo F.Horn2" ProgramChange="123"/>
+      <Patch Number="125" Name="Sml F.Hrm sc" ProgramChange="124"/>
+      <Patch Number="126" Name="Horn Sect 1/" ProgramChange="125"/>
+      <Patch Number="127" Name="F.Horn sc x4" ProgramChange="126"/>
+      <Patch Number="128" Name="Fr.Hrn sfz" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Orchestral: Patches 129-255">
+      <Patch Number="129" Name="F.Hrn Sect2/" ProgramChange="0"/>
+      <Patch Number="130" Name="F.Hrn Sect3" ProgramChange="1"/>
+      <Patch Number="131" Name="F.Hrn Sect4" ProgramChange="2"/>
+      <Patch Number="132" Name="F.Hrn Sect5/" ProgramChange="3"/>
+      <Patch Number="133" Name="F.Hrn Sect6" ProgramChange="4"/>
+      <Patch Number="134" Name="F.Hrn Sect7" ProgramChange="5"/>
+      <Patch Number="135" Name="F.Hrn Sect8" ProgramChange="6"/>
+      <Patch Number="136" Name="MuteHrn Sect" ProgramChange="7"/>
+      <Patch Number="137" Name="Horn+Wood 1" ProgramChange="8"/>
+      <Patch Number="138" Name="Horn+Wood 2" ProgramChange="9"/>
+      <Patch Number="139" Name="Horn+Wood 3" ProgramChange="10"/>
+      <Patch Number="140" Name="Wood Sect 1" ProgramChange="11"/>
+      <Patch Number="141" Name="Wood Sect 2" ProgramChange="12"/>
+      <Patch Number="142" Name="Wood Sect 3" ProgramChange="13"/>
+      <Patch Number="143" Name="Wood Sect 4" ProgramChange="14"/>
+      <Patch Number="144" Name="2 Oboes" ProgramChange="15"/>
+      <Patch Number="145" Name="Oboe + Cla" ProgramChange="16"/>
+      <Patch Number="146" Name="Flt + Piccl" ProgramChange="17"/>
+      <Patch Number="147" Name="Flute + Cla" ProgramChange="18"/>
+      <Patch Number="148" Name="Bassoon+EHrn" ProgramChange="19"/>
+      <Patch Number="149" Name="Hi Woodwinds" ProgramChange="20"/>
+      <Patch Number="150" Name="WoodwindSplt" ProgramChange="21"/>
+      <Patch Number="151" Name="Multi Reed" ProgramChange="22"/>
+      <Patch Number="152" Name="4 Trombones" ProgramChange="23"/>
+      <Patch Number="153" Name="Tb Sect 1" ProgramChange="24"/>
+      <Patch Number="154" Name="Tb + Tp" ProgramChange="25"/>
+      <Patch Number="155" Name="4 Trumpets" ProgramChange="26"/>
+      <Patch Number="156" Name="3 Trumpets" ProgramChange="27"/>
+      <Patch Number="157" Name="Brass ff 1" ProgramChange="28"/>
+      <Patch Number="158" Name="Brass ff 2" ProgramChange="29"/>
+      <Patch Number="159" Name="Brass ff 3" ProgramChange="30"/>
+      <Patch Number="160" Name="McArther Brs" ProgramChange="31"/>
+      <Patch Number="161" Name="Big Bones" ProgramChange="32"/>
+      <Patch Number="162" Name="BassBoneSect" ProgramChange="33"/>
+      <Patch Number="163" Name="Brass Swell1" ProgramChange="34"/>
+      <Patch Number="164" Name="Full Brs 1" ProgramChange="35"/>
+      <Patch Number="165" Name="Brass Sect1/" ProgramChange="36"/>
+      <Patch Number="166" Name="Brass Ens 1" ProgramChange="37"/>
+      <Patch Number="167" Name="Brass Ens 2" ProgramChange="38"/>
+      <Patch Number="168" Name="Brass Ens 3" ProgramChange="39"/>
+      <Patch Number="169" Name="Brass Ens 4" ProgramChange="40"/>
+      <Patch Number="170" Name="Brass Ens 5" ProgramChange="41"/>
+      <Patch Number="171" Name="Brass Ens 6" ProgramChange="42"/>
+      <Patch Number="172" Name="Brass Ens 7" ProgramChange="43"/>
+      <Patch Number="173" Name="Brass Ens 8" ProgramChange="44"/>
+      <Patch Number="174" Name="Horn Strings" ProgramChange="45"/>
+      <Patch Number="175" Name="Full Orch.1" ProgramChange="46"/>
+      <Patch Number="176" Name="Full Orch.2" ProgramChange="47"/>
+      <Patch Number="177" Name="Full Orch.3" ProgramChange="48"/>
+      <Patch Number="178" Name="Full Orch.4" ProgramChange="49"/>
+      <Patch Number="179" Name="Maj Hit 1" ProgramChange="50"/>
+      <Patch Number="180" Name="Min Hit 1" ProgramChange="51"/>
+      <Patch Number="181" Name="Dim Hit 1" ProgramChange="52"/>
+      <Patch Number="182" Name="Major Stab!" ProgramChange="53"/>
+      <Patch Number="183" Name="Maj Hit 2" ProgramChange="54"/>
+      <Patch Number="184" Name="Min Hit 2" ProgramChange="55"/>
+      <Patch Number="185" Name="Classical Gt" ProgramChange="56"/>
+      <Patch Number="186" Name="Harp 1" ProgramChange="57"/>
+      <Patch Number="187" Name="Harp 2" ProgramChange="58"/>
+      <Patch Number="188" Name="Plucked Harp" ProgramChange="59"/>
+      <Patch Number="189" Name="Harp StrumMj" ProgramChange="60"/>
+      <Patch Number="190" Name="Harp StrumMn" ProgramChange="61"/>
+      <Patch Number="191" Name="Water Harp" ProgramChange="62"/>
+      <Patch Number="192" Name="ClasclPiano1" ProgramChange="63"/>
+      <Patch Number="193" Name="ClasclPiano2" ProgramChange="64"/>
+      <Patch Number="194" Name="ClasclPiano3" ProgramChange="65"/>
+      <Patch Number="195" Name="ClasclPiano4" ProgramChange="66"/>
+      <Patch Number="196" Name="Harpsichord1" ProgramChange="67"/>
+      <Patch Number="197" Name="Harpsichord2" ProgramChange="68"/>
+      <Patch Number="198" Name="Harpsichord3" ProgramChange="69"/>
+      <Patch Number="199" Name="Harpsichord4" ProgramChange="70"/>
+      <Patch Number="200" Name="Celesta 1" ProgramChange="71"/>
+      <Patch Number="201" Name="Celesta 2" ProgramChange="72"/>
+      <Patch Number="202" Name="Celesta 3" ProgramChange="73"/>
+      <Patch Number="203" Name="Glockenleste" ProgramChange="74"/>
+      <Patch Number="204" Name="Marimba" ProgramChange="75"/>
+      <Patch Number="205" Name="BassMarimba1" ProgramChange="76"/>
+      <Patch Number="206" Name="BassMarimba2" ProgramChange="77"/>
+      <Patch Number="207" Name="Vibe" ProgramChange="78"/>
+      <Patch Number="208" Name="Xylophone 1" ProgramChange="79"/>
+      <Patch Number="209" Name="Xylophone 2" ProgramChange="80"/>
+      <Patch Number="210" Name="Xylophone 3" ProgramChange="81"/>
+      <Patch Number="211" Name="Glocken 1" ProgramChange="82"/>
+      <Patch Number="212" Name="Glocken 2" ProgramChange="83"/>
+      <Patch Number="213" Name="ChuchBells1" ProgramChange="84"/>
+      <Patch Number="214" Name="ChuchBells2" ProgramChange="85"/>
+      <Patch Number="215" Name="ChuchBells3" ProgramChange="86"/>
+      <Patch Number="216" Name="TubulaBells1" ProgramChange="87"/>
+      <Patch Number="217" Name="TubulaBells2" ProgramChange="88"/>
+      <Patch Number="218" Name="Big Tubulars" ProgramChange="89"/>
+      <Patch Number="219" Name="Dawning" ProgramChange="90"/>
+      <Patch Number="220" Name="MalletStack1" ProgramChange="91"/>
+      <Patch Number="221" Name="MalletStack2" ProgramChange="92"/>
+      <Patch Number="222" Name="MalletStack3" ProgramChange="93"/>
+      <Patch Number="223" Name="MalletStack4" ProgramChange="94"/>
+      <Patch Number="224" Name="MalletStack5" ProgramChange="95"/>
+      <Patch Number="225" Name="MalletStack6" ProgramChange="96"/>
+      <Patch Number="226" Name="MalletStack7" ProgramChange="97"/>
+      <Patch Number="227" Name="Choir 1" ProgramChange="98"/>
+      <Patch Number="228" Name="Choir 2" ProgramChange="99"/>
+      <Patch Number="229" Name="Snare Drum" ProgramChange="100"/>
+      <Patch Number="230" Name="ConcertSNR1/" ProgramChange="101"/>
+      <Patch Number="231" Name="ConcertSNR2/" ProgramChange="102"/>
+      <Patch Number="232" Name="SNR Roll/" ProgramChange="103"/>
+      <Patch Number="233" Name="Concert BD1" ProgramChange="104"/>
+      <Patch Number="234" Name="Concert BD2/" ProgramChange="105"/>
+      <Patch Number="235" Name="BD Roll/" ProgramChange="106"/>
+      <Patch Number="236" Name="Timpani 1/" ProgramChange="107"/>
+      <Patch Number="237" Name="Timpani 2/" ProgramChange="108"/>
+      <Patch Number="238" Name="Timpani 3" ProgramChange="109"/>
+      <Patch Number="239" Name="Timpani 4/" ProgramChange="110"/>
+      <Patch Number="240" Name="Tam Tam" ProgramChange="111"/>
+      <Patch Number="241" Name="Gong" ProgramChange="112"/>
+      <Patch Number="242" Name="Piatti!!" ProgramChange="113"/>
+      <Patch Number="243" Name="Sleigh Bells" ProgramChange="114"/>
+      <Patch Number="244" Name="Slapstick/" ProgramChange="115"/>
+      <Patch Number="245" Name="Wind Chimes1" ProgramChange="116"/>
+      <Patch Number="246" Name="Wind Chimes2" ProgramChange="117"/>
+      <Patch Number="247" Name="Tambourine/" ProgramChange="118"/>
+      <Patch Number="248" Name="Castanets/" ProgramChange="119"/>
+      <Patch Number="249" Name="Rhythm Set" ProgramChange="120"/>
+      <Patch Number="250" Name="Perc Hit 1" ProgramChange="121"/>
+      <Patch Number="251" Name="Perc Hit 2/" ProgramChange="122"/>
+      <Patch Number="252" Name="Perc Hit 3" ProgramChange="123"/>
+      <Patch Number="253" Name="Presenting!" ProgramChange="124"/>
+      <Patch Number="254" Name="Presto!" ProgramChange="125"/>
+      <Patch Number="255" Name="Christmas!!!" ProgramChange="126"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

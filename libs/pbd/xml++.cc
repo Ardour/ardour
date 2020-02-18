@@ -85,13 +85,17 @@ XMLTree::read_internal(bool validate)
 		_doc = 0;
 	}
 
+	/* Calling this prevents libxml2 from treating whitespace as active
+	   nodes. It needs to be called before we create a parser context.
+	*/
+	xmlKeepBlanksDefault(0);
+
 	/* create a parser context */
 	xmlParserCtxtPtr ctxt = xmlNewParserCtxt();
 	if (ctxt == NULL) {
 		return false;
 	}
 
-	xmlKeepBlanksDefault(0);
 	/* parse the file, activating the DTD validation option */
 	if (validate) {
 		_doc = xmlCtxtReadFile(ctxt, _filename.c_str(), NULL, XML_PARSE_DTDVALID);
@@ -258,7 +262,7 @@ XMLNode::clear_lists ()
 
 	_selected_children.clear ();
 
-	for (curchild = _children.begin(); curchild != _children.end();	++curchild) {
+	for (curchild = _children.begin(); curchild != _children.end(); ++curchild) {
 		delete *curchild;
 	}
 
@@ -482,6 +486,12 @@ XMLNode::attribute_value()
 XMLNode*
 XMLNode::add_content(const string& c)
 {
+	if (c.empty ()) {
+		/* this would add a "</>" child, leading to invalid XML.
+		 * Also in XML, empty string content is equivalent to no content.
+		 */
+		return NULL;
+	}
 	return add_child_copy(XMLNode (string(), c));
 }
 
@@ -665,8 +675,7 @@ XMLNode::remove_nodes_and_delete(const string& propname, const string& val)
 }
 
 void
-XMLNode::remove_node_and_delete(const string& n, const string& propname,
- const string& val)
+XMLNode::remove_node_and_delete(const string& n, const string& propname, const string& val)
 {
 	for (XMLNodeIterator i = _children.begin(); i != _children.end(); ++i) {
 		if ((*i)->name() == n) {

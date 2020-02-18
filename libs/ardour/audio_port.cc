@@ -1,20 +1,23 @@
 /*
-    Copyright (C) 2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2006-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2007-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cassert>
 
@@ -26,6 +29,7 @@
 #include "ardour/audio_port.h"
 #include "ardour/data_type.h"
 #include "ardour/port_engine.h"
+#include "ardour/rc_configuration.h"
 
 using namespace ARDOUR;
 using namespace std;
@@ -36,17 +40,24 @@ using namespace std;
 AudioPort::AudioPort (const std::string& name, PortFlags flags)
 	: Port (name, DataType::AUDIO, flags)
 	, _buffer (new AudioBuffer (0))
+	, _data (0)
 {
 	assert (name.find_first_of (':') == string::npos);
-	cache_aligned_malloc ((void**) &_data, sizeof (Sample) * 8192);
 	_src.setup (_resampler_quality);
 	_src.set_rrfilt (10);
 }
 
 AudioPort::~AudioPort ()
 {
-	cache_aligned_free (_data);
+	if (_data) cache_aligned_free (_data);
 	delete _buffer;
+}
+
+void
+AudioPort::set_buffer_size (pframes_t nframes)
+{
+	if (_data) cache_aligned_free (_data);
+	cache_aligned_malloc ((void**) &_data, sizeof (Sample) * lrint (floor (nframes * Config->get_max_transport_speed())));
 }
 
 void

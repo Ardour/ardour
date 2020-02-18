@@ -1,21 +1,24 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009 David Robillard <d@drobilla.net>
+ * Copyright (C) 2016-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include "pbd/controllable.h"
 #include "pbd/enumwriter.h"
@@ -29,16 +32,14 @@
 using namespace PBD;
 using namespace std;
 
-PBD::Signal1<void,Controllable*> Controllable::Destroyed;
-PBD::Signal1<bool,Controllable*> Controllable::StartLearning;
-PBD::Signal1<void,Controllable*> Controllable::StopLearning;
-PBD::Signal3<void,Controllable*,int,int> Controllable::CreateBinding;
-PBD::Signal1<void,Controllable*> Controllable::DeleteBinding;
+PBD::Signal1<bool, boost::weak_ptr<PBD::Controllable> > Controllable::StartLearning;
+PBD::Signal1<void, boost::weak_ptr<PBD::Controllable> > Controllable::StopLearning;
 PBD::Signal1<void, boost::weak_ptr<PBD::Controllable> > Controllable::GUIFocusChanged;
 
 Glib::Threads::RWLock Controllable::registry_lock;
 Controllable::Controllables Controllable::registry;
-PBD::ScopedConnectionList* registry_connections = 0;
+PBD::ScopedConnectionList Controllable::registry_connections;
+
 const std::string Controllable::xml_node_name = X_("Controllable");
 
 Controllable::Controllable (const string& name, Flag f)
@@ -47,62 +48,6 @@ Controllable::Controllable (const string& name, Flag f)
 	, _touching (false)
 {
 	add (*this);
-}
-
-void
-Controllable::add (Controllable& ctl)
-{
-	using namespace boost;
-
-	Glib::Threads::RWLock::WriterLock lm (registry_lock);
-	registry.insert (&ctl);
-
-	if (!registry_connections) {
-		registry_connections = new ScopedConnectionList;
-	}
-
-	/* Controllable::remove() is static - no need to manage this connection */
-
-	ctl.DropReferences.connect_same_thread (*registry_connections, boost::bind (&Controllable::remove, &ctl));
-}
-
-void
-Controllable::remove (Controllable* ctl)
-{
-	Glib::Threads::RWLock::WriterLock lm (registry_lock);
-
-	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i) {
-		if ((*i) == ctl) {
-			registry.erase (i);
-			break;
-		}
-	}
-}
-
-Controllable*
-Controllable::by_id (const ID& id)
-{
-	Glib::Threads::RWLock::ReaderLock lm (registry_lock);
-
-	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i) {
-		if ((*i)->id() == id) {
-			return (*i);
-		}
-	}
-	return 0;
-}
-
-Controllable*
-Controllable::by_name (const string& str)
-{
-	Glib::Threads::RWLock::ReaderLock lm (registry_lock);
-
-	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i) {
-		if ((*i)->_name == str) {
-			return (*i);
-		}
-	}
-	return 0;
 }
 
 XMLNode&
@@ -153,4 +98,51 @@ void
 Controllable::set_flags (Flag f)
 {
 	_flags = f;
+}
+
+void
+Controllable::add (Controllable& ctl)
+{
+	Glib::Threads::RWLock::WriterLock lm (registry_lock);
+	registry.insert (&ctl);
+	ctl.DropReferences.connect_same_thread (registry_connections, boost::bind (&Controllable::remove, &ctl));
+	ctl.Destroyed.connect_same_thread (registry_connections, boost::bind (&Controllable::remove, &ctl));
+}
+
+void
+Controllable::remove (Controllable* ctl)
+{
+	Glib::Threads::RWLock::WriterLock lm (registry_lock);
+	Controllables::iterator i = std::find (registry.begin(), registry.end(), ctl);
+	if (i != registry.end()) {
+		registry.erase (i);
+	}
+}
+
+boost::shared_ptr<Controllable>
+Controllable::by_id (const ID& id)
+{
+	Glib::Threads::RWLock::ReaderLock lm (registry_lock);
+
+	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i) {
+		if ((*i)->id() == id) {
+			return (*i)->shared_from_this ();
+		}
+	}
+	return boost::shared_ptr<Controllable>();
+}
+
+void
+Controllable::dump_registry ()
+{
+	Glib::Threads::RWLock::ReaderLock lm (registry_lock);
+	if (registry.size() == 0) {
+		return;
+	}
+	unsigned int cnt = 0;
+	cout << "-- List Of Registered Controllables\n";
+	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i, ++cnt) {
+		cout << "CTRL: " << (*i)->name() << "\n";
+	}
+	cout << "Total number of registered sontrollables: " << cnt << "\n";
 }

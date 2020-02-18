@@ -1,21 +1,27 @@
 /*
-    Copyright (C) 2012 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2007-2014 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2008-2015 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009 David Robillard <d@drobilla.net>
+ * Copyright (C) 2013-2014 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2017 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2017 Johannes Mueller <github@johannes-mueller.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <algorithm>
 #include <cstring>
@@ -91,8 +97,6 @@ find_session_templates (vector<TemplateInfo>& template_names, bool read_xml)
 		return;
 	}
 
-	cerr << "Found " << templates.size() << " along " << template_search_path().to_string() << endl;
-
 	for (vector<string>::iterator i = templates.begin(); i != templates.end(); ++i) {
 		string file = session_template_dir_to_file (*i);
 
@@ -104,7 +108,7 @@ find_session_templates (vector<TemplateInfo>& template_names, bool read_xml)
 
 			XMLTree tree;
 			if (!tree.read (file.c_str())) {
-				cerr << "Failed to parse Route-template XML file: " << file;
+				cerr << "Failed to parse Route-template XML file: " << file << endl;
 				continue;
 			}
 
@@ -134,6 +138,12 @@ find_session_templates (vector<TemplateInfo>& template_names, bool read_xml)
 	std::sort(template_names.begin(), template_names.end());
 }
 
+struct TemplateInfoSorter {
+	bool operator () (TemplateInfo const& a, TemplateInfo const& b) {
+		return a.name < b.name;
+	}
+};
+
 void
 find_route_templates (vector<TemplateInfo>& template_names)
 {
@@ -151,7 +161,7 @@ find_route_templates (vector<TemplateInfo>& template_names)
 		XMLTree tree;
 
 		if (!tree.read (fullpath.c_str())) {
-			cerr << "Failed to parse Route-template XML file: " << fullpath;
+			cerr << "Failed to parse Route-template XML file: " << fullpath << endl;
 			continue;
 		}
 
@@ -182,6 +192,8 @@ find_route_templates (vector<TemplateInfo>& template_names)
 
 		template_names.push_back (rti);
 	}
+
+	std::sort (template_names.begin(), template_names.end (), TemplateInfoSorter ());
 }
 
 }

@@ -1,24 +1,26 @@
 /*
-    Copyright (C) 2008-2009 Paul Davis
-    Author: Sakari Bergen
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
-
-#include "ardour/export_handler.h"
+ * Copyright (C) 2008-2013 Sakari Bergen <sakari.bergen@beatwaves.net>
+ * Copyright (C) 2008-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2013-2015 Colin Fletcher <colin.m.fletcher@googlemail.com>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 Johannes Mueller <github@johannes-mueller.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include "pbd/gstdio_compat.h"
 #include <glibmm.h>
@@ -31,6 +33,7 @@
 #include "ardour/audio_port.h"
 #include "ardour/debug.h"
 #include "ardour/export_graph_builder.h"
+#include "ardour/export_handler.h"
 #include "ardour/export_timespan.h"
 #include "ardour/export_channel_configuration.h"
 #include "ardour/export_status.h"
@@ -375,7 +378,7 @@ ExportHandler::finish_timespan ()
 		if (!fmt->command().empty()) {
 			SessionMetadata const & metadata (*SessionMetadata::Metadata());
 
-#if 0	// would be nicer with C++11 initialiser...
+#if 0 // would be nicer with C++11 initialiser...
 			std::map<char, std::string> subs {
 				{ 'f', filename },
 				{ 'd', Glib::path_get_dirname(filename)  + G_DIR_SEPARATOR },
@@ -422,7 +425,7 @@ ExportHandler::finish_timespan ()
 			ARDOUR::SystemExec *se = new ARDOUR::SystemExec(fmt->command(), subs);
 			info << "Post-export command line : {" << se->to_s () << "}" << endmsg;
 			se->ReadStdout.connect_same_thread(command_connection, boost::bind(&ExportHandler::command_output, this, _1, _2));
-			int ret = se->start (2);
+			int ret = se->start (SystemExec::MergeWithStdin);
 			if (ret == 0) {
 				// successfully started
 				while (se->is_running ()) {
@@ -745,11 +748,11 @@ ExportHandler::write_track_info_cue (CDMarkerStatus & status)
 	}
 
 	if (status.track_position != status.track_start_sample) {
-		samples_to_cd_samples_string (buf, status.track_position);
+		samples_to_cd_frame_string (buf, status.track_position);
 		status.out << "    INDEX 00" << buf << endl;
 	}
 
-	samples_to_cd_samples_string (buf, status.track_start_sample);
+	samples_to_cd_frame_string (buf, status.track_start_sample);
 	status.out << "    INDEX 01" << buf << endl;
 
 	status.index_number = 2;
@@ -802,13 +805,13 @@ ExportHandler::write_track_info_toc (CDMarkerStatus & status)
 
 	status.out << "  }" << endl << "}" << endl;
 
-	samples_to_cd_samples_string (buf, status.track_position);
+	samples_to_cd_frame_string (buf, status.track_position);
 	status.out << "FILE " << toc_escape_filename (status.filename) << ' ' << buf;
 
-	samples_to_cd_samples_string (buf, status.track_duration);
+	samples_to_cd_frame_string (buf, status.track_duration);
 	status.out << buf << endl;
 
-	samples_to_cd_samples_string (buf, status.track_start_sample - status.track_position);
+	samples_to_cd_frame_string (buf, status.track_start_sample - status.track_position);
 	status.out << "START" << buf << endl;
 }
 
@@ -827,7 +830,7 @@ ExportHandler::write_index_info_cue (CDMarkerStatus & status)
 
 	snprintf (buf, sizeof(buf), "    INDEX %02d", cue_indexnum);
 	status.out << buf;
-	samples_to_cd_samples_string (buf, status.index_position);
+	samples_to_cd_frame_string (buf, status.index_position);
 	status.out << buf << endl;
 
 	cue_indexnum++;
@@ -838,7 +841,7 @@ ExportHandler::write_index_info_toc (CDMarkerStatus & status)
 {
 	gchar buf[18];
 
-	samples_to_cd_samples_string (buf, status.index_position - status.track_position);
+	samples_to_cd_frame_string (buf, status.index_position - status.track_start_sample);
 	status.out << "INDEX" << buf << endl;
 }
 
@@ -848,7 +851,7 @@ ExportHandler::write_index_info_mp4ch (CDMarkerStatus & status)
 }
 
 void
-ExportHandler::samples_to_cd_samples_string (char* buf, samplepos_t when)
+ExportHandler::samples_to_cd_frame_string (char* buf, samplepos_t when)
 {
 	samplecnt_t remainder;
 	samplecnt_t fr = session.nominal_sample_rate();
@@ -956,6 +959,12 @@ ExportHandler::cue_escape_cdtext (const std::string& txt)
 	out = '"' + latin1_txt + '"';
 
 	return out;
+}
+
+ExportHandler::CDMarkerStatus::~CDMarkerStatus () {
+	if (!g_file_set_contents (path.c_str(), out.str().c_str(), -1, NULL)) {
+		PBD::error << string_compose(("Editor: cannot open \"%1\" as export file for CD marker file"), path) << endmsg;
+	}
 }
 
 } // namespace ARDOUR

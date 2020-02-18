@@ -1,21 +1,24 @@
 /*
-    Copyright (C) 2011-2013 Paul Davis
-    Author: Carl Hetherington <cth@carlh.net>
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2014-2015 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2014-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2017 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 /** @file  canvas/canvas.h
  *  @brief Declaration of the main canvas classes.
@@ -26,18 +29,19 @@
 
 #include <set>
 
-#include <gdkmm/window.h>
-#include <gtkmm/eventbox.h>
 #include <gtkmm/alignment.h>
-#include <cairomm/surface.h>
+#include <gtkmm/eventbox.h>
+#include <gdkmm/window.h>
+
 #include <cairomm/context.h>
+#include <cairomm/surface.h>
 
 #include "pbd/signals.h"
 
 #include "gtkmm2ext/cairo_canvas.h"
 
-#include "canvas/visibility.h"
 #include "canvas/root_group.h"
+#include "canvas/visibility.h"
 
 namespace Gtk {
 	class Window;
@@ -104,7 +108,7 @@ public:
 	/** Called when an item is being destroyed */
 	virtual void item_going_away (Item *, Rect) {}
 	virtual void item_shown_or_hidden (Item *);
-        void item_visual_property_changed (Item*);
+	void item_visual_property_changed (Item*);
 	void item_changed (Item *, Rect);
 	void item_moved (Item *, Rect);
 
@@ -131,22 +135,22 @@ public:
 	virtual Coord height () const = 0;
 
 	/** Store the coordinates of the mouse pointer in window coordinates in
-	   @param winpos. Return true if the position was within the window,
-	   false otherwise.
-	*/
+	 * \p winpos . Return true if the position was within the window,
+	 * false otherwise.
+	 */
 	virtual bool get_mouse_position (Duple& winpos) const = 0;
 
 	/** Signal to be used by items that need to track the mouse position
-	   within the window.
-	*/
+	 * within the window.
+	 */
 	sigc::signal<void,Duple const&> MouseMotion;
 
 	sigc::signal<void> PreRender;
 
-	/** Ensures that the position given by @param winpos (in window
-	    coordinates) is within the current window area, possibly reduced by
-	    @param border.
-	*/
+	/** Ensures that the position given by \p winpos (in window
+	 * coordinates) is within the current window area, possibly reduced by
+	 * \p border.
+	 */
 	Duple clamp_to_window (Duple const& winpos, Duple border = Duple());
 
 	void zoomed();
@@ -156,18 +160,23 @@ public:
 	void dump (std::ostream&) const;
 
 	/** Ask the canvas to pick the current item again, and generate
-	    an enter event for it.
-	*/
+	 * an enter event for it.
+	 */
 	virtual void re_enter () = 0;
 
 	virtual void start_tooltip_timeout (Item*) {}
 	virtual void stop_tooltip_timeout () {}
 
 	/** Set the timeout used to display tooltips, in milliseconds
-	 */
+	*/
 	static void set_tooltip_timeout (uint32_t msecs);
 
 	virtual Glib::RefPtr<Pango::Context> get_pango_context() = 0;
+
+	/** Redirect drawing to an intermediate (image) surface.
+	 * see also https://www.cairographics.org/manual/cairo-cairo-t.html#cairo-push-group
+	 */
+	void use_intermediate_surface (bool yn = true);
 
 protected:
 	Root             _root;
@@ -182,6 +191,8 @@ protected:
 	virtual void pick_current_item (Duple const &, int state) = 0;
 
 	std::list<ScrollGroup*> scrollers;
+
+	bool _use_intermediate_surface;
 };
 
 /** A canvas which renders onto a GTK EventBox */
@@ -258,18 +269,17 @@ private:
 	void item_shown_or_hidden (Item *);
 	bool send_leave_event (Item const *, double, double) const;
 
-	Cairo::RefPtr<Cairo::Surface> canvas_image;
-
 	/** Item currently chosen for event delivery based on pointer position */
 	Item * _current_item;
 	/** Item pending as _current_item */
 	Item * _new_current_item;
 	/** the item that is currently grabbed, or 0 */
 	Item * _grabbed_item;
-        /** the item that currently has key focus or 0 */
+	/** the item that currently has key focus or 0 */
 	Item * _focused_item;
 
 	bool _single_exposure;
+	bool _use_image_surface;
 
 	sigc::connection tooltip_timeout_connection;
 	Item* current_tooltip_item;
@@ -282,6 +292,7 @@ private:
 	bool _in_dtor;
 
 	void* _nsglview;
+	Cairo::RefPtr<Cairo::Surface> _canvas_image;
 };
 
 /** A GTK::Alignment with a GtkCanvas inside it plus some Gtk::Adjustments for

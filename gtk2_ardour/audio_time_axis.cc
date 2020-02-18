@@ -1,21 +1,29 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2006 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2005-2006 Sampo Savolainen <v2@iki.fi>
+ * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2005-2007 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2005-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005 Karsten Wiese <fzuuzf@googlemail.com>
+ * Copyright (C) 2006-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2014 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cstdlib>
 #include <cmath>
@@ -51,6 +59,7 @@
 #include "public_editor.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
+#include "ui_config.h"
 #include "utils.h"
 
 #include "pbd/i18n.h"
@@ -67,6 +76,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	: SessionHandlePtr (sess)
 	, RouteTimeAxisView(ed, sess, canvas)
 {
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &AudioTimeAxisView::parameter_changed));
 }
 
 void
@@ -201,6 +211,10 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 
 		create_gain_automation_child (param, show);
 
+	} else if (param.type() == BusSendLevel) {
+
+		create_trim_automation_child (param, show);
+
 	} else if (param.type() == TrimAutomation) {
 
 		create_trim_automation_child (param, show);
@@ -275,7 +289,25 @@ AudioTimeAxisView::hide_all_automation (bool apply_to_selection)
 void
 AudioTimeAxisView::route_active_changed ()
 {
+	RouteTimeAxisView::route_active_changed();
 	update_control_names ();
+
+	if (!_route->active()) {
+		controls_table.hide();
+		inactive_table.show_all();
+		RouteTimeAxisView::hide_all_automation();
+	} else {
+		inactive_table.hide();
+		controls_table.show();
+	}
+}
+
+void
+AudioTimeAxisView::parameter_changed (string const & p)
+{
+	if (p == "vertical-region-gap") {
+		_view->update_contents_height ();
+	}
 }
 
 

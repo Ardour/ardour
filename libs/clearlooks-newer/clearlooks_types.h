@@ -319,10 +319,10 @@ struct _ClearlooksStyleFunctions
 	                               const TabParameters		   *tab,
 	                               int x, int y, int width, int height);
 
-	void (*draw_sample)            (cairo_t				*cr,
+	void (*draw_frame)            (cairo_t				*cr,
 	                               const ClearlooksColors		*colors,
 	                               const WidgetParameters		*widget,
-	                               const FrameParameters		*sample,
+	                               const FrameParameters		*frame,
 	                               int x, int y, int width, int height);
 
 	void (*draw_separator)        (cairo_t				*cr,
@@ -388,7 +388,7 @@ struct _ClearlooksStyleFunctions
 	                               const WidgetParameters		*widget,
 	                               int x, int y, int width, int height);
 
-	void (*draw_menu_sample)       (cairo_t				*cr,
+	void (*draw_menu_frame)       (cairo_t				*cr,
 	                               const ClearlooksColors		*colors,
 	                               const WidgetParameters		*widget,
 	                               int x, int y, int width, int height);

@@ -1,21 +1,25 @@
 /*
-    Copyright (C) 2000,2007 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2000-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2007-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2009 Sampo Savolainen <v2@iki.fi>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2018 Johannes Mueller <github@johannes-mueller.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_plugin_insert_h__
 #define __ardour_plugin_insert_h__
@@ -79,7 +83,7 @@ public:
 
 	bool write_immediate_event (size_t size, const uint8_t* buf);
 
-	void automation_run (samplepos_t, pframes_t);
+	void automation_run (samplepos_t, pframes_t, bool only_active = false);
 	bool find_next_event (double, double, Evoral::ControlEvent&, bool only_active = true) const;
 
 	int set_block_size (pframes_t nframes);
@@ -113,13 +117,7 @@ public:
 	bool has_midi_thru () const;
 	bool inplace () const { return ! _no_inplace; }
 
-#ifdef MIXBUS
 	bool is_channelstrip () const;
-	bool is_nonbypassable () const;
-#else
-	bool is_channelstrip () const { return false; }
-	bool is_nonbypassable () const { return false; }
-#endif
 
 	void set_input_map (uint32_t, ChanMapping);
 	void set_output_map (uint32_t, ChanMapping);
@@ -192,11 +190,12 @@ public:
 			);
 
 	void realtime_handle_transport_stopped ();
-	void realtime_locate ();
+	void realtime_locate (bool);
 	void monitoring_changed ();
 
 	bool load_preset (Plugin::PresetRecord);
 
+	bool provides_stats () const;
 	bool get_stats (uint64_t& min, uint64_t& max, double& avg, double& dev) const;
 	void clear_stats ();
 
@@ -211,6 +210,7 @@ public:
 		double get_value (void) const;
 		void catch_up_with_external_value (double val);
 		XMLNode& get_state();
+		std::string get_user_string() const;
 
 	private:
 		PluginInsert* _plugin;
@@ -256,7 +256,7 @@ public:
 		return boost::shared_ptr<IO> ();
 	}
 
-	PluginType type ();
+	PluginType type () const;
 
 	boost::shared_ptr<ReadOnlyControl> control_output (uint32_t) const;
 
@@ -336,8 +336,8 @@ private:
 
 	boost::weak_ptr<Plugin> _impulseAnalysisPlugin;
 
-	samplecnt_t _signal_analysis_collected_nframes;
-	samplecnt_t _signal_analysis_collect_nframes_max;
+	samplecnt_t _signal_analysis_collect_nsamples;
+	samplecnt_t _signal_analysis_collect_nsamples_max;
 
 	BufferSet _signal_analysis_inputs;
 	BufferSet _signal_analysis_outputs;
@@ -398,6 +398,7 @@ private:
 	void control_list_automation_state_changed (Evoral::Parameter, AutoState);
 	void set_parameter_state_2X (const XMLNode& node, int version);
 	void set_control_ids (const XMLNode&, int version);
+	void update_control_values (const XMLNode&, int version);
 
 	void enable_changed ();
 	void bypassable_changed ();

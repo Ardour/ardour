@@ -1,21 +1,24 @@
 /*
-    Copyright (C) 2008 Paul Davis
-    Author: Sakari Bergen
-
-    This program is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the Free
-    Software Foundation; either version 2 of the License, or (at your option)
-    any later version.
-
-    This program is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
-
-    You should have received a copy of the GNU General Public License along
-    with this program; if not, write to the Free Software Foundation, Inc.,
-    675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2008-2012 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009 David Robillard <d@drobilla.net>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 Colin Fletcher <colin.m.fletcher@googlemail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include "ardour/session_metadata.h"
 
@@ -646,4 +649,36 @@ void
 SessionMetadata::set_country (const string & v)
 {
 	set_value ("user_country", v);
+}
+
+void
+SessionMetadata::av_export_tag (MetaDataMap& meta) const
+{
+	/* this is used for ffmpeg/liblame -metadata key=value
+	 * (video and mp3 export).
+	 * for flac/ogg's vorbis-comment see:
+	 * AudiofileTagger::tag_generic()
+	 * AudiofileTagger::tag_vorbis_comment()
+	 */
+	if (year() > 0) {
+		std::ostringstream osstream; osstream << year();
+		meta["year"] = osstream.str();
+	}
+	if (track_number() > 0) {
+		std::ostringstream osstream; osstream << track_number();
+		meta["track"] = osstream.str();
+	}
+	if (disc_number() > 0) {
+		std::ostringstream osstream; osstream << disc_number();
+		meta["disc"] = osstream.str();
+	}
+	if (!title().empty())        { meta["title"] = title(); }
+	if (!artist().empty())       { meta["author"] = artist(); }
+	if (!album_artist().empty()) { meta["album_artist"] = album_artist(); }
+	if (!album().empty())        { meta["album"] = album(); }
+	if (!genre().empty())        { meta["genre"] = genre(); }
+	if (!composer().empty())     { meta["composer"] = composer(); }
+	if (!comment().empty())      { meta["comment"] = comment(); }
+	if (!copyright().empty())    { meta["copyright"] = copyright(); }
+	if (!subtitle().empty())     { meta["description"] = subtitle(); }
 }

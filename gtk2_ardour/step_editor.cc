@@ -1,21 +1,26 @@
 /*
-    Copyright (C) 2012 Paul Davis
+ * Copyright (C) 2010-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2010-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2011-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2013-2018 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015-2017 Nick Mainsbridge <mainsbridge@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+#include "pbd/stacktrace.h"
 
 #include "ardour/midi_track.h"
 #include "ardour/midi_region.h"
@@ -35,7 +40,6 @@ using namespace std;
 StepEditor::StepEditor (PublicEditor& e, boost::shared_ptr<MidiTrack> t, MidiTimeAxisView& mtv)
 	: _editor (e)
 	, _track (t)
-	, step_editor (0)
 	, _mtv (mtv)
 {
 	step_edit_insert_position = 0;
@@ -52,7 +56,7 @@ StepEditor::StepEditor (PublicEditor& e, boost::shared_ptr<MidiTrack> t, MidiTim
 
 StepEditor::~StepEditor()
 {
-	delete step_editor;
+	StepEntry::instance().set_step_editor (0);
 }
 
 void
@@ -73,16 +77,14 @@ StepEditor::start_step_editing ()
 	assert (step_edit_region);
 	assert (step_edit_region_view);
 
-	if (step_editor == 0) {
-		step_editor = new StepEntry (*this);
-		step_editor->signal_delete_event().connect (sigc::mem_fun (*this, &StepEditor::step_editor_hidden));
-		step_editor->signal_hide().connect (sigc::mem_fun (*this, &StepEditor::step_editor_hide));
-	}
+	StepEntry::instance().set_step_editor (this);
+	delete_connection = StepEntry::instance().signal_delete_event().connect (sigc::mem_fun (*this, &StepEditor::step_entry_hidden));
+	hide_connection = StepEntry::instance(). signal_hide().connect (sigc::mem_fun (*this, &StepEditor::step_entry_done));
 
 	step_edit_region_view->show_step_edit_cursor (step_edit_beat_pos);
-	step_edit_region_view->set_step_edit_cursor_width (step_editor->note_length());
+	step_edit_region_view->set_step_edit_cursor_width (StepEntry::instance().note_length());
 
-	step_editor->present ();
+	StepEntry::instance().present ();
 }
 
 void
@@ -149,15 +151,18 @@ StepEditor::reset_step_edit_beat_pos ()
 }
 
 bool
-StepEditor::step_editor_hidden (GdkEventAny*)
+StepEditor::step_entry_hidden (GdkEventAny*)
 {
-	step_editor_hide ();
-	return true; // XXX remember position ?!
+	step_entry_done ();
+	return true;
 }
 
 void
-StepEditor::step_editor_hide ()
+StepEditor::step_entry_done ()
 {
+	hide_connection.disconnect ();
+	delete_connection.disconnect ();
+
 	/* everything else will follow the change in the model */
 	_track->set_step_editing (false);
 }
@@ -165,9 +170,7 @@ StepEditor::step_editor_hide ()
 void
 StepEditor::stop_step_editing ()
 {
-	if (step_editor) {
-		step_editor->hide ();
-	}
+	StepEntry::instance().hide ();
 
 	if (step_edit_region_view) {
 		step_edit_region_view->hide_step_edit_cursor();
@@ -190,7 +193,9 @@ StepEditor::check_step_edit ()
 		Evoral::EventType type;
 		uint32_t size;
 
-		incoming.read_prefix (&time, &type, &size);
+		if (!incoming.read_prefix (&time, &type, &size)) {
+			break;
+		}
 
 		if (size > bufsize) {
 			delete [] buf;
@@ -198,9 +203,11 @@ StepEditor::check_step_edit ()
 			buf = new uint8_t[bufsize];
 		}
 
-		incoming.read_contents (size, buf);
+		if (!incoming.read_contents (size, buf)) {
+			break;
+		}
 
-		if ((buf[0] & 0xf0) == MIDI_CMD_NOTE_ON) {
+		if ((buf[0] & 0xf0) == MIDI_CMD_NOTE_ON && size == 3) {
 			step_add_note (buf[0] & 0xf, buf[1], buf[2], Temporal::Beats());
 		}
 	}
@@ -256,14 +263,14 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Tem
 		prepare_step_edit_region ();
 		reset_step_edit_beat_pos ();
 		step_edit_region_view->show_step_edit_cursor (step_edit_beat_pos);
-		step_edit_region_view->set_step_edit_cursor_width (step_editor->note_length());
+		step_edit_region_view->set_step_edit_cursor_width (StepEntry::instance().note_length());
 	}
 
 	assert (step_edit_region);
 	assert (step_edit_region_view);
 
-	if (beat_duration == 0.0 && step_editor) {
-		beat_duration = step_editor->note_length();
+	if (beat_duration == 0.0) {
+		beat_duration = StepEntry::instance().note_length();
 	} else if (beat_duration == 0.0) {
 		bool success;
 		beat_duration = _editor.get_grid_type_as_beats (success, step_edit_insert_position);
@@ -324,7 +331,7 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Tem
 		_step_edit_chord_duration = max (_step_edit_chord_duration, beat_duration);
 	}
 
-	step_edit_region_view->set_step_edit_cursor_width (step_editor->note_length());
+	step_edit_region_view->set_step_edit_cursor_width (StepEntry::instance().note_length());
 
 	return 0;
 }

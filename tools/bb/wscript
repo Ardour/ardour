@@ -12,14 +12,13 @@ def configure(ctx):
         pass
 
 def build(bld):
-	obj = bld (features = 'cxx c cxxprogram')
-	obj.install_path = None
-	obj.source    = [ 'bb.cc', 'gui.cc', 'misc.cc' ]
-	obj.target    = 'bb'
-	obj.includes  = ['.', '../libs']
-	obj.ldflags   = ['-no-undefined']
-	obj.use       = [ 'libardour', 'libevoral', ]
-	obj.uselib    = ' JACK GTKMM '
+        obj = bld (features = 'cxx c cxxprogram')
+        obj.install_path = None
+        obj.source    = [ 'bb.cc', 'gui.cc', 'misc.cc' ]
+        obj.target    = 'bb'
+        obj.includes  = ['.', '../libs']
+        obj.use       = [ 'libardour', 'libevoral', ]
+        obj.uselib    = 'JACK GTKMM XML'
 
         wrapper_subst_dict = {
             'INSTALL_PREFIX' : bld.env['PREFIX'],

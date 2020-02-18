@@ -1,0 +1,3693 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>MC-307</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet=""/>
+        <ChannelNameSetAssign Channel="9" NameSet=""/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 2"/>
+        <ChannelNameSetAssign Channel="11" NameSet=""/>
+        <ChannelNameSetAssign Channel="12" NameSet=""/>
+        <ChannelNameSetAssign Channel="13" NameSet=""/>
+        <ChannelNameSetAssign Channel="14" NameSet=""/>
+        <ChannelNameSetAssign Channel="15" NameSet=""/>
+        <ChannelNameSetAssign Channel="16" NameSet=""/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="false"/>
+        <AvailableChannel Channel="9" Available="false"/>
+        <AvailableChannel Channel="10" Available="false"/>
+        <AvailableChannel Channel="11" Available="false"/>
+        <AvailableChannel Channel="12" Available="false"/>
+        <AvailableChannel Channel="13" Available="false"/>
+        <AvailableChannel Channel="14" Available="false"/>
+        <AvailableChannel Channel="15" Available="false"/>
+        <AvailableChannel Channel="16" Available="false"/>
+      </AvailableForChannels>
+      <PatchBank Name="Preset A">
+        <MIDICommands>
+          <ControlChange Control="0" Value="81"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="001" Name="Lead TB 1" ProgramChange="0"/>
+          <Patch Number="002" Name="Dist TB 1" ProgramChange="1"/>
+          <Patch Number="003" Name="Dist Sqr TB" ProgramChange="2"/>
+          <Patch Number="004" Name="Dist TB 2" ProgramChange="3"/>
+          <Patch Number="005" Name="Dist TB 3" ProgramChange="4"/>
+          <Patch Number="006" Name="TB + Voco" ProgramChange="5"/>
+          <Patch Number="007" Name="Dist TB 4" ProgramChange="6"/>
+          <Patch Number="008" Name="Lead TB 2" ProgramChange="7"/>
+          <Patch Number="009" Name="Devil TB" ProgramChange="8"/>
+          <Patch Number="010" Name="Dual TB" ProgramChange="9"/>
+          <Patch Number="011" Name="HiLo303ModSw" ProgramChange="10"/>
+          <Patch Number="012" Name="Arpness TB" ProgramChange="11"/>
+          <Patch Number="013" Name="Acid Line" ProgramChange="12"/>
+          <Patch Number="014" Name="Dist TB 5" ProgramChange="13"/>
+          <Patch Number="015" Name="Lead TB 3" ProgramChange="14"/>
+          <Patch Number="016" Name="Lead TB 4" ProgramChange="15"/>
+          <Patch Number="017" Name="TB Tra Bass" ProgramChange="16"/>
+          <Patch Number="018" Name="Acid TB" ProgramChange="17"/>
+          <Patch Number="019" Name="Psyche-TB" ProgramChange="18"/>
+          <Patch Number="020" Name="TB + Sine" ProgramChange="19"/>
+          <Patch Number="021" Name="Hi-Pass TB" ProgramChange="20"/>
+          <Patch Number="022" Name="Moog Saw" ProgramChange="21"/>
+          <Patch Number="023" Name="OB Saw" ProgramChange="22"/>
+          <Patch Number="024" Name="MG Lead" ProgramChange="23"/>
+          <Patch Number="025" Name="Poly Key" ProgramChange="24"/>
+          <Patch Number="026" Name="Synth Pulse" ProgramChange="25"/>
+          <Patch Number="027" Name="Dual Profs" ProgramChange="26"/>
+          <Patch Number="028" Name="Axe of 80" ProgramChange="27"/>
+          <Patch Number="029" Name="MG Square" ProgramChange="28"/>
+          <Patch Number="030" Name="Square Lead1" ProgramChange="29"/>
+          <Patch Number="031" Name="Square Lead2" ProgramChange="30"/>
+          <Patch Number="032" Name="Square Lead3" ProgramChange="31"/>
+          <Patch Number="033" Name="Lucky" ProgramChange="32"/>
+          <Patch Number="034" Name="Synth Lead 1" ProgramChange="33"/>
+          <Patch Number="035" Name="Moon Lead" ProgramChange="34"/>
+          <Patch Number="036" Name="Rezo SynLead" ProgramChange="35"/>
+          <Patch Number="037" Name="Wspy Synth" ProgramChange="36"/>
+          <Patch Number="038" Name="Enorjizor" ProgramChange="37"/>
+          <Patch Number="039" Name="JP8 Sprang" ProgramChange="38"/>
+          <Patch Number="040" Name="PortaSynLead" ProgramChange="39"/>
+          <Patch Number="041" Name="Wah Lead" ProgramChange="40"/>
+          <Patch Number="042" Name=" Beep Mod" ProgramChange="41"/>
+          <Patch Number="043" Name="Dist Lead 1" ProgramChange="42"/>
+          <Patch Number="044" Name="Freaky Fry" ProgramChange="43"/>
+          <Patch Number="045" Name="JU2 SubOsc 1" ProgramChange="44"/>
+          <Patch Number="046" Name="JU2 SubOsc 2" ProgramChange="45"/>
+          <Patch Number="047" Name="Froggy" ProgramChange="46"/>
+          <Patch Number="048" Name="Synth Lead 2" ProgramChange="47"/>
+          <Patch Number="049" Name="Singin' MINI" ProgramChange="48"/>
+          <Patch Number="050" Name="Plastic Tone" ProgramChange="49"/>
+          <Patch Number="051" Name="SinusoidRave" ProgramChange="50"/>
+          <Patch Number="052" Name="Sine Me Up" ProgramChange="51"/>
+          <Patch Number="053" Name="Spooky Sine" ProgramChange="52"/>
+          <Patch Number="054" Name="Sine Tone" ProgramChange="53"/>
+          <Patch Number="055" Name="D50 Saw Lead" ProgramChange="54"/>
+          <Patch Number="056" Name="Dst Syn Lead" ProgramChange="55"/>
+          <Patch Number="057" Name="Big Up Massv" ProgramChange="56"/>
+          <Patch Number="058" Name="Warm SawLead" ProgramChange="57"/>
+          <Patch Number="059" Name="Hartnoll Era" ProgramChange="58"/>
+          <Patch Number="060" Name="Skegness 97" ProgramChange="59"/>
+          <Patch Number="061" Name="Simply June" ProgramChange="60"/>
+          <Patch Number="062" Name="The Brothers" ProgramChange="61"/>
+          <Patch Number="063" Name="Dist Lead 2" ProgramChange="62"/>
+          <Patch Number="064" Name="Dark SawLead" ProgramChange="63"/>
+          <Patch Number="065" Name="Dist Lead 3" ProgramChange="64"/>
+          <Patch Number="066" Name="Mosquito" ProgramChange="65"/>
+          <Patch Number="067" Name="Phazyn Vox" ProgramChange="66"/>
+          <Patch Number="068" Name="Voc Saw" ProgramChange="67"/>
+          <Patch Number="069" Name="VT Vox" ProgramChange="68"/>
+          <Patch Number="070" Name="Pure Voice" ProgramChange="69"/>
+          <Patch Number="071" Name="Robo Vox" ProgramChange="70"/>
+          <Patch Number="072" Name="Hallucinate" ProgramChange="71"/>
+          <Patch Number="073" Name="Seq.Synth" ProgramChange="72"/>
+          <Patch Number="074" Name="Analog Seq" ProgramChange="73"/>
+          <Patch Number="075" Name="Ana Punch" ProgramChange="74"/>
+          <Patch Number="076" Name="Atom Brain" ProgramChange="75"/>
+          <Patch Number="077" Name="Fooled MC" ProgramChange="76"/>
+          <Patch Number="078" Name="101 Bass 1" ProgramChange="77"/>
+          <Patch Number="079" Name="House Bass" ProgramChange="78"/>
+          <Patch Number="080" Name="101 Bass 2" ProgramChange="79"/>
+          <Patch Number="081" Name="202 Bass" ProgramChange="80"/>
+          <Patch Number="082" Name="Psycho Funk" ProgramChange="81"/>
+          <Patch Number="083" Name="Talking Line" ProgramChange="82"/>
+          <Patch Number="084" Name="Inside Bass" ProgramChange="83"/>
+          <Patch Number="085" Name="Bubble Bass" ProgramChange="84"/>
+          <Patch Number="086" Name="Bass Bleep" ProgramChange="85"/>
+          <Patch Number="087" Name="Wiggle Bass" ProgramChange="86"/>
+          <Patch Number="088" Name="Twist Bass" ProgramChange="87"/>
+          <Patch Number="089" Name="Octa Bass" ProgramChange="88"/>
+          <Patch Number="090" Name="BT's Sticky" ProgramChange="89"/>
+          <Patch Number="091" Name="MG Bass" ProgramChange="90"/>
+          <Patch Number="092" Name="FM Super Bs" ProgramChange="91"/>
+          <Patch Number="093" Name="Solid Bass" ProgramChange="92"/>
+          <Patch Number="094" Name="T Nite Bass" ProgramChange="93"/>
+          <Patch Number="095" Name="Front 505" ProgramChange="94"/>
+          <Patch Number="096" Name="Def Bass 1" ProgramChange="95"/>
+          <Patch Number="097" Name="Def Bass 2" ProgramChange="96"/>
+          <Patch Number="098" Name="Sine Bass 1" ProgramChange="97"/>
+          <Patch Number="099" Name="Sine Bass 2" ProgramChange="98"/>
+          <Patch Number="100" Name="RollModRezBs" ProgramChange="99"/>
+          <Patch Number="101" Name="Gate Me Buzz" ProgramChange="100"/>
+          <Patch Number="102" Name="System Bass" ProgramChange="101"/>
+          <Patch Number="103" Name="Spike Bass" ProgramChange="102"/>
+          <Patch Number="104" Name="Solid Goa" ProgramChange="103"/>
+          <Patch Number="105" Name="Rezo Bass" ProgramChange="104"/>
+          <Patch Number="106" Name="Blip Bass" ProgramChange="105"/>
+          <Patch Number="107" Name="Pizz Bass" ProgramChange="106"/>
+          <Patch Number="108" Name="Voco Bass" ProgramChange="107"/>
+          <Patch Number="109" Name="VoCoRoBo" ProgramChange="108"/>
+          <Patch Number="110" Name="Dust Bass" ProgramChange="109"/>
+          <Patch Number="111" Name="ArtCore Bass" ProgramChange="110"/>
+          <Patch Number="112" Name="NU-NRG Bass" ProgramChange="111"/>
+          <Patch Number="113" Name="TalkBox Bass" ProgramChange="112"/>
+          <Patch Number="114" Name="Incontinence" ProgramChange="113"/>
+          <Patch Number="115" Name="Bari Voice" ProgramChange="114"/>
+          <Patch Number="116" Name="Ac.Bass" ProgramChange="115"/>
+          <Patch Number="117" Name="E.Ac.Bass" ProgramChange="116"/>
+          <Patch Number="118" Name="Acid Jazz Bs" ProgramChange="117"/>
+          <Patch Number="119" Name="Soup's Bass" ProgramChange="118"/>
+          <Patch Number="120" Name="Fingered Bs" ProgramChange="119"/>
+          <Patch Number="121" Name="FingBsVeloSw" ProgramChange="120"/>
+          <Patch Number="122" Name="PickedBass 1" ProgramChange="121"/>
+          <Patch Number="123" Name="PickedBass 2" ProgramChange="122"/>
+          <Patch Number="124" Name="Fretless Bs" ProgramChange="123"/>
+          <Patch Number="125" Name="Phot Bass" ProgramChange="124"/>
+          <Patch Number="126" Name="Slap Bass" ProgramChange="125"/>
+          <Patch Number="127" Name="R&amp;B B-Slides" ProgramChange="126"/>
+          <Patch Number="128" Name="Syn Stack 1" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset B">
+        <MIDICommands>
+          <ControlChange Control="0" Value="81"/>
+          <ControlChange Control="32" Value="1"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="001" Name="Strong Brass" ProgramChange="0"/>
+          <Patch Number="002" Name="You Can Fly" ProgramChange="1"/>
+          <Patch Number="003" Name="Syn stack 2" ProgramChange="2"/>
+          <Patch Number="004" Name="Dawn Of Man" ProgramChange="3"/>
+          <Patch Number="005" Name="005: Saw Stack 1" ProgramChange="4"/>
+          <Patch Number="006" Name="Saw Stack 2" ProgramChange="5"/>
+          <Patch Number="007" Name="DLM Stack" ProgramChange="6"/>
+          <Patch Number="008" Name="DOC Stack" ProgramChange="7"/>
+          <Patch Number="009" Name="LN2 Stack" ProgramChange="8"/>
+          <Patch Number="010" Name="Bend Stack" ProgramChange="9"/>
+          <Patch Number="011" Name="Freedom" ProgramChange="10"/>
+          <Patch Number="012" Name="Good Bean" ProgramChange="11"/>
+          <Patch Number="013" Name="JP8000 5th" ProgramChange="12"/>
+          <Patch Number="014" Name="Mega 5th" ProgramChange="13"/>
+          <Patch Number="015" Name="5th Saw" ProgramChange="14"/>
+          <Patch Number="016" Name="4th Saw" ProgramChange="15"/>
+          <Patch Number="017" Name="Soundtrack" ProgramChange="16"/>
+          <Patch Number="018" Name="Rise Pad" ProgramChange="17"/>
+          <Patch Number="019" Name="Warm Pad" ProgramChange="18"/>
+          <Patch Number="020" Name="JP + OB Pad" ProgramChange="19"/>
+          <Patch Number="021" Name="Planet" ProgramChange="20"/>
+          <Patch Number="022" Name="Additive" ProgramChange="21"/>
+          <Patch Number="023" Name="Noise Pad" ProgramChange="22"/>
+          <Patch Number="024" Name="Sweep Pad 1" ProgramChange="23"/>
+          <Patch Number="025" Name="Sweep Pad 2" ProgramChange="24"/>
+          <Patch Number="026" Name="Alles Padde" ProgramChange="25"/>
+          <Patch Number="027" Name="Sky Light" ProgramChange="26"/>
+          <Patch Number="028" Name="Stargate MC" ProgramChange="27"/>
+          <Patch Number="029" Name="Middle Grow" ProgramChange="28"/>
+          <Patch Number="030" Name="AiRye Bread-" ProgramChange="29"/>
+          <Patch Number="031" Name="NU-NRG Org" ProgramChange="30"/>
+          <Patch Number="032" Name="Halo Pad" ProgramChange="31"/>
+          <Patch Number="033" Name="Str/Brs Pad" ProgramChange="32"/>
+          <Patch Number="034" Name="Syn Brs Pad" ProgramChange="33"/>
+          <Patch Number="035" Name="Simple Pad" ProgramChange="34"/>
+          <Patch Number="036" Name="OB Rezo Pad" ProgramChange="35"/>
+          <Patch Number="037" Name="Sweet Vocode" ProgramChange="36"/>
+          <Patch Number="038" Name="Thin Pad" ProgramChange="37"/>
+          <Patch Number="039" Name="Attack Pad" ProgramChange="38"/>
+          <Patch Number="040" Name="Metal Pad" ProgramChange="39"/>
+          <Patch Number="041" Name="Atmosphere" ProgramChange="40"/>
+          <Patch Number="042" Name="Fantasia" ProgramChange="41"/>
+          <Patch Number="043" Name="Feedbackwave" ProgramChange="42"/>
+          <Patch Number="044" Name="Pacifica" ProgramChange="43"/>
+          <Patch Number="045" Name="Atmosphere 2" ProgramChange="44"/>
+          <Patch Number="046" Name="Sub Atmosphe" ProgramChange="45"/>
+          <Patch Number="047" Name="Machine Pad" ProgramChange="46"/>
+          <Patch Number="048" Name="Detuned Pad" ProgramChange="47"/>
+          <Patch Number="049" Name="Scoop Pad" ProgramChange="48"/>
+          <Patch Number="050" Name="Psycho Trevor" ProgramChange="49"/>
+          <Patch Number="051" Name="Floating Pad" ProgramChange="50"/>
+          <Patch Number="052" Name="Fancy Pad" ProgramChange="51"/>
+          <Patch Number="053" Name="Strings 1" ProgramChange="52"/>
+          <Patch Number="054" Name="Strings 2" ProgramChange="53"/>
+          <Patch Number="055" Name="Old StringSW" ProgramChange="54"/>
+          <Patch Number="056" Name="Swim Strings" ProgramChange="55"/>
+          <Patch Number="057" Name="Eclip-Str" ProgramChange="56"/>
+          <Patch Number="058" Name="Slow Strings" ProgramChange="57"/>
+          <Patch Number="059" Name="OB Slow Str" ProgramChange="58"/>
+          <Patch Number="060" Name="Syn.Strings1" ProgramChange="59"/>
+          <Patch Number="061" Name="Syn.Strings2" ProgramChange="60"/>
+          <Patch Number="062" Name="OB Strings" ProgramChange="61"/>
+          <Patch Number="063" Name="Rhap Strings" ProgramChange="62"/>
+          <Patch Number="064" Name="Banded Jupe" ProgramChange="63"/>
+          <Patch Number="065" Name="NU-NRG Str" ProgramChange="64"/>
+          <Patch Number="066" Name="Violin" ProgramChange="65"/>
+          <Patch Number="067" Name="Contrabass" ProgramChange="66"/>
+          <Patch Number="068" Name="Tremolo Str" ProgramChange="67"/>
+          <Patch Number="069" Name="Pizzicato 1" ProgramChange="68"/>
+          <Patch Number="070" Name="Pizzicato 2" ProgramChange="69"/>
+          <Patch Number="071" Name="Pizz It" ProgramChange="70"/>
+          <Patch Number="072" Name="Guardians" ProgramChange="71"/>
+          <Patch Number="073" Name="Gat Passion" ProgramChange="72"/>
+          <Patch Number="074" Name="Syn Harp" ProgramChange="73"/>
+          <Patch Number="075" Name="Voice Oohs" ProgramChange="74"/>
+          <Patch Number="076" Name="Solo Vox" ProgramChange="75"/>
+          <Patch Number="077" Name="Syn Vox" ProgramChange="76"/>
+          <Patch Number="078" Name="Choir Aahs" ProgramChange="77"/>
+          <Patch Number="079" Name="Space Voice" ProgramChange="78"/>
+          <Patch Number="080" Name="Star Voice" ProgramChange="79"/>
+          <Patch Number="081" Name="Brightness" ProgramChange="80"/>
+          <Patch Number="082" Name="Vox Lead" ProgramChange="81"/>
+          <Patch Number="083" Name="Auhbient" ProgramChange="82"/>
+          <Patch Number="084" Name="Auh Luv Rave" ProgramChange="83"/>
+          <Patch Number="085" Name="PCM Life" ProgramChange="84"/>
+          <Patch Number="086" Name="Noisevox" ProgramChange="85"/>
+          <Patch Number="087" Name="Trance Voice" ProgramChange="86"/>
+          <Patch Number="088" Name="Effect Acer" ProgramChange="87"/>
+          <Patch Number="089" Name="Alternative" ProgramChange="88"/>
+          <Patch Number="090" Name="Hard Pure" ProgramChange="89"/>
+          <Patch Number="091" Name="Metal EF" ProgramChange="90"/>
+          <Patch Number="092" Name="Dly Tone" ProgramChange="91"/>
+          <Patch Number="093" Name="Osci Frog" ProgramChange="92"/>
+          <Patch Number="094" Name="Cal + After" ProgramChange="93"/>
+          <Patch Number="095" Name="8b Pad" ProgramChange="94"/>
+          <Patch Number="096" Name="SpaceHighway" ProgramChange="95"/>
+          <Patch Number="097" Name="Trek Storm" ProgramChange="96"/>
+          <Patch Number="098" Name="Abduction" ProgramChange="97"/>
+          <Patch Number="099" Name="1st Contact" ProgramChange="98"/>
+          <Patch Number="100" Name="Ice Cave" ProgramChange="99"/>
+          <Patch Number="101" Name="Rev Cord" ProgramChange="100"/>
+          <Patch Number="102" Name="Blue Random" ProgramChange="101"/>
+          <Patch Number="103" Name="Sync Tone" ProgramChange="102"/>
+          <Patch Number="104" Name="Seq Up" ProgramChange="103"/>
+          <Patch Number="105" Name="SawLFOSaw" ProgramChange="104"/>
+          <Patch Number="106" Name="Calculating" ProgramChange="105"/>
+          <Patch Number="107" Name="Touch EF" ProgramChange="106"/>
+          <Patch Number="108" Name="Welding " ProgramChange="107"/>
+          <Patch Number="109" Name="Press Machin" ProgramChange="108"/>
+          <Patch Number="110" Name="EF Tribe" ProgramChange="109"/>
+          <Patch Number="111" Name="Scratch Alt" ProgramChange="110"/>
+          <Patch Number="112" Name="Analog FX" ProgramChange="111"/>
+          <Patch Number="113" Name="Non TB" ProgramChange="112"/>
+          <Patch Number="114" Name="Nasty Filt" ProgramChange="113"/>
+          <Patch Number="115" Name="Psy-Ence" ProgramChange="114"/>
+          <Patch Number="116" Name="Music Hi" ProgramChange="115"/>
+          <Patch Number="117" Name="Uber Zone" ProgramChange="116"/>
+          <Patch Number="118" Name="Down Gown" ProgramChange="117"/>
+          <Patch Number="119" Name=" For Giving" ProgramChange="118"/>
+          <Patch Number="120" Name="Sound Alarm" ProgramChange="119"/>
+          <Patch Number="121" Name="Acid Drone" ProgramChange="120"/>
+          <Patch Number="122" Name="X-Mod" ProgramChange="121"/>
+          <Patch Number="123" Name="X-FM/Org" ProgramChange="122"/>
+          <Patch Number="124" Name="X-FM Bass" ProgramChange="123"/>
+          <Patch Number="125" Name="Hard BD?" ProgramChange="124"/>
+          <Patch Number="126" Name="S&amp;H Voc" ProgramChange="125"/>
+          <Patch Number="127" Name="X-TlkBxBass" ProgramChange="126"/>
+          <Patch Number="128" Name="X-Kick/TB" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset C">
+        <MIDICommands>
+          <ControlChange Control="0" Value="81"/>
+          <ControlChange Control="32" Value="2"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="001" Name="X-Org/Nz" ProgramChange="0"/>
+          <Patch Number="002" Name="X-Pizz/Rng" ProgramChange="1"/>
+          <Patch Number="003" Name="White Noise" ProgramChange="2"/>
+          <Patch Number="004" Name="Pink Noise" ProgramChange="3"/>
+          <Patch Number="005" Name="P5 Noise" ProgramChange="4"/>
+          <Patch Number="006" Name="Toy Noise" ProgramChange="5"/>
+          <Patch Number="007" Name="Rezo Noise" ProgramChange="6"/>
+          <Patch Number="008" Name="Vinyl Noise" ProgramChange="7"/>
+          <Patch Number="009" Name="Tornado Jet" ProgramChange="8"/>
+          <Patch Number="010" Name="Smooth Jet" ProgramChange="9"/>
+          <Patch Number="011" Name="Sweep Noise" ProgramChange="10"/>
+          <Patch Number="012" Name="ModWhtSweep" ProgramChange="11"/>
+          <Patch Number="013" Name="Perk Breath" ProgramChange="12"/>
+          <Patch Number="014" Name="Pink Bomb" ProgramChange="13"/>
+          <Patch Number="015" Name="64voicePiano" ProgramChange="14"/>
+          <Patch Number="016" Name="Ac.Piano 1" ProgramChange="15"/>
+          <Patch Number="017" Name="Ac.Piano 2" ProgramChange="16"/>
+          <Patch Number="018" Name="Epic House" ProgramChange="17"/>
+          <Patch Number="019" Name="Hush Piano" ProgramChange="18"/>
+          <Patch Number="020" Name="Happy Piano" ProgramChange="19"/>
+          <Patch Number="021" Name="BPF Piano" ProgramChange="20"/>
+          <Patch Number="022" Name="Honky-tonk" ProgramChange="21"/>
+          <Patch Number="023" Name="NY Piano+Str" ProgramChange="22"/>
+          <Patch Number="024" Name="Voice Piano" ProgramChange="23"/>
+          <Patch Number="025" Name="Old E.Piano" ProgramChange="24"/>
+          <Patch Number="026" Name="E.Piano 1" ProgramChange="25"/>
+          <Patch Number="027" Name="E.Piano 2 " ProgramChange="26"/>
+          <Patch Number="028" Name="Cool Rhodes" ProgramChange="27"/>
+          <Patch Number="029" Name="Psycho EP" ProgramChange="28"/>
+          <Patch Number="030" Name="Trip E.Piano" ProgramChange="29"/>
+          <Patch Number="031" Name="Rotary Rhode" ProgramChange="30"/>
+          <Patch Number="032" Name="EP-Organ" ProgramChange="31"/>
+          <Patch Number="033" Name="Harpsichord" ProgramChange="32"/>
+          <Patch Number="034" Name="Clavi" ProgramChange="33"/>
+          <Patch Number="035" Name="Digi Clavi" ProgramChange="34"/>
+          <Patch Number="036" Name="FM Clavi" ProgramChange="35"/>
+          <Patch Number="037" Name="AnalogClavi1" ProgramChange="36"/>
+          <Patch Number="038" Name="AnalogClavi2" ProgramChange="37"/>
+          <Patch Number="039" Name="Funky Clavi" ProgramChange="38"/>
+          <Patch Number="040" Name="RotaryOrg Sl" ProgramChange="39"/>
+          <Patch Number="041" Name="RotaryOrg Fs" ProgramChange="40"/>
+          <Patch Number="042" Name="Gospel Spin" ProgramChange="41"/>
+          <Patch Number="043" Name="L Org F" ProgramChange="42"/>
+          <Patch Number="044" Name="Organ 1" ProgramChange="43"/>
+          <Patch Number="045" Name="Lp-Hp Organ" ProgramChange="44"/>
+          <Patch Number="046" Name="Organ 2" ProgramChange="45"/>
+          <Patch Number="047" Name="Percsv Organ" ProgramChange="46"/>
+          <Patch Number="048" Name="Ballad B" ProgramChange="47"/>
+          <Patch Number="049" Name="FM Club Org" ProgramChange="48"/>
+          <Patch Number="050" Name="Pop Organ" ProgramChange="49"/>
+          <Patch Number="051" Name="Cheese Organ" ProgramChange="50"/>
+          <Patch Number="052" Name="Reed Organ" ProgramChange="51"/>
+          <Patch Number="053" Name="Telstar" ProgramChange="52"/>
+          <Patch Number="054" Name="Church Org" ProgramChange="53"/>
+          <Patch Number="055" Name="Organ Bass" ProgramChange="54"/>
+          <Patch Number="056" Name="Strict Organ" ProgramChange="55"/>
+          <Patch Number="057" Name="SmkyChrd Org" ProgramChange="56"/>
+          <Patch Number="058" Name="Sweep Organ" ProgramChange="57"/>
+          <Patch Number="059" Name="Accordion" ProgramChange="58"/>
+          <Patch Number="060" Name="Vibraphone" ProgramChange="59"/>
+          <Patch Number="061" Name="FM Marimba" ProgramChange="60"/>
+          <Patch Number="062" Name="Marimba" ProgramChange="61"/>
+          <Patch Number="063" Name="Xylophone" ProgramChange="62"/>
+          <Patch Number="064" Name="Balaphone" ProgramChange="63"/>
+          <Patch Number="065" Name="Timpani" ProgramChange="64"/>
+          <Patch Number="066" Name="Steel Drum" ProgramChange="65"/>
+          <Patch Number="067" Name="Digi Bell" ProgramChange="66"/>
+          <Patch Number="068" Name="Acid Perc" ProgramChange="67"/>
+          <Patch Number="069" Name="MetaL-SD" ProgramChange="68"/>
+          <Patch Number="070" Name="Classy Pulse" ProgramChange="69"/>
+          <Patch Number="071" Name="Glockenspiel" ProgramChange="70"/>
+          <Patch Number="072" Name="Fanta Bell" ProgramChange="71"/>
+          <Patch Number="073" Name="Crystal" ProgramChange="72"/>
+          <Patch Number="074" Name="Tubular-Bell" ProgramChange="73"/>
+          <Patch Number="075" Name="Shank Bells" ProgramChange="74"/>
+          <Patch Number="076" Name="MKS-30 Melts" ProgramChange="75"/>
+          <Patch Number="077" Name="Trip Lead" ProgramChange="76"/>
+          <Patch Number="078" Name="Steel-Str.Gt" ProgramChange="77"/>
+          <Patch Number="079" Name="Clean Gtr" ProgramChange="78"/>
+          <Patch Number="080" Name="Jazz Gtr 1" ProgramChange="79"/>
+          <Patch Number="081" Name="Jazz Gtr 2" ProgramChange="80"/>
+          <Patch Number="082" Name="Muted Gtr " ProgramChange="81"/>
+          <Patch Number="083" Name="Lo-Fi Gtr" ProgramChange="82"/>
+          <Patch Number="084" Name="Terror Dome" ProgramChange="83"/>
+          <Patch Number="085" Name="Psycho-G" ProgramChange="84"/>
+          <Patch Number="086" Name="Dist Gtr Chd" ProgramChange="85"/>
+          <Patch Number="087" Name="Going Bald" ProgramChange="86"/>
+          <Patch Number="088" Name="Gt.Harmonic1" ProgramChange="87"/>
+          <Patch Number="089" Name="Gt.Harmonic2" ProgramChange="88"/>
+          <Patch Number="090" Name="Shafted Gtr" ProgramChange="89"/>
+          <Patch Number="091" Name="WahGT 2 Menu" ProgramChange="90"/>
+          <Patch Number="092" Name="Gtr Up" ProgramChange="91"/>
+          <Patch Number="093" Name="Gtr Down" ProgramChange="92"/>
+          <Patch Number="094" Name="Gtr Sweep" ProgramChange="93"/>
+          <Patch Number="095" Name="Orch Gtr " ProgramChange="94"/>
+          <Patch Number="096" Name="Brass" ProgramChange="95"/>
+          <Patch Number="097" Name="Bright Brass" ProgramChange="96"/>
+          <Patch Number="098" Name="Hush Brass" ProgramChange="97"/>
+          <Patch Number="099" Name="Synth Brass1" ProgramChange="98"/>
+          <Patch Number="100" Name="Synth Brass2" ProgramChange="99"/>
+          <Patch Number="101" Name="Synth Brass3" ProgramChange="100"/>
+          <Patch Number="102" Name="Syn Brs Lead" ProgramChange="101"/>
+          <Patch Number="103" Name="Obilator" ProgramChange="102"/>
+          <Patch Number="104" Name="OpenUp Brass" ProgramChange="103"/>
+          <Patch Number="105" Name="Brass Fall" ProgramChange="104"/>
+          <Patch Number="106" Name="Trumpet" ProgramChange="105"/>
+          <Patch Number="107" Name="MutedTrumpet" ProgramChange="106"/>
+          <Patch Number="108" Name="Soprano Sax" ProgramChange="107"/>
+          <Patch Number="109" Name="Alto Sax" ProgramChange="108"/>
+          <Patch Number="110" Name="Baritone Sax" ProgramChange="109"/>
+          <Patch Number="111" Name="SlideBiteSax" ProgramChange="110"/>
+          <Patch Number="112" Name="Sax &amp; Tp" ProgramChange="111"/>
+          <Patch Number="113" Name="Tuba" ProgramChange="112"/>
+          <Patch Number="114" Name="Syn F.Horn" ProgramChange="113"/>
+          <Patch Number="115" Name="Oboe" ProgramChange="114"/>
+          <Patch Number="116" Name="Whistle" ProgramChange="115"/>
+          <Patch Number="117" Name="Ocarina" ProgramChange="116"/>
+          <Patch Number="118" Name="Recorder" ProgramChange="117"/>
+          <Patch Number="119" Name="Jazz SynLead" ProgramChange="118"/>
+          <Patch Number="120" Name="Solo Flute" ProgramChange="119"/>
+          <Patch Number="121" Name="Pan Flute" ProgramChange="120"/>
+          <Patch Number="122" Name="Bottle Blow" ProgramChange="121"/>
+          <Patch Number="123" Name="Funky Pipe" ProgramChange="122"/>
+          <Patch Number="124" Name="Breath Noise" ProgramChange="123"/>
+          <Patch Number="125" Name="Shakuhachi" ProgramChange="124"/>
+          <Patch Number="126" Name="Sitar 1" ProgramChange="125"/>
+          <Patch Number="127" Name="Sitar 2" ProgramChange="126"/>
+          <Patch Number="128" Name="Santur" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset D">
+        <MIDICommands>
+          <ControlChange Control="0" Value="81"/>
+          <ControlChange Control="32" Value="3"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="001" Name="Kalimba" ProgramChange="0"/>
+          <Patch Number="002" Name="Bagpipes" ProgramChange="1"/>
+          <Patch Number="003" Name="PnoBendM7-m7" ProgramChange="2"/>
+          <Patch Number="004" Name="Org Chd m7" ProgramChange="3"/>
+          <Patch Number="005" Name="BalapChd 9th" ProgramChange="4"/>
+          <Patch Number="006" Name="Wah Gtr Hit" ProgramChange="5"/>
+          <Patch Number="007" Name="Orch Hit 1" ProgramChange="6"/>
+          <Patch Number="008" Name="Orch Hit 2" ProgramChange="7"/>
+          <Patch Number="009" Name="Rave-X-Tasy" ProgramChange="8"/>
+          <Patch Number="010" Name="Philly Hit 1" ProgramChange="9"/>
+          <Patch Number="011" Name="Philly Hit 2" ProgramChange="10"/>
+          <Patch Number="012" Name="Attack Hit" ProgramChange="11"/>
+          <Patch Number="013" Name="Funky Hit" ProgramChange="12"/>
+          <Patch Number="014" Name="Tekno ChdHit" ProgramChange="13"/>
+          <Patch Number="015" Name="Dist Hit" ProgramChange="14"/>
+          <Patch Number="016" Name="Glasgow Hit" ProgramChange="15"/>
+          <Patch Number="017" Name="Happy Hit" ProgramChange="16"/>
+          <Patch Number="018" Name="Scene Hit 1" ProgramChange="17"/>
+          <Patch Number="019" Name="Scene Hit 2" ProgramChange="18"/>
+          <Patch Number="020" Name="Drill Hit" ProgramChange="19"/>
+          <Patch Number="021" Name="Gaia Message" ProgramChange="20"/>
+          <Patch Number="022" Name="Rezo Perc" ProgramChange="21"/>
+          <Patch Number="023" Name="Syn Perc" ProgramChange="22"/>
+          <Patch Number="024" Name="MG Blip" ProgramChange="23"/>
+          <Patch Number="025" Name="Rev Blip" ProgramChange="24"/>
+          <Patch Number="026" Name="Air Blip" ProgramChange="25"/>
+          <Patch Number="027" Name="Radical Perc" ProgramChange="26"/>
+          <Patch Number="028" Name="Machine " ProgramChange="27"/>
+          <Patch Number="029" Name="Metal Hit" ProgramChange="28"/>
+          <Patch Number="030" Name="Tanz Devil" ProgramChange="29"/>
+          <Patch Number="031" Name="Headz Direkt" ProgramChange="30"/>
+          <Patch Number="032" Name="ShoppingCart" ProgramChange="31"/>
+          <Patch Number="033" Name="Noisy Drill" ProgramChange="32"/>
+          <Patch Number="034" Name="Thump Bounce" ProgramChange="33"/>
+          <Patch Number="035" Name="Tape Rewind" ProgramChange="34"/>
+          <Patch Number="036" Name="Stop" ProgramChange="35"/>
+          <Patch Number="037" Name="Ao!" ProgramChange="36"/>
+          <Patch Number="038" Name="Ha!" ProgramChange="37"/>
+          <Patch Number="039" Name="Seashore" ProgramChange="38"/>
+          <Patch Number="040" Name="Bird" ProgramChange="39"/>
+          <Patch Number="041" Name="Telephone" ProgramChange="40"/>
+          <Patch Number="042" Name="Helicopter" ProgramChange="41"/>
+          <Patch Number="043" Name="Applause" ProgramChange="42"/>
+          <Patch Number="044" Name="Gun Shot" ProgramChange="43"/>
+          <Patch Number="045" Name="Machine Gun" ProgramChange="44"/>
+          <Patch Number="046" Name="Laser Gun" ProgramChange="45"/>
+          <Patch Number="047" Name="Sci-Fi Laser" ProgramChange="46"/>
+          <Patch Number="048" Name="Breath" ProgramChange="47"/>
+          <Patch Number="049" Name="Rain" ProgramChange="48"/>
+          <Patch Number="050" Name="Siren" ProgramChange="49"/>
+          <Patch Number="051" Name="TR909 Tom " ProgramChange="50"/>
+          <Patch Number="052" Name="TR808 Tom" ProgramChange="51"/>
+          <Patch Number="053" Name="Syn Tom 1" ProgramChange="52"/>
+          <Patch Number="054" Name="Syn Tom 2" ProgramChange="53"/>
+          <Patch Number="055" Name="Old Syn Tom" ProgramChange="54"/>
+          <Patch Number="056" Name="Taiko" ProgramChange="55"/>
+          <Patch Number="057" Name="Slow Down" ProgramChange="56"/>
+          <Patch Number="058" Name="Boom Drop" ProgramChange="57"/>
+          <Patch Number="059" Name="B-Tom-D " ProgramChange="58"/>
+          <Patch Number="060" Name="Mr.Bong Bass" ProgramChange="59"/>
+          <Patch Number="061" Name="Friends of 0" ProgramChange="60"/>
+          <Patch Number="062" Name="Latin Perc" ProgramChange="61"/>
+          <Patch Number="063" Name="Bongo Fury" ProgramChange="62"/>
+          <Patch Number="064" Name="High Timbale" ProgramChange="63"/>
+          <Patch Number="065" Name="MutePandeiro" ProgramChange="64"/>
+          <Patch Number="066" Name="Open Surdo" ProgramChange="65"/>
+          <Patch Number="067" Name="Brazil Perc" ProgramChange="66"/>
+          <Patch Number="068" Name="Tablabaya" ProgramChange="67"/>
+          <Patch Number="069" Name="Mute Cuica" ProgramChange="68"/>
+          <Patch Number="070" Name="Long Whistle" ProgramChange="69"/>
+          <Patch Number="071" Name="Agogo" ProgramChange="70"/>
+          <Patch Number="072" Name="Short Tamb" ProgramChange="71"/>
+          <Patch Number="073" Name="808 Cowbell" ProgramChange="72"/>
+          <Patch Number="074" Name="CR78 Cowbell" ProgramChange="73"/>
+          <Patch Number="075" Name="CR78 Beat" ProgramChange="74"/>
+          <Patch Number="076" Name="Wind-Chime" ProgramChange="75"/>
+          <Patch Number="077" Name="Rim Shot" ProgramChange="76"/>
+          <Patch Number="078" Name="TR909 Rim" ProgramChange="77"/>
+          <Patch Number="079" Name="Hyoshigi" ProgramChange="78"/>
+          <Patch Number="080" Name="TR626 Shaker" ProgramChange="79"/>
+          <Patch Number="081" Name="727 Quijada" ProgramChange="80"/>
+          <Patch Number="082" Name="Real CH" ProgramChange="81"/>
+          <Patch Number="083" Name="TR909 OH" ProgramChange="82"/>
+          <Patch Number="084" Name="Syn OH" ProgramChange="83"/>
+          <Patch Number="085" Name="TR909 Crash" ProgramChange="84"/>
+          <Patch Number="086" Name="Reverse Cym." ProgramChange="85"/>
+          <Patch Number="087" Name="Asian Gong" ProgramChange="86"/>
+          <Patch Number="088" Name="TR808 Clap" ProgramChange="87"/>
+          <Patch Number="089" Name="Down Clap" ProgramChange="88"/>
+          <Patch Number="090" Name="Clap Tail" ProgramChange="89"/>
+          <Patch Number="091" Name="Rap&amp;Real Clp" ProgramChange="90"/>
+          <Patch Number="092" Name="Maddening" ProgramChange="91"/>
+          <Patch Number="093" Name="TR909 Snare" ProgramChange="92"/>
+          <Patch Number="094" Name="TR808 Snare" ProgramChange="93"/>
+          <Patch Number="095" Name="House Snare" ProgramChange="94"/>
+          <Patch Number="096" Name="Jungle Snr 1" ProgramChange="95"/>
+          <Patch Number="097" Name="Jungle Snr 2" ProgramChange="96"/>
+          <Patch Number="098" Name="TR808 Kick" ProgramChange="97"/>
+          <Patch Number="099" Name="Plastic BD" ProgramChange="98"/>
+          <Patch Number="100" Name="Gate Kick" ProgramChange="99"/>
+          <Patch Number="101" Name="Jungle Kick" ProgramChange="100"/>
+          <Patch Number="102" Name="Scrtch/Vo Mn" ProgramChange="101"/>
+          <Patch Number="103" Name="Flexi Vox Mn" ProgramChange="102"/>
+          <Patch Number="104" Name="Hit Menu" ProgramChange="103"/>
+          <Patch Number="105" Name="Indust Menu" ProgramChange="104"/>
+          <Patch Number="106" Name="Tom Menu" ProgramChange="105"/>
+          <Patch Number="107" Name="Percus1 Menu" ProgramChange="106"/>
+          <Patch Number="108" Name="Percus2 Menu" ProgramChange="107"/>
+          <Patch Number="109" Name="Cowbell Menu" ProgramChange="108"/>
+          <Patch Number="110" Name="Shaker+ Menu" ProgramChange="109"/>
+          <Patch Number="111" Name="Rim Menu" ProgramChange="110"/>
+          <Patch Number="112" Name="Cymbal Menu" ProgramChange="111"/>
+          <Patch Number="113" Name="CHH 1 Menu" ProgramChange="112"/>
+          <Patch Number="114" Name="CHH 2 Menu" ProgramChange="113"/>
+          <Patch Number="115" Name="PHH Menu" ProgramChange="114"/>
+          <Patch Number="116" Name="OHH 1 Menu" ProgramChange="115"/>
+          <Patch Number="117" Name="OHH 2 Menu" ProgramChange="116"/>
+          <Patch Number="118" Name="Clap 1 Menu" ProgramChange="117"/>
+          <Patch Number="119" Name="Clap 2 Menu" ProgramChange="118"/>
+          <Patch Number="120" Name="Snare 1 Menu" ProgramChange="119"/>
+          <Patch Number="121" Name="Snare 2 Menu" ProgramChange="120"/>
+          <Patch Number="122" Name="Snare 3 Menu" ProgramChange="121"/>
+          <Patch Number="123" Name="Snare 4 Menu" ProgramChange="122"/>
+          <Patch Number="124" Name="Snare 5 Menu" ProgramChange="123"/>
+          <Patch Number="125" Name="Snare 6 Menu" ProgramChange="124"/>
+          <Patch Number="126" Name="Kick 1 Menu" ProgramChange="125"/>
+          <Patch Number="127" Name="Kick 2 Menu" ProgramChange="126"/>
+          <Patch Number="128" Name="Kick 3 Menu" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset E">
+        <MIDICommands>
+          <ControlChange Control="0" Value="81"/>
+          <ControlChange Control="32" Value="32"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="001" Name="Dist TB 6" ProgramChange="0"/>
+          <Patch Number="002" Name="Acid Lead" ProgramChange="1"/>
+          <Patch Number="003" Name="Acid TB 2" ProgramChange="2"/>
+          <Patch Number="004" Name="Hi-Pass TB 2" ProgramChange="3"/>
+          <Patch Number="005" Name="Acid NRG 1" ProgramChange="4"/>
+          <Patch Number="006" Name="Acid NRG 2" ProgramChange="5"/>
+          <Patch Number="007" Name="Syn Saw" ProgramChange="6"/>
+          <Patch Number="008" Name="W-Side Saw" ProgramChange="7"/>
+          <Patch Number="009" Name="SawSoloSlide" ProgramChange="8"/>
+          <Patch Number="010" Name="OSC Rezo Saw" ProgramChange="9"/>
+          <Patch Number="011" Name="Cry Wave" ProgramChange="10"/>
+          <Patch Number="012" Name="BignNasty Ld" ProgramChange="11"/>
+          <Patch Number="013" Name="Elect Shock" ProgramChange="12"/>
+          <Patch Number="014" Name="Robo Vox 2" ProgramChange="13"/>
+          <Patch Number="015" Name="Detroit Wave" ProgramChange="14"/>
+          <Patch Number="016" Name="Detune Saw" ProgramChange="15"/>
+          <Patch Number="017" Name="OD Sync" ProgramChange="16"/>
+          <Patch Number="018" Name="HC Solo Lead" ProgramChange="17"/>
+          <Patch Number="019" Name="Night Lead" ProgramChange="18"/>
+          <Patch Number="020" Name="Pluk Out" ProgramChange="19"/>
+          <Patch Number="021" Name="Dragonfly" ProgramChange="20"/>
+          <Patch Number="022" Name="Reso Voice" ProgramChange="21"/>
+          <Patch Number="023" Name="Higher Self" ProgramChange="22"/>
+          <Patch Number="024" Name="Digital Lead" ProgramChange="23"/>
+          <Patch Number="025" Name="DigitalLead2" ProgramChange="24"/>
+          <Patch Number="026" Name="PurSineSolo" ProgramChange="25"/>
+          <Patch Number="027" Name="Too Pure" ProgramChange="26"/>
+          <Patch Number="028" Name="2000 Micro" ProgramChange="27"/>
+          <Patch Number="029" Name="Palm Pad" ProgramChange="28"/>
+          <Patch Number="030" Name="Organ Seq" ProgramChange="29"/>
+          <Patch Number="031" Name="HiRezo Seq" ProgramChange="30"/>
+          <Patch Number="032" Name="Seq.Synth 2" ProgramChange="31"/>
+          <Patch Number="033" Name="Mondigi Seq" ProgramChange="32"/>
+          <Patch Number="034" Name="Synazetic" ProgramChange="33"/>
+          <Patch Number="035" Name="Shaky Saw" ProgramChange="34"/>
+          <Patch Number="036" Name="Now Bass" ProgramChange="35"/>
+          <Patch Number="037" Name="Blip Bass 2" ProgramChange="36"/>
+          <Patch Number="038" Name="Warp Bass" ProgramChange="37"/>
+          <Patch Number="039" Name="Bassage" ProgramChange="38"/>
+          <Patch Number="040" Name="Alter Bass" ProgramChange="39"/>
+          <Patch Number="041" Name="Goldon Bass" ProgramChange="40"/>
+          <Patch Number="042" Name="Bell Bass" ProgramChange="41"/>
+          <Patch Number="043" Name="FM Super Bs2" ProgramChange="42"/>
+          <Patch Number="044" Name="Sl Bass" ProgramChange="43"/>
+          <Patch Number="045" Name="MG Bass 2" ProgramChange="44"/>
+          <Patch Number="046" Name="Cellu Bass" ProgramChange="45"/>
+          <Patch Number="047" Name="Det Bass" ProgramChange="46"/>
+          <Patch Number="048" Name="PWM Bass" ProgramChange="47"/>
+          <Patch Number="049" Name="Electro Rubb" ProgramChange="48"/>
+          <Patch Number="050" Name="Tracore Bass" ProgramChange="49"/>
+          <Patch Number="051" Name="PreasureBass" ProgramChange="50"/>
+          <Patch Number="052" Name="Bau Bass" ProgramChange="51"/>
+          <Patch Number="053" Name="Weird Bass" ProgramChange="52"/>
+          <Patch Number="054" Name="NRG HardBass" ProgramChange="53"/>
+          <Patch Number="055" Name="Noise Bass" ProgramChange="54"/>
+          <Patch Number="056" Name="Ven Bass" ProgramChange="55"/>
+          <Patch Number="057" Name="Low Bit Bass" ProgramChange="56"/>
+          <Patch Number="058" Name="Dub Bass" ProgramChange="57"/>
+          <Patch Number="059" Name="Drum'n'Bass" ProgramChange="58"/>
+          <Patch Number="060" Name="DnB Fall" ProgramChange="59"/>
+          <Patch Number="061" Name="Heavy Bass" ProgramChange="60"/>
+          <Patch Number="062" Name="LoFiAtk Bass" ProgramChange="61"/>
+          <Patch Number="063" Name="OldmeAcBass" ProgramChange="62"/>
+          <Patch Number="064" Name="P-Down Synth" ProgramChange="63"/>
+          <Patch Number="065" Name="P-Up Synth2" ProgramChange="64"/>
+          <Patch Number="066" Name="NRG Sweep" ProgramChange="65"/>
+          <Patch Number="067" Name="Tech Lead" ProgramChange="66"/>
+          <Patch Number="068" Name="Rezo Booster" ProgramChange="67"/>
+          <Patch Number="069" Name="NRG Synthe 1" ProgramChange="68"/>
+          <Patch Number="070" Name="NRG Synthe 2" ProgramChange="69"/>
+          <Patch Number="071" Name="NRG Synthe 3" ProgramChange="70"/>
+          <Patch Number="072" Name="Dust Rave" ProgramChange="71"/>
+          <Patch Number="073" Name="Psyche Stack" ProgramChange="72"/>
+          <Patch Number="074" Name="DOC Stack 2" ProgramChange="73"/>
+          <Patch Number="075" Name="NRG Stack" ProgramChange="74"/>
+          <Patch Number="076" Name="Rave Stack" ProgramChange="75"/>
+          <Patch Number="077" Name="HC Stack" ProgramChange="76"/>
+          <Patch Number="078" Name="Rezo Stack" ProgramChange="77"/>
+          <Patch Number="079" Name="Pad State" ProgramChange="78"/>
+          <Patch Number="080" Name="MG Big Pad" ProgramChange="79"/>
+          <Patch Number="081" Name="Dream Pad" ProgramChange="80"/>
+          <Patch Number="082" Name="Warm Pad 2" ProgramChange="81"/>
+          <Patch Number="083" Name="7th Romance" ProgramChange="82"/>
+          <Patch Number="084" Name="Psycho Power" ProgramChange="83"/>
+          <Patch Number="085" Name="Ocean Pad" ProgramChange="84"/>
+          <Patch Number="086" Name="Aurora" ProgramChange="85"/>
+          <Patch Number="087" Name="Planet CH" ProgramChange="86"/>
+          <Patch Number="088" Name="Strings Atk" ProgramChange="87"/>
+          <Patch Number="089" Name="Rave Tremolo" ProgramChange="88"/>
+          <Patch Number="090" Name="DrkTrem Orch" ProgramChange="89"/>
+          <Patch Number="091" Name="DrkChoirOrch" ProgramChange="90"/>
+          <Patch Number="092" Name="Radio 30's" ProgramChange="91"/>
+          <Patch Number="093" Name="DelayStrings" ProgramChange="92"/>
+          <Patch Number="094" Name="Moon Synth" ProgramChange="93"/>
+          <Patch Number="095" Name="Sweep Str" ProgramChange="94"/>
+          <Patch Number="096" Name="CelluloidStr" ProgramChange="95"/>
+          <Patch Number="097" Name="P5 Sync Str" ProgramChange="96"/>
+          <Patch Number="098" Name="Electric Str" ProgramChange="97"/>
+          <Patch Number="099" Name="F.O.U" ProgramChange="98"/>
+          <Patch Number="100" Name="Choir Aahs 2" ProgramChange="99"/>
+          <Patch Number="101" Name="Floor Choir" ProgramChange="100"/>
+          <Patch Number="102" Name="Darkness" ProgramChange="101"/>
+          <Patch Number="103" Name="HevnsFactory" ProgramChange="102"/>
+          <Patch Number="104" Name="Space Voice2" ProgramChange="103"/>
+          <Patch Number="105" Name="V-Zox" ProgramChange="104"/>
+          <Patch Number="106" Name="Voco+Choir" ProgramChange="105"/>
+          <Patch Number="107" Name="Trancer" ProgramChange="106"/>
+          <Patch Number="108" Name="Slice Choir" ProgramChange="107"/>
+          <Patch Number="109" Name="Matt Chord" ProgramChange="108"/>
+          <Patch Number="110" Name="Fuwa Rings" ProgramChange="109"/>
+          <Patch Number="111" Name="3rdChoir U7D" ProgramChange="110"/>
+          <Patch Number="112" Name="2Matt Colors" ProgramChange="111"/>
+          <Patch Number="113" Name="Detz" ProgramChange="112"/>
+          <Patch Number="114" Name="High Reeveer" ProgramChange="113"/>
+          <Patch Number="115" Name="Home Sweep" ProgramChange="114"/>
+          <Patch Number="116" Name="Ucyu-Bue" ProgramChange="115"/>
+          <Patch Number="117" Name="Machine A" ProgramChange="116"/>
+          <Patch Number="118" Name="MG Sweep" ProgramChange="117"/>
+          <Patch Number="119" Name="2Ranger" ProgramChange="118"/>
+          <Patch Number="120" Name="Warping" ProgramChange="119"/>
+          <Patch Number="121" Name="Galactic Swp" ProgramChange="120"/>
+          <Patch Number="122" Name="Lift UP" ProgramChange="121"/>
+          <Patch Number="123" Name="Trance UFO" ProgramChange="122"/>
+          <Patch Number="124" Name="Dentalic" ProgramChange="123"/>
+          <Patch Number="125" Name="Energy" ProgramChange="124"/>
+          <Patch Number="126" Name="Fatt One" ProgramChange="125"/>
+          <Patch Number="127" Name="Strange" ProgramChange="126"/>
+          <Patch Number="128" Name="Space Creaps" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset F">
+        <MIDICommands>
+          <ControlChange Control="0" Value="81"/>
+          <ControlChange Control="32" Value="5"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="001" Name="Bottle Keep" ProgramChange="0"/>
+          <Patch Number="002" Name="Def filter" ProgramChange="1"/>
+          <Patch Number="003" Name="Analyzer" ProgramChange="2"/>
+          <Patch Number="004" Name="Funny Man" ProgramChange="3"/>
+          <Patch Number="005" Name="SpEcE&amp;HoLd" ProgramChange="4"/>
+          <Patch Number="006" Name="Trance Machin" ProgramChange="5"/>
+          <Patch Number="007" Name="Spaceage" ProgramChange="6"/>
+          <Patch Number="008" Name="Cosmic Rays" ProgramChange="7"/>
+          <Patch Number="009" Name="Dada XYZ" ProgramChange="8"/>
+          <Patch Number="010" Name="What?" ProgramChange="9"/>
+          <Patch Number="011" Name="Take Effect" ProgramChange="10"/>
+          <Patch Number="012" Name="Deep Wave" ProgramChange="11"/>
+          <Patch Number="013" Name="Elktron" ProgramChange="12"/>
+          <Patch Number="014" Name="Transport" ProgramChange="13"/>
+          <Patch Number="015" Name="Fury Atk" ProgramChange="14"/>
+          <Patch Number="016" Name="Horror Film1" ProgramChange="15"/>
+          <Patch Number="017" Name="Horror Film2" ProgramChange="16"/>
+          <Patch Number="018" Name="NoFXrequired" ProgramChange="17"/>
+          <Patch Number="019" Name="Tom Noise" ProgramChange="18"/>
+          <Patch Number="020" Name="16beat rpm" ProgramChange="19"/>
+          <Patch Number="021" Name="Classique" ProgramChange="20"/>
+          <Patch Number="022" Name="Smooth Piano" ProgramChange="21"/>
+          <Patch Number="023" Name="Geek Piano" ProgramChange="22"/>
+          <Patch Number="024" Name="Feed Piano" ProgramChange="23"/>
+          <Patch Number="025" Name="Bird Piano" ProgramChange="24"/>
+          <Patch Number="026" Name="EppEEppE" ProgramChange="25"/>
+          <Patch Number="027" Name="Gentile Wurly" ProgramChange="26"/>
+          <Patch Number="028" Name="Wurly Pad" ProgramChange="27"/>
+          <Patch Number="029" Name="Str8Up Wurly" ProgramChange="28"/>
+          <Patch Number="030" Name="78RPM Wurly" ProgramChange="29"/>
+          <Patch Number="031" Name="OrganOrgan" ProgramChange="30"/>
+          <Patch Number="032" Name="Percs Organ2" ProgramChange="31"/>
+          <Patch Number="033" Name="RotaryOrgFs2" ProgramChange="32"/>
+          <Patch Number="034" Name="Digi Organ" ProgramChange="33"/>
+          <Patch Number="035" Name="Vib+MuteTp" ProgramChange="34"/>
+          <Patch Number="036" Name="Vib+Guitar" ProgramChange="35"/>
+          <Patch Number="037" Name="SteelTimpani" ProgramChange="36"/>
+          <Patch Number="038" Name="Wind Bell" ProgramChange="37"/>
+          <Patch Number="039" Name="Bell 2 Bell" ProgramChange="38"/>
+          <Patch Number="040" Name="TreasureBell" ProgramChange="39"/>
+          <Patch Number="041" Name="Noise Bell" ProgramChange="40"/>
+          <Patch Number="042" Name="Overdrive Gt" ProgramChange="41"/>
+          <Patch Number="043" Name="OD Octave" ProgramChange="42"/>
+          <Patch Number="044" Name="DistMute Gtr" ProgramChange="43"/>
+          <Patch Number="045" Name="RockinMute Gt" ProgramChange="44"/>
+          <Patch Number="046" Name="Funk Gtr" ProgramChange="45"/>
+          <Patch Number="047" Name="FunkyMuteGtr" ProgramChange="46"/>
+          <Patch Number="048" Name="FunkMtWah Gt" ProgramChange="47"/>
+          <Patch Number="049" Name="Ghost Gtr" ProgramChange="48"/>
+          <Patch Number="050" Name="Acoustic Gtr" ProgramChange="49"/>
+          <Patch Number="051" Name="30's Tpt" ProgramChange="50"/>
+          <Patch Number="052" Name="ThunderBrass" ProgramChange="51"/>
+          <Patch Number="053" Name="Solo Trumpet" ProgramChange="52"/>
+          <Patch Number="054" Name="Sax+MuteTp" ProgramChange="53"/>
+          <Patch Number="055" Name="Real Sax" ProgramChange="54"/>
+          <Patch Number="056" Name="Slow BlowSax" ProgramChange="55"/>
+          <Patch Number="057" Name="Brass Fall 2" ProgramChange="56"/>
+          <Patch Number="058" Name="Retro Flute" ProgramChange="57"/>
+          <Patch Number="059" Name="TronM Flute" ProgramChange="58"/>
+          <Patch Number="060" Name="Real Sitar" ProgramChange="59"/>
+          <Patch Number="061" Name="FarOutSGliss" ProgramChange="60"/>
+          <Patch Number="062" Name="Maharagna" ProgramChange="61"/>
+          <Patch Number="063" Name="Didge Pad" ProgramChange="62"/>
+          <Patch Number="064" Name="Bagpipes 2" ProgramChange="63"/>
+          <Patch Number="065" Name="Happy Hit 2" ProgramChange="64"/>
+          <Patch Number="066" Name="Rave Hit" ProgramChange="65"/>
+          <Patch Number="067" Name="MosterAtack" ProgramChange="66"/>
+          <Patch Number="068" Name="Smear Hit 1" ProgramChange="67"/>
+          <Patch Number="069" Name="Dark Hit" ProgramChange="68"/>
+          <Patch Number="070" Name="Bottom Hit" ProgramChange="69"/>
+          <Patch Number="071" Name="TeknoChdHit2" ProgramChange="70"/>
+          <Patch Number="072" Name="JP Lead Hit" ProgramChange="71"/>
+          <Patch Number="073" Name="Classic Hit" ProgramChange="72"/>
+          <Patch Number="074" Name="RevHouse Hit" ProgramChange="73"/>
+          <Patch Number="075" Name="Smear Hit 2" ProgramChange="74"/>
+          <Patch Number="076" Name="Samba Hit" ProgramChange="75"/>
+          <Patch Number="077" Name="Stopper" ProgramChange="76"/>
+          <Patch Number="078" Name="Metal Bang" ProgramChange="77"/>
+          <Patch Number="079" Name="MetallicShot" ProgramChange="78"/>
+          <Patch Number="080" Name="Metal Zapper" ProgramChange="79"/>
+          <Patch Number="081" Name="P-Zing" ProgramChange="80"/>
+          <Patch Number="082" Name="Boing" ProgramChange="81"/>
+          <Patch Number="083" Name="Zap YoYo FXm" ProgramChange="82"/>
+          <Patch Number="084" Name="Zap 1" ProgramChange="83"/>
+          <Patch Number="085" Name="Zap 2" ProgramChange="84"/>
+          <Patch Number="086" Name="Zap 3" ProgramChange="85"/>
+          <Patch Number="087" Name="Zap 4" ProgramChange="86"/>
+          <Patch Number="088" Name="Zap 5" ProgramChange="87"/>
+          <Patch Number="089" Name="Game Bleep" ProgramChange="88"/>
+          <Patch Number="090" Name="Seq MG" ProgramChange="89"/>
+          <Patch Number="091" Name="Bull Scream" ProgramChange="90"/>
+          <Patch Number="092" Name="Hoo!" ProgramChange="91"/>
+          <Patch Number="093" Name="Hey! 2" ProgramChange="92"/>
+          <Patch Number="094" Name="¡Yooh" ProgramChange="93"/>
+          <Patch Number="095" Name="Dolphin" ProgramChange="94"/>
+          <Patch Number="096" Name="Voice Riff" ProgramChange="95"/>
+          <Patch Number="097" Name="Thunderbolt" ProgramChange="96"/>
+          <Patch Number="098" Name="Construct" ProgramChange="97"/>
+          <Patch Number="099" Name="Jack Hammer" ProgramChange="98"/>
+          <Patch Number="100" Name="Turbine" ProgramChange="99"/>
+          <Patch Number="101" Name="Sawing" ProgramChange="100"/>
+          <Patch Number="102" Name="Steaming" ProgramChange="101"/>
+          <Patch Number="103" Name="SteamWhistle" ProgramChange="102"/>
+          <Patch Number="104" Name="Aircraft" ProgramChange="103"/>
+          <Patch Number="105" Name="Missile 3D" ProgramChange="104"/>
+          <Patch Number="106" Name="Siren 2" ProgramChange="105"/>
+          <Patch Number="107" Name="Siren 3" ProgramChange="106"/>
+          <Patch Number="108" Name="FireBomb" ProgramChange="107"/>
+          <Patch Number="109" Name="Boost Tom" ProgramChange="108"/>
+          <Patch Number="110" Name="WaDaiko" ProgramChange="109"/>
+          <Patch Number="111" Name="Tsuzumi Velo" ProgramChange="110"/>
+          <Patch Number="112" Name="LoFi Perc" ProgramChange="111"/>
+          <Patch Number="113" Name="Air Perc" ProgramChange="112"/>
+          <Patch Number="114" Name="Retro Bell" ProgramChange="113"/>
+          <Patch Number="115" Name="Timpani 2" ProgramChange="114"/>
+          <Patch Number="116" Name="Spring Cowb" ProgramChange="115"/>
+          <Patch Number="117" Name="Rim Shot 2" ProgramChange="116"/>
+          <Patch Number="118" Name="Dark Crash" ProgramChange="117"/>
+          <Patch Number="119" Name="DR110 Cymbal" ProgramChange="118"/>
+          <Patch Number="120" Name="Syn Ride" ProgramChange="119"/>
+          <Patch Number="121" Name="Asian Gong 2" ProgramChange="120"/>
+          <Patch Number="122" Name="Asian Gong 3" ProgramChange="121"/>
+          <Patch Number="123" Name="Asian Gong 4" ProgramChange="122"/>
+          <Patch Number="124" Name="TR909 Sn&amp;Clp" ProgramChange="123"/>
+          <Patch Number="125" Name="Afro Clap" ProgramChange="124"/>
+          <Patch Number="126" Name="Dynamic Snr" ProgramChange="125"/>
+          <Patch Number="127" Name="Perc Snare" ProgramChange="126"/>
+          <Patch Number="128" Name="PicSnHrd&amp;Rol" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset G">
+        <MIDICommands>
+          <ControlChange Control="0" Value="81"/>
+          <ControlChange Control="32" Value="6"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="001" Name="PurePhat Snr" ProgramChange="0"/>
+          <Patch Number="002" Name="LoFi Snare" ProgramChange="1"/>
+          <Patch Number="003" Name="Spray SD" ProgramChange="2"/>
+          <Patch Number="004" Name="Plastic BD 2" ProgramChange="3"/>
+          <Patch Number="005" Name="TR808 Kick 2" ProgramChange="4"/>
+          <Patch Number="006" Name="NRG Kick" ProgramChange="5"/>
+          <Patch Number="007" Name="Drive Kick" ProgramChange="6"/>
+          <Patch Number="008" Name="Atack Kick" ProgramChange="7"/>
+          <Patch Number="009" Name="Beats Kick" ProgramChange="8"/>
+          <Patch Number="010" Name="R&amp;B Kick" ProgramChange="9"/>
+          <Patch Number="011" Name="BD reso Ride" ProgramChange="10"/>
+          <Patch Number="012" Name="Future Kick" ProgramChange="11"/>
+          <Patch Number="013" Name="Filtic BD" ProgramChange="12"/>
+          <Patch Number="014" Name="Didge Menu" ProgramChange="13"/>
+          <Patch Number="015" Name="BerimbauMenu" ProgramChange="14"/>
+          <Patch Number="016" Name="MG Zap Menu" ProgramChange="15"/>
+          <Patch Number="017" Name="Sweep Menu" ProgramChange="16"/>
+          <Patch Number="018" Name="Voice Menu" ProgramChange="17"/>
+          <Patch Number="019" Name="Tom 2 Menu" ProgramChange="18"/>
+          <Patch Number="020" Name="Percus3 Menu" ProgramChange="19"/>
+          <Patch Number="021" Name="Percus4 Menu" ProgramChange="20"/>
+          <Patch Number="022" Name="TablaBy Menu" ProgramChange="21"/>
+          <Patch Number="023" Name="Udu Pot Menu" ProgramChange="22"/>
+          <Patch Number="024" Name="Japan Menu" ProgramChange="23"/>
+          <Patch Number="025" Name="Rim 2 Menu" ProgramChange="24"/>
+          <Patch Number="026" Name="C&amp;OHH 3 Menu" ProgramChange="25"/>
+          <Patch Number="027" Name="Cymbal2 Menu" ProgramChange="26"/>
+          <Patch Number="028" Name="AsiaGng Menu" ProgramChange="27"/>
+          <Patch Number="029" Name="Clap 3 Menu" ProgramChange="28"/>
+          <Patch Number="030" Name="Snare 7 Menu" ProgramChange="29"/>
+          <Patch Number="031" Name="Kick 4 Menu" ProgramChange="30"/>
+          <Patch Number="032" Name="Kick 5 Menu" ProgramChange="31"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+    <ChannelNameSet Name="Name Set 2">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="false"/>
+        <AvailableChannel Channel="2" Available="false"/>
+        <AvailableChannel Channel="3" Available="false"/>
+        <AvailableChannel Channel="4" Available="false"/>
+        <AvailableChannel Channel="5" Available="false"/>
+        <AvailableChannel Channel="6" Available="false"/>
+        <AvailableChannel Channel="7" Available="false"/>
+        <AvailableChannel Channel="8" Available="false"/>
+        <AvailableChannel Channel="9" Available="false"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="false"/>
+        <AvailableChannel Channel="12" Available="false"/>
+        <AvailableChannel Channel="13" Available="false"/>
+        <AvailableChannel Channel="14" Available="false"/>
+        <AvailableChannel Channel="15" Available="false"/>
+        <AvailableChannel Channel="16" Available="false"/>
+      </AvailableForChannels>
+      <PatchBank Name="Preset Rhythm sets">
+        <MIDICommands>
+          <ControlChange Control="0" Value="81"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="001" Name="P:01 TR-909" ProgramChange="0">
+            <UsesNoteNameList Name="P:A01 TR-909"/>
+          </Patch>
+          <Patch Number="002" Name="P:A02 TR808" ProgramChange="1">
+            <UsesNoteNameList Name="P:A02 TR808"/>
+          </Patch>
+          <Patch Number="003" Name="P:A03 TR-606" ProgramChange="2">
+            <UsesNoteNameList Name="P:A03 TR-606"/>
+          </Patch>
+          <Patch Number="004" Name="P:A04 CR78&amp;Cheaps" ProgramChange="3">
+            <UsesNoteNameList Name="P:A04 CR78&amp;Cheaps"/>
+          </Patch>
+          <Patch Number="005" Name="P:A05 Techno 1" ProgramChange="4">
+            <UsesNoteNameList Name="P:A05 Techno 1"/>
+          </Patch>
+          <Patch Number="006" Name="P:A06 Techno 2" ProgramChange="5">
+            <UsesNoteNameList Name="P:A06 Techno 2"/>
+          </Patch>
+          <Patch Number="007" Name="P:A07 Techno 3" ProgramChange="6">
+            <UsesNoteNameList Name="P:A07 Techno 3"/>
+          </Patch>
+          <Patch Number="008" Name="P:A08 Hardcore" ProgramChange="7">
+            <UsesNoteNameList Name="P:A08 Hardcore"/>
+          </Patch>
+          <Patch Number="009" Name="P:A09 Ambient" ProgramChange="8">
+            <UsesNoteNameList Name="P:A09 Ambient"/>
+          </Patch>
+          <Patch Number="010" Name="P:A10 House 1" ProgramChange="9">
+            <UsesNoteNameList Name="P:A10 House 1"/>
+          </Patch>
+          <Patch Number="011" Name="P:A11 House 2" ProgramChange="10">
+            <UsesNoteNameList Name="P:A11 House 2"/>
+          </Patch>
+          <Patch Number="012" Name="P:A12 Jungle" ProgramChange="11">
+            <UsesNoteNameList Name="P:A12 Jungle"/>
+          </Patch>
+          <Patch Number="013" Name="P:A13 Drum'n'Bass1" ProgramChange="12">
+            <UsesNoteNameList Name="P:A13 Drum'n'Bass1"/>
+          </Patch>
+          <Patch Number="014" Name="P:A14 Drum'n'Bass2" ProgramChange="13">
+            <UsesNoteNameList Name="P:A14 Drum'n'Bass2"/>
+          </Patch>
+          <Patch Number="015" Name="P:A15 Hip-Hop 1" ProgramChange="14">
+            <UsesNoteNameList Name="P:A15 Hip-Hop 1"/>
+          </Patch>
+          <Patch Number="016" Name="P:A16 Hip-Hop 2" ProgramChange="15">
+            <UsesNoteNameList Name="P:A16 Hip-Hop 2"/>
+          </Patch>
+          <Patch Number="017" Name="P:A17 Funk" ProgramChange="16">
+            <UsesNoteNameList Name="P:A17 Funk"/>
+          </Patch>
+          <Patch Number="018" Name="P:A18 Electro" ProgramChange="17">
+            <UsesNoteNameList Name="P:A18 Electro"/>
+          </Patch>
+          <Patch Number="019" Name="P:A19 Jazz" ProgramChange="18">
+            <UsesNoteNameList Name="P:A19 Jazz"/>
+          </Patch>
+          <Patch Number="020" Name="P:A20 Brush" ProgramChange="19">
+            <UsesNoteNameList Name="P:A20 Brush"/>
+          </Patch>
+          <Patch Number="021" Name="P:A21 Disco" ProgramChange="20">
+            <UsesNoteNameList Name="P:A21 Disco"/>
+          </Patch>
+          <Patch Number="022" Name="P:A22 Ragga" ProgramChange="21">
+            <UsesNoteNameList Name="P:A22 Ragga"/>
+          </Patch>
+          <Patch Number="023" Name="P:A23 Rock" ProgramChange="22">
+            <UsesNoteNameList Name="P:A23 Rock"/>
+          </Patch>
+          <Patch Number="024" Name="P:A24 Industrial" ProgramChange="23">
+            <UsesNoteNameList Name="P:A24 Industrial"/>
+          </Patch>
+          <Patch Number="025" Name="P:A25 Ethnic" ProgramChange="24">
+            <UsesNoteNameList Name="P:A25 Ethnic"/>
+          </Patch>
+          <Patch Number="026" Name="P:A26 Reverse" ProgramChange="25">
+            <UsesNoteNameList Name="P:A26 Reverse"/>
+          </Patch>
+          <Patch Number="027" Name="P:B01 DR-110&amp;220" ProgramChange="26">
+            <UsesNoteNameList Name="P:B01 DR-110&amp;220"/>
+          </Patch>
+          <Patch Number="028" Name="P:B02 TR505&amp;626" ProgramChange="27">
+            <UsesNoteNameList Name="P:B02 TR-505&amp;626"/>
+          </Patch>
+          <Patch Number="029" Name="P:B03 TR707&amp;727" ProgramChange="28">
+            <UsesNoteNameList Name="P:B03 TR707&amp;727"/>
+          </Patch>
+          <Patch Number="030" Name="P:B04 Techno 4" ProgramChange="29">
+            <UsesNoteNameList Name="P:B04 Techno 4"/>
+          </Patch>
+          <Patch Number="031" Name="P:B05 NU-NRG" ProgramChange="30">
+            <UsesNoteNameList Name="P:B05 NU-NRG"/>
+          </Patch>
+          <Patch Number="032" Name="P:B06 Hard House" ProgramChange="31">
+            <UsesNoteNameList Name="P:B06 Hard House"/>
+          </Patch>
+          <Patch Number="033" Name="P:B07 Drum'n'Bass3" ProgramChange="32">
+            <UsesNoteNameList Name="P:B07 Drum'n'Bass3"/>
+          </Patch>
+          <Patch Number="034" Name="P:B08 Breakbeats" ProgramChange="33">
+            <UsesNoteNameList Name="P:B08 Breakbeats"/>
+          </Patch>
+          <Patch Number="035" Name="P:B09 Hip-Hop 3" ProgramChange="34">
+            <UsesNoteNameList Name="P:B09 Hip-Hop 3"/>
+          </Patch>
+          <Patch Number="036" Name="P:B10 Trip-Hop" ProgramChange="35">
+            <UsesNoteNameList Name="P:B10 Trip-Hop"/>
+          </Patch>
+          <Patch Number="037" Name="P:B11 R&amp;B" ProgramChange="36">
+            <UsesNoteNameList Name="P:B11 R&amp;B"/>
+          </Patch>
+          <Patch Number="038" Name="P:B12 Electro 2" ProgramChange="37">
+            <UsesNoteNameList Name="P:B12 Electro 2"/>
+          </Patch>
+          <Patch Number="039" Name="P:B13 Monde" ProgramChange="38">
+            <UsesNoteNameList Name="P:B13 Monde"/>
+          </Patch>
+          <Patch Number="040" Name="P:B14 World Perc" ProgramChange="39">
+            <UsesNoteNameList Name="P:B14 Word Perc"/>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+    <NoteNameList Name="P:A01 TR-909">
+      <Note Number="35" Name="Plastic BD 4"/>
+      <Note Number="36" Name="Plastic BD 3"/>
+      <Note Number="37" Name="TR808 Rim"/>
+      <Note Number="38" Name="TR909 Snr 1"/>
+      <Note Number="39" Name="TR909 Clap 2"/>
+      <Note Number="40" Name="TR909 Snr 3"/>
+      <Note Number="41" Name="TR707 Tom"/>
+      <Note Number="42" Name="TR909 CHH 2"/>
+      <Note Number="43" Name="TR707 Tom"/>
+      <Note Number="44" Name="TR909 PHH"/>
+      <Note Number="45" Name="TR707 Tom"/>
+      <Note Number="46" Name="TR909 OHH 1"/>
+      <Note Number="47" Name="TR909 Kick 4"/>
+      <Note Number="48" Name="TR909 Kick 2"/>
+      <Note Number="49" Name="TR909 Rim"/>
+      <Note Number="50" Name="TR909 Snr 2"/>
+      <Note Number="51" Name="TR909 Clap 1"/>
+      <Note Number="52" Name="TR909 Snr 3"/>
+      <Note Number="53" Name="TR909 Tom"/>
+      <Note Number="54" Name="TR909 CHH 1"/>
+      <Note Number="55" Name="TR909 Tom"/>
+      <Note Number="56" Name="TR909 OHH 2"/>
+      <Note Number="57" Name="TR909 Tom"/>
+      <Note Number="58" Name="TR909 OHH 2"/>
+      <Note Number="59" Name="TR909 Tom"/>
+      <Note Number="60" Name="TR909 Tom"/>
+      <Note Number="61" Name="TR909 Crash"/>
+      <Note Number="62" Name="TR909 Tom"/>
+      <Note Number="63" Name="TR909 Ride"/>
+      <Note Number="64" Name="TR909 Crash"/>
+      <Note Number="65" Name="TR909 Ride"/>
+      <Note Number="66" Name="Tambourine 2"/>
+      <Note Number="67" Name="NaturalCrash"/>
+      <Note Number="68" Name="TR808Cowbell"/>
+      <Note Number="69" Name="TR606 Cym 1"/>
+      <Note Number="70" Name="PC-2 Machine"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="HiBongo Op"/>
+      <Note Number="73" Name="LoBongo Op"/>
+      <Note Number="74" Name="HiConga Mt"/>
+      <Note Number="75" Name="HiConga Op"/>
+      <Note Number="76" Name="Lo Conga Op"/>
+      <Note Number="77" Name="Hi Timbale"/>
+      <Note Number="78" Name="Lo Timbale"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="Cabasa Up"/>
+      <Note Number="82" Name="808 Maracas"/>
+      <Note Number="83" Name="Beam HiQ"/>
+      <Note Number="84" Name="Air Blip"/>
+      <Note Number="85" Name="MG Blip"/>
+      <Note Number="86" Name="Techno Scene"/>
+      <Note Number="87" Name="Air Gun"/>
+      <Note Number="88" Name="Tekno Hit"/>
+      <Note Number="89" Name="Come on!"/>
+      <Note Number="90" Name="Wao!"/>
+      <Note Number="91" Name="Ooh! 1"/>
+      <Note Number="92" Name="Canvas"/>
+      <Note Number="93" Name="JP8000 FBK"/>
+      <Note Number="94" Name="Funky Clap"/>
+      <Note Number="95" Name="TR808 Kick 1"/>
+      <Note Number="96" Name="Gabba Kick"/>
+      <Note Number="97" Name="Synth Snare"/>
+      <Note Number="98" Name="TR808 Snr 2"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A02 TR808">
+      <Note Number="35" Name="TR808 Kick"/>
+      <Note Number="36" Name="TR808 Kick 3"/>
+      <Note Number="37" Name="TR808 RimLng"/>
+      <Note Number="38" Name="TR808 Snr 8"/>
+      <Note Number="39" Name="TR909 Clap 1"/>
+      <Note Number="40" Name="TR808 Snr 9"/>
+      <Note Number="41" Name="TR606 Tom"/>
+      <Note Number="42" Name="TR808 CHH 2"/>
+      <Note Number="43" Name="TR606 Tom"/>
+      <Note Number="44" Name="TR808 PHH 2"/>
+      <Note Number="45" Name="TR606 Tom"/>
+      <Note Number="46" Name="TR808 OHH 2"/>
+      <Note Number="47" Name="TR808 Kick 1"/>
+      <Note Number="48" Name="TR808 Kick 4"/>
+      <Note Number="49" Name="TR808 Rim"/>
+      <Note Number="50" Name="TR808 Snr 6"/>
+      <Note Number="51" Name="TR808 Clap"/>
+      <Note Number="52" Name="TR808 Snr 2"/>
+      <Note Number="53" Name="TR808 Tom"/>
+      <Note Number="54" Name="TR808 CHH 1"/>
+      <Note Number="55" Name="TR808 Tom"/>
+      <Note Number="56" Name="TR808 CHH 2"/>
+      <Note Number="57" Name="TR808 Tom"/>
+      <Note Number="58" Name="TR808 OHH 2"/>
+      <Note Number="59" Name="TR808 Tom"/>
+      <Note Number="60" Name="TR808 Tom"/>
+      <Note Number="61" Name="TR606 Cym 1"/>
+      <Note Number="62" Name="TR808 Tom"/>
+      <Note Number="63" Name="TR606 Cym 1"/>
+      <Note Number="64" Name="TR909 Crash"/>
+      <Note Number="65" Name="TR909 Ride"/>
+      <Note Number="66" Name="CR78 Tamb"/>
+      <Note Number="67" Name="TR909 Crash"/>
+      <Note Number="68" Name="TR808Cowbell"/>
+      <Note Number="69" Name="TR909 Crash"/>
+      <Note Number="70" Name="CR78 Guiro"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="TR808 Conga"/>
+      <Note Number="73" Name="TR808 Conga"/>
+      <Note Number="74" Name="TR808 Conga"/>
+      <Note Number="75" Name="TR808 Conga"/>
+      <Note Number="76" Name="TR808 Conga"/>
+      <Note Number="77" Name="Hi Timbale"/>
+      <Note Number="78" Name="Lo Timbale"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="Cabasa Up"/>
+      <Note Number="82" Name="808 Maracas"/>
+      <Note Number="83" Name="Beam HiQ"/>
+      <Note Number="84" Name="Air Blip"/>
+      <Note Number="85" Name="Syn Hit"/>
+      <Note Number="86" Name="Techno Scene"/>
+      <Note Number="87" Name="Beam HiQ"/>
+      <Note Number="88" Name="PC-2 Machine"/>
+      <Note Number="89" Name="P5 Noise"/>
+      <Note Number="90" Name="Toy Gun"/>
+      <Note Number="91" Name="Syn Tom"/>
+      <Note Number="92" Name="Cup Cym"/>
+      <Note Number="93" Name="TR808 OHH 1"/>
+      <Note Number="94" Name="Hip Clap"/>
+      <Note Number="95" Name="TR808 Kick 2"/>
+      <Note Number="96" Name="TR909 Kick 4"/>
+      <Note Number="97" Name="CR78 Snare"/>
+      <Note Number="98" Name="TR808 Snr 3"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A03 TR-606">
+      <Note Number="35" Name="TR808 Kick 3"/>
+      <Note Number="36" Name="Analog Kick"/>
+      <Note Number="37" Name="TR808 Rim"/>
+      <Note Number="38" Name="TR606 Snr 3"/>
+      <Note Number="39" Name="Cheap Clap"/>
+      <Note Number="40" Name="TR808 Snr 5"/>
+      <Note Number="41" Name="TR606 CmpTom"/>
+      <Note Number="42" Name="TR606 CHH 2"/>
+      <Note Number="43" Name="TR606 CmpTom"/>
+      <Note Number="44" Name="Hip PHH"/>
+      <Note Number="45" Name="TR606 CmpTom"/>
+      <Note Number="46" Name="TR606 DistOHH"/>
+      <Note Number="47" Name="TR606 Dst BD"/>
+      <Note Number="48" Name="TR606 Kick"/>
+      <Note Number="49" Name="Analog Rim"/>
+      <Note Number="50" Name="TR606 Snr 2"/>
+      <Note Number="51" Name="TR808 Clap"/>
+      <Note Number="52" Name="TR606 Snr 2"/>
+      <Note Number="53" Name="TR606 Tom"/>
+      <Note Number="54" Name="TR606 CHH 1"/>
+      <Note Number="55" Name="TR606 Tom"/>
+      <Note Number="56" Name="TR606 PHH 1"/>
+      <Note Number="57" Name="TR606 Tom"/>
+      <Note Number="58" Name="TR606 OHH"/>
+      <Note Number="59" Name="TR606 Tom"/>
+      <Note Number="60" Name="TR606 Tom"/>
+      <Note Number="61" Name="TR606 Cym 2"/>
+      <Note Number="62" Name="TR606 Tom"/>
+      <Note Number="63" Name="TR909 Ride"/>
+      <Note Number="64" Name="TR909 Cym 1"/>
+      <Note Number="65" Name="TR707 Ride"/>
+      <Note Number="66" Name="CR78 Tamb"/>
+      <Note Number="67" Name="TR909 Crash"/>
+      <Note Number="68" Name="TR808Cowbell"/>
+      <Note Number="69" Name="TR909 Crash"/>
+      <Note Number="70" Name="CR78 Guiro"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="TR808 Conga"/>
+      <Note Number="73" Name="TR808 Conga"/>
+      <Note Number="74" Name="TR808 Conga"/>
+      <Note Number="75" Name="TR808 Conga"/>
+      <Note Number="76" Name="TR808 Conga"/>
+      <Note Number="77" Name="Hi Timbale"/>
+      <Note Number="78" Name="Lo Timbale"/>
+      <Note Number="79" Name="CR78 Beat"/>
+      <Note Number="80" Name="CR78 Beat"/>
+      <Note Number="81" Name="Cabasa Up"/>
+      <Note Number="82" Name="808 Maracas"/>
+      <Note Number="83" Name="Beam HiQ"/>
+      <Note Number="84" Name="Buzzer"/>
+      <Note Number="85" Name="Air Blip"/>
+      <Note Number="86" Name="Reso Noise"/>
+      <Note Number="87" Name="Hyoshigi"/>
+      <Note Number="88" Name="Analog Bird"/>
+      <Note Number="89" Name="Retro UFO"/>
+      <Note Number="90" Name="PC-2 Machine"/>
+      <Note Number="91" Name="Syn Hit"/>
+      <Note Number="92" Name="Retro UFO"/>
+      <Note Number="93" Name="Thrill"/>
+      <Note Number="94" Name="Comp Clap"/>
+      <Note Number="95" Name="TR808 Kick 1"/>
+      <Note Number="96" Name="Plastic BD 4"/>
+      <Note Number="97" Name="TR909 Snr 3"/>
+      <Note Number="98" Name="CR78 Snare"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A04 CR78&amp;Cheaps">
+      <Note Number="35" Name="Toy Kick"/>
+      <Note Number="36" Name="Plastic BD 4"/>
+      <Note Number="37" Name="TR808 Rim"/>
+      <Note Number="38" Name="TR909 Snr 5"/>
+      <Note Number="39" Name="TR909 Clap 1"/>
+      <Note Number="40" Name="Deep Snare"/>
+      <Note Number="41" Name="MG Blip"/>
+      <Note Number="42" Name="TR808 CHH 1"/>
+      <Note Number="43" Name="MG Blip"/>
+      <Note Number="44" Name="TR606 PHH 2"/>
+      <Note Number="45" Name="MG Blip"/>
+      <Note Number="46" Name="TR606 OHH"/>
+      <Note Number="47" Name="TR606 Kick"/>
+      <Note Number="48" Name="Analog Kick"/>
+      <Note Number="49" Name="Analog Rim"/>
+      <Note Number="50" Name="TR808 Snr 1"/>
+      <Note Number="51" Name="TR808 Clap"/>
+      <Note Number="52" Name="CR78 Snr"/>
+      <Note Number="53" Name="TR606 Tom"/>
+      <Note Number="54" Name="CR78 CHH 1"/>
+      <Note Number="55" Name="TR606 Tom"/>
+      <Note Number="56" Name="CR78 CHH"/>
+      <Note Number="57" Name="TR606 Tom"/>
+      <Note Number="58" Name="CR78 OHH"/>
+      <Note Number="59" Name="TR606 Tom"/>
+      <Note Number="60" Name="TR606 Tom"/>
+      <Note Number="61" Name="TR606 Cym"/>
+      <Note Number="62" Name="TR606 Tom"/>
+      <Note Number="63" Name="TR606 Ride"/>
+      <Note Number="64" Name="Cup Cym"/>
+      <Note Number="65" Name="TR909 Ride"/>
+      <Note Number="66" Name="CR78 Tamb"/>
+      <Note Number="67" Name="TR909 Crash"/>
+      <Note Number="68" Name="CR78 Cowbell"/>
+      <Note Number="69" Name="TR909 Ride"/>
+      <Note Number="70" Name="TR808 Cowbell"/>
+      <Note Number="71" Name="TR707 Ride"/>
+      <Note Number="72" Name="TR808 Conga"/>
+      <Note Number="73" Name="TR808 Conga"/>
+      <Note Number="74" Name="TR808 Conga"/>
+      <Note Number="75" Name="TR808 Conga"/>
+      <Note Number="76" Name="TR808 Conga"/>
+      <Note Number="77" Name="CR78 Beat"/>
+      <Note Number="78" Name="CR78 Beat"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="CR78 Guiro"/>
+      <Note Number="82" Name="808 Maracas"/>
+      <Note Number="83" Name="Syn Hit"/>
+      <Note Number="84" Name="Beam HiQ"/>
+      <Note Number="85" Name="Analog Bird"/>
+      <Note Number="86" Name="MG Attack"/>
+      <Note Number="87" Name="Tape Rewind"/>
+      <Note Number="88" Name="Air Blip"/>
+      <Note Number="89" Name="Reso FX"/>
+      <Note Number="90" Name="Ring Osc"/>
+      <Note Number="91" Name="MG Blip"/>
+      <Note Number="92" Name="MG White Nz"/>
+      <Note Number="93" Name="Reso Noise"/>
+      <Note Number="94" Name="Cheap Clap"/>
+      <Note Number="95" Name="TR808 Kick 1"/>
+      <Note Number="96" Name="TR909 Kick 1"/>
+      <Note Number="97" Name="TR909 Snr 1"/>
+      <Note Number="98" Name="Sim Snare"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A05 Techno 1">
+      <Note Number="35" Name="Plastic BD 3"/>
+      <Note Number="36" Name="Plastic BD 2"/>
+      <Note Number="37" Name="TR707 Rim"/>
+      <Note Number="38" Name="TR909 Snr 6"/>
+      <Note Number="39" Name="TR909 Clap 1"/>
+      <Note Number="40" Name="TR909 Snr 7"/>
+      <Note Number="41" Name="TR909 DstTom"/>
+      <Note Number="42" Name="TR909 CHH 2"/>
+      <Note Number="43" Name="TR909 DstTom"/>
+      <Note Number="44" Name="TR909 PHH"/>
+      <Note Number="45" Name="TR909 DstTom"/>
+      <Note Number="46" Name="TR909 OHH 1"/>
+      <Note Number="47" Name="TR909 Kick 5"/>
+      <Note Number="48" Name="TR909 Kick 4"/>
+      <Note Number="49" Name="TR909 Rim"/>
+      <Note Number="50" Name="TR909 Snr 4"/>
+      <Note Number="51" Name="Group Clap"/>
+      <Note Number="52" Name="TR909 Snr 5"/>
+      <Note Number="53" Name="TR909 Tom"/>
+      <Note Number="54" Name="TR909 CHH 1"/>
+      <Note Number="55" Name="TR909 Tom"/>
+      <Note Number="56" Name="TR909 PHH 2"/>
+      <Note Number="57" Name="TR909 Tom"/>
+      <Note Number="58" Name="TR909 OHH 3"/>
+      <Note Number="59" Name="TR909 Tom"/>
+      <Note Number="60" Name="TR909 Tom"/>
+      <Note Number="61" Name="TR909 Crash"/>
+      <Note Number="62" Name="TR909 Tom"/>
+      <Note Number="63" Name="TR707 Ride"/>
+      <Note Number="64" Name="TR909 Crash"/>
+      <Note Number="65" Name="Asian Gong"/>
+      <Note Number="66" Name="Tambourine 3"/>
+      <Note Number="67" Name="TR909 Crash"/>
+      <Note Number="68" Name="Cowbell"/>
+      <Note Number="69" Name="TR606 Cym 1"/>
+      <Note Number="70" Name="TR808Cowbell"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="HiBongo LoFi"/>
+      <Note Number="73" Name="LoBongo LoFi"/>
+      <Note Number="74" Name="HiConga LF"/>
+      <Note Number="75" Name="HiConga LF"/>
+      <Note Number="76" Name="Lo Conga LoFi"/>
+      <Note Number="77" Name="HiTimbale LF"/>
+      <Note Number="78" Name="LoTimbale LF"/>
+      <Note Number="79" Name="CR78 Beat"/>
+      <Note Number="80" Name="CR78 Beat"/>
+      <Note Number="81" Name="TechnoShaker"/>
+      <Note Number="82" Name="TR626 Shaker"/>
+      <Note Number="83" Name="Wao!"/>
+      <Note Number="84" Name="Come On!"/>
+      <Note Number="85" Name="Ooh! 1"/>
+      <Note Number="86" Name="MG White Nz"/>
+      <Note Number="87" Name="Bomb Noise"/>
+      <Note Number="88" Name="Wah Gtr 2b"/>
+      <Note Number="89" Name="Toy Gun 3"/>
+      <Note Number="90" Name="Toy Gun 3"/>
+      <Note Number="91" Name="Buzzer"/>
+      <Note Number="92" Name="Bomb Noise"/>
+      <Note Number="93" Name="Sea"/>
+      <Note Number="94" Name="Flange Snr"/>
+      <Note Number="95" Name="TR909 Dst BD"/>
+      <Note Number="96" Name="Plastic BD 4"/>
+      <Note Number="97" Name="Break Snare 2"/>
+      <Note Number="98" Name="Ragga Rim 2"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A06 Techno 2">
+      <Note Number="35" Name="TR808 Kick 5"/>
+      <Note Number="36" Name="TR707 Kick 1"/>
+      <Note Number="37" Name="TR909 Rim"/>
+      <Note Number="38" Name="Real Snare"/>
+      <Note Number="39" Name="Down Clap"/>
+      <Note Number="40" Name="Rap Snare"/>
+      <Note Number="41" Name="TR808 Tom"/>
+      <Note Number="42" Name="TR808 CHH 2"/>
+      <Note Number="43" Name="TR808 Tom"/>
+      <Note Number="44" Name="TR808 PHH"/>
+      <Note Number="45" Name="TR808 Tom"/>
+      <Note Number="46" Name="TR808 OHH 1"/>
+      <Note Number="47" Name="TR909 Kick 2"/>
+      <Note Number="48" Name="Plastic BD 4"/>
+      <Note Number="49" Name="TR808 RimLng"/>
+      <Note Number="50" Name="TR909 Snr 4"/>
+      <Note Number="51" Name="Claptail"/>
+      <Note Number="52" Name="Funky Clap"/>
+      <Note Number="53" Name="TR707 Tom"/>
+      <Note Number="54" Name="Closed Hat"/>
+      <Note Number="55" Name="TR909 Tom"/>
+      <Note Number="56" Name="TR909 OHH 2"/>
+      <Note Number="57" Name="TR707 Tom"/>
+      <Note Number="58" Name="TR909 OHH 2"/>
+      <Note Number="59" Name="TR707 Tom"/>
+      <Note Number="60" Name="TR707 Tom"/>
+      <Note Number="61" Name="TR909 Crash"/>
+      <Note Number="62" Name="TR707 Tom"/>
+      <Note Number="63" Name="TR707 Ride"/>
+      <Note Number="64" Name="TR909 Crash"/>
+      <Note Number="65" Name="Asian Gong"/>
+      <Note Number="66" Name="Tambourine 2"/>
+      <Note Number="67" Name="TR909 Crash"/>
+      <Note Number="68" Name="TR808Cowbell"/>
+      <Note Number="69" Name="TR606 Cym 2"/>
+      <Note Number="70" Name="CR78 Tamb"/>
+      <Note Number="71" Name="Cup Cym"/>
+      <Note Number="72" Name="HiBongo Op"/>
+      <Note Number="73" Name="LoBongo Op"/>
+      <Note Number="74" Name="HiConga Mt"/>
+      <Note Number="75" Name="HiConga Op"/>
+      <Note Number="76" Name="Lo Conga Op"/>
+      <Note Number="77" Name="Hi Timbale"/>
+      <Note Number="78" Name="Lo Timbale"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="TechnoShaker"/>
+      <Note Number="82" Name="Maracas"/>
+      <Note Number="83" Name="Beam HiQ"/>
+      <Note Number="84" Name="Techno Scene"/>
+      <Note Number="85" Name="Thin Beef"/>
+      <Note Number="86" Name="Come on!"/>
+      <Note Number="87" Name="Ooh!1"/>
+      <Note Number="88" Name="Wao!"/>
+      <Note Number="89" Name="Analog Bird"/>
+      <Note Number="90" Name="Retro UFO"/>
+      <Note Number="91" Name="Metal Sweep"/>
+      <Note Number="92" Name="Emergency"/>
+      <Note Number="93" Name="Tonality"/>
+      <Note Number="94" Name="TR909 Clap 1"/>
+      <Note Number="95" Name="Wet Kick"/>
+      <Note Number="96" Name="Hip Kick"/>
+      <Note Number="97" Name="TR909 Snr 5"/>
+      <Note Number="98" Name="Clap Snare 2"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A07 Techno 3">
+      <Note Number="35" Name="Plastic BD 3"/>
+      <Note Number="36" Name="Plastic BD 4"/>
+      <Note Number="37" Name="Jungle Snr 2"/>
+      <Note Number="38" Name="TR808 Snr 7"/>
+      <Note Number="39" Name="Comp Clap"/>
+      <Note Number="40" Name="Indus Snare"/>
+      <Note Number="41" Name="Air Blip"/>
+      <Note Number="42" Name="CHH Menu 2"/>
+      <Note Number="43" Name="MG Blip"/>
+      <Note Number="44" Name="Jungle Rim 2"/>
+      <Note Number="45" Name="Hit Menu"/>
+      <Note Number="46" Name="TR909 OHH 2"/>
+      <Note Number="47" Name="Kick Menu 2"/>
+      <Note Number="48" Name="West Kick"/>
+      <Note Number="49" Name="Natural Rim"/>
+      <Note Number="50" Name="TR808 Snr 8"/>
+      <Note Number="51" Name="Comp Clap"/>
+      <Note Number="52" Name="MC Snare"/>
+      <Note Number="53" Name="Uuh Formant"/>
+      <Note Number="54" Name="TR606 PHH 2"/>
+      <Note Number="55" Name="Ooh Formant"/>
+      <Note Number="56" Name="CR78 CHH"/>
+      <Note Number="57" Name="Iih Formant"/>
+      <Note Number="58" Name="TR606 OHH"/>
+      <Note Number="59" Name="Can Tom"/>
+      <Note Number="60" Name="ElectricDunk"/>
+      <Note Number="61" Name="TR606 Cym 2"/>
+      <Note Number="62" Name="HiBongo LoFi"/>
+      <Note Number="63" Name="Cymbal Menu"/>
+      <Note Number="64" Name="Cup Cym"/>
+      <Note Number="65" Name="TR909 Ride"/>
+      <Note Number="66" Name="Tambourine 4"/>
+      <Note Number="67" Name="Cymbal Menu"/>
+      <Note Number="68" Name="CR78 Beat"/>
+      <Note Number="69" Name="Natural Ride"/>
+      <Note Number="70" Name="CR78 Beat"/>
+      <Note Number="71" Name="Cup Cym"/>
+      <Note Number="72" Name="HiBongo LoFi"/>
+      <Note Number="73" Name="LoBongo LoFi"/>
+      <Note Number="74" Name="HiConga LoFi"/>
+      <Note Number="75" Name="HiConga Mt LF"/>
+      <Note Number="76" Name="HiConga Mute"/>
+      <Note Number="77" Name="Triangle 2"/>
+      <Note Number="78" Name="ElectricDunk"/>
+      <Note Number="79" Name="Air Blip"/>
+      <Note Number="80" Name="MG Attack"/>
+      <Note Number="81" Name="TechnoShaker"/>
+      <Note Number="82" Name="808 Maracas"/>
+      <Note Number="83" Name="Reso FX"/>
+      <Note Number="84" Name="Beam HiQ"/>
+      <Note Number="85" Name="Toy Gun 3"/>
+      <Note Number="86" Name="MG Blip"/>
+      <Note Number="87" Name="Toy Gun 3"/>
+      <Note Number="88" Name="Air Blip"/>
+      <Note Number="89" Name="Reso FX"/>
+      <Note Number="90" Name="Emergency"/>
+      <Note Number="91" Name="MG Blip"/>
+      <Note Number="92" Name="MG Pink Nz"/>
+      <Note Number="93" Name="Jet Plane"/>
+      <Note Number="94" Name="Roll Snare"/>
+      <Note Number="95" Name="TR808 Kick 1"/>
+      <Note Number="96" Name="TR909 Kick 1"/>
+      <Note Number="97" Name="TR909 Snr 1"/>
+      <Note Number="98" Name="Urban RollSD"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A08 Hardcore">
+      <Note Number="35" Name="TR909 Kick 5"/>
+      <Note Number="36" Name="Gabba Kick"/>
+      <Note Number="37" Name="SideStiker"/>
+      <Note Number="38" Name="Jungle Snr 1"/>
+      <Note Number="39" Name="Fuzzy Clap"/>
+      <Note Number="40" Name="TR909 Snr 4"/>
+      <Note Number="41" Name="TR606 CmpTom"/>
+      <Note Number="42" Name="TR909 CHH 2"/>
+      <Note Number="43" Name="TR606 CmpTom"/>
+      <Note Number="44" Name="TR909 PHH 1"/>
+      <Note Number="45" Name="TR606 CmpTom"/>
+      <Note Number="46" Name="TR909 OHH 1"/>
+      <Note Number="47" Name="Amsterdam BD"/>
+      <Note Number="48" Name="TR909 Dst BD"/>
+      <Note Number="49" Name="Lo-Fi Rim"/>
+      <Note Number="50" Name="TR909 DstSnr"/>
+      <Note Number="51" Name="Funk Clap 2"/>
+      <Note Number="52" Name="TR909 DstSnr"/>
+      <Note Number="53" Name="TR909 DstTom"/>
+      <Note Number="54" Name="TR909 PHH 1"/>
+      <Note Number="55" Name="TR909 DstTom"/>
+      <Note Number="56" Name="TR909 DstOHH 2"/>
+      <Note Number="57" Name="TR909 DstTom"/>
+      <Note Number="58" Name="TR909 OHH 2"/>
+      <Note Number="59" Name="TR909 DstTom"/>
+      <Note Number="60" Name="TR909 DstTom"/>
+      <Note Number="61" Name="TR909 Crash"/>
+      <Note Number="62" Name="TR909 DstTom"/>
+      <Note Number="63" Name="TR707 Ride"/>
+      <Note Number="64" Name="TR909 Crash"/>
+      <Note Number="65" Name="Asian Gong"/>
+      <Note Number="66" Name="GC78 Tamb"/>
+      <Note Number="67" Name="NaturalCrash"/>
+      <Note Number="68" Name="TR808Cowbell"/>
+      <Note Number="69" Name="Jungle Crash"/>
+      <Note Number="70" Name="TR727Quijada"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="HiBongo LoFi"/>
+      <Note Number="73" Name="LoBongo LoFi"/>
+      <Note Number="74" Name="HiConga LF"/>
+      <Note Number="75" Name="HiConga LF"/>
+      <Note Number="76" Name="Lo Conga LoFi"/>
+      <Note Number="77" Name="HiTimbale LF"/>
+      <Note Number="78" Name="LoTimbale LF"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="TechnoShaker"/>
+      <Note Number="82" Name="Dance Shaker"/>
+      <Note Number="83" Name="Beam HiQ"/>
+      <Note Number="84" Name="Air Gun"/>
+      <Note Number="85" Name="Electric Dunk"/>
+      <Note Number="86" Name="Thin Beef"/>
+      <Note Number="87" Name="Drill Hit"/>
+      <Note Number="88" Name="TAO Hit"/>
+      <Note Number="89" Name="Rezo Noise"/>
+      <Note Number="90" Name="Toy Gun 1"/>
+      <Note Number="91" Name="Toy Gun 3"/>
+      <Note Number="92" Name="Gtr FX"/>
+      <Note Number="93" Name="Dist Synth"/>
+      <Note Number="94" Name="Funk Clap"/>
+      <Note Number="95" Name="TR909 Kick 2"/>
+      <Note Number="96" Name="Turbo Kick"/>
+      <Note Number="97" Name="Rage Snare"/>
+      <Note Number="98" Name="Big Trash SD"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A09 Ambient">
+      <Note Number="35" Name="TR909 Kick 5"/>
+      <Note Number="36" Name="Wet Kick"/>
+      <Note Number="37" Name="Ragga Rim"/>
+      <Note Number="38" Name="DJ Snare"/>
+      <Note Number="39" Name="Comp Clap"/>
+      <Note Number="40" Name="SideStiker"/>
+      <Note Number="41" Name="TR707 Tom"/>
+      <Note Number="42" Name="Closed Hat"/>
+      <Note Number="43" Name="TR707 Tom"/>
+      <Note Number="44" Name="Pedal Hat 1"/>
+      <Note Number="45" Name="TR707 Tom"/>
+      <Note Number="46" Name="Real OHH"/>
+      <Note Number="47" Name="Wet Kick"/>
+      <Note Number="48" Name="TR808 Kick 3"/>
+      <Note Number="49" Name="TR808 RimLng"/>
+      <Note Number="50" Name="CR78 Snare"/>
+      <Note Number="51" Name="TR909 Clap 1"/>
+      <Note Number="52" Name="Beam HiQ"/>
+      <Note Number="53" Name="TR808 Tom"/>
+      <Note Number="54" Name="DR55 CHH1"/>
+      <Note Number="55" Name="TR808 Tom"/>
+      <Note Number="56" Name="TR606 PHH 2"/>
+      <Note Number="57" Name="TR808 Tom"/>
+      <Note Number="58" Name="CR78 OHH"/>
+      <Note Number="59" Name="TR808 Tom"/>
+      <Note Number="60" Name="TR808 Tom"/>
+      <Note Number="61" Name="TR606 Cym 1"/>
+      <Note Number="62" Name="TR808 Tom"/>
+      <Note Number="63" Name="TR909 Ride"/>
+      <Note Number="64" Name="TR606 Cym 1"/>
+      <Note Number="65" Name="Asian Gong"/>
+      <Note Number="66" Name="Tambourine 3"/>
+      <Note Number="67" Name="TR606 Cym 2"/>
+      <Note Number="68" Name="CR78 Cowbell"/>
+      <Note Number="69" Name="NaturalCrash"/>
+      <Note Number="70" Name="TR808Cowbell"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="HiBongo Op"/>
+      <Note Number="73" Name="LoBongo Op"/>
+      <Note Number="74" Name="HiConga Mt"/>
+      <Note Number="75" Name="HiConga Op"/>
+      <Note Number="76" Name="Lo Conga Op"/>
+      <Note Number="77" Name="Hi Timbale"/>
+      <Note Number="78" Name="Lo Timbale"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="Techno Shaker"/>
+      <Note Number="82" Name="808 Maracas"/>
+      <Note Number="83" Name="Air Blip"/>
+      <Note Number="84" Name="Wind Chime"/>
+      <Note Number="85" Name="Thrill"/>
+      <Note Number="86" Name="CR78 Beat"/>
+      <Note Number="87" Name="Retro UFO"/>
+      <Note Number="88" Name="Hyoshigi"/>
+      <Note Number="89" Name="Pizzy Techno"/>
+      <Note Number="90" Name="Org Chord"/>
+      <Note Number="91" Name="Feedbackwave"/>
+      <Note Number="92" Name="Stream"/>
+      <Note Number="93" Name="Bird"/>
+      <Note Number="94" Name="Claptail"/>
+      <Note Number="95" Name="TR808 Kick 1"/>
+      <Note Number="96" Name="JungleKick 2"/>
+      <Note Number="97" Name="TR808 Snr 2"/>
+      <Note Number="98" Name="Jungle Snr 1"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A10 House 1">
+      <Note Number="35" Name="TR808 Kick 5"/>
+      <Note Number="36" Name="TR909 Kick 2"/>
+      <Note Number="37" Name="TR808 Rim"/>
+      <Note Number="38" Name="Snr Menu 1"/>
+      <Note Number="39" Name="Clap Menu 1"/>
+      <Note Number="40" Name="TR909 Snr 6"/>
+      <Note Number="41" Name="TOM MENU"/>
+      <Note Number="42" Name="TR707 OHH"/>
+      <Note Number="43" Name="TR909 Tom"/>
+      <Note Number="44" Name="TR707 OHH"/>
+      <Note Number="45" Name="TR909 Tom"/>
+      <Note Number="46" Name="TR707 OHH"/>
+      <Note Number="47" Name="TR808 Kick 1"/>
+      <Note Number="48" Name="TR808 Kick 3"/>
+      <Note Number="49" Name="TR808 RimLng"/>
+      <Note Number="50" Name="Break Snare2"/>
+      <Note Number="51" Name="Claptail"/>
+      <Note Number="52" Name="TR909 Snr 4"/>
+      <Note Number="53" Name="TR808 Tom"/>
+      <Note Number="54" Name="TR909 CHH 1"/>
+      <Note Number="55" Name="TR808 Tom"/>
+      <Note Number="56" Name="OHH MENU 1"/>
+      <Note Number="57" Name="TR808 Tom"/>
+      <Note Number="58" Name="OHH MENU 1"/>
+      <Note Number="59" Name="TR707 Tom"/>
+      <Note Number="60" Name="TR707 Tom"/>
+      <Note Number="61" Name="TR909 Crash"/>
+      <Note Number="62" Name="TR707 Tom"/>
+      <Note Number="63" Name="TR909 Ride"/>
+      <Note Number="64" Name="NaturalCrash"/>
+      <Note Number="65" Name="Tambourine 2"/>
+      <Note Number="66" Name="Tambourine 1"/>
+      <Note Number="67" Name="TR909 Crash"/>
+      <Note Number="68" Name="TR707Cowbell"/>
+      <Note Number="69" Name="Cup Cym"/>
+      <Note Number="70" Name="TR808Cowbell"/>
+      <Note Number="71" Name="Naturual Ride"/>
+      <Note Number="72" Name="HiBongo LoFi"/>
+      <Note Number="73" Name="LoBongo LoFi"/>
+      <Note Number="74" Name="HiConga Mt"/>
+      <Note Number="75" Name="HiConga Op"/>
+      <Note Number="76" Name="Lo Conga Op"/>
+      <Note Number="77" Name="Hi Timbale LF"/>
+      <Note Number="78" Name="Lo Timbale LF"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="808 Maracas"/>
+      <Note Number="82" Name="TR626 Shaker"/>
+      <Note Number="83" Name="TR606 CHH1"/>
+      <Note Number="84" Name="TR727 Quijada"/>
+      <Note Number="85" Name="Short Guiro"/>
+      <Note Number="86" Name="Long Guiro"/>
+      <Note Number="87" Name="TR808 Claves"/>
+      <Note Number="88" Name="Hyoshigi"/>
+      <Note Number="89" Name="Bomb Noise"/>
+      <Note Number="90" Name="Come on!"/>
+      <Note Number="91" Name="Triangle 1"/>
+      <Note Number="92" Name="Cup Cym"/>
+      <Note Number="93" Name="TR808 OHH 1"/>
+      <Note Number="94" Name="Hip Clap"/>
+      <Note Number="95" Name="TR808 Kick 2"/>
+      <Note Number="96" Name="TR909 Kick 4"/>
+      <Note Number="97" Name="CR78 Snare"/>
+      <Note Number="98" Name="TR808Snr 3"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A11 House 2">
+      <Note Number="35" Name="Wet Kick"/>
+      <Note Number="36" Name="Plastic BD 2"/>
+      <Note Number="37" Name="TR808 Rim"/>
+      <Note Number="38" Name="Clap Snare 2"/>
+      <Note Number="39" Name="Group Clap"/>
+      <Note Number="40" Name="TR808 Snr 7"/>
+      <Note Number="41" Name="TR808 Tom"/>
+      <Note Number="42" Name="TR707 CHH"/>
+      <Note Number="43" Name="TR808 Tom"/>
+      <Note Number="44" Name="TR707 PHH"/>
+      <Note Number="45" Name="TR808 Tom"/>
+      <Note Number="46" Name="TR707 OHH 1"/>
+      <Note Number="47" Name="TR909 Kick 2"/>
+      <Note Number="48" Name="TR909 Kick 5"/>
+      <Note Number="49" Name="TR909 Rim"/>
+      <Note Number="50" Name="Break Snare2"/>
+      <Note Number="51" Name="TR909 Clap 1"/>
+      <Note Number="52" Name="TR909 Snr 4"/>
+      <Note Number="53" Name="TR707 Tom"/>
+      <Note Number="54" Name="TR909 CHH 1"/>
+      <Note Number="55" Name="TR707 Tom"/>
+      <Note Number="56" Name="TR909 PHH 1"/>
+      <Note Number="57" Name="TR707 Tom"/>
+      <Note Number="58" Name="TR909 OHH 3"/>
+      <Note Number="59" Name="TR707 Tom"/>
+      <Note Number="60" Name="TR707 Tom"/>
+      <Note Number="61" Name="TR909 Crash"/>
+      <Note Number="62" Name="TR707 Tom"/>
+      <Note Number="63" Name="TR909 Ride"/>
+      <Note Number="64" Name="Natural Crash"/>
+      <Note Number="65" Name="Tambourine 3"/>
+      <Note Number="66" Name="Tambourine 4"/>
+      <Note Number="67" Name="TR909 Crash"/>
+      <Note Number="68" Name="TR707Cowbell"/>
+      <Note Number="69" Name="Cup Cym"/>
+      <Note Number="70" Name="TR808Cowbell"/>
+      <Note Number="71" Name="Naturual Ride"/>
+      <Note Number="72" Name="HiBongo LoFi"/>
+      <Note Number="73" Name="LoBongo LoFi"/>
+      <Note Number="74" Name="HiConga Mt LF"/>
+      <Note Number="75" Name="HiConga Op LF"/>
+      <Note Number="76" Name="Lo Conga LoFi"/>
+      <Note Number="77" Name="Hi Timbale LF"/>
+      <Note Number="78" Name="Lo Timbale LF"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="Cabasa Up"/>
+      <Note Number="82" Name="TR626 Shaker"/>
+      <Note Number="83" Name="Belltree"/>
+      <Note Number="84" Name="TR727Quijada"/>
+      <Note Number="85" Name="Short Guiro"/>
+      <Note Number="86" Name="Long Guiro"/>
+      <Note Number="87" Name="TR808 Claves"/>
+      <Note Number="88" Name="Hyshigi"/>
+      <Note Number="89" Name="Bomb Noise"/>
+      <Note Number="90" Name="Come on!"/>
+      <Note Number="91" Name="Ooh! 1"/>
+      <Note Number="92" Name="Wao!"/>
+      <Note Number="93" Name="Laugh"/>
+      <Note Number="94" Name="Claptail"/>
+      <Note Number="95" Name="TR808 Kick 1"/>
+      <Note Number="96" Name="Plastic BD 3"/>
+      <Note Number="97" Name="TR808 Snr 6"/>
+      <Note Number="98" Name="TR909 Snr 7"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A12 Jungle">
+      <Note Number="35" Name="TR909 Kick 3"/>
+      <Note Number="36" Name="Lo-Fi Kick 2"/>
+      <Note Number="37" Name="Side Stiker"/>
+      <Note Number="38" Name="Urban RollSD"/>
+      <Note Number="39" Name="Down Clap"/>
+      <Note Number="40" Name="Jungle Rim 1"/>
+      <Note Number="41" Name="Jungle Snr 2"/>
+      <Note Number="42" Name="Tight CHH"/>
+      <Note Number="43" Name="Jungle Snr 2"/>
+      <Note Number="44" Name="Tight CHH"/>
+      <Note Number="45" Name="Jungle Snr 2"/>
+      <Note Number="46" Name="Tambourine 1"/>
+      <Note Number="47" Name="Jungle Snr 2"/>
+      <Note Number="48" Name="Cym OHH"/>
+      <Note Number="49" Name="TR909 Kick 5"/>
+      <Note Number="50" Name="JungleKick 2"/>
+      <Note Number="51" Name="Jungle Rim 2"/>
+      <Note Number="52" Name="Urban Snare"/>
+      <Note Number="53" Name="Jungle Rim 3"/>
+      <Note Number="54" Name="Jungle Snr 1"/>
+      <Note Number="55" Name="TR606 CmpTom"/>
+      <Note Number="56" Name="Real CHH"/>
+      <Note Number="57" Name="TR606 CmpTom"/>
+      <Note Number="58" Name="Jungle Hat"/>
+      <Note Number="59" Name="TR606 CmpTom"/>
+      <Note Number="60" Name="TR606 CmpTom"/>
+      <Note Number="61" Name="Jungle Crash"/>
+      <Note Number="62" Name="TR606 CmpTom"/>
+      <Note Number="63" Name="Natural Ride"/>
+      <Note Number="64" Name="NaturalCrash"/>
+      <Note Number="65" Name="Asian Gong"/>
+      <Note Number="66" Name="Tambourine 3"/>
+      <Note Number="67" Name="TR606 Cym 1"/>
+      <Note Number="68" Name="Cowbell"/>
+      <Note Number="69" Name="TR909 Crash"/>
+      <Note Number="70" Name="CR78 Tamb"/>
+      <Note Number="71" Name="TR707 Ride"/>
+      <Note Number="72" Name="HiBongo LoFi"/>
+      <Note Number="73" Name="LoBongo LoFi"/>
+      <Note Number="74" Name="HiConga Mt LF"/>
+      <Note Number="75" Name="HiConga Op LF"/>
+      <Note Number="76" Name="Lo Conga LoFi"/>
+      <Note Number="77" Name="Hi Timbale LF"/>
+      <Note Number="78" Name="Lo Timbale LF"/>
+      <Note Number="79" Name="Open Surdo"/>
+      <Note Number="80" Name="Mute Surdo"/>
+      <Note Number="81" Name="TechnoShaker"/>
+      <Note Number="82" Name="TR626 Shaker"/>
+      <Note Number="83" Name="Beam HiQ"/>
+      <Note Number="84" Name="Air Blip"/>
+      <Note Number="85" Name="Thin Beef"/>
+      <Note Number="86" Name="Analog Bird"/>
+      <Note Number="87" Name="Tape REwind"/>
+      <Note Number="88" Name="Wao!"/>
+      <Note Number="89" Name="Emergency"/>
+      <Note Number="90" Name="Toy Gun 3"/>
+      <Note Number="91" Name="Reso FX"/>
+      <Note Number="92" Name="Toy Gun 2"/>
+      <Note Number="93" Name="Toy Gun 1"/>
+      <Note Number="94" Name="Big Clap"/>
+      <Note Number="95" Name="TR808 Kick 2"/>
+      <Note Number="96" Name="Roll Kick"/>
+      <Note Number="97" Name="Roll Snare"/>
+      <Note Number="98" Name="Break Snare2"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A13 Drum'n'Bass1">
+      <Note Number="35" Name="Roll Kick"/>
+      <Note Number="36" Name="Analog Kick"/>
+      <Note Number="37" Name="RaggaTight SD"/>
+      <Note Number="38" Name="Cross Snare"/>
+      <Note Number="39" Name="Roll Snare"/>
+      <Note Number="40" Name="Headz Snare"/>
+      <Note Number="41" Name="TR606 Tom"/>
+      <Note Number="42" Name="Pop CHH"/>
+      <Note Number="43" Name="TR606 Tom"/>
+      <Note Number="44" Name="Tambourine 3"/>
+      <Note Number="45" Name="TR606 Tom"/>
+      <Note Number="46" Name="Pop Hat Open"/>
+      <Note Number="47" Name="Plastic BD 1"/>
+      <Note Number="48" Name="Hip Kick"/>
+      <Note Number="49" Name="Scratch SD r"/>
+      <Note Number="50" Name="Break Snare2"/>
+      <Note Number="51" Name="Funky Clap"/>
+      <Note Number="52" Name="Ragga Snr 2"/>
+      <Note Number="53" Name="Kick Tom"/>
+      <Note Number="54" Name="Real CHH"/>
+      <Note Number="55" Name="Kick Tom"/>
+      <Note Number="56" Name="TR808 PHH 1"/>
+      <Note Number="57" Name="Kick Tom"/>
+      <Note Number="58" Name="TR606 OHH"/>
+      <Note Number="59" Name="Kick Tom"/>
+      <Note Number="60" Name="Kick Tom"/>
+      <Note Number="61" Name="TR909 Crash"/>
+      <Note Number="62" Name="Kick Tom"/>
+      <Note Number="63" Name="TR909 Ride"/>
+      <Note Number="64" Name="TR909 Crash"/>
+      <Note Number="65" Name="Asian Gong"/>
+      <Note Number="66" Name="Tambourine 2"/>
+      <Note Number="67" Name="TR909 Crash"/>
+      <Note Number="68" Name="CR78 Cowbell"/>
+      <Note Number="69" Name="TR626 Cym 2"/>
+      <Note Number="70" Name="TR808 Cowbell"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="HiBongo Op"/>
+      <Note Number="73" Name="LoBongo Op"/>
+      <Note Number="74" Name="HiConga Mt"/>
+      <Note Number="75" Name="HiConga Op"/>
+      <Note Number="76" Name="Lo Conga Op"/>
+      <Note Number="77" Name="Hi Timbale"/>
+      <Note Number="78" Name="Lo Timbale"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="Cabasa Up"/>
+      <Note Number="82" Name="Maracas"/>
+      <Note Number="83" Name="MG Blip"/>
+      <Note Number="84" Name="Air Blip"/>
+      <Note Number="85" Name="Hyoshigi"/>
+      <Note Number="86" Name="CR78 Guiro"/>
+      <Note Number="87" Name="Mt Pandeiro"/>
+      <Note Number="88" Name="Chenchen"/>
+      <Note Number="89" Name="Thrill"/>
+      <Note Number="90" Name="Retro UFO"/>
+      <Note Number="91" Name="Rezo Noise"/>
+      <Note Number="92" Name="Feedbackwave"/>
+      <Note Number="93" Name="Space Noise"/>
+      <Note Number="94" Name="Little Clap"/>
+      <Note Number="95" Name="TR808 Kick 2"/>
+      <Note Number="96" Name="TR909 Kick 1"/>
+      <Note Number="97" Name="Solid Snare"/>
+      <Note Number="98" Name="Flange Snr"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A14 Drum'n'Bass2">
+      <Note Number="35" Name="TR909 Kick 3"/>
+      <Note Number="36" Name="Lo-Fi Kick 2"/>
+      <Note Number="37" Name="Side Stiker"/>
+      <Note Number="38" Name="Urban RollSD"/>
+      <Note Number="39" Name="Down Clap"/>
+      <Note Number="40" Name="Jungle Snr 1"/>
+      <Note Number="41" Name="Jungle Snr 2"/>
+      <Note Number="42" Name="Tight CHH"/>
+      <Note Number="43" Name="Jungle Snr 2"/>
+      <Note Number="44" Name="Tambourine 1"/>
+      <Note Number="45" Name="Jungle Snr 2"/>
+      <Note Number="46" Name="Cym OHH"/>
+      <Note Number="47" Name="TR909 Kick 5"/>
+      <Note Number="48" Name="JungleKick 2"/>
+      <Note Number="49" Name="Jungle Rim 2"/>
+      <Note Number="50" Name="Urban Snare"/>
+      <Note Number="51" Name="Jungle Rim 3"/>
+      <Note Number="52" Name="Jungle Snr 1"/>
+      <Note Number="53" Name="TR909 DstTom"/>
+      <Note Number="54" Name="Real CHH"/>
+      <Note Number="55" Name="TR909 DstTom"/>
+      <Note Number="56" Name="Jungle Hat"/>
+      <Note Number="57" Name="TR909DstTom"/>
+      <Note Number="58" Name="Hip OHH"/>
+      <Note Number="59" Name="TR909 DstTom"/>
+      <Note Number="60" Name="TR909 DstTom"/>
+      <Note Number="61" Name="Jungle Crash"/>
+      <Note Number="62" Name="TR606 CmpTom"/>
+      <Note Number="63" Name="Natural Ride"/>
+      <Note Number="64" Name="NaturalCrash"/>
+      <Note Number="65" Name="Asian Gong"/>
+      <Note Number="66" Name="Tambourine 3"/>
+      <Note Number="67" Name="TR606 Cym 1"/>
+      <Note Number="68" Name="Cowbell "/>
+      <Note Number="69" Name="TR909 Crash"/>
+      <Note Number="70" Name="CR78 Tamb"/>
+      <Note Number="71" Name="TR707 Ride"/>
+      <Note Number="72" Name="HiBongo LoFi"/>
+      <Note Number="73" Name="LoBongo LoFi"/>
+      <Note Number="74" Name="HiCnga Mt LF"/>
+      <Note Number="75" Name="HiCnga Op LF"/>
+      <Note Number="76" Name="Lo Conga LoFi"/>
+      <Note Number="77" Name="Hi Timbale LF"/>
+      <Note Number="78" Name="Lo Timbale LF"/>
+      <Note Number="79" Name="Open Surdo"/>
+      <Note Number="80" Name="Mute Surdo"/>
+      <Note Number="81" Name="Cabasa Up"/>
+      <Note Number="82" Name="Maracas"/>
+      <Note Number="83" Name="Beam HiQ"/>
+      <Note Number="84" Name="ElectricDunk"/>
+      <Note Number="85" Name="Bomb"/>
+      <Note Number="86" Name="Analog Bird"/>
+      <Note Number="87" Name="Tape REwind"/>
+      <Note Number="88" Name="Wao!"/>
+      <Note Number="89" Name="Emergency"/>
+      <Note Number="90" Name="Toy Gun 3"/>
+      <Note Number="91" Name="Reso FX"/>
+      <Note Number="92" Name="Toy Gun 2"/>
+      <Note Number="93" Name="Toy Gun 1"/>
+      <Note Number="94" Name="Big Clap"/>
+      <Note Number="95" Name="TR808 Kick 2"/>
+      <Note Number="96" Name="Roll Kick"/>
+      <Note Number="97" Name="Roll Snare"/>
+      <Note Number="98" Name="Break Snare 2"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A15 Hip-Hop 1">
+      <Note Number="35" Name="Lo-Fi Kick 1"/>
+      <Note Number="36" Name="TR808 Kick 3"/>
+      <Note Number="37" Name="Solid Snare"/>
+      <Note Number="38" Name="HipJazz Snr"/>
+      <Note Number="39" Name="Funk Clap 2"/>
+      <Note Number="40" Name="R&amp;B Snare"/>
+      <Note Number="41" Name="TR808 Tom"/>
+      <Note Number="42" Name="Pop CHH"/>
+      <Note Number="43" Name="TR808 Tom"/>
+      <Note Number="44" Name="Pedal Hat 1"/>
+      <Note Number="45" Name="TR808 Tom"/>
+      <Note Number="46" Name="Pop Hat Open"/>
+      <Note Number="47" Name="Break Kick"/>
+      <Note Number="48" Name="Hip Kick"/>
+      <Note Number="49" Name="Lo-Fi Rim"/>
+      <Note Number="50" Name="Jazz Snare"/>
+      <Note Number="51" Name="Funky Clap"/>
+      <Note Number="52" Name="East Snare"/>
+      <Note Number="53" Name="Natural Tom"/>
+      <Note Number="54" Name="Tight CHH"/>
+      <Note Number="55" Name="Natural Tom"/>
+      <Note Number="56" Name="Pedal Hat 2"/>
+      <Note Number="57" Name="Natural Tom"/>
+      <Note Number="58" Name="Hip OHH"/>
+      <Note Number="59" Name="Natural Tom"/>
+      <Note Number="60" Name="Natural Tom"/>
+      <Note Number="61" Name="TR909 Crash"/>
+      <Note Number="62" Name="Natural Tom"/>
+      <Note Number="63" Name="TR707 Ride"/>
+      <Note Number="64" Name="TR909 Crash"/>
+      <Note Number="65" Name="Cup Cym"/>
+      <Note Number="66" Name="Tambourine 3"/>
+      <Note Number="67" Name="Tambourine 4"/>
+      <Note Number="68" Name="TR808Cowbell"/>
+      <Note Number="69" Name="TR606 Cym 1"/>
+      <Note Number="70" Name="CR78 Cowbell"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="HiBongo LoFi"/>
+      <Note Number="73" Name="LoBongo LoFi"/>
+      <Note Number="74" Name="HiCnga Mt LF"/>
+      <Note Number="75" Name="HiCnga Op LF"/>
+      <Note Number="76" Name="Lo Conga LoFi"/>
+      <Note Number="77" Name="Hi Timbale LF"/>
+      <Note Number="78" Name="Lo Timbale LF"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="Dance Shaker"/>
+      <Note Number="82" Name="808 Maracas"/>
+      <Note Number="83" Name="Scratch BD f"/>
+      <Note Number="84" Name="Scratch BD r"/>
+      <Note Number="85" Name="Scratch SD f"/>
+      <Note Number="86" Name="Scratch SD r"/>
+      <Note Number="87" Name="Scratch ALT"/>
+      <Note Number="88" Name="Vinyl Stop"/>
+      <Note Number="89" Name="Vinyl Noise"/>
+      <Note Number="90" Name="Kick it!"/>
+      <Note Number="91" Name="Ooh! 2"/>
+      <Note Number="92" Name="Ooh 1"/>
+      <Note Number="93" Name="Laugh"/>
+      <Note Number="94" Name="Funk Clap"/>
+      <Note Number="95" Name="TR808 Kick 1"/>
+      <Note Number="96" Name="Dance Kick 1"/>
+      <Note Number="97" Name="Break Snare2"/>
+      <Note Number="98" Name="HH Soul Snr"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A16 Hip-Hop 2">
+      <Note Number="35" Name="TR707 Kick 1"/>
+      <Note Number="36" Name="Optic Kick"/>
+      <Note Number="37" Name="TR808 RimLng"/>
+      <Note Number="38" Name="Headz Snare"/>
+      <Note Number="39" Name="Claptail"/>
+      <Note Number="40" Name="TR808 Snr 7"/>
+      <Note Number="41" Name="TR808 Tom"/>
+      <Note Number="42" Name="TR808 CHH 1"/>
+      <Note Number="43" Name="TR808 Tom"/>
+      <Note Number="44" Name="TR808 PHH 1"/>
+      <Note Number="45" Name="TR808 Tom"/>
+      <Note Number="46" Name="TR808 OHH 2"/>
+      <Note Number="47" Name="TR909 Kick 3"/>
+      <Note Number="48" Name="TR909 Kick 3"/>
+      <Note Number="49" Name="Gate Rim"/>
+      <Note Number="50" Name="Tiny Snare"/>
+      <Note Number="51" Name="Little Clap"/>
+      <Note Number="52" Name="T&amp;B Snare"/>
+      <Note Number="53" Name="Natural Tom"/>
+      <Note Number="54" Name="Pop CHH"/>
+      <Note Number="55" Name="Natural Tom"/>
+      <Note Number="56" Name="Pedal Hat 1"/>
+      <Note Number="57" Name="Natural Tom"/>
+      <Note Number="58" Name="Pop Hat Open"/>
+      <Note Number="59" Name="Natural Tom"/>
+      <Note Number="60" Name="Natural Tom"/>
+      <Note Number="61" Name="Natural Crash"/>
+      <Note Number="62" Name="Natural Tom"/>
+      <Note Number="63" Name="TR909 Ride"/>
+      <Note Number="64" Name="TR909 Crash"/>
+      <Note Number="65" Name="Cup Cym"/>
+      <Note Number="66" Name="Tambourine 4"/>
+      <Note Number="67" Name="TR909 Crash "/>
+      <Note Number="68" Name="Cowbell"/>
+      <Note Number="69" Name="TR606 Cym 1"/>
+      <Note Number="70" Name="TR808 Cowbell"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="HiBongo Op"/>
+      <Note Number="73" Name="LoBongo Op"/>
+      <Note Number="74" Name="HiConga Mt"/>
+      <Note Number="75" Name="HiConga Op"/>
+      <Note Number="76" Name="Lo Conga Op"/>
+      <Note Number="77" Name="Hi Timbale"/>
+      <Note Number="78" Name="Lo Timbale"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="Techno Shaker"/>
+      <Note Number="82" Name="808 Maracas"/>
+      <Note Number="83" Name="Scratch BD f"/>
+      <Note Number="84" Name="Scratch BD r"/>
+      <Note Number="85" Name="Scratch SD f"/>
+      <Note Number="86" Name="Scratch SD r"/>
+      <Note Number="87" Name="Scratch ALT"/>
+      <Note Number="88" Name="Funky Bass"/>
+      <Note Number="89" Name="Vinyl Noise"/>
+      <Note Number="90" Name="Philly Hit"/>
+      <Note Number="91" Name="Brass Fall"/>
+      <Note Number="92" Name="Ooh! 1"/>
+      <Note Number="93" Name="Ooh! 2"/>
+      <Note Number="94" Name="Finger Snap"/>
+      <Note Number="95" Name="TR808 Kick 1"/>
+      <Note Number="96" Name="Hazy Kick"/>
+      <Note Number="97" Name="TR606 Snr 2"/>
+      <Note Number="98" Name="Machine Snr"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A17 Funk">
+      <Note Number="35" Name="TR707 Kick 2"/>
+      <Note Number="36" Name="West Kick"/>
+      <Note Number="37" Name="Lo-Fi Rim"/>
+      <Note Number="38" Name="Deep Snare"/>
+      <Note Number="39" Name="Funky Clap"/>
+      <Note Number="40" Name="Disco Snare"/>
+      <Note Number="41" Name="TR707 Tom"/>
+      <Note Number="42" Name="Tight CHH"/>
+      <Note Number="43" Name="TR707 Tom"/>
+      <Note Number="44" Name="Hip PHH"/>
+      <Note Number="45" Name="TR707 Tom"/>
+      <Note Number="46" Name="Funk OHH"/>
+      <Note Number="47" Name="Hazy Kick"/>
+      <Note Number="48" Name="Turbo Kick"/>
+      <Note Number="49" Name="SideStiker"/>
+      <Note Number="50" Name="Whack Snare"/>
+      <Note Number="51" Name="Funk Clap 2"/>
+      <Note Number="52" Name="Macho Snare"/>
+      <Note Number="53" Name="TR909 Tom"/>
+      <Note Number="54" Name="Real CHH"/>
+      <Note Number="55" Name="TR909 Tom"/>
+      <Note Number="56" Name="Pedal Hat 1"/>
+      <Note Number="57" Name="TR909 Tom"/>
+      <Note Number="58" Name="Cym OHH"/>
+      <Note Number="59" Name="TR909 Tom"/>
+      <Note Number="60" Name="TR909 Tom"/>
+      <Note Number="61" Name="NaturalCrash"/>
+      <Note Number="62" Name="TR909 Tom"/>
+      <Note Number="63" Name="TR909 Ride"/>
+      <Note Number="64" Name="TR909 Crash"/>
+      <Note Number="65" Name="Cup Cym"/>
+      <Note Number="66" Name="TR78 Tamb"/>
+      <Note Number="67" Name="TR909 Crash"/>
+      <Note Number="68" Name="TR707Cowbell"/>
+      <Note Number="69" Name="TR606 Cym 1"/>
+      <Note Number="70" Name="TR808Cowbell"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="HiBongo Op"/>
+      <Note Number="73" Name="LoBongo Op"/>
+      <Note Number="74" Name="HiConga Mt"/>
+      <Note Number="75" Name="HiConga Op"/>
+      <Note Number="76" Name="Lo Conga Op"/>
+      <Note Number="77" Name="Hi Timbale"/>
+      <Note Number="78" Name="Lo Timbale"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="TechnoShaker"/>
+      <Note Number="82" Name="808 Maracas"/>
+      <Note Number="83" Name="Scratch BD f"/>
+      <Note Number="84" Name="Scratch BD r"/>
+      <Note Number="85" Name="Scratch SD f"/>
+      <Note Number="86" Name="Scratch SD r"/>
+      <Note Number="87" Name="Scratch ALT"/>
+      <Note Number="88" Name="Vinyl Stop"/>
+      <Note Number="89" Name="Finyl Noise"/>
+      <Note Number="90" Name="Phily Hit"/>
+      <Note Number="91" Name="Brass Fall"/>
+      <Note Number="92" Name="Kick it!"/>
+      <Note Number="93" Name="Harmo Gtr"/>
+      <Note Number="94" Name="Big Clap"/>
+      <Note Number="95" Name="Plastic BD 2"/>
+      <Note Number="96" Name="TR909 Kick 5"/>
+      <Note Number="97" Name="DanceHall SD"/>
+      <Note Number="98" Name="Machine Snr"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A18 Electro">
+      <Note Number="35" Name="TR808 Kick1"/>
+      <Note Number="36" Name="TR808 Kick 5"/>
+      <Note Number="37" Name="TR808 RimLng"/>
+      <Note Number="38" Name="TR808 Snr 8"/>
+      <Note Number="39" Name="Down Clap"/>
+      <Note Number="40" Name="TR808 Snr 5"/>
+      <Note Number="41" Name="TR808 Tom"/>
+      <Note Number="42" Name="TR808 CHH 1"/>
+      <Note Number="43" Name="TR808 Tom"/>
+      <Note Number="44" Name="TR808 PHH 1"/>
+      <Note Number="45" Name="TR808 Tom"/>
+      <Note Number="46" Name="TR808 OHH 1"/>
+      <Note Number="47" Name="Ele Kick"/>
+      <Note Number="48" Name="TR707 Kick 2"/>
+      <Note Number="49" Name="TR707 Rim"/>
+      <Note Number="50" Name="ElectroSnr 2"/>
+      <Note Number="51" Name="TR707 Clap"/>
+      <Note Number="52" Name="Sim Snare"/>
+      <Note Number="53" Name="Deep Tom"/>
+      <Note Number="54" Name="Closed Hat"/>
+      <Note Number="55" Name="Deep Tom"/>
+      <Note Number="56" Name="Pedal Hat 1"/>
+      <Note Number="57" Name="Deep Tom"/>
+      <Note Number="58" Name="Open Hat"/>
+      <Note Number="59" Name="Deep Tom"/>
+      <Note Number="60" Name="Deep Tom"/>
+      <Note Number="61" Name="TR909 Crash"/>
+      <Note Number="62" Name="Deep Tom"/>
+      <Note Number="63" Name="TR707 Ride"/>
+      <Note Number="64" Name="NaturalCrash"/>
+      <Note Number="65" Name="Asian Gong"/>
+      <Note Number="66" Name="Tambourine 2"/>
+      <Note Number="67" Name="TR909 Crash"/>
+      <Note Number="68" Name="TR808Cowbell"/>
+      <Note Number="69" Name="TR606 Cym 1"/>
+      <Note Number="70" Name="TR727Quijada"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="HiBongo Op"/>
+      <Note Number="73" Name="LoBongo Op"/>
+      <Note Number="74" Name="HiConga Mt"/>
+      <Note Number="75" Name="HiConga Op"/>
+      <Note Number="76" Name="Lo Conga Op"/>
+      <Note Number="77" Name="Hi Timbale"/>
+      <Note Number="78" Name="Lo Timbale"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="Cabasa Up"/>
+      <Note Number="82" Name="808 Maracas"/>
+      <Note Number="83" Name="Air Blip"/>
+      <Note Number="84" Name="Thin Beef"/>
+      <Note Number="85" Name="Back Hit"/>
+      <Note Number="86" Name="Analog Bird"/>
+      <Note Number="87" Name="Hoo"/>
+      <Note Number="88" Name="Metal Sweep"/>
+      <Note Number="89" Name="Emergency"/>
+      <Note Number="90" Name="Buzzer"/>
+      <Note Number="91" Name="Tonality"/>
+      <Note Number="92" Name="Ring Osc"/>
+      <Note Number="93" Name="Toy Gun 3"/>
+      <Note Number="94" Name="Hip Clap"/>
+      <Note Number="95" Name="Plastic BD 1"/>
+      <Note Number="96" Name="LoFi Kick 1"/>
+      <Note Number="97" Name="Synth Snare"/>
+      <Note Number="98" Name="TR808 Snr 6"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A19 Jazz">
+      <Note Number="35" Name="Lo-Fi Kick 1"/>
+      <Note Number="36" Name="Hip Kick"/>
+      <Note Number="37" Name="SideStiker"/>
+      <Note Number="38" Name="Deep Snare"/>
+      <Note Number="39" Name="Real Clap 1"/>
+      <Note Number="40" Name="HH Soul Snr"/>
+      <Note Number="41" Name="Natural Tom"/>
+      <Note Number="42" Name="Real CHH"/>
+      <Note Number="43" Name="Natural Tom"/>
+      <Note Number="44" Name="Pedal Hat 1"/>
+      <Note Number="45" Name="Natural Tom"/>
+      <Note Number="46" Name="Real OHH"/>
+      <Note Number="47" Name="Optic Kick"/>
+      <Note Number="48" Name="Video Kick"/>
+      <Note Number="49" Name="Gate Rim"/>
+      <Note Number="50" Name="Headz Snare"/>
+      <Note Number="51" Name="Big Clap"/>
+      <Note Number="52" Name="Cross Snare"/>
+      <Note Number="53" Name="TR707 Tom"/>
+      <Note Number="54" Name="Closed Hat"/>
+      <Note Number="55" Name="TR707 Tom"/>
+      <Note Number="56" Name="Bristol CHH"/>
+      <Note Number="57" Name="TR707 Tom"/>
+      <Note Number="58" Name="Cym OHH"/>
+      <Note Number="59" Name="TR707 Tom"/>
+      <Note Number="60" Name="TR707 Tom"/>
+      <Note Number="61" Name="NaturalCrash"/>
+      <Note Number="62" Name="TR707 Tom"/>
+      <Note Number="63" Name="TR909 Ride"/>
+      <Note Number="64" Name="NaturalCrash"/>
+      <Note Number="65" Name="Cup Cym"/>
+      <Note Number="66" Name="Tambourine 2"/>
+      <Note Number="67" Name="TR909 Crash"/>
+      <Note Number="68" Name="Cowbell"/>
+      <Note Number="69" Name="TR606 Cym 1"/>
+      <Note Number="70" Name="TR808Cowbell"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="HiBongo Op"/>
+      <Note Number="73" Name="LoBongo Op"/>
+      <Note Number="74" Name="HiConga Mt"/>
+      <Note Number="75" Name="HiConga Op"/>
+      <Note Number="76" Name="Lo Conga Op"/>
+      <Note Number="77" Name="Hi Timbale"/>
+      <Note Number="78" Name="Lo Timbale"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="Cabasa Up"/>
+      <Note Number="82" Name="Maracas"/>
+      <Note Number="83" Name="TR727 Quijada"/>
+      <Note Number="84" Name="Jingle Bell"/>
+      <Note Number="85" Name="Short Guiro"/>
+      <Note Number="86" Name="Long Guiro"/>
+      <Note Number="87" Name="TR808 Claves"/>
+      <Note Number="88" Name="Hyoshigi"/>
+      <Note Number="89" Name="Hyoshigi"/>
+      <Note Number="90" Name="Mute Cuica"/>
+      <Note Number="91" Name="Open Cuica"/>
+      <Note Number="92" Name="Triangle 1"/>
+      <Note Number="93" Name="Triangle 1"/>
+      <Note Number="94" Name="Finger Snap"/>
+      <Note Number="95" Name="TR808 Kick 1"/>
+      <Note Number="96" Name="TR909 Kick 1"/>
+      <Note Number="97" Name="R8 BrshSwill"/>
+      <Note Number="98" Name="R8 Brush Tap"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A20 Brush">
+      <Note Number="35" Name="Video Kick"/>
+      <Note Number="36" Name="West Kick"/>
+      <Note Number="37" Name="Natural Rim"/>
+      <Note Number="38" Name="R&amp;B Snare"/>
+      <Note Number="39" Name="Brush Slap 1"/>
+      <Note Number="40" Name="MC Snare"/>
+      <Note Number="41" Name="TR707 Tom"/>
+      <Note Number="42" Name="Pop CHH"/>
+      <Note Number="43" Name="TR707 Tom"/>
+      <Note Number="44" Name="Room CHH"/>
+      <Note Number="45" Name="TR707 Tom"/>
+      <Note Number="46" Name="Pop Hat Open"/>
+      <Note Number="47" Name="Hip Kick"/>
+      <Note Number="48" Name="Optic Kick"/>
+      <Note Number="49" Name="R8 BrshSwill"/>
+      <Note Number="50" Name="R8Brush Tap"/>
+      <Note Number="51" Name="Brush Slap 2"/>
+      <Note Number="52" Name="R8 Brush Roll"/>
+      <Note Number="53" Name="Natural Tom"/>
+      <Note Number="54" Name="R8 Brush CHH"/>
+      <Note Number="55" Name="Natural Tom"/>
+      <Note Number="56" Name="Pedal Hat 1"/>
+      <Note Number="57" Name="Natural Tom"/>
+      <Note Number="58" Name="R8 OHH"/>
+      <Note Number="59" Name="Natural Tom"/>
+      <Note Number="60" Name="Natural Tom"/>
+      <Note Number="61" Name="NaturalCrash"/>
+      <Note Number="62" Name="Natural Tom"/>
+      <Note Number="63" Name="TR909 Ride"/>
+      <Note Number="64" Name="NaturalCrash"/>
+      <Note Number="65" Name="Cup Cym"/>
+      <Note Number="66" Name="Tambourine 2"/>
+      <Note Number="67" Name="TR606 Cym 1"/>
+      <Note Number="68" Name="Cowbell"/>
+      <Note Number="69" Name="TR909 Crash"/>
+      <Note Number="70" Name="TR808Cowbell"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="HiBongo Op"/>
+      <Note Number="73" Name="LoBongo Op"/>
+      <Note Number="74" Name="HiConga Mt"/>
+      <Note Number="75" Name="HiConga Op"/>
+      <Note Number="76" Name="Lo Conga Op"/>
+      <Note Number="77" Name="Hi Timbale"/>
+      <Note Number="78" Name="Lo Timbale"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="Cabasa Up"/>
+      <Note Number="82" Name="Maracas"/>
+      <Note Number="83" Name="Whistle"/>
+      <Note Number="84" Name="Whistle"/>
+      <Note Number="85" Name="Short Guiro"/>
+      <Note Number="86" Name="Long Guiro"/>
+      <Note Number="87" Name="TR808 Claves"/>
+      <Note Number="88" Name="Hyoshigi"/>
+      <Note Number="89" Name="Hyoshigi"/>
+      <Note Number="90" Name="Mute Cuica"/>
+      <Note Number="91" Name="Open Cuica"/>
+      <Note Number="92" Name="Triangle 1"/>
+      <Note Number="93" Name="Triangle 1"/>
+      <Note Number="94" Name="Real Clap 1"/>
+      <Note Number="95" Name="TR909 Kick 2"/>
+      <Note Number="96" Name="TR707 Kick 1"/>
+      <Note Number="97" Name="Real Snare"/>
+      <Note Number="98" Name="Deep Snare"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A21 Disco">
+      <Note Number="35" Name="TR707 Kick 2"/>
+      <Note Number="36" Name="TR808 Kick 3"/>
+      <Note Number="37" Name="TR707 Rim"/>
+      <Note Number="38" Name="Real Snare"/>
+      <Note Number="39" Name="Real Clap 1"/>
+      <Note Number="40" Name="Fat Snare"/>
+      <Note Number="41" Name="TR707 Tom"/>
+      <Note Number="42" Name="Real CHH"/>
+      <Note Number="43" Name="TR707 Tom"/>
+      <Note Number="44" Name="Pedal Hat 1"/>
+      <Note Number="45" Name="TR707 Tom"/>
+      <Note Number="46" Name="Real OHH"/>
+      <Note Number="47" Name="Turbo Kick"/>
+      <Note Number="48" Name="TR707 Kick 1"/>
+      <Note Number="49" Name="TR808 RimLng"/>
+      <Note Number="50" Name="Deep Snare"/>
+      <Note Number="51" Name="Big Clap"/>
+      <Note Number="52" Name="TR707 Snare"/>
+      <Note Number="53" Name="Deep Tom"/>
+      <Note Number="54" Name="TR808 CHH 1"/>
+      <Note Number="55" Name="Kick Tom"/>
+      <Note Number="56" Name="Pop CHH"/>
+      <Note Number="57" Name="Deep Tom"/>
+      <Note Number="58" Name="TR707 OHH"/>
+      <Note Number="59" Name="Kick Tom"/>
+      <Note Number="60" Name="Deep Tom"/>
+      <Note Number="61" Name="NaturalCrash"/>
+      <Note Number="62" Name="Kick Tom"/>
+      <Note Number="63" Name="TR909 Ride"/>
+      <Note Number="64" Name="NaturalCrash"/>
+      <Note Number="65" Name="Cup Cym"/>
+      <Note Number="66" Name="Tambourine 2"/>
+      <Note Number="67" Name="TR909 Crash"/>
+      <Note Number="68" Name="Cowbell"/>
+      <Note Number="69" Name="TR606 Cym 1"/>
+      <Note Number="70" Name="TR808Cowbell"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="HiBongo Op"/>
+      <Note Number="73" Name="LoBongo Op"/>
+      <Note Number="74" Name="HiConga Mt"/>
+      <Note Number="75" Name="HiConga Op"/>
+      <Note Number="76" Name="Lo Conga Op"/>
+      <Note Number="77" Name="Hi Timbale"/>
+      <Note Number="78" Name="Lo Timbale"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="Cabasa Up"/>
+      <Note Number="82" Name="Maracas"/>
+      <Note Number="83" Name="Triangle 1"/>
+      <Note Number="84" Name="Triangle 1"/>
+      <Note Number="85" Name="Beam HiQ"/>
+      <Note Number="86" Name="Back Hit"/>
+      <Note Number="87" Name="Back Hit"/>
+      <Note Number="88" Name="Philly Hit"/>
+      <Note Number="89" Name="Brass Fall"/>
+      <Note Number="90" Name="Rezo Noise"/>
+      <Note Number="91" Name="Iih Formant"/>
+      <Note Number="92" Name="Analog Bird"/>
+      <Note Number="93" Name="Emergency"/>
+      <Note Number="94" Name="Down Clap"/>
+      <Note Number="95" Name="TR808 Kick 1"/>
+      <Note Number="96" Name="TR909 Kick 1"/>
+      <Note Number="97" Name="TR909 Snr 3"/>
+      <Note Number="98" Name="TR808 Snr 5"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A22 Ragga">
+      <Note Number="35" Name="Analog Kick"/>
+      <Note Number="36" Name="TR707 Kick 2"/>
+      <Note Number="37" Name="Gate Rim"/>
+      <Note Number="38" Name="Jungle Rim 1"/>
+      <Note Number="39" Name="Hip Clap"/>
+      <Note Number="40" Name="Ragga Snr 2"/>
+      <Note Number="41" Name="TR808 Tom"/>
+      <Note Number="42" Name="Bristol CHH"/>
+      <Note Number="43" Name="TR808 Tom"/>
+      <Note Number="44" Name="Pedal Hat 1"/>
+      <Note Number="45" Name="TR808 Tom"/>
+      <Note Number="46" Name="Cym OHH"/>
+      <Note Number="47" Name="Pastic BD 4"/>
+      <Note Number="48" Name="Video Kick"/>
+      <Note Number="49" Name="Beam HiQ"/>
+      <Note Number="50" Name="Dance Hall SD"/>
+      <Note Number="51" Name="Little Clap"/>
+      <Note Number="52" Name="Ragga Rim 2"/>
+      <Note Number="53" Name="Deep Tom"/>
+      <Note Number="54" Name="TR707 CHH"/>
+      <Note Number="55" Name="Deep Tom"/>
+      <Note Number="56" Name="Pop CHH"/>
+      <Note Number="57" Name="Deep Tom"/>
+      <Note Number="58" Name="TR707 OHH"/>
+      <Note Number="59" Name="Deep Tom"/>
+      <Note Number="60" Name="Deep Tom"/>
+      <Note Number="61" Name="NaturalCrash"/>
+      <Note Number="62" Name="Deep Tom"/>
+      <Note Number="63" Name="TR909 Ride"/>
+      <Note Number="64" Name="NaturalCrash"/>
+      <Note Number="65" Name="Asian Gong"/>
+      <Note Number="66" Name="Tambourine 3"/>
+      <Note Number="67" Name="TR909 Crash"/>
+      <Note Number="68" Name="Cowbell"/>
+      <Note Number="69" Name="TR606 Cym 1"/>
+      <Note Number="70" Name="TR808Cowbell"/>
+      <Note Number="71" Name="TR707 Ride"/>
+      <Note Number="72" Name="HiBongo Op"/>
+      <Note Number="73" Name="LoBongo Op"/>
+      <Note Number="74" Name="HiConga Mt"/>
+      <Note Number="75" Name="HiConga Op"/>
+      <Note Number="76" Name="Lo Conga Op"/>
+      <Note Number="77" Name="Hi Timbale"/>
+      <Note Number="78" Name="Lo Timbale"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="TechnoShaker"/>
+      <Note Number="82" Name="808 Maracas"/>
+      <Note Number="83" Name="MG Attack"/>
+      <Note Number="84" Name="Air Blip"/>
+      <Note Number="85" Name="Syn Hit"/>
+      <Note Number="86" Name="TAO Hit"/>
+      <Note Number="87" Name="Chiki!"/>
+      <Note Number="88" Name="Hey!"/>
+      <Note Number="89" Name="Toy Gun 1"/>
+      <Note Number="90" Name="Toy Gun 2"/>
+      <Note Number="91" Name="Toy Gun 3"/>
+      <Note Number="92" Name="Reso FX"/>
+      <Note Number="93" Name="Emergency"/>
+      <Note Number="94" Name="Big Clap"/>
+      <Note Number="95" Name="TR808 Kick 1"/>
+      <Note Number="96" Name="TR909 Kick 1"/>
+      <Note Number="97" Name="HH Soul Snr"/>
+      <Note Number="98" Name="TR909Snr 4"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A23 Rock">
+      <Note Number="35" Name="Optic Kick"/>
+      <Note Number="36" Name="TR909 Kick 4"/>
+      <Note Number="37" Name="TR808 RimLong"/>
+      <Note Number="38" Name="Hash Snare"/>
+      <Note Number="39" Name="Funk Clap 2"/>
+      <Note Number="40" Name="DJ Snare"/>
+      <Note Number="41" Name="Kick Tom"/>
+      <Note Number="42" Name="TR909 CHH 2"/>
+      <Note Number="43" Name="Kick Tom"/>
+      <Note Number="44" Name="TR909 PHH 1"/>
+      <Note Number="45" Name="Kick Tom"/>
+      <Note Number="46" Name="TR909 OHH 1"/>
+      <Note Number="47" Name="TR909 Kick 5"/>
+      <Note Number="48" Name="Turbo Kick"/>
+      <Note Number="49" Name="SideStiker"/>
+      <Note Number="50" Name="Lo-Fi Snare"/>
+      <Note Number="51" Name="Claptail"/>
+      <Note Number="52" Name="Macho Snare"/>
+      <Note Number="53" Name="TR707 Tom"/>
+      <Note Number="54" Name="TR909 PHH 1"/>
+      <Note Number="55" Name="TR707 Tom"/>
+      <Note Number="56" Name="TR909 OHH"/>
+      <Note Number="57" Name="TR707 Tom"/>
+      <Note Number="58" Name="Cym OHH"/>
+      <Note Number="59" Name="TR707 Tom"/>
+      <Note Number="60" Name="TR707 Tom"/>
+      <Note Number="61" Name="TR909 Crash"/>
+      <Note Number="62" Name="TR707 Tom"/>
+      <Note Number="63" Name="TR909 Ride"/>
+      <Note Number="64" Name="TR909 Crash"/>
+      <Note Number="65" Name="Asian Gong"/>
+      <Note Number="66" Name="Tambourine 3"/>
+      <Note Number="67" Name="TR909 Crash"/>
+      <Note Number="68" Name="Cowbell"/>
+      <Note Number="69" Name="TR606 Cym 2"/>
+      <Note Number="70" Name="TR909Cowbell"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="HiBongo LoFi"/>
+      <Note Number="73" Name="LoBongo LoFi"/>
+      <Note Number="74" Name="HiCnga Mt LF"/>
+      <Note Number="75" Name="HiCnga Op LF"/>
+      <Note Number="76" Name="Lo Conga LoFi"/>
+      <Note Number="77" Name="Hi Timbale LF"/>
+      <Note Number="78" Name="Lo Timbale LF"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="TR727 Quijada"/>
+      <Note Number="82" Name="TR626 Shaker"/>
+      <Note Number="83" Name="Bounce"/>
+      <Note Number="84" Name="ElectricDunk"/>
+      <Note Number="85" Name="Iron Door"/>
+      <Note Number="86" Name="Drill Hit"/>
+      <Note Number="87" Name="Thrill"/>
+      <Note Number="88" Name="PCM Press"/>
+      <Note Number="89" Name="Dist TekGtr"/>
+      <Note Number="90" Name="Dist TekGtr"/>
+      <Note Number="91" Name="Dist TekGtr"/>
+      <Note Number="92" Name="Dist TekGtr"/>
+      <Note Number="93" Name="Gtr FX"/>
+      <Note Number="94" Name="Air Gun"/>
+      <Note Number="95" Name="TR909 Kick 2"/>
+      <Note Number="96" Name="Gabba Kick"/>
+      <Note Number="97" Name="ElectroSnr 2"/>
+      <Note Number="98" Name="Big Trash SD"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A24 Industrial">
+      <Note Number="35" Name="TR909 Dst BD"/>
+      <Note Number="36" Name="Lo-Fi Kick 2"/>
+      <Note Number="37" Name="Drill Hit"/>
+      <Note Number="38" Name="Big Trash SD"/>
+      <Note Number="39" Name="Dist Swish"/>
+      <Note Number="40" Name="Rage Snare"/>
+      <Note Number="41" Name="Can Tom"/>
+      <Note Number="42" Name="Air Blip"/>
+      <Note Number="43" Name="Can Tom"/>
+      <Note Number="44" Name="Beam HiQ"/>
+      <Note Number="45" Name="Can Tom"/>
+      <Note Number="46" Name="TR909 Dst OHH"/>
+      <Note Number="47" Name="Bomb"/>
+      <Note Number="48" Name="Iron Door"/>
+      <Note Number="49" Name="Thrill"/>
+      <Note Number="50" Name="PCM Press"/>
+      <Note Number="51" Name="Air Gun"/>
+      <Note Number="52" Name="PCM Press"/>
+      <Note Number="53" Name="TekRok Snare"/>
+      <Note Number="54" Name="Real PHH"/>
+      <Note Number="55" Name="TekRok Snare"/>
+      <Note Number="56" Name="TR909 PHH 1"/>
+      <Note Number="57" Name="TekRok Snare"/>
+      <Note Number="58" Name="TR909 Dst OHH"/>
+      <Note Number="59" Name="TekRokSnare"/>
+      <Note Number="60" Name="TekRok Snare"/>
+      <Note Number="61" Name="Bomb Noise"/>
+      <Note Number="62" Name="TekRok Snare"/>
+      <Note Number="63" Name="TR909 Ride"/>
+      <Note Number="64" Name="Drill Hit "/>
+      <Note Number="65" Name="Electric Dunk"/>
+      <Note Number="66" Name="Mt Pandeiro"/>
+      <Note Number="67" Name="TR606 Cym 1"/>
+      <Note Number="68" Name="PC-2 Machine"/>
+      <Note Number="69" Name="TR909 Crash"/>
+      <Note Number="70" Name="Crash "/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="HiBongo LoFi"/>
+      <Note Number="73" Name="LoBongo LoFi"/>
+      <Note Number="74" Name="HiCnga Mt LF"/>
+      <Note Number="75" Name="HiCnga Op LF"/>
+      <Note Number="76" Name="Lo Conga LoFi"/>
+      <Note Number="77" Name="Hi Timbale LF"/>
+      <Note Number="78" Name="Lo Timbale LF"/>
+      <Note Number="79" Name="Analog Bird"/>
+      <Note Number="80" Name="Analog Bird"/>
+      <Note Number="81" Name="Techno Shaker"/>
+      <Note Number="82" Name="TR626 Shaker"/>
+      <Note Number="83" Name="One!"/>
+      <Note Number="84" Name="Two!"/>
+      <Note Number="85" Name="Three!"/>
+      <Note Number="86" Name="Kick it!"/>
+      <Note Number="87" Name="Wao!"/>
+      <Note Number="88" Name="Come on!"/>
+      <Note Number="89" Name="Fuzzy Clap"/>
+      <Note Number="90" Name="Roll Kick"/>
+      <Note Number="91" Name="Bomb"/>
+      <Note Number="92" Name="LoTimbale LF"/>
+      <Note Number="93" Name="TR909 DstOHH"/>
+      <Note Number="94" Name="Fuzzy Clap"/>
+      <Note Number="95" Name="TR909 Kick 2"/>
+      <Note Number="96" Name="Roll Kick"/>
+      <Note Number="97" Name="TR909 DstSnr"/>
+      <Note Number="98" Name="Flange Snr"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A25 Ethnic">
+      <Note Number="35" Name="Open Surdo"/>
+      <Note Number="36" Name="Mute Surdo"/>
+      <Note Number="37" Name="Jungle Snap"/>
+      <Note Number="38" Name="Natural Rim"/>
+      <Note Number="39" Name="Big Clap"/>
+      <Note Number="40" Name="Jungle Snr 1"/>
+      <Note Number="41" Name="Jungle Snr 2"/>
+      <Note Number="42" Name="MtPandeiro"/>
+      <Note Number="43" Name="Jungle Snr 2"/>
+      <Note Number="44" Name="R8 Brush CHH"/>
+      <Note Number="45" Name="Jugnle Snr 2"/>
+      <Note Number="46" Name="Metal Sweep"/>
+      <Note Number="47" Name="Afro Feet"/>
+      <Note Number="48" Name="Mute Surdo"/>
+      <Note Number="49" Name="Jungle Snap"/>
+      <Note Number="50" Name="Op Pandeiro"/>
+      <Note Number="51" Name="Real Clap 2"/>
+      <Note Number="52" Name="Hi Timbale"/>
+      <Note Number="53" Name="TablaBaya"/>
+      <Note Number="54" Name="Chenchen"/>
+      <Note Number="55" Name="TablaBaya"/>
+      <Note Number="56" Name="Tambourine 1"/>
+      <Note Number="57" Name="TablaBaya"/>
+      <Note Number="58" Name="Tambourine 4"/>
+      <Note Number="59" Name="TablaBaya"/>
+      <Note Number="60" Name="Udo "/>
+      <Note Number="61" Name="Asian Gong"/>
+      <Note Number="62" Name="Udo"/>
+      <Note Number="63" Name="Cup Cym"/>
+      <Note Number="64" Name="NaturalCrash"/>
+      <Note Number="65" Name="Cup Cym"/>
+      <Note Number="66" Name="Tambourine 2"/>
+      <Note Number="67" Name="TR606 Cym 1"/>
+      <Note Number="68" Name="Cowbell"/>
+      <Note Number="69" Name="NaturalCrash"/>
+      <Note Number="70" Name="CR78 Beat"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="HiBongo LoFi"/>
+      <Note Number="73" Name="LoBongo LoFi"/>
+      <Note Number="74" Name="HiCnga Mt LF"/>
+      <Note Number="75" Name="HiCnga Op LF"/>
+      <Note Number="76" Name="Lo Conga LF"/>
+      <Note Number="77" Name="Hi Timbale LF"/>
+      <Note Number="78" Name="Lo Timbale LF"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="Cabasa Up"/>
+      <Note Number="82" Name="TR626 Shaker"/>
+      <Note Number="83" Name="Whistle"/>
+      <Note Number="84" Name="Whistle"/>
+      <Note Number="85" Name="Short Guiro"/>
+      <Note Number="86" Name="Long Guiro"/>
+      <Note Number="87" Name="TR808 Claves"/>
+      <Note Number="88" Name="Hyoshigi"/>
+      <Note Number="89" Name="AfroDrum Rat"/>
+      <Note Number="90" Name="Mute Cuica"/>
+      <Note Number="91" Name="Open Cuica"/>
+      <Note Number="92" Name="Trangle 2"/>
+      <Note Number="93" Name="Triangle 1"/>
+      <Note Number="94" Name="Real Clap 1"/>
+      <Note Number="95" Name="Boost Kick"/>
+      <Note Number="96" Name="Kick Ghost"/>
+      <Note Number="97" Name="Voice Loop"/>
+      <Note Number="98" Name="Chiki!"/>
+    </NoteNameList>
+    <NoteNameList Name="P:A26 Reverse">
+      <Note Number="35" Name="Ele Kick"/>
+      <Note Number="36" Name="Turbo Kick"/>
+      <Note Number="37" Name="TR909 Rim"/>
+      <Note Number="38" Name="TR606 Snr 2"/>
+      <Note Number="39" Name="Comp Clap"/>
+      <Note Number="40" Name="Real Snare"/>
+      <Note Number="41" Name="Can Tom"/>
+      <Note Number="42" Name="TR808 CHH 2"/>
+      <Note Number="43" Name="Can Tom"/>
+      <Note Number="44" Name="TR808 PHH 1"/>
+      <Note Number="45" Name="Can Tom"/>
+      <Note Number="46" Name="TR808 OHH 1"/>
+      <Note Number="47" Name="TR707 Kick 1"/>
+      <Note Number="48" Name="Plastic BD 3"/>
+      <Note Number="49" Name="TR707 Rim"/>
+      <Note Number="50" Name="TR909 Snr 4"/>
+      <Note Number="51" Name="TR707 Clap"/>
+      <Note Number="52" Name="Comp Clap"/>
+      <Note Number="53" Name="TR707 Tom"/>
+      <Note Number="54" Name="TR909 CHH 1"/>
+      <Note Number="55" Name="TR707 Tom"/>
+      <Note Number="56" Name="TR909 PHH 1"/>
+      <Note Number="57" Name="TR707 Tom"/>
+      <Note Number="58" Name="TR909 DstOHH"/>
+      <Note Number="59" Name="TR707 Tom"/>
+      <Note Number="60" Name="TR707 Tom"/>
+      <Note Number="61" Name="TR909 Crash"/>
+      <Note Number="62" Name="TR707 Tom"/>
+      <Note Number="63" Name="TR707 Ride"/>
+      <Note Number="64" Name="TR909 Crash"/>
+      <Note Number="65" Name="Asian Gong"/>
+      <Note Number="66" Name="Tambourine 2"/>
+      <Note Number="67" Name="TR909 Crash"/>
+      <Note Number="68" Name="TR808Cowbell"/>
+      <Note Number="69" Name="TR606 Cym 2"/>
+      <Note Number="70" Name="CR 78 Tamb"/>
+      <Note Number="71" Name="Cup Cym"/>
+      <Note Number="72" Name="HiBongo Op"/>
+      <Note Number="73" Name="LoBongo Op"/>
+      <Note Number="74" Name="HiConga Mt"/>
+      <Note Number="75" Name="HiConga Op"/>
+      <Note Number="76" Name="Lo Conga Op"/>
+      <Note Number="77" Name="Hi Timbale"/>
+      <Note Number="78" Name="Lo Timbale"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="TechnoShaker"/>
+      <Note Number="82" Name="Maracas"/>
+      <Note Number="83" Name="Beam HiQ"/>
+      <Note Number="84" Name="Tape Rewind"/>
+      <Note Number="85" Name="Vinyl Stop"/>
+      <Note Number="86" Name="Come on!"/>
+      <Note Number="87" Name="One!"/>
+      <Note Number="88" Name="Pa!"/>
+      <Note Number="89" Name="Analog Bird"/>
+      <Note Number="90" Name="Retro UFO"/>
+      <Note Number="91" Name="Metal Sweep"/>
+      <Note Number="92" Name="Dst Solo Gtr"/>
+      <Note Number="93" Name="Emergency"/>
+      <Note Number="94" Name="Down Clap"/>
+      <Note Number="95" Name="Wet Kick"/>
+      <Note Number="96" Name="Hip Kick"/>
+      <Note Number="97" Name="TR909 Snr 5"/>
+      <Note Number="98" Name="Jazz Snare"/>
+    </NoteNameList>
+    <NoteNameList Name="P:B01 DR-110&amp;220">
+      <Note Number="35" Name="DR110 Kick"/>
+      <Note Number="36" Name="DR110 Kick"/>
+      <Note Number="37" Name="DR220 Rim"/>
+      <Note Number="38" Name="DR110 Snr"/>
+      <Note Number="39" Name="DR110 Clap"/>
+      <Note Number="40" Name="DR110 Snr"/>
+      <Note Number="41" Name="TR606 CmpTom"/>
+      <Note Number="42" Name="DR110 CHH"/>
+      <Note Number="43" Name="TR606 CmpTom"/>
+      <Note Number="44" Name="DR110 CHH"/>
+      <Note Number="45" Name="TR606 CmpTom"/>
+      <Note Number="46" Name="DR110 OHH"/>
+      <Note Number="47" Name="TR808 Kick 1"/>
+      <Note Number="48" Name="DR220 Kick"/>
+      <Note Number="49" Name="DR220 Rim"/>
+      <Note Number="50" Name="DR220 Snr"/>
+      <Note Number="51" Name="DR220 Clap"/>
+      <Note Number="52" Name="DR220 Snr"/>
+      <Note Number="53" Name="DR220 Tom"/>
+      <Note Number="54" Name="DR220 CHH"/>
+      <Note Number="55" Name="DR220 Tom"/>
+      <Note Number="56" Name="DR220 CHH"/>
+      <Note Number="57" Name="DR220 Tom"/>
+      <Note Number="58" Name="DR220 OHH"/>
+      <Note Number="59" Name="DR220 Tom"/>
+      <Note Number="60" Name="DR220 Tom"/>
+      <Note Number="61" Name="DR220 Cym"/>
+      <Note Number="62" Name="DR220 Tom"/>
+      <Note Number="63" Name="DR220 Ride"/>
+      <Note Number="64" Name="DR220 Cym"/>
+      <Note Number="65" Name="Cup Cym"/>
+      <Note Number="66" Name="TR626 Tamb"/>
+      <Note Number="67" Name="DR110 Cym"/>
+      <Note Number="68" Name="MG Zap 6"/>
+      <Note Number="69" Name="DR220 Ride"/>
+      <Note Number="70" Name="MG Zap 10"/>
+      <Note Number="71" Name="Metallic Shot"/>
+      <Note Number="72" Name="HiBongo Op"/>
+      <Note Number="73" Name="LoBongo Op"/>
+      <Note Number="74" Name="HiConga Mt"/>
+      <Note Number="75" Name="HiConga Op"/>
+      <Note Number="76" Name="Lo Conga Op"/>
+      <Note Number="77" Name="Hi Timbale"/>
+      <Note Number="78" Name="Lo Timbale"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="Cabasa Up"/>
+      <Note Number="82" Name="808 Maracas"/>
+      <Note Number="83" Name="MG Zap 1"/>
+      <Note Number="84" Name="MG Zap 2"/>
+      <Note Number="85" Name="MG Zap 2"/>
+      <Note Number="86" Name="Smear Hit 1"/>
+      <Note Number="87" Name="Construct. 2"/>
+      <Note Number="88" Name="Tekno Hit"/>
+      <Note Number="89" Name="Boing"/>
+      <Note Number="90" Name="MG Zap 8"/>
+      <Note Number="91" Name="Ho"/>
+      <Note Number="92" Name="Canvas"/>
+      <Note Number="93" Name="MG Sweep 3"/>
+      <Note Number="94" Name="TR909 SnClp1"/>
+      <Note Number="95" Name="Dance Kick 1"/>
+      <Note Number="96" Name="Toy Kick"/>
+      <Note Number="97" Name="Sim Snare"/>
+      <Note Number="98" Name="TR808 Snr 5"/>
+    </NoteNameList>
+    <NoteNameList Name="P:B02 TR-505&amp;626">
+      <Note Number="35" Name="Hip Kick"/>
+      <Note Number="36" Name="TR505 Kick"/>
+      <Note Number="37" Name="TR505 Rim"/>
+      <Note Number="38" Name="TR505 Snr "/>
+      <Note Number="39" Name="TR505 Clap"/>
+      <Note Number="40" Name="TR505 Snr"/>
+      <Note Number="41" Name="TR505 Tom"/>
+      <Note Number="42" Name="TR505 CHH"/>
+      <Note Number="43" Name="TR505 Tom"/>
+      <Note Number="44" Name="TR505 CHH"/>
+      <Note Number="45" Name="TR505 Tom"/>
+      <Note Number="46" Name="TR505 OHH"/>
+      <Note Number="47" Name="TR626 Kick 1"/>
+      <Note Number="48" Name="TR626 Kick 2"/>
+      <Note Number="49" Name="TR626 Rim"/>
+      <Note Number="50" Name="TR626 Snr 2"/>
+      <Note Number="51" Name="TR505 Clap"/>
+      <Note Number="52" Name="TR626 Snr 3"/>
+      <Note Number="53" Name="TR626 Tom"/>
+      <Note Number="54" Name="TR626 CHH"/>
+      <Note Number="55" Name="TR626 Tom"/>
+      <Note Number="56" Name="TR626 CHH"/>
+      <Note Number="57" Name="TR626 Tom"/>
+      <Note Number="58" Name="TR626 OHH"/>
+      <Note Number="59" Name="TR626 Tom"/>
+      <Note Number="60" Name="TR626 Tom"/>
+      <Note Number="61" Name="TR626 Crash"/>
+      <Note Number="62" Name="TR626 Tom"/>
+      <Note Number="63" Name="TR626 Ride"/>
+      <Note Number="64" Name="TR626 Crash"/>
+      <Note Number="65" Name="TR626 CupCym"/>
+      <Note Number="66" Name="TR626 Tamb"/>
+      <Note Number="67" Name="TR626 China"/>
+      <Note Number="68" Name="TR626Cowbell"/>
+      <Note Number="69" Name="TR909 Crash"/>
+      <Note Number="70" Name="TR505HiCwbel"/>
+      <Note Number="71" Name="TR505LowCwbel"/>
+      <Note Number="72" Name="TR505 LoCong"/>
+      <Note Number="73" Name="TR505 HiCong"/>
+      <Note Number="74" Name="TR626MtConga"/>
+      <Note Number="75" Name="TR626OpConga"/>
+      <Note Number="76" Name="TR626LoConga"/>
+      <Note Number="77" Name="TR626 HiTimb"/>
+      <Note Number="78" Name="TR626 LoTimb"/>
+      <Note Number="79" Name="TR626 HiAgo"/>
+      <Note Number="80" Name="TR626 LoAgo"/>
+      <Note Number="81" Name="TR727 Cabasa"/>
+      <Note Number="82" Name="TR727 Maracs"/>
+      <Note Number="83" Name="TR626 Claves"/>
+      <Note Number="84" Name="MG Zap 9"/>
+      <Note Number="85" Name="MG Sweep 4"/>
+      <Note Number="86" Name="Sawing"/>
+      <Note Number="87" Name="D.MuteGt mp"/>
+      <Note Number="88" Name="Bull Scream"/>
+      <Note Number="89" Name="Hey! 2"/>
+      <Note Number="90" Name="MG Sweep 2"/>
+      <Note Number="91" Name="MG Zap 2"/>
+      <Note Number="92" Name="MG Zap 7"/>
+      <Note Number="93" Name="Boing "/>
+      <Note Number="94" Name="Group Clap"/>
+      <Note Number="95" Name="TR909 Kick 3"/>
+      <Note Number="96" Name="TR909 Kick 5"/>
+      <Note Number="97" Name="Headz Snare"/>
+      <Note Number="98" Name="TR909 Snr 5"/>
+    </NoteNameList>
+    <NoteNameList Name="P:B03 TR707&amp;727">
+      <Note Number="35" Name="Optic Kick"/>
+      <Note Number="36" Name="Lo-Fi Kick 1"/>
+      <Note Number="37" Name="TR808 Rim"/>
+      <Note Number="38" Name="Whack Snare"/>
+      <Note Number="39" Name="TR707 Clap"/>
+      <Note Number="40" Name="Antigua Snr"/>
+      <Note Number="41" Name="Deep Tom"/>
+      <Note Number="42" Name="Closed Hat"/>
+      <Note Number="43" Name="Deep Tom"/>
+      <Note Number="44" Name="Pedal Hat 1"/>
+      <Note Number="45" Name="Deep Tom"/>
+      <Note Number="46" Name="Open Hat"/>
+      <Note Number="47" Name="TR707 Kick 1"/>
+      <Note Number="48" Name="TR707 Kick 2"/>
+      <Note Number="49" Name="TR707 Rim"/>
+      <Note Number="50" Name="Real Snare"/>
+      <Note Number="51" Name="TR707 Clap"/>
+      <Note Number="52" Name="TR707 Snare"/>
+      <Note Number="53" Name="TR707 Tom"/>
+      <Note Number="54" Name="TR707 CHH"/>
+      <Note Number="55" Name="TR707 Tom"/>
+      <Note Number="56" Name="TR707 PHH"/>
+      <Note Number="57" Name="TR707 Tom"/>
+      <Note Number="58" Name="TR707 OHH"/>
+      <Note Number="59" Name="TR707 Tom"/>
+      <Note Number="60" Name="TR707 Tom"/>
+      <Note Number="61" Name="NaturalCrash"/>
+      <Note Number="62" Name="TR707 Tom"/>
+      <Note Number="63" Name="Natural Ride"/>
+      <Note Number="64" Name="NaturalCrash"/>
+      <Note Number="65" Name="TR707 Ride"/>
+      <Note Number="66" Name="Tambourine 3"/>
+      <Note Number="67" Name="DR220 Cym"/>
+      <Note Number="68" Name="TR707Cowbell"/>
+      <Note Number="69" Name="TR909 Crash"/>
+      <Note Number="70" Name="TR808Cowbell"/>
+      <Note Number="71" Name="TR606 Cym 1"/>
+      <Note Number="72" Name="TR727HiBongo"/>
+      <Note Number="73" Name="TR727LoBongo"/>
+      <Note Number="74" Name="TR626MtConga"/>
+      <Note Number="75" Name="TR626OpConga"/>
+      <Note Number="76" Name="TR626LoConga"/>
+      <Note Number="77" Name="TR727 HiTimb"/>
+      <Note Number="78" Name="TR727 LoTimb"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="TR727 Cabasa"/>
+      <Note Number="82" Name="TR727 Maracs"/>
+      <Note Number="83" Name="ClassicHseHt"/>
+      <Note Number="84" Name="Construct.2"/>
+      <Note Number="85" Name="MG Zap 1"/>
+      <Note Number="86" Name="Space FX Swp"/>
+      <Note Number="87" Name="Boing"/>
+      <Note Number="88" Name="MG Sweep 6"/>
+      <Note Number="89" Name="TR727 Chime"/>
+      <Note Number="90" Name="Sitar Gliss"/>
+      <Note Number="91" Name="TR727Whistle"/>
+      <Note Number="92" Name="TR727Whistle"/>
+      <Note Number="93" Name="Siren 2"/>
+      <Note Number="94" Name="TR909 Clap 4"/>
+      <Note Number="95" Name="TR909 Kick10"/>
+      <Note Number="96" Name="TR808 Kick 1"/>
+      <Note Number="97" Name="TR808 Snr 1"/>
+      <Note Number="98" Name="Clap Snare 3"/>
+    </NoteNameList>
+    <NoteNameList Name="P:B04 Techno 4">
+      <Note Number="35" Name="HiHop Kick2"/>
+      <Note Number="36" Name="Wet Kick"/>
+      <Note Number="37" Name="Jungle Snap"/>
+      <Note Number="38" Name="TR626 Snr 2"/>
+      <Note Number="39" Name="Funk Clap"/>
+      <Note Number="40" Name="Synth Snare"/>
+      <Note Number="41" Name="Kick Tom"/>
+      <Note Number="42" Name="TR606 CHH 1"/>
+      <Note Number="43" Name="Kick Tom"/>
+      <Note Number="44" Name="Tight PHH"/>
+      <Note Number="45" Name="Kick Tom"/>
+      <Note Number="46" Name="TR110 OHH"/>
+      <Note Number="47" Name="TR909 Kick 8"/>
+      <Note Number="48" Name="Plastic BD 4"/>
+      <Note Number="49" Name="MG Pink Nz"/>
+      <Note Number="50" Name="CR78 Snare"/>
+      <Note Number="51" Name="Funk Clap"/>
+      <Note Number="52" Name="Sim Snare"/>
+      <Note Number="53" Name="Deep Tom"/>
+      <Note Number="54" Name="DR110 CHH"/>
+      <Note Number="55" Name="Deep Tom"/>
+      <Note Number="56" Name="Lil' Hat"/>
+      <Note Number="57" Name="Deep Tom"/>
+      <Note Number="58" Name="Pop Hat Open"/>
+      <Note Number="59" Name="Deep Tom"/>
+      <Note Number="60" Name="Deep Tom"/>
+      <Note Number="61" Name="TR909 Crash"/>
+      <Note Number="62" Name="Deep Tom"/>
+      <Note Number="63" Name="TR707 Ride"/>
+      <Note Number="64" Name="TR909 Crash"/>
+      <Note Number="65" Name="TR606 Cym 2"/>
+      <Note Number="66" Name="Tambourine 4"/>
+      <Note Number="67" Name="NaturalCrash"/>
+      <Note Number="68" Name="CR78 Beat"/>
+      <Note Number="69" Name="TR707 Ride"/>
+      <Note Number="70" Name="CR78 Tamb"/>
+      <Note Number="71" Name="Cup Cym"/>
+      <Note Number="72" Name="Udu Pot1 Hi"/>
+      <Note Number="73" Name="Udu Pot1 Acc"/>
+      <Note Number="74" Name="Udu Pot 2 "/>
+      <Note Number="75" Name="Udu Pot2 Mut"/>
+      <Note Number="76" Name="Udu Pot2 Lng"/>
+      <Note Number="77" Name="MG Zap 6"/>
+      <Note Number="78" Name="MG Zap 12"/>
+      <Note Number="79" Name="MG Sweep 5"/>
+      <Note Number="80" Name="P-Zing"/>
+      <Note Number="81" Name="MG Sweep 2"/>
+      <Note Number="82" Name="MG Zap 7"/>
+      <Note Number="83" Name="Beam HiQ"/>
+      <Note Number="84" Name="Jet Plane"/>
+      <Note Number="85" Name="Air Blip"/>
+      <Note Number="86" Name="Dolphin Lo"/>
+      <Note Number="87" Name="Back Hit"/>
+      <Note Number="88" Name="MetallicShot"/>
+      <Note Number="89" Name="Metal Bang"/>
+      <Note Number="90" Name="Construct. 2"/>
+      <Note Number="91" Name="Firebomb"/>
+      <Note Number="92" Name="TR626 LoAgo"/>
+      <Note Number="93" Name="Thunderbolt"/>
+      <Note Number="94" Name="Jack Hammer"/>
+      <Note Number="95" Name="JungleKick 2"/>
+      <Note Number="96" Name="Hip Kick"/>
+      <Note Number="97" Name="Picc. rol Sn"/>
+      <Note Number="98" Name="Picc. hrd Sn"/>
+    </NoteNameList>
+    <NoteNameList Name="P:B05 NU-NRG">
+      <Note Number="35" Name="TR909 Kick 5"/>
+      <Note Number="36" Name="Plastic BD 3"/>
+      <Note Number="37" Name="Gate Rim"/>
+      <Note Number="38" Name="TR909 SNClp2"/>
+      <Note Number="39" Name="TR909 Clap 4"/>
+      <Note Number="40" Name="TR909 DstSnr"/>
+      <Note Number="41" Name="TR909 Tom"/>
+      <Note Number="42" Name="TR909 CHH 3"/>
+      <Note Number="43" Name="TR909 Tom"/>
+      <Note Number="44" Name="TR909 PHH 2"/>
+      <Note Number="45" Name="TR909 Tom"/>
+      <Note Number="46" Name="TR909 OHH 2"/>
+      <Note Number="47" Name="TR909 Kick 8"/>
+      <Note Number="48" Name="TR909 Kick 9"/>
+      <Note Number="49" Name="Natural Rim"/>
+      <Note Number="50" Name="Real Snare"/>
+      <Note Number="51" Name="Claptail"/>
+      <Note Number="52" Name="TR909 Snr 5"/>
+      <Note Number="53" Name="TR808 Tom"/>
+      <Note Number="54" Name="TR909 PHH 1"/>
+      <Note Number="55" Name="TR808 Tom"/>
+      <Note Number="56" Name="TR909 PHH 2"/>
+      <Note Number="57" Name="TR808 Tom"/>
+      <Note Number="58" Name="TR909 DstOHH"/>
+      <Note Number="59" Name="TR808 Tom"/>
+      <Note Number="60" Name="TR808 Tom"/>
+      <Note Number="61" Name="TR909 Crash"/>
+      <Note Number="62" Name="TR808 Tom"/>
+      <Note Number="63" Name="TR909 Ride"/>
+      <Note Number="64" Name="TR909 Crash"/>
+      <Note Number="65" Name="Cup Cym"/>
+      <Note Number="66" Name="CR78 Tamb"/>
+      <Note Number="67" Name="16 Drk Crash"/>
+      <Note Number="68" Name="TR808Cowbell"/>
+      <Note Number="69" Name="DR220 Ride"/>
+      <Note Number="70" Name="TR727Quijada"/>
+      <Note Number="71" Name="TR626 CupCym"/>
+      <Note Number="72" Name="HiBongo LoFi"/>
+      <Note Number="73" Name="LoBongo LoFi"/>
+      <Note Number="74" Name="HiCnga Mt LF"/>
+      <Note Number="75" Name="HiCnga OP LF"/>
+      <Note Number="76" Name="LoConga LoFi"/>
+      <Note Number="77" Name="HiTimbale LF"/>
+      <Note Number="78" Name="LoTimbale LF"/>
+      <Note Number="79" Name="TR626 HiAgo"/>
+      <Note Number="80" Name="TR626 LoAgo"/>
+      <Note Number="81" Name="TR727 Cabasa"/>
+      <Note Number="82" Name="TR727 Maracs"/>
+      <Note Number="83" Name="Mute Cuica"/>
+      <Note Number="84" Name="Dist Swish"/>
+      <Note Number="85" Name="Bounce"/>
+      <Note Number="86" Name="MG Sweep 3"/>
+      <Note Number="87" Name="MG Zap 15"/>
+      <Note Number="88" Name="MG Zap 9"/>
+      <Note Number="89" Name="Hoo!"/>
+      <Note Number="90" Name="JP Hoover"/>
+      <Note Number="91" Name="MG Big Lead"/>
+      <Note Number="92" Name="Bull Scream"/>
+      <Note Number="93" Name="Turbine"/>
+      <Note Number="94" Name="Real Clap 2"/>
+      <Note Number="95" Name="TR909 Kick 9"/>
+      <Note Number="96" Name="TR909 Kick 3"/>
+      <Note Number="97" Name="Flange Snr"/>
+      <Note Number="98" Name="Lo-Hard Snr"/>
+    </NoteNameList>
+    <NoteNameList Name="P:B06 Hard House">
+      <Note Number="35" Name="TR909 Kick10"/>
+      <Note Number="36" Name="TR909 Kick 6"/>
+      <Note Number="37" Name="TR909 Rim"/>
+      <Note Number="38" Name="TR909 Snr 7"/>
+      <Note Number="39" Name="Fuzzy Clap"/>
+      <Note Number="40" Name="TR909 Snr 8"/>
+      <Note Number="41" Name="TR909 Tom"/>
+      <Note Number="42" Name="TR707 CHH"/>
+      <Note Number="43" Name="TR909 Tom"/>
+      <Note Number="44" Name="TR707 PHH"/>
+      <Note Number="45" Name="TR909 Tom"/>
+      <Note Number="46" Name="TR707 OHH"/>
+      <Note Number="47" Name="TR909 Kick 5"/>
+      <Note Number="48" Name="TR909 Kick 9"/>
+      <Note Number="49" Name="Lo-Fi Rim"/>
+      <Note Number="50" Name="TR909 SnClp1"/>
+      <Note Number="51" Name="TR909 Clap "/>
+      <Note Number="52" Name="TR909 SnClp2"/>
+      <Note Number="53" Name="TR909 DstTom"/>
+      <Note Number="54" Name="TR909 CHH 3"/>
+      <Note Number="55" Name="TR909 DstTom"/>
+      <Note Number="56" Name="TR909 PHH 1"/>
+      <Note Number="57" Name="TR909 DstTom"/>
+      <Note Number="58" Name="TR909 OHH 2"/>
+      <Note Number="59" Name="TR909 DstTom"/>
+      <Note Number="60" Name="TR909 DstTom"/>
+      <Note Number="61" Name="TR909 Crash"/>
+      <Note Number="62" Name="TR909 DstTom"/>
+      <Note Number="63" Name="TR909 Ride"/>
+      <Note Number="64" Name="TR909 Crash"/>
+      <Note Number="65" Name="TR626 Ride"/>
+      <Note Number="66" Name="Tambourine 2"/>
+      <Note Number="67" Name="TR626 China"/>
+      <Note Number="68" Name="CR78 Cowbell"/>
+      <Note Number="69" Name="TR626 CupCym"/>
+      <Note Number="70" Name="TR626Cowbell"/>
+      <Note Number="71" Name="DR110 Cym"/>
+      <Note Number="72" Name="Udu Pot2 Mut"/>
+      <Note Number="73" Name="Udu Pot2 Lng"/>
+      <Note Number="74" Name="Udu Pot1 Acc"/>
+      <Note Number="75" Name="Udu Pot1 Hi"/>
+      <Note Number="76" Name="Udu Pot1 Lo"/>
+      <Note Number="77" Name="TR727 HiTimb"/>
+      <Note Number="78" Name="TR727 LoTimb"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="TR626 Shaker"/>
+      <Note Number="82" Name="TR626 Shaker"/>
+      <Note Number="83" Name="Smear Hit 1"/>
+      <Note Number="84" Name="P-Zing"/>
+      <Note Number="85" Name="Mute Cuica"/>
+      <Note Number="86" Name="Open Cuica"/>
+      <Note Number="87" Name="OrchPrc Hit"/>
+      <Note Number="88" Name="Philly Hit"/>
+      <Note Number="89" Name="MG Sweep 5"/>
+      <Note Number="90" Name="Hoo!"/>
+      <Note Number="91" Name="Ooh! 2"/>
+      <Note Number="92" Name="Wao!"/>
+      <Note Number="93" Name="Shout"/>
+      <Note Number="94" Name="Big Clap"/>
+      <Note Number="95" Name="HipHop Kick2"/>
+      <Note Number="96" Name="TR909 Kick 6"/>
+      <Note Number="97" Name="TR606 Snr 2"/>
+      <Note Number="98" Name="Lo-Hard Snr"/>
+    </NoteNameList>
+    <NoteNameList Name="P:B07 Drum'n'Bass3">
+      <Note Number="35" Name="Hall Kick 2"/>
+      <Note Number="36" Name="HipHop Kick3"/>
+      <Note Number="37" Name="Jungle Snap"/>
+      <Note Number="38" Name="Picc. rol Sn"/>
+      <Note Number="39" Name="Little Clap"/>
+      <Note Number="40" Name="Picc. hrd Sn"/>
+      <Note Number="41" Name="Deep Tom"/>
+      <Note Number="42" Name="Real CHH"/>
+      <Note Number="43" Name="Deep Tom"/>
+      <Note Number="44" Name="Real PHH"/>
+      <Note Number="45" Name="Deep Tom"/>
+      <Note Number="46" Name="R8 OHH"/>
+      <Note Number="47" Name="JungleKick 2"/>
+      <Note Number="48" Name="HipHop Kick2"/>
+      <Note Number="49" Name="Ragga Rim 1"/>
+      <Note Number="50" Name="Slamn'Snr"/>
+      <Note Number="51" Name="TR909 SnClp2"/>
+      <Note Number="52" Name="PurePhat Snr"/>
+      <Note Number="53" Name="TR606 CmpTom"/>
+      <Note Number="54" Name="Room CHH"/>
+      <Note Number="55" Name="TR606 CmpTom"/>
+      <Note Number="56" Name="Tight PHH"/>
+      <Note Number="57" Name="TR606 CmpTom"/>
+      <Note Number="58" Name="Hip OHH"/>
+      <Note Number="59" Name="TR606 CmpTom"/>
+      <Note Number="60" Name="TR606 CmpTom"/>
+      <Note Number="61" Name="Jungle Crash"/>
+      <Note Number="62" Name="TR606 CmpTom"/>
+      <Note Number="63" Name="TR909 Ride"/>
+      <Note Number="64" Name="Jungle Crash"/>
+      <Note Number="65" Name="NaturalCrash"/>
+      <Note Number="66" Name="Tambourine 4"/>
+      <Note Number="67" Name="TR606 Cym 2"/>
+      <Note Number="68" Name="TR808Cowbell"/>
+      <Note Number="69" Name="TR909 Crash"/>
+      <Note Number="70" Name="CR78 Tamb"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="Wadaiko"/>
+      <Note Number="73" Name="Wadaiko Rim"/>
+      <Note Number="74" Name="Tsuzumi 2 p"/>
+      <Note Number="75" Name="Tsuzumi 2 mf"/>
+      <Note Number="76" Name="Tsuzumi 2 Hi"/>
+      <Note Number="77" Name="Shimedaiko 2"/>
+      <Note Number="78" Name="Ohkawa 2"/>
+      <Note Number="79" Name="Mokugyo 1"/>
+      <Note Number="80" Name="Mokugyo"/>
+      <Note Number="81" Name="Kane"/>
+      <Note Number="82" Name="Wind Bell"/>
+      <Note Number="83" Name="Bendir"/>
+      <Note Number="84" Name="MG Zap 5"/>
+      <Note Number="85" Name="Dist Swish"/>
+      <Note Number="86" Name="Dolphin Hi 1"/>
+      <Note Number="87" Name="Dolphin Hi 2"/>
+      <Note Number="88" Name="Dolphin Md"/>
+      <Note Number="89" Name="Dolphin Lo"/>
+      <Note Number="90" Name="MG Zap 11"/>
+      <Note Number="91" Name="MG Sweep 3"/>
+      <Note Number="92" Name="Spaced FX Swp"/>
+      <Note Number="93" Name="MG Sweep 5"/>
+      <Note Number="94" Name="Funk Clap"/>
+      <Note Number="95" Name="TR808 Kick 2"/>
+      <Note Number="96" Name="Lo-Fi Kick 2"/>
+      <Note Number="97" Name="TR808 Snr 8"/>
+      <Note Number="98" Name="MC Snare"/>
+    </NoteNameList>
+    <NoteNameList Name="P:B08 Breakbeats">
+      <Note Number="35" Name="HipHop Kick 1"/>
+      <Note Number="36" Name="Hall Kick 2"/>
+      <Note Number="37" Name="Gate Rim"/>
+      <Note Number="38" Name="Fat Snare"/>
+      <Note Number="39" Name="Cop Clap"/>
+      <Note Number="40" Name="Lo-Fi Snare"/>
+      <Note Number="41" Name="Kick Tom"/>
+      <Note Number="42" Name="Real CHH"/>
+      <Note Number="43" Name="Kick Tom"/>
+      <Note Number="44" Name="Pedal Hat 1"/>
+      <Note Number="45" Name="Kick Tom"/>
+      <Note Number="46" Name="Real OHH"/>
+      <Note Number="47" Name="TR707 Kick 2"/>
+      <Note Number="48" Name="HipHop Kick3"/>
+      <Note Number="49" Name="Snap"/>
+      <Note Number="50" Name="Funk Snr 1"/>
+      <Note Number="51" Name="Real Clap 1"/>
+      <Note Number="52" Name="Slamn'Snr"/>
+      <Note Number="53" Name="TR 505 Tom"/>
+      <Note Number="54" Name="Tight CHH"/>
+      <Note Number="55" Name="TR505 Tom"/>
+      <Note Number="56" Name="Tight PHH"/>
+      <Note Number="57" Name="TR505 Tom"/>
+      <Note Number="58" Name="Funk OHH"/>
+      <Note Number="59" Name="TR505 Tom"/>
+      <Note Number="60" Name="TR505 Tom"/>
+      <Note Number="61" Name="NaturalCrash"/>
+      <Note Number="62" Name="TR505 Tom"/>
+      <Note Number="63" Name="TR606 Cym 2"/>
+      <Note Number="64" Name="NaturalCrash"/>
+      <Note Number="65" Name="Natural Ride"/>
+      <Note Number="66" Name="Tambourine 3"/>
+      <Note Number="67" Name="Asian Gong 5"/>
+      <Note Number="68" Name="CR78 Cowbell"/>
+      <Note Number="69" Name="DR220 Ride"/>
+      <Note Number="70" Name="TR626 Claves"/>
+      <Note Number="71" Name="TR626 CupCym"/>
+      <Note Number="72" Name="HiBongo Open"/>
+      <Note Number="73" Name="LoBongo Open"/>
+      <Note Number="74" Name="HiConga Mute"/>
+      <Note Number="75" Name="HiConga Open"/>
+      <Note Number="76" Name="LoConga Open"/>
+      <Note Number="77" Name="Hi Timbale"/>
+      <Note Number="78" Name="Lo Timbale"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="Cabasa Up"/>
+      <Note Number="82" Name="Maracas"/>
+      <Note Number="83" Name="TR727Quijada"/>
+      <Note Number="84" Name="Bendir"/>
+      <Note Number="85" Name="Short Guiro"/>
+      <Note Number="86" Name="Long Guiro"/>
+      <Note Number="87" Name="Smear Hit 1"/>
+      <Note Number="88" Name="Lo--Fi RoomTp"/>
+      <Note Number="89" Name="Str Attack"/>
+      <Note Number="90" Name="Berimbau Mut"/>
+      <Note Number="91" Name="Contruct.2"/>
+      <Note Number="92" Name="Ooh! 2"/>
+      <Note Number="93" Name="Shout"/>
+      <Note Number="94" Name="TR909 Clap 3"/>
+      <Note Number="95" Name="Hazy Kick"/>
+      <Note Number="96" Name="TR808 Kick 2"/>
+      <Note Number="97" Name="Picc. rol Sn"/>
+      <Note Number="98" Name="PurePhat Snr"/>
+    </NoteNameList>
+    <NoteNameList Name="P:B09 Hip-Hop 3">
+      <Note Number="35" Name="HipHop Kick3"/>
+      <Note Number="36" Name="HipHop Kick1"/>
+      <Note Number="37" Name="MG Zap 7"/>
+      <Note Number="38" Name="Slamn'Snr"/>
+      <Note Number="39" Name="Real Clap 2"/>
+      <Note Number="40" Name="PurePhat Snr"/>
+      <Note Number="41" Name="TR606 Tom"/>
+      <Note Number="42" Name="DR110 CHH"/>
+      <Note Number="43" Name="TR606 Tom"/>
+      <Note Number="44" Name="TR110 CHH"/>
+      <Note Number="45" Name="TR606 Tom"/>
+      <Note Number="46" Name="DR110 OHH"/>
+      <Note Number="47" Name="TR808 Kick 2"/>
+      <Note Number="48" Name="HipHop Kick2"/>
+      <Note Number="49" Name="DR220 Rim"/>
+      <Note Number="50" Name="TR626 Snr 2"/>
+      <Note Number="51" Name="Funk Clap"/>
+      <Note Number="52" Name="PurePhat Snr"/>
+      <Note Number="53" Name="Natural Tom"/>
+      <Note Number="54" Name="Real CHH"/>
+      <Note Number="55" Name="Natural Tom"/>
+      <Note Number="56" Name="Real PHH"/>
+      <Note Number="57" Name="Natural Tom"/>
+      <Note Number="58" Name="Open Hat"/>
+      <Note Number="59" Name="Natural Tom"/>
+      <Note Number="60" Name="Natural Tom"/>
+      <Note Number="61" Name="16 Drk Crash"/>
+      <Note Number="62" Name="Natural Tom"/>
+      <Note Number="63" Name="Natural Ride"/>
+      <Note Number="64" Name="16 Drk Crash"/>
+      <Note Number="65" Name="TR626 China"/>
+      <Note Number="66" Name="Tambourine 2"/>
+      <Note Number="67" Name="DR220 Cym"/>
+      <Note Number="68" Name="TR808Cowbell"/>
+      <Note Number="69" Name="TR606 Cym 2"/>
+      <Note Number="70" Name="MG Zap 5"/>
+      <Note Number="71" Name="MetallicShot"/>
+      <Note Number="72" Name="HiBongo Open"/>
+      <Note Number="73" Name="LoBongo Open"/>
+      <Note Number="74" Name="HiConga Mute"/>
+      <Note Number="75" Name="HiConga Open"/>
+      <Note Number="76" Name="LoConga Open"/>
+      <Note Number="77" Name="Hi Timbale"/>
+      <Note Number="78" Name="Lo Timbale"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="TechnoShaker"/>
+      <Note Number="82" Name="808 Maracas"/>
+      <Note Number="83" Name="Scratch SD f"/>
+      <Note Number="84" Name="Scratch SD r"/>
+      <Note Number="85" Name="Metal Sweep"/>
+      <Note Number="86" Name="Boing"/>
+      <Note Number="87" Name="P-Zing"/>
+      <Note Number="88" Name="MG Sweep 5"/>
+      <Note Number="89" Name="Sitar Gliss"/>
+      <Note Number="90" Name="Smear Hit 1"/>
+      <Note Number="91" Name="Bull Scream"/>
+      <Note Number="92" Name="Woa!"/>
+      <Note Number="93" Name="Hey! 2"/>
+      <Note Number="94" Name="Cheap Clap"/>
+      <Note Number="95" Name="Hall Kick 2"/>
+      <Note Number="96" Name="TR909 Kick 9"/>
+      <Note Number="97" Name="TR808 Snr 5"/>
+      <Note Number="98" Name="Ragga TightSD"/>
+    </NoteNameList>
+    <NoteNameList Name="P:B10 Trip-Hop">
+      <Note Number="35" Name="TR909 Kick 10"/>
+      <Note Number="36" Name="TR909 Kick 7"/>
+      <Note Number="37" Name="Natural Rim"/>
+      <Note Number="38" Name="TR808 Snr 6"/>
+      <Note Number="39" Name="Real Clap 2"/>
+      <Note Number="40" Name="Headz Snare"/>
+      <Note Number="41" Name="TR606 Tom"/>
+      <Note Number="42" Name="TR606 CHH 1"/>
+      <Note Number="43" Name="TR606 Tom"/>
+      <Note Number="44" Name="TR606 PHH 1"/>
+      <Note Number="45" Name="TR606 Tom"/>
+      <Note Number="46" Name="TR606 OHH"/>
+      <Note Number="47" Name="Lo-Fi Kick 1"/>
+      <Note Number="48" Name="JungleKick 2"/>
+      <Note Number="49" Name="Side Stiker"/>
+      <Note Number="50" Name="Tiny Snare 1"/>
+      <Note Number="51" Name="Clap Snare 3"/>
+      <Note Number="52" Name="TekRok Snare"/>
+      <Note Number="53" Name="TR808 Tom"/>
+      <Note Number="54" Name="DR 550 CHH 2"/>
+      <Note Number="55" Name="TR808 Tom"/>
+      <Note Number="56" Name="Pedal Hat 1"/>
+      <Note Number="57" Name="TR808 Tom"/>
+      <Note Number="58" Name="DR550 OHH"/>
+      <Note Number="59" Name="TR808 Tom"/>
+      <Note Number="60" Name="TR808 Tom"/>
+      <Note Number="61" Name="NaturalCrash"/>
+      <Note Number="62" Name="TR808 Tom"/>
+      <Note Number="63" Name="TR606 Cym 1"/>
+      <Note Number="64" Name="NaturalCrash"/>
+      <Note Number="65" Name="MG Zap 10"/>
+      <Note Number="66" Name="Tambourine 4"/>
+      <Note Number="67" Name="DR220 Ride"/>
+      <Note Number="68" Name="CR78 Cowbell"/>
+      <Note Number="69" Name="Cup Cym"/>
+      <Note Number="70" Name="MG Zap"/>
+      <Note Number="71" Name="Kane"/>
+      <Note Number="72" Name="HiBongo Open"/>
+      <Note Number="73" Name="LoBongo Open"/>
+      <Note Number="74" Name="HiConga Mute"/>
+      <Note Number="75" Name="HiConga Open"/>
+      <Note Number="76" Name="LoConga Open"/>
+      <Note Number="77" Name="Hi Timbale"/>
+      <Note Number="78" Name="LoTimbale"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="TechnoShaker"/>
+      <Note Number="82" Name="808 Maracas"/>
+      <Note Number="83" Name="Emergency"/>
+      <Note Number="84" Name="Scratch SD r"/>
+      <Note Number="85" Name="MG Pink Nz"/>
+      <Note Number="86" Name="Vinyl Stop"/>
+      <Note Number="87" Name="LoFi MinorHt"/>
+      <Note Number="88" Name="Punch"/>
+      <Note Number="89" Name="Hey! 2"/>
+      <Note Number="90" Name="ElectricDunk"/>
+      <Note Number="91" Name="Bounce"/>
+      <Note Number="92" Name="MetallicShot"/>
+      <Note Number="93" Name="MG Sweep 5"/>
+      <Note Number="94" Name="Down Clap"/>
+      <Note Number="95" Name="TR808 Kick 2"/>
+      <Note Number="96" Name="HipHop Kick2"/>
+      <Note Number="97" Name="Fat Snare"/>
+      <Note Number="98" Name="Funk Snr 1"/>
+    </NoteNameList>
+    <NoteNameList Name="P:B11 R&amp;B">
+      <Note Number="35" Name="TR909 Kick 9"/>
+      <Note Number="36" Name="HipHop Kick1"/>
+      <Note Number="37" Name="Gate Rim"/>
+      <Note Number="38" Name="Deep Snare"/>
+      <Note Number="39" Name="Hip Clap"/>
+      <Note Number="40" Name="Funk Snr 1"/>
+      <Note Number="41" Name="DR 220 Tom"/>
+      <Note Number="42" Name="TR808 CHH 1"/>
+      <Note Number="43" Name="DR220 Tom"/>
+      <Note Number="44" Name="TR808 PHH 1"/>
+      <Note Number="45" Name="DR220 Tom"/>
+      <Note Number="46" Name="TR808 OHH 1"/>
+      <Note Number="47" Name="TR909 Kick 7"/>
+      <Note Number="48" Name="HipHop Kick2"/>
+      <Note Number="49" Name="Lo-Fi Rim"/>
+      <Note Number="50" Name="TR909 Snr 8"/>
+      <Note Number="51" Name="Big Clap"/>
+      <Note Number="52" Name="Solid Snare"/>
+      <Note Number="53" Name="Natural Tom"/>
+      <Note Number="54" Name="Closed Hat"/>
+      <Note Number="55" Name="Natural Tom"/>
+      <Note Number="56" Name="Bristol CHH"/>
+      <Note Number="57" Name="Natural Tom"/>
+      <Note Number="58" Name="Cym OHH"/>
+      <Note Number="59" Name="Natural Tom"/>
+      <Note Number="60" Name="Natural Tom"/>
+      <Note Number="61" Name="NaturalCrash"/>
+      <Note Number="62" Name="Natural Tom"/>
+      <Note Number="63" Name="TR909 Ride "/>
+      <Note Number="64" Name="NaturalCrash"/>
+      <Note Number="65" Name="Cup Cym"/>
+      <Note Number="66" Name="Tambourine 2"/>
+      <Note Number="67" Name="TR909 Crash"/>
+      <Note Number="68" Name="Cowbell"/>
+      <Note Number="69" Name="TR626 China"/>
+      <Note Number="70" Name="TR808Cowbell"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="TablaBaya 6"/>
+      <Note Number="73" Name="Tabla Baya 1"/>
+      <Note Number="74" Name="TR626MtConga"/>
+      <Note Number="75" Name="TR626OpConga"/>
+      <Note Number="76" Name="TR626LoConga"/>
+      <Note Number="77" Name="TR626 HiTimb"/>
+      <Note Number="78" Name="TR626 LoTimb"/>
+      <Note Number="79" Name="TR727 Agogo"/>
+      <Note Number="80" Name="TR727 Agogo"/>
+      <Note Number="81" Name="Cabasa Up"/>
+      <Note Number="82" Name="Maracas"/>
+      <Note Number="83" Name="TR727Quijada"/>
+      <Note Number="84" Name="TR727 Chime"/>
+      <Note Number="85" Name="Short Guiro"/>
+      <Note Number="86" Name="Long Guiro"/>
+      <Note Number="87" Name="MG Zap 11"/>
+      <Note Number="88" Name="Wah Gtr 2c"/>
+      <Note Number="89" Name="Wah Gtr 2d"/>
+      <Note Number="90" Name="Dolphin Hi 1"/>
+      <Note Number="91" Name="Dolphin Hi 2"/>
+      <Note Number="92" Name="Triangle 1"/>
+      <Note Number="93" Name="Triangle 1"/>
+      <Note Number="94" Name="Snap"/>
+      <Note Number="95" Name="TR808 Kick 2"/>
+      <Note Number="96" Name="Hip Kick"/>
+      <Note Number="97" Name="Picc. rol Sn"/>
+      <Note Number="98" Name="Picc Hrd Sn"/>
+    </NoteNameList>
+    <NoteNameList Name="P:B12 Electro 2">
+      <Note Number="35" Name="Toy Kick"/>
+      <Note Number="36" Name="TR909 Kick 7"/>
+      <Note Number="37" Name="Analog Rim"/>
+      <Note Number="38" Name="TR808 Snr 2"/>
+      <Note Number="39" Name="Finger Snap"/>
+      <Note Number="40" Name="ElectroSnr 2"/>
+      <Note Number="41" Name="MG Zap 6"/>
+      <Note Number="42" Name="DR 220 CHH"/>
+      <Note Number="43" Name="MG Zap 6"/>
+      <Note Number="44" Name="DR 220 CHH"/>
+      <Note Number="45" Name="MG Zap 6"/>
+      <Note Number="46" Name="DR220 OHH"/>
+      <Note Number="47" Name="TR808 Kick 2"/>
+      <Note Number="48" Name="TR808 Kick 8"/>
+      <Note Number="49" Name="Boing"/>
+      <Note Number="50" Name="Flange Snre"/>
+      <Note Number="51" Name="TR808 Clap"/>
+      <Note Number="52" Name="Synth Snare"/>
+      <Note Number="53" Name="Syn Tom"/>
+      <Note Number="54" Name="Metal Bang"/>
+      <Note Number="55" Name="Syn Tom"/>
+      <Note Number="56" Name="Metal Bang"/>
+      <Note Number="57" Name="Syn Tom"/>
+      <Note Number="58" Name="Metallic Shot"/>
+      <Note Number="59" Name="Syn Tom"/>
+      <Note Number="60" Name="Syn Tom"/>
+      <Note Number="61" Name="TR626 Crash"/>
+      <Note Number="62" Name="Syn Tom"/>
+      <Note Number="63" Name="TR626 Ride"/>
+      <Note Number="64" Name="TR 626 Crash"/>
+      <Note Number="65" Name="Asian Gong 7"/>
+      <Note Number="66" Name="CR78 Tamb"/>
+      <Note Number="67" Name="TR626 CupCym"/>
+      <Note Number="68" Name="CR78 Cowbell"/>
+      <Note Number="69" Name="TR606 Cyjm 1"/>
+      <Note Number="70" Name="MG Attack"/>
+      <Note Number="71" Name="P-Zing"/>
+      <Note Number="72" Name="MG Zap 1"/>
+      <Note Number="73" Name="MG Zap 2"/>
+      <Note Number="74" Name="MG Zap 3"/>
+      <Note Number="75" Name="MG Zap 4"/>
+      <Note Number="76" Name="MG Zap 5"/>
+      <Note Number="77" Name="MG Zap 6"/>
+      <Note Number="78" Name="MG Zap 7"/>
+      <Note Number="79" Name="MG Zap 8"/>
+      <Note Number="80" Name="MG Zap 9"/>
+      <Note Number="81" Name="MG Zap 10"/>
+      <Note Number="82" Name="MG Zap 13"/>
+      <Note Number="83" Name="MG Zap 14"/>
+      <Note Number="84" Name="MG Zap 15"/>
+      <Note Number="85" Name="Analog Bird"/>
+      <Note Number="86" Name="PC-2 Machine"/>
+      <Note Number="87" Name="Drill Hit"/>
+      <Note Number="88" Name="Dophin Lo"/>
+      <Note Number="89" Name="Toy Gun 3"/>
+      <Note Number="90" Name="Emergency"/>
+      <Note Number="91" Name="Turbine"/>
+      <Note Number="92" Name="Shout"/>
+      <Note Number="93" Name="Come on!"/>
+      <Note Number="94" Name="Udu Pot1 Acc"/>
+      <Note Number="95" Name="Plastic BD 4"/>
+      <Note Number="96" Name="TR909 Kick 3"/>
+      <Note Number="97" Name="Jungle Rim 3"/>
+      <Note Number="98" Name="TR606 Snr 1"/>
+    </NoteNameList>
+    <NoteNameList Name="P:B13 Monde">
+      <Note Number="35" Name="MG Attack"/>
+      <Note Number="36" Name="Amsterdam BD"/>
+      <Note Number="37" Name="TR808 RimLng"/>
+      <Note Number="38" Name="Toy Gun 3"/>
+      <Note Number="39" Name="TR909 SnClp1"/>
+      <Note Number="40" Name="TR808 Snr 3"/>
+      <Note Number="41" Name="MG Zap 7"/>
+      <Note Number="42" Name="TR808 CHH 2"/>
+      <Note Number="43" Name="MG Zap 7"/>
+      <Note Number="44" Name="P5 Noise"/>
+      <Note Number="45" Name="MG Zap 7"/>
+      <Note Number="46" Name="TR606 OHH"/>
+      <Note Number="47" Name="TR808 Kick 1"/>
+      <Note Number="48" Name="TR909 Kick 8"/>
+      <Note Number="49" Name="MG Zap 1"/>
+      <Note Number="50" Name="Flange Snr"/>
+      <Note Number="51" Name="Claptail"/>
+      <Note Number="52" Name="CR78 Snare"/>
+      <Note Number="53" Name="TR808 Tom"/>
+      <Note Number="54" Name="Tight CHH"/>
+      <Note Number="55" Name="TR909 Tom"/>
+      <Note Number="56" Name="DR220 OHH"/>
+      <Note Number="57" Name="TR808 Tom"/>
+      <Note Number="58" Name="TR909 OHH 3"/>
+      <Note Number="59" Name="TR909 Tom"/>
+      <Note Number="60" Name="TR808 Tom"/>
+      <Note Number="61" Name="TR909 Crash"/>
+      <Note Number="62" Name="TR909 Tom"/>
+      <Note Number="63" Name="TR909 Ride"/>
+      <Note Number="64" Name="DR909 Crash"/>
+      <Note Number="65" Name="MetallicShot"/>
+      <Note Number="66" Name="Tambourine 3"/>
+      <Note Number="67" Name="NaturalCrash"/>
+      <Note Number="68" Name="TR808Cowbell"/>
+      <Note Number="69" Name="TR606 Cym 1"/>
+      <Note Number="70" Name="Retro UFO"/>
+      <Note Number="71" Name="Natural Ride"/>
+      <Note Number="72" Name="PC-2 Machine"/>
+      <Note Number="73" Name="PC-2 Machine"/>
+      <Note Number="74" Name="Sine"/>
+      <Note Number="75" Name="Sine"/>
+      <Note Number="76" Name="Sine"/>
+      <Note Number="77" Name="Boing"/>
+      <Note Number="78" Name="MG Sweep 1"/>
+      <Note Number="79" Name="MG Sweep 2"/>
+      <Note Number="80" Name="MG Sweep 4"/>
+      <Note Number="81" Name="MG Sweep 5"/>
+      <Note Number="82" Name="Cabasa Up"/>
+      <Note Number="83" Name="Beam HiQ"/>
+      <Note Number="84" Name="MG Sweep 6"/>
+      <Note Number="85" Name="MG Blip"/>
+      <Note Number="86" Name="Chiki!"/>
+      <Note Number="87" Name="Air Gun"/>
+      <Note Number="88" Name="Frog Wave"/>
+      <Note Number="89" Name="Metal Bang"/>
+      <Note Number="90" Name="Bendir"/>
+      <Note Number="91" Name="MetallicShot"/>
+      <Note Number="92" Name="MetallicShot"/>
+      <Note Number="93" Name="JP8000 FBK"/>
+      <Note Number="94" Name="Funky Clap"/>
+      <Note Number="95" Name="TR909 Kick 6"/>
+      <Note Number="96" Name="TR505 Kick"/>
+      <Note Number="97" Name="Deep Tom"/>
+      <Note Number="98" Name="TR626 Snr 2"/>
+    </NoteNameList>
+    <NoteNameList Name="P:B14 Word Perc">
+      <Note Number="35" Name="Bendir"/>
+      <Note Number="36" Name="Wadaiko"/>
+      <Note Number="37" Name="Wadaiko Rim"/>
+      <Note Number="38" Name="Tsuzumi 2 mf"/>
+      <Note Number="39" Name="Ohkawa 2"/>
+      <Note Number="40" Name="Tsuzumi 2 Hi"/>
+      <Note Number="41" Name="Tsuzumi 2 p"/>
+      <Note Number="42" Name="Mokugyo 2"/>
+      <Note Number="43" Name="Tsuzumi 2 p"/>
+      <Note Number="44" Name="Mokugyo 1"/>
+      <Note Number="45" Name="Tsuzumi 2 p"/>
+      <Note Number="46" Name="Windo Bell"/>
+      <Note Number="47" Name="Afro Feet"/>
+      <Note Number="48" Name="Open Surdo"/>
+      <Note Number="49" Name="DR220 Rim"/>
+      <Note Number="50" Name="Afro Clap"/>
+      <Note Number="51" Name="Real Clap 1"/>
+      <Note Number="52" Name="OrchPrc Hit"/>
+      <Note Number="53" Name="Tabla"/>
+      <Note Number="54" Name="Chenchen"/>
+      <Note Number="55" Name="LoConga Open"/>
+      <Note Number="56" Name="Tambourine 1"/>
+      <Note Number="57" Name="Tabla"/>
+      <Note Number="58" Name="Tambourine 4"/>
+      <Note Number="59" Name="LoConga Open"/>
+      <Note Number="60" Name="Tabla"/>
+      <Note Number="61" Name="Asian Gong 3"/>
+      <Note Number="62" Name="LoConga Open"/>
+      <Note Number="63" Name="Asian Gong 6"/>
+      <Note Number="64" Name="Asian Gong 3"/>
+      <Note Number="65" Name="Asian Gong 2"/>
+      <Note Number="66" Name="Chenchen"/>
+      <Note Number="67" Name="Asian Gong 4"/>
+      <Note Number="68" Name="Kane"/>
+      <Note Number="69" Name="Asian Gong 5"/>
+      <Note Number="70" Name="Triangle 2"/>
+      <Note Number="71" Name="Asian Gong 7"/>
+      <Note Number="72" Name="TablaBaya 2"/>
+      <Note Number="73" Name="TablaBaya 1"/>
+      <Note Number="74" Name="TablaBaya 5"/>
+      <Note Number="75" Name="TablaBaya 4"/>
+      <Note Number="76" Name="TablaBaya 3"/>
+      <Note Number="77" Name="TablaBaya 7"/>
+      <Note Number="78" Name="TablaBaya 6"/>
+      <Note Number="79" Name="Udu Pot2 Mut"/>
+      <Note Number="80" Name="Udu Pot 2 Lng"/>
+      <Note Number="81" Name="Hyoshigi"/>
+      <Note Number="82" Name="TablaBaya 8"/>
+      <Note Number="83" Name="Udu Pot 1"/>
+      <Note Number="84" Name="Udu Pot 2"/>
+      <Note Number="85" Name="Udu Pot1 Lo"/>
+      <Note Number="86" Name="Udu Pot1 Hi"/>
+      <Note Number="87" Name="Udu Pot1 Slp"/>
+      <Note Number="88" Name="Udu Pot1 Acc"/>
+      <Note Number="89" Name="Ho"/>
+      <Note Number="90" Name="Yoh"/>
+      <Note Number="91" Name="¡Yooh"/>
+      <Note Number="92" Name="Hey! 2"/>
+      <Note Number="93" Name="Sitar Gliss"/>
+      <Note Number="94" Name="Funky Clap"/>
+      <Note Number="95" Name="Jungle Kick 2"/>
+      <Note Number="96" Name="Hip Hop Kick2"/>
+      <Note Number="97" Name="East Snare"/>
+      <Note Number="98" Name="PurePhat Snr"/>
+    </NoteNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

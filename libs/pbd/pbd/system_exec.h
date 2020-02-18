@@ -1,22 +1,21 @@
 /*
-    Copyright (C) 2010 Paul Davis
-    Copyright (C) 2010-2014 Robin Gareus <robin@gareus.org>
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2010-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2014 Colin Fletcher <colin.m.fletcher@googlemail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 #ifndef _libpbd_system_exec_h_
 #define _libpbd_system_exec_h_
 
@@ -110,15 +109,24 @@ class LIBPBD_API SystemExec
 		 * creates an argv array from the given command string, splitting into
 		 * parameters at spaces.
 		 * "\ " is non-splitting space, "\\" (and "\" at end of command) as "\",
-		 * for "%<char>", <char> is looked up in subs and the corresponding string
+		 * for "%<char>", \<char\> is looked up in subs and the corresponding string
 		 * substituted. "%%" (and "%" at end of command)
-		 * returns an argv array suitable for creating a new SystemExec with
+		 *
+		 * @returns an argv array suitable for creating a new SystemExec with
 		 */
 		SystemExec (std::string command, const std::map<char, std::string> subs);
 
 		virtual ~SystemExec ();
 
+		static char* format_key_value_parameter (std::string, std::string);
+
 		std::string to_s() const;
+
+		enum StdErrMode {
+			ShareWithParent = 0,
+			IgnoreAndClose  = 1,
+			MergeWithStdin  = 2
+		};
 
 		/** fork and execute the given program
 		 *
@@ -128,10 +136,11 @@ class LIBPBD_API SystemExec
 		 * '1': ignore STDERR of child-program
 		 * '2': merge STDERR into STDOUT and send it with the
 		 *      ReadStdout signal.
+		 * @param _vfork_exec_wrapper path to vfork-wrapper binary
 		 * @return If the process is already running or was launched successfully
 		 * the function returns zero (0). A negative number indicates an error.
 		 */
-		int start (int stderr_mode, const char *_vfork_exec_wrapper);
+		int start (StdErrMode stderr_mode, const char *_vfork_exec_wrapper);
 		/** kill running child-process
 		 *
 		 * if a child process exists trt to shut it down by closing its STDIN.
@@ -151,7 +160,7 @@ class LIBPBD_API SystemExec
 		 *
 		 * This function is only useful if you want to control application
 		 * termination yourself (eg timeouts or progress-dialog).
-		 * @param option flags - see waitpid manual
+		 * @param options flags - see waitpid manual
 		 * @return status info from waitpid call (not waitpid's return value)
 		 * or -1 if the child-program is not running.
 		 */
@@ -164,12 +173,27 @@ class LIBPBD_API SystemExec
 		 */
 		void close_stdin ();
 		/** write into child-program's STDIN
-		 * @param d data to write
+		 * @param d text to write
 		 * @param len length of data to write, if it is 0 (zero), d.length() is
 		 * used to determine the number of bytes to transmit.
 		 * @return number of bytes written.
 		 */
-		int write_to_stdin (std::string d, size_t len=0);
+		size_t write_to_stdin (std::string const& d, size_t len=0);
+
+		/** write into child-program's STDIN
+		 * @param d text to write
+		 * @param len length of data to write, if it is 0 (zero), d.length() is
+		 * used to determine the number of bytes to transmit.
+		 * @return number of bytes written.
+		 */
+		size_t write_to_stdin (const char* d, size_t len=0);
+
+		/** write into child-program's STDIN
+		 * @param data data to write
+		 * @param bytes length of data to write
+		 * @return number of bytes written.
+		 */
+		size_t write_to_stdin (const void* data, size_t bytes=0);
 
 		/** The ReadStdout signal is emitted when the application writes to STDOUT.
 		 * it passes the written data and its length in bytes as arguments to the bound
@@ -222,6 +246,9 @@ class LIBPBD_API SystemExec
 		void make_wargs(char **);
 #else
 		pid_t pid;
+# ifndef NO_VFORK
+		char **argx;
+# endif
 #endif
 		void init ();
 		pthread_mutex_t write_lock;

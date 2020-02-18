@@ -1,28 +1,32 @@
 /*
- * Copyright (C) 2016 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2016-2018 Robin Gareus <robin@gareus.org>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <cstring>
 #include <vamp-hostsdk/PluginLoader.h>
 
+#include "pbd/basename.h"
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 
+#include "ardour/analyser.h"
+#include "ardour/audiofilesource.h"
+#include "ardour/audiosource.h"
 #include "ardour/lua_api.h"
 #include "ardour/luaproc.h"
 #include "ardour/luascripting.h"
@@ -30,6 +34,8 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/readable.h"
+#include "ardour/region_factory.h"
+#include "ardour/source_factory.h"
 
 #include "LuaBridge/LuaBridge.h"
 
@@ -681,9 +687,9 @@ LuaTableRef::set (lua_State* L)
 					}
 					// invalid userdata -- fall through
 				}
-				/* fall through */
+				/* fallthrough */
 			case LUA_TFUNCTION: // no support -- we could... string.format("%q", string.dump(value, true))
-				/* fall through */
+				/* fallthrough */
 			case LUA_TTABLE: // no nested tables, sorry.
 			case LUA_TNIL:
 			default:
@@ -830,7 +836,9 @@ LuaAPI::Vamp::analyze (boost::shared_ptr<ARDOUR::Readable> r, uint32_t channel, 
 		features = _plugin->process (bufs, ::Vamp::RealTime::fromSeconds ((double) pos / _sample_rate));
 
 		if (cb.type () == LUA_TFUNCTION) {
-			cb (&features, pos);
+			if (cb (&features, pos)) {
+				break;
+			}
 		}
 
 		pos += std::min (_stepsize, to_read);
@@ -872,4 +880,271 @@ LuaAPI::note_list (boost::shared_ptr<MidiModel> mm)
 		note_ptr_list.push_back (*i);
 	}
 	return note_ptr_list;
+}
+
+/* ****************************************************************************/
+
+const samplecnt_t LuaAPI::Rubberband::_bufsize = 256;
+
+LuaAPI::Rubberband::Rubberband (boost::shared_ptr<AudioRegion> r, bool percussive)
+	: _region (r)
+	, _rbs (r->session().sample_rate(), r->n_channels(),
+	        percussive ? RubberBand::RubberBandStretcher::DefaultOptions : RubberBand::RubberBandStretcher::PercussiveOptions,
+	        r->stretch (), r->shift ())
+	, _stretch_ratio (r->stretch ())
+	, _pitch_ratio (r->shift ())
+	, _cb (0)
+{
+	_n_channels  = r->n_channels ();
+	_read_len    = r->length () / (double)r->stretch ();
+	_read_start  = r->ancestral_start () + samplecnt_t (r->start () / (double)r->stretch ());
+	_read_offset = _read_start - r->start () + r->position ();
+}
+
+LuaAPI::Rubberband::~Rubberband ()
+{
+}
+
+bool
+LuaAPI::Rubberband::set_strech_and_pitch (double stretch_ratio, double pitch_ratio)
+{
+	if (stretch_ratio <= 0 || pitch_ratio <= 0) {
+		return false;
+	}
+	_stretch_ratio = stretch_ratio * _region->stretch ();
+	_pitch_ratio   = pitch_ratio   * _region->shift ();
+	return true;
+}
+
+bool
+LuaAPI::Rubberband::set_mapping (luabridge::LuaRef tbl)
+{
+	if (!tbl.isTable ()) {
+		return false;
+	}
+
+	_mapping.clear ();
+
+	for (luabridge::Iterator i (tbl); !i.isNil (); ++i) {
+		if (!i.key ().isNumber () || !i.value ().isNumber ()) {
+			continue;
+		}
+		size_t ss = i.key ().cast<double> ();
+		size_t ds = i.value ().cast<double> ();
+		printf ("ADD %ld %ld\n", ss, ds);
+		_mapping[ss] = ds;
+	}
+	return !_mapping.empty ();
+}
+
+samplecnt_t
+LuaAPI::Rubberband::read (Sample* buf, samplepos_t pos, samplecnt_t cnt, int channel) const
+{
+	return _region->master_read_at (buf, NULL, NULL, _read_offset + pos, cnt, channel);
+}
+
+static void null_deleter (LuaAPI::Rubberband*) {}
+
+boost::shared_ptr<Readable>
+LuaAPI::Rubberband::readable ()
+{
+	if (!_self) {
+		_self = boost::shared_ptr<Rubberband> (this, &null_deleter);
+	}
+	return boost::dynamic_pointer_cast<Readable> (_self);
+}
+
+bool
+LuaAPI::Rubberband::read_region (bool study)
+{
+	samplepos_t pos = 0;
+
+	float** buffers = new float*[_n_channels];
+	for (uint32_t c = 0; c < _n_channels; ++c) {
+		buffers[c] = new float[_bufsize];
+	}
+
+	while (pos < _read_len) {
+		samplecnt_t n_read = 0;
+		for (uint32_t c = 0; c < _n_channels; ++c) {
+			samplepos_t to_read = std::min (_bufsize, _read_len - pos);
+			n_read = read (buffers[c], pos, to_read, c);
+			if (n_read != to_read) {
+				pos = 0;
+				goto errout;
+			}
+		}
+
+		pos += n_read;
+
+		assert (!_cb || _cb->type () == LUA_TFUNCTION);
+		if ((*_cb) (NULL, pos * .5 + (study ? 0 : _read_len / 2))) {
+			pos = 0;
+			goto errout;
+		}
+
+		if (study) {
+			_rbs.study (buffers, n_read, pos == _read_len);
+			continue;
+		}
+
+		assert (_asrc.size () == _n_channels);
+		_rbs.process (buffers, n_read, pos == _read_len);
+
+		if (!retrieve (buffers)) {
+			pos = 0;
+			goto errout;
+		}
+	}
+
+	if (!retrieve (buffers)) {
+		pos = 0;
+	}
+
+errout:
+	if (buffers) {
+		for (uint32_t c = 0; c < _n_channels; ++c) {
+			delete[] buffers[c];
+		}
+		delete[] buffers;
+	}
+	return pos == _read_len;
+}
+
+bool
+LuaAPI::Rubberband::retrieve (float** buffers)
+{
+	samplecnt_t avail = 0;
+	while ((avail = _rbs.available ()) > 0) {
+		samplepos_t to_read = std::min (_bufsize, avail);
+		_rbs.retrieve (buffers, to_read);
+
+		for (uint32_t c = 0; c < _asrc.size (); ++c) {
+			if (_asrc[c]->write (buffers[c], to_read) != to_read) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+boost::shared_ptr<AudioRegion>
+LuaAPI::Rubberband::process (luabridge::LuaRef cb)
+{
+	boost::shared_ptr<AudioRegion> rv;
+	if (cb.type () == LUA_TFUNCTION) {
+		_cb = new luabridge::LuaRef (cb);
+	}
+
+	_rbs.reset ();
+	_rbs.setDebugLevel (1);
+	_rbs.setTimeRatio (_stretch_ratio);
+	_rbs.setPitchScale (_pitch_ratio);
+	_rbs.setExpectedInputDuration (_read_len);
+
+	/* compare to Filter::make_new_sources */
+	vector<string> names    = _region->master_source_names ();
+	Session&    session     = _region->session ();
+	samplecnt_t sample_rate = session.sample_rate ();
+
+	for (uint32_t c = 0; c < _n_channels; ++c) {
+		string       name = PBD::basename_nosuffix (names[c]) + "(rb)";
+		const string path = session.new_audio_source_path (name, _n_channels, c, false, false);
+		if (path.empty ()) {
+			cleanup (true);
+			return rv;
+		}
+		try {
+			_asrc.push_back (boost::dynamic_pointer_cast<AudioSource> (
+						SourceFactory::createWritable (
+							DataType::AUDIO, session,
+							path, false, sample_rate)));
+		} catch (failed_constructor& err) {
+			cleanup (true);
+			return rv;
+		}
+	}
+
+	/* study */
+	if (!read_region (true)) {
+		cleanup (true);
+		return rv;
+	}
+
+	if (!_mapping.empty ()) {
+		_rbs.setKeyFrameMap (_mapping);
+	}
+
+	/* process */
+	if (!read_region (false)) {
+		cleanup (true);
+		return rv;
+	}
+
+	rv = finalize ();
+
+	cleanup (false);
+	return rv;
+}
+
+boost::shared_ptr<AudioRegion>
+LuaAPI::Rubberband::finalize ()
+{
+	time_t     xnow = time (NULL);
+	struct tm* now  = localtime (&xnow);
+
+	/* this is the same as RBEffect::finish, Filter::finish */
+	SourceList sl;
+	for (std::vector<boost::shared_ptr<AudioSource> >::iterator i = _asrc.begin (); i != _asrc.end (); ++i) {
+		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (*i);
+		assert (afs);
+		afs->done_with_peakfile_writes ();
+		afs->update_header (_region->position (), *now, xnow);
+		afs->mark_immutable ();
+		Analyser::queue_source_for_analysis (*i, false);
+		sl.push_back (*i);
+	}
+
+	/* create a new region */
+	std::string region_name = RegionFactory::new_region_name (_region->name ());
+
+	PropertyList plist;
+	plist.add (Properties::start, 0);
+	plist.add (Properties::length, _region->length ());
+	plist.add (Properties::name, region_name);
+	plist.add (Properties::whole_file, true);
+	plist.add (Properties::position, _region->position ());
+
+	boost::shared_ptr<Region>      r  = RegionFactory::create (sl, plist);
+	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
+
+	ar->set_scale_amplitude (_region->scale_amplitude ());
+	ar->set_fade_in_active (_region->fade_in_active ());
+	ar->set_fade_in (_region->fade_in ());
+	ar->set_fade_out_active (_region->fade_out_active ());
+	ar->set_fade_out (_region->fade_out ());
+	*(ar->envelope ()) = *(_region->envelope ());
+
+	ar->set_ancestral_data (_read_start, _read_len, _stretch_ratio, _pitch_ratio);
+	ar->set_master_sources (_region->master_sources ());
+	ar->set_length (ar->length () * _stretch_ratio, 0); // XXX
+	if (_stretch_ratio != 1.0) {
+		// TODO: apply mapping
+		ar->envelope ()->x_scale (_stretch_ratio);
+	}
+
+	return ar;
+}
+
+void
+LuaAPI::Rubberband::cleanup (bool abort)
+{
+	if (abort) {
+		for (std::vector<boost::shared_ptr<AudioSource> >::iterator i = _asrc.begin (); i != _asrc.end (); ++i) {
+			(*i)->mark_for_remove ();
+		}
+	}
+	_asrc.clear ();
+	delete (_cb);
+	_cb = 0;
 }

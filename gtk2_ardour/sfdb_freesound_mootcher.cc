@@ -127,15 +127,15 @@ std::string Mootcher::sortMethodString(enum sortMethod sort)
 // sort the results in the requested way.
 
 	switch (sort) {
-		case sort_duration_desc:	return "duration_desc";
-		case sort_duration_asc: 	return "duration_asc";
-		case sort_created_desc:		return "created_desc";
-		case sort_created_asc:		return "created_asc";
-		case sort_downloads_desc:	return "downloads_desc";
-		case sort_downloads_asc:	return "downloads_asc";
-		case sort_rating_desc:		return "rating_desc";
-		case sort_rating_asc:		return "rating_asc";
-		default:			return "";
+		case sort_duration_desc:  return "duration_desc";
+		case sort_duration_asc:   return "duration_asc";
+		case sort_created_desc:   return "created_desc";
+		case sort_created_asc:    return "created_asc";
+		case sort_downloads_desc: return "downloads_desc";
+		case sort_downloads_asc:  return "downloads_asc";
+		case sort_rating_desc:    return "rating_desc";
+		case sort_rating_asc:     return "rating_asc";
+		default:                  return "";
 	}
 }
 

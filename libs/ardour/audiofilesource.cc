@@ -1,21 +1,24 @@
 /*
-    Copyright (C) 2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2007-2017 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifdef WAF_BUILD
 #include "libardour-config.h"
@@ -49,6 +52,7 @@
 
 #include "ardour/audiofilesource.h"
 #include "ardour/debug.h"
+#include "ardour/mp3filesource.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/session.h"
 #include "ardour/filename_extensions.h"
@@ -201,6 +205,10 @@ AudioFileSource::get_soundfile_info (const string& path, SoundFileInfo& _info, s
 	}
 #endif // HAVE_COREAUDIO
 
+	if (Mp3FileSource::get_soundfile_info (path, _info, error_msg) == 0) {
+		return true;
+	}
+
 	return false;
 }
 
@@ -323,6 +331,9 @@ AudioFileSource::safe_audio_file_extension(const string& file)
 		".vwe", ".VWE",
 		".w64", ".W64",
 		".wav", ".WAV",
+		/* minimp3 can read mp2, mp3 */
+		".mp2", ".MP2",
+		".mp3", ".MP3",
 #ifdef HAVE_COREAUDIO
 		".aac", ".AAC",
 		".adts", ".ADTS",
@@ -331,11 +342,9 @@ AudioFileSource::safe_audio_file_extension(const string& file)
 		".mpa", ".MPA",
 		".mpeg", ".MPEG",
 		".mp1", ".MP1",
-		".mp2", ".MP2",
-		".mp3", ".MP3",
 		".mp4", ".MP4",
 		".m4a", ".M4A",
-		".sd2", ".SD2", 	// libsndfile supports sd2 also, but the resource fork is required to open.
+		".sd2", ".SD2", // libsndfile supports sd2 also, but the resource fork is required to open.
 #endif // HAVE_COREAUDIO
 	};
 

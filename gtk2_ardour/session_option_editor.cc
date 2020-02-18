@@ -1,25 +1,29 @@
 /*
-    Copyright (C) 2000-2010 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2012-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2012 Ben Loftis <ben@harrisonconsoles.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include "ardour/session.h"
 #include "ardour/transport_master_manager.h"
 
+#include "actions.h"
 #include "gui_thread.h"
 #include "session_option_editor.h"
 #include "search_path_option.h"
@@ -43,7 +47,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	ComboOption<TimecodeFormat>* smf = new ComboOption<TimecodeFormat> (
 		"timecode-format",
-		_("Timecode samples-per-second"),
+		_("Timecode frames-per-second"),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::get_timecode_format),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_timecode_format)
 		);
@@ -273,11 +277,10 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 				sigc::mem_fun (*_session_config, &SessionConfiguration::set_auto_input)
 				));
 
-	add_option (_("Monitoring"), new BoolOption (
-				"have-monitor-section",
+	add_option (_("Monitoring"), new CheckOption (
+				"unused",
 				_("Use monitor section in this session"),
-				sigc::mem_fun (*this, &SessionOptionEditor::get_use_monitor_section),
-				sigc::mem_fun (*this, &SessionOptionEditor::set_use_monitor_section)
+				ActionManager::get_action(X_("Monitor"), "UseMonitorSection")
 				));
 
 	add_option (_("Monitoring"), new OptionEditorBlank ());
@@ -408,13 +411,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	set_current_page (_("Timecode"));
 }
 
-SessionOptionEditor::~SessionOptionEditor ()
-{
-	delete _vpu;
-	delete _sf;
-	delete _take_name;
-}
-
 void
 SessionOptionEditor::parameter_changed (std::string const & p)
 {
@@ -453,34 +449,6 @@ SessionOptionEditor::parameter_changed (std::string const & p)
 			parameter_changed ("native-file-data-format");
 		}
 	}
-}
-
-/* the presence of absence of a monitor section is not really a regular session
- * property so we provide these two functions to act as setter/getter slots
- */
-
-bool
-SessionOptionEditor::set_use_monitor_section (bool yn)
-{
-	bool had_monitor_section = _session->monitor_out() != 0;
-
-	if (yn) {
-		_session->add_monitor_section ();
-	} else {
-		_session->remove_monitor_section ();
-	}
-
-	/* store this choice for any new sessions */
-
-	Config->set_use_monitor_bus (yn);
-
-	return had_monitor_section != (_session->monitor_out() != 0);
-}
-
-bool
-SessionOptionEditor::get_use_monitor_section ()
-{
-	return _session->monitor_out() != 0;
 }
 
 void

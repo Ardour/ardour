@@ -1,21 +1,28 @@
 /*
-    Copyright (C) 2000 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2016 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2013 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2014-2018 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 André Nusser <andre.nusser@googlemail.com>
+ * Copyright (C) 2016-2017 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2016-2017 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_playlist_h__
 #define __ardour_playlist_h__
@@ -38,7 +45,7 @@
 #include "pbd/sequence_property.h"
 #include "pbd/stacktrace.h"
 
-#include "evoral/Range.hpp"
+#include "evoral/Range.h"
 
 #include "ardour/ardour.h"
 #include "ardour/region.h"
@@ -53,21 +60,21 @@ class Crossfade;
 
 namespace Properties {
 	/* fake the type, since regions are handled by SequenceProperty which doesn't
-	   care about such things.
-	*/
+	 * care about such things.
+	 */
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> regions;
 }
 
 class LIBARDOUR_API RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_ptr<Region> > >
 {
-  public:
+public:
 	RegionListProperty (Playlist&);
 
 	RegionListProperty* clone () const;
 	void get_content_as_xml (boost::shared_ptr<Region>, XMLNode &) const;
 	boost::shared_ptr<Region> get_content_from_xml (XMLNode const &) const;
 
-  private:
+private:
 	RegionListProperty* create () const;
 
 	/* copy construction only by ourselves */
@@ -179,7 +186,12 @@ public:
 	boost::shared_ptr<RegionList> region_list();
 
 	boost::shared_ptr<RegionList> regions_at (samplepos_t sample);
-	uint32_t                   count_regions_at (samplepos_t) const;
+	uint32_t                      count_regions_at (samplepos_t) const;
+
+	/** @param start Range start.
+	 *  @param end Range end.
+	 *  @return regions which have some part within this range.
+	 */
 	boost::shared_ptr<RegionList> regions_touched (samplepos_t start, samplepos_t end);
 	boost::shared_ptr<RegionList> regions_with_start_within (Evoral::Range<samplepos_t>);
 	boost::shared_ptr<RegionList> regions_with_end_within (Evoral::Range<samplepos_t>);
@@ -188,7 +200,7 @@ public:
 	boost::shared_ptr<Region>  top_region_at (samplepos_t sample);
 	boost::shared_ptr<Region>  top_unmuted_region_at (samplepos_t sample);
 	boost::shared_ptr<Region>  find_next_region (samplepos_t sample, RegionPoint point, int dir);
-	samplepos_t                 find_next_region_boundary (samplepos_t sample, int dir);
+	samplepos_t                find_next_region_boundary (samplepos_t sample, int dir);
 	bool                       region_is_shuffle_constrained (boost::shared_ptr<Region>);
 	bool                       has_region_at (samplepos_t const) const;
 
@@ -254,36 +266,36 @@ public:
 
 	void set_capture_insertion_in_progress (bool yn);
 
-  protected:
+protected:
 	friend class Session;
 
-  protected:
-    class RegionReadLock : public Glib::Threads::RWLock::ReaderLock {
-    public:
-        RegionReadLock (Playlist *pl) : Glib::Threads::RWLock::ReaderLock (pl->region_lock) {}
-        ~RegionReadLock() {}
-    };
+protected:
+	class RegionReadLock : public Glib::Threads::RWLock::ReaderLock {
+		public:
+			RegionReadLock (Playlist *pl) : Glib::Threads::RWLock::ReaderLock (pl->region_lock) {}
+			~RegionReadLock() {}
+	};
 
-    class RegionWriteLock : public Glib::Threads::RWLock::WriterLock {
-    public:
-	    RegionWriteLock (Playlist *pl, bool do_block_notify = true)
-                    : Glib::Threads::RWLock::WriterLock (pl->region_lock)
-                    , playlist (pl)
-                    , block_notify (do_block_notify) {
-                    if (block_notify) {
-                            playlist->delay_notifications();
-                    }
-            }
+	class RegionWriteLock : public Glib::Threads::RWLock::WriterLock {
+		public:
+			RegionWriteLock (Playlist *pl, bool do_block_notify = true)
+				: Glib::Threads::RWLock::WriterLock (pl->region_lock)
+					, playlist (pl)
+					 , block_notify (do_block_notify) {
+						 if (block_notify) {
+							 playlist->delay_notifications();
+						 }
+					 }
 
-        ~RegionWriteLock() {
-                Glib::Threads::RWLock::WriterLock::release ();
-                if (block_notify) {
-                        playlist->release_notifications ();
-                }
-        }
-        Playlist *playlist;
-        bool block_notify;
-    };
+			~RegionWriteLock() {
+				Glib::Threads::RWLock::WriterLock::release ();
+				if (block_notify) {
+					playlist->release_notifications ();
+				}
+			}
+			Playlist *playlist;
+			bool block_notify;
+	};
 
 	RegionListProperty   regions;  /* the current list of regions in the playlist */
 	std::set<boost::shared_ptr<Region> > all_regions; /* all regions ever added to this playlist */
@@ -410,21 +422,20 @@ public:
 	*/
 	virtual void pre_uncombine (std::vector<boost::shared_ptr<Region> >&, boost::shared_ptr<Region>) {}
 
-  private:
+private:
 	friend class RegionReadLock;
 	friend class RegionWriteLock;
 	mutable Glib::Threads::RWLock region_lock;
 
-  private:
+private:
 	void setup_layering_indices (RegionList const &);
 	void coalesce_and_check_crossfades (std::list<Evoral::Range<samplepos_t> >);
 	boost::shared_ptr<RegionList> find_regions_at (samplepos_t);
 
 	samplepos_t _end_space;  //this is used when we are pasting a range with extra space at the end
+	bool _playlist_shift_active;
 };
 
 } /* namespace ARDOUR */
 
-#endif	/* __ardour_playlist_h__ */
-
-
+#endif /* __ardour_playlist_h__ */

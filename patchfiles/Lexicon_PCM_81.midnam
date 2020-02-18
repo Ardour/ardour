@@ -1,0 +1,1075 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Lexicon</Manufacturer>
+    <Model>PCM-81</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="P0 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Prime Blue" ProgramChange="0"/>
+          <Patch Number="1" Name="EkoChorus" ProgramChange="1"/>
+          <Patch Number="2" Name="Wet Chorus" ProgramChange="2"/>
+          <Patch Number="3" Name="Wet Chorus 2" ProgramChange="3"/>
+          <Patch Number="4" Name="Wet Chorus 3" ProgramChange="4"/>
+          <Patch Number="5" Name="Chorus Plate" ProgramChange="5"/>
+          <Patch Number="6" Name="Chorus Room" ProgramChange="6"/>
+          <Patch Number="7" Name="ChorusToRvb" ProgramChange="7"/>
+          <Patch Number="8" Name="Funkus Room" ProgramChange="8"/>
+          <Patch Number="9" Name="Detune&amp;Room" ProgramChange="9"/>
+          <Patch Number="10" Name="Detune&amp;Dbl" ProgramChange="10"/>
+          <Patch Number="11" Name="Tight Space" ProgramChange="11"/>
+          <Patch Number="12" Name="Flange&gt;Rvb" ProgramChange="12"/>
+          <Patch Number="13" Name="Flange+Rvb" ProgramChange="13"/>
+          <Patch Number="14" Name="X Eko Flange" ProgramChange="14"/>
+          <Patch Number="15" Name="Glide &gt; Verb" ProgramChange="15"/>
+          <Patch Number="16" Name="Glide X-Ekos" ProgramChange="16"/>
+          <Patch Number="17" Name="Detuned Ekos" ProgramChange="17"/>
+          <Patch Number="18" Name="StereoEqEkos" ProgramChange="18"/>
+          <Patch Number="19" Name="EDJUpMyEchos" ProgramChange="19"/>
+          <Patch Number="20" Name="FSw2Elevate" ProgramChange="20"/>
+          <Patch Number="21" Name="Chorus&amp;Pan" ProgramChange="21"/>
+          <Patch Number="22" Name="Chorus&amp;Amb" ProgramChange="22"/>
+          <Patch Number="23" Name="6 Vox Chorus" ProgramChange="23"/>
+          <Patch Number="24" Name="Split C&amp;E" ProgramChange="24"/>
+          <Patch Number="25" Name="Env:PanKorus" ProgramChange="25"/>
+          <Patch Number="26" Name="6 Vox Flange" ProgramChange="26"/>
+          <Patch Number="27" Name="Mod Max" ProgramChange="27"/>
+          <Patch Number="28" Name="PreciseGlide" ProgramChange="28"/>
+          <Patch Number="29" Name="Round 147" ProgramChange="29"/>
+          <Patch Number="30" Name="FSw2 Rotary" ProgramChange="30"/>
+          <Patch Number="31" Name="RotorCabinet" ProgramChange="31"/>
+          <Patch Number="32" Name="MIDI Rotary" ProgramChange="32"/>
+          <Patch Number="33" Name="Tiled Rotary" ProgramChange="33"/>
+          <Patch Number="34" Name="RotoWood" ProgramChange="34"/>
+          <Patch Number="35" Name="RandomImages" ProgramChange="35"/>
+          <Patch Number="36" Name="Under Water" ProgramChange="36"/>
+          <Patch Number="37" Name="Thunder FX" ProgramChange="37"/>
+          <Patch Number="38" Name="Thunder FX 2" ProgramChange="38"/>
+          <Patch Number="39" Name="ChaosImpulse" ProgramChange="39"/>
+          <Patch Number="40" Name="DemonDescent" ProgramChange="40"/>
+          <Patch Number="41" Name="RoughtIdle FX" ProgramChange="41"/>
+          <Patch Number="42" Name="RoxStutter" ProgramChange="42"/>
+          <Patch Number="43" Name="Split Pitch?" ProgramChange="43"/>
+          <Patch Number="44" Name="TryTalk'n" ProgramChange="44"/>
+          <Patch Number="45" Name="AutoInfinite" ProgramChange="45"/>
+          <Patch Number="46" Name="Remove Cntr" ProgramChange="46"/>
+          <Patch Number="47" Name="V-Eliminate" ProgramChange="47"/>
+          <Patch Number="48" Name="NoCenter Eko" ProgramChange="48"/>
+          <Patch Number="49" Name="Rvb On L-R" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="P1 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="1"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="[n]Ekos/Beat" ProgramChange="0"/>
+          <Patch Number="1" Name="StereoTapDly" ProgramChange="1"/>
+          <Patch Number="2" Name="OffBeat Eko" ProgramChange="2"/>
+          <Patch Number="3" Name="OffBeatEko2" ProgramChange="3"/>
+          <Patch Number="4" Name="Dotted 8ths" ProgramChange="4"/>
+          <Patch Number="5" Name="Shuffle Ekos" ProgramChange="5"/>
+          <Patch Number="6" Name="Shuffles" ProgramChange="6"/>
+          <Patch Number="7" Name="Sliding Eko" ProgramChange="7"/>
+          <Patch Number="8" Name="Six Trips" ProgramChange="8"/>
+          <Patch Number="9" Name="6 StrokeRoll" ProgramChange="9"/>
+          <Patch Number="10" Name="TapGated Rvb" ProgramChange="10"/>
+          <Patch Number="11" Name="TapEkoGate 1" ProgramChange="11"/>
+          <Patch Number="12" Name="TapEkoGate 2" ProgramChange="12"/>
+          <Patch Number="13" Name="TapEkoClear" ProgramChange="13"/>
+          <Patch Number="14" Name="Tap Chamber1" ProgramChange="14"/>
+          <Patch Number="15" Name="Tap Chamber2" ProgramChange="15"/>
+          <Patch Number="16" Name="LatchedEkos" ProgramChange="16"/>
+          <Patch Number="17" Name="X-PanEQ BPM" ProgramChange="17"/>
+          <Patch Number="18" Name="Pan&gt;Eko BPM" ProgramChange="18"/>
+          <Patch Number="19" Name="Tempo Verb" ProgramChange="19"/>
+          <Patch Number="20" Name="Tempo Gate" ProgramChange="20"/>
+          <Patch Number="21" Name="Tape Echo" ProgramChange="21"/>
+          <Patch Number="22" Name="NonLinear 1" ProgramChange="22"/>
+          <Patch Number="23" Name="NonLinear 2" ProgramChange="23"/>
+          <Patch Number="24" Name="NonLinear 3" ProgramChange="24"/>
+          <Patch Number="25" Name="Six Across" ProgramChange="25"/>
+          <Patch Number="26" Name="BankEko Rvb" ProgramChange="26"/>
+          <Patch Number="27" Name="BandEkoSweep" ProgramChange="27"/>
+          <Patch Number="28" Name="LFO EQ Echo" ProgramChange="28"/>
+          <Patch Number="29" Name="ChaseEcho" ProgramChange="29"/>
+          <Patch Number="30" Name="Panned Dlys" ProgramChange="30"/>
+          <Patch Number="31" Name="X-Pan Delays" ProgramChange="31"/>
+          <Patch Number="32" Name="Dly&gt;EQ&gt;Pans" ProgramChange="32"/>
+          <Patch Number="33" Name="Ekoz 4 Drums" ProgramChange="33"/>
+          <Patch Number="34" Name="Haas PanKnob" ProgramChange="34"/>
+          <Patch Number="35" Name="Dial a Delay" ProgramChange="35"/>
+          <Patch Number="36" Name="Precision Dly" ProgramChange="36"/>
+          <Patch Number="37" Name="PhoneOrRoom?" ProgramChange="37"/>
+          <Patch Number="38" Name="CheapTV Room" ProgramChange="38"/>
+          <Patch Number="39" Name="Empty Stage" ProgramChange="39"/>
+          <Patch Number="40" Name="Tomb Room" ProgramChange="40"/>
+          <Patch Number="41" Name="Comb Room" ProgramChange="41"/>
+          <Patch Number="42" Name="Zoom Over" ProgramChange="42"/>
+          <Patch Number="43" Name="OneShotCarBy" ProgramChange="43"/>
+          <Patch Number="44" Name="AmbientCarBy" ProgramChange="44"/>
+          <Patch Number="45" Name="HeadOn CarBy" ProgramChange="45"/>
+          <Patch Number="46" Name="2WayStreet" ProgramChange="46"/>
+          <Patch Number="47" Name="IntoTunnel" ProgramChange="47"/>
+          <Patch Number="48" Name="2WayTunnel" ProgramChange="48"/>
+          <Patch Number="49" Name="FinishLine" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="P2 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="2"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="StereoLoPass" ProgramChange="0"/>
+          <Patch Number="1" Name="Low Pass HiQ" ProgramChange="1"/>
+          <Patch Number="2" Name="Low Pass LFO" ProgramChange="2"/>
+          <Patch Number="3" Name="StereoHiPass" ProgramChange="3"/>
+          <Patch Number="4" Name="StereoB-Pass" ProgramChange="4"/>
+          <Patch Number="5" Name="Stereo Notch" ProgramChange="5"/>
+          <Patch Number="6" Name="SweptNotches" ProgramChange="6"/>
+          <Patch Number="7" Name="Env Notches" ProgramChange="7"/>
+          <Patch Number="8" Name="BandReject4" ProgramChange="8"/>
+          <Patch Number="9" Name="WaaPedalEko" ProgramChange="9"/>
+          <Patch Number="10" Name="RotorWaa" ProgramChange="10"/>
+          <Patch Number="11" Name="Movable Echo" ProgramChange="11"/>
+          <Patch Number="12" Name="Movable Hall" ProgramChange="12"/>
+          <Patch Number="13" Name="Go Away" ProgramChange="13"/>
+          <Patch Number="14" Name="Circular Pan" ProgramChange="14"/>
+          <Patch Number="15" Name="Spatial Hall" ProgramChange="15"/>
+          <Patch Number="16" Name="Rear of Hall" ProgramChange="16"/>
+          <Patch Number="17" Name="Backstage" ProgramChange="17"/>
+          <Patch Number="18" Name="Steered Rear" ProgramChange="18"/>
+          <Patch Number="19" Name="Too Deep!" ProgramChange="19"/>
+          <Patch Number="20" Name="Dyna-Hall" ProgramChange="20"/>
+          <Patch Number="21" Name="RotoRox" ProgramChange="21"/>
+          <Patch Number="22" Name="RotoRoomVox" ProgramChange="22"/>
+          <Patch Number="23" Name="RotoRoom" ProgramChange="23"/>
+          <Patch Number="24" Name="RotoRoom#2" ProgramChange="24"/>
+          <Patch Number="25" Name="Tremolo Tap1" ProgramChange="25"/>
+          <Patch Number="26" Name="X-TremoloTap" ProgramChange="26"/>
+          <Patch Number="27" Name="Panner BPM" ProgramChange="27"/>
+          <Patch Number="28" Name="Nice Pan!" ProgramChange="28"/>
+          <Patch Number="29" Name="Spin &amp; Duck" ProgramChange="29"/>
+          <Patch Number="30" Name="MultiFx Fade" ProgramChange="30"/>
+          <Patch Number="31" Name="Ghost" ProgramChange="31"/>
+          <Patch Number="32" Name="Ghost Flange" ProgramChange="32"/>
+          <Patch Number="33" Name="GhostVibrato" ProgramChange="33"/>
+          <Patch Number="34" Name="AutoFadeIn 1" ProgramChange="34"/>
+          <Patch Number="35" Name="AutoFadeIn 2" ProgramChange="35"/>
+          <Patch Number="36" Name="AutoFadeIn 3" ProgramChange="36"/>
+          <Patch Number="37" Name="ChordSwells" ProgramChange="37"/>
+          <Patch Number="38" Name="BowedChords" ProgramChange="38"/>
+          <Patch Number="39" Name="BowedEchos" ProgramChange="39"/>
+          <Patch Number="40" Name="Pedal Swell" ProgramChange="40"/>
+          <Patch Number="41" Name="RezClimber" ProgramChange="41"/>
+          <Patch Number="42" Name="Chord Walk" ProgramChange="42"/>
+          <Patch Number="43" Name="Mars Bars" ProgramChange="43"/>
+          <Patch Number="44" Name="ModalImpulse" ProgramChange="44"/>
+          <Patch Number="45" Name="MajorMinor" ProgramChange="45"/>
+          <Patch Number="46" Name="MIDIchords" ProgramChange="46"/>
+          <Patch Number="47" Name="LvlSweeper" ProgramChange="47"/>
+          <Patch Number="48" Name="Sweeper" ProgramChange="48"/>
+          <Patch Number="49" Name="MIDIsustain" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="P3 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="3"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Small+Stage" ProgramChange="0"/>
+          <Patch Number="1" Name="Small Room" ProgramChange="1"/>
+          <Patch Number="2" Name="Living Room" ProgramChange="2"/>
+          <Patch Number="3" Name="Brick Kick" ProgramChange="3"/>
+          <Patch Number="4" Name="Large Room" ProgramChange="4"/>
+          <Patch Number="5" Name="Snare Chamber" ProgramChange="5"/>
+          <Patch Number="6" Name="Tiled Room" ProgramChange="6"/>
+          <Patch Number="7" Name="Rich Chamber" ProgramChange="7"/>
+          <Patch Number="8" Name="Vox Chamber" ProgramChange="8"/>
+          <Patch Number="9" Name="Locker Room" ProgramChange="9"/>
+          <Patch Number="10" Name="Wide Chamber" ProgramChange="10"/>
+          <Patch Number="11" Name="Gate Chamber" ProgramChange="11"/>
+          <Patch Number="12" Name="Vox Plate" ProgramChange="12"/>
+          <Patch Number="13" Name="Good olPlate" ProgramChange="13"/>
+          <Patch Number="14" Name="Slap Plate" ProgramChange="14"/>
+          <Patch Number="15" Name="Brass Plate" ProgramChange="15"/>
+          <Patch Number="16" Name="Drum Plate" ProgramChange="16"/>
+          <Patch Number="17" Name="Rich Plate" ProgramChange="17"/>
+          <Patch Number="18" Name="Concert Wave" ProgramChange="18"/>
+          <Patch Number="19" Name="Concert Hall" ProgramChange="19"/>
+          <Patch Number="20" Name="ConcertHall2" ProgramChange="20"/>
+          <Patch Number="21" Name="Piano Hall" ProgramChange="21"/>
+          <Patch Number="22" Name="Medium Hall" ProgramChange="22"/>
+          <Patch Number="23" Name="Vocal Hall" ProgramChange="23"/>
+          <Patch Number="24" Name="Deep Space" ProgramChange="24"/>
+          <Patch Number="25" Name="Plate4 Horns" ProgramChange="25"/>
+          <Patch Number="26" Name="Alley Slap" ProgramChange="26"/>
+          <Patch Number="27" Name="Drum Gate" ProgramChange="27"/>
+          <Patch Number="28" Name="Slope Down" ProgramChange="28"/>
+          <Patch Number="29" Name="BigBoomRoom" ProgramChange="29"/>
+          <Patch Number="30" Name="Whammy Hall" ProgramChange="30"/>
+          <Patch Number="31" Name="Jet Chamber" ProgramChange="31"/>
+          <Patch Number="32" Name="EnvChamber" ProgramChange="32"/>
+          <Patch Number="33" Name="Wizz &amp; Wazz" ProgramChange="33"/>
+          <Patch Number="34" Name="Sci Fi" ProgramChange="34"/>
+          <Patch Number="35" Name="Wobble Plate" ProgramChange="35"/>
+          <Patch Number="36" Name="Dyna Vibrato" ProgramChange="36"/>
+          <Patch Number="37" Name="VibroVerb" ProgramChange="37"/>
+          <Patch Number="38" Name="SweepVerb" ProgramChange="38"/>
+          <Patch Number="39" Name="EnveloVerb" ProgramChange="39"/>
+          <Patch Number="40" Name="Super Ball!" ProgramChange="40"/>
+          <Patch Number="41" Name="LevlStutter" ProgramChange="41"/>
+          <Patch Number="42" Name="Freez 2 of 8" ProgramChange="42"/>
+          <Patch Number="43" Name="Freez 2over3" ProgramChange="43"/>
+          <Patch Number="44" Name="Freeze&amp;Speed" ProgramChange="44"/>
+          <Patch Number="45" Name="ADJToFreeze" ProgramChange="45"/>
+          <Patch Number="46" Name="ADJToFreeze2" ProgramChange="46"/>
+          <Patch Number="47" Name="FSw2 Freeze" ProgramChange="47"/>
+          <Patch Number="48" Name="FSw2 Speedup" ProgramChange="48"/>
+          <Patch Number="49" Name="LongestLoop" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="P4 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="4"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="FixYerVox" ProgramChange="0"/>
+          <Patch Number="1" Name="FixYerVoxChm" ProgramChange="1"/>
+          <Patch Number="2" Name="Thick FixVox" ProgramChange="2"/>
+          <Patch Number="3" Name="Cocomo" ProgramChange="3"/>
+          <Patch Number="4" Name="QuadDTune" ProgramChange="4"/>
+          <Patch Number="5" Name="ADTStereoIn" ProgramChange="5"/>
+          <Patch Number="6" Name="TripleTrack" ProgramChange="6"/>
+          <Patch Number="7" Name="Quad Track" ProgramChange="7"/>
+          <Patch Number="8" Name="Quint Track" ProgramChange="8"/>
+          <Patch Number="9" Name="Add Voices" ProgramChange="9"/>
+          <Patch Number="10" Name="Major Thirds" ProgramChange="10"/>
+          <Patch Number="11" Name="Minor Thirds" ProgramChange="11"/>
+          <Patch Number="12" Name="Major Triads" ProgramChange="12"/>
+          <Patch Number="13" Name="Minor Triads" ProgramChange="13"/>
+          <Patch Number="14" Name="Major &amp; Dbls" ProgramChange="14"/>
+          <Patch Number="15" Name="Minor &amp; Dbls" ProgramChange="15"/>
+          <Patch Number="16" Name="4ths &amp; Dbl" ProgramChange="16"/>
+          <Patch Number="17" Name="MIDI Pitch" ProgramChange="17"/>
+          <Patch Number="18" Name="MIDI Harmony" ProgramChange="18"/>
+          <Patch Number="19" Name="MIDI Chord" ProgramChange="19"/>
+          <Patch Number="20" Name="SingleDetune" ProgramChange="20"/>
+          <Patch Number="21" Name="DualDetune" ProgramChange="21"/>
+          <Patch Number="22" Name="Phat Detune" ProgramChange="22"/>
+          <Patch Number="23" Name="EGtrPitchRm" ProgramChange="23"/>
+          <Patch Number="24" Name="VibroShift1" ProgramChange="24"/>
+          <Patch Number="25" Name="VibroShift2" ProgramChange="25"/>
+          <Patch Number="26" Name="VibroTrem" ProgramChange="26"/>
+          <Patch Number="27" Name="VibroTremRvb" ProgramChange="27"/>
+          <Patch Number="28" Name="OctDown Verb" ProgramChange="28"/>
+          <Patch Number="29" Name="PitchSlapRvb" ProgramChange="29"/>
+          <Patch Number="30" Name="24 String" ProgramChange="30"/>
+          <Patch Number="31" Name="HonkyTonkPno" ProgramChange="31"/>
+          <Patch Number="32" Name="PowerNotes" ProgramChange="32"/>
+          <Patch Number="33" Name="4-NoteChords" ProgramChange="33"/>
+          <Patch Number="34" Name="ModalChords1" ProgramChange="34"/>
+          <Patch Number="35" Name="ModalChords2" ProgramChange="35"/>
+          <Patch Number="36" Name="Chromatic Up" ProgramChange="36"/>
+          <Patch Number="37" Name="Chromatic Dn" ProgramChange="37"/>
+          <Patch Number="38" Name="FootPdl Oct" ProgramChange="38"/>
+          <Patch Number="39" Name="FootPdlChord" ProgramChange="39"/>
+          <Patch Number="40" Name="SnareTools 1" ProgramChange="40"/>
+          <Patch Number="41" Name="SnareTools 2" ProgramChange="41"/>
+          <Patch Number="42" Name="SnareTools 3" ProgramChange="42"/>
+          <Patch Number="43" Name="TomTomTools" ProgramChange="43"/>
+          <Patch Number="44" Name="Slap Up BPM" ProgramChange="44"/>
+          <Patch Number="45" Name="Slap Dn BPM" ProgramChange="45"/>
+          <Patch Number="46" Name="Thick Slap" ProgramChange="46"/>
+          <Patch Number="47" Name="RepeatSlaps" ProgramChange="47"/>
+          <Patch Number="48" Name="AutoScratch" ProgramChange="48"/>
+          <Patch Number="49" Name="Stop n Go" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="P5 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="5"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="PullThePlug!" ProgramChange="0"/>
+          <Patch Number="1" Name="Stargate" ProgramChange="1"/>
+          <Patch Number="2" Name="WhiteHole" ProgramChange="2"/>
+          <Patch Number="3" Name="MotherShip" ProgramChange="3"/>
+          <Patch Number="4" Name="XplodeDown" ProgramChange="4"/>
+          <Patch Number="5" Name="Xplode Up" ProgramChange="5"/>
+          <Patch Number="6" Name="DialogCloner" ProgramChange="6"/>
+          <Patch Number="7" Name="Toon Voices" ProgramChange="7"/>
+          <Patch Number="8" Name="Evil Voice" ProgramChange="8"/>
+          <Patch Number="9" Name="Evil Echoes" ProgramChange="9"/>
+          <Patch Number="10" Name="Pitch Across" ProgramChange="10"/>
+          <Patch Number="11" Name="PitchEkoRvb" ProgramChange="11"/>
+          <Patch Number="12" Name="PitchPong" ProgramChange="12"/>
+          <Patch Number="13" Name="AR DlyVerb" ProgramChange="13"/>
+          <Patch Number="14" Name="In The Air" ProgramChange="14"/>
+          <Patch Number="15" Name="Thick&gt;Ducked" ProgramChange="15"/>
+          <Patch Number="16" Name="FootPdlEkos" ProgramChange="16"/>
+          <Patch Number="17" Name="DualDTuneDly" ProgramChange="17"/>
+          <Patch Number="18" Name="QuaDTuneDly1" ProgramChange="18"/>
+          <Patch Number="19" Name="QuaDTuneDly2" ProgramChange="19"/>
+          <Patch Number="20" Name="Major Across" ProgramChange="20"/>
+          <Patch Number="21" Name="Minor Across" ProgramChange="21"/>
+          <Patch Number="22" Name="Dim hARP" ProgramChange="22"/>
+          <Patch Number="23" Name="Dim hARP Vrb" ProgramChange="23"/>
+          <Patch Number="24" Name="DimScaleDown" ProgramChange="24"/>
+          <Patch Number="25" Name="GlassCascade" ProgramChange="25"/>
+          <Patch Number="26" Name="Carnival" ProgramChange="26"/>
+          <Patch Number="27" Name="Sequence 1" ProgramChange="27"/>
+          <Patch Number="28" Name="Sequence 2" ProgramChange="28"/>
+          <Patch Number="29" Name="Pentatonics" ProgramChange="29"/>
+          <Patch Number="30" Name="JurassicSolo" ProgramChange="30"/>
+          <Patch Number="31" Name="SwrlWholNt" ProgramChange="31"/>
+          <Patch Number="32" Name="Sweet Chorus" ProgramChange="32"/>
+          <Patch Number="33" Name="MirrorChorus" ProgramChange="33"/>
+          <Patch Number="34" Name="LFO Detune" ProgramChange="34"/>
+          <Patch Number="35" Name="SpatialDuck" ProgramChange="35"/>
+          <Patch Number="36" Name="Vibrato BPM" ProgramChange="36"/>
+          <Patch Number="37" Name="Verbato" ProgramChange="37"/>
+          <Patch Number="38" Name="Stereo VSO" ProgramChange="38"/>
+          <Patch Number="39" Name="Mono VSO" ProgramChange="39"/>
+          <Patch Number="40" Name="VoxFix E2&gt;C6" ProgramChange="40"/>
+          <Patch Number="41" Name="VoxFix Bass" ProgramChange="41"/>
+          <Patch Number="42" Name="VoxFix Tenor" ProgramChange="42"/>
+          <Patch Number="43" Name="VoxFix Alto" ProgramChange="43"/>
+          <Patch Number="44" Name="FoxFix Sprno" ProgramChange="44"/>
+          <Patch Number="45" Name="Knob CentsUp" ProgramChange="45"/>
+          <Patch Number="46" Name="Knob CentsDn" ProgramChange="46"/>
+          <Patch Number="47" Name="Double Effect" ProgramChange="47"/>
+          <Patch Number="48" Name="Knob Freeze" ProgramChange="48"/>
+          <Patch Number="49" Name="Demo Correct" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="R0 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="6"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="User Effect" ProgramChange="0"/>
+          <Patch Number="1" Name="User Effect" ProgramChange="1"/>
+          <Patch Number="2" Name="User Effect" ProgramChange="2"/>
+          <Patch Number="3" Name="User Effect" ProgramChange="3"/>
+          <Patch Number="4" Name="User Effect" ProgramChange="4"/>
+          <Patch Number="5" Name="User Effect" ProgramChange="5"/>
+          <Patch Number="6" Name="User Effect" ProgramChange="6"/>
+          <Patch Number="7" Name="User Effect" ProgramChange="7"/>
+          <Patch Number="8" Name="User Effect" ProgramChange="8"/>
+          <Patch Number="9" Name="User Effect" ProgramChange="9"/>
+          <Patch Number="10" Name="User Effect" ProgramChange="10"/>
+          <Patch Number="11" Name="User Effect" ProgramChange="11"/>
+          <Patch Number="12" Name="User Effect" ProgramChange="12"/>
+          <Patch Number="13" Name="User Effect" ProgramChange="13"/>
+          <Patch Number="14" Name="User Effect" ProgramChange="14"/>
+          <Patch Number="15" Name="User Effect" ProgramChange="15"/>
+          <Patch Number="16" Name="User Effect" ProgramChange="16"/>
+          <Patch Number="17" Name="User Effect" ProgramChange="17"/>
+          <Patch Number="18" Name="User Effect" ProgramChange="18"/>
+          <Patch Number="19" Name="User Effect" ProgramChange="19"/>
+          <Patch Number="20" Name="User Effect" ProgramChange="20"/>
+          <Patch Number="21" Name="User Effect" ProgramChange="21"/>
+          <Patch Number="22" Name="User Effect" ProgramChange="22"/>
+          <Patch Number="23" Name="User Effect" ProgramChange="23"/>
+          <Patch Number="24" Name="User Effect" ProgramChange="24"/>
+          <Patch Number="25" Name="User Effect" ProgramChange="25"/>
+          <Patch Number="26" Name="User Effect" ProgramChange="26"/>
+          <Patch Number="27" Name="User Effect" ProgramChange="27"/>
+          <Patch Number="28" Name="User Effect" ProgramChange="28"/>
+          <Patch Number="29" Name="User Effect" ProgramChange="29"/>
+          <Patch Number="30" Name="User Effect" ProgramChange="30"/>
+          <Patch Number="31" Name="User Effect" ProgramChange="31"/>
+          <Patch Number="32" Name="User Effect" ProgramChange="32"/>
+          <Patch Number="33" Name="User Effect" ProgramChange="33"/>
+          <Patch Number="34" Name="User Effect" ProgramChange="34"/>
+          <Patch Number="35" Name="User Effect" ProgramChange="35"/>
+          <Patch Number="36" Name="User Effect" ProgramChange="36"/>
+          <Patch Number="37" Name="User Effect" ProgramChange="37"/>
+          <Patch Number="38" Name="User Effect" ProgramChange="38"/>
+          <Patch Number="39" Name="User Effect" ProgramChange="39"/>
+          <Patch Number="40" Name="User Effect" ProgramChange="40"/>
+          <Patch Number="41" Name="User Effect" ProgramChange="41"/>
+          <Patch Number="42" Name="User Effect" ProgramChange="42"/>
+          <Patch Number="43" Name="User Effect" ProgramChange="43"/>
+          <Patch Number="44" Name="User Effect" ProgramChange="44"/>
+          <Patch Number="45" Name="User Effect" ProgramChange="45"/>
+          <Patch Number="46" Name="User Effect" ProgramChange="46"/>
+          <Patch Number="47" Name="User Effect" ProgramChange="47"/>
+          <Patch Number="48" Name="User Effect" ProgramChange="48"/>
+          <Patch Number="49" Name="User Effect" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="C0 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="12"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Card Effect" ProgramChange="0"/>
+          <Patch Number="1" Name="Card Effect" ProgramChange="1"/>
+          <Patch Number="2" Name="Card Effect" ProgramChange="2"/>
+          <Patch Number="3" Name="Card Effect" ProgramChange="3"/>
+          <Patch Number="4" Name="Card Effect" ProgramChange="4"/>
+          <Patch Number="5" Name="Card Effect" ProgramChange="5"/>
+          <Patch Number="6" Name="Card Effect" ProgramChange="6"/>
+          <Patch Number="7" Name="Card Effect" ProgramChange="7"/>
+          <Patch Number="8" Name="Card Effect" ProgramChange="8"/>
+          <Patch Number="9" Name="Card Effect" ProgramChange="9"/>
+          <Patch Number="10" Name="Card Effect" ProgramChange="10"/>
+          <Patch Number="11" Name="Card Effect" ProgramChange="11"/>
+          <Patch Number="12" Name="Card Effect" ProgramChange="12"/>
+          <Patch Number="13" Name="Card Effect" ProgramChange="13"/>
+          <Patch Number="14" Name="Card Effect" ProgramChange="14"/>
+          <Patch Number="15" Name="Card Effect" ProgramChange="15"/>
+          <Patch Number="16" Name="Card Effect" ProgramChange="16"/>
+          <Patch Number="17" Name="Card Effect" ProgramChange="17"/>
+          <Patch Number="18" Name="Card Effect" ProgramChange="18"/>
+          <Patch Number="19" Name="Card Effect" ProgramChange="19"/>
+          <Patch Number="20" Name="Card Effect" ProgramChange="20"/>
+          <Patch Number="21" Name="Card Effect" ProgramChange="21"/>
+          <Patch Number="22" Name="Card Effect" ProgramChange="22"/>
+          <Patch Number="23" Name="Card Effect" ProgramChange="23"/>
+          <Patch Number="24" Name="Card Effect" ProgramChange="24"/>
+          <Patch Number="25" Name="Card Effect" ProgramChange="25"/>
+          <Patch Number="26" Name="Card Effect" ProgramChange="26"/>
+          <Patch Number="27" Name="Card Effect" ProgramChange="27"/>
+          <Patch Number="28" Name="Card Effect" ProgramChange="28"/>
+          <Patch Number="29" Name="Card Effect" ProgramChange="29"/>
+          <Patch Number="30" Name="Card Effect" ProgramChange="30"/>
+          <Patch Number="31" Name="Card Effect" ProgramChange="31"/>
+          <Patch Number="32" Name="Card Effect" ProgramChange="32"/>
+          <Patch Number="33" Name="Card Effect" ProgramChange="33"/>
+          <Patch Number="34" Name="Card Effect" ProgramChange="34"/>
+          <Patch Number="35" Name="Card Effect" ProgramChange="35"/>
+          <Patch Number="36" Name="Card Effect" ProgramChange="36"/>
+          <Patch Number="37" Name="Card Effect" ProgramChange="37"/>
+          <Patch Number="38" Name="Card Effect" ProgramChange="38"/>
+          <Patch Number="39" Name="Card Effect" ProgramChange="39"/>
+          <Patch Number="40" Name="Card Effect" ProgramChange="40"/>
+          <Patch Number="41" Name="Card Effect" ProgramChange="41"/>
+          <Patch Number="42" Name="Card Effect" ProgramChange="42"/>
+          <Patch Number="43" Name="Card Effect" ProgramChange="43"/>
+          <Patch Number="44" Name="Card Effect" ProgramChange="44"/>
+          <Patch Number="45" Name="Card Effect" ProgramChange="45"/>
+          <Patch Number="46" Name="Card Effect" ProgramChange="46"/>
+          <Patch Number="47" Name="Card Effect" ProgramChange="47"/>
+          <Patch Number="48" Name="Card Effect" ProgramChange="48"/>
+          <Patch Number="49" Name="Card Effect" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="C1 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="13"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Card Effect" ProgramChange="0"/>
+          <Patch Number="1" Name="Card Effect" ProgramChange="1"/>
+          <Patch Number="2" Name="Card Effect" ProgramChange="2"/>
+          <Patch Number="3" Name="Card Effect" ProgramChange="3"/>
+          <Patch Number="4" Name="Card Effect" ProgramChange="4"/>
+          <Patch Number="5" Name="Card Effect" ProgramChange="5"/>
+          <Patch Number="6" Name="Card Effect" ProgramChange="6"/>
+          <Patch Number="7" Name="Card Effect" ProgramChange="7"/>
+          <Patch Number="8" Name="Card Effect" ProgramChange="8"/>
+          <Patch Number="9" Name="Card Effect" ProgramChange="9"/>
+          <Patch Number="10" Name="Card Effect" ProgramChange="10"/>
+          <Patch Number="11" Name="Card Effect" ProgramChange="11"/>
+          <Patch Number="12" Name="Card Effect" ProgramChange="12"/>
+          <Patch Number="13" Name="Card Effect" ProgramChange="13"/>
+          <Patch Number="14" Name="Card Effect" ProgramChange="14"/>
+          <Patch Number="15" Name="Card Effect" ProgramChange="15"/>
+          <Patch Number="16" Name="Card Effect" ProgramChange="16"/>
+          <Patch Number="17" Name="Card Effect" ProgramChange="17"/>
+          <Patch Number="18" Name="Card Effect" ProgramChange="18"/>
+          <Patch Number="19" Name="Card Effect" ProgramChange="19"/>
+          <Patch Number="20" Name="Card Effect" ProgramChange="20"/>
+          <Patch Number="21" Name="Card Effect" ProgramChange="21"/>
+          <Patch Number="22" Name="Card Effect" ProgramChange="22"/>
+          <Patch Number="23" Name="Card Effect" ProgramChange="23"/>
+          <Patch Number="24" Name="Card Effect" ProgramChange="24"/>
+          <Patch Number="25" Name="Card Effect" ProgramChange="25"/>
+          <Patch Number="26" Name="Card Effect" ProgramChange="26"/>
+          <Patch Number="27" Name="Card Effect" ProgramChange="27"/>
+          <Patch Number="28" Name="Card Effect" ProgramChange="28"/>
+          <Patch Number="29" Name="Card Effect" ProgramChange="29"/>
+          <Patch Number="30" Name="Card Effect" ProgramChange="30"/>
+          <Patch Number="31" Name="Card Effect" ProgramChange="31"/>
+          <Patch Number="32" Name="Card Effect" ProgramChange="32"/>
+          <Patch Number="33" Name="Card Effect" ProgramChange="33"/>
+          <Patch Number="34" Name="Card Effect" ProgramChange="34"/>
+          <Patch Number="35" Name="Card Effect" ProgramChange="35"/>
+          <Patch Number="36" Name="Card Effect" ProgramChange="36"/>
+          <Patch Number="37" Name="Card Effect" ProgramChange="37"/>
+          <Patch Number="38" Name="Card Effect" ProgramChange="38"/>
+          <Patch Number="39" Name="Card Effect" ProgramChange="39"/>
+          <Patch Number="40" Name="Card Effect" ProgramChange="40"/>
+          <Patch Number="41" Name="Card Effect" ProgramChange="41"/>
+          <Patch Number="42" Name="Card Effect" ProgramChange="42"/>
+          <Patch Number="43" Name="Card Effect" ProgramChange="43"/>
+          <Patch Number="44" Name="Card Effect" ProgramChange="44"/>
+          <Patch Number="45" Name="Card Effect" ProgramChange="45"/>
+          <Patch Number="46" Name="Card Effect" ProgramChange="46"/>
+          <Patch Number="47" Name="Card Effect" ProgramChange="47"/>
+          <Patch Number="48" Name="Card Effect" ProgramChange="48"/>
+          <Patch Number="49" Name="Card Effect" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="C2 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="14"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Card Effect" ProgramChange="0"/>
+          <Patch Number="1" Name="Card Effect" ProgramChange="1"/>
+          <Patch Number="2" Name="Card Effect" ProgramChange="2"/>
+          <Patch Number="3" Name="Card Effect" ProgramChange="3"/>
+          <Patch Number="4" Name="Card Effect" ProgramChange="4"/>
+          <Patch Number="5" Name="Card Effect" ProgramChange="5"/>
+          <Patch Number="6" Name="Card Effect" ProgramChange="6"/>
+          <Patch Number="7" Name="Card Effect" ProgramChange="7"/>
+          <Patch Number="8" Name="Card Effect" ProgramChange="8"/>
+          <Patch Number="9" Name="Card Effect" ProgramChange="9"/>
+          <Patch Number="10" Name="Card Effect" ProgramChange="10"/>
+          <Patch Number="11" Name="Card Effect" ProgramChange="11"/>
+          <Patch Number="12" Name="Card Effect" ProgramChange="12"/>
+          <Patch Number="13" Name="Card Effect" ProgramChange="13"/>
+          <Patch Number="14" Name="Card Effect" ProgramChange="14"/>
+          <Patch Number="15" Name="Card Effect" ProgramChange="15"/>
+          <Patch Number="16" Name="Card Effect" ProgramChange="16"/>
+          <Patch Number="17" Name="Card Effect" ProgramChange="17"/>
+          <Patch Number="18" Name="Card Effect" ProgramChange="18"/>
+          <Patch Number="19" Name="Card Effect" ProgramChange="19"/>
+          <Patch Number="20" Name="Card Effect" ProgramChange="20"/>
+          <Patch Number="21" Name="Card Effect" ProgramChange="21"/>
+          <Patch Number="22" Name="Card Effect" ProgramChange="22"/>
+          <Patch Number="23" Name="Card Effect" ProgramChange="23"/>
+          <Patch Number="24" Name="Card Effect" ProgramChange="24"/>
+          <Patch Number="25" Name="Card Effect" ProgramChange="25"/>
+          <Patch Number="26" Name="Card Effect" ProgramChange="26"/>
+          <Patch Number="27" Name="Card Effect" ProgramChange="27"/>
+          <Patch Number="28" Name="Card Effect" ProgramChange="28"/>
+          <Patch Number="29" Name="Card Effect" ProgramChange="29"/>
+          <Patch Number="30" Name="Card Effect" ProgramChange="30"/>
+          <Patch Number="31" Name="Card Effect" ProgramChange="31"/>
+          <Patch Number="32" Name="Card Effect" ProgramChange="32"/>
+          <Patch Number="33" Name="Card Effect" ProgramChange="33"/>
+          <Patch Number="34" Name="Card Effect" ProgramChange="34"/>
+          <Patch Number="35" Name="Card Effect" ProgramChange="35"/>
+          <Patch Number="36" Name="Card Effect" ProgramChange="36"/>
+          <Patch Number="37" Name="Card Effect" ProgramChange="37"/>
+          <Patch Number="38" Name="Card Effect" ProgramChange="38"/>
+          <Patch Number="39" Name="Card Effect" ProgramChange="39"/>
+          <Patch Number="40" Name="Card Effect" ProgramChange="40"/>
+          <Patch Number="41" Name="Card Effect" ProgramChange="41"/>
+          <Patch Number="42" Name="Card Effect" ProgramChange="42"/>
+          <Patch Number="43" Name="Card Effect" ProgramChange="43"/>
+          <Patch Number="44" Name="Card Effect" ProgramChange="44"/>
+          <Patch Number="45" Name="Card Effect" ProgramChange="45"/>
+          <Patch Number="46" Name="Card Effect" ProgramChange="46"/>
+          <Patch Number="47" Name="Card Effect" ProgramChange="47"/>
+          <Patch Number="48" Name="Card Effect" ProgramChange="48"/>
+          <Patch Number="49" Name="Card Effect" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="C3 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="15"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Card Effect" ProgramChange="0"/>
+          <Patch Number="1" Name="Card Effect" ProgramChange="1"/>
+          <Patch Number="2" Name="Card Effect" ProgramChange="2"/>
+          <Patch Number="3" Name="Card Effect" ProgramChange="3"/>
+          <Patch Number="4" Name="Card Effect" ProgramChange="4"/>
+          <Patch Number="5" Name="Card Effect" ProgramChange="5"/>
+          <Patch Number="6" Name="Card Effect" ProgramChange="6"/>
+          <Patch Number="7" Name="Card Effect" ProgramChange="7"/>
+          <Patch Number="8" Name="Card Effect" ProgramChange="8"/>
+          <Patch Number="9" Name="Card Effect" ProgramChange="9"/>
+          <Patch Number="10" Name="Card Effect" ProgramChange="10"/>
+          <Patch Number="11" Name="Card Effect" ProgramChange="11"/>
+          <Patch Number="12" Name="Card Effect" ProgramChange="12"/>
+          <Patch Number="13" Name="Card Effect" ProgramChange="13"/>
+          <Patch Number="14" Name="Card Effect" ProgramChange="14"/>
+          <Patch Number="15" Name="Card Effect" ProgramChange="15"/>
+          <Patch Number="16" Name="Card Effect" ProgramChange="16"/>
+          <Patch Number="17" Name="Card Effect" ProgramChange="17"/>
+          <Patch Number="18" Name="Card Effect" ProgramChange="18"/>
+          <Patch Number="19" Name="Card Effect" ProgramChange="19"/>
+          <Patch Number="20" Name="Card Effect" ProgramChange="20"/>
+          <Patch Number="21" Name="Card Effect" ProgramChange="21"/>
+          <Patch Number="22" Name="Card Effect" ProgramChange="22"/>
+          <Patch Number="23" Name="Card Effect" ProgramChange="23"/>
+          <Patch Number="24" Name="Card Effect" ProgramChange="24"/>
+          <Patch Number="25" Name="Card Effect" ProgramChange="25"/>
+          <Patch Number="26" Name="Card Effect" ProgramChange="26"/>
+          <Patch Number="27" Name="Card Effect" ProgramChange="27"/>
+          <Patch Number="28" Name="Card Effect" ProgramChange="28"/>
+          <Patch Number="29" Name="Card Effect" ProgramChange="29"/>
+          <Patch Number="30" Name="Card Effect" ProgramChange="30"/>
+          <Patch Number="31" Name="Card Effect" ProgramChange="31"/>
+          <Patch Number="32" Name="Card Effect" ProgramChange="32"/>
+          <Patch Number="33" Name="Card Effect" ProgramChange="33"/>
+          <Patch Number="34" Name="Card Effect" ProgramChange="34"/>
+          <Patch Number="35" Name="Card Effect" ProgramChange="35"/>
+          <Patch Number="36" Name="Card Effect" ProgramChange="36"/>
+          <Patch Number="37" Name="Card Effect" ProgramChange="37"/>
+          <Patch Number="38" Name="Card Effect" ProgramChange="38"/>
+          <Patch Number="39" Name="Card Effect" ProgramChange="39"/>
+          <Patch Number="40" Name="Card Effect" ProgramChange="40"/>
+          <Patch Number="41" Name="Card Effect" ProgramChange="41"/>
+          <Patch Number="42" Name="Card Effect" ProgramChange="42"/>
+          <Patch Number="43" Name="Card Effect" ProgramChange="43"/>
+          <Patch Number="44" Name="Card Effect" ProgramChange="44"/>
+          <Patch Number="45" Name="Card Effect" ProgramChange="45"/>
+          <Patch Number="46" Name="Card Effect" ProgramChange="46"/>
+          <Patch Number="47" Name="Card Effect" ProgramChange="47"/>
+          <Patch Number="48" Name="Card Effect" ProgramChange="48"/>
+          <Patch Number="49" Name="Card Effect" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="C4 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="16"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Card Effect" ProgramChange="0"/>
+          <Patch Number="1" Name="Card Effect" ProgramChange="1"/>
+          <Patch Number="2" Name="Card Effect" ProgramChange="2"/>
+          <Patch Number="3" Name="Card Effect" ProgramChange="3"/>
+          <Patch Number="4" Name="Card Effect" ProgramChange="4"/>
+          <Patch Number="5" Name="Card Effect" ProgramChange="5"/>
+          <Patch Number="6" Name="Card Effect" ProgramChange="6"/>
+          <Patch Number="7" Name="Card Effect" ProgramChange="7"/>
+          <Patch Number="8" Name="Card Effect" ProgramChange="8"/>
+          <Patch Number="9" Name="Card Effect" ProgramChange="9"/>
+          <Patch Number="10" Name="Card Effect" ProgramChange="10"/>
+          <Patch Number="11" Name="Card Effect" ProgramChange="11"/>
+          <Patch Number="12" Name="Card Effect" ProgramChange="12"/>
+          <Patch Number="13" Name="Card Effect" ProgramChange="13"/>
+          <Patch Number="14" Name="Card Effect" ProgramChange="14"/>
+          <Patch Number="15" Name="Card Effect" ProgramChange="15"/>
+          <Patch Number="16" Name="Card Effect" ProgramChange="16"/>
+          <Patch Number="17" Name="Card Effect" ProgramChange="17"/>
+          <Patch Number="18" Name="Card Effect" ProgramChange="18"/>
+          <Patch Number="19" Name="Card Effect" ProgramChange="19"/>
+          <Patch Number="20" Name="Card Effect" ProgramChange="20"/>
+          <Patch Number="21" Name="Card Effect" ProgramChange="21"/>
+          <Patch Number="22" Name="Card Effect" ProgramChange="22"/>
+          <Patch Number="23" Name="Card Effect" ProgramChange="23"/>
+          <Patch Number="24" Name="Card Effect" ProgramChange="24"/>
+          <Patch Number="25" Name="Card Effect" ProgramChange="25"/>
+          <Patch Number="26" Name="Card Effect" ProgramChange="26"/>
+          <Patch Number="27" Name="Card Effect" ProgramChange="27"/>
+          <Patch Number="28" Name="Card Effect" ProgramChange="28"/>
+          <Patch Number="29" Name="Card Effect" ProgramChange="29"/>
+          <Patch Number="30" Name="Card Effect" ProgramChange="30"/>
+          <Patch Number="31" Name="Card Effect" ProgramChange="31"/>
+          <Patch Number="32" Name="Card Effect" ProgramChange="32"/>
+          <Patch Number="33" Name="Card Effect" ProgramChange="33"/>
+          <Patch Number="34" Name="Card Effect" ProgramChange="34"/>
+          <Patch Number="35" Name="Card Effect" ProgramChange="35"/>
+          <Patch Number="36" Name="Card Effect" ProgramChange="36"/>
+          <Patch Number="37" Name="Card Effect" ProgramChange="37"/>
+          <Patch Number="38" Name="Card Effect" ProgramChange="38"/>
+          <Patch Number="39" Name="Card Effect" ProgramChange="39"/>
+          <Patch Number="40" Name="Card Effect" ProgramChange="40"/>
+          <Patch Number="41" Name="Card Effect" ProgramChange="41"/>
+          <Patch Number="42" Name="Card Effect" ProgramChange="42"/>
+          <Patch Number="43" Name="Card Effect" ProgramChange="43"/>
+          <Patch Number="44" Name="Card Effect" ProgramChange="44"/>
+          <Patch Number="45" Name="Card Effect" ProgramChange="45"/>
+          <Patch Number="46" Name="Card Effect" ProgramChange="46"/>
+          <Patch Number="47" Name="Card Effect" ProgramChange="47"/>
+          <Patch Number="48" Name="Card Effect" ProgramChange="48"/>
+          <Patch Number="49" Name="Card Effect" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="C5 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="17"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Card Effect" ProgramChange="0"/>
+          <Patch Number="1" Name="Card Effect" ProgramChange="1"/>
+          <Patch Number="2" Name="Card Effect" ProgramChange="2"/>
+          <Patch Number="3" Name="Card Effect" ProgramChange="3"/>
+          <Patch Number="4" Name="Card Effect" ProgramChange="4"/>
+          <Patch Number="5" Name="Card Effect" ProgramChange="5"/>
+          <Patch Number="6" Name="Card Effect" ProgramChange="6"/>
+          <Patch Number="7" Name="Card Effect" ProgramChange="7"/>
+          <Patch Number="8" Name="Card Effect" ProgramChange="8"/>
+          <Patch Number="9" Name="Card Effect" ProgramChange="9"/>
+          <Patch Number="10" Name="Card Effect" ProgramChange="10"/>
+          <Patch Number="11" Name="Card Effect" ProgramChange="11"/>
+          <Patch Number="12" Name="Card Effect" ProgramChange="12"/>
+          <Patch Number="13" Name="Card Effect" ProgramChange="13"/>
+          <Patch Number="14" Name="Card Effect" ProgramChange="14"/>
+          <Patch Number="15" Name="Card Effect" ProgramChange="15"/>
+          <Patch Number="16" Name="Card Effect" ProgramChange="16"/>
+          <Patch Number="17" Name="Card Effect" ProgramChange="17"/>
+          <Patch Number="18" Name="Card Effect" ProgramChange="18"/>
+          <Patch Number="19" Name="Card Effect" ProgramChange="19"/>
+          <Patch Number="20" Name="Card Effect" ProgramChange="20"/>
+          <Patch Number="21" Name="Card Effect" ProgramChange="21"/>
+          <Patch Number="22" Name="Card Effect" ProgramChange="22"/>
+          <Patch Number="23" Name="Card Effect" ProgramChange="23"/>
+          <Patch Number="24" Name="Card Effect" ProgramChange="24"/>
+          <Patch Number="25" Name="Card Effect" ProgramChange="25"/>
+          <Patch Number="26" Name="Card Effect" ProgramChange="26"/>
+          <Patch Number="27" Name="Card Effect" ProgramChange="27"/>
+          <Patch Number="28" Name="Card Effect" ProgramChange="28"/>
+          <Patch Number="29" Name="Card Effect" ProgramChange="29"/>
+          <Patch Number="30" Name="Card Effect" ProgramChange="30"/>
+          <Patch Number="31" Name="Card Effect" ProgramChange="31"/>
+          <Patch Number="32" Name="Card Effect" ProgramChange="32"/>
+          <Patch Number="33" Name="Card Effect" ProgramChange="33"/>
+          <Patch Number="34" Name="Card Effect" ProgramChange="34"/>
+          <Patch Number="35" Name="Card Effect" ProgramChange="35"/>
+          <Patch Number="36" Name="Card Effect" ProgramChange="36"/>
+          <Patch Number="37" Name="Card Effect" ProgramChange="37"/>
+          <Patch Number="38" Name="Card Effect" ProgramChange="38"/>
+          <Patch Number="39" Name="Card Effect" ProgramChange="39"/>
+          <Patch Number="40" Name="Card Effect" ProgramChange="40"/>
+          <Patch Number="41" Name="Card Effect" ProgramChange="41"/>
+          <Patch Number="42" Name="Card Effect" ProgramChange="42"/>
+          <Patch Number="43" Name="Card Effect" ProgramChange="43"/>
+          <Patch Number="44" Name="Card Effect" ProgramChange="44"/>
+          <Patch Number="45" Name="Card Effect" ProgramChange="45"/>
+          <Patch Number="46" Name="Card Effect" ProgramChange="46"/>
+          <Patch Number="47" Name="Card Effect" ProgramChange="47"/>
+          <Patch Number="48" Name="Card Effect" ProgramChange="48"/>
+          <Patch Number="49" Name="Card Effect" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="C6 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="18"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Card Effect" ProgramChange="0"/>
+          <Patch Number="1" Name="Card Effect" ProgramChange="1"/>
+          <Patch Number="2" Name="Card Effect" ProgramChange="2"/>
+          <Patch Number="3" Name="Card Effect" ProgramChange="3"/>
+          <Patch Number="4" Name="Card Effect" ProgramChange="4"/>
+          <Patch Number="5" Name="Card Effect" ProgramChange="5"/>
+          <Patch Number="6" Name="Card Effect" ProgramChange="6"/>
+          <Patch Number="7" Name="Card Effect" ProgramChange="7"/>
+          <Patch Number="8" Name="Card Effect" ProgramChange="8"/>
+          <Patch Number="9" Name="Card Effect" ProgramChange="9"/>
+          <Patch Number="10" Name="Card Effect" ProgramChange="10"/>
+          <Patch Number="11" Name="Card Effect" ProgramChange="11"/>
+          <Patch Number="12" Name="Card Effect" ProgramChange="12"/>
+          <Patch Number="13" Name="Card Effect" ProgramChange="13"/>
+          <Patch Number="14" Name="Card Effect" ProgramChange="14"/>
+          <Patch Number="15" Name="Card Effect" ProgramChange="15"/>
+          <Patch Number="16" Name="Card Effect" ProgramChange="16"/>
+          <Patch Number="17" Name="Card Effect" ProgramChange="17"/>
+          <Patch Number="18" Name="Card Effect" ProgramChange="18"/>
+          <Patch Number="19" Name="Card Effect" ProgramChange="19"/>
+          <Patch Number="20" Name="Card Effect" ProgramChange="20"/>
+          <Patch Number="21" Name="Card Effect" ProgramChange="21"/>
+          <Patch Number="22" Name="Card Effect" ProgramChange="22"/>
+          <Patch Number="23" Name="Card Effect" ProgramChange="23"/>
+          <Patch Number="24" Name="Card Effect" ProgramChange="24"/>
+          <Patch Number="25" Name="Card Effect" ProgramChange="25"/>
+          <Patch Number="26" Name="Card Effect" ProgramChange="26"/>
+          <Patch Number="27" Name="Card Effect" ProgramChange="27"/>
+          <Patch Number="28" Name="Card Effect" ProgramChange="28"/>
+          <Patch Number="29" Name="Card Effect" ProgramChange="29"/>
+          <Patch Number="30" Name="Card Effect" ProgramChange="30"/>
+          <Patch Number="31" Name="Card Effect" ProgramChange="31"/>
+          <Patch Number="32" Name="Card Effect" ProgramChange="32"/>
+          <Patch Number="33" Name="Card Effect" ProgramChange="33"/>
+          <Patch Number="34" Name="Card Effect" ProgramChange="34"/>
+          <Patch Number="35" Name="Card Effect" ProgramChange="35"/>
+          <Patch Number="36" Name="Card Effect" ProgramChange="36"/>
+          <Patch Number="37" Name="Card Effect" ProgramChange="37"/>
+          <Patch Number="38" Name="Card Effect" ProgramChange="38"/>
+          <Patch Number="39" Name="Card Effect" ProgramChange="39"/>
+          <Patch Number="40" Name="Card Effect" ProgramChange="40"/>
+          <Patch Number="41" Name="Card Effect" ProgramChange="41"/>
+          <Patch Number="42" Name="Card Effect" ProgramChange="42"/>
+          <Patch Number="43" Name="Card Effect" ProgramChange="43"/>
+          <Patch Number="44" Name="Card Effect" ProgramChange="44"/>
+          <Patch Number="45" Name="Card Effect" ProgramChange="45"/>
+          <Patch Number="46" Name="Card Effect" ProgramChange="46"/>
+          <Patch Number="47" Name="Card Effect" ProgramChange="47"/>
+          <Patch Number="48" Name="Card Effect" ProgramChange="48"/>
+          <Patch Number="49" Name="Card Effect" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="C7 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="19"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Card Effect" ProgramChange="0"/>
+          <Patch Number="1" Name="Card Effect" ProgramChange="1"/>
+          <Patch Number="2" Name="Card Effect" ProgramChange="2"/>
+          <Patch Number="3" Name="Card Effect" ProgramChange="3"/>
+          <Patch Number="4" Name="Card Effect" ProgramChange="4"/>
+          <Patch Number="5" Name="Card Effect" ProgramChange="5"/>
+          <Patch Number="6" Name="Card Effect" ProgramChange="6"/>
+          <Patch Number="7" Name="Card Effect" ProgramChange="7"/>
+          <Patch Number="8" Name="Card Effect" ProgramChange="8"/>
+          <Patch Number="9" Name="Card Effect" ProgramChange="9"/>
+          <Patch Number="10" Name="Card Effect" ProgramChange="10"/>
+          <Patch Number="11" Name="Card Effect" ProgramChange="11"/>
+          <Patch Number="12" Name="Card Effect" ProgramChange="12"/>
+          <Patch Number="13" Name="Card Effect" ProgramChange="13"/>
+          <Patch Number="14" Name="Card Effect" ProgramChange="14"/>
+          <Patch Number="15" Name="Card Effect" ProgramChange="15"/>
+          <Patch Number="16" Name="Card Effect" ProgramChange="16"/>
+          <Patch Number="17" Name="Card Effect" ProgramChange="17"/>
+          <Patch Number="18" Name="Card Effect" ProgramChange="18"/>
+          <Patch Number="19" Name="Card Effect" ProgramChange="19"/>
+          <Patch Number="20" Name="Card Effect" ProgramChange="20"/>
+          <Patch Number="21" Name="Card Effect" ProgramChange="21"/>
+          <Patch Number="22" Name="Card Effect" ProgramChange="22"/>
+          <Patch Number="23" Name="Card Effect" ProgramChange="23"/>
+          <Patch Number="24" Name="Card Effect" ProgramChange="24"/>
+          <Patch Number="25" Name="Card Effect" ProgramChange="25"/>
+          <Patch Number="26" Name="Card Effect" ProgramChange="26"/>
+          <Patch Number="27" Name="Card Effect" ProgramChange="27"/>
+          <Patch Number="28" Name="Card Effect" ProgramChange="28"/>
+          <Patch Number="29" Name="Card Effect" ProgramChange="29"/>
+          <Patch Number="30" Name="Card Effect" ProgramChange="30"/>
+          <Patch Number="31" Name="Card Effect" ProgramChange="31"/>
+          <Patch Number="32" Name="Card Effect" ProgramChange="32"/>
+          <Patch Number="33" Name="Card Effect" ProgramChange="33"/>
+          <Patch Number="34" Name="Card Effect" ProgramChange="34"/>
+          <Patch Number="35" Name="Card Effect" ProgramChange="35"/>
+          <Patch Number="36" Name="Card Effect" ProgramChange="36"/>
+          <Patch Number="37" Name="Card Effect" ProgramChange="37"/>
+          <Patch Number="38" Name="Card Effect" ProgramChange="38"/>
+          <Patch Number="39" Name="Card Effect" ProgramChange="39"/>
+          <Patch Number="40" Name="Card Effect" ProgramChange="40"/>
+          <Patch Number="41" Name="Card Effect" ProgramChange="41"/>
+          <Patch Number="42" Name="Card Effect" ProgramChange="42"/>
+          <Patch Number="43" Name="Card Effect" ProgramChange="43"/>
+          <Patch Number="44" Name="Card Effect" ProgramChange="44"/>
+          <Patch Number="45" Name="Card Effect" ProgramChange="45"/>
+          <Patch Number="46" Name="Card Effect" ProgramChange="46"/>
+          <Patch Number="47" Name="Card Effect" ProgramChange="47"/>
+          <Patch Number="48" Name="Card Effect" ProgramChange="48"/>
+          <Patch Number="49" Name="Card Effect" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="C8 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="20"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Card Effect" ProgramChange="0"/>
+          <Patch Number="1" Name="Card Effect" ProgramChange="1"/>
+          <Patch Number="2" Name="Card Effect" ProgramChange="2"/>
+          <Patch Number="3" Name="Card Effect" ProgramChange="3"/>
+          <Patch Number="4" Name="Card Effect" ProgramChange="4"/>
+          <Patch Number="5" Name="Card Effect" ProgramChange="5"/>
+          <Patch Number="6" Name="Card Effect" ProgramChange="6"/>
+          <Patch Number="7" Name="Card Effect" ProgramChange="7"/>
+          <Patch Number="8" Name="Card Effect" ProgramChange="8"/>
+          <Patch Number="9" Name="Card Effect" ProgramChange="9"/>
+          <Patch Number="10" Name="Card Effect" ProgramChange="10"/>
+          <Patch Number="11" Name="Card Effect" ProgramChange="11"/>
+          <Patch Number="12" Name="Card Effect" ProgramChange="12"/>
+          <Patch Number="13" Name="Card Effect" ProgramChange="13"/>
+          <Patch Number="14" Name="Card Effect" ProgramChange="14"/>
+          <Patch Number="15" Name="Card Effect" ProgramChange="15"/>
+          <Patch Number="16" Name="Card Effect" ProgramChange="16"/>
+          <Patch Number="17" Name="Card Effect" ProgramChange="17"/>
+          <Patch Number="18" Name="Card Effect" ProgramChange="18"/>
+          <Patch Number="19" Name="Card Effect" ProgramChange="19"/>
+          <Patch Number="20" Name="Card Effect" ProgramChange="20"/>
+          <Patch Number="21" Name="Card Effect" ProgramChange="21"/>
+          <Patch Number="22" Name="Card Effect" ProgramChange="22"/>
+          <Patch Number="23" Name="Card Effect" ProgramChange="23"/>
+          <Patch Number="24" Name="Card Effect" ProgramChange="24"/>
+          <Patch Number="25" Name="Card Effect" ProgramChange="25"/>
+          <Patch Number="26" Name="Card Effect" ProgramChange="26"/>
+          <Patch Number="27" Name="Card Effect" ProgramChange="27"/>
+          <Patch Number="28" Name="Card Effect" ProgramChange="28"/>
+          <Patch Number="29" Name="Card Effect" ProgramChange="29"/>
+          <Patch Number="30" Name="Card Effect" ProgramChange="30"/>
+          <Patch Number="31" Name="Card Effect" ProgramChange="31"/>
+          <Patch Number="32" Name="Card Effect" ProgramChange="32"/>
+          <Patch Number="33" Name="Card Effect" ProgramChange="33"/>
+          <Patch Number="34" Name="Card Effect" ProgramChange="34"/>
+          <Patch Number="35" Name="Card Effect" ProgramChange="35"/>
+          <Patch Number="36" Name="Card Effect" ProgramChange="36"/>
+          <Patch Number="37" Name="Card Effect" ProgramChange="37"/>
+          <Patch Number="38" Name="Card Effect" ProgramChange="38"/>
+          <Patch Number="39" Name="Card Effect" ProgramChange="39"/>
+          <Patch Number="40" Name="Card Effect" ProgramChange="40"/>
+          <Patch Number="41" Name="Card Effect" ProgramChange="41"/>
+          <Patch Number="42" Name="Card Effect" ProgramChange="42"/>
+          <Patch Number="43" Name="Card Effect" ProgramChange="43"/>
+          <Patch Number="44" Name="Card Effect" ProgramChange="44"/>
+          <Patch Number="45" Name="Card Effect" ProgramChange="45"/>
+          <Patch Number="46" Name="Card Effect" ProgramChange="46"/>
+          <Patch Number="47" Name="Card Effect" ProgramChange="47"/>
+          <Patch Number="48" Name="Card Effect" ProgramChange="48"/>
+          <Patch Number="49" Name="Card Effect" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="C9 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="21"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Card Effect" ProgramChange="0"/>
+          <Patch Number="1" Name="Card Effect" ProgramChange="1"/>
+          <Patch Number="2" Name="Card Effect" ProgramChange="2"/>
+          <Patch Number="3" Name="Card Effect" ProgramChange="3"/>
+          <Patch Number="4" Name="Card Effect" ProgramChange="4"/>
+          <Patch Number="5" Name="Card Effect" ProgramChange="5"/>
+          <Patch Number="6" Name="Card Effect" ProgramChange="6"/>
+          <Patch Number="7" Name="Card Effect" ProgramChange="7"/>
+          <Patch Number="8" Name="Card Effect" ProgramChange="8"/>
+          <Patch Number="9" Name="Card Effect" ProgramChange="9"/>
+          <Patch Number="10" Name="Card Effect" ProgramChange="10"/>
+          <Patch Number="11" Name="Card Effect" ProgramChange="11"/>
+          <Patch Number="12" Name="Card Effect" ProgramChange="12"/>
+          <Patch Number="13" Name="Card Effect" ProgramChange="13"/>
+          <Patch Number="14" Name="Card Effect" ProgramChange="14"/>
+          <Patch Number="15" Name="Card Effect" ProgramChange="15"/>
+          <Patch Number="16" Name="Card Effect" ProgramChange="16"/>
+          <Patch Number="17" Name="Card Effect" ProgramChange="17"/>
+          <Patch Number="18" Name="Card Effect" ProgramChange="18"/>
+          <Patch Number="19" Name="Card Effect" ProgramChange="19"/>
+          <Patch Number="20" Name="Card Effect" ProgramChange="20"/>
+          <Patch Number="21" Name="Card Effect" ProgramChange="21"/>
+          <Patch Number="22" Name="Card Effect" ProgramChange="22"/>
+          <Patch Number="23" Name="Card Effect" ProgramChange="23"/>
+          <Patch Number="24" Name="Card Effect" ProgramChange="24"/>
+          <Patch Number="25" Name="Card Effect" ProgramChange="25"/>
+          <Patch Number="26" Name="Card Effect" ProgramChange="26"/>
+          <Patch Number="27" Name="Card Effect" ProgramChange="27"/>
+          <Patch Number="28" Name="Card Effect" ProgramChange="28"/>
+          <Patch Number="29" Name="Card Effect" ProgramChange="29"/>
+          <Patch Number="30" Name="Card Effect" ProgramChange="30"/>
+          <Patch Number="31" Name="Card Effect" ProgramChange="31"/>
+          <Patch Number="32" Name="Card Effect" ProgramChange="32"/>
+          <Patch Number="33" Name="Card Effect" ProgramChange="33"/>
+          <Patch Number="34" Name="Card Effect" ProgramChange="34"/>
+          <Patch Number="35" Name="Card Effect" ProgramChange="35"/>
+          <Patch Number="36" Name="Card Effect" ProgramChange="36"/>
+          <Patch Number="37" Name="Card Effect" ProgramChange="37"/>
+          <Patch Number="38" Name="Card Effect" ProgramChange="38"/>
+          <Patch Number="39" Name="Card Effect" ProgramChange="39"/>
+          <Patch Number="40" Name="Card Effect" ProgramChange="40"/>
+          <Patch Number="41" Name="Card Effect" ProgramChange="41"/>
+          <Patch Number="42" Name="Card Effect" ProgramChange="42"/>
+          <Patch Number="43" Name="Card Effect" ProgramChange="43"/>
+          <Patch Number="44" Name="Card Effect" ProgramChange="44"/>
+          <Patch Number="45" Name="Card Effect" ProgramChange="45"/>
+          <Patch Number="46" Name="Card Effect" ProgramChange="46"/>
+          <Patch Number="47" Name="Card Effect" ProgramChange="47"/>
+          <Patch Number="48" Name="Card Effect" ProgramChange="48"/>
+          <Patch Number="49" Name="Card Effect" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Ca Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="22"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Card Effect" ProgramChange="0"/>
+          <Patch Number="1" Name="Card Effect" ProgramChange="1"/>
+          <Patch Number="2" Name="Card Effect" ProgramChange="2"/>
+          <Patch Number="3" Name="Card Effect" ProgramChange="3"/>
+          <Patch Number="4" Name="Card Effect" ProgramChange="4"/>
+          <Patch Number="5" Name="Card Effect" ProgramChange="5"/>
+          <Patch Number="6" Name="Card Effect" ProgramChange="6"/>
+          <Patch Number="7" Name="Card Effect" ProgramChange="7"/>
+          <Patch Number="8" Name="Card Effect" ProgramChange="8"/>
+          <Patch Number="9" Name="Card Effect" ProgramChange="9"/>
+          <Patch Number="10" Name="Card Effect" ProgramChange="10"/>
+          <Patch Number="11" Name="Card Effect" ProgramChange="11"/>
+          <Patch Number="12" Name="Card Effect" ProgramChange="12"/>
+          <Patch Number="13" Name="Card Effect" ProgramChange="13"/>
+          <Patch Number="14" Name="Card Effect" ProgramChange="14"/>
+          <Patch Number="15" Name="Card Effect" ProgramChange="15"/>
+          <Patch Number="16" Name="Card Effect" ProgramChange="16"/>
+          <Patch Number="17" Name="Card Effect" ProgramChange="17"/>
+          <Patch Number="18" Name="Card Effect" ProgramChange="18"/>
+          <Patch Number="19" Name="Card Effect" ProgramChange="19"/>
+          <Patch Number="20" Name="Card Effect" ProgramChange="20"/>
+          <Patch Number="21" Name="Card Effect" ProgramChange="21"/>
+          <Patch Number="22" Name="Card Effect" ProgramChange="22"/>
+          <Patch Number="23" Name="Card Effect" ProgramChange="23"/>
+          <Patch Number="24" Name="Card Effect" ProgramChange="24"/>
+          <Patch Number="25" Name="Card Effect" ProgramChange="25"/>
+          <Patch Number="26" Name="Card Effect" ProgramChange="26"/>
+          <Patch Number="27" Name="Card Effect" ProgramChange="27"/>
+          <Patch Number="28" Name="Card Effect" ProgramChange="28"/>
+          <Patch Number="29" Name="Card Effect" ProgramChange="29"/>
+          <Patch Number="30" Name="Card Effect" ProgramChange="30"/>
+          <Patch Number="31" Name="Card Effect" ProgramChange="31"/>
+          <Patch Number="32" Name="Card Effect" ProgramChange="32"/>
+          <Patch Number="33" Name="Card Effect" ProgramChange="33"/>
+          <Patch Number="34" Name="Card Effect" ProgramChange="34"/>
+          <Patch Number="35" Name="Card Effect" ProgramChange="35"/>
+          <Patch Number="36" Name="Card Effect" ProgramChange="36"/>
+          <Patch Number="37" Name="Card Effect" ProgramChange="37"/>
+          <Patch Number="38" Name="Card Effect" ProgramChange="38"/>
+          <Patch Number="39" Name="Card Effect" ProgramChange="39"/>
+          <Patch Number="40" Name="Card Effect" ProgramChange="40"/>
+          <Patch Number="41" Name="Card Effect" ProgramChange="41"/>
+          <Patch Number="42" Name="Card Effect" ProgramChange="42"/>
+          <Patch Number="43" Name="Card Effect" ProgramChange="43"/>
+          <Patch Number="44" Name="Card Effect" ProgramChange="44"/>
+          <Patch Number="45" Name="Card Effect" ProgramChange="45"/>
+          <Patch Number="46" Name="Card Effect" ProgramChange="46"/>
+          <Patch Number="47" Name="Card Effect" ProgramChange="47"/>
+          <Patch Number="48" Name="Card Effect" ProgramChange="48"/>
+          <Patch Number="49" Name="Card Effect" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

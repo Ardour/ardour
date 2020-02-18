@@ -1,21 +1,23 @@
 /*
-    Copyright (C) 2009 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2008-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <inttypes.h>
 #include <iomanip>
@@ -24,11 +26,14 @@
 
 #include "pbd/convert.h"
 #include "pbd/error.h"
+#include "pbd/unwind.h"
+
 #include "ardour/latent.h"
 
 #include "gtkmm2ext/utils.h"
 
 #include "latency_gui.h"
+#include "utils.h"
 
 #include "pbd/i18n.h"
 
@@ -50,29 +55,19 @@ std::vector<std::string> LatencyGUI::unit_strings;
 std::string
 LatencyBarController::get_label (double&)
 {
-	double const nframes = _latency_gui->adjustment.get_value();
-	std::stringstream s;
-
-	if (nframes < (_latency_gui->sample_rate / 1000.0)) {
-		const samplepos_t nf = (samplepos_t) rint (nframes);
-		s << string_compose (P_("%1 sample", "%1 samples", nf), nf);
-	} else {
-		s << std::fixed << std::setprecision (2) << (nframes / (_latency_gui->sample_rate / 1000.0)) << " ms";
-	}
-
-	return s.str ();
+	return ARDOUR_UI_UTILS::samples_as_time_string (
+			_latency_gui->adjustment.get_value(), _latency_gui->sample_rate, true);
 }
 
 LatencyGUI::LatencyGUI (Latent& l, samplepos_t sr, samplepos_t psz)
-	: _latent (l),
-	  initial_value (_latent.user_latency()),
-	  sample_rate (sr),
-	  period_size (psz),
-	  ignored (new PBD::IgnorableControllable()),
-	  /* max 1 second, step by samples, page by msecs */
-	  adjustment (initial_value, 0.0, sample_rate, 1.0, sample_rate / 1000.0f),
-	  bc (adjustment, this),
-	  reset_button (_("Reset"))
+	: _latent (l)
+	, sample_rate (sr)
+	, period_size (psz)
+	, ignored (new PBD::IgnorableControllable())
+	, _ignore_change (false)
+	, adjustment (0, 0.0, sample_rate, 1.0, sample_rate / 1000.0f) /* max 1 second, step by samples, page by msecs */
+	, bc (adjustment, this)
+	, reset_button (_("Reset"))
 {
 	Widget* w;
 
@@ -103,6 +98,12 @@ LatencyGUI::LatencyGUI (Latent& l, samplepos_t sr, samplepos_t psz)
 	plus_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LatencyGUI::change_latency_from_button), 1));
 	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &LatencyGUI::reset));
 
+	/* Limit value to adjustment range (max = sample_rate).
+	 * Otherwise if the signal_latency() is larger than the adjustment's max,
+	 * LatencyGUI::finish() would set the adjustment's max value as custom-latency.
+	 */
+	adjustment.set_value (std::min (sample_rate, _latent.signal_latency ()));
+
 	adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &LatencyGUI::finish));
 
 	bc.set_size_request (-1, 25);
@@ -116,24 +117,26 @@ LatencyGUI::LatencyGUI (Latent& l, samplepos_t sr, samplepos_t psz)
 void
 LatencyGUI::finish ()
 {
-	samplepos_t new_value = (samplepos_t) adjustment.get_value();
-	if (new_value != initial_value) {
-		_latent.set_user_latency (new_value);
+	if (_ignore_change) {
+		return;
 	}
+	samplepos_t new_value = (samplepos_t) adjustment.get_value();
+	_latent.set_user_latency (new_value);
 }
 
 void
 LatencyGUI::reset ()
 {
-	_latent.set_user_latency (0);
-	adjustment.set_value (initial_value);
+	_latent.unset_user_latency ();
+	PBD::Unwinder<bool> uw (_ignore_change, true);
+	adjustment.set_value (std::min (sample_rate, _latent.signal_latency ()));
 }
 
 void
 LatencyGUI::refresh ()
 {
-	initial_value = _latent.signal_latency();
-	adjustment.set_value (initial_value);
+	PBD::Unwinder<bool> uw (_ignore_change, true);
+	adjustment.set_value (std::min (sample_rate, _latent.effective_latency ()));
 }
 
 void
@@ -160,16 +163,3 @@ LatencyGUI::change_latency_from_button (int dir)
 		adjustment.set_value (adjustment.get_value() - shift);
 	}
 }
-
-LatencyDialog::LatencyDialog (const std::string& title, Latent& l, samplepos_t sr, samplepos_t psz)
-	: ArdourDialog (title, false, true),
-	  lwidget (l, sr, psz)
-{
-	get_vbox()->pack_start (lwidget);
-	add_button (Stock::CLOSE, RESPONSE_CLOSE);
-
-	show_all ();
-	run ();
-}
-
-

@@ -1,6 +1,8 @@
 /*
- * Copyright (C) 2014 Robin Gareus <robin@gareus.org>
- * Copyright (C) 2013 Paul Davis
+ * Copyright (C) 2014-2015 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2014-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2017 John Emmas <john@creativepost.co.uk>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,9 +14,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <math.h>
@@ -128,6 +130,7 @@ DummyAudioBackend::enumerate_devices () const
 		_device_status.push_back (DeviceStatus (_("Sine Sweep Swell"), true));
 		_device_status.push_back (DeviceStatus (_("Square Sweep"), true));
 		_device_status.push_back (DeviceStatus (_("Square Sweep Swell"), true));
+		_device_status.push_back (DeviceStatus (_("Engine Pulse"), true));
 		_device_status.push_back (DeviceStatus (_("LTC"), true));
 		_device_status.push_back (DeviceStatus (_("Loopback"), true));
 	}
@@ -371,6 +374,7 @@ DummyAudioBackend::enumerate_midi_options () const
 		_midi_options.push_back (_("2 in, 2 out, Silence"));
 		_midi_options.push_back (_("8 in, 8 out, Silence"));
 		_midi_options.push_back (_("Midi Event Generators"));
+		_midi_options.push_back (_("Engine Pulse"));
 		_midi_options.push_back (_("8 in, 8 out, Loopback"));
 		_midi_options.push_back (_("MIDI to Audio, Loopback"));
 		_midi_options.push_back (_("No MIDI I/O"));
@@ -390,6 +394,10 @@ DummyAudioBackend::set_midi_option (const std::string& opt)
 	}
 	else if (opt == _("8 in, 8 out, Silence")) {
 		_n_midi_inputs = _n_midi_outputs = 8;
+	}
+	else if (opt == _("Engine Pulse")) {
+		_n_midi_inputs = _n_midi_outputs = 1;
+		_midi_mode = MidiOneHz;
 	}
 	else if (opt == _("Midi Event Generators")) {
 		_n_midi_inputs = _n_midi_outputs = NUM_MIDI_EVENT_GENERATORS;
@@ -635,12 +643,6 @@ DummyAudioBackend::my_name () const
 	return _instance_name;
 }
 
-bool
-DummyAudioBackend::available () const
-{
-	return _running;
-}
-
 uint32_t
 DummyAudioBackend::port_name_size () const
 {
@@ -859,6 +861,8 @@ DummyAudioBackend::register_system_ports()
 		gt = DummyAudioPort::SquareSweep;
 	} else if (_device == _("Square Sweep Swell")) {
 		gt = DummyAudioPort::SquareSweepSwell;
+	} else if (_device == _("Engine Pulse")) {
+		gt = DummyAudioPort::OneHz;
 	} else if (_device == _("LTC")) {
 		gt = DummyAudioPort::LTC;
 	} else if (_device == _("Loopback")) {
@@ -910,7 +914,7 @@ DummyAudioBackend::register_system_ports()
 	lr.min = lr.max = _systemic_input_latency;
 	for (int i = 0; i < m_ins; ++i) {
 		char tmp[64];
-		snprintf(tmp, sizeof(tmp), "system:midi_capture_%d", i+1);
+		snprintf(tmp, sizeof(tmp), "system:midi_capture_dummy_%d", i+1);
 		PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
@@ -921,12 +925,18 @@ DummyAudioBackend::register_system_ports()
 				static_cast<DummyMidiPort*>(p)->set_pretty_name (name);
 			}
 		}
+		else if (_midi_mode == MidiOneHz) {
+			std::string name = static_cast<DummyMidiPort*>(p)->setup_generator (-1, _samplerate);
+			if (!name.empty ()) {
+				static_cast<DummyMidiPort*>(p)->set_pretty_name (name);
+			}
+		}
 	}
 
 	lr.min = lr.max = _systemic_output_latency;
 	for (int i = 1; i <= m_out; ++i) {
 		char tmp[64];
-		snprintf(tmp, sizeof(tmp), "system:midi_playback_%d", i);
+		snprintf(tmp, sizeof(tmp), "system:midi_playback_dummy_%d", i);
 		PortHandle p = add_port(std::string(tmp), DataType::MIDI, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
@@ -1699,6 +1709,14 @@ DummyPort::randf ()
 	return (randi() / 1073741824.f) - 1.f;
 }
 
+pframes_t
+DummyPort::pulse_position () const
+{
+	samplecnt_t sr = _dummy_backend.sample_rate ();
+	samplepos_t st = _dummy_backend.sample_time_at_cycle_start();
+	return (sr - (st % sr)) % sr;
+}
+
 /******************************************************************************/
 
 DummyAudioPort::DummyAudioPort (DummyAudioBackend &b, const std::string& name, PortFlags flags)
@@ -1779,6 +1797,9 @@ DummyAudioPort::setup_generator (GeneratorType const g, float const samplerate, 
 		case GaussianWhiteNoise:
 		case DC05:
 		case Silence:
+			break;
+		case OneHz:
+			name = string_compose ("One Hz (%1)", 1 + c);
 			break;
 		case Demolition:
 			_gen_period = 3 * samplerate;
@@ -2032,6 +2053,17 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 				_gen_offset = (_gen_offset + 1) % _gen_period;
 			}
 			break;
+		case OneHz:
+			memset (_buffer, 0, n_samples * sizeof (Sample));
+			{
+				pframes_t pp = pulse_position ();
+				/* MIDI Pulse needs 2 samples: Note on + off */
+				if (pp < n_samples - 1) {
+					_buffer[pp] = 1.0f;
+					_buffer[pp + 1] = -1.0f;
+				}
+			}
+			break;
 		case SineSweepSwell:
 		case SquareSweepSwell:
 			assert(_wavetable && _gen_period > 0);
@@ -2171,6 +2203,7 @@ DummyMidiPort::DummyMidiPort (DummyAudioBackend &b, const std::string& name, Por
 	, _midi_seq_spb (0)
 	, _midi_seq_time (0)
 	, _midi_seq_pos (0)
+	, _midi_seq_dat (0)
 {
 	_buffer.clear ();
 	_loopback.clear ();
@@ -2199,6 +2232,10 @@ std::string
 DummyMidiPort::setup_generator (int seq_id, const float sr)
 {
 	DummyPort::setup_random_number_generator();
+	if (seq_id < 0) {
+		_midi_seq_spb = sr;
+		return "One Hz";
+	}
 	_midi_seq_dat = DummyMidiData::sequences[seq_id % NUM_MIDI_EVENT_GENERATORS];
 	_midi_seq_spb = sr * .5f; // 120 BPM, beat_time 1.0 per beat.
 	_midi_seq_pos = 0;
@@ -2215,6 +2252,19 @@ void DummyMidiPort::midi_generate (const pframes_t n_samples)
 
 	_buffer.clear ();
 	_gen_cycle = true;
+
+	if (_midi_seq_spb != 0 && !_midi_seq_dat) {
+		/* 1 Hz Note Events */
+		pframes_t pp = pulse_position ();
+		if (pp < n_samples - 1) {
+			uint8_t md[3] = {0x90, 0x3c, 0x7f};
+			_buffer.push_back (boost::shared_ptr<DummyMidiEvent>(new DummyMidiEvent (pp, md, 3)));
+			md[0] = 0x80;
+			md[2] = 0;
+			_buffer.push_back (boost::shared_ptr<DummyMidiEvent>(new DummyMidiEvent (pp + 1, md, 3)));
+		}
+		return;
+	}
 
 	if (_midi_seq_spb == 0 || !_midi_seq_dat) {
 		for (DummyMidiBuffer::const_iterator it = _loopback.begin (); it != _loopback.end (); ++it) {

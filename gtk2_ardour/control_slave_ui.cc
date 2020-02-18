@@ -1,20 +1,21 @@
 /*
-  Copyright (C) 2016 Paul Davis
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2016-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2016-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <string>
 
@@ -51,7 +52,7 @@ ControlSlaveUI::ControlSlaveUI (Session* s)
 	Gtkmm2ext::UI::instance()->set_tip (*this, _("VCA Assign"));
 
 	initial_button.set_no_show_all (true);
-	initial_button.set_name (X_("vca assign"));
+	initial_button.set_name (X_("vca assign button"));
 	initial_button.set_text (_("-VCAs-"));
 	initial_button.show ();
 	initial_button.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
@@ -102,7 +103,7 @@ ControlSlaveUI::update_vca_display ()
 
 	if (stripable) {
 		for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
-			if (stripable->gain_control()->slaved_to ((*v)->gain_control())) {
+			if (stripable->slaved_to (*v)) {
 				add_vca_button (*v);
 				any = true;
 			}
@@ -199,10 +200,7 @@ ControlSlaveUI::vca_button_release (GdkEventButton* ev, uint32_t n)
 		items.push_back (CheckMenuElem ((*v)->name()));
 		Gtk::CheckMenuItem* item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
 
-		boost::shared_ptr<GainControl> gcs = stripable->gain_control();
-		boost::shared_ptr<GainControl> gcm = (*v)->gain_control();
-
-		if (gcs->slaved_to (gcm)) {
+		if (stripable->slaved_to (*v)) {
 			item->set_active (true);
 			slaved = true;
 		}
@@ -227,7 +225,7 @@ ControlSlaveUI::add_vca_button (boost::shared_ptr<VCA> vca)
 	ArdourButton* vca_button = manage (new ArdourButton (ArdourButton::default_elements));
 
 	vca_button->set_no_show_all (true);
-	vca_button->set_name (X_("vca assign"));
+	vca_button->set_name (X_("vca assign button"));
 	vca_button->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	vca_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &ControlSlaveUI::specific_vca_button_release), vca->number()), false);
 	vca_button->set_text (PBD::to_string (vca->number()));

@@ -1,21 +1,26 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2007-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2007-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2013-2017 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2019 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2015 André Nusser <andre.nusser@googlemail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <algorithm>
 #include <cstdlib>
@@ -35,6 +40,7 @@
 #include "editor.h"
 #include "editor_drag.h"
 #include "editor_routes.h"
+#include "editor_sources.h"
 #include "actions.h"
 #include "audio_time_axis.h"
 #include "audio_region_view.h"
@@ -170,6 +176,20 @@ Editor::extend_selection_to_track (TimeAxisView& view)
 
 void
 Editor::select_all_tracks ()
+{
+	TrackViewList tracks;
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*i);
+		if ( rtv && rtv->route()->is_track() ) {
+			tracks.push_back (*i);
+		}
+	}
+	PBD::Unwinder<bool> uw (_track_selection_change_without_scroll, true);
+	selection->set (tracks);
+}
+
+void
+Editor::select_all_visible_lanes ()
 {
 	TrackViewList visible_views;
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
@@ -1214,6 +1234,7 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 	bool have_selection = false;
 	bool have_entered = false;
 	bool have_edit_point = false;
+	bool have_selected_source = false;
 	RegionSelection rs;
 
 	// std::cerr << "STRRA: crossing ? " << because_canvas_crossing << " within ? " << within_track_canvas
@@ -1227,6 +1248,10 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 	if (entered_regionview) {
 		have_entered = true;
 		rs.add (entered_regionview);
+	}
+
+	if ( _sources->get_single_selection() ) {
+		have_selected_source = true;
 	}
 
 	if (rs.empty() && !selection->tracks.empty()) {
@@ -1277,6 +1302,8 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 		} else if ((tgt & EnteredRegions) && have_entered) {
 			sensitive = true;
 		} else if ((tgt & EditPointRegions) && have_edit_point) {
+			sensitive = true;
+		} else if ((tgt & ListSelection) && have_selected_source ) {
 			sensitive = true;
 		}
 
@@ -1503,12 +1530,15 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 		_region_actions->get_action("naturalize-region")->set_sensitive (false);
 	}
 
+	/* Todo: insert-region-from-source-list */
 	/* XXX: should also check that there is a track of the appropriate type for the selected region */
+#if 0
 	if (_edit_point == EditAtMouse || _regions->get_single_selection() == 0 || selection->tracks.empty()) {
-		_region_actions->get_action("insert-region-from-region-list")->set_sensitive (false);
+		_region_actions->get_action("insert-region-from-source-list")->set_sensitive (false);
 	} else {
-		_region_actions->get_action("insert-region-from-region-list")->set_sensitive (true);
+		_region_actions->get_action("insert-region-from-source-list")->set_sensitive (true);
 	}
+#endif
 
 	a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-fade-in"));
 	a->set_active (have_active_fade_in && !have_inactive_fade_in);
@@ -1562,13 +1592,12 @@ Editor::region_selection_changed ()
 	sensitize_the_right_region_actions (false);
 
 	/* propagate into backend */
+	assert (_session);
 
-	if (_session) {
-		if (!selection->regions.empty()) {
-			_session->set_object_selection (selection->regions.start(), selection->regions.end_sample());
-		} else {
-			_session->clear_object_selection ();
-		}
+	if (!selection->regions.empty()) {
+		_session->set_object_selection (selection->regions.start(), selection->regions.end_sample());
+	} else {
+		_session->clear_object_selection ();
 	}
 
 	if (_session->solo_selection_active()) {
@@ -1582,8 +1611,15 @@ Editor::region_selection_changed ()
 		nudge_backward_button.set_name ("nudge button");
 	} else {
 		/* nudge marker or playhead */
-		nudge_forward_button.set_name ("generic button");
-		nudge_backward_button.set_name ("generic button");
+		nudge_forward_button.set_name ("transport button");
+		nudge_backward_button.set_name ("transport button");
+	}
+
+	//there are a few global Editor->Select actions which select regions even if you aren't in Object mode.
+	//if regions are selected, we must always force the mouse mode to Object...
+	//... otherwise the user is confusingly left with selected regions that can't be manipulated.
+	if (!selection->regions.empty()) {
+		set_mouse_mode( MouseObject, false );
 	}
 }
 
@@ -1710,7 +1746,7 @@ Editor::invert_selection ()
 {
 
 	if (internal_editing()) {
-		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+		for (MidiRegionSelection::iterator i = selection->midi_regions.begin(); i != selection->midi_regions.end(); ++i) {
 			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
 			if (mrv) {
 				mrv->invert_selection ();
@@ -1871,7 +1907,7 @@ Editor::set_selection_from_range (Location& loc)
 	// if no tracks are selected, enable all tracks
 	// (_something_ has to be selected for any range selection, otherwise the user won't see anything)
 	if (selection->tracks.empty()) {
-		select_all_tracks();
+		select_all_visible_lanes();
 	}
 
 	commit_reversible_selection_op ();
@@ -2149,9 +2185,6 @@ Editor::select_range_between ()
 bool
 Editor::get_edit_op_range (samplepos_t& start, samplepos_t& end) const
 {
-//	samplepos_t m;
-//	bool ignored;
-
 	/* if an explicit range exists, use it */
 
 	if ((mouse_mode == MouseRange || get_smart_mode()) &&  !selection->time.empty()) {
@@ -2164,87 +2197,6 @@ Editor::get_edit_op_range (samplepos_t& start, samplepos_t& end) const
 		end = 0;
 		return false;
 	}
-
-//	if (!mouse_sample (m, ignored)) {
-//		/* mouse is not in a canvas, try playhead+selected marker.
-//		   this is probably most true when using menus.
-//		*/
-//
-//		if (selection->markers.empty()) {
-//			return false;
-//		}
-
-//		start = selection->markers.front()->position();
-//		end = _session->audible_sample();
-
-//	} else {
-
-//		switch (_edit_point) {
-//		case EditAtPlayhead:
-//			if (selection->markers.empty()) {
-//				/* use mouse + playhead */
-//				start = m;
-//				end = _session->audible_sample();
-//			} else {
-//				/* use playhead + selected marker */
-//				start = _session->audible_sample();
-//				end = selection->markers.front()->position();
-//			}
-//			break;
-
-//		case EditAtMouse:
-//			/* use mouse + selected marker */
-//			if (selection->markers.empty()) {
-//				start = m;
-//				end = _session->audible_sample();
-//			} else {
-//				start = selection->markers.front()->position();
-//				end = m;
-//			}
-//			break;
-
-//		case EditAtSelectedMarker:
-//			/* use mouse + selected marker */
-//			if (selection->markers.empty()) {
-
-//				MessageDialog win (_("No edit range defined"),
-//				                   false,
-//				                   MESSAGE_INFO,
-//				                   BUTTONS_OK);
-
-//				win.set_secondary_text (
-//					_("the edit point is Selected Marker\nbut there is no selected marker."));
-
-
-//				win.set_default_response (RESPONSE_CLOSE);
-//				win.set_position (Gtk::WIN_POS_MOUSE);
-//				win.show_all();
-
-//				win.run ();
-
-//				return false; // NO RANGE
-//			}
-//			start = selection->markers.front()->position();
-//			end = m;
-//			break;
-//		}
-//	}
-
-//	if (start == end) {
-//		return false;
-//	}
-
-//	if (start > end) {
-//		swap (start, end);
-//	}
-
-	/* turn range into one delimited by start...end,
-	   not start...end-1
-	*/
-
-//	end++;
-
-//	return true;
 }
 
 void

@@ -1,23 +1,22 @@
 /*
-    Copyright (C) 2011-2013 Paul Davis
-    Copyright (C) 2017 Tim Mayberry
-    Author: Carl Hetherington <cth@carlh.net>
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2017 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef _WAVEVIEW_WAVE_VIEW_H_
 #define _WAVEVIEW_WAVE_VIEW_H_
@@ -88,8 +87,8 @@ public:
 	void set_channel (int);
 	void set_region_start (ARDOUR::sampleoffset_t);
 
-	/** Change the first position drawn by @param pixels.
-	 * @param pixels must be positive. This is used by
+	/** Change the first position drawn by \p pixels .
+	 * \p pixels must be positive. This is used by
 	 * AudioRegionViews in Ardour to avoid drawing the
 	 * first pixel of a waveform, and exists in case
 	 * there are uses for WaveView where we do not

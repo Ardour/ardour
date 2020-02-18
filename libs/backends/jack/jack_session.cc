@@ -1,21 +1,22 @@
 /*
-  Copyright (C) 2013 Paul Davis
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2013-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2014-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015-2016 Nick Mainsbridge <mainsbridge@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 
 #include <time.h>
@@ -114,7 +115,13 @@ JACKSession::timebase_callback (jack_transport_state_t /*state*/,
 {
 	Timecode::BBT_Time bbt;
 	TempoMap& tempo_map (_session->tempo_map());
-	samplepos_t tf = _session->transport_sample ();
+	samplepos_t tf;
+
+	/* see commit msg for e2c26e1b9 and Session::start_locate() for
+	   details.
+	*/
+
+	tf = _session->nominal_jack_transport_sample().value_or (_session->transport_sample());
 
 	/* BBT info */
 
@@ -190,4 +197,3 @@ JACKSession::timebase_callback (jack_transport_state_t /*state*/,
 	}
 #endif
 }
-

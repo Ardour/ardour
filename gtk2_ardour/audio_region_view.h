@@ -1,20 +1,25 @@
 /*
-    Copyright (C) 2001-2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2006-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2007 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2008-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2012 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __gtk_ardour_audio_region_view_h__
 #define __gtk_ardour_audio_region_view_h__
@@ -104,7 +109,7 @@ public:
 	samplepos_t get_fade_out_shape_width ();
 
 	void set_fade_visibility (bool);
-	void update_coverage_samples (LayerDisplay);
+	void update_coverage_frame (LayerDisplay);
 
 	void update_transient(float old_pos, float new_pos);
 	void remove_transient(float pos);
@@ -153,7 +158,7 @@ protected:
 	};
 
 	std::vector<ArdourWaveView::WaveView *> waves;
-	std::vector<ArdourWaveView::WaveView *> tmp_waves; ///< see ::create_waves()
+	std::vector<ArdourWaveView::WaveView *> tmp_waves; ///< see \ref create_waves()
 
 	std::list<std::pair<samplepos_t, ArdourCanvas::Line*> > feature_lines;
 
@@ -197,7 +202,7 @@ protected:
 	void set_colors ();
 	void set_waveform_colors ();
 	void reset_width_dependent_items (double pixel_width);
-	void set_sample_color ();
+	void set_frame_color ();
 
 	void color_handler ();
 

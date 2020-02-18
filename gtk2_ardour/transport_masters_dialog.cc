@@ -1,21 +1,21 @@
 /*
-    Copyright (C) 2018 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2018-2019 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2018-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 #include <gtkmm/stock.h>
 
 #include "pbd/enumwriter.h"
@@ -86,6 +86,8 @@ TransportMastersWidget::TransportMastersWidget ()
 	TransportMasterManager::instance().Added.connect (add_connection, invalidator (*this), boost::bind (&TransportMastersWidget::rebuild, this), gui_context());
 	TransportMasterManager::instance().Removed.connect (remove_connection, invalidator (*this), boost::bind (&TransportMastersWidget::rebuild, this), gui_context());
 
+	AudioEngine::instance()->Running.connect (engine_running_connection, invalidator (*this), boost::bind (&TransportMastersWidget::update_usability, this), gui_context());
+
 	rebuild ();
 }
 
@@ -143,10 +145,8 @@ TransportMastersWidget::add_master ()
 }
 
 void
-TransportMastersWidget::rebuild ()
+TransportMastersWidget::clear ()
 {
-	TransportMasterManager::TransportMasters const & masters (TransportMasterManager::instance().transport_masters());
-
 	container_clear (table);
 
 	for (vector<Row*>::iterator r = rows.begin(); r != rows.end(); ++r) {
@@ -154,6 +154,14 @@ TransportMastersWidget::rebuild ()
 	}
 
 	rows.clear ();
+}
+
+void
+TransportMastersWidget::rebuild ()
+{
+	TransportMasterManager::TransportMasters const & masters (TransportMasterManager::instance().transport_masters());
+
+	clear ();
 	table.resize (masters.size()+1, 14);
 
 	for (size_t col = 0; col < sizeof (col_title) / sizeof (col_title[0]); ++col) {
@@ -238,6 +246,19 @@ TransportMastersWidget::rebuild ()
 
 		r->prop_change (all_change);
 	}
+
+	update_usability ();
+}
+
+void
+TransportMastersWidget::update_usability ()
+{
+	for (vector<Row*>::iterator r= rows.begin(); r != rows.end(); ++r) {
+		const bool usable = (*r)->tm->usable();
+		(*r)->use_button.set_sensitive (usable);
+		(*r)->collect_button.set_sensitive (usable);
+		(*r)->request_options.set_sensitive (usable);
+	}
 }
 
 TransportMastersWidget::Row::Row (TransportMastersWidget& p)
@@ -248,6 +269,11 @@ TransportMastersWidget::Row::Row (TransportMastersWidget& p)
 	, save_when (0)
 	, ignore_active_change (false)
 {
+}
+
+TransportMastersWidget::Row::~Row ()
+{
+	delete request_option_menu;
 }
 
 bool
@@ -361,7 +387,7 @@ TransportMastersWidget::Row::build_request_options ()
 {
 	using namespace Gtk::Menu_Helpers;
 
-	request_option_menu = manage (new Menu);
+	request_option_menu = new Menu;
 
 	MenuList& items (request_option_menu->items());
 
@@ -481,6 +507,10 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 	Time l;
 	boost::shared_ptr<TimecodeTransportMaster> ttm;
 	boost::shared_ptr<MIDIClock_TransportMaster> mtm;
+
+	if (!AudioEngine::instance()->running()) {
+		return;
+	}
 
 	if (s) {
 

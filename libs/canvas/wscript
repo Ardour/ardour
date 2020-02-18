@@ -80,13 +80,13 @@ def build(bld):
         obj.defines      = [ 'LIBCANVAS_DLL_EXPORTS=1' ]
     else:
         obj = bld.stlib(features = 'cxx cxxstlib', source=canvas_sources)
-        obj.cxxflags = [  bld.env['compiler_flags_dict']['pic'] ]
-        obj.cflags = [ bld.env['compiler_flags_dict']['pic'] ]
-        obj.defines      = [ ]
+        obj.cxxflags = [ bld.env['compiler_flags_dict']['pic'] ]
+        obj.cflags   = [ bld.env['compiler_flags_dict']['pic'] ]
+        obj.defines  = [ ]
 
     obj.export_includes = ['.']
     obj.includes     = ['.']
-    obj.uselib       = 'SIGCPP CAIROMM GTKMM BOOST XML'
+    obj.uselib       = 'SIGCPP CAIROMM GTKMM BOOST XML OSX'
     obj.use          = [ 'libpbd', 'libgtkmm2ext' ]
     obj.name         = 'libcanvas'
     obj.target       = 'canvas'

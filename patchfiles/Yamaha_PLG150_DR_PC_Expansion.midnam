@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Yamaha</Manufacturer>
+    <Model>CS6R</Model>
+    <Model>CS6x</Model>
+    <Model>MOTIF 6</Model>
+    <Model>MOTIF 7</Model>
+    <Model>MOTIF 8</Model>
+    <Model>MOTIF ES6</Model>
+    <Model>MOTIF ES7</Model>
+    <Model>MOTIF ES8</Model>
+    <Model>MOTIF Rack</Model>
+    <Model>MU100R</Model>
+    <Model>S30</Model>
+    <Model>S80</Model>
+    <Model>S90</Model>
+    <PatchNameList Name="Drums Exp: Preset">
+      <Patch Number="001" Name="LiveRm A" ProgramChange="0"/>
+      <Patch Number="002" Name="LiveRm B" ProgramChange="1"/>
+      <Patch Number="003" Name="PowrdStd" ProgramChange="2"/>
+      <Patch Number="004" Name="DryStand" ProgramChange="3"/>
+      <Patch Number="005" Name="RockSt1" ProgramChange="4"/>
+      <Patch Number="006" Name="RockSt2" ProgramChange="5"/>
+      <Patch Number="007" Name="DryKit A" ProgramChange="6"/>
+      <Patch Number="008" Name="DryKit B" ProgramChange="7"/>
+      <Patch Number="009" Name="SmlRoom1" ProgramChange="8"/>
+      <Patch Number="010" Name="SmlRoom2" ProgramChange="9"/>
+      <Patch Number="011" Name="HeavyKit" ProgramChange="10"/>
+      <Patch Number="012" Name="RingSnrs" ProgramChange="11"/>
+      <Patch Number="013" Name="Rocky" ProgramChange="12"/>
+      <Patch Number="014" Name="Trashed1" ProgramChange="13"/>
+      <Patch Number="015" Name="Trashed2" ProgramChange="14"/>
+      <Patch Number="016" Name="Trashed3" ProgramChange="15"/>
+      <Patch Number="017" Name="Weirdo" ProgramChange="16"/>
+      <Patch Number="018" Name="DarkBrk" ProgramChange="17"/>
+      <Patch Number="019" Name="BriteBrk" ProgramChange="18"/>
+      <Patch Number="020" Name="RockBrk" ProgramChange="19"/>
+      <Patch Number="021" Name="DirtyTek" ProgramChange="20"/>
+      <Patch Number="022" Name="Ethnic" ProgramChange="21"/>
+      <Patch Number="023" Name="DigiLofi" ProgramChange="22"/>
+      <Patch Number="024" Name="NoizElec" ProgramChange="23"/>
+      <Patch Number="025" Name="BreakAmb" ProgramChange="24"/>
+      <Patch Number="026" Name="Electron" ProgramChange="25"/>
+      <Patch Number="027" Name="EthncAmb" ProgramChange="26"/>
+      <Patch Number="028" Name="Flanger" ProgramChange="27"/>
+      <Patch Number="029" Name="Phaser1" ProgramChange="28"/>
+      <Patch Number="030" Name="Phaser2" ProgramChange="29"/>
+      <Patch Number="031" Name="AM/PM" ProgramChange="30"/>
+      <Patch Number="032" Name="AutoPan" ProgramChange="31"/>
+      <Patch Number="033" Name="Drone" ProgramChange="32"/>
+      <Patch Number="034" Name="SnareKit" ProgramChange="33"/>
+      <Patch Number="035" Name="Cym Amb" ProgramChange="34"/>
+      <Patch Number="036" Name="KitA/Ht1" ProgramChange="35"/>
+      <Patch Number="037" Name="KitB/Ht1" ProgramChange="36"/>
+      <Patch Number="038" Name="KitA/Ht2" ProgramChange="37"/>
+      <Patch Number="039" Name="KitB/Ht2" ProgramChange="38"/>
+      <Patch Number="040" Name="Spread1" ProgramChange="39"/>
+      <Patch Number="041" Name="Spread2" ProgramChange="40"/>
+      <Patch Number="042" Name="Spread3" ProgramChange="41"/>
+      <Patch Number="043" Name="Spread4" ProgramChange="42"/>
+      <Patch Number="044" Name="Kicks" ProgramChange="43"/>
+      <Patch Number="045" Name="Snares" ProgramChange="44"/>
+      <Patch Number="046" Name="Toms" ProgramChange="45"/>
+      <Patch Number="047" Name="Hats" ProgramChange="46"/>
+      <Patch Number="048" Name="Cymbals" ProgramChange="47"/>
+      <Patch Number="049" Name="A--PlgPC" ProgramChange="48"/>
+      <Patch Number="050" Name="B--PlgPC" ProgramChange="49"/>
+      <Patch Number="051" Name="ABAA/Prc" ProgramChange="50"/>
+      <Patch Number="052" Name="AABA/Prc" ProgramChange="51"/>
+      <Patch Number="053" Name="AAAB/Prc" ProgramChange="52"/>
+      <Patch Number="054" Name="ABBA/Prc" ProgramChange="53"/>
+      <Patch Number="055" Name="AABB/Prc" ProgramChange="54"/>
+      <Patch Number="056" Name="ABAB/Prc" ProgramChange="55"/>
+      <Patch Number="057" Name="ABBB/Prc" ProgramChange="56"/>
+      <Patch Number="058" Name="BABB/Prc" ProgramChange="57"/>
+      <Patch Number="059" Name="BBAB/Prc" ProgramChange="58"/>
+      <Patch Number="060" Name="BBBA/Prc" ProgramChange="59"/>
+      <Patch Number="061" Name="BAAB/Prc" ProgramChange="60"/>
+      <Patch Number="062" Name="BBAA/Prc" ProgramChange="61"/>
+      <Patch Number="063" Name="BABA/Prc" ProgramChange="62"/>
+      <Patch Number="064" Name="BAAA/Prc" ProgramChange="63"/>
+      <Patch Number="065" Name="AAAA/Kk" ProgramChange="64"/>
+      <Patch Number="066" Name="ABAA/Sn1" ProgramChange="65"/>
+      <Patch Number="067" Name="AABA/Sn2" ProgramChange="66"/>
+      <Patch Number="068" Name="AAAB/Tom" ProgramChange="67"/>
+      <Patch Number="069" Name="ABBA/Hat" ProgramChange="68"/>
+      <Patch Number="070" Name="AABB/Cym" ProgramChange="69"/>
+      <Patch Number="071" Name="ABAB/Sn1" ProgramChange="70"/>
+      <Patch Number="072" Name="ABBB/Sn2" ProgramChange="71"/>
+      <Patch Number="073" Name="BBBB/Kk" ProgramChange="72"/>
+      <Patch Number="074" Name="BABB/Sn1" ProgramChange="73"/>
+      <Patch Number="075" Name="BBAB/Sn2" ProgramChange="74"/>
+      <Patch Number="076" Name="BBBA/Tom" ProgramChange="75"/>
+      <Patch Number="077" Name="BAAB/Hat" ProgramChange="76"/>
+      <Patch Number="078" Name="BBAA/Cym" ProgramChange="77"/>
+      <Patch Number="079" Name="BABA/Sn1" ProgramChange="78"/>
+      <Patch Number="080" Name="BAAA/Sn2" ProgramChange="79"/>
+    </PatchNameList>
+    <PatchNameList Name="Percussion Exp: Preset">
+      <Patch Number="001" Name="AfroCubn" ProgramChange="0"/>
+      <Patch Number="002" Name="Brazil" ProgramChange="1"/>
+      <Patch Number="003" Name="MotifLtn" ProgramChange="2"/>
+      <Patch Number="004" Name="GM Perc" ProgramChange="3"/>
+      <Patch Number="005" Name="AfrCbn61" ProgramChange="4"/>
+      <Patch Number="006" Name="Brazil61" ProgramChange="5"/>
+      <Patch Number="007" Name="AC-PlgDR" ProgramChange="6"/>
+      <Patch Number="008" Name="Br-PlgDR" ProgramChange="7"/>
+      <Patch Number="009" Name="Lt-PlgDR" ProgramChange="8"/>
+      <Patch Number="010" Name="GMLtnDrm" ProgramChange="9"/>
+      <Patch Number="011" Name="Live Pop" ProgramChange="10"/>
+      <Patch Number="012" Name="Kick&amp;Snr" ProgramChange="11"/>
+      <Patch Number="013" Name="AfCbHand" ProgramChange="12"/>
+      <Patch Number="014" Name="BrzlHnd1" ProgramChange="13"/>
+      <Patch Number="015" Name="BrzlHnd2" ProgramChange="14"/>
+      <Patch Number="016" Name="Bells" ProgramChange="15"/>
+      <Patch Number="017" Name="Shakers" ProgramChange="16"/>
+      <Patch Number="018" Name="Skins" ProgramChange="17"/>
+      <Patch Number="019" Name="Sticks 1" ProgramChange="18"/>
+      <Patch Number="020" Name="Sticks 2" ProgramChange="19"/>
+      <Patch Number="021" Name="DlyAfrCb" ProgramChange="20"/>
+      <Patch Number="022" Name="DlyBrazl" ProgramChange="21"/>
+      <Patch Number="023" Name="DlyGMPrc" ProgramChange="22"/>
+      <Patch Number="024" Name="DlyGMLtn" ProgramChange="23"/>
+      <Patch Number="025" Name="NsDAfrCb" ProgramChange="24"/>
+      <Patch Number="026" Name="NsDBrazl" ProgramChange="25"/>
+      <Patch Number="027" Name="ODAfrCbn" ProgramChange="26"/>
+      <Patch Number="028" Name="ODBrazil" ProgramChange="27"/>
+      <Patch Number="029" Name="ODGMLatn" ProgramChange="28"/>
+      <Patch Number="030" Name="ODKk&amp;Snr" ProgramChange="29"/>
+      <Patch Number="031" Name="Dst1AfCb" ProgramChange="30"/>
+      <Patch Number="032" Name="Dst1Brzl" ProgramChange="31"/>
+      <Patch Number="033" Name="Dst1GMLt" ProgramChange="32"/>
+      <Patch Number="034" Name="Dst1Kk&amp;S" ProgramChange="33"/>
+      <Patch Number="035" Name="Dst2AfCb" ProgramChange="34"/>
+      <Patch Number="036" Name="Dst2Brzl" ProgramChange="35"/>
+      <Patch Number="037" Name="Dst2GMLt" ProgramChange="36"/>
+      <Patch Number="038" Name="Dst2Kk&amp;S" ProgramChange="37"/>
+      <Patch Number="039" Name="FlgAfrCb" ProgramChange="38"/>
+      <Patch Number="040" Name="FlgBrazl" ProgramChange="39"/>
+      <Patch Number="041" Name="FlgShkrs" ProgramChange="40"/>
+      <Patch Number="042" Name="PhsShkrs" ProgramChange="41"/>
+      <Patch Number="043" Name="Rs1Skins" ProgramChange="42"/>
+      <Patch Number="044" Name="Rs1Stick" ProgramChange="43"/>
+      <Patch Number="045" Name="Rs2Kk&amp;Sn" ProgramChange="44"/>
+      <Patch Number="046" Name="Rs2Stick" ProgramChange="45"/>
+      <Patch Number="047" Name="Md1AfrCb" ProgramChange="46"/>
+      <Patch Number="048" Name="Md1Brazl" ProgramChange="47"/>
+      <Patch Number="049" Name="Md2AfrCb" ProgramChange="48"/>
+      <Patch Number="050" Name="Md2Brazl" ProgramChange="49"/>
+      <Patch Number="051" Name="Md3Bells" ProgramChange="50"/>
+      <Patch Number="052" Name="Md3Shkrs" ProgramChange="51"/>
+      <Patch Number="053" Name="Md4BrHd1" ProgramChange="52"/>
+      <Patch Number="054" Name="Md4BrHd2" ProgramChange="53"/>
+      <Patch Number="055" Name="Md5BrHd1" ProgramChange="54"/>
+      <Patch Number="056" Name="Md5BrHd2" ProgramChange="55"/>
+      <Patch Number="057" Name="PchBells" ProgramChange="56"/>
+      <Patch Number="058" Name="PchShkrs" ProgramChange="57"/>
+      <Patch Number="059" Name="PchSkins" ProgramChange="58"/>
+      <Patch Number="060" Name="PchStick" ProgramChange="59"/>
+      <Patch Number="061" Name="RevAfrCb" ProgramChange="60"/>
+      <Patch Number="062" Name="RevBrazl" ProgramChange="61"/>
+      <Patch Number="063" Name="RevMotif" ProgramChange="62"/>
+      <Patch Number="064" Name="RevGMPrc" ProgramChange="63"/>
+      <Patch Number="065" Name="RevAfC61" ProgramChange="64"/>
+      <Patch Number="066" Name="RevBrz61" ProgramChange="65"/>
+      <Patch Number="067" Name="RvACPgDR" ProgramChange="66"/>
+      <Patch Number="068" Name="RvBrPgDR" ProgramChange="67"/>
+      <Patch Number="069" Name="RvLtPgDR" ProgramChange="68"/>
+      <Patch Number="070" Name="RevGMLtn" ProgramChange="69"/>
+      <Patch Number="071" Name="RevLvPop" ProgramChange="70"/>
+      <Patch Number="072" Name="RevKk&amp;Sn" ProgramChange="71"/>
+      <Patch Number="073" Name="RevACHnd" ProgramChange="72"/>
+      <Patch Number="074" Name="RevBrHd1" ProgramChange="73"/>
+      <Patch Number="075" Name="RevBrHd2" ProgramChange="74"/>
+      <Patch Number="076" Name="RevBells" ProgramChange="75"/>
+      <Patch Number="077" Name="RevShkrs" ProgramChange="76"/>
+      <Patch Number="078" Name="RevSkins" ProgramChange="77"/>
+      <Patch Number="079" Name="RevStck1" ProgramChange="78"/>
+      <Patch Number="080" Name="RevStck2" ProgramChange="79"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

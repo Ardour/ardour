@@ -1,23 +1,22 @@
 /*
-    Copyright (C) 2009 Paul Davis
-    Author: David Robillard
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id: insert.cc 712 2006-07-28 01:08:57Z drobilla $
-*/
+ * Copyright (C) 2009-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2016-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2017 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <stdint.h>
 #include <iostream>
@@ -56,15 +55,32 @@ ChanMapping::ChanMapping (const XMLNode& node)
 	XMLNodeConstIterator iter = node.children().begin();
 	for ( ; iter != node.children().end(); ++iter) {
 		if ((*iter)->name() == X_(state_node_name)) {
-			DataType type(DataType::NIL);
+			DataType type (DataType::NIL);
 			uint32_t from;
 			uint32_t to;
-			(*iter)->get_property("type", type);
-			(*iter)->get_property("from", from);
-			(*iter)->get_property("to", to);
-			set(type, from, to);
+			if (   (*iter)->get_property ("type", type)
+			    && (*iter)->get_property ("from", from)
+			    && (*iter)->get_property ("to", to)) {
+				set(type, from, to);
+			}
 		}
 	}
+}
+
+
+ChanMapping ChanMapping::operator=(const ChanMapping& other)
+{
+	_mappings.clear();
+
+	const ChanMapping::Mappings& mp (other.mappings());
+	for (Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
+		for (TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
+			set (tm->first, i->first, i->second);
+		}
+	}
+
+	_mappings = other._mappings;
+	return *this;
 }
 
 uint32_t

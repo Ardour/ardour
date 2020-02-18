@@ -1,19 +1,19 @@
 /*
  * Copyright (C) 2018 Robin Gareus <robin@gareus.org>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include "gtkmm2ext/utils.h"
@@ -142,30 +142,38 @@ PluginLoadStatsGui::draw_bar (GdkEventExpose* ev)
 	cairo_set_line_width (cr, 1);
 	cairo_stroke_preserve (cr);
 
+	/* TODO statically cache these patterns
+	 * like Meter::generate_meter_background
+	 */
 	if (_valid) {
 		cairo_pattern_t *pat = cairo_pattern_create_linear (x0, 0.0, w, 0.0);
-		cairo_pattern_add_color_stop_rgba (pat, 0,         0,  1, 0, .7);
-		cairo_pattern_add_color_stop_rgba (pat, 6.  / 9.,  0,  1, 0, .7);
-		cairo_pattern_add_color_stop_rgba (pat, 6.5 / 9., .8, .8, 0, .7);
-		cairo_pattern_add_color_stop_rgba (pat, 7.5 / 9., .8, .8, 0, .7);
-		cairo_pattern_add_color_stop_rgba (pat, 8.  / 9.,  1,  0, 0, .7);
+		cairo_pattern_add_color_stop_rgba (pat, 0,         0,  1, 0, .2);
+		cairo_pattern_add_color_stop_rgba (pat, 6.  / 9.,  0,  1, 0, .2);
+		cairo_pattern_add_color_stop_rgba (pat, 6.5 / 9., .8, .8, 0, .2);
+		cairo_pattern_add_color_stop_rgba (pat, 7.5 / 9., .8, .8, 0, .2);
+		cairo_pattern_add_color_stop_rgba (pat, 8.  / 9.,  1,  0, 0, .2);
 		cairo_set_source (cr, pat);
+		cairo_fill_preserve (cr);
 		cairo_pattern_destroy (pat);
-		cairo_fill_preserve (cr);
-	} else {
-		cairo_set_source_rgba (cr, .4, .3, .1, .5);
-		cairo_fill_preserve (cr);
-	}
+		cairo_clip (cr);
 
-
-	cairo_clip (cr);
-
-	if (_valid) {
 		double xmin = DEFLECT(_min / 1000.);
 		double xmax = DEFLECT(_max / 1000.);
 
 		rounded_rectangle (cr, x0 + xmin, y0, xmax - xmin, h, 7);
-		cairo_set_source_rgba (cr, .8, .8, .9, .5);
+
+		pat = cairo_pattern_create_linear (x0, 0.0, w, 0.0);
+		cairo_pattern_add_color_stop_rgba (pat, 0,         0,  1, 0, .8);
+		cairo_pattern_add_color_stop_rgba (pat, 6.  / 9.,  0,  1, 0, .8);
+		cairo_pattern_add_color_stop_rgba (pat, 6.5 / 9., .8, .8, 0, .8);
+		cairo_pattern_add_color_stop_rgba (pat, 7.5 / 9., .8, .8, 0, .8);
+		cairo_pattern_add_color_stop_rgba (pat, 8.  / 9.,  1,  0, 0, .8);
+		cairo_set_source (cr, pat);
+		cairo_fill (cr);
+		cairo_pattern_destroy (pat);
+
+	} else {
+		cairo_set_source_rgba (cr, .4, .3, .1, .5);
 		cairo_fill (cr);
 	}
 

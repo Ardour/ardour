@@ -1,8 +1,12 @@
 #!/bin/sh
-. `dirname "$0"`/../build/headless/hardev_common_waf.sh
-LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+VALGRIND_OPTIONS="$VALGRIND_OPTIONS --num-callers=50"
+VALGRIND_OPTIONS="$VALGRIND_OPTIONS --error-limit=no"
+#VALGRIND_OPTIONS="$VALGRIND_OPTIONS --leak-check=full --leak-resolution=high"
+#VALGRIND_OPTIONS="$VALGRIND_OPTIONS --show-leak-kinds=all -v"
+#VALGRIND_OPTIONS="$VALGRIND_OPTIONS --log-file=/tmp/hardour-%p.log"
 
 TOP=`dirname "$0"`/..
+. $TOP/build/gtk2_ardour/ardev_common_waf.sh
 if uname | grep -q arwin; then
 	OBJSUPP="--suppressions=${TOP}/tools/objc.supp"
 fi
@@ -12,4 +16,4 @@ exec valgrind --tool=memcheck \
 	--track-origins=yes \
 	--suppressions=${TOP}/tools/valgrind.supp \
 	$OBJSUPP \
-	$TOP/$EXECUTABLE --novst "$@"
+	$TOP/build/headless/hardour-$ARDOURVERSION --novst "$@"

@@ -1,22 +1,24 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id: midiregion.h 733 2006-08-01 17:19:38Z drobilla $
-*/
+ * Copyright (C) 2006-2016 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2016-2017 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2016-2017 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_midi_region_h__
 #define __ardour_midi_region_h__
@@ -24,7 +26,7 @@
 #include <vector>
 
 #include "temporal/beats.h"
-#include "evoral/Range.hpp"
+#include "evoral/Range.h"
 
 #include "pbd/string_convert.h"
 
@@ -116,6 +118,11 @@ class LIBARDOUR_API MidiRegion : public Region
 
 	void clobber_sources (boost::shared_ptr<MidiSource> source);
 
+	int render (Evoral::EventSink<samplepos_t>& dst,
+	            uint32_t                        chan_n,
+	            NoteMode                        mode,
+	            MidiChannelFilter*              filter) const;
+
   protected:
 
 	virtual bool can_trim_start_before_source_start () const {
@@ -147,6 +154,8 @@ class LIBARDOUR_API MidiRegion : public Region
 	void recompute_at_start ();
 	void recompute_at_end ();
 
+	bool set_name (const std::string & str);
+
 	void set_position_internal (samplepos_t pos, bool allow_bbt_recompute, const int32_t sub_num);
 	void set_position_music_internal (double qn);
 	void set_length_internal (samplecnt_t len, const int32_t sub_num);
@@ -155,6 +164,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	void update_length_beats (const int32_t sub_num);
 
 	void model_changed ();
+	void model_contents_changed ();
 	void model_shifted (double qn_distance);
 	void model_automation_state_changed (Evoral::Parameter const &);
 
@@ -164,6 +174,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	std::set<Evoral::Parameter> _filtered_parameters; ///< parameters that we ask our source not to return when reading
 	PBD::ScopedConnection _model_connection;
 	PBD::ScopedConnection _model_shift_connection;
+	PBD::ScopedConnection _model_changed_connection;
 	PBD::ScopedConnection _source_connection;
 	PBD::ScopedConnection _model_contents_connection;
 	bool _ignore_shift;

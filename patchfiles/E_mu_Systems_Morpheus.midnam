@@ -1,0 +1,729 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>E-mu Systems</Manufacturer>
+    <Model>Morpheus</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="RAM Presets">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="000" Name="Mph:Z-Synth " ProgramChange="0"/>
+          <Patch Number="001" Name="Real:PnoVibe" ProgramChange="1"/>
+          <Patch Number="002" Name="Cmp:ElecPno " ProgramChange="2"/>
+          <Patch Number="003" Name="Pad:Strings " ProgramChange="3"/>
+          <Patch Number="004" Name="Bass:UpRight" ProgramChange="4"/>
+          <Patch Number="005" Name="Gtr:Trippy  " ProgramChange="5"/>
+          <Patch Number="006" Name="Ld:Grunge   " ProgramChange="6"/>
+          <Patch Number="007" Name="Atm:RaveGruv" ProgramChange="7"/>
+          <Patch Number="008" Name="Voc:Why?    " ProgramChange="8"/>
+          <Patch Number="009" Name="Drum:Sweep  " ProgramChange="9"/>
+          <Patch Number="010" Name="Mph:KlavKlip" ProgramChange="10"/>
+          <Patch Number="011" Name="Mph:FluteToo" ProgramChange="11"/>
+          <Patch Number="012" Name="Mph:AirStrg " ProgramChange="12"/>
+          <Patch Number="013" Name="Mph:Voices  " ProgramChange="13"/>
+          <Patch Number="014" Name="Mph:Whisper " ProgramChange="14"/>
+          <Patch Number="015" Name="Mph:RhyOfLfe" ProgramChange="15"/>
+          <Patch Number="016" Name="Mph:MetalMlt" ProgramChange="16"/>
+          <Patch Number="017" Name="Mph:Phazbraz" ProgramChange="17"/>
+          <Patch Number="018" Name="Mph:RezzSlth" ProgramChange="18"/>
+          <Patch Number="019" Name="Mph:SteinChl" ProgramChange="19"/>
+          <Patch Number="020" Name="Real:Piano  " ProgramChange="20"/>
+          <Patch Number="021" Name="Real:E.Piano" ProgramChange="21"/>
+          <Patch Number="022" Name="Real:StnBass" ProgramChange="22"/>
+          <Patch Number="023" Name="Real:Flute  " ProgramChange="23"/>
+          <Patch Number="024" Name="Real:Mute Me" ProgramChange="24"/>
+          <Patch Number="025" Name="Real:MstyVib" ProgramChange="25"/>
+          <Patch Number="026" Name="Real:ExAcGtr" ProgramChange="26"/>
+          <Patch Number="027" Name="Real:Str&lt;Chr" ProgramChange="27"/>
+          <Patch Number="028" Name="Real:BrasStr" ProgramChange="28"/>
+          <Patch Number="029" Name="Real:StnTine" ProgramChange="29"/>
+          <Patch Number="030" Name="Cmp:ChikWill" ProgramChange="30"/>
+          <Patch Number="031" Name="Cmp:2 Pianos" ProgramChange="31"/>
+          <Patch Number="032" Name="Cmp:RingFire" ProgramChange="32"/>
+          <Patch Number="033" Name="Cmp:TineOrg " ProgramChange="33"/>
+          <Patch Number="034" Name="Cmp:Syntaks " ProgramChange="34"/>
+          <Patch Number="035" Name="Cmp:PuckMuff" ProgramChange="35"/>
+          <Patch Number="036" Name="Cmp:Organic " ProgramChange="36"/>
+          <Patch Number="037" Name="Cmp:VellBell" ProgramChange="37"/>
+          <Patch Number="038" Name="Cmp:Cookin' " ProgramChange="38"/>
+          <Patch Number="039" Name="Cmp:EarCandy" ProgramChange="39"/>
+          <Patch Number="040" Name="Pad:SynthRvr" ProgramChange="40"/>
+          <Patch Number="041" Name="Pad:BrassKin" ProgramChange="41"/>
+          <Patch Number="042" Name="Pad:HugeStrg" ProgramChange="42"/>
+          <Patch Number="043" Name="Pad:SynthMph" ProgramChange="43"/>
+          <Patch Number="044" Name="Pad:StrangTg" ProgramChange="44"/>
+          <Patch Number="045" Name="Pad:Mechanik" ProgramChange="45"/>
+          <Patch Number="046" Name="Pad:Leslike " ProgramChange="46"/>
+          <Patch Number="047" Name="Pad:Weird B3" ProgramChange="47"/>
+          <Patch Number="048" Name="Pad:FlngeStr" ProgramChange="48"/>
+          <Patch Number="049" Name="Pad:EdenDron" ProgramChange="49"/>
+          <Patch Number="050" Name="Bass:Bozo250" ProgramChange="50"/>
+          <Patch Number="051" Name="Bass:FatSawz" ProgramChange="51"/>
+          <Patch Number="052" Name="Bass:Selazap" ProgramChange="52"/>
+          <Patch Number="053" Name="Bass:Bassa  " ProgramChange="53"/>
+          <Patch Number="054" Name="Bass:Grindge" ProgramChange="54"/>
+          <Patch Number="055" Name="Bass:Q Fall " ProgramChange="55"/>
+          <Patch Number="056" Name="Bass:Some   " ProgramChange="56"/>
+          <Patch Number="057" Name="Bass:Headcas" ProgramChange="57"/>
+          <Patch Number="058" Name="Bass:Form   " ProgramChange="58"/>
+          <Patch Number="059" Name="Bass:Ac&amp;Elec" ProgramChange="59"/>
+          <Patch Number="060" Name="Gtr:SntaCrz " ProgramChange="60"/>
+          <Patch Number="061" Name="Gtr:New Dist" ProgramChange="61"/>
+          <Patch Number="062" Name="Gtr:StrgRing" ProgramChange="62"/>
+          <Patch Number="063" Name="Gtr:Expresiv" ProgramChange="63"/>
+          <Patch Number="064" Name="Gtr:Wheel   " ProgramChange="64"/>
+          <Patch Number="065" Name="Gtr:Guitarzn" ProgramChange="65"/>
+          <Patch Number="066" Name="Gtr:ThndrTar" ProgramChange="66"/>
+          <Patch Number="067" Name="Gtr:Harmtoo " ProgramChange="67"/>
+          <Patch Number="068" Name="Gtr:FlgStrat" ProgramChange="68"/>
+          <Patch Number="069" Name="Gtr:Pick It " ProgramChange="69"/>
+          <Patch Number="070" Name="Ld:Sync Lead" ProgramChange="70"/>
+          <Patch Number="071" Name="Ld:CheapTrc " ProgramChange="71"/>
+          <Patch Number="072" Name="Ld:PulseLead" ProgramChange="72"/>
+          <Patch Number="073" Name="Ld:Sinnleed " ProgramChange="73"/>
+          <Patch Number="074" Name="Ld:MtlGrowl " ProgramChange="74"/>
+          <Patch Number="075" Name="Ld:Synthle  " ProgramChange="75"/>
+          <Patch Number="076" Name="Ld:StokedUp " ProgramChange="76"/>
+          <Patch Number="077" Name="Ld:HoohZayr " ProgramChange="77"/>
+          <Patch Number="078" Name="Ld:NylesSong" ProgramChange="78"/>
+          <Patch Number="079" Name="Ld:Mallet   " ProgramChange="79"/>
+          <Patch Number="080" Name="Atm:Astralix" ProgramChange="80"/>
+          <Patch Number="081" Name="Atm:Nova Arp" ProgramChange="81"/>
+          <Patch Number="082" Name="Atm:Mosaic  " ProgramChange="82"/>
+          <Patch Number="083" Name="Atm:LunarArp" ProgramChange="83"/>
+          <Patch Number="084" Name="Atm:HvnsGate" ProgramChange="84"/>
+          <Patch Number="085" Name="Atm:Ferrous " ProgramChange="85"/>
+          <Patch Number="086" Name="Atm:KotoBrth" ProgramChange="86"/>
+          <Patch Number="087" Name="Atm:VulkanVw" ProgramChange="87"/>
+          <Patch Number="088" Name="Atm:Movie   " ProgramChange="88"/>
+          <Patch Number="089" Name="Atm:FluteDuo" ProgramChange="89"/>
+          <Patch Number="090" Name="Voc:FlngeVox" ProgramChange="90"/>
+          <Patch Number="091" Name="Voc:AglHeart" ProgramChange="91"/>
+          <Patch Number="092" Name="Voc:Cirrus  " ProgramChange="92"/>
+          <Patch Number="093" Name="Voc:UmanStrg" ProgramChange="93"/>
+          <Patch Number="094" Name="Voc:Erica's " ProgramChange="94"/>
+          <Patch Number="095" Name="Voc:OzBoiz  " ProgramChange="95"/>
+          <Patch Number="096" Name="Voc:VoxSwp  " ProgramChange="96"/>
+          <Patch Number="097" Name="Voc:Amazon  " ProgramChange="97"/>
+          <Patch Number="098" Name="Voc:Wow Man " ProgramChange="98"/>
+          <Patch Number="099" Name="Voc:WndoPane" ProgramChange="99"/>
+          <Patch Number="100" Name="Drum:House  " ProgramChange="100"/>
+          <Patch Number="101" Name="Drum:Skritch" ProgramChange="101"/>
+          <Patch Number="102" Name="Drum:Reversa" ProgramChange="102"/>
+          <Patch Number="103" Name="Drum:Scratch" ProgramChange="103"/>
+          <Patch Number="104" Name="Drum:My Kick" ProgramChange="104"/>
+          <Patch Number="105" Name="Drum:Kicks  " ProgramChange="105"/>
+          <Patch Number="106" Name="Drum:Snares " ProgramChange="106"/>
+          <Patch Number="107" Name="Drum:CymNoiz" ProgramChange="107"/>
+          <Patch Number="108" Name="Drum:Congas " ProgramChange="108"/>
+          <Patch Number="109" Name="Drum:Alien  " ProgramChange="109"/>
+          <Patch Number="110" Name="Sfx:SonikSyn" ProgramChange="110"/>
+          <Patch Number="111" Name="Sfx:NoiseBnd" ProgramChange="111"/>
+          <Patch Number="112" Name="Sfx:Velimba" ProgramChange="112"/>
+          <Patch Number="113" Name="Sfx:S/H" ProgramChange="113"/>
+          <Patch Number="114" Name="Sfx:Hemloc" ProgramChange="114"/>
+          <Patch Number="115" Name="Sfx:Wormhole" ProgramChange="115"/>
+          <Patch Number="116" Name="Sfx:ManicJig" ProgramChange="116"/>
+          <Patch Number="117" Name="Sfx:Da Radio" ProgramChange="117"/>
+          <Patch Number="118" Name="Sfx:Drumble" ProgramChange="118"/>
+          <Patch Number="119" Name="Sfx:Dipped" ProgramChange="119"/>
+          <Patch Number="120" Name="HTek:Omatika" ProgramChange="120"/>
+          <Patch Number="121" Name="Tek:OralOsc " ProgramChange="121"/>
+          <Patch Number="122" Name="Tek:JavaTea" ProgramChange="122"/>
+          <Patch Number="123" Name="Tek:RzrSlce " ProgramChange="123"/>
+          <Patch Number="124" Name="Tek:RaviaMaj" ProgramChange="124"/>
+          <Patch Number="125" Name="Tek:BellEpic" ProgramChange="125"/>
+          <Patch Number="126" Name="Tek:KrazyRom" ProgramChange="126"/>
+          <Patch Number="127" Name="-defPreset- " ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="ROM Presets">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="1"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="000" Name="Mph:Morpheus" ProgramChange="0"/>
+          <Patch Number="001" Name="Real:PnoVibe" ProgramChange="1"/>
+          <Patch Number="002" Name="Cmp:ElecPno " ProgramChange="2"/>
+          <Patch Number="003" Name="Pad:BallHvys" ProgramChange="3"/>
+          <Patch Number="004" Name="Bass:Sweep  " ProgramChange="4"/>
+          <Patch Number="005" Name="Gtr:Trippy  " ProgramChange="5"/>
+          <Patch Number="006" Name="Ld:FluteMrph" ProgramChange="6"/>
+          <Patch Number="007" Name="Atm:Atmorphs" ProgramChange="7"/>
+          <Patch Number="008" Name="Voc:VocalWhl" ProgramChange="8"/>
+          <Patch Number="009" Name="Drum:Dance  " ProgramChange="9"/>
+          <Patch Number="010" Name="Mph:PhatSky " ProgramChange="10"/>
+          <Patch Number="011" Name="Mph:SwellPad" ProgramChange="11"/>
+          <Patch Number="012" Name="Mph:WindyPip" ProgramChange="12"/>
+          <Patch Number="013" Name="Mph:Org/Bass" ProgramChange="13"/>
+          <Patch Number="014" Name="Mph:Harpog  " ProgramChange="14"/>
+          <Patch Number="015" Name="Mph:SethySax" ProgramChange="15"/>
+          <Patch Number="016" Name="Mph:SaxChnge" ProgramChange="16"/>
+          <Patch Number="017" Name="Mph:ShoopDee" ProgramChange="17"/>
+          <Patch Number="018" Name="Mph:Picknal " ProgramChange="18"/>
+          <Patch Number="019" Name="Mph:SynBrass" ProgramChange="19"/>
+          <Patch Number="020" Name="Real:Amb.Pno" ProgramChange="20"/>
+          <Patch Number="021" Name="Real:Z Piano" ProgramChange="21"/>
+          <Patch Number="022" Name="Real:UpRight" ProgramChange="22"/>
+          <Patch Number="023" Name="Real:PkEldra" ProgramChange="23"/>
+          <Patch Number="024" Name="Real:Mute Me" ProgramChange="24"/>
+          <Patch Number="025" Name="Real:StrgBrs" ProgramChange="25"/>
+          <Patch Number="026" Name="Real:PopBras" ProgramChange="26"/>
+          <Patch Number="027" Name="Real:Vibes  " ProgramChange="27"/>
+          <Patch Number="028" Name="Real:DblBari" ProgramChange="28"/>
+          <Patch Number="029" Name="Real:Flute  " ProgramChange="29"/>
+          <Patch Number="030" Name="Cmp:Yeaowaho" ProgramChange="30"/>
+          <Patch Number="031" Name="Cmp:VoxOrgan" ProgramChange="31"/>
+          <Patch Number="032" Name="Cmp:PnoStik " ProgramChange="32"/>
+          <Patch Number="033" Name="Cmp:NoQrter " ProgramChange="33"/>
+          <Patch Number="034" Name="Cmp:ElektPno" ProgramChange="34"/>
+          <Patch Number="035" Name="Cmp:HotJazz " ProgramChange="35"/>
+          <Patch Number="036" Name="Cmp:Schnap  " ProgramChange="36"/>
+          <Patch Number="037" Name="Cmp:Pad/Clav" ProgramChange="37"/>
+          <Patch Number="038" Name="Cmp:Snowfall" ProgramChange="38"/>
+          <Patch Number="039" Name="Cmp:MufHortn" ProgramChange="39"/>
+          <Patch Number="040" Name="Pad:Swirly  " ProgramChange="40"/>
+          <Patch Number="041" Name="Pad:Centered" ProgramChange="41"/>
+          <Patch Number="042" Name="Pad:Oasis   " ProgramChange="42"/>
+          <Patch Number="043" Name="Pad:EpicMmnt" ProgramChange="43"/>
+          <Patch Number="044" Name="Pad:WrdBeard" ProgramChange="44"/>
+          <Patch Number="045" Name="Pad:HoughFig" ProgramChange="45"/>
+          <Patch Number="046" Name="Pad:Beauty  " ProgramChange="46"/>
+          <Patch Number="047" Name="Pad:KroneWve" ProgramChange="47"/>
+          <Patch Number="048" Name="Pad:StrSwell" ProgramChange="48"/>
+          <Patch Number="049" Name="Pad:FunkShun" ProgramChange="49"/>
+          <Patch Number="050" Name="Bass:Noir   " ProgramChange="50"/>
+          <Patch Number="051" Name="Bass:Deep   " ProgramChange="51"/>
+          <Patch Number="052" Name="Bass:The Q  " ProgramChange="52"/>
+          <Patch Number="053" Name="Bass:Expanse" ProgramChange="53"/>
+          <Patch Number="054" Name="Bass:Breath " ProgramChange="54"/>
+          <Patch Number="055" Name="Bass:Thick  " ProgramChange="55"/>
+          <Patch Number="056" Name="Bass:Friend " ProgramChange="56"/>
+          <Patch Number="057" Name="Bass:MyPulse" ProgramChange="57"/>
+          <Patch Number="058" Name="Bass:SawBass" ProgramChange="58"/>
+          <Patch Number="059" Name="Bass:EmuMod " ProgramChange="59"/>
+          <Patch Number="060" Name="Gtr:Riphust " ProgramChange="60"/>
+          <Patch Number="061" Name="Gtr:Electric" ProgramChange="61"/>
+          <Patch Number="062" Name="Gtr:Mouth   " ProgramChange="62"/>
+          <Patch Number="063" Name="Gtr:Acoustic" ProgramChange="63"/>
+          <Patch Number="064" Name="Gtr:SntaCrz " ProgramChange="64"/>
+          <Patch Number="065" Name="Gtr:Harmonix" ProgramChange="65"/>
+          <Patch Number="066" Name="Gtr:ExprsvAc" ProgramChange="66"/>
+          <Patch Number="067" Name="Gtr:SlipPick" ProgramChange="67"/>
+          <Patch Number="068" Name="Gtr:Distort " ProgramChange="68"/>
+          <Patch Number="069" Name="Gtr:FuzzTone" ProgramChange="69"/>
+          <Patch Number="070" Name="Ld:JuprSynth" ProgramChange="70"/>
+          <Patch Number="071" Name="Ld:BigHooter" ProgramChange="71"/>
+          <Patch Number="072" Name="Ld:Barri Q  " ProgramChange="72"/>
+          <Patch Number="073" Name="Ld:JazzSynth" ProgramChange="73"/>
+          <Patch Number="074" Name="Ld:TalkFlute" ProgramChange="74"/>
+          <Patch Number="075" Name="Ld:JXTouch  " ProgramChange="75"/>
+          <Patch Number="076" Name="Ld:Crunchy  " ProgramChange="76"/>
+          <Patch Number="077" Name="Ld:Whofs    " ProgramChange="77"/>
+          <Patch Number="078" Name="Ld:Reasonble" ProgramChange="78"/>
+          <Patch Number="079" Name="Ld:Brute Emu" ProgramChange="79"/>
+          <Patch Number="080" Name="Atm:TwitPink" ProgramChange="80"/>
+          <Patch Number="081" Name="Atm:EthrlAir" ProgramChange="81"/>
+          <Patch Number="082" Name="Atm:EthrlKys" ProgramChange="82"/>
+          <Patch Number="083" Name="Atm:Synth   " ProgramChange="83"/>
+          <Patch Number="084" Name="Atm:Phobia  " ProgramChange="84"/>
+          <Patch Number="085" Name="Atm:AirFlnge" ProgramChange="85"/>
+          <Patch Number="086" Name="Atm:WaveMerg" ProgramChange="86"/>
+          <Patch Number="087" Name="Atm:FoolsWtr" ProgramChange="87"/>
+          <Patch Number="088" Name="Atm:Noise E!" ProgramChange="88"/>
+          <Patch Number="089" Name="Atm:AirWaves" ProgramChange="89"/>
+          <Patch Number="090" Name="Voc:BigWill " ProgramChange="90"/>
+          <Patch Number="091" Name="Voc:NoizVowl" ProgramChange="91"/>
+          <Patch Number="092" Name="Voc:YahSynth" ProgramChange="92"/>
+          <Patch Number="093" Name="Voc:Yuppies " ProgramChange="93"/>
+          <Patch Number="094" Name="Voc:Hissing " ProgramChange="94"/>
+          <Patch Number="095" Name="Voc:ChrVowel" ProgramChange="95"/>
+          <Patch Number="096" Name="Voc:BreathVl" ProgramChange="96"/>
+          <Patch Number="097" Name="Voc:Pulse   " ProgramChange="97"/>
+          <Patch Number="098" Name="Voc:MorfyYes" ProgramChange="98"/>
+          <Patch Number="099" Name="Voc:Vox Pad " ProgramChange="99"/>
+          <Patch Number="100" Name="Drum:NeuJacq" ProgramChange="100"/>
+          <Patch Number="101" Name="Drum:Snare  " ProgramChange="101"/>
+          <Patch Number="102" Name="Drum:Lo&lt;Drum" ProgramChange="102"/>
+          <Patch Number="103" Name="Drum:Hi&lt;Drum" ProgramChange="103"/>
+          <Patch Number="104" Name="Drum:Morphie" ProgramChange="104"/>
+          <Patch Number="105" Name="Drum:Notch  " ProgramChange="105"/>
+          <Patch Number="106" Name="Drum:Sweep  " ProgramChange="106"/>
+          <Patch Number="107" Name="Drum:Reverse" ProgramChange="107"/>
+          <Patch Number="108" Name="Drum:DeepPwr" ProgramChange="108"/>
+          <Patch Number="109" Name="Drum:China  " ProgramChange="109"/>
+          <Patch Number="110" Name="Sfx:CmptrStr" ProgramChange="110"/>
+          <Patch Number="111" Name="Sfx:BeanMach" ProgramChange="111"/>
+          <Patch Number="112" Name="Sfx:BassDrum" ProgramChange="112"/>
+          <Patch Number="113" Name="Sfx:SnrDrum " ProgramChange="113"/>
+          <Patch Number="114" Name="Sfx:Shaker  " ProgramChange="114"/>
+          <Patch Number="115" Name="Sfx:WhatYeah" ProgramChange="115"/>
+          <Patch Number="116" Name="Sfx:JawMumma" ProgramChange="116"/>
+          <Patch Number="117" Name="Sfx:SpaceGum" ProgramChange="117"/>
+          <Patch Number="118" Name="Sfx:DidgDink" ProgramChange="118"/>
+          <Patch Number="119" Name="Sfx:GrufRhum" ProgramChange="119"/>
+          <Patch Number="120" Name="Tek:LeadMeOn" ProgramChange="120"/>
+          <Patch Number="121" Name="Tek:Woofer  " ProgramChange="121"/>
+          <Patch Number="122" Name="Tek:Blaster " ProgramChange="122"/>
+          <Patch Number="123" Name="Tek:FX      " ProgramChange="123"/>
+          <Patch Number="124" Name="Tek:Poundage" ProgramChange="124"/>
+          <Patch Number="125" Name="Tek:Shame   " ProgramChange="125"/>
+          <Patch Number="126" Name="Tek:Rave    " ProgramChange="126"/>
+          <Patch Number="127" Name="-defPreset- " ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="HyperPresets">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="2"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="000" Name="Hyp:HootTube" ProgramChange="0"/>
+          <Patch Number="001" Name="Hyp:BassPno " ProgramChange="1"/>
+          <Patch Number="002" Name="Hyp:VelElPno" ProgramChange="2"/>
+          <Patch Number="003" Name="Hyp:MoodTxtr" ProgramChange="3"/>
+          <Patch Number="004" Name="Hyp:MostBass" ProgramChange="4"/>
+          <Patch Number="005" Name="Hyp:GtrAura " ProgramChange="5"/>
+          <Patch Number="006" Name="Hyp:MeanLead" ProgramChange="6"/>
+          <Patch Number="007" Name="Hyp:Ah Yeah " ProgramChange="7"/>
+          <Patch Number="008" Name="Hyp:JazzSplt" ProgramChange="8"/>
+          <Patch Number="009" Name="Hyp:WeirdDrm" ProgramChange="9"/>
+          <Patch Number="010" Name="Hyp:MorphMe " ProgramChange="10"/>
+          <Patch Number="011" Name="Hyp:Mill Set" ProgramChange="11"/>
+          <Patch Number="012" Name="Hyp:DblPluck" ProgramChange="12"/>
+          <Patch Number="013" Name="Hyp:MidiHorn" ProgramChange="13"/>
+          <Patch Number="014" Name="Hyp:TmptSax " ProgramChange="14"/>
+          <Patch Number="015" Name="Hyp:AlivePno" ProgramChange="15"/>
+          <Patch Number="016" Name="Hyp:DayMajik" ProgramChange="16"/>
+          <Patch Number="017" Name="Hyp:Stringed" ProgramChange="17"/>
+          <Patch Number="018" Name="Hyp:Trance  " ProgramChange="18"/>
+          <Patch Number="019" Name="Hyp:ElecBand" ProgramChange="19"/>
+          <Patch Number="020" Name="Hyp:RevPno  " ProgramChange="20"/>
+          <Patch Number="021" Name="Hyp:BassShrg" ProgramChange="21"/>
+          <Patch Number="022" Name="Hyp:GtrVibe " ProgramChange="22"/>
+          <Patch Number="023" Name="Hyp:BassVbe " ProgramChange="23"/>
+          <Patch Number="024" Name="Hyp:BrSwitch" ProgramChange="24"/>
+          <Patch Number="025" Name="Hyp:BrSwell " ProgramChange="25"/>
+          <Patch Number="026" Name="Hyp:BasTmpt " ProgramChange="26"/>
+          <Patch Number="027" Name="Hyp:WindySec" ProgramChange="27"/>
+          <Patch Number="028" Name="Hyp:LoString" ProgramChange="28"/>
+          <Patch Number="029" Name="Hyp:HornBalz" ProgramChange="29"/>
+          <Patch Number="030" Name="Hyp:BarbVox " ProgramChange="30"/>
+          <Patch Number="031" Name="Hyp:AirTmple" ProgramChange="31"/>
+          <Patch Number="032" Name="Hyp:Useful  " ProgramChange="32"/>
+          <Patch Number="033" Name="Hyp:Articula" ProgramChange="33"/>
+          <Patch Number="034" Name="Hyp:NicePnos" ProgramChange="34"/>
+          <Patch Number="035" Name="Hyp:Percusiv" ProgramChange="35"/>
+          <Patch Number="036" Name="Hyp:Picknail" ProgramChange="36"/>
+          <Patch Number="037" Name="Hyp:Configur" ProgramChange="37"/>
+          <Patch Number="038" Name="Hyp:Swelling" ProgramChange="38"/>
+          <Patch Number="039" Name="Hyp:NewJazzm" ProgramChange="39"/>
+          <Patch Number="040" Name="Hyp:SandTple" ProgramChange="40"/>
+          <Patch Number="041" Name="Hyp:InDaFunk" ProgramChange="41"/>
+          <Patch Number="042" Name="Hyp:Wash Out" ProgramChange="42"/>
+          <Patch Number="043" Name="Hyp:ElPnoPad" ProgramChange="43"/>
+          <Patch Number="044" Name="Hyp:5th Layr" ProgramChange="44"/>
+          <Patch Number="045" Name="Hyp:Shifter " ProgramChange="45"/>
+          <Patch Number="046" Name="Hyp:ThickPad" ProgramChange="46"/>
+          <Patch Number="047" Name="Hyp:BrthySyn" ProgramChange="47"/>
+          <Patch Number="048" Name="Hyp:Midnight" ProgramChange="48"/>
+          <Patch Number="049" Name="Hyp:BigMama " ProgramChange="49"/>
+          <Patch Number="050" Name="Hyp:SensiBas" ProgramChange="50"/>
+          <Patch Number="051" Name="Hyp:ReasBass" ProgramChange="51"/>
+          <Patch Number="052" Name="Hyp:VeloBass" ProgramChange="52"/>
+          <Patch Number="053" Name="Hyp:BassFlte" ProgramChange="53"/>
+          <Patch Number="054" Name="Hyp:BassVibe" ProgramChange="54"/>
+          <Patch Number="055" Name="Hyp:3 Piece " ProgramChange="55"/>
+          <Patch Number="056" Name="Hyp:4 Piece " ProgramChange="56"/>
+          <Patch Number="057" Name="Hyp:IDentaFi" ProgramChange="57"/>
+          <Patch Number="058" Name="Hyp:LngeHack" ProgramChange="58"/>
+          <Patch Number="059" Name="Hyp:BaddJazz" ProgramChange="59"/>
+          <Patch Number="060" Name="Hyp:Fret!   " ProgramChange="60"/>
+          <Patch Number="061" Name="Hyp:PnoGtr  " ProgramChange="61"/>
+          <Patch Number="062" Name="Hyp:Cowboy  " ProgramChange="62"/>
+          <Patch Number="063" Name="Hyp:Cruz'n  " ProgramChange="63"/>
+          <Patch Number="064" Name="Hyp:MoutSplt" ProgramChange="64"/>
+          <Patch Number="065" Name="Hyp:Janz    " ProgramChange="65"/>
+          <Patch Number="066" Name="Hyp:Flamanco" ProgramChange="66"/>
+          <Patch Number="067" Name="Hyp:GuitReal" ProgramChange="67"/>
+          <Patch Number="068" Name="Hyp:Trails  " ProgramChange="68"/>
+          <Patch Number="069" Name="Hyp:Gruv'in " ProgramChange="69"/>
+          <Patch Number="070" Name="Hyp:EdgeLead" ProgramChange="70"/>
+          <Patch Number="071" Name="Hyp:Gunk    " ProgramChange="71"/>
+          <Patch Number="072" Name="Hyp:CrunchLd" ProgramChange="72"/>
+          <Patch Number="073" Name="Hyp:Time Pad" ProgramChange="73"/>
+          <Patch Number="074" Name="Hyp:Mellorgn" ProgramChange="74"/>
+          <Patch Number="075" Name="Hyp:GrufMeOn" ProgramChange="75"/>
+          <Patch Number="076" Name="Hyp:AccVelo " ProgramChange="76"/>
+          <Patch Number="077" Name="Hyp:Sexafone" ProgramChange="77"/>
+          <Patch Number="078" Name="Hyp:Front   " ProgramChange="78"/>
+          <Patch Number="079" Name="Hyp:Def Ear " ProgramChange="79"/>
+          <Patch Number="080" Name="Hyp:KronGrwl" ProgramChange="80"/>
+          <Patch Number="081" Name="Hyp:VocalWow" ProgramChange="81"/>
+          <Patch Number="082" Name="Hyp:Vowlngrs" ProgramChange="82"/>
+          <Patch Number="083" Name="Hyp:VocaCoal" ProgramChange="83"/>
+          <Patch Number="084" Name="Hyp:Vox Hiss" ProgramChange="84"/>
+          <Patch Number="085" Name="Hyp:Mortus  " ProgramChange="85"/>
+          <Patch Number="086" Name="Hyp:AsianSmr" ProgramChange="86"/>
+          <Patch Number="087" Name="Hyp:DeepBrth" ProgramChange="87"/>
+          <Patch Number="088" Name="Hyp:Vox Vex " ProgramChange="88"/>
+          <Patch Number="089" Name="Hyp:DkMagic " ProgramChange="89"/>
+          <Patch Number="090" Name="Hyp:AtmsFear" ProgramChange="90"/>
+          <Patch Number="091" Name="Hyp:Easternl" ProgramChange="91"/>
+          <Patch Number="092" Name="Hyp:InADream" ProgramChange="92"/>
+          <Patch Number="093" Name="Hyp:GndrBlow" ProgramChange="93"/>
+          <Patch Number="094" Name="Hyp:Seperate" ProgramChange="94"/>
+          <Patch Number="095" Name="Hyp:ThefSwdl" ProgramChange="95"/>
+          <Patch Number="096" Name="Hyp:Combiner" ProgramChange="96"/>
+          <Patch Number="097" Name="Hyp:Illogica" ProgramChange="97"/>
+          <Patch Number="098" Name="Hyp:FloodPln" ProgramChange="98"/>
+          <Patch Number="099" Name="Hyp:Split Up" ProgramChange="99"/>
+          <Patch Number="100" Name="Hyp:KitOMat " ProgramChange="100"/>
+          <Patch Number="101" Name="Hyp:Muph Set" ProgramChange="101"/>
+          <Patch Number="102" Name="Hyp:SuprFlng" ProgramChange="102"/>
+          <Patch Number="103" Name="Hyp:Tecknoid" ProgramChange="103"/>
+          <Patch Number="104" Name="Hyp:VeloDrum" ProgramChange="104"/>
+          <Patch Number="105" Name="Hyp:Kontrol " ProgramChange="105"/>
+          <Patch Number="106" Name="Hyp:Snared  " ProgramChange="106"/>
+          <Patch Number="107" Name="Hyp:Wacked  " ProgramChange="107"/>
+          <Patch Number="108" Name="Hyp:LoHiKit " ProgramChange="108"/>
+          <Patch Number="109" Name="Hyp:Hip Hop " ProgramChange="109"/>
+          <Patch Number="110" Name="Hyp:DrumPile" ProgramChange="110"/>
+          <Patch Number="111" Name="Hyp:FreeStrg" ProgramChange="111"/>
+          <Patch Number="112" Name="Hyp:GruvRun " ProgramChange="112"/>
+          <Patch Number="113" Name="Hyp:Dream'in" ProgramChange="113"/>
+          <Patch Number="114" Name="Hyp:Bass/Org" ProgramChange="114"/>
+          <Patch Number="115" Name="Hyp:Chaos   " ProgramChange="115"/>
+          <Patch Number="116" Name="Hyp:Default " ProgramChange="116"/>
+          <Patch Number="117" Name="Hyp:Default " ProgramChange="117"/>
+          <Patch Number="118" Name="Hyp:Default " ProgramChange="118"/>
+          <Patch Number="119" Name="Hyp:Default " ProgramChange="119"/>
+          <Patch Number="120" Name="Hyp:Default " ProgramChange="120"/>
+          <Patch Number="121" Name="Hyp:Default " ProgramChange="121"/>
+          <Patch Number="122" Name="Hyp:Default " ProgramChange="122"/>
+          <Patch Number="123" Name="Hyp:Default " ProgramChange="123"/>
+          <Patch Number="124" Name="Hyp:Default " ProgramChange="124"/>
+          <Patch Number="125" Name="Hyp:Default " ProgramChange="125"/>
+          <Patch Number="126" Name="Hyp:Default " ProgramChange="126"/>
+          <Patch Number="127" Name="Hyp:Default " ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Card Presets">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="3"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="000" Name="Card Preset" ProgramChange="0"/>
+          <Patch Number="001" Name="Card Preset" ProgramChange="1"/>
+          <Patch Number="002" Name="Card Preset" ProgramChange="2"/>
+          <Patch Number="003" Name="Card Preset" ProgramChange="3"/>
+          <Patch Number="004" Name="Card Preset" ProgramChange="4"/>
+          <Patch Number="005" Name="Card Preset" ProgramChange="5"/>
+          <Patch Number="006" Name="Card Preset" ProgramChange="6"/>
+          <Patch Number="007" Name="Card Preset" ProgramChange="7"/>
+          <Patch Number="008" Name="Card Preset" ProgramChange="8"/>
+          <Patch Number="009" Name="Card Preset" ProgramChange="9"/>
+          <Patch Number="010" Name="Card Preset" ProgramChange="10"/>
+          <Patch Number="011" Name="Card Preset" ProgramChange="11"/>
+          <Patch Number="012" Name="Card Preset" ProgramChange="12"/>
+          <Patch Number="013" Name="Card Preset" ProgramChange="13"/>
+          <Patch Number="014" Name="Card Preset" ProgramChange="14"/>
+          <Patch Number="015" Name="Card Preset" ProgramChange="15"/>
+          <Patch Number="016" Name="Card Preset" ProgramChange="16"/>
+          <Patch Number="017" Name="Card Preset" ProgramChange="17"/>
+          <Patch Number="018" Name="Card Preset" ProgramChange="18"/>
+          <Patch Number="019" Name="Card Preset" ProgramChange="19"/>
+          <Patch Number="020" Name="Card Preset" ProgramChange="20"/>
+          <Patch Number="021" Name="Card Preset" ProgramChange="21"/>
+          <Patch Number="022" Name="Card Preset" ProgramChange="22"/>
+          <Patch Number="023" Name="Card Preset" ProgramChange="23"/>
+          <Patch Number="024" Name="Card Preset" ProgramChange="24"/>
+          <Patch Number="025" Name="Card Preset" ProgramChange="25"/>
+          <Patch Number="026" Name="Card Preset" ProgramChange="26"/>
+          <Patch Number="027" Name="Card Preset" ProgramChange="27"/>
+          <Patch Number="028" Name="Card Preset" ProgramChange="28"/>
+          <Patch Number="029" Name="Card Preset" ProgramChange="29"/>
+          <Patch Number="030" Name="Card Preset" ProgramChange="30"/>
+          <Patch Number="031" Name="Card Preset" ProgramChange="31"/>
+          <Patch Number="032" Name="Card Preset" ProgramChange="32"/>
+          <Patch Number="033" Name="Card Preset" ProgramChange="33"/>
+          <Patch Number="034" Name="Card Preset" ProgramChange="34"/>
+          <Patch Number="035" Name="Card Preset" ProgramChange="35"/>
+          <Patch Number="036" Name="Card Preset" ProgramChange="36"/>
+          <Patch Number="037" Name="Card Preset" ProgramChange="37"/>
+          <Patch Number="038" Name="Card Preset" ProgramChange="38"/>
+          <Patch Number="039" Name="Card Preset" ProgramChange="39"/>
+          <Patch Number="040" Name="Card Preset" ProgramChange="40"/>
+          <Patch Number="041" Name="Card Preset" ProgramChange="41"/>
+          <Patch Number="042" Name="Card Preset" ProgramChange="42"/>
+          <Patch Number="043" Name="Card Preset" ProgramChange="43"/>
+          <Patch Number="044" Name="Card Preset" ProgramChange="44"/>
+          <Patch Number="045" Name="Card Preset" ProgramChange="45"/>
+          <Patch Number="046" Name="Card Preset" ProgramChange="46"/>
+          <Patch Number="047" Name="Card Preset" ProgramChange="47"/>
+          <Patch Number="048" Name="Card Preset" ProgramChange="48"/>
+          <Patch Number="049" Name="Card Preset" ProgramChange="49"/>
+          <Patch Number="050" Name="Card Preset" ProgramChange="50"/>
+          <Patch Number="051" Name="Card Preset" ProgramChange="51"/>
+          <Patch Number="052" Name="Card Preset" ProgramChange="52"/>
+          <Patch Number="053" Name="Card Preset" ProgramChange="53"/>
+          <Patch Number="054" Name="Card Preset" ProgramChange="54"/>
+          <Patch Number="055" Name="Card Preset" ProgramChange="55"/>
+          <Patch Number="056" Name="Card Preset" ProgramChange="56"/>
+          <Patch Number="057" Name="Card Preset" ProgramChange="57"/>
+          <Patch Number="058" Name="Card Preset" ProgramChange="58"/>
+          <Patch Number="059" Name="Card Preset" ProgramChange="59"/>
+          <Patch Number="060" Name="Card Preset" ProgramChange="60"/>
+          <Patch Number="061" Name="Card Preset" ProgramChange="61"/>
+          <Patch Number="062" Name="Card Preset" ProgramChange="62"/>
+          <Patch Number="063" Name="Card Preset" ProgramChange="63"/>
+          <Patch Number="064" Name="Card Preset" ProgramChange="64"/>
+          <Patch Number="065" Name="Card Preset" ProgramChange="65"/>
+          <Patch Number="066" Name="Card Preset" ProgramChange="66"/>
+          <Patch Number="067" Name="Card Preset" ProgramChange="67"/>
+          <Patch Number="068" Name="Card Preset" ProgramChange="68"/>
+          <Patch Number="069" Name="Card Preset" ProgramChange="69"/>
+          <Patch Number="070" Name="Card Preset" ProgramChange="70"/>
+          <Patch Number="071" Name="Card Preset" ProgramChange="71"/>
+          <Patch Number="072" Name="Card Preset" ProgramChange="72"/>
+          <Patch Number="073" Name="Card Preset" ProgramChange="73"/>
+          <Patch Number="074" Name="Card Preset" ProgramChange="74"/>
+          <Patch Number="075" Name="Card Preset" ProgramChange="75"/>
+          <Patch Number="076" Name="Card Preset" ProgramChange="76"/>
+          <Patch Number="077" Name="Card Preset" ProgramChange="77"/>
+          <Patch Number="078" Name="Card Preset" ProgramChange="78"/>
+          <Patch Number="079" Name="Card Preset" ProgramChange="79"/>
+          <Patch Number="080" Name="Card Preset" ProgramChange="80"/>
+          <Patch Number="081" Name="Card Preset" ProgramChange="81"/>
+          <Patch Number="082" Name="Card Preset" ProgramChange="82"/>
+          <Patch Number="083" Name="Card Preset" ProgramChange="83"/>
+          <Patch Number="084" Name="Card Preset" ProgramChange="84"/>
+          <Patch Number="085" Name="Card Preset" ProgramChange="85"/>
+          <Patch Number="086" Name="Card Preset" ProgramChange="86"/>
+          <Patch Number="087" Name="Card Preset" ProgramChange="87"/>
+          <Patch Number="088" Name="Card Preset" ProgramChange="88"/>
+          <Patch Number="089" Name="Card Preset" ProgramChange="89"/>
+          <Patch Number="090" Name="Card Preset" ProgramChange="90"/>
+          <Patch Number="091" Name="Card Preset" ProgramChange="91"/>
+          <Patch Number="092" Name="Card Preset" ProgramChange="92"/>
+          <Patch Number="093" Name="Card Preset" ProgramChange="93"/>
+          <Patch Number="094" Name="Card Preset" ProgramChange="94"/>
+          <Patch Number="095" Name="Card Preset" ProgramChange="95"/>
+          <Patch Number="096" Name="Card Preset" ProgramChange="96"/>
+          <Patch Number="097" Name="Card Preset" ProgramChange="97"/>
+          <Patch Number="098" Name="Card Preset" ProgramChange="98"/>
+          <Patch Number="099" Name="Card Preset" ProgramChange="99"/>
+          <Patch Number="100" Name="Card Preset" ProgramChange="100"/>
+          <Patch Number="101" Name="Card Preset" ProgramChange="101"/>
+          <Patch Number="102" Name="Card Preset" ProgramChange="102"/>
+          <Patch Number="103" Name="Card Preset" ProgramChange="103"/>
+          <Patch Number="104" Name="Card Preset" ProgramChange="104"/>
+          <Patch Number="105" Name="Card Preset" ProgramChange="105"/>
+          <Patch Number="106" Name="Card Preset" ProgramChange="106"/>
+          <Patch Number="107" Name="Card Preset" ProgramChange="107"/>
+          <Patch Number="108" Name="Card Preset" ProgramChange="108"/>
+          <Patch Number="109" Name="Card Preset" ProgramChange="109"/>
+          <Patch Number="110" Name="Card Preset" ProgramChange="110"/>
+          <Patch Number="111" Name="Card Preset" ProgramChange="111"/>
+          <Patch Number="112" Name="Card Preset" ProgramChange="112"/>
+          <Patch Number="113" Name="Card Preset" ProgramChange="113"/>
+          <Patch Number="114" Name="Card Preset" ProgramChange="114"/>
+          <Patch Number="115" Name="Card Preset" ProgramChange="115"/>
+          <Patch Number="116" Name="Card Preset" ProgramChange="116"/>
+          <Patch Number="117" Name="Card Preset" ProgramChange="117"/>
+          <Patch Number="118" Name="Card Preset" ProgramChange="118"/>
+          <Patch Number="119" Name="Card Preset" ProgramChange="119"/>
+          <Patch Number="120" Name="Card Preset" ProgramChange="120"/>
+          <Patch Number="121" Name="Card Preset" ProgramChange="121"/>
+          <Patch Number="122" Name="Card Preset" ProgramChange="122"/>
+          <Patch Number="123" Name="Card Preset" ProgramChange="123"/>
+          <Patch Number="124" Name="Card Preset" ProgramChange="124"/>
+          <Patch Number="125" Name="Card Preset" ProgramChange="125"/>
+          <Patch Number="126" Name="Card Preset" ProgramChange="126"/>
+          <Patch Number="127" Name="Card Preset" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Card HyperPresets">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="4"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="000" Name="Card Hyper" ProgramChange="0"/>
+          <Patch Number="001" Name="Card Hyper" ProgramChange="1"/>
+          <Patch Number="002" Name="Card Hyper" ProgramChange="2"/>
+          <Patch Number="003" Name="Card Hyper" ProgramChange="3"/>
+          <Patch Number="004" Name="Card Hyper" ProgramChange="4"/>
+          <Patch Number="005" Name="Card Hyper" ProgramChange="5"/>
+          <Patch Number="006" Name="Card Hyper" ProgramChange="6"/>
+          <Patch Number="007" Name="Card Hyper" ProgramChange="7"/>
+          <Patch Number="008" Name="Card Hyper" ProgramChange="8"/>
+          <Patch Number="009" Name="Card Hyper" ProgramChange="9"/>
+          <Patch Number="010" Name="Card Hyper" ProgramChange="10"/>
+          <Patch Number="011" Name="Card Hyper" ProgramChange="11"/>
+          <Patch Number="012" Name="Card Hyper" ProgramChange="12"/>
+          <Patch Number="013" Name="Card Hyper" ProgramChange="13"/>
+          <Patch Number="014" Name="Card Hyper" ProgramChange="14"/>
+          <Patch Number="015" Name="Card Hyper" ProgramChange="15"/>
+          <Patch Number="016" Name="Card Hyper" ProgramChange="16"/>
+          <Patch Number="017" Name="Card Hyper" ProgramChange="17"/>
+          <Patch Number="018" Name="Card Hyper" ProgramChange="18"/>
+          <Patch Number="019" Name="Card Hyper" ProgramChange="19"/>
+          <Patch Number="020" Name="Card Hyper" ProgramChange="20"/>
+          <Patch Number="021" Name="Card Hyper" ProgramChange="21"/>
+          <Patch Number="022" Name="Card Hyper" ProgramChange="22"/>
+          <Patch Number="023" Name="Card Hyper" ProgramChange="23"/>
+          <Patch Number="024" Name="Card Hyper" ProgramChange="24"/>
+          <Patch Number="025" Name="Card Hyper" ProgramChange="25"/>
+          <Patch Number="026" Name="Card Hyper" ProgramChange="26"/>
+          <Patch Number="027" Name="Card Hyper" ProgramChange="27"/>
+          <Patch Number="028" Name="Card Hyper" ProgramChange="28"/>
+          <Patch Number="029" Name="Card Hyper" ProgramChange="29"/>
+          <Patch Number="030" Name="Card Hyper" ProgramChange="30"/>
+          <Patch Number="031" Name="Card Hyper" ProgramChange="31"/>
+          <Patch Number="032" Name="Card Hyper" ProgramChange="32"/>
+          <Patch Number="033" Name="Card Hyper" ProgramChange="33"/>
+          <Patch Number="034" Name="Card Hyper" ProgramChange="34"/>
+          <Patch Number="035" Name="Card Hyper" ProgramChange="35"/>
+          <Patch Number="036" Name="Card Hyper" ProgramChange="36"/>
+          <Patch Number="037" Name="Card Hyper" ProgramChange="37"/>
+          <Patch Number="038" Name="Card Hyper" ProgramChange="38"/>
+          <Patch Number="039" Name="Card Hyper" ProgramChange="39"/>
+          <Patch Number="040" Name="Card Hyper" ProgramChange="40"/>
+          <Patch Number="041" Name="Card Hyper" ProgramChange="41"/>
+          <Patch Number="042" Name="Card Hyper" ProgramChange="42"/>
+          <Patch Number="043" Name="Card Hyper" ProgramChange="43"/>
+          <Patch Number="044" Name="Card Hyper" ProgramChange="44"/>
+          <Patch Number="045" Name="Card Hyper" ProgramChange="45"/>
+          <Patch Number="046" Name="Card Hyper" ProgramChange="46"/>
+          <Patch Number="047" Name="Card Hyper" ProgramChange="47"/>
+          <Patch Number="048" Name="Card Hyper" ProgramChange="48"/>
+          <Patch Number="049" Name="Card Hyper" ProgramChange="49"/>
+          <Patch Number="050" Name="Card Hyper" ProgramChange="50"/>
+          <Patch Number="051" Name="Card Hyper" ProgramChange="51"/>
+          <Patch Number="052" Name="Card Hyper" ProgramChange="52"/>
+          <Patch Number="053" Name="Card Hyper" ProgramChange="53"/>
+          <Patch Number="054" Name="Card Hyper" ProgramChange="54"/>
+          <Patch Number="055" Name="Card Hyper" ProgramChange="55"/>
+          <Patch Number="056" Name="Card Hyper" ProgramChange="56"/>
+          <Patch Number="057" Name="Card Hyper" ProgramChange="57"/>
+          <Patch Number="058" Name="Card Hyper" ProgramChange="58"/>
+          <Patch Number="059" Name="Card Hyper" ProgramChange="59"/>
+          <Patch Number="060" Name="Card Hyper" ProgramChange="60"/>
+          <Patch Number="061" Name="Card Hyper" ProgramChange="61"/>
+          <Patch Number="062" Name="Card Hyper" ProgramChange="62"/>
+          <Patch Number="063" Name="Card Hyper" ProgramChange="63"/>
+          <Patch Number="064" Name="Card Hyper" ProgramChange="64"/>
+          <Patch Number="065" Name="Card Hyper" ProgramChange="65"/>
+          <Patch Number="066" Name="Card Hyper" ProgramChange="66"/>
+          <Patch Number="067" Name="Card Hyper" ProgramChange="67"/>
+          <Patch Number="068" Name="Card Hyper" ProgramChange="68"/>
+          <Patch Number="069" Name="Card Hyper" ProgramChange="69"/>
+          <Patch Number="070" Name="Card Hyper" ProgramChange="70"/>
+          <Patch Number="071" Name="Card Hyper" ProgramChange="71"/>
+          <Patch Number="072" Name="Card Hyper" ProgramChange="72"/>
+          <Patch Number="073" Name="Card Hyper" ProgramChange="73"/>
+          <Patch Number="074" Name="Card Hyper" ProgramChange="74"/>
+          <Patch Number="075" Name="Card Hyper" ProgramChange="75"/>
+          <Patch Number="076" Name="Card Hyper" ProgramChange="76"/>
+          <Patch Number="077" Name="Card Hyper" ProgramChange="77"/>
+          <Patch Number="078" Name="Card Hyper" ProgramChange="78"/>
+          <Patch Number="079" Name="Card Hyper" ProgramChange="79"/>
+          <Patch Number="080" Name="Card Hyper" ProgramChange="80"/>
+          <Patch Number="081" Name="Card Hyper" ProgramChange="81"/>
+          <Patch Number="082" Name="Card Hyper" ProgramChange="82"/>
+          <Patch Number="083" Name="Card Hyper" ProgramChange="83"/>
+          <Patch Number="084" Name="Card Hyper" ProgramChange="84"/>
+          <Patch Number="085" Name="Card Hyper" ProgramChange="85"/>
+          <Patch Number="086" Name="Card Hyper" ProgramChange="86"/>
+          <Patch Number="087" Name="Card Hyper" ProgramChange="87"/>
+          <Patch Number="088" Name="Card Hyper" ProgramChange="88"/>
+          <Patch Number="089" Name="Card Hyper" ProgramChange="89"/>
+          <Patch Number="090" Name="Card Hyper" ProgramChange="90"/>
+          <Patch Number="091" Name="Card Hyper" ProgramChange="91"/>
+          <Patch Number="092" Name="Card Hyper" ProgramChange="92"/>
+          <Patch Number="093" Name="Card Hyper" ProgramChange="93"/>
+          <Patch Number="094" Name="Card Hyper" ProgramChange="94"/>
+          <Patch Number="095" Name="Card Hyper" ProgramChange="95"/>
+          <Patch Number="096" Name="Card Hyper" ProgramChange="96"/>
+          <Patch Number="097" Name="Card Hyper" ProgramChange="97"/>
+          <Patch Number="098" Name="Card Hyper" ProgramChange="98"/>
+          <Patch Number="099" Name="Card Hyper" ProgramChange="99"/>
+          <Patch Number="100" Name="Card Hyper" ProgramChange="100"/>
+          <Patch Number="101" Name="Card Hyper" ProgramChange="101"/>
+          <Patch Number="102" Name="Card Hyper" ProgramChange="102"/>
+          <Patch Number="103" Name="Card Hyper" ProgramChange="103"/>
+          <Patch Number="104" Name="Card Hyper" ProgramChange="104"/>
+          <Patch Number="105" Name="Card Hyper" ProgramChange="105"/>
+          <Patch Number="106" Name="Card Hyper" ProgramChange="106"/>
+          <Patch Number="107" Name="Card Hyper" ProgramChange="107"/>
+          <Patch Number="108" Name="Card Hyper" ProgramChange="108"/>
+          <Patch Number="109" Name="Card Hyper" ProgramChange="109"/>
+          <Patch Number="110" Name="Card Hyper" ProgramChange="110"/>
+          <Patch Number="111" Name="Card Hyper" ProgramChange="111"/>
+          <Patch Number="112" Name="Card Hyper" ProgramChange="112"/>
+          <Patch Number="113" Name="Card Hyper" ProgramChange="113"/>
+          <Patch Number="114" Name="Card Hyper" ProgramChange="114"/>
+          <Patch Number="115" Name="Card Hyper" ProgramChange="115"/>
+          <Patch Number="116" Name="Card Hyper" ProgramChange="116"/>
+          <Patch Number="117" Name="Card Hyper" ProgramChange="117"/>
+          <Patch Number="118" Name="Card Hyper" ProgramChange="118"/>
+          <Patch Number="119" Name="Card Hyper" ProgramChange="119"/>
+          <Patch Number="120" Name="Card Hyper" ProgramChange="120"/>
+          <Patch Number="121" Name="Card Hyper" ProgramChange="121"/>
+          <Patch Number="122" Name="Card Hyper" ProgramChange="122"/>
+          <Patch Number="123" Name="Card Hyper" ProgramChange="123"/>
+          <Patch Number="124" Name="Card Hyper" ProgramChange="124"/>
+          <Patch Number="125" Name="Card Hyper" ProgramChange="125"/>
+          <Patch Number="126" Name="Card Hyper" ProgramChange="126"/>
+          <Patch Number="127" Name="Card Hyper" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

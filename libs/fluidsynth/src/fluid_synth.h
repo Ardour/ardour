@@ -190,7 +190,7 @@ fluid_preset_t *fluid_synth_find_preset(fluid_synth_t *synth,
                                         int prognum);
 void fluid_synth_sfont_unref(fluid_synth_t *synth, fluid_sfont_t *sfont);
 
-void fluid_synth_dither_s16(int *dither_index, int len, float *lin, float *rin,
+void fluid_synth_dither_s16(int *dither_index, int len, const float *lin, const float *rin,
                             void *lout, int loff, int lincr,
                             void *rout, int roff, int rincr);
 
@@ -205,13 +205,22 @@ int fluid_synth_set_chorus_full(fluid_synth_t *synth, int set, int nr, double le
 
 fluid_sample_timer_t *new_fluid_sample_timer(fluid_synth_t *synth, fluid_timer_callback_t callback, void *data);
 void delete_fluid_sample_timer(fluid_synth_t *synth, fluid_sample_timer_t *timer);
-
+void fluid_sample_timer_reset(fluid_synth_t *synth, fluid_sample_timer_t *timer);
 
 void fluid_synth_process_event_queue(fluid_synth_t *synth);
 
 int fluid_synth_set_gen2(fluid_synth_t *synth, int chan,
                          int param, float value,
                          int absolute, int normalized);
+
+int
+fluid_synth_process_LOCAL(fluid_synth_t *synth, int len, int nfx, float *fx[],
+                    int nout, float *out[], int (*block_render_func)(fluid_synth_t *, int));
+int
+fluid_synth_write_float_LOCAL(fluid_synth_t *synth, int len,
+                        void *lout, int loff, int lincr,
+                        void *rout, int roff, int rincr,
+                        int (*block_render_func)(fluid_synth_t *, int));
 /*
  * misc
  */

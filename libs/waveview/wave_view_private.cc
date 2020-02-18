@@ -1,21 +1,21 @@
 /*
-    Copyright (C) 2017 Tim Mayberry
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2017 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cmath>
 #include "ardour/lmath.h"
@@ -379,9 +379,14 @@ WaveViewThreads::start_threads ()
 {
 	assert (!_threads.size());
 
-	int num_cpus = hardware_concurrency ();
+	const int num_cpus = hardware_concurrency ();
 
-	uint32_t num_threads = std::max (1, num_cpus - 1);
+	/* the upper limit of 8 here is entirely arbitrary. It just doesn't
+	 * seem worthwhile having "ncpus" of low priority threads for
+	 * rendering waveforms into the cache.
+	 */
+
+	uint32_t num_threads = std::min (8, std::max (1, num_cpus - 1));
 
 	for (uint32_t i = 0; i != num_threads; ++i) {
 		boost::shared_ptr<WaveViewDrawingThread> new_thread (new WaveViewDrawingThread ());

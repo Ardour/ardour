@@ -1,21 +1,24 @@
 /*
-    Copyright (C) 1999-2008 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2006-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2013 Sakari Bergen <sakari.bergen@beatwaves.net>
+ * Copyright (C) 2010-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2015-2018 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 
 #include "pbd/error.h"
@@ -92,7 +95,7 @@ Session::pre_export ()
 
 	_exporting = true;
 	export_status->set_running (true);
-	export_status->Finished.connect_same_thread (*this, boost::bind (&Session::finalize_audio_export, this));
+	export_status->Finished.connect_same_thread (*this, boost::bind (&Session::finalize_audio_export, this, _1));
 
 	/* disable MMC output early */
 
@@ -150,7 +153,7 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 		}
 	}
 
-	/* we just did the core part of a locate() call above, but
+	/* we just did the core part of a locate call above, but
 	   for the sake of any GUI, put the _transport_sample in
 	   the right place too.
 	*/
@@ -158,7 +161,7 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 	_transport_sample = position;
 
 	if (!region_export) {
-		_remaining_latency_preroll = worst_latency_preroll ();
+		_remaining_latency_preroll = worst_latency_preroll_buffer_size_ceil ();
 	} else {
 		_remaining_latency_preroll = 0;
 	}
@@ -172,7 +175,7 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 
 	/* we are ready to go ... */
 
-	if (!_engine.connected()) {
+	if (!_engine.running()) {
 		return -1;
 	}
 
@@ -253,7 +256,7 @@ Session::process_export_fw (pframes_t nframes)
 		set_transport_speed (1.0, 0, false);
 		butler_transport_work ();
 		g_atomic_int_set (&_butler->should_do_transport_work, 0);
-		post_transport ();
+		butler_completed_transport_work ();
 
 		return;
 	}
@@ -296,7 +299,7 @@ int
 Session::stop_audio_export ()
 {
 	/* can't use stop_transport() here because we need
-	   an immediate halt and don't require all the declick
+	   an synchronous halt and don't require all the declick
 	   stuff that stop_transport() implements.
 	*/
 
@@ -308,8 +311,14 @@ Session::stop_audio_export ()
 }
 
 void
-Session::finalize_audio_export ()
+Session::finalize_audio_export (TransportRequestSource trs)
 {
+	/* This is called as a handler for the Finished signal, which is
+	   emitted by a UI component once the ExportStatus object associated
+	   with this export indicates that it has finished. It runs in the UI
+	   thread that emits the signal.
+	*/
+
 	_exporting = false;
 
 	if (_export_rolling) {
@@ -337,6 +346,6 @@ Session::finalize_audio_export ()
 	if (post_export_sync) {
 		config.set_external_sync (true);
 	} else {
-		locate (post_export_position, false, false, false, false, false);
+		request_locate (post_export_position, MustStop, trs);
 	}
 }

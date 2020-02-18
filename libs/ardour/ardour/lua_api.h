@@ -1,20 +1,20 @@
 /*
- * Copyright (C) 2016 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2017 Paul Davis <paul@linuxaudiosystems.com>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #ifndef _ardour_lua_api_h_
 #define _ardour_lua_api_h_
@@ -22,12 +22,15 @@
 #include <string>
 #include <lo/lo.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
+#include <rubberband/RubberBandStretcher.h>
 #include <vamp-hostsdk/Plugin.h>
 
-#include "evoral/Note.hpp"
+#include "evoral/Note.h"
 
 #include "ardour/libardour_visibility.h"
 
+#include "ardour/audioregion.h"
 #include "ardour/midi_model.h"
 #include "ardour/processor.h"
 #include "ardour/session.h"
@@ -65,8 +68,7 @@ namespace ARDOUR { namespace LuaAPI {
 	 */
 	boost::shared_ptr<ARDOUR::Processor> new_luaproc (ARDOUR::Session *s, const std::string& p);
 
-	/** return a PluginInfoList (all plugin)
-	 */
+	/** List all installed plugins */
 	std::list<boost::shared_ptr<ARDOUR::PluginInfo> > list_plugins ();
 
 	/** search a Plugin
@@ -82,6 +84,7 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @param s Session Handle
 	 * @param id Plugin Name, ID or URI
 	 * @param type Plugin Type
+	 * @param preset name of plugin-preset to load, leave empty "" to not load any preset after instantiation
 	 * @returns Processor or nil
 	 */
 	boost::shared_ptr<ARDOUR::Processor> new_plugin (ARDOUR::Session *s, const std::string& id, ARDOUR::PluginType type, const std::string& preset = "");
@@ -93,7 +96,7 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @param value value to set
 	 * @returns true on success, false on error or out-of-bounds value
 	 */
-	bool set_processor_param (boost::shared_ptr<ARDOUR::Processor> proc, uint32_t which, float val);
+	bool set_processor_param (boost::shared_ptr<ARDOUR::Processor> proc, uint32_t which, float value);
 
 	/** get a plugin control parameter value
 	 *
@@ -117,16 +120,16 @@ namespace ARDOUR { namespace LuaAPI {
 	 *
 	 * This is a wrapper around set_processor_param which looks up the Processor by plugin-insert.
 	 *
-	 * @param proc Plugin-Insert
+	 * @param pi Plugin-Insert
 	 * @param which control-input to set (starting at 0)
 	 * @param value value to set
 	 * @returns true on success, false on error or out-of-bounds value
 	 */
-	bool set_plugin_insert_param (boost::shared_ptr<ARDOUR::PluginInsert> pi, uint32_t which, float val);
+	bool set_plugin_insert_param (boost::shared_ptr<ARDOUR::PluginInsert> pi, uint32_t which, float value);
 
 	/** get a plugin control parameter value
 	 *
-	 * @param proc Plugin-Insert
+	 * @param pi Plugin-Insert
 	 * @param which control port to query (starting at 0, including ports of type input and output)
 	 * @param ok boolean variable contains true or false after call returned. to be checked by caller before using value.
 	 * @returns value
@@ -251,12 +254,12 @@ namespace ARDOUR { namespace LuaAPI {
 			 *
 			 * If the plugin is not yet initialized, initialize() is called.
 			 *
-			 * if @cb is not nil, it is called with the immediate
+			 * if \p fn is not nil, it is called with the immediate
 			 * Vamp::Plugin::Features on every process call.
 			 *
 			 * @param r readable
 			 * @param channel channel to process
-			 * @param fn lua callback function
+			 * @param fn lua callback function or nil
 			 * @return 0 on success
 			 */
 			int analyze (boost::shared_ptr<ARDOUR::Readable> r, uint32_t channel, luabridge::LuaRef fn);
@@ -300,10 +303,52 @@ namespace ARDOUR { namespace LuaAPI {
 		private:
 			::Vamp::Plugin* _plugin;
 			float           _sample_rate;
-			samplecnt_t      _bufsize;
-			samplecnt_t      _stepsize;
+			samplecnt_t     _bufsize;
+			samplecnt_t     _stepsize;
 			bool            _initialized;
 
+	};
+
+	class Rubberband : public Readable , public boost::enable_shared_from_this<Rubberband>
+	{
+		public:
+			Rubberband (boost::shared_ptr<AudioRegion>, bool percussive);
+			~Rubberband ();
+			bool set_strech_and_pitch (double stretch_ratio, double pitch_ratio);
+			bool set_mapping (luabridge::LuaRef tbl);
+			boost::shared_ptr<AudioRegion> process (luabridge::LuaRef cb);
+			boost::shared_ptr<Readable> readable ();
+
+			/* readable API */
+			samplecnt_t readable_length () const { return _read_len; }
+			uint32_t n_channels () const { return _n_channels; }
+			samplecnt_t read (Sample*, samplepos_t pos, samplecnt_t cnt, int channel) const;
+
+		private:
+			Rubberband (Rubberband const&); // no copy construction
+			bool read_region (bool study);
+			bool retrieve (float**);
+			void cleanup (bool abort);
+			boost::shared_ptr<AudioRegion> finalize ();
+
+			boost::shared_ptr<AudioRegion> _region;
+
+			uint32_t    _n_channels;
+			samplecnt_t _read_len;
+			samplecnt_t _read_start;
+			samplecnt_t _read_offset;
+
+			std::vector<boost::shared_ptr<AudioSource> > _asrc;
+
+			RubberBand::RubberBandStretcher _rbs;
+			std::map<size_t, size_t>        _mapping;
+
+			double _stretch_ratio;
+			double _pitch_ratio;
+
+			luabridge::LuaRef*            _cb;
+			boost::shared_ptr<Rubberband> _self;
+			static const samplecnt_t      _bufsize;
 	};
 
 	boost::shared_ptr<Evoral::Note<Temporal::Beats> >
@@ -366,41 +411,41 @@ namespace ARDOUR { namespace LuaOSC {
 }
 
 class LuaTableRef {
-	public:
-		LuaTableRef ();
-		~LuaTableRef ();
+public:
+	LuaTableRef ();
+	~LuaTableRef ();
 
-		int get (lua_State* L);
-		int set (lua_State* L);
+	int get (lua_State* L);
+	int set (lua_State* L);
 
-	private:
-		struct LuaTableEntry {
-			LuaTableEntry (int kt, int vt)
-				: keytype (kt)
-				, valuetype (vt)
-			{ }
+private:
+	struct LuaTableEntry {
+		LuaTableEntry (int kt, int vt)
+			: keytype (kt)
+			, valuetype (vt)
+		{ }
 
-			int keytype;
-			std::string k_s;
-			unsigned int k_n;
+		int keytype;
+		std::string k_s;
+		unsigned int k_n;
 
-			int valuetype;
-			// LUA_TUSERDATA
-			const void* c;
-			void* p;
-			// LUA_TBOOLEAN
-			bool b;
-			// LUA_TSTRING:
-			std::string s;
-			// LUA_TNUMBER:
-			double n;
-		};
+		int valuetype;
+		// LUA_TUSERDATA
+		const void* c;
+		void* p;
+		// LUA_TBOOLEAN
+		bool b;
+		// LUA_TSTRING:
+		std::string s;
+		// LUA_TNUMBER:
+		double n;
+	};
 
-		std::vector<LuaTableEntry> _data;
+	std::vector<LuaTableEntry> _data;
 
-		static void* findclasskey (lua_State *L, const void* key);
-		template<typename T>
-		static void assign (luabridge::LuaRef* rv, T key, const LuaTableEntry& s);
+	static void* findclasskey (lua_State *L, const void* key);
+	template<typename T>
+	static void assign (luabridge::LuaRef* rv, T key, const LuaTableEntry& s);
 };
 
 } /* namespace */

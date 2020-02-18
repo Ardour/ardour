@@ -7,7 +7,7 @@ function factory () return function ()
 		if mr:isnil () then goto next end
 
 		print (r:name (), "Pos:", r:position (), "Start:", r:start ())
-		local bfc = ARDOUR.BeatsFramesConverter (Session:tempo_map (), r:position ())
+		local bfc = ARDOUR.BeatsSamplesConverter (Session:tempo_map (), r:position ())
 		local nl = ARDOUR.LuaAPI.note_list (mr:model ())
 		for n in nl:iter () do
 			print (" Note @", bfc:to (n:time ()),
@@ -18,4 +18,3 @@ function factory () return function ()
 		::next::
 	end
 end end
-

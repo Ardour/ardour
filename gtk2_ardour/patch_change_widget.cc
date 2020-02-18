@@ -1,20 +1,19 @@
 /*
- * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
- * Copyright (C) 2011 Paul Davis
+ * Copyright (C) 2017-2019 Robin Gareus <robin@gareus.org>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <bitset>
@@ -23,7 +22,7 @@
 #include "pbd/unwind.h"
 
 #include "evoral/midi_events.h"
-#include "evoral/PatchChange.hpp"
+#include "evoral/PatchChange.h"
 
 #include "midi++/midnam_patch.h"
 
@@ -58,8 +57,6 @@ PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
 	, _audition_end_spin (*manage (new Adjustment (60, 0, 127, 1, 16)))
 	, _audition_velocity (*manage (new Adjustment (100, 1, 127, 1, 16)))
 	, _audition_note_on (false)
-	, _piano ((PianoKeyboard*)piano_keyboard_new())
-	, _pianomm (Glib::wrap((GtkWidget*)_piano))
 {
 	Box* box;
 	box = manage (new HBox ());
@@ -115,11 +112,12 @@ PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
 		_channel_select.AddMenuElem (MenuElemNoMnemonic (buf, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_channel), chn)));
 	}
 
-	piano_keyboard_set_monophonic (_piano, TRUE);
-	g_signal_connect (G_OBJECT (_piano), "note-on", G_CALLBACK (PatchChangeWidget::_note_on_event_handler), this);
-	g_signal_connect (G_OBJECT (_piano), "note-off", G_CALLBACK (PatchChangeWidget::_note_off_event_handler), this);
-	_pianomm->set_flags(Gtk::CAN_FOCUS);
-	pack_start (*_pianomm, false, false);
+	_piano.set_monophonic (true);
+	_piano.NoteOn.connect (sigc::mem_fun (*this, &PatchChangeWidget::_note_on_event_handler));
+	_piano.NoteOff.connect (sigc::mem_fun (*this, &PatchChangeWidget::note_off_event_handler));
+
+	_piano.set_flags(Gtk::CAN_FOCUS);
+	pack_start (_piano, false, false);
 
 	_audition_start_spin.set_sensitive (false);
 	_audition_end_spin.set_sensitive (false);
@@ -146,7 +144,6 @@ PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
 PatchChangeWidget::~PatchChangeWidget ()
 {
 	cancel_audition ();
-	delete _pianomm;
 }
 
 void
@@ -229,7 +226,7 @@ PatchChangeWidget::refill_banks ()
 	const int b = bank (_channel);
 
 	{
-		PBD::Unwinder<bool> (_ignore_spin_btn_signals, true);
+		PBD::Unwinder<bool> uw (_ignore_spin_btn_signals, true);
 		_bank_msb_spin.set_value (b >> 7);
 		_bank_lsb_spin.set_value (b & 127);
 	}
@@ -435,7 +432,7 @@ PatchChangeWidget::cancel_audition ()
 
 	if (_audition_note_on) {
 		note_off_event_handler (_audition_note_num);
-		piano_keyboard_set_note_off (_piano, _audition_note_num);
+		_piano.set_note_off (_audition_note_num);
 	}
 }
 
@@ -468,25 +465,19 @@ PatchChangeWidget::audition_next ()
 {
 	if (_audition_note_on) {
 		note_off_event_handler (_audition_note_num);
-		piano_keyboard_set_note_off (_piano, _audition_note_num);
+		_piano.set_note_off (_audition_note_num);
 		return ++_audition_note_num <= _audition_end_spin.get_value_as_int() && _audition_enable.get_active ();
 	} else {
 		note_on_event_handler (_audition_note_num, true);
-		piano_keyboard_set_note_on (_piano, _audition_note_num);
+		_piano.set_note_on (_audition_note_num);
 		return true;
 	}
 }
 
 void
-PatchChangeWidget::_note_on_event_handler(GtkWidget*, int note, gpointer arg)
+PatchChangeWidget::_note_on_event_handler (int note, int)
 {
-	((PatchChangeWidget*)arg)->note_on_event_handler(note, false);
-}
-
-void
-PatchChangeWidget::_note_off_event_handler(GtkWidget*, int note, gpointer arg)
-{
-	((PatchChangeWidget*)arg)->note_off_event_handler(note);
+	note_on_event_handler(note, false);
 }
 
 void
@@ -494,7 +485,7 @@ PatchChangeWidget::note_on_event_handler (int note, bool for_audition)
 {
 	if (!for_audition) {
 		cancel_audition ();
-		_pianomm->grab_focus ();
+		_piano.grab_focus ();
 	}
 	uint8_t event[3];
 	event[0] = (MIDI_CMD_NOTE_ON | _channel);

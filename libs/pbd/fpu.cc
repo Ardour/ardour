@@ -1,21 +1,23 @@
 /*
-    Copyright (C) 2012 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2007-2016 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2013-2015 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include "libpbd-config.h"
 
@@ -48,25 +50,25 @@ FPU* FPU::_instance (0);
 static void
 __cpuid(int regs[4], int cpuid_leaf)
 {
-        asm volatile (
+	asm volatile (
 #if defined(__i386__)
-	        "pushl %%ebx;\n\t"
+			"pushl %%ebx;\n\t"
 #endif
-	        "cpuid;\n\t"
-	        "movl %%eax, (%1);\n\t"
-	        "movl %%ebx, 4(%1);\n\t"
-	        "movl %%ecx, 8(%1);\n\t"
-	        "movl %%edx, 12(%1);\n\t"
+			"cpuid;\n\t"
+			"movl %%eax, (%1);\n\t"
+			"movl %%ebx, 4(%1);\n\t"
+			"movl %%ecx, 8(%1);\n\t"
+			"movl %%edx, 12(%1);\n\t"
 #if defined(__i386__)
-	        "popl %%ebx;\n\t"
+			"popl %%ebx;\n\t"
 #endif
-	        :"=a" (cpuid_leaf) /* %eax clobbered by CPUID */
-	        :"S" (regs), "a" (cpuid_leaf)
-	        :
+			:"=a" (cpuid_leaf) /* %eax clobbered by CPUID */
+			:"S" (regs), "a" (cpuid_leaf)
+			:
 #if !defined(__i386__)
-	         "%ebx",
+			"%ebx",
 #endif
-	         "%ecx", "%edx", "memory");
+			"%ecx", "%edx", "memory");
 }
 
 #endif /* !PLATFORM_WINDOWS */
@@ -158,15 +160,16 @@ FPU::FPU ()
 	return;
 #else
 
-	/* Get the CPU vendor just for kicks */
-
-	// __cpuid with an InfoType argument of 0 returns the number of
- 	// valid Ids in CPUInfo[0] and the CPU identification string in
- 	// the other three array elements. The CPU identification string is
- 	// not in linear order. The code below arranges the information
- 	// in a human readable form. The human readable order is CPUInfo[1] |
- 	// CPUInfo[3] | CPUInfo[2]. CPUInfo[2] and CPUInfo[3] are swapped
- 	// before using memcpy to copy these three array elements to cpu_string.
+	/* Get the CPU vendor just for kicks
+	 *
+	 * __cpuid with an InfoType argument of 0 returns the number of
+	 * valid Ids in CPUInfo[0] and the CPU identification string in
+	 * the other three array elements. The CPU identification string is
+	 * not in linear order. The code below arranges the information
+	 * in a human readable form. The human readable order is CPUInfo[1] |
+	 * CPUInfo[3] | CPUInfo[2]. CPUInfo[2] and CPUInfo[3] are swapped
+	 * before using memcpy to copy these three array elements to cpu_string.
+	 */
 
 	int cpu_info[4];
 	char cpu_string[48];
@@ -175,9 +178,9 @@ FPU::FPU ()
 	__cpuid (cpu_info, 0);
 
 	int num_ids = cpu_info[0];
- 	std::swap(cpu_info[2], cpu_info[3]);
+	std::swap(cpu_info[2], cpu_info[3]);
 	memcpy(cpu_string, &cpu_info[1], 3 * sizeof(cpu_info[1]));
- 	cpu_vendor.assign(cpu_string, 3 * sizeof(cpu_info[1]));
+	cpu_vendor.assign(cpu_string, 3 * sizeof(cpu_info[1]));
 
 	info << string_compose (_("CPU vendor: %1"), cpu_vendor) << endmsg;
 

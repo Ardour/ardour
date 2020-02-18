@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>E-mu Systems</Manufacturer>
+    <Model>Audity 2000</Model>
+    <Model>HALO</Model>
+    <Model>MK-6</Model>
+    <Model>Mo' Phatt</Model>
+    <Model>Mo' Phatt Turbo</Model>
+    <Model>MP-7</Model>
+    <Model>Orbit V3</Model>
+    <Model>PK-6</Model>
+    <Model>Planet Earth</Model>
+    <Model>Planet Earth Turbo</Model>
+    <Model>Proteus 1000</Model>
+    <Model>Proteus 2000</Model>
+    <Model>Proteus 2500</Model>
+    <Model>Proteus Custom</Model>
+    <Model>Vintage Keys</Model>
+    <Model>Vintage Pro</Model>
+    <Model>Virtuoso 2000</Model>
+    <Model>XK-6</Model>
+    <Model>XL-1</Model>
+    <Model>XL-1 Turbo</Model>
+    <Model>XL-7</Model>
+    <PatchNameList Name="B3 Bank 0 (Organ w/ Rotor)">
+      <Patch Number="000" Name="org:888000000 2" ProgramChange="0"/>
+      <Patch Number="001" Name="org:888000000 3" ProgramChange="1"/>
+      <Patch Number="002" Name="org:888888888mw" ProgramChange="2"/>
+      <Patch Number="003" Name="org:886311588 v" ProgramChange="3"/>
+      <Patch Number="004" Name="org:888800000 2" ProgramChange="4"/>
+      <Patch Number="005" Name="org:888800000 3" ProgramChange="5"/>
+      <Patch Number="006" Name="org:800000008 v" ProgramChange="6"/>
+      <Patch Number="007" Name="org:888800000 v2" ProgramChange="7"/>
+      <Patch Number="008" Name="org:888800000 v3" ProgramChange="8"/>
+      <Patch Number="009" Name="org:888888888 v" ProgramChange="9"/>
+      <Patch Number="010" Name="org:888000000 fx" ProgramChange="10"/>
+      <Patch Number="011" Name="org:B-3 Efx" ProgramChange="11"/>
+      <Patch Number="012" Name="org:886311586" ProgramChange="12"/>
+      <Patch Number="013" Name="org:858000000 2" ProgramChange="13"/>
+      <Patch Number="014" Name="org:858000000 3" ProgramChange="14"/>
+      <Patch Number="015" Name="org:888500000" ProgramChange="15"/>
+      <Patch Number="016" Name="org:888060000" ProgramChange="16"/>
+      <Patch Number="017" Name="org:870060500" ProgramChange="17"/>
+      <Patch Number="018" Name="org:888850000" ProgramChange="18"/>
+      <Patch Number="019" Name="org:800000007" ProgramChange="19"/>
+      <Patch Number="020" Name="org:870650000" ProgramChange="20"/>
+      <Patch Number="021" Name="org:870607000" ProgramChange="21"/>
+      <Patch Number="022" Name="org:888888888 pr" ProgramChange="22"/>
+      <Patch Number="023" Name="org:860000000 ds" ProgramChange="23"/>
+      <Patch Number="024" Name="org:860000000 df" ProgramChange="24"/>
+      <Patch Number="025" Name="org:800000008 ds" ProgramChange="25"/>
+      <Patch Number="026" Name="org:800000008 df" ProgramChange="26"/>
+      <Patch Number="027" Name="org:808000000 ds" ProgramChange="27"/>
+      <Patch Number="028" Name="org:808000000 df" ProgramChange="28"/>
+      <Patch Number="029" Name="org:888000050 pr" ProgramChange="29"/>
+      <Patch Number="030" Name="org:008004000" ProgramChange="30"/>
+      <Patch Number="031" Name="org:008500000" ProgramChange="31"/>
+      <Patch Number="032" Name="org:888000000" ProgramChange="32"/>
+      <Patch Number="033" Name="org:888000000 3" ProgramChange="33"/>
+      <Patch Number="034" Name="org:888000000 2" ProgramChange="34"/>
+      <Patch Number="035" Name="org:888000v/808" ProgramChange="35"/>
+      <Patch Number="036" Name="org:888000000 pr" ProgramChange="36"/>
+      <Patch Number="037" Name="org:888800000" ProgramChange="37"/>
+      <Patch Number="038" Name="org:888800000 3" ProgramChange="38"/>
+      <Patch Number="039" Name="org:88880000vb 3" ProgramChange="39"/>
+      <Patch Number="040" Name="org:888800000vmw" ProgramChange="40"/>
+      <Patch Number="041" Name="org:888888888" ProgramChange="41"/>
+      <Patch Number="042" Name="org:888888888vb" ProgramChange="42"/>
+      <Patch Number="043" Name="org:888888888" ProgramChange="43"/>
+      <Patch Number="044" Name="org:8888-8888vmw" ProgramChange="44"/>
+      <Patch Number="045" Name="org:888888888vmw" ProgramChange="45"/>
+      <Patch Number="046" Name="org:888811580 v" ProgramChange="46"/>
+      <Patch Number="047" Name="org:686311586" ProgramChange="47"/>
+      <Patch Number="048" Name="org:886311588" ProgramChange="48"/>
+      <Patch Number="049" Name="org:888000000" ProgramChange="49"/>
+      <Patch Number="050" Name="org:888000007" ProgramChange="50"/>
+      <Patch Number="051" Name="org:888000050" ProgramChange="51"/>
+      <Patch Number="052" Name="org:888000000 d" ProgramChange="52"/>
+      <Patch Number="053" Name="org:888000000 3" ProgramChange="53"/>
+      <Patch Number="054" Name="org:888800000 v" ProgramChange="54"/>
+      <Patch Number="055" Name="org:888888888 v" ProgramChange="55"/>
+      <Patch Number="056" Name="org:888888888 d" ProgramChange="56"/>
+      <Patch Number="057" Name="org:888888888" ProgramChange="57"/>
+      <Patch Number="058" Name="org:888888888 t" ProgramChange="58"/>
+      <Patch Number="059" Name="org:886311580" ProgramChange="59"/>
+      <Patch Number="060" Name="org:886311588 v" ProgramChange="60"/>
+      <Patch Number="061" Name="org:800000008" ProgramChange="61"/>
+      <Patch Number="062" Name="org:800000006 v" ProgramChange="62"/>
+      <Patch Number="063" Name="org:888000000 fx" ProgramChange="63"/>
+      <Patch Number="064" Name="org:086311588 v" ProgramChange="64"/>
+      <Patch Number="065" Name="org:850700007" ProgramChange="65"/>
+      <Patch Number="066" Name="org:850700070" ProgramChange="66"/>
+      <Patch Number="067" Name="org:850008700" ProgramChange="67"/>
+      <Patch Number="068" Name="org:850000067" ProgramChange="68"/>
+      <Patch Number="069" Name="org:808700070" ProgramChange="69"/>
+      <Patch Number="070" Name="org:808000078" ProgramChange="70"/>
+      <Patch Number="071" Name="org:808006700" ProgramChange="71"/>
+      <Patch Number="072" Name="org:808067000" ProgramChange="72"/>
+      <Patch Number="073" Name="org:808880000" ProgramChange="73"/>
+      <Patch Number="074" Name="org:808800800" ProgramChange="74"/>
+      <Patch Number="075" Name="org:808088000" ProgramChange="75"/>
+      <Patch Number="076" Name="org:808850000" ProgramChange="76"/>
+      <Patch Number="077" Name="org:808000000" ProgramChange="77"/>
+      <Patch Number="078" Name="org:8888-AllOut" ProgramChange="78"/>
+      <Patch Number="079" Name="org:888-AllOut" ProgramChange="79"/>
+      <Patch Number="080" Name="org:888-AllOut 1" ProgramChange="80"/>
+      <Patch Number="081" Name="org:888-AllOut 2" ProgramChange="81"/>
+      <Patch Number="082" Name="org:16/1-HS" ProgramChange="82"/>
+      <Patch Number="083" Name="org:8888-AllOut" ProgramChange="83"/>
+      <Patch Number="084" Name="org:888-AllOut s" ProgramChange="84"/>
+      <Patch Number="085" Name="org:888-AllOut f" ProgramChange="85"/>
+      <Patch Number="086" Name="org:888-HShoe f" ProgramChange="86"/>
+      <Patch Number="087" Name="org:AllOut-888 f" ProgramChange="87"/>
+      <Patch Number="088" Name="org:AllOut-8888" ProgramChange="88"/>
+      <Patch Number="089" Name="org:AllOut-888 f" ProgramChange="89"/>
+      <Patch Number="090" Name="org:AllOut-8888v" ProgramChange="90"/>
+      <Patch Number="091" Name="cmb:Ped/Swl/Gt 1" ProgramChange="91"/>
+      <Patch Number="092" Name="cmb:Ped/Swl/Gt 2" ProgramChange="92"/>
+      <Patch Number="093" Name="cmb:Ped/Swl/Gt 3" ProgramChange="93"/>
+      <Patch Number="094" Name="cmb:Ped/Swl/Gt 4" ProgramChange="94"/>
+      <Patch Number="095" Name="cmb:Ped/Swl/Gt 5" ProgramChange="95"/>
+      <Patch Number="096" Name="cmb:Ped/Swl/Gt 6" ProgramChange="96"/>
+      <Patch Number="097" Name="cmb:Ped/Swl/Gt 7" ProgramChange="97"/>
+      <Patch Number="098" Name="cmb:Ped/Swl/Gt 8" ProgramChange="98"/>
+      <Patch Number="099" Name="cmb:Ped/Swl/Gt 9" ProgramChange="99"/>
+      <Patch Number="100" Name="cmb:Ped/Gt 1" ProgramChange="100"/>
+      <Patch Number="101" Name="cmb:Ped/Gt 2" ProgramChange="101"/>
+      <Patch Number="102" Name="cmb:Ped/Gt 3" ProgramChange="102"/>
+      <Patch Number="103" Name="cmb:Ped/Gt 4" ProgramChange="103"/>
+      <Patch Number="104" Name="cmb:Ped/Gt 5" ProgramChange="104"/>
+      <Patch Number="105" Name="cmb:Ped/Gt 6" ProgramChange="105"/>
+      <Patch Number="106" Name="cmb:Ped/Gt 7" ProgramChange="106"/>
+      <Patch Number="107" Name="cmb:Ped/Gt 8" ProgramChange="107"/>
+      <Patch Number="108" Name="cmb:Ped/Gt 9" ProgramChange="108"/>
+      <Patch Number="109" Name="org:Pedals 01" ProgramChange="109"/>
+      <Patch Number="110" Name="org:Pedals 02" ProgramChange="110"/>
+      <Patch Number="111" Name="org:Pedals 03" ProgramChange="111"/>
+      <Patch Number="112" Name="org:Pedals 04" ProgramChange="112"/>
+      <Patch Number="113" Name="org:Pedals 05" ProgramChange="113"/>
+      <Patch Number="114" Name="org:Pedals 06" ProgramChange="114"/>
+      <Patch Number="115" Name="org:Pedals 07" ProgramChange="115"/>
+      <Patch Number="116" Name="org:Pedals 08" ProgramChange="116"/>
+      <Patch Number="117" Name="org:Pedals 09" ProgramChange="117"/>
+      <Patch Number="118" Name="org:Pedals 10" ProgramChange="118"/>
+      <Patch Number="119" Name="sfx:Stab" ProgramChange="119"/>
+      <Patch Number="120" Name="sfx:Percy 1" ProgramChange="120"/>
+      <Patch Number="121" Name="sfx:Percy 2" ProgramChange="121"/>
+      <Patch Number="122" Name="sfx:Percy 3" ProgramChange="122"/>
+      <Patch Number="123" Name="sfx:Percy 4" ProgramChange="123"/>
+      <Patch Number="124" Name="sfx:Rotozone" ProgramChange="124"/>
+      <Patch Number="125" Name="sfx:Volution" ProgramChange="125"/>
+      <Patch Number="126" Name="sfx:DenseTexture" ProgramChange="126"/>
+      <Patch Number="127" Name="sfx:Drawbars" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="B3 Bank 1 (Direct Out)">
+      <Patch Number="000" Name="dir:800000000 2" ProgramChange="0"/>
+      <Patch Number="001" Name="dir:800000000 3" ProgramChange="1"/>
+      <Patch Number="002" Name="dir:880000000 2" ProgramChange="2"/>
+      <Patch Number="003" Name="dir:880000000 3" ProgramChange="3"/>
+      <Patch Number="004" Name="dir:888000000 2" ProgramChange="4"/>
+      <Patch Number="005" Name="dir:888000000 3" ProgramChange="5"/>
+      <Patch Number="006" Name="dir:888800000 2" ProgramChange="6"/>
+      <Patch Number="007" Name="dir:888800000 3" ProgramChange="7"/>
+      <Patch Number="008" Name="dir:888860000 2" ProgramChange="8"/>
+      <Patch Number="009" Name="dir:888888888" ProgramChange="9"/>
+      <Patch Number="010" Name="dir:888060000 3" ProgramChange="10"/>
+      <Patch Number="011" Name="dir:888000001" ProgramChange="11"/>
+      <Patch Number="012" Name="dir:818000005" ProgramChange="12"/>
+      <Patch Number="013" Name="dir:858000000 3" ProgramChange="13"/>
+      <Patch Number="014" Name="dir:888000050 3" ProgramChange="14"/>
+      <Patch Number="015" Name="dir:860000240 3" ProgramChange="15"/>
+      <Patch Number="016" Name="dir:888400350 2" ProgramChange="16"/>
+      <Patch Number="017" Name="dir:860000000 3" ProgramChange="17"/>
+      <Patch Number="018" Name="dir:860650000 3" ProgramChange="18"/>
+      <Patch Number="019" Name="dir:860607000 3" ProgramChange="19"/>
+      <Patch Number="020" Name="dir:870060000 3" ProgramChange="20"/>
+      <Patch Number="021" Name="dir:870060500 3" ProgramChange="21"/>
+      <Patch Number="022" Name="dir:808000000 3" ProgramChange="22"/>
+      <Patch Number="023" Name="dir:800700000 2" ProgramChange="23"/>
+      <Patch Number="024" Name="dir:800060000 2" ProgramChange="24"/>
+      <Patch Number="025" Name="dir:800005000 2" ProgramChange="25"/>
+      <Patch Number="026" Name="dir:800000340 3" ProgramChange="26"/>
+      <Patch Number="027" Name="dir:800000060 3" ProgramChange="27"/>
+      <Patch Number="028" Name="dir:800000005" ProgramChange="28"/>
+      <Patch Number="029" Name="dir:800000007" ProgramChange="29"/>
+      <Patch Number="030" Name="dir:008004000" ProgramChange="30"/>
+      <Patch Number="031" Name="dir:008500000" ProgramChange="31"/>
+      <Patch Number="032" Name="dir:008500300" ProgramChange="32"/>
+      <Patch Number="033" Name="dir:000800008" ProgramChange="33"/>
+      <Patch Number="034" Name="dir:000088880" ProgramChange="34"/>
+      <Patch Number="035" Name="dir:000005678" ProgramChange="35"/>
+      <Patch Number="036" Name="dir:880800000 2" ProgramChange="36"/>
+      <Patch Number="037" Name="dir:880800000 3" ProgramChange="37"/>
+      <Patch Number="038" Name="dir:880800800 3" ProgramChange="38"/>
+      <Patch Number="039" Name="dir:880080000 2" ProgramChange="39"/>
+      <Patch Number="040" Name="dir:808850000 2" ProgramChange="40"/>
+      <Patch Number="041" Name="dir:808850000 3" ProgramChange="41"/>
+      <Patch Number="042" Name="dir:808850050 3" ProgramChange="42"/>
+      <Patch Number="043" Name="dir:886322588" ProgramChange="43"/>
+      <Patch Number="044" Name="dir:876400566" ProgramChange="44"/>
+      <Patch Number="045" Name="dir:888766000 3" ProgramChange="45"/>
+      <Patch Number="046" Name="dir:888800230 3" ProgramChange="46"/>
+      <Patch Number="047" Name="dir:808808008" ProgramChange="47"/>
+      <Patch Number="048" Name="dir:408808004" ProgramChange="48"/>
+      <Patch Number="049" Name="dir:860060320 2" ProgramChange="49"/>
+      <Patch Number="050" Name="dir:058050230 3" ProgramChange="50"/>
+      <Patch Number="051" Name="dir:080050320 3" ProgramChange="51"/>
+      <Patch Number="052" Name="dir:865300053" ProgramChange="52"/>
+      <Patch Number="053" Name="dir:868040020 3" ProgramChange="53"/>
+      <Patch Number="054" Name="dir:858054030 2" ProgramChange="54"/>
+      <Patch Number="055" Name="dir:870030320 3" ProgramChange="55"/>
+      <Patch Number="056" Name="dir:078030020 3" ProgramChange="56"/>
+      <Patch Number="057" Name="dir:088803455" ProgramChange="57"/>
+      <Patch Number="058" Name="dir:038800230 3" ProgramChange="58"/>
+      <Patch Number="059" Name="dir:008600030 3" ProgramChange="59"/>
+      <Patch Number="060" Name="dir:808504002 2" ProgramChange="60"/>
+      <Patch Number="061" Name="dir:800704002 2" ProgramChange="61"/>
+      <Patch Number="062" Name="dir:848040000 2" ProgramChange="62"/>
+      <Patch Number="063" Name="dir:888800560 3" ProgramChange="63"/>
+      <Patch Number="064" Name="dir:888880060 3" ProgramChange="64"/>
+      <Patch Number="065" Name="dir:868800000 ds" ProgramChange="65"/>
+      <Patch Number="066" Name="dir:868800000 df" ProgramChange="66"/>
+      <Patch Number="067" Name="dir:868008000 ds" ProgramChange="67"/>
+      <Patch Number="068" Name="dir:860808800 df" ProgramChange="68"/>
+      <Patch Number="069" Name="dir:886422588 fx" ProgramChange="69"/>
+      <Patch Number="070" Name="dir:888888888 fx" ProgramChange="70"/>
+      <Patch Number="071" Name="dir:808808008 fx" ProgramChange="71"/>
+      <Patch Number="072" Name="dir:888000000 3d" ProgramChange="72"/>
+      <Patch Number="073" Name="dir:888800000 3d" ProgramChange="73"/>
+      <Patch Number="074" Name="dir:008600030 fx" ProgramChange="74"/>
+      <Patch Number="075" Name="dir:860040300 fx" ProgramChange="75"/>
+      <Patch Number="076" Name="dir:858000000 fx" ProgramChange="76"/>
+      <Patch Number="077" Name="dir:888000000 mx" ProgramChange="77"/>
+      <Patch Number="078" Name="dir:888600000 mx" ProgramChange="78"/>
+      <Patch Number="079" Name="dir:800000004 fx" ProgramChange="79"/>
+      <Patch Number="080" Name="dir:800000008 mx" ProgramChange="80"/>
+      <Patch Number="081" Name="dir:867500000 mx" ProgramChange="81"/>
+      <Patch Number="082" Name="dir:878644302 mx" ProgramChange="82"/>
+      <Patch Number="083" Name="dir:886311580 mx" ProgramChange="83"/>
+      <Patch Number="084" Name="dir:084000020 mx" ProgramChange="84"/>
+      <Patch Number="085" Name="dir:824000030 mx" ProgramChange="85"/>
+      <Patch Number="086" Name="dir:858040030 mx" ProgramChange="86"/>
+      <Patch Number="087" Name="dir:888000040 mx" ProgramChange="87"/>
+      <Patch Number="088" Name="dir:788800240 mx" ProgramChange="88"/>
+      <Patch Number="089" Name="dir:888844440 mx" ProgramChange="89"/>
+      <Patch Number="090" Name="dir:Ped/Grt1 mx" ProgramChange="90"/>
+      <Patch Number="091" Name="dir:Ped/Grt2 mx" ProgramChange="91"/>
+      <Patch Number="092" Name="dir:Ped/Grt3 mx" ProgramChange="92"/>
+      <Patch Number="093" Name="dir:Ped/Grt4 mx" ProgramChange="93"/>
+      <Patch Number="094" Name="dir:888888000 mx" ProgramChange="94"/>
+      <Patch Number="095" Name="dir:888888800 mx" ProgramChange="95"/>
+      <Patch Number="096" Name="dir:888888888 mx" ProgramChange="96"/>
+      <Patch Number="097" Name="dir:888600000mfx" ProgramChange="97"/>
+      <Patch Number="098" Name="dir:800000008mfx" ProgramChange="98"/>
+      <Patch Number="099" Name="dir:886311588mfx" ProgramChange="99"/>
+      <Patch Number="100" Name="lnk:000080000" ProgramChange="100"/>
+      <Patch Number="101" Name="lnk:000088000" ProgramChange="101"/>
+      <Patch Number="102" Name="lnk:000080800" ProgramChange="102"/>
+      <Patch Number="103" Name="lnk:000080080" ProgramChange="103"/>
+      <Patch Number="104" Name="lnk:000080008" ProgramChange="104"/>
+      <Patch Number="105" Name="lnk:000008000" ProgramChange="105"/>
+      <Patch Number="106" Name="lnk:000008800" ProgramChange="106"/>
+      <Patch Number="107" Name="lnk:000008080" ProgramChange="107"/>
+      <Patch Number="108" Name="lnk:000008008" ProgramChange="108"/>
+      <Patch Number="109" Name="lnk:000000800" ProgramChange="109"/>
+      <Patch Number="110" Name="lnk:000000880" ProgramChange="110"/>
+      <Patch Number="111" Name="lnk:000000808" ProgramChange="111"/>
+      <Patch Number="112" Name="lnk:000000080" ProgramChange="112"/>
+      <Patch Number="113" Name="lnk:000000088" ProgramChange="113"/>
+      <Patch Number="114" Name="lnk:000000008" ProgramChange="114"/>
+      <Patch Number="115" Name="lnk:000000888" ProgramChange="115"/>
+      <Patch Number="116" Name="lnk:000088000alt" ProgramChange="116"/>
+      <Patch Number="117" Name="lnk:Perc9thDir a" ProgramChange="117"/>
+      <Patch Number="118" Name="lnk:Perc2ndDir a" ProgramChange="118"/>
+      <Patch Number="119" Name="lnk:Perc3rdDir a" ProgramChange="119"/>
+      <Patch Number="120" Name="lnk:Perc2ndDir b" ProgramChange="120"/>
+      <Patch Number="121" Name="lnk:Perc3rdDir b" ProgramChange="121"/>
+      <Patch Number="122" Name="lnk:Perc2ndDir c" ProgramChange="122"/>
+      <Patch Number="123" Name="lnk:Perc3rdDir c" ProgramChange="123"/>
+    </PatchNameList>
+    <PatchNameList Name="B3 Bank 2 (Wildcards)">
+      <Patch Number="000" Name="var:1st3PlyPerc2" ProgramChange="0"/>
+      <Patch Number="001" Name="var:1st3PlyPerc3" ProgramChange="1"/>
+      <Patch Number="002" Name="var:1st4PlyPerc2" ProgramChange="2"/>
+      <Patch Number="003" Name="var:1st4PlyPerc3" ProgramChange="3"/>
+      <Patch Number="004" Name="var:Cathedral" ProgramChange="4"/>
+      <Patch Number="005" Name="var:Bi Phase" ProgramChange="5"/>
+      <Patch Number="006" Name="var:AM" ProgramChange="6"/>
+      <Patch Number="007" Name="var:All Out Dist" ProgramChange="7"/>
+      <Patch Number="008" Name="var:Sweet Bees" ProgramChange="8"/>
+      <Patch Number="009" Name="var:Rocker" ProgramChange="9"/>
+      <Patch Number="010" Name="var:V-Bass Split" ProgramChange="10"/>
+      <Patch Number="011" Name="var:V-Q5" ProgramChange="11"/>
+      <Patch Number="012" Name="var:Bull Runner" ProgramChange="12"/>
+      <Patch Number="013" Name="var:Rez Touch 1" ProgramChange="13"/>
+      <Patch Number="014" Name="var:Rez Touch 2" ProgramChange="14"/>
+      <Patch Number="015" Name="var:Rez Touch 3" ProgramChange="15"/>
+      <Patch Number="016" Name="var:Rez Touch 4" ProgramChange="16"/>
+      <Patch Number="017" Name="var:KingsSweep" ProgramChange="17"/>
+      <Patch Number="018" Name="var:999999999" ProgramChange="18"/>
+      <Patch Number="019" Name="var:Slivering" ProgramChange="19"/>
+      <Patch Number="020" Name="var:Sky 4" ProgramChange="20"/>
+      <Patch Number="021" Name="var:B Known" ProgramChange="21"/>
+      <Patch Number="022" Name="var:Ice B3" ProgramChange="22"/>
+      <Patch Number="023" Name="var:B a Squak" ProgramChange="23"/>
+      <Patch Number="024" Name="var:Sweeper" ProgramChange="24"/>
+      <Patch Number="025" Name="var:Slow Q" ProgramChange="25"/>
+      <Patch Number="026" Name="var:Reed Tone" ProgramChange="26"/>
+      <Patch Number="027" Name="var:3 Decaying" ProgramChange="27"/>
+      <Patch Number="028" Name="var:9 Decaying" ProgramChange="28"/>
+      <Patch Number="029" Name="var:Big Classic" ProgramChange="29"/>
+      <Patch Number="030" Name="var:Four Out" ProgramChange="30"/>
+      <Patch Number="031" Name="var:Three Sweep" ProgramChange="31"/>
+      <Patch Number="032" Name="var:888&amp;8888 V3" ProgramChange="32"/>
+      <Patch Number="033" Name="var:Heavens B" ProgramChange="33"/>
+      <Patch Number="034" Name="var:B-Files" ProgramChange="34"/>
+      <Patch Number="035" Name="var:Mojo B" ProgramChange="35"/>
+      <Patch Number="036" Name="var:Penny Organ" ProgramChange="36"/>
+      <Patch Number="037" Name="var:1st3 Plus" ProgramChange="37"/>
+      <Patch Number="038" Name="var:1st3 Dist" ProgramChange="38"/>
+      <Patch Number="039" Name="var:1st3 mw 3" ProgramChange="39"/>
+      <Patch Number="040" Name="var:1st3-4 mw 3" ProgramChange="40"/>
+      <Patch Number="041" Name="var:1st3&amp;4 Phase" ProgramChange="41"/>
+      <Patch Number="042" Name="var:1st4 Plus" ProgramChange="42"/>
+      <Patch Number="043" Name="var:1st4 Dist" ProgramChange="43"/>
+      <Patch Number="044" Name="var:1st4 Ultra" ProgramChange="44"/>
+      <Patch Number="045" Name="var:1st 5 Phase" ProgramChange="45"/>
+      <Patch Number="046" Name="var:1st6 Slow mw" ProgramChange="46"/>
+      <Patch Number="047" Name="var:1st9 Slow mw" ProgramChange="47"/>
+      <Patch Number="048" Name="var:1st5PrsPlay" ProgramChange="48"/>
+      <Patch Number="049" Name="var:AllOutWhlWah" ProgramChange="49"/>
+      <Patch Number="050" Name="var:Full House" ProgramChange="50"/>
+      <Patch Number="051" Name="var:Ghost B" ProgramChange="51"/>
+      <Patch Number="052" Name="var:HorsePresWah" ProgramChange="52"/>
+      <Patch Number="053" Name="var:1st4+Harms" ProgramChange="53"/>
+      <Patch Number="054" Name="var:Mello Spin" ProgramChange="54"/>
+      <Patch Number="055" Name="var:Motions 1" ProgramChange="55"/>
+      <Patch Number="056" Name="var:Motions 2" ProgramChange="56"/>
+      <Patch Number="057" Name="var:Motions 3" ProgramChange="57"/>
+      <Patch Number="058" Name="var:Harmoniums" ProgramChange="58"/>
+      <Patch Number="059" Name="var:Harms All" ProgramChange="59"/>
+      <Patch Number="060" Name="var:Harm Seq 1" ProgramChange="60"/>
+      <Patch Number="061" Name="var:Harm Seq 2" ProgramChange="61"/>
+      <Patch Number="062" Name="var:To Harms" ProgramChange="62"/>
+      <Patch Number="063" Name="var:888 Gruzz" ProgramChange="63"/>
+      <Patch Number="064" Name="var:Pulse Fix" ProgramChange="64"/>
+      <Patch Number="065" Name="var:Blah Blah" ProgramChange="65"/>
+      <Patch Number="066" Name="var:Mysteria" ProgramChange="66"/>
+      <Patch Number="067" Name="var:Outer Solo" ProgramChange="67"/>
+      <Patch Number="068" Name="var:8888SlackPhz" ProgramChange="68"/>
+      <Patch Number="069" Name="var:1st3 Perc9th" ProgramChange="69"/>
+      <Patch Number="070" Name="var:1st4 Perc9th" ProgramChange="70"/>
+      <Patch Number="071" Name="var:8888 Gruzz" ProgramChange="71"/>
+      <Patch Number="072" Name="var:All 9 Gruzz" ProgramChange="72"/>
+      <Patch Number="073" Name="var:Lo Fi" ProgramChange="73"/>
+      <Patch Number="074" Name="var:Mr Perk" ProgramChange="74"/>
+      <Patch Number="075" Name="var:Submerged" ProgramChange="75"/>
+      <Patch Number="076" Name="var:Coming Back" ProgramChange="76"/>
+      <Patch Number="077" Name="var:B Careful" ProgramChange="77"/>
+      <Patch Number="078" Name="var:X-1 Tracker" ProgramChange="78"/>
+      <Patch Number="079" Name="var:Shifter" ProgramChange="79"/>
+      <Patch Number="080" Name="lnk:800000008 v" ProgramChange="80"/>
+      <Patch Number="081" Name="lnk:800000000" ProgramChange="81"/>
+      <Patch Number="082" Name="lnk:080000000" ProgramChange="82"/>
+      <Patch Number="083" Name="lnk:008000000" ProgramChange="83"/>
+      <Patch Number="084" Name="lnk:000800000" ProgramChange="84"/>
+      <Patch Number="085" Name="lnk:800080000" ProgramChange="85"/>
+      <Patch Number="086" Name="lnk:000008000" ProgramChange="86"/>
+      <Patch Number="087" Name="lnk:000000800" ProgramChange="87"/>
+      <Patch Number="088" Name="lnk:000000080" ProgramChange="88"/>
+      <Patch Number="089" Name="lnk:000000008" ProgramChange="89"/>
+      <Patch Number="090" Name="lnk:008800000" ProgramChange="90"/>
+      <Patch Number="091" Name="lnk:008080000" ProgramChange="91"/>
+      <Patch Number="092" Name="Ink:008008000" ProgramChange="92"/>
+      <Patch Number="093" Name="lnk:008000800" ProgramChange="93"/>
+      <Patch Number="094" Name="lnk:008000080" ProgramChange="94"/>
+      <Patch Number="095" Name="lnk:008000008" ProgramChange="95"/>
+      <Patch Number="096" Name="lnk:000880000" ProgramChange="96"/>
+      <Patch Number="097" Name="lnk:000808000" ProgramChange="97"/>
+      <Patch Number="098" Name="lnk:000800800" ProgramChange="98"/>
+      <Patch Number="099" Name="lnk:000800080" ProgramChange="99"/>
+      <Patch Number="100" Name="lnk:000800008" ProgramChange="100"/>
+      <Patch Number="101" Name="lnk:000088000" ProgramChange="101"/>
+      <Patch Number="102" Name="lnk:000080800" ProgramChange="102"/>
+      <Patch Number="103" Name="lnk:000080080" ProgramChange="103"/>
+      <Patch Number="104" Name="lnk:000080008" ProgramChange="104"/>
+      <Patch Number="105" Name="lnk:000008800" ProgramChange="105"/>
+      <Patch Number="106" Name="lnk:000008080" ProgramChange="106"/>
+      <Patch Number="107" Name="lnk:000008008" ProgramChange="107"/>
+      <Patch Number="108" Name="lnk:000000880" ProgramChange="108"/>
+      <Patch Number="109" Name="lnk:000000808" ProgramChange="109"/>
+      <Patch Number="110" Name="lnk:000000088" ProgramChange="110"/>
+      <Patch Number="111" Name="lnk:000000008" ProgramChange="111"/>
+      <Patch Number="112" Name="lnk:008800000 b" ProgramChange="112"/>
+      <Patch Number="113" Name="lnk:Perc9th" ProgramChange="113"/>
+      <Patch Number="114" Name="lnk:Perc2nd a" ProgramChange="114"/>
+      <Patch Number="115" Name="Ink:Perc3rd a" ProgramChange="115"/>
+      <Patch Number="116" Name="Ink:Perc2ndVel" ProgramChange="116"/>
+      <Patch Number="117" Name="lnk:Perc3rdVel" ProgramChange="117"/>
+      <Patch Number="118" Name="lnk:Perc2nd b" ProgramChange="118"/>
+      <Patch Number="119" Name="lnk:Perc3rd b" ProgramChange="119"/>
+      <Patch Number="120" Name="lnk:Perc2ndPly" ProgramChange="120"/>
+      <Patch Number="121" Name="lnk:Perc3rdPly" ProgramChange="121"/>
+      <Patch Number="122" Name="lnk:HarmsAllLnk1" ProgramChange="122"/>
+      <Patch Number="123" Name="lnk:HarmsAllLnk2" ProgramChange="123"/>
+      <Patch Number="124" Name="lnk:Harm Seq Lnk" ProgramChange="124"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

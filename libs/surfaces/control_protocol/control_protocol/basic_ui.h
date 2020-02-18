@@ -1,22 +1,24 @@
 /*
-    Copyright (C) 2006 Paul Davis
-
-    This program is free software; you can redistribute it
-    and/or modify it under the terms of the GNU Lesser
-    General Public License as published by the Free Software
-    Foundation; either version 2 of the License, or (at your
-    option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2010 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2010 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2015 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016 Ben Loftis <ben@harrisonconsoles.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_basic_ui_h__
 #define __ardour_basic_ui_h__
@@ -68,11 +70,13 @@ class LIBCONTROLCP_API BasicUI {
 	void set_transport_speed (double speed);
 	double get_transport_speed ();
 
-	void jump_by_seconds( double sec );
-	void jump_by_bars(double bars);
+	void jump_by_seconds (double sec, ARDOUR::LocateTransportDisposition ltd = ARDOUR::RollIfAppropriate);
+	void jump_by_bars (double bars, ARDOUR::LocateTransportDisposition ltd = ARDOUR::RollIfAppropriate);
+	void jump_by_beats (double beats, ARDOUR::LocateTransportDisposition ltd = ARDOUR::RollIfAppropriate);
 
 	ARDOUR::samplepos_t transport_sample ();
-	void locate (ARDOUR::samplepos_t sample, bool play = false);
+	void locate (ARDOUR::samplepos_t sample, ARDOUR::LocateTransportDisposition ltd);
+	void locate (ARDOUR::samplepos_t sample, bool);
 	bool locating ();
 	bool locked ();
 
@@ -99,7 +103,7 @@ class LIBCONTROLCP_API BasicUI {
 	void quick_snapshot_stay ();
 	void quick_snapshot_switch ();
 
-	void toggle_roll();  //this provides the same operation as the "spacebar", it's a lot smarter than "play".
+	void toggle_roll(bool roll_out_of_bounded_mode=true);  //this provides the same operation as the "spacebar", it's a lot smarter than "play".
 
 	void stop_forget();
 
@@ -147,6 +151,12 @@ class LIBCONTROLCP_API BasicUI {
 	void timecode_time (samplepos_t where, Timecode::Time&);
 	void timecode_to_sample (Timecode::Time& timecode, samplepos_t & sample, bool use_offset, bool use_subframes) const;
 	void sample_to_timecode (samplepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
+
+	bool stop_button_onoff() const;
+	bool play_button_onoff() const;
+	bool ffwd_button_onoff() const;
+	bool rewind_button_onoff() const;
+	bool loop_button_onoff() const;
 
   protected:
 	BasicUI ();

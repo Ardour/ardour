@@ -1,21 +1,25 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2006-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2007-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2014 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2015-2018 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <glibmm/module.h>
 
@@ -125,6 +129,11 @@ ControlProtocolManager::activate (ControlProtocolInfo& cpi)
 
 	cpi.requested = true;
 
+	if (cpi.protocol && cpi.protocol->active()) {
+		warning << string_compose (_("Control protocol %1 was already active."), cpi.name) << endmsg;
+		return 0;
+	}
+
 	if ((cp = instantiate (cpi)) == 0) {
 		return -1;
 	}
@@ -181,12 +190,6 @@ ControlProtocolManager::drop_protocols ()
 
 	Glib::Threads::RWLock::WriterLock lm (protocols_lock);
 
-	for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
-		delete *p;
-	}
-
-	control_protocols.clear ();
-
 	for (list<ControlProtocolInfo*>::iterator p = control_protocol_info.begin(); p != control_protocol_info.end(); ++p) {
 		// mark existing protocols as requested
 		// otherwise the ControlProtocol instances are not recreated in set_session
@@ -196,6 +199,12 @@ ControlProtocolManager::drop_protocols ()
 			ProtocolStatusChange (*p); /* EMIT SIGNAL */
 		}
 	}
+
+	for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
+		delete *p;
+	}
+
+	control_protocols.clear ();
 }
 
 ControlProtocol*
@@ -476,9 +485,7 @@ ControlProtocolManager::set_state (const XMLNode& node, int session_specific_sta
 			ControlProtocolInfo* cpi = cpi_by_name (name);
 
 			if (cpi) {
-#ifndef NDEBUG
-				std::cerr << "protocol " << name << " active ? " << active << std::endl;
-#endif
+				DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("Protocolstate %1 %2\n", name, active ? "active" : "inactive"));
 
 				if (active) {
 					delete cpi->state;

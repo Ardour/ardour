@@ -1,21 +1,26 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2005-2015 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2006-2009 Sampo Savolainen <v2@iki.fi>
+ * Copyright (C) 2007-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2017 Julien "_FrnchFrgg_" RIVAUD <frnchfrgg@free.fr>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_plugin_ui_h__
 #define __ardour_plugin_ui_h__
@@ -55,7 +60,7 @@
 
 #include "ardour_window.h"
 #include "automation_controller.h"
-#include "gtk_pianokeyboard.h"
+#include "pianokeyboard.h"
 
 namespace ARDOUR {
 	class PluginInsert;
@@ -79,6 +84,7 @@ class LatencyGUI;
 class ArdourWindow;
 class PluginEqGui;
 class PluginLoadStatsGui;
+class PluginPresetsUI;
 class VSTPluginUI;
 
 class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionList
@@ -126,6 +132,8 @@ protected:
 	ArdourWidgets::ArdourButton save_button;
 	/** a button to delete the current preset (if it is a user one) */
 	ArdourWidgets::ArdourButton delete_button;
+	/** a button to show a preset browser */
+	ArdourWidgets::ArdourButton preset_browser_button;
 	/** a button to delete the reset the plugin params */
 	ArdourWidgets::ArdourButton reset_button;
 	/** a button to bypass the plugin */
@@ -159,6 +167,8 @@ protected:
 
 	PluginEqGui* eqgui;
 	PluginLoadStatsGui* stats_gui;
+	PluginPresetsUI* preset_gui;
+	ArdourWindow* preset_dialog;
 
 	Gtk::Image* focus_out_image;
 	Gtk::Image* focus_in_image;
@@ -169,6 +179,7 @@ protected:
 	void save_plugin_setting ();
 	void delete_plugin_setting ();
 	void reset_plugin_parameters ();
+	void browse_presets ();
 	void manage_pins ();
 	bool focus_toggled(GdkEventButton*);
 	bool bypass_button_release(GdkEventButton*);
@@ -180,6 +191,8 @@ protected:
 	void automation_state_changed ();
 	void preset_added_or_removed ();
 	void update_preset_modified ();
+
+	bool has_descriptive_presets () const;
 
 	PBD::ScopedConnection death_connection;
 	PBD::ScopedConnection active_connection;
@@ -295,11 +308,6 @@ private:
 
 	void knob_size_request(Gtk::Requisition* req, ControlUI* cui);
 
-	/* XXX: remove */
-	void print_parameter (char *buf, uint32_t len, uint32_t param);
-	bool integer_printer (char* buf, Gtk::Adjustment &, ControlUI *);
-	bool midinote_printer(char* buf, Gtk::Adjustment &, ControlUI *);
-
 	typedef std::map<uint32_t, Gtk::FileChooserButton*> FilePathControls;
 	FilePathControls _filepath_controls;
 	void set_path_property (const ARDOUR::ParameterDescriptor& desc,
@@ -310,15 +318,12 @@ private:
 	Gtk::ScrolledWindow scroller;
 
 	Gtk::Expander   _plugin_pianokeyboard_expander;
-	PianoKeyboard*  _piano;
-	Gtk::Widget*    _pianomm;
+	APianoKeyboard* _piano;
 	Gtk::VBox       _pianobox;
 	Gtk::SpinButton _piano_velocity;
 	Gtk::SpinButton _piano_channel;
 
-	static void _note_on_event_handler (GtkWidget*, int, gpointer);
-	static void _note_off_event_handler (GtkWidget*, int, gpointer);
-	void note_on_event_handler (int);
+	void note_on_event_handler (int, int);
 	void note_off_event_handler (int);
 
 	void toggle_pianokeyboard ();

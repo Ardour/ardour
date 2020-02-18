@@ -181,7 +181,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="copy /Y &quot;..\src\Note.cpp&quot; &quot;..\src\Note.impl&quot;&#x0D;&#x0A;"
+				CommandLine="copy /Y &quot;..\Note.cc&quot; &quot;..\src\Note.impl&quot;&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -260,46 +260,46 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\src\Control.cpp"
+				RelativePath="..\Control.cc"
 				>
 			</File>
 			<File
-				RelativePath="..\src\ControlList.cpp"
+				RelativePath="..\ControlList.cc"
 				>
 			</File>
 			<File
-				RelativePath="..\src\ControlSet.cpp"
+				RelativePath="..\ControlSet.cc"
 				>
 			</File>
 			<File
-				RelativePath="..\src\Curve.cpp"
+				RelativePath="..\Curve.cc"
 				>
 			</File>
 			<File
-				RelativePath="..\src\debug.cpp"
+				RelativePath="..\debug.cc"
 				>
 			</File>
 			<File
-				RelativePath="..\src\Event.cpp"
+				RelativePath="..\Event.cc"
 				>
 			</File>
 			<File
-				RelativePath="..\src\Sequence.cpp"
+				RelativePath="..\Sequence.cc"
 				>
 			</File>
 			<File
-				RelativePath="..\src\SMF.cpp"
+				RelativePath="..\SMF.cc"
 				>
 			</File>
 			<File
-				RelativePath="..\src\TimeConverter.cpp"
+				RelativePath="..\TimeConverter.cc"
 				>
 			</File>
 			<Filter
 				Name="libsmf"
 				>
 				<File
-					RelativePath="..\src\libsmf\smf.c"
+					RelativePath="..\libsmf\smf.c"
 					>
 					<FileConfiguration
 						Name="Debug 32|Win32"
@@ -333,7 +333,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\src\libsmf\smf_decode.c"
+					RelativePath="..\libsmf\smf_decode.c"
 					>
 					<FileConfiguration
 						Name="Debug 32|Win32"
@@ -361,7 +361,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\src\libsmf\smf_load.c"
+					RelativePath="..\libsmf\smf_load.c"
 					>
 					<FileConfiguration
 						Name="Debug 32|Win32"
@@ -389,7 +389,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\src\libsmf\smf_save.c"
+					RelativePath="..\libsmf\smf_save.c"
 					>
 					<FileConfiguration
 						Name="Debug 32|Win32"
@@ -417,7 +417,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\src\libsmf\smf_tempo.c"
+					RelativePath="..\libsmf\smf_tempo.c"
 					>
 					<FileConfiguration
 						Name="Debug 32|Win32"
@@ -452,31 +452,27 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\evoral\Beats.hpp"
+				RelativePath="..\evoral\ControlList.h"
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\ControlList.hpp"
+				RelativePath="..\evoral\ControlSet.h"
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\ControlSet.hpp"
+				RelativePath="..\evoral\Curve.h"
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\Curve.hpp"
+				RelativePath="..\evoral\Event.h"
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\Event.hpp"
+				RelativePath="..\evoral\EventList.h"
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\EventList.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\evoral\EventSink.hpp"
+				RelativePath="..\evoral\EventSink.h"
 				>
 			</File>
 			<File
@@ -488,63 +484,59 @@
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\MIDIXML.hpp"
+				RelativePath="..\evoral\MIDIXML.h"
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\Note.hpp"
+				RelativePath="..\evoral\Note.h"
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\OldSMF.hpp"
+				RelativePath="..\evoral\Parameter.h"
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\Parameter.hpp"
+				RelativePath="..\evoral\ParameterDescriptor.h"
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\ParameterDescriptor.hpp"
+				RelativePath="..\evoral\PatchChange.h"
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\PatchChange.hpp"
+				RelativePath="..\evoral\Range.h"
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\Range.hpp"
+				RelativePath="..\evoral\Sequence.h"
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\Sequence.hpp"
+				RelativePath="..\libsmf\smf.h"
 				>
 			</File>
 			<File
-				RelativePath="..\src\libsmf\smf.h"
+				RelativePath="..\evoral\SMF.h"
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\SMF.hpp"
+				RelativePath="..\libsmf\smf_private.h"
 				>
 			</File>
 			<File
-				RelativePath="..\src\libsmf\smf_private.h"
+				RelativePath="..\evoral\SMFReader.h"
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\SMFReader.hpp"
+				RelativePath="..\evoral\TimeConverter.h"
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\TimeConverter.hpp"
+				RelativePath="..\evoral\TypeMap.h"
 				>
 			</File>
 			<File
-				RelativePath="..\evoral\TypeMap.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\evoral\types.hpp"
+				RelativePath="..\evoral\types.h"
 				>
 			</File>
 			<File

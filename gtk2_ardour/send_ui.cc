@@ -1,33 +1,36 @@
 /*
-    Copyright (C) 2002 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2016 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2007-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <gtkmm2ext/doi.h>
 
 #include "ardour/io.h"
 #include "ardour/panner_manager.h"
-#include "ardour/send.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/send.h"
 
-#include "send_ui.h"
-#include "io_selector.h"
-#include "timers.h"
 #include "gui_thread.h"
+#include "io_selector.h"
+#include "send_ui.h"
+#include "timers.h"
 
 #include "pbd/i18n.h"
 
@@ -42,58 +45,49 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
 {
 	assert (_send);
 
- 	_panners.set_panner (s->panner_shell(), s->panner());
-	_gpm.set_controls (boost::shared_ptr<Route>(), s->meter(), s->amp(), s->gain_control());
+	uint32_t const in  = _send->pans_required ();
+	uint32_t const out = _send->pan_outs ();
+	_panners.set_width (Wide);
+	_panners.set_available_panners (PannerManager::instance ().PannerManager::get_available_panners (in, out));
+	_panners.set_panner (s->panner_shell (), s->panner ());
+
+	_send->set_metering (true);
+	_send->output ()->changed.connect (connections, invalidator (*this), boost::bind (&SendUI::outs_changed, this, _1, _2), gui_context ());
+
+	_gpm.setup_meters ();
+	_gpm.set_fader_name (X_("SendUIFader"));
+	_gpm.set_controls (boost::shared_ptr<Route> (), s->meter (), s->amp (), s->gain_control ());
+
+	_io = Gtk::manage (new IOSelector (parent, session, s->output ()));
+
+	set_name (X_("SendUIFrame"));
 
 	_hbox.pack_start (_gpm, true, true);
-	set_name (X_("SendUIFrame"));
 
 	_vbox.set_spacing (5);
 	_vbox.set_border_width (5);
-
 	_vbox.pack_start (_hbox, false, false, false);
 	_vbox.pack_start (_panners, false, false);
 
-	io = Gtk::manage (new IOSelector (parent, session, s->output()));
-
 	pack_start (_vbox, false, false);
+	pack_start (*_io, true, true);
 
-	pack_start (*io, true, true);
-
-	io->show ();
+	_io->show ();
 	_gpm.show_all ();
 	_panners.show_all ();
 	_vbox.show ();
 	_hbox.show ();
 
-	_send->set_metering (true);
-
-	_send->output()->changed.connect (connections, invalidator (*this), boost::bind (&SendUI::outs_changed, this, _1, _2), gui_context());
-
-	uint32_t const in = _send->pans_required();
-	uint32_t const out = _send->pan_outs();
-
-	_panners.set_width (Wide);
-	_panners.set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
-	_panners.setup_pan ();
-
-	_gpm.setup_meters ();
-	_gpm.set_fader_name (X_("SendUIFader"));
-
-	// screen_update_connection = Timers::rapid_connect (
-	//		sigc::mem_fun (*this, &SendUI::update));
 	fast_screen_update_connection = Timers::super_rapid_connect (
-			sigc::mem_fun (*this, &SendUI::fast_update));
+	    sigc::mem_fun (*this, &SendUI::fast_update));
 }
 
 SendUI::~SendUI ()
 {
 	_send->set_metering (false);
 
-	/* XXX not clear that we need to do this */
-
-	screen_update_connection.disconnect();
-	fast_screen_update_connection.disconnect();
+	screen_update_connection.disconnect ();
+	fast_screen_update_connection.disconnect ();
 }
 
 void
@@ -101,12 +95,12 @@ SendUI::outs_changed (IOChange change, void* /*ignored*/)
 {
 	ENSURE_GUI_THREAD (*this, &SendUI::outs_changed, change, ignored)
 	if (change.type & IOChange::ConfigurationChanged) {
-		uint32_t const in = _send->pans_required();
-		uint32_t const out = _send->pan_outs();
+		uint32_t const in  = _send->pans_required ();
+		uint32_t const out = _send->pan_outs ();
 		if (_panners._panner == 0) {
-			_panners.set_panner (_send->panner_shell(), _send->panner());
+			_panners.set_panner (_send->panner_shell (), _send->panner ());
 		}
-		_panners.set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
+		_panners.set_available_panners (PannerManager::instance ().PannerManager::get_available_panners (in, out));
 		_panners.setup_pan ();
 		_panners.show_all ();
 		_gpm.setup_meters ();
@@ -121,17 +115,17 @@ SendUI::update ()
 void
 SendUI::fast_update ()
 {
-	if (!is_mapped()) {
+	if (!is_mapped ()) {
 		return;
 	}
 
-	if (Config->get_meter_falloff() > 0.0f) {
+	if (Config->get_meter_falloff () > 0.0f) {
 		_gpm.update_meters ();
 	}
 }
 
 SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session* session)
-	: ArdourWindow (string (_("Send ")) + s->name())
+	: ArdourWindow (string (_("Send ")) + s->name ())
 {
 	ui = new SendUI (this, s, session);
 
@@ -143,7 +137,6 @@ SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session* session)
 
 	ui->show ();
 	hpacker.show ();
-
 }
 
 SendUIWindow::~SendUIWindow ()

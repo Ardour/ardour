@@ -1,21 +1,28 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2006 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2005-2007 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2005-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2006 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2007-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2014 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2014-2018 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 #ifdef WAF_BUILD
 #include "gtk2ardour-config.h"
 #endif
@@ -24,6 +31,7 @@
 #include <map>
 
 #include <algorithm>
+#include <boost/tokenizer.hpp>
 
 #include <gtkmm/button.h>
 #include <gtkmm/comboboxtext.h>
@@ -61,6 +69,9 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	: ArdourDialog (_("Plugin Manager"), true, false)
 	, search_clear_button (Stock::CLEAR)
 	, manager (mgr)
+	, _need_tag_save (false)
+	, _need_status_save (false)
+	, _need_menu_rebuild (false)
 	, _inhibit_refill (false)
 {
 	set_name ("PluginSelectorWindow");
@@ -69,10 +80,10 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	_plugin_menu = 0;
 	in_row_change = false;
 
-	//anytime the list changes ( Status, Tags, or scanned plugins ) we need to rebuild redirect-box plugin selector menu
 	manager.PluginListChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::build_plugin_menu, this), gui_context());
+	manager.PluginStatusChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::build_plugin_menu, this), gui_context());
+	manager.PluginTagChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::build_plugin_menu, this), gui_context());
 
-	//these are used to update the info of specific entries, while they are being edited
 	manager.PluginStatusChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::plugin_status_changed, this, _1, _2, _3), gui_context());
 	manager.PluginTagChanged.connect(plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::tags_changed, this, _1, _2, _3), gui_context());
 
@@ -342,30 +353,46 @@ PluginSelector::added_row_clicked(GdkEventButton* event)
 		btn_remove_clicked();
 }
 
+
+static void
+setup_search_string (string& searchstr)
+{
+	transform (searchstr.begin(), searchstr.end(), searchstr.begin(), ::toupper);
+}
+
+static bool
+match_search_strings (string const& haystack, string const& needle)
+{
+	boost::char_separator<char> sep (" ");
+	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	tokenizer t (needle, sep);
+	for (tokenizer::iterator ti = t.begin(); ti != t.end(); ++ti) {
+		if (haystack.find (*ti) == string::npos) {
+			return false;
+		}
+	}
+	return true;
+}
+
 bool
 PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& searchstr)
 {
 	string mode;
 	bool maybe_show = false;
+	PluginManager::PluginStatusType status = manager.get_status (info);
 
 	if (!searchstr.empty()) {
 
-		std::string compstr;
-
 		if (_search_name_checkbox->get_active()) { /* name contains */
-			compstr = info->name;
-			transform (compstr.begin(), compstr.end(), compstr.begin(), ::toupper);
-			if (compstr.find (searchstr) != string::npos) {
-				maybe_show = true;
-			}
+			std::string compstr = info->name;
+			setup_search_string (compstr);
+			maybe_show |= match_search_strings (compstr, searchstr);
 		}
 
 		if (_search_tags_checkbox->get_active()) { /* tag contains */
-			compstr = manager.get_tags_as_string (info);
-			transform (compstr.begin(), compstr.end(), compstr.begin(), ::toupper);
-			if (compstr.find (searchstr) != string::npos) {
-				maybe_show = true;
-			}
+			std::string compstr = manager.get_tags_as_string (info);
+			setup_search_string (compstr);
+			maybe_show |= match_search_strings (compstr, searchstr);
 		}
 
 		if (!maybe_show) {
@@ -374,7 +401,10 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 
 		/* user asked to ignore filters */
 		if (maybe_show && _search_ignore_checkbox->get_active()) {
-			if (manager.get_status (info) == PluginManager::Hidden) {
+			if (status == PluginManager::Hidden) {
+				return false;
+			}
+			if (status == PluginManager::Concealed) {
 				return false;
 			}
 			return true;
@@ -393,15 +423,19 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 		return false;
 	}
 
-	if (_fil_favorites_radio->get_active() && !(manager.get_status (info) == PluginManager::Favorite)) {
+	if (_fil_favorites_radio->get_active() && status != PluginManager::Favorite) {
 		return false;
 	}
 
-	if (_fil_hidden_radio->get_active() && !(manager.get_status (info) == PluginManager::Hidden)) {
+	if (_fil_hidden_radio->get_active() && (status != PluginManager::Hidden && status != PluginManager::Concealed)) {
 		return false;
 	}
 
-	if (!_fil_hidden_radio->get_active() && manager.get_status (info) == PluginManager::Hidden) {
+	if (!_fil_hidden_radio->get_active() && status == PluginManager::Hidden) {
+		return false;
+	}
+
+	if (!_fil_hidden_radio->get_active() && status == PluginManager::Concealed) {
 		return false;
 	}
 
@@ -438,13 +472,6 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 	}
 
 	return true;
-}
-
-void
-PluginSelector::setup_search_string (string& searchstr)
-{
-	searchstr = search_entry.get_text ();
-	transform (searchstr.begin(), searchstr.end(), searchstr.begin(), ::toupper);
 }
 
 void
@@ -485,8 +512,6 @@ PluginSelector::refill ()
 		return;
 	}
 
-	std::string searchstr;
-
 	in_row_change = true;
 
 	plugin_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
@@ -500,6 +525,7 @@ PluginSelector::refill ()
 
 	plugin_model->clear ();
 
+	std::string searchstr = search_entry.get_text ();
 	setup_search_string (searchstr);
 
 	ladspa_refiller (searchstr);
@@ -528,8 +554,10 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& searc
 		if (show_this_plugin (*i, searchstr)) {
 
 			TreeModel::Row newrow = *(plugin_model->append());
-			newrow[plugin_columns.favorite] = (manager.get_status (*i) == PluginManager::Favorite);
-			newrow[plugin_columns.hidden] = (manager.get_status (*i) == PluginManager::Hidden);
+
+			PluginManager::PluginStatusType status = manager.get_status (*i);
+			newrow[plugin_columns.favorite] = status == PluginManager::Favorite;
+			newrow[plugin_columns.hidden] = status == PluginManager::Hidden;
 
 			string name = (*i)->name;
 			if (name.length() > 48) {
@@ -787,9 +815,8 @@ PluginSelector::run ()
 	if (_need_status_save) {
 		manager.save_statuses();
 	}
-
-	if ( _need_tag_save || _need_status_save || _need_menu_rebuild ) {
-		manager.PluginListChanged();  //emit signal
+	if (_need_menu_rebuild) {
+		build_plugin_menu ();
 	}
 
 	return (int) r;
@@ -810,7 +837,6 @@ PluginSelector::tag_reset_button_clicked ()
 		manager.reset_tags (pi);
 		display_selection_changed ();
 		_need_tag_save = true;
-		_need_menu_rebuild = true;
 	}
 }
 
@@ -833,7 +859,6 @@ PluginSelector::tag_entry_changed ()
 		manager.set_tags (pi->type, pi->unique_id, tag_entry->get_text(), pi->name, PluginManager::FromGui);
 
 		_need_tag_save = true;
-		_need_menu_rebuild = true;
 	}
 }
 
@@ -861,7 +886,7 @@ PluginSelector::plugin_status_changed (PluginType t, std::string uid, PluginMana
 			(*i)[plugin_columns.hidden] = (stat == PluginManager::Hidden) ? true : false;
 
 			/* if plug was hidden, remove it from the view */
-			if (stat == PluginManager::Hidden) {
+			if (stat == PluginManager::Hidden || stat == PluginManager::Concealed) {
 				if (!_fil_hidden_radio->get_active() && !_fil_all_radio->get_active()) {
 					plugin_model->erase(i);
 				}
@@ -888,7 +913,6 @@ PluginSelector::on_show ()
 
 	_need_tag_save = false;
 	_need_status_save = false;
-	_need_menu_rebuild = false;
 }
 
 struct PluginMenuCompareByCreator {
@@ -937,6 +961,11 @@ PluginSelector::plugin_menu()
 void
 PluginSelector::build_plugin_menu ()
 {
+	if (is_visible ()) {
+		_need_menu_rebuild = true;
+		return;
+	}
+	_need_menu_rebuild = false;
 	PluginInfoList all_plugs;
 
 	all_plugs.insert (all_plugs.end(), manager.ladspa_plugin_info().begin(), manager.ladspa_plugin_info().end());
@@ -961,7 +990,7 @@ PluginSelector::build_plugin_menu ()
 
 	delete _plugin_menu;
 
-	_plugin_menu = manage (new Menu);
+	_plugin_menu = new Menu;
 	_plugin_menu->set_name("ArdourContextMenu");
 
 	MenuList& items = _plugin_menu->items();
@@ -1053,7 +1082,9 @@ PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
 
-		if (manager.get_status (*i) == PluginManager::Hidden) continue;
+		PluginManager::PluginStatusType status = manager.get_status (*i);
+		if (status == PluginManager::Hidden) continue;
+		if (status == PluginManager::Concealed) continue;
 
 		string creator = (*i)->creator;
 
@@ -1111,7 +1142,9 @@ PluginSelector::create_by_tags_menu (ARDOUR::PluginInfoList& all_plugs)
 
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
 
-		if (manager.get_status (*i) == PluginManager::Hidden) continue;
+		PluginManager::PluginStatusType status = manager.get_status (*i);
+		if (status == PluginManager::Hidden) continue;
+		if (status == PluginManager::Concealed) continue;
 
 		/* for each tag in the plugins tag list, add it to that submenu */
 		vector<string> tokens = manager.get_tags(*i);
@@ -1172,7 +1205,6 @@ PluginSelector::favorite_changed (const std::string& path)
 		manager.set_status (pi->type, pi->unique_id, status);
 
 		_need_status_save = true;
-		_need_menu_rebuild = true;
 	}
 	in_row_change = false;
 }
@@ -1205,7 +1237,6 @@ PluginSelector::hidden_changed (const std::string& path)
 		manager.set_status (pi->type, pi->unique_id, status);
 
 		_need_status_save = true;
-		_need_menu_rebuild = true;
 	}
 	in_row_change = false;
 }

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Kurzweil</Manufacturer>
+    <Model>PC88</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Internal Voices">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Classical Piano" ProgramChange="0"/>
+          <Patch Number="1" Name="Stage Piano" ProgramChange="1"/>
+          <Patch Number="2" Name="Classic E Pno" ProgramChange="2"/>
+          <Patch Number="3" Name="Digital E Pno" ProgramChange="3"/>
+          <Patch Number="4" Name="Digital EGrand" ProgramChange="4"/>
+          <Patch Number="5" Name="StagePiano&amp;Str" ProgramChange="5"/>
+          <Patch Number="6" Name="Strings 1" ProgramChange="6"/>
+          <Patch Number="7" Name="Harpsichord" ProgramChange="7"/>
+          <Patch Number="8" Name="AcousticGuitar" ProgramChange="8"/>
+          <Patch Number="9" Name="Clav 1" ProgramChange="9"/>
+          <Patch Number="10" Name="Rock Organ 1" ProgramChange="10"/>
+          <Patch Number="11" Name="Jazz Organ 1" ProgramChange="11"/>
+          <Patch Number="12" Name="St Trem Vibes" ProgramChange="12"/>
+          <Patch Number="13" Name="Acoustic Bass" ProgramChange="13"/>
+          <Patch Number="14" Name="Dual E Bass" ProgramChange="14"/>
+          <Patch Number="15" Name="Stereo Strings" ProgramChange="15"/>
+          <Patch Number="16" Name="ClassPiano 440" ProgramChange="16"/>
+          <Patch Number="17" Name="StagePiano 440" ProgramChange="17"/>
+          <Patch Number="18" Name="Dyn Hard E Pno" ProgramChange="18"/>
+          <Patch Number="19" Name="StTrem Digital" ProgramChange="19"/>
+          <Patch Number="20" Name="Warm E Grand" ProgramChange="20"/>
+          <Patch Number="21" Name="DynPno&amp;Str Pad" ProgramChange="21"/>
+          <Patch Number="22" Name="AttVel Strings" ProgramChange="22"/>
+          <Patch Number="23" Name="Stereo Harpsi" ProgramChange="23"/>
+          <Patch Number="24" Name="12-str Guitar" ProgramChange="24"/>
+          <Patch Number="25" Name="Stereo Clav" ProgramChange="25"/>
+          <Patch Number="26" Name="Rock Organ 2" ProgramChange="26"/>
+          <Patch Number="27" Name="Jazz Organ 2" ProgramChange="27"/>
+          <Patch Number="28" Name="Simple Vibes" ProgramChange="28"/>
+          <Patch Number="29" Name="A Bass &amp; Ride" ProgramChange="29"/>
+          <Patch Number="30" Name="E Bass &amp; Ride" ProgramChange="30"/>
+          <Patch Number="31" Name="Slo String Pad" ProgramChange="31"/>
+          <Patch Number="32" Name="Sustain Piano" ProgramChange="32"/>
+          <Patch Number="33" Name="Bright Piano" ProgramChange="33"/>
+          <Patch Number="34" Name="Soft E Pno" ProgramChange="34"/>
+          <Patch Number="35" Name="FM &amp; Marimba" ProgramChange="35"/>
+          <Patch Number="36" Name="Tight E Grand" ProgramChange="36"/>
+          <Patch Number="37" Name="DigiPno&amp;StrPad" ProgramChange="37"/>
+          <Patch Number="38" Name="Touch Strings" ProgramChange="38"/>
+          <Patch Number="39" Name="8veHarpsichord" ProgramChange="39"/>
+          <Patch Number="40" Name="Fluid Guitar" ProgramChange="40"/>
+          <Patch Number="41" Name="Super Clav" ProgramChange="41"/>
+          <Patch Number="42" Name="Ballad Organ 1" ProgramChange="42"/>
+          <Patch Number="43" Name="Ballad Organ 2" ProgramChange="43"/>
+          <Patch Number="44" Name="Marimba" ProgramChange="44"/>
+          <Patch Number="45" Name="Legato A Bass" ProgramChange="45"/>
+          <Patch Number="46" Name="Sustain E Bass" ProgramChange="46"/>
+          <Patch Number="47" Name="Slo Vibes" ProgramChange="47"/>
+          <Patch Number="48" Name="Sus Piano 440" ProgramChange="48"/>
+          <Patch Number="49" Name="Tack Piano" ProgramChange="49"/>
+          <Patch Number="50" Name="Suitcase E Pno" ProgramChange="50"/>
+          <Patch Number="51" Name="E Pno&amp; Marimba" ProgramChange="51"/>
+          <Patch Number="52" Name="St Elec Grand" ProgramChange="52"/>
+          <Patch Number="53" Name="AcGtr &amp; StrPad" ProgramChange="53"/>
+          <Patch Number="54" Name="...&amp; Strings" ProgramChange="54"/>
+          <Patch Number="55" Name="Pedals Harpschd" ProgramChange="55"/>
+          <Patch Number="56" Name="St Clav Guitar" ProgramChange="56"/>
+          <Patch Number="57" Name="Organi Clav" ProgramChange="57"/>
+          <Patch Number="58" Name="Full Pipes" ProgramChange="58"/>
+          <Patch Number="59" Name="Chiffy Pipes" ProgramChange="59"/>
+          <Patch Number="60" Name="Metal Marimba" ProgramChange="60"/>
+          <Patch Number="61" Name="Leg Bass &amp;Ride" ProgramChange="61"/>
+          <Patch Number="62" Name="Slap E Bass" ProgramChange="62"/>
+          <Patch Number="63" Name="SlowDigitalPad" ProgramChange="63"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="MIDI Setups">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="A Piano Trio" ProgramChange="0"/>
+          <Patch Number="1" Name="E Piano Trio" ProgramChange="1"/>
+          <Patch Number="2" Name="Rhythm Pad" ProgramChange="2"/>
+          <Patch Number="3" Name="Dynamic 5ths" ProgramChange="3"/>
+          <Patch Number="4" Name="Stereo E Grand" ProgramChange="4"/>
+          <Patch Number="5" Name="Harpsi &amp; String" ProgramChange="5"/>
+          <Patch Number="6" Name="SoloPno&gt;Gtrs" ProgramChange="6"/>
+          <Patch Number="7" Name="Pedals Harpsi" ProgramChange="7"/>
+          <Patch Number="8" Name="Deep Guitar" ProgramChange="8"/>
+          <Patch Number="9" Name="Keyboard Comp" ProgramChange="9"/>
+          <Patch Number="10" Name="Bass&amp;Dyn5ths" ProgramChange="10"/>
+          <Patch Number="11" Name="Lead Stack" ProgramChange="11"/>
+          <Patch Number="12" Name="Island Roller" ProgramChange="12"/>
+          <Patch Number="13" Name="Forecast" ProgramChange="13"/>
+          <Patch Number="14" Name="Wet Stuff" ProgramChange="14"/>
+          <Patch Number="15" Name="Volume Sliders" ProgramChange="15"/>
+          <Patch Number="16" Name="FluidGtr &amp; Vibe" ProgramChange="16"/>
+          <Patch Number="17" Name="Click &amp; Trio" ProgramChange="17"/>
+          <Patch Number="18" Name="E Bass/ E Pno" ProgramChange="18"/>
+          <Patch Number="19" Name="Duo Comp 1" ProgramChange="19"/>
+          <Patch Number="20" Name="Vtrig E Piano" ProgramChange="20"/>
+          <Patch Number="21" Name="Shift Limits!" ProgramChange="21"/>
+          <Patch Number="22" Name="Three Things" ProgramChange="22"/>
+          <Patch Number="23" Name="dingalingling" ProgramChange="23"/>
+          <Patch Number="24" Name="Arps on Top" ProgramChange="24"/>
+          <Patch Number="25" Name="Sustain E Piano" ProgramChange="25"/>
+          <Patch Number="26" Name="Enter &amp; Xfade" ProgramChange="26"/>
+          <Patch Number="27" Name="Marimba Thing" ProgramChange="27"/>
+          <Patch Number="28" Name="Click/Ride" ProgramChange="28"/>
+          <Patch Number="29" Name="Pan Sliders" ProgramChange="29"/>
+          <Patch Number="30" Name="MIDI Template" ProgramChange="30"/>
+          <Patch Number="31" Name="Local Template" ProgramChange="31"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

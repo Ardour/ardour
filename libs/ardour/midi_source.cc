@@ -1,21 +1,26 @@
 /*
-    Copyright (C) 2006 Paul Davis
-    Author: David Robillard
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2006-2016 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2008-2009 Hans Baier <hansfbaier@googlemail.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2012-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016 Nick Mainsbridge <mainsbridge@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <sys/stat.h>
 #include <unistd.h>
@@ -33,9 +38,10 @@
 #include "pbd/xml++.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/basename.h"
+#include "pbd/timing.h"
 
-#include "evoral/Control.hpp"
-#include "evoral/EventSink.hpp"
+#include "evoral/Control.h"
+#include "evoral/EventSink.h"
 
 #include "ardour/debug.h"
 #include "ardour/file_source.h"
@@ -195,11 +201,11 @@ MidiSource::invalidate (const Lock& lock)
 
 samplecnt_t
 MidiSource::midi_read (const Lock&                        lm,
-                       Evoral::EventSink<samplepos_t>&     dst,
-                       samplepos_t                         source_start,
-                       samplepos_t                         start,
-                       samplecnt_t                         cnt,
-                       Evoral::Range<samplepos_t>*         loop_range,
+                       Evoral::EventSink<samplepos_t>&    dst,
+                       samplepos_t                        source_start,
+                       samplepos_t                        start,
+                       samplecnt_t                        cnt,
+                       Evoral::Range<samplepos_t>*        loop_range,
                        MidiCursor&                        cursor,
                        MidiStateTracker*                  tracker,
                        MidiChannelFilter*                 filter,
@@ -272,7 +278,7 @@ MidiSource::midi_read (const Lock&                        lm,
 				   destroying events in the model during read. */
 				Evoral::Event<Temporal::Beats> ev(*i, true);
 				if (!filter->filter(ev.buffer(), ev.size())) {
-					dst.write(time_samples, ev.event_type(), ev.size(), ev.buffer());
+					dst.write (time_samples, ev.event_type(), ev.size(), ev.buffer());
 				} else {
 					DEBUG_TRACE (DEBUG::MidiSourceIO,
 					             string_compose ("%1: filter event @ %2 type %3 size %4\n",
@@ -309,7 +315,7 @@ MidiSource::midi_read (const Lock&                        lm,
 }
 
 samplecnt_t
-MidiSource::midi_write (const Lock&                 lm,
+MidiSource::midi_write (const Lock&                  lm,
                         MidiRingBuffer<samplepos_t>& source,
                         samplepos_t                  source_start,
                         samplecnt_t                  cnt)
@@ -352,7 +358,7 @@ MidiSource::mark_write_starting_now (samplecnt_t position,
 	   because it is not RT-safe.
 	*/
 
-	set_timeline_position(position);
+	set_natural_position (position);
 	_capture_length      = capture_length;
 	_capture_loop_length = loop_length;
 
@@ -369,9 +375,9 @@ MidiSource::mark_streaming_write_started (const Lock& lock)
 }
 
 void
-MidiSource::mark_midi_streaming_write_completed (const Lock&                                      lock,
+MidiSource::mark_midi_streaming_write_completed (const Lock&                                        lock,
                                                  Evoral::Sequence<Temporal::Beats>::StuckNoteOption option,
-                                                 Temporal::Beats                                  end)
+                                                 Temporal::Beats                                    end)
 {
 	if (_model) {
 		_model->end_write (option, end);
@@ -417,7 +423,7 @@ MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Te
 {
 	Lock newsrc_lock (newsrc->mutex ());
 
-	newsrc->set_timeline_position (_timeline_position);
+	newsrc->set_natural_position (_natural_position);
 	newsrc->copy_interpolation_from (this);
 	newsrc->copy_automation_state_from (this);
 

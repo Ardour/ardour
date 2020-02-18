@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Korg</Manufacturer>
+    <Model>EX-8000</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Patch Names">
+        <PatchNameList>
+          <Patch Number="11" Name="Program 11" ProgramChange="0"/>
+          <Patch Number="12" Name="Program 12" ProgramChange="1"/>
+          <Patch Number="13" Name="Program 13" ProgramChange="2"/>
+          <Patch Number="14" Name="Program 14" ProgramChange="3"/>
+          <Patch Number="15" Name="Program 15" ProgramChange="4"/>
+          <Patch Number="16" Name="Program 16" ProgramChange="5"/>
+          <Patch Number="17" Name="Program 17" ProgramChange="6"/>
+          <Patch Number="18" Name="Program 18" ProgramChange="7"/>
+          <Patch Number="21" Name="Program 21" ProgramChange="8"/>
+          <Patch Number="22" Name="Program 22" ProgramChange="9"/>
+          <Patch Number="23" Name="Program 23" ProgramChange="10"/>
+          <Patch Number="24" Name="Program 24" ProgramChange="11"/>
+          <Patch Number="25" Name="Program 25" ProgramChange="12"/>
+          <Patch Number="26" Name="Program 26" ProgramChange="13"/>
+          <Patch Number="27" Name="Program 27" ProgramChange="14"/>
+          <Patch Number="28" Name="Program 28" ProgramChange="15"/>
+          <Patch Number="31" Name="Program 31" ProgramChange="16"/>
+          <Patch Number="32" Name="Program 32" ProgramChange="17"/>
+          <Patch Number="33" Name="Program 33" ProgramChange="18"/>
+          <Patch Number="34" Name="Program 34" ProgramChange="19"/>
+          <Patch Number="35" Name="Program 35" ProgramChange="20"/>
+          <Patch Number="36" Name="Program 36" ProgramChange="21"/>
+          <Patch Number="37" Name="Program 37" ProgramChange="22"/>
+          <Patch Number="38" Name="Program 38" ProgramChange="23"/>
+          <Patch Number="41" Name="Program 41" ProgramChange="24"/>
+          <Patch Number="42" Name="Program 42" ProgramChange="25"/>
+          <Patch Number="43" Name="Program 43" ProgramChange="26"/>
+          <Patch Number="44" Name="Program 44" ProgramChange="27"/>
+          <Patch Number="45" Name="Program 45" ProgramChange="28"/>
+          <Patch Number="46" Name="Program 46" ProgramChange="29"/>
+          <Patch Number="47" Name="Program 47" ProgramChange="30"/>
+          <Patch Number="48" Name="Program 48" ProgramChange="31"/>
+          <Patch Number="51" Name="Program 51" ProgramChange="32"/>
+          <Patch Number="52" Name="Program 52" ProgramChange="33"/>
+          <Patch Number="53" Name="Program 53" ProgramChange="34"/>
+          <Patch Number="54" Name="Program 54" ProgramChange="35"/>
+          <Patch Number="55" Name="Program 55" ProgramChange="36"/>
+          <Patch Number="56" Name="Program 56" ProgramChange="37"/>
+          <Patch Number="57" Name="Program 57" ProgramChange="38"/>
+          <Patch Number="58" Name="Program 58" ProgramChange="39"/>
+          <Patch Number="61" Name="Program 61" ProgramChange="40"/>
+          <Patch Number="62" Name="Program 62" ProgramChange="41"/>
+          <Patch Number="63" Name="Program 63" ProgramChange="42"/>
+          <Patch Number="64" Name="Program 64" ProgramChange="43"/>
+          <Patch Number="65" Name="Program 65" ProgramChange="44"/>
+          <Patch Number="66" Name="Program 66" ProgramChange="45"/>
+          <Patch Number="67" Name="Program 67" ProgramChange="46"/>
+          <Patch Number="68" Name="Program 68" ProgramChange="47"/>
+          <Patch Number="71" Name="Program 71" ProgramChange="48"/>
+          <Patch Number="72" Name="Program 72" ProgramChange="49"/>
+          <Patch Number="73" Name="Program 73" ProgramChange="50"/>
+          <Patch Number="74" Name="Program 74" ProgramChange="51"/>
+          <Patch Number="75" Name="Program 75" ProgramChange="52"/>
+          <Patch Number="76" Name="Program 76" ProgramChange="53"/>
+          <Patch Number="77" Name="Program 77" ProgramChange="54"/>
+          <Patch Number="78" Name="Program 78" ProgramChange="55"/>
+          <Patch Number="81" Name="Program 81" ProgramChange="56"/>
+          <Patch Number="82" Name="Program 82" ProgramChange="57"/>
+          <Patch Number="83" Name="Program 83" ProgramChange="58"/>
+          <Patch Number="84" Name="Program 84" ProgramChange="59"/>
+          <Patch Number="85" Name="Program 85" ProgramChange="60"/>
+          <Patch Number="86" Name="Program 86" ProgramChange="61"/>
+          <Patch Number="87" Name="Program 87" ProgramChange="62"/>
+          <Patch Number="88" Name="Program 88" ProgramChange="63"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

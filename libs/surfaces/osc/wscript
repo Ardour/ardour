@@ -30,7 +30,7 @@ def build(bld):
     obj.includes     = ['.', './osc']
     obj.name         = 'libardour_osc'
     obj.target       = 'ardour_osc'
-    obj.uselib       = 'LO GTKMM GTK GDK'
+    obj.uselib       = 'LO GTKMM GTK GDK XML OSX'
     obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 

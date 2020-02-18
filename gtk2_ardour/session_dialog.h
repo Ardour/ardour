@@ -1,21 +1,22 @@
 /*
-    Copyright (C) 2010 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2013-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2014-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2017 Ben Loftis <ben@harrisonconsoles.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __gtk2_ardour_session_dialog_h__
 #define __gtk2_ardour_session_dialog_h__
@@ -54,8 +55,6 @@ public:
 	SessionDialog ();
 	~SessionDialog ();
 
-	void clear_given ();
-
 	std::string session_name (bool& should_be_new);
 	std::string session_folder ();
 
@@ -64,15 +63,11 @@ public:
 
 	uint32_t master_channel_count();
 
-	void set_provided_session(const std::string& session_name, const std::string& session_path) {
-		_provided_session_name = session_name;
-		_provided_session_path = session_path;
-	}
+	void set_provided_session (std::string const & name, std::string const & path);
+	void clear_name ();
 
 private:
 	bool new_only;
-	std::string _provided_session_name;
-	std::string _provided_session_path;
 
 	bool on_delete_event (GdkEventAny*);
 
@@ -190,7 +185,7 @@ private:
 	void disable_plugins_clicked ();
 
 	/* meta-template */
-	uint32_t meta_master_bus_profile (std::string script) const;
+	static uint32_t meta_master_bus_profile (std::string script);
 
 	/* always there */
 
@@ -203,6 +198,9 @@ private:
 	bool info_scroller_update();
 	sigc::connection info_scroller_connection;
 	void updates_button_clicked ();
+
+	int inital_height;
+	int inital_width;
 };
 
 #endif /* __gtk2_ardour_session_dialog_h__ */

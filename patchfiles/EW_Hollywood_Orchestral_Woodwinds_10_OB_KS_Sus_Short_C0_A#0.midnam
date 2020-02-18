@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <!--
+        OB KS Sus_Short C0-A#0
+     
+        Eastwest Hollywood Orchestral Woodwinds KEYSWITCH Patch Program Control Support
+        PLAY 6
+        February 9, 2018
+        Version 1.0
+
+            This document supports instrument articulation switching via Program
+            Changes for Keyswitched patches within the PLAY 6 Virtual Instrument.
+     
+     -->
+  <Author>
+        Charles J. Green Jr.
+    </Author>
+  <MasterDeviceNames>
+    <Manufacturer>Eastwest Hollywood Orchestral Woodwinds</Manufacturer>
+    <Model>10 OB KS Sus_Short C0-A#0</Model>
+    <CustomDeviceMode Name="PLAY">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="PLAY"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="PLAY">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+      </AvailableForChannels>
+      <UsesControlNameList Name="MIDI CONTROL CODES"/>
+      <PatchBank Name="PLAY">
+        <UsesPatchNameList Name="KEYSWITCHED"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <PatchNameList Name="KEYSWITCHED">
+      <Patch Number="1" Name="Sus Non Vib" ProgramChange="0"/>
+      <Patch Number="2" Name="Sus Vib" ProgramChange="1"/>
+      <Patch Number="3" Name="Sus Exp Vib" ProgramChange="2"/>
+      <Patch Number="4" Name="LegRep RRx4" ProgramChange="3"/>
+      <Patch Number="5" Name="StacSs DblTng" ProgramChange="4"/>
+      <Patch Number="6" Name="Stac DblTng" ProgramChange="5"/>
+      <Patch Number="7" Name="Marc Shrt DblTng" ProgramChange="6"/>
+      <Patch Number="8" Name="Trill HT" ProgramChange="7"/>
+      <Patch Number="9" Name="Trill WT" ProgramChange="8"/>
+      <Patch Number="10" Name="Rep Med" ProgramChange="9"/>
+      <Patch Number="11" Name="Rep Slw" ProgramChange="10"/>
+    </PatchNameList>
+    <ControlNameList Name="MIDI CONTROL CODES">
+      <Control Type="7bit" Number="1" Name="Mod Wheel"/>
+      <Control Type="7bit" Number="2" Name="RR Reset"/>
+      <Control Type="7bit" Number="5" Name="Time"/>
+      <Control Type="7bit" Number="7" Name="Volume"/>
+      <Control Type="7bit" Number="10" Name="Pan"/>
+      <Control Type="7bit" Number="11" Name="Expression"/>
+      <Control Type="7bit" Number="22" Name="Polyphonic"/>
+      <Control Type="7bit" Number="65" Name="Portamento"/>
+      <Control Type="7bit" Number="68" Name="Legato"/>
+      <Control Type="7bit" Number="69" Name="Repetition"/>
+    </ControlNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

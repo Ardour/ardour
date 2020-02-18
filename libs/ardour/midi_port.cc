@@ -1,20 +1,24 @@
 /*
-    Copyright (C) 2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2006-2016 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2007-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2008 Hans Baier <hansfbaier@googlemail.com>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cassert>
 #include <iostream>
@@ -75,14 +79,14 @@ MidiPort::cycle_start (pframes_t nframes)
 		read_and_parse_entire_midi_buffer_with_no_speed_adjustment (nframes, *_trace_parser, AudioEngine::instance()->sample_time_at_cycle_start());
 	}
 
-	if (inbound_midi_filter) {
+	if (_inbound_midi_filter) {
 		MidiBuffer& mb (get_midi_buffer (nframes));
-		inbound_midi_filter (mb, mb);
+		_inbound_midi_filter (mb, mb);
 	}
 
 	if (_shadow_port) {
 		MidiBuffer& mb (get_midi_buffer (nframes));
-		if (shadow_midi_filter (mb, _shadow_port->get_midi_buffer (nframes))) {
+		if (_shadow_midi_filter (mb, _shadow_port->get_midi_buffer (nframes))) {
 			_shadow_port->flush_buffers (nframes);
 		}
 	}
@@ -97,6 +101,7 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 	}
 
 	if (receives_input () && _input_active) {
+		_buffer->clear ();
 
 		void* buffer = port_engine.get_buffer (_port_handle, nframes);
 		const pframes_t event_count = port_engine.get_midi_event_count (buffer);
@@ -123,19 +128,34 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 			/* check that the event is in the acceptable time range */
 			if ((timestamp <  (_global_port_buffer_offset)) ||
 			    (timestamp >= (_global_port_buffer_offset + nframes))) {
-				// XXX this is normal after a split cycles:
-				// The engine buffer contains the data for the complete cycle, but
-				// only the part after _global_port_buffer_offset is needed.
+				/* This is normal after a split cycles.
+				 *
+				 * The engine buffer contains the data for the
+				 * complete cycle, but only the part after
+				 * _global_port_buffer_offset is needed.
+				 *
+				 * But of course ... if
+				 * _global_port_buffer_offset is zero,
+				 * something wierd is happening.
+				 */
 #ifndef NDEBUG
-				cerr << "Dropping incoming MIDI at time " << timestamp << "; offset="
-				     << _global_port_buffer_offset << " limit="
-				     << (_global_port_buffer_offset + nframes)
-				     << " = (" << _global_port_buffer_offset
-				     << " + " << nframes
-				     << ")\n";
+				if (_global_port_buffer_offset == 0) {
+					cerr << "Ignored incoming MIDI at time " << timestamp << "; offset="
+					     << _global_port_buffer_offset << " limit="
+					     << (_global_port_buffer_offset + nframes)
+					     << " = (" << _global_port_buffer_offset
+					     << " + " << nframes
+					     << ")";
+					for (size_t xx = 0; xx < size; ++xx) {
+						cerr << ' ' << hex << (int) buf[xx];
+					}
+					cerr << dec << endl;
+				}
 #endif
 				continue;
 			}
+
+			timestamp -= _global_port_buffer_offset;
 
 			if ((buf[0] & 0xF0) == 0x90 && buf[2] == 0) {
 				/* normalize note on with velocity 0 to proper note off */
@@ -265,12 +285,13 @@ MidiPort::flush_buffers (pframes_t nframes)
 
 			const Evoral::Event<MidiBuffer::TimeType> ev (*i, false);
 
+			const samplepos_t adjusted_time = ev.time() + _global_port_buffer_offset;
 
 			if (sends_output() && _trace_parser) {
 				uint8_t const * const buf = ev.buffer();
 				const samplepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();
 
-				_trace_parser->set_timestamp (now + ev.time());
+				_trace_parser->set_timestamp (now + adjusted_time / _speed_ratio);
 
 				uint32_t limit = ev.size();
 
@@ -287,8 +308,8 @@ MidiPort::flush_buffers (pframes_t nframes)
 				const Session* s = AudioEngine::instance()->session();
 				const samplepos_t now = (s ? s->transport_sample() : 0);
 				DEBUG_STR_DECL(a);
-				DEBUG_STR_APPEND(a, string_compose ("MidiPort %7 %1 pop event    @ %2 (global %4, within %5 gpbo %6 sz %3 ", _buffer, ev.time(), ev.size(),
-				                                    now + ev.time(), nframes, _global_port_buffer_offset, name()));
+				DEBUG_STR_APPEND(a, string_compose ("MidiPort %7 %1 pop event    @ %2[%7] (global %4, within %5 gpbo %6 sz %3 ", _buffer, adjusted_time, ev.size(),
+				                                    now + adjusted_time, nframes, _global_port_buffer_offset, name(), ev.time()));
 				for (size_t i=0; i < ev.size(); ++i) {
 					DEBUG_STR_APPEND(a,hex);
 					DEBUG_STR_APPEND(a,"0x");
@@ -300,18 +321,21 @@ MidiPort::flush_buffers (pframes_t nframes)
 			}
 #endif
 
-			assert (ev.time() < (nframes + _global_port_buffer_offset));
-
-			if (ev.time() >= _global_port_buffer_offset) {
-				pframes_t tme = floor (ev.time() / _speed_ratio);
+			// XXX consider removing this check for optimized builds
+			// and just send 'em all, at cycle_end
+			// see AudioEngine::split_cycle (), PortManager::cycle_end()
+			if ((adjusted_time >= _global_port_buffer_offset) && (adjusted_time < _global_port_buffer_offset + nframes)) {
+				pframes_t tme = floor (adjusted_time / _speed_ratio);
 				if (port_engine.midi_event_put (port_buffer, tme, ev.buffer(), ev.size()) != 0) {
-					cerr << "write failed, dropped event, time "
-					     << ev.time()
-							 << " > " << _global_port_buffer_offset << endl;
+					cerr << "write failed, dropped event, time " << adjusted_time << '/' << ev.time() << endl;
 				}
 			} else {
-				cerr << "drop flushed event on the floor, time " << ev.time()
-				     << " too early for " << _global_port_buffer_offset;
+				pframes_t tme = floor (adjusted_time / _speed_ratio);
+				cerr << "Dropped outgoing MIDI event. time " << adjusted_time
+				     << " (" << ev.time() << ") @" << _speed_ratio << " = " << tme
+				     << " out of range [" << _global_port_buffer_offset
+				     << " .. " << _global_port_buffer_offset + nframes
+				     << "]";
 				for (size_t xx = 0; xx < ev.size(); ++xx) {
 					cerr << ' ' << hex << (int) ev.buffer()[xx];
 				}
@@ -319,8 +343,7 @@ MidiPort::flush_buffers (pframes_t nframes)
 			}
 		}
 
-		/* done.. the data has moved to the port buffer, mark it so
-		 */
+		/* done.. the data has moved to the port buffer, mark it so */
 
 		_buffer->clear ();
 	}
@@ -339,7 +362,7 @@ MidiPort::transport_stopped ()
 }
 
 void
-MidiPort::realtime_locate ()
+MidiPort::realtime_locate (bool)
 {
 	_resolve_required = true;
 }
@@ -376,7 +399,7 @@ MidiPort::add_shadow_port (string const & name, MidiFilter mf)
 		return -2;
 	}
 
-	shadow_midi_filter = mf;
+	_shadow_midi_filter = mf;
 
 	if (!(_shadow_port = boost::dynamic_pointer_cast<MidiPort> (AudioEngine::instance()->register_output_port (DataType::MIDI, name, false, PortFlags (Shadow|IsTerminal))))) {
 		return -3;

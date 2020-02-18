@@ -1,0 +1,2689 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Novation</Manufacturer>
+    <Model>Supernova II</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="FAVORITES">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Init Program" ProgramChange="0"/>
+          <Patch Number="1" Name="Init Program" ProgramChange="1"/>
+          <Patch Number="2" Name="Init Program" ProgramChange="2"/>
+          <Patch Number="3" Name="Init Program" ProgramChange="3"/>
+          <Patch Number="4" Name="Init Program" ProgramChange="4"/>
+          <Patch Number="5" Name="Init Program" ProgramChange="5"/>
+          <Patch Number="6" Name="Init Program" ProgramChange="6"/>
+          <Patch Number="7" Name="Init Program" ProgramChange="7"/>
+          <Patch Number="8" Name="Init Program" ProgramChange="8"/>
+          <Patch Number="9" Name="Init Program" ProgramChange="9"/>
+          <Patch Number="10" Name="Init Program" ProgramChange="10"/>
+          <Patch Number="11" Name="Init Program" ProgramChange="11"/>
+          <Patch Number="12" Name="Init Program" ProgramChange="12"/>
+          <Patch Number="13" Name="Init Program" ProgramChange="13"/>
+          <Patch Number="14" Name="Init Program" ProgramChange="14"/>
+          <Patch Number="15" Name="Init Program" ProgramChange="15"/>
+          <Patch Number="16" Name="Init Program" ProgramChange="16"/>
+          <Patch Number="17" Name="Init Program" ProgramChange="17"/>
+          <Patch Number="18" Name="Init Program" ProgramChange="18"/>
+          <Patch Number="19" Name="Init Program" ProgramChange="19"/>
+          <Patch Number="20" Name="Init Program" ProgramChange="20"/>
+          <Patch Number="21" Name="Init Program" ProgramChange="21"/>
+          <Patch Number="22" Name="Init Program" ProgramChange="22"/>
+          <Patch Number="23" Name="Init Program" ProgramChange="23"/>
+          <Patch Number="24" Name="Init Program" ProgramChange="24"/>
+          <Patch Number="25" Name="Init Program" ProgramChange="25"/>
+          <Patch Number="26" Name="Init Program" ProgramChange="26"/>
+          <Patch Number="27" Name="Init Program" ProgramChange="27"/>
+          <Patch Number="28" Name="Init Program" ProgramChange="28"/>
+          <Patch Number="29" Name="Init Program" ProgramChange="29"/>
+          <Patch Number="30" Name="Init Program" ProgramChange="30"/>
+          <Patch Number="31" Name="Init Program" ProgramChange="31"/>
+          <Patch Number="32" Name="Init Program" ProgramChange="32"/>
+          <Patch Number="33" Name="Init Program" ProgramChange="33"/>
+          <Patch Number="34" Name="Init Program" ProgramChange="34"/>
+          <Patch Number="35" Name="Init Program" ProgramChange="35"/>
+          <Patch Number="36" Name="Init Program" ProgramChange="36"/>
+          <Patch Number="37" Name="Init Program" ProgramChange="37"/>
+          <Patch Number="38" Name="Init Program" ProgramChange="38"/>
+          <Patch Number="39" Name="Init Program" ProgramChange="39"/>
+          <Patch Number="40" Name="Init Program" ProgramChange="40"/>
+          <Patch Number="41" Name="Init Program" ProgramChange="41"/>
+          <Patch Number="42" Name="Init Program" ProgramChange="42"/>
+          <Patch Number="43" Name="Init Program" ProgramChange="43"/>
+          <Patch Number="44" Name="Init Program" ProgramChange="44"/>
+          <Patch Number="45" Name="Init Program" ProgramChange="45"/>
+          <Patch Number="46" Name="Init Program" ProgramChange="46"/>
+          <Patch Number="47" Name="Init Program" ProgramChange="47"/>
+          <Patch Number="48" Name="Init Program" ProgramChange="48"/>
+          <Patch Number="49" Name="Init Program" ProgramChange="49"/>
+          <Patch Number="50" Name="Init Program" ProgramChange="50"/>
+          <Patch Number="51" Name="Init Program" ProgramChange="51"/>
+          <Patch Number="52" Name="Init Program" ProgramChange="52"/>
+          <Patch Number="53" Name="Init Program" ProgramChange="53"/>
+          <Patch Number="54" Name="Init Program" ProgramChange="54"/>
+          <Patch Number="55" Name="Init Program" ProgramChange="55"/>
+          <Patch Number="56" Name="Init Program" ProgramChange="56"/>
+          <Patch Number="57" Name="Init Program" ProgramChange="57"/>
+          <Patch Number="58" Name="Init Program" ProgramChange="58"/>
+          <Patch Number="59" Name="Init Program" ProgramChange="59"/>
+          <Patch Number="60" Name="Init Program" ProgramChange="60"/>
+          <Patch Number="61" Name="Init Program" ProgramChange="61"/>
+          <Patch Number="62" Name="Init Program" ProgramChange="62"/>
+          <Patch Number="63" Name="Init Program" ProgramChange="63"/>
+          <Patch Number="64" Name="Init Program" ProgramChange="64"/>
+          <Patch Number="65" Name="Init Program" ProgramChange="65"/>
+          <Patch Number="66" Name="Init Program" ProgramChange="66"/>
+          <Patch Number="67" Name="Init Program" ProgramChange="67"/>
+          <Patch Number="68" Name="Init Program" ProgramChange="68"/>
+          <Patch Number="69" Name="Init Program" ProgramChange="69"/>
+          <Patch Number="70" Name="Init Program" ProgramChange="70"/>
+          <Patch Number="71" Name="Init Program" ProgramChange="71"/>
+          <Patch Number="72" Name="Init Program" ProgramChange="72"/>
+          <Patch Number="73" Name="Init Program" ProgramChange="73"/>
+          <Patch Number="74" Name="Init Program" ProgramChange="74"/>
+          <Patch Number="75" Name="Init Program" ProgramChange="75"/>
+          <Patch Number="76" Name="Init Program" ProgramChange="76"/>
+          <Patch Number="77" Name="Init Program" ProgramChange="77"/>
+          <Patch Number="78" Name="Init Program" ProgramChange="78"/>
+          <Patch Number="79" Name="Init Program" ProgramChange="79"/>
+          <Patch Number="80" Name="Init Program" ProgramChange="80"/>
+          <Patch Number="81" Name="Init Program" ProgramChange="81"/>
+          <Patch Number="82" Name="Init Program" ProgramChange="82"/>
+          <Patch Number="83" Name="Init Program" ProgramChange="83"/>
+          <Patch Number="84" Name="Init Program" ProgramChange="84"/>
+          <Patch Number="85" Name="Init Program" ProgramChange="85"/>
+          <Patch Number="86" Name="Init Program" ProgramChange="86"/>
+          <Patch Number="87" Name="Init Program" ProgramChange="87"/>
+          <Patch Number="88" Name="Init Program" ProgramChange="88"/>
+          <Patch Number="89" Name="Init Program" ProgramChange="89"/>
+          <Patch Number="90" Name="Init Program" ProgramChange="90"/>
+          <Patch Number="91" Name="Init Program" ProgramChange="91"/>
+          <Patch Number="92" Name="Init Program" ProgramChange="92"/>
+          <Patch Number="93" Name="Init Program" ProgramChange="93"/>
+          <Patch Number="94" Name="Init Program" ProgramChange="94"/>
+          <Patch Number="95" Name="Init Program" ProgramChange="95"/>
+          <Patch Number="96" Name="Init Program" ProgramChange="96"/>
+          <Patch Number="97" Name="Init Program" ProgramChange="97"/>
+          <Patch Number="98" Name="Init Program" ProgramChange="98"/>
+          <Patch Number="99" Name="Init Program" ProgramChange="99"/>
+          <Patch Number="100" Name="Init Program" ProgramChange="100"/>
+          <Patch Number="101" Name="Init Program" ProgramChange="101"/>
+          <Patch Number="102" Name="Init Program" ProgramChange="102"/>
+          <Patch Number="103" Name="Init Program" ProgramChange="103"/>
+          <Patch Number="104" Name="Init Program" ProgramChange="104"/>
+          <Patch Number="105" Name="Init Program" ProgramChange="105"/>
+          <Patch Number="106" Name="Init Program" ProgramChange="106"/>
+          <Patch Number="107" Name="Init Program" ProgramChange="107"/>
+          <Patch Number="108" Name="Init Program" ProgramChange="108"/>
+          <Patch Number="109" Name="Init Program" ProgramChange="109"/>
+          <Patch Number="110" Name="Init Program" ProgramChange="110"/>
+          <Patch Number="111" Name="Init Program" ProgramChange="111"/>
+          <Patch Number="112" Name="Init Program" ProgramChange="112"/>
+          <Patch Number="113" Name="Init Program" ProgramChange="113"/>
+          <Patch Number="114" Name="Init Program" ProgramChange="114"/>
+          <Patch Number="115" Name="Init Program" ProgramChange="115"/>
+          <Patch Number="116" Name="Init Program" ProgramChange="116"/>
+          <Patch Number="117" Name="Init Program" ProgramChange="117"/>
+          <Patch Number="118" Name="Init Program" ProgramChange="118"/>
+          <Patch Number="119" Name="Init Program" ProgramChange="119"/>
+          <Patch Number="120" Name="Init Program" ProgramChange="120"/>
+          <Patch Number="121" Name="Init Program" ProgramChange="121"/>
+          <Patch Number="122" Name="Init Program" ProgramChange="122"/>
+          <Patch Number="123" Name="Init Program" ProgramChange="123"/>
+          <Patch Number="124" Name="Init Program" ProgramChange="124"/>
+          <Patch Number="125" Name="Init Program" ProgramChange="125"/>
+          <Patch Number="126" Name="Init Program" ProgramChange="126"/>
+          <Patch Number="127" Name="Init Program" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="PERFORMANCE BANK A">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="1"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Blaster Master" ProgramChange="0"/>
+          <Patch Number="1" Name="Pad on Spec" ProgramChange="1"/>
+          <Patch Number="2" Name="Tech Terror" ProgramChange="2"/>
+          <Patch Number="3" Name="Liquid Goo" ProgramChange="3"/>
+          <Patch Number="4" Name="Layered Pianos" ProgramChange="4"/>
+          <Patch Number="5" Name="SuperStabber" ProgramChange="5"/>
+          <Patch Number="6" Name="Popsickle" ProgramChange="6"/>
+          <Patch Number="7" Name="SintillatedWorry" ProgramChange="7"/>
+          <Patch Number="8" Name="Cool Pad" ProgramChange="8"/>
+          <Patch Number="9" Name="The Pizzacato" ProgramChange="9"/>
+          <Patch Number="10" Name="Klavikle" ProgramChange="10"/>
+          <Patch Number="11" Name="Ravers in the 7th" ProgramChange="11"/>
+          <Patch Number="12" Name="Donna Supermova" ProgramChange="12"/>
+          <Patch Number="13" Name="AbsoluteMassive" ProgramChange="13"/>
+          <Patch Number="14" Name="The Glide" ProgramChange="14"/>
+          <Patch Number="15" Name="Skwelchi 7th" ProgramChange="15"/>
+          <Patch Number="16" Name="Electric Aaah" ProgramChange="16"/>
+          <Patch Number="17" Name="Hypersynus" ProgramChange="17"/>
+          <Patch Number="18" Name="Ambient Nation" ProgramChange="18"/>
+          <Patch Number="19" Name="Brass Section" ProgramChange="19"/>
+          <Patch Number="20" Name="HardToTheKore" ProgramChange="20"/>
+          <Patch Number="21" Name="Pink Phycosis" ProgramChange="21"/>
+          <Patch Number="22" Name="Fatty" ProgramChange="22"/>
+          <Patch Number="23" Name="Naked String" ProgramChange="23"/>
+          <Patch Number="24" Name="TwinOvaHead303's" ProgramChange="24"/>
+          <Patch Number="25" Name="Puff Pipe" ProgramChange="25"/>
+          <Patch Number="26" Name="Deep Stringz" ProgramChange="26"/>
+          <Patch Number="27" Name="SupSupSupSup" ProgramChange="27"/>
+          <Patch Number="28" Name="Pionus" ProgramChange="28"/>
+          <Patch Number="29" Name="Worry Free" ProgramChange="29"/>
+          <Patch Number="30" Name="Conetik" ProgramChange="30"/>
+          <Patch Number="31" Name="Layered Spectra" ProgramChange="31"/>
+          <Patch Number="32" Name="Novestra" ProgramChange="32"/>
+          <Patch Number="33" Name="Forkin Expensive" ProgramChange="33"/>
+          <Patch Number="34" Name="EP &amp; Strings" ProgramChange="34"/>
+          <Patch Number="35" Name="String+PluckLead" ProgramChange="35"/>
+          <Patch Number="36" Name="Good Ole 80's" ProgramChange="36"/>
+          <Patch Number="37" Name="Filming in Space" ProgramChange="37"/>
+          <Patch Number="38" Name="Attack Velo-Chord" ProgramChange="38"/>
+          <Patch Number="39" Name="Probe" ProgramChange="39"/>
+          <Patch Number="40" Name="3rd Party Pad" ProgramChange="40"/>
+          <Patch Number="41" Name="Two Big Ones" ProgramChange="41"/>
+          <Patch Number="42" Name="Trance Nation" ProgramChange="42"/>
+          <Patch Number="43" Name="Morphwave" ProgramChange="43"/>
+          <Patch Number="44" Name="Synth Section" ProgramChange="44"/>
+          <Patch Number="45" Name="LiquidNarcotic" ProgramChange="45"/>
+          <Patch Number="46" Name="Piano+Pading" ProgramChange="46"/>
+          <Patch Number="47" Name="1 Finger LSO" ProgramChange="47"/>
+          <Patch Number="48" Name="Teci" ProgramChange="48"/>
+          <Patch Number="49" Name="Fantasm" ProgramChange="49"/>
+          <Patch Number="50" Name="Tingly &amp; Drugged" ProgramChange="50"/>
+          <Patch Number="51" Name="Sync's R Us" ProgramChange="51"/>
+          <Patch Number="52" Name="Layered Pianos 2" ProgramChange="52"/>
+          <Patch Number="53" Name="Super Fat" ProgramChange="53"/>
+          <Patch Number="54" Name="Squelchie" ProgramChange="54"/>
+          <Patch Number="55" Name="Heaven OrganPad" ProgramChange="55"/>
+          <Patch Number="56" Name="Super Unisyn" ProgramChange="56"/>
+          <Patch Number="57" Name="Space Pad" ProgramChange="57"/>
+          <Patch Number="58" Name="PiciGater Pad" ProgramChange="58"/>
+          <Patch Number="59" Name="Multimode BPF" ProgramChange="59"/>
+          <Patch Number="60" Name="2 Nasties" ProgramChange="60"/>
+          <Patch Number="61" Name="Lead &amp; H2O" ProgramChange="61"/>
+          <Patch Number="62" Name="Minor Evil" ProgramChange="62"/>
+          <Patch Number="63" Name="Botty &amp; Sparks" ProgramChange="63"/>
+          <Patch Number="64" Name="Juicy Gaff" ProgramChange="64"/>
+          <Patch Number="65" Name="Agro Pad" ProgramChange="65"/>
+          <Patch Number="66" Name="Ambi Bambi" ProgramChange="66"/>
+          <Patch Number="67" Name="Solaris" ProgramChange="67"/>
+          <Patch Number="68" Name="Perci Organ" ProgramChange="68"/>
+          <Patch Number="69" Name="Brass+Lead" ProgramChange="69"/>
+          <Patch Number="70" Name="TooPad" ProgramChange="70"/>
+          <Patch Number="71" Name="Chime On" ProgramChange="71"/>
+          <Patch Number="72" Name="Choccie" ProgramChange="72"/>
+          <Patch Number="73" Name="PaddiWhack" ProgramChange="73"/>
+          <Patch Number="74" Name="OrchStrings" ProgramChange="74"/>
+          <Patch Number="75" Name="Liquid Sweep" ProgramChange="75"/>
+          <Patch Number="76" Name="Classic Combo" ProgramChange="76"/>
+          <Patch Number="77" Name="Multimode BPF" ProgramChange="77"/>
+          <Patch Number="78" Name="Annialator" ProgramChange="78"/>
+          <Patch Number="79" Name="Masterbasse" ProgramChange="79"/>
+          <Patch Number="80" Name="Swept" ProgramChange="80"/>
+          <Patch Number="81" Name="Analogue Bleep!" ProgramChange="81"/>
+          <Patch Number="82" Name="Synced Clavinux" ProgramChange="82"/>
+          <Patch Number="83" Name="Tinkler" ProgramChange="83"/>
+          <Patch Number="84" Name="The Three Arps" ProgramChange="84"/>
+          <Patch Number="85" Name="Synced Twice" ProgramChange="85"/>
+          <Patch Number="86" Name="I Feel Funky" ProgramChange="86"/>
+          <Patch Number="87" Name="A Bunch Obiewan" ProgramChange="87"/>
+          <Patch Number="88" Name="Staccato Square" ProgramChange="88"/>
+          <Patch Number="89" Name="Worry Free" ProgramChange="89"/>
+          <Patch Number="90" Name="Ambient Groover" ProgramChange="90"/>
+          <Patch Number="91" Name="Twin Organ" ProgramChange="91"/>
+          <Patch Number="92" Name="Lead &amp; Pad" ProgramChange="92"/>
+          <Patch Number="93" Name="2ForkinRavers" ProgramChange="93"/>
+          <Patch Number="94" Name="Synth Strings" ProgramChange="94"/>
+          <Patch Number="95" Name="Agro Pad" ProgramChange="95"/>
+          <Patch Number="96" Name="Psy Pad" ProgramChange="96"/>
+          <Patch Number="97" Name="7th Heaven" ProgramChange="97"/>
+          <Patch Number="98" Name="3rd &amp; 7th" ProgramChange="98"/>
+          <Patch Number="99" Name="Perky Synth Pad" ProgramChange="99"/>
+          <Patch Number="100" Name="MooZ At 72ooz" ProgramChange="100"/>
+          <Patch Number="101" Name="Stacatto Saw" ProgramChange="101"/>
+          <Patch Number="102" Name="Blip &amp; Co" ProgramChange="102"/>
+          <Patch Number="103" Name="Trouser Fat" ProgramChange="103"/>
+          <Patch Number="104" Name="Invert Filta Pad" ProgramChange="104"/>
+          <Patch Number="105" Name="Perci Fellow" ProgramChange="105"/>
+          <Patch Number="106" Name="Flutter Pad" ProgramChange="106"/>
+          <Patch Number="107" Name="Liquid Sweep" ProgramChange="107"/>
+          <Patch Number="108" Name="JammyLoop" ProgramChange="108"/>
+          <Patch Number="109" Name="When U Wanna" ProgramChange="109"/>
+          <Patch Number="110" Name="Chimez" ProgramChange="110"/>
+          <Patch Number="111" Name="Layered Sweeps" ProgramChange="111"/>
+          <Patch Number="112" Name="TinCanDiffusion" ProgramChange="112"/>
+          <Patch Number="113" Name="Brass Section 2" ProgramChange="113"/>
+          <Patch Number="114" Name="Endless Arps" ProgramChange="114"/>
+          <Patch Number="115" Name="Atmospherics" ProgramChange="115"/>
+          <Patch Number="116" Name="Super Unisyn 2" ProgramChange="116"/>
+          <Patch Number="117" Name="Twin Organ 2" ProgramChange="117"/>
+          <Patch Number="118" Name="Get off Yer Ass!" ProgramChange="118"/>
+          <Patch Number="119" Name="The Pizzacato 2" ProgramChange="119"/>
+          <Patch Number="120" Name="Padnus" ProgramChange="120"/>
+          <Patch Number="121" Name="Layered Neuro" ProgramChange="121"/>
+          <Patch Number="122" Name="The Strings" ProgramChange="122"/>
+          <Patch Number="123" Name="Init Velo Xfade" ProgramChange="123"/>
+          <Patch Number="124" Name="Init VeloSw V110" ProgramChange="124"/>
+          <Patch Number="125" Name="Init Split at C3" ProgramChange="125"/>
+          <Patch Number="126" Name="Multi Ch 1-8" ProgramChange="126"/>
+          <Patch Number="127" Name="Init Perf" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="PERFORMANCE BANK B">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="2"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Energy Rusher!" ProgramChange="0"/>
+          <Patch Number="1" Name="SQ Law" ProgramChange="1"/>
+          <Patch Number="2" Name="Enormous 5th" ProgramChange="2"/>
+          <Patch Number="3" Name="SuperUtopian" ProgramChange="3"/>
+          <Patch Number="4" Name="Plastic Crackpot" ProgramChange="4"/>
+          <Patch Number="5" Name="FM Rhodes 3PtWfx" ProgramChange="5"/>
+          <Patch Number="6" Name="Can Basher" ProgramChange="6"/>
+          <Patch Number="7" Name="The Dark Horse" ProgramChange="7"/>
+          <Patch Number="8" Name="News &amp; Weather" ProgramChange="8"/>
+          <Patch Number="9" Name="SuperGlider" ProgramChange="9"/>
+          <Patch Number="10" Name="On Your Face" ProgramChange="10"/>
+          <Patch Number="11" Name="SuperMorph Brass" ProgramChange="11"/>
+          <Patch Number="12" Name="Euphorik Trancer" ProgramChange="12"/>
+          <Patch Number="13" Name="Ole Genes" ProgramChange="13"/>
+          <Patch Number="14" Name="Crystal SQ" ProgramChange="14"/>
+          <Patch Number="15" Name="SuperSpectra" ProgramChange="15"/>
+          <Patch Number="16" Name="SuperDutch" ProgramChange="16"/>
+          <Patch Number="17" Name="Super T-chu" ProgramChange="17"/>
+          <Patch Number="18" Name="The Profecy!" ProgramChange="18"/>
+          <Patch Number="19" Name="HyperSpace" ProgramChange="19"/>
+          <Patch Number="20" Name="WavS'tion" ProgramChange="20"/>
+          <Patch Number="21" Name="Supa PolyNova 1" ProgramChange="21"/>
+          <Patch Number="22" Name="Supa Piana" ProgramChange="22"/>
+          <Patch Number="23" Name="SuperObiewan" ProgramChange="23"/>
+          <Patch Number="24" Name="Dub'n'Basic!" ProgramChange="24"/>
+          <Patch Number="25" Name="FM Xylophone" ProgramChange="25"/>
+          <Patch Number="26" Name="Cave Trippy" ProgramChange="26"/>
+          <Patch Number="27" Name="No FX Strings" ProgramChange="27"/>
+          <Patch Number="28" Name="SuperSynthi Harp" ProgramChange="28"/>
+          <Patch Number="29" Name="Super Jubrassic" ProgramChange="29"/>
+          <Patch Number="30" Name="Con-figed Arps" ProgramChange="30"/>
+          <Patch Number="31" Name="SuperGlider 2" ProgramChange="31"/>
+          <Patch Number="32" Name="Evolution" ProgramChange="32"/>
+          <Patch Number="33" Name="SuperLucky" ProgramChange="33"/>
+          <Patch Number="34" Name="Tink" ProgramChange="34"/>
+          <Patch Number="35" Name="SuperPhattie" ProgramChange="35"/>
+          <Patch Number="36" Name="Minor Event" ProgramChange="36"/>
+          <Patch Number="37" Name="Supa D'u Know" ProgramChange="37"/>
+          <Patch Number="38" Name="Transwave" ProgramChange="38"/>
+          <Patch Number="39" Name="Big Bast**D" ProgramChange="39"/>
+          <Patch Number="40" Name="2 Giggers" ProgramChange="40"/>
+          <Patch Number="41" Name="Super Pulse 5th" ProgramChange="41"/>
+          <Patch Number="42" Name="Petz'R'Us" ProgramChange="42"/>
+          <Patch Number="43" Name="Sq Chorrale" ProgramChange="43"/>
+          <Patch Number="44" Name="DX E Organ" ProgramChange="44"/>
+          <Patch Number="45" Name="SuperExtravert" ProgramChange="45"/>
+          <Patch Number="46" Name="SuperPunch Pick" ProgramChange="46"/>
+          <Patch Number="47" Name="SuperBrass" ProgramChange="47"/>
+          <Patch Number="48" Name="Cruiser!" ProgramChange="48"/>
+          <Patch Number="49" Name="Spit Bass" ProgramChange="49"/>
+          <Patch Number="50" Name="Supa PolyNova5" ProgramChange="50"/>
+          <Patch Number="51" Name="SuperStringz" ProgramChange="51"/>
+          <Patch Number="52" Name="SuperPianoPad" ProgramChange="52"/>
+          <Patch Number="53" Name="SuperStrillian" ProgramChange="53"/>
+          <Patch Number="54" Name="Dirty Arps" ProgramChange="54"/>
+          <Patch Number="55" Name="Wet Sintillation" ProgramChange="55"/>
+          <Patch Number="56" Name="Elles Bells" ProgramChange="56"/>
+          <Patch Number="57" Name="SuperBrassik" ProgramChange="57"/>
+          <Patch Number="58" Name="SuperTouchie 1" ProgramChange="58"/>
+          <Patch Number="59" Name="SuperSyn Trumpet" ProgramChange="59"/>
+          <Patch Number="60" Name="Dub'n'Basser!" ProgramChange="60"/>
+          <Patch Number="61" Name="PluckinNoseHair" ProgramChange="61"/>
+          <Patch Number="62" Name="Multi Bleep" ProgramChange="62"/>
+          <Patch Number="63" Name="SuperChoral" ProgramChange="63"/>
+          <Patch Number="64" Name="Pianas Pad" ProgramChange="64"/>
+          <Patch Number="65" Name="SuperObiewan2" ProgramChange="65"/>
+          <Patch Number="66" Name="Syncathetic" ProgramChange="66"/>
+          <Patch Number="67" Name="3 Slappa Bass" ProgramChange="67"/>
+          <Patch Number="68" Name="A Pile of Perf" ProgramChange="68"/>
+          <Patch Number="69" Name="AtmosSpace" ProgramChange="69"/>
+          <Patch Number="70" Name="SuperHard" ProgramChange="70"/>
+          <Patch Number="71" Name="SuperSaturated" ProgramChange="71"/>
+          <Patch Number="72" Name="Slow n' Slippery" ProgramChange="72"/>
+          <Patch Number="73" Name="Picked Gat/Harp" ProgramChange="73"/>
+          <Patch Number="74" Name="Arty Farty" ProgramChange="74"/>
+          <Patch Number="75" Name="Slow Pad" ProgramChange="75"/>
+          <Patch Number="76" Name="NetherUltraPulse" ProgramChange="76"/>
+          <Patch Number="77" Name="SuperNeuro" ProgramChange="77"/>
+          <Patch Number="78" Name="Tranzlator" ProgramChange="78"/>
+          <Patch Number="79" Name="Stereo Hardhouse" ProgramChange="79"/>
+          <Patch Number="80" Name="Sync Knife" ProgramChange="80"/>
+          <Patch Number="81" Name="5th Padie" ProgramChange="81"/>
+          <Patch Number="82" Name="Cimmie Pad" ProgramChange="82"/>
+          <Patch Number="83" Name="Click Organ" ProgramChange="83"/>
+          <Patch Number="84" Name="Crankie Says" ProgramChange="84"/>
+          <Patch Number="85" Name="Supa Sync Bass" ProgramChange="85"/>
+          <Patch Number="86" Name="Plucky Tchu" ProgramChange="86"/>
+          <Patch Number="87" Name="Comp 1" ProgramChange="87"/>
+          <Patch Number="88" Name="BuzzyBrass" ProgramChange="88"/>
+          <Patch Number="89" Name="SlightlyDirtyOrg" ProgramChange="89"/>
+          <Patch Number="90" Name="Glided Arps" ProgramChange="90"/>
+          <Patch Number="91" Name="Supa Sync Lead" ProgramChange="91"/>
+          <Patch Number="92" Name="Phatt&amp;Wiffy" ProgramChange="92"/>
+          <Patch Number="93" Name="SuperHealth Haz" ProgramChange="93"/>
+          <Patch Number="94" Name="Master Psy" ProgramChange="94"/>
+          <Patch Number="95" Name="Synk Hit" ProgramChange="95"/>
+          <Patch Number="96" Name="Bouncy Castle" ProgramChange="96"/>
+          <Patch Number="97" Name="SuperEclipse" ProgramChange="97"/>
+          <Patch Number="98" Name="Don't Be Pickie" ProgramChange="98"/>
+          <Patch Number="99" Name="SuperBrillo" ProgramChange="99"/>
+          <Patch Number="100" Name="Strangely" ProgramChange="100"/>
+          <Patch Number="101" Name="SuperSimple Sync" ProgramChange="101"/>
+          <Patch Number="102" Name="Hard'n'Fast" ProgramChange="102"/>
+          <Patch Number="103" Name="SuperSyncaption" ProgramChange="103"/>
+          <Patch Number="104" Name="Elect Guitar" ProgramChange="104"/>
+          <Patch Number="105" Name="Mellow Man" ProgramChange="105"/>
+          <Patch Number="106" Name="Percy" ProgramChange="106"/>
+          <Patch Number="107" Name="Super Attacka" ProgramChange="107"/>
+          <Patch Number="108" Name="Towel Fetish" ProgramChange="108"/>
+          <Patch Number="109" Name="SuperNics" ProgramChange="109"/>
+          <Patch Number="110" Name="Metaloid" ProgramChange="110"/>
+          <Patch Number="111" Name="SuperSync Pad" ProgramChange="111"/>
+          <Patch Number="112" Name="SuperRickety Syn" ProgramChange="112"/>
+          <Patch Number="113" Name="SuperSyncer" ProgramChange="113"/>
+          <Patch Number="114" Name="Trippy 9/8" ProgramChange="114"/>
+          <Patch Number="115" Name="SuperTouchie 2" ProgramChange="115"/>
+          <Patch Number="116" Name="SuperWesterly" ProgramChange="116"/>
+          <Patch Number="117" Name="SuperBarker" ProgramChange="117"/>
+          <Patch Number="118" Name="SuperSlapper" ProgramChange="118"/>
+          <Patch Number="119" Name="Irradiated Blast" ProgramChange="119"/>
+          <Patch Number="120" Name="Init Perf PartFX" ProgramChange="120"/>
+          <Patch Number="121" Name="MultCh1-8 Part FX" ProgramChange="121"/>
+          <Patch Number="122" Name="MultCh9-16 Part FX" ProgramChange="122"/>
+          <Patch Number="123" Name="InitNorm/InvVelo" ProgramChange="123"/>
+          <Patch Number="124" Name="Init VeloSw V100" ProgramChange="124"/>
+          <Patch Number="125" Name="Init Split at C2" ProgramChange="125"/>
+          <Patch Number="126" Name="Multi Ch 9-16" ProgramChange="126"/>
+          <Patch Number="127" Name="Demo" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="USER PERFORMANCE BANK C">
+        <MIDICommands>
+          <ControlChange Control="0" Value="33"/>
+          <ControlChange Control="32" Value="3"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Init Program" ProgramChange="0"/>
+          <Patch Number="1" Name="Init Program" ProgramChange="1"/>
+          <Patch Number="2" Name="Init Program" ProgramChange="2"/>
+          <Patch Number="3" Name="Init Program" ProgramChange="3"/>
+          <Patch Number="4" Name="Init Program" ProgramChange="4"/>
+          <Patch Number="5" Name="Init Program" ProgramChange="5"/>
+          <Patch Number="6" Name="Init Program" ProgramChange="6"/>
+          <Patch Number="7" Name="Init Program" ProgramChange="7"/>
+          <Patch Number="8" Name="Init Program" ProgramChange="8"/>
+          <Patch Number="9" Name="Init Program" ProgramChange="9"/>
+          <Patch Number="10" Name="Init Program" ProgramChange="10"/>
+          <Patch Number="11" Name="Init Program" ProgramChange="11"/>
+          <Patch Number="12" Name="Init Program" ProgramChange="12"/>
+          <Patch Number="13" Name="Init Program" ProgramChange="13"/>
+          <Patch Number="14" Name="Init Program" ProgramChange="14"/>
+          <Patch Number="15" Name="Init Program" ProgramChange="15"/>
+          <Patch Number="16" Name="Init Program" ProgramChange="16"/>
+          <Patch Number="17" Name="Init Program" ProgramChange="17"/>
+          <Patch Number="18" Name="Init Program" ProgramChange="18"/>
+          <Patch Number="19" Name="Init Program" ProgramChange="19"/>
+          <Patch Number="20" Name="Init Program" ProgramChange="20"/>
+          <Patch Number="21" Name="Init Program" ProgramChange="21"/>
+          <Patch Number="22" Name="Init Program" ProgramChange="22"/>
+          <Patch Number="23" Name="Init Program" ProgramChange="23"/>
+          <Patch Number="24" Name="Init Program" ProgramChange="24"/>
+          <Patch Number="25" Name="Init Program" ProgramChange="25"/>
+          <Patch Number="26" Name="Init Program" ProgramChange="26"/>
+          <Patch Number="27" Name="Init Program" ProgramChange="27"/>
+          <Patch Number="28" Name="Init Program" ProgramChange="28"/>
+          <Patch Number="29" Name="Init Program" ProgramChange="29"/>
+          <Patch Number="30" Name="Init Program" ProgramChange="30"/>
+          <Patch Number="31" Name="Init Program" ProgramChange="31"/>
+          <Patch Number="32" Name="Init Program" ProgramChange="32"/>
+          <Patch Number="33" Name="Init Program" ProgramChange="33"/>
+          <Patch Number="34" Name="Init Program" ProgramChange="34"/>
+          <Patch Number="35" Name="Init Program" ProgramChange="35"/>
+          <Patch Number="36" Name="Init Program" ProgramChange="36"/>
+          <Patch Number="37" Name="Init Program" ProgramChange="37"/>
+          <Patch Number="38" Name="Init Program" ProgramChange="38"/>
+          <Patch Number="39" Name="Init Program" ProgramChange="39"/>
+          <Patch Number="40" Name="Init Program" ProgramChange="40"/>
+          <Patch Number="41" Name="Init Program" ProgramChange="41"/>
+          <Patch Number="42" Name="Init Program" ProgramChange="42"/>
+          <Patch Number="43" Name="Init Program" ProgramChange="43"/>
+          <Patch Number="44" Name="Init Program" ProgramChange="44"/>
+          <Patch Number="45" Name="Init Program" ProgramChange="45"/>
+          <Patch Number="46" Name="Init Program" ProgramChange="46"/>
+          <Patch Number="47" Name="Init Program" ProgramChange="47"/>
+          <Patch Number="48" Name="Init Program" ProgramChange="48"/>
+          <Patch Number="49" Name="Init Program" ProgramChange="49"/>
+          <Patch Number="50" Name="Init Program" ProgramChange="50"/>
+          <Patch Number="51" Name="Init Program" ProgramChange="51"/>
+          <Patch Number="52" Name="Init Program" ProgramChange="52"/>
+          <Patch Number="53" Name="Init Program" ProgramChange="53"/>
+          <Patch Number="54" Name="Init Program" ProgramChange="54"/>
+          <Patch Number="55" Name="Init Program" ProgramChange="55"/>
+          <Patch Number="56" Name="Init Program" ProgramChange="56"/>
+          <Patch Number="57" Name="Init Program" ProgramChange="57"/>
+          <Patch Number="58" Name="Init Program" ProgramChange="58"/>
+          <Patch Number="59" Name="Init Program" ProgramChange="59"/>
+          <Patch Number="60" Name="Init Program" ProgramChange="60"/>
+          <Patch Number="61" Name="Init Program" ProgramChange="61"/>
+          <Patch Number="62" Name="Init Program" ProgramChange="62"/>
+          <Patch Number="63" Name="Init Program" ProgramChange="63"/>
+          <Patch Number="64" Name="Init Program" ProgramChange="64"/>
+          <Patch Number="65" Name="Init Program" ProgramChange="65"/>
+          <Patch Number="66" Name="Init Program" ProgramChange="66"/>
+          <Patch Number="67" Name="Init Program" ProgramChange="67"/>
+          <Patch Number="68" Name="Init Program" ProgramChange="68"/>
+          <Patch Number="69" Name="Init Program" ProgramChange="69"/>
+          <Patch Number="70" Name="Init Program" ProgramChange="70"/>
+          <Patch Number="71" Name="Init Program" ProgramChange="71"/>
+          <Patch Number="72" Name="Init Program" ProgramChange="72"/>
+          <Patch Number="73" Name="Init Program" ProgramChange="73"/>
+          <Patch Number="74" Name="Init Program" ProgramChange="74"/>
+          <Patch Number="75" Name="Init Program" ProgramChange="75"/>
+          <Patch Number="76" Name="Init Program" ProgramChange="76"/>
+          <Patch Number="77" Name="Init Program" ProgramChange="77"/>
+          <Patch Number="78" Name="Init Program" ProgramChange="78"/>
+          <Patch Number="79" Name="Init Program" ProgramChange="79"/>
+          <Patch Number="80" Name="Init Program" ProgramChange="80"/>
+          <Patch Number="81" Name="Init Program" ProgramChange="81"/>
+          <Patch Number="82" Name="Init Program" ProgramChange="82"/>
+          <Patch Number="83" Name="Init Program" ProgramChange="83"/>
+          <Patch Number="84" Name="Init Program" ProgramChange="84"/>
+          <Patch Number="85" Name="Init Program" ProgramChange="85"/>
+          <Patch Number="86" Name="Init Program" ProgramChange="86"/>
+          <Patch Number="87" Name="Init Program" ProgramChange="87"/>
+          <Patch Number="88" Name="Init Program" ProgramChange="88"/>
+          <Patch Number="89" Name="Init Program" ProgramChange="89"/>
+          <Patch Number="90" Name="Init Program" ProgramChange="90"/>
+          <Patch Number="91" Name="Init Program" ProgramChange="91"/>
+          <Patch Number="92" Name="Init Program" ProgramChange="92"/>
+          <Patch Number="93" Name="Init Program" ProgramChange="93"/>
+          <Patch Number="94" Name="Init Program" ProgramChange="94"/>
+          <Patch Number="95" Name="Init Program" ProgramChange="95"/>
+          <Patch Number="96" Name="Init Program" ProgramChange="96"/>
+          <Patch Number="97" Name="Init Program" ProgramChange="97"/>
+          <Patch Number="98" Name="Init Program" ProgramChange="98"/>
+          <Patch Number="99" Name="Init Program" ProgramChange="99"/>
+          <Patch Number="100" Name="Init Program" ProgramChange="100"/>
+          <Patch Number="101" Name="Init Program" ProgramChange="101"/>
+          <Patch Number="102" Name="Init Program" ProgramChange="102"/>
+          <Patch Number="103" Name="Init Program" ProgramChange="103"/>
+          <Patch Number="104" Name="Init Program" ProgramChange="104"/>
+          <Patch Number="105" Name="Init Program" ProgramChange="105"/>
+          <Patch Number="106" Name="Init Program" ProgramChange="106"/>
+          <Patch Number="107" Name="Init Program" ProgramChange="107"/>
+          <Patch Number="108" Name="Init Program" ProgramChange="108"/>
+          <Patch Number="109" Name="Init Program" ProgramChange="109"/>
+          <Patch Number="110" Name="Init Program" ProgramChange="110"/>
+          <Patch Number="111" Name="Init Program" ProgramChange="111"/>
+          <Patch Number="112" Name="Init Program" ProgramChange="112"/>
+          <Patch Number="113" Name="Init Program" ProgramChange="113"/>
+          <Patch Number="114" Name="Init Program" ProgramChange="114"/>
+          <Patch Number="115" Name="Init Program" ProgramChange="115"/>
+          <Patch Number="116" Name="Init Program" ProgramChange="116"/>
+          <Patch Number="117" Name="Init Program" ProgramChange="117"/>
+          <Patch Number="118" Name="Init Program" ProgramChange="118"/>
+          <Patch Number="119" Name="Init Program" ProgramChange="119"/>
+          <Patch Number="120" Name="Init Program" ProgramChange="120"/>
+          <Patch Number="121" Name="Init Program" ProgramChange="121"/>
+          <Patch Number="122" Name="Init Program" ProgramChange="122"/>
+          <Patch Number="123" Name="Init Program" ProgramChange="123"/>
+          <Patch Number="124" Name="Init Program" ProgramChange="124"/>
+          <Patch Number="125" Name="Init Program" ProgramChange="125"/>
+          <Patch Number="126" Name="Init Program" ProgramChange="126"/>
+          <Patch Number="127" Name="Init Program" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="USER PERFORMANCE BANK D">
+        <MIDICommands>
+          <ControlChange Control="0" Value="33"/>
+          <ControlChange Control="32" Value="4"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Init Program" ProgramChange="0"/>
+          <Patch Number="1" Name="Init Program" ProgramChange="1"/>
+          <Patch Number="2" Name="Init Program" ProgramChange="2"/>
+          <Patch Number="3" Name="Init Program" ProgramChange="3"/>
+          <Patch Number="4" Name="Init Program" ProgramChange="4"/>
+          <Patch Number="5" Name="Init Program" ProgramChange="5"/>
+          <Patch Number="6" Name="Init Program" ProgramChange="6"/>
+          <Patch Number="7" Name="Init Program" ProgramChange="7"/>
+          <Patch Number="8" Name="Init Program" ProgramChange="8"/>
+          <Patch Number="9" Name="Init Program" ProgramChange="9"/>
+          <Patch Number="10" Name="Init Program" ProgramChange="10"/>
+          <Patch Number="11" Name="Init Program" ProgramChange="11"/>
+          <Patch Number="12" Name="Init Program" ProgramChange="12"/>
+          <Patch Number="13" Name="Init Program" ProgramChange="13"/>
+          <Patch Number="14" Name="Init Program" ProgramChange="14"/>
+          <Patch Number="15" Name="Init Program" ProgramChange="15"/>
+          <Patch Number="16" Name="Init Program" ProgramChange="16"/>
+          <Patch Number="17" Name="Init Program" ProgramChange="17"/>
+          <Patch Number="18" Name="Init Program" ProgramChange="18"/>
+          <Patch Number="19" Name="Init Program" ProgramChange="19"/>
+          <Patch Number="20" Name="Init Program" ProgramChange="20"/>
+          <Patch Number="21" Name="Init Program" ProgramChange="21"/>
+          <Patch Number="22" Name="Init Program" ProgramChange="22"/>
+          <Patch Number="23" Name="Init Program" ProgramChange="23"/>
+          <Patch Number="24" Name="Init Program" ProgramChange="24"/>
+          <Patch Number="25" Name="Init Program" ProgramChange="25"/>
+          <Patch Number="26" Name="Init Program" ProgramChange="26"/>
+          <Patch Number="27" Name="Init Program" ProgramChange="27"/>
+          <Patch Number="28" Name="Init Program" ProgramChange="28"/>
+          <Patch Number="29" Name="Init Program" ProgramChange="29"/>
+          <Patch Number="30" Name="Init Program" ProgramChange="30"/>
+          <Patch Number="31" Name="Init Program" ProgramChange="31"/>
+          <Patch Number="32" Name="Init Program" ProgramChange="32"/>
+          <Patch Number="33" Name="Init Program" ProgramChange="33"/>
+          <Patch Number="34" Name="Init Program" ProgramChange="34"/>
+          <Patch Number="35" Name="Init Program" ProgramChange="35"/>
+          <Patch Number="36" Name="Init Program" ProgramChange="36"/>
+          <Patch Number="37" Name="Init Program" ProgramChange="37"/>
+          <Patch Number="38" Name="Init Program" ProgramChange="38"/>
+          <Patch Number="39" Name="Init Program" ProgramChange="39"/>
+          <Patch Number="40" Name="Init Program" ProgramChange="40"/>
+          <Patch Number="41" Name="Init Program" ProgramChange="41"/>
+          <Patch Number="42" Name="Init Program" ProgramChange="42"/>
+          <Patch Number="43" Name="Init Program" ProgramChange="43"/>
+          <Patch Number="44" Name="Init Program" ProgramChange="44"/>
+          <Patch Number="45" Name="Init Program" ProgramChange="45"/>
+          <Patch Number="46" Name="Init Program" ProgramChange="46"/>
+          <Patch Number="47" Name="Init Program" ProgramChange="47"/>
+          <Patch Number="48" Name="Init Program" ProgramChange="48"/>
+          <Patch Number="49" Name="Init Program" ProgramChange="49"/>
+          <Patch Number="50" Name="Init Program" ProgramChange="50"/>
+          <Patch Number="51" Name="Init Program" ProgramChange="51"/>
+          <Patch Number="52" Name="Init Program" ProgramChange="52"/>
+          <Patch Number="53" Name="Init Program" ProgramChange="53"/>
+          <Patch Number="54" Name="Init Program" ProgramChange="54"/>
+          <Patch Number="55" Name="Init Program" ProgramChange="55"/>
+          <Patch Number="56" Name="Init Program" ProgramChange="56"/>
+          <Patch Number="57" Name="Init Program" ProgramChange="57"/>
+          <Patch Number="58" Name="Init Program" ProgramChange="58"/>
+          <Patch Number="59" Name="Init Program" ProgramChange="59"/>
+          <Patch Number="60" Name="Init Program" ProgramChange="60"/>
+          <Patch Number="61" Name="Init Program" ProgramChange="61"/>
+          <Patch Number="62" Name="Init Program" ProgramChange="62"/>
+          <Patch Number="63" Name="Init Program" ProgramChange="63"/>
+          <Patch Number="64" Name="Init Program" ProgramChange="64"/>
+          <Patch Number="65" Name="Init Program" ProgramChange="65"/>
+          <Patch Number="66" Name="Init Program" ProgramChange="66"/>
+          <Patch Number="67" Name="Init Program" ProgramChange="67"/>
+          <Patch Number="68" Name="Init Program" ProgramChange="68"/>
+          <Patch Number="69" Name="Init Program" ProgramChange="69"/>
+          <Patch Number="70" Name="Init Program" ProgramChange="70"/>
+          <Patch Number="71" Name="Init Program" ProgramChange="71"/>
+          <Patch Number="72" Name="Init Program" ProgramChange="72"/>
+          <Patch Number="73" Name="Init Program" ProgramChange="73"/>
+          <Patch Number="74" Name="Init Program" ProgramChange="74"/>
+          <Patch Number="75" Name="Init Program" ProgramChange="75"/>
+          <Patch Number="76" Name="Init Program" ProgramChange="76"/>
+          <Patch Number="77" Name="Init Program" ProgramChange="77"/>
+          <Patch Number="78" Name="Init Program" ProgramChange="78"/>
+          <Patch Number="79" Name="Init Program" ProgramChange="79"/>
+          <Patch Number="80" Name="Init Program" ProgramChange="80"/>
+          <Patch Number="81" Name="Init Program" ProgramChange="81"/>
+          <Patch Number="82" Name="Init Program" ProgramChange="82"/>
+          <Patch Number="83" Name="Init Program" ProgramChange="83"/>
+          <Patch Number="84" Name="Init Program" ProgramChange="84"/>
+          <Patch Number="85" Name="Init Program" ProgramChange="85"/>
+          <Patch Number="86" Name="Init Program" ProgramChange="86"/>
+          <Patch Number="87" Name="Init Program" ProgramChange="87"/>
+          <Patch Number="88" Name="Init Program" ProgramChange="88"/>
+          <Patch Number="89" Name="Init Program" ProgramChange="89"/>
+          <Patch Number="90" Name="Init Program" ProgramChange="90"/>
+          <Patch Number="91" Name="Init Program" ProgramChange="91"/>
+          <Patch Number="92" Name="Init Program" ProgramChange="92"/>
+          <Patch Number="93" Name="Init Program" ProgramChange="93"/>
+          <Patch Number="94" Name="Init Program" ProgramChange="94"/>
+          <Patch Number="95" Name="Init Program" ProgramChange="95"/>
+          <Patch Number="96" Name="Init Program" ProgramChange="96"/>
+          <Patch Number="97" Name="Init Program" ProgramChange="97"/>
+          <Patch Number="98" Name="Init Program" ProgramChange="98"/>
+          <Patch Number="99" Name="Init Program" ProgramChange="99"/>
+          <Patch Number="100" Name="Init Program" ProgramChange="100"/>
+          <Patch Number="101" Name="Init Program" ProgramChange="101"/>
+          <Patch Number="102" Name="Init Program" ProgramChange="102"/>
+          <Patch Number="103" Name="Init Program" ProgramChange="103"/>
+          <Patch Number="104" Name="Init Program" ProgramChange="104"/>
+          <Patch Number="105" Name="Init Program" ProgramChange="105"/>
+          <Patch Number="106" Name="Init Program" ProgramChange="106"/>
+          <Patch Number="107" Name="Init Program" ProgramChange="107"/>
+          <Patch Number="108" Name="Init Program" ProgramChange="108"/>
+          <Patch Number="109" Name="Init Program" ProgramChange="109"/>
+          <Patch Number="110" Name="Init Program" ProgramChange="110"/>
+          <Patch Number="111" Name="Init Program" ProgramChange="111"/>
+          <Patch Number="112" Name="Init Program" ProgramChange="112"/>
+          <Patch Number="113" Name="Init Program" ProgramChange="113"/>
+          <Patch Number="114" Name="Init Program" ProgramChange="114"/>
+          <Patch Number="115" Name="Init Program" ProgramChange="115"/>
+          <Patch Number="116" Name="Init Program" ProgramChange="116"/>
+          <Patch Number="117" Name="Init Program" ProgramChange="117"/>
+          <Patch Number="118" Name="Init Program" ProgramChange="118"/>
+          <Patch Number="119" Name="Init Program" ProgramChange="119"/>
+          <Patch Number="120" Name="Init Program" ProgramChange="120"/>
+          <Patch Number="121" Name="Init Program" ProgramChange="121"/>
+          <Patch Number="122" Name="Init Program" ProgramChange="122"/>
+          <Patch Number="123" Name="Init Program" ProgramChange="123"/>
+          <Patch Number="124" Name="Init Program" ProgramChange="124"/>
+          <Patch Number="125" Name="Init Program" ProgramChange="125"/>
+          <Patch Number="126" Name="Init Program" ProgramChange="126"/>
+          <Patch Number="127" Name="Init Program" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="PROGRAM BANK A">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="5"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Sintillator M-Wh" ProgramChange="0"/>
+          <Patch Number="1" Name="Skewed Arp 2" ProgramChange="1"/>
+          <Patch Number="2" Name="Softena Bass M-Wh" ProgramChange="2"/>
+          <Patch Number="3" Name="Velo 303" ProgramChange="3"/>
+          <Patch Number="4" Name="Velocity Mutes" ProgramChange="4"/>
+          <Patch Number="5" Name="Its Not Ok" ProgramChange="5"/>
+          <Patch Number="6" Name="Garage Kick" ProgramChange="6"/>
+          <Patch Number="7" Name="FM EP" ProgramChange="7"/>
+          <Patch Number="8" Name="T-chu Wave" ProgramChange="8"/>
+          <Patch Number="9" Name="Ravin On" ProgramChange="9"/>
+          <Patch Number="10" Name="Velo 303 Dist" ProgramChange="10"/>
+          <Patch Number="11" Name="SyncHeathHazard" ProgramChange="11"/>
+          <Patch Number="12" Name="Stringz 2" ProgramChange="12"/>
+          <Patch Number="13" Name="Garage Open" ProgramChange="13"/>
+          <Patch Number="14" Name="Synthi Harp M-Wh" ProgramChange="14"/>
+          <Patch Number="15" Name="Square Basics" ProgramChange="15"/>
+          <Patch Number="16" Name="Synus M-Wh" ProgramChange="16"/>
+          <Patch Number="17" Name="PunchiPick M-Wh" ProgramChange="17"/>
+          <Patch Number="18" Name="Sparkx" ProgramChange="18"/>
+          <Patch Number="19" Name="Morph Bras M-Wh" ProgramChange="19"/>
+          <Patch Number="20" Name="Flathead Bass" ProgramChange="20"/>
+          <Patch Number="21" Name="U-no Polysynth 1" ProgramChange="21"/>
+          <Patch Number="22" Name="MW BPF" ProgramChange="22"/>
+          <Patch Number="23" Name="Perc Organ Bass 1" ProgramChange="23"/>
+          <Patch Number="24" Name="FM Pickeld on.." ProgramChange="24"/>
+          <Patch Number="25" Name="Slynkie Slide" ProgramChange="25"/>
+          <Patch Number="26" Name="Full Organ" ProgramChange="26"/>
+          <Patch Number="27" Name="Vorsprung..M-Wh" ProgramChange="27"/>
+          <Patch Number="28" Name="808 Snare 2" ProgramChange="28"/>
+          <Patch Number="29" Name="Pad 4 Landing" ProgramChange="29"/>
+          <Patch Number="30" Name="DigiTrouserCough" ProgramChange="30"/>
+          <Patch Number="31" Name="Anafuzzy Logik" ProgramChange="31"/>
+          <Patch Number="32" Name="Spectra Pad" ProgramChange="32"/>
+          <Patch Number="33" Name="Vindalo Noise" ProgramChange="33"/>
+          <Patch Number="34" Name="Slap Bass 1" ProgramChange="34"/>
+          <Patch Number="35" Name="Techno crat" ProgramChange="35"/>
+          <Patch Number="36" Name="Obie Paddiviv" ProgramChange="36"/>
+          <Patch Number="37" Name="Deadly Sync M-Wh" ProgramChange="37"/>
+          <Patch Number="38" Name="Echoed Maj 3rd" ProgramChange="38"/>
+          <Patch Number="39" Name="Naked" ProgramChange="39"/>
+          <Patch Number="40" Name="U-no Bass 1" ProgramChange="40"/>
+          <Patch Number="41" Name="EP" ProgramChange="41"/>
+          <Patch Number="42" Name="Ambient Line" ProgramChange="42"/>
+          <Patch Number="43" Name="RainPicks" ProgramChange="43"/>
+          <Patch Number="44" Name="No Moralies M-Wh" ProgramChange="44"/>
+          <Patch Number="45" Name="Highly Strung 2" ProgramChange="45"/>
+          <Patch Number="46" Name="Westerly Lead" ProgramChange="46"/>
+          <Patch Number="47" Name="Filth 5th" ProgramChange="47"/>
+          <Patch Number="48" Name="Clock Clang" ProgramChange="48"/>
+          <Patch Number="49" Name="Skwusha 2 M-Wh" ProgramChange="49"/>
+          <Patch Number="50" Name="Jungle Sine" ProgramChange="50"/>
+          <Patch Number="51" Name="303 Groover 1 M-Wh" ProgramChange="51"/>
+          <Patch Number="52" Name="Distillia" ProgramChange="52"/>
+          <Patch Number="53" Name="Sonar (C3) M-Wh" ProgramChange="53"/>
+          <Patch Number="54" Name="TeaSub Bass" ProgramChange="54"/>
+          <Patch Number="55" Name="Bright EP" ProgramChange="55"/>
+          <Patch Number="56" Name="Brass" ProgramChange="56"/>
+          <Patch Number="57" Name="Eleventh Hour Pad" ProgramChange="57"/>
+          <Patch Number="58" Name="SuperStrings 1" ProgramChange="58"/>
+          <Patch Number="59" Name="FM Strat Program" ProgramChange="59"/>
+          <Patch Number="60" Name="All the Rave" ProgramChange="60"/>
+          <Patch Number="61" Name="Voxi Organ M-Wh" ProgramChange="61"/>
+          <Patch Number="62" Name="Velochord" ProgramChange="62"/>
+          <Patch Number="63" Name="Cheesy Spice" ProgramChange="63"/>
+          <Patch Number="64" Name="PulseBass" ProgramChange="64"/>
+          <Patch Number="65" Name="Synth Scratch" ProgramChange="65"/>
+          <Patch Number="66" Name="Staccato Filter" ProgramChange="66"/>
+          <Patch Number="67" Name="Vienna Bender" ProgramChange="67"/>
+          <Patch Number="68" Name="Piki" ProgramChange="68"/>
+          <Patch Number="69" Name="Rez Square M-Wh" ProgramChange="69"/>
+          <Patch Number="70" Name="DetuneBass M-Wh" ProgramChange="70"/>
+          <Patch Number="71" Name="Randevous 2 harp" ProgramChange="71"/>
+          <Patch Number="72" Name="DX Bass 1" ProgramChange="72"/>
+          <Patch Number="73" Name="Arpy 30Dist" ProgramChange="73"/>
+          <Patch Number="74" Name="Hard Bass" ProgramChange="74"/>
+          <Patch Number="75" Name="Prelude" ProgramChange="75"/>
+          <Patch Number="76" Name="Arp Fingers" ProgramChange="76"/>
+          <Patch Number="77" Name="Sweep 12 dB" ProgramChange="77"/>
+          <Patch Number="78" Name="Strillan M-Wh" ProgramChange="78"/>
+          <Patch Number="79" Name="Waterphones" ProgramChange="79"/>
+          <Patch Number="80" Name="Pulse Clav M-Wh" ProgramChange="80"/>
+          <Patch Number="81" Name="Velo Sync M-Wh" ProgramChange="81"/>
+          <Patch Number="82" Name="Burbler" ProgramChange="82"/>
+          <Patch Number="83" Name="InVinceable M-Wh" ProgramChange="83"/>
+          <Patch Number="84" Name="2 Osc Pad" ProgramChange="84"/>
+          <Patch Number="85" Name="Down Osc" ProgramChange="85"/>
+          <Patch Number="86" Name="Ana Organ" ProgramChange="86"/>
+          <Patch Number="87" Name="Sinker M-Wh" ProgramChange="87"/>
+          <Patch Number="88" Name="No FM Huh?" ProgramChange="88"/>
+          <Patch Number="89" Name="909 Clap" ProgramChange="89"/>
+          <Patch Number="90" Name="Perckie Saw M-Wh" ProgramChange="90"/>
+          <Patch Number="91" Name="Coke Filter M-Wh" ProgramChange="91"/>
+          <Patch Number="92" Name="Sup Jup Horn M-Wh" ProgramChange="92"/>
+          <Patch Number="93" Name="Clockworks M-Wh" ProgramChange="93"/>
+          <Patch Number="94" Name="Comatose" ProgramChange="94"/>
+          <Patch Number="95" Name="Open High Hat 1" ProgramChange="95"/>
+          <Patch Number="96" Name="Your Pad or Mine" ProgramChange="96"/>
+          <Patch Number="97" Name="Xtal Drop" ProgramChange="97"/>
+          <Patch Number="98" Name="S-ash Tray M-Wh" ProgramChange="98"/>
+          <Patch Number="99" Name="Uplifting M-Wh" ProgramChange="99"/>
+          <Patch Number="100" Name="Subbass M-Wh" ProgramChange="100"/>
+          <Patch Number="101" Name="Clix Organ M-Wh" ProgramChange="101"/>
+          <Patch Number="102" Name="Swidge M-Wheel" ProgramChange="102"/>
+          <Patch Number="103" Name="Delicate Arp" ProgramChange="103"/>
+          <Patch Number="104" Name="Syncapation" ProgramChange="104"/>
+          <Patch Number="105" Name="Closed High Hat 1" ProgramChange="105"/>
+          <Patch Number="106" Name="Flange Pad" ProgramChange="106"/>
+          <Patch Number="107" Name="X mod Bass" ProgramChange="107"/>
+          <Patch Number="108" Name="Collision M-Wh" ProgramChange="108"/>
+          <Patch Number="109" Name="Obie Jumpin" ProgramChange="109"/>
+          <Patch Number="110" Name="Novebella" ProgramChange="110"/>
+          <Patch Number="111" Name="Pianola M-Wh" ProgramChange="111"/>
+          <Patch Number="112" Name="E- Dreamsynk" ProgramChange="112"/>
+          <Patch Number="113" Name="Poms Bass 3" ProgramChange="113"/>
+          <Patch Number="114" Name="Just Can't Get it" ProgramChange="114"/>
+          <Patch Number="115" Name="Bubble Arp" ProgramChange="115"/>
+          <Patch Number="116" Name="Velo Trance" ProgramChange="116"/>
+          <Patch Number="117" Name="Virtual Panpipe" ProgramChange="117"/>
+          <Patch Number="118" Name="Glider 2 Pad M-Wh" ProgramChange="118"/>
+          <Patch Number="119" Name="Hard Nosed" ProgramChange="119"/>
+          <Patch Number="120" Name="Nadia M-Wh" ProgramChange="120"/>
+          <Patch Number="121" Name="Piano Pad M-Wh" ProgramChange="121"/>
+          <Patch Number="122" Name="Raver Pad M-Wh" ProgramChange="122"/>
+          <Patch Number="123" Name="Roundhouse Bass" ProgramChange="123"/>
+          <Patch Number="124" Name="Pick n' Mix" ProgramChange="124"/>
+          <Patch Number="125" Name="Rain Piz" ProgramChange="125"/>
+          <Patch Number="126" Name="Mechatron Arp" ProgramChange="126"/>
+          <Patch Number="127" Name="Poms Bass 2" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="PROGRAM BANK B">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="6"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Filtered H2O" ProgramChange="0"/>
+          <Patch Number="1" Name="SuperBassSt'n 19" ProgramChange="1"/>
+          <Patch Number="2" Name="Width Bass M-Wh" ProgramChange="2"/>
+          <Patch Number="3" Name="Wheel 303" ProgramChange="3"/>
+          <Patch Number="4" Name="Lonely Olive" ProgramChange="4"/>
+          <Patch Number="5" Name="Z-Plane VeloPick" ProgramChange="5"/>
+          <Patch Number="6" Name="Harder Kick M-Wh" ProgramChange="6"/>
+          <Patch Number="7" Name="Giggin EP" ProgramChange="7"/>
+          <Patch Number="8" Name="U-no Brass" ProgramChange="8"/>
+          <Patch Number="9" Name="Screaming River" ProgramChange="9"/>
+          <Patch Number="10" Name="DistortOrgan M-Wh" ProgramChange="10"/>
+          <Patch Number="11" Name="Bigger 1" ProgramChange="11"/>
+          <Patch Number="12" Name="Polysikz Strings" ProgramChange="12"/>
+          <Patch Number="13" Name="Chime Pad" ProgramChange="13"/>
+          <Patch Number="14" Name="Lead Gat" ProgramChange="14"/>
+          <Patch Number="15" Name="HolidayLeadBass" ProgramChange="15"/>
+          <Patch Number="16" Name="Sine-us" ProgramChange="16"/>
+          <Patch Number="17" Name="Bottle End" ProgramChange="17"/>
+          <Patch Number="18" Name="StacattoString" ProgramChange="18"/>
+          <Patch Number="19" Name="Obie Brass" ProgramChange="19"/>
+          <Patch Number="20" Name="Flatter Head M-Wh" ProgramChange="20"/>
+          <Patch Number="21" Name="Synthi Trumpet" ProgramChange="21"/>
+          <Patch Number="22" Name="Squeege M-Wh" ProgramChange="22"/>
+          <Patch Number="23" Name="Organ Perc Bass2" ProgramChange="23"/>
+          <Patch Number="24" Name="Don't Pick" ProgramChange="24"/>
+          <Patch Number="25" Name="Stab" ProgramChange="25"/>
+          <Patch Number="26" Name="Fuller organ M-Wh" ProgramChange="26"/>
+          <Patch Number="27" Name="Hartkern M-Wh" ProgramChange="27"/>
+          <Patch Number="28" Name="808 Snare 1" ProgramChange="28"/>
+          <Patch Number="29" Name="Devolution M-Wh" ProgramChange="29"/>
+          <Patch Number="30" Name="Modebas M-Wh" ProgramChange="30"/>
+          <Patch Number="31" Name="Syn Section M-Wh" ProgramChange="31"/>
+          <Patch Number="32" Name="Spectrux Pad M-Wh" ProgramChange="32"/>
+          <Patch Number="33" Name="Filter Sweep KHz" ProgramChange="33"/>
+          <Patch Number="34" Name="SlapBass2" ProgramChange="34"/>
+          <Patch Number="35" Name="Hard House" ProgramChange="35"/>
+          <Patch Number="36" Name="Choral Pad M-Wh" ProgramChange="36"/>
+          <Patch Number="37" Name="Messy Sync M-Wh" ProgramChange="37"/>
+          <Patch Number="38" Name="Old n Rickety" ProgramChange="38"/>
+          <Patch Number="39" Name="Dist FM Sync Pro" ProgramChange="39"/>
+          <Patch Number="40" Name="U-no Bass2" ProgramChange="40"/>
+          <Patch Number="41" Name="Tine1Program" ProgramChange="41"/>
+          <Patch Number="42" Name="Dreamy Arp" ProgramChange="42"/>
+          <Patch Number="43" Name="Ringglass" ProgramChange="43"/>
+          <Patch Number="44" Name="Handbagin Bass" ProgramChange="44"/>
+          <Patch Number="45" Name="Stringie Thingie" ProgramChange="45"/>
+          <Patch Number="46" Name="Lead 1" ProgramChange="46"/>
+          <Patch Number="47" Name="Worry Free Pad" ProgramChange="47"/>
+          <Patch Number="48" Name="FM Velo Chimes" ProgramChange="48"/>
+          <Patch Number="49" Name="Garage Swetch" ProgramChange="49"/>
+          <Patch Number="50" Name="Single Sub Wheel" ProgramChange="50"/>
+          <Patch Number="51" Name="303 Groover 2 M-Wh" ProgramChange="51"/>
+          <Patch Number="52" Name="PWM Crunchie" ProgramChange="52"/>
+          <Patch Number="53" Name="Staccato" ProgramChange="53"/>
+          <Patch Number="54" Name="Simple Bass" ProgramChange="54"/>
+          <Patch Number="55" Name="Super Nova TramP" ProgramChange="55"/>
+          <Patch Number="56" Name="Brassic" ProgramChange="56"/>
+          <Patch Number="57" Name="Upstairs@Holgers" ProgramChange="57"/>
+          <Patch Number="58" Name="SuperStrings2" ProgramChange="58"/>
+          <Patch Number="59" Name="Fin FM Jazz 2" ProgramChange="59"/>
+          <Patch Number="60" Name="Attacka M-Wh" ProgramChange="60"/>
+          <Patch Number="61" Name="Xlade HPF" ProgramChange="61"/>
+          <Patch Number="62" Name="Explosion" ProgramChange="62"/>
+          <Patch Number="63" Name="Pocket Stylophone" ProgramChange="63"/>
+          <Patch Number="64" Name="SuperBassStn 1" ProgramChange="64"/>
+          <Patch Number="65" Name="Synth Backslip" ProgramChange="65"/>
+          <Patch Number="66" Name="Staccato Square" ProgramChange="66"/>
+          <Patch Number="67" Name="Leader" ProgramChange="67"/>
+          <Patch Number="68" Name="D'you know Pick" ProgramChange="68"/>
+          <Patch Number="69" Name="Perci Blip M-Wh" ProgramChange="69"/>
+          <Patch Number="70" Name="Simple Bass 2" ProgramChange="70"/>
+          <Patch Number="71" Name="Snotty Nose" ProgramChange="71"/>
+          <Patch Number="72" Name="Digi Slappa!" ProgramChange="72"/>
+          <Patch Number="73" Name="Harmonic Dist303" ProgramChange="73"/>
+          <Patch Number="74" Name="Hardbasssweep" ProgramChange="74"/>
+          <Patch Number="75" Name="Obie String Pad" ProgramChange="75"/>
+          <Patch Number="76" Name="Random Arp" ProgramChange="76"/>
+          <Patch Number="77" Name="Sweep 24dB" ProgramChange="77"/>
+          <Patch Number="78" Name="Filmskore" ProgramChange="78"/>
+          <Patch Number="79" Name="Liquinova M-Wh" ProgramChange="79"/>
+          <Patch Number="80" Name="FM Clav" ProgramChange="80"/>
+          <Patch Number="81" Name="VeloReso" ProgramChange="81"/>
+          <Patch Number="82" Name="PVC Pipe/Tom M-Wh" ProgramChange="82"/>
+          <Patch Number="83" Name="Rhythm Sweep" ProgramChange="83"/>
+          <Patch Number="84" Name="Pollox Pad" ProgramChange="84"/>
+          <Patch Number="85" Name="Self Osc" ProgramChange="85"/>
+          <Patch Number="86" Name="Organ 1 M-Wh" ProgramChange="86"/>
+          <Patch Number="87" Name="Syncker" ProgramChange="87"/>
+          <Patch Number="88" Name="Psy1" ProgramChange="88"/>
+          <Patch Number="89" Name="808 Clap 3" ProgramChange="89"/>
+          <Patch Number="90" Name="Perckie Sq M-Wh" ProgramChange="90"/>
+          <Patch Number="91" Name="Obie Extravert" ProgramChange="91"/>
+          <Patch Number="92" Name="Sup Jub Brass M-Wh" ProgramChange="92"/>
+          <Patch Number="93" Name="Throbba M-Wh" ProgramChange="93"/>
+          <Patch Number="94" Name="Wineglass" ProgramChange="94"/>
+          <Patch Number="95" Name="HiRage Kick M-Wh" ProgramChange="95"/>
+          <Patch Number="96" Name="Phillharmoic" ProgramChange="96"/>
+          <Patch Number="97" Name="Obie Tootle" ProgramChange="97"/>
+          <Patch Number="98" Name="Wheelreso" ProgramChange="98"/>
+          <Patch Number="99" Name="Slow Sweepa" ProgramChange="99"/>
+          <Patch Number="100" Name="2 Osc &amp; M-Wh Sub" ProgramChange="100"/>
+          <Patch Number="101" Name="Boogie Lead" ProgramChange="101"/>
+          <Patch Number="102" Name="Radar&gt;Comms" ProgramChange="102"/>
+          <Patch Number="103" Name="Rio Mod Wheel" ProgramChange="103"/>
+          <Patch Number="104" Name="Dist Lead" ProgramChange="104"/>
+          <Patch Number="105" Name="MultiHighHat" ProgramChange="105"/>
+          <Patch Number="106" Name="Emerald" ProgramChange="106"/>
+          <Patch Number="107" Name="FilterBass M-Wh" ProgramChange="107"/>
+          <Patch Number="108" Name="Rubber Filter M-Wh" ProgramChange="108"/>
+          <Patch Number="109" Name="Sync Brass Pad" ProgramChange="109"/>
+          <Patch Number="110" Name="Tinkerbell" ProgramChange="110"/>
+          <Patch Number="111" Name="BP Barker" ProgramChange="111"/>
+          <Patch Number="112" Name="Whiteout" ProgramChange="112"/>
+          <Patch Number="113" Name="FM Bass 1" ProgramChange="113"/>
+          <Patch Number="114" Name="Needle Pick M-Wh" ProgramChange="114"/>
+          <Patch Number="115" Name="Electro Wire" ProgramChange="115"/>
+          <Patch Number="116" Name="POT LID" ProgramChange="116"/>
+          <Patch Number="117" Name="Low Transmitter" ProgramChange="117"/>
+          <Patch Number="118" Name="Synth Ensemble" ProgramChange="118"/>
+          <Patch Number="119" Name="OrganDraw M-Wh" ProgramChange="119"/>
+          <Patch Number="120" Name="Pad" ProgramChange="120"/>
+          <Patch Number="121" Name="Unison DaDaDaa" ProgramChange="121"/>
+          <Patch Number="122" Name="Sync Saturation" ProgramChange="122"/>
+          <Patch Number="123" Name="Tin Can Wire M-Wh" ProgramChange="123"/>
+          <Patch Number="124" Name="Clickie Pickie" ProgramChange="124"/>
+          <Patch Number="125" Name="Chirpy Novae" ProgramChange="125"/>
+          <Patch Number="126" Name="Simple Arp M-Wh" ProgramChange="126"/>
+          <Patch Number="127" Name="Init Program" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="PROGRAM BANK C">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="7"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Neuroglider" ProgramChange="0"/>
+          <Patch Number="1" Name="Electro Koto" ProgramChange="1"/>
+          <Patch Number="2" Name="Bace" ProgramChange="2"/>
+          <Patch Number="3" Name="TB Vac&gt;scene" ProgramChange="3"/>
+          <Patch Number="4" Name="Gated Pad" ProgramChange="4"/>
+          <Patch Number="5" Name="Utopian Sweep Wh" ProgramChange="5"/>
+          <Patch Number="6" Name="FX Kick M-Wh" ProgramChange="6"/>
+          <Patch Number="7" Name="Phased EP" ProgramChange="7"/>
+          <Patch Number="8" Name="Jubrassic" ProgramChange="8"/>
+          <Patch Number="9" Name="Raversiren" ProgramChange="9"/>
+          <Patch Number="10" Name="Trance-Atlantic" ProgramChange="10"/>
+          <Patch Number="11" Name="Lead or Bass" ProgramChange="11"/>
+          <Patch Number="12" Name="Smooth Strings" ProgramChange="12"/>
+          <Patch Number="13" Name="Digital Klangg!!" ProgramChange="13"/>
+          <Patch Number="14" Name="Electro StratGat" ProgramChange="14"/>
+          <Patch Number="15" Name="Drubex SQ" ProgramChange="15"/>
+          <Patch Number="16" Name="Softena" ProgramChange="16"/>
+          <Patch Number="17" Name="Nasty Bass" ProgramChange="17"/>
+          <Patch Number="18" Name="5th Lead" ProgramChange="18"/>
+          <Patch Number="19" Name="Jupiter Slapper" ProgramChange="19"/>
+          <Patch Number="20" Name="Fathead" ProgramChange="20"/>
+          <Patch Number="21" Name="U-no Polysynth 2" ProgramChange="21"/>
+          <Patch Number="22" Name="Zumph" ProgramChange="22"/>
+          <Patch Number="23" Name="Garage Organ Bass" ProgramChange="23"/>
+          <Patch Number="24" Name="Sass Pick" ProgramChange="24"/>
+          <Patch Number="25" Name="7th Stak" ProgramChange="25"/>
+          <Patch Number="26" Name="ClickOrgan" ProgramChange="26"/>
+          <Patch Number="27" Name="Dutch M-Wh" ProgramChange="27"/>
+          <Patch Number="28" Name="909 Snare 2" ProgramChange="28"/>
+          <Patch Number="29" Name="Glider" ProgramChange="29"/>
+          <Patch Number="30" Name="U-no Sub" ProgramChange="30"/>
+          <Patch Number="31" Name="It's OK as it is" ProgramChange="31"/>
+          <Patch Number="32" Name="Inverse Sqaure" ProgramChange="32"/>
+          <Patch Number="33" Name="Velo Spitz" ProgramChange="33"/>
+          <Patch Number="34" Name="SlapBass3" ProgramChange="34"/>
+          <Patch Number="35" Name="Zing Leak" ProgramChange="35"/>
+          <Patch Number="36" Name="Plated Analogue" ProgramChange="36"/>
+          <Patch Number="37" Name="SN Pro Sync M-Wh" ProgramChange="37"/>
+          <Patch Number="38" Name="Digi Lead M-Wh" ProgramChange="38"/>
+          <Patch Number="39" Name="Sass!" ProgramChange="39"/>
+          <Patch Number="40" Name="Americana" ProgramChange="40"/>
+          <Patch Number="41" Name="Sanxion Filtered" ProgramChange="41"/>
+          <Patch Number="42" Name="Heavily Slide" ProgramChange="42"/>
+          <Patch Number="43" Name="Ring&gt;Vince" ProgramChange="43"/>
+          <Patch Number="44" Name="Simpler Bass" ProgramChange="44"/>
+          <Patch Number="45" Name="Sollie Strings 1" ProgramChange="45"/>
+          <Patch Number="46" Name="Sync Lead M-Wh" ProgramChange="46"/>
+          <Patch Number="47" Name="Poly 303 M-Wh" ProgramChange="47"/>
+          <Patch Number="48" Name="FM TUBE" ProgramChange="48"/>
+          <Patch Number="49" Name="RnB Glide M-Wh" ProgramChange="49"/>
+          <Patch Number="50" Name="Pulsering Bass" ProgramChange="50"/>
+          <Patch Number="51" Name="U-know Bleep Wh" ProgramChange="51"/>
+          <Patch Number="52" Name="Syncronicity" ProgramChange="52"/>
+          <Patch Number="53" Name="Phatties Diet" ProgramChange="53"/>
+          <Patch Number="54" Name="Bass4" ProgramChange="54"/>
+          <Patch Number="55" Name="Whirly" ProgramChange="55"/>
+          <Patch Number="56" Name="Swishi" ProgramChange="56"/>
+          <Patch Number="57" Name="PurrFlange" ProgramChange="57"/>
+          <Patch Number="58" Name="PolyNova 1" ProgramChange="58"/>
+          <Patch Number="59" Name="TB Poly Arp" ProgramChange="59"/>
+          <Patch Number="60" Name="Our Friend PWM" ProgramChange="60"/>
+          <Patch Number="61" Name="PolyNova 5" ProgramChange="61"/>
+          <Patch Number="62" Name="Pulse 5th M-Wh" ProgramChange="62"/>
+          <Patch Number="63" Name="Whistle" ProgramChange="63"/>
+          <Patch Number="64" Name="Basse" ProgramChange="64"/>
+          <Patch Number="65" Name="Synth Stop Scratch" ProgramChange="65"/>
+          <Patch Number="66" Name="Staccato Pulse" ProgramChange="66"/>
+          <Patch Number="67" Name="In sync M-Wh" ProgramChange="67"/>
+          <Patch Number="68" Name="Poppy" ProgramChange="68"/>
+          <Patch Number="69" Name="Lucked Out M-Wh" ProgramChange="69"/>
+          <Patch Number="70" Name="ThunderFloorBass" ProgramChange="70"/>
+          <Patch Number="71" Name="Synced M-Wh Muck" ProgramChange="71"/>
+          <Patch Number="72" Name="Wabbler" ProgramChange="72"/>
+          <Patch Number="73" Name="TB2" ProgramChange="73"/>
+          <Patch Number="74" Name="PsyGrund M-Wh" ProgramChange="74"/>
+          <Patch Number="75" Name="Airy Fairy" ProgramChange="75"/>
+          <Patch Number="76" Name="Synth Moutharp" ProgramChange="76"/>
+          <Patch Number="77" Name="Vector Synth" ProgramChange="77"/>
+          <Patch Number="78" Name="Film Pad" ProgramChange="78"/>
+          <Patch Number="79" Name="Tubus" ProgramChange="79"/>
+          <Patch Number="80" Name="Clavi" ProgramChange="80"/>
+          <Patch Number="81" Name="Drum n Bass 1" ProgramChange="81"/>
+          <Patch Number="82" Name="Mallet" ProgramChange="82"/>
+          <Patch Number="83" Name="Jazzer Lead Gat" ProgramChange="83"/>
+          <Patch Number="84" Name="Pad Sweep" ProgramChange="84"/>
+          <Patch Number="85" Name="Eclipse M-Wh" ProgramChange="85"/>
+          <Patch Number="86" Name="Pianova" ProgramChange="86"/>
+          <Patch Number="87" Name="Simple Sync" ProgramChange="87"/>
+          <Patch Number="88" Name="Psy2" ProgramChange="88"/>
+          <Patch Number="89" Name="D'you know Sq" ProgramChange="89"/>
+          <Patch Number="90" Name="Perckie Pulse M-Wh" ProgramChange="90"/>
+          <Patch Number="91" Name="PS_Strings 7th" ProgramChange="91"/>
+          <Patch Number="92" Name="Echoed Strings" ProgramChange="92"/>
+          <Patch Number="93" Name="Triplet Twista Wh" ProgramChange="93"/>
+          <Patch Number="94" Name="Music Box" ProgramChange="94"/>
+          <Patch Number="95" Name="808 OHH" ProgramChange="95"/>
+          <Patch Number="96" Name="Soft Strings" ProgramChange="96"/>
+          <Patch Number="97" Name="Pluck Knows M-Wh" ProgramChange="97"/>
+          <Patch Number="98" Name="Deep Lord M-Wh" ProgramChange="98"/>
+          <Patch Number="99" Name="Nova Railway M-Wh" ProgramChange="99"/>
+          <Patch Number="100" Name="Crystal Shimmer M-Wh" ProgramChange="100"/>
+          <Patch Number="101" Name="Force Field" ProgramChange="101"/>
+          <Patch Number="102" Name="Science Lab" ProgramChange="102"/>
+          <Patch Number="103" Name="AfterTouchie Mh" ProgramChange="103"/>
+          <Patch Number="104" Name="Jazz Guitar" ProgramChange="104"/>
+          <Patch Number="105" Name="808 CHH" ProgramChange="105"/>
+          <Patch Number="106" Name="Strung Up" ProgramChange="106"/>
+          <Patch Number="107" Name="Poms Bass 4" ProgramChange="107"/>
+          <Patch Number="108" Name="Drum n Bass 2" ProgramChange="108"/>
+          <Patch Number="109" Name="SupJupVelBrass1" ProgramChange="109"/>
+          <Patch Number="110" Name="Downloading" ProgramChange="110"/>
+          <Patch Number="111" Name="Obie Wurlie" ProgramChange="111"/>
+          <Patch Number="112" Name="Synced Swimin" ProgramChange="112"/>
+          <Patch Number="113" Name="SyncBass" ProgramChange="113"/>
+          <Patch Number="114" Name="Needle Pulse M-Wh" ProgramChange="114"/>
+          <Patch Number="115" Name="HC Bass M-Wh" ProgramChange="115"/>
+          <Patch Number="116" Name="Pot Cover" ProgramChange="116"/>
+          <Patch Number="117" Name="Brillo Pad M-Wh" ProgramChange="117"/>
+          <Patch Number="118" Name="Chord Lead M-Wh" ProgramChange="118"/>
+          <Patch Number="119" Name="DistortOrgan M-Wh" ProgramChange="119"/>
+          <Patch Number="120" Name="Spectrum" ProgramChange="120"/>
+          <Patch Number="121" Name="Die Roboter" ProgramChange="121"/>
+          <Patch Number="122" Name="Saturated Square" ProgramChange="122"/>
+          <Patch Number="123" Name="Trans Euro Exprs" ProgramChange="123"/>
+          <Patch Number="124" Name="Seq Nova M-Wh" ProgramChange="124"/>
+          <Patch Number="125" Name="Nics Diver M-Wh" ProgramChange="125"/>
+          <Patch Number="126" Name="Arp Sync M-Wh" ProgramChange="126"/>
+          <Patch Number="127" Name="Simplest Bass" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="PROGRAM BANK D">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="8"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Synced Formant 1" ProgramChange="0"/>
+          <Patch Number="1" Name="Sawtooth Seq jh" ProgramChange="1"/>
+          <Patch Number="2" Name="Click Bass M-Wh" ProgramChange="2"/>
+          <Patch Number="3" Name="Trance4 M-Wh" ProgramChange="3"/>
+          <Patch Number="4" Name="SimpleEnvVeloarp" ProgramChange="4"/>
+          <Patch Number="5" Name="I" ProgramChange="5"/>
+          <Patch Number="6" Name="909 Kick" ProgramChange="6"/>
+          <Patch Number="7" Name="Metal Knoll" ProgramChange="7"/>
+          <Patch Number="8" Name="Slide Brass M-Wh" ProgramChange="8"/>
+          <Patch Number="9" Name="Gritty Program" ProgramChange="9"/>
+          <Patch Number="10" Name="Soft Brit Sound?" ProgramChange="10"/>
+          <Patch Number="11" Name="Uni*Syn" ProgramChange="11"/>
+          <Patch Number="12" Name="ItskindaPhasedWh" ProgramChange="12"/>
+          <Patch Number="13" Name="House Organ jh" ProgramChange="13"/>
+          <Patch Number="14" Name="BP 303 2" ProgramChange="14"/>
+          <Patch Number="15" Name="Given Bass M-Wh" ProgramChange="15"/>
+          <Patch Number="16" Name="Ahh Voices 2" ProgramChange="16"/>
+          <Patch Number="17" Name="VeloQuack" ProgramChange="17"/>
+          <Patch Number="18" Name="Ballsy Anal-Log!" ProgramChange="18"/>
+          <Patch Number="19" Name="Electric Insect" ProgramChange="19"/>
+          <Patch Number="20" Name="Drum n Bass Bass" ProgramChange="20"/>
+          <Patch Number="21" Name="Synth Sektor FX" ProgramChange="21"/>
+          <Patch Number="22" Name="LFO madness" ProgramChange="22"/>
+          <Patch Number="23" Name="SimpleAnaBass-Wh" ProgramChange="23"/>
+          <Patch Number="24" Name="Pinchi Pick M-Wh" ProgramChange="24"/>
+          <Patch Number="25" Name="FM Glockenspiel" ProgramChange="25"/>
+          <Patch Number="26" Name="DontSurrender-Wh" ProgramChange="26"/>
+          <Patch Number="27" Name="TecknoTecknoM-Wh" ProgramChange="27"/>
+          <Patch Number="28" Name="909 Snare 1" ProgramChange="28"/>
+          <Patch Number="29" Name="Vector Pad" ProgramChange="29"/>
+          <Patch Number="30" Name="Juice Bass" ProgramChange="30"/>
+          <Patch Number="31" Name="Grunge Pick M-Wh" ProgramChange="31"/>
+          <Patch Number="32" Name="Orbit Pad M-Wh" ProgramChange="32"/>
+          <Patch Number="33" Name="FM Sweep jh" ProgramChange="33"/>
+          <Patch Number="34" Name="Pick Bass M-Wh" ProgramChange="34"/>
+          <Patch Number="35" Name="Talker" ProgramChange="35"/>
+          <Patch Number="36" Name="Strings Ens" ProgramChange="36"/>
+          <Patch Number="37" Name="Sync it M-Wh" ProgramChange="37"/>
+          <Patch Number="38" Name="A to B PB-Wh" ProgramChange="38"/>
+          <Patch Number="39" Name="BP 303 M-Wh" ProgramChange="39"/>
+          <Patch Number="40" Name="SoloAnaTrumpet" ProgramChange="40"/>
+          <Patch Number="41" Name="FM Piano/Guitar" ProgramChange="41"/>
+          <Patch Number="42" Name="Chatter Arp M-Wh" ProgramChange="42"/>
+          <Patch Number="43" Name="ModW Surprise jh" ProgramChange="43"/>
+          <Patch Number="44" Name="Dance Bass" ProgramChange="44"/>
+          <Patch Number="45" Name="DualFiltStringWh" ProgramChange="45"/>
+          <Patch Number="46" Name="VeloUniSync" ProgramChange="46"/>
+          <Patch Number="47" Name="EEW" ProgramChange="47"/>
+          <Patch Number="48" Name="FM Marimba" ProgramChange="48"/>
+          <Patch Number="49" Name="Trance6 M-Wh" ProgramChange="49"/>
+          <Patch Number="50" Name="Reso Bass" ProgramChange="50"/>
+          <Patch Number="51" Name="Gated Noise M-Wh" ProgramChange="51"/>
+          <Patch Number="52" Name="Growla BP303M-Wh" ProgramChange="52"/>
+          <Patch Number="53" Name="Scammy Chord" ProgramChange="53"/>
+          <Patch Number="54" Name="Boot Bass" ProgramChange="54"/>
+          <Patch Number="55" Name="AnaPiano M-Wh" ProgramChange="55"/>
+          <Patch Number="56" Name="Bottled Genie" ProgramChange="56"/>
+          <Patch Number="57" Name="Ahh-Yeah M-Wh" ProgramChange="57"/>
+          <Patch Number="58" Name="DualFiltPWMingWh" ProgramChange="58"/>
+          <Patch Number="59" Name="BlubberPick M-Wh" ProgramChange="59"/>
+          <Patch Number="60" Name="BowedMetal M-Wh" ProgramChange="60"/>
+          <Patch Number="61" Name="ThrobiMemberM-Wh" ProgramChange="61"/>
+          <Patch Number="62" Name="Winge Forum M-Wh" ProgramChange="62"/>
+          <Patch Number="63" Name="Trance2 M-Wh" ProgramChange="63"/>
+          <Patch Number="64" Name="Max Bass" ProgramChange="64"/>
+          <Patch Number="65" Name="Communicator" ProgramChange="65"/>
+          <Patch Number="66" Name="Xpander 2000 jh" ProgramChange="66"/>
+          <Patch Number="67" Name="FiltaMatrix M-Wh" ProgramChange="67"/>
+          <Patch Number="68" Name="Fin Pluck it!" ProgramChange="68"/>
+          <Patch Number="69" Name="FM Bell Lead" ProgramChange="69"/>
+          <Patch Number="70" Name="Wart Bass" ProgramChange="70"/>
+          <Patch Number="71" Name="ComeToDance M-Wh" ProgramChange="71"/>
+          <Patch Number="72" Name="FM Lead 1" ProgramChange="72"/>
+          <Patch Number="73" Name="Hard Cheese M-Wh" ProgramChange="73"/>
+          <Patch Number="74" Name="In-Your-Ear M-Wh" ProgramChange="74"/>
+          <Patch Number="75" Name="Strings R Talkin" ProgramChange="75"/>
+          <Patch Number="76" Name="NeedleBleep M-Wh" ProgramChange="76"/>
+          <Patch Number="77" Name="Gusset Pad M-Wh" ProgramChange="77"/>
+          <Patch Number="78" Name="EuphoricNag M-Wh" ProgramChange="78"/>
+          <Patch Number="79" Name="Gated Noise M-Wh" ProgramChange="79"/>
+          <Patch Number="80" Name="AnaKey M-Wh" ProgramChange="80"/>
+          <Patch Number="81" Name="Synced" ProgramChange="81"/>
+          <Patch Number="82" Name="FM Block" ProgramChange="82"/>
+          <Patch Number="83" Name="Dat D n Bass M-Wh" ProgramChange="83"/>
+          <Patch Number="84" Name="Soft Pad" ProgramChange="84"/>
+          <Patch Number="85" Name="Tranceypants" ProgramChange="85"/>
+          <Patch Number="86" Name="BP Organ" ProgramChange="86"/>
+          <Patch Number="87" Name="Plug n Sync jh" ProgramChange="87"/>
+          <Patch Number="88" Name="Sqaurx M-Wh" ProgramChange="88"/>
+          <Patch Number="89" Name="Kraft M-Wh" ProgramChange="89"/>
+          <Patch Number="90" Name="Tottie Arp" ProgramChange="90"/>
+          <Patch Number="91" Name="Lush" ProgramChange="91"/>
+          <Patch Number="92" Name="3'0 Trance 1" ProgramChange="92"/>
+          <Patch Number="93" Name="Funk WahWah M-Wh" ProgramChange="93"/>
+          <Patch Number="94" Name="Polynova 3" ProgramChange="94"/>
+          <Patch Number="95" Name="Iridium" ProgramChange="95"/>
+          <Patch Number="96" Name="Phase Strings jh" ProgramChange="96"/>
+          <Patch Number="97" Name="Bottle Arp" ProgramChange="97"/>
+          <Patch Number="98" Name="Buzz Bass" ProgramChange="98"/>
+          <Patch Number="99" Name="Fin Mono Arp 1" ProgramChange="99"/>
+          <Patch Number="100" Name="Low Bass" ProgramChange="100"/>
+          <Patch Number="101" Name="Show U the Organ" ProgramChange="101"/>
+          <Patch Number="102" Name="Drum n Bass 3" ProgramChange="102"/>
+          <Patch Number="103" Name="Trance7 M-Wh" ProgramChange="103"/>
+          <Patch Number="104" Name="Clean n Clear jh" ProgramChange="104"/>
+          <Patch Number="105" Name="Aggrosweeper" ProgramChange="105"/>
+          <Patch Number="106" Name="1osc pad" ProgramChange="106"/>
+          <Patch Number="107" Name="BasikBass" ProgramChange="107"/>
+          <Patch Number="108" Name="3'0Trance 2" ProgramChange="108"/>
+          <Patch Number="109" Name="Dark Talker" ProgramChange="109"/>
+          <Patch Number="110" Name="Trance Bass M-Wh" ProgramChange="110"/>
+          <Patch Number="111" Name="Trance 1 M-Wh" ProgramChange="111"/>
+          <Patch Number="112" Name="Low Organ" ProgramChange="112"/>
+          <Patch Number="113" Name="Bottie Bass" ProgramChange="113"/>
+          <Patch Number="114" Name="FM Bass" ProgramChange="114"/>
+          <Patch Number="115" Name="FM Xylo Lo" ProgramChange="115"/>
+          <Patch Number="116" Name="FM Xylo Hi" ProgramChange="116"/>
+          <Patch Number="117" Name="Orgpt ClikLo Dry" ProgramChange="117"/>
+          <Patch Number="118" Name="Orgpt DX Lo Dry" ProgramChange="118"/>
+          <Patch Number="119" Name="Orgpt DX Hi Dry" ProgramChange="119"/>
+          <Patch Number="120" Name="FMpt RhodeDt Wfx" ProgramChange="120"/>
+          <Patch Number="121" Name="FMpt RhodeBd Wfx" ProgramChange="121"/>
+          <Patch Number="122" Name="FMpt Rhode Tn Wfx" ProgramChange="122"/>
+          <Patch Number="123" Name="DOUBLE SAW Init" ProgramChange="123"/>
+          <Patch Number="124" Name="Vocoder In 1" ProgramChange="124"/>
+          <Patch Number="125" Name="Input/sw1Program" ProgramChange="125"/>
+          <Patch Number="126" Name="FM Init Program" ProgramChange="126"/>
+          <Patch Number="127" Name="2 Osc Init M-Wh" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="USER PROGRAM BANK E">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="9"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Init Program" ProgramChange="0"/>
+          <Patch Number="1" Name="Init Program" ProgramChange="1"/>
+          <Patch Number="2" Name="Init Program" ProgramChange="2"/>
+          <Patch Number="3" Name="Init Program" ProgramChange="3"/>
+          <Patch Number="4" Name="Init Program" ProgramChange="4"/>
+          <Patch Number="5" Name="Init Program" ProgramChange="5"/>
+          <Patch Number="6" Name="Init Program" ProgramChange="6"/>
+          <Patch Number="7" Name="Init Program" ProgramChange="7"/>
+          <Patch Number="8" Name="Init Program" ProgramChange="8"/>
+          <Patch Number="9" Name="Init Program" ProgramChange="9"/>
+          <Patch Number="10" Name="Init Program" ProgramChange="10"/>
+          <Patch Number="11" Name="Init Program" ProgramChange="11"/>
+          <Patch Number="12" Name="Init Program" ProgramChange="12"/>
+          <Patch Number="13" Name="Init Program" ProgramChange="13"/>
+          <Patch Number="14" Name="Init Program" ProgramChange="14"/>
+          <Patch Number="15" Name="Init Program" ProgramChange="15"/>
+          <Patch Number="16" Name="Init Program" ProgramChange="16"/>
+          <Patch Number="17" Name="Init Program" ProgramChange="17"/>
+          <Patch Number="18" Name="Init Program" ProgramChange="18"/>
+          <Patch Number="19" Name="Init Program" ProgramChange="19"/>
+          <Patch Number="20" Name="Init Program" ProgramChange="20"/>
+          <Patch Number="21" Name="Init Program" ProgramChange="21"/>
+          <Patch Number="22" Name="Init Program" ProgramChange="22"/>
+          <Patch Number="23" Name="Init Program" ProgramChange="23"/>
+          <Patch Number="24" Name="Init Program" ProgramChange="24"/>
+          <Patch Number="25" Name="Init Program" ProgramChange="25"/>
+          <Patch Number="26" Name="Init Program" ProgramChange="26"/>
+          <Patch Number="27" Name="Init Program" ProgramChange="27"/>
+          <Patch Number="28" Name="Init Program" ProgramChange="28"/>
+          <Patch Number="29" Name="Init Program" ProgramChange="29"/>
+          <Patch Number="30" Name="Init Program" ProgramChange="30"/>
+          <Patch Number="31" Name="Init Program" ProgramChange="31"/>
+          <Patch Number="32" Name="Init Program" ProgramChange="32"/>
+          <Patch Number="33" Name="Init Program" ProgramChange="33"/>
+          <Patch Number="34" Name="Init Program" ProgramChange="34"/>
+          <Patch Number="35" Name="Init Program" ProgramChange="35"/>
+          <Patch Number="36" Name="Init Program" ProgramChange="36"/>
+          <Patch Number="37" Name="Init Program" ProgramChange="37"/>
+          <Patch Number="38" Name="Init Program" ProgramChange="38"/>
+          <Patch Number="39" Name="Init Program" ProgramChange="39"/>
+          <Patch Number="40" Name="Init Program" ProgramChange="40"/>
+          <Patch Number="41" Name="Init Program" ProgramChange="41"/>
+          <Patch Number="42" Name="Init Program" ProgramChange="42"/>
+          <Patch Number="43" Name="Init Program" ProgramChange="43"/>
+          <Patch Number="44" Name="Init Program" ProgramChange="44"/>
+          <Patch Number="45" Name="Init Program" ProgramChange="45"/>
+          <Patch Number="46" Name="Init Program" ProgramChange="46"/>
+          <Patch Number="47" Name="Init Program" ProgramChange="47"/>
+          <Patch Number="48" Name="Init Program" ProgramChange="48"/>
+          <Patch Number="49" Name="Init Program" ProgramChange="49"/>
+          <Patch Number="50" Name="Init Program" ProgramChange="50"/>
+          <Patch Number="51" Name="Init Program" ProgramChange="51"/>
+          <Patch Number="52" Name="Init Program" ProgramChange="52"/>
+          <Patch Number="53" Name="Init Program" ProgramChange="53"/>
+          <Patch Number="54" Name="Init Program" ProgramChange="54"/>
+          <Patch Number="55" Name="Init Program" ProgramChange="55"/>
+          <Patch Number="56" Name="Init Program" ProgramChange="56"/>
+          <Patch Number="57" Name="Init Program" ProgramChange="57"/>
+          <Patch Number="58" Name="Init Program" ProgramChange="58"/>
+          <Patch Number="59" Name="Init Program" ProgramChange="59"/>
+          <Patch Number="60" Name="Init Program" ProgramChange="60"/>
+          <Patch Number="61" Name="Init Program" ProgramChange="61"/>
+          <Patch Number="62" Name="Init Program" ProgramChange="62"/>
+          <Patch Number="63" Name="Init Program" ProgramChange="63"/>
+          <Patch Number="64" Name="Init Program" ProgramChange="64"/>
+          <Patch Number="65" Name="Init Program" ProgramChange="65"/>
+          <Patch Number="66" Name="Init Program" ProgramChange="66"/>
+          <Patch Number="67" Name="Init Program" ProgramChange="67"/>
+          <Patch Number="68" Name="Init Program" ProgramChange="68"/>
+          <Patch Number="69" Name="Init Program" ProgramChange="69"/>
+          <Patch Number="70" Name="Init Program" ProgramChange="70"/>
+          <Patch Number="71" Name="Init Program" ProgramChange="71"/>
+          <Patch Number="72" Name="Init Program" ProgramChange="72"/>
+          <Patch Number="73" Name="Init Program" ProgramChange="73"/>
+          <Patch Number="74" Name="Init Program" ProgramChange="74"/>
+          <Patch Number="75" Name="Init Program" ProgramChange="75"/>
+          <Patch Number="76" Name="Init Program" ProgramChange="76"/>
+          <Patch Number="77" Name="Init Program" ProgramChange="77"/>
+          <Patch Number="78" Name="Init Program" ProgramChange="78"/>
+          <Patch Number="79" Name="Init Program" ProgramChange="79"/>
+          <Patch Number="80" Name="Init Program" ProgramChange="80"/>
+          <Patch Number="81" Name="Init Program" ProgramChange="81"/>
+          <Patch Number="82" Name="Init Program" ProgramChange="82"/>
+          <Patch Number="83" Name="Init Program" ProgramChange="83"/>
+          <Patch Number="84" Name="Init Program" ProgramChange="84"/>
+          <Patch Number="85" Name="Init Program" ProgramChange="85"/>
+          <Patch Number="86" Name="Init Program" ProgramChange="86"/>
+          <Patch Number="87" Name="Init Program" ProgramChange="87"/>
+          <Patch Number="88" Name="Init Program" ProgramChange="88"/>
+          <Patch Number="89" Name="Init Program" ProgramChange="89"/>
+          <Patch Number="90" Name="Init Program" ProgramChange="90"/>
+          <Patch Number="91" Name="Init Program" ProgramChange="91"/>
+          <Patch Number="92" Name="Init Program" ProgramChange="92"/>
+          <Patch Number="93" Name="Init Program" ProgramChange="93"/>
+          <Patch Number="94" Name="Init Program" ProgramChange="94"/>
+          <Patch Number="95" Name="Init Program" ProgramChange="95"/>
+          <Patch Number="96" Name="Init Program" ProgramChange="96"/>
+          <Patch Number="97" Name="Init Program" ProgramChange="97"/>
+          <Patch Number="98" Name="Init Program" ProgramChange="98"/>
+          <Patch Number="99" Name="Init Program" ProgramChange="99"/>
+          <Patch Number="100" Name="Init Program" ProgramChange="100"/>
+          <Patch Number="101" Name="Init Program" ProgramChange="101"/>
+          <Patch Number="102" Name="Init Program" ProgramChange="102"/>
+          <Patch Number="103" Name="Init Program" ProgramChange="103"/>
+          <Patch Number="104" Name="Init Program" ProgramChange="104"/>
+          <Patch Number="105" Name="Init Program" ProgramChange="105"/>
+          <Patch Number="106" Name="Init Program" ProgramChange="106"/>
+          <Patch Number="107" Name="Init Program" ProgramChange="107"/>
+          <Patch Number="108" Name="Init Program" ProgramChange="108"/>
+          <Patch Number="109" Name="Init Program" ProgramChange="109"/>
+          <Patch Number="110" Name="Init Program" ProgramChange="110"/>
+          <Patch Number="111" Name="Init Program" ProgramChange="111"/>
+          <Patch Number="112" Name="Init Program" ProgramChange="112"/>
+          <Patch Number="113" Name="Init Program" ProgramChange="113"/>
+          <Patch Number="114" Name="Init Program" ProgramChange="114"/>
+          <Patch Number="115" Name="Init Program" ProgramChange="115"/>
+          <Patch Number="116" Name="Init Program" ProgramChange="116"/>
+          <Patch Number="117" Name="Init Program" ProgramChange="117"/>
+          <Patch Number="118" Name="Init Program" ProgramChange="118"/>
+          <Patch Number="119" Name="Init Program" ProgramChange="119"/>
+          <Patch Number="120" Name="Init Program" ProgramChange="120"/>
+          <Patch Number="121" Name="Init Program" ProgramChange="121"/>
+          <Patch Number="122" Name="Init Program" ProgramChange="122"/>
+          <Patch Number="123" Name="Init Program" ProgramChange="123"/>
+          <Patch Number="124" Name="Init Program" ProgramChange="124"/>
+          <Patch Number="125" Name="Init Program" ProgramChange="125"/>
+          <Patch Number="126" Name="Init Program" ProgramChange="126"/>
+          <Patch Number="127" Name="Init Program" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="USER PROGRAM BANK F">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="10"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Init Program" ProgramChange="0"/>
+          <Patch Number="1" Name="Init Program" ProgramChange="1"/>
+          <Patch Number="2" Name="Init Program" ProgramChange="2"/>
+          <Patch Number="3" Name="Init Program" ProgramChange="3"/>
+          <Patch Number="4" Name="Init Program" ProgramChange="4"/>
+          <Patch Number="5" Name="Init Program" ProgramChange="5"/>
+          <Patch Number="6" Name="Init Program" ProgramChange="6"/>
+          <Patch Number="7" Name="Init Program" ProgramChange="7"/>
+          <Patch Number="8" Name="Init Program" ProgramChange="8"/>
+          <Patch Number="9" Name="Init Program" ProgramChange="9"/>
+          <Patch Number="10" Name="Init Program" ProgramChange="10"/>
+          <Patch Number="11" Name="Init Program" ProgramChange="11"/>
+          <Patch Number="12" Name="Init Program" ProgramChange="12"/>
+          <Patch Number="13" Name="Init Program" ProgramChange="13"/>
+          <Patch Number="14" Name="Init Program" ProgramChange="14"/>
+          <Patch Number="15" Name="Init Program" ProgramChange="15"/>
+          <Patch Number="16" Name="Init Program" ProgramChange="16"/>
+          <Patch Number="17" Name="Init Program" ProgramChange="17"/>
+          <Patch Number="18" Name="Init Program" ProgramChange="18"/>
+          <Patch Number="19" Name="Init Program" ProgramChange="19"/>
+          <Patch Number="20" Name="Init Program" ProgramChange="20"/>
+          <Patch Number="21" Name="Init Program" ProgramChange="21"/>
+          <Patch Number="22" Name="Init Program" ProgramChange="22"/>
+          <Patch Number="23" Name="Init Program" ProgramChange="23"/>
+          <Patch Number="24" Name="Init Program" ProgramChange="24"/>
+          <Patch Number="25" Name="Init Program" ProgramChange="25"/>
+          <Patch Number="26" Name="Init Program" ProgramChange="26"/>
+          <Patch Number="27" Name="Init Program" ProgramChange="27"/>
+          <Patch Number="28" Name="Init Program" ProgramChange="28"/>
+          <Patch Number="29" Name="Init Program" ProgramChange="29"/>
+          <Patch Number="30" Name="Init Program" ProgramChange="30"/>
+          <Patch Number="31" Name="Init Program" ProgramChange="31"/>
+          <Patch Number="32" Name="Init Program" ProgramChange="32"/>
+          <Patch Number="33" Name="Init Program" ProgramChange="33"/>
+          <Patch Number="34" Name="Init Program" ProgramChange="34"/>
+          <Patch Number="35" Name="Init Program" ProgramChange="35"/>
+          <Patch Number="36" Name="Init Program" ProgramChange="36"/>
+          <Patch Number="37" Name="Init Program" ProgramChange="37"/>
+          <Patch Number="38" Name="Init Program" ProgramChange="38"/>
+          <Patch Number="39" Name="Init Program" ProgramChange="39"/>
+          <Patch Number="40" Name="Init Program" ProgramChange="40"/>
+          <Patch Number="41" Name="Init Program" ProgramChange="41"/>
+          <Patch Number="42" Name="Init Program" ProgramChange="42"/>
+          <Patch Number="43" Name="Init Program" ProgramChange="43"/>
+          <Patch Number="44" Name="Init Program" ProgramChange="44"/>
+          <Patch Number="45" Name="Init Program" ProgramChange="45"/>
+          <Patch Number="46" Name="Init Program" ProgramChange="46"/>
+          <Patch Number="47" Name="Init Program" ProgramChange="47"/>
+          <Patch Number="48" Name="Init Program" ProgramChange="48"/>
+          <Patch Number="49" Name="Init Program" ProgramChange="49"/>
+          <Patch Number="50" Name="Init Program" ProgramChange="50"/>
+          <Patch Number="51" Name="Init Program" ProgramChange="51"/>
+          <Patch Number="52" Name="Init Program" ProgramChange="52"/>
+          <Patch Number="53" Name="Init Program" ProgramChange="53"/>
+          <Patch Number="54" Name="Init Program" ProgramChange="54"/>
+          <Patch Number="55" Name="Init Program" ProgramChange="55"/>
+          <Patch Number="56" Name="Init Program" ProgramChange="56"/>
+          <Patch Number="57" Name="Init Program" ProgramChange="57"/>
+          <Patch Number="58" Name="Init Program" ProgramChange="58"/>
+          <Patch Number="59" Name="Init Program" ProgramChange="59"/>
+          <Patch Number="60" Name="Init Program" ProgramChange="60"/>
+          <Patch Number="61" Name="Init Program" ProgramChange="61"/>
+          <Patch Number="62" Name="Init Program" ProgramChange="62"/>
+          <Patch Number="63" Name="Init Program" ProgramChange="63"/>
+          <Patch Number="64" Name="Init Program" ProgramChange="64"/>
+          <Patch Number="65" Name="Init Program" ProgramChange="65"/>
+          <Patch Number="66" Name="Init Program" ProgramChange="66"/>
+          <Patch Number="67" Name="Init Program" ProgramChange="67"/>
+          <Patch Number="68" Name="Init Program" ProgramChange="68"/>
+          <Patch Number="69" Name="Init Program" ProgramChange="69"/>
+          <Patch Number="70" Name="Init Program" ProgramChange="70"/>
+          <Patch Number="71" Name="Init Program" ProgramChange="71"/>
+          <Patch Number="72" Name="Init Program" ProgramChange="72"/>
+          <Patch Number="73" Name="Init Program" ProgramChange="73"/>
+          <Patch Number="74" Name="Init Program" ProgramChange="74"/>
+          <Patch Number="75" Name="Init Program" ProgramChange="75"/>
+          <Patch Number="76" Name="Init Program" ProgramChange="76"/>
+          <Patch Number="77" Name="Init Program" ProgramChange="77"/>
+          <Patch Number="78" Name="Init Program" ProgramChange="78"/>
+          <Patch Number="79" Name="Init Program" ProgramChange="79"/>
+          <Patch Number="80" Name="Init Program" ProgramChange="80"/>
+          <Patch Number="81" Name="Init Program" ProgramChange="81"/>
+          <Patch Number="82" Name="Init Program" ProgramChange="82"/>
+          <Patch Number="83" Name="Init Program" ProgramChange="83"/>
+          <Patch Number="84" Name="Init Program" ProgramChange="84"/>
+          <Patch Number="85" Name="Init Program" ProgramChange="85"/>
+          <Patch Number="86" Name="Init Program" ProgramChange="86"/>
+          <Patch Number="87" Name="Init Program" ProgramChange="87"/>
+          <Patch Number="88" Name="Init Program" ProgramChange="88"/>
+          <Patch Number="89" Name="Init Program" ProgramChange="89"/>
+          <Patch Number="90" Name="Init Program" ProgramChange="90"/>
+          <Patch Number="91" Name="Init Program" ProgramChange="91"/>
+          <Patch Number="92" Name="Init Program" ProgramChange="92"/>
+          <Patch Number="93" Name="Init Program" ProgramChange="93"/>
+          <Patch Number="94" Name="Init Program" ProgramChange="94"/>
+          <Patch Number="95" Name="Init Program" ProgramChange="95"/>
+          <Patch Number="96" Name="Init Program" ProgramChange="96"/>
+          <Patch Number="97" Name="Init Program" ProgramChange="97"/>
+          <Patch Number="98" Name="Init Program" ProgramChange="98"/>
+          <Patch Number="99" Name="Init Program" ProgramChange="99"/>
+          <Patch Number="100" Name="Init Program" ProgramChange="100"/>
+          <Patch Number="101" Name="Init Program" ProgramChange="101"/>
+          <Patch Number="102" Name="Init Program" ProgramChange="102"/>
+          <Patch Number="103" Name="Init Program" ProgramChange="103"/>
+          <Patch Number="104" Name="Init Program" ProgramChange="104"/>
+          <Patch Number="105" Name="Init Program" ProgramChange="105"/>
+          <Patch Number="106" Name="Init Program" ProgramChange="106"/>
+          <Patch Number="107" Name="Init Program" ProgramChange="107"/>
+          <Patch Number="108" Name="Init Program" ProgramChange="108"/>
+          <Patch Number="109" Name="Init Program" ProgramChange="109"/>
+          <Patch Number="110" Name="Init Program" ProgramChange="110"/>
+          <Patch Number="111" Name="Init Program" ProgramChange="111"/>
+          <Patch Number="112" Name="Init Program" ProgramChange="112"/>
+          <Patch Number="113" Name="Init Program" ProgramChange="113"/>
+          <Patch Number="114" Name="Init Program" ProgramChange="114"/>
+          <Patch Number="115" Name="Init Program" ProgramChange="115"/>
+          <Patch Number="116" Name="Init Program" ProgramChange="116"/>
+          <Patch Number="117" Name="Init Program" ProgramChange="117"/>
+          <Patch Number="118" Name="Init Program" ProgramChange="118"/>
+          <Patch Number="119" Name="Init Program" ProgramChange="119"/>
+          <Patch Number="120" Name="Init Program" ProgramChange="120"/>
+          <Patch Number="121" Name="Init Program" ProgramChange="121"/>
+          <Patch Number="122" Name="Init Program" ProgramChange="122"/>
+          <Patch Number="123" Name="Init Program" ProgramChange="123"/>
+          <Patch Number="124" Name="Init Program" ProgramChange="124"/>
+          <Patch Number="125" Name="Init Program" ProgramChange="125"/>
+          <Patch Number="126" Name="Init Program" ProgramChange="126"/>
+          <Patch Number="127" Name="Init Program" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="USER PROGRAM BANK G">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="11"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Init Program" ProgramChange="0"/>
+          <Patch Number="1" Name="Init Program" ProgramChange="1"/>
+          <Patch Number="2" Name="Init Program" ProgramChange="2"/>
+          <Patch Number="3" Name="Init Program" ProgramChange="3"/>
+          <Patch Number="4" Name="Init Program" ProgramChange="4"/>
+          <Patch Number="5" Name="Init Program" ProgramChange="5"/>
+          <Patch Number="6" Name="Init Program" ProgramChange="6"/>
+          <Patch Number="7" Name="Init Program" ProgramChange="7"/>
+          <Patch Number="8" Name="Init Program" ProgramChange="8"/>
+          <Patch Number="9" Name="Init Program" ProgramChange="9"/>
+          <Patch Number="10" Name="Init Program" ProgramChange="10"/>
+          <Patch Number="11" Name="Init Program" ProgramChange="11"/>
+          <Patch Number="12" Name="Init Program" ProgramChange="12"/>
+          <Patch Number="13" Name="Init Program" ProgramChange="13"/>
+          <Patch Number="14" Name="Init Program" ProgramChange="14"/>
+          <Patch Number="15" Name="Init Program" ProgramChange="15"/>
+          <Patch Number="16" Name="Init Program" ProgramChange="16"/>
+          <Patch Number="17" Name="Init Program" ProgramChange="17"/>
+          <Patch Number="18" Name="Init Program" ProgramChange="18"/>
+          <Patch Number="19" Name="Init Program" ProgramChange="19"/>
+          <Patch Number="20" Name="Init Program" ProgramChange="20"/>
+          <Patch Number="21" Name="Init Program" ProgramChange="21"/>
+          <Patch Number="22" Name="Init Program" ProgramChange="22"/>
+          <Patch Number="23" Name="Init Program" ProgramChange="23"/>
+          <Patch Number="24" Name="Init Program" ProgramChange="24"/>
+          <Patch Number="25" Name="Init Program" ProgramChange="25"/>
+          <Patch Number="26" Name="Init Program" ProgramChange="26"/>
+          <Patch Number="27" Name="Init Program" ProgramChange="27"/>
+          <Patch Number="28" Name="Init Program" ProgramChange="28"/>
+          <Patch Number="29" Name="Init Program" ProgramChange="29"/>
+          <Patch Number="30" Name="Init Program" ProgramChange="30"/>
+          <Patch Number="31" Name="Init Program" ProgramChange="31"/>
+          <Patch Number="32" Name="Init Program" ProgramChange="32"/>
+          <Patch Number="33" Name="Init Program" ProgramChange="33"/>
+          <Patch Number="34" Name="Init Program" ProgramChange="34"/>
+          <Patch Number="35" Name="Init Program" ProgramChange="35"/>
+          <Patch Number="36" Name="Init Program" ProgramChange="36"/>
+          <Patch Number="37" Name="Init Program" ProgramChange="37"/>
+          <Patch Number="38" Name="Init Program" ProgramChange="38"/>
+          <Patch Number="39" Name="Init Program" ProgramChange="39"/>
+          <Patch Number="40" Name="Init Program" ProgramChange="40"/>
+          <Patch Number="41" Name="Init Program" ProgramChange="41"/>
+          <Patch Number="42" Name="Init Program" ProgramChange="42"/>
+          <Patch Number="43" Name="Init Program" ProgramChange="43"/>
+          <Patch Number="44" Name="Init Program" ProgramChange="44"/>
+          <Patch Number="45" Name="Init Program" ProgramChange="45"/>
+          <Patch Number="46" Name="Init Program" ProgramChange="46"/>
+          <Patch Number="47" Name="Init Program" ProgramChange="47"/>
+          <Patch Number="48" Name="Init Program" ProgramChange="48"/>
+          <Patch Number="49" Name="Init Program" ProgramChange="49"/>
+          <Patch Number="50" Name="Init Program" ProgramChange="50"/>
+          <Patch Number="51" Name="Init Program" ProgramChange="51"/>
+          <Patch Number="52" Name="Init Program" ProgramChange="52"/>
+          <Patch Number="53" Name="Init Program" ProgramChange="53"/>
+          <Patch Number="54" Name="Init Program" ProgramChange="54"/>
+          <Patch Number="55" Name="Init Program" ProgramChange="55"/>
+          <Patch Number="56" Name="Init Program" ProgramChange="56"/>
+          <Patch Number="57" Name="Init Program" ProgramChange="57"/>
+          <Patch Number="58" Name="Init Program" ProgramChange="58"/>
+          <Patch Number="59" Name="Init Program" ProgramChange="59"/>
+          <Patch Number="60" Name="Init Program" ProgramChange="60"/>
+          <Patch Number="61" Name="Init Program" ProgramChange="61"/>
+          <Patch Number="62" Name="Init Program" ProgramChange="62"/>
+          <Patch Number="63" Name="Init Program" ProgramChange="63"/>
+          <Patch Number="64" Name="Init Program" ProgramChange="64"/>
+          <Patch Number="65" Name="Init Program" ProgramChange="65"/>
+          <Patch Number="66" Name="Init Program" ProgramChange="66"/>
+          <Patch Number="67" Name="Init Program" ProgramChange="67"/>
+          <Patch Number="68" Name="Init Program" ProgramChange="68"/>
+          <Patch Number="69" Name="Init Program" ProgramChange="69"/>
+          <Patch Number="70" Name="Init Program" ProgramChange="70"/>
+          <Patch Number="71" Name="Init Program" ProgramChange="71"/>
+          <Patch Number="72" Name="Init Program" ProgramChange="72"/>
+          <Patch Number="73" Name="Init Program" ProgramChange="73"/>
+          <Patch Number="74" Name="Init Program" ProgramChange="74"/>
+          <Patch Number="75" Name="Init Program" ProgramChange="75"/>
+          <Patch Number="76" Name="Init Program" ProgramChange="76"/>
+          <Patch Number="77" Name="Init Program" ProgramChange="77"/>
+          <Patch Number="78" Name="Init Program" ProgramChange="78"/>
+          <Patch Number="79" Name="Init Program" ProgramChange="79"/>
+          <Patch Number="80" Name="Init Program" ProgramChange="80"/>
+          <Patch Number="81" Name="Init Program" ProgramChange="81"/>
+          <Patch Number="82" Name="Init Program" ProgramChange="82"/>
+          <Patch Number="83" Name="Init Program" ProgramChange="83"/>
+          <Patch Number="84" Name="Init Program" ProgramChange="84"/>
+          <Patch Number="85" Name="Init Program" ProgramChange="85"/>
+          <Patch Number="86" Name="Init Program" ProgramChange="86"/>
+          <Patch Number="87" Name="Init Program" ProgramChange="87"/>
+          <Patch Number="88" Name="Init Program" ProgramChange="88"/>
+          <Patch Number="89" Name="Init Program" ProgramChange="89"/>
+          <Patch Number="90" Name="Init Program" ProgramChange="90"/>
+          <Patch Number="91" Name="Init Program" ProgramChange="91"/>
+          <Patch Number="92" Name="Init Program" ProgramChange="92"/>
+          <Patch Number="93" Name="Init Program" ProgramChange="93"/>
+          <Patch Number="94" Name="Init Program" ProgramChange="94"/>
+          <Patch Number="95" Name="Init Program" ProgramChange="95"/>
+          <Patch Number="96" Name="Init Program" ProgramChange="96"/>
+          <Patch Number="97" Name="Init Program" ProgramChange="97"/>
+          <Patch Number="98" Name="Init Program" ProgramChange="98"/>
+          <Patch Number="99" Name="Init Program" ProgramChange="99"/>
+          <Patch Number="100" Name="Init Program" ProgramChange="100"/>
+          <Patch Number="101" Name="Init Program" ProgramChange="101"/>
+          <Patch Number="102" Name="Init Program" ProgramChange="102"/>
+          <Patch Number="103" Name="Init Program" ProgramChange="103"/>
+          <Patch Number="104" Name="Init Program" ProgramChange="104"/>
+          <Patch Number="105" Name="Init Program" ProgramChange="105"/>
+          <Patch Number="106" Name="Init Program" ProgramChange="106"/>
+          <Patch Number="107" Name="Init Program" ProgramChange="107"/>
+          <Patch Number="108" Name="Init Program" ProgramChange="108"/>
+          <Patch Number="109" Name="Init Program" ProgramChange="109"/>
+          <Patch Number="110" Name="Init Program" ProgramChange="110"/>
+          <Patch Number="111" Name="Init Program" ProgramChange="111"/>
+          <Patch Number="112" Name="Init Program" ProgramChange="112"/>
+          <Patch Number="113" Name="Init Program" ProgramChange="113"/>
+          <Patch Number="114" Name="Init Program" ProgramChange="114"/>
+          <Patch Number="115" Name="Init Program" ProgramChange="115"/>
+          <Patch Number="116" Name="Init Program" ProgramChange="116"/>
+          <Patch Number="117" Name="Init Program" ProgramChange="117"/>
+          <Patch Number="118" Name="Init Program" ProgramChange="118"/>
+          <Patch Number="119" Name="Init Program" ProgramChange="119"/>
+          <Patch Number="120" Name="Init Program" ProgramChange="120"/>
+          <Patch Number="121" Name="Init Program" ProgramChange="121"/>
+          <Patch Number="122" Name="Init Program" ProgramChange="122"/>
+          <Patch Number="123" Name="Init Program" ProgramChange="123"/>
+          <Patch Number="124" Name="Init Program" ProgramChange="124"/>
+          <Patch Number="125" Name="Init Program" ProgramChange="125"/>
+          <Patch Number="126" Name="Init Program" ProgramChange="126"/>
+          <Patch Number="127" Name="Init Program" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="USER PROGRAM BANK H">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="12"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Init Program" ProgramChange="0"/>
+          <Patch Number="1" Name="Init Program" ProgramChange="1"/>
+          <Patch Number="2" Name="Init Program" ProgramChange="2"/>
+          <Patch Number="3" Name="Init Program" ProgramChange="3"/>
+          <Patch Number="4" Name="Init Program" ProgramChange="4"/>
+          <Patch Number="5" Name="Init Program" ProgramChange="5"/>
+          <Patch Number="6" Name="Init Program" ProgramChange="6"/>
+          <Patch Number="7" Name="Init Program" ProgramChange="7"/>
+          <Patch Number="8" Name="Init Program" ProgramChange="8"/>
+          <Patch Number="9" Name="Init Program" ProgramChange="9"/>
+          <Patch Number="10" Name="Init Program" ProgramChange="10"/>
+          <Patch Number="11" Name="Init Program" ProgramChange="11"/>
+          <Patch Number="12" Name="Init Program" ProgramChange="12"/>
+          <Patch Number="13" Name="Init Program" ProgramChange="13"/>
+          <Patch Number="14" Name="Init Program" ProgramChange="14"/>
+          <Patch Number="15" Name="Init Program" ProgramChange="15"/>
+          <Patch Number="16" Name="Init Program" ProgramChange="16"/>
+          <Patch Number="17" Name="Init Program" ProgramChange="17"/>
+          <Patch Number="18" Name="Init Program" ProgramChange="18"/>
+          <Patch Number="19" Name="Init Program" ProgramChange="19"/>
+          <Patch Number="20" Name="Init Program" ProgramChange="20"/>
+          <Patch Number="21" Name="Init Program" ProgramChange="21"/>
+          <Patch Number="22" Name="Init Program" ProgramChange="22"/>
+          <Patch Number="23" Name="Init Program" ProgramChange="23"/>
+          <Patch Number="24" Name="Init Program" ProgramChange="24"/>
+          <Patch Number="25" Name="Init Program" ProgramChange="25"/>
+          <Patch Number="26" Name="Init Program" ProgramChange="26"/>
+          <Patch Number="27" Name="Init Program" ProgramChange="27"/>
+          <Patch Number="28" Name="Init Program" ProgramChange="28"/>
+          <Patch Number="29" Name="Init Program" ProgramChange="29"/>
+          <Patch Number="30" Name="Init Program" ProgramChange="30"/>
+          <Patch Number="31" Name="Init Program" ProgramChange="31"/>
+          <Patch Number="32" Name="Init Program" ProgramChange="32"/>
+          <Patch Number="33" Name="Init Program" ProgramChange="33"/>
+          <Patch Number="34" Name="Init Program" ProgramChange="34"/>
+          <Patch Number="35" Name="Init Program" ProgramChange="35"/>
+          <Patch Number="36" Name="Init Program" ProgramChange="36"/>
+          <Patch Number="37" Name="Init Program" ProgramChange="37"/>
+          <Patch Number="38" Name="Init Program" ProgramChange="38"/>
+          <Patch Number="39" Name="Init Program" ProgramChange="39"/>
+          <Patch Number="40" Name="Init Program" ProgramChange="40"/>
+          <Patch Number="41" Name="Init Program" ProgramChange="41"/>
+          <Patch Number="42" Name="Init Program" ProgramChange="42"/>
+          <Patch Number="43" Name="Init Program" ProgramChange="43"/>
+          <Patch Number="44" Name="Init Program" ProgramChange="44"/>
+          <Patch Number="45" Name="Init Program" ProgramChange="45"/>
+          <Patch Number="46" Name="Init Program" ProgramChange="46"/>
+          <Patch Number="47" Name="Init Program" ProgramChange="47"/>
+          <Patch Number="48" Name="Init Program" ProgramChange="48"/>
+          <Patch Number="49" Name="Init Program" ProgramChange="49"/>
+          <Patch Number="50" Name="Init Program" ProgramChange="50"/>
+          <Patch Number="51" Name="Init Program" ProgramChange="51"/>
+          <Patch Number="52" Name="Init Program" ProgramChange="52"/>
+          <Patch Number="53" Name="Init Program" ProgramChange="53"/>
+          <Patch Number="54" Name="Init Program" ProgramChange="54"/>
+          <Patch Number="55" Name="Init Program" ProgramChange="55"/>
+          <Patch Number="56" Name="Init Program" ProgramChange="56"/>
+          <Patch Number="57" Name="Init Program" ProgramChange="57"/>
+          <Patch Number="58" Name="Init Program" ProgramChange="58"/>
+          <Patch Number="59" Name="Init Program" ProgramChange="59"/>
+          <Patch Number="60" Name="Init Program" ProgramChange="60"/>
+          <Patch Number="61" Name="Init Program" ProgramChange="61"/>
+          <Patch Number="62" Name="Init Program" ProgramChange="62"/>
+          <Patch Number="63" Name="Init Program" ProgramChange="63"/>
+          <Patch Number="64" Name="Init Program" ProgramChange="64"/>
+          <Patch Number="65" Name="Init Program" ProgramChange="65"/>
+          <Patch Number="66" Name="Init Program" ProgramChange="66"/>
+          <Patch Number="67" Name="Init Program" ProgramChange="67"/>
+          <Patch Number="68" Name="Init Program" ProgramChange="68"/>
+          <Patch Number="69" Name="Init Program" ProgramChange="69"/>
+          <Patch Number="70" Name="Init Program" ProgramChange="70"/>
+          <Patch Number="71" Name="Init Program" ProgramChange="71"/>
+          <Patch Number="72" Name="Init Program" ProgramChange="72"/>
+          <Patch Number="73" Name="Init Program" ProgramChange="73"/>
+          <Patch Number="74" Name="Init Program" ProgramChange="74"/>
+          <Patch Number="75" Name="Init Program" ProgramChange="75"/>
+          <Patch Number="76" Name="Init Program" ProgramChange="76"/>
+          <Patch Number="77" Name="Init Program" ProgramChange="77"/>
+          <Patch Number="78" Name="Init Program" ProgramChange="78"/>
+          <Patch Number="79" Name="Init Program" ProgramChange="79"/>
+          <Patch Number="80" Name="Init Program" ProgramChange="80"/>
+          <Patch Number="81" Name="Init Program" ProgramChange="81"/>
+          <Patch Number="82" Name="Init Program" ProgramChange="82"/>
+          <Patch Number="83" Name="Init Program" ProgramChange="83"/>
+          <Patch Number="84" Name="Init Program" ProgramChange="84"/>
+          <Patch Number="85" Name="Init Program" ProgramChange="85"/>
+          <Patch Number="86" Name="Init Program" ProgramChange="86"/>
+          <Patch Number="87" Name="Init Program" ProgramChange="87"/>
+          <Patch Number="88" Name="Init Program" ProgramChange="88"/>
+          <Patch Number="89" Name="Init Program" ProgramChange="89"/>
+          <Patch Number="90" Name="Init Program" ProgramChange="90"/>
+          <Patch Number="91" Name="Init Program" ProgramChange="91"/>
+          <Patch Number="92" Name="Init Program" ProgramChange="92"/>
+          <Patch Number="93" Name="Init Program" ProgramChange="93"/>
+          <Patch Number="94" Name="Init Program" ProgramChange="94"/>
+          <Patch Number="95" Name="Init Program" ProgramChange="95"/>
+          <Patch Number="96" Name="Init Program" ProgramChange="96"/>
+          <Patch Number="97" Name="Init Program" ProgramChange="97"/>
+          <Patch Number="98" Name="Init Program" ProgramChange="98"/>
+          <Patch Number="99" Name="Init Program" ProgramChange="99"/>
+          <Patch Number="100" Name="Init Program" ProgramChange="100"/>
+          <Patch Number="101" Name="Init Program" ProgramChange="101"/>
+          <Patch Number="102" Name="Init Program" ProgramChange="102"/>
+          <Patch Number="103" Name="Init Program" ProgramChange="103"/>
+          <Patch Number="104" Name="Init Program" ProgramChange="104"/>
+          <Patch Number="105" Name="Init Program" ProgramChange="105"/>
+          <Patch Number="106" Name="Init Program" ProgramChange="106"/>
+          <Patch Number="107" Name="Init Program" ProgramChange="107"/>
+          <Patch Number="108" Name="Init Program" ProgramChange="108"/>
+          <Patch Number="109" Name="Init Program" ProgramChange="109"/>
+          <Patch Number="110" Name="Init Program" ProgramChange="110"/>
+          <Patch Number="111" Name="Init Program" ProgramChange="111"/>
+          <Patch Number="112" Name="Init Program" ProgramChange="112"/>
+          <Patch Number="113" Name="Init Program" ProgramChange="113"/>
+          <Patch Number="114" Name="Init Program" ProgramChange="114"/>
+          <Patch Number="115" Name="Init Program" ProgramChange="115"/>
+          <Patch Number="116" Name="Init Program" ProgramChange="116"/>
+          <Patch Number="117" Name="Init Program" ProgramChange="117"/>
+          <Patch Number="118" Name="Init Program" ProgramChange="118"/>
+          <Patch Number="119" Name="Init Program" ProgramChange="119"/>
+          <Patch Number="120" Name="Init Program" ProgramChange="120"/>
+          <Patch Number="121" Name="Init Program" ProgramChange="121"/>
+          <Patch Number="122" Name="Init Program" ProgramChange="122"/>
+          <Patch Number="123" Name="Init Program" ProgramChange="123"/>
+          <Patch Number="124" Name="Init Program" ProgramChange="124"/>
+          <Patch Number="125" Name="Init Program" ProgramChange="125"/>
+          <Patch Number="126" Name="Init Program" ProgramChange="126"/>
+          <Patch Number="127" Name="Init Program" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="ARP BANK MONO">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="13"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Up" ProgramChange="0"/>
+          <Patch Number="1" Name="Down" ProgramChange="1"/>
+          <Patch Number="2" Name="Up &amp; Down 1" ProgramChange="2"/>
+          <Patch Number="3" Name="Up &amp; Down 2" ProgramChange="3"/>
+          <Patch Number="4" Name="Played" ProgramChange="4"/>
+          <Patch Number="5" Name="Walking Up" ProgramChange="5"/>
+          <Patch Number="6" Name="Walking Down" ProgramChange="6"/>
+          <Patch Number="7" Name="Walking Played" ProgramChange="7"/>
+          <Patch Number="8" Name="Random 1" ProgramChange="8"/>
+          <Patch Number="9" Name="Random 2" ProgramChange="9"/>
+          <Patch Number="10" Name="Random 3" ProgramChange="10"/>
+          <Patch Number="11" Name="TB 1" ProgramChange="11"/>
+          <Patch Number="12" Name="TB 2" ProgramChange="12"/>
+          <Patch Number="13" Name="TB 3" ProgramChange="13"/>
+          <Patch Number="14" Name="TB 4" ProgramChange="14"/>
+          <Patch Number="15" Name="TB 5" ProgramChange="15"/>
+          <Patch Number="16" Name="TB 6" ProgramChange="16"/>
+          <Patch Number="17" Name="TB 7" ProgramChange="17"/>
+          <Patch Number="18" Name="TB 8" ProgramChange="18"/>
+          <Patch Number="19" Name="Trance 1" ProgramChange="19"/>
+          <Patch Number="20" Name="Trance 2" ProgramChange="20"/>
+          <Patch Number="21" Name="TB 9" ProgramChange="21"/>
+          <Patch Number="22" Name="TB 10 Up" ProgramChange="22"/>
+          <Patch Number="23" Name="TB 11 DN" ProgramChange="23"/>
+          <Patch Number="24" Name="TB 12 UP/DN" ProgramChange="24"/>
+          <Patch Number="25" Name="Trance Bass 1" ProgramChange="25"/>
+          <Patch Number="26" Name="Trance Bass 2" ProgramChange="26"/>
+          <Patch Number="27" Name="TB 13" ProgramChange="27"/>
+          <Patch Number="28" Name="TB 14" ProgramChange="28"/>
+          <Patch Number="29" Name="TB 15" ProgramChange="29"/>
+          <Patch Number="30" Name="TB 16" ProgramChange="30"/>
+          <Patch Number="31" Name="TB 17" ProgramChange="31"/>
+          <Patch Number="32" Name="TB 18" ProgramChange="32"/>
+          <Patch Number="33" Name="80's 1" ProgramChange="33"/>
+          <Patch Number="34" Name="TB Glide 1" ProgramChange="34"/>
+          <Patch Number="35" Name="TB 19" ProgramChange="35"/>
+          <Patch Number="36" Name="TB Glide 2" ProgramChange="36"/>
+          <Patch Number="37" Name="TB Glide 3" ProgramChange="37"/>
+          <Patch Number="38" Name="TB 20" ProgramChange="38"/>
+          <Patch Number="39" Name="Muso 1 Accented" ProgramChange="39"/>
+          <Patch Number="40" Name="Muso 1 Slightly Accented" ProgramChange="40"/>
+          <Patch Number="41" Name="Trill Dn Accented" ProgramChange="41"/>
+          <Patch Number="42" Name="Trill Dn Slightly Accented" ProgramChange="42"/>
+          <Patch Number="43" Name="Trill Up Accented" ProgramChange="43"/>
+          <Patch Number="44" Name="Trill Up Slightly Accented" ProgramChange="44"/>
+          <Patch Number="45" Name="Trill Dn/Up Accented" ProgramChange="45"/>
+          <Patch Number="46" Name="Trill Dn/Up Slightly Accented" ProgramChange="46"/>
+          <Patch Number="47" Name="Trill Up/Dn Accented" ProgramChange="47"/>
+          <Patch Number="48" Name="Trill Up/Dn Slightly Accented" ProgramChange="48"/>
+          <Patch Number="49" Name="Rave 1 Accented" ProgramChange="49"/>
+          <Patch Number="50" Name="Rave 1 Slightly Accented" ProgramChange="50"/>
+          <Patch Number="51" Name="Rave 2 Accented" ProgramChange="51"/>
+          <Patch Number="52" Name="Rave 2 Slightly Accented" ProgramChange="52"/>
+          <Patch Number="53" Name="Shimmie Accented" ProgramChange="53"/>
+          <Patch Number="54" Name="Shimmie Slightly Accented" ProgramChange="54"/>
+          <Patch Number="55" Name="Running Up Accented" ProgramChange="55"/>
+          <Patch Number="56" Name="Running Up Slightly Accented" ProgramChange="56"/>
+          <Patch Number="57" Name="Running Dn Accented" ProgramChange="57"/>
+          <Patch Number="58" Name="Running Dn Slightly Accented" ProgramChange="58"/>
+          <Patch Number="59" Name="R'ning Up/Dn Accented" ProgramChange="59"/>
+          <Patch Number="60" Name="R'ning Up/Dn Slightly Accented" ProgramChange="60"/>
+          <Patch Number="61" Name="R'ning Dn/Up Accented" ProgramChange="61"/>
+          <Patch Number="62" Name="R'ning Dn/Up Slightly Accented" ProgramChange="62"/>
+          <Patch Number="63" Name="3/3 Up Accented" ProgramChange="63"/>
+          <Patch Number="64" Name="3/3 Up Slightly Accented" ProgramChange="64"/>
+          <Patch Number="65" Name="3/3 Dn Accented" ProgramChange="65"/>
+          <Patch Number="66" Name="3/3 Dn Slightly Acented" ProgramChange="66"/>
+          <Patch Number="67" Name="3/3 Up/Dn Accented" ProgramChange="67"/>
+          <Patch Number="68" Name="3/3 Up/Dn Slightly Accented" ProgramChange="68"/>
+          <Patch Number="69" Name="9/8 Pattern Accented" ProgramChange="69"/>
+          <Patch Number="70" Name="9/8 Pattern Slightly Accented" ProgramChange="70"/>
+          <Patch Number="71" Name="Walking Up 2 Accented" ProgramChange="71"/>
+          <Patch Number="72" Name="Walking Up 2 Slightly Accented" ProgramChange="72"/>
+          <Patch Number="73" Name="Walking Dn 2 Accented" ProgramChange="73"/>
+          <Patch Number="74" Name="Walking Dn 2 Slightly Accented" ProgramChange="74"/>
+          <Patch Number="75" Name="Walk Up/Dn 2 Accented" ProgramChange="75"/>
+          <Patch Number="76" Name="Walk Up/Dn 2 Slightly Accented" ProgramChange="76"/>
+          <Patch Number="77" Name="Walk Dn/Up 2 Accented" ProgramChange="77"/>
+          <Patch Number="78" Name="Walk Dn/Up 2 Slightly Accented" ProgramChange="78"/>
+          <Patch Number="79" Name="Walk 3 Up Accented" ProgramChange="79"/>
+          <Patch Number="80" Name="Walk 3 Up Slightly Accented" ProgramChange="80"/>
+          <Patch Number="81" Name="Walk 3 Dn Accented" ProgramChange="81"/>
+          <Patch Number="82" Name="Walk 3 Dn Slightly Accented" ProgramChange="82"/>
+          <Patch Number="83" Name="House 1 Accented" ProgramChange="83"/>
+          <Patch Number="84" Name="House 1 Slightly Accented" ProgramChange="84"/>
+          <Patch Number="85" Name="Walk Accented" ProgramChange="85"/>
+          <Patch Number="86" Name="Walk Slightly Accented" ProgramChange="86"/>
+          <Patch Number="87" Name="MUSO 2 Accented" ProgramChange="87"/>
+          <Patch Number="88" Name="MUSO 2 Slightly Accented" ProgramChange="88"/>
+          <Patch Number="89" Name="Shuffle Accented" ProgramChange="89"/>
+          <Patch Number="90" Name="Shuffle Slightly Accented" ProgramChange="90"/>
+          <Patch Number="91" Name="80's 2 Accented" ProgramChange="91"/>
+          <Patch Number="92" Name="80's 2 Slightly Accented" ProgramChange="92"/>
+          <Patch Number="93" Name="80's 3 Accented" ProgramChange="93"/>
+          <Patch Number="94" Name="80's 3 Slightly Accented" ProgramChange="94"/>
+          <Patch Number="95" Name="C52's Accented" ProgramChange="95"/>
+          <Patch Number="96" Name="C52's Slightly Accented" ProgramChange="96"/>
+          <Patch Number="97" Name="C52's Variation Accented" ProgramChange="97"/>
+          <Patch Number="98" Name="C52's Variation Slightly Accented" ProgramChange="98"/>
+          <Patch Number="99" Name="Walking Up 1 Accented" ProgramChange="99"/>
+          <Patch Number="100" Name="Walking Up 1 Slightly Accented" ProgramChange="100"/>
+          <Patch Number="101" Name="Walking Dn 1 Accented" ProgramChange="101"/>
+          <Patch Number="102" Name="Walking Dn 1 Slightly Accented" ProgramChange="102"/>
+          <Patch Number="103" Name="Walking Up/Dn Accented" ProgramChange="103"/>
+          <Patch Number="104" Name="Walking Up/Dn Slightly Accented" ProgramChange="104"/>
+          <Patch Number="105" Name="Walking Dn/Up Accented" ProgramChange="105"/>
+          <Patch Number="106" Name="Walking Dn/Up Slightly Accented" ProgramChange="106"/>
+          <Patch Number="107" Name="Techno Accented" ProgramChange="107"/>
+          <Patch Number="108" Name="Techno Slightly Accented" ProgramChange="108"/>
+          <Patch Number="109" Name="Techno Accented" ProgramChange="109"/>
+          <Patch Number="110" Name="Techno Slightly Accented" ProgramChange="110"/>
+          <Patch Number="111" Name="UP UP UP DN" ProgramChange="111"/>
+          <Patch Number="112" Name="UP UP DN UP" ProgramChange="112"/>
+          <Patch Number="113" Name="UP DN UP UP" ProgramChange="113"/>
+          <Patch Number="114" Name="DN UP UP UP" ProgramChange="114"/>
+          <Patch Number="115" Name="DN DN UP UP" ProgramChange="115"/>
+          <Patch Number="116" Name="DN DN DN UP" ProgramChange="116"/>
+          <Patch Number="117" Name="DN DN UP DN" ProgramChange="117"/>
+          <Patch Number="118" Name="DN UP DN DN" ProgramChange="118"/>
+          <Patch Number="119" Name="UP DN DN DN" ProgramChange="119"/>
+          <Patch Number="120" Name="UP DN DN UP" ProgramChange="120"/>
+          <Patch Number="121" Name="DN UP UP DN" ProgramChange="121"/>
+          <Patch Number="122" Name="Harm Up 1" ProgramChange="122"/>
+          <Patch Number="123" Name="Harm Up 2" ProgramChange="123"/>
+          <Patch Number="124" Name="Harm Up 3" ProgramChange="124"/>
+          <Patch Number="125" Name="Harm Dn 1" ProgramChange="125"/>
+          <Patch Number="126" Name="Harm Dn 2" ProgramChange="126"/>
+          <Patch Number="127" Name="Harm Dn 3" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="ARP BANK POLY">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="14"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Bass Trance 1" ProgramChange="0"/>
+          <Patch Number="1" Name="303 Trance 1" ProgramChange="1"/>
+          <Patch Number="2" Name="303 Trance 1v1" ProgramChange="2"/>
+          <Patch Number="3" Name="303 Trance 2" ProgramChange="3"/>
+          <Patch Number="4" Name="Bass Trance 2" ProgramChange="4"/>
+          <Patch Number="5" Name="303 Trance 3" ProgramChange="5"/>
+          <Patch Number="6" Name="303 Trance 3v1" ProgramChange="6"/>
+          <Patch Number="7" Name="303 Trance 4" ProgramChange="7"/>
+          <Patch Number="8" Name="303 Trance 4v1" ProgramChange="8"/>
+          <Patch Number="9" Name="303 Trance 5" ProgramChange="9"/>
+          <Patch Number="10" Name="Up Dn Variation" ProgramChange="10"/>
+          <Patch Number="11" Name="303 Trance 6" ProgramChange="11"/>
+          <Patch Number="12" Name="Minor Up Dn" ProgramChange="12"/>
+          <Patch Number="13" Name="Bleep 1" ProgramChange="13"/>
+          <Patch Number="14" Name="Bleep 2" ProgramChange="14"/>
+          <Patch Number="15" Name="Bleep 3" ProgramChange="15"/>
+          <Patch Number="16" Name="Bleep 4" ProgramChange="16"/>
+          <Patch Number="17" Name="Bleep 4v1" ProgramChange="17"/>
+          <Patch Number="18" Name="Bleep 5" ProgramChange="18"/>
+          <Patch Number="19" Name="Bleep 6" ProgramChange="19"/>
+          <Patch Number="20" Name="Up Dn Runner" ProgramChange="20"/>
+          <Patch Number="21" Name="Bleep 7" ProgramChange="21"/>
+          <Patch Number="22" Name="Bleep 8" ProgramChange="22"/>
+          <Patch Number="23" Name="Bleep 9" ProgramChange="23"/>
+          <Patch Number="24" Name="303 Trance 7" ProgramChange="24"/>
+          <Patch Number="25" Name="Bleep 10" ProgramChange="25"/>
+          <Patch Number="26" Name="Bleep 11" ProgramChange="26"/>
+          <Patch Number="27" Name="Bleep 12" ProgramChange="27"/>
+          <Patch Number="28" Name="303 Trance 8" ProgramChange="28"/>
+          <Patch Number="29" Name="303 Trance 9" ProgramChange="29"/>
+          <Patch Number="30" Name="303 Trance 10" ProgramChange="30"/>
+          <Patch Number="31" Name="Bleep 13" ProgramChange="31"/>
+          <Patch Number="32" Name="303 Trance 11" ProgramChange="32"/>
+          <Patch Number="33" Name="Bleep 14" ProgramChange="33"/>
+          <Patch Number="34" Name="303 Trance 12" ProgramChange="34"/>
+          <Patch Number="35" Name="303 Trance 12v1" ProgramChange="35"/>
+          <Patch Number="36" Name="303 Trance 12v2" ProgramChange="36"/>
+          <Patch Number="37" Name="303 Trance 12v3" ProgramChange="37"/>
+          <Patch Number="38" Name="Bass Trance 3" ProgramChange="38"/>
+          <Patch Number="39" Name="Bass Trance 4" ProgramChange="39"/>
+          <Patch Number="40" Name="NAG 1" ProgramChange="40"/>
+          <Patch Number="41" Name="NAG 2" ProgramChange="41"/>
+          <Patch Number="42" Name="NAG 3" ProgramChange="42"/>
+          <Patch Number="43" Name="NAG 4" ProgramChange="43"/>
+          <Patch Number="44" Name="NAG 5" ProgramChange="44"/>
+          <Patch Number="45" Name="NAG 6" ProgramChange="45"/>
+          <Patch Number="46" Name="NAG 7" ProgramChange="46"/>
+          <Patch Number="47" Name="NAG 8" ProgramChange="47"/>
+          <Patch Number="48" Name="NAG 9" ProgramChange="48"/>
+          <Patch Number="49" Name="DN DN DN UP" ProgramChange="49"/>
+          <Patch Number="50" Name="DN DN UP DN" ProgramChange="50"/>
+          <Patch Number="51" Name="DN DN UP DN 2" ProgramChange="51"/>
+          <Patch Number="52" Name="DN DN UP UP" ProgramChange="52"/>
+          <Patch Number="53" Name="DN UP DN DN" ProgramChange="53"/>
+          <Patch Number="54" Name="DN UP UP UP" ProgramChange="54"/>
+          <Patch Number="55" Name="UP DN DN DN" ProgramChange="55"/>
+          <Patch Number="56" Name="UP DN UP UP" ProgramChange="56"/>
+          <Patch Number="57" Name="UP UP DN DN" ProgramChange="57"/>
+          <Patch Number="58" Name="UP UP DN UP" ProgramChange="58"/>
+          <Patch Number="59" Name="UP UP UP DN" ProgramChange="59"/>
+          <Patch Number="60" Name="Bass 1" ProgramChange="60"/>
+          <Patch Number="61" Name="Bass 2" ProgramChange="61"/>
+          <Patch Number="62" Name="Bass  3" ProgramChange="62"/>
+          <Patch Number="63" Name="Bass 4" ProgramChange="63"/>
+          <Patch Number="64" Name="Bass 5" ProgramChange="64"/>
+          <Patch Number="65" Name="Bass 6" ProgramChange="65"/>
+          <Patch Number="66" Name="Bass 7" ProgramChange="66"/>
+          <Patch Number="67" Name="Bass 8" ProgramChange="67"/>
+          <Patch Number="68" Name="Bass 9" ProgramChange="68"/>
+          <Patch Number="69" Name="Bass 10" ProgramChange="69"/>
+          <Patch Number="70" Name="Bass 11" ProgramChange="70"/>
+          <Patch Number="71" Name="Bass 12" ProgramChange="71"/>
+          <Patch Number="72" Name="Bass 13" ProgramChange="72"/>
+          <Patch Number="73" Name="Bass 14" ProgramChange="73"/>
+          <Patch Number="74" Name="Bass 15" ProgramChange="74"/>
+          <Patch Number="75" Name="Bass 16" ProgramChange="75"/>
+          <Patch Number="76" Name="Bass 17" ProgramChange="76"/>
+          <Patch Number="77" Name="Bass 18" ProgramChange="77"/>
+          <Patch Number="78" Name="Bass 19" ProgramChange="78"/>
+          <Patch Number="79" Name="Bass 20" ProgramChange="79"/>
+          <Patch Number="80" Name="Techno 1" ProgramChange="80"/>
+          <Patch Number="81" Name="Techno 2" ProgramChange="81"/>
+          <Patch Number="82" Name="Techno 3" ProgramChange="82"/>
+          <Patch Number="83" Name="Techno 4" ProgramChange="83"/>
+          <Patch Number="84" Name="Techno 5" ProgramChange="84"/>
+          <Patch Number="85" Name="Techno 6" ProgramChange="85"/>
+          <Patch Number="86" Name="Techno 7" ProgramChange="86"/>
+          <Patch Number="87" Name="Techno 8" ProgramChange="87"/>
+          <Patch Number="88" Name="Techno 9" ProgramChange="88"/>
+          <Patch Number="89" Name="Techno 10" ProgramChange="89"/>
+          <Patch Number="90" Name="Techno 11" ProgramChange="90"/>
+          <Patch Number="91" Name="Techno 12" ProgramChange="91"/>
+          <Patch Number="92" Name="Techno 13" ProgramChange="92"/>
+          <Patch Number="93" Name="Techno 14" ProgramChange="93"/>
+          <Patch Number="94" Name="Techno 15" ProgramChange="94"/>
+          <Patch Number="95" Name="Techno 16" ProgramChange="95"/>
+          <Patch Number="96" Name="Techno 17" ProgramChange="96"/>
+          <Patch Number="97" Name="Techno 18" ProgramChange="97"/>
+          <Patch Number="98" Name="D-D-DAA" ProgramChange="98"/>
+          <Patch Number="99" Name="D-D-DAA 2" ProgramChange="99"/>
+          <Patch Number="100" Name="DADADADA" ProgramChange="100"/>
+          <Patch Number="101" Name="DADADA 2" ProgramChange="101"/>
+          <Patch Number="102" Name="OHH" ProgramChange="102"/>
+          <Patch Number="103" Name="CHH" ProgramChange="103"/>
+          <Patch Number="104" Name="BD" ProgramChange="104"/>
+          <Patch Number="105" Name="Bass Lick" ProgramChange="105"/>
+          <Patch Number="106" Name="Octave Pulse" ProgramChange="106"/>
+          <Patch Number="107" Name="Nag 10" ProgramChange="107"/>
+          <Patch Number="108" Name="Nag 11" ProgramChange="108"/>
+          <Patch Number="109" Name="Nag 12" ProgramChange="109"/>
+          <Patch Number="110" Name="Nag 13" ProgramChange="110"/>
+          <Patch Number="111" Name="Nag 14" ProgramChange="111"/>
+          <Patch Number="112" Name="Nag 15" ProgramChange="112"/>
+          <Patch Number="113" Name="Nag 16" ProgramChange="113"/>
+          <Patch Number="114" Name="Nag 17" ProgramChange="114"/>
+          <Patch Number="115" Name="Nag 18" ProgramChange="115"/>
+          <Patch Number="116" Name="Nag 19" ProgramChange="116"/>
+          <Patch Number="117" Name="Nag 20" ProgramChange="117"/>
+          <Patch Number="118" Name="Nag 21" ProgramChange="118"/>
+          <Patch Number="119" Name="Nag 22" ProgramChange="119"/>
+          <Patch Number="120" Name="Nag 23" ProgramChange="120"/>
+          <Patch Number="121" Name="Nag 24" ProgramChange="121"/>
+          <Patch Number="122" Name="Nag 25" ProgramChange="122"/>
+          <Patch Number="123" Name="Nag 26" ProgramChange="123"/>
+          <Patch Number="124" Name="Nag 27" ProgramChange="124"/>
+          <Patch Number="125" Name="Nag 28" ProgramChange="125"/>
+          <Patch Number="126" Name="Nag 29" ProgramChange="126"/>
+          <Patch Number="127" Name="Nag 30" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="USER ARP BANK">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="15"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Init Program" ProgramChange="0"/>
+          <Patch Number="1" Name="Init Program" ProgramChange="1"/>
+          <Patch Number="2" Name="Init Program" ProgramChange="2"/>
+          <Patch Number="3" Name="Init Program" ProgramChange="3"/>
+          <Patch Number="4" Name="Init Program" ProgramChange="4"/>
+          <Patch Number="5" Name="Init Program" ProgramChange="5"/>
+          <Patch Number="6" Name="Init Program" ProgramChange="6"/>
+          <Patch Number="7" Name="Init Program" ProgramChange="7"/>
+          <Patch Number="8" Name="Init Program" ProgramChange="8"/>
+          <Patch Number="9" Name="Init Program" ProgramChange="9"/>
+          <Patch Number="10" Name="Init Program" ProgramChange="10"/>
+          <Patch Number="11" Name="Init Program" ProgramChange="11"/>
+          <Patch Number="12" Name="Init Program" ProgramChange="12"/>
+          <Patch Number="13" Name="Init Program" ProgramChange="13"/>
+          <Patch Number="14" Name="Init Program" ProgramChange="14"/>
+          <Patch Number="15" Name="Init Program" ProgramChange="15"/>
+          <Patch Number="16" Name="Init Program" ProgramChange="16"/>
+          <Patch Number="17" Name="Init Program" ProgramChange="17"/>
+          <Patch Number="18" Name="Init Program" ProgramChange="18"/>
+          <Patch Number="19" Name="Init Program" ProgramChange="19"/>
+          <Patch Number="20" Name="Init Program" ProgramChange="20"/>
+          <Patch Number="21" Name="Init Program" ProgramChange="21"/>
+          <Patch Number="22" Name="Init Program" ProgramChange="22"/>
+          <Patch Number="23" Name="Init Program" ProgramChange="23"/>
+          <Patch Number="24" Name="Init Program" ProgramChange="24"/>
+          <Patch Number="25" Name="Init Program" ProgramChange="25"/>
+          <Patch Number="26" Name="Init Program" ProgramChange="26"/>
+          <Patch Number="27" Name="Init Program" ProgramChange="27"/>
+          <Patch Number="28" Name="Init Program" ProgramChange="28"/>
+          <Patch Number="29" Name="Init Program" ProgramChange="29"/>
+          <Patch Number="30" Name="Init Program" ProgramChange="30"/>
+          <Patch Number="31" Name="Init Program" ProgramChange="31"/>
+          <Patch Number="32" Name="Init Program" ProgramChange="32"/>
+          <Patch Number="33" Name="Init Program" ProgramChange="33"/>
+          <Patch Number="34" Name="Init Program" ProgramChange="34"/>
+          <Patch Number="35" Name="Init Program" ProgramChange="35"/>
+          <Patch Number="36" Name="Init Program" ProgramChange="36"/>
+          <Patch Number="37" Name="Init Program" ProgramChange="37"/>
+          <Patch Number="38" Name="Init Program" ProgramChange="38"/>
+          <Patch Number="39" Name="Init Program" ProgramChange="39"/>
+          <Patch Number="40" Name="Init Program" ProgramChange="40"/>
+          <Patch Number="41" Name="Init Program" ProgramChange="41"/>
+          <Patch Number="42" Name="Init Program" ProgramChange="42"/>
+          <Patch Number="43" Name="Init Program" ProgramChange="43"/>
+          <Patch Number="44" Name="Init Program" ProgramChange="44"/>
+          <Patch Number="45" Name="Init Program" ProgramChange="45"/>
+          <Patch Number="46" Name="Init Program" ProgramChange="46"/>
+          <Patch Number="47" Name="Init Program" ProgramChange="47"/>
+          <Patch Number="48" Name="Init Program" ProgramChange="48"/>
+          <Patch Number="49" Name="Init Program" ProgramChange="49"/>
+          <Patch Number="50" Name="Init Program" ProgramChange="50"/>
+          <Patch Number="51" Name="Init Program" ProgramChange="51"/>
+          <Patch Number="52" Name="Init Program" ProgramChange="52"/>
+          <Patch Number="53" Name="Init Program" ProgramChange="53"/>
+          <Patch Number="54" Name="Init Program" ProgramChange="54"/>
+          <Patch Number="55" Name="Init Program" ProgramChange="55"/>
+          <Patch Number="56" Name="Init Program" ProgramChange="56"/>
+          <Patch Number="57" Name="Init Program" ProgramChange="57"/>
+          <Patch Number="58" Name="Init Program" ProgramChange="58"/>
+          <Patch Number="59" Name="Init Program" ProgramChange="59"/>
+          <Patch Number="60" Name="Init Program" ProgramChange="60"/>
+          <Patch Number="61" Name="Init Program" ProgramChange="61"/>
+          <Patch Number="62" Name="Init Program" ProgramChange="62"/>
+          <Patch Number="63" Name="Init Program" ProgramChange="63"/>
+          <Patch Number="64" Name="Init Program" ProgramChange="64"/>
+          <Patch Number="65" Name="Init Program" ProgramChange="65"/>
+          <Patch Number="66" Name="Init Program" ProgramChange="66"/>
+          <Patch Number="67" Name="Init Program" ProgramChange="67"/>
+          <Patch Number="68" Name="Init Program" ProgramChange="68"/>
+          <Patch Number="69" Name="Init Program" ProgramChange="69"/>
+          <Patch Number="70" Name="Init Program" ProgramChange="70"/>
+          <Patch Number="71" Name="Init Program" ProgramChange="71"/>
+          <Patch Number="72" Name="Init Program" ProgramChange="72"/>
+          <Patch Number="73" Name="Init Program" ProgramChange="73"/>
+          <Patch Number="74" Name="Init Program" ProgramChange="74"/>
+          <Patch Number="75" Name="Init Program" ProgramChange="75"/>
+          <Patch Number="76" Name="Init Program" ProgramChange="76"/>
+          <Patch Number="77" Name="Init Program" ProgramChange="77"/>
+          <Patch Number="78" Name="Init Program" ProgramChange="78"/>
+          <Patch Number="79" Name="Init Program" ProgramChange="79"/>
+          <Patch Number="80" Name="Init Program" ProgramChange="80"/>
+          <Patch Number="81" Name="Init Program" ProgramChange="81"/>
+          <Patch Number="82" Name="Init Program" ProgramChange="82"/>
+          <Patch Number="83" Name="Init Program" ProgramChange="83"/>
+          <Patch Number="84" Name="Init Program" ProgramChange="84"/>
+          <Patch Number="85" Name="Init Program" ProgramChange="85"/>
+          <Patch Number="86" Name="Init Program" ProgramChange="86"/>
+          <Patch Number="87" Name="Init Program" ProgramChange="87"/>
+          <Patch Number="88" Name="Init Program" ProgramChange="88"/>
+          <Patch Number="89" Name="Init Program" ProgramChange="89"/>
+          <Patch Number="90" Name="Init Program" ProgramChange="90"/>
+          <Patch Number="91" Name="Init Program" ProgramChange="91"/>
+          <Patch Number="92" Name="Init Program" ProgramChange="92"/>
+          <Patch Number="93" Name="Init Program" ProgramChange="93"/>
+          <Patch Number="94" Name="Init Program" ProgramChange="94"/>
+          <Patch Number="95" Name="Init Program" ProgramChange="95"/>
+          <Patch Number="96" Name="Init Program" ProgramChange="96"/>
+          <Patch Number="97" Name="Init Program" ProgramChange="97"/>
+          <Patch Number="98" Name="Init Program" ProgramChange="98"/>
+          <Patch Number="99" Name="Init Program" ProgramChange="99"/>
+          <Patch Number="100" Name="Init Program" ProgramChange="100"/>
+          <Patch Number="101" Name="Init Program" ProgramChange="101"/>
+          <Patch Number="102" Name="Init Program" ProgramChange="102"/>
+          <Patch Number="103" Name="Init Program" ProgramChange="103"/>
+          <Patch Number="104" Name="Init Program" ProgramChange="104"/>
+          <Patch Number="105" Name="Init Program" ProgramChange="105"/>
+          <Patch Number="106" Name="Init Program" ProgramChange="106"/>
+          <Patch Number="107" Name="Init Program" ProgramChange="107"/>
+          <Patch Number="108" Name="Init Program" ProgramChange="108"/>
+          <Patch Number="109" Name="Init Program" ProgramChange="109"/>
+          <Patch Number="110" Name="Init Program" ProgramChange="110"/>
+          <Patch Number="111" Name="Init Program" ProgramChange="111"/>
+          <Patch Number="112" Name="Init Program" ProgramChange="112"/>
+          <Patch Number="113" Name="Init Program" ProgramChange="113"/>
+          <Patch Number="114" Name="Init Program" ProgramChange="114"/>
+          <Patch Number="115" Name="Init Program" ProgramChange="115"/>
+          <Patch Number="116" Name="Init Program" ProgramChange="116"/>
+          <Patch Number="117" Name="Init Program" ProgramChange="117"/>
+          <Patch Number="118" Name="Init Program" ProgramChange="118"/>
+          <Patch Number="119" Name="Init Program" ProgramChange="119"/>
+          <Patch Number="120" Name="Init Program" ProgramChange="120"/>
+          <Patch Number="121" Name="Init Program" ProgramChange="121"/>
+          <Patch Number="122" Name="Init Program" ProgramChange="122"/>
+          <Patch Number="123" Name="Init Program" ProgramChange="123"/>
+          <Patch Number="124" Name="Init Program" ProgramChange="124"/>
+          <Patch Number="125" Name="Init Program" ProgramChange="125"/>
+          <Patch Number="126" Name="Init Program" ProgramChange="126"/>
+          <Patch Number="127" Name="Init Program" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="DRUM MAP A">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="18"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="909 Kick 2" ProgramChange="0"/>
+          <Patch Number="1" Name="Rim Shot" ProgramChange="1"/>
+          <Patch Number="2" Name="808 Snare 2" ProgramChange="2"/>
+          <Patch Number="3" Name="808 Clap" ProgramChange="3"/>
+          <Patch Number="4" Name="909 Snare" ProgramChange="4"/>
+          <Patch Number="5" Name="Electro Low Tom 1" ProgramChange="5"/>
+          <Patch Number="6" Name="Closed High Hat 1" ProgramChange="6"/>
+          <Patch Number="7" Name="Electro Low Tom 2" ProgramChange="7"/>
+          <Patch Number="8" Name="Closed High Hat 2" ProgramChange="8"/>
+          <Patch Number="9" Name="Electro Mid Tom" ProgramChange="9"/>
+          <Patch Number="10" Name="Open High Hat 1" ProgramChange="10"/>
+          <Patch Number="11" Name="Electro Hi Tom 1" ProgramChange="11"/>
+          <Patch Number="12" Name="Electro Hi Tom 2" ProgramChange="12"/>
+          <Patch Number="13" Name="Crash Cymbal 1" ProgramChange="13"/>
+          <Patch Number="14" Name="Crash Cymbal 3" ProgramChange="14"/>
+          <Patch Number="15" Name="Crash Cymbal 4" ProgramChange="15"/>
+          <Patch Number="16" Name="909 Clap 3" ProgramChange="16"/>
+          <Patch Number="17" Name="909 Low Tom 1" ProgramChange="17"/>
+          <Patch Number="18" Name="808 Closed HiHat" ProgramChange="18"/>
+          <Patch Number="19" Name="909 Low Tom 2" ProgramChange="19"/>
+          <Patch Number="20" Name="808 Cowbell" ProgramChange="20"/>
+          <Patch Number="21" Name="909 Mid Tom" ProgramChange="21"/>
+          <Patch Number="22" Name="808 Open HiHat" ProgramChange="22"/>
+          <Patch Number="23" Name="909 Hi Tom 1" ProgramChange="23"/>
+          <Patch Number="24" Name="909 Hi Tom 2" ProgramChange="24"/>
+          <Patch Number="25" Name="808 Kick click L" ProgramChange="25"/>
+          <Patch Number="26" Name="808 Low Conga" ProgramChange="26"/>
+          <Patch Number="27" Name="Noisy Kick" ProgramChange="27"/>
+          <Patch Number="28" Name="808 Mid Conga" ProgramChange="28"/>
+          <Patch Number="29" Name="808 Hi Conga" ProgramChange="29"/>
+          <Patch Number="30" Name="Snova2 Kick 5" ProgramChange="30"/>
+          <Patch Number="31" Name="808 Low Tom" ProgramChange="31"/>
+          <Patch Number="32" Name="Snova2 Kick 4" ProgramChange="32"/>
+          <Patch Number="33" Name="808 Mid Tom" ProgramChange="33"/>
+          <Patch Number="34" Name="808 Maracas" ProgramChange="34"/>
+          <Patch Number="35" Name="808 Hi Tom" ProgramChange="35"/>
+          <Patch Number="36" Name="808 Kick Click" ProgramChange="36"/>
+          <Patch Number="37" Name="Dodger Rodger" ProgramChange="37"/>
+          <Patch Number="38" Name="Noisy Kick 1" ProgramChange="38"/>
+          <Patch Number="39" Name="808 Clave" ProgramChange="39"/>
+          <Patch Number="40" Name="FM Block" ProgramChange="40"/>
+          <Patch Number="41" Name="Bottle" ProgramChange="41"/>
+          <Patch Number="42" Name="Simple Low Conga" ProgramChange="42"/>
+          <Patch Number="43" Name="Simple Mid Conga" ProgramChange="43"/>
+          <Patch Number="44" Name="Simple Hi Conga" ProgramChange="44"/>
+          <Patch Number="45" Name="Snova Kick 5" ProgramChange="45"/>
+          <Patch Number="46" Name="Snova2 Kick 4" ProgramChange="46"/>
+          <Patch Number="47" Name="Snova2 Kick 3" ProgramChange="47"/>
+          <Patch Number="48" Name="Snova2 Kick2" ProgramChange="48"/>
+          <Patch Number="49" Name="General Kit 1 FX" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="DRUM MAP B">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="19"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="909 Kick 2" ProgramChange="0"/>
+          <Patch Number="1" Name="Rim Shot" ProgramChange="1"/>
+          <Patch Number="2" Name="808 Snare 2" ProgramChange="2"/>
+          <Patch Number="3" Name="808 Clap" ProgramChange="3"/>
+          <Patch Number="4" Name="909 Snare 2" ProgramChange="4"/>
+          <Patch Number="5" Name="Electro Tom 5" ProgramChange="5"/>
+          <Patch Number="6" Name="Closed High Hat 3" ProgramChange="6"/>
+          <Patch Number="7" Name="Electro Tom 4" ProgramChange="7"/>
+          <Patch Number="8" Name="Closed High Hat 4" ProgramChange="8"/>
+          <Patch Number="9" Name="Electro Tom 3" ProgramChange="9"/>
+          <Patch Number="10" Name="Open High Hat 2" ProgramChange="10"/>
+          <Patch Number="11" Name="Electro Tom 2" ProgramChange="11"/>
+          <Patch Number="12" Name="Electro Tom 1" ProgramChange="12"/>
+          <Patch Number="13" Name="Crash Cymabl 1" ProgramChange="13"/>
+          <Patch Number="14" Name="Crash Cymbal 2" ProgramChange="14"/>
+          <Patch Number="15" Name="Ride Cymbal" ProgramChange="15"/>
+          <Patch Number="16" Name="Clap 3" ProgramChange="16"/>
+          <Patch Number="17" Name="Disco Tom 5" ProgramChange="17"/>
+          <Patch Number="18" Name="808 Closed Hi Hat" ProgramChange="18"/>
+          <Patch Number="19" Name="Disco Tom 4" ProgramChange="19"/>
+          <Patch Number="20" Name="808 Cowbell 2" ProgramChange="20"/>
+          <Patch Number="21" Name="Disco Tom 3" ProgramChange="21"/>
+          <Patch Number="22" Name="808 Open Hi Hat" ProgramChange="22"/>
+          <Patch Number="23" Name="Disco Tom 2" ProgramChange="23"/>
+          <Patch Number="24" Name="Disco Tom 1" ProgramChange="24"/>
+          <Patch Number="25" Name="808 Kick Click L" ProgramChange="25"/>
+          <Patch Number="26" Name="808 Low Conga" ProgramChange="26"/>
+          <Patch Number="27" Name="808 Snare" ProgramChange="27"/>
+          <Patch Number="28" Name="808 Mid Conga" ProgramChange="28"/>
+          <Patch Number="29" Name="808 Hi Conga" ProgramChange="29"/>
+          <Patch Number="30" Name="Snova2 Kick1" ProgramChange="30"/>
+          <Patch Number="31" Name="Garage Snare 4" ProgramChange="31"/>
+          <Patch Number="32" Name="Breakdown Kick" ProgramChange="32"/>
+          <Patch Number="33" Name="Velo Spitz" ProgramChange="33"/>
+          <Patch Number="34" Name="Maracas 2" ProgramChange="34"/>
+          <Patch Number="35" Name="Electro Guiro" ProgramChange="35"/>
+          <Patch Number="36" Name="Synth Scratch" ProgramChange="36"/>
+          <Patch Number="37" Name="Sonar" ProgramChange="37"/>
+          <Patch Number="38" Name="Synth Backslip" ProgramChange="38"/>
+          <Patch Number="39" Name="808 Clave 2" ProgramChange="39"/>
+          <Patch Number="40" Name="Wah 4" ProgramChange="40"/>
+          <Patch Number="41" Name="Wah 3" ProgramChange="41"/>
+          <Patch Number="42" Name="MultiHigh Hat" ProgramChange="42"/>
+          <Patch Number="43" Name="Wah 2" ProgramChange="43"/>
+          <Patch Number="44" Name="Hi Hat (Closed)" ProgramChange="44"/>
+          <Patch Number="45" Name="Wah 1" ProgramChange="45"/>
+          <Patch Number="46" Name="Hi Hat (open)" ProgramChange="46"/>
+          <Patch Number="47" Name="909 Kick + Click" ProgramChange="47"/>
+          <Patch Number="48" Name="808 Kick No Clk" ProgramChange="48"/>
+          <Patch Number="49" Name="General kit 2 FX" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="DRUM MAP C">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="20"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Res FX 1" ProgramChange="0"/>
+          <Patch Number="1" Name="Wip 1" ProgramChange="1"/>
+          <Patch Number="2" Name="Res FX 2" ProgramChange="2"/>
+          <Patch Number="3" Name="Force Field 2" ProgramChange="3"/>
+          <Patch Number="4" Name="Res FX 3" ProgramChange="4"/>
+          <Patch Number="5" Name="Res FX 4" ProgramChange="5"/>
+          <Patch Number="6" Name="Vindaloo Noise" ProgramChange="6"/>
+          <Patch Number="7" Name="Spit U Like M-Wh" ProgramChange="7"/>
+          <Patch Number="8" Name="RainPicks" ProgramChange="8"/>
+          <Patch Number="9" Name="Spit U Like 2M-Wh" ProgramChange="9"/>
+          <Patch Number="10" Name="InfiltratorSFX" ProgramChange="10"/>
+          <Patch Number="11" Name="Burbler" ProgramChange="11"/>
+          <Patch Number="12" Name="Down Osc" ProgramChange="12"/>
+          <Patch Number="13" Name="Rain Piz" ProgramChange="13"/>
+          <Patch Number="14" Name="Filter Sweep KHz" ProgramChange="14"/>
+          <Patch Number="15" Name="Ringglass" ProgramChange="15"/>
+          <Patch Number="16" Name="Explosion" ProgramChange="16"/>
+          <Patch Number="17" Name="Liquinova M-Wh" ProgramChange="17"/>
+          <Patch Number="18" Name="Self Osc" ProgramChange="18"/>
+          <Patch Number="19" Name="Radar&gt;Comms" ProgramChange="19"/>
+          <Patch Number="20" Name="Whiteout" ProgramChange="20"/>
+          <Patch Number="21" Name="Low Transmitter" ProgramChange="21"/>
+          <Patch Number="22" Name="RaverSiren" ProgramChange="22"/>
+          <Patch Number="23" Name="Ring&gt;Vince" ProgramChange="23"/>
+          <Patch Number="24" Name="Wabbler" ProgramChange="24"/>
+          <Patch Number="25" Name="Tubus" ProgramChange="25"/>
+          <Patch Number="26" Name="Force Field" ProgramChange="26"/>
+          <Patch Number="27" Name="Sience Lab" ProgramChange="27"/>
+          <Patch Number="28" Name="Downloading" ProgramChange="28"/>
+          <Patch Number="29" Name="LFO Madness" ProgramChange="29"/>
+          <Patch Number="30" Name="Res FX 10" ProgramChange="30"/>
+          <Patch Number="31" Name="Res FX 11" ProgramChange="31"/>
+          <Patch Number="32" Name="Noise Sweep" ProgramChange="32"/>
+          <Patch Number="33" Name="Velo Spitz M-Wh" ProgramChange="33"/>
+          <Patch Number="34" Name="Noise Sweep 1" ProgramChange="34"/>
+          <Patch Number="35" Name="Noise Sweep 3" ProgramChange="35"/>
+          <Patch Number="36" Name="Noise Sweep 4" ProgramChange="36"/>
+          <Patch Number="37" Name="Noise Sweep 5" ProgramChange="37"/>
+          <Patch Number="38" Name="REZ 1" ProgramChange="38"/>
+          <Patch Number="39" Name="REZ 2" ProgramChange="39"/>
+          <Patch Number="40" Name="REZ 3" ProgramChange="40"/>
+          <Patch Number="41" Name="Noise Sweep 6" ProgramChange="41"/>
+          <Patch Number="42" Name="CHIRP 1" ProgramChange="42"/>
+          <Patch Number="43" Name="CHIRP 2" ProgramChange="43"/>
+          <Patch Number="44" Name="CHIRP 3" ProgramChange="44"/>
+          <Patch Number="45" Name="CHIRP 4" ProgramChange="45"/>
+          <Patch Number="46" Name="CHIRP 5" ProgramChange="46"/>
+          <Patch Number="47" Name="CHIRP 6" ProgramChange="47"/>
+          <Patch Number="48" Name="CHIRP 7" ProgramChange="48"/>
+          <Patch Number="49" Name="SFX Kit FX" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="DRUM MAP D">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="21"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="FM 808 Kick" ProgramChange="0"/>
+          <Patch Number="1" Name="Rim Shot 2" ProgramChange="1"/>
+          <Patch Number="2" Name="909 Snare 2" ProgramChange="2"/>
+          <Patch Number="3" Name="808 Clap 3" ProgramChange="3"/>
+          <Patch Number="4" Name="808 Snare 3" ProgramChange="4"/>
+          <Patch Number="5" Name="Tom 1" ProgramChange="5"/>
+          <Patch Number="6" Name="808 CHH" ProgramChange="6"/>
+          <Patch Number="7" Name="Tom 2" ProgramChange="7"/>
+          <Patch Number="8" Name="808 CHH 2" ProgramChange="8"/>
+          <Patch Number="9" Name="Tom 3" ProgramChange="9"/>
+          <Patch Number="10" Name="808 OHH" ProgramChange="10"/>
+          <Patch Number="11" Name="Tom 4" ProgramChange="11"/>
+          <Patch Number="12" Name="Tom 5" ProgramChange="12"/>
+          <Patch Number="13" Name="Crash Cymbal 2" ProgramChange="13"/>
+          <Patch Number="14" Name="Noise Shot" ProgramChange="14"/>
+          <Patch Number="15" Name="Ride 2" ProgramChange="15"/>
+          <Patch Number="16" Name="China Cymbal" ProgramChange="16"/>
+          <Patch Number="17" Name="Nova Crash 2" ProgramChange="17"/>
+          <Patch Number="18" Name="Rev High Hat 1" ProgramChange="18"/>
+          <Patch Number="19" Name="Noise Sweep" ProgramChange="19"/>
+          <Patch Number="20" Name="FM Cowbell" ProgramChange="20"/>
+          <Patch Number="21" Name="Lo Timbale/SN" ProgramChange="21"/>
+          <Patch Number="22" Name="Rev High Hat 2" ProgramChange="22"/>
+          <Patch Number="23" Name="Hi Timbale/SN" ProgramChange="23"/>
+          <Patch Number="24" Name="High Conga 4" ProgramChange="24"/>
+          <Patch Number="25" Name="High Conga 3" ProgramChange="25"/>
+          <Patch Number="26" Name="High Conga 2" ProgramChange="26"/>
+          <Patch Number="27" Name="High Conga 1" ProgramChange="27"/>
+          <Patch Number="28" Name="Low Conga 1" ProgramChange="28"/>
+          <Patch Number="29" Name="Low Conga 2" ProgramChange="29"/>
+          <Patch Number="30" Name="Low Conga 3" ProgramChange="30"/>
+          <Patch Number="31" Name="FM GarageSnare 1" ProgramChange="31"/>
+          <Patch Number="32" Name="FM GarageSnare 2" ProgramChange="32"/>
+          <Patch Number="33" Name="Timpani" ProgramChange="33"/>
+          <Patch Number="34" Name="Timpani" ProgramChange="34"/>
+          <Patch Number="35" Name="Timpani" ProgramChange="35"/>
+          <Patch Number="36" Name="Timpani" ProgramChange="36"/>
+          <Patch Number="37" Name="Timpani" ProgramChange="37"/>
+          <Patch Number="38" Name="Timpani" ProgramChange="38"/>
+          <Patch Number="39" Name="Timpani" ProgramChange="39"/>
+          <Patch Number="40" Name="Timpani" ProgramChange="40"/>
+          <Patch Number="41" Name="Timpani" ProgramChange="41"/>
+          <Patch Number="42" Name="Timpani" ProgramChange="42"/>
+          <Patch Number="43" Name="Timpani" ProgramChange="43"/>
+          <Patch Number="44" Name="Timpani" ProgramChange="44"/>
+          <Patch Number="45" Name="Triangle 2" ProgramChange="45"/>
+          <Patch Number="46" Name="Triangle 1" ProgramChange="46"/>
+          <Patch Number="47" Name="FM 909 Kick 1" ProgramChange="47"/>
+          <Patch Number="48" Name="FM 909 Kick 2" ProgramChange="48"/>
+          <Patch Number="49" Name="FM Kit FX" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="USER DRUM MAP E">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="22"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Init Program" ProgramChange="0"/>
+          <Patch Number="1" Name="Init Program" ProgramChange="1"/>
+          <Patch Number="2" Name="Init Program" ProgramChange="2"/>
+          <Patch Number="3" Name="Init Program" ProgramChange="3"/>
+          <Patch Number="4" Name="Init Program" ProgramChange="4"/>
+          <Patch Number="5" Name="Init Program" ProgramChange="5"/>
+          <Patch Number="6" Name="Init Program" ProgramChange="6"/>
+          <Patch Number="7" Name="Init Program" ProgramChange="7"/>
+          <Patch Number="8" Name="Init Program" ProgramChange="8"/>
+          <Patch Number="9" Name="Init Program" ProgramChange="9"/>
+          <Patch Number="10" Name="Init Program" ProgramChange="10"/>
+          <Patch Number="11" Name="Init Program" ProgramChange="11"/>
+          <Patch Number="12" Name="Init Program" ProgramChange="12"/>
+          <Patch Number="13" Name="Init Program" ProgramChange="13"/>
+          <Patch Number="14" Name="Init Program" ProgramChange="14"/>
+          <Patch Number="15" Name="Init Program" ProgramChange="15"/>
+          <Patch Number="16" Name="Init Program" ProgramChange="16"/>
+          <Patch Number="17" Name="Init Program" ProgramChange="17"/>
+          <Patch Number="18" Name="Init Program" ProgramChange="18"/>
+          <Patch Number="19" Name="Init Program" ProgramChange="19"/>
+          <Patch Number="20" Name="Init Program" ProgramChange="20"/>
+          <Patch Number="21" Name="Init Program" ProgramChange="21"/>
+          <Patch Number="22" Name="Init Program" ProgramChange="22"/>
+          <Patch Number="23" Name="Init Program" ProgramChange="23"/>
+          <Patch Number="24" Name="Init Program" ProgramChange="24"/>
+          <Patch Number="25" Name="Init Program" ProgramChange="25"/>
+          <Patch Number="26" Name="Init Program" ProgramChange="26"/>
+          <Patch Number="27" Name="Init Program" ProgramChange="27"/>
+          <Patch Number="28" Name="Init Program" ProgramChange="28"/>
+          <Patch Number="29" Name="Init Program" ProgramChange="29"/>
+          <Patch Number="30" Name="Init Program" ProgramChange="30"/>
+          <Patch Number="31" Name="Init Program" ProgramChange="31"/>
+          <Patch Number="32" Name="Init Program" ProgramChange="32"/>
+          <Patch Number="33" Name="Init Program" ProgramChange="33"/>
+          <Patch Number="34" Name="Init Program" ProgramChange="34"/>
+          <Patch Number="35" Name="Init Program" ProgramChange="35"/>
+          <Patch Number="36" Name="Init Program" ProgramChange="36"/>
+          <Patch Number="37" Name="Init Program" ProgramChange="37"/>
+          <Patch Number="38" Name="Init Program" ProgramChange="38"/>
+          <Patch Number="39" Name="Init Program" ProgramChange="39"/>
+          <Patch Number="40" Name="Init Program" ProgramChange="40"/>
+          <Patch Number="41" Name="Init Program" ProgramChange="41"/>
+          <Patch Number="42" Name="Init Program" ProgramChange="42"/>
+          <Patch Number="43" Name="Init Program" ProgramChange="43"/>
+          <Patch Number="44" Name="Init Program" ProgramChange="44"/>
+          <Patch Number="45" Name="Init Program" ProgramChange="45"/>
+          <Patch Number="46" Name="Init Program" ProgramChange="46"/>
+          <Patch Number="47" Name="Init Program" ProgramChange="47"/>
+          <Patch Number="48" Name="Init Program" ProgramChange="48"/>
+          <Patch Number="49" Name="Init Program" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="USER DRUM MAP F">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="23"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Init Program" ProgramChange="0"/>
+          <Patch Number="1" Name="Init Program" ProgramChange="1"/>
+          <Patch Number="2" Name="Init Program" ProgramChange="2"/>
+          <Patch Number="3" Name="Init Program" ProgramChange="3"/>
+          <Patch Number="4" Name="Init Program" ProgramChange="4"/>
+          <Patch Number="5" Name="Init Program" ProgramChange="5"/>
+          <Patch Number="6" Name="Init Program" ProgramChange="6"/>
+          <Patch Number="7" Name="Init Program" ProgramChange="7"/>
+          <Patch Number="8" Name="Init Program" ProgramChange="8"/>
+          <Patch Number="9" Name="Init Program" ProgramChange="9"/>
+          <Patch Number="10" Name="Init Program" ProgramChange="10"/>
+          <Patch Number="11" Name="Init Program" ProgramChange="11"/>
+          <Patch Number="12" Name="Init Program" ProgramChange="12"/>
+          <Patch Number="13" Name="Init Program" ProgramChange="13"/>
+          <Patch Number="14" Name="Init Program" ProgramChange="14"/>
+          <Patch Number="15" Name="Init Program" ProgramChange="15"/>
+          <Patch Number="16" Name="Init Program" ProgramChange="16"/>
+          <Patch Number="17" Name="Init Program" ProgramChange="17"/>
+          <Patch Number="18" Name="Init Program" ProgramChange="18"/>
+          <Patch Number="19" Name="Init Program" ProgramChange="19"/>
+          <Patch Number="20" Name="Init Program" ProgramChange="20"/>
+          <Patch Number="21" Name="Init Program" ProgramChange="21"/>
+          <Patch Number="22" Name="Init Program" ProgramChange="22"/>
+          <Patch Number="23" Name="Init Program" ProgramChange="23"/>
+          <Patch Number="24" Name="Init Program" ProgramChange="24"/>
+          <Patch Number="25" Name="Init Program" ProgramChange="25"/>
+          <Patch Number="26" Name="Init Program" ProgramChange="26"/>
+          <Patch Number="27" Name="Init Program" ProgramChange="27"/>
+          <Patch Number="28" Name="Init Program" ProgramChange="28"/>
+          <Patch Number="29" Name="Init Program" ProgramChange="29"/>
+          <Patch Number="30" Name="Init Program" ProgramChange="30"/>
+          <Patch Number="31" Name="Init Program" ProgramChange="31"/>
+          <Patch Number="32" Name="Init Program" ProgramChange="32"/>
+          <Patch Number="33" Name="Init Program" ProgramChange="33"/>
+          <Patch Number="34" Name="Init Program" ProgramChange="34"/>
+          <Patch Number="35" Name="Init Program" ProgramChange="35"/>
+          <Patch Number="36" Name="Init Program" ProgramChange="36"/>
+          <Patch Number="37" Name="Init Program" ProgramChange="37"/>
+          <Patch Number="38" Name="Init Program" ProgramChange="38"/>
+          <Patch Number="39" Name="Init Program" ProgramChange="39"/>
+          <Patch Number="40" Name="Init Program" ProgramChange="40"/>
+          <Patch Number="41" Name="Init Program" ProgramChange="41"/>
+          <Patch Number="42" Name="Init Program" ProgramChange="42"/>
+          <Patch Number="43" Name="Init Program" ProgramChange="43"/>
+          <Patch Number="44" Name="Init Program" ProgramChange="44"/>
+          <Patch Number="45" Name="Init Program" ProgramChange="45"/>
+          <Patch Number="46" Name="Init Program" ProgramChange="46"/>
+          <Patch Number="47" Name="Init Program" ProgramChange="47"/>
+          <Patch Number="48" Name="Init Program" ProgramChange="48"/>
+          <Patch Number="49" Name="Init Program" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="USER DRUM MAP G">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="24"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Init Program" ProgramChange="0"/>
+          <Patch Number="1" Name="Init Program" ProgramChange="1"/>
+          <Patch Number="2" Name="Init Program" ProgramChange="2"/>
+          <Patch Number="3" Name="Init Program" ProgramChange="3"/>
+          <Patch Number="4" Name="Init Program" ProgramChange="4"/>
+          <Patch Number="5" Name="Init Program" ProgramChange="5"/>
+          <Patch Number="6" Name="Init Program" ProgramChange="6"/>
+          <Patch Number="7" Name="Init Program" ProgramChange="7"/>
+          <Patch Number="8" Name="Init Program" ProgramChange="8"/>
+          <Patch Number="9" Name="Init Program" ProgramChange="9"/>
+          <Patch Number="10" Name="Init Program" ProgramChange="10"/>
+          <Patch Number="11" Name="Init Program" ProgramChange="11"/>
+          <Patch Number="12" Name="Init Program" ProgramChange="12"/>
+          <Patch Number="13" Name="Init Program" ProgramChange="13"/>
+          <Patch Number="14" Name="Init Program" ProgramChange="14"/>
+          <Patch Number="15" Name="Init Program" ProgramChange="15"/>
+          <Patch Number="16" Name="Init Program" ProgramChange="16"/>
+          <Patch Number="17" Name="Init Program" ProgramChange="17"/>
+          <Patch Number="18" Name="Init Program" ProgramChange="18"/>
+          <Patch Number="19" Name="Init Program" ProgramChange="19"/>
+          <Patch Number="20" Name="Init Program" ProgramChange="20"/>
+          <Patch Number="21" Name="Init Program" ProgramChange="21"/>
+          <Patch Number="22" Name="Init Program" ProgramChange="22"/>
+          <Patch Number="23" Name="Init Program" ProgramChange="23"/>
+          <Patch Number="24" Name="Init Program" ProgramChange="24"/>
+          <Patch Number="25" Name="Init Program" ProgramChange="25"/>
+          <Patch Number="26" Name="Init Program" ProgramChange="26"/>
+          <Patch Number="27" Name="Init Program" ProgramChange="27"/>
+          <Patch Number="28" Name="Init Program" ProgramChange="28"/>
+          <Patch Number="29" Name="Init Program" ProgramChange="29"/>
+          <Patch Number="30" Name="Init Program" ProgramChange="30"/>
+          <Patch Number="31" Name="Init Program" ProgramChange="31"/>
+          <Patch Number="32" Name="Init Program" ProgramChange="32"/>
+          <Patch Number="33" Name="Init Program" ProgramChange="33"/>
+          <Patch Number="34" Name="Init Program" ProgramChange="34"/>
+          <Patch Number="35" Name="Init Program" ProgramChange="35"/>
+          <Patch Number="36" Name="Init Program" ProgramChange="36"/>
+          <Patch Number="37" Name="Init Program" ProgramChange="37"/>
+          <Patch Number="38" Name="Init Program" ProgramChange="38"/>
+          <Patch Number="39" Name="Init Program" ProgramChange="39"/>
+          <Patch Number="40" Name="Init Program" ProgramChange="40"/>
+          <Patch Number="41" Name="Init Program" ProgramChange="41"/>
+          <Patch Number="42" Name="Init Program" ProgramChange="42"/>
+          <Patch Number="43" Name="Init Program" ProgramChange="43"/>
+          <Patch Number="44" Name="Init Program" ProgramChange="44"/>
+          <Patch Number="45" Name="Init Program" ProgramChange="45"/>
+          <Patch Number="46" Name="Init Program" ProgramChange="46"/>
+          <Patch Number="47" Name="Init Program" ProgramChange="47"/>
+          <Patch Number="48" Name="Init Program" ProgramChange="48"/>
+          <Patch Number="49" Name="Init Program" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="USER DRUM MAP H">
+        <MIDICommands>
+          <ControlChange Control="0" Value="32"/>
+          <ControlChange Control="32" Value="25"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Init Program" ProgramChange="0"/>
+          <Patch Number="1" Name="Init Program" ProgramChange="1"/>
+          <Patch Number="2" Name="Init Program" ProgramChange="2"/>
+          <Patch Number="3" Name="Init Program" ProgramChange="3"/>
+          <Patch Number="4" Name="Init Program" ProgramChange="4"/>
+          <Patch Number="5" Name="Init Program" ProgramChange="5"/>
+          <Patch Number="6" Name="Init Program" ProgramChange="6"/>
+          <Patch Number="7" Name="Init Program" ProgramChange="7"/>
+          <Patch Number="8" Name="Init Program" ProgramChange="8"/>
+          <Patch Number="9" Name="Init Program" ProgramChange="9"/>
+          <Patch Number="10" Name="Init Program" ProgramChange="10"/>
+          <Patch Number="11" Name="Init Program" ProgramChange="11"/>
+          <Patch Number="12" Name="Init Program" ProgramChange="12"/>
+          <Patch Number="13" Name="Init Program" ProgramChange="13"/>
+          <Patch Number="14" Name="Init Program" ProgramChange="14"/>
+          <Patch Number="15" Name="Init Program" ProgramChange="15"/>
+          <Patch Number="16" Name="Init Program" ProgramChange="16"/>
+          <Patch Number="17" Name="Init Program" ProgramChange="17"/>
+          <Patch Number="18" Name="Init Program" ProgramChange="18"/>
+          <Patch Number="19" Name="Init Program" ProgramChange="19"/>
+          <Patch Number="20" Name="Init Program" ProgramChange="20"/>
+          <Patch Number="21" Name="Init Program" ProgramChange="21"/>
+          <Patch Number="22" Name="Init Program" ProgramChange="22"/>
+          <Patch Number="23" Name="Init Program" ProgramChange="23"/>
+          <Patch Number="24" Name="Init Program" ProgramChange="24"/>
+          <Patch Number="25" Name="Init Program" ProgramChange="25"/>
+          <Patch Number="26" Name="Init Program" ProgramChange="26"/>
+          <Patch Number="27" Name="Init Program" ProgramChange="27"/>
+          <Patch Number="28" Name="Init Program" ProgramChange="28"/>
+          <Patch Number="29" Name="Init Program" ProgramChange="29"/>
+          <Patch Number="30" Name="Init Program" ProgramChange="30"/>
+          <Patch Number="31" Name="Init Program" ProgramChange="31"/>
+          <Patch Number="32" Name="Init Program" ProgramChange="32"/>
+          <Patch Number="33" Name="Init Program" ProgramChange="33"/>
+          <Patch Number="34" Name="Init Program" ProgramChange="34"/>
+          <Patch Number="35" Name="Init Program" ProgramChange="35"/>
+          <Patch Number="36" Name="Init Program" ProgramChange="36"/>
+          <Patch Number="37" Name="Init Program" ProgramChange="37"/>
+          <Patch Number="38" Name="Init Program" ProgramChange="38"/>
+          <Patch Number="39" Name="Init Program" ProgramChange="39"/>
+          <Patch Number="40" Name="Init Program" ProgramChange="40"/>
+          <Patch Number="41" Name="Init Program" ProgramChange="41"/>
+          <Patch Number="42" Name="Init Program" ProgramChange="42"/>
+          <Patch Number="43" Name="Init Program" ProgramChange="43"/>
+          <Patch Number="44" Name="Init Program" ProgramChange="44"/>
+          <Patch Number="45" Name="Init Program" ProgramChange="45"/>
+          <Patch Number="46" Name="Init Program" ProgramChange="46"/>
+          <Patch Number="47" Name="Init Program" ProgramChange="47"/>
+          <Patch Number="48" Name="Init Program" ProgramChange="48"/>
+          <Patch Number="49" Name="Init Program" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

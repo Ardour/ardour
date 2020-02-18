@@ -1,22 +1,25 @@
 /*
-    Copyright (C) 2007 Paul Davis
-    Author: David Robillard
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2007-2016 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2012 Hans Baier <hansfbaier@googlemail.com>
+ * Copyright (C) 2008-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2015 André Nusser <andre.nusser@googlemail.com>
+ * Copyright (C) 2016 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_midi_model_h__
 #define __ardour_midi_model_h__
@@ -37,8 +40,8 @@
 #include "ardour/types.h"
 #include "ardour/variant.h"
 
-#include "evoral/Note.hpp"
-#include "evoral/Sequence.hpp"
+#include "evoral/Note.h"
+#include "evoral/Sequence.h"
 
 namespace ARDOUR {
 
@@ -251,11 +254,33 @@ public:
 		PatchChangePtr unmarshal_patch_change (XMLNode *);
 	};
 
+	/** Start a new NoteDiff command.
+	 *
+	 * This has no side-effects on the model or Session, the returned command
+	 * can be held on to for as long as the caller wishes, or discarded without
+	 * formality, until apply_command is called and ownership is taken.
+	 */
 	MidiModel::NoteDiffCommand* new_note_diff_command (const std::string& name = "midi edit");
+	/** Start a new SysExDiff command */
 	MidiModel::SysExDiffCommand* new_sysex_diff_command (const std::string& name = "midi edit");
+
+	/** Start a new PatchChangeDiff command */
 	MidiModel::PatchChangeDiffCommand* new_patch_change_diff_command (const std::string& name = "midi edit");
+
+	/** Apply a command.
+	 *
+	 * Ownership of cmd is taken, it must not be deleted by the caller.
+	 * The command will constitute one item on the undo stack.
+	 */
 	void apply_command (Session& session, Command* cmd);
+
 	void apply_command (Session* session, Command* cmd) { if (session) { apply_command (*session, cmd); } }
+
+	/** Apply a command as part of a larger reversible transaction
+	 *
+	 * Ownership of cmd is taken, it must not be deleted by the caller.
+	 * The command will constitute one item on the undo stack.
+	 */
 	void apply_command_as_subcommand (Session& session, Command* cmd);
 
 	bool sync_to_source (const Glib::Threads::Mutex::Lock& source_lock);

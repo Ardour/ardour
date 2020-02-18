@@ -1,21 +1,31 @@
 /*
-    Copyright (C) 2003 Paul Davis
-
-    This program is free software; you an redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2005-2009 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2005-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005 Karsten Wiese <fzuuzf@googlemail.com>
+ * Copyright (C) 2006-2007 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2006-2009 Sampo Savolainen <v2@iki.fi>
+ * Copyright (C) 2007-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2015 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2015 André Nusser <andre.nusser@googlemail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifdef WAF_BUILD
 #include "gtk2ardour-config.h"
@@ -43,6 +53,7 @@
 #include "pbd/file_utils.h"
 #include "pbd/stacktrace.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/search_paths.h"
 
@@ -51,6 +62,8 @@
 
 #include "canvas/item.h"
 
+#include "actions.h"
+#include "context_menu_helper.h"
 #include "debug.h"
 #include "public_editor.h"
 #include "keyboard.h"
@@ -98,6 +111,38 @@ ARDOUR_UI_UTILS::just_hide_it (GdkEventAny */*ev*/, Gtk::Window *win)
 	win->hide ();
 	return 0;
 }
+
+static bool
+idle_notify_engine_stopped ()
+{
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Window", "toggle-audio-midi-setup");
+
+	MessageDialog msg (
+			_("The current operation is not possible because of an error communicating with the audio hardware."),
+			false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_NONE, true);
+
+	msg.add_button (_("Cancel"), Gtk::RESPONSE_CANCEL);
+
+	if (tact && !tact->get_active()) {
+		msg.add_button (_("Configure Hardware"), Gtk::RESPONSE_OK);
+	}
+
+	if (msg.run () == Gtk::RESPONSE_OK) {
+		tact->set_active ();
+	}
+	return false; /* do not call again */
+}
+
+bool
+ARDOUR_UI_UTILS::engine_is_running ()
+{
+	if (ARDOUR::AudioEngine::instance()->running ()) {
+		return true;
+	}
+	Glib::signal_idle().connect (sigc::ptr_fun (&idle_notify_engine_stopped));
+	return false;
+}
+
 
 /* xpm2rgb copied from nixieclock, which bore the legend:
 
@@ -232,7 +277,8 @@ ARDOUR_UI_UTILS::sanitized_font (std::string const& name)
 	Pango::FontDescription fd (name);
 
 	if (fd.get_family().empty()) {
-		fd.set_family ("Sans");
+		/* default: "Sans" or "ArdourSans" */
+		fd.set_family (UIConfiguration::instance ().get_ui_font_family ());
 	}
 
 	return fd;
@@ -370,7 +416,7 @@ ARDOUR_UI_UTILS::get_xpm (std::string name)
 
 		try {
 			xpm_map[name] =  Gdk::Pixbuf::create_from_file (data_file_path);
-		} catch(const Glib::Error& e)	{
+		} catch (const Glib::Error& e) {
 			warning << "Caught Glib::Error: " << e.what() << endmsg;
 		}
 	}
@@ -719,6 +765,43 @@ ARDOUR_UI_UTILS::rate_as_string (float r)
 	return buf;
 }
 
+string
+ARDOUR_UI_UTILS::samples_as_time_string (samplecnt_t s, float rate, bool show_samples)
+{
+	char buf[32];
+	if (rate <= 0) {
+		snprintf (buf, sizeof (buf), "--");
+	} else if (s == 0) {
+		snprintf (buf, sizeof (buf), "0");
+	} else if (s < 1000 && show_samples) {
+		/* 0 .. 999 spl */
+		snprintf (buf, sizeof (buf), "%" PRId64" spl", s);
+	} else if (s < (rate / 1000.f)) {
+		/* 0 .. 999 usec */
+		snprintf (buf, sizeof (buf), "%.0f \u00B5s", s * 1e+6f / rate);
+	} else if (s < (rate / 100.f)) {
+		/* 1.000 .. 9.999 ms */
+		snprintf (buf, sizeof (buf), "%.3f ms", s * 1e+3f / rate);
+	} else if (s < (rate / 10.f)) {
+		/* 1.00 .. 99.99 ms */
+		snprintf (buf, sizeof (buf), "%.2f ms", s * 1e+3f / rate);
+	} else if (s < rate) {
+		/* 100.0 .. 999.9 ms */
+		snprintf (buf, sizeof (buf), "%.1f ms", s * 1e+3f / rate);
+	} else if (s < rate * 10.f) {
+		/* 1.000 s .. 9.999 s */
+		snprintf (buf, sizeof (buf), "%.3f s", s / rate);
+	} else if (s < rate * 90.f) {
+		/* 10.00 s .. 89.99 s */
+		snprintf (buf, sizeof (buf), "%.2f s", s / rate);
+	} else {
+		/* 1m30.0 ...  */
+		snprintf (buf, sizeof (buf), "'%.0fm%.1f", s / (60.f * rate), fmodf (s / rate, 60));
+	}
+	buf[31] = '\0';
+	return buf;
+}
+
 bool
 ARDOUR_UI_UTILS::windows_overlap (Gtk::Window *a, Gtk::Window *b)
 {
@@ -781,4 +864,10 @@ ARDOUR_UI_UTILS::running_from_source_tree ()
 {
 	gchar const *x = g_getenv ("ARDOUR_THEMES_PATH");
 	return x && (string (x).find ("gtk2_ardour") != string::npos);
+}
+
+Gtk::Menu*
+ARDOUR_UI_UTILS::shared_popup_menu ()
+{
+	return ARDOUR_UI::instance()->shared_popup_menu ();
 }

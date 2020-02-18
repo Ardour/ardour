@@ -1,20 +1,21 @@
 /*
-    Copyright (C) 2013 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2013-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2013-2018 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <gtkmm/window.h>
 
@@ -66,12 +67,12 @@ Manager::register_window (ProxyBase* info)
 	if (!info->menu_name().empty()) {
 
 		if (!window_actions) {
-			window_actions = ARDOUR_UI::instance()->global_actions.create_action_group (X_("Window"));
+			window_actions = ActionManager::create_action_group (Gtkmm2ext::UI::instance()->global_bindings, X_("Window"));
 		}
 
-		ARDOUR_UI::instance()->global_actions.register_toggle_action (window_actions,
-		                                                              info->action_name().c_str(), info->menu_name().c_str(),
-		                                                              sigc::bind (sigc::mem_fun (*this, &Manager::toggle_window), info));
+		ActionManager::register_toggle_action (window_actions,
+		                                       info->action_name().c_str(), info->menu_name().c_str(),
+		                                       sigc::bind (sigc::mem_fun (*this, &Manager::toggle_window), info));
 
 		info->signal_map.connect (sigc::bind (sigc::mem_fun (*this, &Manager::window_proxy_was_mapped), info));
 		info->signal_unmap.connect (sigc::bind (sigc::mem_fun (*this, &Manager::window_proxy_was_unmapped), info));
@@ -82,7 +83,7 @@ Manager::register_window (ProxyBase* info)
 void
 Manager::window_proxy_was_mapped (ProxyBase* proxy)
 {
-	Glib::RefPtr<Gtk::Action> act = ARDOUR_UI::instance()->global_actions.find_action (string_compose ("%1/%2", window_actions->get_name(), proxy->action_name()));
+	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (string_compose ("%1/%2", window_actions->get_name(), proxy->action_name()));
 	if (!act) {
 		return;
 	}
@@ -97,7 +98,7 @@ Manager::window_proxy_was_mapped (ProxyBase* proxy)
 void
 Manager::window_proxy_was_unmapped (ProxyBase* proxy)
 {
-	Glib::RefPtr<Gtk::Action> act = ARDOUR_UI::instance()->global_actions.find_action (string_compose ("%1/%2", window_actions->get_name(), proxy->action_name()));
+	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (string_compose ("%1/%2", window_actions->get_name(), proxy->action_name()));
 	if (!act) {
 		return;
 	}
@@ -123,7 +124,7 @@ Manager::remove (const ProxyBase* info)
 void
 Manager::toggle_window (ProxyBase* proxy)
 {
-	Glib::RefPtr<Gtk::Action> act = ARDOUR_UI::instance()->global_actions.find_action (string_compose ("%1/%2", window_actions->get_name(), proxy->action_name()));
+	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (string_compose ("%1/%2", window_actions->get_name(), proxy->action_name()));
 	if (!act) {
 		return;
 	}
@@ -254,11 +255,6 @@ ProxyTemporary::ProxyTemporary (const string& name, Gtk::Window* win)
 {
 	_window = win;
 }
-
-ProxyTemporary::~ProxyTemporary ()
-{
-}
-
 
 ARDOUR::SessionHandlePtr*
 ProxyTemporary::session_handle()

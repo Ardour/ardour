@@ -1,20 +1,20 @@
 /*
  * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
- * Copyright (C) 2015 Paul Davis
+ * Copyright (C) 2019 Johannes Mueller <github@johannes-mueller.org>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef __ardour_faderport8_gui_h__
@@ -36,6 +36,10 @@ namespace Gtk {
 }
 
 #include "faderport8.h"
+
+namespace ActionManager {
+        class ActionModel;
+}
 
 namespace ArdourSurface { namespace FP_NAMESPACE {
 
@@ -88,24 +92,12 @@ private:
 	void auto_pluginui_toggled ();
 
 	/* user actions */
-	void build_available_action_menu ();
 	void build_action_combo (Gtk::ComboBox& cb, FP8Controls::ButtonId id);
 	void action_changed (Gtk::ComboBox* cb, FP8Controls::ButtonId id);
 
-	struct ActionColumns : public Gtk::TreeModel::ColumnRecord {
-		ActionColumns() {
-			add (name);
-			add (path);
-		}
-		Gtk::TreeModelColumn<std::string> name;
-		Gtk::TreeModelColumn<std::string> path;
-	};
+	const ActionManager::ActionModel& action_model;
 
-	ActionColumns action_columns;
-	Glib::RefPtr<Gtk::TreeStore> available_action_model;
 	std::map<std::string,std::string> action_map; // map from action names to paths
-
-	bool find_action_in_model (const Gtk::TreeModel::iterator& iter, std::string const & action_path, Gtk::TreeModel::iterator* found);
 };
 
 } }

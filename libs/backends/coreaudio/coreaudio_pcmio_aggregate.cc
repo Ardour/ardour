@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2004-2008 Grame
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,9 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <vector>
@@ -305,7 +305,7 @@ CoreAudioPCM::create_aggregate_device (
 			fprintf(stderr, "AggregateDevice: kAudioObjectPropertyOwnedObjects error\n");
 		}
 
-		//	Calculate the number of object IDs
+		// Calculate the number of object IDs
 		subDevicesNum = size / sizeof(AudioObjectID);
 #ifndef NDEBUG
 		printf("AggregateDevice: clock drift compensation, number of sub-devices = %u\n", (unsigned int)subDevicesNum);

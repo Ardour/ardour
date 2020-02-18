@@ -1,21 +1,20 @@
 /*
-    Copyright (C) 2009 John Emmas
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2013-2019 John Emmas <john@creativepost.co.uk>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 #ifndef _msvc_pbd_h_
 #define _msvc_pbd_h_
 
@@ -80,11 +79,11 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif	/* __cplusplus */
+#endif /* __cplusplus */
 
 #ifdef __cplusplus
-}		/* extern "C" */
-#endif	/* __cplusplus */
+} /* extern "C" */
+#endif /* __cplusplus */
 
 #ifdef PLATFORM_WINDOWS
 
@@ -121,22 +120,22 @@ extern "C" {
 #endif
 
 #ifndef OPEN_MAX
-#define OPEN_MAX			32
+#define OPEN_MAX (32)
 #endif
 
 #ifdef __cplusplus
 extern "C" {
-#endif	/* __cplusplus */
+#endif /* __cplusplus */
 
-PBDEXTN_API	   int		PBDEXTN_APICALLTYPE cyginit (unsigned int result);
-LIBPBD_API     int 		PBD_APICALLTYPE     dlclose (void *handle) __THROW;
-LIBPBD_API     void*	PBD_APICALLTYPE     dlopen  (const char *file_name, int mode) __THROW;
-LIBPBD_API     void* 	PBD_APICALLTYPE     dlsym   (void *handle, const char *symbol_name) __THROW;
-LIBPBD_API     char* 	PBD_APICALLTYPE     dlerror () __THROW;
+PBDEXTN_API int   PBDEXTN_APICALLTYPE cyginit (unsigned int result);
+LIBPBD_API  int   PBD_APICALLTYPE     dlclose (void *handle) __THROW;
+LIBPBD_API  void* PBD_APICALLTYPE     dlopen  (const char *file_name, int mode) __THROW;
+LIBPBD_API  void* PBD_APICALLTYPE     dlsym   (void *handle, const char *symbol_name) __THROW;
+LIBPBD_API  char* PBD_APICALLTYPE     dlerror () __THROW;
 
 #ifdef __cplusplus
-}		/* extern "C" */
-#endif	/* __cplusplus */
+} /* extern "C" */
+#endif /* __cplusplus */
 
 #ifndef __CYGWIN__
 /* For whatever reason, Ardour's 'libevoral' refuses to build as a DLL if we include both 'rpc.h' */
@@ -157,17 +156,17 @@ typedef int (FAR PBDEXTN_APICALLTYPE *CYGINIT_API)(unsigned int);
 #define _SSIZE_T_
 typedef long _ssize_t;
 
-#ifndef	_NO_OLDNAMES
+#ifndef _NO_OLDNAMES
 typedef _ssize_t ssize_t;
 #endif
 #endif /* ! _SSIZE_T_ */
 
 struct dirent
 {
-	long			d_ino;				  // Always zero
-	unsigned short	d_reclen;			  // Always zero
-	unsigned short	d_namlen;			  // Length of name in d_name
-	char			d_name[FILENAME_MAX]; // File name
+	long            d_ino;                // Always zero
+	unsigned short  d_reclen;             // Always zero
+	unsigned short  d_namlen;             // Length of name in d_name
+	char            d_name[FILENAME_MAX]; // File name
 };
 
 // This is an internal data structure. Do not use it
@@ -175,65 +174,65 @@ struct dirent
 typedef struct
 {
 	// Disk transfer area for this dir
-	struct _finddata_t	dd_dta;
+	struct _finddata_t dd_dta;
 
 	// 'dirent' struct to return from dir (NOTE: this
 	// is not thread safe).
-	struct dirent		dd_dir;
+	struct dirent dd_dir;
 
 	// '_findnext()' handle
-	long				dd_handle;
+	long dd_handle;
 
 	// Current status of search:
 	//  0 = not started yet (next entry to read is first entry)
 	// -1 = off the end
 	//  Otherwise - positive (0 based) index of next entry
-	int					dd_stat;
+	int dd_stat;
 
 	// Full path for dir with search pattern (struct will be extended)
-	char				dd_name[1];
+	char dd_name[1];
 } DIR;
 
 typedef unsigned int nfds_t;
 
 #ifdef __cplusplus
 extern "C" {
-#endif	/* __cplusplus */
+#endif /* __cplusplus */
 
-LIBPBD_API int				__cdecl         gettimeofday(struct timeval *__restrict tv, __timezone_ptr_t tz);
-LIBPBD_API ssize_t			PBD_APICALLTYPE pread(int handle, void *buf, size_t nbytes, off_t offset);
-LIBPBD_API ssize_t			PBD_APICALLTYPE pwrite(int handle, const void *buf, size_t nbytes, off_t offset);
+LIBPBD_API int      __cdecl         gettimeofday(struct timeval *__restrict tv, __timezone_ptr_t tz);
+LIBPBD_API ssize_t  PBD_APICALLTYPE pread(int handle, void *buf, size_t nbytes, off_t offset);
+LIBPBD_API ssize_t  PBD_APICALLTYPE pwrite(int handle, const void *buf, size_t nbytes, off_t offset);
 
 #if defined(_MSC_VER) && (_MSC_VER < 1800)
-LIBPBD_API double			PBD_APICALLTYPE expm1(double x);
-LIBPBD_API double			PBD_APICALLTYPE log1p(double x);
-LIBPBD_API double			PBD_APICALLTYPE round(double x);
-LIBPBD_API float			PBD_APICALLTYPE roundf(float x);
+LIBPBD_API double   PBD_APICALLTYPE expm1(double x);
+LIBPBD_API double   PBD_APICALLTYPE log1p(double x);
+LIBPBD_API double   PBD_APICALLTYPE round(double x);
+LIBPBD_API float    PBD_APICALLTYPE roundf(float x);
 #endif
 
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
-LIBPBD_API double			PBD_APICALLTYPE log2 (double x);
-LIBPBD_API double			PBD_APICALLTYPE trunc(double x);
+LIBPBD_API double   PBD_APICALLTYPE log2 (double x);
+LIBPBD_API double   PBD_APICALLTYPE trunc(double x);
 #endif
 
 namespace PBD {
 
-LIBPBD_API bool 			PBD_APICALLTYPE TestForMinimumSpecOS(char *revision="currently ignored");
-LIBPBD_API char*			PBD_APICALLTYPE realpath    (const char *original_path, char resolved_path[_MAX_PATH+1]);
-LIBPBD_API int				PBD_APICALLTYPE mkstemp     (char *template_name);
-LIBPBD_API int				PBD_APICALLTYPE ntfs_link   (const char *existing_filepath, const char *link_filepath);
-LIBPBD_API int				PBD_APICALLTYPE ntfs_unlink (const char *link_filepath);
+LIBPBD_API bool     PBD_APICALLTYPE TestForMinimumSpecOS(char *revision="currently ignored");
+LIBPBD_API char*    PBD_APICALLTYPE realpath    (const char *original_path, char resolved_path[_MAX_PATH+1]);
+LIBPBD_API int      PBD_APICALLTYPE mkstemp     (char *template_name);
+LIBPBD_API int      PBD_APICALLTYPE ntfs_link   (const char *existing_filepath, const char *link_filepath);
+LIBPBD_API int      PBD_APICALLTYPE ntfs_unlink (const char *link_filepath);
 
 // These are used to replicate 'dirent.h' functionality
-LIBPBD_API DIR*				PBD_APICALLTYPE opendir  (const char *szPath);
-LIBPBD_API struct dirent*	PBD_APICALLTYPE readdir  (DIR *pDir);
-LIBPBD_API int				PBD_APICALLTYPE closedir (DIR *pDir);
+LIBPBD_API DIR*           PBD_APICALLTYPE opendir  (const char *szPath);
+LIBPBD_API struct dirent* PBD_APICALLTYPE readdir  (DIR *pDir);
+LIBPBD_API int            PBD_APICALLTYPE closedir (DIR *pDir);
 
 }  // namespace PBD
 
 #ifdef __cplusplus
-}		/* extern "C" */
-#endif	/* __cplusplus */
+} /* extern "C" */
+#endif /* __cplusplus */
 
 #endif  // !__CYGWIN__
 #endif  // PLATFORM_WINDOWS

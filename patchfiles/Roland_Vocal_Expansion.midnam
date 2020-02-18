@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JD-990</Model>
+    <Model>JV-80</Model>
+    <Model>JV-880</Model>
+    <PatchNameList Name="EXP Vocal 1st(64)">
+      <Patch Number="001" Name="Full Scat Sw" ProgramChange="0"/>
+      <Patch Number="002" Name="Jazz Doos" ProgramChange="1"/>
+      <Patch Number="003" Name="Jazz Doot" ProgramChange="2"/>
+      <Patch Number="004" Name="Jazz Dat" ProgramChange="3"/>
+      <Patch Number="005" Name="Jazz Bap" ProgramChange="4"/>
+      <Patch Number="006" Name="Jz.Dow Fall" ProgramChange="5"/>
+      <Patch Number="007" Name="Big Dows!" ProgramChange="6"/>
+      <Patch Number="008" Name="Vox Bass" ProgramChange="7"/>
+      <Patch Number="009" Name="Happy Scats" ProgramChange="8"/>
+      <Patch Number="010" Name="Doo Dat SW" ProgramChange="9"/>
+      <Patch Number="011" Name="Doo Bap Sw" ProgramChange="10"/>
+      <Patch Number="012" Name="Baps Sw" ProgramChange="11"/>
+      <Patch Number="013" Name="Scatmen! Sw" ProgramChange="12"/>
+      <Patch Number="014" Name="Scat with me" ProgramChange="13"/>
+      <Patch Number="015" Name="Staggered" ProgramChange="14"/>
+      <Patch Number="016" Name="Scatin'Down" ProgramChange="15"/>
+      <Patch Number="017" Name="Bap-A-Dap" ProgramChange="16"/>
+      <Patch Number="018" Name="Thum Steps" ProgramChange="17"/>
+      <Patch Number="019" Name="Minor Scat" ProgramChange="18"/>
+      <Patch Number="020" Name="5th Voxers" ProgramChange="19"/>
+      <Patch Number="021" Name="Doo Forest" ProgramChange="20"/>
+      <Patch Number="022" Name="Doo Atmosph" ProgramChange="21"/>
+      <Patch Number="023" Name="Doo Choir" ProgramChange="22"/>
+      <Patch Number="024" Name="Choirtron" ProgramChange="23"/>
+      <Patch Number="025" Name="Bap Brassy" ProgramChange="24"/>
+      <Patch Number="026" Name="Ambient Scat" ProgramChange="25"/>
+      <Patch Number="027" Name="Real Choir" ProgramChange="26"/>
+      <Patch Number="028" Name="Rich Choir" ProgramChange="27"/>
+      <Patch Number="029" Name="Large Chr Sw" ProgramChange="28"/>
+      <Patch Number="030" Name="Big Choir" ProgramChange="29"/>
+      <Patch Number="031" Name="Large Choir" ProgramChange="30"/>
+      <Patch Number="032" Name="Full Choir" ProgramChange="31"/>
+      <Patch Number="033" Name="Church Choir" ProgramChange="32"/>
+      <Patch Number="034" Name="Uhh Ahh Chr" ProgramChange="33"/>
+      <Patch Number="035" Name="Hybrid Choir" ProgramChange="34"/>
+      <Patch Number="036" Name="Gregorian Sw" ProgramChange="35"/>
+      <Patch Number="037" Name="GregorianChr" ProgramChange="36"/>
+      <Patch Number="038" Name="Greg.Spin" ProgramChange="37"/>
+      <Patch Number="039" Name="Quiet Voices" ProgramChange="38"/>
+      <Patch Number="040" Name="Medium Choir" ProgramChange="39"/>
+      <Patch Number="041" Name="2Soprano Vox" ProgramChange="40"/>
+      <Patch Number="042" Name="SopranoVoice" ProgramChange="41"/>
+      <Patch Number="043" Name="Light Female" ProgramChange="42"/>
+      <Patch Number="044" Name="Boys Choir" ProgramChange="43"/>
+      <Patch Number="045" Name="Rich Boys" ProgramChange="44"/>
+      <Patch Number="046" Name="Combi Choir" ProgramChange="45"/>
+      <Patch Number="047" Name="X.. Vox" ProgramChange="46"/>
+      <Patch Number="048" Name="Serene Choir" ProgramChange="47"/>
+      <Patch Number="049" Name="Tranquil Chr" ProgramChange="48"/>
+      <Patch Number="050" Name="Milky Choir" ProgramChange="49"/>
+      <Patch Number="051" Name="Humming Chr" ProgramChange="50"/>
+      <Patch Number="052" Name="Winter Choir" ProgramChange="51"/>
+      <Patch Number="053" Name="Dreamy Vox" ProgramChange="52"/>
+      <Patch Number="054" Name="December Vox" ProgramChange="53"/>
+      <Patch Number="055" Name="European Chr" ProgramChange="54"/>
+      <Patch Number="056" Name="Glass Choir" ProgramChange="55"/>
+      <Patch Number="057" Name="Dawn of Day" ProgramChange="56"/>
+      <Patch Number="058" Name="Siberian Pad" ProgramChange="57"/>
+      <Patch Number="059" Name="Stacked Vox" ProgramChange="58"/>
+      <Patch Number="060" Name="Detuned VOX" ProgramChange="59"/>
+      <Patch Number="061" Name="Moscow Ghost" ProgramChange="60"/>
+      <Patch Number="062" Name="Light Choir" ProgramChange="61"/>
+      <Patch Number="063" Name="Slow Atmosph" ProgramChange="62"/>
+      <Patch Number="064" Name="Faze Voices" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Vocal 2nd(64)">
+      <Patch Number="065" Name="JD-800 Choir" ProgramChange="0"/>
+      <Patch Number="066" Name="Heaven Dooos" ProgramChange="1"/>
+      <Patch Number="067" Name="Sweeping Vox" ProgramChange="2"/>
+      <Patch Number="068" Name="Phasing Vox" ProgramChange="3"/>
+      <Patch Number="069" Name="Splintered" ProgramChange="4"/>
+      <Patch Number="070" Name="Ancient Vox" ProgramChange="5"/>
+      <Patch Number="071" Name="Streaming Vox" ProgramChange="6"/>
+      <Patch Number="072" Name="Dreams Away" ProgramChange="7"/>
+      <Patch Number="073" Name="Dopey Slider" ProgramChange="8"/>
+      <Patch Number="074" Name="Space Choir" ProgramChange="9"/>
+      <Patch Number="075" Name="Step Choir" ProgramChange="10"/>
+      <Patch Number="076" Name="Ambient Chr" ProgramChange="11"/>
+      <Patch Number="077" Name="Faked Real" ProgramChange="12"/>
+      <Patch Number="078" Name="VP330 5th" ProgramChange="13"/>
+      <Patch Number="079" Name="Fairlike Vox" ProgramChange="14"/>
+      <Patch Number="080" Name="Glue Vox" ProgramChange="15"/>
+      <Patch Number="081" Name="HPF Synvox" ProgramChange="16"/>
+      <Patch Number="082" Name="Gleaming Vox" ProgramChange="17"/>
+      <Patch Number="083" Name="Pulsing Vox" ProgramChange="18"/>
+      <Patch Number="084" Name="Flitter Vox" ProgramChange="19"/>
+      <Patch Number="085" Name="Jumpin Voice" ProgramChange="20"/>
+      <Patch Number="086" Name="Escapades" ProgramChange="21"/>
+      <Patch Number="087" Name="Bell Choir" ProgramChange="22"/>
+      <Patch Number="088" Name="Voice Bell" ProgramChange="23"/>
+      <Patch Number="089" Name="AirySpacePad" ProgramChange="24"/>
+      <Patch Number="090" Name="Harp Vox" ProgramChange="25"/>
+      <Patch Number="091" Name="Raaave Blips" ProgramChange="26"/>
+      <Patch Number="092" Name="Techno Vox" ProgramChange="27"/>
+      <Patch Number="093" Name="Doo VocoBass" ProgramChange="28"/>
+      <Patch Number="094" Name="Danc'dat MOD" ProgramChange="29"/>
+      <Patch Number="095" Name="Voxadelphia" ProgramChange="30"/>
+      <Patch Number="096" Name="Scratch Back" ProgramChange="31"/>
+      <Patch Number="097" Name="Cavern" ProgramChange="32"/>
+      <Patch Number="098" Name="Piano Scat" ProgramChange="33"/>
+      <Patch Number="099" Name="Piano Choir" ProgramChange="34"/>
+      <Patch Number="100" Name="Boys Sky" ProgramChange="35"/>
+      <Patch Number="101" Name="E.Piano Scat" ProgramChange="36"/>
+      <Patch Number="102" Name="Gregorian EP" ProgramChange="37"/>
+      <Patch Number="103" Name="JazzyScatOrg" ProgramChange="38"/>
+      <Patch Number="104" Name="Organ Choir" ProgramChange="39"/>
+      <Patch Number="105" Name="Organ Voice" ProgramChange="40"/>
+      <Patch Number="106" Name="Strings Chr" ProgramChange="41"/>
+      <Patch Number="107" Name="ChoiryString" ProgramChange="42"/>
+      <Patch Number="108" Name="SlowVoicyStr" ProgramChange="43"/>
+      <Patch Number="109" Name="Nylon Doo" ProgramChange="44"/>
+      <Patch Number="110" Name="Ac.Gtr Choir" ProgramChange="45"/>
+      <Patch Number="111" Name="Jazz Gt Scat" ProgramChange="46"/>
+      <Patch Number="112" Name="Flute Scat" ProgramChange="47"/>
+      <Patch Number="113" Name="Andes Choir" ProgramChange="48"/>
+      <Patch Number="114" Name="Windy Vox" ProgramChange="49"/>
+      <Patch Number="115" Name="Tpts Scat" ProgramChange="50"/>
+      <Patch Number="116" Name="Singin'Brass" ProgramChange="51"/>
+      <Patch Number="117" Name="Vocal Menu" ProgramChange="52"/>
+      <Patch Number="118" Name="Reverse Menu" ProgramChange="53"/>
+      <Patch Number="119" Name="Boys Amen 1" ProgramChange="54"/>
+      <Patch Number="120" Name="Boys Amen 2" ProgramChange="55"/>
+      <Patch Number="121" Name="Amen" ProgramChange="56"/>
+      <Patch Number="122" Name="Aleluia" ProgramChange="57"/>
+      <Patch Number="123" Name="Boys Aleluia" ProgramChange="58"/>
+      <Patch Number="124" Name="Mystify" ProgramChange="59"/>
+      <Patch Number="125" Name="Limbus" ProgramChange="60"/>
+      <Patch Number="126" Name="Doos for Pef" ProgramChange="61"/>
+      <Patch Number="127" Name="Doot for Pef" ProgramChange="62"/>
+      <Patch Number="128" Name="Dat for Pefm" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Vocal 3rd(64)">
+      <Patch Number="129" Name="Bap for Pefm" ProgramChange="0"/>
+      <Patch Number="130" Name="Dow for Pefm" ProgramChange="1"/>
+      <Patch Number="131" Name="Vox Bs 4 Pef" ProgramChange="2"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JV-90</Model>
+    <Model>JV-1000</Model>
+    <PatchNameList Name="EXP Vocal A">
+      <Patch Number="EA11" Name="Full Scat Sw" ProgramChange="0"/>
+      <Patch Number="EA12" Name="Jazz Doos" ProgramChange="1"/>
+      <Patch Number="EA13" Name="Jazz Doot" ProgramChange="2"/>
+      <Patch Number="EA14" Name="Jazz Dat" ProgramChange="3"/>
+      <Patch Number="EA15" Name="Jazz Bap" ProgramChange="4"/>
+      <Patch Number="EA16" Name="Jz.Dow Fall" ProgramChange="5"/>
+      <Patch Number="EA17" Name="Big Dows!" ProgramChange="6"/>
+      <Patch Number="EA18" Name="Vox Bass" ProgramChange="7"/>
+      <Patch Number="EA21" Name="Happy Scats" ProgramChange="8"/>
+      <Patch Number="EA22" Name="Doo Dat SW" ProgramChange="9"/>
+      <Patch Number="EA23" Name="Doo Bap Sw" ProgramChange="10"/>
+      <Patch Number="EA24" Name="Baps Sw" ProgramChange="11"/>
+      <Patch Number="EA25" Name="Scatmen! Sw" ProgramChange="12"/>
+      <Patch Number="EA26" Name="Scat with me" ProgramChange="13"/>
+      <Patch Number="EA27" Name="Staggered" ProgramChange="14"/>
+      <Patch Number="EA28" Name="Scatin'Down" ProgramChange="15"/>
+      <Patch Number="EA31" Name="Bap-A-Dap" ProgramChange="16"/>
+      <Patch Number="EA32" Name="Thum Steps" ProgramChange="17"/>
+      <Patch Number="EA33" Name="Minor Scat" ProgramChange="18"/>
+      <Patch Number="EA34" Name="5th Voxers" ProgramChange="19"/>
+      <Patch Number="EA35" Name="Doo Forest" ProgramChange="20"/>
+      <Patch Number="EA36" Name="Doo Atmosph" ProgramChange="21"/>
+      <Patch Number="EA37" Name="Doo Choir" ProgramChange="22"/>
+      <Patch Number="EA38" Name="Choirtron" ProgramChange="23"/>
+      <Patch Number="EA41" Name="Bap Brassy" ProgramChange="24"/>
+      <Patch Number="EA42" Name="Ambient Scat" ProgramChange="25"/>
+      <Patch Number="EA43" Name="Real Choir" ProgramChange="26"/>
+      <Patch Number="EA44" Name="Rich Choir" ProgramChange="27"/>
+      <Patch Number="EA45" Name="Large Chr Sw" ProgramChange="28"/>
+      <Patch Number="EA46" Name="Big Choir" ProgramChange="29"/>
+      <Patch Number="EA47" Name="Large Choir" ProgramChange="30"/>
+      <Patch Number="EA48" Name="Full Choir" ProgramChange="31"/>
+      <Patch Number="EA51" Name="Church Choir" ProgramChange="32"/>
+      <Patch Number="EA52" Name="Uhh Ahh Chr" ProgramChange="33"/>
+      <Patch Number="EA53" Name="Hybrid Choir" ProgramChange="34"/>
+      <Patch Number="EA54" Name="Gregorian Sw" ProgramChange="35"/>
+      <Patch Number="EA55" Name="GregorianChr" ProgramChange="36"/>
+      <Patch Number="EA56" Name="Greg.Spin" ProgramChange="37"/>
+      <Patch Number="EA57" Name="Quiet Voices" ProgramChange="38"/>
+      <Patch Number="EA58" Name="Medium Choir" ProgramChange="39"/>
+      <Patch Number="EA61" Name="2Soprano Vox" ProgramChange="40"/>
+      <Patch Number="EA62" Name="SopranoVoice" ProgramChange="41"/>
+      <Patch Number="EA63" Name="Light Female" ProgramChange="42"/>
+      <Patch Number="EA64" Name="Boys Choir" ProgramChange="43"/>
+      <Patch Number="EA65" Name="Rich Boys" ProgramChange="44"/>
+      <Patch Number="EA66" Name="Combi Choir" ProgramChange="45"/>
+      <Patch Number="EA67" Name="X.. Vox" ProgramChange="46"/>
+      <Patch Number="EA68" Name="Serene Choir" ProgramChange="47"/>
+      <Patch Number="EA71" Name="Tranquil Chr" ProgramChange="48"/>
+      <Patch Number="EA72" Name="Milky Choir" ProgramChange="49"/>
+      <Patch Number="EA73" Name="Humming Chr" ProgramChange="50"/>
+      <Patch Number="EA74" Name="Winter Choir" ProgramChange="51"/>
+      <Patch Number="EA75" Name="Dreamy Vox" ProgramChange="52"/>
+      <Patch Number="EA76" Name="December Vox" ProgramChange="53"/>
+      <Patch Number="EA77" Name="European Chr" ProgramChange="54"/>
+      <Patch Number="EA78" Name="Glass Choir" ProgramChange="55"/>
+      <Patch Number="EA81" Name="Dawn of Day" ProgramChange="56"/>
+      <Patch Number="EA82" Name="Siberian Pad" ProgramChange="57"/>
+      <Patch Number="EA83" Name="Stacked Vox" ProgramChange="58"/>
+      <Patch Number="EA84" Name="Detuned VOX" ProgramChange="59"/>
+      <Patch Number="EA85" Name="Moscow Ghost" ProgramChange="60"/>
+      <Patch Number="EA86" Name="Light Choir" ProgramChange="61"/>
+      <Patch Number="EA87" Name="Slow Atmosph" ProgramChange="62"/>
+      <Patch Number="EA88" Name="Faze Voices" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Vocal B">
+      <Patch Number="EB11" Name="JD-800 Choir" ProgramChange="64"/>
+      <Patch Number="EB12" Name="Heaven Dooos" ProgramChange="65"/>
+      <Patch Number="EB13" Name="Sweeping Vox" ProgramChange="66"/>
+      <Patch Number="EB14" Name="Phasing Vox" ProgramChange="67"/>
+      <Patch Number="EB15" Name="Splintered" ProgramChange="68"/>
+      <Patch Number="EB16" Name="Ancient Vox" ProgramChange="69"/>
+      <Patch Number="EB17" Name="Streaming Vox" ProgramChange="70"/>
+      <Patch Number="EB18" Name="Dreams Away" ProgramChange="71"/>
+      <Patch Number="EB21" Name="Dopey Slider" ProgramChange="72"/>
+      <Patch Number="EB22" Name="Space Choir" ProgramChange="73"/>
+      <Patch Number="EB23" Name="Step Choir" ProgramChange="74"/>
+      <Patch Number="EB24" Name="Ambient Chr" ProgramChange="75"/>
+      <Patch Number="EB25" Name="Faked Real" ProgramChange="76"/>
+      <Patch Number="EB26" Name="VP330 5th" ProgramChange="77"/>
+      <Patch Number="EB27" Name="Fairlike Vox" ProgramChange="78"/>
+      <Patch Number="EB28" Name="Glue Vox" ProgramChange="79"/>
+      <Patch Number="EB31" Name="HPF Synvox" ProgramChange="80"/>
+      <Patch Number="EB32" Name="Gleaming Vox" ProgramChange="81"/>
+      <Patch Number="EB33" Name="Pulsing Vox" ProgramChange="82"/>
+      <Patch Number="EB34" Name="Flitter Vox" ProgramChange="83"/>
+      <Patch Number="EB35" Name="Jumpin Voice" ProgramChange="84"/>
+      <Patch Number="EB36" Name="Escapades" ProgramChange="85"/>
+      <Patch Number="EB37" Name="Bell Choir" ProgramChange="86"/>
+      <Patch Number="EB38" Name="Voice Bell" ProgramChange="87"/>
+      <Patch Number="EB41" Name="AirySpacePad" ProgramChange="88"/>
+      <Patch Number="EB42" Name="Harp Vox" ProgramChange="89"/>
+      <Patch Number="EB43" Name="Raaave Blips" ProgramChange="90"/>
+      <Patch Number="EB44" Name="Techno Vox" ProgramChange="91"/>
+      <Patch Number="EB45" Name="Doo VocoBass" ProgramChange="92"/>
+      <Patch Number="EB46" Name="Danc'dat MOD" ProgramChange="93"/>
+      <Patch Number="EB47" Name="Voxadelphia" ProgramChange="94"/>
+      <Patch Number="EB48" Name="Scratch Back" ProgramChange="95"/>
+      <Patch Number="EB51" Name="Cavern" ProgramChange="96"/>
+      <Patch Number="EB52" Name="Piano Scat" ProgramChange="97"/>
+      <Patch Number="EB53" Name="Piano Choir" ProgramChange="98"/>
+      <Patch Number="EB54" Name="Boys Sky" ProgramChange="99"/>
+      <Patch Number="EB55" Name="E.Piano Scat" ProgramChange="100"/>
+      <Patch Number="EB56" Name="Gregorian EP" ProgramChange="101"/>
+      <Patch Number="EB57" Name="JazzyScatOrg" ProgramChange="102"/>
+      <Patch Number="EB58" Name="Organ Choir" ProgramChange="103"/>
+      <Patch Number="EB61" Name="Organ Voice" ProgramChange="104"/>
+      <Patch Number="EB62" Name="Strings Chr" ProgramChange="105"/>
+      <Patch Number="EB63" Name="ChoiryString" ProgramChange="106"/>
+      <Patch Number="EB64" Name="SlowVoicyStr" ProgramChange="107"/>
+      <Patch Number="EB65" Name="Nylon Doo" ProgramChange="108"/>
+      <Patch Number="EB66" Name="Ac.Gtr Choir" ProgramChange="109"/>
+      <Patch Number="EB67" Name="Jazz Gt Scat" ProgramChange="110"/>
+      <Patch Number="EB68" Name="Flute Scat" ProgramChange="111"/>
+      <Patch Number="EB71" Name="Andes Choir" ProgramChange="112"/>
+      <Patch Number="EB72" Name="Windy Vox" ProgramChange="113"/>
+      <Patch Number="EB73" Name="Tpts Scat" ProgramChange="114"/>
+      <Patch Number="EB74" Name="Singin'Brass" ProgramChange="115"/>
+      <Patch Number="EB75" Name="Vocal Menu" ProgramChange="116"/>
+      <Patch Number="EB76" Name="Reverse Menu" ProgramChange="117"/>
+      <Patch Number="EB77" Name="Boys Amen 1" ProgramChange="118"/>
+      <Patch Number="EB78" Name="Boys Amen 2" ProgramChange="119"/>
+      <Patch Number="EB81" Name="Amen" ProgramChange="120"/>
+      <Patch Number="EB82" Name="Aleluia" ProgramChange="121"/>
+      <Patch Number="EB83" Name="Boys Aleluia" ProgramChange="122"/>
+      <Patch Number="EB84" Name="Mystify" ProgramChange="123"/>
+      <Patch Number="EB85" Name="Limbus" ProgramChange="124"/>
+      <Patch Number="EB86" Name="Doos for Pef" ProgramChange="125"/>
+      <Patch Number="EB87" Name="Doot for Pef" ProgramChange="126"/>
+      <Patch Number="EB88" Name="Dat for Pefm" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Vocal C">
+      <Patch Number="EC11" Name="Bap for Pefm" ProgramChange="0"/>
+      <Patch Number="EC12" Name="Dow for Pefm" ProgramChange="1"/>
+      <Patch Number="EC13" Name="Vox Bs 4 Pef" ProgramChange="2"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JV-1010</Model>
+    <Model>JV-1080</Model>
+    <Model>JV-2080</Model>
+    <Model>XP-50</Model>
+    <Model>XP-80</Model>
+    <Model>XV-5080</Model>
+    <Model>XV-3080</Model>
+    <Model>XV-88</Model>
+    <Model>Fantom</Model>
+    <PatchNameList Name="EXP Vocal: Patches 001-128">
+      <Patch Number="001" Name="Full Scat Sw" ProgramChange="0"/>
+      <Patch Number="002" Name="Jazz Doos" ProgramChange="1"/>
+      <Patch Number="003" Name="Jazz Doot" ProgramChange="2"/>
+      <Patch Number="004" Name="Jazz Dat" ProgramChange="3"/>
+      <Patch Number="005" Name="Jazz Bap" ProgramChange="4"/>
+      <Patch Number="006" Name="Jz.Dow Fall" ProgramChange="5"/>
+      <Patch Number="007" Name="Big Dows!" ProgramChange="6"/>
+      <Patch Number="008" Name="Vox Bass" ProgramChange="7"/>
+      <Patch Number="009" Name="Happy Scats" ProgramChange="8"/>
+      <Patch Number="010" Name="Doo Dat SW" ProgramChange="9"/>
+      <Patch Number="011" Name="Doo Bap Sw" ProgramChange="10"/>
+      <Patch Number="012" Name="Baps Sw" ProgramChange="11"/>
+      <Patch Number="013" Name="Scatmen! Sw" ProgramChange="12"/>
+      <Patch Number="014" Name="Scat with me" ProgramChange="13"/>
+      <Patch Number="015" Name="Staggered" ProgramChange="14"/>
+      <Patch Number="016" Name="Scatin'Down" ProgramChange="15"/>
+      <Patch Number="017" Name="Bap-A-Dap" ProgramChange="16"/>
+      <Patch Number="018" Name="Thum Steps" ProgramChange="17"/>
+      <Patch Number="019" Name="Minor Scat" ProgramChange="18"/>
+      <Patch Number="020" Name="5th Voxers" ProgramChange="19"/>
+      <Patch Number="021" Name="Doo Forest" ProgramChange="20"/>
+      <Patch Number="022" Name="Doo Atmosph" ProgramChange="21"/>
+      <Patch Number="023" Name="Doo Choir" ProgramChange="22"/>
+      <Patch Number="024" Name="Choirtron" ProgramChange="23"/>
+      <Patch Number="025" Name="Bap Brassy" ProgramChange="24"/>
+      <Patch Number="026" Name="Ambient Scat" ProgramChange="25"/>
+      <Patch Number="027" Name="Real Choir" ProgramChange="26"/>
+      <Patch Number="028" Name="Rich Choir" ProgramChange="27"/>
+      <Patch Number="029" Name="Large Chr Sw" ProgramChange="28"/>
+      <Patch Number="030" Name="Big Choir" ProgramChange="29"/>
+      <Patch Number="031" Name="Large Choir" ProgramChange="30"/>
+      <Patch Number="032" Name="Full Choir" ProgramChange="31"/>
+      <Patch Number="033" Name="Church Choir" ProgramChange="32"/>
+      <Patch Number="034" Name="Uhh Ahh Chr" ProgramChange="33"/>
+      <Patch Number="035" Name="Hybrid Choir" ProgramChange="34"/>
+      <Patch Number="036" Name="Gregorian Sw" ProgramChange="35"/>
+      <Patch Number="037" Name="GregorianChr" ProgramChange="36"/>
+      <Patch Number="038" Name="Greg.Spin" ProgramChange="37"/>
+      <Patch Number="039" Name="Quiet Voices" ProgramChange="38"/>
+      <Patch Number="040" Name="Medium Choir" ProgramChange="39"/>
+      <Patch Number="041" Name="2Soprano Vox" ProgramChange="40"/>
+      <Patch Number="042" Name="SopranoVoice" ProgramChange="41"/>
+      <Patch Number="043" Name="Light Female" ProgramChange="42"/>
+      <Patch Number="044" Name="Boys Choir" ProgramChange="43"/>
+      <Patch Number="045" Name="Rich Boys" ProgramChange="44"/>
+      <Patch Number="046" Name="Combi Choir" ProgramChange="45"/>
+      <Patch Number="047" Name="X.. Vox" ProgramChange="46"/>
+      <Patch Number="048" Name="Serene Choir" ProgramChange="47"/>
+      <Patch Number="049" Name="Tranquil Chr" ProgramChange="48"/>
+      <Patch Number="050" Name="Milky Choir" ProgramChange="49"/>
+      <Patch Number="051" Name="Humming Chr" ProgramChange="50"/>
+      <Patch Number="052" Name="Winter Choir" ProgramChange="51"/>
+      <Patch Number="053" Name="Dreamy Vox" ProgramChange="52"/>
+      <Patch Number="054" Name="December Vox" ProgramChange="53"/>
+      <Patch Number="055" Name="European Chr" ProgramChange="54"/>
+      <Patch Number="056" Name="Glass Choir" ProgramChange="55"/>
+      <Patch Number="057" Name="Dawn of Day" ProgramChange="56"/>
+      <Patch Number="058" Name="Siberian Pad" ProgramChange="57"/>
+      <Patch Number="059" Name="Stacked Vox" ProgramChange="58"/>
+      <Patch Number="060" Name="Detuned VOX" ProgramChange="59"/>
+      <Patch Number="061" Name="Moscow Ghost" ProgramChange="60"/>
+      <Patch Number="062" Name="Light Choir" ProgramChange="61"/>
+      <Patch Number="063" Name="Slow Atmosph" ProgramChange="62"/>
+      <Patch Number="064" Name="Faze Voices" ProgramChange="63"/>
+      <Patch Number="065" Name="JD-800 Choir" ProgramChange="64"/>
+      <Patch Number="066" Name="Heaven Dooos" ProgramChange="65"/>
+      <Patch Number="067" Name="Sweeping Vox" ProgramChange="66"/>
+      <Patch Number="068" Name="Phasing Vox" ProgramChange="67"/>
+      <Patch Number="069" Name="Splintered" ProgramChange="68"/>
+      <Patch Number="070" Name="Ancient Vox" ProgramChange="69"/>
+      <Patch Number="071" Name="Streaming Vox" ProgramChange="70"/>
+      <Patch Number="072" Name="Dreams Away" ProgramChange="71"/>
+      <Patch Number="073" Name="Dopey Slider" ProgramChange="72"/>
+      <Patch Number="074" Name="Space Choir" ProgramChange="73"/>
+      <Patch Number="075" Name="Step Choir" ProgramChange="74"/>
+      <Patch Number="076" Name="Ambient Chr" ProgramChange="75"/>
+      <Patch Number="077" Name="Faked Real" ProgramChange="76"/>
+      <Patch Number="078" Name="VP330 5th" ProgramChange="77"/>
+      <Patch Number="079" Name="Fairlike Vox" ProgramChange="78"/>
+      <Patch Number="080" Name="Glue Vox" ProgramChange="79"/>
+      <Patch Number="081" Name="HPF Synvox" ProgramChange="80"/>
+      <Patch Number="082" Name="Gleaming Vox" ProgramChange="81"/>
+      <Patch Number="083" Name="Pulsing Vox" ProgramChange="82"/>
+      <Patch Number="084" Name="Flitter Vox" ProgramChange="83"/>
+      <Patch Number="085" Name="Jumpin Voice" ProgramChange="84"/>
+      <Patch Number="086" Name="Escapades" ProgramChange="85"/>
+      <Patch Number="087" Name="Bell Choir" ProgramChange="86"/>
+      <Patch Number="088" Name="Voice Bell" ProgramChange="87"/>
+      <Patch Number="089" Name="AirySpacePad" ProgramChange="88"/>
+      <Patch Number="090" Name="Harp Vox" ProgramChange="89"/>
+      <Patch Number="091" Name="Raaave Blips" ProgramChange="90"/>
+      <Patch Number="092" Name="Techno Vox" ProgramChange="91"/>
+      <Patch Number="093" Name="Doo VocoBass" ProgramChange="92"/>
+      <Patch Number="094" Name="Danc'dat MOD" ProgramChange="93"/>
+      <Patch Number="095" Name="Voxadelphia" ProgramChange="94"/>
+      <Patch Number="096" Name="Scratch Back" ProgramChange="95"/>
+      <Patch Number="097" Name="Cavern" ProgramChange="96"/>
+      <Patch Number="098" Name="Piano Scat" ProgramChange="97"/>
+      <Patch Number="099" Name="Piano Choir" ProgramChange="98"/>
+      <Patch Number="100" Name="Boys Sky" ProgramChange="99"/>
+      <Patch Number="101" Name="E.Piano Scat" ProgramChange="100"/>
+      <Patch Number="102" Name="Gregorian EP" ProgramChange="101"/>
+      <Patch Number="103" Name="JazzyScatOrg" ProgramChange="102"/>
+      <Patch Number="104" Name="Organ Choir" ProgramChange="103"/>
+      <Patch Number="105" Name="Organ Voice" ProgramChange="104"/>
+      <Patch Number="106" Name="Strings Chr" ProgramChange="105"/>
+      <Patch Number="107" Name="ChoiryString" ProgramChange="106"/>
+      <Patch Number="108" Name="SlowVoicyStr" ProgramChange="107"/>
+      <Patch Number="109" Name="Nylon Doo" ProgramChange="108"/>
+      <Patch Number="110" Name="Ac.Gtr Choir" ProgramChange="109"/>
+      <Patch Number="111" Name="Jazz Gt Scat" ProgramChange="110"/>
+      <Patch Number="112" Name="Flute Scat" ProgramChange="111"/>
+      <Patch Number="113" Name="Andes Choir" ProgramChange="112"/>
+      <Patch Number="114" Name="Windy Vox" ProgramChange="113"/>
+      <Patch Number="115" Name="Tpts Scat" ProgramChange="114"/>
+      <Patch Number="116" Name="Singin'Brass" ProgramChange="115"/>
+      <Patch Number="117" Name="Vocal Menu" ProgramChange="116"/>
+      <Patch Number="118" Name="Reverse Menu" ProgramChange="117"/>
+      <Patch Number="119" Name="Boys Amen 1" ProgramChange="118"/>
+      <Patch Number="120" Name="Boys Amen 2" ProgramChange="119"/>
+      <Patch Number="121" Name="Amen" ProgramChange="120"/>
+      <Patch Number="122" Name="Aleluia" ProgramChange="121"/>
+      <Patch Number="123" Name="Boys Aleluia" ProgramChange="122"/>
+      <Patch Number="124" Name="Mystify" ProgramChange="123"/>
+      <Patch Number="125" Name="Limbus" ProgramChange="124"/>
+      <Patch Number="126" Name="Doos for Pef" ProgramChange="125"/>
+      <Patch Number="127" Name="Doot for Pef" ProgramChange="126"/>
+      <Patch Number="128" Name="Dat for Pefm" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Vocal: Patches 129-131">
+      <Patch Number="129" Name="Bap for Pefm" ProgramChange="0"/>
+      <Patch Number="130" Name="Dow for Pefm" ProgramChange="1"/>
+      <Patch Number="131" Name="Vox Bs 4 Pef" ProgramChange="2"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

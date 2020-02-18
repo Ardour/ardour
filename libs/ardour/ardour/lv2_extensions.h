@@ -20,7 +20,7 @@
 #include "lv2/lv2plug.in/ns/lv2core/lv2.h"
 
 /**
-   @defgroup inlinedisplay Inline-Display
+   @defgroup lv2inlinedisplay Inline-Display
 
    Support for displaying a miniaturized generic view
 	 directly in the host's Mixer Window.
@@ -80,7 +80,7 @@ typedef struct {
 */
 
 /**
-   @defgroup automate Self-Automation
+   @defgroup lv2automate Self-Automation
 
    Support for plugins to write automation data via Atom Events
 
@@ -111,7 +111,7 @@ typedef struct {
 */
 
 /**
-   @defgroup license License-Report
+   @defgroup lv2license License-Report
 
    Allow for commercial LV2 to report their
 	 licensing status.
@@ -149,7 +149,7 @@ typedef struct _LV2_License_Interface {
 */
 
 /**
-   @defgroup plugin provided bypass
+   @defgroup lv2bypass Plugin-provided bypass
 
 	 A port with the designation "processing#enable" must
 	 control a plugin's internal bypass mode.
@@ -180,8 +180,31 @@ typedef struct _LV2_License_Interface {
    @}
 */
 
+
 /**
-   @defgroup midnam MIDI Naming
+   @defgroup lv2routing plugin port/routing control
+
+   This is a "feature" to simplify per port meta-data of
+   http://lv2plug.in/ns/ext/port-groups/port-groups.html#source
+
+   Plugins using this feature provide a strong hint that the host
+   should always connect all audio output-ports.
+
+   This allows mono->stereo plugins to override strict_io rules.
+
+   @{
+*/
+
+#define LV2_ROUTING_URI "http://harrisonconsoles.com/lv2/routing"
+#define LV2_ROUTING_PREFIX LV2_ROUTING_URI "#"
+#define LV2_ROUTING__connectAllOutputs LV2_ROUTING_PREFIX "connectAllOutputs"
+
+/**
+   @}
+*/
+
+/**
+   @defgroup lv2midnam MIDI Naming
 
    @{
 */
@@ -208,7 +231,7 @@ typedef struct {
 	 * text which is a valid midnam desciption
 	 * (or NULL in case of error).
 	 *
-	 * The midnam <Model> must be unique and
+	 * The midnam \<Model\> must be unique and
 	 * specific for the given plugin-instance.
 	 */
 	char* (*midnam)(LV2_Handle instance);
@@ -230,7 +253,10 @@ typedef struct {
 */
 
 /**
-   @defgroup bankpatch
+   @defgroup lv2bankpatch MIDI Bank/Patch Notifications
+
+	 LV2 extension to allow a synth to inform a host about the
+	 currentl used MIDI bank/program.
 
    @{
 */

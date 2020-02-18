@@ -1,21 +1,28 @@
 /*
-    Copyright (C) 2000 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2006-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008 Hans Baier <hansfbaier@googlemail.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2015-2017 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2015-2019 Ben Loftis <ben@harrisonconsoles.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cstdlib>
 #include <cmath>
@@ -27,8 +34,8 @@
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_region.h"
-#include "ardour/region_factory.h"
 #include "ardour/profile.h"
+#include "ardour/region_factory.h"
 
 #include "canvas/canvas.h"
 #include "canvas/text.h"
@@ -48,6 +55,7 @@
 #include "editor_drag.h"
 #include "midi_time_axis.h"
 #include "editor_regions.h"
+#include "editor_sources.h"
 #include "ui_config.h"
 #include "verbose_cursor.h"
 
@@ -797,11 +805,11 @@ Editor::canvas_selection_end_trim_event (GdkEvent *event, ArdourCanvas::Item* it
 }
 
 bool
-Editor::canvas_sample_handle_event (GdkEvent* event, ArdourCanvas::Item* item, RegionView* rv)
+Editor::canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item* item, RegionView* rv)
 {
 	bool ret = false;
 
-	/* sample handles are not active when in internal edit mode, because actual notes
+	/* frame handles are not active when in internal edit mode, because actual notes
 	   might be in the area occupied by the handle - we want them to be editable as normal.
 	*/
 
@@ -809,7 +817,7 @@ Editor::canvas_sample_handle_event (GdkEvent* event, ArdourCanvas::Item* item, R
 		return false;
 	}
 
-	/* NOTE: sample handles pretend to be the colored trim bar from an event handling
+	/* NOTE: frame handles pretend to be the colored trim bar from an event handling
 	   perspective. XXX change this ??
 	*/
 
@@ -1196,7 +1204,10 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 	}
 
 	if (can_drop) {
-		region = _regions->get_dragged_region ();
+
+		if (target == X_("regions")) {
+			region = _regions->get_dragged_region ();
+		}
 
 		if (region) {
 
@@ -1253,7 +1264,8 @@ void
 Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
                       int x, int y,
                       const SelectionData& /*data*/,
-                      guint /*info*/, guint /*time*/)
+                      guint /*info*/, guint /*time*/,
+                      bool from_region_list)
 {
 	GdkEvent event;
 	double px;
@@ -1266,7 +1278,14 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	event.motion.state = Gdk::BUTTON1_MASK;
 	samplepos_t const pos = window_event_sample (&event, &px, &py);
 
-	boost::shared_ptr<Region> region = _regions->get_dragged_region ();
+	boost::shared_ptr<Region> region;
+
+	if (from_region_list) {
+		region = _regions->get_dragged_region ();
+	} else {
+		region = _sources->get_dragged_region ();
+	}
+
 	if (!region) { return; }
 
 	RouteTimeAxisView* rtav = 0;
@@ -1354,4 +1373,3 @@ Editor::key_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType
 
 	return handled;
 }
-

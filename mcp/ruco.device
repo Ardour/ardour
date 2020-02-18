@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MackieProtocolDevice>
+  <Name value="RuCo"/>
+  <DeviceType value="MCU"/>
+  <Strips value="8"/>
+  <MasterFader value="no"/>
+  <TimecodeDisplay value="yes"/>
+  <TwoCharacterDisplay value="yes"/>
+  <Extenders value="0"/>
+  <MasterPosition value="0"/>
+  <GlobalControls value="yes"/>
+  <JogWheel value="yes"/>
+  <TouchSenseFaders value="yes"/>
+  <HasSeparateMeters value="yes"/>
+  <SingleFaderFollowsSelection value="yes"/>
+</MackieProtocolDevice>

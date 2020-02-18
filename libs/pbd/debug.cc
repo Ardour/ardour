@@ -1,23 +1,26 @@
 /*
-    Copyright (C) 2009 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2010-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2010-2016 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2015-2016 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cstring>
+#include <cstdio>
 #include <cstdlib>
 #include <iostream>
 #include <map>
@@ -58,6 +61,7 @@ DebugBits PBD::DEBUG::Timing = PBD::new_debug_bit ("timing");
 DebugBits PBD::DEBUG::Threads = PBD::new_debug_bit ("threads");
 DebugBits PBD::DEBUG::Locale = PBD::new_debug_bit ("locale");
 DebugBits PBD::DEBUG::StringConvert = PBD::new_debug_bit ("stringconvert");
+DebugBits PBD::DEBUG::DebugTimestamps = PBD::new_debug_bit ("debugtimestamps");
 
 /* These are debug bits that are used by backends. Since these are loaded dynamically,
    after command-line parsing, defining them in code that is part of the backend
@@ -85,8 +89,7 @@ PBD::new_debug_bit (const char* name)
 
 	if (_debug_bit >= debug_bits.size()) {
 		cerr << "Too many debug bits defined, offender was " << name << endl;
-		abort ();
-		/*NOTREACHED*/
+		abort (); /*NOTREACHED*/
 	}
 
 	ret.set (_debug_bit++, 1);
@@ -97,7 +100,11 @@ PBD::new_debug_bit (const char* name)
 void
 PBD::debug_print (const char* prefix, string str)
 {
-	cout << prefix << ": " << str;
+	if ((PBD::debug_bits & DEBUG::DebugTimestamps).any()) {
+		printf ("%ld %s: %s", g_get_monotonic_time(), prefix, str.c_str());
+	} else {
+		printf ("%s: %s", prefix, str.c_str());
+	}
 }
 
 int
@@ -125,7 +132,7 @@ PBD::parse_debug_options (const char* str)
 
                         if (strncasecmp (cstr, i->first, strlen (cstr)) == 0) {
 	                        bits |= i->second;
-	                        cout << i->first << " set ... debug bits now set to " << bits << " using " << i->second << endl;
+	                        cout << i->first << " set\n";
                         }
                 }
 	}

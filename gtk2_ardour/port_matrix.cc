@@ -1,23 +1,28 @@
 /*
-    Copyright (C) 2002-2009 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2007-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2008-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2016 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2008 Hans Baier <hansfbaier@googlemail.com>
+ * Copyright (C) 2013-2015 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <iostream>
+
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/label.h>
@@ -26,20 +31,25 @@
 #include <gtkmm/menu_elems.h>
 #include <gtkmm/window.h>
 #include <gtkmm/stock.h>
-#include <gtkmm/messagedialog.h>
+
 #include "ardour/bundle.h"
 #include "ardour/types.h"
 #include "ardour/session.h"
 #include "ardour/route.h"
 #include "ardour/audioengine.h"
+
 #include "gtkmm2ext/utils.h"
+
+#include "ardour_dialog.h"
+#include "ardour_message.h"
+#include "gui_thread.h"
 #include "port_matrix.h"
 #include "port_matrix_body.h"
 #include "port_matrix_component.h"
-#include "ardour_dialog.h"
-#include "pbd/i18n.h"
-#include "gui_thread.h"
 #include "utils.h"
+#include "ui_config.h"
+
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;
@@ -104,6 +114,8 @@ PortMatrix::PortMatrix (Window* parent, Session* session, DataType type)
 	_vspacer.show ();
 	_vnotebook.show ();
 	_hnotebook.show ();
+
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &PortMatrix::parameter_changed));
 }
 
 PortMatrix::~PortMatrix ()
@@ -446,7 +458,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 			if (can_add_channels (bc[dim].bundle)) {
 				/* Start off with options for the `natural' port type */
 				for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
-					if (should_show (*i)) {
+					if (should_show (*i) && can_add_channel_proxy (w, *i)) {
 						snprintf (buf, sizeof (buf), _("Add %s %s"), (*i).to_i18n_string(), channel_noun().c_str());
 						sub.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::add_channel_proxy), w, *i)));
 					}
@@ -454,7 +466,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 
 				/* Now add other ones */
 				for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
-					if (!should_show (*i)) {
+					if (!should_show (*i) && can_add_channel_proxy (w, *i)) {
 						snprintf (buf, sizeof (buf), _("Add %s %s"), (*i).to_i18n_string(), channel_noun().c_str());
 						sub.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::add_channel_proxy), w, *i)));
 					}
@@ -729,7 +741,7 @@ PortMatrix::add_channel (boost::shared_ptr<Bundle> b, DataType t)
 	if (io) {
 		int const r = io->add_port ("", this, t);
 		if (r == -1) {
-			Gtk::MessageDialog msg (_("It is not possible to add a port here."));
+			ArdourMessageDialog msg (_("It is not possible to add a port here."));
 			msg.set_title (_("Cannot add port"));
 			msg.run ();
 		}
@@ -788,6 +800,17 @@ PortMatrix::remove_all_channels (boost::weak_ptr<Bundle> w)
 			remove_channel (ARDOUR::BundleChannel (b, i));
 		}
 	}
+}
+
+bool
+PortMatrix::can_add_channel_proxy (boost::weak_ptr<Bundle> w, DataType t) const
+{
+	boost::shared_ptr<Bundle> b = w.lock ();
+	if (!b) {
+		return false;
+	}
+	boost::shared_ptr<IO> io = io_from_bundle (b);
+	return io->can_add_port (t);
 }
 
 void
@@ -1235,4 +1258,12 @@ PortMatrix::key_press (GdkEventKey* k)
 	}
 
 	return false;
+}
+
+void
+PortMatrix::parameter_changed (string p)
+{
+	if (p == "font-scale") {
+		setup ();
+	}
 }

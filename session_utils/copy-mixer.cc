@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2016-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 #include <iostream>
 #include <cstdlib>
 #include <getopt.h>
@@ -228,7 +246,7 @@ copy_session_routes (
 }
 
 
-static void usage (int status) {
+static void usage () {
 	// help2man compatible format (standard GNU help-text)
 	printf (UTILNAME " - copy mixer settings from one session to another.\n\n");
 	printf ("Usage: " UTILNAME " [ OPTIONS ] <src> <dst>\n\n");
@@ -252,7 +270,7 @@ When --snapshot is set, a new snaphot in the <dst> session is created.\n\
 
 	printf ("Report bugs to <http://tracker.ardour.org/>\n"
 	        "Website: <http://ardour.org/>\n");
-	::exit (status);
+	::exit (EXIT_SUCCESS);
 }
 
 static bool ends_with (std::string const& value, std::string const& ending)
@@ -290,7 +308,7 @@ int main (int argc, char* argv[])
 				break;
 
 			case 'h':
-				usage (0);
+				usage ();
 				break;
 
 			case 'l':
@@ -304,7 +322,7 @@ int main (int argc, char* argv[])
 			case 'V':
 				printf ("ardour-utils version %s\n\n", VERSIONSTRING);
 				printf ("Copyright (C) GPL 2016 Robin Gareus <robin@gareus.org>\n");
-				exit (0);
+				exit (EXIT_SUCCESS);
 				break;
 
 			case 'v':
@@ -312,15 +330,17 @@ int main (int argc, char* argv[])
 				break;
 
 			default:
-					usage (EXIT_FAILURE);
-					break;
+				cerr << "Error: unrecognized option. See --help for usage information.\n";
+				::exit (EXIT_FAILURE);
+				break;
 		}
 	}
 
 	// TODO parse path/name  from a single argument.
 
 	if (optind + 2 > argc) {
-		usage (EXIT_FAILURE);
+		cerr << "Error: Missing parameter. See --help for usage information.\n";
+		::exit (EXIT_FAILURE);
 	}
 
 	std::string src = argv[optind];
@@ -330,19 +350,19 @@ int main (int argc, char* argv[])
 
 	if (!ends_with (src, statefile_suffix)) {
 		fprintf (stderr, "source is not a .ardour session file.\n");
-		exit (1);
+		exit (EXIT_FAILURE);
 	}
 	if (!ends_with (dst, statefile_suffix)) {
 		fprintf (stderr, "target is not a .ardour session file.\n");
-		exit (1);
+		exit (EXIT_FAILURE);
 	}
 	if (!Glib::file_test (src, Glib::FILE_TEST_IS_REGULAR)) {
 		fprintf (stderr, "source is not a regular file.\n");
-		exit (1);
+		exit (EXIT_FAILURE);
 	}
 	if (!Glib::file_test (dst, Glib::FILE_TEST_IS_REGULAR)) {
 		fprintf (stderr, "target is not a regular file.\n");
-		exit (1);
+		exit (EXIT_FAILURE);
 	}
 
 	std::string src_path = Glib::path_get_dirname (src);

@@ -1,20 +1,28 @@
 /*
-    Copyright (C) 2000 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2005-2019 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2006-2008 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2006-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2006-2017 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2006 Sampo Savolainen <v2@iki.fi>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2012-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2015 John Emmas <john@creativepost.co.uk>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifdef WAF_BUILD
 #include "libardour-config.h"
@@ -43,6 +51,10 @@
 #ifdef PLATFORM_WINDOWS
 #include <stdio.h> // for _setmaxstdio
 #include <windows.h> // for LARGE_INTEGER
+#endif
+
+#ifdef HAVE_FFTW35F
+#include <fftw3.h>
 #endif
 
 #ifdef WINDOWS_VST_SUPPORT
@@ -99,6 +111,7 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_ui.h"
+#include "ardour/midi_patch_manager.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/mix.h"
 #include "ardour/operations.h"
@@ -113,6 +126,7 @@
 #include "ardour/runtime_functions.h"
 #include "ardour/session_event.h"
 #include "ardour/source_factory.h"
+#include "ardour/transport_fsm.h"
 #include "ardour/transport_master_manager.h"
 #ifdef LV2_SUPPORT
 #include "ardour/uri_map.h"
@@ -140,7 +154,7 @@ find_peaks_t            ARDOUR::find_peaks = 0;
 apply_gain_to_buffer_t  ARDOUR::apply_gain_to_buffer = 0;
 mix_buffers_with_gain_t ARDOUR::mix_buffers_with_gain = 0;
 mix_buffers_no_gain_t   ARDOUR::mix_buffers_no_gain = 0;
-copy_vector_t			ARDOUR::copy_vector = 0;
+copy_vector_t           ARDOUR::copy_vector = 0;
 
 PBD::Signal1<void,std::string> ARDOUR::BootMessage;
 PBD::Signal3<void,std::string,std::string,bool> ARDOUR::PluginScanMessage;
@@ -151,6 +165,7 @@ PBD::Signal3<bool,std::string,std::string,int> ARDOUR::CopyConfigurationFiles;
 std::map<std::string, bool> ARDOUR::reserved_io_names;
 
 static bool have_old_configuration_files = false;
+static bool running_from_gui = false;
 
 namespace ARDOUR {
 extern void setup_enum_writer ();
@@ -160,6 +175,8 @@ extern void setup_enum_writer ();
    if any bounds-related property has changed
 */
 PBD::PropertyChange ARDOUR::bounds_change;
+
+static PBD::ScopedConnection engine_startup_connection;
 
 void
 setup_hardware_optimization (bool try_optimization)
@@ -174,13 +191,12 @@ setup_hardware_optimization (bool try_optimization)
 
 #ifdef PLATFORM_WINDOWS
 		/* We have AVX-optimized code for Windows */
-
-		if (fpu->has_avx()) {
+		if (fpu->has_avx())
 #else
 		/* AVX code doesn't compile on Linux yet */
-
-		if (false) {
+		if (false)
 #endif
+		{
 			info << "Using AVX optimized routines" << endmsg;
 
 			// AVX SET
@@ -269,7 +285,7 @@ lotsa_files_please ()
 			}
 		} else {
 			if (rl.rlim_cur != RLIM_INFINITY) {
-				info << string_compose (_("Your system is configured to limit %1 to only %2 open files"), PROGRAM_NAME, rl.rlim_cur) << endmsg;
+				info << string_compose (_("Your system is configured to limit %1 to %2 open files"), PROGRAM_NAME, rl.rlim_cur) << endmsg;
 			}
 		}
 	} else {
@@ -286,7 +302,7 @@ lotsa_files_please ()
 	 */
 	int newmax = _setmaxstdio (2048);
 	if (newmax > 0) {
-		info << string_compose (_("Your system is configured to limit %1 to only %2 open files"), PROGRAM_NAME, newmax) << endmsg;
+		info << string_compose (_("Your system is configured to limit %1 to %2 open files"), PROGRAM_NAME, newmax) << endmsg;
 	} else {
 		error << string_compose (_("Could not set system open files limit. Current limit is %1 open files"), _getmaxstdio())  << endmsg;
 	}
@@ -430,16 +446,22 @@ ARDOUR::handle_old_configuration_files (boost::function<bool (std::string const&
 }
 
 bool
-ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir)
+ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir, bool with_gui)
 {
 	if (libardour_initialized) {
 		return true;
 	}
 
+	running_from_gui = with_gui;
+
 #ifndef NDEBUG
-	if (getenv("LUA_METATABLES")) {
+	if (getenv("ARDOUR_LUA_METATABLES")) {
 		luabridge::Security::setHideMetatables (false);
 	}
+#endif
+
+#ifdef HAVE_FFTW35F
+	fftwf_make_planner_thread_safe ();
 #endif
 
 	if (!PBD::init()) return false;
@@ -450,6 +472,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 #endif
 
 	SessionEvent::init_event_pool ();
+	TransportFSM::Event::init_pool ();
 
 	Operations::make_operations_quarks ();
 	SessionObject::make_property_quarks ();
@@ -548,7 +571,6 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	*/
 	EventLoop::register_request_buffer_factory (X_("midiUI"), MidiControlUI::request_factory);
 
-        ProcessThread::init ();
 	/* the + 4 is a bit of a handwave. i don't actually know
 	   how many more per-thread buffer sets we need above
 	   the h/w concurrency, but its definitely > 1 more.
@@ -558,6 +580,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
         PannerManager::instance().discover_panners();
 
 	ARDOUR::AudioEngine::create ();
+	TransportMasterManager::create ();
 
 	/* it is unfortunate that we need to include reserved names here that
 	   refer to control surfaces. But there's no way to ensure a complete
@@ -574,6 +597,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	reserved_io_names[_("Monitor")] = true;
 	reserved_io_names[_("Master")] = true;
 	reserved_io_names["auditioner"] = true; // auditioner.cc  Track (s, "auditioner",...)
+	reserved_io_names[_("Virtual Keyboard")] = false;
 
 	/* pure I/O */
 	reserved_io_names[X_("Click")] = false; // session.cc ClickIO (*this, X_("Click")
@@ -588,43 +612,47 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	reserved_io_names[_("FaderPort16 Recv")] = false;
 	reserved_io_names[_("FaderPort16 Send")] = false;
 
+	MIDI::Name::MidiPatchManager::instance().load_midnams_in_thread ();
+
 	libardour_initialized = true;
 
 	return true;
 }
 
 void
-ARDOUR::init_post_engine ()
+ARDOUR::init_post_engine (uint32_t start_cnt)
 {
 	XMLNode* node;
 
-	if ((node = Config->control_protocol_state()) != 0) {
-		ControlProtocolManager::instance().set_state (*node, 0 /* here: global-config state */);
+	if (start_cnt == 0) {
+
+		if (!running_from_gui) {
+
+			/* find plugins, but only using the existing cache (i.e. do
+			 * not discover new ones. GUIs are responsible for
+			 * invoking this themselves after the engine is
+			 * started, with whatever options they want.
+			 */
+
+			ARDOUR::PluginManager::instance().refresh (true);
+		}
+
+		if ((node = Config->control_protocol_state()) != 0) {
+			ControlProtocolManager::instance().set_state (*node, 0 /* here: global-config state */);
+		}
 	}
 
-	if ((node = Config->transport_master_state()) != 0) {
-		if (TransportMasterManager::instance().set_state (*node, Stateful::loading_state_version)) {
-			error << _("Cannot restore transport master manager") << endmsg;
-			/* XXX now what? */
-		}
-	} else {
-		if (TransportMasterManager::instance().set_default_configuration ()) {
-			error << _("Cannot initialize transport master manager") << endmsg;
-			/* XXX now what? */
-		}
-	}
-
-	/* find plugins */
-
-	ARDOUR::PluginManager::instance().refresh (!Config->get_discover_vst_on_start());
+	TransportMasterManager::instance().restart ();
 }
 
 void
-	ARDOUR::cleanup ()
+ARDOUR::cleanup ()
 {
 	if (!libardour_initialized) {
 		return;
 	}
+
+	engine_startup_connection.disconnect ();
 
 	delete &ControlProtocolManager::instance();
 	ARDOUR::AudioEngine::destroy ();
@@ -665,8 +693,9 @@ ARDOUR::setup_fpu ()
 	}
 
 #if defined(ARCH_X86) && defined(USE_XMMINTRIN)
+	/* see also https://carlh.net/plugins/denormals.php */
 
-	int MXCSR;
+	unsigned int MXCSR;
 
 	if (!fpu->has_flush_to_zero() && !fpu->has_denormals_are_zero()) {
 		return;
@@ -709,6 +738,31 @@ ARDOUR::setup_fpu ()
 	}
 
 	_mm_setcsr (MXCSR);
+
+#elif defined(__aarch64__)
+	/* http://infocenter.arm.com/help/topic/com.arm.doc.ddi0488d/CIHCACFF.html
+	 * bit 24: flush-to-zero */
+	if (Config->get_denormal_model() != DenormalNone) {
+		uint64_t cw;
+		__asm__ __volatile__ (
+				"mrs    %0, fpcr           \n"
+				"orr    %0, %0, #0x1000000 \n"
+				"msr    fpcr, %0           \n"
+				"isb                       \n"
+				: "=r"(cw) :: "memory");
+	}
+
+#elif defined(__arm__)
+	/* http://infocenter.arm.com/help/topic/com.arm.doc.dui0068b/BCFHFBGA.html
+	 * bit 24: flush-to-zero */
+	if (Config->get_denormal_model() != DenormalNone) {
+		uint32_t cw;
+		__asm__ __volatile__ (
+				"vmrs   %0, fpscr          \n"
+				"orr    %0, %0, #0x1000000 \n"
+				"vmsr   fpscr, %0          \n"
+				: "=r"(cw) :: "memory");
+	}
 
 #endif
 }

@@ -1,21 +1,28 @@
 /*
-    Copyright (C) 2000-2002 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2000-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005-2009 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2008-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015-2016 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2015-2017 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2015 Colin Fletcher <colin.m.fletcher@googlemail.com>
+ * Copyright (C) 2016 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <algorithm>
 #include <stdexcept>
@@ -704,15 +711,15 @@ MeterSection::get_state() const
 
 */
 struct MetricSectionSorter {
-    bool operator() (const MetricSection* a, const MetricSection* b) {
-	    return a->pulse() < b->pulse();
-    }
+	bool operator() (const MetricSection* a, const MetricSection* b) {
+		return a->pulse() < b->pulse();
+	}
 };
 
 struct MetricSectionFrameSorter {
-    bool operator() (const MetricSection* a, const MetricSection* b) {
-	    return a->sample() < b->sample();
-    }
+	bool operator() (const MetricSection* a, const MetricSection* b) {
+		return a->sample() < b->sample();
+	}
 };
 
 TempoMap::TempoMap (samplecnt_t fr)
@@ -1426,10 +1433,10 @@ TempoMap::recompute_tempi (Metrics& metrics)
 }
 
 /* tempos must be positioned correctly.
-   the current approach is to use a meter's bbt time as its base position unit.
-   an audio-locked meter requires a recomputation of pulse and beat (but not bbt),
-   while a music-locked meter requires recomputations of sample pulse and beat (but not bbt)
-*/
+ * the current approach is to use a meter's bbt time as its base position unit.
+ * an audio-locked meter requires a recomputation of pulse and beat (but not bbt),
+ * while a music-locked meter requires recomputations of sample pulse and beat (but not bbt)
+ */
 void
 TempoMap::recompute_meters (Metrics& metrics)
 {
@@ -1623,6 +1630,8 @@ TempoMap::beat_at_minute_locked (const Metrics& metrics, const double& minute) c
 		}
 	}
 
+	assert (prev_m);
+
 	const double beat = prev_m->beat() + (ts.pulse_at_minute (minute) - prev_m->pulse()) * prev_m->note_divisor();
 
 	/* audio locked meters fake their beat */
@@ -1723,6 +1732,7 @@ TempoMap::tempo_at_minute_locked (const Metrics& metrics, const double& minute) 
 		}
 	}
 
+	assert (prev_t);
 	return Tempo (prev_t->note_types_per_minute(), prev_t->note_type(), prev_t->end_note_types_per_minute());
 }
 
@@ -1776,6 +1786,7 @@ TempoMap::minute_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) co
 		}
 	}
 
+	assert (prev_t);
 	return prev_t->minute();
 }
 
@@ -1800,6 +1811,7 @@ TempoMap::tempo_at_pulse_locked (const Metrics& metrics, const double& pulse) co
 		}
 	}
 
+	assert (prev_t);
 	return Tempo (prev_t->note_types_per_minute(), prev_t->note_type(), prev_t->end_note_types_per_minute());
 }
 
@@ -1837,6 +1849,7 @@ TempoMap::pulse_at_tempo_locked (const Metrics& metrics, const Tempo& tempo) con
 		}
 	}
 
+	assert (prev_t);
 	return prev_t->pulse();
 }
 
@@ -1938,6 +1951,8 @@ TempoMap::pulse_at_minute_locked (const Metrics& metrics, const double& minute) 
 		}
 	}
 
+	assert (prev_t);
+
 	/* treated as constant for this ts */
 	const double pulses_in_section = ((minute - prev_t->minute()) * prev_t->note_types_per_minute()) / prev_t->note_type();
 
@@ -1967,6 +1982,9 @@ TempoMap::minute_at_pulse_locked (const Metrics& metrics, const double& pulse) c
 			prev_t = t;
 		}
 	}
+
+	assert (prev_t);
+
 	/* must be treated as constant, irrespective of _type */
 	double const dtime = ((pulse - prev_t->pulse()) * prev_t->note_type()) / prev_t->note_types_per_minute();
 
@@ -2010,6 +2028,8 @@ TempoMap::beat_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time& 
 			prev_m = m;
 		}
 	}
+
+	assert (prev_m);
 
 	const double remaining_bars = bbt.bars - prev_m->bbt().bars;
 	const double remaining_bars_in_beats = remaining_bars * prev_m->divisions_per_bar();
@@ -2134,6 +2154,8 @@ TempoMap::pulse_at_bbt_locked (const Metrics& metrics, const Timecode::BBT_Time&
 			prev_m = m;
 		}
 	}
+
+	assert (prev_m);
 
 	const double remaining_bars = bbt.bars - prev_m->bbt().bars;
 	const double remaining_pulses = remaining_bars * prev_m->divisions_per_bar() / prev_m->note_divisor();
@@ -2288,6 +2310,8 @@ TempoMap::bbt_at_minute_locked (const Metrics& metrics, const double& minute) co
 			prev_m = m;
 		}
 	}
+
+	assert (prev_m);
 
 	double beat = prev_m->beat() + (ts.pulse_at_minute (minute) - prev_m->pulse()) * prev_m->note_divisor();
 
@@ -3019,6 +3043,7 @@ TempoMap::solve_map_bbt (Metrics& imaginary, MeterSection* section, const BBT_Ti
 	}
 
 	if (!section_prev) {
+		assert (prev_m);
 
 		const double beats = (when.bars - prev_m->bbt().bars) * prev_m->divisions_per_bar();
 		const double pulse = (beats / prev_m->note_divisor()) + prev_m->pulse();
@@ -3382,10 +3407,12 @@ TempoMap::gui_stretch_tempo (TempoSection* ts, const samplepos_t sample, const s
 		if (ts_copy->clamped()) {
 			TempoSection* next_t = next_tempo_section_locked (future_map, ts_copy);
 			TempoSection* prev_to_ts_copy = previous_tempo_section_locked (future_map, ts_copy);
-                        /* the change in samples is the result of changing the slope of at most 2 previous tempo sections.
-			   constant to constant is straightforward, as the tempo prev to ts_copy has constant slope.
-                        */			double contribution = 0.0;
-			if (next_t && prev_to_ts_copy && prev_to_ts_copy->type() == TempoSection::Ramp) {
+			assert (prev_to_ts_copy);
+			/* the change in samples is the result of changing the slope of at most 2 previous tempo sections.
+			 * constant to constant is straightforward, as the tempo prev to ts_copy has constant slope.
+			 */
+			double contribution = 0.0;
+			if (next_t && prev_to_ts_copy->type() == TempoSection::Ramp) {
 				contribution = (ts_copy->pulse() - prev_to_ts_copy->pulse()) / (double) (next_t->pulse() - prev_to_ts_copy->pulse());
 			}
 			samplepos_t const fr_off = end_sample - sample;
@@ -3951,13 +3978,16 @@ TempoMap::round_to_quarter_note_subdivision (samplepos_t fr, int sub_num, RoundM
 			ticks += ticks_one_subdivisions_worth - mod;
 		}
 
-//NOTE:  this code intentionally limits the rounding so we don't advance to the next beat.
-//  For the purposes of "jump-to-next-subdivision", we DO want to advance to the next beat.
-//	And since the "prev" direction DOES move beats, I assume this code is unintended.
-//  But I'm keeping it around, until we determine there are no terrible consequences.
-//		if (ticks >= BBT_Time::ticks_per_beat) {
-//			ticks -= BBT_Time::ticks_per_beat;
-//		}
+		/* NOTE: this code intentionally limits the rounding so we don't advance to the next beat.
+		 * For the purposes of "jump-to-next-subdivision", we DO want to advance to the next beat.
+		 * And since the "prev" direction DOES move beats, I assume this code is unintended.
+		 * But I'm keeping it around, commened out, until we determine there are no terrible consequences.
+		 */
+#if 0
+		if (ticks >= BBT_Time::ticks_per_beat) {
+			ticks -= BBT_Time::ticks_per_beat;
+		}
+#endif
 
 	} else if (dir < 0) {
 
@@ -4110,7 +4140,6 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 	int32_t cnt = ceil (beat_at_minute_locked (_metrics, minute_at_sample (lower)));
-	samplecnt_t pos = 0;
 	/* although the map handles negative beats, bbt doesn't. */
 	if (cnt < 0.0) {
 		cnt = 0.0;
@@ -4120,13 +4149,18 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 		return;
 	}
 	if (bar_mod == 0) {
-		while (pos >= 0 && pos < upper) {
-			pos = sample_at_minute (minute_at_beat_locked (_metrics, cnt));
+		while (true) {
+			samplecnt_t pos = sample_at_minute (minute_at_beat_locked (_metrics, cnt));
+			if (pos >= upper) {
+				break;
+			}
 			const MeterSection meter = meter_section_at_minute_locked (_metrics, minute_at_sample (pos));
 			const BBT_Time bbt = bbt_at_beat_locked (_metrics, cnt);
 			const double qn = pulse_at_beat_locked (_metrics, cnt) * 4.0;
 
-			points.push_back (BBTPoint (meter, tempo_at_minute_locked (_metrics, minute_at_sample (pos)), pos, bbt.bars, bbt.beats, qn));
+			if (pos >= lower) {
+				points.push_back (BBTPoint (meter, tempo_at_minute_locked (_metrics, minute_at_sample (pos)), pos, bbt.bars, bbt.beats, qn));
+			}
 			++cnt;
 		}
 	} else {
@@ -4139,12 +4173,17 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 			++bbt.bars;
 		}
 
-		while (pos >= 0 && pos < upper) {
-			pos = sample_at_minute (minute_at_bbt_locked (_metrics, bbt));
+		while (true) {
+			samplecnt_t pos = sample_at_minute (minute_at_bbt_locked (_metrics, bbt));
+			if (pos >= upper) {
+				break;
+			}
 			const MeterSection meter = meter_section_at_minute_locked (_metrics, minute_at_sample (pos));
 			const double qn = pulse_at_bbt_locked (_metrics, bbt) * 4.0;
 
-			points.push_back (BBTPoint (meter, tempo_at_minute_locked (_metrics, minute_at_sample (pos)), pos, bbt.bars, bbt.beats, qn));
+			if (pos >= lower) {
+				points.push_back (BBTPoint (meter, tempo_at_minute_locked (_metrics, minute_at_sample (pos)), pos, bbt.bars, bbt.beats, qn));
+			}
 			bbt.bars += bar_mod;
 		}
 	}
@@ -4247,6 +4286,12 @@ TempoMap::tempo_section_at_beat_locked (const Metrics& metrics, const double& be
 		}
 
 	}
+
+	if (prev_t == 0) {
+		fatal << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
 	return *prev_t;
 }
 
@@ -4337,8 +4382,8 @@ TempoMap::next_tempo_section_locked (const Metrics& metrics, TempoSection* ts) c
 	return 0;
 }
 /* don't use this to calculate length (the tempo is only correct for this sample).
-   do that stuff based on the beat_at_sample and sample_at_beat api
-*/
+ * do that stuff based on the beat_at_sample and sample_at_beat api
+ */
 double
 TempoMap::samples_per_quarter_note_at (const samplepos_t sample, const samplecnt_t sr) const
 {
@@ -4424,6 +4469,12 @@ TempoMap::meter_section_at_beat_locked (const Metrics& metrics, const double& be
 		}
 
 	}
+
+	if (prev_m == 0) {
+		fatal << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
 	return *prev_m;
 }
 
@@ -4856,8 +4907,8 @@ TempoMap::samplepos_plus_bbt (samplepos_t pos, BBT_Time op) const
 }
 
 /** Count the number of beats that are equivalent to distance when going forward,
-    starting at pos.
-*/
+ * starting at pos.
+ */
 Temporal::Beats
 TempoMap::framewalk_to_qn (samplepos_t pos, samplecnt_t distance) const
 {
@@ -4867,9 +4918,9 @@ TempoMap::framewalk_to_qn (samplepos_t pos, samplecnt_t distance) const
 }
 
 struct bbtcmp {
-    bool operator() (const BBT_Time& a, const BBT_Time& b) {
-	    return a < b;
-    }
+	bool operator() (const BBT_Time& a, const BBT_Time& b) {
+		return a < b;
+	}
 };
 
 std::ostream&

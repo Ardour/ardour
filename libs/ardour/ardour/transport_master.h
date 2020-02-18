@@ -1,21 +1,20 @@
 /*
-    Copyright (C) 2002 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2018-2019 Paul Davis <paul@linuxaudiosystems.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_transport_master_h__
 #define __ardour_transport_master_h__
@@ -33,7 +32,7 @@
 #include "pbd/i18n.h"
 #include "pbd/properties.h"
 #include "pbd/signals.h"
-#include "pbd/stateful.h"
+#include "pbd/statefuldestructible.h"
 
 #include "temporal/time.h"
 
@@ -205,14 +204,19 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	 *     ARDOURs transport position to the slaves requested transport position.
 	 *   </li>
 	 *   <li>TransportMaster::locked() should return true, otherwise Session::no_roll will be called</li>
-	 *   <li>TransportMaster::starting() should be false, otherwise the transport will not move until it becomes true</li>	 *
+	 *   <li>TransportMaster::starting() should be false, otherwise the transport will not move until it becomes true</li>
 	 * </ul>
 	 *
 	 * @param speed - The transport speed requested
 	 * @param position - The transport position requested
+	 * @param lp last position (used for flywheel)
+	 * @param when last timestamp (used for flywheel)
+	 * @param now monotonic sample time
 	 * @return - The return value is currently ignored (see Session::follow_slave)
 	 */
-	virtual bool speed_and_position (double& speed, samplepos_t& position, samplepos_t & lp, samplepos_t & when, samplepos_t now);
+	virtual bool speed_and_position (double& speed, samplepos_t& position, samplepos_t& lp, samplepos_t& when, samplepos_t now);
+
+	virtual void reset (bool with_position) = 0;
 
 	/**
 	 * reports to ARDOUR whether the TransportMaster is currently synced to its external
@@ -229,6 +233,16 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	 * disconnected from ARDOUR.
 	 */
 	virtual bool ok() const = 0;
+
+	/**
+	 * reports to ARDOUR whether it is possible to use this slave
+	 *
+	 * @return - true if the slave can be used.
+	 *
+	 * Only the JACK ("Engine") slave is ever likely to return false,
+	 * if JACK is not being used for the Audio/MIDI backend.
+	 */
+	virtual bool usable() const { return true; }
 
 	/**
 	 * reports to ARDOUR whether the slave is in the process of starting
@@ -335,8 +349,6 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	TransportRequestType request_mask() const { return _request_mask; }
 	void set_request_mask (TransportRequestType);
 
-	void get_current (double&, samplepos_t&, samplepos_t);
-
 	/* this is set at construction, and not changeable later, so it is not
 	 * a property
 	 */
@@ -346,6 +358,10 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 
 	std::string display_name (bool sh/*ort*/ = true) const;
 
+	virtual void unregister_port ();
+	void connect_port_using_state ();
+	virtual void create_port () = 0;
+
   protected:
 	SyncSource      _type;
 	PBD::Property<std::string>   _name;
@@ -354,7 +370,6 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	bool            _pending_collect;
 	bool            _removeable;
 	PBD::Property<TransportRequestType> _request_mask; /* lists transport requests still accepted when we're in control */
-	PBD::Property<bool> _locked;
 	PBD::Property<bool> _sclock_synced;
 	PBD::Property<bool> _collect;
 	PBD::Property<bool> _connected;
@@ -372,6 +387,8 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	double b, c;
 
 	boost::shared_ptr<Port>  _port;
+
+	XMLNode port_node;
 
 	PBD::ScopedConnection port_connection;
 	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
@@ -423,6 +440,9 @@ class LIBARDOUR_API MTC_TransportMaster : public TimecodeTransportMaster, public
 
 	void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>);
 
+	void unregister_port ();
+
+	void reset (bool with_pos);
 	bool locked() const;
 	bool ok() const;
 	void handle_locate (const MIDI::byte*);
@@ -436,6 +456,8 @@ class LIBARDOUR_API MTC_TransportMaster : public TimecodeTransportMaster, public
         Timecode::TimecodeFormat apparent_timecode_format() const;
         std::string position_string() const;
 	std::string delta_string() const;
+
+	void create_port ();
 
   private:
 	PBD::ScopedConnectionList port_connections;
@@ -467,7 +489,6 @@ class LIBARDOUR_API MTC_TransportMaster : public TimecodeTransportMaster, public
 	Timecode::Time timecode;
 	bool           printed_timecode_warning;
 
-	void reset (bool with_pos);
 	void queue_reset (bool with_pos);
 	void maybe_reset ();
 
@@ -490,6 +511,7 @@ public:
 
 	void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>);
 
+	void reset (bool with_pos);
 	bool locked() const;
 	bool ok() const;
 
@@ -503,6 +525,8 @@ public:
 	std::string position_string() const;
 	std::string delta_string() const;
 
+	void create_port ();
+
   private:
 	void parse_ltc(const pframes_t, const Sample* const, const samplecnt_t);
 	void process_ltc(samplepos_t const);
@@ -510,7 +534,6 @@ public:
 	bool detect_discontinuity(LTCFrameExt *, int, bool);
 	bool detect_ltc_fps(int, bool);
 	bool equal_ltc_sample_time(LTCFrame *a, LTCFrame *b);
-	void reset (bool with_ts = true);
 	void resync_xrun();
 	void resync_latency();
 	void parse_timecode_offset();
@@ -522,10 +545,11 @@ public:
 	LTCDecoder *   decoder;
 	double         samples_per_ltc_frame;
 	Timecode::Time timecode;
-	LTCFrameExt    prev_sample;
+	LTCFrameExt    prev_frame;
 	bool           fps_detected;
 
 	samplecnt_t    monotonic_cnt;
+	uint64_t       frames_since_reset;
 	int            delayedlocked;
 
 	int            ltc_detect_fps_cnt;
@@ -550,13 +574,15 @@ class LIBARDOUR_API MIDIClock_TransportMaster : public TransportMaster, public T
 
 	void set_session (Session*);
 
+	void unregister_port ();
+
 	void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>);
 
 	void rebind (MidiPort&);
 
+	void reset (bool with_pos);
 	bool locked() const;
 	bool ok() const;
-	bool starting() const;
 
 	samplecnt_t update_interval () const;
 	samplecnt_t resolution () const;
@@ -567,6 +593,8 @@ class LIBARDOUR_API MIDIClock_TransportMaster : public TransportMaster, public T
 	std::string delta_string() const;
 
 	float bpm() const { return _bpm; }
+
+	void create_port ();
 
   protected:
 	PBD::ScopedConnectionList port_connections;
@@ -594,7 +622,6 @@ class LIBARDOUR_API MIDIClock_TransportMaster : public TransportMaster, public T
 	bool _running;
 	double _bpm;
 
-	void reset ();
 	void start (MIDI::Parser& parser, samplepos_t timestamp);
 	void contineu (MIDI::Parser& parser, samplepos_t timestamp);
 	void stop (MIDI::Parser& parser, samplepos_t timestamp);
@@ -616,8 +643,10 @@ class LIBARDOUR_API Engine_TransportMaster : public TransportMaster
 	bool speed_and_position (double& speed, samplepos_t& pos, samplepos_t &, samplepos_t &, samplepos_t);
 
 	bool starting() const { return _starting; }
+	void reset (bool with_position);
 	bool locked() const;
 	bool ok() const;
+	bool usable() const;
 	samplecnt_t update_interval () const;
 	samplecnt_t resolution () const { return 1; }
 	bool requires_seekahead () const { return false; }
@@ -628,6 +657,8 @@ class LIBARDOUR_API Engine_TransportMaster : public TransportMaster
 
 	std::string position_string() const;
 	std::string delta_string() const;
+
+	void create_port () { }
 
   private:
         AudioEngine& engine;

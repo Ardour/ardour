@@ -1,21 +1,23 @@
 /*
-    Copyright (C) 2009 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2014-2017 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __gtk_ardour_group_tabs_h__
 #define __gtk_ardour_group_tabs_h__
@@ -47,8 +49,12 @@ public:
 
 	void set_session (ARDOUR::Session *);
 
-	/** @param g Route group, or 0.
-	 *  @return Menu to be popped up on right-click over the given route group.
+	/** Create route-group context menu
+	 *
+	 * @param g Route group, or 0.
+	 * @param tabArea false if context menu is not for a group tab, show the "create new from" items here.
+	 *                 When true a given group's context menu for the group \p g is displayed.
+	 * @return Menu to be popped up on right-click over the given route group.
 	 */
 	Gtk::Menu* get_menu (ARDOUR::RouteGroup* g, bool tabArea = false);
 
@@ -83,11 +89,12 @@ private:
 	 */
 	virtual void draw_tab (cairo_t* cr, Tab const & t) = 0;
 
-	/** @param x x coordinate
-	 *  @param y y coordinate
-	 *  @return x or y, depending on which is the primary coordinate for this widget.
+	/** Coordinate map (editor, mixer)
+	 * @param x x-coordinate
+	 * @param y y-coordinate
+	 * @return x or y, depending on which is the primary coordinate for this widget.
 	 */
-	virtual double primary_coordinate (double, double) const = 0;
+	virtual double primary_coordinate (double x, double y) const = 0;
 
 	virtual ARDOUR::RouteList routes_for_tab (Tab const * t) const = 0;
 

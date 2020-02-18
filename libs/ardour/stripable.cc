@@ -1,21 +1,21 @@
 /*
-    Copyright (C) 2016 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2016-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <boost/algorithm/string.hpp>
 
@@ -129,7 +129,10 @@ Stripable::is_selected() const
 bool
 Stripable::Sorter::operator() (boost::shared_ptr<ARDOUR::Stripable> a, boost::shared_ptr<ARDOUR::Stripable> b)
 {
-	if (a->presentation_info().flags () == b->presentation_info().flags ()) {
+	const PresentationInfo::Flag a_flag = a->presentation_info().flags ();
+	const PresentationInfo::Flag b_flag = b->presentation_info().flags ();
+
+	if (a_flag == b_flag) {
 		return a->presentation_info().order() < b->presentation_info().order();
 	}
 
@@ -148,34 +151,34 @@ Stripable::Sorter::operator() (boost::shared_ptr<ARDOUR::Stripable> a, boost::sh
 	 * Mixbus-Mixer : [Track|Bus] (0) < Mixbus (1) < Master (2) < VCA (3)
 	 */
 
-	if (a->presentation_info().flags () & ARDOUR::PresentationInfo::VCA) {
+	if (a_flag & ARDOUR::PresentationInfo::VCA) {
 		cmp_a = 3;
 	}
 #ifdef MIXBUS
-	else if (a->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut) {
+	else if (a_flag & ARDOUR::PresentationInfo::MasterOut) {
 		cmp_a = _mixer_order ? 2 : 4;
 	}
-	else if ((a->presentation_info().flags () & ARDOUR::PresentationInfo::Mixbus) || a->mixbus()) {
+	else if (a_flag & ARDOUR::PresentationInfo::Mixbus) {
 		cmp_a = 1;
 	}
 #endif
-	else if (_mixer_order && (a->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut)) {
+	else if (_mixer_order && (a_flag & ARDOUR::PresentationInfo::MasterOut)) {
 		cmp_a = 4;
 	}
 
 
-	if (b->presentation_info().flags () & ARDOUR::PresentationInfo::VCA) {
+	if (b_flag & ARDOUR::PresentationInfo::VCA) {
 		cmp_b = 3;
 	}
 #ifdef MIXBUS
-	else if (b->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut) {
+	else if (b_flag & ARDOUR::PresentationInfo::MasterOut) {
 		cmp_b = _mixer_order ? 2 : 4;
 	}
-	else if ((b->presentation_info().flags () & ARDOUR::PresentationInfo::Mixbus) || b->mixbus()) {
+	else if (b_flag & ARDOUR::PresentationInfo::Mixbus) {
 		cmp_b = 1;
 	}
 #endif
-	else if (_mixer_order && (b->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut)) {
+	else if (_mixer_order && (b_flag & ARDOUR::PresentationInfo::MasterOut)) {
 		cmp_b = 4;
 	}
 

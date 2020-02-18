@@ -1,20 +1,19 @@
 /*
- * Copyright (C) 2016 Robin Gareus <robin@gareus.org>
- * Copyright (C) 2011 Paul Davis
+ * Copyright (C) 2016-2017 Robin Gareus <robin@gareus.org>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <gtkmm/frame.h>
@@ -96,13 +95,14 @@ PluginSetupDialog::PluginSetupDialog (boost::shared_ptr<ARDOUR::Route> r, boost:
 		f->add (*box);
 		tbl->attach (*f, 1, 2, row, row + 1, EXPAND|FILL, SHRINK, 0, 8);
 		_fan_out.signal_clicked.connect (sigc::mem_fun (*this, &PluginSetupDialog::toggle_fan_out));
+		_fan_out.set_active (true);
 	} else {
 		_pi->set_preset_out (_pi->natural_output_streams ());
 		update_sensitivity (_pi->natural_output_streams ().n_audio ());
+		_fan_out.set_active (false);
 	}
 
 	_keep_mapping.set_active (false);
-	_fan_out.set_active (false);
 	apply_mapping ();
 
 	add_button (Stock::ADD, 0);
@@ -147,6 +147,8 @@ PluginSetupDialog::setup_output_presets ()
 
 	if (have_matching_io) {
 		select_output_preset (_cur_outputs.n_audio ());
+	} else if (ppc.size() == 1 && _pi->strict_io ()) {
+		select_output_preset (*ppc.begin ());
 	} else {
 		select_output_preset (0);
 	}

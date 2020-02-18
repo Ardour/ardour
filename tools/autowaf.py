@@ -140,14 +140,13 @@ def check_pkg(conf, name, **args):
         found = None
         pkg_var_name = 'PKG_' + name.replace('-', '_')
         pkg_name = name
-        if conf.env.PARDEBUG:
-            args['mandatory'] = False  # Smash mandatory arg
-            found = conf.check_cfg(package=pkg_name + 'D', args="--cflags --libs", **args)
-            if found:
-                pkg_name += 'D'
         if mandatory:
             args['mandatory'] = True  # Unsmash mandatory arg
-        if not found:
+        if 'atleast_version' in args:
+            if not 'msg' in args:
+                args['msg'] = 'Checking for %r >= %s' %(pkg_name, args['atleast_version'])
+            found = conf.check_cfg(package=pkg_name, args=[pkg_name + " >= " + args['atleast_version'], '--cflags', '--libs'], **args)
+        else:
             found = conf.check_cfg(package=pkg_name, args="--cflags --libs", **args)
         if found:
             conf.env[pkg_var_name] = pkg_name

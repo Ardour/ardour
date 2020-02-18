@@ -54,6 +54,7 @@ function factory () return function ()
 					end
 				end
 			end
+			return false -- continue, !cancel
 		end
 
 		vamp:plugin ():setParameter ("Beats Per Bar", 4); -- TODO ask

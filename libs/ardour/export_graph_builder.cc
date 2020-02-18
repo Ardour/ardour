@@ -1,31 +1,38 @@
 /*
-  Copyright (C) 2008-2012 Paul Davis
-  Author: Sakari Bergen
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
-
-#include "ardour/export_graph_builder.h"
+ * Copyright (C) 2009-2013 Sakari Bergen <sakari.bergen@beatwaves.net>
+ * Copyright (C) 2010-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2010-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2011-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2012-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2013-2016 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <vector>
 
 #include <glibmm/miscutils.h>
 
+#include "pbd/uuid.h"
+#include "pbd/file_utils.h"
+#include "pbd/cpus.h"
+
 #include "audiographer/process_context.h"
 #include "audiographer/general/chunker.h"
+#include "audiographer/general/cmdpipe_writer.h"
 #include "audiographer/general/interleaver.h"
 #include "audiographer/general/normalizer.h"
 #include "audiographer/general/analyser.h"
@@ -42,14 +49,16 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/export_channel_configuration.h"
+#include "ardour/export_failed.h"
 #include "ardour/export_filename.h"
 #include "ardour/export_format_specification.h"
+#include "ardour/export_graph_builder.h"
 #include "ardour/export_timespan.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/session_directory.h"
+#include "ardour/session_metadata.h"
 #include "ardour/sndfile_helpers.h"
-
-#include "pbd/file_utils.h"
-#include "pbd/cpus.h"
+#include "ardour/system_exec.h"
 
 using namespace AudioGrapher;
 using std::string;
@@ -212,8 +221,13 @@ boost::shared_ptr<AudioGrapher::Sink<Sample> >
 ExportGraphBuilder::Encoder::init (FileSpec const & new_config)
 {
 	config = new_config;
-	init_writer (float_writer);
-	return float_writer;
+	if (config.format->format_id() == ExportFormatBase::F_FFMPEG) {
+		init_writer (pipe_writer);
+		return pipe_writer;
+	} else {
+		init_writer (float_writer);
+		return float_writer;
+	}
 }
 
 template <>
@@ -257,6 +271,10 @@ ExportGraphBuilder::Encoder::destroy_writer (bool delete_out_file)
 			short_writer->close ();
 		}
 
+		if (pipe_writer) {
+			pipe_writer->close ();
+		}
+
 		if (std::remove(writer_filename.c_str() ) != 0) {
 			std::cout << "Encoder::destroy_writer () : Error removing file: " << strerror(errno) << std::endl;
 		}
@@ -265,6 +283,7 @@ ExportGraphBuilder::Encoder::destroy_writer (bool delete_out_file)
 	float_writer.reset ();
 	int_writer.reset ();
 	short_writer.reset ();
+	pipe_writer.reset ();
 }
 
 bool
@@ -290,6 +309,88 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::Sndfil
 	writer_filename = config.filename->get_path (config.format);
 
 	writer.reset (new AudioGrapher::SndfileWriter<T> (writer_filename, format, channels, config.format->sample_rate(), config.broadcast_info));
+	writer->FileWritten.connect_same_thread (copy_files_connection, boost::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
+	if (format & ExportFormatBase::SF_Vorbis) {
+		/* libsndfile uses range 0..1 (worst.. best) for
+		 * SFC_SET_VBR_ENCODING_QUALITY and maps
+		 * SFC_SET_COMPRESSION_LEVEL = 1.0 - VBR_ENCODING_QUALITY
+		 */
+		double vorbis_quality = config.format->codec_quality () / 100.f;
+		if (vorbis_quality >= 0 && vorbis_quality <= 1.0) {
+			writer->command (SFC_SET_VBR_ENCODING_QUALITY, &vorbis_quality, sizeof (double));
+		}
+	}
+}
+
+template<typename T>
+void
+ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::CmdPipeWriter<T> > & writer)
+{
+	unsigned channels = config.channel_config->get_n_chans();
+	config.filename->set_channel_config(config.channel_config);
+	writer_filename = config.filename->get_path (config.format);
+
+	std::string ffmpeg_exe;
+	std::string unused;
+
+	if (!ArdourVideoToolPaths::transcoder_exe (ffmpeg_exe, unused)) {
+		throw ExportFailed ("External encoder (ffmpeg) is not available.");
+	}
+
+	int quality = config.format->codec_quality ();
+
+	int a=0;
+	char **argp = (char**) calloc (100, sizeof(char*));
+	char tmp[64];
+	argp[a++] = strdup(ffmpeg_exe.c_str());
+	argp[a++] = strdup ("-f");
+	argp[a++] = strdup ("f32le");
+	argp[a++] = strdup ("-acodec");
+	argp[a++] = strdup ("pcm_f32le");
+	argp[a++] = strdup ("-ac");
+	snprintf (tmp, sizeof(tmp), "%d", channels);
+	argp[a++] = strdup (tmp);
+	argp[a++] = strdup ("-ar");
+	snprintf (tmp, sizeof(tmp), "%d", config.format->sample_rate());
+	argp[a++] = strdup (tmp);
+	argp[a++] = strdup ("-i");
+	argp[a++] = strdup ("pipe:0");
+
+	argp[a++] = strdup ("-y");
+	if (quality <= 0) {
+		/* variable rate, lower is better */
+		snprintf (tmp, sizeof(tmp), "%d", -quality);
+		argp[a++] = strdup ("-q:a"); argp[a++] = strdup (tmp);
+	} else {
+		/* fixed bitrate, higher is better */
+		snprintf (tmp, sizeof(tmp), "%dk", quality); // eg. "192k"
+		argp[a++] = strdup ("-b:a"); argp[a++] = strdup (tmp);
+	}
+
+	SessionMetadata::MetaDataMap meta;
+	meta["comment"] = "Created with " PROGRAM_NAME;
+
+	if (config.format->tag()) {
+		ARDOUR::SessionMetadata* session_data = ARDOUR::SessionMetadata::Metadata();
+		session_data->av_export_tag (meta);
+	}
+
+	for(SessionMetadata::MetaDataMap::const_iterator it = meta.begin(); it != meta.end(); ++it) {
+		argp[a++] = strdup("-metadata");
+		argp[a++] = SystemExec::format_key_value_parameter (it->first.c_str(), it->second.c_str());
+	}
+
+	argp[a++] = strdup (writer_filename.c_str());
+	argp[a] = (char *)0;
+
+	/* argp is free()d in ~SystemExec,
+	 * SystemExec is deleted when writer is destroyed */
+	ARDOUR::SystemExec* exec = new ARDOUR::SystemExec (ffmpeg_exe, argp);
+	PBD::info << "Encode command: { " << exec->to_s () << "}" << endmsg;
+	if (exec->start (SystemExec::MergeWithStdin)) {
+		throw ExportFailed ("External encoder (ffmpeg) cannot be started.");
+	}
+	writer.reset (new AudioGrapher::CmdPipeWriter<T> (exec, writer_filename));
 	writer->FileWritten.connect_same_thread (copy_files_connection, boost::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
 }
 

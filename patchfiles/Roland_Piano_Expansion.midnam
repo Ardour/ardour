@@ -1,0 +1,523 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JD-990</Model>
+    <PatchNameList Name="EXP Piano 1-64">
+      <Patch Number="I-11" Name="Grand Piano1" ProgramChange="0"/>
+      <Patch Number="I-12" Name="St. Grand Pno" ProgramChange="1"/>
+      <Patch Number="I-13" Name="Grand Piano2" ProgramChange="2"/>
+      <Patch Number="I-14" Name="Grand Piano3" ProgramChange="3"/>
+      <Patch Number="I-15" Name="Brite Grand" ProgramChange="4"/>
+      <Patch Number="I-16" Name="Full Grand" ProgramChange="5"/>
+      <Patch Number="I-17" Name="Grand Piano4" ProgramChange="6"/>
+      <Patch Number="I-18" Name="ClasclPiano1" ProgramChange="7"/>
+      <Patch Number="I-21" Name="ClasclPiano2" ProgramChange="8"/>
+      <Patch Number="I-22" Name="ClasclPiano3" ProgramChange="9"/>
+      <Patch Number="I-23" Name="Grandioso" ProgramChange="10"/>
+      <Patch Number="I-24" Name="Euro Piano" ProgramChange="11"/>
+      <Patch Number="I-25" Name="Rich Piano" ProgramChange="12"/>
+      <Patch Number="I-26" Name="Pop Piano 1" ProgramChange="13"/>
+      <Patch Number="I-27" Name="Pop Piano 2" ProgramChange="14"/>
+      <Patch Number="I-28" Name="Pop Piano 3" ProgramChange="15"/>
+      <Patch Number="I-31" Name="Pop Piano 4" ProgramChange="16"/>
+      <Patch Number="I-32" Name="Pop Piano 5" ProgramChange="17"/>
+      <Patch Number="I-33" Name="RD A. Piano1A" ProgramChange="18"/>
+      <Patch Number="I-34" Name="RD A. Piano1B" ProgramChange="19"/>
+      <Patch Number="I-35" Name="SA Piano 1" ProgramChange="20"/>
+      <Patch Number="I-36" Name="SA Piano 2" ProgramChange="21"/>
+      <Patch Number="I-37" Name="E J Piano" ProgramChange="22"/>
+      <Patch Number="I-38" Name="FlinStoneway" ProgramChange="23"/>
+      <Patch Number="I-41" Name="RD A. Piano3A" ProgramChange="24"/>
+      <Patch Number="I-42" Name="RD A. Piano3B" ProgramChange="25"/>
+      <Patch Number="I-43" Name="RD A. Piano3C" ProgramChange="26"/>
+      <Patch Number="I-44" Name="Sml E. Grand" ProgramChange="27"/>
+      <Patch Number="I-45" Name="E. Grand 1" ProgramChange="28"/>
+      <Patch Number="I-46" Name="E. Grand 2" ProgramChange="29"/>
+      <Patch Number="I-47" Name="E. Grand 3" ProgramChange="30"/>
+      <Patch Number="I-48" Name="Roadcase Pno" ProgramChange="31"/>
+      <Patch Number="I-51" Name="E. Grand 4" ProgramChange="32"/>
+      <Patch Number="I-52" Name="Whirly Piano" ProgramChange="33"/>
+      <Patch Number="I-53" Name="Whirly Road" ProgramChange="34"/>
+      <Patch Number="I-54" Name="Wurly Trem" ProgramChange="35"/>
+      <Patch Number="I-55" Name="60s Rhodes" ProgramChange="36"/>
+      <Patch Number="I-56" Name="ClassicSound" ProgramChange="37"/>
+      <Patch Number="I-57" Name="Dyno Oz!" ProgramChange="38"/>
+      <Patch Number="I-58" Name="Dyno Phaze" ProgramChange="39"/>
+      <Patch Number="I-61" Name="Rhodes 66" ProgramChange="40"/>
+      <Patch Number="I-62" Name="Suitcase Pno" ProgramChange="41"/>
+      <Patch Number="I-63" Name="Mr Fusion" ProgramChange="42"/>
+      <Patch Number="I-64" Name="Sensitivity" ProgramChange="43"/>
+      <Patch Number="I-65" Name="Rhodes B66" ProgramChange="44"/>
+      <Patch Number="I-66" Name="DynoRhodes 1" ProgramChange="45"/>
+      <Patch Number="I-67" Name="DynoRhodes 2" ProgramChange="46"/>
+      <Patch Number="I-68" Name="Bluesy 1" ProgramChange="47"/>
+      <Patch Number="I-71" Name="DynoRhodes 3" ProgramChange="48"/>
+      <Patch Number="I-72" Name="Tiny Rhodes" ProgramChange="49"/>
+      <Patch Number="I-73" Name="Bluesy 2" ProgramChange="50"/>
+      <Patch Number="I-74" Name="BalladRhodes" ProgramChange="51"/>
+      <Patch Number="I-75" Name="RD Rhodes 1" ProgramChange="52"/>
+      <Patch Number="I-76" Name="Blend" ProgramChange="53"/>
+      <Patch Number="I-77" Name="DynoRhodes 4" ProgramChange="54"/>
+      <Patch Number="I-78" Name="RD Rhodes Tr" ProgramChange="55"/>
+      <Patch Number="I-81" Name="Pop Rhodes 1" ProgramChange="56"/>
+      <Patch Number="I-82" Name="BeautyRhodes" ProgramChange="57"/>
+      <Patch Number="I-83" Name="Little X" ProgramChange="58"/>
+      <Patch Number="I-84" Name="Pop Rhodes 2" ProgramChange="59"/>
+      <Patch Number="I-85" Name="Pop Rhodes 3" ProgramChange="60"/>
+      <Patch Number="I-86" Name="Rhodes X" ProgramChange="61"/>
+      <Patch Number="I-87" Name="BellRhodes 1" ProgramChange="62"/>
+      <Patch Number="I-88" Name="BellRhodes 2" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Piano 65-128">
+      <Patch Number="I-11" Name="Schmaltz Pno" ProgramChange="0"/>
+      <Patch Number="I-12" Name="Combi Piano" ProgramChange="1"/>
+      <Patch Number="I-13" Name="MidiElecGrnd" ProgramChange="2"/>
+      <Patch Number="I-14" Name="Piano Pad" ProgramChange="3"/>
+      <Patch Number="I-15" Name="Concerto" ProgramChange="4"/>
+      <Patch Number="I-16" Name="Bells Piano1" ProgramChange="5"/>
+      <Patch Number="I-17" Name="Vox Piano 1" ProgramChange="6"/>
+      <Patch Number="I-18" Name="Vox Piano 2" ProgramChange="7"/>
+      <Patch Number="I-21" Name="Piano w/Brs" ProgramChange="8"/>
+      <Patch Number="I-22" Name="Wispy Piano1" ProgramChange="9"/>
+      <Patch Number="I-23" Name="Voikey" ProgramChange="10"/>
+      <Patch Number="I-24" Name="Vox Piano 3" ProgramChange="11"/>
+      <Patch Number="I-25" Name="Windy Piano" ProgramChange="12"/>
+      <Patch Number="I-26" Name="Wispy Piano2" ProgramChange="13"/>
+      <Patch Number="I-27" Name="E.P. w/Vox" ProgramChange="14"/>
+      <Patch Number="I-28" Name="Piano Stack" ProgramChange="15"/>
+      <Patch Number="I-31" Name="Bells Piano2" ProgramChange="16"/>
+      <Patch Number="I-32" Name="Wah Clav" ProgramChange="17"/>
+      <Patch Number="I-33" Name="Housey Clavy" ProgramChange="18"/>
+      <Patch Number="I-34" Name="Klavdom 1" ProgramChange="19"/>
+      <Patch Number="I-35" Name="Klavdom 2" ProgramChange="20"/>
+      <Patch Number="I-36" Name="Velo Clav" ProgramChange="21"/>
+      <Patch Number="I-37" Name="Clavidoo" ProgramChange="22"/>
+      <Patch Number="I-38" Name="Funkee Whirl" ProgramChange="23"/>
+      <Patch Number="I-41" Name="Morning Mist" ProgramChange="24"/>
+      <Patch Number="I-42" Name="Chaos Pad" ProgramChange="25"/>
+      <Patch Number="I-43" Name="Clavi Lead" ProgramChange="26"/>
+      <Patch Number="I-44" Name="Funky Lead" ProgramChange="27"/>
+      <Patch Number="I-45" Name="Eclipse" ProgramChange="28"/>
+      <Patch Number="I-46" Name="CadenzPiano" ProgramChange="29"/>
+      <Patch Number="I-47" Name="Grand Pno 1T" ProgramChange="30"/>
+      <Patch Number="I-48" Name="ClasclPno 1T" ProgramChange="31"/>
+      <Patch Number="I-51" Name="Pop Piano 1T" ProgramChange="32"/>
+      <Patch Number="I-52" Name="RD A. Piano1T" ProgramChange="33"/>
+      <Patch Number="I-53" Name="E. Grand 1T" ProgramChange="34"/>
+      <Patch Number="I-54" Name="RD Piano3 1T" ProgramChange="35"/>
+      <Patch Number="I-55" Name="Rhodes 1T" ProgramChange="36"/>
+      <Patch Number="I-56" Name="Suitcase 1T" ProgramChange="37"/>
+      <Patch Number="I-57" Name="RD Rhodes 1T" ProgramChange="38"/>
+      <Patch Number="I-58" Name="Little X 1T" ProgramChange="39"/>
+      <Patch Number="I-61" Name="Velo Clav 1T" ProgramChange="40"/>
+      <Patch Number="I-62" Name="Klavdom 1T" ProgramChange="41"/>
+      <Patch Number="I-63" Name="Clav 1 1T" ProgramChange="42"/>
+      <Patch Number="I-64" Name="Clav 2 1T" ProgramChange="43"/>
+      <Patch Number="I-65" Name="Clav 3 1T" ProgramChange="44"/>
+      <Patch Number="I-66" Name="Clav 4 1T" ProgramChange="45"/>
+      <Patch Number="I-67" Name="Clavi Lead1T" ProgramChange="46"/>
+      <Patch Number="I-68" Name="Patch 68" ProgramChange="47"/>
+      <Patch Number="I-71" Name="Patch 71" ProgramChange="48"/>
+      <Patch Number="I-72" Name="Patch 72" ProgramChange="49"/>
+      <Patch Number="I-73" Name="Patch 73" ProgramChange="50"/>
+      <Patch Number="I-74" Name="Patch 74" ProgramChange="51"/>
+      <Patch Number="I-75" Name="Patch 75" ProgramChange="52"/>
+      <Patch Number="I-76" Name="Patch 76" ProgramChange="53"/>
+      <Patch Number="I-77" Name="Patch 77" ProgramChange="54"/>
+      <Patch Number="I-78" Name="Patch 78" ProgramChange="55"/>
+      <Patch Number="I-81" Name="Patch 81" ProgramChange="56"/>
+      <Patch Number="I-82" Name="Patch 82" ProgramChange="57"/>
+      <Patch Number="I-83" Name="Patch 83" ProgramChange="58"/>
+      <Patch Number="I-84" Name="Patch 84" ProgramChange="59"/>
+      <Patch Number="I-85" Name="Patch 85" ProgramChange="60"/>
+      <Patch Number="I-86" Name="Patch 86" ProgramChange="61"/>
+      <Patch Number="I-87" Name="Patch 87" ProgramChange="62"/>
+      <Patch Number="I-88" Name="Patch 88" ProgramChange="63"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JV-80</Model>
+    <Model>JV-880</Model>
+    <PatchNameList Name="EXP Piano 1st(64)">
+      <Patch Number="i01" Name="Grand Piano1" ProgramChange="0"/>
+      <Patch Number="i02" Name="St. Grand Pno" ProgramChange="1"/>
+      <Patch Number="i03" Name="Grand Piano2" ProgramChange="2"/>
+      <Patch Number="i04" Name="Grand Piano3" ProgramChange="3"/>
+      <Patch Number="i05" Name="Brite Grand" ProgramChange="4"/>
+      <Patch Number="i06" Name="Full Grand" ProgramChange="5"/>
+      <Patch Number="i07" Name="Grand Piano4" ProgramChange="6"/>
+      <Patch Number="i08" Name="ClasclPiano1" ProgramChange="7"/>
+      <Patch Number="i09" Name="ClasclPiano2" ProgramChange="8"/>
+      <Patch Number="i10" Name="ClasclPiano3" ProgramChange="9"/>
+      <Patch Number="i11" Name="Grandioso" ProgramChange="10"/>
+      <Patch Number="i12" Name="Euro Piano" ProgramChange="11"/>
+      <Patch Number="i13" Name="Rich Piano" ProgramChange="12"/>
+      <Patch Number="i14" Name="Pop Piano 1" ProgramChange="13"/>
+      <Patch Number="i15" Name="Pop Piano 2" ProgramChange="14"/>
+      <Patch Number="i16" Name="Pop Piano 3" ProgramChange="15"/>
+      <Patch Number="i17" Name="Pop Piano 4" ProgramChange="16"/>
+      <Patch Number="i18" Name="Pop Piano 5" ProgramChange="17"/>
+      <Patch Number="i19" Name="RD A. Piano1A" ProgramChange="18"/>
+      <Patch Number="i20" Name="RD A. Piano1B" ProgramChange="19"/>
+      <Patch Number="i21" Name="SA Piano 1" ProgramChange="20"/>
+      <Patch Number="i22" Name="SA Piano 2" ProgramChange="21"/>
+      <Patch Number="i23" Name="E J Piano" ProgramChange="22"/>
+      <Patch Number="i24" Name="FlinStoneway" ProgramChange="23"/>
+      <Patch Number="i25" Name="RD A. Piano3A" ProgramChange="24"/>
+      <Patch Number="i26" Name="RD A. Piano3B" ProgramChange="25"/>
+      <Patch Number="i27" Name="RD A. Piano3C" ProgramChange="26"/>
+      <Patch Number="i28" Name="Sml E. Grand" ProgramChange="27"/>
+      <Patch Number="i29" Name="E. Grand 1" ProgramChange="28"/>
+      <Patch Number="i30" Name="E. Grand 2" ProgramChange="29"/>
+      <Patch Number="i31" Name="E. Grand 3" ProgramChange="30"/>
+      <Patch Number="i32" Name="Roadcase Pno" ProgramChange="31"/>
+      <Patch Number="i33" Name="E. Grand 4" ProgramChange="32"/>
+      <Patch Number="i34" Name="Whirly Piano" ProgramChange="33"/>
+      <Patch Number="i35" Name="Whirly Road" ProgramChange="34"/>
+      <Patch Number="i36" Name="Wurly Trem" ProgramChange="35"/>
+      <Patch Number="i37" Name="60s Rhodes" ProgramChange="36"/>
+      <Patch Number="i38" Name="ClassicSound" ProgramChange="37"/>
+      <Patch Number="i39" Name="Dyno Oz!" ProgramChange="38"/>
+      <Patch Number="i40" Name="Dyno Phaze" ProgramChange="39"/>
+      <Patch Number="i41" Name="Rhodes 66" ProgramChange="40"/>
+      <Patch Number="i42" Name="Suitcase Pno" ProgramChange="41"/>
+      <Patch Number="i43" Name="Mr Fusion" ProgramChange="42"/>
+      <Patch Number="i44" Name="Sensitivity" ProgramChange="43"/>
+      <Patch Number="i45" Name="Rhodes B66" ProgramChange="44"/>
+      <Patch Number="i46" Name="DynoRhodes 1" ProgramChange="45"/>
+      <Patch Number="i47" Name="DynoRhodes 2" ProgramChange="46"/>
+      <Patch Number="i48" Name="Bluesy 1" ProgramChange="47"/>
+      <Patch Number="i49" Name="DynoRhodes 3" ProgramChange="48"/>
+      <Patch Number="i50" Name="Tiny Rhodes" ProgramChange="49"/>
+      <Patch Number="i51" Name="Bluesy 2" ProgramChange="50"/>
+      <Patch Number="i52" Name="BalladRhodes" ProgramChange="51"/>
+      <Patch Number="i53" Name="RD Rhodes 1" ProgramChange="52"/>
+      <Patch Number="i54" Name="Blend" ProgramChange="53"/>
+      <Patch Number="i55" Name="DynoRhodes 4" ProgramChange="54"/>
+      <Patch Number="i56" Name="RD Rhodes Tr" ProgramChange="55"/>
+      <Patch Number="i57" Name="Pop Rhodes 1" ProgramChange="56"/>
+      <Patch Number="i58" Name="BeautyRhodes" ProgramChange="57"/>
+      <Patch Number="i59" Name="Little X" ProgramChange="58"/>
+      <Patch Number="i60" Name="Pop Rhodes 2" ProgramChange="59"/>
+      <Patch Number="i61" Name="Pop Rhodes 3" ProgramChange="60"/>
+      <Patch Number="i62" Name="Rhodes X" ProgramChange="61"/>
+      <Patch Number="i63" Name="BellRhodes 1" ProgramChange="62"/>
+      <Patch Number="i64" Name="BellRhodes 2" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Piano 2nd(64)">
+      <Patch Number="i01" Name="Schmaltz Pno" ProgramChange="0"/>
+      <Patch Number="i02" Name="Combi Piano" ProgramChange="1"/>
+      <Patch Number="i03" Name="MidiElecGrnd" ProgramChange="2"/>
+      <Patch Number="i04" Name="Piano Pad" ProgramChange="3"/>
+      <Patch Number="i05" Name="Concerto" ProgramChange="4"/>
+      <Patch Number="i06" Name="Bells Piano1" ProgramChange="5"/>
+      <Patch Number="i07" Name="Vox Piano 1" ProgramChange="6"/>
+      <Patch Number="i08" Name="Vox Piano 2" ProgramChange="7"/>
+      <Patch Number="i09" Name="Piano w/Brs" ProgramChange="8"/>
+      <Patch Number="i10" Name="Wispy Piano1" ProgramChange="9"/>
+      <Patch Number="i11" Name="Voikey" ProgramChange="10"/>
+      <Patch Number="i12" Name="Vox Piano 3" ProgramChange="11"/>
+      <Patch Number="i13" Name="Windy Piano" ProgramChange="12"/>
+      <Patch Number="i14" Name="Wispy Piano2" ProgramChange="13"/>
+      <Patch Number="i15" Name="E.P. w/Vox" ProgramChange="14"/>
+      <Patch Number="i16" Name="Piano Stack" ProgramChange="15"/>
+      <Patch Number="i17" Name="Bells Piano2" ProgramChange="16"/>
+      <Patch Number="i18" Name="Wah Clav" ProgramChange="17"/>
+      <Patch Number="i19" Name="Housey Clavy" ProgramChange="18"/>
+      <Patch Number="i20" Name="Klavdom 1" ProgramChange="19"/>
+      <Patch Number="i21" Name="Klavdom 2" ProgramChange="20"/>
+      <Patch Number="i22" Name="Velo Clav" ProgramChange="21"/>
+      <Patch Number="i23" Name="Clavidoo" ProgramChange="22"/>
+      <Patch Number="i24" Name="Funkee Whirl" ProgramChange="23"/>
+      <Patch Number="i25" Name="Morning Mist" ProgramChange="24"/>
+      <Patch Number="i26" Name="Chaos Pad" ProgramChange="25"/>
+      <Patch Number="i27" Name="Clavi Lead" ProgramChange="26"/>
+      <Patch Number="i28" Name="Funky Lead" ProgramChange="27"/>
+      <Patch Number="i29" Name="Eclipse" ProgramChange="28"/>
+      <Patch Number="i30" Name="CadenzPiano" ProgramChange="29"/>
+      <Patch Number="i31" Name="Grand Pno 1T" ProgramChange="30"/>
+      <Patch Number="i32" Name="ClasclPno 1T" ProgramChange="31"/>
+      <Patch Number="i33" Name="Pop Piano 1T" ProgramChange="32"/>
+      <Patch Number="i34" Name="RD A. Piano1T" ProgramChange="33"/>
+      <Patch Number="i35" Name="E. Grand 1T" ProgramChange="34"/>
+      <Patch Number="i36" Name="RD Piano3 1T" ProgramChange="35"/>
+      <Patch Number="i37" Name="Rhodes 1T" ProgramChange="36"/>
+      <Patch Number="i38" Name="Suitcase 1T" ProgramChange="37"/>
+      <Patch Number="i39" Name="RD Rhodes 1T" ProgramChange="38"/>
+      <Patch Number="i40" Name="Little X 1T" ProgramChange="39"/>
+      <Patch Number="i41" Name="Velo Clav 1T" ProgramChange="40"/>
+      <Patch Number="i42" Name="Klavdom 1T" ProgramChange="41"/>
+      <Patch Number="i43" Name="Clav 1 1T" ProgramChange="42"/>
+      <Patch Number="i44" Name="Clav 2 1T" ProgramChange="43"/>
+      <Patch Number="i45" Name="Clav 3 1T" ProgramChange="44"/>
+      <Patch Number="i46" Name="Clav 4 1T" ProgramChange="45"/>
+      <Patch Number="i47" Name="Clavi Lead1T" ProgramChange="46"/>
+      <Patch Number="i48" Name="Patch i48" ProgramChange="47"/>
+      <Patch Number="i49" Name="Patch i49" ProgramChange="48"/>
+      <Patch Number="i50" Name="Patch i50" ProgramChange="49"/>
+      <Patch Number="i51" Name="Patch i51" ProgramChange="50"/>
+      <Patch Number="i52" Name="Patch i52" ProgramChange="51"/>
+      <Patch Number="i53" Name="Patch i53" ProgramChange="52"/>
+      <Patch Number="i54" Name="Patch i54" ProgramChange="53"/>
+      <Patch Number="i55" Name="Patch i55" ProgramChange="54"/>
+      <Patch Number="i56" Name="Patch i56" ProgramChange="55"/>
+      <Patch Number="i57" Name="Patch i57" ProgramChange="56"/>
+      <Patch Number="i58" Name="Patch i58" ProgramChange="57"/>
+      <Patch Number="i59" Name="Patch i59" ProgramChange="58"/>
+      <Patch Number="i60" Name="Patch i60" ProgramChange="59"/>
+      <Patch Number="i61" Name="Patch i61" ProgramChange="60"/>
+      <Patch Number="i62" Name="Patch i62" ProgramChange="61"/>
+      <Patch Number="i63" Name="Patch i63" ProgramChange="62"/>
+      <Patch Number="i64" Name="Patch i64" ProgramChange="63"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JV-90</Model>
+    <Model>JV-1000</Model>
+    <PatchNameList Name="EXP Piano A">
+      <Patch Number="EA11" Name="Grand Piano1" ProgramChange="0"/>
+      <Patch Number="EA12" Name="St. Grand Pno" ProgramChange="1"/>
+      <Patch Number="EA13" Name="Grand Piano2" ProgramChange="2"/>
+      <Patch Number="EA14" Name="Grand Piano3" ProgramChange="3"/>
+      <Patch Number="EA15" Name="Brite Grand" ProgramChange="4"/>
+      <Patch Number="EA16" Name="Full Grand" ProgramChange="5"/>
+      <Patch Number="EA17" Name="Grand Piano4" ProgramChange="6"/>
+      <Patch Number="EA18" Name="ClasclPiano1" ProgramChange="7"/>
+      <Patch Number="EA21" Name="ClasclPiano2" ProgramChange="8"/>
+      <Patch Number="EA22" Name="ClasclPiano3" ProgramChange="9"/>
+      <Patch Number="EA23" Name="Grandioso" ProgramChange="10"/>
+      <Patch Number="EA24" Name="Euro Piano" ProgramChange="11"/>
+      <Patch Number="EA25" Name="Rich Piano" ProgramChange="12"/>
+      <Patch Number="EA26" Name="Pop Piano 1" ProgramChange="13"/>
+      <Patch Number="EA27" Name="Pop Piano 2" ProgramChange="14"/>
+      <Patch Number="EA28" Name="Pop Piano 3" ProgramChange="15"/>
+      <Patch Number="EA31" Name="Pop Piano 4" ProgramChange="16"/>
+      <Patch Number="EA32" Name="Pop Piano 5" ProgramChange="17"/>
+      <Patch Number="EA33" Name="RD A. Piano1A" ProgramChange="18"/>
+      <Patch Number="EA34" Name="RD A. Piano1B" ProgramChange="19"/>
+      <Patch Number="EA35" Name="SA Piano 1" ProgramChange="20"/>
+      <Patch Number="EA36" Name="SA Piano 2" ProgramChange="21"/>
+      <Patch Number="EA37" Name="E J Piano" ProgramChange="22"/>
+      <Patch Number="EA38" Name="FlinStoneway" ProgramChange="23"/>
+      <Patch Number="EA41" Name="RD A. Piano3A" ProgramChange="24"/>
+      <Patch Number="EA42" Name="RD A. Piano3B" ProgramChange="25"/>
+      <Patch Number="EA43" Name="RD A. Piano3C" ProgramChange="26"/>
+      <Patch Number="EA44" Name="Sml E. Grand" ProgramChange="27"/>
+      <Patch Number="EA45" Name="E. Grand 1" ProgramChange="28"/>
+      <Patch Number="EA46" Name="E. Grand 2" ProgramChange="29"/>
+      <Patch Number="EA47" Name="E. Grand 3" ProgramChange="30"/>
+      <Patch Number="EA48" Name="Roadcase Pno" ProgramChange="31"/>
+      <Patch Number="EA51" Name="E. Grand 4" ProgramChange="32"/>
+      <Patch Number="EA52" Name="Whirly Piano" ProgramChange="33"/>
+      <Patch Number="EA53" Name="Whirly Road" ProgramChange="34"/>
+      <Patch Number="EA54" Name="Wurly Trem" ProgramChange="35"/>
+      <Patch Number="EA55" Name="60s Rhodes" ProgramChange="36"/>
+      <Patch Number="EA56" Name="ClassicSound" ProgramChange="37"/>
+      <Patch Number="EA57" Name="Dyno Oz!" ProgramChange="38"/>
+      <Patch Number="EA58" Name="Dyno Phaze" ProgramChange="39"/>
+      <Patch Number="EA61" Name="Rhodes 66" ProgramChange="40"/>
+      <Patch Number="EA62" Name="Suitcase Pno" ProgramChange="41"/>
+      <Patch Number="EA63" Name="Mr Fusion" ProgramChange="42"/>
+      <Patch Number="EA64" Name="Sensitivity" ProgramChange="43"/>
+      <Patch Number="EA65" Name="Rhodes B66" ProgramChange="44"/>
+      <Patch Number="EA66" Name="DynoRhodes 1" ProgramChange="45"/>
+      <Patch Number="EA67" Name="DynoRhodes 2" ProgramChange="46"/>
+      <Patch Number="EA68" Name="Bluesy 1" ProgramChange="47"/>
+      <Patch Number="EA71" Name="DynoRhodes 3" ProgramChange="48"/>
+      <Patch Number="EA72" Name="Tiny Rhodes" ProgramChange="49"/>
+      <Patch Number="EA73" Name="Bluesy 2" ProgramChange="50"/>
+      <Patch Number="EA74" Name="BalladRhodes" ProgramChange="51"/>
+      <Patch Number="EA75" Name="RD Rhodes 1" ProgramChange="52"/>
+      <Patch Number="EA76" Name="Blend" ProgramChange="53"/>
+      <Patch Number="EA77" Name="DynoRhodes 4" ProgramChange="54"/>
+      <Patch Number="EA78" Name="RD Rhodes Tr" ProgramChange="55"/>
+      <Patch Number="EA81" Name="Pop Rhodes 1" ProgramChange="56"/>
+      <Patch Number="EA82" Name="BeautyRhodes" ProgramChange="57"/>
+      <Patch Number="EA83" Name="Little X" ProgramChange="58"/>
+      <Patch Number="EA84" Name="Pop Rhodes 2" ProgramChange="59"/>
+      <Patch Number="EA85" Name="Pop Rhodes 3" ProgramChange="60"/>
+      <Patch Number="EA86" Name="Rhodes X" ProgramChange="61"/>
+      <Patch Number="EA87" Name="BellRhodes 1" ProgramChange="62"/>
+      <Patch Number="EA88" Name="BellRhodes 2" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Piano B">
+      <Patch Number="EB11" Name="Schmaltz Pno" ProgramChange="64"/>
+      <Patch Number="EB12" Name="Combi Piano" ProgramChange="65"/>
+      <Patch Number="EB13" Name="MidiElecGrnd" ProgramChange="66"/>
+      <Patch Number="EB14" Name="Piano Pad" ProgramChange="67"/>
+      <Patch Number="EB15" Name="Concerto" ProgramChange="68"/>
+      <Patch Number="EB16" Name="Bells Piano1" ProgramChange="69"/>
+      <Patch Number="EB17" Name="Vox Piano 1" ProgramChange="70"/>
+      <Patch Number="EB18" Name="Vox Piano 2" ProgramChange="71"/>
+      <Patch Number="EB21" Name="Piano w/Brs" ProgramChange="72"/>
+      <Patch Number="EB22" Name="Wispy Piano1" ProgramChange="73"/>
+      <Patch Number="EB23" Name="Voikey" ProgramChange="74"/>
+      <Patch Number="EB24" Name="Vox Piano 3" ProgramChange="75"/>
+      <Patch Number="EB25" Name="Windy Piano" ProgramChange="76"/>
+      <Patch Number="EB26" Name="Wispy Piano2" ProgramChange="77"/>
+      <Patch Number="EB27" Name="E.P. w/Vox" ProgramChange="78"/>
+      <Patch Number="EB28" Name="Piano Stack" ProgramChange="79"/>
+      <Patch Number="EB31" Name="Bells Piano2" ProgramChange="80"/>
+      <Patch Number="EB32" Name="Wah Clav" ProgramChange="81"/>
+      <Patch Number="EB33" Name="Housey Clavy" ProgramChange="82"/>
+      <Patch Number="EB34" Name="Klavdom 1" ProgramChange="83"/>
+      <Patch Number="EB35" Name="Klavdom 2" ProgramChange="84"/>
+      <Patch Number="EB36" Name="Velo Clav" ProgramChange="85"/>
+      <Patch Number="EB37" Name="Clavidoo" ProgramChange="86"/>
+      <Patch Number="EB38" Name="Funkee Whirl" ProgramChange="87"/>
+      <Patch Number="EB41" Name="Morning Mist" ProgramChange="88"/>
+      <Patch Number="EB42" Name="Chaos Pad" ProgramChange="89"/>
+      <Patch Number="EB43" Name="Clavi Lead" ProgramChange="90"/>
+      <Patch Number="EB44" Name="Funky Lead" ProgramChange="91"/>
+      <Patch Number="EB45" Name="Eclipse" ProgramChange="92"/>
+      <Patch Number="EB46" Name="CadenzPiano" ProgramChange="93"/>
+      <Patch Number="EB47" Name="Grand Pno 1T" ProgramChange="94"/>
+      <Patch Number="EB48" Name="ClasclPno 1T" ProgramChange="95"/>
+      <Patch Number="EB51" Name="Pop Piano 1T" ProgramChange="96"/>
+      <Patch Number="EB52" Name="RD A. Piano1T" ProgramChange="97"/>
+      <Patch Number="EB53" Name="E. Grand 1T" ProgramChange="98"/>
+      <Patch Number="EB54" Name="RD Piano3 1T" ProgramChange="99"/>
+      <Patch Number="EB55" Name="Rhodes 1T" ProgramChange="100"/>
+      <Patch Number="EB56" Name="Suitcase 1T" ProgramChange="101"/>
+      <Patch Number="EB57" Name="RD Rhodes 1T" ProgramChange="102"/>
+      <Patch Number="EB58" Name="Little X 1T" ProgramChange="103"/>
+      <Patch Number="EB61" Name="Velo Clav 1T" ProgramChange="104"/>
+      <Patch Number="EB62" Name="Klavdom 1T" ProgramChange="105"/>
+      <Patch Number="EB63" Name="Clav 1 1T" ProgramChange="106"/>
+      <Patch Number="EB64" Name="Clav 2 1T" ProgramChange="107"/>
+      <Patch Number="EB65" Name="Clav 3 1T" ProgramChange="108"/>
+      <Patch Number="EB66" Name="Clav 4 1T" ProgramChange="109"/>
+      <Patch Number="EB67" Name="Clavi Lead1T" ProgramChange="110"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JV-1010</Model>
+    <Model>JV-1080</Model>
+    <Model>JV-2080</Model>
+    <Model>XP-50</Model>
+    <Model>XP-80</Model>
+    <Model>XV-5080</Model>
+    <Model>XV-3080</Model>
+    <Model>XV-88</Model>
+    <Model>Fantom</Model>
+    <PatchNameList Name="EXP Piano: Patches">
+      <Patch Number="001" Name="Grand Piano1" ProgramChange="0"/>
+      <Patch Number="002" Name="St. Grand Pno" ProgramChange="1"/>
+      <Patch Number="003" Name="Grand Piano2" ProgramChange="2"/>
+      <Patch Number="004" Name="Grand Piano3" ProgramChange="3"/>
+      <Patch Number="005" Name="Brite Grand" ProgramChange="4"/>
+      <Patch Number="006" Name="Full Grand" ProgramChange="5"/>
+      <Patch Number="007" Name="Grand Piano4" ProgramChange="6"/>
+      <Patch Number="008" Name="ClasclPiano1" ProgramChange="7"/>
+      <Patch Number="009" Name="ClasclPiano2" ProgramChange="8"/>
+      <Patch Number="010" Name="ClasclPiano3" ProgramChange="9"/>
+      <Patch Number="011" Name="Grandioso" ProgramChange="10"/>
+      <Patch Number="012" Name="Euro Piano" ProgramChange="11"/>
+      <Patch Number="013" Name="Rich Piano" ProgramChange="12"/>
+      <Patch Number="014" Name="Pop Piano 1" ProgramChange="13"/>
+      <Patch Number="015" Name="Pop Piano 2" ProgramChange="14"/>
+      <Patch Number="016" Name="Pop Piano 3" ProgramChange="15"/>
+      <Patch Number="017" Name="Pop Piano 4" ProgramChange="16"/>
+      <Patch Number="018" Name="Pop Piano 5" ProgramChange="17"/>
+      <Patch Number="019" Name="RD A. Piano1A" ProgramChange="18"/>
+      <Patch Number="020" Name="RD A. Piano1B" ProgramChange="19"/>
+      <Patch Number="021" Name="SA Piano 1" ProgramChange="20"/>
+      <Patch Number="022" Name="SA Piano 2" ProgramChange="21"/>
+      <Patch Number="023" Name="E J Piano" ProgramChange="22"/>
+      <Patch Number="024" Name="FlinStoneway" ProgramChange="23"/>
+      <Patch Number="025" Name="RD A. Piano3A" ProgramChange="24"/>
+      <Patch Number="026" Name="RD A. Piano3B" ProgramChange="25"/>
+      <Patch Number="027" Name="RD A. Piano3C" ProgramChange="26"/>
+      <Patch Number="028" Name="Sml E. Grand" ProgramChange="27"/>
+      <Patch Number="029" Name="E. Grand 1" ProgramChange="28"/>
+      <Patch Number="030" Name="E. Grand 2" ProgramChange="29"/>
+      <Patch Number="031" Name="E. Grand 3" ProgramChange="30"/>
+      <Patch Number="032" Name="Roadcase Pno" ProgramChange="31"/>
+      <Patch Number="033" Name="E. Grand 4" ProgramChange="32"/>
+      <Patch Number="034" Name="Whirly Piano" ProgramChange="33"/>
+      <Patch Number="035" Name="Whirly Road" ProgramChange="34"/>
+      <Patch Number="036" Name="Wurly Trem" ProgramChange="35"/>
+      <Patch Number="037" Name="60s Rhodes" ProgramChange="36"/>
+      <Patch Number="038" Name="ClassicSound" ProgramChange="37"/>
+      <Patch Number="039" Name="Dyno Oz!" ProgramChange="38"/>
+      <Patch Number="040" Name="Dyno Phaze" ProgramChange="39"/>
+      <Patch Number="041" Name="Rhodes 66" ProgramChange="40"/>
+      <Patch Number="042" Name="Suitcase Pno" ProgramChange="41"/>
+      <Patch Number="043" Name="Mr Fusion" ProgramChange="42"/>
+      <Patch Number="044" Name="Sensitivity" ProgramChange="43"/>
+      <Patch Number="045" Name="Rhodes B66" ProgramChange="44"/>
+      <Patch Number="046" Name="DynoRhodes 1" ProgramChange="45"/>
+      <Patch Number="047" Name="DynoRhodes 2" ProgramChange="46"/>
+      <Patch Number="048" Name="Bluesy 1" ProgramChange="47"/>
+      <Patch Number="049" Name="DynoRhodes 3" ProgramChange="48"/>
+      <Patch Number="050" Name="Tiny Rhodes" ProgramChange="49"/>
+      <Patch Number="051" Name="Bluesy 2" ProgramChange="50"/>
+      <Patch Number="052" Name="BalladRhodes" ProgramChange="51"/>
+      <Patch Number="053" Name="RD Rhodes 1" ProgramChange="52"/>
+      <Patch Number="054" Name="Blend" ProgramChange="53"/>
+      <Patch Number="055" Name="DynoRhodes 4" ProgramChange="54"/>
+      <Patch Number="056" Name="RD Rhodes Tr" ProgramChange="55"/>
+      <Patch Number="057" Name="Pop Rhodes 1" ProgramChange="56"/>
+      <Patch Number="058" Name="BeautyRhodes" ProgramChange="57"/>
+      <Patch Number="059" Name="Little X" ProgramChange="58"/>
+      <Patch Number="060" Name="Pop Rhodes 2" ProgramChange="59"/>
+      <Patch Number="061" Name="Pop Rhodes 3" ProgramChange="60"/>
+      <Patch Number="062" Name="Rhodes X" ProgramChange="61"/>
+      <Patch Number="063" Name="BellRhodes 1" ProgramChange="62"/>
+      <Patch Number="064" Name="BellRhodes 2" ProgramChange="63"/>
+      <Patch Number="065" Name="Schmaltz Pno" ProgramChange="64"/>
+      <Patch Number="066" Name="Combi Piano" ProgramChange="65"/>
+      <Patch Number="067" Name="MidiElecGrnd" ProgramChange="66"/>
+      <Patch Number="068" Name="Piano Pad" ProgramChange="67"/>
+      <Patch Number="069" Name="Concerto" ProgramChange="68"/>
+      <Patch Number="070" Name="Bells Piano1" ProgramChange="69"/>
+      <Patch Number="071" Name="Vox Piano 1" ProgramChange="70"/>
+      <Patch Number="072" Name="Vox Piano 2" ProgramChange="71"/>
+      <Patch Number="073" Name="Piano w/Brs" ProgramChange="72"/>
+      <Patch Number="074" Name="Wispy Piano1" ProgramChange="73"/>
+      <Patch Number="075" Name="Voikey" ProgramChange="74"/>
+      <Patch Number="076" Name="Vox Piano 3" ProgramChange="75"/>
+      <Patch Number="077" Name="Windy Piano" ProgramChange="76"/>
+      <Patch Number="078" Name="Wispy Piano2" ProgramChange="77"/>
+      <Patch Number="079" Name="E.P. w/Vox" ProgramChange="78"/>
+      <Patch Number="080" Name="Piano Stack" ProgramChange="79"/>
+      <Patch Number="081" Name="Bells Piano2" ProgramChange="80"/>
+      <Patch Number="082" Name="Wah Clav" ProgramChange="81"/>
+      <Patch Number="083" Name="Housey Clavy" ProgramChange="82"/>
+      <Patch Number="084" Name="Klavdom 1" ProgramChange="83"/>
+      <Patch Number="085" Name="Klavdom 2" ProgramChange="84"/>
+      <Patch Number="086" Name="Velo Clav" ProgramChange="85"/>
+      <Patch Number="087" Name="Clavidoo" ProgramChange="86"/>
+      <Patch Number="088" Name="Funkee Whirl" ProgramChange="87"/>
+      <Patch Number="089" Name="Morning Mist" ProgramChange="88"/>
+      <Patch Number="090" Name="Chaos Pad" ProgramChange="89"/>
+      <Patch Number="091" Name="Clavi Lead" ProgramChange="90"/>
+      <Patch Number="092" Name="Funky Lead" ProgramChange="91"/>
+      <Patch Number="093" Name="Eclipse" ProgramChange="92"/>
+      <Patch Number="094" Name="CadenzPiano" ProgramChange="93"/>
+      <Patch Number="095" Name="Grand Pno 1T" ProgramChange="94"/>
+      <Patch Number="096" Name="ClasclPno 1T" ProgramChange="95"/>
+      <Patch Number="097" Name="Pop Piano 1T" ProgramChange="96"/>
+      <Patch Number="098" Name="RD A. Piano1T" ProgramChange="97"/>
+      <Patch Number="099" Name="E. Grand 1T" ProgramChange="98"/>
+      <Patch Number="100" Name="RD Piano3 1T" ProgramChange="99"/>
+      <Patch Number="101" Name="Rhodes 1T" ProgramChange="100"/>
+      <Patch Number="102" Name="Suitcase 1T" ProgramChange="101"/>
+      <Patch Number="103" Name="RD Rhodes 1T" ProgramChange="102"/>
+      <Patch Number="104" Name="Little X 1T" ProgramChange="103"/>
+      <Patch Number="105" Name="Velo Clav 1T" ProgramChange="104"/>
+      <Patch Number="106" Name="Klavdom 1T" ProgramChange="105"/>
+      <Patch Number="107" Name="Clav 1 1T" ProgramChange="106"/>
+      <Patch Number="108" Name="Clav 2 1T" ProgramChange="107"/>
+      <Patch Number="109" Name="Clav 3 1T" ProgramChange="108"/>
+      <Patch Number="110" Name="Clav 4 1T" ProgramChange="109"/>
+      <Patch Number="111" Name="Clavi Lead1T" ProgramChange="110"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

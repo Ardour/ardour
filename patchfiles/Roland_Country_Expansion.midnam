@@ -1,0 +1,1239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JV-90</Model>
+    <Model>JV-1000</Model>
+    <PatchNameList Name="EXP Country Rhythm Sets">
+      <Patch Number="01" Name="CountrySet1" ProgramChange="0"/>
+      <Patch Number="02" Name="CountrySet2" ProgramChange="1"/>
+      <Patch Number="03" Name="CountrySet3" ProgramChange="2"/>
+      <Patch Number="04" Name="CountrySet4" ProgramChange="3"/>
+      <Patch Number="05" Name="Brush Set" ProgramChange="4"/>
+      <Patch Number="06" Name="CntryOldSet" ProgramChange="5"/>
+      <Patch Number="07" Name="CntryPopSet1" ProgramChange="6"/>
+      <Patch Number="08" Name="CntryPopSet2" ProgramChange="7"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Country A">
+      <Patch Number="EA11" Name="Banjo Phrs" ProgramChange="0"/>
+      <Patch Number="EA12" Name="Guitar Phrs1" ProgramChange="1"/>
+      <Patch Number="EA13" Name="Guitar Phrs2" ProgramChange="2"/>
+      <Patch Number="EA14" Name="MiddleCRiff" ProgramChange="3"/>
+      <Patch Number="EA15" Name="12 Bar Riff" ProgramChange="4"/>
+      <Patch Number="EA16" Name="PdlStl Phrs" ProgramChange="5"/>
+      <Patch Number="EA17" Name="FiddleFxmenu" ProgramChange="6"/>
+      <Patch Number="EA18" Name="3Chd Strum" ProgramChange="7"/>
+      <Patch Number="EA21" Name="GtrFX Menu" ProgramChange="8"/>
+      <Patch Number="EA22" Name="Country Efx" ProgramChange="9"/>
+      <Patch Number="EA23" Name="Ac.Guitars" ProgramChange="10"/>
+      <Patch Number="EA24" Name="Bright Gtrs" ProgramChange="11"/>
+      <Patch Number="EA25" Name="Sensible Gtr" ProgramChange="12"/>
+      <Patch Number="EA26" Name="Countryside" ProgramChange="13"/>
+      <Patch Number="EA27" Name="AcGtrStereo1" ProgramChange="14"/>
+      <Patch Number="EA28" Name="AcGtrDuo VSW" ProgramChange="15"/>
+      <Patch Number="EA31" Name="Real AcGtr 1" ProgramChange="16"/>
+      <Patch Number="EA32" Name="Real AcGtr 2" ProgramChange="17"/>
+      <Patch Number="EA33" Name="DynoAcoustic" ProgramChange="18"/>
+      <Patch Number="EA34" Name="AcGtr Deluxe" ProgramChange="19"/>
+      <Patch Number="EA35" Name="AcGtrStereo2" ProgramChange="20"/>
+      <Patch Number="EA36" Name="Bright Pick2" ProgramChange="21"/>
+      <Patch Number="EA37" Name="Compres'd AG" ProgramChange="22"/>
+      <Patch Number="EA38" Name="Two Brothers" ProgramChange="23"/>
+      <Patch Number="EA41" Name="AcGtr VSW" ProgramChange="24"/>
+      <Patch Number="EA42" Name="Steel Touch" ProgramChange="25"/>
+      <Patch Number="EA43" Name="Cowboy Gtr" ProgramChange="26"/>
+      <Patch Number="EA44" Name="Noizy Picker" ProgramChange="27"/>
+      <Patch Number="EA45" Name="Stereo Touch" ProgramChange="28"/>
+      <Patch Number="EA46" Name="AcGtr Dual" ProgramChange="29"/>
+      <Patch Number="EA47" Name="AcGtr Finger" ProgramChange="30"/>
+      <Patch Number="EA48" Name="AcGtr Pick" ProgramChange="31"/>
+      <Patch Number="EA51" Name="Pick Solo 1T" ProgramChange="32"/>
+      <Patch Number="EA52" Name="LA Folk" ProgramChange="33"/>
+      <Patch Number="EA53" Name="AcGtr Slide" ProgramChange="34"/>
+      <Patch Number="EA54" Name="Acoustic Wah" ProgramChange="35"/>
+      <Patch Number="EA55" Name="Shadow Gtr" ProgramChange="36"/>
+      <Patch Number="EA56" Name="12 Strings" ProgramChange="37"/>
+      <Patch Number="EA57" Name="Riverside" ProgramChange="38"/>
+      <Patch Number="EA58" Name="MelanCoustic" ProgramChange="39"/>
+      <Patch Number="EA61" Name="Voxy Twelve" ProgramChange="40"/>
+      <Patch Number="EA62" Name="Guitar Song" ProgramChange="41"/>
+      <Patch Number="EA63" Name="Ac. Ballad" ProgramChange="42"/>
+      <Patch Number="EA64" Name="Resonant Duo" ProgramChange="43"/>
+      <Patch Number="EA65" Name="ResonatorGt4" ProgramChange="44"/>
+      <Patch Number="EA66" Name="BlugrassSlide" ProgramChange="45"/>
+      <Patch Number="EA67" Name="VelBendReso." ProgramChange="46"/>
+      <Patch Number="EA68" Name="VeloReso." ProgramChange="47"/>
+      <Patch Number="EA71" Name="Reso. Guitar2" ProgramChange="48"/>
+      <Patch Number="EA72" Name="Reso.Ballad" ProgramChange="49"/>
+      <Patch Number="EA73" Name="Reso Pick 1" ProgramChange="50"/>
+      <Patch Number="EA74" Name="Reso. Touch" ProgramChange="51"/>
+      <Patch Number="EA75" Name="Reso.Guitar3" ProgramChange="52"/>
+      <Patch Number="EA76" Name="Reso.Gtr VSW" ProgramChange="53"/>
+      <Patch Number="EA77" Name="Reso.Pick 2" ProgramChange="54"/>
+      <Patch Number="EA78" Name="Banjo 2" ProgramChange="55"/>
+      <Patch Number="EA81" Name="Banjo 3" ProgramChange="56"/>
+      <Patch Number="EA82" Name="Banjo 4" ProgramChange="57"/>
+      <Patch Number="EA83" Name="Deliverance1" ProgramChange="58"/>
+      <Patch Number="EA84" Name="Banjo Pick" ProgramChange="59"/>
+      <Patch Number="EA85" Name="Banjo 5" ProgramChange="60"/>
+      <Patch Number="EA86" Name="Deliverance2" ProgramChange="61"/>
+      <Patch Number="EA87" Name="Banjo Small" ProgramChange="62"/>
+      <Patch Number="EA88" Name="Banjo Large" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Country B">
+      <Patch Number="EB11" Name="Velo Banjo" ProgramChange="64"/>
+      <Patch Number="EB12" Name="St.Banjo" ProgramChange="65"/>
+      <Patch Number="EB13" Name="Dyno Mandoln" ProgramChange="66"/>
+      <Patch Number="EB14" Name="Mandolin 5" ProgramChange="67"/>
+      <Patch Number="EB15" Name="Mandolin VSW" ProgramChange="68"/>
+      <Patch Number="EB16" Name="Mandolin Dwn" ProgramChange="69"/>
+      <Patch Number="EB17" Name="Mandolin Up" ProgramChange="70"/>
+      <Patch Number="EB18" Name="Mndln Up&amp;Dwn" ProgramChange="71"/>
+      <Patch Number="EB21" Name="Mdln OctEns" ProgramChange="72"/>
+      <Patch Number="EB22" Name="MandolinTrm1" ProgramChange="73"/>
+      <Patch Number="EB23" Name="Mandolin Solo" ProgramChange="74"/>
+      <Patch Number="EB24" Name="Mandolin Trio" ProgramChange="75"/>
+      <Patch Number="EB25" Name="Mdln trem St" ProgramChange="76"/>
+      <Patch Number="EB26" Name="MandoPlayers" ProgramChange="77"/>
+      <Patch Number="EB27" Name="MandoSection" ProgramChange="78"/>
+      <Patch Number="EB28" Name="Mandolin Trm2" ProgramChange="79"/>
+      <Patch Number="EB31" Name="Mndlin Strum1" ProgramChange="80"/>
+      <Patch Number="EB32" Name="Mndlin Strum2" ProgramChange="81"/>
+      <Patch Number="EB33" Name="Mandolin Trm3" ProgramChange="82"/>
+      <Patch Number="EB34" Name="Mandolin Trm4" ProgramChange="83"/>
+      <Patch Number="EB35" Name="MandoStrings" ProgramChange="84"/>
+      <Patch Number="EB36" Name="Mand SlowPad" ProgramChange="85"/>
+      <Patch Number="EB37" Name="The Vatican" ProgramChange="86"/>
+      <Patch Number="EB38" Name="Plato's Dream" ProgramChange="87"/>
+      <Patch Number="EB41" Name="Mandoswell" ProgramChange="88"/>
+      <Patch Number="EB42" Name="Circle Pick" ProgramChange="89"/>
+      <Patch Number="EB43" Name="Bouzouki 3" ProgramChange="90"/>
+      <Patch Number="EB44" Name="Bouzouki 4" ProgramChange="91"/>
+      <Patch Number="EB45" Name="StereoBouzki" ProgramChange="92"/>
+      <Patch Number="EB46" Name="BouzokiSplit" ProgramChange="93"/>
+      <Patch Number="EB47" Name="GentlDulzouk" ProgramChange="94"/>
+      <Patch Number="EB48" Name="Bouzki&amp;Strum" ProgramChange="95"/>
+      <Patch Number="EB51" Name="Le G String" ProgramChange="96"/>
+      <Patch Number="EB52" Name="Country Pizz" ProgramChange="97"/>
+      <Patch Number="EB53" Name="Tele Frnt PU" ProgramChange="98"/>
+      <Patch Number="EB54" Name="Tele Rear PU" ProgramChange="99"/>
+      <Patch Number="EB55" Name="Terry Rear" ProgramChange="100"/>
+      <Patch Number="EB56" Name="Terry Front" ProgramChange="101"/>
+      <Patch Number="EB57" Name="Tell-A-Castr" ProgramChange="102"/>
+      <Patch Number="EB58" Name="Mello Tele" ProgramChange="103"/>
+      <Patch Number="EB61" Name="DynaChrsTele" ProgramChange="104"/>
+      <Patch Number="EB62" Name="SwitchinTele" ProgramChange="105"/>
+      <Patch Number="EB63" Name="Slow Rotary" ProgramChange="106"/>
+      <Patch Number="EB64" Name="Peaks Gtr" ProgramChange="107"/>
+      <Patch Number="EB65" Name="Aerial Guitr" ProgramChange="108"/>
+      <Patch Number="EB66" Name="Mellow Peaks" ProgramChange="109"/>
+      <Patch Number="EB67" Name="SDE2000 Tele" ProgramChange="110"/>
+      <Patch Number="EB68" Name="GlossyStrata" ProgramChange="111"/>
+      <Patch Number="EB71" Name="Clean Strat" ProgramChange="112"/>
+      <Patch Number="EB72" Name="Dyna Strat" ProgramChange="113"/>
+      <Patch Number="EB73" Name="Chunky Strat" ProgramChange="114"/>
+      <Patch Number="EB74" Name="Stumpy Strat" ProgramChange="115"/>
+      <Patch Number="EB75" Name="Strat Rear" ProgramChange="116"/>
+      <Patch Number="EB76" Name="Strat Comp" ProgramChange="117"/>
+      <Patch Number="EB77" Name="Crying Jazz" ProgramChange="118"/>
+      <Patch Number="EB78" Name="Wild Pikker" ProgramChange="119"/>
+      <Patch Number="EB81" Name="Electric 12" ProgramChange="120"/>
+      <Patch Number="EB82" Name="Country 12Gt" ProgramChange="121"/>
+      <Patch Number="EB83" Name="Touch Driver" ProgramChange="122"/>
+      <Patch Number="EB84" Name="My 335 No.1" ProgramChange="123"/>
+      <Patch Number="EB85" Name="Root 335" ProgramChange="124"/>
+      <Patch Number="EB86" Name="335 Pick" ProgramChange="125"/>
+      <Patch Number="EB87" Name="Velo 335" ProgramChange="126"/>
+      <Patch Number="EB88" Name="Plugged Gtr" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Country C">
+      <Patch Number="EC11" Name="T-Arm Vib Gt" ProgramChange="0"/>
+      <Patch Number="EC12" Name="EG DynaPick1" ProgramChange="1"/>
+      <Patch Number="EC13" Name="EG DynaPick2" ProgramChange="2"/>
+      <Patch Number="EC14" Name="Tremolo Less" ProgramChange="3"/>
+      <Patch Number="EC15" Name="LP Gtr" ProgramChange="4"/>
+      <Patch Number="EC16" Name="Backing EG" ProgramChange="5"/>
+      <Patch Number="EC17" Name="Snappy EG" ProgramChange="6"/>
+      <Patch Number="EC18" Name="Pick Wah" ProgramChange="7"/>
+      <Patch Number="EC21" Name="Fast Rotary" ProgramChange="8"/>
+      <Patch Number="EC22" Name="Riff it!" ProgramChange="9"/>
+      <Patch Number="EC23" Name="E.Gtr Mute" ProgramChange="10"/>
+      <Patch Number="EC24" Name="Mute Pop Gtr" ProgramChange="11"/>
+      <Patch Number="EC25" Name="EGuitarTouch" ProgramChange="12"/>
+      <Patch Number="EC26" Name="StereoMuters" ProgramChange="13"/>
+      <Patch Number="EC27" Name="Rocky Peaks" ProgramChange="14"/>
+      <Patch Number="EC28" Name="Sweet Mute" ProgramChange="15"/>
+      <Patch Number="EC31" Name="335 VeloMute" ProgramChange="16"/>
+      <Patch Number="EC32" Name="335PhaseMUte" ProgramChange="17"/>
+      <Patch Number="EC33" Name="335Mute/Pick" ProgramChange="18"/>
+      <Patch Number="EC34" Name="335MuteSlap" ProgramChange="19"/>
+      <Patch Number="EC35" Name="Oct Mute Vel" ProgramChange="20"/>
+      <Patch Number="EC36" Name="Other Mutes" ProgramChange="21"/>
+      <Patch Number="EC37" Name="Pure Steel" ProgramChange="22"/>
+      <Patch Number="EC38" Name="MeloPdlSteel" ProgramChange="23"/>
+      <Patch Number="EC41" Name="Bright Steel" ProgramChange="24"/>
+      <Patch Number="EC42" Name="St.Steel" ProgramChange="25"/>
+      <Patch Number="EC43" Name="PedalSteel 5" ProgramChange="26"/>
+      <Patch Number="EC44" Name="PedalSteel 6" ProgramChange="27"/>
+      <Patch Number="EC45" Name="PedalSteel 7" ProgramChange="28"/>
+      <Patch Number="EC46" Name="Steel Again" ProgramChange="29"/>
+      <Patch Number="EC47" Name="Pink Guitar" ProgramChange="30"/>
+      <Patch Number="EC48" Name="Delay Slide1" ProgramChange="31"/>
+      <Patch Number="EC51" Name="AutoPdlSteel" ProgramChange="32"/>
+      <Patch Number="EC52" Name="Delay Slide2" ProgramChange="33"/>
+      <Patch Number="EC53" Name="AutoBndSteel" ProgramChange="34"/>
+      <Patch Number="EC54" Name="PdlStl Vel 1" ProgramChange="35"/>
+      <Patch Number="EC55" Name="PdlStl Vel 2" ProgramChange="36"/>
+      <Patch Number="EC56" Name="PdlStl Vel 3" ProgramChange="37"/>
+      <Patch Number="EC57" Name="Hicksville" ProgramChange="38"/>
+      <Patch Number="EC58" Name="Pasty EGuitar" ProgramChange="39"/>
+      <Patch Number="EC61" Name="PedalMajor1" ProgramChange="40"/>
+      <Patch Number="EC62" Name="PedalMajor2" ProgramChange="41"/>
+      <Patch Number="EC63" Name="Steel Heaven" ProgramChange="42"/>
+      <Patch Number="EC64" Name="LoneStar" ProgramChange="43"/>
+      <Patch Number="EC65" Name="6Strings Bs1" ProgramChange="44"/>
+      <Patch Number="EC66" Name="Processed Bs" ProgramChange="45"/>
+      <Patch Number="EC67" Name="MetalStr Bs1" ProgramChange="46"/>
+      <Patch Number="EC68" Name="6Strings Bs2" ProgramChange="47"/>
+      <Patch Number="EC71" Name="Pick Bs Hard" ProgramChange="48"/>
+      <Patch Number="EC72" Name="6StrBs Mt/Pk" ProgramChange="49"/>
+      <Patch Number="EC73" Name="6Strings Bs3" ProgramChange="50"/>
+      <Patch Number="EC74" Name="Picked Bass1" ProgramChange="51"/>
+      <Patch Number="EC75" Name="Picked Bass2" ProgramChange="52"/>
+      <Patch Number="EC76" Name="Finger Bass2" ProgramChange="53"/>
+      <Patch Number="EC77" Name="Finger Bass3" ProgramChange="54"/>
+      <Patch Number="EC78" Name="Finger Bass4" ProgramChange="55"/>
+      <Patch Number="EC81" Name="CmpFingerBs1" ProgramChange="56"/>
+      <Patch Number="EC82" Name="CmpFingerBs2" ProgramChange="57"/>
+      <Patch Number="EC83" Name="DynoFngrBass" ProgramChange="58"/>
+      <Patch Number="EC84" Name="Strong Bass" ProgramChange="59"/>
+      <Patch Number="EC85" Name="Super6 Bass" ProgramChange="60"/>
+      <Patch Number="EC86" Name="Finger Bass5" ProgramChange="61"/>
+      <Patch Number="EC87" Name="8Strings Bs" ProgramChange="62"/>
+      <Patch Number="EC88" Name="MetalStr Bs2" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Country D">
+      <Patch Number="ED11" Name="Muted Bass1" ProgramChange="64"/>
+      <Patch Number="ED12" Name="DynoMuteBass" ProgramChange="65"/>
+      <Patch Number="ED13" Name="Muted Bass2" ProgramChange="66"/>
+      <Patch Number="ED14" Name="WWWBass" ProgramChange="67"/>
+      <Patch Number="ED15" Name="Muted Bass3" ProgramChange="68"/>
+      <Patch Number="ED16" Name="Bassy Muters" ProgramChange="69"/>
+      <Patch Number="ED17" Name="Wah Bass" ProgramChange="70"/>
+      <Patch Number="ED18" Name="Tub Mix Bass" ProgramChange="71"/>
+      <Patch Number="ED21" Name="Washtub Bass" ProgramChange="72"/>
+      <Patch Number="ED22" Name="Tub Bass" ProgramChange="73"/>
+      <Patch Number="ED23" Name="Showdown" ProgramChange="74"/>
+      <Patch Number="ED24" Name="Fiddle Split" ProgramChange="75"/>
+      <Patch Number="ED25" Name="Fiddle Duo" ProgramChange="76"/>
+      <Patch Number="ED26" Name="Fiddler 1" ProgramChange="77"/>
+      <Patch Number="ED27" Name="Fiddler 2" ProgramChange="78"/>
+      <Patch Number="ED28" Name="2 Fiddles" ProgramChange="79"/>
+      <Patch Number="ED31" Name="Stac Fiddle" ProgramChange="80"/>
+      <Patch Number="ED32" Name="Fddl+Violins" ProgramChange="81"/>
+      <Patch Number="ED33" Name="Fiddlers" ProgramChange="82"/>
+      <Patch Number="ED34" Name="Let's Jig!" ProgramChange="83"/>
+      <Patch Number="ED35" Name="Fiddlee Dee" ProgramChange="84"/>
+      <Patch Number="ED36" Name="FiddleSect'n" ProgramChange="85"/>
+      <Patch Number="ED37" Name="Fiddle Spice" ProgramChange="86"/>
+      <Patch Number="ED38" Name="FiddlePizz 1" ProgramChange="87"/>
+      <Patch Number="ED41" Name="FiddlePizz 2" ProgramChange="88"/>
+      <Patch Number="ED42" Name="FiddlePizz 3" ProgramChange="89"/>
+      <Patch Number="ED43" Name="FiddlePizz 4" ProgramChange="90"/>
+      <Patch Number="ED44" Name="FiddlePizz 5" ProgramChange="91"/>
+      <Patch Number="ED45" Name="Oct Pizz" ProgramChange="92"/>
+      <Patch Number="ED46" Name="FidpizBounce" ProgramChange="93"/>
+      <Patch Number="ED47" Name="FiddleFilter" ProgramChange="94"/>
+      <Patch Number="ED48" Name="Promenade" ProgramChange="95"/>
+      <Patch Number="ED51" Name="FiddleAbout" ProgramChange="96"/>
+      <Patch Number="ED52" Name="CountryHarp1" ProgramChange="97"/>
+      <Patch Number="ED53" Name="F# Harp" ProgramChange="98"/>
+      <Patch Number="ED54" Name="CountryHarp2" ProgramChange="99"/>
+      <Patch Number="ED55" Name="Session Harp" ProgramChange="100"/>
+      <Patch Number="ED56" Name="Suckn' Blow" ProgramChange="101"/>
+      <Patch Number="ED57" Name="Harmo Blues" ProgramChange="102"/>
+      <Patch Number="ED58" Name="GhostRider" ProgramChange="103"/>
+      <Patch Number="ED61" Name="Harp Choir" ProgramChange="104"/>
+      <Patch Number="ED62" Name="Squeeze Box1" ProgramChange="105"/>
+      <Patch Number="ED63" Name="Squeeze Box2" ProgramChange="106"/>
+      <Patch Number="ED64" Name="Velo Squeeze" ProgramChange="107"/>
+      <Patch Number="ED65" Name="Squeeze Box3" ProgramChange="108"/>
+      <Patch Number="ED66" Name="Squeeze Box4" ProgramChange="109"/>
+      <Patch Number="ED67" Name="Accord Split" ProgramChange="110"/>
+      <Patch Number="ED68" Name="BootScootin'" ProgramChange="111"/>
+      <Patch Number="ED71" Name="BootScootin2" ProgramChange="112"/>
+      <Patch Number="ED72" Name="CanynCascade" ProgramChange="113"/>
+      <Patch Number="ED73" Name="GoodMornin'" ProgramChange="114"/>
+      <Patch Number="ED74" Name="Skyline" ProgramChange="115"/>
+      <Patch Number="ED75" Name="TwangWahEcho" ProgramChange="116"/>
+      <Patch Number="ED76" Name="FunkyResonic" ProgramChange="117"/>
+      <Patch Number="ED77" Name="CntryBallad1" ProgramChange="118"/>
+      <Patch Number="ED78" Name="CntryBallad2" ProgramChange="119"/>
+      <Patch Number="ED81" Name="Country Ens" ProgramChange="120"/>
+      <Patch Number="ED82" Name="Fiddle &amp; PNO" ProgramChange="121"/>
+      <Patch Number="ED83" Name="Shiloh" ProgramChange="122"/>
+      <Patch Number="ED84" Name="Durango" ProgramChange="123"/>
+      <Patch Number="ED85" Name="CountryDrum1" ProgramChange="124"/>
+      <Patch Number="ED86" Name="CountryDrum2" ProgramChange="125"/>
+      <Patch Number="ED87" Name="CountryDrum3" ProgramChange="126"/>
+      <Patch Number="ED88" Name="CountryDrum4" ProgramChange="127"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JV-1010</Model>
+    <Model>JV-1080</Model>
+    <Model>JV-2080</Model>
+    <Model>XP-50</Model>
+    <Model>XP-80</Model>
+    <Model>XV-5080</Model>
+    <Model>XV-3080</Model>
+    <Model>XV-88</Model>
+    <Model>Fantom</Model>
+    <Model>Fantom X</Model>
+    <PatchNameList Name="EXP Country: Rhythm Kits">
+      <Patch Number="001" Name="CountrySet1" ProgramChange="0">
+        <UsesNoteNameList Name="Country: CountrySet1"/>
+      </Patch>
+      <Patch Number="002" Name="CountrySet2" ProgramChange="1">
+        <UsesNoteNameList Name="Country: CountrySet2"/>
+      </Patch>
+      <Patch Number="003" Name="CountrySet3" ProgramChange="2">
+        <UsesNoteNameList Name="Country: CountrySet3"/>
+      </Patch>
+      <Patch Number="004" Name="CountrySet4" ProgramChange="3">
+        <UsesNoteNameList Name="Country: CountrySet4"/>
+      </Patch>
+      <Patch Number="005" Name="Brush Set" ProgramChange="4">
+        <UsesNoteNameList Name="Country: Brush Set"/>
+      </Patch>
+      <Patch Number="006" Name="CntryOldSet" ProgramChange="5">
+        <UsesNoteNameList Name="Country: CntryOldSet"/>
+      </Patch>
+      <Patch Number="007" Name="CntryPopSet1" ProgramChange="6">
+        <UsesNoteNameList Name="Country: CntryPopSet1"/>
+      </Patch>
+      <Patch Number="008" Name="CntryPopSet2" ProgramChange="7">
+        <UsesNoteNameList Name="Country: CntryPopSet2"/>
+      </Patch>
+    </PatchNameList>
+    <PatchNameList Name="EXP Country: Patches 001-128">
+      <Patch Number="001" Name="Banjo Phrs" ProgramChange="0"/>
+      <Patch Number="002" Name="Guitar Phrs1" ProgramChange="1"/>
+      <Patch Number="003" Name="Guitar Phrs2" ProgramChange="2"/>
+      <Patch Number="004" Name="MiddleCRiff" ProgramChange="3"/>
+      <Patch Number="005" Name="12 Bar Riff" ProgramChange="4"/>
+      <Patch Number="006" Name="PdlStl Phrs" ProgramChange="5"/>
+      <Patch Number="007" Name="FiddleFxmenu" ProgramChange="6"/>
+      <Patch Number="008" Name="3Chd Strum" ProgramChange="7"/>
+      <Patch Number="009" Name="GtrFX Menu" ProgramChange="8"/>
+      <Patch Number="010" Name="Country Efx" ProgramChange="9"/>
+      <Patch Number="011" Name="Ac.Guitars" ProgramChange="10"/>
+      <Patch Number="012" Name="Bright Gtrs" ProgramChange="11"/>
+      <Patch Number="013" Name="Sensible Gtr" ProgramChange="12"/>
+      <Patch Number="014" Name="Countryside" ProgramChange="13"/>
+      <Patch Number="015" Name="AcGtrStereo1" ProgramChange="14"/>
+      <Patch Number="016" Name="AcGtrDuo VSW" ProgramChange="15"/>
+      <Patch Number="017" Name="Real AcGtr 1" ProgramChange="16"/>
+      <Patch Number="018" Name="Real AcGtr 2" ProgramChange="17"/>
+      <Patch Number="019" Name="DynoAcoustic" ProgramChange="18"/>
+      <Patch Number="020" Name="AcGtr Deluxe" ProgramChange="19"/>
+      <Patch Number="021" Name="AcGtrStereo2" ProgramChange="20"/>
+      <Patch Number="022" Name="Bright Pick2" ProgramChange="21"/>
+      <Patch Number="023" Name="Compres'd AG" ProgramChange="22"/>
+      <Patch Number="024" Name="Two Brothers" ProgramChange="23"/>
+      <Patch Number="025" Name="AcGtr VSW" ProgramChange="24"/>
+      <Patch Number="026" Name="Steel Touch" ProgramChange="25"/>
+      <Patch Number="027" Name="Cowboy Gtr" ProgramChange="26"/>
+      <Patch Number="028" Name="Noizy Picker" ProgramChange="27"/>
+      <Patch Number="029" Name="Stereo Touch" ProgramChange="28"/>
+      <Patch Number="030" Name="AcGtr Dual" ProgramChange="29"/>
+      <Patch Number="031" Name="AcGtr Finger" ProgramChange="30"/>
+      <Patch Number="032" Name="AcGtr Pick" ProgramChange="31"/>
+      <Patch Number="033" Name="Pick Solo 1T" ProgramChange="32"/>
+      <Patch Number="034" Name="LA Folk" ProgramChange="33"/>
+      <Patch Number="035" Name="AcGtr Slide" ProgramChange="34"/>
+      <Patch Number="036" Name="Acoustic Wah" ProgramChange="35"/>
+      <Patch Number="037" Name="Shadow Gtr" ProgramChange="36"/>
+      <Patch Number="038" Name="12 Strings" ProgramChange="37"/>
+      <Patch Number="039" Name="Riverside" ProgramChange="38"/>
+      <Patch Number="040" Name="MelanCoustic" ProgramChange="39"/>
+      <Patch Number="041" Name="Voxy Twelve" ProgramChange="40"/>
+      <Patch Number="042" Name="Guitar Song" ProgramChange="41"/>
+      <Patch Number="043" Name="Ac. Ballad" ProgramChange="42"/>
+      <Patch Number="044" Name="Resonant Duo" ProgramChange="43"/>
+      <Patch Number="045" Name="ResonatorGt4" ProgramChange="44"/>
+      <Patch Number="046" Name="BlugrassSlide" ProgramChange="45"/>
+      <Patch Number="047" Name="VelBendReso." ProgramChange="46"/>
+      <Patch Number="048" Name="VeloReso." ProgramChange="47"/>
+      <Patch Number="049" Name="Reso. Guitar2" ProgramChange="48"/>
+      <Patch Number="050" Name="Reso.Ballad" ProgramChange="49"/>
+      <Patch Number="051" Name="Reso Pick 1" ProgramChange="50"/>
+      <Patch Number="052" Name="Reso. Touch" ProgramChange="51"/>
+      <Patch Number="053" Name="Reso.Guitar3" ProgramChange="52"/>
+      <Patch Number="054" Name="Reso.Gtr VSW" ProgramChange="53"/>
+      <Patch Number="055" Name="Reso.Pick 2" ProgramChange="54"/>
+      <Patch Number="056" Name="Banjo 2" ProgramChange="55"/>
+      <Patch Number="057" Name="Banjo 3" ProgramChange="56"/>
+      <Patch Number="058" Name="Banjo 4" ProgramChange="57"/>
+      <Patch Number="059" Name="Deliverance1" ProgramChange="58"/>
+      <Patch Number="060" Name="Banjo Pick" ProgramChange="59"/>
+      <Patch Number="061" Name="Banjo 5" ProgramChange="60"/>
+      <Patch Number="062" Name="Deliverance2" ProgramChange="61"/>
+      <Patch Number="063" Name="Banjo Small" ProgramChange="62"/>
+      <Patch Number="064" Name="Banjo Large" ProgramChange="63"/>
+      <Patch Number="065" Name="Velo Banjo" ProgramChange="64"/>
+      <Patch Number="066" Name="St.Banjo" ProgramChange="65"/>
+      <Patch Number="067" Name="Dyno Mandoln" ProgramChange="66"/>
+      <Patch Number="068" Name="Mandolin 5" ProgramChange="67"/>
+      <Patch Number="069" Name="Mandolin VSW" ProgramChange="68"/>
+      <Patch Number="070" Name="Mandolin Dwn" ProgramChange="69"/>
+      <Patch Number="071" Name="Mandolin Up" ProgramChange="70"/>
+      <Patch Number="072" Name="Mndln Up&amp;Dwn" ProgramChange="71"/>
+      <Patch Number="073" Name="Mdln OctEns" ProgramChange="72"/>
+      <Patch Number="074" Name="MandolinTrm1" ProgramChange="73"/>
+      <Patch Number="075" Name="Mandolin Solo" ProgramChange="74"/>
+      <Patch Number="076" Name="Mandolin Trio" ProgramChange="75"/>
+      <Patch Number="077" Name="Mdln trem St" ProgramChange="76"/>
+      <Patch Number="078" Name="MandoPlayers" ProgramChange="77"/>
+      <Patch Number="079" Name="MandoSection" ProgramChange="78"/>
+      <Patch Number="080" Name="Mandolin Trm2" ProgramChange="79"/>
+      <Patch Number="081" Name="Mndlin Strum1" ProgramChange="80"/>
+      <Patch Number="082" Name="Mndlin Strum2" ProgramChange="81"/>
+      <Patch Number="083" Name="Mandolin Trm3" ProgramChange="82"/>
+      <Patch Number="084" Name="Mandolin Trm4" ProgramChange="83"/>
+      <Patch Number="085" Name="MandoStrings" ProgramChange="84"/>
+      <Patch Number="086" Name="Mand SlowPad" ProgramChange="85"/>
+      <Patch Number="087" Name="The Vatican" ProgramChange="86"/>
+      <Patch Number="088" Name="Plato's Dream" ProgramChange="87"/>
+      <Patch Number="089" Name="Mandoswell" ProgramChange="88"/>
+      <Patch Number="090" Name="Circle Pick" ProgramChange="89"/>
+      <Patch Number="091" Name="Bouzouki 3" ProgramChange="90"/>
+      <Patch Number="092" Name="Bouzouki 4" ProgramChange="91"/>
+      <Patch Number="093" Name="StereoBouzki" ProgramChange="92"/>
+      <Patch Number="094" Name="BouzokiSplit" ProgramChange="93"/>
+      <Patch Number="095" Name="GentlDulzouk" ProgramChange="94"/>
+      <Patch Number="096" Name="Bouzki&amp;Strum" ProgramChange="95"/>
+      <Patch Number="097" Name="Le G String" ProgramChange="96"/>
+      <Patch Number="098" Name="Country Pizz" ProgramChange="97"/>
+      <Patch Number="099" Name="Tele Frnt PU" ProgramChange="98"/>
+      <Patch Number="100" Name="Tele Rear PU" ProgramChange="99"/>
+      <Patch Number="101" Name="Terry Rear" ProgramChange="100"/>
+      <Patch Number="102" Name="Terry Front" ProgramChange="101"/>
+      <Patch Number="103" Name="Tell-A-Castr" ProgramChange="102"/>
+      <Patch Number="104" Name="Mello Tele" ProgramChange="103"/>
+      <Patch Number="105" Name="DynaChrsTele" ProgramChange="104"/>
+      <Patch Number="106" Name="SwitchinTele" ProgramChange="105"/>
+      <Patch Number="107" Name="Slow Rotary" ProgramChange="106"/>
+      <Patch Number="108" Name="Peaks Gtr" ProgramChange="107"/>
+      <Patch Number="109" Name="Aerial Guitr" ProgramChange="108"/>
+      <Patch Number="110" Name="Mellow Peaks" ProgramChange="109"/>
+      <Patch Number="111" Name="SDE2000 Tele" ProgramChange="110"/>
+      <Patch Number="112" Name="GlossyStrata" ProgramChange="111"/>
+      <Patch Number="113" Name="Clean Strat" ProgramChange="112"/>
+      <Patch Number="114" Name="Dyna Strat" ProgramChange="113"/>
+      <Patch Number="115" Name="Chunky Strat" ProgramChange="114"/>
+      <Patch Number="116" Name="Stumpy Strat" ProgramChange="115"/>
+      <Patch Number="117" Name="Strat Rear" ProgramChange="116"/>
+      <Patch Number="118" Name="Strat Comp" ProgramChange="117"/>
+      <Patch Number="119" Name="Crying Jazz" ProgramChange="118"/>
+      <Patch Number="120" Name="Wild Pikker" ProgramChange="119"/>
+      <Patch Number="121" Name="Electric 12" ProgramChange="120"/>
+      <Patch Number="122" Name="Country 12Gt" ProgramChange="121"/>
+      <Patch Number="123" Name="Touch Driver" ProgramChange="122"/>
+      <Patch Number="124" Name="My 335 No.1" ProgramChange="123"/>
+      <Patch Number="125" Name="Root 335" ProgramChange="124"/>
+      <Patch Number="126" Name="335 Pick" ProgramChange="125"/>
+      <Patch Number="127" Name="Velo 335" ProgramChange="126"/>
+      <Patch Number="128" Name="Plugged Gtr" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Country: Patches 129-256">
+      <Patch Number="129" Name="T-Arm Vib Gt" ProgramChange="0"/>
+      <Patch Number="130" Name="EG DynaPick1" ProgramChange="1"/>
+      <Patch Number="131" Name="EG DynaPick2" ProgramChange="2"/>
+      <Patch Number="132" Name="Tremolo Less" ProgramChange="3"/>
+      <Patch Number="133" Name="LP Gtr" ProgramChange="4"/>
+      <Patch Number="134" Name="Backing EG" ProgramChange="5"/>
+      <Patch Number="135" Name="Snappy EG" ProgramChange="6"/>
+      <Patch Number="136" Name="Pick Wah" ProgramChange="7"/>
+      <Patch Number="137" Name="Fast Rotary" ProgramChange="8"/>
+      <Patch Number="138" Name="Riff it!" ProgramChange="9"/>
+      <Patch Number="139" Name="E.Gtr Mute" ProgramChange="10"/>
+      <Patch Number="140" Name="Mute Pop Gtr" ProgramChange="11"/>
+      <Patch Number="141" Name="EGuitarTouch" ProgramChange="12"/>
+      <Patch Number="142" Name="StereoMuters" ProgramChange="13"/>
+      <Patch Number="143" Name="Rocky Peaks" ProgramChange="14"/>
+      <Patch Number="144" Name="Sweet Mute" ProgramChange="15"/>
+      <Patch Number="145" Name="335 VeloMute" ProgramChange="16"/>
+      <Patch Number="146" Name="335PhaseMUte" ProgramChange="17"/>
+      <Patch Number="147" Name="335Mute/Pick" ProgramChange="18"/>
+      <Patch Number="148" Name="335MuteSlap" ProgramChange="19"/>
+      <Patch Number="149" Name="Oct Mute Vel" ProgramChange="20"/>
+      <Patch Number="150" Name="Other Mutes" ProgramChange="21"/>
+      <Patch Number="151" Name="Pure Steel" ProgramChange="22"/>
+      <Patch Number="152" Name="MeloPdlSteel" ProgramChange="23"/>
+      <Patch Number="153" Name="Bright Steel" ProgramChange="24"/>
+      <Patch Number="154" Name="St.Steel" ProgramChange="25"/>
+      <Patch Number="155" Name="PedalSteel 5" ProgramChange="26"/>
+      <Patch Number="156" Name="PedalSteel 6" ProgramChange="27"/>
+      <Patch Number="157" Name="PedalSteel 7" ProgramChange="28"/>
+      <Patch Number="158" Name="Steel Again" ProgramChange="29"/>
+      <Patch Number="159" Name="Pink Guitar" ProgramChange="30"/>
+      <Patch Number="160" Name="Delay Slide1" ProgramChange="31"/>
+      <Patch Number="161" Name="AutoPdlSteel" ProgramChange="32"/>
+      <Patch Number="162" Name="Delay Slide2" ProgramChange="33"/>
+      <Patch Number="163" Name="AutoBndSteel" ProgramChange="34"/>
+      <Patch Number="164" Name="PdlStl Vel 1" ProgramChange="35"/>
+      <Patch Number="165" Name="PdlStl Vel 2" ProgramChange="36"/>
+      <Patch Number="166" Name="PdlStl Vel 3" ProgramChange="37"/>
+      <Patch Number="167" Name="Hicksville" ProgramChange="38"/>
+      <Patch Number="168" Name="Pasty EGuitar" ProgramChange="39"/>
+      <Patch Number="169" Name="PedalMajor1" ProgramChange="40"/>
+      <Patch Number="170" Name="PedalMajor2" ProgramChange="41"/>
+      <Patch Number="171" Name="Steel Heaven" ProgramChange="42"/>
+      <Patch Number="172" Name="LoneStar" ProgramChange="43"/>
+      <Patch Number="173" Name="6Strings Bs1" ProgramChange="44"/>
+      <Patch Number="174" Name="Processed Bs" ProgramChange="45"/>
+      <Patch Number="175" Name="MetalStr Bs1" ProgramChange="46"/>
+      <Patch Number="176" Name="6Strings Bs2" ProgramChange="47"/>
+      <Patch Number="177" Name="Pick Bs Hard" ProgramChange="48"/>
+      <Patch Number="178" Name="6StrBs Mt/Pk" ProgramChange="49"/>
+      <Patch Number="179" Name="6Strings Bs3" ProgramChange="50"/>
+      <Patch Number="180" Name="Picked Bass1" ProgramChange="51"/>
+      <Patch Number="181" Name="Picked Bass2" ProgramChange="52"/>
+      <Patch Number="182" Name="Finger Bass2" ProgramChange="53"/>
+      <Patch Number="183" Name="Finger Bass3" ProgramChange="54"/>
+      <Patch Number="184" Name="Finger Bass4" ProgramChange="55"/>
+      <Patch Number="185" Name="CmpFingerBs1" ProgramChange="56"/>
+      <Patch Number="186" Name="CmpFingerBs2" ProgramChange="57"/>
+      <Patch Number="187" Name="DynoFngrBass" ProgramChange="58"/>
+      <Patch Number="188" Name="Strong Bass" ProgramChange="59"/>
+      <Patch Number="189" Name="Super6 Bass" ProgramChange="60"/>
+      <Patch Number="190" Name="Finger Bass5" ProgramChange="61"/>
+      <Patch Number="191" Name="8Strings Bs" ProgramChange="62"/>
+      <Patch Number="192" Name="MetalStr Bs2" ProgramChange="63"/>
+      <Patch Number="193" Name="Muted Bass1" ProgramChange="64"/>
+      <Patch Number="194" Name="DynoMuteBass" ProgramChange="65"/>
+      <Patch Number="195" Name="Muted Bass2" ProgramChange="66"/>
+      <Patch Number="196" Name="WWWBass" ProgramChange="67"/>
+      <Patch Number="197" Name="Muted Bass3" ProgramChange="68"/>
+      <Patch Number="198" Name="Bassy Muters" ProgramChange="69"/>
+      <Patch Number="199" Name="Wah Bass" ProgramChange="70"/>
+      <Patch Number="200" Name="Tub Mix Bass" ProgramChange="71"/>
+      <Patch Number="201" Name="Washtub Bass" ProgramChange="72"/>
+      <Patch Number="202" Name="Tub Bass" ProgramChange="73"/>
+      <Patch Number="203" Name="Showdown" ProgramChange="74"/>
+      <Patch Number="204" Name="Fiddle Split" ProgramChange="75"/>
+      <Patch Number="205" Name="Fiddle Duo" ProgramChange="76"/>
+      <Patch Number="206" Name="Fiddler 1" ProgramChange="77"/>
+      <Patch Number="207" Name="Fiddler 2" ProgramChange="78"/>
+      <Patch Number="208" Name="2 Fiddles" ProgramChange="79"/>
+      <Patch Number="209" Name="Stac Fiddle" ProgramChange="80"/>
+      <Patch Number="210" Name="Fddl+Violins" ProgramChange="81"/>
+      <Patch Number="211" Name="Fiddlers" ProgramChange="82"/>
+      <Patch Number="212" Name="Let's Jig!" ProgramChange="83"/>
+      <Patch Number="213" Name="Fiddlee Dee" ProgramChange="84"/>
+      <Patch Number="214" Name="FiddleSect'n" ProgramChange="85"/>
+      <Patch Number="215" Name="Fiddle Spice" ProgramChange="86"/>
+      <Patch Number="216" Name="FiddlePizz 1" ProgramChange="87"/>
+      <Patch Number="217" Name="FiddlePizz 2" ProgramChange="88"/>
+      <Patch Number="218" Name="FiddlePizz 3" ProgramChange="89"/>
+      <Patch Number="219" Name="FiddlePizz 4" ProgramChange="90"/>
+      <Patch Number="220" Name="FiddlePizz 5" ProgramChange="91"/>
+      <Patch Number="221" Name="Oct Pizz" ProgramChange="92"/>
+      <Patch Number="222" Name="FidpizBounce" ProgramChange="93"/>
+      <Patch Number="223" Name="FiddleFilter" ProgramChange="94"/>
+      <Patch Number="224" Name="Promenade" ProgramChange="95"/>
+      <Patch Number="225" Name="FiddleAbout" ProgramChange="96"/>
+      <Patch Number="226" Name="CountryHarp1" ProgramChange="97"/>
+      <Patch Number="227" Name="F# Harp" ProgramChange="98"/>
+      <Patch Number="228" Name="CountryHarp2" ProgramChange="99"/>
+      <Patch Number="229" Name="Session Harp" ProgramChange="100"/>
+      <Patch Number="230" Name="Suckn' Blow" ProgramChange="101"/>
+      <Patch Number="231" Name="Harmo Blues" ProgramChange="102"/>
+      <Patch Number="232" Name="GhostRider" ProgramChange="103"/>
+      <Patch Number="233" Name="Harp Choir" ProgramChange="104"/>
+      <Patch Number="234" Name="Squeeze Box1" ProgramChange="105"/>
+      <Patch Number="235" Name="Squeeze Box2" ProgramChange="106"/>
+      <Patch Number="236" Name="Velo Squeeze" ProgramChange="107"/>
+      <Patch Number="237" Name="Squeeze Box3" ProgramChange="108"/>
+      <Patch Number="238" Name="Squeeze Box4" ProgramChange="109"/>
+      <Patch Number="239" Name="Accord Split" ProgramChange="110"/>
+      <Patch Number="240" Name="BootScootin'" ProgramChange="111"/>
+      <Patch Number="241" Name="BootScootin2" ProgramChange="112"/>
+      <Patch Number="242" Name="CanynCascade" ProgramChange="113"/>
+      <Patch Number="243" Name="GoodMornin'" ProgramChange="114"/>
+      <Patch Number="244" Name="Skyline" ProgramChange="115"/>
+      <Patch Number="245" Name="TwangWahEcho" ProgramChange="116"/>
+      <Patch Number="246" Name="FunkyResonic" ProgramChange="117"/>
+      <Patch Number="247" Name="CntryBallad1" ProgramChange="118"/>
+      <Patch Number="248" Name="CntryBallad2" ProgramChange="119"/>
+      <Patch Number="249" Name="Country Ens" ProgramChange="120"/>
+      <Patch Number="250" Name="Fiddle &amp; PNO" ProgramChange="121"/>
+      <Patch Number="251" Name="Shiloh" ProgramChange="122"/>
+      <Patch Number="252" Name="Durango" ProgramChange="123"/>
+      <Patch Number="253" Name="CountryDrum1" ProgramChange="124"/>
+      <Patch Number="254" Name="CountryDrum2" ProgramChange="125"/>
+      <Patch Number="255" Name="CountryDrum3" ProgramChange="126"/>
+      <Patch Number="256" Name="CountryDrum4" ProgramChange="127"/>
+    </PatchNameList>
+    <NoteNameList Name="Country: CountrySet1">
+      <Note Number="35" Name="Studio Kick"/>
+      <Note Number="36" Name="Fat BD"/>
+      <Note Number="37" Name="Cross Stick2"/>
+      <Note Number="38" Name="Deep Snare2"/>
+      <Note Number="39" Name="SPD Claps"/>
+      <Note Number="40" Name="NaturalRimSht"/>
+      <Note Number="41" Name="Verb Tom Lo"/>
+      <NoteGroup Name="Hi-Hat">
+        <Note Number="42" Name="Close Hat1"/>
+        <Note Number="44" Name="Closed Hat2"/>
+        <Note Number="46" Name="Open HiHat"/>
+      </NoteGroup>
+      <Note Number="43" Name="Studio Lo Tom"/>
+      <Note Number="45" Name="Verb Tom Hi"/>
+      <Note Number="47" Name="StudioMidTom"/>
+      <Note Number="48" Name="Verb Tom Hi"/>
+      <Note Number="49" Name="Medium Crash"/>
+      <Note Number="50" Name="StudioHi Tom"/>
+      <Note Number="51" Name="Lite Ride"/>
+      <Note Number="52" Name="Medium Crash"/>
+      <Note Number="53" Name="Ride Bell1"/>
+      <Note Number="54" Name="R8 Tamb"/>
+      <Note Number="55" Name="Crash 1"/>
+      <Note Number="56" Name="VDrm Cowbell"/>
+      <Note Number="57" Name="Crash 1"/>
+      <Note Number="58" Name="VDrm Cowbell"/>
+      <Note Number="59" Name="Ride Bell1"/>
+      <NoteGroup Name="Conga Hi Mute/Open">
+        <Note Number="60" Name="Cga Mute Hi"/>
+        <Note Number="63" Name="Cga Open Hi"/>
+      </NoteGroup>
+      <Note Number="62" Name="Cga Slap"/>
+      <NoteGroup Name="Conga Lo Mute/Open">
+        <Note Number="61" Name="Cga Mute Lo"/>
+        <Note Number="64" Name="Cga Open Lo"/>
+      </NoteGroup>
+      <Note Number="65" Name="Timbale"/>
+      <Note Number="66" Name="Timbale"/>
+      <NoteGroup Name="Agogo">
+        <Note Number="67" Name="Agogo"/>
+        <Note Number="68" Name="Agogo"/>
+      </NoteGroup>
+      <Note Number="69" Name="V Drm Cabasa Up"/>
+      <Note Number="70" Name="VDrm Maracas"/>
+      <Note Number="71" Name="Soft Pad A"/>
+      <Note Number="72" Name="Soft Pad B"/>
+      <NoteGroup Name="Guiro">
+        <Note Number="73" Name="Long Guiro"/>
+        <Note Number="74" Name="Long Guiro"/>
+      </NoteGroup>
+      <Note Number="75" Name="VDrm Claves"/>
+      <NoteGroup Name="Wood Blocks">
+        <Note Number="76" Name="VDrm Woodblock"/>
+        <Note Number="77" Name="VDrm Woodblock"/>
+      </NoteGroup>
+      <NoteGroup Name="Cuica">
+        <Note Number="78" Name="Cuica"/>
+        <Note Number="79" Name="Cuica"/>
+      </NoteGroup>
+      <NoteGroup Name="Triangle">
+        <Note Number="80" Name="Open Triangl"/>
+        <Note Number="81" Name="Open Triangl"/>
+      </NoteGroup>
+      <Note Number="82" Name="VDrm CabasaDwn"/>
+      <Note Number="83" Name="Spectrum"/>
+      <Note Number="84" Name="Wind Chimes"/>
+      <Note Number="85" Name="FingerSnaps4"/>
+      <Note Number="86" Name="Cga Slap"/>
+      <Note Number="87" Name="Room Kick 1"/>
+      <Note Number="88" Name="Jazz Dry BD2"/>
+      <Note Number="89" Name="Pillow BD"/>
+      <Note Number="90" Name="Crisp SN"/>
+      <Note Number="91" Name="Maple Lo Snr"/>
+      <Note Number="92" Name="EG E Bend 3"/>
+      <Note Number="93" Name="EG Slide 1"/>
+      <Note Number="94" Name="EG Slide 6"/>
+      <Note Number="95" Name="EG Rake 2"/>
+      <Note Number="96" Name="Metronome 2"/>
+      <Note Number="97" Name="R8 Click"/>
+      <Note Number="98" Name="Metronome 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Country: CountrySet2">
+      <Note Number="35" Name="Room Kick2"/>
+      <Note Number="36" Name="Big Room Kik"/>
+      <Note Number="37" Name="Cross Stick2"/>
+      <Note Number="38" Name="Snappy SN"/>
+      <Note Number="39" Name="NaturlFlamSN"/>
+      <Note Number="40" Name="NaturalBuzzSN"/>
+      <Note Number="41" Name="Verb Tom Lo"/>
+      <NoteGroup Name="Hi-Hat">
+        <Note Number="42" Name="Dexie HH Hlf"/>
+        <Note Number="44" Name="Dexie HH Cls"/>
+        <Note Number="46" Name="Dexie HH Opn"/>
+      </NoteGroup>
+      <Note Number="43" Name="Studio Lo Tom"/>
+      <Note Number="45" Name="Verb Tom Hi"/>
+      <Note Number="47" Name="StudioMidTom"/>
+      <Note Number="48" Name="Verb Tom Hi"/>
+      <Note Number="49" Name="Medium Crash"/>
+      <Note Number="50" Name="StudioHi Tom"/>
+      <Note Number="51" Name="Lite Ride"/>
+      <Note Number="52" Name="Medium Crash"/>
+      <Note Number="53" Name="Ride Bell1"/>
+      <Note Number="54" Name="R8 Tamb"/>
+      <Note Number="55" Name="Crash 1"/>
+      <Note Number="56" Name="VDrm Cowbell"/>
+      <Note Number="57" Name="Crash 1"/>
+      <Note Number="58" Name="VDrm Cowbell"/>
+      <Note Number="59" Name="Ride Bell1"/>
+      <NoteGroup Name="Conga Hi Mute/Open">
+        <Note Number="60" Name="Cga Mute Hi"/>
+        <Note Number="63" Name="Cga Open Hi"/>
+      </NoteGroup>
+      <Note Number="62" Name="Cga Slap"/>
+      <NoteGroup Name="Conga Lo Mute/Open">
+        <Note Number="61" Name="Cga Mute Lo"/>
+        <Note Number="64" Name="Cga Open Lo"/>
+      </NoteGroup>
+      <Note Number="65" Name="Timbale"/>
+      <Note Number="66" Name="Timbale"/>
+      <NoteGroup Name="Agogo">
+        <Note Number="67" Name="Agogo"/>
+        <Note Number="68" Name="Agogo"/>
+      </NoteGroup>
+      <Note Number="69" Name="V Drm Cabasa Up"/>
+      <Note Number="70" Name="VDrm Maracas"/>
+      <Note Number="71" Name="Soft Pad A"/>
+      <Note Number="72" Name="Soft Pad B"/>
+      <NoteGroup Name="Guiro">
+        <Note Number="73" Name="Long Guiro"/>
+        <Note Number="74" Name="Long Guiro"/>
+      </NoteGroup>
+      <Note Number="75" Name="VDrm Claves"/>
+      <NoteGroup Name="Wood Blocks">
+        <Note Number="76" Name="VDrm Woodblock"/>
+        <Note Number="77" Name="VDrm Woodblock"/>
+      </NoteGroup>
+      <NoteGroup Name="Cuica">
+        <Note Number="78" Name="Cuica"/>
+        <Note Number="79" Name="Cuica"/>
+      </NoteGroup>
+      <NoteGroup Name="Triangle">
+        <Note Number="80" Name="Open Triangl"/>
+        <Note Number="81" Name="Open Triangl"/>
+      </NoteGroup>
+      <Note Number="82" Name="VDrm CabasaDwn"/>
+      <Note Number="83" Name="Spectrum"/>
+      <Note Number="84" Name="Wind Chimes"/>
+      <Note Number="85" Name="FingerSnaps4"/>
+      <Note Number="86" Name="Cga Slap"/>
+      <Note Number="87" Name="Room Kick 1"/>
+      <Note Number="88" Name="Jazz Dry BD2"/>
+      <Note Number="89" Name="Strainer Snr"/>
+      <Note Number="90" Name="Jazzy Snr"/>
+      <Note Number="91" Name="NaturlHardSN"/>
+      <Note Number="92" Name="NaturlRimSht"/>
+      <Note Number="93" Name="Bouzki Chd2"/>
+      <Note Number="94" Name="BzkiChd Menu"/>
+      <Note Number="95" Name="BzkiChd Menu"/>
+      <Note Number="96" Name="Metronome 2"/>
+      <Note Number="97" Name="R8 Click"/>
+      <Note Number="98" Name="Metronome 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Country: CountrySet3">
+      <Note Number="35" Name="Jazz Dry BD1"/>
+      <Note Number="36" Name="Jazz Dry BD2"/>
+      <Note Number="37" Name="Cross Stick2"/>
+      <Note Number="38" Name="Brush SlpSnr"/>
+      <Note Number="39" Name="SPD Claps"/>
+      <Note Number="40" Name="R8 Brsh Snr"/>
+      <Note Number="41" Name="Brush Tom Lo"/>
+      <NoteGroup Name="Hi-Hat">
+        <Note Number="42" Name="Closed Hat1"/>
+        <Note Number="44" Name="Closed Hat2"/>
+        <Note Number="46" Name="Open HiHat"/>
+      </NoteGroup>
+      <Note Number="43" Name="Studio Lo Tom"/>
+      <Note Number="45" Name="Brush Hi Tom"/>
+      <Note Number="47" Name="StudioMidTom"/>
+      <Note Number="48" Name="Brush Hi Tomi"/>
+      <Note Number="49" Name="Medium Crash"/>
+      <Note Number="50" Name="StudioHi Tom"/>
+      <Note Number="51" Name="Lite Ride"/>
+      <Note Number="52" Name="Medium Crash"/>
+      <Note Number="53" Name="Ride Bell1"/>
+      <Note Number="54" Name="R8 Tamb"/>
+      <Note Number="55" Name="Crash 1"/>
+      <Note Number="56" Name="VDrm Cowbell"/>
+      <Note Number="57" Name="Crash 1"/>
+      <Note Number="58" Name="VDrm Cowbell"/>
+      <Note Number="59" Name="Ride Bell1"/>
+      <NoteGroup Name="Conga Hi Mute/Open">
+        <Note Number="60" Name="Cga Mute Hi"/>
+        <Note Number="63" Name="Cga Open Hi"/>
+      </NoteGroup>
+      <Note Number="62" Name="Cga Slap"/>
+      <NoteGroup Name="Conga Lo Mute/Open">
+        <Note Number="61" Name="Cga Mute Lo"/>
+        <Note Number="64" Name="Cga Open Lo"/>
+      </NoteGroup>
+      <Note Number="65" Name="Timbale"/>
+      <Note Number="66" Name="Timbale"/>
+      <NoteGroup Name="Agogo">
+        <Note Number="67" Name="Agogo"/>
+        <Note Number="68" Name="Agogo"/>
+      </NoteGroup>
+      <Note Number="69" Name="V Drm Cabasa Up"/>
+      <Note Number="70" Name="VDrm Maracas"/>
+      <Note Number="71" Name="Soft Pad A"/>
+      <Note Number="72" Name="Soft Pad B"/>
+      <NoteGroup Name="Guiro">
+        <Note Number="73" Name="Long Guiro"/>
+        <Note Number="74" Name="Long Guiro"/>
+      </NoteGroup>
+      <Note Number="75" Name="VDrm Claves"/>
+      <NoteGroup Name="Wood Blocks">
+        <Note Number="76" Name="VDrm Woodblock"/>
+        <Note Number="77" Name="VDrm Woodblock"/>
+      </NoteGroup>
+      <NoteGroup Name="Cuica">
+        <Note Number="78" Name="Cuica"/>
+        <Note Number="79" Name="Cuica"/>
+      </NoteGroup>
+      <NoteGroup Name="Triangle">
+        <Note Number="80" Name="Open Triangl"/>
+        <Note Number="81" Name="Open Triangl"/>
+      </NoteGroup>
+      <Note Number="82" Name="VDrm CabasaDwn"/>
+      <Note Number="83" Name="Spectrum"/>
+      <Note Number="84" Name="Wind Chimes"/>
+      <Note Number="85" Name="FingerSnaps4"/>
+      <Note Number="86" Name="Cga Slap"/>
+      <Note Number="87" Name="Room Kick 1"/>
+      <Note Number="88" Name="Studio Kick"/>
+      <Note Number="89" Name="Maple Kick"/>
+      <Note Number="90" Name="Jazzy Snr"/>
+      <Note Number="91" Name="LiteBrush SN1"/>
+      <Note Number="92" Name="Fdl Riff5"/>
+      <Note Number="93" Name="EG Slide1"/>
+      <Note Number="94" Name="EG Rake1"/>
+      <Note Number="95" Name="Fdl Riff3"/>
+      <Note Number="96" Name="Metronome 2"/>
+      <Note Number="97" Name="R8 Click"/>
+      <Note Number="98" Name="Metronome 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Country: CountrySet4">
+      <Note Number="35" Name="Pillow BD"/>
+      <Note Number="36" Name="Room Kick1"/>
+      <Note Number="37" Name="Cross Stick2"/>
+      <Note Number="38" Name="Crisp SN"/>
+      <Note Number="39" Name="NaturlFlamSN"/>
+      <Note Number="40" Name="Depp Snare2"/>
+      <Note Number="41" Name="Verb Tom Lo"/>
+      <NoteGroup Name="Hi-Hat">
+        <Note Number="42" Name="Dexie HH Hlf"/>
+        <Note Number="44" Name="Dexie HH Cls"/>
+        <Note Number="46" Name="Dexie HH Opn"/>
+      </NoteGroup>
+      <Note Number="43" Name="Studio Lo Tom"/>
+      <Note Number="45" Name="Verb Tom Hi"/>
+      <Note Number="47" Name="StudioMidTom"/>
+      <Note Number="48" Name="Verb Tom Hi"/>
+      <Note Number="49" Name="Medium Crash"/>
+      <Note Number="50" Name="StudioHi Tom"/>
+      <Note Number="51" Name="Lite Ride"/>
+      <Note Number="52" Name="Medium Crash"/>
+      <Note Number="53" Name="Ride Bell1"/>
+      <Note Number="54" Name="R8 Tamb"/>
+      <Note Number="55" Name="Crash 1"/>
+      <Note Number="56" Name="VDrm Cowbell"/>
+      <Note Number="57" Name="Crash 1"/>
+      <Note Number="58" Name="VDrm Cowbell"/>
+      <Note Number="59" Name="Ride Bell1"/>
+      <NoteGroup Name="Conga Hi Mute/Open">
+        <Note Number="60" Name="Cga Mute Hi"/>
+        <Note Number="63" Name="Cga Open Hi"/>
+      </NoteGroup>
+      <Note Number="62" Name="Cga Slap"/>
+      <NoteGroup Name="Conga Lo Mute/Open">
+        <Note Number="61" Name="Cga Mute Lo"/>
+        <Note Number="64" Name="Cga Open Lo"/>
+      </NoteGroup>
+      <Note Number="65" Name="Timbale"/>
+      <Note Number="66" Name="Timbale"/>
+      <NoteGroup Name="Agogo">
+        <Note Number="67" Name="Agogo"/>
+        <Note Number="68" Name="Agogo"/>
+      </NoteGroup>
+      <Note Number="69" Name="V Drm Cabasa Up"/>
+      <Note Number="70" Name="VDrm Maracas"/>
+      <Note Number="71" Name="Soft Pad A"/>
+      <Note Number="72" Name="Soft Pad B"/>
+      <NoteGroup Name="Guiro">
+        <Note Number="73" Name="Long Guiro"/>
+        <Note Number="74" Name="Long Guiro"/>
+      </NoteGroup>
+      <Note Number="75" Name="VDrm Claves"/>
+      <NoteGroup Name="Wood Blocks">
+        <Note Number="76" Name="VDrm Woodblock"/>
+        <Note Number="77" Name="VDrm Woodblock"/>
+      </NoteGroup>
+      <NoteGroup Name="Cuica">
+        <Note Number="78" Name="Cuica"/>
+        <Note Number="79" Name="Cuica"/>
+      </NoteGroup>
+      <NoteGroup Name="Triangle">
+        <Note Number="80" Name="Open Triangl"/>
+        <Note Number="81" Name="Open Triangl"/>
+      </NoteGroup>
+      <Note Number="82" Name="VDrm CabasaDwn"/>
+      <Note Number="83" Name="Spectrum"/>
+      <Note Number="84" Name="Wind Chimes"/>
+      <Note Number="85" Name="FingerSnaps4"/>
+      <Note Number="86" Name="Cga Slap"/>
+      <Note Number="87" Name="Room Kick 1"/>
+      <Note Number="88" Name="Big Room Kik"/>
+      <Note Number="89" Name="R&amp;Room Kick"/>
+      <Note Number="90" Name="SmallRing SN"/>
+      <Note Number="91" Name="Strainer Snr"/>
+      <Note Number="92" Name="Fdl Riff6"/>
+      <Note Number="93" Name="Fdl Riff9"/>
+      <Note Number="94" Name="EG Mute"/>
+      <Note Number="95" Name="EG Slide5"/>
+      <Note Number="96" Name="Metronome 2"/>
+      <Note Number="97" Name="R8 Click"/>
+      <Note Number="98" Name="Metronome 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Country: Brush Set">
+      <Note Number="35" Name="Jazz Dry BD1"/>
+      <Note Number="36" Name="Studio Kick"/>
+      <Note Number="37" Name="Cross Stick2"/>
+      <Note Number="38" Name="LiteBrsh SN1"/>
+      <Note Number="39" Name="NaturlBuzzSN"/>
+      <Note Number="40" Name="LiteBrsh SN2"/>
+      <Note Number="41" Name="Brush Lo Tom"/>
+      <NoteGroup Name="Hi-Hat">
+        <Note Number="42" Name="Closed Hat2"/>
+        <Note Number="44" Name="Pedal HiHat"/>
+        <Note Number="46" Name="Open HiHat"/>
+      </NoteGroup>
+      <Note Number="43" Name="Brush Lo Tom"/>
+      <Note Number="45" Name="Brush Hi Tom"/>
+      <Note Number="47" Name="Brush Hi Tom"/>
+      <Note Number="48" Name="Brush Hi Tom"/>
+      <Note Number="49" Name="Medium Crash"/>
+      <Note Number="50" Name="Brush Hi Tom"/>
+      <Note Number="51" Name="Lite Ride"/>
+      <Note Number="52" Name="China Cym"/>
+      <Note Number="53" Name="Ride Bell1"/>
+      <Note Number="54" Name="R8 Tamb"/>
+      <Note Number="55" Name="Crash 1"/>
+      <Note Number="56" Name="VDrm Cowbell"/>
+      <Note Number="57" Name="Medium Crash"/>
+      <Note Number="58" Name="Vibraslap"/>
+      <Note Number="59" Name="Ride 2"/>
+      <NoteGroup Name="Conga Hi Mute/Open">
+        <Note Number="60" Name="Cga Mute Hi"/>
+        <Note Number="63" Name="Cga Open Hi"/>
+      </NoteGroup>
+      <Note Number="62" Name="Cga Slap"/>
+      <NoteGroup Name="Conga Lo Mute/Open">
+        <Note Number="61" Name="Cga Mute Lo"/>
+        <Note Number="64" Name="Cga Open Lo"/>
+      </NoteGroup>
+      <Note Number="65" Name="Timbale"/>
+      <Note Number="66" Name="Timbale"/>
+      <NoteGroup Name="Agogo">
+        <Note Number="67" Name="Agogo"/>
+        <Note Number="68" Name="Agogo"/>
+      </NoteGroup>
+      <Note Number="69" Name="V Drm Cabasa Up"/>
+      <Note Number="70" Name="VDrm Maracas"/>
+      <Note Number="71" Name="Soft Pad A"/>
+      <Note Number="72" Name="Soft Pad B"/>
+      <NoteGroup Name="Guiro">
+        <Note Number="73" Name="Long Guiro"/>
+        <Note Number="74" Name="Long Guiro"/>
+      </NoteGroup>
+      <Note Number="75" Name="VDrm Claves"/>
+      <NoteGroup Name="Wood Blocks">
+        <Note Number="76" Name="VDrm Woodblock"/>
+        <Note Number="77" Name="VDrm Woodblock"/>
+      </NoteGroup>
+      <NoteGroup Name="Cuica">
+        <Note Number="78" Name="Cuica"/>
+        <Note Number="79" Name="Cuica"/>
+      </NoteGroup>
+      <NoteGroup Name="Triangle">
+        <Note Number="80" Name="Open Triangl"/>
+        <Note Number="81" Name="Open Triangl"/>
+      </NoteGroup>
+      <Note Number="82" Name="Cabasa Cut"/>
+      <Note Number="83" Name="Spectrum"/>
+      <Note Number="84" Name="Wind Chimes"/>
+      <Note Number="85" Name="FingerSnaps4"/>
+      <Note Number="86" Name="Cga Slap"/>
+      <Note Number="87" Name="Dry Tom Lo"/>
+      <Note Number="88" Name="Pillow BD"/>
+      <Note Number="89" Name="Maple Kick"/>
+      <Note Number="90" Name="Jazz Room BD"/>
+      <Note Number="91" Name="R&amp;Room Kick"/>
+      <Note Number="92" Name="Brysh SN"/>
+      <Note Number="93" Name="R8 Brush Snr"/>
+      <Note Number="94" Name="Brush SlpSnr"/>
+      <Note Number="95" Name="Brush Slap"/>
+      <Note Number="96" Name="Metronome 2"/>
+      <Note Number="97" Name="R8 Click"/>
+      <Note Number="98" Name="Metronome 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Country: CntryOldSet">
+      <Note Number="35" Name="Studio Kick"/>
+      <Note Number="36" Name="Warm Kick"/>
+      <Note Number="37" Name="Cross Stick2"/>
+      <Note Number="38" Name="Crisp SN"/>
+      <Note Number="39" Name="Claps Real"/>
+      <Note Number="40" Name="SmallRing SN"/>
+      <Note Number="41" Name="Brush Lo Tom"/>
+      <NoteGroup Name="Hi-Hat">
+        <Note Number="42" Name="R8 HH Close"/>
+        <Note Number="44" Name="Dixie HH Pdl"/>
+        <Note Number="46" Name="R8 HH Open"/>
+      </NoteGroup>
+      <Note Number="43" Name="StudioLo Tom"/>
+      <Note Number="45" Name="Brush Hi Tom"/>
+      <Note Number="47" Name="StudioMid Tom"/>
+      <Note Number="48" Name="Brush Hi Tom"/>
+      <Note Number="49" Name="Medium Crash"/>
+      <Note Number="50" Name="Brush Hi Tom"/>
+      <Note Number="51" Name="Lite Ride"/>
+      <Note Number="52" Name="China Cym"/>
+      <Note Number="53" Name="Ride Bell1"/>
+      <Note Number="54" Name="R8 Tamb"/>
+      <Note Number="55" Name="Crash 1"/>
+      <Note Number="56" Name="VDrm Cowbell"/>
+      <Note Number="57" Name="Medium Crash"/>
+      <Note Number="58" Name="Vibraslap"/>
+      <Note Number="59" Name="Ride 2"/>
+      <NoteGroup Name="Conga Hi Mute/Open">
+        <Note Number="60" Name="Cga Mute Hi"/>
+        <Note Number="63" Name="Cga Open Hi"/>
+      </NoteGroup>
+      <Note Number="62" Name="Cga Slap"/>
+      <NoteGroup Name="Conga Lo Mute/Open">
+        <Note Number="61" Name="Cga Mute Lo"/>
+        <Note Number="64" Name="Cga Open Lo"/>
+      </NoteGroup>
+      <Note Number="65" Name="Timbale"/>
+      <Note Number="66" Name="Timbale"/>
+      <NoteGroup Name="Agogo">
+        <Note Number="67" Name="Agogo"/>
+        <Note Number="68" Name="Agogo"/>
+      </NoteGroup>
+      <Note Number="69" Name="V Drm Cabasa Up"/>
+      <Note Number="70" Name="VDrm Maracas"/>
+      <Note Number="71" Name="Soft Pad A"/>
+      <Note Number="72" Name="Soft Pad B"/>
+      <NoteGroup Name="Guiro">
+        <Note Number="73" Name="Long Guiro"/>
+        <Note Number="74" Name="Long Guiro"/>
+      </NoteGroup>
+      <Note Number="75" Name="VDrm Claves"/>
+      <NoteGroup Name="Wood Blocks">
+        <Note Number="76" Name="VDrm Woodblock"/>
+        <Note Number="77" Name="VDrm Woodblock"/>
+      </NoteGroup>
+      <NoteGroup Name="Cuica">
+        <Note Number="78" Name="Cuica"/>
+        <Note Number="79" Name="Cuica"/>
+      </NoteGroup>
+      <NoteGroup Name="Triangle">
+        <Note Number="80" Name="Open Triangl"/>
+        <Note Number="81" Name="Open Triangl"/>
+      </NoteGroup>
+      <Note Number="82" Name="Cabasa Cut"/>
+      <Note Number="83" Name="Spectrum"/>
+      <Note Number="84" Name="Wind Chimes"/>
+      <Note Number="85" Name="FingerSnaps4"/>
+      <Note Number="86" Name="Cga Slap"/>
+      <Note Number="87" Name="Dry Tom Lo"/>
+      <Note Number="88" Name="120:Bnjo A"/>
+      <Note Number="89" Name="120:Bnjo B"/>
+      <Note Number="90" Name="Fdl Riff2"/>
+      <Note Number="91" Name="95:EGtrl G"/>
+      <Note Number="92" Name="Fdl Riff4"/>
+      <Note Number="93" Name="95:EGtrl C"/>
+      <Note Number="94" Name="Fdl Riff7"/>
+      <Note Number="95" Name="95:EGtrl D"/>
+      <Note Number="96" Name="Metronome 2"/>
+      <Note Number="97" Name="R8 Click"/>
+      <Note Number="98" Name="Metronome 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Country: CntryPopSet1">
+      <Note Number="35" Name="Jazz Dry BD2"/>
+      <Note Number="36" Name="Fat BD"/>
+      <Note Number="37" Name="Cross Stick2"/>
+      <Note Number="38" Name="NaturlSoftSN"/>
+      <Note Number="39" Name="NaturlFlamSN"/>
+      <Note Number="40" Name="NaturlHardSN"/>
+      <Note Number="41" Name="Brush Lo Tom"/>
+      <NoteGroup Name="Hi-Hat">
+        <Note Number="42" Name="Closed Hat1"/>
+        <Note Number="44" Name="Pedal HiHat"/>
+        <Note Number="46" Name="Open HiHat"/>
+      </NoteGroup>
+      <Note Number="43" Name="Brush Lo Tom"/>
+      <Note Number="45" Name="Brush Hi Tom"/>
+      <Note Number="47" Name="Brush Hi Tom"/>
+      <Note Number="48" Name="Brush Hi Tom"/>
+      <Note Number="49" Name="Medium Crash"/>
+      <Note Number="50" Name="Brush Hi Tom"/>
+      <Note Number="51" Name="Lite Ride"/>
+      <Note Number="52" Name="China Cym"/>
+      <Note Number="53" Name="Ride Bell1"/>
+      <Note Number="54" Name="R8 Tamb"/>
+      <Note Number="55" Name="Crash 1"/>
+      <Note Number="56" Name="VDrm Cowbell"/>
+      <Note Number="57" Name="Medium Crash"/>
+      <Note Number="58" Name="Vibraslap"/>
+      <Note Number="59" Name="Ride 2"/>
+      <NoteGroup Name="Conga Hi Mute/Open">
+        <Note Number="60" Name="Cga Mute Hi"/>
+        <Note Number="63" Name="Cga Open Hi"/>
+      </NoteGroup>
+      <Note Number="62" Name="Cga Slap"/>
+      <NoteGroup Name="Conga Lo Mute/Open">
+        <Note Number="61" Name="Cga Mute Lo"/>
+        <Note Number="64" Name="Cga Open Lo"/>
+      </NoteGroup>
+      <Note Number="65" Name="Timbale"/>
+      <Note Number="66" Name="Timbale"/>
+      <NoteGroup Name="Agogo">
+        <Note Number="67" Name="Agogo"/>
+        <Note Number="68" Name="Agogo"/>
+      </NoteGroup>
+      <Note Number="69" Name="V Drm Cabasa Up"/>
+      <Note Number="70" Name="VDrm Maracas"/>
+      <Note Number="71" Name="Soft Pad A"/>
+      <Note Number="72" Name="Soft Pad B"/>
+      <NoteGroup Name="Guiro">
+        <Note Number="73" Name="Long Guiro"/>
+        <Note Number="74" Name="Long Guiro"/>
+      </NoteGroup>
+      <Note Number="75" Name="VDrm Claves"/>
+      <NoteGroup Name="Wood Blocks">
+        <Note Number="76" Name="VDrm Woodblock"/>
+        <Note Number="77" Name="VDrm Woodblock"/>
+      </NoteGroup>
+      <NoteGroup Name="Cuica">
+        <Note Number="78" Name="Cuica"/>
+        <Note Number="79" Name="Cuica"/>
+      </NoteGroup>
+      <NoteGroup Name="Triangle">
+        <Note Number="80" Name="Open Triangl"/>
+        <Note Number="81" Name="Open Triangl"/>
+      </NoteGroup>
+      <Note Number="82" Name="Cabasa Cut"/>
+      <Note Number="83" Name="Spectrum"/>
+      <Note Number="84" Name="Wind Chimes"/>
+      <Note Number="85" Name="FingerSnaps4"/>
+      <Note Number="86" Name="Cga Slap"/>
+      <Note Number="87" Name="Dry Tom Lo"/>
+      <Note Number="88" Name="Room Kick2"/>
+      <Note Number="89" Name="Maple Kick"/>
+      <Note Number="90" Name="NaturlRimSht"/>
+      <Note Number="91" Name="NaturlBuzzSN"/>
+      <Note Number="92" Name="EG C Bend 2"/>
+      <Note Number="93" Name="EG E Bend 3"/>
+      <Note Number="94" Name="EG Slide 3"/>
+      <Note Number="95" Name="EG Slide 7"/>
+      <Note Number="96" Name="Metronome 2"/>
+      <Note Number="97" Name="R8 Click"/>
+      <Note Number="98" Name="Metronome 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Country: CntryPopSet2">
+      <Note Number="35" Name="Big Room Kick"/>
+      <Note Number="36" Name="R&amp;Room KickD"/>
+      <Note Number="37" Name="Cross Stick2"/>
+      <Note Number="38" Name="MapleSoftSN"/>
+      <Note Number="39" Name="Claps Real"/>
+      <Note Number="40" Name="MapleHardSN"/>
+      <Note Number="41" Name="Brush Lo Tom"/>
+      <NoteGroup Name="Hi-Hat">
+        <Note Number="42" Name="Dixie HH Cls"/>
+        <Note Number="44" Name="Dixie HH Hlf"/>
+        <Note Number="46" Name="Dixie HH Opn"/>
+      </NoteGroup>
+      <Note Number="43" Name="Brush Lo Tom"/>
+      <Note Number="45" Name="Brush Hi Tom"/>
+      <Note Number="47" Name="Brush Hi Tom"/>
+      <Note Number="48" Name="Brush Hi Tom"/>
+      <Note Number="49" Name="Medium Crash"/>
+      <Note Number="50" Name="Brush Hi Tom"/>
+      <Note Number="51" Name="Lite Ride"/>
+      <Note Number="52" Name="China Cym"/>
+      <Note Number="53" Name="Ride Bell1"/>
+      <Note Number="54" Name="R8 Tamb"/>
+      <Note Number="55" Name="Crash 1"/>
+      <Note Number="56" Name="VDrm Cowbell"/>
+      <Note Number="57" Name="Medium Crash"/>
+      <Note Number="58" Name="Vibraslap"/>
+      <Note Number="59" Name="Ride 2"/>
+      <NoteGroup Name="Conga Hi Mute/Open">
+        <Note Number="60" Name="Cga Mute Hi"/>
+        <Note Number="63" Name="Cga Open Hi"/>
+      </NoteGroup>
+      <Note Number="62" Name="Cga Slap"/>
+      <NoteGroup Name="Conga Lo Mute/Open">
+        <Note Number="61" Name="Cga Mute Lo"/>
+        <Note Number="64" Name="Cga Open Lo"/>
+      </NoteGroup>
+      <Note Number="65" Name="Timbale"/>
+      <Note Number="66" Name="Timbale"/>
+      <NoteGroup Name="Agogo">
+        <Note Number="67" Name="Agogo"/>
+        <Note Number="68" Name="Agogo"/>
+      </NoteGroup>
+      <Note Number="69" Name="V Drm Cabasa Up"/>
+      <Note Number="70" Name="VDrm Maracas"/>
+      <Note Number="71" Name="Soft Pad A"/>
+      <Note Number="72" Name="Soft Pad B"/>
+      <NoteGroup Name="Guiro">
+        <Note Number="73" Name="Long Guiro"/>
+        <Note Number="74" Name="Long Guiro"/>
+      </NoteGroup>
+      <Note Number="75" Name="VDrm Claves"/>
+      <NoteGroup Name="Wood Blocks">
+        <Note Number="76" Name="VDrm Woodblock"/>
+        <Note Number="77" Name="VDrm Woodblock"/>
+      </NoteGroup>
+      <NoteGroup Name="Cuica">
+        <Note Number="78" Name="Cuica"/>
+        <Note Number="79" Name="Cuica"/>
+      </NoteGroup>
+      <NoteGroup Name="Triangle">
+        <Note Number="80" Name="Open Triangl"/>
+        <Note Number="81" Name="Open Triangl"/>
+      </NoteGroup>
+      <Note Number="82" Name="Cabasa Cut"/>
+      <Note Number="83" Name="Spectrum"/>
+      <Note Number="84" Name="Wind Chimes"/>
+      <Note Number="85" Name="FingerSnaps4"/>
+      <Note Number="86" Name="Cga Slap"/>
+      <Note Number="87" Name="Dry Tom Lo"/>
+      <Note Number="88" Name="Deep Kick 4"/>
+      <Note Number="89" Name="Warm Kick"/>
+      <Note Number="90" Name="Maple Lo Snr"/>
+      <Note Number="91" Name="Strainer Snr"/>
+      <Note Number="92" Name="EG D Bend 1"/>
+      <Note Number="93" Name="120: Bnjo G"/>
+      <Note Number="94" Name="Fdl Riff 8"/>
+      <Note Number="95" Name="120: Bnjo Cm"/>
+      <Note Number="96" Name="Metronome 2"/>
+      <Note Number="97" Name="R8 Click"/>
+      <Note Number="98" Name="Metronome 1"/>
+    </NoteNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

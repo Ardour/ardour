@@ -1,25 +1,27 @@
 /*
-    Copyright (C) 2015 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2015-2016 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <gtkmm/stock.h>
 
 #include "ardour/session.h"
+
+#include "gtkmm2ext/utils.h"
 
 #include "save_as_dialog.h"
 
@@ -84,8 +86,10 @@ SaveAsDialog::SaveAsDialog ()
 
 	no_include_media_button.signal_toggled ().connect (sigc::mem_fun (*this, &SaveAsDialog::no_include_toggled));
 
+	Gtkmm2ext::add_volume_shortcuts (new_parent_folder_selector);
 	new_parent_folder_selector.set_action (FILE_CHOOSER_ACTION_SELECT_FOLDER);
 	new_parent_folder_selector.set_current_folder (Config->get_default_session_parent_dir ());
+
 	new_name_entry.signal_changed().connect (sigc::mem_fun (*this, &SaveAsDialog::name_entry_changed));
 	new_parent_folder_selector.signal_current_folder_changed().connect (sigc::mem_fun (*this, &SaveAsDialog::name_entry_changed));
 	new_parent_folder_selector.signal_selection_changed().connect (sigc::mem_fun (*this, &SaveAsDialog::name_entry_changed));

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Alesis</Manufacturer>
+    <Model>MIDIVerb III</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="BANK 0 REVERB">
+        <PatchNameList>
+          <Patch Number="000" Name="Chorus-Reverb-Delay-EQ" ProgramChange="0"/>
+          <Patch Number="001" Name="Small Bright Room 1" ProgramChange="1"/>
+          <Patch Number="002" Name="Small Bright Room 2" ProgramChange="2"/>
+          <Patch Number="003" Name="Small Warm Room" ProgramChange="3"/>
+          <Patch Number="004" Name="Small Warm Chamber" ProgramChange="4"/>
+          <Patch Number="005" Name="Small Dark Plate" ProgramChange="5"/>
+          <Patch Number="006" Name="Small Dark Room" ProgramChange="6"/>
+          <Patch Number="007" Name="Small Diffused Room" ProgramChange="7"/>
+          <Patch Number="008" Name="Small Dark Chamber" ProgramChange="8"/>
+          <Patch Number="009" Name="Small Warm Plate" ProgramChange="9"/>
+          <Patch Number="010" Name="Medium Warm Hall 1" ProgramChange="10"/>
+          <Patch Number="011" Name="Medium Warm Hall 2" ProgramChange="11"/>
+          <Patch Number="012" Name="Medium Warm Room" ProgramChange="12"/>
+          <Patch Number="013" Name="Medium Warm Plate" ProgramChange="13"/>
+          <Patch Number="014" Name="Medium Bright Room" ProgramChange="14"/>
+          <Patch Number="015" Name="Medium Dark Chamber" ProgramChange="15"/>
+          <Patch Number="016" Name="Medium Dark Room Chorus" ProgramChange="16"/>
+          <Patch Number="017" Name="Medium Dark Room" ProgramChange="17"/>
+          <Patch Number="018" Name="Medium Warm Room" ProgramChange="18"/>
+          <Patch Number="019" Name="Medium Warm Plate" ProgramChange="19"/>
+          <Patch Number="020" Name="Large Warm Room 1" ProgramChange="20"/>
+          <Patch Number="021" Name="Large Dark Plate 1" ProgramChange="21"/>
+          <Patch Number="022" Name="Large Warm Plate 1" ProgramChange="22"/>
+          <Patch Number="023" Name="Large Dark Plate 2" ProgramChange="23"/>
+          <Patch Number="024" Name="Large Warm Room 2" ProgramChange="24"/>
+          <Patch Number="025" Name="Large Dark Hall 1" ProgramChange="25"/>
+          <Patch Number="026" Name="Large Dark Chamber" ProgramChange="26"/>
+          <Patch Number="027" Name="Large Dark Hall 2" ProgramChange="27"/>
+          <Patch Number="028" Name="Large Warm Plate 2" ProgramChange="28"/>
+          <Patch Number="029" Name="Ex-Large Warm Plate" ProgramChange="29"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="BANK 1 GATED &amp; REVERSE">
+        <PatchNameList>
+          <Patch Number="030" Name="Bright Gate" ProgramChange="30"/>
+          <Patch Number="031" Name="Medium Bright Gate" ProgramChange="31"/>
+          <Patch Number="032" Name="Fast Warm Gate" ProgramChange="32"/>
+          <Patch Number="033" Name="Long Warm Gate w/Chorus" ProgramChange="33"/>
+          <Patch Number="034" Name="Long Dark Gate Chorus" ProgramChange="34"/>
+          <Patch Number="035" Name="Reverse Chorus" ProgramChange="35"/>
+          <Patch Number="036" Name="Rev Regen Chorus 1" ProgramChange="36"/>
+          <Patch Number="037" Name="Rev Regen Flange" ProgramChange="37"/>
+          <Patch Number="038" Name="Long Rev Chorus" ProgramChange="38"/>
+          <Patch Number="039" Name="Rev Regen Chorus 2" ProgramChange="39"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="BANK 2 CHORUS &amp; FLANGE">
+        <PatchNameList>
+          <Patch Number="040" Name="Slow Mono Flange" ProgramChange="40"/>
+          <Patch Number="041" Name="Deep Slow Mono Flange" ProgramChange="41"/>
+          <Patch Number="042" Name="Stereo Flange" ProgramChange="42"/>
+          <Patch Number="043" Name="Slow Deep Stereo Flange" ProgramChange="43"/>
+          <Patch Number="044" Name="Fast Stereo Flange" ProgramChange="44"/>
+          <Patch Number="045" Name="Slow Mono Chorus" ProgramChange="45"/>
+          <Patch Number="046" Name="Fast Mono Chorus" ProgramChange="46"/>
+          <Patch Number="047" Name="Stereo Chorus" ProgramChange="47"/>
+          <Patch Number="048" Name="Deep Slow Stereo Chorus" ProgramChange="48"/>
+          <Patch Number="049" Name="Ultra Chorus" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="BANK 3 DELAYS">
+        <PatchNameList>
+          <Patch Number="050" Name="30 ms" ProgramChange="50"/>
+          <Patch Number="051" Name="100ms Regen" ProgramChange="51"/>
+          <Patch Number="052" Name="300ms" ProgramChange="52"/>
+          <Patch Number="053" Name="490ms" ProgramChange="53"/>
+          <Patch Number="054" Name="490ms Regen" ProgramChange="54"/>
+          <Patch Number="055" Name="Chorus Slap" ProgramChange="55"/>
+          <Patch Number="056" Name="Chorus w/Regen" ProgramChange="56"/>
+          <Patch Number="057" Name="Deep Stereo Chorus w/Regen" ProgramChange="57"/>
+          <Patch Number="058" Name="Lennon Piano Delay" ProgramChange="58"/>
+          <Patch Number="059" Name="Stereo Flange w/Regen" ProgramChange="59"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="BANK 4 EFFECTS">
+        <PatchNameList>
+          <Patch Number="060" Name="Deep Stereo Flange w/Regen" ProgramChange="60"/>
+          <Patch Number="061" Name="Chorused Reverb" ProgramChange="61"/>
+          <Patch Number="062" Name="Rev Reverb Flange" ProgramChange="62"/>
+          <Patch Number="063" Name="Reverb Flange" ProgramChange="63"/>
+          <Patch Number="064" Name="Chorus Plate" ProgramChange="64"/>
+          <Patch Number="065" Name="Flanged Repeats" ProgramChange="65"/>
+          <Patch Number="066" Name="Chorus Dark Reverb" ProgramChange="66"/>
+          <Patch Number="067" Name="Chorus w/Regen" ProgramChange="67"/>
+          <Patch Number="068" Name="Reverb Mono Flange" ProgramChange="68"/>
+          <Patch Number="069" Name="Stereo Chorus w/Reverb" ProgramChange="69"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="BANK 5 MIDI CONTROLLED">
+        <PatchNameList>
+          <Patch Number="070" Name="Modwheel Reverb w/Flange" ProgramChange="70"/>
+          <Patch Number="071" Name="Velocity Reverb w/Chorus" ProgramChange="71"/>
+          <Patch Number="072" Name="Neg Velocity Delay" ProgramChange="72"/>
+          <Patch Number="073" Name="Pos Velocity Delay" ProgramChange="73"/>
+          <Patch Number="074" Name="Aftertouch Chorus Speed w/Reverb" ProgramChange="74"/>
+          <Patch Number="075" Name="Pos Velocity Reverb" ProgramChange="75"/>
+          <Patch Number="076" Name="Neg Velocity Reverb" ProgramChange="76"/>
+          <Patch Number="077" Name="Sus Pedal Reverb w/Stereo Chorus" ProgramChange="77"/>
+          <Patch Number="078" Name="Sus Pedal Delay Level w/St. Chorus" ProgramChange="78"/>
+          <Patch Number="079" Name="Sus Pedal Delay Regen w/St. Chorus" ProgramChange="79"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="BANK 6 SPECIAL EFX">
+        <PatchNameList>
+          <Patch Number="080" Name="Flanged Echo" ProgramChange="80"/>
+          <Patch Number="081" Name="R&amp;B Room" ProgramChange="81"/>
+          <Patch Number="082" Name="Rock &amp; Roll" ProgramChange="82"/>
+          <Patch Number="083" Name="Fanfare" ProgramChange="83"/>
+          <Patch Number="084" Name="Rocky" ProgramChange="84"/>
+          <Patch Number="085" Name="Flange Rev Echoes" ProgramChange="85"/>
+          <Patch Number="086" Name="Flange Rev" ProgramChange="86"/>
+          <Patch Number="087" Name="Chorused Hall" ProgramChange="87"/>
+          <Patch Number="088" Name="Chorused Room" ProgramChange="88"/>
+          <Patch Number="089" Name="Chorused Delay Regen" ProgramChange="89"/>
+          <Patch Number="090" Name="Metallic FlangeVerb" ProgramChange="90"/>
+          <Patch Number="091" Name="Quick Return" ProgramChange="91"/>
+          <Patch Number="092" Name="Darker Tail" ProgramChange="92"/>
+          <Patch Number="093" Name="Short Chorused 'Verb" ProgramChange="93"/>
+          <Patch Number="094" Name="Lots O' Chorused Repeats" ProgramChange="94"/>
+          <Patch Number="095" Name="Slap 'Verb" ProgramChange="95"/>
+          <Patch Number="096" Name="Dark Chorus Echoes" ProgramChange="96"/>
+          <Patch Number="097" Name="Nice Chorused 'Verb" ProgramChange="97"/>
+          <Patch Number="098" Name="Short Chamber Chorus" ProgramChange="98"/>
+          <Patch Number="099" Name="Bright Chorus 'Verb" ProgramChange="99"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

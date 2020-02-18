@@ -1050,6 +1050,7 @@ struct CFunc
   static int array_index (lua_State* L) {
     T** parray = (T**) luaL_checkudata (L, 1, typeid(T).name());
     int const index = luabridge::Stack<int>::get (L, 2);
+    assert (index > 0);
     luabridge::Stack<T>::push (L, (*parray)[index-1]);
     return 1;
   }
@@ -1060,6 +1061,7 @@ struct CFunc
     T** parray = (T**) luaL_checkudata (L, 1, typeid(T).name());
     int const index = luabridge::Stack<int>::get (L, 2);
     T const value = luabridge::Stack<T>::get (L, 3);
+    assert (index > 0);
     (*parray)[index-1] = value;
     return 0;
   }
@@ -1148,6 +1150,17 @@ struct CFunc
     if (!t) { return luaL_error (L, "cannot derefencee shared_ptr"); }
     return tableToListHelper<T, C> (L, t->get());
   }
+  //--------------------------------------------------------------------------
+
+
+  template <class T, class C>
+  static int vectorToArray (lua_State *L)
+  {
+    C * const t = Userdata::get<C> (L, 1, false);
+    T * a = &((*t)[0]);
+    Stack <T*>::push (L, a);
+    return 1;
+  }
 
   //--------------------------------------------------------------------------
   template <class T, class C>
@@ -1231,6 +1244,20 @@ struct CFunc
     boost::shared_ptr<C> const* const t = Userdata::get <boost::shared_ptr<C> > (L, 1, true);
     if (!t) { return luaL_error (L, "cannot derefencee shared_ptr"); }
     return listToTableHelper<T, C> (L, t->get());
+  }
+
+  //--------------------------------------------------------------------------
+  // push back a C-pointer to a std::list<T*>
+
+  template <class T, class C>
+  static int pushbackptr (lua_State *L)
+  {
+    C * const c = Userdata::get <C> (L, 1, false);
+    if (!c) { return luaL_error (L, "invalid pointer to std::list<>"); }
+    T * const v = Userdata::get <T> (L, 2, true);
+    if (!v) { return luaL_error (L, "invalid pointer to std::list<>::value_type"); }
+    c->push_back (v);
+    return 0;
   }
 
   //--------------------------------------------------------------------------

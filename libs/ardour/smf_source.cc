@@ -1,22 +1,27 @@
 /*
-    Copyright (C) 2006 Paul Davis
-    Author: David Robillard
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2016 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2008-2009 Hans Baier <hansfbaier@googlemail.com>
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2012-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2014-2015 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2016 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2016 Nick Mainsbridge <mainsbridge@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <vector>
 
@@ -29,13 +34,14 @@
 #include "pbd/file_utils.h"
 #include "pbd/stl_delete.h"
 #include "pbd/strsplit.h"
+#include "pbd/timing.h"
 
 #include "pbd/gstdio_compat.h"
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 
-#include "evoral/Control.hpp"
-#include "evoral/SMF.hpp"
+#include "evoral/Control.h"
+#include "evoral/SMF.h"
 
 #include "ardour/debug.h"
 #include "ardour/midi_channel_filter.h"
@@ -150,23 +156,24 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 		}
 
 	} catch (MissingSource& err) {
-
-		if (_flags & Source::Empty) {
-			/* we don't care that the file was not found, because
-			   it was empty. But FileSource::init() will have
-			   failed to set our _path correctly, so we have to do
-			   this ourselves. Use the first entry in the search
-			   path for MIDI files, which is assumed to be the
-			   correct "main" location.
-			*/
-			std::vector<string> sdirs = s.source_search_path (DataType::MIDI);
-			_path = Glib::build_filename (sdirs.front(), _path);
-			/* This might be important, too */
-			_file_is_new = true;
-		} else {
-			/* pass it on */
-			throw;
+		if (0 == (_flags & Source::Empty)) {
+			/* Don't throw, create the source.
+			 * Since MIDI is writable, we cannot use a SilentFileSource.
+			 */
+			_flags = Source::Flag (_flags | Source::Empty | Source::Missing);
 		}
+
+		/* we don't care that the file was not found, because
+			 it was empty. But FileSource::init() will have
+			 failed to set our _path correctly, so we have to do
+			 this ourselves. Use the first entry in the search
+			 path for MIDI files, which is assumed to be the
+			 correct "main" location.
+		*/
+		std::vector<string> sdirs = s.source_search_path (DataType::MIDI);
+		_path = Glib::build_filename (sdirs.front(), _path);
+		/* This might be important, too */
+		_file_is_new = true;
 	}
 
 	if (!(_flags & Source::Empty)) {
@@ -207,6 +214,8 @@ SMFSource::close ()
 {
 	/* nothing to do: file descriptor is never kept open */
 }
+
+extern PBD::Timing minsert;
 
 /** All stamps in audio samples */
 samplecnt_t
@@ -443,6 +452,7 @@ SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&   lock,
 	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
 	_last_ev_time_beats = time;
 	_flags = Source::Flag (_flags & ~Empty);
+	_flags = Source::Flag (_flags & ~Missing);
 }
 
 /** Append an event with a timestamp in samples (samplepos_t) */
@@ -493,6 +503,7 @@ SMFSource::append_event_samples (const Glib::Threads::Mutex::Lock& lock,
 	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
 	_last_ev_time_samples = ev.time();
 	_flags = Source::Flag (_flags & ~Empty);
+	_flags = Source::Flag (_flags & ~Missing);
 }
 
 XMLNode&
@@ -622,7 +633,8 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 	}
 
 	if (!_model) {
-		_model = boost::shared_ptr<MidiModel> (new MidiModel (shared_from_this ()));
+		boost::shared_ptr<SMFSource> smf = boost::dynamic_pointer_cast<SMFSource> ( shared_from_this () );
+		_model = boost::shared_ptr<MidiModel> (new MidiModel (smf));
 	} else {
 		_model->clear();
 	}

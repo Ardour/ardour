@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>at0m</Author>
+  <!-- The author's device is set to channel 14.
+     Customize accordingly in ChannelNameSetAssign below.
+-->
+  <MasterDeviceNames>
+    <Manufacturer>Alesis</Manufacturer>
+    <Model>MicroVerb4</Model>
+    <CustomDeviceMode Name="Alesis MicroVerb4">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="14" NameSet="Presets MV4"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Presets">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="false"/>
+        <AvailableChannel Channel="2" Available="false"/>
+        <AvailableChannel Channel="3" Available="false"/>
+        <AvailableChannel Channel="4" Available="false"/>
+        <AvailableChannel Channel="5" Available="false"/>
+        <AvailableChannel Channel="6" Available="false"/>
+        <AvailableChannel Channel="7" Available="false"/>
+        <AvailableChannel Channel="8" Available="false"/>
+        <AvailableChannel Channel="9" Available="false"/>
+        <AvailableChannel Channel="10" Available="false"/>
+        <AvailableChannel Channel="11" Available="false"/>
+        <AvailableChannel Channel="12" Available="false"/>
+        <AvailableChannel Channel="13" Available="false"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="false"/>
+        <AvailableChannel Channel="16" Available="false"/>
+      </AvailableForChannels>
+      <UsesControlNameList Name="ControlsMV4"/>
+      <PatchBank Name="Factory">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Factory"/>
+      </PatchBank>
+      <PatchBank Name="User">
+        <MIDICommands>
+          <ControlChange Control="0" Value="1"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="User"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <PatchNameList Name="Factory">
+      <Patch Number="0" Name="All- purpose concert hall, great for vocals" ProgramChange="0"/>
+      <Patch Number="1" Name="Warm, large hall, try on piano or acoustic guitar" ProgramChange="1"/>
+      <Patch Number="2" Name="Small, bright hall for snares" ProgramChange="2"/>
+      <Patch Number="3" Name="Big, dark, scary castle reverb" ProgramChange="3"/>
+      <Patch Number="4" Name="Live, medium hall" ProgramChange="4"/>
+      <Patch Number="5" Name="Warm hall with 100ms predelay" ProgramChange="5"/>
+      <Patch Number="6" Name="Deep, wide, bright space" ProgramChange="6"/>
+      <Patch Number="7" Name="Parking garage reverb with lots of high damping" ProgramChange="7"/>
+      <Patch Number="8" Name="Small recital hall for acoustic instruments" ProgramChange="8"/>
+      <Patch Number="9" Name="Bright hall with low damping, try on vocals" ProgramChange="9"/>
+      <Patch Number="10" Name="Medium, hardwood studio room" ProgramChange="10"/>
+      <Patch Number="11" Name="Reverb early reflections, for percussion ambience" ProgramChange="11"/>
+      <Patch Number="12" Name="Warm, medium room for instruments" ProgramChange="12"/>
+      <Patch Number="13" Name="Tight room for ambience" ProgramChange="13"/>
+      <Patch Number="14" Name="Gated room for snares and toms" ProgramChange="14"/>
+      <Patch Number="15" Name="Very tiny room" ProgramChange="15"/>
+      <Patch Number="16" Name="Small studio room with high damping" ProgramChange="16"/>
+      <Patch Number="17" Name="Tighter gated room reverb" ProgramChange="17"/>
+      <Patch Number="18" Name="Nonlinear reverb for retro ‘80s percussion" ProgramChange="18"/>
+      <Patch Number="19" Name="Reverse reverb for effects" ProgramChange="19"/>
+      <Patch Number="20" Name="Studio goldfoil plate reverb" ProgramChange="20"/>
+      <Patch Number="21" Name="Smooth snare drum plate" ProgramChange="21"/>
+      <Patch Number="22" Name="Thin, transparent plate" ProgramChange="22"/>
+      <Patch Number="23" Name="Bright, dense vocal plate" ProgramChange="23"/>
+      <Patch Number="24" Name="Large, warm instrument plate" ProgramChange="24"/>
+      <Patch Number="25" Name="Very small plate reverb, tasty on snares" ProgramChange="25"/>
+      <Patch Number="26" Name="Long, smooth vocal plate" ProgramChange="26"/>
+      <Patch Number="27" Name="Wide, diffuse piano ambience" ProgramChange="27"/>
+      <Patch Number="28" Name="Skinny, vintage plate reverb" ProgramChange="28"/>
+      <Patch Number="29" Name="Simulation of plate reverb with lots of damping" ProgramChange="29"/>
+      <Patch Number="30" Name="Wide, true stereo chorus" ProgramChange="30"/>
+      <Patch Number="31" Name="Fast, shallow stereo chorus" ProgramChange="31"/>
+      <Patch Number="32" Name="True stereo chorus with less predelay" ProgramChange="32"/>
+      <Patch Number="33" Name="Deep stereo chorus with feedback" ProgramChange="33"/>
+      <Patch Number="34" Name="Wide chorus with delay for pads and volume swells" ProgramChange="34"/>
+      <Patch Number="35" Name="Slow, deep quad chorus" ProgramChange="35"/>
+      <Patch Number="36" Name="Fluid true stereo chorus" ProgramChange="36"/>
+      <Patch Number="37" Name="Classic stereo chorus" ProgramChange="37"/>
+      <Patch Number="38" Name="Subtle quad chorus" ProgramChange="38"/>
+      <Patch Number="39" Name="True stereo flanger with doubling delay" ProgramChange="39"/>
+      <Patch Number="40" Name="Slow, sweeping flange with heavy feedback" ProgramChange="40"/>
+      <Patch Number="41" Name="Faster, bubbly stereo flange" ProgramChange="41"/>
+      <Patch Number="42" Name="Slow triggered stereo flange" ProgramChange="42"/>
+      <Patch Number="43" Name="Wide true stereo flange with positive feedback" ProgramChange="43"/>
+      <Patch Number="44" Name="Faster, shallow stereo flange" ProgramChange="44"/>
+      <Patch Number="45" Name="True stereo flange with + and - feedback" ProgramChange="45"/>
+      <Patch Number="46" Name="Slow flange for grungy bass" ProgramChange="46"/>
+      <Patch Number="47" Name="Slow auto pan (set Mix 100% wet)" ProgramChange="47"/>
+      <Patch Number="48" Name="Medium tremolo (set Mix 100% wet)" ProgramChange="48"/>
+      <Patch Number="49" Name="Faster tremolo for electric pianos (set Mix 100% wet)" ProgramChange="49"/>
+      <Patch Number="50" Name="True stereo offset delay" ProgramChange="50"/>
+      <Patch Number="51" Name="Ping pong delay with band pass filter" ProgramChange="51"/>
+      <Patch Number="52" Name="Rhythmic multitap delay" ProgramChange="52"/>
+      <Patch Number="53" Name="True stereo 1/4 note and 1/8 note delay" ProgramChange="53"/>
+      <Patch Number="54" Name="Long mono delay" ProgramChange="54"/>
+      <Patch Number="55" Name="Stereo delay with 3 against 2 rhythm" ProgramChange="55"/>
+      <Patch Number="56" Name="255ms Mono delay" ProgramChange="56"/>
+      <Patch Number="57" Name="Stereo bouncing multitap delay" ProgramChange="57"/>
+      <Patch Number="58" Name="255ms Ping pong delay, try with tap tempo" ProgramChange="58"/>
+      <Patch Number="59" Name="Tape echo, repeats get darker as they decay" ProgramChange="59"/>
+      <Patch Number="60" Name="Classic stereo detuner" ProgramChange="60"/>
+      <Patch Number="61" Name="500ms detuned delay program" ProgramChange="61"/>
+      <Patch Number="62" Name="5th and 9th harmony for leads" ProgramChange="62"/>
+      <Patch Number="63" Name="Thicker stereo detune program" ProgramChange="63"/>
+      <Patch Number="64" Name="Faster detuned delay, great on guitar" ProgramChange="64"/>
+      <Patch Number="65" Name="Upward staircasing pitch effect" ProgramChange="65"/>
+      <Patch Number="66" Name="Mono pitch shifter with Semi and Fine controls" ProgramChange="66"/>
+      <Patch Number="67" Name="Stereo detune with feedback" ProgramChange="67"/>
+      <Patch Number="68" Name="Octave pitch shift" ProgramChange="68"/>
+      <Patch Number="69" Name="Detune/delay program for synth pads" ProgramChange="69"/>
+      <Patch Number="70" Name="Fast rock lezlie program (set Mix 100% wet)" ProgramChange="70"/>
+      <Patch Number="71" Name="Slow, warm lezlie for ballads (set Mix 100% wet)" ProgramChange="71"/>
+      <Patch Number="72" Name="Thick stereo chorus into a hall" ProgramChange="72"/>
+      <Patch Number="73" Name="Large room with flange and delay" ProgramChange="73"/>
+      <Patch Number="74" Name="Flanged room, great for drums and guitars" ProgramChange="74"/>
+      <Patch Number="75" Name="Room into a triggered flange, try on percussion" ProgramChange="75"/>
+      <Patch Number="76" Name="Deep stereo chorus into a room" ProgramChange="76"/>
+      <Patch Number="77" Name="Stereo flange into a small room" ProgramChange="77"/>
+      <Patch Number="78" Name="Thick chorus into a bright room" ProgramChange="78"/>
+      <Patch Number="79" Name="Delay into a room, great for lead vocals" ProgramChange="79"/>
+      <Patch Number="80" Name="Slow chorus into a delay and room reverb" ProgramChange="80"/>
+      <Patch Number="81" Name="Like above, but with a shallower chorus" ProgramChange="81"/>
+      <Patch Number="82" Name="Fluid flange/delay/room program for guitar" ProgramChange="82"/>
+      <Patch Number="83" Name="Like above, but with more room and less flange" ProgramChange="83"/>
+      <Patch Number="84" Name="Chorus and delay into a bright room, for rhythm guitar" ProgramChange="84"/>
+      <Patch Number="85" Name="225ms delay into a room" ProgramChange="85"/>
+      <Patch Number="86" Name="Long delay into a room, perfect for leads" ProgramChange="86"/>
+      <Patch Number="87" Name="350ms delay into room, good for mid tempo vocals" ProgramChange="87"/>
+      <Patch Number="88" Name="Chorus/long delay/hall multieffect" ProgramChange="88"/>
+      <Patch Number="89" Name="Room into flange with heavy feedback" ProgramChange="89"/>
+      <Patch Number="90" Name="Hardwood room and a wide, true stereo chorus" ProgramChange="90"/>
+      <Patch Number="91" Name="Bright room and a slow, sweeping flange" ProgramChange="91"/>
+      <Patch Number="92" Name="Large room and a stereo chorus" ProgramChange="92"/>
+      <Patch Number="93" Name="Like above, with a warmer room. Great for ballads" ProgramChange="93"/>
+      <Patch Number="94" Name="Dark room and a deep flange for rock mixes" ProgramChange="94"/>
+      <Patch Number="95" Name="Tight room and a 150ms slapback delay" ProgramChange="95"/>
+      <Patch Number="96" Name="Large room with a long delay for late night mixes" ProgramChange="96"/>
+      <Patch Number="97" Name="Tight room and a slow stereo chorus" ProgramChange="97"/>
+      <Patch Number="98" Name="Bright hall with a 1/4 note delay 108bpm" ProgramChange="98"/>
+      <Patch Number="99" Name="Large room and a slow flange with feedback" ProgramChange="99"/>
+    </PatchNameList>
+    <PatchNameList Name="User">
+      <Patch Number="100" Name="Large, bright hall, perfect for piano" ProgramChange="0"/>
+      <Patch Number="101" Name="Small, bright hall for drums and brass" ProgramChange="1"/>
+      <Patch Number="102" Name="Large, dense cathedral reverb" ProgramChange="2"/>
+      <Patch Number="103" Name="Dreamy, ambient instrument space" ProgramChange="3"/>
+      <Patch Number="104" Name="Medium hall with high damping, great for strings" ProgramChange="4"/>
+      <Patch Number="105" Name="Breathy small hall for vocals" ProgramChange="5"/>
+      <Patch Number="106" Name="Large hall with bass boost, try on drums" ProgramChange="6"/>
+      <Patch Number="107" Name="Large, bright hall with lots of high damping" ProgramChange="7"/>
+      <Patch Number="108" Name="Medium hall, great for snares and rimshots" ProgramChange="8"/>
+      <Patch Number="109" Name="Large, warm hall for acoustic guitars and pianos" ProgramChange="9"/>
+      <Patch Number="110" Name="Splashy stone room" ProgramChange="10"/>
+      <Patch Number="111" Name="Medium studio room with high damping, try on guitar" ProgramChange="11"/>
+      <Patch Number="112" Name="Large, dark room for vocals and winds" ProgramChange="12"/>
+      <Patch Number="113" Name="Tight percussion room with lots of early reflections" ProgramChange="13"/>
+      <Patch Number="114" Name="Large, deep room for almost anything" ProgramChange="14"/>
+      <Patch Number="115" Name="60% of the signal is gated for a unique snare reverb" ProgramChange="15"/>
+      <Patch Number="116" Name="Dense stone room with wide early reflections" ProgramChange="16"/>
+      <Patch Number="117" Name="Small room for background vocals" ProgramChange="17"/>
+      <Patch Number="118" Name="Long gated reverb, interesting on pianos" ProgramChange="18"/>
+      <Patch Number="119" Name="Wide early reflections for ambience" ProgramChange="19"/>
+      <Patch Number="120" Name="Bright instrument plate" ProgramChange="20"/>
+      <Patch Number="121" Name="Thin, transparent vocal plate" ProgramChange="21"/>
+      <Patch Number="122" Name="Subtle tube plate emulation" ProgramChange="22"/>
+      <Patch Number="123" Name="Dark plate, great for adding sustain to acoustic guitar" ProgramChange="23"/>
+      <Patch Number="124" Name="Long plate with 70ms predelay" ProgramChange="24"/>
+      <Patch Number="125" Name="Medium vocal plate with high damping" ProgramChange="25"/>
+      <Patch Number="126" Name="Small, snappy plate for percussion and rhythm guitar" ProgramChange="26"/>
+      <Patch Number="127" Name="Authentic warm plate for guitar, piano" ProgramChange="27"/>
+      <Patch Number="128" Name="Bright instrument plate, slightly chorused" ProgramChange="28"/>
+      <Patch Number="129" Name="Large, ambient plate for ballads, effects" ProgramChange="29"/>
+      <Patch Number="130" Name="Silky, deep quad chorus" ProgramChange="30"/>
+      <Patch Number="131" Name="Fast stereo chorus for active guitar and keyboard parts" ProgramChange="31"/>
+      <Patch Number="132" Name="Big quad chorus with lots of feedback" ProgramChange="32"/>
+      <Patch Number="133" Name="Faster quad chorus for bass" ProgramChange="33"/>
+      <Patch Number="134" Name="Deep wide chorus with feedback" ProgramChange="34"/>
+      <Patch Number="135" Name="Delayed chorus for sounds with a slow attack" ProgramChange="35"/>
+      <Patch Number="136" Name="Shallow quad chorus for rock and country guitar" ProgramChange="36"/>
+      <Patch Number="137" Name="Slow stereo chorus for electric piano" ProgramChange="37"/>
+      <Patch Number="138" Name="Very slow chorus with stereo delay" ProgramChange="38"/>
+      <Patch Number="139" Name="Wide, true stereo chorus with inverse feedback" ProgramChange="39"/>
+      <Patch Number="140" Name="Smooth true stereo flange for vocals, strings" ProgramChange="40"/>
+      <Patch Number="141" Name="Mild, shallow stereo flange" ProgramChange="41"/>
+      <Patch Number="142" Name="Deep sweeping flange for tense rhythm guitar" ProgramChange="42"/>
+      <Patch Number="143" Name="Dry stereo triggered flange" ProgramChange="43"/>
+      <Patch Number="144" Name="Panning stereo flange, R is double the speed of L side" ProgramChange="44"/>
+      <Patch Number="145" Name="Very deep stereo flanger for extremists" ProgramChange="45"/>
+      <Patch Number="146" Name="Vintage stereo flange pedal, turn it up!" ProgramChange="46"/>
+      <Patch Number="147" Name="Totally useless but fun effect" ProgramChange="47"/>
+      <Patch Number="148" Name="Fast triggered pan (set Mix 100% wet)" ProgramChange="48"/>
+      <Patch Number="149" Name="Medium speed surf guitar tremolo (set Mix 100% wet)" ProgramChange="49"/>
+      <Patch Number="150" Name="Stereo widening delay" ProgramChange="50"/>
+      <Patch Number="151" Name="Stereo multitap for remix percussion effects" ProgramChange="51"/>
+      <Patch Number="152" Name="Jazzy shuffle stereo delay" ProgramChange="52"/>
+      <Patch Number="153" Name="Long ping pong delay for guitar" ProgramChange="53"/>
+      <Patch Number="154" Name="Stereo slapback delay for rock vocals" ProgramChange="54"/>
+      <Patch Number="155" Name="Short mono delay for more surfing guitar players" ProgramChange="55"/>
+      <Patch Number="156" Name="Stereo delay panner (listen 100% wet)" ProgramChange="56"/>
+      <Patch Number="157" Name="Thin phase delay for vocal effects" ProgramChange="57"/>
+      <Patch Number="158" Name="Ambient dance echo effect" ProgramChange="58"/>
+      <Patch Number="159" Name="Wide, 500ms stereo delay" ProgramChange="59"/>
+      <Patch Number="160" Name="Stereo pitch shift with slapback delay" ProgramChange="60"/>
+      <Patch Number="161" Name="Stereo detune with 400ms delay" ProgramChange="61"/>
+      <Patch Number="162" Name="Detuned, repeating echo program" ProgramChange="62"/>
+      <Patch Number="163" Name="”Falling” pitch shifter effect" ProgramChange="63"/>
+      <Patch Number="164" Name="Wide detune/delay program- huge on synth pads" ProgramChange="64"/>
+      <Patch Number="165" Name="Rising whole tone pitch shift effect" ProgramChange="65"/>
+      <Patch Number="166" Name="Pitched harmony: Up a 5th and down a 4th" ProgramChange="66"/>
+      <Patch Number="167" Name="Thick stereo detuner with feedback" ProgramChange="67"/>
+      <Patch Number="168" Name="Rhythmic pitch shift sequence" ProgramChange="68"/>
+      <Patch Number="169" Name="Another falling pitch shifter for vocal effects" ProgramChange="69"/>
+      <Patch Number="170" Name="Fast lezlie for guitar (set Mix 100% wet)" ProgramChange="70"/>
+      <Patch Number="171" Name="Slow lezlie into a hall for ballads (set Mix 100% wet)" ProgramChange="71"/>
+      <Patch Number="172" Name="Authentic lezlie speaker into a small room (100% wet)" ProgramChange="72"/>
+      <Patch Number="173" Name="Stereo chorus into hall program for clean guitars" ProgramChange="73"/>
+      <Patch Number="174" Name="Flange/Delay/Room stack for guitars" ProgramChange="74"/>
+      <Patch Number="175" Name="Large room into a flange, great on bright percussion" ProgramChange="75"/>
+      <Patch Number="176" Name="Deep, resonant flange into a room" ProgramChange="76"/>
+      <Patch Number="177" Name="Pitch shifting room, like the walls are moving..." ProgramChange="77"/>
+      <Patch Number="178" Name="Flange with doubling delay into a small room" ProgramChange="78"/>
+      <Patch Number="179" Name="Slight chorus into a live room, great for piano" ProgramChange="79"/>
+      <Patch Number="180" Name="Fast triggered flange into a room" ProgramChange="80"/>
+      <Patch Number="181" Name="Dreamy reverb for flashbacks in bad movies" ProgramChange="81"/>
+      <Patch Number="182" Name="Chorus/Delay/Room multieffect for uptempo guitar" ProgramChange="82"/>
+      <Patch Number="183" Name="440ms delay with small ambient reverb" ProgramChange="83"/>
+      <Patch Number="184" Name="Huge Chorus multieffect for huge rock guitar" ProgramChange="84"/>
+      <Patch Number="185" Name="Chorus into a room for funky clav or guitar" ProgramChange="85"/>
+      <Patch Number="186" Name="Deep flange into a small hall for grungy guitar" ProgramChange="86"/>
+      <Patch Number="187" Name="Flange into a 244ms delay with warm room reverb" ProgramChange="87"/>
+      <Patch Number="188" Name="Fast delay into a room reverb for vocals, solos" ProgramChange="88"/>
+      <Patch Number="189" Name="Large room into a deep flange- guaranteed to stimulate" ProgramChange="89"/>
+      <Patch Number="190" Name="Warm hall with a stereo chorus" ProgramChange="90"/>
+      <Patch Number="191" Name="Bright hall with a slow flange" ProgramChange="91"/>
+      <Patch Number="192" Name="Small hall and a smooth stereo chorus for ballad mixes" ProgramChange="92"/>
+      <Patch Number="193" Name="Wood room reverb with 250ms delay for vocals" ProgramChange="93"/>
+      <Patch Number="194" Name="Small room with a deep stereo chorus" ProgramChange="94"/>
+      <Patch Number="195" Name="Large hall with a long delay for slower tempos" ProgramChange="95"/>
+      <Patch Number="196" Name="Large room and a slow flange with negative feedback" ProgramChange="96"/>
+      <Patch Number="197" Name="Wooden drum room with medium delay" ProgramChange="97"/>
+      <Patch Number="198" Name="Warm plate with a slow stereo chorus" ProgramChange="98"/>
+      <Patch Number="199" Name="Bright room with a thick stereo flange" ProgramChange="99"/>
+    </PatchNameList>
+    <ControlNameList Name="ControlsMV4">
+      <Control Type="7bit" Number="1" Name="Control A"/>
+      <Control Type="7bit" Number="11" Name="Control B"/>
+    </ControlNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <!--
+        1st Violins Sus KS C0-F#0 Ni DIV B
+     
+        Eastwest Hollywood Strings KEYSWITCH Patch Program Control Support
+        PLAY 6
+        February 9, 2018
+        Version 1.0
+
+            This document supports instrument articulation switching via Program
+            Changes for Keyswitched patches within the PLAY 6 Virtual Instrument.
+
+     -->
+  <Author>
+        Charles J. Green Jr.
+    </Author>
+  <MasterDeviceNames>
+    <Manufacturer>Eastwest Hollywood Strings</Manufacturer>
+    <Model>04 1st Violins Sus KS C0-F#0 Ni DIV B</Model>
+    <CustomDeviceMode Name="PLAY">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="PLAY"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="PLAY">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+      </AvailableForChannels>
+      <UsesControlNameList Name="MIDI CONTROL CODES"/>
+      <PatchBank Name="PLAY">
+        <UsesPatchNameList Name="KEYSWITCHED"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <PatchNameList Name="KEYSWITCHED">
+      <Patch Number="1" Name="Sus Db" ProgramChange="0"/>
+      <Patch Number="2" Name="Sus Ub" ProgramChange="1"/>
+      <Patch Number="3" Name="Detache Db" ProgramChange="2"/>
+      <Patch Number="4" Name="Detache Ub" ProgramChange="3"/>
+      <Patch Number="5" Name="Tremolo" ProgramChange="4"/>
+      <Patch Number="6" Name="Trill HT" ProgramChange="5"/>
+      <Patch Number="7" Name="Trill WT" ProgramChange="6"/>
+    </PatchNameList>
+    <ControlNameList Name="MIDI CONTROL CODES">
+      <Control Type="7bit" Number="1" Name="Mod Wheel"/>
+      <Control Type="7bit" Number="2" Name="RR Reset"/>
+      <Control Type="7bit" Number="5" Name="Time"/>
+      <Control Type="7bit" Number="7" Name="Volume"/>
+      <Control Type="7bit" Number="10" Name="Pan"/>
+      <Control Type="7bit" Number="11" Name="Expression"/>
+      <Control Type="7bit" Number="14" Name="Direction"/>
+      <Control Type="7bit" Number="15" Name="Con Sordino"/>
+      <Control Type="7bit" Number="22" Name="Polyphonic"/>
+      <Control Type="7bit" Number="65" Name="Portamento"/>
+      <Control Type="7bit" Number="68" Name="Legato"/>
+      <Control Type="7bit" Number="69" Name="Repetition"/>
+      <Control Type="7bit" Number="70" Name="Finger Position"/>
+    </ControlNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

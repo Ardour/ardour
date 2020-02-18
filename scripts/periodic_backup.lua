@@ -8,7 +8,7 @@ ardour {
 -- subscribe to signals
 -- http://manual.ardour.org/lua-scripting/class_reference/#LuaSignal.LuaSignal
 function signals ()
-	return LuaSignal.Set():add ({[LuaSignal.LuaTimerDS] = true})
+	return LuaSignal.Set():add ({[LuaSignal.LuaTimerS] = true})
 end
 
 -- create callback function

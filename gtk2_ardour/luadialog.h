@@ -1,19 +1,19 @@
 /*
- * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2017-2018 Robin Gareus <robin@gareus.org>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef _gtk2ardour_luadialog_h_
@@ -21,9 +21,11 @@
 
 #include <cassert>
 #include <gtkmm/table.h>
-#include <gtkmm/messagedialog.h>
+#include <gtkmm/progressbar.h>
 
 #include "LuaBridge/LuaBridge.h"
+
+#include "ardour_message.h"
 
 namespace LuaDialog {
 
@@ -48,7 +50,7 @@ private:
 	static Gtk::ButtonsType to_gtk_bt (ButtonType bt);
 	static Gtk::MessageType to_gtk_mt (MessageType mt);
 
-	Gtk::MessageDialog _message_dialog;
+	ArdourMessageDialog _message_dialog;
 };
 
 class LuaDialogWidget {
@@ -96,6 +98,49 @@ private:
 	typedef std::vector<LuaDialogWidget*> DialogWidgets;
 	DialogWidgets _widgets;
 	std::string _title;
+};
+
+/** Synchronous GUI-thread Progress dialog
+ *
+ * This shows a modal progress dialog with an optional
+ * "Cancel" button. Since it runs in the UI thread
+ * the script needs to regularly call progress(),
+ * as well as close the dialog, as needed.
+ */
+class ProgressWindow : public ArdourDialog
+{
+public:
+	/** Create a new progress window.
+	 * @param title Window title
+	 * @param allow_cancel include a "Cancel" option
+	 */
+	ProgressWindow (std::string const& title, bool allow_cancel);
+
+	/** Report progress and update GUI.
+	 * @param prog progress in range 0..1 show a bar, values outside this range show a pulsing dialog.
+	 * @param text optional text to show on the progress-bar
+	 * @return true if cancel was clicked, false otherwise
+	 */
+	bool progress (float prog, std::string const& text = "");
+
+	bool canceled () const {
+		return _canceled;
+	}
+
+	/** Close and hide the dialog.
+	 *
+	 * This is required to be at the end, since the dialog
+	 * is modal and prevents other UI operations while visible.
+	 */
+	void done ();
+
+private:
+	void cancel_clicked () {
+		_canceled = true;
+	}
+
+	Gtk::ProgressBar _bar;
+	bool             _canceled;
 };
 
 }; // namespace

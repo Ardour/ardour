@@ -3,17 +3,17 @@
   <FadeIn>
     <from>
       <AutomationList automation-id="fadein" id="165" interpolation-style="Linear" state="Off">
-        <events>1 2
-3 4
+        <events>1 0.5
+3 2
 </events>
       </AutomationList>
     </from>
     <to>
       <AutomationList automation-id="fadein" id="163" interpolation-style="Linear" state="Off">
-        <events>1 2
-3 4
-5 6
-7 8
+        <events>1 0.5
+3 2
+5 1.5
+7 1
 </events>
       </AutomationList>
     </to>

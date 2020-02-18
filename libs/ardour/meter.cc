@@ -1,20 +1,24 @@
 /*
-    Copyright (C) 2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the Free
-    Software Foundation; either version 2 of the License, or (at your option)
-    any later version.
-
-    This program is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
-
-    You should have received a copy of the GNU General Public License along
-    with this program; if not, write to the Free Software Foundation, Inc.,
-    675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2006-2016 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015-2016 Len Ovens <len@ovenwerks.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <algorithm>
 #include <cmath>
@@ -84,7 +88,9 @@ PeakMeter::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end
 		return;
 	}
 	const bool do_reset_max = _reset_max;
-	const bool do_reset_dpm = _reset_dpm;
+	// XXX max-peak is set from DPM's peak-buffer, so DPM also needs to be reset in sync:
+	const bool do_reset_dpm = _reset_dpm || do_reset_max;
+
 	_reset_max = false;
 	_reset_dpm = false;
 	_combined_peak = 0;
@@ -401,7 +407,7 @@ PeakMeter::meter_level(uint32_t n, MeterType type) {
 }
 
 void
-PeakMeter::set_type(MeterType t)
+PeakMeter::set_meter_type (MeterType t)
 {
 	if (t == _meter_type) {
 		return;
@@ -434,7 +440,7 @@ PeakMeter::set_type(MeterType t)
 		}
 	}
 
-	TypeChanged(t);
+	MeterTypeChanged (t); /* EMIT SIGNAL */
 }
 
 XMLNode&

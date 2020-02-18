@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>at0m</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Novation</Manufacturer>
+    <Model>BassStationII</Model>
+    <CustomDeviceMode Name="Novation BassStationII">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Patches"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Patches"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Patches">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <UsesControlNameList Name="ControlsBSII"/>
+      <PatchBank Name="Patches">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Patches"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <PatchNameList Name="Patches">
+      <Patch Number="0" Name="Patch 0" ProgramChange="0"/>
+      <Patch Number="1" Name="Patch 1" ProgramChange="1"/>
+      <Patch Number="2" Name="Patch 2" ProgramChange="2"/>
+      <Patch Number="3" Name="Patch 3" ProgramChange="3"/>
+      <Patch Number="4" Name="Patch 4" ProgramChange="4"/>
+      <Patch Number="5" Name="Patch 5" ProgramChange="5"/>
+      <Patch Number="6" Name="Patch 6" ProgramChange="6"/>
+      <Patch Number="7" Name="Patch 7" ProgramChange="7"/>
+      <Patch Number="8" Name="Patch 8" ProgramChange="8"/>
+      <Patch Number="9" Name="Patch 9" ProgramChange="9"/>
+      <Patch Number="10" Name="Patch 10" ProgramChange="10"/>
+      <Patch Number="11" Name="Patch 11" ProgramChange="11"/>
+      <Patch Number="12" Name="Patch 12" ProgramChange="12"/>
+      <Patch Number="13" Name="Patch 13" ProgramChange="13"/>
+      <Patch Number="14" Name="Patch 14" ProgramChange="14"/>
+      <Patch Number="15" Name="Patch 15" ProgramChange="15"/>
+      <Patch Number="16" Name="Patch 16" ProgramChange="16"/>
+      <Patch Number="17" Name="Patch 17" ProgramChange="17"/>
+      <Patch Number="18" Name="Patch 18" ProgramChange="18"/>
+      <Patch Number="19" Name="Patch 19" ProgramChange="19"/>
+      <Patch Number="20" Name="Patch 20" ProgramChange="20"/>
+      <Patch Number="21" Name="Patch 21" ProgramChange="21"/>
+      <Patch Number="22" Name="Patch 22" ProgramChange="22"/>
+      <Patch Number="23" Name="Patch 23" ProgramChange="23"/>
+      <Patch Number="24" Name="Patch 24" ProgramChange="24"/>
+      <Patch Number="25" Name="Patch 25" ProgramChange="25"/>
+      <Patch Number="26" Name="Patch 26" ProgramChange="26"/>
+      <Patch Number="27" Name="Patch 27" ProgramChange="27"/>
+      <Patch Number="28" Name="Patch 28" ProgramChange="28"/>
+      <Patch Number="29" Name="Patch 29" ProgramChange="29"/>
+      <Patch Number="30" Name="Patch 30" ProgramChange="30"/>
+      <Patch Number="31" Name="Patch 31" ProgramChange="31"/>
+      <Patch Number="32" Name="Patch 32" ProgramChange="32"/>
+      <Patch Number="33" Name="Patch 33" ProgramChange="33"/>
+      <Patch Number="34" Name="Patch 34" ProgramChange="34"/>
+      <Patch Number="35" Name="Patch 35" ProgramChange="35"/>
+      <Patch Number="36" Name="Patch 36" ProgramChange="36"/>
+      <Patch Number="37" Name="Patch 37" ProgramChange="37"/>
+      <Patch Number="38" Name="Patch 38" ProgramChange="38"/>
+      <Patch Number="39" Name="Patch 39" ProgramChange="39"/>
+      <Patch Number="40" Name="Patch 40" ProgramChange="40"/>
+      <Patch Number="41" Name="Patch 41" ProgramChange="41"/>
+      <Patch Number="42" Name="Patch 42" ProgramChange="42"/>
+      <Patch Number="43" Name="Patch 43" ProgramChange="43"/>
+      <Patch Number="44" Name="Patch 44" ProgramChange="44"/>
+      <Patch Number="45" Name="Patch 45" ProgramChange="45"/>
+      <Patch Number="46" Name="Patch 46" ProgramChange="46"/>
+      <Patch Number="47" Name="Patch 47" ProgramChange="47"/>
+      <Patch Number="48" Name="Patch 48" ProgramChange="48"/>
+      <Patch Number="49" Name="Patch 49" ProgramChange="49"/>
+      <Patch Number="50" Name="Patch 50" ProgramChange="50"/>
+      <Patch Number="51" Name="Patch 51" ProgramChange="51"/>
+      <Patch Number="52" Name="Patch 52" ProgramChange="52"/>
+      <Patch Number="53" Name="Patch 53" ProgramChange="53"/>
+      <Patch Number="54" Name="Patch 54" ProgramChange="54"/>
+      <Patch Number="55" Name="Patch 55" ProgramChange="55"/>
+      <Patch Number="56" Name="Patch 56" ProgramChange="56"/>
+      <Patch Number="57" Name="Patch 57" ProgramChange="57"/>
+      <Patch Number="58" Name="Patch 58" ProgramChange="58"/>
+      <Patch Number="59" Name="Patch 59" ProgramChange="59"/>
+      <Patch Number="60" Name="Patch 60" ProgramChange="60"/>
+      <Patch Number="61" Name="Patch 61" ProgramChange="61"/>
+      <Patch Number="62" Name="Patch 62" ProgramChange="62"/>
+      <Patch Number="63" Name="Patch 63" ProgramChange="63"/>
+      <Patch Number="64" Name="Patch 64" ProgramChange="64"/>
+      <Patch Number="65" Name="Patch 65" ProgramChange="65"/>
+      <Patch Number="66" Name="Patch 66" ProgramChange="66"/>
+      <Patch Number="67" Name="Patch 67" ProgramChange="67"/>
+      <Patch Number="68" Name="Patch 68" ProgramChange="68"/>
+      <Patch Number="69" Name="Patch 69" ProgramChange="69"/>
+      <Patch Number="70" Name="Patch 70" ProgramChange="70"/>
+      <Patch Number="71" Name="Patch 71" ProgramChange="71"/>
+      <Patch Number="72" Name="Patch 72" ProgramChange="72"/>
+      <Patch Number="73" Name="Patch 73" ProgramChange="73"/>
+      <Patch Number="74" Name="Patch 74" ProgramChange="74"/>
+      <Patch Number="75" Name="Patch 75" ProgramChange="75"/>
+      <Patch Number="76" Name="Patch 76" ProgramChange="76"/>
+      <Patch Number="77" Name="Patch 77" ProgramChange="77"/>
+      <Patch Number="78" Name="Patch 78" ProgramChange="78"/>
+      <Patch Number="79" Name="Patch 79" ProgramChange="79"/>
+      <Patch Number="80" Name="Patch 80" ProgramChange="80"/>
+      <Patch Number="81" Name="Patch 81" ProgramChange="81"/>
+      <Patch Number="82" Name="Patch 82" ProgramChange="82"/>
+      <Patch Number="83" Name="Patch 83" ProgramChange="83"/>
+      <Patch Number="84" Name="Patch 84" ProgramChange="84"/>
+      <Patch Number="85" Name="Patch 85" ProgramChange="85"/>
+      <Patch Number="86" Name="Patch 86" ProgramChange="86"/>
+      <Patch Number="87" Name="Patch 87" ProgramChange="87"/>
+      <Patch Number="88" Name="Patch 88" ProgramChange="88"/>
+      <Patch Number="89" Name="Patch 89" ProgramChange="89"/>
+      <Patch Number="90" Name="Patch 90" ProgramChange="90"/>
+      <Patch Number="91" Name="Patch 91" ProgramChange="91"/>
+      <Patch Number="92" Name="Patch 92" ProgramChange="92"/>
+      <Patch Number="93" Name="Patch 93" ProgramChange="93"/>
+      <Patch Number="94" Name="Patch 94" ProgramChange="94"/>
+      <Patch Number="95" Name="Patch 95" ProgramChange="95"/>
+      <Patch Number="96" Name="Patch 96" ProgramChange="96"/>
+      <Patch Number="97" Name="Patch 97" ProgramChange="97"/>
+      <Patch Number="98" Name="Patch 98" ProgramChange="98"/>
+      <Patch Number="99" Name="Patch 99" ProgramChange="99"/>
+      <Patch Number="100" Name="Patch 100" ProgramChange="100"/>
+      <Patch Number="101" Name="Patch 101" ProgramChange="101"/>
+      <Patch Number="102" Name="Patch 102" ProgramChange="102"/>
+      <Patch Number="103" Name="Patch 103" ProgramChange="103"/>
+      <Patch Number="104" Name="Patch 104" ProgramChange="104"/>
+      <Patch Number="105" Name="Patch 105" ProgramChange="105"/>
+      <Patch Number="106" Name="Patch 106" ProgramChange="106"/>
+      <Patch Number="107" Name="Patch 107" ProgramChange="107"/>
+      <Patch Number="108" Name="Patch 108" ProgramChange="108"/>
+      <Patch Number="109" Name="Patch 109" ProgramChange="109"/>
+      <Patch Number="110" Name="Patch 110" ProgramChange="110"/>
+      <Patch Number="111" Name="Patch 111" ProgramChange="111"/>
+      <Patch Number="112" Name="Patch 112" ProgramChange="112"/>
+      <Patch Number="113" Name="Patch 113" ProgramChange="113"/>
+      <Patch Number="114" Name="Patch 114" ProgramChange="114"/>
+      <Patch Number="115" Name="Patch 115" ProgramChange="115"/>
+      <Patch Number="116" Name="Patch 116" ProgramChange="116"/>
+      <Patch Number="117" Name="Patch 117" ProgramChange="117"/>
+      <Patch Number="118" Name="Patch 118" ProgramChange="118"/>
+      <Patch Number="119" Name="Patch 119" ProgramChange="119"/>
+      <Patch Number="120" Name="Patch 120" ProgramChange="120"/>
+      <Patch Number="121" Name="Patch 121" ProgramChange="121"/>
+      <Patch Number="122" Name="Patch 122" ProgramChange="122"/>
+      <Patch Number="123" Name="Patch 123" ProgramChange="123"/>
+      <Patch Number="124" Name="Patch 124" ProgramChange="124"/>
+      <Patch Number="125" Name="Patch 125" ProgramChange="125"/>
+      <Patch Number="126" Name="Patch 126" ProgramChange="126"/>
+      <Patch Number="127" Name="Patch 127" ProgramChange="127"/>
+      <Patch Number="128" Name="Patch 128" ProgramChange="128"/>
+    </PatchNameList>
+    <ControlNameList Name="ControlsBSII">
+      <!-- MASTER -->
+      <Control Type="7bit" Number="7" Name="Patch Volume"/>
+      <!-- OSCILLATOR -->
+      <!-- osc1 -->
+      <Control Type="7bit" Number="26" Name="osc 1 fine"/>
+      <Control Type="7bit" Number="70" Name="osc 1 range">
+        <Values Min="63" Max="66">
+          <ValueNameList>
+            <Value Number="63" Name="16'"/>
+            <Value Number="64" Name="8'"/>
+            <Value Number="65" Name="4'"/>
+            <Value Number="66" Name="2'"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="27" Name="osc 1 coarse"/>
+      <Control Type="NRPN" Number="72" Name="osc 1 waveform">
+        <Values Min="0" Max="3">
+          <ValueNameList>
+            <Value Number="0" Name="Sine"/>
+            <Value Number="1" Name="Saw"/>
+            <Value Number="2" Name="Tri"/>
+            <Value Number="3" Name="Pulse"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="71" Name="osc 1 mod env depth"/>
+      <Control Type="7bit" Number="28" Name="osc 1 LFO 1 depth"/>
+      <Control Type="7bit" Number="72" Name="osc 1 Mod Env PW mod amount"/>
+      <Control Type="7bit" Number="73" Name="osc 1 LFO 2 PW mod amount"/>
+      <Control Type="7bit" Number="74" Name="osc 1 manual PW amount"/>
+      <!-- osc2 -->
+      <Control Type="7bit" Number="29" Name="osc 2 fine"/>
+      <Control Type="7bit" Number="75" Name="osc 2 range">
+        <Values Min="63" Max="66">
+          <ValueNameList>
+            <Value Number="63" Name="16"/>
+            <Value Number="64" Name="8"/>
+            <Value Number="65" Name="4"/>
+            <Value Number="66" Name="2"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="30" Name="osc 2 coarse"/>
+      <Control Type="NRPN" Number="82" Name="osc 2 waveform">
+        <Values Min="0" Max="3">
+          <ValueNameList>
+            <Value Number="0" Name="Sine"/>
+            <Value Number="1" Name="Saw"/>
+            <Value Number="2" Name="Tri"/>
+            <Value Number="3" Name="Pulse"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="76" Name="osc 2 mod env depth"/>
+      <Control Type="7bit" Number="31" Name="osc 2 LFO 1 depth"/>
+      <Control Type="7bit" Number="77" Name="osc 2 Mod Env PW mod amount"/>
+      <Control Type="7bit" Number="78" Name="osc 2 LFO 2 PW mod amount"/>
+      <Control Type="7bit" Number="79" Name="osc 2 manual PW amount"/>
+      <!-- sub osc -->
+      <Control Type="7bit" Number="81" Name="sub osc oct"/>
+      <Control Type="7bit" Number="80" Name="sub osc wave"/>
+      <!-- MIXER -->
+      <Control Type="7bit" Number="20" Name="osc 1 level"/>
+      <Control Type="7bit" Number="21" Name="osc 2 level"/>
+      <Control Type="7bit" Number="22" Name="sub osc level"/>
+      <Control Type="7bit" Number="23" Name="noise level"/>
+      <Control Type="7bit" Number="24" Name="ringmod level"/>
+      <Control Type="7bit" Number="25" Name="ext signal level"/>
+      <!-- FILTER -->
+      <Control Type="7bit" Number="83" Name="Type">
+        <Values Min="0" Max="1">
+          <ValueNameList>
+            <Value Number="0" Name="Classic"/>
+            <Value Number="1" Name="Acid"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="106" Name="slope">
+        <Values Min="0" Max="1">
+          <ValueNameList>
+            <Value Number="0" Name="12dB"/>
+            <Value Number="1" Name="24dB"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="84" Name="shape: LP, BP, HP">
+        <Values Min="0" Max="2">
+          <ValueNameList>
+            <Value Number="0" Name="LP"/>
+            <Value Number="1" Name="BP"/>
+            <Value Number="2" Name="HP"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="16" Name="frequency"/>
+      <Control Type="7bit" Number="82" Name="resonance"/>
+      <Control Type="7bit" Number="85" Name="mod env depth"/>
+      <Control Type="7bit" Number="17" Name="lfo2 depth"/>
+      <Control Type="7bit" Number="114" Name="overdrive"/>
+      <!-- PORTA -->
+      <Control Type="7bit" Number="5" Name="porta time"/>
+      <!-- LFOs -->
+      <Control Type="7bit" Number="18" Name="LFO 1 speed"/>
+      <Control Type="7bit" Number="86" Name="LFO 1 delay"/>
+      <Control Type="7bit" Number="19" Name="LFO 2 speed"/>
+      <Control Type="7bit" Number="87" Name="LFO 2 delay"/>
+      <Control Type="7bit" Number="88" Name="LFO 1 wave">
+        <Values Min="0" Max="3">
+          <ValueNameList>
+            <Value Number="0" Name="Saw"/>
+            <Value Number="1" Name="Tri"/>
+            <Value Number="2" Name="Square"/>
+            <Value Number="3" Name="S&amp;H"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="89" Name="LFO 2 wave">
+        <Values Min="0" Max="3">
+          <ValueNameList>
+            <Value Number="0" Name="Saw"/>
+            <Value Number="1" Name="Tri"/>
+            <Value Number="2" Name="Square"/>
+            <Value Number="3" Name="S&amp;H"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="NRPN" Number="87" Name="LFO 1 Sync">
+        <Values Min="0" Max="1">
+          <ValueNameList>
+            <Value Number="0" Name="Speed"/>
+            <Value Number="1" Name="Sync"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="NRPN" Number="91" Name="LFO 2 Sync">
+        <Values Min="0" Max="1">
+          <ValueNameList>
+            <Value Number="0" Name="Speed"/>
+            <Value Number="1" Name="Sync"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <!-- Envelope -->
+      <Control Type="7bit" Number="90" Name="Amp Env attack"/>
+      <Control Type="7bit" Number="91" Name="Amp Env decay"/>
+      <Control Type="7bit" Number="92" Name="Amp Env sustain"/>
+      <Control Type="7bit" Number="93" Name="Amp Env release"/>
+      <Control Type="NRPN" Number="73" Name="Amp Env triggering">
+        <Values Min="0" Max="2">
+          <ValueNameList>
+            <Value Number="0" Name="Multi"/>
+            <Value Number="1" Name="Single"/>
+            <Value Number="2" Name="Autoglide"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="102" Name="Mod Env attack"/>
+      <Control Type="7bit" Number="103" Name="Mod Env decay"/>
+      <Control Type="7bit" Number="104" Name="Mod Env sustain"/>
+      <Control Type="7bit" Number="105" Name="Mod Env release"/>
+      <Control Type="NRPN" Number="105" Name="Mod Env triggering">
+        <Values Min="0" Max="2">
+          <ValueNameList>
+            <Value Number="0" Name="Multi"/>
+            <Value Number="1" Name="Single"/>
+            <Value Number="2" Name="Autoglide"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <!-- EFFECTS -->
+      <Control Type="7bit" Number="94" Name="Distortion"/>
+      <Control Type="7bit" Number="115" Name="Osc1 Filter Mod"/>
+      <!-- ARPEGGIATOR -->
+      <Control Type="7bit" Number="108" Name="On Off">
+        <Values Min="0" Max="1">
+          <ValueNameList>
+            <Value Number="0" Name="Arpeg Off"/>
+            <Value Number="1" Name="Arpeg On"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="109" Name="Latch">
+        <Values Min="0" Max="1">
+          <ValueNameList>
+            <Value Number="0" Name="Off"/>
+            <Value Number="1" Name="On"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="119" Name="Rhythm">
+        <Values Min="0" Max="31">
+          <ValueNameList>
+            <Value Number="0" Name="Pattern 1"/>
+            <Value Number="1" Name="Pattern 2"/>
+            <Value Number="2" Name="Pattern 3"/>
+            <Value Number="3" Name="Pattern 4"/>
+            <Value Number="4" Name="Pattern 5"/>
+            <Value Number="5" Name="Pattern 6"/>
+            <Value Number="6" Name="Pattern 7"/>
+            <Value Number="7" Name="Pattern 8"/>
+            <Value Number="8" Name="Pattern 9"/>
+            <Value Number="9" Name="Pattern 10"/>
+            <Value Number="10" Name="Pattern 11"/>
+            <Value Number="11" Name="Pattern 12"/>
+            <Value Number="12" Name="Pattern 13"/>
+            <Value Number="13" Name="Pattern 14"/>
+            <Value Number="14" Name="Pattern 15"/>
+            <Value Number="15" Name="Pattern 16"/>
+            <Value Number="16" Name="Pattern 17"/>
+            <Value Number="17" Name="Pattern 18"/>
+            <Value Number="18" Name="Pattern 19"/>
+            <Value Number="19" Name="Pattern 20"/>
+            <Value Number="20" Name="Pattern 21"/>
+            <Value Number="21" Name="Pattern 22"/>
+            <Value Number="22" Name="Pattern 23"/>
+            <Value Number="23" Name="Pattern 24"/>
+            <Value Number="24" Name="Pattern 25"/>
+            <Value Number="25" Name="Pattern 26"/>
+            <Value Number="26" Name="Pattern 27"/>
+            <Value Number="27" Name="Pattern 28"/>
+            <Value Number="28" Name="Pattern 29"/>
+            <Value Number="29" Name="Pattern 30"/>
+            <Value Number="30" Name="Pattern 31"/>
+            <Value Number="31" Name="Pattern 32"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="118" Name="Note Mode">
+        <Values Min="0" Max="7">
+          <ValueNameList>
+            <Value Number="0" Name="Up"/>
+            <Value Number="1" Name="Down"/>
+            <Value Number="2" Name="UpDown1"/>
+            <Value Number="3" Name="UpDown2"/>
+            <Value Number="4" Name="Played"/>
+            <Value Number="5" Name="Random"/>
+            <Value Number="6" Name="PLAY"/>
+            <Value Number="7" Name="RECORD"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="111" Name="Arp Octaves">
+        <Values Min="1" Max="4">
+          <ValueNameList>
+            <Value Number="1" Name="1oct"/>
+            <Value Number="2" Name="2oct"/>
+            <Value Number="3" Name="3oct"/>
+            <Value Number="4" Name="4oct"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <!-- OTHER -->
+      <Control Type="7bit" Number="0" Name="mod wheel"/>
+      <Control Type="7bit" Number="64" Name="sustain hold"/>
+      <!-- MOD WHEEL -->
+      <Control Type="NRPN" Number="71" Name="MW LFO2 Filter Freq"/>
+      <Control Type="NRPN" Number="70" Name="MW LFO1 Osc Pitch"/>
+      <Control Type="NRPN" Number="78" Name="MW Osc2 Pitch"/>
+      <!-- AFTERTOUCH -->
+      <Control Type="NRPN" Number="74" Name="AT Filter Freq"/>
+      <Control Type="NRPN" Number="75" Name="AT LFO1 to Osc Pitch"/>
+      <Control Type="NRPN" Number="76" Name="AT LFO2 Speed"/>
+      <!-- LFO -->
+      <Control Type="NRPN" Number="89" Name="Key Sync LFO 1">
+        <Values Min="0" Max="1">
+          <ValueNameList>
+            <Value Number="0" Name="Off"/>
+            <Value Number="1" Name="On"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="NRPN" Number="93" Name="Key Sync LFO 2">
+        <Values Min="0" Max="1">
+          <ValueNameList>
+            <Value Number="0" Name="Off"/>
+            <Value Number="1" Name="On"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="NRPN" Number="87" Name="Speed or Sync LFO 1">
+        <Values Min="0" Max="1">
+          <ValueNameList>
+            <Value Number="0" Name="Off"/>
+            <Value Number="1" Name="On"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="NRPN" Number="91" Name="Speed or Sync LFO 2">
+        <Values Min="0" Max="1">
+          <ValueNameList>
+            <Value Number="0" Name="Off"/>
+            <Value Number="1" Name="On"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="NRPN" Number="86" Name="Slew LFO 1"/>
+      <Control Type="NRPN" Number="90" Name="Slew LFO 2"/>
+      <!-- OSCILLATOR -->
+      <Control Type="7bit" Number="107" Name="Bend Amount">
+        <Values Min="1" Max="12"/>
+      </Control>
+      <Control Type="7bit" Number="110" Name="Osc 1-2 Sync">
+        <Values Min="0" Max="1">
+          <ValueNameList>
+            <Value Number="0" Name="Off"/>
+            <Value Number="1" Name="On"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <!-- Velocity -->
+      <Control Type="7bit" Number="112" Name="Velo to Amp Env"/>
+      <Control Type="7bit" Number="113" Name="Velo to Mod Env"/>
+      <!-- VCA -->
+      <Control Type="7bit" Number="95" Name="VCA Limit"/>
+      <!-- Arpeg -->
+      <Control Type="7bit" Number="116" Name="Arpeg Swing"/>
+      <Control Type="NRPN" Number="106" Name="Arpeg Seq Retrig">
+        <Values Min="0" Max="1">
+          <ValueNameList>
+            <Value Number="0" Name="Off"/>
+            <Value Number="1" Name="On"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+    </ControlNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

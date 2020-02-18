@@ -1,21 +1,29 @@
 /*
-  Copyright (C) 2002 Paul Davis
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2006 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2005-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2006-2007 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2006-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2015 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2016 Julien "_FrnchFrgg_" RIVAUD <frnchfrgg@free.fr>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <limits.h>
 
@@ -154,6 +162,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	gain_automation_state_button.set_name ("mixer strip button");
 
 	set_tooltip (gain_automation_state_button, _("Fader automation mode"));
+	set_tooltip (peak_display, _("dBFS - Digital Peak Hold. Click to reset."));
 
 	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
 
@@ -174,21 +183,22 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	meter_point_menu.set_reserve_toggle_size(false);
 
 	meter_point_menu.items().clear ();
-	meter_point_menu.items().push_back (MenuElem(_("Input"),
+	meter_point_menu.items().push_back (MenuElem(meterpt_string(MeterInput),
 	 sigc::bind (sigc::mem_fun (*this,
 	 &GainMeterBase::meter_point_clicked), (MeterPoint) MeterInput)));
-	meter_point_menu.items().push_back (MenuElem(_("Pre Fader"),
+	meter_point_menu.items().push_back (MenuElem(meterpt_string(MeterPreFader),
 	 sigc::bind (sigc::mem_fun (*this,
 	 &GainMeterBase::meter_point_clicked), (MeterPoint) MeterPreFader)));
-	meter_point_menu.items().push_back (MenuElem(_("Post Fader"),
+	meter_point_menu.items().push_back (MenuElem(meterpt_string (MeterPostFader),
 	 sigc::bind (sigc::mem_fun (*this,
 	 &GainMeterBase::meter_point_clicked), (MeterPoint) MeterPostFader)));
-	meter_point_menu.items().push_back (MenuElem(_("Output"),
+	meter_point_menu.items().push_back (MenuElem(meterpt_string (MeterOutput),
 	 sigc::bind (sigc::mem_fun (*this,
 	 &GainMeterBase::meter_point_clicked), (MeterPoint) MeterOutput)));
-	meter_point_menu.items().push_back (MenuElem(_("Custom"),
+	meter_point_menu.items().push_back (MenuElem(meterpt_string (MeterCustom),
 	 sigc::bind (sigc::mem_fun (*this,
 	 &GainMeterBase::meter_point_clicked), (MeterPoint) MeterCustom)));
+
 	meter_point_button.signal_button_press_event().connect (sigc::mem_fun (*this, &GainMeter::meter_press), false);
 
 	gain_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &GainMeterBase::fader_moved));
@@ -255,15 +265,15 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 
 		gain_astate_menu.items().clear ();
 
-		gain_astate_menu.items().push_back (MenuElem (S_("Automation|Manual"),
+		gain_astate_menu.items().push_back (MenuElem (astate_string (ARDOUR::Off),
 							      sigc::bind (sigc::mem_fun (*this, &GainMeterBase::set_gain_astate), (AutoState) ARDOUR::Off)));
-		gain_astate_menu.items().push_back (MenuElem (_("Play"),
+		gain_astate_menu.items().push_back (MenuElem (astate_string (ARDOUR::Play),
 							      sigc::bind (sigc::mem_fun (*this, &GainMeterBase::set_gain_astate), (AutoState) ARDOUR::Play)));
-		gain_astate_menu.items().push_back (MenuElem (_("Write"),
+		gain_astate_menu.items().push_back (MenuElem (astate_string (ARDOUR::Write),
 							      sigc::bind (sigc::mem_fun (*this, &GainMeterBase::set_gain_astate), (AutoState) ARDOUR::Write)));
-		gain_astate_menu.items().push_back (MenuElem (_("Touch"),
+		gain_astate_menu.items().push_back (MenuElem (astate_string (ARDOUR::Touch),
 							      sigc::bind (sigc::mem_fun (*this, &GainMeterBase::set_gain_astate), (AutoState) ARDOUR::Touch)));
-		gain_astate_menu.items().push_back (MenuElem (_("Latch"),
+		gain_astate_menu.items().push_back (MenuElem (astate_string (ARDOUR::Latch),
 							      sigc::bind (sigc::mem_fun (*this, &GainMeterBase::set_gain_astate), (AutoState) ARDOUR::Latch)));
 
 		connections.push_back (gain_automation_state_button.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_automation_state_button_event), false));
@@ -384,12 +394,6 @@ GainMeterBase::setup_meters (int len)
 }
 
 void
-GainMeterBase::set_type (MeterType t)
-{
-	level_meter->set_meter_type(t);
-}
-
-void
 GainMeter::setup_meters (int len)
 {
 	switch (_width) {
@@ -409,12 +413,6 @@ GainMeter::setup_meters (int len)
 			break;
 	}
 	GainMeterBase::setup_meters (len);
-}
-
-void
-GainMeter::set_type (MeterType t)
-{
-	GainMeterBase::set_type (t);
 }
 
 bool
@@ -685,8 +683,9 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 					meter_point_change_target = MeterPointChangeSingle;
 				}
 				Gtkmm2ext::anchored_menu_popup(&meter_point_menu,
-			  	                             &meter_point_button,
-			    	                           "", 1, ev->time);
+				                               &meter_point_button,
+				                               meterpt_string (_route->meter_point()),
+				                               1, ev->time);
 				break;
 			default:
 				break;
@@ -756,7 +755,8 @@ GainMeterBase::gain_automation_state_button_event (GdkEventButton *ev)
 			gain_astate_propagate = Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier | Keyboard::TertiaryModifier));
 			Gtkmm2ext::anchored_menu_popup(&gain_astate_menu,
 			                               &gain_automation_state_button,
-			                               "", 1, ev->time);
+			                               astate_string(_control->alist()->automation_state()),
+			                               1, ev->time);
 			break;
 		default:
 			break;
@@ -781,42 +781,46 @@ GainMeterBase::short_astate_string (AutoState state)
 string
 GainMeterBase::_astate_string (AutoState state, bool shrt)
 {
-	string sstr;
-
 	switch (state) {
-	case ARDOUR::Off:
-		sstr = (shrt ? "M" : S_("Manual|M"));
-		break;
-	case Play:
-		sstr = (shrt ? "P" : S_("Play|P"));
-		break;
-	case Touch:
-		sstr = (shrt ? "T" : S_("Trim|T"));
-		break;
-	case Latch:
-		sstr = (shrt ? "L" : S_("Latch|L"));
-		break;
-	case Write:
-		sstr = (shrt ? "W" : S_("Write|W"));
-		break;
+		case ARDOUR::Off:
+			return shrt ? S_("Manual|M") : S_("Automation|Manual");
+		case Play:
+			return shrt ? S_("Play|P") : _("Play");
+		case Touch:
+			return shrt ? S_("Touch|T") : _("Touch");
+		case Latch:
+			return shrt ? S_("Latch|L") : _("Latch");
+		case Write:
+			return shrt ? S_("Write|W"): _("Write");
 	}
+	assert (0);
+	return "???";
+}
 
-	return sstr;
+string
+GainMeterBase::meterpt_string (MeterPoint mp)
+{
+	switch (mp) {
+		case MeterInput:
+			return _("Input");
+		case MeterPreFader:
+			return _("Pre Fader");
+		case MeterPostFader:
+			return _("Post Fader");
+		case MeterOutput:
+			return _("Output");
+		case MeterCustom:
+			return _("Custom");
+	}
+	assert (0);
+	return "???"; // make gcc and _FrnchFrgg_ happy
 }
 
 void
 GainMeterBase::gain_automation_state_changed ()
 {
 	ENSURE_GUI_THREAD (*this, &GainMeterBase::gain_automation_state_changed);
-
-	switch (_width) {
-	case Wide:
-		gain_automation_state_button.set_text (astate_string(_control->alist()->automation_state()));
-		break;
-	case Narrow:
-		gain_automation_state_button.set_text (short_astate_string(_control->alist()->automation_state()));
-		break;
-	}
+	gain_automation_state_button.set_text (short_astate_string(_control->alist()->automation_state()));
 
 	const bool automation_watch_required = (_control->alist()->automation_state() != ARDOUR::Off);
 
@@ -946,6 +950,8 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	meter_hbox.pack_start (meter_alignment, false, false);
 	meter_hbox.pack_start (meter_ticks2_area, false, false);
 	meter_hbox.pack_start (meter_metric_area, false, false);
+
+	meter_metric_area.set_no_show_all ();
 }
 #undef PX_SCALE
 
@@ -971,8 +977,8 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 		_meter->ConfigurationChanged.connect (
 			model_connections, invalidator (*this), boost::bind (&GainMeter::meter_configuration_changed, this, _1), gui_context()
 			);
-		_meter->TypeChanged.connect (
-			model_connections, invalidator (*this), boost::bind (&GainMeter::meter_type_changed, this, _1), gui_context()
+		_meter->MeterTypeChanged.connect (
+			model_connections, invalidator (*this), boost::bind (&GainMeter::redraw_metrics, this), gui_context()
 			);
 
 		meter_configuration_changed (_meter->input_streams ());
@@ -1131,8 +1137,7 @@ GainMeter::route_active_changed ()
 }
 
 void
-GainMeter::meter_type_changed (MeterType t)
+GainMeter::redraw_metrics ()
 {
-	_route->set_meter_type(t);
-	RedrawMetrics();
+	GainMeterBase::redraw_metrics ();
 }

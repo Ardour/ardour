@@ -1,20 +1,20 @@
 /*
-    Copyright (C) 2015 Robin Gareus <robin@gareus.org>
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __libardour_ltc_file_reader_h__
 #define __libardour_ltc_file_reader_h__
@@ -41,8 +41,8 @@ public:
 	samplepos_t read (uint32_t& hh, uint32_t& mm, uint32_t& ss, uint32_t& ff);
 
 private:
-	LTCDecoder*  _decoder;
-	samplecnt_t  _position;
+	LTCDecoder* _decoder;
+	samplecnt_t _position;
 };
 
 class LIBARDOUR_API LTCFileReader
@@ -76,9 +76,9 @@ private:
 	SNDFILE* _sndfile;
 	SF_INFO  _info;
 
-	LTCReader*   _reader;
-	float*       _interleaved_audio_buffer;
-	samplecnt_t  _samples_read;
+	LTCReader*  _reader;
+	float*      _interleaved_audio_buffer;
+	samplecnt_t _samples_read;
 
 };
 

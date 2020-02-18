@@ -1,20 +1,19 @@
 /*
- * Copyright (C) 2016 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2017 Robin Gareus <robin@gareus.org>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #ifndef _dsp_filter_h_
 #define _dsp_filter_h_
@@ -193,7 +192,7 @@ namespace ARDOUR { namespace DSP {
 			 *
 			 * @param data pointer to control-data array
 			 * @param val target value
-			 * @param array length
+			 * @param n_samples array length
 			 */
 			void ctrl (float *data, const float val, const uint32_t n_samples);
 			/** update filter cut-off frequency
@@ -283,7 +282,7 @@ namespace ARDOUR { namespace DSP {
 
 			/** query
 			 * @param bin the frequency bin 0 .. window_size / 2
-			 * @param norm gain factor (set equal to @bin for 1/f normalization)
+			 * @param norm gain factor (set equal to \p bin for 1/f normalization)
 			 * @return signal power at given bin (in dBFS)
 			 */
 			float power_at_bin (const uint32_t bin, const float norm = 1.f) const;

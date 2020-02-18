@@ -1,22 +1,24 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id$
-*/
+ * Copyright (C) 2006-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2009 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2007-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2014-2015 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifdef WAF_BUILD
 #include "libardour-config.h"
@@ -32,6 +34,7 @@
 #include "ardour/boost_debug.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_playlist_source.h"
+#include "ardour/mp3filesource.h"
 #include "ardour/source.h"
 #include "ardour/source_factory.h"
 #include "ardour/sndfilesource.h"
@@ -39,7 +42,7 @@
 #include "ardour/smf_source.h"
 #include "ardour/session.h"
 
-#ifdef  HAVE_COREAUDIO
+#ifdef HAVE_COREAUDIO
 #include "ardour/coreaudiosource.h"
 #endif
 
@@ -180,7 +183,6 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 
 		} else {
 
-
 			try {
 				Source* src = new SndFileSource (s, node);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
@@ -193,15 +195,11 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 				ret->check_for_analysis_data_on_disk ();
 				SourceCreated (ret);
 				return ret;
-			}
-
-			catch (failed_constructor& err) {
+			} catch (failed_constructor& err) { }
 
 #ifdef HAVE_COREAUDIO
-
-				/* this is allowed to throw */
-
-				Source *src = new CoreAudioSource (s, node);
+			try {
+				Source* src = new CoreAudioSource (s, node);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 				// boost_debug_shared_ptr_mark_interesting (src, "Source");
 #endif
@@ -214,11 +212,12 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 				ret->check_for_analysis_data_on_disk ();
 				SourceCreated (ret);
 				return ret;
-#else
-				throw; // rethrow
+			} catch (...) { }
 #endif
-			}
+			/* this is allowed to throw */
+			throw failed_constructor ();
 		}
+
 	} else if (type == DataType::MIDI) {
 		try {
 			boost::shared_ptr<SMFSource> src (new SMFSource (s, node));
@@ -246,27 +245,23 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 		if (!(flags & Destructive)) {
 
 			try {
-
 				Source* src = new SndFileSource (s, path, chn, flags);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 				// boost_debug_shared_ptr_mark_interesting (src, "Source");
 #endif
 				boost::shared_ptr<Source> ret (src);
-
 				if (setup_peakfile (ret, defer_peaks)) {
 					return boost::shared_ptr<Source>();
 				}
-
 				ret->check_for_analysis_data_on_disk ();
 				if (announce) {
 					SourceCreated (ret);
 				}
 				return ret;
-			}
+			} catch (failed_constructor& err) { }
 
-			catch (failed_constructor& err) {
 #ifdef HAVE_COREAUDIO
-
+			try {
 				Source* src = new CoreAudioSource (s, path, chn, flags);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 				// boost_debug_shared_ptr_mark_interesting (src, "Source");
@@ -280,15 +275,28 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 					SourceCreated (ret);
 				}
 				return ret;
-
-#else
-				throw; // rethrow
+			} catch (...) { }
 #endif
+
+			/* only create mp3s for audition: no announce, no peaks */
+			if (!announce && (!AudioFileSource::get_build_peakfiles () || defer_peaks)) {
+				try {
+					Source* src = new Mp3FileSource (s, path, chn, flags);
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
+					// boost_debug_shared_ptr_mark_interesting (src, "Source");
+#endif
+					boost::shared_ptr<Source> ret (src);
+					return ret;
+
+				} catch (failed_constructor& err) { }
 			}
 
 		} else {
 			// eh?
 		}
+
+		error << string_compose(_("AudioFileSource: cannot open file \"%1\" "), path) << endmsg;
+		throw failed_constructor ();
 
 	} else if (type == DataType::MIDI) {
 

@@ -1,27 +1,27 @@
 /*
-    Copyright (C) 2015 Paul Davis
-    Copyright (C) 2016 Robin Gareus <robin@gareus.org>
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2016-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <gtkmm/stock.h>
 #include <gtkmm/table.h>
 
 #include "ardour/filename_extensions.h"
+
+#include "gtkmm2ext/utils.h"
 
 #include "session_archive_dialog.h"
 
@@ -46,12 +46,12 @@ SessionArchiveDialog::SessionArchiveDialog ()
 	encode_selector.append_text (_("None"));
 	encode_selector.append_text (_("FLAC 16bit"));
 	encode_selector.append_text (_("FLAC 24bit"));
-	encode_selector.set_active_text ("FLAC 16bit"); // TODO remember
+	encode_selector.set_active_text (_("FLAC 16bit")); // TODO remember
 
 	compression_selector.append_text (_("None"));
 	compression_selector.append_text (_("Fast"));
 	compression_selector.append_text (_("Good"));
-	compression_selector.set_active_text ("Good"); // TODO remember
+	compression_selector.set_active_text (_("Good")); // TODO remember
 
 	Gtk::Table* table = manage (new Gtk::Table ());
 	table->set_col_spacings (10);
@@ -106,6 +106,7 @@ SessionArchiveDialog::SessionArchiveDialog ()
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::OK, RESPONSE_OK);
 
+	Gtkmm2ext::add_volume_shortcuts (target_folder_selector);
 	target_folder_selector.set_action (FILE_CHOOSER_ACTION_SELECT_FOLDER);
 	target_folder_selector.set_current_folder (Config->get_default_session_parent_dir ()); // TODO get/set default_archive_dir
 	name_entry.signal_changed().connect (sigc::mem_fun (*this, &SessionArchiveDialog::name_entry_changed));

@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2017-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 #include <iostream>
 #include <cstdlib>
 #include <getopt.h>
@@ -11,7 +29,7 @@ using namespace ARDOUR;
 using namespace SessionUtils;
 
 
-static void usage (int status)
+static void usage ()
 {
 	// help2man compatible format (standard GNU help-text)
 	printf (UTILNAME " - create a new empty session from the commandline.\n\n");
@@ -37,7 +55,7 @@ Examples:\n\
 
 	printf ("Report bugs to <http://tracker.ardour.org/>\n"
 	        "Website: <http://ardour.org/>\n");
-	::exit (status);
+	::exit (EXIT_SUCCESS);
 }
 
 int main (int argc, char* argv[])
@@ -70,15 +88,16 @@ int main (int argc, char* argv[])
 			case 'V':
 				printf ("ardour-utils version %s\n\n", VERSIONSTRING);
 				printf ("Copyright (C) GPL 2017 Robin Gareus <robin@gareus.org>\n");
-				exit (0);
+				exit (EXIT_SUCCESS);
 				break;
 
 			case 'h':
-				usage (0);
+				usage ();
 				break;
 
 			default:
-				usage (EXIT_FAILURE);
+				cerr << "Error: unrecognized option. See --help for usage information.\n";
+				::exit (EXIT_FAILURE);
 				break;
 		}
 	}
@@ -90,11 +109,12 @@ int main (int argc, char* argv[])
 	} else if (optind + 1 == argc) {
 		snapshot_name = Glib::path_get_basename (argv[optind]);
 	} else  {
-		usage (EXIT_FAILURE);
+		cerr << "Error: Missing parameter. See --help for usage information.\n";
+		::exit (EXIT_FAILURE);
 	}
 
 	if (snapshot_name.empty ()) {
-		fprintf(stderr, "Error: Invalid empty session/snapshot name.\n");
+		cerr << "Error: Invalid empty session/snapshot name.\n";
 		::exit (EXIT_FAILURE);
 	}
 

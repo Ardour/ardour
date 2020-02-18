@@ -1,21 +1,23 @@
 /*
-    Copyright (C) 2016 Robin Gareus <robin@gareus.org>
-    Copyright (C) 2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the Free
-    Software Foundation; either version 2 of the License, or (at your option)
-    any later version.
-
-    This program is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
-
-    You should have received a copy of the GNU General Public License along
-    with this program; if not, write to the Free Software Foundation, Inc.,
-    675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2016-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2016-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016 Julien "_FrnchFrgg_" RIVAUD <frnchfrgg@free.fr>
+ * Copyright (C) 2016 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <glib.h>
 #include <glibmm/miscutils.h>
@@ -197,6 +199,9 @@ LuaProc::lua_print (std::string s) {
 bool
 LuaProc::load_script ()
 {
+	if (_script.empty ()) {
+		return true;
+	}
 	assert (!_lua_dsp); // don't allow to re-initialize
 	LuaPluginInfoPtr lpi;
 
@@ -239,6 +244,7 @@ LuaProc::load_script ()
 	}
 	else {
 		assert (0);
+		return true;
 	}
 
 	luabridge::LuaRef lua_dsp_latency = luabridge::getGlobal (L, "dsp_latency");
@@ -252,7 +258,10 @@ LuaProc::load_script ()
 		try {
 			lua_dsp_init (_session.nominal_sample_rate ());
 		} catch (luabridge::LuaException const& e) {
-		} catch (...) { }
+			return true; // error
+		} catch (...) {
+			return true;
+		}
 	}
 
 	_ctrl_params.clear ();
@@ -272,23 +281,25 @@ LuaProc::load_script ()
 
 			for (luabridge::Iterator i (params); !i.isNil (); ++i) {
 				// required fields
-				if (!i.key ().isNumber ())           { return false; }
-				if (!i.value ().isTable ())          { return false; }
-				if (!i.value ()["type"].isString ()) { return false; }
-				if (!i.value ()["name"].isString ()) { return false; }
-				if (!i.value ()["min"].isNumber ())  { return false; }
-				if (!i.value ()["max"].isNumber ())  { return false; }
+				if (!i.key ().isNumber ())           { return true; }
+				if (!i.value ().isTable ())          { return true; }
+				if (!i.value ()["type"].isString ()) { return true; }
+				if (!i.value ()["name"].isString ()) { return true; }
+				if (!i.value ()["min"].isNumber ())  { return true; }
+				if (!i.value ()["max"].isNumber ())  { return true; }
 
 				int pn = i.key ().cast<int> ();
 				std::string type = i.value ()["type"].cast<std::string> ();
 				if (type == "input") {
-					if (!i.value ()["default"].isNumber ()) { return false; }
+					if (!i.value ()["default"].isNumber ()) {
+						return true; // error
+					}
 					_ctrl_params.push_back (std::make_pair (false, pn));
 				}
 				else if (type == "output") {
 					_ctrl_params.push_back (std::make_pair (true, pn));
 				} else {
-					return false;
+					return true; // error
 				}
 				assert (pn == (int) _ctrl_params.size ());
 
@@ -624,13 +635,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 	Plugin::connect_and_run (bufs, start, end, speed, in, out, nframes, offset);
 
 	// This is needed for ARDOUR::Session requests :(
-	if (! SessionEvent::has_per_thread_pool ()) {
-		char name[64];
-		snprintf (name, 64, "Proc-%p", this);
-		pthread_set_name (name);
-		SessionEvent::create_per_thread_pool (name, 64);
-		PBD::notify_event_loops_about_thread_creation (pthread_self(), name, 64);
-	}
+	assert (SessionEvent::has_per_thread_pool ());
 
 	uint32_t const n = parameter_count ();
 	for (uint32_t i = 0; i < n; ++i) {
@@ -646,7 +651,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 	try {
 		if (_lua_does_channelmapping) {
 			// run the DSP function
-			(*_lua_dsp)(&bufs, in, out, nframes, offset);
+			(*_lua_dsp)(&bufs, &in, &out, nframes, offset);
 		} else {
 			// map buffers
 			BufferSet& silent_bufs  = _session.get_silent_buffers (ChanCount (DataType::AUDIO, 1));
@@ -846,11 +851,9 @@ LuaProc::set_script_from_state (const XMLNode& node)
 int
 LuaProc::set_state (const XMLNode& node, int version)
 {
-#ifndef NO_PLUGIN_STATE
 	XMLNodeList nodes;
 	XMLNodeConstIterator iter;
 	XMLNode *child;
-#endif
 
 	if (_script.empty ()) {
 		if (set_script_from_state (node)) {
@@ -858,7 +861,6 @@ LuaProc::set_state (const XMLNode& node, int version)
 		}
 	}
 
-#ifndef NO_PLUGIN_STATE
 	if (node.name() != state_node_name()) {
 		error << _("Bad node sent to LuaProc::set_state") << endmsg;
 		return -1;
@@ -883,7 +885,6 @@ LuaProc::set_state (const XMLNode& node, int version)
 
 		set_parameter (port_id, value);
 	}
-#endif
 
 	return Plugin::set_state (node, version);
 }
@@ -1001,18 +1002,6 @@ LuaProc::describe_parameter (Evoral::Parameter param)
 		return _param_desc[lp].label;
 	}
 	return "??";
-}
-
-void
-LuaProc::print_parameter (uint32_t param, char* buf, uint32_t len) const
-{
-	if (buf && len) {
-		if (param < parameter_count ()) {
-			snprintf (buf, len, "%.3f", get_parameter (param));
-		} else {
-			strcat (buf, "0");
-		}
-	}
 }
 
 boost::shared_ptr<ScalePoints>
@@ -1246,6 +1235,8 @@ LuaPluginInfo::LuaPluginInfo (LuaScriptInfoPtr lsi) {
 	n_outputs.set (DataType::AUDIO, 1);
 	type = Lua;
 
+	// TODO, parse script, get 'dsp_ioconfig', see can_support_io_configuration()
+	_max_outputs = 0;
 }
 
 PluginPtr

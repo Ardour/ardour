@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>E-mu Systems</Manufacturer>
+    <Model>Audity 2000</Model>
+    <Model>B-3</Model>
+    <Model>B-3 Turbo</Model>
+    <Model>HALO</Model>
+    <Model>MK-6</Model>
+    <Model>Mo' Phatt</Model>
+    <Model>Mo' Phatt Turbo</Model>
+    <Model>MP-7</Model>
+    <Model>Orbit V3</Model>
+    <Model>PK-6</Model>
+    <Model>Planet Earth</Model>
+    <Model>Planet Earth Turbo</Model>
+    <Model>Proteus 1000</Model>
+    <Model>Proteus 2000</Model>
+    <Model>Proteus 2500</Model>
+    <Model>Proteus Custom</Model>
+    <Model>Vintage Keys</Model>
+    <Model>Vintage Pro</Model>
+    <Model>XK-6</Model>
+    <Model>XL-1</Model>
+    <Model>XL-1 Turbo</Model>
+    <Model>XL-7</Model>
+    <PatchNameList Name="Orchestral Sessions Vol.2 Bank 0">
+      <Patch Number="000" Name="wnd:SectionWoods" ProgramChange="0"/>
+      <Patch Number="001" Name="wnd:Reed Group1" ProgramChange="1"/>
+      <Patch Number="002" Name="wnd:Reed Group2" ProgramChange="2"/>
+      <Patch Number="003" Name="wnd:Reed Group3" ProgramChange="3"/>
+      <Patch Number="004" Name="wnd:FluteSection" ProgramChange="4"/>
+      <Patch Number="005" Name="wnd:Simple Woods" ProgramChange="5"/>
+      <Patch Number="006" Name="wnd:Soft Winds 2" ProgramChange="6"/>
+      <Patch Number="007" Name="wnd:Woods Room" ProgramChange="7"/>
+      <Patch Number="008" Name="wnd:LoSoft Woods" ProgramChange="8"/>
+      <Patch Number="009" Name="wnd:SctionWoods1" ProgramChange="9"/>
+      <Patch Number="010" Name="wnd:SctionWoods2" ProgramChange="10"/>
+      <Patch Number="011" Name="brs:Sectn Brass3" ProgramChange="11"/>
+      <Patch Number="012" Name="brs:Sectn Brass4" ProgramChange="12"/>
+      <Patch Number="013" Name="brs:Sectn Brass5" ProgramChange="13"/>
+      <Patch Number="014" Name="brs:Big Brass 2" ProgramChange="14"/>
+      <Patch Number="015" Name="brs:OctTrumpets" ProgramChange="15"/>
+      <Patch Number="016" Name="brs:OctBrassSect" ProgramChange="16"/>
+      <Patch Number="017" Name="cmb:Vln/Oboe w" ProgramChange="17"/>
+      <Patch Number="018" Name="cmb:Cel/Bassn w" ProgramChange="18"/>
+      <Patch Number="019" Name="cmb:Bss/CntBsn w" ProgramChange="19"/>
+      <Patch Number="020" Name="cmb:Flt/Clar w" ProgramChange="20"/>
+      <Patch Number="021" Name="wnd:2 AFlutes mf" ProgramChange="21"/>
+      <Patch Number="022" Name="str:SoloQuartet2" ProgramChange="22"/>
+      <Patch Number="023" Name="str:SoloQuartet3" ProgramChange="23"/>
+      <Patch Number="024" Name="str:SoloQuartet4" ProgramChange="24"/>
+      <Patch Number="025" Name="str:Solo Pizz 2" ProgramChange="25"/>
+      <Patch Number="026" Name="str:Solo Pizz 3" ProgramChange="26"/>
+      <Patch Number="027" Name="str:Solo Pizz 4" ProgramChange="27"/>
+      <Patch Number="028" Name="str:Solo Pizz 5" ProgramChange="28"/>
+      <Patch Number="029" Name="vln:SoloVibrato1" ProgramChange="29"/>
+      <Patch Number="030" Name="vln:SoloVibrato2" ProgramChange="30"/>
+      <Patch Number="031" Name="vln:Solo Pizz" ProgramChange="31"/>
+      <Patch Number="032" Name="vln:Solo/Pizz w" ProgramChange="32"/>
+      <Patch Number="033" Name="vla:SoloVibrato1" ProgramChange="33"/>
+      <Patch Number="034" Name="vla:SoloVibrato2" ProgramChange="34"/>
+      <Patch Number="035" Name="vla:SoloVibrato3" ProgramChange="35"/>
+      <Patch Number="036" Name="vla:Sad Viola" ProgramChange="36"/>
+      <Patch Number="037" Name="vla:Solo Pizz" ProgramChange="37"/>
+      <Patch Number="038" Name="vla:Solo/Pizz w" ProgramChange="38"/>
+      <Patch Number="039" Name="cel:Solo Vibrato" ProgramChange="39"/>
+      <Patch Number="040" Name="cel:SoloVibrato2" ProgramChange="40"/>
+      <Patch Number="041" Name="cel:Solo Pizz" ProgramChange="41"/>
+      <Patch Number="042" Name="cel:Solo/Pizz w" ProgramChange="42"/>
+      <Patch Number="043" Name="bas:SoloVibrato1" ProgramChange="43"/>
+      <Patch Number="044" Name="bas:SoloVibrato2" ProgramChange="44"/>
+      <Patch Number="045" Name="bas:Solo Pizz" ProgramChange="45"/>
+      <Patch Number="046" Name="bas:Solo/Pizz w" ProgramChange="46"/>
+      <Patch Number="047" Name="str:BassClloDeep" ProgramChange="47"/>
+      <Patch Number="048" Name="wnd:Piccolo" ProgramChange="48"/>
+      <Patch Number="049" Name="wnd:Piccolo p" ProgramChange="49"/>
+      <Patch Number="050" Name="wnd:Atk Piccolo" ProgramChange="50"/>
+      <Patch Number="051" Name="wnd:Real Piccolo" ProgramChange="51"/>
+      <Patch Number="052" Name="wnd:Piccolo Hall" ProgramChange="52"/>
+      <Patch Number="053" Name="wnd:Flute" ProgramChange="53"/>
+      <Patch Number="054" Name="wnd:Flute p" ProgramChange="54"/>
+      <Patch Number="055" Name="wnd:Room Flute" ProgramChange="55"/>
+      <Patch Number="056" Name="wnd:Chiff Flute" ProgramChange="56"/>
+      <Patch Number="057" Name="wnd:Click Flut" ProgramChange="57"/>
+      <Patch Number="058" Name="wnd:Hall Flute" ProgramChange="58"/>
+      <Patch Number="059" Name="wnd:AltoFlute" ProgramChange="59"/>
+      <Patch Number="060" Name="wnd:AltoFlute p" ProgramChange="60"/>
+      <Patch Number="061" Name="wnd:A.Flt w/Hall" ProgramChange="61"/>
+      <Patch Number="062" Name="wnd:Click A.Flte" ProgramChange="62"/>
+      <Patch Number="063" Name="wnd:AltoFlteHall" ProgramChange="63"/>
+      <Patch Number="064" Name="wnd:Oboe" ProgramChange="64"/>
+      <Patch Number="065" Name="wnd:Oboe p 1" ProgramChange="65"/>
+      <Patch Number="066" Name="wnd:Oboe p 2" ProgramChange="66"/>
+      <Patch Number="067" Name="wnd:Oboe w/Hall" ProgramChange="67"/>
+      <Patch Number="068" Name="wnd:Oboe Hall" ProgramChange="68"/>
+      <Patch Number="069" Name="wnd:English Horn" ProgramChange="69"/>
+      <Patch Number="070" Name="wnd:E.Horn p" ProgramChange="70"/>
+      <Patch Number="071" Name="wnd:Dyna-EHorn" ProgramChange="71"/>
+      <Patch Number="072" Name="wnd:E.Horn w/Hll" ProgramChange="72"/>
+      <Patch Number="073" Name="wnd:E.Horn Hall" ProgramChange="73"/>
+      <Patch Number="074" Name="wnd:Clarinet" ProgramChange="74"/>
+      <Patch Number="075" Name="wnd:Clarinet p" ProgramChange="75"/>
+      <Patch Number="076" Name="wnd:ClarInette" ProgramChange="76"/>
+      <Patch Number="077" Name="wnd:Clar w/Hall" ProgramChange="77"/>
+      <Patch Number="078" Name="wnd:DynaClarinet" ProgramChange="78"/>
+      <Patch Number="079" Name="wnd:ClarinetHall" ProgramChange="79"/>
+      <Patch Number="080" Name="wnd:BassClarinet" ProgramChange="80"/>
+      <Patch Number="081" Name="wnd:B.Clar p" ProgramChange="81"/>
+      <Patch Number="082" Name="wnd:Attack B.Clr" ProgramChange="82"/>
+      <Patch Number="083" Name="wnd:B.Clar w/Hll" ProgramChange="83"/>
+      <Patch Number="084" Name="wnd:B.Clar Hall" ProgramChange="84"/>
+      <Patch Number="085" Name="wnd:Bassoon" ProgramChange="85"/>
+      <Patch Number="086" Name="wnd:Bassoon p" ProgramChange="86"/>
+      <Patch Number="087" Name="wnd:Bassoon Dark" ProgramChange="87"/>
+      <Patch Number="088" Name="wnd:Bassoon Soft" ProgramChange="88"/>
+      <Patch Number="089" Name="wnd:Dyna-Bassoon" ProgramChange="89"/>
+      <Patch Number="090" Name="wnd:Bassoon Hall" ProgramChange="90"/>
+      <Patch Number="091" Name="wnd:ContraBassn" ProgramChange="91"/>
+      <Patch Number="092" Name="wnd:ContraBssn p" ProgramChange="92"/>
+      <Patch Number="093" Name="wnd:CntraBssnDrk" ProgramChange="93"/>
+      <Patch Number="094" Name="wnd:Dyna-CntBssn" ProgramChange="94"/>
+      <Patch Number="095" Name="wnd:CntrBssnHall" ProgramChange="95"/>
+      <Patch Number="096" Name="brs:Soft French" ProgramChange="96"/>
+      <Patch Number="097" Name="brs:MezzFrench" ProgramChange="97"/>
+      <Patch Number="098" Name="brs:PairOfFrench" ProgramChange="98"/>
+      <Patch Number="099" Name="brs:Fatty French" ProgramChange="99"/>
+      <Patch Number="100" Name="brs:Velo French" ProgramChange="100"/>
+      <Patch Number="101" Name="brs:FHorns Hall" ProgramChange="101"/>
+      <Patch Number="102" Name="brs:FHorn p/mf/f" ProgramChange="102"/>
+      <Patch Number="103" Name="brs:Dyna-French" ProgramChange="103"/>
+      <Patch Number="104" Name="brs:Trumpet mf" ProgramChange="104"/>
+      <Patch Number="105" Name="brs:Soft Trumpet" ProgramChange="105"/>
+      <Patch Number="106" Name="brs:Trumpet ff" ProgramChange="106"/>
+      <Patch Number="107" Name="brs:Trumpet 1" ProgramChange="107"/>
+      <Patch Number="108" Name="brs:Trumpet 2" ProgramChange="108"/>
+      <Patch Number="109" Name="brs:Trumpet 3" ProgramChange="109"/>
+      <Patch Number="110" Name="brs:Dyno Trumps" ProgramChange="110"/>
+      <Patch Number="111" Name="brs:Soft TrmBone" ProgramChange="111"/>
+      <Patch Number="112" Name="brs:Trombone mf" ProgramChange="112"/>
+      <Patch Number="113" Name="brs:Bright Tbone" ProgramChange="113"/>
+      <Patch Number="114" Name="brs:Trombone" ProgramChange="114"/>
+      <Patch Number="115" Name="brs:Velo-TrmBone" ProgramChange="115"/>
+      <Patch Number="116" Name="brs:Dyna-Bone" ProgramChange="116"/>
+      <Patch Number="117" Name="brs:Tbone p/m/f" ProgramChange="117"/>
+      <Patch Number="118" Name="brs:Bass Tbone" ProgramChange="118"/>
+      <Patch Number="119" Name="brs:Bass TrmBone" ProgramChange="119"/>
+      <Patch Number="120" Name="brs:Velo BsTbone" ProgramChange="120"/>
+      <Patch Number="121" Name="brs:DynaBsTbone" ProgramChange="121"/>
+      <Patch Number="122" Name="brs:BTbone p/mf" ProgramChange="122"/>
+      <Patch Number="123" Name="brs:Tuba 1" ProgramChange="123"/>
+      <Patch Number="124" Name="brs:Dyna-Tuba" ProgramChange="124"/>
+      <Patch Number="125" Name="brs:Tuba 2" ProgramChange="125"/>
+      <Patch Number="126" Name="brs:Velo Tuba" ProgramChange="126"/>
+      <Patch Number="127" Name="brs:Tuba p/mf/ff" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="Orchestral Sessions Vol.2 Bank 1">
+      <Patch Number="000" Name="wnd:Woodwinds" ProgramChange="0"/>
+      <Patch Number="001" Name="wnd:SoftWinds" ProgramChange="1"/>
+      <Patch Number="002" Name="wnd:HallWindSect" ProgramChange="2"/>
+      <Patch Number="003" Name="wnd:FluteBeauty" ProgramChange="3"/>
+      <Patch Number="004" Name="wnd:WarmWinds" ProgramChange="4"/>
+      <Patch Number="005" Name="wnd:mfWoodSectn" ProgramChange="5"/>
+      <Patch Number="006" Name="wnd:Mega-Woods" ProgramChange="6"/>
+      <Patch Number="007" Name="wnd:DeepWoods" ProgramChange="7"/>
+      <Patch Number="008" Name="wnd:WarmFltsUni" ProgramChange="8"/>
+      <Patch Number="009" Name="wnd:WarmFltsOcts" ProgramChange="9"/>
+      <Patch Number="010" Name="wnd:WrmFlts&amp;Pics" ProgramChange="10"/>
+      <Patch Number="011" Name="wnd:WarmOboes" ProgramChange="11"/>
+      <Patch Number="012" Name="wnd:WarmEHorns" ProgramChange="12"/>
+      <Patch Number="013" Name="wnd:Woodwinds1" ProgramChange="13"/>
+      <Patch Number="014" Name="wnd:Woodwinds2" ProgramChange="14"/>
+      <Patch Number="015" Name="wnd:Woodwinds3" ProgramChange="15"/>
+      <Patch Number="016" Name="wnd:Woodwinds4" ProgramChange="16"/>
+      <Patch Number="017" Name="wnd:Woodwinds5" ProgramChange="17"/>
+      <Patch Number="018" Name="wnd:Woodwinds6" ProgramChange="18"/>
+      <Patch Number="019" Name="wnd:BsClar/CtraB" ProgramChange="19"/>
+      <Patch Number="020" Name="wnd:BassoonHall" ProgramChange="20"/>
+      <Patch Number="021" Name="brs:Brass" ProgramChange="21"/>
+      <Patch Number="022" Name="brs:BigBrass1" ProgramChange="22"/>
+      <Patch Number="023" Name="brs:BigBrass2" ProgramChange="23"/>
+      <Patch Number="024" Name="brs:Trumpet" ProgramChange="24"/>
+      <Patch Number="025" Name="brs:Trumpets" ProgramChange="25"/>
+      <Patch Number="026" Name="brs:Trmptsp/m/f" ProgramChange="26"/>
+      <Patch Number="027" Name="brs:FrenchHorns1" ProgramChange="27"/>
+      <Patch Number="028" Name="brs:FrenchHorns2" ProgramChange="28"/>
+      <Patch Number="029" Name="brs:FHornsp/mf/f" ProgramChange="29"/>
+      <Patch Number="030" Name="brs:WarmBones" ProgramChange="30"/>
+      <Patch Number="031" Name="brs:Tbonesp/m/f" ProgramChange="31"/>
+      <Patch Number="032" Name="brs:BTbonesp/mf" ProgramChange="32"/>
+      <Patch Number="033" Name="brs:DynaBrass" ProgramChange="33"/>
+      <Patch Number="034" Name="brs:SfzBrass" ProgramChange="34"/>
+      <Patch Number="035" Name="brs:SectionBrass" ProgramChange="35"/>
+      <Patch Number="036" Name="prc:Batterie1" ProgramChange="36"/>
+      <Patch Number="037" Name="prc:Batterie2" ProgramChange="37"/>
+      <Patch Number="038" Name="prc:DualBatt's" ProgramChange="38"/>
+      <Patch Number="039" Name="prc:Bss/Snr/Crsh" ProgramChange="39"/>
+      <Patch Number="040" Name="prc:BassDrums" ProgramChange="40"/>
+      <Patch Number="041" Name="prc:VeloBass1" ProgramChange="41"/>
+      <Patch Number="042" Name="prc:VeloBass2" ProgramChange="42"/>
+      <Patch Number="043" Name="prc:VeloBass3" ProgramChange="43"/>
+      <Patch Number="044" Name="prc:AllBassDrum" ProgramChange="44"/>
+      <Patch Number="045" Name="prc:PitchedTimp" ProgramChange="45"/>
+      <Patch Number="046" Name="prc:AllTimpani" ProgramChange="46"/>
+      <Patch Number="047" Name="prc:AllSnares" ProgramChange="47"/>
+      <Patch Number="048" Name="prc:VeloSnare1" ProgramChange="48"/>
+      <Patch Number="049" Name="prc:VeloSnare2" ProgramChange="49"/>
+      <Patch Number="050" Name="prc:VeloSnare3" ProgramChange="50"/>
+      <Patch Number="051" Name="prc:Q'dSnares" ProgramChange="51"/>
+      <Patch Number="052" Name="prc:TheTimps" ProgramChange="52"/>
+      <Patch Number="053" Name="prc:VeloTimp1" ProgramChange="53"/>
+      <Patch Number="054" Name="prc:VeloTimp2" ProgramChange="54"/>
+      <Patch Number="055" Name="prc:VeloTimp3" ProgramChange="55"/>
+      <Patch Number="056" Name="prc:VeloTimp4" ProgramChange="56"/>
+      <Patch Number="057" Name="prc:VeloTimp1/2" ProgramChange="57"/>
+      <Patch Number="058" Name="prc:VeloTimp3/4" ProgramChange="58"/>
+      <Patch Number="059" Name="prc:VelTimpDrums" ProgramChange="59"/>
+      <Patch Number="060" Name="prc:Timps&amp;Snares" ProgramChange="60"/>
+      <Patch Number="061" Name="prc:Timp&amp;Cymbl1" ProgramChange="61"/>
+      <Patch Number="062" Name="prc:Timp&amp;Cymbl2" ProgramChange="62"/>
+      <Patch Number="063" Name="prc:Timp&amp;Cymbl3" ProgramChange="63"/>
+      <Patch Number="064" Name="prc:Timps&amp;Piatti" ProgramChange="64"/>
+      <Patch Number="065" Name="prc:AllPiatti" ProgramChange="65"/>
+      <Patch Number="066" Name="prc:PiattiWide" ProgramChange="66"/>
+      <Patch Number="067" Name="prc:VeloPiatti" ProgramChange="67"/>
+      <Patch Number="068" Name="prc:Toms1&amp;2/3&amp;4w" ProgramChange="68"/>
+      <Patch Number="069" Name="prc:OrchBells1" ProgramChange="69"/>
+      <Patch Number="070" Name="prc:OrchBells2" ProgramChange="70"/>
+      <Patch Number="071" Name="prc:TBellsMono" ProgramChange="71"/>
+      <Patch Number="072" Name="prc:TBellsWide" ProgramChange="72"/>
+      <Patch Number="073" Name="prc:Celesta" ProgramChange="73"/>
+      <Patch Number="074" Name="prc:Celesta&amp;Xylo" ProgramChange="74"/>
+      <Patch Number="075" Name="prc:Marimba" ProgramChange="75"/>
+      <Patch Number="076" Name="prc:Marimba&amp;Xylo" ProgramChange="76"/>
+      <Patch Number="077" Name="prc:Xylophone1" ProgramChange="77"/>
+      <Patch Number="078" Name="prc:Xylophone2" ProgramChange="78"/>
+      <Patch Number="079" Name="prc:Mallets" ProgramChange="79"/>
+      <Patch Number="080" Name="prc:Celebells" ProgramChange="80"/>
+      <Patch Number="081" Name="prc:TheBells" ProgramChange="81"/>
+      <Patch Number="082" Name="prc:BellTree" ProgramChange="82"/>
+      <Patch Number="083" Name="prc:Timberell" ProgramChange="83"/>
+      <Patch Number="084" Name="prc:Childbells" ProgramChange="84"/>
+      <Patch Number="085" Name="prc:Trianglew" ProgramChange="85"/>
+      <Patch Number="086" Name="prc:Bongo1w" ProgramChange="86"/>
+      <Patch Number="087" Name="prc:Bongo2w" ProgramChange="87"/>
+      <Patch Number="088" Name="prc:FngrCym+w" ProgramChange="88"/>
+      <Patch Number="089" Name="prc:Castanetsw" ProgramChange="89"/>
+      <Patch Number="090" Name="prc:Block/Stikw" ProgramChange="90"/>
+      <Patch Number="091" Name="prc:Maracasw" ProgramChange="91"/>
+      <Patch Number="092" Name="prc:Guiro/Clvew" ProgramChange="92"/>
+      <Patch Number="093" Name="prc:Tambourinew" ProgramChange="93"/>
+      <Patch Number="094" Name="prc:Sheet/Anvlw" ProgramChange="94"/>
+      <Patch Number="095" Name="prc:Ratchetwh" ProgramChange="95"/>
+      <Patch Number="096" Name="prc:Gng/Piattiw" ProgramChange="96"/>
+      <Patch Number="097" Name="prc:Clockworx" ProgramChange="97"/>
+      <Patch Number="098" Name="org:PipeOrgan2" ProgramChange="98"/>
+      <Patch Number="099" Name="cmb:Strgs&amp;Flute" ProgramChange="99"/>
+      <Patch Number="100" Name="cmb:SoloBone&amp;Wnd" ProgramChange="100"/>
+      <Patch Number="101" Name="cmb:BSec/Hall" ProgramChange="101"/>
+      <Patch Number="102" Name="cmb:Brass&amp;Woods" ProgramChange="102"/>
+      <Patch Number="103" Name="cmb:SoloBone&amp;Wnd" ProgramChange="103"/>
+      <Patch Number="104" Name="cmb:Brass&amp;Reeds" ProgramChange="104"/>
+      <Patch Number="105" Name="cmb:Winds&amp;Brass" ProgramChange="105"/>
+      <Patch Number="106" Name="cmb:WarmBrssWind" ProgramChange="106"/>
+      <Patch Number="107" Name="cmb:Sloopy" ProgramChange="107"/>
+      <Patch Number="108" Name="cmb:RoundChamber" ProgramChange="108"/>
+      <Patch Number="109" Name="cmb:Viological" ProgramChange="109"/>
+      <Patch Number="110" Name="cmb:MysticalHarp" ProgramChange="110"/>
+      <Patch Number="111" Name="cmb:Warrior" ProgramChange="111"/>
+      <Patch Number="112" Name="cmb:SynBrass&amp;Pad" ProgramChange="112"/>
+      <Patch Number="113" Name="brs:SynthBrass1" ProgramChange="113"/>
+      <Patch Number="114" Name="brs:SynthBrass2" ProgramChange="114"/>
+      <Patch Number="115" Name="brs:SynthBrass3" ProgramChange="115"/>
+      <Patch Number="116" Name="brs:SynthBrass4" ProgramChange="116"/>
+      <Patch Number="117" Name="brs:SynthWind" ProgramChange="117"/>
+      <Patch Number="118" Name="hrp:Harp1" ProgramChange="118"/>
+      <Patch Number="119" Name="hrp:Harp2" ProgramChange="119"/>
+      <Patch Number="120" Name="hrp:Harp3" ProgramChange="120"/>
+      <Patch Number="121" Name="hrp:StereoHarp" ProgramChange="121"/>
+      <Patch Number="122" Name="hrp:MagicHarps" ProgramChange="122"/>
+      <Patch Number="123" Name="hrp:BellHarp" ProgramChange="123"/>
+      <Patch Number="124" Name="sfx:VisionQuest" ProgramChange="124"/>
+      <Patch Number="125" Name="sfx:Darthwaves" ProgramChange="125"/>
+      <Patch Number="126" Name="lnk:PtchdTimp" ProgramChange="126"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

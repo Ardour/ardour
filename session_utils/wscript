@@ -55,10 +55,12 @@ def build_ardour_util(bld, util):
         'PACKAGE="'    + "ARDOURUTILS" + '"',
         ]
     obj.install_path = bld.env['LIBDIR'] + '/utils'
-    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD OGG CURL DL XML'
-    obj.uselib       += ' FFTW3F'
+    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GIOMM GTHREAD OGG CURL DL XML'
     obj.uselib       += ' AUDIOUNITS OSX LO '
-    obj.uselib       += ' TAGLIB '
+    obj.uselib       += ' FFTW3F LO TAGLIB LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
+
+    if bld.is_defined('HAVE_SUIL'):
+        obj.uselib += ' SUIL'
 
     if sys.platform == 'darwin':
         obj.uselib += ' AUDIOUNITS OSX'
@@ -86,7 +88,7 @@ def build(bld):
     utils = bld.path.ant_glob('*.cc', excl=['example.cc', 'common.cc'])
 
     for util in utils:
-        fn = str(util)[:-3]
+        fn = os.path.splitext(os.path.basename(str(util)))[0]
         build_ardour_util(bld, fn)
         if bld.env['build_target'] != 'mingw':
             bld.symlink_as(bld.env['BINDIR'] + '/' + pgmprefix + "-" + fn, bld.env['LIBDIR'] + '/utils/ardour-util.sh')

@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>E-mu Systems</Manufacturer>
+    <Model>Audity 2000</Model>
+    <Model>B-3</Model>
+    <Model>B-3 Turbo</Model>
+    <Model>HALO</Model>
+    <Model>MK-6</Model>
+    <Model>Mo' Phatt</Model>
+    <Model>Mo' Phatt Turbo</Model>
+    <Model>MP-7</Model>
+    <Model>Orbit V3</Model>
+    <Model>PK-6</Model>
+    <Model>Planet Earth</Model>
+    <Model>Planet Earth Turbo</Model>
+    <Model>Proteus 1000</Model>
+    <Model>Proteus 2000</Model>
+    <Model>Proteus 2500</Model>
+    <Model>Proteus Custom</Model>
+    <Model>Vintage Keys</Model>
+    <Model>Vintage Pro</Model>
+    <Model>Virtuoso 2000</Model>
+    <Model>XK-6</Model>
+    <Model>XL-1</Model>
+    <Model>XL-1 Turbo</Model>
+    <Model>XL-7</Model>
+    <PatchNameList Name="Siedlaczek Orchestra Bank 0">
+      <Patch Number="000" Name="cmb:AdvancedOrch" ProgramChange="0"/>
+      <Patch Number="001" Name="cmb:Traditional" ProgramChange="1"/>
+      <Patch Number="002" Name="str:LegatoString" ProgramChange="2"/>
+      <Patch Number="003" Name="cmb:Orch Split" ProgramChange="3"/>
+      <Patch Number="004" Name="prc:Orchestra 1" ProgramChange="4"/>
+      <Patch Number="005" Name="brs:Brass" ProgramChange="5"/>
+      <Patch Number="006" Name="cmb:Full Symph" ProgramChange="6"/>
+      <Patch Number="007" Name="cmb:Symph Minor" ProgramChange="7"/>
+      <Patch Number="008" Name="str:Vib mp-f vSt" ProgramChange="8"/>
+      <Patch Number="009" Name="str:Sus Stereo" ProgramChange="9"/>
+      <Patch Number="010" Name="str:Sor Stereo" ProgramChange="10"/>
+      <Patch Number="011" Name="str:Expressive" ProgramChange="11"/>
+      <Patch Number="012" Name="wnd:Expressive" ProgramChange="12"/>
+      <Patch Number="013" Name="brs:Expressive" ProgramChange="13"/>
+      <Patch Number="014" Name="cmb:BrassOverStr" ProgramChange="14"/>
+      <Patch Number="015" Name="wnd:Warm Octs" ProgramChange="15"/>
+      <Patch Number="016" Name="cmb:Orch Hit" ProgramChange="16"/>
+      <Patch Number="017" Name="str:Staccato 1" ProgramChange="17"/>
+      <Patch Number="018" Name="str:Pizzicato 1" ProgramChange="18"/>
+      <Patch Number="019" Name="cmb:WarmWnd&amp;Str" ProgramChange="19"/>
+      <Patch Number="020" Name="cmb:Brass&amp;Winds1" ProgramChange="20"/>
+      <Patch Number="021" Name="cmb:Velo Orch" ProgramChange="21"/>
+      <Patch Number="022" Name="str:Trem Stereo" ProgramChange="22"/>
+      <Patch Number="023" Name="str:Con Sordino" ProgramChange="23"/>
+      <Patch Number="024" Name="cmb:Legato Orch" ProgramChange="24"/>
+      <Patch Number="025" Name="prc:BassSnareCym" ProgramChange="25"/>
+      <Patch Number="026" Name="prc:Timpani 1" ProgramChange="26"/>
+      <Patch Number="027" Name="prc:Timpani 2" ProgramChange="27"/>
+      <Patch Number="028" Name="syn:HP Sweep Sus" ProgramChange="28"/>
+      <Patch Number="029" Name="syn:Mechawinds" ProgramChange="29"/>
+      <Patch Number="030" Name="sfx:Initiator" ProgramChange="30"/>
+      <Patch Number="031" Name="sfx:Space Choir" ProgramChange="31"/>
+      <Patch Number="032" Name="str:Vibrato f" ProgramChange="32"/>
+      <Patch Number="033" Name="str:Vib f Stereo" ProgramChange="33"/>
+      <Patch Number="034" Name="str:Vibrato mp" ProgramChange="34"/>
+      <Patch Number="035" Name="str:Vib mf Str" ProgramChange="35"/>
+      <Patch Number="036" Name="str:Vibrato mp-f" ProgramChange="36"/>
+      <Patch Number="037" Name="str:Vib mp-f v" ProgramChange="37"/>
+      <Patch Number="038" Name="str:Vib mp-f Oct" ProgramChange="38"/>
+      <Patch Number="039" Name="str:Vib mp 3 Oct" ProgramChange="39"/>
+      <Patch Number="040" Name="str:Vib mp-Sus" ProgramChange="40"/>
+      <Patch Number="041" Name="str:Vb mp-SusOct" ProgramChange="41"/>
+      <Patch Number="042" Name="str:Vib mp-Tr mp" ProgramChange="42"/>
+      <Patch Number="043" Name="str:Vib mp-Tr f" ProgramChange="43"/>
+      <Patch Number="044" Name="str:Vib f-Tr f" ProgramChange="44"/>
+      <Patch Number="045" Name="str:Soft Sustain" ProgramChange="45"/>
+      <Patch Number="046" Name="str:Sus Octave" ProgramChange="46"/>
+      <Patch Number="047" Name="str:Sus-Vib f" ProgramChange="47"/>
+      <Patch Number="048" Name="str:Sus-Vib fOct" ProgramChange="48"/>
+      <Patch Number="049" Name="str:Tremolo ff" ProgramChange="49"/>
+      <Patch Number="050" Name="str:Trem f Str" ProgramChange="50"/>
+      <Patch Number="051" Name="str:Tremolo mp" ProgramChange="51"/>
+      <Patch Number="052" Name="str:Trem mp Str" ProgramChange="52"/>
+      <Patch Number="053" Name="str:Trem mp-fOct" ProgramChange="53"/>
+      <Patch Number="054" Name="str:VibTrem Str" ProgramChange="54"/>
+      <Patch Number="055" Name="str:VbTr mp-fOct" ProgramChange="55"/>
+      <Patch Number="056" Name="str:Legato 1" ProgramChange="56"/>
+      <Patch Number="057" Name="str:Legato 2" ProgramChange="57"/>
+      <Patch Number="058" Name="str:Sor - Vib mp" ProgramChange="58"/>
+      <Patch Number="059" Name="str:Sor-Vb mpOct" ProgramChange="59"/>
+      <Patch Number="060" Name="str:Sor - Vib f" ProgramChange="60"/>
+      <Patch Number="061" Name="str:Sor-Vib fOct" ProgramChange="61"/>
+      <Patch Number="062" Name="str:Sor - Sus" ProgramChange="62"/>
+      <Patch Number="063" Name="str:Sor-Sus Oct" ProgramChange="63"/>
+      <Patch Number="064" Name="str:Staccato 2" ProgramChange="64"/>
+      <Patch Number="065" Name="brs:Sustained ff" ProgramChange="65"/>
+      <Patch Number="066" Name="brs:Sus Str ff" ProgramChange="66"/>
+      <Patch Number="067" Name="brs:Sus Oct ff" ProgramChange="67"/>
+      <Patch Number="068" Name="brs:Sustained mp" ProgramChange="68"/>
+      <Patch Number="069" Name="brs:Sustained mf" ProgramChange="69"/>
+      <Patch Number="070" Name="brs:Sus pp-ff w" ProgramChange="70"/>
+      <Patch Number="071" Name="brs:Shout Brass" ProgramChange="71"/>
+      <Patch Number="072" Name="brs:WhlWah Brass" ProgramChange="72"/>
+      <Patch Number="073" Name="brs:Sfz Brass" ProgramChange="73"/>
+      <Patch Number="074" Name="brs:Staccato f" ProgramChange="74"/>
+      <Patch Number="075" Name="brs:Stac f w" ProgramChange="75"/>
+      <Patch Number="076" Name="brs:Staccato mp" ProgramChange="76"/>
+      <Patch Number="077" Name="brs:Warm Brass" ProgramChange="77"/>
+      <Patch Number="078" Name="brs:Warm Octs" ProgramChange="78"/>
+      <Patch Number="079" Name="brs:Synthy Brass" ProgramChange="79"/>
+      <Patch Number="080" Name="brs:SweepyFourth" ProgramChange="80"/>
+      <Patch Number="081" Name="brs:Brass Min 9" ProgramChange="81"/>
+      <Patch Number="082" Name="brs:Brass Maj6-9" ProgramChange="82"/>
+      <Patch Number="083" Name="wnd:Sustained ff" ProgramChange="83"/>
+      <Patch Number="084" Name="wnd:Sus ff Str" ProgramChange="84"/>
+      <Patch Number="085" Name="wnd:Sus ff Oct" ProgramChange="85"/>
+      <Patch Number="086" Name="wnd:Sustained mp" ProgramChange="86"/>
+      <Patch Number="087" Name="wnd:Sus mp Str" ProgramChange="87"/>
+      <Patch Number="088" Name="wnd:Staccato f" ProgramChange="88"/>
+      <Patch Number="089" Name="wnd:Staccato mp" ProgramChange="89"/>
+      <Patch Number="090" Name="wnd:Super Winds1" ProgramChange="90"/>
+      <Patch Number="091" Name="wnd:Super Winds2" ProgramChange="91"/>
+      <Patch Number="092" Name="wnd:Super Winds3" ProgramChange="92"/>
+      <Patch Number="093" Name="wnd:Warm Winds" ProgramChange="93"/>
+      <Patch Number="094" Name="wnd:Slack Winds" ProgramChange="94"/>
+      <Patch Number="095" Name="wnd:Sweep Winds" ProgramChange="95"/>
+      <Patch Number="096" Name="wnd:Drift Winds" ProgramChange="96"/>
+      <Patch Number="097" Name="wnd:Homers Wind" ProgramChange="97"/>
+      <Patch Number="098" Name="wnd:Winds Minor" ProgramChange="98"/>
+      <Patch Number="099" Name="prc:Orchestra 2" ProgramChange="99"/>
+      <Patch Number="100" Name="prc:Alt Timpani" ProgramChange="100"/>
+      <Patch Number="101" Name="prc:Gran Cassa" ProgramChange="101"/>
+      <Patch Number="102" Name="prc:GranCassa EQ" ProgramChange="102"/>
+      <Patch Number="103" Name="prc:Snare" ProgramChange="103"/>
+      <Patch Number="104" Name="prc:Snare EQ" ProgramChange="104"/>
+      <Patch Number="105" Name="prc:Bass &amp; Tymp" ProgramChange="105"/>
+      <Patch Number="106" Name="prc:BassTympTam" ProgramChange="106"/>
+      <Patch Number="107" Name="prc:Cymbals 1" ProgramChange="107"/>
+      <Patch Number="108" Name="prc:Cymbals 2" ProgramChange="108"/>
+      <Patch Number="109" Name="prc:Tam Tam 1" ProgramChange="109"/>
+      <Patch Number="110" Name="prc:Tam Tam 2" ProgramChange="110"/>
+      <Patch Number="111" Name="prc:TamTam&amp;Cymb" ProgramChange="111"/>
+      <Patch Number="112" Name="prc:TempleBlcks1" ProgramChange="112"/>
+      <Patch Number="113" Name="prc:TempleBlcks2" ProgramChange="113"/>
+      <Patch Number="114" Name="prc:Cowbell p G3" ProgramChange="114"/>
+      <Patch Number="115" Name="prc:Cowbell f G3" ProgramChange="115"/>
+      <Patch Number="116" Name="prc:Cow p-f G3 v" ProgramChange="116"/>
+      <Patch Number="117" Name="prc:Cowbell p C5" ProgramChange="117"/>
+      <Patch Number="118" Name="prc:Cowbell f C5" ProgramChange="118"/>
+      <Patch Number="119" Name="prc:Cow p-f C5 v" ProgramChange="119"/>
+      <Patch Number="120" Name="prc:Clave B5" ProgramChange="120"/>
+      <Patch Number="121" Name="prc:Clave A#5" ProgramChange="121"/>
+      <Patch Number="122" Name="prc:Windchimes 1" ProgramChange="122"/>
+      <Patch Number="123" Name="prc:Windchimes 2" ProgramChange="123"/>
+      <Patch Number="124" Name="prc:Layered Perc" ProgramChange="124"/>
+      <Patch Number="125" Name="lnk:OrchHitLink" ProgramChange="125"/>
+      <Patch Number="126" Name="cmb:AdvancedLnk1" ProgramChange="126"/>
+      <Patch Number="127" Name="cmb:AdvancedLnk2" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="Siedlaczek Orchestra Bank 1">
+      <Patch Number="000" Name="str:Hall Strings" ProgramChange="0"/>
+      <Patch Number="001" Name="str:Dark Legato" ProgramChange="1"/>
+      <Patch Number="002" Name="str:Vib w/Stac v" ProgramChange="2"/>
+      <Patch Number="003" Name="str:Sus w/Stac" ProgramChange="3"/>
+      <Patch Number="004" Name="str:Pizzicato 2" ProgramChange="4"/>
+      <Patch Number="005" Name="str:PizzicatoOct" ProgramChange="5"/>
+      <Patch Number="006" Name="str:Pizz Sustain" ProgramChange="6"/>
+      <Patch Number="007" Name="str:Spic &amp; Pizz" ProgramChange="7"/>
+      <Patch Number="008" Name="str:Vi Col Legno" ProgramChange="8"/>
+      <Patch Number="009" Name="str:Va Col Legno" ProgramChange="9"/>
+      <Patch Number="010" Name="str:ViVaColLegno" ProgramChange="10"/>
+      <Patch Number="011" Name="str:VaCoLeg&amp;Spic" ProgramChange="11"/>
+      <Patch Number="012" Name="str:VaCoLeg&amp;Pizz" ProgramChange="12"/>
+      <Patch Number="013" Name="str:SuperStrngs1" ProgramChange="13"/>
+      <Patch Number="014" Name="str:SuperStrngs2" ProgramChange="14"/>
+      <Patch Number="015" Name="str:SuperStrngs3" ProgramChange="15"/>
+      <Patch Number="016" Name="str:Staccato Oct" ProgramChange="16"/>
+      <Patch Number="017" Name="str:Bright Octs" ProgramChange="17"/>
+      <Patch Number="018" Name="str:Smooth Pad" ProgramChange="18"/>
+      <Patch Number="019" Name="str:Warm Octs 1" ProgramChange="19"/>
+      <Patch Number="020" Name="str:Warm Octs 2" ProgramChange="20"/>
+      <Patch Number="021" Name="str:Warm Octs 3" ProgramChange="21"/>
+      <Patch Number="022" Name="str:String Maj" ProgramChange="22"/>
+      <Patch Number="023" Name="str:String Min 9" ProgramChange="23"/>
+      <Patch Number="024" Name="str:Expressive 2" ProgramChange="24"/>
+      <Patch Number="025" Name="str:Legato Octs" ProgramChange="25"/>
+      <Patch Number="026" Name="str:Slo Sordino" ProgramChange="26"/>
+      <Patch Number="027" Name="str:Alpha 7" ProgramChange="27"/>
+      <Patch Number="028" Name="str:B MovieSweep" ProgramChange="28"/>
+      <Patch Number="029" Name="str:Slak Vibrato" ProgramChange="29"/>
+      <Patch Number="030" Name="str:Trans Trem" ProgramChange="30"/>
+      <Patch Number="031" Name="str:Lilting" ProgramChange="31"/>
+      <Patch Number="032" Name="cmb:Full Symph 2" ProgramChange="32"/>
+      <Patch Number="033" Name="cmb:Full Symph 3" ProgramChange="33"/>
+      <Patch Number="034" Name="cmb:Stac Combo" ProgramChange="34"/>
+      <Patch Number="035" Name="cmb:Solo Symph" ProgramChange="35"/>
+      <Patch Number="036" Name="cmd:Symph 4 Octs" ProgramChange="36"/>
+      <Patch Number="037" Name="cmb:Split Orch 1" ProgramChange="37"/>
+      <Patch Number="038" Name="cmb:Split Orch 2" ProgramChange="38"/>
+      <Patch Number="039" Name="cmb:Split Orch 3" ProgramChange="39"/>
+      <Patch Number="040" Name="cmb:Split Orch 4" ProgramChange="40"/>
+      <Patch Number="041" Name="cmb:Split Orch 5" ProgramChange="41"/>
+      <Patch Number="042" Name="cmb:Split Orch 6" ProgramChange="42"/>
+      <Patch Number="043" Name="cmb:VibratoOrch1" ProgramChange="43"/>
+      <Patch Number="044" Name="cmb:VibratoOrch2" ProgramChange="44"/>
+      <Patch Number="045" Name="cmb:Sordino Orch" ProgramChange="45"/>
+      <Patch Number="046" Name="cmb:Sustain Orch" ProgramChange="46"/>
+      <Patch Number="047" Name="cmb:Phase Orch" ProgramChange="47"/>
+      <Patch Number="048" Name="cmb:String&amp;Brs 1" ProgramChange="48"/>
+      <Patch Number="049" Name="cmb:String&amp;Brs 2" ProgramChange="49"/>
+      <Patch Number="050" Name="cmb:String&amp;Brs 3" ProgramChange="50"/>
+      <Patch Number="051" Name="cmb:String&amp;Brs 4" ProgramChange="51"/>
+      <Patch Number="052" Name="cmb:StrOverBrsWd" ProgramChange="52"/>
+      <Patch Number="053" Name="cmb:WrmBrs&amp;Str1" ProgramChange="53"/>
+      <Patch Number="054" Name="cmb:WrmBrs&amp;Str2" ProgramChange="54"/>
+      <Patch Number="055" Name="cmb:Winds&amp;Strng1" ProgramChange="55"/>
+      <Patch Number="056" Name="cmb:Winds&amp;Strng2" ProgramChange="56"/>
+      <Patch Number="057" Name="cmb:WindsOverStr" ProgramChange="57"/>
+      <Patch Number="058" Name="cmb:Staccati" ProgramChange="58"/>
+      <Patch Number="059" Name="cmb:Theme Pad" ProgramChange="59"/>
+      <Patch Number="060" Name="cmb:Brass&amp;Winds2" ProgramChange="60"/>
+      <Patch Number="061" Name="cmb:High School" ProgramChange="61"/>
+      <Patch Number="062" Name="cmb:AccordnSectn" ProgramChange="62"/>
+      <Patch Number="063" Name="cmb:Brs StrAtk w" ProgramChange="63"/>
+      <Patch Number="064" Name="cmb:Wnd StrAtk w" ProgramChange="64"/>
+      <Patch Number="065" Name="cmb:FanfareBrass" ProgramChange="65"/>
+      <Patch Number="066" Name="cmb:WndLead&amp;Pad" ProgramChange="66"/>
+      <Patch Number="067" Name="cmb:Over Ventura" ProgramChange="67"/>
+      <Patch Number="068" Name="cmb:Enjoy Symph" ProgramChange="68"/>
+      <Patch Number="069" Name="cmb:FrenchString" ProgramChange="69"/>
+      <Patch Number="070" Name="cmb:Brass Mod" ProgramChange="70"/>
+      <Patch Number="071" Name="cmb:Tremers" ProgramChange="71"/>
+      <Patch Number="072" Name="cmb:Ozz" ProgramChange="72"/>
+      <Patch Number="073" Name="cmb:Stacc Echos" ProgramChange="73"/>
+      <Patch Number="074" Name="cmb:Clave Winds" ProgramChange="74"/>
+      <Patch Number="075" Name="cmb:Wind Blocks" ProgramChange="75"/>
+      <Patch Number="076" Name="cmb:Moo Bells" ProgramChange="76"/>
+      <Patch Number="077" Name="cmb:Hidden Fifth" ProgramChange="77"/>
+      <Patch Number="078" Name="cmb:Reflection" ProgramChange="78"/>
+      <Patch Number="079" Name="cmb:Chime String" ProgramChange="79"/>
+      <Patch Number="080" Name="syn:BrsLead&amp;Pad" ProgramChange="80"/>
+      <Patch Number="081" Name="syn:Millennium" ProgramChange="81"/>
+      <Patch Number="082" Name="syn:Digital" ProgramChange="82"/>
+      <Patch Number="083" Name="syn:Density" ProgramChange="83"/>
+      <Patch Number="084" Name="syn:Astrus" ProgramChange="84"/>
+      <Patch Number="085" Name="syn:Sharp Symph" ProgramChange="85"/>
+      <Patch Number="086" Name="syn:Rezor Symph" ProgramChange="86"/>
+      <Patch Number="087" Name="syn:Tambo Spin" ProgramChange="87"/>
+      <Patch Number="088" Name="syn:Tinky Pad" ProgramChange="88"/>
+      <Patch Number="089" Name="syn:Evolute 1" ProgramChange="89"/>
+      <Patch Number="090" Name="syn:Evolute 2" ProgramChange="90"/>
+      <Patch Number="091" Name="syn:Synth Keyz" ProgramChange="91"/>
+      <Patch Number="092" Name="syn:BandPassion" ProgramChange="92"/>
+      <Patch Number="093" Name="syn:Atmos Radio" ProgramChange="93"/>
+      <Patch Number="094" Name="syn:String Me" ProgramChange="94"/>
+      <Patch Number="095" Name="syn:Wind Harms" ProgramChange="95"/>
+      <Patch Number="096" Name="syn:Spiritus" ProgramChange="96"/>
+      <Patch Number="097" Name="syn:Orkadelic" ProgramChange="97"/>
+      <Patch Number="098" Name="syn:Oceanix" ProgramChange="98"/>
+      <Patch Number="099" Name="syn:Voice Symph" ProgramChange="99"/>
+      <Patch Number="100" Name="syn:Mid Phasics" ProgramChange="100"/>
+      <Patch Number="101" Name="syn:Hi Phasics" ProgramChange="101"/>
+      <Patch Number="102" Name="syn:Downmode" ProgramChange="102"/>
+      <Patch Number="103" Name="syn:Synth Orch 1" ProgramChange="103"/>
+      <Patch Number="104" Name="syn:Synth Orch 2" ProgramChange="104"/>
+      <Patch Number="105" Name="syn:Synth Orch 3" ProgramChange="105"/>
+      <Patch Number="106" Name="syn:Synth Orch 4" ProgramChange="106"/>
+      <Patch Number="107" Name="syn:East Temple" ProgramChange="107"/>
+      <Patch Number="108" Name="syn:Boinker" ProgramChange="108"/>
+      <Patch Number="109" Name="syn:Temple Keys" ProgramChange="109"/>
+      <Patch Number="110" Name="syn:FreedomSynth" ProgramChange="110"/>
+      <Patch Number="111" Name="syn:Col Leg No" ProgramChange="111"/>
+      <Patch Number="112" Name="syn:In Depth" ProgramChange="112"/>
+      <Patch Number="113" Name="org:Wind Org 1" ProgramChange="113"/>
+      <Patch Number="114" Name="org:Wind Org 2" ProgramChange="114"/>
+      <Patch Number="115" Name="org:Combo Org 1" ProgramChange="115"/>
+      <Patch Number="116" Name="org:Combo Org 2" ProgramChange="116"/>
+      <Patch Number="117" Name="org:Blue Org" ProgramChange="117"/>
+      <Patch Number="118" Name="sfx:The Core" ProgramChange="118"/>
+      <Patch Number="119" Name="sfx:Scary" ProgramChange="119"/>
+      <Patch Number="120" Name="sfx:Extropia" ProgramChange="120"/>
+      <Patch Number="121" Name="sfx:Possum Perc" ProgramChange="121"/>
+      <Patch Number="122" Name="sfx:InstntSerial" ProgramChange="122"/>
+      <Patch Number="123" Name="sfx:Pulse Orch" ProgramChange="123"/>
+      <Patch Number="124" Name="sfx:Way Alt Ork" ProgramChange="124"/>
+      <Patch Number="125" Name="sfx:Orch Efx 1" ProgramChange="125"/>
+      <Patch Number="126" Name="sfx:Orch Efx 2" ProgramChange="126"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

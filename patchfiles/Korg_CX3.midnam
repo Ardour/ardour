@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Korg</Manufacturer>
+    <Model>CX3</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Program Bank A">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="A-1" Name="Organized" ProgramChange="0"/>
+          <Patch Number="A-2" Name="Comp" ProgramChange="1"/>
+          <Patch Number="A-3" Name="Felix'sDaKat" ProgramChange="2"/>
+          <Patch Number="A-4" Name="BC Gospel 1" ProgramChange="3"/>
+          <Patch Number="A-5" Name="Classic Soul" ProgramChange="4"/>
+          <Patch Number="A-6" Name="Joey's LH" ProgramChange="5"/>
+          <Patch Number="A-7" Name="DS Balls!" ProgramChange="6"/>
+          <Patch Number="A-8" Name="Quiet Hymn 2" ProgramChange="7"/>
+          <Patch Number="B-1" Name="Bro' J" ProgramChange="8"/>
+          <Patch Number="B-2" Name="LS Jazz" ProgramChange="9"/>
+          <Patch Number="B-3" Name="BC LowerComp" ProgramChange="10"/>
+          <Patch Number="B-4" Name="Preachin'" ProgramChange="11"/>
+          <Patch Number="B-5" Name="ShoTown" ProgramChange="12"/>
+          <Patch Number="B-6" Name="LS Fats 'W'" ProgramChange="13"/>
+          <Patch Number="B-7" Name="Turkish" ProgramChange="14"/>
+          <Patch Number="B-8" Name="Dulciana" ProgramChange="15"/>
+          <Patch Number="C-1" Name="Cat On aMojo" ProgramChange="16"/>
+          <Patch Number="C-2" Name="Jazz Comp" ProgramChange="17"/>
+          <Patch Number="C-3" Name="Whyter Shade" ProgramChange="18"/>
+          <Patch Number="C-4" Name="GPGon2Church" ProgramChange="19"/>
+          <Patch Number="C-5" Name="Huggipz" ProgramChange="20"/>
+          <Patch Number="C-6" Name="TC Bass Comp" ProgramChange="21"/>
+          <Patch Number="C-7" Name="SmokeInJapan" ProgramChange="22"/>
+          <Patch Number="C-8" Name="Salcional" ProgramChange="23"/>
+          <Patch Number="D-1" Name="BA PercSplit" ProgramChange="24"/>
+          <Patch Number="D-2" Name="BA Mellow" ProgramChange="25"/>
+          <Patch Number="D-3" Name="Carpet Magic" ProgramChange="26"/>
+          <Patch Number="D-4" Name="Keepin' On" ProgramChange="27"/>
+          <Patch Number="D-5" Name="LS DirtyFunk" ProgramChange="28"/>
+          <Patch Number="D-6" Name="Blueznotes" ProgramChange="29"/>
+          <Patch Number="D-7" Name="AK ChestBand" ProgramChange="30"/>
+          <Patch Number="D-8" Name="DM Hymn Pt2" ProgramChange="31"/>
+          <Patch Number="E-1" Name="GP NicePerc" ProgramChange="32"/>
+          <Patch Number="E-2" Name="Barfly" ProgramChange="33"/>
+          <Patch Number="E-3" Name="Nice Chords" ProgramChange="34"/>
+          <Patch Number="E-4" Name="LSGospelFunk" ProgramChange="35"/>
+          <Patch Number="E-5" Name="BC Schnoz" ProgramChange="36"/>
+          <Patch Number="E-6" Name="Jazzy Ballad" ProgramChange="37"/>
+          <Patch Number="E-7" Name="Mr. Nice : -)" ProgramChange="38"/>
+          <Patch Number="E-8" Name="French Horn" ProgramChange="39"/>
+          <Patch Number="F-1" Name="Go McJimmy" ProgramChange="40"/>
+          <Patch Number="F-2" Name="Joey' Jazz" ProgramChange="41"/>
+          <Patch Number="F-3" Name="Gimme Some" ProgramChange="42"/>
+          <Patch Number="F-4" Name="BC Gospel 2" ProgramChange="43"/>
+          <Patch Number="F-5" Name="Wat's Up?" ProgramChange="44"/>
+          <Patch Number="F-6" Name="Slow Groove" ProgramChange="45"/>
+          <Patch Number="F-7" Name="Deep Hush" ProgramChange="46"/>
+          <Patch Number="F-8" Name="Oboe Horn" ProgramChange="47"/>
+          <Patch Number="G-1" Name="BC Best Solo" ProgramChange="48"/>
+          <Patch Number="G-2" Name="AK Smooth'J'" ProgramChange="49"/>
+          <Patch Number="G-3" Name="AK OnionBook" ProgramChange="50"/>
+          <Patch Number="G-4" Name="TC SoulfulSP" ProgramChange="51"/>
+          <Patch Number="G-5" Name="Smoothie" ProgramChange="52"/>
+          <Patch Number="G-6" Name="Perc Combo" ProgramChange="53"/>
+          <Patch Number="G-7" Name="BC Rock Solo" ProgramChange="54"/>
+          <Patch Number="G-8" Name="Quiet Hymn 1" ProgramChange="55"/>
+          <Patch Number="H-1" Name="GP MintJewel" ProgramChange="56"/>
+          <Patch Number="H-2" Name="BA THE Sound" ProgramChange="57"/>
+          <Patch Number="H-3" Name="Voxinental" ProgramChange="58"/>
+          <Patch Number="H-4" Name="BC Best Full" ProgramChange="59"/>
+          <Patch Number="H-5" Name="Memphis Soul" ProgramChange="60"/>
+          <Patch Number="H-6" Name="TC Celeste" ProgramChange="61"/>
+          <Patch Number="H-7" Name="Whirly Perc" ProgramChange="62"/>
+          <Patch Number="H-8" Name="DM Hymn Pt1" ProgramChange="63"/>
+          <Patch Number="EX A-1" Name="I Gota EX!" ProgramChange="64"/>
+          <Patch Number="EX A-2" Name="Pipe Organ 1" ProgramChange="65"/>
+          <Patch Number="EX A-3" Name="EX Perky 2" ProgramChange="66"/>
+          <Patch Number="EX A-4" Name="EX Gentle 1" ProgramChange="67"/>
+          <Patch Number="EX A-5" Name="Mixture 1" ProgramChange="68"/>
+          <Patch Number="EX A-6" Name="Clean 1" ProgramChange="69"/>
+          <Patch Number="EX A-7" Name="Combo 1" ProgramChange="70"/>
+          <Patch Number="EX A-8" Name="Madly Echo" ProgramChange="71"/>
+          <Patch Number="EX B-1" Name="TC EX-Glassy" ProgramChange="72"/>
+          <Patch Number="EX B-2" Name="Pipe Organ 2" ProgramChange="73"/>
+          <Patch Number="EX B-3" Name="EX Perky 3" ProgramChange="74"/>
+          <Patch Number="EX B-4" Name="Clean 5" ProgramChange="75"/>
+          <Patch Number="EX B-5" Name="Mixture 2" ProgramChange="76"/>
+          <Patch Number="EX B-6" Name="Clean 2" ProgramChange="77"/>
+          <Patch Number="EX B-7" Name="Combo 2" ProgramChange="78"/>
+          <Patch Number="EX B-8" Name="Echo Bells" ProgramChange="79"/>
+          <Patch Number="EX C-1" Name="EX Rock Perc" ProgramChange="80"/>
+          <Patch Number="EX C-2" Name="Pipe Organ 3" ProgramChange="81"/>
+          <Patch Number="EX C-3" Name="Attack 1" ProgramChange="82"/>
+          <Patch Number="EX C-4" Name="Clean 6" ProgramChange="83"/>
+          <Patch Number="EX C-5" Name="Mixture 3" ProgramChange="84"/>
+          <Patch Number="EX C-6" Name="Clean 3" ProgramChange="85"/>
+          <Patch Number="EX C-7" Name="Combo 3" ProgramChange="86"/>
+          <Patch Number="EX C-8" Name="Cluster Echo" ProgramChange="87"/>
+          <Patch Number="EX D-1" Name="B Leakn" ProgramChange="88"/>
+          <Patch Number="EX D-2" Name="Full Pipes" ProgramChange="89"/>
+          <Patch Number="EX D-3" Name="Attack 2" ProgramChange="90"/>
+          <Patch Number="EX D-4" Name="EX Sweet 2" ProgramChange="91"/>
+          <Patch Number="EX D-5" Name="Mixture 4" ProgramChange="92"/>
+          <Patch Number="EX D-6" Name="Clean 4" ProgramChange="93"/>
+          <Patch Number="EX D-7" Name="Combo 4" ProgramChange="94"/>
+          <Patch Number="EX D-8" Name="Cricket" ProgramChange="95"/>
+          <Patch Number="EX E-1" Name="Attack Fat" ProgramChange="96"/>
+          <Patch Number="EX E-2" Name="Mix Bright 2" ProgramChange="97"/>
+          <Patch Number="EX E-3" Name="Attack 3" ProgramChange="98"/>
+          <Patch Number="EX E-4" Name="EX Gentle 2" ProgramChange="99"/>
+          <Patch Number="EX E-5" Name="EX All" ProgramChange="100"/>
+          <Patch Number="EX E-6" Name="Percussion 1" ProgramChange="101"/>
+          <Patch Number="EX E-7" Name="Combo 5" ProgramChange="102"/>
+          <Patch Number="EX E-8" Name="Space Organ" ProgramChange="103"/>
+          <Patch Number="EX F-1" Name="EX Mr. Nice" ProgramChange="104"/>
+          <Patch Number="EX F-2" Name="EX Church" ProgramChange="105"/>
+          <Patch Number="EX F-3" Name="Metal 1" ProgramChange="106"/>
+          <Patch Number="EX F-4" Name="EX Sweet 1" ProgramChange="107"/>
+          <Patch Number="EX F-5" Name="Bright 1" ProgramChange="108"/>
+          <Patch Number="EX F-6" Name="Percussion 2" ProgramChange="109"/>
+          <Patch Number="EX F-7" Name="Combo 6" ProgramChange="110"/>
+          <Patch Number="EX F-8" Name="Only EX" ProgramChange="111"/>
+          <Patch Number="EX G-1" Name="TC EX-Fusion" ProgramChange="112"/>
+          <Patch Number="EX G-2" Name="EX Chapel" ProgramChange="113"/>
+          <Patch Number="EX G-3" Name="Metal 2" ProgramChange="114"/>
+          <Patch Number="EX G-4" Name="Comp+Perc" ProgramChange="115"/>
+          <Patch Number="EX G-5" Name="Bright 2" ProgramChange="116"/>
+          <Patch Number="EX G-6" Name="Percussion 3" ProgramChange="117"/>
+          <Patch Number="EX G-7" Name="Caliope Lead" ProgramChange="118"/>
+          <Patch Number="EX G-8" Name="EX CatchCold" ProgramChange="119"/>
+          <Patch Number="EX H-1" Name="EX Perky 1" ProgramChange="120"/>
+          <Patch Number="EX H-2" Name="EX Hymnal" ProgramChange="121"/>
+          <Patch Number="EX H-3" Name="EX Otones" ProgramChange="122"/>
+          <Patch Number="EX H-4" Name="Mix Bright 1" ProgramChange="123"/>
+          <Patch Number="EX H-5" Name="Gen-EX!" ProgramChange="124"/>
+          <Patch Number="EX H-6" Name="EX Bass" ProgramChange="125"/>
+          <Patch Number="EX H-7" Name="Toy Organ" ProgramChange="126"/>
+          <Patch Number="EX H-8" Name="Low Synth" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

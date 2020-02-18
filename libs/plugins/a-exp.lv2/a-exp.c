@@ -1,16 +1,20 @@
-/* a-exp
- * Copyright (C) 2017 Johannes Mueller <github@johannes-mueller.org>
- * based on a-comp (C) 2016 Damien Zammit <damien@zamaudio.com>
+/*
+ * Copyright (C) 2016-2017 Damien Zammit <damien@zamaudio.com>
+ * Copyright (C) 2017-2019 Johannes Mueller <github@johannes-mueller.org>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 
@@ -27,10 +31,10 @@
 
 #include "lv2/lv2plug.in/ns/lv2core/lv2.h"
 
-#define RESET_PEAK_AFTER_SECONDS 3
-
 #define AEXP_URI "urn:ardour:a-exp"
 #define AEXP_STEREO_URI "urn:ardour:a-exp#stereo"
+
+#define RESET_PEAK_AFTER_SECONDS 3
 
 #ifndef M_PI
 #  define M_PI 3.14159265358979323846
@@ -57,8 +61,8 @@ typedef enum {
 	AEXP_MAKEUP,
 
 	AEXP_GAINR,
-	AEXP_OUTLEVEL,
 	AEXP_INLEVEL,
+	AEXP_OUTLEVEL,
 	AEXP_SIDECHAIN,
 	AEXP_ENABLE,
 
@@ -287,7 +291,6 @@ activate(LV2_Handle instance)
 #endif
 }
 
-
 static void
 run(LV2_Handle instance, uint32_t n_samples)
 {
@@ -363,7 +366,6 @@ run(LV2_Handle instance, uint32_t n_samples)
 #endif
 
 	float in_peak_db = -160.f;
-	old_gainr = *aexp->gainr;
 	float max_gainr = 0.0;
 
 	for (i = 0; i < n_samples; i++) {

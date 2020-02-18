@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <!--
+        Harp KS Master C0-G#0
+     
+        Eastwest Hollywood Harp KEYSWITCH Patch Program Control Support
+        PLAY 6
+        February 9, 2018
+        Version 1.0
+
+            This document supports instrument articulation switching via Program
+            Changes for Keyswitched patches within the PLAY 6 Virtual Instrument.
+     
+     -->
+  <Author>
+        Charles J. Green Jr.
+    </Author>
+  <MasterDeviceNames>
+    <Manufacturer>Eastwest Hollywood Harp</Manufacturer>
+    <Model>02 Harp KS Master C0-G#0</Model>
+    <CustomDeviceMode Name="PLAY">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="PLAY"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="PLAY">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+      </AvailableForChannels>
+      <UsesControlNameList Name="MIDI CONTROL CODES"/>
+      <PatchBank Name="PLAY">
+        <UsesPatchNameList Name="KEYSWITCHED"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <PatchNameList Name="KEYSWITCHED">
+      <Patch Number="1" Name="Pluck Long" ProgramChange="0"/>
+      <Patch Number="2" Name="Thumb Pick" ProgramChange="1"/>
+      <Patch Number="3" Name="Nail Pick" ProgramChange="2"/>
+      <Patch Number="4" Name="Gliss Technique" ProgramChange="3"/>
+      <Patch Number="5" Name="Rep" ProgramChange="4"/>
+      <Patch Number="6" Name="Dbl Hit" ProgramChange="5"/>
+      <Patch Number="7" Name="Pres de la table" ProgramChange="6"/>
+      <Patch Number="8" Name="Harmonics" ProgramChange="7"/>
+      <Patch Number="9" Name="Bisbigliando" ProgramChange="8"/>
+      <Patch Number="10" Name="Patch 10" ProgramChange="9"/>
+      <Patch Number="11" Name="Patch 11" ProgramChange="10"/>
+      <Patch Number="12" Name="Patch 12" ProgramChange="11"/>
+      <Patch Number="13" Name="Patch 13" ProgramChange="12"/>
+      <Patch Number="14" Name="Patch 13" ProgramChange="13"/>
+      <Patch Number="15" Name="Patch 13" ProgramChange="14"/>
+      <Patch Number="16" Name="Patch 13" ProgramChange="15"/>
+    </PatchNameList>
+    <ControlNameList Name="MIDI CONTROL CODES">
+      <Control Type="7bit" Number="1" Name="Mod Wheel"/>
+      <Control Type="7bit" Number="2" Name="RR Reset"/>
+      <Control Type="7bit" Number="5" Name="Time"/>
+      <Control Type="7bit" Number="7" Name="Volume"/>
+      <Control Type="7bit" Number="10" Name="Pan"/>
+      <Control Type="7bit" Number="11" Name="Expression"/>
+      <Control Type="7bit" Number="65" Name="Portamento"/>
+      <Control Type="7bit" Number="68" Name="Legato"/>
+      <Control Type="7bit" Number="69" Name="Repetition"/>
+    </ControlNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

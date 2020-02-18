@@ -2,19 +2,6 @@ ardour { ["type"] = "Snippet", name = "Vamp Audio Transcription Example" }
 
 function factory () return function ()
 
-	-- simple progress information print()ing
-	--[[
-	local progress_total;
-	local progress_last;
-	function cb (_f, pos)
-		local progress = 100 * pos / progress_total;
-		if progress - progress_last > 5 then
-			progress_last = progress;
-			print ("Progress: ", progress)
-		end
-	end
-	--]]
-
 	-- get Editor selection
 	-- http://manual.ardour.org/lua-scripting/class_reference/#ArdourUI:Editor
 	-- http://manual.ardour.org/lua-scripting/class_reference/#ArdourUI:Selection
@@ -25,16 +12,33 @@ function factory () return function ()
 	-- see http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:LuaAPI:Vamp
 	local vamp = ARDOUR.LuaAPI.Vamp ("libardourvampplugins:qm-transcription", sr)
 
+	-- prepare progress dialog
+	local progress_total = 0;
+	local progress_part = 0
+	local pdialog = LuaDialog.ProgressWindow ("Audio to MIDI", true)
+	function cb (_, pos)
+		return pdialog:progress ((pos + progress_part) / progress_total, "Analyzing")
+	end
+
+	-- calculate max progress
+	for r in sel.regions:regionlist ():iter () do
+		progress_total = progress_total + r:to_readable ():readable_length ()
+	end
+
 	-- for each selected region
 	-- http://manual.ardour.org/lua-scripting/class_reference/#ArdourUI:RegionSelection
 	for r in sel.regions:regionlist ():iter () do
 		-- "r" is-a http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:Region
 
-		--[[
-		progress_total = r:to_readable ():readable_length ()
-		progress_last = 0
-		--]]
-		vamp:analyze (r:to_readable (), 0, nil --[[cb--]])
+		vamp:analyze (r:to_readable (), 0, cb)
+
+		if pdialog:canceled () then
+			goto out
+		end
+
+		progress_part = progress_part + r:to_readable ():readable_length ()
+		pdialog:progress (progress_part / progress_total, "Post Processing")
+
 		print ("-- Post Processing: ", r:name ())
 
 		-- post-processing takes longer than actually parsing the data :(
@@ -53,5 +57,12 @@ function factory () return function ()
 		-- reset the plugin (prepare for next iteration)
 		vamp:reset ()
 	end
+
+	::out::
+	-- hide modal progress dialog and destroy it
+	pdialog:done ();
+	pdialog = nil
+	vamp = nil;
+	collectgarbage ()
 
 end end

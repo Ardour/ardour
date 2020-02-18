@@ -1,19 +1,22 @@
 /*
- * Copyright (C) 2016 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2019 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2016-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2017-2018 Ben Loftis <ben@harrisonconsoles.com>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <cairomm/context.h>
@@ -45,6 +48,7 @@
 #include "luainstance.h"
 #include "luasignal.h"
 #include "marker.h"
+#include "mixer_ui.h"
 #include "region_view.h"
 #include "processor_box.h"
 #include "time_axis_view.h"
@@ -52,6 +56,7 @@
 #include "selection.h"
 #include "script_selector.h"
 #include "timers.h"
+#include "ui_config.h"
 #include "utils_videotl.h"
 
 #include "pbd/i18n.h"
@@ -73,9 +78,9 @@ class ImageSurface {
 		 * color or alpha channel belonging to format will be 0. The contents of bits
 		 * within a pixel, but not belonging to the given format are undefined).
 		 *
-		 * @param format 	format of pixels in the surface to create
-		 * @param width 	width of the surface, in pixels
-		 * @param height 	height of the surface, in pixels
+		 * @param format  format of pixels in the surface to create
+		 * @param width   width of the surface, in pixels
+		 * @param height  height of the surface, in pixels
 		 */
 		ImageSurface (Cairo::Format format, int width, int height)
 			: _surface (Cairo::ImageSurface::create (format, width, height))
@@ -147,10 +152,10 @@ class ImageSurface {
 
 		/** Marks a rectangular area of the given surface dirty.
 		 *
-		 * @param x 	 X coordinate of dirty rectangle
-		 * @param y 	Y coordinate of dirty rectangle
-		 * @param width 	width of dirty rectangle
-		 * @param height 	height of dirty rectangle
+		 * @param x X coordinate of dirty rectangle
+		 * @param y Y coordinate of dirty rectangle
+		 * @param width width of dirty rectangle
+		 * @param height height of dirty rectangle
 		 */
 		void mark_dirty (int x, int y, int width, int height) {
 			_surface->mark_dirty (x, y, width, height);
@@ -206,7 +211,7 @@ class PangoLayout {
 		 * @param width The desired width in Pango units, or -1 to indicate that no
 		 * wrapping or ellipsization should be performed.
 		 */
-		void set_width (int width) {
+		void set_width (float width) {
 			_layout->set_width (width * PANGO_SCALE);
 		}
 
@@ -262,6 +267,22 @@ class PangoLayout {
 			return _layout->is_ellipsized ();
 		}
 
+		/** Sets the alignment for the layout: how partial lines are
+		 * positioned within the horizontal space available.
+		 * @param alignment The alignment.
+		 */
+		void set_alignment(Pango::Alignment alignment) {
+			_layout->set_alignment (alignment);
+		}
+
+		/** Gets the alignment for the layout: how partial lines are
+		 * positioned within the horizontal space available.
+		 * @return The alignment.
+		 */
+		Pango::Alignment get_alignment() const {
+			return _layout->get_alignment ();
+		}
+
 		/** Sets the wrap mode; the wrap mode only has effect if a width
 		 * is set on the layout with set_width().
 		 * To turn off wrapping, set the width to -1.
@@ -307,7 +328,6 @@ class PangoLayout {
 			luabridge::Stack<int>::push (L, height);
 			return 2;
 		}
-
 
 		/** Draws a Layout in the specified Cairo @a context. The top-left
 		 *  corner of the Layout will be drawn at the current point of the
@@ -379,6 +399,16 @@ namespace LuaMixer {
 
 };
 
+static void mixer_screenshot (const std::string& fn) {
+	Mixer_UI::instance()->screenshot (fn);
+}
+
+/** Access libardour global configuration */
+static UIConfiguration* _ui_config () {
+	return &UIConfiguration::instance();
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 static PBD::ScopedConnectionList _luaexecs;
@@ -446,7 +476,7 @@ lua_actionlist (lua_State *L)
 	vector<string> tooltips;
 	vector<string> keys;
 	vector<Glib::RefPtr<Gtk::Action> > actions;
-	Gtkmm2ext::ActionMap::get_all_actions (paths, labels, tooltips, keys, actions);
+	ActionManager::get_all_actions (paths, labels, tooltips, keys, actions);
 
 	vector<string>::iterator p;
 	vector<string>::iterator l;
@@ -472,16 +502,10 @@ lua_actionlist (lua_State *L)
 			continue;
 		if (parts[1] == _("redirectmenu"))
 			continue;
-		if (parts[1] == _("Editor_menus"))
-			continue;
 		if (parts[1] == _("RegionList"))
 			continue;
 		if (parts[1] == _("ProcessorMenu"))
 			continue;
-
-		/* strip <Actions>/ from the start */
-		string path = (*p);
-		path = path.substr (strlen ("<Actions>/"));
 
 		if (!action_tbl[parts[1]].isTable()) {
 			action_tbl[parts[1]] = luabridge::newTable (L);
@@ -489,7 +513,7 @@ lua_actionlist (lua_State *L)
 		assert (action_tbl[parts[1]].isTable());
 		luabridge::LuaRef tbl (action_tbl[parts[1]]);
 		assert (tbl.isTable());
-		tbl[*l] = path;
+		tbl[*l] = *p;
 	}
 
 	luabridge::push (L, action_tbl);
@@ -512,6 +536,7 @@ lua_translate_order (RouteDialogs::InsertAt place)
 
 using namespace ARDOUR;
 
+PBD::Signal0<void> LuaInstance::LuaTimerS;
 PBD::Signal0<void> LuaInstance::LuaTimerDS;
 PBD::Signal0<void> LuaInstance::SetSession;
 
@@ -554,6 +579,7 @@ LuaInstance::bind_cairo (lua_State* L)
 	 */
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("C")
+		.registerArray <double> ("DoubleArray")
 		.beginStdVector <double> ("DoubleVector")
 		.endClass ()
 		.endNamespace ();
@@ -647,6 +673,8 @@ LuaInstance::bind_cairo (lua_State* L)
 		.addFunction ("set_ellipsize", &LuaCairo::PangoLayout::set_ellipsize)
 		.addFunction ("get_ellipsize", &LuaCairo::PangoLayout::get_ellipsize)
 		.addFunction ("is_ellipsized", &LuaCairo::PangoLayout::is_ellipsized)
+		.addFunction ("set_alignment", &LuaCairo::PangoLayout::set_alignment)
+		.addFunction ("get_alignment", &LuaCairo::PangoLayout::get_alignment)
 		.addFunction ("set_wrap", &LuaCairo::PangoLayout::set_wrap)
 		.addFunction ("get_wrap", &LuaCairo::PangoLayout::get_wrap)
 		.addFunction ("is_wrapped", &LuaCairo::PangoLayout::is_wrapped)
@@ -658,6 +686,12 @@ LuaInstance::bind_cairo (lua_State* L)
 		.addConst ("Start", Pango::ELLIPSIZE_START)
 		.addConst ("Middle", Pango::ELLIPSIZE_MIDDLE)
 		.addConst ("End", Pango::ELLIPSIZE_END)
+		.endNamespace ()
+
+		.beginNamespace ("Alignment")
+		.addConst ("Left", Pango::ALIGN_LEFT)
+		.addConst ("Center", Pango::ALIGN_CENTER)
+		.addConst ("Right", Pango::ALIGN_RIGHT)
 		.endNamespace ()
 
 		.beginNamespace ("WrapMode")
@@ -732,8 +766,14 @@ LuaInstance::bind_dialog (lua_State* L)
 		.addConst ("None", -1)
 		.endNamespace ()
 
-		.endNamespace ();
+		.beginClass <LuaDialog::ProgressWindow> ("ProgressWindow")
+		.addConstructor <void (*) (std::string const&, bool)> ()
+		.addFunction ("progress", &LuaDialog::ProgressWindow::progress)
+		.addFunction ("done", &LuaDialog::ProgressWindow::done)
+		.addFunction ("canceled", &LuaDialog::ProgressWindow::canceled)
+		.endClass ()
 
+		.endNamespace ();
 }
 
 void
@@ -752,9 +792,11 @@ LuaInstance::register_classes (lua_State* L)
 
 		.addFunction ("http_get", &http_get_unlogged)
 
+		.addFunction ("mixer_screenshot", &mixer_screenshot)
+
 		.addFunction ("processor_selection", &LuaMixer::processor_selection)
 
-		.beginStdList <ArdourMarker*> ("ArdourMarkerList")
+		.beginStdCPtrList <ArdourMarker> ("ArdourMarkerList")
 		.endClass ()
 
 		.beginClass <ArdourMarker> ("ArdourMarker")
@@ -767,6 +809,11 @@ LuaInstance::register_classes (lua_State* L)
 		.endClass ()
 
 		.deriveClass <TimeAxisView, AxisView> ("TimeAxisView")
+		.addFunction ("order", &TimeAxisView::order)
+		.addFunction ("y_position", &TimeAxisView::y_position)
+		.addFunction ("effective_height", &TimeAxisView::effective_height)
+		.addFunction ("current_height", &TimeAxisView::current_height)
+		.addFunction ("set_height", &TimeAxisView::set_height)
 		.endClass ()
 
 		.deriveClass <StripableTimeAxisView, TimeAxisView> ("StripableTimeAxisView")
@@ -794,7 +841,7 @@ LuaInstance::register_classes (lua_State* L)
 		.endClass ()
 
 		// std::list<TimeAxisView*>
-		.beginStdCPtrList <TimeAxisView> ("TrackViewStdList")
+		.beginConstStdCPtrList <TimeAxisView> ("TrackViewStdList")
 		.endClass ()
 
 
@@ -814,7 +861,8 @@ LuaInstance::register_classes (lua_State* L)
 		.deriveClass <MarkerSelection, std::list<ArdourMarker*> > ("MarkerSelection")
 		.endClass ()
 
-		.deriveClass <TrackViewList, std::list<TimeAxisView*> > ("TrackViewList")
+		.beginClass <TrackViewList> ("TrackViewList")
+		.addCast<std::list<TimeAxisView*> > ("to_tav_list")
 		.addFunction ("contains", &TrackViewList::contains)
 		.addFunction ("routelist", &TrackViewList::routelist)
 		.endClass ()
@@ -897,6 +945,7 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("copy_playlists", &PublicEditor::copy_playlists)
 		.addFunction ("clear_playlists", &PublicEditor::clear_playlists)
 
+		.addFunction ("select_all_visible_lanes", &PublicEditor::select_all_visible_lanes)
 		.addFunction ("select_all_tracks", &PublicEditor::select_all_tracks)
 		.addFunction ("deselect_all", &PublicEditor::deselect_all)
 
@@ -1019,7 +1068,28 @@ LuaInstance::register_classes (lua_State* L)
 		.addConst ("Add", Selection::Operation(Selection::Add))
 		.endNamespace ()
 
+		.beginNamespace ("TrackHeightMode")
+		.addConst ("OnlySelf", TimeAxisView::TrackHeightMode(TimeAxisView::OnlySelf))
+		.addConst ("TotalHeight", TimeAxisView::TrackHeightMode(TimeAxisView::TotalHeight))
+		.addConst ("HeightPerLane,", TimeAxisView::TrackHeightMode(TimeAxisView::HeightPerLane))
+		.endNamespace ()
+
 		.addCFunction ("actionlist", &lua_actionlist)
+
+
+		.beginClass <UIConfiguration> ("UIConfiguration")
+#undef  UI_CONFIG_VARIABLE
+#define UI_CONFIG_VARIABLE(Type,var,name,value) \
+		.addFunction ("get_" # var, &UIConfiguration::get_##var) \
+		.addFunction ("set_" # var, &UIConfiguration::set_##var) \
+		.addProperty (#var, &UIConfiguration::get_##var, &UIConfiguration::set_##var)
+
+#include "ui_config_vars.h"
+
+#undef UI_CONFIG_VARIABLE
+		.endClass()
+
+		.addFunction ("config", &_ui_config)
 
 		.endNamespace () // end ArdourUI
 
@@ -1273,6 +1343,7 @@ LuaInstance::load_state ()
 {
 	std::string uiscripts;
 	if (!find_file (ardour_config_search_path(), ui_scripts_file_name, uiscripts)) {
+		pre_seed_scripts ();
 		return -1;
 	}
 	XMLTree tree;
@@ -1341,6 +1412,7 @@ void LuaInstance::set_session (Session* s)
 	for (LuaCallbackMap::iterator i = _callbacks.begin(); i != _callbacks.end(); ++i) {
 		i->second->set_session (s);
 	}
+	second_connection = Timers::rapid_connect (sigc::mem_fun(*this, & LuaInstance::every_second));
 	point_one_second_connection = Timers::rapid_connect (sigc::mem_fun(*this, & LuaInstance::every_point_one_seconds));
 	SetSession (); /* EMIT SIGNAL */
 }
@@ -1349,6 +1421,7 @@ void
 LuaInstance::session_going_away ()
 {
 	ENSURE_GUI_THREAD (*this, &LuaInstance::session_going_away);
+	second_connection.disconnect ();
 	point_one_second_connection.disconnect ();
 
 	(*_lua_clear)();
@@ -1360,7 +1433,13 @@ LuaInstance::session_going_away ()
 
 	lua_State* L = lua.getState();
 	LuaBindings::set_session (L, _session);
-	lua.do_command ("collectgarbage();");
+	lua.collect_garbage ();
+}
+
+void
+LuaInstance::every_second ()
+{
+	LuaTimerS (); // emit signal
 }
 
 void
@@ -1409,6 +1488,24 @@ LuaInstance::set_state (const XMLNode& node)
 	}
 
 	return 0;
+}
+
+void
+LuaInstance::pre_seed_scripts ()
+{
+	LuaScriptInfoPtr spi = LuaScripting::instance ().by_name ("Mixer Screenshot", LuaScriptInfo::EditorAction);
+	int id = 0;
+	if (spi) {
+		try {
+			std::string script = Glib::file_get_contents (spi->path);
+			LuaState ls;
+			register_classes (ls.getState ());
+			LuaScriptParamList lsp = LuaScriptParams::script_params (ls, spi->path, "action_params");
+			LuaScriptParamPtr lspp (new LuaScriptParam("x-script-origin", "", spi->path, false, true));
+			lsp.push_back (lspp);
+			set_lua_action (id++, "Mixer Screenshot", script, lsp);
+		} catch (...) { }
+	}
 }
 
 bool

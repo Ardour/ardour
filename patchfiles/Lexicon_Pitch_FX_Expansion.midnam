@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Lexicon</Manufacturer>
+    <Model>PCM-80</Model>
+    <Model>PCM-81</Model>
+    <PatchNameList Name="X0 Pitch FX">
+      <Patch Number="0" Name="FixYerVox" ProgramChange="0"/>
+      <Patch Number="1" Name="FixYerVoxChm" ProgramChange="1"/>
+      <Patch Number="2" Name="Thick FixVox" ProgramChange="2"/>
+      <Patch Number="3" Name="Cocomo" ProgramChange="3"/>
+      <Patch Number="4" Name="QuadDTune" ProgramChange="4"/>
+      <Patch Number="5" Name="ADTStereoIn" ProgramChange="5"/>
+      <Patch Number="6" Name="TripleTrack" ProgramChange="6"/>
+      <Patch Number="7" Name="Quad Track" ProgramChange="7"/>
+      <Patch Number="8" Name="Quint Track" ProgramChange="8"/>
+      <Patch Number="9" Name="Add Voices" ProgramChange="9"/>
+      <Patch Number="10" Name="Major Thirds" ProgramChange="10"/>
+      <Patch Number="11" Name="Minor Thirds" ProgramChange="11"/>
+      <Patch Number="12" Name="Major Triads" ProgramChange="12"/>
+      <Patch Number="13" Name="Minor Triads" ProgramChange="13"/>
+      <Patch Number="14" Name="Major &amp; Dbls" ProgramChange="14"/>
+      <Patch Number="15" Name="Minor &amp; Dbls" ProgramChange="15"/>
+      <Patch Number="16" Name="4ths &amp; Dbl" ProgramChange="16"/>
+      <Patch Number="17" Name="MIDI Pitch" ProgramChange="17"/>
+      <Patch Number="18" Name="MIDI Harmony" ProgramChange="18"/>
+      <Patch Number="19" Name="MIDI Chord" ProgramChange="19"/>
+      <Patch Number="20" Name="SingleDetune" ProgramChange="20"/>
+      <Patch Number="21" Name="DualDetune" ProgramChange="21"/>
+      <Patch Number="22" Name="Phat Detune" ProgramChange="22"/>
+      <Patch Number="23" Name="EGtrPitchRm" ProgramChange="23"/>
+      <Patch Number="24" Name="VibroShift1" ProgramChange="24"/>
+      <Patch Number="25" Name="VibroShift2" ProgramChange="25"/>
+      <Patch Number="26" Name="VibroTrem" ProgramChange="26"/>
+      <Patch Number="27" Name="VibroTremRvb" ProgramChange="27"/>
+      <Patch Number="28" Name="OctDown Verb" ProgramChange="28"/>
+      <Patch Number="29" Name="PitchSlapRvb" ProgramChange="29"/>
+      <Patch Number="30" Name="24 String" ProgramChange="30"/>
+      <Patch Number="31" Name="HonkyTonkPno" ProgramChange="31"/>
+      <Patch Number="32" Name="PowerNotes" ProgramChange="32"/>
+      <Patch Number="33" Name="4-NoteChords" ProgramChange="33"/>
+      <Patch Number="34" Name="ModalChords1" ProgramChange="34"/>
+      <Patch Number="35" Name="ModalChords2" ProgramChange="35"/>
+      <Patch Number="36" Name="Chromatic Up" ProgramChange="36"/>
+      <Patch Number="37" Name="Chromatic Dn" ProgramChange="37"/>
+      <Patch Number="38" Name="FootPdl Oct" ProgramChange="38"/>
+      <Patch Number="39" Name="FootPdlChord" ProgramChange="39"/>
+      <Patch Number="40" Name="SnareTools 1" ProgramChange="40"/>
+      <Patch Number="41" Name="SnareTools 2" ProgramChange="41"/>
+      <Patch Number="42" Name="SnareTools 3" ProgramChange="42"/>
+      <Patch Number="43" Name="TomTomTools" ProgramChange="43"/>
+      <Patch Number="44" Name="Slap Up BPM" ProgramChange="44"/>
+      <Patch Number="45" Name="Slap Dn BPM" ProgramChange="45"/>
+      <Patch Number="46" Name="Thick Slap" ProgramChange="46"/>
+      <Patch Number="47" Name="RepeatSlaps" ProgramChange="47"/>
+      <Patch Number="48" Name="AutoScratch" ProgramChange="48"/>
+      <Patch Number="49" Name="Stop n Go" ProgramChange="49"/>
+    </PatchNameList>
+    <PatchNameList Name="X1 Pitch FX">
+      <Patch Number="0" Name="PullThePlug!" ProgramChange="0"/>
+      <Patch Number="1" Name="Stargate" ProgramChange="1"/>
+      <Patch Number="2" Name="WhiteHole" ProgramChange="2"/>
+      <Patch Number="3" Name="MotherShip" ProgramChange="3"/>
+      <Patch Number="4" Name="XplodeDown" ProgramChange="4"/>
+      <Patch Number="5" Name="Xplode Up" ProgramChange="5"/>
+      <Patch Number="6" Name="DialogCloner" ProgramChange="6"/>
+      <Patch Number="7" Name="Toon Voices" ProgramChange="7"/>
+      <Patch Number="8" Name="Evil Voice" ProgramChange="8"/>
+      <Patch Number="9" Name="Evil Echoes" ProgramChange="9"/>
+      <Patch Number="10" Name="Pitch Across" ProgramChange="10"/>
+      <Patch Number="11" Name="PitchEkoRvb" ProgramChange="11"/>
+      <Patch Number="12" Name="PitchPong" ProgramChange="12"/>
+      <Patch Number="13" Name="AR DlyVerb" ProgramChange="13"/>
+      <Patch Number="14" Name="In The Air" ProgramChange="14"/>
+      <Patch Number="15" Name="Thick&gt;Ducked" ProgramChange="15"/>
+      <Patch Number="16" Name="FootPdlEkos" ProgramChange="16"/>
+      <Patch Number="17" Name="DualDTuneDly" ProgramChange="17"/>
+      <Patch Number="18" Name="QuaDTuneDly1" ProgramChange="18"/>
+      <Patch Number="19" Name="QuaDTuneDly2" ProgramChange="19"/>
+      <Patch Number="20" Name="Major Across" ProgramChange="20"/>
+      <Patch Number="21" Name="Minor Across" ProgramChange="21"/>
+      <Patch Number="22" Name="Dim hARP" ProgramChange="22"/>
+      <Patch Number="23" Name="Dim hARP Vrb" ProgramChange="23"/>
+      <Patch Number="24" Name="DimScaleDown" ProgramChange="24"/>
+      <Patch Number="25" Name="GlassCascade" ProgramChange="25"/>
+      <Patch Number="26" Name="Carnival" ProgramChange="26"/>
+      <Patch Number="27" Name="Sequence 1" ProgramChange="27"/>
+      <Patch Number="28" Name="Sequence 2" ProgramChange="28"/>
+      <Patch Number="29" Name="Pentatonics" ProgramChange="29"/>
+      <Patch Number="30" Name="JurassicSolo" ProgramChange="30"/>
+      <Patch Number="31" Name="SwrlWholNt" ProgramChange="31"/>
+      <Patch Number="32" Name="Sweet Chorus" ProgramChange="32"/>
+      <Patch Number="33" Name="MirrorChorus" ProgramChange="33"/>
+      <Patch Number="34" Name="LFO Detune" ProgramChange="34"/>
+      <Patch Number="35" Name="SpatialDuck" ProgramChange="35"/>
+      <Patch Number="36" Name="Vibrato BPM" ProgramChange="36"/>
+      <Patch Number="37" Name="Verbato" ProgramChange="37"/>
+      <Patch Number="38" Name="WetDtune Dly" ProgramChange="38"/>
+      <Patch Number="39" Name="Acid Chorus" ProgramChange="39"/>
+      <Patch Number="40" Name="Stereo VSO" ProgramChange="40"/>
+      <Patch Number="41" Name="Mono VSO" ProgramChange="41"/>
+      <Patch Number="42" Name="Pitch + Rvb1" ProgramChange="42"/>
+      <Patch Number="43" Name="Pitch + Rvb2" ProgramChange="43"/>
+      <Patch Number="44" Name="NewVSO-Chmb" ProgramChange="44"/>
+      <Patch Number="45" Name="NewQuad&gt;Hall" ProgramChange="45"/>
+      <Patch Number="46" Name="NewDual-Chmb" ProgramChange="46"/>
+      <Patch Number="47" Name="NewDual-Inv" ProgramChange="47"/>
+      <Patch Number="48" Name="NewDual-Plt" ProgramChange="48"/>
+      <Patch Number="49" Name="NewSter-Chmb" ProgramChange="49"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

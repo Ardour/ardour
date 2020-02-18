@@ -109,12 +109,21 @@ def configure(conf):
     autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.32.0', mandatory=True)
     autowaf.check_pkg(conf, 'giomm-2.4', uselib_store='GIOMM', atleast_version='2.2', mandatory=True)
 
-    conf.check(function_name='getmntent', header_name='mntent.h', define_name='HAVE_GETMNTENT',mandatory=False)
     conf.check(header_name='execinfo.h', define_name='HAVE_EXECINFO',mandatory=False)
     conf.check(header_name='unistd.h', define_name='HAVE_UNISTD',mandatory=False)
     if not Options.options.ppc:
-        conf.check_cc(function_name='posix_memalign', header_name='stdlib.h', cflags='-D_XOPEN_SOURCE=600', define_name='HAVE_POSIX_MEMALIGN', mandatory=False)
-    conf.check(function_name='localtime_r', header_name='time.h', define_name='HAVE_LOCALTIME_R',mandatory=False)
+        conf.check_cc(
+                msg="Checking for function 'posix_memalign' in stdlib.h",
+                fragment = "#define _XOPEN_SOURCE 600\n #include <stdlib.h>\n int main(void) { return posix_memalign (0, 64, 1); }\n",
+                define_name='HAVE_POSIX_MEMALIGN', execute = False, mandatory=False)
+    conf.check_cc(
+            msg="Checking for function 'getmntent' in mntent.h",
+            fragment = "#include <mntent.h>\n int main(void) { return (int)getmntent(0); }\n",
+            define_name='HAVE_GETMNTENT', execute = False, mandatory=False)
+    conf.check_cc(
+            msg="Checking for function 'localtime_r' in time.h",
+            fragment = "#include <time.h>\n int main(void) { return localtime_r(NULL, NULL); }\n",
+            define_name='HAVE_LOCALTIME_R', execute = False, mandatory=False)
 
     # Boost headers
     autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
@@ -151,8 +160,8 @@ def build(bld):
         obj.defines = [ 'LIBPBD_DLL_EXPORTS=1' ]
     else:
         obj              = bld.stlib(features = 'cxx cxxstlib', source=libpbd_sources)
-        obj.cxxflags = [  bld.env['compiler_flags_dict']['pic'] ]
-        obj.cflags = [ bld.env['compiler_flags_dict']['pic'] ]
+        obj.cxxflags     = [ bld.env['compiler_flags_dict']['pic'] ]
+        obj.cflags       = [ bld.env['compiler_flags_dict']['pic'] ]
         obj.defines      = []
 
     if bld.is_defined('DEBUG_RT_ALLOC'):
@@ -162,7 +171,7 @@ def build(bld):
     obj.includes     = ['.']
     obj.name         = 'libpbd'
     obj.target       = 'pbd'
-    obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM ARCHIVE CURL'
+    obj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM ARCHIVE CURL XML'
     if sys.platform == 'darwin':
         TaskGen.task_gen.mappings['.mm'] = TaskGen.task_gen.mappings['.cc']
         if 'cocoa_open_uri.mm' not in obj.source:
@@ -205,9 +214,9 @@ def build(bld):
             testobj.source += [ 'test/windows_timer_utils_test.cc' ]
         testobj.target       = 'run-tests'
         testobj.includes     = obj.includes + ['test', '../pbd']
-        testobj.uselib       = 'CPPUNIT XML SNDFILE'
+        testobj.uselib       = 'GLIBMM SIGCPP XML UUID SNDFILE GIOMM ARCHIVE CURL XML OSX CPPUNIT'
         testobj.use          = 'libpbd'
         testobj.name         = 'libpbd-tests'
         testobj.defines      = [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
         if sys.platform != 'darwin' and bld.env['build_target'] != 'mingw':
-            testobj.linkflags    = ['-lrt']
+            testobj.lib      = ['rt']

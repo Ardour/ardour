@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Line 6</Manufacturer>
+    <Model>PODxt</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Program">
+        <PatchNameList>
+          <Patch Number="MAN" Name="Manual" ProgramChange="0"/>
+          <Patch Number="1A" Name="Plexi Lead" ProgramChange="1"/>
+          <Patch Number="1B" Name="Class A-30 TB" ProgramChange="2"/>
+          <Patch Number="1C" Name="Blackface Lux" ProgramChange="3"/>
+          <Patch Number="1D" Name="Recto Dual" ProgramChange="4"/>
+          <Patch Number="2A" Name="Line 6 Clean" ProgramChange="5"/>
+          <Patch Number="2B" Name="BohemianRhapsody" ProgramChange="6"/>
+          <Patch Number="2C" Name="PiezoAcoustic" ProgramChange="7"/>
+          <Patch Number="2D" Name="Highway To Hell" ProgramChange="8"/>
+          <Patch Number="3A" Name="Line 6 JTS-45" ProgramChange="9"/>
+          <Patch Number="3B" Name="Cold Shot" ProgramChange="10"/>
+          <Patch Number="3C" Name="Tennessee Gent" ProgramChange="11"/>
+          <Patch Number="3D" Name="Don'tTakeMeAlive" ProgramChange="12"/>
+          <Patch Number="4A" Name="Spinal Puppet" ProgramChange="13"/>
+          <Patch Number="4B" Name="StreetsHavNoName" ProgramChange="14"/>
+          <Patch Number="4C" Name="Jazz Clean" ProgramChange="15"/>
+          <Patch Number="4D" Name="Du Hast" ProgramChange="16"/>
+          <Patch Number="5A" Name="Chemical X" ProgramChange="17"/>
+          <Patch Number="5B" Name="Money For Nothin" ProgramChange="18"/>
+          <Patch Number="5C" Name="Day Tripper" ProgramChange="19"/>
+          <Patch Number="5D" Name="Perfect Stranger" ProgramChange="20"/>
+          <Patch Number="6A" Name="Line 6 Insane" ProgramChange="21"/>
+          <Patch Number="6B" Name="The Rover" ProgramChange="22"/>
+          <Patch Number="6C" Name="Double Verb" ProgramChange="23"/>
+          <Patch Number="6D" Name="Plush" ProgramChange="24"/>
+          <Patch Number="7A" Name="Small Tweed" ProgramChange="25"/>
+          <Patch Number="7B" Name="ReelinInTheYears" ProgramChange="26"/>
+          <Patch Number="7C" Name="EJ's Clean" ProgramChange="27"/>
+          <Patch Number="7D" Name="Start Me Up" ProgramChange="28"/>
+          <Patch Number="8A" Name="Tweed B-Man" ProgramChange="29"/>
+          <Patch Number="8B" Name="Bridge of Sighs" ProgramChange="30"/>
+          <Patch Number="8C" Name="Tiny Tweed" ProgramChange="31"/>
+          <Patch Number="8D" Name="Bad Horsie" ProgramChange="32"/>
+          <Patch Number="9A" Name="Hiway 100" ProgramChange="33"/>
+          <Patch Number="9B" Name="AnotherBrickWall" ProgramChange="34"/>
+          <Patch Number="9C" Name="Sultans of Swing" ProgramChange="35"/>
+          <Patch Number="9D" Name="Won't Get Fooled" ProgramChange="36"/>
+          <Patch Number="10A" Name="Plexi 45" ProgramChange="37"/>
+          <Patch Number="10B" Name="Cliffs Of Dover" ProgramChange="38"/>
+          <Patch Number="10C" Name="Comm Breakdown" ProgramChange="39"/>
+          <Patch Number="10D" Name="Sunshine of Love" ProgramChange="40"/>
+          <Patch Number="11A" Name="Plexi Jumped" ProgramChange="41"/>
+          <Patch Number="11B" Name="Purple Haze" ProgramChange="42"/>
+          <Patch Number="11C" Name="Nowhere Man" ProgramChange="43"/>
+          <Patch Number="11D" Name="Satch Boogie" ProgramChange="44"/>
+          <Patch Number="12A" Name="Plexi Variac" ProgramChange="45"/>
+          <Patch Number="12B" Name="Eruption" ProgramChange="46"/>
+          <Patch Number="12C" Name="Funk 49" ProgramChange="47"/>
+          <Patch Number="12D" Name="Paranoid" ProgramChange="48"/>
+          <Patch Number="13A" Name="Brit J-800" ProgramChange="49"/>
+          <Patch Number="13B" Name="Run Like Hell" ProgramChange="50"/>
+          <Patch Number="13C" Name="YouReallyGotMe" ProgramChange="51"/>
+          <Patch Number="13D" Name="Master of Puppets" ProgramChange="52"/>
+          <Patch Number="14A" Name="Match D-30" ProgramChange="53"/>
+          <Patch Number="14B" Name="Auto-Wah" ProgramChange="54"/>
+          <Patch Number="14C" Name="Smooth" ProgramChange="55"/>
+          <Patch Number="14D" Name="Heartbreaker" ProgramChange="56"/>
+          <Patch Number="15A" Name="Solo 100" ProgramChange="57"/>
+          <Patch Number="15B" Name="Square Thang" ProgramChange="58"/>
+          <Patch Number="15C" Name="That's Alright" ProgramChange="59"/>
+          <Patch Number="15D" Name="Awake" ProgramChange="60"/>
+          <Patch Number="16A" Name="USER" ProgramChange="61"/>
+          <Patch Number="16B" Name="USER" ProgramChange="60"/>
+          <Patch Number="16C" Name="USER" ProgramChange="63"/>
+          <Patch Number="16D" Name="USER" ProgramChange="64"/>
+          <Patch Number="TUN" Name="Tuner" ProgramChange="65"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

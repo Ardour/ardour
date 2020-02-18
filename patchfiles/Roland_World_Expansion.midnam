@@ -1,0 +1,818 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JD-990</Model>
+    <Model>JV-80</Model>
+    <Model>JV-880</Model>
+    <PatchNameList Name="EXP World 1st(64)">
+      <Patch Number="001" Name="World Tour!" ProgramChange="0"/>
+      <Patch Number="002" Name="Afropunch" ProgramChange="1"/>
+      <Patch Number="003" Name="Yo-How" ProgramChange="2"/>
+      <Patch Number="004" Name="Kenya Split" ProgramChange="3"/>
+      <Patch Number="005" Name="Intar Melody" ProgramChange="4"/>
+      <Patch Number="006" Name="BerimbauMenu" ProgramChange="5"/>
+      <Patch Number="007" Name="Thumb Chimes" ProgramChange="6"/>
+      <Patch Number="008" Name="Velo Afro 1" ProgramChange="7"/>
+      <Patch Number="009" Name="Bass Kalimba" ProgramChange="8"/>
+      <Patch Number="010" Name="Buzz Kalimba" ProgramChange="9"/>
+      <Patch Number="011" Name="Indalimba" ProgramChange="10"/>
+      <Patch Number="012" Name="Thumb Piano" ProgramChange="11"/>
+      <Patch Number="013" Name="Kalimba FX" ProgramChange="12"/>
+      <Patch Number="014" Name="AfropercMenu" ProgramChange="13"/>
+      <Patch Number="015" Name="Udu Pot Menu" ProgramChange="14"/>
+      <Patch Number="016" Name="Udu Pots/" ProgramChange="15"/>
+      <Patch Number="017" Name="Baateri" ProgramChange="16"/>
+      <Patch Number="018" Name="Log Detuner" ProgramChange="17"/>
+      <Patch Number="019" Name="Afroperk" ProgramChange="18"/>
+      <Patch Number="020" Name="Glass Mallet" ProgramChange="19"/>
+      <Patch Number="021" Name="Velo Afro 2" ProgramChange="20"/>
+      <Patch Number="022" Name="Balafon/" ProgramChange="21"/>
+      <Patch Number="023" Name="Hrd.Balafon" ProgramChange="22"/>
+      <Patch Number="024" Name="Pure Balafon" ProgramChange="23"/>
+      <Patch Number="025" Name="Big ole Logs" ProgramChange="24"/>
+      <Patch Number="026" Name="Afro Log" ProgramChange="25"/>
+      <Patch Number="027" Name="Angklungs" ProgramChange="26"/>
+      <Patch Number="028" Name="BellAngklung" ProgramChange="27"/>
+      <Patch Number="029" Name="Steel Drums1" ProgramChange="28"/>
+      <Patch Number="030" Name="Steel Drums2" ProgramChange="29"/>
+      <Patch Number="031" Name="War Drums" ProgramChange="30"/>
+      <Patch Number="032" Name="AfricanMarch" ProgramChange="31"/>
+      <Patch Number="033" Name="AfricanStomp" ProgramChange="32"/>
+      <Patch Number="034" Name="Tribal Claps" ProgramChange="33"/>
+      <Patch Number="035" Name="Kawala Str" ProgramChange="34"/>
+      <Patch Number="036" Name="Space-o-rama" ProgramChange="35"/>
+      <Patch Number="037" Name="Shakupad" ProgramChange="36"/>
+      <Patch Number="038" Name="Ceremony" ProgramChange="37"/>
+      <Patch Number="039" Name="Los Tremolos" ProgramChange="38"/>
+      <Patch Number="040" Name="Lo Celloez" ProgramChange="39"/>
+      <Patch Number="041" Name="Octargans" ProgramChange="40"/>
+      <Patch Number="042" Name="Lo Ethnoreed" ProgramChange="41"/>
+      <Patch Number="043" Name="Eastvox" ProgramChange="42"/>
+      <Patch Number="044" Name="Black Rain" ProgramChange="43"/>
+      <Patch Number="045" Name="Steel 5th" ProgramChange="44"/>
+      <Patch Number="046" Name="5th Wind" ProgramChange="45"/>
+      <Patch Number="047" Name="5th Bell" ProgramChange="46"/>
+      <Patch Number="048" Name="Ocarawla" ProgramChange="47"/>
+      <Patch Number="049" Name="Conch Call" ProgramChange="48"/>
+      <Patch Number="050" Name="Sweep Floot" ProgramChange="49"/>
+      <Patch Number="051" Name="Space Pipe" ProgramChange="50"/>
+      <Patch Number="052" Name="PercssivRain" ProgramChange="51"/>
+      <Patch Number="053" Name="Asian Chord" ProgramChange="52"/>
+      <Patch Number="054" Name="Dell Ikhitt" ProgramChange="53"/>
+      <Patch Number="055" Name="Ghost Metal" ProgramChange="54"/>
+      <Patch Number="056" Name="Ring-RingPad" ProgramChange="55"/>
+      <Patch Number="057" Name="Misterious" ProgramChange="56"/>
+      <Patch Number="058" Name="Re-mind" ProgramChange="57"/>
+      <Patch Number="059" Name="Whistle Vox" ProgramChange="58"/>
+      <Patch Number="060" Name="Living Dead" ProgramChange="59"/>
+      <Patch Number="061" Name="Earth Child" ProgramChange="60"/>
+      <Patch Number="062" Name="Spaceilimba" ProgramChange="61"/>
+      <Patch Number="063" Name="Drop of Rain" ProgramChange="62"/>
+      <Patch Number="064" Name="Gaia Thought" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP World 2nd(64)">
+      <Patch Number="065" Name="Es E.Piano" ProgramChange="0"/>
+      <Patch Number="066" Name="Piri Rise" ProgramChange="1"/>
+      <Patch Number="067" Name="Pandoras Box" ProgramChange="2"/>
+      <Patch Number="068" Name="Ethno Dreams" ProgramChange="3"/>
+      <Patch Number="069" Name="Snow Man" ProgramChange="4"/>
+      <Patch Number="070" Name="Cuica Steps" ProgramChange="5"/>
+      <Patch Number="071" Name="Saintly" ProgramChange="6"/>
+      <Patch Number="072" Name="Trade Winds" ProgramChange="7"/>
+      <Patch Number="073" Name="Pure Logic" ProgramChange="8"/>
+      <Patch Number="074" Name="Earth Color" ProgramChange="9"/>
+      <Patch Number="075" Name="Jawbreath" ProgramChange="10"/>
+      <Patch Number="076" Name="AsiaCYM Menu" ProgramChange="11"/>
+      <Patch Number="077" Name="Gong Menu" ProgramChange="12"/>
+      <Patch Number="078" Name="Gong/" ProgramChange="13"/>
+      <Patch Number="079" Name="China Menu" ProgramChange="14"/>
+      <Patch Number="080" Name="Kabuki Menu" ProgramChange="15"/>
+      <Patch Number="081" Name="Biwa" ProgramChange="16"/>
+      <Patch Number="082" Name="Genderous" ProgramChange="17"/>
+      <Patch Number="083" Name="Temple Metal" ProgramChange="18"/>
+      <Patch Number="084" Name="Gomelan Tuti" ProgramChange="19"/>
+      <Patch Number="085" Name="African Snow" ProgramChange="20"/>
+      <Patch Number="086" Name="Bonang-Gam." ProgramChange="21"/>
+      <Patch Number="087" Name="Gamelan x4" ProgramChange="22"/>
+      <Patch Number="088" Name="Saron-Gameln" ProgramChange="23"/>
+      <Patch Number="089" Name="Temple Chime" ProgramChange="24"/>
+      <Patch Number="090" Name="Prayer Bowls" ProgramChange="25"/>
+      <Patch Number="091" Name="Hiten Bells" ProgramChange="26"/>
+      <Patch Number="092" Name="Trash Metal" ProgramChange="27"/>
+      <Patch Number="093" Name="Singing Bell" ProgramChange="28"/>
+      <Patch Number="094" Name="Rama Chimes" ProgramChange="29"/>
+      <Patch Number="095" Name="Rama Cymbals" ProgramChange="30"/>
+      <Patch Number="096" Name="Tibet Bells" ProgramChange="31"/>
+      <Patch Number="097" Name="Big Bowls" ProgramChange="32"/>
+      <Patch Number="098" Name="Spoke Mallet" ProgramChange="33"/>
+      <Patch Number="099" Name="Shakuhachi" ProgramChange="34"/>
+      <Patch Number="100" Name="Shaku Accent" ProgramChange="35"/>
+      <Patch Number="101" Name="Shakueko" ProgramChange="36"/>
+      <Patch Number="102" Name="Pipe Melodi" ProgramChange="37"/>
+      <Patch Number="103" Name="Flautwist" ProgramChange="38"/>
+      <Patch Number="104" Name="Flute Press" ProgramChange="39"/>
+      <Patch Number="105" Name="Zamponia" ProgramChange="40"/>
+      <Patch Number="106" Name="Wosh Chiff" ProgramChange="41"/>
+      <Patch Number="107" Name="Tramaloo" ProgramChange="42"/>
+      <Patch Number="108" Name="FantasicPipe" ProgramChange="43"/>
+      <Patch Number="109" Name="Pan Pipe /" ProgramChange="44"/>
+      <Patch Number="110" Name="Random Zamp" ProgramChange="45"/>
+      <Patch Number="111" Name="Zampona tr 2" ProgramChange="46"/>
+      <Patch Number="112" Name="Ethno Pipes1" ProgramChange="47"/>
+      <Patch Number="113" Name="Ethno Pipes2" ProgramChange="48"/>
+      <Patch Number="114" Name="Ethno Pipes3" ProgramChange="49"/>
+      <Patch Number="115" Name="Ocarina 3" ProgramChange="50"/>
+      <Patch Number="116" Name="Quena" ProgramChange="51"/>
+      <Patch Number="117" Name="Kawala" ProgramChange="52"/>
+      <Patch Number="118" Name="Kawallabe" ProgramChange="53"/>
+      <Patch Number="119" Name="Romance Exp" ProgramChange="54"/>
+      <Patch Number="120" Name="Wind 7 Split" ProgramChange="55"/>
+      <Patch Number="121" Name="Uni-Jig Pan" ProgramChange="56"/>
+      <Patch Number="122" Name="OcarinaLead" ProgramChange="57"/>
+      <Patch Number="123" Name="Zamp Lead" ProgramChange="58"/>
+      <Patch Number="124" Name="Blown Touch" ProgramChange="59"/>
+      <Patch Number="125" Name="Barkit" ProgramChange="60"/>
+      <Patch Number="126" Name="Jungle Pipes" ProgramChange="61"/>
+      <Patch Number="127" Name="C Shell+echo" ProgramChange="62"/>
+      <Patch Number="128" Name="Atmospluck" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP World 3rd(64)">
+      <Patch Number="129" Name="Afroharp Arq" ProgramChange="0"/>
+      <Patch Number="130" Name="East/WestPlk" ProgramChange="1"/>
+      <Patch Number="131" Name="Koto" ProgramChange="2"/>
+      <Patch Number="132" Name="Zhueng" ProgramChange="3"/>
+      <Patch Number="133" Name="Kotokeum" ProgramChange="4"/>
+      <Patch Number="134" Name="Kayakeum Plk" ProgramChange="5"/>
+      <Patch Number="135" Name="Asian Dawn" ProgramChange="6"/>
+      <Patch Number="136" Name="Shamisen" ProgramChange="7"/>
+      <Patch Number="137" Name="Noo Tye Whan" ProgramChange="8"/>
+      <Patch Number="138" Name="Time Vault" ProgramChange="9"/>
+      <Patch Number="139" Name="Afroharp 1" ProgramChange="10"/>
+      <Patch Number="140" Name="OctHarp" ProgramChange="11"/>
+      <Patch Number="141" Name="ChineseOrch2" ProgramChange="12"/>
+      <Patch Number="142" Name="Euro Zither" ProgramChange="13"/>
+      <Patch Number="143" Name="AfricaZither" ProgramChange="14"/>
+      <Patch Number="144" Name="Zithgliss" ProgramChange="15"/>
+      <Patch Number="145" Name="Hmr.Dulcimer" ProgramChange="16"/>
+      <Patch Number="146" Name="Cymbalom" ProgramChange="17"/>
+      <Patch Number="147" Name="Brt.Dulcimer" ProgramChange="18"/>
+      <Patch Number="148" Name="Yangchin 1" ProgramChange="19"/>
+      <Patch Number="149" Name="Eastern Twang" ProgramChange="20"/>
+      <Patch Number="150" Name="12th Knight" ProgramChange="21"/>
+      <Patch Number="151" Name="Bandolim" ProgramChange="22"/>
+      <Patch Number="152" Name="Cavaquinho" ProgramChange="23"/>
+      <Patch Number="153" Name="Oud" ProgramChange="24"/>
+      <Patch Number="154" Name="Mondo Oud!" ProgramChange="25"/>
+      <Patch Number="155" Name="HybridStrung" ProgramChange="26"/>
+      <Patch Number="156" Name="GlobalChorus" ProgramChange="27"/>
+      <Patch Number="157" Name="Kanoum" ProgramChange="28"/>
+      <Patch Number="158" Name="MultieastPix" ProgramChange="29"/>
+      <Patch Number="159" Name="Yuehchin" ProgramChange="30"/>
+      <Patch Number="160" Name="Crossbreed" ProgramChange="31"/>
+      <Patch Number="161" Name="SoftRezituar" ProgramChange="32"/>
+      <Patch Number="162" Name="Ethnic VLNx3" ProgramChange="33"/>
+      <Patch Number="163" Name="Singil Piper" ProgramChange="34"/>
+      <Patch Number="164" Name="Kulture Shok" ProgramChange="35"/>
+      <Patch Number="165" Name="Erhu Lead" ProgramChange="36"/>
+      <Patch Number="166" Name="ChineseOrch1" ProgramChange="37"/>
+      <Patch Number="167" Name="Mosque Reeds" ProgramChange="38"/>
+      <Patch Number="168" Name="E.Com Lead 1" ProgramChange="39"/>
+      <Patch Number="169" Name="Piri Solo" ProgramChange="40"/>
+      <Patch Number="170" Name="Mizmar" ProgramChange="41"/>
+      <Patch Number="171" Name="Shahnai" ProgramChange="42"/>
+      <Patch Number="172" Name="Hichirick" ProgramChange="43"/>
+      <Patch Number="173" Name="VeloBagpipes" ProgramChange="44"/>
+      <Patch Number="174" Name="Bagpipes" ProgramChange="45"/>
+      <Patch Number="175" Name="Dholla Menu" ProgramChange="46"/>
+      <Patch Number="176" Name="Egypt Tablah" ProgramChange="47"/>
+      <Patch Number="177" Name="Madal Menu" ProgramChange="48"/>
+      <Patch Number="178" Name="Dholak Menu" ProgramChange="49"/>
+      <Patch Number="179" Name="TablaProcess" ProgramChange="50"/>
+      <Patch Number="180" Name="Tinjaw" ProgramChange="51"/>
+      <Patch Number="181" Name="Moroco FX" ProgramChange="52"/>
+      <Patch Number="182" Name="Arabian" ProgramChange="53"/>
+      <Patch Number="183" Name="TablanRhythm" ProgramChange="54"/>
+      <Patch Number="184" Name="Tablafun" ProgramChange="55"/>
+      <Patch Number="185" Name="Rattabla" ProgramChange="56"/>
+      <Patch Number="186" Name="Sitarchestra" ProgramChange="57"/>
+      <Patch Number="187" Name="Ravis Axe" ProgramChange="58"/>
+      <Patch Number="188" Name="Passag2India" ProgramChange="59"/>
+      <Patch Number="189" Name="Tambra Swirl" ProgramChange="60"/>
+      <Patch Number="190" Name="Sitar ++" ProgramChange="61"/>
+      <Patch Number="191" Name="Movie Synth" ProgramChange="62"/>
+      <Patch Number="192" Name="Sitarsqeezer" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP World 4th(64)">
+      <Patch Number="193" Name="Sitar Gliss" ProgramChange="0"/>
+      <Patch Number="194" Name="Tambura" ProgramChange="1"/>
+      <Patch Number="195" Name="Tamb. Drone" ProgramChange="2"/>
+      <Patch Number="196" Name="Breath Drum" ProgramChange="3"/>
+      <Patch Number="197" Name="Tribe Switch" ProgramChange="4"/>
+      <Patch Number="198" Name="Perc. Hit 1" ProgramChange="5"/>
+      <Patch Number="199" Name="Perc. Hit 2" ProgramChange="6"/>
+      <Patch Number="200" Name="Big Perc.Hit" ProgramChange="7"/>
+      <Patch Number="201" Name="Doira Drum" ProgramChange="8"/>
+      <Patch Number="202" Name="Bendir" ProgramChange="9"/>
+      <Patch Number="203" Name="Chekere/" ProgramChange="10"/>
+      <Patch Number="204" Name="Rek Menu" ProgramChange="11"/>
+      <Patch Number="205" Name="Shaker Menu" ProgramChange="12"/>
+      <Patch Number="206" Name="Caixa Menu" ProgramChange="13"/>
+      <Patch Number="207" Name="Cowbell Menu" ProgramChange="14"/>
+      <Patch Number="208" Name="Bongo Set" ProgramChange="15"/>
+      <Patch Number="209" Name="Guiro/" ProgramChange="16"/>
+      <Patch Number="210" Name="Samba Menu" ProgramChange="17"/>
+      <Patch Number="211" Name="Pandeiro Menu" ProgramChange="18"/>
+      <Patch Number="212" Name="Surdo Menu" ProgramChange="19"/>
+      <Patch Number="213" Name="Cuica" ProgramChange="20"/>
+      <Patch Number="214" Name="Rain Stick" ProgramChange="21"/>
+      <Patch Number="215" Name="Rotating Drm" ProgramChange="22"/>
+      <Patch Number="216" Name="BellsOfSarna" ProgramChange="23"/>
+      <Patch Number="217" Name="Comb.Loop 1" ProgramChange="24"/>
+      <Patch Number="218" Name="Comb.Loop 2" ProgramChange="25"/>
+      <Patch Number="219" Name="Comb.Loop 3" ProgramChange="26"/>
+      <Patch Number="220" Name="Comb.Loop 4" ProgramChange="27"/>
+      <Patch Number="221" Name="Comb.Loop 5" ProgramChange="28"/>
+      <Patch Number="222" Name="Comb.Loop 6" ProgramChange="29"/>
+      <Patch Number="223" Name="Slow.Loop 1" ProgramChange="30"/>
+      <Patch Number="224" Name="2Bar Loop 1" ProgramChange="31"/>
+      <Patch Number="225" Name="2Bar Loop 2" ProgramChange="32"/>
+      <Patch Number="226" Name="2Bar Loop 3" ProgramChange="33"/>
+      <Patch Number="227" Name="CyclicSweep16" ProgramChange="34"/>
+      <Patch Number="228" Name="Special Loop" ProgramChange="35"/>
+      <Patch Number="229" Name="Samba Break/" ProgramChange="36"/>
+      <Patch Number="230" Name="Bushroot" ProgramChange="37"/>
+      <Patch Number="231" Name="Didgeridrone" ProgramChange="38"/>
+      <Patch Number="232" Name="Dingodrone" ProgramChange="39"/>
+      <Patch Number="233" Name="Didgeridoo" ProgramChange="40"/>
+      <Patch Number="234" Name="Paila MG" ProgramChange="41"/>
+      <Patch Number="235" Name="Ethno Bass 1" ProgramChange="42"/>
+      <Patch Number="236" Name="Ethno Bass 2" ProgramChange="43"/>
+      <Patch Number="237" Name="Earth Com Bs" ProgramChange="44"/>
+      <Patch Number="238" Name="Clay HouseBs" ProgramChange="45"/>
+      <Patch Number="239" Name="Berimbass" ProgramChange="46"/>
+      <Patch Number="240" Name="Hunter" ProgramChange="47"/>
+      <Patch Number="241" Name="Jawskin" ProgramChange="48"/>
+      <Patch Number="242" Name="JawHarp Menu" ProgramChange="49"/>
+      <Patch Number="243" Name="AfricaVoices" ProgramChange="50"/>
+      <Patch Number="244" Name="Voice Set" ProgramChange="51"/>
+      <Patch Number="245" Name="Zaghruta" ProgramChange="52"/>
+      <Patch Number="246" Name="Maiting Call" ProgramChange="53"/>
+      <Patch Number="247" Name="Lost my way." ProgramChange="54"/>
+      <Patch Number="248" Name="PlayLoHi F#m" ProgramChange="55"/>
+      <Patch Number="249" Name="Going Deep" ProgramChange="56"/>
+      <Patch Number="250" Name="Worm Hole" ProgramChange="57"/>
+      <Patch Number="251" Name="Ethno Splash" ProgramChange="58"/>
+      <Patch Number="252" Name="DinosaurPark" ProgramChange="59"/>
+      <Patch Number="253" Name="BackwardGong" ProgramChange="60"/>
+      <Patch Number="254" Name="AfricanQueen" ProgramChange="61"/>
+      <Patch Number="255" Name="BedRock 5.30" ProgramChange="62"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JV-90</Model>
+    <Model>JV-1000</Model>
+    <PatchNameList Name="EXP World Rhythm Set">
+      <Patch Number="1" Name="JV rhythm" ProgramChange="0"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP World A">
+      <Patch Number="EA11" Name="World Tour!" ProgramChange="0"/>
+      <Patch Number="EA12" Name="Afropunch" ProgramChange="1"/>
+      <Patch Number="EA13" Name="Yo-How" ProgramChange="2"/>
+      <Patch Number="EA14" Name="Kenya Split" ProgramChange="3"/>
+      <Patch Number="EA15" Name="Intar Melody" ProgramChange="4"/>
+      <Patch Number="EA16" Name="BerimbauMenu" ProgramChange="5"/>
+      <Patch Number="EA17" Name="Thumb Chimes" ProgramChange="6"/>
+      <Patch Number="EA18" Name="Velo Afro 1" ProgramChange="7"/>
+      <Patch Number="EA21" Name="Bass Kalimba" ProgramChange="8"/>
+      <Patch Number="EA22" Name="Buzz Kalimba" ProgramChange="9"/>
+      <Patch Number="EA23" Name="Indalimba" ProgramChange="10"/>
+      <Patch Number="EA24" Name="Thumb Piano" ProgramChange="11"/>
+      <Patch Number="EA25" Name="Kalimba FX" ProgramChange="12"/>
+      <Patch Number="EA26" Name="AfropercMenu" ProgramChange="13"/>
+      <Patch Number="EA27" Name="Udu Pot Menu" ProgramChange="14"/>
+      <Patch Number="EA28" Name="Udu Pots/" ProgramChange="15"/>
+      <Patch Number="EA31" Name="Baateri" ProgramChange="16"/>
+      <Patch Number="EA32" Name="Log Detuner" ProgramChange="17"/>
+      <Patch Number="EA33" Name="Afroperk" ProgramChange="18"/>
+      <Patch Number="EA34" Name="Glass Mallet" ProgramChange="19"/>
+      <Patch Number="EA35" Name="Velo Afro 2" ProgramChange="20"/>
+      <Patch Number="EA36" Name="Balafon/" ProgramChange="21"/>
+      <Patch Number="EA37" Name="Hrd.Balafon" ProgramChange="22"/>
+      <Patch Number="EA38" Name="Pure Balafon" ProgramChange="23"/>
+      <Patch Number="EA41" Name="Big ole Logs" ProgramChange="24"/>
+      <Patch Number="EA42" Name="Afro Log" ProgramChange="25"/>
+      <Patch Number="EA43" Name="Angklungs" ProgramChange="26"/>
+      <Patch Number="EA44" Name="BellAngklung" ProgramChange="27"/>
+      <Patch Number="EA45" Name="Steel Drums1" ProgramChange="28"/>
+      <Patch Number="EA46" Name="Steel Drums2" ProgramChange="29"/>
+      <Patch Number="EA47" Name="War Drums" ProgramChange="30"/>
+      <Patch Number="EA48" Name="AfricanMarch" ProgramChange="31"/>
+      <Patch Number="EA51" Name="AfricanStomp" ProgramChange="32"/>
+      <Patch Number="EA52" Name="Tribal Claps" ProgramChange="33"/>
+      <Patch Number="EA53" Name="Kawala Str" ProgramChange="34"/>
+      <Patch Number="EA54" Name="Space-o-rama" ProgramChange="35"/>
+      <Patch Number="EA55" Name="Shakupad" ProgramChange="36"/>
+      <Patch Number="EA56" Name="Ceremony" ProgramChange="37"/>
+      <Patch Number="EA57" Name="Los Tremolos" ProgramChange="38"/>
+      <Patch Number="EA58" Name="Lo Celloez" ProgramChange="39"/>
+      <Patch Number="EA61" Name="Octargans" ProgramChange="40"/>
+      <Patch Number="EA62" Name="Lo Ethnoreed" ProgramChange="41"/>
+      <Patch Number="EA63" Name="Eastvox" ProgramChange="42"/>
+      <Patch Number="EA64" Name="Black Rain" ProgramChange="43"/>
+      <Patch Number="EA65" Name="Steel 5th" ProgramChange="44"/>
+      <Patch Number="EA66" Name="5th Wind" ProgramChange="45"/>
+      <Patch Number="EA67" Name="5th Bell" ProgramChange="46"/>
+      <Patch Number="EA68" Name="Ocarawla" ProgramChange="47"/>
+      <Patch Number="EA71" Name="Conch Call" ProgramChange="48"/>
+      <Patch Number="EA72" Name="Sweep Floot" ProgramChange="49"/>
+      <Patch Number="EA73" Name="Space Pipe" ProgramChange="50"/>
+      <Patch Number="EA74" Name="PercssivRain" ProgramChange="51"/>
+      <Patch Number="EA75" Name="Asian Chord" ProgramChange="52"/>
+      <Patch Number="EA76" Name="Dell Ikhitt" ProgramChange="53"/>
+      <Patch Number="EA77" Name="Ghost Metal" ProgramChange="54"/>
+      <Patch Number="EA78" Name="Ring-RingPad" ProgramChange="55"/>
+      <Patch Number="EA81" Name="Misterious" ProgramChange="56"/>
+      <Patch Number="EA82" Name="Re-mind" ProgramChange="57"/>
+      <Patch Number="EA83" Name="Whistle Vox" ProgramChange="58"/>
+      <Patch Number="EA84" Name="Living Dead" ProgramChange="59"/>
+      <Patch Number="EA85" Name="Earth Child" ProgramChange="60"/>
+      <Patch Number="EA86" Name="Spaceilimba" ProgramChange="61"/>
+      <Patch Number="EA87" Name="Drop of Rain" ProgramChange="62"/>
+      <Patch Number="EA88" Name="Gaia Thought" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP World B">
+      <Patch Number="EB11" Name="Es E.Piano" ProgramChange="64"/>
+      <Patch Number="EB12" Name="Piri Rise" ProgramChange="65"/>
+      <Patch Number="EB13" Name="Pandoras Box" ProgramChange="66"/>
+      <Patch Number="EB14" Name="Ethno Dreams" ProgramChange="67"/>
+      <Patch Number="EB15" Name="Snow Man" ProgramChange="68"/>
+      <Patch Number="EB16" Name="Cuica Steps" ProgramChange="69"/>
+      <Patch Number="EB17" Name="Saintly" ProgramChange="70"/>
+      <Patch Number="EB18" Name="Trade Winds" ProgramChange="71"/>
+      <Patch Number="EB21" Name="Pure Logic" ProgramChange="72"/>
+      <Patch Number="EB22" Name="Earth Color" ProgramChange="73"/>
+      <Patch Number="EB23" Name="Jawbreath" ProgramChange="74"/>
+      <Patch Number="EB24" Name="AsiaCYM Menu" ProgramChange="75"/>
+      <Patch Number="EB25" Name="Gong Menu" ProgramChange="76"/>
+      <Patch Number="EB26" Name="Gong/" ProgramChange="77"/>
+      <Patch Number="EB27" Name="China Menu" ProgramChange="78"/>
+      <Patch Number="EB28" Name="Kabuki Menu" ProgramChange="79"/>
+      <Patch Number="EB31" Name="Biwa" ProgramChange="80"/>
+      <Patch Number="EB32" Name="Genderous" ProgramChange="81"/>
+      <Patch Number="EB33" Name="Temple Metal" ProgramChange="82"/>
+      <Patch Number="EB34" Name="Gomelan Tuti" ProgramChange="83"/>
+      <Patch Number="EB35" Name="African Snow" ProgramChange="84"/>
+      <Patch Number="EB36" Name="Bonang-Gam." ProgramChange="85"/>
+      <Patch Number="EB37" Name="Gamelan x4" ProgramChange="86"/>
+      <Patch Number="EB38" Name="Saron-Gameln" ProgramChange="87"/>
+      <Patch Number="EB41" Name="Temple Chime" ProgramChange="88"/>
+      <Patch Number="EB42" Name="Prayer Bowls" ProgramChange="89"/>
+      <Patch Number="EB43" Name="Hiten Bells" ProgramChange="90"/>
+      <Patch Number="EB44" Name="Trash Metal" ProgramChange="91"/>
+      <Patch Number="EB45" Name="Singing Bell" ProgramChange="92"/>
+      <Patch Number="EB46" Name="Rama Chimes" ProgramChange="93"/>
+      <Patch Number="EB47" Name="Rama Cymbals" ProgramChange="94"/>
+      <Patch Number="EB48" Name="Tibet Bells" ProgramChange="95"/>
+      <Patch Number="EB51" Name="Big Bowls" ProgramChange="96"/>
+      <Patch Number="EB52" Name="Spoke Mallet" ProgramChange="97"/>
+      <Patch Number="EB53" Name="Shakuhachi" ProgramChange="98"/>
+      <Patch Number="EB54" Name="Shaku Accent" ProgramChange="99"/>
+      <Patch Number="EB55" Name="Shakueko" ProgramChange="100"/>
+      <Patch Number="EB56" Name="Pipe Melodi" ProgramChange="101"/>
+      <Patch Number="EB57" Name="Flautwist" ProgramChange="102"/>
+      <Patch Number="EB58" Name="Flute Press" ProgramChange="103"/>
+      <Patch Number="EB61" Name="Zamponia" ProgramChange="104"/>
+      <Patch Number="EB62" Name="Wosh Chiff" ProgramChange="105"/>
+      <Patch Number="EB63" Name="Tramaloo" ProgramChange="106"/>
+      <Patch Number="EB64" Name="FantasicPipe" ProgramChange="107"/>
+      <Patch Number="EB65" Name="Pan Pipe /" ProgramChange="108"/>
+      <Patch Number="EB66" Name="Random Zamp" ProgramChange="109"/>
+      <Patch Number="EB67" Name="Zampona tr 2" ProgramChange="110"/>
+      <Patch Number="EB68" Name="Ethno Pipes1" ProgramChange="111"/>
+      <Patch Number="EB71" Name="Ethno Pipes2" ProgramChange="112"/>
+      <Patch Number="EB72" Name="Ethno Pipes3" ProgramChange="113"/>
+      <Patch Number="EB73" Name="Ocarina 3" ProgramChange="114"/>
+      <Patch Number="EB74" Name="Quena" ProgramChange="115"/>
+      <Patch Number="EB75" Name="Kawala" ProgramChange="116"/>
+      <Patch Number="EB76" Name="Kawallabe" ProgramChange="117"/>
+      <Patch Number="EB77" Name="Romance Exp" ProgramChange="118"/>
+      <Patch Number="EB78" Name="Wind 7 Split" ProgramChange="119"/>
+      <Patch Number="EB81" Name="Uni-Jig Pan" ProgramChange="120"/>
+      <Patch Number="EB82" Name="OcarinaLead" ProgramChange="121"/>
+      <Patch Number="EB83" Name="Zamp Lead" ProgramChange="122"/>
+      <Patch Number="EB84" Name="Blown Touch" ProgramChange="123"/>
+      <Patch Number="EB85" Name="Barkit" ProgramChange="124"/>
+      <Patch Number="EB86" Name="Jungle Pipes" ProgramChange="125"/>
+      <Patch Number="EB87" Name="C Shell+echo" ProgramChange="126"/>
+      <Patch Number="EB88" Name="Atmospluck" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP World C">
+      <Patch Number="EC11" Name="Afroharp Arq" ProgramChange="0"/>
+      <Patch Number="EC12" Name="East/WestPlk" ProgramChange="1"/>
+      <Patch Number="EC13" Name="Koto" ProgramChange="2"/>
+      <Patch Number="EC14" Name="Zhueng" ProgramChange="3"/>
+      <Patch Number="EC15" Name="Kotokeum" ProgramChange="4"/>
+      <Patch Number="EC16" Name="Kayakeum Plk" ProgramChange="5"/>
+      <Patch Number="EC17" Name="Asian Dawn" ProgramChange="6"/>
+      <Patch Number="EC18" Name="Shamisen" ProgramChange="7"/>
+      <Patch Number="EC21" Name="Noo Tye Whan" ProgramChange="8"/>
+      <Patch Number="EC22" Name="Time Vault" ProgramChange="9"/>
+      <Patch Number="EC23" Name="Afroharp 1" ProgramChange="10"/>
+      <Patch Number="EC24" Name="OctHarp" ProgramChange="11"/>
+      <Patch Number="EC25" Name="ChineseOrch2" ProgramChange="12"/>
+      <Patch Number="EC26" Name="Euro Zither" ProgramChange="13"/>
+      <Patch Number="EC27" Name="AfricaZither" ProgramChange="14"/>
+      <Patch Number="EC28" Name="Zithgliss" ProgramChange="15"/>
+      <Patch Number="EC31" Name="Hmr.Dulcimer" ProgramChange="16"/>
+      <Patch Number="EC32" Name="Cymbalom" ProgramChange="17"/>
+      <Patch Number="EC33" Name="Brt.Dulcimer" ProgramChange="18"/>
+      <Patch Number="EC34" Name="Yangchin 1" ProgramChange="19"/>
+      <Patch Number="EC35" Name="Eastern Twang" ProgramChange="20"/>
+      <Patch Number="EC36" Name="12th Knight" ProgramChange="21"/>
+      <Patch Number="EC37" Name="Bandolim" ProgramChange="22"/>
+      <Patch Number="EC38" Name="Cavaquinho" ProgramChange="23"/>
+      <Patch Number="EC41" Name="Oud" ProgramChange="24"/>
+      <Patch Number="EC42" Name="Mondo Oud!" ProgramChange="25"/>
+      <Patch Number="EC43" Name="HybridStrung" ProgramChange="26"/>
+      <Patch Number="EC44" Name="GlobalChorus" ProgramChange="27"/>
+      <Patch Number="EC45" Name="Kanoum" ProgramChange="28"/>
+      <Patch Number="EC46" Name="MultieastPix" ProgramChange="29"/>
+      <Patch Number="EC47" Name="Yuehchin" ProgramChange="30"/>
+      <Patch Number="EC48" Name="Crossbreed" ProgramChange="31"/>
+      <Patch Number="EC51" Name="SoftRezituar" ProgramChange="32"/>
+      <Patch Number="EC52" Name="Ethnic VLNx3" ProgramChange="33"/>
+      <Patch Number="EC53" Name="Singil Piper" ProgramChange="34"/>
+      <Patch Number="EC54" Name="Kulture Shok" ProgramChange="35"/>
+      <Patch Number="EC55" Name="Erhu Lead" ProgramChange="36"/>
+      <Patch Number="EC56" Name="ChineseOrch1" ProgramChange="37"/>
+      <Patch Number="EC57" Name="Mosque Reeds" ProgramChange="38"/>
+      <Patch Number="EC58" Name="E.Com Lead 1" ProgramChange="39"/>
+      <Patch Number="EC61" Name="Piri Solo" ProgramChange="40"/>
+      <Patch Number="EC62" Name="Mizmar" ProgramChange="41"/>
+      <Patch Number="EC63" Name="Shahnai" ProgramChange="42"/>
+      <Patch Number="EC64" Name="Hichirick" ProgramChange="43"/>
+      <Patch Number="EC65" Name="VeloBagpipes" ProgramChange="44"/>
+      <Patch Number="EC66" Name="Bagpipes" ProgramChange="45"/>
+      <Patch Number="EC67" Name="Dholla Menu" ProgramChange="46"/>
+      <Patch Number="EC68" Name="Egypt Tablah" ProgramChange="47"/>
+      <Patch Number="EC71" Name="Madal Menu" ProgramChange="48"/>
+      <Patch Number="EC72" Name="Dholak Menu" ProgramChange="49"/>
+      <Patch Number="EC73" Name="TablaProcess" ProgramChange="50"/>
+      <Patch Number="EC74" Name="Tinjaw" ProgramChange="51"/>
+      <Patch Number="EC75" Name="Moroco FX" ProgramChange="52"/>
+      <Patch Number="EC76" Name="Arabian" ProgramChange="53"/>
+      <Patch Number="EC77" Name="TablanRhythm" ProgramChange="54"/>
+      <Patch Number="EC78" Name="Tablafun" ProgramChange="55"/>
+      <Patch Number="EC81" Name="Rattabla" ProgramChange="56"/>
+      <Patch Number="EC82" Name="Sitarchestra" ProgramChange="57"/>
+      <Patch Number="EC83" Name="Ravis Axe" ProgramChange="58"/>
+      <Patch Number="EC84" Name="Passag2India" ProgramChange="59"/>
+      <Patch Number="EC85" Name="Tambra Swirl" ProgramChange="60"/>
+      <Patch Number="EC86" Name="Sitar ++" ProgramChange="61"/>
+      <Patch Number="EC87" Name="Movie Synth" ProgramChange="62"/>
+      <Patch Number="EC88" Name="Sitarsqeezer" ProgramChange="63"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP World D">
+      <Patch Number="ED11" Name="Sitar Gliss" ProgramChange="64"/>
+      <Patch Number="ED12" Name="Tambura" ProgramChange="65"/>
+      <Patch Number="ED13" Name="Tamb. Drone" ProgramChange="66"/>
+      <Patch Number="ED14" Name="Breath Drum" ProgramChange="67"/>
+      <Patch Number="ED15" Name="Tribe Switch" ProgramChange="68"/>
+      <Patch Number="ED16" Name="Perc. Hit 1" ProgramChange="69"/>
+      <Patch Number="ED17" Name="Perc. Hit 2" ProgramChange="70"/>
+      <Patch Number="ED18" Name="Big Perc.Hit" ProgramChange="71"/>
+      <Patch Number="ED21" Name="Doira Drum" ProgramChange="72"/>
+      <Patch Number="ED22" Name="Bendir" ProgramChange="73"/>
+      <Patch Number="ED23" Name="Chekere/" ProgramChange="74"/>
+      <Patch Number="ED24" Name="Rek Menu" ProgramChange="75"/>
+      <Patch Number="ED25" Name="Shaker Menu" ProgramChange="76"/>
+      <Patch Number="ED26" Name="Caixa Menu" ProgramChange="77"/>
+      <Patch Number="ED27" Name="Cowbell Menu" ProgramChange="78"/>
+      <Patch Number="ED28" Name="Bongo Set" ProgramChange="79"/>
+      <Patch Number="ED31" Name="Guiro/" ProgramChange="80"/>
+      <Patch Number="ED32" Name="Samba Menu" ProgramChange="81"/>
+      <Patch Number="ED33" Name="Pandeiro Menu" ProgramChange="82"/>
+      <Patch Number="ED34" Name="Surdo Menu" ProgramChange="83"/>
+      <Patch Number="ED35" Name="Cuica" ProgramChange="84"/>
+      <Patch Number="ED36" Name="Rain Stick" ProgramChange="85"/>
+      <Patch Number="ED37" Name="Rotating Drm" ProgramChange="86"/>
+      <Patch Number="ED38" Name="BellsOfSarna" ProgramChange="87"/>
+      <Patch Number="ED41" Name="Comb.Loop 1" ProgramChange="88"/>
+      <Patch Number="ED42" Name="Comb.Loop 2" ProgramChange="89"/>
+      <Patch Number="ED43" Name="Comb.Loop 3" ProgramChange="90"/>
+      <Patch Number="ED44" Name="Comb.Loop 4" ProgramChange="91"/>
+      <Patch Number="ED45" Name="Comb.Loop 5" ProgramChange="92"/>
+      <Patch Number="ED46" Name="Comb.Loop 6" ProgramChange="93"/>
+      <Patch Number="ED47" Name="Slow.Loop 1" ProgramChange="94"/>
+      <Patch Number="ED48" Name="2Bar Loop 1" ProgramChange="95"/>
+      <Patch Number="ED51" Name="2Bar Loop 2" ProgramChange="96"/>
+      <Patch Number="ED52" Name="2Bar Loop 3" ProgramChange="97"/>
+      <Patch Number="ED53" Name="CyclicSweep16" ProgramChange="98"/>
+      <Patch Number="ED54" Name="Special Loop" ProgramChange="99"/>
+      <Patch Number="ED55" Name="Samba Break/" ProgramChange="100"/>
+      <Patch Number="ED56" Name="Bushroot" ProgramChange="101"/>
+      <Patch Number="ED57" Name="Didgeridrone" ProgramChange="102"/>
+      <Patch Number="ED58" Name="Dingodrone" ProgramChange="103"/>
+      <Patch Number="ED61" Name="Didgeridoo" ProgramChange="104"/>
+      <Patch Number="ED62" Name="Paila MG" ProgramChange="105"/>
+      <Patch Number="ED63" Name="Ethno Bass 1" ProgramChange="106"/>
+      <Patch Number="ED64" Name="Ethno Bass 2" ProgramChange="107"/>
+      <Patch Number="ED65" Name="Earth Com Bs" ProgramChange="108"/>
+      <Patch Number="ED66" Name="Clay HouseBs" ProgramChange="109"/>
+      <Patch Number="ED67" Name="Berimbass" ProgramChange="110"/>
+      <Patch Number="ED68" Name="Hunter" ProgramChange="111"/>
+      <Patch Number="ED71" Name="Jawskin" ProgramChange="112"/>
+      <Patch Number="ED72" Name="JawHarp Menu" ProgramChange="113"/>
+      <Patch Number="ED73" Name="AfricaVoices" ProgramChange="114"/>
+      <Patch Number="ED74" Name="Voice Set" ProgramChange="115"/>
+      <Patch Number="ED75" Name="Zaghruta" ProgramChange="116"/>
+      <Patch Number="ED76" Name="Maiting Call" ProgramChange="117"/>
+      <Patch Number="ED77" Name="Lost my way." ProgramChange="118"/>
+      <Patch Number="ED78" Name="PlayLoHi F#m" ProgramChange="119"/>
+      <Patch Number="ED81" Name="Going Deep" ProgramChange="120"/>
+      <Patch Number="ED82" Name="Worm Hole" ProgramChange="121"/>
+      <Patch Number="ED83" Name="Ethno Splash" ProgramChange="122"/>
+      <Patch Number="ED84" Name="DinosaurPark" ProgramChange="123"/>
+      <Patch Number="ED85" Name="BackwardGong" ProgramChange="124"/>
+      <Patch Number="ED86" Name="AfricanQueen" ProgramChange="125"/>
+      <Patch Number="ED87" Name="BedRock 5.30" ProgramChange="126"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JV-1010</Model>
+    <Model>JV-1080</Model>
+    <Model>JV-2080</Model>
+    <Model>XP-50</Model>
+    <Model>XP-80</Model>
+    <Model>XV-5080</Model>
+    <Model>XV-3080</Model>
+    <Model>XV-88</Model>
+    <PatchNameList Name="EXP World: Rhythm Kits">
+      <Patch Number="001" Name="JV rhythm" ProgramChange="0"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP World: Patches 001-128">
+      <Patch Number="001" Name="World Tour!" ProgramChange="0"/>
+      <Patch Number="002" Name="Afropunch" ProgramChange="1"/>
+      <Patch Number="003" Name="Yo-How" ProgramChange="2"/>
+      <Patch Number="004" Name="Kenya Split" ProgramChange="3"/>
+      <Patch Number="005" Name="Intar Melody" ProgramChange="4"/>
+      <Patch Number="006" Name="BerimbauMenu" ProgramChange="5"/>
+      <Patch Number="007" Name="Thumb Chimes" ProgramChange="6"/>
+      <Patch Number="008" Name="Velo Afro 1" ProgramChange="7"/>
+      <Patch Number="009" Name="Bass Kalimba" ProgramChange="8"/>
+      <Patch Number="010" Name="Buzz Kalimba" ProgramChange="9"/>
+      <Patch Number="011" Name="Indalimba" ProgramChange="10"/>
+      <Patch Number="012" Name="Thumb Piano" ProgramChange="11"/>
+      <Patch Number="013" Name="Kalimba FX" ProgramChange="12"/>
+      <Patch Number="014" Name="AfropercMenu" ProgramChange="13"/>
+      <Patch Number="015" Name="Udu Pot Menu" ProgramChange="14"/>
+      <Patch Number="016" Name="Udu Pots/" ProgramChange="15"/>
+      <Patch Number="017" Name="Baateri" ProgramChange="16"/>
+      <Patch Number="018" Name="Log Detuner" ProgramChange="17"/>
+      <Patch Number="019" Name="Afroperk" ProgramChange="18"/>
+      <Patch Number="020" Name="Glass Mallet" ProgramChange="19"/>
+      <Patch Number="021" Name="Velo Afro 2" ProgramChange="20"/>
+      <Patch Number="022" Name="Balafon/" ProgramChange="21"/>
+      <Patch Number="023" Name="Hrd.Balafon" ProgramChange="22"/>
+      <Patch Number="024" Name="Pure Balafon" ProgramChange="23"/>
+      <Patch Number="025" Name="Big ole Logs" ProgramChange="24"/>
+      <Patch Number="026" Name="Afro Log" ProgramChange="25"/>
+      <Patch Number="027" Name="Angklungs" ProgramChange="26"/>
+      <Patch Number="028" Name="BellAngklung" ProgramChange="27"/>
+      <Patch Number="029" Name="Steel Drums1" ProgramChange="28"/>
+      <Patch Number="030" Name="Steel Drums2" ProgramChange="29"/>
+      <Patch Number="031" Name="War Drums" ProgramChange="30"/>
+      <Patch Number="032" Name="AfricanMarch" ProgramChange="31"/>
+      <Patch Number="033" Name="AfricanStomp" ProgramChange="32"/>
+      <Patch Number="034" Name="Tribal Claps" ProgramChange="33"/>
+      <Patch Number="035" Name="Kawala Str" ProgramChange="34"/>
+      <Patch Number="036" Name="Space-o-rama" ProgramChange="35"/>
+      <Patch Number="037" Name="Shakupad" ProgramChange="36"/>
+      <Patch Number="038" Name="Ceremony" ProgramChange="37"/>
+      <Patch Number="039" Name="Los Tremolos" ProgramChange="38"/>
+      <Patch Number="040" Name="Lo Celloez" ProgramChange="39"/>
+      <Patch Number="041" Name="Octargans" ProgramChange="40"/>
+      <Patch Number="042" Name="Lo Ethnoreed" ProgramChange="41"/>
+      <Patch Number="043" Name="Eastvox" ProgramChange="42"/>
+      <Patch Number="044" Name="Black Rain" ProgramChange="43"/>
+      <Patch Number="045" Name="Steel 5th" ProgramChange="44"/>
+      <Patch Number="046" Name="5th Wind" ProgramChange="45"/>
+      <Patch Number="047" Name="5th Bell" ProgramChange="46"/>
+      <Patch Number="048" Name="Ocarawla" ProgramChange="47"/>
+      <Patch Number="049" Name="Conch Call" ProgramChange="48"/>
+      <Patch Number="050" Name="Sweep Floot" ProgramChange="49"/>
+      <Patch Number="051" Name="Space Pipe" ProgramChange="50"/>
+      <Patch Number="052" Name="PercssivRain" ProgramChange="51"/>
+      <Patch Number="053" Name="Asian Chord" ProgramChange="52"/>
+      <Patch Number="054" Name="Dell Ikhitt" ProgramChange="53"/>
+      <Patch Number="055" Name="Ghost Metal" ProgramChange="54"/>
+      <Patch Number="056" Name="Ring-RingPad" ProgramChange="55"/>
+      <Patch Number="057" Name="Misterious" ProgramChange="56"/>
+      <Patch Number="058" Name="Re-mind" ProgramChange="57"/>
+      <Patch Number="059" Name="Whistle Vox" ProgramChange="58"/>
+      <Patch Number="060" Name="Living Dead" ProgramChange="59"/>
+      <Patch Number="061" Name="Earth Child" ProgramChange="60"/>
+      <Patch Number="062" Name="Spaceilimba" ProgramChange="61"/>
+      <Patch Number="063" Name="Drop of Rain" ProgramChange="62"/>
+      <Patch Number="064" Name="Gaia Thought" ProgramChange="63"/>
+      <Patch Number="065" Name="Es E.Piano" ProgramChange="64"/>
+      <Patch Number="066" Name="Piri Rise" ProgramChange="65"/>
+      <Patch Number="067" Name="Pandoras Box" ProgramChange="66"/>
+      <Patch Number="068" Name="Ethno Dreams" ProgramChange="67"/>
+      <Patch Number="069" Name="Snow Man" ProgramChange="68"/>
+      <Patch Number="070" Name="Cuica Steps" ProgramChange="69"/>
+      <Patch Number="071" Name="Saintly" ProgramChange="70"/>
+      <Patch Number="072" Name="Trade Winds" ProgramChange="71"/>
+      <Patch Number="073" Name="Pure Logic" ProgramChange="72"/>
+      <Patch Number="074" Name="Earth Color" ProgramChange="73"/>
+      <Patch Number="075" Name="Jawbreath" ProgramChange="74"/>
+      <Patch Number="076" Name="AsiaCYM Menu" ProgramChange="75"/>
+      <Patch Number="077" Name="Gong Menu" ProgramChange="76"/>
+      <Patch Number="078" Name="Gong/" ProgramChange="77"/>
+      <Patch Number="079" Name="China Menu" ProgramChange="78"/>
+      <Patch Number="080" Name="Kabuki Menu" ProgramChange="79"/>
+      <Patch Number="081" Name="Biwa" ProgramChange="80"/>
+      <Patch Number="082" Name="Genderous" ProgramChange="81"/>
+      <Patch Number="083" Name="Temple Metal" ProgramChange="82"/>
+      <Patch Number="084" Name="Gomelan Tuti" ProgramChange="83"/>
+      <Patch Number="085" Name="African Snow" ProgramChange="84"/>
+      <Patch Number="086" Name="Bonang-Gam." ProgramChange="85"/>
+      <Patch Number="087" Name="Gamelan x4" ProgramChange="86"/>
+      <Patch Number="088" Name="Saron-Gameln" ProgramChange="87"/>
+      <Patch Number="089" Name="Temple Chime" ProgramChange="88"/>
+      <Patch Number="090" Name="Prayer Bowls" ProgramChange="89"/>
+      <Patch Number="091" Name="Hiten Bells" ProgramChange="90"/>
+      <Patch Number="092" Name="Trash Metal" ProgramChange="91"/>
+      <Patch Number="093" Name="Singing Bell" ProgramChange="92"/>
+      <Patch Number="094" Name="Rama Chimes" ProgramChange="93"/>
+      <Patch Number="095" Name="Rama Cymbals" ProgramChange="94"/>
+      <Patch Number="096" Name="Tibet Bells" ProgramChange="95"/>
+      <Patch Number="097" Name="Big Bowls" ProgramChange="96"/>
+      <Patch Number="098" Name="Spoke Mallet" ProgramChange="97"/>
+      <Patch Number="099" Name="Shakuhachi" ProgramChange="98"/>
+      <Patch Number="100" Name="Shaku Accent" ProgramChange="99"/>
+      <Patch Number="101" Name="Shakueko" ProgramChange="100"/>
+      <Patch Number="102" Name="Pipe Melodi" ProgramChange="101"/>
+      <Patch Number="103" Name="Flautwist" ProgramChange="102"/>
+      <Patch Number="104" Name="Flute Press" ProgramChange="103"/>
+      <Patch Number="105" Name="Zamponia" ProgramChange="104"/>
+      <Patch Number="106" Name="Wosh Chiff" ProgramChange="105"/>
+      <Patch Number="107" Name="Tramaloo" ProgramChange="106"/>
+      <Patch Number="108" Name="FantasicPipe" ProgramChange="107"/>
+      <Patch Number="109" Name="Pan Pipe /" ProgramChange="108"/>
+      <Patch Number="110" Name="Random Zamp" ProgramChange="109"/>
+      <Patch Number="111" Name="Zampona tr 2" ProgramChange="110"/>
+      <Patch Number="112" Name="Ethno Pipes1" ProgramChange="111"/>
+      <Patch Number="113" Name="Ethno Pipes2" ProgramChange="112"/>
+      <Patch Number="114" Name="Ethno Pipes3" ProgramChange="113"/>
+      <Patch Number="115" Name="Ocarina 3" ProgramChange="114"/>
+      <Patch Number="116" Name="Quena" ProgramChange="115"/>
+      <Patch Number="117" Name="Kawala" ProgramChange="116"/>
+      <Patch Number="118" Name="Kawallabe" ProgramChange="117"/>
+      <Patch Number="119" Name="Romance Exp" ProgramChange="118"/>
+      <Patch Number="120" Name="Wind 7 Split" ProgramChange="119"/>
+      <Patch Number="121" Name="Uni-Jig Pan" ProgramChange="120"/>
+      <Patch Number="122" Name="OcarinaLead" ProgramChange="121"/>
+      <Patch Number="123" Name="Zamp Lead" ProgramChange="122"/>
+      <Patch Number="124" Name="Blown Touch" ProgramChange="123"/>
+      <Patch Number="125" Name="Barkit" ProgramChange="124"/>
+      <Patch Number="126" Name="Jungle Pipes" ProgramChange="125"/>
+      <Patch Number="127" Name="C Shell+echo" ProgramChange="126"/>
+      <Patch Number="128" Name="Atmospluck" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP World: Patches 129-255">
+      <Patch Number="129" Name="Afroharp Arq" ProgramChange="0"/>
+      <Patch Number="130" Name="East/WestPlk" ProgramChange="1"/>
+      <Patch Number="131" Name="Koto" ProgramChange="2"/>
+      <Patch Number="132" Name="Zhueng" ProgramChange="3"/>
+      <Patch Number="133" Name="Kotokeum" ProgramChange="4"/>
+      <Patch Number="134" Name="Kayakeum Plk" ProgramChange="5"/>
+      <Patch Number="135" Name="Asian Dawn" ProgramChange="6"/>
+      <Patch Number="136" Name="Shamisen" ProgramChange="7"/>
+      <Patch Number="137" Name="Noo Tye Whan" ProgramChange="8"/>
+      <Patch Number="138" Name="Time Vault" ProgramChange="9"/>
+      <Patch Number="139" Name="Afroharp 1" ProgramChange="10"/>
+      <Patch Number="140" Name="OctHarp" ProgramChange="11"/>
+      <Patch Number="141" Name="ChineseOrch2" ProgramChange="12"/>
+      <Patch Number="142" Name="Euro Zither" ProgramChange="13"/>
+      <Patch Number="143" Name="AfricaZither" ProgramChange="14"/>
+      <Patch Number="144" Name="Zithgliss" ProgramChange="15"/>
+      <Patch Number="145" Name="Hmr.Dulcimer" ProgramChange="16"/>
+      <Patch Number="146" Name="Cymbalom" ProgramChange="17"/>
+      <Patch Number="147" Name="Brt.Dulcimer" ProgramChange="18"/>
+      <Patch Number="148" Name="Yangchin 1" ProgramChange="19"/>
+      <Patch Number="149" Name="Eastern Twang" ProgramChange="20"/>
+      <Patch Number="150" Name="12th Knight" ProgramChange="21"/>
+      <Patch Number="151" Name="Bandolim" ProgramChange="22"/>
+      <Patch Number="152" Name="Cavaquinho" ProgramChange="23"/>
+      <Patch Number="153" Name="Oud" ProgramChange="24"/>
+      <Patch Number="154" Name="Mondo Oud!" ProgramChange="25"/>
+      <Patch Number="155" Name="HybridStrung" ProgramChange="26"/>
+      <Patch Number="156" Name="GlobalChorus" ProgramChange="27"/>
+      <Patch Number="157" Name="Kanoum" ProgramChange="28"/>
+      <Patch Number="158" Name="MultieastPix" ProgramChange="29"/>
+      <Patch Number="159" Name="Yuehchin" ProgramChange="30"/>
+      <Patch Number="160" Name="Crossbreed" ProgramChange="31"/>
+      <Patch Number="161" Name="SoftRezituar" ProgramChange="32"/>
+      <Patch Number="162" Name="Ethnic VLNx3" ProgramChange="33"/>
+      <Patch Number="163" Name="Singil Piper" ProgramChange="34"/>
+      <Patch Number="164" Name="Kulture Shok" ProgramChange="35"/>
+      <Patch Number="165" Name="Erhu Lead" ProgramChange="36"/>
+      <Patch Number="166" Name="ChineseOrch1" ProgramChange="37"/>
+      <Patch Number="167" Name="Mosque Reeds" ProgramChange="38"/>
+      <Patch Number="168" Name="E.Com Lead 1" ProgramChange="39"/>
+      <Patch Number="169" Name="Piri Solo" ProgramChange="40"/>
+      <Patch Number="170" Name="Mizmar" ProgramChange="41"/>
+      <Patch Number="171" Name="Shahnai" ProgramChange="42"/>
+      <Patch Number="172" Name="Hichirick" ProgramChange="43"/>
+      <Patch Number="173" Name="VeloBagpipes" ProgramChange="44"/>
+      <Patch Number="174" Name="Bagpipes" ProgramChange="45"/>
+      <Patch Number="175" Name="Dholla Menu" ProgramChange="46"/>
+      <Patch Number="176" Name="Egypt Tablah" ProgramChange="47"/>
+      <Patch Number="177" Name="Madal Menu" ProgramChange="48"/>
+      <Patch Number="178" Name="Dholak Menu" ProgramChange="49"/>
+      <Patch Number="179" Name="TablaProcess" ProgramChange="50"/>
+      <Patch Number="180" Name="Tinjaw" ProgramChange="51"/>
+      <Patch Number="181" Name="Moroco FX" ProgramChange="52"/>
+      <Patch Number="182" Name="Arabian" ProgramChange="53"/>
+      <Patch Number="183" Name="TablanRhythm" ProgramChange="54"/>
+      <Patch Number="184" Name="Tablafun" ProgramChange="55"/>
+      <Patch Number="185" Name="Rattabla" ProgramChange="56"/>
+      <Patch Number="186" Name="Sitarchestra" ProgramChange="57"/>
+      <Patch Number="187" Name="Ravis Axe" ProgramChange="58"/>
+      <Patch Number="188" Name="Passag2India" ProgramChange="59"/>
+      <Patch Number="189" Name="Tambra Swirl" ProgramChange="60"/>
+      <Patch Number="190" Name="Sitar ++" ProgramChange="61"/>
+      <Patch Number="191" Name="Movie Synth" ProgramChange="62"/>
+      <Patch Number="192" Name="Sitarsqeezer" ProgramChange="63"/>
+      <Patch Number="193" Name="Sitar Gliss" ProgramChange="64"/>
+      <Patch Number="194" Name="Tambura" ProgramChange="65"/>
+      <Patch Number="195" Name="Tamb. Drone" ProgramChange="66"/>
+      <Patch Number="196" Name="Breath Drum" ProgramChange="67"/>
+      <Patch Number="197" Name="Tribe Switch" ProgramChange="68"/>
+      <Patch Number="198" Name="Perc. Hit 1" ProgramChange="69"/>
+      <Patch Number="199" Name="Perc. Hit 2" ProgramChange="70"/>
+      <Patch Number="200" Name="Big Perc.Hit" ProgramChange="71"/>
+      <Patch Number="201" Name="Doira Drum" ProgramChange="72"/>
+      <Patch Number="202" Name="Bendir" ProgramChange="73"/>
+      <Patch Number="203" Name="Chekere/" ProgramChange="74"/>
+      <Patch Number="204" Name="Rek Menu" ProgramChange="75"/>
+      <Patch Number="205" Name="Shaker Menu" ProgramChange="76"/>
+      <Patch Number="206" Name="Caixa Menu" ProgramChange="77"/>
+      <Patch Number="207" Name="Cowbell Menu" ProgramChange="78"/>
+      <Patch Number="208" Name="Bongo Set" ProgramChange="79"/>
+      <Patch Number="209" Name="Guiro/" ProgramChange="80"/>
+      <Patch Number="210" Name="Samba Menu" ProgramChange="81"/>
+      <Patch Number="211" Name="Pandeiro Menu" ProgramChange="82"/>
+      <Patch Number="212" Name="Surdo Menu" ProgramChange="83"/>
+      <Patch Number="213" Name="Cuica" ProgramChange="84"/>
+      <Patch Number="214" Name="Rain Stick" ProgramChange="85"/>
+      <Patch Number="215" Name="Rotating Drm" ProgramChange="86"/>
+      <Patch Number="216" Name="BellsOfSarna" ProgramChange="87"/>
+      <Patch Number="217" Name="Comb.Loop 1" ProgramChange="88"/>
+      <Patch Number="218" Name="Comb.Loop 2" ProgramChange="89"/>
+      <Patch Number="219" Name="Comb.Loop 3" ProgramChange="90"/>
+      <Patch Number="220" Name="Comb.Loop 4" ProgramChange="91"/>
+      <Patch Number="221" Name="Comb.Loop 5" ProgramChange="92"/>
+      <Patch Number="222" Name="Comb.Loop 6" ProgramChange="93"/>
+      <Patch Number="223" Name="Slow.Loop 1" ProgramChange="94"/>
+      <Patch Number="224" Name="2Bar Loop 1" ProgramChange="95"/>
+      <Patch Number="225" Name="2Bar Loop 2" ProgramChange="96"/>
+      <Patch Number="226" Name="2Bar Loop 3" ProgramChange="97"/>
+      <Patch Number="227" Name="CyclicSweep16" ProgramChange="98"/>
+      <Patch Number="228" Name="Special Loop" ProgramChange="99"/>
+      <Patch Number="229" Name="Samba Break/" ProgramChange="100"/>
+      <Patch Number="230" Name="Bushroot" ProgramChange="101"/>
+      <Patch Number="231" Name="Didgeridrone" ProgramChange="102"/>
+      <Patch Number="232" Name="Dingodrone" ProgramChange="103"/>
+      <Patch Number="233" Name="Didgeridoo" ProgramChange="104"/>
+      <Patch Number="234" Name="Paila MG" ProgramChange="105"/>
+      <Patch Number="235" Name="Ethno Bass 1" ProgramChange="106"/>
+      <Patch Number="236" Name="Ethno Bass 2" ProgramChange="107"/>
+      <Patch Number="237" Name="Earth Com Bs" ProgramChange="108"/>
+      <Patch Number="238" Name="Clay HouseBs" ProgramChange="109"/>
+      <Patch Number="239" Name="Berimbass" ProgramChange="110"/>
+      <Patch Number="240" Name="Hunter" ProgramChange="111"/>
+      <Patch Number="241" Name="Jawskin" ProgramChange="112"/>
+      <Patch Number="242" Name="JawHarp Menu" ProgramChange="113"/>
+      <Patch Number="243" Name="AfricaVoices" ProgramChange="114"/>
+      <Patch Number="244" Name="Voice Set" ProgramChange="115"/>
+      <Patch Number="245" Name="Zaghruta" ProgramChange="116"/>
+      <Patch Number="246" Name="Maiting Call" ProgramChange="117"/>
+      <Patch Number="247" Name="Lost my way." ProgramChange="118"/>
+      <Patch Number="248" Name="PlayLoHi F#m" ProgramChange="119"/>
+      <Patch Number="249" Name="Going Deep" ProgramChange="120"/>
+      <Patch Number="250" Name="Worm Hole" ProgramChange="121"/>
+      <Patch Number="251" Name="Ethno Splash" ProgramChange="122"/>
+      <Patch Number="252" Name="DinosaurPark" ProgramChange="123"/>
+      <Patch Number="253" Name="BackwardGong" ProgramChange="124"/>
+      <Patch Number="254" Name="AfricanQueen" ProgramChange="125"/>
+      <Patch Number="255" Name="BedRock 5.30" ProgramChange="126"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

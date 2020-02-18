@@ -1,20 +1,21 @@
 /*
-  Copyright (C) 2010-2012 Paul Davis
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2017 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2019 Johannes Mueller <github@johannes-mueller.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <vector>
 
@@ -34,6 +35,10 @@ namespace Gtk {
 #include "button.h"
 
 #include "pbd/i18n.h"
+
+namespace ActionManager {
+        class ActionModel;
+}
 
 namespace ArdourSurface {
 
@@ -66,15 +71,6 @@ class US2400ProtocolGUI : public Gtk::Notebook
 		Gtk::TreeModelColumn<std::string> full_name;
 	};
 
-	struct AvailableActionColumns : public Gtk::TreeModel::ColumnRecord {
-		AvailableActionColumns() {
-			add (name);
-			add (path);
-		}
-		Gtk::TreeModelColumn<std::string> name;
-		Gtk::TreeModelColumn<std::string> path;
-	};
-
 	struct FunctionKeyColumns : public Gtk::TreeModel::ColumnRecord {
 		FunctionKeyColumns() {
 			add (name);
@@ -96,7 +92,6 @@ class US2400ProtocolGUI : public Gtk::Notebook
 		Gtk::TreeModelColumn<std::string> shiftcontrol;
 	};
 
-	AvailableActionColumns available_action_columns;
 	FunctionKeyColumns function_key_columns;
 	MidiPortColumns midi_port_columns;
 
@@ -107,7 +102,8 @@ class US2400ProtocolGUI : public Gtk::Notebook
 
 	Glib::RefPtr<Gtk::ListStore> build_midi_port_list (bool for_input);
 
-	void build_available_action_menu ();
+	const ActionManager::ActionModel& action_model;
+
 	void refresh_function_key_editor ();
 	void build_function_key_editor ();
 	void action_changed (const Glib::ustring &sPath, const Glib::ustring &text, Gtk::TreeModelColumnBase);
@@ -139,4 +135,3 @@ class US2400ProtocolGUI : public Gtk::Notebook
 };
 
 }
-

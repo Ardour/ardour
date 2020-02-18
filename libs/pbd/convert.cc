@@ -1,21 +1,23 @@
 /*
-    Copyright (C) 2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2006 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cmath>
 #include <algorithm>
@@ -46,12 +48,12 @@ namespace PBD {
 string
 capitalize (const string& str)
 {
-        string ret = str;
-        if (!str.empty()) {
-                /* XXX not unicode safe */
-                ret[0] = toupper (str[0]);
-        }
-        return ret;
+	string ret = str;
+	if (!str.empty()) {
+		/* XXX not unicode safe */
+		ret[0] = toupper (str[0]);
+	}
+	return ret;
 }
 
 string
@@ -175,8 +177,8 @@ internationalize (const char *package_name, const char **array)
 static int32_t
 int_from_hex (char hic, char loc)
 {
-	int hi;		/* hi byte */
-	int lo;		/* low byte */
+	int hi; /* hi byte */
+	int lo; /* low byte */
 
 	hi = (int) hic;
 
@@ -224,20 +226,20 @@ url_decode (string const & url)
 string
 length2string (const int32_t samples, const float sample_rate)
 {
-    int32_t secs = (int32_t) (samples / sample_rate);
-    int32_t hrs =  secs / 3600;
-    secs -= (hrs * 3600);
-    int32_t mins = secs / 60;
-    secs -= (mins * 60);
+	int32_t secs = (int32_t) (samples / sample_rate);
+	int32_t hrs =  secs / 3600;
+	secs -= (hrs * 3600);
+	int32_t mins = secs / 60;
+	secs -= (mins * 60);
 
-    int32_t total_secs = (hrs * 3600) + (mins * 60) + secs;
-    int32_t samples_remaining = (int) floor (samples - (total_secs * sample_rate));
-    float fractional_secs = (float) samples_remaining / sample_rate;
+	int32_t total_secs = (hrs * 3600) + (mins * 60) + secs;
+	int32_t samples_remaining = (int) floor (samples - (total_secs * sample_rate));
+	float fractional_secs = (float) samples_remaining / sample_rate;
 
-    char duration_str[32];
-    sprintf (duration_str, "%02" PRIi32 ":%02" PRIi32 ":%05.2f", hrs, mins, (float) secs + fractional_secs);
+	char duration_str[32];
+	sprintf (duration_str, "%02" PRIi32 ":%02" PRIi32 ":%05.2f", hrs, mins, (float) secs + fractional_secs);
 
-    return duration_str;
+	return duration_str;
 }
 #endif
 

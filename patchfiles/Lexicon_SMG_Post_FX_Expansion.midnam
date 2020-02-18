@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Lexicon</Manufacturer>
+    <Model>PCM-80</Model>
+    <Model>PCM-81</Model>
+    <PatchNameList Name="C0 Post FX">
+      <Patch Number="0" Name="Phone Futz 1" ProgramChange="0"/>
+      <Patch Number="1" Name="Phone Futz 2" ProgramChange="1"/>
+      <Patch Number="2" Name="Phone Futz 3" ProgramChange="2"/>
+      <Patch Number="3" Name="Speaker Phone" ProgramChange="3"/>
+      <Patch Number="4" Name="PhoneMachine" ProgramChange="4"/>
+      <Patch Number="5" Name="PhoneSqueez1" ProgramChange="5"/>
+      <Patch Number="6" Name="PhoneSqueez2" ProgramChange="6"/>
+      <Patch Number="7" Name="Radio Futz" ProgramChange="7"/>
+      <Patch Number="8" Name="Lopass Futz" ProgramChange="8"/>
+      <Patch Number="9" Name="TV Speaker" ProgramChange="9"/>
+      <Patch Number="10" Name="Mic Check" ProgramChange="10"/>
+      <Patch Number="11" Name="Radio Mic 1" ProgramChange="11"/>
+      <Patch Number="12" Name="Radio Mic 2" ProgramChange="12"/>
+      <Patch Number="13" Name="Radio Mic 3" ProgramChange="13"/>
+      <Patch Number="14" Name="PA Echo 1" ProgramChange="14"/>
+      <Patch Number="15" Name="PA Echo 2" ProgramChange="15"/>
+      <Patch Number="16" Name="PA Echo 3" ProgramChange="16"/>
+      <Patch Number="17" Name="PA Echo 4" ProgramChange="17"/>
+      <Patch Number="18" Name="PA Echo 5" ProgramChange="18"/>
+      <Patch Number="19" Name="Room/Phone" ProgramChange="19"/>
+      <Patch Number="20" Name="In/Out Room" ProgramChange="20"/>
+      <Patch Number="21" Name="Other Room" ProgramChange="21"/>
+      <Patch Number="22" Name="Wider Image" ProgramChange="22"/>
+      <Patch Number="23" Name="XplodEnhan 1" ProgramChange="23"/>
+      <Patch Number="24" Name="XplodEnhan 2" ProgramChange="24"/>
+      <Patch Number="25" Name="XplodEnhan 3" ProgramChange="25"/>
+      <Patch Number="26" Name="Flashback 1" ProgramChange="26"/>
+      <Patch Number="27" Name="Flashback 2" ProgramChange="27"/>
+      <Patch Number="28" Name="Flashback 3" ProgramChange="28"/>
+      <Patch Number="29" Name="Flashback 4" ProgramChange="29"/>
+      <Patch Number="30" Name="Flashback 5" ProgramChange="30"/>
+      <Patch Number="31" Name="Flashback 6" ProgramChange="31"/>
+      <Patch Number="32" Name="Flashback 7" ProgramChange="32"/>
+      <Patch Number="33" Name="Flashback 8" ProgramChange="33"/>
+      <Patch Number="34" Name="Fantasy" ProgramChange="34"/>
+      <Patch Number="35" Name="Vox Sweep" ProgramChange="35"/>
+      <Patch Number="36" Name="SweeperSaw 1" ProgramChange="36"/>
+      <Patch Number="37" Name="SweeperSaw 2" ProgramChange="37"/>
+      <Patch Number="38" Name="Strange FX" ProgramChange="38"/>
+      <Patch Number="39" Name="StacatoVocod" ProgramChange="39"/>
+      <Patch Number="40" Name="Bubble Vocal" ProgramChange="40"/>
+      <Patch Number="41" Name="Comput Vocal" ProgramChange="41"/>
+      <Patch Number="42" Name="Skitzo Vocal" ProgramChange="42"/>
+      <Patch Number="43" Name="Skitz2 Vocal" ProgramChange="43"/>
+      <Patch Number="44" Name="Heart^Pulse" ProgramChange="44"/>
+      <Patch Number="45" Name="Sci-Fi Delay" ProgramChange="45"/>
+      <Patch Number="46" Name="Bad Connect" ProgramChange="46"/>
+      <Patch Number="47" Name="Bad Mic Cble" ProgramChange="47"/>
+      <Patch Number="48" Name="Car Boom Box" ProgramChange="48"/>
+      <Patch Number="49" Name="DJ Ptch Skip" ProgramChange="49"/>
+    </PatchNameList>
+    <PatchNameList Name="C1 Post FX">
+      <Patch Number="0" Name="Dreamscape 1" ProgramChange="0"/>
+      <Patch Number="1" Name="Dreamscape 2" ProgramChange="1"/>
+      <Patch Number="2" Name="Dreamslinger" ProgramChange="2"/>
+      <Patch Number="3" Name="Dreamsizzle" ProgramChange="3"/>
+      <Patch Number="4" Name="CyberFdbak 1" ProgramChange="4"/>
+      <Patch Number="5" Name="CyberFdbak 2" ProgramChange="5"/>
+      <Patch Number="6" Name="Cybermare 1" ProgramChange="6"/>
+      <Patch Number="7" Name="Cybermare 2" ProgramChange="7"/>
+      <Patch Number="8" Name="Tap Panner" ProgramChange="8"/>
+      <Patch Number="9" Name="TapRotate1:1" ProgramChange="9"/>
+      <Patch Number="10" Name="TapRotate3:1" ProgramChange="10"/>
+      <Patch Number="11" Name="TapRotate3:2" ProgramChange="11"/>
+      <Patch Number="12" Name="EnvPanner 1" ProgramChange="12"/>
+      <Patch Number="13" Name="EnvPanner 2" ProgramChange="13"/>
+      <Patch Number="14" Name="TapPanDelay" ProgramChange="14"/>
+      <Patch Number="15" Name="SusPanner" ProgramChange="15"/>
+      <Patch Number="16" Name="PannerW/Verb" ProgramChange="16"/>
+      <Patch Number="17" Name="Flopper Pan" ProgramChange="17"/>
+      <Patch Number="18" Name="Vibrato Verb" ProgramChange="18"/>
+      <Patch Number="19" Name="Slap Verb" ProgramChange="19"/>
+      <Patch Number="20" Name="Cave Echo" ProgramChange="20"/>
+      <Patch Number="21" Name="Delay Rise 1" ProgramChange="21"/>
+      <Patch Number="22" Name="Delay Rise 2" ProgramChange="22"/>
+      <Patch Number="23" Name="MultiTap Dly" ProgramChange="23"/>
+      <Patch Number="24" Name="TriPan-Delay" ProgramChange="24"/>
+      <Patch Number="25" Name="MeasureDelay" ProgramChange="25"/>
+      <Patch Number="26" Name="Simple-Tap 1" ProgramChange="26"/>
+      <Patch Number="27" Name="Simple-Tap 2" ProgramChange="27"/>
+      <Patch Number="28" Name="Stereo 1" ProgramChange="28"/>
+      <Patch Number="29" Name="Stereo 2" ProgramChange="29"/>
+      <Patch Number="30" Name="L*R Delay C" ProgramChange="30"/>
+      <Patch Number="31" Name="C*Dly Surrnd" ProgramChange="31"/>
+      <Patch Number="32" Name="StringSurrnd" ProgramChange="32"/>
+      <Patch Number="33" Name="Auditorium 1" ProgramChange="33"/>
+      <Patch Number="34" Name="Auditorium 2" ProgramChange="34"/>
+      <Patch Number="35" Name="Small Room" ProgramChange="35"/>
+      <Patch Number="36" Name="Tile Room" ProgramChange="36"/>
+      <Patch Number="37" Name="Metal Tank" ProgramChange="37"/>
+      <Patch Number="38" Name="Paper Plate" ProgramChange="38"/>
+      <Patch Number="39" Name="SmallChambr1" ProgramChange="39"/>
+      <Patch Number="40" Name="SmallChambr2" ProgramChange="40"/>
+      <Patch Number="41" Name="SmallChambr3" ProgramChange="41"/>
+      <Patch Number="42" Name="StringRoom 1" ProgramChange="42"/>
+      <Patch Number="43" Name="StringRoom 2" ProgramChange="43"/>
+      <Patch Number="44" Name="Large Room 1" ProgramChange="44"/>
+      <Patch Number="45" Name="Large Room 2" ProgramChange="45"/>
+      <Patch Number="46" Name="Large Solo" ProgramChange="46"/>
+      <Patch Number="47" Name="Cool Verb" ProgramChange="47"/>
+      <Patch Number="48" Name="Sting Verb" ProgramChange="48"/>
+      <Patch Number="49" Name="HiKhzVerb" ProgramChange="49"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

@@ -1,20 +1,24 @@
 /*
-    Copyright (C) 2011 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2011-2016 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2012-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #define BASELINESTRETCH (1.25)
 
@@ -73,9 +77,7 @@ ShuttleControl::ShuttleControl ()
 	shuttle_grabbed = false;
 	shuttle_speed_on_grab = 0;
 	shuttle_fract = 0.0;
-	shuttle_max_speed = 8.0f;
-	shuttle_style_menu = 0;
-	shuttle_unit_menu = 0;
+	shuttle_max_speed = Config->get_max_transport_speed();
 	shuttle_context_menu = 0;
 	_hovering = false;
 
@@ -87,7 +89,7 @@ ShuttleControl::ShuttleControl ()
 
 	shuttle_max_speed = Config->get_shuttle_max_speed();
 
-	if      (shuttle_max_speed >= 8.f) { shuttle_max_speed = 8.0f; }
+	if      (shuttle_max_speed >= Config->get_max_transport_speed()) { shuttle_max_speed = Config->get_max_transport_speed(); }
 	else if (shuttle_max_speed >= 6.f) { shuttle_max_speed = 6.0f; }
 	else if (shuttle_max_speed >= 4.f) { shuttle_max_speed = 4.0f; }
 	else if (shuttle_max_speed >= 3.f) { shuttle_max_speed = 3.0f; }
@@ -108,6 +110,7 @@ ShuttleControl::~ShuttleControl ()
 {
 	cairo_pattern_destroy (pattern);
 	cairo_pattern_destroy (shine_pattern);
+	delete shuttle_context_menu;
 }
 
 void
@@ -154,7 +157,13 @@ ShuttleControl::on_size_allocate (Gtk::Allocation& alloc)
 void
 ShuttleControl::map_transport_state ()
 {
-	float speed = _session->actual_speed ();
+	float speed;
+
+	if (!_session) {
+		speed = 0.0;
+	} else {
+		speed = _session->actual_speed ();
+	}
 
 	if ( (fabsf( speed - last_speed_displayed) < 0.005f) // dead-zone
 	     && !( speed == 1.f && last_speed_displayed != 1.f)
@@ -222,6 +231,8 @@ ShuttleControl::build_shuttle_context_menu ()
 
 	RadioMenuItem::Group speed_group;
 
+	/* XXX this code assumes that Config->get_max_transport_speed() returns 8 */
+
 	speed_items.push_back (RadioMenuElem (speed_group, "8", sigc::bind (sigc::mem_fun (*this, &ShuttleControl::set_shuttle_max_speed), 8.0f)));
 	if (shuttle_max_speed == 8.0) {
 		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
@@ -256,6 +267,10 @@ ShuttleControl::build_shuttle_context_menu ()
 void
 ShuttleControl::reset_speed ()
 {
+	if (!_session) {
+		return;
+	}
+
 	if (_session->transport_rolling()) {
 		_session->request_transport_speed (1.0, true);
 	} else {
@@ -547,10 +562,13 @@ ShuttleControl::use_shuttle_fract (bool force, bool zero_ok)
 	}
 
 	requested_speed = speed;
-	if (zero_ok) {
-		_session->request_transport_speed (speed, Config->get_shuttle_behaviour() == Wheel);
-	} else {
-		_session->request_transport_speed_nonzero (speed, Config->get_shuttle_behaviour() == Wheel);
+
+	if (_session) {
+		if (zero_ok) {
+			_session->request_transport_speed (speed, Config->get_shuttle_behaviour() == Wheel);
+		} else {
+			_session->request_transport_speed_nonzero (speed, Config->get_shuttle_behaviour() == Wheel);
+		}
 	}
 }
 

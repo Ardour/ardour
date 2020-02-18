@@ -1,21 +1,25 @@
 /*
-    Copyright (C) 1999 Paul Barton-Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 1999-2015 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2007-2008 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2007-2013 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2009-2010 David Robillard <d@drobilla.net>
+ * Copyright (C) 2014-2017 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __pbd_gtk_ui_h__
 #define __pbd_gtk_ui_h__
@@ -147,16 +151,6 @@ public:
 	void idle_add (int (*func)(void *), void *arg);
 
 	Gtk::Main& main() const { return *theMain; }
-
-	template<class T> static bool idle_delete (T *obj) { delete obj; return false; }
-	template<class T> static void delete_when_idle (T *obj) {
-		Glib::signal_idle().connect (bind (slot (&UI::idle_delete<T>), obj));
-	}
-
-	template<class T> void delete_in_self (T *obj) {
-		call_slot (boost::bind (&UI::delete_in_self, this, obj));
-	}
-
 
 	/* starting is sent just before we enter the main loop,
 	 * stopping just after we return from it (at the top level)

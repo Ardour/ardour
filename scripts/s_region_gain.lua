@@ -31,10 +31,10 @@ function factory () return function ()
 		local peak = 0 -- the audio peak to be calculated
 
 		-- iterate over all channels in Audio Region
-		for c = 0, n_channels do
+		for c = 0, n_channels -1 do
+			local pos = 0
 			repeat
-				local pos = 0
-				-- read at most 8K samples of channel 'c'
+				-- read at most 8K samples of channel 'c' starting at 'pos'
 				local s = rd:read (cmem:to_float (0), pos, 8192, c)
 				pos = pos + s
 				-- access the raw audio data
@@ -46,7 +46,8 @@ function factory () return function ()
 						peak = math.abs (d[i])
 					end
 				end
-			until pos < n_samples
+			until s < 8192
+			assert (pos == n_samples)
 		end
 
 		if (peak > 0) then

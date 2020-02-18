@@ -1,19 +1,20 @@
 /*
- * Copyright (C) 2016 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2018 Ben Loftis <ben@harrisonconsoles.com>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include "ardour/audioengine.h"
@@ -508,6 +509,8 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		return;
 	}
 
+	cairo_push_group (cr);
+
 	const int width = get_width ();
 	const int height = get_height ();
 
@@ -519,6 +522,8 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	cairo_clip (cr);
 
 	if (_session == 0) {
+		cairo_pop_group_to_source (cr);
+		cairo_paint (cr);
 		return;
 	}
 
@@ -660,6 +665,9 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	cairo_rel_line_to (cr,  3,  4);
 	cairo_close_path (cr);
 	cairo_fill (cr);
+
+	cairo_pop_group_to_source (cr);
+	cairo_paint (cr);
 }
 
 void
@@ -720,7 +728,7 @@ MiniTimeline::on_button_release_event (GdkEventButton *ev)
 	if (ev->y <= PADDING + _marker_height) {
 		for (JumpList::const_iterator i = _jumplist.begin (); i != _jumplist.end(); ++i) {
 			if (i->left <= ev->x && ev->x <= i->right) {
-				_session->request_locate (i->to, _session->transport_rolling ());
+				_session->request_locate (i->to, RollIfAppropriate);
 				return true;
 			}
 		}
@@ -728,7 +736,7 @@ MiniTimeline::on_button_release_event (GdkEventButton *ev)
 
 	if (ev->button == 1) {
 		samplepos_t when = _last_update_sample + (ev->x - get_width() * .5) / _px_per_sample;
-		_session->request_locate (std::max ((samplepos_t)0, when), _session->transport_rolling ());
+		_session->request_locate (std::max ((samplepos_t)0, when), RollIfAppropriate);
 	}
 
 	return true;
@@ -810,6 +818,6 @@ MiniTimeline::on_scroll_event (GdkEventScroll *ev)
 			return true;
 			break;
 	}
-	_session->request_locate (std::max ((samplepos_t)0, when), _session->transport_rolling ());
+	_session->request_locate (std::max ((samplepos_t)0, when), RollIfAppropriate);
 	return true;
 }

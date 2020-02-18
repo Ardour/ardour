@@ -1,21 +1,26 @@
 /*
-    Copyright (C) 2000 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2006 Hans Fugal <hans@fugal.net>
+ * Copyright (C) 2008-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2008-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 Nick Mainsbridge <mainsbridge@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <iostream>
 #include <cstdlib>
@@ -33,6 +38,7 @@
 #include "ardour/midi_stretch.h"
 #include "ardour/pitch.h"
 #include "ardour/region.h"
+#include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/stretch.h"
 
@@ -41,6 +47,7 @@
 #include "audio_region_view.h"
 #include "audio_time_axis.h"
 #include "editor.h"
+#include "editor_regions.h"
 #include "region_selection.h"
 #include "time_fx_dialog.h"
 
@@ -63,7 +70,6 @@ Editor::time_stretch (RegionSelection& regions, float fraction)
 {
 	RegionList audio;
 	RegionList midi;
-	int aret;
 
 	begin_reversible_command (_("stretch/shrink"));
 
@@ -75,8 +81,9 @@ Editor::time_stretch (RegionSelection& regions, float fraction)
 		}
 	}
 
-	if ((aret = time_fx (audio, fraction, false)) != 0) {
-		commit_reversible_command ();
+	int aret = time_fx (audio, fraction, false);
+	if (aret < 0) {
+		abort_reversible_command ();
 		return aret;
 	}
 
@@ -110,10 +117,18 @@ Editor::time_stretch (RegionSelection& regions, float fraction)
 	}
 
 	for (set<boost::shared_ptr<Playlist> >::iterator p = midi_playlists_affected.begin(); p != midi_playlists_affected.end(); ++p) {
-		_session->add_command (new StatefulDiffCommand (*p));
+		PBD::StatefulDiffCommand* cmd = new StatefulDiffCommand (*p);
+		_session->add_command (cmd);
+		if (!cmd->empty ()) {
+			++aret;
+		}
 	}
 
-	commit_reversible_command ();
+	if (aret > 0) {
+		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
+	}
 
 	return 0;
 }
@@ -131,22 +146,25 @@ Editor::pitch_shift (RegionSelection& regions, float fraction)
 
 	int ret = time_fx (rl, fraction, true);
 
-	if (ret == 0) {
+	if (ret > 0) {
 		commit_reversible_command ();
 	} else {
 		abort_reversible_command ();
 	}
 
-	return ret;
+	return ret < 0 ? -1 : 0;
 }
 
 /** @param val Percentage to time stretch by; ignored if pitch-shifting.
  *  @param pitching true to pitch shift, false to time stretch.
- *  @return -1 in case of error, 1 if operation was cancelled by the user, 0 if everything went ok */
+ *  @return -1 in case of error, otherwise number of regions processed */
 int
 Editor::time_fx (RegionList& regions, float val, bool pitching)
 {
+	delete current_timefx;
+
 	if (regions.empty()) {
+		current_timefx = 0;
 		return 0;
 	}
 
@@ -154,7 +172,6 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 	const samplecnt_t newlen = (samplecnt_t) (regions.front()->length() * val);
 	const samplecnt_t pos = regions.front()->position ();
 
-	delete current_timefx;
 	current_timefx = new TimeFXDialog (*this, pitching, oldlen, newlen, pos);
 	current_timefx->regions = regions;
 
@@ -163,7 +180,7 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 		break;
 	default:
 		current_timefx->hide ();
-		return 1;
+		return -1;
 	}
 
 	current_timefx->status = 0;
@@ -269,6 +286,8 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 	if (longwin)           options |= RubberBandStretcher::OptionWindowLong;
 	if (shortwin)          options |= RubberBandStretcher::OptionWindowShort;
 
+	if (pitching)          options |= RubberBandStretcher::OptionPitchHighQuality;
+
 	switch (transients) {
 	case NoTransients:
 		options |= RubberBandStretcher::OptionTransientsSmooth;
@@ -299,7 +318,6 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 	current_timefx->first_delete = current_timefx->signal_delete_event().connect
 		(sigc::mem_fun (current_timefx, &TimeFXDialog::delete_in_progress));
 
-	current_timefx->start_updates ();
 
 	if (pthread_create_and_store ("timefx", &current_timefx->request.thread, timefx_thread, current_timefx)) {
 		current_timefx->hide ();
@@ -307,7 +325,7 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 		return -1;
 	}
 
-	pthread_detach (current_timefx->request.thread);
+	current_timefx->start_updates ();
 
 	while (!current_timefx->request.done && !current_timefx->request.cancel) {
 		gtk_main_iteration ();
@@ -316,39 +334,43 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 	pthread_join (current_timefx->request.thread, 0);
 
 	current_timefx->hide ();
+
+	if (current_timefx->status < 0) {
+		/* processing was cancelled, some regions may have
+		 * been created and removed via RegionFactory::map_remove()
+		 * The region-list does not update itself when a region is removed.
+		 */
+		_regions->redisplay ();
+	}
 	return current_timefx->status;
 }
 
 void
 Editor::do_timefx ()
 {
-	boost::shared_ptr<Playlist> playlist;
-	boost::shared_ptr<Region>   new_region;
-	set<boost::shared_ptr<Playlist> > playlists_affected;
+	typedef std::map<boost::shared_ptr<Region>, boost::shared_ptr<Region> > ResultMap;
+	ResultMap results;
 
 	uint32_t const N = current_timefx->regions.size ();
 
-	for (RegionList::iterator i = current_timefx->regions.begin(); i != current_timefx->regions.end(); ++i) {
+	for (RegionList::const_iterator i = current_timefx->regions.begin(); i != current_timefx->regions.end(); ++i) {
 		boost::shared_ptr<Playlist> playlist = (*i)->playlist();
-
 		if (playlist) {
 			playlist->clear_changes ();
 		}
 	}
 
-	for (RegionList::iterator i = current_timefx->regions.begin(); i != current_timefx->regions.end(); ++i) {
+	for (RegionList::const_iterator i = current_timefx->regions.begin(); i != current_timefx->regions.end(); ++i) {
 
 		boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (*i);
+		boost::shared_ptr<Playlist> playlist;
 
 		if (!region || (playlist = region->playlist()) == 0) {
 			continue;
 		}
 
 		if (current_timefx->request.cancel) {
-			/* we were cancelled */
-			/* XXX what to do about playlists already affected ? */
-			current_timefx->status = 1;
-			return;
+			break;
 		}
 
 		Filter* fx;
@@ -366,28 +388,43 @@ Editor::do_timefx ()
 		current_timefx->descend (1.0 / N);
 
 		if (fx->run (region, current_timefx)) {
-			current_timefx->status = -1;
-			current_timefx->request.done = true;
+			current_timefx->request.cancel = true;
 			delete fx;
-			return;
+			break;
 		}
 
 		if (!fx->results.empty()) {
-			new_region = fx->results.front();
-
-			playlist->replace_region (region, new_region, region->position());
-			playlists_affected.insert (playlist);
+			results[region] = fx->results.front();
 		}
 
 		current_timefx->ascend ();
 		delete fx;
 	}
 
-	for (set<boost::shared_ptr<Playlist> >::iterator p = playlists_affected.begin(); p != playlists_affected.end(); ++p) {
-		_session->add_command (new StatefulDiffCommand (*p));
-	}
+	pthread_setcancelstate (PTHREAD_CANCEL_DISABLE, NULL);
+	if (current_timefx->request.cancel) {
+		current_timefx->status = -1;
+		for (ResultMap::const_iterator i = results.begin(); i != results.end(); ++i) {
+			boost::weak_ptr<Region> w = i->second;
+			RegionFactory::map_remove (w);
+		}
+	} else {
+		current_timefx->status = 0;
+		for (ResultMap::const_iterator i = results.begin(); i != results.end(); ++i) {
+			boost::shared_ptr<Region> region = i->first;
+			boost::shared_ptr<Region> new_region = i->second;
+			boost::shared_ptr<Playlist> playlist = region->playlist();
+			playlist->replace_region (region, new_region, region->position());
 
-	current_timefx->status = 0;
+			PBD::StatefulDiffCommand* cmd = new StatefulDiffCommand (playlist);
+			_session->add_command (cmd);
+			if (!cmd->empty ()) {
+				++current_timefx->status;
+			}
+		}
+	}
+	pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, NULL);
+
 	current_timefx->request.done = true;
 }
 
@@ -406,12 +443,6 @@ Editor::timefx_thread (void *arg)
 	   event loop doesn't die before any changes we made are processed
 	   by the GUI ...
 	*/
-
-#ifdef PLATFORM_WINDOWS
-	Glib::usleep(2 * G_USEC_PER_SEC);
-#else
-	struct timespec t = { 2, 0 };
-	nanosleep (&t, 0);
-#endif
+	Glib::usleep(G_USEC_PER_SEC / 5);
 	return 0;
 }

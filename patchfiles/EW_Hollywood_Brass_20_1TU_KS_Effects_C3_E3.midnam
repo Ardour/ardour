@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <!--
+        1TU KS Effects C3-E3
+     
+        Eastwest Hollywood Brass KEYSWITCH Patch Program Control Support
+        PLAY 6
+        February 9, 2018
+        Version 1.0
+
+            This document supports instrument articulation switching via Program
+            Changes for Keyswitched patches within the PLAY 6 Virtual Instrument.
+     
+     -->
+  <Author>
+        Charles J. Green Jr.
+    </Author>
+  <MasterDeviceNames>
+    <Manufacturer>Eastwest Hollywood Brass</Manufacturer>
+    <Model>20 1TU KS Effects C3-E3</Model>
+    <CustomDeviceMode Name="PLAY">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="PLAY"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="PLAY">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+      </AvailableForChannels>
+      <UsesControlNameList Name="MIDI CONTROL CODES"/>
+      <PatchBank Name="PLAY">
+        <UsesPatchNameList Name="KEYSWITCHED"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <PatchNameList Name="KEYSWITCHED">
+      <Patch Number="1" Name="Cres Slw" ProgramChange="0"/>
+      <Patch Number="2" Name="Cres Med" ProgramChange="1"/>
+      <Patch Number="3" Name="Cres Fst" ProgramChange="2"/>
+      <Patch Number="4" Name="Flutter Tng" ProgramChange="3"/>
+      <Patch Number="5" Name="Sfz Cres" ProgramChange="4"/>
+    </PatchNameList>
+    <ControlNameList Name="MIDI CONTROL CODES">
+      <Control Type="7bit" Number="1" Name="Mod Wheel"/>
+      <Control Type="7bit" Number="2" Name="RR Reset"/>
+      <Control Type="7bit" Number="5" Name="Time"/>
+      <Control Type="7bit" Number="7" Name="Volume"/>
+      <Control Type="7bit" Number="10" Name="Pan"/>
+      <Control Type="7bit" Number="11" Name="Expression"/>
+      <Control Type="7bit" Number="22" Name="Polyphonic"/>
+      <Control Type="7bit" Number="65" Name="Portamento"/>
+      <Control Type="7bit" Number="68" Name="Legato"/>
+      <Control Type="7bit" Number="69" Name="Repetition"/>
+    </ControlNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

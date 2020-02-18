@@ -1,20 +1,22 @@
 /*
-    Copyright (C) 2012 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2014-2015 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
@@ -59,8 +61,8 @@ AutomationListPropertyTest::basicTest ()
 	/* No change since we just cleared them */
 	CPPUNIT_ASSERT_EQUAL (false, property.changed());
 
-	property->add (1, 2, false, false);
-	property->add (3, 4, false, false);
+	property->add (1, 0.5, false, false);
+	property->add (3, 2.0, false, false);
 
 	/* Now it has changed */
 	CPPUNIT_ASSERT_EQUAL (true, property.changed());
@@ -81,8 +83,8 @@ AutomationListPropertyTest::basicTest ()
 	/* Do some more */
 	property.clear_changes ();
 	CPPUNIT_ASSERT_EQUAL (false, property.changed());
-	property->add (5, 6, false, false);
-	property->add (7, 8, false, false);
+	property->add (5, 1.5, false, false);
+	property->add (7, 1.0, false, false);
 	CPPUNIT_ASSERT_EQUAL (true, property.changed());
 	delete foo;
 	foo = new XMLNode ("test");
@@ -135,13 +137,13 @@ AutomationListPropertyTest::undoTest ()
 	boost::shared_ptr<Fred> sheila (new Fred);
 
 	/* Add some data */
+	sheila->_jim->add (0, 1, false, false);
 	sheila->_jim->add (1, 2, false, false);
-	sheila->_jim->add (3, 4, false, false);
 
 	/* Do a `command' */
 	sheila->clear_changes ();
-	sheila->_jim->add (5, 6, false, false);
-	sheila->_jim->add (7, 8, false, false);
+	sheila->_jim->add (2, 1, false, false);
+	sheila->_jim->add (3, 0, false, false);
 	StatefulDiffCommand sdc (sheila);
 
 	std::string test_data_filename = "automation_list_property_test3.ref";

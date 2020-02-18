@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>D-70</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 2"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="false"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Factory Presets">
+        <PatchNameList>
+          <Patch Number="A11" Name="GrandPF SW" ProgramChange="0"/>
+          <Patch Number="A12" Name="Grandioso" ProgramChange="1"/>
+          <Patch Number="A13" Name="Rhodes 1" ProgramChange="2"/>
+          <Patch Number="A14" Name="BellRhodes" ProgramChange="3"/>
+          <Patch Number="A15" Name="Tack Piano" ProgramChange="4"/>
+          <Patch Number="A16" Name="Grand+Strg" ProgramChange="5"/>
+          <Patch Number="A17" Name="MIDI Piano" ProgramChange="6"/>
+          <Patch Number="A18" Name="MIDI Stack" ProgramChange="7"/>
+          <Patch Number="A21" Name="Strings" ProgramChange="8"/>
+          <Patch Number="A22" Name="Slow n Low" ProgramChange="9"/>
+          <Patch Number="A23" Name="JP-Strings" ProgramChange="10"/>
+          <Patch Number="A24" Name="Pipes 1" ProgramChange="11"/>
+          <Patch Number="A25" Name="Horns +Str" ProgramChange="12"/>
+          <Patch Number="A26" Name="StringsVox" ProgramChange="13"/>
+          <Patch Number="A27" Name="Ffflute" ProgramChange="14"/>
+          <Patch Number="A28" Name="Calliopead" ProgramChange="15"/>
+          <Patch Number="A31" Name="Dual Clav" ProgramChange="16"/>
+          <Patch Number="A32" Name="Wave Synth" ProgramChange="17"/>
+          <Patch Number="A33" Name="DLM Synth" ProgramChange="18"/>
+          <Patch Number="A34" Name="DLM Pf-Gtr" ProgramChange="19"/>
+          <Patch Number="A35" Name="Guitivitty" ProgramChange="20"/>
+          <Patch Number="A36" Name="* Quasar *" ProgramChange="21"/>
+          <Patch Number="A37" Name="Cool Bells" ProgramChange="22"/>
+          <Patch Number="A38" Name="Reso  Bell" ProgramChange="23"/>
+          <Patch Number="A41" Name="Mix Brass" ProgramChange="24"/>
+          <Patch Number="A42" Name="HornEnsmbl" ProgramChange="25"/>
+          <Patch Number="A43" Name="SynBrass" ProgramChange="26"/>
+          <Patch Number="A44" Name="SaxOctarve" ProgramChange="27"/>
+          <Patch Number="A45" Name="Horn Plus" ProgramChange="28"/>
+          <Patch Number="A46" Name="E.Trumpets" ProgramChange="29"/>
+          <Patch Number="A47" Name="MIDI Poly2" ProgramChange="30"/>
+          <Patch Number="A48" Name="DLM Ensmbl" ProgramChange="31"/>
+          <Patch Number="A51" Name="Lead Synth" ProgramChange="32"/>
+          <Patch Number="A52" Name="Solo Synth" ProgramChange="33"/>
+          <Patch Number="A53" Name="Lead Vox" ProgramChange="34"/>
+          <Patch Number="A54" Name="Reso Lead" ProgramChange="35"/>
+          <Patch Number="A55" Name="DLM Piano1" ProgramChange="36"/>
+          <Patch Number="A56" Name="New Slap" ProgramChange="37"/>
+          <Patch Number="A57" Name="Vibes+Bass" ProgramChange="38"/>
+          <Patch Number="A58" Name="DLM Bass 1" ProgramChange="39"/>
+          <Patch Number="A61" Name="Prologue" ProgramChange="40"/>
+          <Patch Number="A62" Name="PPP Vox" ProgramChange="41"/>
+          <Patch Number="A63" Name="NiteSprite" ProgramChange="42"/>
+          <Patch Number="A64" Name="D50 Layer" ProgramChange="43"/>
+          <Patch Number="A65" Name="Sweep Str" ProgramChange="44"/>
+          <Patch Number="A66" Name="Wow Stack" ProgramChange="45"/>
+          <Patch Number="A67" Name="Pad BBrass" ProgramChange="46"/>
+          <Patch Number="A68" Name="EE Pad" ProgramChange="47"/>
+          <Patch Number="A71" Name="ClickLesly" ProgramChange="48"/>
+          <Patch Number="A72" Name="FullOrgan" ProgramChange="49"/>
+          <Patch Number="A73" Name="ClickOrgan" ProgramChange="50"/>
+          <Patch Number="A74" Name="12 StrGuit" ProgramChange="51"/>
+          <Patch Number="A75" Name="Big Guitar" ProgramChange="52"/>
+          <Patch Number="A76" Name="FunkGit Sw" ProgramChange="53"/>
+          <Patch Number="A77" Name="GuitPnoStr" ProgramChange="54"/>
+          <Patch Number="A78" Name="DigitalSax" ProgramChange="55"/>
+          <Patch Number="A81" Name="Asia" ProgramChange="56"/>
+          <Patch Number="A82" Name="BaliDancer" ProgramChange="57"/>
+          <Patch Number="A83" Name="HyperFlute" ProgramChange="58"/>
+          <Patch Number="A84" Name="Shak Filt" ProgramChange="59"/>
+          <Patch Number="A85" Name="Shuu-Doon" ProgramChange="60"/>
+          <Patch Number="A86" Name="Talking" ProgramChange="61"/>
+          <Patch Number="A87" Name="Lab Jet" ProgramChange="62"/>
+          <Patch Number="A88" Name="G-Finale" ProgramChange="63"/>
+          <Patch Number="B11" Name="Ghost Vox1" ProgramChange="64"/>
+          <Patch Number="B12" Name="Wonderous1" ProgramChange="65"/>
+          <Patch Number="B13" Name="DLM Bass 2" ProgramChange="66"/>
+          <Patch Number="B14" Name="SynBones" ProgramChange="67"/>
+          <Patch Number="B15" Name="Ghost Vox2" ProgramChange="68"/>
+          <Patch Number="B16" Name="Jan Bass 1" ProgramChange="69"/>
+          <Patch Number="B17" Name="Reso 2Bell" ProgramChange="70"/>
+          <Patch Number="B18" Name="DLM Bass 3" ProgramChange="71"/>
+          <Patch Number="B21" Name="-•-•-•- B21" ProgramChange="72"/>
+          <Patch Number="B22" Name="-•-•-•- B22" ProgramChange="73"/>
+          <Patch Number="B23" Name="-•-•-•- B23" ProgramChange="74"/>
+          <Patch Number="B24" Name="-•-•-•- B24" ProgramChange="75"/>
+          <Patch Number="B25" Name="-•-•-•- B25" ProgramChange="76"/>
+          <Patch Number="B26" Name="-•-•-•- B26" ProgramChange="77"/>
+          <Patch Number="B27" Name="-•-•-•- B27" ProgramChange="78"/>
+          <Patch Number="B28" Name="-•-•-•- B28" ProgramChange="79"/>
+          <Patch Number="B31" Name="-•-•-•- B31" ProgramChange="80"/>
+          <Patch Number="B32" Name="-•-•-•- B32" ProgramChange="81"/>
+          <Patch Number="B33" Name="-•-•-•- B33" ProgramChange="82"/>
+          <Patch Number="B34" Name="-•-•-•- B34" ProgramChange="83"/>
+          <Patch Number="B35" Name="-•-•-•- B35" ProgramChange="84"/>
+          <Patch Number="B36" Name="-•-•-•- B36" ProgramChange="85"/>
+          <Patch Number="B37" Name="-•-•-•- B37" ProgramChange="86"/>
+          <Patch Number="B38" Name="-•-•-•- B38" ProgramChange="87"/>
+          <Patch Number="B41" Name="-•-•-•- B41" ProgramChange="88"/>
+          <Patch Number="B42" Name="-•-•-•- B42" ProgramChange="89"/>
+          <Patch Number="B43" Name="-•-•-•- B43" ProgramChange="90"/>
+          <Patch Number="B44" Name="-•-•-•- B44" ProgramChange="91"/>
+          <Patch Number="B45" Name="-•-•-•- B45" ProgramChange="92"/>
+          <Patch Number="B46" Name="-•-•-•- B46" ProgramChange="93"/>
+          <Patch Number="B47" Name="-•-•-•- B47" ProgramChange="94"/>
+          <Patch Number="B48" Name="-•-•-•- B48" ProgramChange="95"/>
+          <Patch Number="B51" Name="-•-•-•- B51" ProgramChange="96"/>
+          <Patch Number="B52" Name="-•-•-•- B52" ProgramChange="97"/>
+          <Patch Number="B53" Name="-•-•-•- B53" ProgramChange="98"/>
+          <Patch Number="B54" Name="-•-•-•- B54" ProgramChange="99"/>
+          <Patch Number="B55" Name="-•-•-•- B55" ProgramChange="100"/>
+          <Patch Number="B56" Name="-•-•-•- B56" ProgramChange="101"/>
+          <Patch Number="B57" Name="-•-•-•- B57" ProgramChange="102"/>
+          <Patch Number="B58" Name="-•-•-•- B58" ProgramChange="103"/>
+          <Patch Number="B61" Name="-•-•-•- B61" ProgramChange="104"/>
+          <Patch Number="B62" Name="-•-•-•- B62" ProgramChange="105"/>
+          <Patch Number="B63" Name="-•-•-•- B63" ProgramChange="106"/>
+          <Patch Number="B64" Name="-•-•-•- B64" ProgramChange="107"/>
+          <Patch Number="B65" Name="-•-•-•- B65" ProgramChange="108"/>
+          <Patch Number="B66" Name="-•-•-•- B66" ProgramChange="109"/>
+          <Patch Number="B67" Name="-•-•-•- B67" ProgramChange="110"/>
+          <Patch Number="B68" Name="-•-•-•- B68" ProgramChange="111"/>
+          <Patch Number="B71" Name="-•-•-•- B71" ProgramChange="112"/>
+          <Patch Number="B72" Name="-•-•-•- B72" ProgramChange="113"/>
+          <Patch Number="B73" Name="-•-•-•- B73" ProgramChange="114"/>
+          <Patch Number="B74" Name="-•-•-•- B74" ProgramChange="115"/>
+          <Patch Number="B75" Name="-•-•-•- B75" ProgramChange="116"/>
+          <Patch Number="B76" Name="-•-•-•- B76" ProgramChange="117"/>
+          <Patch Number="B77" Name="-•-•-•- B77" ProgramChange="118"/>
+          <Patch Number="B78" Name="-•-•-•- B78" ProgramChange="119"/>
+          <Patch Number="B81" Name="-•-•-•- B81" ProgramChange="120"/>
+          <Patch Number="B82" Name="-•-•-•- B82" ProgramChange="121"/>
+          <Patch Number="B83" Name="-•-•-•- B83" ProgramChange="122"/>
+          <Patch Number="B84" Name="-•-•-•- B84" ProgramChange="123"/>
+          <Patch Number="B85" Name="-•-•-•- B85" ProgramChange="124"/>
+          <Patch Number="B86" Name="-•-•-•- B86" ProgramChange="125"/>
+          <Patch Number="B87" Name="-•-•-•- B87" ProgramChange="126"/>
+          <Patch Number="B88" Name="-•-•-•- B88" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+    <ChannelNameSet Name="Name Set 2">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="false"/>
+        <AvailableChannel Channel="2" Available="false"/>
+        <AvailableChannel Channel="3" Available="false"/>
+        <AvailableChannel Channel="4" Available="false"/>
+        <AvailableChannel Channel="5" Available="false"/>
+        <AvailableChannel Channel="6" Available="false"/>
+        <AvailableChannel Channel="7" Available="false"/>
+        <AvailableChannel Channel="8" Available="false"/>
+        <AvailableChannel Channel="9" Available="false"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="false"/>
+        <AvailableChannel Channel="12" Available="false"/>
+        <AvailableChannel Channel="13" Available="false"/>
+        <AvailableChannel Channel="14" Available="false"/>
+        <AvailableChannel Channel="15" Available="false"/>
+        <AvailableChannel Channel="16" Available="false"/>
+      </AvailableForChannels>
+      <PatchBank Name="Rhythm Part">
+        <PatchNameList>
+          <Patch Number="" Name="Drums" ProgramChange="0"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

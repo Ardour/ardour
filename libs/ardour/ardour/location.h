@@ -1,21 +1,26 @@
 /*
-    Copyright (C) 2000 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2006 Hans Fugal <hans@fugal.net>
+ * Copyright (C) 2008-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008 Sakari Bergen <sakari.bergen@beatwaves.net>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2015-2016 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2016-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_location_h__
 #define __ardour_location_h__
@@ -44,7 +49,7 @@ class SceneChange;
 /** Location on Timeline - abstract representation for Markers, Loop/Punch Ranges, CD-Markers etc. */
 class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDestructible
 {
-  public:
+public:
 	enum Flags {
 		IsMark = 0x1,
 		IsAutoPunch = 0x2,
@@ -70,7 +75,8 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	void lock ();
 	void unlock ();
 
-	samplepos_t start() const  { return _start; }
+	int64_t timestamp() const { return _timestamp; };
+	samplepos_t start() const { return _start; }
 	samplepos_t end() const { return _end; }
 	samplecnt_t length() const { return _end - _start; }
 
@@ -110,8 +116,8 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	void set_scene_change (boost::shared_ptr<SceneChange>);
 
 	/* these are static signals for objects that want to listen to all
-	   locations at once.
-	*/
+	 * locations at once.
+	 */
 
 	static PBD::Signal1<void,Location*> name_changed;
 	static PBD::Signal1<void,Location*> end_changed;
@@ -124,8 +130,8 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	static PBD::Signal1<void,Location*> changed;
 
 	/* these are member signals for objects that care only about
-	   changes to this object
-	*/
+	 * changes to this object
+	 */
 
 	PBD::Signal0<void> Changed;
 
@@ -149,18 +155,19 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	void recompute_samples_from_beat ();
 
 	static PBD::Signal0<void> scene_changed; /* for use by backend scene change management, class level */
-        PBD::Signal0<void> SceneChangeChanged;   /* for use by objects interested in this object */
+	PBD::Signal0<void> SceneChangeChanged;   /* for use by objects interested in this object */
 
-  private:
+private:
 	std::string        _name;
-	samplepos_t         _start;
+	samplepos_t        _start;
 	double             _start_beat;
-	samplepos_t         _end;
+	samplepos_t        _end;
 	double             _end_beat;
 	Flags              _flags;
 	bool               _locked;
 	PositionLockStyle  _position_lock_style;
 	boost::shared_ptr<SceneChange> _scene_change;
+	int64_t            _timestamp;
 
 	void set_mark (bool yn);
 	bool set_flag_internal (bool yn, Flags flag);
@@ -170,7 +177,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 /** A collection of session locations including unique dedicated locations (loop, punch, etc) */
 class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDestructible
 {
-  public:
+public:
 	typedef std::list<Location *> LocationList;
 
 	Locations (Session &);
@@ -214,8 +221,8 @@ class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDes
 	PBD::Signal1<void,Location*> current_changed;
 
 	/* Objects that care about individual addition and removal of Locations should connect to added/removed.
-	   If an object additionally cares about potential mass clearance of Locations, they should connect to changed.
-	*/
+	 * If an object additionally cares about potential mass clearance of Locations, they should connect to changed.
+	 */
 
 	PBD::Signal1<void,Location*> added;
 	PBD::Signal1<void,Location*> removed;
@@ -223,8 +230,8 @@ class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDes
 
 	template<class T> void apply (T& obj, void (T::*method)(const LocationList&)) const {
 		/* We don't want to hold the lock while the given method runs, so take a copy
-		   of the list and pass that instead.
-		*/
+		 * of the list and pass that instead.
+		 */
 		Locations::LocationList copy;
 		{
 			Glib::Threads::Mutex::Lock lm (lock);
@@ -233,11 +240,10 @@ class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDes
 		(obj.*method)(copy);
 	}
 
-  private:
-
-	LocationList         locations;
-	Location            *current_location;
-	mutable Glib::Threads::Mutex  lock;
+private:
+	LocationList locations;
+	Location*    current_location;
+	mutable Glib::Threads::Mutex lock;
 
 	int set_current_unlocked (Location *);
 	void location_changed (Location*);

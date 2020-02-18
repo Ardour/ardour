@@ -1,22 +1,23 @@
 /*
-    Copyright (C) 2007 Paul Davis
-    Author: David Robillard
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2007-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 Nick Mainsbridge <mainsbridge@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <math.h>
 #include <iostream>
@@ -141,7 +142,7 @@ AutomationControl::set_value (double val, PBD::Controllable::GroupControlDisposi
 	}
 
 	if (_group && _group->use_me (gcd)) {
-		_group->set_group_value (shared_from_this(), val);
+		_group->set_group_value (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()), val);
 	} else {
 		actually_set_value (val, gcd);
 	}
@@ -246,13 +247,9 @@ AutomationControl::set_automation_state (AutoState as)
 		const double val = get_value ();
 
 		alist()->set_automation_state (as);
-		if (_desc.toggled) {
-			Changed (false, Controllable::NoGroup); // notify slaves, update boolean masters
-			return;  // No watch for boolean automation
-		}
 
 		if (as == Write) {
-			AutomationWatch::instance().add_automation_watch (shared_from_this());
+			AutomationWatch::instance().add_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
 		} else if (as & (Touch | Latch)) {
 			if (alist()->empty()) {
 				Control::set_double (val, _session.current_start_sample (), true);
@@ -260,17 +257,17 @@ AutomationControl::set_automation_state (AutoState as)
 				Changed (true, Controllable::NoGroup);
 			}
 			if (!touching()) {
-				AutomationWatch::instance().remove_automation_watch (shared_from_this());
+				AutomationWatch::instance().remove_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
 			} else {
 				/* this seems unlikely, but the combination of
 				 * a control surface and the mouse could make
 				 * it possible to put the control into Touch
 				 * mode *while* touching it.
 				 */
-				AutomationWatch::instance().add_automation_watch (shared_from_this());
+				AutomationWatch::instance().add_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
 			}
 		} else {
-			AutomationWatch::instance().remove_automation_watch (shared_from_this());
+			AutomationWatch::instance().remove_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
 			Changed (false, Controllable::NoGroup);
 		}
 	}
@@ -292,9 +289,7 @@ AutomationControl::start_touch (double when)
 		 */
 		AutomationControl::actually_set_value (get_value (), Controllable::NoGroup);
 		alist()->start_touch (when);
-		if (!_desc.toggled) {
-			AutomationWatch::instance().add_automation_watch (shared_from_this());
-		}
+		AutomationWatch::instance().add_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
 		set_touching (true);
 	}
 }
@@ -309,14 +304,16 @@ AutomationControl::stop_touch (double when)
 	if (alist()->automation_state() == Latch && _session.transport_rolling ()) {
 		return;
 	}
+	if (alist()->automation_state() == Touch && _session.transport_rolling () && _desc.toggled) {
+		/* Toggle buttons always latch */
+		return;
+	}
 
 	set_touching (false);
 
 	if (alist()->automation_state() & (Touch | Latch)) {
 		alist()->stop_touch (when);
-		if (!_desc.toggled) {
-			AutomationWatch::instance().remove_automation_watch (shared_from_this());
-		}
+		AutomationWatch::instance().remove_automation_watch (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()));
 	}
 }
 
@@ -336,23 +333,23 @@ AutomationControl::commit_transaction (bool did_write)
 
 /* take control-value and return UI range [0..1] */
 double
-AutomationControl::internal_to_interface (double val) const
+AutomationControl::internal_to_interface (double val, bool rotary) const
 {
 	// XXX maybe optimize. _desc.from_interface() has
 	// a switch-statement depending on AutomationType.
-	return _desc.to_interface (val);
+	return _desc.to_interface (val, rotary);
 }
 
 /* map GUI range [0..1] to control-value */
 double
-AutomationControl::interface_to_internal (double val) const
+AutomationControl::interface_to_internal (double val, bool rotary) const
 {
 	if (!isfinite_local (val)) {
 		assert (0);
 		val = 0;
 	}
 	// XXX maybe optimize. see above.
-	return _desc.from_interface (val);
+	return _desc.from_interface (val, rotary);
 }
 
 std::string
@@ -378,7 +375,7 @@ AutomationControl::check_rt (double val, Controllable::GroupControlDisposition g
 {
 	if (!_session.loading() && (flags() & Controllable::RealTime) && !AudioEngine::instance()->in_process_thread()) {
 		/* queue change in RT context */
-		_session.set_control (shared_from_this(), val, gcd);
+		_session.set_control (boost::dynamic_pointer_cast<AutomationControl>(shared_from_this()), val, gcd);
 		return true;
 	}
 

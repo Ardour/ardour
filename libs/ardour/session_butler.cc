@@ -1,27 +1,31 @@
 /*
-    Copyright (C) 1999-2002 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 1999-2019 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2006-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2006 Jesse Chappell <jesse@essej.net>
+ * Copyright (C) 2010-2012 Carl Hetherington <carl@carlh.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/stacktrace.h"
 
 #include "ardour/butler.h"
+#include "ardour/disk_reader.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/session_event.h"
@@ -41,7 +45,9 @@ using namespace PBD;
 void
 Session::adjust_playback_buffering ()
 {
-        request_stop (false, false);
+	if (!loading()) {
+		request_stop (false, false);
+	}
 	SessionEvent *ev = new SessionEvent (SessionEvent::AdjustPlaybackBuffering, SessionEvent::Add, SessionEvent::Immediate, 0, 0, 0.0);
 	queue_event (ev);
 }
@@ -49,7 +55,9 @@ Session::adjust_playback_buffering ()
 void
 Session::adjust_capture_buffering ()
 {
-        request_stop (false, false);
+	if (!loading()) {
+		request_stop (false, false);
+	}
 	SessionEvent *ev = new SessionEvent (SessionEvent::AdjustCaptureBuffering, SessionEvent::Add, SessionEvent::Immediate, 0, 0, 0.0);
 	queue_event (ev);
 }
@@ -69,36 +77,32 @@ Session::schedule_capture_buffering_adjustment ()
 }
 
 void
-Session::schedule_curve_reallocation ()
+Session::request_overwrite_buffer (boost::shared_ptr<Track> t, OverwriteReason why)
 {
-	add_post_transport_work (PostTransportCurveRealloc);
-	_butler->schedule_transport_work ();
-}
-
-void
-Session::request_overwrite_buffer (boost::shared_ptr<Route> r)
-{
-	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (r);
-	if (!t) {
-		return;
-	}
-
 	SessionEvent *ev = new SessionEvent (SessionEvent::Overwrite, SessionEvent::Add, SessionEvent::Immediate, 0, 0, 0.0);
-	ev->set_ptr (t.get());
+	ev->set_track (t);
+	ev->overwrite = why;
 	queue_event (ev);
 }
 
-/** Process thread. */
 void
-Session::overwrite_some_buffers (Track* t)
+Session::overwrite_some_buffers (boost::shared_ptr<Route> r, OverwriteReason why)
 {
+	/* this is called from the process thread while handling queued
+	 * SessionEvents. Therefore neither playback sample or read offsets in
+	 * tracks will change while we "queue" them all for an upcoming
+	 * overwrite.
+	 */
+
 	if (actively_recording()) {
 		return;
 	}
 
-	if (t) {
 
-		t->set_pending_overwrite (true);
+	if (r) {
+		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (r);
+		assert (t);
+		t->set_pending_overwrite (why);
 
 	} else {
 
@@ -106,12 +110,13 @@ Session::overwrite_some_buffers (Track* t)
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 			if (tr) {
-				tr->set_pending_overwrite (true);
+				tr->set_pending_overwrite (why);
 			}
 		}
 	}
 
 	add_post_transport_work (PostTransportOverWrite);
+
 	_butler->schedule_transport_work ();
 }
 

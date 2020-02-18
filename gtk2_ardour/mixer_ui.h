@@ -1,21 +1,26 @@
 /*
-    Copyright (C) 2000 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2007 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2005-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2006 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2007-2009 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2018 Ben Loftis <ben@harrisonconsoles.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_mixer_ui_h__
 #define __ardour_mixer_ui_h__
@@ -52,6 +57,7 @@
 
 #include "axis_provider.h"
 #include "enums.h"
+#include "monitor_section.h"
 #include "route_processor_selection.h"
 
 namespace ARDOUR {
@@ -61,6 +67,7 @@ namespace ARDOUR {
 };
 
 class AxisView;
+class FoldbackStrip;
 class MixerStrip;
 class PluginSelector;
 class MixerGroupTabs;
@@ -101,16 +108,13 @@ public:
 
 	void save_plugin_order_file ();
 
-	void show_mixer_list (bool yn);
-	void show_monitor_section (bool);
-
 	void show_strip (MixerStrip *);
 	void hide_strip (MixerStrip *);
 
 	void maximise_mixer_space();
 	void restore_mixer_space();
 
-	MonitorSection* monitor_section() const { return _monitor_section; }
+	MonitorSection& monitor_section() { return _monitor_section; }
 
 	void deselect_all_strip_processors();
 	void delete_processors();
@@ -135,14 +139,26 @@ public:
 	void load_bindings ();
 	Gtkmm2ext::Bindings*  bindings;
 
-	void showhide_vcas (bool on) {
-		if (on) { vca_vpacker.show(); } else { vca_vpacker.hide(); }
-	}
+	void toggle_mixer_list ();
+	void showhide_mixer_list (bool yn);
+
+	void toggle_monitor_section ();
+	void showhide_monitor_section (bool);
+
+	void toggle_foldback_strip ();
+	void showhide_foldback_strip (bool);
+
+	void toggle_vcas ();
+	void showhide_vcas (bool on);
+
 #ifdef MIXBUS
-	void showhide_mixbusses (bool on) {
-		if (on) { mb_vpacker.show(); } else { mb_vpacker.hide(); }
-	}
+	void toggle_mixbuses ();
+	void showhide_mixbusses (bool on);
 #endif
+
+	bool screenshot (std::string const&);
+
+	void toggle_monitor_action (ARDOUR::MonitorChoice monitor_choice, bool group_override = false, bool all = false);
 
 protected:
 	void set_axis_targets_for_operation ();
@@ -172,6 +188,7 @@ private:
 	ArdourWidgets::VPane  rhs_pane1;
 	ArdourWidgets::VPane  rhs_pane2;
 	ArdourWidgets::HPane  inner_pane;
+	Gtk::VBox             strip_group_box;
 	Gtk::HBox             strip_packer;
 	Gtk::ScrolledWindow   vca_scroller;
 	Gtk::HBox             vca_hpacker;
@@ -187,6 +204,7 @@ private:
 	MixerGroupTabs* _group_tabs;
 
 	bool on_scroll_event (GdkEventScroll*);
+	bool on_vca_scroll_event (GdkEventScroll*);
 
 	std::list<MixerStrip *> strips;
 
@@ -195,17 +213,21 @@ private:
 	bool masters_scroller_button_release (GdkEventButton*);
 	void scroll_left ();
 	void scroll_right ();
+	void vca_scroll_left ();
+	void vca_scroll_right ();
 	void toggle_midi_input_active (bool flip_others);
 
+	void move_vca_into_view (boost::shared_ptr<ARDOUR::Stripable>);
 	void move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable>);
 
 	void add_stripables (ARDOUR::StripableList&);
 
 	void add_routes (ARDOUR::RouteList&);
 	void remove_strip (MixerStrip *);
-
+	void remove_foldback (FoldbackStrip *);
 	void add_masters (ARDOUR::VCAList&);
 	void remove_master (VCAMasterStrip*);
+	void new_masters_created ();
 
 	MixerStrip* strip_by_route (boost::shared_ptr<ARDOUR::Route>) const;
 	MixerStrip* strip_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
@@ -285,8 +307,10 @@ private:
 	void track_column_click (gint);
 	void build_track_menu ();
 
-	MonitorSection* _monitor_section;
-	PluginSelector    *_plugin_selector;
+	MonitorSection   _monitor_section;
+	PluginSelector *_plugin_selector;
+	FoldbackStrip * foldback_strip;
+	bool _show_foldback_strip;
 
 	void stripable_property_changed (const PBD::PropertyChange& what_changed, boost::weak_ptr<ARDOUR::Stripable> ws);
 	void route_group_property_changed (ARDOUR::RouteGroup *, const PBD::PropertyChange &);
@@ -377,7 +401,6 @@ private:
 	friend class MixerGroupTabs;
 
 	void monitor_section_going_away ();
-
 	void monitor_section_attached ();
 	void monitor_section_detached ();
 
@@ -398,16 +421,12 @@ private:
 	/// true if we are in fullscreen mode
 	bool _maximised;
 
-	// true if mixer list is visible
-	bool _show_mixer_list;
-
 	bool _strip_selection_change_without_scroll;
 
 	mutable boost::weak_ptr<ARDOUR::Stripable> spilled_strip;
 
 	void escape ();
 
-	Gtkmm2ext::ActionMap myactions;
 	RouteProcessorSelection _selection;
 	AxisViewSelection _axis_targets;
 

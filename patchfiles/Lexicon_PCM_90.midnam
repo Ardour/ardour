@@ -1,0 +1,472 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Lexicon</Manufacturer>
+    <Model>PCM-90</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="P0 Halls">
+        <MIDICommands>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Deep Blue" ProgramChange="0"/>
+          <Patch Number="1" Name="Large Hall" ProgramChange="1"/>
+          <Patch Number="2" Name="Medium Hall" ProgramChange="2"/>
+          <Patch Number="3" Name="Small Hall" ProgramChange="3"/>
+          <Patch Number="4" Name="L Hall+Stage" ProgramChange="4"/>
+          <Patch Number="5" Name="M Hall+Stage" ProgramChange="5"/>
+          <Patch Number="6" Name="S Hall+Stage" ProgramChange="6"/>
+          <Patch Number="7" Name="Gothic Hall" ProgramChange="7"/>
+          <Patch Number="8" Name="Large Church" ProgramChange="8"/>
+          <Patch Number="9" Name="Small Church" ProgramChange="9"/>
+          <Patch Number="10" Name="Choir Hall" ProgramChange="10"/>
+          <Patch Number="11" Name="Vocal Hall" ProgramChange="11"/>
+          <Patch Number="12" Name="Vocal Hall 2" ProgramChange="12"/>
+          <Patch Number="13" Name="VocalConcert" ProgramChange="13"/>
+          <Patch Number="14" Name="Rise'n Hall" ProgramChange="14"/>
+          <Patch Number="15" Name="Good Ol'Verb" ProgramChange="15"/>
+          <Patch Number="16" Name="Deep Verb" ProgramChange="16"/>
+          <Patch Number="17" Name="Vocal Magic" ProgramChange="17"/>
+          <Patch Number="18" Name="Wide Vox" ProgramChange="18"/>
+          <Patch Number="19" Name="Slap Hall" ProgramChange="19"/>
+          <Patch Number="20" Name="Huge Arena" ProgramChange="20"/>
+          <Patch Number="21" Name="Real Hall" ProgramChange="21"/>
+          <Patch Number="22" Name="Great Hall" ProgramChange="22"/>
+          <Patch Number="23" Name="Brick Wallz" ProgramChange="23"/>
+          <Patch Number="24" Name="Cannon Gate" ProgramChange="24"/>
+          <Patch Number="25" Name="Spatial Hall" ProgramChange="25"/>
+          <Patch Number="26" Name="Nonlin Wrhse" ProgramChange="26"/>
+          <Patch Number="27" Name="Sizzle Hall" ProgramChange="27"/>
+          <Patch Number="28" Name="Bright Hall" ProgramChange="28"/>
+          <Patch Number="29" Name="Utility Hall" ProgramChange="29"/>
+          <Patch Number="30" Name="Horns Hall" ProgramChange="30"/>
+          <Patch Number="31" Name="Snare Gate" ProgramChange="31"/>
+          <Patch Number="32" Name="Guitar Cave" ProgramChange="32"/>
+          <Patch Number="33" Name="Drum Cave" ProgramChange="33"/>
+          <Patch Number="34" Name="Saxy Hangar" ProgramChange="34"/>
+          <Patch Number="35" Name="Gated Hall" ProgramChange="35"/>
+          <Patch Number="36" Name="For The Toms" ProgramChange="36"/>
+          <Patch Number="37" Name="Synth Hall" ProgramChange="37"/>
+          <Patch Number="38" Name="ShortReverse" ProgramChange="38"/>
+          <Patch Number="39" Name="GtrBalladBPM" ProgramChange="39"/>
+          <Patch Number="40" Name="Tidal Hall" ProgramChange="40"/>
+          <Patch Number="41" Name="Dream Hall" ProgramChange="41"/>
+          <Patch Number="42" Name="PumpVerb" ProgramChange="42"/>
+          <Patch Number="43" Name="PanHallBPM" ProgramChange="43"/>
+          <Patch Number="44" Name="Utility Verb" ProgramChange="44"/>
+          <Patch Number="45" Name="Museum Hall" ProgramChange="45"/>
+          <Patch Number="46" Name="Nonlinear#1" ProgramChange="46"/>
+          <Patch Number="47" Name="Tap BrickBPM" ProgramChange="47"/>
+          <Patch Number="48" Name="Gen. Concert" ProgramChange="48"/>
+          <Patch Number="49" Name="Gen. RHall" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="P1 Rooms">
+        <MIDICommands>
+          <ControlChange Control="32" Value="1"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Large Room" ProgramChange="0"/>
+          <Patch Number="1" Name="Medium Room" ProgramChange="1"/>
+          <Patch Number="2" Name="Small Room" ProgramChange="2"/>
+          <Patch Number="3" Name="Guitar Room" ProgramChange="3"/>
+          <Patch Number="4" Name="Organ Room" ProgramChange="4"/>
+          <Patch Number="5" Name="LargeChamber" ProgramChange="5"/>
+          <Patch Number="6" Name="SmallChamber" ProgramChange="6"/>
+          <Patch Number="7" Name="SpinningRoom" ProgramChange="7"/>
+          <Patch Number="8" Name="Wide Chamber" ProgramChange="8"/>
+          <Patch Number="9" Name="Tiled Room" ProgramChange="9"/>
+          <Patch Number="10" Name="Brite Vocal" ProgramChange="10"/>
+          <Patch Number="11" Name="Vocal Space" ProgramChange="11"/>
+          <Patch Number="12" Name="Vocal Amb" ProgramChange="12"/>
+          <Patch Number="13" Name="VerySmallAmb" ProgramChange="13"/>
+          <Patch Number="14" Name="S VocalSpace" ProgramChange="14"/>
+          <Patch Number="15" Name="L VocalSpace" ProgramChange="15"/>
+          <Patch Number="16" Name="S VocalAmb" ProgramChange="16"/>
+          <Patch Number="17" Name="L Vocal Amb" ProgramChange="17"/>
+          <Patch Number="18" Name="AmbientSus" ProgramChange="18"/>
+          <Patch Number="19" Name="Vocal Booth" ProgramChange="19"/>
+          <Patch Number="20" Name="LargeSpace" ProgramChange="20"/>
+          <Patch Number="21" Name="Med. Space" ProgramChange="21"/>
+          <Patch Number="22" Name="Delay Space" ProgramChange="22"/>
+          <Patch Number="23" Name="BigBoom Room" ProgramChange="23"/>
+          <Patch Number="24" Name="Tight Space" ProgramChange="24"/>
+          <Patch Number="25" Name="Reflect Room" ProgramChange="25"/>
+          <Patch Number="26" Name="Rock Room" ProgramChange="26"/>
+          <Patch Number="27" Name="Real Room" ProgramChange="27"/>
+          <Patch Number="28" Name="Spatial Bass" ProgramChange="28"/>
+          <Patch Number="29" Name="Great Room" ProgramChange="29"/>
+          <Patch Number="30" Name="Drum Room" ProgramChange="30"/>
+          <Patch Number="31" Name="Snare Trash" ProgramChange="31"/>
+          <Patch Number="32" Name="MetallicRoom" ProgramChange="32"/>
+          <Patch Number="33" Name="Slap Place" ProgramChange="33"/>
+          <Patch Number="34" Name="PercussPlace" ProgramChange="34"/>
+          <Patch Number="35" Name="PercussRoom" ProgramChange="35"/>
+          <Patch Number="36" Name="Room 4 Drums" ProgramChange="36"/>
+          <Patch Number="37" Name="Sloppy Place" ProgramChange="37"/>
+          <Patch Number="38" Name="WideSlapDrum" ProgramChange="38"/>
+          <Patch Number="39" Name="InverseDrums" ProgramChange="39"/>
+          <Patch Number="40" Name="PCM 60 Room" ProgramChange="40"/>
+          <Patch Number="41" Name="InverseRoom2" ProgramChange="41"/>
+          <Patch Number="42" Name="BeeBee Slapz" ProgramChange="42"/>
+          <Patch Number="43" Name="TheStoreroom" ProgramChange="43"/>
+          <Patch Number="44" Name="Crazy Rooms" ProgramChange="44"/>
+          <Patch Number="45" Name="Spatial Room" ProgramChange="45"/>
+          <Patch Number="46" Name="Hole Room" ProgramChange="46"/>
+          <Patch Number="47" Name="Storage Tank" ProgramChange="47"/>
+          <Patch Number="48" Name="StrangePlace" ProgramChange="48"/>
+          <Patch Number="49" Name="Gen. Ambi" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="P2 Plates">
+        <MIDICommands>
+          <ControlChange Control="32" Value="2"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Just Plate" ProgramChange="0"/>
+          <Patch Number="1" Name="Rich Plate" ProgramChange="1"/>
+          <Patch Number="2" Name="Gold Plate" ProgramChange="2"/>
+          <Patch Number="3" Name="Plate4Brass" ProgramChange="3"/>
+          <Patch Number="4" Name="Rock Plate" ProgramChange="4"/>
+          <Patch Number="5" Name="Eko Plate" ProgramChange="5"/>
+          <Patch Number="6" Name="A.Gtr Plate" ProgramChange="6"/>
+          <Patch Number="7" Name="SynthLeadBPM" ProgramChange="7"/>
+          <Patch Number="8" Name="Floyd Wash" ProgramChange="8"/>
+          <Patch Number="9" Name="GtrPlateBPM" ProgramChange="9"/>
+          <Patch Number="10" Name="Vocal Plate" ProgramChange="10"/>
+          <Patch Number="11" Name="Vocal Plate2" ProgramChange="11"/>
+          <Patch Number="12" Name="SmlVoxPlate" ProgramChange="12"/>
+          <Patch Number="13" Name="VoclEkoPlate" ProgramChange="13"/>
+          <Patch Number="14" Name="Choir Plate" ProgramChange="14"/>
+          <Patch Number="15" Name="Multi Vox" ProgramChange="15"/>
+          <Patch Number="16" Name="Bright Vox" ProgramChange="16"/>
+          <Patch Number="17" Name="VoclEcho BPM" ProgramChange="17"/>
+          <Patch Number="18" Name="VocalTapBPM2" ProgramChange="18"/>
+          <Patch Number="19" Name="VocalTapBPM" ProgramChange="19"/>
+          <Patch Number="20" Name="Live Plate" ProgramChange="20"/>
+          <Patch Number="21" Name="Clean Plate" ProgramChange="21"/>
+          <Patch Number="22" Name="Live Gate" ProgramChange="22"/>
+          <Patch Number="23" Name="Bright Plate" ProgramChange="23"/>
+          <Patch Number="24" Name="Hot Plate" ProgramChange="24"/>
+          <Patch Number="25" Name="Ever Plate" ProgramChange="25"/>
+          <Patch Number="26" Name="Warm Plate" ProgramChange="26"/>
+          <Patch Number="27" Name="Live Drums" ProgramChange="27"/>
+          <Patch Number="28" Name="Great Plate" ProgramChange="28"/>
+          <Patch Number="29" Name="PlateDlyBPM" ProgramChange="29"/>
+          <Patch Number="30" Name="Big Drums" ProgramChange="30"/>
+          <Patch Number="31" Name="Drum Plate" ProgramChange="31"/>
+          <Patch Number="32" Name="Fat Drums" ProgramChange="32"/>
+          <Patch Number="33" Name="Cool Plate" ProgramChange="33"/>
+          <Patch Number="34" Name="Tight Plate" ProgramChange="34"/>
+          <Patch Number="35" Name="Short Plate" ProgramChange="35"/>
+          <Patch Number="36" Name="Dark Plate" ProgramChange="36"/>
+          <Patch Number="37" Name="Plate Gate" ProgramChange="37"/>
+          <Patch Number="38" Name="Plate Gate 2" ProgramChange="38"/>
+          <Patch Number="39" Name="BongoPlate" ProgramChange="39"/>
+          <Patch Number="40" Name="Plate 90" ProgramChange="40"/>
+          <Patch Number="41" Name="WhatTheHeck?" ProgramChange="41"/>
+          <Patch Number="42" Name="GtrDlyPlate" ProgramChange="42"/>
+          <Patch Number="43" Name="Patterns BPM" ProgramChange="43"/>
+          <Patch Number="44" Name="MultPlateDly" ProgramChange="44"/>
+          <Patch Number="45" Name="MonoOrStereo" ProgramChange="45"/>
+          <Patch Number="46" Name="TapDelay BPM" ProgramChange="46"/>
+          <Patch Number="47" Name="SpatialPlate" ProgramChange="47"/>
+          <Patch Number="48" Name="PanEkoBPM" ProgramChange="48"/>
+          <Patch Number="49" Name="Gen. Plate" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="P3 Post">
+        <MIDICommands>
+          <ControlChange Control="32" Value="3"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Cabin Fever" ProgramChange="0"/>
+          <Patch Number="1" Name="Echo/Kitchen" ProgramChange="1"/>
+          <Patch Number="2" Name="HardwoodRoom" ProgramChange="2"/>
+          <Patch Number="3" Name="MeetingRoom" ProgramChange="3"/>
+          <Patch Number="4" Name="Locker Room" ProgramChange="4"/>
+          <Patch Number="5" Name="Living Room" ProgramChange="5"/>
+          <Patch Number="6" Name="Bedroom" ProgramChange="6"/>
+          <Patch Number="7" Name="Dual Closets" ProgramChange="7"/>
+          <Patch Number="8" Name="Phone Booth" ProgramChange="8"/>
+          <Patch Number="9" Name="Coffin" ProgramChange="9"/>
+          <Patch Number="10" Name="MetalChamber" ProgramChange="10"/>
+          <Patch Number="11" Name="Stairwell" ProgramChange="11"/>
+          <Patch Number="12" Name="Make-A-Space" ProgramChange="12"/>
+          <Patch Number="13" Name="Dly/Hallway" ProgramChange="13"/>
+          <Patch Number="14" Name="LectureHalls" ProgramChange="14"/>
+          <Patch Number="15" Name="Dance Hall" ProgramChange="15"/>
+          <Patch Number="16" Name="Ballrooms" ProgramChange="16"/>
+          <Patch Number="17" Name="Empty Club" ProgramChange="17"/>
+          <Patch Number="18" Name="NYC Clubs" ProgramChange="18"/>
+          <Patch Number="19" Name="Sports Verbs" ProgramChange="19"/>
+          <Patch Number="20" Name="Inside-Out" ProgramChange="20"/>
+          <Patch Number="21" Name="Outdoor PA" ProgramChange="21"/>
+          <Patch Number="22" Name="Two Autos" ProgramChange="22"/>
+          <Patch Number="23" Name="NYC Tunnels" ProgramChange="23"/>
+          <Patch Number="24" Name="Indoors/Out" ProgramChange="24"/>
+          <Patch Number="25" Name="Echo Beach" ProgramChange="25"/>
+          <Patch Number="26" Name="Block Party" ProgramChange="26"/>
+          <Patch Number="27" Name="Stadium" ProgramChange="27"/>
+          <Patch Number="28" Name="Dull/Bright" ProgramChange="28"/>
+          <Patch Number="29" Name="Outdoor PA-2" ProgramChange="29"/>
+          <Patch Number="30" Name="Wobble Room" ProgramChange="30"/>
+          <Patch Number="31" Name="Spatializer" ProgramChange="31"/>
+          <Patch Number="32" Name="Mic Location" ProgramChange="32"/>
+          <Patch Number="33" Name="Voices?" ProgramChange="33"/>
+          <Patch Number="34" Name="Voice? 2" ProgramChange="34"/>
+          <Patch Number="35" Name="Voices? BPM" ProgramChange="35"/>
+          <Patch Number="36" Name="MovingDelays" ProgramChange="36"/>
+          <Patch Number="37" Name="Windoz'90" ProgramChange="37"/>
+          <Patch Number="38" Name="Wall Slap" ProgramChange="38"/>
+          <Patch Number="39" Name="BombayClub" ProgramChange="39"/>
+          <Patch Number="40" Name="X Variable" ProgramChange="40"/>
+          <Patch Number="41" Name="Y Variable" ProgramChange="41"/>
+          <Patch Number="42" Name="Sound Check" ProgramChange="42"/>
+          <Patch Number="43" Name="Sound Stage" ProgramChange="43"/>
+          <Patch Number="44" Name="BPM Looper" ProgramChange="44"/>
+          <Patch Number="45" Name="Reverse Taps" ProgramChange="45"/>
+          <Patch Number="46" Name="Air Pressure" ProgramChange="46"/>
+          <Patch Number="47" Name="The Tomb" ProgramChange="47"/>
+          <Patch Number="48" Name="Mythology" ProgramChange="48"/>
+          <Patch Number="49" Name="Mr. Vader" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="P4 Splits">
+        <MIDICommands>
+          <ControlChange Control="32" Value="4"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Chamber/Room" ProgramChange="0"/>
+          <Patch Number="1" Name="Two Chambers" ProgramChange="1"/>
+          <Patch Number="2" Name="Hall/Room" ProgramChange="2"/>
+          <Patch Number="3" Name="Mono Halls" ProgramChange="3"/>
+          <Patch Number="4" Name="LgKick/Snare" ProgramChange="4"/>
+          <Patch Number="5" Name="Keys Room" ProgramChange="5"/>
+          <Patch Number="6" Name="Two Guitars" ProgramChange="6"/>
+          <Patch Number="7" Name="Fusion BD/SN" ProgramChange="7"/>
+          <Patch Number="8" Name="Dual Drums" ProgramChange="8"/>
+          <Patch Number="9" Name="SmKick/Snare" ProgramChange="9"/>
+          <Patch Number="10" Name="Vocal Verbs" ProgramChange="10"/>
+          <Patch Number="11" Name="Studio Rooms" ProgramChange="11"/>
+          <Patch Number="12" Name="Hard Rooms" ProgramChange="12"/>
+          <Patch Number="13" Name="Random Rooms" ProgramChange="13"/>
+          <Patch Number="14" Name="Hall/Basemnt" ProgramChange="14"/>
+          <Patch Number="15" Name="Breath" ProgramChange="15"/>
+          <Patch Number="16" Name="Cathedrals" ProgramChange="16"/>
+          <Patch Number="17" Name="Castle Chmbr" ProgramChange="17"/>
+          <Patch Number="18" Name="Warm Dual" ProgramChange="18"/>
+          <Patch Number="19" Name="Rvb+DryDelay" ProgramChange="19"/>
+          <Patch Number="20" Name="Dlys/HallBPM" ProgramChange="20"/>
+          <Patch Number="21" Name="Split Elvis" ProgramChange="21"/>
+          <Patch Number="22" Name="Room In Room" ProgramChange="22"/>
+          <Patch Number="23" Name="Bloom Verbs" ProgramChange="23"/>
+          <Patch Number="24" Name="DualEcho BPM" ProgramChange="24"/>
+          <Patch Number="25" Name="Chords/Leads" ProgramChange="25"/>
+          <Patch Number="26" Name="Two Delays" ProgramChange="26"/>
+          <Patch Number="27" Name="Gloss &amp; BPM" ProgramChange="27"/>
+          <Patch Number="28" Name="BPMVox/Drums" ProgramChange="28"/>
+          <Patch Number="29" Name="DualDelayBPM" ProgramChange="29"/>
+          <Patch Number="30" Name="Symphonic" ProgramChange="30"/>
+          <Patch Number="31" Name="Bass Mics" ProgramChange="31"/>
+          <Patch Number="32" Name="Dyna Room" ProgramChange="32"/>
+          <Patch Number="33" Name="TwoDrumRooms" ProgramChange="33"/>
+          <Patch Number="34" Name="Full Kit" ProgramChange="34"/>
+          <Patch Number="35" Name="Perc/Synth" ProgramChange="35"/>
+          <Patch Number="36" Name="Rhodes/Brass" ProgramChange="36"/>
+          <Patch Number="37" Name="Organ/Piano" ProgramChange="37"/>
+          <Patch Number="38" Name="Brass/Strings" ProgramChange="38"/>
+          <Patch Number="39" Name="Guitar Verbs" ProgramChange="39"/>
+          <Patch Number="40" Name="Thunder&amp;Ice" ProgramChange="40"/>
+          <Patch Number="41" Name="Ring Verb" ProgramChange="41"/>
+          <Patch Number="42" Name="Dark &amp; Brite" ProgramChange="42"/>
+          <Patch Number="43" Name="Dark &amp; Gated" ProgramChange="43"/>
+          <Patch Number="44" Name="Pipe Reverb" ProgramChange="44"/>
+          <Patch Number="45" Name="Weird Places" ProgramChange="45"/>
+          <Patch Number="46" Name="Two Rooms" ProgramChange="46"/>
+          <Patch Number="47" Name="TapDly&amp;Hall" ProgramChange="47"/>
+          <Patch Number="48" Name="E-NoseDelays" ProgramChange="48"/>
+          <Patch Number="49" Name="Gen. Split" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="R0 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="5"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="User Effect" ProgramChange="0"/>
+          <Patch Number="1" Name="User Effect" ProgramChange="1"/>
+          <Patch Number="2" Name="User Effect" ProgramChange="2"/>
+          <Patch Number="3" Name="User Effect" ProgramChange="3"/>
+          <Patch Number="4" Name="User Effect" ProgramChange="4"/>
+          <Patch Number="5" Name="User Effect" ProgramChange="5"/>
+          <Patch Number="6" Name="User Effect" ProgramChange="6"/>
+          <Patch Number="7" Name="User Effect" ProgramChange="7"/>
+          <Patch Number="8" Name="User Effect" ProgramChange="8"/>
+          <Patch Number="9" Name="User Effect" ProgramChange="9"/>
+          <Patch Number="10" Name="User Effect" ProgramChange="10"/>
+          <Patch Number="11" Name="User Effect" ProgramChange="11"/>
+          <Patch Number="12" Name="User Effect" ProgramChange="12"/>
+          <Patch Number="13" Name="User Effect" ProgramChange="13"/>
+          <Patch Number="14" Name="User Effect" ProgramChange="14"/>
+          <Patch Number="15" Name="User Effect" ProgramChange="15"/>
+          <Patch Number="16" Name="User Effect" ProgramChange="16"/>
+          <Patch Number="17" Name="User Effect" ProgramChange="17"/>
+          <Patch Number="18" Name="User Effect" ProgramChange="18"/>
+          <Patch Number="19" Name="User Effect" ProgramChange="19"/>
+          <Patch Number="20" Name="User Effect" ProgramChange="20"/>
+          <Patch Number="21" Name="User Effect" ProgramChange="21"/>
+          <Patch Number="22" Name="User Effect" ProgramChange="22"/>
+          <Patch Number="23" Name="User Effect" ProgramChange="23"/>
+          <Patch Number="24" Name="User Effect" ProgramChange="24"/>
+          <Patch Number="25" Name="User Effect" ProgramChange="25"/>
+          <Patch Number="26" Name="User Effect" ProgramChange="26"/>
+          <Patch Number="27" Name="User Effect" ProgramChange="27"/>
+          <Patch Number="28" Name="User Effect" ProgramChange="28"/>
+          <Patch Number="29" Name="User Effect" ProgramChange="29"/>
+          <Patch Number="30" Name="User Effect" ProgramChange="30"/>
+          <Patch Number="31" Name="User Effect" ProgramChange="31"/>
+          <Patch Number="32" Name="User Effect" ProgramChange="32"/>
+          <Patch Number="33" Name="User Effect" ProgramChange="33"/>
+          <Patch Number="34" Name="User Effect" ProgramChange="34"/>
+          <Patch Number="35" Name="User Effect" ProgramChange="35"/>
+          <Patch Number="36" Name="User Effect" ProgramChange="36"/>
+          <Patch Number="37" Name="User Effect" ProgramChange="37"/>
+          <Patch Number="38" Name="User Effect" ProgramChange="38"/>
+          <Patch Number="39" Name="User Effect" ProgramChange="39"/>
+          <Patch Number="40" Name="User Effect" ProgramChange="40"/>
+          <Patch Number="41" Name="User Effect" ProgramChange="41"/>
+          <Patch Number="42" Name="User Effect" ProgramChange="42"/>
+          <Patch Number="43" Name="User Effect" ProgramChange="43"/>
+          <Patch Number="44" Name="User Effect" ProgramChange="44"/>
+          <Patch Number="45" Name="User Effect" ProgramChange="45"/>
+          <Patch Number="46" Name="User Effect" ProgramChange="46"/>
+          <Patch Number="47" Name="User Effect" ProgramChange="47"/>
+          <Patch Number="48" Name="User Effect" ProgramChange="48"/>
+          <Patch Number="49" Name="User Effect" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="R1 Bank">
+        <MIDICommands>
+          <ControlChange Control="32" Value="6"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="User Effect" ProgramChange="0"/>
+          <Patch Number="1" Name="User Effect" ProgramChange="1"/>
+          <Patch Number="2" Name="User Effect" ProgramChange="2"/>
+          <Patch Number="3" Name="User Effect" ProgramChange="3"/>
+          <Patch Number="4" Name="User Effect" ProgramChange="4"/>
+          <Patch Number="5" Name="User Effect" ProgramChange="5"/>
+          <Patch Number="6" Name="User Effect" ProgramChange="6"/>
+          <Patch Number="7" Name="User Effect" ProgramChange="7"/>
+          <Patch Number="8" Name="User Effect" ProgramChange="8"/>
+          <Patch Number="9" Name="User Effect" ProgramChange="9"/>
+          <Patch Number="10" Name="User Effect" ProgramChange="10"/>
+          <Patch Number="11" Name="User Effect" ProgramChange="11"/>
+          <Patch Number="12" Name="User Effect" ProgramChange="12"/>
+          <Patch Number="13" Name="User Effect" ProgramChange="13"/>
+          <Patch Number="14" Name="User Effect" ProgramChange="14"/>
+          <Patch Number="15" Name="User Effect" ProgramChange="15"/>
+          <Patch Number="16" Name="User Effect" ProgramChange="16"/>
+          <Patch Number="17" Name="User Effect" ProgramChange="17"/>
+          <Patch Number="18" Name="User Effect" ProgramChange="18"/>
+          <Patch Number="19" Name="User Effect" ProgramChange="19"/>
+          <Patch Number="20" Name="User Effect" ProgramChange="20"/>
+          <Patch Number="21" Name="User Effect" ProgramChange="21"/>
+          <Patch Number="22" Name="User Effect" ProgramChange="22"/>
+          <Patch Number="23" Name="User Effect" ProgramChange="23"/>
+          <Patch Number="24" Name="User Effect" ProgramChange="24"/>
+          <Patch Number="25" Name="User Effect" ProgramChange="25"/>
+          <Patch Number="26" Name="User Effect" ProgramChange="26"/>
+          <Patch Number="27" Name="User Effect" ProgramChange="27"/>
+          <Patch Number="28" Name="User Effect" ProgramChange="28"/>
+          <Patch Number="29" Name="User Effect" ProgramChange="29"/>
+          <Patch Number="30" Name="User Effect" ProgramChange="30"/>
+          <Patch Number="31" Name="User Effect" ProgramChange="31"/>
+          <Patch Number="32" Name="User Effect" ProgramChange="32"/>
+          <Patch Number="33" Name="User Effect" ProgramChange="33"/>
+          <Patch Number="34" Name="User Effect" ProgramChange="34"/>
+          <Patch Number="35" Name="User Effect" ProgramChange="35"/>
+          <Patch Number="36" Name="User Effect" ProgramChange="36"/>
+          <Patch Number="37" Name="User Effect" ProgramChange="37"/>
+          <Patch Number="38" Name="User Effect" ProgramChange="38"/>
+          <Patch Number="39" Name="User Effect" ProgramChange="39"/>
+          <Patch Number="40" Name="User Effect" ProgramChange="40"/>
+          <Patch Number="41" Name="User Effect" ProgramChange="41"/>
+          <Patch Number="42" Name="User Effect" ProgramChange="42"/>
+          <Patch Number="43" Name="User Effect" ProgramChange="43"/>
+          <Patch Number="44" Name="User Effect" ProgramChange="44"/>
+          <Patch Number="45" Name="User Effect" ProgramChange="45"/>
+          <Patch Number="46" Name="User Effect" ProgramChange="46"/>
+          <Patch Number="47" Name="User Effect" ProgramChange="47"/>
+          <Patch Number="48" Name="User Effect" ProgramChange="48"/>
+          <Patch Number="49" Name="User Effect" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Dual Vrb Exp Bank 0">
+        <MIDICommands>
+          <ControlChange Control="32" Value="7"/>
+        </MIDICommands>
+        <PatchNameList/>
+      </PatchBank>
+      <PatchBank Name="Dual Vrb Exp Bank 1">
+        <MIDICommands>
+          <ControlChange Control="32" Value="8"/>
+        </MIDICommands>
+        <PatchNameList/>
+      </PatchBank>
+      <PatchBank Name="Dual Vrb Exp Bank 2">
+        <MIDICommands>
+          <ControlChange Control="32" Value="9"/>
+        </MIDICommands>
+        <PatchNameList/>
+      </PatchBank>
+      <PatchBank Name="Dual Vrb Exp Bank 3">
+        <MIDICommands>
+          <ControlChange Control="32" Value="10"/>
+        </MIDICommands>
+        <PatchNameList/>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

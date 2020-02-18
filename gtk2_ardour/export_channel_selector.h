@@ -1,22 +1,24 @@
 /*
-    Copyright (C) 2008 Paul Davis
-    Author: Sakari Bergen
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2008-2013 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2008-2013 Sakari Bergen <sakari.bergen@beatwaves.net>
+ * Copyright (C) 2009-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2013-2015 Colin Fletcher <colin.m.fletcher@googlemail.com>
+ * Copyright (C) 2016-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __export_channel_selector_h__
 #define __export_channel_selector_h__
@@ -42,6 +44,8 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
+
+#include "widgets/ardour_dropdown.h"
 
 namespace ARDOUR {
 	class Session;
@@ -243,6 +247,7 @@ class TrackExportChannelSelector : public ExportChannelSelector
 {
   public:
 	TrackExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager);
+	~TrackExportChannelSelector ();
 
 	virtual void sync_with_manager ();
 
@@ -251,7 +256,7 @@ class TrackExportChannelSelector : public ExportChannelSelector
   private:
 
 	void fill_list();
-	void add_track (boost::shared_ptr<ARDOUR::Route> route);
+	void add_track (boost::shared_ptr<ARDOUR::Route> route, bool selected);
 	void update_config();
 	ChannelConfigList configs;
 
@@ -274,11 +279,11 @@ class TrackExportChannelSelector : public ExportChannelSelector
 
 	Gtk::ScrolledWindow          track_scroller;
 
-	Gtk::HBox                    options_box;
-	Gtk::CheckButton             track_output_button;
-	Gtk::Button                  select_tracks_button;
-	Gtk::Button                  select_busses_button;
-	Gtk::Button                  select_none_button;
+	Gtk::HBox                     options_box;
+	Gtk::CheckButton              track_output_button;
+	ArdourWidgets::ArdourDropdown select_menu;
+	Gtk::CheckMenuItem*           exclude_hidden;
+	Gtk::CheckMenuItem*           exclude_muted;
 	void select_tracks ();
 	void select_busses ();
 	void select_none ();

@@ -1,4 +1,5 @@
 gtk-button-images = 0							      # [ Default value: 1 ] Show stock icons on buttons.
+gtk-theme-name = Ardour # override default gtk-default theme, "MS-Windows" vs "Raleigh" (Linux, Mac)
 
 style "default" = "medium_text"
 {
@@ -104,7 +105,7 @@ style "default" = "medium_text"
 
   GtkEntry::cursor_color = @entry_cursor
   GtkEntry::state-hint = 0
-  
+
   bg[NORMAL]          = @background
   bg[PRELIGHT]        = shade(1.1, @background)
   bg[ACTIVE]          = shade(0.9, @background)
@@ -282,12 +283,12 @@ style "status_bar_box"
 
 style "very_small_text"
 {
-	font_name = "@FONT_SMALLER@"
+	font_name = "@FONTFAMILY@ @FONT_SMALLER@"
 }
 
 style "small_text"
 {
-	font_name = "@FONT_SMALL@"
+	font_name = "@FONTFAMILY@ @FONT_SMALL@"
 }
 
 style "small_clock"
@@ -297,22 +298,22 @@ style "small_clock"
 
 style "small_italic_text"
 {
-	font_name = "italic @FONT_SMALL@"
+	font_name = "@FONTFAMILY@ italic @FONT_SMALL@"
 }
 
 style "small_bold_text"
 {
-	font_name = "bold @FONT_SMALL@"
+	font_name = "@FONTFAMILY@ bold @FONT_SMALL@"
 }
 
 style "medium_bold_text"
 {
-	font_name = "bold @FONT_NORMAL@"
+	font_name = "@FONTFAMILY@ bold @FONT_NORMAL@"
 }
 
 style "medium_text"
 {
-	font_name = "@FONT_NORMAL@"
+	font_name = "@FONTFAMILY@ @FONT_NORMAL@"
 }
 
 style "medium_monospace_text"
@@ -329,12 +330,12 @@ style "red_medium_text" = "medium_text"
 
 style "large_bold_text"
 {
-	font_name = "bold @FONT_LARGE@"
+	font_name = "@FONTFAMILY@ bold @FONT_LARGE@"
 }
 
 style "big_text"
 {
-        font_name = "@FONT_BIG@"
+        font_name = "@FONTFAMILY@ @FONT_BIG@"
 }
 
 style "bigger_clock"
@@ -344,7 +345,7 @@ style "bigger_clock"
 
 style "larger_text"
 {
-	font_name = "@FONT_LARGE@"
+	font_name = "@FONTFAMILY@ @FONT_LARGE@"
 }
 
 style "massive_clock"
@@ -354,7 +355,7 @@ style "massive_clock"
 
 style "big_bold_text"
 {
-	font_name = "bold @FONT_LARGER@"
+	font_name = "@FONTFAMILY@ bold @FONT_LARGER@"
 }
 
 style "plugin_name_text" = "big_bold_text"
@@ -739,6 +740,13 @@ style "audio_bus_base" = "very_small_text"
 	bg[ACTIVE] = @background
 }
 
+style "foldback_bus_base" = "very_small_text"
+{
+	fg[NORMAL] = @foreground
+	bg[NORMAL] = @foldback_bg
+	bg[ACTIVE] = @background
+}
+
 style "send_strip_base" = "default"
 {
 	font_name = " 8"
@@ -926,9 +934,9 @@ style "inspector_track_list_display" = "track_list_display"
 
 style "processor_list" = "very_small_text"
 {
-	bg[NORMAL] = @darkest
+	bg[NORMAL] = @bases
 	bg[ACTIVE] = shade (1.8, @fg_selected)
-	fg[ACTIVE] = @darkest
+	fg[ACTIVE] = @bases
 }
 
 # MixerPanZone:
@@ -1116,6 +1124,7 @@ widget "*EditorWindow" style:highest  "editor_window"
 widget "*SendStripBase" style:highest "send_strip_base"
 widget "*AudioTrackStripBase" style:highest "audio_track_base"
 widget "*AudioBusStripBase" style:highest "audio_bus_base"
+widget "*FoldbackBusStripBase" style:highest "foldback_bus_base"
 widget "*MidiTrackStripBase" style:highest "midi_track_base"
 widget "*AudioTrackStripBaseInactive" style:highest "track_header_inactive"
 widget "*AudioBusStripBaseInactive" style:highest "track_header_inactive"

@@ -1,22 +1,21 @@
 /*
-    Copyright (C) 2015 Paul Davis
-    Copyright (C) 2016 W.P. van Paassen
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2016 W.P. van Paassen
+ * Copyright (C) 2016-2019 Paul Davis <paul@linuxaudiosystems.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_cc121_gui_h__
 #define __ardour_cc121_gui_h__
@@ -36,6 +35,10 @@ namespace Gtk {
 }
 
 #include "cc121.h"
+
+namespace ActionManager {
+        class ActionModel;
+}
 
 namespace ArdourSurface {
 
@@ -87,16 +90,8 @@ private:
 	Glib::RefPtr<Gtk::ListStore> build_midi_port_list (std::vector<std::string> const & ports, bool for_input);
 	void active_port_changed (Gtk::ComboBox*,bool for_input);
 
-	struct ActionColumns : public Gtk::TreeModel::ColumnRecord {
-		ActionColumns() {
-			add (name);
-			add (path);
-		}
-		Gtk::TreeModelColumn<std::string> name;
-		Gtk::TreeModelColumn<std::string> path;
-	};
+	const ActionManager::ActionModel& action_model;
 
-	ActionColumns action_columns;
 	Glib::RefPtr<Gtk::TreeStore> available_action_model;
 	std::map<std::string,std::string> action_map; // map from action names to paths
 
@@ -104,11 +99,7 @@ private:
 	void build_user_action_combo (Gtk::ComboBox&, CC121::ButtonState, CC121::ButtonID);
 	void build_foot_action_combo (Gtk::ComboBox&, CC121::ButtonState);
 
-	void build_available_action_menu ();
 	void action_changed (Gtk::ComboBox*, CC121::ButtonID, CC121::ButtonState);
-
-	bool find_action_in_model (const Gtk::TreeModel::iterator& iter, std::string const & action_path, Gtk::TreeModel::iterator* found);
-
 };
 
 }

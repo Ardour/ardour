@@ -1,21 +1,26 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis
+ * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2018 Ben Loftis <ben@harrisonconsoles.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+#include <gtkmm/dialog.h>
 
 #include "pbd/enumwriter.h"
 
@@ -25,12 +30,14 @@
 #include "editing.h"
 #include "enums.h"
 #include "editor_items.h"
+#include "startup_fsm.h"
 
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 using namespace Editing;
 using namespace ArdourWidgets;
+using namespace Gtk;
 
 void
 setup_gtk_ardour_enums ()
@@ -50,6 +57,9 @@ setup_gtk_ardour_enums ()
 	ZoomFocus zoom_focus;
 	ItemType item_type;
 	MouseMode mouse_mode;
+	StartupFSM::MainState startup_state;
+	StartupFSM::DialogID startup_dialog;
+	Gtk::ResponseType dialog_response;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -180,37 +190,30 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM(MouseContent);
 	REGISTER (mouse_mode);
 
-	ArdourIcon::Icon icons;
+	REGISTER_CLASS_ENUM (StartupFSM, WaitingForPreRelease);
+	REGISTER_CLASS_ENUM (StartupFSM, WaitingForNewUser);
+	REGISTER_CLASS_ENUM (StartupFSM, WaitingForSessionPath);
+	REGISTER_CLASS_ENUM (StartupFSM, WaitingForEngineParams);
+	REGISTER_CLASS_ENUM (StartupFSM, WaitingForPlugins);
+	REGISTER (startup_state);
 
-	REGISTER_ENUM (ArdourIcon::NoIcon);
-	REGISTER_ENUM (ArdourIcon::RecButton);
-	REGISTER_ENUM (ArdourIcon::RecTapeMode);
-	REGISTER_ENUM (ArdourIcon::CloseCross);
-	REGISTER_ENUM (ArdourIcon::StripWidth);
-	REGISTER_ENUM (ArdourIcon::DinMidi);
-	REGISTER_ENUM (ArdourIcon::TransportStop);
-	REGISTER_ENUM (ArdourIcon::TransportPlay);
-	REGISTER_ENUM (ArdourIcon::TransportLoop);
-	REGISTER_ENUM (ArdourIcon::TransportRange);
-	REGISTER_ENUM (ArdourIcon::TransportStart);
-	REGISTER_ENUM (ArdourIcon::TransportEnd);
-	REGISTER_ENUM (ArdourIcon::TransportPanic);
-	REGISTER_ENUM (ArdourIcon::TransportMetronom);
-	REGISTER_ENUM (ArdourIcon::NudgeLeft);
-	REGISTER_ENUM (ArdourIcon::NudgeRight);
-	REGISTER_ENUM (ArdourIcon::ZoomIn);
-	REGISTER_ENUM (ArdourIcon::ZoomOut);
-	REGISTER_ENUM (ArdourIcon::ZoomFull);
-	REGISTER_ENUM (ArdourIcon::ZoomExpand);
-	REGISTER_ENUM (ArdourIcon::TimeAxisShrink);
-	REGISTER_ENUM (ArdourIcon::TimeAxisExpand);
-	REGISTER_ENUM (ArdourIcon::ToolGrab);
-	REGISTER_ENUM (ArdourIcon::ToolRange);
-	REGISTER_ENUM (ArdourIcon::ToolCut);
-	REGISTER_ENUM (ArdourIcon::ToolStretch);
-	REGISTER_ENUM (ArdourIcon::ToolAudition);
-	REGISTER_ENUM (ArdourIcon::ToolDraw);
-	REGISTER_ENUM (ArdourIcon::ToolContent);
-	REGISTER (icons);
+	REGISTER_CLASS_ENUM (StartupFSM, PreReleaseDialog);
+	REGISTER_CLASS_ENUM (StartupFSM, NewUserDialog);
+	REGISTER_CLASS_ENUM (StartupFSM, NewSessionDialog);
+	REGISTER_CLASS_ENUM (StartupFSM, AudioMIDISetup);
+	REGISTER_CLASS_ENUM (StartupFSM, PluginDialog);
+	REGISTER (startup_dialog);
 
+	REGISTER_ENUM (RESPONSE_NONE);
+	REGISTER_ENUM (RESPONSE_REJECT);
+	REGISTER_ENUM (RESPONSE_ACCEPT);
+	REGISTER_ENUM (RESPONSE_DELETE_EVENT);
+	REGISTER_ENUM (RESPONSE_OK);
+	REGISTER_ENUM (RESPONSE_CANCEL);
+	REGISTER_ENUM (RESPONSE_CLOSE);
+	REGISTER_ENUM (RESPONSE_YES);
+	REGISTER_ENUM (RESPONSE_NO);
+	REGISTER_ENUM (RESPONSE_APPLY);
+	REGISTER_ENUM (RESPONSE_HELP);
+	REGISTER (dialog_response);
 }

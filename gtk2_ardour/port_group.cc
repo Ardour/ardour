@@ -1,21 +1,24 @@
 /*
-    Copyright (C) 2002-2009 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2012-2016 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016 Julien "_FrnchFrgg_" RIVAUD <frnchfrgg@free.fr>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cstring>
 #include <boost/shared_ptr.hpp>
@@ -23,6 +26,7 @@
 
 #include "midi++/mmc.h"
 
+#include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/auditioner.h"
 #include "ardour/bundle.h"
@@ -486,6 +490,15 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		}
 	}
 
+	/* virtual keyboard */
+	if (!inputs && (type == DataType::MIDI || type == DataType::NIL)) {
+		boost::shared_ptr<ARDOUR::Port> ap = boost::dynamic_pointer_cast<ARDOUR::Port> (session->vkbd_output_port());
+		AudioEngine* ae = AudioEngine::instance();
+		boost::shared_ptr<Bundle> vm (new Bundle (_("Virtual MIDI"), inputs));
+		vm->add_channel (_("Virtual Keyboard"), DataType::MIDI, ae->make_port_name_non_relative (ap->name()));
+		program->add_bundle (vm);
+	}
+
 	/* our sync ports */
 
 	if ((type == DataType::MIDI || type == DataType::NIL)) {
@@ -602,12 +615,10 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 						/* we own this port (named after the program) */
 
-						/* Hide scene ports from non-Tracks Live builds */
-						if (!ARDOUR::Profile->get_trx()) {
-							if (p.find (_("Scene ")) != string::npos) {
-								++s;
-								continue;
-							}
+						/* Hide scene ports for now */
+						if (p.find (_("Scene ")) != string::npos) {
+							++s;
+							continue;
 						}
 
 						extra_program[t].push_back (p);

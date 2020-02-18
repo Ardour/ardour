@@ -1,21 +1,21 @@
 /*
-  Copyright (C) 2002 Paul Davis
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2016 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <limits.h>
 
@@ -51,7 +51,6 @@ LevelMeter::LevelMeter (Push2& p, Item* parent, int len, Meter::Orientation o)
 	, meter_length (len)
 	, thin_meter_width(2)
 	, max_peak (minus_infinity())
-	, meter_type (MeterPeak)
 	, visible_meter_type (MeterType(0))
 	, midi_count (0)
 	, meter_count (0)
@@ -89,7 +88,7 @@ LevelMeter::set_meter (PeakMeter* meter)
 
 	if (_meter) {
 		_meter->ConfigurationChanged.connect (_configuration_connection, invalidator(*this), boost::bind (&LevelMeter::configuration_changed, this, _1, _2), &p2);
-		_meter->TypeChanged.connect (_meter_type_connection, invalidator (*this), boost::bind (&LevelMeter::meter_type_changed, this, _1), &p2);
+		_meter->MeterTypeChanged.connect (_meter_type_connection, invalidator (*this), boost::bind (&LevelMeter::meter_type_changed, this, _1), &p2);
 	}
 
 	setup_meters (meter_length, regular_meter_width, thin_meter_width);
@@ -161,6 +160,7 @@ LevelMeter::update_meters ()
 			if (n < nmidi) {
 				(*i).meter->set (_meter->meter_level (n, MeterPeak));
 			} else {
+				MeterType meter_type = _meter->meter_type ();
 				const float peak = _meter->meter_level (n, meter_type);
 				if (meter_type == MeterPeak) {
 					(*i).meter->set (log_meter (peak));
@@ -226,7 +226,6 @@ LevelMeter::configuration_changed (ChanCount /*in*/, ChanCount /*out*/)
 void
 LevelMeter::meter_type_changed (MeterType t)
 {
-	meter_type = t;
 	setup_meters (meter_length, regular_meter_width, thin_meter_width);
 }
 
@@ -261,6 +260,7 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 		return; /* do it later or never */
 	}
 
+	MeterType meter_type = _meter->meter_type ();
 	uint32_t nmidi = _meter->input_streams().n_midi();
 	uint32_t nmeters = _meter->input_streams().n_total();
 	regular_meter_width = initial_width;
@@ -480,13 +480,6 @@ LevelMeter::setup_meters (int len, int initial_width, int thin_width)
 	visible_meter_type = meter_type;
 	midi_count = nmidi;
 	meter_count = nmeters;
-}
-
-void
-LevelMeter::set_type(MeterType t)
-{
-	meter_type = t;
-	_meter->set_type(t);
 }
 
 void LevelMeter::clear_meters (bool reset_highlight)

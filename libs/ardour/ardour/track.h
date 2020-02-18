@@ -1,20 +1,23 @@
 /*
-    Copyright (C) 2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2006-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_track_h__
 #define __ardour_track_h__
@@ -62,9 +65,8 @@ public:
 
 	MeterState metering_state () const;
 
-	bool set_processor_state (XMLNode const & node, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure);
+	bool set_processor_state (XMLNode const& node, int version, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure);
 
-	bool needs_butler () const { return _needs_butler; }
 	bool declick_in_progress () const;
 
 	bool can_record();
@@ -135,13 +137,12 @@ public:
 	float capture_buffer_load () const;
 	int do_refill ();
 	int do_flush (RunContext, bool force = false);
-	void set_pending_overwrite (bool);
+	void set_pending_overwrite (OverwriteReason);
 	int seek (samplepos_t, bool complete_refill = false);
-	int can_internal_playback_seek (samplecnt_t);
-	int internal_playback_seek (samplecnt_t);
+	bool can_internal_playback_seek (samplecnt_t);
+	void internal_playback_seek (samplecnt_t);
 	void non_realtime_locate (samplepos_t);
-	void realtime_handle_transport_stopped ();
-	int overwrite_existing_buffers ();
+	bool overwrite_existing_buffers ();
 	samplecnt_t get_captured_samples (uint32_t n = 0) const;
 	void transport_looped (samplepos_t);
 	void transport_stopped_wallclock (struct tm &, time_t, bool);
@@ -165,6 +166,7 @@ public:
 	}
 	void adjust_playback_buffering ();
 	void adjust_capture_buffering ();
+	void reload_loop ();
 
 	PBD::Signal0<void> FreezeChange;
 	PBD::Signal0<void> PlaylistChanged;
@@ -178,7 +180,6 @@ protected:
 
 	MeterPoint    _saved_meter_point;
 	TrackMode     _mode;
-	bool          _needs_butler;
 
 	//private: (FIXME)
 	struct FreezeRecordProcessorInfo {

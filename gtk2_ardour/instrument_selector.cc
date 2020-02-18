@@ -1,25 +1,27 @@
 /*
-  Copyright (C) 2003-2014 Paul Davis
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2016-2018 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include "pbd/convert.h"
 #include "pbd/enumwriter.h"
+
 #include "ardour/plugin_manager.h"
 #include "gtkmm2ext/gui_thread.h"
+
 #include "instrument_selector.h"
 
 #include "pbd/i18n.h"
@@ -121,16 +123,36 @@ InstrumentSelector::build_instrument_list()
 
 	uint32_t n = 1;
 	std::string prev;
-	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end();) {
+	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i, ++n) {
 		PluginInfoPtr p = *i;
-		++i;
-		bool suffix_type = prev == p->name;
-		if (!suffix_type && i != all_plugs.end() && (*i)->name == p->name) {
-			suffix_type = true;
-		}
+		
+		std::string suffix;
 
-		row = *(_instrument_list->append());
-		if (suffix_type) {
+#ifdef MIXBUS
+		uint32_t n_outs = p->max_configurable_ouputs ();
+		if (n_outs > 2) {
+			if (p->reconfigurable_io ()) {
+				suffix = string_compose(_("\u2264 %1 outs"), n_outs);
+			} else {
+				suffix = string_compose(_("%1 outs"), n_outs);
+			}
+		}
+#else
+		if (p->multichannel_name_ambiguity) {
+			uint32_t n_outs = p->max_configurable_ouputs ();
+			if (n_outs > 2) {
+				if (p->reconfigurable_io ()) {
+					suffix = string_compose(_("\u2264 %1 outs"), n_outs);
+				} else {
+					suffix = string_compose(_("%1 outs"), n_outs);
+				}
+			} else if (n_outs == 2) {
+				suffix = _("stereo");
+			}
+		}
+#endif
+
+		if (p->plugintype_name_ambiguity) {
 			std::string pt;
 			switch (p->type) {
 				case AudioUnit:
@@ -144,19 +166,28 @@ InstrumentSelector::build_instrument_list()
 				default:
 					pt = enum_2_string (p->type);
 			}
-			row[_instrument_list_columns.name]   = p->name + " (" + pt + ")";
-		} else {
-			row[_instrument_list_columns.name]   = p->name;
+			if (!suffix.empty ()) {
+				suffix += ", ";
+			}
+			suffix += pt;
 		}
+
+		std::string name = p->name;
+		if (!suffix.empty ()) {
+			name += " (" + suffix + ")";
+		}
+
+		row = *(_instrument_list->append());
+		row[_instrument_list_columns.name] = name;
+
 		row[_instrument_list_columns.info_ptr] = p;
 		if (p->unique_id == "https://community.ardour.org/node/7596") {
 			_reasonable_synth_id = n;
 		}
 		if (p->unique_id == "http://gareus.org/oss/lv2/gmsynth") {
-			_reasonable_synth_id = n;
+			_gmsynth_id = n;
 		}
 		prev = p->name;
-		n++;
 	}
 }
 

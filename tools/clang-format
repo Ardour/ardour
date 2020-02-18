@@ -1,25 +1,44 @@
-﻿---
-
+---
 Language: Cpp
-AlignAfterOpenBracket: 'true'
-AlignTrailingComments: 'true'
-AlwaysBreakTemplateDeclarations: 'true'
-AllowShortBlocksOnASingleLine: 'false'
-AllowShortCaseLabelsOnASingleLine: 'false'
-AllowShortFunctionsOnASingleLine: All
-AllowShortIfStatementsOnASingleLine: 'false'
-AllowShortLoopsOnASingleLine: 'false'
-AlwaysBreakAfterDefinitionReturnType: 'true'
-BasedOnStyle: LLVM
-BreakBeforeBraces: 'Linux'
-BreakConstructorInitializersBeforeComma: 'true'
-ColumnLimit: '100'
-ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
-IndentCaseLabels: 'false'
-NamespaceIndentation: 'None'
-PenaltyReturnTypeOnItsOwnLine: '1'
+BasedOnStyle:  LLVM
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignEscapedNewlinesLeft: false
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortBlocksOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine : false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterReturnType: TopLevel
+AlwaysBreakTemplateDeclarations: true
+BreakBeforeBraces: Linux
+BreakConstructorInitializersBeforeComma: true
+#ColumnLimit:      92
+ColumnLimit:      0
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+ConstructorInitializerIndentWidth: 8
+IndentCaseLabels: true
+AccessModifierOffset: -8
+#IndentPPDirectives: AfterHash
+IndentWidth:     8
+KeepEmptyLinesAtTheStartOfBlocks: false
+PenaltyReturnTypeOnItsOwnLine: 1
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: None
+ReflowComments:  true
 PointerAlignment: Left
+SortIncludes:    true
+SpaceAfterCStyleCast: false
+SpaceBeforeAssignmentOperators: true
 SpaceBeforeParens: Always
-TabWidth: '2'
-UseTab: ForIndentation
-
+#SpacesInAngles: true
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 1
+SpacesInContainerLiterals: true
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+Cpp11BracedListStyle: false
+TabWidth:        8
+UseTab:          ForIndentation

@@ -33,7 +33,7 @@ def build(bld):
     obj.name         = 'libardour_cp'
     obj.target       = 'ardourcp'
     obj.use          = 'libardour libpbd'
-    obj.uselib       = 'GLIBMM SIGCPP XML'
+    obj.uselib       = 'GLIBMM SIGCPP XML OSX'
     obj.install_path = bld.env['LIBDIR']
 
 def shutdown():

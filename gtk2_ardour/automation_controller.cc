@@ -1,22 +1,26 @@
 /*
-    Copyright (C) 2007 Paul Davis
-    Author: David Robillard
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2007-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2014-2015 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2015-2016 Nick Mainsbridge <mainsbridge@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <iomanip>
 #include <cmath>
@@ -31,7 +35,9 @@
 
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_knob.h"
+
 #include "automation_controller.h"
+#include "context_menu_helper.h"
 #include "gui_thread.h"
 #include "note_select_dialog.h"
 #include "timers.h"
@@ -140,14 +146,17 @@ AutomationController::create(const Evoral::Parameter&             param,
                              boost::shared_ptr<AutomationControl> ac,
                              bool use_knob)
 {
-	const double lo        = ac->internal_to_interface(desc.lower);
-	const double up        = ac->internal_to_interface(desc.upper);
-	const double normal    = ac->internal_to_interface(desc.normal);
-	const double smallstep = ac->internal_to_interface(desc.lower + desc.smallstep) - lo;
-	const double largestep = ac->internal_to_interface(desc.lower + desc.largestep) - lo;
+	const double lo        = ac->internal_to_interface(desc.lower, true);
+	const double normal    = ac->internal_to_interface(desc.normal, true);
+	const double smallstep = fabs (ac->internal_to_interface(desc.lower + desc.smallstep, true) - lo);
+	const double largestep = fabs (ac->internal_to_interface(desc.lower + desc.largestep, true) - lo);
 
-	Gtk::Adjustment* adjustment = manage (
-		new Gtk::Adjustment (normal, lo, up, smallstep, largestep));
+	/* even though internal_to_interface() may not generate the full range
+	 * 0..1, the interface range is 0..1 by definition,  so just hard code
+	 * that.
+	 */
+
+	Gtk::Adjustment* adjustment = manage (new Gtk::Adjustment (normal, 0.0, 1.0, smallstep, largestep));
 
 	assert (ac);
 	assert(ac->parameter() == param);
@@ -164,7 +173,7 @@ AutomationController::automation_state_changed ()
 void
 AutomationController::display_effective_value ()
 {
-	double const interface_value = _controllable->internal_to_interface(_controllable->get_value());
+	double const interface_value = _controllable->internal_to_interface(_controllable->get_value(), true);
 
 	if (_grabbed) {
 		/* we cannot use _controllable->touching() here
@@ -185,7 +194,7 @@ void
 AutomationController::value_adjusted ()
 {
 	if (!_ignore_change) {
-		const double new_val = _controllable->interface_to_internal(_adjustment->get_value());
+		const double new_val = _controllable->interface_to_internal(_adjustment->get_value(), true);
 		if (_controllable->user_double() != new_val) {
 			_controllable->set_value (new_val, Controllable::NoGroup);
 		}
@@ -274,7 +283,7 @@ AutomationController::set_freq_beats(double beats)
 {
 	const ARDOUR::ParameterDescriptor& desc    = _controllable->desc();
 	const ARDOUR::Session&             session = _controllable->session();
-	const samplepos_t                   pos     = session.transport_sample();
+	const samplepos_t                  pos     = session.transport_sample();
 	const ARDOUR::Tempo&               tempo   = session.tempo_map().tempo_at_sample (pos);
 	const double                       bpm     = tempo.note_types_per_minute();
 	const double                       bps     = bpm / 60.0;
@@ -301,14 +310,14 @@ AutomationController::on_button_release(GdkEventButton* ev)
 
 	const ARDOUR::ParameterDescriptor& desc = _controllable->desc();
 	if (desc.unit == ARDOUR::ParameterDescriptor::MIDI_NOTE) {
-		Gtk::Menu* menu  = manage(new Menu());
+		Gtk::Menu* menu  = ARDOUR_UI_UTILS::shared_popup_menu ();
 		MenuList&  items = menu->items();
 		items.push_back(MenuElem(_("Select Note..."),
 		                         sigc::mem_fun(*this, &AutomationController::run_note_select_dialog)));
 		menu->popup(1, ev->time);
 		return true;
 	} else if (desc.unit == ARDOUR::ParameterDescriptor::HZ) {
-		Gtk::Menu* menu  = manage(new Menu());
+		Gtk::Menu* menu  = ARDOUR_UI_UTILS::shared_popup_menu ();
 		MenuList&  items = menu->items();
 		items.push_back(MenuElem(_("Halve"),
 		                         sigc::bind(sigc::mem_fun(*this, &AutomationController::set_ratio),

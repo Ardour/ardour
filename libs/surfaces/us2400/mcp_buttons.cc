@@ -1,22 +1,20 @@
 /*
-	Copyright (C) 2006,2007 John Anderson
-	Copyright (C) 2012 Paul Davis
-	Copyright (C) 2017 Ben Loftis
-
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; either version 2 of the License, or
-	(at your option) any later version.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2017-2019 Ben Loftis <ben@harrisonconsoles.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <algorithm>
 
@@ -460,7 +458,7 @@ US2400Protocol::marker_release (Button &)
 
 	samplepos_t where = session->audible_sample();
 
-	if (session->transport_stopped() && session->locations()->mark_at (where, session->sample_rate() / 100.0)) {
+	if (session->transport_stopped_or_stopping() && session->locations()->mark_at (where, session->sample_rate() / 100.0)) {
 		return off;
 	}
 
@@ -489,7 +487,7 @@ US2400Protocol::stop_press (Button &)
 LedState
 US2400Protocol::stop_release (Button &)
 {
-	return session->transport_stopped();
+	return session->transport_stopped_or_stopping();
 }
 
 LedState
@@ -568,7 +566,7 @@ LedState
 US2400Protocol::loop_press (Button &)
 {
 	if (main_modifier_state() & MODIFIER_SHIFT) {
-		access_action ("Common/set-loop-from-edit-range");
+		access_action ("Editor/set-loop-from-edit-range");
 		return off;
 	} else {
 		bool was_on = session->get_play_loop();
@@ -853,7 +851,7 @@ US2400Protocol::master_fader_touch_press (US2400::Button &)
 	boost::shared_ptr<AutomationControl> ac = master_fader->control ();
 
 	master_fader->set_in_use (true);
-	master_fader->start_touch (transport_frame());
+	master_fader->start_touch (transport_sample());
 
 	return none;
 }
@@ -865,7 +863,7 @@ US2400Protocol::master_fader_touch_release (US2400::Button &)
 	Fader* master_fader = _master_surface->master_fader();
 
 	master_fader->set_in_use (false);
-	master_fader->stop_touch (transport_frame());
+	master_fader->stop_touch (transport_sample());
 
 	return none;
 }
@@ -1100,7 +1098,7 @@ US2400::LedState
 US2400Protocol::click_press (US2400::Button&)
 {
 	if (main_modifier_state() & MODIFIER_SHIFT) {
-		access_action ("Common/set-punch-from-edit-range");
+		access_action ("Editor/set-punch-from-edit-range");
 		return off;
 	} else {
 		bool state = !Config->get_clicking();

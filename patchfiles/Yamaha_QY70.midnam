@@ -1,0 +1,2932 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Yamaha</Manufacturer>
+    <Model>QY70</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <DeviceModeEnable>
+        <MIDICommands>
+          <SysEx>F0 43 10 <SysExDeviceID Offset="0"/> 4C 00 00 7E 00 F7</SysEx>
+        </MIDICommands>
+      </DeviceModeEnable>
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Piano">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="000" Name="GrandPno" ProgramChange="0"/>
+          <Patch Number="001+" Name="GrndPnoK">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="1"/>
+              <ProgramChange Number="0"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="001+" Name="MelloGrP">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="18"/>
+              <ProgramChange Number="0"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="001+" Name="PianoStr">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="0"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="001+" Name="Dream">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="41"/>
+              <ProgramChange Number="0"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="002" Name="BritePno" ProgramChange="1"/>
+          <Patch Number="002+" Name="BritPnoK">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="1"/>
+              <ProgramChange Number="1"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="003" Name="El.Grand" ProgramChange="2"/>
+          <Patch Number="003+" Name="ElGrPnoK">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="1"/>
+              <ProgramChange Number="2"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="003+" Name="Det.CP80">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="2"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="003+" Name="LayerCP1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="2"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="003+" Name="LayerCP2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="41"/>
+              <ProgramChange Number="2"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="004" Name="HnkyTonk" ProgramChange="3"/>
+          <Patch Number="004+" Name="HnkyTnkK">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="1"/>
+              <ProgramChange Number="3"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="005" Name="E.Piano1" ProgramChange="4"/>
+          <Patch Number="005+" Name="El.Pno1K">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="1"/>
+              <ProgramChange Number="4"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="005+" Name="MelloEP1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="18"/>
+              <ProgramChange Number="4"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="005+" Name="Chor.EP1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="4"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="005+" Name="HardEl.P">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="4"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="005+" Name="VX El.P1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="45"/>
+              <ProgramChange Number="4"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="005+" Name="60sEl.P">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="4"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="006" Name="E.Piano2" ProgramChange="5"/>
+          <Patch Number="006+" Name="El.Pno2K">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="1"/>
+              <ProgramChange Number="5"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="006+" Name="Chor.EP2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="5"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="006+" Name="DX Hard">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="33"/>
+              <ProgramChange Number="5"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="006+" Name="DXLegend">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="34"/>
+              <ProgramChange Number="5"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="006+" Name="DX Phase">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="5"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="006+" Name="DX+Analg">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="41"/>
+              <ProgramChange Number="5"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="006+" Name="DXKotoEP">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="42"/>
+              <ProgramChange Number="5"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="006+" Name="VX El.P2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="45"/>
+              <ProgramChange Number="5"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="007" Name="Harpsi." ProgramChange="6"/>
+          <Patch Number="007+" Name="Harpsi.K">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="1"/>
+              <ProgramChange Number="6"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="007+" Name="Harpsi.2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="25"/>
+              <ProgramChange Number="6"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="007+" Name="Harpsi.3">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="35"/>
+              <ProgramChange Number="6"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="008" Name="Clavi." ProgramChange="7"/>
+          <Patch Number="008+" Name="Clavi.K">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="1"/>
+              <ProgramChange Number="7"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="008+" Name="ClaviWah">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="27"/>
+              <ProgramChange Number="7"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="008+" Name="PulseClv">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="7"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="008+" Name="PierceCl">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="7"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Chromatic Percussion">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="009" Name="Celesta" ProgramChange="8"/>
+          <Patch Number="010" Name="Glocken" ProgramChange="9"/>
+          <Patch Number="011" Name="MusicBox" ProgramChange="10"/>
+          <Patch Number="011" Name="Orgel">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="10"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="012" Name="Vibes" ProgramChange="11"/>
+          <Patch Number="012+" Name="Vibes K">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="1"/>
+              <ProgramChange Number="11"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="012+" Name="HardVibe">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="45"/>
+              <ProgramChange Number="11"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="013" Name="Marimba" ProgramChange="12"/>
+          <Patch Number="013+" Name="MarimbaK">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="1"/>
+              <ProgramChange Number="12"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="013+" Name="SineMrmb">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="12"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="013+" Name="Balimba">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="97"/>
+              <ProgramChange Number="12"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="013+" Name="Log Drum">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="98"/>
+              <ProgramChange Number="12"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="014" Name="Xylophon" ProgramChange="13"/>
+          <Patch Number="015" Name="TubulBel" ProgramChange="14"/>
+          <Patch Number="015+" Name="ChrchBel">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="96"/>
+              <ProgramChange Number="14"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="015+" Name="Carillon">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="97"/>
+              <ProgramChange Number="14"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="016" Name="Dulcimer" ProgramChange="15"/>
+          <Patch Number="016+" Name="Dulcimr2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="35"/>
+              <ProgramChange Number="15"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="016+" Name="Cimbalom">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="96"/>
+              <ProgramChange Number="15"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="016+" Name="Santur">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="97"/>
+              <ProgramChange Number="15"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Organ">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="017" Name="DrawOrgn" ProgramChange="16"/>
+          <Patch Number="017+" Name="DetDrwOr">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="16"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="017+" Name="60sDrOr1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="33"/>
+              <ProgramChange Number="16"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="017+" Name="60sDrOr2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="34"/>
+              <ProgramChange Number="16"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="017+" Name="70sDrOr1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="35"/>
+              <ProgramChange Number="16"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="017+" Name="DrawOrg2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="36"/>
+              <ProgramChange Number="16"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="017+" Name="60sDrOr3">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="37"/>
+              <ProgramChange Number="16"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="017+" Name="EvenBar">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="38"/>
+              <ProgramChange Number="16"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="017+" Name="16+2”2/3">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="16"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="017+" Name="Organ Ba">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="16"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="017+" Name="70sDrOr2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="16"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="017+" Name="CheezOrg">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="66"/>
+              <ProgramChange Number="16"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="017+" Name="DrawOrg3">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="67"/>
+              <ProgramChange Number="16"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="018" Name="PercOrgn" ProgramChange="17"/>
+          <Patch Number="018+" Name="70sPcOr1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="24"/>
+              <ProgramChange Number="17"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="018+" Name="DetPrcOr">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="17"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="018+" Name="LiteOrg">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="33"/>
+              <ProgramChange Number="17"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="018+" Name="PercOrg2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="37"/>
+              <ProgramChange Number="17"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="019" Name="RockOrgn" ProgramChange="18"/>
+          <Patch Number="019+" Name="RotaryOr">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="18"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="019+" Name="SloRotar">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="18"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="019+" Name="FstRotar">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="66"/>
+              <ProgramChange Number="18"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="19" Name="ChrchOrg" ProgramChange="19"/>
+          <Patch Number="020+" Name="ChurOrg3">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="19"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="020+" Name="ChurOrg2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="35"/>
+              <ProgramChange Number="19"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="020+" Name="NotreDam">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="19"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="020+" Name="OrgFlute">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="19"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="020+" Name="TrmOrgFl">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="19"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="021" Name="ReedOrgn" ProgramChange="20"/>
+          <Patch Number="021+" Name="Puff Org">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="20"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="022" Name="Acordion" ProgramChange="21"/>
+          <Patch Number="022+" Name="AccordIt">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="21"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="022+" Name="Harmnica" ProgramChange="22"/>
+          <Patch Number="023" Name="Harmo. 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="22"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="024" Name="TangoAcd" ProgramChange="23"/>
+          <Patch Number="024+" Name="TngoAcd2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="23"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Guitar">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="025" Name="NylonGtr" ProgramChange="24"/>
+          <Patch Number="025+" Name="NylonGt2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="16"/>
+              <ProgramChange Number="24"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="025+" Name="NylonGt3">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="25"/>
+              <ProgramChange Number="24"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="025+" Name="VelGtHrm">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="43"/>
+              <ProgramChange Number="24"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="025+" Name="Ukulele">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="96"/>
+              <ProgramChange Number="24"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="026" Name="SteelGtr" ProgramChange="25"/>
+          <Patch Number="026+" Name="SteelGt2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="16"/>
+              <ProgramChange Number="25"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="026+" Name="12StrGtr">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="35"/>
+              <ProgramChange Number="25"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="026+" Name="Nyln&amp;Stl">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="25"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="026+" Name="Stl&amp;Body">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="41"/>
+              <ProgramChange Number="25"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="026+" Name="Mandolin">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="96"/>
+              <ProgramChange Number="25"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="027" Name="Jazz Gtr" ProgramChange="26"/>
+          <Patch Number="027+" Name="MelloGtr">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="18"/>
+              <ProgramChange Number="26"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="027+" Name="JazzAmp">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="26"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="027+" Name="PdlSteel">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="96"/>
+              <ProgramChange Number="26"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="028" Name="CleanGtr" ProgramChange="27"/>
+          <Patch Number="028+" Name="ChorusGt">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="27"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="028+" Name="MidT.Gtr">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="27"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="028+" Name="MidTGtSt">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="66"/>
+              <ProgramChange Number="27"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="029" Name="Mute.Gtr" ProgramChange="28"/>
+          <Patch Number="029+" Name="FunkGtr1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="28"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="029+" Name="MuteStlG">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="41"/>
+              <ProgramChange Number="28"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="029+" Name="FunkGtr2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="43"/>
+              <ProgramChange Number="28"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="029+" Name="Jazz Man">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="45"/>
+              <ProgramChange Number="28"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="029+" Name="Mu.DstGt">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="96"/>
+              <ProgramChange Number="28"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="030" Name="Ovrdrive" ProgramChange="29"/>
+          <Patch Number="030+" Name="Gt.Pinch">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="43"/>
+              <ProgramChange Number="29"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="031" Name="Dist.Gtr" ProgramChange="30"/>
+          <Patch Number="031+" Name="DstRthmG">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="12"/>
+              <ProgramChange Number="30"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="031+" Name="DistGtr2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="24"/>
+              <ProgramChange Number="30"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="031+" Name="DistGtr3">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="35"/>
+              <ProgramChange Number="30"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="031+" Name="PowerGt2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="36"/>
+              <ProgramChange Number="30"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="031+" Name="PowerGT1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="37"/>
+              <ProgramChange Number="30"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="031+" Name="Dst.5ths">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="38"/>
+              <ProgramChange Number="30"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="031+" Name="FeedbkGt">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="30"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="031+" Name="FeedbkGt2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="41"/>
+              <ProgramChange Number="30"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="031+" Name="RckRthm2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="43"/>
+              <ProgramChange Number="30"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="031+" Name="RckRthm1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="45"/>
+              <ProgramChange Number="30"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="032" Name="GtrHarmo" ProgramChange="31"/>
+          <Patch Number="032+" Name="GtFeedbk">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="31"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="032+" Name="GtrHrmo2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="66"/>
+              <ProgramChange Number="31"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bass">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="033" Name="Aco.Bass" ProgramChange="32"/>
+          <Patch Number="033+" Name="JazzRthm">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="32"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="033+" Name="VXUprght">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="45"/>
+              <ProgramChange Number="32"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="034" Name="FngrBass" ProgramChange="33"/>
+          <Patch Number="034+" Name="FingrDrk">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="18"/>
+              <ProgramChange Number="33"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="034+" Name="FlangeBa">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="27"/>
+              <ProgramChange Number="33"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="034+" Name="Ba&amp;DstEG">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="33"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="034+" Name="FngrSlap">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="43"/>
+              <ProgramChange Number="33"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="034+" Name="FngBass2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="45"/>
+              <ProgramChange Number="33"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="034+" Name="Jazzy Ba">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="33"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="034+" Name="Mod.Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="33"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="035" Name="PickBass" ProgramChange="34"/>
+          <Patch Number="035+" Name="MutePkBa">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="28"/>
+              <ProgramChange Number="34"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="036" Name="Fretless" ProgramChange="35"/>
+          <Patch Number="036+" Name="Fretles2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="35"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="036+" Name="Fretles3">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="33"/>
+              <ProgramChange Number="35"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="036+" Name="Fretles4">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="34"/>
+              <ProgramChange Number="35"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="036+" Name="SynFretl">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="96"/>
+              <ProgramChange Number="35"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="036+" Name="SmthFrtl">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="97"/>
+              <ProgramChange Number="35"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="037" Name="SlapBas1" ProgramChange="36"/>
+          <Patch Number="037+" Name="ResoSlap">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="27"/>
+              <ProgramChange Number="36"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="037+" Name="PunchThm">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="36"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="037+" Name="Slapper">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="36"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="037+" Name="Thum&amp;Slp">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="36"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="038" Name="SlapBas2" ProgramChange="37"/>
+          <Patch Number="038+" Name="VeloSlap">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="43"/>
+              <ProgramChange Number="37"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="039" Name="SynBass1" ProgramChange="38"/>
+          <Patch Number="039+" Name="SynBa1Dk">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="18"/>
+              <ProgramChange Number="38"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="039+" Name="FastResB">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="20"/>
+              <ProgramChange Number="38"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="039+" Name="AcidBass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="24"/>
+              <ProgramChange Number="38"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="039+" Name="ResoBass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="27"/>
+              <ProgramChange Number="38"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="039+" Name="ClavBass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="35"/>
+              <ProgramChange Number="38"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="039+" Name="TechnoBa">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="38"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="039+" Name="Orbiter">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="38"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="039+" Name="Sqr.Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="38"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="039+" Name="RubberBa">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="66"/>
+              <ProgramChange Number="38"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="039+" Name="Fish">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="67"/>
+              <ProgramChange Number="38"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="039+" Name="HardReso">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="68"/>
+              <ProgramChange Number="38"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="039+" Name="Hammer">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="96"/>
+              <ProgramChange Number="38"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="040" Name="SynBass2" ProgramChange="39"/>
+          <Patch Number="040+" Name="MelloSBa">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="6"/>
+              <ProgramChange Number="39"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="040+" Name="Seq Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="12"/>
+              <ProgramChange Number="39"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="040+" Name="ClkSynBa">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="18"/>
+              <ProgramChange Number="39"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="040+" Name="SynBa2Dk">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="19"/>
+              <ProgramChange Number="39"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="040+" Name="SmthSynB">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="39"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="040+" Name="ModulrBa">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="39"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="040+" Name="DX Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="41"/>
+              <ProgramChange Number="39"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="040+" Name="X WireBa">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="39"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="040+" Name="AtkPulse">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="39"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="040+" Name="CS Light">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="66"/>
+              <ProgramChange Number="39"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="040+" Name="MetlBass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="67"/>
+              <ProgramChange Number="39"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Strings/Orchestra">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="041" Name="Violin" ProgramChange="40"/>
+          <Patch Number="041+" Name="Slow Vln">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="8"/>
+              <ProgramChange Number="40"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="042" Name="Viola" ProgramChange="41"/>
+          <Patch Number="043" Name="Cello" ProgramChange="42"/>
+          <Patch Number="044" Name="Contrabs" ProgramChange="43"/>
+          <Patch Number="045" Name="Trem.Str" ProgramChange="44"/>
+          <Patch Number="045+" Name="SlowTrStr">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="8"/>
+              <ProgramChange Number="44"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="045+" Name="Susp Str">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="44"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="046" Name="Pizz.Str" ProgramChange="45"/>
+          <Patch Number="047" Name="Harp" ProgramChange="46"/>
+          <Patch Number="047+" Name="YangChin">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="46"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="048" Name="Timpani" ProgramChange="47"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Ensemble">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="049" Name="Strings1" ProgramChange="48"/>
+          <Patch Number="049+" Name="S.Strngs">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="3"/>
+              <ProgramChange Number="48"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="049+" Name="Slow Str">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="8"/>
+              <ProgramChange Number="48"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="049+" Name="ArcoStr">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="24"/>
+              <ProgramChange Number="48"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="049+" Name="60sStrng">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="35"/>
+              <ProgramChange Number="48"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="049+" Name="Orchestr">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="48"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="049+" Name="Orchstr2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="41"/>
+              <ProgramChange Number="48"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="049+" Name="TremOrch">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="42"/>
+              <ProgramChange Number="48"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="049+" Name="Velo.Str">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="45"/>
+              <ProgramChange Number="48"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="050" Name="Strings2" ProgramChange="49"/>
+          <Patch Number="050+" Name="S.SlwStr">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="3"/>
+              <ProgramChange Number="49"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="050+" Name="LegatoSt">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="8"/>
+              <ProgramChange Number="49"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="050+" Name="Warm Str">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="49"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="050+" Name="Kingdom">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="41"/>
+              <ProgramChange Number="49"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="050+" Name="70s Str">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="49"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="050+" Name="Strings3">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="49"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="051" Name="Syn.Strg1" ProgramChange="50"/>
+          <Patch Number="051+" Name="Reso Str">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="27"/>
+              <ProgramChange Number="50"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="051+" Name="Syn Str4">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="50"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="051+" Name="Syn Str5">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="50"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="052" Name="Syn.Strg2" ProgramChange="51"/>
+          <Patch Number="053" Name="ChoirAah" ProgramChange="52"/>
+          <Patch Number="053+" Name="S.Choir">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="3"/>
+              <ProgramChange Number="52"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="053+" Name="Ch.Aahs2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="16"/>
+              <ProgramChange Number="52"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="053+" Name="MelChoir">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="52"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="053+" Name="ChoirStr">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="52"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="054" Name="VoiceOoh" ProgramChange="53"/>
+          <Patch Number="055" Name="SynVoice" ProgramChange="54"/>
+          <Patch Number="055+" Name="SynVoice2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="54"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="055+" Name="Choral">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="41"/>
+              <ProgramChange Number="54"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="055+" Name="AnaVoice">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="54"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="056" Name="Orch.Hit" ProgramChange="55"/>
+          <Patch Number="056+" Name="OrchHit2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="35"/>
+              <ProgramChange Number="55"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="056+" Name="Impact">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="55"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="056+" Name="Bass Hit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="68"/>
+              <ProgramChange Number="55"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="056+" Name="6th Hit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="70"/>
+              <ProgramChange Number="55"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="056+" Name="6th Hit +">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="71"/>
+              <ProgramChange Number="55"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="056+" Name="Euro Hit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="72"/>
+              <ProgramChange Number="55"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="056+" Name="EuroHit+">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="73"/>
+              <ProgramChange Number="55"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Brass">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="057" Name="Trumpet" ProgramChange="56"/>
+          <Patch Number="057+" Name="Trumpet2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="16"/>
+              <ProgramChange Number="56"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="057+" Name="BriteTrp">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="17"/>
+              <ProgramChange Number="56"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="057+" Name="WarmTrp">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="56"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="058" Name="Trombone" ProgramChange="57"/>
+          <Patch Number="058+" Name="Trmbone2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="18"/>
+              <ProgramChange Number="57"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="059" Name="Tuba" ProgramChange="58"/>
+          <Patch Number="059+" Name="Tuba 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="16"/>
+              <ProgramChange Number="58"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="060" Name="Mute.Trp" ProgramChange="59"/>
+          <Patch Number="061" Name="Fr.Horn" ProgramChange="60"/>
+          <Patch Number="061+" Name="FrHrSolo">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="6"/>
+              <ProgramChange Number="60"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="061+" Name="FrHorn 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="60"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="061+" Name="HornOrch">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="37"/>
+              <ProgramChange Number="60"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="062" Name="BrasSect" ProgramChange="61"/>
+          <Patch Number="062+" Name="StBrsSec">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="3"/>
+              <ProgramChange Number="61"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="062+" Name="Tp&amp;TbSec">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="35"/>
+              <ProgramChange Number="61"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="062+" Name="BrssSec2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="61"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="062+" Name="Hi Brass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="41"/>
+              <ProgramChange Number="61"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="062+" Name="MelloBrs">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="42"/>
+              <ProgramChange Number="61"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="063" Name="SynBrss1" ProgramChange="62"/>
+          <Patch Number="063+" Name="Quack Br">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="12"/>
+              <ProgramChange Number="62"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="063+" Name="RezSynBr">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="20"/>
+              <ProgramChange Number="62"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="063+" Name="PolyBrss">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="24"/>
+              <ProgramChange Number="62"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="063+" Name="SynBrss3">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="27"/>
+              <ProgramChange Number="62"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="063+" Name="JumpBrss">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="62"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="063+" Name="SyBrsSub">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="62"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="063+" Name="AnaVelBr">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="45"/>
+              <ProgramChange Number="62"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="063+" Name="AnaBrss1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="62"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="064" Name="SynBrss2" ProgramChange="63"/>
+          <Patch Number="064+" Name="Soft Brs">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="18"/>
+              <ProgramChange Number="63"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="064+" Name="SynBrss4">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="63"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="064+" Name="ChoirBrs">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="41"/>
+              <ProgramChange Number="63"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="064+" Name="AnVelBr">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="45"/>
+              <ProgramChange Number="63"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="064+" Name="AnaBrss2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="63"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Reed">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="065" Name="SprnoSax" ProgramChange="64"/>
+          <Patch Number="066" Name="Alto Sax" ProgramChange="65"/>
+          <Patch Number="066+" Name="Sax Sect">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="65"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="066+" Name="HyprAlto">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="43"/>
+              <ProgramChange Number="65"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="067" Name="TenorSax" ProgramChange="66"/>
+          <Patch Number="067+" Name="BrthTnSx">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="66"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="067+" Name="SoftTenr">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="41"/>
+              <ProgramChange Number="66"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="067+" Name="TnrSax 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="66"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="068" Name="Bari.Sax" ProgramChange="67"/>
+          <Patch Number="069" Name="Oboe" ProgramChange="68"/>
+          <Patch Number="070" Name="Eng.Horn" ProgramChange="69"/>
+          <Patch Number="071" Name="Bassoon" ProgramChange="70"/>
+          <Patch Number="072" Name="Clarinet" ProgramChange="71"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Pipe">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="073" Name="Piccolo" ProgramChange="72"/>
+          <Patch Number="074" Name="Flute" ProgramChange="73"/>
+          <Patch Number="075" Name="Recorder" ProgramChange="74"/>
+          <Patch Number="076" Name="PanFlute" ProgramChange="75"/>
+          <Patch Number="077" Name="Bottle" ProgramChange="76"/>
+          <Patch Number="078" Name="Shakhchi" ProgramChange="77"/>
+          <Patch Number="079" Name="Whistle" ProgramChange="78"/>
+          <Patch Number="080" Name="Ocarina" ProgramChange="79"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Synth Lead">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="081" Name="SquareLd" ProgramChange="80"/>
+          <Patch Number="081+" Name="SquarLd2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="6"/>
+              <ProgramChange Number="80"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="081+" Name="LMSquare">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="8"/>
+              <ProgramChange Number="80"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="081+" Name="Hollow">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="18"/>
+              <ProgramChange Number="80"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="081+" Name="Shroud">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="19"/>
+              <ProgramChange Number="80"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="081+" Name="Mellow">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="80"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="081+" Name="SoloSine">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="80"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="081+" Name="SineLead">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="66"/>
+              <ProgramChange Number="80"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="081+" Name="Pulse Ld">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="67"/>
+              <ProgramChange Number="80"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="082" Name="Saw Ld" ProgramChange="81"/>
+          <Patch Number="082+" Name="Saw Ld 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="6"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="082+" Name="ThickSaw">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="8"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="082+" Name="DynaSaw">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="18"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="082+" Name="Digi Saw">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="19"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="082+" Name="Big Lead">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="20"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="082+" Name="HeavySyn">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="24"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="082+" Name="WaspySyn">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="25"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="082+" Name="DoublSaw">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="082+" Name="Toy Lead">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="35"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="082+" Name="Dim Saw">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="36"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="082+" Name="PulseSaw">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="082+" Name="Dr. Lead">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="41"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="082+" Name="VeloLead">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="45"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="082+" Name="Digger">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="082+" Name="Seq Ana.">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="96"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="083" Name="CaliopLd" ProgramChange="82"/>
+          <Patch Number="083+" Name="Pure Lead">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="82"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="084" Name="Chiff Ld" ProgramChange="83"/>
+          <Patch Number="084+" Name="Rubby">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="83"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="084+" Name="Hard Sync">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="83"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="085" Name="CharanLd" ProgramChange="84"/>
+          <Patch Number="085+" Name="DistLead">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="84"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="085+" Name="WireLead">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="84"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="085+" Name="SynPluck">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="66"/>
+              <ProgramChange Number="84"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="086" Name="Voice Ld" ProgramChange="85"/>
+          <Patch Number="086+" Name="SynthAah">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="24"/>
+              <ProgramChange Number="85"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="086+" Name="VoxLead">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="85"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="087" Name="Fifth Ld" ProgramChange="86"/>
+          <Patch Number="087+" Name="Big Five">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="35"/>
+              <ProgramChange Number="86"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="088" Name="Bass&amp;Ld" ProgramChange="87"/>
+          <Patch Number="088+" Name="Big&amp;Low">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="16"/>
+              <ProgramChange Number="87"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="088+" Name="Fat&amp;Prky">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="87"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="088+" Name="SoftWrl">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="87"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Synth Pad">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="089" Name="NewAgePd" ProgramChange="88"/>
+          <Patch Number="089+" Name="Fantasy2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="88"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="090" Name="Warm Pad" ProgramChange="89"/>
+          <Patch Number="090+" Name="ThickPad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="16"/>
+              <ProgramChange Number="89"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="090+" Name="Soft Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="17"/>
+              <ProgramChange Number="89"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="090+" Name="SinePad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="18"/>
+              <ProgramChange Number="89"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="090+" Name="Horn Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="89"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="090+" Name="RotarStr">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="89"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="091" Name="PolySyPd" ProgramChange="90"/>
+          <Patch Number="091+" Name="PolyPd80">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="90"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="091+" Name="ClickPad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="90"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="091+" Name="Ana. Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="66"/>
+              <ProgramChange Number="90"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="091+" Name="SquarPad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="67"/>
+              <ProgramChange Number="90"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="092" Name="ChoirPad" ProgramChange="91"/>
+          <Patch Number="092+" Name="Heaven">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="91"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="092+" Name="Itopia">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="66"/>
+              <ProgramChange Number="91"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="092+" Name="CC Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="67"/>
+              <ProgramChange Number="91"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="093" Name="BowedPad" ProgramChange="92"/>
+          <Patch Number="093+" Name="Glacier">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="92"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="093+" Name="GlassPad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="92"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="094" Name="MetalPad" ProgramChange="93"/>
+          <Patch Number="094+" Name="Tine Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="93"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="094+" Name="Pan Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="93"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="095" Name="Halo Pad" ProgramChange="94"/>
+          <Patch Number="096" Name="SweepPad" ProgramChange="95"/>
+          <Patch Number="096+" Name="Shwimmer">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="20"/>
+              <ProgramChange Number="95"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="096+" Name="Converge">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="27"/>
+              <ProgramChange Number="95"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="096+" Name="PolarPad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="95"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="096+" Name="Celstial">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="66"/>
+              <ProgramChange Number="95"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Synth FX">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="097" Name="Rain" ProgramChange="96"/>
+          <Patch Number="097+" Name="ClaviPad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="45"/>
+              <ProgramChange Number="96"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="097+" Name="HrmoRain">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="96"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="097+" Name="AfrcnWnd">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="96"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="097+" Name="Carib">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="66"/>
+              <ProgramChange Number="96"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="098" Name="SoundTrk" ProgramChange="97"/>
+          <Patch Number="098+" Name="Prologue">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="27"/>
+              <ProgramChange Number="97"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="098+" Name="Ancestrl">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="97"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="099" Name="Crystal" ProgramChange="98"/>
+          <Patch Number="099+" Name="SynDrCmp">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="12"/>
+              <ProgramChange Number="98"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="099+" Name="Popcorn">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="14"/>
+              <ProgramChange Number="98"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="099+" Name="TinyBell">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="18"/>
+              <ProgramChange Number="98"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="099+" Name="RndGlock">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="35"/>
+              <ProgramChange Number="98"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="099+" Name="GlockChi">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="98"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="099+" Name="ClearBel">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="41"/>
+              <ProgramChange Number="98"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="099+" Name="ChorBell">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="42"/>
+              <ProgramChange Number="98"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="099+" Name="SynMalet">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="98"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="099+" Name="SftCryst">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="98"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="099+" Name="LoudGlok">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="66"/>
+              <ProgramChange Number="98"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="099+" Name="ChrsBell">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="67"/>
+              <ProgramChange Number="98"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="099+" Name="VibeBell">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="68"/>
+              <ProgramChange Number="98"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="099+" Name="DigiBell">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="69"/>
+              <ProgramChange Number="98"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="099+" Name="AirBells">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="70"/>
+              <ProgramChange Number="98"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="099+" Name="BellHarp">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="71"/>
+              <ProgramChange Number="98"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="099+" Name="Gamelmba">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="72"/>
+              <ProgramChange Number="98"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="100" Name="Atmosphr" ProgramChange="99"/>
+          <Patch Number="99" Name="WarmAtms">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="18"/>
+              <ProgramChange Number="99"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="99" Name="HollwRls">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="19"/>
+              <ProgramChange Number="99"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="99" Name="Nylon EP">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="40"/>
+              <ProgramChange Number="99"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="99" Name="NylnHarp">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="99"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="99" Name="Harp Vox">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="99"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="99" Name="AtmosPad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="66"/>
+              <ProgramChange Number="99"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="99" Name="Planet">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="67"/>
+              <ProgramChange Number="99"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="100" Name="Bright" ProgramChange="100"/>
+          <Patch Number="100" Name="FantaBel">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="100"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="100" Name="Smokey">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="96"/>
+              <ProgramChange Number="100"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="101" Name="Goblins" ProgramChange="101"/>
+          <Patch Number="101" Name="GobSynth">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="101"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="101" Name="Creeper">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="101"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="101" Name="Ring Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="66"/>
+              <ProgramChange Number="101"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="101" Name="Ritual">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="67"/>
+              <ProgramChange Number="101"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="101" Name="ToHeaven">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="68"/>
+              <ProgramChange Number="101"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="101" Name="Night">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="70"/>
+              <ProgramChange Number="101"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="101" Name="Glisten">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="71"/>
+              <ProgramChange Number="101"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="101" Name="BelChoir">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="96"/>
+              <ProgramChange Number="101"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="102" Name="Echoes" ProgramChange="102"/>
+          <Patch Number="102" Name="Echoes 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="8"/>
+              <ProgramChange Number="102"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="102" Name="Echo Pan">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="14"/>
+              <ProgramChange Number="102"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="102" Name="EchoBell">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="102"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="102" Name="Big Pan">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="102"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="102" Name="SynPiano">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="66"/>
+              <ProgramChange Number="102"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="102" Name="Creation">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="67"/>
+              <ProgramChange Number="102"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="102" Name="StarDust">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="68"/>
+              <ProgramChange Number="102"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="102" Name="Reso&amp;Pan">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="69"/>
+              <ProgramChange Number="102"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="103" Name="Sci-Fi" ProgramChange="103"/>
+          <Patch Number="103" Name="Starz">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="103"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Ethnic">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="104" Name="Sitar" ProgramChange="104"/>
+          <Patch Number="104" Name="DetSitar">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="32"/>
+              <ProgramChange Number="104"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="104" Name="Sitar 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="35"/>
+              <ProgramChange Number="104"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="104" Name="Tambra">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="96"/>
+              <ProgramChange Number="104"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="104" Name="Tamboura">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="97"/>
+              <ProgramChange Number="104"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="105" Name="Banjo" ProgramChange="105"/>
+          <Patch Number="105" Name="MuteBnjo">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="28"/>
+              <ProgramChange Number="105"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="105" Name="Rabab">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="96"/>
+              <ProgramChange Number="105"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="105" Name="Gopichnt">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="97"/>
+              <ProgramChange Number="105"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="105" Name="Oud">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="98"/>
+              <ProgramChange Number="105"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="106" Name="Shamisen" ProgramChange="106"/>
+          <Patch Number="107" Name="Koto" ProgramChange="107"/>
+          <Patch Number="107" Name="Taisho- K">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="96"/>
+              <ProgramChange Number="107"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="107" Name="Kanoon">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="97"/>
+              <ProgramChange Number="107"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="108" Name="Kalimba" ProgramChange="108"/>
+          <Patch Number="109" Name="Bagpipe" ProgramChange="109"/>
+          <Patch Number="110" Name="Fiddle" ProgramChange="110"/>
+          <Patch Number="111" Name="Shanai" ProgramChange="111"/>
+          <Patch Number="111" Name="Shanai 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="111"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="111" Name="Pungi">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="96"/>
+              <ProgramChange Number="111"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="111" Name="Hichriki">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="97"/>
+              <ProgramChange Number="111"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Percussive">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="113" Name="TnklBell" ProgramChange="112"/>
+          <Patch Number="113+" Name="Bonang">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="96"/>
+              <ProgramChange Number="112"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="113+" Name="Altair">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="97"/>
+              <ProgramChange Number="112"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="113+" Name="Gamelan">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="98"/>
+              <ProgramChange Number="112"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="113+" Name="S.Gamlan">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="99"/>
+              <ProgramChange Number="112"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="113+" Name="Rama Cym">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="100"/>
+              <ProgramChange Number="112"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="113+" Name="AsianBel">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="101"/>
+              <ProgramChange Number="112"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="114" Name="Agogo" ProgramChange="113"/>
+          <Patch Number="115" Name="SteelDrm" ProgramChange="114"/>
+          <Patch Number="115+" Name="GlasPerc">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="97"/>
+              <ProgramChange Number="114"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="115+" Name="ThaiBell">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="98"/>
+              <ProgramChange Number="114"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="116" Name="Woodblok" ProgramChange="115"/>
+          <Patch Number="116+" Name="Castanet">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="96"/>
+              <ProgramChange Number="115"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="117" Name="TaikoDrm" ProgramChange="116"/>
+          <Patch Number="117+" Name="Gr.Cassa">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="96"/>
+              <ProgramChange Number="116"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="118" Name="MelodTom" ProgramChange="117"/>
+          <Patch Number="118+" Name="Mel Tom2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="117"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="118+" Name="Real Tom">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="117"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="118+" Name="Rock Tom">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="66"/>
+              <ProgramChange Number="117"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="119" Name="Syn Drum" ProgramChange="118"/>
+          <Patch Number="119+" Name="Ana Tom">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="64"/>
+              <ProgramChange Number="118"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="119+" Name="ElecPerc">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="0"/>
+              <ControlChange Control="32" Value="65"/>
+              <ProgramChange Number="118"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="120" Name="RevCymbl" ProgramChange="119"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Sound FX">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="121" Name="FretNoiz" ProgramChange="120"/>
+          <Patch Number="122" Name="BrthNoiz" ProgramChange="121"/>
+          <Patch Number="123" Name="Seashore" ProgramChange="122"/>
+          <Patch Number="124" Name="Tweet" ProgramChange="123"/>
+          <Patch Number="125" Name="Telphone" ProgramChange="124"/>
+          <Patch Number="126" Name="Helicptr" ProgramChange="125"/>
+          <Patch Number="127" Name="Applause" ProgramChange="126"/>
+          <Patch Number="128" Name="Gunshot" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Drum Kits">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="Standard Kit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="127"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="0"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="1" Name="Stndard Kit 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="127"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="1"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="2" Name="Dry Kit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="127"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="2"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="3" Name="Bright Kit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="127"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="3"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="8" Name="Room Kit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="127"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="8"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="9" Name="Dark Room Kit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="127"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="9"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="16" Name="Rock Kit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="127"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="16"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="17" Name="Rock Kit 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="127"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="17"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="24" Name="Electro Kit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="127"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="24"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="25" Name="Analog Kit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="127"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="25"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="26" Name="Analog Kit 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="127"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="26"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="27" Name="Dance Kit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="127"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="27"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="28" Name="Hip Hop Kit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="127"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="28"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="29" Name="Jungle Kit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="127"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="29"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="32" Name="Jazz Kit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="127"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="32"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="33" Name="Jazz Kit 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="127"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="33"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="40" Name="BrushKit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="127"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="40"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="48" Name="Symphony Kit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="127"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="48"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="0" Name="SFX Kit 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="126"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="0"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="1" Name="SFX Kit 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="126"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="1"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="SFX Voices">
+        <MIDICommands>
+          <ControlChange Control="0" Value="64"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="1" Name="CuttngNz" ProgramChange="0"/>
+          <Patch Number="2" Name="CttngNz2" ProgramChange="1"/>
+          <Patch Number="3" Name="DstCutNz" ProgramChange="2"/>
+          <Patch Number="4" Name="Str Slap" ProgramChange="3"/>
+          <Patch Number="5" Name="B.Slide" ProgramChange="4"/>
+          <Patch Number="6" Name="P.Scrape" ProgramChange="5"/>
+          <Patch Number="17" Name="Fl.KClik" ProgramChange="16"/>
+          <Patch Number="33" Name="Shower">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="4"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="32"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="34" Name="Thunder" ProgramChange="33"/>
+          <Patch Number="35" Name="Wind" ProgramChange="34"/>
+          <Patch Number="36" Name="Stream" ProgramChange="35"/>
+          <Patch Number="37" Name="Bubble" ProgramChange="36"/>
+          <Patch Number="38" Name="Feed" ProgramChange="37"/>
+          <Patch Number="49" Name="Dog" ProgramChange="48"/>
+          <Patch Number="50" Name="Horse" ProgramChange="49"/>
+          <Patch Number="51" Name="Tweet 2" ProgramChange="50"/>
+          <Patch Number="55" Name="Ghost" ProgramChange="54"/>
+          <Patch Number="56" Name="Maou" ProgramChange="55"/>
+          <Patch Number="65" Name="PhonCall" ProgramChange="64"/>
+          <Patch Number="66" Name="DoorSqek" ProgramChange="65"/>
+          <Patch Number="67" Name="DoorSlam" ProgramChange="66"/>
+          <Patch Number="68" Name="ScratchC" ProgramChange="67"/>
+          <Patch Number="69" Name="Scratch 2" ProgramChange="68"/>
+          <Patch Number="70" Name="WindChim" ProgramChange="69"/>
+          <Patch Number="71" Name="Telphon2" ProgramChange="70"/>
+          <Patch Number="81" Name="CarElgnt" ProgramChange="80"/>
+          <Patch Number="82" Name="CarTSqel" ProgramChange="81"/>
+          <Patch Number="83" Name="Car Pass" ProgramChange="82"/>
+          <Patch Number="84" Name="CarCrash" ProgramChange="83"/>
+          <Patch Number="85" Name="Siren" ProgramChange="84"/>
+          <Patch Number="86" Name="Train" ProgramChange="85"/>
+          <Patch Number="87" Name="JetPlane" ProgramChange="86"/>
+          <Patch Number="88" Name="Starship" ProgramChange="87"/>
+          <Patch Number="89" Name="Burst" ProgramChange="88"/>
+          <Patch Number="90" Name="Coaster" ProgramChange="89"/>
+          <Patch Number="91" Name="Submarin" ProgramChange="90"/>
+          <Patch Number="97" Name="Laugh" ProgramChange="96"/>
+          <Patch Number="98" Name="Scream" ProgramChange="97"/>
+          <Patch Number="99" Name="Punch" ProgramChange="98"/>
+          <Patch Number="100" Name="Heart" ProgramChange="99"/>
+          <Patch Number="101" Name="FootStep" ProgramChange="100"/>
+          <Patch Number="113" Name="MchinGun" ProgramChange="112"/>
+          <Patch Number="114" Name="LaserGun" ProgramChange="113"/>
+          <Patch Number="115" Name="Xplosion" ProgramChange="114"/>
+          <Patch Number="116" Name="FireWork" ProgramChange="115"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

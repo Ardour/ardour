@@ -1,10 +1,7 @@
 <Bindings name="Monitor Section">
   <Press>
-     <Binding key="m" action="Monitor/monitor-mono"/>
-     <Binding key="c" action="Monitor/monitor-cut-all"/>
-     <Binding key="d" action="Monitor/monitor-dim-all"/>
-     <Binding key="e" action="Monitor/toggle-exclusive-solo"/>
-     <Binding key="Shift-o" action="Monitor/toggle-mute-overrides-solo"/>
+     <Binding key="e" action="Solo/toggle-exclusive-solo"/>
+     <Binding key="Shift-o" action="Solo/toggle-mute-overrides-solo"/>
      <Binding key="b" action="Monitor/toggle-monitor-processor-box"/>
      
      <Binding key="l" action="Monitor/monitor-cut-0"/>
@@ -16,6 +13,10 @@
      <Binding key="Primary-r" action="Monitor/monitor-solo-1"/>
      <Binding key="Secondary-r" action="Monitor/monitor-dim-1"/>
      <Binding key="Tertiary-r" action="Monitor/monitor-invert-1"/>
+
+     <!-- DO NOT ADD BINDINGS FOR THE GLOBAL "cut-all" STYLE ACTIONS HERE.
+     	  They appear in ardour.keys.in as global bindings.
+       -->
 
      <Binding key="i" action="Solo/solo-use-in-place"/>
      <Binding key="p" action="Solo/solo-use-pfl"/>

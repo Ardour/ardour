@@ -1,21 +1,21 @@
 /*
-    Copyright (C) 2001-2012 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2014-2015 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2016 Paul Davis <paul@linuxaudiosystems.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <stdlib.h>
 #include <string>
@@ -94,42 +94,55 @@ fixup_bundle_environment (int, char* [], string & localedir)
 static __cdecl void
 unload_custom_fonts()
 {
-	std::string ardour_mono_file;
-	if (!find_file (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
-		return;
+	std::string font_file;
+	if (find_file (ardour_data_search_path(), "ArdourMono.ttf", font_file)) {
+		RemoveFontResource(font_file.c_str());
 	}
-	RemoveFontResource(ardour_mono_file.c_str());
+	if (find_file (ardour_data_search_path(), "ArdourSans.ttf", font_file)) {
+		RemoveFontResource(font_file.c_str());
+	}
 }
 
 void
 load_custom_fonts()
 {
 	std::string ardour_mono_file;
+	std::string ardour_sans_file;
 
 	if (!find_file (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
 		cerr << _("Cannot find ArdourMono TrueType font") << endl;
+	}
+
+	if (!find_file (ardour_data_search_path(), "ArdourSans.ttf", ardour_sans_file)) {
+		cerr << _("Cannot find ArdourSans TrueType font") << endl;
+	}
+
+	if (ardour_mono_file.empty () && ardour_sans_file.empty ()) {
 		return;
 	}
 
 	if (pango_font_map_get_type() == PANGO_TYPE_FT2_FONT_MAP) {
 		FcConfig *config = FcInitLoadConfigAndFonts();
-		FcBool ret = FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(ardour_mono_file.c_str()));
 
-		if (ret == FcFalse) {
+		if (!ardour_mono_file.empty () && FcFalse == FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(ardour_mono_file.c_str()))) {
 			cerr << _("Cannot load ArdourMono TrueType font.") << endl;
 		}
 
-		ret = FcConfigSetCurrent(config);
+		if (!ardour_sans_file.empty () && FcFalse == FcConfigAppFontAddFile(config, reinterpret_cast<const FcChar8*>(ardour_sans_file.c_str()))) {
+			cerr << _("Cannot load ArdourSans TrueType font.") << endl;
+		}
 
-		if (ret == FcFalse) {
+		if (FcFalse == FcConfigSetCurrent(config)) {
 			cerr << _("Failed to set fontconfig configuration.") << endl;
 		}
 	} else {
 		// pango with win32 backend
 		if (0 == AddFontResource(ardour_mono_file.c_str())) {
 			cerr << _("Cannot register ArdourMono TrueType font with windows gdi.") << endl;
-		} else {
-			atexit (&unload_custom_fonts);
 		}
+		if (0 == AddFontResource(ardour_sans_file.c_str())) {
+			cerr << _("Cannot register ArdourSans TrueType font with windows gdi.") << endl;
+		}
+		atexit (&unload_custom_fonts);
 	}
 }

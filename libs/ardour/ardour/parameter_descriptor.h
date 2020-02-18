@@ -1,34 +1,41 @@
 /*
-    Copyright (C) 2014 Paul Davis
-    Author: David Robillard
-
-    This program is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the Free
-    Software Foundation; either version 2 of the License, or (at your option)
-    any later version.
-
-    This program is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
-
-    You should have received a copy of the GNU General Public License along
-    with this program; if not, write to the Free Software Foundation, Inc.,
-    675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2014-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014 David Robillard <d@drobilla.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_parameter_descriptor_h__
 #define __ardour_parameter_descriptor_h__
 
+#include "pbd/natsort.h"
 #include "ardour/types.h"
 #include "ardour/variant.h"
 
-#include "evoral/Parameter.hpp"
-#include "evoral/ParameterDescriptor.hpp"
+#include "evoral/Parameter.h"
+#include "evoral/ParameterDescriptor.h"
 
 namespace ARDOUR {
 
-typedef std::map<const std::string, const float> ScalePoints;
+struct CompareNumericallyLess {
+	bool operator() (std::string const& a, std::string const& b) const {
+		return PBD::numerically_less (a.c_str(), b.c_str());
+	}
+};
+
+typedef std::map<const std::string, const float, CompareNumericallyLess> ScalePoints;
 
 /** Descriptor of a parameter or control.
  *
@@ -61,8 +68,12 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 	 * interface value, using settings from Evoral::ParameterDescriptor.
 	 *
 	 * default for AutomationControl::internal_to_interface ();
+	 *
+	 * @param v the control-value to convert
+	 * @param rotary set to true if the GUI control is a rotary knob
+	 * @return interface value in range 0..1
 	 */
-	float to_interface (float) const;
+	float to_interface (float v, bool rotary = false) const;
 
 	/** normalized [0..1] to control-value range
 	 *
@@ -70,8 +81,12 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 	 * using settings from Evoral::ParameterDescriptor.
 	 *
 	 * default for AutomationControl::interface_to_internal ();
+	 *
+	 * @param v the value in range 0..1 to on convert
+	 * @param rotary set to true if the GUI control is a rotary knob
+	 * @return control-value in range lower..upper
 	 */
-	float from_interface (float) const;
+	float from_interface (float v, bool rotary = false) const;
 
 	bool  is_linear () const;
 	float compute_delta (float from, float to) const;
@@ -104,6 +119,7 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 	bool                           integer_step;
 	bool                           sr_dependent;
 	bool                           enumeration;
+	bool                           inline_ctrl;
 };
 
 } // namespace ARDOUR

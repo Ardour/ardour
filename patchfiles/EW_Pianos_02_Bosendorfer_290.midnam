@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <!--
+        BOSENDORFER 290
+     
+        Eastwest Pianos KEYSWITCH Patch Program Control Support
+        PLAY 6
+        February 9, 2018
+        Version 1.0
+
+            This document supports instrument articulation switching via Program
+            Changes for Keyswitched patches within the PLAY 6 Virtual Instrument.
+     
+     -->
+  <Author>
+        Charles J. Green Jr.
+    </Author>
+  <MasterDeviceNames>
+    <Manufacturer>Eastwest Pianos</Manufacturer>
+    <Model>02 Bosendorfer 290</Model>
+    <CustomDeviceMode Name="PLAY">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="PLAY"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="PLAY">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+      </AvailableForChannels>
+      <UsesControlNameList Name="MIDI CONTROL CODES"/>
+      <PatchBank Name="PLAY">
+        <UsesPatchNameList Name="KEYSWITCHED"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <PatchNameList Name="KEYSWITCHED">
+      <Patch Number="1" Name="Patch 01" ProgramChange="0"/>
+      <Patch Number="2" Name="Patch 02" ProgramChange="1"/>
+      <Patch Number="3" Name="Patch 03" ProgramChange="2"/>
+      <Patch Number="4" Name="Patch 04" ProgramChange="3"/>
+      <Patch Number="5" Name="Patch 05" ProgramChange="4"/>
+      <Patch Number="6" Name="Patch 06" ProgramChange="5"/>
+      <Patch Number="7" Name="Patch 07" ProgramChange="6"/>
+      <Patch Number="8" Name="Patch 08" ProgramChange="7"/>
+      <Patch Number="9" Name="Patch 09" ProgramChange="8"/>
+      <Patch Number="10" Name="Patch 10" ProgramChange="9"/>
+      <Patch Number="11" Name="Patch 11" ProgramChange="10"/>
+      <Patch Number="12" Name="Patch 12" ProgramChange="11"/>
+      <Patch Number="13" Name="Patch 13" ProgramChange="12"/>
+      <Patch Number="14" Name="Patch 13" ProgramChange="13"/>
+      <Patch Number="15" Name="Patch 13" ProgramChange="14"/>
+      <Patch Number="16" Name="Patch 13" ProgramChange="15"/>
+    </PatchNameList>
+    <ControlNameList Name="MIDI CONTROL CODES">
+      <Control Type="7bit" Number="1" Name="Mod Wheel"/>
+      <Control Type="7bit" Number="7" Name="Volume"/>
+      <Control Type="7bit" Number="10" Name="Pan"/>
+      <Control Type="7bit" Number="11" Name="Expression"/>
+      <Control Type="7bit" Number="64" Name="Sustain Pedal"/>
+      <Control Type="7bit" Number="67" Name="Soft Pedal"/>
+    </ControlNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

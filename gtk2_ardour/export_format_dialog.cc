@@ -1,22 +1,25 @@
 /*
-    Copyright (C) 2008 Paul Davis
-    Author: Sakari Bergen
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2008-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2010 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2013 Sakari Bergen <sakari.bergen@beatwaves.net>
+ * Copyright (C) 2013-2014 Colin Fletcher <colin.m.fletcher@googlemail.com>
+ * Copyright (C) 2016-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <gtkmm/stock.h>
 
@@ -196,6 +199,13 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	bold.insert (b);
 	encoding_options_label.set_attributes (bold);
 
+	/* Codec options */
+
+	codec_quality_list = Gtk::ListStore::create (codec_quality_cols);
+	codec_quality_combo.set_model (codec_quality_list);
+	codec_quality_combo.pack_start (codec_quality_cols.label);
+	//codec_quality_combo.set_active (0);
+
 	/* Buttons */
 
 	revert_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -241,6 +251,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	silence_end_clock.ValueChanged.connect (sigc::mem_fun (*this, &ExportFormatDialog::update_silence_end_selection));
 
 	src_quality_combo.signal_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_src_quality_selection));
+	codec_quality_combo.signal_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_codec_quality_selection));
 
 	/* Format table signals */
 
@@ -335,6 +346,13 @@ ExportFormatDialog::load_state (FormatPtr spec)
 	for (Gtk::ListStore::Children::iterator it = src_quality_list->children().begin(); it != src_quality_list->children().end(); ++it) {
 		if (it->get_value (src_quality_cols.id) == spec->src_quality()) {
 			src_quality_combo.set_active (it);
+			break;
+		}
+	}
+
+	for (Gtk::ListStore::Children::iterator it = codec_quality_list->children().begin(); it != codec_quality_list->children().end(); ++it) {
+		if (it->get_value (codec_quality_cols.quality) == spec->codec_quality()) {
+			codec_quality_combo.set_active (it);
 			break;
 		}
 	}
@@ -646,6 +664,8 @@ ExportFormatDialog::update_selection (Glib::RefPtr<Gtk::ListStore> & list, Gtk::
 		bool selected = selection->is_selected (it);
 		it->get_value (cols.ptr)->set_selected (selected);
 	}
+
+	set_codec_quality_selection ();
 }
 
 void
@@ -938,6 +958,17 @@ ExportFormatDialog::update_src_quality_selection ()
 }
 
 void
+ExportFormatDialog::update_codec_quality_selection ()
+{
+	Gtk::TreeModel::const_iterator iter = codec_quality_combo.get_active();
+	if (!iter) {
+		return;
+	}
+	int quality = iter->get_value (codec_quality_cols.quality);
+	manager.select_codec_quality (quality);
+}
+
+void
 ExportFormatDialog::update_tagging_selection ()
 {
 	manager.select_tagging (tag_checkbox.get_active());
@@ -952,6 +983,7 @@ ExportFormatDialog::change_encoding_options (ExportFormatPtr ptr)
 	boost::shared_ptr<ARDOUR::ExportFormatOggVorbis> ogg_ptr;
 	boost::shared_ptr<ARDOUR::ExportFormatFLAC> flac_ptr;
 	boost::shared_ptr<ARDOUR::ExportFormatBWF> bwf_ptr;
+	boost::shared_ptr<ARDOUR::ExportFormatFFMPEG> ffmpeg_ptr;
 
 	if ((linear_ptr = boost::dynamic_pointer_cast<ExportFormatLinear> (ptr))) {
 		show_linear_enconding_options (linear_ptr);
@@ -961,6 +993,8 @@ ExportFormatDialog::change_encoding_options (ExportFormatPtr ptr)
 		show_flac_enconding_options (flac_ptr);
 	} else if ((bwf_ptr = boost::dynamic_pointer_cast<ExportFormatBWF> (ptr))) {
 		show_bwf_enconding_options (bwf_ptr);
+	} else if ((ffmpeg_ptr = boost::dynamic_pointer_cast<ExportFormatFFMPEG> (ptr))) {
+		show_ffmpeg_enconding_options (ffmpeg_ptr);
 	} else {
 		std::cout << "Unrecognized format!" << std::endl;
 	}
@@ -997,13 +1031,14 @@ ExportFormatDialog::show_linear_enconding_options (boost::shared_ptr<ARDOUR::Exp
 }
 
 void
-ExportFormatDialog::show_ogg_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatOggVorbis> /*ptr*/)
+ExportFormatDialog::show_ogg_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatOggVorbis> ptr)
 {
 	encoding_options_label.set_label (_("Ogg Vorbis options"));
 
-	encoding_options_table.resize (1, 1);
-	encoding_options_table.attach (tag_checkbox, 0, 1, 0, 1);
-
+	encoding_options_table.resize (2, 1);
+	encoding_options_table.attach (codec_quality_combo, 0, 1, 0, 1);
+	encoding_options_table.attach (tag_checkbox, 0, 1, 1, 2);
+	fill_codec_quality_lists (ptr);
 	show_all_children ();
 }
 
@@ -1037,6 +1072,17 @@ ExportFormatDialog::show_bwf_enconding_options (boost::shared_ptr<ARDOUR::Export
 
 	fill_sample_format_lists (boost::dynamic_pointer_cast<HasSampleFormat> (ptr));
 
+	show_all_children ();
+}
+
+void
+ExportFormatDialog::show_ffmpeg_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatFFMPEG> ptr)
+{
+	encoding_options_label.set_label (_("FFMPEG/MP3 options"));
+	encoding_options_table.resize (1, 1);
+	encoding_options_table.attach (codec_quality_combo, 0, 1, 0, 1);
+	encoding_options_table.attach (tag_checkbox, 0, 1, 1, 2);
+	fill_codec_quality_lists (ptr);
 	show_all_children ();
 }
 
@@ -1079,6 +1125,33 @@ ExportFormatDialog::fill_sample_format_lists (boost::shared_ptr<ARDOUR::HasSampl
 
 		if ((*it)->selected()) {
 			dither_type_view.get_selection()->select (iter);
+		}
+	}
+}
+
+void
+ExportFormatDialog::fill_codec_quality_lists (boost::shared_ptr<ARDOUR::HasCodecQuality> ptr)
+{
+	HasCodecQuality::CodecQualityList const & codecs = ptr->get_codec_qualities();
+
+	codec_quality_list->clear();
+	for (HasCodecQuality::CodecQualityList::const_iterator it = codecs.begin(); it != codecs.end(); ++it) {
+
+	Gtk::TreeModel::iterator iter = codec_quality_list->append();
+	Gtk::TreeModel::Row row = *iter;
+		row[codec_quality_cols.quality] = (*it)->quality;
+		row[codec_quality_cols.label] = (*it)->name;
+	}
+	set_codec_quality_selection ();
+}
+
+void
+ExportFormatDialog::set_codec_quality_selection ()
+{
+	for (Gtk::ListStore::Children::iterator it = codec_quality_list->children().begin(); it != codec_quality_list->children().end(); ++it) {
+		if (it->get_value (codec_quality_cols.quality) == format->codec_quality()) {
+			codec_quality_combo.set_active (it);
+			break;
 		}
 	}
 }

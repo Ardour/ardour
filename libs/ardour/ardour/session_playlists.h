@@ -1,21 +1,22 @@
 /*
-    Copyright (C) 2009 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009-2016 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2016-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_session_playlists_h__
 #define __ardour_session_playlists_h__
@@ -61,6 +62,8 @@ public:
 	boost::shared_ptr<Crossfade> find_crossfade (const PBD::ID &);
 	void sync_all_regions_with_regions ();
 	std::vector<boost::shared_ptr<Playlist> > playlists_for_track (boost::shared_ptr<Track>) const;
+	std::vector<boost::shared_ptr<Playlist> > get_used () const;
+	std::vector<boost::shared_ptr<Playlist> > get_unused () const;
 	uint32_t n_playlists() const;
 
 private:
@@ -70,6 +73,9 @@ private:
 	void remove (boost::shared_ptr<Playlist>);
 	void remove_weak (boost::weak_ptr<Playlist>);
 	void track (bool, boost::weak_ptr<Playlist>);
+	void update_tracking ();
+
+	void update_orig_2X (PBD::ID, PBD::ID);
 
 	void find_equivalent_playlist_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >& result);
 	void update_after_tempo_map_change ();

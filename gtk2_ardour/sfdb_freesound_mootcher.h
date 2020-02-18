@@ -1,21 +1,24 @@
 /*
-    Copyright (C) 2012 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2008-2015 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2011-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013 Colin Fletcher <colin.m.fletcher@googlemail.com>
+ * Copyright (C) 2015-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 /*sfdb_freesound_mootcher.h****************************************************************************
 
@@ -54,15 +57,15 @@ struct SfdbMemoryStruct {
 };
 
 enum sortMethod {
-	sort_none,		// no sort
-	sort_duration_desc,	// Sort by the duration of the sounds, longest sounds first.
-	sort_duration_asc, 	// Same as above, but shortest sounds first.
-	sort_created_desc, 	// Sort by the date of when the sound was added. newest sounds first.
-	sort_created_asc, 	// Same as above, but oldest sounds first.
-	sort_downloads_desc, 	// Sort by the number of downloads, most downloaded sounds first.
-	sort_downloads_asc, 	// Same as above, but least downloaded sounds first.
-	sort_rating_desc, 	// Sort by the average rating given to the sounds, highest rated first.
-	sort_rating_asc 	// Same as above, but lowest rated sounds first.
+	sort_none,           // no sort
+	sort_duration_desc,  // Sort by the duration of the sounds, longest sounds first.
+	sort_duration_asc,   // Same as above, but shortest sounds first.
+	sort_created_desc,   // Sort by the date of when the sound was added. newest sounds first.
+	sort_created_asc,    // Same as above, but oldest sounds first.
+	sort_downloads_desc, // Sort by the number of downloads, most downloaded sounds first.
+	sort_downloads_asc,  // Same as above, but least downloaded sounds first.
+	sort_rating_desc,    // Sort by the average rating given to the sounds, highest rated first.
+	sort_rating_asc      // Same as above, but lowest rated sounds first.
 };
 
 
@@ -72,14 +75,14 @@ public:
 	Mootcher();
 	~Mootcher();
 
-	bool		checkAudioFile(std::string originalFileName, std::string ID);
-	bool		fetchAudioFile(std::string originalFileName, std::string ID, std::string audioURL, SoundFileBrowser *caller);
-	std::string	searchText(std::string query, int page, std::string filter, enum sortMethod sort);
-	std::string	searchSimilar(std::string id);
-	void *		threadFunc();
+	bool checkAudioFile(std::string originalFileName, std::string ID);
+	bool fetchAudioFile(std::string originalFileName, std::string ID, std::string audioURL, SoundFileBrowser *caller);
+	std::string searchText(std::string query, int page, std::string filter, enum sortMethod sort);
+	std::string searchSimilar(std::string id);
+	void* threadFunc();
 	SoundFileBrowser *sfb;
-	std::string	audioFileName;
-	std::string	ID;
+	std::string audioFileName;
+	std::string ID;
 
 	/** signal emitted when mootcher reports progress updates during download.
 	 * The parameters are current and total numbers of bytes downloaded.
@@ -90,19 +93,18 @@ public:
 
 
 private:
+	void ensureWorkingDir ();
 
-	void		ensureWorkingDir();
+	std::string doRequest (std::string uri, std::string params);
+	void setcUrlOptions ();
 
-	std::string	doRequest(std::string uri, std::string params);
-	void		setcUrlOptions();
-
-	static size_t	WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data);
-	static int	progress_callback(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
-	std::string	sortMethodString(enum sortMethod sort);
-	std::string	getSoundResourceFile(std::string ID);
+	static size_t WriteMemoryCallback (void *ptr, size_t size, size_t nmemb, void *data);
+	static int progress_callback (void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
+	std::string sortMethodString (enum sortMethod sort);
+	std::string getSoundResourceFile (std::string ID);
 
 	CURL *curl;
-	char errorBuffer[CURL_ERROR_SIZE];	// storage for cUrl error message
+	char errorBuffer[CURL_ERROR_SIZE]; // storage for cUrl error message
 
 	FILE* theFile;
 

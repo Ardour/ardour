@@ -46,8 +46,8 @@ def build(bld):
         obj.defines      = [ 'LIBWAVEVIEW_DLL_EXPORTS=1' ]
     else:
         obj = bld.stlib(features = 'cxx cxxstlib', source=waveview_sources)
-        obj.cxxflags = [  bld.env['compiler_flags_dict']['pic'] ]
-        obj.cflags = [ bld.env['compiler_flags_dict']['pic'] ]
+        obj.cxxflags = [ bld.env['compiler_flags_dict']['pic'] ]
+        obj.cflags   = [ bld.env['compiler_flags_dict']['pic'] ]
         obj.defines      = [ ]
 
     obj.export_includes = ['.']

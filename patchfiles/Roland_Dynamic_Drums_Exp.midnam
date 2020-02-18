@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>XV-5080</Model>
+    <Model>XV-3080</Model>
+    <Model>XV-88</Model>
+    <Model>XV-5050</Model>
+    <Model>XV-2020</Model>
+    <Model>Fantom</Model>
+    <PatchNameList Name="Dynamic Drum Rhythm">
+      <Patch Number="001" Name="Poppin KIT" ProgramChange="0"/>
+      <Patch Number="002" Name="StdRock1 KIT" ProgramChange="1"/>
+      <Patch Number="003" Name="TightRck1KIT" ProgramChange="2"/>
+      <Patch Number="004" Name="StudioJz KIT" ProgramChange="3"/>
+      <Patch Number="005" Name="Latin KIT" ProgramChange="4"/>
+      <Patch Number="006" Name="BigRock1 KIT" ProgramChange="5"/>
+      <Patch Number="007" Name="Pwr Blld KIT" ProgramChange="6"/>
+      <Patch Number="008" Name="TightRck2KIT" ProgramChange="7"/>
+      <Patch Number="009" Name="Dry Rock KIT" ProgramChange="8"/>
+      <Patch Number="010" Name="StdRock2 KIT" ProgramChange="9"/>
+      <Patch Number="011" Name="OhBabyRckKIT" ProgramChange="10"/>
+      <Patch Number="012" Name="StudioFatKIT" ProgramChange="11"/>
+      <Patch Number="013" Name="RoomBlld KIT" ProgramChange="12"/>
+      <Patch Number="014" Name="Big Blld KIT" ProgramChange="13"/>
+      <Patch Number="015" Name="BigRock2 KIT" ProgramChange="14"/>
+      <Patch Number="016" Name="All Beef KIT" ProgramChange="15"/>
+      <Patch Number="017" Name="Disco KIT" ProgramChange="16"/>
+      <Patch Number="018" Name="VintagFnkKIT" ProgramChange="17"/>
+      <Patch Number="019" Name="Phunque KIT" ProgramChange="18"/>
+      <Patch Number="020" Name="70JzFunk KIT" ProgramChange="19"/>
+      <Patch Number="021" Name="Jazz Mix KIT" ProgramChange="20"/>
+      <Patch Number="022" Name="DynBrush KIT" ProgramChange="21"/>
+      <Patch Number="023" Name="70'sBrushKIT" ProgramChange="22"/>
+      <Patch Number="024" Name="PwrBrush KIT" ProgramChange="23"/>
+      <Patch Number="025" Name="Latin Dry K" ProgramChange="24"/>
+      <Patch Number="026" Name="Cool Dry K" ProgramChange="25"/>
+      <Patch Number="027" Name="Disco/Funk K" ProgramChange="26"/>
+      <Patch Number="028" Name="Old Funk K" ProgramChange="27"/>
+      <Patch Number="029" Name="Power Rock K" ProgramChange="28"/>
+      <Patch Number="030" Name="StudioRock K" ProgramChange="29"/>
+      <Patch Number="031" Name="StreetRock K" ProgramChange="30"/>
+      <Patch Number="032" Name="Big Rock K" ProgramChange="31"/>
+      <Patch Number="033" Name="Wham Bam K" ProgramChange="32"/>
+      <Patch Number="034" Name="StandrdJaz K" ProgramChange="33"/>
+      <Patch Number="035" Name="Jazz Soul K" ProgramChange="34"/>
+      <Patch Number="036" Name="Old Funk Sn" ProgramChange="35"/>
+      <Patch Number="037" Name="70Phunque Sn" ProgramChange="36"/>
+      <Patch Number="038" Name="Latin Sn" ProgramChange="37"/>
+      <Patch Number="039" Name="HiPiccolo Sn" ProgramChange="38"/>
+      <Patch Number="040" Name="Tight Sn" ProgramChange="39"/>
+      <Patch Number="041" Name="Std Rock1 Sn" ProgramChange="40"/>
+      <Patch Number="042" Name="Std Rock2 Sn" ProgramChange="41"/>
+      <Patch Number="043" Name="OhBabyRck Sn" ProgramChange="42"/>
+      <Patch Number="044" Name="Poppin Sn" ProgramChange="43"/>
+      <Patch Number="045" Name="StudioFat Sn" ProgramChange="44"/>
+      <Patch Number="046" Name="JazzStick Sn" ProgramChange="45"/>
+      <Patch Number="047" Name="StudioJz Sn" ProgramChange="46"/>
+      <Patch Number="048" Name="Ballad Sn" ProgramChange="47"/>
+      <Patch Number="049" Name="PwrBallad Sn" ProgramChange="48"/>
+      <Patch Number="050" Name="All Beef Sn" ProgramChange="49"/>
+      <Patch Number="051" Name="Big Rock Sn" ProgramChange="50"/>
+      <Patch Number="052" Name="70's BrushSn" ProgramChange="51"/>
+      <Patch Number="053" Name="JazzBrush Sn" ProgramChange="52"/>
+      <Patch Number="054" Name="Latin Tom" ProgramChange="53"/>
+      <Patch Number="055" Name="Tight Tom" ProgramChange="54"/>
+      <Patch Number="056" Name="JzStick Tom" ProgramChange="55"/>
+      <Patch Number="057" Name="Old Funk Tom" ProgramChange="56"/>
+      <Patch Number="058" Name="Oh Baby Tom" ProgramChange="57"/>
+      <Patch Number="059" Name="PwrBalladTom" ProgramChange="58"/>
+      <Patch Number="060" Name="Big Rock Tom" ProgramChange="59"/>
+      <Patch Number="061" Name="OldBrush Tom" ProgramChange="60"/>
+      <Patch Number="062" Name="Oh Baby Hat" ProgramChange="61"/>
+      <Patch Number="063" Name="JzStick Hat" ProgramChange="62"/>
+      <Patch Number="064" Name="Latin Hat" ProgramChange="63"/>
+      <Patch Number="065" Name="Disco Hat" ProgramChange="64"/>
+      <Patch Number="066" Name="Old Funk Hat" ProgramChange="65"/>
+      <Patch Number="067" Name="Street Hat" ProgramChange="66"/>
+      <Patch Number="068" Name="Big Rock Hat" ProgramChange="67"/>
+      <Patch Number="069" Name="OldBrush Hat" ProgramChange="68"/>
+      <Patch Number="070" Name="Stndrd Crash" ProgramChange="69"/>
+      <Patch Number="071" Name="Jazz Crash" ProgramChange="70"/>
+      <Patch Number="072" Name="Rock Crash" ProgramChange="71"/>
+      <Patch Number="073" Name="Ballad Crash" ProgramChange="72"/>
+      <Patch Number="074" Name="Brush Crash" ProgramChange="73"/>
+      <Patch Number="075" Name="Jazz Ride" ProgramChange="74"/>
+      <Patch Number="076" Name="Rock Ride" ProgramChange="75"/>
+      <Patch Number="077" Name="Ballad Ride" ProgramChange="76"/>
+      <Patch Number="078" Name="Latin Ride" ProgramChange="77"/>
+      <Patch Number="079" Name="Brush Ride" ProgramChange="78"/>
+    </PatchNameList>
+    <PatchNameList Name="Dynamic Drum Patch">
+      <Patch Number="001" Name="Kick 1  Menu" ProgramChange="0"/>
+      <Patch Number="002" Name="Kick 2  Menu" ProgramChange="1"/>
+      <Patch Number="003" Name="Kick 3  Menu" ProgramChange="2"/>
+      <Patch Number="004" Name="Kick 4  Menu" ProgramChange="3"/>
+      <Patch Number="005" Name="OldFnkS Menu" ProgramChange="4"/>
+      <Patch Number="006" Name="Latin S Menu" ProgramChange="5"/>
+      <Patch Number="007" Name="HiPiccS Menu" ProgramChange="6"/>
+      <Patch Number="008" Name="Tight S Menu" ProgramChange="7"/>
+      <Patch Number="009" Name="StdRk1S Menu" ProgramChange="8"/>
+      <Patch Number="010" Name="StdRk2S Menu" ProgramChange="9"/>
+      <Patch Number="011" Name="OhBabyS Menu" ProgramChange="10"/>
+      <Patch Number="012" Name="PoppinS Menu" ProgramChange="11"/>
+      <Patch Number="013" Name="StdFatS Menu" ProgramChange="12"/>
+      <Patch Number="014" Name="JazStkS Menu" ProgramChange="13"/>
+      <Patch Number="015" Name="StdJazS Menu" ProgramChange="14"/>
+      <Patch Number="016" Name="BalladS Menu" ProgramChange="15"/>
+      <Patch Number="017" Name="PwrBldS Menu" ProgramChange="16"/>
+      <Patch Number="018" Name="AlBeefS Menu" ProgramChange="17"/>
+      <Patch Number="019" Name="BigRckS Menu" ProgramChange="18"/>
+      <Patch Number="020" Name="70BrshS Menu" ProgramChange="19"/>
+      <Patch Number="021" Name="JzBrshS Menu" ProgramChange="20"/>
+      <Patch Number="022" Name="CrsStk  Menu" ProgramChange="21"/>
+      <Patch Number="023" Name="Latin T Menu" ProgramChange="22"/>
+      <Patch Number="024" Name="Tight T Menu" ProgramChange="23"/>
+      <Patch Number="025" Name="JazStkT Menu" ProgramChange="24"/>
+      <Patch Number="026" Name="OldFnkT Menu" ProgramChange="25"/>
+      <Patch Number="027" Name="OhBabyT Menu" ProgramChange="26"/>
+      <Patch Number="028" Name="PwrBldT Menu" ProgramChange="27"/>
+      <Patch Number="029" Name="BigRckT Menu" ProgramChange="28"/>
+      <Patch Number="030" Name="OldBrsT Menu" ProgramChange="29"/>
+      <Patch Number="031" Name="OhBabyH Menu" ProgramChange="30"/>
+      <Patch Number="032" Name="JazStkH Menu" ProgramChange="31"/>
+      <Patch Number="033" Name="Latin H Menu" ProgramChange="32"/>
+      <Patch Number="034" Name="Disco H Menu" ProgramChange="33"/>
+      <Patch Number="035" Name="OldFnkH Menu" ProgramChange="34"/>
+      <Patch Number="036" Name="StreetH Menu" ProgramChange="35"/>
+      <Patch Number="037" Name="BigRckH Menu" ProgramChange="36"/>
+      <Patch Number="038" Name="OldBrsH Menu" ProgramChange="37"/>
+      <Patch Number="039" Name="Crash   Menu" ProgramChange="38"/>
+      <Patch Number="040" Name="Ride    Menu" ProgramChange="39"/>
+      <Patch Number="041" Name="OthrCym Men" ProgramChange="40"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

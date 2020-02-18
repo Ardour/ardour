@@ -1,21 +1,23 @@
 /*
-    Copyright (C) 2010 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2007-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_vst_plugin_h__
 #define __ardour_vst_plugin_h__
@@ -61,7 +63,6 @@ public:
 	bool load_preset (PresetRecord);
 	int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
 	std::string describe_parameter (Evoral::Parameter);
-	samplecnt_t signal_latency() const;
 	std::set<Evoral::Parameter> automatable() const;
 
 	PBD::Signal0<void> LoadPresetProgram;
@@ -86,7 +87,7 @@ public:
 	const char * maker () const;
 	int32_t version () const;
 	uint32_t parameter_count () const;
-	void print_parameter (uint32_t, char*, uint32_t len) const;
+	bool print_parameter (uint32_t, char*, uint32_t len) const;
 
 	bool has_editor () const;
 
@@ -119,6 +120,7 @@ protected:
 	void do_remove_preset (std::string name);
 	XMLTree * presets_tree () const;
 	std::string presets_file () const;
+	samplecnt_t plugin_latency() const;
 	void find_presets ();
 
 	VSTHandle* _handle;

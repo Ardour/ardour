@@ -1,22 +1,24 @@
 /*
-    Copyright (C) 2006 Paul Davis
-    Written by Taybin Rutkin
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2009 David Robillard <d@drobilla.net>
+ * Copyright (C) 2006-2009 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2006-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2010-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2015-2017 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <algorithm>
 #include <inttypes.h>
@@ -97,9 +99,6 @@ CoreAudioSource::init_cafile ()
 		af.SetClientFormat (client_format);
 
 	} catch (CAXException& cax) {
-
-		error << string_compose(_("CoreAudioSource: cannot open file \"%1\" for %2"),
-					_path, (writable() ? "read+write" : "reading")) << endmsg;
 		throw failed_constructor ();
 	}
 }
@@ -280,6 +279,7 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string&)
 
 	_info.samplerate = absd.mSampleRate;
 	_info.channels   = absd.mChannelsPerFrame;
+	_info.seekable   = true;
 
 	size = sizeof(_info.length);
 	if (ExtAudioFileGetProperty(af, kExtAudioFileProperty_FileLengthFrames, &size, &_info.length) != noErr) {

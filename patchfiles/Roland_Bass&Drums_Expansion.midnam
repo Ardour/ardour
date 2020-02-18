@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JV-1010</Model>
+    <Model>JV-1080</Model>
+    <Model>JV-2080</Model>
+    <Model>XP-50</Model>
+    <Model>XP-80</Model>
+    <Model>XV-5080</Model>
+    <Model>XV-3080</Model>
+    <Model>XV-88</Model>
+    <Model>Fantom</Model>
+    <PatchNameList Name="EXP Bass &amp; Drums: Rhythm Kits">
+      <Patch Number="01" Name="R&amp;R rhythm 1" ProgramChange="0"/>
+      <Patch Number="02" Name="Funk SET" ProgramChange="1"/>
+      <Patch Number="03" Name="Natural SET" ProgramChange="2"/>
+      <Patch Number="04" Name="Slam SET" ProgramChange="3"/>
+      <Patch Number="05" Name="Ballad SET" ProgramChange="4"/>
+      <Patch Number="06" Name="Studio SET" ProgramChange="5"/>
+      <Patch Number="07" Name="R&amp;R rhythm 2" ProgramChange="6"/>
+      <Patch Number="08" Name="Dance SET" ProgramChange="7"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Bass &amp; Drums: Patches 001-128">
+      <Patch Number="001" Name="Marcus 3way" ProgramChange="0"/>
+      <Patch Number="002" Name="MM Slap/Hrm" ProgramChange="1"/>
+      <Patch Number="003" Name="MM Fat Slap" ProgramChange="2"/>
+      <Patch Number="004" Name="Miller Pop" ProgramChange="3"/>
+      <Patch Number="005" Name="MM Dynathumb" ProgramChange="4"/>
+      <Patch Number="006" Name="Abe Sr. 4way" ProgramChange="5"/>
+      <Patch Number="007" Name="AL 3way/Nz" ProgramChange="6"/>
+      <Patch Number="008" Name="AL 3way P.Bs" ProgramChange="7"/>
+      <Patch Number="009" Name="Abe Limiter" ProgramChange="8"/>
+      <Patch Number="010" Name="Space Bass" ProgramChange="9"/>
+      <Patch Number="011" Name="Hyper Funk" ProgramChange="10"/>
+      <Patch Number="012" Name="Abe's Thumbs" ProgramChange="11"/>
+      <Patch Number="013" Name="AL Dark Slap" ProgramChange="12"/>
+      <Patch Number="014" Name="Poppin' Abe" ProgramChange="13"/>
+      <Patch Number="015" Name="John P.4way" ProgramChange="14"/>
+      <Patch Number="016" Name="John P.w/Nz" ProgramChange="15"/>
+      <Patch Number="017" Name="JP Chorus Bs" ProgramChange="16"/>
+      <Patch Number="018" Name="6String Thing" ProgramChange="17"/>
+      <Patch Number="019" Name="Mondo Johndo" ProgramChange="18"/>
+      <Patch Number="020" Name="JP Fat Slap" ProgramChange="19"/>
+      <Patch Number="021" Name="JP Brite Slap" ProgramChange="20"/>
+      <Patch Number="022" Name="JP Fing+Slap" ProgramChange="21"/>
+      <Patch Number="023" Name="Solo Fretles" ProgramChange="22"/>
+      <Patch Number="024" Name="MM FretnotBs" ProgramChange="23"/>
+      <Patch Number="025" Name="Marcus OctFl" ProgramChange="24"/>
+      <Patch Number="026" Name="MM FrtlsBend" ProgramChange="25"/>
+      <Patch Number="027" Name="MM Smooth Fl" ProgramChange="26"/>
+      <Patch Number="028" Name="MM Weathery" ProgramChange="27"/>
+      <Patch Number="029" Name="Abe's Fretls" ProgramChange="28"/>
+      <Patch Number="030" Name="AL French Ch" ProgramChange="29"/>
+      <Patch Number="031" Name="AL Layer Fls" ProgramChange="30"/>
+      <Patch Number="032" Name="AL Fls Solo" ProgramChange="31"/>
+      <Patch Number="033" Name="JP 6Str Fls" ProgramChange="32"/>
+      <Patch Number="034" Name="JP Solo Fls" ProgramChange="33"/>
+      <Patch Number="035" Name="John's OctFl" ProgramChange="34"/>
+      <Patch Number="036" Name="B-Motional" ProgramChange="35"/>
+      <Patch Number="037" Name="Weather Frls" ProgramChange="36"/>
+      <Patch Number="038" Name="AcoustiTouch" ProgramChange="37"/>
+      <Patch Number="039" Name="JP Soft A.Bs" ProgramChange="38"/>
+      <Patch Number="040" Name="JP Hard A.Bs" ProgramChange="39"/>
+      <Patch Number="041" Name="Ac.Bs Club" ProgramChange="40"/>
+      <Patch Number="042" Name="Dry Acoustic" ProgramChange="41"/>
+      <Patch Number="043" Name="Hybrid Wood" ProgramChange="42"/>
+      <Patch Number="044" Name="John's Rock" ProgramChange="43"/>
+      <Patch Number="045" Name="Pick UP" ProgramChange="44"/>
+      <Patch Number="046" Name="JP Rock Pick" ProgramChange="45"/>
+      <Patch Number="047" Name="Dark Pick" ProgramChange="46"/>
+      <Patch Number="048" Name="JP Rock+Slap" ProgramChange="47"/>
+      <Patch Number="049" Name="JP Rock Fls" ProgramChange="48"/>
+      <Patch Number="050" Name="Velo Rock Bs" ProgramChange="49"/>
+      <Patch Number="051" Name="JP P.Bass 1" ProgramChange="50"/>
+      <Patch Number="052" Name="JP P.Bass 2" ProgramChange="51"/>
+      <Patch Number="053" Name="JP P.Bass 3" ProgramChange="52"/>
+      <Patch Number="054" Name="JP P.Bass 4" ProgramChange="53"/>
+      <Patch Number="055" Name="Dyno Ballad" ProgramChange="54"/>
+      <Patch Number="056" Name="Velo Fingers" ProgramChange="55"/>
+      <Patch Number="057" Name="Ch. Fingrs" ProgramChange="56"/>
+      <Patch Number="058" Name="Studio Mellow" ProgramChange="57"/>
+      <Patch Number="059" Name="Fat Fingers" ProgramChange="58"/>
+      <Patch Number="060" Name="Touchy Bass" ProgramChange="59"/>
+      <Patch Number="061" Name="Abe's P.Bass" ProgramChange="60"/>
+      <Patch Number="062" Name="AL Solid Fng" ProgramChange="61"/>
+      <Patch Number="063" Name="AL 2way Fng" ProgramChange="62"/>
+      <Patch Number="064" Name="AbeSoftBs/Nz" ProgramChange="63"/>
+      <Patch Number="065" Name="Abe Latin Bs" ProgramChange="64"/>
+      <Patch Number="066" Name="AL Latin Ch." ProgramChange="65"/>
+      <Patch Number="067" Name="AL Fat Latin" ProgramChange="66"/>
+      <Patch Number="068" Name="AL Old Soul" ProgramChange="67"/>
+      <Patch Number="069" Name="AL Mellow" ProgramChange="68"/>
+      <Patch Number="070" Name="Marcus Jazz" ProgramChange="69"/>
+      <Patch Number="071" Name="MM Jazz Ch." ProgramChange="70"/>
+      <Patch Number="072" Name="MM Jazz Bs" ProgramChange="71"/>
+      <Patch Number="073" Name="Marcus Mute" ProgramChange="72"/>
+      <Patch Number="074" Name="Bright Pick" ProgramChange="73"/>
+      <Patch Number="075" Name="Garden Party" ProgramChange="74"/>
+      <Patch Number="076" Name="Phaser Mute" ProgramChange="75"/>
+      <Patch Number="077" Name="MM Dry Mute" ProgramChange="76"/>
+      <Patch Number="078" Name="MM Hip-Hop" ProgramChange="77"/>
+      <Patch Number="079" Name="Wild Thang" ProgramChange="78"/>
+      <Patch Number="080" Name="Distorted Bs" ProgramChange="79"/>
+      <Patch Number="081" Name="Rock Phaser" ProgramChange="80"/>
+      <Patch Number="082" Name="Mod.FuzzBs" ProgramChange="81"/>
+      <Patch Number="083" Name="Sticky Bass" ProgramChange="82"/>
+      <Patch Number="084" Name="Abe Flangpop" ProgramChange="83"/>
+      <Patch Number="085" Name="Mutey SynBs" ProgramChange="84"/>
+      <Patch Number="086" Name="Funkin'WahBs" ProgramChange="85"/>
+      <Patch Number="087" Name="T-Wow Fretls" ProgramChange="86"/>
+      <Patch Number="088" Name="T-Wow Slappy" ProgramChange="87"/>
+      <Patch Number="089" Name="Bass SOLO !!" ProgramChange="88"/>
+      <Patch Number="090" Name="Refretter" ProgramChange="89"/>
+      <Patch Number="091" Name="Bass Harmos" ProgramChange="90"/>
+      <Patch Number="092" Name="Marcus Harms" ProgramChange="91"/>
+      <Patch Number="093" Name="Harmonicus" ProgramChange="92"/>
+      <Patch Number="094" Name="Tune Up" ProgramChange="93"/>
+      <Patch Number="095" Name="Harm Up" ProgramChange="94"/>
+      <Patch Number="096" Name="Harm Down" ProgramChange="95"/>
+      <Patch Number="097" Name="Harm A#9" ProgramChange="96"/>
+      <Patch Number="098" Name="Harm Eb#9" ProgramChange="97"/>
+      <Patch Number="099" Name="Harm E+11" ProgramChange="98"/>
+      <Patch Number="100" Name="Harm E69" ProgramChange="99"/>
+      <Patch Number="101" Name="SlidesNoises" ProgramChange="100"/>
+      <Patch Number="102" Name="All Slides" ProgramChange="101"/>
+      <Patch Number="103" Name="All Noises" ProgramChange="102"/>
+      <Patch Number="104" Name="Ac.Bs Noises" ProgramChange="103"/>
+      <Patch Number="105" Name="Kick Menu" ProgramChange="104"/>
+      <Patch Number="106" Name="Snare Menu1" ProgramChange="105"/>
+      <Patch Number="107" Name="Snare Menu2" ProgramChange="106"/>
+      <Patch Number="108" Name="Snare Menu3" ProgramChange="107"/>
+      <Patch Number="109" Name="Hi-Hat Menu" ProgramChange="108"/>
+      <Patch Number="110" Name="Tom-Tom Menu" ProgramChange="109"/>
+      <Patch Number="111" Name="Cymbals Menu" ProgramChange="110"/>
+      <Patch Number="112" Name="Drum LP Demo" ProgramChange="111"/>
+      <Patch Number="113" Name="Sweeping LP's" ProgramChange="112"/>
+      <Patch Number="114" Name="Lo-Fi Loops" ProgramChange="113"/>
+      <Patch Number="115" Name="AmbGrv/Bs" ProgramChange="114"/>
+      <Patch Number="116" Name="SlapHappy" ProgramChange="115"/>
+      <Patch Number="117" Name="PlayC4Fun" ProgramChange="116"/>
+      <Patch Number="118" Name="Flanged" ProgramChange="117"/>
+      <Patch Number="119" Name="BW Jz 6/8" ProgramChange="118"/>
+      <Patch Number="120" Name="BW Brush" ProgramChange="119"/>
+      <Patch Number="121" Name="AL Slam" ProgramChange="120"/>
+      <Patch Number="122" Name="AL Whack" ProgramChange="121"/>
+      <Patch Number="123" Name="AL Grunge" ProgramChange="122"/>
+      <Patch Number="124" Name="BW Swamp" ProgramChange="123"/>
+      <Patch Number="125" Name="BW Latin" ProgramChange="124"/>
+      <Patch Number="126" Name="BW Fusion" ProgramChange="125"/>
+      <Patch Number="127" Name="AL Funk" ProgramChange="126"/>
+      <Patch Number="128" Name="AL Shuff" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="EXP Bass &amp; Drums: Patches 129-204">
+      <Patch Number="129" Name="Fat Rock KIT" ProgramChange="0"/>
+      <Patch Number="130" Name="Ringer KIT" ProgramChange="1"/>
+      <Patch Number="131" Name="DynaPicc.KIT" ProgramChange="2"/>
+      <Patch Number="132" Name="Whammer KIT" ProgramChange="3"/>
+      <Patch Number="133" Name="Big Ballad KIT" ProgramChange="4"/>
+      <Patch Number="134" Name="Fat PunchKIT" ProgramChange="5"/>
+      <Patch Number="135" Name="Fat Funk KIT" ProgramChange="6"/>
+      <Patch Number="136" Name="Garage KIT" ProgramChange="7"/>
+      <Patch Number="137" Name="Rock On KIT" ProgramChange="8"/>
+      <Patch Number="138" Name="Natural KIT" ProgramChange="9"/>
+      <Patch Number="139" Name="Pitched KIT" ProgramChange="10"/>
+      <Patch Number="140" Name="Basher KIT" ProgramChange="11"/>
+      <Patch Number="141" Name="Edgy KIT" ProgramChange="12"/>
+      <Patch Number="142" Name="FAT Comp.KIT" ProgramChange="13"/>
+      <Patch Number="143" Name="FAT &amp; Tight" ProgramChange="14"/>
+      <Patch Number="144" Name="Studio KIT" ProgramChange="15"/>
+      <Patch Number="145" Name="Tight FunKIT" ProgramChange="16"/>
+      <Patch Number="146" Name="Tight PiccKIT" ProgramChange="17"/>
+      <Patch Number="147" Name="Dry DanceKIT" ProgramChange="18"/>
+      <Patch Number="148" Name="R&amp;B KIT" ProgramChange="19"/>
+      <Patch Number="149" Name="DynoSnareKIT" ProgramChange="20"/>
+      <Patch Number="150" Name="Room Toms" ProgramChange="21"/>
+      <Patch Number="151" Name="Natural Toms" ProgramChange="22"/>
+      <Patch Number="152" Name="Soft Toms" ProgramChange="23"/>
+      <Patch Number="153" Name="Big Toms Dry" ProgramChange="24"/>
+      <Patch Number="154" Name="Big Toms Wet" ProgramChange="25"/>
+      <Patch Number="155" Name="Ringer Snare" ProgramChange="26"/>
+      <Patch Number="156" Name="Loud Ring Sn" ProgramChange="27"/>
+      <Patch Number="157" Name="Live Piccolo" ProgramChange="28"/>
+      <Patch Number="158" Name="Wet Piccolo" ProgramChange="29"/>
+      <Patch Number="159" Name="Natural Crak" ProgramChange="30"/>
+      <Patch Number="160" Name="Natural Verb" ProgramChange="31"/>
+      <Patch Number="161" Name="Natural Bryt" ProgramChange="32"/>
+      <Patch Number="162" Name="Dry Ringer" ProgramChange="33"/>
+      <Patch Number="163" Name="Rock On Room" ProgramChange="34"/>
+      <Patch Number="164" Name="Rock On Wet" ProgramChange="35"/>
+      <Patch Number="165" Name="FAT Impact" ProgramChange="36"/>
+      <Patch Number="166" Name="Nice Ballad" ProgramChange="37"/>
+      <Patch Number="167" Name="Huge FAT Snr" ProgramChange="38"/>
+      <Patch Number="168" Name="Warm Room Sn" ProgramChange="39"/>
+      <Patch Number="169" Name="Warm Verb Sn" ProgramChange="40"/>
+      <Patch Number="170" Name="Dry FAT Sn" ProgramChange="41"/>
+      <Patch Number="171" Name="FAT Hall Sn" ProgramChange="42"/>
+      <Patch Number="172" Name="Funk Sn Dry" ProgramChange="43"/>
+      <Patch Number="173" Name="Funk Sn Room" ProgramChange="44"/>
+      <Patch Number="174" Name="Natural Ping" ProgramChange="45"/>
+      <Patch Number="175" Name="Room Ping" ProgramChange="46"/>
+      <Patch Number="176" Name="Dance Snr 1" ProgramChange="47"/>
+      <Patch Number="177" Name="Dance Snr 2" ProgramChange="48"/>
+      <Patch Number="178" Name="Kick&amp;Cym 1/2" ProgramChange="49"/>
+      <Patch Number="179" Name="Kick&amp;Cym 1/4" ProgramChange="50"/>
+      <Patch Number="180" Name="Kick&amp;Cym 2" ProgramChange="51"/>
+      <Patch Number="181" Name="Butt Kicker" ProgramChange="52"/>
+      <Patch Number="182" Name="Kick&amp;Cym 2/3" ProgramChange="53"/>
+      <Patch Number="183" Name="Kick&amp;Cym 2/8" ProgramChange="54"/>
+      <Patch Number="184" Name="Kick&amp;Cym 3" ProgramChange="55"/>
+      <Patch Number="185" Name="Kick&amp;Cym 4" ProgramChange="56"/>
+      <Patch Number="186" Name="Kick&amp;Cym 5" ProgramChange="57"/>
+      <Patch Number="187" Name="Kick&amp;Cym 6" ProgramChange="58"/>
+      <Patch Number="188" Name="Kick&amp;Cym 7" ProgramChange="59"/>
+      <Patch Number="189" Name="Kick&amp;Cym 6/8" ProgramChange="60"/>
+      <Patch Number="190" Name="Kick&amp;Cym 8" ProgramChange="61"/>
+      <Patch Number="191" Name="Kick&amp;Cym 8/2" ProgramChange="62"/>
+      <Patch Number="192" Name="Kick&amp;Cym 9" ProgramChange="63"/>
+      <Patch Number="193" Name="Kick&amp;Cym 9/6" ProgramChange="64"/>
+      <Patch Number="194" Name="Kick&amp;Cym10" ProgramChange="65"/>
+      <Patch Number="195" Name="Kick&amp;Cym11" ProgramChange="66"/>
+      <Patch Number="196" Name="Kick&amp;Cym12" ProgramChange="67"/>
+      <Patch Number="197" Name="Kick&amp;Cym11/12" ProgramChange="68"/>
+      <Patch Number="198" Name="Kick&amp;Cym 12/4" ProgramChange="69"/>
+      <Patch Number="199" Name="Lo-Fi Kick" ProgramChange="70"/>
+      <Patch Number="200" Name="18inHi-Hats1" ProgramChange="71"/>
+      <Patch Number="201" Name="18inHi-Hats2" ProgramChange="72"/>
+      <Patch Number="202" Name="16inHi-Hats1" ProgramChange="73"/>
+      <Patch Number="203" Name="16inHi-Hats2" ProgramChange="74"/>
+      <Patch Number="204" Name="CR-78 Hi-Hat" ProgramChange="75"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

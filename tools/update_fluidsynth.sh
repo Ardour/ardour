@@ -23,6 +23,11 @@ cd $TMP
 #git clone git://git.code.sf.net/p/fluidsynth/code-git fs-git
 git clone git://github.com/FluidSynth/fluidsynth.git fs-git
 
+cd fs-git;
+git describe --tags
+git log | head
+cd $TMP
+
 FSR=fs-git/
 
 rsync -auc --info=progress2 \
@@ -71,6 +76,7 @@ rsync -auc --info=progress2 \
 	${FSR}src/synth/fluid_voice.h \
 	${FSR}src/utils/fluid_conv.c \
 	${FSR}src/utils/fluid_conv.h \
+	${FSR}src/utils/fluid_conv_tables.h \
 	${FSR}src/utils/fluid_hash.c \
 	${FSR}src/utils/fluid_hash.h \
 	${FSR}src/utils/fluid_list.c \
@@ -102,4 +108,12 @@ rsync -auc --info=progress2 \
 	"$ASRC/libs/fluidsynth/fluidsynth/"
 
 cd "$ASRC"
-patch -p1 < tools/ardour_fluidsynth.diff
+## 1st: apply patch below, fix up any merge-conflicts and git commit the result.
+## 2nd run (after commiting the new version): re-create the patch to upstream & amend:
+# git diff -R libs/fluidsynth/ > tools/fluid-patches/ardour_fluidsynth.diff
+#exit
+patch -p1 < tools/fluid-patches/ardour_fluidsynth.diff
+
+# auto-generated files
+cp tools/fluid-patches/fluid_conv_tables.c  libs/fluidsynth/src/
+cp tools/fluid-patches/fluid_rvoice_dsp_tables.c  libs/fluidsynth/src/

@@ -456,7 +456,7 @@ fluid_settings_set(fluid_settings_t *settings, const char *name, fluid_setting_n
             else
             {
                 /* path ends prematurely */
-                FLUID_LOG(FLUID_WARN, "'%s' is not a node. Name of the setting was '%s'", tokens[n], name);
+                FLUID_LOG(FLUID_ERR, "'%s' is not a node. Name of the setting was '%s'", tokens[n], name);
                 return FLUID_FAILED;
             }
 
@@ -549,7 +549,7 @@ fluid_settings_register_str(fluid_settings_t *settings, const char *name, const 
         }
         else
         {
-            FLUID_LOG(FLUID_WARN, "Type mismatch on setting '%s'", name);
+            FLUID_LOG(FLUID_ERR, "Failed to register string setting '%s' as it already exists with a different type", name);
         }
     }
 
@@ -611,7 +611,7 @@ fluid_settings_register_num(fluid_settings_t *settings, const char *name, double
         else
         {
             /* type mismatch */
-            FLUID_LOG(FLUID_WARN, "Type mismatch on setting '%s'", name);
+            FLUID_LOG(FLUID_ERR, "Failed to register numeric setting '%s' as it already exists with a different type", name);
         }
     }
 
@@ -673,7 +673,7 @@ fluid_settings_register_int(fluid_settings_t *settings, const char *name, int de
         else
         {
             /* type mismatch */
-            FLUID_LOG(FLUID_WARN, "Type mismatch on setting '%s'", name);
+            FLUID_LOG(FLUID_ERR, "Failed to register int setting '%s' as it already exists with a different type", name);
         }
     }
 
@@ -935,6 +935,7 @@ fluid_settings_setstr(fluid_settings_t *settings, const char *name, const char *
     if((fluid_settings_get(settings, name, &node) != FLUID_OK)
             || (node->type != FLUID_STR_TYPE))
     {
+        FLUID_LOG(FLUID_ERR, "Unknown string setting '%s'", name);
         goto error_recovery;
     }
 
@@ -1046,7 +1047,7 @@ fluid_settings_copystr(fluid_settings_t *settings, const char *name,
  * @since 1.1.0
  *
  * Like fluid_settings_copystr() but allocates a new copy of the string.  Caller
- * owns the string and should free it with free() when done using it.
+ * owns the string and should free it with fluid_free() when done using it.
  */
 int
 fluid_settings_dupstr(fluid_settings_t *settings, const char *name, char **str)
@@ -1115,7 +1116,7 @@ fluid_settings_dupstr(fluid_settings_t *settings, const char *name, char **str)
  * @param settings a settings object
  * @param name a setting's name
  * @param s a string to be tested
- * @return TRUE if the value exists and is equal to 's', FALSE otherwise
+ * @return TRUE if the value exists and is equal to \c s, FALSE otherwise
  */
 int
 fluid_settings_str_equal(fluid_settings_t *settings, const char *name, const char *s)
@@ -1312,6 +1313,7 @@ fluid_settings_setnum(fluid_settings_t *settings, const char *name, double val)
     if((fluid_settings_get(settings, name, &node) != FLUID_OK)
             || (node->type != FLUID_NUM_TYPE))
     {
+        FLUID_LOG(FLUID_ERR, "Unknown numeric setting '%s'", name);
         goto error_recovery;
     }
 
@@ -1319,7 +1321,7 @@ fluid_settings_setnum(fluid_settings_t *settings, const char *name, double val)
 
     if(val < setting->min || val > setting->max)
     {
-        FLUID_LOG(FLUID_DBG, "requested set value for %s out of range", name);
+        FLUID_LOG(FLUID_ERR, "requested set value for '%s' out of range", name);
         goto error_recovery;
     }
 
@@ -1496,6 +1498,7 @@ fluid_settings_setint(fluid_settings_t *settings, const char *name, int val)
     if((fluid_settings_get(settings, name, &node) != FLUID_OK)
             || (node->type != FLUID_INT_TYPE))
     {
+        FLUID_LOG(FLUID_ERR, "Unknown integer parameter '%s'", name);
         goto error_recovery;
     }
 
@@ -1503,7 +1506,7 @@ fluid_settings_setint(fluid_settings_t *settings, const char *name, int val)
 
     if(val < setting->min || val > setting->max)
     {
-        FLUID_LOG(FLUID_DBG, "requested set value for %s out of range", name);
+        FLUID_LOG(FLUID_ERR, "requested set value for setting '%s' out of range", name);
         goto error_recovery;
     }
 
@@ -1641,7 +1644,7 @@ int fluid_settings_getint_default(fluid_settings_t *settings, const char *name, 
  * @param data any user provided pointer
  * @param func callback function to be called on each iteration
  *
- * @note Starting with FluidSynth 1.1.0 the \a func callback is called for each
+ * @note Starting with FluidSynth 1.1.0 the \p func callback is called for each
  * option in alphabetical order.  Sort order was undefined in previous versions.
  */
 void
@@ -1724,7 +1727,7 @@ fluid_settings_option_count(fluid_settings_t *settings, const char *name)
  * @param name Settings name
  * @param separator String to use between options (NULL to use ", ")
  * @return Newly allocated string or NULL on error (out of memory, not a valid
- *   setting \a name or not a string setting).  Free the string when finished with it.
+ *   setting \p name or not a string setting). Free the string when finished with it by using fluid_free().
  * @since 1.1.0
  */
 char *
@@ -1732,7 +1735,6 @@ fluid_settings_option_concat(fluid_settings_t *settings, const char *name,
                              const char *separator)
 {
     fluid_setting_node_t *node;
-    fluid_str_setting_t *setting;
     fluid_list_t *p, *newlist = NULL;
     size_t count, len;
     char *str, *option;
@@ -1755,10 +1757,8 @@ fluid_settings_option_concat(fluid_settings_t *settings, const char *name,
         return (NULL);
     }
 
-    setting = &node->str;
-
     /* Duplicate option list, count options and get total string length */
-    for(p = setting->options, count = 0, len = 0; p; p = p->next, count++)
+    for(p = node->str.options, count = 0, len = 0; p; p = p->next)
     {
         option = fluid_list_get(p);
 
@@ -1766,6 +1766,7 @@ fluid_settings_option_concat(fluid_settings_t *settings, const char *name,
         {
             newlist = fluid_list_append(newlist, option);
             len += FLUID_STRLEN(option);
+            count++;
         }
     }
 
@@ -1868,7 +1869,7 @@ fluid_settings_foreach_iter(void *key, void *value, void *data)
  * @param data any user provided pointer
  * @param func callback function to be called on each iteration
  *
- * @note Starting with FluidSynth 1.1.0 the \a func callback is called for each
+ * @note Starting with FluidSynth 1.1.0 the \p func callback is called for each
  * setting in alphabetical order.  Sort order was undefined in previous versions.
  */
 void

@@ -1,20 +1,23 @@
 /*
-  Copyright (C) 2016 Paul Davis
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2018-2019 Jan Lentfer <jan.lentfer@web.de>
+ * Copyright (C) 2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2018 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2018 Térence Clastres <t.clastres@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <algorithm>
 
@@ -345,23 +348,23 @@ LaunchControlXL::build_maps ()
 	        boost::bind (&LaunchControlXL::button_device_long_press, this));
 
 
-	if (!device_mode()) {	/* mixer mode */
-		MAKE_SELECT_BUTTON_PRESS(SelectLeft, 106, 46, boost::bind (&LaunchControlXL::button_select_left, this));
-		MAKE_SELECT_BUTTON_PRESS(SelectRight, 107, 47, boost::bind (&LaunchControlXL::button_select_right, this));
+	/* Cancel all mute / solo is available in both modes */
 
-		//MAKE_TRACK_STATE_BUTTON_PRESS(Mute, 106, 41, boost::bind (&LaunchControlXL::button_mute, this));
-
-		MAKE_TRACK_STATE_BUTTON_PRESS_RELEASE_LONG(Mute, 106, 41,
+	MAKE_TRACK_STATE_BUTTON_PRESS_RELEASE_LONG(Mute, 106, 41,
 			boost::bind (&LaunchControlXL::relax, this) ,
 			boost::bind (&LaunchControlXL::button_mute, this),
 	        boost::bind (&LaunchControlXL::button_mute_long_press, this));
 
-		MAKE_TRACK_STATE_BUTTON_PRESS_RELEASE_LONG(Solo, 107, 42,
+	MAKE_TRACK_STATE_BUTTON_PRESS_RELEASE_LONG(Solo, 107, 42,
 			boost::bind (&LaunchControlXL::relax, this) ,
 			boost::bind (&LaunchControlXL::button_solo, this),
 	        boost::bind (&LaunchControlXL::button_solo_long_press, this));
 
-		//MAKE_TRACK_STATE_BUTTON_PRESS(Solo, 107, 42, boost::bind (&LaunchControlXL::button_solo, this));
+
+	if (!device_mode()) {	/* mixer mode */
+		MAKE_SELECT_BUTTON_PRESS(SelectLeft, 106, 46, boost::bind (&LaunchControlXL::button_select_left, this));
+		MAKE_SELECT_BUTTON_PRESS(SelectRight, 107, 47, boost::bind (&LaunchControlXL::button_select_right, this));
+
 		MAKE_TRACK_STATE_BUTTON_PRESS(Record, 108, 43, boost::bind (&LaunchControlXL::button_record, this));
 
 	} else {	/* device mode */
@@ -674,6 +677,7 @@ LaunchControlXL::solo_mute_rec_changed(uint32_t n) {
 	if (!stripable[n]) {
 		return;
 	}
+	DEBUG_TRACE (DEBUG::LaunchControlXL, "solo_mute_rec_changed - CALLING switch_bank(bank_start)\n");
 	switch_bank(bank_start);
 	//update_track_control_led(n);
 }
@@ -866,7 +870,7 @@ LaunchControlXL::knob_pan(uint8_t n)
 
 	if (buttons_down.find(Device) != buttons_down.end()) { // Device button hold
 #ifdef MIXBUS
-		ac = stripable[n]->filter_freq_controllable(true);
+		ac = stripable[n]->comp_threshold_controllable();
 #else
 		ac = stripable[n]->pan_width_control();
 #endif
@@ -875,8 +879,8 @@ LaunchControlXL::knob_pan(uint8_t n)
 	}
 
 
-	if (ac && check_pick_up(knob, ac)) {
-		ac->set_value ( ac->interface_to_internal( knob->value() / 127.0), PBD::Controllable::UseGroup );
+	if (ac && check_pick_up(knob, ac, true)) {
+		ac->set_value (ac->interface_to_internal((knob->value() / 127.0), true), PBD::Controllable::UseGroup);
 	}
 }
 
@@ -996,6 +1000,8 @@ LaunchControlXL::button_device_long_press()
 void
 LaunchControlXL::button_mute()
 {
+	if (device_mode()) { return ; }
+
 	if (buttons_down.find(Device) != buttons_down.end()) {
 		access_action ("Editor/track-mute-toggle");
 	} else {
@@ -1012,6 +1018,8 @@ LaunchControlXL::button_mute_long_press()
 void
 LaunchControlXL::button_solo()
 {
+	if (device_mode()) { return ; }
+
 	if (buttons_down.find(Device) != buttons_down.end()) {
 		access_action ("Editor/track-solo-toggle");
 	} else {
@@ -1028,6 +1036,8 @@ LaunchControlXL::button_solo_long_press()
 void
 LaunchControlXL::button_record()
 {
+	if (device_mode()) { return ; }
+
 	if (buttons_down.find(Device) != buttons_down.end()) {
 		access_action ("Editor/track-record-enable-toggle");
 	} else {
@@ -1142,8 +1152,8 @@ LaunchControlXL::dm_pan_azi (KnobID k)
 
 	ac = first_selected_stripable()->pan_azimuth_control();
 
-	if (ac && check_pick_up(knob, ac)) {
-		ac->set_value ( ac->interface_to_internal( knob->value() / 127.0), PBD::Controllable::UseGroup );
+	if (ac && check_pick_up(knob, ac, true)) {
+		ac->set_value (ac->interface_to_internal((knob->value() / 127.0), true), PBD::Controllable::UseGroup);
 	}
 }
 
@@ -1543,7 +1553,7 @@ LaunchControlXL::dm_mb_sends (KnobID k)
 
 
 	if (buttons_down.find(Device) != buttons_down.end()) { // Device button hold
-		ac = first_selected_stripable()->send_pan_azi_controllable(send);
+		ac = first_selected_stripable()->send_pan_azimuth_controllable(send);
 	} else {
 		ac = first_selected_stripable()->send_level_controllable(send);
 	}

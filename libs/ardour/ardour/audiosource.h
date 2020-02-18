@@ -1,21 +1,24 @@
 /*
-    Copyright (C) 2000 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2015 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2018-2019 Ben Loftis <ben@harrisonconsoles.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_audio_source_h__
 #define __ardour_audio_source_h__
@@ -39,8 +42,7 @@
 namespace ARDOUR {
 
 class LIBARDOUR_API AudioSource : virtual public Source,
-		public ARDOUR::Readable,
-		public boost::enable_shared_from_this<ARDOUR::AudioSource>
+		public ARDOUR::Readable
 {
   public:
 	AudioSource (Session&, const std::string& name);
@@ -64,9 +66,6 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 	virtual void mark_streaming_write_completed (const Lock& lock);
 
 	virtual bool can_truncate_peaks() const { return true; }
-
-	void set_captured_for (std::string str) { _captured_for = str; }
-	std::string captured_for() const { return _captured_for; }
 
 	int read_peaks (PeakData *peaks, samplecnt_t npeaks,
 			samplepos_t start, samplecnt_t cnt, double samples_per_visual_peak) const;
@@ -125,7 +124,6 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 
 	samplecnt_t           _length;
 	std::string         _peakpath;
-	std::string        _captured_for;
 
 	int initialize_peakfile (const std::string& path, const bool in_session = false);
 	int build_peaks_from_scratch ();

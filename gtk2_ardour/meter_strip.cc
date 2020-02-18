@@ -1,25 +1,28 @@
 /*
-    Copyright (C) 2013 Paul Davis
-    Author: Robin Gareus
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2016 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2015-2016 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <list>
 
 #include <sigc++/bind.h>
+
+#include "pbd/unwind.h"
 
 #include "ardour/logmeter.h"
 #include "ardour/session.h"
@@ -39,6 +42,7 @@
 
 #include "gui_thread.h"
 #include "ardour_window.h"
+#include "context_menu_helper.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -65,13 +69,14 @@ PBD::Signal0<void> MeterStrip::ConfigurationChanged;
 
 MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	: RouteUI ((Session*) 0)
+	, metric_type (MeterPeak)
+	, _has_midi (false)
+	, _tick_bar (0)
+	, _strip_type (0)
+	, _metricmode (-1)
+	, level_meter (0)
+	, _suspend_menu_callbacks (false)
 {
-	level_meter = 0;
-	_strip_type = 0;
-	_tick_bar = 0;
-	_metricmode = -1;
-	metric_type = MeterPeak;
-
 	mtr_vbox.set_spacing (PX_SCALE(2, 2));
 	nfo_vbox.set_spacing (PX_SCALE(2, 2));
 	peakbx.set_size_request (-1, PX_SCALE(14, 14));
@@ -119,20 +124,21 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 
 MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	: SessionHandlePtr (sess)
-	, RouteUI(0)
-	, _route(rt)
-	, peak_display()
+	, RouteUI ((Session*) 0)
+	, _route (rt)
+	, metric_type (MeterPeak)
+	, _has_midi (false)
+	, _tick_bar (0)
+	, _strip_type (0)
+	, _metricmode (-1)
+	, level_meter (0)
+	, _suspend_menu_callbacks (false)
 {
 	mtr_vbox.set_spacing (PX_SCALE(2, 2));
 	nfo_vbox.set_spacing (PX_SCALE(2, 2));
 	SessionHandlePtr::set_session (sess);
 	RouteUI::init ();
 	RouteUI::set_route (rt);
-
-	_has_midi = false;
-	_tick_bar = 0;
-	_metricmode = -1;
-	metric_type = MeterPeak;
 
 	// note: level_meter->setup_meters() does the scaling
 	int meter_width = 6;
@@ -144,10 +150,9 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	level_meter = new LevelMeterHBox(sess);
 	level_meter->set_meter (_route->shared_peak_meter().get());
 	level_meter->clear_meters();
-	level_meter->set_meter_type (_route->meter_type());
 	level_meter->setup_meters (220, meter_width, 6);
 	level_meter->ButtonPress.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::level_meter_button_press, this, _1));
-	level_meter->MeterTypeChanged.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::meter_type_changed, this, _1));
+	_route->shared_peak_meter()->MeterTypeChanged.connect (meter_route_connections, invalidator (*this), boost::bind (&MeterStrip::meter_type_changed, this, _1), gui_context());
 
 	meter_align.set(0.5, 0.5, 0.0, 1.0);
 	meter_align.add(*level_meter);
@@ -471,7 +476,9 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 	set_tick_bar(_tick_bar);
 
 	on_theme_changed();
-	if (old_has_midi != _has_midi) MetricChanged();
+	if (old_has_midi != _has_midi) {
+		MetricChanged(); /* EMIT SIGNAL */
+	}
 	else ConfigurationChanged();
 }
 
@@ -579,7 +586,8 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 
 	if (need_relayout) {
 		queue_resize();
-		MetricChanged(); // force re-layout, parent on_scroll(), queue_resize()
+		/* force re-layout, parent on_scroll(), queue_resize() */
+		MetricChanged(); /* EMIT SIGNAL */
 	}
 }
 
@@ -835,12 +843,12 @@ MeterStrip::popup_level_meter_menu (GdkEventButton* ev)
 {
 	using namespace Gtk::Menu_Helpers;
 
-	Gtk::Menu* m = manage (new Menu);
+	Gtk::Menu* m = ARDOUR_UI_UTILS::shared_popup_menu ();
 	MenuList& items = m->items ();
 
 	RadioMenuItem::Group group;
 
-	_suspend_menu_callbacks = true;
+	PBD::Unwinder<bool> uw (_suspend_menu_callbacks, true);
 	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterPeak), MeterPeak);
 	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterPeak0dB), MeterPeak0dB);
 	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterKrms),  MeterKrms);
@@ -865,7 +873,6 @@ MeterStrip::popup_level_meter_menu (GdkEventButton* ev)
 				sigc::bind (SetMeterTypeMulti, _strip_type, _route->route_group(), cmt)));
 
 	m->popup (ev->button, ev->time);
-	_suspend_menu_callbacks = false;
 }
 
 bool
@@ -887,12 +894,12 @@ MeterStrip::popup_name_label_menu (GdkEventButton* ev)
 {
 	using namespace Gtk::Menu_Helpers;
 
-	Gtk::Menu* m = manage (new Menu);
+	Gtk::Menu* m = ARDOUR_UI_UTILS::shared_popup_menu ();
 	MenuList& items = m->items ();
 
 	RadioMenuItem::Group group;
 
-	_suspend_menu_callbacks = true;
+	PBD::Unwinder<bool> uw (_suspend_menu_callbacks, true);
 	add_label_height_item (items, group, _("Variable height"), 0);
 	add_label_height_item (items, group, _("Short"), 1);
 	add_label_height_item (items, group, _("Tall"), 2);
@@ -900,7 +907,6 @@ MeterStrip::popup_name_label_menu (GdkEventButton* ev)
 	add_label_height_item (items, group, _("Venti"), 4);
 
 	m->popup (ev->button, ev->time);
-	_suspend_menu_callbacks = false;
 }
 
 void
@@ -927,9 +933,7 @@ void
 MeterStrip::set_meter_type (MeterType type)
 {
 	if (_suspend_menu_callbacks) return;
-	if (_route->meter_type() == type) return;
-
-	level_meter->set_meter_type (type);
+	_route->set_meter_type (type);
 }
 
 void
@@ -942,11 +946,8 @@ MeterStrip::set_label_height (uint32_t h)
 void
 MeterStrip::meter_type_changed (MeterType type)
 {
-	if (_route->meter_type() != type) {
-		_route->set_meter_type(type);
-	}
 	update_background (type);
-	MetricChanged();
+	MetricChanged(); /* EMIT SIGNAL */
 }
 
 void
@@ -955,15 +956,15 @@ MeterStrip::set_meter_type_multi (int what, RouteGroup* group, MeterType type)
 	switch (what) {
 		case -1:
 			if (_route && group == _route->route_group()) {
-				level_meter->set_meter_type (type);
+				_route->set_meter_type (type);
 			}
 			break;
 		case 0:
-			level_meter->set_meter_type (type);
+			_route->set_meter_type (type);
 			break;
 		default:
 			if (what == _strip_type) {
-				level_meter->set_meter_type (type);
+				_route->set_meter_type (type);
 			}
 			break;
 	}

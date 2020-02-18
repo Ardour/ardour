@@ -1,22 +1,21 @@
 /*
-    Copyright (C) 2012 Paul Davis
-	Copyright (C) 2017 Ben Loftis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2017 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <sstream>
 #include <iomanip>
@@ -642,12 +641,12 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 			float value = (float)ev->value / 127.0;
 			boost::shared_ptr<Stripable> r = mcp().subview_stripable();
 			if (r && r->is_input_strip()) {
-				boost::shared_ptr<AutomationControl> pc = r->send_pan_azi_controllable (10);
+				boost::shared_ptr<AutomationControl> pc = r->send_pan_azimuth_controllable (10);
 				if (pc) {
 					float v = pc->interface_to_internal(value);
 					pc->set_value (v, PBD::Controllable::NoGroup);
 				}
-				pc = r->send_pan_azi_controllable (11);
+				pc = r->send_pan_azimuth_controllable (11);
 				if (pc) {
 					float v = pc->interface_to_internal(value);
 					pc->set_value (v, PBD::Controllable::NoGroup);

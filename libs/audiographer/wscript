@@ -37,7 +37,6 @@ def configure(conf):
     autowaf.check_pkg(conf, 'samplerate', uselib_store='SAMPLERATE', atleast_version='0.1.7', mandatory=False)
     autowaf.check_pkg(conf, 'sndfile', uselib_store='SNDFILE', atleast_version='1.0.18', mandatory=False)
     autowaf.check_pkg(conf, 'fftw3f', uselib_store='FFTW3F', mandatory=True)
-    autowaf.check_pkg(conf, 'fftw3f', uselib_store='FFTW35F', atleast_version='3.3.5', mandatory=False)
 
     # Boost headers
     autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
@@ -78,7 +77,7 @@ def build(bld):
         audiographer.defines      = [ 'LIBAUDIOGRAPHER_DLL_EXPORTS=1' ]
     else:
         audiographer              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=audiographer_sources)
-        audiographer.cxxflags     = [  bld.env['compiler_flags_dict']['pic'] ]
+        audiographer.cxxflags     = [ bld.env['compiler_flags_dict']['pic'] ]
         audiographer.cflags       = [ bld.env['compiler_flags_dict']['pic'] ]
         audiographer.defines      = []
 

@@ -1,21 +1,23 @@
 /*
-    Copyright (C) 2009 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2006-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2007-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_port_h__
 #define __ardour_port_h__
@@ -120,7 +122,8 @@ public:
 	virtual Buffer& get_buffer (pframes_t nframes) = 0;
 	virtual void flush_buffers (pframes_t /*nframes*/) {}
 	virtual void transport_stopped () {}
-	virtual void realtime_locate () {}
+	virtual void realtime_locate (bool for_loop_end) {}
+	virtual void set_buffer_size (pframes_t) {}
 
 	bool physically_connected () const;
 	uint32_t externally_connected () const { return _externally_connected; }
@@ -158,7 +161,7 @@ protected:
 
 	PortEngine::PortHandle _port_handle;
 
-	static bool	      _connecting_blocked;
+	static bool       _connecting_blocked;
 	static pframes_t  _cycle_nframes; /* access only from process() tree */
 
 	static pframes_t  _global_port_buffer_offset; /* access only from process() tree */
@@ -183,7 +186,7 @@ private:
 	void port_connected_or_disconnected (boost::weak_ptr<Port>, boost::weak_ptr<Port>, bool);
 	void signal_drop ();
 	void drop ();
-	PBD::ScopedConnection drop_connection;
+	PBD::ScopedConnectionList drop_connection;
 	PBD::ScopedConnection engine_connection;
 };
 

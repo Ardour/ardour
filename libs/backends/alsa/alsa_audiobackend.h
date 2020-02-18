@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2014 Robin Gareus <robin@gareus.org>
- * Copyright (C) 2013 Paul Davis
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015-2018 Paul Davis <paul@linuxaudiosystems.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,9 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef __libbackend_alsa_audiobackend_h__
@@ -270,7 +270,6 @@ class AlsaAudioBackend : public AudioBackend {
 
 		void* private_handle () const;
 		const std::string& my_name () const;
-		bool available () const;
 		uint32_t port_name_size () const;
 
 		int         set_port_name (PortHandle, const std::string&);
@@ -375,8 +374,8 @@ class AlsaAudioBackend : public AudioBackend {
 			bool     enabled;
 			uint32_t systemic_input_latency;
 			uint32_t systemic_output_latency;
-			AlsaMidiDeviceInfo()
-				: enabled (true)
+			AlsaMidiDeviceInfo (bool en = true)
+				: enabled (en)
 				, systemic_input_latency (0)
 				, systemic_output_latency (0)
 			{}
@@ -384,6 +383,17 @@ class AlsaAudioBackend : public AudioBackend {
 
 		mutable std::map<std::string, struct AlsaMidiDeviceInfo *> _midi_devices;
 		struct AlsaMidiDeviceInfo * midi_device_info(std::string const) const;
+
+		/* midi device changes */
+		void auto_update_midi_devices();
+		bool listen_for_midi_device_changes ();
+		void stop_listen_for_midi_device_changes ();
+		void midi_device_thread ();
+		static void* _midi_device_thread (void *arg);
+		pthread_t _midi_device_thread_id;
+		bool _midi_device_thread_active;
+
+		pthread_mutex_t _device_port_mutex;
 
 		/* processing */
 		float  _dsp_load;
@@ -434,9 +444,6 @@ class AlsaAudioBackend : public AudioBackend {
 
 		std::vector<AlsaMidiOut *> _rmidi_out;
 		std::vector<AlsaMidiIn  *> _rmidi_in;
-
-		unsigned _midi_ins;
-		unsigned _midi_outs;
 
 		struct PortConnectData {
 			std::string a;

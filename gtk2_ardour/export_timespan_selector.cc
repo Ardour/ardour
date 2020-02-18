@@ -1,22 +1,26 @@
 /*
-    Copyright (C) 2008 Paul Davis
-    Author: Sakari Bergen
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2008-2013 Sakari Bergen <sakari.bergen@beatwaves.net>
+ * Copyright (C) 2008-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2013-2014 Colin Fletcher <colin.m.fletcher@googlemail.com>
+ * Copyright (C) 2015-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <sstream>
 #include <iomanip>
@@ -246,17 +250,9 @@ ExportTimespanSelector::construct_label (ARDOUR::Location const * location) cons
 		break;
 	}
 
-	// label += _("from ");
-
-	// label += "<span color=\"#7fff7f\">";
 	label += start;
-// 	label += "</span>";
-
 	label += _(" to ");
-
-// 	label += "<span color=\"#7fff7f\">";
 	label += end;
-// 	label += "</span>";
 
 	return label;
 }
@@ -396,8 +392,8 @@ ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (ARDOUR::Session * se
 	range_id (range_id)
 {
 	range_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
-	range_view.append_column_editable (_("RT"), range_cols.realtime);
-	range_view.append_column_editable (_("Range"), range_cols.name);
+	range_view.append_column_editable (_("RT"), range_cols.realtime); // 0
+	range_view.append_column_editable (_("Range"), range_cols.name); // 1
 
 	if (Gtk::CellRendererToggle * renderer = dynamic_cast<Gtk::CellRendererToggle *> (range_view.get_column_cell_renderer (0))) {
 		renderer->signal_toggled().connect (sigc::hide (sigc::mem_fun (*this, &ExportTimespanSelectorSingle::update_timespans)));
@@ -410,9 +406,22 @@ ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (ARDOUR::Session * se
 	Gtk::CellRendererText * label_render = Gtk::manage (new Gtk::CellRendererText());
 	Gtk::TreeView::Column * label_col = Gtk::manage (new Gtk::TreeView::Column (_("Time Span"), *label_render));
 	label_col->add_attribute (label_render->property_markup(), range_cols.label);
-	range_view.append_column (*label_col);
+	range_view.append_column (*label_col); // 2
 
-	range_view.append_column (_("Length"), range_cols.length);
+	range_view.append_column (_("Length"), range_cols.length); // 3
+	range_view.append_column (_("Creation Date"), range_cols.date); // 4
+
+	Gtk::TreeViewColumn* range_col = range_view.get_column (1); // "Range"
+	range_col->set_sort_column (range_cols.name);
+
+	Gtk::TreeViewColumn* time_span_col = range_view.get_column (2); // "Time Span"
+	time_span_col->set_sort_column (range_cols.start);
+
+	Gtk::TreeViewColumn* length_col = range_view.get_column (3); // "Length"
+	length_col->set_sort_column (range_cols.length_actual);
+
+	Gtk::TreeViewColumn* date_col = range_view.get_column (4); // "Creation Date"
+	date_col->set_sort_column (range_cols.timestamp);
 }
 
 void
@@ -452,6 +461,16 @@ ExportTimespanSelectorSingle::fill_range_list ()
 			row[range_cols.name] = (*it)->name();
 			row[range_cols.label] = construct_label (*it);
 			row[range_cols.length] = construct_length (*it);
+			//the actual samplecnt_t for sorting
+			row[range_cols.length_actual] = (*it)->length();
+
+			//start samplecnt_t for sorting
+			row[range_cols.start] = (*it)->start();
+
+			Glib::DateTime gdt(Glib::DateTime::create_now_local ((*it)->timestamp()));
+			row[range_cols.timestamp] = (*it)->timestamp();
+			row[range_cols.date] = gdt.format ("%F %H:%M");;
+
 
 			add_range_to_selection (*it, false);
 
@@ -501,9 +520,22 @@ ExportTimespanSelectorMultiple::ExportTimespanSelectorMultiple (ARDOUR::Session 
 	Gtk::CellRendererText * label_render = Gtk::manage (new Gtk::CellRendererText());
 	Gtk::TreeView::Column * label_col = Gtk::manage (new Gtk::TreeView::Column (_("Time Span"), *label_render));
 	label_col->add_attribute (label_render->property_markup(), range_cols.label);
-	range_view.append_column (*label_col);
+	range_view.append_column (*label_col); // 3
 
-	range_view.append_column (_("Length"), range_cols.length);
+	range_view.append_column (_("Length"), range_cols.length); // 4
+	range_view.append_column (_("Creation Date"), range_cols.date); // 5
+
+	Gtk::TreeViewColumn* range_col = range_view.get_column (2); // "Range"
+	range_col->set_sort_column (range_cols.name);
+
+	Gtk::TreeViewColumn* time_span_col = range_view.get_column (3); // "Time Span"
+	time_span_col->set_sort_column (range_cols.start);
+
+	Gtk::TreeViewColumn* length_col = range_view.get_column (4); // "Length"
+	length_col->set_sort_column (range_cols.length_actual);
+
+	Gtk::TreeViewColumn* date_col = range_view.get_column (5); // "Creation Date"
+	date_col->set_sort_column (range_cols.timestamp);
 }
 
 void
@@ -534,6 +566,16 @@ ExportTimespanSelectorMultiple::fill_range_list ()
 		row[range_cols.name] = (*it)->name();
 		row[range_cols.label] = construct_label (*it);
 		row[range_cols.length] = construct_length (*it);
+		//the actual samplecnt_t for sorting
+		row[range_cols.length_actual] = (*it)->length();
+
+		//start samplecnt_t for sorting
+		row[range_cols.start] = (*it)->start();
+
+		Glib::DateTime gdt(Glib::DateTime::create_now_local ((*it)->timestamp()));
+		row[range_cols.timestamp] = (*it)->timestamp();
+		row[range_cols.date] = gdt.format ("%F %H:%M");;
+
 	}
 
 	set_selection_from_state ();

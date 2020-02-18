@@ -1,22 +1,22 @@
 /*
-    Copyright (C) 2011 Paul Davis
-    Author: Sakari Bergen
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2011 Sakari Bergen <sakari.bergen@beatwaves.net>
+ * Copyright (C) 2013 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2014 John Emmas <john@creativepost.co.uk>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_comparable_shared_ptr_h__
 #define __ardour_comparable_shared_ptr_h__
@@ -41,6 +41,11 @@ class /*LIBARDOUR_API*/ ComparableSharedPtr : public boost::shared_ptr<T>
 	ComparableSharedPtr (Y * p, D d, A a) : boost::shared_ptr<T> (p, d, a) {}
 
 	ComparableSharedPtr (ComparableSharedPtr const & r) : boost::shared_ptr<T> (r) {}
+
+	ComparableSharedPtr& operator=(ComparableSharedPtr const& r) {
+		boost::shared_ptr<T>(r).swap(*this);
+		return *this;
+	}
 
 	template<class Y>
 	ComparableSharedPtr(ComparableSharedPtr<Y> const & r) : boost::shared_ptr<T> (r) {}

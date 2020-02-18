@@ -1,21 +1,27 @@
 /*
-    Copyright (C) 2000 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2000-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005-2006 Jesse Chappell <jesse@essej.net>
+ * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2006-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2015 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2018 Ben Loftis <ben@harrisonconsoles.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <sys/stat.h>
 #include <unistd.h>
@@ -52,12 +58,16 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+PBD::Signal1<void,boost::shared_ptr<ARDOUR::Source> > Source::SourcePropertyChanged;
+
+
 Source::Source (Session& s, DataType type, const string& name, Flag flags)
 	: SessionObject(s, name)
 	, _type(type)
 	, _flags(flags)
-	, _timeline_position(0)
-        , _use_count (0)
+	, _natural_position(0)
+	, _have_natural_position (false)
+	, _use_count (0)
 	, _level (0)
 {
 	_analysed = false;
@@ -69,7 +79,8 @@ Source::Source (Session& s, const XMLNode& node)
 	: SessionObject(s, "unnamed source")
 	, _type(DataType::AUDIO)
 	, _flags (Flag (Writable|CanRename))
-	, _timeline_position(0)
+	, _natural_position(0)
+	, _have_natural_position (false)
         , _use_count (0)
 	, _level (0)
 {
@@ -102,12 +113,18 @@ Source::get_state ()
 	XMLNode *node = new XMLNode ("Source");
 
 	node->set_property ("name", name());
+	node->set_property ("take-id", take_id());
 	node->set_property ("type", _type);
 	node->set_property (X_("flags"), _flags);
 	node->set_property ("id", id());
 
 	if (_timestamp != 0) {
-		node->set_property ("timestamp", (int64_t)_timestamp);
+		int64_t t = _timestamp;
+		node->set_property ("timestamp", t);
+	}
+
+	if (_have_natural_position) {
+		node->set_property ("natural-position", _natural_position);
 	}
 
 	return *node;
@@ -131,21 +148,32 @@ Source::set_state (const XMLNode& node, int version)
 
 	int64_t t;
 	if (node.get_property ("timestamp", t)) {
-		_timestamp = t;
+		_timestamp = (time_t) t;
+	}
+
+	samplepos_t ts;
+	if (node.get_property ("natural-position", ts)) {
+		_natural_position = ts;
+		_have_natural_position = true;
+	} else if (node.get_property ("timeline-position", ts)) {
+		/* some older versions of ardour might have stored this with
+		   this property name.
+		*/
+		_natural_position = ts;
+		_have_natural_position = true;
 	}
 
 	if (!node.get_property (X_("flags"), _flags)) {
 		_flags = Flag (0);
 	}
 
+	if (!node.get_property (X_("take-id"), _take_id)) {
+		_take_id = "";
+	}
+
 	/* old style, from the period when we had DestructiveFileSource */
 	if (node.get_property (X_("destructive"), str)) {
 		_flags = Flag (_flags | Destructive);
-	}
-
-	if (Profile->get_trx() && (_flags & Destructive)) {
-		error << string_compose (_("%1: this session uses destructive tracks, which are not supported"), PROGRAM_NAME) << endmsg;
-		return -1;
 	}
 
 	if (version < 3000) {
@@ -265,9 +293,10 @@ Source::mark_for_remove ()
 }
 
 void
-Source::set_timeline_position (samplepos_t pos)
+Source::set_natural_position (samplepos_t pos)
 {
-	_timeline_position = pos;
+	_natural_position = pos;
+	_have_natural_position = true;
 }
 
 void
@@ -287,7 +316,14 @@ Source::set_allow_remove_if_empty (bool yn)
 void
 Source::inc_use_count ()
 {
-        g_atomic_int_inc (&_use_count);
+    g_atomic_int_inc (&_use_count);
+
+    try {
+	    boost::shared_ptr<Source> sptr = shared_from_this();
+	    SourcePropertyChanged (sptr);
+    } catch (...) {
+	    /* no shared_ptr available, relax; */
+    }
 }
 
 void
@@ -303,6 +339,13 @@ Source::dec_use_count ()
 #else
         g_atomic_int_add (&_use_count, -1);
 #endif
+
+	try {
+		boost::shared_ptr<Source> sptr = shared_from_this();
+		SourcePropertyChanged (sptr);
+	} catch (...) {
+		/* no shared_ptr available, relax; */
+	}
 }
 
 bool
@@ -310,4 +353,3 @@ Source::writable () const
 {
         return (_flags & Writable) && _session.writable();
 }
-

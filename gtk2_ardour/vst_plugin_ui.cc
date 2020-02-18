@@ -1,21 +1,23 @@
 /*
-    Copyright (C) 2000-2010 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2012-2013 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2014-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <gtkmm.h>
 #include "ardour/vst_plugin.h"
@@ -43,14 +45,15 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> insert, boost:
 	if (insert->controls().size() > 0) {
 		box->pack_end (reset_button, false, false, 4);
 	}
+	if (has_descriptive_presets ()) {
+		box->pack_end (preset_browser_button, false, false);
+	}
 	box->pack_end (delete_button, false, false);
 	box->pack_end (save_button, false, false);
 	box->pack_end (add_button, false, false);
 	box->pack_end (_preset_combo, false, false);
 	box->pack_end (_preset_modified, false, false);
 	box->pack_end (pin_management_button, false, false);
-
-	bypass_button.set_active (!insert->active ());
 
 	pack_start (*box, false, false);
 	box->signal_size_allocate().connect (sigc::mem_fun (*this, &VSTPluginUI::top_box_allocated));
@@ -234,8 +237,10 @@ VSTPluginUI::dispatch_effeditkey (GdkEventKey* gdk_key)
 			special_key = 15;
 			break;
 		case GDK_Page_Down:
+			/* fallthrough */
 		case GDK_KP_Page_Down:
 			special_key = 16;
+			break;
 		case GDK_Insert:
 			special_key = 21;
 			break;

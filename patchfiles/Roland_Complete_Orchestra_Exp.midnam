@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>XV-5080</Model>
+    <Model>XV-3080</Model>
+    <Model>XV-88</Model>
+    <Model>XV-5050</Model>
+    <Model>XV-2020</Model>
+    <Model>Fantom</Model>
+    <Model>RD-700</Model>
+    <PatchNameList Name="SRX-06 Complete Orchestra: Rhythm Kits">
+      <Patch Number="001" Name="Orch.Kit 1" ProgramChange="0"/>
+      <Patch Number="002" Name="Orch.Kit 2" ProgramChange="1"/>
+      <Patch Number="003" Name="Melo OrchKit" ProgramChange="2"/>
+      <Patch Number="004" Name="GM AssignKit" ProgramChange="3"/>
+      <Patch Number="005" Name="All Orch Kit" ProgramChange="4"/>
+    </PatchNameList>
+    <PatchNameList Name="SRX-06 Complete Orchestra: Patches 001-128">
+      <Patch Number="001" Name="Warm Vlns SRX" ProgramChange="0"/>
+      <Patch Number="002" Name="Legato Vlns" ProgramChange="1"/>
+      <Patch Number="003" Name="Natural VlnsS" ProgramChange="2"/>
+      <Patch Number="004" Name="Agitato Vlns" ProgramChange="3"/>
+      <Patch Number="005" Name="Vlns Spc" ProgramChange="4"/>
+      <Patch Number="006" Name="Vl&amp;Va Spicct" ProgramChange="5"/>
+      <Patch Number="007" Name="Arco Vas SRX" ProgramChange="6"/>
+      <Patch Number="008" Name="Agitato Vas" ProgramChange="7"/>
+      <Patch Number="009" Name="Vlas-Spc" ProgramChange="8"/>
+      <Patch Number="010" Name="Marc Vas SRX" ProgramChange="9"/>
+      <Patch Number="011" Name="Vc Sec mf" ProgramChange="10"/>
+      <Patch Number="012" Name="Fast Cellos" ProgramChange="11"/>
+      <Patch Number="013" Name="Vcs Legato" ProgramChange="12"/>
+      <Patch Number="014" Name="3 Cellos" ProgramChange="13"/>
+      <Patch Number="015" Name="Cellos" ProgramChange="14"/>
+      <Patch Number="016" Name="CelloSectMrc" ProgramChange="15"/>
+      <Patch Number="017" Name="Marcato Vcs" ProgramChange="16"/>
+      <Patch Number="018" Name="Agitato Vcs" ProgramChange="17"/>
+      <Patch Number="019" Name="Vcs+Cbs SRX" ProgramChange="18"/>
+      <Patch Number="020" Name="Arco Vcs+Cbs" ProgramChange="19"/>
+      <Patch Number="021" Name="Thick Basses" ProgramChange="20"/>
+      <Patch Number="022" Name="Cb Sect SRX" ProgramChange="21"/>
+      <Patch Number="023" Name="WideBasses S" ProgramChange="22"/>
+      <Patch Number="024" Name="Agitato Cbs" ProgramChange="23"/>
+      <Patch Number="025" Name="Big StrgEns" ProgramChange="24"/>
+      <Patch Number="026" Name="Big Strings2" ProgramChange="25"/>
+      <Patch Number="027" Name="Orch p" ProgramChange="26"/>
+      <Patch Number="028" Name="Orchp&gt;fMOd" ProgramChange="27"/>
+      <Patch Number="029" Name="StrsArco SRX" ProgramChange="28"/>
+      <Patch Number="030" Name="StrSwel/ModS" ProgramChange="29"/>
+      <Patch Number="031" Name="StStrOrcp/fS" ProgramChange="30"/>
+      <Patch Number="032" Name="SlowResinStr" ProgramChange="31"/>
+      <Patch Number="033" Name="Adagio Strs" ProgramChange="32"/>
+      <Patch Number="034" Name="LegatoStrngs" ProgramChange="33"/>
+      <Patch Number="035" Name="Intim StrSec" ProgramChange="34"/>
+      <Patch Number="036" Name="DramaStrsSRX" ProgramChange="35"/>
+      <Patch Number="037" Name="St Str p/f" ProgramChange="36"/>
+      <Patch Number="038" Name="SlowEpic Str" ProgramChange="37"/>
+      <Patch Number="039" Name="Real Strings" ProgramChange="38"/>
+      <Patch Number="040" Name="4Seasons SRX" ProgramChange="39"/>
+      <Patch Number="041" Name="VIVaVcCb SRX" ProgramChange="40"/>
+      <Patch Number="042" Name="StudioString" ProgramChange="41"/>
+      <Patch Number="043" Name="Quartet SRX" ProgramChange="42"/>
+      <Patch Number="044" Name="VibSwStrings" ProgramChange="43"/>
+      <Patch Number="045" Name="Str Swell" ProgramChange="44"/>
+      <Patch Number="046" Name="Ouveture SRX" ProgramChange="45"/>
+      <Patch Number="047" Name="Cluster Sect" ProgramChange="46"/>
+      <Patch Number="048" Name="Velo Str SRX" ProgramChange="47"/>
+      <Patch Number="049" Name="Agitato to 0" ProgramChange="48"/>
+      <Patch Number="050" Name="DynaMarc SRX" ProgramChange="49"/>
+      <Patch Number="051" Name="VivaceStrSRX" ProgramChange="50"/>
+      <Patch Number="052" Name="Agitato Str" ProgramChange="51"/>
+      <Patch Number="053" Name="STR SpiceSRX" ProgramChange="52"/>
+      <Patch Number="054" Name="StacctoSectn" ProgramChange="53"/>
+      <Patch Number="055" Name="Spice/releas" ProgramChange="54"/>
+      <Patch Number="056" Name="STR Marcato" ProgramChange="55"/>
+      <Patch Number="057" Name="Big Marcato" ProgramChange="56"/>
+      <Patch Number="058" Name="Spice Sect" ProgramChange="57"/>
+      <Patch Number="059" Name="Spc+Pz/rleas" ProgramChange="58"/>
+      <Patch Number="060" Name="Piz-Spc/" ProgramChange="59"/>
+      <Patch Number="061" Name="RoomPizz SRX" ProgramChange="60"/>
+      <Patch Number="062" Name="Stage Pizz" ProgramChange="61"/>
+      <Patch Number="063" Name="Nite Pizzico" ProgramChange="62"/>
+      <Patch Number="064" Name="VIOLIN Solo" ProgramChange="63"/>
+      <Patch Number="065" Name="Solo Vln/" ProgramChange="64"/>
+      <Patch Number="066" Name="Solo Violin" ProgramChange="65"/>
+      <Patch Number="067" Name="Sad S VlnSRX" ProgramChange="66"/>
+      <Patch Number="068" Name="Solo Viola" ProgramChange="67"/>
+      <Patch Number="069" Name="AgitatoVaSRX" ProgramChange="68"/>
+      <Patch Number="070" Name="Solo Cello 1" ProgramChange="69"/>
+      <Patch Number="071" Name="Solo Cello 2" ProgramChange="70"/>
+      <Patch Number="072" Name="The V Cello" ProgramChange="71"/>
+      <Patch Number="073" Name="Solo VC/" ProgramChange="72"/>
+      <Patch Number="074" Name="Marcato VC" ProgramChange="73"/>
+      <Patch Number="075" Name="Vln&amp;Vd" ProgramChange="74"/>
+      <Patch Number="076" Name="Solo Cb/" ProgramChange="75"/>
+      <Patch Number="077" Name="Tape Orc SRX" ProgramChange="76"/>
+      <Patch Number="078" Name="Tape Str SRX" ProgramChange="77"/>
+      <Patch Number="079" Name="Old Tale" ProgramChange="78"/>
+      <Patch Number="080" Name="Mellow Tape" ProgramChange="79"/>
+      <Patch Number="081" Name="Crystaline Pd" ProgramChange="80"/>
+      <Patch Number="082" Name="SynStrings" ProgramChange="81"/>
+      <Patch Number="083" Name="Full Orc SRX" ProgramChange="82"/>
+      <Patch Number="084" Name="St.OrcUniSRX" ProgramChange="83"/>
+      <Patch Number="085" Name="OrchUnitSRX" ProgramChange="84"/>
+      <Patch Number="086" Name="GRAND OrcSRX" ProgramChange="85"/>
+      <Patch Number="087" Name="WavinGoodbye" ProgramChange="86"/>
+      <Patch Number="088" Name="DynOrchestrl" ProgramChange="87"/>
+      <Patch Number="089" Name="Pathetique" ProgramChange="88"/>
+      <Patch Number="090" Name="Oboes &amp; Sect" ProgramChange="89"/>
+      <Patch Number="091" Name="SlowEpicOrch" ProgramChange="90"/>
+      <Patch Number="092" Name="Grand Tutti" ProgramChange="91"/>
+      <Patch Number="093" Name="Ultimate Orc" ProgramChange="92"/>
+      <Patch Number="094" Name="SuspenceOrch" ProgramChange="93"/>
+      <Patch Number="095" Name="Tremelo/" ProgramChange="94"/>
+      <Patch Number="096" Name="TremOrc/Mod" ProgramChange="95"/>
+      <Patch Number="097" Name="ORC full+BD" ProgramChange="96"/>
+      <Patch Number="098" Name="Finally Orch" ProgramChange="97"/>
+      <Patch Number="099" Name="Orch &amp; Choir" ProgramChange="98"/>
+      <Patch Number="100" Name="NowWeAreFree" ProgramChange="99"/>
+      <Patch Number="101" Name="Too Tense" ProgramChange="100"/>
+      <Patch Number="102" Name="OrchestrlSRX" ProgramChange="101"/>
+      <Patch Number="103" Name="DynOrchestr2" ProgramChange="102"/>
+      <Patch Number="104" Name="GiantOrchest" ProgramChange="103"/>
+      <Patch Number="105" Name="Strngs&amp;Horns" ProgramChange="104"/>
+      <Patch Number="106" Name="Full Orch 1" ProgramChange="105"/>
+      <Patch Number="107" Name="Full Orch 2" ProgramChange="106"/>
+      <Patch Number="108" Name="Full Orch 3" ProgramChange="107"/>
+      <Patch Number="109" Name="End Titles" ProgramChange="108"/>
+      <Patch Number="110" Name="HornStr SRX" ProgramChange="109"/>
+      <Patch Number="111" Name="SRX Full Orc" ProgramChange="110"/>
+      <Patch Number="112" Name="Harp &amp; Flute" ProgramChange="111"/>
+      <Patch Number="113" Name="Celesta&amp;Flt" ProgramChange="112"/>
+      <Patch Number="114" Name="ProkofievSRX" ProgramChange="113"/>
+      <Patch Number="115" Name="MassInCeeSRX" ProgramChange="114"/>
+      <Patch Number="116" Name="PentatniSRX" ProgramChange="115"/>
+      <Patch Number="117" Name="DawnSymphony" ProgramChange="116"/>
+      <Patch Number="118" Name="Bad Ending" ProgramChange="117"/>
+      <Patch Number="119" Name="Epic Ending" ProgramChange="118"/>
+      <Patch Number="120" Name="Catwalk" ProgramChange="119"/>
+      <Patch Number="121" Name="OrchStaccato" ProgramChange="120"/>
+      <Patch Number="122" Name="StaccatoSRX" ProgramChange="121"/>
+      <Patch Number="123" Name="OrchHitStack" ProgramChange="122"/>
+      <Patch Number="124" Name="Dynam Hit" ProgramChange="123"/>
+      <Patch Number="125" Name="MondoHit SRX" ProgramChange="124"/>
+      <Patch Number="126" Name="OrchHit SRX" ProgramChange="125"/>
+      <Patch Number="127" Name="OrcHitMajSRX" ProgramChange="126"/>
+      <Patch Number="128" Name="OrcHitMinSRX" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="SRX-06 Complete Orchestra: Patches 129-256">
+      <Patch Number="129" Name="OrcHitDimSRX" ProgramChange="0"/>
+      <Patch Number="130" Name="Big Hit Maj1" ProgramChange="1"/>
+      <Patch Number="131" Name="Big Hit Maj2" ProgramChange="2"/>
+      <Patch Number="132" Name="Big Hit Min" ProgramChange="3"/>
+      <Patch Number="133" Name="Big Hit Dim" ProgramChange="4"/>
+      <Patch Number="134" Name="Sfz Hit-Maj" ProgramChange="5"/>
+      <Patch Number="135" Name="Sfz Hit-Min" ProgramChange="6"/>
+      <Patch Number="136" Name="Suspense" ProgramChange="7"/>
+      <Patch Number="137" Name="Hit/Off Maj" ProgramChange="8"/>
+      <Patch Number="138" Name="Trem Hit-Maj" ProgramChange="9"/>
+      <Patch Number="139" Name="Trem Hit-Min" ProgramChange="10"/>
+      <Patch Number="140" Name="Trem Hit-Dim" ProgramChange="11"/>
+      <Patch Number="141" Name="Orc/Prc 5-1" ProgramChange="12"/>
+      <Patch Number="142" Name="Drama Stab" ProgramChange="13"/>
+      <Patch Number="143" Name="Maj Concern" ProgramChange="14"/>
+      <Patch Number="144" Name="OrcGlsMajSRX" ProgramChange="15"/>
+      <Patch Number="145" Name="OrcGlsMinSRX" ProgramChange="16"/>
+      <Patch Number="146" Name="Harp Up Hit" ProgramChange="17"/>
+      <Patch Number="147" Name="Harp Dn Hit" ProgramChange="18"/>
+      <Patch Number="148" Name="BrassStabSRX" ProgramChange="19"/>
+      <Patch Number="149" Name="Finale" ProgramChange="20"/>
+      <Patch Number="150" Name="Tuned HIT" ProgramChange="21"/>
+      <Patch Number="151" Name="YourMissionS" ProgramChange="22"/>
+      <Patch Number="152" Name="Big Hit SRX" ProgramChange="23"/>
+      <Patch Number="153" Name="HorrorHitSRX" ProgramChange="24"/>
+      <Patch Number="154" Name="Perc Hit" ProgramChange="25"/>
+      <Patch Number="155" Name="BrassFallSRX" ProgramChange="26"/>
+      <Patch Number="156" Name="Tp Fall" ProgramChange="27"/>
+      <Patch Number="157" Name="BraStacc SRX" ProgramChange="28"/>
+      <Patch Number="158" Name="Finale SRX" ProgramChange="29"/>
+      <Patch Number="159" Name="Orch Piccolo" ProgramChange="30"/>
+      <Patch Number="160" Name="Pic Vel Tr" ProgramChange="31"/>
+      <Patch Number="161" Name="Piccolo Trio" ProgramChange="32"/>
+      <Patch Number="162" Name="Orch Flute" ProgramChange="33"/>
+      <Patch Number="163" Name="Vibra Flute" ProgramChange="34"/>
+      <Patch Number="164" Name="FluteAtm/Aft" ProgramChange="35"/>
+      <Patch Number="165" Name="Picc/Fl 8va" ProgramChange="36"/>
+      <Patch Number="166" Name="Double Flute" ProgramChange="37"/>
+      <Patch Number="167" Name="FL/EH Usn" ProgramChange="38"/>
+      <Patch Number="168" Name="Calliope SRX" ProgramChange="39"/>
+      <Patch Number="169" Name="DynoCelt SRX" ProgramChange="40"/>
+      <Patch Number="170" Name="Ethnic Flute" ProgramChange="41"/>
+      <Patch Number="171" Name="AmbiFluteSRX" ProgramChange="42"/>
+      <Patch Number="172" Name="T.WhistleDly" ProgramChange="43"/>
+      <Patch Number="173" Name="TinWhistle" ProgramChange="44"/>
+      <Patch Number="174" Name="Sop Recorder" ProgramChange="45"/>
+      <Patch Number="175" Name="Tnr Recorder" ProgramChange="46"/>
+      <Patch Number="176" Name="Whistle SRX" ProgramChange="47"/>
+      <Patch Number="177" Name="Solo Clari" ProgramChange="48"/>
+      <Patch Number="178" Name="Unison Clari" ProgramChange="49"/>
+      <Patch Number="179" Name="Orch Clar" ProgramChange="50"/>
+      <Patch Number="180" Name="Bs Clarinet" ProgramChange="51"/>
+      <Patch Number="181" Name="Orch Bs Clar" ProgramChange="52"/>
+      <Patch Number="182" Name="Cl/Bs Cl 8va" ProgramChange="53"/>
+      <Patch Number="183" Name="Fl/Cl Usn" ProgramChange="54"/>
+      <Patch Number="184" Name="Fl/Cl 8va" ProgramChange="55"/>
+      <Patch Number="185" Name="Orch Oboe" ProgramChange="56"/>
+      <Patch Number="186" Name="Sweet Oboe" ProgramChange="57"/>
+      <Patch Number="187" Name="Cor Oboe" ProgramChange="58"/>
+      <Patch Number="188" Name="OBOE Solo" ProgramChange="59"/>
+      <Patch Number="189" Name="2 Close Oboe" ProgramChange="60"/>
+      <Patch Number="190" Name="Orch Eng Horn" ProgramChange="61"/>
+      <Patch Number="191" Name="Horn'o UK" ProgramChange="62"/>
+      <Patch Number="192" Name="Orch Bassoon" ProgramChange="63"/>
+      <Patch Number="193" Name="Bassoon III" ProgramChange="64"/>
+      <Patch Number="194" Name="BassFoons" ProgramChange="65"/>
+      <Patch Number="195" Name="Cl/Bsn USN" ProgramChange="66"/>
+      <Patch Number="196" Name="Cl/Bsn 8va" ProgramChange="67"/>
+      <Patch Number="197" Name="Fl/Ob Usn" ProgramChange="68"/>
+      <Patch Number="198" Name="Flute EH/8 va" ProgramChange="69"/>
+      <Patch Number="199" Name="Fl/Bsn 8va" ProgramChange="70"/>
+      <Patch Number="200" Name="BsCl/Bsn 8vb" ProgramChange="71"/>
+      <Patch Number="201" Name="BsCl/Bsn Usn" ProgramChange="72"/>
+      <Patch Number="202" Name="Cl/Hrn/Bsn 1" ProgramChange="73"/>
+      <Patch Number="203" Name="Cl/Hrn/Bsn 2" ProgramChange="74"/>
+      <Patch Number="204" Name="Ob/Hrns/Bsns" ProgramChange="75"/>
+      <Patch Number="205" Name="Ob/Bsn 8va" ProgramChange="76"/>
+      <Patch Number="206" Name="Ob/EH Usn" ProgramChange="77"/>
+      <Patch Number="207" Name="Ob/EH 8va" ProgramChange="78"/>
+      <Patch Number="208" Name="EH/Bsn Usn" ProgramChange="79"/>
+      <Patch Number="209" Name="EH/Bsn 8va" ProgramChange="80"/>
+      <Patch Number="210" Name="EH/Cl Usn" ProgramChange="81"/>
+      <Patch Number="211" Name="EH/Bs Cl 8va" ProgramChange="82"/>
+      <Patch Number="212" Name="Ob/Cl Usn" ProgramChange="83"/>
+      <Patch Number="213" Name="Ob/BsCl 15va" ProgramChange="84"/>
+      <Patch Number="214" Name="Hrns/Bsns" ProgramChange="85"/>
+      <Patch Number="215" Name="Really Reeds" ProgramChange="86"/>
+      <Patch Number="216" Name="Reed Duet" ProgramChange="87"/>
+      <Patch Number="217" Name="Multi Reeds" ProgramChange="88"/>
+      <Patch Number="218" Name="Medieval Rds" ProgramChange="89"/>
+      <Patch Number="219" Name="ScottishPIPE" ProgramChange="90"/>
+      <Patch Number="220" Name="Hill&amp;Sheeps" ProgramChange="91"/>
+      <Patch Number="221" Name="HilndChr SRX" ProgramChange="92"/>
+      <Patch Number="222" Name="Solo Fr Horn" ProgramChange="93"/>
+      <Patch Number="223" Name="SoloF.HrnSRX" ProgramChange="94"/>
+      <Patch Number="224" Name="HrnAccompSRX" ProgramChange="95"/>
+      <Patch Number="225" Name="Orch Hrns Sw" ProgramChange="96"/>
+      <Patch Number="226" Name="Hornz Stereo" ProgramChange="97"/>
+      <Patch Number="227" Name="Orch Hrns ff" ProgramChange="98"/>
+      <Patch Number="228" Name="FizzHorns ff" ProgramChange="99"/>
+      <Patch Number="229" Name="Fr.Horns SRX" ProgramChange="100"/>
+      <Patch Number="230" Name="Dynamic Hrns" ProgramChange="101"/>
+      <Patch Number="231" Name="Horn Sect/" ProgramChange="102"/>
+      <Patch Number="232" Name="FrHornSfzSRX" ProgramChange="103"/>
+      <Patch Number="233" Name="MuteFr.Horns" ProgramChange="104"/>
+      <Patch Number="234" Name="F.Horn Rip" ProgramChange="105"/>
+      <Patch Number="235" Name="Trumpet Plus" ProgramChange="106"/>
+      <Patch Number="236" Name="Natural Tmpt" ProgramChange="107"/>
+      <Patch Number="237" Name="Real TP SRX" ProgramChange="108"/>
+      <Patch Number="238" Name="El Bono SRX" ProgramChange="109"/>
+      <Patch Number="239" Name="Coronet" ProgramChange="110"/>
+      <Patch Number="240" Name="Flugelhorn" ProgramChange="111"/>
+      <Patch Number="241" Name="Mute Tp SRX" ProgramChange="112"/>
+      <Patch Number="242" Name="HrmnMute SRX" ProgramChange="113"/>
+      <Patch Number="243" Name="Wah/Mute/Mod" ProgramChange="114"/>
+      <Patch Number="244" Name="Trumpeters" ProgramChange="115"/>
+      <Patch Number="245" Name="TP Ens SRX" ProgramChange="116"/>
+      <Patch Number="246" Name="Trumps fffff" ProgramChange="117"/>
+      <Patch Number="247" Name="Softy Bones" ProgramChange="118"/>
+      <Patch Number="248" Name="Bone Fluegal" ProgramChange="119"/>
+      <Patch Number="249" Name="Natural Tbn" ProgramChange="120"/>
+      <Patch Number="250" Name="Trombone SRX" ProgramChange="121"/>
+      <Patch Number="251" Name="SoloTb SRX 1" ProgramChange="122"/>
+      <Patch Number="252" Name="SoloTb SRX 2" ProgramChange="123"/>
+      <Patch Number="253" Name="Bs Tb" ProgramChange="124"/>
+      <Patch Number="254" Name="Tbn One" ProgramChange="125"/>
+      <Patch Number="255" Name="Bone Boys" ProgramChange="126"/>
+      <Patch Number="256" Name="Bones Sectn" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="SRX-06 Complete Orchestra: Patches 257-384">
+      <Patch Number="257" Name="Big Bones SRX" ProgramChange="0"/>
+      <Patch Number="258" Name="BsBoneSctSRX" ProgramChange="1"/>
+      <Patch Number="259" Name="Noblesse" ProgramChange="2"/>
+      <Patch Number="260" Name="Brass Choral" ProgramChange="3"/>
+      <Patch Number="261" Name="BrassEns/Mod" ProgramChange="4"/>
+      <Patch Number="262" Name="Small Brass" ProgramChange="5"/>
+      <Patch Number="263" Name="Brass Orche" ProgramChange="6"/>
+      <Patch Number="264" Name="Switch Fall" ProgramChange="7"/>
+      <Patch Number="265" Name="4-Pc Brs Scn" ProgramChange="8"/>
+      <Patch Number="266" Name="BiggieBrsSRX" ProgramChange="9"/>
+      <Patch Number="267" Name="SoloTuba SRX" ProgramChange="10"/>
+      <Patch Number="268" Name="Tuba Sfz/ Mod" ProgramChange="11"/>
+      <Patch Number="269" Name="Tuba SRX" ProgramChange="12"/>
+      <Patch Number="270" Name="Medieval Brs" ProgramChange="13"/>
+      <Patch Number="271" Name="Full Brass" ProgramChange="14"/>
+      <Patch Number="272" Name="Brass ff" ProgramChange="15"/>
+      <Patch Number="273" Name="Brass Sect/" ProgramChange="16"/>
+      <Patch Number="274" Name="Multi Sax" ProgramChange="17"/>
+      <Patch Number="275" Name="St.EuroPiano" ProgramChange="18"/>
+      <Patch Number="276" Name="JoyoClassics" ProgramChange="19"/>
+      <Patch Number="277" Name="Empathy" ProgramChange="20"/>
+      <Patch Number="278" Name="Piano&amp;Strs," ProgramChange="21"/>
+      <Patch Number="279" Name="Pno Concerto" ProgramChange="22"/>
+      <Patch Number="280" Name="Song Wish" ProgramChange="23"/>
+      <Patch Number="281" Name="HpsFrntSRX1" ProgramChange="24"/>
+      <Patch Number="282" Name="HpsFrntSRX2" ProgramChange="25"/>
+      <Patch Number="283" Name="HpsFrntSRX3" ProgramChange="26"/>
+      <Patch Number="284" Name="HpsBackSRX1" ProgramChange="27"/>
+      <Patch Number="285" Name="HpsBackSRX2" ProgramChange="28"/>
+      <Patch Number="286" Name="HpsBackSRX3" ProgramChange="29"/>
+      <Patch Number="287" Name="Hps F/B SRX" ProgramChange="30"/>
+      <Patch Number="288" Name="Hps F4/B SRX" ProgramChange="31"/>
+      <Patch Number="289" Name="Hps F/B/B4 S" ProgramChange="32"/>
+      <Patch Number="290" Name="HpsLuteSRX 1" ProgramChange="33"/>
+      <Patch Number="291" Name="HpsLute 2" ProgramChange="34"/>
+      <Patch Number="292" Name="HpsLute 3" ProgramChange="35"/>
+      <Patch Number="293" Name="FullHarps 1" ProgramChange="36"/>
+      <Patch Number="294" Name="FullHarps 2" ProgramChange="37"/>
+      <Patch Number="295" Name="Continuo Pdl" ProgramChange="38"/>
+      <Patch Number="296" Name="Celesta SRX" ProgramChange="39"/>
+      <Patch Number="297" Name="MusicBellSRX" ProgramChange="40"/>
+      <Patch Number="298" Name="Water Mallet" ProgramChange="41"/>
+      <Patch Number="299" Name="Newborn" ProgramChange="42"/>
+      <Patch Number="300" Name="Victoriana 1" ProgramChange="43"/>
+      <Patch Number="301" Name="ST.M.Box SRX" ProgramChange="44"/>
+      <Patch Number="302" Name="Victoriana 2" ProgramChange="45"/>
+      <Patch Number="303" Name="ChurchBellS1" ProgramChange="46"/>
+      <Patch Number="304" Name="BlfryChmSRX" ProgramChange="47"/>
+      <Patch Number="305" Name="ChurchBellS2" ProgramChange="48"/>
+      <Patch Number="306" Name="Tub.Bells S1" ProgramChange="49"/>
+      <Patch Number="307" Name="Tub.Bells S2" ProgramChange="50"/>
+      <Patch Number="308" Name="BsMarimbaSRX1" ProgramChange="51"/>
+      <Patch Number="309" Name="BsMarimbaSRX2" ProgramChange="52"/>
+      <Patch Number="310" Name="MultiMallets" ProgramChange="53"/>
+      <Patch Number="311" Name="Glocken" ProgramChange="54"/>
+      <Patch Number="312" Name="Glockeneste" ProgramChange="55"/>
+      <Patch Number="313" Name="GlocknlstSRX" ProgramChange="56"/>
+      <Patch Number="314" Name="Clear Glock" ProgramChange="57"/>
+      <Patch Number="315" Name="Xylorimba" ProgramChange="58"/>
+      <Patch Number="316" Name="Xylophone S1" ProgramChange="59"/>
+      <Patch Number="317" Name="Xylophone S2" ProgramChange="60"/>
+      <Patch Number="318" Name="Mallet Stack" ProgramChange="61"/>
+      <Patch Number="319" Name="OrgFlutes S1" ProgramChange="62"/>
+      <Patch Number="320" Name="OrgFlutes S2" ProgramChange="63"/>
+      <Patch Number="321" Name="OrgFlutes S3" ProgramChange="64"/>
+      <Patch Number="322" Name="OrgFlute 8'S" ProgramChange="65"/>
+      <Patch Number="323" Name="Psyche Pipes" ProgramChange="66"/>
+      <Patch Number="324" Name="Church Pipes S" ProgramChange="67"/>
+      <Patch Number="325" Name="Organ&amp;Rcrdr" ProgramChange="68"/>
+      <Patch Number="326" Name="Early Harmn" ProgramChange="69"/>
+      <Patch Number="327" Name="CathedralSRX" ProgramChange="70"/>
+      <Patch Number="328" Name="Harmonium" ProgramChange="71"/>
+      <Patch Number="329" Name="ChurchOrgSRX" ProgramChange="72"/>
+      <Patch Number="330" Name="OrganChrdSRX" ProgramChange="73"/>
+      <Patch Number="331" Name="Musaccordian" ProgramChange="74"/>
+      <Patch Number="332" Name="Mystery Pad" ProgramChange="75"/>
+      <Patch Number="333" Name="Psychedelic1" ProgramChange="76"/>
+      <Patch Number="334" Name="Psychedelic2" ProgramChange="77"/>
+      <Patch Number="335" Name="Eylsium m7" ProgramChange="78"/>
+      <Patch Number="336" Name="Eylsium 9th" ProgramChange="79"/>
+      <Patch Number="337" Name="Eylsium +7" ProgramChange="80"/>
+      <Patch Number="338" Name="Eylsium b9" ProgramChange="81"/>
+      <Patch Number="339" Name="VlnRunUpMj" ProgramChange="82"/>
+      <Patch Number="340" Name="VlnRunUpMn" ProgramChange="83"/>
+      <Patch Number="341" Name="VlnRunDnMj" ProgramChange="84"/>
+      <Patch Number="342" Name="VlnRunDnMn" ProgramChange="85"/>
+      <Patch Number="343" Name="Maj/Min Harps" ProgramChange="86"/>
+      <Patch Number="344" Name="9th/b9 Harps" ProgramChange="87"/>
+      <Patch Number="345" Name="Harp m7 SRX" ProgramChange="88"/>
+      <Patch Number="346" Name="Harp 9th SRX" ProgramChange="89"/>
+      <Patch Number="347" Name="Harp +7 SRX" ProgramChange="90"/>
+      <Patch Number="348" Name="Harp b9 SRX" ProgramChange="91"/>
+      <Patch Number="349" Name="Harpm7SclSRX" ProgramChange="92"/>
+      <Patch Number="350" Name="Harp9thScrlS" ProgramChange="93"/>
+      <Patch Number="351" Name="Harp+7SclSRX" ProgramChange="94"/>
+      <Patch Number="352" Name="Harpb9SclSRX" ProgramChange="95"/>
+      <Patch Number="353" Name="Chister Gong" ProgramChange="96"/>
+      <Patch Number="354" Name="Sus.Perc Hit" ProgramChange="97"/>
+      <Patch Number="355" Name="Prc.Ens6-Maj" ProgramChange="98"/>
+      <Patch Number="356" Name="Prc.Ens7-Min" ProgramChange="99"/>
+      <Patch Number="357" Name="Prc.Ens8-Dim" ProgramChange="100"/>
+      <Patch Number="358" Name="Cluster SRX" ProgramChange="101"/>
+      <Patch Number="359" Name="HorrorClustr" ProgramChange="102"/>
+      <Patch Number="360" Name="Hell Section" ProgramChange="103"/>
+      <Patch Number="361" Name="Legettimare" ProgramChange="104"/>
+      <Patch Number="362" Name="Limbus SRX" ProgramChange="105"/>
+      <Patch Number="363" Name="Backword" ProgramChange="106"/>
+      <Patch Number="364" Name="Dreamseq SRX" ProgramChange="107"/>
+      <Patch Number="365" Name="Midnight SRX" ProgramChange="108"/>
+      <Patch Number="366" Name="Colombus SRX" ProgramChange="109"/>
+      <Patch Number="367" Name="Once Upon A" ProgramChange="110"/>
+      <Patch Number="368" Name="Desert Dream" ProgramChange="111"/>
+      <Patch Number="369" Name="AncientTimes" ProgramChange="112"/>
+      <Patch Number="370" Name="Tension SRX" ProgramChange="113"/>
+      <Patch Number="371" Name="Wreck" ProgramChange="114"/>
+      <Patch Number="372" Name="Eclipse SRX" ProgramChange="115"/>
+      <Patch Number="373" Name="Pulsing Vox S" ProgramChange="116"/>
+      <Patch Number="374" Name="SynthStr.Pad" ProgramChange="117"/>
+      <Patch Number="375" Name="Mediate PAD" ProgramChange="118"/>
+      <Patch Number="376" Name="Choir" ProgramChange="119"/>
+      <Patch Number="377" Name="Angelic Pad" ProgramChange="120"/>
+      <Patch Number="378" Name="BoysChoirSRX" ProgramChange="121"/>
+      <Patch Number="379" Name="Single/Mod" ProgramChange="122"/>
+      <Patch Number="380" Name="Smocky Voices" ProgramChange="123"/>
+      <Patch Number="381" Name="Smooth Choir" ProgramChange="124"/>
+      <Patch Number="382" Name="X.Vox SRX" ProgramChange="125"/>
+      <Patch Number="383" Name="RealChoirSRX" ProgramChange="126"/>
+      <Patch Number="384" Name="StChrMm/Ah S" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="SRX-06 Complete Orchestra: Patches 385-450">
+      <Patch Number="385" Name="Mmms&amp;Aaahs" ProgramChange="0"/>
+      <Patch Number="386" Name="Choir/Mod" ProgramChange="1"/>
+      <Patch Number="387" Name="Close Mouths" ProgramChange="2"/>
+      <Patch Number="388" Name="Voice Stax" ProgramChange="3"/>
+      <Patch Number="389" Name="MorphieChoir" ProgramChange="4"/>
+      <Patch Number="390" Name="Morph4Choir" ProgramChange="5"/>
+      <Patch Number="391" Name="17th Movement" ProgramChange="6"/>
+      <Patch Number="392" Name="Matins" ProgramChange="7"/>
+      <Patch Number="393" Name="Quartet II 5" ProgramChange="8"/>
+      <Patch Number="394" Name="Scat/" ProgramChange="9"/>
+      <Patch Number="395" Name="Scatmen!SRX" ProgramChange="10"/>
+      <Patch Number="396" Name="The Voices" ProgramChange="11"/>
+      <Patch Number="397" Name="VocalCollect" ProgramChange="12"/>
+      <Patch Number="398" Name="GregorianCho" ProgramChange="13"/>
+      <Patch Number="399" Name="Soprano&amp;co" ProgramChange="14"/>
+      <Patch Number="400" Name="Tenor solo" ProgramChange="15"/>
+      <Patch Number="401" Name="ClarsahHarpsS" ProgramChange="16"/>
+      <Patch Number="402" Name="Heavens Harp" ProgramChange="17"/>
+      <Patch Number="403" Name="C.Hrp/padSRX" ProgramChange="18"/>
+      <Patch Number="404" Name="PhaseClarsah" ProgramChange="19"/>
+      <Patch Number="405" Name="ClearHarpSRX" ProgramChange="20"/>
+      <Patch Number="406" Name="Nails Harp" ProgramChange="21"/>
+      <Patch Number="407" Name="Harp SRX" ProgramChange="22"/>
+      <Patch Number="408" Name="Natural Harp" ProgramChange="23"/>
+      <Patch Number="409" Name="Warm Harp" ProgramChange="24"/>
+      <Patch Number="410" Name="Bousouk&amp;Harp" ProgramChange="25"/>
+      <Patch Number="411" Name="Etheral Lute" ProgramChange="26"/>
+      <Patch Number="412" Name="DelicateCOMB" ProgramChange="27"/>
+      <Patch Number="413" Name="St.Cymbin" ProgramChange="28"/>
+      <Patch Number="414" Name="CymbinDuoSRX" ProgramChange="29"/>
+      <Patch Number="415" Name="BohemianSRX" ProgramChange="30"/>
+      <Patch Number="416" Name="Bousouki Pic" ProgramChange="31"/>
+      <Patch Number="417" Name="Bousouki" ProgramChange="32"/>
+      <Patch Number="418" Name="PulcinelaSRX" ProgramChange="33"/>
+      <Patch Number="419" Name="SN Roll SRX/" ProgramChange="34"/>
+      <Patch Number="420" Name="Perc Ens 1" ProgramChange="35"/>
+      <Patch Number="421" Name="Perc Ens 2" ProgramChange="36"/>
+      <Patch Number="422" Name="Perc Ens 3" ProgramChange="37"/>
+      <Patch Number="423" Name="Perc Ens 4" ProgramChange="38"/>
+      <Patch Number="424" Name="Perc Ens 5" ProgramChange="39"/>
+      <Patch Number="425" Name="Orch Percs" ProgramChange="40"/>
+      <Patch Number="426" Name="BodhranSplit" ProgramChange="41"/>
+      <Patch Number="427" Name="BodhranVel S" ProgramChange="42"/>
+      <Patch Number="428" Name="CrazyBodhrmS" ProgramChange="43"/>
+      <Patch Number="429" Name="BohdranMenuS" ProgramChange="44"/>
+      <Patch Number="430" Name="Perc Mix SRX" ProgramChange="45"/>
+      <Patch Number="431" Name="MassiveTimpa" ProgramChange="46"/>
+      <Patch Number="432" Name="4-way Timps" ProgramChange="47"/>
+      <Patch Number="433" Name="DynaTimpsSRX" ProgramChange="48"/>
+      <Patch Number="434" Name="TimpaniRoll 1" ProgramChange="49"/>
+      <Patch Number="435" Name="Timpani Roll 2" ProgramChange="50"/>
+      <Patch Number="436" Name="MultiTimpani" ProgramChange="51"/>
+      <Patch Number="437" Name="Roll&gt;Klang" ProgramChange="52"/>
+      <Patch Number="438" Name="Timpani/" ProgramChange="53"/>
+      <Patch Number="439" Name="Big Orc.Perc" ProgramChange="54"/>
+      <Patch Number="440" Name="WindChimesSRX" ProgramChange="55"/>
+      <Patch Number="441" Name="FingerCymSRX" ProgramChange="56"/>
+      <Patch Number="442" Name="ConcertBDSRX" ProgramChange="57"/>
+      <Patch Number="443" Name="BD Roll SRX" ProgramChange="58"/>
+      <Patch Number="444" Name="Tam Tam SRX" ProgramChange="59"/>
+      <Patch Number="445" Name="Piattill SRX" ProgramChange="60"/>
+      <Patch Number="446" Name="SleighBellsS" ProgramChange="61"/>
+      <Patch Number="447" Name="SlapstickS/" ProgramChange="62"/>
+      <Patch Number="448" Name="TambourineS" ProgramChange="63"/>
+      <Patch Number="449" Name="CastanetsS/" ProgramChange="64"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

@@ -1,21 +1,31 @@
 /*
-    Copyright (C) 2002-2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2005-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005 Karsten Wiese <fzuuzf@googlemail.com>
+ * Copyright (C) 2006-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009 Sampo Savolainen <v2@iki.fi>
+ * Copyright (C) 2012-2015 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2013-2015 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2017 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2015 André Nusser <andre.nusser@googlemail.com>
+ * Copyright (C) 2017 Johannes Mueller <github@johannes-mueller.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <map>
 #include <boost/algorithm/string.hpp>
@@ -210,6 +220,7 @@ RouteUI::init ()
 	_session->SoloChanged.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::solo_changed_so_update_mute, this), gui_context());
 	_session->TransportStateChange.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::check_rec_enable_sensitivity, this), gui_context());
 	_session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::session_rec_enable_changed, this), gui_context());
+	_session->MonitorBusAddedOrRemoved.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::set_button_names, this), gui_context());
 
 	_session->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteUI::parameter_changed, this, _1), gui_context());
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&RouteUI::parameter_changed, this, _1), gui_context());
@@ -329,7 +340,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	_route->solo_safe_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->solo_isolate_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->phase_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::polarity_changed, this), gui_context());
-	_route->fan_out.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::fan_out, this, true, true), gui_context());
+	_route->fan_out.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::fan_out, this, false, true), gui_context());
 
 	if (is_track()) {
 		track()->FreezeChange.connect (*this, invalidator (*this), boost::bind (&RouteUI::map_frozen, this), gui_context());
@@ -773,17 +784,15 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 	if (BindingProxy::is_bind_action(ev) )
 		return false;
 
-	if (!_session->engine().connected()) {
-		MessageDialog msg (_("Not connected to AudioEngine - cannot engage record"));
-		msg.run ();
+	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 		return false;
 	}
 
 	if (is_midi_track()) {
 
-		/* rec-enable button exits from step editing */
+		/* rec-enable button exits from step editing, but not context click */
 
-		if (midi_track()->step_editing()) {
+		if (!Keyboard::is_context_menu_event (ev) && midi_track()->step_editing()) {
 			midi_track()->set_step_editing (false);
 			return false;
 		}
@@ -1047,7 +1056,7 @@ RouteUI::build_sends_menu ()
 		);
 
 	items.push_back (
-		MenuElem(_("Assign all tracks and buses (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PreFader, true))
+		MenuElem(_("Assign all tracks and busses (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PreFader, true))
 		);
 
 	items.push_back (
@@ -1055,7 +1064,7 @@ RouteUI::build_sends_menu ()
 		);
 
 	items.push_back (
-		MenuElem(_("Assign all tracks and buses (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PostFader, true))
+		MenuElem(_("Assign all tracks and busses (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PostFader, true))
 		);
 
 	items.push_back (
@@ -1063,14 +1072,14 @@ RouteUI::build_sends_menu ()
 		);
 
 	items.push_back (
-		MenuElem(_("Assign selected tracks and buses (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PreFader, true)));
+		MenuElem(_("Assign selected tracks and busses (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PreFader, true)));
 
 	items.push_back (
 		MenuElem(_("Assign selected tracks (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PostFader, false))
 		);
 
 	items.push_back (
-		MenuElem(_("Assign selected tracks and buses (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PostFader, true))
+		MenuElem(_("Assign selected tracks and busses (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PostFader, true))
 		);
 
 	items.push_back (MenuElem(_("Copy track/bus gains to sends"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_from_track)));
@@ -1918,13 +1927,6 @@ RouteUI::map_frozen ()
 }
 
 void
-RouteUI::adjust_latency ()
-{
-	LatencyDialog dialog (_route->name() + _(" latency"), *(_route->output()), _session->sample_rate(), AudioEngine::instance()->samples_per_cycle());
-}
-
-
-void
 RouteUI::save_as_template_dialog_response (int response, SaveTemplateDialog* d)
 {
 	if (response == RESPONSE_ACCEPT) {
@@ -1997,7 +1999,7 @@ RouteUI::parameter_changed (string const & p)
 
 	if (p == "disable-disarm-during-roll") {
 		check_rec_enable_sensitivity ();
-	} else if (p == "use-monitor-bus" || p == "solo-control-is-listen-control" || p == "listen-position") {
+	} else if (p == "solo-control-is-listen-control" || p == "listen-position") {
 		set_button_names ();
 	} else if (p == "session-monitoring") {
 		update_monitoring_display ();
@@ -2323,6 +2325,10 @@ RouteUI::manage_pins ()
 void
 RouteUI::fan_out (bool to_busses, bool group)
 {
+	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
+		return;
+	}
+
 	DisplaySuspender ds;
 	boost::shared_ptr<ARDOUR::Route> route = _route;
 	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (route->the_instrument ());
@@ -2362,25 +2368,39 @@ RouteUI::fan_out (bool to_busses, bool group)
 	route->output ()->disconnect (this);
 	route->panner_shell ()->set_bypassed (true);
 
+	boost::shared_ptr<AutomationControl> msac = route->master_send_enable_controllable ();
+	if (msac) {
+		msac->start_touch (msac->session().transport_sample());
+		msac->set_value (0, PBD::Controllable::NoGroup);
+	}
+
 	RouteList to_group;
 	for (uint32_t p = 0; p < n_outputs; ++p) {
 		const Plugin::IOPortDescription& pd (plugin->describe_io_port (DataType::AUDIO, false, p));
 		std::string bn = BUSNAME;
 		boost::shared_ptr<Route> r = _session->route_by_name (bn);
 		if (!r) {
-			if (to_busses) {
-				RouteList rl = _session->new_audio_route (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::AudioBus, PresentationInfo::max_order);
-				r = rl.front ();
-				assert (r);
-			} else {
-				list<boost::shared_ptr<AudioTrack> > tl =
-					_session->new_audio_track (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::max_order, Normal);
-				r = tl.front ();
-				assert (r);
+			try {
+				if (to_busses) {
+					RouteList rl = _session->new_audio_route (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::AudioBus, PresentationInfo::max_order);
+					r = rl.front ();
+					assert (r);
+				} else {
+					list<boost::shared_ptr<AudioTrack> > tl =
+						_session->new_audio_track (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::max_order, Normal);
+					r = tl.front ();
+					assert (r);
 
-				boost::shared_ptr<ControlList> cl (new ControlList);
-				cl->push_back (r->monitoring_control ());
-				_session->set_controls (cl, (double) MonitorInput, Controllable::NoGroup);
+					boost::shared_ptr<ControlList> cl (new ControlList);
+					cl->push_back (r->monitoring_control ());
+					_session->set_controls (cl, (double) MonitorInput, Controllable::NoGroup);
+				}
+			} catch (...) {
+				if (!to_group.empty()) {
+					boost::shared_ptr<RouteList> rl (&to_group);
+					_session->remove_routes (rl);
+				}
+				return;
 			}
 			r->input ()->disconnect (this);
 		}

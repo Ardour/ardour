@@ -1,28 +1,33 @@
 /*
-    Copyright (C) 2008 Hans Baier
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id$
-*/
+ * Copyright (C) 2008 Hans Baier <hansfbaier@googlemail.com>
+ * Copyright (C) 2009-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2014 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2015-2016 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef MIDI_PATCH_MANAGER_H_
 #define MIDI_PATCH_MANAGER_H_
 
+#include <glibmm/threads.h>
+
 #include "midi++/midnam_patch.h"
 
+#include "pbd/event_loop.h"
 #include "pbd/signals.h"
 #include "pbd/search_path.h"
 
@@ -48,7 +53,7 @@ public:
 	typedef std::map<std::string, boost::shared_ptr<MIDINameDocument> >    MidiNameDocuments;
 	typedef std::map<std::string, MIDINameDocument::MasterDeviceNamesList> DeviceNamesByMaker;
 
-	virtual ~MidiPatchManager() { _manager = 0; }
+        ~MidiPatchManager();
 
 	static MidiPatchManager& instance() {
 		if (_manager == 0) {
@@ -62,6 +67,7 @@ public:
 	bool add_custom_midnam (const std::string& id, const std::string& midnam);
 	bool update_custom_midnam (const std::string& id, const std::string& midnam);
 	bool remove_custom_midnam (const std::string& id);
+	bool is_custom_model (const std::string& model) const;
 
 	void add_search_path (const PBD::Searchpath& search_path);
 
@@ -143,6 +149,11 @@ public:
 
 	const DeviceNamesByMaker& devices_by_manufacturer() const { return _devices_by_manufacturer; }
 
+	void load_midnams_in_thread ();
+	void maybe_use (PBD::ScopedConnectionList& clist,
+	                PBD::EventLoop::InvalidationRecord* ir,
+	                const boost::function<void()>& slot,
+	                PBD::EventLoop* event_loop);
 private:
 	bool load_midi_name_document(const std::string& file_path);
 	bool add_midi_name_document(boost::shared_ptr<MIDINameDocument>);
@@ -158,6 +169,12 @@ private:
 	MIDINameDocument::MasterDeviceNamesList _master_devices_by_model;
 	DeviceNamesByMaker                      _devices_by_manufacturer;
 	MasterDeviceNames::Models               _all_models;
+
+	Glib::Threads::Mutex _lock;
+	bool no_patch_changed_messages;
+	bool stop_thread;
+	Glib::Threads::Thread* _midnam_load_thread;
+	void load_midnams ();
 };
 
 } // namespace Name

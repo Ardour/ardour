@@ -328,6 +328,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\audiographer\general\cmdpipe_writer.h"
+				>
+			</File>
+			<File
 				RelativePath="..\audiographer\debug_utils.h"
 				>
 			</File>
@@ -377,10 +381,6 @@
 			</File>
 			<File
 				RelativePath="..\audiographer\general\loudness_reader.h"
-				>
-			</File>
-			<File
-				RelativePath="..\private\gdither\noise.h"
 				>
 			</File>
 			<File

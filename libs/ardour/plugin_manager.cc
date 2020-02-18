@@ -1,21 +1,27 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2000-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2006-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2012-2015 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2014-2018 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2018 Ben Loftis <ben@harrisonconsoles.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifdef WAF_BUILD
 #include "libardour-config.h"
@@ -168,7 +174,7 @@ PluginManager::PluginManager ()
 				"ardour-vst-scanner"
 #endif
 				, scanner_bin_path)) {
-		PBD::warning << "VST scanner app (ardour-vst-scanner) not found in path " << vstsp.to_string() <<  endmsg;
+		PBD::warning << "VST scanner app (ardour-vst-scanner) not found in path " << vstsp.to_string() << endmsg;
 	}
 #endif
 
@@ -258,6 +264,79 @@ PluginManager::~PluginManager()
 	}
 }
 
+struct PluginInfoPtrNameSorter {
+	bool operator () (PluginInfoPtr const& a, PluginInfoPtr const& b) const {
+		return PBD::downcase (a->name) < PBD::downcase (b->name);
+	}
+};
+
+void
+PluginManager::detect_name_ambiguities (PluginInfoList* pil)
+{
+	if (!pil) {
+		return;
+	}
+	pil->sort (PluginInfoPtrNameSorter ());
+
+	for (PluginInfoList::iterator i = pil->begin(); i != pil->end();) {
+		 PluginInfoPtr& p = *i;
+		 ++i;
+		 if (i != pil->end() && (*i)->name == p->name) {
+			 /* mark name as ambiguous IFF ambiguity can be resolved
+				* by listing number of audio outputs.
+				* This is used in the instrument selector.
+				*/
+			 bool r = p->max_configurable_ouputs () != (*i)->max_configurable_ouputs ();
+			 p->multichannel_name_ambiguity = r;
+			 (*i)->multichannel_name_ambiguity = r;
+		 }
+	}
+}
+
+void
+PluginManager::detect_type_ambiguities (PluginInfoList& pil)
+{
+	PluginInfoList dup;
+	pil.sort (PluginInfoPtrNameSorter ());
+	for (PluginInfoList::iterator i = pil.begin(); i != pil.end(); ++i) {
+		switch (dup.size ()) {
+			case 0:
+				break;
+			case 1:
+				if (dup.back()->name != (*i)->name) {
+					dup.clear ();
+				}
+				break;
+			default:
+				if (dup.back()->name != (*i)->name) {
+					/* found multiple plugins with same name */
+					bool typediff = false;
+					bool chandiff = false;
+					for (PluginInfoList::iterator j = dup.begin(); j != dup.end(); ++j) {
+						if (dup.front()->type != (*j)->type) {
+							typediff = true;
+						}
+						chandiff |= (*j)->multichannel_name_ambiguity;
+					}
+					if (typediff) {
+						for (PluginInfoList::iterator j = dup.begin(); j != dup.end(); ++j) {
+							(*j)->plugintype_name_ambiguity = true;
+							/* show multi-channel information for consistency, when other types display it.
+							 * eg. "Foo 8 outs, VST", "Foo 12 outs, VST", "Foo <=12 outs, AU"
+							 */
+							if (chandiff) {
+								(*j)->multichannel_name_ambiguity = true;
+							}
+						}
+					}
+					dup.clear ();
+				}
+				break;
+		}
+		dup.push_back (*i);
+	}
+}
+
 void
 PluginManager::refresh (bool cache_only)
 {
@@ -277,6 +356,27 @@ PluginManager::refresh (bool cache_only)
 #ifdef LV2_SUPPORT
 	BootMessage (_("Scanning LV2 Plugins"));
 	lv2_refresh ();
+
+	if (Config->get_conceal_lv1_if_lv2_exists()) {
+		for (PluginInfoList::const_iterator i = _ladspa_plugin_info->begin(); i != _ladspa_plugin_info->end(); ++i) {
+			for (PluginInfoList::const_iterator j = _lv2_plugin_info->begin(); j != _lv2_plugin_info->end(); ++j) {
+				if ((*i)->creator == (*j)->creator && (*i)->name == (*j)->name) {
+					PluginStatus ps (LADSPA, (*i)->unique_id, Concealed);
+					if (find (statuses.begin(), statuses.end(), ps) == statuses.end()) {
+						statuses.erase (ps);
+						statuses.insert (ps);
+					}
+				}
+			}
+		}
+	} else {
+		for (PluginStatusList::iterator i = statuses.begin(); i != statuses.end();) {
+			PluginStatusList::iterator j = i++;
+			if ((*j).status == Concealed) {
+				statuses.erase (j);
+			}
+		}
+	}
 #endif
 #ifdef WINDOWS_VST_SUPPORT
 	if (Config->get_use_windows_vst()) {
@@ -345,6 +445,40 @@ PluginManager::refresh (bool cache_only)
 	PluginListChanged (); /* EMIT SIGNAL */
 	PluginScanMessage(X_("closeme"), "", false);
 	_cancel_scan = false;
+
+	BootMessage (_("Indexing Plugins..."));
+
+	detect_name_ambiguities (_windows_vst_plugin_info);
+	detect_name_ambiguities (_lxvst_plugin_info);
+	detect_name_ambiguities (_mac_vst_plugin_info);
+	detect_name_ambiguities (_au_plugin_info);
+	detect_name_ambiguities (_ladspa_plugin_info);
+	detect_name_ambiguities (_lv2_plugin_info);
+	detect_name_ambiguities (_lua_plugin_info);
+
+	PluginInfoList all_plugs;
+	if (_windows_vst_plugin_info) {
+		all_plugs.insert(all_plugs.end(), _windows_vst_plugin_info->begin(), _windows_vst_plugin_info->end());
+	}
+	if (_lxvst_plugin_info) {
+		all_plugs.insert(all_plugs.end(), _lxvst_plugin_info->begin(), _lxvst_plugin_info->end());
+	}
+	if (_mac_vst_plugin_info) {
+		all_plugs.insert(all_plugs.end(), _mac_vst_plugin_info->begin(), _mac_vst_plugin_info->end());
+	}
+	if (_au_plugin_info) {
+		all_plugs.insert(all_plugs.end(), _au_plugin_info->begin(), _au_plugin_info->end());
+	}
+	if (_ladspa_plugin_info) {
+		all_plugs.insert(all_plugs.end(), _ladspa_plugin_info->begin(), _ladspa_plugin_info->end());
+	}
+	if (_lv2_plugin_info) {
+		all_plugs.insert(all_plugs.end(), _lv2_plugin_info->begin(), _lv2_plugin_info->end());
+	}
+	if (_lua_plugin_info) {
+		all_plugs.insert(all_plugs.end(), _lua_plugin_info->begin(), _lua_plugin_info->end());
+	}
+	detect_type_ambiguities (all_plugs);
 }
 
 void
@@ -637,7 +771,7 @@ PluginManager::ladspa_discover (string path)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Checking for LADSPA plugin at %1\n", path));
 
-	Glib::Module module(path);
+	Glib::Module module (path);
 	const LADSPA_Descriptor *descriptor;
 	LADSPA_Descriptor_Function dfunc;
 	void* func = 0;
@@ -700,6 +834,7 @@ PluginManager::ladspa_discover (string path)
 			info->creator = "Unknown";
 		} else{
 			info->creator = creator.substr (0, pos);
+			strip_whitespace_edges (info->creator);
 		}
 
 		char buf[32];
@@ -727,20 +862,18 @@ PluginManager::ladspa_discover (string path)
 
 		for (PluginInfoList::const_iterator i = _ladspa_plugin_info->begin(); i != _ladspa_plugin_info->end(); ++i) {
 			if(0 == info->unique_id.compare((*i)->unique_id)){
-			      found = true;
+				found = true;
 			}
 		}
 
 		if(!found){
-		    _ladspa_plugin_info->push_back (info);
+			_ladspa_plugin_info->push_back (info);
 			set_tags (info->type, info->unique_id, info->category, info->name, FromPlug);
 		}
 
-		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Found LADSPA plugin, name: %1, Inputs: %2, Outputs: %3\n", info->name, info->n_inputs, info->n_outputs));
+		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Found LADSPA plugin, id: %1 name: %2, Inputs: %3, Outputs: %4\n",
+					info->unique_id, info->name, info->n_inputs, info->n_outputs));
 	}
-
-// GDB WILL NOT LIKE YOU IF YOU DO THIS
-//	dlclose (module);
 
 	return 0;
 }
@@ -862,6 +995,10 @@ PluginManager::windows_vst_refresh (bool cache_only)
 	}
 
 	windows_vst_discover_from_path (Config->get_plugin_path_vst(), cache_only);
+	if (!cache_only) {
+		/* ensure that VST path is flushed to disk */
+		Config->save_state();
+	}
 }
 
 static bool windows_vst_filter (const string& str, void * /*arg*/)
@@ -979,7 +1116,7 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 	vector<VSTInfo*> * finfos = vstfx_get_info_fst (const_cast<char *> (path.c_str()),
 			cache_only ? VST_SCAN_CACHE_ONLY : VST_SCAN_USE_APP);
 
-	// TODO  get extended error messae from vstfx_get_info_fst() e.g  blacklisted, 32/64bit compat,
+	// TODO get extended error messae from vstfx_get_info_fst() e.g blacklisted, 32/64bit compat,
 	// .err file scanner output etc.
 
 	if (finfos->empty()) {
@@ -1052,6 +1189,10 @@ PluginManager::mac_vst_refresh (bool cache_only)
 	}
 
 	mac_vst_discover_from_path ("~/Library/Audio/Plug-Ins/VST:/Library/Audio/Plug-Ins/VST", cache_only);
+	if (!cache_only) {
+		/* ensure that VST path is flushed to disk */
+		Config->save_state();
+	}
 }
 
 static bool mac_vst_filter (const string& str)
@@ -1173,6 +1314,10 @@ PluginManager::lxvst_refresh (bool cache_only)
 	}
 
 	lxvst_discover_from_path (Config->get_plugin_path_lxvst(), cache_only);
+	if (!cache_only) {
+		/* ensure that VST path is flushed to disk */
+		Config->save_state();
+	}
 }
 
 static bool lxvst_filter (const string& str, void *)
@@ -1247,7 +1392,7 @@ PluginManager::lxvst_discover (string path, bool cache_only)
 		/* Make sure we don't find the same plugin in more than one place along
 		 * the LXVST_PATH We can't use a simple 'find' because the path is included
 		 * in the PluginInfo, and that is the one thing we can be sure MUST be
-		 * different if a duplicate instance is found.  So we just compare the type
+		 * different if a duplicate instance is found. So we just compare the type
 		 * and unique ID (which for some VSTs isn't actually unique...)
 		 */
 
@@ -1280,8 +1425,8 @@ PluginManager::PluginStatusType
 PluginManager::get_status (const PluginInfoPtr& pi) const
 {
 	PluginStatus ps (pi->type, pi->unique_id);
-	PluginStatusList::const_iterator i =  find (statuses.begin(), statuses.end(), ps);
-	if (i ==  statuses.end()) {
+	PluginStatusList::const_iterator i = find (statuses.begin(), statuses.end(), ps);
+	if (i == statuses.end()) {
 		return Normal;
 	} else {
 		return i->status;
@@ -1295,6 +1440,9 @@ PluginManager::save_statuses ()
 	stringstream ofs;
 
 	for (PluginStatusList::iterator i = statuses.begin(); i != statuses.end(); ++i) {
+		if ((*i).status == Concealed) {
+			continue;
+		}
 		switch ((*i).type) {
 		case LADSPA:
 			ofs << "LADSPA";
@@ -1331,6 +1479,10 @@ PluginManager::save_statuses ()
 		case Hidden:
 			ofs << "Hidden";
 			break;
+		case Concealed:
+			ofs << "Hidden";
+			assert (0);
+			break;
 		}
 
 		ofs << ' ';
@@ -1345,9 +1497,9 @@ void
 PluginManager::load_statuses ()
 {
 	std::string path;
-	find_file (plugin_metadata_search_path(), "plugin_statuses", path);  //note: if no user folder is found, this will find the resources path
+	find_file (plugin_metadata_search_path(), "plugin_statuses", path); // note: if no user folder is found, this will find the resources path
 	gchar *fbuf = NULL;
-	if (!g_file_get_contents (path.c_str(), &fbuf, NULL, NULL))  {
+	if (!g_file_get_contents (path.c_str(), &fbuf, NULL, NULL)) {
 		return;
 	}
 	stringstream ifs (fbuf);
@@ -1371,7 +1523,6 @@ PluginManager::load_statuses ()
 		ifs >> sstatus;
 		if (!ifs) {
 			break;
-
 		}
 
 		/* rest of the line is the plugin ID */
@@ -1388,8 +1539,7 @@ PluginManager::load_statuses ()
 		} else if (sstatus == "Hidden") {
 			status = Hidden;
 		} else {
-			error << string_compose (_("unknown plugin status type \"%1\" - all entries ignored"), sstatus)
-				  << endmsg;
+			error << string_compose (_("unknown plugin status type \"%1\" - all entries ignored"), sstatus) << endmsg;
 			statuses.clear ();
 			break;
 		}
@@ -1426,7 +1576,7 @@ PluginManager::set_status (PluginType t, string id, PluginStatusType status)
 	PluginStatus ps (t, id, status);
 	statuses.erase (ps);
 
-	if (status != Normal) {
+	if (status != Normal && status != Concealed) {
 		statuses.insert (ps);
 	}
 
@@ -1518,14 +1668,12 @@ PluginManager::save_plugin_order_file (XMLNode &elem) const
 {
 	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "plugin_order");
 
-	info << string_compose (_("Saving plugin order file %1"), path) << endmsg;
-
 	XMLTree tree;
 	tree.set_root (&elem);
 	if (!tree.write (path)) {
 		error << string_compose (_("Could not save Plugin Order info to %1"), path) << endmsg;
 	}
-	tree.set_root (0);  //note: must disconnect the elem from XMLTree, or it will try to delete memory it didn't allocate
+	tree.set_root (0); // note: must disconnect the elem from XMLTree, or it will try to delete memory it didn't allocate
 }
 
 
@@ -1536,8 +1684,16 @@ PluginManager::save_tags ()
 	XMLNode* root = new XMLNode (X_("PluginTags"));
 
 	for (PluginTagList::iterator i = ptags.begin(); i != ptags.end(); ++i) {
-		if ( (*i).tagtype == FromFactoryFile || (*i).tagtype == FromUserFile ) {
-			/* user file should contain only plugins that are (a) newly user-tagged or (b) previously unknown */
+#ifdef MIXBUS
+		if ((*i).type == LADSPA) {
+			uint32_t id = atoi ((*i).unique_id);
+			if (id >= 9300 && id <= 9399) {
+				continue; /* do not write mixbus channelstrip ladspa's in the tagfile */
+			}
+		}
+#endif
+		if ((*i).tagtype <= FromFactoryFile) {
+			/* user file should contain only plugins that are user-tagged */
 			continue;
 		}
 		XMLNode* node = new XMLNode (X_("Plugin"));
@@ -1545,9 +1701,7 @@ PluginManager::save_tags ()
 		node->set_property (X_("id"), (*i).unique_id);
 		node->set_property (X_("tags"), (*i).tags);
 		node->set_property (X_("name"), (*i).name);
-		if ( (*i).tagtype >= FromUserFile ) {
-			node->set_property (X_("user-set"), "1");
-		}
+		node->set_property (X_("user-set"), "1");
 		root->add_child_nocopy (*node);
 	}
 
@@ -1585,33 +1739,40 @@ PluginManager::load_tags ()
 			string name;
 			bool user_set;
 			if (!(*i)->get_property (X_("type"), type) ||
-					!(*i)->get_property (X_("id"), id) ||
-					!(*i)->get_property (X_("tags"), tags) ||
-					!(*i)->get_property (X_("name"), name)) {
+			    !(*i)->get_property (X_("id"), id) ||
+			    !(*i)->get_property (X_("tags"), tags) ||
+			    !(*i)->get_property (X_("name"), name)) {
+				continue;
 			}
 			if (!(*i)->get_property (X_("user-set"), user_set)) {
 				user_set = false;
 			}
 			strip_whitespace_edges (tags);
-			set_tags (type, id, tags, name, user_set ? FromUserFile : FromFactoryFile );
+			set_tags (type, id, tags, name, user_set ? FromUserFile : FromFactoryFile);
 		}
 	}
 }
 
 void
-PluginManager::set_tags (PluginType t, string id, string tag, std::string name, TagType ttype )
+PluginManager::set_tags (PluginType t, string id, string tag, std::string name, TagType ttype)
 {
 	string sanitized = sanitize_tag (tag);
 
-	PluginTag ps (to_generic_vst (t), id, sanitized, name, ttype );
+	PluginTag ps (to_generic_vst (t), id, sanitized, name, ttype);
 	PluginTagList::const_iterator i = find (ptags.begin(), ptags.end(), ps);
 	if (i == ptags.end()) {
 		ptags.insert (ps);
-	} else if ( (uint32_t) ttype >=  (uint32_t) (*i).tagtype ) {  // only overwrite if we are more important than the existing. Gui > UserFile > FactoryFile > Plugin
+	} else if ((uint32_t) ttype >= (uint32_t) (*i).tagtype) { // only overwrite if we are more important than the existing. Gui > UserFile > FactoryFile > Plugin
 		ptags.erase (ps);
 		ptags.insert (ps);
 	}
-	if ( ttype == FromGui ) {
+	if (ttype == FromFactoryFile) {
+		if (find (ftags.begin(), ftags.end(), ps) != ftags.end()) {
+			ftags.erase (ps);
+		}
+		ftags.insert (ps);
+	}
+	if (ttype == FromGui) {
 		PluginTagChanged (t, id, sanitized); /* EMIT SIGNAL */
 	}
 }
@@ -1621,10 +1782,16 @@ PluginManager::reset_tags (PluginInfoPtr const& pi)
 {
 	PluginTag ps (pi->type, pi->unique_id, pi->category, pi->name, FromPlug);
 
+	PluginTagList::const_iterator j = find (ftags.begin(), ftags.end(), ps);
+	if (j != ftags.end()) {
+		ps = *j;
+	}
+
 	PluginTagList::const_iterator i = find (ptags.begin(), ptags.end(), ps);
 	if (i != ptags.end()) {
 		ptags.erase (ps);
 		ptags.insert (ps);
+		PluginTagChanged (ps.type, ps.unique_id, ps.tags); /* EMIT SIGNAL */
 	}
 }
 
@@ -1669,7 +1836,7 @@ PluginManager::get_all_tags (TagFilter tag_filter) const
 		/* if favorites_only then we need to check the info ptr and maybe skip */
 		if (tag_filter == OnlyFavorites) {
 			PluginStatus stat ((*pt).type, (*pt).unique_id);
-			PluginStatusList::const_iterator i =  find (statuses.begin(), statuses.end(), stat);
+			PluginStatusList::const_iterator i = find (statuses.begin(), statuses.end(), stat);
 			if ((i != statuses.end()) && (i->status == Favorite)) {
 				/* it's a favorite! */
 			} else {
@@ -1678,8 +1845,8 @@ PluginManager::get_all_tags (TagFilter tag_filter) const
 		}
 		if (tag_filter == NoHidden) {
 			PluginStatus stat ((*pt).type, (*pt).unique_id);
-			PluginStatusList::const_iterator i =  find (statuses.begin(), statuses.end(), stat);
-			if ((i != statuses.end()) && (i->status == Hidden)) {
+			PluginStatusList::const_iterator i = find (statuses.begin(), statuses.end(), stat);
+			if ((i != statuses.end()) && ((i->status == Hidden) || (i->status == Concealed))) {
 				continue;
 			}
 		}
@@ -1696,7 +1863,7 @@ PluginManager::get_all_tags (TagFilter tag_filter) const
 		/* maybe add the tags we've found */
 		for (vector<string>::iterator t = tags.begin(); t != tags.end(); ++t) {
 			/* if this tag isn't already in the list, add it */
-			vector<string>::iterator i =  find (ret.begin(), ret.end(), *t);
+			vector<string>::iterator i = find (ret.begin(), ret.end(), *t);
 			if (i == ret.end()) {
 				ret.push_back (*t);
 			}

@@ -1,21 +1,25 @@
 /*
-    Copyright (C) 1999-2009 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2008 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2006-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2006-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2006-2019 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2014-2016 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_ardour_h__
 #define __ardour_ardour_h__
@@ -58,11 +62,13 @@ namespace ARDOUR {
 	 * @param try_optimization true to enable hardware optimized routines
 	 * for mixing, finding peak values etc.
 	 * @param localedir Directory to look for localisation files
+	 * @param with_gui set to true if running from a GUI (expected to take
+	 *                care of certain initialization itself)
 	 *
 	 * @return true if Ardour library was successfully initialized
 	 */
-	LIBARDOUR_API bool init (bool with_vst, bool try_optimization, const char* localedir);
-	LIBARDOUR_API void init_post_engine ();
+	LIBARDOUR_API bool init (bool with_vst, bool try_optimization, const char* localedir, bool with_gui = false);
+	LIBARDOUR_API void init_post_engine (uint32_t);
 	LIBARDOUR_API void cleanup ();
 	LIBARDOUR_API bool no_auto_connect ();
 	LIBARDOUR_API void make_property_quarks ();

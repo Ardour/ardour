@@ -1,20 +1,22 @@
 /*
-    Copyright (C) 2011 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2011-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2011-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2016 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifdef WAF_BUILD
 #include "libardour-config.h"
@@ -41,15 +43,17 @@ using namespace ARDOUR;
 using namespace PBD;
 
 PlaylistSource::PlaylistSource (Session& s, const ID& orig, const std::string& name, boost::shared_ptr<Playlist> p, DataType type,
-				sampleoffset_t begin, samplecnt_t len, Source::Flag /*flags*/)
+                                sampleoffset_t begin, samplecnt_t len, Source::Flag /*flags*/)
 	: Source (s, type, name)
 	, _playlist (p)
 	, _original (orig)
+	, _owner (0) /* zero is never a legal ID for an object */
 {
 	/* PlaylistSources are never writable, renameable, removable or destructive */
 	_flags = Flag (_flags & ~(Writable|CanRename|Removable|RemovableIfEmpty|RemoveAtDestroy|Destructive));
 
 	_playlist = p;
+	_playlist->use ();
 	_playlist_offset = begin;
 	_playlist_length = len;
 
@@ -70,6 +74,15 @@ PlaylistSource::PlaylistSource (Session& s, const XMLNode& node)
 
 PlaylistSource::~PlaylistSource ()
 {
+	_playlist->release ();
+}
+
+void
+PlaylistSource::set_owner (PBD::ID const &id)
+{
+	if (_owner == 0) {
+		_owner = id;
+	}
 }
 
 void
@@ -78,7 +91,11 @@ PlaylistSource::add_state (XMLNode& node)
 	node.set_property ("playlist", _playlist->id ());
 	node.set_property ("offset", _playlist_offset);
 	node.set_property ("length", _playlist_length);
-	node.set_property ("original", id());
+	node.set_property ("original", _original);
+
+	if (_owner != 0) {
+		node.set_property ("owner", _owner);
+	}
 
 	node.add_child_nocopy (_playlist->get_state());
 }
@@ -131,16 +148,15 @@ PlaylistSource::set_state (const XMLNode& node, int /*version*/)
 		throw failed_constructor ();
 	}
 
-	/* XXX not quite sure why we set our ID back to the "original" one
-	   here. october 2011, paul
-	*/
-
-	std::string str;
-	if (!node.get_property (X_("original"), str)) {
+	if (!node.get_property (X_("original"), _original)) {
 		throw failed_constructor ();
 	}
 
-	set_id (str);
+	/* this is allowed to fail. It either means an older session file
+	   format, or a PlaylistSource that wasn't created for a combined
+	   region (whose ID would be stored in _owner).
+	*/
+	node.get_property (X_("owner"), _owner);
 
 	_level = _playlist->max_source_level () + 1;
 

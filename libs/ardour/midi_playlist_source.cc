@@ -1,20 +1,22 @@
 /*
-    Copyright (C) 2011 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2011-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2011-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifdef WAF_BUILD
 #include "libardour-config.h"
@@ -123,13 +125,13 @@ MidiPlaylistSource::length (samplepos_t)  const
 
 samplecnt_t
 MidiPlaylistSource::read_unlocked (const Lock& lock,
-				   Evoral::EventSink<samplepos_t>& dst,
-				   samplepos_t /*position*/,
-				   samplepos_t start,
+                                   Evoral::EventSink<samplepos_t>& dst,
+                                   samplepos_t /*position*/,
+                                   samplepos_t start,
                                    samplecnt_t cnt,
                                    Evoral::Range<samplepos_t>* loop_range,
-				   MidiStateTracker*,
-				   MidiChannelFilter*) const
+                                   MidiStateTracker*,
+                                   MidiChannelFilter*) const
 {
 	boost::shared_ptr<MidiPlaylist> mp = boost::dynamic_pointer_cast<MidiPlaylist> (_playlist);
 
@@ -137,7 +139,19 @@ MidiPlaylistSource::read_unlocked (const Lock& lock,
 		return 0;
 	}
 
-	return mp->read (dst, start, cnt, loop_range);
+	/* XXX paul says on Oct 26 2019:
+
+	   rgareus: so to clarify now that i have better perspective: the API i want to get rid of is MidiPlaylist::read() ; everything that used it (i.e. the DiskReader) should use MidiPlaylist::rendered()->read()
+	   rgareus: but a "read" operation is also a "write" operation: you have to put the data somewhere
+	   rgareus: the only other user of MidiPlaylist::read() was MidiPlaylistSource (unsurprisingly), which as I noted is not even (really) used
+	   rgareus: ::rendered() returns a ptr-to-RT_MidiBuffer, which has a read method which expects to write into a MidiBuffer, using push_back()
+	   rgareus: but MidiPlaylistSource::read() is given an EventSink<samplepos_t> as the destination, and this does not (currently) have ::push_back(), only ::write() (which is willing to deal with inserts rather than appends)
+	   rgareus: so, this is the API "mess" I'm trying to clean up. simple solution: since we don't use MidiPlaylistSource just comment out the line and forget about it for now, then remove MidiPlaylist::read() and move on
+
+	   This represents that decision, for now.
+	*/
+
+	return cnt; // mp->read (dst, start, cnt, loop_range);
 }
 
 samplecnt_t
@@ -188,4 +202,3 @@ MidiPlaylistSource::empty () const
 {
 	return !_playlist || _playlist->empty();
 }
-

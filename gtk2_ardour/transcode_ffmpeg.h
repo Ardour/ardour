@@ -1,22 +1,20 @@
 /*
-    Copyright (C) 2010 Paul Davis
-    Author: Robin Gareus <robin@gareus.org>
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2013-2018 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 #ifndef __ardour_transcode_ffmpeg_h__
 #define __ardour_transcode_ffmpeg_h__
 
@@ -50,19 +48,21 @@ class TranscodeFfmpeg : public sigc::trackable
 		/** instantiate a new transcoder. If a file-name is given, the file's
 		 * attributes (fps, duration, geometry etc) are read.
 		 *
-		 * @param f path to the video-file to probe or use as input for
-		 * \ref extract_audio and \ref transcode.
+		 * @param f path to the video-file to probe or use as input for \ref extract_audio and \ref transcode .
 		 */
 		TranscodeFfmpeg (std::string f);
 		virtual ~TranscodeFfmpeg ();
-		/** transcode/import a video-file
-		 * @param outfile full-path (incl. file-extension)
-		 * @param outwidth video-width, \c <0 no scaling)
-		 * @param outheight video-height \c <0 use aspect \c \ref outwidth /c / \c aspect-ratio
-		 * @param kbitps video bitrate \c 0 calculate to use 0.7 bits per pixel on average
+
+		/** transcode to (import a video-file)
+		 *
+		 * @param outfile full-path (incl. file-extension) of the file to create
+		 * @param width video-width, if \c <0 no scaling
+		 * @param height video-height, with \c <0 preserve aspect (\p width \c / \c aspect-ratio)
+		 * @param kbitps video bitrate, with \c 0 calculate to use 0.7 bits per pixel on average
 		 * @return \c true if the transcoder process was successfully started.
 		 */
-		bool transcode (std::string, const int outwidth=0, const int outheight=0, const int kbitps =0);
+		bool transcode (std::string outfile, const int width=0, const int height=0, const int kbitps =0);
+
 		/** Extract an audio track from the given input file to a new 32bit float little-endian PCM WAV file.
 		 * @param outfile full-path (incl. file-extension) to .wav file to write
 		 * @param samplerate target samplerate
@@ -71,6 +71,7 @@ class TranscodeFfmpeg : public sigc::trackable
 		 * @return \c true if the transcoder process was successfully started.
 		 */
 		bool extract_audio (std::string outfile, ARDOUR::samplecnt_t samplerate, unsigned int stream=0);
+
 		/** transcode video and mux audio files into a new video-file.
 		 * @param outfile full-path of output file to create (existing files are overwritten)
 		 * @param inf_a filename of input audio-file
@@ -84,6 +85,7 @@ class TranscodeFfmpeg : public sigc::trackable
 		 * @return \c true if the encoder process was successfully started.
 		 */
 		bool encode (std::string outfile, std::string inf_a, std::string inf_v, FFSettings ffs, FFSettings meta, bool map = true);
+
 		/** @return array with default encoder settings */
 		FFSettings default_encoder_settings ();
 		/** @return array with default meta data */
@@ -150,7 +152,6 @@ class TranscodeFfmpeg : public sigc::trackable
 
 		FFAudioStreams m_audio;
 
-		char *format_metadata (std::string, std::string);
 		void ffmpegparse_v (std::string d, size_t s);
 		void ffmpegparse_a (std::string d, size_t s);
 		void ffprobeparse (std::string d, size_t s);

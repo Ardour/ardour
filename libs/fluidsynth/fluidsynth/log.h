@@ -77,7 +77,11 @@ fluid_log_function_t fluid_set_log_function(int level, fluid_log_function_t fun,
 
 FLUIDSYNTH_API void fluid_default_log_function(int level, const char *message, void *data);
 
-FLUIDSYNTH_API int fluid_log(int level, const char *fmt, ...);
+FLUIDSYNTH_API int fluid_log(int level, const char *fmt, ...)
+#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+__attribute__ ((format (printf, 2, 3)))
+#endif
+;
 
 
 #ifdef __cplusplus

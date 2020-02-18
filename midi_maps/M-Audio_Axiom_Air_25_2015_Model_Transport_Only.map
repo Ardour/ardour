@@ -6,8 +6,9 @@
 
 <!-- NB: loop-toggle and Transport/Record are a bit weird out-of-the-box: it will only stay enabled while you press the button -->
 <!-- To fix them: reconfigure the record button from a Momentary switch to a Toggle switch as in ... -->
-<!-- this manual: http://m-audio.de/download/file/fid/803 On page 8. Then look at page 10 for instructions -->
-<!-- on saving this into the keyboard's persistent memory -->
+<!-- the user-manual describes how to set this up and save this into the keyboard's persistent memory -->
+<!-- "If you want the button to send the same value every time you press it, simply set the same value for both Data 2 and Data 3" -->
+<!-- http://www.indiana.edu/~audioweb/T452/Axiom25_UG.pdf page 3.8 (page 29)  and sect 3.2 (page 15)-->
 
 <!-- Transport Controls -->
   <Binding channel="1" ctl="113" function="loop-toggle"/>

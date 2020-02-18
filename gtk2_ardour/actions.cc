@@ -1,21 +1,26 @@
 /*
-    Copyright (C) 2005 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2005-2015 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2005-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005 Karsten Wiese <fzuuzf@googlemail.com>
+ * Copyright (C) 2008-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2010 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cstring>
 #include <string>
@@ -65,14 +70,7 @@ RelatedActions ActionManager::range_sensitive_actions;
 RelatedActions ActionManager::engine_sensitive_actions;
 RelatedActions ActionManager::engine_opposite_sensitive_actions;
 RelatedActions ActionManager::transport_sensitive_actions;
-RelatedActions ActionManager::edit_point_in_region_sensitive_actions;
 RelatedActions ActionManager::rec_sensitive_actions;
-
-void
-ActionManager::init ()
-{
-	ui_manager = UIManager::create ();
-}
 
 void
 ActionManager::load_menus (const string& menus_file)
@@ -97,7 +95,7 @@ ActionManager::load_menus (const string& menus_file)
 	if (!loaded) {
 		cerr << string_compose (_("%1 will not work without a valid menu definition file"), PROGRAM_NAME) << endl;
 		error << string_compose (_("%1 will not work without a valid menu definition file"), PROGRAM_NAME) << endmsg;
-		exit(1);
+		exit (EXIT_FAILURE);
 	}
 }
 
@@ -178,7 +176,7 @@ ActionManager::toggle_config_state_foo (const char* group, const char* action, s
 void
 ActionManager::map_some_state (const char* group, const char* action, bool (RCConfiguration::*get)() const)
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (group, action);
+	Glib::RefPtr<Action> act = ActionManager::get_action (group, action, false);
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 
@@ -201,7 +199,7 @@ ActionManager::map_some_state (const char* group, const char* action, bool (RCCo
 void
 ActionManager::map_some_state (const char* group, const char* action, bool (UIConfiguration::*get)() const)
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (group, action);
+	Glib::RefPtr<Action> act = ActionManager::get_action (group, action, false);
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 
@@ -219,7 +217,7 @@ ActionManager::map_some_state (const char* group, const char* action, bool (UICo
 void
 ActionManager::map_some_state (const char* group, const char* action, sigc::slot<bool> get)
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (group, action);
+	Glib::RefPtr<Action> act = ActionManager::get_action (group, action, false);
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 

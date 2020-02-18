@@ -1,24 +1,32 @@
 /*
-    Copyright (C) 2008 Paul Davis
-    Author: Sakari Bergen
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2008-2013 Sakari Bergen <sakari.bergen@beatwaves.net>
+ * Copyright (C) 2008-2016 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2013-2015 Colin Fletcher <colin.m.fletcher@googlemail.com>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2015 Nick Mainsbridge <mainsbridge@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <algorithm>
+#include <sstream>
+
+#include <gtkmm/menu.h>
 
 #include "pbd/convert.h"
 
@@ -28,8 +36,7 @@
 #include "ardour/io.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
-
-#include <sstream>
+#include "ardour/selection.h"
 
 #include "export_channel_selector.h"
 #include "route_sorter.h"
@@ -86,9 +93,6 @@ PortExportChannelSelector::PortExportChannelSelector (ARDOUR::Session * session,
 
 PortExportChannelSelector::~PortExportChannelSelector ()
 {
-// 	if (session) {
-// 		session->add_instant_xml (get_state(), false);
-// 	}
 }
 
 void
@@ -550,18 +554,37 @@ RegionExportChannelSelector::handle_selection ()
 TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager)
   : ExportChannelSelector(session, manager)
   , track_output_button(_("Apply track/bus processing"))
-  , select_tracks_button (_("Select all tracks"))
-  , select_busses_button (_("Select all busses"))
-  , select_none_button (_("Deselect all"))
 {
 	pack_start(main_layout);
 
+	// Populate Selection Menu
+	{
+		using namespace Gtk::Menu_Helpers;
+
+		select_menu.set_text (_("Selection Actions"));
+		select_menu.disable_scrolling ();
+
+		select_menu.AddMenuElem (MenuElem (_("Select tracks"), sigc::mem_fun (*this, &TrackExportChannelSelector::select_tracks)));
+		select_menu.AddMenuElem (MenuElem (_("Select busses"), sigc::mem_fun (*this, &TrackExportChannelSelector::select_busses)));
+		select_menu.AddMenuElem (MenuElem (_("Deselect all"), sigc::mem_fun (*this, &TrackExportChannelSelector::select_none)));
+		select_menu.AddMenuElem (SeparatorElem ());
+
+		exclude_hidden = new Gtk::CheckMenuItem (_("Exclude Hidden"));
+		exclude_hidden->set_active (false);
+		exclude_hidden->show();
+		select_menu.AddMenuElem (*exclude_hidden);
+
+		exclude_muted = new Gtk::CheckMenuItem (_("Exclude Muted"));
+		exclude_muted->set_active (true);
+		exclude_muted->show();
+		select_menu.AddMenuElem (*exclude_muted);
+	}
+
 	// Options
-	options_box.pack_start(track_output_button);
-	options_box.pack_start (select_tracks_button);
-	options_box.pack_start (select_busses_button);
-	options_box.pack_start (select_none_button);
-	main_layout.pack_start(options_box, false, false);
+	options_box.set_spacing (8);
+	options_box.pack_start (track_output_button, false, false);
+	options_box.pack_start (select_menu, false, false);
+	main_layout.pack_start (options_box, false, false);
 
 	// Track scroller
 	track_scroller.add (track_view);
@@ -592,15 +615,17 @@ TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * sessio
 	column->pack_start (*text_renderer, false);
 	column->add_attribute (text_renderer->property_text(), track_cols.label);
 
-	select_tracks_button.signal_clicked().connect (sigc::mem_fun (*this, &TrackExportChannelSelector::select_tracks));
-	select_busses_button.signal_clicked().connect (sigc::mem_fun (*this, &TrackExportChannelSelector::select_busses));
-	select_none_button.signal_clicked().connect (sigc::mem_fun (*this, &TrackExportChannelSelector::select_none));
-
 	track_output_button.signal_clicked().connect (sigc::mem_fun (*this, &TrackExportChannelSelector::track_outputs_selected));
 
 	fill_list();
 
 	show_all_children ();
+}
+
+TrackExportChannelSelector::~TrackExportChannelSelector ()
+{
+	delete exclude_hidden;
+	delete exclude_muted;
 }
 
 void
@@ -613,11 +638,19 @@ TrackExportChannelSelector::sync_with_manager ()
 void
 TrackExportChannelSelector::select_tracks ()
 {
+	bool excl_hidden = exclude_hidden->get_active ();
+	bool excl_muted  = exclude_muted->get_active ();
+
 	for (Gtk::ListStore::Children::iterator it = track_list->children().begin(); it != track_list->children().end(); ++it) {
 		Gtk::TreeModel::Row row = *it;
 		boost::shared_ptr<Route> route = row[track_cols.route];
 		if (boost::dynamic_pointer_cast<Track> (route)) {
-			// it's a track
+			if (excl_muted && route->muted ()) {
+				continue;
+			}
+			if (excl_hidden && route->is_hidden ()) {
+				continue;
+			}
 			row[track_cols.selected] = true;
 		}
 	}
@@ -627,11 +660,19 @@ TrackExportChannelSelector::select_tracks ()
 void
 TrackExportChannelSelector::select_busses ()
 {
+	bool excl_hidden = exclude_hidden->get_active ();
+	bool excl_muted  = exclude_muted->get_active ();
+
 	for (Gtk::ListStore::Children::iterator it = track_list->children().begin(); it != track_list->children().end(); ++it) {
 		Gtk::TreeModel::Row row = *it;
 		boost::shared_ptr<Route> route = row[track_cols.route];
 		if (!boost::dynamic_pointer_cast<Track> (route)) {
-			// it's not a track, must be a bus
+			if (excl_muted && route->muted ()) {
+				continue;
+			}
+			if (excl_hidden && route->is_hidden ()) {
+				continue;
+			}
 			row[track_cols.selected] = true;
 		}
 	}
@@ -660,6 +701,8 @@ TrackExportChannelSelector::fill_list()
 	track_list->clear();
 	RouteList routes = _session->get_routelist();
 
+	CoreSelection const& cs (_session->selection());
+
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
 		if (!boost::dynamic_pointer_cast<Track>(*it)) {
 			// not a track, must be a bus
@@ -672,7 +715,7 @@ TrackExportChannelSelector::fill_list()
 			}
 
 			// not monitor or master bus
-			add_track (*it);
+			add_track (*it, cs.selected (*it));
 		}
 	}
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
@@ -681,18 +724,18 @@ TrackExportChannelSelector::fill_list()
 				// don't include inactive tracks
 				continue;
 			}
-			add_track (*it);
+			add_track (*it, cs.selected (*it));
 		}
 	}
 }
 
 void
-TrackExportChannelSelector::add_track (boost::shared_ptr<Route> route)
+TrackExportChannelSelector::add_track (boost::shared_ptr<Route> route, bool selected)
 {
 	Gtk::TreeModel::iterator iter = track_list->append();
 	Gtk::TreeModel::Row row = *iter;
 
-	row[track_cols.selected] = false;
+	row[track_cols.selected] = selected;
 	row[track_cols.label] = route->name();
 	row[track_cols.route] = route;
 	row[track_cols.order_key] = route->presentation_info().order();

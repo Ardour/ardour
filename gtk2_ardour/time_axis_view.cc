@@ -1,21 +1,28 @@
 /*
-    Copyright (C) 2000 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2007 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2005-2008 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2005-2019 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2006-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2006-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2008-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2015 Ben Loftis <ben@harrisonconsoles.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cstdlib>
 #include <cmath>
@@ -46,6 +53,7 @@
 #include "widgets/tooltips.h"
 
 #include "ardour_dialog.h"
+#include "audio_time_axis.h"
 #include "floating_text_entry.h"
 #include "gui_thread.h"
 #include "public_editor.h"
@@ -150,6 +158,10 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	name_label.set_width_chars (12);
 	set_tooltip (name_label, _("Track/Bus name (double click to edit)"));
 
+	inactive_label.set_name (X_("TrackNameEditor"));
+	inactive_label.set_alignment (0.0, 0.5);
+	set_tooltip (inactive_label, _("This track is inactive. (right-click to activate)"));
+
 	{
 		boost::scoped_ptr<Gtk::Entry> an_entry (new FocusEntry);
 		an_entry->set_name (X_("TrackNameEditor"));
@@ -176,6 +188,10 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();
+
+	inactive_table.set_border_width (4);  //try to match the offset of the label on an "active" track
+	inactive_table.attach (inactive_label, 1, 2, 0, 1,  Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK, 0, 0);
+	controls_vbox.pack_start (inactive_table, false, false);
 
 	controls_vbox.pack_start (controls_table, false, false);
 	controls_vbox.show ();
@@ -221,12 +237,11 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	top_hbox.pack_start (scroomer_placeholder, false, false); // OR pack_end to move after meters ?
 
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &TimeAxisView::parameter_changed));
 }
 
 TimeAxisView::~TimeAxisView()
 {
-	CatchDeletion (this);
-
 	in_destructor = true;
 
 	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
@@ -580,7 +595,9 @@ TimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 	uint32_t lanes = 0;
 	if (m == TotalHeight) {
 		for (Children::iterator i = children.begin(); i != children.end(); ++i) {
-			if ( !(*i)->hidden()) ++lanes;
+			if (!(*i)->hidden()) {
+				++lanes;
+			}
 		}
 	}
 	h /= (lanes + 1);
@@ -661,7 +678,7 @@ TimeAxisView::end_name_edit (std::string str, int next_dir)
 
 				RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
 
-				if (rtav && (!rtav->is_track() || rtav->track()->rec_enable_control()->get_value())) {
+				if (rtav && rtav->is_track() && rtav->track()->rec_enable_control()->get_value()) {
 					continue;
 				}
 
@@ -692,7 +709,7 @@ TimeAxisView::end_name_edit (std::string str, int next_dir)
 
 				RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
 
-				if (rtav && (!rtav->is_track() || rtav->track()->rec_enable_control()->get_value())) {
+				if (rtav && rtav->is_track() && rtav->track()->rec_enable_control()->get_value()) {
 					continue;
 				}
 
@@ -844,6 +861,12 @@ TimeAxisView::show_selection (TimeSelection& ts)
 	selection_group->show();
 	selection_group->raise_to_top();
 
+	uint32_t gap = UIConfiguration::instance().get_vertical_region_gap ();
+	float ui_scale = UIConfiguration::instance().get_ui_scale ();
+	if (gap > 0 && ui_scale > 0) {
+		gap = ceil (gap * ui_scale);
+	}
+
 	for (list<AudioRange>::iterator i = ts.begin(); i != ts.end(); ++i) {
 		samplepos_t start, end;
 		samplecnt_t cnt;
@@ -857,6 +880,14 @@ TimeAxisView::show_selection (TimeSelection& ts)
 		x1 = _editor.sample_to_pixel (start);
 		x2 = _editor.sample_to_pixel (start + cnt - 1);
 		y2 = current_height() - 1;
+
+		if (dynamic_cast<AudioTimeAxisView*>(this)) {
+			if (y2 > gap) {
+				y2 -= gap;
+			} else {
+				y2 = 1;
+			}
+		}
 
 		rect->rect->set (ArdourCanvas::Rect (x1, 0, x2, y2));
 
@@ -968,7 +999,9 @@ TimeAxisView::get_selection_rect (uint32_t id)
 
 		rect->rect = new ArdourCanvas::Rectangle (selection_group);
 		CANVAS_DEBUG_NAME (rect->rect, "selection rect");
-		rect->rect->set_outline (false);
+		rect->rect->set_outline (true);
+		rect->rect->set_outline_width (1.0);
+		rect->rect->set_outline_color (UIConfiguration::instance().color ("selection"));
 		rect->rect->set_fill_color (UIConfiguration::instance().color_mod ("selection rect", "selection rect"));
 
 		rect->start_trim = new ArdourCanvas::Rectangle (selection_group);
@@ -1122,8 +1155,8 @@ TimeAxisView::compute_heights ()
 	Gtk::Table one_row_table (1, 1);
 	ArdourButton* test_button = manage (new ArdourButton);
 	const int border_width = 2;
-	const int sample_height = 2;
-	extra_height = (2 * border_width) + sample_height;
+	const int frame_height = 2;
+	extra_height = (2 * border_width) + frame_height;
 
 	window.add (one_row_table);
 	test_button->set_name ("mute button");
@@ -1170,6 +1203,20 @@ TimeAxisView::color_handler ()
 
 		(*i)->end_trim->set_fill_color (UIConfiguration::instance().color ("selection"));
 		(*i)->end_trim->set_outline_color (UIConfiguration::instance().color ("selection"));
+	}
+}
+
+void
+TimeAxisView::parameter_changed (string const & what_changed)
+{
+	if (what_changed == "vertical-region-gap") {
+		if (selected ()) {
+			show_selection (_editor.get_selection().time);
+		}
+	}
+
+	if (view()) {
+		view()->parameter_changed (what_changed);
 	}
 }
 

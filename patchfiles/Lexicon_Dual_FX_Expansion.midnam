@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Lexicon</Manufacturer>
+    <Model>PCM-80</Model>
+    <Model>PCM-81</Model>
+    <PatchNameList Name="X0 Dual FX">
+      <Patch Number="0" Name="Solo Room" ProgramChange="0"/>
+      <Patch Number="1" Name="Left Room" ProgramChange="1"/>
+      <Patch Number="2" Name="Right Room" ProgramChange="2"/>
+      <Patch Number="3" Name="Organ Room" ProgramChange="3"/>
+      <Patch Number="4" Name="Phat Roads 1" ProgramChange="4"/>
+      <Patch Number="5" Name="Phat Roads 2" ProgramChange="5"/>
+      <Patch Number="6" Name="Phat Roads 3" ProgramChange="6"/>
+      <Patch Number="7" Name="Stereo Tunnel" ProgramChange="7"/>
+      <Patch Number="8" Name="Is this on?" ProgramChange="8"/>
+      <Patch Number="9" Name="..AndTheGods" ProgramChange="9"/>
+      <Patch Number="10" Name="Mix&gt;Perc&gt;BP" ProgramChange="10"/>
+      <Patch Number="11" Name="Mix&gt;Snare&gt;LP" ProgramChange="11"/>
+      <Patch Number="12" Name="Mix&gt;Snare&gt;HP" ProgramChange="12"/>
+      <Patch Number="13" Name="Mix&gt;Drum&gt;LP" ProgramChange="13"/>
+      <Patch Number="14" Name="Mix&gt;Drum&gt;HP" ProgramChange="14"/>
+      <Patch Number="15" Name="Mix&gt;Drum&gt;BP" ProgramChange="15"/>
+      <Patch Number="16" Name="Mix&gt;Kick&gt;LP" ProgramChange="16"/>
+      <Patch Number="17" Name="Mix&gt;Kick&gt;HP" ProgramChange="17"/>
+      <Patch Number="18" Name="Mix&gt;Gate&gt;LP" ProgramChange="18"/>
+      <Patch Number="19" Name="Mix&gt;Gate&gt;BP" ProgramChange="19"/>
+      <Patch Number="20" Name="Mix&gt;Card Park" ProgramChange="20"/>
+      <Patch Number="21" Name="Mix&gt;Amb1&gt;LP" ProgramChange="21"/>
+      <Patch Number="22" Name="Mix&gt;Amb1&gt;HP" ProgramChange="22"/>
+      <Patch Number="23" Name="Mix&gt;Amb1&gt;BP" ProgramChange="23"/>
+      <Patch Number="24" Name="Mix&gt;Amb2&gt;LP" ProgramChange="24"/>
+      <Patch Number="25" Name="Mix&gt;Amb2&gt;HP" ProgramChange="25"/>
+      <Patch Number="26" Name="Mix&gt;Amb3&gt;LP" ProgramChange="26"/>
+      <Patch Number="27" Name="Mix&gt;Amb3&gt;HP" ProgramChange="27"/>
+      <Patch Number="28" Name="StereoFutz 1" ProgramChange="28"/>
+      <Patch Number="29" Name="StereoFutz 2" ProgramChange="29"/>
+      <Patch Number="30" Name="Outdoor" ProgramChange="30"/>
+      <Patch Number="31" Name="OutdoorWall" ProgramChange="31"/>
+      <Patch Number="32" Name="ips TapeSlap" ProgramChange="32"/>
+      <Patch Number="33" Name="15ips Echo" ProgramChange="33"/>
+      <Patch Number="34" Name="7.5ipsEkoRvb" ProgramChange="34"/>
+      <Patch Number="35" Name="V SpeedEko1" ProgramChange="35"/>
+      <Patch Number="36" Name="V SpeedEko2" ProgramChange="36"/>
+      <Patch Number="37" Name="V SpeedEko3" ProgramChange="37"/>
+      <Patch Number="38" Name="Eko Spills 1" ProgramChange="38"/>
+      <Patch Number="39" Name="Eko Spills 2" ProgramChange="39"/>
+      <Patch Number="40" Name="X-RhythmEko1" ProgramChange="40"/>
+      <Patch Number="41" Name="X-RhythmEko2" ProgramChange="41"/>
+      <Patch Number="42" Name="X-RhythmEko3" ProgramChange="42"/>
+      <Patch Number="43" Name="X-RhythmEko4" ProgramChange="43"/>
+      <Patch Number="44" Name="X-RhythmEko5" ProgramChange="44"/>
+      <Patch Number="45" Name="SlipTheEkos1" ProgramChange="45"/>
+      <Patch Number="46" Name="SlipTheEkos2" ProgramChange="46"/>
+      <Patch Number="47" Name="SlipTheEkos3" ProgramChange="47"/>
+      <Patch Number="48" Name="SlipTheBeat1" ProgramChange="48"/>
+      <Patch Number="49" Name="SlipTheBeat2" ProgramChange="49"/>
+    </PatchNameList>
+    <PatchNameList Name="X1 Dual FX">
+      <Patch Number="0" Name="KnobLocation" ProgramChange="0"/>
+      <Patch Number="1" Name="KnobPanSwap" ProgramChange="1"/>
+      <Patch Number="2" Name="AutoPanSwap" ProgramChange="2"/>
+      <Patch Number="3" Name="ipsPlateSlap" ProgramChange="3"/>
+      <Patch Number="4" Name="15ips Plate" ProgramChange="4"/>
+      <Patch Number="5" Name="4PoleRvb BP" ProgramChange="5"/>
+      <Patch Number="6" Name="4PoleRvb HP" ProgramChange="6"/>
+      <Patch Number="7" Name="4PoleRvb LP" ProgramChange="7"/>
+      <Patch Number="8" Name="Chorus&gt;Rvb 1" ProgramChange="8"/>
+      <Patch Number="9" Name="Chorus&gt;Rvb 2" ProgramChange="9"/>
+      <Patch Number="10" Name="Rvb&gt;Chorus 1" ProgramChange="10"/>
+      <Patch Number="11" Name="Auto Pan Rvb" ProgramChange="11"/>
+      <Patch Number="12" Name="Knob Pan Rvb" ProgramChange="12"/>
+      <Patch Number="13" Name="Filter Panner" ProgramChange="13"/>
+      <Patch Number="14" Name="EQ'd Rvb HP1" ProgramChange="14"/>
+      <Patch Number="15" Name="EQ'd Rvb HP2" ProgramChange="15"/>
+      <Patch Number="16" Name="EQ'd Rvb LP" ProgramChange="16"/>
+      <Patch Number="17" Name="EQ'd Rvb BP" ProgramChange="17"/>
+      <Patch Number="18" Name="EQ'd RvbSlap" ProgramChange="18"/>
+      <Patch Number="19" Name="EQ'd RvbEnv1" ProgramChange="19"/>
+      <Patch Number="20" Name="EQ'd RvbEnv2" ProgramChange="20"/>
+      <Patch Number="21" Name="EQ'd RvbEnv3" ProgramChange="21"/>
+      <Patch Number="22" Name="EQ'd RvbEnv4" ProgramChange="22"/>
+      <Patch Number="23" Name="Wah Verb" ProgramChange="23"/>
+      <Patch Number="24" Name="Wah Verb Eko" ProgramChange="24"/>
+      <Patch Number="25" Name="Wah Eko Verb" ProgramChange="25"/>
+      <Patch Number="26" Name="Weird EkoRvb" ProgramChange="26"/>
+      <Patch Number="27" Name="Echo Rise  1" ProgramChange="27"/>
+      <Patch Number="28" Name="Echo Rise  2" ProgramChange="28"/>
+      <Patch Number="29" Name="Echo Rise  3" ProgramChange="29"/>
+      <Patch Number="30" Name="Echo Rise  4" ProgramChange="30"/>
+      <Patch Number="31" Name="Rvb Eko Rise" ProgramChange="31"/>
+      <Patch Number="32" Name="EQ'd Eko LP" ProgramChange="32"/>
+      <Patch Number="33" Name="EQ'd Eko HP" ProgramChange="33"/>
+      <Patch Number="34" Name="EQ'd EkoEnv1" ProgramChange="34"/>
+      <Patch Number="35" Name="EQ'd EkoEnv2" ProgramChange="35"/>
+      <Patch Number="36" Name="EQ'd EkoEnv3" ProgramChange="36"/>
+      <Patch Number="37" Name="StereoTapEko" ProgramChange="37"/>
+      <Patch Number="38" Name="Flange&gt;Rvb" ProgramChange="38"/>
+      <Patch Number="39" Name="Rvb&gt;Flange" ProgramChange="39"/>
+      <Patch Number="40" Name="LFO Flange" ProgramChange="40"/>
+      <Patch Number="41" Name="Tape Flange1" ProgramChange="41"/>
+      <Patch Number="42" Name="Tape Flange2" ProgramChange="42"/>
+      <Patch Number="43" Name="Rvb&gt;T Flange" ProgramChange="43"/>
+      <Patch Number="44" Name="T Flange&gt;Eko" ProgramChange="44"/>
+      <Patch Number="45" Name="VS EkoFlange" ProgramChange="45"/>
+      <Patch Number="46" Name="Aerosol:Wet" ProgramChange="46"/>
+      <Patch Number="47" Name="Aerosol:Dry" ProgramChange="47"/>
+      <Patch Number="48" Name="Aerosol:Mix" ProgramChange="48"/>
+      <Patch Number="49" Name="Phat Detune" ProgramChange="49"/>
+    </PatchNameList>
+    <PatchNameList Name="X2 Dual FX">
+      <Patch Number="0" Name="4PoleEQ LP" ProgramChange="0"/>
+      <Patch Number="1" Name="4PoleEQ HP" ProgramChange="1"/>
+      <Patch Number="2" Name="4PoleEQ BP" ProgramChange="2"/>
+      <Patch Number="3" Name="4PoleKnobWah" ProgramChange="3"/>
+      <Patch Number="4" Name="4PoleLFO Wah" ProgramChange="4"/>
+      <Patch Number="5" Name="Weird!" ProgramChange="5"/>
+      <Patch Number="6" Name="Weirder!" ProgramChange="6"/>
+      <Patch Number="7" Name="Weirdest!" ProgramChange="7"/>
+      <Patch Number="8" Name="Phased Fbk" ProgramChange="8"/>
+      <Patch Number="9" Name="KnobFlange 1" ProgramChange="9"/>
+      <Patch Number="10" Name="KnobFlange 2" ProgramChange="10"/>
+      <Patch Number="11" Name="KnobFlange 3" ProgramChange="11"/>
+      <Patch Number="12" Name="Envelo Hall" ProgramChange="12"/>
+      <Patch Number="13" Name="Flange&gt;Ghost" ProgramChange="13"/>
+      <Patch Number="14" Name="Ghost&gt;Flange" ProgramChange="14"/>
+      <Patch Number="15" Name="Bass Tone" ProgramChange="15"/>
+      <Patch Number="16" Name="Gate&gt;Gate" ProgramChange="16"/>
+      <Patch Number="17" Name="Gate on 1&amp;3" ProgramChange="17"/>
+      <Patch Number="18" Name="Symphonic" ProgramChange="18"/>
+      <Patch Number="19" Name="Spin Cycle" ProgramChange="19"/>
+      <Patch Number="20" Name="Dino Steps" ProgramChange="20"/>
+      <Patch Number="21" Name="Hoo-Ha" ProgramChange="21"/>
+      <Patch Number="22" Name="GrossEnctrs" ProgramChange="22"/>
+      <Patch Number="23" Name="Notches-Chmb" ProgramChange="23"/>
+      <Patch Number="24" Name="Multi FX" ProgramChange="24"/>
+      <Patch Number="25" Name="FrameDly  24" ProgramChange="25"/>
+      <Patch Number="26" Name="FrameDly  25" ProgramChange="26"/>
+      <Patch Number="27" Name="FrameDly  30" ProgramChange="27"/>
+      <Patch Number="28" Name="MikedChamb 1" ProgramChange="28"/>
+      <Patch Number="29" Name="MikedChamb 2" ProgramChange="29"/>
+      <Patch Number="30" Name="Phone &gt; Room" ProgramChange="30"/>
+      <Patch Number="31" Name="Mono&gt;Perc&gt;BP" ProgramChange="31"/>
+      <Patch Number="32" Name="Mono&gt;Snr&gt;LP" ProgramChange="32"/>
+      <Patch Number="33" Name="Mono&gt;Snr&gt;HP" ProgramChange="33"/>
+      <Patch Number="34" Name="Mono&gt;Drum&gt;LP" ProgramChange="34"/>
+      <Patch Number="35" Name="Mono&gt;Drum&gt;HP" ProgramChange="35"/>
+      <Patch Number="36" Name="Mono&gt;Drum&gt;BP" ProgramChange="36"/>
+      <Patch Number="37" Name="Mono&gt;Kick&gt;LP" ProgramChange="37"/>
+      <Patch Number="38" Name="Mono&gt;Kick&gt;HP" ProgramChange="38"/>
+      <Patch Number="39" Name="Mono&gt;Gate&gt;LP" ProgramChange="39"/>
+      <Patch Number="40" Name="Mono&gt;Gate&gt;BP" ProgramChange="40"/>
+      <Patch Number="41" Name="Mono&gt;Tunnel" ProgramChange="41"/>
+      <Patch Number="42" Name="Mono&gt;CarPark" ProgramChange="42"/>
+      <Patch Number="43" Name="Mono&gt;Amb1&gt;LP" ProgramChange="43"/>
+      <Patch Number="44" Name="Mono&gt;Amb1&gt;HP" ProgramChange="44"/>
+      <Patch Number="45" Name="Mono&gt;Amb1&gt;BP" ProgramChange="45"/>
+      <Patch Number="46" Name="Mono&gt;Amb2&gt;LP" ProgramChange="46"/>
+      <Patch Number="47" Name="Mono&gt;Amb2&gt;HP" ProgramChange="47"/>
+      <Patch Number="48" Name="Mono&gt;Amb3&gt;LP" ProgramChange="48"/>
+      <Patch Number="49" Name="Mono&gt;Amb3&gt;HP" ProgramChange="49"/>
+    </PatchNameList>
+    <PatchNameList Name="X3 Dual FX">
+      <Patch Number="0" Name="Trance" ProgramChange="0"/>
+      <Patch Number="1" Name="DualTapGate1" ProgramChange="1"/>
+      <Patch Number="2" Name="DualTapGate2" ProgramChange="2"/>
+      <Patch Number="3" Name="X-Eko + Rvb1" ProgramChange="3"/>
+      <Patch Number="4" Name="DuckEko+Rvb1" ProgramChange="4"/>
+      <Patch Number="5" Name="Bounce+ Rvb1" ProgramChange="5"/>
+      <Patch Number="6" Name="Bounce+ Rvb2" ProgramChange="6"/>
+      <Patch Number="7" Name="Bound+ Rvb3" ProgramChange="7"/>
+      <Patch Number="8" Name="Bounce+ Eko1" ProgramChange="8"/>
+      <Patch Number="9" Name="Bounce+ Eko2" ProgramChange="9"/>
+      <Patch Number="10" Name="Bounce+ Eko3" ProgramChange="10"/>
+      <Patch Number="11" Name="Bounce+ Eko4" ProgramChange="11"/>
+      <Patch Number="12" Name="Bounce+ Eko5" ProgramChange="12"/>
+      <Patch Number="13" Name="Tap Eko+Echo" ProgramChange="13"/>
+      <Patch Number="14" Name="PhoneInRoom" ProgramChange="14"/>
+      <Patch Number="15" Name="TV In Room" ProgramChange="15"/>
+      <Patch Number="16" Name="Phone&lt;&gt;Room" ProgramChange="16"/>
+      <Patch Number="17" Name="Flange+Ghost" ProgramChange="17"/>
+      <Patch Number="18" Name="S Flange+Rvb" ProgramChange="18"/>
+      <Patch Number="19" Name="Flange+Plt" ProgramChange="19"/>
+      <Patch Number="20" Name="AutoPan+Chmb" ProgramChange="20"/>
+      <Patch Number="21" Name="Slap + Kick" ProgramChange="21"/>
+      <Patch Number="22" Name="Chorus+Chmb" ProgramChange="22"/>
+      <Patch Number="23" Name="LoPass+Chmb" ProgramChange="23"/>
+      <Patch Number="24" Name="HiPass+Chmb" ProgramChange="24"/>
+      <Patch Number="25" Name="B.Pass+Chmb" ProgramChange="25"/>
+      <Patch Number="26" Name="B.Pass+Hall" ProgramChange="26"/>
+      <Patch Number="27" Name="Tremelo+Chmb" ProgramChange="27"/>
+      <Patch Number="28" Name="Tremelo+Plt" ProgramChange="28"/>
+      <Patch Number="29" Name="Tremelo+Hall" ProgramChange="29"/>
+      <Patch Number="30" Name="L dks R Lvl" ProgramChange="30"/>
+      <Patch Number="31" Name="L dks R Eq" ProgramChange="31"/>
+      <Patch Number="32" Name="L dks R HiFc" ProgramChange="32"/>
+      <Patch Number="33" Name="L dks R LoFc" ProgramChange="33"/>
+      <Patch Number="34" Name="L dks R Band" ProgramChange="34"/>
+      <Patch Number="35" Name="Slap / Kick" ProgramChange="35"/>
+      <Patch Number="36" Name="Phone X-Fade" ProgramChange="36"/>
+      <Patch Number="37" Name="ToneL/PlateR" ProgramChange="37"/>
+      <Patch Number="38" Name="Phone / Room" ProgramChange="38"/>
+      <Patch Number="39" Name="TV / Room" ProgramChange="39"/>
+      <Patch Number="40" Name="Organ/Room 1" ProgramChange="40"/>
+      <Patch Number="41" Name="Organ/Room 2" ProgramChange="41"/>
+      <Patch Number="42" Name="M Flange/Rvb" ProgramChange="42"/>
+      <Patch Number="43" Name="TapEko/Gate" ProgramChange="43"/>
+      <Patch Number="44" Name="Eko15/Plate" ProgramChange="44"/>
+      <Patch Number="45" Name="V Eko1/Rvb" ProgramChange="45"/>
+      <Patch Number="46" Name="V Eko2/Rvb" ProgramChange="46"/>
+      <Patch Number="47" Name="V Eko / Eko" ProgramChange="47"/>
+      <Patch Number="48" Name="EkoRise/Rvb" ProgramChange="48"/>
+      <Patch Number="49" Name="EkoRise/Eko" ProgramChange="49"/>
+    </PatchNameList>
+    <PatchNameList Name="X4 Dual FX">
+      <Patch Number="0" Name="NewBand-Chmb" ProgramChange="0"/>
+      <Patch Number="1" Name="NewBand-Plt" ProgramChange="1"/>
+      <Patch Number="2" Name="NewBand-Hall" ProgramChange="2"/>
+      <Patch Number="3" Name="NewBand-Inf" ProgramChange="3"/>
+      <Patch Number="4" Name="NewBand-Inv" ProgramChange="4"/>
+      <Patch Number="5" Name="NewGld-Chmb" ProgramChange="5"/>
+      <Patch Number="6" Name="NewGld-Plt" ProgramChange="6"/>
+      <Patch Number="7" Name="NewGld-Hall" ProgramChange="7"/>
+      <Patch Number="8" Name="NewGld-Inf" ProgramChange="8"/>
+      <Patch Number="9" Name="NewGld-Inv" ProgramChange="9"/>
+      <Patch Number="10" Name="NewChrs-Chmb" ProgramChange="10"/>
+      <Patch Number="11" Name="NewChrs-Plt" ProgramChange="11"/>
+      <Patch Number="12" Name="NewChrs-Hall" ProgramChange="12"/>
+      <Patch Number="13" Name="NewChrs-Inf" ProgramChange="13"/>
+      <Patch Number="14" Name="NewChrs-Inv" ProgramChange="14"/>
+      <Patch Number="15" Name="NewRes1-Chmb" ProgramChange="15"/>
+      <Patch Number="16" Name="NewRes1-Plt" ProgramChange="16"/>
+      <Patch Number="17" Name="NewRes1-Hall" ProgramChange="17"/>
+      <Patch Number="18" Name="NewRes1-Inf" ProgramChange="18"/>
+      <Patch Number="19" Name="NewRes1-Inv" ProgramChange="19"/>
+      <Patch Number="20" Name="NewRes2-Chmb" ProgramChange="20"/>
+      <Patch Number="21" Name="NewRes2-Plt" ProgramChange="21"/>
+      <Patch Number="22" Name="NewRes2-Hall" ProgramChange="22"/>
+      <Patch Number="23" Name="NewRes2-Inf" ProgramChange="23"/>
+      <Patch Number="24" Name="NewRes2-Inv" ProgramChange="24"/>
+      <Patch Number="25" Name="TapeEcho/Plt" ProgramChange="25"/>
+      <Patch Number="26" Name="TapeEcho/Chmb" ProgramChange="26"/>
+      <Patch Number="27" Name="TapeEcho/Hall" ProgramChange="27"/>
+      <Patch Number="28" Name="Chorus/Chmb" ProgramChange="28"/>
+      <Patch Number="29" Name="Chorus/Plt" ProgramChange="29"/>
+      <Patch Number="30" Name="Chorus/Hall" ProgramChange="30"/>
+      <Patch Number="31" Name="Flange/Chmb" ProgramChange="31"/>
+      <Patch Number="32" Name="Flange/Plt" ProgramChange="32"/>
+      <Patch Number="33" Name="Flange/Hall" ProgramChange="33"/>
+      <Patch Number="34" Name="Tap Eko/Echo" ProgramChange="34"/>
+      <Patch Number="35" Name="LoPass/Chmb" ProgramChange="35"/>
+      <Patch Number="36" Name="LoPass/Plate" ProgramChange="36"/>
+      <Patch Number="37" Name="LoPass/Hall" ProgramChange="37"/>
+      <Patch Number="38" Name="HiPass/Chmb" ProgramChange="38"/>
+      <Patch Number="39" Name="HiPass/Plate" ProgramChange="39"/>
+      <Patch Number="40" Name="HiPass/Hall" ProgramChange="40"/>
+      <Patch Number="41" Name="B.Pass/Chmb" ProgramChange="41"/>
+      <Patch Number="42" Name="B.Pass/Plate" ProgramChange="42"/>
+      <Patch Number="43" Name="B.Pass/Hall" ProgramChange="43"/>
+      <Patch Number="44" Name="Rotary/Chmb" ProgramChange="44"/>
+      <Patch Number="45" Name="Rotary/Plate" ProgramChange="45"/>
+      <Patch Number="46" Name="Rotary/Hall" ProgramChange="46"/>
+      <Patch Number="47" Name="Tremelo/Chmb" ProgramChange="47"/>
+      <Patch Number="48" Name="Tremelo/Plt" ProgramChange="48"/>
+      <Patch Number="49" Name="Tremelo/Hall" ProgramChange="49"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

@@ -1,0 +1,706 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Yamaha</Manufacturer>
+    <Model>TG500</Model>
+    <CustomDeviceMode Name="Mode 2">
+      <DeviceModeEnable>
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="16"/>
+          <ProgramChange Number="0"/>
+          <SysEx>F0 43 10 29 04 00 00 06 00 00 F7</SysEx>
+          <SysEx>F0 43<SysExDeviceID Offset="10"/> 29 04 00 00 07 00 02 F7</SysEx>
+        </MIDICommands>
+      </DeviceModeEnable>
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Internal 1">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="32"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="i00" Name="AP Brite" ProgramChange="0"/>
+          <Patch Number="i01" Name="AP Dark" ProgramChange="1"/>
+          <Patch Number="i02" Name="AP Chrs 2" ProgramChange="2"/>
+          <Patch Number="i03" Name="BA Pluck" ProgramChange="3"/>
+          <Patch Number="i04" Name="BA Soul" ProgramChange="4"/>
+          <Patch Number="i05" Name="BA Stick" ProgramChange="5"/>
+          <Patch Number="i06" Name="BA Low" ProgramChange="6"/>
+          <Patch Number="i07" Name="BA Head" ProgramChange="7"/>
+          <Patch Number="i08" Name="BA Tri" ProgramChange="8"/>
+          <Patch Number="i09" Name="BR Punch" ProgramChange="9"/>
+          <Patch Number="i10" Name="BR TpSf1" ProgramChange="10"/>
+          <Patch Number="i11" Name="BR Movin" ProgramChange="11"/>
+          <Patch Number="i12" Name="BR Ruber" ProgramChange="12"/>
+          <Patch Number="i13" Name="BR CS80" ProgramChange="13"/>
+          <Patch Number="i14" Name="BR Strai" ProgramChange="14"/>
+          <Patch Number="i15" Name="BR Lush" ProgramChange="15"/>
+          <Patch Number="i16" Name="BR TpSf2" ProgramChange="16"/>
+          <Patch Number="i17" Name="CH Quiet" ProgramChange="17"/>
+          <Patch Number="i18" Name="CH Kwire" ProgramChange="18"/>
+          <Patch Number="i19" Name="CH Spirt" ProgramChange="19"/>
+          <Patch Number="i20" Name="CH Analg" ProgramChange="20"/>
+          <Patch Number="i21" Name="CH VoxPc" ProgramChange="21"/>
+          <Patch Number="i22" Name="DR Tom" ProgramChange="22"/>
+          <Patch Number="i23" Name="FI Banjo" ProgramChange="23"/>
+          <Patch Number="i24" Name="FI Koto" ProgramChange="24"/>
+          <Patch Number="i25" Name="FI Sitr2" ProgramChange="25"/>
+          <Patch Number="i26" Name="FI Tamba" ProgramChange="26"/>
+          <Patch Number="i27" Name="GT Fingr" ProgramChange="27"/>
+          <Patch Number="i28" Name="GT Amod" ProgramChange="28"/>
+          <Patch Number="i29" Name="GT Strat" ProgramChange="29"/>
+          <Patch Number="i30" Name="GT Pedal" ProgramChange="30"/>
+          <Patch Number="i31" Name="GT Dist2" ProgramChange="31"/>
+          <Patch Number="i32" Name="KY Hrpzi" ProgramChange="32"/>
+          <Patch Number="i33" Name="KY EP 13" ProgramChange="33"/>
+          <Patch Number="i34" Name="KY EP 14" ProgramChange="34"/>
+          <Patch Number="i35" Name="KY EP 15" ProgramChange="35"/>
+          <Patch Number="i36" Name="KY EP 16" ProgramChange="36"/>
+          <Patch Number="i37" Name="KY EP 17" ProgramChange="37"/>
+          <Patch Number="i38" Name="KY EP 18" ProgramChange="38"/>
+          <Patch Number="i39" Name="KY Harm" ProgramChange="39"/>
+          <Patch Number="i40" Name="KY SyClv" ProgramChange="40"/>
+          <Patch Number="i41" Name="ME Bnshe" ProgramChange="41"/>
+          <Patch Number="i42" Name="ME Bubbl" ProgramChange="42"/>
+          <Patch Number="i43" Name="ME Hit" ProgramChange="43"/>
+          <Patch Number="i44" Name="ME Marin" ProgramChange="44"/>
+          <Patch Number="i45" Name="ME Mojo" ProgramChange="45"/>
+          <Patch Number="i46" Name="ME Poot" ProgramChange="46"/>
+          <Patch Number="i47" Name="ME Sweep" ProgramChange="47"/>
+          <Patch Number="i48" Name="ME Tabla" ProgramChange="48"/>
+          <Patch Number="i49" Name="ME Treml" ProgramChange="49"/>
+          <Patch Number="i50" Name="ME Angel" ProgramChange="50"/>
+          <Patch Number="i51" Name="ME Whisl" ProgramChange="51"/>
+          <Patch Number="i52" Name="OR Door0" ProgramChange="52"/>
+          <Patch Number="i53" Name="OR Jazz" ProgramChange="53"/>
+          <Patch Number="i54" Name="OR Pipe" ProgramChange="54"/>
+          <Patch Number="i55" Name="OR Rock" ProgramChange="55"/>
+          <Patch Number="i56" Name="OR Smoth" ProgramChange="56"/>
+          <Patch Number="i57" Name="SC Anti" ProgramChange="57"/>
+          <Patch Number="i58" Name="SC Bell2" ProgramChange="58"/>
+          <Patch Number="i59" Name="SC Bhind" ProgramChange="59"/>
+          <Patch Number="i60" Name="SC Blot" ProgramChange="60"/>
+          <Patch Number="i61" Name="SC Chop" ProgramChange="61"/>
+          <Patch Number="i62" Name="SC Klav" ProgramChange="62"/>
+          <Patch Number="i63" Name="DR Revrs" ProgramChange="63"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Internal 2">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="35"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="i00" Name="SC Hool" ProgramChange="0"/>
+          <Patch Number="i01" Name="SC Hand" ProgramChange="1"/>
+          <Patch Number="i02" Name="SC WooDX" ProgramChange="2"/>
+          <Patch Number="i03" Name="SC Wire" ProgramChange="3"/>
+          <Patch Number="i04" Name="SC Pain" ProgramChange="4"/>
+          <Patch Number="i05" Name="SC Pluck" ProgramChange="5"/>
+          <Patch Number="i06" Name="SC Reflx" ProgramChange="6"/>
+          <Patch Number="i07" Name="SC Sprkl" ProgramChange="7"/>
+          <Patch Number="i08" Name="SC Thumb" ProgramChange="8"/>
+          <Patch Number="i09" Name="SC Uzzy" ProgramChange="9"/>
+          <Patch Number="i10" Name="SC Vxcla" ProgramChange="10"/>
+          <Patch Number="i11" Name="SC Walk" ProgramChange="11"/>
+          <Patch Number="i12" Name="SC Wits" ProgramChange="12"/>
+          <Patch Number="i13" Name="SC Wow" ProgramChange="13"/>
+          <Patch Number="i14" Name="SE Alien" ProgramChange="14"/>
+          <Patch Number="i15" Name="SE Clox" ProgramChange="15"/>
+          <Patch Number="i16" Name="SE Crck" ProgramChange="16"/>
+          <Patch Number="i17" Name="SE Crsh" ProgramChange="17"/>
+          <Patch Number="i18" Name="SE Duel" ProgramChange="18"/>
+          <Patch Number="i19" Name="SE Fear" ProgramChange="19"/>
+          <Patch Number="i20" Name="SE Roll" ProgramChange="20"/>
+          <Patch Number="i21" Name="SE Lava" ProgramChange="21"/>
+          <Patch Number="i22" Name="SE Laze" ProgramChange="22"/>
+          <Patch Number="i23" Name="SE Mono" ProgramChange="23"/>
+          <Patch Number="i24" Name="SE Saw" ProgramChange="24"/>
+          <Patch Number="i25" Name="SE Swmp" ProgramChange="25"/>
+          <Patch Number="i26" Name="SE Vaqum" ProgramChange="26"/>
+          <Patch Number="i27" Name="SE Vektr" ProgramChange="27"/>
+          <Patch Number="i28" Name="SE Zip" ProgramChange="28"/>
+          <Patch Number="i29" Name="SL Ick" ProgramChange="29"/>
+          <Patch Number="i30" Name="SL 2VCO1" ProgramChange="30"/>
+          <Patch Number="i31" Name="SL Ash" ProgramChange="31"/>
+          <Patch Number="i32" Name="SL Glnt" ProgramChange="32"/>
+          <Patch Number="i33" Name="SL Oth" ProgramChange="33"/>
+          <Patch Number="i34" Name="SL Sqsaw" ProgramChange="34"/>
+          <Patch Number="i35" Name="SL Ut" ProgramChange="35"/>
+          <Patch Number="i36" Name="SP 1980" ProgramChange="36"/>
+          <Patch Number="i37" Name="SP Decay" ProgramChange="37"/>
+          <Patch Number="i38" Name="SP Ear" ProgramChange="38"/>
+          <Patch Number="i39" Name="SP Glas2" ProgramChange="39"/>
+          <Patch Number="i40" Name="SP It" ProgramChange="40"/>
+          <Patch Number="i41" Name="SP Lash" ProgramChange="41"/>
+          <Patch Number="i42" Name="SP Latt" ProgramChange="42"/>
+          <Patch Number="i43" Name="SP Lonly" ProgramChange="43"/>
+          <Patch Number="i44" Name="SP Lyle" ProgramChange="44"/>
+          <Patch Number="i45" Name="SP Melo" ProgramChange="45"/>
+          <Patch Number="i46" Name="SP Nsty2" ProgramChange="46"/>
+          <Patch Number="i47" Name="SP Oscil" ProgramChange="47"/>
+          <Patch Number="i48" Name="SP Ray" ProgramChange="48"/>
+          <Patch Number="i49" Name="SP SloMo" ProgramChange="49"/>
+          <Patch Number="i50" Name="ST Cello" ProgramChange="50"/>
+          <Patch Number="i51" Name="ST Cntra" ProgramChange="51"/>
+          <Patch Number="i52" Name="ST Chamb" ProgramChange="52"/>
+          <Patch Number="i53" Name="ST Arco2" ProgramChange="53"/>
+          <Patch Number="i54" Name="ST High" ProgramChange="54"/>
+          <Patch Number="i55" Name="ST Anlg2" ProgramChange="55"/>
+          <Patch Number="i56" Name="TP Bell" ProgramChange="56"/>
+          <Patch Number="i57" Name="TP Clock" ProgramChange="57"/>
+          <Patch Number="i58" Name="TP GSVib" ProgramChange="58"/>
+          <Patch Number="i59" Name="TP Tabla" ProgramChange="59"/>
+          <Patch Number="i60" Name="TP Boink" ProgramChange="60"/>
+          <Patch Number="i61" Name="WN Flut1" ProgramChange="61"/>
+          <Patch Number="i62" Name="WN Flut2" ProgramChange="62"/>
+          <Patch Number="i63" Name="DR Voice" ProgramChange="63"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset 1">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="34"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="p00" Name="AP Grand" ProgramChange="0"/>
+          <Patch Number="p01" Name="AP Chors" ProgramChange="1"/>
+          <Patch Number="p02" Name="AP Dance" ProgramChange="2"/>
+          <Patch Number="p03" Name="AP Rock" ProgramChange="3"/>
+          <Patch Number="p04" Name="AP Tack" ProgramChange="4"/>
+          <Patch Number="p05" Name="AP Touch" ProgramChange="5"/>
+          <Patch Number="p06" Name="BA Wood" ProgramChange="6"/>
+          <Patch Number="p07" Name="BA Pitz" ProgramChange="7"/>
+          <Patch Number="p08" Name="BA Fingr" ProgramChange="8"/>
+          <Patch Number="p09" Name="BA Frtls" ProgramChange="9"/>
+          <Patch Number="p10" Name="BA Pick1" ProgramChange="10"/>
+          <Patch Number="p11" Name="BA Pick2" ProgramChange="11"/>
+          <Patch Number="p12" Name="BA Slap" ProgramChange="12"/>
+          <Patch Number="p13" Name="BA Thump" ProgramChange="13"/>
+          <Patch Number="p14" Name="BA Syn 1" ProgramChange="14"/>
+          <Patch Number="p15" Name="BA Syn 2" ProgramChange="15"/>
+          <Patch Number="p16" Name="BA Syn 3" ProgramChange="16"/>
+          <Patch Number="p17" Name="BA Syn 4" ProgramChange="17"/>
+          <Patch Number="p18" Name="BA Syn 5" ProgramChange="18"/>
+          <Patch Number="p19" Name="BA Syn 6" ProgramChange="19"/>
+          <Patch Number="p20" Name="BA Syn 7" ProgramChange="20"/>
+          <Patch Number="p21" Name="BA Syn 8" ProgramChange="21"/>
+          <Patch Number="p22" Name="BA Syn 9" ProgramChange="22"/>
+          <Patch Number="p23" Name="BA Syn 10" ProgramChange="23"/>
+          <Patch Number="p24" Name="BA Syn 11" ProgramChange="24"/>
+          <Patch Number="p25" Name="BA Syn 12" ProgramChange="25"/>
+          <Patch Number="p26" Name="BR Trump" ProgramChange="26"/>
+          <Patch Number="p27" Name="BR Mute" ProgramChange="27"/>
+          <Patch Number="p28" Name="BR Horn" ProgramChange="28"/>
+          <Patch Number="p29" Name="BR Tromb" ProgramChange="29"/>
+          <Patch Number="p30" Name="BR Tuba" ProgramChange="30"/>
+          <Patch Number="p31" Name="BR TpEns" ProgramChange="31"/>
+          <Patch Number="p32" Name="BR Tpts" ProgramChange="32"/>
+          <Patch Number="p33" Name="BR TpSfz" ProgramChange="33"/>
+          <Patch Number="p34" Name="BR Stab" ProgramChange="34"/>
+          <Patch Number="p35" Name="BR EnsSF" ProgramChange="35"/>
+          <Patch Number="p36" Name="BR East" ProgramChange="36"/>
+          <Patch Number="p37" Name="Br Syn 1" ProgramChange="37"/>
+          <Patch Number="p38" Name="BR Syn 2" ProgramChange="38"/>
+          <Patch Number="p39" Name="BR Syn 3" ProgramChange="39"/>
+          <Patch Number="p40" Name="BR Syn 4" ProgramChange="40"/>
+          <Patch Number="p41" Name="BR Saw" ProgramChange="41"/>
+          <Patch Number="p42" Name="BR SawSF" ProgramChange="42"/>
+          <Patch Number="p43" Name="BR Swell" ProgramChange="43"/>
+          <Patch Number="p44" Name="BR Tooth" ProgramChange="44"/>
+          <Patch Number="p45" Name="BR Rezz" ProgramChange="45"/>
+          <Patch Number="p46" Name="BR Toto" ProgramChange="46"/>
+          <Patch Number="p47" Name="BR Wow" ProgramChange="47"/>
+          <Patch Number="p48" Name="CH Aah" ProgramChange="48"/>
+          <Patch Number="p49" Name="CH Ooh" ProgramChange="49"/>
+          <Patch Number="p50" Name="CH Pure" ProgramChange="50"/>
+          <Patch Number="p51" Name="CH Breth" ProgramChange="51"/>
+          <Patch Number="p52" Name="CH Ghost" ProgramChange="52"/>
+          <Patch Number="p53" Name="CH Quire" ProgramChange="53"/>
+          <Patch Number="p54" Name="CH Vespa" ProgramChange="54"/>
+          <Patch Number="p55" Name="CH Vocod" ProgramChange="55"/>
+          <Patch Number="p56" Name="FI Blue1" ProgramChange="56"/>
+          <Patch Number="p57" Name="FI Blue2" ProgramChange="57"/>
+          <Patch Number="p58" Name="FI Dudel" ProgramChange="58"/>
+          <Patch Number="p59" Name="FI DulcD" ProgramChange="59"/>
+          <Patch Number="p60" Name="FI DulcM" ProgramChange="60"/>
+          <Patch Number="p61" Name="FI Harp" ProgramChange="61"/>
+          <Patch Number="p62" Name="FI Kalim" ProgramChange="62"/>
+          <Patch Number="p63" Name="DR Kit" ProgramChange="63"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset 2">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="37"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="p00" Name="FI Lip" ProgramChange="0"/>
+          <Patch Number="p01" Name="FI Sitar" ProgramChange="1"/>
+          <Patch Number="p02" Name="GT Nylon" ProgramChange="2"/>
+          <Patch Number="p03" Name="GT Dark" ProgramChange="3"/>
+          <Patch Number="p04" Name="GT Steel" ProgramChange="4"/>
+          <Patch Number="p05" Name="GT 12Str" ProgramChange="5"/>
+          <Patch Number="p06" Name="GT Jazz" ProgramChange="6"/>
+          <Patch Number="p07" Name="GT Strt1" ProgramChange="7"/>
+          <Patch Number="p08" Name="GT Strt2" ProgramChange="8"/>
+          <Patch Number="p09" Name="GT Strt3" ProgramChange="9"/>
+          <Patch Number="p10" Name="GT Mute" ProgramChange="10"/>
+          <Patch Number="p11" Name="GT Harm" ProgramChange="11"/>
+          <Patch Number="p12" Name="GT Comp1" ProgramChange="12"/>
+          <Patch Number="p13" Name="GT Comp2" ProgramChange="13"/>
+          <Patch Number="p14" Name="GT Dist" ProgramChange="14"/>
+          <Patch Number="p15" Name="GT Warm" ProgramChange="15"/>
+          <Patch Number="p16" Name="GT Wah" ProgramChange="16"/>
+          <Patch Number="p17" Name="GT Feed" ProgramChange="17"/>
+          <Patch Number="p18" Name="KY EP 1" ProgramChange="18"/>
+          <Patch Number="p19" Name="KY EP 2" ProgramChange="19"/>
+          <Patch Number="p20" Name="KY EP 3" ProgramChange="20"/>
+          <Patch Number="p21" Name="KY EP 4" ProgramChange="21"/>
+          <Patch Number="p22" Name="KY EP 5" ProgramChange="22"/>
+          <Patch Number="p23" Name="KY EP 6" ProgramChange="23"/>
+          <Patch Number="p24" Name="KY EP 7" ProgramChange="24"/>
+          <Patch Number="p25" Name="KY EP 8" ProgramChange="25"/>
+          <Patch Number="p26" Name="KY EP 9" ProgramChange="26"/>
+          <Patch Number="p27" Name="KY EP 10" ProgramChange="27"/>
+          <Patch Number="p28" Name="KY EP 11" ProgramChange="28"/>
+          <Patch Number="p29" Name="KY EP 12" ProgramChange="29"/>
+          <Patch Number="p30" Name="KY Clav1" ProgramChange="30"/>
+          <Patch Number="p31" Name="KY Clav2" ProgramChange="31"/>
+          <Patch Number="p32" Name="KY Hrpsi" ProgramChange="32"/>
+          <Patch Number="p33" Name="KY Acrdn" ProgramChange="33"/>
+          <Patch Number="p34" Name="KY Cali1" ProgramChange="34"/>
+          <Patch Number="p35" Name="KY Cali2" ProgramChange="35"/>
+          <Patch Number="p36" Name="ME Bottl" ProgramChange="36"/>
+          <Patch Number="p37" Name="ME Gizmo" ProgramChange="37"/>
+          <Patch Number="p38" Name="ME Grind" ProgramChange="38"/>
+          <Patch Number="p39" Name="ME Hand" ProgramChange="39"/>
+          <Patch Number="p40" Name="ME Kali" ProgramChange="40"/>
+          <Patch Number="p41" Name="ME Mello" ProgramChange="41"/>
+          <Patch Number="p42" Name="ME Orch1" ProgramChange="42"/>
+          <Patch Number="p43" Name="ME Orch2" ProgramChange="43"/>
+          <Patch Number="p44" Name="ME OrchR" ProgramChange="44"/>
+          <Patch Number="p45" Name="ME Soro" ProgramChange="45"/>
+          <Patch Number="p46" Name="ME Templ" ProgramChange="46"/>
+          <Patch Number="p47" Name="ME Tink" ProgramChange="47"/>
+          <Patch Number="p48" Name="ME Tomi" ProgramChange="48"/>
+          <Patch Number="p49" Name="ME Voics" ProgramChange="49"/>
+          <Patch Number="p50" Name="OR Jaz B" ProgramChange="50"/>
+          <Patch Number="p51" Name="OR Smoke" ProgramChange="51"/>
+          <Patch Number="p52" Name="OR Airy" ProgramChange="52"/>
+          <Patch Number="p53" Name="OR Dist" ProgramChange="53"/>
+          <Patch Number="p54" Name="OR Cheap" ProgramChange="54"/>
+          <Patch Number="p55" Name="OR Pipes" ProgramChange="55"/>
+          <Patch Number="p56" Name="OR Click" ProgramChange="56"/>
+          <Patch Number="p57" Name="OR Perc" ProgramChange="57"/>
+          <Patch Number="p58" Name="SC Aha!" ProgramChange="58"/>
+          <Patch Number="p59" Name="SC Bari" ProgramChange="59"/>
+          <Patch Number="p60" Name="SC Bell" ProgramChange="60"/>
+          <Patch Number="p61" Name="SC Clav" ProgramChange="61"/>
+          <Patch Number="p62" Name="SC Digi1" ProgramChange="62"/>
+          <Patch Number="p63" Name="DR Zones" ProgramChange="63"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset 3">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="40"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="" Name="SC Digi2" ProgramChange="0"/>
+          <Patch Number="" Name="SC Digi3" ProgramChange="1"/>
+          <Patch Number="" Name="SC Ecko" ProgramChange="2"/>
+          <Patch Number="" Name="SE Fingr" ProgramChange="3"/>
+          <Patch Number="" Name="SC Housy" ProgramChange="4"/>
+          <Patch Number="" Name="SC Jrney" ProgramChange="5"/>
+          <Patch Number="" Name="SC Metal" ProgramChange="6"/>
+          <Patch Number="" Name="SC Mute" ProgramChange="7"/>
+          <Patch Number="" Name="SC Pan" ProgramChange="8"/>
+          <Patch Number="" Name="SC Perc" ProgramChange="9"/>
+          <Patch Number="" Name="SC Rezz" ProgramChange="10"/>
+          <Patch Number="" Name="SC Spike" ProgramChange="11"/>
+          <Patch Number="" Name="SC Sqiff" ProgramChange="12"/>
+          <Patch Number="" Name="SC Synnr" ProgramChange="13"/>
+          <Patch Number="" Name="SC Topia" ProgramChange="14"/>
+          <Patch Number="" Name="SC Vocal" ProgramChange="15"/>
+          <Patch Number="" Name="SC Vox" ProgramChange="16"/>
+          <Patch Number="" Name="SC Wires" ProgramChange="17"/>
+          <Patch Number="" Name="SC Wondr" ProgramChange="18"/>
+          <Patch Number="" Name="SE Alert" ProgramChange="19"/>
+          <Patch Number="" Name="SE Templ" ProgramChange="20"/>
+          <Patch Number="" Name="SE BDup" ProgramChange="21"/>
+          <Patch Number="" Name="SE Chou" ProgramChange="22"/>
+          <Patch Number="" Name="SE Demon" ProgramChange="23"/>
+          <Patch Number="" Name="SE Dropr" ProgramChange="24"/>
+          <Patch Number="" Name="SE Gobln" ProgramChange="25"/>
+          <Patch Number="" Name="SE Heli" ProgramChange="26"/>
+          <Patch Number="" Name="SE Hell" ProgramChange="27"/>
+          <Patch Number="" Name="SE Hyena" ProgramChange="28"/>
+          <Patch Number="" Name="SE Indus" ProgramChange="29"/>
+          <Patch Number="" Name="SE It" ProgramChange="30"/>
+          <Patch Number="" Name="SE Noize" ProgramChange="31"/>
+          <Patch Number="" Name="SE Pops" ProgramChange="32"/>
+          <Patch Number="" Name="SE Rain" ProgramChange="33"/>
+          <Patch Number="" Name="SE Rezo" ProgramChange="34"/>
+          <Patch Number="" Name="SE S&amp;H" ProgramChange="35"/>
+          <Patch Number="" Name="SE Star" ProgramChange="36"/>
+          <Patch Number="" Name="SE Up&amp;Up" ProgramChange="37"/>
+          <Patch Number="" Name="SE Wind" ProgramChange="38"/>
+          <Patch Number="" Name="SL Cutty" ProgramChange="39"/>
+          <Patch Number="" Name="SL Digi" ProgramChange="40"/>
+          <Patch Number="" Name="SL Dist" ProgramChange="41"/>
+          <Patch Number="" Name="SL Hamma" ProgramChange="42"/>
+          <Patch Number="" Name="SL Lead" ProgramChange="43"/>
+          <Patch Number="" Name="SL Lyle" ProgramChange="44"/>
+          <Patch Number="" Name="SL Pulse" ProgramChange="45"/>
+          <Patch Number="" Name="SL Saw 1" ProgramChange="46"/>
+          <Patch Number="" Name="SL Saw 2" ProgramChange="47"/>
+          <Patch Number="" Name="SL Squar" ProgramChange="48"/>
+          <Patch Number="" Name="SL Sync" ProgramChange="49"/>
+          <Patch Number="" Name="SL Whisl" ProgramChange="50"/>
+          <Patch Number="" Name="SP Abyss" ProgramChange="51"/>
+          <Patch Number="" Name="SP Big" ProgramChange="52"/>
+          <Patch Number="" Name="SP Exita" ProgramChange="53"/>
+          <Patch Number="" Name="SP Freqs" ProgramChange="54"/>
+          <Patch Number="" Name="SP Glass" ProgramChange="55"/>
+          <Patch Number="" Name="SP Goner" ProgramChange="56"/>
+          <Patch Number="" Name="SP Hyper" ProgramChange="57"/>
+          <Patch Number="" Name="SP Makro" ProgramChange="58"/>
+          <Patch Number="" Name="SP Mello" ProgramChange="59"/>
+          <Patch Number="" Name="SP Movie" ProgramChange="60"/>
+          <Patch Number="" Name="SP Nasty" ProgramChange="61"/>
+          <Patch Number="" Name="SP Nehan" ProgramChange="62"/>
+          <Patch Number="" Name="DR GMIDI" ProgramChange="63"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset 4">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="43"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="p00" Name="SP Paddy" ProgramChange="0"/>
+          <Patch Number="p01" Name="SP Phaze" ProgramChange="1"/>
+          <Patch Number="p02" Name="SP Poly" ProgramChange="2"/>
+          <Patch Number="p03" Name="SP SawSt" ProgramChange="3"/>
+          <Patch Number="p04" Name="SP Slow" ProgramChange="4"/>
+          <Patch Number="p05" Name="SP Smoky" ProgramChange="5"/>
+          <Patch Number="p06" Name="SP Space" ProgramChange="6"/>
+          <Patch Number="p07" Name="SP Sqare" ProgramChange="7"/>
+          <Patch Number="p08" Name="SP Sweep" ProgramChange="8"/>
+          <Patch Number="p09" Name="SP Sweet" ProgramChange="9"/>
+          <Patch Number="p10" Name="SP Vizon" ProgramChange="10"/>
+          <Patch Number="p11" Name="SP Wine" ProgramChange="11"/>
+          <Patch Number="p12" Name="ST Violn" ProgramChange="12"/>
+          <Patch Number="p13" Name="ST JeanL" ProgramChange="13"/>
+          <Patch Number="p14" Name="ST Sectn" ProgramChange="14"/>
+          <Patch Number="p15" Name="ST Power" ProgramChange="15"/>
+          <Patch Number="p16" Name="ST Deep" ProgramChange="16"/>
+          <Patch Number="p17" Name="ST Dark" ProgramChange="17"/>
+          <Patch Number="p18" Name="ST Brite" ProgramChange="18"/>
+          <Patch Number="p19" Name="ST Arco" ProgramChange="19"/>
+          <Patch Number="p20" Name="ST Sfz" ProgramChange="20"/>
+          <Patch Number="p21" Name="ST Pizz" ProgramChange="21"/>
+          <Patch Number="p22" Name="ST Tron" ProgramChange="22"/>
+          <Patch Number="p23" Name="ST Anlog" ProgramChange="23"/>
+          <Patch Number="p24" Name="ST Sizzl" ProgramChange="24"/>
+          <Patch Number="p25" Name="ST Synth" ProgramChange="25"/>
+          <Patch Number="p26" Name="ST Thin" ProgramChange="26"/>
+          <Patch Number="p27" Name="ST Combo" ProgramChange="27"/>
+          <Patch Number="p28" Name="TP Glock" ProgramChange="28"/>
+          <Patch Number="p29" Name="TP Xylo" ProgramChange="29"/>
+          <Patch Number="p30" Name="TP Vibes" ProgramChange="30"/>
+          <Patch Number="p31" Name="TP Tubal" ProgramChange="31"/>
+          <Patch Number="p32" Name="TP Hands" ProgramChange="32"/>
+          <Patch Number="p33" Name="TP Siam" ProgramChange="33"/>
+          <Patch Number="p34" Name="TP Steel" ProgramChange="34"/>
+          <Patch Number="p35" Name="TP Loggy" ProgramChange="35"/>
+          <Patch Number="p36" Name="TP Bambu" ProgramChange="36"/>
+          <Patch Number="p37" Name="TP Mrmba" ProgramChange="37"/>
+          <Patch Number="p38" Name="TP Timp" ProgramChange="38"/>
+          <Patch Number="p39" Name="TP Syn" ProgramChange="39"/>
+          <Patch Number="p40" Name="TP SynDr" ProgramChange="40"/>
+          <Patch Number="p41" Name="TP Tinkl" ProgramChange="41"/>
+          <Patch Number="p42" Name="TP Agone" ProgramChange="42"/>
+          <Patch Number="p43" Name="TP Angle" ProgramChange="43"/>
+          <Patch Number="p44" Name="WN Sopr" ProgramChange="44"/>
+          <Patch Number="p45" Name="WN Alto" ProgramChange="45"/>
+          <Patch Number="p46" Name="WN Tenor" ProgramChange="46"/>
+          <Patch Number="p47" Name="WN Bari" ProgramChange="47"/>
+          <Patch Number="p48" Name="WN SaxSF" ProgramChange="48"/>
+          <Patch Number="p49" Name="WN Picc" ProgramChange="49"/>
+          <Patch Number="p50" Name="WN Flute" ProgramChange="50"/>
+          <Patch Number="p51" Name="WN Pan" ProgramChange="51"/>
+          <Patch Number="p52" Name="WN Clari" ProgramChange="52"/>
+          <Patch Number="p53" Name="WN Oboe" ProgramChange="53"/>
+          <Patch Number="p54" Name="WN Basso" ProgramChange="54"/>
+          <Patch Number="p55" Name="WN Recor" ProgramChange="55"/>
+          <Patch Number="p56" Name="WN Breth" ProgramChange="56"/>
+          <Patch Number="p57" Name="MI Crash" ProgramChange="57"/>
+          <Patch Number="p58" Name="MI EPNP" ProgramChange="58"/>
+          <Patch Number="p59" Name="MI Hiss" ProgramChange="59"/>
+          <Patch Number="p60" Name="MI Ride" ProgramChange="60"/>
+          <Patch Number="p61" Name="MW EGBia" ProgramChange="61"/>
+          <Patch Number="p62" Name="AT EGBia" ProgramChange="62"/>
+          <Patch Number="p63" Name="DR Efect" ProgramChange="63"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Perf Internal">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="80"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="i00" Name="CO Aster" ProgramChange="0"/>
+          <Patch Number="i01" Name="AP Piano" ProgramChange="1"/>
+          <Patch Number="i02" Name="SP Mtrix" ProgramChange="2"/>
+          <Patch Number="i03" Name="SC Skank" ProgramChange="3"/>
+          <Patch Number="i04" Name="ME Sprk2" ProgramChange="4"/>
+          <Patch Number="i05" Name="BA Drive" ProgramChange="5"/>
+          <Patch Number="i06" Name="BR Fnfr2" ProgramChange="6"/>
+          <Patch Number="i07" Name="SE Devil" ProgramChange="7"/>
+          <Patch Number="i08" Name="ST Moin" ProgramChange="8"/>
+          <Patch Number="i09" Name="FI Dulcim" ProgramChange="9"/>
+          <Patch Number="i10" Name="CO Bells" ProgramChange="10"/>
+          <Patch Number="i11" Name="KY Knock" ProgramChange="11"/>
+          <Patch Number="i12" Name="SP Fanta" ProgramChange="12"/>
+          <Patch Number="i13" Name="SC Elec1" ProgramChange="13"/>
+          <Patch Number="i14" Name="ME Gokrk" ProgramChange="14"/>
+          <Patch Number="i15" Name="BA Susud" ProgramChange="15"/>
+          <Patch Number="i16" Name="BR Forth" ProgramChange="16"/>
+          <Patch Number="i17" Name="SE Swmp" ProgramChange="17"/>
+          <Patch Number="i18" Name="ST Legat" ProgramChange="18"/>
+          <Patch Number="i19" Name="GT Pedal" ProgramChange="19"/>
+          <Patch Number="i20" Name="CO Gloom" ProgramChange="20"/>
+          <Patch Number="i21" Name="OR Cool" ProgramChange="21"/>
+          <Patch Number="i22" Name="SP Flash" ProgramChange="22"/>
+          <Patch Number="i23" Name="SC Gob" ProgramChange="23"/>
+          <Patch Number="i24" Name="ME Max" ProgramChange="24"/>
+          <Patch Number="i25" Name="BA Sldge" ProgramChange="25"/>
+          <Patch Number="i26" Name="BR Synth" ProgramChange="26"/>
+          <Patch Number="i27" Name="SE Wall" ProgramChange="27"/>
+          <Patch Number="i28" Name="ST Accat" ProgramChange="28"/>
+          <Patch Number="i29" Name="GT Steel" ProgramChange="29"/>
+          <Patch Number="i30" Name="CO India" ProgramChange="30"/>
+          <Patch Number="i31" Name="OR Rock" ProgramChange="31"/>
+          <Patch Number="i32" Name="SP Atrio" ProgramChange="32"/>
+          <Patch Number="i33" Name="SC Woody" ProgramChange="33"/>
+          <Patch Number="i34" Name="ME Chorl" ProgramChange="34"/>
+          <Patch Number="i35" Name="GT Round" ProgramChange="35"/>
+          <Patch Number="i36" Name="BR Sfz2" ProgramChange="36"/>
+          <Patch Number="i37" Name="SE Rado" ProgramChange="37"/>
+          <Patch Number="i38" Name="ST LgSm" ProgramChange="38"/>
+          <Patch Number="i39" Name="SL Meteo" ProgramChange="39"/>
+          <Patch Number="i40" Name="CO Clock" ProgramChange="40"/>
+          <Patch Number="i41" Name="OR Mite" ProgramChange="41"/>
+          <Patch Number="i42" Name="SP Wind" ProgramChange="42"/>
+          <Patch Number="i43" Name="SC Arred" ProgramChange="43"/>
+          <Patch Number="i44" Name="ME Chom" ProgramChange="44"/>
+          <Patch Number="i45" Name="CO FMpad" ProgramChange="45"/>
+          <Patch Number="i46" Name="BR Tpts" ProgramChange="46"/>
+          <Patch Number="i47" Name="SE Indst" ProgramChange="47"/>
+          <Patch Number="i48" Name="CO Nuage" ProgramChange="48"/>
+          <Patch Number="i49" Name="SP Lodge" ProgramChange="49"/>
+          <Patch Number="i50" Name="SC Oz" ProgramChange="50"/>
+          <Patch Number="i51" Name="CO Japan" ProgramChange="51"/>
+          <Patch Number="i52" Name="KY Hrpzi" ProgramChange="52"/>
+          <Patch Number="i53" Name="SL Sqsaw" ProgramChange="53"/>
+          <Patch Number="i54" Name="BR CShrn" ProgramChange="54"/>
+          <Patch Number="i55" Name="CO Laura" ProgramChange="55"/>
+          <Patch Number="i56" Name="CO Orch2" ProgramChange="56"/>
+          <Patch Number="i57" Name="ME Hits" ProgramChange="57"/>
+          <Patch Number="i58" Name="ST Solo" ProgramChange="58"/>
+          <Patch Number="i59" Name="CO Soul" ProgramChange="59"/>
+          <Patch Number="i60" Name="GT Wires" ProgramChange="60"/>
+          <Patch Number="i61" Name="OR Pan" ProgramChange="61"/>
+          <Patch Number="i62" Name="BR 3 Osc" ProgramChange="62"/>
+          <Patch Number="i63" Name="CO Fire" ProgramChange="63"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Perf Preset 1">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="82"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="p00" Name="CO Dream" ProgramChange="0"/>
+          <Patch Number="p01" Name="KY Piano" ProgramChange="1"/>
+          <Patch Number="p02" Name="SP Aztec" ProgramChange="2"/>
+          <Patch Number="p03" Name="SC Wyrz" ProgramChange="3"/>
+          <Patch Number="p04" Name="CH Choir" ProgramChange="4"/>
+          <Patch Number="p05" Name="BA Pick1" ProgramChange="5"/>
+          <Patch Number="p06" Name="ST Rosin" ProgramChange="6"/>
+          <Patch Number="p07" Name="BR Stab" ProgramChange="7"/>
+          <Patch Number="p08" Name="CO Soire" ProgramChange="8"/>
+          <Patch Number="p09" Name="OR Bee" ProgramChange="9"/>
+          <Patch Number="p10" Name="SP Lush" ProgramChange="10"/>
+          <Patch Number="p11" Name="SC Rude" ProgramChange="11"/>
+          <Patch Number="p12" Name="CH Breth" ProgramChange="12"/>
+          <Patch Number="p13" Name="BA Swap" ProgramChange="13"/>
+          <Patch Number="p14" Name="ST Octvs" ProgramChange="14"/>
+          <Patch Number="p15" Name="BR Pro5" ProgramChange="15"/>
+          <Patch Number="p16" Name="CO Orch" ProgramChange="16"/>
+          <Patch Number="p17" Name="KY Digi1" ProgramChange="17"/>
+          <Patch Number="p18" Name="SP Faery" ProgramChange="18"/>
+          <Patch Number="p19" Name="SC Talk" ProgramChange="19"/>
+          <Patch Number="p20" Name="CH OohAh" ProgramChange="20"/>
+          <Patch Number="p21" Name="BA Pick2" ProgramChange="21"/>
+          <Patch Number="p22" Name="ST Pitz" ProgramChange="22"/>
+          <Patch Number="p23" Name="BR Sfz" ProgramChange="23"/>
+          <Patch Number="p24" Name="CO Sable" ProgramChange="24"/>
+          <Patch Number="p25" Name="KY Roady" ProgramChange="25"/>
+          <Patch Number="p26" Name="SP Slide" ProgramChange="26"/>
+          <Patch Number="p27" Name="SC Klav" ProgramChange="27"/>
+          <Patch Number="p28" Name="CH Vespa" ProgramChange="28"/>
+          <Patch Number="p29" Name="BA -Fret" ProgramChange="29"/>
+          <Patch Number="p30" Name="ST Rings" ProgramChange="30"/>
+          <Patch Number="p31" Name="BR Forte" ProgramChange="31"/>
+          <Patch Number="p32" Name="CO Jazzr" ProgramChange="32"/>
+          <Patch Number="p33" Name="OR Gimme" ProgramChange="33"/>
+          <Patch Number="p34" Name="SP Lite" ProgramChange="34"/>
+          <Patch Number="p35" Name="SC Buzz" ProgramChange="35"/>
+          <Patch Number="p36" Name="CH Munch" ProgramChange="36"/>
+          <Patch Number="p37" Name="BA Rezzo" ProgramChange="37"/>
+          <Patch Number="p38" Name="ST Dark" ProgramChange="38"/>
+          <Patch Number="p39" Name="BR Saw" ProgramChange="39"/>
+          <Patch Number="p40" Name="CO E.S.P." ProgramChange="40"/>
+          <Patch Number="p41" Name="KY Elek" ProgramChange="41"/>
+          <Patch Number="p42" Name="SP Stars" ProgramChange="42"/>
+          <Patch Number="p43" Name="SC Snaps" ProgramChange="43"/>
+          <Patch Number="p44" Name="CH Abyss" ProgramChange="44"/>
+          <Patch Number="p45" Name="BA Mini" ProgramChange="45"/>
+          <Patch Number="p46" Name="ST 2002" ProgramChange="46"/>
+          <Patch Number="p47" Name="BR Obie" ProgramChange="47"/>
+          <Patch Number="p48" Name="CO Pnooh" ProgramChange="48"/>
+          <Patch Number="p49" Name="OR Nave" ProgramChange="49"/>
+          <Patch Number="p50" Name="SP Ace" ProgramChange="50"/>
+          <Patch Number="p51" Name="SC Point" ProgramChange="51"/>
+          <Patch Number="p52" Name="CH Comet" ProgramChange="52"/>
+          <Patch Number="p53" Name="BA Guppy" ProgramChange="53"/>
+          <Patch Number="p54" Name="ST Big" ProgramChange="54"/>
+          <Patch Number="p55" Name="BR Fatti" ProgramChange="55"/>
+          <Patch Number="p56" Name="CO Inca" ProgramChange="56"/>
+          <Patch Number="p57" Name="KY Funky" ProgramChange="57"/>
+          <Patch Number="p58" Name="SP Vekta" ProgramChange="58"/>
+          <Patch Number="p59" Name="SC Pizza" ProgramChange="59"/>
+          <Patch Number="p60" Name="CH Oral" ProgramChange="60"/>
+          <Patch Number="p61" Name="BA Doom" ProgramChange="61"/>
+          <Patch Number="p62" Name="ST Tron" ProgramChange="62"/>
+          <Patch Number="p63" Name="BR Swell" ProgramChange="63"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Perf Preset 2">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="85"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="p00" Name="CO Ncert" ProgramChange="0"/>
+          <Patch Number="p01" Name="KY Loud" ProgramChange="1"/>
+          <Patch Number="p02" Name="SP Carol" ProgramChange="2"/>
+          <Patch Number="p03" Name="SL Mitey" ProgramChange="3"/>
+          <Patch Number="p04" Name="ME Orion" ProgramChange="4"/>
+          <Patch Number="p05" Name="GT Amped" ProgramChange="5"/>
+          <Patch Number="p06" Name="SE Rolls" ProgramChange="6"/>
+          <Patch Number="p07" Name="WN Tenor" ProgramChange="7"/>
+          <Patch Number="p08" Name="CO DxStr" ProgramChange="8"/>
+          <Patch Number="p09" Name="OR Sine" ProgramChange="9"/>
+          <Patch Number="p10" Name="SP Venus" ProgramChange="10"/>
+          <Patch Number="p11" Name="SL Chick" ProgramChange="11"/>
+          <Patch Number="p12" Name="ME Glitz" ProgramChange="12"/>
+          <Patch Number="p13" Name="GT Strat" ProgramChange="13"/>
+          <Patch Number="p14" Name="SE C-tar" ProgramChange="14"/>
+          <Patch Number="p15" Name="WN Sacks" ProgramChange="15"/>
+          <Patch Number="p16" Name="CO Stass" ProgramChange="16"/>
+          <Patch Number="p17" Name="KY Digi2" ProgramChange="17"/>
+          <Patch Number="p18" Name="SP Whino" ProgramChange="18"/>
+          <Patch Number="p19" Name="SL L7" ProgramChange="19"/>
+          <Patch Number="p20" Name="ME Honto" ProgramChange="20"/>
+          <Patch Number="p21" Name="GT Phunk" ProgramChange="21"/>
+          <Patch Number="p22" Name="SE Xeno" ProgramChange="22"/>
+          <Patch Number="p23" Name="WN Alto" ProgramChange="23"/>
+          <Patch Number="p24" Name="CO Megin" ProgramChange="24"/>
+          <Patch Number="p25" Name="KY Jerry" ProgramChange="25"/>
+          <Patch Number="p26" Name="SP Hinx" ProgramChange="26"/>
+          <Patch Number="p27" Name="SL Eazy" ProgramChange="27"/>
+          <Patch Number="p28" Name="ME Mars" ProgramChange="28"/>
+          <Patch Number="p29" Name="GT Rock" ProgramChange="29"/>
+          <Patch Number="p30" Name="SE Storm" ProgramChange="30"/>
+          <Patch Number="p31" Name="WN Panic" ProgramChange="31"/>
+          <Patch Number="p32" Name="CO Gospl" ProgramChange="32"/>
+          <Patch Number="p33" Name="OR Cheap" ProgramChange="33"/>
+          <Patch Number="p34" Name="SP Pluto" ProgramChange="34"/>
+          <Patch Number="p35" Name="SC Clank" ProgramChange="35"/>
+          <Patch Number="p36" Name="ME Ecko" ProgramChange="36"/>
+          <Patch Number="p37" Name="GT Harm" ProgramChange="37"/>
+          <Patch Number="p38" Name="SE Zoom" ProgramChange="38"/>
+          <Patch Number="p39" Name="BR Reeds" ProgramChange="39"/>
+          <Patch Number="p40" Name="CO Ethos" ProgramChange="40"/>
+          <Patch Number="p41" Name="KY PnoMW" ProgramChange="41"/>
+          <Patch Number="p42" Name="SP Synth" ProgramChange="42"/>
+          <Patch Number="p43" Name="FI Santo" ProgramChange="43"/>
+          <Patch Number="p44" Name="ME Alien" ProgramChange="44"/>
+          <Patch Number="p45" Name="GT El12" ProgramChange="45"/>
+          <Patch Number="p46" Name="SE Delay" ProgramChange="46"/>
+          <Patch Number="p47" Name="BR Lips" ProgramChange="47"/>
+          <Patch Number="p48" Name="CO Kings" ProgramChange="48"/>
+          <Patch Number="p49" Name="KY Calio" ProgramChange="49"/>
+          <Patch Number="p50" Name="SP Anlog" ProgramChange="50"/>
+          <Patch Number="p51" Name="SC Wind" ProgramChange="51"/>
+          <Patch Number="p52" Name="ME Spark" ProgramChange="52"/>
+          <Patch Number="p53" Name="GT 12Str" ProgramChange="53"/>
+          <Patch Number="p54" Name="SE Flies" ProgramChange="54"/>
+          <Patch Number="p55" Name="BR Miles" ProgramChange="55"/>
+          <Patch Number="p56" Name="CO Happi" ProgramChange="56"/>
+          <Patch Number="p57" Name="KY Digi3" ProgramChange="57"/>
+          <Patch Number="p58" Name="SP Arpeg" ProgramChange="58"/>
+          <Patch Number="p59" Name="TP Bells" ProgramChange="59"/>
+          <Patch Number="p60" Name="ME Hit" ProgramChange="60"/>
+          <Patch Number="p61" Name="GT Acstc" ProgramChange="61"/>
+          <Patch Number="p62" Name="SE Hero" ProgramChange="62"/>
+          <Patch Number="p63" Name="BR Fanfr" ProgramChange="63"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

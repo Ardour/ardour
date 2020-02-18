@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>E-mu Systems</Manufacturer>
+    <Model>Audity 2000</Model>
+    <Model>B-3</Model>
+    <Model>B-3 Turbo</Model>
+    <Model>HALO</Model>
+    <Model>MK-6</Model>
+    <Model>Mo' Phatt</Model>
+    <Model>Mo' Phatt Turbo</Model>
+    <Model>MP-7</Model>
+    <Model>Orbit V3</Model>
+    <Model>PK-6</Model>
+    <Model>Planet Earth</Model>
+    <Model>Planet Earth Turbo</Model>
+    <Model>Proteus 1000</Model>
+    <Model>Proteus 2000</Model>
+    <Model>Proteus 2500</Model>
+    <Model>Proteus Custom</Model>
+    <Model>Vintage Keys</Model>
+    <Model>Vintage Pro</Model>
+    <Model>Virtuoso 2000</Model>
+    <Model>XK-6</Model>
+    <Model>XL-1</Model>
+    <Model>XL-1 Turbo</Model>
+    <Model>XL-7</Model>
+    <PatchNameList Name="Holy Grail Bank 0">
+      <Patch Number="000" Name="pno:TheHolyGrail" ProgramChange="0"/>
+      <Patch Number="001" Name="pno:Concert Pno" ProgramChange="1"/>
+      <Patch Number="002" Name="pno:Concert 2" ProgramChange="2"/>
+      <Patch Number="003" Name="pno:Studio" ProgramChange="3"/>
+      <Patch Number="004" Name="pno:Piano Bar" ProgramChange="4"/>
+      <Patch Number="005" Name="pno:R&amp;B" ProgramChange="5"/>
+      <Patch Number="006" Name="pno:Ballad" ProgramChange="6"/>
+      <Patch Number="007" Name="pno:Wide Ballad" ProgramChange="7"/>
+      <Patch Number="008" Name="pno:Smooth" ProgramChange="8"/>
+      <Patch Number="009" Name="pno:Rocker" ProgramChange="9"/>
+      <Patch Number="010" Name="pno:Rock" ProgramChange="10"/>
+      <Patch Number="011" Name="pno:Stadium" ProgramChange="11"/>
+      <Patch Number="012" Name="pno:GrailRock" ProgramChange="12"/>
+      <Patch Number="013" Name="pno:Techno" ProgramChange="13"/>
+      <Patch Number="014" Name="pno:Club" ProgramChange="14"/>
+      <Patch Number="015" Name="pno:GrailHouseWl" ProgramChange="15"/>
+      <Patch Number="016" Name="pno:HonkyTonk 1" ProgramChange="16"/>
+      <Patch Number="017" Name="pno:HonkyTonk 2" ProgramChange="17"/>
+      <Patch Number="018" Name="pno:Grand Flange" ProgramChange="18"/>
+      <Patch Number="019" Name="pno:Flange 2" ProgramChange="19"/>
+      <Patch Number="020" Name="pno:Chorus 1" ProgramChange="20"/>
+      <Patch Number="021" Name="pno:Chorus 2" ProgramChange="21"/>
+      <Patch Number="022" Name="pno:Dance Hall" ProgramChange="22"/>
+      <Patch Number="023" Name="pno:Slap Back" ProgramChange="23"/>
+      <Patch Number="024" Name="pno:Pong" ProgramChange="24"/>
+      <Patch Number="025" Name="pno:Tack" ProgramChange="25"/>
+      <Patch Number="026" Name="pno:Slap Tack 1" ProgramChange="26"/>
+      <Patch Number="027" Name="pno:Slap Tack 2" ProgramChange="27"/>
+      <Patch Number="028" Name="pno:Velo Light" ProgramChange="28"/>
+      <Patch Number="029" Name="pno:Velo Med" ProgramChange="29"/>
+      <Patch Number="030" Name="pno:Heavy Harp" ProgramChange="30"/>
+      <Patch Number="031" Name="pno:WeightedKey1" ProgramChange="31"/>
+      <Patch Number="032" Name="pno:WeightedKey2" ProgramChange="32"/>
+      <Patch Number="033" Name="pno:WeightedKey3" ProgramChange="33"/>
+      <Patch Number="034" Name="pno:WeightedKey4" ProgramChange="34"/>
+      <Patch Number="035" Name="pno:1 Layer" ProgramChange="35"/>
+      <Patch Number="036" Name="pno:AnotherLayer" ProgramChange="36"/>
+      <Patch Number="037" Name="pno:Mono" ProgramChange="37"/>
+      <Patch Number="038" Name="pno:Versatile 1" ProgramChange="38"/>
+      <Patch Number="039" Name="pno:Versatile 2" ProgramChange="39"/>
+      <Patch Number="040" Name="pno:Dark" ProgramChange="40"/>
+      <Patch Number="041" Name="pno:Somber" ProgramChange="41"/>
+      <Patch Number="042" Name="pno:Mr. Mello" ProgramChange="42"/>
+      <Patch Number="043" Name="pno:Slow" ProgramChange="43"/>
+      <Patch Number="044" Name="pno:Briter" ProgramChange="44"/>
+      <Patch Number="045" Name="pno:Parlor" ProgramChange="45"/>
+      <Patch Number="046" Name="pno:Cut Hard" ProgramChange="46"/>
+      <Patch Number="047" Name="pno:Cut Sustain" ProgramChange="47"/>
+      <Patch Number="048" Name="pno:Pacific" ProgramChange="48"/>
+      <Patch Number="049" Name="pno:Manor" ProgramChange="49"/>
+      <Patch Number="050" Name="pno:Percussive" ProgramChange="50"/>
+      <Patch Number="051" Name="pno:Pann" ProgramChange="51"/>
+      <Patch Number="052" Name="pno:Variation 1" ProgramChange="52"/>
+      <Patch Number="053" Name="pno:Variation 2" ProgramChange="53"/>
+      <Patch Number="054" Name="pno:Variation 3" ProgramChange="54"/>
+      <Patch Number="055" Name="pno:Variation 4" ProgramChange="55"/>
+      <Patch Number="056" Name="pno:Variation 5" ProgramChange="56"/>
+      <Patch Number="057" Name="pno:Variation 6" ProgramChange="57"/>
+      <Patch Number="058" Name="pno:Cool Cat" ProgramChange="58"/>
+      <Patch Number="059" Name="pno:Symp Res 1" ProgramChange="59"/>
+      <Patch Number="060" Name="pno:Symp Res 2" ProgramChange="60"/>
+      <Patch Number="061" Name="pno:Max Res" ProgramChange="61"/>
+      <Patch Number="062" Name="pno:ResonanceOnC" ProgramChange="62"/>
+      <Patch Number="063" Name="pno:SostenutoOn2" ProgramChange="63"/>
+      <Patch Number="064" Name="pno:Sostenuto 2" ProgramChange="64"/>
+      <Patch Number="065" Name="pno:FS2 FX" ProgramChange="65"/>
+      <Patch Number="066" Name="pno:FS2SoftPedal" ProgramChange="66"/>
+      <Patch Number="067" Name="pno:FS2BassPedal" ProgramChange="67"/>
+      <Patch Number="068" Name="pno:Upright" ProgramChange="68"/>
+      <Patch Number="069" Name="pno:FX MWheel 1" ProgramChange="69"/>
+      <Patch Number="070" Name="pno:FX MWheel 2" ProgramChange="70"/>
+      <Patch Number="071" Name="pno:FX MWheel 3" ProgramChange="71"/>
+      <Patch Number="072" Name="pno:Dis On C" ProgramChange="72"/>
+      <Patch Number="073" Name="pno:Delay On C" ProgramChange="73"/>
+      <Patch Number="074" Name="cmb:Jazz Joint" ProgramChange="74"/>
+      <Patch Number="075" Name="cmb:Bass Split 2" ProgramChange="75"/>
+      <Patch Number="076" Name="cmb:Pizz/Piano" ProgramChange="76"/>
+      <Patch Number="077" Name="cmb:Tine Grand" ProgramChange="77"/>
+      <Patch Number="078" Name="cmb:Tine 2" ProgramChange="78"/>
+      <Patch Number="079" Name="cmb:Tine 3" ProgramChange="79"/>
+      <Patch Number="080" Name="cmb:Grand &amp; B" ProgramChange="80"/>
+      <Patch Number="081" Name="cmb:Biano" ProgramChange="81"/>
+      <Patch Number="082" Name="cmb:Analog" ProgramChange="82"/>
+      <Patch Number="083" Name="cmb:Digital" ProgramChange="83"/>
+      <Patch Number="084" Name="cmb:Piano&amp;String" ProgramChange="84"/>
+      <Patch Number="085" Name="cmb:Piano &amp; Saw" ProgramChange="85"/>
+      <Patch Number="086" Name="cmb:StringGrail" ProgramChange="86"/>
+      <Patch Number="087" Name="cmb:Padded" ProgramChange="87"/>
+      <Patch Number="088" Name="cmb:Votif" ProgramChange="88"/>
+      <Patch Number="089" Name="cmb:Voxis" ProgramChange="89"/>
+      <Patch Number="090" Name="cmb:Breath" ProgramChange="90"/>
+      <Patch Number="091" Name="cmb:Soul" ProgramChange="91"/>
+      <Patch Number="092" Name="cmb:Lezzlee" ProgramChange="92"/>
+      <Patch Number="093" Name="cmb:Worship" ProgramChange="93"/>
+      <Patch Number="094" Name="cmb:B n' O" ProgramChange="94"/>
+      <Patch Number="095" Name="cmb:Harmonic" ProgramChange="95"/>
+      <Patch Number="096" Name="cmb:SineBelow 1" ProgramChange="96"/>
+      <Patch Number="097" Name="cmb:SineBelow 2" ProgramChange="97"/>
+      <Patch Number="098" Name="cmb:Piano Dianne" ProgramChange="98"/>
+      <Patch Number="099" Name="cmb:Fog Bank" ProgramChange="99"/>
+      <Patch Number="100" Name="cmb:Piano Roll" ProgramChange="100"/>
+      <Patch Number="101" Name="cmb:Dynorganic" ProgramChange="101"/>
+      <Patch Number="102" Name="pad:Padd Grail" ProgramChange="102"/>
+      <Patch Number="103" Name="pad:ResMagic1" ProgramChange="103"/>
+      <Patch Number="104" Name="pad:ResMagic2" ProgramChange="104"/>
+      <Patch Number="105" Name="pad:Magician" ProgramChange="105"/>
+      <Patch Number="106" Name="pad:Spacey" ProgramChange="106"/>
+      <Patch Number="107" Name="pad:Errett&quot;s" ProgramChange="107"/>
+      <Patch Number="108" Name="pad:RezDropper" ProgramChange="108"/>
+      <Patch Number="109" Name="pad:Whisper" ProgramChange="109"/>
+      <Patch Number="110" Name="pad:Grail Trails" ProgramChange="110"/>
+      <Patch Number="111" Name="pad:Voice Over" ProgramChange="111"/>
+      <Patch Number="112" Name="sfx:Transpiano" ProgramChange="112"/>
+      <Patch Number="113" Name="sfx:Key Huffer" ProgramChange="113"/>
+      <Patch Number="114" Name="sfx:Scored" ProgramChange="114"/>
+      <Patch Number="115" Name="sfx:Scared" ProgramChange="115"/>
+      <Patch Number="116" Name="sfx:Nasal Somber" ProgramChange="116"/>
+      <Patch Number="117" Name="sfx:VMS Model l" ProgramChange="117"/>
+      <Patch Number="118" Name="sfx:VMS Model 2" ProgramChange="118"/>
+      <Patch Number="119" Name="sfx:VMS Model 3" ProgramChange="119"/>
+      <Patch Number="120" Name="sfx:VMS Model 4" ProgramChange="120"/>
+      <Patch Number="121" Name="sfx:TreasureChst" ProgramChange="121"/>
+      <Patch Number="122" Name="sfx:L'Omnibus" ProgramChange="122"/>
+      <Patch Number="123" Name="sfx:Moonscape" ProgramChange="123"/>
+      <Patch Number="124" Name="sfx:Submerged" ProgramChange="124"/>
+      <Patch Number="125" Name="sfx:Future Now" ProgramChange="125"/>
+      <Patch Number="126" Name="sfx:MeteorShower" ProgramChange="126"/>
+      <Patch Number="127" Name="sfx:Mojave Dawn" ProgramChange="127"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

@@ -1,20 +1,20 @@
 /*
- * Copyright (C) 2016 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2016-2018 Robin Gareus <robin@gareus.org>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <algorithm>
@@ -78,6 +78,7 @@ void
 ARDOUR::DSP::process_map (BufferSet* bufs, const ChanMapping& in, const ChanMapping& out, pframes_t nframes, samplecnt_t offset, const DataType& dt)
 {
 	const ChanMapping::Mappings& im (in.mappings());
+	const ChanMapping::Mappings& om (out.mappings());
 
 	for (ChanMapping::Mappings::const_iterator tm = im.begin(); tm != im.end(); ++tm) {
 		if (tm->first != dt) { continue; }
@@ -85,7 +86,7 @@ ARDOUR::DSP::process_map (BufferSet* bufs, const ChanMapping& in, const ChanMapp
 			bool valid;
 			const uint32_t idx = out.get (dt, i->second, &valid);
 			if (valid && idx != i->first) {
-				bufs->get (dt, idx).read_from (bufs->get (dt, i->first), nframes, offset, offset);
+				bufs->get_available (dt, idx).read_from (bufs->get_available (dt, i->first), nframes, offset, offset);
 			}
 		}
 	}
@@ -95,11 +96,22 @@ ARDOUR::DSP::process_map (BufferSet* bufs, const ChanMapping& in, const ChanMapp
 			bool valid;
 			in.get_src (dt, i->first, &valid);
 			if (!valid) {
-				bufs->get (dt, i->second).silence (nframes, offset);
+				bufs->get_available (dt, i->second).silence (nframes, offset);
 			}
 		}
 	}
 
+	/* reverse lookup (in case input map is empty */
+	for (ChanMapping::Mappings::const_iterator tm = om.begin(); tm != om.end(); ++tm) {
+		if (tm->first != dt) { continue; }
+		for (ChanMapping::TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
+			bool valid;
+			in.get_src (dt, i->first, &valid);
+			if (!valid) {
+				bufs->get_available (dt, i->second).silence (nframes, offset);
+			}
+		}
+	}
 }
 
 LowPass::LowPass (double samplerate, float freq)

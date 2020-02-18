@@ -1,22 +1,23 @@
 /*
-    Copyright (C) 2008 Paul Davis
-    Author: Sakari Bergen
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2008-2010 Sakari Bergen <sakari.bergen@beatwaves.net>
+ * Copyright (C) 2008-2016 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009 David Robillard <d@drobilla.net>
+ * Copyright (C) 2017-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include "ardour/export_formats.h"
 
@@ -32,6 +33,13 @@ ExportFormat::has_sample_format ()
 {
 	return dynamic_cast<HasSampleFormat *> (this);
 }
+
+bool
+ExportFormat::has_codec_quality ()
+{
+	return dynamic_cast<HasCodecQuality *> (this);
+}
+
 
 bool
 ExportFormat::sample_format_is_compatible (SampleFormat format) const
@@ -268,6 +276,12 @@ ExportFormatOggVorbis::ExportFormatOggVorbis ()
 	add_sample_rate (SR_192);
 	add_sample_rate (SR_Session);
 
+	/* these are 100 vorbis_encode_init_vbr() quality */
+	add_codec_quality ("Low (0)",           0);
+	add_codec_quality ("Default (4)",      40);
+	add_codec_quality ("High (6)",         60);
+	add_codec_quality ("Very High (10)",  100);
+
 	add_endianness (E_FileDefault);
 
 	set_extension ("ogg");
@@ -364,5 +378,55 @@ ExportFormatBWF::set_compatibility_state (ExportFormatCompatibility const & comp
 	set_compatible (compatible);
 	return compatible;
 }
+
+
+/*** FFMPEG Pipe ***/
+
+ExportFormatFFMPEG::ExportFormatFFMPEG (std::string const& name, std::string const& ext)
+{
+	set_name (name);
+	set_format_id (F_FFMPEG);
+	sample_formats.insert (SF_Float);
+
+	add_sample_rate (SR_8);
+	add_sample_rate (SR_22_05);
+	add_sample_rate (SR_44_1);
+	add_sample_rate (SR_48);
+	add_sample_rate (SR_Session);
+
+	add_endianness (E_Little);
+
+	add_codec_quality ("VBR 220-260 kb/s",  0);
+	add_codec_quality ("VBR 190-250 kb/s", -1);
+	add_codec_quality ("VBR 170-210 kb/s", -2);
+	add_codec_quality ("VBR 150-195 kb/s", -3);
+	add_codec_quality ("VBR 140-185 kb/s", -4);
+	add_codec_quality ("VBR 120-150 kb/s", -5);
+	add_codec_quality ("VBR 100-130 kb/s", -6);
+	add_codec_quality ("VBR 80-120 kb/s",  -7);
+	add_codec_quality ("VBR 70-105 kb/s",  -8);
+	add_codec_quality ("VBR 45-85 kb/s",   -9);
+	/*  Available CBR options are:
+	 *  8, 16, 24, 32, 40, 48, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320
+	 */
+	add_codec_quality ("CBR  64 kb/s",     64);
+	add_codec_quality ("CBR 128 kb/s",    128);
+	add_codec_quality ("CBR 160 kb/s",    160);
+	add_codec_quality ("CBR 192 kb/s",    192);
+	add_codec_quality ("CBR 256 kb/s",    256);
+	add_codec_quality ("CBR 320 kb/s",    320);
+
+	set_extension (ext);
+	set_quality (Q_LossyCompression);
+}
+
+bool
+ExportFormatFFMPEG::set_compatibility_state (ExportFormatCompatibility const & compatibility)
+{
+	bool compatible = compatibility.has_format (F_FFMPEG);
+	set_compatible (compatible);
+	return compatible;
+}
+
 
 }; // namespace ARDOUR

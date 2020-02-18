@@ -1,21 +1,26 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2006-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2007-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2012-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015-2018 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2016-2017 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2016 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cmath>
 #include <climits>
@@ -35,7 +40,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/convert.h"
 
-#include "evoral/Curve.hpp"
+#include "evoral/Curve.h"
 
 #include "ardour/audioregion.h"
 #include "ardour/session.h"
@@ -51,9 +56,6 @@
 #include "ardour/progress.h"
 
 #include "ardour/sndfilesource.h"
-#ifdef HAVE_COREAUDIO
-#include "ardour/coreaudiosource.h"
-#endif // HAVE_COREAUDIO
 
 #include "pbd/i18n.h"
 #include <locale.h>
@@ -83,7 +85,8 @@ namespace ARDOUR {
 static void
 reverse_curve (boost::shared_ptr<Evoral::ControlList> dst, boost::shared_ptr<const Evoral::ControlList> src)
 {
-	size_t len = src->back()->when;
+	size_t len = src->when(false);
+	// TODO read-lock of src (!)
 	for (Evoral::ControlList::const_reverse_iterator it = src->rbegin(); it!=src->rend(); it++) {
 		dst->fast_simple_add (len - (*it)->when, (*it)->value);
 	}
@@ -150,27 +153,27 @@ void
 AudioRegion::make_property_quarks ()
 {
 	Properties::envelope_active.property_id = g_quark_from_static_string (X_("envelope-active"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for envelope-active = %1\n", 	Properties::envelope_active.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for envelope-active = %1\n", Properties::envelope_active.property_id));
 	Properties::default_fade_in.property_id = g_quark_from_static_string (X_("default-fade-in"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for default-fade-in = %1\n", 	Properties::default_fade_in.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for default-fade-in = %1\n", Properties::default_fade_in.property_id));
 	Properties::default_fade_out.property_id = g_quark_from_static_string (X_("default-fade-out"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for default-fade-out = %1\n", 	Properties::default_fade_out.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for default-fade-out = %1\n", Properties::default_fade_out.property_id));
 	Properties::fade_in_active.property_id = g_quark_from_static_string (X_("fade-in-active"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-in-active = %1\n", 	Properties::fade_in_active.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-in-active = %1\n", Properties::fade_in_active.property_id));
 	Properties::fade_out_active.property_id = g_quark_from_static_string (X_("fade-out-active"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-out-active = %1\n", 	Properties::fade_out_active.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-out-active = %1\n", Properties::fade_out_active.property_id));
 	Properties::scale_amplitude.property_id = g_quark_from_static_string (X_("scale-amplitude"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for scale-amplitude = %1\n", 	Properties::scale_amplitude.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for scale-amplitude = %1\n", Properties::scale_amplitude.property_id));
 	Properties::fade_in.property_id = g_quark_from_static_string (X_("FadeIn"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for FadeIn = %1\n",		Properties::fade_in.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for FadeIn = %1\n", Properties::fade_in.property_id));
 	Properties::inverse_fade_in.property_id = g_quark_from_static_string (X_("InverseFadeIn"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for InverseFadeIn = %1\n",	Properties::inverse_fade_in.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for InverseFadeIn = %1\n", Properties::inverse_fade_in.property_id));
 	Properties::fade_out.property_id = g_quark_from_static_string (X_("FadeOut"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for FadeOut = %1\n",		Properties::fade_out.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for FadeOut = %1\n", Properties::fade_out.property_id));
 	Properties::inverse_fade_out.property_id = g_quark_from_static_string (X_("InverseFadeOut"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for InverseFadeOut = %1\n",	Properties::inverse_fade_out.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for InverseFadeOut = %1\n", Properties::inverse_fade_out.property_id));
 	Properties::envelope.property_id = g_quark_from_static_string (X_("Envelope"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for Envelope = %1\n",		Properties::envelope.property_id));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for Envelope = %1\n", Properties::envelope.property_id));
 }
 
 void
@@ -261,8 +264,8 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
 	: Region (other)
 	, AUDIOREGION_COPY_STATE (other)
 	  /* As far as I can see, the _envelope's times are relative to region position, and have nothing
-	     to do with sources (and hence _start).  So when we copy the envelope, we just use the supplied offset.
-	  */
+		 * to do with sources (and hence _start).  So when we copy the envelope, we just use the supplied offset.
+		 */
 	, _envelope (Properties::envelope, boost::shared_ptr<AutomationList> (new AutomationList (*other->_envelope.val(), 0, other->_length)))
 	, _automatable (other->session())
 	, _fade_in_suspended (0)
@@ -348,7 +351,7 @@ AudioRegion::post_set (const PropertyChange& /*ignored*/)
 	/* return to default fades if the existing ones are too long */
 
 	if (_left_of_split) {
-		if (_fade_in->back()->when >= _length) {
+		if (_fade_in->when(false) >= _length) {
 			set_default_fade_in ();
 		}
 		set_default_fade_out ();
@@ -356,7 +359,7 @@ AudioRegion::post_set (const PropertyChange& /*ignored*/)
 	}
 
 	if (_right_of_split) {
-		if (_fade_out->back()->when >= _length) {
+		if (_fade_out->when(false) >= _length) {
 			set_default_fade_out ();
 		}
 
@@ -462,7 +465,7 @@ AudioRegion::master_read_at (Sample *buf, Sample* /*mixdown_buffer*/, float* /*g
 
 	assert (cnt >= 0);
 	return read_from_sources (
-		_master_sources, _master_sources.front()->length (_master_sources.front()->timeline_position()),
+		_master_sources, _master_sources.front()->length (_master_sources.front()->natural_position()),
 		buf, position, cnt, chan_n
 		);
 }
@@ -533,7 +536,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 
 	if (_fade_in_active && _session.config.get_use_region_fades()) {
 
-		samplecnt_t fade_in_length = (samplecnt_t) _fade_in->back()->when;
+		samplecnt_t fade_in_length = (samplecnt_t) _fade_in->when(false);
 
 		/* see if this read is within the fade in */
 
@@ -565,7 +568,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 		 *
 		 */
 
-		fade_interval_start = max (internal_offset, _length - samplecnt_t (_fade_out->back()->when));
+		fade_interval_start = max (internal_offset, _length - samplecnt_t (_fade_out->when(false)));
 		samplecnt_t fade_interval_end = min(internal_offset + to_read, _length.val());
 
 		if (fade_interval_end > fade_interval_start) {
@@ -656,7 +659,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 
 	if (fade_out_limit != 0) {
 
-		samplecnt_t const curve_offset = fade_interval_start - (_length - _fade_out->back()->when);
+		samplecnt_t const curve_offset = fade_interval_start - (_length - _fade_out->when(false));
 
 		if (is_opaque) {
 			if (_inverse_fade_out) {
@@ -991,13 +994,13 @@ AudioRegion::fade_range (samplepos_t start, samplepos_t end)
 void
 AudioRegion::set_fade_in_shape (FadeShape shape)
 {
-	set_fade_in (shape, (samplecnt_t) _fade_in->back()->when);
+	set_fade_in (shape, (samplecnt_t) _fade_in->when(false));
 }
 
 void
 AudioRegion::set_fade_out_shape (FadeShape shape)
 {
-	set_fade_out (shape, (samplecnt_t) _fade_out->back()->when);
+	set_fade_out (shape, (samplecnt_t) _fade_out->when(false));
 }
 
 void
@@ -1195,7 +1198,7 @@ AudioRegion::set_fade_out_length (samplecnt_t len)
 		len = 64;
 	}
 
-	bool changed =	_fade_out->extend_to (len);
+	bool changed = _fade_out->extend_to (len);
 
 	if (changed) {
 
@@ -1232,13 +1235,13 @@ AudioRegion::set_fade_out_active (bool yn)
 bool
 AudioRegion::fade_in_is_default () const
 {
-	return _fade_in->size() == 2 && _fade_in->front()->when == 0 && _fade_in->back()->when == 64;
+	return _fade_in->size() == 2 && _fade_in->when(true) == 0 && _fade_in->when(false) == 64;
 }
 
 bool
 AudioRegion::fade_out_is_default () const
 {
-	return _fade_out->size() == 2 && _fade_out->front()->when == 0 && _fade_out->back()->when == 64;
+	return _fade_out->size() == 2 && _fade_out->when(true) == 0 && _fade_out->when(false) == 64;
 }
 
 void
@@ -1288,12 +1291,12 @@ AudioRegion::recompute_at_end ()
 	if (_left_of_split) {
 		set_default_fade_out ();
 		_left_of_split = false;
-	} else if (_fade_out->back()->when > _length) {
+	} else if (_fade_out->when(false) > _length) {
 		_fade_out->extend_to (_length);
 		send_change (PropertyChange (Properties::fade_out));
 	}
 
-	if (_fade_in->back()->when > _length) {
+	if (_fade_in->when(false) > _length) {
 		_fade_in->extend_to (_length);
 		send_change (PropertyChange (Properties::fade_in));
 	}
@@ -1313,12 +1316,12 @@ AudioRegion::recompute_at_start ()
 	if (_right_of_split) {
 		set_default_fade_in ();
 		_right_of_split = false;
-	} else if (_fade_in->back()->when > _length) {
+	} else if (_fade_in->when(false) > _length) {
 		_fade_in->extend_to (_length);
 		send_change (PropertyChange (Properties::fade_in));
 	}
 
-	if (_fade_out->back()->when > _length) {
+	if (_fade_out->when(false) > _length) {
 		_fade_out->extend_to (_length);
 		send_change (PropertyChange (Properties::fade_out));
 	}
@@ -1598,34 +1601,6 @@ AudioRegion::audio_source (uint32_t n) const
 	return boost::dynamic_pointer_cast<AudioSource>(source(n));
 }
 
-uint32_t
-AudioRegion::get_related_audio_file_channel_count () const
-{
-    uint32_t chan_count = 0;
-    for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-
-        boost::shared_ptr<SndFileSource> sndf = boost::dynamic_pointer_cast<SndFileSource>(*i);
-        if (sndf ) {
-
-            if (sndf->channel_count() > chan_count) {
-                chan_count = sndf->channel_count();
-            }
-        }
-#ifdef HAVE_COREAUDIO
-        else {
-            boost::shared_ptr<CoreAudioSource> cauf = boost::dynamic_pointer_cast<CoreAudioSource>(*i);
-            if (cauf) {
-                if (cauf->channel_count() > chan_count) {
-                    chan_count = cauf->channel_count();
-                }
-            }
-        }
-#endif // HAVE_COREAUDIO
-    }
-
-    return chan_count;
-}
-
 void
 AudioRegion::clear_transients () // yet unused
 {
@@ -1709,8 +1684,8 @@ AudioRegion::remove_transient (samplepos_t where)
 	if (_valid_transients) {
 		const samplepos_t p = where - (_position + _transient_user_start - _start);
 		AnalysisFeatureList::iterator i = std::find (_user_transients.begin (), _user_transients.end (), p);
-		if (i != _transients.end ()) {
-			_transients.erase (i);
+		if (i != _user_transients.end ()) {
+			_user_transients.erase (i);
 			changed = true;
 		}
 	}
@@ -1952,7 +1927,7 @@ AudioRegion::find_silence (Sample threshold, samplecnt_t min_length, samplecnt_t
 Evoral::Range<samplepos_t>
 AudioRegion::body_range () const
 {
-	return Evoral::Range<samplepos_t> (first_sample() + _fade_in->back()->when + 1, last_sample() - _fade_out->back()->when);
+	return Evoral::Range<samplepos_t> (first_sample() + _fade_in->when(false) + 1, last_sample() - _fade_out->when(false));
 }
 
 boost::shared_ptr<Region>

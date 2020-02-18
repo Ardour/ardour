@@ -24,6 +24,7 @@ I18N_PACKAGE = 'gtkmm2ext3'
 
 gtkmm2ext_sources = [
         'actions.cc',
+        'action_model.cc',
         'application.cc',
         'bindings.cc',
         'cairo_packer.cc',
@@ -93,6 +94,7 @@ def build(bld):
                             os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
     if sys.platform == 'darwin':
         obj.source += ['gtkapplication_quartz.mm', 'nsglview.mm']
+        obj.uselib += ' OSX'
     else:
         obj.source += ['gtkapplication_x11.c']
 

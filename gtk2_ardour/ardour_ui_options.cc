@@ -1,21 +1,29 @@
 /*
-    Copyright (C) 2005 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2019 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2006-2007 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2006-2007 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2006 Sampo Savolainen <v2@iki.fi>
+ * Copyright (C) 2007-2015 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2008-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008 Hans Baier <hansfbaier@googlemail.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2012-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2018 Ben Loftis <ben@harrisonconsoles.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifdef WAF_BUILD
 #include "gtk2ardour-config.h"
@@ -32,6 +40,7 @@
 #include "gtkmm2ext/utils.h"
 #include "waveview/wave_view.h"
 
+#include "ardour_message.h"
 #include "audio_clock.h"
 #include "ardour_ui.h"
 #include "actions.h"
@@ -52,7 +61,7 @@ ARDOUR_UI::toggle_external_sync()
 {
 	if (_session) {
 		if (_session->config.get_video_pullup() != 0.0f && (TransportMasterManager::instance().current()->type() == Engine)) {
-			MessageDialog msg (_("It is not possible to use JACK as the the sync source\n when the pull up/down setting is non-zero."));
+			ArdourMessageDialog msg (_("It is not possible to use JACK as the the sync source\n when the pull up/down setting is non-zero."));
 			msg.run ();
 			return;
 		}
@@ -129,14 +138,7 @@ ARDOUR_UI::toggle_click ()
 void
 ARDOUR_UI::toggle_session_monitoring_in ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("SessionMonitorIn"));
-	if (!act) {
-		return;
-	}
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	if (!tact) {
-		return;
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Transport"), X_("SessionMonitorIn"));
 
 	if (tact->get_active() && _session->config.get_session_monitoring () == MonitorInput) {
 		return;
@@ -155,14 +157,7 @@ ARDOUR_UI::toggle_session_monitoring_in ()
 void
 ARDOUR_UI::toggle_session_monitoring_disk ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("SessionMonitorDisk"));
-	if (!act) {
-		return;
-	}
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	if (!tact) {
-		return;
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Transport"), X_("SessionMonitorDisk"));
 	if (tact->get_active() && _session->config.get_session_monitoring () == MonitorDisk) {
 		return;
 	}
@@ -180,15 +175,11 @@ ARDOUR_UI::toggle_session_monitoring_disk ()
 void
 ARDOUR_UI::unset_dual_punch ()
 {
-	Glib::RefPtr<Action> action = ActionManager::get_action ("Transport", "TogglePunch");
-
-	if (action) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(action);
-		if (tact) {
-			ignore_dual_punch = true;
-			tact->set_active (false);
-			ignore_dual_punch = false;
-		}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Transport", "TogglePunch");
+	if (tact) {
+		ignore_dual_punch = true;
+		tact->set_active (false);
+		ignore_dual_punch = false;
 	}
 }
 
@@ -199,42 +190,20 @@ ARDOUR_UI::toggle_punch ()
 		return;
 	}
 
-	Glib::RefPtr<Action> action = ActionManager::get_action ("Transport", "TogglePunch");
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Transport", "TogglePunch");
 
-	if (action) {
+	/* drive the other two actions from this one */
+	Glib::RefPtr<ToggleAction> in_action = ActionManager::get_toggle_action ("Transport", "TogglePunchIn");
+	Glib::RefPtr<ToggleAction> out_action = ActionManager::get_toggle_action ("Transport", "TogglePunchOut");
 
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(action);
-
-		if (!tact) {
-			return;
-		}
-
-		/* drive the other two actions from this one */
-
-		Glib::RefPtr<Action> in_action = ActionManager::get_action ("Transport", "TogglePunchIn");
-		Glib::RefPtr<Action> out_action = ActionManager::get_action ("Transport", "TogglePunchOut");
-
-		if (in_action && out_action) {
-			Glib::RefPtr<ToggleAction> tiact = Glib::RefPtr<ToggleAction>::cast_dynamic(in_action);
-			Glib::RefPtr<ToggleAction> toact = Glib::RefPtr<ToggleAction>::cast_dynamic(out_action);
-			tiact->set_active (tact->get_active());
-			toact->set_active (tact->get_active());
-		}
-	}
+	in_action->set_active (tact->get_active());
+	out_action->set_active (tact->get_active());
 }
 
 void
 ARDOUR_UI::toggle_punch_in ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("TogglePunchIn"));
-	if (!act) {
-		return;
-	}
-
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	if (!tact) {
-		return;
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Transport"), X_("TogglePunchIn"));
 
 	if (tact->get_active() != _session->config.get_punch_in()) {
 		_session->config.set_punch_in (tact->get_active ());
@@ -252,15 +221,7 @@ ARDOUR_UI::toggle_punch_in ()
 void
 ARDOUR_UI::toggle_punch_out ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("TogglePunchOut"));
-	if (!act) {
-		return;
-	}
-
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	if (!tact) {
-		return;
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Transport"), X_("TogglePunchOut"));
 
 	if (tact->get_active() != _session->config.get_punch_out()) {
 		_session->config.set_punch_out (tact->get_active ());
@@ -278,17 +239,9 @@ ARDOUR_UI::toggle_punch_out ()
 void
 ARDOUR_UI::show_loop_punch_ruler_and_disallow_hide ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Rulers"), "toggle-loop-punch-ruler");
-	if (!act) {
-		return;
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Rulers"), "toggle-loop-punch-ruler");
 
-	act->set_sensitive (false);
-
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	if (!tact) {
-		return;
-	}
+	tact->set_sensitive (false);
 
 	if (!tact->get_active()) {
 		tact->set_active ();
@@ -311,26 +264,26 @@ ARDOUR_UI::reenable_hide_loop_punch_ruler_if_appropriate ()
 void
 ARDOUR_UI::toggle_video_sync()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action ("Transport", "ToggleVideoSync");
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		_session->config.set_use_video_sync (tact->get_active());
-	}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Transport", "ToggleVideoSync");
+	_session->config.set_use_video_sync (tact->get_active());
 }
 
 void
 ARDOUR_UI::toggle_editing_space()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMaximalEditor");
-
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		if (tact->get_active()) {
-			maximise_editing_space ();
-		} else {
-			restore_editing_space ();
-		}
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Common", "ToggleMaximalEditor");
+	if (tact->get_active()) {
+		maximise_editing_space ();
+	} else {
+		restore_editing_space ();
 	}
+}
+
+void
+ARDOUR_UI::toggle_latency_switch ()
+{
+	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("Main", "ToggleLatencyCompensation");
+	ARDOUR::Latent::force_zero_latency (tact->get_active());
 }
 
 void
@@ -358,8 +311,11 @@ ARDOUR_UI::parameter_changed (std::string p)
 		} else {
 			/* XXX we need to make sure that auto-play is off as well as insensitive */
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (false);
-			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (false);
+			if (!_session->synced_to_engine()) {
+				/* JACK transport allows auto-return */
+				ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
+			}
 		}
 
 	} else if (p == "sync-source") {
@@ -398,27 +354,21 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "auto-input") {
 		ActionManager::map_some_state ("Transport", "ToggleAutoInput", sigc::mem_fun (_session->config, &SessionConfiguration::get_auto_input));
 	} else if (p == "session-monitoring") {
-		Glib::RefPtr<Action> iact = ActionManager::get_action (X_("Transport"), X_("SessionMonitorIn"));
-		Glib::RefPtr<Action> dact = ActionManager::get_action (X_("Transport"), X_("SessionMonitorDisk"));
-		if (iact && dact) {
-			Glib::RefPtr<ToggleAction> tdact = Glib::RefPtr<ToggleAction>::cast_dynamic(dact);
-			Glib::RefPtr<ToggleAction> tiact = Glib::RefPtr<ToggleAction>::cast_dynamic(iact);
-			if (tdact && tiact) {
-				switch (_session->config.get_session_monitoring ()) {
-					case MonitorDisk:
-						tdact->set_active (true);
-						tiact->set_active (false);
-						break;
-					case MonitorInput:
-						tiact->set_active (true);
-						tdact->set_active (false);
-						break;
-					default:
-						tdact->set_active (false);
-						tiact->set_active (false);
-						break;
-				}
-			}
+		Glib::RefPtr<ToggleAction> tiact = ActionManager::get_toggle_action (X_("Transport"), X_("SessionMonitorIn"));
+		Glib::RefPtr<ToggleAction> tdact = ActionManager::get_toggle_action (X_("Transport"), X_("SessionMonitorDisk"));
+		switch (_session->config.get_session_monitoring ()) {
+			case MonitorDisk:
+				tdact->set_active (true);
+				tiact->set_active (false);
+				break;
+			case MonitorInput:
+				tiact->set_active (true);
+				tdact->set_active (false);
+				break;
+			default:
+				tdact->set_active (false);
+				tiact->set_active (false);
+				break;
 		}
 	} else if (p == "punch-out") {
 		ActionManager::map_some_state ("Transport", "TogglePunchOut", sigc::mem_fun (_session->config, &SessionConfiguration::get_punch_out));
@@ -487,6 +437,8 @@ ARDOUR_UI::parameter_changed (std::string p)
 		repack_transport_hbox ();
 	} else if (p == "show-toolbar-selclock") {
 		repack_transport_hbox ();
+	} else if (p == "show-toolbar-latency") {
+		repack_transport_hbox ();
 	} else if (p == "show-editor-meter") {
 		repack_transport_hbox ();
 	} else if (p == "show-secondary-clock") {
@@ -507,7 +459,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 		VisibilityTracker::set_use_window_manager_visibility (UIConfiguration::instance().get_use_wm_visibility());
 	} else if (p == "action-table-columns") {
 		const uint32_t cols = UIConfiguration::instance().get_action_table_columns ();
-		for (int i = 0; i < MAX_LUA_ACTION_SCRIPTS; ++i) {
+		for (int i = 0; i < MAX_LUA_ACTION_BUTTONS; ++i) {
 			const int col = i / 2;
 			if (cols & (1<<col)) {
 				action_script_call_btn[i].show();
@@ -533,8 +485,20 @@ ARDOUR_UI::parameter_changed (std::string p)
 		}
 	} else if ( (p == "snap-to-region-sync") || (p == "snap-to-region-start") || (p == "snap-to-region-end") ) {
 		if (editor) editor->mark_region_boundary_cache_dirty();
+	} else if (p == "screen-saver-mode") {
+		switch (UIConfiguration::instance().get_screen_saver_mode ()) {
+			using namespace ARDOUR_UI_UTILS;
+			case InhibitWhileRecording:
+				inhibit_screensaver (_session && _session->actively_recording ());
+				break;
+			case InhibitAlways:
+				inhibit_screensaver (true);
+				break;
+			case InhibitNever:
+				inhibit_screensaver (false);
+				break;
+		}
 	}
-
 }
 
 void

@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Alesis</Manufacturer>
+    <Model>Quadraverb 2</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Preset Programs">
+        <PatchNameList>
+          <Patch Number="00" Name="Concert Hall" ProgramChange="0"/>
+          <Patch Number="01" Name="Bright Room" ProgramChange="1"/>
+          <Patch Number="02" Name="Vocal Plate" ProgramChange="2"/>
+          <Patch Number="03" Name="Rich Delays" ProgramChange="3"/>
+          <Patch Number="04" Name="Dream Stalker" ProgramChange="4"/>
+          <Patch Number="05" Name="L=Chrs;R=Plat" ProgramChange="5"/>
+          <Patch Number="06" Name="Crystal Delays" ProgramChange="6"/>
+          <Patch Number="07" Name="True Stereo Room" ProgramChange="7"/>
+          <Patch Number="08" Name="Octal Process" ProgramChange="8"/>
+          <Patch Number="09" Name="Tape Delay" ProgramChange="9"/>
+          <Patch Number="10" Name="L=Gate;R=Plate" ProgramChange="10"/>
+          <Patch Number="11" Name="Hardwood Room" ProgramChange="11"/>
+          <Patch Number="12" Name="Darkened Room" ProgramChange="12"/>
+          <Patch Number="13" Name="Tight Room" ProgramChange="13"/>
+          <Patch Number="14" Name="Medium Room" ProgramChange="14"/>
+          <Patch Number="15" Name="Early Reflect." ProgramChange="15"/>
+          <Patch Number="16" Name="Bright Hall" ProgramChange="16"/>
+          <Patch Number="17" Name="Warm Hall" ProgramChange="17"/>
+          <Patch Number="18" Name="Small Hall" ProgramChange="18"/>
+          <Patch Number="19" Name="Medium Hall" ProgramChange="19"/>
+          <Patch Number="20" Name="Large Hall" ProgramChange="20"/>
+          <Patch Number="21" Name="Plate 140" ProgramChange="21"/>
+          <Patch Number="22" Name="Goldfoil Plate" ProgramChange="22"/>
+          <Patch Number="23" Name="Classic Plate" ProgramChange="23"/>
+          <Patch Number="24" Name="Small Plate" ProgramChange="24"/>
+          <Patch Number="25" Name="Long Plate" ProgramChange="25"/>
+          <Patch Number="26" Name="SlightAmbience" ProgramChange="26"/>
+          <Patch Number="27" Name="ReMIX Nonlin" ProgramChange="27"/>
+          <Patch Number="28" Name="ChorusedReverb" ProgramChange="28"/>
+          <Patch Number="29" Name="Gated Room" ProgramChange="29"/>
+          <Patch Number="30" Name="Reverse Reverb" ProgramChange="30"/>
+          <Patch Number="31" Name="Quad Chorus 1" ProgramChange="31"/>
+          <Patch Number="32" Name="Stereo Chorus" ProgramChange="32"/>
+          <Patch Number="33" Name="L=Flat R=Sharp" ProgramChange="33"/>
+          <Patch Number="34" Name="4DiscreteChorus" ProgramChange="34"/>
+          <Patch Number="35" Name="BiAmp Choruses" ProgramChange="35"/>
+          <Patch Number="36" Name="DualMonoDetune" ProgramChange="36"/>
+          <Patch Number="37" Name="StereoFlanger2" ProgramChange="37"/>
+          <Patch Number="38" Name="DuckingFlanger" ProgramChange="38"/>
+          <Patch Number="39" Name="VerbJetFlange" ProgramChange="39"/>
+          <Patch Number="40" Name="Phasor #5" ProgramChange="40"/>
+          <Patch Number="41" Name="5 Second Delay" ProgramChange="41"/>
+          <Patch Number="42" Name="StereoStaccato" ProgramChange="42"/>
+          <Patch Number="43" Name="StereoSampling" ProgramChange="43"/>
+          <Patch Number="44" Name="PanningDLYTaps" ProgramChange="44"/>
+          <Patch Number="45" Name="3 Against 2" ProgramChange="45"/>
+          <Patch Number="46" Name="VariTapPngPong" ProgramChange="46"/>
+          <Patch Number="47" Name="120bpmStereoDL" ProgramChange="47"/>
+          <Patch Number="48" Name="98bpm Dly+Hall" ProgramChange="48"/>
+          <Patch Number="49" Name="Dynamic Delay" ProgramChange="49"/>
+          <Patch Number="50" Name="Ducking Delay" ProgramChange="50"/>
+          <Patch Number="51" Name="Subdivisions" ProgramChange="51"/>
+          <Patch Number="52" Name="Lazy Chorus" ProgramChange="52"/>
+          <Patch Number="53" Name="Chorused Delay" ProgramChange="53"/>
+          <Patch Number="54" Name="Detuned Delays" ProgramChange="54"/>
+          <Patch Number="55" Name="Thin ChorusDly" ProgramChange="55"/>
+          <Patch Number="56" Name="A capella" ProgramChange="56"/>
+          <Patch Number="57" Name="- Perfect 5th" ProgramChange="57"/>
+          <Patch Number="58" Name="- One Fourth" ProgramChange="58"/>
+          <Patch Number="59" Name="Spacehall" ProgramChange="59"/>
+          <Patch Number="60" Name="Warm Med Hall" ProgramChange="60"/>
+          <Patch Number="61" Name="Guitar Rack 01" ProgramChange="61"/>
+          <Patch Number="62" Name="Guitar Rack 02" ProgramChange="62"/>
+          <Patch Number="63" Name="CrossFade Flng" ProgramChange="63"/>
+          <Patch Number="64" Name="Steely Flange" ProgramChange="64"/>
+          <Patch Number="65" Name="Wack Stack" ProgramChange="65"/>
+          <Patch Number="66" Name="RetroQuadraVrb" ProgramChange="66"/>
+          <Patch Number="67" Name="Ambient Chorus" ProgramChange="67"/>
+          <Patch Number="68" Name="Mono Tremolo" ProgramChange="68"/>
+          <Patch Number="69" Name="Washing Delays" ProgramChange="69"/>
+          <Patch Number="70" Name="Vocal Treatmnt" ProgramChange="70"/>
+          <Patch Number="71" Name="WarmVocalPlate" ProgramChange="71"/>
+          <Patch Number="72" Name="Vocal Dly/Hall" ProgramChange="72"/>
+          <Patch Number="73" Name="L=Dubl;R=Hall2" ProgramChange="73"/>
+          <Patch Number="74" Name="L=Thlk;R=Hall2" ProgramChange="74"/>
+          <Patch Number="75" Name="Vocal Doubler" ProgramChange="75"/>
+          <Patch Number="76" Name="Ballad Snare" ProgramChange="76"/>
+          <Patch Number="77" Name="Warm Kick Room" ProgramChange="77"/>
+          <Patch Number="78" Name="Power Station" ProgramChange="78"/>
+          <Patch Number="79" Name="Backwards Room" ProgramChange="79"/>
+          <Patch Number="80" Name="Gated Snare" ProgramChange="80"/>
+          <Patch Number="81" Name="Studio Lezlie" ProgramChange="81"/>
+          <Patch Number="82" Name="Stereo Tremolo" ProgramChange="82"/>
+          <Patch Number="83" Name="Crystal Age" ProgramChange="83"/>
+          <Patch Number="84" Name="EPiano Ballad" ProgramChange="84"/>
+          <Patch Number="85" Name="Kybd Chorusverb" ProgramChange="85"/>
+          <Patch Number="86" Name="Ethereal Synth" ProgramChange="86"/>
+          <Patch Number="87" Name="Warm Synth Pad" ProgramChange="87"/>
+          <Patch Number="88" Name="L=Room/R=Hall" ProgramChange="88"/>
+          <Patch Number="89" Name="VibChors&gt;Lezle" ProgramChange="89"/>
+          <Patch Number="90" Name="Missile Silo" ProgramChange="90"/>
+          <Patch Number="91" Name="SeventhWorldFX" ProgramChange="91"/>
+          <Patch Number="92" Name="Surround Encdr" ProgramChange="92"/>
+          <Patch Number="93" Name="Space Station" ProgramChange="93"/>
+          <Patch Number="94" Name="Digital Mixer" ProgramChange="94"/>
+          <Patch Number="95" Name="5BandSt.ParaEQ" ProgramChange="95"/>
+          <Patch Number="96" Name="VerbOfMyDreams" ProgramChange="96"/>
+          <Patch Number="97" Name="Guitar Rack" ProgramChange="97"/>
+          <Patch Number="98" Name="Stereo Plates" ProgramChange="98"/>
+          <Patch Number="99" Name="*** Bypass ***" ProgramChange="99"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

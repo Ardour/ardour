@@ -1,21 +1,21 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2000-2013 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009 David Robillard <d@drobilla.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __pbd_rcu_h__
 #define __pbd_rcu_h__
@@ -27,22 +27,24 @@
 
 #include "pbd/libpbd_visibility.h"
 
-/** @file Defines a set of classes to implement Read-Copy-Update.  We do not attempt to define RCU here - use google.
-
-   The design consists of two parts: an RCUManager and an RCUWriter.
+/** @file rcu.h
+ * Define a set of classes to implement Read-Copy-Update.  We do not attempt to define RCU here - use google.
+ *
+ * The design consists of two parts: an RCUManager and an RCUWriter.
 */
 
 /** An RCUManager is an object which takes over management of a pointer to another object.
-   It provides three key methods:
-
-           - reader() : obtains a shared pointer to the managed object that may be used for reading, without synchronization
-	       - write_copy() : obtains a shared pointer to the object that may be used for writing/modification
-	       - update() : accepts a shared pointer to a (presumed) modified instance of the object and causes all
-	                    future reader() and write_copy() calls to use that instance.
-
-   Any existing users of the value returned by reader() can continue to use their copy even as a write_copy()/update() takes place.
-   The RCU manager will manage the various instances of "the managed object" in a way that is transparent to users of the manager
-   and managed object.
+ *
+ * It provides three key methods:
+ *
+ * - reader()     : obtains a shared pointer to the managed object that may be used for reading, without synchronization
+ * - write_copy() : obtains a shared pointer to the object that may be used for writing/modification
+ * - update()     : accepts a shared pointer to a (presumed) modified instance of the object and causes all
+ *                  future reader() and write_copy() calls to use that instance.
+ *
+ * Any existing users of the value returned by reader() can continue to use their copy even as a write_copy()/update() takes place.
+ * The RCU manager will manage the various instances of "the managed object" in a way that is transparent to users of the manager
+ * and managed object.
 */
 template<class T>
 class /*LIBPBD_API*/ RCUManager

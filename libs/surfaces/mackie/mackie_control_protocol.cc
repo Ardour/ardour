@@ -1,21 +1,26 @@
 /*
-	Copyright (C) 2006,2007 John Anderson
-	Copyright (C) 2012 Paul Davis
-
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; either version 2 of the License, or
-	(at your option) any later version.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2006-2007 John Anderson
+ * Copyright (C) 2007-2010 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2015-2016 Len Ovens <len@ovenwerks.net>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2018 Ben Loftis <ben@harrisonconsoles.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <fcntl.h>
 #include <iostream>
@@ -75,6 +80,10 @@
 #include "button.h"
 #include "fader.h"
 #include "pot.h"
+
+#ifndef G_SOURCE_FUNC
+#define G_SOURCE_FUNC(f) ((GSourceFunc) (void (*)(void)) (f))
+#endif
 
 using namespace ARDOUR;
 using namespace std;
@@ -480,6 +489,8 @@ MackieControlProtocol::set_active (bool yn)
 		Glib::RefPtr<Glib::TimeoutSource> redisplay_timeout = Glib::TimeoutSource::create (iStripDisplayRefreshTime); // milliseconds
 		redisplay_connection = redisplay_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::redisplay));
 		redisplay_timeout->attach (main_loop()->get_context());
+
+		notify_transport_state_changed ();
 
 	} else {
 
@@ -935,7 +946,7 @@ MackieControlProtocol::create_surfaces ()
 				ipm->mcp = this;
 				ipm->port = &input_port;
 
-				g_source_set_callback (surface->input_source, (GSourceFunc) ipmidi_input_handler, ipm, NULL);
+				g_source_set_callback (surface->input_source, G_SOURCE_FUNC (ipmidi_input_handler), ipm, NULL);
 				g_source_attach (surface->input_source, main_loop()->get_context()->gobj());
 			}
 		}
@@ -1337,11 +1348,11 @@ MackieControlProtocol::notify_transport_state_changed()
 	}
 
 	// switch various play and stop buttons on / off
-	update_global_button (Button::Loop, session->get_play_loop());
-	update_global_button (Button::Play, session->transport_speed() == 1.0);
-	update_global_button (Button::Stop, session->transport_stopped ());
-	update_global_button (Button::Rewind, session->transport_speed() < 0.0);
-	update_global_button (Button::Ffwd, session->transport_speed() > 1.0);
+	update_global_button (Button::Loop, loop_button_onoff ());
+	update_global_button (Button::Play, play_button_onoff ());
+	update_global_button (Button::Stop, stop_button_onoff ());
+	update_global_button (Button::Rewind, rewind_button_onoff ());
+	update_global_button (Button::Ffwd, ffwd_button_onoff ());
 
 	// sometimes a return to start leaves time code at old time
 	_timecode_last = string (10, ' ');
@@ -2016,6 +2027,14 @@ MackieControlProtocol::update_fader_automation_state ()
 		update_global_button (Button::Latch, off);
 		update_global_button (Button::Grp, off);
 		break;
+	case Latch:
+		update_global_button (Button::Read, off);
+		update_global_button (Button::Write, off);
+		update_global_button (Button::Touch, off);
+		update_global_button (Button::Trim, off);
+		update_global_button (Button::Latch, on);
+		update_global_button (Button::Grp, off);
+		break;
 	}
 }
 
@@ -2392,6 +2411,27 @@ MackieControlProtocol::stripable_selection_changed ()
 	//this function is called after the stripable selection is "stable", so this is the place to check surface selection state
 	for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
 		(*si)->update_strip_selection ();
+	}
+
+	/* if we are following the Gui, find the selected strips and map them here */
+	if (_device_info.single_fader_follows_selection()) {
+
+		Sorted sorted = get_sorted_stripables();
+
+		Sorted::iterator r = sorted.begin();
+		for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
+			vector<boost::shared_ptr<Stripable> > stripables;
+			uint32_t added = 0;
+
+			for (; r != sorted.end() && added < (*si)->n_strips (false); ++r, ++added) {
+				if ((*r)->is_selected()) {
+					stripables.push_back (*r);
+				}
+			}
+
+			(*si)->map_stripables (stripables);
+		}
+		return;
 	}
 
 	boost::shared_ptr<Stripable> s = first_selected_stripable ();

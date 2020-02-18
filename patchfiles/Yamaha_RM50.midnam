@@ -1,0 +1,1445 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Yamaha</Manufacturer>
+    <Model>RM50</Model>
+    <CustomDeviceMode Name="Mode 2">
+      <DeviceModeEnable>
+        <MIDICommands>
+          <SysEx>F0 43 <SysExDeviceID Offset="10"/> 30 01 00 00 00 00 00 00 F7</SysEx>
+          <SysEx>F0 43 <SysExDeviceID Offset="10"/> 30 01 00 00 01 00 00 00 F7</SysEx>
+          <SysEx>F0 43 <SysExDeviceID Offset="10"/> 30 01 00 00 02 00 00 00 F7</SysEx>
+          <SysEx>F0 43 <SysExDeviceID Offset="10"/> 30 01 00 00 03 00 00 00 F7</SysEx>
+          <SysEx>F0 43 <SysExDeviceID Offset="10"/> 30 01 00 00 04 00 00 00 F7</SysEx>
+          <SysEx>F0 43 <SysExDeviceID Offset="10"/> 30 01 00 00 05 00 00 00 F7</SysEx>
+          <SysEx>F0 43 <SysExDeviceID Offset="10"/> 30 01 00 00 06 00 00 00 F7</SysEx>
+          <SysEx>F0 43 <SysExDeviceID Offset="10"/> 30 01 00 00 07 00 00 00 F7</SysEx>
+          <SysEx>F0 43 <SysExDeviceID Offset="10"/> 30 01 00 00 08 00 00 00 F7</SysEx>
+          <SysEx>F0 43 <SysExDeviceID Offset="10"/> 30 01 00 00 09 00 00 00 F7</SysEx>
+          <SysEx>F0 43 <SysExDeviceID Offset="10"/> 30 01 00 00 0A 00 00 00 F7</SysEx>
+          <SysEx>F0 43 <SysExDeviceID Offset="10"/> 30 01 00 00 0B 00 00 00 F7</SysEx>
+          <SysEx>F0 43 <SysExDeviceID Offset="10"/> 30 01 00 00 0C 00 00 00 F7</SysEx>
+          <SysEx>F0 43 <SysExDeviceID Offset="10"/> 30 01 00 00 0D 00 00 00 F7</SysEx>
+          <SysEx>F0 43 <SysExDeviceID Offset="10"/> 30 01 00 00 0E 00 00 00 F7</SysEx>
+          <SysEx>F0 43<SysExDeviceID Offset="10"/> 30 01 00 00 0F 00 00 00 F7</SysEx>
+        </MIDICommands>
+      </DeviceModeEnable>
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Preset Rhythm Kits">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="83"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="P-1" Name="Rock 1" ProgramChange="0"/>
+          <Patch Number="P-2" Name="Rock 2" ProgramChange="1"/>
+          <Patch Number="P-3" Name="Rock 3" ProgramChange="2"/>
+          <Patch Number="P-4" Name="Studio 1" ProgramChange="3"/>
+          <Patch Number="P-5" Name="Studio 2" ProgramChange="4"/>
+          <Patch Number="P-6" Name="Metal" ProgramChange="5"/>
+          <Patch Number="P-7" Name="Pop 1" ProgramChange="6"/>
+          <Patch Number="P-8" Name="Pop 2" ProgramChange="7"/>
+          <Patch Number="P-9" Name="Country" ProgramChange="8"/>
+          <Patch Number="P-10" Name="LatinRock" ProgramChange="9"/>
+          <Patch Number="P-11" Name="LatinPerc" ProgramChange="10"/>
+          <Patch Number="P-12" Name="Brazil" ProgramChange="11"/>
+          <Patch Number="P-13" Name="Funk" ProgramChange="12"/>
+          <Patch Number="P-14" Name="R&amp;B 1" ProgramChange="13"/>
+          <Patch Number="P-15" Name="R&amp;B 2" ProgramChange="14"/>
+          <Patch Number="P-16" Name="JazzBig" ProgramChange="15"/>
+          <Patch Number="P-17" Name="JazzSmall" ProgramChange="16"/>
+          <Patch Number="P-18" Name="JazzBrush" ProgramChange="17"/>
+          <Patch Number="P-19" Name="Dance 1" ProgramChange="18"/>
+          <Patch Number="P-20" Name="Dance 2" ProgramChange="19"/>
+          <Patch Number="P-21" Name="House 1" ProgramChange="20"/>
+          <Patch Number="P-22" Name="House 2" ProgramChange="21"/>
+          <Patch Number="P-23" Name="Rap" ProgramChange="22"/>
+          <Patch Number="P-24" Name="MouthKit" ProgramChange="23"/>
+          <Patch Number="P-25" Name="Hip Hop" ProgramChange="24"/>
+          <Patch Number="P-26" Name="World 1" ProgramChange="25"/>
+          <Patch Number="P-27" Name="World 2" ProgramChange="26"/>
+          <Patch Number="P-28" Name="Gated 1" ProgramChange="27"/>
+          <Patch Number="P-29" Name="Gated 2" ProgramChange="28"/>
+          <Patch Number="P-30" Name="Fusion 1" ProgramChange="29"/>
+          <Patch Number="P-31" Name="Fusion 2" ProgramChange="30"/>
+          <Patch Number="P-32" Name="Reggae 1" ProgramChange="31"/>
+          <Patch Number="P-33" Name="Reggae 2" ProgramChange="32"/>
+          <Patch Number="P-34" Name="Techno 1" ProgramChange="33"/>
+          <Patch Number="P-35" Name="Techno 2" ProgramChange="34"/>
+          <Patch Number="P-36" Name="Analog 1" ProgramChange="35"/>
+          <Patch Number="P-37" Name="Analog 2" ProgramChange="36"/>
+          <Patch Number="P-38" Name="Reverb" ProgramChange="37"/>
+          <Patch Number="P-39" Name="Stadium" ProgramChange="38"/>
+          <Patch Number="P-40" Name="SfxKit 1" ProgramChange="39"/>
+          <Patch Number="P-41" Name="SfxKit 2" ProgramChange="40"/>
+          <Patch Number="P-42" Name="G MIDI" ProgramChange="41"/>
+          <Patch Number="P-43" Name="YAMAHA RX" ProgramChange="42"/>
+          <Patch Number="P-44" Name="Dry Zone 1" ProgramChange="43"/>
+          <Patch Number="P-45" Name="Dry Zone 2" ProgramChange="44"/>
+          <Patch Number="P-46" Name="RoomZone 1" ProgramChange="45"/>
+          <Patch Number="P-47" Name="RoomZone 2" ProgramChange="46"/>
+          <Patch Number="P-48" Name="RevZone 1" ProgramChange="47"/>
+          <Patch Number="P-49" Name="RevZone 2" ProgramChange="48"/>
+          <Patch Number="P-50" Name="Kicks 1" ProgramChange="49"/>
+          <Patch Number="P-51" Name="Kicks 2" ProgramChange="50"/>
+          <Patch Number="P-52" Name="Kicks 3" ProgramChange="51"/>
+          <Patch Number="P-53" Name="Snares 1" ProgramChange="52"/>
+          <Patch Number="P-54" Name="Snares 2" ProgramChange="53"/>
+          <Patch Number="P-55" Name="Snares 3" ProgramChange="54"/>
+          <Patch Number="P-56" Name="Toms 1" ProgramChange="55"/>
+          <Patch Number="P-57" Name="Toms 2" ProgramChange="56"/>
+          <Patch Number="P-58" Name="Toms 3" ProgramChange="57"/>
+          <Patch Number="P-59" Name="Cymbals 1" ProgramChange="58"/>
+          <Patch Number="P-60" Name="Cymbals 2" ProgramChange="59"/>
+          <Patch Number="P-61" Name="Perc 1" ProgramChange="60"/>
+          <Patch Number="P-62" Name="Perc 2" ProgramChange="61"/>
+          <Patch Number="P-63" Name="SpecialFX1" ProgramChange="62"/>
+          <Patch Number="P-64" Name="FX/ Stacks" ProgramChange="63"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Internal Rhythm Kits">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="81"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="I-1" Name="Rock 1" ProgramChange="0"/>
+          <Patch Number="I-2" Name="Rock 2" ProgramChange="1"/>
+          <Patch Number="I-3" Name="Rock 3" ProgramChange="2"/>
+          <Patch Number="I-4" Name="Studio 1" ProgramChange="3"/>
+          <Patch Number="I-5" Name="Studio 2" ProgramChange="4"/>
+          <Patch Number="I-6" Name="Metal" ProgramChange="5"/>
+          <Patch Number="I-7" Name="Pop 1" ProgramChange="6"/>
+          <Patch Number="I-8" Name="Pop 2" ProgramChange="7"/>
+          <Patch Number="I-9" Name="Country" ProgramChange="8"/>
+          <Patch Number="I-10" Name="LatinRock" ProgramChange="9"/>
+          <Patch Number="I-11" Name="LatinPerc" ProgramChange="10"/>
+          <Patch Number="I-12" Name="Brazil" ProgramChange="11"/>
+          <Patch Number="I-13" Name="Funk" ProgramChange="12"/>
+          <Patch Number="I-14" Name="R&amp;B 1" ProgramChange="13"/>
+          <Patch Number="I-15" Name="R&amp;B 2" ProgramChange="14"/>
+          <Patch Number="I-16" Name="JazzBig" ProgramChange="15"/>
+          <Patch Number="I-17" Name="JazzSmall" ProgramChange="16"/>
+          <Patch Number="I-18" Name="JazzBrush" ProgramChange="17"/>
+          <Patch Number="I-19" Name="Dance 1" ProgramChange="18"/>
+          <Patch Number="I-20" Name="Dance 2" ProgramChange="19"/>
+          <Patch Number="I-21" Name="House 1" ProgramChange="20"/>
+          <Patch Number="I-22" Name="House 2" ProgramChange="21"/>
+          <Patch Number="I-23" Name="Rap" ProgramChange="22"/>
+          <Patch Number="I-24" Name="MouthKit" ProgramChange="23"/>
+          <Patch Number="I-25" Name="Hip Hop" ProgramChange="24"/>
+          <Patch Number="I-26" Name="World 1" ProgramChange="25"/>
+          <Patch Number="I-27" Name="World 2" ProgramChange="26"/>
+          <Patch Number="I-28" Name="Gated 1" ProgramChange="27"/>
+          <Patch Number="I-29" Name="Gated 2" ProgramChange="28"/>
+          <Patch Number="I-30" Name="Fusion 1" ProgramChange="29"/>
+          <Patch Number="I-31" Name="Fusion 2" ProgramChange="30"/>
+          <Patch Number="I-32" Name="Reggae 1" ProgramChange="31"/>
+          <Patch Number="I-33" Name="Reggae 2" ProgramChange="32"/>
+          <Patch Number="I-34" Name="Techno 1" ProgramChange="33"/>
+          <Patch Number="I-35" Name="Techno 2" ProgramChange="34"/>
+          <Patch Number="I-36" Name="Analog 1" ProgramChange="35"/>
+          <Patch Number="I-37" Name="Analog 2" ProgramChange="36"/>
+          <Patch Number="I-38" Name="Reverb" ProgramChange="37"/>
+          <Patch Number="I-39" Name="Stadium" ProgramChange="38"/>
+          <Patch Number="I-40" Name="SfxKit 1" ProgramChange="39"/>
+          <Patch Number="I-41" Name="SfxKit 2" ProgramChange="40"/>
+          <Patch Number="I-42" Name="G MIDI" ProgramChange="41"/>
+          <Patch Number="I-43" Name="YAMAHA RX" ProgramChange="42"/>
+          <Patch Number="I-44" Name="Dry Zone 1" ProgramChange="43"/>
+          <Patch Number="I-45" Name="Dry Zone 2" ProgramChange="44"/>
+          <Patch Number="I-46" Name="RoomZone 1" ProgramChange="45"/>
+          <Patch Number="I-47" Name="RoomZone 2" ProgramChange="46"/>
+          <Patch Number="I-48" Name="RevZone 1" ProgramChange="47"/>
+          <Patch Number="I-49" Name="RevZone 2" ProgramChange="48"/>
+          <Patch Number="I-50" Name="Kicks 1" ProgramChange="49"/>
+          <Patch Number="I-51" Name="Kicks 2" ProgramChange="50"/>
+          <Patch Number="I-52" Name="Kicks 3" ProgramChange="51"/>
+          <Patch Number="I-53" Name="Snares 1" ProgramChange="52"/>
+          <Patch Number="I-54" Name="Snares 2" ProgramChange="53"/>
+          <Patch Number="I-55" Name="Snares 3" ProgramChange="54"/>
+          <Patch Number="I-56" Name="Toms 1" ProgramChange="55"/>
+          <Patch Number="I-57" Name="Toms 2" ProgramChange="56"/>
+          <Patch Number="I-58" Name="Toms 3" ProgramChange="57"/>
+          <Patch Number="I-59" Name="Cymbals 1" ProgramChange="58"/>
+          <Patch Number="I-60" Name="Cymbals 2" ProgramChange="59"/>
+          <Patch Number="I-61" Name="Perc 1" ProgramChange="60"/>
+          <Patch Number="I-62" Name="Perc 2" ProgramChange="61"/>
+          <Patch Number="I-63" Name="SpecialFX1" ProgramChange="62"/>
+          <Patch Number="I-64" Name="FX/ Stacks" ProgramChange="63"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Internal Pitched Voices MX">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="84"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="I-MX1" Name="DR Kikin" ProgramChange="0"/>
+          <Patch Number="I-MX2" Name="DR Hard" ProgramChange="1"/>
+          <Patch Number="I-MX3" Name="DR Boom" ProgramChange="2"/>
+          <Patch Number="I-MX4" Name="DR Danc1" ProgramChange="3"/>
+          <Patch Number="I-MX5" Name="DR Danc2" ProgramChange="4"/>
+          <Patch Number="I-MX6" Name="DR Danc3" ProgramChange="5"/>
+          <Patch Number="I-MX7" Name="DR Danc4" ProgramChange="6"/>
+          <Patch Number="I-MX8" Name="DR Jazz1" ProgramChange="7"/>
+          <Patch Number="I-MX9" Name="DR Maple" ProgramChange="8"/>
+          <Patch Number="I-MX10" Name="DR Pop1" ProgramChange="9"/>
+          <Patch Number="I-MX11" Name="DR Byter" ProgramChange="10"/>
+          <Patch Number="I-MX12" Name="DR LoCal" ProgramChange="11"/>
+          <Patch Number="I-MX13" Name="DR Beef" ProgramChange="12"/>
+          <Patch Number="I-MX14" Name="DR Clean" ProgramChange="13"/>
+          <Patch Number="I-MX15" Name="DR Click" ProgramChange="14"/>
+          <Patch Number="I-MX16" Name="DR Fuzzy" ProgramChange="15"/>
+          <Patch Number="I-MX17" Name="DR Kinta" ProgramChange="16"/>
+          <Patch Number="I-MX18" Name="DR Punch" ProgramChange="17"/>
+          <Patch Number="I-MX19" Name="DR Round" ProgramChange="18"/>
+          <Patch Number="I-MX20" Name="DR Slap1" ProgramChange="19"/>
+          <Patch Number="I-MX21" Name="DR Slap2" ProgramChange="20"/>
+          <Patch Number="I-MX22" Name="DR Solid" ProgramChange="21"/>
+          <Patch Number="I-MX23" Name="DR Stud1" ProgramChange="22"/>
+          <Patch Number="I-MX24" Name="DR Stud2" ProgramChange="23"/>
+          <Patch Number="I-MX25" Name="DR Thump" ProgramChange="24"/>
+          <Patch Number="I-MX26" Name="DR Woof" ProgramChange="25"/>
+          <Patch Number="I-MX27" Name="DR Arid" ProgramChange="26"/>
+          <Patch Number="I-MX28" Name="DR Huge" ProgramChange="27"/>
+          <Patch Number="I-MX29" Name="DR Live" ProgramChange="28"/>
+          <Patch Number="I-MX30" Name="JZ Lite" ProgramChange="29"/>
+          <Patch Number="I-MX31" Name="JZ DbHd1" ProgramChange="30"/>
+          <Patch Number="I-MX32" Name="JZ DbHd2" ProgramChange="31"/>
+          <Patch Number="I-MX33" Name="JZ Loose" ProgramChange="32"/>
+          <Patch Number="I-MX34" Name="JZ Hard" ProgramChange="33"/>
+          <Patch Number="I-MX35" Name="JZ Swing" ProgramChange="34"/>
+          <Patch Number="I-MX36" Name="JZ Swang" ProgramChange="35"/>
+          <Patch Number="I-MX37" Name="JZ Smith" ProgramChange="36"/>
+          <Patch Number="I-MX38" Name="RM Big" ProgramChange="37"/>
+          <Patch Number="I-MX39" Name="RM Pow" ProgramChange="38"/>
+          <Patch Number="I-MX40" Name="RM Boo" ProgramChange="39"/>
+          <Patch Number="I-MX41" Name="RM Def" ProgramChange="40"/>
+          <Patch Number="I-MX42" Name="RM Lizrd" ProgramChange="41"/>
+          <Patch Number="I-MX43" Name="RM Crnch" ProgramChange="42"/>
+          <Patch Number="I-MX44" Name="RM Piles" ProgramChange="43"/>
+          <Patch Number="I-MX45" Name="RM Open" ProgramChange="44"/>
+          <Patch Number="I-MX46" Name="RM AirHd" ProgramChange="45"/>
+          <Patch Number="I-MX47" Name="RM Tight" ProgramChange="46"/>
+          <Patch Number="I-MX48" Name="RM Soft" ProgramChange="47"/>
+          <Patch Number="I-MX49" Name="RM Jazz" ProgramChange="48"/>
+          <Patch Number="I-MX50" Name="RM Nuke" ProgramChange="49"/>
+          <Patch Number="I-MX51" Name="RM March" ProgramChange="50"/>
+          <Patch Number="I-MX52" Name="RV Bambi" ProgramChange="51"/>
+          <Patch Number="I-MX53" Name="RV Kick" ProgramChange="52"/>
+          <Patch Number="I-MX54" Name="RV Mondo" ProgramChange="53"/>
+          <Patch Number="I-MX55" Name="RV Balad" ProgramChange="54"/>
+          <Patch Number="I-MX56" Name="RV LoHz" ProgramChange="55"/>
+          <Patch Number="I-MX57" Name="RV Orch" ProgramChange="56"/>
+          <Patch Number="I-MX58" Name="RV Arena" ProgramChange="57"/>
+          <Patch Number="I-MX59" Name="GT Tyron" ProgramChange="58"/>
+          <Patch Number="I-MX60" Name="GT Mutha" ProgramChange="59"/>
+          <Patch Number="I-MX61" Name="GT Tight" ProgramChange="60"/>
+          <Patch Number="I-MX62" Name="GT Noizy" ProgramChange="61"/>
+          <Patch Number="I-MX63" Name="GT Homer" ProgramChange="62"/>
+          <Patch Number="I-MX64" Name="GT Aero" ProgramChange="63"/>
+          <Patch Number="I-MX65" Name="GT Fist" ProgramChange="64"/>
+          <Patch Number="I-MX66" Name="GT Stuff" ProgramChange="65"/>
+          <Patch Number="I-MX67" Name="GT Blanc" ProgramChange="66"/>
+          <Patch Number="I-MX68" Name="GT Snack" ProgramChange="67"/>
+          <Patch Number="I-MX69" Name="GT Rattl" ProgramChange="68"/>
+          <Patch Number="I-MX70" Name="GT Klass" ProgramChange="69"/>
+          <Patch Number="I-MX71" Name="GT 5 Bar" ProgramChange="70"/>
+          <Patch Number="I-MX72" Name="GT Grind" ProgramChange="71"/>
+          <Patch Number="I-MX73" Name="AN Antek" ProgramChange="72"/>
+          <Patch Number="I-MX74" Name="AN 919" ProgramChange="73"/>
+          <Patch Number="I-MX75" Name="AN 929" ProgramChange="74"/>
+          <Patch Number="I-MX76" Name="AN 939" ProgramChange="75"/>
+          <Patch Number="I-MX77" Name="AN 818" ProgramChange="76"/>
+          <Patch Number="I-MX78" Name="AN Sinus" ProgramChange="77"/>
+          <Patch Number="I-MX79" Name="AN Booom" ProgramChange="78"/>
+          <Patch Number="I-MX80" Name="EL Kirk" ProgramChange="79"/>
+          <Patch Number="I-MX81" Name="EL Simm" ProgramChange="80"/>
+          <Patch Number="I-MX82" Name="EL Paso" ProgramChange="81"/>
+          <Patch Number="I-MX83" Name="EL Prinz" ProgramChange="82"/>
+          <Patch Number="I-MX84" Name="EL Rap" ProgramChange="83"/>
+          <Patch Number="I-MX85" Name="EL Efant" ProgramChange="84"/>
+          <Patch Number="I-MX86" Name="EL Ectro" ProgramChange="85"/>
+          <Patch Number="I-MX87" Name="EL Ouise" ProgramChange="86"/>
+          <Patch Number="I-MX88" Name="EL Ektrn" ProgramChange="87"/>
+          <Patch Number="I-MX89" Name="EL Sid" ProgramChange="88"/>
+          <Patch Number="I-MX90" Name="EL Tech1" ProgramChange="89"/>
+          <Patch Number="I-MX91" Name="EL Tech2" ProgramChange="90"/>
+          <Patch Number="I-MX92" Name="FX Klam" ProgramChange="91"/>
+          <Patch Number="I-MX93" Name="FX Klang" ProgramChange="92"/>
+          <Patch Number="I-MX94" Name="FX Hell" ProgramChange="93"/>
+          <Patch Number="I-MX95" Name="FX IYF" ProgramChange="94"/>
+          <Patch Number="I-MX96" Name="FX Trash" ProgramChange="95"/>
+          <Patch Number="I-MX97" Name="FX Zilla" ProgramChange="96"/>
+          <Patch Number="I-MX98" Name="FX Atom" ProgramChange="97"/>
+          <Patch Number="I-MX99" Name="FX Futur" ProgramChange="98"/>
+          <Patch Number="I-MX100" Name="FX TNT" ProgramChange="99"/>
+          <Patch Number="I-MX101" Name="FX Cicad" ProgramChange="100"/>
+          <Patch Number="I-MX102" Name="FX Delay" ProgramChange="101"/>
+          <Patch Number="I-MX103" Name="DR HiPop" ProgramChange="102"/>
+          <Patch Number="I-MX104" Name="DR Digit" ProgramChange="103"/>
+          <Patch Number="I-MX105" Name="DR Rim1" ProgramChange="104"/>
+          <Patch Number="I-MX106" Name="DR Damn" ProgramChange="105"/>
+          <Patch Number="I-MX107" Name="DR Custr" ProgramChange="106"/>
+          <Patch Number="I-MX108" Name="DR Basic" ProgramChange="107"/>
+          <Patch Number="I-MX109" Name="DR Kindl" ProgramChange="108"/>
+          <Patch Number="I-MX110" Name="DR Smack" ProgramChange="109"/>
+          <Patch Number="I-MX111" Name="DR M.O.R." ProgramChange="110"/>
+          <Patch Number="I-MX112" Name="DR Metl1" ProgramChange="111"/>
+          <Patch Number="I-MX113" Name="DR Brass" ProgramChange="112"/>
+          <Patch Number="I-MX114" Name="DR Steel" ProgramChange="113"/>
+          <Patch Number="I-MX115" Name="DR Rim2" ProgramChange="114"/>
+          <Patch Number="I-MX116" Name="DR Tite1" ProgramChange="115"/>
+          <Patch Number="I-MX117" Name="DR Tite2" ProgramChange="116"/>
+          <Patch Number="I-MX118" Name="DR Maple" ProgramChange="117"/>
+          <Patch Number="I-MX119" Name="DR Real1" ProgramChange="118"/>
+          <Patch Number="I-MX120" Name="DR Norm" ProgramChange="119"/>
+          <Patch Number="I-MX121" Name="DR 400" ProgramChange="120"/>
+          <Patch Number="I-MX122" Name="DR Marly" ProgramChange="121"/>
+          <Patch Number="I-MX123" Name="DR Danc1" ProgramChange="122"/>
+          <Patch Number="I-MX124" Name="DR Danc2" ProgramChange="123"/>
+          <Patch Number="I-MX125" Name="DR Danc3" ProgramChange="124"/>
+          <Patch Number="I-MX126" Name="DR Arid1" ProgramChange="125"/>
+          <Patch Number="I-MX127" Name="DR Arid2" ProgramChange="126"/>
+          <Patch Number="I-MX128" Name="DR Arid3" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset Pitched Voices BD">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="89"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="P-BD1" Name="DR Kikin" ProgramChange="0"/>
+          <Patch Number="P-BD2" Name="DR Hard" ProgramChange="1"/>
+          <Patch Number="P-BD3" Name="DR Boom" ProgramChange="2"/>
+          <Patch Number="P-BD4" Name="DR Danc1" ProgramChange="3"/>
+          <Patch Number="P-BD5" Name="DR Danc2" ProgramChange="4"/>
+          <Patch Number="P-BD6" Name="DR Danc3" ProgramChange="5"/>
+          <Patch Number="P-BD7" Name="DR Danc4" ProgramChange="6"/>
+          <Patch Number="P-BD8" Name="DR Jazz1" ProgramChange="7"/>
+          <Patch Number="P-BD9" Name="DR Maple" ProgramChange="8"/>
+          <Patch Number="P-BD10" Name="DR Pop1" ProgramChange="9"/>
+          <Patch Number="P-BD11" Name="DR Byter" ProgramChange="10"/>
+          <Patch Number="P-BD12" Name="DR LoCal" ProgramChange="11"/>
+          <Patch Number="P-BD13" Name="DR Beef" ProgramChange="12"/>
+          <Patch Number="P-BD14" Name="DR Clean" ProgramChange="13"/>
+          <Patch Number="P-BD15" Name="DR Click" ProgramChange="14"/>
+          <Patch Number="P-BD16" Name="DR Fuzzy" ProgramChange="15"/>
+          <Patch Number="P-BD17" Name="DR Kinta" ProgramChange="16"/>
+          <Patch Number="P-BD18" Name="DR Punch" ProgramChange="17"/>
+          <Patch Number="P-BD19" Name="DR Round" ProgramChange="18"/>
+          <Patch Number="P-BD20" Name="DR Slap1" ProgramChange="19"/>
+          <Patch Number="P-BD21" Name="DR Slap2" ProgramChange="20"/>
+          <Patch Number="P-BD22" Name="DR Solid" ProgramChange="21"/>
+          <Patch Number="P-BD23" Name="DR Stud1" ProgramChange="22"/>
+          <Patch Number="P-BD24" Name="DR Stud2" ProgramChange="23"/>
+          <Patch Number="P-BD25" Name="DR Thump" ProgramChange="24"/>
+          <Patch Number="P-BD26" Name="DR Woof" ProgramChange="25"/>
+          <Patch Number="P-BD27" Name="DR Arid" ProgramChange="26"/>
+          <Patch Number="P-BD28" Name="DR Huge" ProgramChange="27"/>
+          <Patch Number="P-BD29" Name="DR Live" ProgramChange="28"/>
+          <Patch Number="P-BD30" Name="JZ Lite" ProgramChange="29"/>
+          <Patch Number="P-BD31" Name="JZ DbHd1" ProgramChange="30"/>
+          <Patch Number="P-BD32" Name="JZ DbHd2" ProgramChange="31"/>
+          <Patch Number="P-BD33" Name="JZ Loose" ProgramChange="32"/>
+          <Patch Number="P-BD34" Name="JZ Hard" ProgramChange="33"/>
+          <Patch Number="P-BD35" Name="JZ Swing" ProgramChange="34"/>
+          <Patch Number="P-BD36" Name="JZ Swang" ProgramChange="35"/>
+          <Patch Number="P-BD37" Name="JZ Smith" ProgramChange="36"/>
+          <Patch Number="P-BD38" Name="RM Big" ProgramChange="37"/>
+          <Patch Number="P-BD39" Name="RM Pow" ProgramChange="38"/>
+          <Patch Number="P-BD40" Name="RM Boo" ProgramChange="39"/>
+          <Patch Number="P-BD41" Name="RM Def" ProgramChange="40"/>
+          <Patch Number="P-BD42" Name="RM Lizrd" ProgramChange="41"/>
+          <Patch Number="P-BD43" Name="RM Crnch" ProgramChange="42"/>
+          <Patch Number="P-BD44" Name="RM Piles" ProgramChange="43"/>
+          <Patch Number="P-BD45" Name="RM Open" ProgramChange="44"/>
+          <Patch Number="P-BD46" Name="RM AirHd" ProgramChange="45"/>
+          <Patch Number="P-BD47" Name="RM Tight" ProgramChange="46"/>
+          <Patch Number="P-BD48" Name="RM Soft" ProgramChange="47"/>
+          <Patch Number="P-BD49" Name="RM Jazz" ProgramChange="48"/>
+          <Patch Number="P-BD50" Name="RM Nuke" ProgramChange="49"/>
+          <Patch Number="P-BD51" Name="RM March" ProgramChange="50"/>
+          <Patch Number="P-BD52" Name="RV Bambi" ProgramChange="51"/>
+          <Patch Number="P-BD53" Name="RV Kick" ProgramChange="52"/>
+          <Patch Number="P-BD54" Name="RV Mondo" ProgramChange="53"/>
+          <Patch Number="P-BD55" Name="RV Balad" ProgramChange="54"/>
+          <Patch Number="P-BD56" Name="RV LoHz" ProgramChange="55"/>
+          <Patch Number="P-BD57" Name="RV Orch" ProgramChange="56"/>
+          <Patch Number="P-BD58" Name="RV Arena" ProgramChange="57"/>
+          <Patch Number="P-BD59" Name="GT Tyron" ProgramChange="58"/>
+          <Patch Number="P-BD60" Name="GT Mutha" ProgramChange="59"/>
+          <Patch Number="P-BD61" Name="GT Tight" ProgramChange="60"/>
+          <Patch Number="P-BD62" Name="GT Noizy" ProgramChange="61"/>
+          <Patch Number="P-BD63" Name="GT Homer" ProgramChange="62"/>
+          <Patch Number="P-BD64" Name="GT Aero" ProgramChange="63"/>
+          <Patch Number="P-BD65" Name="GT Fist" ProgramChange="64"/>
+          <Patch Number="P-BD66" Name="GT Stuff" ProgramChange="65"/>
+          <Patch Number="P-BD67" Name="GT Blanc" ProgramChange="66"/>
+          <Patch Number="P-BD68" Name="GT Snack" ProgramChange="67"/>
+          <Patch Number="P-BD69" Name="GT Rattl" ProgramChange="68"/>
+          <Patch Number="P-BD70" Name="GT Klass" ProgramChange="69"/>
+          <Patch Number="P-BD71" Name="GT 5 Bar" ProgramChange="70"/>
+          <Patch Number="P-BD72" Name="GT Grind" ProgramChange="71"/>
+          <Patch Number="P-BD73" Name="AN Antek" ProgramChange="72"/>
+          <Patch Number="P-BD74" Name="AN 919" ProgramChange="73"/>
+          <Patch Number="P-BD75" Name="AN 929" ProgramChange="74"/>
+          <Patch Number="P-BD76" Name="AN 939" ProgramChange="75"/>
+          <Patch Number="P-BD77" Name="AN 818" ProgramChange="76"/>
+          <Patch Number="P-BD78" Name="AN Sinus" ProgramChange="77"/>
+          <Patch Number="P-BD79" Name="AN Booom" ProgramChange="78"/>
+          <Patch Number="P-BD80" Name="EL Kirk" ProgramChange="79"/>
+          <Patch Number="P-BD81" Name="EL Simm" ProgramChange="80"/>
+          <Patch Number="P-BD82" Name="EL Paso" ProgramChange="81"/>
+          <Patch Number="P-BD83" Name="EL Prinz" ProgramChange="82"/>
+          <Patch Number="P-BD84" Name="EL Rap" ProgramChange="83"/>
+          <Patch Number="P-BD85" Name="EL Efant" ProgramChange="84"/>
+          <Patch Number="P-BD86" Name="EL Ectro" ProgramChange="85"/>
+          <Patch Number="P-BD87" Name="EL Ouise" ProgramChange="86"/>
+          <Patch Number="P-BD88" Name="EL Ektrn" ProgramChange="87"/>
+          <Patch Number="P-BD89" Name="EL Sid" ProgramChange="88"/>
+          <Patch Number="P-BD90" Name="EL Tech1" ProgramChange="89"/>
+          <Patch Number="P-BD91" Name="EL Tech2" ProgramChange="90"/>
+          <Patch Number="P-BD92" Name="FX Klam" ProgramChange="91"/>
+          <Patch Number="P-BD93" Name="FX Klang" ProgramChange="92"/>
+          <Patch Number="P-BD94" Name="FX Hell" ProgramChange="93"/>
+          <Patch Number="P-BD95" Name="FX IYF" ProgramChange="94"/>
+          <Patch Number="P-BD96" Name="FX Trash" ProgramChange="95"/>
+          <Patch Number="P-BD97" Name="FX Zilla" ProgramChange="96"/>
+          <Patch Number="P-BD98" Name="FX Atom" ProgramChange="97"/>
+          <Patch Number="P-BD99" Name="FX Futur" ProgramChange="98"/>
+          <Patch Number="P-BD100" Name="FX TNT" ProgramChange="99"/>
+          <Patch Number="P-BD101" Name="FX Cicad" ProgramChange="100"/>
+          <Patch Number="P-BD102" Name="FX Delay" ProgramChange="101"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Internal Pitched Voices BD">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="87"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="I-BD1" Name="DR Kikin" ProgramChange="0"/>
+          <Patch Number="I-BD2" Name="DR Hard" ProgramChange="1"/>
+          <Patch Number="I-BD3" Name="DR Boom" ProgramChange="2"/>
+          <Patch Number="I-BD4" Name="DR Danc1" ProgramChange="3"/>
+          <Patch Number="I-BD5" Name="DR Danc2" ProgramChange="4"/>
+          <Patch Number="I-BD6" Name="DR Danc3" ProgramChange="5"/>
+          <Patch Number="I-BD7" Name="DR Danc4" ProgramChange="6"/>
+          <Patch Number="I-BD8" Name="DR Jazz1" ProgramChange="7"/>
+          <Patch Number="I-BD9" Name="DR Maple" ProgramChange="8"/>
+          <Patch Number="I-BD10" Name="DR Pop1" ProgramChange="9"/>
+          <Patch Number="I-BD11" Name="DR Byter" ProgramChange="10"/>
+          <Patch Number="I-BD12" Name="DR LoCal" ProgramChange="11"/>
+          <Patch Number="I-BD13" Name="DR Beef" ProgramChange="12"/>
+          <Patch Number="I-BD14" Name="DR Clean" ProgramChange="13"/>
+          <Patch Number="I-BD15" Name="DR Click" ProgramChange="14"/>
+          <Patch Number="I-BD16" Name="DR Fuzzy" ProgramChange="15"/>
+          <Patch Number="I-BD17" Name="DR Kinta" ProgramChange="16"/>
+          <Patch Number="I-BD18" Name="DR Punch" ProgramChange="17"/>
+          <Patch Number="I-BD19" Name="DR Round" ProgramChange="18"/>
+          <Patch Number="I-BD20" Name="DR Slap1" ProgramChange="19"/>
+          <Patch Number="I-BD21" Name="DR Slap2" ProgramChange="20"/>
+          <Patch Number="I-BD22" Name="DR Solid" ProgramChange="21"/>
+          <Patch Number="I-BD23" Name="DR Stud1" ProgramChange="22"/>
+          <Patch Number="I-BD24" Name="DR Stud2" ProgramChange="23"/>
+          <Patch Number="I-BD25" Name="DR Thump" ProgramChange="24"/>
+          <Patch Number="I-BD26" Name="DR Woof" ProgramChange="25"/>
+          <Patch Number="I-BD27" Name="DR Arid" ProgramChange="26"/>
+          <Patch Number="I-BD28" Name="DR Huge" ProgramChange="27"/>
+          <Patch Number="I-BD29" Name="DR Live" ProgramChange="28"/>
+          <Patch Number="I-BD30" Name="JZ Lite" ProgramChange="29"/>
+          <Patch Number="I-BD31" Name="JZ DbHd1" ProgramChange="30"/>
+          <Patch Number="I-BD32" Name="JZ DbHd2" ProgramChange="31"/>
+          <Patch Number="I-BD33" Name="JZ Loose" ProgramChange="32"/>
+          <Patch Number="I-BD34" Name="JZ Hard" ProgramChange="33"/>
+          <Patch Number="I-BD35" Name="JZ Swing" ProgramChange="34"/>
+          <Patch Number="I-BD36" Name="JZ Swang" ProgramChange="35"/>
+          <Patch Number="I-BD37" Name="JZ Smith" ProgramChange="36"/>
+          <Patch Number="I-BD38" Name="RM Big" ProgramChange="37"/>
+          <Patch Number="I-BD39" Name="RM Pow" ProgramChange="38"/>
+          <Patch Number="I-BD40" Name="RM Boo" ProgramChange="39"/>
+          <Patch Number="I-BD41" Name="RM Def" ProgramChange="40"/>
+          <Patch Number="I-BD42" Name="RM Lizrd" ProgramChange="41"/>
+          <Patch Number="I-BD43" Name="RM Crnch" ProgramChange="42"/>
+          <Patch Number="I-BD44" Name="RM Piles" ProgramChange="43"/>
+          <Patch Number="I-BD45" Name="RM Open" ProgramChange="44"/>
+          <Patch Number="I-BD46" Name="RM AirHd" ProgramChange="45"/>
+          <Patch Number="I-BD47" Name="RM Tight" ProgramChange="46"/>
+          <Patch Number="I-BD48" Name="RM Soft" ProgramChange="47"/>
+          <Patch Number="I-BD49" Name="RM Jazz" ProgramChange="48"/>
+          <Patch Number="I-BD50" Name="RM Nuke" ProgramChange="49"/>
+          <Patch Number="I-BD51" Name="RM March" ProgramChange="50"/>
+          <Patch Number="I-BD52" Name="RV Bambi" ProgramChange="51"/>
+          <Patch Number="I-BD53" Name="RV Kick" ProgramChange="52"/>
+          <Patch Number="I-BD54" Name="RV Mondo" ProgramChange="53"/>
+          <Patch Number="I-BD55" Name="RV Balad" ProgramChange="54"/>
+          <Patch Number="I-BD56" Name="RV LoHz" ProgramChange="55"/>
+          <Patch Number="I-BD57" Name="RV Orch" ProgramChange="56"/>
+          <Patch Number="I-BD58" Name="RV Arena" ProgramChange="57"/>
+          <Patch Number="I-BD59" Name="GT Tyron" ProgramChange="58"/>
+          <Patch Number="I-BD60" Name="GT Mutha" ProgramChange="59"/>
+          <Patch Number="I-BD61" Name="GT Tight" ProgramChange="60"/>
+          <Patch Number="I-BD62" Name="GT Noizy" ProgramChange="61"/>
+          <Patch Number="I-BD63" Name="GT Homer" ProgramChange="62"/>
+          <Patch Number="I-BD64" Name="GT Aero" ProgramChange="63"/>
+          <Patch Number="I-BD65" Name="GT Fist" ProgramChange="64"/>
+          <Patch Number="I-BD66" Name="GT Stuff" ProgramChange="65"/>
+          <Patch Number="I-BD67" Name="GT Blanc" ProgramChange="66"/>
+          <Patch Number="I-BD68" Name="GT Snack" ProgramChange="67"/>
+          <Patch Number="I-BD69" Name="GT Rattl" ProgramChange="68"/>
+          <Patch Number="I-BD70" Name="GT Klass" ProgramChange="69"/>
+          <Patch Number="I-BD71" Name="GT 5 Bar" ProgramChange="70"/>
+          <Patch Number="I-BD72" Name="GT Grind" ProgramChange="71"/>
+          <Patch Number="I-BD73" Name="AN Antek" ProgramChange="72"/>
+          <Patch Number="I-BD74" Name="AN 919" ProgramChange="73"/>
+          <Patch Number="I-BD75" Name="AN 929" ProgramChange="74"/>
+          <Patch Number="I-BD76" Name="AN 939" ProgramChange="75"/>
+          <Patch Number="I-BD77" Name="AN 818" ProgramChange="76"/>
+          <Patch Number="I-BD78" Name="AN Sinus" ProgramChange="77"/>
+          <Patch Number="I-BD79" Name="AN Booom" ProgramChange="78"/>
+          <Patch Number="I-BD80" Name="EL Kirk" ProgramChange="79"/>
+          <Patch Number="I-BD81" Name="EL Simm" ProgramChange="80"/>
+          <Patch Number="I-BD82" Name="EL Paso" ProgramChange="81"/>
+          <Patch Number="I-BD83" Name="EL Prinz" ProgramChange="82"/>
+          <Patch Number="I-BD84" Name="EL Rap" ProgramChange="83"/>
+          <Patch Number="I-BD85" Name="EL Efant" ProgramChange="84"/>
+          <Patch Number="I-BD86" Name="EL Ectro" ProgramChange="85"/>
+          <Patch Number="I-BD87" Name="EL Ouise" ProgramChange="86"/>
+          <Patch Number="I-BD88" Name="EL Ektrn" ProgramChange="87"/>
+          <Patch Number="I-BD89" Name="EL Sid" ProgramChange="88"/>
+          <Patch Number="I-BD90" Name="EL Tech1" ProgramChange="89"/>
+          <Patch Number="I-BD91" Name="EL Tech2" ProgramChange="90"/>
+          <Patch Number="I-BD92" Name="FX Klam" ProgramChange="91"/>
+          <Patch Number="I-BD93" Name="FX Klang" ProgramChange="92"/>
+          <Patch Number="I-BD94" Name="FX Hell" ProgramChange="93"/>
+          <Patch Number="I-BD95" Name="FX IYF" ProgramChange="94"/>
+          <Patch Number="I-BD96" Name="FX Trash" ProgramChange="95"/>
+          <Patch Number="I-BD97" Name="FX Zilla" ProgramChange="96"/>
+          <Patch Number="I-BD98" Name="FX Atom" ProgramChange="97"/>
+          <Patch Number="I-BD99" Name="FX Futur" ProgramChange="98"/>
+          <Patch Number="I-BD100" Name="FX TNT" ProgramChange="99"/>
+          <Patch Number="I-BD101" Name="FX Cicad" ProgramChange="100"/>
+          <Patch Number="I-BD102" Name="FX Delay" ProgramChange="101"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset Pitched Voices SD">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="92"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="P-SD1" Name="DR HiPop" ProgramChange="0"/>
+          <Patch Number="P-SD2" Name="DR Digit" ProgramChange="1"/>
+          <Patch Number="P-SD3" Name="DR Rim1" ProgramChange="2"/>
+          <Patch Number="P-SD4" Name="DR Damn" ProgramChange="3"/>
+          <Patch Number="P-SD5" Name="DR Custr" ProgramChange="4"/>
+          <Patch Number="P-SD6" Name="DR Basic" ProgramChange="5"/>
+          <Patch Number="P-SD7" Name="DR Kindl" ProgramChange="6"/>
+          <Patch Number="P-SD8" Name="DR Smack" ProgramChange="7"/>
+          <Patch Number="P-SD9" Name="DR M.O.R." ProgramChange="8"/>
+          <Patch Number="P-SD10" Name="DR Metl1" ProgramChange="9"/>
+          <Patch Number="P-SD11" Name="DR Brass" ProgramChange="10"/>
+          <Patch Number="P-SD12" Name="DR Steel" ProgramChange="11"/>
+          <Patch Number="P-SD13" Name="DR Rim2" ProgramChange="12"/>
+          <Patch Number="P-SD14" Name="DR Tite1" ProgramChange="13"/>
+          <Patch Number="P-SD15" Name="DR Tite2" ProgramChange="14"/>
+          <Patch Number="P-SD16" Name="DR Maple" ProgramChange="15"/>
+          <Patch Number="P-SD17" Name="DR Real1" ProgramChange="16"/>
+          <Patch Number="P-SD18" Name="DR Norm" ProgramChange="17"/>
+          <Patch Number="P-SD19" Name="DR 400" ProgramChange="18"/>
+          <Patch Number="P-SD20" Name="DR Marly" ProgramChange="19"/>
+          <Patch Number="P-SD21" Name="DR Danc1" ProgramChange="20"/>
+          <Patch Number="P-SD22" Name="DR Danc2" ProgramChange="21"/>
+          <Patch Number="P-SD23" Name="DR Danc3" ProgramChange="22"/>
+          <Patch Number="P-SD24" Name="DR Arid1" ProgramChange="23"/>
+          <Patch Number="P-SD25" Name="DR Arid2" ProgramChange="24"/>
+          <Patch Number="P-SD26" Name="DR Arid3" ProgramChange="25"/>
+          <Patch Number="P-SD27" Name="DR Arid4" ProgramChange="26"/>
+          <Patch Number="P-SD28" Name="DR Rim3" ProgramChange="27"/>
+          <Patch Number="P-SD29" Name="DR Rim4" ProgramChange="28"/>
+          <Patch Number="P-SD30" Name="DR Vergn" ProgramChange="29"/>
+          <Patch Number="P-SD31" Name="DR Wood" ProgramChange="30"/>
+          <Patch Number="P-SD32" Name="DR Real2" ProgramChange="31"/>
+          <Patch Number="P-SD33" Name="DR Krack" ProgramChange="32"/>
+          <Patch Number="P-SD34" Name="JZ Playr" ProgramChange="33"/>
+          <Patch Number="P-SD35" Name="JZ Cool" ProgramChange="34"/>
+          <Patch Number="P-SD36" Name="JZ Brsa1" ProgramChange="35"/>
+          <Patch Number="P-SD37" Name="JZ Swpa1" ProgramChange="36"/>
+          <Patch Number="P-SD38" Name="JZ Brsb1" ProgramChange="37"/>
+          <Patch Number="P-SD39" Name="JZ Swpb1" ProgramChange="38"/>
+          <Patch Number="P-SD40" Name="JZ Swsh1" ProgramChange="39"/>
+          <Patch Number="P-SD41" Name="JZ Brsa2" ProgramChange="40"/>
+          <Patch Number="P-SD42" Name="JZ Swpa2" ProgramChange="41"/>
+          <Patch Number="P-SD43" Name="JZ Brsb2" ProgramChange="42"/>
+          <Patch Number="P-SD44" Name="JZ Swpb2" ProgramChange="43"/>
+          <Patch Number="P-SD45" Name="JZ Swsh2" ProgramChange="44"/>
+          <Patch Number="P-SD46" Name="RM Burnn" ProgramChange="45"/>
+          <Patch Number="P-SD47" Name="RM Crank" ProgramChange="46"/>
+          <Patch Number="P-SD48" Name="RM Karim" ProgramChange="47"/>
+          <Patch Number="P-SD49" Name="RM Obese" ProgramChange="48"/>
+          <Patch Number="P-SD50" Name="RM Diet" ProgramChange="49"/>
+          <Patch Number="P-SD51" Name="RM Tubby" ProgramChange="50"/>
+          <Patch Number="P-SD52" Name="RM No FC" ProgramChange="51"/>
+          <Patch Number="P-SD53" Name="RM 9volt" ProgramChange="52"/>
+          <Patch Number="P-SD54" Name="RM Gospl" ProgramChange="53"/>
+          <Patch Number="P-SD55" Name="RV TheDB" ProgramChange="54"/>
+          <Patch Number="P-SD56" Name="RV Spike" ProgramChange="55"/>
+          <Patch Number="P-SD57" Name="RV Atom" ProgramChange="56"/>
+          <Patch Number="P-SD58" Name="RV Sizzl" ProgramChange="57"/>
+          <Patch Number="P-SD59" Name="RV Head" ProgramChange="58"/>
+          <Patch Number="P-SD60" Name="RV Biznz" ProgramChange="59"/>
+          <Patch Number="P-SD61" Name="RV Wham" ProgramChange="60"/>
+          <Patch Number="P-SD62" Name="RV Bam" ProgramChange="61"/>
+          <Patch Number="P-SD63" Name="RV Thanx" ProgramChange="62"/>
+          <Patch Number="P-SD64" Name="RV Canon" ProgramChange="63"/>
+          <Patch Number="P-SD65" Name="RV Bryte" ProgramChange="64"/>
+          <Patch Number="P-SD66" Name="RV Ghost" ProgramChange="65"/>
+          <Patch Number="P-SD67" Name="RV IYF" ProgramChange="66"/>
+          <Patch Number="P-SD68" Name="GT Shock" ProgramChange="67"/>
+          <Patch Number="P-SD69" Name="GT HiFab" ProgramChange="68"/>
+          <Patch Number="P-SD70" Name="GT Short" ProgramChange="69"/>
+          <Patch Number="P-SD71" Name="GT LoFab" ProgramChange="70"/>
+          <Patch Number="P-SD72" Name="GT Sucks" ProgramChange="71"/>
+          <Patch Number="P-SD73" Name="GT Thump" ProgramChange="72"/>
+          <Patch Number="P-SD74" Name="GT EatIt" ProgramChange="73"/>
+          <Patch Number="P-SD75" Name="GT Whip" ProgramChange="74"/>
+          <Patch Number="P-SD76" Name="GT Tasty" ProgramChange="75"/>
+          <Patch Number="P-SD77" Name="GT Anvil" ProgramChange="76"/>
+          <Patch Number="P-SD78" Name="GT Stape" ProgramChange="77"/>
+          <Patch Number="P-SD79" Name="GT Erake" ProgramChange="78"/>
+          <Patch Number="P-SD80" Name="GT Fable" ProgramChange="79"/>
+          <Patch Number="P-SD81" Name="GT Wacko" ProgramChange="80"/>
+          <Patch Number="P-SD82" Name="AN Orexk" ProgramChange="81"/>
+          <Patch Number="P-SD83" Name="AN 919" ProgramChange="82"/>
+          <Patch Number="P-SD84" Name="AN 818" ProgramChange="83"/>
+          <Patch Number="P-SD85" Name="AN 929" ProgramChange="84"/>
+          <Patch Number="P-SD86" Name="AN 828" ProgramChange="85"/>
+          <Patch Number="P-SD87" Name="EL Down" ProgramChange="86"/>
+          <Patch Number="P-SD88" Name="EL Power" ProgramChange="87"/>
+          <Patch Number="P-SD89" Name="EL Simm" ProgramChange="88"/>
+          <Patch Number="P-SD90" Name="FX Tech" ProgramChange="89"/>
+          <Patch Number="P-SD91" Name="FX 9Roll" ProgramChange="90"/>
+          <Patch Number="P-SD92" Name="FX Ugly" ProgramChange="91"/>
+          <Patch Number="P-SD93" Name="FX Pain" ProgramChange="92"/>
+          <Patch Number="P-SD94" Name="FX Undys" ProgramChange="93"/>
+          <Patch Number="P-SD95" Name="FX Igor" ProgramChange="94"/>
+          <Patch Number="P-SD96" Name="FX Spit" ProgramChange="95"/>
+          <Patch Number="P-SD97" Name="FX Sneez" ProgramChange="96"/>
+          <Patch Number="P-SD98" Name="FX Cough" ProgramChange="97"/>
+          <Patch Number="P-SD99" Name="FX Bakup" ProgramChange="98"/>
+          <Patch Number="P-SD100" Name="FX Ruff" ProgramChange="99"/>
+          <Patch Number="P-SD101" Name="FX Jam" ProgramChange="100"/>
+          <Patch Number="P-SD102" Name="FX Spew" ProgramChange="101"/>
+          <Patch Number="P-SD103" Name="FX Hack" ProgramChange="102"/>
+          <Patch Number="P-SD104" Name="SS Ambi1" ProgramChange="103"/>
+          <Patch Number="P-SD105" Name="SS Ambi2" ProgramChange="104"/>
+          <Patch Number="P-SD106" Name="SS Dryer" ProgramChange="105"/>
+          <Patch Number="P-SD107" Name="SS Dry" ProgramChange="106"/>
+          <Patch Number="P-SD108" Name="SS Count" ProgramChange="107"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Internal Pitched Voices SD">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="90"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="I-SD1" Name="DR HiPop" ProgramChange="0"/>
+          <Patch Number="I-SD2" Name="DR Digit" ProgramChange="1"/>
+          <Patch Number="I-SD3" Name="DR Rim1" ProgramChange="2"/>
+          <Patch Number="I-SD4" Name="DR Damn" ProgramChange="3"/>
+          <Patch Number="I-SD5" Name="DR Custr" ProgramChange="4"/>
+          <Patch Number="I-SD6" Name="DR Basic" ProgramChange="5"/>
+          <Patch Number="I-SD7" Name="DR Kindl" ProgramChange="6"/>
+          <Patch Number="I-SD8" Name="DR Smack" ProgramChange="7"/>
+          <Patch Number="I-SD9" Name="DR M.O.R." ProgramChange="8"/>
+          <Patch Number="I-SD10" Name="DR Metl1" ProgramChange="9"/>
+          <Patch Number="I-SD11" Name="DR Brass" ProgramChange="10"/>
+          <Patch Number="I-SD12" Name="DR Steel" ProgramChange="11"/>
+          <Patch Number="I-SD13" Name="DR Rim2" ProgramChange="12"/>
+          <Patch Number="I-SD14" Name="DR Tite1" ProgramChange="13"/>
+          <Patch Number="I-SD15" Name="DR Tite2" ProgramChange="14"/>
+          <Patch Number="I-SD16" Name="DR Maple" ProgramChange="15"/>
+          <Patch Number="I-SD17" Name="DR Real1" ProgramChange="16"/>
+          <Patch Number="I-SD18" Name="DR Norm" ProgramChange="17"/>
+          <Patch Number="I-SD19" Name="DR 400" ProgramChange="18"/>
+          <Patch Number="I-SD20" Name="DR Marly" ProgramChange="19"/>
+          <Patch Number="I-SD21" Name="DR Danc1" ProgramChange="20"/>
+          <Patch Number="I-SD22" Name="DR Danc2" ProgramChange="21"/>
+          <Patch Number="I-SD23" Name="DR Danc3" ProgramChange="22"/>
+          <Patch Number="I-SD24" Name="DR Arid1" ProgramChange="23"/>
+          <Patch Number="I-SD25" Name="DR Arid2" ProgramChange="24"/>
+          <Patch Number="I-SD26" Name="DR Arid3" ProgramChange="25"/>
+          <Patch Number="I-SD27" Name="DR Arid4" ProgramChange="26"/>
+          <Patch Number="I-SD28" Name="DR Rim3" ProgramChange="27"/>
+          <Patch Number="I-SD29" Name="DR Rim4" ProgramChange="28"/>
+          <Patch Number="I-SD30" Name="DR Vergn" ProgramChange="29"/>
+          <Patch Number="I-SD31" Name="DR Wood" ProgramChange="30"/>
+          <Patch Number="I-SD32" Name="DR Real2" ProgramChange="31"/>
+          <Patch Number="I-SD33" Name="DR Krack" ProgramChange="32"/>
+          <Patch Number="I-SD34" Name="JZ Playr" ProgramChange="33"/>
+          <Patch Number="I-SD35" Name="JZ Cool" ProgramChange="34"/>
+          <Patch Number="I-SD36" Name="JZ Brsa1" ProgramChange="35"/>
+          <Patch Number="I-SD37" Name="JZ Swpa1" ProgramChange="36"/>
+          <Patch Number="I-SD38" Name="JZ Brsb1" ProgramChange="37"/>
+          <Patch Number="I-SD39" Name="JZ Swpb1" ProgramChange="38"/>
+          <Patch Number="I-SD40" Name="JZ Swsh1" ProgramChange="39"/>
+          <Patch Number="I-SD41" Name="JZ Brsa2" ProgramChange="40"/>
+          <Patch Number="I-SD42" Name="JZ Swpa2" ProgramChange="41"/>
+          <Patch Number="I-SD43" Name="JZ Brsb2" ProgramChange="42"/>
+          <Patch Number="I-SD44" Name="JZ Swpb2" ProgramChange="43"/>
+          <Patch Number="I-SD45" Name="JZ Swsh2" ProgramChange="44"/>
+          <Patch Number="I-SD46" Name="RM Burnn" ProgramChange="45"/>
+          <Patch Number="I-SD47" Name="RM Crank" ProgramChange="46"/>
+          <Patch Number="I-SD48" Name="RM Karim" ProgramChange="47"/>
+          <Patch Number="I-SD49" Name="RM Obese" ProgramChange="48"/>
+          <Patch Number="I-SD50" Name="RM Diet" ProgramChange="49"/>
+          <Patch Number="I-SD51" Name="RM Tubby" ProgramChange="50"/>
+          <Patch Number="I-SD52" Name="RM No FC" ProgramChange="51"/>
+          <Patch Number="I-SD53" Name="RM 9volt" ProgramChange="52"/>
+          <Patch Number="I-SD54" Name="RM Gospl" ProgramChange="53"/>
+          <Patch Number="I-SD55" Name="RV TheDB" ProgramChange="54"/>
+          <Patch Number="I-SD56" Name="RV Spike" ProgramChange="55"/>
+          <Patch Number="I-SD57" Name="RV Atom" ProgramChange="56"/>
+          <Patch Number="I-SD58" Name="RV Sizzl" ProgramChange="57"/>
+          <Patch Number="I-SD59" Name="RV Head" ProgramChange="58"/>
+          <Patch Number="I-SD60" Name="RV Biznz" ProgramChange="59"/>
+          <Patch Number="I-SD61" Name="RV Wham" ProgramChange="60"/>
+          <Patch Number="I-SD62" Name="RV Bam" ProgramChange="61"/>
+          <Patch Number="I-SD63" Name="RV Thanx" ProgramChange="62"/>
+          <Patch Number="I-SD64" Name="RV Canon" ProgramChange="63"/>
+          <Patch Number="I-SD65" Name="RV Bryte" ProgramChange="64"/>
+          <Patch Number="I-SD66" Name="RV Ghost" ProgramChange="65"/>
+          <Patch Number="I-SD67" Name="RV IYF" ProgramChange="66"/>
+          <Patch Number="I-SD68" Name="GT Shock" ProgramChange="67"/>
+          <Patch Number="I-SD69" Name="GT HiFab" ProgramChange="68"/>
+          <Patch Number="I-SD70" Name="GT Short" ProgramChange="69"/>
+          <Patch Number="I-SD71" Name="GT LoFab" ProgramChange="70"/>
+          <Patch Number="I-SD72" Name="GT Sucks" ProgramChange="71"/>
+          <Patch Number="I-SD73" Name="GT Thump" ProgramChange="72"/>
+          <Patch Number="I-SD74" Name="GT EatIt" ProgramChange="73"/>
+          <Patch Number="I-SD75" Name="GT Whip" ProgramChange="74"/>
+          <Patch Number="I-SD76" Name="GT Tasty" ProgramChange="75"/>
+          <Patch Number="I-SD77" Name="GT Anvil" ProgramChange="76"/>
+          <Patch Number="I-SD78" Name="GT Stape" ProgramChange="77"/>
+          <Patch Number="I-SD79" Name="GT Erake" ProgramChange="78"/>
+          <Patch Number="I-SD80" Name="GT Fable" ProgramChange="79"/>
+          <Patch Number="I-SD81" Name="GT Wacko" ProgramChange="80"/>
+          <Patch Number="I-SD82" Name="AN Orexk" ProgramChange="81"/>
+          <Patch Number="I-SD83" Name="AN 919" ProgramChange="82"/>
+          <Patch Number="I-SD84" Name="AN 818" ProgramChange="83"/>
+          <Patch Number="I-SD85" Name="AN 929" ProgramChange="84"/>
+          <Patch Number="I-SD86" Name="AN 828" ProgramChange="85"/>
+          <Patch Number="I-SD87" Name="EL Down" ProgramChange="86"/>
+          <Patch Number="I-SD88" Name="EL Power" ProgramChange="87"/>
+          <Patch Number="I-SD89" Name="EL Simm" ProgramChange="88"/>
+          <Patch Number="I-SD90" Name="FX Tech" ProgramChange="89"/>
+          <Patch Number="I-SD91" Name="FX 9Roll" ProgramChange="90"/>
+          <Patch Number="I-SD92" Name="FX Ugly" ProgramChange="91"/>
+          <Patch Number="I-SD93" Name="FX Pain" ProgramChange="92"/>
+          <Patch Number="I-SD94" Name="FX Undys" ProgramChange="93"/>
+          <Patch Number="I-SD95" Name="FX Igor" ProgramChange="94"/>
+          <Patch Number="I-SD96" Name="FX Spit" ProgramChange="95"/>
+          <Patch Number="I-SD97" Name="FX Sneez" ProgramChange="96"/>
+          <Patch Number="I-SD98" Name="FX Cough" ProgramChange="97"/>
+          <Patch Number="I-SD99" Name="FX Bakup" ProgramChange="98"/>
+          <Patch Number="I-SD100" Name="FX Ruff" ProgramChange="99"/>
+          <Patch Number="I-SD101" Name="FX Jam" ProgramChange="100"/>
+          <Patch Number="I-SD102" Name="FX Spew" ProgramChange="101"/>
+          <Patch Number="I-SD103" Name="FX Hack" ProgramChange="102"/>
+          <Patch Number="I-SD104" Name="SS Ambi1" ProgramChange="103"/>
+          <Patch Number="I-SD105" Name="SS Ambi2" ProgramChange="104"/>
+          <Patch Number="I-SD106" Name="SS Dryer" ProgramChange="105"/>
+          <Patch Number="I-SD107" Name="SS Dry" ProgramChange="106"/>
+          <Patch Number="I-SD108" Name="SS Count" ProgramChange="107"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset Pitched Voices TM">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="95"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="TM1" Name="DR Nice1" ProgramChange="0"/>
+          <Patch Number="TM2" Name="DR Nice2" ProgramChange="1"/>
+          <Patch Number="TM3" Name="DR Nice3" ProgramChange="2"/>
+          <Patch Number="TM4" Name="DR Nice4" ProgramChange="3"/>
+          <Patch Number="TM5" Name="DR Slap1" ProgramChange="4"/>
+          <Patch Number="TM6" Name="DR Slap2" ProgramChange="5"/>
+          <Patch Number="TM7" Name="DR Slap3" ProgramChange="6"/>
+          <Patch Number="TM8" Name="DR Slap4" ProgramChange="7"/>
+          <Patch Number="TM9" Name="DR Map11" ProgramChange="8"/>
+          <Patch Number="TM10" Name="DR Map12" ProgramChange="9"/>
+          <Patch Number="TM11" Name="DR Map13" ProgramChange="10"/>
+          <Patch Number="TM12" Name="DR Map14" ProgramChange="11"/>
+          <Patch Number="TM13" Name="DR Powr1" ProgramChange="12"/>
+          <Patch Number="TM14" Name="DR Powr2" ProgramChange="13"/>
+          <Patch Number="TM15" Name="DR Powr3" ProgramChange="14"/>
+          <Patch Number="TM16" Name="DR Powr4" ProgramChange="15"/>
+          <Patch Number="TM17" Name="DR Danc1" ProgramChange="16"/>
+          <Patch Number="TM18" Name="DR Danc2" ProgramChange="17"/>
+          <Patch Number="TM19" Name="DR Danc3" ProgramChange="18"/>
+          <Patch Number="TM20" Name="DR Danc4" ProgramChange="19"/>
+          <Patch Number="TM21" Name="DR Jaz1" ProgramChange="20"/>
+          <Patch Number="TM22" Name="DR Jaz2" ProgramChange="21"/>
+          <Patch Number="TM23" Name="DR Jaz3" ProgramChange="22"/>
+          <Patch Number="TM24" Name="DR Jaz4" ProgramChange="23"/>
+          <Patch Number="TM25" Name="RM Bop1" ProgramChange="24"/>
+          <Patch Number="TM26" Name="RM Bop2" ProgramChange="25"/>
+          <Patch Number="TM27" Name="RM Bop3" ProgramChange="26"/>
+          <Patch Number="TM28" Name="RM Bop4" ProgramChange="27"/>
+          <Patch Number="TM29" Name="RM Metl1" ProgramChange="28"/>
+          <Patch Number="TM30" Name="RM Metl2" ProgramChange="29"/>
+          <Patch Number="TM31" Name="RM Metl3" ProgramChange="30"/>
+          <Patch Number="TM32" Name="RM Metl4" ProgramChange="31"/>
+          <Patch Number="TM33" Name="RM Metl5" ProgramChange="32"/>
+          <Patch Number="TM34" Name="RM Metl6" ProgramChange="33"/>
+          <Patch Number="TM35" Name="RM Klip1" ProgramChange="34"/>
+          <Patch Number="TM36" Name="RM Klip2" ProgramChange="35"/>
+          <Patch Number="TM37" Name="RM Klip3" ProgramChange="36"/>
+          <Patch Number="TM38" Name="RM Klip4" ProgramChange="37"/>
+          <Patch Number="TM39" Name="RM Wet1" ProgramChange="38"/>
+          <Patch Number="TM40" Name="RM Wet2" ProgramChange="39"/>
+          <Patch Number="TM41" Name="RM Wet3" ProgramChange="40"/>
+          <Patch Number="TM42" Name="RM Wet4" ProgramChange="41"/>
+          <Patch Number="TM43" Name="RM Hard1" ProgramChange="42"/>
+          <Patch Number="TM44" Name="RM Hard2" ProgramChange="43"/>
+          <Patch Number="TM45" Name="RM Hard3" ProgramChange="44"/>
+          <Patch Number="TM46" Name="RM Hard4" ProgramChange="45"/>
+          <Patch Number="TM47" Name="RV Atom1" ProgramChange="46"/>
+          <Patch Number="TM48" Name="RV Atom2" ProgramChange="47"/>
+          <Patch Number="TM49" Name="RV Atom3" ProgramChange="48"/>
+          <Patch Number="TM50" Name="RV Atom4" ProgramChange="49"/>
+          <Patch Number="TM51" Name="RV Huge1" ProgramChange="50"/>
+          <Patch Number="TM52" Name="RV Huge2" ProgramChange="51"/>
+          <Patch Number="TM53" Name="RV Huge3" ProgramChange="52"/>
+          <Patch Number="TM54" Name="RV Huge4" ProgramChange="53"/>
+          <Patch Number="TM55" Name="RV Stik1" ProgramChange="54"/>
+          <Patch Number="TM56" Name="RV Stik2" ProgramChange="55"/>
+          <Patch Number="TM57" Name="RV Stik3" ProgramChange="56"/>
+          <Patch Number="TM58" Name="RV Stik4" ProgramChange="57"/>
+          <Patch Number="TM59" Name="RV Stad1" ProgramChange="58"/>
+          <Patch Number="TM60" Name="RV Stad2" ProgramChange="59"/>
+          <Patch Number="TM61" Name="RV Stad3" ProgramChange="60"/>
+          <Patch Number="TM62" Name="RV Stad4" ProgramChange="61"/>
+          <Patch Number="TM63" Name="RV Ambi1" ProgramChange="62"/>
+          <Patch Number="TM64" Name="RV Ambi2" ProgramChange="63"/>
+          <Patch Number="TM65" Name="RV Ambi3" ProgramChange="64"/>
+          <Patch Number="TM66" Name="RV Ambi4" ProgramChange="65"/>
+          <Patch Number="TM67" Name="GT Tite1" ProgramChange="66"/>
+          <Patch Number="TM68" Name="GT Tite2" ProgramChange="67"/>
+          <Patch Number="TM69" Name="GT Tite3" ProgramChange="68"/>
+          <Patch Number="TM70" Name="GT Tite4" ProgramChange="69"/>
+          <Patch Number="TM71" Name="AN Sine1" ProgramChange="70"/>
+          <Patch Number="TM72" Name="AN Sine2" ProgramChange="71"/>
+          <Patch Number="TM73" Name="AN Sine3" ProgramChange="72"/>
+          <Patch Number="TM74" Name="AN Sine4" ProgramChange="73"/>
+          <Patch Number="TM75" Name="EL Simm1" ProgramChange="74"/>
+          <Patch Number="TM76" Name="EL Simm2" ProgramChange="75"/>
+          <Patch Number="TM77" Name="EL Simm3" ProgramChange="76"/>
+          <Patch Number="TM78" Name="EL Simm4" ProgramChange="77"/>
+          <Patch Number="TM79" Name="EL Phew1" ProgramChange="78"/>
+          <Patch Number="TM80" Name="EL Phew2" ProgramChange="79"/>
+          <Patch Number="TM81" Name="EL Phew3" ProgramChange="80"/>
+          <Patch Number="TM82" Name="EL Phew4" ProgramChange="81"/>
+          <Patch Number="TM83" Name="FX Hurt1" ProgramChange="82"/>
+          <Patch Number="TM84" Name="FX Hurt2" ProgramChange="83"/>
+          <Patch Number="TM85" Name="FX Hurt3" ProgramChange="84"/>
+          <Patch Number="TM86" Name="FX Hurt4" ProgramChange="85"/>
+          <Patch Number="TM87" Name="FX Cyn1" ProgramChange="86"/>
+          <Patch Number="TM88" Name="FX Cyn2" ProgramChange="87"/>
+          <Patch Number="TM89" Name="FX Cyn3" ProgramChange="88"/>
+          <Patch Number="TM90" Name="FX Cyn4" ProgramChange="89"/>
+          <Patch Number="TM91" Name="ET Buru1" ProgramChange="90"/>
+          <Patch Number="TM92" Name="ET Buru2" ProgramChange="91"/>
+          <Patch Number="TM93" Name="ET Buru3" ProgramChange="92"/>
+          <Patch Number="TM94" Name="ET BStik" ProgramChange="93"/>
+          <Patch Number="TM95" Name="FX Wack1" ProgramChange="94"/>
+          <Patch Number="TM96" Name="FX Wack2" ProgramChange="95"/>
+          <Patch Number="TM97" Name="FX Wack3" ProgramChange="96"/>
+          <Patch Number="TM98" Name="FX Wack4" ProgramChange="97"/>
+          <Patch Number="TM99" Name="FX Rvrs1" ProgramChange="98"/>
+          <Patch Number="TM100" Name="FX Rvrs2" ProgramChange="99"/>
+          <Patch Number="TM101" Name="FX Rvrs3" ProgramChange="100"/>
+          <Patch Number="TM102" Name="FX Rvrs4" ProgramChange="101"/>
+          <Patch Number="TM103" Name="FX Flng1" ProgramChange="102"/>
+          <Patch Number="TM104" Name="FX Flng2" ProgramChange="103"/>
+          <Patch Number="TM105" Name="FX Flng3" ProgramChange="104"/>
+          <Patch Number="TM106" Name="FX Flng4" ProgramChange="105"/>
+          <Patch Number="TM107" Name="FX Solo" ProgramChange="106"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Internal Pitched Voices TM">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="93"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="TM1" Name="DR Nice1" ProgramChange="0"/>
+          <Patch Number="TM2" Name="DR Nice2" ProgramChange="1"/>
+          <Patch Number="TM3" Name="DR Nice3" ProgramChange="2"/>
+          <Patch Number="TM4" Name="DR Nice4" ProgramChange="3"/>
+          <Patch Number="TM5" Name="DR Slap1" ProgramChange="4"/>
+          <Patch Number="TM6" Name="DR Slap2" ProgramChange="5"/>
+          <Patch Number="TM7" Name="DR Slap3" ProgramChange="6"/>
+          <Patch Number="TM8" Name="DR Slap4" ProgramChange="7"/>
+          <Patch Number="TM9" Name="DR Map11" ProgramChange="8"/>
+          <Patch Number="TM10" Name="DR Map12" ProgramChange="9"/>
+          <Patch Number="TM11" Name="DR Map13" ProgramChange="10"/>
+          <Patch Number="TM12" Name="DR Map14" ProgramChange="11"/>
+          <Patch Number="TM13" Name="DR Powr1" ProgramChange="12"/>
+          <Patch Number="TM14" Name="DR Powr2" ProgramChange="13"/>
+          <Patch Number="TM15" Name="DR Powr3" ProgramChange="14"/>
+          <Patch Number="TM16" Name="DR Powr4" ProgramChange="15"/>
+          <Patch Number="TM17" Name="DR Danc1" ProgramChange="16"/>
+          <Patch Number="TM18" Name="DR Danc2" ProgramChange="17"/>
+          <Patch Number="TM19" Name="DR Danc3" ProgramChange="18"/>
+          <Patch Number="TM20" Name="DR Danc4" ProgramChange="19"/>
+          <Patch Number="TM21" Name="DR Jaz1" ProgramChange="20"/>
+          <Patch Number="TM22" Name="DR Jaz2" ProgramChange="21"/>
+          <Patch Number="TM23" Name="DR Jaz3" ProgramChange="22"/>
+          <Patch Number="TM24" Name="DR Jaz4" ProgramChange="23"/>
+          <Patch Number="TM25" Name="RM Bop1" ProgramChange="24"/>
+          <Patch Number="TM26" Name="RM Bop2" ProgramChange="25"/>
+          <Patch Number="TM27" Name="RM Bop3" ProgramChange="26"/>
+          <Patch Number="TM28" Name="RM Bop4" ProgramChange="27"/>
+          <Patch Number="TM29" Name="RM Metl1" ProgramChange="28"/>
+          <Patch Number="TM30" Name="RM Metl2" ProgramChange="29"/>
+          <Patch Number="TM31" Name="RM Metl3" ProgramChange="30"/>
+          <Patch Number="TM32" Name="RM Metl4" ProgramChange="31"/>
+          <Patch Number="TM33" Name="RM Metl5" ProgramChange="32"/>
+          <Patch Number="TM34" Name="RM Metl6" ProgramChange="33"/>
+          <Patch Number="TM35" Name="RM Klip1" ProgramChange="34"/>
+          <Patch Number="TM36" Name="RM Klip2" ProgramChange="35"/>
+          <Patch Number="TM37" Name="RM Klip3" ProgramChange="36"/>
+          <Patch Number="TM38" Name="RM Klip4" ProgramChange="37"/>
+          <Patch Number="TM39" Name="RM Wet1" ProgramChange="38"/>
+          <Patch Number="TM40" Name="RM Wet2" ProgramChange="39"/>
+          <Patch Number="TM41" Name="RM Wet3" ProgramChange="40"/>
+          <Patch Number="TM42" Name="RM Wet4" ProgramChange="41"/>
+          <Patch Number="TM43" Name="RM Hard1" ProgramChange="42"/>
+          <Patch Number="TM44" Name="RM Hard2" ProgramChange="43"/>
+          <Patch Number="TM45" Name="RM Hard3" ProgramChange="44"/>
+          <Patch Number="TM46" Name="RM Hard4" ProgramChange="45"/>
+          <Patch Number="TM47" Name="RV Atom1" ProgramChange="46"/>
+          <Patch Number="TM48" Name="RV Atom2" ProgramChange="47"/>
+          <Patch Number="TM49" Name="RV Atom3" ProgramChange="48"/>
+          <Patch Number="TM50" Name="RV Atom4" ProgramChange="49"/>
+          <Patch Number="TM51" Name="RV Huge1" ProgramChange="50"/>
+          <Patch Number="TM52" Name="RV Huge2" ProgramChange="51"/>
+          <Patch Number="TM53" Name="RV Huge3" ProgramChange="52"/>
+          <Patch Number="TM54" Name="RV Huge4" ProgramChange="53"/>
+          <Patch Number="TM55" Name="RV Stik1" ProgramChange="54"/>
+          <Patch Number="TM56" Name="RV Stik2" ProgramChange="55"/>
+          <Patch Number="TM57" Name="RV Stik3" ProgramChange="56"/>
+          <Patch Number="TM58" Name="RV Stik4" ProgramChange="57"/>
+          <Patch Number="TM59" Name="RV Stad1" ProgramChange="58"/>
+          <Patch Number="TM60" Name="RV Stad2" ProgramChange="59"/>
+          <Patch Number="TM61" Name="RV Stad3" ProgramChange="60"/>
+          <Patch Number="TM62" Name="RV Stad4" ProgramChange="61"/>
+          <Patch Number="TM63" Name="RV Ambi1" ProgramChange="62"/>
+          <Patch Number="TM64" Name="RV Ambi2" ProgramChange="63"/>
+          <Patch Number="TM65" Name="RV Ambi3" ProgramChange="64"/>
+          <Patch Number="TM66" Name="RV Ambi4" ProgramChange="65"/>
+          <Patch Number="TM67" Name="GT Tite1" ProgramChange="66"/>
+          <Patch Number="TM68" Name="GT Tite2" ProgramChange="67"/>
+          <Patch Number="TM69" Name="GT Tite3" ProgramChange="68"/>
+          <Patch Number="TM70" Name="GT Tite4" ProgramChange="69"/>
+          <Patch Number="TM71" Name="AN Sine1" ProgramChange="70"/>
+          <Patch Number="TM72" Name="AN Sine2" ProgramChange="71"/>
+          <Patch Number="TM73" Name="AN Sine3" ProgramChange="72"/>
+          <Patch Number="TM74" Name="AN Sine4" ProgramChange="73"/>
+          <Patch Number="TM75" Name="EL Simm1" ProgramChange="74"/>
+          <Patch Number="TM76" Name="EL Simm2" ProgramChange="75"/>
+          <Patch Number="TM77" Name="EL Simm3" ProgramChange="76"/>
+          <Patch Number="TM78" Name="EL Simm4" ProgramChange="77"/>
+          <Patch Number="TM79" Name="EL Phew1" ProgramChange="78"/>
+          <Patch Number="TM80" Name="EL Phew2" ProgramChange="79"/>
+          <Patch Number="TM81" Name="EL Phew3" ProgramChange="80"/>
+          <Patch Number="TM82" Name="EL Phew4" ProgramChange="81"/>
+          <Patch Number="TM83" Name="FX Hurt1" ProgramChange="82"/>
+          <Patch Number="TM84" Name="FX Hurt2" ProgramChange="83"/>
+          <Patch Number="TM85" Name="FX Hurt3" ProgramChange="84"/>
+          <Patch Number="TM86" Name="FX Hurt4" ProgramChange="85"/>
+          <Patch Number="TM87" Name="FX Cyn1" ProgramChange="86"/>
+          <Patch Number="TM88" Name="FX Cyn2" ProgramChange="87"/>
+          <Patch Number="TM89" Name="FX Cyn3" ProgramChange="88"/>
+          <Patch Number="TM90" Name="FX Cyn4" ProgramChange="89"/>
+          <Patch Number="TM91" Name="ET Buru1" ProgramChange="90"/>
+          <Patch Number="TM92" Name="ET Buru2" ProgramChange="91"/>
+          <Patch Number="TM93" Name="ET Buru3" ProgramChange="92"/>
+          <Patch Number="TM94" Name="ET BStik" ProgramChange="93"/>
+          <Patch Number="TM95" Name="FX Wack1" ProgramChange="94"/>
+          <Patch Number="TM96" Name="FX Wack2" ProgramChange="95"/>
+          <Patch Number="TM97" Name="FX Wack3" ProgramChange="96"/>
+          <Patch Number="TM98" Name="FX Wack4" ProgramChange="97"/>
+          <Patch Number="TM99" Name="FX Rvrs1" ProgramChange="98"/>
+          <Patch Number="TM100" Name="FX Rvrs2" ProgramChange="99"/>
+          <Patch Number="TM101" Name="FX Rvrs3" ProgramChange="100"/>
+          <Patch Number="TM102" Name="FX Rvrs4" ProgramChange="101"/>
+          <Patch Number="TM103" Name="FX Flng1" ProgramChange="102"/>
+          <Patch Number="TM104" Name="FX Flng2" ProgramChange="103"/>
+          <Patch Number="TM105" Name="FX Flng3" ProgramChange="104"/>
+          <Patch Number="TM106" Name="FX Flng4" ProgramChange="105"/>
+          <Patch Number="TM107" Name="FX Solo" ProgramChange="106"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset Pitched Voices CY">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="98"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="P-CY1" Name="HH RYCl1" ProgramChange="0"/>
+          <Patch Number="P-CY2" Name="HH RYQt1" ProgramChange="1"/>
+          <Patch Number="P-CY3" Name="HH RYHf1" ProgramChange="2"/>
+          <Patch Number="P-CY4" Name="HH RYOp1" ProgramChange="3"/>
+          <Patch Number="P-CY5" Name="HH RYPd1" ProgramChange="4"/>
+          <Patch Number="P-CY6" Name="HH RYCl2" ProgramChange="5"/>
+          <Patch Number="P-CY7" Name="HH RYOp2" ProgramChange="6"/>
+          <Patch Number="P-CY8" Name="HH RkClR" ProgramChange="7"/>
+          <Patch Number="P-CY9" Name="HH RkkCl" ProgramChange="8"/>
+          <Patch Number="P-CY10" Name="HH RkQrt" ProgramChange="9"/>
+          <Patch Number="P-CY11" Name="HH RkHlf" ProgramChange="10"/>
+          <Patch Number="P-CY12" Name="HH RkOpn" ProgramChange="11"/>
+          <Patch Number="P-CY13" Name="HH RkPed" ProgramChange="12"/>
+          <Patch Number="P-CY14" Name="HH AmCls" ProgramChange="13"/>
+          <Patch Number="P-CY15" Name="HH AmOpn" ProgramChange="14"/>
+          <Patch Number="P-CY16" Name="HH AmPed" ProgramChange="15"/>
+          <Patch Number="P-CY17" Name="HH  VxCls" ProgramChange="16"/>
+          <Patch Number="P-CY18" Name="HH VxOpn" ProgramChange="17"/>
+          <Patch Number="P-CY19" Name="HH TecC1" ProgramChange="18"/>
+          <Patch Number="P-CY20" Name="HH TecC2" ProgramChange="19"/>
+          <Patch Number="P-CY21" Name="HH TecC3" ProgramChange="20"/>
+          <Patch Number="P-CY22" Name="HH Tec01" ProgramChange="21"/>
+          <Patch Number="P-CY23" Name="HH Tec02" ProgramChange="22"/>
+          <Patch Number="P-CY24" Name="HH Pitch" ProgramChange="23"/>
+          <Patch Number="P-CY25" Name="HH Stand" ProgramChange="24"/>
+          <Patch Number="P-CY26" Name="HH AnCl1" ProgramChange="25"/>
+          <Patch Number="P-CY27" Name="HH AnOp1" ProgramChange="26"/>
+          <Patch Number="P-CY28" Name="HH AnCl2" ProgramChange="27"/>
+          <Patch Number="P-CY29" Name="HH AnOp2" ProgramChange="28"/>
+          <Patch Number="P-CY30" Name="RD Medi1" ProgramChange="29"/>
+          <Patch Number="P-CY31" Name="RD EdgCp" ProgramChange="30"/>
+          <Patch Number="P-CY32" Name="RD Bell" ProgramChange="31"/>
+          <Patch Number="P-CY33" Name="RD Flat" ProgramChange="32"/>
+          <Patch Number="P-CY34" Name="RD Rock" ProgramChange="33"/>
+          <Patch Number="P-CY35" Name="RD RckBl" ProgramChange="34"/>
+          <Patch Number="P-CY36" Name="RD Jazz1" ProgramChange="35"/>
+          <Patch Number="P-CY37" Name="RD Jazz2" ProgramChange="36"/>
+          <Patch Number="P-CY38" Name="RD Long" ProgramChange="37"/>
+          <Patch Number="P-CY39" Name="RD Medi2" ProgramChange="38"/>
+          <Patch Number="P-CY40" Name="RD Sizzl" ProgramChange="39"/>
+          <Patch Number="P-CY41" Name="RD FxBel" ProgramChange="40"/>
+          <Patch Number="P-CY42" Name="RD FxRid" ProgramChange="41"/>
+          <Patch Number="P-CY43" Name="CR Crsh1" ProgramChange="42"/>
+          <Patch Number="P-CY44" Name="CR Crsh2" ProgramChange="43"/>
+          <Patch Number="P-CY45" Name="CR Dark1" ProgramChange="44"/>
+          <Patch Number="P-CY46" Name="CR High1" ProgramChange="45"/>
+          <Patch Number="P-CY47" Name="CR Dark2" ProgramChange="46"/>
+          <Patch Number="P-CY48" Name="CR High2" ProgramChange="47"/>
+          <Patch Number="P-CY49" Name="CR Rock1" ProgramChange="48"/>
+          <Patch Number="P-CY50" Name="CR Rock2" ProgramChange="49"/>
+          <Patch Number="P-CY51" Name="CR Choke" ProgramChange="50"/>
+          <Patch Number="P-CY52" Name="CR Spls1" ProgramChange="51"/>
+          <Patch Number="P-CY53" Name="CR Spls2" ProgramChange="52"/>
+          <Patch Number="P-CY54" Name="CR Spls3" ProgramChange="53"/>
+          <Patch Number="P-CY55" Name="CR Chin1" ProgramChange="54"/>
+          <Patch Number="P-CY56" Name="CR Ride" ProgramChange="55"/>
+          <Patch Number="P-CY57" Name="CR Short" ProgramChange="56"/>
+          <Patch Number="P-CY58" Name="CR Chin2" ProgramChange="57"/>
+          <Patch Number="P-CY59" Name="CR Gong" ProgramChange="58"/>
+          <Patch Number="P-CY60" Name="CR Strok" ProgramChange="59"/>
+          <Patch Number="P-CY61" Name="FX Big1" ProgramChange="60"/>
+          <Patch Number="P-CY62" Name="FX Gong" ProgramChange="61"/>
+          <Patch Number="P-CY63" Name="FX Elekt" ProgramChange="62"/>
+          <Patch Number="P-CY64" Name="FX Revrs" ProgramChange="63"/>
+          <Patch Number="P-CY65" Name="FX Tecko" ProgramChange="64"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Internal Pitched Voices CY">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="96"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="I-CY1" Name="HH RYCl1" ProgramChange="0"/>
+          <Patch Number="I-CY2" Name="HH RYQt1" ProgramChange="1"/>
+          <Patch Number="I-CY3" Name="HH RYHf1" ProgramChange="2"/>
+          <Patch Number="I-CY4" Name="HH RYOp1" ProgramChange="3"/>
+          <Patch Number="I-CY5" Name="HH RYPd1" ProgramChange="4"/>
+          <Patch Number="I-CY6" Name="HH RYCl2" ProgramChange="5"/>
+          <Patch Number="I-CY7" Name="HH RYOp2" ProgramChange="6"/>
+          <Patch Number="I-CY8" Name="HH RkClR" ProgramChange="7"/>
+          <Patch Number="I-CY9" Name="HH RkkCl" ProgramChange="8"/>
+          <Patch Number="I-CY10" Name="HH RkQrt" ProgramChange="9"/>
+          <Patch Number="I-CY11" Name="HH RkHlf" ProgramChange="10"/>
+          <Patch Number="I-CY12" Name="HH RkOpn" ProgramChange="11"/>
+          <Patch Number="I-CY13" Name="HH RkPed" ProgramChange="12"/>
+          <Patch Number="I-CY14" Name="HH AmCls" ProgramChange="13"/>
+          <Patch Number="I-CY15" Name="HH AmOpn" ProgramChange="14"/>
+          <Patch Number="I-CY16" Name="HH AmPed" ProgramChange="15"/>
+          <Patch Number="I-CY17" Name="HH  VxCls" ProgramChange="16"/>
+          <Patch Number="I-CY18" Name="HH VxOpn" ProgramChange="17"/>
+          <Patch Number="I-CY19" Name="HH TecC1" ProgramChange="18"/>
+          <Patch Number="I-CY20" Name="HH TecC2" ProgramChange="19"/>
+          <Patch Number="I-CY21" Name="HH TecC3" ProgramChange="20"/>
+          <Patch Number="I-CY22" Name="HH Tec01" ProgramChange="21"/>
+          <Patch Number="I-CY23" Name="HH Tec02" ProgramChange="22"/>
+          <Patch Number="I-CY24" Name="HH Pitch" ProgramChange="23"/>
+          <Patch Number="I-CY25" Name="HH Stand" ProgramChange="24"/>
+          <Patch Number="I-CY26" Name="HH AnCl1" ProgramChange="25"/>
+          <Patch Number="I-CY27" Name="HH AnOp1" ProgramChange="26"/>
+          <Patch Number="I-CY28" Name="HH AnCl2" ProgramChange="27"/>
+          <Patch Number="I-CY29" Name="HH AnOp2" ProgramChange="28"/>
+          <Patch Number="I-CY30" Name="RD Medi1" ProgramChange="29"/>
+          <Patch Number="I-CY31" Name="RD EdgCp" ProgramChange="30"/>
+          <Patch Number="I-CY32" Name="RD Bell" ProgramChange="31"/>
+          <Patch Number="I-CY33" Name="RD Flat" ProgramChange="32"/>
+          <Patch Number="I-CY34" Name="RD Rock" ProgramChange="33"/>
+          <Patch Number="I-CY35" Name="RD RckBl" ProgramChange="34"/>
+          <Patch Number="I-CY36" Name="RD Jazz1" ProgramChange="35"/>
+          <Patch Number="I-CY37" Name="RD Jazz2" ProgramChange="36"/>
+          <Patch Number="I-CY38" Name="RD Long" ProgramChange="37"/>
+          <Patch Number="I-CY39" Name="RD Medi2" ProgramChange="38"/>
+          <Patch Number="I-CY40" Name="RD Sizzl" ProgramChange="39"/>
+          <Patch Number="I-CY41" Name="RD FxBel" ProgramChange="40"/>
+          <Patch Number="I-CY42" Name="RD FxRid" ProgramChange="41"/>
+          <Patch Number="I-CY43" Name="CR Crsh1" ProgramChange="42"/>
+          <Patch Number="I-CY44" Name="CR Crsh2" ProgramChange="43"/>
+          <Patch Number="I-CY45" Name="CR Dark1" ProgramChange="44"/>
+          <Patch Number="I-CY46" Name="CR High1" ProgramChange="45"/>
+          <Patch Number="I-CY47" Name="CR Dark2" ProgramChange="46"/>
+          <Patch Number="I-CY48" Name="CR High2" ProgramChange="47"/>
+          <Patch Number="I-CY49" Name="CR Rock1" ProgramChange="48"/>
+          <Patch Number="I-CY50" Name="CR Rock2" ProgramChange="49"/>
+          <Patch Number="I-CY51" Name="CR Choke" ProgramChange="50"/>
+          <Patch Number="I-CY52" Name="CR Spls1" ProgramChange="51"/>
+          <Patch Number="I-CY53" Name="CR Spls2" ProgramChange="52"/>
+          <Patch Number="I-CY54" Name="CR Spls3" ProgramChange="53"/>
+          <Patch Number="I-CY55" Name="CR Chin1" ProgramChange="54"/>
+          <Patch Number="I-CY56" Name="CR Ride" ProgramChange="55"/>
+          <Patch Number="I-CY57" Name="CR Short" ProgramChange="56"/>
+          <Patch Number="I-CY58" Name="CR Chin2" ProgramChange="57"/>
+          <Patch Number="I-CY59" Name="CR Gong" ProgramChange="58"/>
+          <Patch Number="I-CY60" Name="CR Strok" ProgramChange="59"/>
+          <Patch Number="I-CY61" Name="FX Big1" ProgramChange="60"/>
+          <Patch Number="I-CY62" Name="FX Gong" ProgramChange="61"/>
+          <Patch Number="I-CY63" Name="FX Elekt" ProgramChange="62"/>
+          <Patch Number="I-CY64" Name="FX Revrs" ProgramChange="63"/>
+          <Patch Number="I-CY65" Name="FX Tecko" ProgramChange="64"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset Pitched Voices PC">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="101"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="P-PC1" Name="LP AgoHi" ProgramChange="0"/>
+          <Patch Number="P-PC2" Name="LP AgoLo" ProgramChange="1"/>
+          <Patch Number="P-PC3" Name="LP BngHi" ProgramChange="2"/>
+          <Patch Number="P-PC4" Name="LP BngLo" ProgramChange="3"/>
+          <Patch Number="P-PC5" Name="LP Caba1" ProgramChange="4"/>
+          <Patch Number="P-PC6" Name="LP Caba2" ProgramChange="5"/>
+          <Patch Number="P-PC7" Name="LP Caba3" ProgramChange="6"/>
+          <Patch Number="P-PC8" Name="LP Caba4" ProgramChange="7"/>
+          <Patch Number="P-PC9" Name="LP Clave" ProgramChange="8"/>
+          <Patch Number="P-PC10" Name="LP Qnto1" ProgramChange="9"/>
+          <Patch Number="P-PC11" Name="LP Cong1" ProgramChange="10"/>
+          <Patch Number="P-PC12" Name="LP Tumb1" ProgramChange="11"/>
+          <Patch Number="P-PC13" Name="LP Slap1" ProgramChange="12"/>
+          <Patch Number="P-PC14" Name="LP Low1" ProgramChange="13"/>
+          <Patch Number="P-PC15" Name="LP Mute1" ProgramChange="14"/>
+          <Patch Number="P-PC16" Name="LP Heel1" ProgramChange="15"/>
+          <Patch Number="P-PC17" Name="LP CgHi2" ProgramChange="16"/>
+          <Patch Number="P-PC18" Name="LP CgLo2" ProgramChange="17"/>
+          <Patch Number="P-PC19" Name="LP Slap2" ProgramChange="18"/>
+          <Patch Number="P-PC20" Name="LP Mute2" ProgramChange="19"/>
+          <Patch Number="P-PC21" Name="LP Heel2" ProgramChange="20"/>
+          <Patch Number="P-PC22" Name="LP Cow1" ProgramChange="21"/>
+          <Patch Number="P-PC23" Name="LP Cow2" ProgramChange="22"/>
+          <Patch Number="P-PC24" Name="LP Cow3" ProgramChange="23"/>
+          <Patch Number="P-PC25" Name="LP Guiro" ProgramChange="24"/>
+          <Patch Number="P-PC26" Name="LP Shak1" ProgramChange="25"/>
+          <Patch Number="P-PC27" Name="LP Shak2" ProgramChange="26"/>
+          <Patch Number="P-PC28" Name="LP Tamb1" ProgramChange="27"/>
+          <Patch Number="P-PC29" Name="LP Tamb2" ProgramChange="28"/>
+          <Patch Number="P-PC30" Name="LP Tamb3" ProgramChange="29"/>
+          <Patch Number="P-PC31" Name="LP Tmpl1" ProgramChange="30"/>
+          <Patch Number="P-PC32" Name="LP Tmpl2" ProgramChange="31"/>
+          <Patch Number="P-PC33" Name="LP Tmpl3" ProgramChange="32"/>
+          <Patch Number="P-PC34" Name="LP Tmpl4" ProgramChange="33"/>
+          <Patch Number="P-PC35" Name="LP TimH1" ProgramChange="34"/>
+          <Patch Number="P-PC36" Name="LP TimL1" ProgramChange="35"/>
+          <Patch Number="P-PC37" Name="LP TimH2" ProgramChange="36"/>
+          <Patch Number="P-PC38" Name="LP TimL2" ProgramChange="37"/>
+          <Patch Number="P-PC39" Name="LP Casc1" ProgramChange="38"/>
+          <Patch Number="P-PC40" Name="LP Casc2" ProgramChange="39"/>
+          <Patch Number="P-PC41" Name="LP Trian" ProgramChange="40"/>
+          <Patch Number="P-PC42" Name="LP Whist" ProgramChange="41"/>
+          <Patch Number="P-PC43" Name="PC Log1" ProgramChange="42"/>
+          <Patch Number="P-PC44" Name="PC Log2" ProgramChange="43"/>
+          <Patch Number="P-PC45" Name="PC Log3" ProgramChange="44"/>
+          <Patch Number="P-PC46" Name="PC Log4" ProgramChange="45"/>
+          <Patch Number="P-PC47" Name="PC Talk1" ProgramChange="46"/>
+          <Patch Number="P-PC48" Name="PC Talk2" ProgramChange="47"/>
+          <Patch Number="P-PC49" Name="PC Yoru1" ProgramChange="48"/>
+          <Patch Number="P-PC50" Name="PC Yoru2" ProgramChange="49"/>
+          <Patch Number="P-PC51" Name="PC Yoru3" ProgramChange="50"/>
+          <Patch Number="P-PC52" Name="PC Yoru4" ProgramChange="51"/>
+          <Patch Number="P-PC53" Name="PC Bott1" ProgramChange="52"/>
+          <Patch Number="P-PC54" Name="PC Bott2" ProgramChange="53"/>
+          <Patch Number="P-PC55" Name="PC Bott3" ProgramChange="54"/>
+          <Patch Number="P-PC56" Name="PC Bott4" ProgramChange="55"/>
+          <Patch Number="P-PC57" Name="PC Clap1" ProgramChange="56"/>
+          <Patch Number="P-PC58" Name="PC Clap2" ProgramChange="57"/>
+          <Patch Number="P-PC59" Name="PC AnaMu" ProgramChange="58"/>
+          <Patch Number="P-PC60" Name="PC Snap" ProgramChange="59"/>
+          <Patch Number="P-PC61" Name="PC MeloB" ProgramChange="60"/>
+          <Patch Number="P-PC62" Name="PC Metal" ProgramChange="61"/>
+          <Patch Number="P-PC63" Name="PC PopM1" ProgramChange="62"/>
+          <Patch Number="P-PC64" Name="PC PopM2" ProgramChange="63"/>
+          <Patch Number="P-PC65" Name="PC PopM3" ProgramChange="64"/>
+          <Patch Number="P-PC66" Name="PC PopM4" ProgramChange="65"/>
+          <Patch Number="P-PC67" Name="PC TekD" ProgramChange="66"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Internal Pitched Voices PC">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="99"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="I-PC1" Name="LP AgoHi" ProgramChange="0"/>
+          <Patch Number="I-PC2" Name="LP AgoLo" ProgramChange="1"/>
+          <Patch Number="I-PC3" Name="LP BngHi" ProgramChange="2"/>
+          <Patch Number="I-PC4" Name="LP BngLo" ProgramChange="3"/>
+          <Patch Number="I-PC5" Name="LP Caba1" ProgramChange="4"/>
+          <Patch Number="I-PC6" Name="LP Caba2" ProgramChange="5"/>
+          <Patch Number="I-PC7" Name="LP Caba3" ProgramChange="6"/>
+          <Patch Number="I-PC8" Name="LP Caba4" ProgramChange="7"/>
+          <Patch Number="I-PC9" Name="LP Clave" ProgramChange="8"/>
+          <Patch Number="I-PC10" Name="LP Qnto1" ProgramChange="9"/>
+          <Patch Number="I-PC11" Name="LP Cong1" ProgramChange="10"/>
+          <Patch Number="I-PC12" Name="LP Tumb1" ProgramChange="11"/>
+          <Patch Number="I-PC13" Name="LP Slap1" ProgramChange="12"/>
+          <Patch Number="I-PC14" Name="LP Low1" ProgramChange="13"/>
+          <Patch Number="I-PC15" Name="LP Mute1" ProgramChange="14"/>
+          <Patch Number="I-PC16" Name="LP Heel1" ProgramChange="15"/>
+          <Patch Number="I-PC17" Name="LP CgHi2" ProgramChange="16"/>
+          <Patch Number="I-PC18" Name="LP CgLo2" ProgramChange="17"/>
+          <Patch Number="I-PC19" Name="LP Slap2" ProgramChange="18"/>
+          <Patch Number="I-PC20" Name="LP Mute2" ProgramChange="19"/>
+          <Patch Number="I-PC21" Name="LP Heel2" ProgramChange="20"/>
+          <Patch Number="I-PC22" Name="LP Cow1" ProgramChange="21"/>
+          <Patch Number="I-PC23" Name="LP Cow2" ProgramChange="22"/>
+          <Patch Number="I-PC24" Name="LP Cow3" ProgramChange="23"/>
+          <Patch Number="I-PC25" Name="LP Guiro" ProgramChange="24"/>
+          <Patch Number="I-PC26" Name="LP Shak1" ProgramChange="25"/>
+          <Patch Number="I-PC27" Name="LP Shak2" ProgramChange="26"/>
+          <Patch Number="I-PC28" Name="LP Tamb1" ProgramChange="27"/>
+          <Patch Number="I-PC29" Name="LP Tamb2" ProgramChange="28"/>
+          <Patch Number="I-PC30" Name="LP Tamb3" ProgramChange="29"/>
+          <Patch Number="I-PC31" Name="LP Tmpl1" ProgramChange="30"/>
+          <Patch Number="I-PC32" Name="LP Tmpl2" ProgramChange="31"/>
+          <Patch Number="I-PC33" Name="LP Tmpl3" ProgramChange="32"/>
+          <Patch Number="I-PC34" Name="LP Tmpl4" ProgramChange="33"/>
+          <Patch Number="I-PC35" Name="LP TimH1" ProgramChange="34"/>
+          <Patch Number="I-PC36" Name="LP TimL1" ProgramChange="35"/>
+          <Patch Number="I-PC37" Name="LP TimH2" ProgramChange="36"/>
+          <Patch Number="I-PC38" Name="LP TimL2" ProgramChange="37"/>
+          <Patch Number="I-PC39" Name="LP Casc1" ProgramChange="38"/>
+          <Patch Number="I-PC40" Name="LP Casc2" ProgramChange="39"/>
+          <Patch Number="I-PC41" Name="LP Trian" ProgramChange="40"/>
+          <Patch Number="I-PC42" Name="LP Whist" ProgramChange="41"/>
+          <Patch Number="I-PC43" Name="PC Log1" ProgramChange="42"/>
+          <Patch Number="I-PC44" Name="PC Log2" ProgramChange="43"/>
+          <Patch Number="I-PC45" Name="PC Log3" ProgramChange="44"/>
+          <Patch Number="I-PC46" Name="PC Log4" ProgramChange="45"/>
+          <Patch Number="I-PC47" Name="PC Talk1" ProgramChange="46"/>
+          <Patch Number="I-PC48" Name="PC Talk2" ProgramChange="47"/>
+          <Patch Number="I-PC49" Name="PC Yoru1" ProgramChange="48"/>
+          <Patch Number="I-PC50" Name="PC Yoru2" ProgramChange="49"/>
+          <Patch Number="I-PC51" Name="PC Yoru3" ProgramChange="50"/>
+          <Patch Number="I-PC52" Name="PC Yoru4" ProgramChange="51"/>
+          <Patch Number="I-PC53" Name="PC Bott1" ProgramChange="52"/>
+          <Patch Number="I-PC54" Name="PC Bott2" ProgramChange="53"/>
+          <Patch Number="I-PC55" Name="PC Bott3" ProgramChange="54"/>
+          <Patch Number="I-PC56" Name="PC Bott4" ProgramChange="55"/>
+          <Patch Number="I-PC57" Name="PC Clap1" ProgramChange="56"/>
+          <Patch Number="I-PC58" Name="PC Clap2" ProgramChange="57"/>
+          <Patch Number="I-PC59" Name="PC AnaMu" ProgramChange="58"/>
+          <Patch Number="I-PC60" Name="PC Snap" ProgramChange="59"/>
+          <Patch Number="I-PC61" Name="PC MeloB" ProgramChange="60"/>
+          <Patch Number="I-PC62" Name="PC Metal" ProgramChange="61"/>
+          <Patch Number="I-PC63" Name="PC PopM1" ProgramChange="62"/>
+          <Patch Number="I-PC64" Name="PC PopM2" ProgramChange="63"/>
+          <Patch Number="I-PC65" Name="PC PopM3" ProgramChange="64"/>
+          <Patch Number="I-PC66" Name="PC PopM4" ProgramChange="65"/>
+          <Patch Number="I-PC67" Name="PC TekD" ProgramChange="66"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Preset Pitched Voices SE">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="104"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="P-SE1" Name="FX 7-11" ProgramChange="0"/>
+          <Patch Number="P-SE2" Name="FX B-Ben" ProgramChange="1"/>
+          <Patch Number="P-SE3" Name="FX Joker" ProgramChange="2"/>
+          <Patch Number="P-SE4" Name="FX Tubey" ProgramChange="3"/>
+          <Patch Number="P-SE5" Name="FX Daiko" ProgramChange="4"/>
+          <Patch Number="P-SE6" Name="FX Mello" ProgramChange="5"/>
+          <Patch Number="P-SE7" Name="FX Door" ProgramChange="6"/>
+          <Patch Number="P-SE8" Name="FX Zero" ProgramChange="7"/>
+          <Patch Number="P-SE9" Name="FX Blip" ProgramChange="8"/>
+          <Patch Number="P-SE10" Name="FX Bubbl" ProgramChange="9"/>
+          <Patch Number="P-SE11" Name="FX Canes" ProgramChange="10"/>
+          <Patch Number="P-SE12" Name="FX OilDr" ProgramChange="11"/>
+          <Patch Number="P-SE13" Name="FX Sheet" ProgramChange="12"/>
+          <Patch Number="P-SE14" Name="FX Sword" ProgramChange="13"/>
+          <Patch Number="P-SE15" Name="FX Stab" ProgramChange="14"/>
+          <Patch Number="P-SE16" Name="FX Gongy" ProgramChange="15"/>
+          <Patch Number="P-SE17" Name="FX Robot" ProgramChange="16"/>
+          <Patch Number="P-SE18" Name="FX R2D2" ProgramChange="17"/>
+          <Patch Number="P-SE19" Name="FX RvCrs" ProgramChange="18"/>
+          <Patch Number="P-SE20" Name="FX Scene" ProgramChange="19"/>
+          <Patch Number="P-SE21" Name="FX Scrat" ProgramChange="20"/>
+          <Patch Number="P-SE22" Name="FX Shui" ProgramChange="21"/>
+          <Patch Number="P-SE23" Name="FX Snark" ProgramChange="22"/>
+          <Patch Number="P-SE24" Name="FX Spark" ProgramChange="23"/>
+          <Patch Number="P-SE25" Name="FX Alien" ProgramChange="24"/>
+          <Patch Number="P-SE26" Name="FX Steps" ProgramChange="25"/>
+          <Patch Number="P-SE27" Name="FX Stix" ProgramChange="26"/>
+          <Patch Number="P-SE28" Name="FX Wiggy" ProgramChange="27"/>
+          <Patch Number="P-SE29" Name="FX Falic" ProgramChange="28"/>
+          <Patch Number="P-SE30" Name="FX Afro" ProgramChange="29"/>
+          <Patch Number="P-SE31" Name="FX Blow" ProgramChange="30"/>
+          <Patch Number="P-SE32" Name="FX Log" ProgramChange="31"/>
+          <Patch Number="P-SE33" Name="FX Metal" ProgramChange="32"/>
+          <Patch Number="P-SE34" Name="FX Pip" ProgramChange="33"/>
+          <Patch Number="P-SE35" Name="FX Revrs" ProgramChange="34"/>
+          <Patch Number="P-SE36" Name="FX Rezzo" ProgramChange="35"/>
+          <Patch Number="P-SE37" Name="FX Wet" ProgramChange="36"/>
+          <Patch Number="P-SE38" Name="FX BDMth" ProgramChange="37"/>
+          <Patch Number="P-SE39" Name="FX S1Mth" ProgramChange="38"/>
+          <Patch Number="P-SE40" Name="FX S2Mth" ProgramChange="39"/>
+          <Patch Number="P-SE41" Name="FX S3Mth" ProgramChange="40"/>
+          <Patch Number="P-SE42" Name="FX CYMth" ProgramChange="41"/>
+          <Patch Number="P-SE43" Name="FX HCMth" ProgramChange="42"/>
+          <Patch Number="P-SE44" Name="FX HOMth" ProgramChange="43"/>
+          <Patch Number="P-SE45" Name="FX Type" ProgramChange="44"/>
+          <Patch Number="P-SE46" Name="FX Heart" ProgramChange="45"/>
+          <Patch Number="P-SE47" Name="FX Tape" ProgramChange="46"/>
+          <Patch Number="P-SE48" Name="BA Nasti" ProgramChange="47"/>
+          <Patch Number="P-SE49" Name="BA KillB" ProgramChange="48"/>
+          <Patch Number="P-SE50" Name="BA Softa" ProgramChange="49"/>
+          <Patch Number="P-SE51" Name="BA 30" ProgramChange="50"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Internal Pitched Voices SE">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="102"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="I-SE1" Name="FX 7-11" ProgramChange="0"/>
+          <Patch Number="I-SE2" Name="FX B-Ben" ProgramChange="1"/>
+          <Patch Number="I-SE3" Name="FX Joker" ProgramChange="2"/>
+          <Patch Number="I-SE4" Name="FX Tubey" ProgramChange="3"/>
+          <Patch Number="I-SE5" Name="FX Daiko" ProgramChange="4"/>
+          <Patch Number="I-SE6" Name="FX Mello" ProgramChange="5"/>
+          <Patch Number="I-SE7" Name="FX Door" ProgramChange="6"/>
+          <Patch Number="I-SE8" Name="FX Zero" ProgramChange="7"/>
+          <Patch Number="I-SE9" Name="FX Blip" ProgramChange="8"/>
+          <Patch Number="I-SE10" Name="FX Bubbl" ProgramChange="9"/>
+          <Patch Number="I-SE11" Name="FX Canes" ProgramChange="10"/>
+          <Patch Number="I-SE12" Name="FX OilDr" ProgramChange="11"/>
+          <Patch Number="I-SE13" Name="FX Sheet" ProgramChange="12"/>
+          <Patch Number="I-SE14" Name="FX Sword" ProgramChange="13"/>
+          <Patch Number="I-SE15" Name="FX Stab" ProgramChange="14"/>
+          <Patch Number="I-SE16" Name="FX Gongy" ProgramChange="15"/>
+          <Patch Number="I-SE17" Name="FX Robot" ProgramChange="16"/>
+          <Patch Number="I-SE18" Name="FX R2D2" ProgramChange="17"/>
+          <Patch Number="I-SE19" Name="FX RvCrs" ProgramChange="18"/>
+          <Patch Number="I-SE20" Name="FX Scene" ProgramChange="19"/>
+          <Patch Number="I-SE21" Name="FX Scrat" ProgramChange="20"/>
+          <Patch Number="I-SE22" Name="FX Shui" ProgramChange="21"/>
+          <Patch Number="I-SE23" Name="FX Snark" ProgramChange="22"/>
+          <Patch Number="I-SE24" Name="FX Spark" ProgramChange="23"/>
+          <Patch Number="I-SE25" Name="FX Alien" ProgramChange="24"/>
+          <Patch Number="I-SE26" Name="FX Steps" ProgramChange="25"/>
+          <Patch Number="I-SE27" Name="FX Stix" ProgramChange="26"/>
+          <Patch Number="I-SE28" Name="FX Wiggy" ProgramChange="27"/>
+          <Patch Number="I-SE29" Name="FX Falic" ProgramChange="28"/>
+          <Patch Number="I-SE30" Name="FX Afro" ProgramChange="29"/>
+          <Patch Number="I-SE31" Name="FX Blow" ProgramChange="30"/>
+          <Patch Number="I-SE32" Name="FX Log" ProgramChange="31"/>
+          <Patch Number="I-SE33" Name="FX Metal" ProgramChange="32"/>
+          <Patch Number="I-SE34" Name="FX Pip" ProgramChange="33"/>
+          <Patch Number="I-SE35" Name="FX Revrs" ProgramChange="34"/>
+          <Patch Number="I-SE36" Name="FX Rezzo" ProgramChange="35"/>
+          <Patch Number="I-SE37" Name="FX Wet" ProgramChange="36"/>
+          <Patch Number="I-SE38" Name="FX BDMth" ProgramChange="37"/>
+          <Patch Number="I-SE39" Name="FX S1Mth" ProgramChange="38"/>
+          <Patch Number="I-SE40" Name="FX S2Mth" ProgramChange="39"/>
+          <Patch Number="I-SE41" Name="FX S3Mth" ProgramChange="40"/>
+          <Patch Number="I-SE42" Name="FX CYMth" ProgramChange="41"/>
+          <Patch Number="I-SE43" Name="FX HCMth" ProgramChange="42"/>
+          <Patch Number="I-SE44" Name="FX HOMth" ProgramChange="43"/>
+          <Patch Number="I-SE45" Name="FX Type" ProgramChange="44"/>
+          <Patch Number="I-SE46" Name="FX Heart" ProgramChange="45"/>
+          <Patch Number="I-SE47" Name="FX Tape" ProgramChange="46"/>
+          <Patch Number="I-SE48" Name="BA Nasti" ProgramChange="47"/>
+          <Patch Number="I-SE49" Name="BA KillB" ProgramChange="48"/>
+          <Patch Number="I-SE50" Name="BA Softa" ProgramChange="49"/>
+          <Patch Number="I-SE51" Name="BA 30" ProgramChange="50"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

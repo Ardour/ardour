@@ -1,22 +1,27 @@
 /*
-  Copyright (C) 2007 Paul Davis
-  Author: David Robillard
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2007-2016 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2012 Hans Baier <hansfbaier@googlemail.com>
+ * Copyright (C) 2008-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2014-2016 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015-2017 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2015 André Nusser <andre.nusser@googlemail.com>
+ * Copyright (C) 2016 Julien "_FrnchFrgg_" RIVAUD <frnchfrgg@free.fr>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <algorithm>
 #include <iostream>
@@ -28,7 +33,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
 
-#include "evoral/Control.hpp"
+#include "evoral/Control.h"
 
 #include "midi++/events.h"
 
@@ -59,12 +64,6 @@ MidiModel::MidiModel (boost::shared_ptr<MidiSource> s)
 	set_midi_source (s);
 }
 
-/** Start a new NoteDiff command.
- *
- * This has no side-effects on the model or Session, the returned command
- * can be held on to for as long as the caller wishes, or discarded without
- * formality, until apply_command is called and ownership is taken.
- */
 MidiModel::NoteDiffCommand*
 MidiModel::new_note_diff_command (const string& name)
 {
@@ -74,7 +73,6 @@ MidiModel::new_note_diff_command (const string& name)
 	return new NoteDiffCommand (ms->model(), name);
 }
 
-/** Start a new SysExDiff command */
 MidiModel::SysExDiffCommand*
 MidiModel::new_sysex_diff_command (const string& name)
 {
@@ -84,7 +82,6 @@ MidiModel::new_sysex_diff_command (const string& name)
 	return new SysExDiffCommand (ms->model(), name);
 }
 
-/** Start a new PatchChangeDiff command */
 MidiModel::PatchChangeDiffCommand*
 MidiModel::new_patch_change_diff_command (const string& name)
 {
@@ -95,11 +92,6 @@ MidiModel::new_patch_change_diff_command (const string& name)
 }
 
 
-/** Apply a command.
- *
- * Ownership of cmd is taken, it must not be deleted by the caller.
- * The command will constitute one item on the undo stack.
- */
 void
 MidiModel::apply_command(Session& session, Command* cmd)
 {
@@ -109,11 +101,6 @@ MidiModel::apply_command(Session& session, Command* cmd)
 	set_edited (true);
 }
 
-/** Apply a command as part of a larger reversible transaction
- *
- * Ownership of cmd is taken, it must not be deleted by the caller.
- * The command will constitute one item on the undo stack.
- */
 void
 MidiModel::apply_command_as_subcommand(Session& session, Command* cmd)
 {
@@ -122,7 +109,7 @@ MidiModel::apply_command_as_subcommand(Session& session, Command* cmd)
 	set_edited (true);
 }
 
-/************** DIFF COMMAND ********************/
+/* ************* DIFF COMMAND ********************/
 
 #define NOTE_DIFF_COMMAND_ELEMENT "NoteDiffCommand"
 #define DIFF_NOTES_ELEMENT "ChangedNotes"
@@ -468,40 +455,34 @@ MidiModel::NoteDiffCommand::marshal_note(const NotePtr note)
 Evoral::Sequence<MidiModel::TimeType>::NotePtr
 MidiModel::NoteDiffCommand::unmarshal_note (XMLNode *xml_note)
 {
-	Evoral::event_id_t id;
+	Evoral::event_id_t id = -1;
 	if (!xml_note->get_property ("id", id)) {
 		error << "note information missing ID value" << endmsg;
-		id = -1;
 	}
 
-	uint8_t note;
+	uint8_t note = 127;
 	if (!xml_note->get_property("note", note)) {
 		warning << "note information missing note value" << endmsg;
-		note = 127;
 	}
 
-	uint8_t channel;
+	uint8_t channel = 0;
 	if (!xml_note->get_property("channel", channel)) {
 		warning << "note information missing channel" << endmsg;
-		channel = 0;
 	}
 
-	MidiModel::TimeType time;
+	MidiModel::TimeType time = MidiModel::TimeType();
 	if (!xml_note->get_property("time", time)) {
 		warning << "note information missing time" << endmsg;
-		time = MidiModel::TimeType();
 	}
 
-	MidiModel::TimeType length;
+	MidiModel::TimeType length = MidiModel::TimeType(1);
 	if (!xml_note->get_property("length", length)) {
 		warning << "note information missing length" << endmsg;
-		length = MidiModel::TimeType(1);
 	}
 
-	uint8_t velocity;
+	uint8_t velocity = 127;
 	if (!xml_note->get_property("velocity", velocity)) {
 		warning << "note information missing velocity" << endmsg;
-		velocity = 127;
 	}
 
 	NotePtr note_ptr(new Evoral::Note<TimeType>(channel, time, length, note, velocity));
@@ -1697,8 +1678,12 @@ MidiModel::set_midi_source (boost::shared_ptr<MidiSource> s)
 void
 MidiModel::source_interpolation_changed (Evoral::Parameter p, Evoral::ControlList::InterpolationStyle s)
 {
-	Glib::Threads::Mutex::Lock lm (_control_lock);
-	control(p)->list()->set_interpolation (s);
+	{
+		Glib::Threads::Mutex::Lock lm (_control_lock);
+		control(p)->list()->set_interpolation (s);
+	}
+	/* re-read MIDI */
+	ContentsChanged (); /* EMIT SIGNAL */
 }
 
 /** A ControlList has signalled that its interpolation style has changed.  Again, in order to keep
@@ -1716,9 +1701,13 @@ MidiModel::control_list_interpolation_changed (Evoral::Parameter p, Evoral::Cont
 void
 MidiModel::source_automation_state_changed (Evoral::Parameter p, AutoState s)
 {
-	Glib::Threads::Mutex::Lock lm (_control_lock);
-	boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (control(p)->list ());
-	al->set_automation_state (s);
+	{
+		Glib::Threads::Mutex::Lock lm (_control_lock);
+		boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (control(p)->list ());
+		al->set_automation_state (s);
+	}
+	/* re-read MIDI */
+	ContentsChanged (); /* EMIT SIGNAL */
 }
 
 void

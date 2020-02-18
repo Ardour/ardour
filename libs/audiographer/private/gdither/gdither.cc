@@ -19,7 +19,6 @@
 
 #include "gdither_types_internal.h"
 #include "gdither.h"
-#include "noise.h"
 
 /* this monstrosity is necessary to get access to lrintf() and random().
    whoever is writing the glibc headers <cmath> and <cstdlib> should be
@@ -61,6 +60,14 @@ static const float shaped_bs[] = { 2.033f, -2.165f, 1.959f, -1.590f, 0.6149f };
 #define MAX_S24   8388607
 #define MIN_S24  -8388608
 #define SCALE_S24 8388608.0f
+
+inline static float gdither_noise ()
+{
+	static uint32_t rnd = 23232323;
+	rnd = (rnd * 196314165) + 907633515;
+
+	return rnd * 2.3283064365387e-10f;
+}
 
 GDither gdither_new(GDitherType type, uint32_t channels,
 
@@ -189,10 +196,10 @@ inline static void gdither_innner_loop(const GDitherType dt,
 	case GDitherNone:
 	    break;
 	case GDitherRect:
-	    tmp -= GDITHER_NOISE;
+	    tmp -= gdither_noise ();
 	    break;
 	case GDitherTri:
-	    r = GDITHER_NOISE - 0.5f;
+	    r = gdither_noise () - 0.5f;
 	    tmp -= r - ts[channel];
 	    ts[channel] = r;
 	    break;
@@ -202,7 +209,7 @@ inline static void gdither_innner_loop(const GDitherType dt,
 	    ideal = tmp;
 
 	    /* Run FIR and add white noise */
-	    ss->buffer[ss->phase] = GDITHER_NOISE * 0.5f;
+	    ss->buffer[ss->phase] = gdither_noise () * 0.5f;
 	    tmp += ss->buffer[ss->phase] * shaped_bs[0]
 		   + ss->buffer[(ss->phase - 1) & GDITHER_SH_BUF_MASK]
 		     * shaped_bs[1]
@@ -265,10 +272,10 @@ inline static void gdither_innner_loop_fp(const GDitherType dt,
 	case GDitherNone:
 	    break;
 	case GDitherRect:
-	    tmp -= GDITHER_NOISE;
+	    tmp -= gdither_noise ();
 	    break;
 	case GDitherTri:
-	    r = GDITHER_NOISE - 0.5f;
+	    r = gdither_noise () - 0.5f;
 	    tmp -= r - ts[channel];
 	    ts[channel] = r;
 	    break;
@@ -278,7 +285,7 @@ inline static void gdither_innner_loop_fp(const GDitherType dt,
 	    ideal = tmp;
 
 	    /* Run FIR and add white noise */
-	    ss->buffer[ss->phase] = GDITHER_NOISE * 0.5f;
+	    ss->buffer[ss->phase] = gdither_noise () * 0.5f;
 	    tmp += ss->buffer[ss->phase] * shaped_bs[0]
 		   + ss->buffer[(ss->phase - 1) & GDITHER_SH_BUF_MASK]
 		     * shaped_bs[1]
@@ -473,5 +480,3 @@ void gdither_runf(GDither s, uint32_t channel, uint32_t length,
 			    s->clamp_l);
     }
 }
-
-/* vi:set ts=8 sts=4 sw=4: */

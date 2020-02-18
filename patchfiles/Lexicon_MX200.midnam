@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>at0m</Author>
+  <!-- The author's device is set to channel 12.
+     Customize accordingly in ChannelNameSetAssign and AvailableChannel below.
+-->
+  <MasterDeviceNames>
+    <Manufacturer>Lexicon</Manufacturer>
+    <Model>MX200</Model>
+    <CustomDeviceMode Name="Lexicon MX200">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="12" NameSet="Presets"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Presets">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="false"/>
+        <AvailableChannel Channel="2" Available="false"/>
+        <AvailableChannel Channel="3" Available="false"/>
+        <AvailableChannel Channel="4" Available="false"/>
+        <AvailableChannel Channel="5" Available="false"/>
+        <AvailableChannel Channel="6" Available="false"/>
+        <AvailableChannel Channel="7" Available="false"/>
+        <AvailableChannel Channel="8" Available="false"/>
+        <AvailableChannel Channel="9" Available="false"/>
+        <AvailableChannel Channel="10" Available="false"/>
+        <AvailableChannel Channel="11" Available="false"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="false"/>
+        <AvailableChannel Channel="14" Available="false"/>
+        <AvailableChannel Channel="15" Available="false"/>
+        <AvailableChannel Channel="16" Available="false"/>
+      </AvailableForChannels>
+      <UsesControlNameList Name="ControlsMX200"/>
+      <PatchBank Name="FACTORY">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="FACTORY"/>
+      </PatchBank>
+      <PatchBank Name="USER">
+        <MIDICommands>
+          <ControlChange Control="0" Value="1"/>
+          <ControlChange Control="32" Value="1"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="USER"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <PatchNameList Name="FACTORY">
+      <Patch Number="001" Name="1 Big Pop Vocal" ProgramChange="0"/>
+      <Patch Number="002" Name="2 Pop Vocals" ProgramChange="1"/>
+      <Patch Number="003" Name="3 RetroVerb" ProgramChange="2"/>
+      <Patch Number="004" Name="4 Chorus + Plate" ProgramChange="3"/>
+      <Patch Number="005" Name="5 Vocal Hall+Plate" ProgramChange="4"/>
+      <Patch Number="006" Name="6 Extra Roomy" ProgramChange="5"/>
+      <Patch Number="007" Name="7 Tuned Room" ProgramChange="6"/>
+      <Patch Number="008" Name="8 EchoVerb" ProgramChange="7"/>
+      <Patch Number="009" Name="9 Quickie" ProgramChange="8"/>
+      <Patch Number="010" Name="10 Acoustic Chamber" ProgramChange="9"/>
+      <Patch Number="011" Name="11 Ambient Chamber" ProgramChange="10"/>
+      <Patch Number="012" Name="12 Acoustic Bliss" ProgramChange="11"/>
+      <Patch Number="013" Name="13 Guitar World" ProgramChange="12"/>
+      <Patch Number="014" Name="14 Springtime" ProgramChange="13"/>
+      <Patch Number="015" Name="15 Giant Snare" ProgramChange="14"/>
+      <Patch Number="016" Name="16 SmoothDrmPlate" ProgramChange="15"/>
+      <Patch Number="017" Name="17 Rich Drum Hall" ProgramChange="16"/>
+      <Patch Number="018" Name="18 Big Time" ProgramChange="17"/>
+      <Patch Number="019" Name="19 Voice Of Evil" ProgramChange="18"/>
+      <Patch Number="020" Name="20 Wayback Machine " ProgramChange="19"/>
+      <Patch Number="021" Name="21 BigVocalVerb" ProgramChange="20"/>
+      <Patch Number="022" Name="22 TwoRooms" ProgramChange="21"/>
+      <Patch Number="023" Name="23 The Big Easy" ProgramChange="22"/>
+      <Patch Number="024" Name="24 Nashville" ProgramChange="23"/>
+      <Patch Number="025" Name="25 LA-LA Land" ProgramChange="24"/>
+      <Patch Number="026" Name="26 Smooth Vocals" ProgramChange="25"/>
+      <Patch Number="027" Name="27 CompressedVox" ProgramChange="26"/>
+      <Patch Number="028" Name="28 No S Vocals" ProgramChange="27"/>
+      <Patch Number="029" Name="29 De-Esser+Compr" ProgramChange="28"/>
+      <Patch Number="030" Name="30 Compressor" ProgramChange="29"/>
+      <Patch Number="031" Name="31 De-Esser" ProgramChange="30"/>
+      <Patch Number="032" Name="32 Studio Delay" ProgramChange="31"/>
+      <Patch Number="033" Name="33 60s Delay" ProgramChange="32"/>
+      <Patch Number="034" Name="34 Slapback Delay" ProgramChange="33"/>
+      <Patch Number="035" Name="35 Delay + Verb" ProgramChange="34"/>
+      <Patch Number="036" Name="36 Vocal Chorus" ProgramChange="35"/>
+      <Patch Number="037" Name="37 Choral Hall" ProgramChange="36"/>
+      <Patch Number="038" Name="38 Tape Chorus" ProgramChange="37"/>
+      <Patch Number="039" Name="39 Core Us" ProgramChange="38"/>
+      <Patch Number="040" Name="40 Double Tracks" ProgramChange="39"/>
+      <Patch Number="041" Name="41 Shifted Room" ProgramChange="40"/>
+      <Patch Number="042" Name="42 Like That!" ProgramChange="41"/>
+      <Patch Number="043" Name="43 Plate + Hall" ProgramChange="42"/>
+      <Patch Number="044" Name="44 Vocal + Inst 1" ProgramChange="43"/>
+      <Patch Number="045" Name="45 Vocal + Inst 2" ProgramChange="44"/>
+      <Patch Number="046" Name="46 Vocal + Inst 3" ProgramChange="45"/>
+      <Patch Number="047" Name="47 Get Small" ProgramChange="46"/>
+      <Patch Number="048" Name="48 Alive N Kicking" ProgramChange="47"/>
+      <Patch Number="049" Name="49 Muy Grande" ProgramChange="48"/>
+      <Patch Number="050" Name="50 Bigger Band" ProgramChange="49"/>
+      <Patch Number="051" Name="51 Taps" ProgramChange="50"/>
+      <Patch Number="052" Name="52 Tap Chamber" ProgramChange="51"/>
+      <Patch Number="053" Name="53 Spaced Out" ProgramChange="52"/>
+      <Patch Number="054" Name="54 Dual Halls" ProgramChange="53"/>
+      <Patch Number="055" Name="55 Tried And True" ProgramChange="54"/>
+      <Patch Number="056" Name="56 More And More" ProgramChange="55"/>
+      <Patch Number="057" Name="57 Spring Studio" ProgramChange="56"/>
+      <Patch Number="058" Name="58 Hit Me" ProgramChange="57"/>
+      <Patch Number="059" Name="59 Precision Delay" ProgramChange="58"/>
+      <Patch Number="060" Name="60 Modulated Delay" ProgramChange="59"/>
+      <Patch Number="061" Name="61 Rock Lead" ProgramChange="60"/>
+      <Patch Number="062" Name="62 Pong Verb" ProgramChange="61"/>
+      <Patch Number="063" Name="63 Mod U Verb" ProgramChange="62"/>
+      <Patch Number="064" Name="64 Roto Verb" ProgramChange="63"/>
+      <Patch Number="065" Name="65 Rotary" ProgramChange="64"/>
+      <Patch Number="066" Name="66 Ham N Eggs" ProgramChange="65"/>
+      <Patch Number="067" Name="67 Vibrolux" ProgramChange="66"/>
+      <Patch Number="068" Name="68 Side By Side" ProgramChange="67"/>
+      <Patch Number="069" Name="69 Wobblers" ProgramChange="68"/>
+      <Patch Number="070" Name="70 Rhodes Panner" ProgramChange="69"/>
+      <Patch Number="071" Name="71 Brewed Awakening" ProgramChange="70"/>
+      <Patch Number="072" Name="72 Jet Flange" ProgramChange="71"/>
+      <Patch Number="073" Name="73 Phase Gate" ProgramChange="72"/>
+      <Patch Number="074" Name="74 Phased Plate" ProgramChange="73"/>
+      <Patch Number="075" Name="75 Phame" ProgramChange="74"/>
+      <Patch Number="076" Name="76 Phaser Taser" ProgramChange="75"/>
+      <Patch Number="077" Name="77 Dualing Guitars" ProgramChange="76"/>
+      <Patch Number="078" Name="78 The Low Down" ProgramChange="77"/>
+      <Patch Number="079" Name="79 And Then Some" ProgramChange="78"/>
+      <Patch Number="080" Name="80 Squished Kick" ProgramChange="79"/>
+      <Patch Number="081" Name="81 Gated Snare" ProgramChange="80"/>
+      <Patch Number="082" Name="82 Snare Delay" ProgramChange="81"/>
+      <Patch Number="083" Name="83 Drum Delay" ProgramChange="82"/>
+      <Patch Number="084" Name="84 Drum Echo" ProgramChange="83"/>
+      <Patch Number="085" Name="85 Tempo Gate" ProgramChange="84"/>
+      <Patch Number="086" Name="86 Flange Drums" ProgramChange="85"/>
+      <Patch Number="087" Name="87 Tom Tom" ProgramChange="86"/>
+      <Patch Number="088" Name="88 Snare + Toms" ProgramChange="87"/>
+      <Patch Number="089" Name="89 Drum Plate+Hall" ProgramChange="88"/>
+      <Patch Number="090" Name="90 Vibrato" ProgramChange="89"/>
+      <Patch Number="091" Name="91 Vibraslap" ProgramChange="90"/>
+      <Patch Number="092" Name="92 Spin Cycle" ProgramChange="91"/>
+      <Patch Number="093" Name="93 Role Reversal" ProgramChange="92"/>
+      <Patch Number="094" Name="94 Get Some" ProgramChange="93"/>
+      <Patch Number="095" Name="95 Rewind" ProgramChange="94"/>
+      <Patch Number="096" Name="96 Back At Ya" ProgramChange="95"/>
+      <Patch Number="097" Name="97 Delay Wars" ProgramChange="96"/>
+      <Patch Number="098" Name="98 Pitch Out" ProgramChange="97"/>
+      <Patch Number="099" Name="99 Huh?" ProgramChange="98"/>
+    </PatchNameList>
+    <PatchNameList Name="USER">
+      <Patch Number="001" Name="1u  Big Pop Vocal" ProgramChange="0"/>
+      <Patch Number="002" Name="2u  Pop Vocals" ProgramChange="1"/>
+      <Patch Number="003" Name="3u  RetroVerb" ProgramChange="2"/>
+      <Patch Number="004" Name="4u  Chorus + Plate" ProgramChange="3"/>
+      <Patch Number="005" Name="5u  Vocal Hall+Plate" ProgramChange="4"/>
+      <Patch Number="006" Name="6u  Extra Roomy" ProgramChange="5"/>
+      <Patch Number="007" Name="7u  Tuned Room" ProgramChange="6"/>
+      <Patch Number="008" Name="8u  EchoVerb" ProgramChange="7"/>
+      <Patch Number="009" Name="9u  Quickie" ProgramChange="8"/>
+      <Patch Number="010" Name="10u Acoustic Chamber" ProgramChange="9"/>
+      <Patch Number="011" Name="11u Ambient Chamber" ProgramChange="10"/>
+      <Patch Number="012" Name="12u Acoustic Bliss" ProgramChange="11"/>
+      <Patch Number="013" Name="13u Guitar World" ProgramChange="12"/>
+      <Patch Number="014" Name="14u Springtime" ProgramChange="13"/>
+      <Patch Number="015" Name="15u Giant Snare" ProgramChange="14"/>
+      <Patch Number="016" Name="16u SmoothDrmPlate" ProgramChange="15"/>
+      <Patch Number="017" Name="17u Rich Drum Hall" ProgramChange="16"/>
+      <Patch Number="018" Name="18u Big Time" ProgramChange="17"/>
+      <Patch Number="019" Name="19u Voice Of Evil" ProgramChange="18"/>
+      <Patch Number="020" Name="20u Wayback Machine " ProgramChange="19"/>
+      <Patch Number="021" Name="21u BigVocalVerb" ProgramChange="20"/>
+      <Patch Number="022" Name="22u TwoRooms" ProgramChange="21"/>
+      <Patch Number="023" Name="23u The Big Easy" ProgramChange="22"/>
+      <Patch Number="024" Name="24u Nashville" ProgramChange="23"/>
+      <Patch Number="025" Name="25u LA-LA Land" ProgramChange="24"/>
+      <Patch Number="026" Name="26u Smooth Vocals" ProgramChange="25"/>
+      <Patch Number="027" Name="27u CompressedVox" ProgramChange="26"/>
+      <Patch Number="028" Name="28u No S Vocals" ProgramChange="27"/>
+      <Patch Number="029" Name="29u De-Esser+Compr" ProgramChange="28"/>
+      <Patch Number="030" Name="30u Compressor" ProgramChange="29"/>
+      <Patch Number="031" Name="31u De-Esser" ProgramChange="30"/>
+      <Patch Number="032" Name="32u Studio Delay" ProgramChange="31"/>
+      <Patch Number="033" Name="33u 60s Delay" ProgramChange="32"/>
+      <Patch Number="034" Name="34u Slapback Delay" ProgramChange="33"/>
+      <Patch Number="035" Name="35u Delay + Verb" ProgramChange="34"/>
+      <Patch Number="036" Name="36u Vocal Chorus" ProgramChange="35"/>
+      <Patch Number="037" Name="37u Choral Hall" ProgramChange="36"/>
+      <Patch Number="038" Name="38u Tape Chorus" ProgramChange="37"/>
+      <Patch Number="039" Name="39u Core Us" ProgramChange="38"/>
+      <Patch Number="040" Name="40u Double Tracks" ProgramChange="39"/>
+      <Patch Number="041" Name="41u Shifted Room" ProgramChange="40"/>
+      <Patch Number="042" Name="42u Like That!" ProgramChange="41"/>
+      <Patch Number="043" Name="43u Plate + Hall" ProgramChange="42"/>
+      <Patch Number="044" Name="44u Vocal + Inst 1" ProgramChange="43"/>
+      <Patch Number="045" Name="45u Vocal + Inst 2" ProgramChange="44"/>
+      <Patch Number="046" Name="46u Vocal + Inst 3" ProgramChange="45"/>
+      <Patch Number="047" Name="47u Get Small" ProgramChange="46"/>
+      <Patch Number="048" Name="48u Alive N Kicking" ProgramChange="47"/>
+      <Patch Number="049" Name="49u Muy Grande" ProgramChange="48"/>
+      <Patch Number="050" Name="50u Bigger Band" ProgramChange="49"/>
+      <Patch Number="051" Name="51u Taps" ProgramChange="50"/>
+      <Patch Number="052" Name="52u Tap Chamber" ProgramChange="51"/>
+      <Patch Number="053" Name="53u Spaced Out" ProgramChange="52"/>
+      <Patch Number="054" Name="54u Dual Halls" ProgramChange="53"/>
+      <Patch Number="055" Name="55u Tried And True" ProgramChange="54"/>
+      <Patch Number="056" Name="56u More And More" ProgramChange="55"/>
+      <Patch Number="057" Name="57u Spring Studio" ProgramChange="56"/>
+      <Patch Number="058" Name="58u Hit Me" ProgramChange="57"/>
+      <Patch Number="059" Name="59u Precision Delay" ProgramChange="58"/>
+      <Patch Number="060" Name="60u Modulated Delay" ProgramChange="59"/>
+      <Patch Number="061" Name="61u Rock Lead" ProgramChange="60"/>
+      <Patch Number="062" Name="62u Pong Verb" ProgramChange="61"/>
+      <Patch Number="063" Name="63u Mod U Verb" ProgramChange="62"/>
+      <Patch Number="064" Name="64u Roto Verb" ProgramChange="63"/>
+      <Patch Number="065" Name="65u Rotary" ProgramChange="64"/>
+      <Patch Number="066" Name="66u Ham N Eggs" ProgramChange="65"/>
+      <Patch Number="067" Name="67u Vibrolux" ProgramChange="66"/>
+      <Patch Number="068" Name="68u Side By Side" ProgramChange="67"/>
+      <Patch Number="069" Name="69u Wobblers" ProgramChange="68"/>
+      <Patch Number="070" Name="70u Rhodes Panner" ProgramChange="69"/>
+      <Patch Number="071" Name="71u Brewed Awakening" ProgramChange="70"/>
+      <Patch Number="072" Name="72u Jet Flange" ProgramChange="71"/>
+      <Patch Number="073" Name="73u Phase Gate" ProgramChange="72"/>
+      <Patch Number="074" Name="74u Phased Plate" ProgramChange="73"/>
+      <Patch Number="075" Name="75u Phame" ProgramChange="74"/>
+      <Patch Number="076" Name="76u Phaser Taser" ProgramChange="75"/>
+      <Patch Number="077" Name="77u Dualing Guitars" ProgramChange="76"/>
+      <Patch Number="078" Name="78u The Low Down" ProgramChange="77"/>
+      <Patch Number="079" Name="79u And Then Some" ProgramChange="78"/>
+      <Patch Number="080" Name="80u Squished Kick" ProgramChange="79"/>
+      <Patch Number="081" Name="81u Gated Snare" ProgramChange="80"/>
+      <Patch Number="082" Name="82u Snare Delay" ProgramChange="81"/>
+      <Patch Number="083" Name="83u Drum Delay" ProgramChange="82"/>
+      <Patch Number="084" Name="84u Drum Echo" ProgramChange="83"/>
+      <Patch Number="085" Name="85u Tempo Gate" ProgramChange="84"/>
+      <Patch Number="086" Name="86u Flange Drums" ProgramChange="85"/>
+      <Patch Number="087" Name="87u Tom  Tom" ProgramChange="86"/>
+      <Patch Number="088" Name="88u Snare + Toms" ProgramChange="87"/>
+      <Patch Number="089" Name="89u Drum Plate+Hall" ProgramChange="88"/>
+      <Patch Number="090" Name="90u Vibrato" ProgramChange="89"/>
+      <Patch Number="091" Name="91u Vibraslap" ProgramChange="90"/>
+      <Patch Number="092" Name="92u Spin Cycle" ProgramChange="91"/>
+      <Patch Number="093" Name="93u Role Reversal" ProgramChange="92"/>
+      <Patch Number="094" Name="94u Get Some" ProgramChange="93"/>
+      <Patch Number="095" Name="95u Rewind" ProgramChange="94"/>
+      <Patch Number="096" Name="96u Back At Ya" ProgramChange="95"/>
+      <Patch Number="097" Name="97u Delay Wars" ProgramChange="96"/>
+      <Patch Number="098" Name="98u Pitch Out" ProgramChange="97"/>
+      <Patch Number="099" Name="99u Huh?" ProgramChange="98"/>
+    </PatchNameList>
+    <ControlNameList Name="ControlsMX200">
+      <Control Type="7bit" Number="12" Name="1 Effect Type"/>
+      <Control Type="7bit" Number="13" Name="1 Bypass"/>
+      <Control Type="7bit" Number="14" Name="1 Pre Delay Knob (Time/Speed)"/>
+      <Control Type="7bit" Number="15" Name="1 Decay Knob (Feedback/Depth)"/>
+      <Control Type="7bit" Number="16" Name="1 Variation Knob (Liveliness)"/>
+      <Control Type="7bit" Number="17" Name="1 Tempo"/>
+      <Control Type="7bit" Number="26" Name="1 Effect Mix"/>
+      <Control Type="7bit" Number="19" Name="2 Effect Type"/>
+      <Control Type="7bit" Number="20" Name="2 Bypass"/>
+      <Control Type="7bit" Number="21" Name="2 Pre Delay Knob (Time/Speed)"/>
+      <Control Type="7bit" Number="22" Name="2 Decay Knob (Feedback/Depth)"/>
+      <Control Type="7bit" Number="23" Name="2 Variation Knob (Liveliness)"/>
+      <Control Type="7bit" Number="24" Name="2 Tempo"/>
+      <Control Type="7bit" Number="27" Name="2 Effect Mix"/>
+      <Control Type="7bit" Number="28" Name="Effect Routing "/>
+    </ControlNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

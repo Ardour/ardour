@@ -26,14 +26,20 @@ LuaScriptTest::session_script_test ()
 
 		std::string script = "";
 
-		if (Glib::path_get_basename (spi->path).at(0) == '_') {
+		if (Glib::path_get_basename (spi->path).find ("__") == 0) {
 			continue;
+		}
+
+		if (Glib::path_get_basename (spi->path).at(0) == '_') {
+			std::cout << "LuaSession: " << spi->name << " (not bundled)\n";
+		} else {
+			std::cout << "LuaSession: " << spi->name << "\n";
 		}
 
 		try {
 			script = Glib::file_get_contents (spi->path);
 		} catch (Glib::FileError const& e) {
-			CPPUNIT_FAIL ("Cannot read script file");
+			CPPUNIT_FAIL (spi->name + ": Cannot read script file");
 			continue;
 		}
 
@@ -41,15 +47,15 @@ LuaScriptTest::session_script_test ()
 			LuaScriptParamList lsp = LuaScriptParams::script_params (spi, "sess_params");
 			_session->register_lua_function ("test", script, lsp);
 		} catch (SessionException e) {
-			CPPUNIT_FAIL ("Cannot add script to session");
+			CPPUNIT_FAIL (spi->name + ": Cannot add script to session");
 			continue;
 		}
-		CPPUNIT_ASSERT (!_session->registered_lua_functions ().empty());
+		CPPUNIT_ASSERT_MESSAGE (spi->name, !_session->registered_lua_functions ().empty());
 		Glib::usleep(200000); // wait to script to execute during process()
 		// if the script fails, it'll be removed.
-		CPPUNIT_ASSERT (!_session->registered_lua_functions ().empty());
+		CPPUNIT_ASSERT_MESSAGE (spi->name, !_session->registered_lua_functions ().empty());
 		_session->unregister_lua_function ("test");
-		CPPUNIT_ASSERT (_session->registered_lua_functions ().empty());
+		CPPUNIT_ASSERT_MESSAGE (spi->name, _session->registered_lua_functions ().empty());
 	}
 }
 
@@ -66,20 +72,34 @@ LuaScriptTest::dsp_script_test ()
 	std::cout << "\n";
 	const PluginInfoList& plugs = pm.lua_plugin_info();
 	for (PluginInfoList::const_iterator i = plugs.begin(); i != plugs.end(); ++i) {
-		std::cout << "LuaProc: " <<(*i)->name << "\n";
+
+		if (Glib::path_get_basename ((*i)->path).find ("__") == 0) {
+			/* Example scripts (filename with leading underscore), that
+			 * use a double-underscore at the beginning of the file-name
+			 * are excluded from unit-tests (e.g. "Lua Convolver"
+			 * requires IR files).
+			 */
+			continue;
+		}
+
+		if (Glib::path_get_basename ((*i)->path).at(0) == '_') {
+			std::cout << "LuaProc: " <<(*i)->name << " (not bundled)\n";
+		} else {
+			std::cout << "LuaProc: " <<(*i)->name << "\n";
+		}
 
 		PluginPtr p = (*i)->load (*_session);
-		CPPUNIT_ASSERT (p);
+		CPPUNIT_ASSERT_MESSAGE ((*i)->name, p);
 
 		boost::shared_ptr<Processor> processor (new PluginInsert (*_session, p));
 		processor->enable (true);
 
 		int rv = r->add_processor (processor, boost::shared_ptr<Processor>(), 0);
-		CPPUNIT_ASSERT (rv == 0);
+		CPPUNIT_ASSERT_MESSAGE ((*i)->name, rv == 0);
 		processor->enable (true);
 		Glib::usleep(200000); // run process, failing plugins will be deactivated.
-		CPPUNIT_ASSERT (processor->active());
+		CPPUNIT_ASSERT_MESSAGE ((*i)->name, processor->active());
 		rv = r->remove_processor (processor, NULL, true);
-		CPPUNIT_ASSERT (rv == 0);
+		CPPUNIT_ASSERT_MESSAGE ((*i)->name, rv == 0);
 	}
 }

@@ -1,21 +1,24 @@
 /*
-    Copyright (C) 2000 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2006-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2007-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2016-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2017 Julien "_FrnchFrgg_" RIVAUD <frnchfrgg@free.fr>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_io_h__
 #define __ardour_io_h__
@@ -65,7 +68,7 @@ class UserBundle;
  * An IO can contain ports of varying types, making routes/inserts/etc with
  * varied combinations of types (eg MIDI and audio) possible.
  */
-class LIBARDOUR_API IO : public SessionObject, public Latent
+class LIBARDOUR_API IO : public SessionObject
 {
 public:
 	static const std::string state_node_name;
@@ -104,6 +107,8 @@ public:
 
 	boost::shared_ptr<Bundle> bundle () { return _bundle; }
 
+	bool can_add_port (DataType) const;
+
 	int add_port (std::string connection, void *src, DataType type = DataType::NIL);
 	int remove_port (boost::shared_ptr<Port>, void *src);
 	int connect (boost::shared_ptr<Port> our_port, std::string other_port, void *src);
@@ -113,8 +118,6 @@ public:
 	bool connected_to (const std::string&) const;
 	bool connected () const;
 	bool physically_connected () const;
-
-	samplecnt_t signal_latency () const { return 0; }
 
 	samplecnt_t latency () const;
 	samplecnt_t public_latency () const;

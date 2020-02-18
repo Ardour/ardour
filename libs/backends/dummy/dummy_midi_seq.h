@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,9 +11,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef __libbackend_dummy_midi_seq_h__
@@ -780,7 +780,7 @@ static const MIDISequence s7[] = { // channel1, nonsense
 };
 
 static const MIDISequence s8[] = { // sysex
-	{ 0.00, 10, {0xf0, 0x7f, 0x7f, 0x01, 0x01, /*hour + tc */ 0x20, /*min*/ 0x00, /*sec*/ 0x00, /*sample*/ 0x00, 0xf7} },  // 25fps, 00:00:00:00
+	{ 0.00, 10, {0xf0, 0x7f, 0x7f, 0x01, 0x01, /*hour + tc */ 0x20, /*min*/ 0x00, /*sec*/ 0x00, /*frame*/ 0x00, 0xf7} },  // 25fps, 00:00:00:00
 	// quarter frames spacing (in samples) at 25fps: SR / (25 * 4)
 	// DummyMidiPort::setup_generator uses 120bpm ie (SR / 2)
 	// hence the spacing is: SR / (25 * 4) / (SR / 2) = 0.2

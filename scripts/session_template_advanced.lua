@@ -49,7 +49,7 @@ function factory () return function ()
 	end
 
 	if rv['monitor'] then
-		Session:add_monitor_section ()
+		ARDOUR.config():set_use_monitor_bus (true)
 	end
 
 	ARDOUR.config():set_input_auto_connect (rv['ac_input'])

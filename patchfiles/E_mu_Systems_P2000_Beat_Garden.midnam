@@ -1,0 +1,528 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>E-mu Systems</Manufacturer>
+    <Model>Audity 2000</Model>
+    <Model>B-3</Model>
+    <Model>B-3 Turbo</Model>
+    <Model>HALO</Model>
+    <Model>MK-6</Model>
+    <Model>Mo' Phatt</Model>
+    <Model>Mo' Phatt Turbo</Model>
+    <Model>MP-7</Model>
+    <Model>PK-6</Model>
+    <Model>Planet Earth</Model>
+    <Model>Planet Earth Turbo</Model>
+    <Model>Proteus 1000</Model>
+    <Model>Proteus 2000</Model>
+    <Model>Proteus 2500</Model>
+    <Model>Proteus Custom</Model>
+    <Model>Vintage Keys</Model>
+    <Model>Vintage Pro</Model>
+    <Model>Virtuoso 2000</Model>
+    <Model>XK-6</Model>
+    <Model>XL-1</Model>
+    <Model>XL-1 Turbo</Model>
+    <Model>XL-7</Model>
+    <PatchNameList Name="Beat Garden Bank 0">
+      <Patch Number="000" Name="bts:Beat Garden" ProgramChange="0"/>
+      <Patch Number="001" Name="bas:BeatSquare 1" ProgramChange="1"/>
+      <Patch Number="002" Name="syn:Tulip Bells" ProgramChange="2"/>
+      <Patch Number="003" Name="vox:FlowerBed" ProgramChange="3"/>
+      <Patch Number="004" Name="bts:Disco Garden" ProgramChange="4"/>
+      <Patch Number="005" Name="bas:Oak Tree" ProgramChange="5"/>
+      <Patch Number="006" Name="git:Riff me 1" ProgramChange="6"/>
+      <Patch Number="007" Name="pad:DestyFlower1" ProgramChange="7"/>
+      <Patch Number="008" Name="bas:Bamboe DJ" ProgramChange="8"/>
+      <Patch Number="009" Name="arp:Beat Flache" ProgramChange="9"/>
+      <Patch Number="010" Name="sub:LowerMeBass1" ProgramChange="10"/>
+      <Patch Number="011" Name="pr1:Percussion 1" ProgramChange="11"/>
+      <Patch Number="012" Name="pr2:Percussion 2" ProgramChange="12"/>
+      <Patch Number="013" Name="pr2:Percussion 3" ProgramChange="13"/>
+      <Patch Number="014" Name="sn1:Snares 1 St." ProgramChange="14"/>
+      <Patch Number="015" Name="sn2:Snares 2mono" ProgramChange="15"/>
+      <Patch Number="016" Name="sn3:Snares 3 St." ProgramChange="16"/>
+      <Patch Number="017" Name="sn4:Jungle SN St" ProgramChange="17"/>
+      <Patch Number="018" Name="sn5:Jngl SN St+M" ProgramChange="18"/>
+      <Patch Number="019" Name="sn6:Elec SN 1mon" ProgramChange="19"/>
+      <Patch Number="020" Name="sn6:Elec SN 2 St" ProgramChange="20"/>
+      <Patch Number="021" Name="sn6:Elec SN 3" ProgramChange="21"/>
+      <Patch Number="022" Name="sn6:Elec SN 4" ProgramChange="22"/>
+      <Patch Number="023" Name="sn7:Elec SN+CLP1" ProgramChange="23"/>
+      <Patch Number="024" Name="clp:Claps St. 1" ProgramChange="24"/>
+      <Patch Number="025" Name="clp:Claps St+M.1" ProgramChange="25"/>
+      <Patch Number="026" Name="clp:Claps Stack1" ProgramChange="26"/>
+      <Patch Number="027" Name="bd1:BG BD 1" ProgramChange="27"/>
+      <Patch Number="028" Name="bd1:BG BD room 2" ProgramChange="28"/>
+      <Patch Number="029" Name="bd2:BG BD Elec 1" ProgramChange="29"/>
+      <Patch Number="030" Name="bd2:BG BD Elec 2" ProgramChange="30"/>
+      <Patch Number="031" Name="hh1:HiHats monoI" ProgramChange="31"/>
+      <Patch Number="032" Name="cb1:Cymb&amp;Rides 1" ProgramChange="32"/>
+      <Patch Number="033" Name="cb1:Cymb&amp;Rides 2" ProgramChange="33"/>
+      <Patch Number="034" Name="tom:Beat Toms" ProgramChange="34"/>
+      <Patch Number="035" Name="kit:Jazz &amp; Bass" ProgramChange="35"/>
+      <Patch Number="036" Name="sfx:Beat Field 1" ProgramChange="36"/>
+      <Patch Number="037" Name="sfx:Beat Field 2" ProgramChange="37"/>
+      <Patch Number="038" Name="git:Riff me 2" ProgramChange="38"/>
+      <Patch Number="039" Name="syn:XyloSynth D" ProgramChange="39"/>
+      <Patch Number="040" Name="amb:Snowy Trees" ProgramChange="40"/>
+      <Patch Number="041" Name="bas:Slap it 1cho" ProgramChange="41"/>
+      <Patch Number="042" Name="sfx:Special &amp; Dr" ProgramChange="42"/>
+      <Patch Number="043" Name="syn:Angel Sword" ProgramChange="43"/>
+      <Patch Number="044" Name="git:Muted Alka" ProgramChange="44"/>
+      <Patch Number="045" Name="bas:Jungle GSM" ProgramChange="45"/>
+      <Patch Number="046" Name="pad:GardenString" ProgramChange="46"/>
+      <Patch Number="047" Name="bas:PhatSawer" ProgramChange="47"/>
+      <Patch Number="048" Name="amb:Angel Pad" ProgramChange="48"/>
+      <Patch Number="049" Name="led:Funky Plant" ProgramChange="49"/>
+      <Patch Number="050" Name="bts:Park groove" ProgramChange="50"/>
+      <Patch Number="051" Name="pad:Silk Padings" ProgramChange="51"/>
+      <Patch Number="052" Name="bas:Analoga Tree" ProgramChange="52"/>
+      <Patch Number="053" Name="syn:Chimy Pad" ProgramChange="53"/>
+      <Patch Number="054" Name="bts:Rock Garden" ProgramChange="54"/>
+      <Patch Number="055" Name="bts:Tulip Garden" ProgramChange="55"/>
+      <Patch Number="056" Name="bas:Saw Leaves" ProgramChange="56"/>
+      <Patch Number="057" Name="pad:Artic Sweep" ProgramChange="57"/>
+      <Patch Number="058" Name="bas:Spruce" ProgramChange="58"/>
+      <Patch Number="059" Name="sfx:SF Chimes" ProgramChange="59"/>
+      <Patch Number="060" Name="bas:Acous-Syn 5" ProgramChange="60"/>
+      <Patch Number="061" Name="sub:SinusMoogy" ProgramChange="61"/>
+      <Patch Number="062" Name="vox:Fab Syntha" ProgramChange="62"/>
+      <Patch Number="063" Name="kb2:Butterfly" ProgramChange="63"/>
+      <Patch Number="064" Name="bas:Balled" ProgramChange="64"/>
+      <Patch Number="065" Name="hit:Newish II" ProgramChange="65"/>
+      <Patch Number="066" Name="syn:PlantoDance" ProgramChange="66"/>
+      <Patch Number="067" Name="arp:Beat Chord 1" ProgramChange="67"/>
+      <Patch Number="068" Name="pad:Gardensynth" ProgramChange="68"/>
+      <Patch Number="069" Name="arp:T-Beat 1" ProgramChange="69"/>
+      <Patch Number="070" Name="bas:Wild Plant" ProgramChange="70"/>
+      <Patch Number="071" Name="vox:Big BG Choir" ProgramChange="71"/>
+      <Patch Number="072" Name="syn:Garden Party" ProgramChange="72"/>
+      <Patch Number="073" Name="hit:@ BeatGarden" ProgramChange="73"/>
+      <Patch Number="074" Name="bts:Moveda Floor" ProgramChange="74"/>
+      <Patch Number="075" Name="bas:Cactus VI" ProgramChange="75"/>
+      <Patch Number="076" Name="pad:Dramatique" ProgramChange="76"/>
+      <Patch Number="077" Name="brs:Beat Section" ProgramChange="77"/>
+      <Patch Number="078" Name="syn:Beat Sweep 1" ProgramChange="78"/>
+      <Patch Number="079" Name="arp:git C3-C6 1" ProgramChange="79"/>
+      <Patch Number="080" Name="arp:git C1-C4 1." ProgramChange="80"/>
+      <Patch Number="081" Name="bas:Dream Tree" ProgramChange="81"/>
+      <Patch Number="082" Name="hit:SF Garden" ProgramChange="82"/>
+      <Patch Number="083" Name="arp:Beat Chord 2" ProgramChange="83"/>
+      <Patch Number="084" Name="bas:Flip Trance" ProgramChange="84"/>
+      <Patch Number="085" Name="bas:Acous-Syn 4" ProgramChange="85"/>
+      <Patch Number="086" Name="pad:Bombasticom" ProgramChange="86"/>
+      <Patch Number="087" Name="arp:Velo Garden2" ProgramChange="87"/>
+      <Patch Number="088" Name="pr1:BPM LF0 1" ProgramChange="88"/>
+      <Patch Number="089" Name="pr2:BPM LFO 1" ProgramChange="89"/>
+      <Patch Number="090" Name="pr3:BPM LFO 1" ProgramChange="90"/>
+      <Patch Number="091" Name="sfx:Big Break C4" ProgramChange="91"/>
+      <Patch Number="092" Name="bas:24dB Plant" ProgramChange="92"/>
+      <Patch Number="093" Name="vox:Open Flower" ProgramChange="93"/>
+      <Patch Number="094" Name="bas:JD-Stack IX" ProgramChange="94"/>
+      <Patch Number="095" Name="pad:FlowerFields" ProgramChange="95"/>
+      <Patch Number="096" Name="arp:git C3-C6 2." ProgramChange="96"/>
+      <Patch Number="097" Name="arp:git C1-C4 2." ProgramChange="97"/>
+      <Patch Number="098" Name="bts:Oak groove" ProgramChange="98"/>
+      <Patch Number="099" Name="bts:GroovyGroove" ProgramChange="99"/>
+      <Patch Number="100" Name="bas:Pick S it Is" ProgramChange="100"/>
+      <Patch Number="101" Name="pad:Morning" ProgramChange="101"/>
+      <Patch Number="102" Name="arp:M-Es Twenty" ProgramChange="102"/>
+      <Patch Number="103" Name="bts:RnB Flower 1" ProgramChange="103"/>
+      <Patch Number="104" Name="syn:Garden Stab" ProgramChange="104"/>
+      <Patch Number="105" Name="bas:Slap a Synth" ProgramChange="105"/>
+      <Patch Number="106" Name="bpm:Mars Garden" ProgramChange="106"/>
+    </PatchNameList>
+    <PatchNameList Name="Beat Garden Bank 1">
+      <Patch Number="000" Name="pr1:Cajon 1" ProgramChange="0"/>
+      <Patch Number="001" Name="pr1:BeatRing 1" ProgramChange="1"/>
+      <Patch Number="002" Name="pr1:BeatRing 2" ProgramChange="2"/>
+      <Patch Number="003" Name="pr1:BeatRing 3" ProgramChange="3"/>
+      <Patch Number="004" Name="pr1:BeatRing 4" ProgramChange="4"/>
+      <Patch Number="005" Name="pr1:Cabasa 1" ProgramChange="5"/>
+      <Patch Number="006" Name="pr1:Cowbells 1" ProgramChange="6"/>
+      <Patch Number="007" Name="pr1:Egg E4-G4 1" ProgramChange="7"/>
+      <Patch Number="008" Name="pr1:Egg D4-D#4 1" ProgramChange="8"/>
+      <Patch Number="009" Name="pr1:Egg A#4-C5 1" ProgramChange="9"/>
+      <Patch Number="010" Name="pr2:Djembe gr1" ProgramChange="10"/>
+      <Patch Number="011" Name="pr2:Djembe gr4" ProgramChange="11"/>
+      <Patch Number="012" Name="pr2:BigM Shaker1" ProgramChange="12"/>
+      <Patch Number="013" Name="pr2:SleighBell 1" ProgramChange="13"/>
+      <Patch Number="014" Name="pr2:Agogo bells1" ProgramChange="14"/>
+      <Patch Number="015" Name="pr2:FingerCymb 1" ProgramChange="15"/>
+      <Patch Number="016" Name="pr2:Bongos 1" ProgramChange="16"/>
+      <Patch Number="017" Name="pr2:Congas 1" ProgramChange="17"/>
+      <Patch Number="018" Name="pr2:Congas 2" ProgramChange="18"/>
+      <Patch Number="019" Name="pr2:Tumba fx 1" ProgramChange="19"/>
+      <Patch Number="020" Name="pr3:Triangle 6 1" ProgramChange="20"/>
+      <Patch Number="021" Name="pr3:Triangle 9 1" ProgramChange="21"/>
+      <Patch Number="022" Name="pr3:Shaker Mid 1" ProgramChange="22"/>
+      <Patch Number="023" Name="pr3:Shaker Mid 2" ProgramChange="23"/>
+      <Patch Number="024" Name="pr3:Shaker Plas2" ProgramChange="24"/>
+      <Patch Number="025" Name="pr3:Shaker Plas3" ProgramChange="25"/>
+      <Patch Number="026" Name="pr3:Ganzeiro 2" ProgramChange="26"/>
+      <Patch Number="027" Name="pr3:Ganz.Shaker1" ProgramChange="27"/>
+      <Patch Number="028" Name="pr3:Ganz.Shells1" ProgramChange="28"/>
+      <Patch Number="029" Name="pr3:Udo 1" ProgramChange="29"/>
+      <Patch Number="030" Name="pr3:Caxici DBL 1" ProgramChange="30"/>
+      <Patch Number="031" Name="pr3:Caxici DBL 2" ProgramChange="31"/>
+      <Patch Number="032" Name="pr3:Caxici DBL 3" ProgramChange="32"/>
+      <Patch Number="033" Name="pr3:Tarine 2" ProgramChange="33"/>
+      <Patch Number="034" Name="pr3:Tarine 3" ProgramChange="34"/>
+      <Patch Number="035" Name="pr3:Tambourim 1" ProgramChange="35"/>
+      <Patch Number="036" Name="pr3:Tambourine 2" ProgramChange="36"/>
+      <Patch Number="037" Name="pr3:Shekere 1" ProgramChange="37"/>
+      <Patch Number="038" Name="pr3:Crash Box 1" ProgramChange="38"/>
+      <Patch Number="039" Name="prc:Xylophone" ProgramChange="39"/>
+      <Patch Number="040" Name="syn:GardenStack1" ProgramChange="40"/>
+      <Patch Number="041" Name="sub:AcoustyLow" ProgramChange="41"/>
+      <Patch Number="042" Name="bas:Slap it 1" ProgramChange="42"/>
+      <Patch Number="043" Name="bas:Marc One Cho" ProgramChange="43"/>
+      <Patch Number="044" Name="syn:Click N Bass" ProgramChange="44"/>
+      <Patch Number="045" Name="pad:Artic White" ProgramChange="45"/>
+      <Patch Number="046" Name="org:Organ&amp;Bass" ProgramChange="46"/>
+      <Patch Number="047" Name="hh1:HiHats poly" ProgramChange="47"/>
+      <Patch Number="048" Name="sub:LowerMeBass2" ProgramChange="48"/>
+      <Patch Number="049" Name="arp:Beat U-know1" ProgramChange="49"/>
+      <Patch Number="050" Name="git:Riff me 3" ProgramChange="50"/>
+      <Patch Number="051" Name="bas:Sl+Pull1 F#1" ProgramChange="51"/>
+      <Patch Number="052" Name="bas:Sl+Pull2 F#1" ProgramChange="52"/>
+      <Patch Number="053" Name="pad:SolinaString" ProgramChange="53"/>
+      <Patch Number="054" Name="bas:Udo Frame I" ProgramChange="54"/>
+      <Patch Number="055" Name="git:Muted Meaty" ProgramChange="55"/>
+      <Patch Number="056" Name="syn:XyloSynth C" ProgramChange="56"/>
+      <Patch Number="057" Name="led:Funky Tree" ProgramChange="57"/>
+      <Patch Number="058" Name="bas:Spruce Leaf" ProgramChange="58"/>
+      <Patch Number="059" Name="vox:Botanic" ProgramChange="59"/>
+      <Patch Number="060" Name="syn:RnB Stab" ProgramChange="60"/>
+      <Patch Number="061" Name="sfx:FightDrum" ProgramChange="61"/>
+      <Patch Number="062" Name="led:Aurora Flute" ProgramChange="62"/>
+      <Patch Number="063" Name="syn:TumbaLa Bass" ProgramChange="63"/>
+      <Patch Number="064" Name="arp:T-Beat 2" ProgramChange="64"/>
+      <Patch Number="065" Name="pad:DestyFlower2" ProgramChange="65"/>
+      <Patch Number="066" Name="bas:Dorn @ Plant" ProgramChange="66"/>
+      <Patch Number="067" Name="pad:Faling Leave" ProgramChange="67"/>
+      <Patch Number="068" Name="git:Muted" ProgramChange="68"/>
+      <Patch Number="069" Name="syn:Djembe Toys" ProgramChange="69"/>
+      <Patch Number="070" Name="arp:Velo Garden1" ProgramChange="70"/>
+      <Patch Number="071" Name="vox:BG singers" ProgramChange="71"/>
+      <Patch Number="072" Name="bas:Spruce Color" ProgramChange="72"/>
+      <Patch Number="073" Name="pad:Romarin" ProgramChange="73"/>
+      <Patch Number="074" Name="led:Beat da bass" ProgramChange="74"/>
+      <Patch Number="075" Name="kb2:Garden keys" ProgramChange="75"/>
+      <Patch Number="076" Name="sub:Deep Forest" ProgramChange="76"/>
+      <Patch Number="077" Name="pad:VocaleOrgan" ProgramChange="77"/>
+      <Patch Number="078" Name="bas:Park II" ProgramChange="78"/>
+      <Patch Number="079" Name="syn:RnB Bell I" ProgramChange="79"/>
+      <Patch Number="080" Name="bas:JD-Stack I" ProgramChange="80"/>
+      <Patch Number="081" Name="bpm:Evening Vox" ProgramChange="81"/>
+      <Patch Number="082" Name="syn:Nippon" ProgramChange="82"/>
+      <Patch Number="083" Name="hit:Newish I" ProgramChange="83"/>
+      <Patch Number="084" Name="bas:OrganTube" ProgramChange="84"/>
+      <Patch Number="085" Name="arp:Cords Tree" ProgramChange="85"/>
+      <Patch Number="086" Name="syn:Big Section" ProgramChange="86"/>
+      <Patch Number="087" Name="pad:Bowed Angel" ProgramChange="87"/>
+      <Patch Number="088" Name="bas:Acacia Shade" ProgramChange="88"/>
+      <Patch Number="089" Name="pad:Artic Voices" ProgramChange="89"/>
+      <Patch Number="090" Name="syn:Pro-Teusion" ProgramChange="90"/>
+      <Patch Number="091" Name="bas:Acoustic" ProgramChange="91"/>
+      <Patch Number="092" Name="git:Muted Bliss" ProgramChange="92"/>
+      <Patch Number="093" Name="prc:Xylo-Udo" ProgramChange="93"/>
+      <Patch Number="094" Name="vox:Synthamike I" ProgramChange="94"/>
+      <Patch Number="095" Name="bas:Distal" ProgramChange="95"/>
+      <Patch Number="096" Name="arp:git C3-C6 1W" ProgramChange="96"/>
+      <Patch Number="097" Name="arp:git C1-C4 1W" ProgramChange="97"/>
+      <Patch Number="098" Name="arp:git C3-C6 2W" ProgramChange="98"/>
+      <Patch Number="099" Name="arp:git C1-C4 2W" ProgramChange="99"/>
+      <Patch Number="100" Name="arp:git C3-C6 3W" ProgramChange="100"/>
+      <Patch Number="101" Name="arp:git C1-C4 3W" ProgramChange="101"/>
+      <Patch Number="102" Name="arp:git C3-C6 4W" ProgramChange="102"/>
+      <Patch Number="103" Name="arp:git C1-C4 4W" ProgramChange="103"/>
+      <Patch Number="104" Name="arp:git C3-C6 5W" ProgramChange="104"/>
+      <Patch Number="105" Name="arp:git C1-C4 5W" ProgramChange="105"/>
+      <Patch Number="106" Name="arp:git C3-C6 6W" ProgramChange="106"/>
+      <Patch Number="107" Name="arp:git C1-C4 6W" ProgramChange="107"/>
+      <Patch Number="108" Name="arp:git C3-C6 7W" ProgramChange="108"/>
+      <Patch Number="109" Name="arp:git C1-C4 7W" ProgramChange="109"/>
+      <Patch Number="110" Name="arp:git C3-C6 8W" ProgramChange="110"/>
+      <Patch Number="111" Name="arp:git C1-C4 8W" ProgramChange="111"/>
+      <Patch Number="112" Name="arp:git C3-C6 3." ProgramChange="112"/>
+      <Patch Number="113" Name="arp:git C1-C4 3." ProgramChange="113"/>
+      <Patch Number="114" Name="arp:git C3-C6 4." ProgramChange="114"/>
+      <Patch Number="115" Name="arp:git C1-C4 4." ProgramChange="115"/>
+      <Patch Number="116" Name="arp:git C3-C6 5." ProgramChange="116"/>
+      <Patch Number="117" Name="arp:git C1-C4 5." ProgramChange="117"/>
+      <Patch Number="118" Name="arp:git C3-C6 6." ProgramChange="118"/>
+      <Patch Number="119" Name="arp:git C1-C4 6." ProgramChange="119"/>
+      <Patch Number="120" Name="arp:git C3-C6 7." ProgramChange="120"/>
+      <Patch Number="121" Name="arp:git C1-C4 7." ProgramChange="121"/>
+      <Patch Number="122" Name="arp:git C3-C6 8." ProgramChange="122"/>
+      <Patch Number="123" Name="arp:git C1-C4 8." ProgramChange="123"/>
+      <Patch Number="124" Name="arp:git C3-C6 9." ProgramChange="124"/>
+      <Patch Number="125" Name="arp:git C1-C4 9." ProgramChange="125"/>
+      <Patch Number="126" Name="arp:git C3-C6 T" ProgramChange="126"/>
+      <Patch Number="127" Name="arp:git C1-C4 T" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="Beat Garden Bank 2">
+      <Patch Number="000" Name="sfx:a cold wind" ProgramChange="0"/>
+      <Patch Number="001" Name="bas:Jungle GSM 2" ProgramChange="1"/>
+      <Patch Number="002" Name="arp:Film Chaser" ProgramChange="2"/>
+      <Patch Number="003" Name="git:Muted Rave" ProgramChange="3"/>
+      <Patch Number="004" Name="arp:T-Beat 3 Mwl" ProgramChange="4"/>
+      <Patch Number="005" Name="sfx:Djembe I" ProgramChange="5"/>
+      <Patch Number="006" Name="arp:Velo Garden3" ProgramChange="6"/>
+      <Patch Number="007" Name="hit:Newish IV" ProgramChange="7"/>
+      <Patch Number="008" Name="vox:Thin Leaves" ProgramChange="8"/>
+      <Patch Number="009" Name="bas:PWM Cajon" ProgramChange="9"/>
+      <Patch Number="010" Name="pad:Eastern Wind" ProgramChange="10"/>
+      <Patch Number="011" Name="syn:Ting Shells" ProgramChange="11"/>
+      <Patch Number="012" Name="bas:Udo Octave" ProgramChange="12"/>
+      <Patch Number="013" Name="pad:Phasing Tree" ProgramChange="13"/>
+      <Patch Number="014" Name="sfx:NovaZembla 2" ProgramChange="14"/>
+      <Patch Number="015" Name="syn:ScottsValley" ProgramChange="15"/>
+      <Patch Number="016" Name="bas:Jungle Nok" ProgramChange="16"/>
+      <Patch Number="017" Name="pad:PlantoVox" ProgramChange="17"/>
+      <Patch Number="018" Name="hit:Radio W Beat" ProgramChange="18"/>
+      <Patch Number="019" Name="pad:Tilleul" ProgramChange="19"/>
+      <Patch Number="020" Name="sfx:DSP chat" ProgramChange="20"/>
+      <Patch Number="021" Name="arp:MdWhl Trance" ProgramChange="21"/>
+      <Patch Number="022" Name="bas:SynthaConga" ProgramChange="22"/>
+      <Patch Number="023" Name="arp:PlasticWheel" ProgramChange="23"/>
+      <Patch Number="024" Name="arp:SlapYourKeys" ProgramChange="24"/>
+      <Patch Number="025" Name="sub:Pepples I" ProgramChange="25"/>
+      <Patch Number="026" Name="vox:Thinny-A" ProgramChange="26"/>
+      <Patch Number="027" Name="pr1:BPM LF0 2" ProgramChange="27"/>
+      <Patch Number="028" Name="pr1:BPM LF0 3" ProgramChange="28"/>
+      <Patch Number="029" Name="pr1:BPM LF0 4" ProgramChange="29"/>
+      <Patch Number="030" Name="pr1:BPM LF0 5" ProgramChange="30"/>
+      <Patch Number="031" Name="pr1:BPM LF0 6" ProgramChange="31"/>
+      <Patch Number="032" Name="bas:Mahony I" ProgramChange="32"/>
+      <Patch Number="033" Name="syn:Club Opener" ProgramChange="33"/>
+      <Patch Number="034" Name="arp:Com Plex." ProgramChange="34"/>
+      <Patch Number="035" Name="bas:Analoga Puls" ProgramChange="35"/>
+      <Patch Number="036" Name="arp:Beat O-Phat" ProgramChange="36"/>
+      <Patch Number="037" Name="sfx:Djembe Oct." ProgramChange="37"/>
+      <Patch Number="038" Name="vox:Next 2 Organ" ProgramChange="38"/>
+      <Patch Number="039" Name="arp:Stereo Movie" ProgramChange="39"/>
+      <Patch Number="040" Name="bas:SQR laChorus" ProgramChange="40"/>
+      <Patch Number="041" Name="pr2:BPM LFO 2" ProgramChange="41"/>
+      <Patch Number="042" Name="pr2:BPM LFO 3" ProgramChange="42"/>
+      <Patch Number="043" Name="pr2:BPM LFO 4" ProgramChange="43"/>
+      <Patch Number="044" Name="pr2:BPM LFO 5" ProgramChange="44"/>
+      <Patch Number="045" Name="pr2:BPM LFO 6" ProgramChange="45"/>
+      <Patch Number="046" Name="vox:Gardenlized" ProgramChange="46"/>
+      <Patch Number="047" Name="arp:SlapPull F#1" ProgramChange="47"/>
+      <Patch Number="048" Name="bas:Mahony II" ProgramChange="48"/>
+      <Patch Number="049" Name="syn:RnB Bell IV" ProgramChange="49"/>
+      <Patch Number="050" Name="arp:Beat Chord 1" ProgramChange="50"/>
+      <Patch Number="051" Name="pad:Epicea" ProgramChange="51"/>
+      <Patch Number="052" Name="bas:Djembe Udo I" ProgramChange="52"/>
+      <Patch Number="053" Name="pad:Sweep it up" ProgramChange="53"/>
+      <Patch Number="054" Name="sub:Pepples II" ProgramChange="54"/>
+      <Patch Number="055" Name="pr3:BPM LFO 2" ProgramChange="55"/>
+      <Patch Number="056" Name="pr3:BPM LFO 3" ProgramChange="56"/>
+      <Patch Number="057" Name="pr3:BPM LFO 4" ProgramChange="57"/>
+      <Patch Number="058" Name="pr3:BPM LFO 5" ProgramChange="58"/>
+      <Patch Number="059" Name="pr3:BPM LFO 6" ProgramChange="59"/>
+      <Patch Number="060" Name="bas:Cajon&amp;Udo" ProgramChange="60"/>
+      <Patch Number="061" Name="syn:XyloSynth C" ProgramChange="61"/>
+      <Patch Number="062" Name="arp:Epicea Bass" ProgramChange="62"/>
+      <Patch Number="063" Name="syn:Obie CanObie" ProgramChange="63"/>
+      <Patch Number="064" Name="bas:Mahony III" ProgramChange="64"/>
+      <Patch Number="065" Name="vox:Deep Aahs I" ProgramChange="65"/>
+      <Patch Number="066" Name="arp:Tuber B Mute" ProgramChange="66"/>
+      <Patch Number="067" Name="bas:Deep Trance" ProgramChange="67"/>
+      <Patch Number="068" Name="bas:TumbaConga" ProgramChange="68"/>
+      <Patch Number="069" Name="arp:Pick a Synth" ProgramChange="69"/>
+      <Patch Number="070" Name="pad:Faling Leave" ProgramChange="70"/>
+      <Patch Number="071" Name="sfx:Dig Scratch1" ProgramChange="71"/>
+      <Patch Number="072" Name="sfx:Dig Scratch2" ProgramChange="72"/>
+      <Patch Number="073" Name="led:Sunflower" ProgramChange="73"/>
+      <Patch Number="074" Name="bas:Click a Bass" ProgramChange="74"/>
+      <Patch Number="075" Name="vox:Hi Lady" ProgramChange="75"/>
+      <Patch Number="076" Name="led:Hi Trumpet" ProgramChange="76"/>
+      <Patch Number="077" Name="arp:Cyber Plant." ProgramChange="77"/>
+      <Patch Number="078" Name="bpm:Alien Park" ProgramChange="78"/>
+      <Patch Number="079" Name="syn:XyloSynth B" ProgramChange="79"/>
+      <Patch Number="080" Name="bas:Cajon MarkII" ProgramChange="80"/>
+      <Patch Number="081" Name="sfx:starfighter" ProgramChange="81"/>
+      <Patch Number="082" Name="vox:FlowerSmell" ProgramChange="82"/>
+      <Patch Number="083" Name="bas:Saw laChorus" ProgramChange="83"/>
+      <Patch Number="084" Name="bas:Djembe Frame" ProgramChange="84"/>
+      <Patch Number="085" Name="pad:Vocoderlon" ProgramChange="85"/>
+      <Patch Number="086" Name="git:Muted Flanga" ProgramChange="86"/>
+      <Patch Number="087" Name="hit:Newish Octav" ProgramChange="87"/>
+      <Patch Number="088" Name="arp:Seek Quence" ProgramChange="88"/>
+      <Patch Number="089" Name="syn:Obie Plant" ProgramChange="89"/>
+      <Patch Number="090" Name="syn:My BelloBell" ProgramChange="90"/>
+      <Patch Number="091" Name="sfx:Tuned Frame" ProgramChange="91"/>
+      <Patch Number="092" Name="arp:Beat U-know2" ProgramChange="92"/>
+      <Patch Number="093" Name="pad:Lavende" ProgramChange="93"/>
+      <Patch Number="094" Name="arp:Velo Garden3" ProgramChange="94"/>
+      <Patch Number="095" Name="syn:Moveda Floor" ProgramChange="95"/>
+      <Patch Number="096" Name="led:Mini Plant" ProgramChange="96"/>
+      <Patch Number="097" Name="syn:Iceland" ProgramChange="97"/>
+      <Patch Number="098" Name="sfx:Beat Field 3" ProgramChange="98"/>
+      <Patch Number="099" Name="sfx:Beat Field 4" ProgramChange="99"/>
+      <Patch Number="100" Name="arp:Turn a knob." ProgramChange="100"/>
+      <Patch Number="101" Name="sn6:Elec SN 5 St" ProgramChange="101"/>
+      <Patch Number="102" Name="sn6:Elec SN 6 St" ProgramChange="102"/>
+      <Patch Number="103" Name="sn6:Elec SN 7 St" ProgramChange="103"/>
+      <Patch Number="104" Name="sn1:Snares 1 FX" ProgramChange="104"/>
+      <Patch Number="105" Name="sn1:Snares 2 FX" ProgramChange="105"/>
+      <Patch Number="106" Name="bas:Slowa Deep" ProgramChange="106"/>
+      <Patch Number="107" Name="sfx:Dig Scratch4" ProgramChange="107"/>
+      <Patch Number="108" Name="sfx:Dig Scratch5" ProgramChange="108"/>
+      <Patch Number="109" Name="bas:Lower Swing" ProgramChange="109"/>
+      <Patch Number="110" Name="bas:Shake Garden" ProgramChange="110"/>
+      <Patch Number="111" Name="amb:Dawning" ProgramChange="111"/>
+      <Patch Number="112" Name="sfx:Beat Field 5" ProgramChange="112"/>
+      <Patch Number="113" Name="sfx:Beat Field 6" ProgramChange="113"/>
+      <Patch Number="114" Name="bas:Ace of Saw" ProgramChange="114"/>
+      <Patch Number="115" Name="pad:Meta Macro" ProgramChange="115"/>
+      <Patch Number="116" Name="git:Plectrum-A" ProgramChange="116"/>
+      <Patch Number="117" Name="bas:RnB Flower 1" ProgramChange="117"/>
+      <Patch Number="118" Name="git:Muted Switch" ProgramChange="118"/>
+      <Patch Number="119" Name="git:Plectrum-F" ProgramChange="119"/>
+      <Patch Number="120" Name="bas:Puls Number5" ProgramChange="120"/>
+      <Patch Number="121" Name="sub:SinusMoogy" ProgramChange="121"/>
+      <Patch Number="122" Name="bpm:E-mu Garden" ProgramChange="122"/>
+      <Patch Number="123" Name="git:Plectrum-Q" ProgramChange="123"/>
+      <Patch Number="124" Name="bas:RnB Flower 2" ProgramChange="124"/>
+      <Patch Number="125" Name="kit:Riff set" ProgramChange="125"/>
+      <Patch Number="126" Name="syn:RnB BellXylo" ProgramChange="126"/>
+    </PatchNameList>
+    <PatchNameList Name="Beat Garden Bank 3">
+      <Patch Number="000" Name="bas:Marc One" ProgramChange="0"/>
+      <Patch Number="001" Name="bas:Marc Three" ProgramChange="1"/>
+      <Patch Number="002" Name="bas:Marc &amp; Synth" ProgramChange="2"/>
+      <Patch Number="003" Name="bas:Marc Six" ProgramChange="3"/>
+      <Patch Number="004" Name="bas:Marc Five" ProgramChange="4"/>
+      <Patch Number="005" Name="bas:Marc Middy" ProgramChange="5"/>
+      <Patch Number="006" Name="sfx:Alien Steps" ProgramChange="6"/>
+      <Patch Number="007" Name="bas:Pick Chorus" ProgramChange="7"/>
+      <Patch Number="008" Name="bas:Sweep Leaf" ProgramChange="8"/>
+      <Patch Number="009" Name="arp:T-Beat 4 Mwl" ProgramChange="9"/>
+      <Patch Number="010" Name="bas:JD-Stack II" ProgramChange="10"/>
+      <Patch Number="011" Name="bas:JD-Stack III" ProgramChange="11"/>
+      <Patch Number="012" Name="bas:JD-Stack IV" ProgramChange="12"/>
+      <Patch Number="013" Name="bas:JD-Stack V" ProgramChange="13"/>
+      <Patch Number="014" Name="bas:JD-Stack VI" ProgramChange="14"/>
+      <Patch Number="015" Name="bas:JD-Stack VII" ProgramChange="15"/>
+      <Patch Number="016" Name="bas:JD-StackVIII" ProgramChange="16"/>
+      <Patch Number="017" Name="bas:Distal II" ProgramChange="17"/>
+      <Patch Number="018" Name="bas:SpeakFlower" ProgramChange="18"/>
+      <Patch Number="019" Name="bas:Deja Vu I" ProgramChange="19"/>
+      <Patch Number="020" Name="pad:E-motion" ProgramChange="20"/>
+      <Patch Number="021" Name="bas:Coniferae" ProgramChange="21"/>
+      <Patch Number="022" Name="bas:Vibirnum" ProgramChange="22"/>
+      <Patch Number="023" Name="bas:T-Beat" ProgramChange="23"/>
+      <Patch Number="024" Name="bas:Elm Tree" ProgramChange="24"/>
+      <Patch Number="025" Name="bas:AttackChorus" ProgramChange="25"/>
+      <Patch Number="026" Name="bas:Cactus I" ProgramChange="26"/>
+      <Patch Number="027" Name="bas:Acous-Syn 1" ProgramChange="27"/>
+      <Patch Number="028" Name="bas:CajonFrame" ProgramChange="28"/>
+      <Patch Number="029" Name="sfx:digital H2O" ProgramChange="29"/>
+      <Patch Number="030" Name="arp:Velo Garden2" ProgramChange="30"/>
+      <Patch Number="031" Name="hit:Newish Phat" ProgramChange="31"/>
+      <Patch Number="032" Name="bas:Marc One Two" ProgramChange="32"/>
+      <Patch Number="033" Name="sub:Dark Earth" ProgramChange="33"/>
+      <Patch Number="034" Name="bas:Creamy Palm" ProgramChange="34"/>
+      <Patch Number="035" Name="sub:Underclick." ProgramChange="35"/>
+      <Patch Number="036" Name="bas:Four Voice" ProgramChange="36"/>
+      <Patch Number="037" Name="bas:Cactus II" ProgramChange="37"/>
+      <Patch Number="038" Name="bas:Acous-Syn 2" ProgramChange="38"/>
+      <Patch Number="039" Name="sub:PulsyMoogy" ProgramChange="39"/>
+      <Patch Number="040" Name="prc:Tuned Cajon" ProgramChange="40"/>
+      <Patch Number="041" Name="bas:Cajon Stack" ProgramChange="41"/>
+      <Patch Number="042" Name="pad:Bowed Flower" ProgramChange="42"/>
+      <Patch Number="043" Name="sfx:Huh of Jon" ProgramChange="43"/>
+      <Patch Number="044" Name="sfx:Yell of Jon" ProgramChange="44"/>
+      <Patch Number="045" Name="sfx:Nice drink!" ProgramChange="45"/>
+      <Patch Number="046" Name="sfx:Tuned Tube" ProgramChange="46"/>
+      <Patch Number="047" Name="vox:FemalaSpace" ProgramChange="47"/>
+      <Patch Number="048" Name="bas:Spruce Robes" ProgramChange="48"/>
+      <Patch Number="049" Name="bas:Deja Vu II" ProgramChange="49"/>
+      <Patch Number="050" Name="bas:PhataTubes" ProgramChange="50"/>
+      <Patch Number="051" Name="bas:Cactus III" ProgramChange="51"/>
+      <Patch Number="052" Name="sub:Dark Forest" ProgramChange="52"/>
+      <Patch Number="053" Name="bas:Acous-Syn 3" ProgramChange="53"/>
+      <Patch Number="054" Name="bas:Jungle GSM 3" ProgramChange="54"/>
+      <Patch Number="055" Name="vox:Deep Aahs II" ProgramChange="55"/>
+      <Patch Number="056" Name="sfx:Tumba Tuned" ProgramChange="56"/>
+      <Patch Number="057" Name="sfx:Tuned Shells" ProgramChange="57"/>
+      <Patch Number="058" Name="sfx:Doppler FX 1" ProgramChange="58"/>
+      <Patch Number="059" Name="sfx:Doppler FX 2" ProgramChange="59"/>
+      <Patch Number="060" Name="sfx:Groove Click" ProgramChange="60"/>
+      <Patch Number="061" Name="vox:ThinnyHigh" ProgramChange="61"/>
+      <Patch Number="062" Name="sfx:GardenChimes" ProgramChange="62"/>
+      <Patch Number="063" Name="pad:Stack 4 U" ProgramChange="63"/>
+      <Patch Number="064" Name="bas:Spruce Top" ProgramChange="64"/>
+      <Patch Number="065" Name="bas:AcaciaChorus" ProgramChange="65"/>
+      <Patch Number="066" Name="pad:Reso Fields" ProgramChange="66"/>
+      <Patch Number="067" Name="bas:AttackDeeper" ProgramChange="67"/>
+      <Patch Number="068" Name="sub:Deep Pedal" ProgramChange="68"/>
+      <Patch Number="069" Name="bas:Djembe UdoII" ProgramChange="69"/>
+      <Patch Number="070" Name="sfx:La La synth" ProgramChange="70"/>
+      <Patch Number="071" Name="sfx:X-LoFi Snare" ProgramChange="71"/>
+      <Patch Number="072" Name="sfx:X-Voca Snare" ProgramChange="72"/>
+      <Patch Number="073" Name="sfx:X-Meta Snare" ProgramChange="73"/>
+      <Patch Number="074" Name="sfx:Door Snare" ProgramChange="74"/>
+      <Patch Number="075" Name="sfx:Broken Door" ProgramChange="75"/>
+      <Patch Number="076" Name="sfx:NovaZembla" ProgramChange="76"/>
+      <Patch Number="077" Name="vox:ThinnyOrgan" ProgramChange="77"/>
+      <Patch Number="078" Name="sfx:Doppler FX 3" ProgramChange="78"/>
+      <Patch Number="079" Name="sfx:Doppler FX 4" ProgramChange="79"/>
+      <Patch Number="080" Name="arp:Puls Plant" ProgramChange="80"/>
+      <Patch Number="081" Name="bas:Cactus IV" ProgramChange="81"/>
+      <Patch Number="082" Name="bas:Organ&amp;Udo" ProgramChange="82"/>
+      <Patch Number="083" Name="bas:Acous-Syn 6" ProgramChange="83"/>
+      <Patch Number="084" Name="bas:Udo" ProgramChange="84"/>
+      <Patch Number="085" Name="vox:FemalaSynth" ProgramChange="85"/>
+      <Patch Number="086" Name="sfx:SF bug" ProgramChange="86"/>
+      <Patch Number="087" Name="sfx:SF bug ST" ProgramChange="87"/>
+      <Patch Number="088" Name="sfx:FightDrum M" ProgramChange="88"/>
+      <Patch Number="089" Name="vox:A Big Aah" ProgramChange="89"/>
+      <Patch Number="090" Name="syn:OvertoneBell" ProgramChange="90"/>
+      <Patch Number="091" Name="led:Garden Flute" ProgramChange="91"/>
+      <Patch Number="092" Name="prc:Frame Drum" ProgramChange="92"/>
+      <Patch Number="093" Name="prc:Tuned Conga" ProgramChange="93"/>
+      <Patch Number="094" Name="prc:TunedQuinto1" ProgramChange="94"/>
+      <Patch Number="095" Name="prc:TunedQuinto2" ProgramChange="95"/>
+      <Patch Number="096" Name="bas:Cactus V" ProgramChange="96"/>
+      <Patch Number="097" Name="bas:5th Organ" ProgramChange="97"/>
+      <Patch Number="098" Name="bas:Acous-Syn 7" ProgramChange="98"/>
+      <Patch Number="099" Name="sub:SawyMoogy" ProgramChange="99"/>
+      <Patch Number="100" Name="vox:FemalaHiss" ProgramChange="100"/>
+      <Patch Number="101" Name="syn:RnB Bell II" ProgramChange="101"/>
+      <Patch Number="102" Name="prc:Tumba Wuha" ProgramChange="102"/>
+      <Patch Number="103" Name="prc:Tumba Plop" ProgramChange="103"/>
+      <Patch Number="104" Name="prc:TunedDjembe1" ProgramChange="104"/>
+      <Patch Number="105" Name="prc:TunedDjembe2" ProgramChange="105"/>
+      <Patch Number="106" Name="prc:Tuned Udo FX" ProgramChange="106"/>
+      <Patch Number="107" Name="prc:Tuned Sizzle" ProgramChange="107"/>
+      <Patch Number="108" Name="prc:Tuned China" ProgramChange="108"/>
+      <Patch Number="109" Name="prc:Tuned Sleigh" ProgramChange="109"/>
+      <Patch Number="110" Name="syn:Snaro Wood" ProgramChange="110"/>
+      <Patch Number="111" Name="sfx:Tumba &amp; More" ProgramChange="111"/>
+      <Patch Number="112" Name="sub:Wood" ProgramChange="112"/>
+      <Patch Number="113" Name="bas:CajonSawer" ProgramChange="113"/>
+      <Patch Number="114" Name="bas:Udo Frame II" ProgramChange="114"/>
+      <Patch Number="115" Name="vox:FemalaDream" ProgramChange="115"/>
+      <Patch Number="116" Name="sfx:DeepSpring 1" ProgramChange="116"/>
+      <Patch Number="117" Name="sfx:DeepSpring 2" ProgramChange="117"/>
+      <Patch Number="118" Name="bas:Park I" ProgramChange="118"/>
+      <Patch Number="119" Name="hit:Radio W Big" ProgramChange="119"/>
+      <Patch Number="120" Name="syn:Bass a Wood" ProgramChange="120"/>
+      <Patch Number="121" Name="prc:Tuned BassDr" ProgramChange="121"/>
+      <Patch Number="122" Name="pad:Eucalyptus" ProgramChange="122"/>
+      <Patch Number="123" Name="arp:Hi Tech Tree" ProgramChange="123"/>
+      <Patch Number="124" Name="syn:RnB Bell III" ProgramChange="124"/>
+      <Patch Number="125" Name="sfx:NovaZembla 3" ProgramChange="125"/>
+      <Patch Number="126" Name="vox:OrganVocals" ProgramChange="126"/>
+      <Patch Number="127" Name=":Template" ProgramChange="127"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

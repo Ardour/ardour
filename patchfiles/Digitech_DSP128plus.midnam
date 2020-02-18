@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>at0m</Author>
+  <!-- The author's device is set to channel 15.
+     Customize accordingly in ChannelNameSetAssign and AvailableChannel below.
+-->
+  <MasterDeviceNames>
+    <Manufacturer>DigiTech</Manufacturer>
+    <Model>DSP128plus</Model>
+    <CustomDeviceMode Name="DigiTech DSP128+">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="15" NameSet="Presets"/>
+      </ChannelNameSetAssignments>
+      <!--      <UsesControlNameList Name="Controls"/> -->
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Presets">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="false"/>
+        <AvailableChannel Channel="2" Available="false"/>
+        <AvailableChannel Channel="3" Available="false"/>
+        <AvailableChannel Channel="4" Available="false"/>
+        <AvailableChannel Channel="5" Available="false"/>
+        <AvailableChannel Channel="6" Available="false"/>
+        <AvailableChannel Channel="7" Available="false"/>
+        <AvailableChannel Channel="8" Available="false"/>
+        <AvailableChannel Channel="9" Available="false"/>
+        <AvailableChannel Channel="10" Available="false"/>
+        <AvailableChannel Channel="11" Available="false"/>
+        <AvailableChannel Channel="12" Available="false"/>
+        <AvailableChannel Channel="13" Available="false"/>
+        <AvailableChannel Channel="14" Available="false"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="false"/>
+      </AvailableForChannels>
+      <PatchBank Name="FACTORY">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="FACTORY"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <PatchNameList Name="FACTORY">
+      <Patch Number="001" Name="Large Room + Delay 1" ProgramChange="0"/>
+      <Patch Number="002" Name="Large Room + Delay 2" ProgramChange="1"/>
+      <Patch Number="003" Name="Large Room + Delay 3" ProgramChange="2"/>
+      <Patch Number="004" Name="Large Room + Chorus 1" ProgramChange="3"/>
+      <Patch Number="005" Name="Large Room + Chorus 2" ProgramChange="4"/>
+      <Patch Number="006" Name="Large Room + Chorus 3" ProgramChange="5"/>
+      <Patch Number="007" Name="Large Room + Flange 1" ProgramChange="6"/>
+      <Patch Number="008" Name="Large Room + Flange 2" ProgramChange="7"/>
+      <Patch Number="009" Name="Large Room + Flange 3" ProgramChange="8"/>
+      <Patch Number="010" Name="Large Room + Chorus + Delay 1" ProgramChange="9"/>
+      <Patch Number="011" Name="Large Room + Chorus + Delay 2" ProgramChange="10"/>
+      <Patch Number="012" Name="Large Room + Chorus + Delay 3" ProgramChange="11"/>
+      <Patch Number="013" Name="Large Room + Chorus + Delay 4" ProgramChange="12"/>
+      <Patch Number="014" Name="Large Room + Flange + Delay 1" ProgramChange="13"/>
+      <Patch Number="015" Name="Large Room + Flange + Delay 2" ProgramChange="14"/>
+      <Patch Number="016" Name="Large Room + Flange + Delay 3" ProgramChange="15"/>
+      <Patch Number="017" Name="Medium Room + Delay 1" ProgramChange="16"/>
+      <Patch Number="018" Name="Medium Room + Delay 2" ProgramChange="17"/>
+      <Patch Number="019" Name="Medium Room + Delay 3" ProgramChange="18"/>
+      <Patch Number="020" Name="Medium Room + Chorus 1" ProgramChange="19"/>
+      <Patch Number="021" Name="Medium Room + Chorus 2" ProgramChange="20"/>
+      <Patch Number="022" Name="Medium Room + Chorus 3" ProgramChange="21"/>
+      <Patch Number="023" Name="Medium Room + Chorus 4" ProgramChange="22"/>
+      <Patch Number="024" Name="Medium Room + Flange 1" ProgramChange="23"/>
+      <Patch Number="025" Name="Medium Room + Flange 2" ProgramChange="24"/>
+      <Patch Number="026" Name="Medium Room + Flange 3" ProgramChange="25"/>
+      <Patch Number="027" Name="Medium Room + Chorus + Delay 1" ProgramChange="26"/>
+      <Patch Number="028" Name="Medium Room + Chorus + Delay 2" ProgramChange="27"/>
+      <Patch Number="029" Name="Medium Room + Chorus + Delay 3" ProgramChange="28"/>
+      <Patch Number="030" Name="Medium Room + Chorus + Delay 4" ProgramChange="29"/>
+      <Patch Number="031" Name="Medium Room + Flange + Delay 1" ProgramChange="30"/>
+      <Patch Number="032" Name="Medium Room + Flange + Delay 2" ProgramChange="31"/>
+      <Patch Number="033" Name="Medium Room + Flange + Delay 3" ProgramChange="32"/>
+      <Patch Number="034" Name="Medium Room + Flange + Delay 4" ProgramChange="33"/>
+      <Patch Number="035" Name="Small Room + Delay 1" ProgramChange="34"/>
+      <Patch Number="036" Name="Small Room + Delay 2" ProgramChange="35"/>
+      <Patch Number="037" Name="Small Room + Chorus 1" ProgramChange="36"/>
+      <Patch Number="038" Name="Small Room + Chorus 2" ProgramChange="37"/>
+      <Patch Number="039" Name="Small Room + Chorus 3" ProgramChange="38"/>
+      <Patch Number="040" Name="Small Room + Flange 1" ProgramChange="39"/>
+      <Patch Number="041" Name="Small Room + Flange 2" ProgramChange="40"/>
+      <Patch Number="042" Name="Small Room + Flange 3" ProgramChange="41"/>
+      <Patch Number="043" Name="Small Room + Chorus + Delay 1" ProgramChange="42"/>
+      <Patch Number="044" Name="Small Room + Chorus + Delay 2" ProgramChange="43"/>
+      <Patch Number="045" Name="Small Room + Chorus + Delay 3" ProgramChange="44"/>
+      <Patch Number="046" Name="Small Room + Chorus + Delay 4" ProgramChange="45"/>
+      <Patch Number="047" Name="Small Room + Flange + Delay 1" ProgramChange="46"/>
+      <Patch Number="048" Name="Small Room + Flange + Delay 2" ProgramChange="47"/>
+      <Patch Number="049" Name="Small Room + Flange + Delay 3" ProgramChange="48"/>
+      <Patch Number="050" Name="Gated Verb 1" ProgramChange="49"/>
+      <Patch Number="051" Name="Gated Verb 2" ProgramChange="50"/>
+      <Patch Number="052" Name="Gated Verb 3" ProgramChange="51"/>
+      <Patch Number="053" Name="Gated Verb 4" ProgramChange="52"/>
+      <Patch Number="054" Name="Gated Verb 5" ProgramChange="53"/>
+      <Patch Number="055" Name="Gated Verb 6" ProgramChange="54"/>
+      <Patch Number="056" Name="Gated Verb + Delay 1" ProgramChange="55"/>
+      <Patch Number="057" Name="Gated Verb + Delay 2" ProgramChange="56"/>
+      <Patch Number="058" Name="Gated Verb + Delay 3" ProgramChange="57"/>
+      <Patch Number="059" Name="Gated Verb + Delay 4" ProgramChange="58"/>
+      <Patch Number="060" Name="Reverse Reverb 1" ProgramChange="59"/>
+      <Patch Number="061" Name="Reverse Reverb 2" ProgramChange="60"/>
+      <Patch Number="062" Name="Reverse Reverb 3" ProgramChange="61"/>
+      <Patch Number="063" Name="Reverse Reverb 4" ProgramChange="62"/>
+      <Patch Number="064" Name="Reverse Reverb 5" ProgramChange="63"/>
+      <Patch Number="065" Name="Reverse Reverb 6" ProgramChange="64"/>
+      <Patch Number="066" Name="Reverse Reverb + Delay 1" ProgramChange="65"/>
+      <Patch Number="067" Name="Reverse Reverb + Delay 2" ProgramChange="66"/>
+      <Patch Number="068" Name="Reverse Reverb + Delay 3" ProgramChange="67"/>
+      <Patch Number="069" Name="Reverse Reverb + Delay 4" ProgramChange="68"/>
+      <Patch Number="070" Name="Hall 01" ProgramChange="69"/>
+      <Patch Number="071" Name="Hall 02" ProgramChange="70"/>
+      <Patch Number="072" Name="Hall 03" ProgramChange="71"/>
+      <Patch Number="073" Name="Hall 04" ProgramChange="72"/>
+      <Patch Number="074" Name="Hall 05" ProgramChange="73"/>
+      <Patch Number="075" Name="Hall 06" ProgramChange="74"/>
+      <Patch Number="076" Name="Hall 07" ProgramChange="75"/>
+      <Patch Number="077" Name="Hall 08" ProgramChange="76"/>
+      <Patch Number="078" Name="Hall 09" ProgramChange="77"/>
+      <Patch Number="079" Name="Hall 10" ProgramChange="78"/>
+      <Patch Number="080" Name="Hall 11" ProgramChange="79"/>
+      <Patch Number="081" Name="Hall 12" ProgramChange="80"/>
+      <Patch Number="082" Name="Hall 13" ProgramChange="81"/>
+      <Patch Number="083" Name="Hall 14" ProgramChange="82"/>
+      <Patch Number="084" Name="Hall 15" ProgramChange="83"/>
+      <Patch Number="085" Name="Hall 16" ProgramChange="84"/>
+      <Patch Number="086" Name="Hall 17" ProgramChange="85"/>
+      <Patch Number="087" Name="Hall 18" ProgramChange="86"/>
+      <Patch Number="088" Name="Hall 19" ProgramChange="87"/>
+      <Patch Number="089" Name="Hall 20" ProgramChange="88"/>
+      <Patch Number="090" Name="Multi-Tap Delay 1" ProgramChange="89"/>
+      <Patch Number="091" Name="Multi-Tap Delay 2" ProgramChange="90"/>
+      <Patch Number="092" Name="Multi-Tap Delay 3" ProgramChange="91"/>
+      <Patch Number="093" Name="Multi-Tap Delay 4" ProgramChange="92"/>
+      <Patch Number="094" Name="Multi-Tap Delay + Chorus 1" ProgramChange="93"/>
+      <Patch Number="095" Name="Multi-Tap Delay + Chorus 2" ProgramChange="94"/>
+      <Patch Number="096" Name="Multi-Tap Delay + Chorus 3" ProgramChange="95"/>
+      <Patch Number="097" Name="Multi-Tap Delay + Flange 1" ProgramChange="96"/>
+      <Patch Number="098" Name="Multi-Tap Delay + Flange 2" ProgramChange="97"/>
+      <Patch Number="099" Name="Multi-Tap Delay + Flange 3" ProgramChange="98"/>
+      <Patch Number="100" Name="ParamEQ 1" ProgramChange="99"/>
+      <Patch Number="101" Name="ParamEQ 2" ProgramChange="100"/>
+      <Patch Number="102" Name="ParamEQ 3" ProgramChange="101"/>
+      <Patch Number="103" Name="ParamEQ + Delay 1" ProgramChange="102"/>
+      <Patch Number="104" Name="ParamEQ + Delay 2" ProgramChange="103"/>
+      <Patch Number="105" Name="ParamEQ + Delay 3" ProgramChange="104"/>
+      <Patch Number="106" Name="ParamEQ + Chorus 1" ProgramChange="105"/>
+      <Patch Number="107" Name="ParamEQ + Chorus 2" ProgramChange="106"/>
+      <Patch Number="108" Name="ParamEQ + Chorus 3" ProgramChange="107"/>
+      <Patch Number="109" Name="ParamEQ + Flange 1" ProgramChange="108"/>
+      <Patch Number="110" Name="ParamEQ + Flange 2" ProgramChange="109"/>
+      <Patch Number="111" Name="ParamEQ + Flange 3" ProgramChange="110"/>
+      <Patch Number="112" Name="ParamEQ + Chorus + Delay 1" ProgramChange="111"/>
+      <Patch Number="113" Name="ParamEQ + Chorus + Delay 2" ProgramChange="112"/>
+      <Patch Number="114" Name="ParamEQ + Chorus + Delay 3" ProgramChange="113"/>
+      <Patch Number="115" Name="ParamEQ + Chorus + Delay 4" ProgramChange="114"/>
+      <Patch Number="116" Name="ParamEQ + Flange + Delay 1" ProgramChange="115"/>
+      <Patch Number="117" Name="ParamEQ + Flange + Delay 2" ProgramChange="116"/>
+      <Patch Number="118" Name="ParamEQ + Flange + Delay 3" ProgramChange="117"/>
+      <Patch Number="119" Name="ParamEQ + Flange + Delay 4" ProgramChange="118"/>
+      <Patch Number="120" Name="Graphic EQ 1" ProgramChange="119"/>
+      <Patch Number="121" Name="Graphic EQ 2" ProgramChange="120"/>
+      <Patch Number="122" Name="Graphic EQ 3" ProgramChange="121"/>
+      <Patch Number="123" Name="Graphic EQ 4" ProgramChange="122"/>
+      <Patch Number="124" Name="Graphic EQ 5" ProgramChange="123"/>
+      <Patch Number="125" Name="Graphic EQ 6" ProgramChange="124"/>
+      <Patch Number="126" Name="Graphic EQ 7" ProgramChange="125"/>
+      <Patch Number="127" Name="Mute" ProgramChange="126"/>
+      <Patch Number="128" Name="Dry" ProgramChange="127"/>
+    </PatchNameList>
+    <!-- ControlChanges for this have to be assigned by the user. I'm still undecided as to what I want to control and how. Until then, this section below is commented out.-->
+    <!--        <ControlNameList Name="Controls">
+            <Control Type="7bit" Number="12" Name="1 Effect Type"/>
+            <Control Type="7bit" Number="13" Name="1 Bypass"/>
+            <Control Type="7bit" Number="14" Name="1 Pre Delay Knob (Time/Speed)"/>
+            <Control Type="7bit" Number="15" Name="1 Decay Knob (Feedback/Depth)"/>
+            <Control Type="7bit" Number="16" Name="1 Variation Knob (Liveliness)"/>
+            <Control Type="7bit" Number="17" Name="1 Tempo"/>
+            <Control Type="7bit" Number="26" Name="1 Effect Mix"/>
+            <Control Type="7bit" Number="19" Name="2 Effect Type"/>
+            <Control Type="7bit" Number="20" Name="2 Bypass"/>
+            <Control Type="7bit" Number="21" Name="2 Pre Delay Knob (Time/Speed)"/>
+            <Control Type="7bit" Number="22" Name="2 Decay Knob (Feedback/Depth)"/>
+            <Control Type="7bit" Number="23" Name="2 Variation Knob (Liveliness)"/>
+            <Control Type="7bit" Number="24" Name="2 Tempo"/>
+            <Control Type="7bit" Number="27" Name="2 Effect Mix"/>
+            <Control Type="7bit" Number="28" Name="Effect Routing "/>
+        </ControlNameList>
+        -->
+  </MasterDeviceNames>
+</MIDINameDocument>

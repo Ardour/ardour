@@ -1,21 +1,20 @@
 /*
-    Copyright (C) 2015 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2015-2019 Paul Davis <paul@linuxaudiosystems.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include "gtkmm/stock.h"
 
@@ -161,21 +160,37 @@ DuplicateRouteDialog::on_response (int response)
 	TrackSelection tracks  (PublicEditor::instance().get_selection().tracks);
 	int err = 0;
 
+	/* Track Selection should be sorted into presentation order before
+	 * duplicating, so that new tracks appear in same order as the
+	 * originals.
+	 */
+
+	StripableList sl;
+
 	for (TrackSelection::iterator t = tracks.begin(); t != tracks.end(); ++t) {
-
 		RouteUI* rui = dynamic_cast<RouteUI*> (*t);
+		if (rui) {
+			sl.push_back (rui->route());
+		}
+	}
 
-		if (!rui) {
-			/* some other type of timeaxis view, not a route */
+	sl.sort (Stripable::Sorter());
+
+	for (StripableList::iterator s = sl.begin(); s != sl.end(); ++s) {
+
+		boost::shared_ptr<Route> r;
+
+		if ((r = boost::dynamic_pointer_cast<Route> (*s)) == 0) {
+			/* some other type of Stripable, not a route */
 			continue;
 		}
 
-		if (rui->route()->is_master() || rui->route()->is_monitor()) {
+		if ((*s)->is_master() || (*s)->is_monitor()) {
 			/* no option to duplicate these */
 			continue;
 		}
 
-		XMLNode& state (rui->route()->get_state());
+		XMLNode& state (r->get_state());
 		RouteList rl = _session->new_route_from_template (cnt, ARDOUR_UI::instance()->translate_order (insert_at()), state, std::string(), playlist_action);
 
 		/* normally the state node would be added to a parent, and

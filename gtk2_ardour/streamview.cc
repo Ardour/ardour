@@ -1,20 +1,28 @@
 /*
-    Copyright (C) 2001, 2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2005-2019 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2006-2007 Jesse Chappell <jesse@essej.net>
+ * Copyright (C) 2006-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2007 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2014-2015 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016 Nick Mainsbridge <mainsbridge@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cmath>
 
@@ -158,7 +166,7 @@ StreamView::set_samples_per_pixel (double fpp)
 		recbox.rectangle->set_x1 (xend);
 	}
 
-	update_coverage_samples ();
+	update_coverage_frame ();
 
 	return 0;
 }
@@ -296,7 +304,7 @@ StreamView::playlist_layered (boost::weak_ptr<Track> wtr)
 	if (_layer_display == Stacked) {
 		update_contents_height ();
 		/* tricky. playlist_changed() does this as well, and its really inefficient. */
-		update_coverage_samples ();
+		update_coverage_frame ();
 	} else {
 		/* layering has probably been modified. reflect this in the canvas. */
 		layer_regions();
@@ -324,14 +332,14 @@ StreamView::playlist_switched (boost::weak_ptr<Track> wtr)
 	/* update layers count and the y positions and heights of our regions */
 	_layers = tr->playlist()->top_layer() + 1;
 	update_contents_height ();
-	update_coverage_samples ();
+	update_coverage_frame ();
 
 	/* catch changes */
 
 	tr->playlist()->LayeringChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::playlist_layered, this, boost::weak_ptr<Track> (tr)), gui_context());
 	tr->playlist()->RegionAdded.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::add_region_view, this, _1), gui_context());
 	tr->playlist()->RegionRemoved.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::remove_region_view, this, _1), gui_context());
-	tr->playlist()->ContentsChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::update_coverage_samples, this), gui_context());
+	tr->playlist()->ContentsChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::update_coverage_frame, this), gui_context());
 }
 
 
@@ -676,14 +684,14 @@ StreamView::set_layer_display (LayerDisplay d)
 	}
 
 	update_contents_height ();
-	update_coverage_samples ();
+	update_coverage_frame ();
 }
 
 void
-StreamView::update_coverage_samples ()
+StreamView::update_coverage_frame ()
 {
 	for (RegionViewList::iterator i = region_views.begin (); i != region_views.end (); ++i) {
-		(*i)->update_coverage_samples (_layer_display);
+		(*i)->update_coverage_frame (_layer_display);
 	}
 }
 
@@ -722,5 +730,15 @@ StreamView::setup_new_rec_layer_time (boost::shared_ptr<Region> region)
 		_new_rec_layer_time = _trackview.track()->playlist()->find_next_top_layer_position (region->start());
 	} else {
 		_new_rec_layer_time = max_samplepos;
+	}
+}
+
+void
+StreamView::parameter_changed (string const & what)
+{
+	if (what == "show-region-name") {
+		for (RegionViewList::iterator i = region_views.begin (); i != region_views.end (); ++i) {
+			(*i)->update_visibility ();
+		}
 	}
 }

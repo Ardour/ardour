@@ -88,7 +88,7 @@ fi
 export SRCCACHE
 
 if [ "$(id -u)" = "0" ]; then
-	apt-get -y install nsis curl
+	apt-get -y install nsis curl wget
 fi
 
 
@@ -116,13 +116,13 @@ echo " === bundle to $DESTDIR"
 if test -z "$DESTDIR"; then
 	DESTDIR=`mktemp -d`
 	trap 'rm -rf $DESTDIR' exit SIGINT SIGTERM
+	rm -rf $DESTDIR
 fi
 
 echo " === bundle to $DESTDIR"
 
 ALIBDIR=$DESTDIR/lib/${LOWERCASE_DIRNAME}
 
-rm -rf $DESTDIR
 mkdir -p $DESTDIR/bin
 mkdir -p $DESTDIR/share/
 mkdir -p $ALIBDIR/surfaces
@@ -144,6 +144,7 @@ cp build/libs/ptformat/ptformat-*.dll $DESTDIR/bin/
 cp build/libs/audiographer/audiographer-*.dll $DESTDIR/bin/
 cp build/libs/fst/ardour-vst-scanner.exe $DESTDIR/bin/ || true
 cp build/session_utils/*-*.exe $DESTDIR/bin/ || true
+cp build/tools/luadevel/ardour6-lua.exe $DESTDIR/bin/ || true
 cp `ls -t build/gtk2_ardour/ardour-*.exe | head -n1` $DESTDIR/bin/${PRODUCT_EXE}
 
 mkdir -p $DESTDIR/lib/gtk-2.0/engines
@@ -161,6 +162,7 @@ cp `find build/libs/panners/ -iname "*.dll"` $ALIBDIR/panners/
 
 cp -r build/libs/LV2 $ALIBDIR/
 cp -r build/libs/vamp-plugins/*ardourvampplugins*.dll $ALIBDIR/vamp/libardourvampplugins.dll
+cp -r build/libs/vamp-pyin/*ardourvamppyin*.dll $ALIBDIR/vamp/libardourvamppyin.dll
 cp $PREFIX/lib/suil-*/*.dll $ALIBDIR/suil/ || true
 
 # lv2 core, classifications etc - TODO check if we need the complete LV2 ontology
@@ -200,6 +202,7 @@ cp gtk2_ardour/icons/cursor_square/* $DESTDIR/share/${LOWERCASE_DIRNAME}/icons/
 # clean build-dir after depoyment
 echo " === bundle completed, cleaning up"
 ./waf uninstall
+find $DESTDIR -name "*.dll.a" | xargs rm
 echo " === complete"
 du -sh $DESTDIR
 
@@ -211,16 +214,16 @@ if test -z "$NOVIDEOTOOLS"; then
 	XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
 
 	rsync -a -q --partial \
-		rsync://ardour.org/video-tools/harvid_win-${HARVID_VERSION}.tar.xz \
-		"${SRCCACHE}/harvid_win-${HARVID_VERSION}.tar.xz"
+		rsync://ardour.org/video-tools/harvid_${WARCH}-${HARVID_VERSION}.tar.xz \
+		"${SRCCACHE}/harvid_${WARCH}-${HARVID_VERSION}.tar.xz"
 
 	rsync -a -q --partial \
-		rsync://ardour.org/video-tools/xjadeo_win-${XJADEO_VERSION}.tar.xz \
-		"${SRCCACHE}/xjadeo_win-${XJADEO_VERSION}.tar.xz"
+		rsync://ardour.org/video-tools/xjadeo_${WARCH}-${XJADEO_VERSION}.tar.xz \
+		"${SRCCACHE}/xjadeo_${WARCH}-${XJADEO_VERSION}.tar.xz"
 
 	mkdir $DESTDIR/video
-	tar -xf "${SRCCACHE}/harvid_win-${HARVID_VERSION}.tar.xz" -C "$DESTDIR/video/"
-	tar -xf "${SRCCACHE}/xjadeo_win-${XJADEO_VERSION}.tar.xz" -C "$DESTDIR/video/"
+	tar -xf "${SRCCACHE}/harvid_${WARCH}-${HARVID_VERSION}.tar.xz" -C "$DESTDIR/video/"
+	tar -xf "${SRCCACHE}/xjadeo_${WARCH}-${XJADEO_VERSION}.tar.xz" -C "$DESTDIR/video/"
 
 	echo " === unzipped"
 	du -sh $DESTDIR/video
@@ -271,7 +274,7 @@ if test x$WITH_X42_LV2 != x ; then
 
 	echo "Adding x42 Plugins"
 
-	for proj in x42-meters x42-midifilter x42-midimap x42-stereoroute x42-eq setBfree x42-avldrums x42-whirl; do
+	for proj in x42-meters x42-midifilter x42-stereoroute x42-eq setBfree x42-avldrums x42-whirl x42-limiter x42-tuner; do
 		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://x42-plugins.com/x42/win/${proj}-lv2-${WARCH}-${X42_VERSION}.zip \

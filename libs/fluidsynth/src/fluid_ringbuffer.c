@@ -24,7 +24,7 @@
  */
 
 #include "fluid_ringbuffer.h"
-#include "fluidsynth_priv.h"
+#include "fluid_sys.h"
 
 
 /**

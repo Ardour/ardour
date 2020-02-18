@@ -1,21 +1,24 @@
 /*
-    Copyright (C) 2000 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2018 Len Ovens <len@ovenwerks.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <iostream>
 #include <algorithm>
@@ -46,7 +49,13 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-PBD::Signal0<void> Send::ChangedLatency;
+PBD::Signal0<void> LatentSend::ChangedLatency;
+
+LatentSend::LatentSend ()
+		: _delay_in (0)
+		, _delay_out (0)
+{
+}
 
 string
 Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot, bool ignore_bitslot)
@@ -67,8 +76,8 @@ Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot, bool ignore_b
 		return _("listen"); // no ports, no need for numbering
 	case Delivery::Send:
 		return string_compose (_("send %1"), (bitslot = s.next_send_id ()) + 1);
-	case Delivery::Personal:
-		return string_compose (_("personal %1"), (bitslot = s.next_aux_send_id ()) + 1);
+	case Delivery::Foldback:
+		return string_compose (_("foldback %1"), (bitslot = s.next_aux_send_id ()) + 1);
 	default:
 		fatal << string_compose (_("programming error: send created using role %1"), enum_2_string (r)) << endmsg;
 		abort(); /*NOTREACHED*/
@@ -80,8 +89,6 @@ Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot, bool ignore_b
 Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMaster> mm, Role r, bool ignore_bitslot)
 	: Delivery (s, p, mm, name_and_id_new_send (s, r, _bitslot, ignore_bitslot), r)
 	, _metering (false)
-	, _delay_in (0)
-	, _delay_out (0)
 	, _remove_on_disconnect (false)
 {
 	if (_role == Listen) {
@@ -94,7 +101,8 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 	//boost_debug_shared_ptr_mark_interesting (this, "send");
 
 	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation)));
-	_gain_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(GainAutomation), gl));
+	_gain_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(BusSendLevel), gl));
+	_gain_control->set_flags (Controllable::Flag ((int)_gain_control->flags() | Controllable::InlineControl));
 	add_control (_gain_control);
 
 	_amp.reset (new Amp (_session, _("Fader"), _gain_control, true));
@@ -140,9 +148,6 @@ Send::signal_latency () const
 {
 	if (!_pending_active) {
 		 return 0;
-	}
-	if (_user_latency) {
-		return _user_latency;
 	}
 	if (_delay_out > _delay_in) {
 		return _delay_out - _delay_in;
@@ -198,7 +203,7 @@ Send::set_delay_in (samplecnt_t delay)
 }
 
 void
-Send::set_delay_out (samplecnt_t delay)
+Send::set_delay_out (samplecnt_t delay, size_t /*bus*/)
 {
 	if (_delay_out == delay) {
 		return;
@@ -297,7 +302,7 @@ Send::set_state (const XMLNode& node, int version)
 		*/
 
 		if ((prop = node.property ("bitslot")) == 0) {
-			if (_role == Delivery::Aux || _role == Delivery::Personal) {
+			if (_role == Delivery::Aux || _role == Delivery::Foldback) {
 				_bitslot = _session.next_aux_send_id ();
 			} else if (_role == Delivery::Send) {
 				_bitslot = _session.next_send_id ();
@@ -306,7 +311,7 @@ Send::set_state (const XMLNode& node, int version)
 				_bitslot = 0;
 			}
 		} else {
-			if (_role == Delivery::Aux || _role == Delivery::Personal) {
+			if (_role == Delivery::Aux || _role == Delivery::Foldback) {
 				_session.unmark_aux_send_id (_bitslot);
 				_bitslot = string_to<uint32_t>(prop->value());
 				_session.mark_aux_send_id (_bitslot);
@@ -451,7 +456,7 @@ Send::display_to_user () const
 {
 	/* we ignore Deliver::_display_to_user */
 
-	if (_role == Listen || _role == Personal) {
+	if (_role == Listen || _role == Foldback) {
 		/* don't make the monitor/control/listen send visible */
 		return false;
 	}

@@ -1,21 +1,20 @@
 /*
-    Copyright (C) 2009 John Emmas
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2013-2014 John Emmas <john@creativepost.co.uk>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 #ifndef __msvc_libardour_h__
 #define __msvc_libardour_h__
 
@@ -35,13 +34,13 @@ namespace ARDOUR {
 
 #ifdef __cplusplus
 extern "C" {
-#endif	/* __cplusplus */
+#endif /* __cplusplus */
 
 // LIBARDOUR_API char*  LIBARDOUR_APICALLTYPE placeholder_for_non_msvc_specific_function(s);
 
 #ifdef __cplusplus
-}		/* extern "C" */
-#endif	/* __cplusplus */
+} /* extern "C" */
+#endif /* __cplusplus */
 
 }  // namespace ARDOUR
 
@@ -58,16 +57,16 @@ namespace ARDOUR {
 
 #ifdef __cplusplus
 extern "C" {
-#endif	/* __cplusplus */
+#endif /* __cplusplus */
 
 LIBARDOUR_API int    LIBARDOUR_APICALLTYPE symlink(const char *dest, const char *shortcut, const char *working_directory = 0);
 LIBARDOUR_API int    LIBARDOUR_APICALLTYPE readlink(const char *__restrict shortcut, char *__restrict buf, size_t bufsize);
 
 #ifdef __cplusplus
-}		/* extern "C" */
-#endif	/* __cplusplus */
+} /* extern "C" */
+#endif /* __cplusplus */
 
 }  // namespace ARDOUR
 
-#endif  // 	COMPILER_MSVC
-#endif  // __mavc_libardour_h__
+#endif // COMPILER_MSVC
+#endif // __mavc_libardour_h__

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Johnson</Manufacturer>
+    <Model>J-Station</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Program">
+        <PatchNameList>
+          <Patch Number="01" Name="JCM900 with Hall" ProgramChange="0"/>
+          <Patch Number="02" Name="Classic Blackface" ProgramChange="1"/>
+          <Patch Number="03" Name="Boutique Delay" ProgramChange="2"/>
+          <Patch Number="11" Name="Mr Js Crunch" ProgramChange="3"/>
+          <Patch Number="12" Name="Wide Acoustic" ProgramChange="4"/>
+          <Patch Number="13" Name="Rectifier March" ProgramChange="5"/>
+          <Patch Number="21" Name="Rotary Tweed" ProgramChange="6"/>
+          <Patch Number="22" Name="Voxy" ProgramChange="7"/>
+          <Patch Number="23" Name="Thick Stack Solo" ProgramChange="8"/>
+          <Patch Number="31" Name="Rockabilly" ProgramChange="9"/>
+          <Patch Number="32" Name="Hiwatt with Delay" ProgramChange="10"/>
+          <Patch Number="33" Name="Jazzy Twin" ProgramChange="11"/>
+          <Patch Number="41" Name="Modern Bass" ProgramChange="12"/>
+          <Patch Number="42" Name="Envelope Bass" ProgramChange="13"/>
+          <Patch Number="43" Name="Rock Bass Delay" ProgramChange="14"/>
+          <Patch Number="51" Name="Mike's Tone" ProgramChange="15"/>
+          <Patch Number="52" Name="Octa Slam" ProgramChange="16"/>
+          <Patch Number="53" Name="Johnson Tremolo" ProgramChange="17"/>
+          <Patch Number="61" Name="Bluesy Delay" ProgramChange="18"/>
+          <Patch Number="62" Name="78 Brit Stack" ProgramChange="19"/>
+          <Patch Number="63" Name="Synth Guitar Swell" ProgramChange="20"/>
+          <Patch Number="71" Name="Boogie MKII" ProgramChange="21"/>
+          <Patch Number="72" Name="Wide Solo" ProgramChange="22"/>
+          <Patch Number="73" Name="Acoustic with Delay" ProgramChange="23"/>
+          <Patch Number="81" Name="Boutique Blues" ProgramChange="24"/>
+          <Patch Number="82" Name="Funky Envelope" ProgramChange="25"/>
+          <Patch Number="83" Name="Gilmourish" ProgramChange="26"/>
+          <Patch Number="91" Name="Grindy SVT" ProgramChange="27"/>
+          <Patch Number="92" Name="Fuzz Face" ProgramChange="28"/>
+          <Patch Number="93" Name="Slide Blues" ProgramChange="29"/>
+          <Patch Number="01" Name="JCM900 with Hall" ProgramChange="30"/>
+          <Patch Number="02" Name="Classic Blackface" ProgramChange="31"/>
+          <Patch Number="03" Name="Boutique Delay" ProgramChange="32"/>
+          <Patch Number="11" Name="Mr Js Crunch" ProgramChange="33"/>
+          <Patch Number="12" Name="Wide Acoustic" ProgramChange="34"/>
+          <Patch Number="13" Name="Rectifier March" ProgramChange="35"/>
+          <Patch Number="21" Name="Rotary Tweed" ProgramChange="36"/>
+          <Patch Number="22" Name="Voxy" ProgramChange="37"/>
+          <Patch Number="23" Name="Thick Stack Solo" ProgramChange="38"/>
+          <Patch Number="31" Name="Rockabilly" ProgramChange="39"/>
+          <Patch Number="32" Name="Hiwatt with Delay" ProgramChange="40"/>
+          <Patch Number="33" Name="Jazzy Twin" ProgramChange="41"/>
+          <Patch Number="41" Name="Modern Bass" ProgramChange="42"/>
+          <Patch Number="42" Name="Envelope Bass" ProgramChange="43"/>
+          <Patch Number="43" Name="Rock Bass Delay" ProgramChange="44"/>
+          <Patch Number="51" Name="Mike's Tone" ProgramChange="45"/>
+          <Patch Number="52" Name="Octa Slam" ProgramChange="46"/>
+          <Patch Number="53" Name="Johnson Tremolo" ProgramChange="47"/>
+          <Patch Number="61" Name="Bluesy Delay" ProgramChange="48"/>
+          <Patch Number="62" Name="78 Brit Stack" ProgramChange="49"/>
+          <Patch Number="63" Name="Synth Guitar Swell" ProgramChange="50"/>
+          <Patch Number="71" Name="Boogie MKII" ProgramChange="51"/>
+          <Patch Number="72" Name="Wide Solo" ProgramChange="52"/>
+          <Patch Number="73" Name="Acoustic with Delay" ProgramChange="53"/>
+          <Patch Number="81" Name="Boutique Blues" ProgramChange="54"/>
+          <Patch Number="82" Name="Funky Envelope" ProgramChange="55"/>
+          <Patch Number="83" Name="Gilmourish" ProgramChange="56"/>
+          <Patch Number="91" Name="Grindy SVT" ProgramChange="57"/>
+          <Patch Number="92" Name="Fuzz Face" ProgramChange="58"/>
+          <Patch Number="93" Name="Slide Blues" ProgramChange="59"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

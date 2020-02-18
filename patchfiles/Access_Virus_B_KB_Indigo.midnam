@@ -1,0 +1,1139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Access</Manufacturer>
+    <Model>Virus B</Model>
+    <Model>Virus KB</Model>
+    <Model>Virus Indigo</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="BANK A">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="A000" Name="OvertureCK" ProgramChange="0"/>
+          <Patch Number="A001" Name="Impact  MS" ProgramChange="1"/>
+          <Patch Number="A002" Name="DJ-IQ   RP" ProgramChange="2"/>
+          <Patch Number="A003" Name="BasstardJS" ProgramChange="3"/>
+          <Patch Number="A004" Name="101BASS RP" ProgramChange="4"/>
+          <Patch Number="A005" Name="CyberPopHS" ProgramChange="5"/>
+          <Patch Number="A006" Name="NOT-PAD RP" ProgramChange="6"/>
+          <Patch Number="A007" Name="HarmonixJS" ProgramChange="7"/>
+          <Patch Number="A008" Name="OBY-PAD RP" ProgramChange="8"/>
+          <Patch Number="A009" Name="Vi-Rtro RP" ProgramChange="9"/>
+          <Patch Number="A010" Name="BASSEY  NH" ProgramChange="10"/>
+          <Patch Number="A011" Name="GungGungCK" ProgramChange="11"/>
+          <Patch Number="A012" Name="PADINGS RP" ProgramChange="12"/>
+          <Patch Number="A013" Name="FM Bass JS" ProgramChange="13"/>
+          <Patch Number="A014" Name="MovementHS" ProgramChange="14"/>
+          <Patch Number="A015" Name="Plang   CK" ProgramChange="15"/>
+          <Patch Number="A016" Name="The Fog CK" ProgramChange="16"/>
+          <Patch Number="A017" Name=":)-bass RP" ProgramChange="17"/>
+          <Patch Number="A018" Name="SmoothBsBC" ProgramChange="18"/>
+          <Patch Number="A019" Name="SwellPadNH" ProgramChange="19"/>
+          <Patch Number="A020" Name="MINI-M  K9" ProgramChange="20"/>
+          <Patch Number="A021" Name="SINEBEE JS" ProgramChange="21"/>
+          <Patch Number="A022" Name="Grunge  CK" ProgramChange="22"/>
+          <Patch Number="A023" Name="JUNOAPG JS" ProgramChange="23"/>
+          <Patch Number="A024" Name="InfinityJS" ProgramChange="24"/>
+          <Patch Number="A025" Name="FlagoletAD" ProgramChange="25"/>
+          <Patch Number="A026" Name="7thCORD RP" ProgramChange="26"/>
+          <Patch Number="A027" Name="Grunge2 CK" ProgramChange="27"/>
+          <Patch Number="A028" Name="CORD 1  RP" ProgramChange="28"/>
+          <Patch Number="A029" Name="WAVE  1 K9" ProgramChange="29"/>
+          <Patch Number="A030" Name="Wheek   RP" ProgramChange="30"/>
+          <Patch Number="A031" Name="LFOSSTZ K9" ProgramChange="31"/>
+          <Patch Number="A032" Name="Puls4thsBC" ProgramChange="32"/>
+          <Patch Number="A033" Name="TalkToMeAS" ProgramChange="33"/>
+          <Patch Number="A034" Name="Strings CK" ProgramChange="34"/>
+          <Patch Number="A035" Name="Soft3rdsBC" ProgramChange="35"/>
+          <Patch Number="A036" Name="Aouuh   CK" ProgramChange="36"/>
+          <Patch Number="A037" Name="SpacePatHS" ProgramChange="37"/>
+          <Patch Number="A038" Name="NicoPd4 NH" ProgramChange="38"/>
+          <Patch Number="A039" Name="DmodePadMS" ProgramChange="39"/>
+          <Patch Number="A040" Name="House 3 AS" ProgramChange="40"/>
+          <Patch Number="A041" Name="BIGF1SH PN" ProgramChange="41"/>
+          <Patch Number="A042" Name="RingSyncCK" ProgramChange="42"/>
+          <Patch Number="A043" Name="Moloko  K9" ProgramChange="43"/>
+          <Patch Number="A044" Name="NicoPd4 NH" ProgramChange="44"/>
+          <Patch Number="A045" Name="ResobassK9" ProgramChange="45"/>
+          <Patch Number="A046" Name="TimpotroHS" ProgramChange="46"/>
+          <Patch Number="A047" Name="SideBandNH" ProgramChange="47"/>
+          <Patch Number="A048" Name="CybChoirK9" ProgramChange="48"/>
+          <Patch Number="A049" Name="Alert   JS" ProgramChange="49"/>
+          <Patch Number="A050" Name="FltDist MZ" ProgramChange="50"/>
+          <Patch Number="A051" Name="BassDrumCK" ProgramChange="51"/>
+          <Patch Number="A052" Name="I k9ow UK9" ProgramChange="52"/>
+          <Patch Number="A053" Name="OliveLF MS" ProgramChange="53"/>
+          <Patch Number="A054" Name="SatSync CK" ProgramChange="54"/>
+          <Patch Number="A055" Name="Virus   CK" ProgramChange="55"/>
+          <Patch Number="A056" Name="PP?-PAD RP" ProgramChange="56"/>
+          <Patch Number="A057" Name="Adrenalin2" ProgramChange="57"/>
+          <Patch Number="A058" Name="Farfisa AD" ProgramChange="58"/>
+          <Patch Number="A059" Name="CALLIOPEJS" ProgramChange="59"/>
+          <Patch Number="A060" Name="Prodigy JS" ProgramChange="60"/>
+          <Patch Number="A061" Name="Howner  RP" ProgramChange="61"/>
+          <Patch Number="A062" Name="LFOnoiseK9" ProgramChange="62"/>
+          <Patch Number="A063" Name="Teeobee K9" ProgramChange="63"/>
+          <Patch Number="A064" Name="Teeotwo K9" ProgramChange="64"/>
+          <Patch Number="A065" Name="Talking PI" ProgramChange="65"/>
+          <Patch Number="A066" Name="Softie  CK" ProgramChange="66"/>
+          <Patch Number="A067" Name="DistoriaK9" ProgramChange="67"/>
+          <Patch Number="A068" Name="PHASA   RP" ProgramChange="68"/>
+          <Patch Number="A069" Name="WAVE  1 K9" ProgramChange="69"/>
+          <Patch Number="A070" Name="CyberPopHS" ProgramChange="70"/>
+          <Patch Number="A071" Name="NicoPd2 NH" ProgramChange="71"/>
+          <Patch Number="A072" Name="StrummerHS" ProgramChange="72"/>
+          <Patch Number="A073" Name="WickiderPN" ProgramChange="73"/>
+          <Patch Number="A074" Name="Ageless JH" ProgramChange="74"/>
+          <Patch Number="A075" Name="SpaceChor2" ProgramChange="75"/>
+          <Patch Number="A076" Name="Glint   PI" ProgramChange="76"/>
+          <Patch Number="A077" Name="RedPad  NH" ProgramChange="77"/>
+          <Patch Number="A078" Name="ShinyPadNH" ProgramChange="78"/>
+          <Patch Number="A079" Name="FlagoletAD" ProgramChange="79"/>
+          <Patch Number="A080" Name="VELORP  RP" ProgramChange="80"/>
+          <Patch Number="A081" Name="SwellPadNH" ProgramChange="81"/>
+          <Patch Number="A082" Name="M-ORGAN RP" ProgramChange="82"/>
+          <Patch Number="A083" Name="TO-OLD  RP" ProgramChange="83"/>
+          <Patch Number="A084" Name="? BASS  RP" ProgramChange="84"/>
+          <Patch Number="A085" Name="FatZapp K9" ProgramChange="85"/>
+          <Patch Number="A086" Name="ALISER  MS" ProgramChange="86"/>
+          <Patch Number="A087" Name="SFX-XXX RP" ProgramChange="87"/>
+          <Patch Number="A088" Name="BE-TWO  RP" ProgramChange="88"/>
+          <Patch Number="A089" Name="VI-SYNC RP" ProgramChange="89"/>
+          <Patch Number="A090" Name="Formant PI" ProgramChange="90"/>
+          <Patch Number="A091" Name="BASSEY  NH" ProgramChange="91"/>
+          <Patch Number="A092" Name="SlowSeq PN" ProgramChange="92"/>
+          <Patch Number="A093" Name="Cleanex JH" ProgramChange="93"/>
+          <Patch Number="A094" Name="MovementHS" ProgramChange="94"/>
+          <Patch Number="A095" Name="WishU HeHS" ProgramChange="95"/>
+          <Patch Number="A096" Name="SFX-VC3 RP" ProgramChange="96"/>
+          <Patch Number="A097" Name="CataclysMS" ProgramChange="97"/>
+          <Patch Number="A098" Name="PrcChordAD" ProgramChange="98"/>
+          <Patch Number="A099" Name="DJ-IQ   RP" ProgramChange="99"/>
+          <Patch Number="A100" Name="Subbass K9" ProgramChange="100"/>
+          <Patch Number="A101" Name="NEU *UTZ" ProgramChange="101"/>
+          <Patch Number="A102" Name="MINI-M  K9" ProgramChange="102"/>
+          <Patch Number="A103" Name="LFOSSTZ K9" ProgramChange="103"/>
+          <Patch Number="A104" Name="Strings CK" ProgramChange="104"/>
+          <Patch Number="A105" Name="HOLLAND RP" ProgramChange="105"/>
+          <Patch Number="A106" Name="GO-SEQ  RP" ProgramChange="106"/>
+          <Patch Number="A107" Name="PiSweep RP" ProgramChange="107"/>
+          <Patch Number="A108" Name="Bacon   RP" ProgramChange="108"/>
+          <Patch Number="A109" Name="DIS-BD  RP" ProgramChange="109"/>
+          <Patch Number="A110" Name="BassDrm2CK" ProgramChange="110"/>
+          <Patch Number="A111" Name="BassDrm3CK" ProgramChange="111"/>
+          <Patch Number="A112" Name="BassDrm4CK" ProgramChange="112"/>
+          <Patch Number="A113" Name="BassDrm5CK" ProgramChange="113"/>
+          <Patch Number="A114" Name="Kick 7  BC" ProgramChange="114"/>
+          <Patch Number="A115" Name="Snare 1 BC" ProgramChange="115"/>
+          <Patch Number="A116" Name="Snare 2 BC" ProgramChange="116"/>
+          <Patch Number="A117" Name="Snare 3 BC" ProgramChange="117"/>
+          <Patch Number="A118" Name="Claps   RP" ProgramChange="118"/>
+          <Patch Number="A119" Name="ClsdHHatBC" ProgramChange="119"/>
+          <Patch Number="A120" Name="ClsdHHT2BC" ProgramChange="120"/>
+          <Patch Number="A121" Name="OpenHHatBC" ProgramChange="121"/>
+          <Patch Number="A122" Name="Crash4  BC" ProgramChange="122"/>
+          <Patch Number="A123" Name="RideRim BC" ProgramChange="123"/>
+          <Patch Number="A124" Name="RideBellBC" ProgramChange="124"/>
+          <Patch Number="A125" Name="&gt;&gt;INPUT&lt;&lt;" ProgramChange="125"/>
+          <Patch Number="A126" Name="- Init -" ProgramChange="126"/>
+          <Patch Number="A127" Name="- START -" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="BANK B">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="1"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="B000" Name="First    K" ProgramChange="0"/>
+          <Patch Number="B001" Name="Virus    K" ProgramChange="1"/>
+          <Patch Number="B002" Name="V-Pad 1  K" ProgramChange="2"/>
+          <Patch Number="B003" Name="V-Birth1 K" ProgramChange="3"/>
+          <Patch Number="B004" Name="V-Birth2 K" ProgramChange="4"/>
+          <Patch Number="B005" Name="RavePad2 K" ProgramChange="5"/>
+          <Patch Number="B006" Name="Compres2 K" ProgramChange="6"/>
+          <Patch Number="B007" Name="PP?-PAD RP" ProgramChange="7"/>
+          <Patch Number="B008" Name="NO-SEQ  RP" ProgramChange="8"/>
+          <Patch Number="B009" Name="V-Pad 2  K" ProgramChange="9"/>
+          <Patch Number="B010" Name="Vi-bass RP" ProgramChange="10"/>
+          <Patch Number="B011" Name="VI-SYNC RP" ProgramChange="11"/>
+          <Patch Number="B012" Name="ZZ-ROB  RP" ProgramChange="12"/>
+          <Patch Number="B013" Name="Polaris" ProgramChange="13"/>
+          <Patch Number="B014" Name="Compress K" ProgramChange="14"/>
+          <Patch Number="B015" Name="SatSync  K" ProgramChange="15"/>
+          <Patch Number="B016" Name="ZZ-bass RP" ProgramChange="16"/>
+          <Patch Number="B017" Name="XOBASS  RP" ProgramChange="17"/>
+          <Patch Number="B018" Name="No Age" ProgramChange="18"/>
+          <Patch Number="B019" Name="PAD-777 RP" ProgramChange="19"/>
+          <Patch Number="B020" Name="Virus 2  K" ProgramChange="20"/>
+          <Patch Number="B021" Name="Clockwork" ProgramChange="21"/>
+          <Patch Number="B022" Name="NO-TJO  RP" ProgramChange="22"/>
+          <Patch Number="B023" Name="V-Resoni K" ProgramChange="23"/>
+          <Patch Number="B024" Name="TechnoArp" ProgramChange="24"/>
+          <Patch Number="B025" Name="Tension..." ProgramChange="25"/>
+          <Patch Number="B026" Name="V-Church K" ProgramChange="26"/>
+          <Patch Number="B027" Name="Sitar" ProgramChange="27"/>
+          <Patch Number="B028" Name="HOLLAND RP" ProgramChange="28"/>
+          <Patch Number="B029" Name="GeneratoMS" ProgramChange="29"/>
+          <Patch Number="B030" Name="InfectLead" ProgramChange="30"/>
+          <Patch Number="B031" Name="Melodies" ProgramChange="31"/>
+          <Patch Number="B032" Name="V-Orgel  K" ProgramChange="32"/>
+          <Patch Number="B033" Name="Cutoff   K" ProgramChange="33"/>
+          <Patch Number="B034" Name="V-Birth3 K" ProgramChange="34"/>
+          <Patch Number="B035" Name="Zoober" ProgramChange="35"/>
+          <Patch Number="B036" Name="V-Pad 3  K" ProgramChange="36"/>
+          <Patch Number="B037" Name="ZZ-YOU  RP" ProgramChange="37"/>
+          <Patch Number="B038" Name="PercVox" ProgramChange="38"/>
+          <Patch Number="B039" Name="PPG Bass2" ProgramChange="39"/>
+          <Patch Number="B040" Name="S&amp;H Arp" ProgramChange="40"/>
+          <Patch Number="B041" Name="J.Arnold" ProgramChange="41"/>
+          <Patch Number="B042" Name="Arpegiator" ProgramChange="42"/>
+          <Patch Number="B043" Name="SpaceChor2" ProgramChange="43"/>
+          <Patch Number="B044" Name="Adrenalin1" ProgramChange="44"/>
+          <Patch Number="B045" Name="Arpeggia" ProgramChange="45"/>
+          <Patch Number="B046" Name="Snip" ProgramChange="46"/>
+          <Patch Number="B047" Name="SLAP-IT RP" ProgramChange="47"/>
+          <Patch Number="B048" Name="TOM-TOM RP" ProgramChange="48"/>
+          <Patch Number="B049" Name="HH 3" ProgramChange="49"/>
+          <Patch Number="B050" Name="HH 2" ProgramChange="50"/>
+          <Patch Number="B051" Name="O-HIHAT RP" ProgramChange="51"/>
+          <Patch Number="B052" Name="C-HIHAT RP" ProgramChange="52"/>
+          <Patch Number="B053" Name="V-snare RP" ProgramChange="53"/>
+          <Patch Number="B054" Name="SNR 1" ProgramChange="54"/>
+          <Patch Number="B055" Name="Adrenalin2" ProgramChange="55"/>
+          <Patch Number="B056" Name="V-CUSS  RP" ProgramChange="56"/>
+          <Patch Number="B057" Name="Stick" ProgramChange="57"/>
+          <Patch Number="B058" Name="Low" ProgramChange="58"/>
+          <Patch Number="B059" Name="V-Jump   K" ProgramChange="59"/>
+          <Patch Number="B060" Name="Sci-fi1  K" ProgramChange="60"/>
+          <Patch Number="B061" Name="NEU *UTZ" ProgramChange="61"/>
+          <Patch Number="B062" Name="SatSync2 K" ProgramChange="62"/>
+          <Patch Number="B063" Name="Resonator" ProgramChange="63"/>
+          <Patch Number="B064" Name="WEX TEX RP" ProgramChange="64"/>
+          <Patch Number="B065" Name="Sci-Fi 2" ProgramChange="65"/>
+          <Patch Number="B066" Name="ABC-1   RP" ProgramChange="66"/>
+          <Patch Number="B067" Name="RotDAM  RP" ProgramChange="67"/>
+          <Patch Number="B068" Name="Wino Bench" ProgramChange="68"/>
+          <Patch Number="B069" Name="SEA-PAD RP" ProgramChange="69"/>
+          <Patch Number="B070" Name="BluePAD RP" ProgramChange="70"/>
+          <Patch Number="B071" Name="TECH-NO RP" ProgramChange="71"/>
+          <Patch Number="B072" Name="SO-SOFT RP" ProgramChange="72"/>
+          <Patch Number="B073" Name="Spaz meC*:" ProgramChange="73"/>
+          <Patch Number="B074" Name="DANCIO2 RP" ProgramChange="74"/>
+          <Patch Number="B075" Name="IQ-PAD  RP" ProgramChange="75"/>
+          <Patch Number="B076" Name="Uck Muk RP" ProgramChange="76"/>
+          <Patch Number="B077" Name="RINGPAD" ProgramChange="77"/>
+          <Patch Number="B078" Name="DarkMatter" ProgramChange="78"/>
+          <Patch Number="B079" Name="BIG.F1SH" ProgramChange="79"/>
+          <Patch Number="B080" Name="Welard !" ProgramChange="80"/>
+          <Patch Number="B081" Name="PPG-PAD" ProgramChange="81"/>
+          <Patch Number="B082" Name="SinusSeq" ProgramChange="82"/>
+          <Patch Number="B083" Name="MOOBASS RP" ProgramChange="83"/>
+          <Patch Number="B084" Name="MOOGY   RP" ProgramChange="84"/>
+          <Patch Number="B085" Name="Sci-fi2  K" ProgramChange="85"/>
+          <Patch Number="B086" Name="TB-V03  RP" ProgramChange="86"/>
+          <Patch Number="B087" Name="BASS-ON RP" ProgramChange="87"/>
+          <Patch Number="B088" Name="SWELLAD RP" ProgramChange="88"/>
+          <Patch Number="B089" Name="UNDERO  RP" ProgramChange="89"/>
+          <Patch Number="B090" Name="ViBee 1 RP" ProgramChange="90"/>
+          <Patch Number="B091" Name="WAVEN   RP" ProgramChange="91"/>
+          <Patch Number="B092" Name="MINI-M  RP" ProgramChange="92"/>
+          <Patch Number="B093" Name="543 SEQ RP" ProgramChange="93"/>
+          <Patch Number="B094" Name="FX 303  RP" ProgramChange="94"/>
+          <Patch Number="B095" Name="ACCYBAS RP" ProgramChange="95"/>
+          <Patch Number="B096" Name="V-550   RP" ProgramChange="96"/>
+          <Patch Number="B097" Name="INP clean" ProgramChange="97"/>
+          <Patch Number="B098" Name="INPlopass" ProgramChange="98"/>
+          <Patch Number="B099" Name="INP reso" ProgramChange="99"/>
+          <Patch Number="B100" Name="INPhipass" ProgramChange="100"/>
+          <Patch Number="B101" Name="INPbandps" ProgramChange="101"/>
+          <Patch Number="B102" Name="INPdouble" ProgramChange="102"/>
+          <Patch Number="B103" Name="INPflange" ProgramChange="103"/>
+          <Patch Number="B104" Name="INP key!" ProgramChange="104"/>
+          <Patch Number="B105" Name="INPkeyfol" ProgramChange="105"/>
+          <Patch Number="B106" Name="INP pad" ProgramChange="106"/>
+          <Patch Number="B107" Name="INP arp1" ProgramChange="107"/>
+          <Patch Number="B108" Name="INPsatura" ProgramChange="108"/>
+          <Patch Number="B109" Name="INP amp" ProgramChange="109"/>
+          <Patch Number="B110" Name="INPshaper" ProgramChange="110"/>
+          <Patch Number="B111" Name="VOC osci1" ProgramChange="111"/>
+          <Patch Number="B112" Name="VOC pad" ProgramChange="112"/>
+          <Patch Number="B113" Name="VOC pwm" ProgramChange="113"/>
+          <Patch Number="B114" Name="VOC waves" ProgramChange="114"/>
+          <Patch Number="B115" Name="VOC crisp" ProgramChange="115"/>
+          <Patch Number="B116" Name="VOC tube" ProgramChange="116"/>
+          <Patch Number="B117" Name="VOCwalker" ProgramChange="117"/>
+          <Patch Number="B118" Name="VOCnoise1" ProgramChange="118"/>
+          <Patch Number="B119" Name="VOCreso1" ProgramChange="119"/>
+          <Patch Number="B120" Name="VOCrevers" ProgramChange="120"/>
+          <Patch Number="B121" Name="VOC bell1" ProgramChange="121"/>
+          <Patch Number="B122" Name="VOCtwelve" ProgramChange="122"/>
+          <Patch Number="B123" Name="VOCnarrow" ProgramChange="123"/>
+          <Patch Number="B124" Name="VOCdiffus" ProgramChange="124"/>
+          <Patch Number="B125" Name="VOC lfo" ProgramChange="125"/>
+          <Patch Number="B126" Name="VOC bell2" ProgramChange="126"/>
+          <Patch Number="B127" Name="VOC room" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="BANK C">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="2"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="C000" Name="Taurus  JS" ProgramChange="0"/>
+          <Patch Number="C001" Name="OvertoneJS" ProgramChange="1"/>
+          <Patch Number="C002" Name="CALLIOPEJS" ProgramChange="2"/>
+          <Patch Number="C003" Name="HarmonixJS" ProgramChange="3"/>
+          <Patch Number="C004" Name="Outland JS" ProgramChange="4"/>
+          <Patch Number="C005" Name="Animate JS" ProgramChange="5"/>
+          <Patch Number="C006" Name="Uprite  JS" ProgramChange="6"/>
+          <Patch Number="C007" Name="ConcreteJS" ProgramChange="7"/>
+          <Patch Number="C008" Name="Bassic  JS" ProgramChange="8"/>
+          <Patch Number="C009" Name="7thHeavnJS" ProgramChange="9"/>
+          <Patch Number="C010" Name="Waver   JS" ProgramChange="10"/>
+          <Patch Number="C011" Name="Carpets JS" ProgramChange="11"/>
+          <Patch Number="C012" Name="BASSTARDJS" ProgramChange="12"/>
+          <Patch Number="C013" Name="Raw     JS" ProgramChange="13"/>
+          <Patch Number="C014" Name="Soaring JS" ProgramChange="14"/>
+          <Patch Number="C015" Name="Opener  JS" ProgramChange="15"/>
+          <Patch Number="C016" Name="Anima   JS" ProgramChange="16"/>
+          <Patch Number="C017" Name="Cold SawJS" ProgramChange="17"/>
+          <Patch Number="C018" Name="BELLA   JS" ProgramChange="18"/>
+          <Patch Number="C019" Name="FM Bass JS" ProgramChange="19"/>
+          <Patch Number="C020" Name="Wailin  JS" ProgramChange="20"/>
+          <Patch Number="C021" Name="FX Drum JS" ProgramChange="21"/>
+          <Patch Number="C022" Name="Simply  JS" ProgramChange="22"/>
+          <Patch Number="C023" Name="Nasty   JS" ProgramChange="23"/>
+          <Patch Number="C024" Name="Soaring JS" ProgramChange="24"/>
+          <Patch Number="C025" Name="Moving  JS" ProgramChange="25"/>
+          <Patch Number="C026" Name="Tubez   JS" ProgramChange="26"/>
+          <Patch Number="C027" Name="Whirly  JS" ProgramChange="27"/>
+          <Patch Number="C028" Name="ChainsawJS" ProgramChange="28"/>
+          <Patch Number="C029" Name="Goa4 it JS" ProgramChange="29"/>
+          <Patch Number="C030" Name="Random  JS" ProgramChange="30"/>
+          <Patch Number="C031" Name="YUCCA   JS" ProgramChange="31"/>
+          <Patch Number="C032" Name="JUNO APGJS" ProgramChange="32"/>
+          <Patch Number="C033" Name="PolySin JS" ProgramChange="33"/>
+          <Patch Number="C034" Name="SinderelJS" ProgramChange="34"/>
+          <Patch Number="C035" Name="MajorityJS" ProgramChange="35"/>
+          <Patch Number="C036" Name="WalkaArpJS" ProgramChange="36"/>
+          <Patch Number="C037" Name="Organic JS" ProgramChange="37"/>
+          <Patch Number="C038" Name="Rough   JS" ProgramChange="38"/>
+          <Patch Number="C039" Name="Ghost   JS" ProgramChange="39"/>
+          <Patch Number="C040" Name="Quarx   JS" ProgramChange="40"/>
+          <Patch Number="C041" Name="MonolithJS" ProgramChange="41"/>
+          <Patch Number="C042" Name="Sim SalaJS" ProgramChange="42"/>
+          <Patch Number="C043" Name="Soloist JS" ProgramChange="43"/>
+          <Patch Number="C044" Name="EnglArp JS" ProgramChange="44"/>
+          <Patch Number="C045" Name="X-Bellz JS" ProgramChange="45"/>
+          <Patch Number="C046" Name="Soaker  JS" ProgramChange="46"/>
+          <Patch Number="C047" Name="Haunted JS" ProgramChange="47"/>
+          <Patch Number="C048" Name="NiceArp JS" ProgramChange="48"/>
+          <Patch Number="C049" Name="Alert   JS" ProgramChange="49"/>
+          <Patch Number="C050" Name="Lead    JS" ProgramChange="50"/>
+          <Patch Number="C051" Name="RHY-ARP JS" ProgramChange="51"/>
+          <Patch Number="C052" Name="Vienna  JS" ProgramChange="52"/>
+          <Patch Number="C053" Name="Moon PadJS" ProgramChange="53"/>
+          <Patch Number="C054" Name="Start UpJS" ProgramChange="54"/>
+          <Patch Number="C055" Name="Virus B JS" ProgramChange="55"/>
+          <Patch Number="C056" Name="InfectedJS" ProgramChange="56"/>
+          <Patch Number="C057" Name="Beatbox JS" ProgramChange="57"/>
+          <Patch Number="C058" Name="Mallet  JS" ProgramChange="58"/>
+          <Patch Number="C059" Name="BigSweepJS" ProgramChange="59"/>
+          <Patch Number="C060" Name="Voyager JS" ProgramChange="60"/>
+          <Patch Number="C061" Name="Ghost 2 JS" ProgramChange="61"/>
+          <Patch Number="C062" Name="Fuzzbox JS" ProgramChange="62"/>
+          <Patch Number="C063" Name="Induced JS" ProgramChange="63"/>
+          <Patch Number="C064" Name="Prodigy JS" ProgramChange="64"/>
+          <Patch Number="C065" Name="Sweeper JS" ProgramChange="65"/>
+          <Patch Number="C066" Name="Donkey  JS" ProgramChange="66"/>
+          <Patch Number="C067" Name="FuzzBellJS" ProgramChange="67"/>
+          <Patch Number="C068" Name="Laville JS" ProgramChange="68"/>
+          <Patch Number="C069" Name="BIG FLY JS" ProgramChange="69"/>
+          <Patch Number="C070" Name="InfinityJS" ProgramChange="70"/>
+          <Patch Number="C071" Name="MorsSpc JS" ProgramChange="71"/>
+          <Patch Number="C072" Name="Tubular JS" ProgramChange="72"/>
+          <Patch Number="C073" Name="Bad S   JS" ProgramChange="73"/>
+          <Patch Number="C074" Name="Chant   JS" ProgramChange="74"/>
+          <Patch Number="C075" Name="Puncher JS" ProgramChange="75"/>
+          <Patch Number="C076" Name="BELLA 2 JS" ProgramChange="76"/>
+          <Patch Number="C077" Name="BELLARP JS" ProgramChange="77"/>
+          <Patch Number="C078" Name="FeedyPadJS" ProgramChange="78"/>
+          <Patch Number="C079" Name="Haunted JS" ProgramChange="79"/>
+          <Patch Number="C080" Name="Wave-PadJS" ProgramChange="80"/>
+          <Patch Number="C081" Name="ScanJob JS" ProgramChange="81"/>
+          <Patch Number="C082" Name="DIG ME  JS" ProgramChange="82"/>
+          <Patch Number="C083" Name="NO AGE  JS" ProgramChange="83"/>
+          <Patch Number="C084" Name="SeqIt   JS" ProgramChange="84"/>
+          <Patch Number="C085" Name="DIG THISJS" ProgramChange="85"/>
+          <Patch Number="C086" Name="JAYSYNC JS" ProgramChange="86"/>
+          <Patch Number="C087" Name="Deeper  JS" ProgramChange="87"/>
+          <Patch Number="C088" Name="PIGGY   JS" ProgramChange="88"/>
+          <Patch Number="C089" Name="Percold JS" ProgramChange="89"/>
+          <Patch Number="C090" Name="HackbartJS" ProgramChange="90"/>
+          <Patch Number="C091" Name="Hover   JS" ProgramChange="91"/>
+          <Patch Number="C092" Name="GINA PADJS" ProgramChange="92"/>
+          <Patch Number="C093" Name="Bassta  JS" ProgramChange="93"/>
+          <Patch Number="C094" Name="SINEBEEZJS" ProgramChange="94"/>
+          <Patch Number="C095" Name="OverloadJS" ProgramChange="95"/>
+          <Patch Number="C096" Name="ArtificlJS" ProgramChange="96"/>
+          <Patch Number="C097" Name="JUSTICE JS" ProgramChange="97"/>
+          <Patch Number="C098" Name="EnoesqueJS" ProgramChange="98"/>
+          <Patch Number="C099" Name="For DeepJS" ProgramChange="99"/>
+          <Patch Number="C100" Name="Frozen  JS" ProgramChange="100"/>
+          <Patch Number="C101" Name="Ah RESO JS" ProgramChange="101"/>
+          <Patch Number="C102" Name="KYOTO LdJS" ProgramChange="102"/>
+          <Patch Number="C103" Name="Walker  JS" ProgramChange="103"/>
+          <Patch Number="C104" Name="Tight   JS" ProgramChange="104"/>
+          <Patch Number="C105" Name="Odyssey JS" ProgramChange="105"/>
+          <Patch Number="C106" Name="Hybrid  JS" ProgramChange="106"/>
+          <Patch Number="C107" Name="Birdy   JS" ProgramChange="107"/>
+          <Patch Number="C108" Name="Feng JuiJS" ProgramChange="108"/>
+          <Patch Number="C109" Name="Anabo|icJS" ProgramChange="109"/>
+          <Patch Number="C110" Name="GLITCH OK" ProgramChange="110"/>
+          <Patch Number="C111" Name="DISCO  OK" ProgramChange="111"/>
+          <Patch Number="C112" Name="OLDSCOL OK" ProgramChange="112"/>
+          <Patch Number="C113" Name="WetFunk BC" ProgramChange="113"/>
+          <Patch Number="C114" Name="Soft3rdsBC" ProgramChange="114"/>
+          <Patch Number="C115" Name="Puls4thsBC" ProgramChange="115"/>
+          <Patch Number="C116" Name="Choir 4 BC" ProgramChange="116"/>
+          <Patch Number="C117" Name="PluckMe BC" ProgramChange="117"/>
+          <Patch Number="C118" Name="BC VOV3 BC" ProgramChange="118"/>
+          <Patch Number="C119" Name="Dukbass+BC" ProgramChange="119"/>
+          <Patch Number="C120" Name="SmoothBsBC" ProgramChange="120"/>
+          <Patch Number="C121" Name="Subaqua BC" ProgramChange="121"/>
+          <Patch Number="C122" Name="BC VOV2 BC" ProgramChange="122"/>
+          <Patch Number="C123" Name="Braxter JV" ProgramChange="123"/>
+          <Patch Number="C124" Name="Pulsic  JV" ProgramChange="124"/>
+          <Patch Number="C125" Name="&gt;&gt;INPUT&lt;&lt;" ProgramChange="125"/>
+          <Patch Number="C126" Name="- Init -" ProgramChange="126"/>
+          <Patch Number="C127" Name="- START -" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="BANK D">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="3"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="D000" Name="O-ME-2  RP" ProgramChange="0"/>
+          <Patch Number="D001" Name="2-CHORD RP" ProgramChange="1"/>
+          <Patch Number="D002" Name="TEC-ARP RP" ProgramChange="2"/>
+          <Patch Number="D003" Name="PAD-FLG RP" ProgramChange="3"/>
+          <Patch Number="D004" Name="OBY-PAD RP" ProgramChange="4"/>
+          <Patch Number="D005" Name="VARPEG  RP" ProgramChange="5"/>
+          <Patch Number="D006" Name="VICHORD RP" ProgramChange="6"/>
+          <Patch Number="D007" Name="K-WERK1 RP" ProgramChange="7"/>
+          <Patch Number="D008" Name="RE-BASS RP" ProgramChange="8"/>
+          <Patch Number="D009" Name="NOISeAA RP" ProgramChange="9"/>
+          <Patch Number="D010" Name="7thCORD RP" ProgramChange="10"/>
+          <Patch Number="D011" Name="2-Brass RP" ProgramChange="11"/>
+          <Patch Number="D012" Name="RIBASS  RP" ProgramChange="12"/>
+          <Patch Number="D013" Name="BPM-PAD RP" ProgramChange="13"/>
+          <Patch Number="D014" Name="SH-123  RP" ProgramChange="14"/>
+          <Patch Number="D015" Name="CLOCKED RP" ProgramChange="15"/>
+          <Patch Number="D016" Name="NOT-PAD#RP" ProgramChange="16"/>
+          <Patch Number="D017" Name="BRASS-2 RP" ProgramChange="17"/>
+          <Patch Number="D018" Name="AlfBass RP" ProgramChange="18"/>
+          <Patch Number="D019" Name="STRINGS RP" ProgramChange="19"/>
+          <Patch Number="D020" Name="BANDPAD RP" ProgramChange="20"/>
+          <Patch Number="D021" Name="VO-PAD  RP" ProgramChange="21"/>
+          <Patch Number="D022" Name="NO-TJO  RP" ProgramChange="22"/>
+          <Patch Number="D023" Name="QT-SOFT RP" ProgramChange="23"/>
+          <Patch Number="D024" Name="#NAME?" ProgramChange="24"/>
+          <Patch Number="D025" Name="PADINGS RP" ProgramChange="25"/>
+          <Patch Number="D026" Name="Whl-PAD RP" ProgramChange="26"/>
+          <Patch Number="D027" Name="MO-TJO  RP" ProgramChange="27"/>
+          <Patch Number="D028" Name="VELO-ME RP" ProgramChange="28"/>
+          <Patch Number="D029" Name="BASS-O  RP" ProgramChange="29"/>
+          <Patch Number="D030" Name="EASE    RP" ProgramChange="30"/>
+          <Patch Number="D031" Name="K-Organ RP" ProgramChange="31"/>
+          <Patch Number="D032" Name="STR-ARP RP" ProgramChange="32"/>
+          <Patch Number="D033" Name="BASS ME RP" ProgramChange="33"/>
+          <Patch Number="D034" Name="E-CORD  RP" ProgramChange="34"/>
+          <Patch Number="D035" Name="HAWSCH  RP" ProgramChange="35"/>
+          <Patch Number="D036" Name="101BASS RP" ProgramChange="36"/>
+          <Patch Number="D037" Name="STR-WoW RP" ProgramChange="37"/>
+          <Patch Number="D038" Name="BRASS-1 RP" ProgramChange="38"/>
+          <Patch Number="D039" Name="TOMBASS RP" ProgramChange="39"/>
+          <Patch Number="D040" Name="WINDO   RP" ProgramChange="40"/>
+          <Patch Number="D041" Name="SFX-VC3 RP" ProgramChange="41"/>
+          <Patch Number="D042" Name="FLUBBER RP" ProgramChange="42"/>
+          <Patch Number="D043" Name="GO BASS RP" ProgramChange="43"/>
+          <Patch Number="D044" Name="SoLead  RP" ProgramChange="44"/>
+          <Patch Number="D045" Name="TI-BASS RP" ProgramChange="45"/>
+          <Patch Number="D046" Name="MELLOTR.RP" ProgramChange="46"/>
+          <Patch Number="D047" Name="ROBASS  RP" ProgramChange="47"/>
+          <Patch Number="D048" Name="CHORD-U RP" ProgramChange="48"/>
+          <Patch Number="D049" Name="eXtream RP" ProgramChange="49"/>
+          <Patch Number="D050" Name="T-ORGAN RP" ProgramChange="50"/>
+          <Patch Number="D051" Name="K-WERK2 RP" ProgramChange="51"/>
+          <Patch Number="D052" Name="STR-II  RP" ProgramChange="52"/>
+          <Patch Number="D053" Name="DSP-SEQ RP" ProgramChange="53"/>
+          <Patch Number="D054" Name="Vi-Rtro RP" ProgramChange="54"/>
+          <Patch Number="D055" Name="X MEAN  RP" ProgramChange="55"/>
+          <Patch Number="D056" Name="R-PEGGI RP" ProgramChange="56"/>
+          <Patch Number="D057" Name="MooBass RP" ProgramChange="57"/>
+          <Patch Number="D058" Name="TD-SEQ  RP" ProgramChange="58"/>
+          <Patch Number="D059" Name="BOWED   RP" ProgramChange="59"/>
+          <Patch Number="D060" Name="BRASS-8 RP" ProgramChange="60"/>
+          <Patch Number="D061" Name="PolyPha RP" ProgramChange="61"/>
+          <Patch Number="D062" Name="TEC-MOS RP" ProgramChange="62"/>
+          <Patch Number="D063" Name="DSP-V   RP" ProgramChange="63"/>
+          <Patch Number="D064" Name="SFX-X~ RP" ProgramChange="64"/>
+          <Patch Number="D065" Name="STEVIE  RP" ProgramChange="65"/>
+          <Patch Number="D066" Name="T-8     RP" ProgramChange="66"/>
+          <Patch Number="D067" Name="TF BASS RP" ProgramChange="67"/>
+          <Patch Number="D068" Name="VITAR   RP" ProgramChange="68"/>
+          <Patch Number="D069" Name="FILTERS RP" ProgramChange="69"/>
+          <Patch Number="D070" Name="BE-ME   RP" ProgramChange="70"/>
+          <Patch Number="D071" Name="P-LEAD  RP" ProgramChange="71"/>
+          <Patch Number="D072" Name="THE-BD2 RP" ProgramChange="72"/>
+          <Patch Number="D073" Name="PHASA   RP" ProgramChange="73"/>
+          <Patch Number="D074" Name="TEC-NOS RP" ProgramChange="74"/>
+          <Patch Number="D075" Name="TE-T42  RP" ProgramChange="75"/>
+          <Patch Number="D076" Name="ARP-HH2 RP" ProgramChange="76"/>
+          <Patch Number="D077" Name="101-SUB RP" ProgramChange="77"/>
+          <Patch Number="D078" Name="TEC-STR RP" ProgramChange="78"/>
+          <Patch Number="D079" Name="SADINGS RP" ProgramChange="79"/>
+          <Patch Number="D080" Name="DEEBASS RP" ProgramChange="80"/>
+          <Patch Number="D081" Name="ARP-BD2 RP" ProgramChange="81"/>
+          <Patch Number="D082" Name="ROBOPAD RP" ProgramChange="82"/>
+          <Patch Number="D083" Name="OZ-LEAD RP" ProgramChange="83"/>
+          <Patch Number="D084" Name="TING    RP" ProgramChange="84"/>
+          <Patch Number="D085" Name="TECBASS RP" ProgramChange="85"/>
+          <Patch Number="D086" Name="80s     RP" ProgramChange="86"/>
+          <Patch Number="D087" Name="MAXWave RP" ProgramChange="87"/>
+          <Patch Number="D088" Name="Howner  RP" ProgramChange="88"/>
+          <Patch Number="D089" Name="Omnef   RP" ProgramChange="89"/>
+          <Patch Number="D090" Name="FENDERB RP" ProgramChange="90"/>
+          <Patch Number="D091" Name="NABASS  RP" ProgramChange="91"/>
+          <Patch Number="D092" Name="CLUB-TO RP" ProgramChange="92"/>
+          <Patch Number="D093" Name="X0X KCK RP" ProgramChange="93"/>
+          <Patch Number="D094" Name="DIS-BD  RP" ProgramChange="94"/>
+          <Patch Number="D095" Name="LowKick RP" ProgramChange="95"/>
+          <Patch Number="D096" Name="MS-10 1 RP" ProgramChange="96"/>
+          <Patch Number="D097" Name="PickGTR RP" ProgramChange="97"/>
+          <Patch Number="D098" Name="MISTERY RP" ProgramChange="98"/>
+          <Patch Number="D099" Name="MS-10 2 RP" ProgramChange="99"/>
+          <Patch Number="D100" Name="V Cl.HH RP" ProgramChange="100"/>
+          <Patch Number="D101" Name="V Op.HH RP" ProgramChange="101"/>
+          <Patch Number="D102" Name="P6OO    RP" ProgramChange="102"/>
+          <Patch Number="D103" Name="P-ORGAN RP" ProgramChange="103"/>
+          <Patch Number="D104" Name="IQsnare RP" ProgramChange="104"/>
+          <Patch Number="D105" Name="T-DREAM RP" ProgramChange="105"/>
+          <Patch Number="D106" Name="VR-78 1 RP" ProgramChange="106"/>
+          <Patch Number="D107" Name="VR-78 2 RP" ProgramChange="107"/>
+          <Patch Number="D108" Name="SORRY   RP" ProgramChange="108"/>
+          <Patch Number="D109" Name="DX-OEM  RP" ProgramChange="109"/>
+          <Patch Number="D110" Name="BE-TWO  RP" ProgramChange="110"/>
+          <Patch Number="D111" Name="DX-VE   RP" ProgramChange="111"/>
+          <Patch Number="D112" Name="Q-TECK  RP" ProgramChange="112"/>
+          <Patch Number="D113" Name="V-2-U   RP" ProgramChange="113"/>
+          <Patch Number="D114" Name="2-Burst RP" ProgramChange="114"/>
+          <Patch Number="D115" Name="SHYCUS  RP" ProgramChange="115"/>
+          <Patch Number="D116" Name="CORD 1  RP" ProgramChange="116"/>
+          <Patch Number="D117" Name="CORDY   RP" ProgramChange="117"/>
+          <Patch Number="D118" Name="K-Werk3 RP" ProgramChange="118"/>
+          <Patch Number="D119" Name="PRO-12  RP" ProgramChange="119"/>
+          <Patch Number="D120" Name="HENDRIX RP" ProgramChange="120"/>
+          <Patch Number="D121" Name="??F=V   RP" ProgramChange="121"/>
+          <Patch Number="D122" Name="MS-99   RP" ProgramChange="122"/>
+          <Patch Number="D123" Name="Wurly   RP" ProgramChange="123"/>
+          <Patch Number="D124" Name="FAT-SN. RP" ProgramChange="124"/>
+          <Patch Number="D125" Name="MOVER   RP" ProgramChange="125"/>
+          <Patch Number="D126" Name="VeloPEW RP" ProgramChange="126"/>
+          <Patch Number="D127" Name="SNARE X RP" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="BANK E">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="4"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="E000" Name="AutoBendBC" ProgramChange="0"/>
+          <Patch Number="E001" Name="Avenues JS" ProgramChange="1"/>
+          <Patch Number="E002" Name="Back280sSV" ProgramChange="2"/>
+          <Patch Number="E003" Name="BC NewVoV3" ProgramChange="3"/>
+          <Patch Number="E004" Name="BlkvelvtSV" ProgramChange="4"/>
+          <Patch Number="E005" Name="B-SquareBC" ProgramChange="5"/>
+          <Patch Number="E006" Name="BusysawsSV" ProgramChange="6"/>
+          <Patch Number="E007" Name="ChilloutJS" ProgramChange="7"/>
+          <Patch Number="E008" Name="ChrunchyJS" ProgramChange="8"/>
+          <Patch Number="E009" Name="ClubbassSV" ProgramChange="9"/>
+          <Patch Number="E010" Name="ClubtoolBC" ProgramChange="10"/>
+          <Patch Number="E011" Name="Comm basSV" ProgramChange="11"/>
+          <Patch Number="E012" Name="CommerseSV" ProgramChange="12"/>
+          <Patch Number="E013" Name="Contra  BC" ProgramChange="13"/>
+          <Patch Number="E014" Name="CosmicbsSV" ProgramChange="14"/>
+          <Patch Number="E015" Name="CreameryBC" ProgramChange="15"/>
+          <Patch Number="E016" Name="Cyclone JS" ProgramChange="16"/>
+          <Patch Number="E017" Name="Da Funk BC" ProgramChange="17"/>
+          <Patch Number="E018" Name="Dawn    JS" ProgramChange="18"/>
+          <Patch Number="E019" Name="Decay   JS" ProgramChange="19"/>
+          <Patch Number="E020" Name="Deep9thsBC" ProgramChange="20"/>
+          <Patch Number="E021" Name="Devlish SV" ProgramChange="21"/>
+          <Patch Number="E022" Name="DHR Amb BC" ProgramChange="22"/>
+          <Patch Number="E023" Name="Digedi  JS" ProgramChange="23"/>
+          <Patch Number="E024" Name="Driver  SV" ProgramChange="24"/>
+          <Patch Number="E025" Name="Drmswpr SV" ProgramChange="25"/>
+          <Patch Number="E026" Name="Duffer  BC" ProgramChange="26"/>
+          <Patch Number="E027" Name="Edgy    JS" ProgramChange="27"/>
+          <Patch Number="E028" Name="Etheral SV" ProgramChange="28"/>
+          <Patch Number="E029" Name="Far EastJS" ProgramChange="29"/>
+          <Patch Number="E030" Name="FatWah  BC" ProgramChange="30"/>
+          <Patch Number="E031" Name="Five in1BC" ProgramChange="31"/>
+          <Patch Number="E032" Name="FlyBy   BC" ProgramChange="32"/>
+          <Patch Number="E033" Name="FnkNastyBC" ProgramChange="33"/>
+          <Patch Number="E034" Name="Freno   BC" ProgramChange="34"/>
+          <Patch Number="E035" Name="Fripper JS" ProgramChange="35"/>
+          <Patch Number="E036" Name="Future XSV" ProgramChange="36"/>
+          <Patch Number="E037" Name="FuturwldSV" ProgramChange="37"/>
+          <Patch Number="E038" Name="GarBass8BC" ProgramChange="38"/>
+          <Patch Number="E039" Name="Girls   SV" ProgramChange="39"/>
+          <Patch Number="E040" Name="Glassey SV" ProgramChange="40"/>
+          <Patch Number="E041" Name="Goatic  SV" ProgramChange="41"/>
+          <Patch Number="E042" Name="GoindownSV" ProgramChange="42"/>
+          <Patch Number="E043" Name="GoodniteJS" ProgramChange="43"/>
+          <Patch Number="E044" Name="Gulf    JS" ProgramChange="44"/>
+          <Patch Number="E045" Name="Hifive  SV" ProgramChange="45"/>
+          <Patch Number="E046" Name="HOA Pad SV" ProgramChange="46"/>
+          <Patch Number="E047" Name="Hollow  JS" ProgramChange="47"/>
+          <Patch Number="E048" Name="Homeboy JS" ProgramChange="48"/>
+          <Patch Number="E049" Name="HongKongBC" ProgramChange="49"/>
+          <Patch Number="E050" Name="Hoppin' SV" ProgramChange="50"/>
+          <Patch Number="E051" Name="IntntentSV" ProgramChange="51"/>
+          <Patch Number="E052" Name="intruderJS" ProgramChange="52"/>
+          <Patch Number="E053" Name="Jazzy   JS" ProgramChange="53"/>
+          <Patch Number="E054" Name="JoeZolo BC" ProgramChange="54"/>
+          <Patch Number="E055" Name="KatmanduJS" ProgramChange="55"/>
+          <Patch Number="E056" Name="KingsizeJS" ProgramChange="56"/>
+          <Patch Number="E057" Name="LatitudeSV" ProgramChange="57"/>
+          <Patch Number="E058" Name="Let's goSV" ProgramChange="58"/>
+          <Patch Number="E059" Name="Lite    JS" ProgramChange="59"/>
+          <Patch Number="E060" Name="LongskrtSV" ProgramChange="60"/>
+          <Patch Number="E061" Name="Maja    JS" ProgramChange="61"/>
+          <Patch Number="E062" Name="Mamba   JS" ProgramChange="62"/>
+          <Patch Number="E063" Name="MentalitJS" ProgramChange="63"/>
+          <Patch Number="E064" Name="MetalsynJS" ProgramChange="64"/>
+          <Patch Number="E065" Name="Move it SV" ProgramChange="65"/>
+          <Patch Number="E066" Name="MoveMyMWBC" ProgramChange="66"/>
+          <Patch Number="E067" Name="Muzzle  BC" ProgramChange="67"/>
+          <Patch Number="E068" Name="MWC#ord BC" ProgramChange="68"/>
+          <Patch Number="E069" Name="MystiqueJS" ProgramChange="69"/>
+          <Patch Number="E070" Name="NasalbasSV" ProgramChange="70"/>
+          <Patch Number="E071" Name="NastyFX JS" ProgramChange="71"/>
+          <Patch Number="E072" Name="NewVoV4 BC" ProgramChange="72"/>
+          <Patch Number="E073" Name="NoiztoyzJS" ProgramChange="73"/>
+          <Patch Number="E074" Name="OddgssaySV" ProgramChange="74"/>
+          <Patch Number="E075" Name="OffSoft BC" ProgramChange="75"/>
+          <Patch Number="E076" Name="Oil-crwlSV" ProgramChange="76"/>
+          <Patch Number="E077" Name="OwWah   BC" ProgramChange="77"/>
+          <Patch Number="E078" Name="Pathos  BC" ProgramChange="78"/>
+          <Patch Number="E079" Name="Peace   BC" ProgramChange="79"/>
+          <Patch Number="E080" Name="Pensive BC" ProgramChange="80"/>
+          <Patch Number="E081" Name="Phlute JS" ProgramChange="81"/>
+          <Patch Number="E082" Name="Pitchy  BC" ProgramChange="82"/>
+          <Patch Number="E083" Name="PlaycoolSV" ProgramChange="83"/>
+          <Patch Number="E084" Name="Plugged JS" ProgramChange="84"/>
+          <Patch Number="E085" Name="Polar   JS" ProgramChange="85"/>
+          <Patch Number="E086" Name="PolyGrovJS" ProgramChange="86"/>
+          <Patch Number="E087" Name="PseudoTBSV" ProgramChange="87"/>
+          <Patch Number="E088" Name="Pulsar  SV" ProgramChange="88"/>
+          <Patch Number="E089" Name="Q-Pad   BC" ProgramChange="89"/>
+          <Patch Number="E090" Name="RbbrHrp2BC" ProgramChange="90"/>
+          <Patch Number="E091" Name="Red lineSV" ProgramChange="91"/>
+          <Patch Number="E092" Name="ReflxshnBC" ProgramChange="92"/>
+          <Patch Number="E093" Name="RepeaterJS" ProgramChange="93"/>
+          <Patch Number="E094" Name="RestlessBC" ProgramChange="94"/>
+          <Patch Number="E095" Name="Rezoid  SV" ProgramChange="95"/>
+          <Patch Number="E096" Name="Rezzer2 BC" ProgramChange="96"/>
+          <Patch Number="E097" Name="Rise up!SV" ProgramChange="97"/>
+          <Patch Number="E098" Name="RubbrHrpBC" ProgramChange="98"/>
+          <Patch Number="E099" Name="Sawz 2  SV" ProgramChange="99"/>
+          <Patch Number="E100" Name="Sharp   BC" ProgramChange="100"/>
+          <Patch Number="E101" Name="S&amp;HOrganBC" ProgramChange="101"/>
+          <Patch Number="E102" Name="Sickly  BC" ProgramChange="102"/>
+          <Patch Number="E103" Name="SilkArp SV" ProgramChange="103"/>
+          <Patch Number="E104" Name="SinebassJS" ProgramChange="104"/>
+          <Patch Number="E105" Name="SomethngSV" ProgramChange="105"/>
+          <Patch Number="E106" Name="SpitfireJS" ProgramChange="106"/>
+          <Patch Number="E107" Name="Spoiled SV" ProgramChange="107"/>
+          <Patch Number="E108" Name="SpringPdSV" ProgramChange="108"/>
+          <Patch Number="E109" Name="Spring  SV" ProgramChange="109"/>
+          <Patch Number="E110" Name="StellarpSV" ProgramChange="110"/>
+          <Patch Number="E111" Name="StickyPdBC" ProgramChange="111"/>
+          <Patch Number="E112" Name="SubmergeSV" ProgramChange="112"/>
+          <Patch Number="E113" Name="T-Axxe  JS" ProgramChange="113"/>
+          <Patch Number="E114" Name="Ten InchJS" ProgramChange="114"/>
+          <Patch Number="E115" Name="ThirdEarJS" ProgramChange="115"/>
+          <Patch Number="E116" Name="Tinycat SV" ProgramChange="116"/>
+          <Patch Number="E117" Name="TiptaptuSV" ProgramChange="117"/>
+          <Patch Number="E118" Name="T Pot   BC" ProgramChange="118"/>
+          <Patch Number="E119" Name="TwotonesBC" ProgramChange="119"/>
+          <Patch Number="E120" Name="UniVoV  BC" ProgramChange="120"/>
+          <Patch Number="E121" Name="Vapour  SV" ProgramChange="121"/>
+          <Patch Number="E122" Name="V-Bells JS" ProgramChange="122"/>
+          <Patch Number="E123" Name="VindictrSV" ProgramChange="123"/>
+          <Patch Number="E124" Name="WarmVoV BC" ProgramChange="124"/>
+          <Patch Number="E125" Name="WD40  BC" ProgramChange="125"/>
+          <Patch Number="E126" Name="X World SV" ProgramChange="126"/>
+          <Patch Number="E127" Name="Yawning BC" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="BANK F">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="5"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="F000" Name="AndromdaHS" ProgramChange="0"/>
+          <Patch Number="F001" Name="Arctis HS" ProgramChange="1"/>
+          <Patch Number="F002" Name="AT-Mini HS" ProgramChange="2"/>
+          <Patch Number="F003" Name="AwashBs HS" ProgramChange="3"/>
+          <Patch Number="F004" Name="Backing HS" ProgramChange="4"/>
+          <Patch Number="F005" Name="BadTape HS" ProgramChange="5"/>
+          <Patch Number="F006" Name="Begin? HS" ProgramChange="6"/>
+          <Patch Number="F007" Name="BellBoy BC" ProgramChange="7"/>
+          <Patch Number="F008" Name="BerimTamHS" ProgramChange="8"/>
+          <Patch Number="F009" Name="Boingy HS" ProgramChange="9"/>
+          <Patch Number="F010" Name="BowBouncHS" ProgramChange="10"/>
+          <Patch Number="F011" Name="Bronze HS" ProgramChange="11"/>
+          <Patch Number="F012" Name="BubblX HS" ProgramChange="12"/>
+          <Patch Number="F013" Name="CantburyHS" ProgramChange="13"/>
+          <Patch Number="F014" Name="ChaosBelHS" ProgramChange="14"/>
+          <Patch Number="F015" Name="Choir2 HS" ProgramChange="15"/>
+          <Patch Number="F016" Name="ClubMed HS" ProgramChange="16"/>
+          <Patch Number="F017" Name="Congoid HS" ProgramChange="17"/>
+          <Patch Number="F018" Name="CptKork HS" ProgramChange="18"/>
+          <Patch Number="F019" Name="Cremoma HS" ProgramChange="19"/>
+          <Patch Number="F020" Name="DancePn HS" ProgramChange="20"/>
+          <Patch Number="F021" Name="Dangelo HS" ProgramChange="21"/>
+          <Patch Number="F022" Name="DB-Goer HS" ProgramChange="22"/>
+          <Patch Number="F023" Name="DinoBassHS" ProgramChange="23"/>
+          <Patch Number="F024" Name="Dirtron HS" ProgramChange="24"/>
+          <Patch Number="F025" Name="Dread-0 HS" ProgramChange="25"/>
+          <Patch Number="F026" Name="Dr.What?HS" ProgramChange="26"/>
+          <Patch Number="F027" Name="Dublyoo HS" ProgramChange="27"/>
+          <Patch Number="F028" Name="DX-Pno1 HS" ProgramChange="28"/>
+          <Patch Number="F029" Name="DX-Pno2 HS" ProgramChange="29"/>
+          <Patch Number="F030" Name="DX-Pno3 HS" ProgramChange="30"/>
+          <Patch Number="F031" Name="Dynette HS" ProgramChange="31"/>
+          <Patch Number="F032" Name="Easter1 HS" ProgramChange="32"/>
+          <Patch Number="F033" Name="E-Grand HS" ProgramChange="33"/>
+          <Patch Number="F034" Name="EkoRoad HS" ProgramChange="34"/>
+          <Patch Number="F035" Name="E.Rigby HS" ProgramChange="35"/>
+          <Patch Number="F036" Name="Everest HS" ProgramChange="36"/>
+          <Patch Number="F037" Name="Expense HS" ProgramChange="37"/>
+          <Patch Number="F038" Name="Flats HS" ProgramChange="38"/>
+          <Patch Number="F039" Name="Flutes HS" ProgramChange="39"/>
+          <Patch Number="F040" Name="Flutoon HS" ProgramChange="40"/>
+          <Patch Number="F041" Name="Froese HS" ProgramChange="41"/>
+          <Patch Number="F042" Name="FunctionHS" ProgramChange="42"/>
+          <Patch Number="F043" Name="Ganges HS" ProgramChange="43"/>
+          <Patch Number="F044" Name="GateRim HS" ProgramChange="44"/>
+          <Patch Number="F045" Name="Goomby HS" ProgramChange="45"/>
+          <Patch Number="F046" Name="Ham&amp;X   HS" ProgramChange="46"/>
+          <Patch Number="F047" Name="Harpsie HS" ProgramChange="47"/>
+          <Patch Number="F048" Name="Hektik HS" ProgramChange="48"/>
+          <Patch Number="F049" Name="HissPad BC" ProgramChange="49"/>
+          <Patch Number="F050" Name="JamMini HS" ProgramChange="50"/>
+          <Patch Number="F051" Name="Jawdan HS" ProgramChange="51"/>
+          <Patch Number="F052" Name="JazRoad HS" ProgramChange="52"/>
+          <Patch Number="F053" Name="J.Edgar HS" ProgramChange="53"/>
+          <Patch Number="F054" Name="JuicOrg HS" ProgramChange="54"/>
+          <Patch Number="F055" Name="Kitchen HS" ProgramChange="55"/>
+          <Patch Number="F056" Name="Latex HS" ProgramChange="56"/>
+          <Patch Number="F057" Name="LordOrg HS" ProgramChange="57"/>
+          <Patch Number="F058" Name="Macho HS" ProgramChange="58"/>
+          <Patch Number="F059" Name="Manfman HS" ProgramChange="59"/>
+          <Patch Number="F060" Name="MarkOne HS" ProgramChange="60"/>
+          <Patch Number="F061" Name="MarsAtx HS" ProgramChange="61"/>
+          <Patch Number="F062" Name="Meddle HS" ProgramChange="62"/>
+          <Patch Number="F063" Name="MelloVl HS" ProgramChange="63"/>
+          <Patch Number="F064" Name="MinorityHS" ProgramChange="64"/>
+          <Patch Number="F065" Name="Monza HS" ProgramChange="65"/>
+          <Patch Number="F066" Name="MoonWeedHS" ProgramChange="66"/>
+          <Patch Number="F067" Name="Multasm HS" ProgramChange="67"/>
+          <Patch Number="F068" Name="MW-StepsHS" ProgramChange="68"/>
+          <Patch Number="F069" Name="Nowhere BC" ProgramChange="69"/>
+          <Patch Number="F070" Name="NylSolo HS" ProgramChange="70"/>
+          <Patch Number="F071" Name="Oboe HS" ProgramChange="71"/>
+          <Patch Number="F072" Name="Oddigy HS" ProgramChange="72"/>
+          <Patch Number="F073" Name="Old S&amp;H HS" ProgramChange="73"/>
+          <Patch Number="F074" Name="Orange HS" ProgramChange="74"/>
+          <Patch Number="F075" Name="Oscar1 HS" ProgramChange="75"/>
+          <Patch Number="F076" Name="Outpost HS" ProgramChange="76"/>
+          <Patch Number="F077" Name="PanShakeHS" ProgramChange="77"/>
+          <Patch Number="F078" Name="PataFiz HS" ProgramChange="78"/>
+          <Patch Number="F079" Name="PeaceOrgHS" ProgramChange="79"/>
+          <Patch Number="F080" Name="Picking HS" ProgramChange="80"/>
+          <Patch Number="F081" Name="PickUp HS" ProgramChange="81"/>
+          <Patch Number="F082" Name="PingOrg HS" ProgramChange="82"/>
+          <Patch Number="F083" Name="Pit-Str HS" ProgramChange="83"/>
+          <Patch Number="F084" Name="Pizza HS" ProgramChange="84"/>
+          <Patch Number="F085" Name="PlukalogHS" ProgramChange="85"/>
+          <Patch Number="F086" Name="PopCorn HS" ProgramChange="86"/>
+          <Patch Number="F087" Name="Prions  HS" ProgramChange="87"/>
+          <Patch Number="F088" Name="Pstyro2 HS" ProgramChange="88"/>
+          <Patch Number="F089" Name="Pumpah HS" ProgramChange="89"/>
+          <Patch Number="F090" Name="Qatsi HS" ProgramChange="90"/>
+          <Patch Number="F091" Name="Quack! HS" ProgramChange="91"/>
+          <Patch Number="F092" Name="RadioG HS" ProgramChange="92"/>
+          <Patch Number="F093" Name="Raspry HS" ProgramChange="93"/>
+          <Patch Number="F094" Name="RuminateHS" ProgramChange="94"/>
+          <Patch Number="F095" Name="Saloon  HS" ProgramChange="95"/>
+          <Patch Number="F096" Name="Saxpet HS" ProgramChange="96"/>
+          <Patch Number="F097" Name="Series3 HS" ProgramChange="97"/>
+          <Patch Number="F098" Name="ShineOn HS" ProgramChange="98"/>
+          <Patch Number="F099" Name="SidKid HS" ProgramChange="99"/>
+          <Patch Number="F100" Name="SimSyn HS" ProgramChange="100"/>
+          <Patch Number="F101" Name="SinSolo HS" ProgramChange="101"/>
+          <Patch Number="F102" Name="Slapska HS" ProgramChange="102"/>
+          <Patch Number="F103" Name="Spring HS" ProgramChange="103"/>
+          <Patch Number="F104" Name="Spy HS" ProgramChange="104"/>
+          <Patch Number="F105" Name="Squeeze HS" ProgramChange="105"/>
+          <Patch Number="F106" Name="Squoid HS" ProgramChange="106"/>
+          <Patch Number="F107" Name="Sunder HS" ProgramChange="107"/>
+          <Patch Number="F108" Name="Tabloid HS" ProgramChange="108"/>
+          <Patch Number="F109" Name="TheDome HS" ProgramChange="109"/>
+          <Patch Number="F110" Name="Thustra HS" ProgramChange="110"/>
+          <Patch Number="F111" Name="TimeStepHS" ProgramChange="111"/>
+          <Patch Number="F112" Name="Tunnel HS" ProgramChange="112"/>
+          <Patch Number="F113" Name="TuvaWeelHS" ProgramChange="113"/>
+          <Patch Number="F114" Name="TweakMe HS" ProgramChange="114"/>
+          <Patch Number="F115" Name="TwoOfUs HS" ProgramChange="115"/>
+          <Patch Number="F116" Name="Untune HS" ProgramChange="116"/>
+          <Patch Number="F117" Name="Vanilla HS" ProgramChange="117"/>
+          <Patch Number="F118" Name="Voodoo HS" ProgramChange="118"/>
+          <Patch Number="F119" Name="Vorwerk HS" ProgramChange="119"/>
+          <Patch Number="F120" Name="Warlord HS" ProgramChange="120"/>
+          <Patch Number="F121" Name="Wheee! HS" ProgramChange="121"/>
+          <Patch Number="F122" Name="WishBom HS" ProgramChange="122"/>
+          <Patch Number="F123" Name="WoodyBs HS" ProgramChange="123"/>
+          <Patch Number="F124" Name="X-Didge HS" ProgramChange="124"/>
+          <Patch Number="F125" Name="X-Werx HS" ProgramChange="125"/>
+          <Patch Number="F126" Name="Xyrimba HS" ProgramChange="126"/>
+          <Patch Number="F127" Name="Zorch HS" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="BANK G">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="6"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="G000" Name="AandreasM@" ProgramChange="0"/>
+          <Patch Number="G001" Name="Aerosol  J" ProgramChange="1"/>
+          <Patch Number="G002" Name="AerSynthM@" ProgramChange="2"/>
+          <Patch Number="G003" Name="AI2 Pad M@" ProgramChange="3"/>
+          <Patch Number="G004" Name="AirMonixM@" ProgramChange="4"/>
+          <Patch Number="G005" Name="Apogee  M@" ProgramChange="5"/>
+          <Patch Number="G006" Name="AqutouchM@" ProgramChange="6"/>
+          <Patch Number="G007" Name="Baggins M@" ProgramChange="7"/>
+          <Patch Number="G008" Name="BGot90s M@" ProgramChange="8"/>
+          <Patch Number="G009" Name="BigPadSwM@" ProgramChange="9"/>
+          <Patch Number="G010" Name="Bowzerz M@" ProgramChange="10"/>
+          <Patch Number="G011" Name="Cali-AirM@" ProgramChange="11"/>
+          <Patch Number="G012" Name="CheezwizM@" ProgramChange="12"/>
+          <Patch Number="G013" Name="Claps2  HS" ProgramChange="13"/>
+          <Patch Number="G014" Name="Clench  BC" ProgramChange="14"/>
+          <Patch Number="G015" Name="CloudCtyM@" ProgramChange="15"/>
+          <Patch Number="G016" Name="COMPump M@" ProgramChange="16"/>
+          <Patch Number="G017" Name="CrossQ  BC" ProgramChange="17"/>
+          <Patch Number="G018" Name="D&amp;B FX" ProgramChange="18"/>
+          <Patch Number="G019" Name="D&amp;B Geneqa" ProgramChange="19"/>
+          <Patch Number="G020" Name="D&amp;B Woover" ProgramChange="20"/>
+          <Patch Number="G021" Name="D'EchoerM@" ProgramChange="21"/>
+          <Patch Number="G022" Name="DetektorM@" ProgramChange="22"/>
+          <Patch Number="G023" Name="DigiKoto M" ProgramChange="23"/>
+          <Patch Number="G024" Name="DontFretM@" ProgramChange="24"/>
+          <Patch Number="G025" Name="DripDropM@" ProgramChange="25"/>
+          <Patch Number="G026" Name="Driven  M@" ProgramChange="26"/>
+          <Patch Number="G027" Name="EddiWho?M@" ProgramChange="27"/>
+          <Patch Number="G028" Name="EPhase  BC" ProgramChange="28"/>
+          <Patch Number="G029" Name="EPStage?M@" ProgramChange="29"/>
+          <Patch Number="G030" Name="EPTines2M@" ProgramChange="30"/>
+          <Patch Number="G031" Name="EPWhirlyM@" ProgramChange="31"/>
+          <Patch Number="G032" Name="EPZeply M@" ProgramChange="32"/>
+          <Patch Number="G033" Name="ETom2002M@" ProgramChange="33"/>
+          <Patch Number="G034" Name="Fingers M@" ProgramChange="34"/>
+          <Patch Number="G035" Name="FMChittrM@" ProgramChange="35"/>
+          <Patch Number="G036" Name="FourSaws" ProgramChange="36"/>
+          <Patch Number="G037" Name="FunkLd-1SM" ProgramChange="37"/>
+          <Patch Number="G038" Name="FunkLd-2SM" ProgramChange="38"/>
+          <Patch Number="G039" Name="FunkLd-3SM" ProgramChange="39"/>
+          <Patch Number="G040" Name="FunkLd-4SM" ProgramChange="40"/>
+          <Patch Number="G041" Name="GedyLeedM@" ProgramChange="41"/>
+          <Patch Number="G042" Name="Gntle9thM@" ProgramChange="42"/>
+          <Patch Number="G043" Name="Grander M@" ProgramChange="43"/>
+          <Patch Number="G044" Name="GrimeyM@" ProgramChange="44"/>
+          <Patch Number="G045" Name="Hallows M@" ProgramChange="45"/>
+          <Patch Number="G046" Name="HarmopadM@" ProgramChange="46"/>
+          <Patch Number="G047" Name="He-VPlukM@" ProgramChange="47"/>
+          <Patch Number="G048" Name="HoldChrdM@" ProgramChange="48"/>
+          <Patch Number="G049" Name="HrmadnesM@" ProgramChange="49"/>
+          <Patch Number="G050" Name="Jetropa M@" ProgramChange="50"/>
+          <Patch Number="G051" Name="JunoPowrM@" ProgramChange="51"/>
+          <Patch Number="G052" Name="JV Bass M@" ProgramChange="52"/>
+          <Patch Number="G053" Name="Kompin' M@" ProgramChange="53"/>
+          <Patch Number="G054" Name="Korgan  M@" ProgramChange="54"/>
+          <Patch Number="G055" Name="Kyrie   M@" ProgramChange="55"/>
+          <Patch Number="G056" Name="Lektrik M@" ProgramChange="56"/>
+          <Patch Number="G057" Name="LetsSyncM@" ProgramChange="57"/>
+          <Patch Number="G058" Name="LongKickSM" ProgramChange="58"/>
+          <Patch Number="G059" Name="LuckyMan J" ProgramChange="59"/>
+          <Patch Number="G060" Name="MelodieaM@" ProgramChange="60"/>
+          <Patch Number="G061" Name="MiniBassSM" ProgramChange="61"/>
+          <Patch Number="G062" Name="MiniBS-2SM" ProgramChange="62"/>
+          <Patch Number="G063" Name="MiniBS-3SM" ProgramChange="63"/>
+          <Patch Number="G064" Name="MiniBS-4SM" ProgramChange="64"/>
+          <Patch Number="G065" Name="MiniBS-5SM" ProgramChange="65"/>
+          <Patch Number="G066" Name="MiniLeadSM" ProgramChange="66"/>
+          <Patch Number="G067" Name="ModsweepM@" ProgramChange="67"/>
+          <Patch Number="G068" Name="NewSnareBC" ProgramChange="68"/>
+          <Patch Number="G069" Name="NewWorldM@" ProgramChange="69"/>
+          <Patch Number="G070" Name="NoizBassM@" ProgramChange="70"/>
+          <Patch Number="G071" Name="ObiPad   J" ProgramChange="71"/>
+          <Patch Number="G072" Name="OceanusM@" ProgramChange="72"/>
+          <Patch Number="G073" Name="OhEq-8  M@" ProgramChange="73"/>
+          <Patch Number="G074" Name="Oh Yeah M@" ProgramChange="74"/>
+          <Patch Number="G075" Name="O'Pad M@" ProgramChange="75"/>
+          <Patch Number="G076" Name="OrbteriaM@" ProgramChange="76"/>
+          <Patch Number="G077" Name="PadLayerM@" ProgramChange="77"/>
+          <Patch Number="G078" Name="Paiow   M@" ProgramChange="78"/>
+          <Patch Number="G079" Name="Pat'sGR M@" ProgramChange="79"/>
+          <Patch Number="G080" Name="Pergru  M@" ProgramChange="80"/>
+          <Patch Number="G081" Name="Perky!  M@" ProgramChange="81"/>
+          <Patch Number="G082" Name="PhazplukM@" ProgramChange="82"/>
+          <Patch Number="G083" Name="Popcomp M@" ProgramChange="83"/>
+          <Patch Number="G084" Name="PortaPoly@" ProgramChange="84"/>
+          <Patch Number="G085" Name="ProfeticM@" ProgramChange="85"/>
+          <Patch Number="G086" Name="PrtaBeloBC" ProgramChange="86"/>
+          <Patch Number="G087" Name="Punchit2SV" ProgramChange="87"/>
+          <Patch Number="G088" Name="Punsh itSV" ProgramChange="88"/>
+          <Patch Number="G089" Name="QMenMW  BC" ProgramChange="89"/>
+          <Patch Number="G090" Name="Replika M@" ProgramChange="90"/>
+          <Patch Number="G091" Name="ResoChrdJS" ProgramChange="91"/>
+          <Patch Number="G092" Name="Reveal  JS" ProgramChange="92"/>
+          <Patch Number="G093" Name="RezTailsM@" ProgramChange="93"/>
+          <Patch Number="G094" Name="RichWind" ProgramChange="94"/>
+          <Patch Number="G095" Name="RimShot BC" ProgramChange="95"/>
+          <Patch Number="G096" Name="Ripper  JS" ProgramChange="96"/>
+          <Patch Number="G097" Name="Rollin  JS" ProgramChange="97"/>
+          <Patch Number="G098" Name="Rollups M@" ProgramChange="98"/>
+          <Patch Number="G099" Name="Saw-Ya! M@" ProgramChange="99"/>
+          <Patch Number="G100" Name="ShortWAVM@" ProgramChange="100"/>
+          <Patch Number="G101" Name="Spaced  JS" ProgramChange="101"/>
+          <Patch Number="G102" Name="StarPad  J" ProgramChange="102"/>
+          <Patch Number="G103" Name="Stratus JS" ProgramChange="103"/>
+          <Patch Number="G104" Name="SubdvisnM@" ProgramChange="104"/>
+          <Patch Number="G105" Name="SunbeamsJS" ProgramChange="105"/>
+          <Patch Number="G106" Name="SweePlukM@" ProgramChange="106"/>
+          <Patch Number="G107" Name="Synchym2M@" ProgramChange="107"/>
+          <Patch Number="G108" Name="SyncPedlM@" ProgramChange="108"/>
+          <Patch Number="G109" Name="Tender  JS" ProgramChange="109"/>
+          <Patch Number="G110" Name="TheramosM@" ProgramChange="110"/>
+          <Patch Number="G111" Name="Tight8s M@" ProgramChange="111"/>
+          <Patch Number="G112" Name="Tremor  JS" ProgramChange="112"/>
+          <Patch Number="G113" Name="TronFlt M@" ProgramChange="113"/>
+          <Patch Number="G114" Name="TronStr M@" ProgramChange="114"/>
+          <Patch Number="G115" Name="TwinPadsM@" ProgramChange="115"/>
+          <Patch Number="G116" Name="UofYouthM@" ProgramChange="116"/>
+          <Patch Number="G117" Name="VibePad M@" ProgramChange="117"/>
+          <Patch Number="G118" Name="VolutionM@" ProgramChange="118"/>
+          <Patch Number="G119" Name="Wavelet M@" ProgramChange="119"/>
+          <Patch Number="G120" Name="Whales  JS" ProgramChange="120"/>
+          <Patch Number="G121" Name="WineglasM@" ProgramChange="121"/>
+          <Patch Number="G122" Name="WowGrowlM@" ProgramChange="122"/>
+          <Patch Number="G123" Name="WynwouldM@" ProgramChange="123"/>
+          <Patch Number="G124" Name="X Dream JS" ProgramChange="124"/>
+          <Patch Number="G125" Name="XitLeft M@" ProgramChange="125"/>
+          <Patch Number="G126" Name="X-Men  JS" ProgramChange="126"/>
+          <Patch Number="G127" Name="Zyntar M@" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="BANK H">
+        <MIDICommands>
+          <ControlChange Control="0" Value="0"/>
+          <ControlChange Control="32" Value="7"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="H000" Name="AESound zs" ProgramChange="0"/>
+          <Patch Number="H001" Name="AldoNovaM" ProgramChange="1"/>
+          <Patch Number="H002" Name="AmbientBlJ" ProgramChange="2"/>
+          <Patch Number="H003" Name="AmbientFXJ" ProgramChange="3"/>
+          <Patch Number="H004" Name="ambiRgM zs" ProgramChange="4"/>
+          <Patch Number="H005" Name="AnHigh  M" ProgramChange="5"/>
+          <Patch Number="H006" Name="Arcade  BC" ProgramChange="6"/>
+          <Patch Number="H007" Name="Atlas    J" ProgramChange="7"/>
+          <Patch Number="H008" Name="Attack!  J" ProgramChange="8"/>
+          <Patch Number="H009" Name="AutoTknoBC" ProgramChange="9"/>
+          <Patch Number="H010" Name="BadLand M" ProgramChange="10"/>
+          <Patch Number="H011" Name="Bass 415 M" ProgramChange="11"/>
+          <Patch Number="H012" Name="Bass 504 M" ProgramChange="12"/>
+          <Patch Number="H013" Name="Basser M" ProgramChange="13"/>
+          <Patch Number="H014" Name="BassIk M" ProgramChange="14"/>
+          <Patch Number="H015" Name="basting2zs" ProgramChange="15"/>
+          <Patch Number="H016" Name="basting zs" ProgramChange="16"/>
+          <Patch Number="H017" Name="B-Deep  M" ProgramChange="17"/>
+          <Patch Number="H018" Name="B-Foe    M" ProgramChange="18"/>
+          <Patch Number="H019" Name="bigTung zs" ProgramChange="19"/>
+          <Patch Number="H020" Name="Bleu!   M" ProgramChange="20"/>
+          <Patch Number="H021" Name="Blotto  M" ProgramChange="21"/>
+          <Patch Number="H022" Name="Bubble2 M" ProgramChange="22"/>
+          <Patch Number="H023" Name="CappSt  M" ProgramChange="23"/>
+          <Patch Number="H024" Name="Cavsak M" ProgramChange="24"/>
+          <Patch Number="H025" Name="cirqStb zs" ProgramChange="25"/>
+          <Patch Number="H026" Name="CLEeeN  M" ProgramChange="26"/>
+          <Patch Number="H027" Name="Cloakin M" ProgramChange="27"/>
+          <Patch Number="H028" Name="cutRes  zs" ProgramChange="28"/>
+          <Patch Number="H029" Name="decDATA2zs" ProgramChange="29"/>
+          <Patch Number="H030" Name="decDATA3zs" ProgramChange="30"/>
+          <Patch Number="H031" Name="decDATA zs" ProgramChange="31"/>
+          <Patch Number="H032" Name="deciDAT4zs" ProgramChange="32"/>
+          <Patch Number="H033" Name="dirty   zs" ProgramChange="33"/>
+          <Patch Number="H034" Name="dopeEp zs" ProgramChange="34"/>
+          <Patch Number="H035" Name="Dragon  M" ProgramChange="35"/>
+          <Patch Number="H036" Name="dropIT  zs" ProgramChange="36"/>
+          <Patch Number="H037" Name="drpBomb zs" ProgramChange="37"/>
+          <Patch Number="H038" Name="Drubber BC" ProgramChange="38"/>
+          <Patch Number="H039" Name="Dry Bass J" ProgramChange="39"/>
+          <Patch Number="H040" Name="dstStep zs" ProgramChange="40"/>
+          <Patch Number="H041" Name="Dubsak M" ProgramChange="41"/>
+          <Patch Number="H042" Name="Dumb!    M" ProgramChange="42"/>
+          <Patch Number="H043" Name="Empira 2M" ProgramChange="43"/>
+          <Patch Number="H044" Name="Entropie J" ProgramChange="44"/>
+          <Patch Number="H045" Name="Everest  J" ProgramChange="45"/>
+          <Patch Number="H046" Name="Facial M" ProgramChange="46"/>
+          <Patch Number="H047" Name="FePudn zs" ProgramChange="47"/>
+          <Patch Number="H048" Name="FlutDrumBC" ProgramChange="48"/>
+          <Patch Number="H049" Name="fnkStrg zs" ProgramChange="49"/>
+          <Patch Number="H050" Name="GBEp3   zs" ProgramChange="50"/>
+          <Patch Number="H051" Name="george2 zs" ProgramChange="51"/>
+          <Patch Number="H052" Name="GooHat  M" ProgramChange="52"/>
+          <Patch Number="H053" Name="GotHAM! M" ProgramChange="53"/>
+          <Patch Number="H054" Name="HIDEson M" ProgramChange="54"/>
+          <Patch Number="H055" Name="IndustryBC" ProgramChange="55"/>
+          <Patch Number="H056" Name="LepY2 zs" ProgramChange="56"/>
+          <Patch Number="H057" Name="LepY3 zs" ProgramChange="57"/>
+          <Patch Number="H058" Name="lootRng zs" ProgramChange="58"/>
+          <Patch Number="H059" Name="Lost    M" ProgramChange="59"/>
+          <Patch Number="H060" Name="marimba1zs" ProgramChange="60"/>
+          <Patch Number="H061" Name="marimba4zs" ProgramChange="61"/>
+          <Patch Number="H062" Name="MeBad?  M" ProgramChange="62"/>
+          <Patch Number="H063" Name="Menace  M" ProgramChange="63"/>
+          <Patch Number="H064" Name="MONose  zs" ProgramChange="64"/>
+          <Patch Number="H065" Name="mostHih zs" ProgramChange="65"/>
+          <Patch Number="H066" Name="Mr.Foo M" ProgramChange="66"/>
+          <Patch Number="H067" Name="Necro   M" ProgramChange="67"/>
+          <Patch Number="H068" Name="NoFuture M" ProgramChange="68"/>
+          <Patch Number="H069" Name="orguit  zs" ProgramChange="69"/>
+          <Patch Number="H070" Name="phasEP  zs" ProgramChange="70"/>
+          <Patch Number="H071" Name="Plead   M" ProgramChange="71"/>
+          <Patch Number="H072" Name="Pluka   zs" ProgramChange="72"/>
+          <Patch Number="H073" Name="PowerStrnJ" ProgramChange="73"/>
+          <Patch Number="H074" Name="PulsRay zs" ProgramChange="74"/>
+          <Patch Number="H075" Name="Quarp   BC" ProgramChange="75"/>
+          <Patch Number="H076" Name="RbbrBellBC" ProgramChange="76"/>
+          <Patch Number="H077" Name="ReBird  M" ProgramChange="77"/>
+          <Patch Number="H078" Name="resPad  zs" ProgramChange="78"/>
+          <Patch Number="H079" Name="Reverse  J" ProgramChange="79"/>
+          <Patch Number="H080" Name="rmBack  zs" ProgramChange="80"/>
+          <Patch Number="H081" Name="rngPort zs" ProgramChange="81"/>
+          <Patch Number="H082" Name="Roboe   zs" ProgramChange="82"/>
+          <Patch Number="H083" Name="Shifted BC" ProgramChange="83"/>
+          <Patch Number="H084" Name="ShineChrdJ" ProgramChange="84"/>
+          <Patch Number="H085" Name="shivrPd zs" ProgramChange="85"/>
+          <Patch Number="H086" Name="sineZZZ zs" ProgramChange="86"/>
+          <Patch Number="H087" Name="sinMorf zs" ProgramChange="87"/>
+          <Patch Number="H088" Name="sitar   zs" ProgramChange="88"/>
+          <Patch Number="H089" Name="Skware  zs" ProgramChange="89"/>
+          <Patch Number="H090" Name="smoovLd zs" ProgramChange="90"/>
+          <Patch Number="H091" Name="sneakr  zs" ProgramChange="91"/>
+          <Patch Number="H092" Name="SoftBell J" ProgramChange="92"/>
+          <Patch Number="H093" Name="Softi    J" ProgramChange="93"/>
+          <Patch Number="H094" Name="SoftSeq. J" ProgramChange="94"/>
+          <Patch Number="H095" Name="sofueMODzs" ProgramChange="95"/>
+          <Patch Number="H096" Name="SoSad  M" ProgramChange="96"/>
+          <Patch Number="H097" Name="SpaceNighJ" ProgramChange="97"/>
+          <Patch Number="H098" Name="spasDrv zs" ProgramChange="98"/>
+          <Patch Number="H099" Name="Spinner  M" ProgramChange="99"/>
+          <Patch Number="H100" Name="spoolPd zs" ProgramChange="100"/>
+          <Patch Number="H101" Name="sqPadMM zs" ProgramChange="101"/>
+          <Patch Number="H102" Name="squar00 zs" ProgramChange="102"/>
+          <Patch Number="H103" Name="Sr.Goo M" ProgramChange="103"/>
+          <Patch Number="H104" Name="step2it zs" ProgramChange="104"/>
+          <Patch Number="H105" Name="Subbass zs" ProgramChange="105"/>
+          <Patch Number="H106" Name="Sunday  M" ProgramChange="106"/>
+          <Patch Number="H107" Name="Tomita   J" ProgramChange="107"/>
+          <Patch Number="H108" Name="Torque" ProgramChange="108"/>
+          <Patch Number="H109" Name="UfO 4   M" ProgramChange="109"/>
+          <Patch Number="H110" Name="UKG2    BC" ProgramChange="110"/>
+          <Patch Number="H111" Name="UKG     BC" ProgramChange="111"/>
+          <Patch Number="H112" Name="V_Acid#9 M" ProgramChange="112"/>
+          <Patch Number="H113" Name="V-Acid#4 M" ProgramChange="113"/>
+          <Patch Number="H114" Name="V-Acid#7 M" ProgramChange="114"/>
+          <Patch Number="H115" Name="VCS 3a   J" ProgramChange="115"/>
+          <Patch Number="H116" Name="videoG1 zs" ProgramChange="116"/>
+          <Patch Number="H117" Name="videoG2 zs" ProgramChange="117"/>
+          <Patch Number="H118" Name="videoG4 zs" ProgramChange="118"/>
+          <Patch Number="H119" Name="waowLd  zs" ProgramChange="119"/>
+          <Patch Number="H120" Name="Weazel  M" ProgramChange="120"/>
+          <Patch Number="H121" Name="WetThn  zs" ProgramChange="121"/>
+          <Patch Number="H122" Name="Wobble  M" ProgramChange="122"/>
+          <Patch Number="H123" Name="xPandr  zs" ProgramChange="123"/>
+          <Patch Number="H124" Name="yahy    zs" ProgramChange="124"/>
+          <Patch Number="H125" Name="Yeao!  M" ProgramChange="125"/>
+          <Patch Number="H126" Name="ZartPad  J" ProgramChange="126"/>
+          <Patch Number="H127" Name="Zupfi    J" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

@@ -1,19 +1,19 @@
 /*
  * Copyright (C) 2016 Robin Gareus <robin@gareus.org>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include "audiographer/general/analyser.h"
@@ -149,12 +149,11 @@ Analyser::process (ProcessContext<float> const & ctx)
 	}
 
 	float const * const data = ctx.data ();
-	for (unsigned int c = 0; c < _channels; ++c) {
-		if (!_dbtp_plugin[c]) { continue; }
+	for (unsigned int c = 0; c < _channels && c < _dbtp_plugins.size (); ++c) {
 		for (s = 0; s < n_samples; ++s) {
 			_bufs[0][s] = data[s * _channels + c];
 		}
-		_dbtp_plugin[c]->process (_bufs, Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
+		_dbtp_plugins.at(c)->process (_bufs, Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
 	}
 
 	fftwf_execute (_fft_plan);
@@ -248,9 +247,8 @@ Analyser::result ()
 	}
 
 	const unsigned cmask = _result.n_channels - 1; // [0, 1]
-	for (unsigned int c = 0; c < _channels; ++c) {
-		if (!_dbtp_plugin[c]) { continue; }
-		Vamp::Plugin::FeatureSet features = _dbtp_plugin[c]->getRemainingFeatures ();
+	for (unsigned int c = 0; c < _channels && c < _dbtp_plugins.size (); ++c) {
+		Vamp::Plugin::FeatureSet features = _dbtp_plugins.at(c)->getRemainingFeatures ();
 		if (!features.empty () && features.size () == 2) {
 			_result.have_dbtp = true;
 			float p = features[0][0].values[0];

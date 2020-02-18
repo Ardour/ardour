@@ -1,21 +1,28 @@
 /*
-  Copyright (C) 2001-2009 Paul Davis
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2006 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2005-2019 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005 Karsten Wiese <fzuuzf@googlemail.com>
+ * Copyright (C) 2007-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2008-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2012-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2016 Julien "_FrnchFrgg_" RIVAUD <frnchfrgg@free.fr>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 #include <algorithm>
 
 #include <gtkmm/box.h>
@@ -59,7 +66,7 @@ OptionEditorComponent::add_widget_to_page (OptionEditorPage* p, Gtk::Widget* w)
 }
 
 void
-OptionEditorComponent::add_widgets_to_page (OptionEditorPage* p, Gtk::Widget* wa, Gtk::Widget* wb, bool expand)
+OptionEditorComponent::add_widgets_to_page (OptionEditorPage* p, Gtk::Widget* wa, Gtk::Widget* wb, bool /*notused*/)
 {
 	int const n = p->table.property_n_rows();
 	int m = n + 1;
@@ -69,13 +76,11 @@ OptionEditorComponent::add_widgets_to_page (OptionEditorPage* p, Gtk::Widget* wa
 
 	p->table.resize (m, 3);
 	p->table.attach (*wa, 1, 2, n, n + 1, FILL);
-	if (expand) {
-		p->table.attach (*wb, 2, 3, n, n + 1, FILL | EXPAND);
-	} else {
-		Alignment* a = manage (new Alignment (0, 0.5, 0, 1.0));
-		a->add (*wb);
-		p->table.attach (*a, 2, 3, n, n + 1, FILL | EXPAND);
-	}
+
+	Alignment* a = manage (new Alignment (0, 0.5, 0, 1.0));
+	a->add (*wb);
+	p->table.attach (*a, 2, 3, n, n + 1, FILL | EXPAND);
+
 	maybe_add_note (p, n + 1);
 }
 
@@ -192,15 +197,66 @@ void
 RcActionButton::add_to_page (OptionEditorPage *p)
 {
 	int const n = p->table.property_n_rows();
-	int m = n + 1;
+	const int m = n + 1;
 	p->table.resize (m, 3);
+	Alignment* a = manage (new Alignment (0, 0.5, 0, 1.0));
+	a->add (*_button);
+
 	if (_label) {
-		p->table.attach (*_label,  1, 2, n, n + 1, FILL | EXPAND);
-		p->table.attach (*_button, 2, 3, n, n + 1, FILL | EXPAND);
+		p->table.attach (*_label,  1, 2, n, m);
+		p->table.attach (*a, 2, 3, n, m, FILL|EXPAND);
 	} else {
-		p->table.attach (*_button, 1, 3, n, n + 1, FILL | EXPAND);
+		p->table.attach (*a, 1, 3, n, m, FILL|EXPAND);
 	}
 }
+
+/*--------------------------*/
+
+CheckOption::CheckOption (string const & i, string const & n, Glib::RefPtr<Gtk::Action> act)
+{
+	_button = manage (new CheckButton);
+	_label = manage (new Label);
+	_label->set_markup (n);
+	_button->add (*_label);
+	_button->signal_toggled().connect (sigc::mem_fun (*this, &CheckOption::toggled));
+
+	Gtkmm2ext::Activatable::set_related_action (act);
+	assert (_action);
+
+	action_sensitivity_changed ();
+
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
+	if (tact) {
+		action_toggled ();
+		tact->signal_toggled().connect (sigc::mem_fun (*this, &CheckOption::action_toggled));
+	}
+
+	_action->connect_property_changed ("sensitive", sigc::mem_fun (*this, &CheckOption::action_sensitivity_changed));
+}
+
+void
+CheckOption::action_toggled ()
+{
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
+	if (tact) {
+		_button->set_active (tact->get_active());
+	}
+}
+
+void
+CheckOption::add_to_page (OptionEditorPage* p)
+{
+	add_widget_to_page (p, _button);
+}
+
+void
+CheckOption::toggled ()
+{
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
+
+	tact->set_active (_button->get_active ());
+}
+
 
 /*--------------------------*/
 
@@ -334,6 +390,13 @@ HSliderOption::HSliderOption (
 	_adj.set_value (_get());
 	_adj.signal_value_changed().connect (sigc::mem_fun (*this, &HSliderOption::changed));
 	_hscale.set_update_policy (Gtk::UPDATE_DISCONTINUOUS);
+
+	/* make the slider be a fixed, font-relative width */
+
+	_hscale.ensure_style ();
+	int width, height;
+	get_pixel_size (_hscale.create_pango_layout (X_("a long piece of text that is about as wide as we want sliders to be")), width, height);
+	_hscale.set_size_request (width, -1);
 }
 
 void
@@ -847,6 +910,7 @@ DirectoryOption::DirectoryOption (string const & i, string const & n, sigc::slot
 	, _get (g)
 	, _set (s)
 {
+	Gtkmm2ext::add_volume_shortcuts (_file_chooser);
 	_file_chooser.set_action (Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
 	_file_chooser.signal_selection_changed().connect (sigc::mem_fun (*this, &DirectoryOption::selection_changed));
 }

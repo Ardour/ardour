@@ -1,20 +1,24 @@
 /*
-	Copyright (C) 2010 Paul Davis
-
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; either version 2 of the License, or
-	(at your option) any later version.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2006-2007 John Anderson
+ * Copyright (C) 2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2012-2019 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2014-2015 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015-2017 Len Ovens <len@ovenwerks.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/box.h>
@@ -34,6 +38,7 @@
 #include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/action_model.h"
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
@@ -88,6 +93,7 @@ MackieControlProtocol::build_gui ()
 MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	: _cp (p)
 	, table (2, 9)
+	, action_model (ActionManager::ActionModel::instance ())
 	, touch_sensitivity_adjustment (0, 0, 9, 1, 4)
 	, touch_sensitivity_scale (touch_sensitivity_adjustment)
 	, recalibrate_fader_button (_("Recalibrate Faders"))
@@ -239,7 +245,6 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	function_key_scroller.add (function_key_editor);
 	append_page (*fkey_packer, _("Function Keys"));
 
-	build_available_action_menu ();
 	build_function_key_editor ();
 	refresh_function_key_editor ();
 	fkey_packer->show_all();
@@ -366,7 +371,7 @@ MackieControlProtocolGUI::device_dependent_widget ()
 
 			if (!surface) {
 				PBD::fatal << string_compose (_("programming error: %1\n"), string_compose ("n=%1 surface not found!", n)) << endmsg;
-				/*NOTREACHED*/
+				abort (); /*NOTREACHED*/
 			}
 
 			Gtk::ComboBox* input_combo = manage (new Gtk::ComboBox);
@@ -442,119 +447,6 @@ MackieControlProtocolGUI::make_action_renderer (Glib::RefPtr<TreeStore> model, G
 }
 
 void
-MackieControlProtocolGUI::build_available_action_menu ()
-{
-	/* build a model of all available actions (needs to be tree structured
-	 * more)
-	 */
-
-	available_action_model = TreeStore::create (available_action_columns);
-
-	vector<string> paths;
-	vector<string> labels;
-	vector<string> tooltips;
-	vector<string> keys;
-	vector<Glib::RefPtr<Gtk::Action> > actions;
-
-	typedef std::map<string,TreeIter> NodeMap;
-	NodeMap nodes;
-	NodeMap::iterator r;
-
-	Gtkmm2ext::ActionMap::get_all_actions (paths, labels, tooltips, keys, actions);
-
-	vector<string>::iterator k;
-	vector<string>::iterator p;
-	vector<string>::iterator t;
-	vector<string>::iterator l;
-
-	available_action_model->clear ();
-
-	/* Because there are button bindings built in that are not
-	   in the key binding map, there needs to be a way to undo
-	   a profile edit.
-	*/
-	TreeIter rowp;
-	TreeModel::Row parent;
-	rowp = available_action_model->append();
-	parent = *(rowp);
-	parent[available_action_columns.name] = _("Remove Binding");
-
-	/* Key aliasing */
-
-	rowp = available_action_model->append();
-	parent = *(rowp);
-	parent[available_action_columns.name] = _("Shift");
-	rowp = available_action_model->append();
-	parent = *(rowp);
-	parent[available_action_columns.name] = _("Control");
-	rowp = available_action_model->append();
-	parent = *(rowp);
-	parent[available_action_columns.name] = _("Option");
-	rowp = available_action_model->append();
-	parent = *(rowp);
-	parent[available_action_columns.name] = _("CmdAlt");
-
-	for (l = labels.begin(), k = keys.begin(), p = paths.begin(), t = tooltips.begin(); l != labels.end(); ++k, ++p, ++t, ++l) {
-
-		TreeModel::Row row;
-		vector<string> parts;
-
-		parts.clear ();
-
-		split (*p, parts, '/');
-
-		if (parts.empty()) {
-			continue;
-		}
-
-		//kinda kludgy way to avoid displaying menu items as mappable
-		if ( parts[1] == _("Main_menu") )
-			continue;
-		if ( parts[1] == _("JACK") )
-			continue;
-		if ( parts[1] == _("redirectmenu") )
-			continue;
-		if ( parts[1] == _("Editor_menus") )
-			continue;
-		if ( parts[1] == _("RegionList") )
-			continue;
-		if ( parts[1] == _("ProcessorMenu") )
-			continue;
-
-		if ((r = nodes.find (parts[1])) == nodes.end()) {
-
-			/* top level is missing */
-
-			TreeIter rowp;
-			TreeModel::Row parent;
-			rowp = available_action_model->append();
-			nodes[parts[1]] = rowp;
-			parent = *(rowp);
-			parent[available_action_columns.name] = parts[1];
-
-			row = *(available_action_model->append (parent.children()));
-
-		} else {
-
-			row = *(available_action_model->append ((*r->second)->children()));
-
-		}
-
-		/* add this action */
-
-		if (l->empty ()) {
-			row[available_action_columns.name] = *t;
-			action_map[*t] = *p;
-		} else {
-			row[available_action_columns.name] = *l;
-			action_map[*l] = *p;
-		}
-
-		row[available_action_columns.path] = (*p);
-	}
-}
-
-void
 MackieControlProtocolGUI::build_function_key_editor ()
 {
 	function_key_editor.append_column (_("Key"), function_key_columns.name);
@@ -562,32 +454,32 @@ MackieControlProtocolGUI::build_function_key_editor ()
 	TreeViewColumn* col;
 	CellRendererCombo* renderer;
 
-	renderer = make_action_renderer (available_action_model, function_key_columns.plain);
+	renderer = make_action_renderer (action_model.model(), function_key_columns.plain);
 	col = manage (new TreeViewColumn (_("Plain"), *renderer));
 	col->add_attribute (renderer->property_text(), function_key_columns.plain);
 	function_key_editor.append_column (*col);
 
-	renderer = make_action_renderer (available_action_model, function_key_columns.shift);
+	renderer = make_action_renderer (action_model.model(), function_key_columns.shift);
 	col = manage (new TreeViewColumn (_("Shift"), *renderer));
 	col->add_attribute (renderer->property_text(), function_key_columns.shift);
 	function_key_editor.append_column (*col);
 
-	renderer = make_action_renderer (available_action_model, function_key_columns.control);
+	renderer = make_action_renderer (action_model.model(), function_key_columns.control);
 	col = manage (new TreeViewColumn (_("Control"), *renderer));
 	col->add_attribute (renderer->property_text(), function_key_columns.control);
 	function_key_editor.append_column (*col);
 
-	renderer = make_action_renderer (available_action_model, function_key_columns.option);
+	renderer = make_action_renderer (action_model.model(), function_key_columns.option);
 	col = manage (new TreeViewColumn (_("Option"), *renderer));
 	col->add_attribute (renderer->property_text(), function_key_columns.option);
 	function_key_editor.append_column (*col);
 
-	renderer = make_action_renderer (available_action_model, function_key_columns.cmdalt);
+	renderer = make_action_renderer (action_model.model(), function_key_columns.cmdalt);
 	col = manage (new TreeViewColumn (_("Cmd/Alt"), *renderer));
 	col->add_attribute (renderer->property_text(), function_key_columns.cmdalt);
 	function_key_editor.append_column (*col);
 
-	renderer = make_action_renderer (available_action_model, function_key_columns.shiftcontrol);
+	renderer = make_action_renderer (action_model.model(), function_key_columns.shiftcontrol);
 	col = manage (new TreeViewColumn (_("Shift+Control"), *renderer));
 	col->add_attribute (renderer->property_text(), function_key_columns.shiftcontrol);
 	function_key_editor.append_column (*col);
@@ -639,7 +531,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 					row[function_key_columns.plain] = action;
 				} else {
 
-					act = ActionManager::get_action (action.c_str());
+					act = ActionManager::get_action (action, false);
 					if (act) {
 						row[function_key_columns.plain] = act->get_label();
 					} else {
@@ -663,7 +555,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 					/* Probably a key alias */
 					row[function_key_columns.shift] = action;
 				} else {
-					act = ActionManager::get_action (action.c_str());
+					act = ActionManager::get_action (action, false);
 					if (act) {
 						row[function_key_columns.shift] = act->get_label();
 					} else {
@@ -681,7 +573,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 				/* Probably a key alias */
 				row[function_key_columns.control] = action;
 			} else {
-				act = ActionManager::get_action (action.c_str());
+				act = ActionManager::get_action (action, false);
 				if (act) {
 					row[function_key_columns.control] = act->get_label();
 				} else {
@@ -698,7 +590,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 				/* Probably a key alias */
 				row[function_key_columns.option] = action;
 			} else {
-				act = ActionManager::get_action (action.c_str());
+				act = ActionManager::get_action (action, false);
 				if (act) {
 					row[function_key_columns.option] = act->get_label();
 				} else {
@@ -715,7 +607,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 				/* Probably a key alias */
 				row[function_key_columns.cmdalt] = action;
 			} else {
-				act = ActionManager::get_action (action.c_str());
+				act = ActionManager::get_action (action, false);
 				if (act) {
 					row[function_key_columns.cmdalt] = act->get_label();
 				} else {
@@ -728,7 +620,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 		if (action.empty()) {
 			row[function_key_columns.shiftcontrol] = defstring;
 		} else {
-			act = ActionManager::get_action (action.c_str());
+			act = ActionManager::get_action (action, false);
 			if (act) {
 				row[function_key_columns.shiftcontrol] = act->get_label();
 			} else {
@@ -760,7 +652,7 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 				return;
 			}
 		}
-		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (i->second.c_str());
+		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (i->second, false);
 
 		if (act || remove) {
 			/* update visible text, using string supplied by

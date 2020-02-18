@@ -1,21 +1,21 @@
 /*
-    Copyright (C) 2010 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2010 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2017-2018 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <iostream>
 #include <cmath>
@@ -345,6 +345,8 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		}
 	}
 
+	const int text_margin = char_pixel_width();
+
 	//Pixbuf, if any
 	if (_pixbuf) {
 		double x = rint((get_width() - _pixbuf->get_width()) * .5);
@@ -370,21 +372,30 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	if (_elements & (VectorIcon | IconRenderCallback)) {
 		int vw = get_width();
 		int vh = get_height();
+		cairo_save (cr);
+
 		if (_elements & Menu) {
 			vw -= _diameter + 4;
+		}
+		if (_elements & Indicator) {
+			vw -= _diameter + .5 * text_margin;
+			if (_led_left) {
+				cairo_translate (cr, _diameter + text_margin, 0);
+			}
+		}
+		if (_elements & Text) {
+			vw -= _text_width + text_margin;
 		}
 		if (_elements & VectorIcon) {
 			ArdourIcon::render (cr, _icon, vw, vh, active_state(), text_color);
 		} else {
-			cairo_save (cr);
 			rounded_function (cr, 0, 0, get_width(), get_height(), corner_radius + 1.5);
 			cairo_clip (cr);
 			_icon_render_cb (cr, vw, vh, text_color, _icon_render_cb_data);
-			cairo_restore (cr);
 		}
+		cairo_restore (cr);
 	}
 
-	const int text_margin = char_pixel_width();
 	// Text, if any
 	if (!_pixbuf && ((_elements & Text)==Text) && !_text.empty()) {
 		assert(_layout);
@@ -426,6 +437,9 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 			} else {
 				cairo_move_to (cr, text_margin, text_ypos);
 			}
+			pango_cairo_show_layout (cr, _layout->gobj());
+		} else if (VectorIcon == (_elements & VectorIcon)) {
+			cairo_move_to (cr, get_width () - text_margin - _text_width, text_ypos);
 			pango_cairo_show_layout (cr, _layout->gobj());
 		} else {
 			/* centered text otherwise */
@@ -490,8 +504,8 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		cairo_save (cr);
 
 		/* move to the center of the indicator/led */
-		if (_elements & Text) {
-			int led_xoff = ceil(char_pixel_width() + _diameter * .5);
+		if (_elements & (Text | VectorIcon | IconRenderCallback)) {
+			int led_xoff = ceil((char_pixel_width() + _diameter) * .5);
 			if (_led_left) {
 				cairo_translate (cr, led_xoff, get_height() * .5);
 			} else {
@@ -664,7 +678,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	}
 
 	if (_elements & Indicator) {
-		req->width += lrint (_diameter) + char_pixel_width();
+		req->width += ceil (_diameter + char_pixel_width());
 		req->height = std::max (req->height, (int) lrint (_diameter) + 4);
 	}
 
@@ -673,8 +687,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	}
 
 	if (_elements & (VectorIcon | IconRenderCallback)) {
-		assert(!(_elements & Text));
-		const int wh = std::max (6., std::max (rint (TRACKHEADERBTNW * char_avg_pixel_width()), ceil (char_pixel_height() * BASELINESTRETCH + 1.)));
+		const int wh = std::max (8., std::max (ceil (TRACKHEADERBTNW * char_avg_pixel_width()), ceil (char_pixel_height() * BASELINESTRETCH + 1.)));
 		req->width += wh;
 		req->height = std::max(req->height, wh);
 	}
@@ -811,6 +824,16 @@ void ArdourButton::set_inactive_color (const uint32_t color)
 		RGBA_TO_UINT(  0,   0,   0,   255);  /* use black */
 
 	/* XXX what about led colors ? */
+	CairoWidget::set_dirty ();
+}
+
+void ArdourButton::reset_fixed_colors ()
+{
+	if (_fixed_colors_set == 0) {
+		return;
+	}
+	_fixed_colors_set = 0;
+	_update_colors = true;
 	CairoWidget::set_dirty ();
 }
 

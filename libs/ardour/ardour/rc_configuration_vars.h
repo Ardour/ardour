@@ -1,21 +1,26 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2000-2019 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2012-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2015 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2013-2018 Colin Fletcher <colin.m.fletcher@googlemail.com>
+ * Copyright (C) 2014-2019 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2018 Len Ovens <len@ovenwerks.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 /*****************************************************
     DO NOT USE uint8_t or any other type that resolves
@@ -69,12 +74,8 @@ CONFIG_VARIABLE (bool, midi_input_follows_selection, "midi-input-follows-selecti
 /* Timecode and related */
 
 CONFIG_VARIABLE (bool, run_all_transport_masters_always, "run-all-transport-masters-always", true)
-CONFIG_VARIABLE (bool, use_session_timecode_format, "use-session-timecode-format", true)
 CONFIG_VARIABLE (int, mtc_qf_speed_tolerance, "mtc-qf-speed-tolerance", 5)
 CONFIG_VARIABLE (bool, timecode_sync_frame_rate, "timecode-sync-frame-rate", true)
-#ifdef USE_TRACKS_CODE_FEATURES
-CONFIG_VARIABLE (SyncSource, sync_source, "sync-source", MTC)
-#endif
 CONFIG_VARIABLE (bool, send_ltc, "send-ltc", false)
 CONFIG_VARIABLE (bool, ltc_send_continuously, "ltc-send-continuously", true)
 CONFIG_VARIABLE (std::string, ltc_output_port, "ltc-output-port", "")
@@ -87,9 +88,8 @@ CONFIG_VARIABLE (bool, use_tranzport,  "use-tranzport", false)
 
 /* disk operations */
 
-	CONFIG_VARIABLE (uint32_t, minimum_disk_read_bytes,  "minimum-disk-read-bytes", ARDOUR::DiskReader::default_chunk_samples() * sizeof (ARDOUR::Sample))
-CONFIG_VARIABLE (uint32_t, minimum_disk_write_bytes,  "minimum-disk-write-bytes", ARDOUR::DiskWriter::default_chunk_samples() * sizeof (ARDOUR::Sample))
-CONFIG_VARIABLE (float, midi_readahead,  "midi-readahead", 1.0)
+CONFIG_VARIABLE (uint32_t, minimum_disk_read_bytes, "minimum-disk-read-bytes", ARDOUR::DiskReader::default_chunk_samples() * sizeof (ARDOUR::Sample))
+CONFIG_VARIABLE (uint32_t, minimum_disk_write_bytes, "minimum-disk-write-bytes", ARDOUR::DiskWriter::default_chunk_samples() * sizeof (ARDOUR::Sample))
 CONFIG_VARIABLE (BufferingPreset, buffering_preset, "buffering-preset", Medium)
 CONFIG_VARIABLE (float, audio_capture_buffer_seconds, "capture-buffer-seconds", 5.0)
 CONFIG_VARIABLE (float, audio_playback_buffer_seconds, "playback-buffer-seconds", 5.0)
@@ -97,6 +97,7 @@ CONFIG_VARIABLE (float, midi_track_buffer_seconds, "midi-track-buffer-seconds", 
 CONFIG_VARIABLE (uint32_t, disk_choice_space_threshold,  "disk-choice-space-threshold", 57600000)
 CONFIG_VARIABLE (bool, auto_analyse_audio, "auto-analyse-audio", false)
 CONFIG_VARIABLE (float, transient_sensitivity, "transient-sensitivity", 50)
+CONFIG_VARIABLE (float, max_transport_speed, "max-transport-speed", 8.0)
 
 /* OSC */
 
@@ -109,16 +110,13 @@ CONFIG_VARIABLE (LayerModel, layer_model, "layer-model", Manual)
 CONFIG_VARIABLE (bool, automation_follows_regions, "automation-follows-regions", true)
 CONFIG_VARIABLE (bool, region_boundaries_from_selected_tracks, "region-boundaries-from-selected-tracks", true)
 CONFIG_VARIABLE (bool, region_boundaries_from_onscreen_tracks, "region-boundaries-from-onscreen_tracks", true)
-CONFIG_VARIABLE (FadeShape, default_fade_shape, "default-fade-shape", FadeLinear)
+CONFIG_VARIABLE (FadeShape, default_fade_shape, "default-fade-shape", FadeConstantPower)
+CONFIG_VARIABLE (RangeSelectionAfterSplit, range_selection_after_split, "range-selection-after-split", PreserveSel)
 CONFIG_VARIABLE (RegionSelectionAfterSplit, region_selection_after_split, "region-selection-after-split", None)
 
 /* monitoring, mute, solo etc */
 
-#ifdef USE_TRACKS_CODE_FEATURES
-CONFIG_VARIABLE (bool, mute_affects_pre_fader, "mute-affects-pre-fader", true)
-#else
 CONFIG_VARIABLE (bool, mute_affects_pre_fader, "mute-affects-pre-fader", false)
-#endif
 CONFIG_VARIABLE (bool, mute_affects_post_fader, "mute-affects-post-fader", true)
 CONFIG_VARIABLE (bool, mute_affects_control_outs, "mute-affects-control-outs", true)
 CONFIG_VARIABLE (bool, mute_affects_main_outs, "mute-affects-main-outs", true)
@@ -134,13 +132,13 @@ CONFIG_VARIABLE (bool, latched_record_enable, "latched-record-enable", false)
 CONFIG_VARIABLE (bool, all_safe, "all-safe", false)
 CONFIG_VARIABLE (bool, show_solo_mutes, "show-solo-mutes", true)
 CONFIG_VARIABLE (bool, solo_mute_override, "solo-mute-override", false)
-CONFIG_VARIABLE (bool, tape_machine_mode, "tape-machine-mode", false)
+CONFIG_VARIABLE (bool, auto_input_does_talkback, "auto-input-does-talkback", false)
 CONFIG_VARIABLE (gain_t, solo_mute_gain, "solo-mute-gain", 0.0)
 CONFIG_VARIABLE (std::string, monitor_bus_preferred_bundle, "monitor-bus-preferred-bundle", "")
 CONFIG_VARIABLE (bool, quieten_at_speed, "quieten-at-speed", true)
 
 CONFIG_VARIABLE (bool, link_send_and_route_panner, "link-send-and-route-panner", true)
-CONFIG_VARIABLE (std::string, midi_audition_synth_uri, "midi-audition-synth-uri", "@default@")
+CONFIG_VARIABLE (std::string, midi_audition_synth_uri, "midi-audition-synth-uri", "@default@") /*deprecated*/
 
 /* click */
 
@@ -161,16 +159,11 @@ CONFIG_VARIABLE (bool, plugins_stop_with_transport, "plugins-stop-with-transport
 CONFIG_VARIABLE (bool, stop_recording_on_xrun, "stop-recording-on-xrun", false)
 CONFIG_VARIABLE (bool, create_xrun_marker, "create-xrun-marker", true)
 CONFIG_VARIABLE (bool, stop_at_session_end, "stop-at-session-end", false)
-CONFIG_VARIABLE (bool, seamless_loop, "seamless-loop", false)
-CONFIG_VARIABLE (float, preroll_seconds, "preroll-seconds", 1.0f)
-#ifdef USE_TRACKS_CODE_FEATURES
-CONFIG_VARIABLE (bool, loop_is_mode, "loop-is-mode", true)
-#else
+CONFIG_VARIABLE (float, preroll_seconds, "preroll-seconds", -2.0f)
 CONFIG_VARIABLE (bool, loop_is_mode, "loop-is-mode", false)
-#endif
+CONFIG_VARIABLE (LoopFadeChoice, loop_fade_choice, "loop-fade-choice", XFadeLoop)
 CONFIG_VARIABLE (samplecnt_t, preroll, "preroll", 0)
 CONFIG_VARIABLE (samplecnt_t, postroll, "postroll", 0)
-CONFIG_VARIABLE (float, rf_speed, "rf-speed", 2.0f)
 CONFIG_VARIABLE (float, shuttle_speed_factor, "shuttle-speed-factor", 1.0f) // used for MMC shuttle
 CONFIG_VARIABLE (float, shuttle_speed_threshold, "shuttle-speed-threshold", 5.0f) // used for MMC shuttle
 CONFIG_VARIABLE (ShuttleBehaviour, shuttle_behaviour, "shuttle-behaviour", Sprung)
@@ -178,39 +171,30 @@ CONFIG_VARIABLE (ShuttleUnits, shuttle_units, "shuttle-units", Percentage)
 CONFIG_VARIABLE (float, shuttle_max_speed, "shuttle-max-speed", 8.0f)
 CONFIG_VARIABLE (bool, locate_while_waiting_for_sync, "locate-while-waiting-for-sync", false)
 CONFIG_VARIABLE (bool, disable_disarm_during_roll, "disable-disarm-during-roll", false)
-#ifdef USE_TRACKS_CODE_FEATURES
-CONFIG_VARIABLE (AutoReturnTarget, auto_return_target_list, "auto-return-target-list", AutoReturnTarget(LastLocate) )
-#else
 CONFIG_VARIABLE (AutoReturnTarget, auto_return_target_list, "auto-return-target-list", AutoReturnTarget(LastLocate|RangeSelectionStart|Loop|RegionSelectionStart))
-#endif
 
 /* metering */
 
-#ifdef USE_TRACKS_CODE_FEATURES
-CONFIG_VARIABLE (float, meter_falloff, "meter-falloff", 60.0f)
-CONFIG_VARIABLE (MeterType, meter_type_master, "meter-type-master", MeterPeak)
-#else
 CONFIG_VARIABLE (float, meter_falloff, "meter-falloff", 13.3f)
-CONFIG_VARIABLE (MeterType, meter_type_master, "meter-type-master", MeterK20)
-#endif
+CONFIG_VARIABLE (MeterType, meter_type_master, "meter-type-master", MeterK14)
 CONFIG_VARIABLE (MeterType, meter_type_track, "meter-type-track", MeterPeak)
 CONFIG_VARIABLE (MeterType, meter_type_bus, "meter-type-bus", MeterPeak)
 
 
 /* miscellany */
 
-CONFIG_VARIABLE (bool, try_autostart_engine, "try-autostart-engine", false)
+CONFIG_VARIABLE (bool, try_autostart_engine, "try-autostart-engine", true)
 CONFIG_VARIABLE (bool, hide_dummy_backend, "hide-dummy-backend", true)
 CONFIG_VARIABLE (bool, copy_demo_sessions, "copy-demo-sessions", true)
 CONFIG_VARIABLE (std::string, auditioner_output_left, "auditioner-output-left", "default")
 CONFIG_VARIABLE (std::string, auditioner_output_right, "auditioner-output-right", "default")
-CONFIG_VARIABLE (bool, replicate_missing_region_channels, "replicate-missing-region-channels", false)
+CONFIG_VARIABLE (bool, replicate_missing_region_channels, "replicate-missing-region-channels", true)
 CONFIG_VARIABLE (bool, hiding_groups_deactivates_groups, "hiding-groups-deactivates-groups", true)
 CONFIG_VARIABLE (bool, verify_remove_last_capture, "verify-remove-last-capture", true)
 CONFIG_VARIABLE (bool, save_history, "save-history", true)
 CONFIG_VARIABLE (int32_t, saved_history_depth, "save-history-depth", 20)
 CONFIG_VARIABLE (int32_t, history_depth, "history-depth", 20)
-CONFIG_VARIABLE (RegionEquivalence, region_equivalence, "region-equivalence", Enclosed)
+CONFIG_VARIABLE (RegionEquivalence, region_equivalence, "region-equivalency", LayerTime)
 CONFIG_VARIABLE (bool, periodic_safety_backups, "periodic-safety-backups", true)
 CONFIG_VARIABLE (uint32_t, periodic_safety_backup_interval, "periodic-safety-backup-interval", 120)
 CONFIG_VARIABLE (float, automation_interval_msecs, "automation-interval-msecs", 30)
@@ -240,6 +224,7 @@ CONFIG_VARIABLE (bool, use_lxvst, "use-lxvst", true)
 CONFIG_VARIABLE (bool, use_macvst, "use-macvst", true)
 CONFIG_VARIABLE (bool, discover_vst_on_start, "discover-vst-on-start", false)
 CONFIG_VARIABLE (bool, verbose_plugin_scan, "verbose-plugin-scan", false)
+CONFIG_VARIABLE (bool, conceal_lv1_if_lv2_exists, "conceal-lv1-if-lv2-exists", true)
 CONFIG_VARIABLE (int, vst_scan_timeout, "vst-scan-timeout", 1200) /* deciseconds, per plugin, <= 0 no timeout */
 CONFIG_VARIABLE (bool, discover_audio_units, "discover-audio-units", false)
 CONFIG_VARIABLE (bool, ask_replace_instrument, "ask-replace-instrument", true)
@@ -269,6 +254,7 @@ CONFIG_VARIABLE (std::string, updates_url, "updates-url", "http://ardour.org/wha
 CONFIG_VARIABLE (std::string, donate_url, "donate-url", "http://ardour.org/donate")
 
 /* video timeline configuration */
+CONFIG_VARIABLE (std::string, xjadeo_binary, "xjadeo-binary", "")
 CONFIG_VARIABLE (bool, video_advanced_setup, "video-advanced-setup", false)
 CONFIG_VARIABLE (std::string, video_server_url, "video-server-url", "http://127.0.0.1:1554")
 #ifndef PLATFORM_WINDOWS

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Digitech</Manufacturer>
+    <Model>DSP-128</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Fx Setup">
+        <PatchNameList>
+          <Patch Number="  1" Name="Large Room 1" ProgramChange="0"/>
+          <Patch Number="  2" Name="Large Room 2" ProgramChange="1"/>
+          <Patch Number="  3" Name="Large Room 3" ProgramChange="2"/>
+          <Patch Number="  4" Name="Large Room 4" ProgramChange="3"/>
+          <Patch Number="  5" Name="Large Room 5" ProgramChange="4"/>
+          <Patch Number="  6" Name="L Room Delay 1" ProgramChange="5"/>
+          <Patch Number="  7" Name="L Room Delay 2" ProgramChange="6"/>
+          <Patch Number="  8" Name="L Room Delay 3" ProgramChange="7"/>
+          <Patch Number="  9" Name="L Room Delay 4" ProgramChange="8"/>
+          <Patch Number=" 10" Name="Live Room 1" ProgramChange="9"/>
+          <Patch Number=" 11" Name="Live Room 2" ProgramChange="10"/>
+          <Patch Number=" 12" Name="Live Room 3" ProgramChange="11"/>
+          <Patch Number=" 13" Name="Live Room 4" ProgramChange="12"/>
+          <Patch Number=" 14" Name="Medium Room 1" ProgramChange="13"/>
+          <Patch Number=" 15" Name="Medium Room 2" ProgramChange="14"/>
+          <Patch Number=" 16" Name="Medium Room 3" ProgramChange="15"/>
+          <Patch Number=" 17" Name="Medium Room 4" ProgramChange="16"/>
+          <Patch Number=" 18" Name="Medium Room 5" ProgramChange="17"/>
+          <Patch Number=" 19" Name="Med Room Delay 1" ProgramChange="18"/>
+          <Patch Number=" 20" Name="Med Room Delay 2" ProgramChange="19"/>
+          <Patch Number=" 21" Name="Med Room Delay 3" ProgramChange="20"/>
+          <Patch Number=" 22" Name="Med Room Delay 4" ProgramChange="21"/>
+          <Patch Number=" 23" Name="Live Medium 1" ProgramChange="22"/>
+          <Patch Number=" 24" Name="Live Medium 2" ProgramChange="23"/>
+          <Patch Number=" 25" Name="Live Medium 3" ProgramChange="24"/>
+          <Patch Number=" 26" Name="Small Room 1" ProgramChange="25"/>
+          <Patch Number=" 27" Name="Small Room 2" ProgramChange="26"/>
+          <Patch Number=" 28" Name="Small Room 3" ProgramChange="27"/>
+          <Patch Number=" 29" Name="Small Room 4" ProgramChange="28"/>
+          <Patch Number=" 30" Name="Small Room 5" ProgramChange="29"/>
+          <Patch Number=" 31" Name="Small Rm Delay 1" ProgramChange="30"/>
+          <Patch Number=" 32" Name="Small Rm Delay 2" ProgramChange="31"/>
+          <Patch Number=" 33" Name="Small Rm Delay 3" ProgramChange="32"/>
+          <Patch Number=" 34" Name="Small Rm Delay 4" ProgramChange="33"/>
+          <Patch Number=" 35" Name="Small Rm Delay 5" ProgramChange="34"/>
+          <Patch Number=" 36" Name="Small Rm Delay 6" ProgramChange="35"/>
+          <Patch Number=" 37" Name="50m Gate" ProgramChange="36"/>
+          <Patch Number=" 38" Name="100m Gate 1" ProgramChange="37"/>
+          <Patch Number=" 39" Name="100m Gate 2" ProgramChange="38"/>
+          <Patch Number=" 40" Name="200m Gate 1" ProgramChange="39"/>
+          <Patch Number=" 41" Name="200m Gate 2" ProgramChange="40"/>
+          <Patch Number=" 42" Name="300m Gate 1" ProgramChange="41"/>
+          <Patch Number=" 43" Name="300m Gate 2" ProgramChange="42"/>
+          <Patch Number=" 44" Name="400m Gate" ProgramChange="43"/>
+          <Patch Number=" 45" Name="500m Gate" ProgramChange="44"/>
+          <Patch Number=" 46" Name="600m Gate" ProgramChange="45"/>
+          <Patch Number=" 47" Name="100m Reverse" ProgramChange="46"/>
+          <Patch Number=" 48" Name="150m Reverse" ProgramChange="47"/>
+          <Patch Number=" 49" Name="200m Reverse" ProgramChange="48"/>
+          <Patch Number=" 50" Name="300m Reverse" ProgramChange="49"/>
+          <Patch Number=" 51" Name="400m Revese" ProgramChange="50"/>
+          <Patch Number=" 52" Name="500m Reverse" ProgramChange="51"/>
+          <Patch Number=" 53" Name="600m Reverse" ProgramChange="52"/>
+          <Patch Number=" 54" Name="Multi Reverse 1" ProgramChange="53"/>
+          <Patch Number=" 55" Name="Multi Reverse 2" ProgramChange="54"/>
+          <Patch Number=" 56" Name="Multi Reverse 3" ProgramChange="55"/>
+          <Patch Number=" 57" Name="Hall 1" ProgramChange="56"/>
+          <Patch Number=" 58" Name="Hall 2" ProgramChange="57"/>
+          <Patch Number=" 59" Name="Hall 3" ProgramChange="58"/>
+          <Patch Number=" 60" Name="Hall 4" ProgramChange="59"/>
+          <Patch Number=" 61" Name="Hall 5" ProgramChange="60"/>
+          <Patch Number=" 62" Name="Hall 6" ProgramChange="61"/>
+          <Patch Number=" 63" Name="Hall 7" ProgramChange="62"/>
+          <Patch Number=" 64" Name="Hall 8" ProgramChange="63"/>
+          <Patch Number=" 65" Name="Hall 9" ProgramChange="64"/>
+          <Patch Number=" 66" Name="60m Delay" ProgramChange="65"/>
+          <Patch Number=" 67" Name="90m Delay" ProgramChange="66"/>
+          <Patch Number=" 68" Name="90m Delay 50% Rg" ProgramChange="67"/>
+          <Patch Number=" 69" Name="150m Delay 50%Rg" ProgramChange="68"/>
+          <Patch Number=" 70" Name="250m Delay" ProgramChange="69"/>
+          <Patch Number=" 71" Name="250m Delay 30%Rg" ProgramChange="70"/>
+          <Patch Number=" 72" Name="400m Delay 10%Rg" ProgramChange="71"/>
+          <Patch Number=" 73" Name="600m Delay" ProgramChange="72"/>
+          <Patch Number=" 74" Name="1.0sec Delay" ProgramChange="73"/>
+          <Patch Number=" 75" Name="1.4sec Delay" ProgramChange="74"/>
+          <Patch Number=" 76" Name="1.8sec Delay" ProgramChange="75"/>
+          <Patch Number=" 77" Name="Multitap 1" ProgramChange="76"/>
+          <Patch Number=" 78" Name="Multitap 2" ProgramChange="77"/>
+          <Patch Number=" 79" Name="Multitap 3" ProgramChange="78"/>
+          <Patch Number=" 80" Name="Multitap 4" ProgramChange="79"/>
+          <Patch Number=" 81" Name="Multitap 5" ProgramChange="80"/>
+          <Patch Number=" 82" Name="Multitap 6" ProgramChange="81"/>
+          <Patch Number=" 83" Name="Multitap 7" ProgramChange="82"/>
+          <Patch Number=" 84" Name="Multitap 8" ProgramChange="83"/>
+          <Patch Number=" 85" Name="Chorus 1" ProgramChange="84"/>
+          <Patch Number=" 86" Name="Chorus 2" ProgramChange="85"/>
+          <Patch Number=" 87" Name="Chorus 3" ProgramChange="86"/>
+          <Patch Number=" 88" Name="Chorus 4" ProgramChange="87"/>
+          <Patch Number=" 89" Name="Chorus 5" ProgramChange="88"/>
+          <Patch Number=" 90" Name="Chorus 6" ProgramChange="89"/>
+          <Patch Number=" 91" Name="Chorus 7" ProgramChange="90"/>
+          <Patch Number=" 92" Name="Chorus 8" ProgramChange="91"/>
+          <Patch Number=" 93" Name="Vibrato" ProgramChange="92"/>
+          <Patch Number=" 94" Name="Vibrato Delay" ProgramChange="93"/>
+          <Patch Number=" 95" Name="Chorus Delay 1" ProgramChange="94"/>
+          <Patch Number=" 96" Name="Chorus Delay 2" ProgramChange="95"/>
+          <Patch Number=" 97" Name="Chorus Delay 3" ProgramChange="96"/>
+          <Patch Number=" 98" Name="Chorus Delay 4" ProgramChange="97"/>
+          <Patch Number=" 99" Name="Ch Delay M Rm 1" ProgramChange="98"/>
+          <Patch Number="100" Name="Ch Delay M Rm 2" ProgramChange="99"/>
+          <Patch Number="101" Name="Ch Delay M Rm 3" ProgramChange="100"/>
+          <Patch Number="102" Name="Ch Delay M Rm 4" ProgramChange="101"/>
+          <Patch Number="103" Name="Ch Delay M Rm 5" ProgramChange="102"/>
+          <Patch Number="104" Name="Ch Delay L Rm 1" ProgramChange="103"/>
+          <Patch Number="105" Name="Ch Delay L Rm 2" ProgramChange="104"/>
+          <Patch Number="106" Name="Ch Delay L Rm 3" ProgramChange="105"/>
+          <Patch Number="107" Name="Ch Delay L Rm 4" ProgramChange="106"/>
+          <Patch Number="108" Name="Ch Delay L Rm 5" ProgramChange="107"/>
+          <Patch Number="109" Name="Flange 1" ProgramChange="108"/>
+          <Patch Number="110" Name="Flange 2" ProgramChange="109"/>
+          <Patch Number="111" Name="Flange 3" ProgramChange="110"/>
+          <Patch Number="112" Name="Flange 4" ProgramChange="111"/>
+          <Patch Number="113" Name="Flange 5" ProgramChange="112"/>
+          <Patch Number="114" Name="Flange 6" ProgramChange="113"/>
+          <Patch Number="115" Name="Flange Delay 1" ProgramChange="114"/>
+          <Patch Number="116" Name="Flange Delay 2" ProgramChange="115"/>
+          <Patch Number="117" Name="Flange Delay 3" ProgramChange="116"/>
+          <Patch Number="118" Name="Flange Delay 4" ProgramChange="117"/>
+          <Patch Number="119" Name="Flange Delay 5" ProgramChange="118"/>
+          <Patch Number="120" Name="Quick Bounce" ProgramChange="119"/>
+          <Patch Number="121" Name="Medium Bounce" ProgramChange="120"/>
+          <Patch Number="122" Name="Soft Med Bounce" ProgramChange="121"/>
+          <Patch Number="123" Name="Soft Long Bounce" ProgramChange="122"/>
+          <Patch Number="124" Name="Thin Image" ProgramChange="123"/>
+          <Patch Number="125" Name="Medium Image" ProgramChange="124"/>
+          <Patch Number="126" Name="Wide Image" ProgramChange="125"/>
+          <Patch Number="127" Name="Mute Patch" ProgramChange="126"/>
+          <Patch Number="128" Name="Thru Patch" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

@@ -1,19 +1,20 @@
 /*
  * Copyright (C) 2016 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2017 Paul Davis <paul@linuxaudiosystems.com>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include "audiographer/general/loudness_reader.h"
@@ -23,7 +24,6 @@ using namespace AudioGrapher;
 
 LoudnessReader::LoudnessReader (float sample_rate, unsigned int channels, samplecnt_t bufsize)
 	: _ebur_plugin (0)
-	, _dbtp_plugin (0)
 	, _sample_rate (sample_rate)
 	, _channels (channels)
 	, _bufsize (bufsize / channels)
@@ -46,16 +46,15 @@ LoudnessReader::LoudnessReader (float sample_rate, unsigned int channels, sample
 		}
 	}
 
-	_dbtp_plugin = (Vamp::Plugin**) malloc (sizeof(Vamp::Plugin*) * channels);
 	for (unsigned int c = 0; c < _channels; ++c) {
 		using namespace Vamp::HostExt;
 		PluginLoader* loader (PluginLoader::getInstance ());
-		_dbtp_plugin[c] = loader->loadPlugin ("libardourvampplugins:dBTP", sample_rate, PluginLoader::ADAPT_ALL_SAFE);
-		assert (_dbtp_plugin[c]);
-		_dbtp_plugin[c]->reset ();
-		if (!_dbtp_plugin[c]->initialise (1, _bufsize, _bufsize)) {
-			delete _dbtp_plugin[c];
-			_dbtp_plugin[c] = 0;
+		Vamp::Plugin* dbtp_plugin = loader->loadPlugin ("libardourvampplugins:dBTP", sample_rate, PluginLoader::ADAPT_ALL_SAFE);
+		dbtp_plugin->reset ();
+		if (!dbtp_plugin->initialise (1, _bufsize, _bufsize)) {
+			delete dbtp_plugin;
+		} else {
+			_dbtp_plugins.push_back (dbtp_plugin);
 		}
 	}
 
@@ -66,10 +65,10 @@ LoudnessReader::LoudnessReader (float sample_rate, unsigned int channels, sample
 LoudnessReader::~LoudnessReader ()
 {
 	delete _ebur_plugin;
-	for (unsigned int c = 0; c < _channels; ++c) {
-		delete _dbtp_plugin[c];
+	while (!_dbtp_plugins.empty()) {
+		delete _dbtp_plugins.back();
+		_dbtp_plugins.pop_back();
 	}
-	free (_dbtp_plugin);
 	free (_bufs[0]);
 	free (_bufs[1]);
 }
@@ -81,10 +80,8 @@ LoudnessReader::reset ()
 		_ebur_plugin->reset ();
 	}
 
-	for (unsigned int c = 0; c < _channels; ++c) {
-		if (_dbtp_plugin[c]) {
-			_dbtp_plugin[c]->reset ();
-		}
+	for (std::vector<Vamp::Plugin*>::iterator it = _dbtp_plugins.begin (); it != _dbtp_plugins.end(); ++it) {
+		(*it)->reset ();
 	}
 }
 
@@ -114,18 +111,17 @@ LoudnessReader::process (ProcessContext<float> const & ctx)
 			}
 		}
 		_ebur_plugin->process (_bufs, Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
-		if (_dbtp_plugin[0]) {
-			_dbtp_plugin[0]->process (&_bufs[0], Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
+
+		if (_dbtp_plugins.size() > 0) {
+			_dbtp_plugins.at(0)->process (&_bufs[0], Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
 		}
-		if (_channels == 2 && _dbtp_plugin[1]) {
-			_dbtp_plugin[0]->process (&_bufs[1], Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
+		/* combined dBTP for EBU-R128 */
+		if (_channels == 2 && _dbtp_plugins.size() == 2) {
+			_dbtp_plugins.at(0)->process (&_bufs[1], Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
 		}
 	}
 
-	for (unsigned int c = processed_channels; c < _channels; ++c) {
-		if (!_dbtp_plugin[c]) {
-			continue;
-		}
+	for (unsigned int c = processed_channels; c < _channels && c < _dbtp_plugins.size (); ++c) {
 		samplecnt_t s;
 		float const * const d = ctx.data ();
 		for (s = 0; s < n_samples; ++s) {
@@ -134,7 +130,7 @@ LoudnessReader::process (ProcessContext<float> const & ctx)
 		for (; s < _bufsize; ++s) {
 			_bufs[0][s] = 0.f;
 		}
-		_dbtp_plugin[c]->process (_bufs, Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
+		_dbtp_plugins.at(c)->process (_bufs, Vamp::RealTime::fromSeconds ((double) _pos / _sample_rate));
 	}
 
 	_pos += n_samples;
@@ -158,14 +154,12 @@ LoudnessReader::get_normalize_gain (float target_lufs, float target_dbtp)
 		}
 	}
 
-	for (unsigned int c = 0; c < _channels; ++c) {
-		if (_dbtp_plugin[c]) {
-			Vamp::Plugin::FeatureSet features = _dbtp_plugin[c]->getRemainingFeatures ();
-			if (!features.empty () && features.size () == 2) {
-				const float dbtp = features[0][0].values[0];
-				dBTP = std::max (dBTP, dbtp);
-				++have_dbtp;
-			}
+	for (unsigned int c = 0; c < _channels && c < _dbtp_plugins.size(); ++c) {
+		Vamp::Plugin::FeatureSet features = _dbtp_plugins.at(c)->getRemainingFeatures ();
+		if (!features.empty () && features.size () == 2) {
+			const float dbtp = features[0][0].values[0];
+			dBTP = std::max (dBTP, dbtp);
+			++have_dbtp;
 		}
 	}
 

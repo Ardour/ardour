@@ -1,21 +1,23 @@
 /*
-    Copyright (C) 2006 Paul Davis
-    Author: David Robillard
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2006-2016 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2015-2017 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <algorithm>
 #include <cassert>
@@ -23,8 +25,8 @@
 #include <iostream>
 #include <utility>
 
-#include "evoral/EventList.hpp"
-#include "evoral/Control.hpp"
+#include "evoral/EventList.h"
+#include "evoral/Control.h"
 
 #include "ardour/beats_samples_converter.h"
 #include "ardour/debug.h"
@@ -34,6 +36,7 @@
 #include "ardour/midi_source.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/region_factory.h"
+#include "ardour/rt_midibuffer.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/types.h"
@@ -108,197 +111,19 @@ struct EventsSortByTimeAndType {
     }
 };
 
-samplecnt_t
-MidiPlaylist::read (Evoral::EventSink<samplepos_t>& dst,
-                    samplepos_t                     start,
-                    samplecnt_t                     dur,
-                    Evoral::Range<samplepos_t>*     loop_range,
-                    unsigned                       chan_n,
-                    MidiChannelFilter*             filter)
-{
-	typedef pair<MidiStateTracker*,samplepos_t> TrackerInfo;
-
-	Playlist::RegionReadLock rl (this);
-
-	DEBUG_TRACE (DEBUG::MidiPlaylistIO,
-	             string_compose ("---- MidiPlaylist::read %1 .. %2 (%3 trackers) ----\n",
-	                             start, start + dur, _note_trackers.size()));
-
-	/* First, emit any queued edit fixup events at start. */
-	for (NoteTrackers::iterator t = _note_trackers.begin(); t != _note_trackers.end(); ++t) {
-		t->second->fixer.emit(dst, _read_end, t->second->tracker);
-	}
-
-	/* Find relevant regions that overlap [start..end] */
-	const samplepos_t                         end = start + dur - 1;
-	std::vector< boost::shared_ptr<Region> > regs;
-	std::vector< boost::shared_ptr<Region> > ended;
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-
-		/* check for the case of solo_selection */
-		bool force_transparent = ( _session.solo_selection_active() && SoloSelectedActive() && !SoloSelectedListIncludes( (const Region*) &(**i) ) );
-		if ( force_transparent )
-			continue;
-
-		switch ((*i)->coverage (start, end)) {
-		case Evoral::OverlapStart:
-		case Evoral::OverlapInternal:
-			regs.push_back (*i);
-			break;
-
-		case Evoral::OverlapExternal:
-			/* this region is entirely contained in the read range */
-			regs.push_back (*i);
-			ended.push_back (*i);
-			break;
-
-		case Evoral::OverlapEnd:
-			/* this region ends within the read range */
-			regs.push_back (*i);
-			ended.push_back (*i);
-			break;
-
-		default:
-			/* we don't care */
-			break;
-		}
-	}
-
-	/* If we are reading from a single region, we can read directly into dst.  Otherwise,
-	   we read into a temporarily list, sort it, then write that to dst. */
-	const bool direct_read = regs.size() == 1 &&
-		(ended.empty() || (ended.size() == 1 && ended.front() == regs.front()));
-
-	Evoral::EventList<samplepos_t>  evlist;
-	Evoral::EventSink<samplepos_t>& tgt = direct_read ? dst : evlist;
-
-	DEBUG_TRACE (DEBUG::MidiPlaylistIO,
-	             string_compose ("\t%1 regions to read, direct: %2\n", regs.size(), direct_read));
-
-	for (vector<boost::shared_ptr<Region> >::iterator i = regs.begin(); i != regs.end(); ++i) {
-		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(*i);
-		if (!mr) {
-			continue;
-		}
-
-		/* Get the existing note tracker for this region, or create a new one. */
-		NoteTrackers::iterator           t           = _note_trackers.find (mr.get());
-		bool                             new_tracker = false;
-		boost::shared_ptr<RegionTracker> tracker;
-		if (t == _note_trackers.end()) {
-			tracker     = boost::shared_ptr<RegionTracker>(new RegionTracker);
-			new_tracker = true;
-			DEBUG_TRACE (DEBUG::MidiPlaylistIO,
-			             string_compose ("\tPre-read %1 (%2 .. %3): new tracker\n",
-			                             mr->name(), mr->position(), mr->last_sample()));
-		} else {
-			tracker = t->second;
-			DEBUG_TRACE (DEBUG::MidiPlaylistIO,
-			             string_compose ("\tPre-read %1 (%2 .. %3): %4 active notes\n",
-			                             mr->name(), mr->position(), mr->last_sample(), tracker->tracker.on()));
-		}
-
-		/* Read from region into target. */
-		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("read from %1 at %2 for %3 LR %4 .. %5\n",
-		                                                    mr->name(), start, dur, 
-		                                                    (loop_range ? loop_range->from : -1),
-		                                                    (loop_range ? loop_range->to : -1)));
-		mr->read_at (tgt, start, dur, loop_range, tracker->cursor, chan_n, _note_mode, &tracker->tracker, filter);
-		DEBUG_TRACE (DEBUG::MidiPlaylistIO,
-		             string_compose ("\tPost-read: %1 active notes\n", tracker->tracker.on()));
-
-		if (find (ended.begin(), ended.end(), *i) != ended.end()) {
-			/* Region ended within the read range, so resolve any active notes
-			   (either stuck notes in the data, or notes that end after the end
-			   of the region). */
-			DEBUG_TRACE (DEBUG::MidiPlaylistIO,
-			             string_compose ("\t%1 ended, resolve notes and delete (%2) tracker\n",
-			                             mr->name(), ((new_tracker) ? "new" : "old")));
-
-			tracker->tracker.resolve_notes (tgt, loop_range ? loop_range->squish ((*i)->last_sample()) : (*i)->last_sample());
-			tracker->cursor.invalidate (false);
-			if (!new_tracker) {
-				_note_trackers.erase (t);
-			}
-
-		} else {
-
-			if (new_tracker) {
-				_note_trackers.insert (make_pair (mr.get(), tracker));
-				DEBUG_TRACE (DEBUG::MidiPlaylistIO, "\tadded tracker to trackers\n");
-			}
-		}
-	}
-
-	if (!direct_read && !evlist.empty()) {
-		/* We've read from multiple regions, sort the event list by time. */
-		EventsSortByTimeAndType<samplepos_t> cmp;
-		evlist.sort (cmp);
-
-		/* Copy ordered events from event list to dst. */
-		for (Evoral::EventList<samplepos_t>::iterator e = evlist.begin(); e != evlist.end(); ++e) {
-			Evoral::Event<samplepos_t>* ev (*e);
-			dst.write (ev->time(), ev->event_type(), ev->size(), ev->buffer());
-			delete ev;
-		}
-	}
-
-	DEBUG_TRACE (DEBUG::MidiPlaylistIO, "---- End MidiPlaylist::read ----\n");
-	_read_end = start + dur;
-	return dur;
-}
-
-void
-MidiPlaylist::region_edited(boost::shared_ptr<Region>         region,
-                            const MidiModel::NoteDiffCommand* cmd)
-{
-	typedef MidiModel::NoteDiffCommand Command;
-
-	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
-	if (!mr || !_session.transport_rolling()) {
-		return;
-	}
-
-	/* Take write lock to prevent concurrency with read(). */
-	Playlist::RegionWriteLock lock(this);
-
-	NoteTrackers::iterator t = _note_trackers.find(mr.get());
-	if (t == _note_trackers.end()) {
-		return; /* Region is not currently active, nothing to do. */
-	}
-
-	/* Queue any necessary edit compensation events. */
-	t->second->fixer.prepare(
-		_session.tempo_map(), cmd, mr->position() - mr->start(),
-		_read_end, t->second->cursor.active_notes);
-}
-
 void
 MidiPlaylist::reset_note_trackers ()
 {
-	Playlist::RegionWriteLock rl (this, false);
-
-	DEBUG_TRACE (DEBUG::MidiTrackers, string_compose ("%1 reset all note trackers\n", name()));
-	_note_trackers.clear ();
 }
 
 void
 MidiPlaylist::resolve_note_trackers (Evoral::EventSink<samplepos_t>& dst, samplepos_t time)
 {
-	Playlist::RegionWriteLock rl (this, false);
-
-	for (NoteTrackers::iterator n = _note_trackers.begin(); n != _note_trackers.end(); ++n) {
-		n->second->tracker.resolve_notes(dst, time);
-	}
-	DEBUG_TRACE (DEBUG::MidiTrackers, string_compose ("%1 resolve all note trackers\n", name()));
-	_note_trackers.clear ();
 }
 
 void
 MidiPlaylist::remove_dependents (boost::shared_ptr<Region> region)
 {
-	/* MIDI regions have no dependents (crossfades) but we might be tracking notes */
-	_note_trackers.erase(region.get());
 }
 
 void
@@ -374,11 +199,6 @@ MidiPlaylist::destroy_region (boost::shared_ptr<Region> region)
 			}
 
 			i = tmp;
-		}
-
-		NoteTrackers::iterator t = _note_trackers.find(region.get());
-		if (t != _note_trackers.end()) {
-			_note_trackers.erase(t);
 		}
 	}
 
@@ -486,4 +306,91 @@ MidiPlaylist::contained_automation()
 	}
 
 	return ret;
+}
+
+void
+MidiPlaylist::render (MidiChannelFilter* filter)
+{
+	typedef pair<MidiStateTracker*,samplepos_t> TrackerInfo;
+
+	Playlist::RegionReadLock rl (this);
+
+	DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("---- MidiPlaylist::render (regions: %1)-----\n", regions.size()));
+
+	std::vector< boost::shared_ptr<Region> > regs;
+
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+
+		/* check for the case of solo_selection */
+
+		if (_session.solo_selection_active() && SoloSelectedActive() && !SoloSelectedListIncludes ((const Region*) &(**i))) {
+			continue;
+		}
+
+		regs.push_back (*i);
+	}
+
+	/* If we are reading from a single region, we can read directly into _rendered.  Otherwise,
+	   we read into a temporarily list, sort it, then write that to _rendered.
+	*/
+	Evoral::EventList<samplepos_t>  evlist;
+	Evoral::EventSink<samplepos_t>* tgt;
+
+	/* RAII */
+	RTMidiBuffer::WriteProtectRender wpr (_rendered);
+
+	if (regs.empty()) {
+		wpr.acquire ();
+		_rendered.clear ();
+	} else {
+
+		if (regs.size() == 1) {
+			tgt = &_rendered;
+			wpr.acquire ();
+			_rendered.clear ();
+		} else {
+			tgt = &evlist;
+		}
+
+		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1 regions to read, direct: %2\n", regs.size(), (regs.size() == 1)));
+
+		for (vector<boost::shared_ptr<Region> >::iterator i = regs.begin(); i != regs.end(); ++i) {
+
+			boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(*i);
+
+			if (!mr) {
+				continue;
+			}
+
+			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("render from %1\n", mr->name()));
+			mr->render (*tgt, 0, _note_mode, filter);
+		}
+
+		if (!evlist.empty()) {
+			/* We've read from multiple regions into evlist, sort the event list by time. */
+			EventsSortByTimeAndType<samplepos_t> cmp;
+			evlist.sort (cmp);
+
+			/* Copy ordered events from event list to _rendered. */
+
+			wpr.acquire ();
+			_rendered.clear ();
+
+			for (Evoral::EventList<samplepos_t>::iterator e = evlist.begin(); e != evlist.end(); ++e) {
+				Evoral::Event<samplepos_t>* ev (*e);
+				_rendered.write (ev->time(), ev->event_type(), ev->size(), ev->buffer());
+				delete ev;
+			}
+		}
+	}
+
+	/* no need to release - RAII with WriteProtectRender takes care of it */
+
+	DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("---- End MidiPlaylist::render, events: %1\n", _rendered.size()));
+}
+
+RTMidiBuffer*
+MidiPlaylist::rendered ()
+{
+	return &_rendered;
 }

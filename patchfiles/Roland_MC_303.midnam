@@ -1,0 +1,4585 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>MC-303</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 2"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="false"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Bank 1 - Synth">
+        <MIDICommands>
+          <ControlChange Control="0" Value="64"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="01" Name="Lead TB 1" ProgramChange="0"/>
+          <Patch Number="01+" Name="Lead TB 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="0"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="01+" Name="Wow TB 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="0"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="01+" Name="Lead TB 3">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="0"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="02" Name="MG Saw" ProgramChange="1"/>
+          <Patch Number="02+" Name="Voc.Saw">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="1"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="02+" Name="Cheese Saw">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="1"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="02+" Name="Saw Lead">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="1"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="02+" Name="Calc. Saw">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="1"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="02+" Name="OB2 Saw 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="1"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="02+" Name="Juno6 Saw">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="70"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="1"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="02+" Name="JP8 Pls.1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="71"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="1"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="02+" Name="MG Pls 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="72"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="1"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="02+" Name="Flicker Pls">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="73"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="1"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="03" Name="Tri Lead 1" ProgramChange="2"/>
+          <Patch Number="03+" Name="Tri Lead 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="2"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="03+" Name="PR5 Squ 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="2"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="04" Name="JU2 SubOsc" ProgramChange="3"/>
+          <Patch Number="04+" Name="Frog Wave">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="3"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="05" Name="Seq Synth" ProgramChange="4"/>
+          <Patch Number="05+" Name="Polysynth">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="4"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="05+" Name="JP8 Pls">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="4"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="05+" Name="JP8 Squ">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="4"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="05+" Name="260 Pls 90">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="4"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="05+" Name="Reso Pls">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="4"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="05+" Name="Reso Stack">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="70"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="4"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="06" Name="Soft Lead" ProgramChange="5"/>
+          <Patch Number="06+" Name="8DV Saw 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="5"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="06+" Name="PR5 Saw 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="5"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="06+" Name="D50 Saw">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="5"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="07" Name="MG Sweep" ProgramChange="6"/>
+          <Patch Number="07+" Name="Sweep Lead">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="6"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="07+" Name="Vocorder Man">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="6"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="08" Name="4th Lead 1" ProgramChange="7"/>
+          <Patch Number="08+" Name="4th Lead 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="7"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 2 - S.Bass">
+        <MIDICommands>
+          <ControlChange Control="0" Value="64"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="09" Name="Normal TB" ProgramChange="8"/>
+          <Patch Number="09+" Name="Dist. TB 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="8"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="09+" Name="Dist. TB 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="8"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="09+" Name="Acid TB 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="8"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="09+" Name="Acid TB 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="8"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="09+" Name="Acid TB 3">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="8"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="09+" Name="Acid TB 4">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="70"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="8"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="10" Name="101 Bass 1" ProgramChange="9"/>
+          <Patch Number="10+" Name="101 Bass 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="9"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="10+" Name="101 Bass 3">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="9"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="10+" Name="House Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="9"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="10+" Name="Sine Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="9"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="10+" Name="Dub Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="9"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="11" Name="Pizz Bass" ProgramChange="10"/>
+          <Patch Number="12" Name="MG Bass 1" ProgramChange="11"/>
+          <Patch Number="12+" Name="MG Bass 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="11"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="12+" Name="MG Bass 3">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="11"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="12+" Name="MG Bass 4">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="11"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="12+" Name="FM Super Bs">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="11"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="12+" Name="Cheese Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="11"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="12+" Name="Syn.SB Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="70"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="11"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="13" Name="Blip Bass" ProgramChange="12"/>
+          <Patch Number="13+" Name="KGP Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="12"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="13+" Name="TBMG Bass 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="12"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="13+" Name="MG bass 5">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="12"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="13+" Name="JPMG Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="12"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="13+" Name="Click Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="12"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="13+" Name="KMP Bas">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="70"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="12"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="13+" Name="Osc. Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="71"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="12"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="14" Name="Reso. Bass" ProgramChange="13"/>
+          <Patch Number="14+" Name="Wow MG Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="13"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="14+" Name="Wow 101 Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="13"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="14+" Name="Sweep Wow Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="13"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="14+" Name="MG 5th Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="13"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="14+" Name="Doom Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="13"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="14+" Name="Rubber Bass 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="70"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="13"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="14+" Name="Rubber Bass 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="71"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="13"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="15" Name="Acid Bass" ProgramChange="14"/>
+          <Patch Number="15+" Name="Bubble Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="14"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="16" Name="Organ Bass" ProgramChange="15"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 3 Bass Guitar">
+        <PatchNameList>
+          <Patch Number="17" Name="Ac. Bass 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="16"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="17" Name="Ac. Bass 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="16"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="18" Name="Fingered Bs 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="17"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="18" Name="Fingered Bs 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="17"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="19" Name="Picked Bass 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="18"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="19" Name="Dust Pick Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="18"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="19" Name="Picked bass 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="18"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="20" Name="Fretless Bass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="19"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="21" Name="Slap Bass 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="20"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 4 Synth Stack">
+        <MIDICommands>
+          <ControlChange Control="0" Value="64"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="22" Name="Syn. Stack 1" ProgramChange="21"/>
+          <Patch Number="22" Name="Oct. Stack">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="21"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="22" Name="Syn. Stack 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="21"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="22" Name="Saw Stack">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="21"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="23" Name="Syn. SB 1" ProgramChange="22"/>
+          <Patch Number="23" Name="Syn. SB 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="22"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="23" Name="Brass Perc.">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="22"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="23" Name="Dirty SB">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="22"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 5 Synth Pad">
+        <PatchNameList>
+          <Patch Number="24" Name="Atmosphere">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="23"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="24" Name="Feed Back Wave">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="23"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="24" Name="X-MOD">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="23"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="24" Name="Pacifica">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="23"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="24" Name="7th Atom">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="23"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="24" Name="Outer Space">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="23"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="24" Name="Rev. Atom">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="70"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="23"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="25" Name="2.2 Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="24"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="25" Name="Jungle Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="24"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="25" Name="Psycho Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="24"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="25" Name="Pipe Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="24"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="25" Name="Ambient Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="24"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="25" Name="Flanger Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="24"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="26" Name="Bell Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="25"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="26" Name="7th Bell Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="25"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="26" Name="Fantasia">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="25"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="26" Name="Crystal">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="25"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="26" Name="Exo. Bell Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="25"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="26" Name="Echo Bell">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="25"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="27" Name="Warm Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="26"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="27" Name="Soundtrack">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="26"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="27" Name="Oct. Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="26"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="27" Name="OB Str. Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="26"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="27" Name="X-MOD Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="26"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="27" Name="Sweep Pad 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="26"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="27" Name="Sweep Pad 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="70"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="26"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="27" Name="OB Soft Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="71"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="26"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="27" Name="Goblin">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="72"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="26"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="27" Name="Echo Drops">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="73"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="26"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="28" Name="Random Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="27"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="28" Name="LFO Sweep">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="27"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="28" Name="Horror Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="27"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="28" Name="Pulse Key Pad">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="27"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 6 Strings">
+        <PatchNameList>
+          <Patch Number="29" Name="Real Strings 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="28"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="29" Name="Real Strings 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="28"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="30" Name="Auth Strings">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="29"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="30" Name="Hi Strings">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="29"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="30" Name="Syn. Strings 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="29"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="30" Name="Syn. Strings 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="29"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="30" Name="Syn. Strings 3">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="29"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="31" Name="Noise Strings">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="30"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="31" Name="RND Strings">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="30"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="31" Name="LFO Strings">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="30"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="32" Name="Slow Strings">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="31"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="32" Name="Slow SynStr.">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="31"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="33" Name="Pizzicato Str.">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="32"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 7 Voice">
+        <PatchNameList>
+          <Patch Number="34" Name="Choir Auhs">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="33"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="35" Name="Space Voice">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="34"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="35" Name="Sweepvox">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="34"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="35" Name="Synthvox 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="34"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="35" Name="Auth">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="34"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="35" Name="Synthvox 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="34"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="35" Name="Leadvox">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="34"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="35" Name="Auh Auh">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="34"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="35" Name="Sky Vox">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="34"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="35" Name="Auhbient">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="34"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="35" Name="Vibravox">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="34"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="35" Name="Noisevox">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="34"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 8 Synth FX">
+        <PatchNameList>
+          <Patch Number="36" Name="UFO FX">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="35"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="36" Name="Saw in Saw">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="35"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="36" Name="Feed Bell">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="35"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="36" Name="Abduction">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="35"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="36" Name="Loop Sweep">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="35"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="36" Name="UP FX">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="35"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="36" Name="Robocorder">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="70"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="35"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="36" Name="Noise Grow">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="71"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="35"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="37" Name="LFO Techno">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="36"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="37" Name="Calculating">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="36"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="37" Name="Emergency!">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="36"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="37" Name="FX Beats">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="36"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="37" Name="Analog FX">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="36"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="37" Name="Transformer">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="36"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="37" Name="Dusty Scratch">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="70"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="36"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="37" Name="Space Worms">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="71"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="36"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="37" Name="Winky FX">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="72"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="36"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 9 Noise">
+        <PatchNameList>
+          <Patch Number="38" Name="PR5 Noise 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="37"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="38" Name="PR5 Noise 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="37"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="38" Name="Pink Noise">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="37"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="38" Name="White Noise">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="37"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="39" Name="Bomb Wind">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="38"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="39" Name="Syn. Wind">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="38"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="39" Name="Vinyl Noise">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="38"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="39" Name="Noise Snare">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="38"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="40" Name="Explosion">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="39"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="40" Name="Pink Bomb">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="39"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 10 Piano">
+        <PatchNameList>
+          <Patch Number="41" Name="Ac Piano">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="40"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="41" Name="Bright Piano">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="40"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="42" Name="E. Piano 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="41"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="42" Name="E. Piano 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="41"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="42" Name="E. Piano 3 ">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="41"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="42" Name="E. Piano 4">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="41"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="43" Name="Org. E.Piano">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="42"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="43" Name="Noise Piano">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="42"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="44" Name="Clav.">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="43"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="44" Name="Ana.Clav.">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="43"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="44" Name="Digi.Clav">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="43"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 11 Organ">
+        <PatchNameList>
+          <Patch Number="45" Name="Organ 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="44"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="45" Name="Lp-Hp Organ">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="44"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="46" Name="Organ 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="45"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="46" Name="Percsv Organ">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="45"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="47" Name="Slow Organ">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="46"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="48" Name="Smokey Org.Chrd">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="47"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="48" Name="Organ Chord">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="47"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="49" Name="'60s Organ">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="48"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="50" Name="Dist. Organ">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="49"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="51" Name="Church Organ 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="50"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="52" Name="Organ Loop">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="51"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="52" Name="LF-Organ">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="51"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 12 Chromatic Percussion">
+        <PatchNameList>
+          <Patch Number="53" Name="Glockenspiel">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="52"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="53" Name="Vibraphone">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="52"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="53" Name="Beat Glocken">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="52"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="53" Name="Marimba">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="52"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="54" Name="Timpani">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="53"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="54" Name="Steel Drums">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="53"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="55" Name="Sqr.Perc.">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="54"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="55" Name="Juno Bell">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="54"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="55" Name="MG Perc.">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="54"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="55" Name="Perc. Glass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="54"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 13 Bell">
+        <PatchNameList>
+          <Patch Number="56" Name="Tubular-Bell">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="55"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="56" Name="Vib. Bell">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="55"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="57" Name="7th Bells">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="56"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="57" Name="Ring Bell">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="56"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="57" Name="Digi. Bell 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="56"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="57" Name="Ring Mod.">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="56"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="57" Name="Digi. Bell 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="56"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="57" Name="Dirty Bell 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="56"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="57" Name="Dirty Bell 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="70"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="56"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="57" Name="Digi. Bell 3">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="71"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="56"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 14 Guitar">
+        <PatchNameList>
+          <Patch Number="58" Name="Steel Str.Gt.">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="57"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="58" Name="12str. Guitar">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="57"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="59" Name="Jazz Guitar">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="58"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="59" Name="Clean Guitar">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="58"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="59" Name="Distortion Gr.">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="58"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="59" Name="Gt.Harmonics">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="58"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="60" Name="Acid Guitar 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="59"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="60" Name="Acid Guitar 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="59"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="60" Name="Jazz Steel Guitar">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="59"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="60" Name="Sitar Guitar">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="59"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="60" Name="Wah Guitar">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="59"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 15 Brass Section">
+        <PatchNameList>
+          <Patch Number="62" Name="Brass 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="61"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="62" Name="Bright Brass 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="61"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="62" Name="Bright Brass 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="61"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="63" Name="Brass&amp;Strings">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="62"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="63" Name="SB Brass Sect.">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="62"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="63" Name="ST Brass Sect.">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="62"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="64" Name="OB Brass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="63"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="64" Name="Hybrid Brass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="63"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="65" Name="4th Brass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="64"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 16 Brass/Pipe">
+        <PatchNameList>
+          <Patch Number="66" Name="Synth Brass 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="65"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="66" Name="Synth Brass 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="65"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="66" Name="Bright Syn.Brs 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="65"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="66" Name="Bright Syn.Brs 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="65"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="66" Name="Warm Brass 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="65"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="66" Name="Stack Brass 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="65"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="66" Name="Warm Brass 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="70"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="65"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="66" Name="String Brass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="71"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="65"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="66" Name="Warm Brass 3">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="72"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="65"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="66" Name="Stack Brass 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="73"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="65"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="67" Name="Trumpet">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="66"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="67" Name="Muted Trumpet">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="66"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="67" Name="Sax&amp;Trumpet">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="66"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="68" Name="Alto Sax">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="67"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="68" Name="Baritone Sax">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="67"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="68" Name="Bright Sax">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="67"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="69" Name="Flute">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="68"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="70" Name="Pan Flute">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="69"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="70" Name="Afro Flute">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="69"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="70" Name="Pipe Lead 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="69"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="70" Name="Pipe Lead 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="69"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="71" Name="Shacuhachi">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="70"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 17 Ethnic">
+        <PatchNameList>
+          <Patch Number="72" Name="Sitar 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="71"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="72" Name="Sitar 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="71"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="73" Name="Kalimba">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="72"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="74" Name="Bagpipe">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="73"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 18 Hit">
+        <PatchNameList>
+          <Patch Number="76" Name="MG Blip 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="75"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="76" Name="Rev. Blip">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="75"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="76" Name="MG Blip 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="75"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="76" Name="Syn. Perc">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="75"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="76" Name="Powa">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="75"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="76" Name="Douby">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="75"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="76" Name="P-Mod Perc.">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="70"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="75"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="77" Name="Bam Hit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="76"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="77" Name="Bit Hit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="76"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="77" Name="Orch. Hit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="76"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="77" Name="BF Hit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="76"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="77" Name="Organ Hit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="76"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="77" Name="Bim Hit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="76"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="77" Name="Dist. Hit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="70"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="76"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="77" Name="Brass Fall">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="71"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="76"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="77" Name="Strings Hit">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="72"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="76"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="77" Name="Space Frog">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="73"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="76"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="78" Name="Hoo!">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="77"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="78" Name="Ha!">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="77"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="78" Name="Afro Feet">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="77"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="78" Name="Breath 3">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="77"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="79" Name="Scratch Rwnd">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="78"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="79" Name="Scratch Push">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="78"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="79" Name="Scratch Pull">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="78"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="80" Name="Tape Rewind">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="79"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="80" Name="Vinyl Stop">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="79"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 19 SFX">
+        <PatchNameList>
+          <Patch Number="81" Name="Starship">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="80"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="81" Name="Burst Noise">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="80"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="81" Name="Laser-gun">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="80"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="82" Name="Seashore">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="82" Name="Rain">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="82" Name="Thunder">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="82" Name="Wind">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="82" Name="Stream">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="82" Name="Bubble">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="81"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="83" Name="Bird">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="82"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="83" Name="Low Bird">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="82"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="84" Name="Telephone">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="83"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="84" Name="Gun Shot">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="83"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="84" Name="Machine-gun">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="83"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="85" Name="Car-Pass">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="84"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="85" Name="Car-Cras">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="84"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="85" Name="Siren">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="84"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="85" Name="Jetplane">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="84"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="85" Name="Helicopter">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="84"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="86" Name="Laughing">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="85"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="86" Name="Screaming">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="85"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="86" Name="Punch">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="85"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="86" Name="Heart Beat">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="85"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="86" Name="Applause">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="85"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 20 Drum Percussion">
+        <PatchNameList>
+          <Patch Number="87" Name="909 Tom">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="86"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="87" Name="Synth Tom">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="86"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="87" Name="808 Tom">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="86"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="87" Name="Elec. Tom">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="86"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="87" Name="Ac. Tom">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="86"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="87" Name="78 Tom">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="86"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="88" Name="Hi Bongo Mute">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="87"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="88" Name="Hi Bongo Open">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="87"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="88" Name="Lo Bongo Mute">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="87"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="88" Name="Lo Bongo Open">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="87"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="89" Name="Hi Conga Slap">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="88"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="89" Name="Hi Cinga Mute">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="88"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="89" Name="Hi Conga Open">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="88"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="89" Name="Lo Conga Mute">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="88"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="89" Name="Lo Conga Open">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="88"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="89" Name="808 Conga">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="88"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="90" Name="Mute Surdo">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="89"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="90" Name="Open Surdo">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="89"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="91" Name="Open Pandeiro">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="90"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="91" Name="Mute Pandeiro">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="90"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="92" Name="Mute Cuica">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="91"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="92" Name="Open Cuica">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="91"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="93" Name="Timbale">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="92"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="94" Name="Tablabaya">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="93"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="94" Name="Udo">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="93"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="95" Name="Latin Menu #1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="94"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 21 Metal Percussion">
+        <PatchNameList>
+          <Patch Number="96" Name="Jungle Tamb">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="95"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="96" Name="Tambourine">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="95"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="96" Name="Hit Tamb.">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="95"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="96" Name="Shake Tamb.">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="95"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="96" Name="78 Tamb.">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="95"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="97" Name="Cowbell">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="96"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="97" Name="808 Cowbell">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="96"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="97" Name="78 Cowbell">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="96"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="98" Name="Mute Triangle">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="97"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="98" Name="Open Triangle">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="97"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="99" Name="Agogo">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="98"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="99" Name="78 Metal Beat">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="98"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="100" Name="Jingle Bell">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="99"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="100" Name="Bell Tree">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="99"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="100" Name="Wind-chime">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="99"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 22 Other Percussion">
+        <PatchNameList>
+          <Patch Number="101" Name="Maracas">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="100"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="101" Name="808 Maracas">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="100"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="102" Name="Cabasa Up">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="101"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="102" Name="Cabasa Down">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="101"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="103" Name="626 Shaker">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="102"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="104" Name="Short Whistle">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="103"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="104" Name="Long Whistle">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="103"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="105" Name="Short Guiro">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="104"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="105" Name="Long Guiro">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="104"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="105" Name="78 Guiro">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="104"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="106" Name="Click Noise">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="105"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="107" Name="909 Rim Shot">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="106"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="107" Name="808 Rim Shot">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="106"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="107" Name="Rim Shot">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="106"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="108" Name="Hyoshigi">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="107"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="108" Name="Claves">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="107"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="108" Name="808 Claves">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="107"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="108" Name="Wood Block">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="107"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="109" Name="Vibra-slap">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="108"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 23 - Hi-Hat">
+        <PatchNameList>
+          <Patch Number="110" Name="Real CH 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="109"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="110+" Name="Real PH 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="109"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="110+" Name="Real OH 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="109"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="110+" Name="Room CH">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="109"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="110+" Name="Room OH">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="109"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="110+" Name="Real CH 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="109"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="110+" Name="Real PH 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="70"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="109"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="110+" Name="Real OH 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="71"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="109"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="111" Name="808 CH">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="110"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="111+" Name="808 OH">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="110"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="111+" Name="78 CH">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="110"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="111+" Name="78 OH">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="110"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="111+" Name="707 CH">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="110"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="111+" Name="707 OH">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="110"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="111+" Name="606 CH">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="70"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="110"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="111+" Name="909 CH 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="71"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="110"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="111+" Name="909 CH 2 ">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="72"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="110"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="111+" Name="909 OH">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="73"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="110"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="111+" Name="909 Dist. OH">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="74"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="110"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 24 - Cymbal">
+        <PatchNameList>
+          <Patch Number="112+" Name="909 Crash">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="111"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="112+" Name="808 Cymbal">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="111"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="113+" Name="909 Ride Cym.">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="112"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="113+" Name="Ride Cymbal">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="112"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="114" Name="Ride Bell">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="113"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="115" Name="Asian Gong">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="114"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="116" Name="Reverse Cymbal">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="115"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 25 - Clap">
+        <PatchNameList>
+          <Patch Number="117" Name="808 Clap">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="116"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="117+" Name="Finger Snap">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="116"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="117+" Name="Hip Clap">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="116"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="118" Name="Shake &amp; Light Clap *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="117"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="118+" Name="Rap &amp; Real Clap *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="117"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="118+" Name="909 &amp; Hard Clap *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="117"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="118+" Name="HC2 &amp; 707 Clap *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="117"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 26 - Snare Drum (Single)">
+        <PatchNameList>
+          <Patch Number="119" Name="Funky Ghost">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="118"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="119+" Name="Clap SD">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="118"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="119+" Name="Fat SD">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="118"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="119+" Name="Tight SD">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="118"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="119+" Name="909 SD">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="119"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="120" Name="808 SD">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="119"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="120+" Name="Elec SD">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="119"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="120+" Name="80809 SD">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="119"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="120+" Name="Slap ">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="119"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="120+" Name="Blip SD">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="119"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 27 - Snare Drum (Kit)">
+        <PatchNameList>
+          <Patch Number="121" Name="Rim SD Kit *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="120"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="121+" Name="Jngl.SD Kit 1 *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="120"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="121+" Name="Jngl.SD Kit 2 *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="120"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="121+" Name="Mute SD Kit *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="120"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="121+" Name="Funky SD Kit *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="120"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="121+" Name="Rap SD Kit *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="120"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="121+" Name="Dry SD Kit *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="70"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="120"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="122" Name="Brush Tap *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="121"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="122+" Name="Brush Slap *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="121"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="122+" Name="Brush Swirl *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="121"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="123" Name="909 SD Kit *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="122"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="123+" Name="808 SD Kit 1 *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="122"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="123+" Name="Hyper SD Kit *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="122"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="123+" Name="FX SD Kit *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="122"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="123+" Name="808 SD Kit 2 *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="122"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="123+" Name="606 SD Kit *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="122"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 28 - Bass Drum (Single)">
+        <PatchNameList>
+          <Patch Number="125" Name="Blip BD">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="124"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="125+" Name="Cave BD">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="124"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="125+" Name="808 BD 1">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="124"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="125+" Name="808 BD 2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="124"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="125+" Name="Elec. BD">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="124"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="125+" Name="Afro Feet BD">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="124"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 29 - Bass Drum (Kit)">
+        <PatchNameList>
+          <Patch Number="127" Name="Dist. BD Kit *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="64"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="126"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="127+" Name="Jngl.BD Kit *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="65"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="126"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="127+" Name="909 BD Kit 1 *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="66"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="126"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="127+" Name="909 BD Kit 2 *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="67"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="126"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="127+" Name="909 BD Kit 3 *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="68"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="126"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="127+" Name="Dry BD Kit *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="69"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="126"/>
+            </PatchMIDICommands>
+          </Patch>
+          <Patch Number="127+" Name="606 BD Kit *2">
+            <PatchMIDICommands>
+              <ControlChange Control="0" Value="70"/>
+              <ControlChange Control="32" Value="0"/>
+              <ProgramChange Number="126"/>
+            </PatchMIDICommands>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+    <ChannelNameSet Name="Name Set 2">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="false"/>
+        <AvailableChannel Channel="2" Available="false"/>
+        <AvailableChannel Channel="3" Available="false"/>
+        <AvailableChannel Channel="4" Available="false"/>
+        <AvailableChannel Channel="5" Available="false"/>
+        <AvailableChannel Channel="6" Available="false"/>
+        <AvailableChannel Channel="7" Available="false"/>
+        <AvailableChannel Channel="8" Available="false"/>
+        <AvailableChannel Channel="9" Available="false"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="false"/>
+        <AvailableChannel Channel="12" Available="false"/>
+        <AvailableChannel Channel="13" Available="false"/>
+        <AvailableChannel Channel="14" Available="false"/>
+        <AvailableChannel Channel="15" Available="false"/>
+        <AvailableChannel Channel="16" Available="false"/>
+      </AvailableForChannels>
+      <PatchBank Name="MC-303 Drums">
+        <PatchNameList>
+          <Patch Number="1" Name="TR-909" ProgramChange="0">
+            <UsesNoteNameList Name="TR909 Set"/>
+          </Patch>
+          <Patch Number="9" Name="TR-808" ProgramChange="8">
+            <UsesNoteNameList Name="TR-808"/>
+          </Patch>
+          <Patch Number="17" Name="CR-78/606" ProgramChange="16">
+            <UsesNoteNameList Name="CR-78/606"/>
+          </Patch>
+          <Patch Number="25" Name="Jazz Set" ProgramChange="24">
+            <UsesNoteNameList Name="Jazz Set"/>
+          </Patch>
+          <Patch Number="26" Name="Brush Set" ProgramChange="25">
+            <UsesNoteNameList Name="Brush Set"/>
+          </Patch>
+          <Patch Number="33" Name="Jungle Set" ProgramChange="32">
+            <UsesNoteNameList Name="Jungle Set"/>
+          </Patch>
+          <Patch Number="41" Name="House Set" ProgramChange="40">
+            <UsesNoteNameList Name="House Set"/>
+          </Patch>
+          <Patch Number="49" Name="Techno 1" ProgramChange="48">
+            <UsesNoteNameList Name="Techno Set1"/>
+          </Patch>
+          <Patch Number="57" Name="Techno 2" ProgramChange="56">
+            <UsesNoteNameList Name="Techno Set2"/>
+          </Patch>
+          <Patch Number="65" Name="Techno 3" ProgramChange="64">
+            <UsesNoteNameList Name="Techno 3"/>
+          </Patch>
+          <Patch Number="73" Name="Abstract Set" ProgramChange="72">
+            <UsesNoteNameList Name="Abstract Set"/>
+          </Patch>
+          <Patch Number="81" Name="HipHop Set" ProgramChange="80">
+            <UsesNoteNameList Name="HipHop Set"/>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+    <NoteNameList Name="TR909 Set">
+      <Note Number="11" Name="909 SD1"/>
+      <Note Number="12" Name="808 SD 4"/>
+      <Note Number="13" Name="Rim SD 1"/>
+      <Note Number="14" Name="Hyper SD 1"/>
+      <Note Number="15" Name="Hyper SD 2"/>
+      <Note Number="16" Name="Finger Snap"/>
+      <Note Number="17" Name="909 BD 1"/>
+      <Note Number="18" Name="Cave BD"/>
+      <Note Number="19" Name="808 BD 1"/>
+      <Note Number="20" Name="909 BD 3"/>
+      <Note Number="21" Name="Blip BD"/>
+      <Note Number="22" Name="606 BD 3"/>
+      <Note Number="23" Name="909 BD 9"/>
+      <Note Number="24" Name="909 BD 1"/>
+      <Note Number="25" Name="Rim Shot"/>
+      <Note Number="26" Name="909 SD 3"/>
+      <Note Number="27" Name="Hip Clap 1"/>
+      <Note Number="28" Name="909 SD 1"/>
+      <Note Number="29" Name="78 Lo Tom"/>
+      <Note Number="30" Name="808 CH"/>
+      <Note Number="31" Name="78 Mid Tom"/>
+      <Note Number="32" Name="606 CH"/>
+      <Note Number="33" Name="78 Hi Tom"/>
+      <Note Number="34" Name="909 Dist.OH"/>
+      <Note Number="35" Name="909 BD 9"/>
+      <Note Number="36" Name="909 BD 1"/>
+      <Note Number="37" Name="909 Rim Shot"/>
+      <Note Number="38" Name="909 SD 2"/>
+      <Note Number="39" Name="909 Clap"/>
+      <Note Number="40" Name="909 SD 1"/>
+      <Note Number="41" Name="909 Lo Tom 1"/>
+      <Note Number="42" Name="909 CH"/>
+      <Note Number="43" Name="909 Lo Tom 2"/>
+      <Note Number="44" Name="909 CH 2"/>
+      <Note Number="45" Name="909 Mid Tom 1"/>
+      <Note Number="46" Name="909 OH"/>
+      <Note Number="47" Name="909 Mid Tom 2"/>
+      <Note Number="48" Name="909 Hi Tom 1"/>
+      <Note Number="49" Name="909 Crash 1"/>
+      <Note Number="50" Name="909  Hi Tom 2"/>
+      <Note Number="51" Name="909 Ride"/>
+      <Note Number="52" Name="Rev Cymbal"/>
+      <Note Number="53" Name="Ride Bell"/>
+      <Note Number="54" Name="Tambourine"/>
+      <Note Number="55" Name="909 Crash2"/>
+      <Note Number="56" Name="Cowbell"/>
+      <Note Number="57" Name="808 Cymbal 1"/>
+      <Note Number="58" Name="Vibraslap"/>
+      <Note Number="59" Name="Ride Cymbal"/>
+      <Note Number="60" Name="Hi Bongo Op"/>
+      <Note Number="61" Name="Lo Bongo Op"/>
+      <Note Number="62" Name="Hi Conga Slap"/>
+      <Note Number="63" Name="Hi Conga Open"/>
+      <Note Number="64" Name="Lo Conga Open"/>
+      <Note Number="65" Name="Hi Timbales"/>
+      <Note Number="66" Name="Lo Timbales"/>
+      <Note Number="67" Name="Hi Agogo"/>
+      <Note Number="68" Name="Lo Agogo"/>
+      <Note Number="69" Name="Cabasa Up"/>
+      <Note Number="70" Name="Maracas"/>
+      <Note Number="71" Name="Short Whistle"/>
+      <Note Number="72" Name="Long Whistle"/>
+      <Note Number="73" Name="Short Guiro"/>
+      <Note Number="74" Name="Long Guiro"/>
+      <Note Number="75" Name="Claves"/>
+      <Note Number="76" Name="Hi Woodblock"/>
+      <Note Number="77" Name="Lo Woodblock"/>
+      <Note Number="78" Name="Mute Cuica"/>
+      <Note Number="79" Name="Open Cuica"/>
+      <Note Number="80" Name="Mute Triangle"/>
+      <Note Number="81" Name="Open Triangle"/>
+      <Note Number="82" Name="626 Shaker"/>
+      <Note Number="83" Name="Oche.Hit"/>
+      <Note Number="84" Name="Bam Hit"/>
+      <Note Number="85" Name="Bim Hit"/>
+      <Note Number="86" Name="Dist.Hit"/>
+      <Note Number="87" Name="Organ Hit"/>
+      <Note Number="88" Name="Douby"/>
+      <Note Number="89" Name="Strings Hit"/>
+      <Note Number="90" Name="Syn.Perc."/>
+      <Note Number="91" Name="MG Blip1"/>
+      <Note Number="92" Name="Rev.Blip"/>
+      <Note Number="93" Name="Ha!"/>
+      <Note Number="94" Name="Hoo!"/>
+      <Note Number="95" Name="Brass Fall"/>
+      <Note Number="96" Name="Scratch Push"/>
+      <Note Number="97" Name="Scratch Pull"/>
+      <Note Number="98" Name="Scratch Rwnd"/>
+      <Note Number="99" Name="Tape Rewind"/>
+      <Note Number="100" Name="Vinyl Stop"/>
+      <Note Number="101" Name="Laughing"/>
+      <Note Number="102" Name="Screaming"/>
+      <Note Number="103" Name="Car-Pass"/>
+      <Note Number="104" Name="Car-Crash"/>
+      <Note Number="105" Name="Helicopter"/>
+      <Note Number="106" Name="Jetplane"/>
+      <Note Number="107" Name="Laser-Gun"/>
+      <Note Number="108" Name="Burst Noise"/>
+      <Note Number="109" Name="Starship"/>
+      <Note Number="110" Name="Analog FX"/>
+      <Note Number="111" Name="Bird"/>
+      <Note Number="112" Name="Bubble"/>
+      <Note Number="113" Name="Wind"/>
+      <Note Number="114" Name="Stream"/>
+      <Note Number="115" Name="Sea Shore"/>
+      <Note Number="116" Name="Thunder"/>
+      <Note Number="117" Name="Applause"/>
+      <Note Number="118" Name="Explosion"/>
+    </NoteNameList>
+    <NoteNameList Name="TR-808">
+      <Note Number="11" Name="909 SD1"/>
+      <Note Number="12" Name="808 SD 4"/>
+      <Note Number="13" Name="808 SD 3"/>
+      <Note Number="14" Name="808 SD 5"/>
+      <Note Number="15" Name="Hyper SD 1"/>
+      <Note Number="16" Name="Finger Snap"/>
+      <Note Number="17" Name="909 BD 1"/>
+      <Note Number="18" Name="Cave BD"/>
+      <Note Number="19" Name="Jungle 808 BD"/>
+      <Note Number="20" Name="909 BD 4"/>
+      <Note Number="21" Name="Blip BD"/>
+      <Note Number="22" Name="Dry BD 2"/>
+      <Note Number="23" Name="909 BD 8"/>
+      <Note Number="24" Name="Elec.BD"/>
+      <Note Number="25" Name="Rim Shot"/>
+      <Note Number="26" Name="Elec.SD1"/>
+      <Note Number="27" Name="Rap Clap 1"/>
+      <Note Number="28" Name="Elec.SD 2"/>
+      <Note Number="29" Name="Lo Synth Tom"/>
+      <Note Number="30" Name="Real CH 1"/>
+      <Note Number="31" Name="Mid Synth Tom"/>
+      <Note Number="32" Name="707 OH"/>
+      <Note Number="33" Name="Hi Synth Tom"/>
+      <Note Number="34" Name="Real OH 2"/>
+      <Note Number="35" Name="808 BD"/>
+      <Note Number="36" Name="808 BD 2"/>
+      <Note Number="37" Name="808 Rim Shot"/>
+      <Note Number="38" Name="808 SD 2"/>
+      <Note Number="39" Name="808 Clap"/>
+      <Note Number="40" Name="808 SD 1"/>
+      <Note Number="41" Name="808 Lo Tom 1"/>
+      <Note Number="42" Name="808 CH"/>
+      <Note Number="43" Name="808 Lo Tom 2"/>
+      <Note Number="44" Name="808 CH"/>
+      <Note Number="45" Name="808 Mid Tom 1"/>
+      <Note Number="46" Name="808 OH"/>
+      <Note Number="47" Name="808 Mid Tom 2"/>
+      <Note Number="48" Name="808 Hi Tom 1"/>
+      <Note Number="49" Name="808 Cymbal 1"/>
+      <Note Number="50" Name="808 Hi Tom 2"/>
+      <Note Number="51" Name="808 Cymbal 2"/>
+      <Note Number="52" Name="Rev.Cymbal"/>
+      <Note Number="53" Name="Ride Bell"/>
+      <Note Number="54" Name="78 Tamb."/>
+      <Note Number="55" Name="909 Crash 2"/>
+      <Note Number="56" Name="808 Cowbell"/>
+      <Note Number="57" Name="909 Crash 1"/>
+      <Note Number="58" Name="Vibraslap"/>
+      <Note Number="59" Name="Ride Cymbal"/>
+      <Note Number="60" Name="Elec.Hi Bongo"/>
+      <Note Number="61" Name="Elec.Lo Bongo"/>
+      <Note Number="62" Name="808 Hi Conga"/>
+      <Note Number="63" Name="808 Mid Conga"/>
+      <Note Number="64" Name="808 Lo Conga"/>
+      <Note Number="65" Name="Hi Timbales"/>
+      <Note Number="66" Name="Lo Timbales"/>
+      <Note Number="67" Name="Hi Agogo"/>
+      <Note Number="68" Name="Lo Agogo"/>
+      <Note Number="69" Name="Cabasa Up"/>
+      <Note Number="70" Name="Maracas"/>
+      <Note Number="71" Name="Short Whistle"/>
+      <Note Number="72" Name="Long Whistle"/>
+      <Note Number="73" Name="Short Guiro"/>
+      <Note Number="74" Name="Long Guiro"/>
+      <Note Number="75" Name="Claves"/>
+      <Note Number="76" Name="Hi Woodblock"/>
+      <Note Number="77" Name="Lo Woodblock"/>
+      <Note Number="78" Name="Mute Cuica"/>
+      <Note Number="79" Name="Open Cuica"/>
+      <Note Number="80" Name="Mute Triangle"/>
+      <Note Number="81" Name="Open Triangle"/>
+      <Note Number="82" Name="626 Shaker"/>
+      <Note Number="83" Name="Oche.Hit"/>
+      <Note Number="84" Name="Bam Hit"/>
+      <Note Number="85" Name="Bim Hit"/>
+      <Note Number="86" Name="Dist.Hit"/>
+      <Note Number="87" Name="Organ Hit"/>
+      <Note Number="88" Name="Douby"/>
+      <Note Number="89" Name="Strings Hit"/>
+      <Note Number="90" Name="Syn.Perc."/>
+      <Note Number="91" Name="MG Blip1"/>
+      <Note Number="92" Name="Rev.Blip"/>
+      <Note Number="93" Name="Ha!"/>
+      <Note Number="94" Name="Hoo!"/>
+      <Note Number="95" Name="Brass Fall"/>
+      <Note Number="96" Name="Scratch Push"/>
+      <Note Number="97" Name="Scratch Pull"/>
+      <Note Number="98" Name="Scratch Rwnd"/>
+      <Note Number="99" Name="Tape Rewind"/>
+      <Note Number="100" Name="Vinyl Stop"/>
+      <Note Number="101" Name="Laughing"/>
+      <Note Number="102" Name="Screaming"/>
+      <Note Number="103" Name="Car-Pass"/>
+      <Note Number="104" Name="Car-Crash"/>
+      <Note Number="105" Name="Helicopter"/>
+      <Note Number="106" Name="Jetplane"/>
+      <Note Number="107" Name="Laser-Gun"/>
+      <Note Number="108" Name="Burst Noise"/>
+      <Note Number="109" Name="Starship"/>
+      <Note Number="110" Name="Analog FX"/>
+      <Note Number="111" Name="Bird"/>
+      <Note Number="112" Name="Bubble"/>
+      <Note Number="113" Name="Wind"/>
+      <Note Number="114" Name="Stream"/>
+      <Note Number="115" Name="Sea Shore"/>
+      <Note Number="116" Name="Thunder"/>
+      <Note Number="117" Name="Applause"/>
+      <Note Number="118" Name="Explosion"/>
+    </NoteNameList>
+    <NoteNameList Name="CR-78/606">
+      <Note Number="11" Name="909 SD1"/>
+      <Note Number="12" Name="808 SD 4"/>
+      <Note Number="13" Name="808 SD 3"/>
+      <Note Number="14" Name="808 SD 5"/>
+      <Note Number="15" Name="Hyper SD 1"/>
+      <Note Number="16" Name="Finger Snap"/>
+      <Note Number="17" Name="909 BD 1"/>
+      <Note Number="18" Name="Cave BD"/>
+      <Note Number="19" Name="Jungle 808 BD"/>
+      <Note Number="20" Name="909 BD 4"/>
+      <Note Number="21" Name="Blip BD"/>
+      <Note Number="22" Name="Dry BD 2"/>
+      <Note Number="23" Name="606 BD 3"/>
+      <Note Number="24" Name="606 BD 1"/>
+      <Note Number="25" Name="Tiny Rim 3"/>
+      <Note Number="26" Name="606 SD 3"/>
+      <Note Number="27" Name="HC2 Clap"/>
+      <Note Number="28" Name="606 SD 1"/>
+      <Note Number="29" Name="808 Lo Tom"/>
+      <Note Number="30" Name="606 CH"/>
+      <Note Number="31" Name="808 Mid Tom"/>
+      <Note Number="32" Name="707 CH"/>
+      <Note Number="33" Name="808 Hi Tom"/>
+      <Note Number="34" Name="808 OH"/>
+      <Note Number="35" Name="606 BD 3"/>
+      <Note Number="36" Name="606 BD 1"/>
+      <Note Number="37" Name="808 Rim Shot"/>
+      <Note Number="38" Name="808 SD 1"/>
+      <Note Number="39" Name="808 Clap"/>
+      <Note Number="40" Name="78 SD"/>
+      <Note Number="41" Name="78 Lo Tom 1"/>
+      <Note Number="42" Name="78 CH"/>
+      <Note Number="43" Name="78 Lo Tom 2"/>
+      <Note Number="44" Name="808 CHH"/>
+      <Note Number="45" Name="78 Mid Tom 1"/>
+      <Note Number="46" Name="78 OH"/>
+      <Note Number="47" Name="78 Mid Tom 2"/>
+      <Note Number="48" Name="78 Hi Tom 1"/>
+      <Note Number="49" Name="808 Cymbal 1"/>
+      <Note Number="50" Name="78 Hi Tom 2"/>
+      <Note Number="51" Name="808 Cymbal 2"/>
+      <Note Number="52" Name="Rev. Cymbal"/>
+      <Note Number="53" Name="Ride Bell"/>
+      <Note Number="54" Name="78 Tamb."/>
+      <Note Number="55" Name="909 Crash 2"/>
+      <Note Number="56" Name="808 Cowbell"/>
+      <Note Number="57" Name="909 Crash 1"/>
+      <Note Number="58" Name="Vibraslap"/>
+      <Note Number="59" Name="Ride Cymbal"/>
+      <Note Number="60" Name="Elec.Hi Bongo"/>
+      <Note Number="61" Name="Elec.Lo Bongo"/>
+      <Note Number="62" Name="808 Hi Conga"/>
+      <Note Number="63" Name="808 Mid Conga"/>
+      <Note Number="64" Name="808 Lo Conga"/>
+      <Note Number="65" Name="Hi Timbales"/>
+      <Note Number="66" Name="Lo Timbales"/>
+      <Note Number="67" Name="Hi Agogo"/>
+      <Note Number="68" Name="Lo Agogo"/>
+      <Note Number="69" Name="Cabasa Up"/>
+      <Note Number="70" Name="Maracas"/>
+      <Note Number="71" Name="Short Whistle"/>
+      <Note Number="72" Name="Long Whistle"/>
+      <Note Number="73" Name="Short Guiro"/>
+      <Note Number="74" Name="Long Guiro"/>
+      <Note Number="75" Name="Claves"/>
+      <Note Number="76" Name="Hi Woodblock"/>
+      <Note Number="77" Name="Lo Woodblock"/>
+      <Note Number="78" Name="Mute Cuica"/>
+      <Note Number="79" Name="Open Cuica"/>
+      <Note Number="80" Name="Mute Triangle"/>
+      <Note Number="81" Name="Open Triangle"/>
+      <Note Number="82" Name="626 Shaker"/>
+      <Note Number="83" Name="Oche.Hit"/>
+      <Note Number="84" Name="Bam Hit"/>
+      <Note Number="85" Name="Bim Hit"/>
+      <Note Number="86" Name="Dist.Hit"/>
+      <Note Number="87" Name="Organ Hit"/>
+      <Note Number="88" Name="Douby"/>
+      <Note Number="89" Name="Strings Hit"/>
+      <Note Number="90" Name="Syn.Perc."/>
+      <Note Number="91" Name="MG Blip1"/>
+      <Note Number="92" Name="Rev.Blip"/>
+      <Note Number="93" Name="Ha!"/>
+      <Note Number="94" Name="Hoo!"/>
+      <Note Number="95" Name="Brass Fall"/>
+      <Note Number="96" Name="Scratch Push"/>
+      <Note Number="97" Name="Scratch Pull"/>
+      <Note Number="98" Name="Scratch Rwnd"/>
+      <Note Number="99" Name="Tape Rewind"/>
+      <Note Number="100" Name="Vinyl Stop"/>
+      <Note Number="101" Name="Laughing"/>
+      <Note Number="102" Name="Screaming"/>
+      <Note Number="103" Name="Car-Pass"/>
+      <Note Number="104" Name="Car-Crash"/>
+      <Note Number="105" Name="Helicopter"/>
+      <Note Number="106" Name="Jetplane"/>
+      <Note Number="107" Name="Laser-Gun"/>
+      <Note Number="108" Name="Burst Noise"/>
+      <Note Number="109" Name="Starship"/>
+      <Note Number="110" Name="Analog FX"/>
+      <Note Number="111" Name="Bird"/>
+      <Note Number="112" Name="Bubble"/>
+      <Note Number="113" Name="Wind"/>
+      <Note Number="114" Name="Stream"/>
+      <Note Number="115" Name="Sea Shore"/>
+      <Note Number="116" Name="Thunder"/>
+      <Note Number="117" Name="Applause"/>
+      <Note Number="118" Name="Explosion"/>
+    </NoteNameList>
+    <NoteNameList Name="Jazz Set">
+      <Note Number="11" Name="909 SD 1"/>
+      <Note Number="12" Name="808 SD 4"/>
+      <Note Number="13" Name="Dry SD 1"/>
+      <Note Number="14" Name="Jungle SD 1"/>
+      <Note Number="15" Name="Fat SD"/>
+      <Note Number="16" Name="Finger Snap"/>
+      <Note Number="17" Name="909 BD 1"/>
+      <Note Number="18" Name="Cave BD"/>
+      <Note Number="19" Name="808 BD 1"/>
+      <Note Number="20" Name="909 BD 3"/>
+      <Note Number="21" Name="Dry BD 3"/>
+      <Note Number="22" Name="606 BD 1"/>
+      <Note Number="23" Name="808 BD 2"/>
+      <Note Number="24" Name="Dry BD 2"/>
+      <Note Number="25" Name="909 Rim Shot"/>
+      <Note Number="26" Name="Funky Ghost"/>
+      <Note Number="27" Name="Hip Clap 1"/>
+      <Note Number="28" Name="Funky SD 2"/>
+      <Note Number="29" Name="909 Lo Tom 3"/>
+      <Note Number="30" Name="Room CH"/>
+      <Note Number="31" Name="909 Mid Tom 3"/>
+      <Note Number="32" Name="Real PH 2"/>
+      <Note Number="33" Name="909 Hi Tom 3"/>
+      <Note Number="34" Name="Room OH"/>
+      <Note Number="35" Name="808 BD 2"/>
+      <Note Number="36" Name="Dry BD 2"/>
+      <Note Number="37" Name="Rim Shot"/>
+      <Note Number="38" Name="Dry SD 1"/>
+      <Note Number="39" Name="Real Clap"/>
+      <Note Number="40" Name="Funky SD 1"/>
+      <Note Number="41" Name="Ac.Lo Tom 1"/>
+      <Note Number="42" Name="Real CH 1"/>
+      <Note Number="43" Name="Ac.Lo Tom 2"/>
+      <Note Number="44" Name="Real PH 1"/>
+      <Note Number="45" Name="Ac.Mid Tom 1"/>
+      <Note Number="46" Name="Real OH 1"/>
+      <Note Number="47" Name="Ac.Mid Tom 2"/>
+      <Note Number="48" Name="Ac.Hi Tom 1"/>
+      <Note Number="49" Name="909 Crash 1"/>
+      <Note Number="50" Name="Ac.Hi Tom 2"/>
+      <Note Number="51" Name="909 Ride"/>
+      <Note Number="52" Name="Rev.Cymbal"/>
+      <Note Number="53" Name="Ride Bell"/>
+      <Note Number="54" Name="78 Tamb."/>
+      <Note Number="55" Name="909 Crash 2"/>
+      <Note Number="56" Name="808 Cowbell"/>
+      <Note Number="57" Name="909 Crash 1"/>
+      <Note Number="58" Name="Vibraslap"/>
+      <Note Number="59" Name="Ride Cymbal"/>
+      <Note Number="60" Name="Hi Bongo Op"/>
+      <Note Number="61" Name="Lo Bongo Op"/>
+      <Note Number="62" Name="Hi Conga Slap"/>
+      <Note Number="63" Name="Hi Conga Open"/>
+      <Note Number="64" Name="Lo Conga Open"/>
+      <Note Number="65" Name="Hi Timbales"/>
+      <Note Number="66" Name="Lo Timbales"/>
+      <Note Number="67" Name="Hi Agogo"/>
+      <Note Number="68" Name="Lo Agogo"/>
+      <Note Number="69" Name="Cabasa Up"/>
+      <Note Number="70" Name="Maracas"/>
+      <Note Number="71" Name="Short Whistle"/>
+      <Note Number="72" Name="Long Whistle"/>
+      <Note Number="73" Name="Short Guiro"/>
+      <Note Number="74" Name="Long Guiro"/>
+      <Note Number="75" Name="Claves"/>
+      <Note Number="76" Name="Hi Woodblock"/>
+      <Note Number="77" Name="Lo Woodblock"/>
+      <Note Number="78" Name="Mute Cuica"/>
+      <Note Number="79" Name="Open Cuica"/>
+      <Note Number="80" Name="Mute Triangle"/>
+      <Note Number="81" Name="Open Triangle"/>
+      <Note Number="82" Name="626 Shaker"/>
+      <Note Number="83" Name="Oche.Hit"/>
+      <Note Number="84" Name="Bam Hit"/>
+      <Note Number="85" Name="Bim Hit"/>
+      <Note Number="86" Name="Dist.Hit"/>
+      <Note Number="87" Name="Organ Hit"/>
+      <Note Number="88" Name="Douby"/>
+      <Note Number="89" Name="Strings Hit"/>
+      <Note Number="90" Name="Syn.Perc."/>
+      <Note Number="91" Name="MG Blip1"/>
+      <Note Number="92" Name="Rev.Blip"/>
+      <Note Number="93" Name="Ha!"/>
+      <Note Number="94" Name="Hoo!"/>
+      <Note Number="95" Name="Brass Fall"/>
+      <Note Number="96" Name="Scratch Push"/>
+      <Note Number="97" Name="Scratch Pull"/>
+      <Note Number="98" Name="Scratch Rwnd"/>
+      <Note Number="99" Name="Tape Rewind"/>
+      <Note Number="100" Name="Vinyl Stop"/>
+      <Note Number="101" Name="Laughing"/>
+      <Note Number="102" Name="Screaming"/>
+      <Note Number="103" Name="Car-Pass"/>
+      <Note Number="104" Name="Car-Crash"/>
+      <Note Number="105" Name="Helicopter"/>
+      <Note Number="106" Name="Jetplane"/>
+      <Note Number="107" Name="Laser-Gun"/>
+      <Note Number="108" Name="Burst Noise"/>
+      <Note Number="109" Name="Starship"/>
+      <Note Number="110" Name="Analog FX"/>
+      <Note Number="111" Name="Bird"/>
+      <Note Number="112" Name="Bubble"/>
+      <Note Number="113" Name="Wind"/>
+      <Note Number="114" Name="Stream"/>
+      <Note Number="115" Name="Sea Shore"/>
+      <Note Number="116" Name="Thunder"/>
+      <Note Number="117" Name="Applause"/>
+      <Note Number="118" Name="Explosion"/>
+    </NoteNameList>
+    <NoteNameList Name="Brush Set">
+      <Note Number="11" Name="909 SD 1"/>
+      <Note Number="12" Name="808 SD 4"/>
+      <Note Number="13" Name="Clp SD 1"/>
+      <Note Number="14" Name="Rim SD 1"/>
+      <Note Number="15" Name="Funky SD 1"/>
+      <Note Number="16" Name="Finger Snap"/>
+      <Note Number="17" Name="909 BD 1"/>
+      <Note Number="18" Name="Cave BD"/>
+      <Note Number="19" Name="808 BD 1"/>
+      <Note Number="20" Name="909 BD 3"/>
+      <Note Number="21" Name="Dry BD 3"/>
+      <Note Number="22" Name="606 BD 2"/>
+      <Note Number="23" Name="606 BD 1"/>
+      <Note Number="24" Name="Dry BD 2"/>
+      <Note Number="25" Name="909 Rim Shot"/>
+      <Note Number="26" Name="Fat SD"/>
+      <Note Number="27" Name="Real Clap"/>
+      <Note Number="28" Name="Tight SD"/>
+      <Note Number="29" Name="909 Lo Tom 3"/>
+      <Note Number="30" Name="Real CH 1"/>
+      <Note Number="31" Name="909 Mid Tom 3"/>
+      <Note Number="32" Name="Real PH 1"/>
+      <Note Number="33" Name="909 Hi Tom 3"/>
+      <Note Number="34" Name="Real OH 2"/>
+      <Note Number="35" Name="808 BD 2"/>
+      <Note Number="36" Name="Dry BD 2"/>
+      <Note Number="37" Name="Rim Shot"/>
+      <Note Number="38" Name="Brush Tap"/>
+      <Note Number="39" Name="Brush Slap"/>
+      <Note Number="40" Name="Brush Swirl"/>
+      <Note Number="41" Name="Ac.Lo Tom 1"/>
+      <Note Number="42" Name="Real CH 2"/>
+      <Note Number="43" Name="Ac.Lo Tom2"/>
+      <Note Number="44" Name="Real RH 2"/>
+      <Note Number="45" Name="Ac.Mid Tom 1"/>
+      <Note Number="46" Name="Real OH 2"/>
+      <Note Number="47" Name="Ac.Mid Tom 2"/>
+      <Note Number="48" Name="Ac.Hi Tom 1"/>
+      <Note Number="49" Name="909 Crash 1"/>
+      <Note Number="50" Name="Ac.Hi Tom 2"/>
+      <Note Number="51" Name="909 Ride"/>
+      <Note Number="52" Name="Rev.Cymbal"/>
+      <Note Number="53" Name="Ride Bell"/>
+      <Note Number="54" Name="Tambourine"/>
+      <Note Number="55" Name="909 Crash 2"/>
+      <Note Number="56" Name="808 Cowbell"/>
+      <Note Number="57" Name="909 Crash 1"/>
+      <Note Number="58" Name="Vibraslap"/>
+      <Note Number="59" Name="Ride Cymbal"/>
+      <Note Number="60" Name="Hi Bongo Op"/>
+      <Note Number="61" Name="Lo Bongo Op"/>
+      <Note Number="62" Name="Hi Conga Slap"/>
+      <Note Number="63" Name="Hi Conga Open"/>
+      <Note Number="64" Name="Lo Conga Open"/>
+      <Note Number="65" Name="Hi Timbales"/>
+      <Note Number="66" Name="Lo Timbales"/>
+      <Note Number="67" Name="Hi Agogo"/>
+      <Note Number="68" Name="Lo Agogo"/>
+      <Note Number="69" Name="Cabasa Up"/>
+      <Note Number="70" Name="Maracas"/>
+      <Note Number="71" Name="Short Whistle"/>
+      <Note Number="72" Name="Long Whistle"/>
+      <Note Number="73" Name="Short Guiro"/>
+      <Note Number="74" Name="Long Guiro"/>
+      <Note Number="75" Name="Claves"/>
+      <Note Number="76" Name="Hi Woodblock"/>
+      <Note Number="77" Name="Lo Woodblock"/>
+      <Note Number="78" Name="Mute Cuica"/>
+      <Note Number="79" Name="Open Cuica"/>
+      <Note Number="80" Name="Mute Triangle"/>
+      <Note Number="81" Name="Open Triangle"/>
+      <Note Number="82" Name="626 Shaker"/>
+      <Note Number="83" Name="Oche.Hit"/>
+      <Note Number="84" Name="Bam Hit"/>
+      <Note Number="85" Name="Bim Hit"/>
+      <Note Number="86" Name="Dist.Hit"/>
+      <Note Number="87" Name="Organ Hit"/>
+      <Note Number="88" Name="Douby"/>
+      <Note Number="89" Name="Strings Hit"/>
+      <Note Number="90" Name="Syn.Perc."/>
+      <Note Number="91" Name="MG Blip1"/>
+      <Note Number="92" Name="Rev.Blip"/>
+      <Note Number="93" Name="Ha!"/>
+      <Note Number="94" Name="Hoo!"/>
+      <Note Number="95" Name="Brass Fall"/>
+      <Note Number="96" Name="Scratch Push"/>
+      <Note Number="97" Name="Scratch Pull"/>
+      <Note Number="98" Name="Scratch Rwnd"/>
+      <Note Number="99" Name="Tape Rewind"/>
+      <Note Number="100" Name="Vinyl Stop"/>
+      <Note Number="101" Name="Laughing"/>
+      <Note Number="102" Name="Screaming"/>
+      <Note Number="103" Name="Car-Pass"/>
+      <Note Number="104" Name="Car-Crash"/>
+      <Note Number="105" Name="Helicopter"/>
+      <Note Number="106" Name="Jetplane"/>
+      <Note Number="107" Name="Laser-Gun"/>
+      <Note Number="108" Name="Burst Noise"/>
+      <Note Number="109" Name="Starship"/>
+      <Note Number="110" Name="Analog FX"/>
+      <Note Number="111" Name="Bird"/>
+      <Note Number="112" Name="Bubble"/>
+      <Note Number="113" Name="Wind"/>
+      <Note Number="114" Name="Stream"/>
+      <Note Number="115" Name="Sea Shore"/>
+      <Note Number="116" Name="Thunder"/>
+      <Note Number="117" Name="Applause"/>
+      <Note Number="118" Name="Explosion"/>
+    </NoteNameList>
+    <NoteNameList Name="Jungle Set">
+      <Note Number="11" Name="909 SD 1"/>
+      <Note Number="12" Name="Bamboo Stk."/>
+      <Note Number="13" Name="Jungl SD 3"/>
+      <Note Number="14" Name="Funky SD 1"/>
+      <Note Number="15" Name="Clp SD 1"/>
+      <Note Number="16" Name="606 SD 2"/>
+      <Note Number="17" Name="909 BD 1"/>
+      <Note Number="18" Name="Cave BD"/>
+      <Note Number="19" Name="Heart Beat"/>
+      <Note Number="20" Name="Dry BD 1"/>
+      <Note Number="21" Name="Blip BD"/>
+      <Note Number="22" Name="Jungle BD 2"/>
+      <Note Number="23" Name="909 BD 7"/>
+      <Note Number="24" Name="909 BD 9"/>
+      <Note Number="25" Name="Tiny Rim 4"/>
+      <Note Number="26" Name="Tamb.SD 1"/>
+      <Note Number="27" Name="Rap Clap 2"/>
+      <Note Number="28" Name="JungleSD 4"/>
+      <Note Number="29" Name="Lo BambooTom"/>
+      <Note Number="30" Name="808 CH"/>
+      <Note Number="31" Name="Mid BambooTom"/>
+      <Note Number="32" Name="707 CH"/>
+      <Note Number="33" Name="Hi BambooTom"/>
+      <Note Number="34" Name="707 OH"/>
+      <Note Number="35" Name="Jungle 808 BD"/>
+      <Note Number="36" Name="Jungle BD 1"/>
+      <Note Number="37" Name="Tiny Rim 2"/>
+      <Note Number="38" Name="Jungle SD 2"/>
+      <Note Number="39" Name="Hard Clap"/>
+      <Note Number="40" Name="Jungle SD 1"/>
+      <Note Number="41" Name="909 Lo Tom 1"/>
+      <Note Number="42" Name="Real CH 1"/>
+      <Note Number="43" Name="909 Lo Tom 2"/>
+      <Note Number="44" Name="Jungle Tamb"/>
+      <Note Number="45" Name="909 Mid Tom 1"/>
+      <Note Number="46" Name="Room OH"/>
+      <Note Number="47" Name="909 Mid Tom 2"/>
+      <Note Number="48" Name="909 Hi Tom 1"/>
+      <Note Number="49" Name="909 Crash 1"/>
+      <Note Number="50" Name="909 Hi Tom 2"/>
+      <Note Number="51" Name="909 Ride"/>
+      <Note Number="52" Name="Rev.Cymbal"/>
+      <Note Number="53" Name="Asian Gong"/>
+      <Note Number="54" Name="Hit Tamb."/>
+      <Note Number="55" Name="909 Crash"/>
+      <Note Number="56" Name="Cowbell"/>
+      <Note Number="57" Name="909 Crash 2"/>
+      <Note Number="58" Name="Vibraslap"/>
+      <Note Number="59" Name="Ride Cymbal"/>
+      <Note Number="60" Name="Hi Bongo Op"/>
+      <Note Number="61" Name="Lo Bongo Op"/>
+      <Note Number="62" Name="Hi Conga Slap"/>
+      <Note Number="63" Name="Hi Conga Open"/>
+      <Note Number="64" Name="Lo Conga Open"/>
+      <Note Number="65" Name="Hi Timbales"/>
+      <Note Number="66" Name="Lo Timbales"/>
+      <Note Number="67" Name="Hi Agogo"/>
+      <Note Number="68" Name="Lo Agogo"/>
+      <Note Number="69" Name="Cabasa Up"/>
+      <Note Number="70" Name="Maracas"/>
+      <Note Number="71" Name="Short Whistle"/>
+      <Note Number="72" Name="Long Whistle"/>
+      <Note Number="73" Name="Short Guiro"/>
+      <Note Number="74" Name="Long Guiro"/>
+      <Note Number="75" Name="Claves"/>
+      <Note Number="76" Name="Hi Woodblock"/>
+      <Note Number="77" Name="Lo Woodblock"/>
+      <Note Number="78" Name="Mute Cuica"/>
+      <Note Number="79" Name="Open Cuica"/>
+      <Note Number="80" Name="Mute Triangle"/>
+      <Note Number="81" Name="Open Triangle"/>
+      <Note Number="82" Name="626 Shaker"/>
+      <Note Number="83" Name="Oche.Hit"/>
+      <Note Number="84" Name="Bam Hit"/>
+      <Note Number="85" Name="Bim Hit"/>
+      <Note Number="86" Name="Dist.Hit"/>
+      <Note Number="87" Name="Organ Hit"/>
+      <Note Number="88" Name="Douby"/>
+      <Note Number="89" Name="Strings Hit"/>
+      <Note Number="90" Name="Syn.Perc."/>
+      <Note Number="91" Name="MG Blip1"/>
+      <Note Number="92" Name="Rev.Blip"/>
+      <Note Number="93" Name="Ha!"/>
+      <Note Number="94" Name="Hoo!"/>
+      <Note Number="95" Name="Brass Fall"/>
+      <Note Number="96" Name="Scratch Push"/>
+      <Note Number="97" Name="Scratch Pull"/>
+      <Note Number="98" Name="Scratch Rwnd"/>
+      <Note Number="99" Name="Tape Rewind"/>
+      <Note Number="100" Name="Vinyl Stop"/>
+      <Note Number="101" Name="Laughing"/>
+      <Note Number="102" Name="Screaming"/>
+      <Note Number="103" Name="Car-Pass"/>
+      <Note Number="104" Name="Car-Crash"/>
+      <Note Number="105" Name="Helicopter"/>
+      <Note Number="106" Name="Jetplane"/>
+      <Note Number="107" Name="Laser-Gun"/>
+      <Note Number="108" Name="Burst Noise"/>
+      <Note Number="109" Name="Starship"/>
+      <Note Number="110" Name="Analog FX"/>
+      <Note Number="111" Name="Bird"/>
+      <Note Number="112" Name="Bubble"/>
+      <Note Number="113" Name="Wind"/>
+      <Note Number="114" Name="Stream"/>
+      <Note Number="115" Name="Sea Shore"/>
+      <Note Number="116" Name="Thunder"/>
+      <Note Number="117" Name="Applause"/>
+      <Note Number="118" Name="Explosion"/>
+    </NoteNameList>
+    <NoteNameList Name="House Set">
+      <Note Number="11" Name="909 SD 1"/>
+      <Note Number="12" Name="808 SD 4"/>
+      <Note Number="13" Name="Jungle SD 1"/>
+      <Note Number="14" Name="Hyper SD 2"/>
+      <Note Number="15" Name="Tiny SD"/>
+      <Note Number="16" Name="Finger Snap"/>
+      <Note Number="17" Name="909 BD 1"/>
+      <Note Number="18" Name="Cave BD"/>
+      <Note Number="19" Name="808 BD 1"/>
+      <Note Number="20" Name="Dry BD 1"/>
+      <Note Number="21" Name="Blip BD"/>
+      <Note Number="22" Name="606 BD 3"/>
+      <Note Number="23" Name="909 BD 9"/>
+      <Note Number="24" Name="909 BD 7"/>
+      <Note Number="25" Name="Rim Shot"/>
+      <Note Number="26" Name="Funky SD"/>
+      <Note Number="27" Name="Real Clap"/>
+      <Note Number="28" Name="Rap SD"/>
+      <Note Number="29" Name="808 Lo Tom 1"/>
+      <Note Number="30" Name="808 CH"/>
+      <Note Number="31" Name="808 Mid Tom 3"/>
+      <Note Number="32" Name="Real PH 1"/>
+      <Note Number="33" Name="808 Hi Tom 3"/>
+      <Note Number="34" Name="808 OH"/>
+      <Note Number="35" Name="909 BD 6"/>
+      <Note Number="36" Name="909 BD 3"/>
+      <Note Number="37" Name="909 Rim Shot"/>
+      <Note Number="38" Name="909 SD 3"/>
+      <Note Number="39" Name="909 Clap"/>
+      <Note Number="40" Name="Clp SD 1"/>
+      <Note Number="41" Name="909 Lo Tom 1"/>
+      <Note Number="42" Name="909 CH"/>
+      <Note Number="43" Name="909 Lo Tom 2"/>
+      <Note Number="44" Name="909 CH 2"/>
+      <Note Number="45" Name="909 Mid Tom 1"/>
+      <Note Number="46" Name="909 OH"/>
+      <Note Number="47" Name="909 Mid Tom 2"/>
+      <Note Number="48" Name="909 Hi Tom 1"/>
+      <Note Number="49" Name="909 Crash 1"/>
+      <Note Number="50" Name="909 Hi Tom 2"/>
+      <Note Number="51" Name="909 Ride"/>
+      <Note Number="52" Name="Rev.Cymbal"/>
+      <Note Number="53" Name="Ride Bell"/>
+      <Note Number="54" Name="Tambourine"/>
+      <Note Number="55" Name="909 Crash 2"/>
+      <Note Number="56" Name="808 Cowbell"/>
+      <Note Number="57" Name="808 Cymbal 1"/>
+      <Note Number="58" Name="Vibraslap"/>
+      <Note Number="59" Name="Ride Cymbal"/>
+      <Note Number="60" Name="Hi Bongo Op"/>
+      <Note Number="61" Name="Lo Bongo Op"/>
+      <Note Number="62" Name="Hi Conga Slap"/>
+      <Note Number="63" Name="Hi Conga Open"/>
+      <Note Number="64" Name="Lo Conga Open"/>
+      <Note Number="65" Name="Hi Timbales"/>
+      <Note Number="66" Name="Lo Timbales"/>
+      <Note Number="67" Name="Hi Agogo"/>
+      <Note Number="68" Name="Lo Agogo"/>
+      <Note Number="69" Name="Cabasa Up"/>
+      <Note Number="70" Name="Cabasa Up"/>
+      <Note Number="71" Name="Short Whistle"/>
+      <Note Number="72" Name="Long Whistle"/>
+      <Note Number="73" Name="Short Guiro"/>
+      <Note Number="74" Name="Long Guiro"/>
+      <Note Number="75" Name="Claves"/>
+      <Note Number="76" Name="Mute Pandeiro"/>
+      <Note Number="77" Name="Open Pandeiro"/>
+      <Note Number="78" Name="Mute Cuica"/>
+      <Note Number="79" Name="Open Cuica"/>
+      <Note Number="80" Name="Mute Triangle"/>
+      <Note Number="81" Name="Open Triangle"/>
+      <Note Number="82" Name="626 Shaker"/>
+      <Note Number="83" Name="Oche.Hit"/>
+      <Note Number="84" Name="Bam Hit"/>
+      <Note Number="85" Name="Bim Hit"/>
+      <Note Number="86" Name="Dist.Hit"/>
+      <Note Number="87" Name="Organ Hit"/>
+      <Note Number="88" Name="Douby"/>
+      <Note Number="89" Name="Strings Hit"/>
+      <Note Number="90" Name="Syn.Perc."/>
+      <Note Number="91" Name="MG Blip1"/>
+      <Note Number="92" Name="Rev.Blip"/>
+      <Note Number="93" Name="Ha!"/>
+      <Note Number="94" Name="Hoo!"/>
+      <Note Number="95" Name="Brass Fall"/>
+      <Note Number="96" Name="Scratch Push"/>
+      <Note Number="97" Name="Scratch Pull"/>
+      <Note Number="98" Name="Scratch Rwnd"/>
+      <Note Number="99" Name="Tape Rewind"/>
+      <Note Number="100" Name="Vinyl Stop"/>
+      <Note Number="101" Name="Laughing"/>
+      <Note Number="102" Name="Screaming"/>
+      <Note Number="103" Name="Car-Pass"/>
+      <Note Number="104" Name="Car-Crash"/>
+      <Note Number="105" Name="Helicopter"/>
+      <Note Number="106" Name="Jetplane"/>
+      <Note Number="107" Name="Laser-Gun"/>
+      <Note Number="108" Name="Burst Noise"/>
+      <Note Number="109" Name="Starship"/>
+      <Note Number="110" Name="Analog FX"/>
+      <Note Number="111" Name="Bird"/>
+      <Note Number="112" Name="Bubble"/>
+      <Note Number="113" Name="Wind"/>
+      <Note Number="114" Name="Stream"/>
+      <Note Number="115" Name="Sea Shore"/>
+      <Note Number="116" Name="Thunder"/>
+      <Note Number="117" Name="Applause"/>
+      <Note Number="118" Name="Explosion"/>
+    </NoteNameList>
+    <NoteNameList Name="Techno Set1">
+      <Note Number="11" Name="909 SD 1"/>
+      <Note Number="12" Name="808 SD 4"/>
+      <Note Number="13" Name="Funky SD 1"/>
+      <Note Number="14" Name="Hyper SD 1"/>
+      <Note Number="15" Name="Tamb SD 3"/>
+      <Note Number="16" Name="Finger Snap"/>
+      <Note Number="17" Name="909 BD 1"/>
+      <Note Number="18" Name="Cave BD"/>
+      <Note Number="19" Name="Jungle 808 BD"/>
+      <Note Number="20" Name="909 BD 10"/>
+      <Note Number="21" Name="Blip BD"/>
+      <Note Number="22" Name="606 BD 1"/>
+      <Note Number="23" Name="909 BD 9"/>
+      <Note Number="24" Name="909 BD 8"/>
+      <Note Number="25" Name="Rim Shot"/>
+      <Note Number="26" Name="90 9 SD 3"/>
+      <Note Number="27" Name="HC2 Clap"/>
+      <Note Number="28" Name="909 SD 1"/>
+      <Note Number="29" Name="Tablabaya"/>
+      <Note Number="30" Name="808 CH"/>
+      <Note Number="31" Name="Lo Udo"/>
+      <Note Number="32" Name="Room CH 1"/>
+      <Note Number="33" Name="Hi Udo"/>
+      <Note Number="34" Name="909 OH"/>
+      <Note Number="35" Name="Afro Feet Kick"/>
+      <Note Number="36" Name="909 BD 6"/>
+      <Note Number="37" Name="808 Rim Shot"/>
+      <Note Number="38" Name="909 SD 2"/>
+      <Note Number="39" Name="707 Clap"/>
+      <Note Number="40" Name="80809 SD"/>
+      <Note Number="41" Name="909 Lo Tom 1"/>
+      <Note Number="42" Name="707 CH"/>
+      <Note Number="43" Name="909 Lo Tom 2"/>
+      <Note Number="44" Name="Real PH 1"/>
+      <Note Number="45" Name="909 Mid Tom 1"/>
+      <Note Number="46" Name="707 OH"/>
+      <Note Number="47" Name="909 Mid Tom 2"/>
+      <Note Number="48" Name="909 Hi Tom 1"/>
+      <Note Number="49" Name="909 Crash 1"/>
+      <Note Number="50" Name="909 Hi Tom 2"/>
+      <Note Number="51" Name="909 Ride"/>
+      <Note Number="52" Name="Rev.Cymbal"/>
+      <Note Number="53" Name="Asian Gong"/>
+      <Note Number="54" Name="Tambourine"/>
+      <Note Number="55" Name="909 Crash 2"/>
+      <Note Number="56" Name="808 Cowbell"/>
+      <Note Number="57" Name="808 Cymbal 1"/>
+      <Note Number="58" Name="Vibraslap"/>
+      <Note Number="59" Name="Ride Cymbal"/>
+      <Note Number="60" Name="Elec.Hi Bongo"/>
+      <Note Number="61" Name="Elec.Lo Bongo"/>
+      <Note Number="62" Name="808 Hi Conga"/>
+      <Note Number="63" Name="808 Mid Conga"/>
+      <Note Number="64" Name="808 Lo Conga"/>
+      <Note Number="65" Name="Hi Timbales"/>
+      <Note Number="66" Name="Lo Timbales"/>
+      <Note Number="67" Name="Hi Agogo"/>
+      <Note Number="68" Name="Lo Agogo"/>
+      <Note Number="69" Name="Cabasa Up"/>
+      <Note Number="70" Name="Maracas"/>
+      <Note Number="71" Name="Short Whistle"/>
+      <Note Number="72" Name="Long Whistle"/>
+      <Note Number="73" Name="Short Guiro"/>
+      <Note Number="74" Name="Long Guiro"/>
+      <Note Number="75" Name="808 Claves"/>
+      <Note Number="76" Name="Hi Hyoshigi"/>
+      <Note Number="77" Name="Lo Hyoshigi"/>
+      <Note Number="78" Name="Mute Cuica"/>
+      <Note Number="79" Name="Open Cuica"/>
+      <Note Number="80" Name="Mute Triangle"/>
+      <Note Number="81" Name="Open Triangle"/>
+      <Note Number="82" Name="626 Shaker"/>
+      <Note Number="83" Name="Oche.Hit"/>
+      <Note Number="84" Name="Bam Hit"/>
+      <Note Number="85" Name="Bim Hit"/>
+      <Note Number="86" Name="Dist.Hit"/>
+      <Note Number="87" Name="Organ Hit"/>
+      <Note Number="88" Name="Douby"/>
+      <Note Number="89" Name="Strings Hit"/>
+      <Note Number="90" Name="Syn.Perc."/>
+      <Note Number="91" Name="MG Blip1"/>
+      <Note Number="92" Name="Rev.Blip"/>
+      <Note Number="93" Name="Ha!"/>
+      <Note Number="94" Name="Hoo!"/>
+      <Note Number="95" Name="Brass Fall"/>
+      <Note Number="96" Name="Scratch Push"/>
+      <Note Number="97" Name="Scratch Pull"/>
+      <Note Number="98" Name="Scratch Rwnd"/>
+      <Note Number="99" Name="Tape Rewind"/>
+      <Note Number="100" Name="Vinyl Stop"/>
+      <Note Number="101" Name="Laughing"/>
+      <Note Number="102" Name="Screaming"/>
+      <Note Number="103" Name="Car-Pass"/>
+      <Note Number="104" Name="Car-Crash"/>
+      <Note Number="105" Name="Helicopter"/>
+      <Note Number="106" Name="Jetplane"/>
+      <Note Number="107" Name="Laser-Gun"/>
+      <Note Number="108" Name="Burst Noise"/>
+      <Note Number="109" Name="Starship"/>
+      <Note Number="110" Name="Analog FX"/>
+      <Note Number="111" Name="Bird"/>
+      <Note Number="112" Name="Bubble"/>
+      <Note Number="113" Name="Wind"/>
+      <Note Number="114" Name="Stream"/>
+      <Note Number="115" Name="Sea Shore"/>
+      <Note Number="116" Name="Thunder"/>
+      <Note Number="117" Name="Applause"/>
+      <Note Number="118" Name="Explosion"/>
+    </NoteNameList>
+    <NoteNameList Name="Techno Set2">
+      <Note Number="11" Name="909 SD 1"/>
+      <Note Number="12" Name="808 SD 4"/>
+      <Note Number="13" Name="Rim SD 2"/>
+      <Note Number="14" Name="Hard SD 1"/>
+      <Note Number="15" Name="Bamboo SD"/>
+      <Note Number="16" Name="Finger Snap"/>
+      <Note Number="17" Name="909 BD 1"/>
+      <Note Number="18" Name="Cave BD"/>
+      <Note Number="19" Name="Jungle 808 BD"/>
+      <Note Number="20" Name="Dist BD 3"/>
+      <Note Number="21" Name="Blip BD"/>
+      <Note Number="22" Name="Jungle BD 2"/>
+      <Note Number="23" Name="909 BD 9"/>
+      <Note Number="24" Name="909 BD 7"/>
+      <Note Number="25" Name="Rim Shot"/>
+      <Note Number="26" Name="HYper SD 3"/>
+      <Note Number="27" Name="707 Clap"/>
+      <Note Number="28" Name="Tamb SD 2"/>
+      <Note Number="29" Name="Lo Bim Hit"/>
+      <Note Number="30" Name="808 CH"/>
+      <Note Number="31" Name="Mid Bim Hit"/>
+      <Note Number="32" Name="70 CH"/>
+      <Note Number="33" Name="Hi Bim Hit"/>
+      <Note Number="34" Name="Room OH"/>
+      <Note Number="35" Name="Dist.BD 2"/>
+      <Note Number="36" Name="Dist.BD 1"/>
+      <Note Number="37" Name="909 Rim Shot"/>
+      <Note Number="38" Name="909 SD 3"/>
+      <Note Number="39" Name="Hyper SD 2"/>
+      <Note Number="40" Name="FX SD 1"/>
+      <Note Number="41" Name="Elec.Lo Tom 1"/>
+      <Note Number="42" Name="909 CH"/>
+      <Note Number="43" Name="Elec.Lo Tom 2"/>
+      <Note Number="44" Name="Room CH"/>
+      <Note Number="45" Name="Elec.Mid Tom 1"/>
+      <Note Number="46" Name="909 Dist.OH"/>
+      <Note Number="47" Name="Elec.Mid Tom 2"/>
+      <Note Number="48" Name="Elec.Hi Tom 1"/>
+      <Note Number="49" Name="909 Crash 1"/>
+      <Note Number="50" Name="Elec.Hi Tom 2"/>
+      <Note Number="51" Name="909 Ride"/>
+      <Note Number="52" Name="Rev.Cymbal"/>
+      <Note Number="53" Name="Asian Gong"/>
+      <Note Number="54" Name="Tambourine"/>
+      <Note Number="55" Name="909 Crash 2"/>
+      <Note Number="56" Name="808 Cowbell"/>
+      <Note Number="57" Name="808 Cymbal 1"/>
+      <Note Number="58" Name="Vibraslap"/>
+      <Note Number="59" Name="Ride Cymbal"/>
+      <Note Number="60" Name="Hi Bongo Op"/>
+      <Note Number="61" Name="Lo Bongo Op"/>
+      <Note Number="62" Name="Hi Conga Slap"/>
+      <Note Number="63" Name="Hi Conga Open"/>
+      <Note Number="64" Name="Lo Conga Open"/>
+      <Note Number="65" Name="Hi Timbales"/>
+      <Note Number="66" Name="Lo Timbales"/>
+      <Note Number="67" Name="Hi Agogo"/>
+      <Note Number="68" Name="Lo Agogo"/>
+      <Note Number="69" Name="Cabasa Up"/>
+      <Note Number="70" Name="Maracas"/>
+      <Note Number="71" Name="Short Whistle"/>
+      <Note Number="72" Name="Long Whistle"/>
+      <Note Number="73" Name="Short Guiro"/>
+      <Note Number="74" Name="Long Guiro"/>
+      <Note Number="75" Name="808 Claves"/>
+      <Note Number="76" Name="Hi Hyoshigi"/>
+      <Note Number="77" Name="Lo Hyoshigi"/>
+      <Note Number="78" Name="Mute Cuica"/>
+      <Note Number="79" Name="Open Cuica"/>
+      <Note Number="80" Name="Mute Triangle"/>
+      <Note Number="81" Name="Open Triangle"/>
+      <Note Number="82" Name="626 Shaker"/>
+      <Note Number="83" Name="Oche.Hit"/>
+      <Note Number="84" Name="Bam Hit"/>
+      <Note Number="85" Name="Bim Hit"/>
+      <Note Number="86" Name="Dist.Hit"/>
+      <Note Number="87" Name="Organ Hit"/>
+      <Note Number="88" Name="Douby"/>
+      <Note Number="89" Name="Strings Hit"/>
+      <Note Number="90" Name="Syn.Perc."/>
+      <Note Number="91" Name="MG Blip1"/>
+      <Note Number="92" Name="Rev.Blip"/>
+      <Note Number="93" Name="Ha!"/>
+      <Note Number="94" Name="Hoo!"/>
+      <Note Number="95" Name="Brass Fall"/>
+      <Note Number="96" Name="Scratch Push"/>
+      <Note Number="97" Name="Scratch Pull"/>
+      <Note Number="98" Name="Scratch Rwnd"/>
+      <Note Number="99" Name="Tape Rewind"/>
+      <Note Number="100" Name="Vinyl Stop"/>
+      <Note Number="101" Name="Laughing"/>
+      <Note Number="102" Name="Screaming"/>
+      <Note Number="103" Name="Car-Pass"/>
+      <Note Number="104" Name="Car-Crash"/>
+      <Note Number="105" Name="Helicopter"/>
+      <Note Number="106" Name="Jetplane"/>
+      <Note Number="107" Name="Laser-Gun"/>
+      <Note Number="108" Name="Burst Noise"/>
+      <Note Number="109" Name="Starship"/>
+      <Note Number="110" Name="Analog FX"/>
+      <Note Number="111" Name="Bird"/>
+      <Note Number="112" Name="Bubble"/>
+      <Note Number="113" Name="Wind"/>
+      <Note Number="114" Name="Stream"/>
+      <Note Number="115" Name="Sea Shore"/>
+      <Note Number="116" Name="Thunder"/>
+      <Note Number="117" Name="Applause"/>
+      <Note Number="118" Name="Explosion"/>
+    </NoteNameList>
+    <NoteNameList Name="Techno 3">
+      <Note Number="11" Name="909 SD 1"/>
+      <Note Number="12" Name="808 SD 4"/>
+      <Note Number="13" Name="Funky SD 1"/>
+      <Note Number="14" Name="Elec.SD"/>
+      <Note Number="15" Name="Hyper SD 3"/>
+      <Note Number="16" Name="Finger Snap"/>
+      <Note Number="17" Name="909 BD 1"/>
+      <Note Number="18" Name="Cave BD"/>
+      <Note Number="19" Name="Jungle 808 BD"/>
+      <Note Number="20" Name="909 BD 10"/>
+      <Note Number="21" Name="Blip BD"/>
+      <Note Number="22" Name="606 BD 3"/>
+      <Note Number="23" Name="Dist.BD 3"/>
+      <Note Number="24" Name="909 BD 5"/>
+      <Note Number="25" Name="Rim Shot"/>
+      <Note Number="26" Name="Noise SD"/>
+      <Note Number="27" Name="909 Clap"/>
+      <Note Number="28" Name="80809 SD"/>
+      <Note Number="29" Name="Lo Synth Tom"/>
+      <Note Number="30" Name="707 CH"/>
+      <Note Number="31" Name="Mid Synth Tom"/>
+      <Note Number="32" Name="Room CH"/>
+      <Note Number="33" Name="Hi Synth Tom"/>
+      <Note Number="34" Name="909 OH"/>
+      <Note Number="35" Name="909 BD 7"/>
+      <Note Number="36" Name="909 BD 8"/>
+      <Note Number="37" Name="Dust Rim Shot"/>
+      <Note Number="38" Name="Slap"/>
+      <Note Number="39" Name="808 Clap"/>
+      <Note Number="40" Name="Blip SD"/>
+      <Note Number="41" Name="78 Lo Tom 1"/>
+      <Note Number="42" Name="808 CH"/>
+      <Note Number="43" Name="78 Lo Tom 2"/>
+      <Note Number="44" Name="Real PH 1"/>
+      <Note Number="45" Name="78 Mid Tom 1"/>
+      <Note Number="46" Name="808 OH "/>
+      <Note Number="47" Name="78 Mid Tom 2"/>
+      <Note Number="48" Name="78 Hi Tom 1"/>
+      <Note Number="49" Name="909 Crash 1"/>
+      <Note Number="50" Name="78 Hi Tom 2"/>
+      <Note Number="51" Name="909 Ride"/>
+      <Note Number="52" Name="Rev.Cymbal"/>
+      <Note Number="53" Name="Asian Gong"/>
+      <Note Number="54" Name="Tambourine"/>
+      <Note Number="55" Name="909 Crash 2"/>
+      <Note Number="56" Name="808 Cowbell"/>
+      <Note Number="57" Name="808 Cymbal 1"/>
+      <Note Number="58" Name="Vibraslap"/>
+      <Note Number="59" Name="Ride Cymbal"/>
+      <Note Number="60" Name="Elec.Hi Bongo"/>
+      <Note Number="61" Name="Elec.Lo Bongo"/>
+      <Note Number="62" Name="808 Hi Conga"/>
+      <Note Number="63" Name="808 Mid Conga"/>
+      <Note Number="64" Name="808 Lo Conga"/>
+      <Note Number="65" Name="Hi Timbales"/>
+      <Note Number="66" Name="Lo Timbales"/>
+      <Note Number="67" Name="Hi Agogo"/>
+      <Note Number="68" Name="Lo Agogo"/>
+      <Note Number="69" Name="Cabasa Up"/>
+      <Note Number="70" Name="Maracas"/>
+      <Note Number="71" Name="Short Whistle"/>
+      <Note Number="72" Name="Long Whistle"/>
+      <Note Number="73" Name="Short Guiro"/>
+      <Note Number="74" Name="Long Guiro"/>
+      <Note Number="75" Name="808 Claves"/>
+      <Note Number="76" Name="Hi Hyoshigi"/>
+      <Note Number="77" Name="Lo Hyoshigi"/>
+      <Note Number="78" Name="Mute Cuica"/>
+      <Note Number="79" Name="Open Cuica"/>
+      <Note Number="80" Name="Mute Triangle"/>
+      <Note Number="81" Name="Open Triangle"/>
+      <Note Number="82" Name="626 Shaker"/>
+      <Note Number="83" Name="Oche.Hit"/>
+      <Note Number="84" Name="Bam Hit"/>
+      <Note Number="85" Name="Bim Hit"/>
+      <Note Number="86" Name="Dist.Hit"/>
+      <Note Number="87" Name="Organ Hit"/>
+      <Note Number="88" Name="Douby"/>
+      <Note Number="89" Name="Strings Hit"/>
+      <Note Number="90" Name="Syn.Perc."/>
+      <Note Number="91" Name="MG Blip1"/>
+      <Note Number="92" Name="Rev.Blip"/>
+      <Note Number="93" Name="Ha!"/>
+      <Note Number="94" Name="Hoo!"/>
+      <Note Number="95" Name="Brass Fall"/>
+      <Note Number="96" Name="Scratch Push"/>
+      <Note Number="97" Name="Scratch Pull"/>
+      <Note Number="98" Name="Scratch Rwnd"/>
+      <Note Number="99" Name="Tape Rewind"/>
+      <Note Number="100" Name="Vinyl Stop"/>
+      <Note Number="101" Name="Laughing"/>
+      <Note Number="102" Name="Screaming"/>
+      <Note Number="103" Name="Car-Pass"/>
+      <Note Number="104" Name="Car-Crash"/>
+      <Note Number="105" Name="Helicopter"/>
+      <Note Number="106" Name="Jetplane"/>
+      <Note Number="107" Name="Laser-Gun"/>
+      <Note Number="108" Name="Burst Noise"/>
+      <Note Number="109" Name="Starship"/>
+      <Note Number="110" Name="Analog FX"/>
+      <Note Number="111" Name="Bird"/>
+      <Note Number="112" Name="Bubble"/>
+      <Note Number="113" Name="Wind"/>
+      <Note Number="114" Name="Stream"/>
+      <Note Number="115" Name="Sea Shore"/>
+      <Note Number="116" Name="Thunder"/>
+      <Note Number="117" Name="Applause"/>
+      <Note Number="118" Name="Explosion"/>
+    </NoteNameList>
+    <NoteNameList Name="Abstract Set">
+      <Note Number="11" Name="909 SD 1"/>
+      <Note Number="12" Name="808 SD 4"/>
+      <Note Number="13" Name="Hard SD 2"/>
+      <Note Number="14" Name="FX SD 2"/>
+      <Note Number="15" Name="Jungle SD 1"/>
+      <Note Number="16" Name="Finger Snap"/>
+      <Note Number="17" Name="909 BD 2"/>
+      <Note Number="18" Name="Cave BD"/>
+      <Note Number="19" Name="808 BD 1"/>
+      <Note Number="20" Name="Dry BD 1"/>
+      <Note Number="21" Name="Blip BD 2"/>
+      <Note Number="22" Name="606 BD 1"/>
+      <Note Number="23" Name="909 BD 9"/>
+      <Note Number="24" Name="909 BD 8"/>
+      <Note Number="25" Name="Rim Shot"/>
+      <Note Number="26" Name="Funky SD 1"/>
+      <Note Number="27" Name="Shake Clap"/>
+      <Note Number="28" Name="Dry SD 1"/>
+      <Note Number="29" Name="Ac.Lo Tom"/>
+      <Note Number="30" Name="Real CH 1"/>
+      <Note Number="31" Name="Ac.Mid Tom 1"/>
+      <Note Number="32" Name="Room CH 1"/>
+      <Note Number="33" Name="Ac.Hi Tom"/>
+      <Note Number="34" Name="Room OH"/>
+      <Note Number="35" Name="606 BD 1"/>
+      <Note Number="36" Name="Cave BD"/>
+      <Note Number="37" Name="808 Rim Shot"/>
+      <Note Number="38" Name="78 SD"/>
+      <Note Number="39" Name="Hyper SN 2"/>
+      <Note Number="40" Name="MG Blip"/>
+      <Note Number="41" Name="78 Lo Tom 1"/>
+      <Note Number="42" Name="78 CH"/>
+      <Note Number="43" Name="78 Lo Tom 2"/>
+      <Note Number="44" Name="808 CH"/>
+      <Note Number="45" Name="78 Mid Tom 1"/>
+      <Note Number="46" Name="78 OH"/>
+      <Note Number="47" Name="78 Mid Tom 2"/>
+      <Note Number="48" Name="78 Hi Tom 1"/>
+      <Note Number="49" Name="808 Cymbal 1"/>
+      <Note Number="50" Name="78 Hi Tom 2"/>
+      <Note Number="51" Name="909 Ride"/>
+      <Note Number="52" Name="Rev.Cymbal"/>
+      <Note Number="53" Name="Asian Gong"/>
+      <Note Number="54" Name="Tambourine"/>
+      <Note Number="55" Name="909 Crash 2"/>
+      <Note Number="56" Name="808 Cowbell"/>
+      <Note Number="57" Name="808 Cymbal 1"/>
+      <Note Number="58" Name="Vibraslap"/>
+      <Note Number="59" Name="Ride Cymbal"/>
+      <Note Number="60" Name="Elec.Hi Bongo"/>
+      <Note Number="61" Name="Elec.Lo Bongo"/>
+      <Note Number="62" Name="808 Hi Conga"/>
+      <Note Number="63" Name="808 Mid Conga"/>
+      <Note Number="64" Name="808 Lo Conga"/>
+      <Note Number="65" Name="Hi Timbales"/>
+      <Note Number="66" Name="Lo Timbales"/>
+      <Note Number="67" Name="Hi Agogo"/>
+      <Note Number="68" Name="Lo Agogo"/>
+      <Note Number="69" Name="Cabasa Up"/>
+      <Note Number="70" Name="Maracas"/>
+      <Note Number="71" Name="Short Whistle"/>
+      <Note Number="72" Name="Long Whistle"/>
+      <Note Number="73" Name="Short Guiro"/>
+      <Note Number="74" Name="Long Guiro"/>
+      <Note Number="75" Name="Claves"/>
+      <Note Number="76" Name="Hi Hyoshigi"/>
+      <Note Number="77" Name="Lo Hyoshigi"/>
+      <Note Number="78" Name="Mute Cuica"/>
+      <Note Number="79" Name="Open Cuica"/>
+      <Note Number="80" Name="Mute Triangle"/>
+      <Note Number="81" Name="Open Triangle"/>
+      <Note Number="82" Name="626 Shaker"/>
+      <Note Number="83" Name="Oche.Hit"/>
+      <Note Number="84" Name="Bam Hit"/>
+      <Note Number="85" Name="Bim Hit"/>
+      <Note Number="86" Name="Dist.Hit"/>
+      <Note Number="87" Name="Organ Hit"/>
+      <Note Number="88" Name="Douby"/>
+      <Note Number="89" Name="Strings Hit"/>
+      <Note Number="90" Name="Syn.Perc."/>
+      <Note Number="91" Name="MG Blip1"/>
+      <Note Number="92" Name="Rev.Blip"/>
+      <Note Number="93" Name="Ha!"/>
+      <Note Number="94" Name="Hoo!"/>
+      <Note Number="95" Name="Brass Fall"/>
+      <Note Number="96" Name="Scratch Push"/>
+      <Note Number="97" Name="Scratch Pull"/>
+      <Note Number="98" Name="Scratch Rwnd"/>
+      <Note Number="99" Name="Tape Rewind"/>
+      <Note Number="100" Name="Vinyl Stop"/>
+      <Note Number="101" Name="Laughing"/>
+      <Note Number="102" Name="Screaming"/>
+      <Note Number="103" Name="Car-Pass"/>
+      <Note Number="104" Name="Car-Crash"/>
+      <Note Number="105" Name="Helicopter"/>
+      <Note Number="106" Name="Jetplane"/>
+      <Note Number="107" Name="Laser-Gun"/>
+      <Note Number="108" Name="Burst Noise"/>
+      <Note Number="109" Name="Starship"/>
+      <Note Number="110" Name="Analog FX"/>
+      <Note Number="111" Name="Bird"/>
+      <Note Number="112" Name="Bubble"/>
+      <Note Number="113" Name="Wind"/>
+      <Note Number="114" Name="Stream"/>
+      <Note Number="115" Name="Sea Shore"/>
+      <Note Number="116" Name="Thunder"/>
+      <Note Number="117" Name="Applause"/>
+      <Note Number="118" Name="Explosion"/>
+    </NoteNameList>
+    <NoteNameList Name="HipHop Set">
+      <Note Number="11" Name="909 SD 1"/>
+      <Note Number="12" Name="808 SD 4"/>
+      <Note Number="13" Name="Dry SD 2"/>
+      <Note Number="14" Name="Jungle SD 1"/>
+      <Note Number="15" Name="Clp SD 2"/>
+      <Note Number="16" Name="Shake Clap"/>
+      <Note Number="17" Name="909 BD 1"/>
+      <Note Number="18" Name="Cave BD"/>
+      <Note Number="19" Name="808 BD 1"/>
+      <Note Number="20" Name="909 BD 2"/>
+      <Note Number="21" Name="909 BD 7"/>
+      <Note Number="22" Name="606 BD 1"/>
+      <Note Number="23" Name="808 BD 2"/>
+      <Note Number="24" Name="Dry BD 2"/>
+      <Note Number="25" Name="909 Rim Shot"/>
+      <Note Number="26" Name="Clp SD 1"/>
+      <Note Number="27" Name="Hard Clap"/>
+      <Note Number="28" Name="Funky SD 1"/>
+      <Note Number="29" Name="909 Lo Tom"/>
+      <Note Number="30" Name="Room CH 1"/>
+      <Note Number="31" Name="909 Mid Tom"/>
+      <Note Number="32" Name="Real CH 1"/>
+      <Note Number="33" Name="909 Hi Tom"/>
+      <Note Number="34" Name="Room OH"/>
+      <Note Number="35" Name="Dry BD 2"/>
+      <Note Number="36" Name="Dry BD 1"/>
+      <Note Number="37" Name="Rim Shot"/>
+      <Note Number="38" Name="Rap SD"/>
+      <Note Number="39" Name="Hip Clap 1"/>
+      <Note Number="40" Name="Hard SD 1"/>
+      <Note Number="41" Name="Ac.Lo Tom 1"/>
+      <Note Number="42" Name="Real CH 1"/>
+      <Note Number="43" Name="Ac.Lo Tom 2"/>
+      <Note Number="44" Name="Real PH 1"/>
+      <Note Number="45" Name="Ac.Mid Tom 1"/>
+      <Note Number="46" Name="Real OH 1"/>
+      <Note Number="47" Name="Ac.Mid Tom 2"/>
+      <Note Number="48" Name="Ac.Hi Tom 1"/>
+      <Note Number="49" Name="909 Crash 1"/>
+      <Note Number="50" Name="Ac.Hi Tom 1"/>
+      <Note Number="51" Name="909 Ride"/>
+      <Note Number="52" Name="Rev.Cymbal"/>
+      <Note Number="53" Name="Asian Gong"/>
+      <Note Number="54" Name="Tambourine"/>
+      <Note Number="55" Name="909 Crash 2"/>
+      <Note Number="56" Name="808 Cowbell"/>
+      <Note Number="57" Name="808 Cymbal 1"/>
+      <Note Number="58" Name="Vibraslap"/>
+      <Note Number="59" Name="Ride Cymbal"/>
+      <Note Number="60" Name="Hi Bongo Op"/>
+      <Note Number="61" Name="Lo Bongo Op"/>
+      <Note Number="62" Name="Hi Conga Slap"/>
+      <Note Number="63" Name="Hi Conga Open"/>
+      <Note Number="64" Name="Lo Conga Open"/>
+      <Note Number="65" Name="Hi Timbales"/>
+      <Note Number="66" Name="Lo Timbales"/>
+      <Note Number="67" Name="Hi Agogo"/>
+      <Note Number="68" Name="Lo Agogo"/>
+      <Note Number="69" Name="Cabasa Up"/>
+      <Note Number="70" Name="Cabasa Up"/>
+      <Note Number="71" Name="Short Whistle"/>
+      <Note Number="72" Name="Long Whistle"/>
+      <Note Number="73" Name="Short Guiro"/>
+      <Note Number="74" Name="Long Guiro"/>
+      <Note Number="75" Name="Claves"/>
+      <Note Number="76" Name="Mute Pandeiro"/>
+      <Note Number="77" Name="Open Pandeiro"/>
+      <Note Number="78" Name="Mute Cuica"/>
+      <Note Number="79" Name="Open Cuica"/>
+      <Note Number="80" Name="Mute Triangle"/>
+      <Note Number="81" Name="Open Triangle"/>
+      <Note Number="82" Name="626 Shaker"/>
+      <Note Number="83" Name="Oche.Hit"/>
+      <Note Number="84" Name="Bam Hit"/>
+      <Note Number="85" Name="Bim Hit"/>
+      <Note Number="86" Name="Dist.Hit"/>
+      <Note Number="87" Name="Organ Hit"/>
+      <Note Number="88" Name="Douby"/>
+      <Note Number="89" Name="Strings Hit"/>
+      <Note Number="90" Name="Syn.Perc."/>
+      <Note Number="91" Name="MG Blip1"/>
+      <Note Number="92" Name="Rev.Blip"/>
+      <Note Number="93" Name="Ha!"/>
+      <Note Number="94" Name="Hoo!"/>
+      <Note Number="95" Name="Brass Fall"/>
+      <Note Number="96" Name="Scratch Push"/>
+      <Note Number="97" Name="Scratch Pull"/>
+      <Note Number="98" Name="Scratch Rwnd"/>
+      <Note Number="99" Name="Tape Rewind"/>
+      <Note Number="100" Name="Vinyl Stop"/>
+      <Note Number="101" Name="Laughing"/>
+      <Note Number="102" Name="Screaming"/>
+      <Note Number="103" Name="Car-Pass"/>
+      <Note Number="104" Name="Car-Crash"/>
+      <Note Number="105" Name="Helicopter"/>
+      <Note Number="106" Name="Jetplane"/>
+      <Note Number="107" Name="Laser-Gun"/>
+      <Note Number="108" Name="Burst Noise"/>
+      <Note Number="109" Name="Starship"/>
+      <Note Number="110" Name="Analog FX"/>
+      <Note Number="111" Name="Bird"/>
+      <Note Number="112" Name="Bubble"/>
+      <Note Number="113" Name="Wind"/>
+      <Note Number="114" Name="Stream"/>
+      <Note Number="115" Name="Sea Shore"/>
+      <Note Number="116" Name="Thunder"/>
+      <Note Number="117" Name="Applause"/>
+      <Note Number="118" Name="Explosion"/>
+    </NoteNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

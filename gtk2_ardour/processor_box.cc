@@ -1,21 +1,29 @@
 /*
-    Copyright (C) 2000-2004 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2007-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2007 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2008-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2015 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2015 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2014-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2017 Johannes Mueller <github@johannes-mueller.org>
+ * Copyright (C) 2018 Len Ovens <len@ovenwerks.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifdef WAF_BUILD
 #include "gtk2ardour-config.h"
@@ -31,6 +39,8 @@
 #include <glibmm/fileutils.h>
 
 #include <gtkmm/messagedialog.h>
+
+#include "pbd/unwind.h"
 
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gtk_ui.h"
@@ -106,6 +116,8 @@ using namespace Gtkmm2ext;
 using namespace ArdourWidgets;
 
 ProcessorBox*  ProcessorBox::_current_processor_box = 0;
+bool           ProcessorBox::_ignore_disk_io_change = false;
+
 RefPtr<Action> ProcessorBox::paste_action;
 RefPtr<Action> ProcessorBox::cut_action;
 RefPtr<Action> ProcessorBox::copy_action;
@@ -117,7 +129,6 @@ RefPtr<Action> ProcessorBox::disk_io_action;
 RefPtr<Action> ProcessorBox::edit_action;
 RefPtr<Action> ProcessorBox::edit_generic_action;
 RefPtr<ActionGroup> ProcessorBox::processor_box_actions;
-Gtkmm2ext::ActionMap ProcessorBox::myactions (X_("processor box"));
 Gtkmm2ext::Bindings* ProcessorBox::bindings = 0;
 
 
@@ -524,7 +535,7 @@ ProcessorEntry::setup_tooltip ()
 			}
 
 			if ((replicated = pi->get_count()) > 1) {
-				postfix += string_compose(_("\nThis mono plugin has been replicated %1 times."), replicated);
+				postfix += string_compose(_("\nThis plugin has been replicated %1 times."), replicated);
 			}
 
 			if (pi->plugin()->has_editor()) {
@@ -620,11 +631,15 @@ ProcessorEntry::name (Width w) const
 
 	} else {
 		boost::shared_ptr<ARDOUR::PluginInsert> pi;
-		uint32_t replicated;
-		if ((pi = boost::dynamic_pointer_cast<ARDOUR::PluginInsert> (_processor)) != 0
-				&& (replicated = pi->get_count()) > 1)
-		{
-			name_display += string_compose(_("(%1x1) "), replicated);
+		if ((pi = boost::dynamic_pointer_cast<ARDOUR::PluginInsert> (_processor)) != 0 && pi->get_count() > 1) {
+			switch (w) {
+				case Wide:
+					name_display += "* ";
+					break;
+				case Narrow:
+					name_display += "*";
+					break;
+			}
 		}
 
 		switch (w) {
@@ -635,7 +650,6 @@ ProcessorEntry::name (Width w) const
 			name_display += PBD::short_version (_processor->display_name(), 5);
 			break;
 		}
-
 	}
 
 	return name_display;
@@ -713,7 +727,7 @@ ProcessorEntry::hide_things ()
 }
 
 
-Menu *
+Menu*
 ProcessorEntry::build_controls_menu ()
 {
 	using namespace Menu_Helpers;
@@ -776,7 +790,7 @@ ProcessorEntry::toggle_control_visibility (Control* c)
 	_parent->update_gui_object_state (this);
 }
 
-Menu *
+Menu*
 ProcessorEntry::build_send_options_menu ()
 {
 	using namespace Menu_Helpers;
@@ -1025,7 +1039,8 @@ ProcessorEntry::Control::set_state (XMLNode const * node)
 			set_visible (visible);
 		}
 	} else {
-		set_visible (false);
+		boost::shared_ptr<AutomationControl> c = _control.lock ();
+		set_visible (c && (c->flags () & Controllable::InlineControl));
 	}
 }
 
@@ -1671,7 +1686,7 @@ ProcessorEntry::PluginInlineDisplay::update_height_alloc (uint32_t inline_height
 }
 
 void
-ProcessorEntry::PluginInlineDisplay::display_sample (cairo_t* cr, double w, double h)
+ProcessorEntry::PluginInlineDisplay::display_frame (cairo_t* cr, double w, double h)
 {
 	Gtkmm2ext::rounded_rectangle (cr, .5, -1.5, w - 1, h + 1, 7);
 }
@@ -1839,8 +1854,8 @@ ProcessorBox::set_route (boost::shared_ptr<Route> r)
 void
 ProcessorBox::route_going_away ()
 {
-	/* don't keep updating display as processors are deleted */
 	no_processor_redisplay = true;
+	processor_display.clear ();
 	_route.reset ();
 }
 
@@ -1983,6 +1998,9 @@ ProcessorBox::object_drop (DnDVBox<ProcessorEntry>* source, ProcessorEntry* posi
 			if (boost::dynamic_pointer_cast<UnknownProcessor> ((*i)->processor())) {
 				continue;
 			}
+			if (boost::dynamic_pointer_cast<PortInsert> ((*i)->processor())) {
+				continue;
+			}
 			procs.push_back ((*i)->processor ());
 		}
 	}
@@ -2034,7 +2052,7 @@ ProcessorBox::build_possible_aux_menu ()
 		return 0;
 	}
 
-	if (_route->is_monitor () || _route->is_listenbus ()) {
+	if (_route->is_monitor () || _route->is_foldbackbus ()) {
 		return 0;
 	}
 
@@ -2047,7 +2065,7 @@ ProcessorBox::build_possible_aux_menu ()
 			/* don't allow sending to master or monitor or to self */
 			continue;
 		}
-		if ((*r)->is_listenbus ()) {
+		if ((*r)->is_foldbackbus ()) {
 			continue;
 		}
 		if (_route->internal_send_for (*r)) {
@@ -2070,7 +2088,7 @@ ProcessorBox::build_possible_listener_menu ()
 		return 0;
 	}
 
-	if (_route->is_monitor () || _route->is_listenbus ()) {
+	if (_route->is_monitor () || _route->is_foldbackbus ()) {
 		return 0;
 	}
 
@@ -2083,7 +2101,7 @@ ProcessorBox::build_possible_listener_menu ()
 			/* don't allow sending to master or monitor or to self */
 			continue;
 		}
-		if (!(*r)->is_listenbus ()) {
+		if (!(*r)->is_foldbackbus ()) {
 			continue;
 		}
 		if (_route->internal_send_for (*r)) {
@@ -2106,7 +2124,7 @@ ProcessorBox::build_possible_remove_listener_menu ()
 		return 0;
 	}
 
-	if (_route->is_monitor () || _route->is_listenbus ()) {
+	if (_route->is_monitor () || _route->is_foldbackbus ()) {
 		return 0;
 	}
 
@@ -2119,7 +2137,7 @@ ProcessorBox::build_possible_remove_listener_menu ()
 			/* don't allow sending to master or monitor or to self */
 			continue;
 		}
-		if (!(*r)->is_listenbus ()) {
+		if (!(*r)->is_foldbackbus ()) {
 			continue;
 		}
 		if (!_route->internal_send_for (*r)) {
@@ -2158,6 +2176,7 @@ ProcessorBox::show_processor_menu (int arg)
 			aux_menu_item->set_submenu (*m);
 			aux_menu_item->set_sensitive (true);
 		} else {
+			delete m;
 			/* stupid gtkmm: we need to pass a null reference here */
 			gtk_menu_item_set_submenu (aux_menu_item->gobj(), 0);
 			aux_menu_item->set_sensitive (false);
@@ -2172,6 +2191,7 @@ ProcessorBox::show_processor_menu (int arg)
 			listen_menu_item->set_submenu (*m);
 			listen_menu_item->set_sensitive (true);
 		} else {
+			delete m;
 			/* stupid gtkmm: we need to pass a null reference here */
 			gtk_menu_item_set_submenu (listen_menu_item->gobj(), 0);
 			listen_menu_item->set_sensitive (false);
@@ -2186,14 +2206,15 @@ ProcessorBox::show_processor_menu (int arg)
 			remove_listen_menu_item->set_submenu (*m);
 			remove_listen_menu_item->set_sensitive (true);
 		} else {
+			delete m;
 			/* stupid gtkmm: we need to pass a null reference here */
 			gtk_menu_item_set_submenu (remove_listen_menu_item->gobj(), 0);
 			remove_listen_menu_item->set_sensitive (false);
 		}
 	}
 
-	ActionManager::get_action (X_("ProcessorMenu"), "newinsert")->set_sensitive (!_route->is_monitor () && !_route->is_listenbus ());
-	ActionManager::get_action (X_("ProcessorMenu"), "newsend")->set_sensitive (!_route->is_monitor () && !_route->is_listenbus ());
+	ActionManager::get_action (X_("ProcessorMenu"), "newinsert")->set_sensitive (!_route->is_monitor () && !_route->is_foldbackbus ());
+	ActionManager::get_action (X_("ProcessorMenu"), "newsend")->set_sensitive (!_route->is_monitor () && !_route->is_foldbackbus ());
 
 	ProcessorEntry* single_selection = 0;
 	if (processor_display.selection().size() == 1) {
@@ -2211,6 +2232,7 @@ ProcessorBox::show_processor_menu (int arg)
 				controls_menu_item->set_submenu (*m);
 				controls_menu_item->set_sensitive (true);
 			} else {
+				delete m;
 				gtk_menu_item_set_submenu (controls_menu_item->gobj(), 0);
 				controls_menu_item->set_sensitive (false);
 			}
@@ -2228,6 +2250,7 @@ ProcessorBox::show_processor_menu (int arg)
 				send_menu_item->set_submenu (*m);
 				send_menu_item->set_sensitive (true);
 			} else {
+				delete m;
 				gtk_menu_item_set_submenu (send_menu_item->gobj(), 0);
 				send_menu_item->set_sensitive (false);
 			}
@@ -2257,6 +2280,10 @@ ProcessorBox::show_processor_menu (int arg)
 	manage_pins_action->set_sensitive (pi != 0);
 	if (boost::dynamic_pointer_cast<Track>(_route)) {
 		disk_io_action->set_sensitive (true);
+		PBD::Unwinder<bool> uw (_ignore_disk_io_change, true);
+		ActionManager::get_toggle_action (X_("ProcessorMenu"), "disk-io-prefader")->set_active (_route->disk_io_point () == DiskIOPreFader);
+		ActionManager::get_toggle_action (X_("ProcessorMenu"), "disk-io-postfader")->set_active (_route->disk_io_point () == DiskIOPostFader);
+		ActionManager::get_toggle_action (X_("ProcessorMenu"), "disk-io-custom")->set_active (_route->disk_io_point () == DiskIOCustom);
 	} else {
 		disk_io_action->set_sensitive (false);
 	}
@@ -2424,18 +2451,17 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 
 	if (processor && (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS))) {
 
-		if (_session->engine().connected()) {
-			/* XXX giving an error message here is hard, because we may be in the midst of a button press */
+		if (!one_processor_can_be_edited ()) {
+			return true;
+		}
+		if (!ARDOUR_UI_UTILS::engine_is_running ()) {
+			return true;
+		}
 
-			if (!one_processor_can_be_edited ()) {
-				return true;
-			}
-
-			if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
-				generic_edit_processor (processor);
-			} else {
-				edit_processor (processor);
-			}
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+			generic_edit_processor (processor);
+		} else {
+			edit_processor (processor);
 		}
 
 		ret = true;
@@ -2534,8 +2560,10 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 			else if (boost::dynamic_pointer_cast<PluginInsert>(processor)->plugin()->has_inline_display() && UIConfiguration::instance().get_prefer_inline_over_gui()) {
 				; /* only show inline display */
 			}
-			else if (_session->engine().connected () && processor_can_be_edited (processor)) {
-				if ((*p)->has_editor ()) {
+			else if (processor_can_be_edited (processor)) {
+				if (!ARDOUR_UI_UTILS::engine_is_running()) {
+					return true;
+				} else if ((*p)->has_editor ()) {
 					edit_processor (processor);
 				} else if (boost::dynamic_pointer_cast<PluginInsert>(processor)->plugin()->parameter_count() > 0) {
 					generic_edit_processor (processor);
@@ -2718,8 +2746,8 @@ ProcessorBox::choose_aux (boost::weak_ptr<Route> wr)
 		return;
 	}
 
-	if (target->is_listenbus ()) {
-		_route->add_personal_send (target);
+	if (target->is_foldbackbus ()) {
+		_route->add_foldback_send (target);
 	} else {
 		_session->add_internal_send (target, _placement, _route);
 	}
@@ -2877,29 +2905,15 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 	boost::shared_ptr<UnknownProcessor> stub = boost::dynamic_pointer_cast<UnknownProcessor> (processor);
 
 	//faders and meters are not deletable, copy/paste-able, so they shouldn't be selectable
-	if (!send && !plugin_insert && !ext && !stub)
+	if (!send && !plugin_insert && !ext && !stub) {
 		e->set_selectable(false);
-
-	bool mark_send_visible = false;
-	if (send && _parent_strip) {
-		/* show controls of new sends by default */
-		GUIObjectState& st = _parent_strip->gui_object_state ();
-		XMLNode* strip = st.get_or_add_node (_parent_strip->state_id ());
-		assert (strip);
-		/* check if state exists, if not it must be a new send */
-		if (!st.get_node(strip, e->state_id())) {
-			mark_send_visible = true;
-		}
 	}
 
 	/* Set up this entry's state from the GUIObjectState */
 	XMLNode* proc = entry_gui_object_state (e);
 	if (proc) {
 		e->set_control_state (proc);
-	}
-
-	if (mark_send_visible) {
-		e->show_all_controls ();
+		update_gui_object_state (e); /* save updated state (InlineControl) */
 	}
 
 	if (plugin_insert
@@ -3662,7 +3676,7 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 
 	} else if ((send = boost::dynamic_pointer_cast<Send> (processor)) != 0) {
 
-		if (!_session->engine().connected()) {
+		if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 			return 0;
 		}
 
@@ -3678,7 +3692,7 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 			return 0;
 		}
 
-		if (!_session->engine().connected()) {
+		if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 			return 0;
 		}
 
@@ -3720,9 +3734,7 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 
 	} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (processor)) != 0) {
 
-		if (!_session->engine().connected()) {
-			MessageDialog msg ( _("Not connected to audio engine - no I/O changes are possible"));
-			msg.run ();
+		if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 			return 0;
 		}
 
@@ -3763,44 +3775,50 @@ ProcessorBox::get_generic_editor_window (boost::shared_ptr<Processor> processor)
 void
 ProcessorBox::register_actions ()
 {
-	processor_box_actions = myactions.create_action_group (X_("ProcessorMenu"));
+	/* We need to use a static object as the owner, since these actions
+	   need to be considered ownable by all ProcessorBox objects
+	*/
+
+	load_bindings ();
+
+	processor_box_actions = ActionManager::create_action_group (bindings, X_("ProcessorMenu"));
 
 	Glib::RefPtr<Action> act;
 
 	/* new stuff */
-	myactions.register_action (processor_box_actions, X_("newplugin"), _("New Plugin"),
+	ActionManager::register_action (processor_box_actions, X_("newplugin"), _("New Plugin"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_plugin));
 
-	act = myactions.register_action (processor_box_actions, X_("newinsert"), _("New Insert"),
+	act = ActionManager::register_action (processor_box_actions, X_("newinsert"), _("New Insert"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_insert));
 	ActionManager::engine_sensitive_actions.push_back (act);
-	act = myactions.register_action (processor_box_actions, X_("newsend"), _("New External Send ..."),
+	act = ActionManager::register_action (processor_box_actions, X_("newsend"), _("New External Send ..."),
 			sigc::ptr_fun (ProcessorBox::rb_choose_send));
 	ActionManager::engine_sensitive_actions.push_back (act);
 
-	myactions.register_action (processor_box_actions, X_("newaux"), _("New Aux Send ..."));
-	myactions.register_action (processor_box_actions, X_("newlisten"), _("New Monitor Send ..."));
-	myactions.register_action (processor_box_actions, X_("removelisten"), _("Remove Monitor Send ..."));
+	ActionManager::register_action (processor_box_actions, X_("newaux"), _("New Aux Send ..."));
+	ActionManager::register_action (processor_box_actions, X_("newlisten"), _("New Monitor Send ..."));
+	ActionManager::register_action (processor_box_actions, X_("removelisten"), _("Remove Monitor Send ..."));
 
-	myactions.register_action (processor_box_actions, X_("controls"), _("Controls"));
-	myactions.register_action (processor_box_actions, X_("send_options"), _("Send Options"));
+	ActionManager::register_action (processor_box_actions, X_("controls"), _("Controls"));
+	ActionManager::register_action (processor_box_actions, X_("send_options"), _("Send Options"));
 
-	myactions.register_action (processor_box_actions, X_("clear"), _("Clear (all)"),
+	ActionManager::register_action (processor_box_actions, X_("clear"), _("Clear (all)"),
 			sigc::ptr_fun (ProcessorBox::rb_clear));
-	myactions.register_action (processor_box_actions, X_("clear_pre"), _("Clear (pre-fader)"),
+	ActionManager::register_action (processor_box_actions, X_("clear_pre"), _("Clear (pre-fader)"),
 			sigc::ptr_fun (ProcessorBox::rb_clear_pre));
-	myactions.register_action (processor_box_actions, X_("clear_post"), _("Clear (post-fader)"),
+	ActionManager::register_action (processor_box_actions, X_("clear_post"), _("Clear (post-fader)"),
 			sigc::ptr_fun (ProcessorBox::rb_clear_post));
 
 	/* standard editing stuff */
 
-	cut_action = myactions.register_action (processor_box_actions, X_("cut"), _("Cut"),
+	cut_action = ActionManager::register_action (processor_box_actions, X_("cut"), _("Cut"),
 	                                                    sigc::ptr_fun (ProcessorBox::rb_cut));
-	copy_action = myactions.register_action (processor_box_actions, X_("copy"), _("Copy"),
+	copy_action = ActionManager::register_action (processor_box_actions, X_("copy"), _("Copy"),
 	                                                     sigc::ptr_fun (ProcessorBox::rb_copy));
-	delete_action = myactions.register_action (processor_box_actions, X_("delete"), _("Delete"),
+	delete_action = ActionManager::register_action (processor_box_actions, X_("delete"), _("Delete"),
 	                                                       sigc::ptr_fun (ProcessorBox::rb_delete));
-	backspace_action = myactions.register_action (processor_box_actions, X_("backspace"), _("Delete"),
+	backspace_action = ActionManager::register_action (processor_box_actions, X_("backspace"), _("Delete"),
 	                                                       sigc::ptr_fun (ProcessorBox::rb_delete));
 
 	ActionManager::plugin_selection_sensitive_actions.push_back (cut_action);
@@ -3808,44 +3826,43 @@ ProcessorBox::register_actions ()
 	ActionManager::plugin_selection_sensitive_actions.push_back (delete_action);
 	ActionManager::plugin_selection_sensitive_actions.push_back (backspace_action);
 
-	paste_action = myactions.register_action (processor_box_actions, X_("paste"), _("Paste"),
+	paste_action = ActionManager::register_action (processor_box_actions, X_("paste"), _("Paste"),
 			sigc::ptr_fun (ProcessorBox::rb_paste));
-	rename_action = myactions.register_action (processor_box_actions, X_("rename"), _("Rename"),
+	rename_action = ActionManager::register_action (processor_box_actions, X_("rename"), _("Rename"),
 			sigc::ptr_fun (ProcessorBox::rb_rename));
-	myactions.register_action (processor_box_actions, X_("selectall"), _("Select All"),
+	ActionManager::register_action (processor_box_actions, X_("selectall"), _("Select All"),
 			sigc::ptr_fun (ProcessorBox::rb_select_all));
-	myactions.register_action (processor_box_actions, X_("deselectall"), _("Deselect All"),
+	ActionManager::register_action (processor_box_actions, X_("deselectall"), _("Deselect All"),
 			sigc::ptr_fun (ProcessorBox::rb_deselect_all));
 
 	/* activation etc. */
 
-	myactions.register_action (processor_box_actions, X_("activate_all"), _("Activate All"),
+	ActionManager::register_action (processor_box_actions, X_("activate_all"), _("Activate All"),
 			sigc::ptr_fun (ProcessorBox::rb_activate_all));
-	myactions.register_action (processor_box_actions, X_("deactivate_all"), _("Deactivate All"),
+	ActionManager::register_action (processor_box_actions, X_("deactivate_all"), _("Deactivate All"),
 			sigc::ptr_fun (ProcessorBox::rb_deactivate_all));
-	myactions.register_action (processor_box_actions, X_("ab_plugins"), _("A/B Plugins"),
+	ActionManager::register_action (processor_box_actions, X_("ab_plugins"), _("A/B Plugins"),
 			sigc::ptr_fun (ProcessorBox::rb_ab_plugins));
 
-	manage_pins_action = myactions.register_action (
+	manage_pins_action = ActionManager::register_action (
 		processor_box_actions, X_("manage-pins"), _("Pin Connections..."),
 		sigc::ptr_fun (ProcessorBox::rb_manage_pins));
 
 	/* Disk IO stuff */
-	disk_io_action = myactions.register_action (processor_box_actions, X_("disk-io-menu"), _("Disk I/O ..."));
-	myactions.register_action (processor_box_actions, X_("disk-io-prefader"), _("Pre-Fader."), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOPreFader));
-	myactions.register_action (processor_box_actions, X_("disk-io-postfader"), _("Post-Fader."), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOPostFader));
-	myactions.register_action (processor_box_actions, X_("disk-io-custom"), _("Custom."), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOCustom));
+	disk_io_action = ActionManager::register_action (processor_box_actions, X_("disk-io-menu"), _("Disk I/O ..."));
+	ActionManager::register_toggle_action (processor_box_actions, X_("disk-io-prefader"), _("Pre-Fader"), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOPreFader));
+	ActionManager::register_toggle_action (processor_box_actions, X_("disk-io-postfader"), _("Post-Fader"), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOPostFader));
+	ActionManager::register_toggle_action (processor_box_actions, X_("disk-io-custom"), _("Custom"), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOCustom));
 
 	/* show editors */
-	edit_action = myactions.register_action (
+	edit_action = ActionManager::register_action (
 		processor_box_actions, X_("edit"), _("Edit..."),
 		sigc::ptr_fun (ProcessorBox::rb_edit));
 
-	edit_generic_action = myactions.register_action (
+	edit_generic_action = ActionManager::register_action (
 		processor_box_actions, X_("edit-generic"), _("Edit with generic controls..."),
 		sigc::ptr_fun (ProcessorBox::rb_edit_generic));
 
-	load_bindings ();
 }
 
 void
@@ -3872,6 +3889,9 @@ void
 ProcessorBox::rb_set_disk_io_position (DiskIOPoint diop)
 {
 	if (_current_processor_box == 0) {
+		return;
+	}
+	if (_ignore_disk_io_change) {
 		return;
 	}
 
@@ -4069,6 +4089,10 @@ ProcessorBox::edit_aux_send (boost::shared_ptr<Processor> processor)
 	if (boost::dynamic_pointer_cast<InternalSend> (processor) == 0) {
 		return false;
 	}
+	if (ARDOUR::Profile->get_mixbus()) {
+		/* don't allow editing sends, ignore switch to send-edit */
+		return true;
+	}
 
 	if (_parent_strip) {
 		boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
@@ -4090,7 +4114,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 	if (edit_aux_send (processor)) {
 		return;
 	}
-	if (!_session->engine().connected()) {
+	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 		return;
 	}
 
@@ -4111,7 +4135,7 @@ ProcessorBox::generic_edit_processor (boost::shared_ptr<Processor> processor)
 	if (edit_aux_send (processor)) {
 		return;
 	}
-	if (!_session->engine().connected()) {
+	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 		return;
 	}
 
@@ -4480,5 +4504,5 @@ PluginPinWindowProxy::processor_going_away ()
 void
 ProcessorBox::load_bindings ()
 {
-	bindings = Bindings::get_bindings (X_("Processor Box"), myactions);
+	bindings = Bindings::get_bindings (X_("Processor Box"));
 }

@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Lexicon</Manufacturer>
+    <Model>PCM-90</Model>
+    <PatchNameList Name="X0 Studio Bank">
+      <Patch Number="0" Name="Lunar Blue" ProgramChange="0"/>
+      <Patch Number="1" Name="Air 1/Air 2" ProgramChange="1"/>
+      <Patch Number="2" Name="Ambi 1/Air 3" ProgramChange="2"/>
+      <Patch Number="3" Name="Big/Bigger" ProgramChange="3"/>
+      <Patch Number="4" Name="Big Rooms" ProgramChange="4"/>
+      <Patch Number="5" Name="HallA /HallB" ProgramChange="5"/>
+      <Patch Number="6" Name="Living Dead" ProgramChange="6"/>
+      <Patch Number="7" Name="Wave/NuHall" ProgramChange="7"/>
+      <Patch Number="8" Name="Dual Chambrs" ProgramChange="8"/>
+      <Patch Number="9" Name="Crusher" ProgramChange="9"/>
+      <Patch Number="10" Name="Studio A &amp; B" ProgramChange="10"/>
+      <Patch Number="11" Name="Two Rooms" ProgramChange="11"/>
+      <Patch Number="12" Name="Reversals" ProgramChange="12"/>
+      <Patch Number="13" Name="Thiss/Flubb" ProgramChange="13"/>
+      <Patch Number="14" Name="Sax Gates" ProgramChange="14"/>
+      <Patch Number="15" Name="Fat Guitars" ProgramChange="15"/>
+      <Patch Number="16" Name="Vintage FX" ProgramChange="16"/>
+      <Patch Number="17" Name="TremeloVERB" ProgramChange="17"/>
+      <Patch Number="18" Name="Guitar Weeps" ProgramChange="18"/>
+      <Patch Number="19" Name="Amp&gt;Add Room" ProgramChange="19"/>
+      <Patch Number="20" Name="Far&amp;CloseMic" ProgramChange="20"/>
+      <Patch Number="21" Name="Vox Doublers" ProgramChange="21"/>
+      <Patch Number="22" Name="Real Vocals" ProgramChange="22"/>
+      <Patch Number="23" Name="ErsatzPlates" ProgramChange="23"/>
+      <Patch Number="24" Name="Endless Vox" ProgramChange="24"/>
+      <Patch Number="25" Name="Tapps / Mic" ProgramChange="25"/>
+      <Patch Number="26" Name="Mic&gt;Add Room" ProgramChange="26"/>
+      <Patch Number="27" Name="Studio&gt;Walls" ProgramChange="27"/>
+      <Patch Number="28" Name="Airclip&gt;Room" ProgramChange="28"/>
+      <Patch Number="29" Name="Plate&gt;DifEko" ProgramChange="29"/>
+      <Patch Number="30" Name="Drum Gates" ProgramChange="30"/>
+      <Patch Number="31" Name="Nonlin A / B" ProgramChange="31"/>
+      <Patch Number="32" Name="Kick&amp;Snare" ProgramChange="32"/>
+      <Patch Number="33" Name="Kick&amp;Snare 2" ProgramChange="33"/>
+      <Patch Number="34" Name="Buckslam Oil" ProgramChange="34"/>
+      <Patch Number="35" Name="Atom Jumper" ProgramChange="35"/>
+      <Patch Number="36" Name="70Kick/Snare" ProgramChange="36"/>
+      <Patch Number="37" Name="Ballad Drums" ProgramChange="37"/>
+      <Patch Number="38" Name="HiphopDrumz" ProgramChange="38"/>
+      <Patch Number="39" Name="NuGate/Room" ProgramChange="39"/>
+      <Patch Number="40" Name="Rise n'Verbs" ProgramChange="40"/>
+      <Patch Number="41" Name="Brick n'Wood" ProgramChange="41"/>
+      <Patch Number="42" Name="Grit Verbs" ProgramChange="42"/>
+      <Patch Number="43" Name="Zippers A/B" ProgramChange="43"/>
+      <Patch Number="44" Name="Stereoizers" ProgramChange="44"/>
+      <Patch Number="45" Name="EchoVerb" ProgramChange="45"/>
+      <Patch Number="46" Name="Flipped Tape" ProgramChange="46"/>
+      <Patch Number="47" Name="Direct Gtr" ProgramChange="47"/>
+      <Patch Number="48" Name="Clipp/Bsmnt" ProgramChange="48"/>
+      <Patch Number="49" Name="TrembleRobot" ProgramChange="49"/>
+    </PatchNameList>
+    <PatchNameList Name="X1 Live Bank">
+      <Patch Number="0" Name="Sprites A/B" ProgramChange="0"/>
+      <Patch Number="1" Name="Brass/Room" ProgramChange="1"/>
+      <Patch Number="2" Name="Horns/String" ProgramChange="2"/>
+      <Patch Number="3" Name="Elecoustic" ProgramChange="3"/>
+      <Patch Number="4" Name="Hall/Chamber" ProgramChange="4"/>
+      <Patch Number="5" Name="Wind/Brass" ProgramChange="5"/>
+      <Patch Number="6" Name="Place/Roomed" ProgramChange="6"/>
+      <Patch Number="7" Name="Dream Hornz" ProgramChange="7"/>
+      <Patch Number="8" Name="Dream Hornz2" ProgramChange="8"/>
+      <Patch Number="9" Name="Small Halls" ProgramChange="9"/>
+      <Patch Number="10" Name="Griln/Flitt" ProgramChange="10"/>
+      <Patch Number="11" Name="Pico Gates" ProgramChange="11"/>
+      <Patch Number="12" Name="HiPass/Club" ProgramChange="12"/>
+      <Patch Number="13" Name="Rock Guitars" ProgramChange="13"/>
+      <Patch Number="14" Name="Spritz&gt;Verb" ProgramChange="14"/>
+      <Patch Number="15" Name="Brite&gt;Hallit" ProgramChange="15"/>
+      <Patch Number="16" Name="Echo&gt;Room" ProgramChange="16"/>
+      <Patch Number="17" Name="Gate&gt;Hall" ProgramChange="17"/>
+      <Patch Number="18" Name="Gater&gt;Silkey" ProgramChange="18"/>
+      <Patch Number="19" Name="Slap&gt;Bleed" ProgramChange="19"/>
+      <Patch Number="20" Name="Vocals" ProgramChange="20"/>
+      <Patch Number="21" Name="Sax Vox Hall" ProgramChange="21"/>
+      <Patch Number="22" Name="LiveVoxPlate" ProgramChange="22"/>
+      <Patch Number="23" Name="Air&gt;Club" ProgramChange="23"/>
+      <Patch Number="24" Name="Gated&gt;Hiss" ProgramChange="24"/>
+      <Patch Number="25" Name="ArchAngels" ProgramChange="25"/>
+      <Patch Number="26" Name="Lead/BackVox" ProgramChange="26"/>
+      <Patch Number="27" Name="Small&gt;Hall" ProgramChange="27"/>
+      <Patch Number="28" Name="Nonlin&gt;Open" ProgramChange="28"/>
+      <Patch Number="29" Name="SmlGate&gt;Chmb" ProgramChange="29"/>
+      <Patch Number="30" Name="Nonlin Plus" ProgramChange="30"/>
+      <Patch Number="31" Name="PercussHalls" ProgramChange="31"/>
+      <Patch Number="32" Name="Drums/Vox" ProgramChange="32"/>
+      <Patch Number="33" Name="Gate Weight" ProgramChange="33"/>
+      <Patch Number="34" Name="Sn/KickInvrs" ProgramChange="34"/>
+      <Patch Number="35" Name="Drums/2Kill" ProgramChange="35"/>
+      <Patch Number="36" Name="Live DRUMrms" ProgramChange="36"/>
+      <Patch Number="37" Name="JumpinDrumZ" ProgramChange="37"/>
+      <Patch Number="38" Name="Nonlin&gt;Garaj" ProgramChange="38"/>
+      <Patch Number="39" Name="Room&gt;Woosh" ProgramChange="39"/>
+      <Patch Number="40" Name="Angels Sing" ProgramChange="40"/>
+      <Patch Number="41" Name="StompVox FX" ProgramChange="41"/>
+      <Patch Number="42" Name="Flitz&gt;Echo" ProgramChange="42"/>
+      <Patch Number="43" Name="Horn Section" ProgramChange="43"/>
+      <Patch Number="44" Name="Soliloquy" ProgramChange="44"/>
+      <Patch Number="45" Name="Room&gt;Hiss" ProgramChange="45"/>
+      <Patch Number="46" Name="Hang&gt;BigCan" ProgramChange="46"/>
+      <Patch Number="47" Name="Chmbr2Plate" ProgramChange="47"/>
+      <Patch Number="48" Name="2 Big Halls" ProgramChange="48"/>
+      <Patch Number="49" Name="2 FakePlates" ProgramChange="49"/>
+    </PatchNameList>
+    <PatchNameList Name="X2 Post Bank">
+      <Patch Number="0" Name="Booth 1/2" ProgramChange="0"/>
+      <Patch Number="1" Name="Bathroom M/W" ProgramChange="1"/>
+      <Patch Number="2" Name="Bedroom/Gate" ProgramChange="2"/>
+      <Patch Number="3" Name="Bath/Gate" ProgramChange="3"/>
+      <Patch Number="4" Name="Car/Reverse" ProgramChange="4"/>
+      <Patch Number="5" Name="Oil Drums" ProgramChange="5"/>
+      <Patch Number="6" Name="Two Coffins" ProgramChange="6"/>
+      <Patch Number="7" Name="Small Rooms" ProgramChange="7"/>
+      <Patch Number="8" Name="Close/Closet" ProgramChange="8"/>
+      <Patch Number="9" Name="Coffin&gt;Heavn" ProgramChange="9"/>
+      <Patch Number="10" Name="Garage A/B" ProgramChange="10"/>
+      <Patch Number="11" Name="Locker/Booth" ProgramChange="11"/>
+      <Patch Number="12" Name="Garage/Booth" ProgramChange="12"/>
+      <Patch Number="13" Name="Class/LoGate" ProgramChange="13"/>
+      <Patch Number="14" Name="Studio/Gate" ProgramChange="14"/>
+      <Patch Number="15" Name="Farm Rooms" ProgramChange="15"/>
+      <Patch Number="16" Name="Barns" ProgramChange="16"/>
+      <Patch Number="17" Name="Medium Rooms" ProgramChange="17"/>
+      <Patch Number="18" Name="Room&gt;Smooth" ProgramChange="18"/>
+      <Patch Number="19" Name="Store&gt;Wrhse" ProgramChange="19"/>
+      <Patch Number="20" Name="Club/Rehurse" ProgramChange="20"/>
+      <Patch Number="21" Name="Hanger/Wave" ProgramChange="21"/>
+      <Patch Number="22" Name="TajMahal/Gat" ProgramChange="22"/>
+      <Patch Number="23" Name="Gym/DublGate" ProgramChange="23"/>
+      <Patch Number="24" Name="5:15 Hall" ProgramChange="24"/>
+      <Patch Number="25" Name="Wembley" ProgramChange="25"/>
+      <Patch Number="26" Name="Bloom&gt;Gym" ProgramChange="26"/>
+      <Patch Number="27" Name="Box&gt;Hall" ProgramChange="27"/>
+      <Patch Number="28" Name="Small &amp; Huge" ProgramChange="28"/>
+      <Patch Number="29" Name="Skydome" ProgramChange="29"/>
+      <Patch Number="30" Name="Igloo" ProgramChange="30"/>
+      <Patch Number="31" Name="Scrap Yard" ProgramChange="31"/>
+      <Patch Number="32" Name="Rolly/Arena" ProgramChange="32"/>
+      <Patch Number="33" Name="Stair&gt;Canyon" ProgramChange="33"/>
+      <Patch Number="34" Name="Close&gt;Far" ProgramChange="34"/>
+      <Patch Number="35" Name="Bricks&gt;Wash" ProgramChange="35"/>
+      <Patch Number="36" Name="Tin Castle" ProgramChange="36"/>
+      <Patch Number="37" Name="Cemetery" ProgramChange="37"/>
+      <Patch Number="38" Name="Log Cabin" ProgramChange="38"/>
+      <Patch Number="39" Name="Brick&amp;Glass" ProgramChange="39"/>
+      <Patch Number="40" Name="Up &amp; Down" ProgramChange="40"/>
+      <Patch Number="41" Name="Silos" ProgramChange="41"/>
+      <Patch Number="42" Name="Rivits&gt;Tank" ProgramChange="42"/>
+      <Patch Number="43" Name="Phazer&gt;Hall" ProgramChange="43"/>
+      <Patch Number="44" Name="Wind&amp;Thunder" ProgramChange="44"/>
+      <Patch Number="45" Name="Pitfall!" ProgramChange="45"/>
+      <Patch Number="46" Name="TemporalRift" ProgramChange="46"/>
+      <Patch Number="47" Name="Ricochets" ProgramChange="47"/>
+      <Patch Number="48" Name="NaturaSpace" ProgramChange="48"/>
+      <Patch Number="49" Name="Reverse&gt;Echo" ProgramChange="49"/>
+    </PatchNameList>
+    <PatchNameList Name="X3 Surround Bank">
+      <Patch Number="0" Name="Submersible" ProgramChange="0"/>
+      <Patch Number="1" Name="Tap Chamber" ProgramChange="1"/>
+      <Patch Number="2" Name="Tempo Verb" ProgramChange="2"/>
+      <Patch Number="3" Name="SnareChamber" ProgramChange="3"/>
+      <Patch Number="4" Name="Tiled Surrnd" ProgramChange="4"/>
+      <Patch Number="5" Name="SurrndChambr" ProgramChange="5"/>
+      <Patch Number="6" Name="Surrnd Room" ProgramChange="6"/>
+      <Patch Number="7" Name="Surrnd Booth" ProgramChange="7"/>
+      <Patch Number="8" Name="Dark Room" ProgramChange="8"/>
+      <Patch Number="9" Name="Phone Booth" ProgramChange="9"/>
+      <Patch Number="10" Name="Classical" ProgramChange="10"/>
+      <Patch Number="11" Name="Surround Vox" ProgramChange="11"/>
+      <Patch Number="12" Name="LincolnTunnl" ProgramChange="12"/>
+      <Patch Number="13" Name="Empty Stage" ProgramChange="13"/>
+      <Patch Number="14" Name="Vox Chamber" ProgramChange="14"/>
+      <Patch Number="15" Name="Surrnd Club" ProgramChange="15"/>
+      <Patch Number="16" Name="Surrnd Space" ProgramChange="16"/>
+      <Patch Number="17" Name="Lecture Hall" ProgramChange="17"/>
+      <Patch Number="18" Name="Bayside Expo" ProgramChange="18"/>
+      <Patch Number="19" Name="Tin RearWall" ProgramChange="19"/>
+      <Patch Number="20" Name="InvFront2Bak" ProgramChange="20"/>
+      <Patch Number="21" Name="DlyUpVerbBak" ProgramChange="21"/>
+      <Patch Number="22" Name="DynamicSwell" ProgramChange="22"/>
+      <Patch Number="23" Name="Steam Bath" ProgramChange="23"/>
+      <Patch Number="24" Name="Clockwise" ProgramChange="24"/>
+      <Patch Number="25" Name="Quad Tremelo" ProgramChange="25"/>
+      <Patch Number="26" Name="HipHopSurrnd" ProgramChange="26"/>
+      <Patch Number="27" Name="Cyber Vortex" ProgramChange="27"/>
+      <Patch Number="28" Name="Yodel!!" ProgramChange="28"/>
+      <Patch Number="29" Name="CyberVox" ProgramChange="29"/>
+      <Patch Number="30" Name="Bombs_Away!" ProgramChange="30"/>
+      <Patch Number="31" Name="Brick Kick" ProgramChange="31"/>
+      <Patch Number="32" Name="BypassStompFX" ProgramChange="32"/>
+      <Patch Number="33" Name="StompSwellFX" ProgramChange="33"/>
+      <Patch Number="34" Name="RollinThundr" ProgramChange="34"/>
+      <Patch Number="35" Name="Dark Cavern" ProgramChange="35"/>
+      <Patch Number="36" Name="Invertigo" ProgramChange="36"/>
+      <Patch Number="37" Name="Invertigo2" ProgramChange="37"/>
+      <Patch Number="38" Name="Guitar Hero" ProgramChange="38"/>
+      <Patch Number="39" Name="StrangleHold" ProgramChange="39"/>
+      <Patch Number="40" Name="Room2/Room2" ProgramChange="40"/>
+      <Patch Number="41" Name="Invrs/Invrs" ProgramChange="41"/>
+      <Patch Number="42" Name="Chmbr/Invrs" ProgramChange="42"/>
+      <Patch Number="43" Name="Invrs/Room2" ProgramChange="43"/>
+      <Patch Number="44" Name="Chmbr/Chmbr" ProgramChange="44"/>
+      <Patch Number="45" Name="Chmbr&gt;Room2" ProgramChange="45"/>
+      <Patch Number="46" Name="Invrs&gt;Chmbr" ProgramChange="46"/>
+      <Patch Number="47" Name="Room2&gt;Chmbr" ProgramChange="47"/>
+      <Patch Number="48" Name="Invrs&gt;Room2" ProgramChange="48"/>
+      <Patch Number="49" Name="Matrix Chamb" ProgramChange="49"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

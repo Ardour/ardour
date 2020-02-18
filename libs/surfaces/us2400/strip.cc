@@ -1,22 +1,21 @@
 /*
-	Copyright (C) 2006,2007 John Anderson
-	Copyright (C) 2012 Paul Davis
-	Copyright (C) 2017 Ben Loftis
-
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; either version 2 of the License, or
-	(at your option) any later version.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2017 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2017 Paul Davis <paul@linuxaudiosystems.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <sstream>
 #include <vector>
@@ -263,14 +262,18 @@ Strip::reset_stripable ()
 void
 Strip::notify_all()
 {
-//	if (!_stripable) {
-//		zero ();
-//		return;
-//	}
+#if 0
+	if (!_stripable) {
+		zero ();
+		return;
+	}
+#endif
 	// The active V-pot control may not be active for this strip
 	// But if we zero it in the controls function it may erase
 	// the one we do want
-//	_surface->write (_vpot->zero());
+#if 0
+	_surface->write (_vpot->zero());
+#endif
 
 	notify_solo_changed ();
 	notify_mute_changed ();
@@ -281,15 +284,19 @@ Strip::notify_all()
 	notify_vpot_change ();
 	notify_panner_width_changed ();
 	notify_record_enable_changed ();
-//	notify_processor_changed ();
+#if 0
+	notify_processor_changed ();
+#endif
 }
 
 void
 Strip::notify_solo_changed ()
 {
-//	if (_stripable && _solo) {
-//		_surface->write (_solo->set_state (_stripable->solo_control()->soloed() ? on : off));
-//	}
+#if 0
+	if (_stripable && _solo) {
+		_surface->write (_solo->set_state (_stripable->solo_control()->soloed() ? on : off));
+	}
+#endif
 
 	_solo->mark_dirty ();
 	_trickle_counter = 0;
@@ -299,14 +306,16 @@ void
 Strip::notify_mute_changed ()
 {
 	DEBUG_TRACE (DEBUG::US2400, string_compose ("Strip %1 mute changed\n", _index));
-//	if (_stripable && _mute) {
-//		DEBUG_TRACE (DEBUG::US2400, string_compose ("\tstripable muted ? %1\n", _stripable->mute_control()->muted()));
-//		DEBUG_TRACE (DEBUG::US2400, string_compose ("mute message: %1\n", _mute->set_state (_stripable->mute_control()->muted() ? on : off)));
-//
-//		_surface->write (_mute->set_state (_stripable->mute_control()->muted() ? on : off));
-//	} else {
-//		_surface->write (_mute->zero());
-//	}
+#if 0
+	if (_stripable && _mute) {
+		DEBUG_TRACE (DEBUG::US2400, string_compose ("\tstripable muted ? %1\n", _stripable->mute_control()->muted()));
+		DEBUG_TRACE (DEBUG::US2400, string_compose ("mute message: %1\n", _mute->set_state (_stripable->mute_control()->muted() ? on : off)));
+
+		_surface->write (_mute->set_state (_stripable->mute_control()->muted() ? on : off));
+	} else {
+		_surface->write (_mute->zero());
+	}
+#endif
 
 	_mute->mark_dirty ();
 	_trickle_counter = 0;
@@ -346,10 +355,11 @@ Strip::update_selection_state ()
 {
 	_select->mark_dirty ();
 	_trickle_counter = 0;
-
-//	if(_stripable) {
-//		_surface->write (_select->set_state (_stripable->is_selected()));
-//	}
+#if 0
+	if(_stripable) {
+		_surface->write (_select->set_state (_stripable->is_selected()));
+	}
+#endif
 }
 
 void
@@ -418,12 +428,12 @@ Strip::fader_touch_event (Button&, ButtonState bs)
 		boost::shared_ptr<AutomationControl> ac = _fader->control ();
 
 		_fader->set_in_use (true);
-		_fader->start_touch (_surface->mcp().transport_frame());
+		_fader->start_touch (_surface->mcp().transport_sample());
 
 	} else {
 
 		_fader->set_in_use (false);
-		_fader->stop_touch (_surface->mcp().transport_frame());
+		_fader->stop_touch (_surface->mcp().transport_sample());
 
 	}
 }
@@ -499,9 +509,9 @@ void
 Strip::handle_fader_touch (Fader& fader, bool touch_on)
 {
 	if (touch_on) {
-		fader.start_touch (_surface->mcp().transport_frame());
+		fader.start_touch (_surface->mcp().transport_sample());
 	} else {
-		fader.stop_touch (_surface->mcp().transport_frame());
+		fader.stop_touch (_surface->mcp().transport_sample());
 	}
 }
 

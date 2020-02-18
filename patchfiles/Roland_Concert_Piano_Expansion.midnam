@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>XV-5080</Model>
+    <Model>XV-3080</Model>
+    <Model>XV-88</Model>
+    <Model>XV-5050</Model>
+    <Model>XV-2020</Model>
+    <Model>Fantom</Model>
+    <Model>RD-700</Model>
+    <PatchNameList Name="SRX-02 Concert Piano: Patches">
+      <Patch Number="001" Name="PremierGrand" ProgramChange="0"/>
+      <Patch Number="002" Name="Steady Grand" ProgramChange="1"/>
+      <Patch Number="003" Name="DynamicGrand" ProgramChange="2"/>
+      <Patch Number="004" Name="Concert Hall" ProgramChange="3"/>
+      <Patch Number="005" Name="Bright Grand" ProgramChange="4"/>
+      <Patch Number="006" Name="Classical" ProgramChange="5"/>
+      <Patch Number="007" Name="SoftPdlGrand" ProgramChange="6"/>
+      <Patch Number="008" Name="OnMicPremier" ProgramChange="7"/>
+      <Patch Number="009" Name="OnMic Bright" ProgramChange="8"/>
+      <Patch Number="010" Name="OnMicSoftPdl" ProgramChange="9"/>
+      <Patch Number="011" Name="Premier Mono" ProgramChange="10"/>
+      <Patch Number="012" Name="Bright Mono" ProgramChange="11"/>
+      <Patch Number="013" Name="SoftPdl Mono" ProgramChange="12"/>
+      <Patch Number="014" Name="Mellow Piano" ProgramChange="13"/>
+      <Patch Number="015" Name="Enhanced Pno" ProgramChange="14"/>
+      <Patch Number="016" Name="Comp.Piano" ProgramChange="15"/>
+      <Patch Number="017" Name="HonkytonkPno" ProgramChange="16"/>
+      <Patch Number="018" Name="NewAgeGrand1" ProgramChange="17"/>
+      <Patch Number="019" Name="NewAgeGrand2" ProgramChange="18"/>
+      <Patch Number="020" Name="Requiem" ProgramChange="19"/>
+      <Patch Number="021" Name="Soundscape" ProgramChange="20"/>
+      <Patch Number="022" Name="Grand w/Str" ProgramChange="21"/>
+      <Patch Number="023" Name="Concerto 1" ProgramChange="22"/>
+      <Patch Number="024" Name="Concerto 2" ProgramChange="23"/>
+      <Patch Number="025" Name="SoftpadGrand" ProgramChange="24"/>
+      <Patch Number="026" Name="Synpad Grand" ProgramChange="25"/>
+      <Patch Number="027" Name="Vox Grand 1" ProgramChange="26"/>
+      <Patch Number="028" Name="Vox Grand 2" ProgramChange="27"/>
+      <Patch Number="029" Name="Oohs Piano" ProgramChange="28"/>
+      <Patch Number="030" Name="Air Grand" ProgramChange="29"/>
+      <Patch Number="031" Name="GtrPad Grand" ProgramChange="30"/>
+      <Patch Number="032" Name="PhasePad Pno" ProgramChange="31"/>
+      <Patch Number="033" Name="HeavenPadPno" ProgramChange="32"/>
+      <Patch Number="034" Name="Somber Pad" ProgramChange="33"/>
+      <Patch Number="035" Name="Wet Chorus" ProgramChange="34"/>
+      <Patch Number="036" Name="Nylon Grand" ProgramChange="35"/>
+      <Patch Number="037" Name="FM EP Grand" ProgramChange="36"/>
+      <Patch Number="038" Name="Bell Grand" ProgramChange="37"/>
+      <Patch Number="039" Name="Bellvox Pno" ProgramChange="38"/>
+      <Patch Number="040" Name="StackedGrand" ProgramChange="39"/>
+      <Patch Number="041" Name="Hard Stack 1" ProgramChange="40"/>
+      <Patch Number="042" Name="Hard Stack 2" ProgramChange="41"/>
+      <Patch Number="043" Name="PianoBrass" ProgramChange="42"/>
+      <Patch Number="044" Name="PianoBrs fff" ProgramChange="43"/>
+      <Patch Number="045" Name="Gig Split 1" ProgramChange="44"/>
+      <Patch Number="046" Name="Gig Split 2" ProgramChange="45"/>
+      <Patch Number="047" Name="Gig Split 3" ProgramChange="46"/>
+      <Patch Number="048" Name="Throb Piano" ProgramChange="47"/>
+      <Patch Number="049" Name="Feedback Pno" ProgramChange="48"/>
+      <Patch Number="050" Name="Eastern 5th" ProgramChange="49"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

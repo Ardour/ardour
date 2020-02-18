@@ -1,21 +1,27 @@
 /*
-    Copyright (C) 2005 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2006-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2017 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2007 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2019 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2015-2017 Nick Mainsbridge <mainsbridge@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifdef WAF_BUILD
 #include "gtk2ardour-config.h"
@@ -249,11 +255,10 @@ Editor::initialize_canvas ()
 
 	vector<TargetEntry> target_table;
 
-	// Drag-N-Drop from the region list can generate this target
-	target_table.push_back (TargetEntry ("regions"));
-
-	target_table.push_back (TargetEntry ("text/plain"));
+	target_table.push_back (TargetEntry ("regions")); // DnD from the region list will generate this target
+	target_table.push_back (TargetEntry ("sources")); // DnD from the source list will generate this target
 	target_table.push_back (TargetEntry ("text/uri-list"));
+	target_table.push_back (TargetEntry ("text/plain"));
 	target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
 
 	_track_canvas->drag_dest_set (target_table);
@@ -373,8 +378,13 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 					 const SelectionData& data,
 					 guint info, guint time)
 {
-	if (data.get_target() == "regions") {
-		drop_regions (context, x, y, data, info, time);
+	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
+		return;
+	}
+	if (data.get_target() == X_("regions")) {
+		drop_regions (context, x, y, data, info, time, true);
+	} else if (data.get_target() == X_("sources")) {
+		drop_regions (context, x, y, data, info, time, false);
 	} else {
 		drop_paths (context, x, y, data, info, time);
 	}
@@ -522,7 +532,7 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 
 		controls_layout.get_parent()->translate_coordinates (*toplevel,
 		                                                     alloc.get_x(), alloc.get_y(),
-		        		                             wx, wy);
+		                                                     wx, wy);
 
 		scrolling_boundary = ArdourCanvas::Rect (wx, wy, wx + alloc.get_width(), wy + alloc.get_height());
 
@@ -575,6 +585,18 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 	    (allow_vert && ((y < scrolling_boundary.y0 && vertical_adjustment.get_value() > 0)|| y >= scrolling_boundary.y1))) {
 		start_canvas_autoscroll (allow_horiz, allow_vert, scrolling_boundary);
 	}
+}
+
+bool
+Editor::drag_active () const
+{
+	return _drags->active();
+}
+
+bool
+Editor::preview_video_drag_active () const
+{
+	return _drags->preview_video ();
 }
 
 bool
@@ -1159,7 +1181,6 @@ Editor::which_trim_cursor (bool left) const
 	Trimmable::CanTrim ct = entered_regionview->region()->can_trim ();
 
 	if (left) {
-
 		if (ct & Trimmable::FrontTrimEarlier) {
 			return _cursors->left_side_trim;
 		} else {
@@ -1280,15 +1301,12 @@ Editor::which_canvas_cursor(ItemType type) const
 	    mouse_mode == MouseContent) {
 
 		/* find correct cursor to use in object/smart mode */
-
 		switch (type) {
 		case RegionItem:
 		/* We don't choose a cursor for these items on top of a region view,
 		   because this would push a new context on the enter stack which
 		   means switching the region context for things like smart mode
 		   won't actualy change the cursor. */
-		// case RegionViewNameHighlight:
-		// case RegionViewName:
 		// case WaveItem:
 		case StreamItem:
 		case AutomationTrackItem:
@@ -1347,6 +1365,20 @@ Editor::which_canvas_cursor(ItemType type) const
 				cursor = which_trim_cursor (false);
 			else
 				cursor = _cursors->selector;
+			break;
+		case RegionViewName:
+		case RegionViewNameHighlight:
+			/* the trim bar is used for trimming, but we have to determine if we are on the left or right side of the region */
+			cursor = MouseCursors::invalid_cursor ();
+			if (entered_regionview) {
+				samplepos_t where;
+				bool in_track_canvas;
+				if (mouse_sample (where, in_track_canvas)) {
+					samplepos_t start = entered_regionview->region()->first_sample();
+					samplepos_t end = entered_regionview->region()->last_sample();
+					cursor = which_trim_cursor ((where - start) < (end - where));
+				}
+			}
 			break;
 		case StartCrossFadeItem:
 			cursor = _cursors->fade_in;

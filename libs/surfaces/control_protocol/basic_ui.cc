@@ -1,22 +1,27 @@
 /*
-    Copyright (C) 2006 Paul Davis
-
-    This program is free software; you can redistribute it
-    and/or modify it under the terms of the GNU Lesser
-    General Public License as published by the Free Software
-    Foundation; either version 2 of the License, or (at your
-    option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2006-2009 David Robillard <d@drobilla.net>
+ * Copyright (C) 2006-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2010 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2015 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2017 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2017-2019 Johannes Mueller <github@johannes-mueller.org>
+ * Copyright (C) 2017 Len Ovens <len@ovenwerks.net>
+ * Copyright (C) 2017 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include "pbd/pthread_utils.h"
 #include "pbd/memento_command.h"
@@ -24,6 +29,7 @@
 #include "ardour/session.h"
 #include "ardour/location.h"
 #include "ardour/tempo.h"
+#include "ardour/transport_master_manager.h"
 #include "ardour/utils.h"
 
 #include "control_protocol/basic_ui.h"
@@ -182,7 +188,7 @@ BasicUI::remove_marker_at_playhead ()
 void
 BasicUI::rewind ()
 {
-	session->request_transport_speed (session->transport_speed() - 1.5);
+	session->request_transport_speed (session->actual_speed() - 1.5);
 }
 
 void
@@ -197,9 +203,41 @@ BasicUI::transport_stop ()
 	session->request_transport_speed (0.0);
 }
 
+bool
+BasicUI::stop_button_onoff () const
+{
+	return session->transport_stopped_or_stopping ();
+}
+
+bool
+BasicUI::play_button_onoff () const
+{
+	return session->actual_speed() == 1.0;
+}
+
+bool
+BasicUI::ffwd_button_onoff () const
+{
+	return session->actual_speed() > 1.0;
+}
+
+bool
+BasicUI::rewind_button_onoff () const
+{
+	return session->actual_speed() < 0.0;
+}
+
+bool
+BasicUI::loop_button_onoff () const
+{
+	return session->get_play_loop();
+}
+
 void
 BasicUI::transport_play (bool from_last_start)
 {
+	/* ::toggle_roll() is smarter and preferred */
+
 	if (!session) {
 		return;
 	}
@@ -233,10 +271,7 @@ BasicUI::transport_play (bool from_last_start)
 			/* XXX it is not possible to just leave seamless loop and keep
 			   playing at present (nov 4th 2009)
 			*/
-			if (!Config->get_seamless_loop()) {
-				/* stop loop playback and stop rolling */
-				session->request_play_loop (false, true);
-			} else if (rolling) {
+			if (rolling) {
 				/* stop loop playback but keep rolling */
 				session->request_play_loop (false, false);
 			}
@@ -295,7 +330,7 @@ BasicUI::prev_marker ()
 	samplepos_t pos = session->locations()->first_mark_before (session->transport_sample());
 
 	if (pos >= 0) {
-		session->request_locate (pos, session->transport_rolling());
+		session->request_locate (pos, RollIfAppropriate);
 	} else {
 		session->goto_start ();
 	}
@@ -307,7 +342,7 @@ BasicUI::next_marker ()
 	samplepos_t pos = session->locations()->first_mark_after (session->transport_sample());
 
 	if (pos >= 0) {
-		session->request_locate (pos, session->transport_rolling());
+		session->request_locate (pos, RollIfAppropriate);
 	} else {
 		session->goto_end();
 	}
@@ -382,13 +417,19 @@ BasicUI::transport_sample ()
 }
 
 void
-BasicUI::locate (samplepos_t where, bool roll_after_locate)
+BasicUI::locate (samplepos_t where, LocateTransportDisposition ltd)
 {
-	session->request_locate (where, roll_after_locate);
+	session->request_locate (where, ltd);
 }
 
 void
-BasicUI::jump_by_seconds (double secs)
+BasicUI::locate (samplepos_t where, bool roll)
+{
+	session->request_locate (where, roll ? MustRoll : RollIfAppropriate);
+}
+
+void
+BasicUI::jump_by_seconds (double secs, LocateTransportDisposition ltd)
 {
 	samplepos_t current = session->transport_sample();
 	double s = (double) current / (double) session->nominal_sample_rate();
@@ -399,11 +440,11 @@ BasicUI::jump_by_seconds (double secs)
 	}
 	s = s * session->nominal_sample_rate();
 
-	session->request_locate ( floor(s) );
+	session->request_locate (floor(s), ltd);
 }
 
 void
-BasicUI::jump_by_bars (double bars)
+BasicUI::jump_by_bars (double bars, LocateTransportDisposition ltd)
 {
 	TempoMap& tmap (session->tempo_map());
 	Timecode::BBT_Time bbt (tmap.bbt_at_sample (session->transport_sample()));
@@ -417,7 +458,18 @@ BasicUI::jump_by_bars (double bars)
 	any.type = AnyTime::BBT;
 	any.bbt.bars = bars;
 
-	session->request_locate ( session->convert_to_samples (any) );
+	session->request_locate (session->convert_to_samples (any), ltd);
+}
+
+void
+BasicUI::jump_by_beats (double beats, LocateTransportDisposition ltd)
+{
+	TempoMap& tmap (session->tempo_map ());
+	double qn_goal = tmap.quarter_note_at_sample (session->transport_sample ()) + beats;
+	if (qn_goal < 0.0) {
+		qn_goal = 0.0;
+	}
+	session->request_locate (tmap.sample_at_quarter_note (qn_goal), ltd);
 }
 
 void
@@ -473,12 +525,65 @@ BasicUI::toggle_click ()
 }
 
 void
-BasicUI::toggle_roll ()
+BasicUI::toggle_roll (bool roll_out_of_bounded_mode)
 {
-	if (session->transport_rolling()) {
-		transport_stop ();
-	} else {
-		transport_play (false);
+	/* TO BE KEPT IN SYNC WITH ARDOUR_UI::toggle_roll() */
+
+	if (!session) {
+		return;
+	}
+
+	if (session->is_auditioning()) {
+		session->cancel_audition ();
+		return;
+	}
+
+	if (session->config.get_external_sync()) {
+		switch (TransportMasterManager::instance().current()->type()) {
+		case Engine:
+			break;
+		default:
+			/* transport controlled by the master */
+			return;
+		}
+	}
+
+	bool rolling = session->transport_rolling();
+
+	if (rolling) {
+
+		if (roll_out_of_bounded_mode) {
+			/* drop out of loop/range playback but leave transport rolling */
+
+			if (session->get_play_loop()) {
+
+				if (session->actively_recording()) {
+					/* actually stop transport because
+					   otherwise the captured data will make
+					   no sense.
+					*/
+					session->request_play_loop (false, true);
+
+				} else {
+					session->request_play_loop (false, false);
+				}
+
+			} else if (session->get_play_range ()) {
+
+				session->request_cancel_play_range ();
+			}
+
+		} else {
+			session->request_stop (true, true);
+		}
+
+	} else { /* not rolling */
+
+		if (session->get_play_loop() && Config->get_loop_is_mode()) {
+			session->request_locate (session->locations()->auto_loop_location()->start(), MustRoll);
+		} else {
+			session->request_transport_speed (1.0f);
+		}
 	}
 }
 
@@ -590,7 +695,7 @@ BasicUI::goto_nth_marker (int n)
 	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
 		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_session_range()) {
 			if (n == 0) {
-				session->request_locate ((*i)->start(), session->transport_rolling());
+				session->request_locate ((*i)->start(), RollIfAppropriate);
 				break;
 			}
 			--n;

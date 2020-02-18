@@ -1,22 +1,25 @@
-/* Faderport 8 Control Surface
- * This is the button "Controller" of the MVC surface inteface,
- * see callbacks.cc for the "View".
+/*
+ * Copyright (C) 2017-2018 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2018 Ben Loftis <ben@harrisonconsoles.com>
  *
- * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+/* Faderport 8 Control Surface
+ * This is the button "Controller" of the MVC surface inteface,
+ * see callbacks.cc for the "View".
  */
 
 #include "ardour/dB.h"
@@ -306,7 +309,7 @@ FaderPort8::button_varispeed (bool ffw)
 		// stop key-repeat
 		dynamic_cast<FP8RepeatButton*>(&b_ffw)->stop_repeat();
 		dynamic_cast<FP8RepeatButton*>(&b_rew)->stop_repeat();
-		session->request_locate (0, false);
+		session->request_locate (0, MustStop);
 		return;
 	}
 
@@ -428,9 +431,9 @@ FaderPort8::handle_encoder_pan (int steps)
 			if (steps == 0) {
 				ac->set_value (ac->normal(), PBD::Controllable::UseGroup);
 			} else {
-				double v = ac->internal_to_interface (ac->get_value());
+				double v = ac->internal_to_interface (ac->get_value(), true);
 				v = std::max (0.0, std::min (1.0, v + steps * .01));
-				ac->set_value (ac->interface_to_internal(v), PBD::Controllable::UseGroup);
+				ac->set_value (ac->interface_to_internal(v, true), PBD::Controllable::UseGroup);
 			}
 		}
 	}
@@ -447,7 +450,7 @@ FaderPort8::handle_encoder_link (int steps)
 		return;
 	}
 
-	double v = ac->internal_to_interface (ac->get_value());
+	double v = ac->internal_to_interface (ac->get_value(), true);
 	ac->start_touch (ac->session().transport_sample());
 
 	if (steps == 0) {
@@ -465,7 +468,7 @@ FaderPort8::handle_encoder_link (int steps)
 	} else {
 		v = std::max (0.0, std::min (1.0, v + steps * .01));
 	}
-	ac->set_value (ac->interface_to_internal(v), PBD::Controllable::UseGroup);
+	ac->set_value (ac->interface_to_internal(v, true), PBD::Controllable::UseGroup);
 }
 
 
@@ -585,7 +588,7 @@ FaderPort8::button_encoder ()
 				 * the current position and we're not rolling.
 				 */
 				samplepos_t where = session->audible_sample();
-				if (session->transport_stopped() && session->locations()->mark_at (where, session->sample_rate() / 100.0)) {
+				if (session->transport_stopped_or_stopping() && session->locations()->mark_at (where, session->sample_rate() / 100.0)) {
 					return;
 				}
 

@@ -1,21 +1,23 @@
 /*
-    Copyright (C) 2009 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <iostream>
 
@@ -49,6 +51,9 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	, _destroying (false)
 	, analysis_progress_cur (0)
 	, analysis_progress_max (0)
+	, _threshold_value (-60)
+	, _minimum_length_value (1000)
+	, _fade_length_value (64)
 {
 	set_session (s);
 
@@ -61,6 +66,14 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	Gtk::Table* table = Gtk::manage (new Gtk::Table (3, 3));
 	table->set_spacings (6);
 
+	//get the last used settings for this
+	XMLNode* node = _session->extra_xml(X_("StripSilence"));
+	if (node) {
+		node->get_property(X_("threshold"), _threshold_value);
+		node->get_property(X_("min-length"), _minimum_length_value);
+		node->get_property(X_("fade-length"), _fade_length_value);
+	}
+
 	int n = 0;
 
 	table->attach (*Gtk::manage (new Gtk::Label (_("Threshold"), 1, 0.5)), 0, 1, n, n + 1, Gtk::FILL);
@@ -71,7 +84,7 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	_threshold.set_digits (1);
 	_threshold.set_increments (1, 10);
 	_threshold.set_range (-120, 0);
-	_threshold.set_value (-60);
+	_threshold.set_value (_threshold_value);
 	_threshold.set_activates_default ();
 
 	table->attach (*Gtk::manage (new Gtk::Label (_("Minimum length"), 1, 0.5)), 0, 1, n, n + 1, Gtk::FILL);
@@ -80,7 +93,7 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 
 	_minimum_length->set_session (s);
 	_minimum_length->set_mode (AudioClock::Samples);
-	_minimum_length->set (1000, true);
+	_minimum_length->set (_minimum_length_value, true);
 
 	table->attach (*Gtk::manage (new Gtk::Label (_("Fade length"), 1, 0.5)), 0, 1, n, n + 1, Gtk::FILL);
 	table->attach (*_fade_length, 1, 2, n, n + 1, Gtk::FILL);
@@ -88,7 +101,7 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 
 	_fade_length->set_session (s);
 	_fade_length->set_mode (AudioClock::Samples);
-	_fade_length->set (64, true);
+	_fade_length->set (_fade_length_value, true);
 
 	hbox->pack_start (*table);
 
@@ -118,6 +131,8 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	Completed.connect (_completed_connection, invalidator(*this), boost::bind (&StripSilenceDialog::update, this), gui_context ());
 	_thread_should_finish = false;
 	pthread_create (&_thread, 0, StripSilenceDialog::_detection_thread_work, this);
+
+	signal_response().connect(sigc::mem_fun (*this, &StripSilenceDialog::finished));
 }
 
 
@@ -176,7 +191,7 @@ StripSilenceDialog::drop_rects ()
 	_lock.unlock ();
 
 	for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
-		v->view->drop_silent_samples ();
+		v->view->drop_silent_frames ();
 	}
 
 	cancel_button->set_sensitive (false);
@@ -223,7 +238,7 @@ StripSilenceDialog::update_silence_rects ()
 	double const y = _threshold.get_value();
 
 	for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
-		v->view->set_silent_samples (v->intervals, y);
+		v->view->set_silent_frames (v->intervals, y);
 	}
 }
 
@@ -336,4 +351,27 @@ void
 StripSilenceDialog::update_progress_gui (float p)
 {
 	_progress_bar.set_fraction (p);
+}
+
+XMLNode&
+StripSilenceDialog::get_state ()
+{
+	XMLNode* node = new XMLNode(X_("StripSilence"));
+	node->set_property(X_("threshold"), threshold());
+	node->set_property(X_("min-length"), minimum_length());
+	node->set_property(X_("fade-length"), fade_length());
+	return *node;
+}
+
+void
+StripSilenceDialog::set_state (const XMLNode &)
+{
+}
+
+void
+StripSilenceDialog::finished(int response)
+{
+	if(response == Gtk::RESPONSE_OK) {
+		_session->add_extra_xml(get_state());
+	}
 }

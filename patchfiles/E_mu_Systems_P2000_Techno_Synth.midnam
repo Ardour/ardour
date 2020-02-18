@@ -1,0 +1,546 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>E-mu Systems</Manufacturer>
+    <Model>Audity 2000</Model>
+    <Model>B-3</Model>
+    <Model>B-3 Turbo</Model>
+    <Model>HALO</Model>
+    <Model>MK-6</Model>
+    <Model>Mo' Phatt</Model>
+    <Model>Mo' Phatt Turbo</Model>
+    <Model>MP-7</Model>
+    <Model>PK-6</Model>
+    <Model>Planet Earth</Model>
+    <Model>Planet Earth Turbo</Model>
+    <Model>Proteus 1000</Model>
+    <Model>Proteus 2000</Model>
+    <Model>Proteus 2500</Model>
+    <Model>Proteus Custom</Model>
+    <Model>Vintage Keys</Model>
+    <Model>Vintage Pro</Model>
+    <Model>Virtuoso 2000</Model>
+    <Model>XK-6</Model>
+    <Model>XL-1</Model>
+    <Model>XL-1 Turbo</Model>
+    <Model>XL-7</Model>
+    <PatchNameList Name="Techno Synth Bank 0">
+      <Patch Number="000" Name="hit:Intruder" ProgramChange="0"/>
+      <Patch Number="001" Name="bpm:Voxa Move" ProgramChange="1"/>
+      <Patch Number="002" Name="syn:ScreamSync 1" ProgramChange="2"/>
+      <Patch Number="003" Name="kit:909 Audition" ProgramChange="3"/>
+      <Patch Number="004" Name="pad:Rise to Fall" ProgramChange="4"/>
+      <Patch Number="005" Name="tec:Vel Swing" ProgramChange="5"/>
+      <Patch Number="006" Name="bas:T-Be Sawy 1" ProgramChange="6"/>
+      <Patch Number="007" Name="pad:Thin Strings" ProgramChange="7"/>
+      <Patch Number="008" Name="kit:GM Groove 1" ProgramChange="8"/>
+      <Patch Number="009" Name="org:Dancy 1" ProgramChange="9"/>
+      <Patch Number="010" Name="sfx:Phee Two Kay" ProgramChange="10"/>
+      <Patch Number="011" Name="wnd:Panflute Sof" ProgramChange="11"/>
+      <Patch Number="012" Name="kit:GM 808-1 BD1" ProgramChange="12"/>
+      <Patch Number="013" Name="kit:Noise Hits" ProgramChange="13"/>
+      <Patch Number="014" Name="amb:Aioon Pad" ProgramChange="14"/>
+      <Patch Number="015" Name="syn:Romancer" ProgramChange="15"/>
+      <Patch Number="016" Name="led:Proteo Moogy" ProgramChange="16"/>
+      <Patch Number="017" Name="tec:Dutch Stab 1" ProgramChange="17"/>
+      <Patch Number="018" Name="tec:Kraft Kord" ProgramChange="18"/>
+      <Patch Number="019" Name="amb:Seam to Pad" ProgramChange="19"/>
+      <Patch Number="020" Name="syn:80s Brass" ProgramChange="20"/>
+      <Patch Number="021" Name="syn:Modulair Seq" ProgramChange="21"/>
+      <Patch Number="022" Name="bas:Warm Groovy" ProgramChange="22"/>
+      <Patch Number="023" Name="kit:GM 808-2 BD2" ProgramChange="23"/>
+      <Patch Number="024" Name="kit:909-1 Dance" ProgramChange="24"/>
+      <Patch Number="025" Name="prc:Voca Snare" ProgramChange="25"/>
+      <Patch Number="026" Name="sub:Prophet" ProgramChange="26"/>
+      <Patch Number="027" Name="bpm:Pad Winder" ProgramChange="27"/>
+      <Patch Number="028" Name="tec:Velo VoX 1" ProgramChange="28"/>
+      <Patch Number="029" Name="bas:SH-101 Chorus" ProgramChange="29"/>
+      <Patch Number="030" Name="kit:TeCnO 4" ProgramChange="30"/>
+      <Patch Number="031" Name="bas:T-Be Distort" ProgramChange="31"/>
+      <Patch Number="032" Name="kit:TeC Percus" ProgramChange="32"/>
+      <Patch Number="033" Name="bpm:SemiLife" ProgramChange="33"/>
+      <Patch Number="034" Name="led:Modern Fifth" ProgramChange="34"/>
+      <Patch Number="035" Name="bas:Krafta Bass" ProgramChange="35"/>
+      <Patch Number="036" Name="tec:Pizzi Chord" ProgramChange="36"/>
+      <Patch Number="037" Name="hit:Ito 11th 1" ProgramChange="37"/>
+      <Patch Number="038" Name="bpm:Vox Sequence" ProgramChange="38"/>
+      <Patch Number="039" Name="syn:Juno Dance 1" ProgramChange="39"/>
+      <Patch Number="040" Name="bas:Swing" ProgramChange="40"/>
+      <Patch Number="041" Name="pad:Soft 2000" ProgramChange="41"/>
+      <Patch Number="042" Name="tec:Velo PWM 1" ProgramChange="42"/>
+      <Patch Number="043" Name="tec:Snaro" ProgramChange="43"/>
+      <Patch Number="044" Name="Leadhit:Happy Major3" ProgramChange="44"/>
+      <Patch Number="045" Name="pad:Floating" ProgramChange="45"/>
+      <Patch Number="046" Name="tec:Da Chord me" ProgramChange="46"/>
+      <Patch Number="047" Name="hit:Sweet 7 Pizz" ProgramChange="47"/>
+      <Patch Number="048" Name="bpm:Mystical" ProgramChange="48"/>
+      <Patch Number="049" Name="tec:Rogue Chord" ProgramChange="49"/>
+      <Patch Number="050" Name="pad:Tron Analog" ProgramChange="50"/>
+      <Patch Number="051" Name="bas:Deep mover" ProgramChange="51"/>
+      <Patch Number="052" Name="bas:Deep Steady" ProgramChange="52"/>
+      <Patch Number="053" Name="pad:Soft Oooh" ProgramChange="53"/>
+      <Patch Number="054" Name="bas:Talky Voxa" ProgramChange="54"/>
+      <Patch Number="055" Name="kit:GM Groove 2" ProgramChange="55"/>
+      <Patch Number="056" Name="kit:GM Groove 3" ProgramChange="56"/>
+      <Patch Number="057" Name="kit:GM TeCnO 6" ProgramChange="57"/>
+      <Patch Number="058" Name="kit:GM TeCnO 7 GM TeCnO 8" ProgramChange="58"/>
+      <Patch Number="059" Name="tec:Z-PlaneChord" ProgramChange="59"/>
+      <Patch Number="060" Name="hit:Expensive" ProgramChange="60"/>
+      <Patch Number="061" Name="hit:SweetMaj7 1" ProgramChange="61"/>
+      <Patch Number="062" Name="bpm:Pad Sequence" ProgramChange="62"/>
+      <Patch Number="063" Name="syn:Micro Dream" ProgramChange="63"/>
+      <Patch Number="064" Name="amb:Soft to Lead" ProgramChange="64"/>
+      <Patch Number="065" Name="kit:GM 909-2 HH2" ProgramChange="65"/>
+      <Patch Number="066" Name="sfx:Emu TeCnO" ProgramChange="66"/>
+      <Patch Number="067" Name="sfx:Proteus 2000" ProgramChange="67"/>
+      <Patch Number="068" Name="tec:Velo Sync" ProgramChange="68"/>
+      <Patch Number="069" Name="bas:T-Be Pulsy 1" ProgramChange="69"/>
+      <Patch Number="070" Name="tec:Super Juno 1" ProgramChange="70"/>
+      <Patch Number="071" Name="hit:TeCnO Major2" ProgramChange="71"/>
+      <Patch Number="072" Name="syn:Tune Wood" ProgramChange="72"/>
+      <Patch Number="073" Name="tec:Velo PWM 2" ProgramChange="73"/>
+      <Patch Number="074" Name="bas:Digital Wave" ProgramChange="74"/>
+      <Patch Number="075" Name="vox:Ya How Split" ProgramChange="75"/>
+      <Patch Number="076" Name="sfx:Time Travel" ProgramChange="76"/>
+      <Patch Number="077" Name="sfx:Spectr Waves" ProgramChange="77"/>
+      <Patch Number="078" Name="sfx:Prophet Sync" ProgramChange="78"/>
+      <Patch Number="079" Name="pad:Soft Rise" ProgramChange="79"/>
+      <Patch Number="080" Name="bas:Bottle Octav" ProgramChange="80"/>
+      <Patch Number="081" Name="pad:Z-Plane 2000" ProgramChange="81"/>
+      <Patch Number="082" Name="hit:TeCnO Major5" ProgramChange="82"/>
+      <Patch Number="083" Name="hit:BE Minor 1" ProgramChange="83"/>
+      <Patch Number="084" Name="bas:Square it" ProgramChange="84"/>
+      <Patch Number="085" Name="sub:Fend Mini" ProgramChange="85"/>
+      <Patch Number="086" Name="bas:Fend Reso" ProgramChange="86"/>
+      <Patch Number="087" Name="bpm:Z-Plane Trip" ProgramChange="87"/>
+      <Patch Number="088" Name="prc:VintageMetal" ProgramChange="88"/>
+      <Patch Number="089" Name="amb:Sea Flutes" ProgramChange="89"/>
+      <Patch Number="090" Name="sub:Rogua Deep" ProgramChange="90"/>
+      <Patch Number="091" Name="sfx:Reso Dive 1" ProgramChange="91"/>
+      <Patch Number="092" Name="bas:Rogue Da" ProgramChange="92"/>
+      <Patch Number="093" Name="hit:Big Minor 3" ProgramChange="93"/>
+      <Patch Number="094" Name="hit:Soft Major 2" ProgramChange="94"/>
+      <Patch Number="095" Name="wnd:Bottle Me" ProgramChange="95"/>
+      <Patch Number="096" Name="hit:Prophecies" ProgramChange="96"/>
+      <Patch Number="097" Name="sfx:Sha Dive" ProgramChange="97"/>
+      <Patch Number="098" Name="hit:Amb Minor 1" ProgramChange="98"/>
+      <Patch Number="099" Name="hit:Amb Minor Re" ProgramChange="99"/>
+      <Patch Number="100" Name="pad:Water Lake" ProgramChange="100"/>
+      <Patch Number="101" Name="kit:GM 909-1 HH1" ProgramChange="101"/>
+      <Patch Number="102" Name="kit:FM CR-78 1" ProgramChange="102"/>
+      <Patch Number="103" Name="kit:GM Dance 1" ProgramChange="103"/>
+      <Patch Number="104" Name="kit:GM Dance 2" ProgramChange="104"/>
+      <Patch Number="105" Name="kit:GM TeCnO 1" ProgramChange="105"/>
+      <Patch Number="106" Name="kit:GM TeCnO 2" ProgramChange="106"/>
+      <Patch Number="107" Name="kit:GM 808 Hip 1" ProgramChange="107"/>
+      <Patch Number="108" Name="kit:GM 808 Hip 2" ProgramChange="108"/>
+      <Patch Number="109" Name="kit:GM Dance 3" ProgramChange="109"/>
+      <Patch Number="110" Name="kit:GM Dance 4" ProgramChange="110"/>
+      <Patch Number="111" Name="kit:GM Dance 5" ProgramChange="111"/>
+      <Patch Number="112" Name="kit:GM TeCnO 3" ProgramChange="112"/>
+      <Patch Number="113" Name="kit:GM TeCnO 4" ProgramChange="113"/>
+      <Patch Number="114" Name="kit:GM TeCnO 5" ProgramChange="114"/>
+      <Patch Number="115" Name="amb:Human Dive" ProgramChange="115"/>
+      <Patch Number="116" Name="bas:To B@SS" ProgramChange="116"/>
+      <Patch Number="117" Name="bas:Mini Dow" ProgramChange="117"/>
+      <Patch Number="118" Name="bas:T-Be Sawy 2" ProgramChange="118"/>
+      <Patch Number="119" Name="tec:Swap Lead" ProgramChange="119"/>
+      <Patch Number="120" Name="syn:Waves Rising" ProgramChange="120"/>
+      <Patch Number="121" Name="bas:TeC B@SS Oct" ProgramChange="121"/>
+      <Patch Number="122" Name="bas:TeC Layer" ProgramChange="122"/>
+      <Patch Number="123" Name="bas:TeC Attack" ProgramChange="123"/>
+      <Patch Number="124" Name="sub:Low B@SS" ProgramChange="124"/>
+      <Patch Number="125" Name="bas:To Puls" ProgramChange="125"/>
+      <Patch Number="126" Name="bpm:Org Sequence" ProgramChange="126"/>
+    </PatchNameList>
+    <PatchNameList Name="Techno Synth Bank 1">
+      <Patch Number="000" Name="bas:To B@SS 2" ProgramChange="0"/>
+      <Patch Number="001" Name="bas:To B@SS 3" ProgramChange="1"/>
+      <Patch Number="002" Name="bas:To B@SS 4" ProgramChange="2"/>
+      <Patch Number="003" Name="bas:Dofty" ProgramChange="3"/>
+      <Patch Number="004" Name="org:Dancy 2" ProgramChange="4"/>
+      <Patch Number="005" Name="org:Dancy 3" ProgramChange="5"/>
+      <Patch Number="006" Name="org:Dancy 4" ProgramChange="6"/>
+      <Patch Number="007" Name="org:Dancy 5" ProgramChange="7"/>
+      <Patch Number="008" Name="org:Dancy 6" ProgramChange="8"/>
+      <Patch Number="009" Name="org:Dancy 7" ProgramChange="9"/>
+      <Patch Number="010" Name="org:Dancy 8" ProgramChange="10"/>
+      <Patch Number="011" Name="org:Dancy 9" ProgramChange="11"/>
+      <Patch Number="012" Name="org:Dancy 10" ProgramChange="12"/>
+      <Patch Number="013" Name="org:Dancy 11" ProgramChange="13"/>
+      <Patch Number="014" Name="org:Dancy 12" ProgramChange="14"/>
+      <Patch Number="015" Name="org:The Dance" ProgramChange="15"/>
+      <Patch Number="016" Name="org:Filtrosa" ProgramChange="16"/>
+      <Patch Number="017" Name="org:Syntha" ProgramChange="17"/>
+      <Patch Number="018" Name="org:Deep Fi-Bass" ProgramChange="18"/>
+      <Patch Number="019" Name="org:Bliss Filter" ProgramChange="19"/>
+      <Patch Number="020" Name="org:Major Chord" ProgramChange="20"/>
+      <Patch Number="021" Name="org:Minor Chord" ProgramChange="21"/>
+      <Patch Number="022" Name="org:Major Chord2" ProgramChange="22"/>
+      <Patch Number="023" Name="org:Minor Chord2" ProgramChange="23"/>
+      <Patch Number="024" Name="org:Drop Dance" ProgramChange="24"/>
+      <Patch Number="025" Name="org:Kraft Work" ProgramChange="25"/>
+      <Patch Number="026" Name="prc:Disco BD" ProgramChange="26"/>
+      <Patch Number="027" Name="bas:SH-101 1" ProgramChange="27"/>
+      <Patch Number="028" Name="sfx:Music by ..." ProgramChange="28"/>
+      <Patch Number="029" Name="bpm:Compute Me" ProgramChange="29"/>
+      <Patch Number="030" Name="bas:Fend Reso 2" ProgramChange="30"/>
+      <Patch Number="031" Name="bas:Mini XX" ProgramChange="31"/>
+      <Patch Number="032" Name="tec:Dutch Filtro" ProgramChange="32"/>
+      <Patch Number="033" Name="syn:Hall Synth" ProgramChange="33"/>
+      <Patch Number="034" Name="tec:Inspector" ProgramChange="34"/>
+      <Patch Number="035" Name="bas:To-Mo Bass" ProgramChange="35"/>
+      <Patch Number="036" Name="orc:Pizzicato" ProgramChange="36"/>
+      <Patch Number="037" Name="bas:To Low Bass" ProgramChange="37"/>
+      <Patch Number="038" Name="sub:Digital Deep" ProgramChange="38"/>
+      <Patch Number="039" Name="syn:Juno Dance 2" ProgramChange="39"/>
+      <Patch Number="040" Name="bpm:Octave Movy" ProgramChange="40"/>
+      <Patch Number="041" Name="hit:Big Minor 1" ProgramChange="41"/>
+      <Patch Number="042" Name="bpm:WoWoW Me" ProgramChange="42"/>
+      <Patch Number="043" Name="hit:Amb Minor 2" ProgramChange="43"/>
+      <Patch Number="044" Name="tec:Spiriment" ProgramChange="44"/>
+      <Patch Number="045" Name="sfx:Reso Dive 4" ProgramChange="45"/>
+      <Patch Number="046" Name="orc:Pizzicato Oc" ProgramChange="46"/>
+      <Patch Number="047" Name="orc:TeC Pizzi 1" ProgramChange="47"/>
+      <Patch Number="048" Name="orc:TeC Pizzi 2" ProgramChange="48"/>
+      <Patch Number="049" Name="orc:TeC Pizzi 3" ProgramChange="49"/>
+      <Patch Number="050" Name="orc:TeC Pizzi 4" ProgramChange="50"/>
+      <Patch Number="051" Name="sub:Prophet Deep" ProgramChange="51"/>
+      <Patch Number="052" Name="bas:T-Be Sawy 3" ProgramChange="52"/>
+      <Patch Number="053" Name="pad:Soft Proteus" ProgramChange="53"/>
+      <Patch Number="054" Name="bas:Mini Q" ProgramChange="54"/>
+      <Patch Number="055" Name="vox:Aa Ie Deep" ProgramChange="55"/>
+      <Patch Number="056" Name="tec:Watch Out" ProgramChange="56"/>
+      <Patch Number="057" Name="bas:T-Be Sawy 4" ProgramChange="57"/>
+      <Patch Number="058" Name="vox:Ten Sea Sea" ProgramChange="58"/>
+      <Patch Number="059" Name="sfx:Prophet Swap" ProgramChange="59"/>
+      <Patch Number="060" Name="tec:Phase Thin" ProgramChange="60"/>
+      <Patch Number="061" Name="vox:Oie The Moi" ProgramChange="61"/>
+      <Patch Number="062" Name="vox:Oie" ProgramChange="62"/>
+      <Patch Number="063" Name="vox:Moi" ProgramChange="63"/>
+      <Patch Number="064" Name="hit:Big Minor 4" ProgramChange="64"/>
+      <Patch Number="065" Name="hit:Happy Major1" ProgramChange="65"/>
+      <Patch Number="066" Name="hit:Happy Major2" ProgramChange="66"/>
+      <Patch Number="067" Name="kit:TeCnO 4 #4" ProgramChange="67"/>
+      <Patch Number="068" Name="kit:TeCnO 5 #3" ProgramChange="68"/>
+      <Patch Number="069" Name="kit:TeCnO 6 #3" ProgramChange="69"/>
+      <Patch Number="070" Name="kit:TeCno 6 #4" ProgramChange="70"/>
+      <Patch Number="071" Name="hit:Happy Major4" ProgramChange="71"/>
+      <Patch Number="072" Name="hit:TuT Minor 2" ProgramChange="72"/>
+      <Patch Number="073" Name="hit:TuT Minor 3" ProgramChange="73"/>
+      <Patch Number="074" Name="wnd:Bottle Two" ProgramChange="74"/>
+      <Patch Number="075" Name="hit:TeC Maj Pizz" ProgramChange="75"/>
+      <Patch Number="076" Name="tec:Dominate" ProgramChange="76"/>
+      <Patch Number="077" Name="sfx:Tune Tectos" ProgramChange="77"/>
+      <Patch Number="078" Name="sfx:Hollow Noise" ProgramChange="78"/>
+      <Patch Number="079" Name="sfx:The Dutch" ProgramChange="79"/>
+      <Patch Number="080" Name="sfx:DJ re Loop" ProgramChange="80"/>
+      <Patch Number="081" Name="sfx:Weirdo Cymb" ProgramChange="81"/>
+      <Patch Number="082" Name="syn:PPG my Bell" ProgramChange="82"/>
+      <Patch Number="083" Name="hit:Big Minor 2" ProgramChange="83"/>
+      <Patch Number="084" Name="hit:Soft Major 1" ProgramChange="84"/>
+      <Patch Number="085" Name="hit:TeCnO Major1" ProgramChange="85"/>
+      <Patch Number="086" Name="hit:TeCnO Major3" ProgramChange="86"/>
+      <Patch Number="087" Name="hit:TeCnO Major4" ProgramChange="87"/>
+      <Patch Number="088" Name="hit:Sweet Maj7 2" ProgramChange="88"/>
+      <Patch Number="089" Name="hit:Sweet Maj7 3" ProgramChange="89"/>
+      <Patch Number="090" Name="hit:Sweet Maj7 4" ProgramChange="90"/>
+      <Patch Number="091" Name="hit:BE Minor 2" ProgramChange="91"/>
+      <Patch Number="092" Name="hit:Soft Major 3" ProgramChange="92"/>
+      <Patch Number="093" Name="sfx:Reso Dive 2" ProgramChange="93"/>
+      <Patch Number="094" Name="tec:Watch Two" ProgramChange="94"/>
+      <Patch Number="095" Name="syn:Pizzi Ahay" ProgramChange="95"/>
+      <Patch Number="096" Name="org:Silly" ProgramChange="96"/>
+      <Patch Number="097" Name="org:Silly Two" ProgramChange="97"/>
+      <Patch Number="098" Name="org:Hybride" ProgramChange="98"/>
+      <Patch Number="099" Name="sfx:Reso Dive 3" ProgramChange="99"/>
+      <Patch Number="100" Name="hit:The end.." ProgramChange="100"/>
+      <Patch Number="101" Name="kit:909-2 Dance" ProgramChange="101"/>
+      <Patch Number="102" Name="kit:909-3 Dance" ProgramChange="102"/>
+      <Patch Number="103" Name="kit:909-4 Dance" ProgramChange="103"/>
+      <Patch Number="104" Name="kit:909-5 Dance" ProgramChange="104"/>
+      <Patch Number="105" Name="kit:909-6 Dance" ProgramChange="105"/>
+      <Patch Number="106" Name="kit:909-7 Dance" ProgramChange="106"/>
+      <Patch Number="107" Name="kit:909-8 Dance" ProgramChange="107"/>
+      <Patch Number="108" Name="kit:909-9 Dance" ProgramChange="108"/>
+      <Patch Number="109" Name="kit:909-10 Dance" ProgramChange="109"/>
+      <Patch Number="110" Name="kit:909-11 Dance" ProgramChange="110"/>
+      <Patch Number="111" Name="kit:909 BD proce" ProgramChange="111"/>
+      <Patch Number="112" Name="kit:909 BD clean" ProgramChange="112"/>
+      <Patch Number="113" Name="wnd:Bottle Veloc" ProgramChange="113"/>
+      <Patch Number="114" Name="kit:GM 909-1 HH2" ProgramChange="114"/>
+      <Patch Number="115" Name="kit:GM 909-2 HH1" ProgramChange="115"/>
+      <Patch Number="116" Name="kit:909-3 HH1" ProgramChange="116"/>
+      <Patch Number="117" Name="kit:909-3 HH2" ProgramChange="117"/>
+      <Patch Number="118" Name="sfx:Breath" ProgramChange="118"/>
+      <Patch Number="119" Name="bas:Da Moogy" ProgramChange="119"/>
+      <Patch Number="120" Name="bas:Da Moogy Tec" ProgramChange="120"/>
+      <Patch Number="121" Name="sub:Low Da Moogy" ProgramChange="121"/>
+      <Patch Number="122" Name="bas:Da Attack" ProgramChange="122"/>
+      <Patch Number="123" Name="syn:Flangy Da" ProgramChange="123"/>
+      <Patch Number="124" Name="bas:Bottle" ProgramChange="124"/>
+      <Patch Number="125" Name="wnd:Panflute Vel" ProgramChange="125"/>
+      <Patch Number="126" Name="kit:TeCnO 1" ProgramChange="126"/>
+      <Patch Number="127" Name="kit:TeCnO 1 #2" ProgramChange="127"/>
+    </PatchNameList>
+    <PatchNameList Name="Techno Synth Bank 2">
+      <Patch Number="000" Name="kit:TeCnO 2" ProgramChange="0"/>
+      <Patch Number="001" Name="kit:TeCnO 3" ProgramChange="1"/>
+      <Patch Number="002" Name="kit:TeCnO 3 #2" ProgramChange="2"/>
+      <Patch Number="003" Name="kit:TeCnO 4 #2" ProgramChange="3"/>
+      <Patch Number="004" Name="kit:TeCnO 5" ProgramChange="4"/>
+      <Patch Number="005" Name="kit:TeCnO 5 #2" ProgramChange="5"/>
+      <Patch Number="006" Name="kit:TeCnO 6" ProgramChange="6"/>
+      <Patch Number="007" Name="kit:TeCnO 6 #2" ProgramChange="7"/>
+      <Patch Number="008" Name="kit:TeC Percus 2" ProgramChange="8"/>
+      <Patch Number="009" Name="kit:TeCnO BD 1" ProgramChange="9"/>
+      <Patch Number="010" Name="kit:TeCnO BD 2" ProgramChange="10"/>
+      <Patch Number="011" Name="kit:TeCnO BD 3" ProgramChange="11"/>
+      <Patch Number="012" Name="kit:TeCnO BD 4" ProgramChange="12"/>
+      <Patch Number="013" Name="kit:TeCnO BD 5" ProgramChange="13"/>
+      <Patch Number="014" Name="kit:TeCnO BD 6" ProgramChange="14"/>
+      <Patch Number="015" Name="kit:TeC BD 1mono" ProgramChange="15"/>
+      <Patch Number="016" Name="kit:TeC BD 2mono" ProgramChange="16"/>
+      <Patch Number="017" Name="kit:TeC BD 3mono" ProgramChange="17"/>
+      <Patch Number="018" Name="kit:TeC BD 4mono" ProgramChange="18"/>
+      <Patch Number="019" Name="kit:TeC BD 5mono" ProgramChange="19"/>
+      <Patch Number="020" Name="kit:TeC BD 6mono" ProgramChange="20"/>
+      <Patch Number="021" Name="kit:Noise Hits 2" ProgramChange="21"/>
+      <Patch Number="022" Name="kit:Noise Hits 3" ProgramChange="22"/>
+      <Patch Number="023" Name="kit:NoiseH.velo1" ProgramChange="23"/>
+      <Patch Number="024" Name="kit:NoiseH.velo2" ProgramChange="24"/>
+      <Patch Number="025" Name="kit:NoiseH.velo3" ProgramChange="25"/>
+      <Patch Number="026" Name="prc:Noise Hit 1" ProgramChange="26"/>
+      <Patch Number="027" Name="prc:Noise Hit 1b" ProgramChange="27"/>
+      <Patch Number="028" Name="prc:Noise Hit 1c" ProgramChange="28"/>
+      <Patch Number="029" Name="prc:Noise Hit 1d" ProgramChange="29"/>
+      <Patch Number="030" Name="prc:Noise Hit 1e" ProgramChange="30"/>
+      <Patch Number="031" Name="prc:Noise Hit 1f" ProgramChange="31"/>
+      <Patch Number="032" Name="prc:Noise Hit 2" ProgramChange="32"/>
+      <Patch Number="033" Name="prc:Noise Hit 2b" ProgramChange="33"/>
+      <Patch Number="034" Name="prc:Noise Hit 2c" ProgramChange="34"/>
+      <Patch Number="035" Name="prc:Noise Hit 2d" ProgramChange="35"/>
+      <Patch Number="036" Name="prc:Noise Hit 2e" ProgramChange="36"/>
+      <Patch Number="037" Name="prc:Noise Hit 2f" ProgramChange="37"/>
+      <Patch Number="038" Name="prc:Noise Hit 3" ProgramChange="38"/>
+      <Patch Number="039" Name="prc:Noise Hit 3b" ProgramChange="39"/>
+      <Patch Number="040" Name="prc:Noise Hit 3c" ProgramChange="40"/>
+      <Patch Number="041" Name="prc:Noise Hit 3d" ProgramChange="41"/>
+      <Patch Number="042" Name="prc:Noise Hit 3e" ProgramChange="42"/>
+      <Patch Number="043" Name="prc:Noise Hit 3f" ProgramChange="43"/>
+      <Patch Number="044" Name="prc:Noise Hit 4" ProgramChange="44"/>
+      <Patch Number="045" Name="prc:Noise Hit 4b" ProgramChange="45"/>
+      <Patch Number="046" Name="prc:Noise Hit 4c" ProgramChange="46"/>
+      <Patch Number="047" Name="prc:Noise Hit 4d" ProgramChange="47"/>
+      <Patch Number="048" Name="prc:Noise Hit 4e" ProgramChange="48"/>
+      <Patch Number="049" Name="prc:Noise Hit 4f" ProgramChange="49"/>
+      <Patch Number="050" Name="prc:Noise Hit 5" ProgramChange="50"/>
+      <Patch Number="051" Name="prc:Noise Hit 5b" ProgramChange="51"/>
+      <Patch Number="052" Name="prc:Noise Hit 5c" ProgramChange="52"/>
+      <Patch Number="053" Name="prc:Noise Hit 5d" ProgramChange="53"/>
+      <Patch Number="054" Name="prc:Noise Hit 5e" ProgramChange="54"/>
+      <Patch Number="055" Name="prc:Noise Hit 5f" ProgramChange="55"/>
+      <Patch Number="056" Name="prc:Noise Hit 6" ProgramChange="56"/>
+      <Patch Number="057" Name="prc:Noise Hit 6b" ProgramChange="57"/>
+      <Patch Number="058" Name="prc:Noise Hit 6c" ProgramChange="58"/>
+      <Patch Number="059" Name="prc:Noise Hit 6d" ProgramChange="59"/>
+      <Patch Number="060" Name="prc:Noise Hit 6e" ProgramChange="60"/>
+      <Patch Number="061" Name="prc:Noise Hit 6f" ProgramChange="61"/>
+      <Patch Number="062" Name="prc:Noise Hit 7" ProgramChange="62"/>
+      <Patch Number="063" Name="prc:Noise Hit 7b" ProgramChange="63"/>
+      <Patch Number="064" Name="prc:Noise Hit 7c" ProgramChange="64"/>
+      <Patch Number="065" Name="prc:Noise Hit 7d" ProgramChange="65"/>
+      <Patch Number="066" Name="prc:Noise Hit 7e" ProgramChange="66"/>
+      <Patch Number="067" Name="prc:Noise Hit 7f" ProgramChange="67"/>
+      <Patch Number="068" Name="prc:Noise Hit 8" ProgramChange="68"/>
+      <Patch Number="069" Name="prc:Noise Hit 8b" ProgramChange="69"/>
+      <Patch Number="070" Name="prc:Noise Hit 8c" ProgramChange="70"/>
+      <Patch Number="071" Name="prc:Noise Hit 8d" ProgramChange="71"/>
+      <Patch Number="072" Name="prc:Noise Hit 8e" ProgramChange="72"/>
+      <Patch Number="073" Name="prc:Noise Hit 8f" ProgramChange="73"/>
+      <Patch Number="074" Name="prc:Noise Hit 9" ProgramChange="74"/>
+      <Patch Number="075" Name="prc:Noise Hit 9b" ProgramChange="75"/>
+      <Patch Number="076" Name="prc:Noise Hit 9c" ProgramChange="76"/>
+      <Patch Number="077" Name="prc:Noise Hit 9d" ProgramChange="77"/>
+      <Patch Number="078" Name="prc:Noise Hit 9e" ProgramChange="78"/>
+      <Patch Number="079" Name="prc:Noise Hit 9f" ProgramChange="79"/>
+      <Patch Number="080" Name="prc:TeCnO BD 1" ProgramChange="80"/>
+      <Patch Number="081" Name="prc:TeCnO BD 1b" ProgramChange="81"/>
+      <Patch Number="082" Name="prc:TeCnO BD 1c" ProgramChange="82"/>
+      <Patch Number="083" Name="prc:TeCnO BD 2" ProgramChange="83"/>
+      <Patch Number="084" Name="prc:TeCnO BD 2b" ProgramChange="84"/>
+      <Patch Number="085" Name="prc:TeCnO BD 2c" ProgramChange="85"/>
+      <Patch Number="086" Name="prc:TeCnO BD 3" ProgramChange="86"/>
+      <Patch Number="087" Name="prc:TeCnO BD 3b" ProgramChange="87"/>
+      <Patch Number="088" Name="prc:TeCnO BD 3c" ProgramChange="88"/>
+      <Patch Number="089" Name="prc:TeCnO BD 4" ProgramChange="89"/>
+      <Patch Number="090" Name="prc:TeCnO BD 4b" ProgramChange="90"/>
+      <Patch Number="091" Name="prc:TeCnO BD 4c" ProgramChange="91"/>
+      <Patch Number="092" Name="prc:TeCnO BD 5" ProgramChange="92"/>
+      <Patch Number="093" Name="prc:TeCnO BD 5b" ProgramChange="93"/>
+      <Patch Number="094" Name="prc:TeCnO BD 5c" ProgramChange="94"/>
+      <Patch Number="095" Name="prc:TeCnO BD 6" ProgramChange="95"/>
+      <Patch Number="096" Name="prc:TeCnO BD 6b" ProgramChange="96"/>
+      <Patch Number="097" Name="prc:TeCnO BD 6c" ProgramChange="97"/>
+      <Patch Number="098" Name="prc:TeCnO BD 7" ProgramChange="98"/>
+      <Patch Number="099" Name="prc:TeCnO BD 7b" ProgramChange="99"/>
+      <Patch Number="100" Name="prc:TeCnO BD 7c" ProgramChange="100"/>
+      <Patch Number="101" Name="prc:TeCnO BD 8" ProgramChange="101"/>
+      <Patch Number="102" Name="prc:TeCnO BD 8b" ProgramChange="102"/>
+      <Patch Number="103" Name="prc:TeCnO BD 8c" ProgramChange="103"/>
+      <Patch Number="104" Name="prc:TeCnO BD 9" ProgramChange="104"/>
+      <Patch Number="105" Name="prc:TeCnO BD 9b" ProgramChange="105"/>
+      <Patch Number="106" Name="prc:TeCnO BD 9c" ProgramChange="106"/>
+      <Patch Number="107" Name="prc:TeCnO BD 10" ProgramChange="107"/>
+      <Patch Number="108" Name="prc:TeCnO BD 10b" ProgramChange="108"/>
+      <Patch Number="109" Name="prc:TeCnO BD 10c" ProgramChange="109"/>
+      <Patch Number="110" Name="prc:TeCnO BD 11" ProgramChange="110"/>
+      <Patch Number="111" Name="prc:TeCnO BD 11b" ProgramChange="111"/>
+      <Patch Number="112" Name="prc:TeCnO BD 11c" ProgramChange="112"/>
+      <Patch Number="113" Name="prc:TeCnO BD 12" ProgramChange="113"/>
+      <Patch Number="114" Name="prc:TeCnO BD 12b" ProgramChange="114"/>
+      <Patch Number="115" Name="prc:TeCnO BD 12c" ProgramChange="115"/>
+      <Patch Number="116" Name="prc:TeCnO BD 13" ProgramChange="116"/>
+      <Patch Number="117" Name="prc:TeCnO BD 13b" ProgramChange="117"/>
+      <Patch Number="118" Name="prc:TeCnO BD 13c" ProgramChange="118"/>
+      <Patch Number="119" Name="prc:TeCnO BD 14" ProgramChange="119"/>
+      <Patch Number="120" Name="prc:TeCnO BD 14b" ProgramChange="120"/>
+      <Patch Number="121" Name="prc:TeCnO BD 14c" ProgramChange="121"/>
+      <Patch Number="122" Name="prc:Finger snap" ProgramChange="122"/>
+      <Patch Number="123" Name="prc:Tambourine" ProgramChange="123"/>
+      <Patch Number="124" Name="prc:Short Shake" ProgramChange="124"/>
+      <Patch Number="125" Name="prc:Shaky LoopC4" ProgramChange="125"/>
+      <Patch Number="126" Name="prc:Super BD" ProgramChange="126"/>
+    </PatchNameList>
+    <PatchNameList Name="Techno Synth Bank 3">
+      <Patch Number="000" Name="prc:Thinny BD" ProgramChange="0"/>
+      <Patch Number="001" Name="prc:New Real BD" ProgramChange="1"/>
+      <Patch Number="002" Name="prc:TeCnO BD 15" ProgramChange="2"/>
+      <Patch Number="003" Name="prc:TeCnO BD 15b" ProgramChange="3"/>
+      <Patch Number="004" Name="prc:TeC Clap 1st" ProgramChange="4"/>
+      <Patch Number="005" Name="prC:TeC Clap 1" ProgramChange="5"/>
+      <Patch Number="006" Name="prC:TeC Clap 2st" ProgramChange="6"/>
+      <Patch Number="007" Name="prC:TeC Clap 2" ProgramChange="7"/>
+      <Patch Number="008" Name="prC:TeC Clap 3" ProgramChange="8"/>
+      <Patch Number="009" Name="prC:TeC Clap 4st" ProgramChange="9"/>
+      <Patch Number="010" Name="prc:Reverse CLP1" ProgramChange="10"/>
+      <Patch Number="011" Name="prc:Reverse CLP2" ProgramChange="11"/>
+      <Patch Number="012" Name="prc:80s Clap 1st" ProgramChange="12"/>
+      <Patch Number="013" Name="prc:80s Clap 1" ProgramChange="13"/>
+      <Patch Number="014" Name="prc:TeC Clap 5" ProgramChange="14"/>
+      <Patch Number="015" Name="prc:TeC Clap 6" ProgramChange="15"/>
+      <Patch Number="016" Name="prc:TeC Clap 7" ProgramChange="16"/>
+      <Patch Number="017" Name="prc:808 Clap 1st" ProgramChange="17"/>
+      <Patch Number="018" Name="prc:808 Clap 1" ProgramChange="18"/>
+      <Patch Number="019" Name="prc:909 CLP+Revs" ProgramChange="19"/>
+      <Patch Number="020" Name="prc:Reso Squeek1" ProgramChange="20"/>
+      <Patch Number="021" Name="prc:Reso Squeek2" ProgramChange="21"/>
+      <Patch Number="022" Name="prc:Reso Squeek3" ProgramChange="22"/>
+      <Patch Number="023" Name="prc:Reso Squeek4" ProgramChange="23"/>
+      <Patch Number="024" Name="prc:Reso Squeek5" ProgramChange="24"/>
+      <Patch Number="025" Name="sfx:Reso Dive Me" ProgramChange="25"/>
+      <Patch Number="026" Name="sfx:Vintage Perc" ProgramChange="26"/>
+      <Patch Number="027" Name="prc:MS20 Bongos 1" ProgramChange="27"/>
+      <Patch Number="028" Name="prc:MS20 Bongos2" ProgramChange="28"/>
+      <Patch Number="029" Name="prc:TeC Snare 1" ProgramChange="29"/>
+      <Patch Number="030" Name="prc:TeC Snare 2" ProgramChange="30"/>
+      <Patch Number="031" Name="prc:TeC Snare 3" ProgramChange="31"/>
+      <Patch Number="032" Name="prc:TeC Snare 4" ProgramChange="32"/>
+      <Patch Number="033" Name="prc:TeC Snare 5" ProgramChange="33"/>
+      <Patch Number="034" Name="prc:TeC Snare 6" ProgramChange="34"/>
+      <Patch Number="035" Name="prc:TeC Snare 7" ProgramChange="35"/>
+      <Patch Number="036" Name="prc:TeC Snare 8" ProgramChange="36"/>
+      <Patch Number="037" Name="prc:TeC Snare 9" ProgramChange="37"/>
+      <Patch Number="038" Name="prc:TeC Snare 10" ProgramChange="38"/>
+      <Patch Number="039" Name="prc:TeC Snare 11" ProgramChange="39"/>
+      <Patch Number="040" Name="prc:TeC Snare 12" ProgramChange="40"/>
+      <Patch Number="041" Name="prc:TeC Snare 13" ProgramChange="41"/>
+      <Patch Number="042" Name="prc:TeC Snare 14" ProgramChange="42"/>
+      <Patch Number="043" Name="prc:TeC Snare 15" ProgramChange="43"/>
+      <Patch Number="044" Name="prc:TeC Snare 16" ProgramChange="44"/>
+      <Patch Number="045" Name="prc:TeC Snare 17" ProgramChange="45"/>
+      <Patch Number="046" Name="prc:TeC Snare 18" ProgramChange="46"/>
+      <Patch Number="047" Name="prc:TeC Snare 19" ProgramChange="47"/>
+      <Patch Number="048" Name="prc:TeC Snare 20" ProgramChange="48"/>
+      <Patch Number="049" Name="prc:TeC Snare 21" ProgramChange="49"/>
+      <Patch Number="050" Name="prc:TeC Snare 22" ProgramChange="50"/>
+      <Patch Number="051" Name="prc:TeC Snare 23" ProgramChange="51"/>
+      <Patch Number="052" Name="prc:TeC Snare 24" ProgramChange="52"/>
+      <Patch Number="053" Name="prc:TeC Snare 25" ProgramChange="53"/>
+      <Patch Number="054" Name="prc:TeC Snare 26" ProgramChange="54"/>
+      <Patch Number="055" Name="prc:TeC Snare 27" ProgramChange="55"/>
+      <Patch Number="056" Name="prc:TeC Snare 28" ProgramChange="56"/>
+      <Patch Number="057" Name="prc:TeC Snare 29" ProgramChange="57"/>
+      <Patch Number="058" Name="prc:TeC Snare 30" ProgramChange="58"/>
+      <Patch Number="059" Name="prc:TeC Snare 31" ProgramChange="59"/>
+      <Patch Number="060" Name="prc:TeC Snare 32" ProgramChange="60"/>
+      <Patch Number="061" Name="prc:TeC Snare 33" ProgramChange="61"/>
+      <Patch Number="062" Name="prc:TeC Snare 34" ProgramChange="62"/>
+      <Patch Number="063" Name="prc:TeC Snare 35" ProgramChange="63"/>
+      <Patch Number="064" Name="prc:TeC Snare 36" ProgramChange="64"/>
+      <Patch Number="065" Name="prc:TeC Snare 37" ProgramChange="65"/>
+      <Patch Number="066" Name="prc:TeC Snare 38" ProgramChange="66"/>
+      <Patch Number="067" Name="prc:TeC Snare 39" ProgramChange="67"/>
+      <Patch Number="068" Name="prc:TeC Snare 40" ProgramChange="68"/>
+      <Patch Number="069" Name="prc:TeC Snare 41" ProgramChange="69"/>
+      <Patch Number="070" Name="prc:TeC Snare 42" ProgramChange="70"/>
+      <Patch Number="071" Name="prc:TeC Snare 43" ProgramChange="71"/>
+      <Patch Number="072" Name="prc:TeC Snare 44" ProgramChange="72"/>
+      <Patch Number="073" Name="prc:TeC Snare 45" ProgramChange="73"/>
+      <Patch Number="074" Name="prc:TeC Snare 46" ProgramChange="74"/>
+      <Patch Number="075" Name="prc:TeC Snare 47" ProgramChange="75"/>
+      <Patch Number="076" Name="prc:TeC Snare 48" ProgramChange="76"/>
+      <Patch Number="077" Name="prc:TeC Snare 49" ProgramChange="77"/>
+      <Patch Number="078" Name="prc:TeC Snare 50" ProgramChange="78"/>
+      <Patch Number="079" Name="prc:TeC Snare 51" ProgramChange="79"/>
+      <Patch Number="080" Name="prc:TeC Snare 52" ProgramChange="80"/>
+      <Patch Number="081" Name="prc:TeC Snare 53" ProgramChange="81"/>
+      <Patch Number="082" Name="prc:TeC Snare 54" ProgramChange="82"/>
+      <Patch Number="083" Name="prc:TeC Snare 55" ProgramChange="83"/>
+      <Patch Number="084" Name="prc:TeC Snare 56" ProgramChange="84"/>
+      <Patch Number="085" Name="prc:TeC Snare 57" ProgramChange="85"/>
+      <Patch Number="086" Name="prc:TeC Snare 58" ProgramChange="86"/>
+      <Patch Number="087" Name="prc:TeC Snare 59" ProgramChange="87"/>
+      <Patch Number="088" Name="prc:TeC Snare 60" ProgramChange="88"/>
+      <Patch Number="089" Name="prc:TeC Snare 61" ProgramChange="89"/>
+      <Patch Number="090" Name="prc:TeC Snare 62" ProgramChange="90"/>
+      <Patch Number="091" Name="prc:TeC Snare 63" ProgramChange="91"/>
+      <Patch Number="092" Name="prc:TeC Snare 64" ProgramChange="92"/>
+      <Patch Number="093" Name="prc:TeC Snare 65" ProgramChange="93"/>
+      <Patch Number="094" Name="prc:TeC Snare 66" ProgramChange="94"/>
+      <Patch Number="095" Name="prc:TeC Snare 67" ProgramChange="95"/>
+      <Patch Number="096" Name="prc:TeC Snare 68" ProgramChange="96"/>
+      <Patch Number="097" Name="prc:TeC Snare 69" ProgramChange="97"/>
+      <Patch Number="098" Name="prc:Hip Snare 1" ProgramChange="98"/>
+      <Patch Number="099" Name="prc:Hip Snare 2" ProgramChange="99"/>
+      <Patch Number="100" Name="prc:Hip Snare 3" ProgramChange="100"/>
+      <Patch Number="101" Name="prc:Hip Snare 4" ProgramChange="101"/>
+      <Patch Number="102" Name="prc:Hip Snare 5" ProgramChange="102"/>
+      <Patch Number="103" Name="prc:Hip Snare 6" ProgramChange="103"/>
+      <Patch Number="104" Name="prc:Noise Tja" ProgramChange="104"/>
+      <Patch Number="105" Name="prc:Tech Snare" ProgramChange="105"/>
+      <Patch Number="106" Name="prc:Noise Tjow" ProgramChange="106"/>
+      <Patch Number="107" Name="sfx:Spectrumize" ProgramChange="107"/>
+      <Patch Number="108" Name="syn:After Flutes" ProgramChange="108"/>
+      <Patch Number="109" Name="syn:Known Fifth" ProgramChange="109"/>
+      <Patch Number="110" Name="led:Soft Aahs" ProgramChange="110"/>
+      <Patch Number="111" Name="led:Carnival" ProgramChange="111"/>
+      <Patch Number="112" Name="hit:TuT Minor 1" ProgramChange="112"/>
+      <Patch Number="113" Name="bas:The X Seven" ProgramChange="113"/>
+      <Patch Number="114" Name="bpm:Beam me Up" ProgramChange="114"/>
+      <Patch Number="115" Name="pad:Blue Sky" ProgramChange="115"/>
+      <Patch Number="116" Name="hit:BE MinorPizz" ProgramChange="116"/>
+      <Patch Number="117" Name="bpm:Pad to fase" ProgramChange="117"/>
+      <Patch Number="118" Name="led:Terra Luna" ProgramChange="118"/>
+      <Patch Number="119" Name="bpm:Time Vox" ProgramChange="119"/>
+      <Patch Number="120" Name="sfx:Orwell" ProgramChange="120"/>
+      <Patch Number="121" Name="bpm:Rocket Ship" ProgramChange="121"/>
+      <Patch Number="122" Name="bpm:Weird Song" ProgramChange="122"/>
+      <Patch Number="123" Name="led:Dance Diva" ProgramChange="123"/>
+      <Patch Number="124" Name="led:Rodin's Knee" ProgramChange="124"/>
+      <Patch Number="125" Name="sfx:Freak Out" ProgramChange="125"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

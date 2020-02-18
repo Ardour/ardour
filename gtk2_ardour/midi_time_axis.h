@@ -1,20 +1,25 @@
 /*
-    Copyright (C) 2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2006-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2012 Hans Baier <hansfbaier@googlemail.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015-2017 Nick Mainsbridge <mainsbridge@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_midi_time_axis_h__
 #define __ardour_midi_time_axis_h__
@@ -96,8 +101,6 @@ public:
 	boost::shared_ptr<MIDI::Name::MasterDeviceNames> get_device_names();
 	boost::shared_ptr<MIDI::Name::CustomDeviceMode> get_device_mode();
 
-	void update_range();
-
 	Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
 
 	StepEditor* step_editor() { return _step_editor; }
@@ -109,6 +112,7 @@ public:
 	uint8_t get_channel_for_add () const;
 
 	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&);
+	void use_midnam_info ();
 
 protected:
 	void start_step_editing ();
@@ -121,10 +125,9 @@ private:
 	void setup_midnam_patches ();
 	void update_patch_selector ();
 
-	void start_scroomer_update ();
-	void stop_scroomer_update ();
 	sigc::connection _note_range_changed_connection;
 
+	void maybe_trigger_model_change ();
 	void model_changed(const std::string& model);
 	void custom_device_mode_changed(const std::string& mode);
 
@@ -192,8 +195,6 @@ private:
 	ParameterMenuMap _controller_menu_map;
 
 	StepEditor* _step_editor;
-
-	void immediate_patch_chnage_response (int response);
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

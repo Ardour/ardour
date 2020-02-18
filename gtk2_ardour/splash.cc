@@ -1,21 +1,24 @@
 /*
-    Copyright (C) 2008 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2008-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2016 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2012-2014 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2012-2017 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <string>
 
@@ -44,6 +47,28 @@ using namespace std;
 using namespace ARDOUR;
 
 Splash* Splash::the_splash = 0;
+
+Splash*
+Splash::instance()
+{
+	if (!the_splash) {
+		the_splash = new Splash;
+	}
+	return the_splash;
+}
+
+bool
+Splash::exists ()
+{
+	return the_splash;
+}
+
+void
+Splash::drop ()
+{
+	delete the_splash;
+	the_splash = 0;
+}
 
 Splash::Splash ()
 {
@@ -126,7 +151,9 @@ Splash::pop_back_for (Gtk::Window& win)
 	hide();
 #else
 	set_keep_above (false);
-	get_window()->restack (win.get_window(), false);
+	if (is_mapped()) {
+		get_window()->restack (win.get_window(), false);
+	}
 #endif
 }
 
@@ -205,6 +232,9 @@ Splash::expose (GdkEventExpose* ev)
 void
 Splash::boot_message (std::string msg)
 {
+	if (!is_visible()) {
+		display ();
+	}
 	message (msg);
 }
 

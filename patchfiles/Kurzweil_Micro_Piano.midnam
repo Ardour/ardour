@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Kurzweil</Manufacturer>
+    <Model>Micro Piano</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Micro Piano">
+        <PatchNameList>
+          <Patch Number="01" Name="Classical Piano-solo tuning" ProgramChange="1"/>
+          <Patch Number="02" Name="Stage Piano-solo tuning" ProgramChange="2"/>
+          <Patch Number="03" Name="Classical Piano-ensemble tuning" ProgramChange="3"/>
+          <Patch Number="04" Name="Stage Piano-ensemble tuning" ProgramChange="4"/>
+          <Patch Number="05" Name="Bright Piano" ProgramChange="5"/>
+          <Patch Number="06" Name="Sustain Piano" ProgramChange="6"/>
+          <Patch Number="07" Name="Stage Piano &amp; Strings" ProgramChange="7"/>
+          <Patch Number="08" Name="Piano &amp; String Pad" ProgramChange="8"/>
+          <Patch Number="09" Name="Tack Piano" ProgramChange="9"/>
+          <Patch Number="10" Name="Bright Electric Grand" ProgramChange="10"/>
+          <Patch Number="11" Name="Tight Electric Grand" ProgramChange="11"/>
+          <Patch Number="12" Name="Warm Electric Grand" ProgramChange="12"/>
+          <Patch Number="13" Name="Digital Electric Grand" ProgramChange="13"/>
+          <Patch Number="14" Name="Classic Electric Piano" ProgramChange="14"/>
+          <Patch Number="15" Name="Digital Electric Piano" ProgramChange="15"/>
+          <Patch Number="16" Name="Dyno-Electric Piano" ProgramChange="16"/>
+          <Patch Number="17" Name="Hard Dyno-Electric Piano" ProgramChange="17"/>
+          <Patch Number="18" Name="Stereo Hard Electric Piano" ProgramChange="18"/>
+          <Patch Number="19" Name="Stereo Trem Digital Elec Piano" ProgramChange="19"/>
+          <Patch Number="20" Name="Digital Elec Piano &amp; String Pad" ProgramChange="20"/>
+          <Patch Number="21" Name="Rock Organ 1" ProgramChange="21"/>
+          <Patch Number="22" Name="Rock Organ 2" ProgramChange="22"/>
+          <Patch Number="23" Name="Percussion Organ" ProgramChange="23"/>
+          <Patch Number="24" Name="Ballad Organ 1" ProgramChange="24"/>
+          <Patch Number="25" Name="Ballad Organ 2" ProgramChange="25"/>
+          <Patch Number="26" Name="Organ &amp; Piano" ProgramChange="26"/>
+          <Patch Number="27" Name="Fast Strings 1" ProgramChange="27"/>
+          <Patch Number="28" Name="Fast Strings 2" ProgramChange="28"/>
+          <Patch Number="29" Name="Touch Strings" ProgramChange="29"/>
+          <Patch Number="30" Name="Stereo Slow Strings" ProgramChange="30"/>
+          <Patch Number="31" Name="Stereo Slow String Pad" ProgramChange="31"/>
+          <Patch Number="32" Name="Slow Digital Pad" ProgramChange="32"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

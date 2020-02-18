@@ -1,21 +1,29 @@
 /*
-    Copyright (C) 2000 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2005 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2006 Hans Fugal <hans@fugal.net>
+ * Copyright (C) 2008-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2014 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2013-2015 Colin Fletcher <colin.m.fletcher@googlemail.com>
+ * Copyright (C) 2014-2015 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2014-2017 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cstdlib>
 #include <cmath>
@@ -815,7 +823,6 @@ Editor::tempo_or_meter_marker_context_menu (GdkEventButton* ev, ArdourCanvas::It
 
 	if (mm) {
 		can_remove = !mm->meter().initial ();
-		delete meter_marker_menu;
 		build_meter_marker_menu (mm, can_remove);
 		meter_marker_menu->popup (1, ev->time);
 	} else if (tm) {
@@ -823,7 +830,6 @@ Editor::tempo_or_meter_marker_context_menu (GdkEventButton* ev, ArdourCanvas::It
 			return;
 		}
 		can_remove = !tm->tempo().initial() && !tm->tempo().locked_to_meter();
-		delete tempo_marker_menu;
 		build_tempo_marker_menu (tm, can_remove);
 		tempo_marker_menu->popup (1, ev->time);
 	} else {
@@ -845,15 +851,13 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 
 	if (loc == transport_loop_location() || loc == transport_punch_location() || loc->is_session_range ()) {
 
-		delete transport_marker_menu;
 		build_range_marker_menu (loc, loc == transport_loop_location() || loc == transport_punch_location(), loc->is_session_range());
 
 		marker_menu_item = item;
-		transport_marker_menu->popup (1, ev->time);
+		range_marker_menu->popup (1, ev->time);
 
 	} else if (loc->is_mark()) {
 
-			delete marker_menu;
 			build_marker_menu (loc);
 
 		// GTK2FIX use action group sensitivity
@@ -874,9 +878,7 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 			marker_menu->popup (1, ev->time);
 
 	} else if (loc->is_range_marker()) {
-		delete range_marker_menu;
 		build_range_marker_menu (loc, false, false);
-
 		marker_menu_item = item;
 		range_marker_menu->popup (1, ev->time);
 	}
@@ -898,6 +900,7 @@ Editor::build_marker_menu (Location* loc)
 {
 	using namespace Menu_Helpers;
 
+	delete marker_menu;
 	marker_menu = new Menu;
 
 	MenuList& items = marker_menu->items();
@@ -940,15 +943,11 @@ Editor::build_range_marker_menu (Location* loc, bool loop_or_punch, bool session
 
 	bool const loop_or_punch_or_session = loop_or_punch || session;
 
-	Menu* markerMenu = new Menu;
+	delete range_marker_menu;
+	range_marker_menu = new Menu;
 
-	if (loop_or_punch_or_session) {
-		transport_marker_menu = markerMenu;
-	} else {
-		range_marker_menu = markerMenu;
-	}
-	MenuList& items = markerMenu->items();
-	markerMenu->set_name ("ArdourContextMenu");
+	MenuList& items = range_marker_menu->items();
+	range_marker_menu->set_name ("ArdourContextMenu");
 
 	items.push_back (MenuElem (_("Play Range"), sigc::mem_fun(*this, &Editor::marker_menu_play_range)));
 	items.push_back (MenuElem (_("Locate to Marker"), sigc::mem_fun(*this, &Editor::marker_menu_set_playhead)));
@@ -995,6 +994,7 @@ Editor::build_tempo_marker_menu (TempoMarker* loc, bool can_remove)
 {
 	using namespace Menu_Helpers;
 
+	delete tempo_marker_menu;
 	tempo_marker_menu = new Menu;
 
 	MenuList& items = tempo_marker_menu->items();
@@ -1037,6 +1037,7 @@ Editor::build_meter_marker_menu (MeterMarker* loc, bool can_remove)
 {
 	using namespace Menu_Helpers;
 
+	delete meter_marker_menu;
 	meter_marker_menu = new Menu;
 
 	MenuList& items = meter_marker_menu->items();
@@ -1178,15 +1179,15 @@ Editor::marker_menu_play_from ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			_session->request_locate (l->start(), true);
+			_session->request_locate (l->start(), MustRoll);
 		}
 		else {
 			//_session->request_bounded_roll (l->start(), l->end());
 
 			if (is_start) {
-				_session->request_locate (l->start(), true);
+				_session->request_locate (l->start(), MustRoll);
 			} else {
-				_session->request_locate (l->end(), true);
+				_session->request_locate (l->end(), MustRoll);
 			}
 		}
 	}
@@ -1208,13 +1209,13 @@ Editor::marker_menu_set_playhead ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			_session->request_locate (l->start(), false);
+			_session->request_locate (l->start(), MustStop);
 		}
 		else {
 			if (is_start) {
-				_session->request_locate (l->start(), false);
+				_session->request_locate (l->start(), MustStop);
 			} else {
-				_session->request_locate (l->end(), false);
+				_session->request_locate (l->end(), MustStop);
 			}
 		}
 	}
@@ -1329,7 +1330,7 @@ Editor::marker_menu_play_range ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			_session->request_locate (l->start(), true);
+			_session->request_locate (l->start(), MustRoll);
 		}
 		else {
 			_session->request_bounded_roll (l->start(), l->end());
@@ -1355,7 +1356,7 @@ Editor::marker_menu_loop_range ()
 		if (l != transport_loop_location()) {
 			set_loop_range (l->start(), l->end(), _("loop range from marker"));
 		}
-		_session->request_locate (l->start(), true);
+		_session->request_locate (l->start(), MustRoll);
 		_session->request_play_loop (true);
 	}
 }
@@ -1767,7 +1768,7 @@ Editor::goto_nth_marker (int n)
 	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
 		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_session_range()) {
 			if (n == 0) {
-				_session->request_locate ((*i)->start(), _session->transport_rolling());
+				_session->request_locate ((*i)->start(), RollIfAppropriate);
 				break;
 			}
 			--n;

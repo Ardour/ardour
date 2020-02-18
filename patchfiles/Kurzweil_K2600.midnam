@@ -1,0 +1,1107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Kurzweil</Manufacturer>
+    <Model>K2600</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Bank 0">
+        <MIDICommands>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="0" Name="None" ProgramChange="0"/>
+          <Patch Number="1" Name="Concert Piano 1" ProgramChange="1"/>
+          <Patch Number="2" Name="Stereo Solo Pno" ProgramChange="2"/>
+          <Patch Number="3" Name="Brt Concert Pno" ProgramChange="3"/>
+          <Patch Number="4" Name="Rok Piano" ProgramChange="4"/>
+          <Patch Number="5" Name="Piano for Layers" ProgramChange="5"/>
+          <Patch Number="6" Name="rkPno^ArakisPno" ProgramChange="6"/>
+          <Patch Number="7" Name="Honky-Tonk" ProgramChange="7"/>
+          <Patch Number="8" Name="Pno&amp;Syn/AcString" ProgramChange="8"/>
+          <Patch Number="9" Name="ClassicPiano&amp;Vox" ProgramChange="9"/>
+          <Patch Number="10" Name="E Grand Stack" ProgramChange="10"/>
+          <Patch Number="11" Name="Piano D'Biggy" ProgramChange="11"/>
+          <Patch Number="12" Name="DynEPiano EPnoPF" ProgramChange="12"/>
+          <Patch Number="13" Name="FM-ish E-Piano" ProgramChange="13"/>
+          <Patch Number="14" Name="Suitcase E Piano" ProgramChange="14"/>
+          <Patch Number="15" Name="PhunkEPno FonkMW" ProgramChange="15"/>
+          <Patch Number="16" Name="Clavinators 1^2" ProgramChange="16"/>
+          <Patch Number="17" Name="Spaceychord 1^2" ProgramChange="17"/>
+          <Patch Number="18" Name="D'Nu Clavs 1^2^3" ProgramChange="18"/>
+          <Patch Number="19" Name="VAST B3!  PW+CC2" ProgramChange="19"/>
+          <Patch Number="20" Name="Rock Organ" ProgramChange="20"/>
+          <Patch Number="21" Name="Ballad Organ" ProgramChange="21"/>
+          <Patch Number="22" Name="Gospel Organ" ProgramChange="22"/>
+          <Patch Number="23" Name="Overdrive Organ" ProgramChange="23"/>
+          <Patch Number="24" Name="Perc Organ" ProgramChange="24"/>
+          <Patch Number="25" Name="Chiffy Pipes" ProgramChange="25"/>
+          <Patch Number="26" Name="Offertory" ProgramChange="26"/>
+          <Patch Number="27" Name="Pedal Pipes" ProgramChange="27"/>
+          <Patch Number="28" Name="Church Organ" ProgramChange="28"/>
+          <Patch Number="29" Name="DualBass SlapBas" ProgramChange="29"/>
+          <Patch Number="30" Name="Warm Bass 1^2" ProgramChange="30"/>
+          <Patch Number="31" Name="SustBass^MixBass" ProgramChange="31"/>
+          <Patch Number="32" Name="RickenBass" ProgramChange="32"/>
+          <Patch Number="33" Name="Synth Fretless" ProgramChange="33"/>
+          <Patch Number="34" Name="Moogy Bass 1^2" ProgramChange="34"/>
+          <Patch Number="35" Name="Moogy Bass 3^4" ProgramChange="35"/>
+          <Patch Number="36" Name="MatrixBigBass1 2" ProgramChange="36"/>
+          <Patch Number="37" Name="PittBass mono1 2" ProgramChange="37"/>
+          <Patch Number="38" Name="Punch Bass 1 2" ProgramChange="38"/>
+          <Patch Number="39" Name="Tee Bee This MW" ProgramChange="39"/>
+          <Patch Number="40" Name="BottomFeed Pulse" ProgramChange="40"/>
+          <Patch Number="41" Name="SkoolBass^Simple" ProgramChange="41"/>
+          <Patch Number="42" Name="MonoBass^FixBass" ProgramChange="42"/>
+          <Patch Number="43" Name="Ravelike Basses" ProgramChange="43"/>
+          <Patch Number="44" Name="Junosis^Geo-Bass" ProgramChange="44"/>
+          <Patch Number="45" Name="AceBass^ChirpBas" ProgramChange="45"/>
+          <Patch Number="46" Name="Gritz" ProgramChange="46"/>
+          <Patch Number="47" Name="Homey Saw" ProgramChange="47"/>
+          <Patch Number="48" Name="OG" ProgramChange="48"/>
+          <Patch Number="49" Name="Lowdown Bass" ProgramChange="49"/>
+          <Patch Number="50" Name="SquashStudio Kit" ProgramChange="50"/>
+          <Patch Number="51" Name="Retro Skins MW" ProgramChange="51"/>
+          <Patch Number="52" Name="2 Live Kits 2 MW" ProgramChange="52"/>
+          <Patch Number="53" Name="Garage Kit II MW" ProgramChange="53"/>
+          <Patch Number="54" Name="Jazz Kit II" ProgramChange="54"/>
+          <Patch Number="55" Name="Hoppy Kit!" ProgramChange="55"/>
+          <Patch Number="56" Name="L'il Nipper Kit" ProgramChange="56"/>
+          <Patch Number="57" Name="Geo-Kit MW+22" ProgramChange="57"/>
+          <Patch Number="58" Name="Lo-Fi Vinyl Kit" ProgramChange="58"/>
+          <Patch Number="59" Name="Technoo Kit" ProgramChange="59"/>
+          <Patch Number="60" Name="VAST Sliders 808" ProgramChange="60"/>
+          <Patch Number="61" Name="Industry Set II" ProgramChange="61"/>
+          <Patch Number="62" Name="General MIDI Kit" ProgramChange="62"/>
+          <Patch Number="63" Name="Slam'nDrumsII GM" ProgramChange="63"/>
+          <Patch Number="64" Name="ElectroDrumsetGM" ProgramChange="64"/>
+          <Patch Number="65" Name="SmallKit+Perc MW" ProgramChange="65"/>
+          <Patch Number="66" Name="Steel Str Guitar" ProgramChange="66"/>
+          <Patch Number="67" Name="12-Str Guitar" ProgramChange="67"/>
+          <Patch Number="68" Name="Spark Guitar" ProgramChange="68"/>
+          <Patch Number="69" Name="Blue Moods" ProgramChange="69"/>
+          <Patch Number="70" Name="SloChrsGtr Harms" ProgramChange="70"/>
+          <Patch Number="71" Name="ES335 Abercrmbie" ProgramChange="71"/>
+          <Patch Number="72" Name="SliderDistJazzGt" ProgramChange="72"/>
+          <Patch Number="73" Name="Crunchy Lead" ProgramChange="73"/>
+          <Patch Number="74" Name="NooMutes WahTaur" ProgramChange="74"/>
+          <Patch Number="75" Name="CeeTaur Kotolin" ProgramChange="75"/>
+          <Patch Number="76" Name="Liquid T Lead" ProgramChange="76"/>
+          <Patch Number="77" Name="Square Lead" ProgramChange="77"/>
+          <Patch Number="78" Name="AlaZawi Take 2" ProgramChange="78"/>
+          <Patch Number="79" Name="Modulead" ProgramChange="79"/>
+          <Patch Number="80" Name="Polyreal Mini" ProgramChange="80"/>
+          <Patch Number="81" Name="ModularLead1 2 3" ProgramChange="81"/>
+          <Patch Number="82" Name="Soul Boy Lead" ProgramChange="82"/>
+          <Patch Number="83" Name="Flutey Leads" ProgramChange="83"/>
+          <Patch Number="84" Name="Hrmnica Accrdion" ProgramChange="84"/>
+          <Patch Number="85" Name="Trumpets BrBrass" ProgramChange="85"/>
+          <Patch Number="86" Name="Hip Brass" ProgramChange="86"/>
+          <Patch Number="87" Name="Brass De ROM" ProgramChange="87"/>
+          <Patch Number="88" Name="BigBand Hornz" ProgramChange="88"/>
+          <Patch Number="89" Name="Z-Plane Brass" ProgramChange="89"/>
+          <Patch Number="90" Name="OrcBrs FrnchBone" ProgramChange="90"/>
+          <Patch Number="91" Name="Brt Saxy Section" ProgramChange="91"/>
+          <Patch Number="92" Name="Brt Saxy/Split" ProgramChange="92"/>
+          <Patch Number="93" Name="Mr. Parker" ProgramChange="93"/>
+          <Patch Number="94" Name="Dynasax" ProgramChange="94"/>
+          <Patch Number="95" Name="DynTrumpet^Miles" ProgramChange="95"/>
+          <Patch Number="96" Name="Wawa Trumpet MW" ProgramChange="96"/>
+          <Patch Number="97" Name="Almost Muted MW" ProgramChange="97"/>
+          <Patch Number="98" Name="Solo Trombone" ProgramChange="98"/>
+          <Patch Number="99" Name="Jazz Band" ProgramChange="99"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 1">
+        <MIDICommands>
+          <ControlChange Control="32" Value="1"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="100" Name="W.C.Flute Winds" ProgramChange="0"/>
+          <Patch Number="101" Name="Baroque Flute" ProgramChange="1"/>
+          <Patch Number="102" Name="Synth Calliopies" ProgramChange="2"/>
+          <Patch Number="103" Name="Incan" ProgramChange="3"/>
+          <Patch Number="104" Name="String Orchestra" ProgramChange="4"/>
+          <Patch Number="105" Name="ClassicalStrings" ProgramChange="5"/>
+          <Patch Number="106" Name="StSloStr SilkStr" ProgramChange="6"/>
+          <Patch Number="107" Name="BigStrgs FlngStr" ProgramChange="7"/>
+          <Patch Number="108" Name="Chamber Ensemble" ProgramChange="8"/>
+          <Patch Number="109" Name="PsuedoViolin 1 2" ProgramChange="9"/>
+          <Patch Number="110" Name="Slow Solo Cello" ProgramChange="10"/>
+          <Patch Number="111" Name="Horn&amp;Flute w/Str" ProgramChange="11"/>
+          <Patch Number="112" Name="DynOrch WTellOrc" ProgramChange="12"/>
+          <Patch Number="113" Name="Touchy Orchestra" ProgramChange="13"/>
+          <Patch Number="114" Name="Synth Strings" ProgramChange="14"/>
+          <Patch Number="115" Name="MelloStr ShineOn" ProgramChange="15"/>
+          <Patch Number="116" Name="Mellotron MW" ProgramChange="16"/>
+          <Patch Number="117" Name="RavStrngs Solina" ProgramChange="17"/>
+          <Patch Number="118" Name="Choir Strings" ProgramChange="18"/>
+          <Patch Number="119" Name="CathdrVox 8veVox" ProgramChange="19"/>
+          <Patch Number="120" Name="Mixed Choir " ProgramChange="20"/>
+          <Patch Number="121" Name="NUChoir SpaceVox" ProgramChange="21"/>
+          <Patch Number="122" Name="Marimbae Vibeish" ProgramChange="22"/>
+          <Patch Number="123" Name="EchoBars SliderE" ProgramChange="23"/>
+          <Patch Number="124" Name="Malleflute Split" ProgramChange="24"/>
+          <Patch Number="125" Name="Malletoo" ProgramChange="25"/>
+          <Patch Number="126" Name="Highlandistic" ProgramChange="26"/>
+          <Patch Number="127" Name="Buzz Kill" ProgramChange="27"/>
+          <Patch Number="128" Name="Harshey's" ProgramChange="28"/>
+          <Patch Number="129" Name="Spunter" ProgramChange="29"/>
+          <Patch Number="130" Name="Crumper" ProgramChange="30"/>
+          <Patch Number="131" Name="Zeek" ProgramChange="31"/>
+          <Patch Number="132" Name="Elephantiasis" ProgramChange="32"/>
+          <Patch Number="133" Name="SoftMatrix12 5th" ProgramChange="33"/>
+          <Patch Number="134" Name="TchRezoid Hungry" ProgramChange="34"/>
+          <Patch Number="135" Name="MatchStik^NuDigi" ProgramChange="35"/>
+          <Patch Number="136" Name="Peppers Digiclub" ProgramChange="36"/>
+          <Patch Number="137" Name="Frog LowNoteTalk" ProgramChange="37"/>
+          <Patch Number="138" Name="Oink Doink" ProgramChange="38"/>
+          <Patch Number="139" Name="Wheepy Dood" ProgramChange="39"/>
+          <Patch Number="140" Name="Funk-O-Matic" ProgramChange="40"/>
+          <Patch Number="141" Name="Pulsemonster5ths" ProgramChange="41"/>
+          <Patch Number="142" Name="OB Pad OB Brass" ProgramChange="42"/>
+          <Patch Number="143" Name="Detooner BigPMW" ProgramChange="43"/>
+          <Patch Number="144" Name="TeknoBallCrusher" ProgramChange="44"/>
+          <Patch Number="145" Name="VTrig SquareHead" ProgramChange="45"/>
+          <Patch Number="146" Name="Razor Saw" ProgramChange="46"/>
+          <Patch Number="147" Name="Razorip Buzzsaw" ProgramChange="47"/>
+          <Patch Number="148" Name="Pulse Pass" ProgramChange="48"/>
+          <Patch Number="149" Name="Nordic Square" ProgramChange="49"/>
+          <Patch Number="150" Name="Rezonant Snob" ProgramChange="50"/>
+          <Patch Number="151" Name="Borfin' Jumps RPT" ProgramChange="51"/>
+          <Patch Number="152" Name="Elektro Funk" ProgramChange="52"/>
+          <Patch Number="153" Name="Acid" ProgramChange="53"/>
+          <Patch Number="154" Name="Rancid" ProgramChange="54"/>
+          <Patch Number="155" Name="Fuse" ProgramChange="55"/>
+          <Patch Number="156" Name="Squwee Monosync " ProgramChange="56"/>
+          <Patch Number="157" Name="Generic Ravelead" ProgramChange="57"/>
+          <Patch Number="158" Name="Notch Sinker " ProgramChange="58"/>
+          <Patch Number="159" Name="Grungesync Sweep" ProgramChange="59"/>
+          <Patch Number="160" Name="Rezzysaws" ProgramChange="60"/>
+          <Patch Number="161" Name="Prophet Sync " ProgramChange="61"/>
+          <Patch Number="162" Name="Glider" ProgramChange="62"/>
+          <Patch Number="163" Name="Alaska Glide MW" ProgramChange="63"/>
+          <Patch Number="164" Name="Rave Classic" ProgramChange="64"/>
+          <Patch Number="165" Name="Meditator SloEns" ProgramChange="65"/>
+          <Patch Number="166" Name="Tranquil Picked" ProgramChange="66"/>
+          <Patch Number="167" Name="The Chaser" ProgramChange="67"/>
+          <Patch Number="168" Name="Enterprize MTree" ProgramChange="68"/>
+          <Patch Number="169" Name="Orgazmica" ProgramChange="69"/>
+          <Patch Number="170" Name="Universal" ProgramChange="70"/>
+          <Patch Number="171" Name="Asian Digital" ProgramChange="71"/>
+          <Patch Number="172" Name="Wheel Wave Sweep" ProgramChange="72"/>
+          <Patch Number="173" Name="Arystal InTheAir" ProgramChange="73"/>
+          <Patch Number="174" Name="Cymbal Singers" ProgramChange="74"/>
+          <Patch Number="175" Name="BriteBells Glock" ProgramChange="75"/>
+          <Patch Number="176" Name="Crystalline RX7" ProgramChange="76"/>
+          <Patch Number="177" Name="Wave Power X 2" ProgramChange="77"/>
+          <Patch Number="178" Name="Trinibell" ProgramChange="78"/>
+          <Patch Number="179" Name="Frozen Pizzibell" ProgramChange="79"/>
+          <Patch Number="180" Name="Den City" ProgramChange="80"/>
+          <Patch Number="181" Name="Synth Bell 1 2" ProgramChange="81"/>
+          <Patch Number="182" Name="DynPercMix Gator" ProgramChange="82"/>
+          <Patch Number="183" Name="Workingman Space" ProgramChange="83"/>
+          <Patch Number="184" Name="OronicoKno Shift" ProgramChange="84"/>
+          <Patch Number="185" Name="Ethereal Dawning" ProgramChange="85"/>
+          <Patch Number="186" Name="RAVReligion Prey" ProgramChange="86"/>
+          <Patch Number="187" Name="Voyage" ProgramChange="87"/>
+          <Patch Number="188" Name="WispSingrs Glass" ProgramChange="88"/>
+          <Patch Number="189" Name="Luscious" ProgramChange="89"/>
+          <Patch Number="190" Name="LightMist Padify" ProgramChange="90"/>
+          <Patch Number="191" Name="VortexRev Launch" ProgramChange="91"/>
+          <Patch Number="192" Name="Hello A No Way" ProgramChange="92"/>
+          <Patch Number="193" Name="Environments" ProgramChange="93"/>
+          <Patch Number="194" Name="Gremlin Groupies" ProgramChange="94"/>
+          <Patch Number="195" Name="Lost In Space" ProgramChange="95"/>
+          <Patch Number="196" Name="Lunar Wind" ProgramChange="96"/>
+          <Patch Number="197" Name="Noise Toys" ProgramChange="97"/>
+          <Patch Number="198" Name="Click" ProgramChange="98"/>
+          <Patch Number="199" Name="Default Program" ProgramChange="99"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 2">
+        <MIDICommands>
+          <ControlChange Control="32" Value="2"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="200" Name="User Patch" ProgramChange="0"/>
+          <Patch Number="201" Name="User Patch" ProgramChange="1"/>
+          <Patch Number="202" Name="User Patch" ProgramChange="2"/>
+          <Patch Number="203" Name="User Patch" ProgramChange="3"/>
+          <Patch Number="204" Name="User Patch" ProgramChange="4"/>
+          <Patch Number="205" Name="User Patch" ProgramChange="5"/>
+          <Patch Number="206" Name="User Patch" ProgramChange="6"/>
+          <Patch Number="207" Name="User Patch" ProgramChange="7"/>
+          <Patch Number="208" Name="User Patch" ProgramChange="8"/>
+          <Patch Number="209" Name="User Patch" ProgramChange="9"/>
+          <Patch Number="210" Name="User Patch" ProgramChange="10"/>
+          <Patch Number="211" Name="User Patch" ProgramChange="11"/>
+          <Patch Number="212" Name="User Patch" ProgramChange="12"/>
+          <Patch Number="213" Name="User Patch" ProgramChange="13"/>
+          <Patch Number="214" Name="User Patch" ProgramChange="14"/>
+          <Patch Number="215" Name="User Patch" ProgramChange="15"/>
+          <Patch Number="216" Name="User Patch" ProgramChange="16"/>
+          <Patch Number="217" Name="User Patch" ProgramChange="17"/>
+          <Patch Number="218" Name="User Patch" ProgramChange="18"/>
+          <Patch Number="219" Name="User Patch" ProgramChange="19"/>
+          <Patch Number="220" Name="User Patch" ProgramChange="20"/>
+          <Patch Number="221" Name="User Patch" ProgramChange="21"/>
+          <Patch Number="222" Name="User Patch" ProgramChange="22"/>
+          <Patch Number="223" Name="User Patch" ProgramChange="23"/>
+          <Patch Number="224" Name="User Patch" ProgramChange="24"/>
+          <Patch Number="225" Name="User Patch" ProgramChange="25"/>
+          <Patch Number="226" Name="User Patch" ProgramChange="26"/>
+          <Patch Number="227" Name="User Patch" ProgramChange="27"/>
+          <Patch Number="228" Name="User Patch" ProgramChange="28"/>
+          <Patch Number="229" Name="User Patch" ProgramChange="29"/>
+          <Patch Number="230" Name="User Patch" ProgramChange="30"/>
+          <Patch Number="231" Name="User Patch" ProgramChange="31"/>
+          <Patch Number="232" Name="User Patch" ProgramChange="32"/>
+          <Patch Number="233" Name="User Patch" ProgramChange="33"/>
+          <Patch Number="234" Name="User Patch" ProgramChange="34"/>
+          <Patch Number="235" Name="User Patch" ProgramChange="35"/>
+          <Patch Number="236" Name="User Patch" ProgramChange="36"/>
+          <Patch Number="237" Name="User Patch" ProgramChange="37"/>
+          <Patch Number="238" Name="User Patch" ProgramChange="38"/>
+          <Patch Number="239" Name="User Patch" ProgramChange="39"/>
+          <Patch Number="240" Name="User Patch" ProgramChange="40"/>
+          <Patch Number="241" Name="User Patch" ProgramChange="41"/>
+          <Patch Number="242" Name="User Patch" ProgramChange="42"/>
+          <Patch Number="243" Name="User Patch" ProgramChange="43"/>
+          <Patch Number="244" Name="User Patch" ProgramChange="44"/>
+          <Patch Number="245" Name="User Patch" ProgramChange="45"/>
+          <Patch Number="246" Name="User Patch" ProgramChange="46"/>
+          <Patch Number="247" Name="User Patch" ProgramChange="47"/>
+          <Patch Number="248" Name="User Patch" ProgramChange="48"/>
+          <Patch Number="249" Name="User Patch" ProgramChange="49"/>
+          <Patch Number="250" Name="User Patch" ProgramChange="50"/>
+          <Patch Number="251" Name="User Patch" ProgramChange="51"/>
+          <Patch Number="252" Name="User Patch" ProgramChange="52"/>
+          <Patch Number="253" Name="User Patch" ProgramChange="53"/>
+          <Patch Number="254" Name="User Patch" ProgramChange="54"/>
+          <Patch Number="255" Name="User Patch" ProgramChange="55"/>
+          <Patch Number="256" Name="User Patch" ProgramChange="56"/>
+          <Patch Number="257" Name="User Patch" ProgramChange="57"/>
+          <Patch Number="258" Name="User Patch" ProgramChange="58"/>
+          <Patch Number="259" Name="User Patch" ProgramChange="59"/>
+          <Patch Number="260" Name="User Patch" ProgramChange="60"/>
+          <Patch Number="261" Name="User Patch" ProgramChange="61"/>
+          <Patch Number="262" Name="User Patch" ProgramChange="62"/>
+          <Patch Number="263" Name="User Patch" ProgramChange="63"/>
+          <Patch Number="264" Name="User Patch" ProgramChange="64"/>
+          <Patch Number="265" Name="User Patch" ProgramChange="65"/>
+          <Patch Number="266" Name="User Patch" ProgramChange="66"/>
+          <Patch Number="267" Name="User Patch" ProgramChange="67"/>
+          <Patch Number="268" Name="User Patch" ProgramChange="68"/>
+          <Patch Number="269" Name="User Patch" ProgramChange="69"/>
+          <Patch Number="270" Name="User Patch" ProgramChange="70"/>
+          <Patch Number="271" Name="User Patch" ProgramChange="71"/>
+          <Patch Number="272" Name="User Patch" ProgramChange="72"/>
+          <Patch Number="273" Name="User Patch" ProgramChange="73"/>
+          <Patch Number="274" Name="User Patch" ProgramChange="74"/>
+          <Patch Number="275" Name="User Patch" ProgramChange="75"/>
+          <Patch Number="276" Name="User Patch" ProgramChange="76"/>
+          <Patch Number="277" Name="User Patch" ProgramChange="77"/>
+          <Patch Number="278" Name="User Patch" ProgramChange="78"/>
+          <Patch Number="279" Name="User Patch" ProgramChange="79"/>
+          <Patch Number="280" Name="User Patch" ProgramChange="80"/>
+          <Patch Number="281" Name="User Patch" ProgramChange="81"/>
+          <Patch Number="282" Name="User Patch" ProgramChange="82"/>
+          <Patch Number="283" Name="User Patch" ProgramChange="83"/>
+          <Patch Number="284" Name="User Patch" ProgramChange="84"/>
+          <Patch Number="285" Name="User Patch" ProgramChange="85"/>
+          <Patch Number="286" Name="User Patch" ProgramChange="86"/>
+          <Patch Number="287" Name="User Patch" ProgramChange="87"/>
+          <Patch Number="288" Name="User Patch" ProgramChange="88"/>
+          <Patch Number="289" Name="User Patch" ProgramChange="89"/>
+          <Patch Number="290" Name="User Patch" ProgramChange="90"/>
+          <Patch Number="291" Name="User Patch" ProgramChange="91"/>
+          <Patch Number="292" Name="User Patch" ProgramChange="92"/>
+          <Patch Number="293" Name="User Patch" ProgramChange="93"/>
+          <Patch Number="294" Name="User Patch" ProgramChange="94"/>
+          <Patch Number="295" Name="User Patch" ProgramChange="95"/>
+          <Patch Number="296" Name="User Patch" ProgramChange="96"/>
+          <Patch Number="297" Name="User Patch" ProgramChange="97"/>
+          <Patch Number="298" Name="User Patch" ProgramChange="98"/>
+          <Patch Number="299" Name="User Patch" ProgramChange="99"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 3">
+        <MIDICommands>
+          <ControlChange Control="32" Value="3"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="300" Name="User Patch" ProgramChange="0"/>
+          <Patch Number="301" Name="User Patch" ProgramChange="1"/>
+          <Patch Number="302" Name="User Patch" ProgramChange="2"/>
+          <Patch Number="303" Name="User Patch" ProgramChange="3"/>
+          <Patch Number="304" Name="User Patch" ProgramChange="4"/>
+          <Patch Number="305" Name="User Patch" ProgramChange="5"/>
+          <Patch Number="306" Name="User Patch" ProgramChange="6"/>
+          <Patch Number="307" Name="User Patch" ProgramChange="7"/>
+          <Patch Number="308" Name="User Patch" ProgramChange="8"/>
+          <Patch Number="309" Name="User Patch" ProgramChange="9"/>
+          <Patch Number="310" Name="User Patch" ProgramChange="10"/>
+          <Patch Number="311" Name="User Patch" ProgramChange="11"/>
+          <Patch Number="312" Name="User Patch" ProgramChange="12"/>
+          <Patch Number="313" Name="User Patch" ProgramChange="13"/>
+          <Patch Number="314" Name="User Patch" ProgramChange="14"/>
+          <Patch Number="315" Name="User Patch" ProgramChange="15"/>
+          <Patch Number="316" Name="User Patch" ProgramChange="16"/>
+          <Patch Number="317" Name="User Patch" ProgramChange="17"/>
+          <Patch Number="318" Name="User Patch" ProgramChange="18"/>
+          <Patch Number="319" Name="User Patch" ProgramChange="19"/>
+          <Patch Number="320" Name="User Patch" ProgramChange="20"/>
+          <Patch Number="321" Name="User Patch" ProgramChange="21"/>
+          <Patch Number="322" Name="User Patch" ProgramChange="22"/>
+          <Patch Number="323" Name="User Patch" ProgramChange="23"/>
+          <Patch Number="324" Name="User Patch" ProgramChange="24"/>
+          <Patch Number="325" Name="User Patch" ProgramChange="25"/>
+          <Patch Number="326" Name="User Patch" ProgramChange="26"/>
+          <Patch Number="327" Name="User Patch" ProgramChange="27"/>
+          <Patch Number="328" Name="User Patch" ProgramChange="28"/>
+          <Patch Number="329" Name="User Patch" ProgramChange="29"/>
+          <Patch Number="330" Name="User Patch" ProgramChange="30"/>
+          <Patch Number="331" Name="User Patch" ProgramChange="31"/>
+          <Patch Number="332" Name="User Patch" ProgramChange="32"/>
+          <Patch Number="333" Name="User Patch" ProgramChange="33"/>
+          <Patch Number="334" Name="User Patch" ProgramChange="34"/>
+          <Patch Number="335" Name="User Patch" ProgramChange="35"/>
+          <Patch Number="336" Name="User Patch" ProgramChange="36"/>
+          <Patch Number="337" Name="User Patch" ProgramChange="37"/>
+          <Patch Number="338" Name="User Patch" ProgramChange="38"/>
+          <Patch Number="339" Name="User Patch" ProgramChange="39"/>
+          <Patch Number="340" Name="User Patch" ProgramChange="40"/>
+          <Patch Number="341" Name="User Patch" ProgramChange="41"/>
+          <Patch Number="342" Name="User Patch" ProgramChange="42"/>
+          <Patch Number="343" Name="User Patch" ProgramChange="43"/>
+          <Patch Number="344" Name="User Patch" ProgramChange="44"/>
+          <Patch Number="345" Name="User Patch" ProgramChange="45"/>
+          <Patch Number="346" Name="User Patch" ProgramChange="46"/>
+          <Patch Number="347" Name="User Patch" ProgramChange="47"/>
+          <Patch Number="348" Name="User Patch" ProgramChange="48"/>
+          <Patch Number="349" Name="User Patch" ProgramChange="49"/>
+          <Patch Number="350" Name="User Patch" ProgramChange="50"/>
+          <Patch Number="351" Name="User Patch" ProgramChange="51"/>
+          <Patch Number="352" Name="User Patch" ProgramChange="52"/>
+          <Patch Number="353" Name="User Patch" ProgramChange="53"/>
+          <Patch Number="354" Name="User Patch" ProgramChange="54"/>
+          <Patch Number="355" Name="User Patch" ProgramChange="55"/>
+          <Patch Number="356" Name="User Patch" ProgramChange="56"/>
+          <Patch Number="357" Name="User Patch" ProgramChange="57"/>
+          <Patch Number="358" Name="User Patch" ProgramChange="58"/>
+          <Patch Number="359" Name="User Patch" ProgramChange="59"/>
+          <Patch Number="360" Name="User Patch" ProgramChange="60"/>
+          <Patch Number="361" Name="User Patch" ProgramChange="61"/>
+          <Patch Number="362" Name="User Patch" ProgramChange="62"/>
+          <Patch Number="363" Name="User Patch" ProgramChange="63"/>
+          <Patch Number="364" Name="User Patch" ProgramChange="64"/>
+          <Patch Number="365" Name="User Patch" ProgramChange="65"/>
+          <Patch Number="366" Name="User Patch" ProgramChange="66"/>
+          <Patch Number="367" Name="User Patch" ProgramChange="67"/>
+          <Patch Number="368" Name="User Patch" ProgramChange="68"/>
+          <Patch Number="369" Name="User Patch" ProgramChange="69"/>
+          <Patch Number="370" Name="User Patch" ProgramChange="70"/>
+          <Patch Number="371" Name="User Patch" ProgramChange="71"/>
+          <Patch Number="372" Name="User Patch" ProgramChange="72"/>
+          <Patch Number="373" Name="User Patch" ProgramChange="73"/>
+          <Patch Number="374" Name="User Patch" ProgramChange="74"/>
+          <Patch Number="375" Name="User Patch" ProgramChange="75"/>
+          <Patch Number="376" Name="User Patch" ProgramChange="76"/>
+          <Patch Number="377" Name="User Patch" ProgramChange="77"/>
+          <Patch Number="378" Name="User Patch" ProgramChange="78"/>
+          <Patch Number="379" Name="User Patch" ProgramChange="79"/>
+          <Patch Number="380" Name="User Patch" ProgramChange="80"/>
+          <Patch Number="381" Name="User Patch" ProgramChange="81"/>
+          <Patch Number="382" Name="User Patch" ProgramChange="82"/>
+          <Patch Number="383" Name="User Patch" ProgramChange="83"/>
+          <Patch Number="384" Name="User Patch" ProgramChange="84"/>
+          <Patch Number="385" Name="User Patch" ProgramChange="85"/>
+          <Patch Number="386" Name="User Patch" ProgramChange="86"/>
+          <Patch Number="387" Name="User Patch" ProgramChange="87"/>
+          <Patch Number="388" Name="User Patch" ProgramChange="88"/>
+          <Patch Number="289" Name="User Patch" ProgramChange="89"/>
+          <Patch Number="390" Name="User Patch" ProgramChange="90"/>
+          <Patch Number="291" Name="User Patch" ProgramChange="91"/>
+          <Patch Number="392" Name="User Patch" ProgramChange="92"/>
+          <Patch Number="393" Name="User Patch" ProgramChange="93"/>
+          <Patch Number="394" Name="User Patch" ProgramChange="94"/>
+          <Patch Number="395" Name="User Patch" ProgramChange="95"/>
+          <Patch Number="396" Name="User Patch" ProgramChange="96"/>
+          <Patch Number="397" Name="User Patch" ProgramChange="97"/>
+          <Patch Number="398" Name="User Patch" ProgramChange="98"/>
+          <Patch Number="399" Name="User Patch" ProgramChange="99"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 4">
+        <MIDICommands>
+          <ControlChange Control="32" Value="4"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="000" Name="User Patch" ProgramChange="0"/>
+          <Patch Number="401" Name="User Patch" ProgramChange="1"/>
+          <Patch Number="202" Name="User Patch" ProgramChange="2"/>
+          <Patch Number="403" Name="User Patch" ProgramChange="3"/>
+          <Patch Number="404" Name="User Patch" ProgramChange="4"/>
+          <Patch Number="405" Name="User Patch" ProgramChange="5"/>
+          <Patch Number="406" Name="User Patch" ProgramChange="6"/>
+          <Patch Number="407" Name="User Patch" ProgramChange="7"/>
+          <Patch Number="408" Name="User Patch" ProgramChange="8"/>
+          <Patch Number="409" Name="User Patch" ProgramChange="9"/>
+          <Patch Number="410" Name="User Patch" ProgramChange="10"/>
+          <Patch Number="411" Name="User Patch" ProgramChange="11"/>
+          <Patch Number="412" Name="User Patch" ProgramChange="12"/>
+          <Patch Number="413" Name="User Patch" ProgramChange="13"/>
+          <Patch Number="414" Name="User Patch" ProgramChange="14"/>
+          <Patch Number="415" Name="User Patch" ProgramChange="15"/>
+          <Patch Number="416" Name="User Patch" ProgramChange="16"/>
+          <Patch Number="417" Name="User Patch" ProgramChange="17"/>
+          <Patch Number="418" Name="User Patch" ProgramChange="18"/>
+          <Patch Number="419" Name="User Patch" ProgramChange="19"/>
+          <Patch Number="420" Name="User Patch" ProgramChange="20"/>
+          <Patch Number="421" Name="User Patch" ProgramChange="21"/>
+          <Patch Number="422" Name="User Patch" ProgramChange="22"/>
+          <Patch Number="423" Name="User Patch" ProgramChange="23"/>
+          <Patch Number="424" Name="User Patch" ProgramChange="24"/>
+          <Patch Number="425" Name="User Patch" ProgramChange="25"/>
+          <Patch Number="426" Name="User Patch" ProgramChange="26"/>
+          <Patch Number="427" Name="User Patch" ProgramChange="27"/>
+          <Patch Number="428" Name="User Patch" ProgramChange="28"/>
+          <Patch Number="429" Name="User Patch" ProgramChange="29"/>
+          <Patch Number="430" Name="User Patch" ProgramChange="30"/>
+          <Patch Number="431" Name="User Patch" ProgramChange="31"/>
+          <Patch Number="432" Name="User Patch" ProgramChange="32"/>
+          <Patch Number="433" Name="User Patch" ProgramChange="33"/>
+          <Patch Number="434" Name="User Patch" ProgramChange="34"/>
+          <Patch Number="435" Name="User Patch" ProgramChange="35"/>
+          <Patch Number="436" Name="User Patch" ProgramChange="36"/>
+          <Patch Number="437" Name="User Patch" ProgramChange="37"/>
+          <Patch Number="438" Name="User Patch" ProgramChange="38"/>
+          <Patch Number="439" Name="User Patch" ProgramChange="39"/>
+          <Patch Number="440" Name="User Patch" ProgramChange="40"/>
+          <Patch Number="441" Name="User Patch" ProgramChange="41"/>
+          <Patch Number="442" Name="User Patch" ProgramChange="42"/>
+          <Patch Number="443" Name="User Patch" ProgramChange="43"/>
+          <Patch Number="444" Name="User Patch" ProgramChange="44"/>
+          <Patch Number="445" Name="User Patch" ProgramChange="45"/>
+          <Patch Number="446" Name="User Patch" ProgramChange="46"/>
+          <Patch Number="447" Name="User Patch" ProgramChange="47"/>
+          <Patch Number="448" Name="User Patch" ProgramChange="48"/>
+          <Patch Number="449" Name="User Patch" ProgramChange="49"/>
+          <Patch Number="450" Name="User Patch" ProgramChange="50"/>
+          <Patch Number="451" Name="User Patch" ProgramChange="51"/>
+          <Patch Number="452" Name="User Patch" ProgramChange="52"/>
+          <Patch Number="453" Name="User Patch" ProgramChange="53"/>
+          <Patch Number="454" Name="User Patch" ProgramChange="54"/>
+          <Patch Number="455" Name="User Patch" ProgramChange="55"/>
+          <Patch Number="456" Name="User Patch" ProgramChange="56"/>
+          <Patch Number="457" Name="User Patch" ProgramChange="57"/>
+          <Patch Number="458" Name="User Patch" ProgramChange="58"/>
+          <Patch Number="459" Name="User Patch" ProgramChange="59"/>
+          <Patch Number="460" Name="User Patch" ProgramChange="60"/>
+          <Patch Number="461" Name="User Patch" ProgramChange="61"/>
+          <Patch Number="462" Name="User Patch" ProgramChange="62"/>
+          <Patch Number="463" Name="User Patch" ProgramChange="63"/>
+          <Patch Number="464" Name="User Patch" ProgramChange="64"/>
+          <Patch Number="465" Name="User Patch" ProgramChange="65"/>
+          <Patch Number="466" Name="User Patch" ProgramChange="66"/>
+          <Patch Number="467" Name="User Patch" ProgramChange="67"/>
+          <Patch Number="468" Name="User Patch" ProgramChange="68"/>
+          <Patch Number="469" Name="User Patch" ProgramChange="69"/>
+          <Patch Number="470" Name="User Patch" ProgramChange="70"/>
+          <Patch Number="471" Name="User Patch" ProgramChange="71"/>
+          <Patch Number="472" Name="User Patch" ProgramChange="72"/>
+          <Patch Number="473" Name="User Patch" ProgramChange="73"/>
+          <Patch Number="474" Name="User Patch" ProgramChange="74"/>
+          <Patch Number="475" Name="User Patch" ProgramChange="75"/>
+          <Patch Number="476" Name="User Patch" ProgramChange="76"/>
+          <Patch Number="477" Name="User Patch" ProgramChange="77"/>
+          <Patch Number="478" Name="User Patch" ProgramChange="78"/>
+          <Patch Number="479" Name="User Patch" ProgramChange="79"/>
+          <Patch Number="480" Name="User Patch" ProgramChange="80"/>
+          <Patch Number="481" Name="User Patch" ProgramChange="81"/>
+          <Patch Number="482" Name="User Patch" ProgramChange="82"/>
+          <Patch Number="483" Name="User Patch" ProgramChange="83"/>
+          <Patch Number="484" Name="User Patch" ProgramChange="84"/>
+          <Patch Number="485" Name="User Patch" ProgramChange="85"/>
+          <Patch Number="486" Name="User Patch" ProgramChange="86"/>
+          <Patch Number="487" Name="User Patch" ProgramChange="87"/>
+          <Patch Number="488" Name="User Patch" ProgramChange="88"/>
+          <Patch Number="489" Name="User Patch" ProgramChange="89"/>
+          <Patch Number="490" Name="User Patch" ProgramChange="90"/>
+          <Patch Number="491" Name="User Patch" ProgramChange="91"/>
+          <Patch Number="492" Name="User Patch" ProgramChange="92"/>
+          <Patch Number="493" Name="User Patch" ProgramChange="93"/>
+          <Patch Number="494" Name="User Patch" ProgramChange="94"/>
+          <Patch Number="495" Name="User Patch" ProgramChange="95"/>
+          <Patch Number="496" Name="User Patch" ProgramChange="96"/>
+          <Patch Number="497" Name="User Patch" ProgramChange="97"/>
+          <Patch Number="498" Name="User Patch" ProgramChange="98"/>
+          <Patch Number="499" Name="User Patch" ProgramChange="99"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 5">
+        <MIDICommands>
+          <ControlChange Control="32" Value="5"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="500" Name="User Patch" ProgramChange="0"/>
+          <Patch Number="501" Name="User Patch" ProgramChange="1"/>
+          <Patch Number="502" Name="User Patch" ProgramChange="2"/>
+          <Patch Number="503" Name="User Patch" ProgramChange="3"/>
+          <Patch Number="504" Name="User Patch" ProgramChange="4"/>
+          <Patch Number="505" Name="User Patch" ProgramChange="5"/>
+          <Patch Number="506" Name="User Patch" ProgramChange="6"/>
+          <Patch Number="507" Name="User Patch" ProgramChange="7"/>
+          <Patch Number="508" Name="User Patch" ProgramChange="8"/>
+          <Patch Number="509" Name="User Patch" ProgramChange="9"/>
+          <Patch Number="510" Name="User Patch" ProgramChange="10"/>
+          <Patch Number="511" Name="User Patch" ProgramChange="11"/>
+          <Patch Number="512" Name="User Patch" ProgramChange="12"/>
+          <Patch Number="513" Name="User Patch" ProgramChange="13"/>
+          <Patch Number="514" Name="User Patch" ProgramChange="14"/>
+          <Patch Number="515" Name="User Patch" ProgramChange="15"/>
+          <Patch Number="516" Name="User Patch" ProgramChange="16"/>
+          <Patch Number="517" Name="User Patch" ProgramChange="17"/>
+          <Patch Number="518" Name="User Patch" ProgramChange="18"/>
+          <Patch Number="519" Name="User Patch" ProgramChange="19"/>
+          <Patch Number="520" Name="User Patch" ProgramChange="20"/>
+          <Patch Number="521" Name="User Patch" ProgramChange="21"/>
+          <Patch Number="522" Name="User Patch" ProgramChange="22"/>
+          <Patch Number="523" Name="User Patch" ProgramChange="23"/>
+          <Patch Number="524" Name="User Patch" ProgramChange="24"/>
+          <Patch Number="525" Name="User Patch" ProgramChange="25"/>
+          <Patch Number="526" Name="User Patch" ProgramChange="26"/>
+          <Patch Number="527" Name="User Patch" ProgramChange="27"/>
+          <Patch Number="528" Name="User Patch" ProgramChange="28"/>
+          <Patch Number="529" Name="User Patch" ProgramChange="29"/>
+          <Patch Number="530" Name="User Patch" ProgramChange="30"/>
+          <Patch Number="531" Name="User Patch" ProgramChange="31"/>
+          <Patch Number="532" Name="User Patch" ProgramChange="32"/>
+          <Patch Number="533" Name="User Patch" ProgramChange="33"/>
+          <Patch Number="534" Name="User Patch" ProgramChange="34"/>
+          <Patch Number="535" Name="User Patch" ProgramChange="35"/>
+          <Patch Number="536" Name="User Patch" ProgramChange="36"/>
+          <Patch Number="537" Name="User Patch" ProgramChange="37"/>
+          <Patch Number="538" Name="User Patch" ProgramChange="38"/>
+          <Patch Number="539" Name="User Patch" ProgramChange="39"/>
+          <Patch Number="540" Name="User Patch" ProgramChange="40"/>
+          <Patch Number="541" Name="User Patch" ProgramChange="41"/>
+          <Patch Number="542" Name="User Patch" ProgramChange="42"/>
+          <Patch Number="543" Name="User Patch" ProgramChange="43"/>
+          <Patch Number="544" Name="User Patch" ProgramChange="44"/>
+          <Patch Number="545" Name="User Patch" ProgramChange="45"/>
+          <Patch Number="546" Name="User Patch" ProgramChange="46"/>
+          <Patch Number="547" Name="User Patch" ProgramChange="47"/>
+          <Patch Number="548" Name="User Patch" ProgramChange="48"/>
+          <Patch Number="549" Name="User Patch" ProgramChange="49"/>
+          <Patch Number="550" Name="User Patch" ProgramChange="50"/>
+          <Patch Number="551" Name="User Patch" ProgramChange="51"/>
+          <Patch Number="552" Name="User Patch" ProgramChange="52"/>
+          <Patch Number="553" Name="User Patch" ProgramChange="53"/>
+          <Patch Number="554" Name="User Patch" ProgramChange="54"/>
+          <Patch Number="555" Name="User Patch" ProgramChange="55"/>
+          <Patch Number="556" Name="User Patch" ProgramChange="56"/>
+          <Patch Number="557" Name="User Patch" ProgramChange="57"/>
+          <Patch Number="558" Name="User Patch" ProgramChange="58"/>
+          <Patch Number="559" Name="User Patch" ProgramChange="59"/>
+          <Patch Number="560" Name="User Patch" ProgramChange="60"/>
+          <Patch Number="561" Name="User Patch" ProgramChange="61"/>
+          <Patch Number="562" Name="User Patch" ProgramChange="62"/>
+          <Patch Number="563" Name="User Patch" ProgramChange="63"/>
+          <Patch Number="564" Name="User Patch" ProgramChange="64"/>
+          <Patch Number="565" Name="User Patch" ProgramChange="65"/>
+          <Patch Number="566" Name="User Patch" ProgramChange="66"/>
+          <Patch Number="567" Name="User Patch" ProgramChange="67"/>
+          <Patch Number="568" Name="User Patch" ProgramChange="68"/>
+          <Patch Number="569" Name="User Patch" ProgramChange="69"/>
+          <Patch Number="570" Name="User Patch" ProgramChange="70"/>
+          <Patch Number="571" Name="User Patch" ProgramChange="71"/>
+          <Patch Number="572" Name="User Patch" ProgramChange="72"/>
+          <Patch Number="573" Name="User Patch" ProgramChange="73"/>
+          <Patch Number="574" Name="User Patch" ProgramChange="74"/>
+          <Patch Number="575" Name="User Patch" ProgramChange="75"/>
+          <Patch Number="576" Name="User Patch" ProgramChange="76"/>
+          <Patch Number="577" Name="User Patch" ProgramChange="77"/>
+          <Patch Number="578" Name="User Patch" ProgramChange="78"/>
+          <Patch Number="579" Name="User Patch" ProgramChange="79"/>
+          <Patch Number="580" Name="User Patch" ProgramChange="80"/>
+          <Patch Number="581" Name="User Patch" ProgramChange="81"/>
+          <Patch Number="582" Name="User Patch" ProgramChange="82"/>
+          <Patch Number="583" Name="User Patch" ProgramChange="83"/>
+          <Patch Number="584" Name="User Patch" ProgramChange="84"/>
+          <Patch Number="585" Name="User Patch" ProgramChange="85"/>
+          <Patch Number="586" Name="User Patch" ProgramChange="86"/>
+          <Patch Number="587" Name="User Patch" ProgramChange="87"/>
+          <Patch Number="588" Name="User Patch" ProgramChange="88"/>
+          <Patch Number="589" Name="User Patch" ProgramChange="89"/>
+          <Patch Number="590" Name="User Patch" ProgramChange="90"/>
+          <Patch Number="591" Name="User Patch" ProgramChange="91"/>
+          <Patch Number="592" Name="User Patch" ProgramChange="92"/>
+          <Patch Number="593" Name="User Patch" ProgramChange="93"/>
+          <Patch Number="594" Name="User Patch" ProgramChange="94"/>
+          <Patch Number="595" Name="User Patch" ProgramChange="95"/>
+          <Patch Number="596" Name="User Patch" ProgramChange="96"/>
+          <Patch Number="597" Name="User Patch" ProgramChange="97"/>
+          <Patch Number="598" Name="User Patch" ProgramChange="98"/>
+          <Patch Number="599" Name="User Patch" ProgramChange="99"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 6">
+        <MIDICommands>
+          <ControlChange Control="32" Value="6"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="600" Name="User Patch" ProgramChange="0"/>
+          <Patch Number="601" Name="User Patch" ProgramChange="1"/>
+          <Patch Number="602" Name="User Patch" ProgramChange="2"/>
+          <Patch Number="603" Name="User Patch" ProgramChange="3"/>
+          <Patch Number="604" Name="User Patch" ProgramChange="4"/>
+          <Patch Number="605" Name="User Patch" ProgramChange="5"/>
+          <Patch Number="606" Name="User Patch" ProgramChange="6"/>
+          <Patch Number="607" Name="User Patch" ProgramChange="7"/>
+          <Patch Number="608" Name="User Patch" ProgramChange="8"/>
+          <Patch Number="609" Name="User Patch" ProgramChange="9"/>
+          <Patch Number="610" Name="User Patch" ProgramChange="10"/>
+          <Patch Number="611" Name="User Patch" ProgramChange="11"/>
+          <Patch Number="612" Name="User Patch" ProgramChange="12"/>
+          <Patch Number="613" Name="User Patch" ProgramChange="13"/>
+          <Patch Number="614" Name="User Patch" ProgramChange="14"/>
+          <Patch Number="615" Name="User Patch" ProgramChange="15"/>
+          <Patch Number="616" Name="User Patch" ProgramChange="16"/>
+          <Patch Number="617" Name="User Patch" ProgramChange="17"/>
+          <Patch Number="618" Name="User Patch" ProgramChange="18"/>
+          <Patch Number="619" Name="User Patch" ProgramChange="19"/>
+          <Patch Number="620" Name="User Patch" ProgramChange="20"/>
+          <Patch Number="621" Name="User Patch" ProgramChange="21"/>
+          <Patch Number="622" Name="User Patch" ProgramChange="22"/>
+          <Patch Number="623" Name="User Patch" ProgramChange="23"/>
+          <Patch Number="624" Name="User Patch" ProgramChange="24"/>
+          <Patch Number="625" Name="User Patch" ProgramChange="25"/>
+          <Patch Number="626" Name="User Patch" ProgramChange="26"/>
+          <Patch Number="627" Name="User Patch" ProgramChange="27"/>
+          <Patch Number="628" Name="User Patch" ProgramChange="28"/>
+          <Patch Number="629" Name="User Patch" ProgramChange="29"/>
+          <Patch Number="630" Name="User Patch" ProgramChange="30"/>
+          <Patch Number="631" Name="User Patch" ProgramChange="31"/>
+          <Patch Number="632" Name="User Patch" ProgramChange="32"/>
+          <Patch Number="633" Name="User Patch" ProgramChange="33"/>
+          <Patch Number="634" Name="User Patch" ProgramChange="34"/>
+          <Patch Number="635" Name="User Patch" ProgramChange="35"/>
+          <Patch Number="636" Name="User Patch" ProgramChange="36"/>
+          <Patch Number="637" Name="User Patch" ProgramChange="37"/>
+          <Patch Number="638" Name="User Patch" ProgramChange="38"/>
+          <Patch Number="639" Name="User Patch" ProgramChange="39"/>
+          <Patch Number="640" Name="User Patch" ProgramChange="40"/>
+          <Patch Number="641" Name="User Patch" ProgramChange="41"/>
+          <Patch Number="642" Name="User Patch" ProgramChange="42"/>
+          <Patch Number="643" Name="User Patch" ProgramChange="43"/>
+          <Patch Number="644" Name="User Patch" ProgramChange="44"/>
+          <Patch Number="645" Name="User Patch" ProgramChange="45"/>
+          <Patch Number="646" Name="User Patch" ProgramChange="46"/>
+          <Patch Number="647" Name="User Patch" ProgramChange="47"/>
+          <Patch Number="648" Name="User Patch" ProgramChange="48"/>
+          <Patch Number="649" Name="User Patch" ProgramChange="49"/>
+          <Patch Number="650" Name="User Patch" ProgramChange="50"/>
+          <Patch Number="651" Name="User Patch" ProgramChange="51"/>
+          <Patch Number="652" Name="User Patch" ProgramChange="52"/>
+          <Patch Number="653" Name="User Patch" ProgramChange="53"/>
+          <Patch Number="654" Name="User Patch" ProgramChange="54"/>
+          <Patch Number="655" Name="User Patch" ProgramChange="55"/>
+          <Patch Number="656" Name="User Patch" ProgramChange="56"/>
+          <Patch Number="657" Name="User Patch" ProgramChange="57"/>
+          <Patch Number="658" Name="User Patch" ProgramChange="58"/>
+          <Patch Number="659" Name="User Patch" ProgramChange="59"/>
+          <Patch Number="660" Name="User Patch" ProgramChange="60"/>
+          <Patch Number="661" Name="User Patch" ProgramChange="61"/>
+          <Patch Number="662" Name="User Patch" ProgramChange="62"/>
+          <Patch Number="663" Name="User Patch" ProgramChange="63"/>
+          <Patch Number="664" Name="User Patch" ProgramChange="64"/>
+          <Patch Number="665" Name="User Patch" ProgramChange="65"/>
+          <Patch Number="666" Name="User Patch" ProgramChange="66"/>
+          <Patch Number="667" Name="User Patch" ProgramChange="67"/>
+          <Patch Number="668" Name="User Patch" ProgramChange="68"/>
+          <Patch Number="669" Name="User Patch" ProgramChange="69"/>
+          <Patch Number="670" Name="User Patch" ProgramChange="70"/>
+          <Patch Number="671" Name="User Patch" ProgramChange="71"/>
+          <Patch Number="672" Name="User Patch" ProgramChange="72"/>
+          <Patch Number="673" Name="User Patch" ProgramChange="73"/>
+          <Patch Number="674" Name="User Patch" ProgramChange="74"/>
+          <Patch Number="675" Name="User Patch" ProgramChange="75"/>
+          <Patch Number="676" Name="User Patch" ProgramChange="76"/>
+          <Patch Number="677" Name="User Patch" ProgramChange="77"/>
+          <Patch Number="678" Name="User Patch" ProgramChange="78"/>
+          <Patch Number="679" Name="User Patch" ProgramChange="79"/>
+          <Patch Number="680" Name="User Patch" ProgramChange="80"/>
+          <Patch Number="681" Name="User Patch" ProgramChange="81"/>
+          <Patch Number="682" Name="User Patch" ProgramChange="82"/>
+          <Patch Number="683" Name="User Patch" ProgramChange="83"/>
+          <Patch Number="684" Name="User Patch" ProgramChange="84"/>
+          <Patch Number="685" Name="User Patch" ProgramChange="85"/>
+          <Patch Number="686" Name="User Patch" ProgramChange="86"/>
+          <Patch Number="687" Name="User Patch" ProgramChange="87"/>
+          <Patch Number="688" Name="User Patch" ProgramChange="88"/>
+          <Patch Number="689" Name="User Patch" ProgramChange="89"/>
+          <Patch Number="690" Name="User Patch" ProgramChange="90"/>
+          <Patch Number="691" Name="User Patch" ProgramChange="91"/>
+          <Patch Number="692" Name="User Patch" ProgramChange="92"/>
+          <Patch Number="693" Name="User Patch" ProgramChange="93"/>
+          <Patch Number="694" Name="User Patch" ProgramChange="94"/>
+          <Patch Number="695" Name="User Patch" ProgramChange="95"/>
+          <Patch Number="696" Name="User Patch" ProgramChange="96"/>
+          <Patch Number="697" Name="User Patch" ProgramChange="97"/>
+          <Patch Number="698" Name="User Patch" ProgramChange="98"/>
+          <Patch Number="699" Name="User Patch" ProgramChange="99"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 7">
+        <MIDICommands>
+          <ControlChange Control="32" Value="7"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="700" Name="User Patch" ProgramChange="0"/>
+          <Patch Number="701" Name="User Patch" ProgramChange="1"/>
+          <Patch Number="702" Name="User Patch" ProgramChange="2"/>
+          <Patch Number="703" Name="User Patch" ProgramChange="3"/>
+          <Patch Number="704" Name="User Patch" ProgramChange="4"/>
+          <Patch Number="705" Name="User Patch" ProgramChange="5"/>
+          <Patch Number="706" Name="User Patch" ProgramChange="6"/>
+          <Patch Number="707" Name="User Patch" ProgramChange="7"/>
+          <Patch Number="708" Name="User Patch" ProgramChange="8"/>
+          <Patch Number="709" Name="User Patch" ProgramChange="9"/>
+          <Patch Number="710" Name="User Patch" ProgramChange="10"/>
+          <Patch Number="711" Name="User Patch" ProgramChange="11"/>
+          <Patch Number="712" Name="User Patch" ProgramChange="12"/>
+          <Patch Number="713" Name="User Patch" ProgramChange="13"/>
+          <Patch Number="714" Name="User Patch" ProgramChange="14"/>
+          <Patch Number="715" Name="User Patch" ProgramChange="15"/>
+          <Patch Number="716" Name="User Patch" ProgramChange="16"/>
+          <Patch Number="717" Name="User Patch" ProgramChange="17"/>
+          <Patch Number="718" Name="User Patch" ProgramChange="18"/>
+          <Patch Number="719" Name="User Patch" ProgramChange="19"/>
+          <Patch Number="720" Name="User Patch" ProgramChange="20"/>
+          <Patch Number="721" Name="User Patch" ProgramChange="21"/>
+          <Patch Number="722" Name="User Patch" ProgramChange="22"/>
+          <Patch Number="723" Name="User Patch" ProgramChange="23"/>
+          <Patch Number="724" Name="User Patch" ProgramChange="24"/>
+          <Patch Number="725" Name="User Patch" ProgramChange="25"/>
+          <Patch Number="726" Name="User Patch" ProgramChange="26"/>
+          <Patch Number="727" Name="User Patch" ProgramChange="27"/>
+          <Patch Number="728" Name="User Patch" ProgramChange="28"/>
+          <Patch Number="729" Name="User Patch" ProgramChange="29"/>
+          <Patch Number="730" Name="User Patch" ProgramChange="30"/>
+          <Patch Number="731" Name="User Patch" ProgramChange="31"/>
+          <Patch Number="732" Name="User Patch" ProgramChange="32"/>
+          <Patch Number="733" Name="User Patch" ProgramChange="33"/>
+          <Patch Number="734" Name="User Patch" ProgramChange="34"/>
+          <Patch Number="735" Name="User Patch" ProgramChange="35"/>
+          <Patch Number="736" Name="User Patch" ProgramChange="36"/>
+          <Patch Number="737" Name="User Patch" ProgramChange="37"/>
+          <Patch Number="738" Name="User Patch" ProgramChange="38"/>
+          <Patch Number="739" Name="User Patch" ProgramChange="39"/>
+          <Patch Number="740" Name="User Patch" ProgramChange="40"/>
+          <Patch Number="741" Name="User Patch" ProgramChange="41"/>
+          <Patch Number="742" Name="User Patch" ProgramChange="42"/>
+          <Patch Number="743" Name="User Patch" ProgramChange="43"/>
+          <Patch Number="744" Name="User Patch" ProgramChange="44"/>
+          <Patch Number="745" Name="User Patch" ProgramChange="45"/>
+          <Patch Number="746" Name="User Patch" ProgramChange="46"/>
+          <Patch Number="747" Name="User Patch" ProgramChange="47"/>
+          <Patch Number="748" Name="User Patch" ProgramChange="48"/>
+          <Patch Number="749" Name="User Patch" ProgramChange="49"/>
+          <Patch Number="750" Name="Testify" ProgramChange="50"/>
+          <Patch Number="751" Name="Prog Rock Organ" ProgramChange="51"/>
+          <Patch Number="752" Name="Syn Rock Organ" ProgramChange="52"/>
+          <Patch Number="753" Name="Dirty Syn B" ProgramChange="53"/>
+          <Patch Number="754" Name="CleanFullDrawbar" ProgramChange="54"/>
+          <Patch Number="755" Name="Loungin" ProgramChange="55"/>
+          <Patch Number="756" Name="Mild Grunge" ProgramChange="56"/>
+          <Patch Number="757" Name="WarmDriveBallad" ProgramChange="57"/>
+          <Patch Number="758" Name="Gospel Drawbars" ProgramChange="58"/>
+          <Patch Number="759" Name="Live Drawbars" ProgramChange="59"/>
+          <Patch Number="760" Name="Keith's Revenge" ProgramChange="60"/>
+          <Patch Number="761" Name="SynthPerc Rocker" ProgramChange="61"/>
+          <Patch Number="762" Name="LORD'S Blown Amp" ProgramChange="62"/>
+          <Patch Number="763" Name="Dist GigantorGan" ProgramChange="63"/>
+          <Patch Number="764" Name="SynOrganHologram" ProgramChange="64"/>
+          <Patch Number="765" Name="SynChurch Organ" ProgramChange="65"/>
+          <Patch Number="766" Name="SynChrch&amp;Chorale" ProgramChange="66"/>
+          <Patch Number="767" Name="Choir &amp; Pipes" ProgramChange="67"/>
+          <Patch Number="768" Name="Theater Flutes" ProgramChange="68"/>
+          <Patch Number="769" Name="Even Tuned Bars" ProgramChange="69"/>
+          <Patch Number="770" Name="Concert Piano 2" ProgramChange="70"/>
+          <Patch Number="771" Name="Studio Grand" ProgramChange="71"/>
+          <Patch Number="772" Name="Soft Piano" ProgramChange="72"/>
+          <Patch Number="773" Name="MonoStudioGrand" ProgramChange="73"/>
+          <Patch Number="774" Name="RandomPan Grand" ProgramChange="74"/>
+          <Patch Number="775" Name="Funky Piano" ProgramChange="75"/>
+          <Patch Number="776" Name="Piano Chase" ProgramChange="76"/>
+          <Patch Number="777" Name="Grand &amp; Elec 1" ProgramChange="77"/>
+          <Patch Number="778" Name="Grand &amp; Elec 2" ProgramChange="78"/>
+          <Patch Number="779" Name="Detuned Piano" ProgramChange="79"/>
+          <Patch Number="780" Name="Ballad Piano" ProgramChange="80"/>
+          <Patch Number="781" Name="Piano&amp;SpaceyPad" ProgramChange="81"/>
+          <Patch Number="782" Name="Lush Piano Pad" ProgramChange="82"/>
+          <Patch Number="783" Name="Rotating Piano" ProgramChange="83"/>
+          <Patch Number="784" Name="MajesticPianoism" ProgramChange="84"/>
+          <Patch Number="785" Name="Sonar Piano" ProgramChange="85"/>
+          <Patch Number="786" Name="Pop Grand" ProgramChange="86"/>
+          <Patch Number="787" Name="Grandsichord" ProgramChange="87"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 8">
+        <MIDICommands>
+          <ControlChange Control="32" Value="8"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="800" Name="User Patch" ProgramChange="0"/>
+          <Patch Number="801" Name="User Patch" ProgramChange="1"/>
+          <Patch Number="602" Name="User Patch" ProgramChange="2"/>
+          <Patch Number="803" Name="User Patch" ProgramChange="3"/>
+          <Patch Number="804" Name="User Patch" ProgramChange="4"/>
+          <Patch Number="805" Name="User Patch" ProgramChange="5"/>
+          <Patch Number="806" Name="User Patch" ProgramChange="6"/>
+          <Patch Number="807" Name="User Patch" ProgramChange="7"/>
+          <Patch Number="808" Name="User Patch" ProgramChange="8"/>
+          <Patch Number="809" Name="User Patch" ProgramChange="9"/>
+          <Patch Number="810" Name="User Patch" ProgramChange="10"/>
+          <Patch Number="811" Name="User Patch" ProgramChange="11"/>
+          <Patch Number="812" Name="User Patch" ProgramChange="12"/>
+          <Patch Number="813" Name="User Patch" ProgramChange="13"/>
+          <Patch Number="814" Name="User Patch" ProgramChange="14"/>
+          <Patch Number="815" Name="User Patch" ProgramChange="15"/>
+          <Patch Number="816" Name="User Patch" ProgramChange="16"/>
+          <Patch Number="817" Name="User Patch" ProgramChange="17"/>
+          <Patch Number="818" Name="User Patch" ProgramChange="18"/>
+          <Patch Number="819" Name="User Patch" ProgramChange="19"/>
+          <Patch Number="820" Name="User Patch" ProgramChange="20"/>
+          <Patch Number="821" Name="User Patch" ProgramChange="21"/>
+          <Patch Number="822" Name="User Patch" ProgramChange="22"/>
+          <Patch Number="823" Name="User Patch" ProgramChange="23"/>
+          <Patch Number="824" Name="User Patch" ProgramChange="24"/>
+          <Patch Number="825" Name="User Patch" ProgramChange="25"/>
+          <Patch Number="826" Name="User Patch" ProgramChange="26"/>
+          <Patch Number="827" Name="User Patch" ProgramChange="27"/>
+          <Patch Number="828" Name="User Patch" ProgramChange="28"/>
+          <Patch Number="829" Name="User Patch" ProgramChange="29"/>
+          <Patch Number="830" Name="User Patch" ProgramChange="30"/>
+          <Patch Number="831" Name="User Patch" ProgramChange="31"/>
+          <Patch Number="832" Name="User Patch" ProgramChange="32"/>
+          <Patch Number="833" Name="User Patch" ProgramChange="33"/>
+          <Patch Number="834" Name="User Patch" ProgramChange="34"/>
+          <Patch Number="835" Name="User Patch" ProgramChange="35"/>
+          <Patch Number="836" Name="User Patch" ProgramChange="36"/>
+          <Patch Number="837" Name="User Patch" ProgramChange="37"/>
+          <Patch Number="838" Name="User Patch" ProgramChange="38"/>
+          <Patch Number="839" Name="User Patch" ProgramChange="39"/>
+          <Patch Number="840" Name="User Patch" ProgramChange="40"/>
+          <Patch Number="841" Name="User Patch" ProgramChange="41"/>
+          <Patch Number="842" Name="User Patch" ProgramChange="42"/>
+          <Patch Number="843" Name="User Patch" ProgramChange="43"/>
+          <Patch Number="844" Name="User Patch" ProgramChange="44"/>
+          <Patch Number="845" Name="User Patch" ProgramChange="45"/>
+          <Patch Number="846" Name="User Patch" ProgramChange="46"/>
+          <Patch Number="847" Name="User Patch" ProgramChange="47"/>
+          <Patch Number="848" Name="User Patch" ProgramChange="48"/>
+          <Patch Number="849" Name="User Patch" ProgramChange="49"/>
+          <Patch Number="850" Name="User Patch" ProgramChange="50"/>
+          <Patch Number="851" Name="User Patch" ProgramChange="51"/>
+          <Patch Number="852" Name="User Patch" ProgramChange="52"/>
+          <Patch Number="853" Name="User Patch" ProgramChange="53"/>
+          <Patch Number="854" Name="User Patch" ProgramChange="54"/>
+          <Patch Number="855" Name="User Patch" ProgramChange="55"/>
+          <Patch Number="856" Name="User Patch" ProgramChange="56"/>
+          <Patch Number="857" Name="User Patch" ProgramChange="57"/>
+          <Patch Number="858" Name="User Patch" ProgramChange="58"/>
+          <Patch Number="859" Name="User Patch" ProgramChange="59"/>
+          <Patch Number="860" Name="User Patch" ProgramChange="60"/>
+          <Patch Number="861" Name="User Patch" ProgramChange="61"/>
+          <Patch Number="862" Name="User Patch" ProgramChange="62"/>
+          <Patch Number="863" Name="User Patch" ProgramChange="63"/>
+          <Patch Number="864" Name="User Patch" ProgramChange="64"/>
+          <Patch Number="865" Name="User Patch" ProgramChange="65"/>
+          <Patch Number="866" Name="User Patch" ProgramChange="66"/>
+          <Patch Number="867" Name="User Patch" ProgramChange="67"/>
+          <Patch Number="868" Name="User Patch" ProgramChange="68"/>
+          <Patch Number="869" Name="User Patch" ProgramChange="69"/>
+          <Patch Number="870" Name="User Patch" ProgramChange="70"/>
+          <Patch Number="871" Name="User Patch" ProgramChange="71"/>
+          <Patch Number="872" Name="User Patch" ProgramChange="72"/>
+          <Patch Number="873" Name="User Patch" ProgramChange="73"/>
+          <Patch Number="874" Name="User Patch" ProgramChange="74"/>
+          <Patch Number="875" Name="User Patch" ProgramChange="75"/>
+          <Patch Number="876" Name="User Patch" ProgramChange="76"/>
+          <Patch Number="877" Name="User Patch" ProgramChange="77"/>
+          <Patch Number="878" Name="User Patch" ProgramChange="78"/>
+          <Patch Number="879" Name="User Patch" ProgramChange="79"/>
+          <Patch Number="880" Name="User Patch" ProgramChange="80"/>
+          <Patch Number="881" Name="User Patch" ProgramChange="81"/>
+          <Patch Number="882" Name="User Patch" ProgramChange="82"/>
+          <Patch Number="883" Name="User Patch" ProgramChange="83"/>
+          <Patch Number="884" Name="User Patch" ProgramChange="84"/>
+          <Patch Number="885" Name="User Patch" ProgramChange="85"/>
+          <Patch Number="886" Name="User Patch" ProgramChange="86"/>
+          <Patch Number="887" Name="User Patch" ProgramChange="87"/>
+          <Patch Number="888" Name="User Patch" ProgramChange="88"/>
+          <Patch Number="889" Name="User Patch" ProgramChange="89"/>
+          <Patch Number="890" Name="User Patch" ProgramChange="90"/>
+          <Patch Number="891" Name="User Patch" ProgramChange="91"/>
+          <Patch Number="892" Name="User Patch" ProgramChange="92"/>
+          <Patch Number="893" Name="User Patch" ProgramChange="93"/>
+          <Patch Number="894" Name="User Patch" ProgramChange="94"/>
+          <Patch Number="895" Name="User Patch" ProgramChange="95"/>
+          <Patch Number="896" Name="User Patch" ProgramChange="96"/>
+          <Patch Number="897" Name="User Patch" ProgramChange="97"/>
+          <Patch Number="898" Name="User Patch" ProgramChange="98"/>
+          <Patch Number="899" Name="User Patch" ProgramChange="99"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Bank 9">
+        <MIDICommands>
+          <ControlChange Control="32" Value="9"/>
+        </MIDICommands>
+        <PatchNameList>
+          <Patch Number="900" Name="User Patch" ProgramChange="0"/>
+          <Patch Number="901" Name="User Patch" ProgramChange="1"/>
+          <Patch Number="902" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="903" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="904" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="905" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="906" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="907" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="908" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="909" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="910" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="911" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="912" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="913" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="914" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="915" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="916" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="917" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="918" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="919" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="920" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="921" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="922" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="923" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="924" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="925" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="926" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="927" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="928" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="929" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="930" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="931" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="932" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="933" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="934" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="935" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="936" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="937" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="938" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="939" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="940" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="941" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="942" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="943" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="944" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="945" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="946" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="947" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="948" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="949" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="950" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="951" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="952" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="953" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="954" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="955" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="956" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="957" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="958" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="959" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="960" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="961" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="962" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="963" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="964" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="965" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="966" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="967" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="968" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="969" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="970" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="971" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="972" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="973" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="974" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="975" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="976" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="977" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="978" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="979" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="980" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="981" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="982" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="983" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="984" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="985" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="986" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="987" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="988" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="989" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="990" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="991" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="992" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="993" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="994" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="995" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="996" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="997" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="998" Name="User Patch" ProgramChange="100"/>
+          <Patch Number="999" Name="User Patch" ProgramChange="100"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

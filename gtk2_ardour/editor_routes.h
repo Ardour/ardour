@@ -1,21 +1,23 @@
 /*
-    Copyright (C) 2009 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_gtk_editor_route_h__
 #define __ardour_gtk_editor_route_h__
@@ -36,6 +38,7 @@ class EditorRoutes : public EditorComponent, public PBD::ScopedConnectionList, p
 {
 public:
 	EditorRoutes (Editor *);
+	~EditorRoutes ();
 
 	void set_session (ARDOUR::Session *);
 
@@ -89,6 +92,7 @@ private:
 	void active_changed (std::string const &);
 	void reordered (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const &, int *);
 	bool button_press (GdkEventButton *);
+	bool button_release (GdkEventButton *);
 	void route_property_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Stripable>);
 	void handle_gui_changes (std::string const &, void *);
 	bool idle_update_mute_rec_solo_etc ();
@@ -114,7 +118,6 @@ private:
 
 	int plugin_setup (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::PluginInsert>, ARDOUR::Route::PluginSetupOptions);
 
-	bool selection_filter (Glib::RefPtr<Gtk::TreeModel> const &, Gtk::TreeModel::Path const &, bool);
 	void name_edit (std::string const &, std::string const &);
 	void solo_changed_so_update_mute ();
 
@@ -161,6 +164,17 @@ private:
 		Gtk::TreeModelColumn<bool>           active;
 	};
 
+	Gtk::TreeViewColumn* rec_state_column;
+	Gtk::TreeViewColumn* rec_safe_column;
+	Gtk::TreeViewColumn* input_active_column;
+	Gtk::TreeViewColumn* mute_state_column;
+	Gtk::TreeViewColumn* solo_state_column;
+	Gtk::TreeViewColumn* solo_safe_state_column;
+	Gtk::TreeViewColumn* solo_isolate_state_column;
+	Gtk::TreeViewColumn* name_column;
+	Gtk::TreeViewColumn* visible_column;
+	Gtk::TreeViewColumn* active_column;
+
 	Gtk::ScrolledWindow _scroller;
 	Gtk::TreeView _display;
 	Glib::RefPtr<Gtk::ListStore> _model;
@@ -171,6 +185,7 @@ private:
 
 	bool _ignore_reorder;
 	bool _ignore_selection_change;
+	bool column_does_not_select;
 	bool _no_redisplay;
 	bool _adding_routes;
 	bool _route_deletion_in_progress;
@@ -181,6 +196,8 @@ private:
 	Gtk::Menu* _menu;
 	Gtk::Widget* old_focus;
 	Gtk::CellEditable* name_editable;
+
+	bool select_function (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool);
 
 	bool key_press (GdkEventKey* ev);
 	bool focus_in (GdkEventFocus*);

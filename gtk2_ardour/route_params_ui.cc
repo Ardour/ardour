@@ -1,21 +1,24 @@
 /*
-    Copyright (C) 2000 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2007 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2005-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2007-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2007-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <algorithm>
 #include <inttypes.h>
@@ -41,6 +44,7 @@
 #include "gui_thread.h"
 #include "io_selector.h"
 #include "keyboard.h"
+#include "mixer_ui.h"
 #include "mixer_strip.h"
 #include "port_insert_ui.h"
 #include "plugin_selector.h"
@@ -59,20 +63,17 @@ using namespace Gtkmm2ext;
 
 RouteParams_UI::RouteParams_UI ()
 	: ArdourWindow (_("Tracks and Busses"))
-	, latency_apply_button (Stock::APPLY)
 	, track_menu(0)
 {
 	insert_box = 0;
 	_input_iosel = 0;
 	_output_iosel = 0;
 	_active_view = 0;
-	latency_widget = 0;
 
 	using namespace Notebook_Helpers;
 
 	input_frame.set_shadow_type(Gtk::SHADOW_NONE);
 	output_frame.set_shadow_type(Gtk::SHADOW_NONE);
-	latency_frame.set_shadow_type (Gtk::SHADOW_NONE);
 
 	notebook.set_show_tabs (true);
 	notebook.set_show_border (true);
@@ -105,16 +106,11 @@ RouteParams_UI::RouteParams_UI ()
 	notebook.pages().push_back (TabElem (input_frame, _("Inputs")));
 	notebook.pages().push_back (TabElem (output_frame, _("Outputs")));
 	notebook.pages().push_back (TabElem (redir_hpane, _("Plugins, Inserts & Sends")));
-	notebook.pages().push_back (TabElem (latency_frame, _("Latency")));
 
 	notebook.set_name ("InspectorNotebook");
 
 	title_label.set_name ("RouteParamsTitleLabel");
 	update_title();
-
-	latency_packer.set_spacing (18);
-	latency_button_box.pack_start (latency_apply_button);
-	delay_label.set_alignment (0, 0.5);
 
 	// changeable area
 	route_param_frame.set_name("RouteParamsBaseFrame");
@@ -140,12 +136,12 @@ RouteParams_UI::RouteParams_UI ()
 
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_RELEASE_MASK);
 
-	_plugin_selector = new PluginSelector (PluginManager::instance());
 	show_all();
 }
 
 RouteParams_UI::~RouteParams_UI ()
 {
+	delete track_menu;
 }
 
 void
@@ -227,6 +223,11 @@ RouteParams_UI::map_frozen()
 	}
 }
 
+PluginSelector*
+RouteParams_UI::plugin_selector() {
+	return Mixer_UI::instance()->plugin_selector ();
+}
+
 void
 RouteParams_UI::setup_processor_boxes()
 {
@@ -263,58 +264,9 @@ RouteParams_UI::cleanup_processor_boxes()
 }
 
 void
-RouteParams_UI::refresh_latency ()
+RouteParams_UI::setup_io_selector()
 {
-	if (latency_widget) {
-		latency_widget->refresh();
-
-		char buf[128];
-		snprintf (buf, sizeof (buf), _("Latency: %" PRId64 " samples"), _route->signal_latency ());
-		delay_label.set_text (buf);
-	}
-}
-
-void
-RouteParams_UI::cleanup_latency_frame ()
-{
-	if (latency_widget) {
-		latency_frame.remove ();
-		latency_packer.remove (*latency_widget);
-		latency_packer.remove (latency_button_box);
-		latency_packer.remove (delay_label);
-		latency_connections.drop_connections ();
-		latency_click_connection.disconnect ();
-
-		delete latency_widget;
-		latency_widget = 0;
-
-	}
-}
-
-void
-RouteParams_UI::setup_latency_frame ()
-{
-	latency_widget = new LatencyGUI (*(_route->output()), _session->sample_rate(), AudioEngine::instance()->samples_per_cycle());
-
-	char buf[128];
-	snprintf (buf, sizeof (buf), _("Latency: %" PRId64 " samples"), _route->signal_latency());
-	delay_label.set_text (buf);
-
-	latency_packer.pack_start (*latency_widget, false, false);
-	latency_packer.pack_start (latency_button_box, false, false);
-	latency_packer.pack_start (delay_label);
-
-	latency_click_connection = latency_apply_button.signal_clicked().connect (sigc::mem_fun (*latency_widget, &LatencyGUI::finish));
-	_route->signal_latency_updated.connect (latency_connections, invalidator (*this), boost::bind (&RouteParams_UI::refresh_latency, this), gui_context());
-
-	latency_frame.add (latency_packer);
-	latency_frame.show_all ();
-}
-
-void
-RouteParams_UI::setup_io_samples()
-{
-	cleanup_io_samples();
+	cleanup_io_selector();
 
 	// input
 	_input_iosel = new IOSelector (this, _session, _route->input());
@@ -330,7 +282,7 @@ RouteParams_UI::setup_io_samples()
 }
 
 void
-RouteParams_UI::cleanup_io_samples()
+RouteParams_UI::cleanup_io_selector()
 {
 	if (_input_iosel) {
 		_input_iosel->Finished (IOSelector::Cancelled);
@@ -352,14 +304,14 @@ void
 RouteParams_UI::cleanup_view (bool stopupdate)
 {
 	if (_active_view) {
-		GenericPluginUI *   plugui = 0;
+		GenericPluginUI* plugui = 0;
 
 		if (stopupdate && (plugui = dynamic_cast<GenericPluginUI*>(_active_view)) != 0) {
-			  plugui->stop_updating (0);
+			plugui->stop_updating (0);
 		}
 
 		_processor_going_away_connection.disconnect ();
- 		redir_hpane.remove(*_active_view);
+		redir_hpane.remove(*_active_view);
 		delete _active_view;
 		_active_view = 0;
 	}
@@ -389,7 +341,7 @@ RouteParams_UI::route_removed (boost::weak_ptr<Route> wr)
 	}
 
 	if (route == _route) {
-		cleanup_io_samples();
+		cleanup_io_selector();
 		cleanup_view();
 		cleanup_processor_boxes();
 
@@ -405,7 +357,6 @@ RouteParams_UI::set_session (Session *sess)
 	ArdourWindow::set_session (sess);
 
 	route_display_model->clear();
-	_plugin_selector->set_session (_session);
 
 	if (_session) {
 		boost::shared_ptr<RouteList> r = _session->get_routes();
@@ -427,10 +378,9 @@ RouteParams_UI::session_going_away ()
 
 	route_display_model->clear();
 
-	cleanup_io_samples();
+	cleanup_io_selector();
 	cleanup_view();
 	cleanup_processor_boxes();
-	cleanup_latency_frame ();
 
 	_route.reset ((Route*) 0);
 	_processor.reset ((Processor*) 0);
@@ -457,17 +407,15 @@ RouteParams_UI::route_selected()
 			_route_processors_connection.disconnect ();
 			cleanup_processor_boxes();
 			cleanup_view();
-			cleanup_io_samples();
-			cleanup_latency_frame ();
+			cleanup_io_selector();
 		}
 
 		// update the other panes with the correct info
 		_route = route;
 		//update_routeinfo (route);
 
-		setup_io_samples();
+		setup_io_selector();
 		setup_processor_boxes();
-		setup_latency_frame ();
 
 		route->processors_changed.connect (_route_processors_connection, invalidator (*this), boost::bind (&RouteParams_UI::processors_changed, this, _1), gui_context());
 
@@ -481,10 +429,9 @@ RouteParams_UI::route_selected()
 			_route_processors_connection.disconnect ();
 
 			// remove from view
-			cleanup_io_samples();
+			cleanup_io_selector();
 			cleanup_view();
 			cleanup_processor_boxes();
-			cleanup_latency_frame ();
 
 			_route.reset ((Route*) 0);
 			_processor.reset ((Processor*) 0);

@@ -1,21 +1,24 @@
 /*
-    Copyright (C) 2009 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009 Hans Baier <hansfbaier@googlemail.com>
+ * Copyright (C) 2012-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2012 Ben Loftis <ben@harrisonconsoles.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 /*****************************************************
     DO NOT USE uint8_t or any other type that resolves
@@ -86,14 +89,3 @@ CONFIG_VARIABLE (bool, show_solo_on_meterbridge, "show-solo-on-meterbridge", fal
 CONFIG_VARIABLE (bool, show_monitor_on_meterbridge, "show-monitor-on-meterbridge", false)
 CONFIG_VARIABLE (bool, show_name_on_meterbridge, "show-name-on-meterbridge", true)
 CONFIG_VARIABLE (uint32_t, meterbridge_label_height,  "meterbridge-label-height", 0)
-
-#ifdef USE_TRACKS_CODE_FEATURES
-/* This variable was not discussed with Ardour developers and is considered
-   weakly conceived. It is also poorly named, since we have "groups" already
-   present in libardour but this variable has nothing to do with it. There
-   should have been more discussion about what was required and the best
-   way to accomplish it.
-*/
-CONFIG_VARIABLE (bool, enable_group_edit, "enable-group-edit", false)
-/* These are GUI-only properties and should not be present in this context */
-#endif

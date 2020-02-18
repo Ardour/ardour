@@ -1,22 +1,27 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id: midiregion.cc 746 2006-08-02 02:44:23Z drobilla $
-*/
+ * Copyright (C) 2006-2016 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2008 Hans Baier <hansfbaier@googlemail.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2012-2015 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2016-2017 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2016-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016 Julien "_FrnchFrgg_" RIVAUD <frnchfrgg@free.fr>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cmath>
 #include <climits>
@@ -476,6 +481,86 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 	return to_read;
 }
 
+
+int
+MidiRegion::render (Evoral::EventSink<samplepos_t>& dst,
+                    uint32_t                        chan_n,
+                    NoteMode                        mode,
+                    MidiChannelFilter*              filter) const
+{
+	sampleoffset_t internal_offset = 0;
+
+	/* precondition: caller has verified that we cover the desired section */
+
+	assert(chan_n == 0);
+
+	if (muted()) {
+		return 0; /* read nothing */
+	}
+
+
+	/* dump pulls from zero to infinity ... */
+
+	if (_position) {
+		/* we are starting the read from before the start of the region */
+		internal_offset = 0;
+	} else {
+		/* we are starting the read from after the start of the region */
+		internal_offset = -_position;
+	}
+
+	if (internal_offset >= _length) {
+		return 0; /* read nothing */
+	}
+
+	boost::shared_ptr<MidiSource> src = midi_source(chan_n);
+
+	Glib::Threads::Mutex::Lock lm(src->mutex());
+
+	src->set_note_mode(lm, mode);
+
+#if 0
+	cerr << "MR " << name () << " render "
+	     << " _position = " << _position
+	     << " _start = " << _start
+	     << " intoffset = " << internal_offset
+	     << " quarter_note = " << quarter_note()
+	     << " start_beat = " << _start_beats
+	     << " a1 " << _position - _start
+	     << " a2 " << _start + internal_offset
+	     << " a3 " << _length
+	     << endl;
+#endif
+
+	MidiCursor cursor;
+	MidiStateTracker tracker;
+
+	/* This call reads events from a source and writes them to `dst' timed in session samples */
+
+	src->midi_read (
+		lm, // source lock
+		dst, // destination buffer
+		_position - _start, // start position of the source in session samples
+		_start + internal_offset, // where to start reading in the source
+		_length, // length to read
+		0,
+		cursor,
+		&tracker,
+		filter,
+		_filtered_parameters,
+		quarter_note(),
+		_start_beats);
+
+	/* resolve any notes that were "cut off" by the end of the region. The
+	 * Note-Off's get inserted at the end of the region
+	 */
+
+	tracker.resolve_notes (dst, (_position - _start) + (_start + internal_offset + _length));
+
+	return 0;
+}
+
+
 XMLNode&
 MidiRegion::state ()
 {
@@ -592,7 +677,15 @@ MidiRegion::model_changed ()
 		);
 
 	model()->ContentsShifted.connect_same_thread (_model_shift_connection, boost::bind (&MidiRegion::model_shifted, this, _1));
+	model()->ContentsChanged.connect_same_thread (_model_changed_connection, boost::bind (&MidiRegion::model_contents_changed, this));
 }
+
+void
+MidiRegion::model_contents_changed ()
+{
+	send_change (Properties::contents);
+}
+
 void
 MidiRegion::model_shifted (double qn_distance)
 {
@@ -607,6 +700,7 @@ MidiRegion::model_shifted (double qn_distance)
 		_start = new_start;
 		what_changed.add (Properties::start);
 		what_changed.add (Properties::start_beats);
+		what_changed.add (Properties::contents);
 		send_change (what_changed);
 	} else {
 		_ignore_shift = false;
@@ -728,4 +822,18 @@ MidiRegion::trim_to_internal (samplepos_t position, samplecnt_t length, const in
 	if (!what_changed.empty()) {
 		send_change (what_changed);
 	}
+}
+
+bool
+MidiRegion::set_name (const std::string& str)
+{
+	if (_name == str) {
+		return true;
+	}
+
+	if (Session::session_name_is_legal (str) != 0) {
+		return false;
+	}
+
+	return Region::set_name (str);
 }

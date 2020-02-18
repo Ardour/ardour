@@ -1,26 +1,26 @@
 /*
-    Copyright (C) 2011 Paul Davis
-    Author: Carl Hetherington <cth@carlh.net>
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
-
-#if !defined USE_CAIRO_IMAGE_SURFACE && !defined NDEBUG
-#define OPTIONAL_CAIRO_IMAGE_SURFACE
-#endif
+ * Copyright (C) 2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2014-2015 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2014-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2014-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015-2017 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2015 John Emmas <john@creativepost.co.uk>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 /** @file  canvas/canvas.cc
  *  @brief Implementation of the main canvas classes.
@@ -58,8 +58,23 @@ Canvas::Canvas ()
 	: _root (this)
 	, _bg_color (Gtkmm2ext::rgba_to_color (0, 1.0, 0.0, 1.0))
 	, _last_render_start_timestamp(0)
+	, _use_intermediate_surface (false)
 {
+#ifdef __APPLE__
+	_use_intermediate_surface = true;
+#else
+	_use_intermediate_surface = NULL != g_getenv("ARDOUR_INTERMEDIATE_SURFACE");
+#endif
 	set_epoch ();
+}
+
+void
+Canvas::use_intermediate_surface (bool yn)
+{
+	if (_use_intermediate_surface == yn) {
+		return;
+	}
+	_use_intermediate_surface = yn;
 }
 
 void
@@ -431,12 +446,19 @@ GtkCanvas::GtkCanvas ()
 	, _new_current_item (0)
 	, _grabbed_item (0)
 	, _focused_item (0)
-	, _single_exposure (1)
+	, _single_exposure (true)
+	, _use_image_surface (false)
 	, current_tooltip_item (0)
 	, tooltip_window (0)
 	, _in_dtor (false)
 	, _nsglview (0)
 {
+#ifdef USE_CAIRO_IMAGE_SURFACE /* usually Windows builds */
+	_use_image_surface = true;
+#else
+	_use_image_surface = NULL != g_getenv("ARDOUR_IMAGE_SURFACE");
+#endif
+
 	/* these are the events we want to know about */
 	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK |
 		    Gdk::SCROLL_MASK | Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK |
@@ -835,18 +857,11 @@ void
 GtkCanvas::on_size_allocate (Gtk::Allocation& a)
 {
 	EventBox::on_size_allocate (a);
-#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
-	if (getenv("ARDOUR_IMAGE_SURFACE")) {
-#endif
-#if defined USE_CAIRO_IMAGE_SURFACE || defined OPTIONAL_CAIRO_IMAGE_SURFACE
-	/* allocate an image surface as large as the canvas itself */
 
-	canvas_image.clear ();
-	canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, a.get_width(), a.get_height());
-#endif
-#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
+	if (_use_image_surface) {
+		_canvas_image.clear ();
+		_canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, a.get_width(), a.get_height());
 	}
-#endif
 
 #ifdef __APPLE__
 	if (_nsglview) {
@@ -881,33 +896,24 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	const int64_t start = g_get_monotonic_time ();
 #endif
 
-#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
 	Cairo::RefPtr<Cairo::Context> draw_context;
-	Cairo::RefPtr<Cairo::Context> window_context;
-	if (getenv("ARDOUR_IMAGE_SURFACE")) {
-		if (!canvas_image) {
-			canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
+	if (_use_image_surface) {
+		if (!_canvas_image) {
+			_canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
 		}
-		draw_context = Cairo::Context::create (canvas_image);
-		window_context = get_window()->create_cairo_context ();
+		draw_context = Cairo::Context::create (_canvas_image);
 	} else {
 		draw_context = get_window()->create_cairo_context ();
 	}
-#elif defined USE_CAIRO_IMAGE_SURFACE
-	if (!canvas_image) {
-		canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
-	}
-	Cairo::RefPtr<Cairo::Context> draw_context = Cairo::Context::create (canvas_image);
-	Cairo::RefPtr<Cairo::Context> window_context = get_window()->create_cairo_context ();
-#else
-	Cairo::RefPtr<Cairo::Context> draw_context = get_window()->create_cairo_context ();
-#endif
 
 	draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	draw_context->clip();
 
-#ifdef __APPLE__
-	/* group calls cairo_quartz_surface_create() which
+	/* (this comment applies to macOS, but is other platforms
+	 * also benefit from using CPU-rendering on a image-surface
+	 * with a final bitblt).
+	 *
+	 * group calls cairo_quartz_surface_create() which
 	 * effectively uses a CGBitmapContext + image-surface
 	 *
 	 * This avoids expensive argb32_image_mark_image() during drawing.
@@ -919,8 +925,9 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	 *
 	 * Fixing this for good likely involves changes to GdkQuartzWindow, GdkQuartzView
 	 */
-	draw_context->push_group ();
-#endif
+	if (_use_intermediate_surface && !_use_image_surface) {
+		draw_context->push_group ();
+	}
 
 	/* draw background color */
 	draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
@@ -928,7 +935,7 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	draw_context->fill ();
 
 	/* render canvas */
-	if ( _single_exposure ) {
+	if (_single_exposure) {
 
 		Canvas::render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
 
@@ -944,26 +951,19 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 		g_free (rects);
 	}
 
-#ifdef __APPLE__
-	draw_context->pop_group_to_source ();
-	draw_context->paint ();
-#endif
-
-#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
-	if (getenv("ARDOUR_IMAGE_SURFACE")) {
-#endif
-#if defined USE_CAIRO_IMAGE_SURFACE || defined OPTIONAL_CAIRO_IMAGE_SURFACE
-		/* now blit our private surface back to the GDK one */
-
+	if (_use_image_surface) {
+		_canvas_image->flush ();
+		Cairo::RefPtr<Cairo::Context> window_context = get_window()->create_cairo_context ();
 		window_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 		window_context->clip ();
-		window_context->set_source (canvas_image, 0, 0);
+		window_context->set_source (_canvas_image, 0, 0);
 		window_context->set_operator (Cairo::OPERATOR_SOURCE);
 		window_context->paint ();
-#endif
-#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
+	} else if (_use_intermediate_surface) {
+		draw_context->pop_group_to_source ();
+		draw_context->paint ();
 	}
-#endif
+
 
 #ifdef CANVAS_PROFILE
 	const int64_t end = g_get_monotonic_time ();

@@ -1,0 +1,26 @@
+digraph finite_state_machine {
+	rankdir=TB;
+	start="STOPPED";
+
+	node [shape = ellipse];
+	STOPPED     -> locateWait [ label = "Locate/Chase", fontcolor=red ];
+	STOPPED     -> prerollWait [ label = "speed(!0)",fontcolor=red];
+
+	masterWait  -> prerollWait [ label = "MasterHere", fontcolor=red ];
+
+	prerollWait -> ROLLING;
+	prerollWait -> STOPPED [ label = "speed(0)", fontcolor=red ];
+	ROLLING     -> DECLICKOUT  [ label = "speed(0)/Locate/Chase",fontcolor=red ]
+	ROLLING     -> reverseWait [ label = "speed(-speed)",fontcolor=red ];
+
+	reverseWait -> ROLLING;
+
+	DECLICKOUT  -> STOPPED;
+	DECLICKOUT  -> locateWait;
+	DECLICKOUT  -> masterWait [ label = "Chase",fontcolor=red ];
+
+	locateWait  -> masterWait  [ label = "Chase",fontcolor=red ];
+	locateWait  -> STOPPED     [ label = "autoplay-off",fontcolor=blue ];
+	locateWait  -> prerollWait [ label = "autoplay-on",fontcolor=blue ];
+
+}

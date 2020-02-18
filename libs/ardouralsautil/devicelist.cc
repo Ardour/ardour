@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2014 Robin Gareus <robin@gareus.org>
- * Copyright (C) 2013 Paul Davis
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,9 +11,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <alsa/asoundlib.h>
@@ -57,11 +56,7 @@ ARDOUR::get_alsa_audio_device_names (std::map<std::string, std::string>& devices
 			}
 
 			string card_name = snd_ctl_card_info_get_name (info);
-
-			/* change devname to use ID, not number */
-
-			devname = "hw:";
-			devname += snd_ctl_card_info_get_id (info);
+			bool have_multiple_subdevices = false;
 
 			while (snd_ctl_pcm_next_device (handle, &device) >= 0 && device >= 0) {
 
@@ -84,13 +79,92 @@ ARDOUR::get_alsa_audio_device_names (std::map<std::string, std::string>& devices
 				if (snd_ctl_pcm_info (handle, pcminfo) < 0 && (duplex & HalfDuplexOut)) {
 					continue;
 				}
-				devname += ',';
-				devname += PBD::to_string (device);
-				devices.insert (std::make_pair (card_name, devname));
+
+				/* prefer hardware ID (not card/device number) */
+				string hwname = "hw:";
+				hwname += snd_ctl_card_info_get_id (info);
+				hwname += ',';
+				hwname += PBD::to_string (device);
+
+				if (false /* list first subdevice only */) {
+					devices.insert (std::make_pair (card_name, hwname));
+					continue;
+				}
+
+				string uniq_name = card_name;
+
+				if (have_multiple_subdevices) {
+					uniq_name += " (" + hwname + ")";
+				}
+
+				std::pair<std::map<std::string, std::string>::iterator, bool> rv;
+				rv = devices.insert (std::make_pair (uniq_name, hwname));
+
+				if (!rv.second) {
+					assert (!have_multiple_subdevices);
+					have_multiple_subdevices = true;
+
+					uniq_name += " (" + PBD::to_string (device) + ")";
+					devices.insert (std::make_pair (uniq_name, hwname));
+#if 0 // disabled (blame the_CLA's laptop)
+					/* It may happen that the soundcard has multiple sub-devices for playback
+					 * but none for recording.
+					 *
+					 * In that case the playback device-name has a suffix "(0)" while
+					 * the capture device has none.
+					 *
+					 * This causes issues for backends that use
+					 *  ::match_input_output_devices_or_none()
+					 *
+					 * (the alternative would be to always add a suffix,
+					 * and the proper solution would be to compare the hw:name)
+					 */
+					/* remname the previous entry */
+					hwname = devices[card_name];
+					devices.erase (devices.find (card_name));
+					size_t se = hwname.find_last_of (',');
+					assert (se != string::npos);
+
+					uniq_name = card_name + " (" + hwname.substr (se + 1) + ")";
+					devices.insert (std::make_pair (uniq_name, hwname));
+#endif
+				}
 			}
 
 			snd_ctl_close(handle);
 		}
+	}
+}
+
+static void
+insert_unique_device_name (std::map<std::string, std::string>& devices, std::string const& card_name, std::string const& devname, int caps)
+{
+	assert (caps != 0);
+	std::pair<std::map<std::string, std::string>::iterator, bool> rv;
+	char cnt = '2';
+	std::string cn = card_name;
+	/* Add numbers first this is be independent of physical ID (sequencer vs rawmidi).
+	 * If this fails (>= 10 devices) add the device-name for uniqness
+	 *
+	 * XXX: Perhaps this is a bad idea, and `devname` should always be added if
+	 * there is more than one device with the same name.
+	 */
+	do {
+		cn += " (";
+		if (caps & SND_SEQ_PORT_CAP_READ) cn += "I";
+		if (caps & SND_SEQ_PORT_CAP_WRITE) cn += "O";
+		cn += ")";
+		rv = devices.insert (std::make_pair (cn, devname));
+		cn = card_name + " [" + cnt + "]";
+	} while (!rv.second && ++cnt <= '9');
+
+	if (!rv.second) {
+		cn = card_name + " [" + devname + "] (";
+		if (caps & SND_SEQ_PORT_CAP_READ) cn += "I";
+		if (caps & SND_SEQ_PORT_CAP_WRITE) cn += "O";
+		cn += ")";
+		rv = devices.insert (std::make_pair (cn, devname));
+		assert (rv.second == true);
 	}
 }
 
@@ -149,14 +223,13 @@ ARDOUR::get_alsa_rawmidi_device_names (std::map<std::string, std::string>& devic
 						devname += ",";
 						devname += PBD::to_string (device);
 
-						std::string card_name;
-						card_name = snd_rawmidi_info_get_name (info);
-						card_name += " (";
-						if (sub < subs_in) card_name += "I";
-						if (sub < subs_out) card_name += "O";
-						card_name += ")";
+						std::string card_name = snd_rawmidi_info_get_name (info);
 
-						devices.insert (std::make_pair (card_name, devname));
+						int caps = 0;
+						if (sub < subs_in) caps |= SND_SEQ_PORT_CAP_READ;
+						if (sub < subs_out) caps |= SND_SEQ_PORT_CAP_WRITE;
+
+						insert_unique_device_name (devices, card_name, devname, caps);
 						break;
 					} else {
 						devname = "hw:";
@@ -166,12 +239,10 @@ ARDOUR::get_alsa_rawmidi_device_names (std::map<std::string, std::string>& devic
 						devname += ",";
 						devname += PBD::to_string (sub);
 
-						std::string card_name = sub_name;
-						card_name += " (";
-						if (sub < subs_in) card_name += "I";
-						if (sub < subs_out) card_name += "O";
-						card_name += ")";
-						devices.insert (std::make_pair (card_name, devname));
+						int caps = 0;
+						if (sub < subs_in) caps |= SND_SEQ_PORT_CAP_READ;
+						if (sub < subs_out) caps |= SND_SEQ_PORT_CAP_WRITE;
+						insert_unique_device_name (devices, sub_name, devname, caps);
 					}
 				}
 			}
@@ -217,16 +288,11 @@ ARDOUR::get_alsa_sequencer_names (std::map<std::string, std::string>& devices)
 			std::string card_name;
 			card_name = snd_seq_port_info_get_name (pinfo);
 
-			card_name += " (";
-			if (caps & SND_SEQ_PORT_CAP_READ) card_name += "I";
-			if (caps & SND_SEQ_PORT_CAP_WRITE) card_name += "O";
-			card_name += ")";
-
 			std::string devname;
 			devname = PBD::to_string(snd_seq_port_info_get_client (pinfo));
 			devname += ":";
 			devname += PBD::to_string(snd_seq_port_info_get_port (pinfo));
-			devices.insert (std::make_pair (card_name, devname));
+			insert_unique_device_name (devices, card_name, devname, caps);
 		}
 	}
 	snd_seq_close (seq);

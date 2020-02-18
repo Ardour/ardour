@@ -1,19 +1,19 @@
 /*
- * Copyright (C) 2016 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016-2018 Robin Gareus <robin@gareus.org>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <gtkmm/box.h>
@@ -86,8 +86,11 @@ LuaScriptManager::LuaScriptManager ()
 	doc->set_line_wrap();
 	f->add (*doc);
 
+	Gtk::ScrolledWindow *scroller = manage (new Gtk::ScrolledWindow());
+	scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	scroller->add (_a_view);
 	Gtk::VBox *vbox = manage (new VBox());
-	vbox->pack_start (_a_view, false, false);
+	vbox->pack_start (*scroller, true, true);
 	vbox->pack_end (*edit_box, false, false);
 	vbox->pack_end (*f, false, false);
 	vbox->show_all ();
@@ -124,8 +127,11 @@ LuaScriptManager::LuaScriptManager ()
 	doc->set_line_wrap();
 	f->add (*doc);
 
+	scroller = manage (new Gtk::ScrolledWindow());
+	scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	scroller->add (_c_view);
 	vbox = manage (new VBox());
-	vbox->pack_start (_c_view, false, false);
+	vbox->pack_start (*scroller, true, true);
 	vbox->pack_end (*edit_box, false, false);
 	vbox->pack_end (*f, false, false);
 	vbox->show_all ();
@@ -157,8 +163,11 @@ LuaScriptManager::LuaScriptManager ()
 	doc->set_line_wrap();
 	f->add (*doc);
 
+	scroller = manage (new Gtk::ScrolledWindow());
+	scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	scroller->add (_s_view);
 	vbox = manage (new VBox());
-	vbox->pack_start (_s_view, false, false);
+	vbox->pack_start (*scroller, true, true);
 	vbox->pack_end (*edit_box, false, false);
 	vbox->pack_end (*f, false, false);
 	vbox->show_all ();

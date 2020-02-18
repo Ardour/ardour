@@ -1,21 +1,24 @@
 /*
-    Copyright (C) 2006-2007 Paul Davis
-    Author: David Robillard
-
-    This program is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the Free
-    Software Foundation; either version 2 of the License, or (at your option)
-    any later version.
-
-    This program is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
-
-    You should have received a copy of the GNU General Public License along
-    with this program; if not, write to the Free Software Foundation, Inc.,
-    675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2007-2016 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2008-2009 Hans Baier <hansfbaier@googlemail.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2014-2016 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <iostream>
 
@@ -50,7 +53,7 @@ MidiBuffer::~MidiBuffer()
 }
 
 void
-MidiBuffer::resize(size_t size)
+MidiBuffer::resize (size_t size)
 {
 	if (_data && size < _capacity) {
 
@@ -62,11 +65,16 @@ MidiBuffer::resize(size_t size)
 		return;
 	}
 
-	cache_aligned_free (_data);
+	uint8_t* old_data = _data;
 
 	cache_aligned_malloc ((void**) &_data, size);
 
-	_size = 0;
+	if (_size) {
+		assert (old_data);
+		memcpy (_data, old_data, _size);
+	}
+
+	cache_aligned_free (old_data);
 	_capacity = size;
 
 	assert(_data);
@@ -89,11 +97,6 @@ MidiBuffer::copy(MidiBuffer const * const copy)
 }
 
 
-/** Read events from @a src starting at time @a offset into the START of this buffer, for
- * time duration @a nframes.  Relative time, where 0 = start of buffer.
- *
- * Note that offset and nframes refer to sample time, NOT buffer offsets or event counts.
- */
 void
 MidiBuffer::read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t dst_offset, sampleoffset_t /* src_offset*/)
 {
@@ -103,46 +106,19 @@ MidiBuffer::read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t ds
 	const MidiBuffer& msrc = (const MidiBuffer&) src;
 
 	assert (_capacity >= msrc.size());
+	assert (dst_offset == 0); /* there is no known scenario in Nov 2019 where this should be false */
 
-	if (dst_offset == 0) {
-		clear ();
-		assert (_size == 0);
-	}
+	clear ();
+	assert (_size == 0);
 
 	for (MidiBuffer::const_iterator i = msrc.begin(); i != msrc.end(); ++i) {
 		const Evoral::Event<TimeType> ev(*i, false);
 
-		if (dst_offset >= 0) {
-			/* Positive offset: shifting events from internal
-			   buffer view of time (always relative to to start of
-			   current possibly split cycle) to from global/port
-			   view of time (always relative to start of process
-			   cycle).
-
-			   Check it is within range of this (split) cycle, then shift.
-			*/
-			if (ev.time() >= 0 && ev.time() < nframes) {
-				push_back (ev.time() + dst_offset, ev.size(), ev.buffer());
-			} else {
-				cerr << "\t!!!! MIDI event @ " <<  ev.time() << " skipped, not within range 0 .. " << nframes << ": ";
-			}
+		if (ev.time() >= 0 && ev.time() < nframes) {
+			push_back (ev.time(), ev.size(), ev.buffer());
 		} else {
-			/* Negative offset: shifting events from global/port
-			   view of time (always relative to start of process
-			   cycle) back to internal buffer view of time (always
-			   relative to to start of current possibly split
-			   cycle.
-
-			   Shift first, then check it is within range of this
-			   (split) cycle.
-			*/
-			const samplepos_t evtime = ev.time() + dst_offset;
-
-			if (evtime >= 0 && evtime < nframes) {
-				push_back (evtime, ev.size(), ev.buffer());
-			} else {
-				cerr << "\t!!!! MIDI event @ " <<  evtime << " (based on " << ev.time() << " + " << dst_offset << ") skipped, not within range 0 .. " << nframes << ": ";
-			}
+			cerr << "\t!!!! MIDI event @ " <<  ev.time() << " skipped, not within range 0 .. " << nframes << endl;
+			PBD::stacktrace (cerr, 30);
 		}
 	}
 
@@ -219,6 +195,8 @@ MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 	return true;
 }
 
+extern PBD::Timing minsert;
+
 bool
 MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 {
@@ -230,7 +208,7 @@ MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 	const size_t bytes_to_merge = stamp_size + ev.size();
 
 	if (_size + bytes_to_merge >= _capacity) {
-		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
+		cerr << string_compose ("MidiBuffer::push_back failed (buffer is full: size: %1 capacity %2 new bytes %3)", _size, _capacity, bytes_to_merge) << endl;
 		PBD::stacktrace (cerr, 20);
 		return false;
 	}
@@ -251,8 +229,10 @@ MidiBuffer::insert_event(const Evoral::Event<TimeType>& ev)
 		insert_offset = m.offset;
 		break;
 	}
+
 	if (insert_offset == -1) {
-		return push_back(ev);
+		bool r = push_back(ev);
+		return r;
 	}
 
 	// don't use memmove - it may use malloc(!)

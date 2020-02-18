@@ -1,19 +1,16 @@
 ardour { ["type"] = "EditorAction", name = "Tom's Loop",
 	license     = "MIT",
 	author      = "Ardour Team",
-	description = [[Bounce the loop-range of all non muted audio tracks, paste N times at playhead]]
+	description = [[Bounce the loop-range of all non muted audio tracks, paste at playhead]]
 }
-
--- for minimal configuration in dialogue
-function action_params ()
-	return { ["times"]   = { title = "Number of copies to add", default = "1"}, }
-end
 
 -- main method, every custom (i.e. non-ardour) method must be defined *inside* factory()
 function factory (params) return function ()
 
 -- when this script is called as an action, the output will be printed to the ardour log window
 	function print_help()
+		printf("See source for help.")
+---[[
 		print("")
 		print("---------------------------------------------------------------------")
 		print("")
@@ -160,11 +157,10 @@ function factory (params) return function ()
 		print("See also: Lua Action Bounce+Replace Regions")
 		print("")
 		print("")
+--]]
 	end -- print_help()
 
-	-- get options
-	local p = params or {}
-	local n_paste  = tonumber (p["times"] or 1)
+	local n_paste  = 1
 	assert (n_paste > 0)
 
 	local proc     = ARDOUR.LuaAPI.nil_proc () -- bounce w/o processing
@@ -263,7 +259,7 @@ function factory (params) return function ()
 
 	--advance playhead so it's just after the newly added regions
 	if n_regions_created > 0 then
-		Session:request_locate((playhead + loop:length() * n_paste),false)
+		Session:request_locate((playhead + loop:length() * n_paste),false,5) --TRS_UI
 	end
 
 	-- all done, commit the combined Undo Operation
@@ -274,7 +270,7 @@ function factory (params) return function ()
 		Session:abort_reversible_command ()
 	end
 
-	print ("bounced " .. n_regions_created .. " regions from loop range (" .. loop:length() ..  " frames) to playhead @ frame # " .. playhead)
+	print ("bounced " .. n_regions_created .. " regions from loop range (" .. loop:length() ..  " samples) to playhead @ sample # " .. playhead)
 	::errorout::
 end -- end of anonymous action script function
 end -- end of script factory

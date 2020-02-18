@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Tascam</Manufacturer>
+    <Model>TM-D1000</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet=""/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 2"/>
+        <ChannelNameSetAssign Channel="4" NameSet=""/>
+        <ChannelNameSetAssign Channel="5" NameSet=""/>
+        <ChannelNameSetAssign Channel="6" NameSet=""/>
+        <ChannelNameSetAssign Channel="7" NameSet=""/>
+        <ChannelNameSetAssign Channel="8" NameSet=""/>
+        <ChannelNameSetAssign Channel="9" NameSet=""/>
+        <ChannelNameSetAssign Channel="10" NameSet=""/>
+        <ChannelNameSetAssign Channel="11" NameSet=""/>
+        <ChannelNameSetAssign Channel="12" NameSet=""/>
+        <ChannelNameSetAssign Channel="13" NameSet=""/>
+        <ChannelNameSetAssign Channel="14" NameSet=""/>
+        <ChannelNameSetAssign Channel="15" NameSet=""/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="false"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="false"/>
+        <AvailableChannel Channel="4" Available="false"/>
+        <AvailableChannel Channel="5" Available="false"/>
+        <AvailableChannel Channel="6" Available="false"/>
+        <AvailableChannel Channel="7" Available="false"/>
+        <AvailableChannel Channel="8" Available="false"/>
+        <AvailableChannel Channel="9" Available="false"/>
+        <AvailableChannel Channel="10" Available="false"/>
+        <AvailableChannel Channel="11" Available="false"/>
+        <AvailableChannel Channel="12" Available="false"/>
+        <AvailableChannel Channel="13" Available="false"/>
+        <AvailableChannel Channel="14" Available="false"/>
+        <AvailableChannel Channel="15" Available="false"/>
+      </AvailableForChannels>
+      <PatchBank Name="Effect 1 Presets">
+        <PatchNameList>
+          <Patch Number="1" Name="Stereo Echo" ProgramChange="0"/>
+          <Patch Number="2" Name="Enhanced Comb" ProgramChange="1"/>
+          <Patch Number="3" Name="Cross Feedback" ProgramChange="2"/>
+          <Patch Number="4" Name="Delay L&lt;&gt;R" ProgramChange="3"/>
+          <Patch Number="5" Name="80bpm" ProgramChange="4"/>
+          <Patch Number="6" Name="120 bpm" ProgramChange="5"/>
+          <Patch Number="7" Name="150 bpm" ProgramChange="6"/>
+          <Patch Number="8" Name="Ensemble" ProgramChange="7"/>
+          <Patch Number="9" Name="Chorus Flanger" ProgramChange="8"/>
+          <Patch Number="10" Name="Octaver" ProgramChange="9"/>
+          <Patch Number="11" Name="5th Harmony" ProgramChange="10"/>
+          <Patch Number="12" Name="Pitch Chorus" ProgramChange="11"/>
+          <Patch Number="13" Name="Grow Up" ProgramChange="12"/>
+          <Patch Number="14" Name="Sweet Flanger" ProgramChange="13"/>
+          <Patch Number="15" Name="Tremolo Flange" ProgramChange="14"/>
+          <Patch Number="16" Name="Mellow Phaser" ProgramChange="15"/>
+          <Patch Number="17" Name="Wah Phaser" ProgramChange="16"/>
+          <Patch Number="18" Name="0dB Limit" ProgramChange="17"/>
+          <Patch Number="19" Name="Percussive" ProgramChange="18"/>
+          <Patch Number="20" Name="Sustain" ProgramChange="19"/>
+          <Patch Number="21" Name="Fat Comp" ProgramChange="20"/>
+          <Patch Number="22" Name="Light Gate" ProgramChange="21"/>
+          <Patch Number="23" Name="Violin Gate" ProgramChange="22"/>
+          <Patch Number="24" Name="For Hiss Noise" ProgramChange="23"/>
+          <Patch Number="25" Name="Edge" ProgramChange="24"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Effect 1-Reserve">
+        <PatchNameList>
+          <Patch Number="1-26" Name="Reserve" ProgramChange="25"/>
+          <Patch Number="1-27" Name="Reserve" ProgramChange="26"/>
+          <Patch Number="1-28" Name="Reserve" ProgramChange="27"/>
+          <Patch Number="1-29" Name="Reserve" ProgramChange="28"/>
+          <Patch Number="1-30" Name="Reserve" ProgramChange="29"/>
+          <Patch Number="1-31" Name="Reserve" ProgramChange="30"/>
+          <Patch Number="1-32" Name="Reserve" ProgramChange="31"/>
+          <Patch Number="1-33" Name="Reserve" ProgramChange="32"/>
+          <Patch Number="1-34" Name="Reserve" ProgramChange="33"/>
+          <Patch Number="1-35" Name="Reserve" ProgramChange="34"/>
+          <Patch Number="1-36" Name="Reserve" ProgramChange="35"/>
+          <Patch Number="1-37" Name="Reserve" ProgramChange="36"/>
+          <Patch Number="1-38" Name="Reserve" ProgramChange="37"/>
+          <Patch Number="1-39" Name="Reserve" ProgramChange="38"/>
+          <Patch Number="1-40" Name="Reserve" ProgramChange="39"/>
+          <Patch Number="1-41" Name="Reserve" ProgramChange="40"/>
+          <Patch Number="1-42" Name="Reserve" ProgramChange="41"/>
+          <Patch Number="1-43" Name="Reserve" ProgramChange="42"/>
+          <Patch Number="1-44" Name="Reserve" ProgramChange="43"/>
+          <Patch Number="1-45" Name="Reserve" ProgramChange="44"/>
+          <Patch Number="1-46" Name="Reserve" ProgramChange="45"/>
+          <Patch Number="1-47" Name="Reserve" ProgramChange="46"/>
+          <Patch Number="1-48" Name="Reserve" ProgramChange="47"/>
+          <Patch Number="1-49" Name="Reserve" ProgramChange="48"/>
+          <Patch Number="1-50" Name="Reserve" ProgramChange="49"/>
+          <Patch Number="1-51" Name="Reserve" ProgramChange="50"/>
+          <Patch Number="1-52" Name="Reserve" ProgramChange="51"/>
+          <Patch Number="1-53" Name="Reserve" ProgramChange="52"/>
+          <Patch Number="1-54" Name="Reserve" ProgramChange="53"/>
+          <Patch Number="1-55" Name="Reserve" ProgramChange="54"/>
+          <Patch Number="1-56" Name="Reserve" ProgramChange="55"/>
+          <Patch Number="1-57" Name="Reserve" ProgramChange="56"/>
+          <Patch Number="1-58" Name="Reserve" ProgramChange="57"/>
+          <Patch Number="1-59" Name="Reserve" ProgramChange="58"/>
+          <Patch Number="1-60" Name="Reserve" ProgramChange="59"/>
+          <Patch Number="1-61" Name="Reserve" ProgramChange="60"/>
+          <Patch Number="1-62" Name="Reserve" ProgramChange="61"/>
+          <Patch Number="1-63" Name="Reserve" ProgramChange="62"/>
+          <Patch Number="1-64" Name="Reserve" ProgramChange="63"/>
+          <Patch Number="1-65" Name="Reserve" ProgramChange="64"/>
+          <Patch Number="1-66" Name="Reserve" ProgramChange="65"/>
+          <Patch Number="1-67" Name="Reserve" ProgramChange="66"/>
+          <Patch Number="1-68" Name="Reserve" ProgramChange="67"/>
+          <Patch Number="1-69" Name="Reserve" ProgramChange="68"/>
+          <Patch Number="1-70" Name="Reserve" ProgramChange="69"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Effect U1-Reserve">
+        <PatchNameList>
+          <Patch Number="U1-41" Name="Reserve" ProgramChange="110"/>
+          <Patch Number="U1-42" Name="Reserve" ProgramChange="111"/>
+          <Patch Number="U1-43" Name="Reserve" ProgramChange="112"/>
+          <Patch Number="U1-44" Name="Reserve" ProgramChange="113"/>
+          <Patch Number="U1-45" Name="Reserve" ProgramChange="114"/>
+          <Patch Number="U1-46" Name="Reserve" ProgramChange="115"/>
+          <Patch Number="U1-47" Name="Reserve" ProgramChange="116"/>
+          <Patch Number="U1-48" Name="Reserve" ProgramChange="117"/>
+          <Patch Number="U1-49" Name="Reserve" ProgramChange="118"/>
+          <Patch Number="U1-50" Name="Reserve" ProgramChange="119"/>
+          <Patch Number="U1-51" Name="Reserve" ProgramChange="120"/>
+          <Patch Number="U1-52" Name="Reserve" ProgramChange="121"/>
+          <Patch Number="U1-53" Name="Reserve" ProgramChange="122"/>
+          <Patch Number="U1-54" Name="Reserve" ProgramChange="123"/>
+          <Patch Number="U1-55" Name="Reserve" ProgramChange="124"/>
+          <Patch Number="U1-56" Name="Reserve" ProgramChange="125"/>
+          <Patch Number="U1-57" Name="Reserve" ProgramChange="126"/>
+          <Patch Number="U1-58" Name="Reserve" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+    <ChannelNameSet Name="Name Set 2">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="false"/>
+        <AvailableChannel Channel="2" Available="false"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="false"/>
+        <AvailableChannel Channel="5" Available="false"/>
+        <AvailableChannel Channel="6" Available="false"/>
+        <AvailableChannel Channel="7" Available="false"/>
+        <AvailableChannel Channel="8" Available="false"/>
+        <AvailableChannel Channel="9" Available="false"/>
+        <AvailableChannel Channel="10" Available="false"/>
+        <AvailableChannel Channel="11" Available="false"/>
+        <AvailableChannel Channel="12" Available="false"/>
+        <AvailableChannel Channel="13" Available="false"/>
+        <AvailableChannel Channel="14" Available="false"/>
+        <AvailableChannel Channel="15" Available="false"/>
+      </AvailableForChannels>
+      <PatchBank Name="Effect 2">
+        <PatchNameList>
+          <Patch Number="1" Name="Concert Hall" ProgramChange="0"/>
+          <Patch Number="2" Name="Bright Reverb" ProgramChange="1"/>
+          <Patch Number="3" Name="Church" ProgramChange="2"/>
+          <Patch Number="4" Name="Orchestra" ProgramChange="3"/>
+          <Patch Number="5" Name="Woody Hall" ProgramChange="4"/>
+          <Patch Number="6" Name="Thin Hall" ProgramChange="5"/>
+          <Patch Number="7" Name="Ambience" ProgramChange="6"/>
+          <Patch Number="8" Name="Garage" ProgramChange="7"/>
+          <Patch Number="9" Name="Big Drums" ProgramChange="8"/>
+          <Patch Number="10" Name="Concrete Room" ProgramChange="9"/>
+          <Patch Number="11" Name="Live House" ProgramChange="10"/>
+          <Patch Number="12" Name="Plate Reverb" ProgramChange="11"/>
+          <Patch Number="13" Name="Stadium" ProgramChange="12"/>
+          <Patch Number="14" Name="Arena" ProgramChange="13"/>
+          <Patch Number="15" Name="Spacy" ProgramChange="14"/>
+          <Patch Number="16" Name="Endless" ProgramChange="15"/>
+          <Patch Number="17" Name="Vocal Plate" ProgramChange="16"/>
+          <Patch Number="18" Name="Instrument Booth" ProgramChange="17"/>
+          <Patch Number="19" Name="Strings Reverb" ProgramChange="18"/>
+          <Patch Number="20" Name="Session" ProgramChange="19"/>
+          <Patch Number="21" Name="Stereo Echo" ProgramChange="20"/>
+          <Patch Number="22" Name="Enhance Comb" ProgramChange="21"/>
+          <Patch Number="23" Name="Cross Feedback" ProgramChange="22"/>
+          <Patch Number="24" Name="Delay L&lt;&gt;R" ProgramChange="23"/>
+          <Patch Number="25" Name="80 bpm" ProgramChange="24"/>
+          <Patch Number="26" Name="120 bpm" ProgramChange="25"/>
+          <Patch Number="27" Name="150 bpm" ProgramChange="26"/>
+          <Patch Number="28" Name="Ensemble" ProgramChange="27"/>
+          <Patch Number="29" Name="Chorus Flange" ProgramChange="28"/>
+          <Patch Number="30" Name="Octaver" ProgramChange="29"/>
+          <Patch Number="31" Name="5th Harmony" ProgramChange="30"/>
+          <Patch Number="32" Name="Pitch Chorus" ProgramChange="31"/>
+          <Patch Number="33" Name="Grow Up" ProgramChange="32"/>
+          <Patch Number="34" Name="Sweet Flanger" ProgramChange="33"/>
+          <Patch Number="35" Name="Tremolo Flange" ProgramChange="34"/>
+          <Patch Number="36" Name="Mellow Phaser" ProgramChange="35"/>
+          <Patch Number="37" Name="Wah Phaser" ProgramChange="36"/>
+          <Patch Number="38" Name="0dB Limit" ProgramChange="37"/>
+          <Patch Number="39" Name="Percussive" ProgramChange="38"/>
+          <Patch Number="40" Name="Sustain" ProgramChange="39"/>
+          <Patch Number="41" Name="Fat Comp" ProgramChange="40"/>
+          <Patch Number="42" Name="Light Gate" ProgramChange="41"/>
+          <Patch Number="43" Name="Violin Gate" ProgramChange="42"/>
+          <Patch Number="44" Name="For Hiss Noise" ProgramChange="43"/>
+          <Patch Number="45" Name="Edge" ProgramChange="44"/>
+          <Patch Number="46" Name="Short Gate" ProgramChange="45"/>
+          <Patch Number="47" Name="Wild Gate" ProgramChange="46"/>
+          <Patch Number="48" Name="-36dB Gate" ProgramChange="47"/>
+          <Patch Number="49" Name="Slow Attack" ProgramChange="48"/>
+          <Patch Number="50" Name="Ambience Gate" ProgramChange="49"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="Effect 2-Reserve">
+        <PatchNameList>
+          <Patch Number="2-51" Name="Reserve" ProgramChange="50"/>
+          <Patch Number="2-52" Name="Reserve" ProgramChange="51"/>
+          <Patch Number="2-53" Name="Reserve" ProgramChange="52"/>
+          <Patch Number="2-54" Name="Reserve" ProgramChange="53"/>
+          <Patch Number="2-55" Name="Reserve" ProgramChange="54"/>
+          <Patch Number="2-56" Name="Reserve" ProgramChange="55"/>
+          <Patch Number="2-57" Name="Reserve" ProgramChange="56"/>
+          <Patch Number="2-58" Name="Reserve" ProgramChange="57"/>
+          <Patch Number="2-59" Name="Reserve" ProgramChange="58"/>
+          <Patch Number="2-60" Name="Reserve" ProgramChange="59"/>
+          <Patch Number="2-61" Name="Reserve" ProgramChange="60"/>
+          <Patch Number="2-62" Name="Reserve" ProgramChange="61"/>
+          <Patch Number="2-63" Name="Reserve" ProgramChange="62"/>
+          <Patch Number="2-64" Name="Reserve" ProgramChange="63"/>
+          <Patch Number="2-65" Name="Reserve" ProgramChange="64"/>
+          <Patch Number="2-66" Name="Reserve" ProgramChange="65"/>
+          <Patch Number="2-67" Name="Reserve" ProgramChange="66"/>
+          <Patch Number="2-68" Name="Reserve" ProgramChange="67"/>
+          <Patch Number="2-69" Name="Reserve" ProgramChange="68"/>
+          <Patch Number="2-70" Name="Reserve" ProgramChange="69"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

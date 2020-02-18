@@ -1,27 +1,34 @@
 /*
-    Copyright (C) 1999-2002 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 1999-2019 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2006-2007 Jesse Chappell <jesse@essej.net>
+ * Copyright (C) 2006-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2008-2009 Hans Baier <hansfbaier@googlemail.com>
+ * Copyright (C) 2012-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <cmath>
 #include <cerrno>
 #include <algorithm>
 #include <unistd.h>
 
+#include <boost/algorithm/string/erase.hpp>
+
+#include "pbd/i18n.h"
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
 
@@ -38,6 +45,7 @@
 #include "ardour/process_thread.h"
 #include "ardour/scene_changer.h"
 #include "ardour/session.h"
+#include "ardour/transport_fsm.h"
 #include "ardour/transport_master.h"
 #include "ardour/transport_master_manager.h"
 #include "ardour/ticker.h"
@@ -47,11 +55,14 @@
 
 #include "midi++/mmc.h"
 
-#include "pbd/i18n.h"
-
 using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
+
+#define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::Event (evtype)); }
+#define TFSM_STOP(abort,clear) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StopTransport,abort,clear)); }
+#define TFSM_LOCATE(target,ltd,flush,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,ltd,flush,loop,force)); }
+
 
 /** Called by the audio engine when there is work to be done with JACK.
  * @param nframes Number of samples to process.
@@ -66,13 +77,16 @@ Session::process (pframes_t nframes)
 
 	if (processing_blocked()) {
 		_silent = true;
-		cerr << "%%%%%%%%%%%%%% session process blocked\n";
 		return;
 	}
 
 	if (non_realtime_work_pending()) {
+		DEBUG_TRACE (DEBUG::Butler, string_compose ("non-realtime work pending: %1 (%2%3%4)\n", enum_2_string (post_transport_work()), std::hex, post_transport_work(), std::dec));
 		if (!_butler->transport_work_requested ()) {
-			post_transport ();
+			DEBUG_TRACE (DEBUG::Butler, string_compose ("done, waiting? %1\n", _transport_fsm->waiting_for_butler()));
+			butler_completed_transport_work ();
+		} else {
+			DEBUG_TRACE (DEBUG::Butler, "doesn't seem to have finished yet (from view of RT thread)\n");
 		}
 	}
 
@@ -87,11 +101,16 @@ Session::process (pframes_t nframes)
 	 * callig it hold a _processor_lock reader-lock
 	 */
 	boost::shared_ptr<RouteList> r = routes.reader ();
+	bool one_or_more_routes_declicking = false;
 	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->apply_processor_changes_rt()) {
 			_rt_emit_pending = true;
 		}
+		if ((*i)->declick_in_progress()) {
+			one_or_more_routes_declicking = true;
+		}
 	}
+
 	if (_rt_emit_pending) {
 		if (!_rt_thread_active) {
 			emit_route_signals ();
@@ -101,6 +120,17 @@ Session::process (pframes_t nframes)
 			pthread_mutex_unlock (&_rt_emit_mutex);
 			_rt_emit_pending = false;
 		}
+	}
+
+	/* We are checking two things here:
+	 *
+	 * 1) whether or not all tracks have finished a declick out.
+	 * 2) is the transport FSM waiting to be told this
+	 */
+
+	if (!one_or_more_routes_declicking && declick_in_progress()) {
+		/* end of the declick has been reached by all routes */
+		TFSM_EVENT (TransportFSM::DeclickDone);
 	}
 
 	_engine.main_thread()->drop_buffers ();
@@ -136,7 +166,7 @@ Session::no_roll (pframes_t nframes)
 {
 	PT_TIMING_CHECK (4);
 
-	samplepos_t end_sample = _transport_sample + nframes; // FIXME: varispeed + no_roll ??
+	samplepos_t end_sample = _transport_sample + floor (nframes * _transport_speed);
 	int ret = 0;
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
@@ -150,6 +180,8 @@ Session::no_roll (pframes_t nframes)
 	for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
 		(*i)->automation_run (_transport_sample, nframes);
 	}
+
+	_global_locate_pending = locate_pending ();
 
 	if (_process_graph) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/no-roll\n");
@@ -191,7 +223,7 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 		(*i)->automation_run (start_sample, nframes);
 	}
 
-	_global_locate_pending = locate_pending ();
+	_global_locate_pending = locate_pending();
 
 	if (_process_graph) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/process-routes\n");
@@ -212,7 +244,7 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 			bool b = false;
 
 			if ((ret = (*i)->roll (nframes, start_sample, end_sample, b)) < 0) {
-				stop_transport ();
+				TFSM_STOP (false, false);
 				return -1;
 			}
 
@@ -314,7 +346,7 @@ Session::process_with_events (pframes_t nframes)
 
 	assert (_count_in_samples == 0 || _remaining_latency_preroll == 0 || _count_in_samples == _remaining_latency_preroll);
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("Running count in/latency preroll of %1 & %2\n", _count_in_samples, _remaining_latency_preroll));
+	// DEBUG_TRACE (DEBUG::Transport, string_compose ("Running count in/latency preroll of %1 & %2\n", _count_in_samples, _remaining_latency_preroll));
 
 	while (_count_in_samples > 0 || _remaining_latency_preroll > 0) {
 		samplecnt_t ns;
@@ -448,6 +480,7 @@ Session::process_with_events (pframes_t nframes)
 	assert (_transport_speed == 0 || _transport_speed == 1.0 || _transport_speed == -1.0);
 
 	samples_moved = (samplecnt_t) nframes * _transport_speed;
+	// DEBUG_TRACE (DEBUG::Transport, string_compose ("plan to move transport by %1 (%2 @ %3)\n", samples_moved, nframes, _transport_speed));
 
 	end_sample = _transport_sample + samples_moved;
 
@@ -472,15 +505,15 @@ Session::process_with_events (pframes_t nframes)
 			return;
 		}
 
-		if (!_exporting && !timecode_transmission_suspended()) {
-			send_midi_time_code_for_cycle (_transport_sample, end_sample, nframes);
-		}
-
-		ltc_tx_send_time_code_for_cycle (_transport_sample, end_sample, _target_transport_speed, _transport_speed, nframes);
 
 		samplepos_t stop_limit = compute_stop_limit ();
 
 		if (maybe_stop (stop_limit)) {
+			if (!_exporting && !timecode_transmission_suspended()) {
+				send_midi_time_code_for_cycle (_transport_sample, end_sample, nframes);
+			}
+			ltc_tx_send_time_code_for_cycle (_transport_sample, end_sample, _target_transport_speed, _transport_speed, nframes);
+
 			no_roll (nframes);
 			return;
 		}
@@ -497,17 +530,25 @@ Session::process_with_events (pframes_t nframes)
 
 			this_nframes = nframes; /* real (jack) time relative */
 			samples_moved = (samplecnt_t) floor (_transport_speed * nframes); /* transport relative */
+			// DEBUG_TRACE (DEBUG::Transport, string_compose ("sub-loop plan to move transport by %1 (%2 @ %3)\n", samples_moved, nframes, _transport_speed));
 
 			/* running an event, position transport precisely to its time */
 			if (this_event && this_event->action_sample <= end_sample && this_event->action_sample >= _transport_sample) {
 				/* this isn't quite right for reverse play */
 				samples_moved = (samplecnt_t) (this_event->action_sample - _transport_sample);
+				// DEBUG_TRACE (DEBUG::Transport, string_compose ("sub-loop2 (for %4)plan to move transport by %1 (%2 @ %3)\n", samples_moved, nframes, _transport_speed, enum_2_string (this_event->type)));
 				this_nframes = abs (floor(samples_moved / _transport_speed));
 			}
 
 			try_run_lua (this_nframes);
 
 			if (this_nframes) {
+
+				if (!_exporting && !timecode_transmission_suspended()) {
+					send_midi_time_code_for_cycle (_transport_sample, _transport_sample + samples_moved, this_nframes);
+				}
+
+				ltc_tx_send_time_code_for_cycle (_transport_sample,  _transport_sample + samples_moved, _target_transport_speed, _transport_speed, this_nframes);
 
 				click (_transport_sample, this_nframes);
 
@@ -524,6 +565,8 @@ Session::process_with_events (pframes_t nframes)
 					decrement_transport_position (-samples_moved);
 				} else if (samples_moved) {
 					increment_transport_position (samples_moved);
+				} else {
+					DEBUG_TRACE (DEBUG::Transport, "no transport motion\n");
 				}
 
 				maybe_stop (stop_limit);
@@ -601,7 +644,7 @@ Session::process_without_events (pframes_t nframes)
 		no_roll (nframes);
 		return;
 	} else {
-		samples_moved = (samplecnt_t) nframes;
+		samples_moved = (samplecnt_t) nframes * _transport_speed;
 	}
 
 	if (!_exporting && !timecode_transmission_suspended()) {
@@ -632,8 +675,12 @@ Session::process_without_events (pframes_t nframes)
 
 	if (samples_moved < 0) {
 		decrement_transport_position (-samples_moved);
+		//DEBUG_TRACE (DEBUG::Transport, string_compose ("DEcrement transport by %1 to %2\n", samples_moved, _transport_sample));
 	} else if (samples_moved) {
 		increment_transport_position (samples_moved);
+		//DEBUG_TRACE (DEBUG::Transport, string_compose ("INcrement transport by %1 to %2\n", samples_moved, _transport_sample));
+	} else {
+		DEBUG_TRACE (DEBUG::Transport, "no transport motion\n");
 	}
 
 	maybe_stop (stop_limit);
@@ -730,6 +777,7 @@ Session::maybe_sync_start (pframes_t & nframes)
 		_silent = true;
 
 		if (Config->get_locate_while_waiting_for_sync()) {
+			DEBUG_TRACE (DEBUG::Transport, "micro-locate while waiting for sync\n");
 			if (micro_locate (nframes)) {
 				/* XXX ERROR !!! XXX */
 			}
@@ -744,9 +792,9 @@ Session::maybe_sync_start (pframes_t & nframes)
 void
 Session::queue_event (SessionEvent* ev)
 {
-	if (_state_of_the_state & Deletion) {
+	if (deletion_in_progress ()) {
 		return;
-	} else if (_state_of_the_state & Loading) {
+	} else if (loading ()) {
 		merge_event (ev);
 	} else {
 		Glib::Threads::Mutex::Lock lm (rb_write_lock);
@@ -804,45 +852,34 @@ Session::process_event (SessionEvent* ev)
 
 	switch (ev->type) {
 	case SessionEvent::SetLoop:
-		set_play_loop (ev->yes_or_no, ev->speed);
+		set_play_loop (ev->yes_or_no, true);
 		break;
 
 	case SessionEvent::AutoLoop:
 		if (play_loop) {
-			/* roll after locate, do not flush, set "with loop"
-			   true only if we are seamless looping
+			/* roll after locate, do not flush, set "for loop end" true
 			*/
-			start_locate (ev->target_sample, true, false, Config->get_seamless_loop());
+			TFSM_LOCATE (ev->target_sample, MustRoll, false, true, false);
 		}
 		remove = false;
 		del = false;
 		break;
 
 	case SessionEvent::Locate:
-		if (ev->yes_or_no) { /* force locate */
-			/* args: do not roll after locate, do flush, not with loop */
-			locate (ev->target_sample, false, true, false);
-		} else {
-			/* args: do not roll after locate, do flush, not with loop */
-			start_locate (ev->target_sample, false, true, false);
-		}
+		/* args: do not roll after locate, clear state, not for loop, force */
+		TFSM_LOCATE (ev->target_sample, ev->locate_transport_disposition, true, false, ev->yes_or_no);
 		_send_timecode_update = true;
 		break;
 
 	case SessionEvent::LocateRoll:
-		if (ev->yes_or_no) {
-			/* args: roll after locate, do flush, not with loop */
-			locate (ev->target_sample, true, true, false);
-		} else {
-			/* args: roll after locate, do flush, not with loop */
-			start_locate (ev->target_sample, true, true, false);
-		}
+		/* args: roll after locate, clear state if not looping, not for loop, force */
+		TFSM_LOCATE (ev->target_sample, ev->locate_transport_disposition, !play_loop, false, ev->yes_or_no);
 		_send_timecode_update = true;
 		break;
 
 	case SessionEvent::Skip:
 		if (Config->get_skip_playback()) {
-			start_locate (ev->target_sample, true, true, false);
+			TFSM_LOCATE (ev->target_sample, MustRoll, true, false, false);
 			_send_timecode_update = true;
 		}
 		remove = false;
@@ -852,7 +889,8 @@ Session::process_event (SessionEvent* ev)
 	case SessionEvent::LocateRollLocate:
 		// locate is handled by ::request_roll_at_and_return()
 		_requested_return_sample = ev->target_sample;
-		request_locate (ev->target2_sample, true);
+		TFSM_LOCATE (ev->target2_sample, MustRoll, true, false, false);
+		_send_timecode_update = true;
 		break;
 
 
@@ -882,32 +920,21 @@ Session::process_event (SessionEvent* ev)
 		del = false;
 		break;
 
-	case SessionEvent::StopOnce:
-		if (!non_realtime_work_pending()) {
-			_clear_event_type (SessionEvent::StopOnce);
-			stop_transport (ev->yes_or_no);
-		}
-		remove = false;
-		del = false;
-		break;
-
 	case SessionEvent::RangeStop:
-		if (!non_realtime_work_pending()) {
-			stop_transport (ev->yes_or_no);
-		}
+		TFSM_STOP (ev->yes_or_no, false);
 		remove = false;
 		del = false;
 		break;
 
 	case SessionEvent::RangeLocate:
 		/* args: roll after locate, do flush, not with loop */
-		start_locate (ev->target_sample, true, true, false);
+		TFSM_LOCATE (ev->target_sample, MustRoll, true, false, false);
 		remove = false;
 		del = false;
 		break;
 
 	case SessionEvent::Overwrite:
-		overwrite_some_buffers (static_cast<Track*>(ev->ptr));
+		overwrite_some_buffers (ev->track, ev->overwrite);
 		break;
 
 	case SessionEvent::Audition:
@@ -1065,8 +1092,8 @@ Session::follow_transport_master (pframes_t nframes)
 {
 	TransportMasterManager& tmm (TransportMasterManager::instance());
 
-	double slave_speed;
-	samplepos_t slave_transport_sample;
+	double master_speed;
+	samplepos_t master_transport_sample;
 	sampleoffset_t delta;
 
 	if (tmm.master_invalid_this_cycle()) {
@@ -1074,33 +1101,106 @@ Session::follow_transport_master (pframes_t nframes)
 		goto noroll;
 	}
 
-	slave_speed = tmm.get_current_speed_in_process_context();
-	slave_transport_sample = tmm.get_current_position_in_process_context ();
-	delta = _transport_sample - slave_transport_sample;
+	master_speed = tmm.get_current_speed_in_process_context();
+	master_transport_sample = tmm.get_current_position_in_process_context ();
+	delta = _transport_sample - master_transport_sample;
 
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("session at %1, master at %2, delta: %3 res: %4\n", _transport_sample, slave_transport_sample, delta, tmm.current()->resolution()));
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("session at %1, master at %2, delta: %3 res: %4 TFSM state %5\n", _transport_sample, master_transport_sample, delta, tmm.current()->resolution(), _transport_fsm->current_state()));
 
-	track_transport_master (slave_speed, slave_transport_sample);
+	if (tmm.current()->type() == Engine) {
 
-	if (transport_master_tracking_state == Running) {
+		/* JACK Transport. */
 
-		if (!actively_recording() && abs (delta) > tmm.current()->resolution()) {
-			DEBUG_TRACE (DEBUG::Slave, string_compose ("average slave delta %1 greater than slave resolution %2\n", delta, tmm.current()->resolution()));
-			if (micro_locate (-delta) != 0) {
-				DEBUG_TRACE (DEBUG::Slave, "micro-locate didn't work, set no disk output true\n");
+		if (master_speed == 0) {
 
-				/* run routes as normal, but no disk output */
-				DiskReader::set_no_disk_output (true);
+			if (!actively_recording()) {
+
+				const samplecnt_t wlp = worst_latency_preroll_buffer_size_ceil ();
+
+				if (delta != wlp) {
+
+					/* if we're not aligned with the current JACK * time, then jump to it */
+
+					if (!locate_pending() && !declick_in_progress() && !tmm.current()->starting()) {
+
+						const samplepos_t locate_target = master_transport_sample + wlp;
+						DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: jump to master position %1 by locating to %2\n", master_transport_sample, locate_target));
+						/* for JACK transport always stop after the locate (2nd argument == false) */
+						TFSM_LOCATE (locate_target, MustStop, true, false, false);
+
+					} else {
+						DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK Transport: locate already in process, sts = %1\n", master_transport_sample));
+					}
+				}
 			}
-			return true;
+
+		} else {
+
+			if (_transport_speed) {
+				/* master is rolling, and we're rolling ... with JACK we should always be perfectly in sync, so ... WTF? */
+				if (delta) {
+					if (remaining_latency_preroll() && worst_latency_preroll()) {
+						/* our transport position is not moving because we're doing latency alignment. Nothing in particular to do */
+					} else {
+						cerr << "\n\n\n IMPOSSIBLE! OUT OF SYNC WITH JACK TRANSPORT (rlp = " << remaining_latency_preroll() << " wlp " << worst_latency_preroll() << ")\n\n\n";
+					}
+				}
+			}
 		}
 
-		if (transport_master_tracking_state == Running) {
-			/* speed is set, we're locked, and good to go */
-			DiskReader::set_no_disk_output (false);
+	} else {
+
+		/* This is a heuristic rather than a strictly provable rule. The idea
+		 * is that if we're "far away" from the master, we should locate to its
+		 * current position, and then varispeed to sync with it.
+		 *
+		 * On the other hand, if we're close to it, just varispeed.
+		 */
+
+		if (!actively_recording() && abs (delta) > (5 * current_block_size)) {
+
+			DiskReader::inc_no_disk_output ();
+
+			if (!locate_pending() && !declick_in_progress()) {
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("request locate to master position %1\n", master_transport_sample));
+				/* note that for non-JACK transport masters, we assume that the transport state (rolling,stopped) after the locate
+				 * remains unchanged (2nd argument, "roll-after-locate")
+				 */
+				TFSM_LOCATE (master_transport_sample, (master_speed != 0) ? MustRoll : MustStop, true, false, false);
+			}
+
 			return true;
 		}
 	}
+
+	if (master_speed != 0.0) {
+		if (_transport_speed == 0.0f) {
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave starts transport: %1 sample %2 tf %3\n", master_speed, master_transport_sample, _transport_sample));
+			TFSM_EVENT (TransportFSM::StartTransport);
+		}
+
+	} else if (!tmm.current()->starting()) { /* master stopped, not in "starting" state */
+
+		if (_transport_speed != 0.0f) {
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stops transport: %1 sample %2 tf %3\n", master_speed, master_transport_sample, _transport_sample));
+			TFSM_STOP (false, false);
+		}
+	}
+
+	/* This is the second part of the "we're not synced yet" code. If we're
+	 * close, but not within the resolution of the master, silence disk
+	 * output but continue to varispeed to get in sync.
+	 */
+
+	if ((tmm.current()->type() != Engine) && !actively_recording() && abs (delta) > tmm.current()->resolution()) {
+		/* just varispeed to chase the master, and be silent till we're synced */
+		DiskReader::inc_no_disk_output ();
+		return true;
+	}
+
+	/* speed is set, we're locked, and good to go */
+	DiskReader::dec_no_disk_output ();
+	return true;
 
   noroll:
 	/* don't move at all */
@@ -1110,95 +1210,7 @@ Session::follow_transport_master (pframes_t nframes)
 }
 
 void
-Session::track_transport_master (float slave_speed, samplepos_t slave_transport_sample)
-{
-	boost::shared_ptr<TransportMaster> master (TransportMasterManager::instance().current());
-
-	assert (master);
-
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("session has master tracking state as %1\n", transport_master_tracking_state));
-
-	if (slave_speed != 0.0f) {
-
-		/* slave is running */
-
-		switch (transport_master_tracking_state) {
-		case Stopped:
-			if (master->requires_seekahead()) {
-				master_wait_end = slave_transport_sample + master->seekahead_distance ();
-				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stopped, but running, requires seekahead to %1\n", master_wait_end));
-				/* we can call locate() here because we are in process context */
-				if (micro_locate (master_wait_end - _transport_sample) != 0) {
-					locate (master_wait_end, false, false);
-				}
-				transport_master_tracking_state = Waiting;
-
-			} else {
-
-				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stopped -> running at %1\n", slave_transport_sample));
-
-				if (slave_transport_sample != _transport_sample) {
-					DEBUG_TRACE (DEBUG::Slave, string_compose ("require locate to run. eng: %1 -> sl: %2\n", _transport_sample, slave_transport_sample));
-					if (micro_locate (slave_transport_sample - _transport_sample) != 0) {
-						locate (slave_transport_sample, false, false);
-					}
-				}
-				transport_master_tracking_state = Running;
-			}
-			break;
-
-		case Waiting:
-		default:
-			break;
-		}
-
-		if (transport_master_tracking_state == Waiting) {
-
-			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave waiting at %1\n", slave_transport_sample));
-
-			if (slave_transport_sample >= master_wait_end) {
-
-				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave start at %1 vs %2\n", slave_transport_sample, _transport_sample));
-
-				transport_master_tracking_state = Running;
-
-				/* now perform a "micro-seek" within the disk buffers to realign ourselves
-				   precisely with the master.
-				*/
-
-				if (micro_locate (slave_transport_sample - _transport_sample) != 0) {
-					cerr << "cannot micro-seek\n";
-					/* XXX what? */
-				}
-			}
-		}
-
-		if (transport_master_tracking_state == Running && _transport_speed == 0.0f) {
-			DEBUG_TRACE (DEBUG::Slave, "slave starts transport\n");
-			start_transport ();
-		}
-
-	} else { // slave_speed is 0
-
-		/* slave has stopped */
-
-		if (_transport_speed != 0.0f) {
-			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stops transport: %1 sample %2 tf %3\n", slave_speed, slave_transport_sample, _transport_sample));
-			stop_transport ();
-		}
-
-		if (slave_transport_sample != _transport_sample) {
-			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stopped, move to %1\n", slave_transport_sample));
-			force_locate (slave_transport_sample, false);
-		}
-
-		reset_slave_state();
-	}
-}
-
-void
 Session::reset_slave_state ()
 {
-	transport_master_tracking_state = Stopped;
-	DiskReader::set_no_disk_output (false);
+	DiskReader::dec_no_disk_output ();
 }

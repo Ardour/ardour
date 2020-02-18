@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>XV-5080</Model>
+    <Model>XV-3080</Model>
+    <Model>XV-88</Model>
+    <Model>XV-5050</Model>
+    <Model>XV-2020</Model>
+    <Model>Fantom</Model>
+    <Model>RD-700</Model>
+    <PatchNameList Name="SRX-10 Big Brass Ensemble: Patches">
+      <Patch Number="001" Name="Pop Brs Sect" ProgramChange="0"/>
+      <Patch Number="002" Name="Pop Brs Stac" ProgramChange="1"/>
+      <Patch Number="003" Name="Pop Brs Fall" ProgramChange="2"/>
+      <Patch Number="004" Name="Trumpet Sect" ProgramChange="3"/>
+      <Patch Number="005" Name="Tp Sect Stac" ProgramChange="4"/>
+      <Patch Number="006" Name="Tp Sect Doit" ProgramChange="5"/>
+      <Patch Number="007" Name="Mute Tp Sect" ProgramChange="6"/>
+      <Patch Number="008" Name="MtTpSect Stc" ProgramChange="7"/>
+      <Patch Number="009" Name="C Tp Section" ProgramChange="8"/>
+      <Patch Number="010" Name="C TpSect Stc" ProgramChange="9"/>
+      <Patch Number="011" Name="C TpSect Tri" ProgramChange="10"/>
+      <Patch Number="012" Name="TromboneSect" ProgramChange="11"/>
+      <Patch Number="013" Name="Tb Sect Stac" ProgramChange="12"/>
+      <Patch Number="014" Name="Tb Sect Fall" ProgramChange="13"/>
+      <Patch Number="015" Name="Horn Section" ProgramChange="14"/>
+      <Patch Number="016" Name="HornSect Stc" ProgramChange="15"/>
+      <Patch Number="017" Name="HornSect Rip" ProgramChange="16"/>
+      <Patch Number="018" Name="Tuba /" ProgramChange="17"/>
+      <Patch Number="019" Name="Tuba Stacc" ProgramChange="18"/>
+      <Patch Number="020" Name="Mezzo Pop" ProgramChange="19"/>
+      <Patch Number="021" Name="Mezzo Pop WS" ProgramChange="20"/>
+      <Patch Number="022" Name="DynaBrass  M" ProgramChange="21"/>
+      <Patch Number="023" Name="Smooth Brass" ProgramChange="22"/>
+      <Patch Number="024" Name="Oct PopBrass" ProgramChange="23"/>
+      <Patch Number="025" Name="PopBrass Sfz" ProgramChange="24"/>
+      <Patch Number="026" Name="Stac PopSect" ProgramChange="25"/>
+      <Patch Number="027" Name="PopBrs ShtFl" ProgramChange="26"/>
+      <Patch Number="028" Name="PopBrs LngFl" ProgramChange="27"/>
+      <Patch Number="029" Name="PopBrass Rip" ProgramChange="28"/>
+      <Patch Number="030" Name="PopBrs /Fl 1" ProgramChange="29"/>
+      <Patch Number="031" Name="PopBrs /Fl 2" ProgramChange="30"/>
+      <Patch Number="032" Name="ShortBrs /Fl" ProgramChange="31"/>
+      <Patch Number="033" Name="Smooth Tps" ProgramChange="32"/>
+      <Patch Number="034" Name="Tpt Section" ProgramChange="33"/>
+      <Patch Number="035" Name="Tpt Sect WS" ProgramChange="34"/>
+      <Patch Number="036" Name="Tpt Sect M" ProgramChange="35"/>
+      <Patch Number="037" Name="Mild Tp Sect" ProgramChange="36"/>
+      <Patch Number="038" Name="Tp Sect Sfz" ProgramChange="37"/>
+      <Patch Number="039" Name="Tp Sect Fall" ProgramChange="38"/>
+      <Patch Number="040" Name="TpSect RipFl" ProgramChange="39"/>
+      <Patch Number="041" Name="TpSect RipCp" ProgramChange="40"/>
+      <Patch Number="042" Name="TpSect Shake" ProgramChange="41"/>
+      <Patch Number="043" Name="Trumpets /Fl" ProgramChange="42"/>
+      <Patch Number="044" Name="Trumpts/Shak" ProgramChange="43"/>
+      <Patch Number="045" Name="Trumpts/Doit" ProgramChange="44"/>
+      <Patch Number="046" Name="ShortTps /Fl" ProgramChange="45"/>
+      <Patch Number="047" Name="..the Ripper" ProgramChange="46"/>
+      <Patch Number="048" Name="Don't Doit!" ProgramChange="47"/>
+      <Patch Number="049" Name="MuteTpSect S" ProgramChange="48"/>
+      <Patch Number="050" Name="MuteTpSect M" ProgramChange="49"/>
+      <Patch Number="051" Name="Mild MuteTps" ProgramChange="50"/>
+      <Patch Number="052" Name="Smooth C-Tps" ProgramChange="51"/>
+      <Patch Number="053" Name="C-Tps w/Vib" ProgramChange="52"/>
+      <Patch Number="054" Name="C-Tp Sect" ProgramChange="53"/>
+      <Patch Number="055" Name="C-Tp Sect WS" ProgramChange="54"/>
+      <Patch Number="056" Name="C-Tp Sect M" ProgramChange="55"/>
+      <Patch Number="057" Name="Mild CTpSect" ProgramChange="56"/>
+      <Patch Number="058" Name="CTp Sect Sfz" ProgramChange="57"/>
+      <Patch Number="059" Name="Tripoli" ProgramChange="58"/>
+      <Patch Number="060" Name="Mainly Stacc" ProgramChange="59"/>
+      <Patch Number="061" Name="C Tpts /Trit" ProgramChange="60"/>
+      <Patch Number="062" Name="Smooth Tbs" ProgramChange="61"/>
+      <Patch Number="063" Name="Mild Tb Sect" ProgramChange="62"/>
+      <Patch Number="064" Name="Tb Sect" ProgramChange="63"/>
+      <Patch Number="065" Name="Tb Sect WS" ProgramChange="64"/>
+      <Patch Number="066" Name="Tb Sect M" ProgramChange="65"/>
+      <Patch Number="067" Name="Tb Sect Sfz" ProgramChange="66"/>
+      <Patch Number="068" Name="Tb Sect Rip" ProgramChange="67"/>
+      <Patch Number="069" Name="Tb Sect /Fl" ProgramChange="68"/>
+      <Patch Number="070" Name="ShortTbs /Fl" ProgramChange="69"/>
+      <Patch Number="071" Name="ToodleAction" ProgramChange="70"/>
+      <Patch Number="072" Name="Smooth Horns" ProgramChange="71"/>
+      <Patch Number="073" Name="Horn Sect" ProgramChange="72"/>
+      <Patch Number="074" Name="Horn Sect WS" ProgramChange="73"/>
+      <Patch Number="075" Name="Horn Sect M" ProgramChange="74"/>
+      <Patch Number="076" Name="EmotiveHorns" ProgramChange="75"/>
+      <Patch Number="077" Name="Mild Horns" ProgramChange="76"/>
+      <Patch Number="078" Name="HornSect Sfz" ProgramChange="77"/>
+      <Patch Number="079" Name="HornSect/Rip" ProgramChange="78"/>
+      <Patch Number="080" Name="HornSwitcher" ProgramChange="79"/>
+      <Patch Number="081" Name="Mild Tuba" ProgramChange="80"/>
+      <Patch Number="082" Name="Tuba Sect WS" ProgramChange="81"/>
+      <Patch Number="083" Name="Tuba Sect M" ProgramChange="82"/>
+      <Patch Number="084" Name="TubaSwitchOn" ProgramChange="83"/>
+      <Patch Number="085" Name="Tp+Tb Sect /" ProgramChange="84"/>
+      <Patch Number="086" Name="CTp+Tb Sect/" ProgramChange="85"/>
+      <Patch Number="087" Name="LOUD OK?!" ProgramChange="86"/>
+      <Patch Number="088" Name="Hey You Mute" ProgramChange="87"/>
+      <Patch Number="089" Name="FullOnBrass" ProgramChange="88"/>
+      <Patch Number="090" Name="Blend Brass" ProgramChange="89"/>
+      <Patch Number="091" Name="LR Mix Stacc" ProgramChange="90"/>
+      <Patch Number="092" Name="Warm Tp Sect" ProgramChange="91"/>
+      <Patch Number="093" Name="Dyna Section" ProgramChange="92"/>
+      <Patch Number="094" Name="Warm Horns" ProgramChange="93"/>
+      <Patch Number="095" Name="Schizo Brass" ProgramChange="94"/>
+      <Patch Number="096" Name="Don't hit me" ProgramChange="95"/>
+      <Patch Number="097" Name="DiminerBrass" ProgramChange="96"/>
+      <Patch Number="098" Name="Wild Niner" ProgramChange="97"/>
+      <Patch Number="099" Name="Mid Thirties" ProgramChange="98"/>
+      <Patch Number="100" Name="BrsStac Echo" ProgramChange="99"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

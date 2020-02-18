@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
-from waflib import Options
+from waflib import Options, Task, Tools
 import os
 import sys
 import re
@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 # default state file version for this build
-CURRENT_SESSION_FILE_VERSION = 5990
+CURRENT_SESSION_FILE_VERSION = 6000
 
 I18N_PACKAGE = 'ardour'
 
@@ -38,6 +38,7 @@ libardour_sources = [
         'audiofile_tagger.cc',
         'audiofilesource.cc',
         'audioregion.cc',
+        'audiorom.cc',
         'audiosource.cc',
         'auditioner.cc',
         'automatable.cc',
@@ -113,6 +114,7 @@ libardour_sources = [
         'io_processor.cc',
         'kmeterdsp.cc',
         'ladspa_plugin.cc',
+        'latent.cc',
         'legatize.cc',
         'location.cc',
         'location_importer.cc',
@@ -147,12 +149,13 @@ libardour_sources = [
         'mode.cc',
         'monitor_control.cc',
         'monitor_processor.cc',
+        'mp3fileimportable.cc',
+        'mp3filesource.cc',
         'mtc_slave.cc',
         'mtdm.cc',
         'muteable.cc',
         'mute_control.cc',
         'mute_master.cc',
-        'note_fixer.cc',
         'onset_detector.cc',
         'operations.cc',
         'pan_controllable.cc',
@@ -161,7 +164,6 @@ libardour_sources = [
         'panner_manager.cc',
         'panner_shell.cc',
         'parameter_descriptor.cc',
-        'pcm_utils.cc',
         'phase_control.cc',
         'playlist.cc',
         'playlist_factory.cc',
@@ -180,6 +182,7 @@ libardour_sources = [
         'progress.cc',
         'quantize.cc',
         'rc_configuration.cc',
+        'readable.cc',
         'readonly_control.cc',
         'raw_midi_parser.cc',
         'recent_sessions.cc',
@@ -201,6 +204,7 @@ libardour_sources = [
         'selection.cc',
         'send.cc',
         'session.cc',
+        'session_bundles.cc',
         'session_butler.cc',
         'session_click.cc',
         'session_command.cc',
@@ -239,6 +243,7 @@ libardour_sources = [
         'strip_silence.cc',
         'system_exec.cc',
         'revision.cc',
+        'rt_midibuffer.cc',
         'tape_file_matcher.cc',
         'template_utils.cc',
         'tempo.cc',
@@ -248,6 +253,7 @@ libardour_sources = [
         'track.cc',
         'transient_detector.cc',
         'transform.cc',
+        'transport_fsm.cc',
         'transport_master.cc',
         'transport_master_manager.cc',
         'transpose.cc',
@@ -256,6 +262,7 @@ libardour_sources = [
         'utils.cc',
         'vca.cc',
         'vca_manager.cc',
+        'video_tools_paths.cc',
         'vumeterdsp.cc',
         'worker.cc'
 ]
@@ -298,30 +305,21 @@ def configure(conf):
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP',
                       atleast_version='2.0')
 
-    if Options.options.lv2:
-        autowaf.check_pkg(conf, 'lv2', uselib_store='LV2',
-                          atleast_version='1.0.0', mandatory=True)
-        autowaf.check_pkg(conf, 'lv2', uselib_store='LV2_1_2_0',
-                          atleast_version='1.2.0', mandatory=False)
-        autowaf.check_pkg(conf, 'lv2', uselib_store='LV2_1_10_0',
-                          atleast_version='1.10.0', mandatory=False)
-        autowaf.check_pkg(conf, 'serd-0', uselib_store='SERD',
-                          atleast_version='0.14.0', mandatory=True)
-        autowaf.check_pkg(conf, 'sord-0', uselib_store='SORD',
-                          atleast_version='0.8.0', mandatory=True)
-        autowaf.check_pkg(conf, 'sratom-0', uselib_store='SRATOM',
-                          atleast_version='0.2.0', mandatory=True)
-        autowaf.check_pkg(conf, 'lilv-0', uselib_store='LILV',
-                          atleast_version='0.14.0', mandatory=True)
-        autowaf.check_pkg(conf, 'lilv-0', uselib_store='LILV_0_16_0',
-                          atleast_version='0.16.0', mandatory=False)
-        autowaf.check_pkg(conf, 'lilv-0', uselib_store='LILV_0_19_2',
-                          atleast_version='0.19.2', mandatory=False)
-        autowaf.check_pkg(conf, 'lilv-0', uselib_store='LILV_0_21_3',
-                          atleast_version='0.21.3', mandatory=False)
-        autowaf.check_pkg(conf, 'suil-0', uselib_store='SUIL',
-                          atleast_version='0.6.0', mandatory=False)
-        conf.define ('LV2_SUPPORT', 1)
+    autowaf.check_pkg(conf, 'lv2', uselib_store='LV2',
+                      atleast_version='1.2.0', mandatory=True)
+    autowaf.check_pkg(conf, 'lv2', uselib_store='LV2_1_10_0',
+                      atleast_version='1.10.0', mandatory=False)
+    autowaf.check_pkg(conf, 'serd-0', uselib_store='SERD',
+                      atleast_version='0.14.0', mandatory=True)
+    autowaf.check_pkg(conf, 'sord-0', uselib_store='SORD',
+                      atleast_version='0.8.0', mandatory=True)
+    autowaf.check_pkg(conf, 'sratom-0', uselib_store='SRATOM',
+                      atleast_version='0.2.0', mandatory=True)
+    autowaf.check_pkg(conf, 'lilv-0', uselib_store='LILV',
+                      atleast_version='0.24.2', mandatory=True)
+    autowaf.check_pkg(conf, 'suil-0', uselib_store='SUIL',
+                      atleast_version='0.6.0', mandatory=False)
+    conf.define ('LV2_SUPPORT', 1)
 
     # non-standard LV2 extention -- TODO: add option to disable??
     if conf.is_defined ('HAVE_LV2_1_10_0'):
@@ -336,6 +334,9 @@ def configure(conf):
                       atleast_version='1.2.1')
     autowaf.check_pkg(conf, 'libcurl', uselib_store='CURL',
                       atleast_version='7.0.0')
+
+    autowaf.check_pkg(conf, 'fftw3f', uselib_store='FFTW35F',
+                      atleast_version='3.3.5', mandatory=False)
 
     # controls whether we actually use it in preference to soundtouch
     # Note: as of 2104, soundtouch (WSOLA) has been out-of-use for years.
@@ -374,10 +375,13 @@ def build(bld):
     # micro increment <=> no interface changes
     LIBARDOUR_LIB_VERSION = "3.0.0"
 
+    # remove '${DEFINES_ST:DEFINES}' from run_str.
+    # x86_64-w64-mingw32-as (mingw) -D flag is for debug messages
+    if bld.env['build_target'] == 'mingw':
+        class asm(Task.classes['asm']): run_str = '${AS} ${ASFLAGS} ${ASMPATH_ST:INCPATHS} ${AS_SRC_F}${SRC} ${AS_TGT_F}${TGT}'
+
     # operate on copy to avoid adding sources twice
     sources = list(libardour_sources)
-    if bld.is_tracks_build():
-        sources += [ 'engine_state_controller.cc' ]
 
     # Library
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
@@ -386,7 +390,7 @@ def build(bld):
         obj.defines      = [ 'LIBARDOUR_DLL_EXPORTS=1' ]
     else:
         obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=sources)
-        obj.cxxflags     = [  bld.env['compiler_flags_dict']['pic'] ]
+        obj.cxxflags     = [ bld.env['compiler_flags_dict']['pic'] ]
         obj.cflags       = [ bld.env['compiler_flags_dict']['pic'] ]
         obj.defines      = []
 
@@ -482,7 +486,7 @@ def build(bld):
             avx_cxxflags = list(bld.env['CXXFLAGS'])
             avx_cxxflags.append (bld.env['compiler_flags_dict']['avx'])
             avx_cxxflags.append (bld.env['compiler_flags_dict']['pic'])
-            bld(features = 'cxx',
+            bld(features = 'cxx cxxstlib asm',
                 source   = avx_sources,
                 cxxflags = avx_cxxflags,
                 includes = [ '.' ],
@@ -507,7 +511,7 @@ def build(bld):
         testcommon.includes     = obj.includes + ['test', '../pbd', '..']
         testcommon.source       = ['test/testrunner.cc', 'test/test_needing_session.cc',
                                    'test/dummy_lxvst.cc', 'test/audio_region_test.cc', 'test/test_util.cc', 'test/test_ui.cc']
-        testcommon.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
+        testcommon.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD', 'OSX', 'FFTW3F',
                                    'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
         testcommon.use          = ['libpbd','libmidipp','libevoral',
                                    'libaudiographer','libardour']
@@ -529,7 +533,7 @@ def build(bld):
             create_ardour_test_program(bld, obj.includes, 'bbt', 'test_bbt', ['test/bbt_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'tempo', 'test_tempo', ['test/tempo_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'lua_script', 'test_lua_script', ['test/lua_script_test.cc'])
-            create_ardour_test_program(bld, obj.includes, 'midi_clock_slave', 'test_midi_clock_slave', ['test/midi_clock_slave_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'midi_clock', 'test_midi_clock', ['test/midi_clock_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'resampled_source', 'test_resampled_source', ['test/resampled_source_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'samplewalk_to_beats', 'test_samplewalk_to_beats', ['test/samplewalk_to_beats_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'samplepos_plus_beats', 'test_samplepos_plus_beats', ['test/samplepos_plus_beats_test.cc'])
@@ -550,7 +554,7 @@ def build(bld):
             test/dsp_load_calculator_test.cc
             test/tempo_test.cc
             test/lua_script_test.cc
-            test/midi_clock_slave_test.cc
+            test/midi_clock_test.cc
             test/resampled_source_test.cc
             test/samplewalk_to_beats_test.cc
             test/samplepos_plus_beats_test.cc
@@ -584,7 +588,7 @@ def build(bld):
         load_save_session.includes  = obj.includes
         load_save_session.includes.append ('test')
         load_save_session.uselib    = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
-                             'SAMPLERATE','XML','LRDF','COREAUDIO']
+                             'SAMPLERATE','XML','LRDF','COREAUDIO', 'FFTW3F']
         load_save_session.use       = ['libpbd','libmidipp','libardour']
         load_save_session.name      = 'libardour-load-save-session'
         load_save_session.target    = 'load-save-session'
@@ -609,7 +613,7 @@ def build(bld):
             profilingobj.includes  = obj.includes
             profilingobj.includes.append ('test')
             profilingobj.uselib    = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
-                             'SAMPLERATE','XML','LRDF','COREAUDIO']
+                             'SAMPLERATE','XML','LRDF','COREAUDIO', 'FFTW3F']
             profilingobj.use       = ['libpbd','libmidipp','libardour']
             profilingobj.name      = 'libardour-profiling'
             profilingobj.target    = p
@@ -625,7 +629,7 @@ def create_ardour_test_program(bld, includes, name, target, sources):
     testobj              = bld(features = 'cxx cxxprogram')
     testobj.includes     = includes + ['test', '../pbd', '..']
     testobj.source       = sources
-    testobj.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
+    testobj.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD', 'FFTW3F',
                             'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
     testobj.use          = ['libpbd','libmidipp','libevoral',
                             'libaudiographer','libardour','testcommon']

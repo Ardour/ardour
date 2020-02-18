@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JD-990</Model>
+    <PatchNameList Name="EXP Experience 1-64">
+      <Patch Number="I-11" Name="Tr.Rhodes" ProgramChange="0"/>
+      <Patch Number="I-12" Name="DynRhodes 1" ProgramChange="1"/>
+      <Patch Number="I-13" Name="DynRhodes 2" ProgramChange="2"/>
+      <Patch Number="I-14" Name="Solo Vln1/" ProgramChange="3"/>
+      <Patch Number="I-15" Name="Solo Vln2" ProgramChange="4"/>
+      <Patch Number="I-16" Name="Agitato Vln" ProgramChange="5"/>
+      <Patch Number="I-17" Name="Marcato Str" ProgramChange="6"/>
+      <Patch Number="I-18" Name="VeloString2" ProgramChange="7"/>
+      <Patch Number="I-21" Name="New Strings" ProgramChange="8"/>
+      <Patch Number="I-22" Name="Pentatonic2" ProgramChange="9"/>
+      <Patch Number="I-23" Name="Dim Hit 2" ProgramChange="10"/>
+      <Patch Number="I-24" Name="Tnr/SopSax1" ProgramChange="11"/>
+      <Patch Number="I-25" Name="Tnr/SopSax2" ProgramChange="12"/>
+      <Patch Number="I-26" Name="Dist Gt Low" ProgramChange="13"/>
+      <Patch Number="I-27" Name="Power Chord" ProgramChange="14"/>
+      <Patch Number="I-28" Name="Bowed Guitar" ProgramChange="15"/>
+      <Patch Number="I-31" Name="Asian Gong" ProgramChange="16"/>
+      <Patch Number="I-32" Name="KalimbaGls2" ProgramChange="17"/>
+      <Patch Number="I-33" Name="Mini Tour" ProgramChange="18"/>
+      <Patch Number="I-34" Name="OB 2 Voice" ProgramChange="19"/>
+      <Patch Number="I-35" Name="OB 2 Voice2" ProgramChange="20"/>
+      <Patch Number="I-36" Name="PatsGR300 2" ProgramChange="21"/>
+      <Patch Number="I-37" Name="CS Lead 2" ProgramChange="22"/>
+      <Patch Number="I-38" Name="SynthLead1" ProgramChange="23"/>
+      <Patch Number="I-41" Name="SynthLead2" ProgramChange="24"/>
+      <Patch Number="I-42" Name="SynthLead3" ProgramChange="25"/>
+      <Patch Number="I-43" Name="SynthLead4" ProgramChange="26"/>
+      <Patch Number="I-44" Name="Polysync 2" ProgramChange="27"/>
+      <Patch Number="I-45" Name="Wavesync" ProgramChange="28"/>
+      <Patch Number="I-46" Name="Rock Sync 2" ProgramChange="29"/>
+      <Patch Number="I-47" Name="P5 Sync Lead" ProgramChange="30"/>
+      <Patch Number="I-48" Name="T8 Sync 2" ProgramChange="31"/>
+      <Patch Number="I-51" Name="P5SyncRush2" ProgramChange="32"/>
+      <Patch Number="I-52" Name="Synkoid 2" ProgramChange="33"/>
+      <Patch Number="I-53" Name="TB303 Bs" ProgramChange="34"/>
+      <Patch Number="I-54" Name="TB303 AcidBs" ProgramChange="35"/>
+      <Patch Number="I-55" Name="Bark Bass 2" ProgramChange="36"/>
+      <Patch Number="I-56" Name="Quack Brass" ProgramChange="37"/>
+      <Patch Number="I-57" Name="Spit Brass 2" ProgramChange="38"/>
+      <Patch Number="I-58" Name="PolyXpandr2" ProgramChange="39"/>
+      <Patch Number="I-61" Name="AsianBellPd" ProgramChange="40"/>
+      <Patch Number="I-62" Name="Asian Ens" ProgramChange="41"/>
+      <Patch Number="I-63" Name="Square Pad" ProgramChange="42"/>
+      <Patch Number="I-64" Name="Jet Pad 1" ProgramChange="43"/>
+      <Patch Number="I-65" Name="Jet Pad 2" ProgramChange="44"/>
+      <Patch Number="I-66" Name="OB Pad 1" ProgramChange="45"/>
+      <Patch Number="I-67" Name="OB Pad 2" ProgramChange="46"/>
+      <Patch Number="I-68" Name="Strings Ens" ProgramChange="47"/>
+      <Patch Number="I-71" Name="MG STR" ProgramChange="48"/>
+      <Patch Number="I-72" Name="JP8 Str 1" ProgramChange="49"/>
+      <Patch Number="I-73" Name="JP8 Str 2" ProgramChange="50"/>
+      <Patch Number="I-74" Name="CS Str" ProgramChange="51"/>
+      <Patch Number="I-75" Name="CS Pad" ProgramChange="52"/>
+      <Patch Number="I-76" Name="Prologue 2" ProgramChange="53"/>
+      <Patch Number="I-77" Name="Asian Sweep" ProgramChange="54"/>
+      <Patch Number="I-78" Name="Sweep Pad 1" ProgramChange="55"/>
+      <Patch Number="I-81" Name="Sweep Pad 2" ProgramChange="56"/>
+      <Patch Number="I-82" Name="ClicheSweep" ProgramChange="57"/>
+      <Patch Number="I-83" Name="MetalDrone2" ProgramChange="58"/>
+      <Patch Number="I-84" Name="PG HarmoPad" ProgramChange="59"/>
+      <Patch Number="I-85" Name="Wavetable" ProgramChange="60"/>
+      <Patch Number="I-86" Name="Animotion 2" ProgramChange="61"/>
+      <Patch Number="I-87" Name="Random Pad2" ProgramChange="62"/>
+      <Patch Number="I-88" Name="MC8 Seq 2" ProgramChange="63"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JV-80</Model>
+    <Model>JV-880</Model>
+    <PatchNameList Name="EXP Experience 1st(64)">
+      <Patch Number="i01" Name="Tr.Rhodes" ProgramChange="0"/>
+      <Patch Number="i02" Name="DynRhodes 1" ProgramChange="1"/>
+      <Patch Number="i03" Name="DynRhodes 2" ProgramChange="2"/>
+      <Patch Number="i04" Name="Solo Vln1/" ProgramChange="3"/>
+      <Patch Number="i05" Name="Solo Vln2" ProgramChange="4"/>
+      <Patch Number="i06" Name="Agitato Vln" ProgramChange="5"/>
+      <Patch Number="i07" Name="Marcato Str" ProgramChange="6"/>
+      <Patch Number="i08" Name="VeloString2" ProgramChange="7"/>
+      <Patch Number="i09" Name="New Strings" ProgramChange="8"/>
+      <Patch Number="i10" Name="Pentatonic2" ProgramChange="9"/>
+      <Patch Number="i11" Name="Dim Hit 2" ProgramChange="10"/>
+      <Patch Number="i12" Name="Tnr/SopSax1" ProgramChange="11"/>
+      <Patch Number="i13" Name="Tnr/SopSax2" ProgramChange="12"/>
+      <Patch Number="i14" Name="Dist Gt Low" ProgramChange="13"/>
+      <Patch Number="i15" Name="Power Chord" ProgramChange="14"/>
+      <Patch Number="i16" Name="Bowed Guitar" ProgramChange="15"/>
+      <Patch Number="i17" Name="Asian Gong" ProgramChange="16"/>
+      <Patch Number="i18" Name="KalimbaGls2" ProgramChange="17"/>
+      <Patch Number="i19" Name="Mini Tour" ProgramChange="18"/>
+      <Patch Number="i20" Name="OB 2 Voice" ProgramChange="19"/>
+      <Patch Number="i21" Name="OB 2 Voice2" ProgramChange="20"/>
+      <Patch Number="i22" Name="PatsGR300 2" ProgramChange="21"/>
+      <Patch Number="i23" Name="CS Lead 2" ProgramChange="22"/>
+      <Patch Number="i24" Name="SynthLead1" ProgramChange="23"/>
+      <Patch Number="i25" Name="SynthLead2" ProgramChange="24"/>
+      <Patch Number="i26" Name="SynthLead3" ProgramChange="25"/>
+      <Patch Number="i27" Name="SynthLead4" ProgramChange="26"/>
+      <Patch Number="i28" Name="Polysync 2" ProgramChange="27"/>
+      <Patch Number="i29" Name="Wavesync" ProgramChange="28"/>
+      <Patch Number="i30" Name="Rock Sync 2" ProgramChange="29"/>
+      <Patch Number="i31" Name="P5 Sync Lead" ProgramChange="30"/>
+      <Patch Number="i32" Name="T8 Sync 2" ProgramChange="31"/>
+      <Patch Number="i33" Name="P5SyncRush2" ProgramChange="32"/>
+      <Patch Number="i34" Name="Synkoid 2" ProgramChange="33"/>
+      <Patch Number="i35" Name="TB303 Bs" ProgramChange="34"/>
+      <Patch Number="i36" Name="TB303 AcidBs" ProgramChange="35"/>
+      <Patch Number="i37" Name="Bark Bass 2" ProgramChange="36"/>
+      <Patch Number="i38" Name="Quack Brass" ProgramChange="37"/>
+      <Patch Number="i39" Name="Spit Brass 2" ProgramChange="38"/>
+      <Patch Number="i40" Name="PolyXpandr2" ProgramChange="39"/>
+      <Patch Number="i41" Name="AsianBellPd" ProgramChange="40"/>
+      <Patch Number="i42" Name="Asian Ens" ProgramChange="41"/>
+      <Patch Number="i43" Name="Square Pad" ProgramChange="42"/>
+      <Patch Number="i44" Name="Jet Pad 1" ProgramChange="43"/>
+      <Patch Number="i45" Name="Jet Pad 2" ProgramChange="44"/>
+      <Patch Number="i46" Name="OB Pad 1" ProgramChange="45"/>
+      <Patch Number="i47" Name="OB Pad 2" ProgramChange="46"/>
+      <Patch Number="i48" Name="Strings Ens" ProgramChange="47"/>
+      <Patch Number="i49" Name="MG STR" ProgramChange="48"/>
+      <Patch Number="i50" Name="JP8 Str 1" ProgramChange="49"/>
+      <Patch Number="i51" Name="JP8 Str 2" ProgramChange="50"/>
+      <Patch Number="i52" Name="CS Str" ProgramChange="51"/>
+      <Patch Number="i53" Name="CS Pad" ProgramChange="52"/>
+      <Patch Number="i54" Name="Prologue 2" ProgramChange="53"/>
+      <Patch Number="i55" Name="Asian Sweep" ProgramChange="54"/>
+      <Patch Number="i56" Name="Sweep Pad 1" ProgramChange="55"/>
+      <Patch Number="i57" Name="Sweep Pad 2" ProgramChange="56"/>
+      <Patch Number="i58" Name="ClicheSweep" ProgramChange="57"/>
+      <Patch Number="i59" Name="MetalDrone2" ProgramChange="58"/>
+      <Patch Number="i60" Name="PG HarmoPad" ProgramChange="59"/>
+      <Patch Number="i61" Name="Wavetable" ProgramChange="60"/>
+      <Patch Number="i62" Name="Animotion 2" ProgramChange="61"/>
+      <Patch Number="i63" Name="Random Pad2" ProgramChange="62"/>
+      <Patch Number="i64" Name="MC8 Seq 2" ProgramChange="63"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JV-90</Model>
+    <Model>JV-1000</Model>
+    <PatchNameList Name="EXP Experience A">
+      <Patch Number="EA11" Name="Tr.Rhodes" ProgramChange="0"/>
+      <Patch Number="EA12" Name="DynRhodes 1" ProgramChange="1"/>
+      <Patch Number="EA13" Name="DynRhodes 2" ProgramChange="2"/>
+      <Patch Number="EA14" Name="Solo Vln1/" ProgramChange="3"/>
+      <Patch Number="EA15" Name="Solo Vln2" ProgramChange="4"/>
+      <Patch Number="EA16" Name="Agitato Vln" ProgramChange="5"/>
+      <Patch Number="EA17" Name="Marcato Str" ProgramChange="6"/>
+      <Patch Number="EA18" Name="VeloString2" ProgramChange="7"/>
+      <Patch Number="EA21" Name="New Strings" ProgramChange="8"/>
+      <Patch Number="EA22" Name="Pentatonic2" ProgramChange="9"/>
+      <Patch Number="EA23" Name="Dim Hit 2" ProgramChange="10"/>
+      <Patch Number="EA24" Name="Tnr/SopSax1" ProgramChange="11"/>
+      <Patch Number="EA25" Name="Tnr/SopSax2" ProgramChange="12"/>
+      <Patch Number="EA26" Name="Dist Gt Low" ProgramChange="13"/>
+      <Patch Number="EA27" Name="Power Chord" ProgramChange="14"/>
+      <Patch Number="EA28" Name="Bowed Guitar" ProgramChange="15"/>
+      <Patch Number="EA31" Name="Asian Gong" ProgramChange="16"/>
+      <Patch Number="EA32" Name="KalimbaGls2" ProgramChange="17"/>
+      <Patch Number="EA33" Name="Mini Tour" ProgramChange="18"/>
+      <Patch Number="EA34" Name="OB 2 Voice" ProgramChange="19"/>
+      <Patch Number="EA35" Name="OB 2 Voice2" ProgramChange="20"/>
+      <Patch Number="EA36" Name="PatsGR300 2" ProgramChange="21"/>
+      <Patch Number="EA37" Name="CS Lead 2" ProgramChange="22"/>
+      <Patch Number="EA38" Name="SynthLead1" ProgramChange="23"/>
+      <Patch Number="EA41" Name="SynthLead2" ProgramChange="24"/>
+      <Patch Number="EA42" Name="SynthLead3" ProgramChange="25"/>
+      <Patch Number="EA43" Name="SynthLead4" ProgramChange="26"/>
+      <Patch Number="EA44" Name="Polysync 2" ProgramChange="27"/>
+      <Patch Number="EA45" Name="Wavesync" ProgramChange="28"/>
+      <Patch Number="EA46" Name="Rock Sync 2" ProgramChange="29"/>
+      <Patch Number="EA47" Name="P5 Sync Lead" ProgramChange="30"/>
+      <Patch Number="EA48" Name="T8 Sync 2" ProgramChange="31"/>
+      <Patch Number="EA51" Name="P5SyncRush2" ProgramChange="32"/>
+      <Patch Number="EA52" Name="Synkoid 2" ProgramChange="33"/>
+      <Patch Number="EA53" Name="TB303 Bs" ProgramChange="34"/>
+      <Patch Number="EA54" Name="TB303 AcidBs" ProgramChange="35"/>
+      <Patch Number="EA55" Name="Bark Bass 2" ProgramChange="36"/>
+      <Patch Number="EA56" Name="Quack Brass" ProgramChange="37"/>
+      <Patch Number="EA57" Name="Spit Brass 2" ProgramChange="38"/>
+      <Patch Number="EA58" Name="PolyXpandr2" ProgramChange="39"/>
+      <Patch Number="EA61" Name="AsianBellPd" ProgramChange="40"/>
+      <Patch Number="EA62" Name="Asian Ens" ProgramChange="41"/>
+      <Patch Number="EA63" Name="Square Pad" ProgramChange="42"/>
+      <Patch Number="EA64" Name="Jet Pad 1" ProgramChange="43"/>
+      <Patch Number="EA65" Name="Jet Pad 2" ProgramChange="44"/>
+      <Patch Number="EA66" Name="OB Pad 1" ProgramChange="45"/>
+      <Patch Number="EA67" Name="OB Pad 2" ProgramChange="46"/>
+      <Patch Number="EA68" Name="Strings Ens" ProgramChange="47"/>
+      <Patch Number="EA71" Name="MG STR" ProgramChange="48"/>
+      <Patch Number="EA72" Name="JP8 Str 1" ProgramChange="49"/>
+      <Patch Number="EA73" Name="JP8 Str 2" ProgramChange="50"/>
+      <Patch Number="EA74" Name="CS Str" ProgramChange="51"/>
+      <Patch Number="EA75" Name="CS Pad" ProgramChange="52"/>
+      <Patch Number="EA76" Name="Prologue 2" ProgramChange="53"/>
+      <Patch Number="EA77" Name="Asian Sweep" ProgramChange="54"/>
+      <Patch Number="EA78" Name="Sweep Pad 1" ProgramChange="55"/>
+      <Patch Number="EA81" Name="Sweep Pad 2" ProgramChange="56"/>
+      <Patch Number="EA82" Name="ClicheSweep" ProgramChange="57"/>
+      <Patch Number="EA83" Name="MetalDrone2" ProgramChange="58"/>
+      <Patch Number="EA84" Name="PG HarmoPad" ProgramChange="59"/>
+      <Patch Number="EA85" Name="Wavetable" ProgramChange="60"/>
+      <Patch Number="EA86" Name="Animotion 2" ProgramChange="61"/>
+      <Patch Number="EA87" Name="Random Pad2" ProgramChange="62"/>
+      <Patch Number="EA88" Name="MC8 Seq 2" ProgramChange="63"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+  <ExtendingDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>JV-1010</Model>
+    <Model>JV-1080</Model>
+    <Model>JV-2080</Model>
+    <Model>XP-50</Model>
+    <Model>XP-80</Model>
+    <PatchNameList Name="EXP Experience: Patches">
+      <Patch Number="001" Name="Tr.Rhodes" ProgramChange="0"/>
+      <Patch Number="002" Name="DynRhodes 1" ProgramChange="1"/>
+      <Patch Number="003" Name="DynRhodes 2" ProgramChange="2"/>
+      <Patch Number="004" Name="Solo Vln1/" ProgramChange="3"/>
+      <Patch Number="005" Name="Solo Vln2" ProgramChange="4"/>
+      <Patch Number="006" Name="Agitato Vln" ProgramChange="5"/>
+      <Patch Number="007" Name="Marcato Str" ProgramChange="6"/>
+      <Patch Number="008" Name="VeloString2" ProgramChange="7"/>
+      <Patch Number="009" Name="New Strings" ProgramChange="8"/>
+      <Patch Number="010" Name="Pentatonic2" ProgramChange="9"/>
+      <Patch Number="011" Name="Dim Hit 2" ProgramChange="10"/>
+      <Patch Number="012" Name="Tnr/SopSax1" ProgramChange="11"/>
+      <Patch Number="013" Name="Tnr/SopSax2" ProgramChange="12"/>
+      <Patch Number="014" Name="Dist Gt Low" ProgramChange="13"/>
+      <Patch Number="015" Name="Power Chord" ProgramChange="14"/>
+      <Patch Number="016" Name="Bowed Guitar" ProgramChange="15"/>
+      <Patch Number="017" Name="Asian Gong" ProgramChange="16"/>
+      <Patch Number="018" Name="KalimbaGls2" ProgramChange="17"/>
+      <Patch Number="019" Name="Mini Tour" ProgramChange="18"/>
+      <Patch Number="020" Name="OB 2 Voice" ProgramChange="19"/>
+      <Patch Number="021" Name="OB 2 Voice2" ProgramChange="20"/>
+      <Patch Number="022" Name="PatsGR300 2" ProgramChange="21"/>
+      <Patch Number="023" Name="CS Lead 2" ProgramChange="22"/>
+      <Patch Number="024" Name="SynthLead1" ProgramChange="23"/>
+      <Patch Number="025" Name="SynthLead2" ProgramChange="24"/>
+      <Patch Number="026" Name="SynthLead3" ProgramChange="25"/>
+      <Patch Number="027" Name="SynthLead4" ProgramChange="26"/>
+      <Patch Number="028" Name="Polysync 2" ProgramChange="27"/>
+      <Patch Number="029" Name="Wavesync" ProgramChange="28"/>
+      <Patch Number="030" Name="Rock Sync 2" ProgramChange="29"/>
+      <Patch Number="031" Name="P5 Sync Lead" ProgramChange="30"/>
+      <Patch Number="032" Name="T8 Sync 2" ProgramChange="31"/>
+      <Patch Number="033" Name="P5SyncRush2" ProgramChange="32"/>
+      <Patch Number="034" Name="Synkoid 2" ProgramChange="33"/>
+      <Patch Number="035" Name="TB303 Bs" ProgramChange="34"/>
+      <Patch Number="036" Name="TB303 AcidBs" ProgramChange="35"/>
+      <Patch Number="037" Name="Bark Bass 2" ProgramChange="36"/>
+      <Patch Number="038" Name="Quack Brass" ProgramChange="37"/>
+      <Patch Number="039" Name="Spit Brass 2" ProgramChange="38"/>
+      <Patch Number="040" Name="PolyXpandr2" ProgramChange="39"/>
+      <Patch Number="041" Name="AsianBellPd" ProgramChange="40"/>
+      <Patch Number="042" Name="Asian Ens" ProgramChange="41"/>
+      <Patch Number="043" Name="Square Pad" ProgramChange="42"/>
+      <Patch Number="044" Name="Jet Pad 1" ProgramChange="43"/>
+      <Patch Number="045" Name="Jet Pad 2" ProgramChange="44"/>
+      <Patch Number="046" Name="OB Pad 1" ProgramChange="45"/>
+      <Patch Number="047" Name="OB Pad 2" ProgramChange="46"/>
+      <Patch Number="048" Name="Strings Ens" ProgramChange="47"/>
+      <Patch Number="049" Name="MG STR" ProgramChange="48"/>
+      <Patch Number="050" Name="JP8 Str 1" ProgramChange="49"/>
+      <Patch Number="051" Name="JP8 Str 2" ProgramChange="50"/>
+      <Patch Number="052" Name="CS Str" ProgramChange="51"/>
+      <Patch Number="053" Name="CS Pad" ProgramChange="52"/>
+      <Patch Number="054" Name="Prologue 2" ProgramChange="53"/>
+      <Patch Number="055" Name="Asian Sweep" ProgramChange="54"/>
+      <Patch Number="056" Name="Sweep Pad 1" ProgramChange="55"/>
+      <Patch Number="057" Name="Sweep Pad 2" ProgramChange="56"/>
+      <Patch Number="058" Name="ClicheSweep" ProgramChange="57"/>
+      <Patch Number="059" Name="MetalDrone2" ProgramChange="58"/>
+      <Patch Number="060" Name="PG HarmoPad" ProgramChange="59"/>
+      <Patch Number="061" Name="Wavetable" ProgramChange="60"/>
+      <Patch Number="062" Name="Animotion 2" ProgramChange="61"/>
+      <Patch Number="063" Name="Random Pad2" ProgramChange="62"/>
+      <Patch Number="064" Name="MC8 Seq 2" ProgramChange="63"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

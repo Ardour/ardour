@@ -1,20 +1,28 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2000-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2006-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2006 Jesse Chappell <jesse@essej.net>
+ * Copyright (C) 2007-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2015 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2013-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 GZharun <grygoriiz@wavesglobal.com>
+ * Copyright (C) 2016-2017 Julien "_FrnchFrgg_" RIVAUD <frnchfrgg@free.fr>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <algorithm>
 #include <cmath>
@@ -105,7 +113,7 @@ IO::~IO ()
 void
 IO::disconnect_check (boost::shared_ptr<Port> a, boost::shared_ptr<Port> b)
 {
-	if (_session.state_of_the_state () & Session::Deletion) {
+	if (_session.deletion_in_progress ()) {
 		return;
 	}
 	/* this could be called from within our own ::disconnect() method(s)
@@ -200,6 +208,21 @@ IO::connect (boost::shared_ptr<Port> our_port, string other_port, void* src)
 	return 0;
 }
 
+bool
+IO::can_add_port (DataType type) const
+{
+	switch (type) {
+		case DataType::NIL:
+			return false;
+		case DataType::AUDIO:
+			return true;
+		case DataType::MIDI:
+			return _ports.count ().n_midi() < 1;
+	}
+	abort(); /*NOTREACHED*/
+	return false;
+}
+
 int
 IO::remove_port (boost::shared_ptr<Port> port, void* src)
 {
@@ -208,7 +231,7 @@ IO::remove_port (boost::shared_ptr<Port> port, void* src)
 	after.set (port->type(), after.get (port->type()) - 1);
 
 	boost::optional<bool> const r = PortCountChanging (after); /* EMIT SIGNAL */
-	if (r.get_value_or (false)) {
+	if (r.value_or (false)) {
 		return -1;
 	}
 
@@ -267,6 +290,10 @@ IO::add_port (string destination, void* src, DataType type)
 
 	if (type == DataType::NIL) {
 		type = _default_type;
+	}
+
+	if (!can_add_port (type)) {
+		return -1;
 	}
 
 	ChanCount before = _ports.count ();
@@ -536,8 +563,6 @@ IO::state ()
 		node->add_child_nocopy (*pnode);
 	}
 
-	node->set_property (X_("user-latency"), _user_latency);
-
 	return *node;
 }
 
@@ -576,6 +601,21 @@ IO::set_state (const XMLNode& node, int version)
 	if (create_ports (node, version)) {
 		return -1;
 	}
+	if (_sendish && _direction == Output) {
+		/* ignore <Port name="...">  from XML for sends, but use the names
+		 * ::ensure_ports_locked() creates port using ::build_legal_port_name()
+		 * This is needed to properly restore connections when creating
+		 * external sends from templates because the IO name changes.
+		 */
+		PortSet::iterator i = _ports.begin();
+		XMLNodeConstIterator x = node.children().begin();
+		for (; i != _ports.end(), x != node.children().end(); ++i, ++x) {
+			if ((*x)->name() == "Port") {
+				(*x)->remove_property (X_("name"));
+				(*x)->set_property (X_("name"), i->name());
+			}
+		}
+	}
 
 	// after create_ports, updates names
 	if (node.get_property ("pretty-name", name)) {
@@ -596,8 +636,6 @@ IO::set_state (const XMLNode& node, int version)
 		pending_state_node_in = false;
 		ConnectingLegal.connect_same_thread (connection_legal_c, boost::bind (&IO::connecting_became_legal, this));
 	}
-
-	node.get_property ("user-latency", _user_latency);
 
 	return 0;
 }
@@ -662,10 +700,7 @@ IO::connecting_became_legal ()
 
 	connection_legal_c.disconnect ();
 
-	// it's not required for TracksLive, as long as TracksLive's session does all the connections when it's being loaded
-	if (!Profile->get_trx() ) {
-		ret = make_connections (*pending_state_node, pending_state_node_version, pending_state_node_in);
-	}
+	ret = make_connections (*pending_state_node, pending_state_node_version, pending_state_node_in);
 
 	delete pending_state_node;
 	pending_state_node = 0;
@@ -1363,14 +1398,12 @@ IO::enable_connecting ()
 	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock());
 	connecting_legal = true;
 	boost::optional<int> r = ConnectingLegal ();
-	return r.get_value_or (0);
+	return r.value_or (0);
 }
 
 void
 IO::bundle_changed (Bundle::Change /*c*/)
 {
-	/* XXX */
-//	connect_input_ports_to_bundle (_input_bundle, this);
 }
 
 

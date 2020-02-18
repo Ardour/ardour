@@ -1,21 +1,27 @@
 /*
-    Copyright (C) 2010 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2006 Sampo Savolainen <v2@iki.fi>
+ * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2005-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2007-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2007-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2013-2015 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2014-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
@@ -308,8 +314,6 @@ VSTPlugin::set_state (const XMLNode& node, int version)
 {
 	LocaleGuard lg;
 	int ret = -1;
-
-#ifndef NO_PLUGIN_STATE
 	XMLNode* child;
 
 	if ((child = find_named_node (node, X_("chunk"))) != 0) {
@@ -347,7 +351,6 @@ VSTPlugin::set_state (const XMLNode& node, int version)
 		ret = 0;
 
 	}
-#endif
 
 	Plugin::set_state (node, version);
 	return ret;
@@ -643,12 +646,8 @@ VSTPlugin::describe_parameter (Evoral::Parameter param)
 }
 
 samplecnt_t
-VSTPlugin::signal_latency () const
+VSTPlugin::plugin_latency () const
 {
-	if (_user_latency) {
-		return _user_latency;
-	}
-
 #if ( defined(__x86_64__) || defined(_M_X64) )
 	return *((int32_t *) (((char *) &_plugin->flags) + 24)); /* initialDelay */
 #else
@@ -810,16 +809,20 @@ VSTPlugin::has_editor () const
 	return _plugin->flags & effFlagsHasEditor;
 }
 
-void
-VSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t /*len*/) const
+bool
+VSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
 {
 	char *first_nonws;
+	assert (len > VestigeMaxShortLabelLen);
+	memset (buf, 0, len);
 
 	_plugin->dispatcher (_plugin, 7 /* effGetParamDisplay */, param, 0, buf, 0);
 
 	if (buf[0] == '\0') {
-		return;
+		return false;
 	}
+
+	buf[len - 1] = '\0';
 
 	first_nonws = buf;
 	while (*first_nonws && isspace (*first_nonws)) {
@@ -827,10 +830,11 @@ VSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t /*len*/) const
 	}
 
 	if (*first_nonws == '\0') {
-		return;
+		return false;
 	}
 
 	memmove (buf, first_nonws, strlen (buf) - (first_nonws - buf) + 1);
+	return true;
 }
 
 void

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2014 Robin Gareus <robin@gareus.org>
- * Copyright (C) 2013 Paul Davis
+ * Copyright (C) 2014-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2014-2018 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,9 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef __libbackend_dummy_audiobackend_h__
@@ -123,11 +123,13 @@ class DummyPort {
 		void _disconnect (DummyPort* , bool);
 
 	protected:
-		// random number generator
+		/* random number generator */
 		void setup_random_number_generator ();
 		inline float    randf ();
 		inline uint32_t randi ();
 		uint32_t _rseed;
+		/* engine time */
+		pframes_t pulse_position () const;
 
 		// signal generator
 		volatile bool _gen_cycle;
@@ -162,6 +164,7 @@ class DummyAudioPort : public DummyPort {
 			SineSweepSwell,
 			SquareSweep,
 			SquareSweepSwell,
+			OneHz,
 			LTC,
 			Loopback,
 		};
@@ -323,7 +326,6 @@ class DummyAudioBackend : public AudioBackend {
 
 		void* private_handle () const;
 		const std::string& my_name () const;
-		bool available () const;
 		uint32_t port_name_size () const;
 
 		int         set_port_name (PortHandle, const std::string&);
@@ -390,6 +392,7 @@ class DummyAudioBackend : public AudioBackend {
 		enum MidiPortMode {
 			MidiNoEvents,
 			MidiGenerator,
+			MidiOneHz,
 			MidiLoopback,
 			MidiToAudio,
 		};

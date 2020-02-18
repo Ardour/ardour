@@ -1,21 +1,21 @@
 /*
-    Copyright (C) 2009-2016 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2016-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2017-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_disk_io_h__
 #define __ardour_disk_io_h__
@@ -28,7 +28,13 @@
 #include "pbd/rcu.h"
 
 #include "ardour/interpolation.h"
+#include "ardour/midi_buffer.h"
 #include "ardour/processor.h"
+#include "ardour/rt_midibuffer.h"
+
+namespace PBD {
+	template<class T> class PlaybackBuffer;
+}
 
 namespace ARDOUR {
 
@@ -37,8 +43,7 @@ class AudioPlaylist;
 class Location;
 class MidiPlaylist;
 class Playlist;
-class Route;
-class Route;
+class Track;
 class Session;
 
 template<typename T> class MidiRingBuffer;
@@ -58,8 +63,8 @@ public:
 	DiskIOProcessor (Session&, const std::string& name, Flag f);
 	virtual ~DiskIOProcessor ();
 
-	void set_route (boost::shared_ptr<Route>);
-	void drop_route ();
+	void set_track (boost::shared_ptr<Track>);
+	void drop_track ();
 
 	static void set_buffering_parameters (BufferingPreset bp);
 
@@ -112,14 +117,11 @@ protected:
 
 protected:
 	Flag         _flags;
-	uint32_t      i_am_the_modifier;
-	double       _actual_speed;
-	double       _target_speed;
 	bool         _slaved;
 	bool          in_set_state;
 	samplepos_t   playback_sample;
 	bool         _need_butler;
-	boost::shared_ptr<Route> _route;
+	boost::shared_ptr<Track> _track;
 
 	void init ();
 
@@ -149,10 +151,11 @@ protected:
 		ChannelInfo (samplecnt_t buffer_size);
 		virtual ~ChannelInfo ();
 
-		/** Ringbuffer for data to be played back.
-		 * written to in the butler thread, read from in the process thread.
+		/** A semi-random-access ringbuffers for data to be played back.
+		 * written to in the butler thread, read from in the process
+		 * thread.
 		 */
-		PBD::RingBufferNPT<Sample>* rbuf;
+		PBD::PlaybackBuffer<Sample>* rbuf;
 
 		/** A ringbuffer for data to be recorded back, written to in the
 		 * process thread, read from in the butler thread.

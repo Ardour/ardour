@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Waldorf</Manufacturer>
+    <Model>Pulse</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Programs">
+        <PatchNameList>
+          <Patch Number="P.1" Name="UserProgram" ProgramChange="0"/>
+          <Patch Number="P.2" Name="UserProgram" ProgramChange="1"/>
+          <Patch Number="P.3" Name="UserProgram" ProgramChange="2"/>
+          <Patch Number="P.4" Name="UserProgram" ProgramChange="3"/>
+          <Patch Number="P.5" Name="UserProgram" ProgramChange="4"/>
+          <Patch Number="P.6" Name="UserProgram" ProgramChange="5"/>
+          <Patch Number="P.7" Name="UserProgram" ProgramChange="6"/>
+          <Patch Number="P.8" Name="UserProgram" ProgramChange="7"/>
+          <Patch Number="P.9" Name="UserProgram" ProgramChange="8"/>
+          <Patch Number="P.10" Name="UserProgram" ProgramChange="9"/>
+          <Patch Number="P.11" Name="UserProgram" ProgramChange="10"/>
+          <Patch Number="P.12" Name="UserProgram" ProgramChange="11"/>
+          <Patch Number="P.13" Name="UserProgram" ProgramChange="12"/>
+          <Patch Number="P.14" Name="UserProgram" ProgramChange="13"/>
+          <Patch Number="P.15" Name="UserProgram" ProgramChange="14"/>
+          <Patch Number="P.16" Name="UserProgram" ProgramChange="15"/>
+          <Patch Number="P.17" Name="UserProgram" ProgramChange="16"/>
+          <Patch Number="P.18" Name="UserProgram" ProgramChange="17"/>
+          <Patch Number="P.19" Name="UserProgram" ProgramChange="18"/>
+          <Patch Number="P.20" Name="UserProgram" ProgramChange="19"/>
+          <Patch Number="P.21" Name="UserProgram" ProgramChange="20"/>
+          <Patch Number="P.22" Name="UserProgram" ProgramChange="21"/>
+          <Patch Number="P.23" Name="UserProgram" ProgramChange="22"/>
+          <Patch Number="P.24" Name="UserProgram" ProgramChange="23"/>
+          <Patch Number="P.25" Name="UserProgram" ProgramChange="24"/>
+          <Patch Number="P.26" Name="UserProgram" ProgramChange="25"/>
+          <Patch Number="P.27" Name="UserProgram" ProgramChange="26"/>
+          <Patch Number="P.28" Name="UserProgram" ProgramChange="27"/>
+          <Patch Number="P.29" Name="UserProgram" ProgramChange="28"/>
+          <Patch Number="P.30" Name="UserProgram" ProgramChange="29"/>
+          <Patch Number="P.31" Name="UserProgram" ProgramChange="30"/>
+          <Patch Number="P.32" Name="UserProgram" ProgramChange="31"/>
+          <Patch Number="P.33" Name="UserProgram" ProgramChange="32"/>
+          <Patch Number="P.34" Name="UserProgram" ProgramChange="33"/>
+          <Patch Number="P.35" Name="UserProgram" ProgramChange="34"/>
+          <Patch Number="P.36" Name="UserProgram" ProgramChange="35"/>
+          <Patch Number="P.37" Name="UserProgram" ProgramChange="36"/>
+          <Patch Number="P.38" Name="UserProgram" ProgramChange="37"/>
+          <Patch Number="P.39" Name="UserProgram" ProgramChange="38"/>
+          <Patch Number="P.40" Name="UserProgram" ProgramChange="39"/>
+          <Patch Number="P.41" Name="FactoryProgram" ProgramChange="40"/>
+          <Patch Number="P.42" Name="FactoryProgram" ProgramChange="41"/>
+          <Patch Number="P.43" Name="FactoryProgram" ProgramChange="42"/>
+          <Patch Number="P.44" Name="FactoryProgram" ProgramChange="43"/>
+          <Patch Number="P.45" Name="FactoryProgram" ProgramChange="44"/>
+          <Patch Number="P.46" Name="FactoryProgram" ProgramChange="45"/>
+          <Patch Number="P.47" Name="FactoryProgram" ProgramChange="46"/>
+          <Patch Number="P.48" Name="FactoryProgram" ProgramChange="47"/>
+          <Patch Number="P.49" Name="FactoryProgram" ProgramChange="48"/>
+          <Patch Number="P.50" Name="FactoryProgram" ProgramChange="49"/>
+          <Patch Number="P.51" Name="FactoryProgram" ProgramChange="50"/>
+          <Patch Number="P.52" Name="FactoryProgram" ProgramChange="51"/>
+          <Patch Number="P.53" Name="FactoryProgram" ProgramChange="52"/>
+          <Patch Number="P.54" Name="FactoryProgram" ProgramChange="53"/>
+          <Patch Number="P.55" Name="FactoryProgram" ProgramChange="54"/>
+          <Patch Number="P.56" Name="FactoryProgram" ProgramChange="55"/>
+          <Patch Number="P.57" Name="FactoryProgram" ProgramChange="56"/>
+          <Patch Number="P.58" Name="FactoryProgram" ProgramChange="57"/>
+          <Patch Number="P.59" Name="FactoryProgram" ProgramChange="58"/>
+          <Patch Number="P.60" Name="FactoryProgram" ProgramChange="59"/>
+          <Patch Number="P.61" Name="FactoryProgram" ProgramChange="60"/>
+          <Patch Number="P.62" Name="FactoryProgram" ProgramChange="61"/>
+          <Patch Number="P.63" Name="FactoryProgram" ProgramChange="62"/>
+          <Patch Number="P.64" Name="FactoryProgram" ProgramChange="63"/>
+          <Patch Number="P.65" Name="FactoryProgram" ProgramChange="64"/>
+          <Patch Number="P.66" Name="FactoryProgram" ProgramChange="65"/>
+          <Patch Number="P.67" Name="FactoryProgram" ProgramChange="66"/>
+          <Patch Number="P.68" Name="FactoryProgram" ProgramChange="67"/>
+          <Patch Number="P.69" Name="FactoryProgram" ProgramChange="68"/>
+          <Patch Number="P.70" Name="FactoryProgram" ProgramChange="69"/>
+          <Patch Number="P.71" Name="FactoryProgram" ProgramChange="70"/>
+          <Patch Number="P.72" Name="FactoryProgram" ProgramChange="71"/>
+          <Patch Number="P.73" Name="FactoryProgram" ProgramChange="72"/>
+          <Patch Number="P.74" Name="FactoryProgram" ProgramChange="73"/>
+          <Patch Number="P.75" Name="FactoryProgram" ProgramChange="74"/>
+          <Patch Number="P.76" Name="FactoryProgram" ProgramChange="75"/>
+          <Patch Number="P.77" Name="FactoryProgram" ProgramChange="76"/>
+          <Patch Number="P.78" Name="FactoryProgram" ProgramChange="77"/>
+          <Patch Number="P.79" Name="FactoryProgram" ProgramChange="78"/>
+          <Patch Number="P.80" Name="FactoryProgram" ProgramChange="79"/>
+          <Patch Number="P.81" Name="FactoryProgram" ProgramChange="80"/>
+          <Patch Number="P.82" Name="FactoryProgram" ProgramChange="81"/>
+          <Patch Number="P.83" Name="FactoryProgram" ProgramChange="82"/>
+          <Patch Number="P.84" Name="FactoryProgram" ProgramChange="83"/>
+          <Patch Number="P.85" Name="FactoryProgram" ProgramChange="84"/>
+          <Patch Number="P.86" Name="FactoryProgram" ProgramChange="85"/>
+          <Patch Number="P.87" Name="FactoryProgram" ProgramChange="86"/>
+          <Patch Number="P.88" Name="FactoryProgram" ProgramChange="87"/>
+          <Patch Number="P.89" Name="FactoryProgram" ProgramChange="88"/>
+          <Patch Number="P.90" Name="FactoryProgram" ProgramChange="89"/>
+          <Patch Number="P.91" Name="FactoryProgram" ProgramChange="90"/>
+          <Patch Number="P.92" Name="FactoryProgram" ProgramChange="91"/>
+          <Patch Number="P.93" Name="FactoryProgram" ProgramChange="92"/>
+          <Patch Number="P.94" Name="FactoryProgram" ProgramChange="93"/>
+          <Patch Number="P.95" Name="FactoryProgram" ProgramChange="94"/>
+          <Patch Number="P.96" Name="FactoryProgram" ProgramChange="95"/>
+          <Patch Number="P.97" Name="FactoryProgram" ProgramChange="96"/>
+          <Patch Number="P.98" Name="FactoryProgram" ProgramChange="97"/>
+          <Patch Number="P.99" Name="FactoryProgram" ProgramChange="98"/>
+          <Patch Number="P.rn" Name="RandomProgram" ProgramChange="99"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Korg</Manufacturer>
+    <Model>T1</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="T Series Combin">
+        <PatchNameList>
+          <Patch Number="00" Name="CosmicRain" ProgramChange="0"/>
+          <Patch Number="001" Name="PianoHaven" ProgramChange="1"/>
+          <Patch Number="002" Name="Jazz Band" ProgramChange="2"/>
+          <Patch Number="003" Name="Ladies" ProgramChange="3"/>
+          <Patch Number="004" Name="OnTheRoad" ProgramChange="4"/>
+          <Patch Number="005" Name="Vivaldi" ProgramChange="5"/>
+          <Patch Number="006" Name="SuperSynth" ProgramChange="6"/>
+          <Patch Number="007" Name="TheStrings" ProgramChange="7"/>
+          <Patch Number="008" Name="Willow" ProgramChange="8"/>
+          <Patch Number="009" Name="BigDrums" ProgramChange="9"/>
+          <Patch Number="010" Name="The Deep" ProgramChange="10"/>
+          <Patch Number="011" Name="TyneTime" ProgramChange="11"/>
+          <Patch Number="012" Name="Safe Sax" ProgramChange="12"/>
+          <Patch Number="013" Name="Full Pipe" ProgramChange="13"/>
+          <Patch Number="014" Name="KillerBass" ProgramChange="14"/>
+          <Patch Number="015" Name="SynthBass" ProgramChange="15"/>
+          <Patch Number="016" Name="Big Band" ProgramChange="16"/>
+          <Patch Number="017" Name="Telemann" ProgramChange="17"/>
+          <Patch Number="018" Name="ClavTalk!" ProgramChange="18"/>
+          <Patch Number="019" Name="Rga Dance" ProgramChange="19"/>
+          <Patch Number="020" Name="SteamBells" ProgramChange="20"/>
+          <Patch Number="021" Name="GrandPiano" ProgramChange="21"/>
+          <Patch Number="022" Name="Timp+amp;Horns" ProgramChange="22"/>
+          <Patch Number="023" Name="SynVoices" ProgramChange="23"/>
+          <Patch Number="024" Name="Tonight" ProgramChange="24"/>
+          <Patch Number="025" Name="Timp+amp;Orch" ProgramChange="25"/>
+          <Patch Number="026" Name="Musette" ProgramChange="26"/>
+          <Patch Number="027" Name="Superior" ProgramChange="27"/>
+          <Patch Number="028" Name="Bell Pad" ProgramChange="28"/>
+          <Patch Number="029" Name="BowedSteel" ProgramChange="29"/>
+          <Patch Number="030" Name="JasonLives" ProgramChange="30"/>
+          <Patch Number="031" Name="Velo-Road" ProgramChange="31"/>
+          <Patch Number="032" Name="V alves" ProgramChange="32"/>
+          <Patch Number="033" Name="SoftPipe" ProgramChange="33"/>
+          <Patch Number="034" Name="Jaco Bass" ProgramChange="34"/>
+          <Patch Number="035" Name="OrchWOod" ProgramChange="35"/>
+          <Patch Number="036" Name="SonicSplit" ProgramChange="36"/>
+          <Patch Number="037" Name="Violins" ProgramChange="37"/>
+          <Patch Number="038" Name="Wave Picks" ProgramChange="38"/>
+          <Patch Number="039" Name="Matsuri" ProgramChange="39"/>
+          <Patch Number="040" Name="Ice Man" ProgramChange="40"/>
+          <Patch Number="041" Name="2 Pianos" ProgramChange="41"/>
+          <Patch Number="042" Name="3-Saxes" ProgramChange="42"/>
+          <Patch Number="043" Name="VoiceChoir" ProgramChange="43"/>
+          <Patch Number="044" Name="Stick Pals" ProgramChange="44"/>
+          <Patch Number="045" Name="Symphony" ProgramChange="45"/>
+          <Patch Number="046" Name="JazzHits!!" ProgramChange="46"/>
+          <Patch Number="047" Name="HarpString" ProgramChange="47"/>
+          <Patch Number="048" Name="DreamAfter" ProgramChange="48"/>
+          <Patch Number="049" Name="MondoDrums" ProgramChange="49"/>
+          <Patch Number="050" Name="Kryptonite" ProgramChange="50"/>
+          <Patch Number="051" Name="Catwatchin" ProgramChange="51"/>
+          <Patch Number="052" Name="F.Hrn.+amp;Timp" ProgramChange="52"/>
+          <Patch Number="053" Name="MediumPipe" ProgramChange="53"/>
+          <Patch Number="054" Name="Velo-Bass" ProgramChange="54"/>
+          <Patch Number="055" Name="Sonata" ProgramChange="55"/>
+          <Patch Number="056" Name="SpikeSyn" ProgramChange="56"/>
+          <Patch Number="057" Name="Passion" ProgramChange="57"/>
+          <Patch Number="058" Name="Talk To Me" ProgramChange="58"/>
+          <Patch Number="059" Name="New Age" ProgramChange="59"/>
+          <Patch Number="060" Name="SteamSweep" ProgramChange="60"/>
+          <Patch Number="061" Name="Piano+amp;Strg" ProgramChange="61"/>
+          <Patch Number="062" Name="Brass Band" ProgramChange="62"/>
+          <Patch Number="063" Name="AirVoices" ProgramChange="63"/>
+          <Patch Number="064" Name="Bass +amp; Gtr" ProgramChange="64"/>
+          <Patch Number="065" Name="OrchSwitch" ProgramChange="65"/>
+          <Patch Number="066" Name="JamSession" ProgramChange="66"/>
+          <Patch Number="067" Name="StringPizz" ProgramChange="67"/>
+          <Patch Number="068" Name="Dream Pad" ProgramChange="68"/>
+          <Patch Number="069" Name="Asian Perc" ProgramChange="69"/>
+          <Patch Number="070" Name="NewGalaxy" ProgramChange="70"/>
+          <Patch Number="071" Name="70's Piano" ProgramChange="71"/>
+          <Patch Number="072" Name="MutedHorns" ProgramChange="72"/>
+          <Patch Number="073" Name="OrganChoir" ProgramChange="73"/>
+          <Patch Number="074" Name="Stick+amp;Pick" ProgramChange="74"/>
+          <Patch Number="075" Name="Wodwinds2" ProgramChange="75"/>
+          <Patch Number="076" Name="AnalogSplt" ProgramChange="76"/>
+          <Patch Number="077" Name="HornString" ProgramChange="77"/>
+          <Patch Number="078" Name="Resonant" ProgramChange="78"/>
+          <Patch Number="079" Name="Flutes" ProgramChange="79"/>
+          <Patch Number="080" Name="AlphaWaves" ProgramChange="80"/>
+          <Patch Number="081" Name="SweetTynes" ProgramChange="81"/>
+          <Patch Number="082" Name="Sax+amp;Growl" ProgramChange="82"/>
+          <Patch Number="083" Name="MetalVoice" ProgramChange="83"/>
+          <Patch Number="084" Name="Clavs" ProgramChange="84"/>
+          <Patch Number="085" Name="Orch+amp;Bells" ProgramChange="85"/>
+          <Patch Number="086" Name="Accordion" ProgramChange="86"/>
+          <Patch Number="087" Name="AiryString" ProgramChange="87"/>
+          <Patch Number="088" Name="Orbits" ProgramChange="88"/>
+          <Patch Number="089" Name="India" ProgramChange="89"/>
+          <Patch Number="090" Name="Going Up?" ProgramChange="90"/>
+          <Patch Number="091" Name="Bass+amp;Piano" ProgramChange="91"/>
+          <Patch Number="092" Name="AirHorns" ProgramChange="92"/>
+          <Patch Number="093" Name="Sparkles" ProgramChange="93"/>
+          <Patch Number="094" Name="Rock+amp;Roll" ProgramChange="94"/>
+          <Patch Number="095" Name="Wind 5th" ProgramChange="95"/>
+          <Patch Number="096" Name="OrganSplit" ProgramChange="96"/>
+          <Patch Number="097" Name="Divisi" ProgramChange="97"/>
+          <Patch Number="098" Name="Dusty*Sax" ProgramChange="98"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="T Series A Bank">
+        <PatchNameList>
+          <Patch Number="0" Name="Orch Hits" ProgramChange="0"/>
+          <Patch Number="001" Name="Piano 16+apos;" ProgramChange="1"/>
+          <Patch Number="002" Name="Brass 1" ProgramChange="2"/>
+          <Patch Number="003" Name="Ooh/Ahh" ProgramChange="3"/>
+          <Patch Number="004" Name="Guitar 1" ProgramChange="4"/>
+          <Patch Number="005" Name="Bottlebell" ProgramChange="5"/>
+          <Patch Number="006" Name="Fretless" ProgramChange="6"/>
+          <Patch Number="007" Name="Symphonic" ProgramChange="7"/>
+          <Patch Number="008" Name="Pan FLute" ProgramChange="8"/>
+          <Patch Number="009" Name="T2 Drums" ProgramChange="9"/>
+          <Patch Number="010" Name="PanMallet" ProgramChange="10"/>
+          <Patch Number="011" Name="E. Piano 1" ProgramChange="11"/>
+          <Patch Number="012" Name="Trumpet" ProgramChange="12"/>
+          <Patch Number="013" Name="I saw Wind" ProgramChange="13"/>
+          <Patch Number="014" Name="Van Guitar" ProgramChange="14"/>
+          <Patch Number="015" Name="Vibes" ProgramChange="15"/>
+          <Patch Number="016" Name="PickBass" ProgramChange="16"/>
+          <Patch Number="017" Name="Sawstrings" ProgramChange="17"/>
+          <Patch Number="018" Name="Flute" ProgramChange="18"/>
+          <Patch Number="019" Name="Soft Pole" ProgramChange="19"/>
+          <Patch Number="020" Name="Night Dad" ProgramChange="20"/>
+          <Patch Number="021" Name="Pad Piano" ProgramChange="21"/>
+          <Patch Number="022" Name="T2Perc." ProgramChange="22"/>
+          <Patch Number="023" Name="Choir" ProgramChange="23"/>
+          <Patch Number="024" Name="12-String" ProgramChange="24"/>
+          <Patch Number="025" Name="Kalimba" ProgramChange="25"/>
+          <Patch Number="026" Name="A.Bass" ProgramChange="26"/>
+          <Patch Number="027" Name="Strings" ProgramChange="27"/>
+          <Patch Number="028" Name="Syn Mallet" ProgramChange="28"/>
+          <Patch Number="029" Name="Velo+Gate2" ProgramChange="29"/>
+          <Patch Number="030" Name="Lore" ProgramChange="30"/>
+          <Patch Number="031" Name="Harpsicord" ProgramChange="31"/>
+          <Patch Number="032" Name="DoubleReed" ProgramChange="32"/>
+          <Patch Number="033" Name="SpitBottle" ProgramChange="33"/>
+          <Patch Number="034" Name="KotoTrem" ProgramChange="34"/>
+          <Patch Number="035" Name=" Bell Ring" ProgramChange="35"/>
+          <Patch Number="036" Name="Synthbass 1" ProgramChange="36"/>
+          <Patch Number="037" Name="Super Pizz" ProgramChange="37"/>
+          <Patch Number="038" Name="Mono Synth" ProgramChange="38"/>
+          <Patch Number="039" Name="Pan Drops" ProgramChange="39"/>
+          <Patch Number="040" Name="Dreampad 2" ProgramChange="40"/>
+          <Patch Number="041" Name="Piano 8+apos;" ProgramChange="41"/>
+          <Patch Number="042" Name="Fanfare" ProgramChange="42"/>
+          <Patch Number="043" Name="Angels" ProgramChange="43"/>
+          <Patch Number="044" Name="New Slap" ProgramChange="44"/>
+          <Patch Number="045" Name="Tubular" ProgramChange="45"/>
+          <Patch Number="046" Name="SuperSlap" ProgramChange="46"/>
+          <Patch Number="047" Name="Pipeorgan" ProgramChange="47"/>
+          <Patch Number="048" Name="Wire" ProgramChange="48"/>
+          <Patch Number="049" Name="Pitch Kit" ProgramChange="49"/>
+          <Patch Number="050" Name="Bambu Trem" ProgramChange="50"/>
+          <Patch Number="051" Name="E. Piano 4" ProgramChange="51"/>
+          <Patch Number="052" Name="TubaFLugel" ProgramChange="52"/>
+          <Patch Number="053" Name="Voice Wave" ProgramChange="53"/>
+          <Patch Number="054" Name="Guitar 2" ProgramChange="54"/>
+          <Patch Number="055" Name="Synthsweep" ProgramChange="55"/>
+          <Patch Number="056" Name="Roto-Bass" ProgramChange="56"/>
+          <Patch Number="057" Name="ArcoStrng2" ProgramChange="57"/>
+          <Patch Number="058" Name="Soft-Bells" ProgramChange="58"/>
+          <Patch Number="059" Name="Thunder" ProgramChange="59"/>
+          <Patch Number="060" Name="CLoud Nine" ProgramChange="60"/>
+          <Patch Number="061" Name="Clav 1" ProgramChange="61"/>
+          <Patch Number="062" Name="Tenor Sax" ProgramChange="62"/>
+          <Patch Number="063" Name="Voices" ProgramChange="63"/>
+          <Patch Number="064" Name="DistGuitar" ProgramChange="64"/>
+          <Patch Number="065" Name="Windbells" ProgramChange="65"/>
+          <Patch Number="066" Name="Pull bass" ProgramChange="66"/>
+          <Patch Number="067" Name="Quartet" ProgramChange="67"/>
+          <Patch Number="068" Name="Block" ProgramChange="68"/>
+          <Patch Number="069" Name="MagicVoice" ProgramChange="69"/>
+          <Patch Number="070" Name="MagicOrgan" ProgramChange="70"/>
+          <Patch Number="071" Name="Perc. Organ" ProgramChange="71"/>
+          <Patch Number="072" Name="Brass 2" ProgramChange="72"/>
+          <Patch Number="073" Name="M-Wavers" ProgramChange="73"/>
+          <Patch Number="074" Name="Digital 4" ProgramChange="74"/>
+          <Patch Number="075" Name="Digi Bells" ProgramChange="75"/>
+          <Patch Number="076" Name="SquareBass" ProgramChange="76"/>
+          <Patch Number="077" Name="Soundtrack" ProgramChange="77"/>
+          <Patch Number="078" Name="Busy Talk" ProgramChange="78"/>
+          <Patch Number="079" Name="Wild Pole" ProgramChange="79"/>
+          <Patch Number="080" Name="Echo Pad" ProgramChange="80"/>
+          <Patch Number="081" Name="Digital 2" ProgramChange="81"/>
+          <Patch Number="082" Name="Mute Trp." ProgramChange="82"/>
+          <Patch Number="083" Name="Vox Voice" ProgramChange="83"/>
+          <Patch Number="084" Name="Sitar2" ProgramChange="84"/>
+          <Patch Number="085" Name="Octapad" ProgramChange="85"/>
+          <Patch Number="086" Name="HammerBass" ProgramChange="86"/>
+          <Patch Number="087" Name="Soft Horns" ProgramChange="87"/>
+          <Patch Number="088" Name="Tri-Square" ProgramChange="88"/>
+          <Patch Number="089" Name="Rhythm" ProgramChange="89"/>
+          <Patch Number="090" Name="UpTheRiver" ProgramChange="90"/>
+          <Patch Number="091" Name="DWGS Clav" ProgramChange="91"/>
+          <Patch Number="092" Name="Synthbrass" ProgramChange="92"/>
+          <Patch Number="093" Name="Digital 5" ProgramChange="93"/>
+          <Patch Number="094" Name="E.Guitar 1" ProgramChange="94"/>
+          <Patch Number="095" Name="DWGS Bell" ProgramChange="95"/>
+          <Patch Number="096" Name="Slap Bass" ProgramChange="96"/>
+          <Patch Number="097" Name="Magic Ring" ProgramChange="97"/>
+          <Patch Number="098" Name="Tri-Synth" ProgramChange="98"/>
+        </PatchNameList>
+      </PatchBank>
+      <PatchBank Name="T Series B Bank">
+        <PatchNameList>
+          <Patch Number="00" Name="One World" ProgramChange="0"/>
+          <Patch Number="001" Name="Piano2 16+apos;" ProgramChange="1"/>
+          <Patch Number="002" Name="Alto Sax" ProgramChange="2"/>
+          <Patch Number="003" Name="Spectrum 2" ProgramChange="3"/>
+          <Patch Number="004" Name="E.Bass 2" ProgramChange="4"/>
+          <Patch Number="005" Name="Marimba" ProgramChange="5"/>
+          <Patch Number="006" Name="Res-Synth1" ProgramChange="6"/>
+          <Patch Number="007" Name="Sringorch" ProgramChange="7"/>
+          <Patch Number="008" Name="Wavesweep1" ProgramChange="8"/>
+          <Patch Number="009" Name="T2 Drums" ProgramChange="9"/>
+          <Patch Number="010" Name="Steamsynth" ProgramChange="10"/>
+          <Patch Number="011" Name="Soft E.P." ProgramChange="11"/>
+          <Patch Number="012" Name="Trombone" ProgramChange="12"/>
+          <Patch Number="013" Name="Wavesweep2" ProgramChange="13"/>
+          <Patch Number="014" Name="Banjo" ProgramChange="14"/>
+          <Patch Number="015" Name="Gamelan" ProgramChange="15"/>
+          <Patch Number="016" Name="Pick-Piano" ProgramChange="16"/>
+          <Patch Number="017" Name="Harp" ProgramChange="17"/>
+          <Patch Number="018" Name="Wavesweep3" ProgramChange="18"/>
+          <Patch Number="019" Name="Timpani" ProgramChange="19"/>
+          <Patch Number="020" Name="Pasqualina" ProgramChange="20"/>
+          <Patch Number="021" Name="Pad Piano" ProgramChange="21"/>
+          <Patch Number="022" Name="T2 Perc." ProgramChange="22"/>
+          <Patch Number="023" Name="Vocoder" ProgramChange="23"/>
+          <Patch Number="024" Name="Stick Bass" ProgramChange="24"/>
+          <Patch Number="025" Name="Pot Covers" ProgramChange="25"/>
+          <Patch Number="026" Name="Da Voice" ProgramChange="26"/>
+          <Patch Number="027" Name="Soloviolin" ProgramChange="27"/>
+          <Patch Number="028" Name="Bellsynth1" ProgramChange="28"/>
+          <Patch Number="029" Name="Drum Kit 2" ProgramChange="29"/>
+          <Patch Number="030" Name="Pizzicato" ProgramChange="30"/>
+          <Patch Number="031" Name="Organ 4" ProgramChange="31"/>
+          <Patch Number="032" Name="Clarinet" ProgramChange="32"/>
+          <Patch Number="033" Name="Analogpad1" ProgramChange="33"/>
+          <Patch Number="034" Name="E. Guitar 2" ProgramChange="34"/>
+          <Patch Number="035" Name="Music Box" ProgramChange="35"/>
+          <Patch Number="036" Name="Pro Sync" ProgramChange="36"/>
+          <Patch Number="037" Name="Analogpad2" ProgramChange="37"/>
+          <Patch Number="038" Name="Analogstab" ProgramChange="38"/>
+          <Patch Number="039" Name="Tuned Drum" ProgramChange="39"/>
+          <Patch Number="040" Name="Gospelorg" ProgramChange="40"/>
+          <Patch Number="041" Name="Clavinet" ProgramChange="41"/>
+          <Patch Number="042" Name="Baritonsax" ProgramChange="42"/>
+          <Patch Number="043" Name="Choriana" ProgramChange="43"/>
+          <Patch Number="044" Name="New Slap" ProgramChange="44"/>
+          <Patch Number="045" Name="Industry" ProgramChange="45"/>
+          <Patch Number="046" Name="Res-Synth2" ProgramChange="46"/>
+          <Patch Number="047" Name="Veneziano" ProgramChange="47"/>
+          <Patch Number="048" Name="Wavesweep4" ProgramChange="48"/>
+          <Patch Number="049" Name="Gate Drum" ProgramChange="49"/>
+          <Patch Number="050" Name="Palamine" ProgramChange="50"/>
+          <Patch Number="051" Name="Piano2 8+apos;" ProgramChange="51"/>
+          <Patch Number="052" Name="Accordion" ProgramChange="52"/>
+          <Patch Number="053" Name="Bellsynth2" ProgramChange="53"/>
+          <Patch Number="054" Name="Mandolin" ProgramChange="54"/>
+          <Patch Number="055" Name="Spec. Junk" ProgramChange="55"/>
+          <Patch Number="056" Name="Cha Voice" ProgramChange="56"/>
+          <Patch Number="057" Name="ArcoStrng1" ProgramChange="57"/>
+          <Patch Number="058" Name="Synthbass3" ProgramChange="58"/>
+          <Patch Number="059" Name="Velo+Gated" ProgramChange="59"/>
+          <Patch Number="060" Name="Fantasy" ProgramChange="60"/>
+          <Patch Number="061" Name="Pipeorgan1" ProgramChange="61"/>
+          <Patch Number="062" Name="French Horn" ProgramChange="62"/>
+          <Patch Number="063" Name="Wavesweep5" ProgramChange="63"/>
+          <Patch Number="064" Name="FingerPick" ProgramChange="64"/>
+          <Patch Number="065" Name="Toy Piano" ProgramChange="65"/>
+          <Patch Number="066" Name="Zawinul" ProgramChange="66"/>
+          <Patch Number="067" Name="Softstring" ProgramChange="67"/>
+          <Patch Number="068" Name="Super E.P." ProgramChange="68"/>
+          <Patch Number="069" Name="Clicker" ProgramChange="69"/>
+          <Patch Number="070" Name="Bag Pipe" ProgramChange="70"/>
+          <Patch Number="071" Name="Hard E.P." ProgramChange="71"/>
+          <Patch Number="072" Name="Hard Flute" ProgramChange="72"/>
+          <Patch Number="073" Name="Soft Pad" ProgramChange="73"/>
+          <Patch Number="074" Name="Harmonics" ProgramChange="74"/>
+          <Patch Number="075" Name="Synth Gong" ProgramChange="75"/>
+          <Patch Number="076" Name="Wire 2" ProgramChange="76"/>
+          <Patch Number="077" Name="Cellos" ProgramChange="77"/>
+          <Patch Number="078" Name="Chorus Gtr" ProgramChange="78"/>
+          <Patch Number="079" Name="Cymbell" ProgramChange="79"/>
+          <Patch Number="080" Name="Start Orch" ProgramChange="80"/>
+          <Patch Number="081" Name="Organ 3" ProgramChange="81"/>
+          <Patch Number="082" Name="Analog" ProgramChange="82"/>
+          <Patch Number="083" Name="Sensitive" ProgramChange="83"/>
+          <Patch Number="084" Name="Round Bass" ProgramChange="84"/>
+          <Patch Number="085" Name="Steam" ProgramChange="85"/>
+          <Patch Number="086" Name="PickGuitar" ProgramChange="86"/>
+          <Patch Number="087" Name="Monsoon" ProgramChange="87"/>
+          <Patch Number="088" Name="Wavesweep6" ProgramChange="88"/>
+          <Patch Number="089" Name="Perc Wave" ProgramChange="89"/>
+          <Patch Number="090" Name="Mystery" ProgramChange="90"/>
+          <Patch Number="091" Name="Pipeorgan2" ProgramChange="91"/>
+          <Patch Number="092" Name="HardSax" ProgramChange="92"/>
+          <Patch Number="093" Name="Waterphone" ProgramChange="93"/>
+          <Patch Number="094" Name="Koto" ProgramChange="94"/>
+          <Patch Number="095" Name="Noise" ProgramChange="95"/>
+          <Patch Number="096" Name="Two Worlds" ProgramChange="96"/>
+          <Patch Number="097" Name="Tchu Wave" ProgramChange="97"/>
+          <Patch Number="098" Name="Wavesweep7" ProgramChange="98"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

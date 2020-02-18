@@ -1,21 +1,28 @@
 /*
-    Copyright (C) 2000 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2006 Hans Fugal <hans@fugal.net>
+ * Copyright (C) 2007-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2009 Sakari Bergen <sakari.bergen@beatwaves.net>
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2015-2016 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 GZharun <grygoriiz@wavesglobal.com>
+ * Copyright (C) 2016 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <algorithm>
 #include <set>
@@ -65,6 +72,7 @@ Location::Location (Session& s)
 	, _flags (Flags (0))
 	, _locked (false)
 	, _position_lock_style (AudioTime)
+	, _timestamp (time (0))
 {
 	assert (_start >= 0);
 	assert (_end >= 0);
@@ -79,7 +87,7 @@ Location::Location (Session& s, samplepos_t sample_start, samplepos_t sample_end
 	, _flags (bits)
 	, _locked (false)
 	, _position_lock_style (s.config.get_glue_new_markers_to_bars_and_beats() ? MusicTime : AudioTime)
-
+	, _timestamp (time (0))
 {
 	recompute_beat_from_samples (sub_num);
 
@@ -97,7 +105,7 @@ Location::Location (const Location& other)
 	, _end_beat (other._end_beat)
 	, _flags (other._flags)
 	, _position_lock_style (other._position_lock_style)
-
+	, _timestamp (time (0))
 {
 	/* copy is not locked even if original was */
 
@@ -113,6 +121,7 @@ Location::Location (Session& s, const XMLNode& node)
 	: SessionHandleRef (s)
 	, _flags (Flags (0))
 	, _position_lock_style (AudioTime)
+	, _timestamp (time (0))
 {
 	/* Note: _position_lock_style is initialised above in case set_state doesn't set it
 	   (for 2.X session file compatibility).
@@ -599,7 +608,7 @@ Location::get_state ()
 	node->set_property ("flags", _flags);
 	node->set_property ("locked", _locked);
 	node->set_property ("position-lock-style", _position_lock_style);
-
+	node->set_property ("timestamp", _timestamp);
 	if (_scene_change) {
 		node->add_child_nocopy (_scene_change->get_state());
 	}
@@ -647,6 +656,8 @@ Location::set_state (const XMLNode& node, int version)
 		error << _("XML node for Location has no end information") << endmsg;
 		return -1;
 	}
+
+	node.get_property ("timestamp", _timestamp);
 
 	Flags old_flags (_flags);
 

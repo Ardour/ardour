@@ -1,21 +1,23 @@
 /*
-    Copyright (C) 2004-2007 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2008-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2008-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <algorithm>
 #include <cmath>
@@ -302,7 +304,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 			}
 		}
 
-		while ((avail = stretcher.available()) >= 0) {
+		while ((avail = stretcher.available()) > 0) {
 
 			samplecnt_t this_read = min (bufsize, avail);
 
@@ -340,7 +342,9 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 	new_name += suffix;
 
-	ret = finish (region, nsrcs, new_name);
+	if (!tsr.cancel) {
+		ret = finish (region, nsrcs, new_name);
+	}
 
 	/* now reset ancestral data for each new region */
 
@@ -360,7 +364,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	/* stretch region gain envelope */
 	/* XXX: assuming we've only processed one input region into one result here */
 
-	if (tsr.time_fraction != 1) {
+	if (ret == 0 && tsr.time_fraction != 1) {
 		result = boost::dynamic_pointer_cast<AudioRegion> (results.front());
 		assert (result);
 		result->envelope()->x_scale (tsr.time_fraction);

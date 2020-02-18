@@ -1,21 +1,25 @@
 /*
-    Copyright (C) 2009 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2009-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009-2016 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2011-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2013-2016 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 #include <vector>
 
 #include "ardour/debug.h"
@@ -111,6 +115,30 @@ SessionPlaylists::remove (boost::shared_ptr<Playlist> playlist)
 	}
 }
 
+void
+SessionPlaylists::update_tracking ()
+{
+	/* This is intended to be called during session-load, after loading
+	 * playlists and re-assigning them to tracks (refcnt is up to date).
+	 * Check playlist refcnt, move unused playlist to unused_playlists
+	 * array (which may be the case when loading old sessions)
+	 */
+	for (List::iterator i = playlists.begin(); i != playlists.end(); ) {
+		if ((*i)->hidden () || (*i)->used ()) {
+			++i;
+			continue;
+		}
+
+		warning << _("Session State: Unused playlist was listed as used.") << endmsg;
+
+		assert (unused_playlists.find (*i) == unused_playlists.end());
+		unused_playlists.insert (*i);
+
+		List::iterator rm = i;
+		++i;
+		 playlists.erase (rm);
+	}
+}
 
 void
 SessionPlaylists::track (bool inuse, boost::weak_ptr<Playlist> wpl)
@@ -212,6 +240,24 @@ SessionPlaylists::unassigned (std::list<boost::shared_ptr<Playlist> > & list)
 	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
 		if (!(*i)->get_orig_track_id().to_s().compare ("0")) {
 			list.push_back (*i);
+		}
+	}
+}
+
+void
+SessionPlaylists::update_orig_2X (PBD::ID old_orig, PBD::ID new_orig)
+{
+	Glib::Threads::Mutex::Lock lm (lock);
+
+	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		if ((*i)->get_orig_track_id() == old_orig) {
+			(*i)->set_orig_track_id (new_orig);
+		}
+	}
+
+	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+		if ((*i)->get_orig_track_id() == old_orig) {
+			(*i)->set_orig_track_id (new_orig);
 		}
 	}
 }
@@ -401,7 +447,7 @@ SessionPlaylists::maybe_delete_unused (boost::function<int(boost::shared_ptr<Pla
 			// delete this and all later
 			delete_remaining = true;
 
-			/* fall through */
+			/* fallthrough */
 		case 1:
 			// delete this
 			playlists_tbd.push_back (*x);
@@ -519,6 +565,34 @@ SessionPlaylists::region_use_count (boost::shared_ptr<Region> region) const
 	}
 
 	return cnt;
+}
+
+vector<boost::shared_ptr<Playlist> >
+SessionPlaylists::get_used () const
+{
+	vector<boost::shared_ptr<Playlist> > pl;
+
+	Glib::Threads::Mutex::Lock lm (lock);
+
+	for (List::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		pl.push_back (*i);
+	}
+
+	return pl;
+}
+
+vector<boost::shared_ptr<Playlist> >
+SessionPlaylists::get_unused () const
+{
+	vector<boost::shared_ptr<Playlist> > pl;
+
+	Glib::Threads::Mutex::Lock lm (lock);
+
+	for (List::const_iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+		pl.push_back (*i);
+	}
+
+	return pl;
 }
 
 /** @return list of Playlists that are associated with a track */

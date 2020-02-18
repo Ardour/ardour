@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <ExtendingDeviceNames>
+    <Manufacturer>Lexicon</Manufacturer>
+    <Model>PCM-80</Model>
+    <Model>PCM-81</Model>
+    <PatchNameList Name="C0 Music FX">
+      <Patch Number="0" Name="BrtKydbHall" ProgramChange="0"/>
+      <Patch Number="1" Name="SynthPlate 1" ProgramChange="1"/>
+      <Patch Number="2" Name="SynthPlate 2" ProgramChange="2"/>
+      <Patch Number="3" Name="SynPlt&amp;Dly" ProgramChange="3"/>
+      <Patch Number="4" Name="SynPlt&amp;Dly 2" ProgramChange="4"/>
+      <Patch Number="5" Name="SynPlt+Sus 1" ProgramChange="5"/>
+      <Patch Number="6" Name="SynPlt+Sus 2" ProgramChange="6"/>
+      <Patch Number="7" Name="Kybd Solo 1" ProgramChange="7"/>
+      <Patch Number="8" Name="Kybd Solo 2" ProgramChange="8"/>
+      <Patch Number="9" Name="Bright Hall" ProgramChange="9"/>
+      <Patch Number="10" Name="BrtPianoHall" ProgramChange="10"/>
+      <Patch Number="11" Name="Warm Rotor" ProgramChange="11"/>
+      <Patch Number="12" Name="NeatLesChrs" ProgramChange="12"/>
+      <Patch Number="13" Name="OrbitLesChrs" ProgramChange="13"/>
+      <Patch Number="14" Name="No Quarter" ProgramChange="14"/>
+      <Patch Number="15" Name="Ster Tremolo" ProgramChange="15"/>
+      <Patch Number="16" Name="Detune+Verb" ProgramChange="16"/>
+      <Patch Number="17" Name="Empty Arena" ProgramChange="17"/>
+      <Patch Number="18" Name="Cln Gtr Verb" ProgramChange="18"/>
+      <Patch Number="19" Name="Lush Chorus" ProgramChange="19"/>
+      <Patch Number="20" Name="Tite Chrs" ProgramChange="20"/>
+      <Patch Number="21" Name="Chrs&amp;Plate" ProgramChange="21"/>
+      <Patch Number="22" Name="Gtr Amp Trem" ProgramChange="22"/>
+      <Patch Number="23" Name="Fat Gtr Verb" ProgramChange="23"/>
+      <Patch Number="24" Name="Rich Chorus" ProgramChange="24"/>
+      <Patch Number="25" Name="RichChrs+Rvb" ProgramChange="25"/>
+      <Patch Number="26" Name="Strummg+Rvb" ProgramChange="26"/>
+      <Patch Number="27" Name="Gtr Chamber" ProgramChange="27"/>
+      <Patch Number="28" Name="Guitar Solo" ProgramChange="28"/>
+      <Patch Number="29" Name="Bass Chorus" ProgramChange="29"/>
+      <Patch Number="30" Name="DrumRoom Med" ProgramChange="30"/>
+      <Patch Number="31" Name="DrumRoom Lrg" ProgramChange="31"/>
+      <Patch Number="32" Name="FatDrm Chmbr" ProgramChange="32"/>
+      <Patch Number="33" Name="Rock N Room" ProgramChange="33"/>
+      <Patch Number="34" Name="BriteDrumRm" ProgramChange="34"/>
+      <Patch Number="35" Name="Snare Plate" ProgramChange="35"/>
+      <Patch Number="36" Name="SnareChambr1" ProgramChange="36"/>
+      <Patch Number="37" Name="SnareChambr2" ProgramChange="37"/>
+      <Patch Number="38" Name="SudoGatePlt" ProgramChange="38"/>
+      <Patch Number="39" Name="DarkGatePlt" ProgramChange="39"/>
+      <Patch Number="40" Name="ClscPnoHall" ProgramChange="40"/>
+      <Patch Number="41" Name="Strings Hall" ProgramChange="41"/>
+      <Patch Number="42" Name="Brass Hall" ProgramChange="42"/>
+      <Patch Number="43" Name="BrassPltMed" ProgramChange="43"/>
+      <Patch Number="44" Name="BrassPltTite" ProgramChange="44"/>
+      <Patch Number="45" Name="Perc Plate" ProgramChange="45"/>
+      <Patch Number="46" Name="Sax Hall" ProgramChange="46"/>
+      <Patch Number="47" Name="Sax Plate" ProgramChange="47"/>
+      <Patch Number="48" Name="WoodwindHall" ProgramChange="48"/>
+      <Patch Number="49" Name="Chamber Orch" ProgramChange="49"/>
+    </PatchNameList>
+    <PatchNameList Name="C1 Music FX">
+      <Patch Number="0" Name="Stereo Delay" ProgramChange="0"/>
+      <Patch Number="1" Name="Mono Delay" ProgramChange="1"/>
+      <Patch Number="2" Name="Mono Dly+Pan" ProgramChange="2"/>
+      <Patch Number="3" Name="Two 42's" ProgramChange="3"/>
+      <Patch Number="4" Name="Two 42's+Dly" ProgramChange="4"/>
+      <Patch Number="5" Name="Vocal Slap 1" ProgramChange="5"/>
+      <Patch Number="6" Name="Vocal Slap 2" ProgramChange="6"/>
+      <Patch Number="7" Name="Dual Detune" ProgramChange="7"/>
+      <Patch Number="8" Name="Mono Detune" ProgramChange="8"/>
+      <Patch Number="9" Name="Tap4RvbDecay" ProgramChange="9"/>
+      <Patch Number="10" Name="StereoFlange" ProgramChange="10"/>
+      <Patch Number="11" Name="WateryFlange" ProgramChange="11"/>
+      <Patch Number="12" Name="StrangePhase" ProgramChange="12"/>
+      <Patch Number="13" Name="Band Sweep 1" ProgramChange="13"/>
+      <Patch Number="14" Name="Band Sweep 2" ProgramChange="14"/>
+      <Patch Number="15" Name="Up&amp;DownLFO" ProgramChange="15"/>
+      <Patch Number="16" Name="SterSim+Trem" ProgramChange="16"/>
+      <Patch Number="17" Name="DynaVib Ster" ProgramChange="17"/>
+      <Patch Number="18" Name="DynaChrsDuck" ProgramChange="18"/>
+      <Patch Number="19" Name="DynaChrsXpnd" ProgramChange="19"/>
+      <Patch Number="20" Name="FlangedEkos" ProgramChange="20"/>
+      <Patch Number="21" Name="FlngEkos+Vrb" ProgramChange="21"/>
+      <Patch Number="22" Name="SwimmingDlys" ProgramChange="22"/>
+      <Patch Number="23" Name="SwimmingDly2" ProgramChange="23"/>
+      <Patch Number="24" Name="Flanged Slap" ProgramChange="24"/>
+      <Patch Number="25" Name="Warble Ekos" ProgramChange="25"/>
+      <Patch Number="26" Name="Slappy Room" ProgramChange="26"/>
+      <Patch Number="27" Name="DuckDly&amp;Chrs" ProgramChange="27"/>
+      <Patch Number="28" Name="XpndDly&amp;Chrs" ProgramChange="28"/>
+      <Patch Number="29" Name="XpandDly+Tap" ProgramChange="29"/>
+      <Patch Number="30" Name="The Abyss" ProgramChange="30"/>
+      <Patch Number="31" Name="WarpMtlTank" ProgramChange="31"/>
+      <Patch Number="32" Name="WarpMtlTank2" ProgramChange="32"/>
+      <Patch Number="33" Name="Inverse Room" ProgramChange="33"/>
+      <Patch Number="34" Name="Reverb Xpand" ProgramChange="34"/>
+      <Patch Number="35" Name="Reverb Duck" ProgramChange="35"/>
+      <Patch Number="36" Name="DynaPan" ProgramChange="36"/>
+      <Patch Number="37" Name="DynaPan&amp;Chrs" ProgramChange="37"/>
+      <Patch Number="38" Name="Sweep Up" ProgramChange="38"/>
+      <Patch Number="39" Name="Sweep Down" ProgramChange="39"/>
+      <Patch Number="40" Name="MIDIclkDly 4" ProgramChange="40"/>
+      <Patch Number="41" Name="MIDIclkDly 8" ProgramChange="41"/>
+      <Patch Number="42" Name="MIDIclkDly16" ProgramChange="42"/>
+      <Patch Number="43" Name="MIDIclkDly 3" ProgramChange="43"/>
+      <Patch Number="44" Name="MIDIclkDly 6" ProgramChange="44"/>
+      <Patch Number="45" Name="MIDIclkDly X" ProgramChange="45"/>
+      <Patch Number="46" Name="MIDIclkDly3X" ProgramChange="46"/>
+      <Patch Number="47" Name="MIDIclk Verb" ProgramChange="47"/>
+      <Patch Number="48" Name="Stereo Sim 1" ProgramChange="48"/>
+      <Patch Number="49" Name="Stereo Sim 2" ProgramChange="49"/>
+    </PatchNameList>
+  </ExtendingDeviceNames>
+</MIDINameDocument>

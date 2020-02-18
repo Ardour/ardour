@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Roland</Manufacturer>
+    <Model>D-50</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Patches">
+        <PatchNameList>
+          <Patch Number="i-11" Name="Fantasia" ProgramChange="0"/>
+          <Patch Number="i-12" Name="Metal Harp" ProgramChange="1"/>
+          <Patch Number="i-13" Name="Jazz Guitar Duo" ProgramChange="2"/>
+          <Patch Number="i-14" Name="Arco Strings" ProgramChange="3"/>
+          <Patch Number="i-15" Name="Horn Section" ProgramChange="4"/>
+          <Patch Number="i-16" Name="Living Calliope" ProgramChange="5"/>
+          <Patch Number="i-17" Name="D-50 Voices" ProgramChange="6"/>
+          <Patch Number="i-18" Name="Slow Rotor" ProgramChange="7"/>
+          <Patch Number="i-21" Name="DigitalNativeDance" ProgramChange="8"/>
+          <Patch Number="i-22" Name="Bass Marimba" ProgramChange="9"/>
+          <Patch Number="i-23" Name="Flute-Piano Duo" ProgramChange="10"/>
+          <Patch Number="i-24" Name="Combie Strings" ProgramChange="11"/>
+          <Patch Number="i-25" Name="Harpsichord Stabs" ProgramChange="12"/>
+          <Patch Number="i-26" Name="Griitttarr" ProgramChange="13"/>
+          <Patch Number="i-27" Name="Nylon Atmosphere" ProgramChange="14"/>
+          <Patch Number="i-28" Name="Synthetic Electric" ProgramChange="15"/>
+          <Patch Number="i-31" Name="Breathy Chiffer" ProgramChange="16"/>
+          <Patch Number="i-32" Name="Gamelan Bell" ProgramChange="17"/>
+          <Patch Number="i-33" Name="Slap Brass" ProgramChange="18"/>
+          <Patch Number="i-34" Name="PressureMe Strings" ProgramChange="19"/>
+          <Patch Number="i-35" Name="Rich Brass" ProgramChange="20"/>
+          <Patch Number="i-36" Name="Pipe Solo" ProgramChange="21"/>
+          <Patch Number="i-37" Name="Soundtrack" ProgramChange="22"/>
+          <Patch Number="i-38" Name="Cathedral Organ" ProgramChange="23"/>
+          <Patch Number="i-41" Name="Shamus Theme" ProgramChange="24"/>
+          <Patch Number="i-42" Name="Vibraphone" ProgramChange="25"/>
+          <Patch Number="i-43" Name="Basin Strat Blues" ProgramChange="26"/>
+          <Patch Number="i-44" Name="Pizzagogo" ProgramChange="27"/>
+          <Patch Number="i-45" Name="Flutish Brass" ProgramChange="28"/>
+          <Patch Number="i-46" Name="Pressure Me Lead" ProgramChange="29"/>
+          <Patch Number="i-47" Name="Spacious Sweep" ProgramChange="30"/>
+          <Patch Number="i-48" Name="Piano-Fifty" ProgramChange="31"/>
+          <Patch Number="i-51" Name="Glass Voices" ProgramChange="32"/>
+          <Patch Number="i-52" Name="Hollowed Harp" ProgramChange="33"/>
+          <Patch Number="i-53" Name="Ethnic Session" ProgramChange="34"/>
+          <Patch Number="i-54" Name="Jete Strings" ProgramChange="35"/>
+          <Patch Number="i-55" Name="Stereo Polysynth" ProgramChange="36"/>
+          <Patch Number="i-56" Name="Tine Wave" ProgramChange="37"/>
+          <Patch Number="i-57" Name="Syn-Harmonium" ProgramChange="38"/>
+          <Patch Number="i-58" Name="Rock Organ" ProgramChange="39"/>
+          <Patch Number="i-61" Name="Staccato Heaven" ProgramChange="40"/>
+          <Patch Number="i-62" Name="Oriental Bells" ProgramChange="41"/>
+          <Patch Number="i-63" Name="E-Bass and E-Piano" ProgramChange="42"/>
+          <Patch Number="i-64" Name="Legato Strings" ProgramChange="43"/>
+          <Patch Number="i-65" Name="JX Horns-Strings" ProgramChange="44"/>
+          <Patch Number="i-66" Name="Shakuhachi" ProgramChange="45"/>
+          <Patch Number="i-67" Name="Choir" ProgramChange="46"/>
+          <Patch Number="i-68" Name="Picked Guitar Duo" ProgramChange="47"/>
+          <Patch Number="i-71" Name="Nightmare" ProgramChange="48"/>
+          <Patch Number="i-72" Name="Syn Marimba" ProgramChange="49"/>
+          <Patch Number="i-73" Name="Slap Bass n Brass" ProgramChange="50"/>
+          <Patch Number="i-74" Name="String Ensemble" ProgramChange="51"/>
+          <Patch Number="i-75" Name="Velo-Brass" ProgramChange="52"/>
+          <Patch Number="i-76" Name="Digital Cello" ProgramChange="53"/>
+          <Patch Number="i-77" Name="O K  Chorale" ProgramChange="54"/>
+          <Patch Number="i-78" Name="Pianissimo" ProgramChange="55"/>
+          <Patch Number="i-81" Name="Intruder FX" ProgramChange="56"/>
+          <Patch Number="i-82" Name="Steel Pick" ProgramChange="57"/>
+          <Patch Number="i-83" Name="Synth Bass" ProgramChange="58"/>
+          <Patch Number="i-84" Name="Afterthought" ProgramChange="59"/>
+          <Patch Number="i-85" Name="Bones" ProgramChange="60"/>
+          <Patch Number="i-86" Name="Bottle Blower" ProgramChange="61"/>
+          <Patch Number="i-87" Name="Future Pad" ProgramChange="62"/>
+          <Patch Number="i-88" Name="PCM E-Piano" ProgramChange="63"/>
+          <Patch Number="c-11" Name="Card Patch" ProgramChange="64"/>
+          <Patch Number="c-12" Name="Card Patch" ProgramChange="65"/>
+          <Patch Number="c-13" Name="Card Patch" ProgramChange="66"/>
+          <Patch Number="c-14" Name="Card Patch" ProgramChange="67"/>
+          <Patch Number="c-15" Name="Card Patch" ProgramChange="68"/>
+          <Patch Number="c-16" Name="Card Patch" ProgramChange="69"/>
+          <Patch Number="c-17" Name="Card Patch" ProgramChange="70"/>
+          <Patch Number="c-18" Name="Card Patch" ProgramChange="71"/>
+          <Patch Number="c-21" Name="Card Patch" ProgramChange="72"/>
+          <Patch Number="c-22" Name="Card Patch" ProgramChange="73"/>
+          <Patch Number="c-23" Name="Card Patch" ProgramChange="74"/>
+          <Patch Number="c-24" Name="Card Patch" ProgramChange="75"/>
+          <Patch Number="c-25" Name="Card Patch" ProgramChange="76"/>
+          <Patch Number="c-26" Name="Card Patch" ProgramChange="77"/>
+          <Patch Number="c-27" Name="Card Patch" ProgramChange="78"/>
+          <Patch Number="c-28" Name="Card Patch" ProgramChange="79"/>
+          <Patch Number="c-31" Name="Card Patch" ProgramChange="80"/>
+          <Patch Number="c-32" Name="Card Patch" ProgramChange="81"/>
+          <Patch Number="c-33" Name="Card Patch" ProgramChange="82"/>
+          <Patch Number="c-34" Name="Card Patch" ProgramChange="83"/>
+          <Patch Number="c-35" Name="Card Patch" ProgramChange="84"/>
+          <Patch Number="c-36" Name="Card Patch" ProgramChange="85"/>
+          <Patch Number="c-37" Name="Card Patch" ProgramChange="86"/>
+          <Patch Number="c-38" Name="Card Patch" ProgramChange="87"/>
+          <Patch Number="c-41" Name="Card Patch" ProgramChange="88"/>
+          <Patch Number="c-42" Name="Card Patch" ProgramChange="89"/>
+          <Patch Number="c-43" Name="Card Patch" ProgramChange="90"/>
+          <Patch Number="c-44" Name="Card Patch" ProgramChange="91"/>
+          <Patch Number="c-45" Name="Card Patch" ProgramChange="92"/>
+          <Patch Number="c-46" Name="Card Patch" ProgramChange="93"/>
+          <Patch Number="c-47" Name="Card Patch" ProgramChange="94"/>
+          <Patch Number="c-48" Name="Card Patch" ProgramChange="95"/>
+          <Patch Number="c-51" Name="Card Patch" ProgramChange="96"/>
+          <Patch Number="c-52" Name="Card Patch" ProgramChange="97"/>
+          <Patch Number="c-53" Name="Card Patch" ProgramChange="98"/>
+          <Patch Number="c-54" Name="Card Patch" ProgramChange="99"/>
+          <Patch Number="c-55" Name="Card Patch" ProgramChange="100"/>
+          <Patch Number="c-56" Name="Card Patch" ProgramChange="101"/>
+          <Patch Number="c-57" Name="Card Patch" ProgramChange="102"/>
+          <Patch Number="c-58" Name="Card Patch" ProgramChange="103"/>
+          <Patch Number="c-61" Name="Card Patch" ProgramChange="104"/>
+          <Patch Number="c-62" Name="Card Patch" ProgramChange="105"/>
+          <Patch Number="c-63" Name="Card Patch" ProgramChange="106"/>
+          <Patch Number="c-64" Name="Card Patch" ProgramChange="107"/>
+          <Patch Number="c-65" Name="Card Patch" ProgramChange="108"/>
+          <Patch Number="c-66" Name="Card Patch" ProgramChange="109"/>
+          <Patch Number="c-67" Name="Card Patch" ProgramChange="110"/>
+          <Patch Number="c-68" Name="Card Patch" ProgramChange="111"/>
+          <Patch Number="c-71" Name="Card Patch" ProgramChange="112"/>
+          <Patch Number="c-72" Name="Card Patch" ProgramChange="113"/>
+          <Patch Number="c-73" Name="Card Patch" ProgramChange="114"/>
+          <Patch Number="c-74" Name="Card Patch" ProgramChange="115"/>
+          <Patch Number="c-75" Name="Card Patch" ProgramChange="116"/>
+          <Patch Number="c-76" Name="Card Patch" ProgramChange="117"/>
+          <Patch Number="c-77" Name="Card Patch" ProgramChange="118"/>
+          <Patch Number="c-78" Name="Card Patch" ProgramChange="119"/>
+          <Patch Number="c-81" Name="Card Patch" ProgramChange="120"/>
+          <Patch Number="c-82" Name="Card Patch" ProgramChange="121"/>
+          <Patch Number="c-83" Name="Card Patch" ProgramChange="122"/>
+          <Patch Number="c-84" Name="Card Patch" ProgramChange="123"/>
+          <Patch Number="c-85" Name="Card Patch" ProgramChange="124"/>
+          <Patch Number="c-86" Name="Card Patch" ProgramChange="125"/>
+          <Patch Number="c-87" Name="Card Patch" ProgramChange="126"/>
+          <Patch Number="c-88" Name="Card Patch" ProgramChange="127"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

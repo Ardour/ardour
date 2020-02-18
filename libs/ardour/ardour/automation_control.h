@@ -1,22 +1,24 @@
 /*
-    Copyright (C) 2007 Paul Davis
-    Author: David Robillard
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2007-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 Nick Mainsbridge <mainsbridge@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_automation_control_h__
 #define __ardour_automation_control_h__
@@ -26,12 +28,11 @@
 #include <glibmm/threads.h>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
 
 #include "pbd/controllable.h"
 
-#include "evoral/types.hpp"
-#include "evoral/Control.hpp"
+#include "evoral/types.h"
+#include "evoral/Control.h"
 
 #include "ardour/automation_list.h"
 #include "ardour/control_group_member.h"
@@ -51,7 +52,6 @@ class ControlGroup;
 class LIBARDOUR_API AutomationControl
 	: public PBD::Controllable
 	, public Evoral::Control
-	, public boost::enable_shared_from_this<AutomationControl>
 	, public ControlGroupMember
 	, public SessionHandleRef
 {
@@ -113,8 +113,8 @@ public:
 	double normal()  const { return _desc.normal; }
 	bool   toggled() const { return _desc.toggled; }
 
-	double internal_to_interface (double i) const;
-	double interface_to_internal (double i) const;
+	double internal_to_interface (double, bool rotary = false) const;
+	double interface_to_internal (double, bool rotary = false) const;
 
 	virtual std::string get_user_string() const;
 

@@ -1,22 +1,29 @@
 /*
-    Copyright (C) 2008 Paul Davis
-    Author: Sakari Bergen
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2005-2006 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2005-2008 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2005-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2006-2011 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2012 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2008-2013 Sakari Bergen <sakari.bergen@beatwaves.net>
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2014 Colin Fletcher <colin.m.fletcher@googlemail.com>
+ * Copyright (C) 2015-2017 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 
 #include <sigc++/signal.h>
@@ -24,8 +31,12 @@
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
 
+#include "pbd/gstdio_compat.h"
+#include "pbd/file_utils.h"
+
 #include "ardour/audioregion.h"
 #include "ardour/export_channel_configuration.h"
+#include "ardour/export_format_specification.h"
 #include "ardour/export_status.h"
 #include "ardour/export_handler.h"
 #include "ardour/profile.h"
@@ -33,7 +44,9 @@
 #include "export_dialog.h"
 #include "export_report.h"
 #include "gui_thread.h"
+#include "mixer_ui.h"
 #include "nag.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -45,10 +58,11 @@ ExportDialog::ExportDialog (PublicEditor & editor, std::string title, ARDOUR::Ex
   : ArdourDialog (title)
   , type (type)
   , editor (editor)
-
   , warn_label ("", Gtk::ALIGN_LEFT)
   , list_files_label (_("<span color=\"#ffa755\">Some already existing files will be overwritten.</span>"), Gtk::ALIGN_RIGHT)
   , list_files_button (_("List files"))
+  , previous_progress (0)
+  , _initialized (false)
 { }
 
 ExportDialog::~ExportDialog ()
@@ -101,8 +115,18 @@ ExportDialog::set_session (ARDOUR::Session* s)
 	channel_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_realtime_selection));
 	file_notebook->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings_and_example_filename));
 
+	/* Catch major selection changes, and set the session dirty */
+
+	preset_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::maybe_set_session_dirty));
+	timespan_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::maybe_set_session_dirty));
+	channel_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::maybe_set_session_dirty));
+	channel_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::maybe_set_session_dirty));
+	file_notebook->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::maybe_set_session_dirty));
+
 	update_warnings_and_example_filename ();
 	update_realtime_selection ();
+
+	_initialized = true;
 
 	_session->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&ExportDialog::parameter_changed, this, _1), gui_context());
 }
@@ -212,6 +236,17 @@ ExportDialog::sync_with_manager ()
 
 	update_warnings_and_example_filename ();
 	update_realtime_selection ();
+}
+
+
+void
+ExportDialog::maybe_set_session_dirty ()
+{
+	/* Presumably after all initialization is finished, sync_with_manager means that something important changed. */
+	/* Let's prompt the user to save the session; otherwise these Export settings changes would be lost on re-open */
+	if (_initialized) {
+		_session->set_dirty();
+	}
 }
 
 void
@@ -370,7 +405,38 @@ ExportDialog::show_progress ()
 		}
 	}
 
-	status->finish ();
+	status->finish (TRS_UI);
+
+	if (!status->aborted() && UIConfiguration::instance().get_save_export_mixer_screenshot ()) {
+		ExportProfileManager::TimespanStateList const& timespans = profile_manager->get_timespans();
+		ExportProfileManager::FilenameStateList const& filenames = profile_manager->get_filenames ();
+
+		std::list<std::string> paths;
+		for (ExportProfileManager::FilenameStateList::const_iterator fi = filenames.begin(); fi != filenames.end(); ++fi) {
+			for (ExportProfileManager::TimespanStateList::const_iterator ti = timespans.begin(); ti != timespans.end(); ++ti) {
+				ExportProfileManager::TimespanListPtr tlp = (*ti)->timespans;
+				for (ExportProfileManager::TimespanList::const_iterator eti = tlp->begin(); eti != tlp->end(); ++eti) {
+					(*fi)->filename->set_timespan (*eti);
+					paths.push_back ((*fi)->filename->get_path (ExportFormatSpecPtr ()) + "-mixer.png");
+				}
+			}
+		}
+
+		if (paths.size() > 0) {
+			PBD::info << string_compose(_("Writing Mixer Screenshot: %1."), paths.front()) << endmsg;
+			Mixer_UI::instance()->screenshot (paths.front());
+
+			std::list<std::string>::const_iterator it = paths.begin ();
+			++it;
+			for (; it != paths.end(); ++it) {
+				PBD::info << string_compose(_("Copying Mixer Screenshot: %1."), *it) << endmsg;
+				::g_unlink (it->c_str());
+				if (!hard_link (paths.front(), *it)) {
+					copy_file (paths.front(), *it);
+				}
+			}
+		}
+	}
 
 	if (!status->aborted() && status->result_map.size() > 0) {
 		hide();

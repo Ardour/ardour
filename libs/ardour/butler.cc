@@ -1,21 +1,24 @@
 /*
-    Copyright (C) 1999-2009 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 1999-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2009-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2010-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2014-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 GZharun <grygoriiz@wavesglobal.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <errno.h>
 #include <fcntl.h>
@@ -47,9 +50,9 @@ Butler::Butler(Session& s)
 	: SessionHandleRef (s)
 	, thread()
 	, have_thread (false)
-	, audio_dstream_capture_buffer_size(0)
-	, audio_dstream_playback_buffer_size(0)
-	, midi_dstream_buffer_size(0)
+	, _audio_capture_buffer_size(0)
+	, _audio_playback_buffer_size(0)
+	, _midi_buffer_size(0)
 	, pool_trash(16)
 	, _xthread (true)
 {
@@ -80,30 +83,20 @@ Butler::config_changed (std::string p)
 		_session.adjust_playback_buffering ();
 		if (Config->get_buffering_preset() == Custom) {
 			/* size is in Samples, not bytes */
-			audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.sample_rate());
+			_audio_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.sample_rate());
 			_session.adjust_playback_buffering ();
-		} else {
-#ifndef NDEBUG
-			std::cerr << "Skip explicit buffer seconds, preset in use\n";
-#endif
 		}
 	} else if (p == "capture-buffer-seconds") {
 		if (Config->get_buffering_preset() == Custom) {
-			audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.sample_rate());
+			_audio_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.sample_rate());
 			_session.adjust_capture_buffering ();
-		} else {
-#ifndef NDEBUG
-			std::cerr << "Skip explicit buffer seconds, preset in use\n";
-#endif
 		}
 	} else if (p == "buffering-preset") {
 		DiskIOProcessor::set_buffering_parameters (Config->get_buffering_preset());
-		audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.sample_rate());
-		audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.sample_rate());
+		_audio_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.sample_rate());
+		_audio_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.sample_rate());
 		_session.adjust_capture_buffering ();
 		_session.adjust_playback_buffering ();
-	} else if (p == "midi-readahead") {
-		DiskReader::set_midi_readahead_samples ((samplecnt_t) (Config->get_midi_readahead() * _session.sample_rate()));
 	}
 }
 
@@ -115,16 +108,14 @@ Butler::start_thread()
 
 	/* size is in Samples, not bytes */
 	const float rate = (float)_session.sample_rate();
-	audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * rate);
-	audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * rate);
+	_audio_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * rate);
+	_audio_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * rate);
 
 	/* size is in bytes
 	 * XXX: AudioEngine needs to tell us the MIDI buffer size
 	 * (i.e. how many MIDI bytes we might see in a cycle)
 	 */
-	midi_dstream_buffer_size = (uint32_t) floor (Config->get_midi_track_buffer_seconds() * rate);
-
-	DiskReader::set_midi_readahead_samples ((samplecnt_t) (Config->get_midi_readahead() * rate));
+	_midi_buffer_size = (uint32_t) floor (Config->get_midi_track_buffer_seconds() * rate);
 
 	should_run = false;
 
@@ -213,6 +204,18 @@ Butler::thread_work ()
 			DEBUG_TRACE (DEBUG::Butler, string_compose ("do transport work @ %1\n", g_get_monotonic_time()));
 			_session.butler_transport_work ();
 			DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttransport work complete @ %1, twr = %2\n", g_get_monotonic_time(), transport_work_requested()));
+
+			if (_session.locate_initiated()) {
+				/* we have done the "stop" required for a
+				   locate (DeclickToLocate state in TFSM), but
+				   once that finishes we're going to do a locate,
+				   so do not bother with buffer refills at this
+				   time.
+				*/
+				DEBUG_TRACE (DEBUG::Butler, string_compose ("\tlocate pending, so just pause @ %1 till woken again\n", g_get_monotonic_time()));
+				paused.signal ();
+				continue;
+			}
 		}
 
 		sampleoffset_t audition_seek;

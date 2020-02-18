@@ -61,20 +61,20 @@ def configure(conf):
 def build(bld):
     # Headers
     #bld.install_files('${INCLUDEDIR}/evoral', 'evoral/*.h')
-    #bld.install_files('${INCLUDEDIR}/evoral', 'evoral/*.hpp')
+    #bld.install_files('${INCLUDEDIR}/evoral', 'evoral/*.h')
 
     # Pkgconfig file
     #autowaf.build_pc(bld, 'EVORAL', EVORAL_VERSION, 'GLIBMM GTHREAD')
 
     libsmf = bld(features = 'c cstlib')
     libsmf.source = '''
-            src/libsmf/smf.c
-            src/libsmf/smf_decode.c
-            src/libsmf/smf_load.c
-            src/libsmf/smf_save.c
-            src/libsmf/smf_tempo.c
+            libsmf/smf.c
+            libsmf/smf_decode.c
+            libsmf/smf_load.c
+            libsmf/smf_save.c
+            libsmf/smf_tempo.c
     '''
-    libsmf.export_includes = ['./src/libsmf']
+    libsmf.export_includes = ['./libsmf']
     libsmf.defines      = ['SMF_VERSION="1.2"', 'LIBSMF_DLL_EXPORTS']
     libsmf.includes     = ['./src']
     libsmf.name         = 'libsmf'
@@ -87,16 +87,16 @@ def build(bld):
         libsmf.cflags       = [ bld.env['compiler_flags_dict']['pic'] ]
 
     lib_source = '''
-            src/Control.cpp
-            src/ControlList.cpp
-            src/ControlSet.cpp
-            src/Curve.cpp
-            src/Event.cpp
-            src/Note.cpp
-            src/SMF.cpp
-            src/Sequence.cpp
-            src/TimeConverter.cpp
-            src/debug.cpp
+            Control.cc
+            ControlList.cc
+            ControlSet.cc
+            Curve.cc
+            Event.cc
+            Note.cc
+            SMF.cc
+            Sequence.cc
+            TimeConverter.cc
+            debug.cc
     '''
 
     # Library
@@ -114,7 +114,7 @@ def build(bld):
     obj.includes       = ['.', './src']
     obj.name           = 'libevoral'
     obj.target         = 'evoral'
-    obj.uselib         = 'GLIBMM GTHREAD SMF XML LIBPBD'
+    obj.uselib         = 'GLIBMM GTHREAD SMF XML LIBPBD OSX'
     obj.use            = 'libsmf libpbd'
     obj.vnum           = EVORAL_LIB_VERSION
     obj.install_path   = bld.env['LIBDIR']
@@ -141,16 +141,16 @@ def build(bld):
         # Unit tests
         obj              = bld(features = 'cxx cxxprogram')
         obj.source       = '''
-                test/SequenceTest.cpp
-                test/SMFTest.cpp
-                test/RangeTest.cpp
-                test/NoteTest.cpp
-                test/CurveTest.cpp
-                test/testrunner.cpp
+                test/SequenceTest.cc
+                test/SMFTest.cc
+                test/RangeTest.cc
+                test/NoteTest.cc
+                test/CurveTest.cc
+                test/testrunner.cc
         '''
         obj.includes     = ['.', './src']
         obj.use          = 'libevoral_static'
-        obj.uselib       = 'CPPUNIT SNDFILE LIBPBD'
+        obj.uselib       = 'GLIBMM GTHREAD SMF XML LIBPBD OSX CPPUNIT'
         obj.target       = 'run-tests'
         obj.name         = 'libevoral-tests'
         obj.install_path = ''

@@ -1,21 +1,22 @@
 /*
-    Copyright (C) 2014 Paul Davis
-    Author: David Robillard
-
-    This program is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the Free
-    Software Foundation; either version 2 of the License, or (at your option)
-    any later version.
-
-    This program is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
-
-    You should have received a copy of the GNU General Public License along
-    with this program; if not, write to the Free Software Foundation, Inc.,
-    675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2016 Paul Davis <paul@linuxaudiosystems.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
@@ -52,13 +53,16 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 	/* Note: defaults in Evoral::ParameterDescriptor */
 
 	switch((AutomationType)parameter.type()) {
-	case GainAutomation:
 	case BusSendLevel:
+		inline_ctrl = true;
+		/* fallthrough */
+	case GainAutomation:
 		upper  = Config->get_max_gain();
 		normal = 1.0f;
 		break;
 	case BusSendEnable:
-		normal = 1.0f;
+		upper  = 1.f;
+		normal = 1.f;
 		toggled = true;
 		break;
 	case TrimAutomation:
@@ -148,6 +152,7 @@ ParameterDescriptor::ParameterDescriptor()
 	, integer_step(false)
 	, sr_dependent(false)
 	, enumeration(false)
+	, inline_ctrl(false)
 {}
 
 void
@@ -193,7 +198,7 @@ ParameterDescriptor::update_steps()
 	if (unit == ParameterDescriptor::MIDI_NOTE) {
 		step      = smallstep = 1;  // semitone
 		largestep = 12;             // octave
-	} else if (type == GainAutomation || type == TrimAutomation) {
+	} else if (type == GainAutomation || type == TrimAutomation || type == BusSendLevel) {
 		/* dB_coeff_step gives a step normalized for [0, max_gain].  This is
 		   like "slider position", so we convert from "slider position" to gain
 		   to have the correct unit here. */
@@ -294,7 +299,7 @@ ParameterDescriptor::midi_note_num (const std::string& name)
 {
 	static NameNumMap name2num = build_midi_name2num();
 
-	uint8_t num = -1;			// -1 (or 255) is returned in case of failure
+	uint8_t num = -1; // -1 (or 255) is returned in case of failure
 
 	NameNumMap::const_iterator it = name2num.find(normalize_note_name(name));
 	if (it != name2num.end())
@@ -304,7 +309,7 @@ ParameterDescriptor::midi_note_num (const std::string& name)
 }
 
 float
-ParameterDescriptor::to_interface (float val) const
+ParameterDescriptor::to_interface (float val, bool rotary) const
 {
 	val = std::min (upper, std::max (lower, val));
 	switch(type) {
@@ -321,6 +326,12 @@ ParameterDescriptor::to_interface (float val) const
 			}
 			break;
 		case PanAzimuthAutomation:
+			if (rotary) {
+				val = val;
+			} else {
+				val = 1.0 - val;
+			}
+			break;
 		case PanElevationAutomation:
 			val = val;
 			break;
@@ -354,7 +365,7 @@ ParameterDescriptor::to_interface (float val) const
 }
 
 float
-ParameterDescriptor::from_interface (float val) const
+ParameterDescriptor::from_interface (float val, bool rotary) const
 {
 	val = std::max (0.f, std::min (1.f, val));
 
@@ -372,6 +383,12 @@ ParameterDescriptor::from_interface (float val) const
 			}
 			break;
 		case PanAzimuthAutomation:
+			if (rotary) {
+				val = val;
+			} else {
+				val = 1.0 - val;
+			}
+			break;
 		case PanElevationAutomation:
 			 val = val;
 			break;

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Kawai</Manufacturer>
+    <Model>K1</Model>
+    <Model>K1r</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Single Patches">
+        <PatchNameList>
+          <Patch Number="IA-1" Name="Ahh" ProgramChange="0"/>
+          <Patch Number="IA-2" Name="6 String" ProgramChange="1"/>
+          <Patch Number="IA-3" Name="String Pad" ProgramChange="2"/>
+          <Patch Number="IA-4" Name="Al'sRhodes" ProgramChange="3"/>
+          <Patch Number="IA-5" Name="Visitors" ProgramChange="4"/>
+          <Patch Number="IA-6" Name="Pan Flute" ProgramChange="5"/>
+          <Patch Number="IA-7" Name="Trumpet" ProgramChange="6"/>
+          <Patch Number="IA-8" Name="1 Key Beat" ProgramChange="7"/>
+          <Patch Number="IB-1" Name="Sitar" ProgramChange="8"/>
+          <Patch Number="IB-2" Name="Piano 1" ProgramChange="9"/>
+          <Patch Number="IB-3" Name="Jazz Harp" ProgramChange="10"/>
+          <Patch Number="IB-4" Name="Fuzz Clav" ProgramChange="11"/>
+          <Patch Number="IB-5" Name="Jazz Organ" ProgramChange="12"/>
+          <Patch Number="IB-6" Name="Clarinet" ProgramChange="13"/>
+          <Patch Number="IB-7" Name="BowedStrng" ProgramChange="14"/>
+          <Patch Number="IB-8" Name="Pizzicato" ProgramChange="15"/>
+          <Patch Number="IC-1" Name="Stratocast" ProgramChange="16"/>
+          <Patch Number="IC-2" Name="StrutNstuf" ProgramChange="17"/>
+          <Patch Number="IC-3" Name="AnalogBras" ProgramChange="18"/>
+          <Patch Number="IC-4" Name="Crockett's" ProgramChange="19"/>
+          <Patch Number="IC-5" Name="Reflection" ProgramChange="20"/>
+          <Patch Number="IC-6" Name="HeavyHittr" ProgramChange="21"/>
+          <Patch Number="IC-7" Name="Terminator" ProgramChange="22"/>
+          <Patch Number="IC-8" Name="Nomads" ProgramChange="23"/>
+          <Patch Number="ID-1" Name="Kick Bass" ProgramChange="24"/>
+          <Patch Number="ID-2" Name="Pull Bass" ProgramChange="25"/>
+          <Patch Number="ID-3" Name="Vybes" ProgramChange="26"/>
+          <Patch Number="ID-4" Name="Bellery" ProgramChange="27"/>
+          <Patch Number="ID-5" Name="Music Box" ProgramChange="28"/>
+          <Patch Number="ID-6" Name="Kick+E.Snr" ProgramChange="29"/>
+          <Patch Number="ID-7" Name="ETom+HiHat" ProgramChange="30"/>
+          <Patch Number="ID-8" Name="Cymbals" ProgramChange="31"/>
+          <Patch Number="iA-1" Name="Voice" ProgramChange="32"/>
+          <Patch Number="iA-2" Name="12 String" ProgramChange="33"/>
+          <Patch Number="iA-3" Name="String Ens" ProgramChange="34"/>
+          <Patch Number="iA-4" Name="Digi Piano" ProgramChange="35"/>
+          <Patch Number="iA-5" Name="Return Home" ProgramChange="36"/>
+          <Patch Number="iA-6" Name="Flute" ProgramChange="37"/>
+          <Patch Number="iA-7" Name="FrenchHorn" ProgramChange="38"/>
+          <Patch Number="iA-8" Name="GongOfKngs" ProgramChange="39"/>
+          <Patch Number="iB-1" Name="Kimono" ProgramChange="40"/>
+          <Patch Number="iB-2" Name="Piano 2" ProgramChange="41"/>
+          <Patch Number="iB-3" Name="Saxy" ProgramChange="42"/>
+          <Patch Number="iB-4" Name="Harpsicord" ProgramChange="43"/>
+          <Patch Number="iB-5" Name="DeepPurple" ProgramChange="44"/>
+          <Patch Number="iB-6" Name="Oboe" ProgramChange="45"/>
+          <Patch Number="iB-7" Name="Cellos" ProgramChange="46"/>
+          <Patch Number="iB-8" Name="Orchestra" ProgramChange="47"/>
+          <Patch Number="iC-1" Name="Steel Keys" ProgramChange="48"/>
+          <Patch Number="iC-2" Name="Club Piano" ProgramChange="49"/>
+          <Patch Number="iC-3" Name="NastyBrass" ProgramChange="50"/>
+          <Patch Number="iC-4" Name="Jan'sTheme" ProgramChange="51"/>
+          <Patch Number="iC-5" Name="Ole!" ProgramChange="52"/>
+          <Patch Number="iC-6" Name="Aftertouch" ProgramChange="53"/>
+          <Patch Number="iC-7" Name="DragonHall" ProgramChange="54"/>
+          <Patch Number="iC-8" Name="Arrangment" ProgramChange="55"/>
+          <Patch Number="iD-1" Name="Ac Bass" ProgramChange="56"/>
+          <Patch Number="iD-2" Name="ElectrBass" ProgramChange="57"/>
+          <Patch Number="iD-3" Name="Marimba" ProgramChange="58"/>
+          <Patch Number="iD-4" Name="Glocken" ProgramChange="59"/>
+          <Patch Number="iD-5" Name="Steel Drum" ProgramChange="60"/>
+          <Patch Number="iD-6" Name="Kick+Snare" ProgramChange="61"/>
+          <Patch Number="iD-7" Name="ATom+HiHat" ProgramChange="62"/>
+          <Patch Number="iD-8" Name="Rim+Snare" ProgramChange="63"/>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+  </MasterDeviceNames>
+</MIDINameDocument>

@@ -1,22 +1,23 @@
 /*
-    Copyright (C) 2009 Paul Davis
-    Author: Sakari Bergen
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2009-2012 Sakari Bergen <sakari.bergen@beatwaves.net>
+ * Copyright (C) 2010-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2013-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2016-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __ardour_export_graph_builder_h__
 #define __ardour_export_graph_builder_h__
@@ -39,6 +40,7 @@ namespace AudioGrapher {
 	template <typename T> class SampleFormatConverter;
 	template <typename T> class Interleaver;
 	template <typename T> class SndfileWriter;
+	template <typename T> class CmdPipeWriter;
 	template <typename T> class SilenceTrimmer;
 	template <typename T> class TmpFile;
 	template <typename T> class Threader;
@@ -102,7 +104,11 @@ class LIBARDOUR_API ExportGraphBuilder
 		typedef boost::shared_ptr<AudioGrapher::SndfileWriter<int> >    IntWriterPtr;
 		typedef boost::shared_ptr<AudioGrapher::SndfileWriter<short> >  ShortWriterPtr;
 
+		typedef boost::shared_ptr<AudioGrapher::CmdPipeWriter<Sample> > FloatPipePtr;
+
 		template<typename T> void init_writer (boost::shared_ptr<AudioGrapher::SndfileWriter<T> > & writer);
+		template<typename T> void init_writer (boost::shared_ptr<AudioGrapher::CmdPipeWriter<T> > & writer);
+
 		void copy_files (std::string orig_path);
 
 		FileSpec               config;
@@ -115,6 +121,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		FloatWriterPtr float_writer;
 		IntWriterPtr   int_writer;
 		ShortWriterPtr short_writer;
+		FloatPipePtr   pipe_writer;
 	};
 
 	// sample format converter
@@ -174,7 +181,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		ExportGraphBuilder & parent;
 
 		FileSpec        config;
-		samplecnt_t      max_samples_out;
+		samplecnt_t     max_samples_out;
 		bool            use_loudness;
 		bool            use_peak;
 		BufferPtr       buffer;
@@ -182,6 +189,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		TmpFilePtr      tmp_file;
 		NormalizerPtr   normalizer;
 		ThreaderPtr     threader;
+
 		LoudnessReaderPtr    loudness_reader;
 		boost::ptr_list<SFC> children;
 
@@ -209,7 +217,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		boost::ptr_list<SFC>  children;
 		boost::ptr_list<Intermediate> intermediate_children;
 		SRConverterPtr        converter;
-		samplecnt_t            max_samples_out;
+		samplecnt_t           max_samples_out;
 	};
 
 	// Silence trimmer + adder
@@ -228,7 +236,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		FileSpec             config;
 		boost::ptr_list<SRC> children;
 		SilenceTrimmerPtr    silence_trimmer;
-		samplecnt_t           max_samples_in;
+		samplecnt_t          max_samples_in;
 	};
 
 	// channel configuration
@@ -248,7 +256,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		boost::ptr_list<SilenceHandler> children;
 		InterleaverPtr            interleaver;
 		ChunkerPtr                chunker;
-		samplecnt_t                max_samples_out;
+		samplecnt_t               max_samples_out;
 	};
 
 	Session const & session;

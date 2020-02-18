@@ -1,0 +1,1003 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Mark of the Unicorn - converted from FreeMIDI (Adapted by Harrison Consoles)</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Alesis</Manufacturer>
+    <Model>SR-16</Model>
+    <CustomDeviceMode Name="Mode 1">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Name Set 1"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Name Set 1"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Name Set 1">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1" Available="true"/>
+        <AvailableChannel Channel="2" Available="true"/>
+        <AvailableChannel Channel="3" Available="true"/>
+        <AvailableChannel Channel="4" Available="true"/>
+        <AvailableChannel Channel="5" Available="true"/>
+        <AvailableChannel Channel="6" Available="true"/>
+        <AvailableChannel Channel="7" Available="true"/>
+        <AvailableChannel Channel="8" Available="true"/>
+        <AvailableChannel Channel="9" Available="true"/>
+        <AvailableChannel Channel="10" Available="true"/>
+        <AvailableChannel Channel="11" Available="true"/>
+        <AvailableChannel Channel="12" Available="true"/>
+        <AvailableChannel Channel="13" Available="true"/>
+        <AvailableChannel Channel="14" Available="true"/>
+        <AvailableChannel Channel="15" Available="true"/>
+        <AvailableChannel Channel="16" Available="true"/>
+      </AvailableForChannels>
+      <PatchBank Name="Drum Kits">
+        <PatchNameList>
+          <Patch Number="00" Name="Drumset 00" ProgramChange="0">
+            <UsesNoteNameList Name="Drumset 00"/>
+          </Patch>
+          <Patch Number="01" Name="Drumset 01" ProgramChange="1">
+            <UsesNoteNameList Name="Drumset 01"/>
+          </Patch>
+          <Patch Number="02" Name="Drumset 02" ProgramChange="2">
+            <UsesNoteNameList Name="Drumset 02"/>
+          </Patch>
+          <Patch Number="03" Name="Drumset 03" ProgramChange="3">
+            <UsesNoteNameList Name="Drumset 03"/>
+          </Patch>
+          <Patch Number="04" Name="Drumset 04" ProgramChange="4">
+            <UsesNoteNameList Name="Drumset 04"/>
+          </Patch>
+          <Patch Number="05" Name="Drumset 05" ProgramChange="5">
+            <UsesNoteNameList Name="Drumset 05"/>
+          </Patch>
+          <Patch Number="06" Name="Drumset 06" ProgramChange="6">
+            <UsesNoteNameList Name="Drumset 06"/>
+          </Patch>
+          <Patch Number="07" Name="Drumset 07" ProgramChange="7">
+            <UsesNoteNameList Name="Drumset 07"/>
+          </Patch>
+          <Patch Number="08" Name="Drumset 08" ProgramChange="8">
+            <UsesNoteNameList Name="Drumset 08"/>
+          </Patch>
+          <Patch Number="09" Name="Drumset 09" ProgramChange="9">
+            <UsesNoteNameList Name="Drumset 09"/>
+          </Patch>
+          <Patch Number="10" Name="Drumset 10" ProgramChange="10">
+            <UsesNoteNameList Name="Drumset 10"/>
+          </Patch>
+          <Patch Number="11" Name="Drumset 11" ProgramChange="11">
+            <UsesNoteNameList Name="Drumset 11"/>
+          </Patch>
+          <Patch Number="12" Name="Drumset 12" ProgramChange="12">
+            <UsesNoteNameList Name="Drumset 12"/>
+          </Patch>
+          <Patch Number="13" Name="Drumset 13" ProgramChange="13">
+            <UsesNoteNameList Name="Drumset 13"/>
+          </Patch>
+          <Patch Number="14" Name="Drumset 14" ProgramChange="14">
+            <UsesNoteNameList Name="Drumset 14"/>
+          </Patch>
+          <Patch Number="15" Name="Drumset 15" ProgramChange="15">
+            <UsesNoteNameList Name="Drumset 15"/>
+          </Patch>
+          <Patch Number="16" Name="Drumset 16" ProgramChange="16">
+            <UsesNoteNameList Name="Drumset 16"/>
+          </Patch>
+          <Patch Number="17" Name="Drumset 17" ProgramChange="17">
+            <UsesNoteNameList Name="Drumset 17"/>
+          </Patch>
+          <Patch Number="18" Name="Drumset 18" ProgramChange="18">
+            <UsesNoteNameList Name="Drumset 18"/>
+          </Patch>
+          <Patch Number="19" Name="Drumset 19" ProgramChange="19">
+            <UsesNoteNameList Name="Drumset 19"/>
+          </Patch>
+          <Patch Number="20" Name="Drumset 20" ProgramChange="20">
+            <UsesNoteNameList Name="Drumset 20"/>
+          </Patch>
+          <Patch Number="21" Name="Drumset 21" ProgramChange="21">
+            <UsesNoteNameList Name="Drumset 21"/>
+          </Patch>
+          <Patch Number="22" Name="Drumset 22" ProgramChange="22">
+            <UsesNoteNameList Name="Drumset 22"/>
+          </Patch>
+          <Patch Number="23" Name="Drumset 23" ProgramChange="23">
+            <UsesNoteNameList Name="Drumset 23"/>
+          </Patch>
+          <Patch Number="24" Name="Drumset 24" ProgramChange="24">
+            <UsesNoteNameList Name="Drumset 24"/>
+          </Patch>
+          <Patch Number="25" Name="Drumset 25" ProgramChange="25">
+            <UsesNoteNameList Name="Drumset 25"/>
+          </Patch>
+          <Patch Number="26" Name="Drumset 26" ProgramChange="26">
+            <UsesNoteNameList Name="Drumset 26"/>
+          </Patch>
+          <Patch Number="27" Name="Drumset 27 " ProgramChange="27">
+            <UsesNoteNameList Name="Drumset 27"/>
+          </Patch>
+          <Patch Number="28" Name="Drumset 28" ProgramChange="28">
+            <UsesNoteNameList Name="Drumset 28"/>
+          </Patch>
+          <Patch Number="29" Name="Drumset 29" ProgramChange="29">
+            <UsesNoteNameList Name="Drumset 29"/>
+          </Patch>
+          <Patch Number="30" Name="Drumset 30" ProgramChange="30">
+            <UsesNoteNameList Name="Drumset 30"/>
+          </Patch>
+          <Patch Number="31" Name="Drumset 31" ProgramChange="31">
+            <UsesNoteNameList Name="Drumset 31"/>
+          </Patch>
+          <Patch Number="32" Name="Drumset 32" ProgramChange="32">
+            <UsesNoteNameList Name="Drumset 32"/>
+          </Patch>
+          <Patch Number="33" Name="Drumset 33" ProgramChange="33">
+            <UsesNoteNameList Name="Drumset 33"/>
+          </Patch>
+          <Patch Number="34" Name="Drumset 34" ProgramChange="34">
+            <UsesNoteNameList Name="Drumset 34"/>
+          </Patch>
+          <Patch Number="35" Name="Drumset 35" ProgramChange="35">
+            <UsesNoteNameList Name="Drumset 35"/>
+          </Patch>
+          <Patch Number="36" Name="Drumset 36" ProgramChange="36">
+            <UsesNoteNameList Name="Drumset 36"/>
+          </Patch>
+          <Patch Number="37" Name="Drumset 37" ProgramChange="37">
+            <UsesNoteNameList Name="Drumset 37"/>
+          </Patch>
+          <Patch Number="38" Name="Drumset 38" ProgramChange="38">
+            <UsesNoteNameList Name="Drumset 38"/>
+          </Patch>
+          <Patch Number="39" Name="Drumset 39" ProgramChange="39">
+            <UsesNoteNameList Name="Drumset 39"/>
+          </Patch>
+          <Patch Number="40" Name="Drumset 40" ProgramChange="40">
+            <UsesNoteNameList Name="Drumset 40"/>
+          </Patch>
+          <Patch Number="41" Name="Drumset 41" ProgramChange="41">
+            <UsesNoteNameList Name="Drumset 41"/>
+          </Patch>
+          <Patch Number="42" Name="Drumset 42" ProgramChange="42">
+            <UsesNoteNameList Name="Drumset 42"/>
+          </Patch>
+          <Patch Number="43" Name="Drumset 43" ProgramChange="43">
+            <UsesNoteNameList Name="Drumset 43"/>
+          </Patch>
+          <Patch Number="44" Name="Drumset 44" ProgramChange="44">
+            <UsesNoteNameList Name="Drumset 44"/>
+          </Patch>
+          <Patch Number="45" Name="Drumset 45" ProgramChange="45">
+            <UsesNoteNameList Name="Drumset 45"/>
+          </Patch>
+          <Patch Number="46" Name="Drumset 46" ProgramChange="46">
+            <UsesNoteNameList Name="Drumset 46"/>
+          </Patch>
+          <Patch Number="47" Name="Drumset 47" ProgramChange="47">
+            <UsesNoteNameList Name="Drumset 47"/>
+          </Patch>
+          <Patch Number="48" Name="Drumset 48" ProgramChange="48">
+            <UsesNoteNameList Name="Drumset 48"/>
+          </Patch>
+          <Patch Number="49" Name="Drumset 49" ProgramChange="49">
+            <UsesNoteNameList Name="Drumset 49"/>
+          </Patch>
+        </PatchNameList>
+      </PatchBank>
+    </ChannelNameSet>
+    <NoteNameList Name="Drumset 00">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 01">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 02">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 03">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 04">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 05">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 06">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 07">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 08">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 09">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 10">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 11">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 12">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 13">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 14">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 15">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 16">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 17">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 18">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 19">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 20">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 21">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 22">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 23">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 24">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 25">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 26">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 27">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 28">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 29">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 30">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 31">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 32">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 33">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 34">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 35">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 36">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 37">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 38">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 39">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 40">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 41">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 42">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 43">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 44">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 45">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 46">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 47">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 48">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+    <NoteNameList Name="Drumset 49">
+      <NoteGroup Name="HiHat">
+        <Note Number="42" Name="Closed Hat"/>
+        <Note Number="46" Name="Open Hat"/>
+      </NoteGroup>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="40" Name="Snare"/>
+      <Note Number="60" Name="Claps"/>
+      <Note Number="62" Name="Perc 2"/>
+      <Note Number="41" Name="Tom 1"/>
+      <Note Number="43" Name="Tom 2"/>
+      <Note Number="45" Name="Tom 3"/>
+      <Note Number="51" Name="Ride"/>
+      <Note Number="49" Name="Crash"/>
+      <Note Number="63" Name="Perc 1"/>
+    </NoteNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>

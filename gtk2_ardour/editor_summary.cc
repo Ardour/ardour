@@ -1,21 +1,27 @@
 /*
-    Copyright (C) 2009 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2009-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2009-2015 David Robillard <d@drobilla.net>
+ * Copyright (C) 2009-2019 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2012-2013 Colin Fletcher <colin.m.fletcher@googlemail.com>
+ * Copyright (C) 2012-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2016 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2015-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2017-2019 Ben Loftis <ben@harrisonconsoles.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include "ardour/session.h"
 
@@ -24,6 +30,7 @@
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
 
+#include "context_menu_helper.h"
 #include "time_axis_view.h"
 #include "streamview.h"
 #include "editor_summary.h"
@@ -118,6 +125,10 @@ EditorSummary::set_session (Session* s)
 		_editor->selection->RegionsChanged.connect (sigc::mem_fun(*this, &EditorSummary::set_background_dirty));
 	}
 
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &EditorSummary::set_colors));
+
+	set_colors();
+
 	_leftmost = max_samplepos;
 	_rightmost = 0;
 }
@@ -155,7 +166,7 @@ EditorSummary::render_background_image ()
 	/* calculate x scale */
 	if (_end != _start) {
 		_x_scale = static_cast<double> (get_width()) / (_end - _start);
- 	} else {
+	} else {
 		_x_scale = 1;
 	}
 
@@ -286,8 +297,9 @@ EditorSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle
 	/* Playhead */
 
 	cairo_set_line_width (cr, 1);
-	/* XXX: colour should be set from configuration file */
-	cairo_set_source_rgba (cr, 1, 0, 0, 1);
+
+	double r,g,b,a;  Gtkmm2ext::color_to_rgba(_phead_color, r,g,b,a);
+	cairo_set_source_rgb (cr, r,g,b); // playhead color
 
 	const double ph= playhead_sample_to_position (_editor->playhead_cursor->current_sample());
 	cairo_move_to (cr, ph, 0);
@@ -298,6 +310,14 @@ EditorSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle
 	_last_playhead = ph;
 
 }
+
+void
+EditorSummary::set_colors ()
+{
+	_phead_color = UIConfiguration::instance().color ("play head");
+}
+
+
 
 /** Render a region for the summary.
  *  @param r Region view.
@@ -410,11 +430,14 @@ EditorSummary::on_key_press_event (GdkEventKey* key)
 {
 	gint x, y;
 	GtkAccelKey set_playhead_accel;
+
+	/* XXXX this is really ugly and should be using our own action maps and bindings */
+
 	if (gtk_accel_map_lookup_entry ("<Actions>/Editor/set-playhead", &set_playhead_accel)) {
 		if (key->keyval == set_playhead_accel.accel_key && (int) key->state == set_playhead_accel.accel_mods) {
 			if (_session) {
 				get_pointer (x, y);
-				_session->request_locate (_start + (samplepos_t) x / _x_scale, _session->transport_rolling());
+				_session->request_locate (_start + (samplepos_t) x / _x_scale, RollIfAppropriate);
 				return true;
 			}
 		}
@@ -428,6 +451,9 @@ EditorSummary::on_key_release_event (GdkEventKey* key)
 {
 
 	GtkAccelKey set_playhead_accel;
+
+	/* XXXX this is really ugly and should be using our own action maps and bindings */
+
 	if (gtk_accel_map_lookup_entry ("<Actions>/Editor/set-playhead", &set_playhead_accel)) {
 		if (key->keyval == set_playhead_accel.accel_key && (int) key->state == set_playhead_accel.accel_mods) {
 			return true;
@@ -448,7 +474,7 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 
 	if (ev->button == 3) { // right-click:  show the reset menu action
 		using namespace Gtk::Menu_Helpers;
-		Gtk::Menu* m = manage (new Gtk::Menu);
+		Gtk::Menu* m = ARDOUR_UI_UTILS::shared_popup_menu ();
 		MenuList& items = m->items ();
 		items.push_back(MenuElem(_("Reset Summary to Extents"),
 			sigc::mem_fun(*this, &EditorSummary::reset_to_extents)));

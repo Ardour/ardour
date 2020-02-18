@@ -1,21 +1,25 @@
 /*
-  Copyright (C) 2002 Paul Davis
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2008-2011 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2008-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2008-2016 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2015 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <limits.h>
 
@@ -49,7 +53,6 @@ LevelMeterBase::LevelMeterBase (Session* s, PBD::EventLoop::InvalidationRecord* 
 	, meter_length (0)
 	, thin_meter_width(2)
 	, max_peak (minus_infinity())
-	, _meter_type (MeterPeak)
 	, visible_meter_type (MeterType(0))
 	, midi_count (0)
 	, meter_count (0)
@@ -85,7 +88,7 @@ LevelMeterBase::set_meter (PeakMeter* meter)
 
 	if (_meter) {
 		_meter->ConfigurationChanged.connect (_configuration_connection, parent_invalidator, boost::bind (&LevelMeterBase::configuration_changed, this, _1, _2), gui_context());
-		_meter->TypeChanged.connect (_meter_type_connection, parent_invalidator, boost::bind (&LevelMeterBase::meter_type_changed, this, _1), gui_context());
+		_meter->MeterTypeChanged.connect (_meter_type_connection, parent_invalidator, boost::bind (&LevelMeterBase::meter_type_changed, this, _1), gui_context());
 	}
 }
 
@@ -150,24 +153,25 @@ LevelMeterBase::update_meters ()
 			if (n < nmidi) {
 				(*i).meter->set (_meter->meter_level (n, MeterPeak));
 			} else {
-				const float peak = _meter->meter_level (n, _meter_type);
-				if (_meter_type == MeterPeak) {
+				MeterType meter_type = _meter->meter_type ();
+				const float peak = _meter->meter_level (n, meter_type);
+				if (meter_type == MeterPeak) {
 					(*i).meter->set (log_meter (peak));
-				} else if (_meter_type == MeterPeak0dB) {
+				} else if (meter_type == MeterPeak0dB) {
 					(*i).meter->set (log_meter0dB (peak));
-				} else if (_meter_type == MeterIEC1NOR) {
+				} else if (meter_type == MeterIEC1NOR) {
 					(*i).meter->set (meter_deflect_nordic (peak + meter_lineup(0)));
-				} else if (_meter_type == MeterIEC1DIN) {
+				} else if (meter_type == MeterIEC1DIN) {
 					(*i).meter->set (meter_deflect_din (peak + meter_lineup_cfg(UIConfiguration::instance().get_meter_line_up_din(), 3.0)));
-				} else if (_meter_type == MeterIEC2BBC || _meter_type == MeterIEC2EBU) {
+				} else if (meter_type == MeterIEC2BBC || meter_type == MeterIEC2EBU) {
 					(*i).meter->set (meter_deflect_ppm (peak + meter_lineup(0)));
-				} else if (_meter_type == MeterVU) {
+				} else if (meter_type == MeterVU) {
 					(*i).meter->set (meter_deflect_vu (peak + vu_standard() + meter_lineup(0)));
-				} else if (_meter_type == MeterK12) {
+				} else if (meter_type == MeterK12) {
 					(*i).meter->set (meter_deflect_k (peak, 12), meter_deflect_k(_meter->meter_level(n, MeterPeak), 12));
-				} else if (_meter_type == MeterK14) {
+				} else if (meter_type == MeterK14) {
 					(*i).meter->set (meter_deflect_k (peak, 14), meter_deflect_k(_meter->meter_level(n, MeterPeak), 14));
-				} else if (_meter_type == MeterK20) {
+				} else if (meter_type == MeterK20) {
 					(*i).meter->set (meter_deflect_k (peak, 20), meter_deflect_k(_meter->meter_level(n, MeterPeak), 20));
 				} else { // RMS
 					(*i).meter->set (log_meter (peak), log_meter(_meter->meter_level(n, MeterPeak)));
@@ -218,9 +222,7 @@ LevelMeterBase::configuration_changed (ChanCount /*in*/, ChanCount /*out*/)
 void
 LevelMeterBase::meter_type_changed (MeterType t)
 {
-	_meter_type = t;
 	setup_meters (meter_length, regular_meter_width, thin_meter_width);
-	MeterTypeChanged(t);
 }
 
 void
@@ -250,11 +252,12 @@ void
 LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 {
 
- 	if (!_meter) {
+	if (!_meter) {
 		hide_all_meters ();
- 		return; /* do it later or never */
- 	}
+		return; /* do it later or never */
+	}
 
+	MeterType meter_type = _meter->meter_type ();
 	uint32_t nmidi = _meter->input_streams().n_midi();
 	uint32_t nmeters = _meter->input_streams().n_total();
 	regular_meter_width = initial_width;
@@ -282,7 +285,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 	    && meters[0].width == width
 	    && meters[0].length == len
 	    && !color_changed
-	    && _meter_type == visible_meter_type) {
+	    && meter_type == visible_meter_type) {
 		return;
 	}
 
@@ -292,7 +295,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 			(meters.size() > 0 &&  meters[0].width == width) ? "yes" : "no",
 			(meters.size() > 0 &&  meters[0].length == len) ? "yes" : "no",
 			(nmeters == meter_count) ? "yes" : "no",
-			(_meter_type == visible_meter_type) ? "yes" : "no",
+			(meter_type == visible_meter_type) ? "yes" : "no",
 			!color_changed ? "yes" : "no"
 			);
 #endif
@@ -340,7 +343,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 			c[8] = UIConfiguration::instance().color ("meter color8");
 			c[9] = UIConfiguration::instance().color ("meter color9");
 
-			switch (_meter_type) {
+			switch (meter_type) {
 				case MeterK20:
 					stp[0] = 115.0 * meter_deflect_k(-40, 20);  //-20
 					stp[1] = 115.0 * meter_deflect_k(-20, 20);  //  0
@@ -452,7 +455,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 				}
 			}
 		}
-		if (meters[n].width != width || meters[n].length != len || color_changed || _meter_type != visible_meter_type || nmidi != midi_count) {
+		if (meters[n].width != width || meters[n].length != len || color_changed || meter_type != visible_meter_type || nmidi != midi_count) {
 			bool hl = meters[n].meter ? meters[n].meter->get_highlight() : false;
 			meters[n].packed = false;
 			delete meters[n].meter;
@@ -482,16 +485,9 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 	}
 	//show();
 	color_changed = false;
-	visible_meter_type = _meter_type;
+	visible_meter_type = meter_type;
 	midi_count = nmidi;
 	meter_count = nmeters;
-}
-
-void
-LevelMeterBase::set_meter_type(MeterType t)
-{
-	_meter_type = t;
-	_meter->set_type(t);
 }
 
 bool

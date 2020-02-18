@@ -1,22 +1,21 @@
 /*
-    Copyright (C) 2009 Paul Davis
-    From an idea by Carl Hetherington.
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2009-2018 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include "libpbd-config.h"
 
@@ -37,16 +36,15 @@
 
 class Backtrace {
 public:
-    Backtrace ();
-    std::ostream& print (std::ostream& str) const;
+	Backtrace ();
+	std::ostream& print (std::ostream& str) const;
 
 private:
-    void* trace[200];
-    size_t size;
+	void* trace[200];
+	size_t size;
 };
 
 std::ostream& operator<< (std::ostream& str, const Backtrace& bt) { return bt.print (str); }
-
 
 Backtrace::Backtrace()
 {
@@ -78,12 +76,11 @@ Backtrace::print (std::ostream& str) const
 
 struct BTPair {
 
-    Backtrace* ref;
-    Backtrace* rel;
+	Backtrace* ref;
+	Backtrace* rel;
 
-    BTPair (Backtrace* bt) : ref (bt), rel (0) {}
-    ~BTPair () { }
-
+	BTPair (Backtrace* bt) : ref (bt), rel (0) {}
+	~BTPair () { }
 };
 
 std::ostream& operator<<(std::ostream& str, const BTPair& btp) {
@@ -95,14 +92,14 @@ std::ostream& operator<<(std::ostream& str, const BTPair& btp) {
 }
 
 struct SPDebug {
-    Backtrace* constructor;
-    Backtrace* destructor;
+	Backtrace* constructor;
+	Backtrace* destructor;
 
-    SPDebug (Backtrace* c) : constructor (c), destructor (0) {}
-    ~SPDebug () {
-	    delete constructor;
-	    delete destructor;
-    }
+	SPDebug (Backtrace* c) : constructor (c), destructor (0) {}
+	~SPDebug () {
+		delete constructor;
+		delete destructor;
+	}
 };
 
 std::ostream& operator<< (std::ostream& str, const SPDebug& spd)
@@ -115,38 +112,41 @@ std::ostream& operator<< (std::ostream& str, const SPDebug& spd)
 	return str;
 }
 
-typedef std::multimap<void const*,SPDebug*> PointerMap;
-typedef std::map<void const*,const char*> IPointerMap;
+typedef std::multimap<volatile void const*,SPDebug*> PointerMap;
+typedef std::map<volatile void const*,const char*> IPointerMap;
 
 using namespace std;
 
 static PointerMap* _sptrs;
-PointerMap& sptrs() {
-        if (_sptrs == 0) {
-                _sptrs = new PointerMap;
-        }
-        return *_sptrs;
+PointerMap& sptrs()
+{
+	if (_sptrs == 0) {
+		_sptrs = new PointerMap;
+	}
+	return *_sptrs;
 }
 
 static IPointerMap* _interesting_pointers;
-IPointerMap& interesting_pointers() {
-        if (_interesting_pointers == 0) {
-                _interesting_pointers = new IPointerMap;
-        }
-        return *_interesting_pointers;
+IPointerMap& interesting_pointers()
+{
+	if (_interesting_pointers == 0) {
+		_interesting_pointers = new IPointerMap;
+	}
+	return *_interesting_pointers;
 }
 
 static Glib::Threads::Mutex* _the_lock;
-static Glib::Threads::Mutex& the_lock() {
-        if (_the_lock == 0) {
-                _the_lock = new Glib::Threads::Mutex;
-        }
-        return *_the_lock;
+static Glib::Threads::Mutex& the_lock()
+{
+	if (_the_lock == 0) {
+		_the_lock = new Glib::Threads::Mutex;
+	}
+	return *_the_lock;
 }
 
 
 static bool
-is_interesting_object (void const* ptr)
+is_interesting_object (volatile void const* ptr)
 {
 	if (ptr == 0) {
 		return false;
@@ -169,7 +169,7 @@ void
 boost_debug_shared_ptr_mark_interesting (void* ptr, const char* type)
 {
 	Glib::Threads::Mutex::Lock guard (the_lock());
- 	pair<void*,const char*> newpair (ptr, type);
+	pair<void*,const char*> newpair (ptr, type);
 	interesting_pointers().insert (newpair);
 	if (debug_out) {
 		cerr << "Interesting object @ " << ptr << " of type " << type << endl;
@@ -273,7 +273,7 @@ boost_debug_shared_ptr_reset (void const *sp, void const *old_obj, int old_use_c
 }
 
 void
-boost_debug_shared_ptr_destructor (void const *sp, void const *obj, int use_count)
+boost_debug_shared_ptr_destructor (void const *sp, volatile void const *obj, int use_count)
 {
 	Glib::Threads::Mutex::Lock guard (the_lock());
 	PointerMap::iterator x = sptrs().find (sp);
@@ -287,7 +287,7 @@ boost_debug_shared_ptr_destructor (void const *sp, void const *obj, int use_coun
 }
 
 void
-boost_debug_shared_ptr_constructor (void const *sp, void const *obj, int use_count)
+boost_debug_shared_ptr_constructor (void const *sp, volatile void const *obj, int use_count)
 {
 	if (is_interesting_object (obj)) {
 		Glib::Threads::Mutex::Lock guard (the_lock());

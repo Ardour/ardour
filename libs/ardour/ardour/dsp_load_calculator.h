@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2015 Tim Mayberry <mojofunk@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -11,14 +12,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef ARDOUR_DSP_LOAD_CALCULATOR_H
 #define ARDOUR_DSP_LOAD_CALCULATOR_H
 
+#include <glib.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <cassert>
@@ -32,18 +34,21 @@ public:
 	    : m_max_time_us(0)
 	    , m_start_timestamp_us(0)
 	    , m_stop_timestamp_us(0)
+	    , m_alpha(0)
 	    , m_dsp_load(0)
 	{
-
+		m_calc_avg_load = NULL != g_getenv("ARDOUR_AVG_DSP_LOAD");
 	}
 
 	void set_max_time(double samplerate, uint32_t period_size) {
 		m_max_time_us = period_size * 1e6 / samplerate;
+		m_alpha = 0.2f * (m_max_time_us * 1e-6f);
 	}
 
 	void set_max_time_us(uint64_t max_time_us) {
 		assert(max_time_us != 0);
 		m_max_time_us = max_time_us;
+		m_alpha = 0.2f * (m_max_time_us * 1e-6f);
 	}
 
 	int64_t get_max_time_us() const { return m_max_time_us; }
@@ -69,19 +74,12 @@ public:
 			return;
 		}
 
-#ifndef NDEBUG
-		const bool calc_avg_load = NULL != getenv("AVGLOAD");
-#else
-		const bool calc_avg_load = false;
-#endif
-
 		const float load = (float) elapsed_time_us() / (float)m_max_time_us;
-		if ((calc_avg_load && load > .95f) || (!calc_avg_load && (load > m_dsp_load || load > 1.f))) {
+		if ((m_calc_avg_load && load > .95f) || (!m_calc_avg_load && (load > m_dsp_load || load > 1.f))) {
 			m_dsp_load = load;
 		} else {
-			const float alpha = 0.2f * (m_max_time_us * 1e-6f);
 			m_dsp_load = std::min (1.f, m_dsp_load);
-			m_dsp_load += alpha * (load - m_dsp_load) + 1e-12;
+			m_dsp_load += m_alpha * (load - m_dsp_load) + 1e-12;
 		}
 	}
 
@@ -119,9 +117,11 @@ public:
 	int64_t max_timer_error_us() { return 4 * m_max_time_us; }
 
 private: // data
+	bool    m_calc_avg_load;
 	int64_t m_max_time_us;
 	int64_t m_start_timestamp_us;
 	int64_t m_stop_timestamp_us;
+	float m_alpha;
 	float m_dsp_load;
 };
 

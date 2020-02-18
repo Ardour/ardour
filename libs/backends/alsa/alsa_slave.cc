@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2017 Paul Davis <paul@linuxaudiosystems.com>
  * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -11,9 +12,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 
@@ -209,7 +210,7 @@ AlsaAudioSlave::process_thread ()
 			no_proc_errors = 0;
 
 			_pcmi.capt_init (spp);
-			if (drain) {
+			if (drain || _pcmi.ncapt () == 0) {
 				/* do nothing */
 			} else if (_rb_capture.write_space () >= _pcmi.ncapt () * spp) {
 #if 0 // failsafe: write interleave sample by sample
@@ -266,7 +267,10 @@ AlsaAudioSlave::process_thread ()
 			}
 
 			_pcmi.play_init (spp);
-			if (_rb_playback.read_space () >= _pcmi.nplay () * spp) {
+			if (_pcmi.nplay () == 0) {
+				/* relax */
+			}
+			else if (_rb_playback.read_space () >= _pcmi.nplay () * spp) {
 #if 0 // failsafe: read sample by sample de-interleave
 				for (uint32_t s = 0; s < spp; ++s) {
 					for (uint32_t c = 0; c < _pcmi.nplay (); ++c) {
@@ -447,7 +451,7 @@ AlsaAudioSlave::cycle_end ()
 	_src_play.inp_count = _samples_per_period;
 	_src_play.inp_data  = _play_buff;
 
-	while (_src_play.inp_count && _active) {
+	while (_src_play.inp_count && _active && nchn > 0) {
 		unsigned int n;
 		PBD::RingBuffer<float>::rw_vector vec;
 		_rb_playback.get_write_vector (&vec);

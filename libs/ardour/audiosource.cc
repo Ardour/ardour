@@ -1,21 +1,26 @@
 /*
-    Copyright (C) 2000 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2000-2019 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2006-2014 David Robillard <d@drobilla.net>
+ * Copyright (C) 2007-2016 Tim Mayberry <mojofunk@gmail.com>
+ * Copyright (C) 2008-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2013-2015 John Emmas <john@creativepost.co.uk>
+ * Copyright (C) 2015-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 Nick Mainsbridge <mainsbridge@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifdef COMPILER_MSVC
 #include <sys/utime.h>
@@ -50,6 +55,7 @@
 #include <glibmm/miscutils.h>
 
 #include "pbd/file_utils.h"
+#include "pbd/playback_buffer.h"
 #include "pbd/scoped_file_descriptor.h"
 #include "pbd/xml++.h"
 
@@ -266,7 +272,7 @@ AudioSource::initialize_peakfile (const string& audio_path, const bool in_sessio
 
 		/* we found it in the peaks dir, so check it out */
 
-		if (statbuf.st_size == 0 || (statbuf.st_size < (off_t) ((length(_timeline_position) / _FPP) * sizeof (PeakData)))) {
+		if (statbuf.st_size == 0 || (statbuf.st_size < (off_t) ((length(_natural_position) / _FPP) * sizeof (PeakData)))) {
 			DEBUG_TRACE(DEBUG::Peaks, string_compose("Peakfile %1 is empty\n", _peakpath));
 			_peaks_built = false;
 		} else {
@@ -390,7 +396,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 			}
 			if (statbuf.st_size < expected_file_size) {
 				fatal << "peak file is still truncated after rebuild" << endmsg;
-				/*NOTREACHED*/
+				abort (); /*NOTREACHED*/
 			}
 		}
 	}
@@ -519,14 +525,14 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		DEBUG_TRACE (DEBUG::Peaks, "DOWNSAMPLE\n");
 
 		/* the caller wants:
-
-		    - more samples-per-peak (lower resolution) than the peakfile, or to put it another way,
-                    - less peaks than the peakfile holds for the same range
-
-		    So, read a block into a staging area, and then downsample from there.
-
-		    to avoid confusion, I'll refer to the requested peaks as visual_peaks and the peakfile peaks as stored_peaks
-		*/
+		 *
+		 * - more samples-per-peak (lower resolution) than the peakfile, or to put it another way,
+		 * - less peaks than the peakfile holds for the same range
+		 *
+		 * So, read a block into a staging area, and then downsample from there.
+		 *
+		 * to avoid confusion, I'll refer to the requested peaks as visual_peaks and the peakfile peaks as stored_peaks
+		 */
 
 		const samplecnt_t chunksize = (samplecnt_t) expected_peaks; // we read all the peaks we need in one hit.
 
@@ -610,7 +616,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 				peak_cache[nvisual_peaks].max = xmax;
 				peak_cache[nvisual_peaks].min = xmin;
 				++nvisual_peaks;
-				next_visual_peak_sample =  min ((double) start + cnt, (next_visual_peak_sample + samples_per_visual_peak));
+				next_visual_peak_sample = min ((double) start + cnt, (next_visual_peak_sample + samples_per_visual_peak));
 				stored_peak_before_next_visual_peak = (uint32_t) next_visual_peak_sample / samples_per_file_peak;
 			}
 
@@ -631,12 +637,12 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		DEBUG_TRACE (DEBUG::Peaks, "UPSAMPLE\n");
 
 		/* the caller wants
-
-		     - less samples-per-peak (more resolution)
-		     - more peaks than stored in the Peakfile
-
-		   So, fetch data from the raw source, and generate peak
-		   data on the fly.
+		 *
+		 * - less samples-per-peak (more resolution)
+		 * - more peaks than stored in the Peakfile
+		 *
+		 * So, fetch data from the raw source, and generate peak
+		 * data on the fly.
 		*/
 
 		samplecnt_t samples_read = 0;
@@ -646,9 +652,8 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 		samplecnt_t chunksize = (samplecnt_t) min (cnt, (samplecnt_t) 4096);
 		boost::scoped_array<Sample> raw_staging(new Sample[chunksize]);
 
-		samplepos_t sample_pos = start;
-		double pixel_pos = floor (sample_pos / samples_per_visual_peak);
-		double next_pixel_pos = ceil (sample_pos / samples_per_visual_peak);
+		double pixel_pos         = start / samples_per_visual_peak;
+		double next_pixel_pos    = 1.0 + floor (pixel_pos);
 		double pixels_per_sample = 1.0 / samples_per_visual_peak;
 
 		xmin = 1.0;
@@ -662,27 +667,27 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 
 				if (current_sample >= _length) {
 
-                                        /* hmm, error condition - we've reached the end of the file
-                                           without generating all the peak data. cook up a zero-filled
-                                           data buffer and then use it. this is simpler than
-                                           adjusting zero_fill and read_npeaks and then breaking out of
-                                           this loop early
-					*/
+					/* hmm, error condition - we've reached the end of the file
+					 * without generating all the peak data. cook up a zero-filled
+					 * data buffer and then use it. this is simpler than
+					 * adjusting zero_fill and read_npeaks and then breaking out of
+					 * this loop early
+					 */
 
-                                        memset (raw_staging.get(), 0, sizeof (Sample) * chunksize);
+					memset (raw_staging.get(), 0, sizeof (Sample) * chunksize);
 
-                                } else {
+				} else {
 
-                                        to_read = min (chunksize, (_length - current_sample));
+					to_read = min (chunksize, (_length - current_sample));
 
 
-                                        if ((samples_read = read_unlocked (raw_staging.get(), current_sample, to_read)) == 0) {
-                                                error << string_compose(_("AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"),
-                                                                        _name, to_read, current_sample, _length, strerror (errno))
-                                                      << endmsg;
-                                                return -1;
-                                        }
-                                }
+					if ((samples_read = read_unlocked (raw_staging.get(), current_sample, to_read)) == 0) {
+						error << string_compose(_("AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"),
+						                        _name, to_read, current_sample, _length, strerror (errno))
+						     << endmsg;
+						return -1;
+					}
+				}
 
 				i = 0;
 			}
@@ -1066,7 +1071,7 @@ samplecnt_t
 AudioSource::available_peaks (double zoom_factor) const
 {
 	if (zoom_factor < _FPP) {
-		return length(_timeline_position); // peak data will come from the audio file
+		return length(_natural_position); // peak data will come from the audio file
 	}
 
 	/* peak data comes from peakfile, but the filesize might not represent
@@ -1117,7 +1122,7 @@ AudioSource::ensure_buffers_for_level (uint32_t level, samplecnt_t sample_rate)
 void
 AudioSource::ensure_buffers_for_level_locked (uint32_t level, samplecnt_t sample_rate)
 {
-	samplecnt_t nframes = (samplecnt_t) floor (Config->get_audio_playback_buffer_seconds() * sample_rate);
+	samplecnt_t nframes = PlaybackBuffer<Sample>::power_of_two_size ((samplecnt_t) floor (Config->get_audio_playback_buffer_seconds() * sample_rate));
 
 	/* this may be called because either "level" or "sample_rate" have
 	 * changed. and it may be called with "level" smaller than the current

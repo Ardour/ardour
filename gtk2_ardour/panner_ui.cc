@@ -1,20 +1,28 @@
 /*
-  Copyright (C) 2004 Paul Davis
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2005-2006 Nick Mainsbridge <mainsbridge@gmail.com>
+ * Copyright (C) 2005-2006 Taybin Rutkin <taybin@taybin.com>
+ * Copyright (C) 2005-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2006-2007 Doug McLain <doug@nostar.net>
+ * Copyright (C) 2006-2012 David Robillard <d@drobilla.net>
+ * Copyright (C) 2006 Sampo Savolainen <v2@iki.fi>
+ * Copyright (C) 2008-2012 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2012-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2015 Tim Mayberry <mojofunk@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include <limits.h>
 
@@ -29,6 +37,7 @@
 
 #include "widgets/tooltips.h"
 
+#include "gain_meter.h"
 #include "panner_ui.h"
 #include "panner2d.h"
 #include "gui_thread.h"
@@ -90,7 +99,7 @@ PannerUI::set_panner (boost::shared_ptr<PannerShell> ps, boost::shared_ptr<Panne
 	/* note that the panshell might not change here (i.e. ps == _panshell)
 	 */
 
- 	connections.drop_connections ();
+	connections.drop_connections ();
 
 	delete pan_astyle_menu;
 	pan_astyle_menu = 0;
@@ -142,21 +151,16 @@ PannerUI::build_astate_menu ()
 	/** TRANSLATORS: this is `Manual' in the sense of automation not being played,
 	    so that changes to pan must be done by hand.
 	*/
-	pan_astate_menu->items().push_back (MenuElem (S_("Automation|Manual"), sigc::bind (
-			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
-			(AutoState) ARDOUR::Off)));
-	pan_astate_menu->items().push_back (MenuElem (_("Play"), sigc::bind (
-			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
-			(AutoState) Play)));
-	pan_astate_menu->items().push_back (MenuElem (_("Write"), sigc::bind (
-			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
-			(AutoState) Write)));
-	pan_astate_menu->items().push_back (MenuElem (_("Touch"), sigc::bind (
-			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
-			(AutoState) Touch)));
-	pan_astate_menu->items().push_back (MenuElem (_("Latch"), sigc::bind (
-			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
-			(AutoState) Latch)));
+	pan_astate_menu->items().push_back (MenuElem (GainMeterBase::astate_string (ARDOUR::Off),
+			sigc::bind ( sigc::mem_fun (_panner.get(), &Panner::set_automation_state), (AutoState) ARDOUR::Off)));
+	pan_astate_menu->items().push_back (MenuElem (GainMeterBase::astate_string (ARDOUR::Play),
+			sigc::bind ( sigc::mem_fun (_panner.get(), &Panner::set_automation_state), (AutoState) Play)));
+	pan_astate_menu->items().push_back (MenuElem (GainMeterBase::astate_string (ARDOUR::Write),
+			sigc::bind ( sigc::mem_fun (_panner.get(), &Panner::set_automation_state), (AutoState) Write)));
+	pan_astate_menu->items().push_back (MenuElem (GainMeterBase::astate_string (ARDOUR::Touch),
+			sigc::bind (sigc::mem_fun (_panner.get(), &Panner::set_automation_state), (AutoState) Touch)));
+	pan_astate_menu->items().push_back (MenuElem (GainMeterBase::astate_string (ARDOUR::Latch),
+			sigc::bind ( sigc::mem_fun (_panner.get(), &Panner::set_automation_state), (AutoState) Latch)));
 
 }
 
@@ -211,6 +215,8 @@ PannerUI::setup_pan ()
 {
 	int const nouts = _panner ? _panner->out().n_audio() : -1;
 	int const nins = _panner ? _panner->in().n_audio() : -1;
+
+	assert (_panshell);
 
 	if (nouts == _current_nouts
 			&& nins == _current_nins
@@ -308,7 +314,7 @@ PannerUI::setup_pan ()
 		twod_panner->set_size_request (-1, rintf(61.f * scale));
 		twod_panner->set_send_drawing_mode (_send_mode);
 
-		/* and finally, add it to the panner sample */
+		/* and finally, add it to the panner frame */
 
 		pan_vbox.pack_start (*twod_panner, false, false);
 	}
@@ -374,7 +380,7 @@ PannerUI::pan_button_event (GdkEventButton* ev)
 
 	case 3:
 		if (pan_menu == 0) {
-			pan_menu = manage (new Menu);
+			pan_menu = new Menu;
 			pan_menu->set_name ("ArdourContextMenu");
 		}
 		build_pan_menu ();
@@ -516,15 +522,7 @@ void
 PannerUI::pan_automation_state_changed ()
 {
 	boost::shared_ptr<Pannable> pannable (_panner->pannable());
-
-	switch (_width) {
-	case Wide:
-		pan_automation_state_button.set_label (astate_string(pannable->automation_state()));
-		break;
-	case Narrow:
-		pan_automation_state_button.set_label (short_astate_string(pannable->automation_state()));
-		break;
-	}
+	pan_automation_state_button.set_label (GainMeterBase::short_astate_string(pannable->automation_state()));
 
 	bool x = (pannable->automation_state() != ARDOUR::Off);
 
@@ -535,44 +533,6 @@ PannerUI::pan_automation_state_changed ()
 	}
 
 	update_pan_sensitive ();
-}
-
-string
-PannerUI::astate_string (AutoState state)
-{
-	return _astate_string (state, false);
-}
-
-string
-PannerUI::short_astate_string (AutoState state)
-{
-	return _astate_string (state, true);
-}
-
-string
-PannerUI::_astate_string (AutoState state, bool shrt)
-{
-	string sstr;
-
-	switch (state) {
-	case ARDOUR::Off:
-		sstr = (shrt ? "M" : S_("Manual|M"));
-		break;
-	case Play:
-		sstr = (shrt ? "P" : S_("Play|P"));
-		break;
-	case Touch:
-		sstr = (shrt ? "T" : S_("Touch|T"));
-		break;
-	case Latch:
-		sstr = (shrt ? "L" : S_("Latch|L"));
-		break;
-	case Write:
-		sstr = (shrt ? "W" : S_("Write|W"));
-		break;
-	}
-
-	return sstr;
 }
 
 void

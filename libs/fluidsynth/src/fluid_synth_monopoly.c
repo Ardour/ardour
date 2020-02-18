@@ -290,11 +290,6 @@ static char fluid_synth_get_fromkey_portamento_legato(fluid_channel_t *chan,
  *  Sust.on/off  >------------------------->|_______________|
  *  Sost.on/off
 ------------------------------------------------------------------------------*/
-int fluid_synth_noteoff_monopoly(fluid_synth_t *synth, int chan, int key,
-                                 char Mono);
-
-int fluid_synth_noteon_monopoly_legato(fluid_synth_t *synth, int chan,
-                                       int fromkey, int tokey, int vel);
 
 /**
  * Plays a noteon event for a Synth instance in "monophonic playing" state.

@@ -1,25 +1,28 @@
 /*
-    Copyright (C) 2001-2012 Paul Davis
+ * Copyright (C) 2014-2016 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2015-2018 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+#include <unistd.h>
 
 #include <string>
 #include <vector>
 #include <cerrno>
+#include <cstdio>
 #include <cstring>
 
 #include <glib.h>
@@ -32,9 +35,9 @@
 #include "ardour/filesystem_paths.h"
 
 #include "pbd/epa.h"
+#include "pbd/file_utils.h"
 #include "pbd/search_path.h"
 #include "pbd/pathexpand.h"
-#include "pbd/file_utils.h"
 
 #include "bundle_env.h"
 
@@ -53,36 +56,47 @@ extern void set_language_preference (); // cocoacarbon.mm
 extern void no_app_nap (); // cocoacarbon.mm
 
 static void
-setup_logging(void)
+setup_logging (void)
 {
-	/* The ASL API has evolved since it was introduced in 10.4. If ASL_LOG_DESCRIPTOR_WRITE is not available,
-	   then we're not interested in doing any of this, since its only purpose is to get stderr/stdout to
-	   appear in the Console.
-	*/
-#ifdef ASL_LOG_DESCRIPTOR_WRITE
-	aslmsg msg;
-	aslclient c = asl_open (PROGRAM_NAME, "com.apple.console", 0);
+	char path[PATH_MAX+1];
+	snprintf (path, sizeof (path), "%s/stderr.log", user_config_directory().c_str());
 
-	msg = asl_new(ASL_TYPE_MSG);
-	asl_set(msg, ASL_KEY_FACILITY, "com.apple.console");
-	asl_set(msg, ASL_KEY_LEVEL, ASL_STRING_NOTICE);
-	asl_set(msg, ASL_KEY_READ_UID, "-1");
+	int efd = ::open (path, O_CREAT|O_WRONLY|O_TRUNC, 0644);
 
-	int fd = dup(2);
-	//asl_set_filter(c, ASL_FILTER_MASK_UPTO(ASL_LEVEL_DEBUG));
-	asl_add_log_file(c, fd);
-	asl_log(c, NULL, ASL_LEVEL_INFO, string_compose ("Hello world from %1", PROGRAM_NAME).c_str());
-	asl_log_descriptor(c, msg, ASL_LEVEL_INFO, 1,  ASL_LOG_DESCRIPTOR_WRITE);
-	asl_log_descriptor(c, msg, ASL_LEVEL_INFO, 2, ASL_LOG_DESCRIPTOR_WRITE);
-#else
-#warning This build host has an older ASL API, so no console logging in this build.
-#endif
+	if (efd >= 0) {
+		if (dup2 (efd, STDERR_FILENO) < 0) {
+			::exit (12);
+		}
+	} else {
+		::exit (11);
+	}
+
+	snprintf (path, sizeof (path), "%s/stdout.log", user_config_directory().c_str());
+
+	int ofd = ::open (path, O_CREAT|O_WRONLY|O_TRUNC, 0644);
+
+	if (ofd >= 0) {
+		if (dup2 (ofd, STDOUT_FILENO) < 0) {
+			::exit (14);
+		}
+	} else {
+		::exit (13);
+	}
 }
 
 void
 fixup_bundle_environment (int argc, char* argv[], string & localedir)
 {
-	/* do this even for non-bundle runtimes */
+	/* if running from a bundle, stdout/stderr will be redirect to null by
+	 * launchd. That's not useful for anyone, so fix that. Use the same
+	 * mechanism is not running from a bundle, but ARDOUR_LOGGING is
+	 * set. This allows us to test the stderr/stdout redirects directly
+	 * from ./ardev.
+	 */
+
+	if (g_getenv ("ARDOUR_BUNDLED") || g_getenv ("ARDOUR_LOGGING")) {
+		setup_logging ();
+	}
 
 	no_app_nap ();
 
@@ -90,11 +104,14 @@ fixup_bundle_environment (int argc, char* argv[], string & localedir)
 		return;
 	}
 
-	EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency (true, "PREBUNDLE_ENV"));
+	if (g_getenv ("ARDOUR_SELF")) {
+		g_setenv ("ARDOUR_SELF", argv[0], 1);
+	}
+	if (g_getenv ("PREBUNDLE_ENV")) {
+		EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency (true, "PREBUNDLE_ENV"));
+	}
 
 	set_language_preference ();
-
-	setup_logging ();
 
 	char execpath[MAXPATHLEN+1];
 	uint32_t pathsz = sizeof (execpath);
@@ -156,22 +173,38 @@ void load_custom_fonts()
 	 */
 
 #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
-	std::string ardour_mono_file;
+	std::string font_file;
 
-	if (!find_file (ardour_data_search_path(), "ArdourMono.ttf", ardour_mono_file)) {
+	if (!find_file (ardour_data_search_path(), "ArdourMono.ttf", font_file)) {
 		cerr << _("Cannot find ArdourMono TrueType font") << endl;
+	} else {
+		CFStringRef ttf;
+		CFURLRef fontURL;
+		CFErrorRef error;
+		ttf = CFStringCreateWithBytes(
+				kCFAllocatorDefault, (const UInt8*) font_file.c_str(),
+				font_file.length(),
+				kCFStringEncodingUTF8, FALSE);
+		fontURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, ttf, kCFURLPOSIXPathStyle, TRUE);
+		if (CTFontManagerRegisterFontsForURL(fontURL, kCTFontManagerScopeProcess, &error) != true) {
+			cerr << _("Cannot load ArdourMono TrueType font.") << endl;
+		}
 	}
 
-	CFStringRef ttf;
-	CFURLRef fontURL;
-	CFErrorRef error;
-	ttf = CFStringCreateWithBytes(
-			kCFAllocatorDefault, (UInt8*) ardour_mono_file.c_str(),
-			ardour_mono_file.length(),
-			kCFStringEncodingUTF8, FALSE);
-	fontURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, ttf, kCFURLPOSIXPathStyle, TRUE);
-	if (CTFontManagerRegisterFontsForURL(fontURL, kCTFontManagerScopeProcess, &error) != true) {
-		cerr << _("Cannot load ArdourMono TrueType font.") << endl;
+	if (!find_file (ardour_data_search_path(), "ArdourSans.ttf", font_file)) {
+		cerr << _("Cannot find ArdourSans TrueType font") << endl;
+	} else {
+		CFStringRef ttf;
+		CFURLRef fontURL;
+		CFErrorRef error;
+		ttf = CFStringCreateWithBytes(
+				kCFAllocatorDefault, (const UInt8*) font_file.c_str(),
+				font_file.length(),
+				kCFStringEncodingUTF8, FALSE);
+		fontURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, ttf, kCFURLPOSIXPathStyle, TRUE);
+		if (CTFontManagerRegisterFontsForURL(fontURL, kCTFontManagerScopeProcess, &error) != true) {
+			cerr << _("Cannot load ArdourSans TrueType font.") << endl;
+		}
 	}
 #endif
 }

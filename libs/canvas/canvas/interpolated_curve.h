@@ -1,42 +1,42 @@
 /*
-    Copyright (C) 2013 Paul Davis
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ * Copyright (C) 2014 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __CANVAS_INTERPOLATED_CURVE_H__
 #define __CANVAS_INTERPOLATED_CURVE_H__
 
-#include "canvas/visibility.h"
 #include "canvas/types.h"
+#include "canvas/visibility.h"
 
 namespace ArdourCanvas {
 
 class LIBCANVAS_API InterpolatedCurve
 {
 public:
-    enum SplineType {
-	    CatmullRomUniform,
-	    CatmullRomCentripetal,
-    };
+	enum SplineType {
+		CatmullRomUniform,
+		CatmullRomCentripetal,
+	};
 
 protected:
 
 	/**
 	 * This method will calculate the Catmull-Rom interpolation curve, returning
-	 * it as a list of Coord coordinate objects.  This method in particular
+	 * it as a list of Coord coordinate objects. This method in particular
 	 * adds the first and last control points which are not visible, but required
 	 * for calculating the spline.
 	 *
@@ -47,11 +47,13 @@ protected:
 	 * point will depend on the spacing between the control points.
 	 * @return The list of interpolated coordinates.
 	 * @param curve_type Chordal (stiff), Uniform(floppy), or Centripetal(medium)
+	 * @param closed Specify if the shape is open or closed
+	 * @param results List of calculated coordinates
 	 * @throws gov.ca.water.shapelite.analysis.CatmullRomException if
 	 * points_per_segment is less than 2.
 	 */
 	static void
-		interpolate (const Points& coordinates, uint32_t points_per_segment, SplineType curve_type, bool closed, Points& results)
+	interpolate (const Points& coordinates, uint32_t points_per_segment, SplineType curve_type, bool closed, Points& results)
 	{
 		if (points_per_segment < 2) {
 			return;
@@ -150,7 +152,7 @@ private:
 	 * position between p1 and p2 to interpolate the value.
 	 */
 	static double
-		__interpolate (double p[4], double time[4], double t)
+	__interpolate (double p[4], double time[4], double t)
 	{
 		const double L01 = p[0] * (time[1] - t) / (time[1] - time[0]) + p[1] * (t - time[0]) / (time[1] - time[0]);
 		const double L12 = p[1] * (time[2] - t) / (time[2] - time[1]) + p[2] * (t - time[1]) / (time[2] - time[1]);
@@ -176,11 +178,11 @@ private:
 	 * or centripetal curve types. Uniform can produce loops, chordal can
 	 * produce large distortions from the original lines, and centripetal is an
 	 * optimal balance without spaces.
-	 * @return the list of coordinates that define the CatmullRom curve
+	 * @param results List of calculated coordinates that define the CatmullRom curve
 	 * between the points defined by index+1 and index+2.
 	 */
 	static void
-		_interpolate (const Points& points, Points::size_type index, int points_per_segment, SplineType curve_type, Points& results)
+	_interpolate (const Points& points, Points::size_type index, int points_per_segment, SplineType curve_type, Points& results)
 	{
 		double x[4];
 		double y[4];

@@ -1,19 +1,19 @@
-/* a-fluidsynth -- simple & robust x-platform fluidsynth LV2
- *
- * Copyright (C) 2016 Robin Gareus <robin@gareus.org>
+/*
+ * Copyright (C) 2016-2019 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #ifndef _GNU_SOURCE
@@ -133,7 +133,7 @@ typedef struct {
 	LV2_Log_Logger       logger;
   LV2_Worker_Schedule* schedule;
 	LV2_Atom_Forge       forge;
-	LV2_Atom_Forge_Frame sample;
+	LV2_Atom_Forge_Frame frame;
 
 #ifdef LV2_EXTENDED
 	LV2_Midnam*          midnam;
@@ -243,15 +243,15 @@ inform_ui (AFluidSynth* self)
 		return;
 	}
 
-	LV2_Atom_Forge_Frame sample;
+	LV2_Atom_Forge_Frame frame;
 	lv2_atom_forge_frame_time (&self->forge, 0);
-	x_forge_object (&self->forge, &sample, 1, self->patch_Set);
+	x_forge_object (&self->forge, &frame, 1, self->patch_Set);
 	lv2_atom_forge_property_head (&self->forge, self->patch_property, 0);
 	lv2_atom_forge_urid (&self->forge, self->afs_sf2file);
 	lv2_atom_forge_property_head (&self->forge, self->patch_value, 0);
 	lv2_atom_forge_path (&self->forge, self->current_sf2_file_path, strlen (self->current_sf2_file_path));
 
-	lv2_atom_forge_pop (&self->forge, &sample);
+	lv2_atom_forge_pop (&self->forge, &frame);
 }
 
 static float
@@ -310,6 +310,16 @@ instantiate (const LV2_Descriptor*     descriptor,
 		return NULL;
 	}
 
+#ifdef LV2_EXTENDED
+	if (!self->midnam) {
+		lv2_log_warning (&self->logger, "a-fluidsynth.lv2: Host does not support midnam:update\n");
+	}
+
+	if (!self->bankpatch) {
+		lv2_log_warning (&self->logger, "a-fluidsynth.lv2: Host does not support bankpatch:notify\n");
+	}
+#endif
+
 	/* initialize fluid synth */
 	self->settings = new_fluid_settings ();
 
@@ -320,7 +330,6 @@ instantiate (const LV2_Descriptor*     descriptor,
 	}
 
 	fluid_settings_setnum (self->settings, "synth.sample-rate", rate);
-	fluid_settings_setint (self->settings, "synth.parallel-render", 1);
 	fluid_settings_setint (self->settings, "synth.threadsafe-api", 0);
 	fluid_settings_setstr (self->settings, "synth.midi-bank-select", "mma");
 
@@ -336,6 +345,9 @@ instantiate (const LV2_Descriptor*     descriptor,
 	fluid_synth_set_gain (self->synth, 1.0f);
 	fluid_synth_set_polyphony (self->synth, 32);
 	fluid_synth_set_sample_rate (self->synth, (float)rate);
+
+	fluid_synth_set_reverb_on (self->synth, 0);
+	fluid_synth_set_chorus_on (self->synth, 0);
 
 	self->fmidi_event = new_fluid_midi_event ();
 
@@ -421,7 +433,7 @@ run (LV2_Handle instance, uint32_t n_samples)
 
 	const uint32_t capacity = self->notify->atom.size;
 	lv2_atom_forge_set_buffer (&self->forge, (uint8_t*)self->notify, capacity);
-	lv2_atom_forge_sequence_head (&self->forge, &self->sample, 0);
+	lv2_atom_forge_sequence_head (&self->forge, &self->frame, 0);
 
 	if (!self->initialized || self->reinit_in_progress) {
 		memset (self->p_ports[FS_PORT_OUT_L], 0, n_samples * sizeof (float));
@@ -502,7 +514,7 @@ run (LV2_Handle instance, uint32_t n_samples)
 			}
 		}
 		else if (ev->body.type == self->midi_MidiEvent) {
-			if (ev->body.size > 3 || ev->time.frames >= n_samples) {
+			if (ev->body.size > 3 || ev->time.frames >= n_samples || self->reinit_in_progress) {
 				continue;
 			}
 
@@ -570,16 +582,17 @@ run (LV2_Handle instance, uint32_t n_samples)
 		self->inform_ui = false;
 
 		/* emit stateChanged */
-		LV2_Atom_Forge_Frame sample;
+		LV2_Atom_Forge_Frame frame;
 		lv2_atom_forge_frame_time(&self->forge, 0);
-		x_forge_object(&self->forge, &sample, 1, self->state_Changed);
-		lv2_atom_forge_pop(&self->forge, &sample);
+		x_forge_object(&self->forge, &frame, 1, self->state_Changed);
+		lv2_atom_forge_pop(&self->forge, &frame);
 
 		/* send .sf2 filename */
 		inform_ui (self);
 
 #ifdef LV2_EXTENDED
-		self->midnam->update (self->midnam->handle);
+		if (self->midnam)
+			self->midnam->update (self->midnam->handle);
 #endif
 	}
 
@@ -714,7 +727,10 @@ save (LV2_Handle                instance,
 		return LV2_STATE_ERR_NO_PROPERTY;
 	}
 
-	LV2_State_Map_Path* map_path = NULL;
+	LV2_State_Map_Path*  map_path = NULL;
+#ifdef LV2_STATE__freePath
+	LV2_State_Free_Path* free_path = NULL;
+#endif
 
 	for (int i = 0; features[i]; ++i) {
 		if (!strcmp (features[i]->URI, LV2_STATE__mapPath)) {
@@ -730,6 +746,16 @@ save (LV2_Handle                instance,
 	store (handle, self->afs_sf2file,
 			apath, strlen (apath) + 1,
 			self->atom_Path, LV2_STATE_IS_POD);
+#ifdef LV2_STATE__freePath
+	if (free_path) {
+		free_path->free_path (free_path->handle, apath);
+	} else
+#endif
+	{
+#ifndef _WIN32 // https://github.com/drobilla/lilv/issues/14
+		free (apath);
+#endif
+	}
 
 	return LV2_STATE_SUCCESS;
 }
@@ -747,15 +773,46 @@ restore (LV2_Handle                  instance,
 		return LV2_STATE_ERR_UNKNOWN;
 	}
 
+	LV2_State_Map_Path*  map_path = NULL;
+#ifdef LV2_STATE__freePath
+	LV2_State_Free_Path* free_path = NULL;
+#endif
+
+	for (int i = 0; features[i]; ++i) {
+		if (!strcmp (features[i]->URI, LV2_STATE__mapPath)) {
+			map_path = (LV2_State_Map_Path*) features[i]->data;
+		}
+#ifdef LV2_STATE__freePath
+		else if (!strcmp(features[i]->URI, LV2_STATE__freePath)) {
+			free_path = (LV2_State_Free_Path*)features[i]->data;
+		}
+#endif
+	}
+
+	if (!map_path) {
+		return LV2_STATE_ERR_NO_FEATURE;
+	}
+
   size_t   size;
   uint32_t type;
   uint32_t valflags;
 
   const void* value = retrieve (handle, self->afs_sf2file, &size, &type, &valflags);
 	if (value) {
-		strncpy (self->queue_sf2_file_path, (const char*) value, 1023);
+		char* apath = map_path->absolute_path (map_path->handle, (const char*) value);
+		strncpy (self->queue_sf2_file_path, apath, 1023);
 		self->queue_sf2_file_path[1023] = '\0';
 		self->queue_reinit = true;
+#ifdef LV2_STATE__freePath
+		if (free_path) {
+			free_path->free_path (free_path->handle, apath);
+		} else
+#endif
+		{
+#ifndef _WIN32 // https://github.com/drobilla/lilv/issues/14
+			free (apath);
+#endif
+		}
 	}
 	return LV2_STATE_SUCCESS;
 }
@@ -842,12 +899,18 @@ mn_file (LV2_Handle instance)
 	pf ("    </ChannelNameSet>\n");
 
 	pf ("    <ControlNameList Name=\"Controls\">\n");
+	pf ("       <Control Type=\"7bit\" Number=\"1\" Name=\"Modulation\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"2\" Name=\"Breath\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"5\" Name=\"Portamento Time\"/>\n");
 	pf ("       <Control Type=\"7bit\" Number=\"7\" Name=\"Channel Volume\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"8\" Name=\"Stereo Balance\"/>\n");
 	pf ("       <Control Type=\"7bit\" Number=\"10\" Name=\"Pan\"/>\n");
-	pf ("       <Control Type=\"7bit\" Number=\"39\" Name=\"Channel Volume (Fine)\"/>\n");
-	pf ("       <Control Type=\"7bit\" Number=\"42\" Name=\"Pan (Fine)\"/>\n");
-	pf ("       <Control Type=\"7bit\" Number=\"64\" Name=\"Damper Pedal (Sustain)\"/>\n");
-	pf ("       <Control Type=\"7bit\" Number=\"66\" Name=\"Sostenuto\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"11\" Name=\"Expression\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"37\" Name=\"Portamento Time (Fine)\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"64\" Name=\"Sustain On/Off\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"65\" Name=\"Portamento On/Off\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"66\" Name=\"Sostenuto On/Off\"/>\n");
+	pf ("       <Control Type=\"7bit\" Number=\"68\" Name=\"Legato On/Off\"/>\n");
 	pf ("       <Control Type=\"7bit\" Number=\"91\" Name=\"Reverb\"/>\n");
 	pf ("       <Control Type=\"7bit\" Number=\"93\" Name=\"Chorus\"/>\n");
 	pf ("    </ControlNameList>\n");

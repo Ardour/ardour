@@ -1,21 +1,23 @@
 /*
-  Copyright (C) 2016 Paul Davis
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-*/
+ * Copyright (C) 2016-2017 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2016-2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2017 Ben Loftis <ben@harrisonconsoles.com>
+ * Copyright (C) 2018 Len Ovens <len@ovenwerks.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #ifndef __libardour_stripable_h__
 #define __libardour_stripable_h__
@@ -74,7 +76,7 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	bool is_private_route() const { return is_auditioner(); }
 	bool is_master() const { return _presentation_info.flags() & PresentationInfo::MasterOut; }
 	bool is_monitor() const { return _presentation_info.flags() & PresentationInfo::MonitorOut; }
-	bool is_listenbus() const { return _presentation_info.flags() & PresentationInfo::ListenBus; }
+	bool is_foldbackbus() const { return _presentation_info.flags() & PresentationInfo::FoldbackBus; }
 
 	int set_state (XMLNode const&, int);
 
@@ -152,6 +154,7 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	virtual boost::shared_ptr<AutomationControl> filter_enable_controllable (bool hp) const = 0;
 
 	virtual boost::shared_ptr<AutomationControl> tape_drive_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	virtual boost::shared_ptr<ReadOnlyControl> tape_drive_mtr_controllable () const { return boost::shared_ptr<ReadOnlyControl>(); }
 
 	/* "well-known" controls for a compressor in this route. Any or all may
 	 * be null.
@@ -183,7 +186,8 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	 */
 	virtual boost::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const = 0;
 	virtual boost::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const = 0;
-	virtual boost::shared_ptr<AutomationControl> send_pan_azi_controllable (uint32_t n) const = 0;
+	virtual boost::shared_ptr<AutomationControl> send_pan_azimuth_controllable (uint32_t n) const = 0;
+	virtual boost::shared_ptr<AutomationControl> send_pan_azimuth_enable_controllable (uint32_t n) const = 0;
 
 	/* for the same value of @param n, this returns the name of the send
 	 * associated with the pair of controllables returned by the above two methods.
@@ -198,6 +202,31 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	 */
 	virtual boost::shared_ptr<AutomationControl> master_send_enable_controllable () const = 0;
 
+	/* well known control for mixbus's correlation meter.
+	 *
+	 * In Ardour, this returns null.
+	 * In Mixbus, it will return a suitable control, or null depending on the route.
+	 * @param mm min/max of the correlation range, true for upper value
+	 */
+	virtual boost::shared_ptr<ReadOnlyControl> master_correlation_mtr_controllable (bool mm) const { return boost::shared_ptr<ReadOnlyControl>(); }
+
+	/* well known control for mixbus's limiter.
+	 *
+	 * In Ardour, this returns null.
+	 * In Mixbus, it will return a suitable control, or null depending on
+	 * the route.
+	 */
+	virtual boost::shared_ptr<AutomationControl> master_limiter_enable_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	virtual boost::shared_ptr<ReadOnlyControl> master_limiter_mtr_controllable () const { return boost::shared_ptr<ReadOnlyControl>(); }
+
+	/* well known control for mixbus's k-meter.
+	 *
+	 * In Ardour, this returns null.
+	 * In Mixbus, it will return a suitable control, or null depending on
+	 * the route.
+	 */
+	virtual boost::shared_ptr<ReadOnlyControl> master_k_mtr_controllable () const { return boost::shared_ptr<ReadOnlyControl>(); }
+
 	virtual bool muted_by_others_soloing () const = 0;
 
 	virtual boost::shared_ptr<MonitorProcessor> monitor_control() const = 0;
@@ -207,6 +236,7 @@ class LIBARDOUR_API Stripable : public SessionObject,
 
   protected:
 	PresentationInfo _presentation_info;
+
 	private:
 	StripableColorDialog* _active_color_picker;
 };

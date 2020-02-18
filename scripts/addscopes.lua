@@ -61,6 +61,7 @@ function icon (params) return function (ctx, width, height)
 	local wh = math.min (width, height) * .5
 	local x0 = math.ceil (wh * .4)
 	local x1 = math.floor (wh * 1.6)
+	ctx:translate (math.floor (width * .5 - wh), math.floor (height * .5 - wh))
 	ctx:rectangle (wh * .4, wh * .4, wh * 1.2, wh * 1.2)
 	ctx:set_source_rgba (.7, .7, .7, 1)
 	ctx:fill ()
