@@ -30,6 +30,7 @@
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
 #include "ardour/delayline.h"
+#include "ardour/event_type_map.h"
 #include "ardour/gain_control.h"
 #include "ardour/io.h"
 #include "ardour/meter.h"
@@ -100,7 +101,7 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 
 	//boost_debug_shared_ptr_mark_interesting (this, "send");
 
-	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation)));
+	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (BusSendLevel)));
 	_gain_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(BusSendLevel), gl));
 	_gain_control->set_flags (Controllable::Flag ((int)_gain_control->flags() | Controllable::InlineControl));
 	add_control (_gain_control);
@@ -279,7 +280,7 @@ Send::state ()
 
 	node.set_property ("selfdestruct", _remove_on_disconnect);
 
-	node.add_child_nocopy (_amp->get_state ());
+	node.add_child_nocopy (_gain_control->get_state());
 
 	return node;
 }
@@ -291,11 +292,51 @@ Send::set_state (const XMLNode& node, int version)
 		return set_state_2X (node, version);
 	}
 
-	XMLProperty const * prop;
+	XMLNode* gain_node;
+	if ((gain_node = node.child (Controllable::xml_node_name.c_str ())) != 0) {
+		_gain_control->set_state (*gain_node, version);
+	}
+
+	if (version <= 6000) {
+		/* convert GainAutomation to BusSendLevel
+		 *
+		 * (early Ardour 6.0-pre0 and Mixbus 6.0 used "BusSendLevel"
+		 *  control with GainAutomation, so we check version <= 6000.
+		 *  New A6 sessions do not have a GainAutomation parameter,
+		 *  so this is safe.)
+		 *
+		 * Normally this is restored via
+		 * Delivery::set_state() -> Processor::set_state()
+		 * -> Automatable::set_automation_xml_state()
+		 */
+		XMLNodeList nlist;
+		XMLNode* automation = node.child ("Automation");
+		if (automation) {
+			nlist = automation->children();
+		}
+		for (XMLNodeIterator i = nlist.begin(); i != nlist.end(); ++i) {
+			if ((*i)->name() != "AutomationList") {
+				continue;
+			}
+			XMLProperty const* id_prop = (*i)->property("automation-id");
+			if (!id_prop) {
+				continue;
+			}
+			Evoral::Parameter param = EventTypeMap::instance().from_symbol (id_prop->value());
+			if (param.type() != GainAutomation) {
+				continue;
+			}
+			XMLNode xn (**i);
+			xn.set_property ("automation-id", EventTypeMap::instance().to_symbol(Evoral::Parameter (BusSendLevel)));
+			_gain_control->alist()->set_state (xn, version);
+			break;
+		}
+	}
 
 	Delivery::set_state (node, version);
 
 	if (node.property ("ignore-bitslot") == 0) {
+		XMLProperty const* prop;
 
 		/* don't try to reset bitslot if there is a node for it already: this can cause
 		   issues with the session's accounting of send ID's
@@ -327,13 +368,6 @@ Send::set_state (const XMLNode& node, int version)
 	}
 
 	node.get_property (X_("selfdestruct"), _remove_on_disconnect);
-
-	XMLNodeList nlist = node.children();
-	for (XMLNodeIterator i = nlist.begin(); i != nlist.end(); ++i) {
-		if ((*i)->name() == X_("Processor")) {
-			_amp->set_state (**i, version);
-		}
-	}
 
 	_send_delay->set_name ("Send-" + name());
 	_thru_delay->set_name ("Thru-" + name());
