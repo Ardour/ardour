@@ -103,6 +103,7 @@
 #include "ardour/route_graph.h"
 #include "ardour/route_group.h"
 #include "ardour/rt_tasklist.h"
+#include "ardour/silentfilesource.h"
 #include "ardour/send.h"
 #include "ardour/selection.h"
 #include "ardour/session.h"
@@ -6335,6 +6336,22 @@ Session::unknown_processors () const
 	p.sort ();
 	p.unique ();
 
+	return p;
+}
+
+list<string>
+Session::missing_filesources (DataType dt) const
+{
+	list<string> p;
+	for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+		if (dt == DataType::AUDIO && 0 != boost::dynamic_pointer_cast<SilentFileSource> (i->second)) {
+			p.push_back (i->second->name());
+		}
+		else if (dt == DataType::MIDI && 0 != boost::dynamic_pointer_cast<SMFSource> (i->second) && (i->second->flags() & Source::Missing) != 0) {
+			p.push_back (i->second->name());
+		}
+	}
+	p.sort ();
 	return p;
 }
 

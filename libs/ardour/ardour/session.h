@@ -1161,6 +1161,8 @@ public:
 
 	std::list<std::string> unknown_processors () const;
 
+	std::list<std::string> missing_filesources (DataType) const;
+
 	/** Emitted when a feedback cycle has been detected within Ardour's signal
 	    processing path.  Until it is fixed (by the user) some (unspecified)
 	    routes will not be run.

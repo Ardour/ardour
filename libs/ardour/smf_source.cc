@@ -156,23 +156,24 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 		}
 
 	} catch (MissingSource& err) {
-
-		if (_flags & Source::Empty) {
-			/* we don't care that the file was not found, because
-			   it was empty. But FileSource::init() will have
-			   failed to set our _path correctly, so we have to do
-			   this ourselves. Use the first entry in the search
-			   path for MIDI files, which is assumed to be the
-			   correct "main" location.
-			*/
-			std::vector<string> sdirs = s.source_search_path (DataType::MIDI);
-			_path = Glib::build_filename (sdirs.front(), _path);
-			/* This might be important, too */
-			_file_is_new = true;
-		} else {
-			/* pass it on */
-			throw;
+		if (0 == (_flags & Source::Empty)) {
+			/* Don't throw, create the source.
+			 * Since MIDI is writable, we cannot use a SilentFileSource.
+			 */
+			_flags = Source::Flag (_flags | Source::Empty | Source::Missing);
 		}
+
+		/* we don't care that the file was not found, because
+			 it was empty. But FileSource::init() will have
+			 failed to set our _path correctly, so we have to do
+			 this ourselves. Use the first entry in the search
+			 path for MIDI files, which is assumed to be the
+			 correct "main" location.
+		*/
+		std::vector<string> sdirs = s.source_search_path (DataType::MIDI);
+		_path = Glib::build_filename (sdirs.front(), _path);
+		/* This might be important, too */
+		_file_is_new = true;
 	}
 
 	if (!(_flags & Source::Empty)) {
@@ -451,6 +452,7 @@ SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&   lock,
 	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
 	_last_ev_time_beats = time;
 	_flags = Source::Flag (_flags & ~Empty);
+	_flags = Source::Flag (_flags & ~Missing);
 }
 
 /** Append an event with a timestamp in samples (samplepos_t) */
@@ -501,6 +503,7 @@ SMFSource::append_event_samples (const Glib::Threads::Mutex::Lock& lock,
 	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer(), event_id);
 	_last_ev_time_samples = ev.time();
 	_flags = Source::Flag (_flags & ~Empty);
+	_flags = Source::Flag (_flags & ~Missing);
 }
 
 XMLNode&

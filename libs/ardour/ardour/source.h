@@ -56,6 +56,7 @@ public:
 		Destructive = 0x80,
 		Empty = 0x100, /* used for MIDI only */
 		RF64_RIFF = 0x200,
+		Missing = 0x400, /* used for MIDI only */
 	};
 
 	typedef Glib::Threads::Mutex::Lock Lock;
