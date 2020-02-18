@@ -380,7 +380,7 @@ Session::post_locate ()
  *  @param speed New speed
  */
 void
-Session::set_transport_speed (double speed, samplepos_t destination_sample, bool abort, bool clear_state, bool as_default)
+Session::set_transport_speed (double speed, bool abort, bool clear_state, bool as_default)
 {
 	ENSURE_PROCESS_THREAD;
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1, abort = %2 clear_state = %3, current = %4 as_default %6\n",
@@ -439,13 +439,6 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 				_count_in_once = false;
 				unset_play_loop ();
 			}
-		} else {
-			bool const auto_return_enabled = (!config.get_external_sync() && (Config->get_auto_return_target_list() || abort));
-
-			if (!auto_return_enabled) {
-				_requested_return_sample = destination_sample;
-			}
-
 		}
 
 		TFSM_STOP (abort, false);

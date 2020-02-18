@@ -1692,7 +1692,7 @@ private:
 	int  micro_locate (samplecnt_t distance);
 
 	void force_locate (samplepos_t sample, LocateTransportDisposition);
-	void set_transport_speed (double speed, samplepos_t destination_sample, bool abort = false, bool clear_state = false, bool as_default = false);
+	void set_transport_speed (double speed, bool abort = false, bool clear_state = false, bool as_default = false);
 	void realtime_stop (bool abort, bool clear_state);
 	void realtime_locate (bool);
 	void non_realtime_start_scrub ();
