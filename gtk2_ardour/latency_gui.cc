@@ -59,11 +59,33 @@ LatencyBarController::get_label (double&)
 			_latency_gui->adjustment.get_value(), _latency_gui->sample_rate, true);
 }
 
+void
+LatencyGUIControllable::set_value (double v, PBD::Controllable::GroupControlDisposition group_override)
+{
+	_latency_gui->adjustment.set_value (v);
+}
+
+double
+LatencyGUIControllable::get_value () const
+{
+	return _latency_gui->adjustment.get_value ();
+}
+double
+LatencyGUIControllable::lower() const
+{
+	return _latency_gui->adjustment.get_lower ();
+}
+
+double
+LatencyGUIControllable::upper() const
+{
+	return _latency_gui->adjustment.get_upper ();
+}
+
 LatencyGUI::LatencyGUI (Latent& l, samplepos_t sr, samplepos_t psz)
 	: _latent (l)
 	, sample_rate (sr)
 	, period_size (psz)
-	, ignored (new PBD::IgnorableControllable())
 	, _ignore_change (false)
 	, adjustment (0, 0.0, sample_rate, 1.0, sample_rate / 1000.0f) /* max 1 second, step by samples, page by msecs */
 	, bc (adjustment, this)
