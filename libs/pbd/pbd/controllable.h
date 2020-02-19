@@ -191,19 +191,6 @@ private:
 	static void remove (Controllable*);
 };
 
-/* a utility class for the occasions when you need but do not have
- * a Controllable
- */
-class LIBPBD_API IgnorableControllable : public Controllable
-{
-public:
-	IgnorableControllable () : PBD::Controllable ("ignoreMe") {}
-	~IgnorableControllable () {}
-
-	void set_value (double v, PBD::Controllable::GroupControlDisposition group_override) {}
-	double get_value () const { return 0.0; }
-};
-
 }
 
 #endif /* __pbd_controllable_h__ */
