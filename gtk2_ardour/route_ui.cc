@@ -50,6 +50,7 @@
 #include "ardour/monitor_control.h"
 #include "ardour/internal_send.h"
 #include "ardour/panner_shell.h"
+#include "ardour/polarity_processor.h"
 #include "ardour/profile.h"
 #include "ardour/phase_control.h"
 #include "ardour/send.h"
@@ -351,7 +352,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_property_changed, this, _1), gui_context());
 	_route->presentation_info().PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_gui_changed, this, _1), gui_context ());
 
-	_route->io_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::setup_invert_buttons, this), gui_context ());
+	_route->polarity()->ConfigurationChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::polarity_configuration_changed, this, _1, _2), gui_context());
 
 	if (_session->writable() && is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
@@ -2017,6 +2018,12 @@ RouteUI::parameter_changed (string const & p)
 }
 
 void
+RouteUI::polarity_configuration_changed (const ChanCount in, const ChanCount out)
+{
+	setup_invert_buttons();
+}
+
+void
 RouteUI::setup_invert_buttons ()
 {
 	/* remove old invert buttons */
@@ -2026,12 +2033,11 @@ RouteUI::setup_invert_buttons ()
 
 	_invert_buttons.clear ();
 
-	if (!_route || !_route->input()) {
+	if (!_route) {
 		return;
 	}
 
-	uint32_t const N = _route->input()->n_ports().n_audio ();
-
+	uint32_t const N = _route->phase_control()->size();
 	uint32_t const to_add = (N <= _max_invert_buttons) ? N : 1;
 
 	for (uint32_t i = 0; i < to_add; ++i) {
@@ -2067,7 +2073,7 @@ RouteUI::setup_invert_buttons ()
 void
 RouteUI::set_invert_button_state ()
 {
-	uint32_t const N = _route->input()->n_ports().n_audio();
+	uint32_t const N = _route->phase_control()->size();
 	if (N > _max_invert_buttons) {
 
 		/* One button for many channels; explicit active if all channels are inverted,
@@ -2100,7 +2106,7 @@ bool
 RouteUI::invert_release (GdkEventButton* ev, uint32_t i)
 {
 	if (ev->button == 1 && i < _invert_buttons.size()) {
-		uint32_t const N = _route->input()->n_ports().n_audio ();
+		uint32_t const N = _route->phase_control()->size();
 		if (N <= _max_invert_buttons) {
 			/* left-click inverts phase so long as we have a button per channel */
 			_route->phase_control()->set_phase_invert (i, !_invert_buttons[i]->get_active());
@@ -2116,7 +2122,7 @@ RouteUI::invert_press (GdkEventButton* ev)
 {
 	using namespace Menu_Helpers;
 
-	uint32_t const N = _route->input()->n_ports().n_audio();
+	uint32_t const N = _route->phase_control()->size();
 	if (N <= _max_invert_buttons && ev->button != 3) {
 		/* If we have an invert button per channel, we only pop
 		   up a menu on right-click; left click is handled

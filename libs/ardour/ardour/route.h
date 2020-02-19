@@ -205,6 +205,7 @@ public:
 
 	boost::shared_ptr<Amp> amp() const  { return _amp; }
 	boost::shared_ptr<Amp> trim() const { return _trim; }
+	boost::shared_ptr<PolarityProcessor> polarity() const { return _polarity; }
 	boost::shared_ptr<PeakMeter>       peak_meter()       { return _meter; }
 	boost::shared_ptr<const PeakMeter> peak_meter() const { return _meter; }
 	boost::shared_ptr<PeakMeter> shared_peak_meter() const { return _meter; }

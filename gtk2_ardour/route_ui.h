@@ -186,6 +186,7 @@ public:
 	virtual void processors_changed (ARDOUR::RouteProcessorChange) {}
 	void route_rec_enable_changed();
 	void session_rec_enable_changed();
+	void polarity_configuration_changed (const ARDOUR::ChanCount in, const ARDOUR::ChanCount out);
 
 	void build_solo_menu ();
 
