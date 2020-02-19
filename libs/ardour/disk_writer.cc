@@ -109,12 +109,13 @@ DiskWriter::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_many)
 	return 0;
 }
 
-
-
 bool
 DiskWriter::set_write_source_name (string const & str)
 {
 	_write_source_name = str;
+
+	reset_write_sources (false);
+
 	return true;
 }
 
