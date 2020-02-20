@@ -629,7 +629,7 @@ DiskReader::overwrite_existing_audio ()
 
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
-	if (c->empty () || !_playlists[DataType::AUDIO]) {
+	if (c->empty ()) {
 		return true;
 	}
 
@@ -1801,33 +1801,4 @@ DiskReader::reload_loop ()
 		}
 
 	}
-}
-
-bool
-DiskReader::can_support_io_configuration (const ChanCount& in, ChanCount& out)
-{
-	if (!DiskIOProcessor::can_support_io_configuration (in, out)) {
-		return false;
-	}
-
-	/* DiskIO might have done this too, but do it again anyway as a
-	 * starting point.
-	 */
-
-	out == in;
-
-	if (_playlists[DataType::AUDIO]) {
-		ChannelList::size_type naudio = max (ChannelList::size_type (1), channels.reader()->size());
-		if (out.n_audio() < naudio) {
-			out.set (DataType::AUDIO, naudio);
-		}
-	}
-
-	if (_playlists[DataType::MIDI]) {
-		if (out.n_midi() != 1) {
-			out.set (DataType::MIDI, 1);
-		}
-	}
-
-	return true;
 }
