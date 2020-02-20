@@ -433,7 +433,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	/* MIDI data handling */
 
-	const bool midi_data_available = !(pending_overwrite() & PlaylistModified);
+	const bool no_playlist_modification_pending = !(pending_overwrite() & PlaylistModified);
 
 	if (bufs.count().n_midi()) {
 
@@ -444,14 +444,14 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			run_must_resolve = false;
 		}
 
-		if (!_no_disk_output && !declick_in_progress() && (ms & MonitoringDisk) && !still_locating && midi_data_available && speed) {
+		if (!_no_disk_output && !declick_in_progress() && (ms & MonitoringDisk) && !still_locating && no_playlist_modification_pending && speed) {
 			get_midi_playback (dst, start_sample, end_sample, ms, scratch_bufs, speed, disk_samples_to_consume);
 		}
 	}
 
 	/* decide if we need the butler */
 
-	if (!still_locating && midi_data_available) {
+	if (!still_locating && no_playlist_modification_pending) {
 
 		bool butler_required = false;
 
