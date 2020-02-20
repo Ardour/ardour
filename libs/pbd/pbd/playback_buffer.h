@@ -161,11 +161,9 @@ public:
 	bool can_seek (int64_t cnt) {
 		if (cnt > 0) {
 			return read_space() >= cnt;
-		}
-		else if (cnt < 0) {
+		} else if (cnt < 0) {
 			return g_atomic_int_get (&reserved) >= -cnt;
-		}
-		else {
+		} else {
 			return true;
 		}
 	}
