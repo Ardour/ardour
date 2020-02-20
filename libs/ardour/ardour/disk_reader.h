@@ -67,13 +67,15 @@ public:
 
 	void move_processor_automation (boost::weak_ptr<Processor>, std::list<Evoral::RangeMove<samplepos_t> > const &);
 
-	/* called by the Butler in a non-realtime context */
+	/* called by the Butler in a non-realtime context as part of its
+	 * normal loop (not due to transport-mechanism requests like locate
+	 */
 
 	int do_refill () {
 		return refill (_sum_buffer, _mixdown_buffer, _gain_buffer, 0);
 	}
 
-	/** For non-butler contexts (allocates temporary working buffers)
+	/** For contexts outside the normal butler refill loop (allocates temporary working buffers)
 	 *
 	 * This accessible method has a default argument; derived classes
 	 * must inherit the virtual method that we call which does NOT
