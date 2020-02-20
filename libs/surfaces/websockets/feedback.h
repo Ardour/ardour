@@ -49,7 +49,7 @@ class ArdourFeedback : public SurfaceComponent
     void observe_strip_plugin_param_values (uint32_t, uint32_t,
         boost::shared_ptr<ARDOUR::PluginInsert>);
 
-    void update_all (std::string, std::initializer_list<uint32_t>, TypedValue) const;
+    void update_all (std::string, std::vector<uint32_t>, TypedValue) const;
 
 };
 

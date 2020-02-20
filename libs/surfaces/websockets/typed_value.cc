@@ -19,10 +19,42 @@
 #include <cmath>
 #include <limits>
 #include <string>
+#include <boost/lexical_cast.hpp>
 
 #include "typed_value.h"
 
 #define DBL_TOLERANCE 0.001
+
+TypedValue::TypedValue ()
+    : _type (Empty)
+    , _b (false)
+    , _i (0)
+    , _d (0) { }
+
+TypedValue::TypedValue (bool value)
+    : _type (Bool)
+    , _b (value)
+    , _i (0)
+    , _d (0) { }
+
+TypedValue::TypedValue (int value)
+    : _type (Int)
+    , _b (false)
+    , _i (value)
+    , _d (0) { }
+
+TypedValue::TypedValue (double value)
+    : _type (Double)
+    , _b (false)
+    , _i (0)
+    , _d (value) { }
+
+TypedValue::TypedValue (std::string value)
+    : _type (String)
+    , _b (false)
+    , _i (0)
+    , _d (0)
+    , _s (value) { }
 
 TypedValue::operator
 bool () const
@@ -53,8 +85,8 @@ int () const
             return static_cast<int>(_d);
         case String:
             try {
-                return std::stoi (_s);
-            } catch (const std::exception&) {
+                return boost::lexical_cast<int> (_s);
+            } catch (const boost::bad_lexical_cast&) {
                 return 0;
             }
         default:
@@ -74,8 +106,8 @@ double () const
             return static_cast<double>(_i);
         case String:
             try {
-                return std::stod (_s);
-            } catch (const std::exception&) {
+                return boost::lexical_cast<double> (_s);
+            } catch (const boost::bad_lexical_cast&) {
                 return 0;
             }
         default:
@@ -92,9 +124,9 @@ std::string () const
         case Bool:
             return _b ? "true" : "false";
         case Int:
-            return std::to_string (_i);
+            return boost::lexical_cast<std::string> (_i);
         case Double:
-            return std::to_string (_d);
+            return boost::lexical_cast<std::string> (_d);
         default:
             return "";
     }

@@ -47,13 +47,13 @@ NodeStateMessage::NodeStateMessage (void *buf, size_t len)
     , _write (false)
 {
     try {
-        std::string s { static_cast<char *>(buf), len };
+        std::string s (static_cast<char *>(buf), len);
 
-        std::istringstream is { s };
+        std::istringstream is (s);
         pt::ptree root;
         pt::read_json (is, root);
 
-        _state = NodeState { root.get<std::string> ("node") };
+        _state = NodeState (root.get<std::string> ("node"));
 
         pt::ptree addr = root.get_child ("addr", pt::ptree ());
 

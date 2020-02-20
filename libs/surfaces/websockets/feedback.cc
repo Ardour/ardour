@@ -164,8 +164,7 @@ ArdourFeedback::observe_strip_plugin_param_values (uint32_t strip_n,
 }
 
 void
-ArdourFeedback::update_all (std::string node, std::initializer_list<uint32_t> addr,
-    TypedValue val) const
+ArdourFeedback::update_all (std::string node, std::vector<uint32_t> addr, TypedValue val) const
 {
     server ().update_all_clients ({ node, addr, { val }}, false);
 }

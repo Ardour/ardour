@@ -19,7 +19,7 @@
 #ifndef websockets_server_h
 #define websockets_server_h
 
-#include <unordered_map>
+#include <boost/unordered_map.hpp>
 #include <libwebsockets.h>
 
 #if LWS_LIBRARY_VERSION_MAJOR < 3
@@ -68,10 +68,10 @@ class WebsocketsServer : public SurfaceComponent
 
     Glib::RefPtr<Glib::IOChannel> _channel;
 
-    typedef std::unordered_map<lws_sockfd_type, LwsPollFdGlibSource> LwsPollFdGlibSourceMap;
+    typedef boost::unordered_map<lws_sockfd_type, LwsPollFdGlibSource> LwsPollFdGlibSourceMap;
     LwsPollFdGlibSourceMap _fd_ctx;
 
-    typedef std::unordered_map<Client, ClientContext> ClientContextMap;
+    typedef boost::unordered_map<Client, ClientContext> ClientContextMap;
     ClientContextMap _client_ctx;
 
     void add_poll_fd (struct lws_pollargs*);

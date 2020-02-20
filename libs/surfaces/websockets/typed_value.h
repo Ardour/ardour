@@ -33,11 +33,11 @@ class TypedValue
         String
     };
 
-    TypedValue (): _type (Empty) { }
-    TypedValue (bool value): _type { Bool }, _b (value) { }
-    TypedValue (int value): _type { Int }, _i (value) { }
-    TypedValue (double value): _type { Double }, _d (value) { }
-    TypedValue (std::string value): _type { String }, _s (value) { }
+    TypedValue ();
+    TypedValue (bool);
+    TypedValue (int);
+    TypedValue (double);
+    TypedValue (std::string);
 
     bool empty () const { return _type == Empty; };
     Type type () const { return _type; };
@@ -55,9 +55,9 @@ class TypedValue
   private:
 
     Type _type;
-    bool _b = false;
-    int _i = 0;
-    double _d = 0.0;
+    bool _b;
+    int _i;
+    double _d;
     std::string _s;
 
 };
