@@ -401,20 +401,22 @@ Track::set_name (const string& str)
 
 	boost::shared_ptr<Track> me = boost::dynamic_pointer_cast<Track> (shared_from_this ());
 
-	if (_playlists[data_type()]->all_regions_empty () && _session.playlists()->playlists_for_track (me).size() == 1) {
-		/* Only rename the diskstream (and therefore the playlist) if
-		   a) the playlist has never had a region added to it and
-		   b) there is only one playlist for this track.
+	if (_playlists[data_type()]) {
+		if (_playlists[data_type()]->all_regions_empty () && _session.playlists()->playlists_for_track (me).size() == 1) {
+			/* Only rename the diskstream (and therefore the playlist) if
+			   a) the playlist has never had a region added to it and
+			   b) there is only one playlist for this track.
 
-		   If (a) is not followed, people can get confused if, say,
-		   they have notes about a playlist with a given name and then
-		   it changes (see mantis #4759).
+			   If (a) is not followed, people can get confused if, say,
+			   they have notes about a playlist with a given name and then
+			   it changes (see mantis #4759).
 
-		   If (b) is not followed, we rename the current playlist and not
-		   the other ones, which is a bit confusing (see mantis #4977).
-		*/
-		_disk_reader->set_name (str);
-		_disk_writer->set_name (str);
+			   If (b) is not followed, we rename the current playlist and not
+			   the other ones, which is a bit confusing (see mantis #4977).
+			*/
+			_disk_reader->set_name (str);
+			_disk_writer->set_name (str);
+		}
 	}
 
 	for (uint32_t n = 0; n < DataType::num_types; ++n) {
@@ -660,7 +662,7 @@ Track::use_playlist (DataType dt, boost::shared_ptr<Playlist> p)
 	if (ret == 0) {
 		_playlists[dt] = p;
 	}
-	
+
 	//allow all regions of prior and new playlists to update their visibility?
 	if (old)  old->foreach_region(update_region_visibility);
 	if (p)    p->foreach_region(update_region_visibility);
@@ -1116,5 +1118,3 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 	pl->set_capture_insertion_in_progress (false);
 	_session.add_command (new StatefulDiffCommand (pl));
 }
-
-

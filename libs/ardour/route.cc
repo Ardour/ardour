@@ -2605,7 +2605,7 @@ Route::set_state (const XMLNode& node, int version)
 
 	std::string route_name;
 	if (node.get_property (X_("name"), route_name)) {
-		Route::set_name (route_name);
+		set_name (route_name);
 	}
 
 	set_id (node);
