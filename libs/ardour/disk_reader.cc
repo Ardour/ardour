@@ -187,11 +187,8 @@ void
 DiskReader::realtime_locate (bool for_loop_end)
 {
 	if (!for_loop_end) {
-		std::cerr << name() << " DO note resolve on locate\n";
 		boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack>(_track);
 		_tracker.resolve_notes (mt->immediate_events(), 0);
-	} else {
-		std::cerr << name() << " skip note resolve on locate for loop\n";
 	}
 }
 
