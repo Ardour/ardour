@@ -1081,11 +1081,11 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 		return 0;
 	}
 
-	samplepos_t ffa = file_sample[DataType::AUDIO];
+	samplepos_t fsa = file_sample[DataType::AUDIO];
 
 	if (reversed) {
 
-		if (ffa == 0) {
+		if (fsa == 0) {
 			/* at start: nothing to do but fill with silence */
 			for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
 				ChannelInfo* chan (*i);
@@ -1094,17 +1094,17 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 			return 0;
 		}
 
-		if (ffa < total_space) {
+		if (fsa < total_space) {
 			/* too close to the start: read what we can, and then zero fill the rest */
-			zero_fill = total_space - ffa;
-			total_space = ffa;
+			zero_fill = total_space - fsa;
+			total_space = fsa;
 		} else {
 			zero_fill = 0;
 		}
 
 	} else {
 
-		if (ffa == max_samplepos) {
+		if (fsa == max_samplepos) {
 			/* at end: nothing to do but fill with silence */
 			for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
 				ChannelInfo* chan (*i);
@@ -1113,10 +1113,10 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 			return 0;
 		}
 
-		if (ffa > max_samplepos - total_space) {
+		if (fsa > max_samplepos - total_space) {
 			/* to close to the end: read what we can, and zero fill the rest */
-			zero_fill = total_space - (max_samplepos - ffa);
-			total_space = max_samplepos - ffa;
+			zero_fill = total_space - (max_samplepos - fsa);
+			total_space = max_samplepos - fsa;
 
 		} else {
 			zero_fill = 0;
@@ -1139,7 +1139,7 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 
 	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: will refill %2 channels with %3 samples\n", name(), c->size(), total_space));
 
-	samplepos_t file_sample_tmp = ffa;
+	samplepos_t file_sample_tmp = fsa;
 
 	// int64_t before = g_get_monotonic_time ();
 	// int64_t elapsed;
@@ -1147,7 +1147,13 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 	for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
 
 		ChannelInfo* chan (*i);
-		file_sample_tmp = ffa;
+
+		/* we want all channels to read from the same position, but
+		 * audio_read() will increment its position argument. So
+		 * reinitialize this for every channel.
+		 */
+
+		file_sample_tmp = fsa;
 		samplecnt_t ts = total_space;
 
 		samplecnt_t to_read = min (ts, (samplecnt_t) chan->rbuf->write_space ());
@@ -1167,7 +1173,7 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 			} else {
 
 				if ((nread = audio_read (sum_buffer, mixdown_buffer, gain_buffer, file_sample_tmp, to_read, rci, chan_n, reversed)) != to_read) {
-					error << string_compose(_("DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"), name(), to_read, ffa) << endmsg;
+					error << string_compose(_("DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"), name(), to_read, fsa) << endmsg;
 					ret = -1;
 					goto out;
 				}
