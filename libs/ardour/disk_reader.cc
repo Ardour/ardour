@@ -717,13 +717,13 @@ DiskReader::overwrite_existing_buffers ()
 	bool ret = true;
 
 	if (g_atomic_int_get (&_pending_overwrite) & (PlaylistModified|LoopDisabled|LoopChanged|PlaylistChanged)) {
-		if (!overwrite_existing_audio ()) {
+		if (_playlists[DataType::AUDIO] && !overwrite_existing_audio ()) {
 			ret = false;
 		}
 	}
 
 	if (g_atomic_int_get (&_pending_overwrite) & (PlaylistModified|PlaylistChanged)) {
-		if (!overwrite_existing_midi ()) {
+		if (_playlists[DataType::MIDI] && !overwrite_existing_midi ()) {
 			ret = false;
 		}
 	}
