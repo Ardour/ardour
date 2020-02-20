@@ -19,7 +19,7 @@
 #ifndef websockets_dispatcher_h
 #define websockets_dispatcher_h
 
-#include <unordered_map>
+#include <boost/unordered_map.hpp>
 
 #include "component.h"
 #include "client.h"
@@ -39,7 +39,7 @@ class WebsocketsDispatcher : public SurfaceComponent
   private:
 
     typedef void (WebsocketsDispatcher::*DispatcherMethod) (Client, const NodeStateMessage&);
-    typedef std::unordered_map<std::string, DispatcherMethod> NodeMethodMap;
+    typedef boost::unordered_map<std::string, DispatcherMethod> NodeMethodMap;
 
     static NodeMethodMap _node_to_method;
     
@@ -50,8 +50,7 @@ class WebsocketsDispatcher : public SurfaceComponent
     void strip_plugin_enable_handler (Client, const NodeStateMessage&);
     void strip_plugin_param_value_handler (Client, const NodeStateMessage&);
 
-    void update (Client, std::string, std::initializer_list<uint32_t>,
-        std::initializer_list<TypedValue>);
+    void update (Client, std::string, std::vector<uint32_t>, std::vector<TypedValue>);
 
 };
 

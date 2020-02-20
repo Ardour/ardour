@@ -62,7 +62,7 @@ class ArdourStrips : public SurfaceComponent
 
   private:
 
-    typedef std::vector<boost::shared_ptr<ARDOUR::Stripable>> StripableVector;
+    typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > StripableVector;
     StripableVector _strips;
 
 };

@@ -19,7 +19,7 @@
 #ifndef client_context_h
 #define client_context_h
 
-#include <unordered_set>
+#include <boost/unordered_set.hpp>
 #include <list>
 
 #include "state.h"
@@ -48,7 +48,7 @@ class ClientContext
 
     Client _wsi;
 
-    typedef std::unordered_set<NodeState> ClientState;
+    typedef boost::unordered_set<NodeState> ClientState;
     ClientState _state;
 
     ClientOutputBuffer _output_buf;

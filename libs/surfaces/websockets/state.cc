@@ -17,28 +17,20 @@
  */
 
 #include <sstream>
+#include <boost/unordered_set.hpp>
 
 #include "state.h"
 
-NodeState::NodeState ()
-{
-    update_node_addr_hash ();
-}
+NodeState::NodeState () { }
 
 NodeState::NodeState (std::string node)
-    : _node (node)
-{
-    update_node_addr_hash ();
-}
+    : _node (node) { }
 
-NodeState::NodeState (std::string node, std::initializer_list<uint32_t> addr,
-        std::initializer_list<TypedValue> val)
+NodeState::NodeState (std::string node, std::vector<uint32_t> addr,
+        std::vector<TypedValue> val)
     : _node (node)
     , _addr (addr)
-    , _val (val)
-{
-    update_node_addr_hash ();
-}
+    , _val (val) { }
 
 std::string 
 NodeState::debug_str () const
@@ -57,8 +49,6 @@ NodeState::debug_str () const
     for (std::vector<TypedValue>::const_iterator it = _val.begin (); it != _val.end (); ++it) {
         s << std::endl << " val " << it->debug_str ();
     }
-
-    s << std::endl << " hash = " << _node_addr_hash;
     
     return s.str ();
 }
@@ -79,7 +69,6 @@ void
 NodeState::add_addr (uint32_t addr)
 {
     _addr.push_back (addr);
-    update_node_addr_hash ();
 }
 
 int
@@ -104,15 +93,22 @@ NodeState::add_val (TypedValue val)
     _val.push_back (val);
 }
 
-void
-NodeState::update_node_addr_hash ()
+std::size_t
+NodeState::node_addr_hash () const
 {
-    std::stringstream ss;
-    ss << _node;
+    std::size_t seed = 0;
+    boost::hash_combine (seed, _node);
+    boost::hash_combine (seed, _addr);
+    return seed;
+}
 
-    for (std::vector<uint32_t>::iterator it = _addr.begin (); it != _addr.end (); ++it) {
-        ss << "_" << *it;
-    }
+bool
+NodeState::operator== (const NodeState& other) const
+{
+    return node_addr_hash () == other.node_addr_hash ();
+}
 
-    _node_addr_hash = ss.str ();
+std::size_t hash_value (const NodeState &state)
+{
+    return state.node_addr_hash ();
 }

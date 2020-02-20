@@ -25,8 +25,7 @@
 
 using namespace Glib;
 
-WebsocketsServer::WebsocketsServer
-    (ArdourSurface::ArdourWebsockets& surface)
+WebsocketsServer::WebsocketsServer (ArdourSurface::ArdourWebsockets& surface)
     : SurfaceComponent (surface)
     , _lws_context (0)
 {

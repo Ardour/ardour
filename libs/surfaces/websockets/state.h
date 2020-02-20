@@ -19,9 +19,10 @@
 #ifndef node_state_h
 #define node_state_h
 
-#include <vector>
+#include <stdint.h>
 #include <cmath>
 #include <cstring>
+#include <vector>
 
 #include "typed_value.h"
 
@@ -36,7 +37,7 @@ namespace Node {
     const std::string strip_plugin_enable       = "strip_plugin_enable";
     const std::string strip_plugin_param_desc   = "strip_plugin_param_desc";
     const std::string strip_plugin_param_value  = "strip_plugin_param_value";
-};
+}
 
 class NodeState {
 
@@ -44,8 +45,8 @@ class NodeState {
 
     NodeState ();
     NodeState (std::string);
-    NodeState (std::string, std::initializer_list<uint32_t>,
-        std::initializer_list<TypedValue> = {});
+    NodeState (std::string, std::vector<uint32_t>,
+        std::vector<TypedValue> = std::vector<TypedValue>());
 
     std::string debug_str () const;
 
@@ -59,37 +60,18 @@ class NodeState {
     TypedValue nth_val (int) const;
     void add_val (TypedValue);
 
+    std::size_t node_addr_hash () const;
+
+    bool operator== (const NodeState& other) const;
+
   private:
 
     std::string _node;
     std::vector<uint32_t> _addr;
     std::vector<TypedValue> _val;
-    std::string _node_addr_hash;
-
-    void update_node_addr_hash ();
-
-    friend struct std::hash<NodeState>;
-    friend struct std::equal_to<NodeState>;
 
 };
 
-namespace std {
-    template <>
-    struct hash<NodeState> {
-        size_t operator () (const NodeState &state) const {
-            // std::hash<const char*> produces a hash of the value of the
-            // pointer (the memory address), it does not examine the contents
-            // of any character array.
-            return std::hash<std::string>()(state._node_addr_hash);
-        }
-    };
-
-    template<>
-    struct equal_to<NodeState> {
-        bool operator() (const NodeState& lhs, const NodeState& rhs) const {
-            return lhs._node_addr_hash == rhs._node_addr_hash;
-        }
-    };
-}
+std::size_t hash_value (const NodeState&);
 
 #endif // node_state_h
