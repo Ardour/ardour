@@ -128,14 +128,6 @@ public:
 	}
 
 	/* read-thead */
-	void read_flush ()
-	{
-		SpinLock sl (_reservation_lock);
-		g_atomic_int_set (&read_idx, g_atomic_int_get (&write_idx));
-		g_atomic_int_set (&reserved, 0);
-	}
-
-	/* read-thead */
 	guint decrement_read_ptr (guint cnt)
 	{
 		SpinLock sl (_reservation_lock);
