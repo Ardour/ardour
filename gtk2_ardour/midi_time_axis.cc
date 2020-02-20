@@ -430,6 +430,9 @@ MidiTimeAxisView::maybe_trigger_model_change ()
 				setup_midnam_patches ();
 			}
 		}
+	} else {
+		/* no plugin provided MIDNAM for this plugin */
+		setup_midnam_patches ();
 	}
 }
 
@@ -461,10 +464,12 @@ MidiTimeAxisView::model_changed (const std::string& m)
 	typedef MIDI::Name::MidiPatchManager PatchManager;
 	PatchManager& patch_manager = PatchManager::instance();
 	std::string model (m);
+	bool save_model = true;
 
 	std::list<std::string> device_modes = patch_manager.custom_device_mode_names_by_model (model);
 
 	if (device_modes.empty()) {
+		save_model = false;
 		model = DEFAULT_MIDNAM_MODEL;
 		device_modes = patch_manager.custom_device_mode_names_by_model (model);
 		assert (!device_modes.empty());
@@ -481,7 +486,9 @@ MidiTimeAxisView::model_changed (const std::string& m)
 		remove_gui_property (X_("midnam-model-name"));
 	} else {
 		_midnam_model_selector.set_text(model);
-		set_gui_property (X_("midnam-model-name"), model);
+		if (save_model) {
+			set_gui_property (X_("midnam-model-name"), model);
+		}
 	}
 
 	_midnam_custom_device_mode_selector.clear_items();
