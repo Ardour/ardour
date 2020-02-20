@@ -464,6 +464,11 @@ Route::process_output_buffers (BufferSet& bufs,
 
 		bool re_inject_oob_data = false;
 		if ((*i) == _disk_reader) {
+			/* ignore port-count from prior plugins, use DR's count.
+			 * see also Route::try_configure_processors_unlocked
+			 */
+			bufs.set_count ((*i)->output_streams());
+
 			/* Well now, we've made it past the disk-writer and to the disk-reader.
 			 * Time to decide what to do about monitoring.
 			 *
@@ -1751,7 +1756,14 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 	DEBUG_TRACE (DEBUG::Processors, string_compose ("%1: configure processors\n", _name));
 	DEBUG_TRACE (DEBUG::Processors, "{\n");
 
+	ChanCount disk_io = in;
+
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++index) {
+
+		if (boost::dynamic_pointer_cast<DiskReader> (*p)) {
+			/* disk-reader has the same i/o as disk-writer */
+			in = max (in, disk_io);
+		}
 
 		if ((*p)->can_support_io_configuration(in, out)) {
 
@@ -1822,6 +1834,14 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 					return list<pair<ChanCount, ChanCount> > ();
 				}
 			}
+
+			if (boost::dynamic_pointer_cast<DiskWriter> (*p)) {
+				assert (in == out);
+				disk_io = out;
+			}
+
+
+			/* next processor's in == this processor's out*/
 			in = out;
 		} else {
 			if (err) {
