@@ -745,13 +745,21 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 		return 0;
 	}
 
-	if (sample == playback_sample && !complete_refill) {
-		return 0;
-	}
+	if (_last_read_reversed && (_last_read_reversed == read_reversed)) {
 
-	if (abs (sample - playback_sample) < (c->front()->rbuf->reserved_size() / 6)) {
-		/* we're close enough. Note: this is a heuristic */
-		return 0;
+		/* We do these things only if we're still reading in the same
+		 * direction we did last time.
+		 */
+
+		if (sample == playback_sample && !complete_refill) {
+
+			return 0;
+		}
+
+		if (abs (sample - playback_sample) < (c->front()->rbuf->reserved_size() / 6)) {
+			/* we're close enough. Note: this is a heuristic */
+			return 0;
+		}
 	}
 
 	g_atomic_int_set (&_pending_overwrite, 0);
