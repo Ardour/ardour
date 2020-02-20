@@ -776,6 +776,17 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 		(*chan)->rbuf->reset ();
 	}
 
+	/* move the intended read target, so that after the refill is done,
+	   the intended read target is "reservation" from the start of the
+	   playback buffer. Then increment the read ptr, so that we can
+	   potentially do an internal seek backwards of up "reservation"
+	   samples.
+	*/
+
+	const samplecnt_t shift = sample > c->front()->rbuf->reservation_size() ? c->front()->rbuf->reservation_size() : sample;
+
+	sample -= shift;
+
 	playback_sample = sample;
 	file_sample[DataType::AUDIO] = sample;
 	file_sample[DataType::MIDI] = sample;
@@ -790,6 +801,16 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 		   return.
 		*/
 		ret = do_refill_with_alloc (true);
+	}
+
+	sample += shift;
+
+	playback_sample = sample;
+	file_sample[DataType::AUDIO] = sample;
+	file_sample[DataType::MIDI] = sample;
+
+	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
+		(*chan)->rbuf->increment_read_ptr (shift);
 	}
 
 	return ret;
