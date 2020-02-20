@@ -2623,11 +2623,9 @@ Route::set_state (const XMLNode& node, int version)
 	if ( !(file_flags & PresentationInfo::TypeMask) ) {
 		if (dynamic_cast<AudioTrack*>(this)) {
 			_presentation_info.set_flags ( PresentationInfo::Flag (file_flags | PresentationInfo::AudioTrack) );
-		}
-		else if (dynamic_cast<MidiTrack*>(this)) {
+		} else if (dynamic_cast<MidiTrack*>(this)) {
 			_presentation_info.set_flags ( PresentationInfo::Flag (file_flags | PresentationInfo::MidiTrack) );
-		}
-		else {
+		} else {
 			//no idea what this is, so let's call it an audio bus
 			_presentation_info.set_flags ( PresentationInfo::Flag (file_flags | PresentationInfo::AudioBus) );
 		}
