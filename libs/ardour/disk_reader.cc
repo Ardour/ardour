@@ -381,10 +381,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			}
 
 			/* reset _declick_amp to the correct gain before processing this channel. */
-			if (declick_out) {
-				_declick_amp.set_gain (initial_declick_gain);
-			}
-
+			_declick_amp.set_gain (initial_declick_gain);
 
 			if (!declick_out) {
 
