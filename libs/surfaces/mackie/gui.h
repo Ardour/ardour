@@ -106,14 +106,12 @@ class MackieControlProtocolGUI : public Gtk::Notebook
 
 	void refresh_function_key_editor ();
 	void build_function_key_editor ();
-	void action_changed (const Glib::ustring &sPath, const Glib::ustring &text, Gtk::TreeModelColumnBase);
+	void action_changed (const Glib::ustring &sPath, const Gtk::TreeModel::iterator &, Gtk::TreeModelColumnBase);
 	Gtk::CellRendererCombo* make_action_renderer (Glib::RefPtr<Gtk::TreeStore> model, Gtk::TreeModelColumnBase);
 
 	void surface_combo_changed ();
 	void profile_combo_changed ();
 	void ipmidi_spinner_changed ();
-
-	std::map<std::string,std::string> action_map; // map from action names to paths
 
 	Gtk::CheckButton relay_click_button;
 	Gtk::CheckButton backlight_button;
