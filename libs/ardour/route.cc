@@ -462,26 +462,6 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
-		/* TODO check for split cycles here.
-		 *
-		 * start_frame, end_frame is adjusted by latency and may
-		 * cross loop points.
-		 */
-
-#ifndef NDEBUG
-		/* if it has any inputs, make sure they match */
-		if (boost::dynamic_pointer_cast<UnknownProcessor> (*i) == 0 && (*i)->input_streams() != ChanCount::ZERO) {
-			if (bufs.count() != (*i)->input_streams()) {
-				DEBUG_TRACE (
-					DEBUG::Processors, string_compose (
-						"input port mismatch %1 bufs = %2 input for %3 = %4\n",
-						_name, bufs.count(), (*i)->name(), (*i)->input_streams()
-						)
-					);
-			}
-		}
-#endif
-
 		bool re_inject_oob_data = false;
 		if ((*i) == _disk_reader) {
 			/* Well now, we've made it past the disk-writer and to the disk-reader.
