@@ -223,7 +223,7 @@ FaderPort::pan_azimuth (int delta)
 		return;
 	}
 
-	azimuth->set_value (azimuth->interface_to_internal (azimuth->internal_to_interface (azimuth->get_value()) + (delta / encoder_divider)), Controllable::NoGroup);
+	azimuth->set_interface ((azimuth->internal_to_interface (azimuth->get_value(),true) + (delta / encoder_divider)), true);
 }
 
 
