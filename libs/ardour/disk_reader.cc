@@ -1019,6 +1019,10 @@ DiskReader::_do_refill_with_alloc (bool partial_fill)
 int
 DiskReader::refill (Sample* sum_buffer, Sample* mixdown_buffer, float* gain_buffer, samplecnt_t fill_level)
 {
+	/* NOTE: Audio refill MUST come first so that in contexts where ONLY it
+	   is called, _last_read_reversed is set correctly.
+	*/
+
 	if (refill_audio (sum_buffer, mixdown_buffer, gain_buffer, fill_level)) {
 		return -1;
 	}
