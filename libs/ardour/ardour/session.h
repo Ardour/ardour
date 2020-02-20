@@ -771,7 +771,8 @@ public:
 	bool   transport_stopped() const;
 	bool   transport_stopped_or_stopping() const;
 	bool   transport_rolling() const;
-
+	bool   transport_will_roll_forwards() const;
+	
 	bool silent () { return _silent; }
 
 	TempoMap&       tempo_map()       { return *_tempo_map; }
@@ -1254,6 +1255,8 @@ protected:
 	void schedule_butler_for_transport_work ();
 	bool should_roll_after_locate () const;
 	double speed() const { return _transport_speed; }
+	samplepos_t position() const { return _transport_sample; }
+	void set_transport_speed (double speed, bool abort, bool clear_state, bool as_default);
 
 private:
 	int  create (const std::string& mix_template, BusProfile const *);
@@ -1692,7 +1695,6 @@ private:
 	int  micro_locate (samplecnt_t distance);
 
 	void force_locate (samplepos_t sample, LocateTransportDisposition);
-	void set_transport_speed (double speed, bool abort = false, bool clear_state = false, bool as_default = false);
 	void realtime_stop (bool abort, bool clear_state);
 	void realtime_locate (bool);
 	void non_realtime_start_scrub ();

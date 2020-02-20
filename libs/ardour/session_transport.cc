@@ -99,10 +99,9 @@ Session::realtime_stop (bool abort, bool clear_state)
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("realtime stop @ %1 speed = %2\n", _transport_sample, _transport_speed));
 	PostTransportWork todo = PostTransportWork (0);
 
-	if (_last_transport_speed < 0.0f) {
-		todo = (PostTransportWork (todo | PostTransportStop | PostTransportReverse));
+	if (_transport_speed < 0.0f) {
+		todo = (PostTransportWork (todo | PostTransportStop));
 		_default_transport_speed = 1.0;
-		DiskReader::inc_no_disk_output (); // for the buffer reversal
 	} else {
 		todo = PostTransportWork (todo | PostTransportStop);
 	}
@@ -195,7 +194,7 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 		*/
 
 		if (with_roll) {
-			set_transport_speed (1.0, 0, false);
+			set_transport_speed (1.0, false, false, false);
 		}
 		loop_changing = false;
 		TFSM_EVENT (TransportFSM::LocateDone);
@@ -383,11 +382,17 @@ void
 Session::set_transport_speed (double speed, bool abort, bool clear_state, bool as_default)
 {
 	ENSURE_PROCESS_THREAD;
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1, abort = %2 clear_state = %3, current = %4 as_default %6\n",
-						       speed, abort, clear_state, _transport_speed, _transport_sample, as_default));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1 from %4 (es = %7), abort = %2 clear_state = %3, as_default %6\n",
+	                                               speed, abort, clear_state, _transport_speed, _transport_sample, as_default, _engine_speed));
+
+	if ((_engine_speed != 1) && (_engine_speed == fabs (speed)) && (speed * _transport_speed) >= 0) {
+		/* engine speed is not changing and no direction change, do nothing */
+		DEBUG_TRACE (DEBUG::Transport, "no reason to change speed, do nothing\n");
+		return;
+	}
 
 	/* max speed is somewhat arbitrary but based on guestimates regarding disk i/o capability
-	   and user needs. We really need CD-style "skip" playback for ffwd and rewind.
+	   and user needs. XXX We really need CD-style "skip" playback for ffwd and rewind.
 	*/
 
 	if (speed > 0) {
@@ -397,6 +402,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 	}
 
 	double new_engine_speed = 1.0;
+
 	if (speed != 0) {
 		new_engine_speed = fabs (speed);
 		if (speed < 0) speed = -1;
@@ -510,24 +516,10 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 		   before the last stop, then we have to do extra work.
 		*/
 
-		PostTransportWork todo = PostTransportWork (0);
-
-		if ((_transport_speed && speed * _transport_speed < 0.0) || (_last_transport_speed * speed < 0.0) || (_last_transport_speed == 0.0 && speed < 0.0)) {
-			todo = PostTransportWork (todo | PostTransportReverse);
-			DiskReader::inc_no_disk_output (); // for the buffer reversal
-			_last_roll_or_reversal_location = _transport_sample;
-		}
-
-		_last_transport_speed = _transport_speed;
 		_transport_speed = speed;
 
 		if (as_default) {
 			_default_transport_speed = speed;
-		}
-
-		if (todo) {
-			add_post_transport_work (todo);
-			TFSM_EVENT (TransportFSM::ButlerRequired);
 		}
 
 		DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC3 with speed = %1\n", _transport_speed));
@@ -537,7 +529,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 		 * usually changes every cycle (tiny amounts due to DLL).
 		 * Emitting a signal every cycle is overkill and unwarranted.
 		 *
-		 * Using _last_transport_speed is not acceptable,
+		 * Using _transport_speed is not acceptable,
 		 * since it allows for large changes over a long period
 		 * of time. Hence we introduce a dedicated variable to keep track
 		 *
@@ -713,7 +705,7 @@ Session::butler_completed_transport_work ()
 
 	bool start_after_butler_done_msg = false;
 
-	if ((ptw & (PostTransportReverse|PostTransportRoll))) {
+	if (ptw & PostTransportRoll) {
 		start_after_butler_done_msg = true;
 	}
 
@@ -1184,29 +1176,6 @@ Session::butler_transport_work ()
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 			if (tr) {
 				tr->adjust_capture_buffering ();
-			}
-		}
-	}
-
-	if (ptw & PostTransportReverse) {
-
-		clear_clicks();
-
-		/* don't seek if locate will take care of that in non_realtime_stop() */
-
-		if (!(ptw & PostTransportLocate)) {
-			for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-				(*i)->non_realtime_locate (_transport_sample);
-
-				if (on_entry != g_atomic_int_get (&_butler->should_do_transport_work)) {
-					/* new request, stop seeking, and start again */
-					g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
-					goto restart;
-				}
-			}
-			VCAList v = _vca_manager->vcas ();
-			for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
-				(*i)->non_realtime_locate (_transport_sample);
 			}
 		}
 	}
@@ -2042,4 +2011,10 @@ bool
 Session::declick_in_progress () const
 {
 	return _transport_fsm->declick_in_progress();
+}
+
+bool
+Session::transport_will_roll_forwards () const
+{
+	return _transport_fsm->will_roll_fowards ();
 }

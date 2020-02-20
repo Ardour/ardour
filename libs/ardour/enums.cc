@@ -155,10 +155,11 @@ setup_enum_writer ()
 	TransportFSM::EventType _TransportFSM_EventType;
 	TransportFSM::MotionState _TransportFSM_MotionState;
 	TransportFSM::ButlerState _TransportFSM_ButlerState;
+	TransportFSM::DirectionState _TransportFSM_DirectionState;
 	LoopFadeChoice _LoopFadeChooice;
 	TransportState _TransportState;
 	LocateTransportDisposition _LocateTransportDisposition;
-	
+
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
@@ -809,6 +810,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (TransportFSM, StopTransport);
 	REGISTER_CLASS_ENUM (TransportFSM, Locate);
 	REGISTER_CLASS_ENUM (TransportFSM, LocateDone);
+	REGISTER_CLASS_ENUM (TransportFSM, SetSpeed);
 	REGISTER (_TransportFSM_EventType);
 
 	REGISTER_CLASS_ENUM (TransportFSM, Stopped);
@@ -818,10 +820,14 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (TransportFSM, WaitingForLocate);
 	REGISTER (_TransportFSM_MotionState);
 
-
 	REGISTER_CLASS_ENUM (TransportFSM, NotWaitingForButler);
 	REGISTER_CLASS_ENUM (TransportFSM, WaitingForButler);
 	REGISTER (_TransportFSM_ButlerState);
+
+	REGISTER_CLASS_ENUM (TransportFSM, Forwards);
+	REGISTER_CLASS_ENUM (TransportFSM, Backwards);
+	REGISTER_CLASS_ENUM (TransportFSM, Reversing);
+	REGISTER (_TransportFSM_DirectionState);
 
 	REGISTER_ENUM (NoLoopFade);
 	REGISTER_ENUM (EndLoopFade);

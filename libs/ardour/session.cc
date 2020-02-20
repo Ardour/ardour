@@ -191,7 +191,6 @@ Session::Session (AudioEngine &eng,
 	, _engine_speed (1.0)
 	, _transport_speed (0)
 	, _default_transport_speed (1.0)
-	, _last_transport_speed (0)
 	, _signalled_varispeed (0)
 	, _target_transport_speed (0.0)
 	, auto_play_legal (false)
