@@ -20,6 +20,8 @@
 #ifndef __ardour_disk_reader_h__
 #define __ardour_disk_reader_h__
 
+#include <boost/optional.hpp>
+
 #include "pbd/i18n.h"
 
 #include "evoral/Curve.h"
@@ -191,6 +193,7 @@ private:
 	DeclickAmp     _declick_amp;
 	sampleoffset_t _declick_offs;
 	MidiStateTracker _tracker;
+	boost::optional<bool> _last_read_reversed; 
 
 	int _do_refill_with_alloc (bool partial_fill);
 

@@ -630,7 +630,7 @@ DiskReader::overwrite_existing_audio ()
 		return true;
 	}
 
-	const bool reversed = _session.transport_speed() < 0.0f;
+	const bool reversed = !_session.transport_will_roll_forwards ();
 
 	sampleoffset_t chunk1_offset;
 	samplecnt_t    chunk1_cnt;
@@ -739,6 +739,7 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 	int ret = -1;
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
+	const bool read_reversed = !_session.transport_will_roll_forwards ();
 
 	if (c->empty()) {
 		return 0;
@@ -966,6 +967,7 @@ DiskReader::audio_read (Sample* sum_buffer,
 		sum_buffer += this_read;
 	}
 
+	_last_read_reversed = reversed;
 	return rcnt;
 }
 
@@ -1021,11 +1023,13 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 	}
 
 	int32_t ret = 0;
-	bool const reversed = _session.transport_speed() < 0.0f;
+	bool const reversed = !_session.transport_will_roll_forwards ();
 	samplecnt_t zero_fill;
 	uint32_t chan_n;
 	ChannelList::iterator i;
 	boost::shared_ptr<ChannelList> c = channels.reader();
+
+	_last_read_reversed = !_session.transport_will_roll_forwards ();
 
 	if (c->empty()) {
 		return 0;
