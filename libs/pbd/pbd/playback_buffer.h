@@ -172,10 +172,11 @@ public:
 
 	guint read_ptr() const { return read_idx; }
 	guint reserved_size() const { return reserved; }
+	guint reservation_size() const { return reservation; }
 
 private:
 	T *buf;
-	guint reservation;
+	const guint reservation;
 	guint size;
 	guint size_mask;
 
