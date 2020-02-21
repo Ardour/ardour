@@ -203,16 +203,26 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 	switch (ev.type) {
 
 	case SetSpeed:
-		switch (_motion_state) {
-		case Stopped:
-		case Rolling:
-			set_speed (ev);
-			break;
-		default:
+		switch (_direction_state) {
+		case Reversing:
 			if (!already_deferred) {
 				defer (ev);
 				deferred = true;
 			}
+			break;
+		default:
+			switch (_motion_state) {
+			case Stopped:
+			case Rolling:
+				set_speed (ev);
+			break;
+			default:
+				if (!already_deferred) {
+					defer (ev);
+					deferred = true;
+				}
+			}
+			break;
 		}
 		break;
 
@@ -315,16 +325,15 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 		switch (_motion_state) {
 		case WaitingForLocate:
 
-			if (_reversing) {
-
-				_reversing = false;
-				transition (Rolling);
+			if (reversing()) {
 
 				if (most_recently_requested_speed > 0) {
 					transition (Forwards);
 				} else {
 					transition (Forwards);
 				}
+
+				transition (Rolling);
 
 				api->set_transport_speed (last_speed_request.speed, last_speed_request.abort_capture, last_speed_request.clear_state, last_speed_request.as_default);
 
@@ -617,7 +626,7 @@ TransportFSM::set_speed (Event const & ev)
 
 		most_recently_requested_speed = ev.speed;
 		last_speed_request = ev;
-		_reversing = true;
+		transition (Reversing);
 
 		DEBUG_TRACE (DEBUG::TFSMState, string_compose ("reverse, target speed %1 MRRS %2 state %3\n", ev.speed, most_recently_requested_speed, current_state()));
 
@@ -638,7 +647,7 @@ TransportFSM::set_speed (Event const & ev)
 bool
 TransportFSM::will_roll_fowards () const
 {
-	if (_reversing) {
+	if (reversing()) {
 		return most_recently_requested_speed >= 0; /* note: future speed of zero is equivalent to Forwards */
 	}
 	return (_direction_state == Forwards);

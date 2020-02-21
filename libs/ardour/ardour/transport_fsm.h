@@ -184,6 +184,7 @@ struct TransportFSM
 	bool declicking_for_locate() const { return _motion_state == DeclickToLocate; }
 	bool forwards() const             { return _direction_state == Forwards; }
 	bool backwards() const             { return _direction_state == Backwards; }
+	bool reversing() const             { return _direction_state == Reversing; }
 	bool will_roll_fowards() const;
 
 	void enqueue (Event* ev);
@@ -207,7 +208,6 @@ struct TransportFSM
 	int processing;
 	mutable boost::optional<bool> current_roll_after_locate_status;
 	double most_recently_requested_speed;
-	bool _reversing;
 
 	void defer (Event& ev);
 	void bad_transition (Event const &);
