@@ -822,11 +822,7 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 		 * buffer for backwards-internal-seek
 		 */
 
-		sample += shift;
-
-		playback_sample = sample;
-		file_sample[DataType::AUDIO] = sample;
-		file_sample[DataType::MIDI] = sample;
+		playback_sample += shift;
 
 		/* we always move the read-ptr forwards, since even when in
 		 * reverse, the data is placed in the buffer in normal read
