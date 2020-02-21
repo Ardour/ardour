@@ -228,7 +228,7 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	/* it is important here that we use the internal state of the transport
 	   FSM, not the public facing result of ::transport_rolling()
 	*/
-	bool transport_was_stopped = _transport_fsm->stopped();
+	bool transport_was_stopped = !_transport_fsm->rolling();
 
 	if (!transport_was_stopped &&
 	    (!auto_play_legal || !config.get_auto_play()) &&
