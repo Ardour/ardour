@@ -774,6 +774,7 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 
 	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
 		(*chan)->rbuf->reset ();
+		assert ((*chan)->rbuf->reserved_size() == 0);
 	}
 
 	/* move the intended read target, so that after the refill is done,
@@ -783,7 +784,18 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 	   samples.
 	*/
 
-	const samplecnt_t shift = sample > c->front()->rbuf->reservation_size() ? c->front()->rbuf->reservation_size() : sample;
+	samplecnt_t shift = sample > c->front()->rbuf->reservation_size() ? c->front()->rbuf->reservation_size() : sample;
+
+	// shift = 0;
+
+	if (read_reversed) {
+		/* reading in reverse, so start at a later sample, and read
+		   "backwards" from there.
+		*/
+		shift = -shift;
+	}
+
+	/* start the read at an earlier position (or later if reversed) */
 
 	sample -= shift;
 
@@ -795,22 +807,37 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 		/* call _do_refill() to refill the entire buffer, using
 		   the largest reads possible.
 		*/
-		while ((ret = do_refill_with_alloc (false)) > 0) ;
+		while ((ret = do_refill_with_alloc (false, read_reversed)) > 0) ;
 	} else {
 		/* call _do_refill() to refill just one chunk, and then
 		   return.
 		*/
-		ret = do_refill_with_alloc (true);
+		ret = do_refill_with_alloc (true, read_reversed);
 	}
 
-	sample += shift;
+	if (shift) {
 
-	playback_sample = sample;
-	file_sample[DataType::AUDIO] = sample;
-	file_sample[DataType::MIDI] = sample;
+		/* now tell everyone where we really are, leaving the
+		 * "reserved" data represented by "shift" available in the
+		 * buffer for backwards-internal-seek
+		 */
 
-	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
-		(*chan)->rbuf->increment_read_ptr (shift);
+		sample += shift;
+
+		playback_sample = sample;
+		file_sample[DataType::AUDIO] = sample;
+		file_sample[DataType::MIDI] = sample;
+
+		/* we always move the read-ptr forwards, since even when in
+		 * reverse, the data is placed in the buffer in normal read
+		 * (increment) order.
+		 */
+
+		shift = abs (shift);
+
+		for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
+			(*chan)->rbuf->increment_read_ptr (shift);
+		}
 	}
 
 	return ret;
@@ -1001,7 +1028,14 @@ DiskReader::audio_read (Sample* sum_buffer,
 }
 
 int
-DiskReader::_do_refill_with_alloc (bool partial_fill)
+DiskReader::do_refill ()
+{
+	const bool reversed = !_session.transport_will_roll_forwards ();
+	return refill (_sum_buffer, _mixdown_buffer, _gain_buffer, 0, reversed);
+}
+
+int
+DiskReader::do_refill_with_alloc (bool partial_fill, bool reversed)
 {
 	/* We limit disk reads to at most 4MB chunks, which with floating point
 	   samples would be 1M samples. But we might use 16 or 14 bit samples,
@@ -1013,21 +1047,21 @@ DiskReader::_do_refill_with_alloc (bool partial_fill)
 	boost::scoped_array<Sample> mix_buf (new Sample[2*1048576]);
 	boost::scoped_array<float>  gain_buf (new float[2*1048576]);
 
-	return refill_audio (sum_buf.get(), mix_buf.get(), gain_buf.get(), (partial_fill ? _chunk_samples : 0));
+	return refill_audio (sum_buf.get(), mix_buf.get(), gain_buf.get(), (partial_fill ? _chunk_samples : 0), reversed);
 }
 
 int
-DiskReader::refill (Sample* sum_buffer, Sample* mixdown_buffer, float* gain_buffer, samplecnt_t fill_level)
+DiskReader::refill (Sample* sum_buffer, Sample* mixdown_buffer, float* gain_buffer, samplecnt_t fill_level, bool reversed)
 {
 	/* NOTE: Audio refill MUST come first so that in contexts where ONLY it
 	   is called, _last_read_reversed is set correctly.
 	*/
 
-	if (refill_audio (sum_buffer, mixdown_buffer, gain_buffer, fill_level)) {
+	if (refill_audio (sum_buffer, mixdown_buffer, gain_buffer, fill_level, reversed)) {
 		return -1;
 	}
 
-	if (rt_midibuffer() && (_session.transport_speed() < 0.0f) != rt_midibuffer()->reversed()) {
+	if (rt_midibuffer() && (reversed != rt_midibuffer()->reversed())) {
 		rt_midibuffer()->reverse ();
 	}
 
@@ -1045,7 +1079,7 @@ DiskReader::refill (Sample* sum_buffer, Sample* mixdown_buffer, float* gain_buff
  */
 
 int
-DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gain_buffer, samplecnt_t fill_level)
+DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gain_buffer, samplecnt_t fill_level, bool reversed)
 {
 	/* do not read from disk while session is marked as Loading, to avoid
 	   useless redundant I/O.
@@ -1056,13 +1090,12 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 	}
 
 	int32_t ret = 0;
-	bool const reversed = !_session.transport_will_roll_forwards ();
 	samplecnt_t zero_fill;
 	uint32_t chan_n;
 	ChannelList::iterator i;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
-	_last_read_reversed = !_session.transport_will_roll_forwards ();
+	_last_read_reversed = reversed;
 
 	if (c->empty()) {
 		return 0;

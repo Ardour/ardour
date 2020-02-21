@@ -481,7 +481,7 @@ Session::process_with_events (pframes_t nframes)
 	assert (_transport_speed == 0 || _transport_speed == 1.0 || _transport_speed == -1.0);
 
 	samples_moved = (samplecnt_t) nframes * _transport_speed;
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("plan to move transport by %1 (%2 @ %3)\n", samples_moved, nframes, _transport_speed));
+	// DEBUG_TRACE (DEBUG::Transport, string_compose ("plan to move transport by %1 (%2 @ %3)\n", samples_moved, nframes, _transport_speed));
 
 	end_sample = _transport_sample + samples_moved;
 
@@ -642,12 +642,12 @@ Session::process_without_events (pframes_t nframes)
 	assert (_transport_speed == 0 || _transport_speed == 1.0 || _transport_speed == -1.0);
 
 	if (_transport_speed == 0) {
-		DEBUG_TRACE (DEBUG::Transport, string_compose ("transport not moving @ %1\n", _transport_sample));
+		// DEBUG_TRACE (DEBUG::Transport, string_compose ("transport not moving @ %1\n", _transport_sample));
 		no_roll (nframes);
 		return;
 	} else {
 		samples_moved = (samplecnt_t) nframes * _transport_speed;
-		DEBUG_TRACE (DEBUG::Transport, string_compose ("plan to move transport by %1 (%2 @ %3)\n", samples_moved, nframes, _transport_speed));
+		// DEBUG_TRACE (DEBUG::Transport, string_compose ("plan to move transport by %1 (%2 @ %3)\n", samples_moved, nframes, _transport_speed));
 	}
 
 	if (!_exporting && !timecode_transmission_suspended()) {

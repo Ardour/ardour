@@ -29,7 +29,7 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-const uint32_t SrcFileSource::max_blocksize = 2097152U; /* see AudioDiskstream::_do_refill_with_alloc, max */
+const uint32_t SrcFileSource::max_blocksize = 2097152U; /* see AudioDiskstream::do_refill_with_alloc, max */
 
 SrcFileSource::SrcFileSource (Session& s, boost::shared_ptr<AudioFileSource> src, SrcQuality srcq)
 	: Source(s, DataType::AUDIO, src->name(), Flag (src->flags() & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
