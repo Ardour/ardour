@@ -15,7 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#define DEBUG
+
 #ifdef DEBUG
 #include <iostream>
 #endif
@@ -278,7 +278,7 @@ WebsocketsServer::write_client (Client wsi)
 }
 
 bool
-WebsocketsServer::io_handler (IOCondition ioc, lws_sockfd_type fd)
+WebsocketsServer::io_handler (Glib::IOCondition ioc, lws_sockfd_type fd)
 {
     // IO_IN=1, IO_PRI=2, IO_ERR=8, IO_HUP=16
     //printf ("io_handler ioc = %d\n", ioc);
@@ -295,28 +295,24 @@ WebsocketsServer::io_handler (IOCondition ioc, lws_sockfd_type fd)
         return false;
     }
 
-    return ioc & (IO_IN | IO_OUT);
+    return ioc & (Glib::IO_IN | Glib::IO_OUT);
 }
 
 IOCondition
 WebsocketsServer::events_to_ioc (int events)
 {
-    IOCondition ioc;
+    IOCondition ioc = Glib::IO_ERR;
 
     if (events & POLLIN) {
-        ioc |= IO_IN;
+        ioc |= Glib::IO_IN;
     }
 
     if (events & POLLOUT) {
-        ioc |= IO_OUT;
+        ioc |= Glib::IO_OUT;
     }
 
     if (events & POLLHUP) {
-        ioc |= IO_HUP;
-    }
-
-    if (events & POLLERR) {
-        ioc |= IO_ERR;
+        ioc |= Glib::IO_HUP;
     }
 
     return ioc;
@@ -327,19 +323,19 @@ WebsocketsServer::ioc_to_events (IOCondition ioc)
 {
     int events = 0;
 
-    if (ioc & IO_IN) {
+    if (ioc & Glib::IO_IN) {
         events |= POLLIN;
     }
 
-    if (ioc & IO_OUT) {
+    if (ioc & Glib::IO_OUT) {
         events |= POLLOUT;
     }
 
-    if (ioc & IO_HUP) {
+    if (ioc & Glib::IO_HUP) {
         events |= POLLHUP;
     }
 
-    if (ioc & IO_ERR) {
+    if (ioc & Glib::IO_ERR) {
         events |= POLLERR;
     }
 
