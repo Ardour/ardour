@@ -26,8 +26,7 @@ NodeState::NodeState () { }
 NodeState::NodeState (std::string node)
     : _node (node) { }
 
-NodeState::NodeState (std::string node, std::vector<uint32_t> addr,
-        std::vector<TypedValue> val)
+NodeState::NodeState (std::string node, AddressVector addr, ValueVector val)
     : _node (node)
     , _addr (addr)
     , _val (val) { }
@@ -41,12 +40,12 @@ NodeState::debug_str () const
     if (!_addr.empty ()) {
         s << std::endl << " addr = ";
 
-        for (std::vector<uint32_t>::const_iterator it = _addr.begin (); it != _addr.end (); ++it) {
+        for (AddressVector::const_iterator it = _addr.begin (); it != _addr.end (); ++it) {
             s << *it << ";";
         }
     }
 
-    for (std::vector<TypedValue>::const_iterator it = _val.begin (); it != _val.end (); ++it) {
+    for (ValueVector::const_iterator it = _val.begin (); it != _val.end (); ++it) {
         s << std::endl << " val " << it->debug_str ();
     }
     

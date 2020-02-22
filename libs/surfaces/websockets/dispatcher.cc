@@ -187,8 +187,7 @@ WebsocketsDispatcher::strip_plugin_param_value_handler (Client client, const Nod
 }
 
 void
-WebsocketsDispatcher::update (Client client, std::string node, std::vector<uint32_t> addr,
-    std::vector<TypedValue> val)
+WebsocketsDispatcher::update (Client client, std::string node, AddressVector addr, ValueVector val)
 {
     server ().update_client (client, { node, addr, val }, true);
 }
