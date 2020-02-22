@@ -35,6 +35,11 @@ class ArdourFeedback : public SurfaceComponent
     int start ();
     int stop ();
 
+    void update_all (std::string, TypedValue) const;
+    void update_all (std::string, uint32_t, TypedValue) const;
+    void update_all (std::string, uint32_t, uint32_t, TypedValue) const;
+    void update_all (std::string, uint32_t, uint32_t, uint32_t, TypedValue) const;
+    
   private:
 
     Glib::Threads::Mutex _client_state_lock;
@@ -48,11 +53,6 @@ class ArdourFeedback : public SurfaceComponent
     void observe_strip_plugins (uint32_t, boost::shared_ptr<ARDOUR::Stripable>);
     void observe_strip_plugin_param_values (uint32_t, uint32_t,
         boost::shared_ptr<ARDOUR::PluginInsert>);
-
-    void update_all (std::string, TypedValue) const;
-    void update_all (std::string, uint32_t, TypedValue) const;
-    void update_all (std::string, uint32_t, uint32_t, TypedValue) const;
-    void update_all (std::string, uint32_t, uint32_t, uint32_t, TypedValue) const;
 
 };
 

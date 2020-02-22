@@ -31,7 +31,45 @@ using namespace ARDOUR;
 
 #define ADDR_NONE   UINT_MAX
 
-typedef boost::function<void ()> SignalObserver;
+struct TempoObserver {
+    void operator() (ArdourFeedback* p) {
+        p->update_all (Node::tempo, p->globals ().tempo ());
+    }
+};
+
+struct StripGainObserver {
+    void operator() (ArdourFeedback* p, uint32_t strip_n) {
+        // fires multiple times (4x as of ardour 6.0)
+        p->update_all (Node::strip_gain, strip_n, p->strips ().strip_gain (strip_n));
+    }
+};
+
+struct StripPanObserver {
+    void operator() (ArdourFeedback* p, uint32_t strip_n) {
+        p->update_all (Node::strip_pan, strip_n, p->strips ().strip_pan (strip_n));
+    }
+};
+
+struct StripMuteObserver {
+    void operator() (ArdourFeedback* p, uint32_t strip_n) {
+        p->update_all (Node::strip_mute, strip_n, p->strips ().strip_mute (strip_n));
+    }
+};
+
+struct PluginBypassObserver {
+    void operator() (ArdourFeedback* p, uint32_t strip_n, uint32_t plugin_n) {
+        p->update_all (Node::strip_plugin_enable, strip_n, plugin_n,
+            p->strips ().strip_plugin_enabled (strip_n, plugin_n));
+    }
+};
+
+struct PluginParamValueObserver {
+    void operator() (ArdourFeedback* p, uint32_t strip_n, uint32_t plugin_n,
+                        uint32_t param_n, boost::shared_ptr<AutomationControl> control) {
+        p->update_all (Node::strip_plugin_param_value, strip_n, plugin_n, param_n,
+            ArdourStrips::plugin_param_value (control));
+    }
+};
 
 int
 ArdourFeedback::start ()
@@ -54,129 +92,6 @@ ArdourFeedback::stop ()
     _periodic_connection.disconnect ();
     _signal_connections.drop_connections ();
     return 0;
-}
-
-bool
-ArdourFeedback::poll () const
-{
-    for (uint32_t strip_n = 0; strip_n < strips ().strip_count (); ++strip_n) {
-        // meters
-        boost::shared_ptr<Stripable> strip = strips ().nth_strip (strip_n);
-        boost::shared_ptr<PeakMeter> meter = strip->peak_meter ();
-        float db = meter ? meter->meter_level (0, MeterMCP) : -193;
-        update_all (Node::strip_meter, strip_n, static_cast<double>(db));
-    }
-
-    return true;
-}
-
-void
-ArdourFeedback::observe_globals ()
-{
-    // tempo
-    struct TempoObserver {
-        void operator() (ArdourFeedback* p) {
-            p->update_all (Node::tempo, p->globals ().tempo ());
-        }
-    };
-
-    session ().tempo_map ().PropertyChanged.connect (_signal_connections, MISSING_INVALIDATOR,
-        boost::bind<void> (TempoObserver (), this), event_loop ());
-}
-
-void
-ArdourFeedback::observe_strips ()
-{
-    for (uint32_t strip_n = 0; strip_n < strips ().strip_count (); ++strip_n) {
-        boost::shared_ptr<Stripable> strip = strips ().nth_strip (strip_n);
-
-        struct StripGainObserver {
-            void operator() (ArdourFeedback* p, uint32_t strip_n) {
-                // fires multiple times (4x as of ardour 6.0)
-                p->update_all (Node::strip_gain, strip_n, p->strips ().strip_gain (strip_n));
-            }
-        };
-        strip->gain_control ()->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
-            boost::bind<void> (StripGainObserver (), this, strip_n), event_loop ());
-
-        struct StripPanObserver {
-            void operator() (ArdourFeedback* p, uint32_t strip_n) {
-                p->update_all (Node::strip_pan, strip_n, p->strips ().strip_pan (strip_n));
-            }
-        };
-        strip->pan_azimuth_control ()->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
-            boost::bind<void> (StripPanObserver (), this, strip_n), event_loop ());
-
-        struct StripMuteObserver {
-            void operator() (ArdourFeedback* p, uint32_t strip_n) {
-                p->update_all (Node::strip_mute, strip_n, p->strips ().strip_mute (strip_n));
-            }
-        };
-        strip->mute_control ()->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
-            boost::bind<void> (StripMuteObserver (), this, strip_n), event_loop ());
-
-        observe_strip_plugins (strip_n, strip);
-    }
-}
-
-void
-ArdourFeedback::observe_strip_plugins (uint32_t strip_n, boost::shared_ptr<ARDOUR::Stripable> strip)
-{
-    for (uint32_t plugin_n = 0 ; ; ++plugin_n) {
-        boost::shared_ptr<PluginInsert> insert = strips ().strip_plugin_insert (strip_n, plugin_n);
-        if (!insert) {
-            break;
-        }
-
-        uint32_t bypass = insert->plugin ()->designated_bypass_port ();
-        Evoral::Parameter param = Evoral::Parameter (PluginAutomation, 0, bypass);
-        boost::shared_ptr<AutomationControl> control = insert->automation_control (param);
-
-        if (control) {
-            struct PluginBypassObserver {
-                void operator() (ArdourFeedback* p, uint32_t strip_n, uint32_t plugin_n) {
-                    p->update_all (Node::strip_plugin_enable, strip_n, plugin_n,
-                        p->strips ().strip_plugin_enabled (strip_n, plugin_n));
-                }
-            };
-
-            control->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
-                boost::bind<void> (PluginBypassObserver (), this, strip_n, plugin_n), event_loop ());
-        }
-
-        observe_strip_plugin_param_values (strip_n, plugin_n, insert);
-    }
-}
-
-void
-ArdourFeedback::observe_strip_plugin_param_values (uint32_t strip_n,
-    uint32_t plugin_n, boost::shared_ptr<ARDOUR::PluginInsert> insert)
-{
-    boost::shared_ptr<Plugin> plugin = insert->plugin ();
-
-    for (uint32_t param_n = 0; param_n < plugin->parameter_count (); ++param_n) {
-        boost::shared_ptr<AutomationControl> control = strips ().strip_plugin_param_control (
-            strip_n, plugin_n, param_n);
-
-        if (!control) {
-            continue;
-        }
-
-        struct PluginParamValueObserver {
-            void operator() (ArdourFeedback* p, uint32_t strip_n, uint32_t plugin_n,
-                                uint32_t param_n, boost::shared_ptr<AutomationControl> control) {
-                p->update_all (
-                    Node::strip_plugin_param_value,
-                    strip_n, plugin_n, param_n,
-                    ArdourStrips::plugin_param_value (control)
-                );
-            }
-        };
-
-        control->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
-            boost::bind<void> (PluginParamValueObserver (), this, strip_n, plugin_n, param_n,
-                control), event_loop ());
-    }
 }
 
 void
@@ -220,4 +135,86 @@ ArdourFeedback::update_all (std::string node, uint32_t strip_n, uint32_t plugin_
     val.push_back (value);
 
     server ().update_all_clients (NodeState (node, addr, val), false);
+}
+
+bool
+ArdourFeedback::poll () const
+{
+    for (uint32_t strip_n = 0; strip_n < strips ().strip_count (); ++strip_n) {
+        // meters
+        boost::shared_ptr<Stripable> strip = strips ().nth_strip (strip_n);
+        boost::shared_ptr<PeakMeter> meter = strip->peak_meter ();
+        float db = meter ? meter->meter_level (0, MeterMCP) : -193;
+        update_all (Node::strip_meter, strip_n, static_cast<double>(db));
+    }
+
+    return true;
+}
+
+void
+ArdourFeedback::observe_globals ()
+{
+    session ().tempo_map ().PropertyChanged.connect (_signal_connections, MISSING_INVALIDATOR,
+        boost::bind<void> (TempoObserver (), this), event_loop ());
+}
+
+void
+ArdourFeedback::observe_strips ()
+{
+    for (uint32_t strip_n = 0; strip_n < strips ().strip_count (); ++strip_n) {
+        boost::shared_ptr<Stripable> strip = strips ().nth_strip (strip_n);
+
+        strip->gain_control ()->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
+            boost::bind<void> (StripGainObserver (), this, strip_n), event_loop ());
+
+        strip->pan_azimuth_control ()->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
+            boost::bind<void> (StripPanObserver (), this, strip_n), event_loop ());
+
+        strip->mute_control ()->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
+            boost::bind<void> (StripMuteObserver (), this, strip_n), event_loop ());
+
+        observe_strip_plugins (strip_n, strip);
+    }
+}
+
+void
+ArdourFeedback::observe_strip_plugins (uint32_t strip_n, boost::shared_ptr<ARDOUR::Stripable> strip)
+{
+    for (uint32_t plugin_n = 0 ; ; ++plugin_n) {
+        boost::shared_ptr<PluginInsert> insert = strips ().strip_plugin_insert (strip_n, plugin_n);
+        if (!insert) {
+            break;
+        }
+
+        uint32_t bypass = insert->plugin ()->designated_bypass_port ();
+        Evoral::Parameter param = Evoral::Parameter (PluginAutomation, 0, bypass);
+        boost::shared_ptr<AutomationControl> control = insert->automation_control (param);
+
+        if (control) {
+            control->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
+                boost::bind<void> (PluginBypassObserver (), this, strip_n, plugin_n), event_loop ());
+        }
+
+        observe_strip_plugin_param_values (strip_n, plugin_n, insert);
+    }
+}
+
+void
+ArdourFeedback::observe_strip_plugin_param_values (uint32_t strip_n,
+    uint32_t plugin_n, boost::shared_ptr<ARDOUR::PluginInsert> insert)
+{
+    boost::shared_ptr<Plugin> plugin = insert->plugin ();
+
+    for (uint32_t param_n = 0; param_n < plugin->parameter_count (); ++param_n) {
+        boost::shared_ptr<AutomationControl> control = strips ().strip_plugin_param_control (
+            strip_n, plugin_n, param_n);
+
+        if (!control) {
+            continue;
+        }
+
+        control->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
+            boost::bind<void> (PluginParamValueObserver (), this, strip_n, plugin_n, param_n,
+                control), event_loop ());
+    }
 }
