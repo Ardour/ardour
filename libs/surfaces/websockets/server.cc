@@ -163,7 +163,7 @@ WebsocketsServer::mod_poll_fd (struct lws_pollargs *pa)
 
     it->second.lws_pfd.events = pa->events;
 
-    if (pa->events & POLLOUT) {
+    if (pa->events & LWS_POLLOUT) {
         // libwebsockets wants to write but cannot find a way to update
         // an existing glib::iosource event flags using glibmm,
         // create another iosource and set to IO_OUT, it will be destroyed
@@ -301,18 +301,14 @@ WebsocketsServer::io_handler (Glib::IOCondition ioc, lws_sockfd_type fd)
 IOCondition
 WebsocketsServer::events_to_ioc (int events)
 {
-    IOCondition ioc = Glib::IO_ERR;
+    IOCondition ioc;
 
-    if (events & POLLIN) {
-        ioc |= Glib::IO_IN;
-    }
-
-    if (events & POLLOUT) {
-        ioc |= Glib::IO_OUT;
-    }
-
-    if (events & POLLHUP) {
-        ioc |= Glib::IO_HUP;
+    if (events & LWS_POLLIN) {
+        ioc = Glib::IO_IN;
+    } else if (events & LWS_POLLOUT) {
+        ioc = Glib::IO_OUT;
+    } else if (events & LWS_POLLHUP) {
+        ioc = Glib::IO_HUP;
     }
 
     return ioc;
@@ -324,19 +320,15 @@ WebsocketsServer::ioc_to_events (IOCondition ioc)
     int events = 0;
 
     if (ioc & Glib::IO_IN) {
-        events |= POLLIN;
+        events |= LWS_POLLIN;
     }
 
     if (ioc & Glib::IO_OUT) {
-        events |= POLLOUT;
+        events |= LWS_POLLOUT;
     }
 
-    if (ioc & Glib::IO_HUP) {
-        events |= POLLHUP;
-    }
-
-    if (ioc & Glib::IO_ERR) {
-        events |= POLLERR;
+    if (ioc & (Glib::IO_HUP | Glib::IO_ERR)) {
+        events |= LWS_POLLHUP;
     }
 
     return events;
