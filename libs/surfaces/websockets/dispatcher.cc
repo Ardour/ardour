@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <boost/assign.hpp>
+
 #include "ardour/plugin_insert.h"
 
 #include "dispatcher.h"
@@ -24,17 +26,17 @@
 
 using namespace ARDOUR;
 
-#define NODE_METHOD_PAIR(x) { Node::x, &WebsocketsDispatcher::x ## _handler }
+#define NODE_METHOD_PAIR(x) (Node::x, &WebsocketsDispatcher::x ## _handler)
 
 WebsocketsDispatcher::NodeMethodMap
-WebsocketsDispatcher::_node_to_method = {
-    NODE_METHOD_PAIR(tempo),
-    NODE_METHOD_PAIR(strip_gain),
-    NODE_METHOD_PAIR(strip_pan),
-    NODE_METHOD_PAIR(strip_mute),
-    NODE_METHOD_PAIR(strip_plugin_enable),
+WebsocketsDispatcher::_node_to_method = boost::assign::map_list_of
+    NODE_METHOD_PAIR(tempo)
+    NODE_METHOD_PAIR(strip_gain)
+    NODE_METHOD_PAIR(strip_pan)
+    NODE_METHOD_PAIR(strip_mute)
+    NODE_METHOD_PAIR(strip_plugin_enable)
     NODE_METHOD_PAIR(strip_plugin_param_value)
-};
+    ;
 
 void
 WebsocketsDispatcher::dispatch (Client client, const NodeStateMessage& msg)
@@ -52,7 +54,7 @@ WebsocketsDispatcher::dispatch (Client client, const NodeStateMessage& msg)
 void
 WebsocketsDispatcher::update_all_nodes (Client client)
 {
-    update (client, Node::tempo, {}, { globals ().tempo () });
+    update (client, Node::tempo, globals ().tempo ());
 
     for (uint32_t strip_n = 0; strip_n < strips ().strip_count (); ++strip_n) {
         boost::shared_ptr<Stripable> strip = strips ().nth_strip (strip_n);
@@ -61,10 +63,10 @@ WebsocketsDispatcher::update_all_nodes (Client client)
             continue;
         }
 
-        update (client, Node::strip_desc, { strip_n }, { strip->name () });
-        update (client, Node::strip_gain, { strip_n }, { strips ().strip_gain (strip_n) });
-        update (client, Node::strip_pan, { strip_n }, { strips ().strip_pan (strip_n) });
-        update (client, Node::strip_mute, { strip_n }, { strips ().strip_mute (strip_n) });
+        update (client, Node::strip_desc, strip_n, strip->name ());
+        update (client, Node::strip_gain, strip_n, strips ().strip_gain (strip_n));
+        update (client, Node::strip_pan, strip_n, strips ().strip_pan (strip_n));
+        update (client, Node::strip_mute, strip_n, strips ().strip_mute (strip_n));
 
         for (uint32_t plugin_n = 0 ; ; ++plugin_n) {
             boost::shared_ptr<PluginInsert> insert = strips ()
@@ -74,11 +76,11 @@ WebsocketsDispatcher::update_all_nodes (Client client)
             }
 
             boost::shared_ptr<Plugin> plugin = insert->plugin ();
-            update (client, Node::strip_plugin_desc, { strip_n, plugin_n },
-                { static_cast<std::string>(plugin->name ()) });
+            update (client, Node::strip_plugin_desc, strip_n, plugin_n,
+                static_cast<std::string>(plugin->name ()));
 
-            update (client, Node::strip_plugin_enable, { strip_n, plugin_n },
-                { strips ().strip_plugin_enabled (strip_n, plugin_n) });
+            update (client, Node::strip_plugin_enable, strip_n, plugin_n,
+                strips ().strip_plugin_enabled (strip_n, plugin_n));
 
             for (uint32_t param_n = 0; param_n < plugin->parameter_count (); ++param_n) {
                 boost::shared_ptr<AutomationControl> a_ctrl =
@@ -87,23 +89,35 @@ WebsocketsDispatcher::update_all_nodes (Client client)
                     continue;
                 }
 
+                AddressVector addr = AddressVector ();
+                addr.push_back (strip_n);
+                addr.push_back (plugin_n);
+                addr.push_back (param_n);
+
+                ValueVector val = ValueVector ();
+                val.push_back (a_ctrl->name ());
+
                 // possible flags: enumeration, integer_step, logarithmic, sr_dependent, toggled
                 ParameterDescriptor pd = a_ctrl->desc ();
 
                 if (pd.toggled) {
-                    update (client, Node::strip_plugin_param_desc, { strip_n, plugin_n, param_n },
-                        { a_ctrl->name (), std::string("b") });
+                    val.push_back (std::string("b"));
                 } else if (pd.enumeration || pd.integer_step) {
-                    update (client, Node::strip_plugin_param_desc, { strip_n, plugin_n, param_n },
-                        { a_ctrl->name (), std::string("i"), pd.lower, pd.upper, pd.integer_step });
+                    val.push_back (std::string("i"));
+                    val.push_back (pd.lower);
+                    val.push_back (pd.upper);
+                    val.push_back (pd.integer_step);
                 } else {
-                    update (client, Node::strip_plugin_param_desc, { strip_n, plugin_n, param_n },
-                    { a_ctrl->name (), std::string("d"), pd.lower, pd.upper, pd.logarithmic });
+                    val.push_back (std::string("d"));
+                    val.push_back (pd.lower);
+                    val.push_back (pd.upper);
+                    val.push_back (pd.logarithmic);
                 }
 
+                update (client, Node::strip_plugin_param_desc, addr, val);
+
                 TypedValue value = strips ().strip_plugin_param_value (strip_n, plugin_n, param_n);
-                update (client, Node::strip_plugin_param_value, { strip_n, plugin_n, param_n },
-                    { value });
+                update (client, Node::strip_plugin_param_value, strip_n, plugin_n, param_n, value);
             }
         }
     }
@@ -115,7 +129,7 @@ WebsocketsDispatcher::tempo_handler (Client client, const NodeStateMessage& msg)
     if (msg.is_write ()) {
         globals ().set_tempo (msg.state ().nth_val (0));
     } else {
-        update (client, Node::tempo, {}, { globals ().tempo () });
+        update (client, Node::tempo, globals ().tempo ());
     }
 }
 
@@ -127,7 +141,7 @@ WebsocketsDispatcher::strip_gain_handler (Client client, const NodeStateMessage&
     if (msg.is_write ()) {
         strips ().set_strip_gain (strip_id, msg.state ().nth_val (0));
     } else {
-        update (client, Node::strip_gain, { strip_id }, { strips ().strip_gain (strip_id) });
+        update (client, Node::strip_gain, strip_id, strips ().strip_gain (strip_id));
     }
 }
 
@@ -139,7 +153,7 @@ WebsocketsDispatcher::strip_pan_handler (Client client, const NodeStateMessage& 
     if (msg.is_write ()) {
         strips ().set_strip_pan (strip_id, msg.state ().nth_val (0));
     } else {
-        update (client, Node::strip_pan, { strip_id }, { strips ().strip_pan(strip_id) });
+        update (client, Node::strip_pan, strip_id, strips ().strip_pan(strip_id));
     }
 }
 
@@ -151,7 +165,7 @@ WebsocketsDispatcher::strip_mute_handler (Client client, const NodeStateMessage&
     if (msg.is_write ()) {
         strips ().set_strip_mute (strip_id, msg.state ().nth_val (0));
     } else {
-        update (client, Node::strip_mute, { strip_id }, { strips ().strip_mute (strip_id) });
+        update (client, Node::strip_mute, strip_id, strips ().strip_mute (strip_id));
     }
 }
 
@@ -164,8 +178,8 @@ WebsocketsDispatcher::strip_plugin_enable_handler (Client client, const NodeStat
     if (msg.is_write ()) {
         strips ().set_strip_plugin_enabled (strip_id, plugin_id, msg.state ().nth_val (0));
     } else {
-        update (client, Node::strip_plugin_enable, { strip_id, plugin_id },
-            { strips ().strip_plugin_enabled (strip_id, plugin_id) });
+        update (client, Node::strip_plugin_enable, strip_id, plugin_id,
+            strips ().strip_plugin_enabled (strip_id, plugin_id));
     }
 }
 
@@ -181,13 +195,59 @@ WebsocketsDispatcher::strip_plugin_param_value_handler (Client client, const Nod
             msg.state ().nth_val (0));
     } else {
         TypedValue value = strips ().strip_plugin_param_value (strip_id, plugin_id, param_id);
-        update (client, Node::strip_plugin_param_value, { strip_id, plugin_id, param_id },
-            { value });
+        update (client, Node::strip_plugin_param_value, strip_id, plugin_id, param_id, value);
     }
 }
 
 void
-WebsocketsDispatcher::update (Client client, std::string node, AddressVector addr, ValueVector val)
+WebsocketsDispatcher::update (Client client, std::string node, TypedValue val1)
 {
-    server ().update_client (client, { node, addr, val }, true);
+    update (client, node, ADDR_NONE, ADDR_NONE, ADDR_NONE, val1);
+}
+
+void
+WebsocketsDispatcher::update (Client client, std::string node, uint32_t strip_n, TypedValue val1)
+{
+    update (client, node, strip_n, ADDR_NONE, ADDR_NONE, val1);
+}
+
+void
+WebsocketsDispatcher::update (Client client, std::string node, uint32_t strip_n, uint32_t plugin_n,
+    TypedValue val1)
+{
+    update (client, node, strip_n, plugin_n, ADDR_NONE, val1);
+}
+
+void
+WebsocketsDispatcher::update (Client client, std::string node, uint32_t strip_n, uint32_t plugin_n,
+    uint32_t param_n, TypedValue val1)
+{
+    AddressVector addr = AddressVector ();
+
+    if (strip_n != ADDR_NONE) {
+        addr.push_back (strip_n);
+    }
+
+    if (plugin_n != ADDR_NONE) {
+        addr.push_back (plugin_n);
+    }
+
+    if (param_n != ADDR_NONE) {
+        addr.push_back (param_n);
+    }
+
+    ValueVector val = ValueVector ();
+
+    if (!val1.empty ()) {
+        val.push_back (val1);
+    }
+
+    update (client, node, addr, val);
+}
+
+void
+WebsocketsDispatcher::update (Client client, std::string node, const AddressVector& addr,
+    const ValueVector& val)
+{
+    server ().update_client (client, NodeState (node, addr, val), true);
 }

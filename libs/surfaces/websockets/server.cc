@@ -30,20 +30,19 @@ WebsocketsServer::WebsocketsServer (ArdourSurface::ArdourWebsockets& surface)
     , _lws_context (0)
 {
     // keep references to all config for libwebsockets 2
-    _lws_proto[0] = {
-        "lws-ardour", // name
-        WebsocketsServer::lws_callback, // callback
-        0,  // per_session_data_size
-        0,  // rx_buffer_size
-        0,  // id
-        0,  // user
+    lws_protocols proto;
+    proto.name = "lws-ardour";
+    proto.callback = WebsocketsServer::lws_callback;
+    proto.per_session_data_size = 0;
+    proto.rx_buffer_size = 0;
+    proto.id = 0;
+    proto.user = 0;
 #if LWS_LIBRARY_VERSION_MAJOR >= 3
-        0   // tx_packet_size
+    proto.tx_packet_size = 0;
 #endif
-    };
-    _lws_proto[1] = {}; // sentinel
+    _lws_proto[0] = proto;
+    memset (&_lws_proto[1], 0, sizeof(lws_protocols));
 
-    _lws_info = {};
     _lws_info.port = WEBSOCKET_LISTEN_PORT;
     _lws_info.protocols = _lws_proto;
     _lws_info.uid  = -1;
@@ -110,7 +109,7 @@ WebsocketsServer::update_client (Client wsi, const NodeState& state, bool force)
     if (force || !it->second.has_state (state)) {
         // write to client only if state was updated
         it->second.update_state (state);
-        it->second.output_buf ().push_back (NodeStateMessage { state });
+        it->second.output_buf ().push_back (NodeStateMessage (state));
         lws_callback_on_writable (wsi);
     }
 }
@@ -134,7 +133,7 @@ WebsocketsServer::add_poll_fd (struct lws_pollargs *pa)
 #else
     RefPtr<IOChannel> g_channel = IOChannel::create_from_fd (fd);
 #endif
-    RefPtr<IOSource> rg_iosrc { IOSource::create (g_channel, events_to_ioc (pa->events)) };
+    RefPtr<IOSource> rg_iosrc (IOSource::create (g_channel, events_to_ioc (pa->events)));
     rg_iosrc->connect (sigc::bind (sigc::mem_fun (*this, &WebsocketsServer::io_handler), fd));
     rg_iosrc->attach (main_loop ()->get_context ());
 
@@ -142,7 +141,14 @@ WebsocketsServer::add_poll_fd (struct lws_pollargs *pa)
     lws_pfd.fd = pa->fd;
     lws_pfd.events = pa->events;
     lws_pfd.revents = 0;
-    _fd_ctx[fd] = LwsPollFdGlibSource { lws_pfd, g_channel, rg_iosrc, { } };
+
+    LwsPollFdGlibSource ctx;
+    ctx.lws_pfd = lws_pfd;
+    ctx.g_channel = g_channel;
+    ctx.rg_iosrc = rg_iosrc;
+    ctx.wg_iosrc = Glib::RefPtr<Glib::IOSource>(0);
+
+    _fd_ctx[fd] = ctx;
 }
 
 void
@@ -166,14 +172,14 @@ WebsocketsServer::mod_poll_fd (struct lws_pollargs *pa)
             return;
         }
 
-        RefPtr<IOSource> wg_iosrc = it->second.g_channel->create_watch (IOCondition::IO_OUT);
+        RefPtr<IOSource> wg_iosrc = it->second.g_channel->create_watch (Glib::IO_OUT);
         wg_iosrc->connect (sigc::bind (sigc::mem_fun (*this, &WebsocketsServer::io_handler), pa->fd));
         wg_iosrc->attach (main_loop ()->get_context ());
         it->second.wg_iosrc = wg_iosrc;
     } else {
         if (it->second.wg_iosrc) {
             it->second.wg_iosrc->destroy ();
-            it->second.wg_iosrc = { };
+            it->second.wg_iosrc = Glib::RefPtr<Glib::IOSource>(0);
         }
     }
 }
@@ -198,7 +204,7 @@ WebsocketsServer::del_poll_fd (struct lws_pollargs *pa)
 void
 WebsocketsServer::add_client (Client wsi)
 {
-    _client_ctx.emplace (wsi, ClientContext { wsi });
+    _client_ctx.emplace (wsi, ClientContext (wsi));
     dispatcher ().update_all_nodes (wsi);   // send all state
 }
 
@@ -214,7 +220,7 @@ WebsocketsServer::del_client (Client wsi)
 void
 WebsocketsServer::recv_client (Client wsi, void *buf, size_t len)
 {
-    NodeStateMessage msg { buf, len };
+    NodeStateMessage msg (buf, len);
     if (!msg.is_valid ()) {
         return;
     }
@@ -270,7 +276,7 @@ WebsocketsServer::write_client (Client wsi)
 }
 
 bool
-WebsocketsServer::io_handler (Glib::IOCondition ioc, lws_sockfd_type fd)
+WebsocketsServer::io_handler (IOCondition ioc, lws_sockfd_type fd)
 {
     // IO_IN=1, IO_PRI=2, IO_ERR=8, IO_HUP=16
     //printf ("io_handler ioc = %d\n", ioc);
@@ -293,7 +299,7 @@ WebsocketsServer::io_handler (Glib::IOCondition ioc, lws_sockfd_type fd)
 IOCondition
 WebsocketsServer::events_to_ioc (int events)
 {
-    IOCondition ioc = { };
+    IOCondition ioc;
 
     if (events & POLLIN) {
         ioc |= IO_IN;
