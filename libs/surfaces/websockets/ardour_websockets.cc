@@ -43,7 +43,11 @@ ArdourWebsockets::ArdourWebsockets (Session& s)
     , _server (*this)
     , _dispatcher (*this)
 {
-    _components = { &_strips, &_globals, &_server, &_feedback, &_dispatcher };
+    _components.push_back (&_strips);
+    _components.push_back (&_globals);
+    _components.push_back (&_server);
+    _components.push_back (&_feedback);
+    _components.push_back (&_dispatcher);
 }
 
 ArdourWebsockets::~ArdourWebsockets ()

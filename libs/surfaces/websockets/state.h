@@ -20,11 +20,14 @@
 #define node_state_h
 
 #include <stdint.h>
+#include <climits>
 #include <cmath>
 #include <cstring>
 #include <vector>
 
 #include "typed_value.h"
+
+#define ADDR_NONE   UINT_MAX
 
 namespace Node {
     const std::string tempo                     = "tempo";

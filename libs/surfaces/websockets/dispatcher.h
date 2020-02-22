@@ -50,7 +50,11 @@ class WebsocketsDispatcher : public SurfaceComponent
     void strip_plugin_enable_handler (Client, const NodeStateMessage&);
     void strip_plugin_param_value_handler (Client, const NodeStateMessage&);
 
-    void update (Client, std::string, AddressVector, ValueVector);
+    void update (Client, std::string, TypedValue);
+    void update (Client, std::string, uint32_t, TypedValue);
+    void update (Client, std::string, uint32_t, uint32_t, TypedValue);
+    void update (Client, std::string, uint32_t, uint32_t, uint32_t, TypedValue);
+    void update (Client, std::string, const AddressVector&, const ValueVector&);
 
 };
 

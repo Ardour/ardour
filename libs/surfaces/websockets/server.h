@@ -19,8 +19,9 @@
 #ifndef websockets_server_h
 #define websockets_server_h
 
-#include <boost/unordered_map.hpp>
+#include <glibmm.h>
 #include <libwebsockets.h>
+#include <boost/unordered_map.hpp>
 
 #if LWS_LIBRARY_VERSION_MAJOR < 3
 // <libwebsockets.h> includes <uv.h> which in turn includes

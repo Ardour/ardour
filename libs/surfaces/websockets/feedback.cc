@@ -29,8 +29,6 @@
 
 using namespace ARDOUR;
 
-#define ADDR_NONE   UINT_MAX
-
 struct TempoObserver {
     void operator() (ArdourFeedback* p) {
         p->update_all (Node::tempo, p->globals ().tempo ());
