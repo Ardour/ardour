@@ -23,6 +23,21 @@
 #include "server.h"
 #include "dispatcher.h"
 
+/* backport from libwebsockets 3.0,
+ * allow to compile on GNU/Linux with libwebsockets 2.x
+ */
+#ifndef PLATFORM_WINDOWS
+# ifndef LWS_POLLHUP
+#  define LWS_POLLHUP (POLLHUP|POLLERR)
+# endif
+# ifndef LWS_POLLIN
+#  define LWS_POLLIN (POLLIN)
+# endif
+# ifndef LWS_POLLOUT
+#  define LWS_POLLOUT (POLLOUT)
+# endif
+#endif
+
 using namespace Glib;
 
 WebsocketsServer::WebsocketsServer (ArdourSurface::ArdourWebsockets& surface)
