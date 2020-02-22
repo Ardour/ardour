@@ -15,7 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
+#define DEBUG
 #ifdef DEBUG
 #include <iostream>
 #endif
@@ -31,6 +31,7 @@ WebsocketsServer::WebsocketsServer (ArdourSurface::ArdourWebsockets& surface)
 {
     // keep references to all config for libwebsockets 2
     lws_protocols proto;
+    memset (&proto, 0, sizeof(lws_protocols));
     proto.name = "lws-ardour";
     proto.callback = WebsocketsServer::lws_callback;
     proto.per_session_data_size = 0;
@@ -43,6 +44,7 @@ WebsocketsServer::WebsocketsServer (ArdourSurface::ArdourWebsockets& surface)
     _lws_proto[0] = proto;
     memset (&_lws_proto[1], 0, sizeof(lws_protocols));
 
+    memset (&_lws_info, 0, sizeof(lws_context_creation_info));
     _lws_info.port = WEBSOCKET_LISTEN_PORT;
     _lws_info.protocols = _lws_proto;
     _lws_info.uid  = -1;
