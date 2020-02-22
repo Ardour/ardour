@@ -39,14 +39,16 @@ namespace Node {
     const std::string strip_plugin_param_value  = "strip_plugin_param_value";
 }
 
+typedef std::vector<uint32_t> AddressVector;
+typedef std::vector<TypedValue> ValueVector;
+
 class NodeState {
 
   public:
 
     NodeState ();
     NodeState (std::string);
-    NodeState (std::string, std::vector<uint32_t>,
-        std::vector<TypedValue> = std::vector<TypedValue>());
+    NodeState (std::string, AddressVector, ValueVector = ValueVector());
 
     std::string debug_str () const;
 
@@ -67,8 +69,8 @@ class NodeState {
   private:
 
     std::string _node;
-    std::vector<uint32_t> _addr;
-    std::vector<TypedValue> _val;
+    AddressVector _addr;
+    ValueVector _val;
 
 };
 
