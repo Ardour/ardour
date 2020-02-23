@@ -268,7 +268,7 @@ children = [
         'share/osc',
         'share/patchfiles',
         'share/plugin_metadata',
-        'scripts',
+        'share/scripts',
         'headless',
         'session_utils',
         # shared helper binaries (plugin-scanner, exec-wrapper)
