@@ -413,11 +413,11 @@ void
 OSCGlobalObserver::send_transport_state_changed()
 {
 	_osc.float_message (X_("/loop_toggle"), session->get_play_loop(), addr);
-	_osc.float_message (X_("/transport_play"), session->transport_speed() == 1.0, addr);
-	_osc.float_message (X_("/toggle_roll"), session->transport_speed() == 1.0, addr);
+	_osc.float_message (X_("/transport_play"), session->actual_speed() == 1.0, addr);
+	_osc.float_message (X_("/toggle_roll"), session->actual_speed() == 1.0, addr);
 	_osc.float_message (X_("/transport_stop"), session->transport_stopped_or_stopping(), addr);
-	_osc.float_message (X_("/rewind"), session->transport_speed() < 0.0, addr);
-	_osc.float_message (X_("/ffwd"), (session->transport_speed() != 1.0 && session->transport_speed() > 0.0), addr);
+	_osc.float_message (X_("/rewind"), session->actual_speed() < 0.0, addr);
+	_osc.float_message (X_("/ffwd"), (session->actual_speed() != 1.0 && session->actual_speed() > 0.0), addr);
 }
 
 void
