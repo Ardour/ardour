@@ -92,8 +92,12 @@ ArdourStrips::strip_pan (uint32_t strip_n) const
 void
 ArdourStrips::set_strip_pan (uint32_t strip_n, double value)
 {
-    value = (value + 1.0) / 2.0;
-    nth_strip (strip_n)->pan_azimuth_control ()->set_value (value, PBD::Controllable::NoGroup);
+	 boost::shared_ptr<AutomationControl> ac = nth_strip (strip_n)->pan_azimuth_control ();
+	if (!ac) {
+		return;
+	}
+	value = (value + 1.0) / 2.0;
+	ac->set_value (value, PBD::Controllable::NoGroup);
 }
 
 bool

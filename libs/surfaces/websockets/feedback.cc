@@ -165,8 +165,10 @@ ArdourFeedback::observe_strips ()
         strip->gain_control ()->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
             boost::bind<void> (StripGainObserver (), this, strip_n), event_loop ());
 
-        strip->pan_azimuth_control ()->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
-            boost::bind<void> (StripPanObserver (), this, strip_n), event_loop ());
+	if (strip->pan_azimuth_control ()) {
+		strip->pan_azimuth_control ()->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
+				boost::bind<void> (StripPanObserver (), this, strip_n), event_loop ());
+	}
 
         strip->mute_control ()->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
             boost::bind<void> (StripMuteObserver (), this, strip_n), event_loop ());
