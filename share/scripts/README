@@ -27,3 +27,6 @@ Script Naming conventions:
  to create EditorActions.
  The filename prefix is only for convenience, "type" = "Snippet" is used when
  scripts are listed at runtime.
+
+^_-*.lua
+ git ignores those. Intended for local/custom dev scripts or work in progress.
