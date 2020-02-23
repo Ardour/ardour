@@ -16,8 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ardour_feedback_h
-#define ardour_feedback_h
+#ifndef _ardour_surface_websockets_feedback_h_
+#define _ardour_surface_websockets_feedback_h_
 
 #include <boost/shared_ptr.hpp>
 #include <glibmm/main.h>

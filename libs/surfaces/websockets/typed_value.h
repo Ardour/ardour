@@ -18,8 +18,8 @@
 
 #include <string>
 
-#ifndef typed_value_h
-#define typed_value_h
+#ifndef _ardour_surface_websockets_typed_value_h_
+#define _ardour_surface_websockets_typed_value_h_
 
 class TypedValue
 {

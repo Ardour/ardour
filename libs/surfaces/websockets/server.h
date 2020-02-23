@@ -16,8 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef websockets_server_h
-#define websockets_server_h
+#ifndef _ardour_surface_websockets_server_h_
+#define _ardour_surface_websockets_server_h_
 
 #include <boost/unordered_map.hpp>
 #include <glibmm.h>

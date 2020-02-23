@@ -16,8 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef node_state_h
-#define node_state_h
+#ifndef _ardour_surface_websockets_state_h_
+#define _ardour_surface_websockets_state_h_
 
 #include <climits>
 #include <cmath>

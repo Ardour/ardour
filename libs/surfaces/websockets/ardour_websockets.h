@@ -23,8 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef ardour_websockets_h
-#define ardour_websockets_h
+#ifndef _ardour_surface_websockets_h_
+#define _ardour_surface_websockets_h_
 
 #define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"

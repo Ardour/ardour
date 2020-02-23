@@ -16,8 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef surface_component_h
-#define surface_component_h
+#ifndef _ardour_surface_websockets_component_h_
+#define _ardour_surface_websockets_component_h_
 
 #include <glibmm.h>
 

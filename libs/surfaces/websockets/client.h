@@ -16,8 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef client_context_h
-#define client_context_h
+#ifndef _ardour_surface_websockets_client_h_
+#define _ardour_surface_websockets_client_h_
 
 #include <boost/unordered_set.hpp>
 #include <list>
