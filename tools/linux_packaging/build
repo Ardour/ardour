@@ -373,7 +373,7 @@ done
 
 # Lua Scripts Files
 # got to be careful with names here
-for x in $BUILD_ROOT/../scripts/*.lua ; do
+for x in $BUILD_ROOT/../share/scripts/*.lua ; do
 		BN=$(basename $x)
 	  if test "${BN:0:1}" = "_"; then
 			continue;
