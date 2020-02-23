@@ -85,17 +85,23 @@ ArdourStrips::set_strip_gain (uint32_t strip_n, double db)
 double
 ArdourStrips::strip_pan (uint32_t strip_n) const
 {
+	boost::shared_ptr<AutomationControl> ac = nth_strip (strip_n)->pan_azimuth_control ();
+	if (!ac) {
+		/* TODO: inform GUI that strip has no panner */
+		return 0;
+	}
 	/* scale from [0.0 ; 1.0] to [-1.0 ; 1.0] */
-	return 2.0 * nth_strip (strip_n)->pan_azimuth_control ()->get_value () - 1.0;
+	return 2.0 * ac->get_value () - 1.0; //TODO: prefer ac->internal_to_interface (c->get_value ());
 }
 
 void
 ArdourStrips::set_strip_pan (uint32_t strip_n, double value)
 {
-	 boost::shared_ptr<AutomationControl> ac = nth_strip (strip_n)->pan_azimuth_control ();
+	boost::shared_ptr<AutomationControl> ac = nth_strip (strip_n)->pan_azimuth_control ();
 	if (!ac) {
 		return;
 	}
+	/* TODO: prefer ac->set_value (ac->interface_to_internal (value), NoGroup); */
 	value = (value + 1.0) / 2.0;
 	ac->set_value (value, PBD::Controllable::NoGroup);
 }
