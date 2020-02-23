@@ -262,12 +262,12 @@ children = [
         'libs/plugins/a-reverb.lv2',
         'libs/plugins/a-fluidsynth.lv2',
         'gtk2_ardour',
-        'export',
-        'midi_maps',
-        'mcp',
-        'osc',
-        'patchfiles',
-        'plugin_metadata',
+        'share/export',
+        'share/midi_maps',
+        'share/mcp',
+        'share/osc',
+        'share/patchfiles',
+        'share/plugin_metadata',
         'scripts',
         'headless',
         'session_utils',
@@ -1451,7 +1451,7 @@ def build(bld):
 
     bld.install_files (bld.env['CONFDIR'], 'system_config')
 
-    bld.install_files (os.path.join (bld.env['DATADIR'], 'templates'), bld.path.ant_glob ('templates/**'), cwd=bld.path.find_dir ('templates'), relative_trick=True)
+    bld.install_files (os.path.join (bld.env['DATADIR'], 'templates'), bld.path.ant_glob ('share/templates/**'), cwd=bld.path.find_dir ('share/templates'), relative_trick=True)
 
     if bld.env['RUN_TESTS']:
         bld.add_post_fun(test)
