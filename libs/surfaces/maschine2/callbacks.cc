@@ -127,7 +127,7 @@ Maschine2::notify_record_state_changed ()
 void
 Maschine2::notify_transport_state_changed ()
 {
-	if (session->transport_rolling ()) {
+	if (transport_rolling ()) {
 		_ctrl->button (M2Contols::Play)->set_color (COLOR_WHITE);
 	} else {
 		_ctrl->button (M2Contols::Play)->set_color (0);
@@ -198,7 +198,7 @@ Maschine2::notify_history_changed ()
 void
 Maschine2::button_play ()
 {
-	if (session->transport_rolling ()) {
+	if (transport_rolling ()) {
 		transport_stop ();
 	} else {
 		transport_play ();
@@ -226,7 +226,7 @@ Maschine2::button_metronom ()
 void
 Maschine2::button_rewind ()
 {
-	goto_start (session->transport_rolling ());
+	goto_start (transport_rolling ());
 }
 
 void

@@ -95,11 +95,11 @@ TranzportControlProtocol::show_wheel_mode ()
 {
 	string text;
 
-	// if(session->transport_speed() != 0) {
+	// if(get_transport_speed() != 0) {
 	//    if session-transport_speed() < 1.0) show_big_bar/beat
 	//    if ? greater. dont
 
-	if(session->transport_speed() != 0) {
+	if(get_transport_speed() != 0) {
 		show_mini_meter();
 	} else {
 

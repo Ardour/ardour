@@ -3182,7 +3182,7 @@ OSC::transport_speed (lo_message msg)
 		return;
 	}
 	check_surface (msg);
-	double ts = session->transport_speed ();
+	double ts = get_transport_speed();
 
 	lo_message reply = lo_message_new ();
 	lo_message_add_double (reply, ts);

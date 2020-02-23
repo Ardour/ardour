@@ -135,8 +135,8 @@ FaderPort8::setup_actions ()
 void
 FaderPort8::button_play ()
 {
-	if (session->transport_rolling ()) {
-		if (session->transport_speed () != 1.0) {
+	if (transport_rolling ()) {
+		if (get_transport_speed() != 1.0) {
 			session->request_transport_speed (1.0);
 		} else {
 			transport_stop ();
@@ -149,7 +149,7 @@ FaderPort8::button_play ()
 void
 FaderPort8::button_stop ()
 {
-	if (session->transport_rolling ()) {
+	if (transport_rolling ()) {
 		transport_stop ();
 	} else {
 		AccessAction ("Transport", "GotoStart");
@@ -315,20 +315,20 @@ FaderPort8::button_varispeed (bool ffw)
 
 	// switch play direction, if needed
 	if (ffw) {
-		if (session->transport_speed () <= 0) {
+		if (get_transport_speed() <= 0) {
 			session->request_transport_speed (1.0);
 			return ;
 		}
 	} else {
-		if (session->transport_speed () >= 0) {
+		if (get_transport_speed() >= 0) {
 			session->request_transport_speed (-1.0);
 			return ;
 		}
 	}
-	// incremetally increase speed. double speed every 10 clicks
+	// incrementally increase speed by semitones
 	// (keypress auto-repeat is 100ms)
 	float maxspeed = Config->get_shuttle_max_speed();
-	float speed = exp2f(0.1f) * session->transport_speed ();
+	float speed = exp2f(1.0/12.0) * get_transport_speed();
 	speed = std::max (-maxspeed, std::min (maxspeed, speed));
 	session->request_transport_speed (speed, false);
 }

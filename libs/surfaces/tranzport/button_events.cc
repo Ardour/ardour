@@ -359,7 +359,7 @@ TranzportControlProtocol::button_event_footswitch_press (bool shifted)
 void
 TranzportControlProtocol::button_event_footswitch_release (bool shifted)
 {
-	if(session->transport_speed() == 0.0)
+	if(get_transport_speed() == 0.0)
 	{
 		transport_play ();
 	}
