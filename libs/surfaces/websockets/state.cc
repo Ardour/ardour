@@ -16,98 +16,105 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <sstream>
 #include <boost/unordered_set.hpp>
+#include <sstream>
 
 #include "state.h"
 
-NodeState::NodeState () { }
+NodeState::NodeState () {}
 
 NodeState::NodeState (std::string node)
-    : _node (node) { }
+    : _node (node)
+{
+}
 
 NodeState::NodeState (std::string node, AddressVector addr, ValueVector val)
     : _node (node)
     , _addr (addr)
-    , _val (val) { }
+    , _val (val)
+{
+}
 
-std::string 
+std::string
 NodeState::debug_str () const
 {
-    std::stringstream s;
-    s << "node = " << _node;
+	std::stringstream s;
+	s << "node = " << _node;
 
-    if (!_addr.empty ()) {
-        s << std::endl << " addr = ";
+	if (!_addr.empty ()) {
+		s << std::endl
+		  << " addr = ";
 
-        for (AddressVector::const_iterator it = _addr.begin (); it != _addr.end (); ++it) {
-            s << *it << ";";
-        }
-    }
+		for (AddressVector::const_iterator it = _addr.begin (); it != _addr.end (); ++it) {
+			s << *it << ";";
+		}
+	}
 
-    for (ValueVector::const_iterator it = _val.begin (); it != _val.end (); ++it) {
-        s << std::endl << " val " << it->debug_str ();
-    }
-    
-    return s.str ();
+	for (ValueVector::const_iterator it = _val.begin (); it != _val.end (); ++it) {
+		s << std::endl
+		  << " val " << it->debug_str ();
+	}
+
+	return s.str ();
 }
 
 int
 NodeState::n_addr () const
 {
-    return static_cast<int>(_addr.size ());
+	return static_cast<int> (_addr.size ());
 }
 
 uint32_t
 NodeState::nth_addr (int n) const
 {
-    return _addr[n];
+	return _addr[n];
 }
 
 void
 NodeState::add_addr (uint32_t addr)
 {
-    _addr.push_back (addr);
+	_addr.push_back (addr);
 }
 
 int
 NodeState::n_val () const
 {
-    return static_cast<int>(_val.size ());
+	return static_cast<int> (_val.size ());
 }
 
 TypedValue
 NodeState::nth_val (int n) const
 {
-    if (n_val () < n) {
-        return TypedValue ();
-    }
+	if (n_val () < n) {
+		return TypedValue ();
+	}
 
-    return _val[n];
+	return _val[n];
 }
 
 void
 NodeState::add_val (TypedValue val)
 {
-    _val.push_back (val);
+	_val.push_back (val);
 }
 
 std::size_t
 NodeState::node_addr_hash () const
 {
-    std::size_t seed = 0;
-    boost::hash_combine (seed, _node);
-    boost::hash_combine (seed, _addr);
-    return seed;
+	std::size_t seed = 0;
+	boost::hash_combine (seed, _node);
+	boost::hash_combine (seed, _addr);
+	return seed;
 }
 
 bool
 NodeState::operator== (const NodeState& other) const
 {
-    return node_addr_hash () == other.node_addr_hash ();
+	return node_addr_hash () == other.node_addr_hash ();
 }
 
-std::size_t hash_value (const NodeState &state)
+std::size_t
+hash_value (const NodeState& state)
 {
-    return state.node_addr_hash ();
+	return state.node_addr_hash ();
 }

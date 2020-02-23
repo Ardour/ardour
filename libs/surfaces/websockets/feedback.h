@@ -19,41 +19,39 @@
 #ifndef ardour_feedback_h
 #define ardour_feedback_h
 
-#include <glibmm/main.h>
 #include <boost/shared_ptr.hpp>
+#include <glibmm/main.h>
 
 #include "component.h"
 #include "typed_value.h"
 
 class ArdourFeedback : public SurfaceComponent
 {
-  public:
+public:
+	ArdourFeedback (ArdourSurface::ArdourWebsockets& surface)
+	    : SurfaceComponent (surface){};
+	virtual ~ArdourFeedback (){};
 
-    ArdourFeedback (ArdourSurface::ArdourWebsockets& surface) : SurfaceComponent (surface) {};
-    virtual ~ArdourFeedback () {};
+	int start ();
+	int stop ();
 
-    int start ();
-    int stop ();
+	void update_all (std::string, TypedValue) const;
+	void update_all (std::string, uint32_t, TypedValue) const;
+	void update_all (std::string, uint32_t, uint32_t, TypedValue) const;
+	void update_all (std::string, uint32_t, uint32_t, uint32_t, TypedValue) const;
 
-    void update_all (std::string, TypedValue) const;
-    void update_all (std::string, uint32_t, TypedValue) const;
-    void update_all (std::string, uint32_t, uint32_t, TypedValue) const;
-    void update_all (std::string, uint32_t, uint32_t, uint32_t, TypedValue) const;
-    
-  private:
+private:
+	Glib::Threads::Mutex      _client_state_lock;
+	PBD::ScopedConnectionList _signal_connections;
+	sigc::connection          _periodic_connection;
 
-    Glib::Threads::Mutex _client_state_lock;
-    PBD::ScopedConnectionList _signal_connections;
-    sigc::connection _periodic_connection;
-    
-    bool poll () const;
+	bool poll () const;
 
-    void observe_globals ();
-    void observe_strips ();
-    void observe_strip_plugins (uint32_t, boost::shared_ptr<ARDOUR::Stripable>);
-    void observe_strip_plugin_param_values (uint32_t, uint32_t,
-        boost::shared_ptr<ARDOUR::PluginInsert>);
-
+	void observe_globals ();
+	void observe_strips ();
+	void observe_strip_plugins (uint32_t, boost::shared_ptr<ARDOUR::Stripable>);
+	void observe_strip_plugin_param_values (uint32_t, uint32_t,
+	                                        boost::shared_ptr<ARDOUR::PluginInsert>);
 };
 
 #endif // ardour_feedback_h

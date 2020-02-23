@@ -33,66 +33,77 @@
 #include "control_protocol/control_protocol.h"
 
 #include "component.h"
-#include "strips.h"
+#include "dispatcher.h"
+#include "feedback.h"
 #include "globals.h"
 #include "server.h"
-#include "feedback.h"
-#include "dispatcher.h"
+#include "strips.h"
 
-#define SURFACE_NAME    "WebSockets Server (Experimental)"
-#define SURFACE_ID      "uri://ardour.org/surfaces/ardour_websockets:0"
+#define SURFACE_NAME "WebSockets Server (Experimental)"
+#define SURFACE_ID   "uri://ardour.org/surfaces/ardour_websockets:0"
 
-namespace ArdourSurface {
-
+namespace ArdourSurface
+{
 struct ArdourWebsocketsUIRequest : public BaseUI::BaseRequestObject {
-  public:
-    ArdourWebsocketsUIRequest () {}
-    ~ArdourWebsocketsUIRequest () {}
+public:
+	ArdourWebsocketsUIRequest () {}
+	~ArdourWebsocketsUIRequest () {}
 };
 
 class ArdourWebsockets : public ARDOUR::ControlProtocol,
-                        public AbstractUI<ArdourWebsocketsUIRequest>
+                         public AbstractUI<ArdourWebsocketsUIRequest>
 {
-  public:
-    
-    ArdourWebsockets (ARDOUR::Session&);
-    virtual ~ArdourWebsockets ();
+public:
+	ArdourWebsockets (ARDOUR::Session&);
+	virtual ~ArdourWebsockets ();
 
-    static void* request_factory (uint32_t);
+	static void* request_factory (uint32_t);
 
-    int set_active (bool);
+	int set_active (bool);
 
-    ARDOUR::Session& ardour_session () { return *session; }
-    ArdourStrips& strips_component () { return _strips; }
-    ArdourGlobals& globals_component () { return _globals; }
-    WebsocketsServer& server_component () { return _server; }
-    WebsocketsDispatcher& dispatcher_component () { return _dispatcher; }
+	ARDOUR::Session& ardour_session ()
+	{
+		return *session;
+	}
+	ArdourStrips& strips_component ()
+	{
+		return _strips;
+	}
+	ArdourGlobals& globals_component ()
+	{
+		return _globals;
+	}
+	WebsocketsServer& server_component ()
+	{
+		return _server;
+	}
+	WebsocketsDispatcher& dispatcher_component ()
+	{
+		return _dispatcher;
+	}
 
-    // ControlProtocol
-    void stripable_selection_changed () {}
+	/* ControlProtocol */
+	void stripable_selection_changed () {}
 
-  protected:
+protected:
+	/* BaseUI */
+	void thread_init ();
 
-    // BaseUI
-    void thread_init ();
-    
-    // AbstractUI
-    void do_request (ArdourWebsocketsUIRequest*);
+	/* AbstractUI */
+	void do_request (ArdourWebsocketsUIRequest*);
 
-  private:
+private:
+	ArdourStrips                   _strips;
+	ArdourGlobals                  _globals;
+	ArdourFeedback                 _feedback;
+	WebsocketsServer               _server;
+	WebsocketsDispatcher           _dispatcher;
+	std::vector<SurfaceComponent*> _components;
 
-    ArdourStrips _strips;
-    ArdourGlobals _globals;
-    ArdourFeedback _feedback;
-    WebsocketsServer _server;
-    WebsocketsDispatcher _dispatcher;
-    std::vector<SurfaceComponent *> _components;
-
-    int start ();
-    int stop ();
-
+	int start ();
+	int stop ();
 };
 
-} // namespace
+} // namespace ArdourSurface
 
 #endif // ardour_websockets_h

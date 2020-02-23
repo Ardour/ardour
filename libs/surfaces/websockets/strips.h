@@ -24,47 +24,45 @@
 
 class ArdourStrips : public SurfaceComponent
 {
-  public:
+public:
+	ArdourStrips (ArdourSurface::ArdourWebsockets& surface)
+	    : SurfaceComponent (surface){};
+	virtual ~ArdourStrips (){};
 
-    ArdourStrips (ArdourSurface::ArdourWebsockets& surface) : SurfaceComponent (surface) {};
-    virtual ~ArdourStrips () {};
+	int start ();
+	int stop ();
 
-    int start ();
-    int stop ();
+	static double to_db (double);
+	static double from_db (double);
 
-    static double to_db (double);
-    static double from_db (double);
+	double strip_gain (uint32_t) const;
+	void   set_strip_gain (uint32_t, double);
 
-    double strip_gain (uint32_t) const;
-    void set_strip_gain (uint32_t, double);
+	double strip_pan (uint32_t) const;
+	void   set_strip_pan (uint32_t, double);
 
-    double strip_pan (uint32_t) const;
-    void set_strip_pan (uint32_t, double);
+	bool strip_mute (uint32_t) const;
+	void set_strip_mute (uint32_t, bool);
 
-    bool strip_mute (uint32_t) const;
-    void set_strip_mute (uint32_t, bool);
-    
-    bool strip_plugin_enabled (uint32_t, uint32_t) const;
-    void set_strip_plugin_enabled (uint32_t, uint32_t, bool);
+	bool strip_plugin_enabled (uint32_t, uint32_t) const;
+	void set_strip_plugin_enabled (uint32_t, uint32_t, bool);
 
-    TypedValue strip_plugin_param_value (uint32_t, uint32_t, uint32_t) const;
-    void set_strip_plugin_param_value (uint32_t, uint32_t, uint32_t, TypedValue);
+	TypedValue strip_plugin_param_value (uint32_t, uint32_t, uint32_t) const;
+	void       set_strip_plugin_param_value (uint32_t, uint32_t, uint32_t, TypedValue);
 
-    uint32_t strip_count () const;
-    boost::shared_ptr<ARDOUR::Stripable> nth_strip (uint32_t) const;
+	uint32_t                             strip_count () const;
+	boost::shared_ptr<ARDOUR::Stripable> nth_strip (uint32_t) const;
 
-    boost::shared_ptr<ARDOUR::PluginInsert> strip_plugin_insert (uint32_t, uint32_t) const;
-    
-    boost::shared_ptr<ARDOUR::AutomationControl> strip_plugin_param_control(
-        uint32_t, uint32_t, uint32_t) const;
+	boost::shared_ptr<ARDOUR::PluginInsert> strip_plugin_insert (uint32_t, uint32_t) const;
 
-    static TypedValue plugin_param_value (boost::shared_ptr<ARDOUR::AutomationControl>);
+	boost::shared_ptr<ARDOUR::AutomationControl> strip_plugin_param_control (
+	    uint32_t, uint32_t, uint32_t) const;
 
-  private:
+	static TypedValue plugin_param_value (boost::shared_ptr<ARDOUR::AutomationControl>);
 
-    typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > StripableVector;
-    StripableVector _strips;
-
+private:
+	typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > StripableVector;
+	StripableVector                                           _strips;
 };
 
 #endif // ardour_strips_h

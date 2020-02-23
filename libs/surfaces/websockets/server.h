@@ -19,9 +19,9 @@
 #ifndef websockets_server_h
 #define websockets_server_h
 
+#include <boost/unordered_map.hpp>
 #include <glibmm.h>
 #include <libwebsockets.h>
-#include <boost/unordered_map.hpp>
 
 #if LWS_LIBRARY_VERSION_MAJOR < 3
 // <libwebsockets.h> includes <uv.h> which in turn includes
@@ -34,63 +34,60 @@
 // version 3 in order to keep things simpler for the end user
 #endif
 
-#include "component.h"
 #include "client.h"
-#include "state.h"
+#include "component.h"
 #include "message.h"
+#include "state.h"
 
-#define WEBSOCKET_LISTEN_PORT   9000
+#define WEBSOCKET_LISTEN_PORT 9000
 
 struct LwsPollFdGlibSource {
-    struct lws_pollfd lws_pfd;
-    Glib::RefPtr<Glib::IOChannel> g_channel;
-    Glib::RefPtr<Glib::IOSource> rg_iosrc;
-    Glib::RefPtr<Glib::IOSource> wg_iosrc;
+	struct lws_pollfd             lws_pfd;
+	Glib::RefPtr<Glib::IOChannel> g_channel;
+	Glib::RefPtr<Glib::IOSource>  rg_iosrc;
+	Glib::RefPtr<Glib::IOSource>  wg_iosrc;
 };
 
 class WebsocketsServer : public SurfaceComponent
 {
-  public:
+public:
+	WebsocketsServer (ArdourSurface::ArdourWebsockets&);
+	virtual ~WebsocketsServer (){};
 
-    WebsocketsServer (ArdourSurface::ArdourWebsockets&);
-    virtual ~WebsocketsServer () {};
+	int start ();
+	int stop ();
 
-    int start ();
-    int stop ();
+	void update_client (Client, const NodeState&, bool);
+	void update_all_clients (const NodeState&, bool);
 
-    void update_client (Client, const NodeState&, bool);
-    void update_all_clients (const NodeState&, bool);
+private:
+	struct lws_protocols             _lws_proto[2];
+	struct lws_context_creation_info _lws_info;
+	struct lws_context*              _lws_context;
 
-  private: 
+	Glib::RefPtr<Glib::IOChannel> _channel;
 
-    struct lws_protocols _lws_proto[2];
-    struct lws_context_creation_info _lws_info;
-    struct lws_context *_lws_context;
+	typedef boost::unordered_map<lws_sockfd_type, LwsPollFdGlibSource> LwsPollFdGlibSourceMap;
+	LwsPollFdGlibSourceMap                                             _fd_ctx;
 
-    Glib::RefPtr<Glib::IOChannel> _channel;
+	typedef boost::unordered_map<Client, ClientContext> ClientContextMap;
+	ClientContextMap                                    _client_ctx;
 
-    typedef boost::unordered_map<lws_sockfd_type, LwsPollFdGlibSource> LwsPollFdGlibSourceMap;
-    LwsPollFdGlibSourceMap _fd_ctx;
+	void add_poll_fd (struct lws_pollargs*);
+	void mod_poll_fd (struct lws_pollargs*);
+	void del_poll_fd (struct lws_pollargs*);
 
-    typedef boost::unordered_map<Client, ClientContext> ClientContextMap;
-    ClientContextMap _client_ctx;
+	void add_client (Client);
+	void del_client (Client);
+	void recv_client (Client, void* buf, size_t len);
+	void write_client (Client);
 
-    void add_poll_fd (struct lws_pollargs*);
-    void mod_poll_fd (struct lws_pollargs*);
-    void del_poll_fd (struct lws_pollargs*);
-    
-    void add_client (Client);
-    void del_client (Client);
-    void recv_client (Client, void *buf, size_t len);
-    void write_client (Client);
+	bool io_handler (Glib::IOCondition, lws_sockfd_type);
 
-    bool io_handler (Glib::IOCondition, lws_sockfd_type);
+	Glib::IOCondition events_to_ioc (int);
+	int               ioc_to_events (Glib::IOCondition);
 
-    Glib::IOCondition events_to_ioc (int);
-    int ioc_to_events (Glib::IOCondition);
-
-    static int lws_callback(struct lws*, enum lws_callback_reasons, void *, void *, size_t);
-
+	static int lws_callback (struct lws*, enum lws_callback_reasons, void*, void*, size_t);
 };
 
 #endif // websockets_server_h

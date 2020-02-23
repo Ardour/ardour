@@ -22,37 +22,41 @@
 #include <boost/unordered_set.hpp>
 #include <list>
 
-#include "state.h"
 #include "message.h"
+#include "state.h"
 
-typedef struct lws* Client;
+typedef struct lws*                 Client;
 typedef std::list<NodeStateMessage> ClientOutputBuffer;
 
 class ClientContext
 {
-  public:
+public:
+	ClientContext (Client wsi)
+	    : _wsi (wsi){};
+	virtual ~ClientContext (){};
 
-    ClientContext (Client wsi) : _wsi(wsi) {};
-    virtual ~ClientContext () {};
+	Client wsi () const
+	{
+		return _wsi;
+	}
 
-    Client wsi () const { return _wsi; }
+	bool has_state (const NodeState&);
+	void update_state (const NodeState&);
 
-    bool has_state (const NodeState&);
-    void update_state (const NodeState&);
+	ClientOutputBuffer& output_buf ()
+	{
+		return _output_buf;
+	}
 
-    ClientOutputBuffer& output_buf () { return _output_buf; }
-    
-    std::string debug_str ();
+	std::string debug_str ();
 
-  private:
+private:
+	Client _wsi;
 
-    Client _wsi;
+	typedef boost::unordered_set<NodeState> ClientState;
+	ClientState                             _state;
 
-    typedef boost::unordered_set<NodeState> ClientState;
-    ClientState _state;
-
-    ClientOutputBuffer _output_buf;
-
+	ClientOutputBuffer _output_buf;
 };
 
 #endif // client_context_h

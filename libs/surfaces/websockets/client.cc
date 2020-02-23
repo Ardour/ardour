@@ -23,49 +23,49 @@
 bool
 ClientContext::has_state (const NodeState& node_state)
 {
-    ClientState::iterator it = _state.find (node_state);
+	ClientState::iterator it = _state.find (node_state);
 
-    if (it == _state.end ()) {
-        return false;
-    }
+	if (it == _state.end ()) {
+		return false;
+	}
 
-    int n_val = node_state.n_val ();
+	int n_val = node_state.n_val ();
 
-    if (it->n_val () != n_val) {
-        return false;
-    }
+	if (it->n_val () != n_val) {
+		return false;
+	}
 
-    for (int i = 0; i < n_val; i++) {
-        if (it->nth_val (i) != node_state.nth_val (i)) {
-            return false;
-        }
-    }
+	for (int i = 0; i < n_val; i++) {
+		if (it->nth_val (i) != node_state.nth_val (i)) {
+			return false;
+		}
+	}
 
-    return true;
+	return true;
 }
 
 void
 ClientContext::update_state (const NodeState& node_state)
 {
-    ClientState::iterator it = _state.find (node_state);
+	ClientState::iterator it = _state.find (node_state);
 
-    if (it != _state.end ()) {
-        _state.erase (it);
-    }
+	if (it != _state.end ()) {
+		_state.erase (it);
+	}
 
-    _state.insert (node_state);
+	_state.insert (node_state);
 }
 
 std::string
 ClientContext::debug_str ()
 {
-    std::stringstream ss;
+	std::stringstream ss;
 
-    ss << "client = " << std::hex << _wsi << std::endl;
-    
-    for (ClientState::iterator it = _state.begin (); it != _state.end (); ++it) {
-        ss << " - " << it->debug_str () << std::endl;
-    }
+	ss << "client = " << std::hex << _wsi << std::endl;
 
-    return ss.str ();
+	for (ClientState::iterator it = _state.begin (); it != _state.end (); ++it) {
+		ss << " - " << it->debug_str () << std::endl;
+	}
+
+	return ss.str ();
 }

@@ -22,41 +22,41 @@
 PBD::EventLoop*
 SurfaceComponent::event_loop () const
 {
-    return static_cast<PBD::EventLoop*>(&_surface);
+	return static_cast<PBD::EventLoop*> (&_surface);
 }
 
 Glib::RefPtr<Glib::MainLoop>
 SurfaceComponent::main_loop () const
 {
-    return _surface.main_loop ();
+	return _surface.main_loop ();
 }
 
 ARDOUR::Session&
 SurfaceComponent::session () const
 {
-    return _surface.ardour_session ();
+	return _surface.ardour_session ();
 }
 
 ArdourStrips&
 SurfaceComponent::strips () const
 {
-    return _surface.strips_component ();
+	return _surface.strips_component ();
 }
 
 ArdourGlobals&
 SurfaceComponent::globals () const
 {
-    return _surface.globals_component ();
+	return _surface.globals_component ();
 }
 
 WebsocketsServer&
 SurfaceComponent::server () const
 {
-    return _surface.server_component ();
+	return _surface.server_component ();
 }
 
 WebsocketsDispatcher&
 SurfaceComponent::dispatcher () const
 {
-    return _surface.dispatcher_component ();
+	return _surface.dispatcher_component ();
 }

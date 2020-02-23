@@ -27,47 +27,49 @@ using namespace ArdourSurface;
 
 static ControlProtocol*
 new_ardour_websockets_protocol (ControlProtocolDescriptor* /*descriptor*/,
-    Session* s)
+                                Session* s)
 {
-    ArdourWebsockets* surface = new ArdourWebsockets (*s);
+	ArdourWebsockets* surface = new ArdourWebsockets (*s);
 
-    surface->set_active (true);
+	surface->set_active (true);
 
-    return surface;
+	return surface;
 }
 
 static void
 delete_ardour_websockets_protocol (ControlProtocolDescriptor* /*descriptor*/,
-    ControlProtocol* cp)
+                                   ControlProtocol* cp)
 {
-    delete cp;
+	delete cp;
 }
 
 static bool
 probe_ardour_websockets_protocol (ControlProtocolDescriptor* /*descriptor*/)
 {
-    return true;
+	return true;
 }
 
 static void*
 ardour_websockets_request_buffer_factory (uint32_t num_requests)
 {
-    return ArdourWebsockets::request_factory (num_requests);
+	return ArdourWebsockets::request_factory (num_requests);
 }
 
 static ControlProtocolDescriptor ardour_websockets_descriptor = {
-    /*name :              */   SURFACE_NAME,
-    /*id :                */   SURFACE_ID,
-    /*ptr :               */   0,
-    /*module :            */   0,
-    /*mandatory :         */   0,
-    /*supports_feedback : */   true,
-    /*probe :             */   probe_ardour_websockets_protocol,
-    /*initialize :        */   new_ardour_websockets_protocol,
-    /*destroy :           */   delete_ardour_websockets_protocol,
-    /*request_buffer_factory */ ardour_websockets_request_buffer_factory
+	/*name :              */ SURFACE_NAME,
+	/*id :                */ SURFACE_ID,
+	/*ptr :               */ 0,
+	/*module :            */ 0,
+	/*mandatory :         */ 0,
+	/*supports_feedback : */ true,
+	/*probe :             */ probe_ardour_websockets_protocol,
+	/*initialize :        */ new_ardour_websockets_protocol,
+	/*destroy :           */ delete_ardour_websockets_protocol,
+	/*request_buffer_factory */ ardour_websockets_request_buffer_factory
 };
 
-extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () {
-    return &ardour_websockets_descriptor;
+extern "C" ARDOURSURFACE_API ControlProtocolDescriptor*
+protocol_descriptor ()
+{
+	return &ardour_websockets_descriptor;
 }

@@ -25,15 +25,15 @@ using namespace ARDOUR;
 double
 ArdourGlobals::tempo () const
 {
-    Tempo tempo = session ().tempo_map ().tempo_at_sample (0);
-    return tempo.note_type () * tempo.pulses_per_minute ();
+	Tempo tempo = session ().tempo_map ().tempo_at_sample (0);
+	return tempo.note_type () * tempo.pulses_per_minute ();
 }
 
 void
 ArdourGlobals::set_tempo (double bpm)
 {
-    bpm = max (0.01, bpm);
-    TempoMap& tempo_map = session ().tempo_map ();
-    Tempo tempo (bpm, tempo_map.tempo_at_sample (0).note_type (), bpm);
-    tempo_map.add_tempo (tempo, 0.0, 0, AudioTime);
+	bpm                 = max (0.01, bpm);
+	TempoMap& tempo_map = session ().tempo_map ();
+	Tempo     tempo (bpm, tempo_map.tempo_at_sample (0).note_type (), bpm);
+	tempo_map.add_tempo (tempo, 0.0, 0, AudioTime);
 }

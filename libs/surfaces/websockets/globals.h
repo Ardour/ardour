@@ -23,14 +23,13 @@
 
 class ArdourGlobals : public SurfaceComponent
 {
-  public:
+public:
+	ArdourGlobals (ArdourSurface::ArdourWebsockets& surface)
+	    : SurfaceComponent (surface){};
+	virtual ~ArdourGlobals (){};
 
-    ArdourGlobals (ArdourSurface::ArdourWebsockets& surface) : SurfaceComponent (surface) {};
-    virtual ~ArdourGlobals () {};
-
-    double tempo () const;
-    void set_tempo (double);
-
+	double tempo () const;
+	void   set_tempo (double);
 };
 
 #endif // ardour_globals_h

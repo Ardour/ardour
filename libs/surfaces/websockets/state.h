@@ -19,64 +19,66 @@
 #ifndef node_state_h
 #define node_state_h
 
-#include <stdint.h>
 #include <climits>
 #include <cmath>
 #include <cstring>
+#include <stdint.h>
 #include <vector>
 
 #include "typed_value.h"
 
-#define ADDR_NONE   UINT_MAX
+#define ADDR_NONE UINT_MAX
 
-namespace Node {
-    const std::string tempo                     = "tempo";
-    const std::string strip_desc                = "strip_desc";
-    const std::string strip_meter               = "strip_meter";
-    const std::string strip_gain                = "strip_gain";
-    const std::string strip_pan                 = "strip_pan";
-    const std::string strip_mute                = "strip_mute";
-    const std::string strip_plugin_desc         = "strip_plugin_desc";
-    const std::string strip_plugin_enable       = "strip_plugin_enable";
-    const std::string strip_plugin_param_desc   = "strip_plugin_param_desc";
-    const std::string strip_plugin_param_value  = "strip_plugin_param_value";
-}
+namespace Node
+{
+	const std::string tempo                    = "tempo";
+	const std::string strip_desc               = "strip_desc";
+	const std::string strip_meter              = "strip_meter";
+	const std::string strip_gain               = "strip_gain";
+	const std::string strip_pan                = "strip_pan";
+	const std::string strip_mute               = "strip_mute";
+	const std::string strip_plugin_desc        = "strip_plugin_desc";
+	const std::string strip_plugin_enable      = "strip_plugin_enable";
+	const std::string strip_plugin_param_desc  = "strip_plugin_param_desc";
+	const std::string strip_plugin_param_value = "strip_plugin_param_value";
+} // namespace Node
 
-typedef std::vector<uint32_t> AddressVector;
+typedef std::vector<uint32_t>   AddressVector;
 typedef std::vector<TypedValue> ValueVector;
 
-class NodeState {
+class NodeState
+{
+public:
+	NodeState ();
+	NodeState (std::string);
+	NodeState (std::string, AddressVector, ValueVector = ValueVector ());
 
-  public:
+	std::string debug_str () const;
 
-    NodeState ();
-    NodeState (std::string);
-    NodeState (std::string, AddressVector, ValueVector = ValueVector());
+	std::string node () const
+	{
+		return _node;
+	}
 
-    std::string debug_str () const;
+	int      n_addr () const;
+	uint32_t nth_addr (int) const;
+	void     add_addr (uint32_t);
 
-    std::string node () const { return _node; }
+	int        n_val () const;
+	TypedValue nth_val (int) const;
+	void       add_val (TypedValue);
 
-    int n_addr () const;
-    uint32_t nth_addr (int) const;
-    void add_addr (uint32_t);
+	std::size_t node_addr_hash () const;
 
-    int n_val () const;
-    TypedValue nth_val (int) const;
-    void add_val (TypedValue);
+	bool operator== (const NodeState& other) const;
 
-    std::size_t node_addr_hash () const;
-
-    bool operator== (const NodeState& other) const;
-
-  private:
-
-    std::string _node;
-    AddressVector _addr;
-    ValueVector _val;
-
+private:
+	std::string   _node;
+	AddressVector _addr;
+	ValueVector   _val;
 };
 
-std::size_t hash_value (const NodeState&);
+std::size_t
+hash_value (const NodeState&);
 
 #endif // node_state_h

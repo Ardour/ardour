@@ -24,8 +24,9 @@
 #include "ardour/session.h"
 #include "pbd/event_loop.h"
 
-namespace ArdourSurface {
-  class ArdourWebsockets;
+namespace ArdourSurface
+{
+class ArdourWebsockets;
 }
 
 class ArdourStrips;
@@ -35,27 +36,31 @@ class WebsocketsDispatcher;
 
 class SurfaceComponent
 {
-  public:
+public:
+	SurfaceComponent (ArdourSurface::ArdourWebsockets& surface)
+	    : _surface (surface){};
 
-    SurfaceComponent (ArdourSurface::ArdourWebsockets& surface) : _surface (surface) {};
+	virtual ~SurfaceComponent (){};
 
-    virtual ~SurfaceComponent () {};
+	virtual int start ()
+	{
+		return 0;
+	}
+	virtual int stop ()
+	{
+		return 0;
+	}
 
-    virtual int start () { return 0; }
-    virtual int stop () { return 0; }
+	PBD::EventLoop*              event_loop () const;
+	Glib::RefPtr<Glib::MainLoop> main_loop () const;
+	ARDOUR::Session&             session () const;
+	ArdourStrips&                strips () const;
+	ArdourGlobals&               globals () const;
+	WebsocketsServer&            server () const;
+	WebsocketsDispatcher&        dispatcher () const;
 
-    PBD::EventLoop* event_loop () const;
-    Glib::RefPtr<Glib::MainLoop> main_loop() const;
-    ARDOUR::Session& session () const;
-    ArdourStrips& strips () const;
-    ArdourGlobals& globals () const;
-    WebsocketsServer& server () const;
-    WebsocketsDispatcher& dispatcher () const;
-
-  protected:
-
-    ArdourSurface::ArdourWebsockets& _surface;
-
+protected:
+	ArdourSurface::ArdourWebsockets& _surface;
 };
 
 #endif // surface_component_h

@@ -35,7 +35,7 @@ using namespace ArdourSurface;
 #include "pbd/abstract_ui.cc" // instantiate template
 
 ArdourWebsockets::ArdourWebsockets (Session& s)
-    : ControlProtocol (s, X_(SURFACE_NAME))
+    : ControlProtocol (s, X_ (SURFACE_NAME))
     , AbstractUI<ArdourWebsocketsUIRequest> (name ())
     , _strips (*this)
     , _globals (*this)
@@ -43,94 +43,95 @@ ArdourWebsockets::ArdourWebsockets (Session& s)
     , _server (*this)
     , _dispatcher (*this)
 {
-    _components.push_back (&_strips);
-    _components.push_back (&_globals);
-    _components.push_back (&_server);
-    _components.push_back (&_feedback);
-    _components.push_back (&_dispatcher);
+	_components.push_back (&_strips);
+	_components.push_back (&_globals);
+	_components.push_back (&_server);
+	_components.push_back (&_feedback);
+	_components.push_back (&_dispatcher);
 }
 
 ArdourWebsockets::~ArdourWebsockets ()
 {
-    stop();
+	stop ();
 }
 
 void*
 ArdourWebsockets::request_factory (uint32_t num_requests)
 {
-    /* AbstractUI<T>::request_buffer_factory() is a template method only
+	/* AbstractUI<T>::request_buffer_factory() is a template method only
        instantiated in this source module. To provide something visible for
        use in the interface/descriptor, we have this static method that is
        template-free.
     */
-    return request_buffer_factory (num_requests);
+	return request_buffer_factory (num_requests);
 }
 
 int
 ArdourWebsockets::set_active (bool yn)
 {
-    if (yn != active ()) {
-        if (yn) {
-            if (start ()) {
-                return -1;
-            }
-        } else {
-            if (stop ()) {
-                return -1;
-            }
-        }
-    }
+	if (yn != active ()) {
+		if (yn) {
+			if (start ()) {
+				return -1;
+			}
+		} else {
+			if (stop ()) {
+				return -1;
+			}
+		}
+	}
 
-    return ControlProtocol::set_active (yn);
+	return ControlProtocol::set_active (yn);
 }
 
 void
 ArdourWebsockets::thread_init ()
 {
-    pthread_set_name (event_loop_name ().c_str ());
-    PBD::notify_event_loops_about_thread_creation (pthread_self (), event_loop_name (), 2048);
-    SessionEvent::create_per_thread_pool (event_loop_name (), 128);
+	pthread_set_name (event_loop_name ().c_str ());
+	PBD::notify_event_loops_about_thread_creation (pthread_self (), event_loop_name (), 2048);
+	SessionEvent::create_per_thread_pool (event_loop_name (), 128);
 }
 
 void
 ArdourWebsockets::do_request (ArdourWebsocketsUIRequest* req)
 {
-    if (req->type == CallSlot) {
-        call_slot (MISSING_INVALIDATOR, req->the_slot);
-    } else if (req->type == Quit) {
-        stop ();
-    }
+	if (req->type == CallSlot) {
+		call_slot (MISSING_INVALIDATOR, req->the_slot);
+	} else if (req->type == Quit) {
+		stop ();
+	}
 }
 
 int
 ArdourWebsockets::start ()
 {
-    // startup the event loop thread
-    BaseUI::run ();
+	/* startup the event loop thread */
+	BaseUI::run ();
 
-    for (std::vector<SurfaceComponent *>::iterator it = _components.begin ();
-            it != _components.end (); ++it) {
-        int rc = (*it)->start ();
-        if (rc != 0) {
-            return -1;
-        }
-    }
+	for (std::vector<SurfaceComponent*>::iterator it = _components.begin ();
+	     it != _components.end (); ++it) {
+		int rc = (*it)->start ();
+		if (rc != 0) {
+			return -1;
+		}
+	}
 
-    PBD::info << "ArdourWebsockets: started" << endmsg;
+	PBD::info << "ArdourWebsockets: started" << endmsg;
 
-    return 0;
+	return 0;
 }
 
 int
-ArdourWebsockets::stop () {
-    for (std::vector<SurfaceComponent *>::iterator it = _components.begin ();
-            it != _components.end (); ++it) {
-        (*it)->stop ();
-    }
+ArdourWebsockets::stop ()
+{
+	for (std::vector<SurfaceComponent*>::iterator it = _components.begin ();
+	     it != _components.end (); ++it) {
+		(*it)->stop ();
+	}
 
-    BaseUI::quit ();
-    
-    PBD::info << "ArdourWebsockets: stopped" << endmsg;
+	BaseUI::quit ();
 
-    return 0;
+	PBD::info << "ArdourWebsockets: stopped" << endmsg;
+
+	return 0;
 }
