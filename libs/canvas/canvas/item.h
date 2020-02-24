@@ -37,7 +37,6 @@
 
 namespace ArdourCanvas
 {
-struct Rect;
 
 class Canvas;
 class ScrollGroup;
