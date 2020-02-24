@@ -399,11 +399,9 @@ Session::post_engine_init ()
 
 	ltc_tx_initialize();
 
-	_state_of_the_state = Clean;
-
 	Port::set_connecting_blocked (false);
 
-	DirtyChanged (); /* EMIT SIGNAL */
+	set_clean ();
 
 	/* Now, finally, we can fill the playback buffers */
 
@@ -425,9 +423,7 @@ Session::session_loaded ()
 {
 	SessionLoaded();
 
-	_state_of_the_state = Clean;
-
-	DirtyChanged (); /* EMIT SIGNAL */
+	set_clean ();
 
 	if (_is_new) {
 		save_state ("");
@@ -651,8 +647,6 @@ Session::create (const string& session_template, BusProfile const * bus_profile)
 
 	}
 
-	_state_of_the_state = Clean;
-
 	/* set up Master Out and Monitor Out if necessary */
 
 	if (bus_profile) {
@@ -669,6 +663,8 @@ Session::create (const string& session_template, BusProfile const * bus_profile)
 				add_monitor_section ();
 		}
 	}
+
+	set_clean ();
 
 	return 0;
 }
