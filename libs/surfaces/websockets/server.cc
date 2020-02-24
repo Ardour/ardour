@@ -388,7 +388,28 @@ WebsocketsServer::lws_callback (struct lws* wsi, enum lws_callback_reasons reaso
 			server->write_client (wsi);
 			break;
 
+		case LWS_CALLBACK_FILTER_NETWORK_CONNECTION:
+		case LWS_CALLBACK_FILTER_PROTOCOL_CONNECTION:
+		case LWS_CALLBACK_SERVER_NEW_CLIENT_INSTANTIATED:
+		case LWS_CALLBACK_PROTOCOL_INIT:
+		case LWS_CALLBACK_PROTOCOL_DESTROY:
+		case LWS_CALLBACK_WSI_CREATE:
+		case LWS_CALLBACK_WSI_DESTROY:
+		case LWS_CALLBACK_LOCK_POLL:
+		case LWS_CALLBACK_UNLOCK_POLL:
+		case LWS_CALLBACK_WS_PEER_INITIATED_CLOSE:
+			break;
+
+		/* TODO: handle HTTP connections.
+		 * Serve static ctrl-surface pages, JS, CSS etc.
+		 */
+
 		default:
+#ifndef NDEBUG
+			/* see libwebsockets.h lws_callback_reasons */
+			std::cerr << "LWS: unhandled callback " << reason << std::endl;
+#endif
+			return -1;
 			break;
 	}
 
