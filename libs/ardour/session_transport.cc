@@ -1807,6 +1807,7 @@ void
 Session::engine_running ()
 {
 	_transport_fsm->start ();
+	reset_xrun_count ();
 }
 
 void

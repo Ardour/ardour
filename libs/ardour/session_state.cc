@@ -415,6 +415,7 @@ Session::post_engine_init ()
 		}
 	}
 
+	reset_xrun_count ();
 	return 0;
 }
 
@@ -436,6 +437,7 @@ Session::session_loaded ()
 
 	BootMessage (_("Filling playback buffers"));
 	force_locate (_transport_sample, MustStop);
+	reset_xrun_count ();
 }
 
 string
@@ -665,6 +667,7 @@ Session::create (const string& session_template, BusProfile const * bus_profile)
 	}
 
 	set_clean ();
+	reset_xrun_count ();
 
 	return 0;
 }
