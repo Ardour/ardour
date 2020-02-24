@@ -584,7 +584,6 @@ Region::special_set_position (samplepos_t pos)
 	 * a way to store its "natural" or "captured" position.
 	 */
 
-	_position = _position;
 	_position = pos;
 }
 
