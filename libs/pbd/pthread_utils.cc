@@ -285,7 +285,7 @@ pbd_mach_set_realtime_policy (pthread_t thread_id, double period_ns)
 	kern_return_t rv = thread_policy_get (pthread_mach_thread_np (thread_id),
 			THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t) &policy,
 			&msgt, &dflt);
-	printf ("Mach Thread(%p) %d %d %d %d DFLT %d OK: %d\n", thread_id, policy.period, policy.computation, policy.constraint, policy.preemptible, dflt, rv == KERN_SUCCESS);
+	printf ("Mach Thread(%p) get: period=%d comp=%d constraint=%d preemt=%d OK: %d\n", thread_id, policy.period, policy.computation, policy.constraint, policy.preemptible, rv == KERN_SUCCESS);
 #endif
 
 	mach_timebase_info_data_t timebase_info;
@@ -301,7 +301,7 @@ pbd_mach_set_realtime_policy (pthread_t thread_id, double period_ns)
 			THREAD_TIME_CONSTRAINT_POLICY_COUNT);
 
 #ifndef NDEBUG
-	printf ("Mach Thread(%p) %d %d %d %d OK: %d\n", thread_id, policy.period, policy.computation, policy.constraint, policy.preemptible, res == KERN_SUCCESS);
+	printf ("Mach Thread(%p) set: period=%d comp=%d constraint=%d preemt=%d OK: %d\n", thread_id, policy.period, policy.computation, policy.constraint, policy.preemptible, res == KERN_SUCCESS);
 #endif
 	return res != KERN_SUCCESS;
 #endif
