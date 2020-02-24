@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifdef DEBUG
+#ifndef NDEBUG
 #include <iostream>
 #endif
 
@@ -245,7 +245,7 @@ WebsocketsServer::recv_client (Client wsi, void* buf, size_t len)
 		return;
 	}
 
-#ifdef DEBUG
+#ifndef NDEBUG
 	std::cerr << "RX " << msg.state ().debug_str () << std::endl;
 #endif
 
@@ -282,7 +282,7 @@ WebsocketsServer::write_client (Client wsi)
 	size_t        len = msg.serialize (out_buf + LWS_PRE, 1024 - LWS_PRE);
 
 	if (len > 0) {
-#ifdef DEBUG
+#ifndef NDEBUG
 		std::cerr << "TX " << msg.state ().debug_str () << std::endl;
 #endif
 		lws_write (wsi, out_buf + LWS_PRE, len, LWS_WRITE_TEXT);

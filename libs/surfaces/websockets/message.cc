@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifdef DEBUG
+#ifndef NDEBUG
 #include <iostream>
 #endif
 
@@ -97,7 +97,7 @@ NodeStateMessage::NodeStateMessage (void* buf, size_t len)
 		_valid = true;
 
 	} catch (const std::exception& exc) {
-#ifdef DEBUG
+#ifndef NDEBUG
 		std::cerr << "cannot parse message - " << exc.what () << std::endl;
 #endif
 	}
