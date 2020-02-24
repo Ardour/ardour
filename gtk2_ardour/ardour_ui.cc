@@ -571,9 +571,6 @@ ARDOUR_UI::engine_running (uint32_t cnt)
 		post_engine();
 	}
 
-	if (_session) {
-		_session->reset_xrun_count ();
-	}
 	update_disk_space ();
 	update_cpu_load ();
 	update_sample_rate (AudioEngine::instance()->sample_rate());
