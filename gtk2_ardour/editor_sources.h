@@ -120,6 +120,7 @@ private:
 
 	void add_source (boost::shared_ptr<ARDOUR::Region>);
 	void remove_source (boost::shared_ptr<ARDOUR::Source>);
+	void remove_weak_region (boost::weak_ptr<ARDOUR::Region>);
 	void remove_weak_source (boost::weak_ptr<ARDOUR::Source>);
 
 	void clock_format_changed ();
@@ -150,6 +151,7 @@ private:
 	PBD::ScopedConnection source_property_connection;
 	PBD::ScopedConnection add_source_connection;
 	PBD::ScopedConnection remove_source_connection;
+	PBD::ScopedConnectionList remove_region_connections;
 
 	PBD::ScopedConnection editor_freeze_connection;
 	PBD::ScopedConnection editor_thaw_connection;

@@ -320,6 +320,23 @@ EditorSources::remove_source (boost::shared_ptr<ARDOUR::Source> source)
 }
 
 void
+EditorSources::remove_weak_region (boost::weak_ptr<ARDOUR::Region> r)
+{
+	boost::shared_ptr<ARDOUR::Region> region = r.lock();
+	if (!region) {
+		return;
+	}
+	TreeModel::Children rows = _model->children();
+	for (TreeModel::iterator i = rows.begin(); i != rows.end(); ++i) {
+		boost::shared_ptr<ARDOUR::Region> rr = (*i)[_columns.region];
+		if (rr = region) {
+			_model->erase(i);
+			break;
+		}
+	}
+}
+
+void
 EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Region> region)
 {
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::record_state_changed, row, region);
@@ -409,9 +426,11 @@ EditorSources::redisplay ()
 		return;
 	}
 
+	remove_region_connections.drop_connections ();
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 	_model->clear ();
 	_model->set_sort_column (-2, SORT_ASCENDING); //Disable sorting to gain performance
+
 
 	//Ask the region factory to fill our list of whole-file regions
 	RegionFactory::foreach_region (sigc::mem_fun (*this, &EditorSources::add_source));
@@ -438,6 +457,8 @@ EditorSources::add_source (boost::shared_ptr<ARDOUR::Region> region)
 	if (!fs || fs->empty()) {
 		return;
 	}
+
+	region->DropReferences.connect (remove_region_connections, MISSING_INVALIDATOR, boost::bind (&EditorSources::remove_weak_region, this, boost::weak_ptr<Region> (region)), gui_context());
 
 	TreeModel::Row row = *(_model->append());
 	populate_row (row, region);
@@ -828,6 +849,7 @@ EditorSources::get_dragged_region ()
 void
 EditorSources::clear ()
 {
+	remove_region_connections.drop_connections ();
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore> (0));
 	_model->clear ();
 	_display.set_model (_model);
