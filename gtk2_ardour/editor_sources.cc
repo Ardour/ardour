@@ -81,9 +81,6 @@ EditorSources::EditorSources (Editor* e)
 	: EditorComponent (e)
 	, old_focus (0)
 	, tags_editable (0)
-	, _menu (0)
-	, _selection (0)
-	, _no_redisplay (false)
 {
 	_display.set_size_request (100, -1);
 	_display.set_rules_hint (true);
@@ -280,11 +277,6 @@ EditorSources::set_session (ARDOUR::Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (s) {
-
-		/*  Currently, none of the displayed properties are mutable, so there is no reason to register for changes
-		 * ARDOUR::Region::RegionPropertyChanged.connect (source_property_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::source_changed, this, _1, _2), gui_context());
-		*/
-
 		ARDOUR::RegionFactory::CheckNewRegion.connect (add_source_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::add_source, this, _1), gui_context());
 
 		s->SourceRemoved.connect (remove_source_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::remove_weak_source, this, _1), gui_context());
@@ -420,10 +412,6 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Regio
 void
 EditorSources::redisplay ()
 {
-	if (_no_redisplay || !_session) {
-		return;
-	}
-
 	remove_region_connections.drop_connections ();
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 	_model->clear ();
@@ -812,17 +800,12 @@ EditorSources::tag_edit (const std::string& path, const std::string& new_text)
 }
 
 void
-EditorSources::selection_mapover (sigc::slot<void,boost::shared_ptr<Region> > sl)
-{
-}
-
-void
 EditorSources::drag_data_received (const RefPtr<Gdk::DragContext>& context,
                                    int x, int y,
                                    const SelectionData& data,
                                    guint info, guint time)
 {
-	/* ToDo:  allow dropping files/loops into the source list?  */
+	/* ToDo: allow dropping files/loops into the source list?  */
 }
 
 /** @return Region that has been dragged out of the list, or 0 */
@@ -899,5 +882,4 @@ EditorSources::get_state () const
 void
 EditorSources::set_state (const XMLNode & node)
 {
-
 }
