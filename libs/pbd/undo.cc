@@ -93,7 +93,12 @@ UndoTransaction::add_command (Command* const cmd)
 void
 UndoTransaction::remove_command (Command* const action)
 {
-	actions.remove (action);
+	list<Command*>::iterator i =std::find (actions.begin (), actions.end (), action);
+	if (i == actions.end ()) {
+		return;
+	}
+	actions.erase (i);
+	delete action;
 }
 
 bool
