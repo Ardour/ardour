@@ -1044,6 +1044,7 @@ def configure(conf):
 
     if Options.options.boost_sp_debug:
         conf.env.append_value('CXXFLAGS', '-DBOOST_SP_ENABLE_DEBUG_HOOKS')
+        conf.env.append_value('CXXFLAGS', '-DBOOST_NO_CXX11_CONSTEXPR')
 
     # executing a test program is n/a when cross-compiling
     if Options.options.dist_target != 'mingw':
