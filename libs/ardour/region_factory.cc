@@ -663,19 +663,17 @@ void
 RegionFactory::remove_regions_using_source (boost::shared_ptr<Source> src)
 {
 	Glib::Threads::Mutex::Lock lm (region_map_lock);
-
-	RegionMap::iterator i = region_map.begin();
-	while (i != region_map.end()) {
-
-		RegionMap::iterator j = i;
-		++j;
-
+	RegionList remove_regions;
+	for (RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
 		if (i->second->uses_source (src)) {
-			remove_from_region_name_map (i->second->name ());
-			region_map.erase (i);
-                }
+			remove_regions.push_back (i->second);
+		}
+	}
+	lm.release ();
 
-		i = j;
+	/* this will call RegionFactory::map_remove () */
+	for (RegionList::iterator i = remove_regions.begin(); i != remove_regions.end(); ++i) {
+		(*i)->drop_references ();
 	}
 }
 
