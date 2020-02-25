@@ -3375,7 +3375,7 @@ Session::cleanup_sources (CleanupReport& rep)
 {
 	// FIXME: needs adaptation to midi
 
-	vector<boost::shared_ptr<Source> > dead_sources;
+	SourceList dead_sources;
 	string audio_path;
 	string midi_path;
 	vector<string> candidates;
@@ -3390,6 +3390,8 @@ Session::cleanup_sources (CleanupReport& rep)
 	set<boost::shared_ptr<Source> > sources_used_by_this_snapshot;
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state | InCleanup);
+
+	Glib::Threads::Mutex::Lock ls (source_lock, Glib::Threads::NOT_LOCK);
 
 	/* this is mostly for windows which doesn't allow file
 	 * renaming if the file is in use. But we don't special
@@ -3418,6 +3420,7 @@ Session::cleanup_sources (CleanupReport& rep)
 	rep.paths.clear ();
 	rep.space = 0;
 
+	ls.acquire ();
 	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ) {
 
 		SourceMap::iterator tmp;
@@ -3431,11 +3434,11 @@ Session::cleanup_sources (CleanupReport& rep)
 
 		if (!i->second->used() && (i->second->length(i->second->natural_position()) > 0)) {
 			dead_sources.push_back (i->second);
-			i->second->drop_references ();
 		}
 
 		i = tmp;
 	}
+	ls.release ();
 
 	/* build a list of all the possible audio directories for the session */
 
@@ -3476,6 +3479,7 @@ Session::cleanup_sources (CleanupReport& rep)
 	/*  add our current source list
 	*/
 
+	ls.acquire ();
 	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ) {
 		boost::shared_ptr<FileSource> fs;
 		SourceMap::iterator tmp = i;
@@ -3523,11 +3527,20 @@ Session::cleanup_sources (CleanupReport& rep)
 				 * reference to it.
 				 */
 
+				dead_sources.push_back (i->second);
 				sources.erase (i);
 			}
 		}
 
 		i = tmp;
+	}
+	ls.release ();
+
+	for (SourceList::iterator i = dead_sources.begin(); i != dead_sources.end(); ++i) {
+		/* The following triggers Region::source_deleted (), which
+		 * causes regions to drop the given source */
+		(*i)->drop_references ();
+		SourceRemoved (*i); /* EMIT SIGNAL */
 	}
 
 	/* now check each candidate source to see if it exists in the list of
@@ -3661,7 +3674,10 @@ Session::cleanup_sources (CleanupReport& rep)
 		rep.space += statbuf.st_size;
 	}
 
-	/* dump the history list */
+	/* drop last Source references */
+	dead_sources.clear ();
+
+	/* dump the history list, remove references */
 
 	_history.clear ();
 
