@@ -68,8 +68,12 @@ struct PluginBypassObserver {
 
 struct PluginParamValueObserver {
 	void operator() (ArdourFeedback* p, uint32_t strip_n, uint32_t plugin_n,
-	                 uint32_t param_n, boost::shared_ptr<AutomationControl> control)
+	                 uint32_t param_n, boost::weak_ptr<AutomationControl> ctrl)
 	{
+		boost::shared_ptr<AutomationControl> control = ctrl.lock ();
+		if (!control) {
+			return;
+		}
 		p->update_all (Node::strip_plugin_param_value, strip_n, plugin_n, param_n,
 		               ArdourStrips::plugin_param_value (control));
 	}
@@ -221,7 +225,7 @@ ArdourFeedback::observe_strip_plugin_param_values (uint32_t strip_n,
 
 		control->Changed.connect (_signal_connections, MISSING_INVALIDATOR,
 		                          boost::bind<void> (PluginParamValueObserver (), this, strip_n, plugin_n, param_n,
-		                                             control),
+		                                             boost::weak_ptr<AutomationControl>(control)),
 		                          event_loop ());
 	}
 }
