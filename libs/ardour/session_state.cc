@@ -2335,7 +2335,7 @@ Session::get_sources_as_xml ()
 	XMLNode* node = new XMLNode (X_("Sources"));
 	Glib::Threads::Mutex::Lock lm (source_lock);
 
-	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+	for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
 		node->add_child_nocopy (i->second->get_state());
 	}
 

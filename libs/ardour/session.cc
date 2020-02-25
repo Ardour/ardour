@@ -4488,7 +4488,7 @@ Session::count_sources_by_origin (const string& path)
 	uint32_t cnt = 0;
 	Glib::Threads::Mutex::Lock lm (source_lock);
 
-	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+	for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
 		boost::shared_ptr<FileSource> fs
 			= boost::dynamic_pointer_cast<FileSource>(i->second);
 
