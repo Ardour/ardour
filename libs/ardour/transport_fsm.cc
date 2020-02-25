@@ -327,18 +327,23 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 
 			if (reversing()) {
 
-				if (most_recently_requested_speed > 0) {
+				if (most_recently_requested_speed >= 0.) {
 					transition (Forwards);
 				} else {
-					transition (Forwards);
+					transition (Backwards);
 				}
 
-				transition (Rolling);
+				if (fabs (most_recently_requested_speed) > 0.) {
 
-				api->set_transport_speed (last_speed_request.speed, last_speed_request.abort_capture, last_speed_request.clear_state, last_speed_request.as_default);
+					transition (Rolling);
 
-				if (most_recently_requested_speed != 0.0) {
-					roll_after_locate ();
+					api->set_transport_speed (last_speed_request.speed, last_speed_request.abort_capture, last_speed_request.clear_state, last_speed_request.as_default);
+
+					if (most_recently_requested_speed != 0.0) {
+						roll_after_locate ();
+					}
+				} else {
+					transition (Stopped);
 				}
 
 			} else {
