@@ -356,7 +356,9 @@ TransportMasterManager::add (SyncSource type, std::string const & name, bool rem
 			return -1;
 		}
 
+#if defined BOOST_SP_ENABLE_DEBUG_HOOKS && defined BOOST_DEBUG_TMM
 		boost_debug_shared_ptr_mark_interesting (tm.get(), "tm");
+#endif
 		ret = add_locked (tm);
 	}
 
@@ -529,7 +531,9 @@ TransportMasterManager::set_state (XMLNode const & node, int version)
 		Glib::Threads::RWLock::WriterLock lm (lock);
 
 		_current_master.reset ();
+#if defined BOOST_SP_ENABLE_DEBUG_HOOKS && defined BOOST_DEBUG_TMM
 		boost_debug_list_ptrs ();
+#endif
 
 		/* TramsportMasters live for the entire life of the
 		 * program. TransportMasterManager::set_state() should only be
@@ -547,7 +551,9 @@ TransportMasterManager::set_state (XMLNode const & node, int version)
 				continue;
 			}
 
+#if defined BOOST_SP_ENABLE_DEBUG_HOOKS && defined BOOST_DEBUG_TMM
 			boost_debug_shared_ptr_mark_interesting (tm.get(), "tm");
+#endif
 
 			if (add_locked (tm)) {
 				continue;
