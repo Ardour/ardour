@@ -28,6 +28,7 @@
 
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
+#include "ardour/boost_debug.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
 #include "ardour/region.h"
@@ -35,6 +36,8 @@
 #include "ardour/session.h"
 
 #include "pbd/i18n.h"
+
+// #define BOOST_DEBUG_REGION
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -98,8 +101,8 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, bo
 		}
 	}
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-	// boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
+#if defined BOOST_SP_ENABLE_DEBUG_HOOKS && defined BOOST_DEBUG_REGION
+	boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
 #endif
 	return ret;
 }
@@ -139,8 +142,8 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 		}
 	}
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-        // boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
+#if defined BOOST_SP_ENABLE_DEBUG_HOOKS && defined BOOST_DEBUG_REGION
+	boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
 #endif
 	return ret;
 }
@@ -180,8 +183,8 @@ RegionFactory::create (boost::shared_ptr<Region> region, MusicSample offset, con
 		}
 	}
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-	// boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
+#if defined BOOST_SP_ENABLE_DEBUG_HOOKS && defined BOOST_DEBUG_REGION
+	boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
 #endif
 	return ret;
 }
@@ -221,8 +224,8 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 		}
 	}
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-        // boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
+#if defined BOOST_SP_ENABLE_DEBUG_HOOKS && defined BOOST_DEBUG_REGION
+	boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
 #endif
 	return ret;
 }
@@ -265,8 +268,8 @@ RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool a
 		}
 	}
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-	// boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
+#if defined BOOST_SP_ENABLE_DEBUG_HOOKS && defined BOOST_DEBUG_REGION
+	boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
 #endif
 	return ret;
 }
@@ -310,8 +313,8 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 		}
 	}
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-	// boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
+#if defined BOOST_SP_ENABLE_DEBUG_HOOKS && defined BOOST_DEBUG_REGION
+	boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
 #endif
 	return ret;
 }
