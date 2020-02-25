@@ -161,19 +161,19 @@ EditorSources::EditorSources (Editor* e)
 	_display.set_headers_visible (true);
 	_display.set_rules_hint ();
 
-	//set the color of the name field
+	/* set the color of the name field */
 	TreeViewColumn* tv_col = _display.get_column(0);
 	CellRendererText* renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
 	tv_col->add_attribute(renderer->property_text(), _columns.name);
 	tv_col->add_attribute(renderer->property_foreground_gdk(), _columns.color_);
 
-	//Tags cell: make editable
+	/* Tags cell: make editable */
 	CellRendererText* region_tags_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (1));
 	region_tags_cell->property_editable() = true;
 	region_tags_cell->signal_edited().connect (sigc::mem_fun (*this, &EditorSources::tag_edit));
 	region_tags_cell->signal_editing_started().connect (sigc::mem_fun (*this, &EditorSources::tag_editing_started));
 
-	//right-align the Natural Pos column
+	/* right-align the Natural Pos column */
 	TreeViewColumn* nat_col = _display.get_column(3);
 	nat_col->set_alignment (ALIGN_RIGHT);
 	renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (3));
@@ -181,7 +181,7 @@ EditorSources::EditorSources (Editor* e)
 		renderer->property_xalign() = ( 1.0 );
 	}
 
-	//the PATH field should expand when the pane is opened wider
+	/* the PATH field should expand when the pane is opened wider */
 	tv_col = _display.get_column(4);
 	renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (4));
 	tv_col->add_attribute(renderer->property_text(), _columns.path);
@@ -284,7 +284,7 @@ EditorSources::set_session (ARDOUR::Session* s)
 		/*  Currently, none of the displayed properties are mutable, so there is no reason to register for changes
 		 * ARDOUR::Region::RegionPropertyChanged.connect (source_property_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::source_changed, this, _1, _2), gui_context());
 		*/
-		
+
 		ARDOUR::RegionFactory::CheckNewRegion.connect (add_source_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::add_source, this, _1), gui_context());
 
 		s->SourceRemoved.connect (remove_source_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::remove_weak_source, this, _1), gui_context());
@@ -345,9 +345,9 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Regio
 		return;
 	}
 
-	boost::shared_ptr<ARDOUR::Source> source = region->source();  //ToDo:  is it OK to use only the first source?
+	boost::shared_ptr<ARDOUR::Source> source = region->source(); // ToDo: is it OK to use only the first source?
 
-	//COLOR  (for missing files)
+	/* COLOR  (for missing files) */
 	Gdk::Color c;
 	bool missing_source = boost::dynamic_pointer_cast<SilentFileSource>(source) != NULL;
 	if (missing_source) {
@@ -357,33 +357,33 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Regio
 	}
 	row[_columns.color_] = c;
 
-	//NAME
+	/* NAME */
 	std::string str = region->name();
-	//if a multichannel region, show the number of channels  ToDo:  make a sortable column for this?
+	/* if a multichannel region, show the number of channels
+	 * ToDo:  make a sortable column for this?
+	 */
 	if ( region->n_channels() > 1 ) {
 		str += string_compose("[%1]", region->n_channels());
 	}
 	row[_columns.name] = str;
 
-	//TAGS
+	/* TAGS */
 	row[_columns.tags] = region->tags();
 
 	row[_columns.region] = region;
 	row[_columns.take_id] = source->take_id();
 
-	//PATH
+	/* PATH */
 	string pathstr = source->name();
 	if (missing_source) {
 		pathstr = _("(MISSING) ") + Gtkmm2ext::markup_escape_text (source->name());
 	} else {
-
-		//is it a file?
+		/* is it a file? */
 		boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource>(source);
 		if (!fs) {
-			pathstr = Gtkmm2ext::markup_escape_text (source->name());  //someday:  sequence region(?)
+			pathstr = Gtkmm2ext::markup_escape_text (source->name()); // someday: sequence region(?)
 		} else {
-	
-			//audio file?
+			/* audio file? */
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(source);
 			if (afs) {
 				const string audio_directory = _session->session_directory().sound_path();
@@ -391,8 +391,7 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Regio
 					pathstr = Gtkmm2ext::markup_escape_text (fs->path());
 				}
 			}
-			
-			//midi file?
+			/* midi file? */
 			boost::shared_ptr<SMFSource> mfs = boost::dynamic_pointer_cast<SMFSource>(source);
 			if (mfs) {
 				const string midi_directory = _session->session_directory().midi_path();
@@ -400,16 +399,15 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Regio
 					pathstr = Gtkmm2ext::markup_escape_text (fs->path());
 				}
 			}
-			
 		}
 	}
-	
+
 	row[_columns.path] = pathstr;
 
-	//Natural Position (samples, an invisible column for sorting)
+	/* Natural Position (samples, an invisible column for sorting) */
 	row[_columns.natural_s] = source->natural_position();
 
-	//Natural Position (text representation)
+	/* Natural Position (text representation) */
 	if (source->have_natural_position()) {
 		char buf[64];
 		format_position (source->natural_position(), buf, sizeof (buf));
@@ -429,10 +427,9 @@ EditorSources::redisplay ()
 	remove_region_connections.drop_connections ();
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 	_model->clear ();
-	_model->set_sort_column (-2, SORT_ASCENDING); //Disable sorting to gain performance
+	_model->set_sort_column (-2, SORT_ASCENDING); // Disable sorting to gain performance
 
-
-	//Ask the region factory to fill our list of whole-file regions
+	/* Ask the region factory to fill our list of whole-file regions */
 	RegionFactory::foreach_region (sigc::mem_fun (*this, &EditorSources::add_source));
 
 	_model->set_sort_column (0, SORT_ASCENDING); // re-enable sorting
@@ -446,13 +443,17 @@ EditorSources::add_source (boost::shared_ptr<ARDOUR::Region> region)
 		return;
 	}
 
-	//by definition, the Source List only shows whole-file regions
-	//this roughly equates to Source objects, but preserves the stereo-ness (or multichannel-ness) of a stereo source file.
+	/* by definition, the Source List only shows whole-file regions
+	 * this roughly equates to Source objects, but preserves the stereo-ness
+	 * (or multichannel-ness) of a stereo source file.
+	 */
 	if ( !region->whole_file() ) {
 		return;
 	}
-	
-	//we only show files-on-disk.  if there's some other kind of source, we ignore it (for now)
+
+	/* we only show files-on-disk.
+	 * if there's some other kind of source, we ignore it (for now)
+	 */
 	boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (region->source());
 	if (!fs || fs->empty()) {
 		return;
@@ -468,7 +469,7 @@ void
 EditorSources::source_changed (boost::shared_ptr<ARDOUR::Region> region)
 {
 	/* Currently never reached .. we have no mutable properties shown in the list*/
-	
+
 	TreeModel::iterator i;
 	TreeModel::Children rows = _model->children();
 
@@ -496,7 +497,7 @@ EditorSources::selection_changed ()
 
 			if ((iter = _model->get_iter (*i))) {
 
-				//highlight any regions in the editor that use this region's source
+				/* highlight any regions in the editor that use this region's source */
  				boost::shared_ptr<ARDOUR::Region> region = (*iter)[_columns.region];
  				if (!region) continue;
 
@@ -620,7 +621,7 @@ void
 EditorSources::recover_selected_sources ()
 {
 	ARDOUR::RegionList to_be_recovered;
-	
+
 	if (_display.get_selection()->count_selected_rows() > 0) {
 
 		TreeIter iter;
@@ -635,11 +636,9 @@ EditorSources::recover_selected_sources ()
 		}
 	}
 
-
 	/* ToDo */
-	_editor->recover_regions(to_be_recovered);  //this operation should be undo-able
+	_editor->recover_regions(to_be_recovered); // this operation should be undo-able
 }
-
 
 void
 EditorSources::remove_selected_sources ()
@@ -660,9 +659,9 @@ EditorSources::remove_selected_sources ()
 	int opt = prompter.run ();
 
 	if ( opt >= 1) {
-		
+
 		std::list<boost::weak_ptr<ARDOUR::Source> > to_be_removed;
-		
+
 		if (_display.get_selection()->count_selected_rows() > 0) {
 
 			TreeIter iter;
@@ -675,7 +674,7 @@ EditorSources::remove_selected_sources ()
 				if ((iter = _model->get_iter (*i))) {
 
 					boost::shared_ptr<ARDOUR::Region> region = (*iter)[_columns.region];
-	
+
 	 				if (!region) continue;
 
  					boost::shared_ptr<ARDOUR::Source> source = region->source();
@@ -688,25 +687,24 @@ EditorSources::remove_selected_sources ()
 							_editor->set_selected_regionview_from_region_list (*region, Selection::Add);
 							_change_connection.block (false);
 						}
-						
+
 						to_be_removed.push_back(source);
 					}
 				}
 
 			}
 
-			_editor->remove_selected_regions();  //this operation is undo-able
+			_editor->remove_selected_regions(); // this operation is undo-able
 
-			if (opt==2) {	
+			if (opt==2) {
 				for (std::list<boost::weak_ptr<ARDOUR::Source> >::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i) {
-						_session->remove_source(*i);  //this operation is (currently) not undo-able
+						_session->remove_source(*i); // this operation is (currently) not undo-able
 				}
 			}
 		}
 	}
 
 }
-
 
 bool
 EditorSources::key_press (GdkEventKey* ev)
@@ -735,7 +733,7 @@ EditorSources::key_press (GdkEventKey* ev)
 
 	case GDK_BackSpace:
 		remove_selected_sources();
-		return true; 
+		return true;
 
 	default:
 		break;
@@ -807,19 +805,16 @@ EditorSources::tag_edit (const std::string& path, const std::string& new_text)
 	if (region) {
 		region->set_tags (new_text);
 
-		_session->set_dirty();  //whole-file regions aren't in a playlist to catch property changes, so we need to explicitly set the session dirty
+		_session->set_dirty(); // whole-file regions aren't in a playlist to catch property changes, so we need to explicitly set the session dirty
 
 		populate_row ((*row_iter), region);
 	}
 }
 
-
 void
 EditorSources::selection_mapover (sigc::slot<void,boost::shared_ptr<Region> > sl)
 {
-
 }
-
 
 void
 EditorSources::drag_data_received (const RefPtr<Gdk::DragContext>& context,
@@ -881,7 +876,7 @@ void
 EditorSources::freeze_tree_model ()
 {
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
-	_model->set_sort_column (-2, SORT_ASCENDING); //Disable sorting to gain performance
+	_model->set_sort_column (-2, SORT_ASCENDING); // Disable sorting to gain performance
 }
 
 void
@@ -896,7 +891,7 @@ EditorSources::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("SourcesList"));
 
-	//TODO:  save sort state?
+	//TODO: save sort state?
 
 	return *node;
 }

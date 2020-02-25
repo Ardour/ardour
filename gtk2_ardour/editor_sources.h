@@ -43,7 +43,7 @@ public:
 	}
 
 	void clear ();
-	
+
 	void selection_mapover (sigc::slot<void,boost::shared_ptr<ARDOUR::Region> >);
 
 	boost::shared_ptr<ARDOUR::Region> get_dragged_region ();
@@ -157,8 +157,8 @@ private:
 	PBD::ScopedConnection editor_thaw_connection;
 
 	Selection* _selection;
-	
+
 	bool _no_redisplay;
 };
 
-#endif /* __gtk_ardour_editor_regions_h__ */
+#endif
