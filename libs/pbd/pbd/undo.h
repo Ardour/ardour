@@ -79,8 +79,6 @@ private:
 	struct timeval      _timestamp;
 	bool                _clearing;
 
-	friend void command_death (UndoTransaction*, Command*);
-
 	void about_to_explicitly_delete ();
 };
 

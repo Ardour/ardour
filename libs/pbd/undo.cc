@@ -52,7 +52,7 @@ UndoTransaction::~UndoTransaction ()
 	clear ();
 }
 
-void
+static void
 command_death (UndoTransaction* ut, Command* c)
 {
 	if (ut->clearing ()) {
