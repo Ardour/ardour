@@ -25,15 +25,24 @@
    unless the program was configured with --boost-sp-debug
 */
 
-//#define BOOST_MARK_ROUTE(p) boost_debug_shared_ptr_mark_interesting((p).get(),"Route")
-//#define BOOST_MARK_TRACK(p) boost_debug_shared_ptr_mark_interesting((p).get(),"Track")
-//#define BOOST_MARK_VCA(p) boost_debug_shared_ptr_mark_interesting((p).get(),"ControlMaster")
-//#define BOOST_SHOW_POINTERS() boost_debug_list_ptrs()
+//#define BOOST_MARK_ROUTE(p)  boost_debug_shared_ptr_mark_interesting ((p).get(),"Route")
+//#define BOOST_MARK_TRACK(p)  boost_debug_shared_ptr_mark_interesting ((p).get(),"Track")
+//#define BOOST_MARK_VCA(p)    boost_debug_shared_ptr_mark_interesting ((p).get(),"ControlMaster")
+//#define BOOST_MARK_REGION(p) boost_debug_shared_ptr_mark_interesting ((p).get(), "Region")
+//#define BOOST_MARK_SOURCE(p) boost_debug_shared_ptr_mark_interesting ((p).get(), "Source")
+//#define BOOST_MARK_TMM(p)    boost_debug_shared_ptr_mark_interesting ((p).get(), "TransportMaster")
 
 #define BOOST_MARK_ROUTE(p)
 #define BOOST_MARK_TRACK(p)
 #define BOOST_MARK_VCA(p)
-#define BOOST_SHOW_POINTERS()
+#define BOOST_MARK_REGION(p)
+#define BOOST_MARK_SOURCE(p)
+#define BOOST_MARK_TMM(p)
 
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
+#define BOOST_SHOW_POINTERS() boost_debug_list_ptrs()
+#else
+#define BOOST_SHOW_POINTERS()
+#endif
 
 #endif /* __libardour_boost_debug_h__ */

@@ -16,17 +16,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "pbd/stateful.h"
+
 #include "ardour/audioengine.h"
+#include "ardour/boost_debug.h"
 #include "ardour/debug.h"
 #include "ardour/disk_reader.h"
 #include "ardour/session.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/transport_master_manager.h"
 
-#include "pbd/boost_debug.cc"
 #include "pbd/i18n.h"
-#include "pbd/stateful.h"
 
+using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
@@ -356,9 +358,8 @@ TransportMasterManager::add (SyncSource type, std::string const & name, bool rem
 			return -1;
 		}
 
-#if defined BOOST_SP_ENABLE_DEBUG_HOOKS && defined BOOST_DEBUG_TMM
-		boost_debug_shared_ptr_mark_interesting (tm.get(), "tm");
-#endif
+		BOOST_MARK_TMM (tm);
+
 		ret = add_locked (tm);
 	}
 
@@ -531,7 +532,7 @@ TransportMasterManager::set_state (XMLNode const & node, int version)
 		Glib::Threads::RWLock::WriterLock lm (lock);
 
 		_current_master.reset ();
-#if defined BOOST_SP_ENABLE_DEBUG_HOOKS && defined BOOST_DEBUG_TMM
+#if 0
 		boost_debug_list_ptrs ();
 #endif
 
@@ -551,9 +552,7 @@ TransportMasterManager::set_state (XMLNode const & node, int version)
 				continue;
 			}
 
-#if defined BOOST_SP_ENABLE_DEBUG_HOOKS && defined BOOST_DEBUG_TMM
-			boost_debug_shared_ptr_mark_interesting (tm.get(), "tm");
-#endif
+			BOOST_MARK_TMM (tm);
 
 			if (add_locked (tm)) {
 				continue;
