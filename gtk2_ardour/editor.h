@@ -1425,12 +1425,17 @@ private:
 	/* import specific info */
 
 	struct EditorImportStatus : public ARDOUR::ImportStatus {
-	    Editing::ImportMode mode;
-	    samplepos_t pos;
-	    int target_tracks;
-	    int target_regions;
-	    boost::shared_ptr<ARDOUR::Track> track;
-	    bool replace;
+		void clear () {
+			ARDOUR::ImportStatus::clear ();
+			track.reset ();
+		}
+
+		Editing::ImportMode mode;
+		samplepos_t pos;
+		int target_tracks;
+		int target_regions;
+		boost::shared_ptr<ARDOUR::Track> track;
+		bool replace;
 	};
 
 	EditorImportStatus import_status;

@@ -383,7 +383,7 @@ Editor::do_import (vector<string>          paths,
 		} else {
 			ipw.show ();
 			ok = (import_sndfiles (paths, disposition, mode, quality, pos, 1, 1, track, false, instrument) == 0);
-			import_status.sources.clear();
+			import_status.clear();
 		}
 
 	} else {
@@ -429,7 +429,7 @@ Editor::do_import (vector<string>          paths,
 				}
 
 				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, 1, -1, track, replace, instrument) == 0);
-				import_status.sources.clear();
+				import_status.clear();
 				break;
 
 			case Editing::ImportDistinctChannels:
@@ -438,7 +438,7 @@ Editor::do_import (vector<string>          paths,
 				to_import.push_back (*a);
 
 				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, -1, -1, track, replace, instrument) == 0);
-				import_status.sources.clear();
+				import_status.clear();
 				break;
 
 			case Editing::ImportSerializeFiles:
@@ -447,7 +447,7 @@ Editor::do_import (vector<string>          paths,
 				to_import.push_back (*a);
 
 				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, 1, 1, track, replace, instrument) == 0);
-				import_status.sources.clear();
+				import_status.clear();
 				break;
 
 			case Editing::ImportMergeFiles:
