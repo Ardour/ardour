@@ -244,7 +244,6 @@ libardour_sources = [
         'system_exec.cc',
         'revision.cc',
         'rt_midibuffer.cc',
-        'tape_file_matcher.cc',
         'template_utils.cc',
         'tempo.cc',
         'tempo_map_importer.cc',
