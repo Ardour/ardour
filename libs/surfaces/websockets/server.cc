@@ -411,9 +411,11 @@ WebsocketsServer::lws_callback (struct lws* wsi, enum lws_callback_reasons reaso
 		case LWS_CALLBACK_UNLOCK_POLL:
 		case LWS_CALLBACK_WS_PEER_INITIATED_CLOSE:
 		case LWS_CALLBACK_FILTER_HTTP_CONNECTION:
+#if LWS_LIBRARY_VERSION_MAJOR >= 3
 		case LWS_CALLBACK_HTTP_BIND_PROTOCOL:
 		case LWS_CALLBACK_ADD_HEADERS:
 		case LWS_CALLBACK_HTTP_CONFIRM_UPGRADE:
+#endif
 			break;
 
 		/* TODO: handle HTTP connections.
