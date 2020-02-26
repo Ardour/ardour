@@ -14,6 +14,10 @@ function dsp_ioconfig ()
 	return { { midi_in = 1, midi_out = 1, audio_in = -1, audio_out = -1}, }
 end
 
+function dsp_configure (ins, outs)
+	n_out = outs
+end
+
 -- "dsp_runmap" uses Ardour's internal processor API, eqivalent to
 -- 'connect_and_run()". There is no overhead (mapping, translating buffers).
 -- The lua implementation is responsible to map all the buffers directly.
@@ -41,8 +45,7 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	-- The following code is needed with "dsp_runmap" to work for arbitrary pin connections
 	-- this passes though all audio/midi data unprocessed.
 
-	ARDOUR.DSP.process_map (bufs, in_map, out_map, n_samples, offset, ARDOUR.DataType ("audio"))
-	ARDOUR.DSP.process_map (bufs, in_map, out_map, n_samples, offset, ARDOUR.DataType ("midi"))
+	ARDOUR.DSP.process_map (bufs, n_out, in_map, out_map, n_samples, offset)
 
 	-- equivalent lua code.
 	-- NOTE: the lua implementation below is intended for io-config [-1,-1].

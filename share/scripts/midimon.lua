@@ -54,13 +54,16 @@ function dsp_init (rate)
 	end
 end
 
+function dsp_configure (ins, outs)
+	n_out = outs
+end
+
 function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	local pos = self:shmem():atomic_get_int(0)
 	local buffer = self:shmem():to_int(1):array()
 
 	-- passthrough all data
-	ARDOUR.DSP.process_map (bufs, in_map, out_map, n_samples, offset, ARDOUR.DataType ("audio"))
-	ARDOUR.DSP.process_map (bufs, in_map, out_map, n_samples, offset, ARDOUR.DataType ("midi"))
+	ARDOUR.DSP.process_map (bufs, n_out, in_map, out_map, n_samples, offset)
 
 	-- then fill the event buffer
 	local ib = in_map:get (ARDOUR.DataType ("midi"), 0) -- index of 1st midi input
