@@ -75,40 +75,28 @@ ARDOUR::DSP::peaks (const float *data, float &min, float &max, uint32_t n_sample
 }
 
 void
-ARDOUR::DSP::process_map (BufferSet* bufs, const ChanMapping& in, const ChanMapping& out, pframes_t nframes, samplecnt_t offset, const DataType& dt)
+ARDOUR::DSP::process_map (BufferSet* bufs, const ChanCount& n_out, const ChanMapping& in_map, const ChanMapping& out_map, pframes_t nframes, samplecnt_t offset)
 {
-	const ChanMapping::Mappings& im (in.mappings());
-	const ChanMapping::Mappings& om (out.mappings());
-
-	for (ChanMapping::Mappings::const_iterator tm = im.begin(); tm != im.end(); ++tm) {
-		if (tm->first != dt) { continue; }
-		for (ChanMapping::TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
+	/* PluginInsert already handles most, in particular `no-inplace` buffers in case
+	 * or x-over connections, and through connections.
+	 *
+	 * This just fills output buffers, forwarding inputs as needed:
+	 * Input -> plugin-sink == plugin-src -> Output
+	 */
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		for (uint32_t out = 0; out < n_out.get (*t); ++out) {
 			bool valid;
-			const uint32_t idx = out.get (dt, i->second, &valid);
-			if (valid && idx != i->first) {
-				bufs->get_available (dt, idx).read_from (bufs->get_available (dt, i->first), nframes, offset, offset);
-			}
-		}
-	}
-	for (ChanMapping::Mappings::const_iterator tm = im.begin(); tm != im.end(); ++tm) {
-		if (tm->first != dt) { continue; }
-		for (ChanMapping::TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
-			bool valid;
-			in.get_src (dt, i->first, &valid);
+			uint32_t out_idx = out_map.get (*t, out, &valid);
 			if (!valid) {
-				bufs->get_available (dt, i->second).silence (nframes, offset);
+				continue;
 			}
-		}
-	}
-
-	/* reverse lookup (in case input map is empty */
-	for (ChanMapping::Mappings::const_iterator tm = om.begin(); tm != om.end(); ++tm) {
-		if (tm->first != dt) { continue; }
-		for (ChanMapping::TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
-			bool valid;
-			in.get_src (dt, i->first, &valid);
+			uint32_t in_idx = in_map.get (*t, out, &valid);
 			if (!valid) {
-				bufs->get_available (dt, i->second).silence (nframes, offset);
+				bufs->get_available (*t, out_idx).silence (nframes, offset);
+				continue;
+			}
+			if (in_idx != out_idx) {
+				bufs->get_available (*t, out_idx).read_from (bufs->get_available (*t, in_idx), nframes, offset, offset);
 			}
 		}
 	}

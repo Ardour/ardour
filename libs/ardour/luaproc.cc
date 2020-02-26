@@ -571,7 +571,7 @@ LuaProc::configure_io (ChanCount in, ChanCount out)
 		luabridge::LuaRef lua_dsp_configure = luabridge::getGlobal (L, "dsp_configure");
 		if (lua_dsp_configure.type () == LUA_TFUNCTION) {
 			try {
-				luabridge::LuaRef io = lua_dsp_configure (&in, &out);
+				luabridge::LuaRef io = lua_dsp_configure (in, out);
 				if (io.isTable ()) {
 					ChanCount lin (_selected_in);
 					ChanCount lout (_selected_out);
