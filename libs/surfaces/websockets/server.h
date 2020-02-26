@@ -81,6 +81,7 @@ private:
 	void del_client (Client);
 	void recv_client (Client, void* buf, size_t len);
 	void write_client (Client);
+	void reject_http_client (Client);
 
 	bool io_handler (Glib::IOCondition, lws_sockfd_type);
 
