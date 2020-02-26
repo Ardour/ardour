@@ -99,11 +99,7 @@ FileSource::existence_check ()
 void
 FileSource::prevent_deletion ()
 {
-	if (!(_flags & Destructive)) {
-		mark_immutable ();
-	} else {
-		_flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy));
-	}
+	mark_immutable ();
 }
 
 bool
@@ -517,20 +513,14 @@ out:
 void
 FileSource::mark_immutable ()
 {
-	/* destructive sources stay writable, and their other flags don't change.  */
-	if (!(_flags & Destructive)) {
-		_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
-		close();
-	}
+	_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
+	close();
 }
 
 void
 FileSource::mark_immutable_except_write ()
 {
-	/* destructive sources stay writable, and their other flags don't change.  */
-	if (!(_flags & Destructive)) {
-		_flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
-	}
+	_flags = Flag (_flags & ~(Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
 }
 
 void

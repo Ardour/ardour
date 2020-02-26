@@ -28,7 +28,6 @@
     the value of the variable.
 *****************************************************/
 
-CONFIG_VARIABLE (uint32_t, destructive_xfade_msecs,  "destructive-xfade-msecs", 2)
 CONFIG_VARIABLE (bool, use_region_fades, "use-region-fades", true)
 CONFIG_VARIABLE (bool, use_transport_fades, "use-transport-fades", true)
 CONFIG_VARIABLE (bool, use_monitor_fades, "use-monitor-fades", true)

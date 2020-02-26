@@ -2173,15 +2173,7 @@ void
 RouteUI::track_mode_changed (void)
 {
 	assert(is_track());
-	switch (track()->mode()) {
-		case ARDOUR::NonLayered:
-		case ARDOUR::Normal:
-			rec_enable_button->set_icon (ArdourIcon::RecButton);
-			break;
-		case ARDOUR::Destructive:
-			rec_enable_button->set_icon (ArdourIcon::RecTapeMode);
-			break;
-	}
+	rec_enable_button->set_icon (ArdourIcon::RecButton);
 	rec_enable_button->queue_draw();
 }
 

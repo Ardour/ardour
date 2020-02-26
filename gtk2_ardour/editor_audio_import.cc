@@ -719,9 +719,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 					source = boost::dynamic_pointer_cast<AudioFileSource> (
 						SourceFactory::createExternal (DataType::AUDIO, *_session,
 									       path, n,
-									       (mode == ImportAsTapeTrack
-										? Source::Destructive
-										: Source::Flag (0)),
+						                               Source::Flag (0),
 									true, true));
 				} else {
 					source = boost::dynamic_pointer_cast<AudioFileSource> (s);
@@ -1070,27 +1068,6 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 		break;
 	}
 
-	case ImportAsTapeTrack:
-	{
-		if (!ar) {
-			return -1;
-		}
-
-		list<boost::shared_ptr<AudioTrack> > at (_session->new_audio_track (in_chans, out_chans, 0, 1, string(), PresentationInfo::max_order, Destructive));
-		if (!at.empty()) {
-			boost::shared_ptr<Playlist> playlist = at.front()->playlist();
-			boost::shared_ptr<Region> copy (RegionFactory::create (region, true));
-			playlist->clear_changes ();
-			playlist->add_region (copy, pos);
-			_session->add_command (new StatefulDiffCommand (playlist));
-		}
-		if (Config->get_strict_io ()) {
-			for (list<boost::shared_ptr<AudioTrack> >::iterator i = at.begin(); i != at.end(); ++i) {
-				(*i)->set_strict_io (true);
-			}
-		}
-		break;
-	}
 	}
 
 	return 0;

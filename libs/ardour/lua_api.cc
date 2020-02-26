@@ -1049,7 +1049,7 @@ LuaAPI::Rubberband::process (luabridge::LuaRef cb)
 
 	for (uint32_t c = 0; c < _n_channels; ++c) {
 		string       name = PBD::basename_nosuffix (names[c]) + "(rb)";
-		const string path = session.new_audio_source_path (name, _n_channels, c, false, false);
+		const string path = session.new_audio_source_path (name, _n_channels, c, false);
 		if (path.empty ()) {
 			cleanup (true);
 			return rv;

@@ -129,7 +129,6 @@ public:
 	boost::shared_ptr<Playlist> playlist ();
 	void request_input_monitoring (bool);
 	void ensure_input_monitoring (bool);
-	bool destructive () const;
 	std::list<boost::shared_ptr<Source> > & last_capture_sources ();
 	std::string steal_write_source_name ();
 	void reset_write_sources (bool, bool force = false);
@@ -208,7 +207,6 @@ protected:
 
 	FreezeRecord _freeze_record;
 	XMLNode*      pending_state;
-	bool         _destructive;
 
 	boost::shared_ptr<AutomationControl> _record_enable_control;
 	boost::shared_ptr<AutomationControl> _record_safe_control;

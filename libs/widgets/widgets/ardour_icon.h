@@ -28,7 +28,6 @@
 namespace ArdourWidgets { namespace ArdourIcon {
 	enum Icon {
 		RecButton,
-		RecTapeMode,
 		TransportPanic,
 		TransportStop,
 		TransportPlay,

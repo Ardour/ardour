@@ -205,7 +205,6 @@ main (int argc, char** argv)
 	int pos = 0;
 
 	draw_icon (cr, pos++, ArdourIcon::RecButton, Gtkmm2ext::Off);
-	draw_icon (cr, pos++, ArdourIcon::RecTapeMode, Gtkmm2ext::Off);
 	draw_icon (cr, pos++, ArdourIcon::RecButton, Gtkmm2ext::ImplicitActive);
 	draw_icon (cr, pos++, ArdourIcon::RecTapeMode, Gtkmm2ext::ImplicitActive);
 

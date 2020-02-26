@@ -1074,7 +1074,7 @@ RouteTimeAxisView::rename_current_playlist ()
 	string name;
 
 	boost::shared_ptr<Track> tr = track();
-	if (!tr || tr->destructive()) {
+	if (!tr) {
 		return;
 	}
 
@@ -1148,7 +1148,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playl
 	string name;
 
 	boost::shared_ptr<Track> tr = track ();
-	if (!tr || tr->destructive()) {
+	if (!tr) {
 		return;
 	}
 
@@ -1216,7 +1216,7 @@ void
 RouteTimeAxisView::clear_playlist ()
 {
 	boost::shared_ptr<Track> tr = track ();
-	if (!tr || tr->destructive()) {
+	if (!tr) {
 		return;
 	}
 

@@ -264,7 +264,6 @@ gtk2_ardour_sources = [
         'stripable_colorpicker.cc',
         'stripable_time_axis.cc',
         'sys_ex.cc',
-        'tape_region_view.cc',
         'template_dialog.cc',
         'tempo_curve.cc',
         'tempo_dialog.cc',

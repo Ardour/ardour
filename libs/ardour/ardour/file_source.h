@@ -66,7 +66,7 @@ public:
 
 	int set_state (const XMLNode&, int version);
 
-	int set_source_name (const std::string& newname, bool destructive);
+	int set_source_name (const std::string& newname);
 
 	static bool find (Session&, DataType type, const std::string& path,
 	                  bool must_exist, bool& is_new, uint16_t& chan,

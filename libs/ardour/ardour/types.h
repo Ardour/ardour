@@ -227,7 +227,6 @@ enum MeterType {
 enum TrackMode {
 	Normal,
 	NonLayered,
-	Destructive
 };
 
 enum NoteMode {

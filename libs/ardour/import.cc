@@ -155,7 +155,7 @@ Session::get_paths_for_new_sources (bool /*allow_replacing*/, const string& impo
 			}
 			break;
 		case DataType::AUDIO:
-			filepath = new_audio_source_path (basename, channels, n, false, false);
+			filepath = new_audio_source_path (basename, channels, n, false);
 			break;
 		}
 
@@ -204,7 +204,7 @@ create_mono_sources_for_writing (const vector<string>& new_paths,
 
 			source = SourceFactory::createWritable (type, sess,
 			                                        i->c_str(),
-			                                        false, // destructive
+			                                        false,
 			                                        samplerate);
 		}
 

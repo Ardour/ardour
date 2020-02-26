@@ -262,9 +262,9 @@ public:
 	std::string construct_peak_filepath (const std::string& audio_path, const bool in_session = false, const bool old_peak_name = false) const;
 
 	bool audio_source_name_is_unique (const std::string& name);
-	std::string format_audio_source_name (const std::string& legalized_base, uint32_t nchan, uint32_t chan, bool destructive, bool take_required, uint32_t cnt, bool related_exists);
+	std::string format_audio_source_name (const std::string& legalized_base, uint32_t nchan, uint32_t chan, bool take_required, uint32_t cnt, bool related_exists);
 	std::string new_audio_source_path_for_embedded (const std::string& existing_path);
-	std::string new_audio_source_path (const std::string&, uint32_t nchans, uint32_t chan, bool destructive, bool take_required);
+	std::string new_audio_source_path (const std::string&, uint32_t nchans, uint32_t chan, bool take_required);
 	std::string new_midi_source_path (const std::string&, bool need_source_lock = true);
 
 	/** create a new track or bus from a template (XML path)
@@ -841,7 +841,7 @@ public:
 	static PBD::Signal0<int> AskAboutPendingState;
 
 	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (
-		size_t, std::string const &, uint32_t, bool destructive);
+		size_t, std::string const &, uint32_t);
 
 	boost::shared_ptr<MidiSource> create_midi_source_for_session (std::string const &);
 	boost::shared_ptr<MidiSource> create_midi_source_by_stealing_name (boost::shared_ptr<Track>);
@@ -1760,8 +1760,6 @@ private:
 	bool _adding_routes_in_progress;
 	bool _reconnecting_routes_in_progress;
 	bool _route_deletion_in_progress;
-
-	uint32_t destructive_index;
 
 	boost::shared_ptr<Route> XMLRouteFactory (const XMLNode&, int);
 	boost::shared_ptr<Route> XMLRouteFactory_2X (const XMLNode&, int);

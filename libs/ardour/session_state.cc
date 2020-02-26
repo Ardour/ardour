@@ -278,7 +278,6 @@ Session::post_engine_init ()
 
 		/* crossfades require sample rate knowledge */
 
-		SndFileSource::setup_standard_crossfades (*this, sample_rate());
 		_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this, true));
 		_engine.MidiSelectionPortsChanged.connect_same_thread (*this, boost::bind (&Session::rewire_midi_selection_ports, this));
 
@@ -1283,7 +1282,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 		for (SourceMap::iterator siter = sources.begin(); siter != sources.end(); ++siter) {
 
 			/* Don't save information about non-file Sources, or
-			 * about non-destructive file sources that are empty
+			 * about file sources that are empty
 			 * and unused by any regions.
 			 */
 			boost::shared_ptr<FileSource> fs;
@@ -1292,10 +1291,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 				continue;
 			}
 
-			if (!fs->destructive()) {
-				if (fs->empty() && !fs->used()) {
-					continue;
-				}
+			if (fs->empty() && !fs->used()) {
+				continue;
 			}
 
 			if (only_used_assets) {
@@ -2483,7 +2480,7 @@ retry:
 								return -1;
 							}
 							/* Note that we do not announce the source just yet - we need to reset its ID before we do that */
-							source = SourceFactory::createWritable (DataType::MIDI, *this, fullpath, false, _current_sample_rate, false, false);
+							source = SourceFactory::createWritable (DataType::MIDI, *this, fullpath, _current_sample_rate, false, false);
 							/* reset ID to match the missing one */
 							source->set_id (**niter);
 							/* Now we can announce it */

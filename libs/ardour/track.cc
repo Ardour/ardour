@@ -92,10 +92,6 @@ Track::init ()
 
 	DiskIOProcessor::Flag dflags = DiskIOProcessor::Recordable;
 
-	if (_mode == Destructive) {
-		dflags = DiskIOProcessor::Flag (dflags | DiskIOProcessor::Destructive);
-	}
-
 	_disk_reader.reset (new DiskReader (_session, name(), dflags));
 	_disk_reader->set_block_size (_session.get_block_size ());
 	_disk_reader->set_track (boost::dynamic_pointer_cast<Track> (shared_from_this()));
@@ -466,12 +462,6 @@ Track::ensure_input_monitoring (bool m)
 	for (PortSet::iterator i = _input->ports().begin(); i != _input->ports().end(); ++i) {
 		AudioEngine::instance()->ensure_input_monitoring ((*i)->name(), m);
 	}
-}
-
-bool
-Track::destructive () const
-{
-	return _disk_writer->destructive ();
 }
 
 list<boost::shared_ptr<Source> > &
@@ -1037,20 +1027,6 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 	boost::shared_ptr<AudioRegion> region;
 
 	if (!afs || !pl) {
-		return;
-	}
-
-	/* destructive tracks have a single, never changing region */
-
-	if (destructive()) {
-
-		/* send a signal that any UI can pick up to do the right thing. there is
-		   a small problem here in that a UI may need the peak data to be ready
-		   for the data that was recorded and this isn't interlocked with that
-		   process. this problem is deferred to the UI.
-		 */
-
-		pl->LayeringChanged(); // XXX this may not get the UI to do the right thing
 		return;
 	}
 

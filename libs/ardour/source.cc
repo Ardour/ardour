@@ -173,7 +173,7 @@ Source::set_state (const XMLNode& node, int version)
 
 	/* old style, from the period when we had DestructiveFileSource */
 	if (node.get_property (X_("destructive"), str)) {
-		_flags = Flag (_flags | Destructive);
+		throw (SessionException (_("This session uses destructive tracks, which are no longer supported. Please use an older version of Ardour to work with this session")));
 	}
 
 	if (version < 3000) {
@@ -181,9 +181,7 @@ Source::set_state (const XMLNode& node, int version)
 		   and therefore cannot be removable/writable etc. etc.; 2.X
 		   sometimes marks sources as removable which shouldn't be.
 		*/
-		if (!(_flags & Destructive)) {
-			_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
-		}
+		_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
 	}
 
 	return 0;
@@ -280,14 +278,10 @@ Source::check_for_analysis_data_on_disk ()
 void
 Source::mark_for_remove ()
 {
-	// This operation is not allowed for sources for destructive tracks or out-of-session files.
+	// This operation is not allowed for sources for out-of-session files.
 
 	/* XXX need a way to detect _within_session() condition here - move it from FileSource?
 	 */
-
-	if ((_flags & Destructive)) {
-		return;
-	}
 
 	_flags = Flag (_flags | Removable | RemoveAtDestroy);
 }

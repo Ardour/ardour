@@ -1730,7 +1730,7 @@ Region::source_length(uint32_t n) const
 bool
 Region::verify_length (samplecnt_t& len)
 {
-	if (source() && (source()->destructive() || source()->length_mutable())) {
+	if (source() && source()->length_mutable()) {
 		return true;
 	}
 
@@ -1748,7 +1748,7 @@ Region::verify_length (samplecnt_t& len)
 bool
 Region::verify_start_and_length (samplepos_t new_start, samplecnt_t& new_length)
 {
-	if (source() && (source()->destructive() || source()->length_mutable())) {
+	if (source() && source()->length_mutable()) {
 		return true;
 	}
 
@@ -1766,7 +1766,7 @@ Region::verify_start_and_length (samplepos_t new_start, samplecnt_t& new_length)
 bool
 Region::verify_start (samplepos_t pos)
 {
-	if (source() && (source()->destructive() || source()->length_mutable())) {
+	if (source() && source()->length_mutable()) {
 		return true;
 	}
 
@@ -1781,7 +1781,7 @@ Region::verify_start (samplepos_t pos)
 bool
 Region::verify_start_mutable (samplepos_t& new_start)
 {
-	if (source() && (source()->destructive() || source()->length_mutable())) {
+	if (source() && source()->length_mutable()) {
 		return true;
 	}
 

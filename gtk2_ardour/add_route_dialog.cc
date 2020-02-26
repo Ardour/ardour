@@ -105,7 +105,6 @@ AddRouteDialog::AddRouteDialog ()
 		     "* " + _("A group which the track(s) will be assigned to") + "\n" +
 #ifndef MIXBUS
 		     "* " + _("The pin connections mode (see tooltip for details)") + "\n" +
-		     "* " + _("Normal (non-destructive) or tape (destructive) recording mode") + "\n" +
 #endif
 		     "\n" + _("The track(s) will be added at the location specified by \"Position\"")
 		     ));
@@ -135,7 +134,6 @@ AddRouteDialog::AddRouteDialog ()
 		     "* " + _("A group which the track(s) will be assigned to") + "\n" +
 #ifndef MIXBUS
 		     "* " + _("The pin connections mode (see tooltip for details)") + "\n" +
-		     "* " + _("Normal (non-destructive) or tape (destructive) recording mode") + "\n" +
 #endif
 		     "\n" + _("The track(s) will be added at the location specified by \"Position\"")
 		     ));
@@ -448,11 +446,6 @@ AddRouteDialog::trk_template_row_selected ()
 			switch ((ARDOUR::TrackMode) atoi (it->second.c_str())) {
 				case ARDOUR::Normal:
 					mode_combo.set_active_text (_("Normal"));
-					break;
-				case ARDOUR::Destructive:
-					if (!ARDOUR::Profile->get_mixbus ()) {
-						mode_combo.set_active_text (_("Tape"));
-					}
 					break;
 				default: // "NonLayered" enum is still present for session-format compat
 					break;
@@ -820,10 +813,6 @@ AddRouteDialog::refill_track_modes ()
 	vector<string> s;
 
 	s.push_back (_("Normal"));
-	if (!ARDOUR::Profile->get_mixbus ()) {
-		s.push_back (_("Tape"));
-	}
-
 	set_popdown_strings (mode_combo, s);
 	mode_combo.set_active_text (s.front());
 }
@@ -836,8 +825,6 @@ AddRouteDialog::mode ()
 		return ARDOUR::Normal;
 	} else if (str == _("Non Layered")){
 		return ARDOUR::NonLayered;
-	} else if (str == _("Tape")) {
-		return ARDOUR::Destructive;
 	} else {
 		fatal << string_compose (X_("programming error: unknown track mode in add route dialog combo = %1"), str)
 		      << endmsg;

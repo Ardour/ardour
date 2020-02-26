@@ -233,55 +233,46 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 {
 	if (type == DataType::AUDIO) {
 
-		if (!(flags & Destructive)) {
-
-			try {
-				Source* src = new SndFileSource (s, path, chn, flags);
-				boost::shared_ptr<Source> ret (src);
-				BOOST_MARK_SOURCE (ret);
-				if (setup_peakfile (ret, defer_peaks)) {
-					return boost::shared_ptr<Source>();
-				}
-				ret->check_for_analysis_data_on_disk ();
-				if (announce) {
-					SourceCreated (ret);
-				}
-				return ret;
-			} catch (failed_constructor& err) { }
+		try {
+			Source* src = new SndFileSource (s, path, chn, flags);
+			boost::shared_ptr<Source> ret (src);
+			BOOST_MARK_SOURCE (ret);
+			if (setup_peakfile (ret, defer_peaks)) {
+				return boost::shared_ptr<Source>();
+			}
+			ret->check_for_analysis_data_on_disk ();
+			if (announce) {
+				SourceCreated (ret);
+			}
+			return ret;
+		} catch (failed_constructor& err) { }
 
 #ifdef HAVE_COREAUDIO
-			try {
-				Source* src = new CoreAudioSource (s, path, chn, flags);
-				boost::shared_ptr<Source> ret (src);
-				BOOST_MARK_SOURCE (ret);
-				if (setup_peakfile (ret, defer_peaks)) {
-					return boost::shared_ptr<Source>();
-				}
-				ret->check_for_analysis_data_on_disk ();
-				if (announce) {
-					SourceCreated (ret);
-				}
-				return ret;
-			} catch (...) { }
+		try {
+			Source* src = new CoreAudioSource (s, path, chn, flags);
+			boost::shared_ptr<Source> ret (src);
+			BOOST_MARK_SOURCE (ret);
+			if (setup_peakfile (ret, defer_peaks)) {
+				return boost::shared_ptr<Source>();
+			}
+			ret->check_for_analysis_data_on_disk ();
+			if (announce) {
+				SourceCreated (ret);
+			}
+			return ret;
+		} catch (...) { }
 #endif
 
-			/* only create mp3s for audition: no announce, no peaks */
-			if (!announce && (!AudioFileSource::get_build_peakfiles () || defer_peaks)) {
-				try {
-					Source* src = new Mp3FileSource (s, path, chn, flags);
-					boost::shared_ptr<Source> ret (src);
-					BOOST_MARK_SOURCE (ret);
-					return ret;
+		/* only create mp3s for audition: no announce, no peaks */
+		if (!announce && (!AudioFileSource::get_build_peakfiles () || defer_peaks)) {
+			try {
+				Source* src = new Mp3FileSource (s, path, chn, flags);
+				boost::shared_ptr<Source> ret (src);
+				BOOST_MARK_SOURCE (ret);
+				return ret;
 
-				} catch (failed_constructor& err) { }
-			}
-
-		} else {
-			// eh?
+			} catch (failed_constructor& err) { }
 		}
-
-		error << string_compose(_("AudioFileSource: cannot open file \"%1\" "), path) << endmsg;
-		throw failed_constructor ();
 
 	} else if (type == DataType::MIDI) {
 
@@ -306,7 +297,7 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 
 boost::shared_ptr<Source>
 SourceFactory::createWritable (DataType type, Session& s, const std::string& path,
-			       bool destructive, samplecnt_t rate, bool announce, bool defer_peaks)
+			       samplecnt_t rate, bool announce, bool defer_peaks)
 {
 	/* this might throw failed_constructor(), which is OK */
 
@@ -315,9 +306,7 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 						 s.config.get_native_file_data_format(),
 						 s.config.get_native_file_header_format(),
 						 rate,
-						 (destructive
-						  ? Source::Flag (SndFileSource::default_writable_flags | Source::Destructive)
-						  : SndFileSource::default_writable_flags));
+		                                 SndFileSource::default_writable_flags);
 		boost::shared_ptr<Source> ret (src);
 		BOOST_MARK_SOURCE (ret);
 

@@ -44,7 +44,6 @@
 
 #include "audio_streamview.h"
 #include "audio_region_view.h"
-#include "tape_region_view.h"
 #include "audio_time_axis.h"
 #include "region_selection.h"
 #include "region_gain_line.h"
@@ -114,10 +113,7 @@ AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_
 					_samples_per_pixel, region_color);
 		}
 		break;
-	case Destructive:
-		region_view = new TapeAudioRegionView (_canvas_group, _trackview, region,
-		                                       _samples_per_pixel, region_color);
-		break;
+
 	default:
 		fatal << string_compose (_("programming error: %1"), "illegal track mode in ::create_region_view()") << endmsg;
 		abort(); /*NOTREACHED*/
@@ -240,7 +236,7 @@ AudioStreamView::setup_rec_box ()
 
 			boost::shared_ptr<AudioTrack> at = _trackview.audio_track();
 			samplepos_t const sample_pos = at->current_capture_start ();
-			double     const width     = ((at->mode() == Destructive) ? 2 : 0);
+			double     const width     = 2;
 
 			create_rec_box(sample_pos, width);
 

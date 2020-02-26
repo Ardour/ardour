@@ -65,17 +65,11 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	int flush_header ();
 	void flush ();
 
-	samplepos_t last_capture_start_sample() const;
-	void mark_capture_start (samplepos_t);
-	void mark_capture_end ();
-	void clear_capture_marks();
-
 	bool one_of_several_channels () const;
-    uint32_t channel_count () const { return _info.channels; }
+	uint32_t channel_count () const { return _info.channels; }
 
 	bool clamped_at_unity () const;
 
-	static void setup_standard_crossfades (Session const &, samplecnt_t sample_rate);
 	static const Source::Flag default_writable_flags;
 
 	static int get_soundfile_info (const std::string& path, SoundFileInfo& _info, std::string& error_msg);
@@ -100,24 +94,8 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	int setup_broadcast_info (samplepos_t when, struct tm&, time_t);
 	void file_closed ();
 
-	/* destructive */
-
-	static samplecnt_t xfade_samples;
-
-	static gain_t* out_coefficient;
-	static gain_t* in_coefficient;
-
-	bool           _capture_start;
-	bool           _capture_end;
-	samplepos_t    capture_start_sample;
-	samplepos_t    file_pos; // unit is samples
-	Sample*        xfade_buf;
-
-	samplecnt_t crossfade (Sample* data, samplecnt_t cnt, int dir);
 	void set_natural_position (samplepos_t);
-	samplecnt_t destructive_write_unlocked (Sample *dst, samplecnt_t cnt);
 	samplecnt_t nondestructive_write_unlocked (Sample *dst, samplecnt_t cnt);
-	void handle_header_position_change ();
 	PBD::ScopedConnection header_position_connection;
 };
 

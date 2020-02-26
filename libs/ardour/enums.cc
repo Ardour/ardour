@@ -248,7 +248,6 @@ setup_enum_writer ()
 
 	REGISTER_ENUM (Normal);
 	REGISTER_ENUM (NonLayered);
-	REGISTER_ENUM (Destructive);
 	REGISTER (_TrackMode);
 
 	REGISTER_ENUM (Sustained);
@@ -520,7 +519,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Source, RemovableIfEmpty);
 	REGISTER_CLASS_ENUM (Source, RemoveAtDestroy);
 	REGISTER_CLASS_ENUM (Source, NoPeakFile);
-	REGISTER_CLASS_ENUM (Source, Destructive);
 	REGISTER_CLASS_ENUM (Source, Empty);
 	REGISTER_BITS (_Source_Flag);
 
@@ -544,7 +542,6 @@ setup_enum_writer ()
 
 	REGISTER_CLASS_ENUM (DiskIOProcessor, Recordable);
 	REGISTER_CLASS_ENUM (DiskIOProcessor, Hidden);
-	REGISTER_CLASS_ENUM (DiskIOProcessor, Destructive);
 	REGISTER_BITS (_DiskIOProcessor_Flag);
 
 	REGISTER_CLASS_ENUM (Location, IsMark);

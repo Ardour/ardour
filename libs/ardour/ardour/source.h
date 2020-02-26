@@ -53,7 +53,7 @@ public:
 		RemovableIfEmpty = 0x10,
 		RemoveAtDestroy = 0x20,
 		NoPeakFile = 0x40,
-		Destructive = 0x80,
+		/* 0x80 was Destructive */
 		Empty = 0x100, /* used for MIDI only */
 		RF64_RIFF = 0x200,
 		Missing = 0x400, /* used for MIDI only */
@@ -88,7 +88,6 @@ public:
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
-	bool         destructive() const       { return (_flags & Destructive); }
 	bool         writable () const;
 
 	virtual bool length_mutable() const    { return false; }

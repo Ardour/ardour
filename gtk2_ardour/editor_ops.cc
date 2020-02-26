@@ -3181,12 +3181,6 @@ Editor::separate_regions_between (const TimeSelection& ts)
 			continue;
 		}
 
-		/* no edits to destructive tracks */
-
-		if (rtv->track()->destructive()) {
-			continue;
-		}
-
 		if ((playlist = rtv->playlist()) != 0) {
 
 			playlist->clear_changes ();
@@ -3444,8 +3438,7 @@ Editor::crop_region_to (samplepos_t start, samplepos_t end)
 
 		boost::shared_ptr<Track> t = rtv->track();
 
-		if (t != 0 && ! t->destructive()) {
-
+		if (t) {
 			if ((playlist = rtv->playlist()) != 0) {
 				playlists.push_back (playlist);
 			}

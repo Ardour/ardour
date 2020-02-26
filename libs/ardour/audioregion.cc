@@ -1587,11 +1587,6 @@ AudioRegion::source_offset_changed ()
 	}
 
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(_sources.front());
-
-	if (afs && afs->destructive()) {
-		// set_start (source()->natural_position(), this);
-		set_position (source()->natural_position());
-	}
 }
 
 boost::shared_ptr<AudioSource>

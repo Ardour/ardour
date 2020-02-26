@@ -80,7 +80,6 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (ImportAsTrack);
 	REGISTER_ENUM (ImportToTrack);
 	REGISTER_ENUM (ImportAsRegion);
-	REGISTER_ENUM (ImportAsTapeTrack);
 	REGISTER (import_mode);
 
 	REGISTER_ENUM (EditAtPlayhead);

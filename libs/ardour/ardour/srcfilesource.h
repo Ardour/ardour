@@ -46,7 +46,6 @@ public:
 	samplecnt_t readable_length() const { return _source->readable_length() * _ratio; }
 	samplecnt_t length (samplepos_t pos) const { return _source->length(pos) * _ratio; }
 
-	bool destructive() const { return false; }
 	bool can_be_analysed() const { return false; }
 	bool clamped_at_unity() const { return false; }
 

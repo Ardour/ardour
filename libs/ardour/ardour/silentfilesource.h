@@ -37,7 +37,6 @@ public:
 	void set_length (samplecnt_t len) { _length = len; }
 	void flush () {}
 
-	bool destructive() const { return false; }
 	bool can_be_analysed() const { return false; }
 
 	bool clamped_at_unity() const { return false; }

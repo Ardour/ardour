@@ -278,7 +278,6 @@ Session::Session (AudioEngine &eng,
 	, _adding_routes_in_progress (false)
 	, _reconnecting_routes_in_progress (false)
 	, _route_deletion_in_progress (false)
-	, destructive_index (0)
 	, _track_number_decimals(1)
 	, default_fade_steepness (0)
 	, default_fade_msecs (0)
@@ -4758,7 +4757,7 @@ Session::audio_source_name_is_unique (const string& name)
 }
 
 string
-Session::format_audio_source_name (const string& legalized_base, uint32_t nchan, uint32_t chan, bool destructive, bool take_required, uint32_t cnt, bool related_exists)
+Session::format_audio_source_name (const string& legalized_base, uint32_t nchan, uint32_t chan, bool take_required, uint32_t cnt, bool related_exists)
 {
 	ostringstream sstr;
 	const string ext = native_header_format_extension (config.get_native_file_header_format(), DataType::AUDIO);
@@ -4794,7 +4793,7 @@ Session::format_audio_source_name (const string& legalized_base, uint32_t nchan,
 
 /** Return a unique name based on \a base for a new internal audio source */
 string
-Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t chan, bool destructive, bool take_required)
+Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t chan, bool take_required)
 {
 	uint32_t cnt;
 	string possible_name;
@@ -4806,9 +4805,9 @@ Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t cha
 
 	// Find a "version" of the base name that doesn't exist in any of the possible directories.
 
-	for (cnt = (destructive ? ++destructive_index : 1); cnt <= limit; ++cnt) {
+	for (cnt = 1; cnt <= limit; ++cnt) {
 
-		possible_name = format_audio_source_name (legalized, nchan, chan, destructive, take_required, cnt, some_related_source_name_exists);
+		possible_name = format_audio_source_name (legalized, nchan, chan, take_required, cnt, some_related_source_name_exists);
 
 		if (audio_source_name_is_unique (possible_name)) {
 			break;
@@ -4901,13 +4900,13 @@ Session::new_midi_source_path (const string& base, bool need_lock)
 
 /** Create a new within-session audio source */
 boost::shared_ptr<AudioFileSource>
-Session::create_audio_source_for_session (size_t n_chans, string const & base, uint32_t chan, bool destructive)
+Session::create_audio_source_for_session (size_t n_chans, string const & base, uint32_t chan)
 {
-	const string path = new_audio_source_path (base, n_chans, chan, destructive, true);
+	const string path = new_audio_source_path (base, n_chans, chan, true);
 
 	if (!path.empty()) {
 		return boost::dynamic_pointer_cast<AudioFileSource> (
-			SourceFactory::createWritable (DataType::AUDIO, *this, path, destructive, sample_rate(), true, true));
+			SourceFactory::createWritable (DataType::AUDIO, *this, path, sample_rate(), true, true));
 	} else {
 		throw failed_constructor ();
 	}
@@ -5717,7 +5716,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 		string base_name = string_compose ("%1-%2-bounce", playlist->name(), chan_n);
 		string path = ((data_type == DataType::AUDIO)
-		               ? new_audio_source_path (legal_playlist_name, diskstream_channels.n_audio(), chan_n, false, true)
+		               ? new_audio_source_path (legal_playlist_name, diskstream_channels.n_audio(), chan_n, true)
 		               : new_midi_source_path (legal_playlist_name));
 
 		if (path.empty()) {

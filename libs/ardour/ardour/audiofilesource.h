@@ -51,9 +51,6 @@ public:
 		return safe_audio_file_extension(path);
 	}
 
-	/* this block of methods do nothing for regular file sources, but are significant
-	   for files used in destructive recording.
-	*/
 	virtual samplepos_t last_capture_start_sample() const { return 0; }
 	virtual void      mark_capture_start (samplepos_t) {}
 	virtual void      mark_capture_end () {}
@@ -72,7 +69,7 @@ public:
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
-	bool can_truncate_peaks() const { return !destructive(); }
+	bool can_truncate_peaks() const { return true; }
 	bool can_be_analysed() const    { return _length > 0; }
 
 	static bool safe_audio_file_extension (const std::string& path);
