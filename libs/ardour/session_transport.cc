@@ -233,7 +233,7 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	if (!transport_was_stopped &&
 	    (!auto_play_legal || !config.get_auto_play()) &&
 	    !with_roll &&
-	    !(synced_to_engine() && play_loop) &&
+	    !(synced_to_engine() && get_play_loop ()) &&
 	    !(config.get_external_sync() && !synced_to_engine())) {
 
 		realtime_stop (false, true); // XXX paul - check if the 2nd arg is really correct
@@ -289,7 +289,7 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	}
 
 	/* cancel looped playback if transport pos outside of loop range */
-	if (play_loop) {
+	if (get_play_loop ()) {
 
 		Location* al = _locations->auto_loop_location();
 
@@ -457,7 +457,7 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state, bool a
 
 		/* we are stopped and we want to start rolling at speed 1 */
 
-		if (Config->get_loop_is_mode() && play_loop) {
+		if (Config->get_loop_is_mode() && get_play_loop ()) {
 
 			Location *location = _locations->auto_loop_location();
 
@@ -595,7 +595,7 @@ Session::start_transport ()
 		break;
 
 	case Recording:
-		if (!play_loop) {
+		if (!get_play_loop ()) {
 			disable_record (false);
 		}
 		break;
@@ -1562,7 +1562,7 @@ Session::set_play_loop (bool yn, bool change_transport_state)
 
 	Location *loc;
 
-	if (yn == play_loop || (actively_recording() && yn) || (loc = _locations->auto_loop_location()) == 0) {
+	if (yn == get_play_loop () || (actively_recording() && yn) || (loc = _locations->auto_loop_location()) == 0) {
 		/* nothing to do, or can't change loop status while recording */
 		return;
 	}
@@ -1580,56 +1580,51 @@ Session::set_play_loop (bool yn, bool change_transport_state)
 		play_loop = true;
 		have_looped = false;
 
-		if (loc) {
+		unset_play_range ();
+		/* set all tracks to use internal looping */
+		set_track_loop (true);
 
-			unset_play_range ();
-			/* set all tracks to use internal looping */
-			set_track_loop (true);
+		merge_event (new SessionEvent (SessionEvent::AutoLoop, SessionEvent::Replace, loc->end(), loc->start(), 0.0f));
 
-			merge_event (new SessionEvent (SessionEvent::AutoLoop, SessionEvent::Replace, loc->end(), loc->start(), 0.0f));
-
-			if (!Config->get_loop_is_mode()) {
-				/* args: positition, roll=true, flush=true, for_loop_end=false, force buffer, refill  looping */
-				/* set this so that when/if we stop for locate,
-				   we do not call unset_play_loop(). This is a
-				   crude mechanism. Got a better idea?
-				*/
-				loop_changing = true;
-				TFSM_LOCATE (loc->start(), MustRoll, true, false, true);
-			} else if (!transport_rolling()) {
-				/* loop-is-mode: not rolling, just locate to loop start */
-				TFSM_LOCATE (loc->start(), MustStop, true, false, true);
-			}
+		if (!Config->get_loop_is_mode()) {
+			/* args: positition, roll=true, flush=true, for_loop_end=false, force buffer, refill  looping */
+			/* set this so that when/if we stop for locate,
+				 we do not call unset_play_loop(). This is a
+				 crude mechanism. Got a better idea?
+				 */
+			loop_changing = true;
+			TFSM_LOCATE (loc->start(), MustRoll, true, false, true);
+		} else if (!transport_rolling()) {
+			/* loop-is-mode: not rolling, just locate to loop start */
+			TFSM_LOCATE (loc->start(), MustStop, true, false, true);
 		}
-
+		TransportStateChange (); /* EMIT SIGNAL */
 	} else {
-
 		unset_play_loop ();
 	}
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC2 with speed = %1\n", _transport_speed));
-	TransportStateChange (); /* EMIT SIGNAL */
 }
 
 void
 Session::unset_play_loop (bool change_transport_state)
 {
-	if (play_loop) {
-
-		play_loop = false;
-		clear_events (SessionEvent::AutoLoop);
-		set_track_loop (false);
-
-		/* likely need to flush track buffers: this will locate us to wherever we are */
-
-		if (change_transport_state && transport_rolling ()) {
-			TFSM_STOP (false, false);
-		}
-
-		overwrite_some_buffers (boost::shared_ptr<Route>(), LoopDisabled);
-
-		TransportStateChange (); /* EMIT SIGNAL */
+	if (!get_play_loop()) {
+		return;
 	}
+
+	play_loop = false;
+	clear_events (SessionEvent::AutoLoop);
+	set_track_loop (false);
+
+	/* likely need to flush track buffers: this will locate us to wherever we are */
+
+	if (change_transport_state && transport_rolling ()) {
+		TFSM_STOP (false, false);
+	}
+
+	overwrite_some_buffers (boost::shared_ptr<Route>(), LoopDisabled);
+	TransportStateChange (); /* EMIT SIGNAL */
 }
 
 void

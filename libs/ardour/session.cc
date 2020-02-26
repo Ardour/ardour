@@ -1430,7 +1430,7 @@ Session::auto_loop_changed (Location* location)
 
 	if (rolling) {
 
-		if (play_loop) {
+		if (get_play_loop ()) {
 
 			if (_transport_sample < location->start() || _transport_sample > location->end()) {
 
@@ -1563,15 +1563,9 @@ Session::set_auto_loop_location (Location* location)
 
 	location->set_auto_loop (true, this);
 
-	if (Config->get_loop_is_mode() && play_loop) {
-		// set all tracks to use internal looping
-		boost::shared_ptr<RouteList> rl = routes.reader ();
-		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-			if (tr && !tr->is_private_route()) {
-				tr->set_loop (location);
-			}
-		}
+	if (Config->get_loop_is_mode() && get_play_loop ()) {
+		/* set all tracks to use internal looping */
+		set_track_loop (true);
 	}
 
 	/* take care of our stuff first */
@@ -1734,7 +1728,7 @@ Session::location_removed (Location *location)
 {
 	if (location->is_auto_loop()) {
 		set_auto_loop_location (0);
-		if (!play_loop) {
+		if (!get_play_loop ()) {
 			set_track_loop (false);
 		}
 		unset_play_loop ();
