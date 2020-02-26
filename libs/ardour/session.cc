@@ -2143,7 +2143,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 
 		for (RouteList::iterator j = r->begin(); j != r->end(); ++j) {
 
-			bool via_sends_only;
+			bool via_sends_only = false;
 
 			/* See if this *j feeds *i according to the current state of the JACK
 			   connections and internal sends.
