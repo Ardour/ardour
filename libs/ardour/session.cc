@@ -5466,6 +5466,9 @@ Session::mark_insert_id (uint32_t id)
 void
 Session::unmark_send_id (uint32_t id)
 {
+	if (deletion_in_progress ()) {
+		return;
+	}
 	if (id < send_bitset.size()) {
 		send_bitset[id] = false;
 	}
@@ -5474,6 +5477,9 @@ Session::unmark_send_id (uint32_t id)
 void
 Session::unmark_aux_send_id (uint32_t id)
 {
+	if (deletion_in_progress ()) {
+		return;
+	}
 	if (id < aux_send_bitset.size()) {
 		aux_send_bitset[id] = false;
 	}
@@ -5493,6 +5499,9 @@ Session::unmark_return_id (uint32_t id)
 void
 Session::unmark_insert_id (uint32_t id)
 {
+	if (deletion_in_progress ()) {
+		return;
+	}
 	if (id < insert_bitset.size()) {
 		insert_bitset[id] = false;
 	}
