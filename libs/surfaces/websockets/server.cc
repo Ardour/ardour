@@ -295,6 +295,14 @@ WebsocketsServer::write_client (Client wsi)
 	}
 }
 
+void
+WebsocketsServer::reject_http_client (Client wsi)
+{
+	const char *html_body = "<p>This URL is not meant to be accessed via HTTP; for example using"
+		" a web browser. Refer to Ardour documentation for further information.</p>";
+	lws_return_http_status (wsi, 404, html_body);
+}
+
 bool
 WebsocketsServer::io_handler (Glib::IOCondition ioc, lws_sockfd_type fd)
 {
@@ -388,6 +396,10 @@ WebsocketsServer::lws_callback (struct lws* wsi, enum lws_callback_reasons reaso
 			server->write_client (wsi);
 			break;
 
+		case LWS_CALLBACK_HTTP:
+			server->reject_http_client (wsi);
+			break;
+
 		case LWS_CALLBACK_FILTER_NETWORK_CONNECTION:
 		case LWS_CALLBACK_FILTER_PROTOCOL_CONNECTION:
 		case LWS_CALLBACK_SERVER_NEW_CLIENT_INSTANTIATED:
@@ -398,6 +410,10 @@ WebsocketsServer::lws_callback (struct lws* wsi, enum lws_callback_reasons reaso
 		case LWS_CALLBACK_LOCK_POLL:
 		case LWS_CALLBACK_UNLOCK_POLL:
 		case LWS_CALLBACK_WS_PEER_INITIATED_CLOSE:
+		case LWS_CALLBACK_FILTER_HTTP_CONNECTION:
+		case LWS_CALLBACK_HTTP_BIND_PROTOCOL:
+		case LWS_CALLBACK_ADD_HEADERS:
+		case LWS_CALLBACK_HTTP_CONFIRM_UPGRADE:
 			break;
 
 		/* TODO: handle HTTP connections.
