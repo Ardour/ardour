@@ -398,6 +398,7 @@ WebsocketsServer::lws_callback (struct lws* wsi, enum lws_callback_reasons reaso
 
 		case LWS_CALLBACK_HTTP:
 			server->reject_http_client (wsi);
+			return 1;
 			break;
 
 		case LWS_CALLBACK_FILTER_NETWORK_CONNECTION:
