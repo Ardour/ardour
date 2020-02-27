@@ -248,6 +248,10 @@ setup_enum_writer ()
 
 	REGISTER_ENUM (Normal);
 	REGISTER_ENUM (NonLayered);
+	/* No longer used but we leave this here so that enumwriter can parse
+	 * strings containing "Destructive"
+	 */
+	REGISTER_ENUM (Destructive);
 	REGISTER (_TrackMode);
 
 	REGISTER_ENUM (Sustained);
@@ -519,6 +523,10 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Source, RemovableIfEmpty);
 	REGISTER_CLASS_ENUM (Source, RemoveAtDestroy);
 	REGISTER_CLASS_ENUM (Source, NoPeakFile);
+	/* No longer used but we leave this here so that enumwriter can parse
+	 * strings containing "Destructive"
+	 */
+	REGISTER_CLASS_ENUM (Source, Destructive);
 	REGISTER_CLASS_ENUM (Source, Empty);
 	REGISTER_BITS (_Source_Flag);
 

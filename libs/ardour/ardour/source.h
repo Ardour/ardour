@@ -53,7 +53,8 @@ public:
 		RemovableIfEmpty = 0x10,
 		RemoveAtDestroy = 0x20,
 		NoPeakFile = 0x40,
-		/* 0x80 was Destructive */
+		/* No longer in use but kept to allow loading of older sessions */
+		Destructive = 0x80,
 		Empty = 0x100, /* used for MIDI only */
 		RF64_RIFF = 0x200,
 		Missing = 0x400, /* used for MIDI only */

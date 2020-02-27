@@ -143,6 +143,11 @@ AudioTrack::set_state (const XMLNode& node, int version)
 		_mode = Normal;
 	}
 
+	if (_mode == Destructive) {
+		/* XXX warn user */
+		_mode = Normal;
+	}
+
 	if (Track::set_state (node, version)) {
 		return -1;
 	}

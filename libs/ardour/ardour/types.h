@@ -227,6 +227,8 @@ enum MeterType {
 enum TrackMode {
 	Normal,
 	NonLayered,
+	/* No longer in use but kept to allow loading of older sessions */
+	Destructive,
 };
 
 enum NoteMode {

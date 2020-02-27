@@ -167,6 +167,10 @@ Source::set_state (const XMLNode& node, int version)
 		_flags = Flag (0);
 	}
 
+	/* Destructive is no longer valid */
+
+	_flags = Flag (_flags & ~Destructive);
+
 	if (!node.get_property (X_("take-id"), _take_id)) {
 		_take_id = "";
 	}
