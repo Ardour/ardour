@@ -1428,12 +1428,25 @@ Session::loop_is_possible () const
 	return g_atomic_int_get(&_punch_or_loop) != OnlyPunch;
 }
 
+void
+Session::reset_punch_loop_constraint ()
+{
+	if (g_atomic_int_get (&_punch_or_loop) == NoConstraint) {
+		return;
+	}
+	g_atomic_int_set (&_punch_or_loop, NoConstraint);
+	PunchLoopConstraintChange (); /* EMIT SIGNAL */
+}
+
 bool
 Session::maybe_allow_only_loop (bool play_loop) {
 	if (!(get_play_loop () || play_loop)) {
 		return false;
 	}
 	bool rv = g_atomic_int_compare_and_exchange (&_punch_or_loop, NoConstraint, OnlyLoop);
+	if (rv) {
+		PunchLoopConstraintChange (); /* EMIT SIGNAL */
+	}
 	if (rv || loop_is_possible ()) {
 		unset_punch ();
 		return true;
@@ -1447,6 +1460,9 @@ Session::maybe_allow_only_punch () {
 		return false;
 	}
 	bool rv = g_atomic_int_compare_and_exchange (&_punch_or_loop, NoConstraint, OnlyPunch);
+	if (rv) {
+		PunchLoopConstraintChange (); /* EMIT SIGNAL */
+	}
 	return rv || punch_is_possible ();
 }
 

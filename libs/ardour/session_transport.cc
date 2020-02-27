@@ -145,7 +145,7 @@ Session::realtime_stop (bool abort, bool clear_state)
 
 	reset_slave_state ();
 
-	g_atomic_int_set (&_punch_or_loop, NoConstraint);
+	reset_punch_loop_constraint ();
 
 	_transport_speed = 0;
 	_target_transport_speed = 0;

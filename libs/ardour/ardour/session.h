@@ -775,6 +775,10 @@ public:
 	
 	bool silent () { return _silent; }
 
+	bool punch_is_possible () const;
+	bool loop_is_possible () const;
+	PBD::Signal0<void> PunchLoopConstraintChange;
+
 	TempoMap&       tempo_map()       { return *_tempo_map; }
 	const TempoMap& tempo_map() const { return *_tempo_map; }
 	void maybe_update_tempo_from_midiclock_tempo (float bpm);
@@ -1702,11 +1706,9 @@ private:
 
 	volatile guint _punch_or_loop; // enum PunchLoopLock
 
-	bool punch_is_possible () const;
-	bool loop_is_possible () const;
-
 	bool punch_active () const;
 	void unset_punch ();
+	void reset_punch_loop_constraint ();
 	bool maybe_allow_only_loop (bool play_loop = false);
 	bool maybe_allow_only_punch ();
 
