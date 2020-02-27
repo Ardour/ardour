@@ -857,10 +857,10 @@ If you still wish to proceed, please use the\n\n\
 	save_as_dialog->hide ();
 
 	switch (response) {
-	case Gtk::RESPONSE_OK:
-		break;
-	default:
-		return;
+		case Gtk::RESPONSE_OK:
+			break;
+		default:
+			return;
 	}
 
 
@@ -1055,8 +1055,11 @@ ARDOUR_UI::open_session ()
 	int response = open_session_selector.run();
 	open_session_selector.hide ();
 
-	if (response == Gtk::RESPONSE_CANCEL) {
-		return;
+	switch (response) {
+		case Gtk::RESPONSE_ACCEPT:
+			break;
+		default:
+			return;
 	}
 
 	string session_path = open_session_selector.get_filename();

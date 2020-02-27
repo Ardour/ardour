@@ -4017,10 +4017,10 @@ Editor::freeze_route ()
 		int response = d.run ();
 
 		switch (response) {
-		case Gtk::RESPONSE_CANCEL:
-			return;
-		default:
-			break;
+			case Gtk::RESPONSE_OK:
+				break;
+			default:
+				return;
 		}
 	}
 
@@ -5759,8 +5759,11 @@ Editor::insert_patch_change (bool from_context)
 	Evoral::PatchChange<Temporal::Beats> empty (Temporal::Beats(), 0, 0, 0);
 	PatchChangeDialog d (0, _session, empty, first->instrument_info(), Gtk::Stock::ADD);
 
-	if (d.run() == RESPONSE_CANCEL) {
-		return;
+	switch (d.run()) {
+		case Gtk::RESPONSE_ACCEPT:
+			break;
+		default:
+			return;
 	}
 
 	for (RegionSelection::iterator i = rs.begin (); i != rs.end(); ++i) {
@@ -7324,8 +7327,12 @@ Editor::close_region_gaps ()
 	dialog.add_button (_("Ok"), RESPONSE_ACCEPT);
 	dialog.show_all ();
 
-	if (dialog.run () == RESPONSE_CANCEL) {
-		return;
+	switch (dialog.run ()) {
+		case Gtk::RESPONSE_ACCEPT:
+		case Gtk::RESPONSE_OK:
+			break;
+		default:
+			return;
 	}
 
 	samplepos_t crossfade_len = spin_crossfade.get_value();

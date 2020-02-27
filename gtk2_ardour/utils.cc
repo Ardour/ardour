@@ -853,7 +853,6 @@ ARDOUR_UI_UTILS::overwrite_file_dialog (Gtk::Window& parent, string title, strin
 	switch (dialog.run()) {
 	case RESPONSE_ACCEPT:
 		return true;
-	case RESPONSE_CANCEL:
 	default:
 		return false;
 	}

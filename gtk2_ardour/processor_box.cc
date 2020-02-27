@@ -349,6 +349,7 @@ ProcessorEntry::drag_data_get (Glib::RefPtr<Gdk::DragContext> const, Gtk::Select
 		_plugin_preset_pointer->_preset.valid = false;
 
 		switch (d.run ()) {
+			default:
 			case Gtk::RESPONSE_CANCEL:
 				data.set (data.get_target(), 8, NULL, 0);
 				return true;

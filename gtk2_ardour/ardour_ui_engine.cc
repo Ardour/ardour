@@ -104,7 +104,6 @@ ARDOUR_UI::audioengine_became_silent ()
 		exit (EXIT_SUCCESS);
 		break;
 
-	case Gtk::RESPONSE_CANCEL:
 	default:
 		/* don't reset, save session and exit */
 		break;
