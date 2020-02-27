@@ -192,6 +192,9 @@ ARDOUR_UI::set_session (Session *s)
 	_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::map_transport_state, this), gui_context());
 	_session->DirtyChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_dirty_changed, this), gui_context());
 
+	_session->PunchLoopConstraintChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::set_punch_sensitivity, this), gui_context());
+	_session->auto_punch_location_changed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::set_punch_sensitivity, this), gui_context ());
+
 	_session->Xrun.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::xrun_handler, this, _1), gui_context());
 	_session->SoloActive.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::soloing_changed, this, _1), gui_context());
 	_session->AuditionActive.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::auditioning_changed, this, _1), gui_context());

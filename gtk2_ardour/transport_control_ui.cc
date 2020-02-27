@@ -179,6 +179,7 @@ TransportControlUI::set_session (ARDOUR::Session *s)
 	_session->StepEditStatusChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&TransportControlUI::step_edit_status_change, this, _1), gui_context());
 	_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&TransportControlUI::map_transport_state, this), gui_context());
 	_session->auto_loop_location_changed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&TransportControlUI::set_loop_sensitivity, this), gui_context ());
+	_session->PunchLoopConstraintChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&TransportControlUI::set_loop_sensitivity, this), gui_context ());
 
 	rec_button.set_sensitive (true);
 }
@@ -287,7 +288,7 @@ TransportControlUI::set_loop_sensitivity ()
 	if (!_session || _session->config.get_external_sync()) {
 		auto_loop_button.set_sensitive (false);
 	} else {
-		auto_loop_button.set_sensitive (_session && _session->locations()->auto_loop_location());
+		auto_loop_button.set_sensitive (_session && _session->loop_is_possible() && _session->locations()->auto_loop_location());
 	}
 }
 

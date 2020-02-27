@@ -646,6 +646,7 @@ private:
 	void import_metadata ();
 
 	void set_transport_sensitivity (bool);
+	void set_punch_sensitivity ();
 
 	//stuff for ProTools-style numpad
 	void transport_numpad_event (int num);
