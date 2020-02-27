@@ -1392,6 +1392,22 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 
 	what_changed = set_values (node);
 
+	/* Regions derived from "Destructive/Tape" mode tracks in earlier
+	 * versions will have their length set to an extremely large value
+	 * (essentially the maximum possible length of a file). Detect this
+	 * here and reset to the actual source length (using the first source
+	 * as a proxy for all of them). For "previously destructive" sources,
+	 * this will correspond to the full extent of the data actually written
+	 * to the file (though this may include blank space if discontiguous
+	 * punches/capture passes were carried out.
+	 */
+
+	if (!_sources.empty()) {
+		if (_length > _sources.front()->length(_position)) {
+			_length = _sources.front()->length(_position) - _start;
+		}
+	}
+
 	set_id (node);
 
 	if (_position_lock_style == MusicTime) {
