@@ -1694,6 +1694,22 @@ private:
 	void flush_all_inserts ();
 	int  micro_locate (samplecnt_t distance);
 
+	enum PunchLoopLock {
+		NoConstraint,
+		OnlyPunch,
+		OnlyLoop,
+	};
+
+	volatile guint _punch_or_loop; // enum PunchLoopLock
+
+	bool punch_is_possible () const;
+	bool loop_is_possible () const;
+
+	bool punch_active () const;
+	void unset_punch ();
+	bool maybe_allow_only_loop (bool play_loop = false);
+	bool maybe_allow_only_punch ();
+
 	void force_locate (samplepos_t sample, LocateTransportDisposition);
 	void realtime_stop (bool abort, bool clear_state);
 	void realtime_locate (bool);

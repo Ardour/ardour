@@ -145,6 +145,8 @@ Session::realtime_stop (bool abort, bool clear_state)
 
 	reset_slave_state ();
 
+	g_atomic_int_set (&_punch_or_loop, NoConstraint);
+
 	_transport_speed = 0;
 	_target_transport_speed = 0;
 	_engine_speed = 1.0;
@@ -603,6 +605,9 @@ Session::start_transport ()
 	default:
 		break;
 	}
+
+	maybe_allow_only_loop ();
+	maybe_allow_only_punch ();
 
 	_transport_speed = _default_transport_speed;
 	_target_transport_speed = _transport_speed;
@@ -1572,6 +1577,10 @@ Session::set_play_loop (bool yn, bool change_transport_state)
 			_("Looping cannot be supported while %1 is using JACK transport.\n"
 			  "Recommend changing the configured options"), PROGRAM_NAME)
 			<< endmsg;
+		return;
+	}
+
+	if (yn && !maybe_allow_only_loop (true)) {
 		return;
 	}
 

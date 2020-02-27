@@ -271,6 +271,7 @@ Session::Session (AudioEngine &eng,
 	, ltc_timecode_offset (0)
 	, ltc_timecode_negative_offset (false)
 	, midi_control_ui (0)
+	, _punch_or_loop (NoConstraint)
 	, _tempo_map (0)
 	, _all_route_group (new RouteGroup (*this, "all"))
 	, routes (new RouteList)
@@ -1397,6 +1398,72 @@ Session::auto_punch_start_changed (Location* location)
 	}
 }
 
+bool
+Session::punch_active () const
+{
+	if (!get_record_enabled ()) {
+		return false;
+	}
+	if (!_locations->auto_punch_location ()) {
+		return false;
+	}
+	return config.get_punch_in () || config.get_punch_out ();
+}
+
+bool
+Session::punch_is_possible () const
+{
+	return g_atomic_int_get (&_punch_or_loop) != OnlyLoop;
+}
+
+bool
+Session::loop_is_possible () const
+{
+#if 0 /* maybe prevent looping even when not rolling ? */
+	if (get_record_enabled () && punch_active ()) {
+			return false;
+		}
+	}
+#endif
+	return g_atomic_int_get(&_punch_or_loop) != OnlyPunch;
+}
+
+bool
+Session::maybe_allow_only_loop (bool play_loop) {
+	if (!(get_play_loop () || play_loop)) {
+		return false;
+	}
+	bool rv = g_atomic_int_compare_and_exchange (&_punch_or_loop, NoConstraint, OnlyLoop);
+	if (rv || loop_is_possible ()) {
+		unset_punch ();
+		return true;
+	}
+	return false;
+}
+
+bool
+Session::maybe_allow_only_punch () {
+	if (!punch_active ()) {
+		return false;
+	}
+	bool rv = g_atomic_int_compare_and_exchange (&_punch_or_loop, NoConstraint, OnlyPunch);
+	return rv || punch_is_possible ();
+}
+
+void
+Session::unset_punch ()
+{
+	/* used when enabling looping
+	 * -> _punch_or_loop = OnlyLoop;
+	 */
+	if (config.get_punch_in ()) {
+		config.set_punch_in (false);
+	}
+	if (config.get_punch_out ()) {
+		config.set_punch_out (false);
+	}
+}
+
 void
 Session::auto_punch_end_changed (Location* location)
 {
@@ -1871,6 +1938,7 @@ Session::maybe_enable_record (bool rt_context)
 	}
 
 	if (_transport_speed) {
+		maybe_allow_only_punch ();
 		if (!config.get_punch_in()) {
 			enable_record ();
 		}
