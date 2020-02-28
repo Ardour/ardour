@@ -1383,6 +1383,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 			const RegionFactory::RegionMap& region_map (RegionFactory::all_regions());
 			for (RegionFactory::RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
 				boost::shared_ptr<Region> r = i->second;
+				/* regions must have sources */
+				assert (r->sources().size() > 0 && r->master_sources().size() > 0);
 				/* only store regions not attached to playlists */
 				if (r->playlist() == 0) {
 					if (boost::dynamic_pointer_cast<AudioRegion>(r)) {
