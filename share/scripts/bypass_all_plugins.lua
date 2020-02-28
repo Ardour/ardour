@@ -15,7 +15,7 @@ function factory () return function ()
 			if proc:isnil () then
 				break
 			end
-			proc:to_insert():deactivate()
+			proc:to_insert():enable (false)
 			i = i + 1
 		end
 	end
