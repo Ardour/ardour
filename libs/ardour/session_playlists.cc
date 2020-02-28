@@ -484,6 +484,7 @@ SessionPlaylists::load (Session& session, const XMLNode& node)
 
 		if ((playlist = XMLPlaylistFactory (session, **niter)) == 0) {
 			error << _("Session: cannot create Playlist from XML description.") << endmsg;
+			return -1;
 		}
 	}
 
