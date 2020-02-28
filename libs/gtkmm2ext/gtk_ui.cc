@@ -511,12 +511,18 @@ UI::do_request (UIRequest* req)
   ======================================================================*/
 
 void
-UI::dump_errors (std::ostream& ostr)
+UI::dump_errors (std::ostream& ostr, size_t limit)
 {
 	Glib::Threads::Mutex::Lock lm (error_lock);
 	ostr << endl << X_("Errors/Messages:") << endl;
 	for (list<string>::const_iterator i = error_stack.begin(); i != error_stack.end(); ++i) {
 		ostr << *i << endl;
+		if (limit > 0) {
+			if (--limit == 0) {
+				ostr << "..." << endl;
+				break;
+			}
+		}
 	}
 	ostr << endl;
 }

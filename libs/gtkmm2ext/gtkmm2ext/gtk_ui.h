@@ -143,7 +143,8 @@ public:
 	void flush_pending (float timeout = 0);
 	void toggle_errors ();
 	void show_errors ();
-	void dump_errors (std::ostream&);
+	void dump_errors (std::ostream&, size_t limit = 0);
+	void clear_errors () { error_stack.clear (); }
 	void touch_display (Touchable *);
 	void set_tip (Gtk::Widget &w, const gchar *tip);
 	void set_tip (Gtk::Widget &w, const std::string &tip);
