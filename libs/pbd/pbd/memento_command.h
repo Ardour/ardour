@@ -120,7 +120,6 @@ public:
 	}
 
 	~MementoCommand () {
-		drop_references ();
 		delete before;
 		delete after;
 		delete _binder;

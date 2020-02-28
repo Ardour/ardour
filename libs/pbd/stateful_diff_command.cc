@@ -68,8 +68,6 @@ StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<StatefulDestructible
 
 StatefulDiffCommand::~StatefulDiffCommand ()
 {
-        drop_references ();
-
         delete _changes;
 }
 
