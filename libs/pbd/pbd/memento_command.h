@@ -127,7 +127,8 @@ public:
 	}
 
 	void binder_dying () {
-		delete this;
+		/* delegate to UndoTransaction::command_death */
+		drop_references ();
 	}
 
 	void operator() () {
