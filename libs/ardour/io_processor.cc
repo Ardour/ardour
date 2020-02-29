@@ -245,16 +245,25 @@ IOProcessor::natural_input_streams () const
 }
 
 bool
-IOProcessor::set_name (const std::string& name)
+IOProcessor::set_name (const std::string& new_name)
 {
-	bool ret = SessionObject::set_name (name);
+	bool ret = true;
+
+	if (name () == new_name) {
+		return ret;
+	}
 
 	if (ret && _own_input && _input) {
-		ret = _input->set_name (name);
+		ret = _input->set_name (new_name);
 	}
 
 	if (ret && _own_output && _output) {
-		ret = _output->set_name (name);
+		ret = _output->set_name (new_name);
+	}
+
+	if (ret) {
+		ret = SessionObject::set_name (new_name); // never fails
+		assert (ret);
 	}
 
 	return ret;
