@@ -125,8 +125,6 @@ string2importmode (string const & str)
 		return ImportToTrack;
 	} else if (str == _("to source list")) {
 		return ImportAsRegion;
-	} else if (str == _("as new tape tracks")) {
-		return ImportAsTapeTrack;
 	}
 
 	warning << string_compose (_("programming error: unknown import mode string %1"), str) << endmsg;
