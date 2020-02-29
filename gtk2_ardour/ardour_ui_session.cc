@@ -459,6 +459,22 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		goto out;
 	}
 
+	if (new_session->had_destructive_tracks()) {
+		ArdourMessageDialog msg (string_compose (_("This session (from an older version of %1) used at least\none \"tape track\" (aka \"destructive recording\".\n\n"
+		                                           "This is no longer supported by the program. The tape track(s) have been setup as normal tracks.\n\n"
+		                                           "If you need to continue using tape tracks/destructive recording\n"
+		                                           "please use an older version of %1 to work on this session"), PROGRAM_NAME),
+
+		                         true,
+		                         Gtk::MESSAGE_INFO,
+		                         BUTTONS_OK);
+
+		msg.set_title (_("Tape Tracks No Longer Supported"));
+		msg.set_position (Gtk::WIN_POS_CENTER);
+		(void) msg.run ();
+		msg.hide ();
+	}
+
 	{
 		list<string> const u = new_session->missing_filesources (DataType::MIDI);
 		if (!u.empty()) {
