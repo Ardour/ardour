@@ -169,6 +169,9 @@ Source::set_state (const XMLNode& node, int version)
 
 	/* Destructive is no longer valid */
 
+	if (_flags & Destructive) {
+		_session.set_had_destructive_tracks (true);
+	}
 	_flags = Flag (_flags & ~Destructive);
 
 	if (!node.get_property (X_("take-id"), _take_id)) {
@@ -177,7 +180,7 @@ Source::set_state (const XMLNode& node, int version)
 
 	/* old style, from the period when we had DestructiveFileSource */
 	if (node.get_property (X_("destructive"), str)) {
-		throw (SessionException (_("This session uses destructive tracks, which are no longer supported. Please use an older version of Ardour to work with this session")));
+		_session.set_had_destructive_tracks (true);
 	}
 
 	if (version < 3000) {

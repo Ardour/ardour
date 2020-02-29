@@ -319,6 +319,7 @@ Session::Session (AudioEngine &eng,
 	, _vca_manager (new VCAManager (*this))
 	, _selection (new CoreSelection (*this))
 	, _global_locate_pending (false)
+	, _had_destructive_tracks (false)
 {
 	created_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 
@@ -7004,4 +7005,16 @@ Session::maybe_update_tempo_from_midiclock_tempo (float bpm)
 			_tempo_map->replace_tempo (ts, tempo, 0.0, 0.0, AudioTime);
 		}
 	}
+}
+
+void
+Session::set_had_destructive_tracks (bool yn)
+{
+	_had_destructive_tracks = yn;
+}
+
+bool
+Session::had_destructive_tracks() const
+{
+	return _had_destructive_tracks;
 }

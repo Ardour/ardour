@@ -466,6 +466,9 @@ public:
 	bool declick_in_progress () const;
 	bool transport_locked () const;
 
+	bool had_destructive_tracks () const;
+	void set_had_destructive_tracks (bool yn);
+
 	int wipe ();
 
 	samplepos_t current_end_sample () const;
@@ -2134,6 +2137,8 @@ private:
 
 	bool _global_locate_pending;
 	boost::optional<samplepos_t> _nominal_jack_transport_sample;
+
+	bool _had_destructive_tracks;
 };
 
 
