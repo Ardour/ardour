@@ -72,13 +72,14 @@ Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot, bool ignore_b
 
 	switch (r) {
 	case Delivery::Aux:
-		return string_compose (_("aux %1"), (bitslot = s.next_aux_send_id ()) + 1);
+		return string_compose (_("aux %1"), (bitslot = s.next_aux_send_id ()));
 	case Delivery::Listen:
+		bitslot = 0; /* unused */
 		return _("listen"); // no ports, no need for numbering
 	case Delivery::Send:
-		return string_compose (_("send %1"), (bitslot = s.next_send_id ()) + 1);
+		return string_compose (_("send %1"), (bitslot = s.next_send_id ()));
 	case Delivery::Foldback:
-		return string_compose (_("foldback %1"), (bitslot = s.next_aux_send_id ()) + 1);
+		return string_compose (_("foldback %1"), (bitslot = s.next_aux_send_id ()));
 	default:
 		fatal << string_compose (_("programming error: send created using role %1"), enum_2_string (r)) << endmsg;
 		abort(); /*NOTREACHED*/
@@ -92,13 +93,6 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 	, _metering (false)
 	, _remove_on_disconnect (false)
 {
-	if (_role == Listen) {
-		/* we don't need to do this but it keeps things looking clean
-		   in a debugger. _bitslot is not used by listen sends.
-		*/
-		_bitslot = 0;
-	}
-
 	//boost_debug_shared_ptr_mark_interesting (this, "send");
 
 	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (BusSendLevel)));
@@ -305,6 +299,26 @@ Send::set_state (const XMLNode& node, int version)
 	}
 
 	if (version <= 6000) {
+		XMLNode const* nn = &node;
+
+#ifdef MIXBUS
+		/* This was also broken in mixbus 6.0 */
+		if (version <= 6000)
+#else
+		/* version 5: Gain Control was owned by the Amp */
+		if (version < 6000)
+#endif
+		{
+			XMLNode* processor = node.child ("Processor");
+			if (processor) {
+				nn = processor;
+				if ((gain_node = nn->child (Controllable::xml_node_name.c_str ())) != 0) {
+					_gain_control->set_state (*gain_node, version);
+					_gain_control->set_flags (Controllable::Flag ((int)_gain_control->flags() | Controllable::InlineControl));
+				}
+			}
+		}
+
 		/* convert GainAutomation to BusSendLevel
 		 *
 		 * (early Ardour 6.0-pre0 and Mixbus 6.0 used "BusSendLevel"
@@ -317,8 +331,10 @@ Send::set_state (const XMLNode& node, int version)
 		 * -> Automatable::set_automation_xml_state()
 		 */
 		XMLNodeList nlist;
-		XMLNode* automation = node.child ("Automation");
+		XMLNode* automation = nn->child ("Automation");
 		if (automation) {
+			nlist = automation->children();
+		} else if (0 != (automation = node.child ("Automation"))) {
 			nlist = automation->children();
 		}
 		for (XMLNodeIterator i = nlist.begin(); i != nlist.end(); ++i) {

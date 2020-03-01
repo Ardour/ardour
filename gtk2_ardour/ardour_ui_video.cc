@@ -77,8 +77,11 @@ ARDOUR_UI::stop_video_server (bool ask_confirm)
 			confirm.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 			confirm.add_button (_("Yes, Stop It"), Gtk::RESPONSE_ACCEPT);
 			confirm.show_all ();
-			if (confirm.run() == RESPONSE_CANCEL) {
-				return;
+			switch (confirm.run()) {
+				case RESPONSE_ACCEPT:
+					break;
+				default:
+					return;
 			}
 		}
 		delete video_server_process;

@@ -2409,6 +2409,7 @@ Playlist::state (bool full_state)
 		node->set_property ("combine-ops", _combine_ops);
 
 		for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+			assert ((*i)->sources().size() > 0 && (*i)->master_sources().size() > 0);
 			node->add_child_nocopy ((*i)->get_state());
 		}
 	}

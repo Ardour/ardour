@@ -85,7 +85,7 @@ StartupFSM::StartupFSM (EngineControl& amd)
 	 * WaitingForSessionPath: if the previous two conditions are not true
 	 */
 
-	if (string (VERSIONSTRING).find (".pre") != string::npos) {
+	if (string (VERSIONSTRING).find (".pre0") != string::npos) {
 		string fn = Glib::build_filename (user_config_directory(), ".i_swear_that_i_will_heed_the_guidelines_stated_in_the_pre_release_dialog");
 		if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
 			set_state (WaitingForPreRelease);

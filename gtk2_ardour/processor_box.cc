@@ -349,6 +349,7 @@ ProcessorEntry::drag_data_get (Glib::RefPtr<Gdk::DragContext> const, Gtk::Select
 		_plugin_preset_pointer->_preset.valid = false;
 
 		switch (d.run ()) {
+			default:
 			case Gtk::RESPONSE_CANCEL:
 				data.set (data.get_target(), 8, NULL, 0);
 				return true;
@@ -1984,7 +1985,10 @@ ProcessorBox::object_drop (DnDVBox<ProcessorEntry>* source, ProcessorEntry* posi
 		 * (this needs a better solution which retains connections)
 		 */
 		state.remove_nodes_and_delete ("Processor");
+		/* Controllable and automation IDs should not be copied */
+		PBD::Stateful::ForceIDRegeneration force_ids;
 		proc->set_state (state, Stateful::loading_state_version);
+		/* but retain the processor's ID (LV2 state save) */
 		boost::dynamic_pointer_cast<PluginInsert>(proc)->update_id (id);
 		return;
 	}
@@ -3491,12 +3495,14 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				/* strip side-chain state (processor inside processor must be a side-chain)
 				 * otherwise we'll end up with duplicate ports-names.
 				 * (this needs a better solution which retains connections)
-				 * We really would want Stateful::ForceIDRegeneration here :(
 				 */
 				XMLNode state (**niter);
 				state.remove_nodes_and_delete ("Processor");
 
+				/* Controllable and automation IDs should not be copied */
+				PBD::Stateful::ForceIDRegeneration force_ids;
 				p->set_state (state, Stateful::current_state_version);
+				/* but retain the processor's ID (LV2 state save) */
 				boost::dynamic_pointer_cast<PluginInsert>(p)->update_id (id);
 			}
 

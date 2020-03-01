@@ -1181,7 +1181,7 @@ PluginInsert::bypass (BufferSet& bufs, pframes_t nframes)
 					bufs.get_available (*t, out).silence (nframes, 0);
 					continue;
 				}
-				if (in_idx != src_idx) {
+				if (in_idx != out) {
 					bufs.get_available (*t, out).read_from (bufs.get_available (*t, in_idx), nframes, 0, 0);
 				}
 			}

@@ -70,7 +70,12 @@ VideoUtils::confirm_video_outfn (Gtk::Window& parent, std::string outfn, std::st
 		confirm.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 		confirm.add_button (_("Continue"), Gtk::RESPONSE_ACCEPT);
 		confirm.show_all ();
-		if (confirm.run() == RESPONSE_CANCEL) { return false; }
+		switch (confirm.run ()) {
+			case Gtk::RESPONSE_ACCEPT:
+				break;
+			default:
+				return false;
+		}
 	}
 
 	if (Glib::file_test(outfn, Glib::FILE_TEST_EXISTS)) {

@@ -415,7 +415,9 @@ WebsocketsServer::lws_callback (struct lws* wsi, enum lws_callback_reasons reaso
 #if LWS_LIBRARY_VERSION_MAJOR >= 3
 		case LWS_CALLBACK_HTTP_BIND_PROTOCOL:
 		case LWS_CALLBACK_ADD_HEADERS:
+#if LWS_LIBRARY_VERSION_MINOR >= 1
 		case LWS_CALLBACK_HTTP_CONFIRM_UPGRADE:
+#endif
 #endif
 			break;
 

@@ -166,10 +166,10 @@ namespace ARDOUR { namespace DSP {
 	float log_meter_coeff (float coeff);
 
 	void process_map (BufferSet* bufs,
-	                  const ChanMapping& in,
-	                  const ChanMapping& out,
-	                  pframes_t nframes, samplecnt_t offset,
-	                  const DataType&);
+	                  const ChanCount&   n_out,
+	                  const ChanMapping& in_map,
+	                  const ChanMapping& out_map,
+	                  pframes_t nframes, samplecnt_t offset);
 
 	/** 1st order Low Pass filter */
 	class LIBARDOUR_API LowPass {

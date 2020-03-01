@@ -83,6 +83,18 @@ public:
 			return false;
 		}
 
+	template <typename T>
+		bool get_gui_property (const std::string& state_id, const std::string& property_name, T& value) const
+		{
+			std::string str = gui_object_state().get_string (state_id, property_name);
+
+			if (!str.empty ()) {
+				return PBD::string_to<T>(str, value);
+			}
+			return false;
+		}
+
+
 	void set_gui_property (const std::string& property_name, const std::string& value);
 	void remove_gui_property (const std::string& property_name);
 

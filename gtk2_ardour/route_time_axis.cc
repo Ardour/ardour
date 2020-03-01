@@ -2045,8 +2045,22 @@ RouteTimeAxisView::add_existing_processor_automation_curves (boost::weak_ptr<Pro
 	}
 
 	set<Evoral::Parameter> existing;
-
 	processor->what_has_data (existing);
+
+	/* Also add explicitly visible */
+	const std::set<Evoral::Parameter>& automatable = processor->what_can_be_automated ();
+	for (std::set<Evoral::Parameter>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
+		boost::shared_ptr<AutomationControl> control = boost::dynamic_pointer_cast<AutomationControl>(processor->control(*i, false));
+		if (!control) {
+			continue;
+		}
+		/* see also AutomationTimeAxisView::state_id() */
+		std::string ctrl_state_id = std::string("automation ") + control->id().to_s();
+		bool visible;
+		if (get_gui_property (ctrl_state_id, "visible", visible) && visible) {
+			existing.insert (*i);
+		}
+	}
 
 	for (set<Evoral::Parameter>::iterator i = existing.begin(); i != existing.end(); ++i) {
 

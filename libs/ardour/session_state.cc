@@ -1383,6 +1383,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool only_used_ass
 			const RegionFactory::RegionMap& region_map (RegionFactory::all_regions());
 			for (RegionFactory::RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
 				boost::shared_ptr<Region> r = i->second;
+				/* regions must have sources */
+				assert (r->sources().size() > 0 && r->master_sources().size() > 0);
 				/* only store regions not attached to playlists */
 				if (r->playlist() == 0) {
 					if (boost::dynamic_pointer_cast<AudioRegion>(r)) {
@@ -4006,8 +4008,15 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "punch-in") {
 
-		Location* location;
+		if (!punch_is_possible ()) {
+			if (config.get_punch_in ()) {
+				/* force off */
+				config.set_punch_in (false);
+				return;
+			}
+		}
 
+		Location* location;
 		if ((location = _locations->auto_punch_location()) != 0) {
 
 			if (config.get_punch_in ()) {
@@ -4019,8 +4028,15 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "punch-out") {
 
-		Location* location;
+		if (!punch_is_possible ()) {
+			if (config.get_punch_out ()) {
+				/* force off */
+				config.set_punch_out (false);
+				return;
+			}
+		}
 
+		Location* location;
 		if ((location = _locations->auto_punch_location()) != 0) {
 
 			if (config.get_punch_out()) {

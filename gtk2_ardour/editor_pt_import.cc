@@ -87,39 +87,33 @@ Editor::external_pt_dialog ()
 	PTImportSelector dialog (import_ptf);
 	dialog.set_session (_session);
 
-	while (true) {
-		int result = dialog.run ();
+	if (dialog.run () != Gtk::RESPONSE_ACCEPT) {
+		return;
+	}
 
-		if (result == Gtk::RESPONSE_ACCEPT) {
+	import_pt_status.all_done = false;
 
-			import_pt_status.all_done = false;
+	ImportProgressWindow ipw (&import_pt_status, _("PT Import"), _("Cancel Import"));
+	pthread_create_and_store ("import_pt", &import_pt_status.thread, _import_pt_thread, this);
+	pthread_detach (import_pt_status.thread);
 
-			ImportProgressWindow ipw (&import_pt_status, _("PT Import"), _("Cancel Import"));
-			pthread_create_and_store ("import_pt", &import_pt_status.thread, _import_pt_thread, this);
-			pthread_detach (import_pt_status.thread);
+	ipw.show();
 
-			ipw.show();
+	while (!import_pt_status.all_done) {
+		gtk_main_iteration ();
+	}
 
-			while (!import_pt_status.all_done) {
-				gtk_main_iteration ();
-			}
+	// wait for thread to terminate
+	while (!import_pt_status.done) {
+		gtk_main_iteration ();
+	}
 
-			// wait for thread to terminate
-			while (!import_pt_status.done) {
-				gtk_main_iteration ();
-			}
-
-			if (import_pt_status.cancel) {
-				MessageDialog msg (_("PT import may have missing files, check session log for details"));
-				msg.run ();
-			} else {
-				MessageDialog msg (_("PT import complete!"));
-				msg.run ();
-			}
-			break;
-		} else if (result == Gtk::RESPONSE_CANCEL) {
-			break;
-		}
+	if (import_pt_status.cancel) {
+		MessageDialog msg (_("PT import may have missing files, check session log for details"));
+		msg.run ();
+	} else {
+		MessageDialog msg (_("PT import complete!"));
+		msg.run ();
 	}
 }
 

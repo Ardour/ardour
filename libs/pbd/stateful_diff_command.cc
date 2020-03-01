@@ -19,10 +19,10 @@
  */
 
 #include "pbd/stateful_diff_command.h"
-#include "pbd/types_convert.h"
-#include "pbd/property_list.h"
 #include "pbd/demangle.h"
 #include "pbd/i18n.h"
+#include "pbd/property_list.h"
+#include "pbd/types_convert.h"
 
 using namespace std;
 using namespace PBD;
@@ -33,88 +33,86 @@ using namespace PBD;
  */
 
 StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<StatefulDestructible> s)
-        : _object (s)
-        , _changes (0)
+	: _object (s)
+	, _changes (0)
 {
 	_changes = s->get_changes_as_properties (this);
 
-        /* if the stateful object that this command refers to goes away,
+	/* if the stateful object that this command refers to goes away,
            be sure to notify owners of this command.
         */
 
-        s->DropReferences.connect_same_thread (*this, boost::bind (&Destructible::drop_references, this));
+	s->DropReferences.connect_same_thread (*this, boost::bind (&Destructible::drop_references, this));
 }
 
-StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<StatefulDestructible> s, XMLNode const & n)
+StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<StatefulDestructible> s, XMLNode const& n)
 	: _object (s)
-        , _changes (0)
+	, _changes (0)
 {
-        const XMLNodeList& children (n.children());
+	const XMLNodeList& children (n.children ());
 
-        for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-                if ((*i)->name() == X_("Changes")) {
-                        _changes = s->property_factory (**i);
-                }
+	for (XMLNodeList::const_iterator i = children.begin (); i != children.end (); ++i) {
+		if ((*i)->name () == X_ ("Changes")) {
+			_changes = s->property_factory (**i);
+		}
 	}
 
-        assert (_changes != 0);
+	assert (_changes != 0);
 
-        /* if the stateful object that this command refers to goes away,
+	/* if the stateful object that this command refers to goes away,
            be sure to notify owners of this command.
         */
 
-        s->DropReferences.connect_same_thread (*this, boost::bind (&Destructible::drop_references, this));
+	s->DropReferences.connect_same_thread (*this, boost::bind (&Destructible::drop_references, this));
 }
 
 StatefulDiffCommand::~StatefulDiffCommand ()
 {
-        drop_references ();
-
-        delete _changes;
+	delete _changes;
 }
 
 void
 StatefulDiffCommand::operator() ()
 {
-	boost::shared_ptr<Stateful> s (_object.lock());
+	boost::shared_ptr<Stateful> s (_object.lock ());
 
 	if (s) {
-                s->apply_changes (*_changes);
+		s->apply_changes (*_changes);
 	}
 }
 
 void
 StatefulDiffCommand::undo ()
 {
-	boost::shared_ptr<Stateful> s (_object.lock());
+	boost::shared_ptr<Stateful> s (_object.lock ());
 
 	if (s) {
 		PropertyList p = *_changes;
 		p.invert ();
-                s->apply_changes (p);
+		s->apply_changes (p);
 	}
 }
 
 XMLNode&
 StatefulDiffCommand::get_state ()
 {
-	boost::shared_ptr<Stateful> s (_object.lock());
+	boost::shared_ptr<Stateful> s (_object.lock ());
 
 	if (!s) {
 		/* XXX should we throw? */
-		return * new XMLNode("");
+		return *new XMLNode ("");
 	}
 
-	XMLNode* node = new XMLNode (X_("StatefulDiffCommand"));
+	XMLNode* node = new XMLNode (X_ ("StatefulDiffCommand"));
 
-	node->set_property ("obj-id", s->id());
-	node->set_property ("type-name", demangled_name (*s.get()));
+	node->set_property ("obj-id", s->id ());
+	node->set_property ("type-name", demangled_name (*s.get ()));
 
-        XMLNode* changes = new XMLNode (X_("Changes"));
+	XMLNode* changes = new XMLNode (X_ ("Changes"));
 
-        _changes->get_changes_as_xml (changes);
+	_changes->get_changes_as_xml (changes);
 
-        node->add_child_nocopy (*changes);
+	node->add_child_nocopy (*changes);
 
 	return *node;
 }
@@ -122,5 +120,5 @@ StatefulDiffCommand::get_state ()
 bool
 StatefulDiffCommand::empty () const
 {
-	return _changes->empty();
+	return _changes->empty ();
 }

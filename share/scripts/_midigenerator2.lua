@@ -11,6 +11,11 @@ function dsp_ioconfig ()
 	return { { midi_in = 1, midi_out = 1, audio_in = -1, audio_out = -1}, }
 end
 
+function dsp_configure (ins, outs)
+	n_out = outs
+	n_out:set_midi (0)
+end
+
 function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 	local ob = out_map:get (ARDOUR.DataType ("midi"), 0)
 	if ob ~= ARDOUR.ChanMapping.Invalid then
@@ -28,7 +33,5 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 		ba:add ({0x80, 64, 127})
 		mb:push_back (n_samples - 1 - offset, ba:size (), ba:to_array());
 	end
-
-	-- passthrough audio, apply pin/channel mapping
-	ARDOUR.DSP.process_map (bufs, in_map, out_map, n_samples, offset, ARDOUR.DataType ("audio"))
+	ARDOUR.DSP.process_map (bufs, n_out, in_map, out_map, n_samples, offset)
 end

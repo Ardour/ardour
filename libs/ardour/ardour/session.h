@@ -775,6 +775,10 @@ public:
 	
 	bool silent () { return _silent; }
 
+	bool punch_is_possible () const;
+	bool loop_is_possible () const;
+	PBD::Signal0<void> PunchLoopConstraintChange;
+
 	TempoMap&       tempo_map()       { return *_tempo_map; }
 	const TempoMap& tempo_map() const { return *_tempo_map; }
 	void maybe_update_tempo_from_midiclock_tempo (float bpm);
@@ -1693,6 +1697,20 @@ private:
 	void overwrite_some_buffers (boost::shared_ptr<Route>, OverwriteReason);
 	void flush_all_inserts ();
 	int  micro_locate (samplecnt_t distance);
+
+	enum PunchLoopLock {
+		NoConstraint,
+		OnlyPunch,
+		OnlyLoop,
+	};
+
+	volatile guint _punch_or_loop; // enum PunchLoopLock
+
+	bool punch_active () const;
+	void unset_punch ();
+	void reset_punch_loop_constraint ();
+	bool maybe_allow_only_loop (bool play_loop = false);
+	bool maybe_allow_only_punch ();
 
 	void force_locate (samplepos_t sample, LocateTransportDisposition);
 	void realtime_stop (bool abort, bool clear_state);

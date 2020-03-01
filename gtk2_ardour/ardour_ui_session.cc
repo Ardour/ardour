@@ -418,17 +418,19 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		goto out;
 	}
 	catch (SessionException const& e) {
+		stringstream ss;
+		dump_errors (ss, 6);
+		dump_errors (cerr);
+		clear_errors ();
 		ArdourMessageDialog msg (string_compose(
-			                         _("Session \"%1 (snapshot %2)\" did not load successfully:\n%3"),
-			                         path, snap_name, e.what()),
-		                         true,
+			                         _("Session \"%1 (snapshot %2)\" did not load successfully:\n%3%4%5"),
+			                         path, snap_name, e.what(), ss.str().empty() ? "" : "\n\n---", ss.str()),
+		                         false,
 		                         Gtk::MESSAGE_INFO,
 		                         BUTTONS_OK);
 
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
-
-		dump_errors (cerr);
 
 		(void) msg.run ();
 		msg.hide ();
@@ -436,18 +438,20 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		goto out;
 	}
 	catch (...) {
+		stringstream ss;
+		dump_errors (ss, 6);
+		dump_errors (cerr);
+		clear_errors ();
 
 		ArdourMessageDialog msg (string_compose(
-		                           _("Session \"%1 (snapshot %2)\" did not load successfully."),
-		                           path, snap_name),
+		                           _("Session \"%1 (snapshot %2)\" did not load successfully.%3%4"),
+		                           path, snap_name, ss.str().empty() ? "" : "\n\n---", ss.str()),
 		                         true,
 		                         Gtk::MESSAGE_INFO,
 		                         BUTTONS_OK);
 
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
-
-		dump_errors (cerr);
 
 		(void) msg.run ();
 		msg.hide ();
@@ -611,20 +615,26 @@ ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& 
 		new_session = new Session (*AudioEngine::instance(), path, snap_name, bus_profile.master_out_channels > 0 ? &bus_profile : NULL, meta_session ? "" : session_template);
 	}
 	catch (SessionException const& e) {
+		stringstream ss;
+		dump_errors (ss, 6);
 		cerr << "Here are the errors associated with this failed session:\n";
 		dump_errors (cerr);
 		cerr << "---------\n";
-		ArdourMessageDialog msg (string_compose(_("Could not create session in \"%1\": %2"), path, e.what()));
+		clear_errors ();
+		ArdourMessageDialog msg (string_compose(_("Could not create session in \"%1\": %2%3%4"), path, e.what(), ss.str().empty() ? "" : "\n\n---", ss.str()));
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		msg.run ();
 		return -1;
 	}
 	catch (...) {
+		stringstream ss;
+		dump_errors (ss, 6);
 		cerr << "Here are the errors associated with this failed session:\n";
 		dump_errors (cerr);
 		cerr << "---------\n";
-		ArdourMessageDialog msg (string_compose(_("Could not create session in \"%1\""), path));
+		clear_errors ();
+		ArdourMessageDialog msg (string_compose(_("Could not create session in \"%1\"%2%3"), path, ss.str().empty() ? "" : "\n\n---", ss.str()));
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		msg.run ();
@@ -857,10 +867,10 @@ If you still wish to proceed, please use the\n\n\
 	save_as_dialog->hide ();
 
 	switch (response) {
-	case Gtk::RESPONSE_OK:
-		break;
-	default:
-		return;
+		case Gtk::RESPONSE_OK:
+			break;
+		default:
+			return;
 	}
 
 
@@ -1055,8 +1065,11 @@ ARDOUR_UI::open_session ()
 	int response = open_session_selector.run();
 	open_session_selector.hide ();
 
-	if (response == Gtk::RESPONSE_CANCEL) {
-		return;
+	switch (response) {
+		case Gtk::RESPONSE_ACCEPT:
+			break;
+		default:
+			return;
 	}
 
 	string session_path = open_session_selector.get_filename();

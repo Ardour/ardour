@@ -236,9 +236,13 @@ SessionImportDialog::update (string path)
 			// Prompt user for verification
 			string txt = _("This will select all elements of this type!");
 			ArdourMessageDialog msg (txt, false, MESSAGE_QUESTION, BUTTONS_OK_CANCEL, true);
-			if (msg.run() == RESPONSE_CANCEL) {
-				(*cell)[sb_cols.queued] = false;
-				return;
+			switch (msg.run()) {
+				case Gtk::RESPONSE_ACCEPT:
+				case Gtk::RESPONSE_OK:
+					break;
+				default:
+					(*cell)[sb_cols.queued] = false;
+					return;
 			}
 		}
 

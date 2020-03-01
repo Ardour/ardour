@@ -174,7 +174,7 @@ void
 Convolution::run (BufferSet& bufs, ChanMapping const& in_map, ChanMapping const& out_map, pframes_t n_samples, samplecnt_t offset)
 {
 	if (!ready ()) {
-		process_map (&bufs, in_map, out_map, n_samples, offset, DataType::AUDIO);
+		process_map (&bufs, ChanCount (DataType::AUDIO, _n_outputs), in_map, out_map, n_samples, offset);
 		return;
 	}
 
