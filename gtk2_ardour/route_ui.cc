@@ -340,7 +340,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	_route->solo_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->solo_safe_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->solo_isolate_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
-	_route->phase_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::polarity_changed, this), gui_context());
+	_route->phase_control()->Changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_polarity_display, this), gui_context());
 	_route->fan_out.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::fan_out, this, false, true), gui_context());
 
 	if (is_track()) {
@@ -395,7 +395,6 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	map_frozen ();
 
 	setup_invert_buttons ();
-	set_invert_button_state ();
 
 	boost::shared_ptr<Route> s = _showing_sends_to.lock ();
 	bus_send_display_changed (s);
@@ -411,16 +410,6 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	maybe_add_route_print_mgr ();
 	route_color_changed();
 	route_gui_changed (PropertyChange (Properties::selected));
-}
-
-void
-RouteUI::polarity_changed ()
-{
-	if (!_route) {
-		return;
-	}
-
-	set_invert_button_state ();
 }
 
 bool
@@ -2063,11 +2052,11 @@ RouteUI::setup_invert_buttons ()
 	_invert_button_box.set_spacing (1);
 	_invert_button_box.show_all ();
 
-	set_invert_button_state ();
+	update_polarity_display ();
 }
 
 void
-RouteUI::set_invert_button_state ()
+RouteUI::update_polarity_display ()
 {
 	uint32_t const N = _route->phase_control()->size();
 	if (N > _max_invert_buttons) {
@@ -2112,7 +2101,6 @@ RouteUI::invert_release (GdkEventButton* ev, uint32_t i)
 	return false;
 }
 
-
 bool
 RouteUI::invert_press (GdkEventButton* ev)
 {
@@ -2151,7 +2139,6 @@ RouteUI::invert_menu_toggled (uint32_t c)
 	if (_i_am_the_modifier) {
 		return;
 	}
-
 
 	_route->phase_control()->set_phase_invert (c, !_route->phase_control()->inverted (c));
 }

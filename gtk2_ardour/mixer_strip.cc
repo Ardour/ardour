@@ -690,8 +690,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	/* now force an update of all the various elements */
 
-	update_mute_display ();
-	update_solo_display ();
 	name_changed ();
 	comment_changed ();
 	route_group_changed ();

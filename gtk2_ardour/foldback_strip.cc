@@ -569,8 +569,6 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	name_changed ();
 	update_send_box ();
 	_session->FBSendsChanged.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::update_send_box, this), gui_context());
-	update_mute_display ();
-	update_solo_display ();
 	comment_changed ();
 	connect_to_pan ();
 	panners.setup_pan ();
