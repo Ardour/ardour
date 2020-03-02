@@ -6,7 +6,9 @@
     This software is distributed without any warranty.
     See <http://creativecommons.org/publicdomain/zero/1.0/>.
 */
-#include <stdint.h>
+
+/* don't use global includes, since this file is included in "namespace ardour" */
+//#include <stdint.h>
 
 #define MINIMP3_MAX_SAMPLES_PER_FRAME (1152*2)
 
