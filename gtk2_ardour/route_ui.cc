@@ -352,7 +352,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_property_changed, this, _1), gui_context());
 	_route->presentation_info().PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_gui_changed, this, _1), gui_context ());
 
-	_route->polarity()->ConfigurationChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::polarity_configuration_changed, this, _1, _2), gui_context());
+	_route->polarity()->ConfigurationChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::setup_invert_buttons, this), gui_context());
 
 	if (_session->writable() && is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
@@ -2018,12 +2018,6 @@ RouteUI::parameter_changed (string const & p)
 }
 
 void
-RouteUI::polarity_configuration_changed (const ChanCount in, const ChanCount out)
-{
-	setup_invert_buttons();
-}
-
-void
 RouteUI::setup_invert_buttons ()
 {
 	/* remove old invert buttons */
@@ -2068,6 +2062,8 @@ RouteUI::setup_invert_buttons ()
 
 	_invert_button_box.set_spacing (1);
 	_invert_button_box.show_all ();
+
+	set_invert_button_state ();
 }
 
 void
