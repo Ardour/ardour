@@ -42,10 +42,10 @@ function factory () return function ()
 				-- http://manual.ardour.org/lua-scripting/class_reference/#C:FloatArray
 				local d = cmem:to_float (0):array()
 				-- iterate over the audio sample data
-				for i = 0, s do
+				for i = 1, s do
 					if math.abs (d[i]) > 0 then
 						if (nonzeropos < 0 or pos + i < nonzeropos) then
-							nonzeropos = pos + i
+							nonzeropos = pos + i - 1
 						end
 						break
 					end
