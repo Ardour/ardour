@@ -398,7 +398,7 @@ bool
 InternalSend::set_name (const string& str)
 {
 	/* rules for external sends don't apply to us */
-	return IOProcessor::set_name (str);
+	return Delivery::set_name (str);
 }
 
 string

@@ -49,7 +49,7 @@ public:
 	             ARDOUR::DataType default_type = DataType::AUDIO, bool sendish=false);
 
 	IOProcessor (Session&, boost::shared_ptr<IO> input, boost::shared_ptr<IO> output,
-	             const std::string& proc_name, ARDOUR::DataType default_type = DataType::AUDIO);
+	             const std::string& proc_name, bool sendish=false);
 
 	virtual ~IOProcessor ();
 
@@ -81,9 +81,15 @@ public:
 
 	static void prepare_for_reset (XMLNode& state, const std::string& name);
 
+	uint32_t bit_slot() const { return _bitslot; }
+
 protected:
 	boost::shared_ptr<IO> _input;
 	boost::shared_ptr<IO> _output;
+
+	/* used by PortInsert, Send & Return*/
+	std::string validate_name (std::string const& new_name, std::string const& canonical_name) const;
+	uint32_t _bitslot;
 
 private:
 	/* disallow copy construction */

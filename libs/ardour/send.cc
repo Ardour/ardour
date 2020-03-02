@@ -485,22 +485,11 @@ Send::set_name (const string& new_name)
 	string unique_name;
 
 	if (_role == Delivery::Send) {
-		char buf[32];
+		unique_name = validate_name (new_name, string_compose (_("send %1"), _bitslot));
 
-		/* rip any existing numeric part of the name, and append the bitslot
-		 */
-
-		string::size_type last_letter = new_name.find_last_not_of ("0123456789");
-
-		if (last_letter != string::npos) {
-			unique_name = new_name.substr (0, last_letter + 1);
-		} else {
-			unique_name = new_name;
+		if (unique_name.empty ()) {
+			return false;
 		}
-
-		snprintf (buf, sizeof (buf), "%u", (_bitslot + 1));
-		unique_name += buf;
-
 	} else {
 		unique_name = new_name;
 	}

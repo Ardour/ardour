@@ -42,7 +42,7 @@ string
 PortInsert::name_and_id_new_insert (Session& s, uint32_t& bitslot)
 {
 	bitslot = s.next_insert_id ();
-	return string_compose (_("insert %1"), bitslot+ 1);
+	return string_compose (_("insert %1"), bitslot);
 }
 
 PortInsert::PortInsert (Session& s, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster> mm)
@@ -272,13 +272,15 @@ PortInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 }
 
 bool
-PortInsert::set_name (const std::string& name)
+PortInsert::set_name (const std::string& new_name)
 {
-	bool ret = Processor::set_name (name);
+	string unique_name = validate_name (new_name, string_compose (_("insert %1"), _bitslot));
 
-	ret = (ret && _input->set_name (name) && _output->set_name (name));
+	if (unique_name.empty ()) {
+		return false;
+	}
 
-	return ret;
+	return IOProcessor::set_name (unique_name);
 }
 
 void

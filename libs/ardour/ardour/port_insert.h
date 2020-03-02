@@ -71,8 +71,6 @@ public:
 
 	void set_pre_fader (bool);
 
-	uint32_t bit_slot() const { return _bitslot; }
-
 	void start_latency_detection ();
 	void stop_latency_detection ();
 
@@ -90,7 +88,6 @@ private:
 
 	boost::shared_ptr<Delivery> _out;
 
-	uint32_t    _bitslot;
 	MTDM*       _mtdm;
 	bool        _latency_detect;
 	samplecnt_t _latency_flush_samples;
