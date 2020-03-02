@@ -3337,7 +3337,7 @@ ProcessorBox::rename_processor (boost::shared_ptr<Processor> processor)
 
 	case Gtk::RESPONSE_ACCEPT:
 		name_prompter.get_result (result);
-		if (result.length()) {
+		if (result.length() && result != processor->name ()) {
 
 			int tries = 0;
 			string test = result;
