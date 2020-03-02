@@ -345,6 +345,7 @@ private:
 	int _i_am_the_modifier;
 	std::vector<ArdourWidgets::ArdourButton*> _invert_buttons;
 	Gtk::Menu* _invert_menu;
+	uint32_t   _n_polarity_invert;
 
 	StripableColorDialog _color_picker;
 

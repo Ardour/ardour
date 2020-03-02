@@ -2009,6 +2009,13 @@ RouteUI::parameter_changed (string const & p)
 void
 RouteUI::setup_invert_buttons ()
 {
+	uint32_t const N = _route ? _route->phase_control()->size() : 0;
+
+	if (_n_polarity_invert == N) {
+		return;
+	}
+	_n_polarity_invert = N;
+
 	/* remove old invert buttons */
 	for (vector<ArdourButton*>::iterator i = _invert_buttons.begin(); i != _invert_buttons.end(); ++i) {
 		_invert_button_box.remove (**i);
@@ -2016,11 +2023,10 @@ RouteUI::setup_invert_buttons ()
 
 	_invert_buttons.clear ();
 
-	if (!_route) {
+	if (N == 0) {
 		return;
 	}
 
-	uint32_t const N = _route->phase_control()->size();
 	uint32_t const to_add = (N <= _max_invert_buttons) ? N : 1;
 
 	for (uint32_t i = 0; i < to_add; ++i) {
