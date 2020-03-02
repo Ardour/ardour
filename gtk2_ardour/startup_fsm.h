@@ -76,6 +76,8 @@ class StartupFSM : public sigc::trackable
 
 	bool brand_new_user() const { return new_user; }
 
+	void handle_path (std::string const & path);
+
   private:
 	bool new_user;
 	bool new_session_required;

@@ -907,3 +907,11 @@ Full information on all the above can be found on the support page at\n\
 	pre_release_dialog->set_position (WIN_POS_CENTER);
 	pre_release_dialog->present ();
 }
+
+void
+StartupFSM::handle_path (string const & path)
+{
+	if (get_session_parameters_from_path (path, string(), false)) {
+		_signal_response (LoadSession);
+	}
+}

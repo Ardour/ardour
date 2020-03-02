@@ -549,6 +549,11 @@ ARDOUR_UI::startup_done ()
 	   and we have to take over responsibility.
 	*/
 	Application::instance()->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
+	/* Same story applies for ShouldLoad ... startupFSM will handle it
+	   normally, but if it doesn't we (ARDOUR_UI) need to take responsibility
+	   for it.
+	*/
+	Application::instance()->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::load_from_application_api));
 
 	use_config ();
 
@@ -643,4 +648,77 @@ ARDOUR_UI::check_memory_locking ()
 		}
 	}
 #endif // !__APPLE__
+}
+
+void
+ARDOUR_UI::load_from_application_api (const std::string& path)
+{
+	/* OS X El Capitan (and probably later) now somehow passes the command
+	   line arguments to an app via the openFile delegate protocol. Ardour
+	   already does its own command line processing, and having both
+	   pathways active causes crashes. So, if the command line was already
+	   set, do nothing here.
+	*/
+
+	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
+		return;
+	}
+
+	/* Cancel SessionDialog if it's visible to make OSX delegates work.
+	 *
+	 * ARDOUR_UI::starting connects app->ShouldLoad signal and then shows a SessionDialog
+	 * race-condition:
+	 *  - ShouldLoad does not arrive in time, ARDOUR_COMMAND_LINE::session_name is empty:
+	 *    -> startupFSM starts a SessionDialog.
+	 *  - ShouldLoad signal arrives, this function is called and sets ARDOUR_COMMAND_LINE::session_name
+	 *    -> SessionDialog is not displayed
+	 */
+
+	if (startup_fsm) {
+		startup_fsm->handle_path (path);
+		return;
+	}
+
+	ARDOUR_COMMAND_LINE::session_name = path;
+
+	int rv;
+
+	if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
+		/* /path/to/foo => /path/to/foo, foo */
+		rv = load_session (path, basename_nosuffix (path));
+	} else {
+		/* /path/to/foo/foo.ardour => /path/to/foo, foo */
+		rv = load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
+	}
+
+	// if load_session fails, and there is no existing session ....
+
+	if (rv && !_session) {
+
+		ARDOUR_COMMAND_LINE::session_name = string();
+
+		/* do this again */
+
+		EngineControl* amd;
+
+		try {
+			amd = dynamic_cast<EngineControl*> (audio_midi_setup.get (true));
+		} catch (...) {
+			std::cerr << "audio-midi engine setup failed."<< std::endl;
+			return;
+		}
+
+		startup_fsm = new StartupFSM (*amd);
+		startup_fsm->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::sfsm_response));
+
+		/* Note: entire startup process could happen in this one call
+		 * if:
+		 *
+		 * 1) not a new user
+		 * 2) session name provided on command line (and valid)
+		 * 3) no audio/MIDI setup required
+		 */
+
+		startup_fsm->start ();
+	}
 }
