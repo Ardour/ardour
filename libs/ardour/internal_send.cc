@@ -88,7 +88,7 @@ InternalSend::init_gain ()
 }
 
 int
-InternalSend::use_target (boost::shared_ptr<Route> sendto)
+InternalSend::use_target (boost::shared_ptr<Route> sendto, bool update_name)
 {
 	if (_send_to) {
 		_send_to->remove_send_from_internal_return (this);
@@ -107,7 +107,9 @@ InternalSend::use_target (boost::shared_ptr<Route> sendto)
 
 	reset_panner ();
 
-	set_name (sendto->name());
+	if (update_name) {
+		set_name (sendto->name());
+	}
 	_send_to_id = _send_to->id();
 
 	target_connections.drop_connections ();
@@ -360,7 +362,7 @@ InternalSend::connect_when_legal ()
 		return -1;
 	}
 
-	return use_target (sendto);
+	return use_target (sendto, false);
 }
 
 bool
