@@ -1286,7 +1286,6 @@ int main () { return 0; }
 
     if conf.env['build_host'] not in [ 'mojave', 'catalina']:
 	    conf.env.append_value('CXXFLAGS_OSX', '-F/System/Library/Frameworks')
-	    print("**** YES ADDING FRAMEWORKS")
 
     conf.env.append_value('CXXFLAGS_OSX', '-F/Library/Frameworks')
 
