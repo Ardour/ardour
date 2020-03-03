@@ -1592,7 +1592,7 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 		break;
 
 	case StreamItem:
-		if (clicked_routeview->track()) {
+		if (clicked_routeview != 0 && clicked_routeview->track()) {
 			build_menu_function = &Editor::build_track_context_menu;
 		} else {
 			build_menu_function = &Editor::build_track_bus_context_menu;
