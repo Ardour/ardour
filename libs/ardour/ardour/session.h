@@ -1126,6 +1126,10 @@ public:
 		return _exporting;
 	}
 
+	bool realtime_export() const {
+		return _realtime_export;
+	}
+
 	bool bounce_processing() const {
 		return _bounce_processing_active;
 	}

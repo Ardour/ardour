@@ -283,7 +283,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	const bool declicked_out = (_declick_amp.gain() == target_gain) && target_gain == 0.0;
 	const bool declick_out = (_declick_amp.gain() != target_gain) && target_gain == 0.0;
 
-	if (!_session.cfg ()->get_use_transport_fades ()) {
+	if (!_session.cfg ()->get_use_transport_fades () || (_session.exporting () && ! _session.realtime_export ())) {
 		_declick_amp.set_gain (target_gain);
 	}
 
