@@ -25,6 +25,7 @@
 #include <vector>
 
 #include <glibmm/miscutils.h>
+#include <glibmm/timer.h>
 
 #include "pbd/uuid.h"
 #include "pbd/file_utils.h"
@@ -655,10 +656,17 @@ ExportGraphBuilder::Intermediate::prepare_post_processing()
 void
 ExportGraphBuilder::Intermediate::start_post_processing()
 {
-	// called in disk-thread (when exporting in realtime)
+	/* called in disk-thread (when exporting in realtime) */
 	tmp_file->seek (0, SEEK_SET);
+	/* RT Stem export has multiple TmpFileRt threads,
+	 * prevent concurrent calls to enable freewheel ()
+	 */
+	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 	if (!AudioEngine::instance()->freewheeling ()) {
 		AudioEngine::instance()->freewheel (true);
+		while (!AudioEngine::instance()->freewheeling ()) {
+			Glib::usleep (AudioEngine::instance()->usecs_per_cycle ());
+		}
 	}
 }
 

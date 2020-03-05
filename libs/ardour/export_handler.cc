@@ -172,6 +172,14 @@ ExportHandler::start_timespan ()
 {
 	export_status->timespan++;
 
+	/* stop freewheeling and wait for latency callbacks */
+	if (AudioEngine::instance()->freewheeling ()) {
+		AudioEngine::instance()->freewheel (false);
+		do {
+			Glib::usleep (AudioEngine::instance()->usecs_per_cycle ());
+		} while (AudioEngine::instance()->freewheeling ());
+	}
+
 	if (config_map.empty()) {
 		// freewheeling has to be stopped from outside the process cycle
 		export_status->set_running (false);
@@ -266,10 +274,11 @@ ExportHandler::process (samplecnt_t samples)
 			// wait until we're freewheeling
 			return 0;
 		}
-	} else {
+	} else if (samples > 0) {
 		Glib::Threads::Mutex::Lock l (export_status->lock());
 		return process_timespan (samples);
 	}
+	return 0;
 }
 
 int
@@ -336,6 +345,16 @@ ExportHandler::command_output(std::string output, size_t size)
 {
 	std::cerr << "command: " << size << ", " << output << std::endl;
 	info << output << endmsg;
+}
+
+void*
+ExportHandler::start_timespan_bg (void* eh)
+{
+	ExportHandler* self = static_cast<ExportHandler*> (eh);
+	self->process_connection.disconnect ();
+	Glib::Threads::Mutex::Lock l (self->export_status->lock());
+	self->start_timespan ();
+	return 0;
 }
 
 void
@@ -474,7 +493,12 @@ ExportHandler::finish_timespan ()
 		config_map.erase (config_map.begin());
 	}
 
-	start_timespan ();
+	/* finish timespan is called in freewheeling rt-context,
+	 * we cannot start a new export from here */
+	assert (AudioEngine::instance()->freewheeling ());
+	pthread_t tid;
+	pthread_create (&tid, NULL, ExportHandler::start_timespan_bg, this);
+	pthread_detach (tid);
 }
 
 void
