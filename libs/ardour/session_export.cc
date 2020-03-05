@@ -285,20 +285,33 @@ Session::process_export_fw (pframes_t nframes)
 			_engine.main_thread()->get_buffers ();
 		}
 
-		process_without_events (remain);
+		assert (_count_in_samples == 0);
+		while (remain > 0) {
+			samplecnt_t ns = calc_preroll_subcycle (remain);
+
+			bool session_needs_butler = false;
+			if (process_routes (ns, session_needs_butler)) {
+				fail_roll (ns);
+			}
+
+			ProcessExport (ns);
+
+			_remaining_latency_preroll -= ns;
+			remain -= ns;
+			nframes -= ns;
+
+			if (remain != 0) {
+				_engine.split_cycle (ns);
+			}
+		}
 
 		if (need_buffers) {
 			_engine.main_thread()->drop_buffers ();
 		}
 
-		_remaining_latency_preroll -= remain;
-		_transport_sample -= remain;
-		nframes -= remain;
-
 		if (nframes == 0) {
 			return;
 		}
-		_engine.split_cycle (remain);
 	}
 
 	if (need_buffers) {

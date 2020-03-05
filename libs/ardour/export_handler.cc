@@ -299,12 +299,13 @@ ExportHandler::process_timespan (samplecnt_t samples)
 		samples_to_read = samples;
 	}
 
-	process_position += samples_to_read;
-	export_status->processed_samples += samples_to_read;
-	export_status->processed_samples_current_timespan += samples_to_read;
-
 	/* Do actual processing */
-	int ret = graph_builder->process (samples_to_read, last_cycle);
+	samplecnt_t ret = graph_builder->process (samples_to_read, last_cycle);
+	if (ret > 0) {
+		process_position += ret;
+		export_status->processed_samples += ret;
+		export_status->processed_samples_current_timespan += ret;
+	}
 
 	/* Start post-processing/normalizing if necessary */
 	if (last_cycle) {
@@ -318,7 +319,7 @@ ExportHandler::process_timespan (samplecnt_t samples)
 		}
 	}
 
-	return ret;
+	return 0;
 }
 
 int
