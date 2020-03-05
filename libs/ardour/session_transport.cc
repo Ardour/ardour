@@ -101,10 +101,11 @@ Session::realtime_stop (bool abort, bool clear_state)
 
 	if (_transport_speed < 0.0f) {
 		todo = (PostTransportWork (todo | PostTransportStop));
-		_default_transport_speed = 1.0;
 	} else {
 		todo = PostTransportWork (todo | PostTransportStop);
 	}
+
+	_default_transport_speed = 1.0;
 
 	/* call routes */
 
