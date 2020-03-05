@@ -97,14 +97,9 @@ Session::realtime_stop (bool abort, bool clear_state)
 	ENSURE_PROCESS_THREAD;
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("realtime stop @ %1 speed = %2\n", _transport_sample, _transport_speed));
-	PostTransportWork todo = PostTransportWork (0);
+	PostTransportWork todo = PostTransportStop;
 
-	if (_transport_speed < 0.0f) {
-		todo = (PostTransportWork (todo | PostTransportStop));
-	} else {
-		todo = PostTransportWork (todo | PostTransportStop);
-	}
-
+	/* this resets the speed we will start at if just requested to roll again */
 	_default_transport_speed = 1.0;
 
 	/* call routes */
