@@ -1345,6 +1345,8 @@ private:
 	void process_export         (pframes_t);
 	void process_export_fw      (pframes_t);
 
+	samplecnt_t calc_preroll_subcycle (samplecnt_t) const;
+
 	void block_processing() { g_atomic_int_set (&processing_prohibited, 1); }
 	void unblock_processing() { g_atomic_int_set (&processing_prohibited, 0); }
 	bool processing_blocked() const { return g_atomic_int_get (&processing_prohibited); }
