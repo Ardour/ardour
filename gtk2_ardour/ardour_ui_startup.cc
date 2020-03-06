@@ -474,6 +474,8 @@ ARDOUR_UI::starting ()
 {
 	Application* app = Application::instance();
 
+	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::load_from_application_api));
+
 	if (ARDOUR_COMMAND_LINE::check_announcements) {
 		check_announcements ();
 	}
@@ -657,7 +659,7 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 	   line arguments to an app via the openFile delegate protocol. Ardour
 	   already does its own command line processing, and having both
 	   pathways active causes crashes. So, if the command line was already
-	   set, do nothing here.
+	   set, do nothing here. NSM also uses this code path.
 	*/
 
 	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
@@ -675,7 +677,20 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 	 */
 
 	if (startup_fsm) {
+		/* this will result in the StartupFSM signalling us to load a
+		 * session, which if successful will then destroy the
+		 * startupFSM and we'll move right along.
+		 */
+
 		startup_fsm->handle_path (path);
+		return;
+	}
+
+	/* the mechanisms that can result is this being called are only
+	 * possible for existing sessions.
+	 */
+
+	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
 		return;
 	}
 
@@ -691,7 +706,7 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 		rv = load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
 	}
 
-	// if load_session fails, and there is no existing session ....
+	// there was no startupFSM, load_session fails, and there is no existing session ....
 
 	if (rv && !_session) {
 

@@ -95,7 +95,6 @@ StartupFSM::StartupFSM (EngineControl& amd)
 	Application* app = Application::instance ();
 
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &StartupFSM::queue_finish));
-	app->ShouldLoad.connect (sigc::mem_fun (*this, &StartupFSM::load_from_application_api));
 
 	Gtkmm2ext::Keyboard::HideMightMeanQuit.connect (sigc::mem_fun (*this, &StartupFSM::dialog_hidden));
 }
@@ -567,6 +566,7 @@ StartupFSM::get_session_parameters_from_path (string const & path, string const 
 		session_path = path;
 	}
 
+	session_template = string ();
 
 	if (!template_name.empty()) {
 
@@ -827,22 +827,6 @@ StartupFSM::copy_demo_sessions ()
 			}
 		}
 	}
-}
-
-void
-StartupFSM::load_from_application_api (const std::string& path)
-{
-	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
-		return;
-	}
-
-	/* just set this as if it was given on the command line, rather than
-	 * supplied via some desktop system (e.g. macOS application delegate
-	 * and "openFile". Note that this relies on this being invoked before
-	 * StartupFSM::start().
-	 */
-
-	ARDOUR_COMMAND_LINE::session_name = path;
 }
 
 bool

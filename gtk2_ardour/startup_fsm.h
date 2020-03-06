@@ -75,7 +75,6 @@ class StartupFSM : public sigc::trackable
 	sigc::signal1<void,Result>& signal_response() { return _signal_response; }
 
 	bool brand_new_user() const { return new_user; }
-
 	void handle_path (std::string const & path);
 
   private:
@@ -96,7 +95,6 @@ class StartupFSM : public sigc::trackable
 	void show_plugin_scan_dialog ();
 
 	void copy_demo_sessions ();
-	void load_from_application_api (std::string const &);
 	bool get_session_parameters_from_command_line (bool new_session_required);
 	bool get_session_parameters_from_path (std::string const & path, std::string const & template_name, bool new_session_required);
 	void queue_finish ();
