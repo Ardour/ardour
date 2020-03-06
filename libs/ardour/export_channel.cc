@@ -182,9 +182,6 @@ RegionExportChannelFactory::RegionExportChannelFactory (Session * session, Audio
 		std::fill_n (gain_buffer.get(), samples_per_cycle, Sample (1.0));
 
 		break;
-	  case Processed:
-		n_channels = track.n_outputs().n_audio();
-		break;
 	  default:
 		throw ExportFailed ("Unhandled type in ExportChannelFactory constructor");
 	}
@@ -238,9 +235,6 @@ RegionExportChannelFactory::update_buffers (samplecnt_t samples)
 			buffers.get_audio (channel).silence(samples);
 			region.read_at (buffers.get_audio (channel).data(), mixdown_buffer.get(), gain_buffer.get(), position, samples, channel);
 		}
-		break;
-	case Processed:
-		track.export_stuff (buffers, position, samples, track.main_outs(), true, true, false);
 		break;
 	default:
 		throw ExportFailed ("Unhandled type in ExportChannelFactory::update_buffers");

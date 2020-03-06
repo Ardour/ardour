@@ -210,7 +210,6 @@ ExportHandler::start_timespan ()
 		spec.filename->set_timespan (it->first);
 		switch (spec.channel_config->region_processing_type ()) {
 			case RegionExportChannelFactory::None:
-			case RegionExportChannelFactory::Processed:
 				region_export = false;
 				break;
 			default:

@@ -668,7 +668,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (RegionExportChannelFactory, None);
 	REGISTER_CLASS_ENUM (RegionExportChannelFactory, Raw);
 	REGISTER_CLASS_ENUM (RegionExportChannelFactory, Fades);
-	REGISTER_CLASS_ENUM (RegionExportChannelFactory, Processed);
 	REGISTER (_RegionExportChannelFactory_Type);
 
 	REGISTER_CLASS_ENUM (Delivery, Insert);
