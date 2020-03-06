@@ -419,7 +419,7 @@ ARDOUR_UI::export_video (bool range)
 			ARDOUR::Config->set_show_video_export_info(false);
 		}
 		switch (rv) {
-			case GTK_RESPONSE_YES:
+			case RESPONSE_YES:
 				PBD::open_uri (ARDOUR::Config->get_reference_manual_url() + "/video-timeline/operations/#export");
 				break;
 			default:
