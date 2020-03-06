@@ -39,7 +39,8 @@ class StartupFSM : public sigc::trackable
 		NewUserDialog,
 		NewSessionDialog,
 		AudioMIDISetup,
-		PluginDialog
+		PluginDialog,
+		ApplicationPseudoDialog,
 	};
 
 	enum Result {

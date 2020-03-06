@@ -199,6 +199,9 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 	switch (_state) {
 	case WaitingForPreRelease:
 		switch (dialog_id) {
+		case ApplicationPseudoDialog:
+			/* this shouldn't happen; ignore it */
+			break;
 		case PreReleaseDialog:
 		default:
 			/* any response value from the pre-release dialog means
@@ -217,6 +220,9 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 
 	case WaitingForNewUser:
 		switch (dialog_id) {
+		case ApplicationPseudoDialog:
+			/* this shouldn't happen; ignore it */
+			break;
 		case NewUserDialog:
 			switch (response) {
 			case RESPONSE_OK:
@@ -259,6 +265,13 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 			default:
 				_signal_response (ExitProgram);
 				break;
+			}
+			break;
+
+		case ApplicationPseudoDialog:
+			/* macOS, NSM etc. ... existence was already checked */
+			if (get_session_parameters_from_path (ARDOUR_COMMAND_LINE::session_name, string(), false)) {
+				start_audio_midi_setup ();
 			}
 			break;
 
@@ -895,7 +908,11 @@ Full information on all the above can be found on the support page at\n\
 void
 StartupFSM::handle_path (string const & path)
 {
-	if (get_session_parameters_from_path (path, string(), false)) {
-		_signal_response (LoadSession);
+	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
+		return;
 	}
+
+	ARDOUR_COMMAND_LINE::session_name = path;
+
+	dialog_response_handler (RESPONSE_OK, ApplicationPseudoDialog);
 }
