@@ -105,7 +105,6 @@ class LIBARDOUR_API RegionExportChannelFactory
 		None,
 		Raw,
 		Fades,
-		Processed
 	};
 
 	RegionExportChannelFactory (Session * session, AudioRegion const & region, AudioTrack & track, Type type);

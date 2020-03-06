@@ -231,7 +231,6 @@ private:
 	ARDOUR::AudioTrack & track;
 
 	uint32_t region_chans;
-	uint32_t track_chans;
 
 	/*** GUI components ***/
 
@@ -240,7 +239,6 @@ private:
 	Gtk::RadioButtonGroup type_group;
 	Gtk::RadioButton      raw_button;
 	Gtk::RadioButton      fades_button;
-	Gtk::RadioButton      processed_button;
 };
 
 class TrackExportChannelSelector : public ExportChannelSelector
