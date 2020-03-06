@@ -332,15 +332,17 @@ CoreAudioBackend::set_buffer_size (uint32_t bs)
 	if (bs <= 0 || bs >= _max_buffer_size) {
 		return -1;
 	}
-	_samples_per_period = bs;
+	if (!_run) {
+		_samples_per_period = bs;
+		engine.buffer_size_change (bs);
+	}
 	_pcmio->set_samples_per_period(bs);
 	if (_run) {
-		pbd_mach_set_realtime_policy (_main_thread, 1e9 * _samples_per_period / _samplerate);
+		pbd_mach_set_realtime_policy (_main_thread, 1e9 * bs / _samplerate);
 	}
 	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i) {
-		pbd_mach_set_realtime_policy (*i, 1e9 * _samples_per_period / _samplerate);
+		pbd_mach_set_realtime_policy (*i, 1e9 * bs / _samplerate);
 	}
-	//engine.buffer_size_change (bs);
 	return 0;
 }
 
