@@ -197,7 +197,6 @@ ExportTimespanSelector::allow_realtime_export (bool yn)
 void
 ExportTimespanSelector::toggle_realtime ()
 {
-	printf ("ExportTimespanSelector::toggle_realtime\n");
 	const bool realtime = !_session->config.get_realtime_export ();
 	_session->config.set_realtime_export (realtime);
 	realtime_checkbutton.set_inconsistent (false);
