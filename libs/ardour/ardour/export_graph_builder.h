@@ -278,7 +278,8 @@ class LIBARDOUR_API ExportGraphBuilder
 	bool        _realtime;
 	samplecnt_t _master_align;
 
-	Glib::ThreadPool thread_pool;
+	Glib::ThreadPool     thread_pool;
+	Glib::Threads::Mutex engine_request_lock;
 };
 
 } // namespace ARDOUR
