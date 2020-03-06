@@ -45,7 +45,7 @@ using std::string;
 
 ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, ProfileManagerPtr manager, bool multi)
 	: manager (manager)
-	, _realtime_available (true)
+	, _realtime_available (false)
 	, time_format_label (_("Show Times as:"), Gtk::ALIGN_LEFT)
 	, realtime_checkbutton (_("Realtime Export"))
 {
@@ -73,6 +73,7 @@ ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, Profi
 	}
 	option_hbox.pack_start (realtime_checkbutton, false, false, 6);
 	realtime_checkbutton.set_active (session->config.get_realtime_export ());
+	realtime_checkbutton.set_sensitive (_realtime_available);
 
 	realtime_checkbutton.signal_toggled ().connect (
 			sigc::mem_fun (*this, &ExportTimespanSelector::toggle_realtime)
@@ -196,6 +197,7 @@ ExportTimespanSelector::allow_realtime_export (bool yn)
 void
 ExportTimespanSelector::toggle_realtime ()
 {
+	printf ("ExportTimespanSelector::toggle_realtime\n");
 	const bool realtime = !_session->config.get_realtime_export ();
 	_session->config.set_realtime_export (realtime);
 	realtime_checkbutton.set_inconsistent (false);
@@ -487,14 +489,22 @@ ExportTimespanSelectorSingle::update_timespans ()
 	state->timespans->clear();
 	const bool realtime = _session->config.get_realtime_export ();
 	bool inconsistent = false;
+	bool rt_match = false;
 
 	for (Gtk::TreeStore::Children::iterator it = range_list->children().begin(); it != range_list->children().end(); ++it) {
 		add_range_to_selection (it->get_value (range_cols.location), it->get_value (range_cols.realtime) && _realtime_available);
 		if (it->get_value (range_cols.realtime) != realtime) {
 			inconsistent = true;
+		} else {
+			rt_match = true;
 		}
 	}
-	realtime_checkbutton.set_inconsistent (inconsistent);
+	if (!rt_match) {
+		realtime_checkbutton.set_inconsistent (false);
+		realtime_checkbutton.set_active (!realtime);
+	} else {
+		realtime_checkbutton.set_inconsistent (inconsistent);
+	}
 }
 
 /*** ExportTimespanSelectorMultiple ***/
@@ -615,6 +625,7 @@ ExportTimespanSelectorMultiple::update_timespans ()
 	state->timespans->clear();
 	const bool realtime = _session->config.get_realtime_export ();
 	bool inconsistent = false;
+	bool rt_match = false;
 
 	for (Gtk::TreeStore::Children::iterator it = range_list->children().begin(); it != range_list->children().end(); ++it) {
 		if (it->get_value (range_cols.selected)) {
@@ -622,8 +633,15 @@ ExportTimespanSelectorMultiple::update_timespans ()
 		}
 		if (it->get_value (range_cols.realtime) != realtime) {
 			inconsistent = true;
+		} else {
+			rt_match = true;
 		}
 	}
-	realtime_checkbutton.set_inconsistent (inconsistent);
+	if (!rt_match) {
+		realtime_checkbutton.set_inconsistent (false);
+		realtime_checkbutton.set_active (!realtime);
+	} else {
+		realtime_checkbutton.set_inconsistent (inconsistent);
+	}
 }
 
