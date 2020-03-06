@@ -321,7 +321,7 @@ EditorSources::remove_weak_region (boost::weak_ptr<ARDOUR::Region> r)
 	TreeModel::Children rows = _model->children();
 	for (TreeModel::iterator i = rows.begin(); i != rows.end(); ++i) {
 		boost::shared_ptr<ARDOUR::Region> rr = (*i)[_columns.region];
-		if (rr = region) {
+		if (rr == region) {
 			_model->erase(i);
 			break;
 		}
