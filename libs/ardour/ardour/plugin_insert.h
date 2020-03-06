@@ -29,6 +29,7 @@
 
 #include <boost/weak_ptr.hpp>
 
+#include "pbd/stack_allocator.h"
 #include "pbd/timing.h"
 
 #include "ardour/ardour.h"
@@ -370,7 +371,8 @@ private:
 	/* ordered map [plugin instance ID] => ARDOUR::ChanMapping
 	 * TODO: consider replacing with boost::flat_map<> or std::vector<>.
 	 */
-	class PinMappings : public std::map <uint32_t, ARDOUR::ChanMapping> {
+	class PinMappings : public std::map <uint32_t, ARDOUR::ChanMapping, std::less<uint32_t>, PBD::StackAllocator<std::pair<const uint32_t, ARDOUR::ChanMapping>, 4> > 
+	{
 		public:
 			/* this emulates C++11's  std::map::at()
 			 * return mapping for given plugin instance */

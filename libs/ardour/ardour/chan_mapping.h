@@ -25,12 +25,13 @@
 #include <ostream>
 #include <utility>
 
+#include "pbd/stack_allocator.h"
 #include "pbd/xml++.h"
+
 #include "ardour/data_type.h"
 #include "ardour/chan_count.h"
 
 namespace ARDOUR {
-
 
 /** A mapping from one set of channels to another.
  * The general form is  1 source (from), many sinks (to).
@@ -103,8 +104,8 @@ public:
 	 */
 	bool     is_subset (const ChanMapping& superset) const;
 
-	typedef std::map<uint32_t, uint32_t>    TypeMapping;
-	typedef std::map<DataType, TypeMapping> Mappings;
+	typedef std::map<uint32_t, uint32_t, std::less<uint32_t>, PBD::StackAllocator<std::pair<const uint32_t, uint32_t>, 16> > TypeMapping;
+	typedef std::map<DataType, TypeMapping, std::less<DataType>, PBD::StackAllocator<std::pair<const DataType, TypeMapping>, 2> > Mappings;
 
 	Mappings        mappings()       { return _mappings; }
 	const Mappings& mappings() const { return _mappings; }
