@@ -5137,15 +5137,11 @@ OSC::route_set_send_gain_dB (int ssid, int id, float val, lo_message msg)
 		if (id > 0) {
 			--id;
 		}
-#ifdef MIXBUS
-		abs = val;
-#else
 		if (val < -192) {
 			abs = 0;
 		} else {
 			abs = dB_to_coefficient (val);
 		}
-#endif
 		if (s->send_level_controllable (id)) {
 			s->send_level_controllable (id)->set_value (abs, sur->usegroup);
 			return 0;
@@ -5193,15 +5189,11 @@ OSC::sel_sendgain (int id, float val, lo_message msg)
 		if (id > 0) {
 			send_id = id - 1;
 		}
-#ifdef MIXBUS
-		abs = val;
-#else
 		if (val < -192) {
 			abs = 0;
 		} else {
 			abs = dB_to_coefficient (val);
 		}
-#endif
 		if (sur->send_page_size) {
 			send_id = send_id + ((sur->send_page - 1) * sur->send_page_size);
 		}
