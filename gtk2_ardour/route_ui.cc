@@ -178,6 +178,7 @@ RouteUI::init ()
 	multiple_mute_change = false;
 	multiple_solo_change = false;
 	_i_am_the_modifier = 0;
+	_n_polarity_invert = 0;
 
 	input_selector = 0;
 	output_selector = 0;
