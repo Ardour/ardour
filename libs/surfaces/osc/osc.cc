@@ -3083,32 +3083,25 @@ OSC::_sel_plugin (int id, lo_address addr)
 			return 1;
 		}
 
-		// find out how many plugins we have
-		bool plugs;
-		int nplugs  = 0;
+		/* find out how many plugins we have */
 		sur->plugins.clear();
-		do {
-			plugs = false;
-			if (r->nth_plugin (nplugs)) {
-				if (r->nth_plugin(nplugs)->display_to_user()) {
-#ifdef MIXBUS
-					// need to check for mixbus channel strips (and exclude them)
-					boost::shared_ptr<Processor> proc = r->nth_plugin (nplugs);
-					boost::shared_ptr<PluginInsert> pi;
-					if ((pi = boost::dynamic_pointer_cast<PluginInsert>(proc))) {
-
-						if (!pi->is_channelstrip()) {
-#endif
-							sur->plugins.push_back (nplugs);
-							nplugs++;
-#ifdef MIXBUS
-						}
-					}
-#endif
-				}
-				plugs = true;
+		for (int nplugs = 0; true; ++nplugs) {
+			boost::shared_ptr<Processor> proc = r->nth_plugin (nplugs);
+			if (!proc) {
+				break;
 			}
-		} while (plugs);
+			if (!r->nth_plugin(nplugs)->display_to_user()) {
+				continue;
+			}
+#ifdef MIXBUS
+			/* need to check for mixbus channel strips (and exclude them) */
+			boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(proc);
+			if (pi && pi->is_channelstrip()) {
+				continue;
+			}
+#endif
+			sur->plugins.push_back (nplugs);
+		}
 
 		// limit plugin_id to actual plugins
 		if (sur->plugins.size() < 1) {
