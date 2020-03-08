@@ -963,18 +963,11 @@ ARDOUR_UI::archive_session ()
 void
 ARDOUR_UI::quick_snapshot_session (bool switch_to_it)
 {
-		char timebuf[128];
-		time_t n;
-		struct tm local_time;
-
-		time (&n);
-		localtime_r (&n, &local_time);
-		strftime (timebuf, sizeof(timebuf), "%FT%H.%M.%S", &local_time);
-		if (switch_to_it && _session->dirty ()) {
-			save_state_canfail ("");
-		}
-
-		save_state (timebuf, switch_to_it);
+	if (switch_to_it && _session->dirty ()) {
+		save_state_canfail ("");
+	}
+	Glib::DateTime tm (g_date_time_new_now_local ());
+	save_state (tm.format ("%FT%H.%M.%S"), switch_to_it);
 }
 
 
