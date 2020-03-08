@@ -648,6 +648,8 @@ Session::start_transport ()
 			int clickbeat = 0;
 			samplepos_t cf = _transport_sample - _count_in_samples;
 			samplecnt_t offset = _click_io->connected_latency (true);
+			clear_clicks ();
+			_clicks_cleared = cf;
 			while (cf < _transport_sample + offset) {
 				add_click (cf, clickbeat == 0);
 				cf += dt;
