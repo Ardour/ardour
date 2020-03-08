@@ -1285,7 +1285,7 @@ int main () { return 0; }
     set_compiler_flags (conf, Options.options)
 
     if conf.env['build_host'] not in [ 'mojave', 'catalina']:
-	    conf.env.append_value('CXXFLAGS_OSX', '-F/System/Library/Frameworks')
+        conf.env.append_value('CXXFLAGS_OSX', '-F/System/Library/Frameworks')
 
     conf.env.append_value('CXXFLAGS_OSX', '-F/Library/Frameworks')
 
