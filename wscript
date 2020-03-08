@@ -548,7 +548,7 @@ int main() { return 0; }''',
                 compiler_flags.extend ([ flags_dict['sse'], flags_dict['fpmath-sse'], flags_dict['xmmintrinsics'], flags_dict['attasm'] ])
 
                 # mingw/gcc-8.2
-                compiler_flags.append(lags_dict['xsaveintrin'])
+                compiler_flags.append(flags_dict['xsaveintrin'])
 
     # end of processor-specific section
 
