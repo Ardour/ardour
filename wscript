@@ -687,6 +687,9 @@ int main() { return 0; }''',
         ('-D__STDC_LIMIT_MACROS', '-D__STDC_FORMAT_MACROS',
          '-DCANVAS_COMPATIBILITY', '-DCANVAS_DEBUG'))
 
+    # Do not use Boost.System library
+    cxx_flags.append('-DBOOST_ERROR_CODE_HEADER_ONLY')
+
     # use sparingly, prefer runtime profile
     if Options.options.program_name.lower().startswith('mixbus'):
         compiler_flags.append ('-DMIXBUS')
