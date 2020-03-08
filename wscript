@@ -52,6 +52,8 @@ compiler_flags_dictionaries= {
         'sse' : '-msse',
         # Flags required to use SSE unit for floating point math
         'fpmath-sse' : '-mfpmath=sse',
+        # Flags required to use _xgetbv with mingw+gcc > 8.2
+        'xsaveintrin' : '-mxsave',
         # Flags required to use XMM Intrinsics
         'xmmintrinsics' : '-DUSE_XMMINTRIN',
         # Flags to use posix pipes between compiler stages
@@ -97,6 +99,7 @@ compiler_flags_dictionaries= {
         'sse' : '/arch:SSE',
         'silence-unused-arguments' : '',
         'sse' : '',
+        'xsaveintrin' : '',
         'fpmath-sse' : '',
         'xmmintrinsics' : '',
         'pipe' : '',
@@ -135,6 +138,7 @@ compiler_flags_dictionaries['gcc-darwin'] = gcc_darwin_dict;
 clang_dict = compiler_flags_dictionaries['gcc'].copy();
 clang_dict['sse'] = ''
 clang_dict['fpmath-sse'] = ''
+clang_dict['xsaveintrin'] = ''
 clang_dict['xmmintrinsics'] = ''
 clang_dict['silence-unused-arguments'] = '-Qunused-arguments'
 clang_dict['extra-cxx-warnings'] = [ '-Woverloaded-virtual', '-Wno-mismatched-tags', '-Wno-cast-align', '-Wno-unused-local-typedefs', '-Wunneeded-internal-declaration' ]
@@ -542,6 +546,9 @@ int main() { return 0; }''',
                 # compiler_flags.append (["--mmnemonic=att", "msyntax=att")
 
                 compiler_flags.extend ([ flags_dict['sse'], flags_dict['fpmath-sse'], flags_dict['xmmintrinsics'], flags_dict['attasm'] ])
+
+                # mingw/gcc-8.2
+                compiler_flags.append(lags_dict['xsaveintrin'])
 
     # end of processor-specific section
 
