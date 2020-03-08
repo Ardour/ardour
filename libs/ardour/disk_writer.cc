@@ -18,6 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <glibmm/datetime.h>
+
 #include "ardour/analyser.h"
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
@@ -1262,9 +1264,8 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 			as->set_captured_for (_name.val());
 			as->mark_immutable ();
 
-			char buf[128];
-			strftime (buf, sizeof(buf), "%F %H.%M.%S", &when);
-			as->set_take_id ( buf );
+			Glib::DateTime tm (Glib::DateTime::create_now_local (mktime (&when)));
+			as->set_take_id (tm.format ("%F %H.%M.%S"));
 
 			if (Config->get_auto_analyse_audio()) {
 				Analyser::queue_source_for_analysis (as, true);
@@ -1313,9 +1314,8 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 		_midi_write_source->set_natural_position (capture_info.front()->start);
 		_midi_write_source->set_captured_for (_name);
 
-		char buf[128];
-		strftime (buf, sizeof(buf), "%F %H.%M.%S", &when);
-		_midi_write_source->set_take_id ( buf );
+		Glib::DateTime tm (Glib::DateTime::create_now_local (mktime (&when)));
+		_midi_write_source->set_take_id (tm.format ("%F %H.%M.%S"));
 
 		/* set length in beats to entire capture length */
 
