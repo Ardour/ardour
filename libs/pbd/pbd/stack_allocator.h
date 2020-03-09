@@ -128,17 +128,19 @@ public:
 		new (p) U ();
 	}
 
+#if __cplusplus > 201103L || defined __clang__
 	template <class U, class A>
-	void construct (U* const p, A& a)
+	void construct (U* const p, A* const a)
 	{
 		new (p) U (a);
 	}
-
-	template <class U, class A, class B>
-	void construct (U* const p, A& a, B& b)
+#else
+	template <class U, class A>
+	void construct (U* const p, A const& a)
 	{
-		new (p) U (a, b);
+		new (p) U (a);
 	}
+#endif
 
 private:
 	StackAllocator& operator= (const StackAllocator&);
