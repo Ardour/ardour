@@ -336,8 +336,10 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 					}
 				}
 
-				have_looped = true;
-				TransportLooped(); // EMIT SIGNAL
+				if (for_loop_end) {
+					have_looped = true;
+					TransportLooped(); // EMIT SIGNAL
+				}
 			}
 		}
 	}
