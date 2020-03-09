@@ -2243,6 +2243,7 @@ OSC::global_feedback (OSCSurface* sur)
 	OSCGlobalObserver* o = sur->global_obs;
 	if (o) {
 		delete o;
+		sur->global_obs = NULL;
 	}
 	if (sur->feedback[4] || sur->feedback[3] || sur->feedback[5] || sur->feedback[6]) {
 
