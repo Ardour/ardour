@@ -725,15 +725,12 @@ LuaProc::connect_and_run (BufferSet& bufs,
 
 			// copy back midi events
 			if (_has_midi_output && lua_midi_sink_tbl.isTable ()) {
-				uint32_t count = 0;
-				uint32_t idx;
-				for (luabridge::Iterator i (lua_midi_sink_tbl); !i.isNil (); ++i) {
-					bool iter_is_valid;
-					idx = out.get(DataType::MIDI, count, &iter_is_valid);
-					count++;
-					if (iter_is_valid && bufs.count().n_midi() > idx) {
-						MidiBuffer& mbuf = bufs.get_midi(idx);
-						mbuf.silence(0, 0);
+				bool valid;
+				const uint32_t idx = out.get(DataType::MIDI, 0, &valid);
+				if (valid && bufs.count().n_midi() > idx) {
+					MidiBuffer& mbuf = bufs.get_midi(idx);
+					mbuf.silence(0, 0);
+					for (luabridge::Iterator i (lua_midi_sink_tbl); !i.isNil (); ++i) {
 						if (!i.key ().isNumber ()) { continue; }
 						if (!i.value ()["time"].isNumber ()) { continue; }
 						if (!i.value ()["data"].isTable ()) { continue; }
