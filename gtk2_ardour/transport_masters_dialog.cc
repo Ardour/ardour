@@ -455,7 +455,6 @@ void
 TransportMastersWidget::Row::populate_port_combo ()
 {
 	if (!tm->port()) {
-		cerr << "TM " << tm->name() << " has no port\n";
 		port_combo.hide ();
 		return;
 	} else {
