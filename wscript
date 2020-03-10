@@ -549,6 +549,7 @@ int main() { return 0; }''',
 
                 # mingw/gcc-8.2
                 compiler_flags.append(flags_dict['xsaveintrin'])
+                compiler_flags.append('-fno-inline-functions')
 
     # end of processor-specific section
 
