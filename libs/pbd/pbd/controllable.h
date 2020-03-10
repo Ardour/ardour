@@ -163,6 +163,9 @@ public:
 	Flag flags() const { return _flags; }
 	void set_flags (Flag f);
 
+	void set_flag (Flag f); ///< _flags |= f;
+	void clear_flag (Flag f); ///< _flags &= ~f;
+
 	static boost::shared_ptr<Controllable> by_id (const PBD::ID&);
 	static void dump_registry ();
 
