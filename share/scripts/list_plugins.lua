@@ -42,9 +42,4 @@ function factory () return function ()
 	end
 
 	LuaDialog.Message ("All Plugins", "<span face=\"mono\">" .. rv .. "</span>", LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run()
-
-	all_plugs = nil
-	rv = ""
-	collectgarbage ();
-
 end end

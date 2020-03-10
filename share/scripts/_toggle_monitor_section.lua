@@ -5,6 +5,5 @@ function factory () return function ()
 		ARDOUR.config():set_use_monitor_bus (true)
 	else
 		ARDOUR.config():set_use_monitor_bus (false)
-		collectgarbage ()
 	end
 end end

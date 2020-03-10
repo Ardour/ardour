@@ -20,7 +20,6 @@ function factory () return function ()
 		end
 		ArdourUI.mixer_screenshot (rv['file'])
 	end
-	collectgarbage ()
 end end
 
 function icon (params) return function (ctx, width, height, fg)

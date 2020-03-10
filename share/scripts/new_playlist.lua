@@ -12,6 +12,4 @@ function factory () return function ()
 		local rtav = Editor:rtav_from_route(r) -- lookup RTAV
 		Editor:new_playlists(rtav:to_timeaxisview())
 	end
-
-collectgarbage()
 end end

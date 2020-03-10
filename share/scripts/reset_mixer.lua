@@ -245,5 +245,4 @@ function factory() return function()
 		end
 	end
 	::pass_script::
-	collectgarbage()
 end end

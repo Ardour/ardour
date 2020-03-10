@@ -97,9 +97,6 @@ function factory () return function ()
 
 	::out::
 	pdialog:done ();
-	pdialog = nil
-	vamp = nil;
-	collectgarbage ()
 end end
 
 function icon (params) return function (ctx, width, height, fg)

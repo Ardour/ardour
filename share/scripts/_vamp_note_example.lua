@@ -61,8 +61,4 @@ function factory () return function ()
 	::out::
 	-- hide modal progress dialog and destroy it
 	pdialog:done ();
-	pdialog = nil
-	vamp = nil;
-	collectgarbage ()
-
 end end

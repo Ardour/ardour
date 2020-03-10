@@ -44,8 +44,6 @@ function factory () return function ()
 	-- bail out if there are no parameters
 	if not have_entries then
 		LuaDialog.Message ("CC to Plugin Automation", "No Plugins found", LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run ()
-		targets = nil
-		collectgarbage ()
 		return
 	end
 
@@ -117,7 +115,6 @@ function factory () return function ()
 		Session:abort_reversible_command ()
 		LuaDialog.Message ("CC to Plugin Automation", "No data was converted. Was a MIDI-region with CC-automation selected? ", LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run ()
 	end
-	collectgarbage ()
 end end
 
 function icon (params) return function (ctx, width, height, fg)

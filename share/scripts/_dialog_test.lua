@@ -88,8 +88,4 @@ function factory () return function ()
 	if (rv) then
 		print (serialize ("dialog", rv))
 	end
-
-	od = nil
-	collectgarbage ()
-
 end end

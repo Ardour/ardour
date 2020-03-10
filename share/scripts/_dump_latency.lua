@@ -73,5 +73,4 @@ function factory () return function ()
 			lc[1].min, lc[1].max, pcl.min, pcl.max, bcl.min, bcl.max))
 		end
 	end
-	collectgarbage ()
 end end

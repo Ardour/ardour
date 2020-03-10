@@ -30,8 +30,5 @@ function factory ()
 			-- unset most recently used filename on dialog "cancel"
 			file_name_testscript_last_filename = nil
 		end
-
-		od = nil
-		collectgarbage ()
 	end
 end

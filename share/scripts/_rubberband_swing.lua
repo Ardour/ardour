@@ -158,10 +158,6 @@ function factory () return function ()
 	else
 		Session:abort_reversible_command ()
 	end
-
-	-- clean up, unload vamp plugin
-	vamp = nil
-	collectgarbage ()
 end end
 
 

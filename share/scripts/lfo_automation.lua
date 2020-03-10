@@ -65,7 +65,6 @@ function factory (unused_params)
          LuaDialog.Message("Add LFO automation to region", "No plugin parameters found.",
                            LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run()
          region, track, targets = nil, nil, nil
-         collectgarbage()
          return
       end
 
@@ -85,7 +84,6 @@ function factory (unused_params)
       -- Return if the user cancelled
       if not rv then
          region, track, targets = nil, nil, nil
-         collectgarbage()
          return
       end
 
@@ -171,7 +169,6 @@ function factory (unused_params)
       Session:commit_reversible_command(nil)
 
       region, al, lut = nil, nil, nil
-      collectgarbage()
    end
 end
 

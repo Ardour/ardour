@@ -105,8 +105,6 @@ function factory () return function ()
 	end
 
 	::out::
-	rv = nil
-	collectgarbage ()
 end end
 
 function icon (params) return function (ctx, width, height, fg)

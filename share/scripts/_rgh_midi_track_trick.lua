@@ -77,5 +77,4 @@ function factory (p) return function ()
 		end
 		i = i + 1
 	end
-	collectgarbage () -- drop references to tracks.
 end end

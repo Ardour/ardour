@@ -29,8 +29,4 @@ function factory () return function ()
 		t:set_presentation_order(pos)
 		pos = pos + 1
 	end
-
-	-- drop all track references
-	tracklist = nil
-	collectgarbage ()
 end end
