@@ -401,6 +401,9 @@ TransportMaster::factory (SyncSource type, std::string const& name, bool removea
 	}
 
 	if (tm) {
+		if (AudioEngine::instance()->running()) {
+			tm->create_port ();
+		}
 		tm->set_removeable (removeable);
 	}
 
