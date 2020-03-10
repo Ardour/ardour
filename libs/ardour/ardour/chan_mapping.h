@@ -104,8 +104,19 @@ public:
 	 */
 	bool     is_subset (const ChanMapping& superset) const;
 
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+	/* Use the older (heap based) mapping for early versions of MSVC.
+	 * In fact it might be safer to use this for all MSVC builds - as
+	 * our StackAllocator class depends on 'boost::aligned_storage'
+	 * which is known to be troublesome with Visual C++ :-
+	 * https://www.boost.org/doc/libs/1_65_0/libs/type_traits/doc/html/boost_typetraits/reference/aligned_storage.html
+	 */
+	typedef std::map<uint32_t, uint32_t>    TypeMapping;
+	typedef std::map<DataType, TypeMapping> Mappings;
+#else
 	typedef std::map<uint32_t, uint32_t, std::less<uint32_t>, PBD::StackAllocator<std::pair<const uint32_t, uint32_t>, 16> > TypeMapping;
 	typedef std::map<DataType, TypeMapping, std::less<DataType>, PBD::StackAllocator<std::pair<const DataType, TypeMapping>, 2> > Mappings;
+#endif
 
 	Mappings        mappings()       { return _mappings; }
 	const Mappings& mappings() const { return _mappings; }
