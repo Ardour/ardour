@@ -99,8 +99,14 @@ Session::realtime_stop (bool abort, bool clear_state)
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("realtime stop @ %1 speed = %2\n", _transport_sample, _transport_speed));
 	PostTransportWork todo = PostTransportStop;
 
-	/* this resets the speed we will start at if just requested to roll again */
-	_default_transport_speed = 1.0;
+	/* this resets the speed we will start at if just requested to roll
+	 * again. Don't do it if we are stopping to locate ... in those
+	 * conditions, keep the current default speed so that when we start
+	 * again we resume that speed
+	 */
+	if (!_transport_fsm->declicking_for_locate()) {
+		_default_transport_speed = 1.0;
+	}
 
 	/* call routes */
 
