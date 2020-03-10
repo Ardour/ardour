@@ -263,7 +263,7 @@ Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter le
 			if (_can_automate_list.find (param) == _can_automate_list.end ()) {
 				boost::shared_ptr<AutomationControl> actl = automation_control (param);
 				if (actl && (*niter)->children().size() > 0 && Config->get_limit_n_automatables () > 0) {
-					actl->set_flags (Controllable::Flag ((int)actl->flags() & ~Controllable::NotAutomatable));
+					actl->clear_flag (Controllable::NotAutomatable);
 					can_automate (param);
 					info << "Marked parmater as automatable" << endl;
 				} else {

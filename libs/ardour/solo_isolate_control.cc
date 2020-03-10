@@ -39,7 +39,7 @@ SoloIsolateControl::SoloIsolateControl (Session& session, std::string const & na
 {
 	_list->set_interpolation (Evoral::ControlList::Discrete);
 	/* isolate changes must be synchronized by the process cycle */
-	set_flags (Controllable::Flag (flags() | Controllable::RealTime));
+	set_flag (Controllable::RealTime);
 }
 
 void

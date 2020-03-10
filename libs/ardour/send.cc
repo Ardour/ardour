@@ -97,7 +97,7 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 
 	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (BusSendLevel)));
 	_gain_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(BusSendLevel), gl));
-	_gain_control->set_flags (Controllable::Flag ((int)_gain_control->flags() | Controllable::InlineControl));
+	_gain_control->set_flag (Controllable::InlineControl);
 	add_control (_gain_control);
 
 	_amp.reset (new Amp (_session, _("Fader"), _gain_control, true));
@@ -294,7 +294,7 @@ Send::set_state (const XMLNode& node, int version)
 		 * this is mainly relevant for Mixbus6.0, copy/paste aux-sends.
 		 * -> remove me after 6.1
 		 */
-		_gain_control->set_flags (Controllable::Flag ((int)_gain_control->flags() | Controllable::InlineControl));
+		_gain_control->set_flag (Controllable::InlineControl);
 #endif
 	}
 
@@ -314,7 +314,7 @@ Send::set_state (const XMLNode& node, int version)
 				nn = processor;
 				if ((gain_node = nn->child (Controllable::xml_node_name.c_str ())) != 0) {
 					_gain_control->set_state (*gain_node, version);
-					_gain_control->set_flags (Controllable::Flag ((int)_gain_control->flags() | Controllable::InlineControl));
+					_gain_control->set_flags (Controllable::InlineControl);
 				}
 			}
 		}

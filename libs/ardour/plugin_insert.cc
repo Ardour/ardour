@@ -487,10 +487,10 @@ PluginInsert::create_automatable_parameters ()
 		boost::shared_ptr<AutomationList> list(new AutomationList(param, desc));
 		boost::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc, list));
 		if (!automatable || (limit_automatables > 0 && what_can_be_automated ().size() > limit_automatables)) {
-			c->set_flags (Controllable::Flag ((int)c->flags() | Controllable::NotAutomatable));
+			c->set_flag (Controllable::NotAutomatable);
 		}
 		if (desc.inline_ctrl) {
-			c->set_flags (Controllable::Flag ((int)c->flags() | Controllable::InlineControl));
+			c->set_flag (Controllable::InlineControl);
 		}
 		add_control (c);
 		plugin->set_automation_control (i, c);
@@ -508,7 +508,7 @@ PluginInsert::create_automatable_parameters ()
 			}
 			boost::shared_ptr<AutomationControl> c (new PluginPropertyControl(this, param, desc, list));
 			if (!Variant::type_is_numeric(desc.datatype)) {
-				c->set_flags (Controllable::Flag ((int)c->flags() | Controllable::NotAutomatable));
+				c->set_flag (Controllable::NotAutomatable);
 			}
 			add_control (c);
 		}
