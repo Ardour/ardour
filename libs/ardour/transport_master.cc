@@ -482,6 +482,27 @@ TransportMaster::allow_request (TransportRequestSource src, TransportRequestType
 	return _request_mask & type;
 }
 
+std::string
+TransportMaster::allowed_request_string () const
+{
+	std::string s;
+	if (_request_mask == TransportRequestType (TR_StartStop|TR_Speed|TR_Locate)) {
+		s = _("All");
+	} else if (_request_mask == TransportRequestType (0)) {
+		s = _("None");
+	} else if (_request_mask == TR_StartStop) {
+		s = _("Start/Stop");
+	} else if (_request_mask == TR_Speed) {
+		s = _("Speed");
+	} else if (_request_mask == TR_Locate) {
+		s = _("Locate");
+	} else {
+		s = _("Complex");
+	}
+
+	return s;
+}
+
 void
 TransportMaster::set_request_mask (TransportRequestType t)
 {

@@ -864,8 +864,14 @@ Session::request_transport_speed (double speed, bool as_default, TransportReques
 		return;
 	}
 
-	if (should_ignore_transport_request (origin, TR_Speed)) {
-		return;
+	if (speed == 1. || speed == 0. || speed == -1.) {
+		if (should_ignore_transport_request (origin, TR_StartStop)) {
+			return;
+		}
+	} else {
+		if (should_ignore_transport_request (origin, TR_Speed)) {
+			return;
+		}
 	}
 
 	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, speed);
@@ -881,10 +887,6 @@ Session::request_transport_speed (double speed, bool as_default, TransportReques
 void
 Session::request_transport_speed_nonzero (double speed, bool as_default, TransportRequestSource origin)
 {
-	if (should_ignore_transport_request (origin, TransportRequestType (TR_Speed|TR_Start))) {
-		return;
-	}
-
 	if (speed == 0) {
 		speed = DBL_EPSILON;
 	}
@@ -900,7 +902,7 @@ Session::request_stop (bool abort, bool clear_state, TransportRequestSource orig
 		return;
 	}
 
-	if (should_ignore_transport_request (origin, TR_Stop)) {
+	if (should_ignore_transport_request (origin, TR_StartStop)) {
 		return;
 	}
 

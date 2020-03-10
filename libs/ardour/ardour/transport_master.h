@@ -345,6 +345,7 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 
 	virtual void check_backend() {}
 	virtual bool allow_request (TransportRequestSource, TransportRequestType) const;
+	std::string allowed_request_string () const;
 
 	TransportRequestType request_mask() const { return _request_mask; }
 	void set_request_mask (TransportRequestType);
