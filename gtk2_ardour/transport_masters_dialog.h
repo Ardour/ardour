@@ -94,6 +94,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		samplepos_t save_when;
 
 		void build_request_options();
+		void mod_request_type (ARDOUR::TransportRequestType);
 
 		boost::shared_ptr<ARDOUR::TransportMaster> tm;
 

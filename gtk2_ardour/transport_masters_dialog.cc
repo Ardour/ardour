@@ -54,20 +54,24 @@ TransportMastersWidget::TransportMastersWidget ()
 
 	add_button.signal_clicked ().connect (sigc::mem_fun (*this, &TransportMastersWidget::add_master));
 
-	col_title[0].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Use")));
+	col_title[0].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Select")));
 	col_title[1].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Name")));
 	col_title[2].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Type")));
-	col_title[3].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Format/\nBPM")));
+	col_title[3].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Format")));
 	col_title[4].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Current")));
 	col_title[5].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Last")));
 	col_title[6].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Timestamp")));
 	col_title[7].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Delta")));
 	col_title[8].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Collect")));
-	col_title[9].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Data Source")));
+	col_title[9].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Source")));
 	col_title[10].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Active\nCommands")));
 	col_title[11].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Clock\nSynced")));
 	col_title[12].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("29.97/\n30")));
 	col_title[13].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Remove")));
+
+	set_tooltip (col_title[10], _("Controls whether or not certain transport-related commands can be sent from the GUI or control "
+	                              "surfaces when this transport master is in use. The default is not to allow any such commands "
+	                              "when the master is in use."));
 
 	set_tooltip (col_title[12], _("<b>When enabled</b> the external timecode source is assumed to use 29.97 fps instead of 30000/1001.\n"
 	                              "SMPTE 12M-1999 specifies 29.97df as 30000/1001. The spec further mentions that "
@@ -238,6 +242,7 @@ TransportMastersWidget::rebuild ()
 		all_change.add (Properties::locked);
 		all_change.add (Properties::collect);
 		all_change.add (Properties::connected);
+		all_change.add (Properties::allowed_transport_requests);
 
 		if (ttm) {
 			all_change.add (Properties::fr2997);
@@ -341,6 +346,10 @@ TransportMastersWidget::Row::prop_change (PropertyChange what_changed)
 	if (what_changed.contains (Properties::name)) {
 		label.set_text (tm->name());
 	}
+
+	if (what_changed.contains (Properties::allowed_transport_requests)) {
+		request_options.set_label (tm->allowed_request_string());
+	}
 }
 
 void
@@ -391,12 +400,26 @@ TransportMastersWidget::Row::build_request_options ()
 
 	MenuList& items (request_option_menu->items());
 
-	items.push_back (CheckMenuElem (_("Accept speed-changing commands (start/stop)")));
+	items.push_back (CheckMenuElem (_("Accept start/stop commands")));
 	Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back ());
+	i->set_active (tm->request_mask() & TR_StartStop);
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TransportMastersWidget::Row::mod_request_type), TR_StartStop));
+
+	items.push_back (CheckMenuElem (_("Accept speed-changing commands")));
+	i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back ());
 	i->set_active (tm->request_mask() & TR_Speed);
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TransportMastersWidget::Row::mod_request_type), TR_Speed));
+
 	items.push_back (CheckMenuElem (_("Accept locate commands")));
 	i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back ());
 	i->set_active (tm->request_mask() & TR_Locate);
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TransportMastersWidget::Row::mod_request_type), TR_Speed));
+}
+
+void
+TransportMastersWidget::Row::mod_request_type (TransportRequestType t)
+{
+	tm->set_request_mask (TransportRequestType ((tm->request_mask() & t) ? (tm->request_mask() & ~t) : (tm->request_mask() | t)));
 }
 
 Glib::RefPtr<Gtk::ListStore>
@@ -432,6 +455,7 @@ void
 TransportMastersWidget::Row::populate_port_combo ()
 {
 	if (!tm->port()) {
+		cerr << "TM " << tm->name() << " has no port\n";
 		port_combo.hide ();
 		return;
 	} else {
@@ -524,15 +548,21 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 				last.set_text (Timecode::timecode_format_time (l));
 			} else if ((mtm = boost::dynamic_pointer_cast<MIDIClock_TransportMaster> (tm))) {
 				char buf[8];
-				snprintf (buf, sizeof (buf), "%.1f", mtm->bpm());
+				snprintf (buf, sizeof (buf), "%.1fBPM", mtm->bpm());
 				format.set_text (buf);
 				last.set_text ("");
 			} else {
 				format.set_text ("");
 				last.set_text ("");
 			}
+
 			current.set_text (Timecode::timecode_format_time (t));
-			delta.set_markup (tm->delta_string ());
+
+			if (TransportMasterManager::instance().current() == tm) {
+				delta.set_markup (tm->delta_string ());
+			} else {
+				delta.set_markup ("");
+			}
 
 			char gap[32];
 			const float seconds = (when - now) / (float) AudioEngine::instance()->sample_rate();
