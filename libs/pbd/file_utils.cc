@@ -360,8 +360,12 @@ bool
 hard_link (const std::string& existing_file, const std::string& new_path)
 {
 #ifdef PLATFORM_WINDOWS
+# if defined (COMPILER_MINGW) && !defined(_WIN64) && defined(__GNUC__) && __GNUC__ >= 8
+	return false; // 32bit windows, mingw
+# else
 	/* see also ntfs_link -- msvc only pbd extension */
 	return CreateHardLinkA (new_path.c_str(), existing_file.c_str(), NULL);
+# endif
 #else
 	return 0 == link (existing_file.c_str(), new_path.c_str());
 #endif
