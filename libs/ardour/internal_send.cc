@@ -184,50 +184,49 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 				}
 			}
 		}
-	} else {
-		if (role () == Listen) {
-			/* We're going to the monitor bus, so discard MIDI data */
+	} else if (role () == Listen) {
+		/* We're going to the monitor bus, so discard MIDI data */
 
-			uint32_t const bufs_audio    = bufs.count ().get (DataType::AUDIO);
-			uint32_t const mixbufs_audio = mixbufs.count ().get (DataType::AUDIO);
+		uint32_t const bufs_audio    = bufs.count ().get (DataType::AUDIO);
+		uint32_t const mixbufs_audio = mixbufs.count ().get (DataType::AUDIO);
 
-			/* monitor-section has same number of channels as master-bus (on creation).
-			 *
-			 * There is no clear answer what should happen when trying to PFL or AFL
-			 * a track that has more channels (bufs_audio from source-track is
-			 * larger than mixbufs).
-			 *
-			 * There are two options:
-			 *  1: discard additional channels    (current)
-			 * OR
-			 *  2: require the monitor-section to have at least as many channels
-			 * as the largest count of any route
-			 */
-			//assert (mixbufs.available().get (DataType::AUDIO) >= bufs_audio);
+		/* monitor-section has same number of channels as master-bus (on creation).
+		 *
+		 * There is no clear answer what should happen when trying to PFL or AFL
+		 * a track that has more channels (bufs_audio from source-track is
+		 * larger than mixbufs).
+		 *
+		 * There are two options:
+		 *  1: discard additional channels    (current)
+		 * OR
+		 *  2: require the monitor-section to have at least as many channels
+		 * as the largest count of any route
+		 */
+		//assert (mixbufs.available().get (DataType::AUDIO) >= bufs_audio);
 
-			/* Copy bufs into mixbufs, going round bufs more than once if necessary
-			 * to ensure that every mixbuf gets some data.
-			 */
+		/* Copy bufs into mixbufs, going round bufs more than once if necessary
+		 * to ensure that every mixbuf gets some data.
+		 */
 
-			uint32_t j = 0;
-			uint32_t i = 0;
-			for (i = 0; i < mixbufs_audio && j < bufs_audio; ++i) {
-				mixbufs.get_audio (i).read_from (bufs.get_audio (j), nframes);
-				++j;
+		uint32_t j = 0;
+		uint32_t i = 0;
+		for (i = 0; i < mixbufs_audio && j < bufs_audio; ++i) {
+			mixbufs.get_audio (i).read_from (bufs.get_audio (j), nframes);
+			++j;
 
-				if (j == bufs_audio) {
-					j = 0;
-				}
+			if (j == bufs_audio) {
+				j = 0;
 			}
-			/* in case or MIDI track with 0 audio channels */
-			for (; i < mixbufs_audio; ++i) {
-				mixbufs.get_audio (i).silence (nframes);
-			}
-
-		} else {
-			assert (mixbufs.available () >= bufs.count ());
-			mixbufs.read_from (bufs, nframes);
 		}
+		/* in case or MIDI track with 0 audio channels */
+		for (; i < mixbufs_audio; ++i) {
+			mixbufs.get_audio (i).silence (nframes);
+		}
+
+	} else {
+		/* no panner or panner is bypassed */
+		assert (mixbufs.available () >= bufs.count ());
+		mixbufs.read_from (bufs, nframes);
 	}
 
 	/* main gain control: * mute & bypass/enable */
