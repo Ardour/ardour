@@ -226,7 +226,21 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	} else {
 		/* no panner or panner is bypassed */
 		assert (mixbufs.available () >= bufs.count ());
-		mixbufs.read_from (bufs, nframes);
+		/* BufferSet::read_from() changes the channel-conut,
+		 * so we manually copy bufs -> mixbufs
+		 */
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			/* iterate over outputs */
+			BufferSet::iterator i = bufs.begin (*t);
+			for (BufferSet::iterator o = mixbufs.begin (*t); o != mixbufs.end (*t); ++o) {
+				if (i == bufs.end (*t)) {
+					o->silence (nframes, 0);
+				} else {
+					o->read_from (*i, nframes);
+					++i;
+				}
+			}
+		}
 	}
 
 	/* main gain control: * mute & bypass/enable */
