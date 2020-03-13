@@ -905,7 +905,7 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 
-	case SessionEvent::SetTransportSpeed: 
+	case SessionEvent::SetTransportSpeed:
 		TFSM_SPEED (ev->speed, ev->yes_or_no, ev->second_yes_or_no, ev->third_yes_or_no);
 		break;
 
@@ -1175,6 +1175,7 @@ Session::follow_transport_master (pframes_t nframes)
 				/* note that for non-JACK transport masters, we assume that the transport state (rolling,stopped) after the locate
 				 * remains unchanged (2nd argument, "roll-after-locate")
 				 */
+				tmm.reinit (master_speed, master_transport_sample);
 				TFSM_LOCATE (master_transport_sample, (master_speed != 0) ? MustRoll : MustStop, true, false, false);
 			}
 
