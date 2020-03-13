@@ -1370,7 +1370,6 @@ private:
 	bool follow_transport_master (pframes_t nframes);
 
 	void sync_source_changed (SyncSource, samplepos_t pos, pframes_t cycle_nframes);
-	void reset_slave_state ();
 
 	bool post_export_sync;
 	samplepos_t post_export_position;

@@ -1170,8 +1170,6 @@ Session::follow_transport_master (pframes_t nframes)
 
 		if (!actively_recording() && abs (delta) > (5 * current_block_size)) {
 
-			DiskReader::inc_no_disk_output ();
-
 			if (!locate_pending() && !declick_in_progress()) {
 				DEBUG_TRACE (DEBUG::Slave, string_compose ("request locate to master position %1\n", master_transport_sample));
 				/* note that for non-JACK transport masters, we assume that the transport state (rolling,stopped) after the locate
@@ -1205,12 +1203,12 @@ Session::follow_transport_master (pframes_t nframes)
 
 	if ((tmm.current()->type() != Engine) && !actively_recording() && abs (delta) > tmm.current()->resolution()) {
 		/* just varispeed to chase the master, and be silent till we're synced */
-		DiskReader::inc_no_disk_output ();
+		tmm.block_disk_output ();
 		return true;
 	}
 
 	/* speed is set, we're locked, and good to go */
-	DiskReader::dec_no_disk_output ();
+	tmm.unblock_disk_output ();
 	return true;
 
   noroll:
@@ -1218,10 +1216,4 @@ Session::follow_transport_master (pframes_t nframes)
 	DEBUG_TRACE (DEBUG::Slave, "no roll\n")
 	no_roll (nframes);
 	return false;
-}
-
-void
-Session::reset_slave_state ()
-{
-	DiskReader::dec_no_disk_output ();
 }

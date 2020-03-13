@@ -85,6 +85,10 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 
 	void reconnect_ports ();
 
+	void block_disk_output ();
+	void unblock_disk_output ();
+	void reinit (double speed, samplepos_t pos);
+
   private:
 	TransportMasterManager();
 
@@ -96,6 +100,7 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 	Session* _session;
 
 	bool _master_invalid_this_cycle;
+	bool disk_output_blocked;
 
 	// a DLL to chase the transport master
 

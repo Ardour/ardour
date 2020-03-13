@@ -145,8 +145,6 @@ Session::realtime_stop (bool abort, bool clear_state)
 		unset_play_loop ();
 	}
 
-	reset_slave_state ();
-
 	reset_punch_loop_constraint ();
 
 	_transport_speed = 0;
@@ -730,8 +728,6 @@ Session::butler_completed_transport_work ()
 	if (_transport_fsm->waiting_for_butler()) {
 		TFSM_EVENT (TransportFSM::ButlerDone);
 	}
-
-	DiskReader::dec_no_disk_output ();
 
 	if (start_after_butler_done_msg) {
 		if (_transport_speed) {
@@ -1942,7 +1938,7 @@ Session::sync_source_changed (SyncSource type, samplepos_t pos, pframes_t cycle_
 	   longer valid with a new slave.
 	*/
 
-	DiskReader::dec_no_disk_output ();
+	TransportMasterManager::instance().unblock_disk_output ();
 
 #if 0
 	we should not be treating specific transport masters as special cases because there maybe > 1 of a particular type
