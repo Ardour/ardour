@@ -207,6 +207,8 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 		return 1.0;
 	}
 
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("Current master at %1 moving at %2\n", _master_position, _master_speed));
+
 	if (_current_master->sample_clock_synced()) {
 
 		/* No master DLL required. Speed identified by the master is
@@ -233,8 +235,7 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 
 				init_transport_master_dll (_master_speed, _master_position);
 				_master_invalid_this_cycle = true;
-				DEBUG_TRACE (DEBUG::Slave, "no roll3 - still initializing master DLL\n");
-				master_dll_initstate = _master_speed > 0.0 ? 1 : -1;
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("no roll3 - still initializing master DLL, will be %1 next process cycle\n", master_dll_initstate));
 
 				return 1.0;
 			}
