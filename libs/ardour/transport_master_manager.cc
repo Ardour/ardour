@@ -430,9 +430,14 @@ TransportMasterManager::set_current_locked (boost::shared_ptr<TransportMaster> c
 		return -1;
 	}
 
+	/* this is called from within the process() call stack, but *after* the
+	 * call to ::pre_process_transport_masters()
+	 */
+
 	_current_master = c;
 	_master_speed = 0;
 	_master_position = 0;
+	_master_invalid_this_cycle = true;
 
 	master_dll_initstate = 0;
 
