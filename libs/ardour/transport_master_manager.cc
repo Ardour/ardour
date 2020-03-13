@@ -60,10 +60,8 @@ TransportMasterManager::create ()
 	XMLNode* tmm_node = Config->transport_master_state ();
 
 	if (tmm_node) {
-		cerr << " setting state via XML\n";
 		_instance->set_state (*tmm_node, Stateful::current_state_version);
 	} else {
-		cerr << " setting default config\n";
 		_instance->set_default_configuration ();
 	}
 
@@ -91,7 +89,6 @@ TransportMasterManager::set_default_configuration ()
 	}
 
 	_current_master = _transport_masters.back();
-	cerr << "default current master (back) is " << _current_master->name() << endl;
 	return 0;
 }
 
@@ -530,7 +527,6 @@ TransportMasterManager::clear ()
 int
 TransportMasterManager::set_state (XMLNode const & node, int version)
 {
-	PBD::stacktrace (std::cerr, 20);
 	assert (node.name() == state_node_name);
 
 	XMLNodeList const & children = node.children();
