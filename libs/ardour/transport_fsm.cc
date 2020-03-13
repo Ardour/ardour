@@ -27,6 +27,7 @@
 #include "pbd/stacktrace.h"
 
 #include "ardour/debug.h"
+#include "ardour/disk_reader.h"
 #include "ardour/session.h"
 #include "ardour/transport_fsm.h"
 
@@ -305,6 +306,23 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 				 * Note that ev.ltd is ignored and
 				 * assumed to be true because we're looping.
 				 */
+				transition (WaitingForLocate);
+				locate_for_loop (ev);
+			} else if (DiskReader::no_disk_output()) {
+
+				/* separate clause to allow a comment that is
+				   case specific. Logically this condition
+				   could be bundled into first if() above.
+				*/
+
+				/* this can occur when locating to catch up
+				   with a transport master. no_disk_output was
+				   set to prevent playback until we're synced
+				   and locked with the master. If we locate
+				   during this process, we're not producing any
+				   audio from disk, and so there is no need to
+				   declick.
+				*/
 				transition (WaitingForLocate);
 				locate_for_loop (ev);
 			} else {
