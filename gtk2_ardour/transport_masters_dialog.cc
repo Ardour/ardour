@@ -20,6 +20,7 @@
 
 #include "pbd/enumwriter.h"
 #include "pbd/i18n.h"
+#include "pbd/unwind.h"
 
 #include "temporal/time.h"
 
@@ -48,7 +49,14 @@ using namespace ArdourWidgets;
 TransportMastersWidget::TransportMastersWidget ()
 	: table (4, 13)
 	, add_button (_("Add a new Transport Master"))
+	, ignore_active_change (false)
 {
+	midi_port_store = ListStore::create (port_columns);
+	audio_port_store = ListStore::create (port_columns);
+
+	AudioEngine::instance()->PortRegisteredOrUnregistered.connect (port_reg_connection, invalidator (*this),  boost::bind (&TransportMastersWidget::update_ports, this), gui_context());
+	update_ports ();
+
 	pack_start (table, PACK_EXPAND_WIDGET, 12);
 	pack_start (add_button, FALSE, FALSE);
 
@@ -255,6 +263,35 @@ TransportMastersWidget::rebuild ()
 	update_usability ();
 }
 
+bool
+TransportMastersWidget::idle_remove (TransportMastersWidget::Row* row)
+{
+	TransportMasterManager::instance().remove (row->tm->name());
+	return false;
+}
+
+void
+TransportMastersWidget::update_ports ()
+{
+	{
+		PBD::Unwinder<bool> uw (ignore_active_change, true);
+		vector<string> inputs;
+
+		ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsOutput), inputs);
+		build_port_model (midi_port_store, inputs);
+
+		inputs.clear ();
+
+		ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::AUDIO, ARDOUR::PortFlags (ARDOUR::IsOutput), inputs);
+		build_port_model (audio_port_store, inputs);
+	}
+
+	for (vector<Row*>::iterator r = rows.begin(); r != rows.end(); ++r) {
+		(*r)->port_choice_changed ();
+	}
+
+}
+
 void
 TransportMastersWidget::update_usability ()
 {
@@ -272,7 +309,6 @@ TransportMastersWidget::Row::Row (TransportMastersWidget& p)
 	, remove_button (X_("x"))
 	, name_editor (0)
 	, save_when (0)
-	, ignore_active_change (false)
 {
 }
 
@@ -297,11 +333,32 @@ TransportMastersWidget::Row::name_press (GdkEventButton* ev)
 	return false;
 }
 
-bool
-TransportMastersWidget::idle_remove (TransportMastersWidget::Row* row)
+void
+TransportMastersWidget::build_port_model (Glib::RefPtr<Gtk::ListStore> model, vector<string> const & ports)
 {
-	TransportMasterManager::instance().remove (row->tm->name());
-	return false;
+	TreeModel::Row row;
+
+	model->clear ();
+
+	row = *model->append ();
+	row[port_columns.full_name] = string();
+	row[port_columns.short_name] = _("Disconnected");
+
+	for (vector<string>::const_iterator p = ports.begin(); p != ports.end(); ++p) {
+
+		if (AudioEngine::instance()->port_is_mine (*p)) {
+			continue;
+		}
+
+		row = *model->append ();
+		row[port_columns.full_name] = *p;
+
+		std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*p);
+		if (pn.empty ()) {
+			pn = (*p).substr ((*p).find (':') + 1);
+		}
+		row[port_columns.short_name] = pn;
+	}
 }
 
 void
@@ -422,35 +479,6 @@ TransportMastersWidget::Row::mod_request_type (TransportRequestType t)
 	tm->set_request_mask (TransportRequestType ((tm->request_mask() & t) ? (tm->request_mask() & ~t) : (tm->request_mask() | t)));
 }
 
-Glib::RefPtr<Gtk::ListStore>
-TransportMastersWidget::Row::build_port_list (vector<string> const & ports)
-{
-	Glib::RefPtr<Gtk::ListStore> store = ListStore::create (port_columns);
-	TreeModel::Row row;
-
-	row = *store->append ();
-	row[port_columns.full_name] = string();
-	row[port_columns.short_name] = _("Disconnected");
-
-	for (vector<string>::const_iterator p = ports.begin(); p != ports.end(); ++p) {
-
-		if (AudioEngine::instance()->port_is_mine (*p)) {
-			continue;
-		}
-
-		row = *store->append ();
-		row[port_columns.full_name] = *p;
-
-		std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*p);
-		if (pn.empty ()) {
-			pn = (*p).substr ((*p).find (':') + 1);
-		}
-		row[port_columns.short_name] = pn;
-	}
-
-	return store;
-}
-
 void
 TransportMastersWidget::Row::populate_port_combo ()
 {
@@ -461,15 +489,13 @@ TransportMastersWidget::Row::populate_port_combo ()
 		port_combo.show ();
 	}
 
-	vector<string> inputs;
+	build_port_list (tm->port()->type());
+}
 
-	if (tm->port()->type() == DataType::MIDI) {
-		ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsOutput), inputs);
-	} else {
-		ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::AUDIO, ARDOUR::PortFlags (ARDOUR::IsOutput), inputs);
-	}
-
-	Glib::RefPtr<Gtk::ListStore> input = build_port_list (inputs);
+void
+TransportMastersWidget::Row::build_port_list (DataType type)
+{
+	Glib::RefPtr<Gtk::ListStore> input = (type == DataType::MIDI ? parent.midi_port_store : parent.audio_port_store);
 	bool input_found = false;
 	int n;
 
@@ -480,9 +506,8 @@ TransportMastersWidget::Row::populate_port_combo ()
 	i = children.begin();
 	++i; /* skip "Disconnected" */
 
-
 	for (n = 1;  i != children.end(); ++i, ++n) {
-		string port_name = (*i)[port_columns.full_name];
+		string port_name = (*i)[parent.port_columns.full_name];
 		if (tm->port()->connected_to (port_name)) {
 			port_combo.set_active (n);
 			input_found = true;
@@ -498,12 +523,18 @@ TransportMastersWidget::Row::populate_port_combo ()
 void
 TransportMastersWidget::Row::port_choice_changed ()
 {
-	if (ignore_active_change) {
+	if (!tm->port()) {
 		return;
 	}
 
+	if (parent.ignore_active_change) {
+		return;
+	}
+
+	build_port_list (tm->port()->type());
+
 	TreeModel::iterator active = port_combo.get_active ();
-	string new_port = (*active)[port_columns.full_name];
+	string new_port = (*active)[parent.port_columns.full_name];
 
 	if (new_port.empty()) {
 		tm->port()->disconnect_all ();

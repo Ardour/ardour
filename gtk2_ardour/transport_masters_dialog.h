@@ -103,19 +103,8 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		Row (TransportMastersWidget& parent);
 		~Row ();
 
-		struct PortColumns : public Gtk::TreeModel::ColumnRecord {
-			PortColumns() {
-				add (short_name);
-				add (full_name);
-			}
-			Gtk::TreeModelColumn<std::string> short_name;
-			Gtk::TreeModelColumn<std::string> full_name;
-		};
-
-		PortColumns port_columns;
-
 		void populate_port_combo ();
-		Glib::RefPtr<Gtk::ListStore> build_port_list (std::vector<std::string> const & ports);
+		void build_port_list (ARDOUR::DataType);
 
 		void use_button_toggled ();
 		void collect_button_toggled ();
@@ -132,6 +121,8 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 		PBD::ScopedConnection property_change_connection;
 		bool ignore_active_change;
+
+		bool port_combo_proxy (GdkEventButton*);
 	};
 
 	std::vector<Row*> rows;
@@ -145,6 +136,26 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	PBD::ScopedConnection add_connection;
 	PBD::ScopedConnection remove_connection;
 	PBD::ScopedConnection engine_running_connection;
+
+	struct PortColumns : public Gtk::TreeModel::ColumnRecord {
+		PortColumns() {
+			add (short_name);
+			add (full_name);
+		}
+		Gtk::TreeModelColumn<std::string> short_name;
+		Gtk::TreeModelColumn<std::string> full_name;
+	};
+
+	PortColumns port_columns;
+
+	friend class Row;
+	Glib::RefPtr<Gtk::ListStore> midi_port_store;
+	Glib::RefPtr<Gtk::ListStore> audio_port_store;
+
+	PBD::ScopedConnection port_reg_connection;
+	void update_ports ();
+	bool ignore_active_change;
+	void build_port_model (Glib::RefPtr<Gtk::ListStore>, std::vector<std::string> const &);
 
 	void rebuild ();
 	void clear ();
