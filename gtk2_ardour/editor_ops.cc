@@ -55,6 +55,7 @@
 #include "widgets/popup.h"
 #include "widgets/prompter.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioregion.h"
 #include "ardour/boost_debug.h"
@@ -3984,12 +3985,24 @@ Editor::freeze_route ()
 	}
 
 	/* stop transport before we start. this is important */
-
 	_session->request_transport_speed (0.0);
 
 	/* wait for just a little while, because the above call is asynchronous */
+	int timeout = 10;
+	do {
+		Glib::usleep (_session->engine().usecs_per_cycle ());
+	} while (!_session->transport_stopped() && --timeout > 0);
 
-	Glib::usleep (250000);
+	if (timeout == 0) {
+		ArdourMessageDialog d (
+			_("Transport cannot be stopped, likely due to external timecode sync.\n"
+			  "Freezing a track requires the transport to be stopped.")
+			);
+		d.set_title (_("Cannot freeze"));
+		d.run ();
+		return;
+		return;
+	}
 
 	if (clicked_routeview == 0 || !clicked_routeview->is_audio_track()) {
 		return;
@@ -4006,8 +4019,8 @@ Editor::freeze_route ()
 	}
 
 	if (clicked_routeview->track()->has_external_redirects()) {
-		ArdourMessageDialog d (string_compose (_("<b>%1</b>\n\nThis track has at least one send/insert/return as part of its signal flow.\n\n"
-		                                         "Freezing will only process the signal as far as the first send/insert/return."),
+		ArdourMessageDialog d (string_compose (_("<b>%1</b>\n\nThis track has at least one send/insert/return/sidechain as part of its signal flow.\n\n"
+		                                         "Freezing will only process the signal as far as the first send/insert/return/sidechain."),
 		                                       clicked_routeview->track()->name()), true, MESSAGE_INFO, BUTTONS_NONE, true);
 
 		d.add_button (_("Freeze anyway"), Gtk::RESPONSE_OK);
