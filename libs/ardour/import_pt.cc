@@ -209,8 +209,6 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 	vector<ptflookup_t> usedtracks;
 	ptflookup_t utr;
 
-	Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
-
 	for (w = ptf.audiofiles ().begin (); w != ptf.audiofiles ().end () && !status.cancel; ++w) {
 		ptflookup_t p;
 		ok = false;
@@ -271,7 +269,6 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 		info << _("All audio files found for PT import!") << endmsg;
 	}
 
-	lx.acquire();
 	save_state("");
 
 	for (vector<PTFFormat::region_t>::const_iterator a = ptf.regions ().begin ();
@@ -327,12 +324,10 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 					/* Use existing track if possible */
 					existing_track = get_nth_audio_track (found->index2 + 1);
 					if (!existing_track) {
-						lx.release();
 						list<boost::shared_ptr<AudioTrack> > at (new_audio_track (1, 2, 0, 1, "", PresentationInfo::max_order, Normal));
 						if (at.empty ()) {
 							return;
 						}
-						lx.acquire();
 						existing_track = at.back ();
 					}
 					/* Put on existing track */
@@ -342,14 +337,12 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 					playlist->add_region (copy, a->reg.startpos);
 					//add_command (new StatefulDiffCommand (playlist));
 				} else {
-					lx.release();
 					/* Put on a new track */
 					DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) new_tr(%3)\n", a->reg.wave.filename.c_str (), a->reg.index, nth));
 					list<boost::shared_ptr<AudioTrack> > at (new_audio_track (1, 2, 0, 1, "", PresentationInfo::max_order, Normal));
 					if (at.empty ()) {
 						return;
 					}
-					lx.acquire();
 					existing_track = at.back ();
 					std::string trackname;
 					try {
@@ -372,15 +365,12 @@ Session::import_pt (PTFFormat& ptf, ImportStatus& status)
 					nth++;
 				}
 				usedtracks.push_back (utr);
-
-				save_state("");
 			}
 		}
 	}
 
-	lx.release();
-
 trymidi:
+	save_state("");
 	status.paths.clear();
 	status.paths.push_back(ptf.path ());
 	status.current = 1;
