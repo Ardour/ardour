@@ -406,21 +406,23 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 		for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
 
-			if ((*r)->does_routing() && (*r)->active()) {
+			if (boost::dynamic_pointer_cast<PeakMeter>(*r)) {
+				continue;
+			}
+
+			if (!can_freeze_processor (*r)) {
 				break;
 			}
-			if (!boost::dynamic_pointer_cast<PeakMeter>(*r)) {
 
-				FreezeRecordProcessorInfo* frii  = new FreezeRecordProcessorInfo ((*r)->get_state(), (*r));
+			FreezeRecordProcessorInfo* frii  = new FreezeRecordProcessorInfo ((*r)->get_state(), (*r));
 
-				frii->id = (*r)->id();
+			frii->id = (*r)->id();
 
-				_freeze_record.processor_info.push_back (frii);
+			_freeze_record.processor_info.push_back (frii);
 
-				/* now deactivate the processor, */
-				if (!boost::dynamic_pointer_cast<Amp>(*r)) {
-					(*r)->deactivate ();
-				}
+			/* now deactivate the processor, */
+			if (!boost::dynamic_pointer_cast<Amp>(*r)) {
+				(*r)->deactivate ();
 			}
 
 			_session.set_dirty ();

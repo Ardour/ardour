@@ -608,6 +608,8 @@ protected:
 	samplecnt_t  bounce_get_latency (boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
 	ChanCount    bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
 
+	bool can_freeze_processor (boost::shared_ptr<Processor>, bool allow_routing = false) const;
+
 	bool           _active;
 	samplecnt_t    _signal_latency;
 

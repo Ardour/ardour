@@ -564,10 +564,7 @@ Route::bounce_process (BufferSet& buffers, samplepos_t start, samplecnt_t nframe
 		}
 
 		/* if we're *not* exporting, stop processing if we come across a routing processor. */
-		if (!for_export && boost::dynamic_pointer_cast<PortInsert>(*i)) {
-			break;
-		}
-		if (!for_export && for_freeze && (*i)->does_routing() && (*i)->active()) {
+		if (!for_export && !can_freeze_processor (*i, !for_freeze)) {
 			break;
 		}
 
@@ -618,10 +615,7 @@ Route::bounce_get_latency (boost::shared_ptr<Processor> endpoint,
 			}
 			continue;
 		}
-		if (!for_export && boost::dynamic_pointer_cast<PortInsert>(*i)) {
-			break;
-		}
-		if (!for_export && for_freeze && (*i)->does_routing() && (*i)->active()) {
+		if (!for_export && !can_freeze_processor (*i, !for_freeze)) {
 			break;
 		}
 		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
@@ -646,10 +640,7 @@ Route::bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> en
 		if (!include_endpoint && (*i) == endpoint) {
 			break;
 		}
-		if (!for_export && boost::dynamic_pointer_cast<PortInsert>(*i)) {
-			break;
-		}
-		if (!for_export && for_freeze && (*i)->does_routing() && (*i)->active()) {
+		if (!for_export && !can_freeze_processor (*i, !for_freeze)) {
 			break;
 		}
 		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
@@ -5177,19 +5168,40 @@ Route::metering_state () const
 }
 
 bool
-Route::has_external_redirects () const
+Route::can_freeze_processor (boost::shared_ptr<Processor> p, bool allow_routing) const
 {
-	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-
-		/* ignore inactive processors and obviously ignore the main
-		 * outs since everything has them and we don't care.
-		 */
-
-		if ((*i)->active() && (*i) != _main_outs && (*i)->does_routing()) {
-			return true;;
-		}
+	/* ignore inactive processors and obviously ignore the main
+	 * outs since everything has them and we don't care.
+	 */
+	if (!p->active()) {
+		return true;
 	}
 
+	if (p != _main_outs && p->does_routing()) {
+		return allow_routing;
+	}
+
+	if (boost::dynamic_pointer_cast<PortInsert>(p)) {
+		return false;
+	}
+
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(p);
+	if (pi && pi->has_sidechain () && pi->sidechain_input () && pi->sidechain_input ()->connected()) {
+		return false;
+	}
+
+	return true;
+}
+
+bool
+Route::has_external_redirects () const
+{
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		if (!can_freeze_processor (*i)) {
+			return true;
+		}
+	}
 	return false;
 }
 
