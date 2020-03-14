@@ -498,6 +498,8 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	latency_button.set_icon (ArdourIcon::LatencyClock);
 	latency_button.add_elements (ArdourButton::Text);
+	latency_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::latency_button_clicked));
+	set_latency_label ();
 
 	add_button.set_name ("generic button");
 	add_button.set_icon (ArdourIcon::PsetAdd);
@@ -522,6 +524,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	pin_management_button.set_name ("generic button");
 	pin_management_button.set_icon (ArdourIcon::PluginPinout);
 	pin_management_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::manage_pins));
+
 
 	insert->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&PlugUIBase::processor_active_changed, this,  boost::weak_ptr<Processor>(insert)), gui_context());
 

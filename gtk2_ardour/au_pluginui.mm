@@ -424,6 +424,7 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	HBox* smaller_hbox = manage (new HBox);
 
 	smaller_hbox->set_spacing (6);
+	smaller_hbox->pack_start (latency_button, false, false, 4);
 	smaller_hbox->pack_start (pin_management_button, false, false, 4);
 	smaller_hbox->pack_start (preset_label, false, false, 4);
 	smaller_hbox->pack_start (_preset_modified, false, false);
