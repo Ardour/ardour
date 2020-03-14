@@ -490,6 +490,11 @@ AudioTrack::unfreeze ()
 		/* XXX need to use _main_outs _panner->set_automation_state (_freeze_record.pan_automation_state); */
 	}
 
+	for (vector<FreezeRecordProcessorInfo*>::iterator ii = _freeze_record.processor_info.begin(); ii != _freeze_record.processor_info.end(); ++ii) {
+		delete *ii;
+	}
+	_freeze_record.processor_info.clear ();
+
 	_freeze_record.state = UnFrozen;
 	FreezeChange (); /* EMIT SIGNAL */
 }
