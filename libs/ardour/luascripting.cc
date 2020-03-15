@@ -216,7 +216,7 @@ LuaScripting::scan_script (const std::string &fn, const std::string &sc)
 		}
 		if (err) {
 #ifndef NDEBUG
-		cerr << "failed to load lua script\n";
+		cerr << "failed to load lua script fn: '"<< fn << "'\n";
 #endif
 			return LuaScriptInfoPtr();
 		}
