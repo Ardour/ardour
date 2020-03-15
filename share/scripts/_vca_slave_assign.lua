@@ -65,5 +65,4 @@ function factory () return function ()
 	else
 		LuaDialog.Message ("VCA Slave Example", "Recursive VCA assignment ignored", LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run ()
 	end
-:nd end
-
+end end
