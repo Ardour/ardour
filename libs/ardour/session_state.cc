@@ -3704,9 +3704,6 @@ Session::cleanup_trash_sources (CleanupReport& rep)
 	vector<space_and_path>::iterator i;
 	string dead_dir;
 
-	rep.paths.clear ();
-	rep.space = 0;
-
 	for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 
 		dead_dir = Glib::build_filename ((*i).path, dead_dir_name);

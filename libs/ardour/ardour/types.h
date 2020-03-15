@@ -662,6 +662,7 @@ enum ScreenSaverMode {
 };
 
 struct CleanupReport {
+	CleanupReport () : space (0) {}
 	std::vector<std::string> paths;
 	size_t                   space;
 };
