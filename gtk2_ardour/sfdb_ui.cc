@@ -41,12 +41,13 @@
 #include <unistd.h>
 #include <limits.h>
 
+#include <glib.h>
+#include "pbd/gstdio_compat.h"
+#include <glibmm/fileutils.h>
+
 #include <gtkmm/box.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/stock.h>
-
-#include "pbd/gstdio_compat.h"
-#include <glibmm/fileutils.h>
 
 #include "pbd/tokenizer.h"
 #include "pbd/enumwriter.h"

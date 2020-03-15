@@ -29,9 +29,7 @@
 
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
-
 #include <glibmm.h>
-#include <glibmm/datetime.h>
 
 #include <gtkmm/filechooser.h>
 #include <gtkmm/stock.h>
