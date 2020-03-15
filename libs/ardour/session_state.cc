@@ -1873,9 +1873,9 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 		boost::shared_ptr<Track> track;
 
 		if (type == DataType::AUDIO) {
-			track.reset (new AudioTrack (*this, string())); // name will be reset from XML in ::set_state() below
+			track.reset (new AudioTrack (*this));
 		} else {
-			track.reset (new MidiTrack (*this, string())); // name will be reset from XML in ::set_state() below
+			track.reset (new MidiTrack (*this));
 		}
 
 		if (track->init()) {
@@ -1924,9 +1924,9 @@ Session::XMLRouteFactory_3X (const XMLNode& node, int version)
 		boost::shared_ptr<Track> track;
 
 		if (type == DataType::AUDIO) {
-			track.reset (new AudioTrack (*this, string())); // name will be reset from XML in ::set_state() below
+			track.reset (new AudioTrack (*this));
 		} else {
-			track.reset (new MidiTrack (*this, string())); // name will be reset from XML in ::set_state() below
+			track.reset (new MidiTrack (*this));
 		}
 
 		if (track->init()) {
@@ -1986,9 +1986,9 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 		boost::shared_ptr<Track> track;
 
 		if (type == DataType::AUDIO) {
-			track.reset (new AudioTrack (*this, string())); // name will be reset from XML in ::set_state() below
+			track.reset (new AudioTrack (*this));
 		} else {
-			track.reset (new MidiTrack (*this, string())); // name will be reset from XML in ::set_state() below
+			track.reset (new MidiTrack (*this));
 		}
 
 		if (track->init()) {
