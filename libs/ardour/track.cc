@@ -110,9 +110,9 @@ Track::init ()
 
 	if (!name().empty()) {
 		/* an empty name means that we are being constructed via
-		   serialized state (XML). Don't create a playlist, because one
-		   will be created or discovered during ::set_state().
-		*/
+		 * serialized state (XML). Don't create a playlist, because one
+		 * will be created or discovered during ::set_state().
+		 */
 		use_new_playlist (data_type());
 	}
 
@@ -417,6 +417,18 @@ Track::set_name (const string& str)
 			_disk_reader->set_name (str);
 			_disk_writer->set_name (str);
 		}
+	}
+
+	/* When creating a track during session-load,
+	 * do not change playlist's name, nor try to save the session.
+	 *
+	 * Changing the playlist name from 'toBeResetFroXML' breaks loading
+	 * Ardour v2..5 sessions. Older versions of Arodur identified playlist
+	 * by name, and this causes duplicate names and name conflicts.
+	 * (new track name -> new playlist name  != old playlist)
+	 */
+	if (_session.loading ()) {
+		return Route::set_name (str);
 	}
 
 	for (uint32_t n = 0; n < DataType::num_types; ++n) {
