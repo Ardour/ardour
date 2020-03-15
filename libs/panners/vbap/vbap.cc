@@ -55,7 +55,7 @@ static PanPluginDescriptor _descriptor = {
         "http://ardour.org/plugin/panner_vbap",
         "http://ardour.org/plugin/panner_vbap#ui",
         -1, -1,
-        1000,
+        10,
         VBAPanner::factory
 };
 

@@ -37,10 +37,11 @@
 
 #include "pbd/cartesian.h"
 #include "pbd/convert.h"
+#include "pbd/enumwriter.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
+#include "pbd/stateful.h"
 #include "pbd/xml++.h"
-#include "pbd/enumwriter.h"
 
 #include "evoral/Curve.h"
 
@@ -125,6 +126,9 @@ PannerShell::configure_io (ChanCount in, ChanCount out)
 	if (!pi) {
 		fatal << _("No panner found: check that panners are being discovered correctly during startup.") << endmsg;
 		abort(); /*NOTREACHED*/
+	}
+	if (Stateful::loading_state_version < 6000 && pi->descriptor.in == 2) {
+		_user_selected_panner_uri = pi->descriptor.panner_uri;
 	}
 
 	DEBUG_TRACE (DEBUG::Panning, string_compose (_("select panner: %1\n"), pi->descriptor.name.c_str()));
