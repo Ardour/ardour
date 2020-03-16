@@ -431,7 +431,7 @@ MTC_TransportMaster::update_mtc_time (const MIDI::byte *msg, bool was_full, samp
 	if (was_full || outside_window (mtc_frame)) {
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("update_mtc_time: full TC %1 or outside window %2 MTC %3\n", was_full, outside_window (mtc_frame), mtc_frame));
 		boost::shared_ptr<TransportMaster> c = TransportMasterManager::instance().current();
-		if (c && c.get() == this) {
+		if (c && c.get() == this && _session->config.get_external_sync()) {
 			_session->set_requested_return_sample (-1);
 			_session->request_transport_speed (0, TRS_MTC);
 			_session->request_locate (mtc_frame, MustStop, TRS_MTC);
