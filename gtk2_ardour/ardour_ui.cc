@@ -2614,12 +2614,12 @@ ARDOUR_UI::start_duplicate_routes ()
 void
 ARDOUR_UI::add_route ()
 {
-	if (!add_route_dialog.get (false)) {
-		add_route_dialog->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::add_route_dialog_response));
+	if (!_session || !_session->writable() || _session->actively_recording()) {
+		return;
 	}
 
-	if (!_session) {
-		return;
+	if (!add_route_dialog.get (false)) {
+		add_route_dialog->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::add_route_dialog_response));
 	}
 
 	if (add_route_dialog->is_visible()) {
