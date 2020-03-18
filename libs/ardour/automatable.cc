@@ -178,7 +178,9 @@ Automatable::add_control(boost::shared_ptr<Evoral::Control> ac)
 	ControlSet::add_control (ac);
 
 	if ((!actl || !(actl->flags() & Controllable::NotAutomatable)) && al) {
-		_can_automate_list.insert (param);
+		if (!actl || !(actl->flags() & Controllable::HiddenControl)) {
+			can_automate (param);
+		}
 		automation_list_automation_state_changed (param, al->automation_state ()); // sync everything up
 	}
 }
@@ -264,7 +266,9 @@ Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter le
 				boost::shared_ptr<AutomationControl> actl = automation_control (param);
 				if (actl && (*niter)->children().size() > 0 && Config->get_limit_n_automatables () > 0) {
 					actl->clear_flag (Controllable::NotAutomatable);
-					can_automate (param);
+					if (!(actl->flags() & Controllable::HiddenControl) && actl->name() != X_("hidden")) {
+						can_automate (param);
+					}
 					info << "Marked parmater as automatable" << endl;
 				} else {
 					warning << "Ignored automation data for non-automatable parameter" << endl;
