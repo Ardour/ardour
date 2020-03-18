@@ -359,6 +359,10 @@ GenericPluginUI::build ()
 				= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
 					insert->control(param));
 
+			if (c->flags () & Controllable::HiddenControl) {
+				continue;
+			}
+
 			ParameterDescriptor desc;
 			plugin->get_parameter_descriptor(i, desc);
 			if ((cui = build_control_ui (param, desc, c, value, plugin->parameter_is_input(i), hint.knob)) == 0) {

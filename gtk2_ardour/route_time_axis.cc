@@ -2067,6 +2067,11 @@ RouteTimeAxisView::add_existing_processor_automation_curves (boost::weak_ptr<Pro
 		Evoral::Parameter param (*i);
 		boost::shared_ptr<AutomationLine> al;
 
+		boost::shared_ptr<AutomationControl> control = boost::dynamic_pointer_cast<AutomationControl>(processor->control(*i, false));
+		if (!control || control->flags () & Controllable::HiddenControl) {
+			continue;
+		}
+
 		if ((al = find_processor_automation_curve (processor, param)) != 0) {
 			al->queue_reset ();
 		} else {
