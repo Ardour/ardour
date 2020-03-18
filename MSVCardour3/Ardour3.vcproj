@@ -1260,10 +1260,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\tape_region_view.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\template_dialog.cc"
 				>
 			</File>
@@ -2407,10 +2403,6 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\sys_ex.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\tape_region_view.h"
 				>
 			</File>
 			<File
