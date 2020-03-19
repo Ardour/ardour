@@ -315,15 +315,6 @@ public:
 	void session_add_audio_route (bool, int32_t, int32_t, ARDOUR::TrackMode, ARDOUR::RouteGroup *,
 	                              uint32_t, std::string const &, bool, ARDOUR::PresentationInfo::order_t order);
 
-	void session_add_mixed_track (const ARDOUR::ChanCount&, const ARDOUR::ChanCount&, ARDOUR::RouteGroup*,
-	                              uint32_t, std::string const &, bool strict_io,
-	                              ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord* pset,
-	                              ARDOUR::PresentationInfo::order_t order);
-
-	void session_add_midi_bus (ARDOUR::RouteGroup*, uint32_t, std::string const &, bool strict_io,
-	                           ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord* pset,
-	                           ARDOUR::PresentationInfo::order_t order);
-
 	void session_add_midi_route (bool, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool,
 	                             ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord*,
 	                             ARDOUR::PresentationInfo::order_t order);

@@ -123,22 +123,6 @@ AddRouteDialog::AddRouteDialog ()
 		     "\n" + _("The track(s) will be added at the location specified by \"Position\"")
 		     ));
 
-#ifndef MIXBUS
-		builtin_types.push_back (
-		   std::pair<string,string> (_("Audio+MIDI Tracks"), std::string () +
-		     _("Use these settings to create one or more Audio+MIDI tracks.") + "\n\n" +
-		     _("You may select:") + "\n" +
-		     "* " + _("The number of tracks to add") + "\n" +
-		     "* " + _("A name for the track(s)") + "\n" +
-		     "* " + _("An instrument plugin (or select \"None\" to drive an external device)") + "\n" +
-		     "* " + _("A group which the track(s) will be assigned to") + "\n" +
-#ifndef MIXBUS
-		     "* " + _("The pin connections mode (see tooltip for details)") + "\n" +
-#endif
-		     "\n" + _("The track(s) will be added at the location specified by \"Position\"")
-		     ));
-#endif
-
 		builtin_types.push_back (
 		   std::pair<string,string> (_("Audio Busses"), std::string () +
 		     _("Use these settings to create one or more audio busses.") + "\n\n" +
@@ -570,8 +554,6 @@ AddRouteDialog::type_wanted()
 		return MidiBus;
 	} else if (str == _("MIDI Tracks")){
 		return MidiTrack;
-	} else if (str == _("Audio+MIDI Tracks")) {
-		return MixedTrack;
 	} else if (str == _("Audio Tracks")) {
 		return AudioTrack;
 	} else if (str == _("VCA Masters")) {
@@ -597,9 +579,6 @@ AddRouteDialog::maybe_update_name_template_entry ()
 		break;
 	case MidiTrack:
 		name_template_entry.set_text (_("MIDI"));
-		break;
-	case MixedTrack:
-		name_template_entry.set_text (_("Audio+MIDI"));
 		break;
 	case AudioBus:
 	case MidiBus:
@@ -648,33 +627,6 @@ AddRouteDialog::track_type_chosen ()
 
 		mode_label.set_sensitive (false);
 		mode_combo.set_sensitive (false);
-
-		instrument_label.set_sensitive (true);
-		instrument_combo.set_sensitive (true);
-
-		group_label.set_sensitive (true);
-		route_group_combo.set_sensitive (true);
-
-		strict_io_label.set_sensitive (true);
-		strict_io_combo.set_sensitive (true);
-
-		insert_label.set_sensitive (true);
-		insert_at_combo.set_sensitive (true);
-
-		break;
-	case MixedTrack:
-		{
-			ArdourMessageDialog msg (_("Audio+MIDI tracks are intended for use <b>ONLY</b> with plugins that use both audio and MIDI input data.\n\n"
-			                           "Use a normal audio or MIDI track if you do not plan to use such a plugin."),
-			                         true, MESSAGE_INFO, BUTTONS_OK, true);
-			msg.run ();
-		}
-
-		configuration_label.set_sensitive (true);
-		channel_combo.set_sensitive (true);
-
-		mode_label.set_sensitive (true);
-		mode_combo.set_sensitive (true);
 
 		instrument_label.set_sensitive (true);
 		instrument_combo.set_sensitive (true);
@@ -791,7 +743,6 @@ AddRouteDialog::name_template_is_default () const
 
 	if (n == _("Audio") ||
 	    n == _("MIDI") ||
-	    n == _("Audio+MIDI") ||
 	    n == _("Bus") ||
 	    n == _("Foldback") ||
 	    n == VCA::default_name_template()) {
@@ -860,11 +811,6 @@ AddRouteDialog::channels ()
 	case MidiBus:
 	case MidiTrack:
 		ret.set (DataType::AUDIO, 0);
-		ret.set (DataType::MIDI, 1);
-		break;
-
-	case MixedTrack:
-		ret.set (DataType::AUDIO, channel_count ());
 		ret.set (DataType::MIDI, 1);
 		break;
 

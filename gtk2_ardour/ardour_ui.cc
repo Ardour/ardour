@@ -1382,40 +1382,8 @@ ARDOUR_UI::update_wall_clock ()
 }
 
 void
-ARDOUR_UI::session_add_mixed_track (
-		const ChanCount& input,
-		const ChanCount& output,
-		RouteGroup* route_group,
-		uint32_t how_many,
-		const string& name_template,
-		bool strict_io,
-		PluginInfoPtr instrument,
-		Plugin::PresetRecord* pset,
-		ARDOUR::PresentationInfo::order_t order)
-{
-	assert (_session);
-
-	if (Profile->get_mixbus ()) {
-		strict_io = true;
-	}
-
-	try {
-		list<boost::shared_ptr<MidiTrack> > tracks;
-		tracks = _session->new_midi_track (input, output, strict_io, instrument, pset, route_group, how_many, name_template, order, ARDOUR::Normal);
-
-		if (tracks.size() != how_many) {
-			error << string_compose(P_("could not create %1 new mixed track", "could not create %1 new mixed tracks", how_many), how_many) << endmsg;
-		}
-	}
-
-	catch (...) {
-		display_insufficient_ports_message ();
-		return;
-	}
-}
-
-void
-ARDOUR_UI::session_add_midi_bus (
+ARDOUR_UI::session_add_midi_route (
+		bool disk,
 		RouteGroup* route_group,
 		uint32_t how_many,
 		const string& name_template,
@@ -1434,37 +1402,32 @@ ARDOUR_UI::session_add_midi_bus (
 	}
 
 	try {
-		RouteList routes;
-		routes = _session->new_midi_route (route_group, how_many, name_template, strict_io, instrument, pset, PresentationInfo::MidiBus, order);
-		if (routes.size() != how_many) {
-			error << string_compose(P_("could not create %1 new Midi Bus", "could not create %1 new Midi Busses", how_many), how_many) << endmsg;
-		}
+		if (disk) {
 
+			ChanCount one_midi_channel;
+			one_midi_channel.set (DataType::MIDI, 1);
+
+			list<boost::shared_ptr<MidiTrack> > tracks;
+			tracks = _session->new_midi_track (one_midi_channel, one_midi_channel, strict_io, instrument, pset, route_group, how_many, name_template, order, ARDOUR::Normal);
+
+			if (tracks.size() != how_many) {
+				error << string_compose(P_("could not create %1 new mixed track", "could not create %1 new mixed tracks", how_many), how_many) << endmsg;
+			}
+
+		} else {
+
+			RouteList routes;
+			routes = _session->new_midi_route (route_group, how_many, name_template, strict_io, instrument, pset, PresentationInfo::MidiBus, order);
+
+			if (routes.size() != how_many) {
+				error << string_compose(P_("could not create %1 new Midi Bus", "could not create %1 new Midi Busses", how_many), how_many) << endmsg;
+			}
+
+		}
 	}
 	catch (...) {
 		display_insufficient_ports_message ();
 		return;
-	}
-}
-
-void
-ARDOUR_UI::session_add_midi_route (
-		bool disk,
-		RouteGroup* route_group,
-		uint32_t how_many,
-		const string& name_template,
-		bool strict_io,
-		PluginInfoPtr instrument,
-		Plugin::PresetRecord* pset,
-		ARDOUR::PresentationInfo::order_t order)
-{
-	ChanCount one_midi_channel;
-	one_midi_channel.set (DataType::MIDI, 1);
-
-	if (disk) {
-		session_add_mixed_track (one_midi_channel, one_midi_channel, route_group, how_many, name_template, strict_io, instrument, pset, order);
-	} else {
-		session_add_midi_bus (route_group, how_many, name_template, strict_io, instrument, pset, order);
 	}
 }
 
@@ -2711,17 +2674,14 @@ ARDOUR_UI::add_route_dialog_response (int r)
 	case AddRouteDialog::AudioTrack:
 		session_add_audio_route (true, input_chan.n_audio(), output_chan.n_audio(), add_route_dialog->mode(), route_group, count, name_template, strict_io, order);
 		break;
-	case AddRouteDialog::MidiTrack:
-		session_add_midi_route (true, route_group, count, name_template, strict_io, instrument, 0, order);
-		break;
-	case AddRouteDialog::MixedTrack:
-		session_add_mixed_track (input_chan, output_chan, route_group, count, name_template, strict_io, instrument, 0, order);
-		break;
 	case AddRouteDialog::AudioBus:
 		session_add_audio_route (false, input_chan.n_audio(), output_chan.n_audio(), ARDOUR::Normal, route_group, count, name_template, strict_io, order);
 		break;
+	case AddRouteDialog::MidiTrack:
+		session_add_midi_route (true, route_group, count, name_template, strict_io, instrument, 0, order);
+		break;
 	case AddRouteDialog::MidiBus:
-		session_add_midi_bus (route_group, count, name_template, strict_io, instrument, 0, order);
+		session_add_midi_route (false, route_group, count, name_template, strict_io, instrument, 0, order);
 		break;
 	case AddRouteDialog::VCAMaster:
 		_session->vca_manager().create_vca (count, name_template);
