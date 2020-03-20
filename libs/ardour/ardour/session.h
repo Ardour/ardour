@@ -775,7 +775,7 @@ public:
 	bool   transport_stopped_or_stopping() const;
 	bool   transport_rolling() const;
 	bool   transport_will_roll_forwards() const;
-	
+
 	bool silent () { return _silent; }
 
 	bool punch_is_possible () const;
@@ -1369,7 +1369,34 @@ private:
 	};
 
 	samplepos_t master_wait_end;
-	void track_transport_master (float slave_speed, samplepos_t slave_transport_sample);
+
+	enum TransportMasterAction {
+		TransportMasterRelax,
+		TransportMasterNoRoll,
+		TransportMasterLocate,
+		TransportMasterStart,
+		TransportMasterStop,
+		TransportMasterWait,
+	};
+
+	struct TransportMasterStrategy {
+		TransportMasterAction action;
+		samplepos_t target;
+		LocateTransportDisposition roll_disposition;
+		double catch_speed;
+
+		TransportMasterStrategy ()
+			: action (TransportMasterRelax)
+			, target (0)
+			, roll_disposition (MustStop)
+			, catch_speed (0.) {}
+	};
+
+	TransportMasterStrategy transport_master_strategy;
+	double plan_master_strategy (pframes_t nframes, double master_speed, samplepos_t master_transport_sample, double catch_speed);
+	double plan_master_strategy_engine (pframes_t nframes, double master_speed, samplepos_t master_transport_sample, double catch_speed);
+	bool implement_master_strategy ();
+
 	bool follow_transport_master (pframes_t nframes);
 
 	void sync_source_changed (SyncSource, samplepos_t pos, pframes_t cycle_nframes);

@@ -439,6 +439,8 @@ TransportMasterManager::set_current_locked (boost::shared_ptr<TransportMaster> c
 
 	master_dll_initstate = 0;
 
+	unblock_disk_output ();
+
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("current transport master set to %1\n", (c ? c->name() : string ("none"))));
 
 	return 0;
