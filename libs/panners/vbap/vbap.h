@@ -49,8 +49,6 @@ public:
         void set_width (double);
         void set_elevation (double);
 
-        std::set<Evoral::Parameter> what_can_be_automated() const;
-
 	static Panner* factory (boost::shared_ptr<Pannable>, boost::shared_ptr<Speakers>);
 
 	void distribute (BufferSet& ibufs, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes);

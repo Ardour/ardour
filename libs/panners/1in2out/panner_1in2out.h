@@ -52,8 +52,6 @@ class Panner1in2out : public Panner
 	ChanCount in() const { return ChanCount (DataType::AUDIO, 1); }
 	ChanCount out() const { return ChanCount (DataType::AUDIO, 2); }
 
-	std::set<Evoral::Parameter> what_can_be_automated() const;
-
 	static Panner* factory (boost::shared_ptr<Pannable>, boost::shared_ptr<Speakers>);
 
 	std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;

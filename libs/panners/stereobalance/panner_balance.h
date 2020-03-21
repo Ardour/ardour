@@ -50,8 +50,6 @@ class Pannerbalance : public Panner
 	std::pair<double, double> position_range () const;
 	double position () const;
 
-	std::set<Evoral::Parameter> what_can_be_automated() const;
-
 	static Panner* factory (boost::shared_ptr<Pannable>, boost::shared_ptr<Speakers>);
 
 	std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;

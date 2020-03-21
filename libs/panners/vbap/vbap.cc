@@ -123,6 +123,16 @@ VBAPanner::configure_io (ChanCount in, ChanCount /* ignored - we use Speakers */
 void
 VBAPanner::update ()
 {
+
+        _can_automate_list.clear ();
+        _can_automate_list.insert (Evoral::Parameter (PanAzimuthAutomation));
+        if (_signals.size() > 1) {
+                _can_automate_list.insert (Evoral::Parameter (PanWidthAutomation));
+        }
+        if (_speakers->dimension() == 3) {
+                _can_automate_list.insert (Evoral::Parameter (PanElevationAutomation));
+        }
+
         /* recompute signal directions based on panner azimuth and, if relevant, width (diffusion) and elevation parameters */
         double elevation = _pannable->pan_elevation_control->get_value() * 90.0;
 
@@ -390,20 +400,6 @@ ChanCount
 VBAPanner::out() const
 {
         return ChanCount (DataType::AUDIO, _speakers->n_speakers());
-}
-
-std::set<Evoral::Parameter>
-VBAPanner::what_can_be_automated() const
-{
-        set<Evoral::Parameter> s;
-        s.insert (Evoral::Parameter (PanAzimuthAutomation));
-        if (_signals.size() > 1) {
-                s.insert (Evoral::Parameter (PanWidthAutomation));
-        }
-        if (_speakers->dimension() == 3) {
-                s.insert (Evoral::Parameter (PanElevationAutomation));
-        }
-        return s;
 }
 
 string

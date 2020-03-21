@@ -5367,7 +5367,7 @@ Route::pan_elevation_control() const
 		return boost::shared_ptr<AutomationControl>();
 	}
 
-	set<Evoral::Parameter> c = panner()->what_can_be_automated ();
+	set<Evoral::Parameter> c = pannable()->what_can_be_automated ();
 
 	if (c.find (PanElevationAutomation) != c.end()) {
 		return _pannable->pan_elevation_control;
@@ -5388,7 +5388,7 @@ Route::pan_width_control() const
 		return boost::shared_ptr<AutomationControl>();
 	}
 
-	set<Evoral::Parameter> c = panner()->what_can_be_automated ();
+	set<Evoral::Parameter> c = pannable()->what_can_be_automated ();
 
 	if (c.find (PanWidthAutomation) != c.end()) {
 		return _pannable->pan_width_control;
@@ -5403,7 +5403,7 @@ Route::pan_frontback_control() const
 		return boost::shared_ptr<AutomationControl>();
 	}
 
-	set<Evoral::Parameter> c = panner()->what_can_be_automated ();
+	set<Evoral::Parameter> c = pannable()->what_can_be_automated ();
 
 	if (c.find (PanFrontBackAutomation) != c.end()) {
 		return _pannable->pan_frontback_control;
@@ -5418,7 +5418,7 @@ Route::pan_lfe_control() const
 		return boost::shared_ptr<AutomationControl>();
 	}
 
-	set<Evoral::Parameter> c = panner()->what_can_be_automated ();
+	set<Evoral::Parameter> c = pannable()->what_can_be_automated ();
 
 	if (c.find (PanLFEAutomation) != c.end()) {
 		return _pannable->pan_lfe_control;

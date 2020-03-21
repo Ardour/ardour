@@ -86,12 +86,6 @@ Panner::touching () const
 	return _pannable->touching ();
 }
 
-set<Evoral::Parameter>
-Panner::what_can_be_automated() const
-{
-	return _pannable->what_can_be_automated ();
-}
-
 int
 Panner::set_state (XMLNode const &, int)
 {

@@ -77,6 +77,8 @@ Pannerbalance::Pannerbalance (boost::shared_ptr<Pannable> p)
 		_pannable->pan_azimuth_control->set_value (0.5, Controllable::NoGroup);
 	}
 
+	_can_automate_list.insert (Evoral::Parameter (PanAzimuthAutomation));
+
 	update ();
 
 	/* LEFT SIGNAL */
@@ -273,14 +275,6 @@ Pannerbalance::get_state ()
 	/* this is needed to allow new sessions to load with old Ardour: */
 	root.set_property (X_("type"), _descriptor.name);
 	return root;
-}
-
-std::set<Evoral::Parameter>
-Pannerbalance::what_can_be_automated() const
-{
-	set<Evoral::Parameter> s;
-	s.insert (Evoral::Parameter (PanAzimuthAutomation));
-	return s;
 }
 
 string

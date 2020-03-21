@@ -108,6 +108,16 @@ Pannable::set_panner (boost::shared_ptr<Panner> p)
 	_panner = p;
 }
 
+const std::set<Evoral::Parameter>&
+Pannable::what_can_be_automated() const
+{
+	boost::shared_ptr<Panner> const panner = _panner.lock();
+	if (panner) {
+		return panner->what_can_be_automated ();
+	}
+	return Automatable::what_can_be_automated ();
+}
+
 void
 Pannable::value_changed ()
 {

@@ -85,6 +85,8 @@ Panner2in2out::Panner2in2out (boost::shared_ptr<Pannable> p)
                 set_width(w > 0 ? wrange : -wrange);
         }
 
+        _can_automate_list.insert (Evoral::Parameter (PanAzimuthAutomation));
+        _can_automate_list.insert (Evoral::Parameter (PanWidthAutomation));
 
         update ();
 
@@ -484,15 +486,6 @@ Panner2in2out::get_state ()
 	/* this is needed to allow new sessions to load with old Ardour: */
 	root.set_property (X_("type"), _descriptor.name);
 	return root;
-}
-
-std::set<Evoral::Parameter>
-Panner2in2out::what_can_be_automated() const
-{
-        set<Evoral::Parameter> s;
-        s.insert (Evoral::Parameter (PanAzimuthAutomation));
-        s.insert (Evoral::Parameter (PanWidthAutomation));
-        return s;
 }
 
 string

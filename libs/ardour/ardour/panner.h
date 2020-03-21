@@ -110,8 +110,6 @@ public:
 	void      set_automation_state (AutoState);
 	AutoState automation_state() const;
 
-	virtual std::set<Evoral::Parameter> what_can_be_automated() const;
-
 	bool touching() const;
 
 	/**
@@ -145,7 +143,15 @@ public:
 
 protected:
 	friend PanControllable;
+	friend Pannable; // allow what_can_be_automated
+
 	boost::shared_ptr<Pannable> _pannable;
+
+	std::set<Evoral::Parameter> _can_automate_list;
+
+	const std::set<Evoral::Parameter>& what_can_be_automated() const {
+		return _can_automate_list;
+	}
 
 	virtual std::string value_as_string (boost::shared_ptr<const AutomationControl>) const = 0;
 
