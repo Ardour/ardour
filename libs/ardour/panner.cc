@@ -98,12 +98,6 @@ Panner::describe_parameter (Evoral::Parameter p)
 	return _pannable->describe_parameter (p);
 }
 
-string
-Panner::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
-{
-	return _pannable->value_as_string (ac);
-}
-
 int
 Panner::set_state (XMLNode const &, int)
 {
