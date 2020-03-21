@@ -1101,14 +1101,17 @@ Session::emit_thread_run ()
 }
 
 double
-Session::plan_master_strategy_engine (pframes_t nframes, double master_speed, samplepos_t master_transport_sample, double catch_speed)
+Session::plan_master_strategy_engine (pframes_t nframes, double master_speed, samplepos_t master_transport_sample, double /* catch_speed */)
 {
 	/* JACK Transport. */
 
 	TransportMasterManager& tmm (TransportMasterManager::instance());
 	sampleoffset_t delta = _transport_sample - master_transport_sample;
+	const bool interesting_transport_state_change_underway = (locate_pending() || declick_in_progress());
 
 	if (master_speed == 0) {
+
+		DEBUG_TRACE (DEBUG::Slave, "JACK transport: not moving\n");
 
 		if (!actively_recording()) {
 
@@ -1116,14 +1119,19 @@ Session::plan_master_strategy_engine (pframes_t nframes, double master_speed, sa
 
 			if (delta != wlp) {
 
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: need to locate to reduce delta %1 vs %2\n", delta, wlp));
+
 				/* if we're not aligned with the current JACK * time, then jump to it */
 
-				if (!locate_pending() && !declick_in_progress() && !tmm.current()->starting()) {
+				if (!interesting_transport_state_change_underway && !tmm.current()->starting()) {
 
 					const samplepos_t locate_target = master_transport_sample + wlp;
 					DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: jump to master position %1 by locating to %2\n", master_transport_sample, locate_target));
 					/* for JACK transport always stop after the locate (2nd argument == false) */
-					TFSM_LOCATE (locate_target, MustStop, true, false, false);
+
+					transport_master_strategy.action = TransportMasterLocate;
+					transport_master_strategy.target = master_transport_sample;
+					transport_master_strategy.roll_disposition = MustStop;
 
 				} else {
 					DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK Transport: locate already in process, sts = %1\n", master_transport_sample));
@@ -1133,11 +1141,16 @@ Session::plan_master_strategy_engine (pframes_t nframes, double master_speed, sa
 
 	} else {
 
+		DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: MOVING at %1\n", master_speed));
+
 		if (_transport_speed) {
 			/* master is rolling, and we're rolling ... with JACK we should always be perfectly in sync, so ... WTF? */
 			if (delta) {
 				if (remaining_latency_preroll() && worst_latency_preroll()) {
 					/* our transport position is not moving because we're doing latency alignment. Nothing in particular to do */
+					DEBUG_TRACE (DEBUG::Slave, "JACK transport: waiting for latency alignment\n");
+					transport_master_strategy.action = TransportMasterRelax;
+					return 1.0;
 				} else {
 					cerr << "\n\n\n IMPOSSIBLE! OUT OF SYNC WITH JACK TRANSPORT (rlp = " << remaining_latency_preroll() << " wlp " << worst_latency_preroll() << ")\n\n\n";
 				}
@@ -1145,8 +1158,7 @@ Session::plan_master_strategy_engine (pframes_t nframes, double master_speed, sa
 		}
 	}
 
-
-	if (!locate_pending() && !declick_in_progress()) {
+	if (!interesting_transport_state_change_underway) {
 
 		if (master_speed != 0.0) {
 
@@ -1154,19 +1166,23 @@ Session::plan_master_strategy_engine (pframes_t nframes, double master_speed, sa
 
 			if (_transport_speed == 0.0f) {
 				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave starts transport: %1 sample %2 tf %3\n", master_speed, master_transport_sample, _transport_sample));
-				TFSM_EVENT (TransportFSM::StartTransport);
+				transport_master_strategy.action = TransportMasterStart;
+				return 1.0;
 			}
 
 		} else if (!tmm.current()->starting()) { /* master stopped, not in "starting" state */
 
 			if (_transport_speed != 0.0f) {
 				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stops transport: %1 sample %2 tf %3\n", master_speed, master_transport_sample, _transport_sample));
-				TFSM_STOP (false, false);
+				transport_master_strategy.action = TransportMasterStop;
+				return 1.0;
 			}
 		}
 	}
 
-	return catch_speed;
+	/* No varispeed with JACK */
+	transport_master_strategy.action = TransportMasterRelax;
+	return 1.0;
 }
 
 double
