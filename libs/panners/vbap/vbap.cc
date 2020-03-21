@@ -61,7 +61,7 @@ static PanPluginDescriptor _descriptor = {
 
 extern "C" ARDOURPANNER_API PanPluginDescriptor* panner_descriptor () { return &_descriptor; }
 
-VBAPanner::Signal::Signal (Session&, VBAPanner&, uint32_t, uint32_t n_speakers)
+VBAPanner::Signal::Signal (VBAPanner&, uint32_t, uint32_t n_speakers)
 {
         resize_gains (n_speakers);
 
@@ -112,7 +112,7 @@ VBAPanner::configure_io (ChanCount in, ChanCount /* ignored - we use Speakers */
         clear_signals ();
 
         for (uint32_t i = 0; i < n; ++i) {
-                Signal* s = new Signal (_pannable->session(), *this, i, _speakers->n_speakers());
+                Signal* s = new Signal (*this, i, _speakers->n_speakers());
                 _signals.push_back (s);
 
         }

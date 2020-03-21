@@ -76,7 +76,7 @@ private:
             int desired_outputs[3]; /* outputs to use the next time we distribute */
             double desired_gains[3]; /* target gains for desired_outputs */
 
-            Signal (Session&, VBAPanner&, uint32_t which, uint32_t n_speakers);
+            Signal (VBAPanner&, uint32_t which, uint32_t n_speakers);
             void resize_gains (uint32_t n_speakers);
         };
 
