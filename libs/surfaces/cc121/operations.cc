@@ -22,7 +22,6 @@
 #include "ardour/async_midi_port.h"
 #include "ardour/monitor_processor.h"
 #include "ardour/monitor_control.h"
-#include "ardour/pannable.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/record_enable_control.h"

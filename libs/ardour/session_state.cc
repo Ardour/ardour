@@ -109,7 +109,6 @@
 #include "ardour/midi_scene_changer.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
-#include "ardour/pannable.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/playlist_source.h"
 #include "ardour/port.h"
