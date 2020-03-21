@@ -407,21 +407,6 @@ VBAPanner::what_can_be_automated() const
 }
 
 string
-VBAPanner::describe_parameter (Evoral::Parameter p)
-{
-        switch (p.type()) {
-        case PanAzimuthAutomation:
-                return _("Azimuth");
-        case PanWidthAutomation:
-                return _("Width");
-        case PanElevationAutomation:
-                return _("Elevation");
-        default:
-                return _pannable->describe_parameter (p);
-        }
-}
-
-string
 VBAPanner::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
 {
         /* DO NOT USE LocaleGuard HERE */

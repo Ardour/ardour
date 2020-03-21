@@ -928,7 +928,7 @@ Panner2dWindow::Panner2dWindow (boost::shared_ptr<PannerShell> p, int32_t h, uin
 	left_side.pack_start (button_box, false, false);
 
 	Gtk::Label* l = manage (new Label (
-				p->panner()->describe_parameter(PanWidthAutomation),
+				p->pannable()->describe_parameter(PanWidthAutomation),
 				Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	spinner_box.pack_start (*l, false, false);
 	spinner_box.pack_start (width_spinner, false, false);

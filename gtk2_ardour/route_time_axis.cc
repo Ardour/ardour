@@ -1829,7 +1829,7 @@ RouteTimeAxisView::ensure_pan_views (bool show)
 
 			/* we don't already have an AutomationTimeAxisView for this parameter */
 
-			std::string const name = _route->panner()->describe_parameter (pan_control->parameter ());
+			std::string const name = _route->pannable()->describe_parameter (pan_control->parameter ());
 
 			boost::shared_ptr<AutomationTimeAxisView> t (
 					new AutomationTimeAxisView (_session,

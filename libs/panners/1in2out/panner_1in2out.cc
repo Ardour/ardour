@@ -352,17 +352,6 @@ Panner1in2out::what_can_be_automated() const
 }
 
 string
-Panner1in2out::describe_parameter (Evoral::Parameter p)
-{
-        switch (p.type()) {
-        case PanAzimuthAutomation:
-                return _("L/R");
-        default:
-                return _pannable->describe_parameter (p);
-        }
-}
-
-string
 Panner1in2out::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
 {
         /* DO NOT USE LocaleGuard HERE */

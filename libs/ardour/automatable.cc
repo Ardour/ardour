@@ -198,6 +198,12 @@ Automatable::describe_parameter (Evoral::Parameter param)
 		return _("Trim");
 	} else if (param.type() == MuteAutomation) {
 		return _("Mute");
+	} else if (param.type() == PanAzimuthAutomation) {
+		return _("Azimuth");
+	} else if (param.type() == PanWidthAutomation) {
+		return _("Width");
+	} else if (param.type() == PanElevationAutomation) {
+		return _("Elevation");
 	} else if (param.type() == MidiCCAutomation) {
 		return string_compose("Controller %1 [%2]", param.id(), int(param.channel()) + 1);
 	} else if (param.type() == MidiPgmChangeAutomation) {
@@ -553,7 +559,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	} else if (param.type() == PanAzimuthAutomation || param.type() == PanWidthAutomation || param.type() == PanElevationAutomation) {
 		Pannable* pannable = dynamic_cast<Pannable*>(this);
 		if (pannable) {
-			control = new PanControllable (_a_session, pannable->describe_parameter (param), pannable, param);
+			control = new PanControllable (_a_session, describe_parameter (param), pannable, param);
 		} else {
 			warning << "PanAutomation for non-Pannable" << endl;
 		}

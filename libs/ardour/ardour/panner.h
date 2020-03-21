@@ -111,7 +111,6 @@ public:
 	AutoState automation_state() const;
 
 	virtual std::set<Evoral::Parameter> what_can_be_automated() const;
-	virtual std::string describe_parameter (Evoral::Parameter);
 
 	bool touching() const;
 
