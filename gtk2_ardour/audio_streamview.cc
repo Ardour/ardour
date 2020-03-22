@@ -236,9 +236,8 @@ AudioStreamView::setup_rec_box ()
 
 			boost::shared_ptr<AudioTrack> at = _trackview.audio_track();
 			samplepos_t const sample_pos = at->current_capture_start ();
-			double     const width     = 2;
 
-			create_rec_box(sample_pos, width);
+			create_rec_box(sample_pos, 0);
 
 		} else if (rec_active &&
 		           (_trackview.session()->record_status() != Session::Recording ||
