@@ -1109,33 +1109,37 @@ Session::plan_master_strategy_engine (pframes_t nframes, double master_speed, sa
 	sampleoffset_t delta = _transport_sample - master_transport_sample;
 	const bool interesting_transport_state_change_underway = (locate_pending() || declick_in_progress());
 
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK Transport: delta = %1 transport change underway %2 master speed %3\n", delta, interesting_transport_state_change_underway, master_speed));
+
 	if (master_speed == 0) {
 
 		DEBUG_TRACE (DEBUG::Slave, "JACK transport: not moving\n");
 
-		if (!actively_recording()) {
+		const samplecnt_t wlp = worst_latency_preroll_buffer_size_ceil ();
 
-			const samplecnt_t wlp = worst_latency_preroll_buffer_size_ceil ();
+		if (delta != wlp) {
 
-			if (delta != wlp) {
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: need to locate to reduce delta %1 vs %2\n", delta, wlp));
 
-				DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: need to locate to reduce delta %1 vs %2\n", delta, wlp));
+			/* if we're not aligned with the current JACK * time, then jump to it */
 
-				/* if we're not aligned with the current JACK * time, then jump to it */
+			if (!interesting_transport_state_change_underway) {
 
-				if (!interesting_transport_state_change_underway && !tmm.current()->starting()) {
+				const samplepos_t locate_target = master_transport_sample + wlp;
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: jump to master position %1 by locating to %2\n", master_transport_sample, locate_target));
+				/* for JACK transport always stop after the locate (2nd argument == false) */
 
-					const samplepos_t locate_target = master_transport_sample + wlp;
-					DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: jump to master position %1 by locating to %2\n", master_transport_sample, locate_target));
-					/* for JACK transport always stop after the locate (2nd argument == false) */
+				transport_master_strategy.action = TransportMasterLocate;
+				transport_master_strategy.target = locate_target;
+				transport_master_strategy.roll_disposition = MustStop;
 
-					transport_master_strategy.action = TransportMasterLocate;
-					transport_master_strategy.target = master_transport_sample;
-					transport_master_strategy.roll_disposition = MustStop;
+				return 1.0;
 
-				} else {
-					DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK Transport: locate already in process, sts = %1\n", master_transport_sample));
-				}
+			} else {
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK Transport: locate already in process, master @ %1, locating %2 declick %3\n",
+				                                           master_transport_sample, locate_pending(), declick_in_progress()));
+				transport_master_strategy.action = TransportMasterRelax;
+				return 1.0;
 			}
 		}
 
@@ -1143,7 +1147,7 @@ Session::plan_master_strategy_engine (pframes_t nframes, double master_speed, sa
 
 		DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: MOVING at %1\n", master_speed));
 
-		if (_transport_speed) {
+		if (_transport_fsm->rolling()) {
 			/* master is rolling, and we're rolling ... with JACK we should always be perfectly in sync, so ... WTF? */
 			if (delta) {
 				if (remaining_latency_preroll() && worst_latency_preroll()) {
@@ -1152,7 +1156,7 @@ Session::plan_master_strategy_engine (pframes_t nframes, double master_speed, sa
 					transport_master_strategy.action = TransportMasterRelax;
 					return 1.0;
 				} else {
-					cerr << "\n\n\n IMPOSSIBLE! OUT OF SYNC WITH JACK TRANSPORT (rlp = " << remaining_latency_preroll() << " wlp " << worst_latency_preroll() << ")\n\n\n";
+					cerr << "\n\n\n IMPOSSIBLE! OUT OF SYNC (delta = " << delta << ") WITH JACK TRANSPORT (rlp = " << remaining_latency_preroll() << " wlp " << worst_latency_preroll() << ")\n\n\n";
 				}
 			}
 		}

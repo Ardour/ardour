@@ -441,6 +441,15 @@ TransportMasterManager::set_current_locked (boost::shared_ptr<TransportMaster> c
 
 	unblock_disk_output ();
 
+	if (c && c->type() == Engine) {
+
+		/* We cannot sync with an already moving JACK transport mechanism, so
+		 * stop it before we start.
+		 */
+
+		AudioEngine::instance()->transport_stop ();
+	}
+
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("current transport master set to %1\n", (c ? c->name() : string ("none"))));
 
 	return 0;
