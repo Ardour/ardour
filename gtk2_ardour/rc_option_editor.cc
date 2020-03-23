@@ -2699,16 +2699,14 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 
-	if (!ARDOUR::Profile->get_mixbus()) {
-		add_option (_("Mixer"), new OptionEditorHeading (_("Send Routing")));
-		add_option (_("Mixer"),
-				new BoolOption (
-					"link-send-and-route-panner",
-					_("Link panners of Aux and External Sends with main panner by default"),
-					sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_send_and_route_panner),
-					sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_send_and_route_panner)
-					));
-	}
+	add_option (_("Mixer"), new OptionEditorHeading (_("Send Routing")));
+	add_option (_("Mixer"),
+			new BoolOption (
+				"link-send-and-route-panner",
+				_("Link panners of Aux and External Sends with main panner by default"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_send_and_route_panner),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_send_and_route_panner)
+				));
 
 	/* Signal Flow */
 

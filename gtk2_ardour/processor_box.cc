@@ -798,14 +798,12 @@ ProcessorEntry::build_send_options_menu ()
 	Menu* menu = manage (new Menu);
 	MenuList& items = menu->items ();
 
-	if (!ARDOUR::Profile->get_mixbus()) {
-		boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (_processor);
-		if (send) {
-			items.push_back (CheckMenuElem (_("Link panner controls")));
-			Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-			c->set_active (send->panner_shell()->is_linked_to_route());
-			c->signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::toggle_panner_link));
-		}
+	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (_processor);
+	if (send) {
+		items.push_back (CheckMenuElem (_("Link panner controls")));
+		Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+		c->set_active (send->panner_shell()->is_linked_to_route());
+		c->signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::toggle_panner_link));
 	}
 
 	boost::shared_ptr<InternalSend> aux = boost::dynamic_pointer_cast<InternalSend> (_processor);
@@ -4094,10 +4092,6 @@ ProcessorBox::edit_aux_send (boost::shared_ptr<Processor> processor)
 {
 	if (boost::dynamic_pointer_cast<InternalSend> (processor) == 0) {
 		return false;
-	}
-	if (ARDOUR::Profile->get_mixbus()) {
-		/* don't allow editing sends, ignore switch to send-edit */
-		return true;
 	}
 
 	if (_parent_strip) {
