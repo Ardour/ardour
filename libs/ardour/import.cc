@@ -204,7 +204,6 @@ create_mono_sources_for_writing (const vector<string>& new_paths,
 
 			source = SourceFactory::createWritable (type, sess,
 			                                        i->c_str(),
-			                                        false,
 			                                        samplerate);
 		}
 
