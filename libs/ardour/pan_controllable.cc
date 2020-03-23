@@ -26,13 +26,15 @@ using namespace ARDOUR;
 void
 PanControllable::actually_set_value (double v, Controllable::GroupControlDisposition group_override)
 {
-	boost::shared_ptr<Panner> p = owner->panner();
+	v = std::min (upper (), std::max (lower (), v));
 
-	if (!p) {
+	if (!owner || !owner->panner()) {
 		/* no panner: just do it */
 		AutomationControl::actually_set_value (v, group_override);
 		return;
 	}
+
+	boost::shared_ptr<Panner> p = owner->panner();
 
 	bool can_set = false;
 
