@@ -803,8 +803,6 @@ FoldbackStrip::connect_to_pan ()
 		return;
 	}
 
-	boost::shared_ptr<Pannable> p = _route->pannable ();
-
 	update_panner_choices();
 }
 
