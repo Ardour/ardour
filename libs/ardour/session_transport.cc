@@ -1268,6 +1268,9 @@ Session::non_realtime_locate ()
 		/* no more looping .. should have been noticed elsewhere */
 	}
 
+	microseconds_t start;
+	uint32_t nt = 0;
+	int hundreths_of_second_per_track = 0;
 
 	samplepos_t tf;
 
@@ -1277,13 +1280,20 @@ Session::non_realtime_locate ()
 	  restart:
 		gint sc = g_atomic_int_get (&_seek_counter);
 		tf = _transport_sample;
+		start = get_microseconds ();
 
-		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i, ++nt) {
 			(*i)->non_realtime_locate (tf);
 			if (sc != g_atomic_int_get (&_seek_counter)) {
 				std::cerr << "\n\nLOCATE INTERRUPTED BY LOCATE!!!\n\n";
 				goto restart;
 			}
+		}
+
+		microseconds_t end = get_microseconds ();
+		int usecs_per_track = lrintf ((end - start) / (double) nt);
+		if (usecs_per_track > g_atomic_int_get (&current_usecs_per_track)) {
+			g_atomic_int_set (&current_usecs_per_track, usecs_per_track);
 		}
 	}
 

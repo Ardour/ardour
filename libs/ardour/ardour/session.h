@@ -1740,6 +1740,7 @@ private:
 	};
 
 	volatile guint _punch_or_loop; // enum PunchLoopLock
+	gint current_usecs_per_track;
 
 	bool punch_active () const;
 	void unset_punch ();
