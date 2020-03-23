@@ -287,9 +287,10 @@ TransportMastersWidget::update_ports ()
 	}
 
 	for (vector<Row*>::iterator r = rows.begin(); r != rows.end(); ++r) {
-		(*r)->port_choice_changed ();
+		if ((*r)->tm->port()) {
+			(*r)->build_port_list ((*r)->tm->port()->type());
+		}
 	}
-
 }
 
 void
@@ -530,8 +531,6 @@ TransportMastersWidget::Row::port_choice_changed ()
 	if (parent.ignore_active_change) {
 		return;
 	}
-
-	build_port_list (tm->port()->type());
 
 	TreeModel::iterator active = port_combo.get_active ();
 	string new_port = (*active)[parent.port_columns.full_name];
