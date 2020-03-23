@@ -79,7 +79,7 @@ PannerShell::PannerShell (string name, Session& s, boost::shared_ptr<Pannable> p
 {
 	if (is_send) {
 		_pannable_internal.reset(new Pannable (s));
-		if (Config->get_link_send_and_route_panner() && !ARDOUR::Profile->get_mixbus()) {
+		if (Config->get_link_send_and_route_panner()) {
 			_panlinked = true;
 		} else {
 			_panlinked = false;
@@ -187,9 +187,7 @@ PannerShell::set_state (const XMLNode& node, int version)
 	}
 
 	if (node.get_property (X_("linked-to-route"), yn)) {
-		if (!ARDOUR::Profile->get_mixbus()) {
-			_panlinked = yn;
-		}
+		_panlinked = yn;
 	}
 
 	node.get_property (X_("user-panner"), _user_selected_panner_uri);
