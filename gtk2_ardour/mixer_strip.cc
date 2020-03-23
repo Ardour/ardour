@@ -780,7 +780,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 	gpm.gain_automation_state_button.set_text (GainMeterBase::short_astate_string (gain_automation->automation_state()));
 
 	if (_route->panner()) {
-		((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (GainMeterBase::short_astate_string (_route->panner()->automation_state()));
+		((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (GainMeterBase::short_astate_string (_route->pannable()->automation_state()));
 	}
 
 	switch (w) {
