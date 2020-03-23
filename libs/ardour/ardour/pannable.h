@@ -51,8 +51,6 @@ public:
 	boost::shared_ptr<Panner> panner() const { return _panner.lock(); }
 	void set_panner(boost::shared_ptr<Panner>);
 
-	Session& session() { return _session; }
-
 	const std::set<Evoral::Parameter>& what_can_be_automated() const;
 
 	void set_automation_state (AutoState);

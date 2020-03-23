@@ -145,7 +145,7 @@ Pannable::set_automation_state (AutoState state)
 			}
 		}
 
-		session().set_dirty ();
+		_session.set_dirty ();
 		automation_state_changed (_auto_state);
 	}
 }
