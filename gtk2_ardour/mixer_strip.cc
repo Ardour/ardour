@@ -662,7 +662,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		/* non-master bus */
 
 		if (!_route->is_master()) {
-			rec_mon_table.attach (*show_sends_button, 0, 1, 0, 2);
+			rec_mon_table.attach (*show_sends_button, 0, 3, 0, 2);
 			show_sends_button->show();
 		}
 	}
@@ -787,7 +787,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 	case Wide:
 
 		if (show_sends_button)  {
-			show_sends_button->set_text (_("Aux"));
+			show_sends_button->set_text (_("Show Sends"));
 		}
 
 		{
@@ -801,7 +801,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 	case Narrow:
 
 		if (show_sends_button) {
-			show_sends_button->set_text (_("Snd"));
+			show_sends_button->set_text (_("Show"));
 		}
 
 		gain_meter().setup_meters (); // recalc meter width

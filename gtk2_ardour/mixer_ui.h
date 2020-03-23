@@ -246,7 +246,7 @@ private:
 	void track_name_changed (MixerStrip *);
 
 	void redisplay_track_list ();
-	void spill_redisplay (boost::shared_ptr<ARDOUR::VCA>);
+	void spill_redisplay (boost::shared_ptr<ARDOUR::Stripable>);
 	bool no_track_list_redisplay;
 	bool track_display_button_press (GdkEventButton*);
 	void strip_width_changed ();

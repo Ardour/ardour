@@ -77,6 +77,7 @@
 #include "keyboard.h"
 #include "latency_gui.h"
 #include "mixer_strip.h"
+#include "mixer_ui.h"
 #include "patch_change_widget.h"
 #include "plugin_pin_dialog.h"
 #include "rgb_macros.h"
@@ -205,7 +206,7 @@ RouteUI::init ()
 
 	show_sends_button = manage (new ArdourButton);
 	show_sends_button->set_name ("send alert button");
-	UI::instance()->set_tip (show_sends_button, _("make mixer strips show sends to this bus"), "");
+	UI::instance()->set_tip (show_sends_button, _("Show the strips that send to this bus, and control them from the faders"), "");
 
 	monitor_input_button = new ArdourButton (ArdourButton::default_elements);
 	monitor_input_button->set_name ("monitor button");
@@ -1152,8 +1153,10 @@ RouteUI::show_sends_press(GdkEventButton* ev)
 
 			if (s == _route) {
 				set_showing_sends_to (boost::shared_ptr<Route> ());
+				Mixer_UI::instance()->show_spill (boost::shared_ptr<ARDOUR::Stripable>());
 			} else {
 				set_showing_sends_to (_route);
+				Mixer_UI::instance()->show_spill (_route);
 			}
 		}
 	}
