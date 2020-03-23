@@ -28,6 +28,9 @@
 namespace ArdourWidgets { namespace ArdourIcon {
 	enum Icon {
 		RecButton,
+		ZoomIn,
+		ZoomOut,
+		ZoomFull,
 		TransportPanic,
 		TransportStop,
 		TransportPlay,
@@ -43,9 +46,6 @@ namespace ArdourWidgets { namespace ArdourIcon {
 		ToolAudition,
 		ToolDraw,
 		ToolContent,
-		ZoomIn,
-		ZoomOut,
-		ZoomFull,
 		ZoomExpand,
 		TimeAxisShrink,
 		TimeAxisExpand,
