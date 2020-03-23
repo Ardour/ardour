@@ -384,7 +384,7 @@
     <ColorAlias name="send alert button: fill" alias="theme:contrasting selection"/>
     <ColorAlias name="send alert button: fill active" alias="alert:cyan"/>
     <ColorAlias name="send alert button: led active" alias="alert:red"/>
-    <ColorAlias name="send bg" alias="alert:cyan"/>
+    <ColorAlias name="send bg" alias="neutral:backgroundest"/>
     <ColorAlias name="shuttle" alias="widget:bg"/>
     <ColorAlias name="shuttle bg" alias="neutral:backgroundest"/>
     <ColorAlias name="shuttle text" alias="neutral:foregroundest"/>
