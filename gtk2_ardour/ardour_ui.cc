@@ -2119,6 +2119,21 @@ ARDOUR_UI::save_template ()
 	d->show ();
 }
 
+void
+ARDOUR_UI::save_route_template (bool local) 
+{
+}
+
+void
+ARDOUR_UI::apply_route_template () 
+{
+}
+
+void
+ARDOUR_UI::new_from_route_template () 
+{
+}
+
 void ARDOUR_UI::manage_templates ()
 {
 	if(!_session) {

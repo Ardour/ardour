@@ -82,6 +82,7 @@
 #include "rgb_macros.h"
 #include "route_time_axis.h"
 #include "route_ui.h"
+#include "save_template_dialog.h"
 #include "timers.h"
 #include "ui_config.h"
 #include "utils.h"
