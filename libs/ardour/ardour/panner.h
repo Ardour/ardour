@@ -107,11 +107,6 @@ public:
 	/* azimut, width or elevation updated -> recalc signal_position ->  emit Changed */
 	PBD::Signal0<void> SignalPositionChanged;
 
-	void      set_automation_state (AutoState);
-	AutoState automation_state() const;
-
-	bool touching() const;
-
 	/**
 	 *  Pan some input buffers to a number of output buffers.
 	 *

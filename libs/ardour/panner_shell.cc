@@ -386,11 +386,11 @@ PannerShell::run (BufferSet& inbufs, BufferSet& outbufs, samplepos_t start_sampl
 
 	// More than 1 output
 
-	AutoState as = _panner->automation_state ();
+	AutoState as = pannable ()->automation_state ();
 
 	// If we shouldn't play automation defer to distribute_no_automation
 
-	if (!((as & Play) || ((as & (Touch | Latch)) && !_panner->touching()))) {
+	if (!((as & Play) || ((as & (Touch | Latch)) && !pannable ()->touching ()))) {
 
 		distribute_no_automation (inbufs, outbufs, nframes, 1.0);
 
