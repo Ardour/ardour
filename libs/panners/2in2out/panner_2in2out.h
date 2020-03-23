@@ -20,31 +20,37 @@
 #ifndef __ardour_panner_2in2out_h__
 #define __ardour_panner_2in2out_h__
 
-#include <cmath>
 #include <cassert>
-#include <vector>
-#include <string>
+#include <cmath>
 #include <iostream>
+#include <string>
+#include <vector>
 
-#include "pbd/stateful.h"
-#include "pbd/controllable.h"
 #include "pbd/cartesian.h"
+#include "pbd/controllable.h"
+#include "pbd/stateful.h"
 
-#include "ardour/automation_control.h"
 #include "ardour/automatable.h"
+#include "ardour/automation_control.h"
 #include "ardour/panner.h"
 #include "ardour/types.h"
 
-namespace ARDOUR {
-
+namespace ARDOUR
+{
 class Panner2in2out : public Panner
 {
-  public:
+public:
 	Panner2in2out (boost::shared_ptr<Pannable>);
 	~Panner2in2out ();
 
-	ChanCount in() const { return ChanCount (DataType::AUDIO, 2); }
-	ChanCount out() const { return ChanCount (DataType::AUDIO, 2); }
+	ChanCount in () const
+	{
+		return ChanCount (DataType::AUDIO, 2);
+	}
+	ChanCount out () const
+	{
+		return ChanCount (DataType::AUDIO, 2);
+	}
 
 	bool clamp_position (double&);
 	bool clamp_width (double&);
@@ -69,7 +75,7 @@ class Panner2in2out : public Panner
 	void reset ();
 	void thaw ();
 
-  protected:
+protected:
 	float left[2];
 	float right[2];
 	float desired_left[2];
@@ -77,7 +83,7 @@ class Panner2in2out : public Panner
 	float left_interp[2];
 	float right_interp[2];
 
-  private:
+private:
 	bool clamp_stereo_pan (double& direction_as_lr_fract, double& width);
 
 	void distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t which);
@@ -86,6 +92,6 @@ class Panner2in2out : public Panner
 	                               pan_t** buffers, uint32_t which);
 };
 
-} // namespace
+} // namespace ARDOUR
 
 #endif /* __ardour_panner_2in2out_h__ */
