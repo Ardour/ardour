@@ -79,6 +79,7 @@ using namespace ARDOUR_UI_UTILS;
 SessionDialog::SessionDialog (bool require_new, const std::string& session_name, const std::string& session_path, const std::string& template_name, bool cancel_not_quit)
 	: ArdourDialog (_("Session Setup"), true, true)
 	, new_only (require_new)
+	, new_name_was_edited (false)
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
 	, _existing_session_chooser_used (false)
 {
@@ -515,6 +516,7 @@ SessionDialog::new_session_button_clicked ()
 
         new_name_entry.set_text (string_compose (_("Untitled-%1"), tm.format ("%F-%H-%M-%S")));
 	new_name_entry.select_region (0, -1);
+	new_name_was_edited = false;
 
 	back_button->set_sensitive (true);
 	new_name_entry.grab_focus ();
@@ -614,6 +616,7 @@ SessionDialog::setup_new_session_page ()
 	name_hbox->pack_start (*name_label, false, true);
 	name_hbox->pack_start (new_name_entry, true, true);
 
+	new_name_entry.signal_key_press_event().connect (sigc::mem_fun (*this, &SessionDialog::new_name_edited), false);
 	new_name_entry.signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::new_name_changed));
 	new_name_entry.signal_activate().connect (sigc::mem_fun (*this, &SessionDialog::new_name_activated));
 
@@ -693,6 +696,21 @@ SessionDialog::setup_new_session_page ()
 	session_new_vbox.pack_start (*folder_box, false, true);
 	session_new_vbox.pack_start (*name_hbox, false, true);
 	session_new_vbox.show_all ();
+}
+
+bool
+SessionDialog::new_name_edited (GdkEventKey* ev)
+{
+	switch (ev->keyval) {
+	case GDK_KP_Enter:
+	case GDK_3270_Enter:
+	case GDK_Return:
+		break;
+	default:
+		new_name_was_edited = true;
+	}
+
+	return false;
 }
 
 void

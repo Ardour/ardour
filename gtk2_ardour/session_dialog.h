@@ -65,6 +65,7 @@ public:
 
 	void set_provided_session (std::string const & name, std::string const & path);
 	void clear_name ();
+	bool was_new_name_edited() const { return new_name_was_edited; }
 
 private:
 	bool new_only;
@@ -143,6 +144,9 @@ private:
 
 	void setup_new_session_page ();
 	Gtk::Entry new_name_entry;
+	bool new_name_was_edited;
+	bool new_name_edited (GdkEventKey*);
+
 	Gtk::FileChooserButton new_folder_chooser;
 
 	struct SessionTemplateColumns : public Gtk::TreeModel::ColumnRecord {
