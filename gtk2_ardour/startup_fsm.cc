@@ -756,6 +756,7 @@ StartupFSM::check_session_parameters (bool must_be_new)
 			std::string existing = Glib::build_filename (session_path, session_name);
 
 			if (!ask_about_loading_existing_session (existing)) {
+				session_dialog->show ();
 				session_dialog->clear_name ();
 				return 1; /* try again */
 			}
