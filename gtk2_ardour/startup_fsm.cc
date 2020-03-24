@@ -69,6 +69,7 @@ using std::vector;
 StartupFSM::StartupFSM (EngineControl& amd)
 	: session_existing_sample_rate (0)
 	, session_is_new (false)
+	, session_name_edited (false)
 	, new_user (NewUserWizard::required())
 	, new_session_required (ARDOUR_COMMAND_LINE::new_session || (!ARDOUR::Profile->get_mixbus() && new_user))
 	, _state (new_user ? WaitingForNewUser : WaitingForSessionPath)
@@ -657,6 +658,7 @@ StartupFSM::check_session_parameters (bool must_be_new)
 
 	session_name = session_dialog->session_name (requested_new);
 	session_path = session_dialog->session_folder ();
+	session_name_edited = session_dialog->was_new_name_edited ();
 
 	if (must_be_new) {
 		assert (requested_new);

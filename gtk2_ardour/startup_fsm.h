@@ -67,6 +67,8 @@ class StartupFSM : public sigc::trackable
 	std::string session_template;
 	int         session_existing_sample_rate;
 	bool        session_is_new;
+	bool        session_name_edited;
+
 	ARDOUR::BusProfile bus_profile;
 
 	/* It's not a dialog but we provide this to make it behave like a (non-modal)
