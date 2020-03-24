@@ -2024,6 +2024,10 @@ ARDOUR_UI::save_state (const string & name, bool switch_to_it)
 		return;
 	}
 
+	if (_session->unnamed()) {
+		rename_session (true);
+	}
+
 	XMLNode* node = new XMLNode (X_("UI"));
 
 	WM::Manager::instance().add_state (*node);

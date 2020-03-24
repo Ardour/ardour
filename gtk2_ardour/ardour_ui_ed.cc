@@ -225,7 +225,7 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("Archive"), _("Archive..."), sigc::mem_fun(*this, &ARDOUR_UI::archive_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("Rename"), _("Rename..."), sigc::mem_fun(*this, &ARDOUR_UI::rename_session));
+	act = ActionManager::register_action (main_actions, X_("Rename"), _("Rename..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::rename_session), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 

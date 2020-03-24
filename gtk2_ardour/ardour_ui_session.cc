@@ -763,7 +763,7 @@ If you still wish to proceed, please use the\n\n\
  */
 
 void
-ARDOUR_UI::rename_session ()
+ARDOUR_UI::rename_session (bool for_unnamed)
 {
 	if (!_session) {
 		return;
@@ -774,8 +774,13 @@ ARDOUR_UI::rename_session ()
 
 	prompter.set_name ("Prompter");
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
-	prompter.set_title (_("Rename Session"));
-	prompter.set_prompt (_("New session name"));
+	if (for_unnamed) {
+		prompter.set_title (_("Name Session"));
+		prompter.set_prompt (_("Session name"));
+	} else {
+		prompter.set_title (_("Rename Session"));
+		prompter.set_prompt (_("New session name"));
+	}
 
   again:
 	switch (prompter.run()) {
