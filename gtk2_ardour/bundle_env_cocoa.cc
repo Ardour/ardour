@@ -99,6 +99,13 @@ fixup_bundle_environment (int argc, char* argv[], string & localedir)
 		setup_logging ();
 	}
 
+	if (query_darwin_version () >= 19) {
+		/* on Catalina, do not use NSGLView */
+		g_setenv ("ARDOUR_NSGL", "0", 0);
+	} else {
+		g_setenv ("ARDOUR_NSGL", "1", 0);
+	}
+
 	no_app_nap ();
 
 	if (!g_getenv ("ARDOUR_BUNDLED")) {
