@@ -202,9 +202,7 @@ create_mono_sources_for_writing (const vector<string>& new_paths,
 		try {
 			const DataType type = SMFSource::safe_midi_file_extension (*i) ? DataType::MIDI : DataType::AUDIO;
 
-			source = SourceFactory::createWritable (type, sess,
-			                                        i->c_str(),
-			                                        samplerate);
+			source = SourceFactory::createWritable (type, sess, i->c_str(), samplerate);
 		}
 
 		catch (const failed_constructor& err) {

@@ -1055,10 +1055,9 @@ LuaAPI::Rubberband::process (luabridge::LuaRef cb)
 			return rv;
 		}
 		try {
-			_asrc.push_back (boost::dynamic_pointer_cast<AudioSource> (
-						SourceFactory::createWritable (
-							DataType::AUDIO, session,
-							path, false, sample_rate)));
+
+			_asrc.push_back (boost::dynamic_pointer_cast<AudioSource> (SourceFactory::createWritable (DataType::AUDIO, session, path, sample_rate)));
+
 		} catch (failed_constructor& err) {
 			cleanup (true);
 			return rv;

@@ -119,9 +119,7 @@ ensure_per_region_source (Session* session, boost::shared_ptr<MidiRegion> region
 		     << " for region " << region->name() << endl;
 
 	} else {
-		newsrc = boost::dynamic_pointer_cast<MidiSource>(
-			SourceFactory::createWritable(DataType::MIDI, *session,
-						      newsrc_path, false, session->sample_rate()));
+		newsrc = boost::dynamic_pointer_cast<MidiSource>(SourceFactory::createWritable(DataType::MIDI, *session, newsrc_path, session->sample_rate()));
 
 		if (!newsrc) {
 			cout << UTILNAME << ":" << endl
@@ -175,8 +173,7 @@ ensure_per_source_source (Session* session, boost::shared_ptr<MidiRegion> region
 	} else {
 
 		newsrc = boost::dynamic_pointer_cast<MidiSource>(
-			SourceFactory::createWritable(DataType::MIDI, *session,
-						      newsrc_path, false, session->sample_rate()));
+			SourceFactory::createWritable(DataType::MIDI, *session, newsrc_path, session->sample_rate()));
 		if (!newsrc) {
 			cout << UTILNAME << ":" << endl
 			     <<" An error occurred creating writeable source " << newsrc_path << " exiting." << endl;

@@ -4907,8 +4907,7 @@ Session::create_audio_source_for_session (size_t n_chans, string const & base, u
 	const string path = new_audio_source_path (base, n_chans, chan, true);
 
 	if (!path.empty()) {
-		return boost::dynamic_pointer_cast<AudioFileSource> (
-			SourceFactory::createWritable (DataType::AUDIO, *this, path, sample_rate(), true, true));
+		return boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, *this, path, sample_rate(), true, true));
 	} else {
 		throw failed_constructor ();
 	}
@@ -4921,9 +4920,7 @@ Session::create_midi_source_for_session (string const & basic_name)
 	const string path = new_midi_source_path (basic_name);
 
 	if (!path.empty()) {
-		return boost::dynamic_pointer_cast<SMFSource> (
-			SourceFactory::createWritable (
-				DataType::MIDI, *this, path, false, sample_rate()));
+		return boost::dynamic_pointer_cast<SMFSource> (SourceFactory::createWritable (DataType::MIDI, *this, path, sample_rate()));
 	} else {
 		throw failed_constructor ();
 	}
@@ -4966,9 +4963,7 @@ Session::create_midi_source_by_stealing_name (boost::shared_ptr<Track> track)
 
 	const string path = Glib::build_filename (source_search_path (DataType::MIDI).front(), name);
 
-	return boost::dynamic_pointer_cast<SMFSource> (
-		SourceFactory::createWritable (
-			DataType::MIDI, *this, path, false, sample_rate()));
+	return boost::dynamic_pointer_cast<SMFSource> (SourceFactory::createWritable (DataType::MIDI, *this, path, sample_rate()));
 }
 
 bool
@@ -5726,7 +5721,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 		}
 
 		try {
-			source = SourceFactory::createWritable (data_type, *this, path, false, sample_rate());
+			source = SourceFactory::createWritable (data_type, *this, path, sample_rate());
 		}
 
 		catch (failed_constructor& err) {

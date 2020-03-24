@@ -269,10 +269,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 
 
 			try {
-				fs = boost::dynamic_pointer_cast<AudioFileSource> (
-					SourceFactory::createWritable (DataType::AUDIO, *_session,
-					                               path, true,
-					                               false, _session->sample_rate()));
+				fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, *_session, path, _session->sample_rate()));
 			}
 
 			catch (failed_constructor& err) {
@@ -408,10 +405,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 		path = s;
 
 		try {
-			fs = boost::dynamic_pointer_cast<AudioFileSource> (
-				SourceFactory::createWritable (DataType::AUDIO, *_session,
-				                               path, true,
-				                               false, _session->sample_rate()));
+			fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, *_session, path, _session->sample_rate()));
 		}
 
 		catch (failed_constructor& err) {

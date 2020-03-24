@@ -86,7 +86,7 @@ Filter::make_new_sources (boost::shared_ptr<Region> region, SourceList& nsrcs, s
 
 			nsrcs.push_back (boost::dynamic_pointer_cast<Source> (
 				                 SourceFactory::createWritable (region->data_type(), session,
-				                                                path, false, sample_rate)));
+				                                                path, sample_rate)));
 		}
 
 		catch (failed_constructor& err) {
