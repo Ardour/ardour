@@ -68,7 +68,7 @@ TransportMastersWidget::TransportMastersWidget ()
 	col_title[3].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Format")));
 	col_title[4].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Current")));
 	col_title[5].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Last")));
-	col_title[6].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Timestamp")));
+	col_title[6].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Age")));
 	col_title[7].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Delta")));
 	col_title[8].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Collect")));
 	col_title[9].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Source")));
@@ -88,6 +88,7 @@ TransportMastersWidget::TransportMastersWidget ()
 	                              "That is not the actual rate. However, some vendors use that rate - despite it being against the specs - "
 	                              "because the variant of using exactly 29.97 fps has zero timecode drift.\n"
 		             ));
+	set_tooltip (col_title[6], _("How long since the last full timestamp was received from this transport master"));
 
 	set_tooltip (col_title[11], string_compose (_("<b>When enabled</b> the external timecode source is assumed to be sample-clock synced to the audio interface\n"
 	                                              "being used by %1."), PROGRAM_NAME));
@@ -594,11 +595,14 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 			}
 
 			char gap[32];
-			const float seconds = (when - now) / (float) AudioEngine::instance()->sample_rate();
+			float seconds = (when - now) / (float) AudioEngine::instance()->sample_rate();
+			if (seconds < 0.) {
+				seconds = 0.;
+			}
 			if (abs (seconds) < 1.0) {
-				snprintf (gap, sizeof (gap), "%.3fs", seconds);
+				snprintf (gap, sizeof (gap), "%-.03fs", seconds);
 			} else if (abs (seconds) < 4.0) {
-				snprintf (gap, sizeof (gap), "%ds", (int) floor (seconds));
+				snprintf (gap, sizeof (gap), "%-3ds", (int) floor (seconds));
 			} else {
 				snprintf (gap, sizeof (gap), "%s", _(">4s ago"));
 			}
@@ -612,9 +616,9 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 
 				const float seconds = (when - now) / (float) AudioEngine::instance()->sample_rate();
 				if (abs (seconds) < 1.0) {
-					snprintf (gap, sizeof (gap), "%.3fs", seconds);
+					snprintf (gap, sizeof (gap), "%-.3fs", seconds);
 				} else if (abs (seconds) < 4.0) {
-					snprintf (gap, sizeof (gap), "%ds", (int) floor (seconds));
+					snprintf (gap, sizeof (gap), "%-2ds", (int) floor (seconds));
 				} else {
 					snprintf (gap, sizeof (gap), "%s", _(">4s ago"));
 				}
