@@ -507,6 +507,15 @@ SessionDialog::new_session_button_clicked ()
 
 	get_vbox()->remove (ic_vbox);
 	get_vbox()->pack_start (session_new_vbox, true, true);
+
+        time_t n;
+        time (&n);
+        struct tm* now = localtime (&n);
+        Glib::DateTime tm (Glib::DateTime::create_now_local (mktime (now)));
+
+        new_name_entry.set_text (string_compose (_("Untitled-%1"), tm.format ("%F-%H-%M-%S")));
+	new_name_entry.select_region (0, -1);
+
 	back_button->set_sensitive (true);
 	new_name_entry.grab_focus ();
 }
