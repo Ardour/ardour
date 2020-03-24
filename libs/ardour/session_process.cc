@@ -1228,7 +1228,11 @@ Session::plan_master_strategy (pframes_t nframes, double master_speed, samplepos
 
 	if (tmm.master_invalid_this_cycle()) {
 		DEBUG_TRACE (DEBUG::Slave, "session told not to use the transport master this cycle\n");
-		transport_master_strategy.action = TransportMasterNoRoll;
+		if (_transport_fsm->rolling() && Config->get_transport_masters_just_roll_when_sync_lost()) {
+			transport_master_strategy.action = TransportMasterRelax;
+		} else {
+			transport_master_strategy.action = TransportMasterNoRoll;
+		}
 		return 1.0;
 	}
 
