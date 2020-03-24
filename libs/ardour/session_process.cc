@@ -1332,7 +1332,6 @@ Session::plan_master_strategy (pframes_t nframes, double master_speed, samplepos
 			 * session (so far).
 			 */
 
-			cerr << "chase/locate using " << current_usecs_per_track << " usecs/track\n";
 			locate_target += wlp + lrintf (ntracks() * sample_rate() * (1.5 * (current_usecs_per_track / 1000000.0)));
 
 			DEBUG_TRACE (DEBUG::Slave, string_compose ("After locate-to-catch-master, still too far off (%1). Locate again to %2\n", delta, locate_target));
