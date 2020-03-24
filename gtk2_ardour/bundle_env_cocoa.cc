@@ -54,6 +54,7 @@ using namespace std;
 
 extern void set_language_preference (); // cocoacarbon.mm
 extern void no_app_nap (); // cocoacarbon.mm
+extern int query_darwin_version (); // cocoacarbon.mm
 
 static void
 setup_logging (void)

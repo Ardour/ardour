@@ -21,9 +21,13 @@
 #include <string>
 #include <ctype.h>
 #include <stdlib.h>
+#include <sys/utsname.h>
+#include <sys/sysctl.h>
+
 #include <pbd/error.h>
 #include <gtkmm2ext/gtkapplication.h>
 #include <gdk/gdkquartz.h>
+
 #undef check
 #undef YES
 #undef NO
@@ -123,4 +127,40 @@ no_app_nap ()
 		cout << "Disabling MacOS AppNap\n";
 		[ [ NSProcessInfo processInfo] beginActivityWithOptions:NSActivityLatencyCritical reason:@"realtime audio" ];
 	}
+}
+
+/** Query Darwin kernel version.
+ * @return major kernel version or -1 on failure
+ *
+ * kernel version is 4 ahead of OS X release
+ * 19.x.x - OS 10.15 (Catalina)
+ * 18.x.x - OS 10.14 (Mojave)
+ * 17.x.x - OS 10.13 (High Sierra)
+ * 16.x.x - OS 10.12 (Sierra)
+ * ...
+ * 10.x.x - OS 10.6  (Snow Leopard)
+ */
+int
+query_darwin_version ()
+{
+	char str[256] = {0};
+	size_t size = sizeof(str);
+
+	if (0 == sysctlbyname ("kern.osrelease", str, &size, NULL, 0)) {
+		short int v[3];
+		if (3 == sscanf (str, "%hd.%hd.%hd", &v[0], &v[1], &v[2])) {
+			return v[0]; // major version only
+		}
+	} else {
+		struct utsname name;
+		uname (&name);
+		int v[3];
+		if (3 == sscanf (name.release, "%d.%d.%d", &v[0], &v[1], &v[2])) {
+			return v[0]; // major version only
+		}
+		if (2 == sscanf (name.release, "%d.%d", &v[0], &v[1])) {
+			return v[0]; // major version only
+		}
+	}
+	return -1;
 }
