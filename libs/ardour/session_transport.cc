@@ -1270,7 +1270,6 @@ Session::non_realtime_locate ()
 
 	microseconds_t start;
 	uint32_t nt = 0;
-	int hundreths_of_second_per_track = 0;
 
 	samplepos_t tf;
 
