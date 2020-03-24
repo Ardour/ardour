@@ -243,7 +243,7 @@ public:
 	bool cannot_save () const                      { return _state_of_the_state & CannotSave; }
 	bool in_cleanup () const                       { return _state_of_the_state & InCleanup; }
 	bool inital_connect_or_deletion_in_progress () { return _state_of_the_state & (InitialConnecting | Deletion); }
-	bool not_named() const;
+	bool unnamed() const;
 
 	PBD::Signal0<void> DirtyChanged;
 

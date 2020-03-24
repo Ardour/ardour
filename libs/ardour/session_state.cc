@@ -950,9 +950,6 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		remove_pending_capture_state ();
 	}
 
-	/* remove unnamed file name, if any (it's not an error if it doesn't exist */
-	::g_unlink (unnamed_file_name().c_str());
-
 	return 0;
 }
 
@@ -4535,6 +4532,9 @@ Session::rename (const std::string& new_name)
 
 	store_recent_sessions (new_name, _path);
 
+	/* remove unnamed file name, if any (it's not an error if it doesn't exist) */
+	::g_unlink (unnamed_file_name().c_str());
+
 	return 0;
 }
 
@@ -5657,7 +5657,7 @@ Session::unnamed_file_name() const
 }
 
 bool
-Session::not_named() const
+Session::unnamed() const
 {
 	return Glib::file_test (unnamed_file_name(), Glib::FILE_TEST_EXISTS);
 }
