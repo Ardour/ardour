@@ -1402,7 +1402,7 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 	 * punches/capture passes were carried out.
 	 */
 
-	if (!_sources.empty()) {
+	if (!_sources.empty() && _type == DataType::AUDIO) {
 		if (_length > _sources.front()->length(_position)) {
 			_length = _sources.front()->length(_position) - _start;
 		}
