@@ -57,7 +57,6 @@ class Pannable;
 class BufferSet;
 class AudioBuffer;
 class Speakers;
-class PanControllable;
 
 class LIBARDOUR_API Panner : public PBD::Stateful, public PBD::ScopedConnectionList
 {
@@ -136,24 +135,20 @@ public:
 	virtual void freeze ();
 	virtual void thaw ();
 
-protected:
-	friend PanControllable;
-	friend Pannable; // allow what_can_be_automated
-
-	boost::shared_ptr<Pannable> _pannable;
-
-	std::set<Evoral::Parameter> _can_automate_list;
-
 	const std::set<Evoral::Parameter>& what_can_be_automated() const {
 		return _can_automate_list;
 	}
 
 	virtual std::string value_as_string (boost::shared_ptr<const AutomationControl>) const = 0;
 
+protected:
 	virtual void distribute_one (AudioBuffer&, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t which) = 0;
 	virtual void distribute_one_automated (AudioBuffer&, BufferSet& obufs,
 	                                       samplepos_t start, samplepos_t end, pframes_t nframes,
 	                                       pan_t** buffers, uint32_t which) = 0;
+
+	boost::shared_ptr<Pannable> _pannable;
+	std::set<Evoral::Parameter> _can_automate_list;
 
 	int32_t _frozen;
 };
