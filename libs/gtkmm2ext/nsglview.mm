@@ -278,6 +278,9 @@ __attribute__ ((visibility ("hidden")))
 void*
 Gtkmm2ext::nsglview_create (Gtkmm2ext::CairoCanvas* canvas)
 {
+	if (g_getenv ("ARDOUR_NSGL") && (0 == atoi (g_getenv ("ARDOUR_NSGL")))) {
+		return 0;
+	}
 /* the API is currently only used on intel mac
  * for big-endian  RGBA <> RGBA byte order of the texture
  * will have to be swapped.
