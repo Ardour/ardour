@@ -172,7 +172,8 @@ Session::Session (AudioEngine &eng,
                   const string& fullpath,
                   const string& snapshot_name,
                   BusProfile const * bus_profile,
-                  string mix_template)
+                  string mix_template,
+                  bool unnamed)
 	: _playlists (new SessionPlaylists)
 	, _engine (eng)
 	, process_function (&Session::process_with_events)
@@ -344,7 +345,7 @@ Session::Session (AudioEngine &eng,
 
 		Stateful::loading_state_version = CURRENT_SESSION_FILE_VERSION;
 
-		if (create (mix_template, bus_profile)) {
+		if (create (mix_template, bus_profile, unnamed)) {
 			destroy ();
 			throw SessionException (_("Session initialization failed"));
 		}

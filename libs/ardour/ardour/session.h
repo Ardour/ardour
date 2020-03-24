@@ -207,7 +207,8 @@ public:
 	         const std::string& fullpath,
 	         const std::string& snapshot_name,
 	         BusProfile const * bus_profile = 0,
-	         std::string mix_template = "");
+	         std::string mix_template = "",
+	         bool unnamed = false);
 
 	virtual ~Session ();
 
@@ -242,6 +243,7 @@ public:
 	bool cannot_save () const                      { return _state_of_the_state & CannotSave; }
 	bool in_cleanup () const                       { return _state_of_the_state & InCleanup; }
 	bool inital_connect_or_deletion_in_progress () { return _state_of_the_state & (InitialConnecting | Deletion); }
+	bool not_named() const;
 
 	PBD::Signal0<void> DirtyChanged;
 
@@ -1270,7 +1272,7 @@ protected:
 	void set_transport_speed (double speed, bool abort, bool clear_state, bool as_default);
 
 private:
-	int  create (const std::string& mix_template, BusProfile const *);
+	int  create (const std::string& mix_template, BusProfile const *, bool unnamed);
 	void destroy ();
 
 	static guint _name_id_counter;

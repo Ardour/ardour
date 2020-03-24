@@ -44,6 +44,10 @@
 #include <climits>
 #include <signal.h>
 #include <sys/time.h>
+/* for open(2) */
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #ifdef HAVE_SYS_VFS_H
 #include <sys/vfs.h>
@@ -80,6 +84,7 @@
 #include "pbd/file_utils.h"
 #include "pbd/pathexpand.h"
 #include "pbd/pthread_utils.h"
+#include "pbd/scoped_file_descriptor.h"
 #include "pbd/stacktrace.h"
 #include "pbd/types_convert.h"
 #include "pbd/localtime_r.h"
@@ -153,6 +158,8 @@ using namespace ARDOUR;
 using namespace PBD;
 
 #define DEBUG_UNDO_HISTORY(msg) DEBUG_TRACE (PBD::DEBUG::UndoHistory, string_compose ("%1: %2\n", __LINE__, msg));
+
+static const char* unnamed_file_name = X_(".unnamed");
 
 void
 Session::pre_engine_init (string fullpath)
@@ -569,11 +576,15 @@ Session::ensure_subdirs ()
  *  Caller must not hold process lock.
  */
 int
-Session::create (const string& session_template, BusProfile const * bus_profile)
+Session::create (const string& session_template, BusProfile const * bus_profile, bool unnamed)
 {
 	if (g_mkdir_with_parents (_path.c_str(), 0755) < 0) {
 		error << string_compose(_("Session: cannot create session folder \"%1\" (%2)"), _path, strerror (errno)) << endmsg;
 		return -1;
+	}
+
+	if (unnamed) {
+		PBD::ScopedFileDescriptor fd = g_open (Glib::build_filename (_path, unnamed_file_name).c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666);
 	}
 
 	if (ensure_subdirs ()) {
@@ -5636,4 +5647,10 @@ Session::redo (uint32_t n)
 
 	StateProtector stp (this);
 	_history.redo (n);
+}
+
+bool
+Session::not_named() const
+{
+	return Glib::file_test (Glib::build_filename (_path, unnamed_file_name), Glib::FILE_TEST_EXISTS);
 }
