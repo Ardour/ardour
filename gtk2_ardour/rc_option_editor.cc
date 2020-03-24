@@ -2908,7 +2908,6 @@ RCOptionEditor::RCOptionEditor ()
 	vkeybdlayout->add ("QWERTY", _("QWERTY"));
 	vkeybdlayout->add ("QWERTZ", _("QWERTZ"));
 	vkeybdlayout->add ("AZERTY", _("AZERTY"));
-	vkeybdlayout->add ("AZERTY", _("AZERTY"));
 	vkeybdlayout->add ("DVORAK", _("DVORAK"));
 	vkeybdlayout->add ("QWERTY Single", _("QWERTY Single"));
 	vkeybdlayout->add ("QWERTZ Single", _("QWERTZ Single"));
