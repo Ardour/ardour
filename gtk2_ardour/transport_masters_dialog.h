@@ -130,6 +130,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	Gtk::Table table;
 	Gtk::Label col_title[14];
 	Gtk::Button add_button;
+	Gtk::CheckButton lost_sync_button;
 
 	sigc::connection update_connection;
 	PBD::ScopedConnection current_connection;
@@ -162,6 +163,11 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	void current_changed (boost::shared_ptr<ARDOUR::TransportMaster> old_master, boost::shared_ptr<ARDOUR::TransportMaster> new_master);
 	void add_master ();
 	void update_usability ();
+
+	void lost_sync_changed ();
+	void lost_sync_button_toggled ();
+	void param_changed (std::string const &);
+	PBD::ScopedConnection config_connection;
 
   public:
 	bool idle_remove (Row*);

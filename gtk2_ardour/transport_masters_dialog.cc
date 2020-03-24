@@ -49,6 +49,7 @@ using namespace ArdourWidgets;
 TransportMastersWidget::TransportMastersWidget ()
 	: table (4, 13)
 	, add_button (_("Add a new Transport Master"))
+	, lost_sync_button (_("Keeping rolling if sync is lost"))
 	, ignore_active_change (false)
 {
 	midi_port_store = ListStore::create (port_columns);
@@ -59,6 +60,13 @@ TransportMastersWidget::TransportMastersWidget ()
 
 	pack_start (table, PACK_EXPAND_WIDGET, 12);
 	pack_start (add_button, FALSE, FALSE);
+	pack_start (lost_sync_button, FALSE, FALSE, 12);
+
+	Config->ParameterChanged.connect (config_connection, invalidator (*this), boost::bind (&TransportMastersWidget::param_changed, this, _1), gui_context());
+	lost_sync_button.signal_toggled().connect (sigc::mem_fun (*this, &TransportMastersWidget::lost_sync_button_toggled));
+	lost_sync_button.set_active (Config->get_transport_masters_just_roll_when_sync_lost());
+	set_tooltip (lost_sync_button, string_compose (_("<b>When enabled</b>, if the signal from a transport master is lost, %1 will keep rolling at its current speed.\n"
+	                                                 "<b>When disabled</b>, loss of transport master sync causes %1 to stop"), PROGRAM_NAME));
 
 	add_button.signal_clicked ().connect (sigc::mem_fun (*this, &TransportMastersWidget::add_master));
 
@@ -735,4 +743,25 @@ TransportMastersWidget::AddTransportMasterDialog::get_type() const
 	}
 
 	return LTC;
+}
+
+void
+TransportMastersWidget::lost_sync_changed ()
+{
+	lost_sync_button.set_active (Config->get_transport_masters_just_roll_when_sync_lost());
+}
+
+void
+TransportMastersWidget::lost_sync_button_toggled ()
+{
+	bool active = lost_sync_button.get_active ();
+	Config->set_transport_masters_just_roll_when_sync_lost (active);
+}
+
+void
+TransportMastersWidget::param_changed (string const & p)
+{
+	if (p == "transport-masters-just_roll-when-sync-lost") {
+		lost_sync_changed ();
+	}
 }
