@@ -2169,6 +2169,8 @@ private:
 	boost::optional<samplepos_t> _nominal_jack_transport_sample;
 
 	bool _had_destructive_tracks;
+
+	std::string unnamed_file_name () const;
 };
 
 

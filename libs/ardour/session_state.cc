@@ -159,8 +159,6 @@ using namespace PBD;
 
 #define DEBUG_UNDO_HISTORY(msg) DEBUG_TRACE (PBD::DEBUG::UndoHistory, string_compose ("%1: %2\n", __LINE__, msg));
 
-static const char* unnamed_file_name = X_(".unnamed");
-
 void
 Session::pre_engine_init (string fullpath)
 {
@@ -584,7 +582,7 @@ Session::create (const string& session_template, BusProfile const * bus_profile,
 	}
 
 	if (unnamed) {
-		PBD::ScopedFileDescriptor fd = g_open (Glib::build_filename (_path, unnamed_file_name).c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666);
+		PBD::ScopedFileDescriptor fd = g_open (unnamed_file_name().c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666);
 	}
 
 	if (ensure_subdirs ()) {
@@ -951,6 +949,9 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	if (!pending && !for_archive && ! template_only) {
 		remove_pending_capture_state ();
 	}
+
+	/* remove unnamed file name, if any (it's not an error if it doesn't exist */
+	::g_unlink (unnamed_file_name().c_str());
 
 	return 0;
 }
@@ -5649,8 +5650,14 @@ Session::redo (uint32_t n)
 	_history.redo (n);
 }
 
+std::string
+Session::unnamed_file_name() const
+{
+	return Glib::build_filename (_path, X_(".unnamed"));
+}
+
 bool
 Session::not_named() const
 {
-	return Glib::file_test (Glib::build_filename (_path, unnamed_file_name), Glib::FILE_TEST_EXISTS);
+	return Glib::file_test (unnamed_file_name(), Glib::FILE_TEST_EXISTS);
 }
