@@ -976,19 +976,32 @@ ARDOUR_UI::idle_finish ()
 void
 ARDOUR_UI::finish()
 {
+	bool delete_unnamed_session = false;
+	const bool unnamed = _session->unnamed();
+
 	if (_session) {
 		ARDOUR_UI::instance()->video_timeline->sync_session_state();
 
-		if (_session->dirty()) {
+		if (_session->dirty() || unnamed) {
 			vector<string> actions;
 			actions.push_back (_("Don't quit"));
-			actions.push_back (_("Just quit"));
-			actions.push_back (_("Save and quit"));
-			switch (ask_about_saving_session(actions)) {
+
+			if (_session->unnamed()) {
+				actions.push_back (_("Discard session"));
+				actions.push_back (_("Name session and quit"));
+			} else {
+				actions.push_back (_("Just quit"));
+				actions.push_back (_("Save and quit"));
+			}
+
+			switch (ask_about_saving_session (actions)) {
 			case -1:
 				return;
 				break;
 			case 1:
+				if (unnamed) {
+					rename_session (true);
+				}
 				/* use the default name */
 				if (save_state_canfail ("")) {
 					/* failed - don't quit */
@@ -1002,6 +1015,9 @@ If you still wish to quit, please use the\n\n\
 				}
 				break;
 			case 0:
+				if (unnamed) {
+					delete_unnamed_session = true;
+				}
 				break;
 			}
 		}
@@ -1029,9 +1045,43 @@ If you still wish to quit, please use the\n\n\
 	close_all_dialogs ();
 
 	if (_session) {
+
+		string path;
+
+
+		if (delete_unnamed_session) {
+
+			path = _session->path();
+
+			ArdourMessageDialog msg (_main_window,
+			                         _("DANGER!"),
+			                         true,
+			                         Gtk::MESSAGE_WARNING,
+			                         Gtk::BUTTONS_NONE, true);
+
+			msg.set_secondary_text (string_compose (_("You have not named this session yet.\n"
+			                                          "You can continue to use it as\n\n"
+			                                          "%1\n\n"
+			                                          "or it will be deleted.\n\n"
+			                                          "Deletion is permanent and irreversible."), _session->name()));
+
+			msg.set_title (_("SCRATCH SESSION - DANGER!"));
+			msg.add_button (_("Delete this session (IRREVERSIBLE!)"), RESPONSE_OK);
+			msg.add_button (_("Do not delete"), RESPONSE_CANCEL);
+			msg.set_default_response (RESPONSE_CANCEL);
+			msg.set_position (Gtk::WIN_POS_MOUSE);
+
+			int r = msg.run ();
+
+			if (r == Gtk::RESPONSE_OK) {
+				PBD::remove_directory (path);
+			}
+		}
+
 		_session->set_clean ();
 		delete _session;
 		_session = 0;
+
 	}
 
 	halt_connection.disconnect ();
