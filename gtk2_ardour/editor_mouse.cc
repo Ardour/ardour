@@ -1653,6 +1653,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		switch (item_type) {
 		/* see comments in button_press_handler */
 		case PlayheadCursorItem:
+			std::cerr << "in middle of playhead cursor event handler\n";
 		case MarkerItem:
 		case GainLineItem:
 		case AutomationLineItem:
