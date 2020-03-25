@@ -142,6 +142,10 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	}
 	inital_height = get_height();
 	inital_width = get_width();
+
+	if (require_new) {
+		setup_untitled_session ();
+	}
 }
 
 SessionDialog::SessionDialog ()
@@ -509,17 +513,8 @@ SessionDialog::new_session_button_clicked ()
 	get_vbox()->remove (ic_vbox);
 	get_vbox()->pack_start (session_new_vbox, true, true);
 
-	time_t n;
-	time (&n);
-	struct tm* now = localtime (&n);
-	Glib::DateTime tm (Glib::DateTime::create_now_local (mktime (now)));
-
-	new_name_entry.set_text (string_compose (_("Untitled-%1"), tm.format ("%F-%H-%M-%S")));
-	new_name_entry.select_region (0, -1);
-	new_name_was_edited = false;
-
 	back_button->set_sensitive (true);
-	new_name_entry.grab_focus ();
+	setup_untitled_session ();
 }
 
 bool
@@ -541,6 +536,22 @@ SessionDialog::open_button_pressed (GdkEventButton* ev)
 	}
 	response (RESPONSE_ACCEPT);
 	return true;
+}
+
+void
+SessionDialog::setup_untitled_session ()
+{
+	time_t n;
+	time (&n);
+	struct tm* now = localtime (&n);
+	Glib::DateTime tm (Glib::DateTime::create_now_local (mktime (now)));
+
+	new_name_entry.set_text (string_compose (_("Untitled-%1"), tm.format ("%F-%H-%M-%S")));
+	new_name_entry.select_region (0, -1);
+	new_name_was_edited = false;
+
+	back_button->set_sensitive (true);
+	new_name_entry.grab_focus ();
 }
 
 void

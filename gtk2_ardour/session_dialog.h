@@ -147,6 +147,8 @@ private:
 	bool new_name_was_edited;
 	bool new_name_edited (GdkEventKey*);
 
+	void setup_untitled_session ();
+
 	Gtk::FileChooserButton new_folder_chooser;
 
 	struct SessionTemplateColumns : public Gtk::TreeModel::ColumnRecord {
