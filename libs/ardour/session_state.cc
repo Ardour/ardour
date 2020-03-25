@@ -5661,3 +5661,9 @@ Session::unnamed() const
 {
 	return Glib::file_test (unnamed_file_name(), Glib::FILE_TEST_EXISTS);
 }
+
+void
+Session::end_unnamed_status () const
+{
+	::g_remove (unnamed_file_name().c_str());
+}
