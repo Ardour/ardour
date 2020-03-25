@@ -3998,7 +3998,7 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 {
 	Drag::start_grab (event, c);
 
-	cerr << "start CD at " << event->button.x << " PH @ " << _editor->playhead_cursor->current_sample() << endl;
+	cerr << "start CD @ " << event->button.x << " PH @ " << _editor->playhead_cursor->current_sample() << endl;
 
 	setup_snap_delta (MusicSample (_editor->playhead_cursor->current_sample(), 0));
 
@@ -4060,7 +4060,7 @@ CursorDrag::motion (GdkEvent* event, bool)
 	MusicSample where (_editor->canvas_event_sample (event) + snap_delta (event->button.state), 0);
 
 #ifndef NDEBUG
-	cerr << "cursor drag motion event x = " << event->motion.x << " spp " << _editor->get_current_zoom()
+	cerr << "cursor drag motion event type " << event->type << " x = " << event->motion.x << " spp " << _editor->get_current_zoom()
 	     << " would be " << event->motion.x * _editor->get_current_zoom() << " @ " << _editor->canvas_event_sample (event) << " + " << snap_delta (event->button.state) << " = " << where.sample << endl;
 #endif
 
