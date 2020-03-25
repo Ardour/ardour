@@ -4049,6 +4049,8 @@ CursorDrag::motion (GdkEvent* event, bool)
 {
 	MusicSample where (_editor->canvas_event_sample (event) + snap_delta (event->button.state), 0);
 
+	cerr << "cursor drag motion  @ " << _editor->canvas_event_sample (event) << " + " << snap_delta (event->button.state) << " = " << where.sample << endl;
+	
 	_editor->snap_to_with_modifier (where, event);
 
 	if (where.sample != last_pointer_sample()) {
@@ -4104,6 +4106,7 @@ CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	Session* s = _editor->session ();
 	if (s) {
+		cerr << "cursor drag finished, reqL with " << _editor->playhead_cursor->current_sample() << endl;
 		s->request_locate (_editor->playhead_cursor->current_sample (), _was_rolling ? MustRoll : MustStop);
 		_editor->_pending_locate_request = true;
 		s->request_resume_timecode_transmission ();
