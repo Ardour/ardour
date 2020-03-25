@@ -2962,6 +2962,20 @@ Route::set_state_2X (const XMLNode& node, int version)
 		}
 	}
 
+	bool phase_invert; /* yes / no - apply to all channels */
+	if (node.get_property (X_("phase-invert"), phase_invert)) {
+		/* phase_control is not usually configured at this point in time
+		 * _phase_control->count() == 0. However in v2, polarity invert
+		 * is directly after the input, so the input channel count can be used.
+		 * NB. v2 busses: polarity invert was only applied to inputs. Aux-return
+		 * was not affected. This is no longer the case (and may break sessions).
+		 */
+		uint64_t pol_cnt = std::max ((uint64_t)_input->n_ports().n_audio (), _phase_control->count ());
+		for (uint64_t c = 0; c < pol_cnt; ++c) {
+			_phase_control->set_phase_invert (c, phase_invert);
+		}
+	}
+
 	return 0;
 }
 
