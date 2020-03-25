@@ -2054,7 +2054,7 @@ ProcessorBox::build_possible_aux_menu ()
 		return 0;
 	}
 
-	if (_route->is_monitor () || _route->is_foldbackbus ()) {
+	if (_route->is_monitor () || _route->is_foldbackbus () || _route->is_master ()) {
 		return 0;
 	}
 
@@ -3423,7 +3423,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				}
 
 				/* compare to ProcessorBox::build_possible_aux_menu */
-				if (_route->is_monitor () || _route->is_foldbackbus ()) {
+				if (_route->is_monitor () || _route->is_foldbackbus () || _route->is_master ()) {
 					continue;
 				}
 
