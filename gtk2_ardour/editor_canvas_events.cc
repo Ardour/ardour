@@ -188,7 +188,15 @@ Editor::track_canvas_button_release_event (GdkEventButton *event)
 {
 	if (!Keyboard::is_context_menu_event (event)) {
 		if (_drags->active ()) {
-			_drags->end_grab ((GdkEvent*) event);
+
+			GdkEvent copy = *((GdkEvent*) event);
+			Duple winpos = Duple (event->x, event->y);
+			Duple where = _track_canvas->window_to_canvas (winpos);
+
+			copy.button.x = where.x;
+			copy.button.y = where.y;
+
+			_drags->end_grab (&copy);
 		}
 	}
 	return false;
