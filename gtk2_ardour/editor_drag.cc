@@ -4040,7 +4040,7 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 	}
 
 	fake_locate (where.sample - snap_delta (event->button.state));
-	
+
 	_last_y_delta = 0;
 }
 
@@ -4049,17 +4049,18 @@ CursorDrag::motion (GdkEvent* event, bool)
 {
 	MusicSample where (_editor->canvas_event_sample (event) + snap_delta (event->button.state), 0);
 
-	cerr << "cursor drag motion  @ " << _editor->canvas_event_sample (event) << " + " << snap_delta (event->button.state) << " = " << where.sample << endl;
-	
+	cerr << "cursor drag motion event x = " << event->motion.x << " spp " << _editor->get_current_zoom()
+	     << " would be " << event->motion.x * _editor->get_current_zoom() << " @ " << _editor->canvas_event_sample (event) << " + " << snap_delta (event->button.state) << " = " << where.sample << endl;
+
 	_editor->snap_to_with_modifier (where, event);
 
 	if (where.sample != last_pointer_sample()) {
 		fake_locate (where.sample - snap_delta (event->button.state));
 	}
-	
+
 	//maybe do zooming, too, if the option is enabled
 	if (UIConfiguration::instance ().get_use_time_rulers_to_zoom_with_vertical_drag () ) {
-	
+
 		//To avoid accidental zooming, the mouse must move exactly vertical, not diagonal, to trigger a zoom step
 		//we use screen coordinates for this, not canvas-based grab_x
 		double mx = event->button.x;
@@ -6339,7 +6340,7 @@ AutomationRangeDrag::setup (list<boost::shared_ptr<AutomationLine> > const & lin
 			r.first = 0;
 			r.second = max_samplepos;
 		}
-		
+
 		/* check this range against all the AudioRanges that we are using */
 		list<AudioRange>::const_iterator k = _ranges.begin ();
 		while (k != _ranges.end()) {
