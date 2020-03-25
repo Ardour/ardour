@@ -977,9 +977,10 @@ void
 ARDOUR_UI::finish()
 {
 	bool delete_unnamed_session = false;
-	const bool unnamed = _session->unnamed();
 
 	if (_session) {
+		const bool unnamed = _session->unnamed();
+
 		ARDOUR_UI::instance()->video_timeline->sync_session_state();
 
 		if (_session->dirty() || unnamed) {
