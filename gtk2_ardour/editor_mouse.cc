@@ -179,8 +179,6 @@ Editor::canvas_event_sample (GdkEvent const * event, double* pcx, double* pcy) c
 		return 0;
 	}
 
-	cerr << "Event coords " << x << ", " << y << " zoom = " << samples_per_pixel << " loc = " << pixel_to_sample_from_event (x) << endl;
-
 	if (pcx) {
 		*pcx = x;
 	}
@@ -1653,7 +1651,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		switch (item_type) {
 		/* see comments in button_press_handler */
 		case PlayheadCursorItem:
-			std::cerr << "in middle of playhead cursor event handler\n";
 		case MarkerItem:
 		case GainLineItem:
 		case AutomationLineItem:

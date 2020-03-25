@@ -3998,19 +3998,13 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 {
 	Drag::start_grab (event, c);
 
-	cerr << "start CD event type " << event->type << " @ " << event->button.x << " PH @ " << _editor->playhead_cursor->current_sample() << endl;
-
 	setup_snap_delta (MusicSample (_editor->playhead_cursor->current_sample(), 0));
 
 	_grab_zoom = _editor->samples_per_pixel;
 
 	MusicSample where (_editor->canvas_event_sample (event) + snap_delta (event->button.state), 0);
 
-	cerr << "where is " << _editor->canvas_event_sample (event) << " + " << snap_delta (event->button.state) << " = " << where.sample << endl;
-
 	_editor->snap_to_with_modifier (where, event);
-
-	cerr << "after snap " << where.sample << endl;
 
 	_editor->_dragging_playhead = true;
 	_editor->_control_scroll_target = where.sample;
@@ -4047,8 +4041,6 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 		}
 	}
 
-	cerr << "fake locate to " << where.sample << endl;
-
 	fake_locate (where.sample - snap_delta (event->button.state));
 
 	_last_y_delta = 0;
@@ -4058,11 +4050,6 @@ void
 CursorDrag::motion (GdkEvent* event, bool)
 {
 	MusicSample where (_editor->canvas_event_sample (event) + snap_delta (event->button.state), 0);
-
-#ifndef NDEBUG
-	cerr << "cursor drag motion event type " << event->type << " x = " << event->motion.x << " spp " << _editor->get_current_zoom()
-	     << " would be " << event->motion.x * _editor->get_current_zoom() << " @ " << _editor->canvas_event_sample (event) << " + " << snap_delta (event->button.state) << " = " << where.sample << endl;
-#endif
 
 	_editor->snap_to_with_modifier (where, event);
 
@@ -4107,8 +4094,6 @@ CursorDrag::motion (GdkEvent* event, bool)
 void
 CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	PBD::stacktrace (std::cerr, 40);
-
 	_editor->_dragging_playhead = false;
 
 	_cursor.track_canvas_item().ungrab();
@@ -4121,9 +4106,6 @@ CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	Session* s = _editor->session ();
 	if (s) {
-#ifndef NDEBUG
-		cerr << "cursor drag finished, reqL with " << _editor->playhead_cursor->current_sample() << endl;
-#endif
 		s->request_locate (_editor->playhead_cursor->current_sample (), _was_rolling ? MustRoll : MustStop);
 		_editor->_pending_locate_request = true;
 		s->request_resume_timecode_transmission ();

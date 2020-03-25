@@ -769,8 +769,6 @@ GtkCanvas::deliver_event (GdkEvent* event)
 
 		Item* parent = item->parent ();
 
-		DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("consider delivery to %1 %2 (ignored = ? %3)\n", item->whatami(), item->name.empty() ? "[unknown]" : item->name, item->ignore_events()));
-
 		if (!item->ignore_events () &&
 		    item->Event (event)) {
 			/* this item has just handled the event */
