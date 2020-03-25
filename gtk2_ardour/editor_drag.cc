@@ -3998,7 +3998,7 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 {
 	Drag::start_grab (event, c);
 
-	cerr << "start CD @ " << event->button.x << " PH @ " << _editor->playhead_cursor->current_sample() << endl;
+	cerr << "start CD event type " << event->type << " @ " << event->button.x << " PH @ " << _editor->playhead_cursor->current_sample() << endl;
 
 	setup_snap_delta (MusicSample (_editor->playhead_cursor->current_sample(), 0));
 
