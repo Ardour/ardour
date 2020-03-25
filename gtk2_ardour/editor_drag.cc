@@ -3997,13 +3997,21 @@ void
 CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 {
 	Drag::start_grab (event, c);
+
+	cerr << "start CD at " << event->button.x << " PH @ " << _editor->playhead_cursor->current_sample() << endl;
+
 	setup_snap_delta (MusicSample (_editor->playhead_cursor->current_sample(), 0));
 
 	_grab_zoom = _editor->samples_per_pixel;
 
 	MusicSample where (_editor->canvas_event_sample (event) + snap_delta (event->button.state), 0);
 
+	cerr << "where is " << _editor->canvas_event_sample (event) << " + " << snap_delta (event->button.state) << " = " << where.sample << endl;
+
 	_editor->snap_to_with_modifier (where, event);
+
+	cerr << "after snap " << where.sample << endl;
+
 	_editor->_dragging_playhead = true;
 	_editor->_control_scroll_target = where.sample;
 
@@ -4038,6 +4046,8 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 			}
 		}
 	}
+
+	cerr << "fake locate to " << where.sample << endl;
 
 	fake_locate (where.sample - snap_delta (event->button.state));
 
