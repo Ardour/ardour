@@ -880,6 +880,7 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::Locate:
 		/* args: do not roll after locate, clear state, not for loop, force */
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("sending locate to %1 to tfsm\n", ev->target_sample));
 		TFSM_LOCATE (ev->target_sample, ev->locate_transport_disposition, true, false, ev->yes_or_no);
 		_send_timecode_update = true;
 		break;
