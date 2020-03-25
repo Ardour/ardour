@@ -3422,6 +3422,11 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 					continue;
 				}
 
+				/* compare to ProcessorBox::build_possible_aux_menu */
+				if (_route->is_monitor () || _route->is_foldbackbus ()) {
+					continue;
+				}
+
 				boost::shared_ptr<Pannable> sendpan(new Pannable (*_session));
 				XMLNode n (**niter);
 				InternalSend* s = new InternalSend (*_session, sendpan, _route->mute_master(),
@@ -3430,6 +3435,14 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				if (s->set_state (n, Stateful::loading_state_version)) {
 					delete s;
 					return;
+				}
+
+				boost::shared_ptr<Route> target = s->target_route();
+
+				if (_route->internal_send_for (target) || target == _route) {
+					/* aux-send to target already exists */
+					delete s;
+					continue;
 				}
 
 				p.reset (s);
