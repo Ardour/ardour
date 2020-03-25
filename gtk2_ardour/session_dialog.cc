@@ -541,12 +541,7 @@ SessionDialog::open_button_pressed (GdkEventButton* ev)
 void
 SessionDialog::setup_untitled_session ()
 {
-	time_t n;
-	time (&n);
-	struct tm* now = localtime (&n);
-	Glib::DateTime tm (Glib::DateTime::create_now_local (mktime (now)));
-
-	new_name_entry.set_text (string_compose (_("Untitled-%1"), tm.format ("%F-%H-%M-%S")));
+	new_name_entry.set_text (string_compose (_("Untitled-%1"), Glib::DateTime::create_now_local().format ("%F-%H-%M-%S")));
 	new_name_entry.select_region (0, -1);
 	new_name_was_edited = false;
 

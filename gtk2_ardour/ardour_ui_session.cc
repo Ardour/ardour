@@ -962,9 +962,7 @@ ARDOUR_UI::archive_session ()
 		return;
 	}
 
-	time_t n;
-	time (&n);
-	Glib::DateTime gdt (Glib::DateTime::create_now_local (n));
+	Glib::DateTime gdt (Glib::DateTime::create_now_local ());
 
 	SessionArchiveDialog sad;
 	sad.set_name (_session->name() + gdt.format ("_%F_%H%M%S"));
@@ -987,8 +985,8 @@ ARDOUR_UI::quick_snapshot_session (bool switch_to_it)
 	if (switch_to_it && _session->dirty ()) {
 		save_state_canfail ("");
 	}
-	Glib::DateTime tm (g_date_time_new_now_local ());
-	save_state (tm.format ("%FT%H.%M.%S"), switch_to_it);
+
+	save_state (Glib::DateTime::create_now_local().format ("%FT%H.%M.%S"), switch_to_it);
 }
 
 
