@@ -916,7 +916,6 @@ AudioClock::set (samplepos_t when, bool force, samplecnt_t offset)
 			break;
 
 		case Samples:
-			std::cerr << this << " set (" << when << ")\n";
 			set_samples (when, force);
 			break;
 		}
