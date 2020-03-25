@@ -308,12 +308,15 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 		case -1:
 			// cancel
 			return 1;
-
 		case 1:
+			if (_session->unnamed()) {
+				rename_session (true);
+			}
 			_session->save_state ("");
 			break;
 		}
 	}
+
 
 	{
 		// tear down session specific CPI (owned by rc_config_editor which can remain)

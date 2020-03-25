@@ -890,6 +890,8 @@ private:
 
 	bool bind_lua_action_script (GdkEventButton*, int);
 	void update_action_script_btn (int i, const std::string&);
+
+	void ask_about_scratch_deletion ();
 };
 
 #endif /* __ardour_gui_h__ */
