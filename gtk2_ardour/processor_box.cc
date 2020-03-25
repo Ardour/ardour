@@ -3427,8 +3427,6 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				InternalSend* s = new InternalSend (*_session, sendpan, _route->mute_master(),
 						_route, boost::shared_ptr<Route>(), Delivery::Aux);
 
-				IOProcessor::prepare_for_reset (n, s->name());
-
 				if (s->set_state (n, Stateful::loading_state_version)) {
 					delete s;
 					return;
