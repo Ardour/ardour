@@ -52,20 +52,6 @@ namespace {
 
 static bool libpbd_initialized = false;
 
-static
-void
-set_debug_options_from_env ()
-{
-	bool set;
-	std::string options;
-
-	options = Glib::getenv ("PBD_DEBUG", set);
-	if (set) {
-		std::cerr << X_("PBD_DEBUG=") << options << std::endl;
-		PBD::parse_debug_options (options.c_str());
-	}
-}
-
 #ifdef PLATFORM_WINDOWS
 static
 void
@@ -128,8 +114,6 @@ PBD::init ()
 	PBD::ID::init ();
 
 	setup_libpbd_enums ();
-
-	set_debug_options_from_env ();
 
 	libpbd_initialized = true;
 	return true;
