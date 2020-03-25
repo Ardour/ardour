@@ -1097,6 +1097,8 @@ ARDOUR_UI::ask_about_scratch_deletion ()
 
 	if (r == Gtk::RESPONSE_OK) {
 		PBD::remove_directory (path);
+	} else {
+		_session->end_unnamed_status ();
 	}
 }
 
