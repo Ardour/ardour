@@ -179,6 +179,8 @@ Editor::canvas_event_sample (GdkEvent const * event, double* pcx, double* pcy) c
 		return 0;
 	}
 
+	cerr << "Event coords " << x << ", " << y << " zoom = " << samples_per_pixel << " loc = " << pixel_to_sample_from_event (x) << endl;
+
 	if (pcx) {
 		*pcx = x;
 	}
