@@ -4107,6 +4107,8 @@ CursorDrag::motion (GdkEvent* event, bool)
 void
 CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 {
+	PBD::stacktrace (std::cerr, 40);
+
 	_editor->_dragging_playhead = false;
 
 	_cursor.track_canvas_item().ungrab();
