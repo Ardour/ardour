@@ -2312,14 +2312,14 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor"),
 	     new BoolOption (
 		     "draggable-playhead",
-		     _("Allow dragging of playhead"),
+		     _("Enable playhead dragging"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_draggable_playhead),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_draggable_playhead)
 		     ));
 
 	ComboOption<float>* dps = new ComboOption<float> (
 		     "draggable-playhead-speed",
-		     _("Playhead dragging speed (%)"),
+		     _("Auto-scroll speed when dragging playhead (%)"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_draggable_playhead_speed),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_draggable_playhead_speed)
 		     );
