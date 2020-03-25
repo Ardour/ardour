@@ -360,10 +360,12 @@ int main (int argc, char *argv[])
 	}
 
 	{
+#ifndef NDEBUG
 		const char *adf;
 		if ((adf = g_getenv ("ARDOUR_DEBUG_FLAGS"))) {
 			PBD::parse_debug_options (adf);
 		}
+#endif /* NDEBUG */
 	}
 
 	cout << PROGRAM_NAME

@@ -180,9 +180,11 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 			break;
 
 		case 'D':
+#ifndef NDEBUG
 			if (PBD::parse_debug_options (optarg)) {
 				exit (EXIT_SUCCESS);
 			}
+#endif /* NDEBUG */
 			break;
 
 		case 'm':
@@ -247,4 +249,3 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 
 	return 0;
 }
-
