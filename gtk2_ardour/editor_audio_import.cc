@@ -308,13 +308,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, samplepos_t pos)
 		}
 
 		last_meter = meter;
-
-		cerr << "@ " << t->time_pulses/(double)smf.ppqn() << " ("
-		     << t->time_seconds << ") Add T " << tempo << " M " << meter << endl;
 	}
-
-	cerr << "NEW MAP:\n";
-	new_map.dump (cerr);
 
 	_session->tempo_map() = new_map;
 }
