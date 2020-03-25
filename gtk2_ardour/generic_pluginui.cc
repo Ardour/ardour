@@ -359,7 +359,7 @@ GenericPluginUI::build ()
 				= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
 					insert->control(param));
 
-			if (c->flags () & Controllable::HiddenControl) {
+			if (c && c->flags () & Controllable::HiddenControl) {
 				continue;
 			}
 
