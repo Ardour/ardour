@@ -762,18 +762,20 @@ MidiListEditor::redisplay_model ()
 	if (_session) {
 
 		BeatsSamplesConverter conv (_session->tempo_map(), region->position());
-		MidiModel::Notes notes = region->midi_source(0)->model()->notes();
+		boost::shared_ptr<MidiModel> m (region->midi_source(0)->model());
 		TreeModel::Row row;
 		stringstream ss;
 
-		for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
+		MidiModel::Notes::const_iterator i = m->note_lower_bound(conv.from (region->start()));
+		Temporal::Beats end_time = conv.from (region->start()) + conv.from (region->length());
+		for (; i != m->notes().end() && (*i)->time() < end_time; ++i) {
 			row = *(model->append());
 			row[columns.channel] = (*i)->channel() + 1;
 			row[columns.note_name] = ParameterDescriptor::midi_note_name ((*i)->note());
 			row[columns.note] = (*i)->note();
 			row[columns.velocity] = (*i)->velocity();
 
-			Timecode::BBT_Time bbt (_session->tempo_map().bbt_at_sample (region->position() + conv.to ((*i)->time())));
+			Timecode::BBT_Time bbt (_session->tempo_map().bbt_at_sample (region->position() - region->start() + conv.to ((*i)->time())));
 
 			ss.str ("");
 			ss << bbt;
