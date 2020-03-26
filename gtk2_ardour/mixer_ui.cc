@@ -613,6 +613,7 @@ Mixer_UI::add_stripables (StripableList& slist)
 					if (foldback_strip) {
 						// last strip created is shown
 						foldback_strip->set_route (route);
+						foldback_strip->prev_next_changed();
 					} else {
 						foldback_strip = new FoldbackStrip (*this, _session, route);
 						out_packer.pack_start (*foldback_strip, false, false);
@@ -1440,17 +1441,24 @@ Mixer_UI::track_list_delete (const Gtk::TreeModel::Path&)
 }
 
 void
-Mixer_UI::spill_redisplay (boost::shared_ptr<VCA> vca)
+Mixer_UI::spill_redisplay (boost::shared_ptr<Stripable> s)
 {
+
+	boost::shared_ptr<VCA> vca = boost::dynamic_pointer_cast<VCA> (s);
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
+
 	TreeModel::Children rows = track_model->children();
 	std::list<boost::shared_ptr<VCA> > vcas;
-	vcas.push_back (vca);
 
-	for (TreeModel::Children::const_iterator i = rows.begin(); i != rows.end(); ++i) {
-		AxisView* av = (*i)[stripable_columns.strip];
-		VCAMasterStrip* vms = dynamic_cast<VCAMasterStrip*> (av);
-		if (vms && vms->vca()->slaved_to (vca)) {
-			vcas.push_back (vms->vca());
+	if (vca) {
+		vcas.push_back (vca);
+
+		for (TreeModel::Children::const_iterator i = rows.begin(); i != rows.end(); ++i) {
+			AxisView* av = (*i)[stripable_columns.strip];
+			VCAMasterStrip* vms = dynamic_cast<VCAMasterStrip*> (av);
+			if (vms && vms->vca()->slaved_to (vca)) {
+				vcas.push_back (vms->vca());
+			}
 		}
 	}
 
@@ -1459,6 +1467,8 @@ Mixer_UI::spill_redisplay (boost::shared_ptr<VCA> vca)
 		AxisView* av = (*i)[stripable_columns.strip];
 		MixerStrip* strip = dynamic_cast<MixerStrip*> (av);
 		bool const visible = (*i)[stripable_columns.visible];
+		bool slaved = false;
+		bool feeds = false;
 
 		if (!strip) {
 			/* we're in the middle of changing a row, don't worry */
@@ -1474,15 +1484,23 @@ Mixer_UI::spill_redisplay (boost::shared_ptr<VCA> vca)
 			continue;
 		}
 
-		bool slaved = false;
-		for (std::list<boost::shared_ptr<VCA> >::const_iterator m = vcas.begin(); m != vcas.end(); ++m) {
-			if (strip->route()->slaved_to (*m)) {
-				slaved = true;
-				break;
+		if (vca) {
+			for (std::list<boost::shared_ptr<VCA> >::const_iterator m = vcas.begin(); m != vcas.end(); ++m) {
+				if (strip->route()->slaved_to (*m)) {
+					slaved = true;
+					break;
+				}
 			}
 		}
 
-		if (slaved && visible) {
+		if (r) {
+			feeds = strip->route()->feeds (r);
+		}
+
+		bool should_show = visible && (slaved || feeds);
+		should_show |= (strip->route() == r);  //the spilled aux should itself be shown...
+
+		if (should_show) {
 
 			if (strip->packed()) {
 				strip_packer.reorder_child (*strip, -1); /* put at end */
@@ -1516,6 +1534,12 @@ Mixer_UI::redisplay_track_list ()
 				_spill_scroll_position = scroller.get_hscrollbar()->get_adjustment()->get_value();
 			}
 			spill_redisplay (sv);
+			return;
+		} else {
+			if (_spill_scroll_position <= 0 && scroller.get_hscrollbar()) {
+				_spill_scroll_position = scroller.get_hscrollbar()->get_adjustment()->get_value();
+			}
+			spill_redisplay (ss);
 			return;
 		}
 	}

@@ -77,8 +77,11 @@ ARDOUR_UI::stop_video_server (bool ask_confirm)
 			confirm.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 			confirm.add_button (_("Yes, Stop It"), Gtk::RESPONSE_ACCEPT);
 			confirm.show_all ();
-			if (confirm.run() == RESPONSE_CANCEL) {
-				return;
+			switch (confirm.run()) {
+				case RESPONSE_ACCEPT:
+					break;
+				default:
+					return;
 			}
 		}
 		delete video_server_process;
@@ -416,7 +419,7 @@ ARDOUR_UI::export_video (bool range)
 			ARDOUR::Config->set_show_video_export_info(false);
 		}
 		switch (rv) {
-			case GTK_RESPONSE_YES:
+			case RESPONSE_YES:
 				PBD::open_uri (ARDOUR::Config->get_reference_manual_url() + "/video-timeline/operations/#export");
 				break;
 			default:

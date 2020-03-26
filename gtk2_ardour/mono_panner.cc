@@ -422,9 +422,8 @@ MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 	int w = get_width();
 	double delta = (ev->x - last_drag_x) / (double) w;
 
-	/* create a detent close to the center */
-
-	if (!detented && ARDOUR::Panner::equivalent (position_control->get_value(), 0.5)) {
+	/* create a detent close to the center, at approx 1/180 deg */
+	if (!detented && fabsf (position_control->get_value() - .5) < 0.006) {
 		detented = true;
 		/* snap to center */
 		position_control->set_value (0.5, Controllable::NoGroup);
@@ -435,10 +434,10 @@ MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 
 		/* have we pulled far enough to escape ? */
 
-		if (fabs (accumulated_delta) >= 0.025) {
-			position_control->set_value (position_control->get_value() + accumulated_delta, Controllable::NoGroup);
+		if (fabs (accumulated_delta) >= 0.048) {
+			position_control->set_value (position_control->get_value() + (accumulated_delta > 0 ? 0.006 : -0.006), Controllable::NoGroup);
 			detented = false;
-			accumulated_delta = false;
+			accumulated_delta = 0;
 		}
 	} else {
 		double pv = position_control->get_value(); // 0..1.0 ; 0 = left

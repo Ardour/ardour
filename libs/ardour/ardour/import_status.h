@@ -34,6 +34,15 @@ namespace ARDOUR {
 
 class LIBARDOUR_API ImportStatus : public InterThreadInfo {
 public:
+	virtual ~ImportStatus() {
+		clear ();
+	}
+
+	virtual void clear () {
+		sources.clear ();
+		paths.clear ();
+	}
+
 	std::string doing_what;
 
 	/* control info */

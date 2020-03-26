@@ -38,6 +38,7 @@ libardour_sources = [
         'audiofile_tagger.cc',
         'audiofilesource.cc',
         'audioregion.cc',
+        'audiorom.cc',
         'audiosource.cc',
         'auditioner.cc',
         'automatable.cc',
@@ -181,6 +182,7 @@ libardour_sources = [
         'progress.cc',
         'quantize.cc',
         'rc_configuration.cc',
+        'readable.cc',
         'readonly_control.cc',
         'raw_midi_parser.cc',
         'recent_sessions.cc',
@@ -242,7 +244,6 @@ libardour_sources = [
         'system_exec.cc',
         'revision.cc',
         'rt_midibuffer.cc',
-        'tape_file_matcher.cc',
         'template_utils.cc',
         'tempo.cc',
         'tempo_map_importer.cc',
@@ -307,6 +308,8 @@ def configure(conf):
                       atleast_version='1.2.0', mandatory=True)
     autowaf.check_pkg(conf, 'lv2', uselib_store='LV2_1_10_0',
                       atleast_version='1.10.0', mandatory=False)
+    autowaf.check_pkg(conf, 'lv2', uselib_store='LV2_1_17_2',
+                      atleast_version='1.17.2', mandatory=False)
     autowaf.check_pkg(conf, 'serd-0', uselib_store='SERD',
                       atleast_version='0.14.0', mandatory=True)
     autowaf.check_pkg(conf, 'sord-0', uselib_store='SORD',

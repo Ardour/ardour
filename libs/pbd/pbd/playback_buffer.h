@@ -128,14 +128,6 @@ public:
 	}
 
 	/* read-thead */
-	void read_flush ()
-	{
-		SpinLock sl (_reservation_lock);
-		g_atomic_int_set (&read_idx, g_atomic_int_get (&write_idx));
-		g_atomic_int_set (&reserved, 0);
-	}
-
-	/* read-thead */
 	guint decrement_read_ptr (guint cnt)
 	{
 		SpinLock sl (_reservation_lock);
@@ -169,21 +161,20 @@ public:
 	bool can_seek (int64_t cnt) {
 		if (cnt > 0) {
 			return read_space() >= cnt;
-		}
-		else if (cnt < 0) {
+		} else if (cnt < 0) {
 			return g_atomic_int_get (&reserved) >= -cnt;
-		}
-		else {
+		} else {
 			return true;
 		}
 	}
 
 	guint read_ptr() const { return read_idx; }
 	guint reserved_size() const { return reserved; }
+	guint reservation_size() const { return reservation; }
 
 private:
 	T *buf;
-	guint reservation;
+	const guint reservation;
 	guint size;
 	guint size_mask;
 

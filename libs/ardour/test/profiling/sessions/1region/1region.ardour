@@ -5,7 +5,6 @@
     <Option name="xfade-choice" value="ConstantPowerMinus3dB"/>
     <Option name="auto-xfade" value="1"/>
     <Option name="short-xfade-seconds" value="0.015"/>
-    <Option name="destructive-xfade-msecs" value="2"/>
     <Option name="use-region-fades" value="1"/>
     <Option name="show-region-fades" value="1"/>
     <Option name="native-file-data-format" value="FormatFloat"/>

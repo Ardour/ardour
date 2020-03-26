@@ -25,7 +25,6 @@
 #include "pbd/gstdio_compat.h"
 
 #include <glibmm.h>
-#include <glibmm/datetime.h>
 
 #include <gtkmm/liststore.h>
 

@@ -511,12 +511,18 @@ UI::do_request (UIRequest* req)
   ======================================================================*/
 
 void
-UI::dump_errors (std::ostream& ostr)
+UI::dump_errors (std::ostream& ostr, size_t limit)
 {
 	Glib::Threads::Mutex::Lock lm (error_lock);
 	ostr << endl << X_("Errors/Messages:") << endl;
 	for (list<string>::const_iterator i = error_stack.begin(); i != error_stack.end(); ++i) {
 		ostr << *i << endl;
+		if (limit > 0) {
+			if (--limit == 0) {
+				ostr << "..." << endl;
+				break;
+			}
+		}
 	}
 	ostr << endl;
 }
@@ -643,14 +649,9 @@ void
 UI::display_message (const char *prefix, gint /*prefix_len*/, RefPtr<TextBuffer::Tag> ptag, RefPtr<TextBuffer::Tag> mtag, const char *msg)
 {
 	RefPtr<TextBuffer> buffer (errors->text().get_buffer());
+	Glib::DateTime tm (g_date_time_new_now_local ());
 
-	char timebuf[128];
-	time_t n = time (NULL);
-	struct tm local_time;
-	localtime_r (&n, &local_time);
-	strftime (timebuf, sizeof(timebuf), "%FT%H:%M:%S ", &local_time);
-
-	buffer->insert_with_tag(buffer->end(), timebuf, ptag);
+	buffer->insert_with_tag(buffer->end(), tm.format ("%FT%H:%M:%S "), ptag);
 	buffer->insert_with_tag(buffer->end(), prefix, ptag);
 	buffer->insert_with_tag(buffer->end(), msg, mtag);
 	buffer->insert_with_tag(buffer->end(), "\n", mtag);

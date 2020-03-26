@@ -329,7 +329,10 @@ int main (int argc, char *argv[])
 #endif
 
 #if ENABLE_NLS
+
+#ifndef NDEBUG
 	cerr << "bind txt domain [" << PACKAGE << "] to " << localedir << endl;
+#endif
 
 	(void) bindtextdomain (PACKAGE, localedir.c_str());
 	/* our i18n translations are all in UTF-8, so make sure
@@ -360,10 +363,12 @@ int main (int argc, char *argv[])
 	}
 
 	{
+#ifndef NDEBUG
 		const char *adf;
 		if ((adf = g_getenv ("ARDOUR_DEBUG_FLAGS"))) {
 			PBD::parse_debug_options (adf);
 		}
+#endif /* NDEBUG */
 	}
 
 	cout << PROGRAM_NAME
@@ -381,7 +386,7 @@ int main (int argc, char *argv[])
 	}
 
 	if (no_splash) {
-		cerr << _("Copyright (C) 1999-2020 Paul Davis") << endl
+		cout << _("Copyright (C) 1999-2020 Paul Davis") << endl
 		     << _("Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker, Robin Gareus") << endl
 		     << endl
 		     << string_compose (_("%1 comes with ABSOLUTELY NO WARRANTY"), PROGRAM_NAME) << endl

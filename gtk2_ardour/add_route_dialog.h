@@ -69,7 +69,6 @@ public:
 	enum TypeWanted {
 		AudioTrack,
 		MidiTrack,
-		MixedTrack,
 		AudioBus,
 		MidiBus,
 		VCAMaster,

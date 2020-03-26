@@ -54,7 +54,7 @@ class LIBARDOUR_API SourceFactory {
 	static boost::shared_ptr<Source> createWritable
 		(DataType type, Session&,
 		 const std::string& path,
-		 bool destructive, samplecnt_t rate, bool announce = true, bool async = false);
+		 samplecnt_t rate, bool announce = true, bool async = false);
 
 
 	static boost::shared_ptr<Source> createForRecovery

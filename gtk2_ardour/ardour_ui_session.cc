@@ -59,6 +59,7 @@
 #include "ardour_message.h"
 #include "ardour_ui.h"
 #include "engine_dialog.h"
+#include "missing_filesource_dialog.h"
 #include "missing_plugin_dialog.h"
 #include "opts.h"
 #include "public_editor.h"
@@ -119,7 +120,7 @@ ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& sess
 		bus_profile.master_out_channels = (uint32_t) sd.master_channel_count();
 	}
 
-	build_session (session_path, session_name, session_template, bus_profile);
+	build_session (session_path, session_name, session_template, bus_profile, false, !sd.was_new_name_edited());
 }
 
 /** This is only ever used once Ardour is already running with a session
@@ -417,17 +418,19 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		goto out;
 	}
 	catch (SessionException const& e) {
+		stringstream ss;
+		dump_errors (ss, 6);
+		dump_errors (cerr);
+		clear_errors ();
 		ArdourMessageDialog msg (string_compose(
-			                         _("Session \"%1 (snapshot %2)\" did not load successfully:\n%3"),
-			                         path, snap_name, e.what()),
-		                         true,
+			                         _("Session \"%1 (snapshot %2)\" did not load successfully:\n%3%4%5"),
+			                         path, snap_name, e.what(), ss.str().empty() ? "" : "\n\n---", ss.str()),
+		                         false,
 		                         Gtk::MESSAGE_INFO,
 		                         BUTTONS_OK);
 
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
-
-		dump_errors (cerr);
 
 		(void) msg.run ();
 		msg.hide ();
@@ -435,10 +438,14 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		goto out;
 	}
 	catch (...) {
+		stringstream ss;
+		dump_errors (ss, 6);
+		dump_errors (cerr);
+		clear_errors ();
 
 		ArdourMessageDialog msg (string_compose(
-		                           _("Session \"%1 (snapshot %2)\" did not load successfully."),
-		                           path, snap_name),
+		                           _("Session \"%1 (snapshot %2)\" did not load successfully.%3%4"),
+		                           path, snap_name, ss.str().empty() ? "" : "\n\n---", ss.str()),
 		                         true,
 		                         Gtk::MESSAGE_INFO,
 		                         BUTTONS_OK);
@@ -446,14 +453,35 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
 
-		dump_errors (cerr);
-
 		(void) msg.run ();
 		msg.hide ();
 
 		goto out;
 	}
 
+	if (new_session->had_destructive_tracks()) {
+		ArdourMessageDialog msg (string_compose (_("This session (from an older version of %1) used at least\none \"tape track\" (aka \"destructive recording\".\n\n"
+		                                           "This is no longer supported by the program. The tape track(s) have been setup as normal tracks.\n\n"
+		                                           "If you need to continue using tape tracks/destructive recording\n"
+		                                           "please use an older version of %1 to work on this session"), PROGRAM_NAME),
+
+		                         true,
+		                         Gtk::MESSAGE_INFO,
+		                         BUTTONS_OK);
+
+		msg.set_title (_("Tape Tracks No Longer Supported"));
+		msg.set_position (Gtk::WIN_POS_CENTER);
+		(void) msg.run ();
+		msg.hide ();
+	}
+
+	{
+		list<string> const u = new_session->missing_filesources (DataType::MIDI);
+		if (!u.empty()) {
+			MissingFileSourceDialog d (_session, u, DataType::MIDI);
+			d.run ();
+		}
+	}
 	{
 		list<string> const u = new_session->unknown_processors ();
 		if (!u.empty()) {
@@ -524,7 +552,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 }
 
 int
-ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name, const std::string& session_template, BusProfile const& bus_profile, bool from_startup_fsm)
+ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name, const std::string& session_template, BusProfile const& bus_profile, bool from_startup_fsm, bool unnamed)
 {
 	int x;
 
@@ -543,11 +571,11 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	 * asked for the SR (even if try-autostart-engine is set)
 	 */
 	if (from_startup_fsm && AudioEngine::instance()->running ()) {
-		return build_session_stage_two (path, snap_name, session_template, bus_profile);
+		return build_session_stage_two (path, snap_name, session_template, bus_profile, unnamed);
 	}
 	/* Sample-rate cannot be changed when JACK is running */
 	if (!ARDOUR::AudioEngine::instance()->setup_required () && AudioEngine::instance()->running ()) {
-		return build_session_stage_two (path, snap_name, session_template, bus_profile);
+		return build_session_stage_two (path, snap_name, session_template, bus_profile, unnamed);
 	}
 
 	/* Work-around missing "OK" button:
@@ -563,7 +591,7 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	audio_midi_setup->set_position (WIN_POS_CENTER);
 	audio_midi_setup->set_modal ();
 	audio_midi_setup->present ();
-	_engine_dialog_connection = audio_midi_setup->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::audio_midi_setup_for_new_session_done), path, snap_name, session_template, bus_profile));
+	_engine_dialog_connection = audio_midi_setup->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::audio_midi_setup_for_new_session_done), path, snap_name, session_template, bus_profile, unnamed));
 
 	/* not done yet, but we're avoiding modal dialogs */
 	return 0;
@@ -571,7 +599,7 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 
 
 void
-ARDOUR_UI::audio_midi_setup_for_new_session_done (int response, std::string path, std::string snap_name, std::string template_name, BusProfile const& bus_profile)
+ARDOUR_UI::audio_midi_setup_for_new_session_done (int response, std::string path, std::string snap_name, std::string template_name, BusProfile const& bus_profile, bool unnamed)
 {
 	_engine_dialog_connection.disconnect ();
 
@@ -589,34 +617,40 @@ ARDOUR_UI::audio_midi_setup_for_new_session_done (int response, std::string path
 	audio_midi_setup->set_modal (false);
 	audio_midi_setup->hide();
 
-	build_session_stage_two (path, snap_name, template_name, bus_profile);
+	build_session_stage_two (path, snap_name, template_name, bus_profile, unnamed);
 }
 
 int
-ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& snap_name, std::string const& session_template, BusProfile const& bus_profile)
+ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& snap_name, std::string const& session_template, BusProfile const& bus_profile, bool unnamed)
 {
 	Session* new_session;
 
 	bool meta_session = !session_template.empty() && session_template.substr (0, 11) == "urn:ardour:";
 
 	try {
-		new_session = new Session (*AudioEngine::instance(), path, snap_name, bus_profile.master_out_channels > 0 ? &bus_profile : NULL, meta_session ? "" : session_template);
+		new_session = new Session (*AudioEngine::instance(), path, snap_name, bus_profile.master_out_channels > 0 ? &bus_profile : NULL, meta_session ? "" : session_template, unnamed);
 	}
 	catch (SessionException const& e) {
+		stringstream ss;
+		dump_errors (ss, 6);
 		cerr << "Here are the errors associated with this failed session:\n";
 		dump_errors (cerr);
 		cerr << "---------\n";
-		ArdourMessageDialog msg (string_compose(_("Could not create session in \"%1\": %2"), path, e.what()));
+		clear_errors ();
+		ArdourMessageDialog msg (string_compose(_("Could not create session in \"%1\": %2%3%4"), path, e.what(), ss.str().empty() ? "" : "\n\n---", ss.str()));
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		msg.run ();
 		return -1;
 	}
 	catch (...) {
+		stringstream ss;
+		dump_errors (ss, 6);
 		cerr << "Here are the errors associated with this failed session:\n";
 		dump_errors (cerr);
 		cerr << "---------\n";
-		ArdourMessageDialog msg (string_compose(_("Could not create session in \"%1\""), path));
+		clear_errors ();
+		ArdourMessageDialog msg (string_compose(_("Could not create session in \"%1\"%2%3"), path, ss.str().empty() ? "" : "\n\n---", ss.str()));
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		msg.run ();
@@ -729,7 +763,7 @@ If you still wish to proceed, please use the\n\n\
  */
 
 void
-ARDOUR_UI::rename_session ()
+ARDOUR_UI::rename_session (bool for_unnamed)
 {
 	if (!_session) {
 		return;
@@ -740,8 +774,13 @@ ARDOUR_UI::rename_session ()
 
 	prompter.set_name ("Prompter");
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
-	prompter.set_title (_("Rename Session"));
-	prompter.set_prompt (_("New session name"));
+	if (for_unnamed) {
+		prompter.set_title (_("Name Session"));
+		prompter.set_prompt (_("Session name"));
+	} else {
+		prompter.set_title (_("Rename Session"));
+		prompter.set_prompt (_("New session name"));
+	}
 
   again:
 	switch (prompter.run()) {
@@ -849,10 +888,10 @@ If you still wish to proceed, please use the\n\n\
 	save_as_dialog->hide ();
 
 	switch (response) {
-	case Gtk::RESPONSE_OK:
-		break;
-	default:
-		return;
+		case Gtk::RESPONSE_OK:
+			break;
+		default:
+			return;
 	}
 
 
@@ -923,9 +962,7 @@ ARDOUR_UI::archive_session ()
 		return;
 	}
 
-	time_t n;
-	time (&n);
-	Glib::DateTime gdt (Glib::DateTime::create_now_local (n));
+	Glib::DateTime gdt (Glib::DateTime::create_now_local ());
 
 	SessionArchiveDialog sad;
 	sad.set_name (_session->name() + gdt.format ("_%F_%H%M%S"));
@@ -945,18 +982,11 @@ ARDOUR_UI::archive_session ()
 void
 ARDOUR_UI::quick_snapshot_session (bool switch_to_it)
 {
-		char timebuf[128];
-		time_t n;
-		struct tm local_time;
+	if (switch_to_it && _session->dirty ()) {
+		save_state_canfail ("");
+	}
 
-		time (&n);
-		localtime_r (&n, &local_time);
-		strftime (timebuf, sizeof(timebuf), "%FT%H.%M.%S", &local_time);
-		if (switch_to_it && _session->dirty ()) {
-			save_state_canfail ("");
-		}
-
-		save_state (timebuf, switch_to_it);
+	save_state (Glib::DateTime::create_now_local().format ("%FT%H.%M.%S"), switch_to_it);
 }
 
 
@@ -1047,8 +1077,11 @@ ARDOUR_UI::open_session ()
 	int response = open_session_selector.run();
 	open_session_selector.hide ();
 
-	if (response == Gtk::RESPONSE_CANCEL) {
-		return;
+	switch (response) {
+		case Gtk::RESPONSE_ACCEPT:
+			break;
+		default:
+			return;
 	}
 
 	string session_path = open_session_selector.get_filename();

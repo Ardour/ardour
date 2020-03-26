@@ -32,6 +32,7 @@ using namespace ArdourWidgets;
 
 static int  wh   = 64;
 static int  sq   = 1;
+static int  bd   = 0;
 static bool grid = false;
 
 static uint32_t bg_color = 0x3d3d3dff; // gtk_background
@@ -119,7 +120,7 @@ draw_icon (cairo_t* cr, int pos, const enum ArdourIcon::Icon icon, const Gtkmm2e
 	int col = pos % sq;
 	int row = pos / sq;
 	cairo_save (cr);
-	cairo_translate (cr, col * wh, row * wh);
+	cairo_translate (cr, bd + col * wh, bd + row * wh);
 	if (grid) {
 		cairo_rectangle (cr, .5, .5, wh - 1, wh - 1);
 		cairo_set_line_width (cr, 1);
@@ -139,10 +140,14 @@ int
 main (int argc, char** argv)
 {
 	const char* fn = "/tmp/ardour_icons.png";
+	bool border = false;
 
 	int c = 0;
-	while (EOF != (c = getopt (argc, argv, "go:s:t:"))) {
+	while (EOF != (c = getopt (argc, argv, "bgo:s:t:"))) {
 		switch (c) {
+			case 'b':
+				border = true;
+				break;
 			case 'g':
 				grid = true;
 				break;
@@ -174,9 +179,24 @@ main (int argc, char** argv)
 		wh = 64;
 	}
 
+	int fs = std::max (9, wh / 3);
+
+	if (border) {
+		bd = wh / 4;
+		cairo_surface_t* cs = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 1, 1);
+		cairo_t*         cr = cairo_create (cs);
+		cairo_set_font_size (cr, fs);
+		cairo_text_extents_t extents;
+		cairo_text_extents (cr, "A8", &extents);
+		cairo_destroy (cr);
+		cairo_surface_destroy (cs);
+		bd = std::max (bd, 2 + (int)ceil(extents.height));
+		bd = std::max (bd, 2 + (int)ceil(extents.width));
+	}
+
 	sq = ceil (sqrt (ArdourIcon::NoIcon + 3));
 
-	cairo_surface_t* cs = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, wh * sq, wh * sq);
+	cairo_surface_t* cs = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 2 * bd + wh * sq, 2 * bd + wh * sq);
 	cairo_t*         cr = cairo_create (cs);
 
 	Gtkmm2ext::set_source_rgba (cr, bg_color);
@@ -185,12 +205,37 @@ main (int argc, char** argv)
 	int pos = 0;
 
 	draw_icon (cr, pos++, ArdourIcon::RecButton, Gtkmm2ext::Off);
-	draw_icon (cr, pos++, ArdourIcon::RecTapeMode, Gtkmm2ext::Off);
 	draw_icon (cr, pos++, ArdourIcon::RecButton, Gtkmm2ext::ImplicitActive);
-	draw_icon (cr, pos++, ArdourIcon::RecTapeMode, Gtkmm2ext::ImplicitActive);
 
 	for (int i = 0; i < ArdourIcon::NoIcon; ++i) {
 		draw_icon (cr, pos++, ArdourIcon::Icon (i), Gtkmm2ext::ExplicitActive);
+	}
+
+	if (bd > 0) {
+		Gtkmm2ext::set_source_rgba (cr, fg_color);
+		cairo_set_line_width (cr, 1);
+		cairo_rectangle (cr, bd - .5, bd - .5, 1 + wh * sq, 1 + wh * sq);
+		cairo_stroke (cr);
+		cairo_set_font_size (cr, fs);
+		for (int rc = 0; rc < sq; ++rc) {
+			char tmp[8];
+			snprintf (tmp, sizeof(tmp), "%c", rc + 'A');
+			cairo_text_extents_t extents;
+			cairo_text_extents (cr, tmp, &extents);
+			cairo_move_to (cr,
+					bd + wh * rc + rint (.5 * (wh - extents.width)),
+					rint (.5 * (bd  + extents.height))
+					);
+			cairo_show_text (cr, tmp);
+
+			snprintf (tmp, sizeof(tmp), "%d", rc + 1);
+			cairo_text_extents (cr, tmp, &extents);
+			cairo_move_to (cr,
+					rint (.5 * (bd - extents.width)),
+					bd + wh * rc + rint (.5 * (wh + extents.height))
+					);
+			cairo_show_text (cr, tmp);
+		}
 	}
 
 	if (CAIRO_STATUS_SUCCESS != cairo_surface_write_to_png (cs, fn)) {

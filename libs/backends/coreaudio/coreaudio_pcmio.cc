@@ -474,7 +474,9 @@ CoreAudioPCM::get_latency(uint32_t device_id, bool input)
 	for (size_t i = 0; i < stream_latencies.size(); ++i) {
 		max_stream_latency = std::max(max_stream_latency, stream_latencies[i]);
 	}
+#if 0
 	latency += max_stream_latency;
+#endif
 
 	return latency;
 }

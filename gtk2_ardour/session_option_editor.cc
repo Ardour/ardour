@@ -142,14 +142,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	/* FADES */
 
 	add_option (_("Fades"), new OptionEditorHeading (_("Audio Fades")));
-	add_option (_("Fades"), new SpinOption<float> (
-		_("destructive-xfade-seconds"),
-		_("Destructive crossfade length"),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::get_destructive_xfade_msecs),
-		sigc::mem_fun (*_session_config, &SessionConfiguration::set_destructive_xfade_msecs),
-		0, 1000, 1, 10,
-		_("ms")
-			    ));
 
 	add_option (_("Fades"), new BoolOption (
 			    "use-transport-fades",

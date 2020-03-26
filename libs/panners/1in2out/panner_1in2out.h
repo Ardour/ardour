@@ -21,49 +21,53 @@
 #ifndef __ardour_panner_1in2out_h__
 #define __ardour_panner_1in2out_h__
 
-#include <cmath>
 #include <cassert>
-#include <vector>
-#include <string>
+#include <cmath>
 #include <iostream>
+#include <string>
+#include <vector>
 
-#include "pbd/stateful.h"
-#include "pbd/controllable.h"
 #include "pbd/cartesian.h"
+#include "pbd/controllable.h"
+#include "pbd/stateful.h"
 
-#include "ardour/types.h"
 #include "ardour/panner.h"
+#include "ardour/types.h"
 
-
-namespace ARDOUR {
+namespace ARDOUR
+{
 
 class Panner1in2out : public Panner
 {
-  public:
+public:
 	Panner1in2out (boost::shared_ptr<Pannable>);
 	~Panner1in2out ();
 
-    void set_position (double);
-    bool clamp_position (double&);
+	void                      set_position (double);
+	bool                      clamp_position (double&);
 	std::pair<double, double> position_range () const;
 
-	double position() const;
+	double position () const;
 
-	ChanCount in() const { return ChanCount (DataType::AUDIO, 1); }
-	ChanCount out() const { return ChanCount (DataType::AUDIO, 2); }
+	ChanCount in () const
+	{
+		return ChanCount (DataType::AUDIO, 1);
+	}
 
-	std::set<Evoral::Parameter> what_can_be_automated() const;
+	ChanCount out () const
+	{
+		return ChanCount (DataType::AUDIO, 2);
+	}
 
 	static Panner* factory (boost::shared_ptr<Pannable>, boost::shared_ptr<Speakers>);
 
-	std::string describe_parameter (Evoral::Parameter);
 	std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;
 
 	XMLNode& get_state ();
 
 	void reset ();
 
-  protected:
+protected:
 	float left;
 	float right;
 	float desired_left;
@@ -79,6 +83,6 @@ class Panner1in2out : public Panner
 	void update ();
 };
 
-} // namespace
+} // namespace ARDOUR
 
 #endif /* __ardour_panner_1in2out_h__ */

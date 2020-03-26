@@ -50,7 +50,8 @@ class LIBARDOUR_API ExportChannel : public boost::less_than_comparable<ExportCha
 
 	virtual ~ExportChannel () {}
 
-	virtual void set_max_buffer_size(samplecnt_t) { }
+	virtual samplecnt_t common_port_playback_latency () const { return 0; }
+	virtual void prepare_export (samplecnt_t max_samples, sampleoffset_t common_latency) { }
 
 	virtual void read (Sample const *& data, samplecnt_t samples) const = 0;
 	virtual bool empty () const = 0;
@@ -74,7 +75,8 @@ class LIBARDOUR_API PortExportChannel : public ExportChannel
 	PortExportChannel ();
 	~PortExportChannel ();
 
-	void set_max_buffer_size(samplecnt_t samples);
+	samplecnt_t common_port_playback_latency () const;
+	void prepare_export (samplecnt_t max_samples, sampleoffset_t common_latency);
 
 	void read (Sample const *& data, samplecnt_t samples) const;
 	bool empty () const { return ports.empty(); }
@@ -103,7 +105,6 @@ class LIBARDOUR_API RegionExportChannelFactory
 		None,
 		Raw,
 		Fades,
-		Processed
 	};
 
 	RegionExportChannelFactory (Session * session, AudioRegion const & region, AudioTrack & track, Type type);
@@ -171,7 +172,7 @@ class LIBARDOUR_API RouteExportChannel : public ExportChannel
         static void create_from_route(std::list<ExportChannelPtr> & result, boost::shared_ptr<Route> route);
 
   public: // ExportChannel interface
-	void set_max_buffer_size(samplecnt_t samples);
+	void prepare_export (samplecnt_t max_samples, sampleoffset_t common_latency);
 
 	void read (Sample const *& data, samplecnt_t samples) const;
 	bool empty () const { return false; }

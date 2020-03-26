@@ -212,7 +212,7 @@ public:
 
 	int load_session (const std::string& path, const std::string& snapshot, std::string mix_template = std::string());
 	bool session_load_in_progress;
-	int build_session (std::string const& path, std::string const& snapshot, std::string const& session_template, ARDOUR::BusProfile const&, bool from_startup_fsm = false);
+	int build_session (std::string const& path, std::string const& snapshot, std::string const& session_template, ARDOUR::BusProfile const&, bool from_startup_fsm, bool unnamed);
 	bool session_is_new() const { return _session_is_new; }
 
 	ARDOUR::Session* the_session() { return _session; }
@@ -314,15 +314,6 @@ public:
 
 	void session_add_audio_route (bool, int32_t, int32_t, ARDOUR::TrackMode, ARDOUR::RouteGroup *,
 	                              uint32_t, std::string const &, bool, ARDOUR::PresentationInfo::order_t order);
-
-	void session_add_mixed_track (const ARDOUR::ChanCount&, const ARDOUR::ChanCount&, ARDOUR::RouteGroup*,
-	                              uint32_t, std::string const &, bool strict_io,
-	                              ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord* pset,
-	                              ARDOUR::PresentationInfo::order_t order);
-
-	void session_add_midi_bus (ARDOUR::RouteGroup*, uint32_t, std::string const &, bool strict_io,
-	                           ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord* pset,
-	                           ARDOUR::PresentationInfo::order_t order);
 
 	void session_add_midi_route (bool, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool,
 	                             ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord*,
@@ -454,8 +445,8 @@ private:
 
 	void audio_midi_setup_reconfigure_done (int response, std::string path, std::string snapshot, std::string mix_template);
 	int  load_session_stage_two (const std::string& path, const std::string& snapshot, std::string mix_template = std::string());
-	void audio_midi_setup_for_new_session_done (int response, std::string path, std::string snapshot, std::string session_template, ARDOUR::BusProfile const&);
-	int  build_session_stage_two (std::string const& path, std::string const& snapshot, std::string const& session_template, ARDOUR::BusProfile const&);
+	void audio_midi_setup_for_new_session_done (int response, std::string path, std::string snapshot, std::string session_template, ARDOUR::BusProfile const&, bool unnamed);
+	int  build_session_stage_two (std::string const& path, std::string const& snapshot, std::string const& session_template, ARDOUR::BusProfile const&, bool unnamed);
 	sigc::connection _engine_dialog_connection;
 
 	void save_session_at_its_request (std::string);
@@ -646,6 +637,7 @@ private:
 	void import_metadata ();
 
 	void set_transport_sensitivity (bool);
+	void set_punch_sensitivity ();
 
 	//stuff for ProTools-style numpad
 	void transport_numpad_event (int num);
@@ -692,7 +684,7 @@ private:
 	bool save_as_progress_update (float fraction, int64_t cnt, int64_t total, Gtk::Label* label, Gtk::ProgressBar* bar);
 	void save_session_as ();
 	void archive_session ();
-	void rename_session ();
+	void rename_session (bool for_unnamed);
 
 	int         create_mixer ();
 	int         create_editor ();
@@ -898,6 +890,8 @@ private:
 
 	bool bind_lua_action_script (GdkEventButton*, int);
 	void update_action_script_btn (int i, const std::string&);
+
+	void ask_about_scratch_deletion ();
 };
 
 #endif /* __ardour_gui_h__ */

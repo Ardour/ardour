@@ -669,7 +669,7 @@ CC121::map_transport_state ()
 {
 	get_button (Loop).set_led_state (_output_port, session->get_play_loop());
 
-	float ts = session->transport_speed();
+	float ts = get_transport_speed();
 
 	if (ts == 0) {
 		stop_blinking (Play);

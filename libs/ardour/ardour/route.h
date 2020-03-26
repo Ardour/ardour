@@ -205,6 +205,7 @@ public:
 
 	boost::shared_ptr<Amp> amp() const  { return _amp; }
 	boost::shared_ptr<Amp> trim() const { return _trim; }
+	boost::shared_ptr<PolarityProcessor> polarity() const { return _polarity; }
 	boost::shared_ptr<PeakMeter>       peak_meter()       { return _meter; }
 	boost::shared_ptr<const PeakMeter> peak_meter() const { return _meter; }
 	boost::shared_ptr<PeakMeter> shared_peak_meter() const { return _meter; }
@@ -606,6 +607,8 @@ protected:
 
 	samplecnt_t  bounce_get_latency (boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
 	ChanCount    bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
+
+	bool can_freeze_processor (boost::shared_ptr<Processor>, bool allow_routing = false) const;
 
 	bool           _active;
 	samplecnt_t    _signal_latency;

@@ -308,13 +308,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, samplepos_t pos)
 		}
 
 		last_meter = meter;
-
-		cerr << "@ " << t->time_pulses/(double)smf.ppqn() << " ("
-		     << t->time_seconds << ") Add T " << tempo << " M " << meter << endl;
 	}
-
-	cerr << "NEW MAP:\n";
-	new_map.dump (cerr);
 
 	_session->tempo_map() = new_map;
 }
@@ -383,7 +377,7 @@ Editor::do_import (vector<string>          paths,
 		} else {
 			ipw.show ();
 			ok = (import_sndfiles (paths, disposition, mode, quality, pos, 1, 1, track, false, instrument) == 0);
-			import_status.sources.clear();
+			import_status.clear();
 		}
 
 	} else {
@@ -429,7 +423,7 @@ Editor::do_import (vector<string>          paths,
 				}
 
 				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, 1, -1, track, replace, instrument) == 0);
-				import_status.sources.clear();
+				import_status.clear();
 				break;
 
 			case Editing::ImportDistinctChannels:
@@ -438,7 +432,7 @@ Editor::do_import (vector<string>          paths,
 				to_import.push_back (*a);
 
 				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, -1, -1, track, replace, instrument) == 0);
-				import_status.sources.clear();
+				import_status.clear();
 				break;
 
 			case Editing::ImportSerializeFiles:
@@ -447,7 +441,7 @@ Editor::do_import (vector<string>          paths,
 				to_import.push_back (*a);
 
 				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, 1, 1, track, replace, instrument) == 0);
-				import_status.sources.clear();
+				import_status.clear();
 				break;
 
 			case Editing::ImportMergeFiles:
@@ -719,9 +713,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 					source = boost::dynamic_pointer_cast<AudioFileSource> (
 						SourceFactory::createExternal (DataType::AUDIO, *_session,
 									       path, n,
-									       (mode == ImportAsTapeTrack
-										? Source::Destructive
-										: Source::Flag (0)),
+						                               Source::Flag (0),
 									true, true));
 				} else {
 					source = boost::dynamic_pointer_cast<AudioFileSource> (s);
@@ -795,7 +787,7 @@ Editor::add_sources (vector<string>            paths,
 
 		boost::shared_ptr<Region> r = RegionFactory::create (sources, plist);
 
-		if (use_timestamp && boost::dynamic_pointer_cast<AudioRegion>(r)) {
+		if (boost::dynamic_pointer_cast<AudioRegion>(r)) {
 			boost::dynamic_pointer_cast<AudioRegion>(r)->special_set_position(sources[0]->natural_position());
 		}
 
@@ -884,7 +876,7 @@ Editor::add_sources (vector<string>            paths,
 
 			boost::shared_ptr<Region> r = RegionFactory::create (just_one, plist);
 
-			if (use_timestamp && boost::dynamic_pointer_cast<AudioRegion>(r)) {
+			if (boost::dynamic_pointer_cast<AudioRegion>(r)) {
 				boost::dynamic_pointer_cast<AudioRegion>(r)->special_set_position((*x)->natural_position());
 			}
 
@@ -1070,27 +1062,6 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 		break;
 	}
 
-	case ImportAsTapeTrack:
-	{
-		if (!ar) {
-			return -1;
-		}
-
-		list<boost::shared_ptr<AudioTrack> > at (_session->new_audio_track (in_chans, out_chans, 0, 1, string(), PresentationInfo::max_order, Destructive));
-		if (!at.empty()) {
-			boost::shared_ptr<Playlist> playlist = at.front()->playlist();
-			boost::shared_ptr<Region> copy (RegionFactory::create (region, true));
-			playlist->clear_changes ();
-			playlist->add_region (copy, pos);
-			_session->add_command (new StatefulDiffCommand (playlist));
-		}
-		if (Config->get_strict_io ()) {
-			for (list<boost::shared_ptr<AudioTrack> >::iterator i = at.begin(); i != at.end(); ++i) {
-				(*i)->set_strict_io (true);
-			}
-		}
-		break;
-	}
 	}
 
 	return 0;

@@ -108,6 +108,16 @@ Pannable::set_panner (boost::shared_ptr<Panner> p)
 	_panner = p;
 }
 
+const std::set<Evoral::Parameter>&
+Pannable::what_can_be_automated() const
+{
+	boost::shared_ptr<Panner> const panner = _panner.lock();
+	if (panner) {
+		return panner->what_can_be_automated ();
+	}
+	return Automatable::what_can_be_automated ();
+}
+
 void
 Pannable::value_changed ()
 {
@@ -135,7 +145,7 @@ Pannable::set_automation_state (AutoState state)
 			}
 		}
 
-		session().set_dirty ();
+		_session.set_dirty ();
 		automation_state_changed (_auto_state);
 	}
 }
@@ -255,16 +265,4 @@ Pannable::set_state (const XMLNode& root, int version)
 	_has_state = true;
 
 	return 0;
-}
-
-string
-Pannable::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
-{
-	boost::shared_ptr<Panner> p = panner ();
-
-	if (p) {
-		return p->value_as_string (ac);
-	}
-
-	return ARDOUR::value_as_string(ac->desc(), ac->get_value());
 }

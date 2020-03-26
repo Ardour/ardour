@@ -188,13 +188,13 @@ BasicUI::remove_marker_at_playhead ()
 void
 BasicUI::rewind ()
 {
-	session->request_transport_speed (session->actual_speed() - 1.5);
+	session->request_transport_speed (get_transport_speed() - 1.5);
 }
 
 void
 BasicUI::ffwd ()
 {
-	session->request_transport_speed (session->transport_speed() + 1.5);
+	session->request_transport_speed (get_transport_speed() + 1.5);
 }
 
 void
@@ -212,19 +212,19 @@ BasicUI::stop_button_onoff () const
 bool
 BasicUI::play_button_onoff () const
 {
-	return session->actual_speed() == 1.0;
+	return get_transport_speed() == 1.0;
 }
 
 bool
 BasicUI::ffwd_button_onoff () const
 {
-	return session->actual_speed() > 1.0;
+	return get_transport_speed() > 1.0;
 }
 
 bool
 BasicUI::rewind_button_onoff () const
 {
-	return session->actual_speed() < 0.0;
+	return get_transport_speed() < 0.0;
 }
 
 bool
@@ -258,7 +258,7 @@ BasicUI::transport_play (bool from_last_start)
 	}
 #endif
 
-	bool rolling = session->transport_rolling();
+	bool rolling = transport_rolling();
 
 	if (session->get_play_loop()) {
 
@@ -355,9 +355,15 @@ BasicUI::set_transport_speed (double speed)
 }
 
 double
-BasicUI::get_transport_speed ()
+BasicUI::get_transport_speed () const
 {
-	return session->transport_speed ();
+	return session->actual_speed ();
+}
+
+double
+BasicUI::transport_rolling () const
+{
+	return !session->transport_stopped_or_stopping ();
 }
 
 void
@@ -548,7 +554,7 @@ BasicUI::toggle_roll (bool roll_out_of_bounded_mode)
 		}
 	}
 
-	bool rolling = session->transport_rolling();
+	bool rolling = transport_rolling();
 
 	if (rolling) {
 

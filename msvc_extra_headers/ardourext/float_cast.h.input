@@ -40,8 +40,9 @@
 
 	#include	<math.h>
 
-	/*	Win32 doesn't seem to have these functions.
-	**	Therefore implement inline versions of these functions here.
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+/*	Win32 doesn't seem to have these functions.
+	*	Therefore implement inline versions of these functions here.
 	*/
 
 	__inline long int
@@ -115,6 +116,8 @@
 			
 		return intgr ;
 	}
-#endif
+#endif  // _MSC_VER && _MSC_VER < 1900
+
+#endif  // _WIN32 || WIN32
 
 #endif  // __FLOAT_CAST_H__

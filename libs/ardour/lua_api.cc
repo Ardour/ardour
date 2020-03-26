@@ -1049,16 +1049,15 @@ LuaAPI::Rubberband::process (luabridge::LuaRef cb)
 
 	for (uint32_t c = 0; c < _n_channels; ++c) {
 		string       name = PBD::basename_nosuffix (names[c]) + "(rb)";
-		const string path = session.new_audio_source_path (name, _n_channels, c, false, false);
+		const string path = session.new_audio_source_path (name, _n_channels, c, false);
 		if (path.empty ()) {
 			cleanup (true);
 			return rv;
 		}
 		try {
-			_asrc.push_back (boost::dynamic_pointer_cast<AudioSource> (
-						SourceFactory::createWritable (
-							DataType::AUDIO, session,
-							path, false, sample_rate)));
+
+			_asrc.push_back (boost::dynamic_pointer_cast<AudioSource> (SourceFactory::createWritable (DataType::AUDIO, session, path, sample_rate)));
+
 		} catch (failed_constructor& err) {
 			cleanup (true);
 			return rv;

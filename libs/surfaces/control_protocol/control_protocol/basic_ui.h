@@ -68,7 +68,9 @@ class LIBCONTROLCP_API BasicUI {
 	void transport_stop ();
 	void transport_play (bool jump_back = false);
 	void set_transport_speed (double speed);
-	double get_transport_speed ();
+
+	double get_transport_speed () const;
+	double transport_rolling () const;
 
 	void jump_by_seconds (double sec, ARDOUR::LocateTransportDisposition ltd = ARDOUR::RollIfAppropriate);
 	void jump_by_bars (double bars, ARDOUR::LocateTransportDisposition ltd = ARDOUR::RollIfAppropriate);

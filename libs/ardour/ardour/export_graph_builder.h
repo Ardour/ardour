@@ -69,7 +69,7 @@ class LIBARDOUR_API ExportGraphBuilder
 	ExportGraphBuilder (Session const & session);
 	~ExportGraphBuilder ();
 
-	int process (samplecnt_t samples, bool last_cycle);
+	samplecnt_t process (samplecnt_t samples, bool last_cycle);
 	bool post_process (); // returns true when finished
 	bool need_postprocessing () const { return !intermediates.empty(); }
 	bool realtime() const { return _realtime; }
@@ -275,9 +275,11 @@ class LIBARDOUR_API ExportGraphBuilder
 
 	AnalysisMap analysis_map;
 
-	bool _realtime;
+	bool        _realtime;
+	samplecnt_t _master_align;
 
-	Glib::ThreadPool thread_pool;
+	Glib::ThreadPool     thread_pool;
+	Glib::Threads::Mutex engine_request_lock;
 };
 
 } // namespace ARDOUR

@@ -15,7 +15,7 @@ Ardour graba multiples canales simultáneos a disco rigido (HDR) y es una
 estación de trabajo de audio digital (DAW).
 Es capaz de grabar 24 o mas canales simultáneamente con calidad de audio
 de 32 bit y a 48khz.
-La inteción de Ardour es funcionar como un sistema HDR "profesional",
+La intención de Ardour es funcionar como un sistema HDR "profesional",
 reemplazando soluciones de hardware dedicado como la Mackie HDR, el 
 Tascam 2424 y otros sistemas tradicionales que emplean cinta como la 
 linea de ADATs de Alesis.
@@ -23,7 +23,7 @@ Tambien se busca igualar o mejorar la       funcionalidad de sistemas
 basados en software como ProTools,         Samplitude, Logic Audio, 
 Nuendo y Cubase VST (reconocemos a estos y a todos los nombres ya 
 mencionados, como marcas registradas de sus respectivos dueños). 
-Ardour soporta Control de Maquina MIDI, por lo que puede ser controlado
+Ardour soporta Control de Máquina MIDI, por lo que puede ser controlado
 desde cualquier controladora MMC, como la "Mackie Digital 8 Bus Mixer"
 y otros mixers digitales modernos.
 .SH OPCIONES

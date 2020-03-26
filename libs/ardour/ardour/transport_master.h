@@ -43,9 +43,9 @@
 #include "midi++/parser.h"
 #include "midi++/types.h"
 
-/* used for delta_string(): */
+/* used for delta_string(): (note: \u00B1 is the plus-or-minus sign) */
 #define PLUSMINUS(A) ( ((A)<0) ? "-" : (((A)>0) ? "+" : "\u00B1") )
-#define LEADINGZERO(A) ( (A)<10 ? "   " : (A)<100 ? "  " : (A)<1000 ? " " : "" )
+#define LEADINGZERO(A) ( (A)<10 ? "    " : (A)<100 ? "   " : (A)<1000 ? "  " : (A)<10000 ? " " : "" )
 
 namespace ARDOUR {
 
@@ -345,6 +345,7 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 
 	virtual void check_backend() {}
 	virtual bool allow_request (TransportRequestSource, TransportRequestType) const;
+	std::string allowed_request_string () const;
 
 	TransportRequestType request_mask() const { return _request_mask; }
 	void set_request_mask (TransportRequestType);

@@ -514,73 +514,6 @@ static void icon_rec_enable (cairo_t *cr, const int width, const int height, con
 	cairo_stroke (cr);
 }
 
-/** tape-mode, "reel" */
-static void icon_rec_tape (cairo_t *cr, const int width, const int height, const Gtkmm2ext::ActiveState state)
-{
-	const double x = width * .5;
-	const double y = height * .5;
-	const double r = std::min (x, y) * .6;
-	const double slit = .11 * M_PI;
-	cairo_translate (cr, x, y);
-
-	cairo_arc (cr, 0, 0, r, 0, 2 * M_PI);
-	if (state == Gtkmm2ext::ExplicitActive) {
-		cairo_set_source_rgba (cr, 1.0, .1, .1, 1.0);
-	}
-	else if (state == Gtkmm2ext::ImplicitActive) {
-		cairo_set_source_rgba (cr, .9, .3, .3, 1.0);
-	}
-	else {
-		cairo_set_source_rgba (cr, .4, .3, .3, 1.0);
-	}
-	cairo_fill_preserve (cr);
-	cairo_set_source_rgba (cr, .0, .0, .0, .5);
-	cairo_set_line_width (cr, 1);
-	cairo_stroke (cr);
-
-	cairo_save (cr);
-	cairo_set_source_rgba (cr, .15, .07, .07, 1.0);
-
-	cairo_rotate (cr, -.5 * M_PI);
-	cairo_move_to (cr, 0, 0);
-	cairo_arc (cr, 0, 0, r *.85, -slit, slit);
-	cairo_line_to (cr, 0, 0);
-	cairo_close_path (cr);
-
-	cairo_fill (cr);
-	cairo_rotate (cr, 2. * M_PI / 3.);
-
-	cairo_move_to (cr, 0, 0);
-	cairo_arc (cr, 0, 0, r *.85, -slit, slit);
-	cairo_line_to (cr, 0, 0);
-	cairo_close_path (cr);
-	cairo_fill (cr);
-
-	cairo_rotate (cr, 2. * M_PI / 3.);
-	cairo_move_to (cr, 0, 0);
-	cairo_arc (cr, 0, 0, r *.85, -slit, slit);
-	cairo_line_to (cr, 0, 0);
-	cairo_close_path (cr);
-	cairo_fill (cr);
-
-	cairo_restore (cr);
-
-	cairo_arc (cr, 0, 0, r * .3, 0, 2 * M_PI);
-	if (state == Gtkmm2ext::ExplicitActive) {
-		cairo_set_source_rgba (cr, 1.0, .1, .1, 1.0);
-	}
-	else if (state == Gtkmm2ext::ImplicitActive) {
-		cairo_set_source_rgba (cr, .9, .3, .3, 1.0);
-	}
-	else {
-		cairo_set_source_rgba (cr, .4, .3, .3, 1.0);
-	}
-	cairo_fill (cr);
-	cairo_set_source_rgba (cr, .0, .0, .0, 1.0);
-	cairo_arc (cr, 0, 0, r *.15, 0, 2 * M_PI); // hole in the middle
-	cairo_fill (cr);
-}
-
 /*****************************************************************************
  * Transport buttons, foreground is always white
  */
@@ -1339,9 +1272,6 @@ ArdourWidgets::ArdourIcon::render (cairo_t *cr,
 			/* fallthrough */
 		case TransportRange:
 			icon_transport_ck (cr, icon, width, height);
-			break;
-		case RecTapeMode:
-			icon_rec_tape (cr, width, height, state);
 			break;
 		case RecButton:
 			icon_rec_enable (cr, width, height, state);

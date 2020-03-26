@@ -33,7 +33,7 @@ class MidiBuffer;
 class MidiEngine;
 
 class LIBARDOUR_API MidiPort : public Port {
-public:
+  public:
 	~MidiPort();
 
 	DataType type () const {
@@ -82,7 +82,7 @@ private:
 	MidiFilter                  _shadow_midi_filter;
 	MIDI::Parser*               _trace_parser;
 	bool                        _data_fetched_for_cycle;
-	
+
 	void resolve_notes (void* buffer, samplepos_t when);
 	void pull_input (pframes_t nframes, bool adjust_speed);
 	void parse_input (pframes_t nframes, MIDI::Parser& parser);

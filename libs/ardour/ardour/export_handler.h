@@ -146,6 +146,8 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 
 	/* Timespan management */
 
+	static void* start_timespan_bg (void*);
+
 	void start_timespan ();
 	int  process_timespan (samplecnt_t samples);
 	int  post_process ();

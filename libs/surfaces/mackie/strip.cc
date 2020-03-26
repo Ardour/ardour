@@ -43,7 +43,6 @@
 #include "ardour/meter.h"
 #include "ardour/monitor_control.h"
 #include "ardour/plugin_insert.h"
-#include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 #include "ardour/phase_control.h"
@@ -585,7 +584,7 @@ Strip::notify_panner_azi_changed (bool force_update)
 		return;
 	}
 
-	double normalized_pos = pan_control->internal_to_interface (pan_control->get_value());
+	double normalized_pos = pan_control->internal_to_interface (pan_control->get_value(), true);
 	double internal_pos = pan_control->get_value();
 
 	if (force_update || (normalized_pos != _last_pan_azi_position_written)) {
@@ -1019,14 +1018,14 @@ Strip::handle_pot (Pot& pot, float delta)
 
 	} else {
 
-		double p = ac->get_interface();
+		double p = ac->get_interface(true);
 
 		p += delta;
 
 		p = max (0.0, p);
 		p = min (1.0, p);
 
-		ac->set_value ( ac->interface_to_internal(p), gcd);
+		ac->set_interface ( p, true);
 	}
 }
 

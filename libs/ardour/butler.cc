@@ -508,4 +508,3 @@ Butler::drop_references ()
 
 
 } // namespace ARDOUR
-

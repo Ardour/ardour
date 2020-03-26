@@ -32,7 +32,7 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 	send_address.sin_family = AF_INET;
 	send_address.sin_addr.s_addr = inet_addr("127.0.0.1");
 	send_address.sin_port = htons(0);
-	int status = bind(send_socket, (SOCKADDR*)&send_address,
+	int status = ::bind(send_socket, (SOCKADDR*)&send_address,
 			  sizeof(send_address));
 
 	if (status != 0) {
@@ -54,7 +54,7 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 	recv_address.sin_family = AF_INET;
 	recv_address.sin_addr.s_addr = inet_addr("127.0.0.1");
 	recv_address.sin_port = htons(0);
-	status = bind(receive_socket, (SOCKADDR*)&recv_address,
+	status = ::bind(receive_socket, (SOCKADDR*)&recv_address,
 		      sizeof(recv_address));
 
 	if (status != 0) {

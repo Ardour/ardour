@@ -111,9 +111,10 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 {
 	if (!_exporting) {
 		pre_export ();
+	} else {
+		realtime_stop (true, true);
 	}
 
-	_realtime_export = realtime;
 	_region_export = region_export;
 
 	if (region_export) {
@@ -165,7 +166,6 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 	} else {
 		_remaining_latency_preroll = 0;
 	}
-	export_status->stop = false;
 
 	/* get transport ready. note how this is calling butler functions
 	   from a non-butler thread. we waited for the butler to stop
@@ -179,15 +179,27 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 		return -1;
 	}
 
-	_engine.Freewheel.connect_same_thread (export_freewheel_connection, boost::bind (&Session::process_export_fw, this, _1));
+	assert (!_engine.freewheeling ());
+	assert (!_engine.in_process_thread ());
 
-	if (_realtime_export) {
+	if (realtime) {
 		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		_export_rolling = true;
+		_realtime_export = true;
+		export_status->stop = false;
 		process_function = &Session::process_export_fw;
+		/* this is required for ExportGraphBuilder::Intermediate::start_post_processing */
+		_engine.Freewheel.connect_same_thread (export_freewheel_connection, boost::bind (&Session::process_export_fw, this, _1));
 		return 0;
 	} else {
+		if (_realtime_export) {
+			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			process_function = &Session::process_with_events;
+		}
+		_realtime_export = false;
 		_export_rolling = true;
+		export_status->stop = false;
+		_engine.Freewheel.connect_same_thread (export_freewheel_connection, boost::bind (&Session::process_export_fw, this, _1));
 		return _engine.freewheel (true);
 	}
 }
@@ -235,6 +247,11 @@ Session::process_export (pframes_t nframes)
 void
 Session::process_export_fw (pframes_t nframes)
 {
+	if (!_export_rolling) {
+		ProcessExport (0);
+		return;
+	}
+
 	const bool need_buffers = _engine.freewheeling ();
 	if (_export_preroll > 0) {
 
@@ -253,7 +270,7 @@ Session::process_export_fw (pframes_t nframes)
 			return;
 		}
 
-		set_transport_speed (1.0, 0, false);
+		set_transport_speed (1.0, false, false, false);
 		butler_transport_work ();
 		g_atomic_int_set (&_butler->should_do_transport_work, 0);
 		butler_completed_transport_work ();
@@ -268,20 +285,33 @@ Session::process_export_fw (pframes_t nframes)
 			_engine.main_thread()->get_buffers ();
 		}
 
-		process_without_events (remain);
+		assert (_count_in_samples == 0);
+		while (remain > 0) {
+			samplecnt_t ns = calc_preroll_subcycle (remain);
+
+			bool session_needs_butler = false;
+			if (process_routes (ns, session_needs_butler)) {
+				fail_roll (ns);
+			}
+
+			ProcessExport (ns);
+
+			_remaining_latency_preroll -= ns;
+			remain -= ns;
+			nframes -= ns;
+
+			if (remain != 0) {
+				_engine.split_cycle (ns);
+			}
+		}
 
 		if (need_buffers) {
 			_engine.main_thread()->drop_buffers ();
 		}
 
-		_remaining_latency_preroll -= remain;
-		_transport_sample -= remain;
-		nframes -= remain;
-
 		if (nframes == 0) {
 			return;
 		}
-		_engine.split_cycle (remain);
 	}
 
 	if (need_buffers) {

@@ -39,7 +39,6 @@
 #include "ardour/meter.h"
 #include "ardour/monitor_control.h"
 #include "ardour/plugin_insert.h"
-#include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 #include "ardour/phase_control.h"

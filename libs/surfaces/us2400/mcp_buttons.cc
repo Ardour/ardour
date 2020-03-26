@@ -497,7 +497,7 @@ US2400Protocol::play_press (Button &)
 	   again, jump back to where we started last time
 	*/
 
-	transport_play (session->transport_speed() == 1.0);
+	transport_play (get_transport_speed() == 1.0);
 	return none;
 }
 
@@ -821,7 +821,7 @@ US2400Protocol::cancel_release (Button &)
 LedState
 US2400Protocol::user_a_press (Button &)
 {
-	transport_play (session->transport_speed() == 1.0);
+	transport_play (get_transport_speed() == 1.0);
 	return off;
 }
 LedState

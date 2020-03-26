@@ -78,6 +78,7 @@ public:
 		RealTime       = 0x04,
 		NotAutomatable = 0x08,
 		InlineControl  = 0x10,
+		HiddenControl  = 0x20,
 	};
 
 	Controllable (const std::string& name, Flag f = Flag (0));
@@ -131,8 +132,8 @@ public:
 	}
 
 	/** Get and Set `interface' value  (typically, fraction of knob travel) */
-	virtual float get_interface() const { return (internal_to_interface(get_value())); }
-	virtual void set_interface (float fraction) { fraction = min( max(0.0f, fraction), 1.0f);  set_value(interface_to_internal(fraction), NoGroup); }
+	virtual float get_interface(bool rotary=false) const { return (internal_to_interface(get_value(), rotary)); }
+	virtual void set_interface (float fraction, bool rotary=false) { fraction = min( max(0.0f, fraction), 1.0f);  set_value(interface_to_internal(fraction, rotary), NoGroup); }
 
 	virtual std::string get_user_string() const { return std::string(); }
 
@@ -163,6 +164,9 @@ public:
 	Flag flags() const { return _flags; }
 	void set_flags (Flag f);
 
+	void set_flag (Flag f); ///< _flags |= f;
+	void clear_flag (Flag f); ///< _flags &= ~f;
+
 	static boost::shared_ptr<Controllable> by_id (const PBD::ID&);
 	static void dump_registry ();
 
@@ -189,19 +193,6 @@ private:
 
 	static void add (Controllable&);
 	static void remove (Controllable*);
-};
-
-/* a utility class for the occasions when you need but do not have
- * a Controllable
- */
-class LIBPBD_API IgnorableControllable : public Controllable
-{
-public:
-	IgnorableControllable () : PBD::Controllable ("ignoreMe") {}
-	~IgnorableControllable () {}
-
-	void set_value (double v, PBD::Controllable::GroupControlDisposition group_override) {}
-	double get_value () const { return 0.0; }
 };
 
 }

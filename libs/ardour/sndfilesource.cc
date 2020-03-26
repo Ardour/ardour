@@ -54,9 +54,6 @@ using namespace ARDOUR;
 using namespace PBD;
 using std::string;
 
-gain_t* SndFileSource::out_coefficient = 0;
-gain_t* SndFileSource::in_coefficient = 0;
-samplecnt_t SndFileSource::xfade_samples = 64;
 const Source::Flag SndFileSource::default_writable_flags = Source::Flag (
 		Source::Writable |
 		Source::Removable |
@@ -68,10 +65,6 @@ SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 	, AudioFileSource (s, node)
 	, _sndfile (0)
 	, _broadcast_info (0)
-	, _capture_start (false)
-	, _capture_end (false)
-	, file_pos (0)
-	, xfade_buf (0)
 {
 	init_sndfile ();
 
@@ -92,10 +85,6 @@ SndFileSource::SndFileSource (Session& s, const string& path, int chn, Flag flag
 	, AudioFileSource (s, path, Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 	, _sndfile (0)
 	, _broadcast_info (0)
-	, _capture_start (false)
-	, _capture_end (false)
-	, file_pos (0)
-	, xfade_buf (0)
 {
 	_channel = chn;
 
@@ -118,10 +107,6 @@ SndFileSource::SndFileSource (Session& s, const string& path, const string& orig
 	, AudioFileSource (s, path, origin, flags, sfmt, hf)
 	, _sndfile (0)
 	, _broadcast_info (0)
-	, _capture_start (false)
-	, _capture_end (false)
-	, file_pos (0)
-	, xfade_buf (0)
 {
 	int fmt = 0;
 
@@ -144,7 +129,6 @@ SndFileSource::SndFileSource (Session& s, const string& path, const string& orig
 			sfmt = FormatInt24;
 		}
 		_flags = Flag (_flags & ~Broadcast);
-		_flags = Flag (_flags & ~Destructive); // XXX or force WAV if destructive?
 		break;
 
 	case AIFF:
@@ -209,14 +193,8 @@ SndFileSource::SndFileSource (Session& s, const string& path, const string& orig
 	_info.samplerate = rate;
 	_info.format = fmt;
 
-	if (_flags & Destructive) {
-		if (open()) {
-			throw failed_constructor();
-		}
-	} else {
-		/* normal mode: do not open the file here - do that in {read,write}_unlocked() as needed
-		 */
-	}
+	/* normal mode: do not open the file here - do that in {read,write}_unlocked() as needed
+	 */
 }
 
 /** Constructor to be called for recovering files being used for
@@ -230,10 +208,6 @@ SndFileSource::SndFileSource (Session& s, const string& path, int chn)
 	, AudioFileSource (s, path, Flag (0))
 	, _sndfile (0)
 	, _broadcast_info (0)
-	, _capture_start (false)
-	, _capture_end (false)
-	, file_pos (0)
-	, xfade_buf (0)
 {
 	_channel = chn;
 
@@ -253,10 +227,6 @@ SndFileSource::SndFileSource (Session& s, const AudioFileSource& other, const st
 	, AudioFileSource (s, path, "", Flag ((other.flags () | default_writable_flags | NoPeakFile) & ~RF64_RIFF), /*unused*/ FormatFloat, /*unused*/ WAVE64)
 	, _sndfile (0)
 	, _broadcast_info (0)
-	, _capture_start (false)
-	, _capture_end (false)
-	, file_pos (0)
-	, xfade_buf (0)
 {
 	if (other.readable_length () == 0) {
 		throw failed_constructor();
@@ -353,11 +323,6 @@ SndFileSource::init_sndfile ()
 
 	memset (&_info, 0, sizeof(_info));
 
-	if (destructive()) {
-		xfade_buf = new Sample[xfade_samples];
-		_natural_position = header_position_offset;
-	}
-
 	AudioFileSource::HeaderPositionOffsetChanged.connect_same_thread (header_position_connection, boost::bind (&SndFileSource::handle_header_position_change, this));
 }
 
@@ -398,7 +363,6 @@ SndFileSource::open ()
 	}
 
 	if ((_info.format & SF_FORMAT_TYPEMASK ) == SF_FORMAT_FLAC) {
-		assert (!destructive());
 		_sndfile = sf_open_fd (fd, writable () ? SFM_WRITE : SFM_READ, &_info, true);
 	} else {
 		_sndfile = sf_open_fd (fd, writable() ? SFM_RDWR : SFM_READ, &_info, true);
@@ -445,16 +409,9 @@ SndFileSource::open ()
 		header_position_offset = _natural_position;
 	}
 
-	if (destructive()) {
-		/* Set our timeline position to either the time reference from a BWF header or the current
-		   start of the session.
-		*/
-		set_natural_position (bwf_info_exists ? _broadcast_info->get_time_reference() : header_position_offset);
-	} else {
-		/* If a BWF header exists, set our _natural_position from it */
-		if (bwf_info_exists) {
-			set_natural_position (_broadcast_info->get_time_reference());
-		}
+	/* If a BWF header exists, set our _natural_position from it */
+	if (bwf_info_exists) {
+		set_natural_position (_broadcast_info->get_time_reference());
 	}
 
 	if (_length != 0 && !bwf_info_exists) {
@@ -501,7 +458,6 @@ SndFileSource::~SndFileSource ()
 {
 	close ();
 	delete _broadcast_info;
-	delete [] xfade_buf;
 }
 
 float
@@ -614,11 +570,7 @@ SndFileSource::write_unlocked (Sample *data, samplecnt_t cnt)
                 return 0; // failure
         }
 
-	if (destructive()) {
-		return destructive_write_unlocked (data, cnt);
-	} else {
-		return nondestructive_write_unlocked (data, cnt);
-	}
+        return nondestructive_write_unlocked (data, cnt);
 }
 
 samplecnt_t
@@ -646,95 +598,6 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, samplecnt_t cnt)
 	if (_build_peakfiles) {
 		compute_and_write_peaks (data, sample_pos, cnt, true, true);
 	}
-
-	return cnt;
-}
-
-samplecnt_t
-SndFileSource::destructive_write_unlocked (Sample* data, samplecnt_t cnt)
-{
-	if (!writable()) {
-		warning << string_compose (_("attempt to write a non-writable audio file source (%1)"), _path) << endmsg;
-		return 0;
-	}
-
-	if (_capture_start && _capture_end) {
-
-		/* start and end of capture both occur within the data we are writing,
-		   so do both crossfades.
-		*/
-
-		_capture_start = false;
-		_capture_end = false;
-
-		/* move to the correct location place */
-		file_pos = capture_start_sample - _natural_position;
-
-		// split cnt in half
-		samplecnt_t subcnt = cnt / 2;
-		samplecnt_t ofilepos = file_pos;
-
-		// fade in
-		if (crossfade (data, subcnt, 1) != subcnt) {
-			return 0;
-		}
-
-		file_pos += subcnt;
-		Sample * tmpdata = data + subcnt;
-
-		// fade out
-		subcnt = cnt - subcnt;
-		if (crossfade (tmpdata, subcnt, 0) != subcnt) {
-			return 0;
-		}
-
-		file_pos = ofilepos; // adjusted below
-
-	} else if (_capture_start) {
-
-		/* start of capture both occur within the data we are writing,
-		   so do the fade in
-		*/
-
-		_capture_start = false;
-		_capture_end = false;
-
-		/* move to the correct location place */
-		file_pos = capture_start_sample - _natural_position;
-
-		if (crossfade (data, cnt, 1) != cnt) {
-			return 0;
-		}
-
-	} else if (_capture_end) {
-
-		/* end of capture both occur within the data we are writing,
-		   so do the fade out
-		*/
-
-		_capture_start = false;
-		_capture_end = false;
-
-		if (crossfade (data, cnt, 0) != cnt) {
-			return 0;
-		}
-
-	} else {
-
-		/* in the middle of recording */
-
-		if (write_float (data, file_pos, cnt) != cnt) {
-			return 0;
-		}
-	}
-
-	update_length (file_pos + cnt);
-
-	if (_build_peakfiles) {
-		compute_and_write_peaks (data, file_pos, cnt, true, true);
-	}
-
-	file_pos += cnt;
 
 	return cnt;
 }
@@ -856,209 +719,9 @@ SndFileSource::write_float (Sample* data, samplepos_t sample_pos, samplecnt_t cn
 }
 
 void
-SndFileSource::clear_capture_marks ()
-{
-	_capture_start = false;
-	_capture_end = false;
-}
-
-/** @param pos Capture start position in session samples */
-void
-SndFileSource::mark_capture_start (samplepos_t pos)
-{
-	if (destructive()) {
-		if (pos < _natural_position) {
-			_capture_start = false;
-		} else {
-			_capture_start = true;
-			capture_start_sample = pos;
-		}
-	}
-}
-
-void
-SndFileSource::mark_capture_end()
-{
-	if (destructive()) {
-		_capture_end = true;
-	}
-}
-
-samplecnt_t
-SndFileSource::crossfade (Sample* data, samplecnt_t cnt, int fade_in)
-{
-	samplecnt_t xfade = min (xfade_samples, cnt);
-	samplecnt_t nofade = cnt - xfade;
-	Sample* fade_data = 0;
-	samplepos_t fade_position = 0; // in samples
-	ssize_t retval;
-	samplecnt_t file_cnt;
-
-	if (fade_in) {
-		fade_position = file_pos;
-		fade_data = data;
-	} else {
-		fade_position = file_pos + nofade;
-		fade_data = data + nofade;
-	}
-
-	if (fade_position > _length) {
-
-		/* read starts beyond end of data, just memset to zero */
-
-		file_cnt = 0;
-
-	} else if (fade_position + xfade > _length) {
-
-		/* read ends beyond end of data, read some, memset the rest */
-
-		file_cnt = _length - fade_position;
-
-	} else {
-
-		/* read is entirely within data */
-
-		file_cnt = xfade;
-	}
-
-	if (file_cnt) {
-
-		if ((retval = read_unlocked (xfade_buf, fade_position, file_cnt)) != (ssize_t) file_cnt) {
-			if (retval >= 0 && errno == EAGAIN) {
-				/* XXX - can we really trust that errno is meaningful here?  yes POSIX, i'm talking to you.
-				 * short or no data there */
-				memset (xfade_buf, 0, xfade * sizeof(Sample));
-			} else {
-				error << string_compose(_("SndFileSource: \"%1\" bad read retval: %2 of %5 (%3: %4)"), _path, retval, errno, strerror (errno), xfade) << endmsg;
-				return 0;
-			}
-		}
-	}
-
-	if (file_cnt != xfade) {
-		samplecnt_t delta = xfade - file_cnt;
-		memset (xfade_buf+file_cnt, 0, sizeof (Sample) * delta);
-	}
-
-	if (nofade && !fade_in) {
-		if (write_float (data, file_pos, nofade) != nofade) {
-			error << string_compose(_("SndFileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
-			return 0;
-		}
-	}
-
-	if (xfade == xfade_samples) {
-
-		samplecnt_t n;
-
-		/* use the standard xfade curve */
-
-		if (fade_in) {
-
-			/* fade new material in */
-
-			for (n = 0; n < xfade; ++n) {
-				xfade_buf[n] = (xfade_buf[n] * out_coefficient[n]) + (fade_data[n] * in_coefficient[n]);
-			}
-
-		} else {
-
-
-			/* fade new material out */
-
-			for (n = 0; n < xfade; ++n) {
-				xfade_buf[n] = (xfade_buf[n] * in_coefficient[n]) + (fade_data[n] * out_coefficient[n]);
-			}
-		}
-
-	} else if (xfade < xfade_samples) {
-
-		std::vector<gain_t> in(xfade);
-		std::vector<gain_t> out(xfade);
-
-		/* short xfade, compute custom curve */
-
-		compute_equal_power_fades (xfade, &in[0], &out[0]);
-
-		for (samplecnt_t n = 0; n < xfade; ++n) {
-			xfade_buf[n] = (xfade_buf[n] * out[n]) + (fade_data[n] * in[n]);
-		}
-
-	} else if (xfade) {
-
-		/* long xfade length, has to be computed across several calls */
-
-	}
-
-	if (xfade) {
-		if (write_float (xfade_buf, fade_position, xfade) != xfade) {
-			error << string_compose(_("SndFileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
-			return 0;
-		}
-	}
-
-	if (fade_in && nofade) {
-		if (write_float (data + xfade, file_pos + xfade, nofade) != nofade) {
-			error << string_compose(_("SndFileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
-			return 0;
-		}
-	}
-
-	return cnt;
-}
-
-samplepos_t
-SndFileSource::last_capture_start_sample () const
-{
-	if (destructive()) {
-		return capture_start_sample;
-	} else {
-		return 0;
-	}
-}
-
-void
-SndFileSource::handle_header_position_change ()
-{
-	if (destructive()) {
-		if ( _length != 0 ) {
-			error << string_compose(_("Filesource: start time is already set for existing file (%1): Cannot change start time."), _path ) << endmsg;
-			//in the future, pop up a dialog here that allows user to regenerate file with new start offset
-		} else if (writable()) {
-			_natural_position = header_position_offset;
-			set_header_natural_position ();  //this will get flushed if/when the file is recorded to
-		}
-	}
-}
-
-void
-SndFileSource::setup_standard_crossfades (Session const & s, samplecnt_t rate)
-{
-	/* This static method is assumed to have been called by the Session
-	   before any DFS's are created.
-	*/
-
-	xfade_samples = (samplecnt_t) floor ((s.config.get_destructive_xfade_msecs () / 1000.0) * rate);
-
-	delete [] out_coefficient;
-	delete [] in_coefficient;
-
-	out_coefficient = new gain_t[xfade_samples];
-	in_coefficient = new gain_t[xfade_samples];
-
-	compute_equal_power_fades (xfade_samples, in_coefficient, out_coefficient);
-}
-
-void
 SndFileSource::set_natural_position (samplepos_t pos)
 {
-	// destructive track timeline postion does not change
-	// except at instantion or when header_position_offset
-	// (session start) changes
-
-	if (!destructive()) {
-		AudioFileSource::set_natural_position (pos);
-	}
+	AudioFileSource::set_natural_position (pos);
 }
 
 int

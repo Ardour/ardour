@@ -33,6 +33,7 @@
 #include "ardour/midi_port.h"
 #include "ardour/session.h"
 #include "ardour/transport_master.h"
+#include "ardour/transport_master_manager.h"
 
 #include "pbd/i18n.h"
 
@@ -429,9 +430,12 @@ MTC_TransportMaster::update_mtc_time (const MIDI::byte *msg, bool was_full, samp
 
 	if (was_full || outside_window (mtc_frame)) {
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("update_mtc_time: full TC %1 or outside window %2 MTC %3\n", was_full, outside_window (mtc_frame), mtc_frame));
-		_session->set_requested_return_sample (-1);
-		_session->request_transport_speed (0, TRS_MTC);
-		_session->request_locate (mtc_frame, MustStop, TRS_MTC);
+		boost::shared_ptr<TransportMaster> c = TransportMasterManager::instance().current();
+		if (c && c.get() == this && _session->config.get_external_sync()) {
+			_session->set_requested_return_sample (-1);
+			_session->request_transport_speed (0, TRS_MTC);
+			_session->request_locate (mtc_frame, MustStop, TRS_MTC);
+		}
 		update_mtc_status (MIDI::MTC_Stopped);
 		reset (false);
 		reset_window (mtc_frame);
@@ -567,7 +571,7 @@ MTC_TransportMaster::position_string() const
 std::string
 MTC_TransportMaster::delta_string () const
 {
-	char delta[80];
+	char delta[128];
 	SafeTime last;
 	current.safe_read (last);
 
@@ -576,8 +580,14 @@ MTC_TransportMaster::delta_string () const
 	if (last.timestamp == 0 || reset_pending) {
 		snprintf(delta, sizeof(delta), "\u2012\u2012\u2012\u2012");
 	} else {
-		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%" PRIi64 "</span>sm",
-				LEADINGZERO(abs(_current_delta)), PLUSMINUS(-_current_delta), abs(_current_delta));
+		if (abs (_current_delta) > _session->sample_rate()) {
+			int secs = rint ((double) _current_delta / _session->sample_rate());
+			snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%d</span><span face=\"monospace\"> s</span>",
+			         LEADINGZERO(abs(secs)), PLUSMINUS(-secs), abs(secs));
+		} else {
+			snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%" PRIi64 "</span><span face=\"monospace\">sm</span>",
+			         LEADINGZERO(abs(_current_delta)), PLUSMINUS(-_current_delta), abs(_current_delta));
+		}
 	}
 	return std::string(delta);
 }

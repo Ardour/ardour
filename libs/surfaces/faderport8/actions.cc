@@ -135,8 +135,8 @@ FaderPort8::setup_actions ()
 void
 FaderPort8::button_play ()
 {
-	if (session->transport_rolling ()) {
-		if (session->transport_speed () != 1.0) {
+	if (transport_rolling ()) {
+		if (get_transport_speed() != 1.0) {
 			session->request_transport_speed (1.0);
 		} else {
 			transport_stop ();
@@ -149,7 +149,7 @@ FaderPort8::button_play ()
 void
 FaderPort8::button_stop ()
 {
-	if (session->transport_rolling ()) {
+	if (transport_rolling ()) {
 		transport_stop ();
 	} else {
 		AccessAction ("Transport", "GotoStart");
@@ -315,20 +315,20 @@ FaderPort8::button_varispeed (bool ffw)
 
 	// switch play direction, if needed
 	if (ffw) {
-		if (session->transport_speed () <= 0) {
+		if (get_transport_speed() <= 0) {
 			session->request_transport_speed (1.0);
 			return ;
 		}
 	} else {
-		if (session->transport_speed () >= 0) {
+		if (get_transport_speed() >= 0) {
 			session->request_transport_speed (-1.0);
 			return ;
 		}
 	}
-	// incremetally increase speed. double speed every 10 clicks
+	// incrementally increase speed by semitones
 	// (keypress auto-repeat is 100ms)
 	float maxspeed = Config->get_shuttle_max_speed();
-	float speed = exp2f(0.1f) * session->transport_speed ();
+	float speed = exp2f(1.0/12.0) * get_transport_speed();
 	speed = std::max (-maxspeed, std::min (maxspeed, speed));
 	session->request_transport_speed (speed, false);
 }
@@ -431,9 +431,9 @@ FaderPort8::handle_encoder_pan (int steps)
 			if (steps == 0) {
 				ac->set_value (ac->normal(), PBD::Controllable::UseGroup);
 			} else {
-				double v = ac->internal_to_interface (ac->get_value());
+				double v = ac->internal_to_interface (ac->get_value(), true);
 				v = std::max (0.0, std::min (1.0, v + steps * .01));
-				ac->set_value (ac->interface_to_internal(v), PBD::Controllable::UseGroup);
+				ac->set_value (ac->interface_to_internal(v, true), PBD::Controllable::UseGroup);
 			}
 		}
 	}
@@ -450,7 +450,7 @@ FaderPort8::handle_encoder_link (int steps)
 		return;
 	}
 
-	double v = ac->internal_to_interface (ac->get_value());
+	double v = ac->internal_to_interface (ac->get_value(), true);
 	ac->start_touch (ac->session().transport_sample());
 
 	if (steps == 0) {
@@ -468,7 +468,7 @@ FaderPort8::handle_encoder_link (int steps)
 	} else {
 		v = std::max (0.0, std::min (1.0, v + steps * .01));
 	}
-	ac->set_value (ac->interface_to_internal(v), PBD::Controllable::UseGroup);
+	ac->set_value (ac->interface_to_internal(v, true), PBD::Controllable::UseGroup);
 }
 
 

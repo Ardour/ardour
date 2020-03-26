@@ -1074,7 +1074,7 @@ RouteTimeAxisView::rename_current_playlist ()
 	string name;
 
 	boost::shared_ptr<Track> tr = track();
-	if (!tr || tr->destructive()) {
+	if (!tr) {
 		return;
 	}
 
@@ -1148,7 +1148,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playl
 	string name;
 
 	boost::shared_ptr<Track> tr = track ();
-	if (!tr || tr->destructive()) {
+	if (!tr) {
 		return;
 	}
 
@@ -1216,7 +1216,7 @@ void
 RouteTimeAxisView::clear_playlist ()
 {
 	boost::shared_ptr<Track> tr = track ();
-	if (!tr || tr->destructive()) {
+	if (!tr) {
 		return;
 	}
 
@@ -1814,7 +1814,7 @@ RouteTimeAxisView::ensure_pan_views (bool show)
 		return;
 	}
 
-	set<Evoral::Parameter> params = _route->panner()->what_can_be_automated();
+	set<Evoral::Parameter> params = _route->pannable()->what_can_be_automated();
 	set<Evoral::Parameter>::iterator p;
 
 	for (p = params.begin(); p != params.end(); ++p) {
@@ -1829,7 +1829,7 @@ RouteTimeAxisView::ensure_pan_views (bool show)
 
 			/* we don't already have an AutomationTimeAxisView for this parameter */
 
-			std::string const name = _route->panner()->describe_parameter (pan_control->parameter ());
+			std::string const name = _route->pannable()->describe_parameter (pan_control->parameter ());
 
 			boost::shared_ptr<AutomationTimeAxisView> t (
 					new AutomationTimeAxisView (_session,
@@ -2045,16 +2045,34 @@ RouteTimeAxisView::add_existing_processor_automation_curves (boost::weak_ptr<Pro
 	}
 
 	set<Evoral::Parameter> existing;
-
 	processor->what_has_data (existing);
+
+	/* Also add explicitly visible */
+	const std::set<Evoral::Parameter>& automatable = processor->what_can_be_automated ();
+	for (std::set<Evoral::Parameter>::const_iterator i = automatable.begin(); i != automatable.end(); ++i) {
+		boost::shared_ptr<AutomationControl> control = boost::dynamic_pointer_cast<AutomationControl>(processor->control(*i, false));
+		if (!control) {
+			continue;
+		}
+		/* see also AutomationTimeAxisView::state_id() */
+		std::string ctrl_state_id = std::string("automation ") + control->id().to_s();
+		bool visible;
+		if (get_gui_property (ctrl_state_id, "visible", visible) && visible) {
+			existing.insert (*i);
+		}
+	}
 
 	for (set<Evoral::Parameter>::iterator i = existing.begin(); i != existing.end(); ++i) {
 
 		Evoral::Parameter param (*i);
 		boost::shared_ptr<AutomationLine> al;
 
+		boost::shared_ptr<AutomationControl> control = boost::dynamic_pointer_cast<AutomationControl>(processor->control(*i, false));
+		if (!control || control->flags () & Controllable::HiddenControl) {
+			continue;
+		}
+
 		if ((al = find_processor_automation_curve (processor, param)) != 0) {
-#warning NOT REACHED -- bug?
 			al->queue_reset ();
 		} else {
 			add_processor_automation_curve (processor, param);
@@ -2269,7 +2287,7 @@ RouteTimeAxisView::find_processor_automation_curve (boost::shared_ptr<Processor>
 
 	if ((pan = find_processor_automation_node (processor, what)) != 0) {
 		if (pan->view) {
-			pan->view->line();
+			return pan->view->line();
 		}
 	}
 

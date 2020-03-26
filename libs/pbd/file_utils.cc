@@ -360,8 +360,14 @@ bool
 hard_link (const std::string& existing_file, const std::string& new_path)
 {
 #ifdef PLATFORM_WINDOWS
+# if defined (COMPILER_MINGW) && defined(__GNUC__) && __GNUC__ == 8
+	/* For some reason mingx 8.3.0 does not support CreateHardLinkA()
+	 * (mingw/gcc-4.9 does) */
+	return false;
+# else
 	/* see also ntfs_link -- msvc only pbd extension */
 	return CreateHardLinkA (new_path.c_str(), existing_file.c_str(), NULL);
+# endif
 #else
 	return 0 == link (existing_file.c_str(), new_path.c_str());
 #endif

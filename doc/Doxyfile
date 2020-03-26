@@ -281,7 +281,7 @@ OPTIMIZE_OUTPUT_VHDL   = NO
 # Note that for custom extensions you also need to set FILE_PATTERNS otherwise
 # the files are not read by doxygen.
 
-EXTENSION_MAPPING      =
+EXTENSION_MAPPING      = .h=C++
 
 # If the MARKDOWN_SUPPORT tag is enabled then doxygen pre-processes all comments
 # according to the Markdown format, which allows for more readable
@@ -760,13 +760,16 @@ WARN_LOGFILE           =
 
 INPUT                  = ../libs/ardour \
                          ../libs/ardouralsautil \
+                         ../libs/audiographer \
                          ../libs/backends \
                          ../libs/canvas \
                          ../libs/evoral \
                          ../libs/gtkmm2ext \
                          ../libs/libltc \
+                         ../libs/lua \
                          ../libs/midi++2 \
                          ../libs/pbd \
+                         ../libs/plugins \
                          ../libs/ptformat \
                          ../libs/qm-dsp \
                          ../libs/surfaces \
@@ -2051,41 +2054,46 @@ PREDEFINED             = \
                          CONFIG_ARCH="x86_64" \
                          WAF_BUILD \
                          CANVAS_COMPATIBILITY=1 \
-                         HAVE_AUBIO=1 \
+                         \
                          HAVE_ALSA=1 \
+                         HAVE_AUBIO=1 \
                          HAVE_GLIB=1 \
+                         HAVE_GTK=1 \
+                         HAVE_LIBS_GTKMM2EXT=1 \
                          HAVE_LIBS_LUA=1 \
-                         HAVE_XML=1 \
-                         PTFORMAT=1 \
-                         HAVE_SAMPLERATE=1 \
+                         HAVE_LILV=1 \
+                         HAVE_LO=1 \
+                         HAVE_LOCALTIME_R=1 \
+                         HAVE_LRDF=1 \
                          HAVE_LV2=1 \
+                         HAVE_LV2_1_0_0=1 \
                          HAVE_LV2_1_10_0=1 \
+                         HAVE_POSIX_MEMALIGN=1 \
+                         HAVE_PULSEAUDIO=1 \
+                         HAVE_READLINE=1 \
+                         HAVE_RUBBERBAND=1 \
+                         HAVE_SAMPLERATE=1 \
                          HAVE_SERD=1 \
                          HAVE_SORD=1 \
                          HAVE_SRATOM=1 \
-                         HAVE_LILV=1 \
-                         HAVE_LV2_1_0_0=1 \
                          HAVE_SUIL=1 \
+                         HAVE_TAGLIB=1 \
+                         HAVE_VAMPHOSTSDK=1 \
+                         HAVE_VAMPSDK=1 \
+                         HAVE_X11=1 \
+                         HAVE_XML=1 \
+                         \
+                         ENABLE_NLS=1 \
                          LV2_SUPPORT=1 \
                          LV2_EXTENDED=1 \
-                         HAVE_GTK=1 \
-                         HAVE_LIBS_GTKMM2EXT=1 \
-                         HAVE_X11=1  \
                          LXVST_64BIT=1 \
                          LXVST_SUPPORT=1 \
-                         HAVE_TAGLIB=1 \
-                         HAVE_POSIX_MEMALIGN=1 \
-                         HAVE_VAMPSDK=1 \
-                         HAVE_VAMPHOSTSDK=1 \
-                         HAVE_RUBBERBAND=1 \
-                         ENABLE_NLS=1 \
-                         HAVE_CURL=1 \
-                         HAVE_LO=1 \
-                         HAVE_LRDF=1 \
+                         PTFORMAT=1 \
                          _VAMP_NO_PLUGIN_NAMESPACE=1 \
                          _VAMP_NO_HOST_NAMESPACE=1 \
                          \
                          LIBARDOUR_API= \
+                         LIBAUDIOGRAPHER_API= \
                          LIBWIDGETS_API= \
                          LIBWAVEVIEW_API= \
                          LIBCANVAS_API= \

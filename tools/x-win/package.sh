@@ -235,6 +235,9 @@ fi
 ### http://sourceforge.net/projects/mingw/files/MinGW/Extension/gdb/gdb-7.6.1-1/gdb-7.6.1-1-mingw32-bin.tar.lzma
 ### http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.9.1/threads-win32/sjlj/x86_64-4.9.1-release-win32-sjlj-rt_v3-rev1.7z
 if ! grep " using ./waf configure" build/config.log | grep -q -- "--optimize"; then
+	PACKAGE_GDB=1
+fi
+if test -n "$PACKAGE_GDB"; then
 	download gdb-static-win3264.tar.xz http://robin.linuxaudio.org/gdb-static-win3264.tar.xz
 	cd ${SRCCACHE}
 	tar xf gdb-static-win3264.tar.xz

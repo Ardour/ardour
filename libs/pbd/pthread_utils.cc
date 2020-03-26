@@ -36,6 +36,12 @@ DECLARE_DEFAULT_COMPARISONS(pthread_t)  // Needed for 'DECLARE_DEFAULT_COMPARISO
                                         // to be the case with ptw32 'pthread_t' which is a simple struct.
 #endif
 
+#ifdef __APPLE__
+#include <mach/thread_policy.h>
+#include <mach/thread_act.h>
+#include <mach/mach_time.h>
+#endif
+
 using namespace std;
 
 typedef std::list<pthread_t> ThreadMap;
@@ -271,15 +277,15 @@ pbd_set_thread_priority (pthread_t thread, const int policy, int priority)
 bool
 pbd_mach_set_realtime_policy (pthread_t thread_id, double period_ns)
 {
-#ifdef _APPLE_
+#ifdef __APPLE__
 	thread_time_constraint_policy_data_t policy;
 #ifndef NDEBUG
 	mach_msg_type_number_t msgt = 4;
 	boolean_t dflt = false;
-	kern_return_t rv = thread_policy_get (pthread_mach_thread_np (_main_thread),
+	kern_return_t rv = thread_policy_get (pthread_mach_thread_np (thread_id),
 			THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t) &policy,
 			&msgt, &dflt);
-	printf ("Mach Thread(%p) %d %d %d %d DFLT %d OK: %d\n", _main_thread, policy.period, policy.computation, policy.constraint, policy.preemptible, dflt, rv == KERN_SUCCESS);
+	printf ("Mach Thread(%p) get: period=%d comp=%d constraint=%d preemt=%d OK: %d\n", thread_id, policy.period, policy.computation, policy.constraint, policy.preemptible, rv == KERN_SUCCESS);
 #endif
 
 	mach_timebase_info_data_t timebase_info;
@@ -295,7 +301,7 @@ pbd_mach_set_realtime_policy (pthread_t thread_id, double period_ns)
 			THREAD_TIME_CONSTRAINT_POLICY_COUNT);
 
 #ifndef NDEBUG
-	printf ("Mach Thread(%p) %d %d %d %d OK: %d\n", thread_id, policy.period, policy.computation, policy.constraint, policy.preemptible, res == KERN_SUCCESS);
+	printf ("Mach Thread(%p) set: period=%d comp=%d constraint=%d preemt=%d OK: %d\n", thread_id, policy.period, policy.computation, policy.constraint, policy.preemptible, res == KERN_SUCCESS);
 #endif
 	return res != KERN_SUCCESS;
 #endif

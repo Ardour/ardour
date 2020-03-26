@@ -69,6 +69,7 @@ using std::vector;
 StartupFSM::StartupFSM (EngineControl& amd)
 	: session_existing_sample_rate (0)
 	, session_is_new (false)
+	, session_name_edited (false)
 	, new_user (NewUserWizard::required())
 	, new_session_required (ARDOUR_COMMAND_LINE::new_session || (!ARDOUR::Profile->get_mixbus() && new_user))
 	, _state (new_user ? WaitingForNewUser : WaitingForSessionPath)
@@ -85,7 +86,7 @@ StartupFSM::StartupFSM (EngineControl& amd)
 	 * WaitingForSessionPath: if the previous two conditions are not true
 	 */
 
-	if (string (VERSIONSTRING).find (".pre") != string::npos) {
+	if (string (VERSIONSTRING).find (".pre0") != string::npos) {
 		string fn = Glib::build_filename (user_config_directory(), ".i_swear_that_i_will_heed_the_guidelines_stated_in_the_pre_release_dialog");
 		if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
 			set_state (WaitingForPreRelease);
@@ -95,7 +96,6 @@ StartupFSM::StartupFSM (EngineControl& amd)
 	Application* app = Application::instance ();
 
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &StartupFSM::queue_finish));
-	app->ShouldLoad.connect (sigc::mem_fun (*this, &StartupFSM::load_from_application_api));
 
 	Gtkmm2ext::Keyboard::HideMightMeanQuit.connect (sigc::mem_fun (*this, &StartupFSM::dialog_hidden));
 }
@@ -200,6 +200,9 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 	switch (_state) {
 	case WaitingForPreRelease:
 		switch (dialog_id) {
+		case ApplicationPseudoDialog:
+			/* this shouldn't happen; ignore it */
+			break;
 		case PreReleaseDialog:
 		default:
 			/* any response value from the pre-release dialog means
@@ -218,6 +221,9 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 
 	case WaitingForNewUser:
 		switch (dialog_id) {
+		case ApplicationPseudoDialog:
+			/* this shouldn't happen; ignore it */
+			break;
 		case NewUserDialog:
 			switch (response) {
 			case RESPONSE_OK:
@@ -260,6 +266,13 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 			default:
 				_signal_response (ExitProgram);
 				break;
+			}
+			break;
+
+		case ApplicationPseudoDialog:
+			/* macOS, NSM etc. ... existence was already checked */
+			if (get_session_parameters_from_path (ARDOUR_COMMAND_LINE::session_name, string(), false)) {
+				start_audio_midi_setup ();
 			}
 			break;
 
@@ -567,6 +580,7 @@ StartupFSM::get_session_parameters_from_path (string const & path, string const 
 		session_path = path;
 	}
 
+	session_template = string ();
 
 	if (!template_name.empty()) {
 
@@ -644,6 +658,7 @@ StartupFSM::check_session_parameters (bool must_be_new)
 
 	session_name = session_dialog->session_name (requested_new);
 	session_path = session_dialog->session_folder ();
+	session_name_edited = session_dialog->was_new_name_edited ();
 
 	if (must_be_new) {
 		assert (requested_new);
@@ -743,6 +758,7 @@ StartupFSM::check_session_parameters (bool must_be_new)
 			std::string existing = Glib::build_filename (session_path, session_name);
 
 			if (!ask_about_loading_existing_session (existing)) {
+				session_dialog->show ();
 				session_dialog->clear_name ();
 				return 1; /* try again */
 			}
@@ -829,22 +845,6 @@ StartupFSM::copy_demo_sessions ()
 	}
 }
 
-void
-StartupFSM::load_from_application_api (const std::string& path)
-{
-	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
-		return;
-	}
-
-	/* just set this as if it was given on the command line, rather than
-	 * supplied via some desktop system (e.g. macOS application delegate
-	 * and "openFile". Note that this relies on this being invoked before
-	 * StartupFSM::start().
-	 */
-
-	ARDOUR_COMMAND_LINE::session_name = path;
-}
-
 bool
 StartupFSM::ask_about_loading_existing_session (const std::string& session_path)
 {
@@ -906,4 +906,16 @@ Full information on all the above can be found on the support page at\n\
 	pre_release_dialog->get_vbox()->show_all ();
 	pre_release_dialog->set_position (WIN_POS_CENTER);
 	pre_release_dialog->present ();
+}
+
+void
+StartupFSM::handle_path (string const & path)
+{
+	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
+		return;
+	}
+
+	ARDOUR_COMMAND_LINE::session_name = path;
+
+	dialog_response_handler (RESPONSE_OK, ApplicationPseudoDialog);
 }

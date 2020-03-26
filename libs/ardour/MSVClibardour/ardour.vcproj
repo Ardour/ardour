@@ -352,6 +352,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\audiorom.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\audiosource.cc"
 				>
 			</File>
@@ -940,6 +944,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\readable.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\readonly_control.cc"
 				>
 			</File>
@@ -1368,10 +1376,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\tape_file_matcher.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\template_utils.cc"
 				>
 			</File>
@@ -1575,6 +1579,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\audioregion.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\audiorom.h"
 				>
 			</File>
 			<File
@@ -2483,10 +2491,6 @@
 			</File>
 			<File
 				RelativePath="..\ardour\system_exec.h"
-				>
-			</File>
-			<File
-				RelativePath="..\ardour\tape_file_matcher.h"
 				>
 			</File>
 			<File

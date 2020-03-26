@@ -463,11 +463,9 @@ RegionExportChannelSelector::RegionExportChannelSelector (ARDOUR::Session * _ses
 	region (region),
 	track (track),
 	region_chans (region.n_channels()),
-	track_chans (track.n_outputs().n_audio()),
 
 	raw_button (type_group),
-	fades_button (type_group),
-	processed_button (type_group)
+	fades_button (type_group)
 {
 	pack_start (vbox);
 
@@ -482,10 +480,6 @@ RegionExportChannelSelector::RegionExportChannelSelector (ARDOUR::Session * _ses
 	fades_button.set_label (string_compose (_("Region contents with fades and region gain (channels: %1)"), region_chans));
 	fades_button.signal_toggled ().connect (sigc::mem_fun (*this, &RegionExportChannelSelector::handle_selection));
 	vbox.pack_start (fades_button, false, false);
-
-	processed_button.set_label (string_compose (_("Track output (channels: %1)"), track_chans));
-	processed_button.signal_toggled ().connect (sigc::mem_fun (*this, &RegionExportChannelSelector::handle_selection));
-	vbox.pack_start (processed_button, false, false);
 
 	sync_with_manager();
 	vbox.show_all_children ();
@@ -509,9 +503,6 @@ RegionExportChannelSelector::sync_with_manager ()
 	case RegionExportChannelFactory::Fades:
 		fades_button.set_active (true);
 		break;
-	case RegionExportChannelFactory::Processed:
-		processed_button.set_active (true);
-		break;
 	}
 
 	handle_selection ();
@@ -531,8 +522,6 @@ RegionExportChannelSelector::handle_selection ()
 		type = RegionExportChannelFactory::Raw;
 	} else if (fades_button.get_active ()) {
 		type = RegionExportChannelFactory::Fades;
-	} else if (processed_button.get_active ()) {
-		type = RegionExportChannelFactory::Processed;
 	} else {
 		CriticalSelectionChanged ();
 		return;
@@ -541,8 +530,7 @@ RegionExportChannelSelector::handle_selection ()
 	factory.reset (new RegionExportChannelFactory (_session, region, track, type));
 	state->config->set_region_processing_type (type);
 
-	const size_t cc = type == RegionExportChannelFactory::Processed ? track_chans : region_chans;
-	for (size_t chan = 0; chan < cc; ++chan) {
+	for (size_t chan = 0; chan < region_chans; ++chan) {
 		state->config->register_channel (factory->create (chan));
 	}
 

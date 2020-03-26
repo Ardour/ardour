@@ -273,16 +273,13 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		color_dialog.get_colorsel()->set_current_color (c);
 
 		switch (color_dialog.run()) {
-		case RESPONSE_CANCEL:
-			break;
-		case RESPONSE_ACCEPT:
-			c = color_dialog.get_colorsel()->get_current_color();
-			GroupTabs::set_group_color (group, gdk_color_to_rgba (c));
-			break;
+			case RESPONSE_ACCEPT:
+				c = color_dialog.get_colorsel()->get_current_color();
+				GroupTabs::set_group_color (group, gdk_color_to_rgba (c));
+				break;
 
-		default:
-			break;
-
+			default:
+				break;
 		}
 
 		color_dialog.hide ();

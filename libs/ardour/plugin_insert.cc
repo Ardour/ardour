@@ -222,7 +222,7 @@ PluginInsert::add_sidechain (uint32_t n_audio, uint32_t n_midi)
 	} else if (owner()) {
 		n << "SC " << owner()->name() << "/" << name() << " " << Session::next_name_id ();
 	} else {
-		n << "tobeRenamed";
+		n << "toBeRenamed" << id().to_s();
 	}
 	SideChain *sc = new SideChain (_session, n.str ());
 	_sidechain = boost::shared_ptr<SideChain> (sc);
@@ -487,10 +487,10 @@ PluginInsert::create_automatable_parameters ()
 		boost::shared_ptr<AutomationList> list(new AutomationList(param, desc));
 		boost::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc, list));
 		if (!automatable || (limit_automatables > 0 && what_can_be_automated ().size() > limit_automatables)) {
-			c->set_flags (Controllable::Flag ((int)c->flags() | Controllable::NotAutomatable));
+			c->set_flag (Controllable::NotAutomatable);
 		}
 		if (desc.inline_ctrl) {
-			c->set_flags (Controllable::Flag ((int)c->flags() | Controllable::InlineControl));
+			c->set_flag (Controllable::InlineControl);
 		}
 		add_control (c);
 		plugin->set_automation_control (i, c);
@@ -508,7 +508,7 @@ PluginInsert::create_automatable_parameters ()
 			}
 			boost::shared_ptr<AutomationControl> c (new PluginPropertyControl(this, param, desc, list));
 			if (!Variant::type_is_numeric(desc.datatype)) {
-				c->set_flags (Controllable::Flag ((int)c->flags() | Controllable::NotAutomatable));
+				c->set_flag (Controllable::NotAutomatable);
 			}
 			add_control (c);
 		}
@@ -1181,7 +1181,7 @@ PluginInsert::bypass (BufferSet& bufs, pframes_t nframes)
 					bufs.get_available (*t, out).silence (nframes, 0);
 					continue;
 				}
-				if (in_idx != src_idx) {
+				if (in_idx != out) {
 					bufs.get_available (*t, out).read_from (bufs.get_available (*t, in_idx), nframes, 0, 0);
 				}
 			}
@@ -3037,10 +3037,10 @@ PluginInsert::PluginControl::get_user_string () const
 {
 	boost::shared_ptr<Plugin> plugin = _plugin->plugin (0);
 	if (plugin) {
-		char buf[32];
+		char buf[64];
 		if (plugin->print_parameter (parameter().id(), buf, sizeof(buf))) {
 			assert (strlen (buf) > 0);
-			return std::string (buf) + " (" + AutomationControl::get_user_string () + ")";
+			return std::string (buf);
 		}
 	}
 	return AutomationControl::get_user_string ();

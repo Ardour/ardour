@@ -49,8 +49,10 @@ pbd_g_stat(const gchar *filename, GStatBufW32 *buf)
  * while the windows API is
  *   int _wstat(const wchar_t*, struct _stat*)
  * note that  struct _stat != struct stat;
+ *
+ * This has been fixed with sometime between 2.42.0 and 2.64.1
  */
-#if defined(_WIN32) && !defined(_MSC_VER) && defined(_WIN64)
+#if defined(_WIN32) && !defined(_MSC_VER) && defined(_WIN64) && !GLIB_CHECK_VERSION (2,64,1)
 #include <windows.h>
 #include <errno.h>
 #include <wchar.h>

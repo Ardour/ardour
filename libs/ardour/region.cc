@@ -584,7 +584,6 @@ Region::special_set_position (samplepos_t pos)
 	 * a way to store its "natural" or "captured" position.
 	 */
 
-	_position = _position;
 	_position = pos;
 }
 
@@ -1393,6 +1392,22 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 
 	what_changed = set_values (node);
 
+	/* Regions derived from "Destructive/Tape" mode tracks in earlier
+	 * versions will have their length set to an extremely large value
+	 * (essentially the maximum possible length of a file). Detect this
+	 * here and reset to the actual source length (using the first source
+	 * as a proxy for all of them). For "previously destructive" sources,
+	 * this will correspond to the full extent of the data actually written
+	 * to the file (though this may include blank space if discontiguous
+	 * punches/capture passes were carried out.
+	 */
+
+	if (!_sources.empty() && _type == DataType::AUDIO) {
+		if (_length > _sources.front()->length(_position)) {
+			_length = _sources.front()->length(_position) - _start;
+		}
+	}
+
 	set_id (node);
 
 	if (_position_lock_style == MusicTime) {
@@ -1731,7 +1746,7 @@ Region::source_length(uint32_t n) const
 bool
 Region::verify_length (samplecnt_t& len)
 {
-	if (source() && (source()->destructive() || source()->length_mutable())) {
+	if (source() && source()->length_mutable()) {
 		return true;
 	}
 
@@ -1749,7 +1764,7 @@ Region::verify_length (samplecnt_t& len)
 bool
 Region::verify_start_and_length (samplepos_t new_start, samplecnt_t& new_length)
 {
-	if (source() && (source()->destructive() || source()->length_mutable())) {
+	if (source() && source()->length_mutable()) {
 		return true;
 	}
 
@@ -1767,7 +1782,7 @@ Region::verify_start_and_length (samplepos_t new_start, samplecnt_t& new_length)
 bool
 Region::verify_start (samplepos_t pos)
 {
-	if (source() && (source()->destructive() || source()->length_mutable())) {
+	if (source() && source()->length_mutable()) {
 		return true;
 	}
 
@@ -1782,7 +1797,7 @@ Region::verify_start (samplepos_t pos)
 bool
 Region::verify_start_mutable (samplepos_t& new_start)
 {
-	if (source() && (source()->destructive() || source()->length_mutable())) {
+	if (source() && source()->length_mutable()) {
 		return true;
 	}
 

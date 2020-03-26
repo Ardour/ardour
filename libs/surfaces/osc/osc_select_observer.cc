@@ -938,19 +938,11 @@ OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> 
 	string path;
 	float value = 0.0;
 	float db;
-#ifdef MIXBUS
-	if (controllable) {
-		db = raw_value;
-	} else {
-		db = -193;
-	}
-#else
 	if (raw_value < 1e-15) {
 		db = -193;
 	} else {
 		db = accurate_coefficient_to_dB (raw_value);
 	}
-#endif
 
 	if (gainmode) {
 		if (controllable) {

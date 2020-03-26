@@ -299,7 +299,7 @@ AudioTrackImporter::_move ()
 
 	boost::shared_ptr<DiskReader> new_ds (new DiskReader (session, *ds_node));
 	new_ds->set_name (name);
-	new_ds->do_refill_with_alloc ();
+	new_ds->do_refill_with_alloc (true, false);
 	new_ds->set_block_size (session.get_block_size ());
 
 	/* Import playlists */

@@ -40,6 +40,8 @@ setup_libpbd_enums ()
 	REGISTER_CLASS_ENUM (Controllable, GainLike);
 	REGISTER_CLASS_ENUM (Controllable, RealTime);
 	REGISTER_CLASS_ENUM (Controllable, NotAutomatable);
+	REGISTER_CLASS_ENUM (Controllable, InlineControl);
+	REGISTER_CLASS_ENUM (Controllable, HiddenControl);
 	REGISTER_BITS (controllable_flags);
 
 	REGISTER_CLASS_ENUM (Controllable, InverseGroup);

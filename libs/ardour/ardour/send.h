@@ -68,8 +68,6 @@ public:
 	Send (Session&, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster>, Delivery::Role r = Delivery::Send, bool ignore_bitslot = false);
 	virtual ~Send ();
 
-	uint32_t bit_slot() const { return _bitslot; }
-
 	bool display_to_user() const;
 	bool is_foldback () const { return _role == Foldback; }
 
@@ -128,8 +126,7 @@ private:
 
 	int set_state_2X (XMLNode const &, int);
 
-	uint32_t    _bitslot;
-	bool        _remove_on_disconnect;
+	bool _remove_on_disconnect;
 };
 
 } // namespace ARDOUR

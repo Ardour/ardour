@@ -12,7 +12,6 @@
     <Port name="Scene out" direction="output"/>
   </MIDIPorts>
   <Config>
-    <Option name="destructive-xfade-msecs" value="2"/>
     <Option name="use-region-fades" value="1"/>
     <Option name="use-transport-fades" value="1"/>
     <Option name="use-monitor-fades" value="1"/>

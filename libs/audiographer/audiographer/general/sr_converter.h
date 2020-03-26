@@ -35,7 +35,6 @@ class LIBAUDIOGRAPHER_API SampleRateConverter
 	  * Note that outpt size may vary a lot.
 	  * May or may not output several contexts of data.
 	  * \n Should be RT safe.
-	  * \TODO Check RT safety from libsamplerate
 	  */
 	void process (ProcessContext<float> const & c);
 	using Sink<float>::process;

@@ -83,14 +83,11 @@ class AutomationLine;
 class AutomationTimeAxisView;
 class ControlPoint;
 class DragManager;
-class Editor;
 class ArdourMarker;
 class MeterMarker;
 class MixerStrip;
 class MouseCursors;
 class PlaylistSelector;
-class PluginSelector;
-class PluginUIWindow;
 class RegionView;
 class RouteTimeAxisView;
 class Selection;
@@ -98,9 +95,7 @@ class StripableTimeAxisView;
 class TempoCurve;
 class TempoMarker;
 class TimeAxisView;
-class TimeAxisViewItem;
 class VerboseCursor;
-class XMLNode;
 struct SelectionRect;
 
 class DisplaySuspender;
@@ -377,6 +372,8 @@ public:
 	sigc::signal<void> ZoomChanged;
 	sigc::signal<void> Realized;
 	sigc::signal<void,samplepos_t> UpdateAllTransportClocks;
+
+	virtual bool pending_locate_request() const = 0;
 
 	static sigc::signal<void> DropDownKeys;
 

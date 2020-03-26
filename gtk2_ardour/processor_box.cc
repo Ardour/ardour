@@ -349,6 +349,7 @@ ProcessorEntry::drag_data_get (Glib::RefPtr<Gdk::DragContext> const, Gtk::Select
 		_plugin_preset_pointer->_preset.valid = false;
 
 		switch (d.run ()) {
+			default:
 			case Gtk::RESPONSE_CANCEL:
 				data.set (data.get_target(), 8, NULL, 0);
 				return true;
@@ -797,14 +798,12 @@ ProcessorEntry::build_send_options_menu ()
 	Menu* menu = manage (new Menu);
 	MenuList& items = menu->items ();
 
-	if (!ARDOUR::Profile->get_mixbus()) {
-		boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (_processor);
-		if (send) {
-			items.push_back (CheckMenuElem (_("Link panner controls")));
-			Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
-			c->set_active (send->panner_shell()->is_linked_to_route());
-			c->signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::toggle_panner_link));
-		}
+	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (_processor);
+	if (send) {
+		items.push_back (CheckMenuElem (_("Link panner controls")));
+		Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+		c->set_active (send->panner_shell()->is_linked_to_route());
+		c->signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::toggle_panner_link));
 	}
 
 	boost::shared_ptr<InternalSend> aux = boost::dynamic_pointer_cast<InternalSend> (_processor);
@@ -1984,7 +1983,10 @@ ProcessorBox::object_drop (DnDVBox<ProcessorEntry>* source, ProcessorEntry* posi
 		 * (this needs a better solution which retains connections)
 		 */
 		state.remove_nodes_and_delete ("Processor");
+		/* Controllable and automation IDs should not be copied */
+		PBD::Stateful::ForceIDRegeneration force_ids;
 		proc->set_state (state, Stateful::loading_state_version);
+		/* but retain the processor's ID (LV2 state save) */
 		boost::dynamic_pointer_cast<PluginInsert>(proc)->update_id (id);
 		return;
 	}
@@ -2052,7 +2054,7 @@ ProcessorBox::build_possible_aux_menu ()
 		return 0;
 	}
 
-	if (_route->is_monitor () || _route->is_foldbackbus ()) {
+	if (_route->is_monitor () || _route->is_foldbackbus () || _route->is_master ()) {
 		return 0;
 	}
 
@@ -3333,7 +3335,7 @@ ProcessorBox::rename_processor (boost::shared_ptr<Processor> processor)
 
 	case Gtk::RESPONSE_ACCEPT:
 		name_prompter.get_result (result);
-		if (result.length()) {
+		if (result.length() && result != processor->name ()) {
 
 			int tries = 0;
 			string test = result;
@@ -3420,16 +3422,27 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 					continue;
 				}
 
+				/* compare to ProcessorBox::build_possible_aux_menu */
+				if (_route->is_monitor () || _route->is_foldbackbus () || _route->is_master ()) {
+					continue;
+				}
+
 				boost::shared_ptr<Pannable> sendpan(new Pannable (*_session));
 				XMLNode n (**niter);
 				InternalSend* s = new InternalSend (*_session, sendpan, _route->mute_master(),
 						_route, boost::shared_ptr<Route>(), Delivery::Aux);
 
-				IOProcessor::prepare_for_reset (n, s->name());
-
 				if (s->set_state (n, Stateful::loading_state_version)) {
 					delete s;
 					return;
+				}
+
+				boost::shared_ptr<Route> target = s->target_route();
+
+				if (_route->internal_send_for (target) || target == _route) {
+					/* aux-send to target already exists */
+					delete s;
+					continue;
 				}
 
 				p.reset (s);
@@ -3491,12 +3504,14 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				/* strip side-chain state (processor inside processor must be a side-chain)
 				 * otherwise we'll end up with duplicate ports-names.
 				 * (this needs a better solution which retains connections)
-				 * We really would want Stateful::ForceIDRegeneration here :(
 				 */
 				XMLNode state (**niter);
 				state.remove_nodes_and_delete ("Processor");
 
+				/* Controllable and automation IDs should not be copied */
+				PBD::Stateful::ForceIDRegeneration force_ids;
 				p->set_state (state, Stateful::current_state_version);
+				/* but retain the processor's ID (LV2 state save) */
 				boost::dynamic_pointer_cast<PluginInsert>(p)->update_id (id);
 			}
 

@@ -182,7 +182,7 @@ ControlSlaveUI::vca_button_release (GdkEventButton* ev, uint32_t n)
 
 	if (vcas.empty()) {
 		/* the button should not have been visible under these conditions */
-		return true;
+		return false;
 	}
 
 	delete context_menu;
@@ -214,9 +214,10 @@ ControlSlaveUI::vca_button_release (GdkEventButton* ev, uint32_t n)
 
 	if (!items.empty()) {
 		context_menu->popup (1, ev->time);
+		return true;
 	}
 
-	return true;
+	return false;
 }
 
 void

@@ -20,6 +20,8 @@
 #ifndef __ardour_disk_reader_h__
 #define __ardour_disk_reader_h__
 
+#include <boost/optional.hpp>
+
 #include "pbd/i18n.h"
 
 #include "evoral/Curve.h"
@@ -50,8 +52,6 @@ public:
 	static samplecnt_t default_chunk_samples ();
 	static void set_chunk_samples (samplecnt_t n) { _chunk_samples = n; }
 
-	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
-
 	void run (BufferSet& /*bufs*/, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double speed, pframes_t /*nframes*/, bool /*result_required*/);
 	void realtime_handle_transport_stopped ();
 	void realtime_locate (bool);
@@ -67,21 +67,17 @@ public:
 
 	void move_processor_automation (boost::weak_ptr<Processor>, std::list<Evoral::RangeMove<samplepos_t> > const &);
 
-	/* called by the Butler in a non-realtime context */
-
-	int do_refill () {
-		return refill (_sum_buffer, _mixdown_buffer, _gain_buffer, 0);
-	}
-
-	/** For non-butler contexts (allocates temporary working buffers)
-	 *
-	 * This accessible method has a default argument; derived classes
-	 * must inherit the virtual method that we call which does NOT
-	 * have a default argument, to avoid complications with inheritance
+	/* called by the Butler in a non-realtime context as part of its normal
+	 * buffer refill loop (not due to transport-mechanism requests like
+	 * locate)
 	 */
-	int do_refill_with_alloc (bool partial_fill = true) {
-		return _do_refill_with_alloc (partial_fill);
-	}
+
+	int do_refill ();
+
+	/** For contexts outside the normal butler refill loop (allocates temporary working buffers)
+	 */
+
+	int do_refill_with_alloc (bool partial_fill, bool reverse);
 
 	bool pending_overwrite () const;
 
@@ -193,8 +189,7 @@ private:
 	DeclickAmp     _declick_amp;
 	sampleoffset_t _declick_offs;
 	MidiStateTracker _tracker;
-
-	int _do_refill_with_alloc (bool partial_fill);
+	boost::optional<bool> _last_read_reversed;
 
 	static samplecnt_t _chunk_samples;
 	static gint       _no_disk_output;
@@ -215,8 +210,8 @@ private:
 	static Sample* _mixdown_buffer;
 	static gain_t* _gain_buffer;
 
-	int refill (Sample* sum_buffer, Sample* mixdown_buffer, float* gain_buffer, samplecnt_t fill_level);
-	int refill_audio (Sample* sum_buffer, Sample *mixdown_buffer, float *gain_buffer, samplecnt_t fill_level);
+	int refill (Sample* sum_buffer, Sample* mixdown_buffer, float* gain_buffer, samplecnt_t fill_level, bool reversed);
+	int refill_audio (Sample* sum_buffer, Sample *mixdown_buffer, float *gain_buffer, samplecnt_t fill_level, bool reversed);
 
 	sampleoffset_t calculate_playback_distance (pframes_t);
 

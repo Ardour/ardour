@@ -132,7 +132,7 @@ PBD::parse_debug_options (const char* str)
 
                         if (strncasecmp (cstr, i->first, strlen (cstr)) == 0) {
 	                        bits |= i->second;
-	                        cout << i->first << " set\n";
+	                        cout << string_compose (X_("Debug flag '%1' set\n"), i->first);
                         }
                 }
 	}

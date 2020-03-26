@@ -103,6 +103,7 @@
 #include "ardour/route_graph.h"
 #include "ardour/route_group.h"
 #include "ardour/rt_tasklist.h"
+#include "ardour/silentfilesource.h"
 #include "ardour/send.h"
 #include "ardour/selection.h"
 #include "ardour/session.h"
@@ -171,7 +172,8 @@ Session::Session (AudioEngine &eng,
                   const string& fullpath,
                   const string& snapshot_name,
                   BusProfile const * bus_profile,
-                  string mix_template)
+                  string mix_template,
+                  bool unnamed)
 	: _playlists (new SessionPlaylists)
 	, _engine (eng)
 	, process_function (&Session::process_with_events)
@@ -190,7 +192,6 @@ Session::Session (AudioEngine &eng,
 	, _engine_speed (1.0)
 	, _transport_speed (0)
 	, _default_transport_speed (1.0)
-	, _last_transport_speed (0)
 	, _signalled_varispeed (0)
 	, _target_transport_speed (0.0)
 	, auto_play_legal (false)
@@ -271,13 +272,14 @@ Session::Session (AudioEngine &eng,
 	, ltc_timecode_offset (0)
 	, ltc_timecode_negative_offset (false)
 	, midi_control_ui (0)
+	, _punch_or_loop (NoConstraint)
+	, current_usecs_per_track (1000)
 	, _tempo_map (0)
 	, _all_route_group (new RouteGroup (*this, "all"))
 	, routes (new RouteList)
 	, _adding_routes_in_progress (false)
 	, _reconnecting_routes_in_progress (false)
 	, _route_deletion_in_progress (false)
-	, destructive_index (0)
 	, _track_number_decimals(1)
 	, default_fade_steepness (0)
 	, default_fade_msecs (0)
@@ -319,6 +321,7 @@ Session::Session (AudioEngine &eng,
 	, _vca_manager (new VCAManager (*this))
 	, _selection (new CoreSelection (*this))
 	, _global_locate_pending (false)
+	, _had_destructive_tracks (false)
 {
 	created_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 
@@ -342,7 +345,7 @@ Session::Session (AudioEngine &eng,
 
 		Stateful::loading_state_version = CURRENT_SESSION_FILE_VERSION;
 
-		if (create (mix_template, bus_profile)) {
+		if (create (mix_template, bus_profile, unnamed)) {
 			destroy ();
 			throw SessionException (_("Session initialization failed"));
 		}
@@ -1397,6 +1400,88 @@ Session::auto_punch_start_changed (Location* location)
 	}
 }
 
+bool
+Session::punch_active () const
+{
+	if (!get_record_enabled ()) {
+		return false;
+	}
+	if (!_locations->auto_punch_location ()) {
+		return false;
+	}
+	return config.get_punch_in () || config.get_punch_out ();
+}
+
+bool
+Session::punch_is_possible () const
+{
+	return g_atomic_int_get (&_punch_or_loop) != OnlyLoop;
+}
+
+bool
+Session::loop_is_possible () const
+{
+#if 0 /* maybe prevent looping even when not rolling ? */
+	if (get_record_enabled () && punch_active ()) {
+			return false;
+		}
+	}
+#endif
+	return g_atomic_int_get(&_punch_or_loop) != OnlyPunch;
+}
+
+void
+Session::reset_punch_loop_constraint ()
+{
+	if (g_atomic_int_get (&_punch_or_loop) == NoConstraint) {
+		return;
+	}
+	g_atomic_int_set (&_punch_or_loop, NoConstraint);
+	PunchLoopConstraintChange (); /* EMIT SIGNAL */
+}
+
+bool
+Session::maybe_allow_only_loop (bool play_loop) {
+	if (!(get_play_loop () || play_loop)) {
+		return false;
+	}
+	bool rv = g_atomic_int_compare_and_exchange (&_punch_or_loop, NoConstraint, OnlyLoop);
+	if (rv) {
+		PunchLoopConstraintChange (); /* EMIT SIGNAL */
+	}
+	if (rv || loop_is_possible ()) {
+		unset_punch ();
+		return true;
+	}
+	return false;
+}
+
+bool
+Session::maybe_allow_only_punch () {
+	if (!punch_active ()) {
+		return false;
+	}
+	bool rv = g_atomic_int_compare_and_exchange (&_punch_or_loop, NoConstraint, OnlyPunch);
+	if (rv) {
+		PunchLoopConstraintChange (); /* EMIT SIGNAL */
+	}
+	return rv || punch_is_possible ();
+}
+
+void
+Session::unset_punch ()
+{
+	/* used when enabling looping
+	 * -> _punch_or_loop = OnlyLoop;
+	 */
+	if (config.get_punch_in ()) {
+		config.set_punch_in (false);
+	}
+	if (config.get_punch_out ()) {
+		config.set_punch_out (false);
+	}
+}
+
 void
 Session::auto_punch_end_changed (Location* location)
 {
@@ -1430,7 +1515,7 @@ Session::auto_loop_changed (Location* location)
 
 	if (rolling) {
 
-		if (play_loop) {
+		if (get_play_loop ()) {
 
 			if (_transport_sample < location->start() || _transport_sample > location->end()) {
 
@@ -1563,15 +1648,9 @@ Session::set_auto_loop_location (Location* location)
 
 	location->set_auto_loop (true, this);
 
-	if (Config->get_loop_is_mode() && play_loop) {
-		// set all tracks to use internal looping
-		boost::shared_ptr<RouteList> rl = routes.reader ();
-		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-			if (tr && !tr->is_private_route()) {
-				tr->set_loop (location);
-			}
-		}
+	if (Config->get_loop_is_mode() && get_play_loop ()) {
+		/* set all tracks to use internal looping */
+		set_track_loop (true);
 	}
 
 	/* take care of our stuff first */
@@ -1734,7 +1813,7 @@ Session::location_removed (Location *location)
 {
 	if (location->is_auto_loop()) {
 		set_auto_loop_location (0);
-		if (!play_loop) {
+		if (!get_play_loop ()) {
 			set_track_loop (false);
 		}
 		unset_play_loop ();
@@ -1877,6 +1956,7 @@ Session::maybe_enable_record (bool rt_context)
 	}
 
 	if (_transport_speed) {
+		maybe_allow_only_punch ();
 		if (!config.get_punch_in()) {
 			enable_record ();
 		}
@@ -2143,7 +2223,7 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 
 		for (RouteList::iterator j = r->begin(); j != r->end(); ++j) {
 
-			bool via_sends_only;
+			bool via_sends_only = false;
 
 			/* See if this *j feeds *i according to the current state of the JACK
 			   connections and internal sends.
@@ -2378,7 +2458,6 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 	failed:
 	if (!new_routes.empty()) {
 		StateProtector sp (this);
-		add_routes (new_routes, true, true, false, order);
 
 		if (instrument) {
 			for (RouteList::iterator r = new_routes.begin(); r != new_routes.end(); ++r) {
@@ -2402,6 +2481,8 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, bool s
 				}
 			}
 		}
+
+		add_routes (new_routes, true, true, false, order);
 	}
 
 	return ret;
@@ -4487,7 +4568,7 @@ Session::count_sources_by_origin (const string& path)
 	uint32_t cnt = 0;
 	Glib::Threads::Mutex::Lock lm (source_lock);
 
-	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+	for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
 		boost::shared_ptr<FileSource> fs
 			= boost::dynamic_pointer_cast<FileSource>(i->second);
 
@@ -4679,7 +4760,7 @@ Session::audio_source_name_is_unique (const string& name)
 }
 
 string
-Session::format_audio_source_name (const string& legalized_base, uint32_t nchan, uint32_t chan, bool destructive, bool take_required, uint32_t cnt, bool related_exists)
+Session::format_audio_source_name (const string& legalized_base, uint32_t nchan, uint32_t chan, bool take_required, uint32_t cnt, bool related_exists)
 {
 	ostringstream sstr;
 	const string ext = native_header_format_extension (config.get_native_file_header_format(), DataType::AUDIO);
@@ -4715,7 +4796,7 @@ Session::format_audio_source_name (const string& legalized_base, uint32_t nchan,
 
 /** Return a unique name based on \a base for a new internal audio source */
 string
-Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t chan, bool destructive, bool take_required)
+Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t chan, bool take_required)
 {
 	uint32_t cnt;
 	string possible_name;
@@ -4727,9 +4808,9 @@ Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t cha
 
 	// Find a "version" of the base name that doesn't exist in any of the possible directories.
 
-	for (cnt = (destructive ? ++destructive_index : 1); cnt <= limit; ++cnt) {
+	for (cnt = 1; cnt <= limit; ++cnt) {
 
-		possible_name = format_audio_source_name (legalized, nchan, chan, destructive, take_required, cnt, some_related_source_name_exists);
+		possible_name = format_audio_source_name (legalized, nchan, chan, take_required, cnt, some_related_source_name_exists);
 
 		if (audio_source_name_is_unique (possible_name)) {
 			break;
@@ -4822,13 +4903,12 @@ Session::new_midi_source_path (const string& base, bool need_lock)
 
 /** Create a new within-session audio source */
 boost::shared_ptr<AudioFileSource>
-Session::create_audio_source_for_session (size_t n_chans, string const & base, uint32_t chan, bool destructive)
+Session::create_audio_source_for_session (size_t n_chans, string const & base, uint32_t chan)
 {
-	const string path = new_audio_source_path (base, n_chans, chan, destructive, true);
+	const string path = new_audio_source_path (base, n_chans, chan, true);
 
 	if (!path.empty()) {
-		return boost::dynamic_pointer_cast<AudioFileSource> (
-			SourceFactory::createWritable (DataType::AUDIO, *this, path, destructive, sample_rate(), true, true));
+		return boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, *this, path, sample_rate(), true, true));
 	} else {
 		throw failed_constructor ();
 	}
@@ -4841,9 +4921,7 @@ Session::create_midi_source_for_session (string const & basic_name)
 	const string path = new_midi_source_path (basic_name);
 
 	if (!path.empty()) {
-		return boost::dynamic_pointer_cast<SMFSource> (
-			SourceFactory::createWritable (
-				DataType::MIDI, *this, path, false, sample_rate()));
+		return boost::dynamic_pointer_cast<SMFSource> (SourceFactory::createWritable (DataType::MIDI, *this, path, sample_rate()));
 	} else {
 		throw failed_constructor ();
 	}
@@ -4886,9 +4964,7 @@ Session::create_midi_source_by_stealing_name (boost::shared_ptr<Track> track)
 
 	const string path = Glib::build_filename (source_search_path (DataType::MIDI).front(), name);
 
-	return boost::dynamic_pointer_cast<SMFSource> (
-		SourceFactory::createWritable (
-			DataType::MIDI, *this, path, false, sample_rate()));
+	return boost::dynamic_pointer_cast<SMFSource> (SourceFactory::createWritable (DataType::MIDI, *this, path, sample_rate()));
 }
 
 bool
@@ -5465,6 +5541,9 @@ Session::mark_insert_id (uint32_t id)
 void
 Session::unmark_send_id (uint32_t id)
 {
+	if (deletion_in_progress ()) {
+		return;
+	}
 	if (id < send_bitset.size()) {
 		send_bitset[id] = false;
 	}
@@ -5473,6 +5552,9 @@ Session::unmark_send_id (uint32_t id)
 void
 Session::unmark_aux_send_id (uint32_t id)
 {
+	if (deletion_in_progress ()) {
+		return;
+	}
 	if (id < aux_send_bitset.size()) {
 		aux_send_bitset[id] = false;
 	}
@@ -5492,6 +5574,9 @@ Session::unmark_return_id (uint32_t id)
 void
 Session::unmark_insert_id (uint32_t id)
 {
+	if (deletion_in_progress ()) {
+		return;
+	}
 	if (id < insert_bitset.size()) {
 		insert_bitset[id] = false;
 	}
@@ -5629,7 +5714,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 		string base_name = string_compose ("%1-%2-bounce", playlist->name(), chan_n);
 		string path = ((data_type == DataType::AUDIO)
-		               ? new_audio_source_path (legal_playlist_name, diskstream_channels.n_audio(), chan_n, false, true)
+		               ? new_audio_source_path (legal_playlist_name, diskstream_channels.n_audio(), chan_n, true)
 		               : new_midi_source_path (legal_playlist_name));
 
 		if (path.empty()) {
@@ -5637,7 +5722,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 		}
 
 		try {
-			source = SourceFactory::createWritable (data_type, *this, path, false, sample_rate());
+			source = SourceFactory::createWritable (data_type, *this, path, sample_rate());
 		}
 
 		catch (failed_constructor& err) {
@@ -6337,6 +6422,22 @@ Session::unknown_processors () const
 	return p;
 }
 
+list<string>
+Session::missing_filesources (DataType dt) const
+{
+	list<string> p;
+	for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+		if (dt == DataType::AUDIO && 0 != boost::dynamic_pointer_cast<SilentFileSource> (i->second)) {
+			p.push_back (i->second->name());
+		}
+		else if (dt == DataType::MIDI && 0 != boost::dynamic_pointer_cast<SMFSource> (i->second) && (i->second->flags() & Source::Missing) != 0) {
+			p.push_back (i->second->name());
+		}
+	}
+	p.sort ();
+	return p;
+}
+
 void
 Session::initialize_latencies ()
 {
@@ -6429,7 +6530,7 @@ Session::update_latency (bool playback)
 	if (inital_connect_or_deletion_in_progress () || _adding_routes_in_progress || _route_deletion_in_progress) {
 		return;
 	}
-	if (!_engine.running()) {
+	if (!_engine.running() || _exporting) {
 		return;
 	}
 
@@ -6901,4 +7002,16 @@ Session::maybe_update_tempo_from_midiclock_tempo (float bpm)
 			_tempo_map->replace_tempo (ts, tempo, 0.0, 0.0, AudioTime);
 		}
 	}
+}
+
+void
+Session::set_had_destructive_tracks (bool yn)
+{
+	_had_destructive_tracks = yn;
+}
+
+bool
+Session::had_destructive_tracks() const
+{
+	return _had_destructive_tracks;
 }

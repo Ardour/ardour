@@ -627,7 +627,7 @@ ContourDesignControlProtocol::shuttle_event (int position)
 
 	if (position != 0) {
 		if (_shuttle_was_zero) {
-			_was_rolling_before_shuttle = session->transport_rolling ();
+			_was_rolling_before_shuttle = transport_rolling ();
 		}
 		const vector<double>& spds = _shuttle_speeds;
 		const double speed = position > 0 ? spds[position-1] : -spds[-position-1];

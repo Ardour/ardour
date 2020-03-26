@@ -1,0 +1,92 @@
+html {
+    height: 100%;
+}
+
+body {
+    background: #282923;
+    color: rgb(248,248,242);
+    font-family: Helvetica, Arial, sans-serif;
+    height: 100%;
+    margin: 0;
+}
+
+div {
+    box-sizing: border-box;
+}
+
+#main {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#strips {
+    flex: 1;
+    overflow: scroll;
+    overflow-x: hidden;
+    box-shadow: 0px 0px 10px #000;
+}
+
+#log {
+    height: 6em;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+
+#log pre {
+    margin: 0;
+    font-family: Menlo, monospace;
+    font-size: 1em;
+}
+
+.message-in {
+    color: rgb(166,226,44);
+}
+
+.message-out {
+    color: rgb(172,128,255);
+}
+
+.error {
+    color: rgb(249,36,114);
+}
+
+.comp-name {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.strip {
+    margin: 5%;
+    padding: 2.5% 5%;
+    background: rgba(0,0,0,0.1);
+    border-radius: 5px;
+}
+
+.slider-meter {
+    float: right;
+}
+
+.strip-slider {
+    margin-top: 2.5%;
+}
+
+.plugin {
+    margin: 5%;
+    padding: 2.5% 5%;
+    background: rgba(0,0,0,0.05);
+    border: solid 1px rgba(255,255,255,0.1);
+    border-radius: 5px;
+}
+
+.plugin-enable {
+    float: right;
+}
+
+.plugin-param {
+    margin: 5%;
+}
+
+.plugin-param.boolean {
+    display: inline-block;
+}

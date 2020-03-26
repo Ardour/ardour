@@ -39,7 +39,8 @@ class StartupFSM : public sigc::trackable
 		NewUserDialog,
 		NewSessionDialog,
 		AudioMIDISetup,
-		PluginDialog
+		PluginDialog,
+		ApplicationPseudoDialog,
 	};
 
 	enum Result {
@@ -66,6 +67,8 @@ class StartupFSM : public sigc::trackable
 	std::string session_template;
 	int         session_existing_sample_rate;
 	bool        session_is_new;
+	bool        session_name_edited;
+
 	ARDOUR::BusProfile bus_profile;
 
 	/* It's not a dialog but we provide this to make it behave like a (non-modal)
@@ -75,6 +78,7 @@ class StartupFSM : public sigc::trackable
 	sigc::signal1<void,Result>& signal_response() { return _signal_response; }
 
 	bool brand_new_user() const { return new_user; }
+	void handle_path (std::string const & path);
 
   private:
 	bool new_user;
@@ -94,7 +98,6 @@ class StartupFSM : public sigc::trackable
 	void show_plugin_scan_dialog ();
 
 	void copy_demo_sessions ();
-	void load_from_application_api (std::string const &);
 	bool get_session_parameters_from_command_line (bool new_session_required);
 	bool get_session_parameters_from_path (std::string const & path, std::string const & template_name, bool new_session_required);
 	void queue_finish ();

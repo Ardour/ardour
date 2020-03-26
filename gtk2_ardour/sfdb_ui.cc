@@ -41,12 +41,13 @@
 #include <unistd.h>
 #include <limits.h>
 
+#include <glib.h>
+#include "pbd/gstdio_compat.h"
+#include <glibmm/fileutils.h>
+
 #include <gtkmm/box.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/stock.h>
-
-#include "pbd/gstdio_compat.h"
-#include <glibmm/fileutils.h>
 
 #include "pbd/tokenizer.h"
 #include "pbd/enumwriter.h"
@@ -124,8 +125,6 @@ string2importmode (string const & str)
 		return ImportToTrack;
 	} else if (str == _("to source list")) {
 		return ImportAsRegion;
-	} else if (str == _("as new tape tracks")) {
-		return ImportAsTapeTrack;
 	}
 
 	warning << string_compose (_("programming error: unknown import mode string %1"), str) << endmsg;
@@ -143,8 +142,6 @@ importmode2string (ImportMode mode)
 		return _("to selected tracks");
 	case ImportAsRegion:
 		return _("to source list");
-	case ImportAsTapeTrack:
-		return _("as new tape tracks");
 	}
 	abort(); /*NOTREACHED*/
 	return _("as new tracks");
@@ -1502,9 +1499,6 @@ SoundFileOmega::reset_options ()
 
 	action_strings.push_back (importmode2string (ImportAsTrack));
 	action_strings.push_back (importmode2string (ImportAsRegion));
-	if (!Profile->get_mixbus()) {
-		action_strings.push_back (importmode2string (ImportAsTapeTrack));
-	}
 
 	existing_choice = action_combo.get_active_text();
 
@@ -1538,7 +1532,7 @@ SoundFileOmega::reset_options ()
 
 	vector<string> channel_strings;
 
-	if (mode == ImportAsTrack || mode == ImportAsTapeTrack || mode == ImportToTrack) {
+	if (mode == ImportAsTrack || mode == ImportToTrack) {
 
 		channel_strings.push_back (_("one track per file"));
 
@@ -1550,9 +1544,7 @@ SoundFileOmega::reset_options ()
 			/* tape tracks are a single region per track, so we cannot
 			   sequence multiple files.
 			*/
-			if (mode != ImportAsTapeTrack) {
-				channel_strings.push_back (_("sequence files"));
-			}
+			channel_strings.push_back (_("sequence files"));
 			if (same_size) {
 				channel_strings.push_back (_("all files in one track"));
 				channel_strings.push_back (_("merge files"));
@@ -1921,7 +1913,6 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	str.push_back (importmode2string (ImportAsTrack));
 	str.push_back (importmode2string (ImportToTrack));
 	str.push_back (importmode2string (ImportAsRegion));
-	str.push_back (importmode2string (ImportAsTapeTrack));
 	set_popdown_strings (action_combo, str);
 	action_combo.set_active_text (importmode2string(mode_hint));
 

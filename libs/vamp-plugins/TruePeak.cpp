@@ -593,12 +593,18 @@ VampTruePeak::process(const float *const *inputBuffers,
 		return FeatureSet();
 	}
 
-	_meter.process (inputBuffers[0], m_blockSize);
+	size_t remain = m_blockSize;
+	size_t processed = 0;
+	while (remain > 0) {
+		size_t to_proc = std::min ((size_t)48, remain);
+		_meter.process (&inputBuffers[0][processed], to_proc);
+		processed += to_proc;
+		remain -= to_proc;
 
-	// TODO optional (not rt safe)
-	if (_meter.read () >= .89125 /* -1dBTP */) {
-		long f = Vamp::RealTime::realTime2Frame (timestamp, m_rate);
-		_above_m1.values.push_back ((float) f);
+		if (_meter.read () >= .89125 /* -1dBTP */) {
+			long f = Vamp::RealTime::realTime2Frame (timestamp, m_rate);
+			_above_m1.values.push_back ((float) (f + processed));
+		}
 	}
 
 	return FeatureSet();

@@ -94,6 +94,13 @@ AxisView::get_gui_property (const std::string& property_name, std::string& value
 }
 
 void
+AxisView::remove_gui_property (const std::string& property_name)
+{
+	property_hashtable.erase (property_name);
+	gui_object_state().remove_property (state_id(), property_name);
+}
+
+void
 AxisView::set_gui_property (const std::string& property_name, const std::string& value)
 {
 	property_hashtable.erase (property_name);

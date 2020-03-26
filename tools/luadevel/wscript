@@ -22,6 +22,7 @@ def configure(conf):
             header_name='stdio.h readline/readline.h',
             lib='readline',
             uselib_store='READLINE',
+            define_name='HAVE_READLINE',
             mandatory=False)
     autowaf.configure(conf)
 
@@ -74,11 +75,13 @@ def build(bld):
         'PACKAGE="'    + "ARDOURUTILS" + '"',
         ]
 
-    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD OGG CURL DL XML'
-    obj.uselib       += ' FFTW3F'
+    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GIOMM GTHREAD OGG CURL DL XML'
     obj.uselib       += ' AUDIOUNITS OSX LO '
-    obj.uselib       += ' TAGLIB '
     obj.uselib       += ' READLINE '
+    obj.uselib       += ' FFTW3F LO TAGLIB LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
+
+    if bld.is_defined('HAVE_SUIL'):
+        obj.uselib += ' SUIL'
 
     if sys.platform == 'darwin':
         obj.uselib += ' AUDIOUNITS OSX'

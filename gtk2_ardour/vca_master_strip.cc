@@ -32,6 +32,7 @@
 #include "widgets/tooltips.h"
 
 #include "ardour_dialog.h"
+#include "ardour_message.h"
 #include "floating_text_entry.h"
 #include "gui_thread.h"
 #include "mixer_ui.h"
@@ -498,6 +499,32 @@ VCAMasterStrip::remove ()
 	if (!_session) {
 		return;
 	}
+
+	ArdourMessageDialog checker (_("Do you really want to remove this VCA?"),
+	                             true,
+	                             Gtk::MESSAGE_QUESTION,
+	                             Gtk::BUTTONS_NONE);
+
+	string title = string_compose (_("Remove %1"), "VCA");
+	checker.set_title (title);
+
+	checker.set_secondary_text(_("This action cannot be undone."));
+
+	checker.add_button (_("No, do nothing."), RESPONSE_CANCEL);
+	checker.add_button (_("Yes, remove it."), RESPONSE_ACCEPT);
+	checker.set_default_response (RESPONSE_CANCEL);
+
+	checker.set_name (X_("RemoveVcaDialog"));
+	checker.set_wmclass (X_("ardour_vca_remove"), PROGRAM_NAME);
+	checker.set_position (Gtk::WIN_POS_MOUSE);
+
+	switch (checker.run()) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
+		return;
+	}
+	checker.hide();
 
 	_session->vca_manager().remove_vca (_vca);
 }

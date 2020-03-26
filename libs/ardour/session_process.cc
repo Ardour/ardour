@@ -61,6 +61,7 @@ using namespace std;
 
 #define TFSM_EVENT(evtype) { _transport_fsm->enqueue (new TransportFSM::Event (evtype)); }
 #define TFSM_STOP(abort,clear) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StopTransport,abort,clear)); }
+#define TFSM_SPEED(speed,abort,clear_state,as_default) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::SetSpeed,speed,abort,clear_state,as_default)); }
 #define TFSM_LOCATE(target,ltd,flush,loop,force) { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::Locate,target,ltd,flush,loop,force)); }
 
 
@@ -302,6 +303,27 @@ Session::compute_audible_delta (samplepos_t& pos_and_delta) const
 	return true;
 }
 
+samplecnt_t
+Session::calc_preroll_subcycle (samplecnt_t ns) const
+{
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
+		samplecnt_t route_offset = (*i)->playback_latency ();
+		if (_remaining_latency_preroll > route_offset + ns) {
+			/* route will no-roll for complete pre-roll cycle */
+			continue;
+		}
+		if (_remaining_latency_preroll > route_offset) {
+			/* route may need partial no-roll and partial roll from
+			 * (_transport_sample - _remaining_latency_preroll) ..  +ns.
+			 * shorten and split the cycle.
+			 */
+			ns = std::min (ns, (_remaining_latency_preroll - route_offset));
+		}
+	}
+	return ns;
+}
+
 /** Process callback used when the auditioner is not active */
 void
 Session::process_with_events (pframes_t nframes)
@@ -357,21 +379,8 @@ Session::process_with_events (pframes_t nframes)
 			ns = std::min ((samplecnt_t)nframes, _count_in_samples);
 		}
 
-		boost::shared_ptr<RouteList> r = routes.reader ();
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			samplecnt_t route_offset = (*i)->playback_latency ();
-			if (_remaining_latency_preroll > route_offset + ns) {
-				/* route will no-roll for complete pre-roll cycle */
-				continue;
-			}
-			if (_remaining_latency_preroll > route_offset) {
-				/* route may need partial no-roll and partial roll from
-				* (_transport_sample - _remaining_latency_preroll) ..  +ns.
-				* shorten and split the cycle.
-				*/
-				ns = std::min (ns, (_remaining_latency_preroll - route_offset));
-			}
-		}
+		/* process until next route in-point */
+		ns = calc_preroll_subcycle (ns);
 
 		if (_count_in_samples > 0) {
 			run_click (_transport_sample - _count_in_samples, ns);
@@ -494,7 +503,8 @@ Session::process_with_events (pframes_t nframes)
 		}
 
 		if (!_exporting && config.get_external_sync()) {
-			if (!follow_transport_master (nframes)) {
+			if (!implement_master_strategy ()) {
+				no_roll (nframes);
 				ltc_tx_send_time_code_for_cycle (_transport_sample, end_sample, _target_transport_speed, _transport_speed, nframes);
 				return;
 			}
@@ -632,7 +642,8 @@ Session::process_without_events (pframes_t nframes)
 	}
 
 	if (!_exporting && config.get_external_sync()) {
-		if (!follow_transport_master (nframes)) {
+		if (!implement_master_strategy ()) {
+			no_roll (nframes);
 			ltc_tx_send_time_code_for_cycle (_transport_sample, _transport_sample, 0, 0 , nframes);
 			return;
 		}
@@ -641,10 +652,12 @@ Session::process_without_events (pframes_t nframes)
 	assert (_transport_speed == 0 || _transport_speed == 1.0 || _transport_speed == -1.0);
 
 	if (_transport_speed == 0) {
+		// DEBUG_TRACE (DEBUG::Transport, string_compose ("transport not moving @ %1\n", _transport_sample));
 		no_roll (nframes);
 		return;
 	} else {
 		samples_moved = (samplecnt_t) nframes * _transport_speed;
+		// DEBUG_TRACE (DEBUG::Transport, string_compose ("plan to move transport by %1 (%2 @ %3)\n", samples_moved, nframes, _transport_speed));
 	}
 
 	if (!_exporting && !timecode_transmission_suspended()) {
@@ -867,6 +880,7 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::Locate:
 		/* args: do not roll after locate, clear state, not for loop, force */
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("sending locate to %1 to tfsm\n", ev->target_sample));
 		TFSM_LOCATE (ev->target_sample, ev->locate_transport_disposition, true, false, ev->yes_or_no);
 		_send_timecode_update = true;
 		break;
@@ -895,7 +909,7 @@ Session::process_event (SessionEvent* ev)
 
 
 	case SessionEvent::SetTransportSpeed:
-		set_transport_speed (ev->speed, ev->target_sample, ev->yes_or_no, ev->second_yes_or_no, ev->third_yes_or_no);
+		TFSM_SPEED (ev->speed, ev->yes_or_no, ev->second_yes_or_no, ev->third_yes_or_no);
 		break;
 
 	case SessionEvent::SetTransportMaster:
@@ -1087,130 +1101,395 @@ Session::emit_thread_run ()
 	pthread_mutex_unlock (&_rt_emit_mutex);
 }
 
-bool
-Session::follow_transport_master (pframes_t nframes)
+double
+Session::plan_master_strategy_engine (pframes_t nframes, double master_speed, samplepos_t master_transport_sample, double /* catch_speed */)
 {
+	/* JACK Transport. */
+
 	TransportMasterManager& tmm (TransportMasterManager::instance());
+	sampleoffset_t delta = _transport_sample - master_transport_sample;
+	const bool interesting_transport_state_change_underway = (locate_pending() || declick_in_progress());
 
-	double master_speed;
-	samplepos_t master_transport_sample;
-	sampleoffset_t delta;
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK Transport: delta = %1 transport change underway %2 master speed %3\n", delta, interesting_transport_state_change_underway, master_speed));
 
-	if (tmm.master_invalid_this_cycle()) {
-		DEBUG_TRACE (DEBUG::Slave, "session told not to use the transport master this cycle\n");
-		goto noroll;
-	}
+	if (master_speed == 0) {
 
-	master_speed = tmm.get_current_speed_in_process_context();
-	master_transport_sample = tmm.get_current_position_in_process_context ();
-	delta = _transport_sample - master_transport_sample;
+		DEBUG_TRACE (DEBUG::Slave, "JACK transport: not moving\n");
 
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("session at %1, master at %2, delta: %3 res: %4 TFSM state %5\n", _transport_sample, master_transport_sample, delta, tmm.current()->resolution(), _transport_fsm->current_state()));
+		const samplecnt_t wlp = worst_latency_preroll_buffer_size_ceil ();
 
-	if (tmm.current()->type() == Engine) {
+		if (delta != wlp) {
 
-		/* JACK Transport. */
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: need to locate to reduce delta %1 vs %2\n", delta, wlp));
 
-		if (master_speed == 0) {
+			/* if we're not aligned with the current JACK * time, then jump to it */
 
-			if (!actively_recording()) {
+			if (!interesting_transport_state_change_underway) {
 
-				const samplecnt_t wlp = worst_latency_preroll_buffer_size_ceil ();
+				const samplepos_t locate_target = master_transport_sample + wlp;
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: jump to master position %1 by locating to %2\n", master_transport_sample, locate_target));
+				/* for JACK transport always stop after the locate (2nd argument == false) */
 
-				if (delta != wlp) {
+				transport_master_strategy.action = TransportMasterLocate;
+				transport_master_strategy.target = locate_target;
+				transport_master_strategy.roll_disposition = MustStop;
 
-					/* if we're not aligned with the current JACK * time, then jump to it */
+				return 1.0;
 
-					if (!locate_pending() && !declick_in_progress() && !tmm.current()->starting()) {
-
-						const samplepos_t locate_target = master_transport_sample + wlp;
-						DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: jump to master position %1 by locating to %2\n", master_transport_sample, locate_target));
-						/* for JACK transport always stop after the locate (2nd argument == false) */
-						TFSM_LOCATE (locate_target, MustStop, true, false, false);
-
-					} else {
-						DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK Transport: locate already in process, sts = %1\n", master_transport_sample));
-					}
-				}
-			}
-
-		} else {
-
-			if (_transport_speed) {
-				/* master is rolling, and we're rolling ... with JACK we should always be perfectly in sync, so ... WTF? */
-				if (delta) {
-					if (remaining_latency_preroll() && worst_latency_preroll()) {
-						/* our transport position is not moving because we're doing latency alignment. Nothing in particular to do */
-					} else {
-						cerr << "\n\n\n IMPOSSIBLE! OUT OF SYNC WITH JACK TRANSPORT (rlp = " << remaining_latency_preroll() << " wlp " << worst_latency_preroll() << ")\n\n\n";
-					}
-				}
+			} else {
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK Transport: locate already in process, master @ %1, locating %2 declick %3\n",
+				                                           master_transport_sample, locate_pending(), declick_in_progress()));
+				transport_master_strategy.action = TransportMasterRelax;
+				return 1.0;
 			}
 		}
 
 	} else {
 
-		/* This is a heuristic rather than a strictly provable rule. The idea
+		DEBUG_TRACE (DEBUG::Slave, string_compose ("JACK transport: MOVING at %1\n", master_speed));
+
+		if (_transport_fsm->rolling()) {
+			/* master is rolling, and we're rolling ... with JACK we should always be perfectly in sync, so ... WTF? */
+			if (delta) {
+				if (remaining_latency_preroll() && worst_latency_preroll()) {
+					/* our transport position is not moving because we're doing latency alignment. Nothing in particular to do */
+					DEBUG_TRACE (DEBUG::Slave, "JACK transport: waiting for latency alignment\n");
+					transport_master_strategy.action = TransportMasterRelax;
+					return 1.0;
+				} else {
+					cerr << "\n\n\n IMPOSSIBLE! OUT OF SYNC (delta = " << delta << ") WITH JACK TRANSPORT (rlp = " << remaining_latency_preroll() << " wlp " << worst_latency_preroll() << ")\n\n\n";
+				}
+			}
+		}
+	}
+
+	if (!interesting_transport_state_change_underway) {
+
+		if (master_speed != 0.0) {
+
+			/* master rolling, we should be too */
+
+			if (_transport_speed == 0.0f) {
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave starts transport: %1 sample %2 tf %3\n", master_speed, master_transport_sample, _transport_sample));
+				transport_master_strategy.action = TransportMasterStart;
+				return 1.0;
+			}
+
+		} else if (!tmm.current()->starting()) { /* master stopped, not in "starting" state */
+
+			if (_transport_speed != 0.0f) {
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stops transport: %1 sample %2 tf %3\n", master_speed, master_transport_sample, _transport_sample));
+				transport_master_strategy.action = TransportMasterStop;
+				return 1.0;
+			}
+		}
+	}
+
+	/* No varispeed with JACK */
+	transport_master_strategy.action = TransportMasterRelax;
+	return 1.0;
+}
+
+double
+Session::plan_master_strategy (pframes_t nframes, double master_speed, samplepos_t master_transport_sample, double catch_speed)
+{
+	/* This is called from inside AudioEngine::process_callback(),
+	 * immediately after the TransportMasterManager has run its
+	 * ::pre_process_transport_masters() method to allow all transport
+	 * masters to update their information on the speed and position
+	 * indicated by their data sources.
+	 *
+	 * Our task here is to determine what the Session should do during its
+	 * process() call in order to respond to the transport master (or to
+	 * not respond at all, if we're not using external sync). We want to
+	 * set transport_master_strategy.action, which will be used from within
+	 * the Session process() callback (via ::implement_master_strategy())
+	 * to determine what, if anything to do there.
+	 *
+	 * The return value is the speed (aka "ratio") to be used by the port
+	 * resampler. If we're not chasing the master, the correct answer will
+	 * be 1.0. This can occur in a number of scenarios. If we are synced
+	 * and locked to the master, we want to use the "catch speed" given to
+	 * us as a parameter. This was determined by the
+	 * TransportMasterManager as the correct speed to use in order to
+	 * reduce the delta between the master's position and the session
+	 * transport position.
+	 *
+	 * In situations where we are not synced+locked, either temporarily or
+	 * longer term, we return 1.0, which leads to no resampling, and the
+	 * session will run at normal speed.
+	 */
+
+	if (!config.get_external_sync()) {
+		return 1.0;
+	}
+
+	TransportMasterManager& tmm (TransportMasterManager::instance());
+	const samplecnt_t locate_threshold = 5 * current_block_size;
+
+	if (tmm.master_invalid_this_cycle()) {
+		DEBUG_TRACE (DEBUG::Slave, "session told not to use the transport master this cycle\n");
+		if (_transport_fsm->rolling() && Config->get_transport_masters_just_roll_when_sync_lost()) {
+			transport_master_strategy.action = TransportMasterRelax;
+		} else {
+			transport_master_strategy.action = TransportMasterNoRoll;
+		}
+		return 1.0;
+	}
+
+	if (tmm.current()->type() == Engine) {
+		/* JACK is fundamentally different */
+		return plan_master_strategy_engine (nframes, master_speed, master_transport_sample, catch_speed);
+	}
+
+	const sampleoffset_t delta = _transport_sample - master_transport_sample;
+
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("\n\n\n\nsession at %1, master at %2, delta: %3 res: %4 TFSM state %5 action %6\n", _transport_sample, master_transport_sample, delta, tmm.current()->resolution(), _transport_fsm->current_state(), transport_master_strategy.action));
+
+	const bool interesting_transport_state_change_underway = (locate_pending() || declick_in_progress());
+
+	if ((transport_master_strategy.action == TransportMasterWait) || (transport_master_strategy.action == TransportMasterNoRoll)) {
+
+		/* We've either been:
+		 *
+		 * 1) waiting for the master to catch up with a position that
+		 * we located to (Wait)
+		 * 2) waiting to be able to use the master's speed & position
+		 *
+		 * The two cases are very similar, but differ in the conditions
+		 * under which we need to initiate a (possibly successive)
+		 * locate in response to the master's position
+		 *
+		 * This code is very similar to the non-wait case (the "else"
+		 * that ends this scope). The big difference is that here we
+		 * know that we've just finished a locate specifically in order
+		 * to catch the master. This changes the logic a little bit.
+		 */
+
+		DEBUG_TRACE (DEBUG::Slave, "had been waiting for locate-to-catch-master to finish\n");
+
+		if (interesting_transport_state_change_underway) {
+			/* still waiting for the declick and/or locate to
+			   finish ... nothing to do for now.
+			*/
+			DEBUG_TRACE (DEBUG::Slave, "still waiting for the locate to finish\n");
+			return 1.0;
+		}
+
+		const samplecnt_t wlp = worst_latency_preroll_buffer_size_ceil ();
+		bool should_locate;
+
+		if (transport_master_strategy.action == TransportMasterNoRoll) {
+
+			/* We've been waiting to be able to use the master's
+			 * position (i.e to get a lock on the incoming data
+			 * stream). We need to locate if we're either ahead or
+			 * behind the master by <threshold>.
+			 */
+
+			should_locate = abs (delta) > locate_threshold;
+		} else {
+
+			/* we located to be ahead of the master's position (see
+			 * the locate call in the next "else" scope where we
+			 * jump ahead by a significant distance).
+			 *
+			 * So, we should be ahead (or behind) the master's
+			 * position, and waiting for it to get close to us.
+			 *
+			 * We only need to locate again if we are actually
+			 * behind (or ahead, for reverse motion) of the master
+			 * by more than <threshold>.
+			 */
+
+			should_locate = delta < 0 && (abs (delta) > locate_threshold);
+		}
+
+		if (should_locate) {
+
+			/* we're too far from the master to catch it via
+			 * varispeed ... need to locate ahead of it, wait for
+			 * it to get cose to us, then varispeed to sync.
+			 *
+			 * We assume that the transport state after the locate
+			 * is always Stopped - we don't restart the transport
+			 * until the master catches us, or at least gets close
+			 * to our new position.
+			 *
+			 * Any time we locate, we need to reset the DLL used by
+			 * the TransportMasterManager. Do that here, since the
+			 * TMM will not need that again until after we start
+			 * the locate (and hence the apparent transport
+			 * position of the Session will reflect the target we
+			 * set here). That is because the locate will be
+			 * initiated in the Session::process() callback that is
+			 * about to happen right after we return.
+			 */
+
+			tmm.reinit (master_speed, master_transport_sample);
+
+			samplepos_t locate_target = master_transport_sample;
+
+			/* locate to a position "worst_latency_preroll" head of
+			 * the master, but also add in a generous estimate to
+			 * cover the time it will take to locate to that
+			 * position, based on our worst-case estimate for this
+			 * session (so far).
+			 */
+
+			locate_target += wlp + lrintf (ntracks() * sample_rate() * (1.5 * (current_usecs_per_track / 1000000.0)));
+
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("After locate-to-catch-master, still too far off (%1). Locate again to %2\n", delta, locate_target));
+
+			transport_master_strategy.action = TransportMasterLocate;
+			transport_master_strategy.target = locate_target;
+			transport_master_strategy.roll_disposition = MustStop;
+			transport_master_strategy.catch_speed = catch_speed;
+
+			return 1.0;
+		}
+
+		if (delta > wlp) {
+
+			/* We're close, but haven't reached the point where we
+			 * need to start rolling for preroll latency yet.
+			 */
+
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("master @ %1 is not yet within %2 of our position %3 (delta is %4)\n", master_transport_sample, wlp, _transport_sample, delta));
+			return 1.0;
+		}
+
+		/* case #3: we should start rolling */
+
+		DEBUG_TRACE (DEBUG::Slave, string_compose ("master @ %1 is WITHIN %2 of our position %3 (delta is %4), so start\n", master_transport_sample, wlp, _transport_sample, delta));
+
+		transport_master_strategy.action = TransportMasterStart;
+		transport_master_strategy.catch_speed = catch_speed;
+		return catch_speed;
+
+	}
+
+	/* currently we're not waiting to sync with the master. So
+	 * check if we're way out of alignment (case #1) or just a bit
+	 * out of alignment (case #2)
+	 */
+
+	if (abs (delta) > locate_threshold) {
+
+		/* CASE ONE
+		 *
+		 * This is a heuristic rather than a strictly provable rule. The idea
 		 * is that if we're "far away" from the master, we should locate to its
 		 * current position, and then varispeed to sync with it.
 		 *
 		 * On the other hand, if we're close to it, just varispeed.
 		 */
 
-		if (!actively_recording() && abs (delta) > (5 * current_block_size)) {
+		tmm.reinit (master_speed, master_transport_sample);
 
-			DiskReader::inc_no_disk_output ();
+		samplepos_t locate_target = master_transport_sample;
 
-			if (!locate_pending() && !declick_in_progress()) {
-				DEBUG_TRACE (DEBUG::Slave, string_compose ("request locate to master position %1\n", master_transport_sample));
-				/* note that for non-JACK transport masters, we assume that the transport state (rolling,stopped) after the locate
-				 * remains unchanged (2nd argument, "roll-after-locate")
-				 */
-				TFSM_LOCATE (master_transport_sample, (master_speed != 0) ? MustRoll : MustStop, true, false, false);
-			}
+		locate_target += lrintf (ntracks() * sample_rate() * 0.05);
 
-			return true;
+		DEBUG_TRACE (DEBUG::Slave, string_compose ("request locate to master position %1\n", locate_target));
+
+		transport_master_strategy.action = TransportMasterLocate;
+		transport_master_strategy.target = locate_target;
+		transport_master_strategy.roll_disposition = (master_speed != 0) ? MustRoll : MustStop;
+		transport_master_strategy.catch_speed = catch_speed;
+
+		/* Session::process_with(out)_events() will take this
+		 * up when called.
+		 */
+
+		return 1.0;
+
+	} else if (abs (delta) > tmm.current()->resolution()) {
+
+		/* CASE TWO
+		 *
+		 * If we're close, but not within the resolution of the
+		 * master, just varispeed to chase the master, and be
+		 * silent till we're synced
+		 */
+
+		tmm.block_disk_output ();
+
+	} else {
+
+		/* speed is set, we're locked and synced and good to go */
+
+		if (!locate_pending() && !declick_in_progress()) {
+			DEBUG_TRACE (DEBUG::Slave, "master/slave synced & locked\n");
+			tmm.unblock_disk_output ();
 		}
 	}
 
 	if (master_speed != 0.0) {
+
+		/* master rolling, we should be too */
+
 		if (_transport_speed == 0.0f) {
 			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave starts transport: %1 sample %2 tf %3\n", master_speed, master_transport_sample, _transport_sample));
-			TFSM_EVENT (TransportFSM::StartTransport);
+			transport_master_strategy.action = TransportMasterStart;
+			transport_master_strategy.catch_speed = catch_speed;
+			return catch_speed;
 		}
 
 	} else if (!tmm.current()->starting()) { /* master stopped, not in "starting" state */
 
 		if (_transport_speed != 0.0f) {
 			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stops transport: %1 sample %2 tf %3\n", master_speed, master_transport_sample, _transport_sample));
-			TFSM_STOP (false, false);
+			transport_master_strategy.action = TransportMasterStop;
+			return catch_speed;
 		}
 	}
 
-	/* This is the second part of the "we're not synced yet" code. If we're
-	 * close, but not within the resolution of the master, silence disk
-	 * output but continue to varispeed to get in sync.
+	/* we were not waiting for the master, we're close enough to
+	 * it, and our transport state already matched the master
+	 * (stopped or rolling). We should just continue
+	 * resampling/varispeeding at "catch_speed" in order to remain
+	 * synced with the master.
 	 */
 
-	if ((tmm.current()->type() != Engine) && !actively_recording() && abs (delta) > tmm.current()->resolution()) {
-		/* just varispeed to chase the master, and be silent till we're synced */
-		DiskReader::inc_no_disk_output ();
-		return true;
-	}
-
-	/* speed is set, we're locked, and good to go */
-	DiskReader::dec_no_disk_output ();
-	return true;
-
-  noroll:
-	/* don't move at all */
-	DEBUG_TRACE (DEBUG::Slave, "no roll\n")
-	no_roll (nframes);
-	return false;
+	transport_master_strategy.action = TransportMasterRelax;
+	return catch_speed;
 }
 
-void
-Session::reset_slave_state ()
+bool
+Session::implement_master_strategy ()
 {
-	DiskReader::dec_no_disk_output ();
+	/* This is called from within Session::process(), only if we are using
+	 * external sync. The task here is simply to implement whatever actions
+	 * where decided by ::plan_master_strategy (), from within the
+	 * ::process() callback (the planning step is executed before
+	 * Session::process() begins.
+	 */
+
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("Implementing master strategy: %1\n", transport_master_strategy.action));
+
+	switch (transport_master_strategy.action) {
+	case TransportMasterNoRoll:
+		/* This is the one case where we do not want the session to
+		   call ::roll() under any circumstances. Returning false here
+		   will do that.
+		*/
+		return false;
+	case TransportMasterRelax:
+		break;
+	case TransportMasterWait:
+		break;
+	case TransportMasterLocate:
+		transport_master_strategy.action = TransportMasterWait;
+		TFSM_LOCATE(transport_master_strategy.target, transport_master_strategy.roll_disposition, true, false, false);
+		break;
+	case TransportMasterStart:
+		TFSM_EVENT (TransportFSM::StartTransport);
+		break;
+	case TransportMasterStop:
+		TFSM_STOP (false, false);
+		break;
+	}
+
+	return true;
 }

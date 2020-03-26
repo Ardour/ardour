@@ -41,6 +41,7 @@
 #include "ardour/audio_port.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioplaylist.h"
+#include "ardour/audiorom.h"
 #include "ardour/buffer_set.h"
 #include "ardour/beats_samples_converter.h"
 #include "ardour/chan_mapping.h"
@@ -247,6 +248,7 @@ CLASSKEYS(std::list<Evoral::ControlEvent*>);
 CLASSKEYS(std::vector<ARDOUR::Plugin::PresetRecord>);
 CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Processor> >);
 CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Source> >);
+CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Readable> >);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::PluginInfo> >); // PluginInfoList
 
 CLASSKEYS(std::list<ArdourMarker*>);
@@ -259,6 +261,7 @@ CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Stripable> >);
 CLASSKEYS(boost::shared_ptr<std::list<boost::shared_ptr<ARDOUR::Route> > >);
 
 CLASSKEYS(boost::shared_ptr<ARDOUR::AudioRegion>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::AudioRom>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::AudioSource>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Automatable>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::AutomatableSequence<Temporal::Beats> >);
@@ -1197,6 +1200,11 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("read", &Readable::read)
 		.addFunction ("readable_length", &Readable::readable_length)
 		.addFunction ("n_channels", &Readable::n_channels)
+		.addStaticFunction ("load", &Readable::load)
+		.endClass ()
+
+		.deriveWSPtrClass <AudioRom, Readable> ("AudioRom")
+		.addStaticFunction ("new_rom", &AudioRom::new_rom)
 		.endClass ()
 
 		.deriveWSPtrClass <Region, SessionObject> ("Region")
@@ -1204,6 +1212,7 @@ LuaBindings::common (lua_State* L)
 		.addCast<MidiRegion> ("to_midiregion")
 		.addCast<AudioRegion> ("to_audioregion")
 
+		.addFunction ("playlist", &Region::playlist)
 		.addFunction ("set_name", &Region::set_name)
 		/* properties */
 		.addFunction ("position", &Region::position)
@@ -1282,6 +1291,14 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("scale_amplitude", &AudioRegion::scale_amplitude)
 		.addFunction ("maximum_amplitude", &AudioRegion::maximum_amplitude)
 		.addFunction ("rms", &AudioRegion::rms)
+		.addFunction ("fade_in_active", &AudioRegion::fade_in_active)
+		.addFunction ("fade_out_active", &AudioRegion::fade_out_active)
+		.addFunction ("set_fade_in_active", &AudioRegion::set_fade_in_active)
+		.addFunction ("set_fade_in_shape", &AudioRegion::set_fade_in_shape)
+		.addFunction ("set_fade_in_length", &AudioRegion::set_fade_in_length)
+		.addFunction ("set_fade_out_active", &AudioRegion::set_fade_out_active)
+		.addFunction ("set_fade_out_shape", &AudioRegion::set_fade_out_shape)
+		.addFunction ("set_fade_out_length", &AudioRegion::set_fade_out_length)
 		.addRefFunction ("separate_by_channel", &AudioRegion::separate_by_channel)
 		.endClass ()
 
@@ -1293,7 +1310,6 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("empty", &Source::empty)
 		.addFunction ("length", &Source::length)
 		.addFunction ("natural_position", &Source::natural_position)
-		.addFunction ("destructive", &Source::destructive)
 		.addFunction ("writable", &Source::writable)
 		.addFunction ("has_been_analysed", &Source::has_been_analysed)
 		.addFunction ("can_be_analysed", &Source::can_be_analysed)
@@ -1585,6 +1601,7 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <Amp, Processor> ("Amp")
 		.addFunction ("gain_control", (boost::shared_ptr<GainControl>(Amp::*)())&Amp::gain_control)
+		.addStaticFunction ("apply_gain", static_cast<gain_t (*)(AudioBuffer&, samplecnt_t, samplecnt_t, gain_t, gain_t, sampleoffset_t)>(&Amp::apply_gain))
 		.endClass ()
 
 		.deriveWSPtrClass <PeakMeter, Processor> ("PeakMeter")
@@ -1688,6 +1705,10 @@ LuaBindings::common (lua_State* L)
 
 		// typedef std::vector<boost::shared_ptr<Source> > Region::SourceList
 		.beginStdVector <boost::shared_ptr<Source> > ("SourceList")
+		.endClass ()
+
+		// typedef std::vector<boost::shared_ptr<Readable> >
+		.beginStdVector <boost::shared_ptr<Readable> > ("ReadableList")
 		.endClass ()
 
 		// from SessionPlaylists: std::vector<boost::shared_ptr<Playlist > >
@@ -1830,6 +1851,8 @@ LuaBindings::common (lua_State* L)
 		.addConstructor <void (*) (DataType, uint32_t)> ()
 		.addFunction ("get", &ChanCount::get)
 		.addFunction ("set", &ChanCount::set)
+		.addFunction ("set_audio", &ChanCount::set_audio)
+		.addFunction ("set_midi", &ChanCount::set_midi)
 		.addFunction ("n_audio", &ChanCount::n_audio)
 		.addFunction ("n_midi", &ChanCount::n_midi)
 		.addFunction ("n_total", &ChanCount::n_total)
@@ -2008,7 +2031,6 @@ LuaBindings::common (lua_State* L)
 		.beginNamespace ("TrackMode")
 		.addConst ("Normal", ARDOUR::TrackMode(Start))
 		.addConst ("NonLayered", ARDOUR::TrackMode(NonLayered))
-		.addConst ("Destructive", ARDOUR::TrackMode(Destructive))
 		.endNamespace ()
 
 		.beginNamespace ("TransportRequestSource")
@@ -2320,6 +2342,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("request_locate", &Session::request_locate)
 		.addFunction ("request_stop", &Session::request_stop)
 		.addFunction ("request_play_loop", &Session::request_play_loop)
+		.addFunction ("request_bounded_roll", &Session::request_bounded_roll)
 		.addFunction ("get_play_loop", &Session::get_play_loop)
 		.addFunction ("get_xrun_count", &Session::get_xrun_count)
 		.addFunction ("reset_xrun_count", &Session::reset_xrun_count)
@@ -2533,6 +2556,17 @@ LuaBindings::common (lua_State* L)
 		.addRefFunction ("read", &ARDOUR::LTCReader::read)
 		.endClass ()
 
+		.beginClass <DSP::Convolution> ("Convolution")
+		.addConstructor <void (*) (Session&, uint32_t, uint32_t)> ()
+		.addFunction ("add_impdata", &ARDOUR::DSP::Convolution::add_impdata)
+		.addFunction ("run", &ARDOUR::DSP::Convolution::run)
+		.addFunction ("restart", &ARDOUR::DSP::Convolution::restart)
+		.addFunction ("ready", &ARDOUR::DSP::Convolution::ready)
+		.addFunction ("latency", &ARDOUR::DSP::Convolution::latency)
+		.addFunction ("n_inputs", &ARDOUR::DSP::Convolution::n_inputs)
+		.addFunction ("n_outputs", &ARDOUR::DSP::Convolution::n_outputs)
+		.endClass ()
+
 		.beginClass <DSP::Convolver::IRSettings> ("IRSettings")
 		.addVoidConstructor ()
 		.addData ("gain", &DSP::Convolver::IRSettings::gain)
@@ -2543,14 +2577,10 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_channel_delay", &ARDOUR::DSP::Convolver::IRSettings::set_channel_delay)
 		.endClass ()
 
-		.beginClass <DSP::Convolver> ("Convolver")
+		.deriveClass <DSP::Convolver, DSP::Convolution> ("Convolver")
 		.addConstructor <void (*) (Session&, std::string const&, DSP::Convolver::IRChannelConfig, DSP::Convolver::IRSettings)> ()
-		.addFunction ("run", &ARDOUR::DSP::Convolver::run)
+		.addFunction ("run_mono", &ARDOUR::DSP::Convolver::run_mono)
 		.addFunction ("run_stereo", &ARDOUR::DSP::Convolver::run_stereo)
-		.addFunction ("latency", &ARDOUR::DSP::Convolver::latency)
-		.addFunction ("n_inputs", &ARDOUR::DSP::Convolver::n_inputs)
-		.addFunction ("n_outputs", &ARDOUR::DSP::Convolver::n_outputs)
-		.addFunction ("ready", &ARDOUR::DSP::Convolver::ready)
 		.endClass ()
 
 		/* DSP enums */
@@ -2632,6 +2662,7 @@ LuaBindings::dsp (lua_State* L)
 		.addFunction ("get_audio", static_cast<AudioBuffer&(BufferSet::*)(size_t)>(&BufferSet::get_audio))
 		.addFunction ("get_midi", static_cast<MidiBuffer&(BufferSet::*)(size_t)>(&BufferSet::get_midi))
 		.addFunction ("count", static_cast<const ChanCount&(BufferSet::*)()const>(&BufferSet::count))
+		.addFunction ("available", static_cast<const ChanCount&(BufferSet::*)()const>(&BufferSet::available))
 		.endClass()
 		.endNamespace ();
 

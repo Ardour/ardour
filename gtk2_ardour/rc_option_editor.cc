@@ -2309,17 +2309,9 @@ RCOptionEditor::RCOptionEditor ()
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), _("If enabled, popup a dialog when a new marker is created to allow its name to be set as it is created."
 								"\n\nYou can always rename markers by right-clicking on them"));
 
-	add_option (_("Editor"),
-	     new BoolOption (
-		     "draggable-playhead",
-		     _("Allow dragging of playhead"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_draggable_playhead),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_draggable_playhead)
-		     ));
-
 	ComboOption<float>* dps = new ComboOption<float> (
 		     "draggable-playhead-speed",
-		     _("Playhead dragging speed (%)"),
+		     _("Auto-scroll speed when dragging playhead (%)"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_draggable_playhead_speed),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_draggable_playhead_speed)
 		     );
@@ -2699,16 +2691,14 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 
-	if (!ARDOUR::Profile->get_mixbus()) {
-		add_option (_("Mixer"), new OptionEditorHeading (_("Send Routing")));
-		add_option (_("Mixer"),
-				new BoolOption (
-					"link-send-and-route-panner",
-					_("Link panners of Aux and External Sends with main panner by default"),
-					sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_send_and_route_panner),
-					sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_send_and_route_panner)
-					));
-	}
+	add_option (_("Mixer"), new OptionEditorHeading (_("Send Routing")));
+	add_option (_("Mixer"),
+			new BoolOption (
+				"link-send-and-route-panner",
+				_("Link panners of Aux and External Sends with main panner by default"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_send_and_route_panner),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_send_and_route_panner)
+				));
 
 	/* Signal Flow */
 
@@ -2907,7 +2897,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	vkeybdlayout->add ("QWERTY", _("QWERTY"));
 	vkeybdlayout->add ("QWERTZ", _("QWERTZ"));
-	vkeybdlayout->add ("AZERTY", _("AZERTY"));
 	vkeybdlayout->add ("AZERTY", _("AZERTY"));
 	vkeybdlayout->add ("DVORAK", _("DVORAK"));
 	vkeybdlayout->add ("QWERTY Single", _("QWERTY Single"));

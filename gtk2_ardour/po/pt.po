@@ -12848,7 +12848,7 @@ msgid ""
 msgstr ""
 
 #: session_option_editor.cc:136
-msgid "destructive-xfade-seconds"
+msgid "mark_destructive-xfade-seconds"
 msgstr ""
 
 #: session_option_editor.cc:137

@@ -26,6 +26,7 @@
 
 #include "ardour/amp.h"
 #include "ardour/audio_buffer.h"
+#include "ardour/audioengine.h"
 #include "ardour/delayline.h"
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
@@ -33,11 +34,13 @@
 #include "ardour/panner_shell.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
-#include "ardour/audioengine.h"
 
 #include "pbd/i18n.h"
 
-namespace ARDOUR { class MuteMaster; class Pannable; }
+namespace ARDOUR {
+	class MuteMaster;
+	class Pannable;
+}
 
 using namespace PBD;
 using namespace ARDOUR;
@@ -45,20 +48,20 @@ using namespace std;
 
 PBD::Signal1<void, pframes_t> InternalSend::CycleStart;
 
-InternalSend::InternalSend (Session& s,
-		boost::shared_ptr<Pannable> p,
-		boost::shared_ptr<MuteMaster> mm,
-		boost::shared_ptr<Route> sendfrom,
-		boost::shared_ptr<Route> sendto,
-		Delivery::Role role,
-		bool ignore_bitslot)
+InternalSend::InternalSend (Session&                      s,
+                            boost::shared_ptr<Pannable>   p,
+                            boost::shared_ptr<MuteMaster> mm,
+                            boost::shared_ptr<Route>      sendfrom,
+                            boost::shared_ptr<Route>      sendto,
+                            Delivery::Role                role,
+                            bool                          ignore_bitslot)
 	: Send (s, p, mm, role, ignore_bitslot)
 	, _send_from (sendfrom)
 	, _allow_feedback (false)
 {
 	if (sendto) {
 		if (use_target (sendto)) {
-			throw failed_constructor();
+			throw failed_constructor ();
 		}
 	}
 
@@ -88,7 +91,7 @@ InternalSend::init_gain ()
 }
 
 int
-InternalSend::use_target (boost::shared_ptr<Route> sendto)
+InternalSend::use_target (boost::shared_ptr<Route> sendto, bool update_name)
 {
 	if (_send_to) {
 		_send_to->remove_send_from_internal_return (this);
@@ -98,17 +101,19 @@ InternalSend::use_target (boost::shared_ptr<Route> sendto)
 
 	_send_to->add_send_to_internal_return (this);
 
-	mixbufs.ensure_buffers (_send_to->internal_return()->input_streams(), _session.get_block_size());
-	mixbufs.set_count (_send_to->internal_return()->input_streams());
+	mixbufs.ensure_buffers (_send_to->internal_return ()->input_streams (), _session.get_block_size ());
+	mixbufs.set_count (_send_to->internal_return ()->input_streams ());
 
-	_meter->configure_io (ChanCount (DataType::AUDIO, pan_outs()), ChanCount (DataType::AUDIO, pan_outs()));
+	_meter->configure_io (ChanCount (DataType::AUDIO, pan_outs ()), ChanCount (DataType::AUDIO, pan_outs ()));
 
-	_send_delay->configure_io (ChanCount (DataType::AUDIO, pan_outs()), ChanCount (DataType::AUDIO, pan_outs()));
+	_send_delay->configure_io (ChanCount (DataType::AUDIO, pan_outs ()), ChanCount (DataType::AUDIO, pan_outs ()));
 
 	reset_panner ();
 
-	set_name (sendto->name());
-	_send_to_id = _send_to->id();
+	if (update_name) {
+		set_name (sendto->name ());
+	}
+	_send_to_id = _send_to->id ();
 
 	target_connections.drop_connections ();
 
@@ -123,15 +128,15 @@ void
 InternalSend::target_io_changed ()
 {
 	assert (_send_to);
-	mixbufs.ensure_buffers (_send_to->internal_return()->input_streams(), _session.get_block_size());
-	mixbufs.set_count (_send_to->internal_return()->input_streams());
-	reset_panner();
+	mixbufs.ensure_buffers (_send_to->internal_return ()->input_streams (), _session.get_block_size ());
+	mixbufs.set_count (_send_to->internal_return ()->input_streams ());
+	reset_panner ();
 }
 
 void
 InternalSend::send_from_going_away ()
 {
-	_send_from.reset();
+	_send_from.reset ();
 }
 
 void
@@ -150,10 +155,11 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		return;
 	}
 
-	// we have to copy the input, because we may alter the buffers with the amp
-	// in-place, which a send must never do.
+	/* we have to copy the input, because we may alter the buffers with the amp
+	 * in-place, which a send must never do.
+	 */
 
-	if (_panshell && !_panshell->bypassed() && role() != Listen) {
+	if (_panshell && !_panshell->bypassed () && role () != Listen) {
 		if (mixbufs.count ().n_audio () > 0) {
 			_panshell->run (bufs, mixbufs, start_sample, end_sample, nframes);
 		}
@@ -162,93 +168,98 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		 * if there are more buffers available than send buffers, ignore them,
 		 * if there are less, copy the last as IO::copy_to_output does. */
 
-		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		for (DataType::iterator t = DataType::begin (); t != DataType::end (); ++t) {
 			if (*t != DataType::AUDIO) {
-				BufferSet::iterator o = mixbufs.begin(*t);
-				BufferSet::iterator i = bufs.begin(*t);
+				BufferSet::iterator o = mixbufs.begin (*t);
+				BufferSet::iterator i = bufs.begin (*t);
 
-				while (i != bufs.end(*t) && o != mixbufs.end(*t)) {
+				while (i != bufs.end (*t) && o != mixbufs.end (*t)) {
 					o->read_from (*i, nframes);
 					++i;
 					++o;
 				}
-				while (o != mixbufs.end(*t)) {
-					o->silence(nframes, 0);
+				while (o != mixbufs.end (*t)) {
+					o->silence (nframes, 0);
 					++o;
 				}
 			}
 		}
+	} else if (role () == Listen) {
+		/* We're going to the monitor bus, so discard MIDI data */
+
+		uint32_t const bufs_audio    = bufs.count ().get (DataType::AUDIO);
+		uint32_t const mixbufs_audio = mixbufs.count ().get (DataType::AUDIO);
+
+		/* monitor-section has same number of channels as master-bus (on creation).
+		 *
+		 * There is no clear answer what should happen when trying to PFL or AFL
+		 * a track that has more channels (bufs_audio from source-track is
+		 * larger than mixbufs).
+		 *
+		 * There are two options:
+		 *  1: discard additional channels    (current)
+		 * OR
+		 *  2: require the monitor-section to have at least as many channels
+		 * as the largest count of any route
+		 */
+		//assert (mixbufs.available().get (DataType::AUDIO) >= bufs_audio);
+
+		/* Copy bufs into mixbufs, going round bufs more than once if necessary
+		 * to ensure that every mixbuf gets some data.
+		 */
+
+		uint32_t j = 0;
+		uint32_t i = 0;
+		for (i = 0; i < mixbufs_audio && j < bufs_audio; ++i) {
+			mixbufs.get_audio (i).read_from (bufs.get_audio (j), nframes);
+			++j;
+
+			if (j == bufs_audio) {
+				j = 0;
+			}
+		}
+		/* in case or MIDI track with 0 audio channels */
+		for (; i < mixbufs_audio; ++i) {
+			mixbufs.get_audio (i).silence (nframes);
+		}
+
 	} else {
-		if (role() == Listen) {
-			/* We're going to the monitor bus, so discard MIDI data */
-
-			uint32_t const bufs_audio = bufs.count().get (DataType::AUDIO);
-			uint32_t const mixbufs_audio = mixbufs.count().get (DataType::AUDIO);
-
-			/* monitor-section has same number of channels as master-bus (on creation).
-			 *
-			 * There is no clear answer what should happen when trying to PFL or AFL
-			 * a track that has more channels (bufs_audio from source-track is
-			 * larger than mixbufs).
-			 *
-			 * There are two options:
-			 *  1: discard additional channels    (current)
-			 * OR
-			 *  2: require the monitor-section to have at least as many channels
-			 * as the largest count of any route
-			 */
-			//assert (mixbufs.available().get (DataType::AUDIO) >= bufs_audio);
-
-			/* Copy bufs into mixbufs, going round bufs more than once if necessary
-			   to ensure that every mixbuf gets some data.
-			*/
-
-			uint32_t j = 0;
-			uint32_t i = 0;
-			for (i = 0; i < mixbufs_audio && j < bufs_audio; ++i) {
-				mixbufs.get_audio(i).read_from (bufs.get_audio(j), nframes);
-				++j;
-
-				if (j == bufs_audio) {
-					j = 0;
+		/* no panner or panner is bypassed */
+		assert (mixbufs.available () >= bufs.count ());
+		/* BufferSet::read_from() changes the channel-conut,
+		 * so we manually copy bufs -> mixbufs
+		 */
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			/* iterate over outputs */
+			BufferSet::iterator i = bufs.begin (*t);
+			for (BufferSet::iterator o = mixbufs.begin (*t); o != mixbufs.end (*t); ++o) {
+				if (i == bufs.end (*t)) {
+					o->silence (nframes, 0);
+				} else {
+					o->read_from (*i, nframes);
+					++i;
 				}
 			}
-			/* in case or MIDI track with 0 audio channels */
-			for (; i < mixbufs_audio; ++i) {
-				mixbufs.get_audio(i).silence (nframes);
-			}
-
-		} else {
-			assert (mixbufs.available() >= bufs.count());
-			mixbufs.read_from (bufs, nframes);
 		}
 	}
 
-	/* gain control */
-
+	/* main gain control: * mute & bypass/enable */
 	gain_t tgain = target_gain ();
 
 	if (tgain != _current_gain) {
-
-		/* target gain has changed */
-
-		_current_gain = Amp::apply_gain (mixbufs, _session.nominal_sample_rate(), nframes, _current_gain, tgain);
-
+		/* target gain has changed, fade in/out */
+		_current_gain = Amp::apply_gain (mixbufs, _session.nominal_sample_rate (), nframes, _current_gain, tgain);
 	} else if (tgain == GAIN_COEFF_ZERO) {
-
-		/* we were quiet last time, and we're still supposed to be quiet.
-		*/
-
+		/* we were quiet last time, and we're still supposed to be quiet. */
 		_meter->reset ();
 		Amp::apply_simple_gain (mixbufs, nframes, GAIN_COEFF_ZERO);
 		goto out;
-
 	} else if (tgain != GAIN_COEFF_UNITY) {
-
 		/* target gain has not changed, but is not zero or unity */
 		Amp::apply_simple_gain (mixbufs, nframes, tgain);
 	}
 
+	/* apply fader gain automation */
 	_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
 	_amp->setup_gain_automation (start_sample, end_sample, nframes);
 	_amp->run (mixbufs, start_sample, end_sample, speed, nframes, true);
@@ -256,10 +267,9 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	_send_delay->run (mixbufs, start_sample, end_sample, speed, nframes, true);
 
 	/* consider metering */
-
 	if (_metering) {
-		if (_amp->gain_control()->get_value() == GAIN_COEFF_ZERO) {
-			_meter->reset();
+		if (_amp->gain_control ()->get_value () == GAIN_COEFF_ZERO) {
+			_meter->reset ();
 		} else {
 			_meter->run (mixbufs, start_sample, end_sample, speed, nframes, true);
 		}
@@ -269,7 +279,7 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 	/* target will pick up our output when it is ready */
 
-  out:
+out:
 	_active = _pending_active;
 }
 
@@ -277,7 +287,7 @@ int
 InternalSend::set_block_size (pframes_t nframes)
 {
 	if (_send_to) {
-		mixbufs.ensure_buffers (_send_to->internal_return()->input_streams(), nframes);
+		mixbufs.ensure_buffers (_send_to->internal_return ()->input_streams (), nframes);
 	}
 
 	return 0;
@@ -309,7 +319,7 @@ InternalSend::state ()
 	node.set_property ("type", "intsend");
 
 	if (_send_to) {
-		node.set_property ("target", _send_to->id());
+		node.set_property ("target", _send_to->id ());
 	}
 	node.set_property ("allow-feedback", _allow_feedback);
 
@@ -324,11 +334,10 @@ InternalSend::set_state (const XMLNode& node, int version)
 	Send::set_state (node, version);
 
 	if (node.get_property ("target", _send_to_id)) {
-
 		/* if we're loading a session, the target route may not have been
-		   create yet. make sure we defer till we are sure that it should
-		   exist.
-		*/
+		 * create yet. make sure we defer till we are sure that it should
+		 * exist.
+		 */
 
 		if (!IO::connecting_legal) {
 			IO::ConnectingLegal.connect_same_thread (connect_c, boost::bind (&InternalSend::connect_when_legal, this));
@@ -355,12 +364,12 @@ InternalSend::connect_when_legal ()
 	boost::shared_ptr<Route> sendto;
 
 	if ((sendto = _session.route_by_id (_send_to_id)) == 0) {
-		error << string_compose (_("%1 - cannot find any track/bus with the ID %2 to connect to"), display_name(), _send_to_id) << endmsg;
-		cerr << string_compose (_("%1 - cannot find any track/bus with the ID %2 to connect to"), display_name(), _send_to_id) << endl;
+		error << string_compose (_("%1 - cannot find any track/bus with the ID %2 to connect to"), display_name (), _send_to_id) << endmsg;
+		cerr << string_compose (_("%1 - cannot find any track/bus with the ID %2 to connect to"), display_name (), _send_to_id) << endl;
 		return -1;
 	}
 
-	return use_target (sendto);
+	return use_target (sendto, false);
 }
 
 bool
@@ -374,23 +383,24 @@ uint32_t
 InternalSend::pan_outs () const
 {
 	/* the number of targets for our panner is determined by what we are
-	   sending to, if anything.
-	*/
+	 * sending to, if anything.
+	 */
 
 	if (_send_to) {
-		return _send_to->internal_return()->input_streams().n_audio();
+		return _send_to->internal_return ()->input_streams ().n_audio ();
 	}
 
-	return 1; /* zero is more accurate, but 1 is probably safer as a way to
-		   * say "don't pan"
-		   */
+	/* zero is more accurate, but 1 is probably safer as a way to
+	 * say "don't pan"
+	 */
+	return 1;
 }
 
 bool
 InternalSend::configure_io (ChanCount in, ChanCount out)
 {
 	bool ret = Send::configure_io (in, out);
-	set_block_size (_session.engine().samples_per_cycle());
+	set_block_size (_session.engine ().samples_per_cycle ());
 	return ret;
 }
 
@@ -398,7 +408,7 @@ bool
 InternalSend::set_name (const string& str)
 {
 	/* rules for external sends don't apply to us */
-	return IOProcessor::set_name (str);
+	return Delivery::set_name (str);
 }
 
 string
@@ -440,7 +450,7 @@ InternalSend::set_can_pan (bool yn)
 void
 InternalSend::cycle_start (pframes_t /*nframes*/)
 {
-	for (BufferSet::audio_iterator b = mixbufs.audio_begin(); b != mixbufs.audio_end(); ++b) {
+	for (BufferSet::audio_iterator b = mixbufs.audio_begin (); b != mixbufs.audio_end (); ++b) {
 		b->prepare ();
 	}
 }

@@ -106,37 +106,6 @@ public:
 	/* azimut, width or elevation updated -> recalc signal_position ->  emit Changed */
 	PBD::Signal0<void> SignalPositionChanged;
 
-	void      set_automation_state (AutoState);
-	AutoState automation_state() const;
-
-	virtual std::set<Evoral::Parameter> what_can_be_automated() const;
-	virtual std::string describe_parameter (Evoral::Parameter);
-	virtual std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;
-
-	bool touching() const;
-
-	static double azimuth_to_lr_fract (double azi) {
-		/* 180.0 degrees=> left => 0.0 */
-		/* 0.0 degrees => right => 1.0 */
-
-		/* humans can only distinguish 1 degree of arc between two positions,
-		   so force azi back to an integral value before computing
-		*/
-
-		return 1.0 - (rint(azi)/180.0);
-	}
-
-	static double lr_fract_to_azimuth (double fract) {
-		/* fract = 0.0 => degrees = 180.0 => left */
-		/* fract = 1.0 => degrees = 0.0 => right */
-
-		/* humans can only distinguish 1 degree of arc between two positions,
-		   so force azi back to an integral value after computing
-		*/
-
-		return rint (180.0 - (fract * 180.0));
-	}
-
 	/**
 	 *  Pan some input buffers to a number of output buffers.
 	 *
@@ -163,25 +132,23 @@ public:
 
 	boost::shared_ptr<Pannable> pannable() const { return _pannable; }
 
-	static bool equivalent (pan_t a, pan_t b) {
-		return fabsf (a - b) < 0.002; // about 1 degree of arc for a stereo panner
-	}
-
-	static bool equivalent (const PBD::AngularVector& a, const PBD::AngularVector& b) {
-		/* XXX azimuth only, at present */
-		return fabs (a.azi - b.azi) < 1.0;
-	}
-
 	virtual void freeze ();
 	virtual void thaw ();
 
-protected:
-	boost::shared_ptr<Pannable> _pannable;
+	const std::set<Evoral::Parameter>& what_can_be_automated() const {
+		return _can_automate_list;
+	}
 
+	virtual std::string value_as_string (boost::shared_ptr<const AutomationControl>) const = 0;
+
+protected:
 	virtual void distribute_one (AudioBuffer&, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t which) = 0;
 	virtual void distribute_one_automated (AudioBuffer&, BufferSet& obufs,
 	                                       samplepos_t start, samplepos_t end, pframes_t nframes,
 	                                       pan_t** buffers, uint32_t which) = 0;
+
+	boost::shared_ptr<Pannable> _pannable;
+	std::set<Evoral::Parameter> _can_automate_list;
 
 	int32_t _frozen;
 };

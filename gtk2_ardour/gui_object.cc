@@ -157,3 +157,13 @@ GUIObjectState::all_ids () const
 	}
 	return ids;
 }
+
+void
+GUIObjectState::remove_property (const string & id, const string & prop_name)
+{
+	std::map <std::string, XMLNode*>::iterator i = object_map.find (id);
+	if (i == object_map.end()) {
+		return;
+	}
+	i->second->remove_property (prop_name);
+}

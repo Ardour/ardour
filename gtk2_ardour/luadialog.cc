@@ -873,7 +873,6 @@ ProgressWindow::progress (float prog, std::string const& text)
 		_bar.set_text (text);
 	}
 	if (prog < 0 || prog > 1) {
-		std::cerr << "pulse\n";
 		_bar.set_pulse_step(.1);
 		_bar.pulse();
 	} else {

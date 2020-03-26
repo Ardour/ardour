@@ -46,17 +46,35 @@ PortExportChannel::~PortExportChannel ()
 	_delaylines.clear ();
 }
 
-void PortExportChannel::set_max_buffer_size(samplecnt_t samples)
+samplecnt_t PortExportChannel::common_port_playback_latency () const
 {
-	_buffer_size = samples;
-	_buffer.reset (new Sample[samples]);
+	samplecnt_t l = 0;
+	bool first = true;
+	for (PortSet::const_iterator it = ports.begin(); it != ports.end(); ++it) {
+		boost::shared_ptr<AudioPort> p = it->lock ();
+		if (!p) { continue; }
+		samplecnt_t latency = p->private_latency_range (true).max;
+		if (first) {
+			first = false;
+			l = p->private_latency_range (true).max;
+			continue;
+		}
+		l = std::min (l, latency);
+	}
+	return l;
+}
+
+void PortExportChannel::prepare_export (samplecnt_t max_samples, sampleoffset_t common_latency)
+{
+	_buffer_size = max_samples;
+	_buffer.reset (new Sample[max_samples]);
 
 	_delaylines.clear ();
 
 	for (PortSet::const_iterator it = ports.begin(); it != ports.end(); ++it) {
 		boost::shared_ptr<AudioPort> p = it->lock ();
 		if (!p) { continue; }
-		samplecnt_t latency = p->private_latency_range (true).max;
+		samplecnt_t latency = p->private_latency_range (true).max - common_latency;
 		PBD::RingBuffer<Sample>* rb = new PBD::RingBuffer<Sample> (latency + 1 + _buffer_size);
 		for (samplepos_t i = 0; i < latency; ++i) {
 			Sample zero = 0;
@@ -164,9 +182,6 @@ RegionExportChannelFactory::RegionExportChannelFactory (Session * session, Audio
 		std::fill_n (gain_buffer.get(), samples_per_cycle, Sample (1.0));
 
 		break;
-	  case Processed:
-		n_channels = track.n_outputs().n_audio();
-		break;
 	  default:
 		throw ExportFailed ("Unhandled type in ExportChannelFactory constructor");
 	}
@@ -221,9 +236,6 @@ RegionExportChannelFactory::update_buffers (samplecnt_t samples)
 			region.read_at (buffers.get_audio (channel).data(), mixdown_buffer.get(), gain_buffer.get(), position, samples, channel);
 		}
 		break;
-	case Processed:
-		track.export_stuff (buffers, position, samples, track.main_outs(), true, true, false);
-		break;
 	default:
 		throw ExportFailed ("Unhandled type in ExportChannelFactory::update_buffers");
 	}
@@ -258,10 +270,10 @@ RouteExportChannel::create_from_route(std::list<ExportChannelPtr> & result, boos
 }
 
 void
-RouteExportChannel::set_max_buffer_size(samplecnt_t samples)
+RouteExportChannel::prepare_export (samplecnt_t max_samples, sampleoffset_t)
 {
 	if (processor) {
-		processor->set_block_size (samples);
+		processor->set_block_size (max_samples);
 	}
 }
 

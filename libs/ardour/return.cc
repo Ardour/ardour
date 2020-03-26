@@ -47,7 +47,7 @@ Return::name_and_id_new_return (Session& s, uint32_t& bitslot)
 
 Return::Return (Session& s, bool internal)
 	: IOProcessor (s, (internal ? false : true), false,
-		       name_and_id_new_return (s, _bitslot))
+		       name_and_id_new_return (s, _bitslot), "", DataType::AUDIO, true)
 	, _metering (false)
 {
 	/* never muted */

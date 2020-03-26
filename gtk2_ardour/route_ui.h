@@ -235,21 +235,12 @@ public:
 	Gtk::CheckMenuItem *rec_safe_item;
 	void toggle_rec_safe ();
 
-	virtual void polarity_changed ();
-
 	Gtk::CheckMenuItem *denormal_menu_item;
 	void toggle_denormal_protection();
 	virtual void denormal_protection_changed ();
 
 	void disconnect_input ();
 	void disconnect_output ();
-
-	virtual void blink_rec_display (bool onoff);
-	void update_mute_display ();
-
-	void update_solo_display ();
-
-	virtual void map_frozen ();
 
 	void save_as_template_dialog_response (int response, SaveTemplateDialog* d);
 	void save_as_template ();
@@ -289,6 +280,9 @@ protected:
 
 	void init ();
 	void reset ();
+
+	virtual void blink_rec_display (bool onoff);
+	virtual void map_frozen ();
 
 	void self_delete ();
 	virtual void start_step_editing () {}
@@ -340,14 +334,18 @@ protected:
 
 private:
 	void setup_invert_buttons ();
-	void set_invert_button_state ();
 	void invert_menu_toggled (uint32_t);
 	bool invert_press (GdkEventButton *);
 	bool invert_release (GdkEventButton *, uint32_t i);
 
+	void update_solo_display ();
+	void update_mute_display ();
+	void update_polarity_display ();
+
 	int _i_am_the_modifier;
 	std::vector<ArdourWidgets::ArdourButton*> _invert_buttons;
 	Gtk::Menu* _invert_menu;
+	uint32_t   _n_polarity_invert;
 
 	StripableColorDialog _color_picker;
 

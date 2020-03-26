@@ -29,6 +29,7 @@
 
 #include <boost/weak_ptr.hpp>
 
+#include "pbd/stack_allocator.h"
 #include "pbd/timing.h"
 
 #include "ardour/ardour.h"
@@ -370,7 +371,18 @@ private:
 	/* ordered map [plugin instance ID] => ARDOUR::ChanMapping
 	 * TODO: consider replacing with boost::flat_map<> or std::vector<>.
 	 */
-	class PinMappings : public std::map <uint32_t, ARDOUR::ChanMapping> {
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+	/* Use the older (heap based) mapping for early versions of MSVC.
+	 * In fact it might be safer to use this for all MSVC builds - as
+	 * our StackAllocator class depends on 'boost::aligned_storage'
+	 * which is known to be troublesome with Visual C++ :-
+	 * https://www.boost.org/doc/libs/1_65_0/libs/type_traits/doc/html/boost_typetraits/reference/aligned_storage.html
+	 */
+	class PinMappings : public std::map <uint32_t, ARDOUR::ChanMapping>
+#else
+	class PinMappings : public std::map <uint32_t, ARDOUR::ChanMapping, std::less<uint32_t>, PBD::StackAllocator<std::pair<const uint32_t, ARDOUR::ChanMapping>, 4> >
+#endif
+	{
 		public:
 			/* this emulates C++11's  std::map::at()
 			 * return mapping for given plugin instance */

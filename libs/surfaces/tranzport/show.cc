@@ -120,7 +120,7 @@ void TranzportControlProtocol::show_mini_meter()
 	static uint32_t last_meter_fill_r = 0;
 	uint32_t meter_size;
 
-	float speed = fabsf(session->transport_speed());
+	float speed = fabsf(get_transport_speed());
 	char buf[meter_buf_size];
 
 	if (speed == 1.0)  {
@@ -301,7 +301,7 @@ TranzportControlProtocol::show_bbt (samplepos_t where)
 		last_ticks = bbt.ticks;
 		last_where = where;
 
-		float speed = fabsf(session->transport_speed());
+		float speed = fabsf(get_transport_speed());
 
 		if (speed == 1.0)  {
 			sprintf (buf, "%03" PRIu32 "%1" PRIu32, bbt.bars,bbt.beats); // switch to hex one day

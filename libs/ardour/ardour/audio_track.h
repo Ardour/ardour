@@ -35,7 +35,7 @@ class AudioFileSource;
 class LIBARDOUR_API AudioTrack : public Track
 {
   public:
-	AudioTrack (Session&, std::string name, TrackMode m = Normal);
+	AudioTrack (Session&, std::string name = "", TrackMode m = Normal);
 	~AudioTrack ();
 
 	MonitorState get_auto_monitoring_state () const;

@@ -20,7 +20,6 @@
 
 #include "ardour/async_midi_port.h"
 #include "ardour/monitor_processor.h"
-#include "ardour/pannable.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/record_enable_control.h"
@@ -223,7 +222,7 @@ FaderPort::pan_azimuth (int delta)
 		return;
 	}
 
-	azimuth->set_value (azimuth->interface_to_internal (azimuth->internal_to_interface (azimuth->get_value()) + (delta / encoder_divider)), Controllable::NoGroup);
+	azimuth->set_interface ((azimuth->internal_to_interface (azimuth->get_value(),true) + (delta / encoder_divider)), true);
 }
 
 

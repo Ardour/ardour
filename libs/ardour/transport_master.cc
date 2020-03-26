@@ -133,7 +133,7 @@ TransportMaster::speed_and_position (double& speed, samplepos_t& pos, samplepos_
 
 	pos = last.position + (now - last.timestamp) * speed;
 
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("%1 sync spd: %2 pos: %3 | last-pos: %4 @  %7| elapsed: %5 | speed: %6\n",
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("%1 sync spd: %2 pos: %3 | last-pos: %4 @  %7 | elapsed: %5 | speed: %6\n",
 	                                           name(), speed, pos, last.position, (now - last.timestamp), speed, when));
 
 	return true;
@@ -401,6 +401,9 @@ TransportMaster::factory (SyncSource type, std::string const& name, bool removea
 	}
 
 	if (tm) {
+		if (AudioEngine::instance()->running()) {
+			tm->create_port ();
+		}
 		tm->set_removeable (removeable);
 	}
 
@@ -480,6 +483,27 @@ bool
 TransportMaster::allow_request (TransportRequestSource src, TransportRequestType type) const
 {
 	return _request_mask & type;
+}
+
+std::string
+TransportMaster::allowed_request_string () const
+{
+	std::string s;
+	if (_request_mask == TransportRequestType (TR_StartStop|TR_Speed|TR_Locate)) {
+		s = _("All");
+	} else if (_request_mask == TransportRequestType (0)) {
+		s = _("None");
+	} else if (_request_mask == TR_StartStop) {
+		s = _("Start/Stop");
+	} else if (_request_mask == TR_Speed) {
+		s = _("Speed");
+	} else if (_request_mask == TR_Locate) {
+		s = _("Locate");
+	} else {
+		s = _("Complex");
+	}
+
+	return s;
 }
 
 void

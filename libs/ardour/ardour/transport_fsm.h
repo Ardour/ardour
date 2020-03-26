@@ -39,13 +39,14 @@ struct TransportFSM
 		StartTransport,
 		StopTransport,
 		Locate,
-		LocateDone
+		LocateDone,
+		SetSpeed,
 	};
 
 	struct Event : public boost::intrusive::list_base_hook<> {
 		EventType type;
-		/* for stop */
-		bool abort;
+		/* for stop and speed */
+		bool abort_capture;
 		bool clear_state;
 		/* for locate */
 		LocateTransportDisposition ltd;
@@ -53,10 +54,13 @@ struct TransportFSM
 		samplepos_t target;
 		bool for_loop_end;
 		bool force;
+		/* for SetSpeed */
+		double speed;
+		bool   as_default;
 
 		Event (EventType t)
 			: type (t)
-			, abort (false)
+			, abort_capture (false)
 			, clear_state (false)
 			, ltd (MustStop)
 			, with_flush (false)
@@ -69,7 +73,7 @@ struct TransportFSM
 		}
 		Event (EventType t, bool ab, bool cl)
 			: type (t)
-			, abort (ab)
+			, abort_capture (ab)
 			, clear_state (cl)
 			, ltd (MustStop)
 			, with_flush (false)
@@ -81,7 +85,7 @@ struct TransportFSM
 		}
 		Event (EventType t, samplepos_t pos, LocateTransportDisposition l, bool fl, bool lp, bool f4c)
 			: type (t)
-			, abort (false)
+			, abort_capture (false)
 			, clear_state (false)
 			, ltd (l)
 			, with_flush (fl)
@@ -90,6 +94,15 @@ struct TransportFSM
 			, force (f4c)
 		{
 			assert (t == Locate);
+		}
+		Event (EventType t, double sp, bool ab, bool cs, bool ad)
+			: type (t)
+			, abort_capture (ab)
+			, clear_state (cs)
+			, speed (sp)
+			, as_default (ad)
+		{
+			assert (t == SetSpeed);
 		}
 
 		void* operator new (size_t);
@@ -128,11 +141,18 @@ struct TransportFSM
 		WaitingForButler
 	};
 
+	enum DirectionState {
+		Forwards,
+		Backwards,
+		Reversing,
+	};
+
 	std::string current_state () const;
 
   private:
 	MotionState _motion_state;
 	ButlerState _butler_state;
+	DirectionState _direction_state;
 
 	void init();
 
@@ -147,6 +167,7 @@ struct TransportFSM
 	void start_locate_while_stopped (Event const &) const;
 	void interrupt_locate (Event const &) const;
 	void start_declick_for_locate (Event const &);
+	void set_speed (Event const &);
 
 	/* guards */
 
@@ -161,18 +182,24 @@ struct TransportFSM
 	bool waiting_for_butler() const  { return _butler_state == WaitingForButler; }
 	bool declick_in_progress() const { return _motion_state == DeclickToLocate || _motion_state == DeclickToStop; }
 	bool declicking_for_locate() const { return _motion_state == DeclickToLocate; }
+	bool forwards() const             { return _direction_state == Forwards; }
+	bool backwards() const             { return _direction_state == Backwards; }
+	bool reversing() const             { return _direction_state == Reversing; }
+	bool will_roll_fowards() const;
 
 	void enqueue (Event* ev);
 
   private:
 
-	void transition (MotionState ms);
-	void transition (ButlerState bs);
+	void transition (MotionState);
+	void transition (ButlerState);
+	void transition (DirectionState);
 
 	void process_events ();
 	bool process_event (Event&, bool was_deferred, bool& deferred);
 
 	Event _last_locate;
+	Event last_speed_request;
 
 	TransportAPI* api;
 	typedef boost::intrusive::list<Event> EventList;
@@ -180,6 +207,7 @@ struct TransportFSM
 	EventList deferred_events;
 	int processing;
 	mutable boost::optional<bool> current_roll_after_locate_status;
+	double most_recently_requested_speed;
 
 	void defer (Event& ev);
 	void bad_transition (Event const &);

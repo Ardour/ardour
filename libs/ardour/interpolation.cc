@@ -44,7 +44,7 @@ CubicInterpolation::interpolate (int channel, samplecnt_t input_samples, Sample 
 	assert (output_samples > 0);
 	assert (input);
 	assert (output);
-	assert (phase.size () > channel);
+	assert (phase.size () > std::vector<double>::size_type (channel));
 
 	_speed = fabs (_speed);
 

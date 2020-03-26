@@ -463,74 +463,16 @@ PTFFormat::load(std::string const& ptf, int64_t targetsr) {
 
 bool
 PTFFormat::parse_version() {
-	uint32_t seg_len,str_len;
-	uint8_t *data = _ptfunxored + 0x14;
-	uintptr_t data_end = ((uintptr_t)_ptfunxored) + 0x100;
-	uint8_t seg_type;
-	bool success = false;
+	bool failed = true;
+	struct block_t b;
 
 	if (_ptfunxored[0] != '\x03' && foundat(_ptfunxored, 0x100, BITCODE) != 1) {
-		return false;
+		return failed;
 	}
 
-	while( ((uintptr_t)data < data_end) && (success == false) ) {
+	is_bigendian = !!_ptfunxored[0x11];
 
-		if (data[0] != 0x5a) {
-			success = false;
-			break;
-		}
-
-		seg_type = data[1];
-		/* Skip segment header */
-		data += 3;
-		if (data[0] == 0 && data[1] == 0) {
-			/* BE */
-			is_bigendian = true;
-		} else {
-			/* LE */
-			is_bigendian = false;
-		}
-		seg_len = u_endian_read4(&data[0], is_bigendian);
-
-		/* Skip seg_len */
-		data += 4;
-		if (!(seg_type == 0x04 || seg_type == 0x03) || data[0] != 0x03) {
-			/* Go to next segment */
-			data += seg_len;
-			continue;
-		}
-		/* Skip 0x03 0x00 0x00 */
-		data += 3;
-		seg_len -= 3;
-		str_len = (*(uint8_t *)data);
-		if (! (_product = (uint8_t *)malloc((str_len+1) * sizeof(uint8_t)))) {
-			success = false;
-			break;
-		}
-
-		/* Skip str_len */
-		data += 4;
-		seg_len -= 4;
-
-		memcpy(_product, data, str_len);
-		_product[str_len] = 0;
-		data += str_len;
-		seg_len -= str_len;
-
-		/* Skip 0x03 0x00 0x00 0x00 */
-		data += 4;
-		seg_len -= 4;
-
-		_version = data[0];
-		if (_version == 0) {
-			_version = data[3];
-		}
-		data += seg_len;
-		success = true;
-	}
-
-	/* If the above does not work, try other heuristics */
-	if ((uintptr_t)data >= data_end - seg_len) {
+	if (!parse_block_at(0x1f, &b, NULL, 0)) {
 		_version = _ptfunxored[0x40];
 		if (_version == 0) {
 			_version = _ptfunxored[0x3d];
@@ -538,11 +480,22 @@ PTFFormat::parse_version() {
 		if (_version == 0) {
 			_version = _ptfunxored[0x3a] + 2;
 		}
-		if (_version != 0) {
-			success = true;
+		if (_version != 0)
+			failed = false;
+		return failed;
+	} else {
+		if (b.content_type == 0x0003) {
+			// old
+			uint16_t skip = parsestring(b.offset + 3).size() + 8;
+			_version = u_endian_read4(&_ptfunxored[b.offset + 3 + skip], is_bigendian);
+			failed = false;
+		} else if (b.content_type == 0x2067) {
+			// new
+			_version = 2 + u_endian_read4(&_ptfunxored[b.offset + 20], is_bigendian);
+			failed = false;
 		}
+		return failed;
 	}
-	return (!success);
 }
 
 uint8_t

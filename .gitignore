@@ -54,7 +54,7 @@ tags
 /gtk2_ardour/po/*.mo
 /gtk2_ardour/*.pot
 /libs/ardour/po/*.mo
-/libs/ardour/ardour3.pot
+/libs/ardour/ardour*.pot
 /libs/ardour/libardour.pot
 /libs/gtkmm2ext/po/*.mo
 /libs/gtkmm2ext/libgtkmm2ext.pot
@@ -132,9 +132,15 @@ tags
 
 /MSVCMixbus3/MSVCMixbus3.vsprops
 /MSVCardour3/MSVCMixbus3.vsprops
-/icons/win32/msvc_resources.rc
-/tools/osx_packaging/Ardour/*.app
-
-/tools/doxy2json/doxy2json
-
 /MSVCvst_scan/vst_scan.rc
+/icons/win32/msvc_resources.rc
+
+/tools/osx_packaging/Ardour/*.app
+/tools/doxy2json/doxy2json
+/tools/icons/icon
+
+# local dev scripts
+/share/scripts/_-*.lua
+
+# misc custom files git should ignore
+/local

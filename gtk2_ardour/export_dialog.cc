@@ -293,22 +293,11 @@ ExportDialog::update_realtime_selection ()
 	bool rt_ok = true;
 	switch (profile_manager->type ()) {
 		case ExportProfileManager::RegularExport:
-			break;
 		case ExportProfileManager::RangeExport:
-			break;
 		case ExportProfileManager::SelectionExport:
 			break;
 		case ExportProfileManager::RegionExport:
-			if (!profile_manager->get_channel_configs().empty ()) {
-				switch (profile_manager->get_channel_configs().front()->config->region_processing_type ()) {
-					case RegionExportChannelFactory::Raw:
-					case RegionExportChannelFactory::Fades:
-						rt_ok = false;
-						break;
-					default:
-						break;
-				}
-			}
+			rt_ok = false;
 			break;
 		case ExportProfileManager::StemExport:
 			if (! static_cast<TrackExportChannelSelector*>(channel_selector.get())->track_output ()) {

@@ -227,7 +227,8 @@ enum MeterType {
 enum TrackMode {
 	Normal,
 	NonLayered,
-	Destructive
+	/* No longer in use but kept to allow loading of older sessions */
+	Destructive,
 };
 
 enum NoteMode {
@@ -598,10 +599,9 @@ enum TransportRequestSource {
 };
 
 enum TransportRequestType {
-	TR_Stop   = 0x1,
-	TR_Start  = 0x2,
-	TR_Speed  = 0x4,
-	TR_Locate = 0x8
+	TR_StartStop = 0x1,
+	TR_Speed     = 0x2,
+	TR_Locate    = 0x4
 };
 
 enum ShuttleBehaviour {
@@ -663,6 +663,7 @@ enum ScreenSaverMode {
 };
 
 struct CleanupReport {
+	CleanupReport () : space (0) {}
 	std::vector<std::string> paths;
 	size_t                   space;
 };

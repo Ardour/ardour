@@ -19,9 +19,19 @@
 #ifndef __ardour_msvc_extensions_h__
 #define __ardour_msvc_extensions_h__
 
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0500
+#ifdef WINVER
+#undef WINVER
 #endif
+#if (defined(_MSC_VER) && (_MSC_VER < 1900)) /* 1900 is an arbitrary value, corresponding to VS2019 (it might need to be lowered) */
+#define WINVER 0x0500
+#else
+#define WINVER 0x0601
+#endif
+#ifdef _WIN32_WINNT
+#undef _WIN32_WINNT
+#endif
+#define _WIN32_WINNT WINVER
+
 #ifndef _CPP_VECTOR
 #define _CPP_VECTOR  1
 #endif
@@ -208,8 +218,10 @@ inline int64_t abs(int64_t val) throw()
 #endif
 
 // fmin() and fmax()
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
 #define fmin(a, b) min((double)a, (double)b)
 #define fmax(a, b) max((double)a, (double)b)
+#endif
 
 // approximate POSIX pipe()
 #define pipe(handles) _pipe(handles, 4096, _O_BINARY)

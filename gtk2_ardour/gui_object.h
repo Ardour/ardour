@@ -50,6 +50,7 @@ public:
 		XMLNode* child = get_or_add_node (id);
 		child->set_property (prop_name.c_str(), val);
 	}
+	void remove_property (const std::string & id, const std:: string & prop_name);
 
 	/** Remove node with provided id.
 	 *  @param id property of Object node to look for.

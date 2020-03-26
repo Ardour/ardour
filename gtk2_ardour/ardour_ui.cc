@@ -571,9 +571,6 @@ ARDOUR_UI::engine_running (uint32_t cnt)
 		post_engine();
 	}
 
-	if (_session) {
-		_session->reset_xrun_count ();
-	}
 	update_disk_space ();
 	update_cpu_load ();
 	update_sample_rate (AudioEngine::instance()->sample_rate());
@@ -979,19 +976,33 @@ ARDOUR_UI::idle_finish ()
 void
 ARDOUR_UI::finish()
 {
+	bool delete_unnamed_session = false;
+
 	if (_session) {
+		const bool unnamed = _session->unnamed();
+
 		ARDOUR_UI::instance()->video_timeline->sync_session_state();
 
-		if (_session->dirty()) {
+		if (_session->dirty() || unnamed) {
 			vector<string> actions;
 			actions.push_back (_("Don't quit"));
-			actions.push_back (_("Just quit"));
-			actions.push_back (_("Save and quit"));
-			switch (ask_about_saving_session(actions)) {
+
+			if (_session->unnamed()) {
+				actions.push_back (_("Discard session"));
+				actions.push_back (_("Name session and quit"));
+			} else {
+				actions.push_back (_("Just quit"));
+				actions.push_back (_("Save and quit"));
+			}
+
+			switch (ask_about_saving_session (actions)) {
 			case -1:
 				return;
 				break;
 			case 1:
+				if (unnamed) {
+					rename_session (true);
+				}
 				/* use the default name */
 				if (save_state_canfail ("")) {
 					/* failed - don't quit */
@@ -1005,6 +1016,9 @@ If you still wish to quit, please use the\n\n\
 				}
 				break;
 			case 0:
+				if (unnamed) {
+					delete_unnamed_session = true;
+				}
 				break;
 			}
 		}
@@ -1032,9 +1046,16 @@ If you still wish to quit, please use the\n\n\
 	close_all_dialogs ();
 
 	if (_session) {
+
+
+		if (delete_unnamed_session) {
+			ask_about_scratch_deletion ();
+		}
+
 		_session->set_clean ();
 		delete _session;
 		_session = 0;
+
 	}
 
 	halt_connection.disconnect ();
@@ -1043,6 +1064,42 @@ If you still wish to quit, please use the\n\n\
 	fst_stop_threading();
 #endif
 	quit ();
+}
+
+void
+ARDOUR_UI::ask_about_scratch_deletion ()
+{
+	if (!_session) {
+		return;
+	}
+
+	string path = _session->path();
+
+	ArdourMessageDialog msg (_main_window,
+	                         _("DANGER!"),
+	                         true,
+	                         Gtk::MESSAGE_WARNING,
+	                         Gtk::BUTTONS_NONE, true);
+
+	msg.set_secondary_text (string_compose (_("You have not named this session yet.\n"
+	                                          "You can continue to use it as\n\n"
+	                                          "%1\n\n"
+	                                          "or it will be deleted.\n\n"
+	                                          "Deletion is permanent and irreversible."), _session->name()));
+
+	msg.set_title (_("SCRATCH SESSION - DANGER!"));
+	msg.add_button (_("Delete this session (IRREVERSIBLE!)"), RESPONSE_OK);
+	msg.add_button (_("Do not delete"), RESPONSE_CANCEL);
+	msg.set_default_response (RESPONSE_CANCEL);
+	msg.set_position (Gtk::WIN_POS_MOUSE);
+
+	int r = msg.run ();
+
+	if (r == Gtk::RESPONSE_OK) {
+		PBD::remove_directory (path);
+	} else {
+		_session->end_unnamed_status ();
+	}
 }
 
 void
@@ -1385,40 +1442,8 @@ ARDOUR_UI::update_wall_clock ()
 }
 
 void
-ARDOUR_UI::session_add_mixed_track (
-		const ChanCount& input,
-		const ChanCount& output,
-		RouteGroup* route_group,
-		uint32_t how_many,
-		const string& name_template,
-		bool strict_io,
-		PluginInfoPtr instrument,
-		Plugin::PresetRecord* pset,
-		ARDOUR::PresentationInfo::order_t order)
-{
-	assert (_session);
-
-	if (Profile->get_mixbus ()) {
-		strict_io = true;
-	}
-
-	try {
-		list<boost::shared_ptr<MidiTrack> > tracks;
-		tracks = _session->new_midi_track (input, output, strict_io, instrument, pset, route_group, how_many, name_template, order, ARDOUR::Normal);
-
-		if (tracks.size() != how_many) {
-			error << string_compose(P_("could not create %1 new mixed track", "could not create %1 new mixed tracks", how_many), how_many) << endmsg;
-		}
-	}
-
-	catch (...) {
-		display_insufficient_ports_message ();
-		return;
-	}
-}
-
-void
-ARDOUR_UI::session_add_midi_bus (
+ARDOUR_UI::session_add_midi_route (
+		bool disk,
 		RouteGroup* route_group,
 		uint32_t how_many,
 		const string& name_template,
@@ -1437,37 +1462,32 @@ ARDOUR_UI::session_add_midi_bus (
 	}
 
 	try {
-		RouteList routes;
-		routes = _session->new_midi_route (route_group, how_many, name_template, strict_io, instrument, pset, PresentationInfo::MidiBus, order);
-		if (routes.size() != how_many) {
-			error << string_compose(P_("could not create %1 new Midi Bus", "could not create %1 new Midi Busses", how_many), how_many) << endmsg;
-		}
+		if (disk) {
 
+			ChanCount one_midi_channel;
+			one_midi_channel.set (DataType::MIDI, 1);
+
+			list<boost::shared_ptr<MidiTrack> > tracks;
+			tracks = _session->new_midi_track (one_midi_channel, one_midi_channel, strict_io, instrument, pset, route_group, how_many, name_template, order, ARDOUR::Normal);
+
+			if (tracks.size() != how_many) {
+				error << string_compose(P_("could not create %1 new mixed track", "could not create %1 new mixed tracks", how_many), how_many) << endmsg;
+			}
+
+		} else {
+
+			RouteList routes;
+			routes = _session->new_midi_route (route_group, how_many, name_template, strict_io, instrument, pset, PresentationInfo::MidiBus, order);
+
+			if (routes.size() != how_many) {
+				error << string_compose(P_("could not create %1 new Midi Bus", "could not create %1 new Midi Busses", how_many), how_many) << endmsg;
+			}
+
+		}
 	}
 	catch (...) {
 		display_insufficient_ports_message ();
 		return;
-	}
-}
-
-void
-ARDOUR_UI::session_add_midi_route (
-		bool disk,
-		RouteGroup* route_group,
-		uint32_t how_many,
-		const string& name_template,
-		bool strict_io,
-		PluginInfoPtr instrument,
-		Plugin::PresetRecord* pset,
-		ARDOUR::PresentationInfo::order_t order)
-{
-	ChanCount one_midi_channel;
-	one_midi_channel.set (DataType::MIDI, 1);
-
-	if (disk) {
-		session_add_mixed_track (one_midi_channel, one_midi_channel, route_group, how_many, name_template, strict_io, instrument, pset, order);
-	} else {
-		session_add_midi_bus (route_group, how_many, name_template, strict_io, instrument, pset, order);
 	}
 }
 
@@ -2036,7 +2056,7 @@ ARDOUR_UI::update_clocks ()
 {
 	if (!_session) return;
 
-	if (editor && !editor->dragging_playhead()) {
+	if (editor && !editor->dragging_playhead() && !editor->pending_locate_request()) {
 		Clock (_session->audible_sample()); /* EMIT_SIGNAL */
 	}
 }
@@ -2062,6 +2082,10 @@ ARDOUR_UI::save_state (const string & name, bool switch_to_it)
 {
 	if (!_session || _session->deletion_in_progress()) {
 		return;
+	}
+
+	if (_session->unnamed()) {
+		rename_session (true);
 	}
 
 	XMLNode* node = new XMLNode (X_("UI"));
@@ -2617,12 +2641,12 @@ ARDOUR_UI::start_duplicate_routes ()
 void
 ARDOUR_UI::add_route ()
 {
-	if (!add_route_dialog.get (false)) {
-		add_route_dialog->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::add_route_dialog_response));
+	if (!_session || !_session->writable() || _session->actively_recording()) {
+		return;
 	}
 
-	if (!_session) {
-		return;
+	if (!add_route_dialog.get (false)) {
+		add_route_dialog->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::add_route_dialog_response));
 	}
 
 	if (add_route_dialog->is_visible()) {
@@ -2714,17 +2738,14 @@ ARDOUR_UI::add_route_dialog_response (int r)
 	case AddRouteDialog::AudioTrack:
 		session_add_audio_route (true, input_chan.n_audio(), output_chan.n_audio(), add_route_dialog->mode(), route_group, count, name_template, strict_io, order);
 		break;
-	case AddRouteDialog::MidiTrack:
-		session_add_midi_route (true, route_group, count, name_template, strict_io, instrument, 0, order);
-		break;
-	case AddRouteDialog::MixedTrack:
-		session_add_mixed_track (input_chan, output_chan, route_group, count, name_template, strict_io, instrument, 0, order);
-		break;
 	case AddRouteDialog::AudioBus:
 		session_add_audio_route (false, input_chan.n_audio(), output_chan.n_audio(), ARDOUR::Normal, route_group, count, name_template, strict_io, order);
 		break;
+	case AddRouteDialog::MidiTrack:
+		session_add_midi_route (true, route_group, count, name_template, strict_io, instrument, 0, order);
+		break;
 	case AddRouteDialog::MidiBus:
-		session_add_midi_bus (route_group, count, name_template, strict_io, instrument, 0, order);
+		session_add_midi_route (false, route_group, count, name_template, strict_io, instrument, 0, order);
 		break;
 	case AddRouteDialog::VCAMaster:
 		_session->vca_manager().create_vca (count, name_template);

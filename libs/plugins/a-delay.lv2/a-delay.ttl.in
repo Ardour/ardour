@@ -136,7 +136,7 @@
         lv2:symbol "gain" ;
         lv2:default 0.000000 ;
         lv2:minimum -60.000000 ;
-        lv2:maximum 0.000000 ;
+        lv2:maximum 20.000000 ;
         unit:unit unit:db ;
     ] ,
     [

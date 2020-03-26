@@ -51,7 +51,7 @@ public:
 	boost::shared_ptr<Panner> panner() const { return _panner.lock(); }
 	void set_panner(boost::shared_ptr<Panner>);
 
-	Session& session() { return _session; }
+	const std::set<Evoral::Parameter>& what_can_be_automated() const;
 
 	void set_automation_state (AutoState);
 	AutoState automation_state() const { return _auto_state; }
@@ -63,8 +63,6 @@ public:
 	bool automation_write () const {
 		return ((_auto_state & Write) || ((_auto_state & (Touch | Latch)) && touching()));
 	}
-
-	std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;
 
 	void start_touch (double when);
 	void stop_touch (double when);

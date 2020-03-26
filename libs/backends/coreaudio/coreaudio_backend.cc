@@ -332,15 +332,17 @@ CoreAudioBackend::set_buffer_size (uint32_t bs)
 	if (bs <= 0 || bs >= _max_buffer_size) {
 		return -1;
 	}
-	_samples_per_period = bs;
+	if (!_run) {
+		_samples_per_period = bs;
+		engine.buffer_size_change (bs);
+	}
 	_pcmio->set_samples_per_period(bs);
 	if (_run) {
-		pbd_mach_set_realtime_policy (_main_thread, 1e9 * _samples_per_period / _samplerate);
+		pbd_mach_set_realtime_policy (_main_thread, 1e9 * bs / _samplerate);
 	}
 	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i) {
-		pbd_mach_set_realtime_policy (*i, 1e9 * _samples_per_period / _samplerate);
+		pbd_mach_set_realtime_policy (*i, 1e9 * bs / _samplerate);
 	}
-	//engine.buffer_size_change (bs);
 	return 0;
 }
 
@@ -438,6 +440,24 @@ uint32_t
 CoreAudioBackend::systemic_output_latency () const
 {
 	return _systemic_audio_output_latency;
+}
+
+uint32_t
+CoreAudioBackend::systemic_hw_input_latency () const
+{
+	if (name_to_id (_input_audio_device) != UINT32_MAX) {
+		return _pcmio->get_latency(name_to_id(_input_audio_device, Input), true);
+	}
+	return 0;
+}
+
+uint32_t
+CoreAudioBackend::systemic_hw_output_latency () const
+{
+	if (name_to_id (_output_audio_device) != UINT32_MAX) {
+		return _pcmio->get_latency(name_to_id(_output_audio_device, Output), false);
+	}
+	return 0;
 }
 
 /* MIDI */
@@ -1120,7 +1140,7 @@ CoreAudioBackend::register_system_audio_ports()
 #endif
 
 	/* audio ports */
-	lr.min = lr.max = coreaudio_reported_input_latency + (_measure_latency ? 0 : _systemic_audio_input_latency);
+	lr.min = lr.max = _measure_latency ? 0 : _systemic_audio_input_latency;
 	for (uint32_t i = 0; i < a_ins; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:capture_%d", i+1);
@@ -1132,7 +1152,7 @@ CoreAudioBackend::register_system_audio_ports()
 		_system_inputs.push_back(cp);
 	}
 
-	lr.min = lr.max = coreaudio_reported_output_latency + (_measure_latency ? 0 : _systemic_audio_output_latency);
+	lr.min = lr.max = _measure_latency ? 0 : _systemic_audio_output_latency;
 	for (uint32_t i = 0; i < a_out; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:playback_%d", i+1);

@@ -68,42 +68,6 @@ Panner::distribute_automated (BufferSet& ibufs, BufferSet& obufs,
 	}
 }
 
-void
-Panner::set_automation_state (AutoState state)
-{
-	_pannable->set_automation_state (state);
-}
-
-AutoState
-Panner::automation_state () const
-{
-	return _pannable->automation_state();
-}
-
-bool
-Panner::touching () const
-{
-	return _pannable->touching ();
-}
-
-set<Evoral::Parameter>
-Panner::what_can_be_automated() const
-{
-	return _pannable->what_can_be_automated ();
-}
-
-string
-Panner::describe_parameter (Evoral::Parameter p)
-{
-	return _pannable->describe_parameter (p);
-}
-
-string
-Panner::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
-{
-	return _pannable->value_as_string (ac);
-}
-
 int
 Panner::set_state (XMLNode const &, int)
 {

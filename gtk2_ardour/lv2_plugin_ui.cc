@@ -19,6 +19,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifdef WAF_BUILD
+#include "gtk2ardour-config.h"
+#endif
+
 #include <gtkmm/stock.h>
 
 #include "ardour/lv2_plugin.h"
@@ -135,19 +139,22 @@ LV2PluginUI::set_path_property (int response,
 	active_parameter_requests.erase (desc.key);
 }
 
-uint32_t
-LV2PluginUI::request_parameter (void* handle, LV2_URID key)
+#ifdef HAVE_LV2_1_17_2
+LV2UI_Request_Value_Status
+LV2PluginUI::request_value(void*                     handle,
+                           LV2_URID                  key,
+                           LV2_URID                  type,
+                           const LV2_Feature* const* features)
 {
 	LV2PluginUI* me = (LV2PluginUI*)handle;
 
-	/* This will return `PropertyDescriptors nothing` when not found */
 	const ParameterDescriptor& desc (me->_lv2->get_property_descriptor(key));
-	if (desc.datatype != Variant::PATH) {
-		return 0;
-	}
-
-	if (me->active_parameter_requests.find (key) != me->active_parameter_requests.end()) {
-		return 0; /* already showing dialog */
+	if (desc.key == (uint32_t)-1) {
+		return LV2UI_REQUEST_VALUE_ERR_UNKNOWN;
+	} else if (desc.datatype != Variant::PATH) {
+		return LV2UI_REQUEST_VALUE_ERR_UNSUPPORTED;
+	} else if (me->active_parameter_requests.count (key)) {
+		return LV2UI_REQUEST_VALUE_BUSY;
 	}
 	me->active_parameter_requests.insert (key);
 
@@ -173,8 +180,9 @@ LV2PluginUI::request_parameter (void* handle, LV2_URID key)
 
 	lv2ui_file_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*me, &LV2PluginUI::set_path_property), desc, lv2ui_file_dialog));
 	lv2ui_file_dialog->present();
-	return 0;
+	return LV2UI_REQUEST_VALUE_SUCCESS;
 }
+#endif
 
 void
 LV2PluginUI::update_timeout()
@@ -314,6 +322,7 @@ LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
 	_ardour_buttons_box.pack_end (_preset_combo, false, false);
 	_ardour_buttons_box.pack_end (_preset_modified, false, false);
 	_ardour_buttons_box.pack_end (pin_management_button, false, false);
+	_ardour_buttons_box.pack_start (latency_button, false, false, 4);
 
 	plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&LV2PluginUI::queue_port_update, this), gui_context ());
 }
@@ -340,12 +349,14 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		features[fi] = features_src[fi];
 	}
 
-	_lv2ui_request_paramater.handle = this;
-	_lv2ui_request_paramater.request = LV2PluginUI::request_parameter;
-	_lv2ui_request_feature.URI  = LV2_UI_PREFIX "requestParameter";
-	_lv2ui_request_feature.data = &_lv2ui_request_paramater;
+#ifdef HAVE_LV2_1_17_2
+	_lv2ui_request_value.handle  = this;
+	_lv2ui_request_value.request = LV2PluginUI::request_value;
+	_lv2ui_request_feature.URI   = LV2_UI__requestValue;
+	_lv2ui_request_feature.data  = &_lv2ui_request_value;
 
 	features[fi++] = &_lv2ui_request_feature;
+#endif
 
 	Gtk::Alignment* container = NULL;
 	if (is_external_ui) {
@@ -378,7 +389,11 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	}
 
 	features[fi] = NULL;
-	assert (fi == features_count + (is_external_ui ? 3 : 2));
+#ifdef HAVE_LV2_1_17_2
+	assert (fi == features_count + (is_external_ui ? 3 : 1));
+#else
+	assert (fi == features_count + (is_external_ui ? 2 : 1));
+#endif
 
 	if (!ui_host) {
 		ui_host = suil_host_new(LV2PluginUI::write_from_ui,

@@ -16,17 +16,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "pbd/stateful.h"
+
 #include "ardour/audioengine.h"
+#include "ardour/boost_debug.h"
 #include "ardour/debug.h"
 #include "ardour/disk_reader.h"
 #include "ardour/session.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/transport_master_manager.h"
 
-#include "pbd/boost_debug.cc"
 #include "pbd/i18n.h"
-#include "pbd/stateful.h"
 
+using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
@@ -38,6 +40,7 @@ TransportMasterManager::TransportMasterManager()
 	, _master_position (0)
 	, _session (0)
 	, _master_invalid_this_cycle (false)
+	, disk_output_blocked (false)
 	, master_dll_initstate (0)
 {
 }
@@ -57,10 +60,8 @@ TransportMasterManager::create ()
 	XMLNode* tmm_node = Config->transport_master_state ();
 
 	if (tmm_node) {
-		cerr << " setting state via XML\n";
 		_instance->set_state (*tmm_node, Stateful::current_state_version);
 	} else {
-		cerr << " setting default config\n";
 		_instance->set_default_configuration ();
 	}
 
@@ -88,7 +89,6 @@ TransportMasterManager::set_default_configuration ()
 	}
 
 	_current_master = _transport_masters.back();
-	cerr << "default current master (back) is " << _current_master->name() << endl;
 	return 0;
 }
 
@@ -122,7 +122,7 @@ TransportMasterManager::parameter_changed (std::string const & what)
 	if (what == "external-sync") {
 		if (!_session->config.get_external_sync()) {
 			/* disabled */
-			DiskReader::dec_no_disk_output ();
+			unblock_disk_output ();
 		}
 	}
 }
@@ -204,6 +204,8 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 		return 1.0;
 	}
 
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("Current master at %1 moving at %2\n", _master_position, _master_speed));
+
 	if (_current_master->sample_clock_synced()) {
 
 		/* No master DLL required. Speed identified by the master is
@@ -230,8 +232,7 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 
 				init_transport_master_dll (_master_speed, _master_position);
 				_master_invalid_this_cycle = true;
-				DEBUG_TRACE (DEBUG::Slave, "no roll3 - still initializing master DLL\n");
-				master_dll_initstate = _master_speed > 0.0 ? 1 : -1;
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("no roll3 - still initializing master DLL, will be %1 next process cycle\n", master_dll_initstate));
 
 				return 1.0;
 			}
@@ -253,12 +254,12 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 				if (!_session->actively_recording()) {
 					DEBUG_TRACE (DEBUG::Slave, string_compose ("slave delta %1 greater than slave resolution %2 => no disk output\n", delta, _current_master->resolution()));
 					/* run routes as normal, but no disk output */
-					DiskReader::inc_no_disk_output ();
+					block_disk_output ();
 				} else {
-					DiskReader::dec_no_disk_output ();
+					unblock_disk_output ();
 				}
 			} else {
-				DiskReader::dec_no_disk_output ();
+				unblock_disk_output ();
 			}
 
 			/* inject DLL with new data */
@@ -356,7 +357,8 @@ TransportMasterManager::add (SyncSource type, std::string const & name, bool rem
 			return -1;
 		}
 
-		boost_debug_shared_ptr_mark_interesting (tm.get(), "tm");
+		BOOST_MARK_TMM (tm);
+
 		ret = add_locked (tm);
 	}
 
@@ -426,11 +428,27 @@ TransportMasterManager::set_current_locked (boost::shared_ptr<TransportMaster> c
 		return -1;
 	}
 
+	/* this is called from within the process() call stack, but *after* the
+	 * call to ::pre_process_transport_masters()
+	 */
+
 	_current_master = c;
 	_master_speed = 0;
 	_master_position = 0;
+	_master_invalid_this_cycle = true;
 
 	master_dll_initstate = 0;
+
+	unblock_disk_output ();
+
+	if (c && c->type() == Engine) {
+
+		/* We cannot sync with an already moving JACK transport mechanism, so
+		 * stop it before we start.
+		 */
+
+		AudioEngine::instance()->transport_stop ();
+	}
 
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("current transport master set to %1\n", (c ? c->name() : string ("none"))));
 
@@ -520,7 +538,6 @@ TransportMasterManager::clear ()
 int
 TransportMasterManager::set_state (XMLNode const & node, int version)
 {
-	PBD::stacktrace (std::cerr, 20);
 	assert (node.name() == state_node_name);
 
 	XMLNodeList const & children = node.children();
@@ -529,7 +546,9 @@ TransportMasterManager::set_state (XMLNode const & node, int version)
 		Glib::Threads::RWLock::WriterLock lm (lock);
 
 		_current_master.reset ();
+#if 0
 		boost_debug_list_ptrs ();
+#endif
 
 		/* TramsportMasters live for the entire life of the
 		 * program. TransportMasterManager::set_state() should only be
@@ -547,7 +566,7 @@ TransportMasterManager::set_state (XMLNode const & node, int version)
 				continue;
 			}
 
-			boost_debug_shared_ptr_mark_interesting (tm.get(), "tm");
+			BOOST_MARK_TMM (tm);
 
 			if (add_locked (tm)) {
 				continue;
@@ -659,4 +678,28 @@ TransportMasterManager::reconnect_ports ()
 			(*tm)->connect_port_using_state ();
 		}
 	}
+}
+
+void
+TransportMasterManager::block_disk_output ()
+{
+	if (!disk_output_blocked) {
+		//DiskReader::inc_no_disk_output ();
+		disk_output_blocked = true;
+	}
+}
+
+void
+TransportMasterManager::unblock_disk_output ()
+{
+	if (disk_output_blocked) {
+		//DiskReader::dec_no_disk_output ();
+		disk_output_blocked = false;
+	}
+}
+
+void
+TransportMasterManager::reinit (double speed, samplepos_t pos)
+{
+	init_transport_master_dll (speed, pos);
 }

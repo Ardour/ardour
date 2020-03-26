@@ -68,6 +68,7 @@ namespace ARDOUR {
 	const char * const coreaudio_driver_name = X_("CoreAudio");
 	const char * const alsa_driver_name = X_("ALSA");
 	const char * const oss_driver_name = X_("OSS");
+	const char * const sun_driver_name = X_("Sun");
 	const char * const freebob_driver_name = X_("FreeBoB");
 	const char * const ffado_driver_name = X_("FFADO");
 	const char * const netjack_driver_name = X_("NetJACK");
@@ -81,6 +82,7 @@ namespace {
 	const char * const coreaudio_driver_command_line_name = X_("coreaudio");
 	const char * const alsa_driver_command_line_name = X_("alsa");
 	const char * const oss_driver_command_line_name = X_("oss");
+	const char * const sun_driver_command_line_name = X_("sun");
 	const char * const freebob_driver_command_line_name = X_("freebob");
 	const char * const ffado_driver_command_line_name = X_("firewire");
 	const char * const netjack_driver_command_line_name = X_("netjack");
@@ -118,6 +120,9 @@ ARDOUR::get_jack_audio_driver_names (vector<string>& audio_driver_names)
 	audio_driver_names.push_back (alsa_driver_name);
 #endif
 	audio_driver_names.push_back (oss_driver_name);
+#if defined(__NetBSD__) || defined(__sun)
+	audio_driver_names.push_back (sun_driver_name);
+#endif
 	audio_driver_names.push_back (freebob_driver_name);
 	audio_driver_names.push_back (ffado_driver_name);
 #endif
@@ -217,6 +222,9 @@ get_jack_command_line_audio_driver_name (const string& driver_name, string& comm
 		return true;
 	} else if (driver_name == oss_driver_name) {
 		command_line_name = oss_driver_command_line_name;
+		return true;
+	} else if (driver_name == sun_driver_name) {
+		command_line_name = sun_driver_command_line_name;
 		return true;
 	} else if (driver_name == freebob_driver_name) {
 		command_line_name = freebob_driver_command_line_name;
@@ -406,6 +414,13 @@ ARDOUR::get_jack_oss_device_names (device_map_t& devices)
 }
 
 void
+ARDOUR::get_jack_sun_device_names (device_map_t& devices)
+{
+	devices.insert (make_pair (default_device_name, default_device_name));
+}
+
+
+void
 ARDOUR::get_jack_freebob_device_names (device_map_t& devices)
 {
 	devices.insert (make_pair (default_device_name, default_device_name));
@@ -442,6 +457,8 @@ ARDOUR::get_jack_device_names_for_audio_driver (const string& driver_name, devic
 		get_jack_alsa_device_names (devices);
 	} else if (driver_name == oss_driver_name) {
 		get_jack_oss_device_names (devices);
+	} else if (driver_name == sun_driver_name) {
+		get_jack_sun_device_names (devices);
 	} else if (driver_name == freebob_driver_name) {
 		get_jack_freebob_device_names (devices);
 	} else if (driver_name == ffado_driver_name) {
@@ -474,7 +491,8 @@ ARDOUR::get_jack_device_names_for_audio_driver (const string& driver_name)
 bool
 ARDOUR::get_jack_audio_driver_supports_two_devices (const string& driver)
 {
-	return (driver == alsa_driver_name || driver == oss_driver_name);
+	return (driver == alsa_driver_name || driver == oss_driver_name ||
+			driver == sun_driver_name);
 }
 
 bool

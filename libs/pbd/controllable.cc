@@ -101,6 +101,18 @@ Controllable::set_flags (Flag f)
 }
 
 void
+Controllable::set_flag (Flag f)
+{
+	_flags = Flag ((int)_flags | f);
+}
+
+void
+Controllable::clear_flag (Flag f)
+{
+	_flags = Flag ((int)_flags & ~f);
+}
+
+void
 Controllable::add (Controllable& ctl)
 {
 	Glib::Threads::RWLock::WriterLock lm (registry_lock);

@@ -178,7 +178,9 @@ Automatable::add_control(boost::shared_ptr<Evoral::Control> ac)
 	ControlSet::add_control (ac);
 
 	if ((!actl || !(actl->flags() & Controllable::NotAutomatable)) && al) {
-		_can_automate_list.insert (param);
+		if (!actl || !(actl->flags() & Controllable::HiddenControl)) {
+			can_automate (param);
+		}
 		automation_list_automation_state_changed (param, al->automation_state ()); // sync everything up
 	}
 }
@@ -196,6 +198,12 @@ Automatable::describe_parameter (Evoral::Parameter param)
 		return _("Trim");
 	} else if (param.type() == MuteAutomation) {
 		return _("Mute");
+	} else if (param.type() == PanAzimuthAutomation) {
+		return _("Azimuth");
+	} else if (param.type() == PanWidthAutomation) {
+		return _("Width");
+	} else if (param.type() == PanElevationAutomation) {
+		return _("Elevation");
 	} else if (param.type() == MidiCCAutomation) {
 		return string_compose("Controller %1 [%2]", param.id(), int(param.channel()) + 1);
 	} else if (param.type() == MidiPgmChangeAutomation) {
@@ -263,8 +271,10 @@ Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter le
 			if (_can_automate_list.find (param) == _can_automate_list.end ()) {
 				boost::shared_ptr<AutomationControl> actl = automation_control (param);
 				if (actl && (*niter)->children().size() > 0 && Config->get_limit_n_automatables () > 0) {
-					actl->set_flags (Controllable::Flag ((int)actl->flags() & ~Controllable::NotAutomatable));
-					can_automate (param);
+					actl->clear_flag (Controllable::NotAutomatable);
+					if (!(actl->flags() & Controllable::HiddenControl) && actl->name() != X_("hidden")) {
+						can_automate (param);
+					}
 					info << "Marked parmater as automatable" << endl;
 				} else {
 					warning << "Ignored automation data for non-automatable parameter" << endl;
@@ -549,7 +559,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	} else if (param.type() == PanAzimuthAutomation || param.type() == PanWidthAutomation || param.type() == PanElevationAutomation) {
 		Pannable* pannable = dynamic_cast<Pannable*>(this);
 		if (pannable) {
-			control = new PanControllable (_a_session, pannable->describe_parameter (param), pannable, param);
+			control = new PanControllable (_a_session, describe_parameter (param), pannable, param);
 		} else {
 			warning << "PanAutomation for non-Pannable" << endl;
 		}

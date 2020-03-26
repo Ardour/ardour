@@ -1483,4 +1483,3 @@ GtkCanvasViewport::on_size_request (Gtk::Requisition* req)
 	req->width = 16;
 	req->height = 16;
 }
-

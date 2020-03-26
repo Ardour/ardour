@@ -55,6 +55,7 @@
 #include "widgets/popup.h"
 #include "widgets/prompter.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioregion.h"
 #include "ardour/boost_debug.h"
@@ -3180,12 +3181,6 @@ Editor::separate_regions_between (const TimeSelection& ts)
 			continue;
 		}
 
-		/* no edits to destructive tracks */
-
-		if (rtv->track()->destructive()) {
-			continue;
-		}
-
 		if ((playlist = rtv->playlist()) != 0) {
 
 			playlist->clear_changes ();
@@ -3443,8 +3438,7 @@ Editor::crop_region_to (samplepos_t start, samplepos_t end)
 
 		boost::shared_ptr<Track> t = rtv->track();
 
-		if (t != 0 && ! t->destructive()) {
-
+		if (t) {
 			if ((playlist = rtv->playlist()) != 0) {
 				playlists.push_back (playlist);
 			}
@@ -3984,12 +3978,24 @@ Editor::freeze_route ()
 	}
 
 	/* stop transport before we start. this is important */
-
 	_session->request_transport_speed (0.0);
 
 	/* wait for just a little while, because the above call is asynchronous */
+	int timeout = 10;
+	do {
+		Glib::usleep (_session->engine().usecs_per_cycle ());
+	} while (!_session->transport_stopped() && --timeout > 0);
 
-	Glib::usleep (250000);
+	if (timeout == 0) {
+		ArdourMessageDialog d (
+			_("Transport cannot be stopped, likely due to external timecode sync.\n"
+			  "Freezing a track requires the transport to be stopped.")
+			);
+		d.set_title (_("Cannot freeze"));
+		d.run ();
+		return;
+		return;
+	}
 
 	if (clicked_routeview == 0 || !clicked_routeview->is_audio_track()) {
 		return;
@@ -4006,8 +4012,8 @@ Editor::freeze_route ()
 	}
 
 	if (clicked_routeview->track()->has_external_redirects()) {
-		ArdourMessageDialog d (string_compose (_("<b>%1</b>\n\nThis track has at least one send/insert/return as part of its signal flow.\n\n"
-		                                         "Freezing will only process the signal as far as the first send/insert/return."),
+		ArdourMessageDialog d (string_compose (_("<b>%1</b>\n\nThis track has at least one send/insert/return/sidechain as part of its signal flow.\n\n"
+		                                         "Freezing will only process the signal as far as the first send/insert/return/sidechain."),
 		                                       clicked_routeview->track()->name()), true, MESSAGE_INFO, BUTTONS_NONE, true);
 
 		d.add_button (_("Freeze anyway"), Gtk::RESPONSE_OK);
@@ -4017,10 +4023,10 @@ Editor::freeze_route ()
 		int response = d.run ();
 
 		switch (response) {
-		case Gtk::RESPONSE_CANCEL:
-			return;
-		default:
-			break;
+			case Gtk::RESPONSE_OK:
+				break;
+			default:
+				return;
 		}
 	}
 
@@ -5759,8 +5765,11 @@ Editor::insert_patch_change (bool from_context)
 	Evoral::PatchChange<Temporal::Beats> empty (Temporal::Beats(), 0, 0, 0);
 	PatchChangeDialog d (0, _session, empty, first->instrument_info(), Gtk::Stock::ADD);
 
-	if (d.run() == RESPONSE_CANCEL) {
-		return;
+	switch (d.run()) {
+		case Gtk::RESPONSE_ACCEPT:
+			break;
+		default:
+			return;
 	}
 
 	for (RegionSelection::iterator i = rs.begin (); i != rs.end(); ++i) {
@@ -7324,8 +7333,12 @@ Editor::close_region_gaps ()
 	dialog.add_button (_("Ok"), RESPONSE_ACCEPT);
 	dialog.show_all ();
 
-	if (dialog.run () == RESPONSE_CANCEL) {
-		return;
+	switch (dialog.run ()) {
+		case Gtk::RESPONSE_ACCEPT:
+		case Gtk::RESPONSE_OK:
+			break;
+		default:
+			return;
 	}
 
 	samplepos_t crossfade_len = spin_crossfade.get_value();

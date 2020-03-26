@@ -81,7 +81,7 @@ private:
 	void send_to_property_changed (const PBD::PropertyChange&);
 	int  connect_when_legal ();
 	void init_gain ();
-	int  use_target (boost::shared_ptr<Route>);
+	int  use_target (boost::shared_ptr<Route>, bool update_name = true);
 	void target_io_changed ();
 };
 

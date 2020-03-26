@@ -155,10 +155,11 @@ setup_enum_writer ()
 	TransportFSM::EventType _TransportFSM_EventType;
 	TransportFSM::MotionState _TransportFSM_MotionState;
 	TransportFSM::ButlerState _TransportFSM_ButlerState;
+	TransportFSM::DirectionState _TransportFSM_DirectionState;
 	LoopFadeChoice _LoopFadeChooice;
 	TransportState _TransportState;
 	LocateTransportDisposition _LocateTransportDisposition;
-	
+
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
@@ -247,6 +248,9 @@ setup_enum_writer ()
 
 	REGISTER_ENUM (Normal);
 	REGISTER_ENUM (NonLayered);
+	/* No longer used but we leave this here so that enumwriter can parse
+	 * strings containing "Destructive"
+	 */
 	REGISTER_ENUM (Destructive);
 	REGISTER (_TrackMode);
 
@@ -417,8 +421,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (LTC);
 	REGISTER (_SyncSource);
 
-	REGISTER_ENUM (TR_Stop);
-	REGISTER_ENUM (TR_Start);
+	REGISTER_ENUM (TR_StartStop);
 	REGISTER_ENUM (TR_Speed);
 	REGISTER_ENUM (TR_Locate);
 	REGISTER (_TransportRequestType);
@@ -520,6 +523,9 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Source, RemovableIfEmpty);
 	REGISTER_CLASS_ENUM (Source, RemoveAtDestroy);
 	REGISTER_CLASS_ENUM (Source, NoPeakFile);
+	/* No longer used but we leave this here so that enumwriter can parse
+	 * strings containing "Destructive"
+	 */
 	REGISTER_CLASS_ENUM (Source, Destructive);
 	REGISTER_CLASS_ENUM (Source, Empty);
 	REGISTER_BITS (_Source_Flag);
@@ -544,7 +550,6 @@ setup_enum_writer ()
 
 	REGISTER_CLASS_ENUM (DiskIOProcessor, Recordable);
 	REGISTER_CLASS_ENUM (DiskIOProcessor, Hidden);
-	REGISTER_CLASS_ENUM (DiskIOProcessor, Destructive);
 	REGISTER_BITS (_DiskIOProcessor_Flag);
 
 	REGISTER_CLASS_ENUM (Location, IsMark);
@@ -667,7 +672,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (RegionExportChannelFactory, None);
 	REGISTER_CLASS_ENUM (RegionExportChannelFactory, Raw);
 	REGISTER_CLASS_ENUM (RegionExportChannelFactory, Fades);
-	REGISTER_CLASS_ENUM (RegionExportChannelFactory, Processed);
 	REGISTER (_RegionExportChannelFactory_Type);
 
 	REGISTER_CLASS_ENUM (Delivery, Insert);
@@ -809,6 +813,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (TransportFSM, StopTransport);
 	REGISTER_CLASS_ENUM (TransportFSM, Locate);
 	REGISTER_CLASS_ENUM (TransportFSM, LocateDone);
+	REGISTER_CLASS_ENUM (TransportFSM, SetSpeed);
 	REGISTER (_TransportFSM_EventType);
 
 	REGISTER_CLASS_ENUM (TransportFSM, Stopped);
@@ -818,10 +823,14 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (TransportFSM, WaitingForLocate);
 	REGISTER (_TransportFSM_MotionState);
 
-
 	REGISTER_CLASS_ENUM (TransportFSM, NotWaitingForButler);
 	REGISTER_CLASS_ENUM (TransportFSM, WaitingForButler);
 	REGISTER (_TransportFSM_ButlerState);
+
+	REGISTER_CLASS_ENUM (TransportFSM, Forwards);
+	REGISTER_CLASS_ENUM (TransportFSM, Backwards);
+	REGISTER_CLASS_ENUM (TransportFSM, Reversing);
+	REGISTER (_TransportFSM_DirectionState);
 
 	REGISTER_ENUM (NoLoopFade);
 	REGISTER_ENUM (EndLoopFade);

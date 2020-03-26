@@ -233,12 +233,13 @@ RTMidiBuffer::write (TimeType time, Evoral::EventType /*type*/, uint32_t size, c
 	return size;
 }
 
+/* These (non-matching) comparison arguments weren't supported prior to C99 !!!
 static
 bool
 item_timestamp_earlier (ARDOUR::RTMidiBuffer::Item const & item, samplepos_t time)
 {
 	return item.timestamp < time;
-}
+}*/
 
 static
 bool
@@ -256,21 +257,22 @@ RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiSta
 		return 0;
 	}
 
+	bool reverse;
+	Item foo;
 	Item* iend;
 	Item* item;
+
 	uint32_t count = 0;
-	bool reverse;
+	foo.timestamp = start;
 
 	if (start < end) {
 		iend = _data+_size;
-		item = lower_bound (_data, iend, start, item_timestamp_earlier);
+		item = lower_bound (_data, iend, foo, item_item_earlier);
 		reverse = false;
 	} else {
 		iend = _data;
 		--iend; /* yes, this is technically "illegal" but we will never indirect */
 		Item* uend = _data+_size;
-		Item foo;
-		foo.timestamp = start;
 		item = upper_bound (_data, uend, foo, item_item_earlier);
 
 		if (item == uend) {

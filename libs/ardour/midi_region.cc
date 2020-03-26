@@ -145,9 +145,7 @@ MidiRegion::do_export (string path) const
 	/* caller must check for pre-existing file */
 	assert (!path.empty());
 	assert (!Glib::file_test (path, Glib::FILE_TEST_EXISTS));
-	newsrc = boost::dynamic_pointer_cast<MidiSource>(
-		SourceFactory::createWritable(DataType::MIDI, _session,
-		                              path, false, _session.sample_rate()));
+	newsrc = boost::dynamic_pointer_cast<MidiSource>(SourceFactory::createWritable(DataType::MIDI, _session, path, _session.sample_rate()));
 
 	BeatsSamplesConverter bfc (_session.tempo_map(), _position);
 	Temporal::Beats const bbegin = bfc.from (_start);
@@ -177,8 +175,7 @@ MidiRegion::clone (string path) const
 	assert (!path.empty());
 	assert (!Glib::file_test (path, Glib::FILE_TEST_EXISTS));
 	newsrc = boost::dynamic_pointer_cast<MidiSource>(
-		SourceFactory::createWritable(DataType::MIDI, _session,
-					      path, false, _session.sample_rate()));
+		SourceFactory::createWritable(DataType::MIDI, _session, path, _session.sample_rate()));
 	return clone (newsrc);
 }
 

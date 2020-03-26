@@ -31,6 +31,7 @@
 #include "ardour/io_processor.h"
 #include "ardour/processor.h"
 #include "ardour/route.h"
+#include "ardour/session.h"
 #include "ardour/session_object.h"
 #include "ardour/types.h"
 
@@ -62,12 +63,15 @@ IOProcessor::IOProcessor (Session& s, bool with_input, bool with_output,
 	if (with_output) {
 		_output.reset (new IO(s, io_name.empty() ? proc_name : io_name, IO::Output, dtype, sendish));
 	}
+	if (!sendish) {
+		_bitslot = 0;
+	}
 }
 
 /* create an IOProcessor that proxies to an existing IO object */
 
 IOProcessor::IOProcessor (Session& s, boost::shared_ptr<IO> in, boost::shared_ptr<IO> out,
-			  const string& proc_name, DataType /*dtype*/)
+			  const string& proc_name, bool sendish)
 	: Processor(s, proc_name)
 	, _input (in)
 	, _output (out)
@@ -82,6 +86,10 @@ IOProcessor::IOProcessor (Session& s, boost::shared_ptr<IO> in, boost::shared_pt
 		_own_output = false;
 	} else {
 		_own_output = true;
+	}
+
+	if (!sendish) {
+		_bitslot = 0;
 	}
 }
 
@@ -244,17 +252,83 @@ IOProcessor::natural_input_streams () const
 	return _input ? _input->n_ports() : ChanCount::ZERO;
 }
 
-bool
-IOProcessor::set_name (const std::string& name)
+std::string
+IOProcessor::validate_name (std::string const& new_name, std::string const& canonical_name) const
 {
-	bool ret = SessionObject::set_name (name);
+	/* For use by Send::set_name() and PortInsert::set_name()
+	 *
+	 * allow canonical name e.g.
+	 *  _("insert %1"), bitslot) // PortInsert::name_and_id_new_insert
+	 *  _("send %1"), bitslot) // Send::name_and_id_new_send
+	 * do *not* allow to use use potential canonical names with different
+	 * bitslot id.
+	 *
+	 * Next, ensure that port-name is unique. Since ::set_name() is used
+	 * when converting old sessions, a unique name has to be generated
+	 */
+
+	bool ok = new_name == canonical_name;
+
+	if (!ok) {
+		string unique_base;
+		/* strip existing numeric part (bitslot) of the name */
+		string::size_type last_letter = new_name.find_last_not_of ("0123456789");
+		if (last_letter != string::npos) {
+			unique_base = new_name.substr (0, last_letter + 1);
+		}
+		ok = unique_base != _("send ") && unique_base != _("insert ") && unique_base != _("return ");
+	}
+
+	if (!ok || !_session.io_name_is_legal (new_name)) {
+		/* rip any existing numeric part of the name, and append the bitslot */
+		string unique_base;
+		string::size_type last_letter = new_name.find_last_not_of ("0123456789-");
+		if (last_letter != string::npos) {
+			unique_base = new_name.substr (0, last_letter + 1);
+		} else {
+			unique_base = new_name;
+		}
+
+		int tries = 0;
+		std::string unique_name;
+		do {
+			unique_name = unique_base;
+			char buf[32];
+			if (tries > 0 || !ok) {
+				snprintf (buf, sizeof (buf), "%u-%u", _bitslot, tries + (ok ? 0 : 1));
+			} else {
+				snprintf (buf, sizeof (buf), "%u", _bitslot);
+			}
+			unique_name += buf;
+			if (25 == ++tries) {
+				return "";
+			}
+		} while (!_session.io_name_is_legal (unique_name));
+		return unique_name;
+	}
+	return new_name;
+}
+
+bool
+IOProcessor::set_name (const std::string& new_name)
+{
+	bool ret = true;
+
+	if (name () == new_name) {
+		return ret;
+	}
 
 	if (ret && _own_input && _input) {
-		ret = _input->set_name (name);
+		ret = _input->set_name (new_name);
 	}
 
 	if (ret && _own_output && _output) {
-		ret = _output->set_name (name);
+		ret = _output->set_name (new_name);
+	}
+
+	if (ret) {
+		ret = SessionObject::set_name (new_name); // never fails
+		assert (ret);
 	}
 
 	return ret;

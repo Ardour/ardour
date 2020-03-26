@@ -75,7 +75,7 @@ def build(bld):
             obj.linkflags = ['-mwindows']
             obj.use = [ 'libpbd', 'vstwin' ]
         else:
-            obj.uselib = ['GIOMM', 'DL', 'OSX']
+            obj.uselib = ['GIOMM', 'DL', 'OSX', 'XML', 'ARCHIVE', 'CURL']
             obj.use = [ 'libpbd' ]
 
     obj.includes  = [ '../pbd/', '../ardour/', '.' ]
@@ -86,7 +86,7 @@ def build(bld):
         'PACKAGE="' + I18N_PACKAGE + str(bld.env['MAJOR']) + '"',
         'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"',
         ]
-    if re.search ("freebsd", sys.platform) != None or re.search ("openbsd", sys.platform) != None:
+    if re.search ("bsd", sys.platform) != None:
         obj.defines.append('_POSIX_C_SOURCE=200809')
         obj.defines.append('_XOPEN_SOURCE=700')
 

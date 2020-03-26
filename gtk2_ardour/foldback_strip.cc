@@ -346,7 +346,7 @@ FoldbackStrip::init ()
 
 	_show_sends_button.set_name ("send alert button");
 	_show_sends_button.set_text (_("Show Sends"));
-	UI::instance()->set_tip (&_show_sends_button, _("make mixer strips show sends to this bus"), "");
+	UI::instance()->set_tip (&_show_sends_button, _("Show the strips that send to this bus, and control them from the faders"), "");
 
 	send_display.set_flags (CAN_FOCUS);
 	send_display.set_spacing (4);
@@ -404,8 +404,8 @@ FoldbackStrip::init ()
 	// or hides.
 	global_vpacker.pack_start (prev_next_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (_invert_button_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_show_sends_button, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (_invert_button_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (send_scroller, true, true);
 #ifndef MIXBUS
 	//add a spacer underneath the foldback bus;
@@ -569,8 +569,6 @@ FoldbackStrip::set_route (boost::shared_ptr<Route> rt)
 	name_changed ();
 	update_send_box ();
 	_session->FBSendsChanged.connect (route_connections, invalidator (*this), boost::bind (&FoldbackStrip::update_send_box, this), gui_context());
-	update_mute_display ();
-	update_solo_display ();
 	comment_changed ();
 	connect_to_pan ();
 	panners.setup_pan ();
@@ -804,8 +802,6 @@ FoldbackStrip::connect_to_pan ()
 	if (!_route->panner()) {
 		return;
 	}
-
-	boost::shared_ptr<Pannable> p = _route->pannable ();
 
 	update_panner_choices();
 }
@@ -1287,11 +1283,13 @@ void
 FoldbackStrip::show_sends_clicked ()
 {
 	if (_showing_sends) {
+		Mixer_UI::instance()->show_spill (boost::shared_ptr<ARDOUR::Stripable>());
 		BusSendDisplayChanged (boost::shared_ptr<Route> ()); /* EMIT SIGNAL */
 		_showing_sends = false;
 		_show_sends_button.set_active (false);
 		send_blink_connection.disconnect ();
 	} else {
+		Mixer_UI::instance()->show_spill (_route);
 		BusSendDisplayChanged (_route); /* EMIT SIGNAL */
 		_showing_sends = true;
 		_show_sends_button.set_active (true);

@@ -1304,6 +1304,22 @@ private:
       return addConstructor <void (*) ()> ();
     }
 
+    template <class FP>
+    WSPtrClass <T>& addStaticFunction (char const* name, FP const fp)
+    {
+      FUNDOC ("Static Member Function", name, FP)
+      set_shared_class ();
+      new (lua_newuserdata (L, sizeof (fp))) FP (fp);
+      lua_pushcclosure (L, &CFunc::Call <FP>::f, 1);
+      rawsetfield (L, -2, name);
+
+      set_weak_class ();
+      new (lua_newuserdata (L, sizeof (fp))) FP (fp);
+      lua_pushcclosure (L, &CFunc::Call <FP>::f, 1);
+      rawsetfield (L, -2, name);
+      return *this;
+    }
+
     WSPtrClass <T>& addNilPtrConstructor ()
     {
       FUNDOC ("Weak/Shared Pointer NIL Constructor", "", void (*) ())

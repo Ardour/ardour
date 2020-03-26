@@ -421,9 +421,11 @@ AudioEngine::process_callback (pframes_t nframes)
 	}
 
 	if (!_freewheeling || Freewheel.empty()) {
-		const double engine_speed = tmm.pre_process_transport_masters (nframes, sample_time_at_cycle_start());
+		double engine_speed = tmm.pre_process_transport_masters (nframes, sample_time_at_cycle_start());
+		engine_speed = _session->plan_master_strategy (nframes, tmm.get_current_speed_in_process_context(), tmm.get_current_position_in_process_context(), engine_speed);
 		Port::set_speed_ratio (engine_speed);
 		DEBUG_TRACE (DEBUG::Slave, string_compose ("transport master (current=%1) gives speed %2 (ports using %3)\n", tmm.current() ? tmm.current()->name() : string("[]"), engine_speed, Port::speed_ratio()));
+
 #if 0 // USE FOR DEBUG ONLY
 		/* use with Dummy backend, engine pulse and
 		 * scripts/_find_nonzero_sample.lua

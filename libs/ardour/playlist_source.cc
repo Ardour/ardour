@@ -49,8 +49,8 @@ PlaylistSource::PlaylistSource (Session& s, const ID& orig, const std::string& n
 	, _original (orig)
 	, _owner (0) /* zero is never a legal ID for an object */
 {
-	/* PlaylistSources are never writable, renameable, removable or destructive */
-	_flags = Flag (_flags & ~(Writable|CanRename|Removable|RemovableIfEmpty|RemoveAtDestroy|Destructive));
+	/* PlaylistSources are never writable, renameable or removable */
+	_flags = Flag (_flags & ~(Writable|CanRename|Removable|RemovableIfEmpty|RemoveAtDestroy));
 
 	_playlist = p;
 	_playlist->use ();
@@ -63,8 +63,8 @@ PlaylistSource::PlaylistSource (Session& s, const ID& orig, const std::string& n
 PlaylistSource::PlaylistSource (Session& s, const XMLNode& node)
 	: Source (s, DataType::AUDIO, "toBeRenamed")
 {
-	/* PlaylistSources are never writable, renameable, removable or destructive */
-	_flags = Flag (_flags & ~(Writable|CanRename|Removable|RemovableIfEmpty|RemoveAtDestroy|Destructive));
+	/* PlaylistSources are never writable, renameable or removable */
+	_flags = Flag (_flags & ~(Writable|CanRename|Removable|RemovableIfEmpty|RemoveAtDestroy));
 
 
 	if (set_state (node, Stateful::loading_state_version)) {

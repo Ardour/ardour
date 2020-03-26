@@ -811,6 +811,14 @@ ARDOUR_UI::set_transport_sensitivity (bool yn)
 }
 
 void
+ARDOUR_UI::set_punch_sensitivity ()
+{
+	bool can_punch = _session && _session->punch_is_possible() && _session->locations()->auto_punch_location ();
+	ActionManager::get_action ("Transport", "TogglePunchIn")->set_sensitive (can_punch);
+	ActionManager::get_action ("Transport", "TogglePunchOut")->set_sensitive (can_punch);
+}
+
+void
 ARDOUR_UI::editor_realized ()
 {
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));

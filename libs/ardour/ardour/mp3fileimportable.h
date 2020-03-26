@@ -20,6 +20,8 @@
 #ifndef _ardour_mp3file_importable_source_h_
 #define _ardour_mp3file_importable_source_h_
 
+#include <stdint.h>
+
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/importable_source.h"

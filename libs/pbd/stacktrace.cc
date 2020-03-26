@@ -114,7 +114,7 @@ PBD::stacktrace (std::ostream& out, int)
 
 	for (i = 0; i < frames; ++i) {
 		SymFromAddr (process, (DWORD64)(stack[i]), 0, symbol);
-		out << string_compose ("%1: %2 - %3\n", samples - i - 1, symbol->Name, symbol->Address);
+		out << string_compose ("%1: %2 - %3\n", frames - i - 1, symbol->Name, symbol->Address);
 	}
 
 	out.flush ();

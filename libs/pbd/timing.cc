@@ -21,6 +21,7 @@
 
 #include <sstream>
 #include <limits>
+#include <algorithm>
 
 namespace PBD {
 

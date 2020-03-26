@@ -571,7 +571,7 @@ LuaProc::configure_io (ChanCount in, ChanCount out)
 		luabridge::LuaRef lua_dsp_configure = luabridge::getGlobal (L, "dsp_configure");
 		if (lua_dsp_configure.type () == LUA_TFUNCTION) {
 			try {
-				luabridge::LuaRef io = lua_dsp_configure (&in, &out);
+				luabridge::LuaRef io = lua_dsp_configure (in, out);
 				if (io.isTable ()) {
 					ChanCount lin (_selected_in);
 					ChanCount lout (_selected_out);
@@ -651,7 +651,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 	try {
 		if (_lua_does_channelmapping) {
 			// run the DSP function
-			(*_lua_dsp)(&bufs, in, out, nframes, offset);
+			(*_lua_dsp)(&bufs, &in, &out, nframes, offset);
 		} else {
 			// map buffers
 			BufferSet& silent_bufs  = _session.get_silent_buffers (ChanCount (DataType::AUDIO, 1));
@@ -1141,6 +1141,7 @@ LuaProc::load_preset (PresetRecord r)
 				if (!(*j)->get_property (X_("index"), index) ||
 				    !(*j)->get_property (X_("value"), value)) {
 					assert (false);
+					continue;
 				}
 				set_parameter (index, value);
 				PresetPortSetValue (index, value); /* EMIT SIGNAL */

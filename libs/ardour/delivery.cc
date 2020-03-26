@@ -57,10 +57,10 @@ bool                          Delivery::panners_legal = false;
 
 Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pannable> pannable,
                     boost::shared_ptr<MuteMaster> mm, const string& name, Role r)
-	: IOProcessor(s, boost::shared_ptr<IO>(), (role_requires_output_ports (r) ? io : boost::shared_ptr<IO>()), name)
+	: IOProcessor(s, boost::shared_ptr<IO>(), (role_requires_output_ports (r) ? io : boost::shared_ptr<IO>()), name, (r == Send || r == Aux || r == Foldback))
 	, _role (r)
 	, _output_buffers (new BufferSet())
-	, _current_gain (GAIN_COEFF_UNITY)
+	, _current_gain (GAIN_COEFF_ZERO)
 	, _no_outs_cuz_we_no_monitor (false)
 	, _mute_master (mm)
 	, _no_panner_reset (false)
@@ -81,10 +81,10 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pann
 /* deliver to a new IO object */
 
 Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster> mm, const string& name, Role r)
-	: IOProcessor(s, false, (role_requires_output_ports (r) ? true : false), name, "", DataType::AUDIO, (r == Send))
+	: IOProcessor(s, false, (role_requires_output_ports (r) ? true : false), name, "", DataType::AUDIO, (r == Send || r == Aux || r == Foldback))
 	, _role (r)
 	, _output_buffers (new BufferSet())
-	, _current_gain (GAIN_COEFF_UNITY)
+	, _current_gain (GAIN_COEFF_ZERO)
 	, _no_outs_cuz_we_no_monitor (false)
 	, _mute_master (mm)
 	, _no_panner_reset (false)

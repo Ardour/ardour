@@ -396,6 +396,9 @@ public:
 	bool device_mode () const { return _device_mode; }
 
 #ifdef MIXBUS32C
+	void set_ctrllowersends (bool yn);
+	bool ctrllowersends () const { return _ctrllowersends; }
+
 	void store_fss_type();
 	bool fss_is_mixbus() const { return _fss_is_mixbus; }
 #endif
@@ -416,6 +419,7 @@ private:
 	bool _fader8master;
 	bool _device_mode;
 #ifdef MIXBUS32C
+	bool _ctrllowersends;
 	bool _fss_is_mixbus;
 #endif
 	bool _refresh_leds_flag;
@@ -495,7 +499,7 @@ private:
 	void connect_to_parser();
 	void handle_button_message(boost::shared_ptr<Button> button, MIDI::EventTwoBytes *);
 
-	bool check_pick_up(boost::shared_ptr<Controller> controller, boost::shared_ptr<ARDOUR::AutomationControl> ac);
+	bool check_pick_up(boost::shared_ptr<Controller> controller, boost::shared_ptr<ARDOUR::AutomationControl> ac, bool rotary = false);
 
 	void handle_midi_controller_message(MIDI::Parser &, MIDI::EventTwoBytes *, MIDI::channel_t chan);
 	void handle_midi_note_on_message(MIDI::Parser &, MIDI::EventTwoBytes *, MIDI::channel_t chan);

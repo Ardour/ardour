@@ -270,6 +270,7 @@ MIDIControllable::lookup_controllable()
 	boost::shared_ptr<Controllable> c = _surface->lookup_controllable (_current_uri);
 
 	if (!c) {
+		set_controllable (boost::shared_ptr<PBD::Controllable>());
 		return -1;
 	}
 

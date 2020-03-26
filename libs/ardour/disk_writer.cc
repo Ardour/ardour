@@ -18,6 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <glibmm/datetime.h>
+
 #include "ardour/analyser.h"
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
@@ -109,12 +111,13 @@ DiskWriter::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_many)
 	return 0;
 }
 
-
-
 bool
 DiskWriter::set_write_source_name (string const & str)
 {
 	_write_source_name = str;
+
+	reset_write_sources (false);
+
 	return true;
 }
 
@@ -346,26 +349,7 @@ DiskWriter::non_realtime_locate (samplepos_t position)
 void
 DiskWriter::prepare_record_status (samplepos_t _capture_start_sample)
 {
-	if (recordable() && destructive()) {
-		boost::shared_ptr<ChannelList> c = channels.reader ();
-		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-
-			RingBufferNPT<CaptureTransition>::rw_vector transitions;
-			(*chan)->capture_transition_buf->get_write_vector (&transitions);
-
-			if (transitions.len[0] > 0) {
-				transitions.buf[0]->type = CaptureStart;
-				transitions.buf[0]->capture_val = _capture_start_sample;
-				(*chan)->capture_transition_buf->increment_write_ptr(1);
-			} else {
-				// bad!
-				fatal << X_("programming error: capture_transition_buf is full on rec start!  inconceivable!")
-					<< endmsg;
-			}
-		}
-	}
 }
-
 
 /** Do some record stuff [not described in this comment!]
  *
@@ -672,25 +656,6 @@ DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
 		return;
 	}
 
-	if (recordable() && destructive()) {
-		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-
-			RingBufferNPT<CaptureTransition>::rw_vector transvec;
-			(*chan)->capture_transition_buf->get_write_vector(&transvec);
-
-			if (transvec.len[0] > 0) {
-				transvec.buf[0]->type = CaptureEnd;
-				transvec.buf[0]->capture_val = _capture_captured;
-				(*chan)->capture_transition_buf->increment_write_ptr(1);
-			}
-			else {
-				// bad!
-				fatal << string_compose (_("programmer error: %1"), X_("capture_transition_buf is full when stopping record!  inconceivable!")) << endmsg;
-			}
-		}
-	}
-
-
 	CaptureInfo* ci = new CaptureInfo;
 
 	ci->start =  _capture_start_sample;
@@ -741,12 +706,6 @@ DiskWriter::set_record_enabled (bool yn)
 		return;
 	}
 
-	/* can't rec-enable in destructive mode if transport is before start */
-
-	if (destructive() && yn && _session.transport_sample() < _session.current_start_sample()) {
-		return;
-	}
-
 	/* yes, i know that this not proof against race conditions, but its
 	   good enough. i think.
 	*/
@@ -769,13 +728,6 @@ DiskWriter::set_record_safe (bool yn)
 		return;
 	}
 
-	/* can't rec-safe in destructive mode if transport is before start ????
-	 REQUIRES REVIEW */
-
-	if (destructive() && yn && _session.transport_sample() < _session.current_start_sample()) {
-		return;
-	}
-
 	/* yes, i know that this not proof against race conditions, but its
 	 good enough. i think.
 	 */
@@ -795,12 +747,6 @@ bool
 DiskWriter::prep_record_enable ()
 {
 	if (!recordable() || !_session.record_enabling_legal() || channels.reader()->empty() || record_safe ()) { // REQUIRES REVIEW "|| record_safe ()"
-		return false;
-	}
-
-	/* can't rec-enable in destructive mode if transport is before start */
-
-	if (destructive() && _session.transport_sample() < _session.current_start_sample()) {
 		return false;
 	}
 
@@ -869,12 +815,6 @@ DiskWriter::seek (samplepos_t sample, bool complete_refill)
 	g_atomic_int_set(&_samples_read_from_ringbuffer, 0);
 	g_atomic_int_set(&_samples_written_to_ringbuffer, 0);
 
-	/* can't rec-enable in destructive mode if transport is before start */
-
-	if (destructive() && record_enabled() && sample < _session.current_start_sample()) {
-		disengage_record_enable ();
-	}
-
 	playback_sample = sample;
 
 	return 0;
@@ -922,56 +862,6 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 
 		to_write = min (_chunk_samples, (samplecnt_t) vector.len[0]);
 
-		// check the transition buffer when recording destructive
-		// important that we get this after the capture buf
-
-		if (destructive()) {
-			(*chan)->capture_transition_buf->get_read_vector(&transvec);
-			size_t transcount = transvec.len[0] + transvec.len[1];
-			size_t ti;
-
-			for (ti=0; ti < transcount; ++ti) {
-				CaptureTransition & captrans = (ti < transvec.len[0]) ? transvec.buf[0][ti] : transvec.buf[1][ti-transvec.len[0]];
-
-				if (captrans.type == CaptureStart) {
-					// by definition, the first data we got above represents the given capture pos
-
-					(*chan)->write_source->mark_capture_start (captrans.capture_val);
-					(*chan)->curr_capture_cnt = 0;
-
-				} else if (captrans.type == CaptureEnd) {
-
-					// capture end, the capture_val represents total samples in capture
-
-					if (captrans.capture_val <= (*chan)->curr_capture_cnt + to_write) {
-
-						// shorten to make the write a perfect fit
-						uint32_t nto_write = (captrans.capture_val - (*chan)->curr_capture_cnt);
-
-						if (nto_write < to_write) {
-							ret = 1; // should we?
-						}
-						to_write = nto_write;
-
-						(*chan)->write_source->mark_capture_end ();
-
-						// increment past this transition, but go no further
-						++ti;
-						break;
-					}
-					else {
-						// actually ends just beyond this chunk, so force more work
-						ret = 1;
-						break;
-					}
-				}
-			}
-
-			if (ti > 0) {
-				(*chan)->capture_transition_buf->increment_read_ptr(ti);
-			}
-		}
-
 		if ((!(*chan)->write_source) || (*chan)->write_source->write (vector.buf[0], to_write) != to_write) {
 			error << string_compose(_("AudioDiskstream %1: cannot write to disk"), id()) << endmsg;
 			return -1;
@@ -980,7 +870,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 		(*chan)->wbuf->increment_read_ptr (to_write);
 		(*chan)->curr_capture_cnt += to_write;
 
-		if ((to_write == vector.len[0]) && (total > to_write) && (to_write < _chunk_samples) && !destructive()) {
+		if ((to_write == vector.len[0]) && (total > to_write) && (to_write < _chunk_samples)) {
 
 			/* we wrote all of vector.len[0] but it wasn't an entire
 			   disk_write_chunk_samples of data, so arrange for some part
@@ -1065,35 +955,26 @@ DiskWriter::reset_write_sources (bool mark_write_complete, bool /*force*/)
 
 	for (chan = c->begin(), n = 0; chan != c->end(); ++chan, ++n) {
 
-		if (!destructive()) {
+		if ((*chan)->write_source) {
 
-			if ((*chan)->write_source) {
-
-				if (mark_write_complete) {
-					Source::Lock lock((*chan)->write_source->mutex());
-					(*chan)->write_source->mark_streaming_write_completed (lock);
-					(*chan)->write_source->done_with_peakfile_writes ();
-				}
-
-				if ((*chan)->write_source->removable()) {
-					(*chan)->write_source->mark_for_remove ();
-					(*chan)->write_source->drop_references ();
-				}
-
-				(*chan)->write_source.reset ();
+			if (mark_write_complete) {
+				Source::Lock lock((*chan)->write_source->mutex());
+				(*chan)->write_source->mark_streaming_write_completed (lock);
+				(*chan)->write_source->done_with_peakfile_writes ();
 			}
 
-			use_new_write_source (DataType::AUDIO, n);
-
-			if (record_enabled()) {
-				capturing_sources.push_back ((*chan)->write_source);
+			if ((*chan)->write_source->removable()) {
+				(*chan)->write_source->mark_for_remove ();
+				(*chan)->write_source->drop_references ();
 			}
 
-		} else {
+			(*chan)->write_source.reset ();
+		}
 
-			if ((*chan)->write_source == 0) {
-				use_new_write_source (DataType::AUDIO, n);
-			}
+		use_new_write_source (DataType::AUDIO, n);
+
+		if (record_enabled()) {
+			capturing_sources.push_back ((*chan)->write_source);
 		}
 	}
 
@@ -1106,17 +987,6 @@ DiskWriter::reset_write_sources (bool mark_write_complete, bool /*force*/)
 
 	if (_playlists[DataType::MIDI]) {
 		use_new_write_source (DataType::MIDI);
-	}
-
-	if (destructive() && !c->empty ()) {
-
-		/* we now have all our write sources set up, so create the
-		   playlist's single region.
-		*/
-
-		if (_playlists[DataType::MIDI]->empty()) {
-			setup_destructive_playlist ();
-		}
 	}
 }
 
@@ -1158,7 +1028,7 @@ DiskWriter::use_new_write_source (DataType dt, uint32_t n)
 
 		try {
 			if ((chan->write_source = _session.create_audio_source_for_session (
-				     c->size(), write_source_name(), n, destructive())) == 0) {
+				     c->size(), write_source_name(), n)) == 0) {
 				throw failed_constructor();
 			}
 		}
@@ -1169,9 +1039,7 @@ DiskWriter::use_new_write_source (DataType dt, uint32_t n)
 			return -1;
 		}
 
-		/* do not remove destructive files even if they are empty */
-
-		chan->write_source->set_allow_remove_if_empty (!destructive());
+		chan->write_source->set_allow_remove_if_empty (true);
 	}
 
 	return 0;
@@ -1220,10 +1088,6 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 
 	if (abort_capture) {
 
-		if (destructive()) {
-			goto outout;
-		}
-
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 
 			if ((*chan)->write_source) {
@@ -1261,9 +1125,8 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 			as->set_captured_for (_name.val());
 			as->mark_immutable ();
 
-			char buf[128];
-			strftime (buf, sizeof(buf), "%F %H.%M.%S", &when);
-			as->set_take_id ( buf );
+			Glib::DateTime tm (Glib::DateTime::create_now_local (mktime (&when)));
+			as->set_take_id (tm.format ("%F %H.%M.%S"));
 
 			if (Config->get_auto_analyse_audio()) {
 				Analyser::queue_source_for_analysis (as, true);
@@ -1312,9 +1175,8 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 		_midi_write_source->set_natural_position (capture_info.front()->start);
 		_midi_write_source->set_captured_for (_name);
 
-		char buf[128];
-		strftime (buf, sizeof(buf), "%F %H.%M.%S", &when);
-		_midi_write_source->set_take_id ( buf );
+		Glib::DateTime tm (Glib::DateTime::create_now_local (mktime (&when)));
+		_midi_write_source->set_take_id (tm.format ("%F %H.%M.%S"));
 
 		/* set length in beats to entire capture length */
 
@@ -1379,26 +1241,6 @@ DiskWriter::loop (samplepos_t transport_sample)
 		_first_recordable_sample = transport_sample; // mild lie
 		_last_recordable_sample = max_samplepos;
 		_was_recording = true;
-
-		if (recordable() && destructive()) {
-			for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-
-				RingBufferNPT<CaptureTransition>::rw_vector transvec;
-				(*chan)->capture_transition_buf->get_write_vector(&transvec);
-
-				if (transvec.len[0] > 0) {
-					transvec.buf[0]->type = CaptureStart;
-					transvec.buf[0]->capture_val = _capture_start_sample;
-					(*chan)->capture_transition_buf->increment_write_ptr(1);
-				}
-				else {
-					// bad!
-					fatal << X_("programming error: capture_transition_buf is full on rec loop!  inconceivable!")
-					      << endmsg;
-				}
-			}
-		}
-
 	}
 
 	/* Here we only keep track of the number of captured loops so monotonic
@@ -1411,82 +1253,6 @@ DiskWriter::loop (samplepos_t transport_sample)
 	if (_was_recording) {
 		g_atomic_int_add(const_cast<gint*> (&_num_captured_loops), 1);
 	}
-}
-
-void
-DiskWriter::setup_destructive_playlist ()
-{
-	SourceList srcs;
-	boost::shared_ptr<ChannelList> c = channels.reader();
-
-	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-		srcs.push_back ((*chan)->write_source);
-	}
-
-	/* a single full-sized region */
-
-	assert (!srcs.empty ());
-
-	PropertyList plist;
-	plist.add (Properties::name, _name.val());
-	plist.add (Properties::start, 0);
-	plist.add (Properties::length, max_samplepos - srcs.front()->natural_position());
-
-	boost::shared_ptr<Region> region (RegionFactory::create (srcs, plist));
-	_playlists[DataType::AUDIO]->add_region (region, srcs.front()->natural_position());
-
-	/* apply region properties and update write sources */
-	use_destructive_playlist();
-}
-
-void
-DiskWriter::use_destructive_playlist ()
-{
-	/* this is called from the XML-based constructor or ::set_destructive. when called,
-	   we already have a playlist and a region, but we need to
-	   set up our sources for write. we use the sources associated
-	   with the (presumed single, full-extent) region.
-	*/
-
-	boost::shared_ptr<Region> rp;
-	{
-		const RegionList& rl (_playlists[DataType::AUDIO]->region_list_property().rlist());
-		if (rl.size() > 0) {
-			/* this can happen when dragging a region onto a tape track */
-			assert((rl.size() == 1));
-			rp = rl.front();
-		}
-	}
-
-	if (!rp) {
-		reset_write_sources (false, true);
-		return;
-	}
-
-	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (rp);
-
-	if (region == 0) {
-		throw failed_constructor();
-	}
-
-	/* be sure to stretch the region out to the maximum length (non-musical)*/
-
-	region->set_length (max_samplepos - region->position(), 0);
-
-	uint32_t n;
-	ChannelList::iterator chan;
-	boost::shared_ptr<ChannelList> c = channels.reader();
-
-	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
-		(*chan)->write_source = boost::dynamic_pointer_cast<AudioFileSource>(region->source (n));
-		assert((*chan)->write_source);
-		(*chan)->write_source->set_allow_remove_if_empty (false);
-
-		// should be set when creating the source or loading the state
-		assert ((*chan)->write_source->destructive());
-	}
-
-	/* the source list will never be reset for a destructive track */
 }
 
 void

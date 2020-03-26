@@ -28,7 +28,6 @@
     the value of the variable.
 *****************************************************/
 
-CONFIG_VARIABLE (uint32_t, destructive_xfade_msecs,  "destructive-xfade-msecs", 2)
 CONFIG_VARIABLE (bool, use_region_fades, "use-region-fades", true)
 CONFIG_VARIABLE (bool, use_transport_fades, "use-transport-fades", true)
 CONFIG_VARIABLE (bool, use_monitor_fades, "use-monitor-fades", true)
@@ -36,7 +35,7 @@ CONFIG_VARIABLE (SampleFormat, native_file_data_format,  "native-file-data-forma
 CONFIG_VARIABLE (HeaderFormat, native_file_header_format,  "native-file-header-format", ARDOUR::WAVE)
 CONFIG_VARIABLE (bool, auto_play, "auto-play", false)
 CONFIG_VARIABLE (bool, auto_return, "auto-return", false)
-CONFIG_VARIABLE (bool, auto_input, "auto-input", false)
+CONFIG_VARIABLE (bool, auto_input, "auto-input", true)
 CONFIG_VARIABLE (bool, punch_in, "punch-in", false)
 CONFIG_VARIABLE (bool, punch_out, "punch-out", false)
 CONFIG_VARIABLE (bool, count_in, "count-in", false)

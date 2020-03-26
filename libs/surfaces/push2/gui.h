@@ -78,19 +78,6 @@ private:
 	Glib::RefPtr<Gtk::ListStore> build_midi_port_list (std::vector<std::string> const & ports, bool for_input);
 	void active_port_changed (Gtk::ComboBox*,bool for_input);
 
-	struct ActionColumns : public Gtk::TreeModel::ColumnRecord {
-		ActionColumns() {
-			add (name);
-			add (path);
-		}
-		Gtk::TreeModelColumn<std::string> name;
-		Gtk::TreeModelColumn<std::string> path;
-	};
-
-	ActionColumns action_columns;
-	Glib::RefPtr<Gtk::TreeStore> available_action_model;
-	std::map<std::string,std::string> action_map; // map from action names to paths
-
 	struct PressureModeColumns : public Gtk::TreeModel::ColumnRecord {
 		PressureModeColumns() {
 			add (mode);

@@ -131,23 +131,35 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 	*/
 
 	if (ARDOUR::Port::receives_input()) {
-		MidiBuffer& mb (get_midi_buffer (nframes));
-		samplecnt_t when;
 
-		if (have_timer) {
-			when = timer ();
-		} else {
-			when = AudioEngine::instance()->sample_time_at_cycle_start();
-		}
+		void* buffer = port_engine.get_buffer (_port_handle, nframes);
+		const pframes_t event_count = port_engine.get_midi_event_count (buffer);
 
-		for (MidiBuffer::iterator b = mb.begin(); b != mb.end(); ++b) {
-			if (!have_timer) {
-				when += (*b).time();
+		for (pframes_t i = 0; i < event_count; ++i) {
+
+			pframes_t timestamp;
+			size_t size;
+			uint8_t const* buf;
+
+			port_engine.midi_event_get (timestamp, size, &buf, buffer, i);
+
+			if (buf[0] == 0xfe) {
+				/* throw away active sensing */
+				continue;
 			}
-			input_fifo.write (when, Evoral::NO_EVENT, (*b).size(), (*b).buffer());
+
+			samplecnt_t when;
+
+			if (have_timer) {
+				when = timer ();
+			} else {
+				when = AudioEngine::instance()->sample_time_at_cycle_start() + timestamp;
+			}
+
+			input_fifo.write (when, Evoral::NO_EVENT, size, buf);
 		}
 
-		if (!mb.empty()) {
+		if (event_count) {
 			_xthread.wakeup ();
 		}
 
@@ -346,4 +358,3 @@ AsyncMIDIPort::is_process_thread()
 {
 	return pthread_equal (pthread_self(), _process_thread);
 }
-

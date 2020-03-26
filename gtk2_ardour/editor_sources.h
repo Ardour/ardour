@@ -36,28 +36,20 @@ public:
 
 	void set_session (ARDOUR::Session *);
 
-	void set_selection (Selection *sel) { _selection = sel; }
-
 	Gtk::Widget& widget () {
 		return _scroller;
 	}
 
 	void clear ();
-	
-	void selection_mapover (sigc::slot<void,boost::shared_ptr<ARDOUR::Region> >);
 
 	boost::shared_ptr<ARDOUR::Region> get_dragged_region ();
 	boost::shared_ptr<ARDOUR::Region> get_single_selection ();
-
-	void block_change_connection (bool b) {
-		_change_connection.block (b);
-	}
 
 	void unselect_all () {
 		_display.get_selection()->unselect_all ();
 	}
 
-	//user actions
+	/* user actions */
 	void remove_selected_sources ();
 	void recover_selected_sources();
 
@@ -120,43 +112,29 @@ private:
 
 	void add_source (boost::shared_ptr<ARDOUR::Region>);
 	void remove_source (boost::shared_ptr<ARDOUR::Source>);
+	void remove_weak_region (boost::weak_ptr<ARDOUR::Region>);
 	void remove_weak_source (boost::weak_ptr<ARDOUR::Source>);
 
 	void clock_format_changed ();
 
 	void redisplay ();
 
-	void suspend_redisplay () {
-		_no_redisplay = true;
-	}
-
-	void resume_redisplay () {
-		_no_redisplay = false;
-		redisplay ();
-	}
-
 	void drag_data_received (
 		Glib::RefPtr<Gdk::DragContext> const &, gint, gint, Gtk::SelectionData const &, guint, guint
 		);
 
-	Gtk::Menu* _menu;
 	Gtk::ScrolledWindow _scroller;
-	Gtk::Frame _frame;
 
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Region> > _display;
 
 	Glib::RefPtr<Gtk::TreeStore> _model;
 
-	PBD::ScopedConnection source_property_connection;
 	PBD::ScopedConnection add_source_connection;
 	PBD::ScopedConnection remove_source_connection;
+	PBD::ScopedConnectionList remove_region_connections;
 
 	PBD::ScopedConnection editor_freeze_connection;
 	PBD::ScopedConnection editor_thaw_connection;
-
-	Selection* _selection;
-	
-	bool _no_redisplay;
 };
 
-#endif /* __gtk_ardour_editor_regions_h__ */
+#endif

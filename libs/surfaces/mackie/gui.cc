@@ -441,7 +441,7 @@ MackieControlProtocolGUI::make_action_renderer (Glib::RefPtr<TreeStore> model, G
 	renderer->property_editable() = true;
 	renderer->property_text_column() = 0;
 	renderer->property_has_entry() = false;
-	renderer->signal_edited().connect (sigc::bind (sigc::mem_fun(*this, &MackieControlProtocolGUI::action_changed), column));
+	renderer->signal_changed().connect (sigc::bind (sigc::mem_fun(*this, &MackieControlProtocolGUI::action_changed), column));
 
 	return renderer;
 }
@@ -633,26 +633,31 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 }
 
 void
-MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib::ustring &text, TreeModelColumnBase col)
+MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const TreeModel::iterator & iter, TreeModelColumnBase col)
 {
+	string action_path = (*iter)[action_model.columns().path];
+
 	// Remove Binding is not in the action map but still valid
-	bool remove (false);
-	if ( text == "Remove Binding") {
+
+	bool remove = false;
+
+	if (action_path == "Remove Binding") {
 		remove = true;
 	}
+
 	Gtk::TreePath path(sPath);
 	Gtk::TreeModel::iterator row = function_key_model->get_iter(path);
 
 	if (row) {
 
-		std::map<std::string,std::string>::iterator i = action_map.find (text);
+		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (action_path, false);
 
-		if (i == action_map.end()) {
+		if (!act) {
+			cerr << action_path << " not found in action map\n";
 			if (!remove) {
 				return;
 			}
 		}
-		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (i->second, false);
 
 		if (act || remove) {
 			/* update visible text, using string supplied by
@@ -663,7 +668,7 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 				Glib::ustring dot = "\u2022";
 				(*row).set_value (col.index(), dot);
 			} else {
-				(*row).set_value (col.index(), text);
+				(*row).set_value (col.index(), act->get_label());
 			}
 
 			/* update the current DeviceProfile, using the full
@@ -695,7 +700,7 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 			if (remove) {
 				_cp.device_profile().set_button_action ((*row)[function_key_columns.id], modifier, "");
 			} else {
-				_cp.device_profile().set_button_action ((*row)[function_key_columns.id], modifier, i->second);
+				_cp.device_profile().set_button_action ((*row)[function_key_columns.id], modifier, action_path);
 			}
 
 			_ignore_profile_changed = true;

@@ -54,7 +54,6 @@ public:
 	enum Flag {
 		Recordable  = 0x1,
 		Hidden      = 0x2,
-		Destructive = 0x4,
 		NonLayered  = 0x8 // deprecated (kept only for enum compat)
 	};
 

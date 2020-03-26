@@ -174,6 +174,9 @@ Session::run_click (samplepos_t start, samplepos_t nframes)
 	/* given a large output latency, `start' can be offset by by > 1 cycle.
 	 * and needs to be mapped back into the loop-range */
 	Location* loop_location = get_play_loop () ? locations()->auto_loop_location () : NULL;
+	if (_count_in_samples > 0) {
+		loop_location = NULL;
+	}
 	bool crossloop = false;
 	samplecnt_t span = nframes;
 	if (loop_location) {
@@ -216,6 +219,9 @@ Session::run_click (samplepos_t start, samplepos_t nframes)
 			 * clicks at loop-start into account */
 			const samplepos_t loop_start = loop_location->start ();
 			internal_offset = clk->start - loop_start + span;
+		} else if (_count_in_samples > 0) {
+			++i;
+			continue;
 		} else {
 			/* this can happen when locating
 			 * with an active click */

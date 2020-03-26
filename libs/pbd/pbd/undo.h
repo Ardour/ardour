@@ -23,91 +23,107 @@
 #ifndef __lib_pbd_undo_h__
 #define __lib_pbd_undo_h__
 
-#include <string>
 #include <list>
 #include <map>
-#include <sigc++/slot.h>
+#include <string>
+
 #include <sigc++/bind.h>
-#ifndef  COMPILER_MSVC
+#include <sigc++/slot.h>
+
+#ifndef COMPILER_MSVC
 #include <sys/time.h>
 #else
 #include <ardourext/misc.h>
 #endif
 
-#include "pbd/libpbd_visibility.h"
 #include "pbd/command.h"
+#include "pbd/libpbd_visibility.h"
 
 typedef sigc::slot<void> UndoAction;
 
 class LIBPBD_API UndoTransaction : public Command
 {
-  public:
+public:
 	UndoTransaction ();
 	UndoTransaction (const UndoTransaction&);
 	UndoTransaction& operator= (const UndoTransaction&);
 	~UndoTransaction ();
 
 	void clear ();
-	bool empty() const;
-	bool clearing () const { return _clearing; }
+	bool empty () const;
+	bool clearing () const {
+		return _clearing;
+	}
 
 	void add_command (Command* const);
 	void remove_command (Command* const);
 
 	void operator() ();
-	void undo();
-	void redo();
+	void undo ();
+	void redo ();
 
-	XMLNode &get_state();
+	XMLNode& get_state ();
 
-	void set_timestamp (struct timeval &t) {
+	void set_timestamp (struct timeval& t)
+	{
 		_timestamp = t;
 	}
 
-	const struct timeval& timestamp() const {
+	const struct timeval& timestamp () const
+	{
 		return _timestamp;
 	}
 
-  private:
-	std::list<Command*>    actions;
-	struct timeval        _timestamp;
-	bool                  _clearing;
-
-	friend void command_death (UndoTransaction*, Command *);
+private:
+	std::list<Command*> actions;
+	struct timeval      _timestamp;
+	bool                _clearing;
 
 	void about_to_explicitly_delete ();
 };
 
 class LIBPBD_API UndoHistory : public PBD::ScopedConnectionList
 {
-  public:
-	UndoHistory();
-	~UndoHistory() {}
+public:
+	UndoHistory ();
+	~UndoHistory () {}
 
 	void add (UndoTransaction* ut);
 	void undo (unsigned int n);
 	void redo (unsigned int n);
 
-	unsigned long undo_depth() const { return UndoList.size(); }
-	unsigned long redo_depth() const { return RedoList.size(); }
+	unsigned long undo_depth () const
+	{
+		return UndoList.size ();
+	}
+	unsigned long redo_depth () const
+	{
+		return RedoList.size ();
+	}
 
-	std::string next_undo() const { return (UndoList.empty() ? std::string() : UndoList.back()->name()); }
-	std::string next_redo() const { return (RedoList.empty() ? std::string() : RedoList.back()->name()); }
+	std::string next_undo () const
+	{
+		return (UndoList.empty () ? std::string () : UndoList.back ()->name ());
+	}
+	std::string next_redo () const
+	{
+		return (RedoList.empty () ? std::string () : RedoList.back ()->name ());
+	}
 
 	void clear ();
 	void clear_undo ();
 	void clear_redo ();
 
 	/* returns all or part of the history.
-	   If depth==0 it returns just the top
-	   node. If depth<0, it returns everything.
-	   If depth>0, it returns state for that
-	   many elements of the history, or
-	   the full history, whichever is smaller.
-	*/
+	 * If depth==0 it returns just the top
+	 * node. If depth<0, it returns everything.
+	 * If depth>0, it returns state for that
+	 * many elements of the history, or
+	 * the full history, whichever is smaller.
+	 */
 
-        XMLNode &get_state(int32_t depth = 0);
-        void save_state();
+	XMLNode& get_state (int32_t depth = 0);
+	void     save_state ();
 
 	void set_depth (uint32_t);
 
@@ -115,14 +131,13 @@ class LIBPBD_API UndoHistory : public PBD::ScopedConnectionList
 	PBD::Signal0<void> BeginUndoRedo;
 	PBD::Signal0<void> EndUndoRedo;
 
-  private:
-	bool _clearing;
-	uint32_t _depth;
+private:
+	bool                        _clearing;
+	uint32_t                    _depth;
 	std::list<UndoTransaction*> UndoList;
 	std::list<UndoTransaction*> RedoList;
 
 	void remove (UndoTransaction*);
 };
-
 
 #endif /* __lib_pbd_undo_h__ */

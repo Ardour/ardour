@@ -38,10 +38,12 @@ enum AVRT_PRIORITY {
 	AVRT_PRIORITY_CRITICAL
 };
 
+#ifndef ERROR_INVALID_TASK_NAME
 enum error_codes {
 	ERROR_INVALID_TASK_NAME = 1550,
 	ERROR_INVALID_TASK_INDEX = 1551
 };
+#endif
 
 bool LIBPBD_API initialize ();
 

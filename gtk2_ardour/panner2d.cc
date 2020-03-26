@@ -256,7 +256,7 @@ Panner2d::handle_state_change ()
 
 	panner_shell->panner()->SignalPositionChanged.connect (panner_connections, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
 
-	set<Evoral::Parameter> params = panner_shell->panner()->what_can_be_automated();
+	set<Evoral::Parameter> params = panner_shell->pannable()->what_can_be_automated();
 	set<Evoral::Parameter>::iterator p = params.find(PanElevationAutomation);
 	bool elev = have_elevation;
 	have_elevation = (p == params.end()) ? false : true;
@@ -928,7 +928,7 @@ Panner2dWindow::Panner2dWindow (boost::shared_ptr<PannerShell> p, int32_t h, uin
 	left_side.pack_start (button_box, false, false);
 
 	Gtk::Label* l = manage (new Label (
-				p->panner()->describe_parameter(PanWidthAutomation),
+				p->pannable()->describe_parameter(PanWidthAutomation),
 				Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	spinner_box.pack_start (*l, false, false);
 	spinner_box.pack_start (width_spinner, false, false);
@@ -997,7 +997,7 @@ Panner2dWindow::set_bypassed ()
 		bypass_button.set_active(model);
 	}
 
-	set<Evoral::Parameter> params = widget.get_panner_shell()->panner()->what_can_be_automated();
+	set<Evoral::Parameter> params = widget.get_panner_shell()->pannable()->what_can_be_automated();
 	set<Evoral::Parameter>::iterator p = params.find(PanWidthAutomation);
 	if (p == params.end()) {
 		spinner_box.set_sensitive(false);

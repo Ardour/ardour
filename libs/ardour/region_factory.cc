@@ -28,6 +28,7 @@
 
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
+#include "ardour/boost_debug.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
 #include "ardour/region.h"
@@ -98,9 +99,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, bo
 		}
 	}
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-	// boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
-#endif
+	BOOST_MARK_REGION (ret);
 	return ret;
 }
 
@@ -139,9 +138,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 		}
 	}
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-        // boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
-#endif
+	BOOST_MARK_REGION (ret);
 	return ret;
 }
 
@@ -180,9 +177,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, MusicSample offset, con
 		}
 	}
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-	// boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
-#endif
+	BOOST_MARK_REGION (ret);
 	return ret;
 }
 
@@ -221,9 +216,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 		}
 	}
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-        // boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
-#endif
+	BOOST_MARK_REGION (ret);
 	return ret;
 }
 
@@ -265,9 +258,7 @@ RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool a
 		}
 	}
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-	// boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
-#endif
+	BOOST_MARK_REGION (ret);
 	return ret;
 }
 
@@ -310,9 +301,7 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 		}
 	}
 
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-	// boost_debug_shared_ptr_mark_interesting (ret.get(), "Region");
-#endif
+	BOOST_MARK_REGION (ret);
 	return ret;
 }
 
@@ -663,19 +652,17 @@ void
 RegionFactory::remove_regions_using_source (boost::shared_ptr<Source> src)
 {
 	Glib::Threads::Mutex::Lock lm (region_map_lock);
-
-	RegionMap::iterator i = region_map.begin();
-	while (i != region_map.end()) {
-
-		RegionMap::iterator j = i;
-		++j;
-
+	RegionList remove_regions;
+	for (RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
 		if (i->second->uses_source (src)) {
-			remove_from_region_name_map (i->second->name ());
-			region_map.erase (i);
-                }
+			remove_regions.push_back (i->second);
+		}
+	}
+	lm.release ();
 
-		i = j;
+	/* this will call RegionFactory::map_remove () */
+	for (RegionList::iterator i = remove_regions.begin(); i != remove_regions.end(); ++i) {
+		(*i)->drop_references ();
 	}
 }
 

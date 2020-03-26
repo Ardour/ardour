@@ -68,8 +68,8 @@ MidiPlaylistSource::MidiPlaylistSource (Session& s, const XMLNode& node)
 	, MidiSource (s, node)
 	, PlaylistSource (s, node)
 {
-	/* PlaylistSources are never writable, renameable, removable or destructive */
-	_flags = Flag (_flags & ~(Writable|CanRename|Removable|RemovableIfEmpty|RemoveAtDestroy|Destructive));
+	/* PlaylistSources are never writable, renameable or removable */
+	_flags = Flag (_flags & ~(Writable|CanRename|Removable|RemovableIfEmpty|RemoveAtDestroy));
 
 	/* ancestors have already called ::set_state() in their XML-based
 	   constructors.

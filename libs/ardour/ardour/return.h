@@ -41,8 +41,6 @@ public:
 	Return (Session&, bool internal = false);
 	virtual ~Return ();
 
-	uint32_t bit_slot() const { return _bitslot; }
-
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);
 
 	boost::shared_ptr<Amp> amp() const { return _amp; }
@@ -73,8 +71,6 @@ protected:
 private:
 	/* disallow copy construction */
 	Return (const Return&);
-
-	uint32_t _bitslot;
 
 	void collect_input (BufferSet& bufs, pframes_t nframes, ChanCount offset = ChanCount::ZERO);
 };

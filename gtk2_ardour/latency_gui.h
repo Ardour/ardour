@@ -42,13 +42,38 @@ namespace ARDOUR {
 
 class LatencyGUI;
 
+class LatencyGUIControllable : public PBD::Controllable
+{
+public:
+	LatencyGUIControllable (LatencyGUI* g)
+		: PBD::Controllable ("ignoreMe")
+		, _latency_gui (g)
+	{}
+
+	void set_value (double v, PBD::Controllable::GroupControlDisposition group_override);
+	double get_value () const;
+	double lower() const;
+  double upper() const;
+	double internal_to_interface (double i, bool rotary = false) const {
+		return i;
+	}
+	double interface_to_internal (double i, bool rotary = false) const {
+		return i;
+	}
+
+private:
+	LatencyGUI* _latency_gui;
+};
+
 class LatencyBarController : public ArdourWidgets::BarController
 {
 public:
 	LatencyBarController (Gtk::Adjustment& adj, LatencyGUI* g)
-		: BarController (adj, boost::shared_ptr<PBD::IgnorableControllable> (new PBD::IgnorableControllable ())),
-		                 _latency_gui (g)
-	{}
+		: BarController (adj, boost::shared_ptr<PBD::Controllable> (new LatencyGUIControllable (g)))
+		, _latency_gui (g)
+	{
+		set_digits (0);
+	}
 
 private:
 	LatencyGUI* _latency_gui;
@@ -72,8 +97,6 @@ private:
 	samplepos_t sample_rate;
 	samplepos_t period_size;
 
-	boost::shared_ptr<PBD::IgnorableControllable> ignored;
-
 	bool _ignore_change;
 	Gtk::Adjustment adjustment;
 	LatencyBarController bc;
@@ -88,6 +111,7 @@ private:
 	void change_latency_from_button (int dir);
 
 	friend class LatencyBarController;
+	friend class LatencyGUIControllable;
 
 	static std::vector<std::string> unit_strings;
 };

@@ -161,6 +161,7 @@ gtk2_ardour_sources = [
         'midi_velocity_dialog.cc',
         'mini_timeline.cc',
         'missing_file_dialog.cc',
+        'missing_filesource_dialog.cc',
         'missing_plugin_dialog.cc',
         'mixer_group_tabs.cc',
         'mixer_strip.cc',
@@ -263,7 +264,6 @@ gtk2_ardour_sources = [
         'stripable_colorpicker.cc',
         'stripable_time_axis.cc',
         'sys_ex.cc',
-        'tape_region_view.cc',
         'template_dialog.cc',
         'tempo_curve.cc',
         'tempo_dialog.cc',
@@ -522,7 +522,7 @@ def build(bld):
                 'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
                 ]
         obj.linkflags = ''
-        obj.uselib    = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML '
+        obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
         obj.source += [ 'luadoc.cc', 'bundle_env_linux.cc' ]
         if bld.is_defined('HAVE_SUIL'):
             obj.source += [ 'lv2_plugin_ui.cc' ]
@@ -591,6 +591,7 @@ def build(bld):
         obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
         obj.linkflags += bld.env['LDFLAGS']
         obj.defines = ['_POSIX_SOURCE', 'USE_WS_PREFIX']
+        obj.uselib       = 'GLIB'
         obj.install_path = bld.env['DLLDIR']
         # end of the wine executable
 
@@ -641,7 +642,7 @@ def build(bld):
         ]
     obj.install_path = bld.env['DLLDIR']
     obj.linkflags    = ''
-    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML LILV'
+    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
 
     if sys.platform == 'darwin':
         obj.uselib += ' AUDIOUNITS OSX '

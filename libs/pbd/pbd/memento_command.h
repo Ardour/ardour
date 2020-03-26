@@ -120,14 +120,14 @@ public:
 	}
 
 	~MementoCommand () {
-		drop_references ();
 		delete before;
 		delete after;
 		delete _binder;
 	}
 
 	void binder_dying () {
-		delete this;
+		/* delegate to UndoTransaction::command_death */
+		drop_references ();
 	}
 
 	void operator() () {

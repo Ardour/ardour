@@ -657,16 +657,22 @@ LTC_TransportMaster::position_string() const
 std::string
 LTC_TransportMaster::delta_string() const
 {
-	char delta[80];
+	char delta[128];
 
 	if (!_collect || current.timestamp == 0) {
 		snprintf (delta, sizeof(delta), "\u2012\u2012\u2012\u2012");
 	} else if ((monotonic_cnt - current.timestamp) > 2 * samples_per_ltc_frame) {
 		snprintf (delta, sizeof(delta), "%s", _("flywheel"));
 	} else {
-		snprintf (delta, sizeof(delta), "<span foreground=\"%s\" face=\"monospace\" >%s%s%lld</span>sm",
-				sync_lock_broken ? "red" : "white",
-				LEADINGZERO(::llabs(_current_delta)), PLUSMINUS(-_current_delta), ::llabs(_current_delta));
+		if (abs (_current_delta) > _session->sample_rate()) {
+			int secs = rint ((double) _current_delta / _session->sample_rate());
+			snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%d</span><span face=\"monospace\"> s</span>",
+			         LEADINGZERO(abs(secs)), PLUSMINUS(-secs), abs(secs));
+		} else {
+			snprintf (delta, sizeof(delta), "<span foreground=\"%s\" face=\"monospace\" >%s%s%lld</span><span face=\"monospace\">sm</span>",
+			          sync_lock_broken ? "red" : "white",
+			          LEADINGZERO(::llabs(_current_delta)), PLUSMINUS(-_current_delta), ::llabs(_current_delta));
+		}
 	}
 
 	return delta;

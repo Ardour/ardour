@@ -52,6 +52,8 @@ compiler_flags_dictionaries= {
         'sse' : '-msse',
         # Flags required to use SSE unit for floating point math
         'fpmath-sse' : '-mfpmath=sse',
+        # Flags required to use _xgetbv with mingw+gcc > 8.2
+        'xsaveintrin' : '-mxsave',
         # Flags required to use XMM Intrinsics
         'xmmintrinsics' : '-DUSE_XMMINTRIN',
         # Flags to use posix pipes between compiler stages
@@ -97,6 +99,7 @@ compiler_flags_dictionaries= {
         'sse' : '/arch:SSE',
         'silence-unused-arguments' : '',
         'sse' : '',
+        'xsaveintrin' : '',
         'fpmath-sse' : '',
         'xmmintrinsics' : '',
         'pipe' : '',
@@ -135,6 +138,7 @@ compiler_flags_dictionaries['gcc-darwin'] = gcc_darwin_dict;
 clang_dict = compiler_flags_dictionaries['gcc'].copy();
 clang_dict['sse'] = ''
 clang_dict['fpmath-sse'] = ''
+clang_dict['xsaveintrin'] = ''
 clang_dict['xmmintrinsics'] = ''
 clang_dict['silence-unused-arguments'] = '-Qunused-arguments'
 clang_dict['extra-cxx-warnings'] = [ '-Woverloaded-virtual', '-Wno-mismatched-tags', '-Wno-cast-align', '-Wno-unused-local-typedefs', '-Wunneeded-internal-declaration' ]
@@ -262,13 +266,13 @@ children = [
         'libs/plugins/a-reverb.lv2',
         'libs/plugins/a-fluidsynth.lv2',
         'gtk2_ardour',
-        'export',
-        'midi_maps',
-        'mcp',
-        'osc',
-        'patchfiles',
-        'plugin_metadata',
-        'scripts',
+        'share/export',
+        'share/midi_maps',
+        'share/mcp',
+        'share/osc',
+        'share/patchfiles',
+        'share/plugin_metadata',
+        'share/scripts',
         'headless',
         'session_utils',
         # shared helper binaries (plugin-scanner, exec-wrapper)
@@ -543,6 +547,10 @@ int main() { return 0; }''',
 
                 compiler_flags.extend ([ flags_dict['sse'], flags_dict['fpmath-sse'], flags_dict['xmmintrinsics'], flags_dict['attasm'] ])
 
+                # mingw/gcc-8.2
+                compiler_flags.append(flags_dict['xsaveintrin'])
+                compiler_flags.append('-fno-inline-functions')
+
     # end of processor-specific section
 
     # optimization section
@@ -648,7 +656,7 @@ int main() { return 0; }''',
     if opt.stl_debug:
         cxx_flags.append("-D_GLIBCXX_DEBUG")
 
-    if re.search ("freebsd", sys.platform) != None or re.search ("openbsd", sys.platform) != None:
+    if re.search ("bsd", sys.platform) != None:
         linker_flags.append('-lexecinfo')
 
     if conf.env['DEBUG_RT_ALLOC']:
@@ -686,6 +694,9 @@ int main() { return 0; }''',
     cxx_flags.extend(
         ('-D__STDC_LIMIT_MACROS', '-D__STDC_FORMAT_MACROS',
          '-DCANVAS_COMPATIBILITY', '-DCANVAS_DEBUG'))
+
+    # Do not use Boost.System library
+    cxx_flags.append('-DBOOST_ERROR_CODE_HEADER_ONLY')
 
     # use sparingly, prefer runtime profile
     if Options.options.program_name.lower().startswith('mixbus'):
@@ -1044,10 +1055,11 @@ def configure(conf):
 
     if Options.options.boost_sp_debug:
         conf.env.append_value('CXXFLAGS', '-DBOOST_SP_ENABLE_DEBUG_HOOKS')
+        conf.env.append_value('CXXFLAGS', '-DBOOST_NO_CXX11_CONSTEXPR')
 
     # executing a test program is n/a when cross-compiling
     if Options.options.dist_target != 'mingw':
-        if Options.options.dist_target != 'msvc' and re.search ("openbsd", sys.platform) == None:
+        if Options.options.dist_target != 'msvc' and re.search ("(open|net)bsd", sys.platform) == None:
             if re.search ("freebsd", sys.platform) != None:
                 conf.check_cc(
                         msg="Checking for function 'dlopen' in dlfcn.h",
@@ -1284,8 +1296,7 @@ int main () { return 0; }
     set_compiler_flags (conf, Options.options)
 
     if conf.env['build_host'] not in [ 'mojave', 'catalina']:
-	    conf.env.append_value('CXXFLAGS_OSX', '-F/System/Library/Frameworks')
-	    print("**** YES ADDING FRAMEWORKS")
+        conf.env.append_value('CXXFLAGS_OSX', '-F/System/Library/Frameworks')
 
     conf.env.append_value('CXXFLAGS_OSX', '-F/Library/Frameworks')
 
@@ -1451,7 +1462,7 @@ def build(bld):
 
     bld.install_files (bld.env['CONFDIR'], 'system_config')
 
-    bld.install_files (os.path.join (bld.env['DATADIR'], 'templates'), bld.path.ant_glob ('templates/**'), cwd=bld.path.find_dir ('templates'), relative_trick=True)
+    bld.install_files (os.path.join (bld.env['DATADIR'], 'templates'), bld.path.ant_glob ('share/templates/**'), cwd=bld.path.find_dir ('share/templates'), relative_trick=True)
 
     if bld.env['RUN_TESTS']:
         bld.add_post_fun(test)

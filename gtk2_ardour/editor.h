@@ -167,6 +167,8 @@ public:
 	void             first_idle ();
 	virtual bool     have_idled () const { return _have_idled; }
 
+	bool pending_locate_request() const { return _pending_locate_request; }
+
 	samplepos_t leftmost_sample() const { return _leftmost_sample; }
 
 	samplecnt_t current_page_samples() const {
@@ -1425,12 +1427,17 @@ private:
 	/* import specific info */
 
 	struct EditorImportStatus : public ARDOUR::ImportStatus {
-	    Editing::ImportMode mode;
-	    samplepos_t pos;
-	    int target_tracks;
-	    int target_regions;
-	    boost::shared_ptr<ARDOUR::Track> track;
-	    bool replace;
+		void clear () {
+			ARDOUR::ImportStatus::clear ();
+			track.reset ();
+		}
+
+		Editing::ImportMode mode;
+		samplepos_t pos;
+		int target_tracks;
+		int target_regions;
+		boost::shared_ptr<ARDOUR::Track> track;
+		bool replace;
 	};
 
 	EditorImportStatus import_status;

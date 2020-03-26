@@ -299,7 +299,7 @@ WiimoteControlProtocol::update_led_state ()
 	}
 
 	// enable LED1 if Ardour is playing
-	if (session->transport_rolling ()) {
+	if (transport_rolling ()) {
 		DEBUG_TRACE (DEBUG::WiimoteControl, "WiimoteControlProtocol::update_led_state playing, activate LED1\n");
 		state |= CWIID_LED1_ON;
 	}

@@ -662,7 +662,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		/* non-master bus */
 
 		if (!_route->is_master()) {
-			rec_mon_table.attach (*show_sends_button, 0, 1, 0, 2);
+			rec_mon_table.attach (*show_sends_button, 0, 3, 0, 2);
 			show_sends_button->show();
 		}
 	}
@@ -690,8 +690,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	/* now force an update of all the various elements */
 
-	update_mute_display ();
-	update_solo_display ();
 	name_changed ();
 	comment_changed ();
 	route_group_changed ();
@@ -782,14 +780,14 @@ MixerStrip::set_width_enum (Width w, void* owner)
 	gpm.gain_automation_state_button.set_text (GainMeterBase::short_astate_string (gain_automation->automation_state()));
 
 	if (_route->panner()) {
-		((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (GainMeterBase::short_astate_string (_route->panner()->automation_state()));
+		((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (GainMeterBase::short_astate_string (_route->pannable()->automation_state()));
 	}
 
 	switch (w) {
 	case Wide:
 
 		if (show_sends_button)  {
-			show_sends_button->set_text (_("Aux"));
+			show_sends_button->set_text (_("Show Sends"));
 		}
 
 		{
@@ -803,7 +801,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 	case Narrow:
 
 		if (show_sends_button) {
-			show_sends_button->set_text (_("Snd"));
+			show_sends_button->set_text (_("Show"));
 		}
 
 		gain_meter().setup_meters (); // recalc meter width
@@ -1966,7 +1964,6 @@ MixerStrip::map_frozen ()
 	boost::shared_ptr<AudioTrack> at = audio_track();
 
 	bool en   = _route->active () || ARDOUR::Profile->get_mixbus();
-	bool send = _current_delivery && boost::dynamic_pointer_cast<Send>(_current_delivery) != 0;
 
 	if (at) {
 		switch (at->freeze_state()) {
@@ -1975,11 +1972,11 @@ MixerStrip::map_frozen ()
 			hide_redirect_editors ();
 			break;
 		default:
-			processor_box.set_sensitive (en && !send);
+			processor_box.set_sensitive (en);
 			break;
 		}
 	} else {
-		processor_box.set_sensitive (en && !send);
+		processor_box.set_sensitive (en);
 	}
 	RouteUI::map_frozen ();
 }

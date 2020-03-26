@@ -6,7 +6,6 @@
     <Option name="short-xfade-seconds" value="0.015"/>
     <Option name="xfades-active" value="1"/>
     <Option name="xfades-visible" value="1"/>
-    <Option name="destructive-xfade-msecs" value="2"/>
     <Option name="use-region-fades" value="1"/>
     <Option name="show-region-fades" value="1"/>
     <Option name="native-file-data-format" value="FormatFloat"/>

@@ -27,6 +27,7 @@
 #include "pbd/stacktrace.h"
 
 #include "ardour/debug.h"
+#include "ardour/disk_reader.h"
 #include "ardour/session.h"
 #include "ardour/transport_fsm.h"
 
@@ -55,6 +56,7 @@ TransportFSM::Event::operator delete (void *ptr, size_t /*size*/)
 
 TransportFSM::TransportFSM (TransportAPI& tapi)
 	: _last_locate (Locate, 0, MustRoll, false, false, false) /* all but first argument don't matter */
+	, last_speed_request (SetSpeed, 0, false, false, false) /* ditto */
 	, api (&tapi)
 	, processing (0)
 {
@@ -66,6 +68,7 @@ TransportFSM::init ()
 {
 	_motion_state = Stopped;
 	_butler_state = NotWaitingForButler;
+	_direction_state = Forwards;
 	_last_locate.target = max_samplepos;
 }
 
@@ -179,7 +182,7 @@ std::string
 TransportFSM::current_state () const
 {
 	std::stringstream s;
-	s << enum_2_string (_motion_state) << '/' << enum_2_string (_butler_state);
+	s << enum_2_string (_motion_state) << '/' << enum_2_string (_butler_state) << '/' << enum_2_string (_direction_state);
 	return s.str();
 }
 
@@ -199,6 +202,30 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 	deferred = false;
 
 	switch (ev.type) {
+
+	case SetSpeed:
+		switch (_direction_state) {
+		case Reversing:
+			if (!already_deferred) {
+				defer (ev);
+				deferred = true;
+			}
+			break;
+		default:
+			switch (_motion_state) {
+			case Stopped:
+			case Rolling:
+				set_speed (ev);
+			break;
+			default:
+				if (!already_deferred) {
+					defer (ev);
+					deferred = true;
+				}
+			}
+			break;
+		}
+		break;
 
 	case StartTransport:
 		switch (_motion_state) {
@@ -281,6 +308,23 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 				 */
 				transition (WaitingForLocate);
 				locate_for_loop (ev);
+			} else if (DiskReader::no_disk_output()) {
+
+				/* separate clause to allow a comment that is
+				   case specific. Logically this condition
+				   could be bundled into first if() above.
+				*/
+
+				/* this can occur when locating to catch up
+				   with a transport master. no_disk_output was
+				   set to prevent playback until we're synced
+				   and locked with the master. If we locate
+				   during this process, we're not producing any
+				   audio from disk, and so there is no need to
+				   declick.
+				*/
+				transition (WaitingForLocate);
+				locate_for_loop (ev);
 			} else {
 				transition (DeclickToLocate);
 				start_declick_for_locate (ev);
@@ -298,12 +342,37 @@ TransportFSM::process_event (Event& ev, bool already_deferred, bool& deferred)
 	case LocateDone:
 		switch (_motion_state) {
 		case WaitingForLocate:
-			if (should_not_roll_after_locate()) {
-				transition (Stopped);
-				/* already stopped, nothing to do */
+
+			if (reversing()) {
+
+				if (most_recently_requested_speed >= 0.) {
+					transition (Forwards);
+				} else {
+					transition (Backwards);
+				}
+
+				if (fabs (most_recently_requested_speed) > 0.) {
+
+					transition (Rolling);
+
+					api->set_transport_speed (last_speed_request.speed, last_speed_request.abort_capture, last_speed_request.clear_state, last_speed_request.as_default);
+
+					if (most_recently_requested_speed != 0.0) {
+						roll_after_locate ();
+					}
+				} else {
+					transition (Stopped);
+				}
+
 			} else {
-				transition (Rolling);
-				roll_after_locate ();
+				if (should_not_roll_after_locate()) {
+					transition (Stopped);
+					/* already stopped, nothing to do */
+				} else {
+					transition (Rolling);
+					roll_after_locate ();
+				}
+				break;
 			}
 			break;
 		default:
@@ -375,7 +444,7 @@ TransportFSM::stop_playback (Event const & s)
 	_last_locate.target = max_samplepos;
 	current_roll_after_locate_status = boost::none;
 
-	api->stop_transport (s.abort, s.clear_state);
+	api->stop_transport (s.abort_capture, s.clear_state);
 }
 
 void
@@ -536,6 +605,14 @@ TransportFSM::transition (ButlerState bs)
 }
 
 void
+TransportFSM::transition (DirectionState ds)
+{
+	const DirectionState old = _direction_state;
+	_direction_state = ds;
+	DEBUG_TRACE (DEBUG::TFSMState, string_compose ("Leave %1, enter %2\n", enum_2_string (old), current_state()));
+}
+
+void
 TransportFSM::enqueue (Event* ev)
 {
 	DEBUG_TRACE (DEBUG::TFSMState, string_compose ("queue tfsm event %1\n", enum_2_string (ev->type)));
@@ -544,3 +621,58 @@ TransportFSM::enqueue (Event* ev)
 		process_events ();
 	}
 }
+
+void
+TransportFSM::set_speed (Event const & ev)
+{
+	if ((rolling() && ev.speed * most_recently_requested_speed < 0.0) ||
+	    (stopped() && ev.speed < 0.0) ||
+	    (rolling() && most_recently_requested_speed < 0.0 && ev.speed == 0.0)) {
+
+		/* Transport was rolling, and new speed has opposite sign to
+		 * the last requested speed.
+		 *
+		 * OR
+		 *
+		 * Transport was stopped, and new speed is negative.
+		 *
+		 * OR
+		 *
+		 * new speed is zero, last requested speed was negative
+		 *
+		 * SO ... we need to reverse.
+		 *
+		 * The plan: stop normally (with a declick, and schedule a
+		 * locate to our current position, with "force" set to true,
+		 * and roll right after it is complete.
+		 */
+
+		most_recently_requested_speed = ev.speed;
+		last_speed_request = ev;
+		transition (Reversing);
+
+		DEBUG_TRACE (DEBUG::TFSMState, string_compose ("reverse, target speed %1 MRRS %2 state %3\n", ev.speed, most_recently_requested_speed, current_state()));
+
+		Event lev (Locate, api->position(), MustRoll, true, false, true);
+
+		transition (DeclickToLocate);
+		start_declick_for_locate (lev);
+
+	} else {
+
+		most_recently_requested_speed = ev.speed;
+		api->set_transport_speed (ev.speed, ev.abort_capture, ev.clear_state, ev.as_default);
+
+	}
+
+}
+
+bool
+TransportFSM::will_roll_fowards () const
+{
+	if (reversing()) {
+		return most_recently_requested_speed >= 0; /* note: future speed of zero is equivalent to Forwards */
+	}
+	return (_direction_state == Forwards);
+}
+

@@ -143,6 +143,11 @@ AudioTrack::set_state (const XMLNode& node, int version)
 		_mode = Normal;
 	}
 
+	if (_mode == Destructive) {
+		/* XXX warn user */
+		_mode = Normal;
+	}
+
 	if (Track::set_state (node, version)) {
 		return -1;
 	}
@@ -406,21 +411,23 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 		for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
 
-			if ((*r)->does_routing() && (*r)->active()) {
+			if (boost::dynamic_pointer_cast<PeakMeter>(*r)) {
+				continue;
+			}
+
+			if (!can_freeze_processor (*r)) {
 				break;
 			}
-			if (!boost::dynamic_pointer_cast<PeakMeter>(*r)) {
 
-				FreezeRecordProcessorInfo* frii  = new FreezeRecordProcessorInfo ((*r)->get_state(), (*r));
+			FreezeRecordProcessorInfo* frii  = new FreezeRecordProcessorInfo ((*r)->get_state(), (*r));
 
-				frii->id = (*r)->id();
+			frii->id = (*r)->id();
 
-				_freeze_record.processor_info.push_back (frii);
+			_freeze_record.processor_info.push_back (frii);
 
-				/* now deactivate the processor, */
-				if (!boost::dynamic_pointer_cast<Amp>(*r)) {
-					(*r)->deactivate ();
-				}
+			/* now deactivate the processor, */
+			if (!boost::dynamic_pointer_cast<Amp>(*r)) {
+				(*r)->deactivate ();
 			}
 
 			_session.set_dirty ();
@@ -487,6 +494,11 @@ AudioTrack::unfreeze ()
 		_freeze_record.playlist.reset ();
 		/* XXX need to use _main_outs _panner->set_automation_state (_freeze_record.pan_automation_state); */
 	}
+
+	for (vector<FreezeRecordProcessorInfo*>::iterator ii = _freeze_record.processor_info.begin(); ii != _freeze_record.processor_info.end(); ++ii) {
+		delete *ii;
+	}
+	_freeze_record.processor_info.clear ();
 
 	_freeze_record.state = UnFrozen;
 	FreezeChange (); /* EMIT SIGNAL */
