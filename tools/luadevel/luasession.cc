@@ -1,11 +1,19 @@
-#include <stdint.h>
 #include <assert.h>
+#include <getopt.h>
+#include <stdint.h>
 
 #include <cstdio>
 #include <iostream>
 #include <string>
 #include <list>
 #include <vector>
+
+#ifdef PLATFORM_WINDOWS
+# include <io.h>
+# include <windows.h>
+#else
+# include <unistd.h>
+#endif
 
 #include <glibmm.h>
 
@@ -403,11 +411,9 @@ incomplete (lua_State* L, int status) {
 	return 0;
 }
 
-int main (int argc, char **argv)
+static void
+interactive_interpreter ()
 {
-	init ();
-	setup_lua ();
-
 	using_history ();
 	std::string histfile = Glib::build_filename (user_config_directory(), "/luahist");
 
@@ -459,6 +465,90 @@ int main (int argc, char **argv)
 	}
 	free (line);
 	printf ("\n");
+	write_history (histfile.c_str());
+}
+
+static bool
+is_tty ()
+{
+#ifdef PLATFORM_WINDOWS
+	return _isatty (_fileno (stdin));
+#else
+	return isatty (0);
+#endif
+}
+
+static void usage ()
+{
+	printf ("ardour-lua - interactive Ardour Lua interpreter.\n\n");
+	printf ("Usage: ardour-lua [ OPTIONS ] [ file ]\n\n");
+	printf ("Options:\n\
+  -h, --help                 display this help and exit\n\
+	-i, --interactive          enter interactive mode after executing 'script'\n\
+  -V, --version              print version information and exit\n\
+\n");
+	printf ("\n\
+Ardour at your finger tips...\n\
+\n");
+	printf ("Report bugs to <http://tracker.ardour.org/>\n"
+	        "Website: <http://ardour.org/>\n");
+	::exit (EXIT_SUCCESS);
+}
+
+int main (int argc, char **argv)
+{
+
+	const char *optstring = "hiV";
+
+	const struct option longopts[] = {
+		{ "help",        0, 0, 'h' },
+		{ "interactive", 0, 0, 'i' },
+		{ "version",     0, 0, 'V' },
+	};
+
+	bool interactive = false;
+
+	int c = 0;
+	while (EOF != (c = getopt_long (argc, argv,
+					optstring, longopts, (int *) 0))) {
+		switch (c) {
+			case 'h':
+				usage ();
+				break;
+
+			case 'i':
+				interactive = true;
+				break;
+
+			case 'V':
+				printf ("ardour-lua version %s\n\n", VERSIONSTRING);
+				printf ("Copyright (C) GPL 2015-2020 Robin Gareus <robin@gareus.org>\n");
+				exit (EXIT_SUCCESS);
+				break;
+
+			default:
+				cerr << "Error: unrecognized option. See --help for usage information.\n";
+				::exit (EXIT_FAILURE);
+				break;
+		}
+	}
+
+	init ();
+	setup_lua ();
+
+	if (argc > optind) {
+		lua->do_file (argv[optind]);
+	} else {
+		interactive = true;
+	}
+
+	if (!interactive || !keep_running) {
+		/* continue to exit */
+	} else if (is_tty ()) {
+		interactive_interpreter ();
+	} else {
+		luaL_dofile (lua->getState(), NULL);
+	}
 
 	if (session) {
 		close_session ();
@@ -469,12 +559,9 @@ int main (int argc, char **argv)
 	delete lua;
 	lua = NULL;
 
-	write_history (histfile.c_str());
-
 	AudioEngine::instance ()->stop ();
 	AudioEngine::destroy ();
 
-	// cleanup
 	ARDOUR::cleanup ();
 	delete event_loop;
 	pthread_cancel_all ();
