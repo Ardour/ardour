@@ -1256,7 +1256,9 @@ Editor::map_position_change (samplepos_t sample)
 		center_screen (sample);
 	}
 
-	playhead_cursor->set_position (sample);
+	if (!_session->locate_initiated()) {
+		playhead_cursor->set_position (sample);
+	}
 }
 
 void
@@ -5951,7 +5953,9 @@ Editor::super_rapid_screen_update ()
 		return;
 	}
 
-	playhead_cursor->set_position (sample);
+	if (!_pending_locate_request) {
+		playhead_cursor->set_position (sample);
+	}
 
 	if (_session->requested_return_sample() >= 0) {
 		_last_update_time = 0;
