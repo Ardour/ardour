@@ -167,6 +167,8 @@ public:
 	void             first_idle ();
 	virtual bool     have_idled () const { return _have_idled; }
 
+	bool pending_locate_request() const { return _pending_locate_request; }
+
 	samplepos_t leftmost_sample() const { return _leftmost_sample; }
 
 	samplecnt_t current_page_samples() const {

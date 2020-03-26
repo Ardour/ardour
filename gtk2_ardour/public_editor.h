@@ -373,6 +373,8 @@ public:
 	sigc::signal<void> Realized;
 	sigc::signal<void,samplepos_t> UpdateAllTransportClocks;
 
+	virtual bool pending_locate_request() const = 0;
+
 	static sigc::signal<void> DropDownKeys;
 
 	struct RegionAction {
