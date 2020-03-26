@@ -100,7 +100,7 @@ private:
 	boost::shared_ptr<ARDOUR::MidiTrack>  track;
 
 	/** connection used to connect to model's ContentChanged signal */
-	PBD::ScopedConnection content_connection;
+	PBD::ScopedConnectionList content_connections;
 
 	void edited (const std::string&, const std::string&);
 	void editing_started (Gtk::CellEditable*, const std::string& path, int);

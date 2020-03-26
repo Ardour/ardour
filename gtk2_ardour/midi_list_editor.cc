@@ -148,8 +148,10 @@ MidiListEditor::MidiListEditor (Session* s, boost::shared_ptr<MidiRegion> r, boo
 
 	redisplay_model ();
 
-	region->midi_source(0)->model()->ContentsChanged.connect (content_connection, invalidator (*this),
-								  boost::bind (&MidiListEditor::redisplay_model, this), gui_context());
+	region->midi_source(0)->model()->ContentsChanged.connect (content_connections, invalidator (*this),
+	                                                          boost::bind (&MidiListEditor::redisplay_model, this), gui_context());
+	region->RegionPropertyChanged.connect (content_connections, invalidator (*this),
+	                                       boost::bind (&MidiListEditor::redisplay_model, this), gui_context());
 
 	buttons.attach (sound_notes_button, 0, 1, 0, 1);
 	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action ("Editor", "sound-midi-notes");
