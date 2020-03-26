@@ -1,5 +1,5 @@
-#ifndef __libzreampler_visibility_h__
-#define __libzreampler_visibility_h__
+#ifndef __libzresampler_visibility_h__
+#define __libzresampler_visibility_h__
 
 #if defined(COMPILER_MSVC)
   #define LIBZRESAMPLER_DLL_IMPORT __declspec(dllimport)
@@ -11,7 +11,7 @@
   #define LIBZRESAMPLER_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
 #endif
 
-#ifdef LIBZRESAMPLER_STATIC // libzita-reampler is a DLL
+#ifdef LIBZRESAMPLER_STATIC // libzita-resampler is a DLL
   #define LIBZRESAMPLER_API
   #define LIBZRESAMPLER_LOCAL
   #define LIBZRESAMPLER_TEMPLATE_API
