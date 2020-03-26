@@ -516,7 +516,7 @@ static void
 usage ()
 {
 	printf ("ardour-lua - interactive Ardour Lua interpreter.\n\n");
-	printf ("Usage: ardour-lua [ OPTIONS ] [ file ]\n\n");
+	printf ("Usage: ardour-lua [ OPTIONS ] [ file [args] ]\n\n");
 	printf ("Options:\n\
   -h, --help                 display this help and exit\n\
 	-i, --interactive          enter interactive mode after executing 'script'\n\
@@ -571,7 +571,18 @@ main (int argc, char** argv)
 	init ();
 	setup_lua ();
 
-	if (argc > optind) {
+	{
+		/* push arguments to script, use scoped LuaRef */
+		lua_State* L = lua->getState ();
+		luabridge::LuaRef arg (luabridge::newTable (L));
+		for (int i = 1; i < argc - optind; ++i) {
+			arg[i] = std::string (argv[i + optind]);
+		}
+		luabridge::push (L, arg);
+		lua_setglobal (L, "arg");
+	}
+
+	if (argc > optind && 0 != strcmp (argv[optind], "-")) {
 		lua->do_file (argv[optind]);
 	} else {
 		interactive = true;
