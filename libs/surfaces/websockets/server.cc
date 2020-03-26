@@ -327,14 +327,16 @@ WebsocketsServer::io_handler (Glib::IOCondition ioc, lws_sockfd_type fd)
 IOCondition
 WebsocketsServer::events_to_ioc (int events)
 {
-	IOCondition ioc;
+	IOCondition ioc = Glib::IOCondition (0);
 
 	if (events & LWS_POLLIN) {
-		ioc = Glib::IO_IN;
-	} else if (events & LWS_POLLOUT) {
-		ioc = Glib::IO_OUT;
-	} else if (events & LWS_POLLHUP) {
-		ioc = Glib::IO_HUP;
+		ioc |= Glib::IO_IN;
+	}
+	if (events & LWS_POLLOUT) {
+		ioc |= Glib::IO_OUT;
+	}
+	if (events & LWS_POLLHUP) {
+		ioc |= Glib::IO_HUP;
 	}
 
 	return ioc;
