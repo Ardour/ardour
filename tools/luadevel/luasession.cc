@@ -4,8 +4,8 @@
 
 #include <cstdio>
 #include <iostream>
-#include <string>
 #include <list>
+#include <string>
 #include <vector>
 
 #ifdef PLATFORM_WINDOWS
@@ -18,8 +18,8 @@
 #include <glibmm.h>
 
 #include "pbd/debug.h"
-#include "pbd/event_loop.h"
 #include "pbd/error.h"
+#include "pbd/event_loop.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/reallocpool.h"
@@ -35,22 +35,22 @@
 #include "ardour/types.h"
 #include "ardour/vst_types.h"
 
-#include <readline/readline.h>
 #include <readline/history.h>
+#include <readline/readline.h>
 
-#include "lua/luastate.h"
 #include "LuaBridge/LuaBridge.h"
+#include "lua/luastate.h"
 
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-static const char* localedir = LOCALEDIR;
+static const char*               localedir = LOCALEDIR;
 static PBD::ScopedConnectionList engine_connections;
 static PBD::ScopedConnectionList session_connections;
-static Session* session = NULL;
-static LuaState* lua;
-static bool keep_running = true;
+static Session*                  session = NULL;
+static LuaState*                 lua;
+static bool                      keep_running = true;
 
 /* extern VST functions */
 int vstfx_init (void*) { return 0; }
@@ -59,79 +59,88 @@ void vstfx_destroy_editor (VSTState*) {}
 
 class LuaReceiver : public Receiver
 {
-  protected:
-    void receive (Transmitter::Channel chn, const char * str)
-		{
-			const char *prefix = "";
+protected:
+	void receive (Transmitter::Channel chn, const char* str)
+	{
+		const char* prefix = "";
 
-			switch (chn) {
-				case Transmitter::Error:
-					prefix = "[ERROR]: ";
-					break;
-				case Transmitter::Info:
-					/* ignore */
-					return;
-				case Transmitter::Warning:
-					prefix = "[WARNING]: ";
-					break;
-				case Transmitter::Fatal:
-					prefix = "[FATAL]: ";
-					break;
-				case Transmitter::Throw:
-					/* this isn't supposed to happen */
-					abort ();
-			}
+		switch (chn) {
+			case Transmitter::Error:
+				prefix = "[ERROR]: ";
+				break;
+			case Transmitter::Info:
+				/* ignore */
+				return;
+			case Transmitter::Warning:
+				prefix = "[WARNING]: ";
+				break;
+			case Transmitter::Fatal:
+				prefix = "[FATAL]: ";
+				break;
+			case Transmitter::Throw:
+				/* this isn't supposed to happen */
+				abort ();
+		}
 
-			/* note: iostreams are already thread-safe: no external
+		/* note: iostreams are already thread-safe: no external
 				 lock required.
 				 */
 
-			std::cout << prefix << str << std::endl;
+		std::cout << prefix << str << std::endl;
 
-			if (chn == Transmitter::Fatal) {
-				::exit (9);
-			}
+		if (chn == Transmitter::Fatal) {
+			::exit (9);
 		}
+	}
 };
 
 class MyEventLoop : public sigc::trackable, public EventLoop
 {
-	public:
-		MyEventLoop (std::string const& name) : EventLoop (name) {
-			run_loop_thread = Glib::Threads::Thread::self ();
+public:
+	MyEventLoop (std::string const& name)
+	    : EventLoop (name)
+	{
+		run_loop_thread = Glib::Threads::Thread::self ();
+	}
+
+	void call_slot (InvalidationRecord* ir, const boost::function<void()>& f)
+	{
+		if (Glib::Threads::Thread::self () == run_loop_thread) {
+			cout << string_compose ("%1/%2 direct dispatch of call slot via functor @ %3, invalidation %4\n", event_loop_name (), pthread_name (), &f, ir);
+			f ();
+		} else {
+			cout << string_compose ("%1/%2 queue call-slot using functor @ %3, invalidation %4\n", event_loop_name (), pthread_name (), &f, ir);
+			assert (!ir);
+			f (); // XXX TODO, queue and process during run ()
 		}
+	}
 
-		void call_slot (InvalidationRecord* ir, const boost::function<void()>& f) {
-			if (Glib::Threads::Thread::self () == run_loop_thread) {
-				cout << string_compose ("%1/%2 direct dispatch of call slot via functor @ %3, invalidation %4\n", event_loop_name(), pthread_name(), &f, ir);
-				f ();
-			} else {
-				cout << string_compose ("%1/%2 queue call-slot using functor @ %3, invalidation %4\n", event_loop_name(), pthread_name(), &f, ir);
-				assert (!ir);
-				f (); // XXX TODO, queue and process during run ()
-			}
-		}
+	void run ()
+	{
+		; // TODO process Events, if any
+	}
 
-		void run () {
-			; // TODO process Events, if any
-		}
+	Glib::Threads::Mutex& slot_invalidation_mutex ()
+	{
+		return request_buffer_map_lock;
+	}
 
-		Glib::Threads::Mutex& slot_invalidation_mutex () { return request_buffer_map_lock; }
-
-	private:
-		Glib::Threads::Thread* run_loop_thread;
-		Glib::Threads::Mutex   request_buffer_map_lock;
+private:
+	Glib::Threads::Thread* run_loop_thread;
+	Glib::Threads::Mutex   request_buffer_map_lock;
 };
 
-static MyEventLoop *event_loop = NULL;
+static MyEventLoop* event_loop = NULL;
 
 /* ****************************************************************************/
 /* internal helper fn and callbacks */
 
-static void init ()
+static void
+init ()
 {
 	if (!ARDOUR::init (false, true, localedir)) {
-		cerr << "Ardour failed to initialize\n" << endl;
+		cerr << "Ardour failed to initialize\n"
+		     << endl;
 		::exit (EXIT_FAILURE);
 	}
 
@@ -148,7 +157,8 @@ static void init ()
 	lua_receiver.listen_to (warning);
 }
 
-static void set_session (ARDOUR::Session *s)
+static void
+set_session (ARDOUR::Session* s)
 {
 	session = s;
 	assert (lua);
@@ -157,13 +167,15 @@ static void set_session (ARDOUR::Session *s)
 	lua->collect_garbage (); // drop references
 }
 
-static void unset_session ()
+static void
+unset_session ()
 {
 	session_connections.drop_connections ();
 	set_session (NULL);
 }
 
-static int prepare_engine ()
+static int
+prepare_engine ()
 {
 	AudioEngine* engine = AudioEngine::instance ();
 
@@ -185,7 +197,8 @@ static int prepare_engine ()
 	return 0;
 }
 
-static int start_engine (uint32_t rate)
+static int
+start_engine (uint32_t rate)
 {
 	AudioEngine* engine = AudioEngine::instance ();
 
@@ -202,7 +215,8 @@ static int start_engine (uint32_t rate)
 	return 0;
 }
 
-static Session * _create_session (string dir, string state, uint32_t rate) // throws
+static Session*
+_create_session (string dir, string state, uint32_t rate) // throws
 {
 	if (prepare_engine ()) {
 		return 0;
@@ -222,21 +236,22 @@ static Session * _create_session (string dir, string state, uint32_t rate) // th
 	BusProfile bus_profile;
 	bus_profile.master_out_channels = 2;
 
-	AudioEngine* engine = AudioEngine::instance ();
-	Session* session = new Session (*engine, dir, state, &bus_profile);
+	AudioEngine* engine  = AudioEngine::instance ();
+	Session*     session = new Session (*engine, dir, state, &bus_profile);
 	return session;
 }
 
-static Session * _load_session (string dir, string state) // throws
+static Session*
+_load_session (string dir, string state) // throws
 {
 	if (prepare_engine ()) {
 		return 0;
 	}
 
-	float sr;
+	float        sr;
 	SampleFormat sf;
-	std::string v;
-	std::string s = Glib::build_filename (dir, state + statefile_suffix);
+	std::string  v;
+	std::string  s = Glib::build_filename (dir, state + statefile_suffix);
 	if (!Glib::file_test (dir, Glib::FILE_TEST_EXISTS)) {
 		std::cerr << "Cannot find session: " << s << "\n";
 		return 0;
@@ -251,19 +266,21 @@ static Session * _load_session (string dir, string state) // throws
 		return 0;
 	}
 
-	AudioEngine* engine = AudioEngine::instance ();
-	Session* session = new Session (*engine, dir, state);
+	AudioEngine* engine  = AudioEngine::instance ();
+	Session*     session = new Session (*engine, dir, state);
 	return session;
 }
 
 /* ****************************************************************************/
 /* lua bound functions */
 
-static Session* create_session (string dir, string state, uint32_t rate)
+static Session*
+create_session (string dir, string state, uint32_t rate)
 {
 	Session* s = 0;
 	if (session) {
-		cerr << "Session already open" << "\n";
+		cerr << "Session already open"
+		     << "\n";
 		return 0;
 	}
 	try {
@@ -290,11 +307,13 @@ static Session* create_session (string dir, string state, uint32_t rate)
 	return s;
 }
 
-static Session* load_session (string dir, string state)
+static Session*
+load_session (string dir, string state)
 {
 	Session* s = 0;
 	if (session) {
-		cerr << "Session already open" << "\n";
+		cerr << "Session already open"
+		     << "\n";
 		return 0;
 	}
 	try {
@@ -321,34 +340,41 @@ static Session* load_session (string dir, string state)
 	return s;
 }
 
-static int set_debug_options (const char *opts)
+static int
+set_debug_options (const char* opts)
 {
 	return PBD::parse_debug_options (opts);
 }
 
-static void close_session ()
+static void
+close_session ()
 {
 	delete session;
 	assert (!session);
 }
 
-static int close_session_lua (lua_State *L)
+static int
+close_session_lua (lua_State* L)
 {
 	if (!session) {
-		cerr << "No open session" << "\n";
+		cerr << "No open session"
+		     << "\n";
 		return 0;
 	}
 	close_session ();
 	return 0;
 }
 
-static void delay (float d) {
+static void
+delay (float d)
+{
 	if (d > 0) {
 		Glib::usleep (d * 1000000);
 	}
 }
 
-static int do_quit (lua_State *L)
+static int
+do_quit (lua_State* L)
 {
 	keep_running = false;
 	return 0;
@@ -356,11 +382,14 @@ static int do_quit (lua_State *L)
 
 /* ****************************************************************************/
 
-static void my_lua_print (std::string s) {
+static void
+my_lua_print (std::string s)
+{
 	std::cout << s << "\n";
 }
 
-static void setup_lua ()
+static void
+setup_lua ()
 {
 	assert (!lua);
 
@@ -374,37 +403,38 @@ static void setup_lua ()
 	LuaBindings::osc (L);
 
 	luabridge::getGlobalNamespace (L)
-		.beginNamespace ("_G")
-		.addFunction ("create_session", &create_session)
-		.addFunction ("load_session", &load_session)
-		.addFunction ("close_session", &close_session)
-		.addFunction ("sleep", &delay)
-		.addFunction ("quit", &do_quit)
-		.addFunction ("set_debug_options", &set_debug_options)
-		.endNamespace ();
+	    .beginNamespace ("_G")
+	    .addFunction ("create_session", &create_session)
+	    .addFunction ("load_session", &load_session)
+	    .addFunction ("close_session", &close_session)
+	    .addFunction ("sleep", &delay)
+	    .addFunction ("quit", &do_quit)
+	    .addFunction ("set_debug_options", &set_debug_options)
+	    .endNamespace ();
 
 	// add a Session::close() method
 	luabridge::getGlobalNamespace (L)
-		.beginNamespace ("ARDOUR")
-		.beginClass <Session> ("Session")
-		.addExtCFunction ("close", &close_session_lua)
-		.endClass ()
-		.endNamespace ();
+	    .beginNamespace ("ARDOUR")
+	    .beginClass<Session> ("Session")
+	    .addExtCFunction ("close", &close_session_lua)
+	    .endClass ()
+	    .endNamespace ();
 
 	// push instance to global namespace (C++ lifetime)
-	luabridge::push <AudioEngine *> (L, AudioEngine::create ());
+	luabridge::push<AudioEngine*> (L, AudioEngine::create ());
 	lua_setglobal (L, "AudioEngine");
 
 	AudioEngine::instance ()->stop ();
 }
 
 static int
-incomplete (lua_State* L, int status) {
+incomplete (lua_State* L, int status)
+{
 	if (status == LUA_ERRSYNTAX) {
-		size_t lmsg;
-		const char *msg = lua_tolstring (L, -1, &lmsg);
-		if (lmsg >= 5 && strcmp(msg + lmsg - 5, "<eof>") == 0) {
-			lua_pop(L, 1);
+		size_t      lmsg;
+		const char* msg = lua_tolstring (L, -1, &lmsg);
+		if (lmsg >= 5 && strcmp (msg + lmsg - 5, "<eof>") == 0) {
+			lua_pop (L, 1);
 			return 1;
 		}
 	}
@@ -415,39 +445,41 @@ static void
 interactive_interpreter ()
 {
 	using_history ();
-	std::string histfile = Glib::build_filename (user_config_directory(), "/luahist");
+	std::string histfile = Glib::build_filename (user_config_directory (), "/luahist");
 
 	rl_bind_key ('\t', rl_insert); // disable completion
-	read_history (histfile.c_str());
+	read_history (histfile.c_str ());
 
-	char *line = NULL;
+	char* line = NULL;
 	while (keep_running && (line = readline ("> "))) {
-		event_loop->run();
+		event_loop->run ();
 		if (!strcmp (line, "quit")) {
-			free (line); line = NULL;
+			free (line);
+			line = NULL;
 			break;
 		}
 
 		if (strlen (line) == 0) {
-			free (line); line = NULL;
+			free (line);
+			line = NULL;
 			continue;
 		}
 
 		do {
-			LuaState lt;
-			lua_State* L = lt.getState ();
-			int status = luaL_loadbuffer (L, line, strlen(line), "=stdin");
+			LuaState   lt;
+			lua_State* L      = lt.getState ();
+			int        status = luaL_loadbuffer (L, line, strlen (line), "=stdin");
 			if (!incomplete (L, status)) {
 				break;
 			}
-			char *l2 = readline (">> ");
+			char* l2 = readline (">> ");
 			if (!l2) {
 				break;
 			}
 			if (strlen (l2) == 0) {
 				continue;
 			}
-			line = (char*) realloc ((void*)line, (strlen(line) + strlen (l2) + 2) * sizeof(char));
+			line = (char*)realloc ((void*)line, (strlen (line) + strlen (l2) + 2) * sizeof (char));
 			strcat (line, "\n");
 			strcat (line, l2);
 			free (l2);
@@ -455,17 +487,19 @@ interactive_interpreter ()
 
 		if (lua->do_command (line)) {
 			/* error */
-			free (line); line = NULL;
+			free (line);
+			line = NULL;
 			continue;
 		}
 
 		add_history (line);
-		event_loop->run();
-		free (line); line = NULL;
+		event_loop->run ();
+		free (line);
+		line = NULL;
 	}
 	free (line);
 	printf ("\n");
-	write_history (histfile.c_str());
+	write_history (histfile.c_str ());
 }
 
 static bool
@@ -478,7 +512,8 @@ is_tty ()
 #endif
 }
 
-static void usage ()
+static void
+usage ()
 {
 	printf ("ardour-lua - interactive Ardour Lua interpreter.\n\n");
 	printf ("Usage: ardour-lua [ OPTIONS ] [ file ]\n\n");
@@ -495,10 +530,10 @@ Ardour at your finger tips...\n\
 	::exit (EXIT_SUCCESS);
 }
 
-int main (int argc, char **argv)
+int
+main (int argc, char** argv)
 {
-
-	const char *optstring = "hiV";
+	const char* optstring = "hiV";
 
 	const struct option longopts[] = {
 		{ "help",        0, 0, 'h' },
@@ -510,7 +545,7 @@ int main (int argc, char **argv)
 
 	int c = 0;
 	while (EOF != (c = getopt_long (argc, argv,
-					optstring, longopts, (int *) 0))) {
+	                                optstring, longopts, (int*)0))) {
 		switch (c) {
 			case 'h':
 				usage ();
@@ -547,7 +582,7 @@ int main (int argc, char **argv)
 	} else if (is_tty ()) {
 		interactive_interpreter ();
 	} else {
-		luaL_dofile (lua->getState(), NULL);
+		luaL_dofile (lua->getState (), NULL);
 	}
 
 	if (session) {
