@@ -168,7 +168,7 @@ headless/
 session_utils/
  command-line tools using libardour (e.g. export)
 
-tools/luadevel/
+luasession/
  arlua -- commandline interface to libardour
 
 vst

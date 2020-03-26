@@ -17,7 +17,7 @@ fi
 
 
 if test -z "$DBG"; then
-	exec $TOP/build/tools/luadevel/luasession "$@"
+	exec $TOP/build/luasession/luasession "$@"
 fi
 
 if test "$DBG" = "valgrind"; then
@@ -28,7 +28,7 @@ if test "$DBG" = "valgrind"; then
 		--track-origins=yes \
 		 --leak-check=full --show-leak-kinds=all \
 		--suppressions=${TOP}/tools/valgrind.supp \
-		$TOP/build/tools/luadevel/luasession "$@"
+		$TOP/build/luasession/luasession "$@"
 fi
 
 if test "$DBG" = "callgrind"; then
@@ -39,12 +39,12 @@ if test "$DBG" = "callgrind"; then
 		--separate-threads=yes \
 		--collect-systime=yes \
 		--collect-jumps=yes \
-		$TOP/build/tools/luadevel/luasession "$@"
+		$TOP/build/luasession/luasession "$@"
 fi
 
 if test -n "`which gdb`"; then
-	exec gdb --args $TOP/build/tools/luadevel/luasession "$@"
+	exec gdb --args $TOP/build/luasession/luasession "$@"
 fi
 if test -n "`which lldb`"; then
-	exec lldb -- $TOP/build/tools/luadevel/luasession "$@"
+	exec lldb -- $TOP/build/luasession/luasession "$@"
 fi

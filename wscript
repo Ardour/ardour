@@ -274,12 +274,12 @@ children = [
         'share/plugin_metadata',
         'share/scripts',
         'headless',
+        'luasession',
         'session_utils',
         # shared helper binaries (plugin-scanner, exec-wrapper)
         'libs/fst',
         'libs/vfork',
         'libs/ardouralsautil',
-        'tools/luadevel',
 ]
 
 i18n_children = [

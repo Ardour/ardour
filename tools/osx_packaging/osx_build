@@ -342,9 +342,7 @@ cp $BUILD_ROOT/libs/surfaces/control_protocol/libardourcp*.dylib $Frameworks
 cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
 
 # Backends
-for backend in jack wavesaudio dummy coreaudio; do
-	cp $BUILD_ROOT/libs/backends/$backend/lib*.dylib $Backends
-done
+cp $BUILD_ROOT/libs/backends/*/lib*.dylib $Backends
 
 # Export Formats/Presets
 for f in $BUILD_ROOT/../share/export/*.preset $BUILD_ROOT/../share/export/*.format ; do
@@ -434,9 +432,9 @@ for file in $BUILD_ROOT/session_utils/${lower_case_appname}${major_version}-*; d
 	HAVE_SESSION_UTILS=true
 done
 
-if test -x $BUILD_ROOT/tools/luadevel/luasession; then
+if test -x $BUILD_ROOT/luasession/luasession; then
 	BN=${lower_case_appname}${major_version}-lua
-	cp -v $BUILD_ROOT/tools/luadevel/luasession $Frameworks/$BN
+	cp -v $BUILD_ROOT/luasession/luasession $Frameworks/$BN
 	if test x$STRIP = xall ; then
 		strip -s $Frameworks/${BN}
 	fi
