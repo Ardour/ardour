@@ -3037,10 +3037,10 @@ PluginInsert::PluginControl::get_user_string () const
 {
 	boost::shared_ptr<Plugin> plugin = _plugin->plugin (0);
 	if (plugin) {
-		char buf[32];
+		char buf[64];
 		if (plugin->print_parameter (parameter().id(), buf, sizeof(buf))) {
 			assert (strlen (buf) > 0);
-			return std::string (buf) + " (" + AutomationControl::get_user_string () + ")";
+			return std::string (buf);
 		}
 	}
 	return AutomationControl::get_user_string ();

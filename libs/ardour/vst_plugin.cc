@@ -406,13 +406,13 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 
 		/* old style */
 
-		char label[VestigeMaxLabelLen];
+		char pname[VestigeMaxLabelLen];
 		/* some VST plugins expect this buffer to be zero-filled */
-		memset (label, 0, sizeof (label));
+		memset (pname, 0, sizeof (pname));
 
-		_plugin->dispatcher (_plugin, effGetParamName, which, 0, label, 0);
+		_plugin->dispatcher (_plugin, effGetParamName, which, 0, pname, 0);
 
-		desc.label = Glib::locale_to_utf8 (label);
+		desc.label = Glib::locale_to_utf8 (pname);
 		desc.lower = 0.0f;
 		desc.upper = 1.0f;
 		desc.smallstep = desc.step = 1.f / 300.f;
@@ -834,6 +834,17 @@ VSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
 	}
 
 	memmove (buf, first_nonws, strlen (buf) - (first_nonws - buf) + 1);
+
+	/* optional Unit label */
+	char label[VestigeMaxNameLen];
+	memset (label, 0, sizeof (label));
+	_plugin->dispatcher (_plugin, 6 /* effGetParamLabel */, param, 0, label, 0);
+
+	if (strlen (label) > 0) {
+		std::string lbl = std::string (" ") + Glib::locale_to_utf8 (label);
+		strncat (buf, lbl.c_str(), strlen (buf) - 1);
+	}
+
 	return true;
 }
 
