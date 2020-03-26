@@ -2309,14 +2309,6 @@ RCOptionEditor::RCOptionEditor ()
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(), _("If enabled, popup a dialog when a new marker is created to allow its name to be set as it is created."
 								"\n\nYou can always rename markers by right-clicking on them"));
 
-	add_option (_("Editor"),
-	     new BoolOption (
-		     "draggable-playhead",
-		     _("Enable playhead dragging"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_draggable_playhead),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_draggable_playhead)
-		     ));
-
 	ComboOption<float>* dps = new ComboOption<float> (
 		     "draggable-playhead-speed",
 		     _("Auto-scroll speed when dragging playhead (%)"),
