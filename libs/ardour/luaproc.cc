@@ -1141,6 +1141,7 @@ LuaProc::load_preset (PresetRecord r)
 				if (!(*j)->get_property (X_("index"), index) ||
 				    !(*j)->get_property (X_("value"), value)) {
 					assert (false);
+					continue;
 				}
 				set_parameter (index, value);
 				PresetPortSetValue (index, value); /* EMIT SIGNAL */
