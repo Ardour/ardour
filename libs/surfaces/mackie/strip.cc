@@ -59,6 +59,7 @@
 #include "ardour/value_as_string.h"
 
 #include "mackie_control_protocol.h"
+#include "subview.h"
 #include "surface_port.h"
 #include "surface.h"
 #include "strip.h"
@@ -108,7 +109,6 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	, _metering_active (true)
 	, _block_screen_redisplay_until (0)
 	, return_to_vpot_mode_display_at (UINT64_MAX)
-	, eq_band (-1)
 	, _pan_mode (PanAzimuthAutomation)
 	, _last_gain_position_written (-1.0)
 	, _last_pan_azi_position_written (-1.0)
@@ -255,7 +255,7 @@ Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 
 	_pan_mode = PanAzimuthAutomation;
 
-	if (_surface->mcp().subview_mode() == MackieControlProtocol::None) {
+	if (_surface->mcp().subview()->subview_mode() == SubViewMode::None) {
 		set_vpot_parameter (_pan_mode);
 	}
 
@@ -394,9 +394,9 @@ Strip::update_selection_state ()
 void
 Strip::show_stripable_name ()
 {
-	MackieControlProtocol::SubViewMode svm = _surface->mcp().subview_mode();
+	SubViewMode svm = _surface->mcp().subview()->subview_mode();
 
-	if (svm != MackieControlProtocol::None) {
+	if (svm != SubViewMode::None) {
 		/* subview mode is responsible for upper line */
 		return;
 	}
@@ -412,153 +412,6 @@ Strip::show_stripable_name ()
 		pending_display[0] = fullname;
 	} else {
 		pending_display[0] = PBD::short_version (fullname, 6);
-	}
-}
-
-void
-Strip::notify_send_level_change (uint32_t send_num, bool force_update)
-{
-	boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
-
-	if (!r) {
-		/* not in subview mode */
-		return;
-	}
-
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::Sends) {
-		/* no longer in Sends subview mode */
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> control = r->send_level_controllable (send_num);
-	if (!control) {
-		return;
-	}
-
-	if (control) {
-		float val = control->get_value();
-		do_parameter_display (control->desc (), val); // BusSendLevel
-
-		if (_vpot->control() == control) {
-			/* update pot/encoder */
-			_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
-		}
-	}
-}
-
-void
-Strip::notify_trackview_change (AutomationType type, uint32_t send_num, bool force_update)
-{
-	boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
-
-	if (!r) {
-		/* not in subview mode */
-		return;
-	}
-
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::TrackView) {
-		/* no longer in TrackViewsubview mode */
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> control;
-	boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (r);
-	bool screen_hold = false;
-
-	switch (type) {
-	case TrimAutomation:
-		control = r->trim_control();
-		screen_hold = true;
-		break;
-	case SoloIsolateAutomation:
-		control = r->solo_isolate_control ();
-		break;
-	case SoloSafeAutomation:
-		control = r->solo_safe_control ();
-		break;
-	case MonitoringAutomation:
-		if (track) {
-			control = track->monitoring_control();
-			screen_hold = true;
-		}
-		break;
-	case PhaseAutomation:
-		control = r->phase_control ();
-		screen_hold = true;
-		break;
-	default:
-		break;
-	}
-
-	if (control) {
-		float val = control->get_value();
-
-		/* Note: all of the displayed controllables require the display
-		 * of their *actual* ("internal") value, not the version mapped
-		 * into the normalized 0..1.0 ("interface") range.
-		 */
-
-		do_parameter_display (control->desc(), val, screen_hold);
-		/* update pot/encoder */
-		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
-	}
-}
-
-void
-Strip::notify_eq_change (boost::weak_ptr<AutomationControl> pc, bool force_update)
-{
-	boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
-
-	if (!r) {
-		/* not in subview mode */
-		return;
-	}
-
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::EQ) {
-		/* no longer in EQ subview mode */
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> control = pc.lock ();
-	if (control) {
-		float val = control->get_value();
-		do_parameter_display (control->desc(), val, true);
-		/* update pot/encoder */
-		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
-	}
-}
-
-void
-Strip::notify_dyn_change (boost::weak_ptr<AutomationControl> pc, bool force_update, bool propagate_mode)
-{
-	boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
-
-	if (!r) {
-		/* not in subview mode */
-		return;
-	}
-
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::Dynamics) {
-		/* no longer in EQ subview mode */
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> control= pc.lock ();
-	bool reset_all = false;
-
-	if (propagate_mode && reset_all) {
-		_surface->subview_mode_changed ();
-	}
-
-	if (control) {
-		float val = control->get_value();
-		if (control == r->comp_mode_controllable ()) {
-			pending_display[1] = r->comp_mode_name (val);
-		} else {
-			do_parameter_display (control->desc(), val, true);
-		}
-		/* update pot/encoder */
-		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 	}
 }
 
@@ -659,85 +512,13 @@ Strip::select_event (Button&, ButtonState bs)
 void
 Strip::vselect_event (Button&, ButtonState bs)
 {
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
-
+	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
 		/* most subview modes: vpot press acts like a button for toggle parameters */
-
 		if (bs != press) {
 			return;
 		}
-
-		if (_surface->mcp().subview_mode() != MackieControlProtocol::Sends) {
-
-			boost::shared_ptr<AutomationControl> control = _vpot->control ();
-			if (!control) {
-				return;
-			}
-
-			Controllable::GroupControlDisposition gcd;
-			if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
-				gcd = Controllable::InverseGroup;
-			} else {
-				gcd = Controllable::UseGroup;
-			}
-
-			if (control->toggled()) {
-				if (control->toggled()) {
-					control->set_value (!control->get_value(), gcd);
-				}
-
-			} else if (control->desc().enumeration || control->desc().integer_step) {
-
-				double val = control->get_value ();
-				if (val <= control->upper() - 1.0) {
-					control->set_value (val + 1.0, gcd);
-				} else {
-					control->set_value (control->lower(), gcd);
-				}
-			}
-
-		} else {
-
-			/* Send mode: press enables/disables the relevant
-			 * send, but the vpot is bound to the send-level so we
-			 * need to lookup the enable/disable control
-			 * explicitly.
-			 */
-
-			boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
-
-			if (r) {
-
-				const uint32_t global_pos = _surface->mcp().global_index (*this);
-				boost::shared_ptr<AutomationControl> control = r->send_enable_controllable (global_pos);
-
-				if (control) {
-					bool currently_enabled = (bool) control->get_value();
-					Controllable::GroupControlDisposition gcd;
-
-					if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
-						gcd = Controllable::InverseGroup;
-					} else {
-						gcd = Controllable::UseGroup;
-					}
-
-					control->set_value (!currently_enabled, gcd);
-
-					if (currently_enabled) {
-						/* we just turned it off */
-						pending_display[1] = "off";
-					} else {
-						/* we just turned it on, show the level
-						*/
-						control = _stripable->send_level_controllable (global_pos);
-						do_parameter_display (control->desc(), control->get_value()); // BusSendLevel
-					}
-				}
-			}
-		}
-
-		/* done with this event in subview mode */
-
+		
+		_surface->mcp().subview()->handle_vselect_event(_surface->mcp().global_index (*this));
 		return;
 	}
 
@@ -877,9 +658,14 @@ Strip::handle_button (Button& button, ButtonState bs)
 	}
 }
 
-void
-Strip::do_parameter_display (ARDOUR::ParameterDescriptor const& desc, float val, bool screen_hold)
+std::string
+Strip::format_paramater_for_display(
+		ARDOUR::ParameterDescriptor const& desc, 
+		float val, 
+		boost::shared_ptr<ARDOUR::Stripable> stripable_for_non_mixbus_azimuth_automation, 
+		bool& overwrite_screen_hold)
 {
+	std::string formatted_parameter_display;
 	char buf[16];
 
 	switch (desc.type) {
@@ -888,12 +674,12 @@ Strip::do_parameter_display (ARDOUR::ParameterDescriptor const& desc, float val,
 	case TrimAutomation:
 		// we can't use value_as_string() that'll suffix "dB" and also use "-inf" w/o space :(
 		if (val == 0.0) {
-			pending_display[1] = " -inf ";
+			formatted_parameter_display = " -inf ";
 		} else {
 			float dB = accurate_coefficient_to_dB (val);
 			snprintf (buf, sizeof (buf), "%6.1f", dB);
-			pending_display[1] = buf;
-			screen_hold = true;
+			formatted_parameter_display = buf;
+			overwrite_screen_hold = true;
 		}
 		break;
 
@@ -901,26 +687,34 @@ Strip::do_parameter_display (ARDOUR::ParameterDescriptor const& desc, float val,
 		if (Profile->get_mixbus()) {
 			// XXX no _stripable check?
 			snprintf (buf, sizeof (buf), "%2.1f", val);
-			pending_display[1] = buf;
-			screen_hold = true;
+			formatted_parameter_display = buf;
+			overwrite_screen_hold = true;
 		} else {
-			if (_stripable) {
-				boost::shared_ptr<AutomationControl> pa = _stripable->pan_azimuth_control();
+			if (stripable_for_non_mixbus_azimuth_automation) {
+				boost::shared_ptr<AutomationControl> pa = stripable_for_non_mixbus_azimuth_automation->pan_azimuth_control();
 				if (pa) {
-					pending_display[1] = pa->get_user_string ();
-					screen_hold = true;
+					formatted_parameter_display = pa->get_user_string ();
+					overwrite_screen_hold = true;
 				}
 			}
 		}
 		break;
 	default:
-		pending_display[1] = ARDOUR::value_as_string (desc, val);
-		if (pending_display[1].size () < 6) { // left-padding, right-align
-			pending_display[1].insert (0, 6 - pending_display[1].size (), ' ');
+		formatted_parameter_display = ARDOUR::value_as_string (desc, val);
+		if (formatted_parameter_display.size () < 6) { // left-padding, right-align
+			formatted_parameter_display.insert (0, 6 - formatted_parameter_display.size (), ' ');
 		}
 		break;
 	}
+	
+	return formatted_parameter_display;
+}
 
+void
+Strip::do_parameter_display (ARDOUR::ParameterDescriptor const& desc, float val, bool screen_hold)
+{
+	pending_display[1] = format_paramater_for_display(desc, val, _stripable, screen_hold);
+	
 	if (screen_hold) {
 		/* we just queued up a parameter to be displayed.
 		   1 second from now, switch back to vpot mode display.
@@ -1105,7 +899,7 @@ Strip::update_meter ()
 		return;
 	}
 
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
+	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
 		return;
 	}
 
@@ -1193,7 +987,7 @@ Strip::unlock_controls ()
 string
 Strip::vpot_mode_string ()
 {
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
+	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
 		return string();
 	}
 
@@ -1230,7 +1024,7 @@ Strip::vpot_mode_string ()
 void
 Strip::flip_mode_changed ()
 {
-	if (_surface->mcp().subview_mode() == MackieControlProtocol::Sends) {
+	if (_surface->mcp().subview()->permit_flipping_faders_and_pots()) {
 
 		boost::shared_ptr<AutomationControl> pot_control = _vpot->control();
 		boost::shared_ptr<AutomationControl> fader_control = _fader->control();
@@ -1281,7 +1075,7 @@ Strip::return_to_vpot_mode_display ()
 	   back the mode where it shows what the VPot controls.
 	*/
 
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
+	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
 		/* do nothing - second line shows value of current subview parameter */
 		return;
 	} else if (_stripable) {
@@ -1312,7 +1106,7 @@ Strip::next_pot_mode ()
 	}
 
 
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
+	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
 		return;
 	}
 
@@ -1344,12 +1138,8 @@ Strip::next_pot_mode ()
 void
 Strip::subview_mode_changed ()
 {
-	boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
-
-	subview_connections.drop_connections ();
-
-	switch (_surface->mcp().subview_mode()) {
-	case MackieControlProtocol::None:
+	switch (_surface->mcp().subview()->subview_mode()) {
+	case SubViewMode::None:
 		set_vpot_parameter (_pan_mode);
 		/* need to show strip name again */
 		show_stripable_name ();
@@ -1358,332 +1148,16 @@ Strip::subview_mode_changed ()
 			_surface->write (_fader->set_position (0.0));
 		}
 		notify_metering_state_changed ();
-		eq_band = -1;
 		break;
 
-	case MackieControlProtocol::EQ:
-		if (r) {
-			setup_eq_vpot (r);
-		} else {
-			/* leave it as it was */
-		}
-		break;
-
-	case MackieControlProtocol::Dynamics:
-		if (r) {
-			setup_dyn_vpot (r);
-		} else {
-			/* leave it as it was */
-		}
-		eq_band = -1;
-		break;
-
-	case MackieControlProtocol::Sends:
-		if (r) {
-			setup_sends_vpot (r);
-		} else {
-			/* leave it as it was */
-		}
-		eq_band = -1;
-		break;
-	case MackieControlProtocol::TrackView:
-		if (r) {
-			setup_trackview_vpot (r);
-		} else {
-			/* leave it as it was */
-		}
-		eq_band = -1;
+	case SubViewMode::EQ:
+	case SubViewMode::Dynamics:
+	case SubViewMode::Sends:
+	case SubViewMode::TrackView:
+	case SubViewMode::Plugin:
+		_surface->mcp().subview()->setup_vpot(this, _vpot, pending_display);
 		break;
 	}
-}
-
-void
-Strip::setup_dyn_vpot (boost::shared_ptr<Stripable> r)
-{
-	if (!r) {
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> tc = r->comp_threshold_controllable ();
-	boost::shared_ptr<AutomationControl> sc = r->comp_speed_controllable ();
-	boost::shared_ptr<AutomationControl> mc = r->comp_mode_controllable ();
-	boost::shared_ptr<AutomationControl> kc = r->comp_makeup_controllable ();
-	boost::shared_ptr<AutomationControl> ec = r->comp_enable_controllable ();
-
-#ifdef MIXBUS32C	//Mixbus32C needs to spill the filter controls into the comp section
-	boost::shared_ptr<AutomationControl> hpfc = r->filter_freq_controllable (true);
-	boost::shared_ptr<AutomationControl> lpfc = r->filter_freq_controllable (false);
-	boost::shared_ptr<AutomationControl> fec = r->filter_enable_controllable (true); // shared HP/LP
-#endif
-
-	uint32_t pos = _surface->mcp().global_index (*this);
-
-	/* we will control the pos-th available parameter, from the list in the
-	 * order shown above.
-	 */
-
-	vector<std::pair<boost::shared_ptr<AutomationControl>, std::string > > available;
-	vector<AutomationType> params;
-
-	if (tc) { available.push_back (std::make_pair (tc, "Thresh")); }
-	if (sc) { available.push_back (std::make_pair (sc, mc ? r->comp_speed_name (mc->get_value()) : "Speed")); }
-	if (mc) { available.push_back (std::make_pair (mc, "Mode")); }
-	if (kc) { available.push_back (std::make_pair (kc, "Makeup")); }
-	if (ec) { available.push_back (std::make_pair (ec, "on/off")); }
-
-#ifdef MIXBUS32C	//Mixbus32C needs to spill the filter controls into the comp section
-	if (hpfc) { available.push_back (std::make_pair (hpfc, "HPF")); }
-	if (lpfc) { available.push_back (std::make_pair (lpfc, "LPF")); }
-	if (fec)  { available.push_back (std::make_pair (fec, "FiltIn")); }
-#endif
-
-	if (pos >= available.size()) {
-		/* this knob is not needed to control the available parameters */
-		_vpot->set_control (boost::shared_ptr<AutomationControl>());
-		pending_display[0] = string();
-		pending_display[1] = string();
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> pc;
-
-	pc = available[pos].first;
-	string pot_id = available[pos].second;
-
-	pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_dyn_change, this, boost::weak_ptr<AutomationControl>(pc), false, true), ui_context());
-	_vpot->set_control (pc);
-
-	if (!pot_id.empty()) {
-		pending_display[0] = pot_id;
-	} else {
-		pending_display[0] = string();
-	}
-
-	notify_dyn_change (boost::weak_ptr<AutomationControl>(pc), true, false);
-}
-
-void
-Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
-{
-	boost::shared_ptr<AutomationControl> pc;
-	string pot_id;
-
-#ifdef MIXBUS
-	const uint32_t global_pos = _surface->mcp().global_index (*this);
-	int eq_band = -1;
-	std::string band_name;
-	if (r->is_input_strip ()) {
-
-#ifdef MIXBUS32C
-		switch (global_pos) {
-			case 0:
-			case 2:
-			case 4:
-			case 6:
-				eq_band = global_pos / 2;
-				pc = r->eq_freq_controllable (eq_band);
-				band_name = r->eq_band_name (eq_band);
-				pot_id = band_name + "Freq";
-				break;
-			case 1:
-			case 3:
-			case 5:
-			case 7:
-				eq_band = global_pos / 2;
-				pc = r->eq_gain_controllable (eq_band);
-				band_name = r->eq_band_name (eq_band);
-				pot_id = band_name + "Gain";
-				break;
-			case 8: 
-				pc = r->eq_shape_controllable(0);  //low band "bell" button
-				band_name = "lo";
-				pot_id = band_name + " Shp";
-				break;
-			case 9:
-				pc = r->eq_shape_controllable(3);  //high band "bell" button
-				band_name = "hi";
-				pot_id = band_name + " Shp";
-				break;
-			case 10:
-				pc = r->eq_enable_controllable();
-				pot_id = "EQ";
-				break;
-		}
-
-#else  //regular Mixbus channel EQ
-
-		switch (global_pos) {
-			case 0:
-			case 2:
-			case 4:
-				eq_band = global_pos / 2;
-				pc = r->eq_gain_controllable (eq_band);
-				band_name = r->eq_band_name (eq_band);
-				pot_id = band_name + "Gain";
-				break;
-			case 1:
-			case 3:
-			case 5:
-				eq_band = global_pos / 2;
-				pc = r->eq_freq_controllable (eq_band);
-				band_name = r->eq_band_name (eq_band);
-				pot_id = band_name + "Freq";
-				break;
-			case 6:
-				pc = r->eq_enable_controllable();
-				pot_id = "EQ";
-				break;
-			case 7:
-				pc = r->filter_freq_controllable(true);
-				pot_id = "HP Freq";
-				break;
-		}
-
-#endif
-
-	} else {  //mixbus or master bus ( these are currently the same for MB & 32C )
-		switch (global_pos) {
-			case 0:
-			case 1:
-			case 2:
-				eq_band = global_pos;
-				pc = r->eq_gain_controllable (eq_band);
-				band_name = r->eq_band_name (eq_band);
-				pot_id = band_name + "Gain";
-				break;
-		}
-	}
-#endif
-
-	//If a controllable was found, connect it up, and put the labels in the display.
-	if (pc) {
-		pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_eq_change, this, boost::weak_ptr<AutomationControl>(pc), false), ui_context());
-		_vpot->set_control (pc);
-
-		if (!pot_id.empty()) {
-			pending_display[0] = pot_id;
-		} else {
-			pending_display[0] = string();
-		}
-		
-	} else {  //no controllable was found;  just clear this knob
-		_vpot->set_control (boost::shared_ptr<AutomationControl>());
-		pending_display[0] = string();
-		pending_display[1] = string();
-	}
-	
-	notify_eq_change (boost::weak_ptr<AutomationControl>(pc), true);
-}
-
-void
-Strip::setup_sends_vpot (boost::shared_ptr<Stripable> r)
-{
-	if (!r) {
-		return;
-	}
-
-	const uint32_t global_pos = _surface->mcp().global_index (*this);
-
-	boost::shared_ptr<AutomationControl> pc = r->send_level_controllable (global_pos);
-
-	if (!pc) {
-		/* nothing to control */
-		_vpot->set_control (boost::shared_ptr<AutomationControl>());
-		pending_display[0] = string();
-		pending_display[1] = string();
-		return;
-	}
-
-	pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_send_level_change, this, global_pos, false), ui_context());
-	_vpot->set_control (pc);
-
-	pending_display[0] = PBD::short_version (r->send_name (global_pos), 6);
-
-	notify_send_level_change (global_pos, true);
-}
-
-void
-Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
-{
-	if (!r) {
-		return;
-	}
-
-	const uint32_t global_pos = _surface->mcp().global_index (*this);
-
-	if (global_pos >= 8) {
-		/* nothing to control */
-		_vpot->set_control (boost::shared_ptr<AutomationControl>());
-		pending_display[0] = string();
-		pending_display[1] = string();
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> pc;
-	boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (r);
-	string label;
-
-	switch (global_pos) {
-	case 0:
-		pc = r->trim_control ();
-		if (pc) {
-			pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_trackview_change, this, TrimAutomation, global_pos, false), ui_context());
-			pending_display[0] = "Trim";
-			notify_trackview_change (TrimAutomation, global_pos, true);
-		}
-		break;
-	case 1:
-		if (track) {
-			pc = track->monitoring_control();
-			if (pc) {
-				pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_trackview_change, this, MonitoringAutomation, global_pos, false), ui_context());
-				pending_display[0] = "Mon";
-				notify_trackview_change (MonitoringAutomation, global_pos, true);
-			}
-		}
-		break;
-	case 2:
-		pc = r->solo_isolate_control ();
-		if (pc) {
-			pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_trackview_change, this, SoloIsolateAutomation, global_pos, false), ui_context());
-			notify_trackview_change (SoloIsolateAutomation, global_pos, true);
-			pending_display[0] = "S-Iso";
-		}
-		break;
-	case 3:
-		pc = r->solo_safe_control ();
-		if (pc) {
-			pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_trackview_change, this, SoloSafeAutomation, global_pos, false), ui_context());
-			notify_trackview_change (SoloSafeAutomation, global_pos, true);
-			pending_display[0] = "S-Safe";
-		}
-		break;
-	case 4:
-		pc = r->phase_control();
-		if (pc) {
-			pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_trackview_change, this, PhaseAutomation, global_pos, false), ui_context());
-			notify_trackview_change (PhaseAutomation, global_pos, true);
-			pending_display[0] = "Phase";
-		}
-		break;
-	case 5:
-		// pc = r->trim_control ();
-		break;
-	case 6:
-		// pc = r->trim_control ();
-		break;
-	case 7:
-		// pc = r->trim_control ();
-		break;
-	}
-
-	if (!pc) {
-		pending_display[0] = string();
-		pending_display[1] = string();
-		return;
-	}
-
-	_vpot->set_control (pc);
 }
 
 void
@@ -1745,7 +1219,7 @@ Strip::reset_saved_values ()
 void
 Strip::notify_metering_state_changed()
 {
-	if (_surface->mcp().subview_mode() != MackieControlProtocol::None) {
+	if (_surface->mcp().subview()->subview_mode() != SubViewMode::None) {
 		return;
 	}
 
