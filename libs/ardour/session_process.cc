@@ -1221,7 +1221,7 @@ Session::plan_master_strategy (pframes_t nframes, double master_speed, samplepos
 	 */
 
 	if (!config.get_external_sync()) {
-		return 1.0;
+		return actual_speed ();
 	}
 
 	TransportMasterManager& tmm (TransportMasterManager::instance());
