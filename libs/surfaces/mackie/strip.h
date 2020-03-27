@@ -93,6 +93,12 @@ public:
 
 	MidiByteArray display (uint32_t line_number, const std::string&);
 	MidiByteArray blank_display (uint32_t line_number);
+	
+	static std::string format_paramater_for_display(
+		ARDOUR::ParameterDescriptor const& desc, 
+		float val, 
+		boost::shared_ptr<ARDOUR::Stripable> stripable_for_non_mixbus_azimuth_automation, 
+		bool& overwrite_screen_hold);
 
 	void zero ();
 
@@ -136,9 +142,6 @@ private:
 	uint64_t return_to_vpot_mode_display_at;
 	boost::shared_ptr<ARDOUR::Stripable> _stripable;
 	PBD::ScopedConnectionList stripable_connections;
-	PBD::ScopedConnectionList subview_connections;
-	PBD::ScopedConnectionList send_connections;
-	int       eq_band;
 
 	ARDOUR::AutomationType  _pan_mode;
 
@@ -178,18 +181,6 @@ private:
 	void reset_saved_values ();
 
 	bool is_midi_track () const;
-
-	void notify_eq_change (boost::weak_ptr<ARDOUR::AutomationControl>, bool force);
-	void setup_eq_vpot (boost::shared_ptr<ARDOUR::Stripable>);
-
-	void notify_dyn_change (boost::weak_ptr<ARDOUR::AutomationControl>, bool force, bool propagate_mode_change);
-	void setup_dyn_vpot (boost::shared_ptr<ARDOUR::Stripable>);
-
-	void notify_send_level_change (uint32_t band, bool force);
-	void setup_sends_vpot (boost::shared_ptr<ARDOUR::Stripable>);
-
-	void notify_trackview_change (ARDOUR::AutomationType, uint32_t band, bool force);
-	void setup_trackview_vpot (boost::shared_ptr<ARDOUR::Stripable>);
 };
 
 }
