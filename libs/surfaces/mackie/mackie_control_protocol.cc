@@ -72,6 +72,7 @@
 #include "midi_byte_array.h"
 #include "mackie_control_exception.h"
 #include "device_profile.h"
+#include "subview.h"
 #include "surface_port.h"
 #include "surface.h"
 #include "strip.h"
@@ -126,7 +127,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _scrub_mode (false)
 	, _flip_mode (Normal)
 	, _view_mode (Mixer)
-	, _subview_mode (None)
+	, _subview (0)
 	, _current_selected_track (-1)
 	, _modifier_state (0)
 	, _ipmidi_base (MIDI::IPMIDIPort::lowest_ipmidi_port_default)
@@ -139,6 +140,8 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, nudge_modifier_consumed_by_button (false)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
+	
+	_subview = Mackie::SubviewFactory::instance()->create_subview(SubViewMode::None, *this, boost::shared_ptr<Stripable>());
 
 	DeviceInfo::reload_device_info ();
 	DeviceProfile::reload_device_profiles ();
@@ -658,7 +661,7 @@ MackieControlProtocol::device_ready ()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("device ready init (active=%1)\n", active()));
 	update_surfaces ();
-	set_subview_mode (MackieControlProtocol::None, boost::shared_ptr<Stripable>());
+	set_subview_mode (Mackie::SubViewMode::None, boost::shared_ptr<Stripable>());
 	set_flip_mode (Normal);
 }
 
@@ -1697,43 +1700,8 @@ void
 MackieControlProtocol::notify_subview_stripable_deleted ()
 {
 	/* return to global/mixer view */
-	_subview_stripable.reset ();
+	_subview->notify_subview_stripable_deleted();
 	set_view_mode (Mixer);
-}
-
-bool
-MackieControlProtocol::subview_mode_would_be_ok (SubViewMode mode, boost::shared_ptr<Stripable> r)
-{
-	switch (mode) {
-	case None:
-		return true;
-		break;
-
-	case Sends:
-		if (r && r->send_level_controllable (0)) {
-			return true;
-		}
-		break;
-
-	case EQ:
-		if (r && r->eq_band_cnt() > 0) {
-			return true;
-		}
-		break;
-
-	case Dynamics:
-		if (r && r->comp_enable_controllable()) {
-			return true;
-		}
-		break;
-
-	case TrackView:
-		if (r) {
-			return true;
-		}
-	}
-
-	return false;
 }
 
 bool
@@ -1754,7 +1722,7 @@ MackieControlProtocol::redisplay_subview_mode ()
 	return false;
 }
 
-int
+bool
 MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Stripable> r)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("set subview mode %1 with stripable %2, current flip mode %3\n", sm, (r ? r->name() : string ("null")), _flip_mode));
@@ -1763,7 +1731,8 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Strip
 		set_flip_mode (Normal);
 	}
 
-	if (!subview_mode_would_be_ok (sm, r)) {
+	std::string reason_why_subview_not_possible = "";
+	if (!_subview->subview_mode_would_be_ok (sm, r, reason_why_subview_not_possible)) {
 
 		DEBUG_TRACE (DEBUG::MackieControl, "subview mode not OK\n");
 
@@ -1772,27 +1741,9 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Strip
 			Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
 			if (!surfaces.empty()) {
-
-				string msg;
-
-				switch (sm) {
-				case Sends:
-					msg = _("no sends for selected track/bus");
-					break;
-				case EQ:
-					msg = _("no EQ in the track/bus");
-					break;
-				case Dynamics:
-					msg = _("no dynamics in selected track/bus");
-					break;
-				case TrackView:
-					msg = _("no track view possible");
-				default:
-					break;
-				}
-				if (!msg.empty()) {
-					surfaces.front()->display_message_for (msg, 1000);
-					if (_subview_mode != None) {
+				if (!reason_why_subview_not_possible.empty()) {
+					surfaces.front()->display_message_for (reason_why_subview_not_possible, 1000);
+					if (_subview->subview_mode() != Mackie::SubViewMode::None) {
 						/* redisplay current subview mode after
 						   that message goes away.
 						*/
@@ -1804,73 +1755,21 @@ MackieControlProtocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Strip
 			}
 		}
 
-		return -1;
+		return false;
 	}
-
-	boost::shared_ptr<Stripable> old_stripable = _subview_stripable;
-
-	_subview_mode = sm;
-	_subview_stripable = r;
-
-	if (_subview_stripable != old_stripable) {
-		subview_stripable_connections.drop_connections ();
-
-		/* Catch the current subview stripable going away */
-		if (_subview_stripable) {
-			_subview_stripable->DropReferences.connect (subview_stripable_connections, MISSING_INVALIDATOR,
-			                                            boost::bind (&MackieControlProtocol::notify_subview_stripable_deleted, this),
-			                                            this);
-		}
+	
+	_subview = Mackie::SubviewFactory::instance()->create_subview(sm, *this, r);
+	/* Catch the current subview stripable going away */
+	if (_subview->subview_stripable()) {
+		_subview->subview_stripable()->DropReferences.connect (_subview->subview_stripable_connections(), MISSING_INVALIDATOR,
+													boost::bind (&MackieControlProtocol::notify_subview_stripable_deleted, this),
+													this);
 	}
 
 	redisplay_subview_mode ();
+	_subview->update_global_buttons();
 
-	/* turn buttons related to vpot mode on or off as required */
-
-	switch (_subview_mode) {
-	case MackieControlProtocol::None:
-		update_global_button (Button::Send, off);
-		update_global_button (Button::Plugin, off);
-		update_global_button (Button::Eq, off);
-		update_global_button (Button::Dyn, off);
-		update_global_button (Button::Track, off);
-		update_global_button (Button::Pan, on);
-		break;
-	case MackieControlProtocol::EQ:
-		update_global_button (Button::Send, off);
-		update_global_button (Button::Plugin, off);
-		update_global_button (Button::Eq, on);
-		update_global_button (Button::Dyn, off);
-		update_global_button (Button::Track, off);
-		update_global_button (Button::Pan, off);
-		break;
-	case MackieControlProtocol::Dynamics:
-		update_global_button (Button::Send, off);
-		update_global_button (Button::Plugin, off);
-		update_global_button (Button::Eq, off);
-		update_global_button (Button::Dyn, on);
-		update_global_button (Button::Track, off);
-		update_global_button (Button::Pan, off);
-		break;
-	case MackieControlProtocol::Sends:
-		update_global_button (Button::Send, on);
-		update_global_button (Button::Plugin, off);
-		update_global_button (Button::Eq, off);
-		update_global_button (Button::Dyn, off);
-		update_global_button (Button::Track, off);
-		update_global_button (Button::Pan, off);
-		break;
-	case MackieControlProtocol::TrackView:
-		update_global_button (Button::Send, off);
-		update_global_button (Button::Plugin, off);
-		update_global_button (Button::Eq, off);
-		update_global_button (Button::Dyn, off);
-		update_global_button (Button::Track, on);
-		update_global_button (Button::Pan, off);
-		break;
-	}
-
-	return 0;
+	return true;
 }
 
 void
@@ -1890,7 +1789,8 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 	}
 
 	/* leave subview mode, whatever it was */
-	set_subview_mode (None, boost::shared_ptr<Stripable>());
+	DEBUG_TRACE (DEBUG::MackieControl, "\t\t\tsubview mode reset in MackieControlProtocol::set_view_mode \n");
+	set_subview_mode (Mackie::SubViewMode::None, boost::shared_ptr<Stripable>());
 	display_view_mode ();
 }
 
@@ -2445,10 +2345,13 @@ MackieControlProtocol::stripable_selection_changed ()
 		 * set_subview_mode() will fail, and we will reset to None.
 		 */
 
-		if (set_subview_mode (_subview_mode, s)) {
-			set_subview_mode (None, boost::shared_ptr<Stripable>());
+		if (!set_subview_mode (_subview->subview_mode(), s)) {
+			set_subview_mode (Mackie::SubViewMode::None, boost::shared_ptr<Stripable>());
 		}
-
+	}
+	else {
+		// none selected or not on surface
+		set_subview_mode(Mackie::SubViewMode::None, boost::shared_ptr<Stripable>());
 	}
 }
 
@@ -2473,12 +2376,6 @@ MackieControlProtocol::first_selected_stripable () const
 	}
 
 	return s; /* may be null */
-}
-
-boost::shared_ptr<Stripable>
-MackieControlProtocol::subview_stripable () const
-{
-	return _subview_stripable;
 }
 
 uint32_t
