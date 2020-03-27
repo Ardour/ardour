@@ -336,9 +336,7 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len, samplecnt_t now)
 		} else if (len == 10 && msg[0] == 0xf0 && msg[1] == 0x7f && msg[9] == 0xf7)  {
 
 			/* MTC full sample */
-			s += snprintf (
-				&buf[s], bufsize, " MTC full sample to %02d:%02d:%02d:%02d\n", msg[5] & 0x1f, msg[6], msg[7], msg[8]
-				);
+			s += snprintf (&buf[s], bufsize, " MTC full sample to %02d:%02d:%02d:%02d\n", msg[5] & 0x1f, msg[6], msg[7], msg[8]);
 		} else if (len == 3 && msg[0] == MIDI::position) {
 
 			/* MIDI Song Position */
