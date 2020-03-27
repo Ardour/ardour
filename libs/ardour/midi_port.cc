@@ -213,9 +213,20 @@ MidiPort::read_and_parse_entire_midi_buffer_with_no_speed_adjustment (pframes_t 
 			parser.scanner (0x80 | (buf[0] & 0x0F));  /* note off */
 			parser.scanner (buf[1]);
 			parser.scanner (0x40);  /* default (off) velocity */
+
+			if (_trace_parser) {
+				_trace_parser->scanner (0x80 | (buf[0] & 0x0F));
+				_trace_parser->scanner (buf[1]);
+				_trace_parser->scanner (0x40);
+			}
 		} else {
 			for (size_t n = 0; n < size; ++n) {
 				parser.scanner (buf[n]);
+			}
+			if (_trace_parser) {
+				for (size_t n = 0; n < size; ++n) {
+					_trace_parser->scanner (buf[n]);
+				}
 			}
 		}
 	}
