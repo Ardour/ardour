@@ -344,6 +344,10 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len, samplecnt_t now)
 			/* MIDI Song Position */
 			int midi_beats = (msg[2] << 7) | msg[1];
 			s += snprintf (&buf[s], bufsize, "%16s %d\n", "Position", (int) midi_beats);
+		} else if (len == 2 && msg[0] == MIDI::mtc_quarter) {
+
+			s += snprintf (&buf[s], bufsize, "%16s %02x\n", "MTC Quarter", msg[1]);
+
 		} else {
 
 			/* other sys-ex */
