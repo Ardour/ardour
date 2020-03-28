@@ -51,7 +51,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 
 	_piano.set_flags (Gtk::CAN_FOCUS);
 
-	_piano.set_keyboard_layout (APianoKeyboard::S_QWERTY);
+	select_keyboard_layout (UIConfiguration::instance().get_vkeybd_layout ());
 	_piano.set_annotate_octave (true);
 	_piano.set_grand_piano_highlight (false);
 	_piano.set_annotate_layout (true);
