@@ -229,14 +229,18 @@ snd_pcm_sframes_t Alsa_pcmi::pcm_wait (void)
 	if (_play_handle && (play_av = snd_pcm_avail_update (_play_handle)) < 0)
 	{
 		_state = -1;
-		recover ();
+		if (!recover ()) {
+		_state = 1;
+		}
 		return 0;
 	}
 	capt_av = 999999999;
 	if (_capt_handle && (capt_av = snd_pcm_avail_update (_capt_handle)) < 0)
 	{
 		_state = -1;
-		recover ();
+		if (!recover ()) {
+		_state = 1;
+		}
 		return 0;
 	}
 
