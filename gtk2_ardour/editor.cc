@@ -2941,12 +2941,14 @@ Editor::snap_to_marker (samplepos_t presnap, RoundMode direction)
 	samplepos_t after;
 	samplepos_t test;
 
+	if (_session->locations()->list().empty()) {
+		/* No marks to snap to, so just don't snap */
+		return test;
+	}
+
 	_session->locations()->marks_either_side (presnap, before, after);
 
-	if (before == max_samplepos && after == max_samplepos) {
-		/* No marks to snap to, so just don't snap */
-		return presnap;
-	} else if (before == max_samplepos) {
+	if (before == max_samplepos) {
 		test = after;
 	} else if (after == max_samplepos) {
 		test = before;
