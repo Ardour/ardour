@@ -751,8 +751,8 @@ def options(opt):
                     help='The user-visible name of the program being built')
     opt.add_option('--arch', type='string', action='store', dest='arch',
                     help='Architecture-specific compiler FLAGS')
-    opt.add_option('--with-backends', type='string', action='store', default='jack', dest='with_backends',
-                    help='Specify which backend modules are to be included(jack,alsa,dummy,portaudio,coreaudio)')
+    opt.add_option('--with-backends', type='string', action='store', default='', dest='with_backends',
+                    help='Specify which backend modules are to be included(jack,alsa,dummy,portaudio,coreaudio,pulseaudio)')
     opt.add_option('--backtrace', action='store_true', default=False, dest='backtrace',
                     help='Compile with -rdynamic -- allow obtaining backtraces from within Ardour')
     opt.add_option('--no-carbon', action='store_true', default=False, dest='nocarbon',
@@ -1256,11 +1256,24 @@ int main () { return 0; }
         conf.env['NO_THREADED_WAVEVIEWS'] = True
 
     backends = opts.with_backends.split(',')
+
+    if backends == ['']:
+        backends = ['dummy']
+        autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.121.0', mandatory=False)
+        if conf.is_defined('HAVE_JACK'):
+            backends += ['jack']
+        if conf.is_defined('HAVE_PULSEAUDIO'):
+            backends += ['pulseaudio']
+
+        if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw':
+            backends += ['alsa']
+        if sys.platform == 'darwin':
+            backends += ['coreaudio']
+        if Options.options.dist_target == 'mingw':
+            backends += ['portaudio']
+
     if opts.build_tests and 'dummy' not in backends:
         backends += ['dummy']
-
-    if not backends:
-        conf.fatal("Must configure and build at least one backend")
 
     conf.env['BACKENDS'] = backends
     conf.env['BUILD_JACKBACKEND'] = any('jack' in b for b in backends)
@@ -1269,6 +1282,16 @@ int main () { return 0; }
     conf.env['BUILD_PABACKEND'] = any('portaudio' in b for b in backends)
     conf.env['BUILD_CORECRAPPITA'] = any('coreaudio' in b for b in backends)
     conf.env['BUILD_PULSEAUDIO'] = any('pulseaudio' in b for b in backends)
+
+    if backends == [''] or not (
+               conf.env['BUILD_JACKBACKEND']
+            or conf.env['BUILD_ALSABACKEND']
+            or conf.env['BUILD_DUMMYBACKEND']
+            or conf.env['BUILD_PABACKEND']
+            or conf.env['BUILD_CORECRAPPITA']
+            or conf.env['BUILD_PULSEAUDIO']):
+        conf.fatal("Must configure and build at least one backend")
+
 
     if (Options.options.use_lld):
         if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw' and conf.env['BUILD_PABACKEND']:
