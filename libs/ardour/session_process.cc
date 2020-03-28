@@ -948,7 +948,9 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::Overwrite:
-		overwrite_some_buffers (ev->track, ev->overwrite);
+		if (boost::shared_ptr<Track> track = ev->track.lock()) {
+			overwrite_some_buffers (track, ev->overwrite);
+		}
 		break;
 
 	case SessionEvent::Audition:

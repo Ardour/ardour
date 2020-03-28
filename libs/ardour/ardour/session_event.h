@@ -25,6 +25,7 @@
 #include <list>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 
 #include "pbd/pool.h"
 #include "pbd/ringbuffer.h"
@@ -86,7 +87,7 @@ public:
 		OverwriteReason  overwrite;
 	};
 
-	boost::shared_ptr<Track> track;
+	boost::weak_ptr<Track> track;
 
 	union {
 		bool second_yes_or_no;
