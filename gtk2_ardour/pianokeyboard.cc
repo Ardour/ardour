@@ -642,6 +642,15 @@ APianoKeyboard::on_key_press_event (GdkEventKey* event)
 		return true;
 	}
 
+	std::map<std::string, int>::const_iterator kv = _note_stack.find (key);
+	if (kv != _note_stack.end ()) {
+		/* key is already pressed, ignore event.
+		 * this can happen when changing the octave with the mouse
+		 * while playing.
+		 */
+		return true;
+	}
+
 	note += _octave * 12;
 
 	assert (key);
