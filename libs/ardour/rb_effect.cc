@@ -22,6 +22,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include <glibmm.h>
+
 #include <rubberband/RubberBandStretcher.h>
 
 #include "pbd/error.h"
@@ -75,7 +77,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 	SourceList nsrcs;
 	int ret = -1;
-	const samplecnt_t bufsize = 256;
+	const samplecnt_t bufsize = 8192;
 	gain_t* gain_buffer = 0;
 	Sample** buffers = 0;
 	char suffix[32];
@@ -83,6 +85,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	string::size_type at;
 	boost::shared_ptr<AudioRegion> result;
 
+#ifndef NDEBUG
 	cerr << "RBEffect: source region: position = " << region->position()
 	     << ", start = " << region->start()
 	     << ", length = " << region->length()
@@ -90,6 +93,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	     << ", ancestral_length = " << region->ancestral_length()
 	     << ", stretch " << region->stretch()
 	     << ", shift " << region->shift() << endl;
+#endif
 
 	/*
 	   We have two cases to consider:
@@ -157,15 +161,24 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 	uint32_t channels = region->n_channels();
 
-	RubberBandStretcher stretcher
-		(session.sample_rate(), channels,
-		 (RubberBandStretcher::Options) tsr.opts, stretch, shift);
+#ifndef NDEBUG
+	cerr << "RBStretcher: input-len = " << read_duration
+	     << ", rate = " << session.sample_rate()
+	     << ", channels = " << channels
+	     << ", opts = " << tsr.opts
+	     << ", stretch = " << stretch
+	     << ", shift = " << shift << endl;
+#endif
+
+	RubberBandStretcher stretcher (session.sample_rate(), channels,
+	                               (RubberBandStretcher::Options) tsr.opts,
+	                               stretch, shift);
 
 	progress->set_progress (0);
 	tsr.done = false;
 
-	stretcher.setExpectedInputDuration(read_duration);
 	stretcher.setDebugLevel(1);
+	stretcher.setExpectedInputDuration(read_duration);
 
 	/* the name doesn't need to be super-precise, but allow for 2 fractional
 	   digits just to disambiguate close but not identical FX
@@ -253,6 +266,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 				samplepos_t this_time;
 				this_time = min(bufsize, read_duration - pos);
+				this_time = min(this_time, (samplepos_t) stretcher.getSamplesRequired());
 
 				samplepos_t this_position;
 				this_position = read_start + pos -
@@ -287,7 +301,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 				this_read = min (bufsize, avail);
 
-				stretcher.retrieve(buffers, this_read);
+				this_read = stretcher.retrieve(buffers, this_read);
 
 				for (uint32_t i = 0; i < nsrcs.size(); ++i) {
 
@@ -304,11 +318,16 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 			}
 		}
 
-		while ((avail = stretcher.available()) > 0) {
+		while ((avail = stretcher.available()) >= 0 && !tsr.cancel) {
+			if (avail == 0) {
+				/* wait for stretcher threads */
+				Glib::usleep (10000);
+				continue;
+			}
 
 			samplecnt_t this_read = min (bufsize, avail);
 
-			stretcher.retrieve(buffers, this_read);
+			this_read = stretcher.retrieve(buffers, this_read);
 
 			for (uint32_t i = 0; i < nsrcs.size(); ++i) {
 
