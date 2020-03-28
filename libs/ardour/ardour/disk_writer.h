@@ -141,6 +141,8 @@ protected:
 
 	virtual XMLNode& state ();
 
+	int use_playlist (DataType, boost::shared_ptr<Playlist>);
+
 	int do_flush (RunContext context, bool force = false);
 
 private:

@@ -1337,3 +1337,16 @@ DiskWriter::configure_io (ChanCount in, ChanCount out)
 
 	return true;
 }
+
+int
+DiskWriter::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
+{
+	bool reset_ws = _playlists[dt] != playlist;
+
+	if (DiskIOProcessor::use_playlist (dt, playlist)) {
+		return -1;
+	}
+	if (reset_ws) {
+		reset_write_sources (false, true);
+	}
+}
