@@ -213,6 +213,13 @@ Location::set_start (samplepos_t s, bool force, bool allow_beat_recompute, const
 		}
 	}
 
+	if (is_cd_marker()) {
+		if (s <= _session.current_start_sample()) {
+			info << _("You cannot put a CD marker at the start of the session") << endmsg;
+			return -1;
+		}
+	}
+
 	if (is_mark()) {
 		if (_start != s) {
 			_start = s;
