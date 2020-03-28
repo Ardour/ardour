@@ -83,7 +83,6 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	char suffix[32];
 	string new_name;
 	string::size_type at;
-	boost::shared_ptr<AudioRegion> result;
 
 #ifndef NDEBUG
 	cerr << "RBEffect: source region: position = " << region->position()
@@ -197,8 +196,6 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	/* create new sources */
 
 	samplepos_t pos   = 0;
-	samplecnt_t avail = 0;
-	samplecnt_t done  = 0;
 
 	if (make_new_sources (region, nsrcs, suffix)) {
 		goto out;
@@ -219,13 +216,11 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 	try {
 		while (pos < read_duration && !tsr.cancel) {
-
 			samplecnt_t this_read = 0;
 
 			for (uint32_t i = 0; i < channels; ++i) {
 
-				samplepos_t this_time;
-				this_time = min(bufsize, read_duration - pos);
+				samplepos_t this_time = min(bufsize, read_duration - pos);
 
 				samplepos_t this_position;
 				this_position = read_start + pos -
@@ -248,14 +243,13 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 			}
 
 			pos += this_read;
-			done += this_read;
 
-			progress->set_progress (((float) done / read_duration) * 0.25);
+			progress->set_progress (((float) pos / read_duration) * 0.25);
 
 			stretcher.study(buffers, this_read, pos == read_duration);
 		}
 
-		done = 0;
+		/* done studing, start process */
 		pos = 0;
 
 		while (pos < read_duration && !tsr.cancel) {
@@ -289,14 +283,12 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 			}
 
 			pos += this_read;
-			done += this_read;
 
-			progress->set_progress (0.25 + ((float) done / read_duration) * 0.75);
+			progress->set_progress (0.25 + ((float) pos / read_duration) * 0.75);
 
 			stretcher.process(buffers, this_read, pos == read_duration);
 
 			samplecnt_t avail = 0;
-
 			while ((avail = stretcher.available()) > 0) {
 
 				this_read = min (bufsize, avail);
@@ -318,6 +310,9 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 			}
 		}
 
+		/* completing */
+
+		samplecnt_t avail = 0;
 		while ((avail = stretcher.available()) >= 0 && !tsr.cancel) {
 			if (avail == 0) {
 				/* wait for stretcher threads */
@@ -384,7 +379,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	/* XXX: assuming we've only processed one input region into one result here */
 
 	if (ret == 0 && tsr.time_fraction != 1) {
-		result = boost::dynamic_pointer_cast<AudioRegion> (results.front());
+		boost::shared_ptr<AudioRegion> result = boost::dynamic_pointer_cast<AudioRegion> (results.front());
 		assert (result);
 		result->envelope()->x_scale (tsr.time_fraction);
 	}
