@@ -16,11 +16,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "control_point_dialog.h"
-#include "control_point.h"
-#include "automation_line.h"
-#include "pbd/i18n.h"
+#include <string>
 #include <gtkmm/stock.h>
+
+#include "automation_line.h"
+#include "control_point.h"
+#include "control_point_dialog.h"
+
+#include "pbd/i18n.h"
 
 /**
  *    ControlPointDialog constructor.
@@ -29,14 +32,27 @@
  */
 
 ControlPointDialog::ControlPointDialog (ControlPoint* p)
-	: ArdourDialog (_("Control point")),
-	  point_ (p)
+	: ArdourDialog (_("Control point"))
+	, point_ (p)
 {
 	assert (point_);
 
 	double const y_fraction = 1.0 - (p->get_y () / p->line().height ());
 
-	value_.set_text (p->line().fraction_to_string (y_fraction));
+	/* This effectively calls ARDOUR::value_as_string */
+	std::string val (p->line().fraction_to_string (y_fraction));
+
+	/* Undo desc.toggled special cases */
+	if (val == _("on")) {
+		val = "1";
+	} else if (val == _("off")) {
+		val = "0";
+	}
+
+	/* separate quantity and unit (if any) */
+	std::size_t sep = val.find_last_of (" ");
+
+	value_.set_text (val.substr (0, sep));
 	value_.set_activates_default ();
 
 	Gtk::HBox* b = Gtk::manage (new Gtk::HBox ());
@@ -44,8 +60,8 @@ ControlPointDialog::ControlPointDialog (ControlPoint* p)
 	b->pack_start (*Gtk::manage (new Gtk::Label (_("Value"))));
 	b->pack_start (value_);
 
-	if (p->line ().get_uses_gain_mapping ()) {
-		b->pack_start (*Gtk::manage (new Gtk::Label (_("dB"))));
+	if (sep != std::string::npos) {
+		b->pack_start (*Gtk::manage (new Gtk::Label (val.substr (sep + 1))));
 	}
 
 	get_vbox ()->pack_end (*b);
