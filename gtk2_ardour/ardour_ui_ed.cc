@@ -6,7 +6,7 @@
  * Copyright (C) 2006-2012 David Robillard <d@drobilla.net>
  * Copyright (C) 2007-2012 Carl Hetherington <carl@carlh.net>
  * Copyright (C) 2008 Hans Baier <hansfbaier@googlemail.com>
- * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2020 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2014-2019 Ben Loftis <ben@harrisonconsoles.com>
  * Copyright (C) 2015 André Nusser <andre.nusser@googlemail.com>
  *
@@ -719,6 +719,8 @@ ARDOUR_UI::build_menu_bar ()
 
 	EventBox* ev_dsp = manage (new EventBox);
 	EventBox* ev_path = manage (new EventBox);
+	EventBox* ev_format = manage (new EventBox);
+	EventBox* ev_timecode = manage (new EventBox);
 
 	Gtk::HBox* hbox = manage (new Gtk::HBox);
 	hbox->show ();
@@ -739,6 +741,13 @@ ARDOUR_UI::build_menu_bar ()
 
 	ev_dsp->add (dsp_load_label);
 	ev_path->add (session_path_label);
+	ev_format->add (format_label);
+	ev_timecode->add (timecode_format_label);
+
+	ev_dsp->show ();
+	ev_path->show ();
+	ev_format->show ();
+	ev_timecode->show ();
 
 #ifdef __APPLE__
 	use_menubar_as_top_menubar ();
@@ -752,8 +761,8 @@ ARDOUR_UI::build_menu_bar ()
 	hbox->pack_end (*ev_dsp, false, false, 6);
 	hbox->pack_end (disk_space_label, false, false, 6);
 	hbox->pack_end (sample_rate_label, false, false, 6);
-	hbox->pack_end (timecode_format_label, false, false, 6);
-	hbox->pack_end (format_label, false, false, 6);
+	hbox->pack_end (*ev_timecode, false, false, 6);
+	hbox->pack_end (*ev_format, false, false, 6);
 	hbox->pack_end (peak_thread_work_label, false, false, 6);
 	hbox->pack_end (*ev_path, false, false, 6);
 
@@ -778,6 +787,8 @@ ARDOUR_UI::build_menu_bar ()
 
 	ev_dsp->signal_button_release_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::xrun_button_release));
 	ev_path->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::path_button_press));
+	ev_format->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::format_button_press));
+	ev_timecode->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::timecode_button_press));
 }
 
 void

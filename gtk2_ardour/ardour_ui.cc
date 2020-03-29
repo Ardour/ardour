@@ -1365,7 +1365,7 @@ ARDOUR_UI::format_disk_space_label (float remain_sec)
 	std::string label = string_compose (X_("<span weight=\"ultralight\">%1</span>: "), _("Rec"));
 
 	if (remain_sec > 86400) {
-		disk_space_label.set_markup (_(">24h"));
+		disk_space_label.set_markup (label + _(">24h"));
 	} else if (remain_sec > 32400 /* 9 hours */) {
 		snprintf (buf, sizeof (buf), "%.0f", remain_sec / 3600.f);
 		disk_space_label.set_markup (label + buf + S_("hours|h"));

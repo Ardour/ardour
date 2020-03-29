@@ -7,7 +7,7 @@
  * Copyright (C) 2007-2012 Carl Hetherington <carl@carlh.net>
  * Copyright (C) 2007-2015 Tim Mayberry <mojofunk@gmail.com>
  * Copyright (C) 2007 Doug McLain <doug@nostar.net>
- * Copyright (C) 2013-2019 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2013-2020 Robin Gareus <robin@gareus.org>
  * Copyright (C) 2014-2018 Ben Loftis <ben@harrisonconsoles.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -991,4 +991,30 @@ ARDOUR_UI::toggle_mixer_space()
 	} else {
 		mixer->restore_mixer_space ();
 	}
+}
+
+bool
+ARDOUR_UI::timecode_button_press (GdkEventButton* ev)
+{
+	if (ev->button != 1 || ev->type != GDK_2BUTTON_PRESS) {
+		return false;
+	}
+	if (_session) {
+		session_option_editor->show ();
+		session_option_editor->set_current_page (_("Timecode"));
+	}
+	return true;
+}
+
+bool
+ARDOUR_UI::format_button_press (GdkEventButton* ev)
+{
+	if (ev->button != 1 || ev->type != GDK_2BUTTON_PRESS) {
+		return false;
+	}
+	if (_session) {
+		session_option_editor->show ();
+		session_option_editor->set_current_page (_("Media"));
+	}
+	return true;
 }
