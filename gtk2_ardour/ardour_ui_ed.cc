@@ -44,6 +44,7 @@
 #include "pbd/file_utils.h"
 #include "pbd/fpu.h"
 #include "pbd/convert.h"
+#include "pbd/openuri.h"
 
 #include "gtkmm2ext/cairo_packer.h"
 #include "gtkmm2ext/utils.h"
@@ -716,6 +717,9 @@ ARDOUR_UI::build_menu_bar ()
 	ev->set_name ("MainMenuBar");
 	ev->show ();
 
+	EventBox* ev_dsp = manage (new EventBox);
+	EventBox* ev_path = manage (new EventBox);
+
 	Gtk::HBox* hbox = manage (new Gtk::HBox);
 	hbox->show ();
 	hbox->set_border_width (2);
@@ -733,6 +737,9 @@ ARDOUR_UI::build_menu_bar ()
 	session_path_label.set_name ("Path");
 	format_label.set_use_markup ();
 
+	ev_dsp->add (dsp_load_label);
+	ev_path->add (session_path_label);
+
 #ifdef __APPLE__
 	use_menubar_as_top_menubar ();
 #else
@@ -742,13 +749,13 @@ ARDOUR_UI::build_menu_bar ()
 	hbox->pack_end (error_alert_button, false, false, 2);
 	hbox->pack_end (wall_clock_label, false, false, 10);
 
-	hbox->pack_end (dsp_load_label, false, false, 6);
+	hbox->pack_end (*ev_dsp, false, false, 6);
 	hbox->pack_end (disk_space_label, false, false, 6);
 	hbox->pack_end (sample_rate_label, false, false, 6);
 	hbox->pack_end (timecode_format_label, false, false, 6);
 	hbox->pack_end (format_label, false, false, 6);
 	hbox->pack_end (peak_thread_work_label, false, false, 6);
-	hbox->pack_end (session_path_label, false, false, 6);
+	hbox->pack_end (*ev_path, false, false, 6);
 
 	menu_hbox.pack_end (*ev, true, true, 2);
 
@@ -768,7 +775,9 @@ ARDOUR_UI::build_menu_bar ()
 #endif
 
 	ev->signal_button_press_event().connect (sigc::mem_fun (_status_bar_visibility, &VisibilityGroup::button_press_event));
-	ev->signal_button_release_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::xrun_button_release));
+
+	ev_dsp->signal_button_release_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::xrun_button_release));
+	ev_path->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::path_button_press));
 }
 
 void
@@ -927,13 +936,26 @@ ARDOUR_UI::focus_on_clock ()
 bool
 ARDOUR_UI::xrun_button_release (GdkEventButton* ev)
 {
-	if (ev->button != 1 || !Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+	if (ev->button != 1 || !(Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier) || ev->type == GDK_2BUTTON_PRESS)) {
 		return false;
 	}
 
 	if (_session) {
 		_session->reset_xrun_count ();
 		update_cpu_load ();
+	}
+	return true;
+}
+
+bool
+ARDOUR_UI::path_button_press (GdkEventButton* ev)
+{
+	if (ev->button != 1 || ev->type != GDK_2BUTTON_PRESS) {
+		return false;
+	}
+
+	if (_session) {
+		PBD::open_folder (_session->path ());
 	}
 	return true;
 }

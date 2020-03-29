@@ -859,6 +859,7 @@ private:
 
 	void on_theme_changed ();
 
+	bool path_button_press (GdkEventButton* ev);
 	bool xrun_button_release (GdkEventButton* ev);
 
 	std::string _announce_string;
