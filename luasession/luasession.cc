@@ -517,9 +517,12 @@ usage ()
 {
 	printf ("ardour-lua - interactive Ardour Lua interpreter.\n\n");
 	printf ("Usage: ardour-lua [ OPTIONS ] [ file [args] ]\n\n");
+/*        1         2         3         4         5         6         7         8
+ *2345678901234567890123456789012345678901234567890123456789012345678901234567890*/
 	printf ("Options:\n\
   -h, --help                 display this help and exit\n\
 	-i, --interactive          enter interactive mode after executing 'script'\n\
+	                           force the interpeter to behave interactively\n\
   -V, --version              print version information and exit\n\
 \n");
 	printf ("\n\
@@ -584,13 +587,14 @@ main (int argc, char** argv)
 
 	if (argc > optind && 0 != strcmp (argv[optind], "-")) {
 		lua->do_file (argv[optind]);
-	} else {
-		interactive = true;
+		if (!interactive) {
+			keep_running = false;
+		}
 	}
 
-	if (!interactive || !keep_running) {
+	if (!keep_running) {
 		/* continue to exit */
-	} else if (is_tty ()) {
+	} else if (is_tty () || interactive) {
 		interactive_interpreter ();
 	} else {
 		luaL_dofile (lua->getState (), NULL);
