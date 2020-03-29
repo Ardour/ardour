@@ -1279,10 +1279,11 @@ void
 ARDOUR_UI::update_cpu_load ()
 {
 	const unsigned int x = _session ? _session->get_xrun_count () : 0;
+	const bool fw = AudioEngine::instance()->freewheeling ();
 	double const c = AudioEngine::instance()->get_dsp_load ();
 
 	std::string label = string_compose (X_("<span weight=\"ultralight\">%1</span>: "), _("DSP"));
-	const char* const bg = c > 90 ? " background=\"red\" foreground=\"white\"" : "";
+	const char* const bg = (c > 90 && !fw) ? " background=\"red\" foreground=\"white\"" : "";
 
 	char buf[256];
 	if (x > 9999) {
