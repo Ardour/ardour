@@ -730,6 +730,7 @@ ARDOUR_UI::build_menu_bar ()
 	sample_rate_label.set_name ("SampleRate");
 	sample_rate_label.set_use_markup ();
 	format_label.set_name ("Format");
+	session_path_label.set_name ("Path");
 	format_label.set_use_markup ();
 
 #ifdef __APPLE__
@@ -747,12 +748,14 @@ ARDOUR_UI::build_menu_bar ()
 	hbox->pack_end (timecode_format_label, false, false, 6);
 	hbox->pack_end (format_label, false, false, 6);
 	hbox->pack_end (peak_thread_work_label, false, false, 6);
+	hbox->pack_end (session_path_label, false, false, 6);
 
 	menu_hbox.pack_end (*ev, true, true, 2);
 
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);
 
+	_status_bar_visibility.add (&session_path_label    ,X_("Path"),      _("Path to Session"), false);
 	_status_bar_visibility.add (&peak_thread_work_label,X_("Peakfile"),  _("Active Peak-file Work"), false);
 	_status_bar_visibility.add (&format_label,          X_("Format"),    _("File Format"), false);
 	_status_bar_visibility.add (&timecode_format_label, X_("TCFormat"),  _("Timecode Format"), false);

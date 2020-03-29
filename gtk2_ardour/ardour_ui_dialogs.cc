@@ -121,6 +121,8 @@ ARDOUR_UI::set_session (Session *s)
 		virtual_keyboard_window->set_session (s);
 	}
 
+	update_path_label ();
+
 	if (!_session) {
 		WM::Manager::instance().set_session (s);
 		/* Session option editor cannot exist across change-of-session */

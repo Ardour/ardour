@@ -1276,6 +1276,19 @@ ARDOUR_UI::update_format ()
 }
 
 void
+ARDOUR_UI::update_path_label ()
+{
+	stringstream s;
+	s << X_("<span weight=\"ultralight\">") << _("Path") << X_("</span>: ");
+	if (_session) {
+		s << Gtkmm2ext::markup_escape_text (_session->path());
+	} else {
+		s << "-";
+	}
+	session_path_label.set_markup (s.str ());
+}
+
+void
 ARDOUR_UI::update_cpu_load ()
 {
 	const unsigned int x = _session ? _session->get_xrun_count () : 0;
