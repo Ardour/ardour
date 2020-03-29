@@ -83,6 +83,7 @@ _query_registry (const char *regkey, const char *regval, std::string &rv) {
 static void*
 _pingback (void *arg)
 {
+	pthread_set_name ("Pingback");
 	ArdourCurl::HttpGet h;
 
 	ping_call* cm = static_cast<ping_call*> (arg);

@@ -31,6 +31,8 @@
 #include <glib.h>
 #include <glibmm/timer.h>
 
+#include "pbd/pthread_utils.h"
+
 #include "ardour/linux_vst_support.h"
 #include "ardour/vst_plugin.h"
 
@@ -319,6 +321,7 @@ windows, that is if they don't manage their own UIs **/
 static void*
 gui_event_loop (void* ptr)
 {
+	pthread_set_name ("LXVSTEventLoop");
 	VSTState* vstfx;
 	int LXVST_sched_timer_interval = 40; //ms, 25fps
 	XEvent event;

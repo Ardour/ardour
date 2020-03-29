@@ -26,6 +26,8 @@
 #include <gtkmm/progressbar.h>
 #include <gtkmm/stock.h>
 
+#include "pbd/pthread_utils.h"
+
 #include "ardour/audioregion.h"
 #include "ardour/dB.h"
 #include "ardour/logmeter.h"
@@ -246,6 +248,7 @@ void *
 StripSilenceDialog::_detection_thread_work (void* arg)
 {
 	StripSilenceDialog* d = reinterpret_cast<StripSilenceDialog*> (arg);
+	pthread_set_name ("SilenceDetect");
 	return d->detection_thread_work ();
 }
 
