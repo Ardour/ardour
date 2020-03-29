@@ -51,6 +51,7 @@
 #include "gtkmm2ext/window_title.h"
 
 #include "widgets/tearoff.h"
+#include "widgets/tooltips.h"
 
 #include "ardour_ui.h"
 #include "public_editor.h"
@@ -719,6 +720,7 @@ ARDOUR_UI::build_menu_bar ()
 
 	EventBox* ev_dsp = manage (new EventBox);
 	EventBox* ev_path = manage (new EventBox);
+	EventBox* ev_audio = manage (new EventBox);
 	EventBox* ev_format = manage (new EventBox);
 	EventBox* ev_timecode = manage (new EventBox);
 
@@ -741,11 +743,13 @@ ARDOUR_UI::build_menu_bar ()
 
 	ev_dsp->add (dsp_load_label);
 	ev_path->add (session_path_label);
+	ev_audio->add (sample_rate_label);
 	ev_format->add (format_label);
 	ev_timecode->add (timecode_format_label);
 
 	ev_dsp->show ();
 	ev_path->show ();
+	ev_audio->show ();
 	ev_format->show ();
 	ev_timecode->show ();
 
@@ -760,7 +764,7 @@ ARDOUR_UI::build_menu_bar ()
 
 	hbox->pack_end (*ev_dsp, false, false, 6);
 	hbox->pack_end (disk_space_label, false, false, 6);
-	hbox->pack_end (sample_rate_label, false, false, 6);
+	hbox->pack_end (*ev_audio, false, false, 6);
 	hbox->pack_end (*ev_timecode, false, false, 6);
 	hbox->pack_end (*ev_format, false, false, 6);
 	hbox->pack_end (peak_thread_work_label, false, false, 6);
@@ -787,8 +791,14 @@ ARDOUR_UI::build_menu_bar ()
 
 	ev_dsp->signal_button_release_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::xrun_button_release));
 	ev_path->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::path_button_press));
+	ev_audio->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::audio_button_press));
 	ev_format->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::format_button_press));
 	ev_timecode->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::timecode_button_press));
+
+	ArdourWidgets::set_tooltip (session_path_label, _("Double click to open session folder."));
+	ArdourWidgets::set_tooltip (format_label, _("Double click to edit audoi file format."));
+	ArdourWidgets::set_tooltip (timecode_format_label, _("Double click to change timecode settings."));
+	ArdourWidgets::set_tooltip (sample_rate_label, _("Double click to show audio/midi setup."));
 }
 
 void
@@ -955,6 +965,16 @@ ARDOUR_UI::xrun_button_release (GdkEventButton* ev)
 		_session->reset_xrun_count ();
 		update_cpu_load ();
 	}
+	return true;
+}
+
+bool
+ARDOUR_UI::audio_button_press (GdkEventButton* ev)
+{
+  if (ev->button != 1 || ev->type != GDK_2BUTTON_PRESS) {
+    return false;
+  }
+  audio_midi_setup->present ();
 	return true;
 }
 

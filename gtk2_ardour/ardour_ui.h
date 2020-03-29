@@ -394,7 +394,6 @@ protected:
 	void reenable_hide_loop_punch_ruler_if_appropriate ();
 	void toggle_auto_return ();
 	void toggle_click ();
-	void toggle_audio_midi_setup ();
 	void toggle_session_auto_loop ();
 	void toggle_rc_options_window ();
 	void toggle_session_options_window ();
@@ -860,6 +859,7 @@ private:
 	void on_theme_changed ();
 
 	bool path_button_press (GdkEventButton* ev);
+	bool audio_button_press (GdkEventButton* ev);
 	bool format_button_press (GdkEventButton* ev);
 	bool timecode_button_press (GdkEventButton* ev);
 	bool xrun_button_release (GdkEventButton* ev);
