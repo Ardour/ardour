@@ -739,7 +739,7 @@ ARDOUR_UI::build_menu_bar ()
 #endif
 
 	hbox->pack_end (error_alert_button, false, false, 2);
-	hbox->pack_end (wall_clock_label, false, false, 2);
+	hbox->pack_end (wall_clock_label, false, false, 10);
 
 	hbox->pack_end (dsp_load_label, false, false, 6);
 	hbox->pack_end (disk_space_label, false, false, 6);
