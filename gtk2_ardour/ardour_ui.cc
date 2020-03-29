@@ -1180,35 +1180,38 @@ ARDOUR_UI::set_fps_timeout_connection ()
 void
 ARDOUR_UI::update_sample_rate (samplecnt_t)
 {
-	char buf[64];
+	std::string heading = string_compose (X_("<i>%1</i>: "), _("Audio"));
 
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::update_sample_rate, ignored)
 
 	if (!AudioEngine::instance()->running()) {
 
-		snprintf (buf, sizeof (buf), "%s", _("Audio: <span foreground=\"red\">none</span>"));
+		sample_rate_label.set_markup (heading + _("none"));
 
 	} else {
 
 		samplecnt_t rate = AudioEngine::instance()->sample_rate();
 
 		if (rate == 0) {
+
 			/* no sample rate available */
-			snprintf (buf, sizeof (buf), "%s", _("Audio: <span foreground=\"red\">none</span>"));
+			sample_rate_label.set_markup (heading + _("none"));
+
 		} else {
+			char buf[64];
 
 			if (fmod (rate, 1000.0) != 0.0) {
-				snprintf (buf, sizeof (buf), _("Audio: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"),
-					  (float) rate / 1000.0f,
-					  (AudioEngine::instance()->usecs_per_cycle() / 1000.0f));
+				snprintf (buf, sizeof (buf), "%.1f %s / %4.1f %s",
+					  (float) rate / 1000.0f, _("kHz"),
+					  (AudioEngine::instance()->usecs_per_cycle() / 1000.0f), _("ms"));
 			} else {
-				snprintf (buf, sizeof (buf), _("Audio: <span foreground=\"green\">%" PRId64 " kHz / %4.1f ms</span>"),
-					  rate/1000,
-					  (AudioEngine::instance()->usecs_per_cycle() / 1000.0f));
+				snprintf (buf, sizeof (buf), "%" PRId64 " %s / %4.1f %s",
+					  rate / 1000, _("kHz"),
+					  (AudioEngine::instance()->usecs_per_cycle() / 1000.0f), _("ms"));
 			}
+			sample_rate_label.set_markup (heading + buf);
 		}
 	}
-	sample_rate_label.set_markup (buf);
 }
 
 void
@@ -1220,7 +1223,7 @@ ARDOUR_UI::update_format ()
 	}
 
 	stringstream s;
-	s << _("File:") << X_(" <span foreground=\"green\">");
+	s << X_("<i>") << _("File") << X_("</i>: ");
 
 	switch (_session->config.get_native_file_header_format ()) {
 	case BWF:
@@ -1269,8 +1272,6 @@ ARDOUR_UI::update_format ()
 		break;
 	}
 
-	s << X_("</span>");
-
 	format_label.set_markup (s.str ());
 }
 
@@ -1280,28 +1281,29 @@ ARDOUR_UI::update_cpu_load ()
 	const unsigned int x = _session ? _session->get_xrun_count () : 0;
 	double const c = AudioEngine::instance()->get_dsp_load ();
 
+	std::string heading = string_compose (X_("<i>%1</i>: "), _("DSP"));
 	const char* const bg = c > 90 ? " background=\"red\"" : "";
 
 	char buf[64];
 	if (x > 9999) {
-		snprintf (buf, sizeof (buf), "DSP: <span%s>%.0f%%</span> (>10k)", bg, c);
+		snprintf (buf, sizeof (buf), "<span face=\"monospace\"%s>%2.0f%%</span> (>10k)", bg, c);
 	} else if (x > 0) {
-		snprintf (buf, sizeof (buf), "DSP: <span%s>%.0f%%</span> (%d)", bg, c, x);
+		snprintf (buf, sizeof (buf), "<span face=\"monospace\"%s>%2.0f%%</span> (%d)", bg, c, x);
 	} else {
-		snprintf (buf, sizeof (buf), "DSP: <span%s>%.0f%%</span>", bg, c);
+		snprintf (buf, sizeof (buf), "<span face=\"monospace\"%s>%2.0f%%</span>", bg, c);
 	}
 
-	dsp_load_label.set_markup (buf);
+	dsp_load_label.set_markup (heading + buf);
 
 	if (x > 9999) {
-		snprintf (buf, sizeof (buf), _("DSP: %.1f%% X: >10k\n%s"), c, _("Shift+Click to clear xruns."));
+		snprintf (buf, sizeof (buf), "%.1f%% X: >10k\n%s", c, _("Shift+Click to clear xruns."));
 	} else if (x > 0) {
-		snprintf (buf, sizeof (buf), _("DSP: %.1f%% X: %u\n%s"), c, x, _("Shift+Click to clear xruns."));
+		snprintf (buf, sizeof (buf), "%.1f%% X: %u\n%s", c, x, _("Shift+Click to clear xruns."));
 	} else {
-		snprintf (buf, sizeof (buf), _("DSP: %.1f%%"), c);
+		snprintf (buf, sizeof (buf), "%.1f%%", c);
 	}
 
-	ArdourWidgets::set_tooltip (dsp_load_label, buf);
+	ArdourWidgets::set_tooltip (dsp_load_label, heading + buf);
 }
 
 void
@@ -1310,8 +1312,10 @@ ARDOUR_UI::update_peak_thread_work ()
 	char buf[64];
 	const int c = SourceFactory::peak_work_queue_length ();
 	if (c > 0) {
-		snprintf (buf, sizeof (buf), _("PkBld: <span foreground=\"%s\">%d</span>"), c >= 2 ? X_("red") : X_("green"), c);
-		peak_thread_work_label.set_markup (buf);
+		std::string heading = string_compose (X_("<i>%1</i>: "), _("PkBld"));
+		const char* const bg = c > 2 ? " background=\"red\"" : "";
+		snprintf (buf, sizeof (buf), "<span %s>%d</span>", bg, c);
+		peak_thread_work_label.set_markup (heading + buf);
 	} else {
 		peak_thread_work_label.set_markup (X_(""));
 	}
@@ -1344,17 +1348,21 @@ ARDOUR_UI::format_disk_space_label (float remain_sec)
 	snprintf (buf, sizeof(buf), _("%02dh:%02dm:%02ds"), hrs, mins, secs);
 	ArdourWidgets::set_tooltip (disk_space_label, buf);
 
+	std::string heading = string_compose (X_("<i>%1</i>: "), _("Rec"));
+
 	if (remain_sec > 86400) {
-		disk_space_label.set_text (_("Rec: >24h"));
-		return;
+		disk_space_label.set_markup (_(">24h"));
+		disk_space_label.set_markup (heading + buf);
 	} else if (remain_sec > 32400 /* 9 hours */) {
-		snprintf (buf, sizeof (buf), "Rec: %.0fh", remain_sec / 3600.f);
+		snprintf (buf, sizeof (buf), "%.0f", remain_sec / 3600.f);
+		disk_space_label.set_markup (heading + buf + S_("hours|h"));
 	} else if (remain_sec > 5940 /* 99 mins */) {
-		snprintf (buf, sizeof (buf), "Rec: %.1fh", remain_sec / 3600.f);
+		snprintf (buf, sizeof (buf), "%.1f", remain_sec / 3600.f);
+		disk_space_label.set_markup (heading + buf + S_("hours|h"));
 	} else {
-		snprintf (buf, sizeof (buf), "Rec: %.0fm", remain_sec / 60.f);
+		snprintf (buf, sizeof (buf), "%.0f", remain_sec / 60.f);
+		disk_space_label.set_markup (heading + buf + S_("minutes|m"));
 	}
-	disk_space_label.set_text (buf);
 
 }
 
@@ -1399,6 +1407,7 @@ void
 ARDOUR_UI::update_timecode_format ()
 {
 	char buf[64];
+	std::string heading = string_compose (X_("<i>%1</i>: "), S_("Timecode|TC"));
 
 	if (_session) {
 		bool matching;
@@ -1411,15 +1420,16 @@ ARDOUR_UI::update_timecode_format ()
 			matching = true;
 		}
 
+		const char* const bg = matching ? "" : " background=\"red\"";
 
-		snprintf (buf, sizeof (buf), S_("Timecode|TC: <span foreground=\"%s\">%s</span>"),
-			  matching ? X_("green") : X_("red"),
-			  Timecode::timecode_format_name (_session->config.get_timecode_format()).c_str());
+		snprintf (buf, sizeof (buf), _("<span%s>%s</span>"), bg,
+				Timecode::timecode_format_name (_session->config.get_timecode_format()).c_str());
+
+		timecode_format_label.set_markup (heading + buf);
 	} else {
-		snprintf (buf, sizeof (buf), "TC: n/a");
+		timecode_format_label.set_markup (heading + _("n/a"));
 	}
 
-	timecode_format_label.set_markup (buf);
 }
 
 gint

@@ -740,12 +740,13 @@ ARDOUR_UI::build_menu_bar ()
 
 	hbox->pack_end (error_alert_button, false, false, 2);
 	hbox->pack_end (wall_clock_label, false, false, 2);
-	hbox->pack_end (dsp_load_label, false, false, 4);
-	hbox->pack_end (disk_space_label, false, false, 4);
-	hbox->pack_end (sample_rate_label, false, false, 4);
-	hbox->pack_end (timecode_format_label, false, false, 4);
-	hbox->pack_end (format_label, false, false, 4);
-	hbox->pack_end (peak_thread_work_label, false, false, 4);
+
+	hbox->pack_end (dsp_load_label, false, false, 6);
+	hbox->pack_end (disk_space_label, false, false, 6);
+	hbox->pack_end (sample_rate_label, false, false, 6);
+	hbox->pack_end (timecode_format_label, false, false, 6);
+	hbox->pack_end (format_label, false, false, 6);
+	hbox->pack_end (peak_thread_work_label, false, false, 6);
 
 	menu_hbox.pack_end (*ev, true, true, 2);
 
