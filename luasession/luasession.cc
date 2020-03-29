@@ -521,8 +521,8 @@ usage ()
  *2345678901234567890123456789012345678901234567890123456789012345678901234567890*/
 	printf ("Options:\n\
   -h, --help                 display this help and exit\n\
-	-i, --interactive          enter interactive mode after executing 'script'\n\
-	                           force the interpeter to behave interactively\n\
+	-i, --interactive          enter interactive mode after executing 'script',\n\
+	                           force the interpreter to run interactively\n\
   -V, --version              print version information and exit\n\
 \n");
 	printf ("\n\
