@@ -1281,8 +1281,8 @@ ARDOUR_UI::update_cpu_load ()
 	const unsigned int x = _session ? _session->get_xrun_count () : 0;
 	double const c = AudioEngine::instance()->get_dsp_load ();
 
-	const char* const bg = c > 90 ? " background=\"red\"" : "";
 	std::string label = string_compose (X_("<span weight=\"ultralight\">%1</span>: "), _("DSP"));
+	const char* const bg = c > 90 ? " background=\"red\" foreground=\"white\"" : "";
 
 	char buf[256];
 	if (x > 9999) {
@@ -1312,8 +1312,8 @@ ARDOUR_UI::update_peak_thread_work ()
 	char buf[64];
 	const int c = SourceFactory::peak_work_queue_length ();
 	if (c > 0) {
-		const char* const bg = c > 2 ? " background=\"red\"" : "";
 		std::string label = string_compose (X_("<span weight=\"ultralight\">%1</span>: "), _("PkBld"));
+		const char* const bg = c > 2 ? " background=\"red\" foreground=\"white\"" : "";
 		snprintf (buf, sizeof (buf), "<span %s>%d</span>", bg, c);
 		peak_thread_work_label.set_markup (label + buf);
 	} else {
@@ -1419,7 +1419,7 @@ ARDOUR_UI::update_timecode_format ()
 			matching = true;
 		}
 
-		const char* const bg = matching ? "" : " background=\"red\"";
+		const char* const bg = matching ? "" : " background=\"red\" foreground=\"white\"";
 
 		timecode_format_label.set_markup (string_compose ("%1<span%2>%3</span>",
 					label, bg,
