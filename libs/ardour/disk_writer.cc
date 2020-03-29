@@ -1349,4 +1349,5 @@ DiskWriter::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
 	if (reset_ws) {
 		reset_write_sources (false, true);
 	}
+	return 0;
 }
