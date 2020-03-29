@@ -1180,13 +1180,13 @@ ARDOUR_UI::set_fps_timeout_connection ()
 void
 ARDOUR_UI::update_sample_rate (samplecnt_t)
 {
-	std::string heading = string_compose (X_("<i>%1</i>: "), _("Audio"));
+	std::string label = string_compose (X_("<span weight=\"ultralight\">%1</span>: "), _("Audio"));
 
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::update_sample_rate, ignored)
 
 	if (!AudioEngine::instance()->running()) {
 
-		sample_rate_label.set_markup (heading + _("none"));
+		sample_rate_label.set_markup (label + _("none"));
 
 	} else {
 
@@ -1195,7 +1195,7 @@ ARDOUR_UI::update_sample_rate (samplecnt_t)
 		if (rate == 0) {
 
 			/* no sample rate available */
-			sample_rate_label.set_markup (heading + _("none"));
+			sample_rate_label.set_markup (label + _("none"));
 
 		} else {
 			char buf[64];
@@ -1209,7 +1209,7 @@ ARDOUR_UI::update_sample_rate (samplecnt_t)
 					  rate / 1000, _("kHz"),
 					  (AudioEngine::instance()->usecs_per_cycle() / 1000.0f), _("ms"));
 			}
-			sample_rate_label.set_markup (heading + buf);
+			sample_rate_label.set_markup (label + buf);
 		}
 	}
 }
@@ -1223,7 +1223,7 @@ ARDOUR_UI::update_format ()
 	}
 
 	stringstream s;
-	s << X_("<i>") << _("File") << X_("</i>: ");
+	s << X_("<span weight=\"ultralight\">") << _("File") << X_("</span>: ");
 
 	switch (_session->config.get_native_file_header_format ()) {
 	case BWF:
@@ -1281,10 +1281,10 @@ ARDOUR_UI::update_cpu_load ()
 	const unsigned int x = _session ? _session->get_xrun_count () : 0;
 	double const c = AudioEngine::instance()->get_dsp_load ();
 
-	std::string heading = string_compose (X_("<i>%1</i>: "), _("DSP"));
 	const char* const bg = c > 90 ? " background=\"red\"" : "";
+	std::string label = string_compose (X_("<span weight=\"ultralight\">%1</span>: "), _("DSP"));
 
-	char buf[64];
+	char buf[256];
 	if (x > 9999) {
 		snprintf (buf, sizeof (buf), "<span face=\"monospace\"%s>%2.0f%%</span> (>10k)", bg, c);
 	} else if (x > 0) {
@@ -1293,7 +1293,7 @@ ARDOUR_UI::update_cpu_load ()
 		snprintf (buf, sizeof (buf), "<span face=\"monospace\"%s>%2.0f%%</span>", bg, c);
 	}
 
-	dsp_load_label.set_markup (heading + buf);
+	dsp_load_label.set_markup (label + buf);
 
 	if (x > 9999) {
 		snprintf (buf, sizeof (buf), "%.1f%% X: >10k\n%s", c, _("Shift+Click to clear xruns."));
@@ -1303,7 +1303,7 @@ ARDOUR_UI::update_cpu_load ()
 		snprintf (buf, sizeof (buf), "%.1f%%", c);
 	}
 
-	ArdourWidgets::set_tooltip (dsp_load_label, heading + buf);
+	ArdourWidgets::set_tooltip (dsp_load_label, label + buf);
 }
 
 void
@@ -1312,10 +1312,10 @@ ARDOUR_UI::update_peak_thread_work ()
 	char buf[64];
 	const int c = SourceFactory::peak_work_queue_length ();
 	if (c > 0) {
-		std::string heading = string_compose (X_("<i>%1</i>: "), _("PkBld"));
 		const char* const bg = c > 2 ? " background=\"red\"" : "";
+		std::string label = string_compose (X_("<span weight=\"ultralight\">%1</span>: "), _("PkBld"));
 		snprintf (buf, sizeof (buf), "<span %s>%d</span>", bg, c);
-		peak_thread_work_label.set_markup (heading + buf);
+		peak_thread_work_label.set_markup (label + buf);
 	} else {
 		peak_thread_work_label.set_markup (X_(""));
 	}
@@ -1348,20 +1348,20 @@ ARDOUR_UI::format_disk_space_label (float remain_sec)
 	snprintf (buf, sizeof(buf), _("%02dh:%02dm:%02ds"), hrs, mins, secs);
 	ArdourWidgets::set_tooltip (disk_space_label, buf);
 
-	std::string heading = string_compose (X_("<i>%1</i>: "), _("Rec"));
+	std::string label = string_compose (X_("<span weight=\"ultralight\">%1</span>: "), _("Rec"));
 
 	if (remain_sec > 86400) {
 		disk_space_label.set_markup (_(">24h"));
-		disk_space_label.set_markup (heading + buf);
+		disk_space_label.set_markup (label + buf);
 	} else if (remain_sec > 32400 /* 9 hours */) {
 		snprintf (buf, sizeof (buf), "%.0f", remain_sec / 3600.f);
-		disk_space_label.set_markup (heading + buf + S_("hours|h"));
+		disk_space_label.set_markup (label + buf + S_("hours|h"));
 	} else if (remain_sec > 5940 /* 99 mins */) {
 		snprintf (buf, sizeof (buf), "%.1f", remain_sec / 3600.f);
-		disk_space_label.set_markup (heading + buf + S_("hours|h"));
+		disk_space_label.set_markup (label + buf + S_("hours|h"));
 	} else {
 		snprintf (buf, sizeof (buf), "%.0f", remain_sec / 60.f);
-		disk_space_label.set_markup (heading + buf + S_("minutes|m"));
+		disk_space_label.set_markup (label + buf + S_("minutes|m"));
 	}
 
 }
@@ -1406,8 +1406,7 @@ ARDOUR_UI::update_disk_space()
 void
 ARDOUR_UI::update_timecode_format ()
 {
-	char buf[64];
-	std::string heading = string_compose (X_("<i>%1</i>: "), S_("Timecode|TC"));
+	std::string label = string_compose (X_("<span weight=\"ultralight\">%1</span>: "), S_("Timecode|TC"));
 
 	if (_session) {
 		bool matching;
@@ -1422,12 +1421,11 @@ ARDOUR_UI::update_timecode_format ()
 
 		const char* const bg = matching ? "" : " background=\"red\"";
 
-		snprintf (buf, sizeof (buf), _("<span%s>%s</span>"), bg,
-				Timecode::timecode_format_name (_session->config.get_timecode_format()).c_str());
-
-		timecode_format_label.set_markup (heading + buf);
+		timecode_format_label.set_markup (string_compose ("%1<span%2>%3</span>",
+					label, bg,
+					Timecode::timecode_format_name (_session->config.get_timecode_format()).c_str()));
 	} else {
-		timecode_format_label.set_markup (heading + _("n/a"));
+		timecode_format_label.set_markup (label + _("n/a"));
 	}
 
 }
