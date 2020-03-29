@@ -153,6 +153,14 @@ pthread_set_name (const char *str)
 	/* copy string and delete it when exiting */
 
 	thread_name.set (strdup (str)); // leaks
+
+#if !defined PLATFORM_WINDOWS && defined _GNU_SOURCE
+	/* set public thread name, up to 16 chars */
+	char ptn[16];
+	memset (ptn, 0, 16);
+	strncpy (ptn, str, 15);
+	pthread_setname_np (pthread_self(), ptn);
+#endif
 }
 
 const char *
