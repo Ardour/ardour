@@ -288,9 +288,12 @@ AudioEngine::process_callback (pframes_t nframes)
 		--_init_countdown;
 		/* Warm up caches */
 		PortManager::cycle_start (nframes);
-		PortManager::silence (nframes);
 		_session->process (nframes);
+		PortManager::silence (nframes);
 		PortManager::cycle_end (nframes);
+		if (_init_countdown == 0) {
+			_session->reset_xrun_count();
+		}
 		return 0;
 	}
 
@@ -723,7 +726,7 @@ AudioEngine::set_session (Session *s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
-		_init_countdown = 8;
+		_init_countdown = std::max (8, (int)(_backend->sample_rate () / _backend->buffer_size ()) / 2);
 	}
 }
 
