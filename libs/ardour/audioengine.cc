@@ -598,6 +598,7 @@ void
 AudioEngine::do_reset_backend()
 {
 	SessionEvent::create_per_thread_pool (X_("Backend reset processing thread"), 1024);
+	pthread_set_name ("EngineWatchdog");
 
 	Glib::Threads::Mutex::Lock guard (_reset_request_lock);
 
@@ -658,6 +659,7 @@ void
 AudioEngine::do_devicelist_update()
 {
 	SessionEvent::create_per_thread_pool (X_("Device list update processing thread"), 512);
+	pthread_set_name ("DeviceList");
 
 	Glib::Threads::Mutex::Lock guard (_devicelist_update_lock);
 

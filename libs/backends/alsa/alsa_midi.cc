@@ -64,6 +64,7 @@ AlsaMidiIO::~AlsaMidiIO ()
 static void * pthread_process (void *arg)
 {
 	AlsaMidiIO *d = static_cast<AlsaMidiIO *>(arg);
+	pthread_set_name ("AlsaMidiIO");
 	d->main_process_thread ();
 	pthread_exit (0);
 	return 0;

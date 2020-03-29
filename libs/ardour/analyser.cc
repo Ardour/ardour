@@ -19,6 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+
 #include "ardour/analyser.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/rc_configuration.h"
@@ -27,6 +28,8 @@
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
+#include "pbd/pthread_utils.h"
+
 #include "pbd/i18n.h"
 
 using namespace std;
@@ -51,6 +54,7 @@ Analyser::~Analyser ()
 static void
 analyser_work ()
 {
+	pthread_set_name ("Analyzer");
 	Analyser::work ();
 }
 

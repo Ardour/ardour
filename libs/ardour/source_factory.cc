@@ -63,6 +63,7 @@ static void
 peak_thread_work ()
 {
 	SessionEvent::create_per_thread_pool (X_("PeakFile Builder "), 64);
+	pthread_set_name ("PeakFileBuilder");
 
 	while (true) {
 

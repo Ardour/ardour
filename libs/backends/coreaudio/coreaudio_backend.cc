@@ -504,6 +504,7 @@ CoreAudioBackend::launch_control_app ()
 static void * pthread_freewheel (void *arg)
 {
 	CoreAudioBackend *d = static_cast<CoreAudioBackend *>(arg);
+	pthread_set_name ("CAFreewheel");
 	d->freewheel_thread ();
 	pthread_exit (0);
 	return 0;

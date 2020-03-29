@@ -21,6 +21,7 @@
 #include "ardour/lmath.h"
 
 #include "pbd/cpus.h"
+#include "pbd/pthread_utils.h"
 
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
@@ -438,6 +439,7 @@ WaveViewDrawingThread::quit ()
 void
 WaveViewDrawingThread::run ()
 {
+	pthread_set_name ("WaveViewDrawing");
 	while (true) {
 
 		if (g_atomic_int_get (&_quit)) {

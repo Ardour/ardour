@@ -63,6 +63,7 @@ RTTaskList::drop_threads ()
 RTTaskList::_thread_run (void *arg)
 {
 	RTTaskList *d = static_cast<RTTaskList *>(arg);
+	pthread_set_name ("RTTaskList");
 	d->run ();
 	pthread_exit (0);
 	return 0;

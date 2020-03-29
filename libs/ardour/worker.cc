@@ -20,11 +20,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "ardour/worker.h"
+#include <glibmm/timer.h>
+
 #include "pbd/error.h"
 #include "pbd/compose.h"
+#include "pbd/pthread_utils.h"
 
-#include <glibmm/timer.h>
+#include "ardour/worker.h"
 
 namespace ARDOUR {
 
@@ -136,6 +138,8 @@ Worker::emit_responses()
 void
 Worker::run()
 {
+	pthread_set_name ("LV2Worker");
+
 	void*  buf      = NULL;
 	size_t buf_size = 0;
 	while (true) {

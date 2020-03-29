@@ -5,13 +5,16 @@
 #include <string>
 
 #include <glib.h>
+
 #include "pbd/gstdio_compat.h"
+#include "pbd/pthread_utils.h"
 #include "pbd/ringbuffer.h"
 
 #include "audiographer/flag_debuggable.h"
 #include "audiographer/sink.h"
 #include "sndfile_writer.h"
 #include "sndfile_reader.h"
+
 #include "tmp_file.h"
 
 namespace AudioGrapher
@@ -133,6 +136,7 @@ class TmpFileRt
 	static void * _disk_thread (void *arg)
 	{
 		TmpFileRt *d = static_cast<TmpFileRt *>(arg);
+		pthread_set_name ("ExportDiskIO");
 		d->disk_thread ();
 		pthread_exit (0);
 		return 0;

@@ -47,6 +47,7 @@
 
 #include "pbd/file_utils.h"
 #include "pbd/search_path.h"
+#include "pbd/pthread_utils.h"
 #include "pbd/system_exec.h"
 
 using namespace std;
@@ -370,6 +371,7 @@ SystemExec::~SystemExec ()
 static void*
 interposer_thread (void *arg) {
 	SystemExec *sex = static_cast<SystemExec *>(arg);
+	pthread_set_name ("ExecStdOut");
 	sex->output_interposer();
 	pthread_exit(0);
 	return 0;

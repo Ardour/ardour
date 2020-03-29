@@ -680,6 +680,9 @@ void*
 Convlevel::static_main (void* arg)
 {
 	((Convlevel*)arg)->main ();
+#if !defined PTW32_VERSION && defined _GNU_SOURCE
+	pthread_setname_np (pthread_self(), "ZConvlevel");
+#endif
 	return 0;
 }
 

@@ -6922,6 +6922,7 @@ void *
 Session::auto_connect_thread (void *arg)
 {
 	Session *s = static_cast<Session *>(arg);
+	pthread_set_name (X_("autoconnect"));
 	s->auto_connect_thread_run ();
 	pthread_exit (0);
 	return 0;
@@ -6930,7 +6931,6 @@ Session::auto_connect_thread (void *arg)
 void
 Session::auto_connect_thread_run ()
 {
-	pthread_set_name (X_("autoconnect"));
 	SessionEvent::create_per_thread_pool (X_("autoconnect"), 1024);
 	PBD::notify_event_loops_about_thread_creation (pthread_self(), X_("autoconnect"), 1024);
 	pthread_mutex_lock (&_auto_connect_mutex);

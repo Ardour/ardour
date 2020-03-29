@@ -143,6 +143,7 @@ void*
 AlsaAudioSlave::_process_thread (void* arg)
 {
 	AlsaAudioSlave* aas = static_cast<AlsaAudioSlave*> (arg);
+	pthread_set_name ("AlsaAudioSlave");
 	return aas->process_thread ();
 }
 

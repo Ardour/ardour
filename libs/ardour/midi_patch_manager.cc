@@ -274,6 +274,7 @@ MidiPatchManager::load_midnams ()
 	*/
 
 	PBD::notify_event_loops_about_thread_creation (pthread_self(), "midi-patch-manager", 8);
+	pthread_set_name ("MIDNAMLoader");
 
 	{
 		Glib::Threads::Mutex::Lock lm (_lock);

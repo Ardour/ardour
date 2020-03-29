@@ -31,6 +31,7 @@
 #include "pbd/i18n.h"
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
+#include "pbd/pthread_utils.h"
 
 #include <glibmm/threads.h>
 
@@ -1087,6 +1088,7 @@ void *
 Session::emit_thread (void *arg)
 {
 	Session *s = static_cast<Session *>(arg);
+	pthread_set_name ("SessionSignals");
 	s->emit_thread_run ();
 	pthread_exit (0);
 	return 0;
