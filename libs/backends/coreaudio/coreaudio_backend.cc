@@ -708,6 +708,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 	_port_change_flag = true;
 	pre_process ();
 
+	_dsp_load_calc.reset ();
 	// all systems go.
 	_pcmio->set_xrun_callback (xrun_callback_ptr, this);
 	_preinit = false;
@@ -1797,6 +1798,7 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	if (!_run || _freewheel || _preinit) {
 		// NB if we return 1, the output is
 		// zeroed by the coreaudio callback
+		_dsp_load_calc.reset ();
 		return 1;
 	}
 

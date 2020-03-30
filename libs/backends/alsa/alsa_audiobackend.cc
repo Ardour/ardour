@@ -2107,6 +2107,7 @@ AlsaAudioBackend::main_process_thread ()
 		Glib::usleep (1000000 * (_samples_per_period / _samplerate ));
 	}
 
+	_dsp_load_calc.reset ();
 	_pcmi->pcm_start ();
 
 	while (_run) {
@@ -2124,6 +2125,7 @@ AlsaAudioBackend::main_process_thread ()
 				_pcmi->pcm_stop ();
 				_pcmi->pcm_start ();
 				drain_slaves = true;
+				_dsp_load_calc.reset ();
 			}
 		}
 

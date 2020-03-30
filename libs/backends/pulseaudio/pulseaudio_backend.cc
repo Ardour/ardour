@@ -1412,6 +1412,7 @@ PulseAudioBackend::main_process_thread ()
 		}
 	}
 
+	_dsp_load_calc.reset ();
 	stream_latency_update_cb (p_stream, this);
 
 	while (_run) {
@@ -1436,6 +1437,7 @@ PulseAudioBackend::main_process_thread ()
 				if (!sync_pulse (pa_stream_flush (p_stream, stream_operation_cb, this)) || !_operation_succeeded) {
 					break;
 				}
+				_dsp_load_calc.reset ();
 			}
 		}
 

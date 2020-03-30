@@ -684,6 +684,8 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	engine.reconnect_ports ();
 	_port_change_flag = false;
 
+	_dsp_calc.reset ();
+
 	if (_use_blocking_api) {
 		if (!start_blocking_process_thread()) {
 			return ProcessThreadStartError;
@@ -925,6 +927,7 @@ PortAudioBackend::freewheel_process_thread()
 				_freewheel_ack = false; // prepare next handshake
 				_midiio->set_enabled(true);
 				engine.freewheel_callback (_freewheeling);
+				_dsp_calc.reset ();
 			} else {
 				first_run = true;
 				_freewheel = true;
@@ -1883,11 +1886,15 @@ PortAudioBackend::blocking_process_thread ()
 	DWORD tid = GetCurrentThreadId ();
 	DEBUG_THREADS (string_compose ("Process Thread Master ID: %1\n", tid));
 
+	_dsp_calc.reset ();
 	while (_run) {
 
 		if (_freewheeling != _freewheel) {
 			_freewheel = _freewheeling;
 			engine.freewheel_callback (_freewheel);
+			if (!_freewheel) {
+				_dsp_calc.reset ();
+			}
 		}
 
 		if (!_freewheel) {
