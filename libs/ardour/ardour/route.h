@@ -190,7 +190,7 @@ public:
 	void set_denormal_protection (bool yn);
 	bool denormal_protection() const;
 
-	void         set_meter_point (MeterPoint, bool force = false);
+	void         set_meter_point (MeterPoint);
 	bool         apply_processor_changes_rt ();
 	void         emit_pending_signals ();
 	MeterPoint   meter_point() const { return _pending_meter_point; }

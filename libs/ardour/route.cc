@@ -2693,7 +2693,7 @@ Route::set_state (const XMLNode& node, int version)
 
 	MeterPoint mp;
 	if (node.get_property (X_("meter-point"), mp)) {
-		set_meter_point (mp, true);
+		set_meter_point (mp);
 		if (_meter) {
 			_meter->set_display_to_user (_meter_point == MeterCustom);
 		}
@@ -4022,13 +4022,13 @@ Route::emit_pending_signals ()
 }
 
 void
-Route::set_meter_point (MeterPoint p, bool force)
+Route::set_meter_point (MeterPoint p)
 {
-	if (_pending_meter_point == p && !force) {
+	if (_pending_meter_point == p) {
 		return;
 	}
 
-	if (force || !AudioEngine::instance()->running()) {
+	if (!AudioEngine::instance()->running()) {
 		bool meter_visibly_changed = false;
 		{
 			Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
