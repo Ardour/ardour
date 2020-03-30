@@ -2668,14 +2668,6 @@ Route::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	MeterPoint mp;
-	if (node.get_property (X_("meter-point"), mp)) {
-		set_meter_point (mp, true);
-		if (_meter) {
-			_meter->set_display_to_user (_meter_point == MeterCustom);
-		}
-	}
-
 	DiskIOPoint diop;
 	if (node.get_property (X_("disk-io-point"), diop)) {
 		if (_disk_writer) {
@@ -2698,6 +2690,14 @@ Route::set_state (const XMLNode& node, int version)
 
 	// this looks up the internal instrument in processors
 	reset_instrument_info();
+
+	MeterPoint mp;
+	if (node.get_property (X_("meter-point"), mp)) {
+		set_meter_point (mp, true);
+		if (_meter) {
+			_meter->set_display_to_user (_meter_point == MeterCustom);
+		}
+	}
 
 	bool denormal_protection;
 	if (node.get_property (X_("denormal-protection"), denormal_protection)) {
