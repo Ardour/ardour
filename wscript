@@ -59,7 +59,7 @@ compiler_flags_dictionaries= {
         # Flags to use posix pipes between compiler stages
         'pipe' : '-pipe',
         # Flags for maximally optimized build
-        'full-optimization' : [ '-O3', '-fomit-frame-pointer', '-ffast-math', '-fstrength-reduce', ],
+        'full-optimization' : [ '-O3', '-fomit-frame-pointer', '-ffast-math', '-fstrength-reduce', '-fno-finite-math-only' ],
         # Flag to ensure that compiler error output includes column/line numbers
         'show-column' : '-fshow-column',
         # Flags required to build for x86 only (OS X feature)
