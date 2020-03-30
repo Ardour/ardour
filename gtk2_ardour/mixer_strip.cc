@@ -663,7 +663,11 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 		if (!_route->is_master()) {
 			rec_mon_table.attach (*show_sends_button, 0, 3, 0, 2);
-			show_sends_button->show();
+			if (_mixer_owned) {
+				show_sends_button->show();
+			} else {
+				show_sends_button->hide();
+			}
 		}
 	}
 
