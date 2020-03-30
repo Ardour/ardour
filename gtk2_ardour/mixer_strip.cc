@@ -663,7 +663,12 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		/* non-master bus */
 
 		if (!_route->is_master()) {
-			rec_mon_table.attach (*show_sends_button, 0, 3, 0, 2);
+			if (ARDOUR::Profile->get_mixbus()) {
+				rec_mon_table.attach (*show_sends_button, 0, 3, 0, 2);
+			} else {
+				rec_mon_table.attach (*show_sends_button, 0, 2, 0, 2);
+			}
+
 			if (_mixer_owned) {
 				show_sends_button->show();
 			} else {
