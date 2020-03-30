@@ -40,6 +40,12 @@ public:
 		m_calc_avg_load = NULL != g_getenv("ARDOUR_AVG_DSP_LOAD");
 	}
 
+	void reset () {
+		m_dsp_load = 0;
+		m_start_timestamp_us = 0;
+		m_stop_timestamp_us = 0;
+	}
+
 	void set_max_time(double samplerate, uint32_t period_size) {
 		m_max_time_us = period_size * 1e6 / samplerate;
 		m_alpha = 0.2f * (m_max_time_us * 1e-6f);
@@ -53,8 +59,7 @@ public:
 
 	int64_t get_max_time_us() const { return m_max_time_us; }
 
-	void set_start_timestamp_us(int64_t start_timestamp_us)
-	{
+	void set_start_timestamp_us(int64_t start_timestamp_us) {
 		m_start_timestamp_us = start_timestamp_us;
 	}
 
@@ -73,6 +78,7 @@ public:
 		    elapsed_time_us() > max_timer_error_us()) {
 			return;
 		}
+		assert (m_max_time_us > 0);
 
 		const float load = (float) elapsed_time_us() / (float)m_max_time_us;
 		if ((m_calc_avg_load && load > .95f) || (!m_calc_avg_load && (load > m_dsp_load || load > 1.f))) {
