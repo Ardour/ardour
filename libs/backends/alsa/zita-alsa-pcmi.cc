@@ -230,7 +230,7 @@ snd_pcm_sframes_t Alsa_pcmi::pcm_wait (void)
 	{
 		_state = -1;
 		if (!recover ()) {
-		_state = 1;
+			_state = 1;
 		}
 		return 0;
 	}
@@ -239,7 +239,7 @@ snd_pcm_sframes_t Alsa_pcmi::pcm_wait (void)
 	{
 		_state = -1;
 		if (!recover ()) {
-		_state = 1;
+			_state = 1;
 		}
 		return 0;
 	}

@@ -2086,7 +2086,6 @@ AlsaAudioBackend::main_process_thread ()
 	double dll_w2 = dll_w1 * dll_w1;
 
 	uint64_t clock1;
-	_pcmi->pcm_start ();
 	int no_proc_errors = 0;
 	const int bailout = 5 * _samplerate / _samples_per_period;
 
@@ -2094,6 +2093,21 @@ AlsaAudioBackend::main_process_thread ()
 	manager.graph_order_callback();
 
 	const double sr_norm = 1e-6 * (double) _samplerate / (double)_samples_per_period;
+
+	/* warm up */
+	int cnt = std::max (8, (int)(_samplerate / _samples_per_period) / 2);
+	for (int w = 0; w < cnt; ++w) {
+		for (std::vector<AlsaPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+			memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
+		}
+		if (engine.process_callback (_samples_per_period)) {
+			_active = false;
+			return 0;
+		}
+		Glib::usleep (1000000 * (_samples_per_period / _samplerate ));
+	}
+
+	_pcmi->pcm_start ();
 
 	while (_run) {
 		long nr;
