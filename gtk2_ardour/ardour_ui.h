@@ -862,6 +862,7 @@ private:
 	bool audio_button_press (GdkEventButton* ev);
 	bool format_button_press (GdkEventButton* ev);
 	bool timecode_button_press (GdkEventButton* ev);
+	bool xrun_button_press (GdkEventButton* ev);
 	bool xrun_button_release (GdkEventButton* ev);
 
 	std::string _announce_string;

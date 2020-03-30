@@ -789,6 +789,7 @@ ARDOUR_UI::build_menu_bar ()
 
 	ev->signal_button_press_event().connect (sigc::mem_fun (_status_bar_visibility, &VisibilityGroup::button_press_event));
 
+	ev_dsp->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::xrun_button_press));
 	ev_dsp->signal_button_release_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::xrun_button_release));
 	ev_path->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::path_button_press));
 	ev_audio->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::audio_button_press));
@@ -955,9 +956,22 @@ ARDOUR_UI::focus_on_clock ()
 }
 
 bool
+ARDOUR_UI::xrun_button_press (GdkEventButton* ev)
+{
+	if (ev->button != 1 || ev->type != GDK_2BUTTON_PRESS) {
+		return false;
+	}
+	if (_session) {
+		_session->reset_xrun_count ();
+		update_cpu_load ();
+	}
+	return true;
+}
+
+bool
 ARDOUR_UI::xrun_button_release (GdkEventButton* ev)
 {
-	if (ev->button != 1 || !(Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier) || ev->type == GDK_2BUTTON_PRESS)) {
+	if (ev->button != 1 || !Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 		return false;
 	}
 
