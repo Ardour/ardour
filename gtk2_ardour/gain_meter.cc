@@ -704,7 +704,7 @@ GainMeterBase::set_route_group_meter_point (Route& route, MeterPoint mp)
 	RouteGroup* route_group;
 
 	if ((route_group = route.route_group ()) != 0) {
-		route_group->foreach_route (boost::bind (&Route::set_meter_point, _1, mp, false));
+		route_group->foreach_route (boost::bind (&Route::set_meter_point, _1, mp));
 	} else {
 		route.set_meter_point (mp);
 	}
