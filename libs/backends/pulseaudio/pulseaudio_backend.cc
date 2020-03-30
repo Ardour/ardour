@@ -1399,8 +1399,6 @@ PulseAudioBackend::main_process_thread ()
 	manager.registration_callback ();
 	manager.graph_order_callback ();
 
-	manager.registration_callback ();
-	manager.graph_order_callback ();
 
 	/* flush stream */
 	pa_threaded_mainloop_lock (p_mainloop);
