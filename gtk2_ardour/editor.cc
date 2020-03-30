@@ -2998,11 +2998,11 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 				prev--;
 			}
 
-			if ((direction == RoundUpMaybe || direction == RoundUpAlways))
+			if ((direction == RoundUpMaybe || direction == RoundUpAlways)) {
 				test = *next;
-			else if ((direction == RoundDownMaybe || direction == RoundDownAlways))
+			} else if ((direction == RoundDownMaybe || direction == RoundDownAlways)) {
 				test = *prev;
-			else if (direction ==  0) {
+			} else if (direction ==  0) {
 				if ((presnap - *prev) < (*next - presnap)) {
 					test = *prev;
 				} else {
