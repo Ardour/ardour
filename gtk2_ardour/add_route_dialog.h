@@ -141,8 +141,8 @@ private:
 
 	TrackTemplateColumns track_template_columns;
 
-    Glib::RefPtr<Gtk::TreeStore>  trk_template_model;
-    Gtk::TreeView                 trk_template_chooser;
+	Glib::RefPtr<Gtk::TreeStore>  trk_template_model;
+	Gtk::TreeView                 trk_template_chooser;
 
 	void trk_template_row_selected ();
 
@@ -162,6 +162,9 @@ private:
 
 	typedef std::vector<ChannelSetup> ChannelSetups;
 	ChannelSetups channel_setups;
+
+	int last_route_count;
+	bool route_count_set_by_template;
 
 	static std::vector<std::pair<std::string, std::string> > builtin_types;
 	static std::vector<std::string> channel_combo_strings;

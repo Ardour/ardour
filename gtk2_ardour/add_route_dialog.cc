@@ -80,6 +80,8 @@ AddRouteDialog::AddRouteDialog ()
 	, strict_io_label (_("Pin Mode:"))
 	, mode_label (_("Record Mode:"))
 	, instrument_label (_("Instrument:"))
+	, last_route_count (1)
+	, route_count_set_by_template (false)
 	, name_edited_by_user (false)
 {
 	set_name ("AddRouteDialog");
@@ -380,6 +382,8 @@ AddRouteDialog::trk_template_row_selected ()
 	const string n = (*iter)[track_template_columns.name];
 	const string p = (*iter)[track_template_columns.path];
 
+	bool route_count_now_set_by_template = false;
+
 	if (p.substr (0, 11) == "urn:ardour:") {
 		/* lua script - meta-template */
 		const std::map<std::string, std::string> rs (ARDOUR_UI::instance()->route_setup_info (p.substr (11)));
@@ -420,10 +424,13 @@ AddRouteDialog::trk_template_row_selected ()
 			name_template_entry.set_text ("");
 		}
 
-		if ((it = rs.find ("how_many")) != rs.end()) {
-			if (atoi (it->second.c_str()) > 0) {
-				routes_adjustment.set_value (atoi (it->second.c_str()));
+		if ((it = rs.find ("how_many")) != rs.end() && atoi (it->second.c_str()) > 0) {
+			if (!route_count_set_by_template) {
+				last_route_count = routes_adjustment.get_value();
 			}
+			routes_adjustment.set_value (atoi (it->second.c_str()));
+			route_count_now_set_by_template = true;
+			route_count_set_by_template = true;
 		}
 
 		if ((it = rs.find ("track_mode")) != rs.end()) {
@@ -488,6 +495,11 @@ AddRouteDialog::trk_template_row_selected ()
 		routes_spinner.set_sensitive (true);
 		name_template_entry.set_sensitive (true);
 		track_type_chosen ();
+	}
+
+	if (!route_count_now_set_by_template && route_count_set_by_template) {
+		routes_adjustment.set_value (last_route_count);
+		route_count_set_by_template = false;
 	}
 }
 
