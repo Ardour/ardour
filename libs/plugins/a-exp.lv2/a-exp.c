@@ -268,12 +268,12 @@ sanitize_denormal(float value) {
 
 static inline float
 from_dB(float gdb) {
-	return (exp(gdb/20.f*log(10.f)));
+	return powf (10.0f, 0.05f * gdb);
 }
 
 static inline float
 to_dB(float g) {
-	return (20.f*log10(g));
+	return (20.f * log10f (g));
 }
 
 static void
@@ -302,8 +302,8 @@ run(LV2_Handle instance, uint32_t n_samples)
 
 	float srate = aexp->srate;
 	float width = (6.f * *(aexp->knee)) + 0.01;
-	float attack_coeff = exp(-1000.f/(*(aexp->attack) * srate));
-	float release_coeff = exp(-1000.f/(*(aexp->release) * srate));
+	float attack_coeff = expf (-1000.f / (*(aexp->attack) * srate));
+	float release_coeff = expf (-1000.f / (*(aexp->release) * srate));
 
 	float max_out = 0.f;
 	float Lgain = 1.f;
@@ -325,7 +325,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 	float makeup_target = from_dB(makeup);
 	float makeup_gain = aexp->makeup_gain;
 
-	const float tau = (1.0 - exp (-2.f * M_PI * 25.f / aexp->srate));
+	const float tau = (1.f - expf (-2.f * M_PI * 25.f / aexp->srate));
 
 	if (*aexp->enable <= 0) {
 		ratio = 1.f;

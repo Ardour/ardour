@@ -149,7 +149,7 @@ instantiate(const LV2_Descriptor* descriptor,
 {
 	Aeq* aeq = (Aeq*)calloc(1, sizeof(Aeq));
 	aeq->srate = rate;
-	aeq->tau = 1.0 - expf (-2.f * M_PI * 64.f * 25.f / aeq->srate); // 25Hz time constant @ 64fpp
+	aeq->tau = 1.f - expf (-2.f * M_PI * 64.f * 25.f / aeq->srate); // 25Hz time constant @ 64fpp
 
 #ifdef LV2_EXTENDED
 	for (int i=0; features[i]; ++i) {
