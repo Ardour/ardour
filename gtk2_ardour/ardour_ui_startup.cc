@@ -93,6 +93,7 @@ bool
 ARDOUR_UI::first_idle ()
 {
 	if (_session) {
+		_session->reset_xrun_count ();
 		_session->allow_auto_play (true);
 	}
 
