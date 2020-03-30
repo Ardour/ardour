@@ -1360,7 +1360,7 @@ ARDOUR_UI::format_disk_space_label (float remain_sec)
 	int mins = (sec / 60) % 60;
 	int secs = sec % 60;
 	snprintf (buf, sizeof(buf), _("%02dh:%02dm:%02ds"), hrs, mins, secs);
-	ArdourWidgets::set_tooltip (disk_space_label, buf);
+	ArdourWidgets::set_tooltip (disk_space_label, string_compose ("%1: %2", _("Available record time"), buf));
 
 	std::string label = string_compose (X_("<span weight=\"ultralight\">%1</span>: "), _("Rec"));
 

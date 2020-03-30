@@ -796,7 +796,7 @@ ARDOUR_UI::build_menu_bar ()
 	ev_timecode->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::timecode_button_press));
 
 	ArdourWidgets::set_tooltip (session_path_label, _("Double click to open session folder."));
-	ArdourWidgets::set_tooltip (format_label, _("Double click to edit audoi file format."));
+	ArdourWidgets::set_tooltip (format_label, _("Double click to edit audio file format."));
 	ArdourWidgets::set_tooltip (timecode_format_label, _("Double click to change timecode settings."));
 	ArdourWidgets::set_tooltip (sample_rate_label, _("Double click to show audio/midi setup."));
 }
