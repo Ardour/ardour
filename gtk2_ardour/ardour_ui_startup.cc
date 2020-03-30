@@ -525,7 +525,7 @@ ARDOUR_UI::load_session_from_startup_fsm ()
 	const string session_template = startup_fsm->session_template;
 	const bool   session_is_new = startup_fsm->session_is_new;
 	const BusProfile bus_profile = startup_fsm->bus_profile;
-	const bool   session_was_not_named = !startup_fsm->session_name_edited;
+	const bool   session_was_not_named = (!startup_fsm->session_name_edited && ARDOUR_COMMAND_LINE::session_name.empty());
 
 	std::cout  << " loading from " << session_path << " as " << session_name << " templ " << session_template << " is_new " << session_is_new << " bp " << bus_profile.master_out_channels << std::endl;
 
