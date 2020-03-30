@@ -2984,11 +2984,11 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 		check_best_snap(presnap, test, dist, best);
 	}
 
+	const UIConfiguration& uic (UIConfiguration::instance());
+
 	/* check snap-to-region-{start/end/sync} */
-	if (
-		(pref == SnapToAny_Visual) &&
-		(UIConfiguration::instance().get_snap_to_region_start() || UIConfiguration::instance().get_snap_to_region_end() || UIConfiguration::instance().get_snap_to_region_sync())
-		) {
+	if ((pref == SnapToAny_Visual) && (uic.get_snap_to_region_start() || uic.get_snap_to_region_end() || uic.get_snap_to_region_sync())) {
+
 		if (!region_boundary_cache.empty()) {
 
 			vector<samplepos_t>::iterator prev = region_boundary_cache.begin();
@@ -3016,17 +3016,18 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 	}
 
 	/* check Grid */
-	if (UIConfiguration::instance().get_snap_to_grid() && (_grid_type != GridTypeNone)) {
+	if (uic.get_snap_to_grid() && (_grid_type != GridTypeNone)) {
 		MusicSample pre(presnap, 0);
 		MusicSample post = snap_to_grid (pre, direction, pref);
 		check_best_snap(presnap, post.sample, dist, best);
+		cerr << best << endl;
 	}
 
 	/* now check "magnetic" state: is the grid within reasonable on-screen distance to trigger a snap?
 	 * this also helps to avoid snapping to somewhere the user can't see.  (i.e.: I clicked on a region and it disappeared!!)
 	 * ToDo: Perhaps this should only occur if EditPointMouse?
 	 */
-	int snap_threshold_s = pixel_to_sample(UIConfiguration::instance().get_snap_threshold());
+	int snap_threshold_s = pixel_to_sample (uic.get_snap_threshold());
 	if (ensure_snap) {
 		start.set (best, 0);
 		return;
