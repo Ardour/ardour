@@ -794,10 +794,11 @@ Editor::build_region_boundary_cache ()
 			switch (*p) {
 			case Start:
 				rpos = r->first_sample();
+				cerr << "use start of " << r->name() << endl;
 				break;
 
 			case End:
-				rpos = r->last_sample();
+				rpos = r->last_sample() + 1;
 				break;
 
 			case SyncPoint:
