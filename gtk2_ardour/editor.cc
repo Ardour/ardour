@@ -3020,7 +3020,6 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 		MusicSample pre(presnap, 0);
 		MusicSample post = snap_to_grid (pre, direction, pref);
 		check_best_snap(presnap, post.sample, dist, best);
-		cerr << best << endl;
 	}
 
 	/* now check "magnetic" state: is the grid within reasonable on-screen distance to trigger a snap?
