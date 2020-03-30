@@ -284,6 +284,7 @@ MixerStrip::init ()
 	trim_control.StopGesture.connect(sigc::mem_fun(*this, &MixerStrip::trim_end_touch));
 	input_button_box.pack_start (trim_control, false, false);
 
+	global_vpacker.set_no_show_all ();
 	global_vpacker.set_border_width (1);
 	global_vpacker.set_spacing (0);
 

@@ -189,6 +189,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();
 
+	inactive_table.set_no_show_all ();
 	inactive_table.set_border_width (4);  //try to match the offset of the label on an "active" track
 	inactive_table.attach (inactive_label, 1, 2, 0, 1,  Gtk::FILL|Gtk::EXPAND, Gtk::SHRINK, 0, 0);
 	controls_vbox.pack_start (inactive_table, false, false);
