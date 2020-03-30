@@ -2943,7 +2943,7 @@ Editor::snap_to_marker (samplepos_t presnap, RoundMode direction)
 
 	if (_session->locations()->list().empty()) {
 		/* No marks to snap to, so just don't snap */
-		return test;
+		return 0;
 	}
 
 	_session->locations()->marks_either_side (presnap, before, after);
