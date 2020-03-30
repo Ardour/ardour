@@ -1156,9 +1156,14 @@ AudioRegionView::delete_waves ()
 
 	for (vector<ArdourWaveView::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
 		group->remove(*w);
+		delete *w;
 	}
 	waves.clear();
-	tmp_waves.clear();
+
+	while (!tmp_waves.empty ()) {
+		delete tmp_waves.back ();
+		tmp_waves.pop_back ();
+	}
 	pending_peak_data->show ();
 }
 
@@ -1304,8 +1309,12 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 		/* all waves are ready */
 		tmp_waves.resize(nwaves);
 
-		waves = tmp_waves;
-		tmp_waves.clear ();
+		waves.swap(tmp_waves);
+
+		while (!tmp_waves.empty ()) {
+			delete tmp_waves.back ();
+			tmp_waves.pop_back ();
+		}
 
 		/* indicate peak-completed */
 		pending_peak_data->hide ();
