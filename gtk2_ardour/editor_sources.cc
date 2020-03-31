@@ -733,24 +733,10 @@ EditorSources::key_press (GdkEventKey* ev)
 bool
 EditorSources::button_press (GdkEventButton *ev)
 {
-	boost::shared_ptr<ARDOUR::Region> region;
-	TreeIter iter;
-	TreeModel::Path path;
-	TreeViewColumn* column;
-	int cellx;
-	int celly;
-
-	if (_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
-		if ((iter = _model->get_iter (path))) {
-			region = (*iter)[_columns.region];
-		}
-	}
-
 	if (Keyboard::is_context_menu_event (ev)) {
 		show_context_menu (ev->button, ev->time);
-		return false;
+		return true;
 	}
-
 	return false;
 }
 
