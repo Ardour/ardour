@@ -6036,6 +6036,10 @@ Route::set_disk_io_point (DiskIOPoint diop)
 
 	_disk_io_point = diop;
 
+	if (_initial_io_setup) {
+		return;
+	}
+
 	if (changed) {
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		configure_processors (0);
