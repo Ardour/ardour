@@ -514,13 +514,37 @@ void
 UI::dump_errors (std::ostream& ostr, size_t limit)
 {
 	Glib::Threads::Mutex::Lock lm (error_lock);
-	ostr << endl << X_("Errors/Messages:") << endl;
-	for (list<string>::const_iterator i = error_stack.begin(); i != error_stack.end(); ++i) {
-		ostr << *i << endl;
-		if (limit > 0) {
+	bool first = true;
+
+	if (limit > 0) {
+		/* reverse listing, Errors only */
+		for (list<string>::const_reverse_iterator i = error_stack.rbegin(); i != error_stack.rend(); ++i) {
+			if ((*i).substr (0, 9) == X_("WARNING: ") || (*i).substr (0, 6) == X_("INFO: ")) {
+				continue;
+			}
+			if (first) {
+				first = false;
+			}
+			ostr << *i << endl;
 			if (--limit == 0) {
 				ostr << "..." << endl;
 				break;
+			}
+		}
+	}
+
+	if (first) {
+		for (list<string>::const_iterator i = error_stack.begin(); i != error_stack.end(); ++i) {
+			if (first) {
+				ostr << endl << X_("Log Messages:") << endl;
+				first = false;
+			}
+			ostr << *i << endl;
+			if (limit > 0) {
+				if (--limit == 0) {
+					ostr << "..." << endl;
+					break;
+				}
 			}
 		}
 	}
