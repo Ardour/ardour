@@ -513,6 +513,13 @@ MidiTimeAxisView::model_changed (const std::string& m)
 		_midnam_custom_device_mode_selector.hide();
 	}
 
+	/* inform the backend, route owned instrument info */
+	if (device_modes.size() > 0) {
+		_route->instrument_info().set_external_instrument (model, device_modes.front());
+	} else {
+		_route->instrument_info().set_external_instrument (model, "");
+	}
+
 	// Rebuild controller menu
 	_controller_menu_map.clear ();
 	delete controller_menu;
@@ -531,6 +538,7 @@ MidiTimeAxisView::custom_device_mode_changed(const std::string& mode)
 
 	set_gui_property (X_("midnam-custom-device-mode"), mode);
 	_midnam_custom_device_mode_selector.set_text (mode);
+	/* inform the backend, route owned instrument info */
 	_route->instrument_info().set_external_instrument (model, mode);
 }
 
