@@ -953,11 +953,10 @@ MidiTimeAxisView::build_controller_menu ()
 		}
 	}
 
-	// XXX ->  InstrumentInfo::master_control_names ()
-	using namespace MIDI::Name;
-	boost::shared_ptr<MasterDeviceNames> device_names = _route->instrument_info().master_device_names ();
+	size_t total_ctrls = _route->instrument_info().master_controller_count ();
+	if (total_ctrls > 0) {
+		using namespace MIDI::Name;
 
-	if (device_names && !device_names->controls().empty()) {
 		/* Controllers names available in midnam file, generate fancy menu */
 		unsigned n_items  = 0;
 		unsigned n_groups = 0;
@@ -966,13 +965,7 @@ MidiTimeAxisView::build_controller_menu ()
 		uint16_t ctl_start = 1;
 		uint16_t ctl_end   = 1;
 
-		MasterDeviceNames::ControlNameLists const& ctllist (device_names->controls());
-
-		size_t total_ctrls = 0;
-		for (MasterDeviceNames::ControlNameLists::const_iterator l = ctllist.begin(); l != ctllist.end(); ++l) {
-			boost::shared_ptr<ControlNameList> name_list = l->second;
-			total_ctrls += name_list->controls().size();
-		}
+		MasterDeviceNames::ControlNameLists const& ctllist (_route->instrument_info().master_device_names ()->controls ());
 
 		bool to_top_level = total_ctrls < 32;
 
@@ -1192,10 +1185,8 @@ MidiTimeAxisView::show_all_automation (bool apply_to_selection)
 				create_automation_child(*i, true);
 			}
 
-			// Show automation for all controllers named in midnam file
-			boost::shared_ptr<MasterDeviceNames> device_names = _route->instrument_info().master_device_names (); // XXX
-
-			if (/*gui_property (X_("midnam-model-name")) != DEFAULT_MIDNAM_MODEL && */ device_names && !device_names->controls().empty()) {
+			/* Show automation for all controllers named in midnam file */
+			if (_route->instrument_info().master_controller_count () > 0) {
 
 				const uint16_t selected_channels = midi_track()->get_playback_channel_mask();
 
