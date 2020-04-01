@@ -68,6 +68,8 @@ public:
 
 	boost::shared_ptr<const MIDI::Name::ValueNameList> value_name_list_by_control (uint8_t channel, uint8_t number) const;
 
+	size_t master_controller_count () const;
+
 	PBD::Signal0<void> Changed;
 
 	bool have_custom_plugin_info () const;

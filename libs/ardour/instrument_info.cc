@@ -176,6 +176,23 @@ InstrumentInfo::control_name_list (uint8_t channel)
 	return dev_names->control_name_list (chan_names->control_list_name ());
 }
 
+size_t
+InstrumentInfo::master_controller_count () const
+{
+	boost::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
+	if (!dev_names) {
+		return 0;
+	}
+	MasterDeviceNames::ControlNameLists const& ctllist (dev_names->controls());
+
+	size_t total_ctrls = 0;
+	for (MasterDeviceNames::ControlNameLists::const_iterator l = ctllist.begin(); l != ctllist.end(); ++l) {
+		boost::shared_ptr<ControlNameList> const& name_list = l->second;
+		total_ctrls += name_list->controls().size();
+	}
+	return total_ctrls;
+}
+
 #if 0
 MasterDeviceNames::ControlNameLists const&
 InstrumentInfo::master_control_names () const
