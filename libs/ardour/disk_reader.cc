@@ -762,12 +762,15 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 		return 0;
 	}
 
-	if ((!_last_read_reversed || (_last_read_reversed == read_reversed)) &&
-	    (!_last_read_loop || (_last_read_loop == read_loop))) {
+	/* There are two possible shortcuts we can take that will completely
+	 * skip reading from disk. However, they are invalid if we need to read
+	 * data in the opposite direction than we did last time, or if our need
+	 * for looped data has chaned since the last read. Both of these change
+	 * the semantics of a read from disk, even if the position we are
+	 * reading from is the same.
+	 */
 
-		/* We do these things only if we're still reading in the same
-		 * direction we did last time.
-		 */
+	if ((_last_read_reversed.value_or (read_reversed) == read_reversed) && (_last_read_loop.value_or (read_loop) == read_loop)) {
 
 		if (sample == playback_sample && !complete_refill) {
 			return 0;
