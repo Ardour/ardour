@@ -38,7 +38,7 @@ using namespace MIDI::Name;
 using std::string;
 
 InstrumentInfo::InstrumentInfo ()
-	: external_instrument_model (_("Unknown"))
+	: _external_instrument_model (_("Unknown"))
 {
 }
 
@@ -49,26 +49,28 @@ InstrumentInfo::~InstrumentInfo ()
 void
 InstrumentInfo::set_external_instrument (const string& model, const string& mode)
 {
-	if (external_instrument_model == model && external_instrument_mode == mode) {
+	invalidate_cached_plugin_model ();
+	if (_external_instrument_model == model && _external_instrument_mode == mode) {
 		//std::cerr << "InstrumentInfo::set_external_instrument '" << model << "' '" << mode << "' -- no change\n";
 		return;
 	}
 	//std::cerr << "InstrumentInfo::set_external_instrument '" << model << "' '" << mode << "'\n";
-	external_instrument_model = model;
-	external_instrument_mode  = mode;
+	_external_instrument_model = model;
+	_external_instrument_mode  = mode;
 	Changed (); /* EMIT SIGNAL */
 }
 
 void
 InstrumentInfo::set_internal_instrument (boost::shared_ptr<Processor> p)
 {
+	invalidate_cached_plugin_model ();
 	if (p == internal_instrument.lock ()) {
 		//std::cerr << "InstrumentInfo::set_internal_instrument -- NO CHANGE\n";
 		return;
 	}
 	//std::cerr << "InstrumentInfo::set_internal_instrument -> '" << (p ? p->name () : "(NULL)") << "'\n";
 	internal_instrument = p;
-	if (external_instrument_model.empty () || external_instrument_model == _("Unknown")) {
+	if (_external_instrument_model.empty () || _external_instrument_model == _("Unknown")) {
 		Changed (); /* EMIT SIGNAL */
 	}
 }
@@ -92,14 +94,17 @@ InstrumentInfo::have_custom_plugin_info () const
 std::string
 InstrumentInfo::model () const
 {
-	if (!external_instrument_model.empty ()) {
-		return external_instrument_model;
+	if (!_external_instrument_model.empty ()) {
+		return _external_instrument_model;
 	}
-	// TODO: cache plugin model
+	if (!_plugin_model.empty ()) {
+		return _plugin_model;
+	}
 	boost::shared_ptr<Processor>    p  = internal_instrument.lock ();
 	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (p);
 	if (pi && pi->plugin ()->has_midnam ()) {
-		return pi->plugin ()->midnam_model ();
+		_plugin_model = pi->plugin ()->midnam_model ();
+		return _plugin_model;
 	}
 	return "";
 }
@@ -107,16 +112,19 @@ InstrumentInfo::model () const
 std::string
 InstrumentInfo::mode () const
 {
-	if (!external_instrument_model.empty ()) {
-		return external_instrument_mode;
+	if (!_external_instrument_model.empty ()) {
+		return _external_instrument_mode;
 	}
-	// TODO: cache plugin mode
+	if (!_plugin_mode.empty ()) {
+		return _plugin_mode;
+	}
 	boost::shared_ptr<Processor>    p  = internal_instrument.lock ();
 	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (p);
 	if (pi && pi->plugin ()->has_midnam ()) {
 		const std::list<std::string> device_modes = MidiPatchManager::instance ().custom_device_mode_names_by_model (model ());
 		if (device_modes.size () > 0) {
-			return device_modes.front ();
+			_plugin_mode = device_modes.front ();
+			return _plugin_mode;
 		}
 	}
 	return "";

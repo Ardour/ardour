@@ -78,8 +78,17 @@ private:
 
 	std::string get_patch_name (uint16_t bank, uint8_t program, uint8_t channel, bool with_extra) const;
 
-	std::string external_instrument_model;
-	std::string external_instrument_mode;
+	void invalidate_cached_plugin_model ()
+	{
+		_plugin_model = "";
+		_plugin_mode = "";
+	}
+
+	std::string _external_instrument_model;
+	std::string _external_instrument_mode;
+
+	mutable std::string _plugin_model;
+	mutable std::string _plugin_mode;
 
 	boost::weak_ptr<ARDOUR::Processor> internal_instrument;
 };
