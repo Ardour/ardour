@@ -944,6 +944,9 @@ LocationUI::location_added (Location* location)
 		punch_edit_row.set_location(location);
 	} else if (location->is_auto_loop()) {
 		loop_edit_row.set_location(location);
+	} else if (location->is_xrun()) {
+		/* we don't show xrun markers here */
+		return;
 	} else if (location->is_range_marker() || location->is_mark()) {
 		Locations::LocationList loc = _session->locations()->list ();
 		loc.sort (LocationSortByStart ());
