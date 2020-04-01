@@ -397,13 +397,11 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 			if (!declick_out) {
 
-				const samplecnt_t total = chaninfo->rbuf->read (disk_buf.data(), disk_samples_to_consume);
+				const samplecnt_t available = chaninfo->rbuf->read (disk_buf.data(), disk_samples_to_consume);
 
-				if (disk_samples_to_consume > total) {
-					cerr << _name << " Need " << total << " have only " << disk_samples_to_consume << endl;
-					cerr << "underrun for " << _name << endl;
-					DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 underrun in %2, total space = %3\n",
-					                                            DEBUG_THREAD_SELF, name(), total));
+				if (disk_samples_to_consume > available) {
+					cerr << "underrun for " << _name << " Available samples: " << available << " required: " << disk_samples_to_consume << endl;
+					DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 underrun in %2, total space = %3 vs %4\n", DEBUG_THREAD_SELF, name(), available, disk_samples_to_consume));
 					Underrun ();
 					return;
 				}
