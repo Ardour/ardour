@@ -743,19 +743,20 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	const bool read_reversed = !_session.transport_will_roll_forwards ();
+	const bool read_loop = (bool) _loop_location;
 
 	if (c->empty()) {
 		return 0;
 	}
 
-	if (_last_read_reversed && (_last_read_reversed == read_reversed)) {
+	if ((!_last_read_reversed && (_last_read_reversed != read_reversed)) ||
+	    (!_last_read_loop && (_last_read_loop != read_loop))) {
 
 		/* We do these things only if we're still reading in the same
 		 * direction we did last time.
 		 */
 
 		if (sample == playback_sample && !complete_refill) {
-
 			return 0;
 		}
 
@@ -1023,6 +1024,8 @@ DiskReader::audio_read (Sample* sum_buffer,
 	}
 
 	_last_read_reversed = reversed;
+	_last_read_loop = (bool) loc;
+
 	return rcnt;
 }
 

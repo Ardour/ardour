@@ -190,6 +190,7 @@ private:
 	sampleoffset_t _declick_offs;
 	MidiStateTracker _tracker;
 	boost::optional<bool> _last_read_reversed;
+	boost::optional<bool> _last_read_loop;
 
 	static samplecnt_t _chunk_samples;
 	static gint       _no_disk_output;
