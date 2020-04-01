@@ -363,7 +363,7 @@ Session::Session (AudioEngine &eng,
 
 		if (!mix_template.empty()) {
 			try {
-				if (load_state (_current_snapshot_name)) {
+				if (load_state (_current_snapshot_name, /* from_template = */ true)) {
 					throw SessionException (_("Failed to load template/snapshot state"));
 				}
 			} catch (PBD::unknown_enumeration& e) {

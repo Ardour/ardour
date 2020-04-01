@@ -970,7 +970,7 @@ Session::restore_state (string snapshot_name)
 }
 
 int
-Session::load_state (string snapshot_name)
+Session::load_state (string snapshot_name, bool from_template)
 {
 	delete state_tree;
 	state_tree = 0;
@@ -1035,7 +1035,7 @@ Session::load_state (string snapshot_name)
 		throw SessionException (string_compose (_("Incomatible Session Version. That session was created with a newer version of %1"), PROGRAM_NAME));
 	}
 
-	if (Stateful::loading_state_version < CURRENT_SESSION_FILE_VERSION && _writable) {
+	if (Stateful::loading_state_version < CURRENT_SESSION_FILE_VERSION && _writable && !from_template) {
 
 		std::string backup_path(_session_dir->root_path());
 		std::string backup_filename = string_compose ("%1-%2%3", legalize_for_path (snapshot_name), Stateful::loading_state_version, statefile_suffix);

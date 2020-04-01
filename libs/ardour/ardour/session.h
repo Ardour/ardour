@@ -1472,7 +1472,7 @@ private:
 	Glib::Threads::Mutex peak_cleanup_lock;
 
 	int        load_options (const XMLNode&);
-	int        load_state (std::string snapshot_name);
+	int        load_state (std::string snapshot_name, bool from_template = false);
 	static int parse_stateful_loading_version (const std::string&);
 
 	samplepos_t _last_roll_location;
