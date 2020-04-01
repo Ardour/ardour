@@ -61,6 +61,7 @@ public:
 		IsSkip = 0x80,
 		IsSkipping = 0x100, /* skipping is active (or not) */
 		IsClockOrigin = 0x200,
+		IsXrun = 0x400,
 	};
 
 	Location (Session &);
@@ -108,6 +109,7 @@ public:
 	bool is_skip() const { return _flags & IsSkip; }
 	bool is_clock_origin() const { return _flags & IsClockOrigin; }
 	bool is_skipping() const { return (_flags & IsSkip) && (_flags & IsSkipping); }
+	bool is_xrun() const { return _flags & IsXrun; }
 	bool matches (Flags f) const { return _flags & f; }
 
 	Flags flags () const { return _flags; }
