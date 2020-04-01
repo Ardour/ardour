@@ -341,6 +341,9 @@ Session::Session (AudioEngine &eng,
 	assert (AudioEngine::instance()->running());
 	immediately_post_engine ();
 
+	bool need_template_resave = false;
+	std::string template_description;
+
 	if (_is_new) {
 
 		Stateful::loading_state_version = CURRENT_SESSION_FILE_VERSION;
@@ -368,6 +371,15 @@ Session::Session (AudioEngine &eng,
 				}
 			} catch (PBD::unknown_enumeration& e) {
 				throw SessionException (_("Failed to parse template/snapshot state"));
+			}
+
+			if (state_tree && Stateful::loading_state_version < CURRENT_SESSION_FILE_VERSION) {
+				need_template_resave = true;
+				XMLNode const & root (*state_tree->root());
+				XMLNode* desc_nd = root.child (X_("description"));
+				if (desc_nd) {
+					template_description = desc_nd->attribute_value();
+				}
 			}
 			store_recent_templates (mix_template);
 		}
@@ -448,6 +460,10 @@ Session::Session (AudioEngine &eng,
 
 	session_loaded ();
 	_is_new = false;
+
+	if (need_template_resave) {
+		save_template (mix_template, template_description, true);
+	}
 
 	BootMessage (_("Session loading complete"));
 }
