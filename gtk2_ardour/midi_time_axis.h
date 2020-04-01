@@ -98,9 +98,6 @@ public:
 	ARDOUR::NoteMode  note_mode() const { return _note_mode; }
 	ARDOUR::ColorMode color_mode() const { return _color_mode; }
 
-	boost::shared_ptr<MIDI::Name::MasterDeviceNames> get_device_names();
-	boost::shared_ptr<MIDI::Name::CustomDeviceMode> get_device_mode();
-
 	Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
 
 	StepEditor* step_editor() { return _step_editor; }

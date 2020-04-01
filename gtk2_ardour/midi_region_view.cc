@@ -4306,16 +4306,9 @@ MidiRegionView::get_note_name (boost::shared_ptr<NoteType> n, uint8_t note_value
 
 	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	if (mtv) {
-		boost::shared_ptr<MasterDeviceNames> device_names(mtv->get_device_names());
-		if (device_names) {
-			MIDI::Name::PatchPrimaryKey patch_key;
-			get_patch_key_at(n->time(), n->channel(), patch_key);
-			name = device_names->note_name(mtv->gui_property(X_("midnam-custom-device-mode")),
-			                               n->channel(),
-			                               patch_key.bank(),
-			                               patch_key.program(),
-			                               note_value);
-		}
+		MIDI::Name::PatchPrimaryKey patch_key;
+		get_patch_key_at (n->time(), n->channel(), patch_key);
+		name = instrument_info ().get_note_name (patch_key.bank(), patch_key.program(), n->channel(), note_value);
 	}
 
 	char buf[128];

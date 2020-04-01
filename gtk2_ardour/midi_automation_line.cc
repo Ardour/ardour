@@ -66,16 +66,9 @@ MidiAutomationLine::get_verbose_cursor_string (double fraction) const
 		return AutomationLine::get_verbose_cursor_string(fraction);
 	}
 
-	boost::shared_ptr<MasterDeviceNames> device_names(mtv->get_device_names());
-	if (!device_names) {
-		return AutomationLine::get_verbose_cursor_string(fraction);
-	}
+	const uint8_t channel = mtv->get_channel_for_add();
+	boost::shared_ptr<const ValueNameList> value_names = mtv->route()->instrument_info().value_name_list_by_control (channel, _parameter.id());
 
-	const std::string& device_mode = mtv->gui_property(X_("midnam-custom-device-mode"));
-	const uint8_t      channel     = mtv->get_channel_for_add();
-
-	boost::shared_ptr<const ValueNameList> value_names = device_names->value_name_list_by_control(
-		device_mode, channel, _parameter.id());
 	if (!value_names) {
 		return AutomationLine::get_verbose_cursor_string(fraction);
 	}
