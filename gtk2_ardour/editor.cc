@@ -5925,9 +5925,11 @@ Editor::super_rapid_screen_update ()
 			snapped_cursor->set_position (ms.sample);
 			snapped_cursor->show ();
 		}
-	} else if (mouse_sample (where.sample, ignored)) { // cursor is in the editing canvas. show it.
+	} else if (_edit_point == EditAtMouse && mouse_sample (where.sample, ignored)) {
+		/* cursor is in the editing canvas. show it. */
 		snapped_cursor->show ();
-	} else { // mouse is out of the editing canvas. hide the snapped_cursor
+	} else {
+		/* mouse is out of the editing canvas, or edit-point isn't mouse. Hide the snapped_cursor */
 		snapped_cursor->hide ();
 	}
 
