@@ -26,9 +26,9 @@
 
 #include "ardour/instrument_info.h"
 #include "ardour/midi_patch_manager.h"
-#include "ardour/processor.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/processor.h"
 #include "ardour/rc_configuration.h"
 
 #include "pbd/i18n.h"
@@ -36,8 +36,6 @@
 using namespace ARDOUR;
 using namespace MIDI::Name;
 using std::string;
-
-MIDI::Name::PatchNameList InstrumentInfo::_gm_patches;
 
 InstrumentInfo::InstrumentInfo ()
 	: external_instrument_model (_("Unknown"))
@@ -51,62 +49,138 @@ InstrumentInfo::~InstrumentInfo ()
 void
 InstrumentInfo::set_external_instrument (const string& model, const string& mode)
 {
-	if (external_instrument_model == model && external_instrument_mode == mode && internal_instrument.expired ()) {
+	if (external_instrument_model == model && external_instrument_mode == mode) {
+		//std::cerr << "InstrumentInfo::set_external_instrument '" << model << "' '" << mode << "' -- no change\n";
 		return;
 	}
+	//std::cerr << "InstrumentInfo::set_external_instrument '" << model << "' '" << mode << "'\n";
 	external_instrument_model = model;
-	external_instrument_mode = mode;
-	internal_instrument.reset ();
-	Changed(); /* EMIT SIGNAL */
+	external_instrument_mode  = mode;
+	Changed (); /* EMIT SIGNAL */
 }
 
 void
 InstrumentInfo::set_internal_instrument (boost::shared_ptr<Processor> p)
 {
-	bool changed = !external_instrument_mode.empty ();
-	external_instrument_mode = "";
+	if (p == internal_instrument.lock ()) {
+		//std::cerr << "InstrumentInfo::set_internal_instrument -- NO CHANGE\n";
+		return;
+	}
+	//std::cerr << "InstrumentInfo::set_internal_instrument -> '" << (p ? p->name () : "(NULL)") << "'\n";
+	internal_instrument = p;
+	if (external_instrument_model.empty () || external_instrument_model == _("Unknown")) {
+		Changed (); /* EMIT SIGNAL */
+	}
+}
 
-	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(p);
+bool
+InstrumentInfo::have_custom_plugin_info () const
+{
+	boost::shared_ptr<Processor> p = internal_instrument.lock ();
+
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (p);
 	if (pi && pi->plugin ()->has_midnam ()) {
-		/* really back hack, following MidiTimeAxisView::model_changed()
-		 *
-		 * InstrumentInfo::get_plugin_patch_name() needs to be overhauled,
-		 * it limits all PluginInsert to generic-midi or only numbers.
-		 */
-		changed |= !internal_instrument.expired ();
-		changed |= external_instrument_model != pi->plugin ()->midnam_model ();
-
-		internal_instrument.reset ();
-		external_instrument_model = pi->plugin ()->midnam_model ();
-		const std::list<std::string> device_modes = MIDI::Name::MidiPatchManager::instance().custom_device_mode_names_by_model (external_instrument_model);
-		if (device_modes.size() > 0) {
-			changed |= external_instrument_mode != device_modes.front();
-			external_instrument_mode = device_modes.front();
+		std::string                  model        = pi->plugin ()->midnam_model ();
+		const std::list<std::string> device_modes = MidiPatchManager::instance ().custom_device_mode_names_by_model (model);
+		if (device_modes.size () > 0) {
+			return true;
 		}
-	} else {
-		changed |= internal_instrument.lock () != p || external_instrument_model != _("Unknown");
-		internal_instrument = p;
-		external_instrument_model = _("Unknown");
 	}
-	if (changed) {
-		Changed(); /* EMIT SIGNAL */
+	return false;
+}
+
+std::string
+InstrumentInfo::model () const
+{
+	if (!external_instrument_model.empty ()) {
+		return external_instrument_model;
 	}
+	// TODO: cache plugin model
+	boost::shared_ptr<Processor>    p  = internal_instrument.lock ();
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (p);
+	if (pi && pi->plugin ()->has_midnam ()) {
+		return pi->plugin ()->midnam_model ();
+	}
+	return "";
+}
+
+std::string
+InstrumentInfo::mode () const
+{
+	if (!external_instrument_model.empty ()) {
+		return external_instrument_mode;
+	}
+	// TODO: cache plugin mode
+	boost::shared_ptr<Processor>    p  = internal_instrument.lock ();
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (p);
+	if (pi && pi->plugin ()->has_midnam ()) {
+		const std::list<std::string> device_modes = MidiPatchManager::instance ().custom_device_mode_names_by_model (model ());
+		if (device_modes.size () > 0) {
+			return device_modes.front ();
+		}
+	}
+	return "";
 }
 
 string
-InstrumentInfo::get_instrument_name () const
+InstrumentInfo::get_note_name (uint16_t bank, uint8_t program, uint8_t channel, uint8_t note) const
 {
-	boost::shared_ptr<Processor> p = internal_instrument.lock();
-	if (p) {
-		return p->name();
+	boost::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
+	if (dev_names) {
+		return dev_names->note_name (mode (), channel, bank, program, note);
 	}
-
-	if (external_instrument_mode.empty()) {
-		return external_instrument_model;
-	} else {
-		return string_compose ("%1 (%2)", external_instrument_model, external_instrument_mode);
-	}
+	return "";
 }
+
+boost::shared_ptr<const ValueNameList>
+InstrumentInfo::value_name_list_by_control (uint8_t channel, uint8_t number) const
+{
+	boost::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
+	if (dev_names) {
+		return dev_names->value_name_list_by_control (mode (), channel, number);
+	}
+	return boost::shared_ptr<const ValueNameList> ();
+}
+
+boost::shared_ptr<MasterDeviceNames>
+InstrumentInfo::master_device_names () const
+{
+#if 1
+	/* this safe if model does not exist */
+	boost::shared_ptr<MIDINameDocument> midnam = MidiPatchManager::instance ().document_by_model (model ());
+	if (midnam) {
+		return midnam->master_device_names (model ());
+	}
+	return boost::shared_ptr<MasterDeviceNames> ();
+#else
+	return MidiPatchManager::instance ().master_device_by_model (model ());
+#endif
+}
+
+boost::shared_ptr<ControlNameList>
+InstrumentInfo::control_name_list (uint8_t channel)
+{
+	boost::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
+	boost::shared_ptr<ChannelNameSet> const&    chan_names (dev_names->channel_name_set_by_channel (mode (), channel));
+	if (!chan_names) {
+		return boost::shared_ptr<ControlNameList> ();
+	}
+	return dev_names->control_name_list (chan_names->control_list_name ());
+}
+
+#if 0
+MasterDeviceNames::ControlNameLists const&
+InstrumentInfo::master_control_names () const
+{
+	static MasterDeviceNames::ControlNameLists empty_list;
+
+	boost::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
+	if (dev_names) {
+		return dev_names->controls();
+	}
+	return empty_list;
+}
+#endif
 
 string
 InstrumentInfo::get_patch_name (uint16_t bank, uint8_t program, uint8_t channel) const
@@ -123,26 +197,19 @@ InstrumentInfo::get_patch_name_without (uint16_t bank, uint8_t program, uint8_t 
 string
 InstrumentInfo::get_patch_name (uint16_t bank, uint8_t program, uint8_t channel, bool with_extra) const
 {
-	boost::shared_ptr<Processor> p = internal_instrument.lock();
-	if (p) {
-		return get_plugin_patch_name (p, bank, program, channel);
-	}
+	PatchPrimaryKey patch_key (program, bank);
 
-	MIDI::Name::PatchPrimaryKey patch_key (program, bank);
-
-	boost::shared_ptr<MIDI::Name::Patch> patch =
-		MIDI::Name::MidiPatchManager::instance().find_patch (external_instrument_model,
-								     external_instrument_mode, channel, patch_key);
+	boost::shared_ptr<MIDI::Name::Patch> const& patch (MidiPatchManager::instance ().find_patch (model (), mode (), channel, patch_key));
 
 	if (patch) {
-		return patch->name();
+		return patch->name ();
 	} else {
 		/* program and bank numbers are zero-based: convert to one-based: MIDI_BP_ZERO */
 
-#define MIDI_BP_ZERO ((Config->get_first_midi_bank_is_zero())?0:1)
+#define MIDI_BP_ZERO ((Config->get_first_midi_bank_is_zero ()) ? 0 : 1)
 
 		if (with_extra) {
-			return string_compose ("prg %1 bnk %2",program + MIDI_BP_ZERO , bank + MIDI_BP_ZERO);
+			return string_compose ("prg %1 bnk %2", program + MIDI_BP_ZERO, bank + MIDI_BP_ZERO);
 		} else {
 			return string_compose ("%1", program + MIDI_BP_ZERO);
 		}
@@ -152,136 +219,35 @@ InstrumentInfo::get_patch_name (uint16_t bank, uint8_t program, uint8_t channel,
 string
 InstrumentInfo::get_controller_name (Evoral::Parameter param) const
 {
-	boost::shared_ptr<Processor> p = internal_instrument.lock();
-	if (param.type() != MidiCCAutomation) {
+	if (param.type () != MidiCCAutomation) {
 		return "";
 	}
-	if (p) {
-		return get_plugin_controller_name (p, param);
-	}
 
-	boost::shared_ptr<MIDI::Name::MasterDeviceNames> dev_names(
-		MIDI::Name::MidiPatchManager::instance().master_device_by_model(
-			external_instrument_model));
+	boost::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
 	if (!dev_names) {
 		return "";
 	}
 
-	boost::shared_ptr<ChannelNameSet> chan_names(
-		dev_names->channel_name_set_by_channel(
-			external_instrument_mode, param.channel()));
+	boost::shared_ptr<ChannelNameSet> const& chan_names (dev_names->channel_name_set_by_channel (mode (), param.channel ()));
 	if (!chan_names) {
 		return "";
 	}
 
-	boost::shared_ptr<ControlNameList> control_names(
-		dev_names->control_name_list(chan_names->control_list_name()));
+	boost::shared_ptr<ControlNameList> const& control_names (dev_names->control_name_list (chan_names->control_list_name ()));
 	if (!control_names) {
 		return "";
 	}
-	boost::shared_ptr<const Control> c = control_names->control(param.id());
+	boost::shared_ptr<const Control> const& c = control_names->control (param.id ());
 
 	if (c) {
-		return string_compose(c->name() + " [%1]", int(param.channel()) + 1);
+		return string_compose (c->name () + " [%1]", int(param.channel ()) + 1);
 	}
 
 	return "";
 }
 
-boost::shared_ptr<MIDI::Name::ChannelNameSet>
+boost::shared_ptr<ChannelNameSet>
 InstrumentInfo::get_patches (uint8_t channel)
 {
-	boost::shared_ptr<Processor> p = internal_instrument.lock();
-	if (p) {
-		return plugin_programs_to_channel_name_set (p);
-	}
-
-	boost::shared_ptr<MIDI::Name::ChannelNameSet> channel_name_set =
-		MidiPatchManager::instance().find_channel_name_set (external_instrument_model,
-														    external_instrument_mode,
-														    channel);
-
-	//std::cerr << "got channel name set with name '" << channel_name_set->name() << std::endl;
-
-	return channel_name_set;
-}
-
-boost::shared_ptr<MIDI::Name::ChannelNameSet>
-InstrumentInfo::plugin_programs_to_channel_name_set (boost::shared_ptr<Processor> p)
-{
-	PatchNameList patch_list;
-
-	boost::shared_ptr<PluginInsert> insert = boost::dynamic_pointer_cast<PluginInsert> (p);
-	if (!insert) {
-		return boost::shared_ptr<ChannelNameSet>();
-	}
-
-	boost::shared_ptr<Plugin> pp = insert->plugin();
-
-	if (pp->current_preset_uses_general_midi()) {
-
-		patch_list = InstrumentInfo::general_midi_patches ();
-
-	} else if (pp->presets_are_MIDI_programs()) {
-
-		std::vector<Plugin::PresetRecord> presets = pp->get_presets ();
-		std::vector<Plugin::PresetRecord>::iterator i;
-		int n;
-
-		for (n = 0, i = presets.begin(); i != presets.end(); ++i, ++n) {
-			if ((*i).valid) {
-				patch_list.push_back (boost::shared_ptr<Patch> (new Patch ((*i).label, n)));
-			} else {
-				patch_list.push_back (boost::shared_ptr<Patch> (new Patch (string_compose ("program %1", n), n)));
-			}
-		}
-	} else {
-		for (int n = 0; n < 127; ++n) {
-			patch_list.push_back (boost::shared_ptr<Patch> (new Patch (string_compose ("program %1", n), n)));
-		}
-	}
-
-	boost::shared_ptr<PatchBank> pb (new PatchBank (0, p->name()));
-	pb->set_patch_name_list (patch_list);
-
-	ChannelNameSet::PatchBanks patch_banks;
-	patch_banks.push_back (pb);
-
-	boost::shared_ptr<MIDI::Name::ChannelNameSet> cns (new ChannelNameSet);
-	cns->set_patch_banks (patch_banks);
-
-	return cns;
-}
-
-const MIDI::Name::PatchNameList&
-InstrumentInfo::general_midi_patches()
-{
-	if (_gm_patches.empty()) {
-		for (int n = 0; n < 128; n++) {
-			_gm_patches.push_back (boost::shared_ptr<Patch> (new Patch (general_midi_program_names[n], n)));
-		}
-	}
-
-	return _gm_patches;
-}
-
-string
-InstrumentInfo::get_plugin_controller_name (boost::shared_ptr<ARDOUR::Processor>, Evoral::Parameter param) const
-{
-	return "";
-}
-
-string
-InstrumentInfo::get_plugin_patch_name (boost::shared_ptr<Processor> p, uint16_t bank, uint8_t program, uint8_t /*channel*/) const
-{
-	boost::shared_ptr<PluginInsert> insert = boost::dynamic_pointer_cast<PluginInsert> (p);
-	if (insert) {
-		boost::shared_ptr<Plugin> pp = insert->plugin();
-
-		if (pp->current_preset_uses_general_midi()) {
-			return MIDI::Name::general_midi_program_names[std::min((uint8_t) 127,program)];
-		}
-	}
-
-	return string_compose (_("preset %1 (bank %2)"), (int) program, (int) bank);
+	return MidiPatchManager::instance ().find_channel_name_set (model (), mode (), channel);
 }

@@ -1701,9 +1701,7 @@ void
 Route::reset_instrument_info ()
 {
 	boost::shared_ptr<Processor> instr = the_instrument();
-	if (instr) {
-		_instrument_info.set_internal_instrument (instr);
-	}
+	_instrument_info.set_internal_instrument (instr);
 }
 
 /** Caller must hold process lock */
