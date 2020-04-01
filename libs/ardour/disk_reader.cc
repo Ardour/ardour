@@ -280,18 +280,33 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	}
 
 	const gain_t target_gain = ((speed == 0.0) || ((ms & MonitoringDisk) == 0)) ? 0.0 : 1.0;
-	const bool declicked_out = (_declick_amp.gain() == target_gain) && target_gain == 0.0;
-	const bool declick_out = (_declick_amp.gain() != target_gain) && target_gain == 0.0;
+	bool declick_out = (_declick_amp.gain() != target_gain) && target_gain == 0.0;
 
 	if (!_session.cfg ()->get_use_transport_fades () || (_session.exporting () && ! _session.realtime_export ())) {
-		_declick_amp.set_gain (target_gain);
-	}
 
-	if (declicked_out && (ms == MonitoringDisk)) {
-		/* Stopped and declicking has finished. Don't accidentally pass
-		 * any data from disk into our outputs (e.g. via interpolation)
-		 */
-		return;
+		/* no transport fades or exporting - no declick out logic */
+
+		_declick_amp.set_gain (target_gain);
+		declick_out = false;
+
+	} else {
+
+		/* using transport fades and not exporting - declick login in effect */
+
+		if (ms == MonitoringDisk) {
+
+			/* Only monitoring from disk, so if we've finished a
+			 * declick (for stop/locate), do not accidentally pass
+			 * any data from disk to our outputs.
+			 */
+
+			if ((target_gain == 0.0) && (_declick_amp.gain() == target_gain)) {
+				/* we were heading for zero (declick out for
+				   stop), and we've reached there. Done.
+				*/
+				return;
+			}
+		}
 	}
 
 	BufferSet& scratch_bufs (_session.get_scratch_buffers (bufs.count()));
