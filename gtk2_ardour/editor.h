@@ -1566,7 +1566,6 @@ private:
 	std::set<boost::shared_ptr<ARDOUR::Playlist> > motion_frozen_playlists;
 
 	bool _dragging_playhead;
-	bool _dragging_edit_point;
 
 	void marker_drag_motion_callback (GdkEvent*);
 	void marker_drag_finished_callback (GdkEvent*);

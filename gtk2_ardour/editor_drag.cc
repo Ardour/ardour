@@ -4417,7 +4417,6 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	bool is_start;
 
 	Location *location = _editor->find_location_from_marker (_marker, is_start);
-	_editor->_dragging_edit_point = true;
 
 	update_item (location);
 
@@ -4721,8 +4720,6 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		return;
 	}
-
-	_editor->_dragging_edit_point = false;
 
 	XMLNode &before = _editor->session()->locations()->get_state();
 	bool in_command = false;
