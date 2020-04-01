@@ -1767,7 +1767,7 @@ Editor::temporal_zoom_step_scale (bool zoom_out, double scale)
 }
 
 void
-Editor::temporal_zoom (samplecnt_t fpp)
+Editor::temporal_zoom (samplecnt_t spp)
 {
 	if (!_session) {
 		return;
@@ -1783,10 +1783,10 @@ Editor::temporal_zoom (samplecnt_t fpp)
 	samplepos_t where;
 	bool in_track_canvas;
 	bool use_mouse_sample = true;
-	samplecnt_t nfpp;
+	samplecnt_t nspp;
 	double l;
 
-	if (fpp == samples_per_pixel) {
+	if (spp == samples_per_pixel) {
 		return;
 	}
 
@@ -1798,10 +1798,10 @@ Editor::temporal_zoom (samplecnt_t fpp)
 	// all of which is used for the editor track displays. The whole day
 	// would be 4147200000 samples, so 2592000 samples per pixel.
 
-	nfpp = min (fpp, (samplecnt_t) 2592000);
-	nfpp = max ((samplecnt_t) 1, nfpp);
+	nspp = min (spp, (samplecnt_t) 2592000);
+	nspp = max ((samplecnt_t) 1, nspp);
 
-	new_page_size = (samplepos_t) floor (_visible_canvas_width * nfpp);
+	new_page_size = (samplepos_t) floor (_visible_canvas_width * nspp);
 	half_page_size = new_page_size / 2;
 
 	Editing::ZoomFocus zf = zoom_focus;
@@ -1897,7 +1897,7 @@ Editor::temporal_zoom (samplecnt_t fpp)
 
 	// leftmost_after_zoom = min (leftmost_after_zoom, _session->current_end_sample());
 
-	reposition_and_zoom (leftmost_after_zoom, nfpp);
+	reposition_and_zoom (leftmost_after_zoom, nspp);
 }
 
 void
