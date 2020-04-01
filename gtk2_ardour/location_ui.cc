@@ -256,7 +256,6 @@ LocationEditRow::set_location (Location *loc)
 		string date = gdt.format ("%F %H:%M");
 		date_label.set_text(date);
 		item_table.attach (date_label, 9, 10, 0, 1, FILL, Gtk::FILL, 4, 0);
-		
 	}
 	hide_check_button.set_active (location->is_hidden());
 	lock_check_button.set_active (location->locked());
