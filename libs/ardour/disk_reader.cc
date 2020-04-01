@@ -762,7 +762,7 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 		return 0;
 	}
 
-	if ((!_last_read_reversed || (_last_read_reversed == read_reversed)) ||
+	if ((!_last_read_reversed || (_last_read_reversed == read_reversed)) &&
 	    (!_last_read_loop || (_last_read_loop == read_loop))) {
 
 		/* We do these things only if we're still reading in the same
