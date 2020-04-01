@@ -575,6 +575,7 @@ TemplateManager::import_template_set ()
 
 	FileFilter archive_filter;
 	archive_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::template_archive_suffix));
+	archive_filter.add_pattern (X_("*.tar.xz")); // template archives from 5.x
 	archive_filter.set_name (_("Template archives"));
 	dialog.add_filter (archive_filter);
 
