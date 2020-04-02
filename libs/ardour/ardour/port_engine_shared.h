@@ -81,8 +81,10 @@ class BackendPort
 
 	void update_connected_latency (bool for_playback);
 
-  private:
+  protected:
 	PortEngineSharedImpl &_backend;
+
+  private:
 	std::string _name;
 	std::string _pretty_name;
 	const PortFlags _flags;

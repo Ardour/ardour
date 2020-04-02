@@ -37,6 +37,7 @@
 #include "ardour/types.h"
 #include "ardour/audio_backend.h"
 #include "ardour/dsp_load_calculator.h"
+#include "ardour/port_engine_shared.h"
 
 namespace ARDOUR {
 
@@ -69,58 +70,13 @@ class DummyMidiEvent {
 
 typedef std::vector<boost::shared_ptr<DummyMidiEvent> > DummyMidiBuffer;
 
-class DummyPort {
+class DummyPort : public BackendPort {
 	protected:
 		DummyPort (DummyAudioBackend &b, const std::string&, PortFlags);
 	public:
 		virtual ~DummyPort ();
 
-		const std::string& name () const { return _name; }
-		const std::string& pretty_name () const { return _pretty_name; }
-		PortFlags flags () const { return _flags; }
-
-		int set_name (const std::string &name) { _name = name; return 0; }
-		int set_pretty_name (const std::string &name) { _pretty_name = name; return 0; }
-
-		virtual DataType type () const = 0;
-
-		bool is_input ()     const { return flags () & IsInput; }
-		bool is_output ()    const { return flags () & IsOutput; }
-		bool is_physical ()  const { return flags () & IsPhysical; }
-		bool is_terminal ()  const { return flags () & IsTerminal; }
-		bool is_connected () const { return _connections.size () != 0; }
-		bool is_connected (const DummyPort *port) const;
-		bool is_physically_connected () const;
-
-		const std::set<DummyPort *>& get_connections () const { return _connections; }
-
-		int connect (DummyPort *port);
-		int disconnect (DummyPort *port);
-		void disconnect_all ();
-
-		virtual void* get_buffer (pframes_t nframes) = 0;
 		void next_period () { _gen_cycle = false; }
-
-		const LatencyRange latency_range (bool for_playback) const
-		{
-			return for_playback ? _playback_latency_range : _capture_latency_range;
-		}
-
-		void set_latency_range (const LatencyRange &latency_range, bool for_playback);
-
-		void update_connected_latency (bool for_playback);
-
-	private:
-		DummyAudioBackend &_dummy_backend;
-		std::string _name;
-		std::string _pretty_name;
-		const PortFlags _flags;
-		LatencyRange _capture_latency_range;
-		LatencyRange _playback_latency_range;
-		std::set<DummyPort*> _connections;
-
-		void _connect (DummyPort* , bool);
-		void _disconnect (DummyPort* , bool);
 
 	protected:
 		/* random number generator */
@@ -134,6 +90,9 @@ class DummyPort {
 		// signal generator
 		volatile bool _gen_cycle;
 		Glib::Threads::Mutex generator_lock;
+
+        private:
+		AudioBackend& _engine;
 
 }; // class DummyPort
 
@@ -227,7 +186,7 @@ class DummyMidiPort : public DummyPort {
 		DummyMidiData::MIDISequence const * _midi_seq_dat;
 }; // class DummyMidiPort
 
-class DummyAudioBackend : public AudioBackend {
+class DummyAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 	friend class DummyPort;
 	public:
 	         DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info);
@@ -326,33 +285,35 @@ class DummyAudioBackend : public AudioBackend {
 
 		void* private_handle () const;
 		const std::string& my_name () const;
-		uint32_t port_name_size () const;
 
-		int         set_port_name (PortHandle, const std::string&);
-		std::string get_port_name (PortHandle) const;
-		PortFlags get_port_flags (PortHandle) const;
-		PortHandle  get_port_by_name (const std::string&) const;
+		/* PortEngine API - forwarded to PortEngineSharedImpl */
 
-		int get_port_property (PortHandle, const std::string& key, std::string& value, std::string& type) const;
-		int set_port_property (PortHandle, const std::string& key, const std::string& value, const std::string& type);
+	bool        port_is_physical (PortEngine::PortHandle ph) const { return PortEngineSharedImpl::port_is_physical (ph); }
+	void        get_physical_outputs (DataType type, std::vector<std::string>& results) { PortEngineSharedImpl::get_physical_outputs (type, results); }
+	void        get_physical_inputs (DataType type, std::vector<std::string>& results) { PortEngineSharedImpl::get_physical_inputs (type, results); }
+	ChanCount   n_physical_outputs () const { return PortEngineSharedImpl::n_physical_outputs (); }
+	ChanCount   n_physical_inputs () const { return PortEngineSharedImpl::n_physical_inputs (); }
+	uint32_t    port_name_size () const { return PortEngineSharedImpl::port_name_size(); }
+	int         set_port_name (PortEngine::PortHandle ph, const std::string& name) { return PortEngineSharedImpl::set_port_name (ph, name); }
+	std::string get_port_name (PortEngine::PortHandle ph) const { return PortEngineSharedImpl::get_port_name (ph); }
+	PortFlags   get_port_flags (PortEngine::PortHandle ph) const { return PortEngineSharedImpl::get_port_flags (ph); }
+	PortEngine::PortHandle  get_port_by_name (std::string const & name) const { return PortEngineSharedImpl::get_port_by_name (name); }
+	int         get_port_property (PortEngine::PortHandle ph, const std::string& key, std::string& value, std::string& type) const { return PortEngineSharedImpl::get_port_property (ph, key, value, type); }
+	int         set_port_property (PortEngine::PortHandle ph, const std::string& key, const std::string& value, const std::string& type) { return PortEngineSharedImpl::set_port_property (ph, key, value, type); }
+	int         get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>& results) const { return PortEngineSharedImpl::get_ports (port_name_pattern, type, flags, results); }
+	DataType    port_data_type (PortEngine::PortHandle ph) const { return PortEngineSharedImpl::port_data_type (ph); }
+	PortEngine::PortHandle register_port (const std::string& shortname, ARDOUR::DataType type, ARDOUR::PortFlags flags) { return PortEngineSharedImpl::register_port (shortname, type, flags); }
+	void        unregister_port (PortHandle ph) { if (!_running) return; PortEngineSharedImpl::unregister_port (ph); }
+	int         connect (const std::string& src, const std::string& dst) { return PortEngineSharedImpl::connect (src, dst); }
+	int         disconnect (const std::string& src, const std::string& dst) { return PortEngineSharedImpl::disconnect (src, dst); }
+	int         connect (PortEngine::PortHandle ph, const std::string& other) { return PortEngineSharedImpl::connect (ph, other); }
+	int         disconnect (PortEngine::PortHandle ph, const std::string& other) { return PortEngineSharedImpl::disconnect (ph, other); }
+	int         disconnect_all (PortEngine::PortHandle ph) { return PortEngineSharedImpl::disconnect_all (ph); }
+	bool        connected (PortEngine::PortHandle ph, bool process_callback_safe) { return PortEngineSharedImpl::connected (ph, process_callback_safe); }
+	bool        connected_to (PortEngine::PortHandle ph, const std::string& other, bool process_callback_safe) { return PortEngineSharedImpl::connected_to (ph, other, process_callback_safe); }
+	bool        physically_connected (PortEngine::PortHandle ph, bool process_callback_safe) { return PortEngineSharedImpl::physically_connected (ph, process_callback_safe); }
+	int         get_connections (PortEngine::PortHandle ph, std::vector<std::string>& results, bool process_callback_safe) { return PortEngineSharedImpl::get_connections (ph, results, process_callback_safe); }
 
-		int get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>&) const;
-
-		DataType port_data_type (PortHandle) const;
-
-		PortHandle register_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
-		void unregister_port (PortHandle);
-
-		int  connect (const std::string& src, const std::string& dst);
-		int  disconnect (const std::string& src, const std::string& dst);
-		int  connect (PortHandle, const std::string&);
-		int  disconnect (PortHandle, const std::string&);
-		int  disconnect_all (PortHandle);
-
-		bool connected (PortHandle, bool process_callback_safe);
-		bool connected_to (PortHandle, const std::string&, bool process_callback_safe);
-		bool physically_connected (PortHandle, bool process_callback_safe);
-		int  get_connections (PortHandle, std::vector<std::string>&, bool process_callback_safe);
 
 		/* MIDI */
 		int midi_event_get (pframes_t& timestamp, size_t& size, uint8_t const** buf, void* port_buffer, uint32_t event_index);
@@ -371,14 +332,6 @@ class DummyAudioBackend : public AudioBackend {
 
 		void         set_latency_range (PortHandle, bool for_playback, LatencyRange);
 		LatencyRange get_latency_range (PortHandle, bool for_playback);
-
-		/* Discovering physical ports */
-
-		bool      port_is_physical (PortHandle) const;
-		void      get_physical_outputs (DataType type, std::vector<std::string>&);
-		void      get_physical_inputs (DataType type, std::vector<std::string>&);
-		ChanCount n_physical_outputs () const;
-		ChanCount n_physical_inputs () const;
 
 		/* Getting access to the data buffer for a port */
 
@@ -449,28 +402,9 @@ class DummyAudioBackend : public AudioBackend {
 		};
 
 		/* port engine */
-		PortHandle add_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
 		int register_system_ports ();
-		void unregister_ports (bool system_only = false);
 		void update_system_port_latecies ();
 
-		std::vector<DummyAudioPort *> _system_inputs;
-		std::vector<DummyAudioPort *> _system_outputs;
-		std::vector<DummyMidiPort *> _system_midi_in;
-		std::vector<DummyMidiPort *> _system_midi_out;
-
-		struct SortByPortName
-		{
-			bool operator ()(const DummyPort* lhs, const DummyPort* rhs) const
-			{
-				return PBD::naturally_less (lhs->name ().c_str (), rhs->name ().c_str ());
-			}
-		};
-
-		typedef std::map<std::string, DummyPort *> PortMap; // fast lookup in _ports
-		typedef std::set<DummyPort *, SortByPortName> PortIndex; // fast lookup in _ports
-		PortMap _portmap;
-		PortIndex _ports;
 
 		struct PortConnectData {
 			std::string a;
@@ -497,17 +431,7 @@ class DummyAudioBackend : public AudioBackend {
 			pthread_mutex_unlock (&_port_callback_mutex);
 		}
 
-		bool valid_port (PortHandle port) const {
-			return std::find (_ports.begin(), _ports.end(), static_cast<DummyPort*>(port)) != _ports.end ();
-		}
-
-		DummyPort* find_port (const std::string& port_name) const {
-			PortMap::const_iterator it = _portmap.find (port_name);
-			if (it == _portmap.end()) {
-				return NULL;
-			}
-			return (*it).second;
-		}
+	BackendPort* port_factory (std::string const & name, ARDOUR::DataType type, ARDOUR::PortFlags);
 
 }; // class DummyAudioBackend
 

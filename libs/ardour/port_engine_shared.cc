@@ -38,7 +38,8 @@ BackendPort::BackendPort (PortEngineSharedImpl &b, const std::string& name, Port
 	_playback_latency_range.max = 0;
 }
 
-BackendPort::~BackendPort () {
+BackendPort::~BackendPort ()
+{
 	disconnect_all ();
 }
 
