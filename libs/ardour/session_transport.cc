@@ -362,9 +362,8 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	}
 
 	_last_roll_location = _last_roll_or_reversal_location =  _transport_sample;
-	if (!synced_to_engine () || _transport_sample == _engine.transport_sample ()) {
-		Located (); /* EMIT SIGNAL */
-	}
+
+	Located (); /* EMIT SIGNAL */
 }
 
 void
