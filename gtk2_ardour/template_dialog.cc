@@ -329,6 +329,7 @@ TemplateManager::handle_dirty_description ()
 		} else {
 			_description_editor.get_buffer()->set_text (_current_selection->get_value (_template_columns.description));
 		}
+		_desc_dirty = false;
 	}
 }
 
