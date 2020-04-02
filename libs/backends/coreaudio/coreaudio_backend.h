@@ -33,6 +33,7 @@
 #include "pbd/natsort.h"
 #include "ardour/audio_backend.h"
 #include "ardour/dsp_load_calculator.h"
+#include "ardour/port_engine_shared.h"
 #include "ardour/types.h"
 
 #include "coreaudio_pcmio.h"
@@ -60,61 +61,7 @@ class CoreMidiEvent {
 
 typedef std::vector<CoreMidiEvent> CoreMidiBuffer;
 
-class CoreBackendPort {
-  protected:
-	CoreBackendPort (CoreAudioBackend &b, const std::string&, PortFlags);
-  public:
-	virtual ~CoreBackendPort ();
-
-	const std::string& name () const { return _name; }
-	const std::string& pretty_name () const { return _pretty_name; }
-	PortFlags flags () const { return _flags; }
-
-	int set_name (const std::string &name) { _name = name; return 0; }
-	int set_pretty_name (const std::string &name) { _pretty_name = name; return 0; }
-
-	virtual DataType type () const = 0;
-
-	bool is_input ()     const { return flags () & IsInput; }
-	bool is_output ()    const { return flags () & IsOutput; }
-	bool is_physical ()  const { return flags () & IsPhysical; }
-	bool is_terminal ()  const { return flags () & IsTerminal; }
-	bool is_connected () const { return _connections.size () != 0; }
-	bool is_connected (const CoreBackendPort *port) const;
-	bool is_physically_connected () const;
-
-	const std::set<CoreBackendPort *>& get_connections () const { return _connections; }
-
-	int connect (CoreBackendPort *port);
-	int disconnect (CoreBackendPort *port);
-	void disconnect_all ();
-
-	virtual void* get_buffer (pframes_t nframes) = 0;
-
-	const LatencyRange latency_range (bool for_playback) const
-	{
-		return for_playback ? _playback_latency_range : _capture_latency_range;
-	}
-
-	void set_latency_range (const LatencyRange &latency_range, bool for_playback);
-
-	void update_connected_latency (bool for_playback);
-
-  private:
-	CoreAudioBackend &_osx_backend;
-	std::string _name;
-	std::string _pretty_name;
-	const PortFlags _flags;
-	LatencyRange _capture_latency_range;
-	LatencyRange _playback_latency_range;
-	std::set<CoreBackendPort*> _connections;
-
-	void _connect (CoreBackendPort* , bool);
-	void _disconnect (CoreBackendPort* , bool);
-
-}; // class CoreBackendPort
-
-class CoreAudioPort : public CoreBackendPort {
+class CoreAudioPort : public BackendPort {
   public:
 	CoreAudioPort (CoreAudioBackend &b, const std::string&, PortFlags);
 	~CoreAudioPort ();
@@ -129,7 +76,7 @@ class CoreAudioPort : public CoreBackendPort {
 	Sample _buffer[8192];
 }; // class CoreAudioPort
 
-class CoreMidiPort : public CoreBackendPort {
+class CoreMidiPort : public BackendPort {
   public:
 	CoreMidiPort (CoreAudioBackend &b, const std::string&, PortFlags);
 	~CoreMidiPort ();
@@ -207,7 +154,7 @@ class CoreMidiPort : public CoreBackendPort {
 
 }; // class CoreMidiPort
 
-class CoreAudioBackend : public AudioBackend {
+class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 	friend class CoreBackendPort;
   public:
 	CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info);
@@ -319,32 +266,34 @@ class CoreAudioBackend : public AudioBackend {
 
 	void* private_handle () const;
 	const std::string& my_name () const;
-	uint32_t port_name_size () const;
 
-	int         set_port_name (PortHandle, const std::string&);
-	std::string get_port_name (PortHandle) const;
-	PortFlags get_port_flags (PortHandle) const;
-	PortHandle  get_port_by_name (const std::string&) const;
-	int get_port_property (PortHandle, const std::string& key, std::string& value, std::string& type) const;
-	int set_port_property (PortHandle, const std::string& key, const std::string& value, const std::string& type);
+	/* PortEngine API - forwarded to PortEngineSharedImpl */
 
-	int get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>&) const;
-
-	DataType port_data_type (PortHandle) const;
-
-	PortHandle register_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
-	void unregister_port (PortHandle);
-
-	int  connect (const std::string& src, const std::string& dst);
-	int  disconnect (const std::string& src, const std::string& dst);
-	int  connect (PortHandle, const std::string&);
-	int  disconnect (PortHandle, const std::string&);
-	int  disconnect_all (PortHandle);
-
-	bool connected (PortHandle, bool process_callback_safe);
-	bool connected_to (PortHandle, const std::string&, bool process_callback_safe);
-	bool physically_connected (PortHandle, bool process_callback_safe);
-	int  get_connections (PortHandle, std::vector<std::string>&, bool process_callback_safe);
+	bool        port_is_physical (PortEngine::PortHandle ph) const { return PortEngineSharedImpl::port_is_physical (ph); }
+	void        get_physical_outputs (DataType type, std::vector<std::string>& results) { PortEngineSharedImpl::get_physical_outputs (type, results); }
+	void        get_physical_inputs (DataType type, std::vector<std::string>& results) { PortEngineSharedImpl::get_physical_inputs (type, results); }
+	ChanCount   n_physical_outputs () const { return PortEngineSharedImpl::n_physical_outputs (); }
+	ChanCount   n_physical_inputs () const { return PortEngineSharedImpl::n_physical_inputs (); }
+	uint32_t    port_name_size () const { return PortEngineSharedImpl::port_name_size(); }
+	int         set_port_name (PortEngine::PortHandle ph, const std::string& name) { return PortEngineSharedImpl::set_port_name (ph, name); }
+	std::string get_port_name (PortEngine::PortHandle ph) const { return PortEngineSharedImpl::get_port_name (ph); }
+	PortFlags   get_port_flags (PortEngine::PortHandle ph) const { return PortEngineSharedImpl::get_port_flags (ph); }
+	PortEngine::PortHandle  get_port_by_name (std::string const & name) const { return PortEngineSharedImpl::get_port_by_name (name); }
+	int         get_port_property (PortEngine::PortHandle ph, const std::string& key, std::string& value, std::string& type) const { return PortEngineSharedImpl::get_port_property (ph, key, value, type); }
+	int         set_port_property (PortEngine::PortHandle ph, const std::string& key, const std::string& value, const std::string& type) { return PortEngineSharedImpl::set_port_property (ph, key, value, type); }
+	int         get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>& results) const { return PortEngineSharedImpl::get_ports (port_name_pattern, type, flags, results); }
+	DataType    port_data_type (PortEngine::PortHandle ph) const { return PortEngineSharedImpl::port_data_type (ph); }
+	PortEngine::PortHandle register_port (const std::string& shortname, ARDOUR::DataType type, ARDOUR::PortFlags flags) { return PortEngineSharedImpl::register_port (shortname, type, flags); }
+	void        unregister_port (PortHandle ph) { if (!_run) return; PortEngineSharedImpl::unregister_port (ph); }
+	int         connect (const std::string& src, const std::string& dst) { return PortEngineSharedImpl::connect (src, dst); }
+	int         disconnect (const std::string& src, const std::string& dst) { return PortEngineSharedImpl::disconnect (src, dst); }
+	int         connect (PortEngine::PortHandle ph, const std::string& other) { return PortEngineSharedImpl::connect (ph, other); }
+	int         disconnect (PortEngine::PortHandle ph, const std::string& other) { return PortEngineSharedImpl::disconnect (ph, other); }
+	int         disconnect_all (PortEngine::PortHandle ph) { return PortEngineSharedImpl::disconnect_all (ph); }
+	bool        connected (PortEngine::PortHandle ph, bool process_callback_safe) { return PortEngineSharedImpl::connected (ph, process_callback_safe); }
+	bool        connected_to (PortEngine::PortHandle ph, const std::string& other, bool process_callback_safe) { return PortEngineSharedImpl::connected_to (ph, other, process_callback_safe); }
+	bool        physically_connected (PortEngine::PortHandle ph, bool process_callback_safe) { return PortEngineSharedImpl::physically_connected (ph, process_callback_safe); }
+	int         get_connections (PortEngine::PortHandle ph, std::vector<std::string>& results, bool process_callback_safe) { return PortEngineSharedImpl::get_connections (ph, results, process_callback_safe); }
 
 	/* MIDI */
 	int midi_event_get (pframes_t& timestamp, size_t& size, uint8_t const** buf, void* port_buffer, uint32_t event_index);
@@ -459,24 +408,6 @@ class CoreAudioBackend : public AudioBackend {
 	void unregister_ports (bool system_only = false);
 	void update_system_port_latecies ();
 
-	std::vector<CoreBackendPort *> _system_inputs;
-	std::vector<CoreBackendPort *> _system_outputs;
-	std::vector<CoreBackendPort *> _system_midi_in;
-	std::vector<CoreBackendPort *> _system_midi_out;
-
-	struct SortByPortName
-	{
-		bool operator ()(const CoreBackendPort* lhs, const CoreBackendPort* rhs) const
-		{
-			return PBD::naturally_less (lhs->name ().c_str (), rhs->name ().c_str ());
-		}
-	};
-
-	typedef std::map<std::string, CoreBackendPort *> PortMap; // fast lookup in _ports
-	typedef std::set<CoreBackendPort *, SortByPortName> PortIndex; // fast lookup in _ports
-	PortMap _portmap;
-	PortIndex _ports;
-
 	struct PortConnectData {
 		std::string a;
 		std::string b;
@@ -501,18 +432,6 @@ class CoreAudioBackend : public AudioBackend {
 		pthread_mutex_lock (&_port_callback_mutex);
 		_port_change_flag = true;
 		pthread_mutex_unlock (&_port_callback_mutex);
-	}
-
-	bool valid_port (PortHandle port) const {
-		return std::find (_ports.begin(), _ports.end(), static_cast<CoreBackendPort*>(port)) != _ports.end ();
-	}
-
-	CoreBackendPort* find_port (const std::string& port_name) const {
-		PortMap::const_iterator it = _portmap.find (port_name);
-		if (it == _portmap.end()) {
-			return NULL;
-		}
-		return (*it).second;
 	}
 
 	CoreBackendPort * find_port_in (std::vector<CoreBackendPort *> plist, const std::string& port_name) const {
