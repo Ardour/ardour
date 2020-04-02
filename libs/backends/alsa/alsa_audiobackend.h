@@ -35,6 +35,7 @@
 
 #include "ardour/audio_backend.h"
 #include "ardour/dsp_load_calculator.h"
+#include "ardour/port_engine_shared.h"
 #include "ardour/system_exec.h"
 #include "ardour/types.h"
 
@@ -65,61 +66,7 @@ class AlsaMidiEvent {
 
 typedef std::vector<AlsaMidiEvent> AlsaMidiBuffer;
 
-class AlsaPort {
-	protected:
-		AlsaPort (AlsaAudioBackend &b, const std::string&, PortFlags);
-	public:
-		virtual ~AlsaPort ();
-
-		const std::string& name () const { return _name; }
-		const std::string& pretty_name () const { return _pretty_name; }
-		PortFlags flags () const { return _flags; }
-
-		int set_name (const std::string &name) { _name = name; return 0; }
-		int set_pretty_name (const std::string &name) { _pretty_name = name; return 0; }
-
-		virtual DataType type () const = 0;
-
-		bool is_input ()     const { return flags () & IsInput; }
-		bool is_output ()    const { return flags () & IsOutput; }
-		bool is_physical ()  const { return flags () & IsPhysical; }
-		bool is_terminal ()  const { return flags () & IsTerminal; }
-		bool is_connected () const { return _connections.size () != 0; }
-		bool is_connected (const AlsaPort *port) const;
-		bool is_physically_connected () const;
-
-		const std::set<AlsaPort *>& get_connections () const { return _connections; }
-
-		int connect (AlsaPort *port);
-		int disconnect (AlsaPort *port);
-		void disconnect_all ();
-
-		virtual void* get_buffer (pframes_t nframes) = 0;
-
-		const LatencyRange latency_range (bool for_playback) const
-		{
-			return for_playback ? _playback_latency_range : _capture_latency_range;
-		}
-
-		void set_latency_range (const LatencyRange &latency_range, bool for_playback);
-
-		void update_connected_latency (bool for_playback);
-
-	private:
-		AlsaAudioBackend &_alsa_backend;
-		std::string _name;
-		std::string _pretty_name;
-		const PortFlags _flags;
-		LatencyRange _capture_latency_range;
-		LatencyRange _playback_latency_range;
-		std::set<AlsaPort*> _connections;
-
-		void _connect (AlsaPort* , bool);
-		void _disconnect (AlsaPort* , bool);
-
-}; // class AlsaPort
-
-class AlsaAudioPort : public AlsaPort {
+class AlsaAudioPort : public BackendPort {
 	public:
 		AlsaAudioPort (AlsaAudioBackend &b, const std::string&, PortFlags);
 		~AlsaAudioPort ();
@@ -134,7 +81,7 @@ class AlsaAudioPort : public AlsaPort {
 		Sample _buffer[8192];
 }; // class AlsaAudioPort
 
-class AlsaMidiPort : public AlsaPort {
+class AlsaMidiPort : public BackendPort {
 	public:
 		AlsaMidiPort (AlsaAudioBackend &b, const std::string&, PortFlags);
 		~AlsaMidiPort ();
@@ -170,7 +117,8 @@ class AlsaDeviceReservation
 		bool _reservation_succeeded;
 };
 
-class AlsaAudioBackend : public AudioBackend {
+class AlsaAudioBackend : public AudioBackend, public PortEngineSharedImpl
+{
 	friend class AlsaPort;
 	public:
 		AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info);
@@ -234,6 +182,34 @@ class AlsaAudioBackend : public AudioBackend {
 
 		bool can_set_systemic_midi_latencies () const { return true; }
 
+	/* PortEngine API - forwarded to PortEngineSharedImpl */
+
+	bool        port_is_physical (PortEngine::PortHandle ph) const { return PortEngineSharedImpl::port_is_physical (ph); }
+	void        get_physical_outputs (DataType type, std::vector<std::string>& results) { PortEngineSharedImpl::get_physical_outputs (type, results); }
+	void        get_physical_inputs (DataType type, std::vector<std::string>& results) { PortEngineSharedImpl::get_physical_inputs (type, results); }
+	ChanCount   n_physical_outputs () const { return PortEngineSharedImpl::n_physical_outputs (); }
+	ChanCount   n_physical_inputs () const { return PortEngineSharedImpl::n_physical_inputs (); }
+	uint32_t    port_name_size () const { return PortEngineSharedImpl::port_name_size(); }
+	int         set_port_name (PortEngine::PortHandle ph, const std::string& name) { return PortEngineSharedImpl::set_port_name (ph, name); }
+	std::string get_port_name (PortEngine::PortHandle ph) const { return PortEngineSharedImpl::get_port_name (ph); }
+	PortFlags   get_port_flags (PortEngine::PortHandle ph) const { return PortEngineSharedImpl::get_port_flags (ph); }
+	PortEngine::PortHandle  get_port_by_name (std::string const & name) const { return PortEngineSharedImpl::get_port_by_name (name); }
+	int         get_port_property (PortEngine::PortHandle ph, const std::string& key, std::string& value, std::string& type) const { return PortEngineSharedImpl::get_port_property (ph, key, value, type); }
+	int         set_port_property (PortEngine::PortHandle ph, const std::string& key, const std::string& value, const std::string& type) { return PortEngineSharedImpl::set_port_property (ph, key, value, type); }
+	int         get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>& results) const { return PortEngineSharedImpl::get_ports (port_name_pattern, type, flags, results); }
+	DataType    port_data_type (PortEngine::PortHandle ph) const { return PortEngineSharedImpl::port_data_type (ph); }
+	PortEngine::PortHandle register_port (const std::string& shortname, ARDOUR::DataType type, ARDOUR::PortFlags flags) { return PortEngineSharedImpl::register_port (shortname, type, flags); }
+	void        unregister_port (PortHandle ph) { if (!_run) return; PortEngineSharedImpl::unregister_port (ph); }
+	int         connect (const std::string& src, const std::string& dst) { return PortEngineSharedImpl::connect (src, dst); }
+	int         disconnect (const std::string& src, const std::string& dst) { return PortEngineSharedImpl::disconnect (src, dst); }
+	int         connect (PortEngine::PortHandle ph, const std::string& other) { return PortEngineSharedImpl::connect (ph, other); }
+	int         disconnect (PortEngine::PortHandle ph, const std::string& other) { return PortEngineSharedImpl::disconnect (ph, other); }
+	int         disconnect_all (PortEngine::PortHandle ph) { return PortEngineSharedImpl::disconnect_all (ph); }
+	bool        connected (PortEngine::PortHandle ph, bool process_callback_safe) { return PortEngineSharedImpl::connected (ph, process_callback_safe); }
+	bool        connected_to (PortEngine::PortHandle ph, const std::string& other, bool process_callback_safe) { return PortEngineSharedImpl::connected_to (ph, other, process_callback_safe); }
+	bool        physically_connected (PortEngine::PortHandle ph, bool process_callback_safe) { return PortEngineSharedImpl::physically_connected (ph, process_callback_safe); }
+	int         get_connections (PortEngine::PortHandle ph, std::vector<std::string>& results, bool process_callback_safe) { return PortEngineSharedImpl::get_connections (ph, results, process_callback_safe); }
+
 		/* External control app */
 		std::string control_app_name () const { return std::string (); }
 		void launch_control_app () {}
@@ -272,35 +248,8 @@ class AlsaAudioBackend : public AudioBackend {
 
 		void* private_handle () const;
 		const std::string& my_name () const;
-		uint32_t port_name_size () const;
 
-		int         set_port_name (PortHandle, const std::string&);
-		std::string get_port_name (PortHandle) const;
-		PortFlags get_port_flags (PortHandle) const;
-		PortHandle  get_port_by_name (const std::string&) const;
-
-		int get_port_property (PortHandle, const std::string& key, std::string& value, std::string& type) const;
-		int set_port_property (PortHandle, const std::string& key, const std::string& value, const std::string& type);
-
-		int get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>&) const;
-
-		DataType port_data_type (PortHandle) const;
-
-		PortHandle register_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
-		void unregister_port (PortHandle);
-
-		int  connect (const std::string& src, const std::string& dst);
-		int  disconnect (const std::string& src, const std::string& dst);
-		int  connect (PortHandle, const std::string&);
-		int  disconnect (PortHandle, const std::string&);
-		int  disconnect_all (PortHandle);
-
-		bool connected (PortHandle, bool process_callback_safe);
-		bool connected_to (PortHandle, const std::string&, bool process_callback_safe);
-		bool physically_connected (PortHandle, bool process_callback_safe);
-		int  get_connections (PortHandle, std::vector<std::string>&, bool process_callback_safe);
-
-		/* MIDI */
+	/* MIDI */
 		int midi_event_get (pframes_t& timestamp, size_t& size, uint8_t const** buf, void* port_buffer, uint32_t event_index);
 		int midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size);
 		uint32_t get_midi_event_count (void* port_buffer);
@@ -317,14 +266,6 @@ class AlsaAudioBackend : public AudioBackend {
 
 		void         set_latency_range (PortHandle, bool for_playback, LatencyRange);
 		LatencyRange get_latency_range (PortHandle, bool for_playback);
-
-		/* Discovering physical ports */
-
-		bool      port_is_physical (PortHandle) const;
-		void      get_physical_outputs (DataType type, std::vector<std::string>&);
-		void      get_physical_inputs (DataType type, std::vector<std::string>&);
-		ChanCount n_physical_outputs () const;
-		ChanCount n_physical_inputs () const;
 
 		/* Getting access to the data buffer for a port */
 
@@ -420,29 +361,12 @@ class AlsaAudioBackend : public AudioBackend {
 		};
 
 		/* port engine */
-		PortHandle add_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
+
+		BackendPort* port_factory (std::string const & name, ARDOUR::DataType dt, ARDOUR::PortFlags flags);
+
 		int register_system_audio_ports ();
 		int register_system_midi_ports (const std::string device = "");
-		void unregister_ports (bool system_only = false);
 		void update_system_port_latecies ();
-
-		std::vector<AlsaPort *> _system_inputs;
-		std::vector<AlsaPort *> _system_outputs;
-		std::vector<AlsaPort *> _system_midi_in;
-		std::vector<AlsaPort *> _system_midi_out;
-
-		struct SortByPortName
-		{
-			bool operator ()(const AlsaPort* lhs, const AlsaPort* rhs) const
-			{
-				return PBD::naturally_less (lhs->name ().c_str (), rhs->name ().c_str ());
-			}
-		};
-
-		typedef std::map<std::string, AlsaPort *> PortMap; // fast lookup in _ports
-		typedef std::set<AlsaPort *, SortByPortName> PortIndex; // fast lookup in _ports
-		SerializedRCUManager<PortMap> _portmap;
-		SerializedRCUManager<PortIndex> _ports;
 
 		std::vector<AlsaMidiOut *> _rmidi_out;
 		std::vector<AlsaMidiIn  *> _rmidi_in;
@@ -472,20 +396,6 @@ class AlsaAudioBackend : public AudioBackend {
 			pthread_mutex_unlock (&_port_callback_mutex);
 		}
 
-		bool valid_port (PortHandle port) const {
-			boost::shared_ptr<PortIndex> p = _ports.reader();
-			return std::find (p->begin(), p->end(), static_cast<AlsaPort*>(port)) != p->end ();
-		}
-
-		AlsaPort* find_port (const std::string& port_name) const {
-			boost::shared_ptr<PortMap> p = _portmap.reader();
-			PortMap::const_iterator it = p->find (port_name);
-			if (it == p->end()) {
-				return NULL;
-			}
-			return (*it).second;
-		}
-
 		void update_systemic_audio_latencies ();
 		void update_systemic_midi_latencies ();
 
@@ -512,8 +422,8 @@ class AlsaAudioBackend : public AudioBackend {
 				bool halt;
 				bool dead;
 
-				std::vector<AlsaPort *> inputs;
-				std::vector<AlsaPort *> outputs;
+				std::vector<BackendPort *> inputs;
+				std::vector<BackendPort *> outputs;
 
 				PBD::Signal0<void> UpdateLatency;
 				PBD::ScopedConnection latency_connection;
