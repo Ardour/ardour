@@ -43,6 +43,7 @@
 
 #include "pbd/fpu.h"
 #include "pbd/cpus.h"
+#include "pbd/unwind.h"
 #include "pbd/i18n.h"
 
 #include "ardour/audio_backend.h"
@@ -1300,6 +1301,194 @@ class BufferingOptions : public OptionEditorComponent
 		HSliderOption _playback;
 		HSliderOption _capture;
 		ComboBoxText  _buffering_presets_combo;
+};
+
+class LTCPortSelectOption : public OptionEditorComponent, public sigc::trackable
+{
+public:
+	LTCPortSelectOption (RCConfiguration* c, SessionHandlePtr* shp)
+			: _rc_config (c)
+			, _shp (shp)
+			, _label (_("LTC Output Port:"))
+			, _ignore_change (false)
+	{
+		_store = ListStore::create (_port_columns);
+		_combo.set_model (_store);
+		_combo.pack_start (_port_columns.short_name);
+
+		set_tooltip (_combo, _("The LTC generator output will be auto-connected to this port when a session is loaded."));
+
+		update_port_combo ();
+
+		_combo.signal_map ().connect (sigc::mem_fun (*this, &LTCPortSelectOption::on_map));
+		_combo.signal_unmap ().connect (sigc::mem_fun (*this, &LTCPortSelectOption::on_unmap));
+		_combo.signal_changed ().connect (sigc::mem_fun (*this, &LTCPortSelectOption::port_changed));
+	}
+
+	void add_to_page (OptionEditorPage* p)
+	{
+		add_widgets_to_page (p, &_label, &_combo);
+	}
+
+	Gtk::Widget& tip_widget()
+	{
+		return _combo;
+	}
+
+	void parameter_changed (string const & p)
+	{
+		if (p == "ltc-output-port") {
+			update_selection ();
+		}
+	}
+
+	void set_state_from_config ()
+	{
+		parameter_changed ("ltc-output-port");
+	}
+
+private:
+	struct PortColumns : public Gtk::TreeModel::ColumnRecord {
+		PortColumns() {
+			add (short_name);
+			add (full_name);
+		}
+		Gtk::TreeModelColumn<std::string> short_name;
+		Gtk::TreeModelColumn<std::string> full_name;
+	};
+
+	RCConfiguration*  _rc_config;
+	SessionHandlePtr* _shp;
+	Label             _label;
+	Gtk::ComboBox     _combo;
+	bool              _ignore_change;
+	PortColumns       _port_columns;
+
+	Glib::RefPtr<Gtk::ListStore> _store;
+	PBD::ScopedConnection        _engine_connection;
+
+	void on_map ()
+	{
+		AudioEngine::instance()->PortRegisteredOrUnregistered.connect (
+				_engine_connection,
+				invalidator (*this),
+				boost::bind (&LTCPortSelectOption::update_port_combo, this),
+				gui_context());
+	}
+
+	void on_unmap ()
+	{
+		_engine_connection.disconnect ();
+	}
+
+	void port_changed ()
+	{
+		if (_ignore_change) {
+			return;
+		}
+		TreeModel::iterator active = _combo.get_active ();
+		string new_port = (*active)[_port_columns.full_name];
+		_rc_config->set_ltc_output_port (new_port);
+
+		if (!_shp->session()) {
+			return;
+		}
+		boost::shared_ptr<IO> ltc_io = _shp->session()->ltc_output_io();
+		if (!ltc_io) {
+			return;
+		}
+		boost::shared_ptr<Port> ltc_port = ltc_io->nth (0);
+		if (!ltc_port) {
+			return;
+		}
+		if (ltc_port->connected_to (new_port)) {
+			return;
+		}
+
+		ltc_io->disconnect (this);
+		if (!new_port.empty()) {
+			ltc_port->connect (new_port);
+		}
+	}
+
+	void update_port_combo ()
+	{
+		vector<string> ports;
+		ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::AUDIO, ARDOUR::PortFlags (ARDOUR::IsInput|ARDOUR::IsTerminal), ports);
+
+		PBD::Unwinder<bool> uw (_ignore_change, true);
+		_store->clear ();
+
+		TreeModel::Row row;
+		row = *_store->append ();
+		row[_port_columns.full_name] = string();
+		row[_port_columns.short_name] = _("Disconnected");
+
+		for (vector<string>::const_iterator p = ports.begin(); p != ports.end(); ++p) {
+			row = *_store->append ();
+			row[_port_columns.full_name] = *p;
+			std::string pn = ARDOUR::AudioEngine::instance()->get_pretty_name_by_name (*p);
+			if (pn.empty ()) {
+				pn = (*p).substr ((*p).find (':') + 1);
+			}
+			row[_port_columns.short_name] = pn;
+		}
+
+		update_selection ();
+	}
+
+	void update_selection ()
+	{
+		int n;
+		Gtk::TreeModel::Children children = _store->children();
+		Gtk::TreeModel::Children::iterator i = children.begin();
+		++i; /* skip "Disconnected" */
+
+		std::string const& pn = _rc_config->get_ltc_output_port ();
+		boost::shared_ptr<Port> ltc_port;
+		if (_shp->session()) {
+			boost::shared_ptr<IO> ltc_io = _shp->session()->ltc_output_io();
+			if (ltc_io) {
+				ltc_port = ltc_io->nth (0);
+			}
+		}
+
+		PBD::Unwinder<bool> uw (_ignore_change, true);
+
+		/* try match preference with available port-names */
+		for (n = 1;  i != children.end(); ++i, ++n) {
+			string port_name = (*i)[_port_columns.full_name];
+			if (port_name == pn) {
+				_combo.set_active (n);
+				return;
+			}
+		}
+
+		/* Set preference to current port connection
+		 * (LTC is auto-connected at session load).
+		 */
+		if (ltc_port) {
+			i = children.begin();
+			++i; /* skip "Disconnected" */
+			for (n = 1;  i != children.end(); ++i, ++n) {
+				string port_name = (*i)[_port_columns.full_name];
+				if (ltc_port->connected_to (port_name)) {
+					_combo.set_active (n);
+					return;
+				}
+			}
+		}
+
+		if (pn.empty ()) {
+			_combo.set_active (0); /* disconnected */
+		} else {
+			/* The port is currently not available, retain preference */
+			TreeModel::Row row = *_store->append ();
+			row[_port_columns.full_name] = pn;
+			row[_port_columns.short_name] = (pn).substr ((pn).find (':') + 1);
+			_combo.set_active (n);
+		}
+	}
 };
 
 class ControlSurfacesOptions : public OptionEditorMiniPage
@@ -3270,6 +3459,8 @@ RCOptionEditor::RCOptionEditor ()
 		 _("Specify the Peak Volume of the generated LTC signal in dBFS. A good value is  0dBu ^= -18dBFS in an EBU calibrated system"));
 
 	add_option (_("Transport/LTC"), _ltc_volume_slider);
+
+	add_option (_("Transport/LTC"), new LTCPortSelectOption (_rc_config, this));
 
 	add_option (_("Transport/MIDI"), new OptionEditorHeading (_("MIDI Beat Clock (Mclk) Generator")));
 

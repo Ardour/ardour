@@ -54,7 +54,6 @@ private:
 	ComboOption<ARDOUR::ListenPosition>* _listen_position;
 	VisibilityGroup _mixer_strip_visibility;
 	BoolOption* _sync_framerate;
-	ComboStringOption* _ltc_port;
 	HSliderOption* _ltc_volume_slider;
 	Gtk::Adjustment* _ltc_volume_adjustment;
 	BoolOption* _ltc_send_continuously;
