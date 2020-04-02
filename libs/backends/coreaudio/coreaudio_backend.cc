@@ -86,6 +86,7 @@ static void midi_port_change (void *arg)
 
 CoreAudioBackend::CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	: AudioBackend (e, info)
+	, PortEngineSharedImpl (e, s_instance_name)
 	, _run (false)
 	, _active_ca (false)
 	, _active_fw (false)
@@ -531,15 +532,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 		return BackendReinitializationError;
 	}
 
-	if (_ports.size () || _portmap.size ()) {
-		PBD::warning << _("CoreAudioBackend: recovering from unclean shutdown, port registry is not empty.") << endmsg;
-		_system_inputs.clear();
-		_system_outputs.clear();
-		_system_midi_in.clear();
-		_system_midi_out.clear();
-		_ports.clear();
-		_portmap.clear();
-	}
+	clear_ports ();
 
 	uint32_t device1 = name_to_id(_input_audio_device, Input);
 	uint32_t device2 = name_to_id(_output_audio_device, Output);
@@ -961,7 +954,7 @@ CoreAudioBackend::register_system_audio_ports()
 		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
-		CoreBackendPort *cp = static_cast<CoreBackendPort*>(p);
+		BackendPort *cp = static_cast<BackendPort*>(p);
 		cp->set_pretty_name (_pcmio->cached_port_name(i, true));
 		_system_inputs.push_back(cp);
 	}
@@ -973,7 +966,7 @@ CoreAudioBackend::register_system_audio_ports()
 		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
-		CoreBackendPort *cp = static_cast<CoreBackendPort*>(p);
+		BackendPort *cp = static_cast<BackendPort*>(p);
 		cp->set_pretty_name (_pcmio->cached_port_name(i, false));
 		_system_outputs.push_back(cp);
 	}
@@ -983,17 +976,17 @@ CoreAudioBackend::register_system_audio_ports()
 void
 CoreAudioBackend::update_system_port_latecies ()
 {
-	for (std::vector<CoreBackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+	for (std::vector<BackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
 		(*it)->update_connected_latency (true);
 	}
-	for (std::vector<CoreBackendPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
+	for (std::vector<BackendPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
 		(*it)->update_connected_latency (false);
 	}
 
-	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+	for (std::vector<BackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
 		(*it)->update_connected_latency (true);
 	}
-	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
+	for (std::vector<BackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
 		(*it)->update_connected_latency (false);
 	}
 }
@@ -1006,7 +999,7 @@ CoreAudioBackend::coremidi_rediscover()
 
 	pthread_mutex_lock (&_process_callback_mutex);
 
-	for (std::vector<CoreBackendPort*>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end ();) {
+	for (std::vector<BackendPort*>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end ();) {
 		bool found = false;
 		for (size_t i = 0; i < _midiio->n_midi_outputs(); ++i) {
 			if ((*it)->name() == _midiio->port_id(i, false)) {
@@ -1026,7 +1019,7 @@ CoreAudioBackend::coremidi_rediscover()
 		}
 	}
 
-	for (std::vector<CoreBackendPort*>::iterator it = _system_midi_in.begin (); it != _system_midi_in.end ();) {
+	for (std::vector<BackendPort*>::iterator it = _system_midi_in.begin (); it != _system_midi_in.end ();) {
 		bool found = false;
 		for (size_t i = 0; i < _midiio->n_midi_inputs(); ++i) {
 			if ((*it)->name() == _midiio->port_id(i, true)) {
@@ -1063,7 +1056,7 @@ CoreAudioBackend::coremidi_rediscover()
 		LatencyRange lr;
 		lr.min = lr.max = _samples_per_period; // TODO add per-port midi-systemic latency
 		set_latency_range (p, false, lr);
-		CoreBackendPort *pp = static_cast<CoreBackendPort*>(p);
+		BackendPort *pp = static_cast<BackendPort*>(p);
 		pp->set_pretty_name(_midiio->port_name(i, true));
 		_system_midi_in.push_back(pp);
 		_port_change_flag = true;
@@ -1086,7 +1079,7 @@ CoreAudioBackend::coremidi_rediscover()
 		LatencyRange lr;
 		lr.min = lr.max = _samples_per_period; // TODO add per-port midi-systemic latency
 		set_latency_range (p, false, lr);
-		CoreBackendPort *pp = static_cast<CoreBackendPort*>(p);
+		BackendPort *pp = static_cast<BackendPort*>(p);
 		pp->set_pretty_name(_midiio->port_name(i, false));
 		_system_midi_out.push_back(pp);
 		_port_change_flag = true;
@@ -1210,10 +1203,10 @@ void
 CoreAudioBackend::set_latency_range (PortEngine::PortHandle port, bool for_playback, LatencyRange latency_range)
 {
 	if (!valid_port (port)) {
-		PBD::warning << _("CoreBackendPort::set_latency_range (): invalid port.") << endmsg;
+		PBD::warning << _("BackendPort::set_latency_range (): invalid port.") << endmsg;
 		return;
 	}
-	static_cast<CoreBackendPort*>(port)->set_latency_range (latency_range, for_playback);
+	static_cast<BackendPort*>(port)->set_latency_range (latency_range, for_playback);
 }
 
 LatencyRange
@@ -1221,12 +1214,12 @@ CoreAudioBackend::get_latency_range (PortEngine::PortHandle port, bool for_playb
 {
 	LatencyRange r;
 	if (!valid_port (port)) {
-		PBD::warning << _("CoreBackendPort::get_latency_range (): invalid port.") << endmsg;
+		PBD::warning << _("BackendPort::get_latency_range (): invalid port.") << endmsg;
 		r.min = 0;
 		r.max = 0;
 		return r;
 	}
-	CoreBackendPort* p = static_cast<CoreBackendPort*>(port);
+	BackendPort* p = static_cast<BackendPort*>(port);
 	assert(p);
 
 	r = p->latency_range (for_playback);
@@ -1243,82 +1236,6 @@ CoreAudioBackend::get_latency_range (PortEngine::PortHandle port, bool for_playb
 	return r;
 }
 
-/* Discovering physical ports */
-
-bool
-CoreAudioBackend::port_is_physical (PortEngine::PortHandle port) const
-{
-	if (!valid_port (port)) {
-		PBD::warning << _("CoreBackendPort::port_is_physical (): invalid port.") << endmsg;
-		return false;
-	}
-	return static_cast<CoreBackendPort*>(port)->is_physical ();
-}
-
-void
-CoreAudioBackend::get_physical_outputs (DataType type, std::vector<std::string>& port_names)
-{
-	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
-		CoreBackendPort* port = *i;
-		if ((port->type () == type) && port->is_input () && port->is_physical ()) {
-			port_names.push_back (port->name ());
-		}
-	}
-}
-
-void
-CoreAudioBackend::get_physical_inputs (DataType type, std::vector<std::string>& port_names)
-{
-	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
-		CoreBackendPort* port = *i;
-		if ((port->type () == type) && port->is_output () && port->is_physical ()) {
-			port_names.push_back (port->name ());
-		}
-	}
-}
-
-ChanCount
-CoreAudioBackend::n_physical_outputs () const
-{
-	int n_midi = 0;
-	int n_audio = 0;
-	for (PortIndex::const_iterator i = _ports.begin (); i != _ports.end (); ++i) {
-		CoreBackendPort* port = *i;
-		if (port->is_output () && port->is_physical ()) {
-			switch (port->type ()) {
-			case DataType::AUDIO: ++n_audio; break;
-			case DataType::MIDI: ++n_midi; break;
-			default: break;
-			}
-		}
-	}
-	ChanCount cc;
-	cc.set (DataType::AUDIO, n_audio);
-	cc.set (DataType::MIDI, n_midi);
-	return cc;
-}
-
-ChanCount
-CoreAudioBackend::n_physical_inputs () const
-{
-	int n_midi = 0;
-	int n_audio = 0;
-	for (PortIndex::const_iterator i = _ports.begin (); i != _ports.end (); ++i) {
-		CoreBackendPort* port = *i;
-		if (port->is_input () && port->is_physical ()) {
-			switch (port->type ()) {
-			case DataType::AUDIO: ++n_audio; break;
-			case DataType::MIDI: ++n_midi; break;
-			default: break;
-			}
-		}
-	}
-	ChanCount cc;
-	cc.set (DataType::AUDIO, n_audio);
-	cc.set (DataType::MIDI, n_midi);
-	return cc;
-}
-
 /* Getting access to the data buffer for a port */
 
 void*
@@ -1327,7 +1244,7 @@ CoreAudioBackend::get_buffer (PortEngine::PortHandle port, pframes_t nframes)
 	assert (port);
 	assert (valid_port (port));
 	if (!port || !valid_port (port)) return NULL; // XXX remove me
-	return static_cast<CoreBackendPort*>(port)->get_buffer (nframes);
+	return static_cast<BackendPort*>(port)->get_buffer (nframes);
 }
 
 void
@@ -1367,7 +1284,7 @@ CoreAudioBackend::pre_process ()
 void
 CoreAudioBackend::reset_midi_parsers ()
 {
-	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+	for (std::vector<BackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
 		CoreMidiPort* port = dynamic_cast<CoreMidiPort*>(*it);
 		if (port) {
 			port->reset_parser ();
@@ -1441,10 +1358,10 @@ CoreAudioBackend::freewheel_thread ()
 		/* Freewheelin' */
 
 		// clear input buffers
-		for (std::vector<CoreBackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+		for (std::vector<BackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
 			memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
 		}
-		for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+		for (std::vector<BackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
 			static_cast<CoreMidiBuffer*>((*it)->get_buffer(0))->clear ();
 		}
 
@@ -1517,7 +1434,7 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 
 	/* get midi */
 	i=0;
-	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
+	for (std::vector<BackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
 		CoreMidiPort* port = dynamic_cast<CoreMidiPort*> (*it);
 		if (!port) {
 			continue;
@@ -1538,12 +1455,12 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 
 	/* get audio */
 	i = 0;
-	for (std::vector<CoreBackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it, ++i) {
+	for (std::vector<BackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it, ++i) {
 		_pcmio->get_capture_channel (i, (float*)((*it)->get_buffer(n_samples)), n_samples);
 	}
 
 	/* clear output buffers */
-	for (std::vector<CoreBackendPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
+	for (std::vector<BackendPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
 		memset ((*it)->get_buffer (n_samples), 0, n_samples * sizeof (Sample));
 	}
 
@@ -1559,13 +1476,13 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	}
 
 	/* mixdown midi */
-	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
+	for (std::vector<BackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
 		static_cast<CoreMidiPort*>(*it)->get_buffer(0);
 	}
 
 	/* queue outgoing midi */
 	i = 0;
-	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
+	for (std::vector<BackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
 		const CoreMidiBuffer *src = static_cast<const CoreMidiPort*>(*it)->const_buffer();
 		for (CoreMidiBuffer::const_iterator mit = src->begin (); mit != src->end (); ++mit) {
 			_midiio->send_event (i, mit->timestamp (), mit->data (), mit->size ());
@@ -1574,7 +1491,7 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 
 	/* write back audio */
 	i = 0;
-	for (std::vector<CoreBackendPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it, ++i) {
+	for (std::vector<BackendPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it, ++i) {
 		_pcmio->set_playback_channel (i, (float const*)(*it)->get_buffer (n_samples), n_samples);
 	}
 
@@ -1701,163 +1618,10 @@ extern "C" ARDOURBACKEND_API ARDOUR::AudioBackendInfo* descriptor ()
 	return &_descriptor;
 }
 
-
-/******************************************************************************/
-CoreBackendPort::CoreBackendPort (CoreAudioBackend &b, const std::string& name, PortFlags flags)
-	: _osx_backend (b)
-	, _name  (name)
-	, _flags (flags)
-{
-	_capture_latency_range.min = 0;
-	_capture_latency_range.max = 0;
-	_playback_latency_range.min = 0;
-	_playback_latency_range.max = 0;
-}
-
-CoreBackendPort::~CoreBackendPort () {
-	disconnect_all ();
-}
-
-
-int CoreBackendPort::connect (CoreBackendPort *port)
-{
-	if (!port) {
-		PBD::warning << _("CoreBackendPort::connect (): invalid (null) port") << endmsg;
-		return -1;
-	}
-
-	if (type () != port->type ()) {
-		PBD::warning << _("CoreBackendPort::connect (): wrong port-type") << endmsg;
-		return -1;
-	}
-
-	if (is_output () && port->is_output ()) {
-		PBD::warning << _("CoreBackendPort::connect (): cannot inter-connect output ports.") << endmsg;
-		return -1;
-	}
-
-	if (is_input () && port->is_input ()) {
-		PBD::warning << _("CoreBackendPort::connect (): cannot inter-connect input ports.") << endmsg;
-		return -1;
-	}
-
-	if (this == port) {
-		PBD::warning << _("CoreBackendPort::connect (): cannot self-connect ports.") << endmsg;
-		return -1;
-	}
-
-	if (is_connected (port)) {
-#if 0 // don't bother to warn about this for now. just ignore it
-		PBD::info << _("CoreBackendPort::connect (): ports are already connected:")
-		          << " (" << name () << ") -> (" << port->name () << ")"
-		          << endmsg;
-#endif
-		return -1;
-	}
-
-	_connect (port, true);
-	return 0;
-}
-
-
-void CoreBackendPort::_connect (CoreBackendPort *port, bool callback)
-{
-	_connections.insert (port);
-	if (callback) {
-		port->_connect (this, false);
-		_osx_backend.port_connect_callback (name(),  port->name(), true);
-	}
-}
-
-int CoreBackendPort::disconnect (CoreBackendPort *port)
-{
-	if (!port) {
-		PBD::warning << _("CoreBackendPort::disconnect (): invalid (null) port") << endmsg;
-		return -1;
-	}
-
-	if (!is_connected (port)) {
-		PBD::warning << _("CoreBackendPort::disconnect (): ports are not connected:")
-		             << " (" << name () << ") -> (" << port->name () << ")"
-		             << endmsg;
-		return -1;
-	}
-	_disconnect (port, true);
-	return 0;
-}
-
-void CoreBackendPort::_disconnect (CoreBackendPort *port, bool callback)
-{
-	std::set<CoreBackendPort*>::iterator it = _connections.find (port);
-	assert (it != _connections.end ());
-	_connections.erase (it);
-	if (callback) {
-		port->_disconnect (this, false);
-		_osx_backend.port_connect_callback (name(),  port->name(), false);
-	}
-}
-
-void CoreBackendPort::disconnect_all ()
-{
-	while (!_connections.empty ()) {
-		std::set<CoreBackendPort*>::iterator it = _connections.begin ();
-		(*it)->_disconnect (this, false);
-		_osx_backend.port_connect_callback (name(), (*it)->name(), false);
-		_connections.erase (it);
-	}
-}
-
-bool
-CoreBackendPort::is_connected (const CoreBackendPort *port) const
-{
-	return _connections.find (const_cast<CoreBackendPort *>(port)) != _connections.end ();
-}
-
-bool CoreBackendPort::is_physically_connected () const
-{
-	for (std::set<CoreBackendPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
-		if ((*it)->is_physical ()) {
-			return true;
-		}
-	}
-	return false;
-}
-
-void
-CoreBackendPort::set_latency_range (const LatencyRange &latency_range, bool for_playback)
-{
-	if (for_playback) {
-		_playback_latency_range = latency_range;
-	} else {
-		_capture_latency_range = latency_range;
-	}
-
-	for (std::set<CoreBackendPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
-		if ((*it)->is_physical ()) {
-			(*it)->update_connected_latency (is_input ());
-		}
-	}
-}
-
-void
-CoreBackendPort::update_connected_latency (bool for_playback)
-{
-	LatencyRange lr;
-	lr.min = lr.max = 0;
-	const std::set<CoreBackendPort *>& cp = get_connections ();
-	for (std::set<CoreBackendPort*>::const_iterator it = cp.begin (); it != cp.end (); ++it) {
-		LatencyRange l;
-		l = (*it)->latency_range (for_playback);
-		lr.min = std::max (lr.min, l.min);
-		lr.max = std::max (lr.max, l.max);
-	}
-	set_latency_range (lr, for_playback);
-}
-
 /******************************************************************************/
 
 CoreAudioPort::CoreAudioPort (CoreAudioBackend &b, const std::string& name, PortFlags flags)
-	: CoreBackendPort (b, name, flags)
+	: BackendPort (b, name, flags)
 {
 	memset (_buffer, 0, sizeof (_buffer));
 	mlock(_buffer, sizeof (_buffer));
@@ -1868,8 +1632,8 @@ CoreAudioPort::~CoreAudioPort () { }
 void* CoreAudioPort::get_buffer (pframes_t n_samples)
 {
 	if (is_input ()) {
-		const std::set<CoreBackendPort *>& connections = get_connections ();
-		std::set<CoreBackendPort*>::const_iterator it = connections.begin ();
+		const std::set<BackendPort *>& connections = get_connections ();
+		std::set<BackendPort*>::const_iterator it = connections.begin ();
 		if (it == connections.end ()) {
 			memset (_buffer, 0, n_samples * sizeof (Sample));
 		} else {
@@ -1892,7 +1656,7 @@ void* CoreAudioPort::get_buffer (pframes_t n_samples)
 
 
 CoreMidiPort::CoreMidiPort (CoreAudioBackend &b, const std::string& name, PortFlags flags)
-	: CoreBackendPort (b, name, flags)
+	: BackendPort (b, name, flags)
 	, _n_periods (1)
 	, _bufperiod (0)
 	, _event (0, 0)
@@ -1922,8 +1686,8 @@ void* CoreMidiPort::get_buffer (pframes_t /* nframes */)
 {
 	if (is_input ()) {
 		(_buffer[_bufperiod]).clear ();
-		const std::set<CoreBackendPort*>& connections = get_connections ();
-		for (std::set<CoreBackendPort*>::const_iterator i = connections.begin ();
+		const std::set<BackendPort*>& connections = get_connections ();
+		for (std::set<BackendPort*>::const_iterator i = connections.begin ();
 		     i != connections.end ();
 		     ++i) {
 			const CoreMidiBuffer * src = static_cast<const CoreMidiPort*>(*i)->const_buffer ();

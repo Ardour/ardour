@@ -316,14 +316,6 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 	void         set_latency_range (PortHandle, bool for_playback, LatencyRange);
 	LatencyRange get_latency_range (PortHandle, bool for_playback);
 
-	/* Discovering physical ports */
-
-	bool      port_is_physical (PortHandle) const;
-	void      get_physical_outputs (DataType type, std::vector<std::string>&);
-	void      get_physical_inputs (DataType type, std::vector<std::string>&);
-	ChanCount n_physical_outputs () const;
-	ChanCount n_physical_inputs () const;
-
 	/* Getting access to the data buffer for a port */
 
 	void* get_buffer (PortHandle, pframes_t);
@@ -403,9 +395,7 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 	};
 
 	/* port engine */
-	PortHandle add_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
 	int register_system_audio_ports ();
-	void unregister_ports (bool system_only = false);
 	void update_system_port_latecies ();
 
 	struct PortConnectData {
@@ -434,14 +424,16 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 		pthread_mutex_unlock (&_port_callback_mutex);
 	}
 
-	CoreBackendPort * find_port_in (std::vector<CoreBackendPort *> plist, const std::string& port_name) const {
-		for (std::vector<CoreBackendPort*>::const_iterator it = plist.begin (); it != plist.end (); ++it) {
+	BackendPort * find_port_in (std::vector<BackendPort *> plist, const std::string& port_name) const {
+		for (std::vector<BackendPort*>::const_iterator it = plist.begin (); it != plist.end (); ++it) {
 			if ((*it)->name () == port_name) {
 				return *it;
 			}
 		}
 		return NULL;
 	}
+
+	BackendPort* port_factory (std::string const & name, ARDOUR::DataType type, ARDOUR::PortFlags);
 
 	void reset_midi_parsers ();
 
