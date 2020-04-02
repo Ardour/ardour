@@ -1838,10 +1838,13 @@ Session::xrun_recovery ()
 	if (Config->get_stop_recording_on_xrun() && actively_recording()) {
 
 		/* it didn't actually halt, but we need
-		   to handle things in the same way.
-		*/
+		 * to handle things in the same way.
+		 */
 
 		engine_halted();
+
+		/* ..and start the FSM engine again */
+		_transport_fsm->start ();
 	}
 }
 
