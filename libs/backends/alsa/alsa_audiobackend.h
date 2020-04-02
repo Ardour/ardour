@@ -31,6 +31,8 @@
 #include <boost/shared_ptr.hpp>
 
 #include "pbd/natsort.h"
+#include "pbd/rcu.h"
+
 #include "ardour/audio_backend.h"
 #include "ardour/dsp_load_calculator.h"
 #include "ardour/system_exec.h"
@@ -439,8 +441,8 @@ class AlsaAudioBackend : public AudioBackend {
 
 		typedef std::map<std::string, AlsaPort *> PortMap; // fast lookup in _ports
 		typedef std::set<AlsaPort *, SortByPortName> PortIndex; // fast lookup in _ports
-		PortMap _portmap;
-		PortIndex _ports;
+		SerializedRCUManager<PortMap> _portmap;
+		SerializedRCUManager<PortIndex> _ports;
 
 		std::vector<AlsaMidiOut *> _rmidi_out;
 		std::vector<AlsaMidiIn  *> _rmidi_in;
@@ -471,12 +473,14 @@ class AlsaAudioBackend : public AudioBackend {
 		}
 
 		bool valid_port (PortHandle port) const {
-			return std::find (_ports.begin(), _ports.end(), static_cast<AlsaPort*>(port)) != _ports.end ();
+			boost::shared_ptr<PortIndex> p = _ports.reader();
+			return std::find (p->begin(), p->end(), static_cast<AlsaPort*>(port)) != p->end ();
 		}
 
 		AlsaPort* find_port (const std::string& port_name) const {
-			PortMap::const_iterator it = _portmap.find (port_name);
-			if (it == _portmap.end()) {
+			boost::shared_ptr<PortMap> p = _portmap.reader();
+			PortMap::const_iterator it = p->find (port_name);
+			if (it == p->end()) {
 				return NULL;
 			}
 			return (*it).second;

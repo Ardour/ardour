@@ -75,6 +75,8 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _midi_device_thread_active (false)
 	, _dsp_load (0)
 	, _processed_samples (0)
+	, _portmap (new PortMap)
+	, _ports (new PortIndex)
 	, _port_change_flag (false)
 {
 	_instance_name = s_instance_name;
@@ -753,14 +755,22 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		return BackendReinitializationError;
 	}
 
-	if (_ports.size () || _portmap.size ()) {
-		PBD::warning << _("AlsaAudioBackend: recovering from unclean shutdown, port registry is not empty.") << endmsg;
-		_system_inputs.clear();
-		_system_outputs.clear();
-		_system_midi_in.clear();
-		_system_midi_out.clear();
-		_ports.clear();
-		_portmap.clear();
+	{
+		RCUWriter<PortIndex> index_writer (_ports);
+		RCUWriter<PortMap> map_writer (_portmap);
+
+		boost::shared_ptr<PortIndex> ps = index_writer.get_copy();
+		boost::shared_ptr<PortMap> pm = map_writer.get_copy ();
+
+		if (ps->size () || pm->size ()) {
+			PBD::warning << _("AlsaAudioBackend: recovering from unclean shutdown, port registry is not empty.") << endmsg;
+			_system_inputs.clear();
+			_system_outputs.clear();
+			_system_midi_in.clear();
+			_system_midi_out.clear();
+			ps->clear();
+			pm->clear();
+		}
 	}
 
 	/* reset internal state */
@@ -1201,8 +1211,15 @@ AlsaAudioBackend::set_port_name (PortEngine::PortHandle port, const std::string&
 	}
 
 	AlsaPort* p = static_cast<AlsaPort*>(port);
-	_portmap.erase (p->name());
-	_portmap.insert (make_pair (newname, p));
+
+	{
+		RCUWriter<PortMap> map_writer (_portmap);
+		boost::shared_ptr<PortMap> pm = map_writer.get_copy ();
+
+		pm->erase (p->name());
+		pm->insert (make_pair (newname, p));
+	}
+
 	return p->set_name (newname);
 }
 
@@ -1279,7 +1296,9 @@ AlsaAudioBackend::get_ports (
 		}
 	}
 
-	for (PortIndex::const_iterator i = _ports.begin (); i != _ports.end (); ++i) {
+	boost::shared_ptr<PortIndex> p = _ports.reader ();
+
+	for (PortIndex::const_iterator i = p->begin (); i != p->end (); ++i) {
 		AlsaPort* port = *i;
 		if ((port->type () == type) && flags == (port->flags () & flags)) {
 			if (!use_regexp || !regexec (&port_regex, port->name ().c_str (), 0, NULL, 0)) {
@@ -1339,8 +1358,16 @@ AlsaAudioBackend::add_port (
 			return 0;
 	}
 
-	_ports.insert (port);
-	_portmap.insert (make_pair (name, port));
+	{
+		RCUWriter<PortIndex> index_writer (_ports);
+		RCUWriter<PortMap> map_writer (_portmap);
+
+		boost::shared_ptr<PortIndex> ps = index_writer.get_copy ();
+		boost::shared_ptr<PortMap> pm = map_writer.get_copy ();
+
+		ps->insert (port);
+		pm->insert (make_pair (name, port));
+	}
 
 	return port;
 }
@@ -1351,15 +1378,29 @@ AlsaAudioBackend::unregister_port (PortEngine::PortHandle port_handle)
 	if (!_run) {
 		return;
 	}
+
 	AlsaPort* port = static_cast<AlsaPort*>(port_handle);
-	PortIndex::iterator i = std::find (_ports.begin(), _ports.end(), static_cast<AlsaPort*>(port_handle));
-	if (i == _ports.end ()) {
-		PBD::error << _("AlsaBackend::unregister_port: Failed to find port") << endmsg;
-		return;
+
+	{
+		RCUWriter<PortIndex> index_writer (_ports);
+		RCUWriter<PortMap> map_writer (_portmap);
+
+		boost::shared_ptr<PortIndex> ps = index_writer.get_copy ();
+		boost::shared_ptr<PortMap> pm = map_writer.get_copy ();
+
+		PortIndex::iterator i = std::find (ps->begin(), ps->end(), static_cast<AlsaPort*>(port_handle));
+
+		if (i == ps->end ()) {
+			PBD::error << _("AlsaBackend::unregister_port: Failed to find port") << endmsg;
+			return;
+		}
+
+		disconnect_all(port_handle);
+
+		pm->erase (port->name());
+		ps->erase (i);
 	}
-	disconnect_all(port_handle);
-	_portmap.erase (port->name());
-	_ports.erase (i);
+
 	delete port;
 }
 
@@ -1729,14 +1770,21 @@ AlsaAudioBackend::unregister_ports (bool system_only)
 	_system_midi_in.clear();
 	_system_midi_out.clear();
 
-	for (PortIndex::iterator i = _ports.begin (); i != _ports.end ();) {
+	RCUWriter<PortIndex> index_writer (_ports);
+	RCUWriter<PortMap> map_writer (_portmap);
+
+	boost::shared_ptr<PortIndex> ps = index_writer.get_copy ();
+	boost::shared_ptr<PortMap> pm = map_writer.get_copy ();
+
+
+	for (PortIndex::iterator i = ps->begin (); i != ps->end ();) {
 		PortIndex::iterator cur = i++;
 		AlsaPort* port = *cur;
 		if (! system_only || (port->is_physical () && port->is_terminal ())) {
 			port->disconnect_all ();
-			_portmap.erase (port->name());
+			pm->erase (port->name());
 			delete port;
-			_ports.erase (cur);
+			ps->erase (cur);
 		}
 	}
 }
@@ -2000,7 +2048,9 @@ AlsaAudioBackend::port_is_physical (PortEngine::PortHandle port) const
 void
 AlsaAudioBackend::get_physical_outputs (DataType type, std::vector<std::string>& port_names)
 {
-	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
+	boost::shared_ptr<PortIndex> p = _ports.reader();
+
+	for (PortIndex::iterator i = p->begin (); i != p->end (); ++i) {
 		AlsaPort* port = *i;
 		if ((port->type () == type) && port->is_input () && port->is_physical ()) {
 			port_names.push_back (port->name ());
@@ -2011,7 +2061,9 @@ AlsaAudioBackend::get_physical_outputs (DataType type, std::vector<std::string>&
 void
 AlsaAudioBackend::get_physical_inputs (DataType type, std::vector<std::string>& port_names)
 {
-	for (PortIndex::iterator i = _ports.begin (); i != _ports.end (); ++i) {
+	boost::shared_ptr<PortIndex> p = _ports.reader();
+
+	for (PortIndex::iterator i = p->begin (); i != p->end (); ++i) {
 		AlsaPort* port = *i;
 		if ((port->type () == type) && port->is_output () && port->is_physical ()) {
 			port_names.push_back (port->name ());
@@ -2024,7 +2076,10 @@ AlsaAudioBackend::n_physical_outputs () const
 {
 	int n_midi = 0;
 	int n_audio = 0;
-	for (PortIndex::const_iterator i = _ports.begin (); i != _ports.end (); ++i) {
+
+	boost::shared_ptr<PortIndex> p = _ports.reader();
+
+	for (PortIndex::const_iterator i = p->begin (); i != p->end (); ++i) {
 		AlsaPort* port = *i;
 		if (port->is_output () && port->is_physical ()) {
 			switch (port->type ()) {
@@ -2045,7 +2100,10 @@ AlsaAudioBackend::n_physical_inputs () const
 {
 	int n_midi = 0;
 	int n_audio = 0;
-	for (PortIndex::const_iterator i = _ports.begin (); i != _ports.end (); ++i) {
+
+	boost::shared_ptr<PortIndex> p = _ports.reader();
+
+	for (PortIndex::const_iterator i = p->begin (); i != p->end (); ++i) {
 		AlsaPort* port = *i;
 		if (port->is_input () && port->is_physical ()) {
 			switch (port->type ()) {
