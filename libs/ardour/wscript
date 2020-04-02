@@ -173,6 +173,7 @@ libardour_sources = [
         'plugin_manager.cc',
         'polarity_processor.cc',
         'port.cc',
+        'port_engine_shared.cc',
         'port_insert.cc',
         'port_manager.cc',
         'port_set.cc',
