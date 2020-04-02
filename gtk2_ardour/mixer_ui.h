@@ -127,6 +127,7 @@ public:
 	void do_vca_unassign (boost::shared_ptr<ARDOUR::VCA>);
 	void show_spill (boost::shared_ptr<ARDOUR::Stripable>);
 	bool showing_spill_for (boost::shared_ptr<ARDOUR::Stripable>) const;
+	void fan_out (boost::weak_ptr<ARDOUR::Route>, bool to_busses, bool group);
 
 	sigc::signal1<void,boost::shared_ptr<ARDOUR::Stripable> > show_spill_change;
 
