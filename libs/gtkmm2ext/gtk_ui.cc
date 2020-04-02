@@ -518,7 +518,7 @@ UI::dump_errors (std::ostream& ostr, size_t limit)
 
 	if (limit > 0) {
 		/* reverse listing, Errors only */
-		for (list<string>::const_reverse_iterator i = error_stack.rbegin(); i != error_stack.rend(); ++i) {
+		for (list<string>::reverse_iterator i = error_stack.rbegin(); i != error_stack.rend(); ++i) {
 			if ((*i).substr (0, 9) == X_("WARNING: ") || (*i).substr (0, 6) == X_("INFO: ")) {
 				continue;
 			}
