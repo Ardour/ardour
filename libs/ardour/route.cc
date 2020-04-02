@@ -103,6 +103,8 @@ using namespace PBD;
 
 PBD::Signal3<int,boost::shared_ptr<Route>, boost::shared_ptr<PluginInsert>, Route::PluginSetupOptions > Route::PluginSetup;
 
+PBD::Signal1<void, boost::weak_ptr<Route> > Route::FanOut;
+
 /** Base class for all routable/mixable objects (tracks and busses) */
 Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType default_type)
 	: Stripable (sess, name, PresentationInfo (flag))
@@ -1151,7 +1153,9 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 	if (fanout && fanout->configured ()
 			&& fanout->output_streams().n_audio() > 2
 			&& boost::dynamic_pointer_cast<PluginInsert> (the_instrument ()) == fanout) {
-		fan_out (); /* EMIT SIGNAL */
+		/* This adds new tracks or busses, and changes connections.
+		 * This cannot be done here, and needs to be delegated to the GUI thread. */
+		FanOut (boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this())); /* EMIT SIGNAL */
 	}
 	return 0;
 }

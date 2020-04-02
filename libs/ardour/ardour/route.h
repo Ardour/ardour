@@ -384,11 +384,14 @@ public:
 		MultiOut = 0x2,
 	};
 
-	static PBD::Signal3<int,boost::shared_ptr<Route>, boost::shared_ptr<PluginInsert>, PluginSetupOptions > PluginSetup;
+	/** ask GUI about port-count, fan-out when adding instrument */
+	static PBD::Signal3<int, boost::shared_ptr<Route>, boost::shared_ptr<PluginInsert>, PluginSetupOptions > PluginSetup;
+
+	/** used to signal the GUI to fan-out (track-creation) */
+	static PBD::Signal1<void, boost::weak_ptr<Route> > FanOut;
 
 	/** the processors have changed; the parameter indicates what changed */
 	PBD::Signal1<void,RouteProcessorChange> processors_changed;
-	PBD::Signal0<void> fan_out; // used to signal the GUI to fan-out (track-creation)
 	PBD::Signal1<void,void*> record_enable_changed;
 	/** a processor's latency has changed
 	 * (emitted from PluginInsert::latency_changed)
