@@ -237,10 +237,6 @@
         <menuitem action='toggle-region-fade-out'/>
       </menu>
       <separator/>
-      <menu action="AutomationMenu">
-        <menuitem action="toggle-all-existing-automation"/>
-      </menu>
-      <separator/>
       <menuitem action='tag-last-capture'/>
       <menuitem action='remove-last-capture'/>
       <separator/>
@@ -421,11 +417,18 @@
       <separator/>
       <menuitem action='toggle-track-active'/>
       <menuitem action='remove-track'/>
+      <separator/>
     </menu>
 
     <menu name='View' action = 'View'>
       <menuitem action='ToggleMaximalEditor'/>
       <menuitem action='ToggleMaximalMixer'/>
+
+      <separator/>
+
+      <menu action="AutomationMenu">
+        <menuitem action="toggle-all-existing-automation"/>
+      </menu>
 
       <separator/>
 
