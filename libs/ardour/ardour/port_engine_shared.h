@@ -39,7 +39,7 @@ class PortEngineSharedImpl;
 class PortManager;
 
 
-class BackendPort
+class LIBARDOUR_API BackendPort
 {
    protected:
 	BackendPort (PortEngineSharedImpl &b, const std::string&, PortFlags);
@@ -97,7 +97,7 @@ class BackendPort
 
 }; // class BackendPort
 
-class PortEngineSharedImpl
+class LIBARDOUR_API PortEngineSharedImpl
 {
   public:
 	PortEngineSharedImpl (PortManager& mgr, std::string const & instance_name);
