@@ -572,15 +572,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 		return BackendReinitializationError;
 	}
 
-	if (_ports.size()) {
-		DEBUG_AUDIO(
-		    "Recovering from unclean shutdown, port registry is not empty.\n");
-		_system_inputs.clear();
-		_system_outputs.clear();
-		_system_midi_in.clear();
-		_system_midi_out.clear();
-		_ports.clear();
-	}
+	clear_ports ();
 
 	/* reset internal state */
 	assert (_run == false);
