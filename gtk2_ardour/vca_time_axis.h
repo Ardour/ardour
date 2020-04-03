@@ -56,6 +56,10 @@ public:
 	bool marked_for_display () const;
 	bool set_marked_for_display (bool);
 
+	void show_all_automation (bool apply_to_selection = false);
+	void show_existing_automation (bool apply_to_selection = false);
+	void hide_all_automation (bool apply_to_selection = false);
+
 protected:
 	boost::shared_ptr<ARDOUR::VCA> _vca;
 	ArdourWidgets::ArdourButton    solo_button;
@@ -69,10 +73,6 @@ protected:
 	void create_gain_automation_child (const Evoral::Parameter &, bool);
 	void create_trim_automation_child (const Evoral::Parameter &, bool) {}
 	void create_mute_automation_child (const Evoral::Parameter &, bool);
-
-	virtual void show_all_automation (bool apply_to_selection = false);
-	virtual void show_existing_automation (bool apply_to_selection = false);
-	virtual void hide_all_automation (bool apply_to_selection = false);
 
 	void create_automation_child (const Evoral::Parameter& param, bool show);
 	virtual void build_automation_action_menu (bool);

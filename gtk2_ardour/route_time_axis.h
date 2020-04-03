@@ -149,6 +149,10 @@ public:
 
 	std::string state_id() const;
 
+	void show_all_automation (bool apply_to_selection = false);
+	void show_existing_automation (bool apply_to_selection = false);
+	void hide_all_automation (bool apply_to_selection = false);
+
 protected:
 	friend class StreamView;
 
@@ -229,10 +233,6 @@ protected:
 	void rename_current_playlist ();
 
 	bool         automation_click (GdkEventButton *);
-
-	virtual void show_all_automation (bool apply_to_selection = false);
-	virtual void show_existing_automation (bool apply_to_selection = false);
-	virtual void hide_all_automation (bool apply_to_selection = false);
 
 	void timestretch (samplepos_t start, samplepos_t end);
 	void speed_changed ();

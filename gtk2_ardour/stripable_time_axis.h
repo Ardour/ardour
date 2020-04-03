@@ -40,6 +40,10 @@ public:
 
 	void request_redraw ();
 
+	virtual void show_all_automation (bool apply_to_selection = false);
+	virtual void show_existing_automation (bool apply_to_selection = false);
+	virtual void hide_all_automation (bool apply_to_selection = false);
+
 protected:
 	void reset_samples_per_pixel ();
 	virtual void set_samples_per_pixel (double);
@@ -54,10 +58,6 @@ protected:
 	void update_gain_track_visibility ();
 	void update_trim_track_visibility ();
 	void update_mute_track_visibility ();
-
-	virtual void show_all_automation (bool apply_to_selection = false);
-	virtual void show_existing_automation (bool apply_to_selection = false);
-	virtual void hide_all_automation (bool apply_to_selection = false);
 
 	boost::shared_ptr<ARDOUR::Stripable> _stripable;
 
