@@ -996,8 +996,7 @@ Mixer_UI::fan_out (boost::weak_ptr<Route> wr, bool to_busses, bool group)
 					r = rl.front ();
 					assert (r);
 				} else {
-					list<boost::shared_ptr<AudioTrack> > tl =
-						_session->new_audio_track (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::max_order, Normal);
+					list<boost::shared_ptr<AudioTrack> > tl = _session->new_audio_track (busnames[bn], outputs, NULL, 1, bn, PresentationInfo::max_order, Normal, false);
 					r = tl.front ();
 					assert (r);
 
@@ -1012,7 +1011,6 @@ Mixer_UI::fan_out (boost::weak_ptr<Route> wr, bool to_busses, bool group)
 				}
 				return;
 			}
-			r->input ()->disconnect (this);
 		}
 		to_group.push_back (r);
 		route->output ()->audio (p)->connect (r->input ()->audio (pd.group_channel).get());
