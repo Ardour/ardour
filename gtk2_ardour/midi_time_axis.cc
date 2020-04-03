@@ -264,7 +264,6 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_midi_controls_box.set_homogeneous(false);
 	_midi_controls_box.set_border_width (2);
 
-
 	/* this directly calls use_midnam_info() if there are midnam's already */
 	MIDI::Name::MidiPatchManager::instance().maybe_use (*this, invalidator (*this), boost::bind (&MidiTimeAxisView::use_midnam_info, this), gui_context());
 
@@ -308,13 +307,6 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 }
 
 void
-MidiTimeAxisView::processors_changed (RouteProcessorChange c)
-{
-	RouteTimeAxisView::processors_changed (c);
-	maybe_trigger_model_change ();
-}
-
-void
 MidiTimeAxisView::first_idle ()
 {
 	if (is_track ()) {
@@ -344,9 +336,34 @@ MidiTimeAxisView::check_step_edit ()
 }
 
 void
+MidiTimeAxisView::processors_changed (RouteProcessorChange c)
+{
+	RouteTimeAxisView::processors_changed (c);
+	maybe_trigger_model_change ();
+}
+
+void
 MidiTimeAxisView::use_midnam_info ()
 {
 	setup_midnam_patches ();
+}
+
+void
+MidiTimeAxisView::maybe_trigger_model_change ()
+{
+	if (_route->instrument_info().have_custom_plugin_info ()) {
+		/* ensure that "Plugin Provided" is at the top of the list */
+		if (_midnam_model_selector.items().empty () || _midnam_model_selector.items().begin()->get_label() != _("Plugin Provided")) {
+			/* setup_midnam_patches unconditionally calls model_changed() */
+			setup_midnam_patches ();
+		}
+	} else {
+		/* no plugin provided MIDNAM for this plugin */
+		if (!_midnam_model_selector.items().empty () && _midnam_model_selector.items().begin()->get_label() == _("Plugin Provided")) {
+			/* setup_midnam_patches unconditionally calls model_changed() */
+			setup_midnam_patches ();
+		}
+	}
 }
 
 void
@@ -366,7 +383,7 @@ MidiTimeAxisView::setup_midnam_patches ()
 		Menu*                   menu  = Gtk::manage(new Menu);
 		Menu_Helpers::MenuList& items = menu->items();
 
-		// Build manufacturer submenu
+		/* Build manufacturer submenu */
 		for (MIDI::Name::MIDINameDocument::MasterDeviceNamesList::const_iterator n = m->second.begin(); n != m->second.end(); ++n) {
 
 			if (patch_manager.is_custom_model (n->first)) {
@@ -385,7 +402,7 @@ MidiTimeAxisView::setup_midnam_patches ()
 			continue;
 		}
 
-		// Add manufacturer submenu to selector
+		/* Add manufacturer submenu to selector */
 		_midnam_model_selector.AddMenuElem(Menu_Helpers::MenuElem(m->first, *menu));
 	}
 
@@ -411,22 +428,6 @@ MidiTimeAxisView::setup_midnam_patches ()
 		model_changed ("");
 	} else {
 		model_changed (model);
-	}
-}
-
-void
-MidiTimeAxisView::maybe_trigger_model_change ()
-{
-	bool changed = false;
-	if (_route->instrument_info().have_custom_plugin_info ()) {
-		if (_midnam_model_selector.items().empty () || _midnam_model_selector.items().begin()->get_label() != _("Plugin Provided")) {
-			setup_midnam_patches ();
-		}
-	} else {
-		/* no plugin provided MIDNAM for this plugin */
-		if (!_midnam_model_selector.items().empty () && _midnam_model_selector.items().begin()->get_label() == _("Plugin Provided")) {
-			setup_midnam_patches ();
-		}
 	}
 }
 
@@ -485,14 +486,14 @@ MidiTimeAxisView::model_changed (const std::string& m)
 	/* set backend state */
 	_route->instrument_info().set_external_instrument (model, mode);
 
+	/* query effective model/mode -- may be plugin provided */
 	if (_effective_model == _route->instrument_info().model () && _effective_mode == _route->instrument_info().mode ()) {
 		/* no change */
-		printf (" ---- SKIP ----\n");
 		return;
 	}
 
 	_effective_model = _route->instrument_info().model ();
-	_effective_mode = _route->instrument_info().mode ();
+	_effective_mode  = _route->instrument_info().mode ();
 
 	/* update GUI */
 
