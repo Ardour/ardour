@@ -52,6 +52,9 @@ public:
 	InstrumentInfo ();
 	~InstrumentInfo ();
 
+	std::string model () const;
+	std::string mode () const;
+
 	void set_external_instrument (const std::string& model, const std::string& mode);
 	void set_internal_instrument (boost::shared_ptr<ARDOUR::Processor>);
 
@@ -75,9 +78,6 @@ public:
 	bool have_custom_plugin_info () const;
 
 private:
-	std::string model () const;
-	std::string mode () const;
-
 	std::string get_patch_name (uint16_t bank, uint8_t program, uint8_t channel, bool with_extra) const;
 
 	void invalidate_cached_plugin_model ()
