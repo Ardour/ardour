@@ -1124,7 +1124,7 @@ class FontScalingOptions : public HSliderOption
 		_hscale.add_mark(200, Gtk::POS_TOP, empty);
 		_hscale.add_mark(250, Gtk::POS_TOP, empty);
 
-		set_note (_("Adjusting the scale requires an application restart to re-layout."));
+		set_note (_("Adjusting the scale requires an application restart for fully accurate re-layout."));
 	}
 
 	void changed ()
