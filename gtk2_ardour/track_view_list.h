@@ -20,9 +20,14 @@
 #ifndef __ardour_gtk_track_view_list_h__
 #define __ardour_gtk_track_view_list_h__
 
-#include "ardour/types.h"
+#include "ardour/types.h" /* XXX is this here because of some Cocoa nonsense ? */
+
 #include <list>
 #include <set>
+
+#include "route_ui.h"
+#include "audio_time_axis.h"
+#include "midi_time_axis.h"
 
 class TimeAxisView;
 
@@ -39,6 +44,79 @@ public:
 
 	TrackViewList filter_to_unique_playlists ();
 	ARDOUR::RouteList routelist () const;
+
+	template <typename Function>
+	void foreach_time_axis (Function f) {
+		for (iterator i = begin(); i != end(); ++i) {
+			f (*i);
+		}
+	}
+
+	template <typename Function>
+	void foreach_route_ui (Function f) {
+		for (iterator i = begin(); i != end(); ) {
+			iterator tmp = i;
+			++tmp;
+
+			RouteUI* t = dynamic_cast<RouteUI*> (*i);
+			if (t) {
+				f (t);
+			}
+			i = tmp;
+		}
+	}
+
+	template <typename Function>
+	void foreach_stripable_time_axis (Function f) {
+		for (iterator i = begin(); i != end(); ) {
+			iterator tmp = i;
+			++tmp;
+			StripableTimeAxisView* t = dynamic_cast<StripableTimeAxisView*> (*i);
+			if (t) {
+				f (t);
+			}
+			i = tmp;
+		}
+	}
+
+	template <typename Function>
+	void foreach_route_time_axis (Function f) {
+		for (iterator i = begin(); i != end(); ) {
+			iterator tmp = i;
+			++tmp;
+			RouteTimeAxisView* t = dynamic_cast<RouteTimeAxisView*> (*i);
+			if (t) {
+				f (t);
+			}
+			i = tmp;
+		}
+	}
+
+	template <typename Function>
+	void foreach_audio_time_axis (Function f) {
+		for (iterator i = begin(); i != end(); ) {
+			iterator tmp = i;
+			++tmp;
+			AudioTimeAxisView* t = dynamic_cast<AudioTimeAxisView*> (*i);
+			if (t) {
+				f (t);
+			}
+			i = tmp;
+		}
+	}
+
+	template <typename Function>
+	void foreach_midi_time_axis (Function f) {
+		for (iterator i = begin(); i != end(); ) {
+			iterator tmp = i;
+			++tmp;
+			MidiTimeAxisView* t = dynamic_cast<MidiTimeAxisView*> (*i);
+			if (t) {
+				f (t);
+			}
+			i = tmp;
+		}
+	}
 };
 
 #endif
