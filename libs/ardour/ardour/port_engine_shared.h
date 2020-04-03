@@ -30,8 +30,9 @@
 #include "pbd/natsort.h"
 #include "pbd/rcu.h"
 
-#include "ardour/types.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/port_engine.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 
