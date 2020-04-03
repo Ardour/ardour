@@ -230,7 +230,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	name_label.set_size_request (floor (50.0 * UIConfiguration::instance().get_ui_scale()), -1);
 
 	/* add the buttons */
-	controls_table.set_border_width (1);
+	controls_table.set_border_width (0);
 	controls_table.attach (hide_button, 1, 2, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 	controls_table.attach (name_label,  2, 3, 1, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 2, 0);
 	controls_table.attach (auto_dropdown, 3, 4, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
