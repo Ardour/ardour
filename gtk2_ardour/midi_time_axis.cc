@@ -264,10 +264,9 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	_midi_controls_box.set_homogeneous(false);
 	_midi_controls_box.set_border_width (2);
 
-	MIDI::Name::MidiPatchManager::instance().maybe_use (*this, invalidator (*this), boost::bind (&MidiTimeAxisView::use_midnam_info, this), gui_context());
 
-	maybe_trigger_model_change ();
-	custom_device_mode_changed (gui_property(X_("midnam-custom-device-mode")));
+	/* this directly calls use_midnam_info() if there are midnam's already */
+	MIDI::Name::MidiPatchManager::instance().maybe_use (*this, invalidator (*this), boost::bind (&MidiTimeAxisView::use_midnam_info, this), gui_context());
 
 	controls_vbox.pack_start(_midi_controls_box, false, false);
 
@@ -312,7 +311,7 @@ void
 MidiTimeAxisView::processors_changed (RouteProcessorChange c)
 {
 	RouteTimeAxisView::processors_changed (c);
-	update_patch_selector ();
+	maybe_trigger_model_change ();
 }
 
 void
@@ -347,9 +346,7 @@ MidiTimeAxisView::check_step_edit ()
 void
 MidiTimeAxisView::use_midnam_info ()
 {
-	//cerr << "MidiTimeAxisView::use_midnam_info\n";
 	setup_midnam_patches ();
-	update_patch_selector ();
 }
 
 void
@@ -392,57 +389,6 @@ MidiTimeAxisView::setup_midnam_patches ()
 		_midnam_model_selector.AddMenuElem(Menu_Helpers::MenuElem(m->first, *menu));
 	}
 
-	std::string model = gui_property (X_("midnam-model-name"));
-	if (model.empty() && _route->instrument_info().have_custom_plugin_info ()) {
-		/* use plugin's MIDNAM */
-		model_changed ("");
-	} else if (!_route->instrument_info().master_device_names()) {
-		/* switch to use default */
-		model_changed ("");
-	}
-}
-
-void
-MidiTimeAxisView::maybe_trigger_model_change ()
-{
-
-	if (_route->instrument_info().have_custom_plugin_info ()) {
-		const std::string saved_model_name = gui_property (X_("midnam-model-name"));
-
-		if (!saved_model_name.empty()) {
-			/* user changed the MIDNAM model to something
-			 * other than the plugin provided one. We
-			 * should use that, and not the "plugin
-			 * provided" label.
-			 */
-			model_changed (saved_model_name);
-
-		} else {
-			/* user has not explicitly set MIDNAM model, and
-			 * there's a plugin provided MIDNAM. Ensure that
-			 * "Plugin Provided" is prefixed at the top of the list
-			 */
-			model_changed ("");
-			if (_midnam_model_selector.items().empty () || _midnam_model_selector.items().begin()->get_label() != _("Plugin Provided")) {
-				setup_midnam_patches ();
-			}
-		}
-	} else {
-		/* no plugin provided MIDNAM for this plugin */
-		setup_midnam_patches ();
-	}
-}
-
-void
-MidiTimeAxisView::update_patch_selector ()
-{
-	typedef MIDI::Name::MidiPatchManager PatchManager;
-	PatchManager& patch_manager = PatchManager::instance();
-
-	if (_route) {
-		maybe_trigger_model_change ();
-	}
-
 	if (patch_manager.all_models().empty()) {
 		_midnam_model_selector.hide ();
 		_midnam_custom_device_mode_selector.hide ();
@@ -450,6 +396,36 @@ MidiTimeAxisView::update_patch_selector ()
 		_midnam_model_selector.show ();
 		if (_midnam_custom_device_mode_selector.items().size() > 1) {
 			_midnam_custom_device_mode_selector.show ();
+		}
+	}
+
+	/* call _midnam_model_selector.set_text ()
+	 * and show/hide _midnam_custom_device_mode_selector
+	 */
+	std::string model = gui_property (X_("midnam-model-name"));
+	if (model.empty() && _route->instrument_info().have_custom_plugin_info ()) {
+		/* use plugin's MIDNAM */
+		model_changed ("");
+	} else if (!_route->instrument_info().master_device_names()) {
+		/* switch to use default */
+		model_changed ("");
+	} else {
+		model_changed (model);
+	}
+}
+
+void
+MidiTimeAxisView::maybe_trigger_model_change ()
+{
+	bool changed = false;
+	if (_route->instrument_info().have_custom_plugin_info ()) {
+		if (_midnam_model_selector.items().empty () || _midnam_model_selector.items().begin()->get_label() != _("Plugin Provided")) {
+			setup_midnam_patches ();
+		}
+	} else {
+		/* no plugin provided MIDNAM for this plugin */
+		if (!_midnam_model_selector.items().empty () && _midnam_model_selector.items().begin()->get_label() == _("Plugin Provided")) {
+			setup_midnam_patches ();
 		}
 	}
 }
@@ -479,8 +455,6 @@ MidiTimeAxisView::model_changed (const std::string& m)
 		device_modes = patch_manager.custom_device_mode_names_by_model (model);
 	}
 
-	const std::string current_mode = gui_property (X_("midname-custom-device-mode"));
-
 	if (model == "") {
 		_midnam_model_selector.set_text (_("Plugin Provided"));
 	} else {
@@ -491,21 +465,40 @@ MidiTimeAxisView::model_changed (const std::string& m)
 		set_gui_property (X_("midnam-model-name"), model);
 	} else {
 		remove_gui_property (X_("midnam-model-name"));
+		model = "";
 	}
+
+	/* set new mode */
+	const std::string current_mode = gui_property (X_("midname-custom-device-mode"));
+	std::string mode;
+	if (find (device_modes.begin(), device_modes.end(), current_mode) == device_modes.end()) {
+		if (device_modes.size() > 0) {
+			mode = device_modes.front();
+			custom_device_mode_changed (device_modes.front());
+		} else {
+			mode = "";
+		}
+	} else {
+		mode = current_mode;
+	}
+
+	/* set backend state */
+	_route->instrument_info().set_external_instrument (model, mode);
+
+	if (_effective_model == _route->instrument_info().model () && _effective_mode == _route->instrument_info().mode ()) {
+		/* no change */
+		printf (" ---- SKIP ----\n");
+		return;
+	}
+
+	_effective_model = _route->instrument_info().model ();
+	_effective_mode = _route->instrument_info().mode ();
+
+	/* update GUI */
 
 	_midnam_custom_device_mode_selector.clear_items();
 	for (std::list<std::string>::const_iterator i = device_modes.begin(); i != device_modes.end(); ++i) {
 		_midnam_custom_device_mode_selector.AddMenuElem (Gtk::Menu_Helpers::MenuElem(*i, sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed), *i)));
-	}
-
-	if (find (device_modes.begin(), device_modes.end(), current_mode) == device_modes.end()) {
-		if (device_modes.size() > 0) {
-			custom_device_mode_changed (device_modes.front());
-		} else {
-			custom_device_mode_changed ("");
-		}
-	} else {
-		custom_device_mode_changed (current_mode);
 	}
 
 	if (device_modes.size() > 1) {
@@ -514,13 +507,14 @@ MidiTimeAxisView::model_changed (const std::string& m)
 		_midnam_custom_device_mode_selector.hide();
 	}
 
-	//cerr << "MidiTimeAxisView::model_changed model '" << model << "' mode '" << current_mode << "'\n";
+	/* set _midnam_custom_device_mode_selector */
+	custom_device_mode_changed (mode);
 
-	// Rebuild controller menu
+	/* Rebuild controller menu */
 	_controller_menu_map.clear ();
 	delete controller_menu;
 	controller_menu = 0;
-	build_automation_action_menu(false);
+	build_automation_action_menu (false);
 
 	if (patch_change_dialog ()) {
 		patch_change_dialog ()->refresh ();
@@ -531,7 +525,6 @@ void
 MidiTimeAxisView::custom_device_mode_changed(const std::string& mode)
 {
 	const std::string model = gui_property (X_("midnam-model-name"));
-
 	set_gui_property (X_("midnam-custom-device-mode"), mode);
 	_midnam_custom_device_mode_selector.set_text (mode);
 	/* inform the backend, route owned instrument info */

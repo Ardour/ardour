@@ -120,7 +120,6 @@ private:
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
 
 	void setup_midnam_patches ();
-	void update_patch_selector ();
 
 	sigc::connection _note_range_changed_connection;
 
@@ -143,6 +142,8 @@ private:
 	void update_control_names ();
 
 	bool                          _ignore_signals;
+	std::string                   _effective_model;
+	std::string                   _effective_mode;
 	MidiScroomer*                 _range_scroomer;
 	PianoRollHeader*              _piano_roll_header;
 	ARDOUR::NoteMode              _note_mode;
