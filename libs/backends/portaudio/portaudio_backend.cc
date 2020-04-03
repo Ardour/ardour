@@ -1905,7 +1905,7 @@ void* PortMidiPort::get_buffer (pframes_t /* nframes */)
 {
 	if (is_input ()) {
 		(_buffer[_bufperiod]).clear ();
-		for (std::vector<BackendPort*>::const_iterator i = get_connections ().begin ();
+		for (std::set<BackendPort*>::const_iterator i = get_connections ().begin ();
 				i != get_connections ().end ();
 				++i) {
 			const PortMidiBuffer * src = static_cast<const PortMidiPort*>(*i)->const_buffer ();
