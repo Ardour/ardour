@@ -32,7 +32,7 @@
 
 #include "ardour/audio_backend.h"
 #include "ardour/dsp_load_calculator.h"
-#include "ardour/port_ending_shared.h"
+#include "ardour/port_engine_shared.h"
 #include "ardour/types.h"
 
 #include "portaudio_io.h"
