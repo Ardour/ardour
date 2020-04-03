@@ -1859,7 +1859,7 @@ PortAudioPort::~PortAudioPort () { }
 void* PortAudioPort::get_buffer (pframes_t n_samples)
 {
 	if (is_input ()) {
-		std::vector<BackendPort*>::const_iterator it = get_connections ().begin ();
+		std::set<BackendPort*>::const_iterator it = get_connections ().begin ();
 		if (it == get_connections ().end ()) {
 			memset (_buffer, 0, n_samples * sizeof (Sample));
 		} else {
