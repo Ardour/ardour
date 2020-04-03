@@ -35,6 +35,8 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/runtime_functions.h"
 
+#include "pbd/i18n.h"
+
 using namespace std;
 
 using namespace ARDOUR;
@@ -73,6 +75,11 @@ PeakMeter::~PeakMeter ()
 	}
 }
 
+std::string
+PeakMeter::display_name() const
+{
+	return _("Meter");
+}
 
 /** Get peaks from @a bufs
  * Input acceptance is lenient - the first n buffers from @a bufs will

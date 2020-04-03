@@ -49,6 +49,8 @@ public:
 	void reset ();
 	void reset_max ();
 
+	std::string display_name() const;
+
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
 
