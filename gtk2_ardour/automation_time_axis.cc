@@ -227,6 +227,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	name_label.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
 	name_label.set_name (X_("TrackParameterName"));
 	name_label.set_ellipsize (Pango::ELLIPSIZE_END);
+	set_size_request_to_display_given_text (name_label, X_("mmmm"), 0, 0); /* "4em" width, will expand as possible */
 
 	/* add the buttons */
 	controls_table.set_border_width (1);
