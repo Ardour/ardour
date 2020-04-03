@@ -1508,6 +1508,8 @@ private:
 	void remove_location_at_playhead_cursor ();
 	bool select_new_marker;
 
+	void toggle_all_existing_automation ();
+
 	void reverse_selection ();
 	void edit_envelope ();
 

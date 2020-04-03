@@ -293,13 +293,13 @@ Editor::split_regions_at (MusicSample where, RegionSelection& regions)
 		selection->clear_time();
 		//but leave track selection intact
 	}
-	
+
 	//if the user doesn't want to preserve the "Existing" selection, then clear the selection
 	if (!(rsas & Existing)) {
 		selection->clear_objects();
 		selection->clear_time();
 	}
-	
+
 	//if the user wants newly-created regions to be selected, then select them:
 	if (mouse_mode == MouseObject) {
 		for (RegionSelection::iterator ri = latest_regionviews.begin(); ri != latest_regionviews.end(); ri++) {
@@ -3234,7 +3234,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 			//but leave track selection intact
 		} else if (rsas == ForceSel) {
 			//note: forcing the regions to be selected *might* force a tool-change to Object here
-			selection->set(new_selection);	
+			selection->set(new_selection);
 		}
 
 		commit_reversible_command ();
@@ -4519,7 +4519,7 @@ Editor::recover_regions (ARDOUR::RegionList regions)
 			if (track) {
 				//ToDo
 				if (source->captured_for() == track->) {
-					//_session->add_command(new StatefulDiffCommand (playlist));	
+					//_session->add_command(new StatefulDiffCommand (playlist));
 				}
 			}
 		}
@@ -5230,12 +5230,12 @@ Editor::tag_regions (RegionList regions)
 
 	std::string tagstr = entry.get_text();
 	strip_whitespace_edges (tagstr);
-	
+
 	if (!tagstr.empty()) {
 		for (RegionList::iterator r = regions.begin(); r != regions.end(); r++) {
 			(*r)->set_tags(tagstr);
 		}
-			
+
 		_regions->redisplay ();
 	}
 }
@@ -5276,7 +5276,7 @@ Editor::tag_last_capture ()
 
 		}
 	}
-	
+
 	tag_regions(rlist);
 }
 
@@ -8503,4 +8503,31 @@ Editor::bring_all_sources_into_session ()
 	cerr << " Do it\n";
 
 	_session->bring_all_sources_into_session (boost::bind (&Editor::bring_in_callback, this, &msg, _1, _2, _3));
+}
+
+void
+Editor::toggle_all_existing_automation ()
+{
+	TrackViewList & tvl (selection->tracks.empty() ? track_views : selection->tracks);
+	bool some_automation_shown = false;
+
+	for (TrackViewList::const_iterator t = tvl.begin(); t != tvl.end(); ++t) {
+		TimeAxisView::Children children = (*t)->get_child_list ();
+		for (TimeAxisView::Children::const_iterator c = children.begin(); c != children.end(); ++c) {
+			if (boost::dynamic_pointer_cast<AutomationTimeAxisView> (*c)) {
+				some_automation_shown = true;
+				break;
+			}
+		}
+
+		if (some_automation_shown) {
+			break;
+		}
+	}
+
+	if (!some_automation_shown) {
+		tvl.foreach_stripable_time_axis (boost::bind (&StripableTimeAxisView::show_existing_automation, _1, false));
+	} else {
+		tvl.foreach_stripable_time_axis (boost::bind (&StripableTimeAxisView::hide_all_automation, _1, false));
+	}
 }

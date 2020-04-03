@@ -124,6 +124,7 @@ Editor::register_actions ()
 
 	ActionManager::register_action (editor_menu_actions, X_("AlignMenu"), _("Align"));
 	ActionManager::register_action (editor_menu_actions, X_("Autoconnect"), _("Autoconnect"));
+	ActionManager::register_action (editor_menu_actions, X_("AutomationMenu"), _("Automation"));
 	ActionManager::register_action (editor_menu_actions, X_("Crossfades"), _("Crossfades"));
 	ActionManager::register_action (editor_menu_actions, X_("Edit"), _("Edit"));
 	ActionManager::register_action (editor_menu_actions, X_("EditCursorMovementOptions"), _("Move Selected Marker"));
@@ -254,6 +255,8 @@ Editor::register_actions ()
 
 	reg_sens (editor_actions, "select-next-stripable", _("Select Next Strip"), sigc::bind (sigc::mem_fun(*this, &Editor::select_next_stripable), false));
 	reg_sens (editor_actions, "select-prev-stripable", _("Select Previous Strip"), sigc::bind (sigc::mem_fun(*this, &Editor::select_prev_stripable), false));
+
+	reg_sens (editor_actions, "toggle-all-existing-automation", _("Toggle All Existing Automation"), sigc::mem_fun (*this, &Editor::toggle_all_existing_automation));
 
 	act = reg_sens (editor_actions, "track-record-enable-toggle", _("Toggle Record Enable"), sigc::mem_fun(*this, &Editor::toggle_record_enable));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
